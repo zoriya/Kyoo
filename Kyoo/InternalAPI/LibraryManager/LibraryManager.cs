@@ -1,4 +1,5 @@
 ﻿using Kyoo.Models;
+using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Diagnostics;
@@ -11,13 +12,15 @@ namespace Kyoo.InternalAPI
         private readonly SQLiteConnection sqlConnection;
 
 
-        public LibraryManager()
+        public LibraryManager(IConfiguration configuration)
         {
-            Debug.WriteLine("&Library Manager init");
+            string databasePath = configuration.GetValue<string>("databasePath");
 
-            string databasePath = @"C://Projects/database.db";
+            Debug.WriteLine("&Library Manager init, databasePath: " + databasePath);
             if (!File.Exists(databasePath))
             {
+                Debug.WriteLine("&Database doesn't exist, creating one.");
+
                 SQLiteConnection.CreateFile(databasePath);
                 sqlConnection = new SQLiteConnection(string.Format("Data Source={0};Version=3", databasePath));
                 sqlConnection.Open();
@@ -27,6 +30,7 @@ namespace Kyoo.InternalAPI
 					    uri TEXT UNIQUE, 
 					    title TEXT, 
 					    aliases TEXT, 
+                        path TEXT,
 					    overview TEXT, 
 					    status TEXT, 
 					    startYear INTEGER, 
@@ -54,6 +58,7 @@ namespace Kyoo.InternalAPI
 					    showID INTEGER, 
 					    seasonID INTEGER, 
 					    episodeNumber INTEGER, 
+					    path TEXT, 
 					    title TEXT, 
 					    overview TEXT, 
 					    imgPrimary TEXT, 
@@ -158,7 +163,7 @@ namespace Kyoo.InternalAPI
 
         public IEnumerable<Show> QueryShows(string selection)
         {
-            string query = "SELECT * FROM shows";
+            string query = "SELECT * FROM shows;";
 
             SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection);
             SQLiteDataReader reader = cmd.ExecuteReader();
@@ -169,6 +174,26 @@ namespace Kyoo.InternalAPI
                 shows.Add(Show.FromReader(reader));
 
             return shows;
+        }
+
+        public bool IsEpisodeRegistered(string episodePath)
+        {
+            string query = "SELECT 1 FROM episodes WHERE path = $path;";
+            SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection);
+
+            cmd.Parameters.AddWithValue("$path", episodePath);
+
+            return cmd.ExecuteScalar() != null;
+        }
+
+        public bool IsShowRegistered(string showPath)
+        {
+            string query = "SELECT 1 FROM shows WHERE path = $path;";
+            SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection);
+
+            cmd.Parameters.AddWithValue("$path", showPath);
+
+            return cmd.ExecuteScalar() != null;
         }
     }
 }
