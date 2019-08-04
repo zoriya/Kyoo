@@ -1,19 +1,20 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Kyoo.Models
 {
     public class Show
     {
-        public readonly int id;
+        public readonly long id;
 
         public string Uri;
         public string Title;
         public List<string> Aliases;
         public string Overview;
-        public Status Status;
+        public Status? Status;
 
-        public int StartYear;
-        public int EndYear;
+        public long? StartYear;
+        public long? EndYear;
 
         public string ImgPrimary;
         public string ImgThumb;
@@ -24,7 +25,7 @@ namespace Kyoo.Models
         public string ExternalIDs;
 
 
-        public Show(int id, string uri, string title, List<string> aliases, string overview, Status status, int startYear, int endYear, string imgPrimary, string imgThumb, string imgBanner, string imgLogo, string imgBackdrop, string externalIDs)
+        public Show(long id, string uri, string title, List<string> aliases, string overview, Status? status, long? startYear, long? endYear, string imgPrimary, string imgThumb, string imgBanner, string imgLogo, string imgBackdrop, string externalIDs)
         {
             this.id = id;
             Uri = uri;
@@ -42,23 +43,22 @@ namespace Kyoo.Models
             ExternalIDs = externalIDs;
         }
 
-        //Cast error here (Unable to cast object of type 'System.Int64' to type 'System.Int32'.)
         public static Show FromReader(System.Data.SQLite.SQLiteDataReader reader)
         {
-            return new Show((int)reader["id"], 
-                (string)reader["uri"], 
-                (string)reader["title"], 
-                null,
-                (string)reader["overview"],
-                Status.Finished, 
-                (int)reader["startYear"], 
-                (int)reader["endYear"],
-                (string)reader["imgPrimary"],
-                (string)reader["imgThumb"],
-                (string)reader["imgBanner"],
-                (string)reader["imgLogo"],
-                (string)reader["imgBackdrop"],
-                (string)reader["externalIDs"]);
+            return new Show((long)reader["id"],
+                reader["uri"] as string,
+                reader["title"] as string,
+                (reader["aliases"] as string)?.Split('|').ToList() ?? null,
+                reader["overview"] as string,
+                reader["status"] as Status?,
+                reader["startYear"] as long?, 
+                reader["endYear"] as long?,
+                reader["imgPrimary"] as string, 
+                reader["imgThumb"] as string,
+                reader["imgBanner"] as string,
+                reader["imgLogo"] as string,
+                reader["imgBackdrop"] as string,
+                reader["externalIDs"] as string);
         }
     }
 

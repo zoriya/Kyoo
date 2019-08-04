@@ -17,10 +17,10 @@ namespace Kyoo.Controllers
             this.libraryManager = libraryManager;
         }
 
-        [HttpGet("api/browse")]
+        [HttpGet("api/getall")]
         public IEnumerable<Show> GetAll()
         {
-            return libraryManager.QueryShows(null);//new Show[] { new Show(0, "clannad", "Clannad", null, "Best Anime", Status.Finished, 2007, 2008, "", "", "t", "", "", "TvDB=159|Mal=123") };
+            return libraryManager.QueryShows(null);
         }
     }
 }
