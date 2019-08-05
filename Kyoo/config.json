@@ -2,5 +2,6 @@
   "databasePath": "C://Projects/database.db",
   "libraryPaths": [
     "D:\\Videos"
-  ]
+  ],
+  "regex": ".*\\\\(?<ShowTitle>.+?) S(?<Season>\\d+)E(?<Episode>\\d+)"
 }

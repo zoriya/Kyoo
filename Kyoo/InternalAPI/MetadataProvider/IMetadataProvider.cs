@@ -1,9 +1,12 @@
 ﻿using Kyoo.Models;
+using System.Threading.Tasks;
 
 namespace Kyoo.InternalAPI
 {
     public interface IMetadataProvider
     {
-        Show GetShowFromName(string showName);
+        Task<Show> GetShowFromID(string externalIDs);
+
+        Task<Show> GetShowFromName(string showName);
     }
 }

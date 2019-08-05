@@ -5,9 +5,9 @@ namespace Kyoo.Models
 {
     public class Show
     {
-        public readonly long id;
+        public readonly long id = -1;
 
-        public string Uri;
+        public string Slug;
         public string Title;
         public List<string> Aliases;
         public string Overview;
@@ -24,11 +24,12 @@ namespace Kyoo.Models
 
         public string ExternalIDs;
 
+        public Show() { }
 
-        public Show(long id, string uri, string title, List<string> aliases, string overview, Status? status, long? startYear, long? endYear, string imgPrimary, string imgThumb, string imgBanner, string imgLogo, string imgBackdrop, string externalIDs)
+        public Show(long id, string slug, string title, List<string> aliases, string overview, Status? status, long? startYear, long? endYear, string imgPrimary, string imgThumb, string imgBanner, string imgLogo, string imgBackdrop, string externalIDs)
         {
             this.id = id;
-            Uri = uri;
+            Slug = slug;
             Title = title;
             Aliases = aliases;
             Overview = overview;
@@ -46,7 +47,7 @@ namespace Kyoo.Models
         public static Show FromReader(System.Data.SQLite.SQLiteDataReader reader)
         {
             return new Show((long)reader["id"],
-                reader["uri"] as string,
+                reader["slug"] as string,
                 reader["title"] as string,
                 (reader["aliases"] as string)?.Split('|').ToList() ?? null,
                 reader["overview"] as string,
