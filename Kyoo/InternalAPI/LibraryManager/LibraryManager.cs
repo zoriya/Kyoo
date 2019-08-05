@@ -27,7 +27,7 @@ namespace Kyoo.InternalAPI
 
                 string createStatement = @"CREATE TABLE shows(
 					    id INTEGER PRIMARY KEY UNIQUE, 
-					    uri TEXT UNIQUE, 
+					    slug TEXT UNIQUE, 
 					    title TEXT, 
 					    aliases TEXT, 
                         path TEXT,
@@ -94,7 +94,7 @@ namespace Kyoo.InternalAPI
 
 				    CREATE TABLE libraries(
 					    id INTEGER PRIMARY KEY UNIQUE, 
-					    uri TEXT UNIQUE, 
+					    slug TEXT UNIQUE, 
 					    name TEXT
 				    );
 				    CREATE TABLE librariesLinks(
@@ -106,7 +106,7 @@ namespace Kyoo.InternalAPI
 
 				    CREATE TABLE studios(
 					    id INTEGER PRIMARY KEY UNIQUE, 
-					    uri TEXT UNIQUE, 
+					    slug TEXT UNIQUE, 
 					    name TEXT
 					    );
 				    CREATE TABLE studiosLinks(
@@ -118,7 +118,7 @@ namespace Kyoo.InternalAPI
 
 				    CREATE TABLE people(
 					    id INTEGER PRIMARY KEY UNIQUE, 
-					    uri TEXT UNIQUE, 
+					    slug TEXT UNIQUE, 
 					    name TEXT, 
 					    imgPrimary TEXT, 
 					    externalIDs TEXT
@@ -134,7 +134,7 @@ namespace Kyoo.InternalAPI
 
 				    CREATE TABLE genres(
 					    id INTEGER PRIMARY KEY UNIQUE, 
-					    uri TEXT UNIQUE, 
+					    slug TEXT UNIQUE, 
 					    name TEXT
 				    );
 				    CREATE TABLE genresLinks(

@@ -40,7 +40,7 @@ namespace Kyoo.InternalAPI
             return null;
         }
 
-        public void Scan(string folderPath)
+        public async void Scan(string folderPath)
         {
             string[] files = Directory.GetFiles(folderPath);
 
@@ -50,7 +50,7 @@ namespace Kyoo.InternalAPI
                 {
                     Debug.WriteLine("&Should insert this: " + file);
 
-                    string patern = @".*\\(?<ShowTitle>.+?) S(?<Season>\d+)E(?<Episode>\d+)";
+                    string patern = config.GetValue<string>("regex");
                     Regex regex = new Regex(patern, RegexOptions.IgnoreCase);
                     Match match = regex.Match(file);
 
@@ -63,7 +63,10 @@ namespace Kyoo.InternalAPI
 
                     if(!libraryManager.IsShowRegistered(ShowPath))
                     {
-                        Show show = metadataProvider.GetShowFromName(ShowTitle);
+                        Show show = await metadataProvider.GetShowFromName(ShowTitle);
+
+                        Debug.WriteLine("&Show Name: " + show.Title + " Overview: " + show.Overview);
+                        //long showID = libraryManager.RegisterShow(show);
                     }
                 }
             }
