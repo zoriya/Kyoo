@@ -30,14 +30,14 @@ namespace Kyoo.InternalAPI
 					    slug TEXT UNIQUE, 
 					    title TEXT, 
 					    aliases TEXT, 
-                        path TEXT,
+                        path TEXT UNIQUE,
 					    overview TEXT, 
+					    genres TEXT, 
 					    status TEXT, 
 					    startYear INTEGER, 
 					    endYear INTEGER, 
 					    imgPrimary TEXT, 
 					    imgThumb TEXT, 
-					    imgBanner TEXT, 
 					    imgLogo TEXT, 
 					    imgBackdrop TEXT, 
 					    externalIDs TEXT
@@ -144,8 +144,10 @@ namespace Kyoo.InternalAPI
 					    FOREIGN KEY(showID) REFERENCES shows(id)
 				    );";
 
-                SQLiteCommand createCmd = new SQLiteCommand(createStatement, sqlConnection);
-                createCmd.ExecuteNonQuery();
+                using (SQLiteCommand createCmd = new SQLiteCommand(createStatement, sqlConnection))
+                {
+                    createCmd.ExecuteNonQuery();
+                }
             }
             else
             {
@@ -165,35 +167,78 @@ namespace Kyoo.InternalAPI
         {
             string query = "SELECT * FROM shows;";
 
-            SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection);
-            SQLiteDataReader reader = cmd.ExecuteReader();
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                SQLiteDataReader reader = cmd.ExecuteReader();
 
-            List<Show> shows = new List<Show>();
+                List<Show> shows = new List<Show>();
 
-            while (reader.Read())
-                shows.Add(Show.FromReader(reader));
+                while (reader.Read())
+                    shows.Add(Show.FromReader(reader));
 
-            return shows;
+                return shows;
+            }
         }
 
         public bool IsEpisodeRegistered(string episodePath)
         {
             string query = "SELECT 1 FROM episodes WHERE path = $path;";
-            SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection);
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$path", episodePath);
 
-            cmd.Parameters.AddWithValue("$path", episodePath);
-
-            return cmd.ExecuteScalar() != null;
+                return cmd.ExecuteScalar() != null;
+            }
         }
 
         public bool IsShowRegistered(string showPath)
         {
             string query = "SELECT 1 FROM shows WHERE path = $path;";
-            SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection);
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$path", showPath);
 
-            cmd.Parameters.AddWithValue("$path", showPath);
+                return cmd.ExecuteScalar() != null;
+            }
+        }
 
-            return cmd.ExecuteScalar() != null;
+        public bool IsShowRegistered(string showPath, out long? showID)
+        {
+            string query = "SELECT 1 FROM shows WHERE path = $path;";
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$path", showPath);
+                showID = cmd.ExecuteScalar() as long?;
+
+                return showID != null;
+            }
+        }
+
+        public long RegisterShow(Show show)
+        {
+            string query = "INSERT INTO shows (slug, title, aliases, path, overview, genres, startYear, endYear, imgPrimary, imgThumb, imgLogo, imgBackdrop, externalIDs) VALUES($slug, $title, $aliases, $path, $overview, $genres, $startYear, $endYear, $imgPrimary, $imgThumb, $imgLogo, $imgBackdrop, $externalIDs);";
+            Debug.WriteLine("&SQL QUERY:: " + query);
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("slug", show.Slug);
+                cmd.Parameters.AddWithValue("title", show.Title);
+                cmd.Parameters.AddWithValue("aliases", show.GetAliases());
+                cmd.Parameters.AddWithValue("path", show.Path);
+                cmd.Parameters.AddWithValue("overview", show.Overview);
+                cmd.Parameters.AddWithValue("genres", show.GetGenres());
+                cmd.Parameters.AddWithValue("status", show.Status);
+                cmd.Parameters.AddWithValue("startYear", show.StartYear);
+                cmd.Parameters.AddWithValue("endYear", show.EndYear);
+                cmd.Parameters.AddWithValue("imgPrimary", show.ImgPrimary);
+                cmd.Parameters.AddWithValue("imgThumb", show.ImgThumb);
+                cmd.Parameters.AddWithValue("imgLogo", show.ImgLogo);
+                cmd.Parameters.AddWithValue("imgBackdrop", show.ImgBackdrop);
+                cmd.Parameters.AddWithValue("externalIDs", show.ExternalIDs);
+                cmd.ExecuteNonQuery();
+
+                cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
+                return (long)cmd.ExecuteScalar();
+            }
         }
     }
 }
