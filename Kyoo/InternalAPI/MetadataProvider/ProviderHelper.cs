@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using Kyoo.Models;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Kyoo.InternalAPI.MetadataProvider
@@ -11,7 +12,7 @@ namespace Kyoo.InternalAPI.MetadataProvider
         {
             if (externalIDs.Contains(Provider))
             {
-                int startIndex = externalIDs.IndexOf(Provider) + Provider.Length;
+                int startIndex = externalIDs.IndexOf(Provider) + Provider.Length + 1; //The + 1 is for the '='
                 return externalIDs.Substring(startIndex, externalIDs.IndexOf('|', startIndex) - startIndex);
             }
             else
@@ -43,6 +44,29 @@ namespace Kyoo.InternalAPI.MetadataProvider
             showTitle = Regex.Replace(showTitle, @"([-_]){2,}", "$1", RegexOptions.Compiled);
 
             return showTitle;
+        }
+
+        public enum ImageType { Poster, Background, Thumbnail, Logo }
+
+        public void SetImage(Show show, string imgUrl, ImageType type)
+        {
+            switch(type)
+            {
+                case ImageType.Poster:
+                    show.ImgPrimary = imgUrl;
+                    break;
+                case ImageType.Thumbnail:
+                    show.ImgThumb = imgUrl;
+                    break;
+                case ImageType.Logo:
+                    show.ImgLogo = imgUrl;
+                    break;
+                case ImageType.Background:
+                    show.ImgBackdrop = imgUrl;
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

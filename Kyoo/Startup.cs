@@ -32,7 +32,7 @@ namespace Kyoo
 
             services.AddSingleton<ILibraryManager, LibraryManager>();
             services.AddHostedService<Crawler>();
-            services.AddSingleton<IMetadataProvider, ProviderTheTvDB>(); //Shouldn't use it like that, it won't work with multiple providers.
+            services.AddSingleton<IMetadataProvider, ShowProviderTvDB>(); //Shouldn't use it like that, it won't work with multiple providers.
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
