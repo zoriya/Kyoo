@@ -13,6 +13,8 @@ namespace Kyoo.InternalAPI
         Task<Show> GetImages(Show show);
 
         //For the seasons
-        Task<Season> GetSeason(string showName, int seasonNumber);
+        Task<Season> GetSeason(string showName, long seasonNumber);
+
+        Task<string> GetSeasonImage(string showName, long seasonNumber);
     }
 }

@@ -3,6 +3,7 @@ using Kyoo.Models;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -25,32 +26,37 @@ namespace Kyoo.InternalAPI
             providers.Clear();
             providers.Add(new ProviderTheTvDB());
 
-            string[] pluginsPaths = Directory.GetFiles(config.GetValue<string>("providerPlugins"));
-            List<Assembly> plugins = new List<Assembly>();
-            List<Type> types = new List<Type>();
+            string pluginFolder = config.GetValue<string>("providerPlugins");
 
-            for (int i = 0; i < pluginsPaths.Length; i++)
+            if (Directory.Exists(pluginFolder))
             {
-                plugins.Add(Assembly.LoadFile(pluginsPaths[i]));
-                types.AddRange(plugins[i].GetTypes());
-            }
+                string[] pluginsPaths = Directory.GetFiles(pluginFolder);
+                List<Assembly> plugins = new List<Assembly>();
+                List<Type> types = new List<Type>();
 
-            List<Type> providersPlugins = types.FindAll(x =>
-            {
-                object[] atr = x.GetCustomAttributes(typeof(MetaProvider), false);
+                for (int i = 0; i < pluginsPaths.Length; i++)
+                {
+                    plugins.Add(Assembly.LoadFile(pluginsPaths[i]));
+                    types.AddRange(plugins[i].GetTypes());
+                }
 
-                if (atr == null || atr.Length == 0)
+                List<Type> providersPlugins = types.FindAll(x =>
+                {
+                    object[] atr = x.GetCustomAttributes(typeof(MetaProvider), false);
+
+                    if (atr == null || atr.Length == 0)
+                        return false;
+
+                    List<Type> interfaces = new List<Type>(x.GetInterfaces());
+
+                    if (interfaces.Contains(typeof(IMetadataProvider)))
+                        return true;
+
                     return false;
+                });
 
-                List<Type> interfaces = new List<Type>(x.GetInterfaces());
-
-                if (interfaces.Contains(typeof(IMetadataProvider)))
-                    return true;
-
-                return false;
-            });
-
-            providers.AddRange(providersPlugins.ConvertAll<IMetadataProvider>(x => Activator.CreateInstance(x) as IMetadataProvider));
+                providers.AddRange(providersPlugins.ConvertAll<IMetadataProvider>(x => Activator.CreateInstance(x) as IMetadataProvider));
+            }
         }
 
         //public Show MergeShows(Show baseShow, Show newShow)
@@ -79,6 +85,16 @@ namespace Kyoo.InternalAPI
         public Task<Show> GetShowFromName(string showName, string showPath)
         {
             return providers[0].GetShowFromName(showName, showPath);
+        }
+
+        public Task<Season> GetSeason(string showName, long seasonNumber)
+        {
+            return providers[0].GetSeason(showName, seasonNumber);
+        }
+
+        public Task<string> GetSeasonImage(string showName, long seasonNumber)
+        {
+            return providers[0].GetSeasonImage(showName, seasonNumber);
         }
     }
 }
