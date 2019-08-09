@@ -61,12 +61,16 @@ namespace Kyoo.InternalAPI
 
                     Debug.WriteLine("&ShowPath: " + showPath + " Show: " + showName + " season: " + seasonNumber + " episode: " + episodeNumber);
 
+                    string showProviderIDs;
                     if (!libraryManager.IsShowRegistered(showPath, out long showID))
                     {
                         Debug.WriteLine("&Should register show: " + showName);
                         Show show = await metadataProvider.GetShowFromName(showName, showPath);
+                        showProviderIDs = show.ExternalIDs;
                         showID = libraryManager.RegisterShow(show);
                     }
+                    else
+                        showProviderIDs = libraryManager.GetShowExternalIDs(showID);
 
                     Debug.WriteLine("&Show ID: " + showID);
 
@@ -79,6 +83,11 @@ namespace Kyoo.InternalAPI
                     }
 
                     Debug.WriteLine("&Season ID: " + seasonID);
+
+                    Episode episode = await metadataProvider.GetEpisode(showProviderIDs, seasonNumber, episodeNumber);
+                    episode.ShowID = showID;
+                    episode.SeasonID = seasonID;
+                    libraryManager.RegisterEpisode(episode);
                 }
             }
         }
