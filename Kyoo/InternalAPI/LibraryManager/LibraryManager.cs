@@ -163,6 +163,7 @@ namespace Kyoo.InternalAPI
             sqlConnection.Close();
         }
 
+        #region Read the database
         public IEnumerable<Show> QueryShows(string selection)
         {
             string query = "SELECT * FROM shows;";
@@ -179,18 +180,9 @@ namespace Kyoo.InternalAPI
                 return shows;
             }
         }
+        #endregion
 
-        public bool IsEpisodeRegistered(string episodePath)
-        {
-            string query = "SELECT 1 FROM episodes WHERE path = $path;";
-            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
-            {
-                cmd.Parameters.AddWithValue("$path", episodePath);
-
-                return cmd.ExecuteScalar() != null;
-            }
-        }
-
+        #region Check if items exists
         public bool IsShowRegistered(string showPath)
         {
             string query = "SELECT 1 FROM shows WHERE path = $path;";
@@ -202,18 +194,56 @@ namespace Kyoo.InternalAPI
             }
         }
 
-        public bool IsShowRegistered(string showPath, out long? showID)
+        public bool IsShowRegistered(string showPath, out long showID)
         {
             string query = "SELECT 1 FROM shows WHERE path = $path;";
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
                 cmd.Parameters.AddWithValue("$path", showPath);
-                showID = cmd.ExecuteScalar() as long?;
+                showID = cmd.ExecuteScalar() as long? ?? -1;
 
-                return showID != null;
+                return showID != -1;
             }
         }
 
+        public bool IsSeasonRegistered(long showID, long seasonNumber)
+        {
+            string query = "SELECT 1 FROM seasons WHERE showID = $showID AND seasonNumber = $seasonNumber;";
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$showID", showID);
+                cmd.Parameters.AddWithValue("$seasonNumber", seasonNumber);
+
+                return cmd.ExecuteScalar() != null;
+            }
+        }
+
+        public bool IsSeasonRegistered(long showID, long seasonNumber, out long seasonID)
+        {
+            string query = "SELECT 1 FROM seasons WHERE showID = $showID AND seasonNumber = $seasonNumber;";
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$showID", showID);
+                cmd.Parameters.AddWithValue("$seasonNumber", seasonNumber);
+                seasonID = cmd.ExecuteScalar() as long? ?? -1;
+
+                return seasonID != -1;
+            }
+        }
+
+        public bool IsEpisodeRegistered(string episodePath)
+        {
+            string query = "SELECT 1 FROM episodes WHERE path = $path;";
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$path", episodePath);
+
+                return cmd.ExecuteScalar() != null;
+            }
+        }
+        #endregion
+
+        #region Write Into The Database
         public long RegisterShow(Show show)
         {
             string query = "INSERT INTO shows (slug, title, aliases, path, overview, genres, startYear, endYear, imgPrimary, imgThumb, imgLogo, imgBackdrop, externalIDs) VALUES($slug, $title, $aliases, $path, $overview, $genres, $startYear, $endYear, $imgPrimary, $imgThumb, $imgLogo, $imgBackdrop, $externalIDs);";
@@ -240,5 +270,26 @@ namespace Kyoo.InternalAPI
                 return (long)cmd.ExecuteScalar();
             }
         }
+
+        public long RegisterSeason(Season season)
+        {
+            string query = "INSERT INTO seasons (showID, seasonNumber, title, overview, year, imgPrimary, externalIDs) VALUES($showID, $seasonNumber, $title, $overview, $year, $imgPrimary, $externalIDs);";
+            Debug.WriteLine("&SQL QUERY:: " + query);
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$showID", season.ShowID);
+                cmd.Parameters.AddWithValue("$seasonNumber", season.seasonNumber);
+                cmd.Parameters.AddWithValue("$title", season.Title);
+                cmd.Parameters.AddWithValue("$overview", season.Overview);
+                cmd.Parameters.AddWithValue("$year", season.year);
+                cmd.Parameters.AddWithValue("$imgPrimary", season.ImgPrimary);
+                cmd.Parameters.AddWithValue("$externalIDs", season.ExternalIDs);
+                cmd.ExecuteNonQuery();
+
+                cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
+                return (long)cmd.ExecuteScalar();
+            }
+        }
+        #endregion
     }
 }

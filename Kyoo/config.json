@@ -1,5 +1,6 @@
 {
   "databasePath": "C://Projects/database.db",
+  "providerPlugins": "C://Projects/Plugins/Providers",
   "libraryPaths": [
     "D:\\Videos"
   ],
