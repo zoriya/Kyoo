@@ -54,17 +54,17 @@ namespace Kyoo.InternalAPI
                     Regex regex = new Regex(patern, RegexOptions.IgnoreCase);
                     Match match = regex.Match(file);
 
-                    string ShowPath = Path.GetDirectoryName(file);
-                    string ShowTitle = match.Groups["ShowTitle"].Value;
+                    string showPath = Path.GetDirectoryName(file);
+                    string showName = match.Groups["ShowTitle"].Value;
                     bool seasonSuccess = long.TryParse(match.Groups["Season"].Value, out long seasonNumber);
                     bool episodeSucess = long.TryParse(match.Groups["Episode"].Value, out long episodeNumber);
 
-                    Debug.WriteLine("&ShowPath: " + ShowPath + " Show: " + ShowTitle + " season: " + seasonNumber + " episode: " + episodeNumber);
+                    Debug.WriteLine("&ShowPath: " + showPath + " Show: " + showName + " season: " + seasonNumber + " episode: " + episodeNumber);
 
-                    if (!libraryManager.IsShowRegistered(ShowPath, out long showID))
+                    if (!libraryManager.IsShowRegistered(showPath, out long showID))
                     {
-                        Debug.WriteLine("&Should register show: " + ShowTitle);
-                        Show show = await metadataProvider.GetShowFromName(ShowTitle, ShowPath);
+                        Debug.WriteLine("&Should register show: " + showName);
+                        Show show = await metadataProvider.GetShowFromName(showName, showPath);
                         showID = libraryManager.RegisterShow(show);
                     }
 
@@ -72,8 +72,9 @@ namespace Kyoo.InternalAPI
 
                     if(!libraryManager.IsSeasonRegistered(showID, seasonNumber, out long seasonID))
                     {
-                        Debug.WriteLine("&Should register season: " + ShowTitle + " - " + seasonNumber);
-                        Season season = await metadataProvider.GetSeason(showID, seasonNumber);
+                        Debug.WriteLine("&Should register season: " + showName + " - " + seasonNumber);
+                        Season season = await metadataProvider.GetSeason(showName, seasonNumber);
+                        season.ShowID = showID;
                         showID = libraryManager.RegisterSeason(season);
                     }
 

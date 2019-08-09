@@ -215,43 +215,55 @@ namespace Kyoo.InternalAPI.MetadataProvider
 
             foreach (KeyValuePair<ImageType, string> type in imageTypes)
             {
-                WebRequest request = WebRequest.Create("https://api.thetvdb.com/series/" + id + "/images/query?keyType=" + type.Value);
-                request.Method = "GET";
-                request.Timeout = 12000;
-                request.ContentType = "application/json";
-                request.Headers.Add(HttpRequestHeader.Authorization, "Bearer " + token);
-
-                HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
-
-                if (response.StatusCode == HttpStatusCode.OK)
+                try
                 {
-                    Stream stream = response.GetResponseStream();
-                    using (StreamReader reader = new StreamReader(stream))
-                    {
-                        string content = await reader.ReadToEndAsync();
-                        stream.Close();
-                        response.Close();
+                    WebRequest request = WebRequest.Create("https://api.thetvdb.com/series/" + id + "/images/query?keyType=" + type.Value);
+                    request.Method = "GET";
+                    request.Timeout = 12000;
+                    request.ContentType = "application/json";
+                    request.Headers.Add(HttpRequestHeader.Authorization, "Bearer " + token);
 
-                        var model = new { data = new ImageTvDb[0], error = new ErrorsTvDB() };
-                        //Should implement language selection here
-                        ImageTvDb data = JsonConvert.DeserializeAnonymousType(content, model).data.OrderByDescending(x => x.ratingsInfo.average).ThenByDescending(x => x.ratingsInfo.count).FirstOrDefault();
-                        IEnumerable<ImageTvDb> datas = JsonConvert.DeserializeAnonymousType(content, model).data.OrderByDescending(x => x.ratingsInfo.average).ThenByDescending(x => x.ratingsInfo.count);
-                        SetImage(show, "https://www.thetvdb.com/banners/" + data.fileName, type.Key);
+                    HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
+
+                    if (response.StatusCode == HttpStatusCode.OK)
+                    {
+                        Stream stream = response.GetResponseStream();
+                        using (StreamReader reader = new StreamReader(stream))
+                        {
+                            string content = await reader.ReadToEndAsync();
+                            stream.Close();
+                            response.Close();
+
+                            var model = new { data = new ImageTvDb[0], error = new ErrorsTvDB() };
+                            //Should implement language selection here
+                            ImageTvDb data = JsonConvert.DeserializeAnonymousType(content, model).data.OrderByDescending(x => x.ratingsInfo.average).ThenByDescending(x => x.ratingsInfo.count).FirstOrDefault();
+                            IEnumerable<ImageTvDb> datas = JsonConvert.DeserializeAnonymousType(content, model).data.OrderByDescending(x => x.ratingsInfo.average).ThenByDescending(x => x.ratingsInfo.count);
+                            SetImage(show, "https://www.thetvdb.com/banners/" + data.fileName, type.Key);
+                        }
+                    }
+                    else
+                    {
+                        Debug.WriteLine("&TheTvDB Provider couldn't get " + type + " for the show with the id: " + id + ".\nError Code: " + response.StatusCode + " Message: " + response.StatusDescription);
+                        response.Close();
                     }
                 }
-                else
+                catch (WebException ex)
                 {
-                    Debug.WriteLine("&TheTvDB Provider couldn't get " + type + " for the show with the id: " + id + ".\nError Code: " + response.StatusCode + " Message: " + response.StatusDescription);
-                    response.Close();
+                    Debug.WriteLine("&TheTvDB Provider couldn't get " + type + " for the show with the id: " + id + ".\nError Code: " + ex.Status);
                 }
             }
 
             return show;
         }
 
-        public Task<Season> GetSeason(string showName, int seasonNumber)
+        public Task<Season> GetSeason(string showName, long seasonNumber)
         {
-            throw new NotImplementedException();
+            return new Season(-1, -1, seasonNumber, "Season " + seasonNumber, null, null, null, null);
+        }
+
+        public Task<string> GetSeasonImage(string showName, long seasonNumber)
+        {
+            return null;
         }
     }
 }
