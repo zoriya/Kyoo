@@ -5,10 +5,14 @@ namespace Kyoo.InternalAPI
 {
     public interface IMetadataProvider
     {
-        Task<Show> CompleteShow(Show show);
+        //For the show
+        Task<Show> GetShowByID(string id);
 
         Task<Show> GetShowFromName(string showName, string showPath);
 
         Task<Show> GetImages(Show show);
+
+        //For the seasons
+        Task<Season> GetSeason(string showName, int seasonNumber);
     }
 }

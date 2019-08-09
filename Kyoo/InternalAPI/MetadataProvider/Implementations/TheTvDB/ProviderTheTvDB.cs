@@ -7,13 +7,13 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using System.Web;
 
 namespace Kyoo.InternalAPI.MetadataProvider
 {
-    public class ShowProviderTvDB : HelperTvDB, IMetadataProvider
+    [MetaProvider]
+    public class ProviderTheTvDB : HelperTvDB, IMetadataProvider
     {
         private struct SearchTbDB
         {
@@ -122,7 +122,7 @@ namespace Kyoo.InternalAPI.MetadataProvider
                                 GetYear(data.firstAired),
                                 null, //endYear
                                 string.Format("{0}={1}|", Provider, data.id));
-                            return await CompleteShow(show);
+                            return await GetShowByID(GetID(show.ExternalIDs)) ?? show;
                         }
                     }
                     else
@@ -140,17 +140,12 @@ namespace Kyoo.InternalAPI.MetadataProvider
             return new Show() { Slug = ToSlug(showName), Title = showName };
         }
 
-        public async Task<Show> CompleteShow(Show show)
+        public async Task<Show> GetShowByID(string id)
         {
-            string id = GetId(show.ExternalIDs);
-
-            if (id == null)
-                return show;
-
             string token = await Authentificate();
 
             if (token == null)
-                return show;
+                return null;
 
             WebRequest request = WebRequest.Create("https://api.thetvdb.com/series/" + id);
             request.Method = "GET";
@@ -174,12 +169,17 @@ namespace Kyoo.InternalAPI.MetadataProvider
                         var model = new { data = new DataTvDb(), errors = new ErrorsTvDB() };
                         DataTvDb data = JsonConvert.DeserializeAnonymousType(content, model).data;
 
-                        show.Title = data.seriesName;
-                        show.Aliases = data.aliases;
-                        show.Overview = data.overview;
-                        show.Genres = data.genre;
-                        show.Status = GetStatus(data.status);
-                        show.StartYear = GetYear(data.firstAired);
+                        Show show = new Show(-1, 
+                            null, //Slug
+                            data.seriesName,
+                            data.aliases,
+                            null, //Path
+                            data.overview,
+                            data.genre,
+                            GetStatus(data.status),
+                            GetYear(data.firstAired),
+                            null, //endYear
+                            string.Format("TvDB={0}|", id));
                         await GetImages(show);
                         return show;
                     }
@@ -188,20 +188,20 @@ namespace Kyoo.InternalAPI.MetadataProvider
                 {
                     Debug.WriteLine("&TheTvDB Provider couldn't work for the show with the id: " + id + ".\nError Code: " + response.StatusCode + " Message: " + response.StatusDescription);
                     response.Close();
-                    return show;
+                    return null;
                 }
             }
             catch(WebException ex)
             {
                 Debug.WriteLine("&TheTvDB Provider couldn't work for the show with the id: " + id + ".\nError Code: " + ex.Status);
-                return show;
+                return null;
             }
         }
 
         public async Task<Show> GetImages(Show show)
         {
             Debug.WriteLine("&Getting images for: " + show.Title);
-            string id = GetId(show.ExternalIDs);
+            string id = GetID(show.ExternalIDs);
 
             if (id == null)
                 return show;
@@ -247,6 +247,11 @@ namespace Kyoo.InternalAPI.MetadataProvider
             }
 
             return show;
+        }
+
+        public Task<Season> GetSeason(string showName, int seasonNumber)
+        {
+            throw new NotImplementedException();
         }
     }
 }

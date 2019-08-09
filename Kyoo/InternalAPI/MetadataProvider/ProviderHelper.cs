@@ -8,7 +8,7 @@ namespace Kyoo.InternalAPI.MetadataProvider
     {
         public abstract string Provider { get; }
         
-        public string GetId(string externalIDs)
+        public string GetID(string externalIDs)
         {
             if (externalIDs.Contains(Provider))
             {

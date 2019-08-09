@@ -56,12 +56,12 @@ namespace Kyoo.InternalAPI
 
                     string ShowPath = Path.GetDirectoryName(file);
                     string ShowTitle = match.Groups["ShowTitle"].Value;
-                    bool seasonSuccess = long.TryParse(match.Groups["Season"].Value, out long Season);
-                    bool episodeSucess = long.TryParse(match.Groups["Episode"].Value, out long Episode);
+                    bool seasonSuccess = long.TryParse(match.Groups["Season"].Value, out long seasonNumber);
+                    bool episodeSucess = long.TryParse(match.Groups["Episode"].Value, out long episodeNumber);
 
-                    Debug.WriteLine("&ShowPath: " + ShowPath + " Show: " + ShowTitle + " season: " + Season + " episode: " + Episode);
+                    Debug.WriteLine("&ShowPath: " + ShowPath + " Show: " + ShowTitle + " season: " + seasonNumber + " episode: " + episodeNumber);
 
-                    if (!libraryManager.IsShowRegistered(ShowPath, out long? showID))
+                    if (!libraryManager.IsShowRegistered(ShowPath, out long showID))
                     {
                         Debug.WriteLine("&Should register show: " + ShowTitle);
                         Show show = await metadataProvider.GetShowFromName(ShowTitle, ShowPath);
@@ -69,6 +69,15 @@ namespace Kyoo.InternalAPI
                     }
 
                     Debug.WriteLine("&Show ID: " + showID);
+
+                    if(!libraryManager.IsSeasonRegistered(showID, seasonNumber, out long seasonID))
+                    {
+                        Debug.WriteLine("&Should register season: " + ShowTitle + " - " + seasonNumber);
+                        Season season = await metadataProvider.GetSeason(showID, seasonNumber);
+                        showID = libraryManager.RegisterSeason(season);
+                    }
+
+                    Debug.WriteLine("&Season ID: " + seasonID);
                 }
             }
         }
