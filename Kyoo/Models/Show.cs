@@ -91,6 +91,13 @@ namespace Kyoo.Models
                 reader["imgBackdrop"] as string,
                 reader["externalIDs"] as string);
         }
+
+        public Show Set(string slug, string path)
+        {
+            Slug = slug;
+            Path = path;
+            return this;
+        }
     }
 
     public enum Status { Finished, Airing }

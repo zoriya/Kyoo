@@ -261,7 +261,6 @@ namespace Kyoo.InternalAPI
         public long RegisterShow(Show show)
         {
             string query = "INSERT INTO shows (slug, title, aliases, path, overview, genres, startYear, endYear, imgPrimary, imgThumb, imgLogo, imgBackdrop, externalIDs) VALUES($slug, $title, $aliases, $path, $overview, $genres, $startYear, $endYear, $imgPrimary, $imgThumb, $imgLogo, $imgBackdrop, $externalIDs);";
-            Debug.WriteLine("&SQL QUERY:: " + query);
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
                 cmd.Parameters.AddWithValue("slug", show.Slug);
@@ -288,7 +287,6 @@ namespace Kyoo.InternalAPI
         public long RegisterSeason(Season season)
         {
             string query = "INSERT INTO seasons (showID, seasonNumber, title, overview, year, imgPrimary, externalIDs) VALUES($showID, $seasonNumber, $title, $overview, $year, $imgPrimary, $externalIDs);";
-            Debug.WriteLine("&SQL QUERY:: " + query);
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
                 cmd.Parameters.AddWithValue("$showID", season.ShowID);
@@ -308,7 +306,6 @@ namespace Kyoo.InternalAPI
         public long RegisterEpisode(Episode episode)
         {
             string query = "INSERT INTO episodes (showID, seasonID, episodeNumber, title, overview, releaseDate, runtime, imgPrimary, externalIDs) VALUES($showID, $seasonID, $episodeNumber, $title, $overview, $releaseDate, $runtime, $imgPrimary, $externalIDs);";
-            Debug.WriteLine("&SQL QUERY:: " + query);
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
                 cmd.Parameters.AddWithValue("$showID", episode.ShowID);

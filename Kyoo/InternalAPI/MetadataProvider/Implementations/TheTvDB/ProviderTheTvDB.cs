@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -122,7 +123,7 @@ namespace Kyoo.InternalAPI.MetadataProvider
                                 GetYear(data.firstAired),
                                 null, //endYear
                                 string.Format("{0}={1}|", Provider, data.id));
-                            return await GetShowByID(GetID(show.ExternalIDs)) ?? show;
+                            return (await GetShowByID(GetID(show.ExternalIDs))).Set(show.Slug, show.Path) ?? show;
                         }
                     }
                     else
@@ -268,8 +269,6 @@ namespace Kyoo.InternalAPI.MetadataProvider
             return null;
         }
 
-
-
         public async Task<Episode> GetEpisode(string externalIDs, long seasonNumber, long episodeNumber)
         {
             string id = GetID(externalIDs);
@@ -282,8 +281,8 @@ namespace Kyoo.InternalAPI.MetadataProvider
             if (token == null)
                 return null;
 
-            long page = episodeNumber / 100 + 1;
-            long index = episodeNumber % 100;
+            int page = (int)episodeNumber / 100 + 1;
+            int index = (int)episodeNumber % 100;
 
             WebRequest request = WebRequest.Create("https://api.thetvdb.com/series/" + id + "/episodes?page=" + page);
             request.Method = "GET";
@@ -307,8 +306,8 @@ namespace Kyoo.InternalAPI.MetadataProvider
                         dynamic data = JsonConvert.DeserializeObject(content);
                         dynamic episode = data.data[index];
 
-                        Debug.WriteLine("&Date: " + (string)episode.firstAired);
-                        return new Episode(episodeNumber, episode.episodeName, episode.overview, DateTime.Parse(episode.firstAired), -1, "https://www.thetvdb.com/banners/" + episode.filename, string.Format("TvDB={0}|", episode.id));
+                        DateTime dateTime = DateTime.ParseExact((string)episode.firstAired, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+                        return new Episode(episodeNumber, (string)episode.episodeName, (string)episode.overview, dateTime, -1, "https://www.thetvdb.com/banners/" + episode.filename, string.Format("TvDB={0}|", episode.id));
                     }
                 }
                 else
