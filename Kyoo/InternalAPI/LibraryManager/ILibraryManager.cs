@@ -5,7 +5,8 @@ namespace Kyoo.InternalAPI
 {
     public interface ILibraryManager
     {
-        //Public value reading
+        //Read values
+        string GetShowExternalIDs(long showID);
         IEnumerable<Show> QueryShows(string selection);
 
         //Check if value exists
@@ -18,5 +19,6 @@ namespace Kyoo.InternalAPI
         //Register values
         long RegisterShow(Show show);
         long RegisterSeason(Season season);
+        long RegisterEpisode(Episode episode);
     }
 }

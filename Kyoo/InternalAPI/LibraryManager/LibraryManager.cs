@@ -164,6 +164,20 @@ namespace Kyoo.InternalAPI
         }
 
         #region Read the database
+        public string GetShowExternalIDs(long showID)
+        {
+            string query = string.Format("SELECT 1 FROM shows WHERE showID = {0};", showID);
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                SQLiteDataReader reader = cmd.ExecuteReader();
+
+                reader.Read();
+                return Show.FromReader(reader).ExternalIDs;
+            }
+        }
+
+
         public IEnumerable<Show> QueryShows(string selection)
         {
             string query = "SELECT * FROM shows;";
@@ -284,6 +298,28 @@ namespace Kyoo.InternalAPI
                 cmd.Parameters.AddWithValue("$year", season.year);
                 cmd.Parameters.AddWithValue("$imgPrimary", season.ImgPrimary);
                 cmd.Parameters.AddWithValue("$externalIDs", season.ExternalIDs);
+                cmd.ExecuteNonQuery();
+
+                cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
+                return (long)cmd.ExecuteScalar();
+            }
+        }
+
+        public long RegisterEpisode(Episode episode)
+        {
+            string query = "INSERT INTO episodes (showID, seasonID, episodeNumber, title, overview, releaseDate, runtime, imgPrimary, externalIDs) VALUES($showID, $seasonID, $episodeNumber, $title, $overview, $releaseDate, $runtime, $imgPrimary, $externalIDs);";
+            Debug.WriteLine("&SQL QUERY:: " + query);
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$showID", episode.ShowID);
+                cmd.Parameters.AddWithValue("seasonID", episode.SeasonID);
+                cmd.Parameters.AddWithValue("episodeNumber", episode.episodeNumber);
+                cmd.Parameters.AddWithValue("$title", episode.Title);
+                cmd.Parameters.AddWithValue("$overview", episode.Overview);
+                cmd.Parameters.AddWithValue("$releaseDate", episode.ReleaseDate);
+                cmd.Parameters.AddWithValue("$runtime", episode.Runtime);
+                cmd.Parameters.AddWithValue("$imgPrimary", episode.ImgPrimary);
+                cmd.Parameters.AddWithValue("$externalIDs", episode.ExternalIDs);
                 cmd.ExecuteNonQuery();
 
                 cmd.CommandText = "SELECT LAST_INSERT_ROWID()";

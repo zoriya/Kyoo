@@ -3,7 +3,6 @@ using Kyoo.Models;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -95,6 +94,11 @@ namespace Kyoo.InternalAPI
         public Task<string> GetSeasonImage(string showName, long seasonNumber)
         {
             return providers[0].GetSeasonImage(showName, seasonNumber);
+        }
+
+        public Task<Episode> GetEpisode(string externalIDs, long seasonNumber, long episodeNumber)
+        {
+            return providers[0].GetEpisode(externalIDs, seasonNumber, episodeNumber);
         }
     }
 }

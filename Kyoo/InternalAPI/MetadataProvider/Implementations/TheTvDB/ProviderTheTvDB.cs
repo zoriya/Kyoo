@@ -256,7 +256,9 @@ namespace Kyoo.InternalAPI.MetadataProvider
             return show;
         }
 
-        public Task<Season> GetSeason(string showName, long seasonNumber)
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        public async Task<Season> GetSeason(string showName, long seasonNumber)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             return new Season(-1, -1, seasonNumber, "Season " + seasonNumber, null, null, null, null);
         }
@@ -264,6 +266,63 @@ namespace Kyoo.InternalAPI.MetadataProvider
         public Task<string> GetSeasonImage(string showName, long seasonNumber)
         {
             return null;
+        }
+
+
+
+        public async Task<Episode> GetEpisode(string externalIDs, long seasonNumber, long episodeNumber)
+        {
+            string id = GetID(externalIDs);
+
+            if (id == null)
+                return null;
+
+            string token = await Authentificate();
+
+            if (token == null)
+                return null;
+
+            long page = episodeNumber / 100 + 1;
+            long index = episodeNumber % 100;
+
+            WebRequest request = WebRequest.Create("https://api.thetvdb.com/series/" + id + "/episodes?page=" + page);
+            request.Method = "GET";
+            request.Timeout = 12000;
+            request.ContentType = "application/json";
+            request.Headers.Add(HttpRequestHeader.Authorization, "Bearer " + token);
+
+            try
+            {
+                HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
+
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    Stream stream = response.GetResponseStream();
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        string content = await reader.ReadToEndAsync();
+                        stream.Close();
+                        response.Close();
+
+                        dynamic data = JsonConvert.DeserializeObject(content);
+                        dynamic episode = data.data[index];
+
+                        Debug.WriteLine("&Date: " + (string)episode.firstAired);
+                        return new Episode(episodeNumber, episode.episodeName, episode.overview, DateTime.Parse(episode.firstAired), -1, "https://www.thetvdb.com/banners/" + episode.filename, string.Format("TvDB={0}|", episode.id));
+                    }
+                }
+                else
+                {
+                    Debug.WriteLine("&TheTvDB Provider couldn't work for the episode number: " + episodeNumber + ".\nError Code: " + response.StatusCode + " Message: " + response.StatusDescription);
+                    response.Close();
+                    return null;
+                }
+            }
+            catch (WebException ex)
+            {
+                Debug.WriteLine("&TheTvDB Provider couldn't work for the episode number: " + episodeNumber + ".\nError Code: " + ex.Status);
+                return null;
+            }
         }
     }
 }
