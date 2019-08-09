@@ -48,8 +48,6 @@ namespace Kyoo.InternalAPI
             {
                 if(IsVideo(file) && !libraryManager.IsEpisodeRegistered(file))
                 {
-                    Debug.WriteLine("&Should insert this: " + file);
-
                     string patern = config.GetValue<string>("regex");
                     Regex regex = new Regex(patern, RegexOptions.IgnoreCase);
                     Match match = regex.Match(file);
@@ -59,12 +57,9 @@ namespace Kyoo.InternalAPI
                     bool seasonSuccess = long.TryParse(match.Groups["Season"].Value, out long seasonNumber);
                     bool episodeSucess = long.TryParse(match.Groups["Episode"].Value, out long episodeNumber);
 
-                    Debug.WriteLine("&ShowPath: " + showPath + " Show: " + showName + " season: " + seasonNumber + " episode: " + episodeNumber);
-
                     string showProviderIDs;
                     if (!libraryManager.IsShowRegistered(showPath, out long showID))
                     {
-                        Debug.WriteLine("&Should register show: " + showName);
                         Show show = await metadataProvider.GetShowFromName(showName, showPath);
                         showProviderIDs = show.ExternalIDs;
                         showID = libraryManager.RegisterShow(show);
@@ -72,17 +67,12 @@ namespace Kyoo.InternalAPI
                     else
                         showProviderIDs = libraryManager.GetShowExternalIDs(showID);
 
-                    Debug.WriteLine("&Show ID: " + showID);
-
                     if(!libraryManager.IsSeasonRegistered(showID, seasonNumber, out long seasonID))
                     {
-                        Debug.WriteLine("&Should register season: " + showName + " - " + seasonNumber);
                         Season season = await metadataProvider.GetSeason(showName, seasonNumber);
                         season.ShowID = showID;
-                        showID = libraryManager.RegisterSeason(season);
+                        seasonID = libraryManager.RegisterSeason(season);
                     }
-
-                    Debug.WriteLine("&Season ID: " + seasonID);
 
                     Episode episode = await metadataProvider.GetEpisode(showProviderIDs, seasonNumber, episodeNumber);
                     episode.ShowID = showID;
