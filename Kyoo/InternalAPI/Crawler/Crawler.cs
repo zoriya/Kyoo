@@ -77,6 +77,7 @@ namespace Kyoo.InternalAPI
                     Episode episode = await metadataProvider.GetEpisode(showProviderIDs, seasonNumber, episodeNumber);
                     episode.ShowID = showID;
                     episode.SeasonID = seasonID;
+                    episode.Path = file;
                     libraryManager.RegisterEpisode(episode);
                 }
             }

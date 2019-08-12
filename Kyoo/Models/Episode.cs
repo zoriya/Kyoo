@@ -9,6 +9,7 @@ namespace Kyoo.Models
         public long SeasonID;
 
         public long episodeNumber;
+        public string Path;
         public string Title;
         public string Overview;
         public DateTime ReleaseDate;
@@ -43,12 +44,13 @@ namespace Kyoo.Models
             ExternalIDs = externalIDs;
         }
 
-        public Episode(long id, long showID, long seasonID, long episodeNumber, string title, string overview, DateTime releaseDate, long runtime, string imgPrimary, string externalIDs)
+        public Episode(long id, long showID, long seasonID, long episodeNumber, string path, string title, string overview, DateTime releaseDate, long runtime, string imgPrimary, string externalIDs)
         {
             this.id = id;
             ShowID = showID;
             SeasonID = seasonID;
             this.episodeNumber = episodeNumber;
+            Path = path;
             Title = title;
             Overview = overview;
             ReleaseDate = releaseDate;
