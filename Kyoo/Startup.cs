@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Diagnostics;
+using System.Web.Http;
 
 namespace Kyoo
 {
@@ -55,8 +57,9 @@ namespace Kyoo
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
-                    name: "default",
-                    template: "{controller}/{action=Index}/{id?}");
+                    name: "API Route",
+                    template: "api/{controller}/{id}",
+                    defaults: new { id = RouteParameter.Optional });
             });
 
             app.UseSpa(spa =>

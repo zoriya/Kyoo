@@ -164,16 +164,35 @@ namespace Kyoo.InternalAPI
         }
 
         #region Read the database
-        public string GetShowExternalIDs(long showID)
+        public IEnumerable<Library> GetLibraries()
         {
-            string query = string.Format("SELECT 1 FROM shows WHERE showID = {0};", showID);
+            string query = "SELECT * FROM libraries;";
 
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
                 SQLiteDataReader reader = cmd.ExecuteReader();
 
-                reader.Read();
-                return Show.FromReader(reader).ExternalIDs;
+                List<Library> libraries = new List<Library>();
+
+                while (reader.Read())
+                    libraries.Add(Library.FromReader(reader));
+
+                return libraries;
+            }
+        }
+
+        public string GetShowExternalIDs(long showID)
+        {
+            string query = string.Format("SELECT * FROM shows WHERE id = {0};", showID);
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                SQLiteDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                    return Show.FromReader(reader).ExternalIDs;
+                else
+                    return null;
             }
         }
 
@@ -192,6 +211,22 @@ namespace Kyoo.InternalAPI
                     shows.Add(Show.FromReader(reader));
 
                 return shows;
+            }
+        }
+
+        public Show GetShowBySlug(string slug)
+        {
+            string query = "SELECT * FROM shows WHERE slug = $slug;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$slug", slug);
+                SQLiteDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                    return Show.FromReader(reader);
+                else
+                    return null;
             }
         }
         #endregion
@@ -305,12 +340,13 @@ namespace Kyoo.InternalAPI
 
         public long RegisterEpisode(Episode episode)
         {
-            string query = "INSERT INTO episodes (showID, seasonID, episodeNumber, title, overview, releaseDate, runtime, imgPrimary, externalIDs) VALUES($showID, $seasonID, $episodeNumber, $title, $overview, $releaseDate, $runtime, $imgPrimary, $externalIDs);";
+            string query = "INSERT INTO episodes (showID, seasonID, episodeNumber, path, title, overview, releaseDate, runtime, imgPrimary, externalIDs) VALUES($showID, $seasonID, $episodeNumber, $path, $title, $overview, $releaseDate, $runtime, $imgPrimary, $externalIDs);";
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
                 cmd.Parameters.AddWithValue("$showID", episode.ShowID);
                 cmd.Parameters.AddWithValue("seasonID", episode.SeasonID);
                 cmd.Parameters.AddWithValue("episodeNumber", episode.episodeNumber);
+                cmd.Parameters.AddWithValue("path", episode.Path);
                 cmd.Parameters.AddWithValue("$title", episode.Title);
                 cmd.Parameters.AddWithValue("$overview", episode.Overview);
                 cmd.Parameters.AddWithValue("$releaseDate", episode.ReleaseDate);

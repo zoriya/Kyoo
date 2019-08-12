@@ -9,6 +9,10 @@ namespace Kyoo.InternalAPI
         string GetShowExternalIDs(long showID);
         IEnumerable<Show> QueryShows(string selection);
 
+        //Public read
+        IEnumerable<Library> GetLibraries();
+        Show GetShowBySlug(string slug);
+
         //Check if value exists
         bool IsShowRegistered(string showPath);
         bool IsShowRegistered(string showPath, out long showID);
