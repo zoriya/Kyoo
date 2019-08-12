@@ -1,0 +1,17 @@
+.navbar
+{
+  justify-content: left;
+}
+
+.navbar-nav
+{
+  flex-direction: row;
+}
+
+.nav-item
+{
+  > a
+  {
+    padding: 16px;
+  }
+}
