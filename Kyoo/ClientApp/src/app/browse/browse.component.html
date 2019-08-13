@@ -1,0 +1,8 @@
+<div>
+  <a class="show" *ngFor="let show of this.shows" routerLink="/shows/{{show.slug}}">
+    <img src="{{show.imgPrimary}}" />
+    <p>{{show.title}}</p>
+    <p class="date" *ngIf="show.endYear; else elseBlock">{{show.startYear}} - {{show.endYear}}</p>
+    <ng-template #elseBlock><p class="date">{{show.startYear}}</p></ng-template>
+  </a>
+</div>
