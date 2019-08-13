@@ -9,7 +9,7 @@
   padding: 1em;
   display: inline-block;
   text-decoration: none;
-  color: initial;
+  color: inherit;
 
   @include media-breakpoint-up(md)
   {

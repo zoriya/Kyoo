@@ -3,28 +3,46 @@
   justify-content: left;
 }
 
+.nav-item
+{
+  outline: none;
+
+  > a
+  {
+    outline: none;
+  }
+}
+
 .nav-link
 {
   padding: 12px;
+  color: rgba(255, 255, 255, 0.7) !important;
+
+  &:hover
+  {
+    color: white !important;
+  }
+
+  &.active
+  {
+    color: var(--accentColor) !important;
+  }
+}
+
+.navbar-brand:hover
+{
+  color: var(--accentColor);
 }
 
 .icon
 {
   padding: 8px;
   display: inline-block;
-
-  > svg
-  {
-    fill: #d3d3d3;
-  }
+  opacity: 0.7;
 
   &:hover
   {
     cursor: pointer;
-
-    > svg
-    {
-      fill: #ffffff;
-    }
+    opacity: 1;
   }
 }

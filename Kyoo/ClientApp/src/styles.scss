@@ -1,1 +1,14 @@
-/* You can add global styles to this file, and also import other style files */
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+
+$theme-colors: (
+  "primary": #0a1128,
+  "secondary": #080708,
+  "accentColor": #e23c00,
+  "textPrimary": #ffffff
+);
+
+$body-bg: theme-color("primary");
+$body-color: theme-color("textPrimary");
+
+@import "~bootstrap/scss/bootstrap";
