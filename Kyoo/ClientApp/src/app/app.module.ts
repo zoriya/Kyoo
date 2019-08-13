@@ -4,10 +4,16 @@ import { NgModule } from '@angular/core';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
+import { NotFoundComponent } from './not-found/not-found.component';
+import { BrowseComponent } from './browse/browse.component';
+import { ShowDetailsComponent } from './show-details/show-details.component';
 
 @NgModule({
   declarations: [
-    AppComponent
+    AppComponent,
+    NotFoundComponent,
+    BrowseComponent,
+    ShowDetailsComponent
   ],
   imports: [
     BrowserModule,

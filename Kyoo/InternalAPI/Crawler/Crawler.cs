@@ -46,40 +46,8 @@ namespace Kyoo.InternalAPI
 
             foreach (string file in files)
             {
-                if(IsVideo(file) && !libraryManager.IsEpisodeRegistered(file))
-                {
-                    string patern = config.GetValue<string>("regex");
-                    Regex regex = new Regex(patern, RegexOptions.IgnoreCase);
-                    Match match = regex.Match(file);
-
-                    string showPath = Path.GetDirectoryName(file);
-                    string showName = match.Groups["ShowTitle"].Value;
-                    bool seasonSuccess = long.TryParse(match.Groups["Season"].Value, out long seasonNumber);
-                    bool episodeSucess = long.TryParse(match.Groups["Episode"].Value, out long episodeNumber);
-
-                    string showProviderIDs;
-                    if (!libraryManager.IsShowRegistered(showPath, out long showID))
-                    {
-                        Show show = await metadataProvider.GetShowFromName(showName, showPath);
-                        showProviderIDs = show.ExternalIDs;
-                        showID = libraryManager.RegisterShow(show);
-                    }
-                    else
-                        showProviderIDs = libraryManager.GetShowExternalIDs(showID);
-
-                    if(!libraryManager.IsSeasonRegistered(showID, seasonNumber, out long seasonID))
-                    {
-                        Season season = await metadataProvider.GetSeason(showName, seasonNumber);
-                        season.ShowID = showID;
-                        seasonID = libraryManager.RegisterSeason(season);
-                    }
-
-                    Episode episode = await metadataProvider.GetEpisode(showProviderIDs, seasonNumber, episodeNumber);
-                    episode.ShowID = showID;
-                    episode.SeasonID = seasonID;
-                    episode.Path = file;
-                    libraryManager.RegisterEpisode(episode);
-                }
+                if (IsVideo(file))
+                    await TryRegisterEpisode(file);
             }
         }
 
@@ -111,6 +79,11 @@ namespace Kyoo.InternalAPI
         private void FileCreated(object sender, FileSystemEventArgs e)
         {
             Debug.WriteLine("&File Created at " + e.FullPath);
+            if (IsVideo(e.FullPath))
+            {
+                Debug.WriteLine("&Created file is a video");
+                _ = TryRegisterEpisode(e.FullPath);
+            }
         }
 
         private void FileChanged(object sender, FileSystemEventArgs e)
@@ -127,6 +100,47 @@ namespace Kyoo.InternalAPI
         {
             Debug.WriteLine("&File Deleted at " + e.FullPath);
         }
+
+
+
+        private async Task TryRegisterEpisode(string path)
+        {
+            if (!libraryManager.IsEpisodeRegistered(path))
+            {
+                string patern = config.GetValue<string>("regex");
+                Regex regex = new Regex(patern, RegexOptions.IgnoreCase);
+                Match match = regex.Match(path);
+
+                string showPath = Path.GetDirectoryName(path);
+                string showName = match.Groups["ShowTitle"].Value;
+                bool seasonSuccess = long.TryParse(match.Groups["Season"].Value, out long seasonNumber);
+                bool episodeSucess = long.TryParse(match.Groups["Episode"].Value, out long episodeNumber);
+
+                string showProviderIDs;
+                if (!libraryManager.IsShowRegistered(showPath, out long showID))
+                {
+                    Show show = await metadataProvider.GetShowFromName(showName, showPath);
+                    showProviderIDs = show.ExternalIDs;
+                    showID = libraryManager.RegisterShow(show);
+                }
+                else
+                    showProviderIDs = libraryManager.GetShowExternalIDs(showID);
+
+                if (!libraryManager.IsSeasonRegistered(showID, seasonNumber, out long seasonID))
+                {
+                    Season season = await metadataProvider.GetSeason(showName, seasonNumber);
+                    season.ShowID = showID;
+                    seasonID = libraryManager.RegisterSeason(season);
+                }
+
+                Episode episode = await metadataProvider.GetEpisode(showProviderIDs, seasonNumber, episodeNumber);
+                episode.ShowID = showID;
+                episode.SeasonID = seasonID;
+                episode.Path = path;
+                libraryManager.RegisterEpisode(episode);
+            }
+        }
+
 
 
         private static readonly string[] videoExtensions = { ".webm", ".mkv", ".flv", ".vob", ".ogg", ".ogv", ".avi", ".mts", ".m2ts", ".ts", ".mov", ".qt", ".asf", ".mp4", ".m4p", ".m4v", ".mpg", ".mp2", ".mpeg", ".mpe", ".mpv", ".m2v", ".3gp", ".3g2" };

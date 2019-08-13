@@ -3,15 +3,28 @@
   justify-content: left;
 }
 
-.navbar-nav
+.nav-link
 {
-  flex-direction: row;
+  padding: 12px;
 }
 
-.nav-item
+.icon
 {
-  > a
+  padding: 8px;
+  display: inline-block;
+
+  > svg
   {
-    padding: 16px;
+    fill: #d3d3d3;
+  }
+
+  &:hover
+  {
+    cursor: pointer;
+
+    > svg
+    {
+      fill: #ffffff;
+    }
   }
 }
