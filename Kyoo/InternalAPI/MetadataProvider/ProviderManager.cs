@@ -1,9 +1,11 @@
 ﻿using Kyoo.InternalAPI.MetadataProvider;
+using Kyoo.InternalAPI.ThumbnailsManager;
 using Kyoo.Models;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -12,10 +14,12 @@ namespace Kyoo.InternalAPI
     public class ProviderManager : IMetadataProvider
     {
         private readonly List<IMetadataProvider> providers = new List<IMetadataProvider>();
+        private readonly IThumbnailsManager thumbnailsManager;
         private readonly IConfiguration config;
 
-        public ProviderManager(IConfiguration configuration)
+        public ProviderManager(IThumbnailsManager thumbnailsManager, IConfiguration configuration)
         {
+            this.thumbnailsManager = thumbnailsManager;
             config = configuration;
             LoadProviders();
         }
@@ -58,12 +62,21 @@ namespace Kyoo.InternalAPI
             }
         }
 
-        //public Show MergeShows(Show baseShow, Show newShow)
-        //{
+        public Show Merge(IEnumerable<Show> shows)
+        {
+            return shows.FirstOrDefault();
+        }
 
-        //}
+        public Season Merge(IEnumerable<Season> seasons)
+        {
+            return seasons.FirstOrDefault();
+        }
 
-        
+        public Episode Merge(IEnumerable<Episode> episodes)
+        {
+            return episodes.FirstOrDefault();
+        }
+
         //For all the following methods, it should use all providers and merge the data.
 
         public Task<Show> GetImages(Show show)
@@ -71,34 +84,69 @@ namespace Kyoo.InternalAPI
             return providers[0].GetImages(show);
         }
 
-        public Task<Season> GetSeason(string showName, int seasonNumber)
+        public async Task<Season> GetSeason(string showName, int seasonNumber)
         {
-            return providers[0].GetSeason(showName, seasonNumber);
+            List<Season> datas = new List<Season>();
+            for (int i = 0; i < providers.Count; i++)
+            {
+                datas.Add(await providers[i].GetSeason(showName, seasonNumber));
+            }
+
+            return Merge(datas);
         }
 
-        public Task<Show> GetShowByID(string id)
+        public async Task<Show> GetShowByID(string id)
         {
-            return providers[0].GetShowByID(id);
+            List<Show> datas = new List<Show>();
+            for (int i = 0; i < providers.Count; i++)
+            {
+                datas.Add(await providers[i].GetShowByID(id));
+            }
+
+            return Merge(datas);
         }
 
-        public Task<Show> GetShowFromName(string showName, string showPath)
+        public async Task<Show> GetShowFromName(string showName, string showPath)
         {
-            return providers[0].GetShowFromName(showName, showPath);
+            List<Show> datas = new List<Show>();
+            for (int i = 0; i < providers.Count; i++)
+            {
+                datas.Add(await providers[i].GetShowFromName(showName, showPath));
+            }
+
+            Show show = Merge(datas);
+            return thumbnailsManager.Validate(show);
         }
 
-        public Task<Season> GetSeason(string showName, long seasonNumber)
+        public async Task<Season> GetSeason(string showName, long seasonNumber)
         {
-            return providers[0].GetSeason(showName, seasonNumber);
+            List<Season> datas = new List<Season>();
+            for (int i = 0; i < providers.Count; i++)
+            {
+                datas.Add(await providers[i].GetSeason(showName, seasonNumber));
+            }
+
+            return Merge(datas);
         }
 
         public Task<string> GetSeasonImage(string showName, long seasonNumber)
         {
+            //Should select the best provider for this show.
+
             return providers[0].GetSeasonImage(showName, seasonNumber);
         }
 
-        public Task<Episode> GetEpisode(string externalIDs, long seasonNumber, long episodeNumber)
+        public async Task<Episode> GetEpisode(string externalIDs, long seasonNumber, long episodeNumber, string episodePath)
         {
-            return providers[0].GetEpisode(externalIDs, seasonNumber, episodeNumber);
+            List<Episode> datas = new List<Episode>();
+            for (int i = 0; i < providers.Count; i++)
+            {
+                datas.Add(await providers[i].GetEpisode(externalIDs, seasonNumber, episodeNumber, episodePath));
+            }
+
+            Episode episode = Merge(datas);
+            episode.Path = episodePath;
+            return thumbnailsManager.Validate(episode);
         }
     }
 }

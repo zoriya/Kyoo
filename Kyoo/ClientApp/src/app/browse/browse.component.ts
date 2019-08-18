@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { DomSanitizer, SafeStyle } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-browse',
@@ -13,7 +14,7 @@ export class BrowseComponent implements OnInit
 
   private watch: any;
 
-  constructor(private http: HttpClient, private route: ActivatedRoute) { }
+  constructor(private http: HttpClient, private route: ActivatedRoute, private sanitizer: DomSanitizer) {}
 
   ngOnInit()
   {
@@ -41,5 +42,10 @@ export class BrowseComponent implements OnInit
   ngOnDestroy()
   {
     this.watch.unsubscribe();
+  }
+
+  getThumb(slug: string)
+  {
+    return this.sanitizer.bypassSecurityTrustStyle("url(/thumb/" + slug + ")");
   }
 }

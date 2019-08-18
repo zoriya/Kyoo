@@ -1,1 +1,2 @@
-<p>Should display show details of: {{this.show.title}}</p>
+<p *ngIf="this.show; else elseBlock">Should display show details of: {{this.show.title}}</p>
+<ng-template #elseBlock>Loading</ng-template>

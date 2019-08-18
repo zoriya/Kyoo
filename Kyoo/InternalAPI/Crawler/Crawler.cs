@@ -42,7 +42,7 @@ namespace Kyoo.InternalAPI
 
         public async void Scan(string folderPath)
         {
-            string[] files = Directory.GetFiles(folderPath);
+            string[] files = Directory.GetFiles(folderPath, "*", SearchOption.AllDirectories);
 
             foreach (string file in files)
             {
@@ -133,10 +133,9 @@ namespace Kyoo.InternalAPI
                     seasonID = libraryManager.RegisterSeason(season);
                 }
 
-                Episode episode = await metadataProvider.GetEpisode(showProviderIDs, seasonNumber, episodeNumber);
+                Episode episode = await metadataProvider.GetEpisode(showProviderIDs, seasonNumber, episodeNumber, path);
                 episode.ShowID = showID;
                 episode.SeasonID = seasonID;
-                episode.Path = path;
                 libraryManager.RegisterEpisode(episode);
             }
         }

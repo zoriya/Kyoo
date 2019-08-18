@@ -1,5 +1,6 @@
 using Kyoo.InternalAPI;
 using Kyoo.InternalAPI.MetadataProvider;
+using Kyoo.InternalAPI.ThumbnailsManager;
 using Kyoo.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using System.Diagnostics;
 using System.Web.Http;
 
@@ -32,8 +34,12 @@ namespace Kyoo
                 configuration.RootPath = "ClientApp/dist";
             });
 
+            //Services needed in the private and in the public API
             services.AddSingleton<ILibraryManager, LibraryManager>();
+
+            //Services used to get informations about files and register them
             services.AddHostedService<Crawler>();
+            services.AddSingleton<IThumbnailsManager, ThumbnailsManager>();
             services.AddSingleton<IMetadataProvider, ProviderManager>();
         }
 
