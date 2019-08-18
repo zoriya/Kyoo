@@ -15,6 +15,6 @@ namespace Kyoo.InternalAPI
         Task<string> GetSeasonImage(string showName, long seasonNumber);
 
         //For the episodes
-        Task<Episode> GetEpisode(string externalIDs, long seasonNumber, long episodeNumber);
+        Task<Episode> GetEpisode(string externalIDs, long seasonNumber, long episodeNumber, string episodePath);
     }
 }

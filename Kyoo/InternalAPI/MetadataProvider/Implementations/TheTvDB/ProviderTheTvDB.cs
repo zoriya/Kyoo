@@ -269,7 +269,7 @@ namespace Kyoo.InternalAPI.MetadataProvider
             return null;
         }
 
-        public async Task<Episode> GetEpisode(string externalIDs, long seasonNumber, long episodeNumber)
+        public async Task<Episode> GetEpisode(string externalIDs, long seasonNumber, long episodeNumber, string episodePath)
         {
             string id = GetID(externalIDs);
 
