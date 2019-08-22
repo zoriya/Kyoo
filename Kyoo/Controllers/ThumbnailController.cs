@@ -2,8 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
 
-// For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace Kyoo.Controllers
 {
     public class ThumbnailController : Controller
@@ -18,7 +16,20 @@ namespace Kyoo.Controllers
         [HttpGet("thumb/{showSlug}")]
         public IActionResult GetShowThumb(string showSlug)
         {
-            string thumbPath = libraryManager.GetShowBySlug(showSlug).ImgPrimary;
+            string thumbPath = libraryManager.GetShowBySlug(showSlug)?.ImgPrimary;
+            if (thumbPath == null)
+                return NotFound();
+
+            return new PhysicalFileResult(thumbPath, "image/jpg");
+        }
+
+        [HttpGet("backdrop/{showSlug}")]
+        public IActionResult GetShowBackground(string showSlug)
+        {
+            string thumbPath = libraryManager.GetShowBySlug(showSlug)?.ImgBackdrop;
+            if (thumbPath == null)
+                return NotFound();
+
             return new PhysicalFileResult(thumbPath, "image/jpg");
         }
     }

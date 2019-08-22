@@ -18,7 +18,17 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
                 }
             }
 
+            string localBackdrop = Path.Combine(show.Path, "backdrop.jpg");
+            if (!File.Exists(localBackdrop))
+            {
+                using (WebClient client = new WebClient())
+                {
+                    client.DownloadFileAsync(new Uri(show.ImgBackdrop), localBackdrop);
+                }
+            }
+
             show.ImgPrimary = localThumb;
+            show.ImgBackdrop = localBackdrop;
             return show;
         }
 

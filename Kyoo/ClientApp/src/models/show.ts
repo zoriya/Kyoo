@@ -1,21 +1,21 @@
 interface Show
 {
   id: number;
-  Slug: string;
+  slug: string;
   title: string;
   //IEnumerable < > Aliases;
-  Path: string;
-  Overview: string;
+  path: string;
+  overview: string;
   //IEnumerable < > Genres;
   //Status ? Status;
 
-  StartYear: number;
-  EndYear : number;
+  startYear: number;
+  endYear : number;
 
-  ImgPrimary: string;
-  ImgThumb: string;
-  ImgLogo: string;
-  ImgBackdrop: string;
+  imgPrimary: string;
+  imgThumb: string;
+  imgLogo: string;
+  imgBackdrop: string;
 
-  ExternalIDs: string;
+  externalIDs: string;
 }

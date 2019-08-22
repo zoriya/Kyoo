@@ -11,6 +11,11 @@ $theme-colors: (
 
 $body-bg: theme-color("primary");
 $body-color: theme-color("textPrimary");
+.body
+{
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
 
 @import "~bootstrap/scss/bootstrap";
 

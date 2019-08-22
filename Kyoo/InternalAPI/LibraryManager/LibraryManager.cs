@@ -199,7 +199,7 @@ namespace Kyoo.InternalAPI
 
         public IEnumerable<Show> QueryShows(string selection)
         {
-            string query = "SELECT * FROM shows;";
+            string query = "SELECT * FROM shows ORDER BY title;";
 
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
