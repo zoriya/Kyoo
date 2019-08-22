@@ -1,3 +1,4 @@
+//Bootstrap configuration
 @import "~bootstrap/scss/functions";
 @import "~bootstrap/scss/variables";
 
@@ -12,3 +13,21 @@ $body-bg: theme-color("primary");
 $body-color: theme-color("textPrimary");
 
 @import "~bootstrap/scss/bootstrap";
+
+
+//Material Angular Configuration
+@import '~@angular/material/theming';
+@include mat-core();
+
+// Define the default theme (same as the example above).
+$primary: (default: #0a1128);
+$accent: (default: #e23c00, lighter: #ff9149);
+$theme: mat-light-theme($primary, $accent);
+
+// Include the default theme styles.
+@include angular-material-theme($theme);
+
+.snackError {
+  background-color: theme-color("accentColor");
+  color: theme-color("textPrimary");
+}
