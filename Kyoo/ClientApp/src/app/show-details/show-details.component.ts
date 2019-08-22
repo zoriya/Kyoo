@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-show-details',
@@ -10,10 +11,16 @@ export class ShowDetailsComponent implements OnInit
 {
   show: Show;
 
-  constructor(private route: ActivatedRoute) { }
+  constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer) { }
 
   ngOnInit()
   {
     this.show = this.route.snapshot.data.show;
+    document.body.style.backgroundImage = "url(/backdrop/" + this.show.slug + ")";
+  }
+
+  getBackdrop()
+  {
+    return this.sanitizer.bypassSecurityTrustStyle("url(/backdrop/" + this.show.slug + ")");
   }
 }

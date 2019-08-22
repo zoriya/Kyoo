@@ -1,2 +1,12 @@
-<p *ngIf="this.show; else elseBlock">Should display show details of: {{this.show.title}}</p>
-<ng-template #elseBlock>Loading</ng-template>
+<div class="container pt-5">
+  <img class="poster" src="thumb/{{this.show.slug}}" />
+  <div class="info">
+    <h1>{{this.show.title}}</h1>
+    <h6 *ngIf="show.endYear; else elseBlock">{{show.startYear}} - {{show.endYear}}</h6>
+    <ng-template #elseBlock><h2>{{show.startYear}}</h2></ng-template>
+  </div>
+</div>
+
+<div class="main">
+  <p>{{this.show.overview}}</p>
+</div>
