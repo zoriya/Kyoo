@@ -1,6 +1,7 @@
 ﻿using Kyoo.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -122,6 +123,9 @@ namespace Kyoo.InternalAPI
                     Show show = await metadataProvider.GetShowFromName(showName, showPath);
                     showProviderIDs = show.ExternalIDs;
                     showID = libraryManager.RegisterShow(show);
+
+                    List<People> actors = await metadataProvider.GetPeople(show.ExternalIDs);
+                    libraryManager.RegisterShowPeople(showID, actors);
                 }
                 else
                     showProviderIDs = libraryManager.GetShowExternalIDs(showID);

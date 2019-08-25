@@ -224,9 +224,27 @@ namespace Kyoo.InternalAPI
                 SQLiteDataReader reader = cmd.ExecuteReader();
 
                 if (reader.Read())
-                    return Show.FromReader(reader);
+                    return Show.FromReader(reader).SetPeople(this);
                 else
                     return null;
+            }
+        }
+
+        public List<People> GetPeople(long showID)
+        {
+            string query = "SELECT people.id, people.slug, people.name, people.imgPrimary, people.externalIDs, l.role, l.type FROM people JOIN peopleLinks l ON l.peopleID = people.id WHERE l.showID = $showID;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$showID", showID);
+                SQLiteDataReader reader = cmd.ExecuteReader();
+
+                List<People> people = new List<People>();
+
+                while (reader.Read())
+                    people.Add(People.FromReader(reader));
+
+                return people;
             }
         }
         #endregion
@@ -298,20 +316,20 @@ namespace Kyoo.InternalAPI
             string query = "INSERT INTO shows (slug, title, aliases, path, overview, genres, startYear, endYear, imgPrimary, imgThumb, imgLogo, imgBackdrop, externalIDs) VALUES($slug, $title, $aliases, $path, $overview, $genres, $startYear, $endYear, $imgPrimary, $imgThumb, $imgLogo, $imgBackdrop, $externalIDs);";
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
-                cmd.Parameters.AddWithValue("slug", show.Slug);
-                cmd.Parameters.AddWithValue("title", show.Title);
-                cmd.Parameters.AddWithValue("aliases", show.GetAliases());
-                cmd.Parameters.AddWithValue("path", show.Path);
-                cmd.Parameters.AddWithValue("overview", show.Overview);
-                cmd.Parameters.AddWithValue("genres", show.GetGenres());
-                cmd.Parameters.AddWithValue("status", show.Status);
-                cmd.Parameters.AddWithValue("startYear", show.StartYear);
-                cmd.Parameters.AddWithValue("endYear", show.EndYear);
-                cmd.Parameters.AddWithValue("imgPrimary", show.ImgPrimary);
-                cmd.Parameters.AddWithValue("imgThumb", show.ImgThumb);
-                cmd.Parameters.AddWithValue("imgLogo", show.ImgLogo);
-                cmd.Parameters.AddWithValue("imgBackdrop", show.ImgBackdrop);
-                cmd.Parameters.AddWithValue("externalIDs", show.ExternalIDs);
+                cmd.Parameters.AddWithValue("$slug", show.Slug);
+                cmd.Parameters.AddWithValue("$title", show.Title);
+                cmd.Parameters.AddWithValue("$aliases", show.GetAliases());
+                cmd.Parameters.AddWithValue("$path", show.Path);
+                cmd.Parameters.AddWithValue("$overview", show.Overview);
+                cmd.Parameters.AddWithValue("$genres", show.GetGenres());
+                cmd.Parameters.AddWithValue("$status", show.Status);
+                cmd.Parameters.AddWithValue("$startYear", show.StartYear);
+                cmd.Parameters.AddWithValue("$endYear", show.EndYear);
+                cmd.Parameters.AddWithValue("$imgPrimary", show.ImgPrimary);
+                cmd.Parameters.AddWithValue("$imgThumb", show.ImgThumb);
+                cmd.Parameters.AddWithValue("$imgLogo", show.ImgLogo);
+                cmd.Parameters.AddWithValue("$imgBackdrop", show.ImgBackdrop);
+                cmd.Parameters.AddWithValue("$externalIDs", show.ExternalIDs);
                 cmd.ExecuteNonQuery();
 
                 cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
@@ -344,9 +362,9 @@ namespace Kyoo.InternalAPI
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
                 cmd.Parameters.AddWithValue("$showID", episode.ShowID);
-                cmd.Parameters.AddWithValue("seasonID", episode.SeasonID);
-                cmd.Parameters.AddWithValue("episodeNumber", episode.episodeNumber);
-                cmd.Parameters.AddWithValue("path", episode.Path);
+                cmd.Parameters.AddWithValue("$seasonID", episode.SeasonID);
+                cmd.Parameters.AddWithValue("$episodeNumber", episode.episodeNumber);
+                cmd.Parameters.AddWithValue("$path", episode.Path);
                 cmd.Parameters.AddWithValue("$title", episode.Title);
                 cmd.Parameters.AddWithValue("$overview", episode.Overview);
                 cmd.Parameters.AddWithValue("$releaseDate", episode.ReleaseDate);
@@ -357,6 +375,38 @@ namespace Kyoo.InternalAPI
 
                 cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
                 return (long)cmd.ExecuteScalar();
+            }
+        }
+
+        public void RegisterShowPeople(long showID, List<People> people)
+        {
+            string query = "INSERT INTO people (slug, name, imgPrimary, externalIDs) VALUES($slug, $name, $imgPrimary, $externalIDs);";
+            string linkQuery = "INSERT INTO peopleLinks (peopleID, showID, role, type) VALUES($peopleID, $showID, $role, $type);";
+
+            for (int i = 0; i < people.Count; i++)
+            {
+                long peopleID;
+
+                using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+                {
+                    cmd.Parameters.AddWithValue("$slug", people[i].slug);
+                    cmd.Parameters.AddWithValue("$name", people[i].Name);
+                    cmd.Parameters.AddWithValue("$imgPrimary", people[i].imgPrimary);
+                    cmd.Parameters.AddWithValue("$externalIDs", people[i].externalIDs);
+                    cmd.ExecuteNonQuery();
+
+                    cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
+                    peopleID = (long)cmd.ExecuteScalar();
+                }
+
+                using (SQLiteCommand cmd = new SQLiteCommand(linkQuery, sqlConnection))
+                {
+                    cmd.Parameters.AddWithValue("$peopleID", peopleID);
+                    cmd.Parameters.AddWithValue("$showID", showID);
+                    cmd.Parameters.AddWithValue("$role", people[i].Role);
+                    cmd.Parameters.AddWithValue("$type", people[i].Type);
+                    cmd.ExecuteNonQuery();
+                }
             }
         }
         #endregion

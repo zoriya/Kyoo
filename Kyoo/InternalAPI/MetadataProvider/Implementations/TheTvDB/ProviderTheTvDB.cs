@@ -90,7 +90,7 @@ namespace Kyoo.InternalAPI.MetadataProvider
 
             if (token != null)
             {
-                WebRequest request = WebRequest.Create("https://api.thetvdb.com/search/series?name=" + HttpUtility.HtmlEncode(showName));
+                WebRequest request = WebRequest.Create("https://api.thetvdb.com/search/series?name=" + HttpUtility.UrlEncode(showName));
                 request.Method = "GET";
                 request.Timeout = 12000;
                 request.ContentType = "application/json";
@@ -138,7 +138,7 @@ namespace Kyoo.InternalAPI.MetadataProvider
                 }
             }
 
-            return new Show() { Slug = ToSlug(showName), Title = showName };
+            return new Show() { Slug = ToSlug(showName), Title = showName, Path = showPath };
         }
 
         public async Task<Show> GetShowByID(string id)
@@ -320,6 +320,55 @@ namespace Kyoo.InternalAPI.MetadataProvider
             catch (WebException ex)
             {
                 Debug.WriteLine("&TheTvDB Provider couldn't work for the episode number: " + episodeNumber + ".\nError Code: " + ex.Status);
+                return null;
+            }
+        }
+
+        public async Task<List<People>> GetPeople(string externalIDs)
+        {
+            string id = GetID(externalIDs);
+
+            if (id == null)
+                return null;
+
+            string token = await Authentificate();
+
+            if (token == null)
+                return null;
+
+            WebRequest request = WebRequest.Create("https://api.thetvdb.com/series/" + id + "/actors");
+            request.Method = "GET";
+            request.Timeout = 12000;
+            request.ContentType = "application/json";
+            request.Headers.Add(HttpRequestHeader.Authorization, "Bearer " + token);
+
+            try
+            {
+                HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
+
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    Stream stream = response.GetResponseStream();
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        string content = await reader.ReadToEndAsync();
+                        stream.Close();
+                        response.Close();
+
+                        dynamic data = JsonConvert.DeserializeObject(content);
+                        return (((IEnumerable<dynamic>)data.data).OrderBy(x => x.sortOrder)).ToList().ConvertAll(x => { return new People(-1, ToSlug((string)x.name), (string)x.name, (string)x.role, null, "https://www.thetvdb.com/banners/" + (string)x.image, string.Format("TvDB={0}|", x.id)); });
+                    }
+                }
+                else
+                {
+                    Debug.WriteLine("&TheTvDB Provider couldn't work for the actors of the show: " + id + ".\nError Code: " + response.StatusCode + " Message: " + response.StatusDescription);
+                    response.Close();
+                    return null;
+                }
+            }
+            catch (WebException ex)
+            {
+                Debug.WriteLine("&TheTvDB Provider couldn't work for the actors of the show: " + id + ".\nError Code: " + ex.Status);
                 return null;
             }
         }
