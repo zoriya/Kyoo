@@ -8,6 +8,7 @@ namespace Kyoo.InternalAPI
         //Read values
         string GetShowExternalIDs(long showID);
         IEnumerable<Show> QueryShows(string selection);
+        List<People> GetPeople(long showID);
 
         //Public read
         IEnumerable<Library> GetLibraries();
@@ -24,5 +25,7 @@ namespace Kyoo.InternalAPI
         long RegisterShow(Show show);
         long RegisterSeason(Season season);
         long RegisterEpisode(Episode episode);
+
+        void RegisterShowPeople(long showID, List<People> actors);
     }
 }

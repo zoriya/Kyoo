@@ -1,16 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using Kyoo.InternalAPI;
+using Newtonsoft.Json;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Kyoo.Models
 {
     public class Show
     {
-        public readonly long id = -1;
+        [JsonIgnore] public readonly long id = -1;
 
         public string Slug;
         public string Title;
         public IEnumerable<string> Aliases;
-        public string Path;
+        [JsonIgnore] public string Path;
         public string Overview;
         public IEnumerable<string> Genres;
         public Status? Status;
@@ -18,21 +20,29 @@ namespace Kyoo.Models
         public long? StartYear;
         public long? EndYear;
 
-        public string ImgPrimary;
-        public string ImgThumb;
-        public string ImgLogo;
-        public string ImgBackdrop;
+        [JsonIgnore] public string ImgPrimary;
+        [JsonIgnore] public string ImgThumb;
+        [JsonIgnore] public string ImgLogo;
+        [JsonIgnore] public string ImgBackdrop;
 
         public string ExternalIDs;
+
+        public IEnumerable<People> people; //Used in the rest API excusively.
 
 
         public string GetAliases()
         {
+            if (Aliases == null)
+                return null;
+
             return string.Join('|', Aliases);
         }
 
         public string GetGenres()
         {
+            if (Genres == null)
+                return null;
+
             return string.Join('|', Genres);
         }
 
@@ -96,6 +106,18 @@ namespace Kyoo.Models
         {
             Slug = slug;
             Path = path;
+            return this;
+        }
+
+        public Show SetPeople(People[] people)
+        {
+            this.people = people;
+            return this;
+        }
+
+        public Show SetPeople(ILibraryManager manager)
+        {
+            people = manager.GetPeople(id);
             return this;
         }
     }

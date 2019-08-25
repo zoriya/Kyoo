@@ -1,22 +1,23 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 
 namespace Kyoo.Models
 {
     public class Episode
     {
-        public readonly long id;
-        public long ShowID;
-        public long SeasonID;
+        [JsonIgnore] public readonly long id;
+        [JsonIgnore] public long ShowID;
+        [JsonIgnore] public long SeasonID;
 
         public long episodeNumber;
-        public string Path;
+        [JsonIgnore] public string Path;
         public string Title;
         public string Overview;
         public DateTime ReleaseDate;
 
         public long Runtime; //This runtime variable should be in seconds (used by the video manager so we need precisions)
 
-        public string ImgPrimary;
+        [JsonIgnore] public string ImgPrimary;
         public string ExternalIDs;
 
         public long RuntimeInMinutes

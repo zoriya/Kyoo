@@ -1,8 +1,10 @@
-﻿namespace Kyoo.Models
+﻿using Newtonsoft.Json;
+
+namespace Kyoo.Models
 {
     public struct Library
     {
-        public readonly long id;
+        [JsonIgnore] public readonly long id;
         public string Slug;
         public string Name;
 

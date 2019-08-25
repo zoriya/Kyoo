@@ -148,5 +148,11 @@ namespace Kyoo.InternalAPI
             episode.Path = episodePath;
             return thumbnailsManager.Validate(episode);
         }
+
+        public async Task<List<People>> GetPeople(string id)
+        {
+            List<People> actors = await providers[0].GetPeople(id);
+            return thumbnailsManager.Validate(actors);
+        }
     }
 }

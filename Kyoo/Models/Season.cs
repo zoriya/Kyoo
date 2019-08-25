@@ -1,16 +1,18 @@
-﻿namespace Kyoo.Models
+﻿using Newtonsoft.Json;
+
+namespace Kyoo.Models
 {
     public class Season
     {
-        public readonly long id;
-        public long ShowID;
+        [JsonIgnore] public readonly long id;
+        [JsonIgnore] public long ShowID;
 
         public long seasonNumber;
         public string Title;
         public string Overview;
         public long? year;
 
-        public string ImgPrimary;
+        [JsonIgnore] public string ImgPrimary;
         public string ExternalIDs;
 
         public Season() { }
