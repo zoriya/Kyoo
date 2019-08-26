@@ -32,7 +32,6 @@ namespace Kyoo.InternalAPI
 					    aliases TEXT, 
                         path TEXT UNIQUE,
 					    overview TEXT, 
-					    genres TEXT, 
 					    status TEXT, 
 					    startYear INTEGER, 
 					    endYear INTEGER, 
@@ -224,7 +223,7 @@ namespace Kyoo.InternalAPI
                 SQLiteDataReader reader = cmd.ExecuteReader();
 
                 if (reader.Read())
-                    return Show.FromReader(reader).SetPeople(this);
+                    return Show.FromReader(reader).SetGenres(this).SetPeople(this);
                 else
                     return null;
             }
@@ -242,9 +241,59 @@ namespace Kyoo.InternalAPI
                 List<People> people = new List<People>();
 
                 while (reader.Read())
-                    people.Add(People.FromReader(reader));
+                    people.Add(People.FromFullReader(reader));
 
                 return people;
+            }
+        }
+
+        public People GetPeopleBySlug(string slug)
+        {
+            string query = "SELECT * FROM people WHERE slug = $slug;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$slug", slug);
+                SQLiteDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                    return People.FromReader(reader);
+                else
+                    return null;
+            }
+        }
+
+        public List<Genre> GetGenreForShow(long showID)
+        {
+            string query = "SELECT genres.id, genres.slug, genres.name FROM genres JOIN genresLinks l ON l.genreID = genres.id WHERE l.showID = $showID;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$showID", showID);
+                SQLiteDataReader reader = cmd.ExecuteReader();
+
+                List<Genre> genres = new List<Genre>();
+
+                while (reader.Read())
+                    genres.Add(Genre.FromReader(reader));
+
+                return genres;
+            }
+        }
+
+        public Genre GetGenreBySlug(string slug)
+        {
+            string query = "SELECT * FROM genres WHERE slug = $slug;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$slug", slug);
+                SQLiteDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                    return Genre.FromReader(reader);
+                else
+                    return null;
             }
         }
         #endregion
@@ -308,12 +357,31 @@ namespace Kyoo.InternalAPI
                 return cmd.ExecuteScalar() != null;
             }
         }
+
+        public long GetOrCreateGenre(Genre genre)
+        {
+            Genre existingGenre = GetGenreBySlug(genre.Slug);
+
+            if (existingGenre != null)
+                return existingGenre.id;
+
+            string query = "INSERT INTO genres (slug, name) VALUES($slug, $name);";
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$slug", genre.Slug);
+                cmd.Parameters.AddWithValue("$name", genre.Name);
+                cmd.ExecuteNonQuery();
+
+                cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
+                return (long)cmd.ExecuteScalar();
+            }
+        }
         #endregion
 
         #region Write Into The Database
         public long RegisterShow(Show show)
         {
-            string query = "INSERT INTO shows (slug, title, aliases, path, overview, genres, startYear, endYear, imgPrimary, imgThumb, imgLogo, imgBackdrop, externalIDs) VALUES($slug, $title, $aliases, $path, $overview, $genres, $startYear, $endYear, $imgPrimary, $imgThumb, $imgLogo, $imgBackdrop, $externalIDs);";
+            string query = "INSERT INTO shows (slug, title, aliases, path, overview, startYear, endYear, imgPrimary, imgThumb, imgLogo, imgBackdrop, externalIDs) VALUES($slug, $title, $aliases, $path, $overview, $startYear, $endYear, $imgPrimary, $imgThumb, $imgLogo, $imgBackdrop, $externalIDs);";
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
                 cmd.Parameters.AddWithValue("$slug", show.Slug);
@@ -321,7 +389,6 @@ namespace Kyoo.InternalAPI
                 cmd.Parameters.AddWithValue("$aliases", show.GetAliases());
                 cmd.Parameters.AddWithValue("$path", show.Path);
                 cmd.Parameters.AddWithValue("$overview", show.Overview);
-                cmd.Parameters.AddWithValue("$genres", show.GetGenres());
                 cmd.Parameters.AddWithValue("$status", show.Status);
                 cmd.Parameters.AddWithValue("$startYear", show.StartYear);
                 cmd.Parameters.AddWithValue("$endYear", show.EndYear);
@@ -333,7 +400,18 @@ namespace Kyoo.InternalAPI
                 cmd.ExecuteNonQuery();
 
                 cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
-                return (long)cmd.ExecuteScalar();
+                long showID = (long)cmd.ExecuteScalar();
+
+                cmd.CommandText = "INSERT INTO genresLinks (genreID, showID) VALUES($genreID, $showID);";
+                foreach (Genre genre in show.Genres)
+                {
+                    long genreID = GetOrCreateGenre(genre);
+                    cmd.Parameters.AddWithValue("$genreID", genreID);
+                    cmd.Parameters.AddWithValue("$showID", showID);
+                    cmd.ExecuteNonQuery();
+                }
+
+                return showID;
             }
         }
 

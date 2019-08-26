@@ -1,6 +1,5 @@
 ﻿using Kyoo.InternalAPI;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.FileProviders;
 
 namespace Kyoo.Controllers
 {
@@ -27,6 +26,16 @@ namespace Kyoo.Controllers
         public IActionResult GetShowBackground(string showSlug)
         {
             string thumbPath = libraryManager.GetShowBySlug(showSlug)?.ImgBackdrop;
+            if (thumbPath == null)
+                return NotFound();
+
+            return new PhysicalFileResult(thumbPath, "image/jpg");
+        }
+
+        [HttpGet("peopleimg/{peopleSlug}")]
+        public IActionResult GetPeopleIcon(string peopleSlug)
+        {
+            string thumbPath = libraryManager.GetPeopleBySlug(peopleSlug)?.imgPrimary;
             if (thumbPath == null)
                 return NotFound();
 

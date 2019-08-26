@@ -176,7 +176,7 @@ namespace Kyoo.InternalAPI.MetadataProvider
                             data.aliases,
                             null, //Path
                             data.overview,
-                            data.genre,
+                            GetGenres(data.genre),
                             GetStatus(data.status),
                             GetYear(data.firstAired),
                             null, //endYear

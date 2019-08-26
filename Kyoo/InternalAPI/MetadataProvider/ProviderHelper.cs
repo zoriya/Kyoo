@@ -1,4 +1,5 @@
 ﻿using Kyoo.Models;
+using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -67,6 +68,16 @@ namespace Kyoo.InternalAPI.MetadataProvider
                 default:
                     break;
             }
+        }
+
+        public IEnumerable<Genre> GetGenres(string[] input)
+        {
+            List<Genre> genres = new List<Genre>();
+
+            foreach (string genre in input)
+                genres.Add(new Genre(ToSlug(genre), genre));
+
+            return genres;
         }
     }
 }

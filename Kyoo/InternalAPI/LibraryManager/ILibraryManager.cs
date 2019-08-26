@@ -9,10 +9,13 @@ namespace Kyoo.InternalAPI
         string GetShowExternalIDs(long showID);
         IEnumerable<Show> QueryShows(string selection);
         List<People> GetPeople(long showID);
+        List<Genre> GetGenreForShow(long showID);
 
         //Public read
         IEnumerable<Library> GetLibraries();
         Show GetShowBySlug(string slug);
+        People GetPeopleBySlug(string slug);
+        Genre GetGenreBySlug(string slug);
 
         //Check if value exists
         bool IsShowRegistered(string showPath);
@@ -25,6 +28,8 @@ namespace Kyoo.InternalAPI
         long RegisterShow(Show show);
         long RegisterSeason(Season season);
         long RegisterEpisode(Episode episode);
+
+        long GetOrCreateGenre(Genre genre);
 
         void RegisterShowPeople(long showID, List<People> actors);
     }

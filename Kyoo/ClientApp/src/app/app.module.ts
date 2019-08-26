@@ -10,6 +10,8 @@ import { ShowDetailsComponent } from './show-details/show-details.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
+import { MatButtonModule } from '@angular/material/button'; 
+import { MatDividerModule } from '@angular/material/divider'; 
 
 @NgModule({
   declarations: [
@@ -24,7 +26,9 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
     AppRoutingModule,
     BrowserAnimationsModule,
     MatSnackBarModule,
-    MatProgressBarModule
+    MatProgressBarModule,
+    MatButtonModule,
+    MatDividerModule
   ],
   providers: [],
   bootstrap: [AppComponent]
