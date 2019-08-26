@@ -22,6 +22,16 @@ namespace Kyoo.Controllers
             return new PhysicalFileResult(thumbPath, "image/jpg");
         }
 
+        [HttpGet("logo/{showSlug}")]
+        public IActionResult GetShowLogo(string showSlug)
+        {
+            string thumbPath = libraryManager.GetShowBySlug(showSlug)?.ImgLogo;
+            if (thumbPath == null)
+                return NotFound();
+
+            return new PhysicalFileResult(thumbPath, "image/png");
+        }
+
         [HttpGet("backdrop/{showSlug}")]
         public IActionResult GetShowBackground(string showSlug)
         {

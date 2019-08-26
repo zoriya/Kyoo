@@ -7,13 +7,19 @@
         <h6 *ngIf="show.endYear; else elseBlock">{{show.startYear}} - {{show.endYear}}</h6>
         <ng-template #elseBlock><h2>{{show.startYear}}</h2></ng-template>
       </div>
-      <!--<mat-divider></mat-divider>-->
       <div class="buttons">
         <button mat-fab>Play</button>
         <button mat-mini-fab>Download</button>
         <button mat-mini-fab>Watched</button>
         <button mat-mini-fab>More</button>
       </div>
+    </div>
+    <div class="logo">
+      <img src="logo/{{this.show.slug}}" />
+    </div>
+    <div>
+      <p>Studio</p>
+      <p>Director</p>
     </div>
   </div>
 
