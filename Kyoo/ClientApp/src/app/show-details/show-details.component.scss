@@ -2,18 +2,112 @@
 {
   width: 25%;
   background-color: #333333;
-  display: inline-block;
-}
-
-.info
-{
-  display: inline-block;
-  padding-left: 2.5em;
-  padding-bottom: 7em;
-  vertical-align: bottom;
 }
 
 .main
 {
+  align-self: end;
+  padding-bottom: 5em;
+  padding-left: 2.5em;
 
+  .info
+  {
+  }
+
+  .buttons
+  {
+    > button
+    {
+      outline: none;
+      margin: .3em;
+    }
+  }
+}
+
+.people-container
+{
+  display: flex;
+  overflow: hidden;
+}
+
+.people
+{
+  width: 15%;
+  margin: 1em;
+  text-decoration: none;
+  color: inherit;
+  outline: none;
+  flex-shrink: 0;
+  flex-grow: 0;
+
+  /*@include media-breakpoint-up(md)
+  {
+    width: 25%;
+  }
+
+  @include media-breakpoint-up(lg)
+  {
+    width: 20%;
+  }
+
+  @include media-breakpoint-up(xl)
+  {
+    width: 18%;
+  }*/
+  /*&:focus, &:hover
+  {
+    > img
+    {
+      outline: solid var(--accentColor);
+    }
+
+    > .title
+    {
+      text-decoration: underline;
+    }
+  }*/
+  > img
+  {
+    width: 100%;
+    height: 0;
+    padding-top: 147.0588%;
+    background-size: cover;
+    background-color: #333333;
+  }
+
+  > p
+  {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    margin-bottom: 0px;
+
+    &.role
+    {
+      opacity: 0.8;
+      font-size: 0.8em;
+    }
+  }
+
+  &:hover
+  {
+    cursor: pointer;
+  }
+}
+
+#leftBtn
+{
+  position: absolute;
+  left: 0;
+  top: 33%;
+  outline: none;
+}
+
+#rightBtn
+{
+  position: absolute;
+  right: 0;
+  top: 33%;
+  outline: none;
 }

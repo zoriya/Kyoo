@@ -19,6 +19,11 @@ export class ShowDetailsComponent implements OnInit
     document.body.style.backgroundImage = "url(/backdrop/" + this.show.slug + ")";
   }
 
+  getPeopleIcon(slug: string)
+  {
+    return this.sanitizer.bypassSecurityTrustStyle("url(/peopleimg/" + slug + ")");
+  }
+
   getBackdrop()
   {
     return this.sanitizer.bypassSecurityTrustStyle("url(/backdrop/" + this.show.slug + ")");

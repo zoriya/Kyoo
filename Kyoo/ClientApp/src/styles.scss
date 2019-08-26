@@ -36,3 +36,9 @@ $theme: mat-light-theme($primary, $accent);
   background-color: theme-color("accentColor");
   color: theme-color("textPrimary");
 }
+
+.scroll-row
+{
+  padding-left: 0;
+  padding-right: 0;
+}

@@ -13,6 +13,15 @@ namespace Kyoo.Models
 
         public string externalIDs;
 
+        public People(long id, string slug, string name, string imgPrimary, string externalIDs)
+        {
+            this.id = id;
+            this.slug = slug;
+            Name = name;
+            this.imgPrimary = imgPrimary;
+            this.externalIDs = externalIDs;
+        }
+
         public People(long id, string slug, string name, string role, string type, string imgPrimary, string externalIDs)
         {
             this.id = id;
@@ -25,6 +34,15 @@ namespace Kyoo.Models
         }
 
         public static People FromReader(System.Data.SQLite.SQLiteDataReader reader)
+        {
+            return new People((long)reader["id"],
+                reader["slug"] as string,
+                reader["name"] as string,
+                reader["imgPrimary"] as string,
+                reader["externalIDs"] as string);
+        }
+
+        public static People FromFullReader(System.Data.SQLite.SQLiteDataReader reader)
         {
             return new People((long)reader["id"],
                 reader["slug"] as string,

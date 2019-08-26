@@ -14,7 +14,7 @@ namespace Kyoo.Models
         public IEnumerable<string> Aliases;
         [JsonIgnore] public string Path;
         public string Overview;
-        public IEnumerable<string> Genres;
+        public IEnumerable<Genre> Genres;
         public Status? Status;
 
         public long? StartYear;
@@ -49,7 +49,7 @@ namespace Kyoo.Models
 
         public Show() { }
 
-        public Show(long id, string slug, string title, IEnumerable<string> aliases, string path, string overview, IEnumerable<string> genres, Status? status, long? startYear, long? endYear, string externalIDs)
+        public Show(long id, string slug, string title, IEnumerable<string> aliases, string path, string overview, IEnumerable<Genre> genres, Status? status, long? startYear, long? endYear, string externalIDs)
         {
             this.id = id;
             Slug = slug;
@@ -64,7 +64,7 @@ namespace Kyoo.Models
             ExternalIDs = externalIDs;
         }
 
-        public Show(long id, string slug, string title, IEnumerable<string> aliases, string path, string overview, IEnumerable<string> genres, Status? status, long? startYear, long? endYear, string imgPrimary, string imgThumb, string imgLogo, string imgBackdrop, string externalIDs)
+        public Show(long id, string slug, string title, IEnumerable<string> aliases, string path, string overview, Status? status, long? startYear, long? endYear, string imgPrimary, string imgThumb, string imgLogo, string imgBackdrop, string externalIDs)
         {
             this.id = id;
             Slug = slug;
@@ -72,7 +72,6 @@ namespace Kyoo.Models
             Aliases = aliases;
             Path = path;
             Overview = overview;
-            Genres = genres;
             Status = status;
             StartYear = startYear;
             EndYear = endYear;
@@ -91,7 +90,6 @@ namespace Kyoo.Models
                 (reader["aliases"] as string)?.Split('|') ?? null,
                 reader["path"] as string,
                 reader["overview"] as string,
-                (reader["genres"] as string)?.Split('|') ?? null,
                 reader["status"] as Status?,
                 reader["startYear"] as long?, 
                 reader["endYear"] as long?,
@@ -109,9 +107,9 @@ namespace Kyoo.Models
             return this;
         }
 
-        public Show SetPeople(People[] people)
+        public Show SetGenres(ILibraryManager manager)
         {
-            this.people = people;
+            Genres = manager.GetGenreForShow(id);
             return this;
         }
 
