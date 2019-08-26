@@ -24,6 +24,17 @@
   }
 }
 
+.logo
+{
+  display: inline-block;
+  width: 15%;
+
+  >img
+  {
+    max-width: 100%;
+  }
+}
+
 .people-container
 {
   display: flex;
