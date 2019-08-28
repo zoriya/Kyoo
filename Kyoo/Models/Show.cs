@@ -27,7 +27,10 @@ namespace Kyoo.Models
 
         public string ExternalIDs;
 
-        public IEnumerable<People> people; //Used in the rest API excusively.
+        //Used in the rest API excusively.
+        public Studio studio; 
+        public IEnumerable<People> directors;
+        public IEnumerable<People> people;
 
 
         public string GetAliases()
@@ -110,6 +113,18 @@ namespace Kyoo.Models
         public Show SetGenres(ILibraryManager manager)
         {
             Genres = manager.GetGenreForShow(id);
+            return this;
+        }
+
+        public Show SetStudio(ILibraryManager manager)
+        {
+            studio = manager.GetStudio(id);
+            return this;
+        }
+
+        public Show SetDirectors(ILibraryManager manager)
+        {
+            directors = manager.GetDirectors(id);
             return this;
         }
 

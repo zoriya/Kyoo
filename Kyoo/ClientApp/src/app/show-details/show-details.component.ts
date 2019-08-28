@@ -16,7 +16,7 @@ export class ShowDetailsComponent implements OnInit
   ngOnInit()
   {
     this.show = this.route.snapshot.data.show;
-    document.body.style.backgroundImage = "url(/backdrop/" + this.show.slug + ")";
+    //document.body.style.backgroundImage = "url(/backdrop/" + this.show.slug + ")";
   }
 
   getPeopleIcon(slug: string)

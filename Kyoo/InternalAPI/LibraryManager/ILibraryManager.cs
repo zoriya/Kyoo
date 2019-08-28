@@ -8,6 +8,8 @@ namespace Kyoo.InternalAPI
         //Read values
         string GetShowExternalIDs(long showID);
         IEnumerable<Show> QueryShows(string selection);
+        Studio GetStudio(long showID);
+        List<People> GetDirectors(long showID);
         List<People> GetPeople(long showID);
         List<Genre> GetGenreForShow(long showID);
 
@@ -16,6 +18,7 @@ namespace Kyoo.InternalAPI
         Show GetShowBySlug(string slug);
         People GetPeopleBySlug(string slug);
         Genre GetGenreBySlug(string slug);
+        Studio GetStudioBySlug(string slug);
 
         //Check if value exists
         bool IsShowRegistered(string showPath);
@@ -30,6 +33,7 @@ namespace Kyoo.InternalAPI
         long RegisterEpisode(Episode episode);
 
         long GetOrCreateGenre(Genre genre);
+        long GetOrCreateStudio(Studio studio);
 
         void RegisterShowPeople(long showID, List<People> actors);
     }
