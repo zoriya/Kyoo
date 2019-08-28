@@ -34,6 +34,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="wwwroot\iconfont\codepoints" />
+    <None Include="wwwroot\iconfont\MaterialIcons-Regular.ijmap" />
+    <None Include="wwwroot\iconfont\MaterialIcons-Regular.svg" />
+    <None Include="wwwroot\iconfont\MaterialIcons-Regular.woff2" />
+    <None Include="wwwroot\iconfont\README.md" />
+  </ItemGroup>
+
+  <ItemGroup>
     <TypeScriptCompile Include="ClientApp\src\models\show.ts" />
   </ItemGroup>
 

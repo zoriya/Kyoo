@@ -223,7 +223,7 @@ namespace Kyoo.InternalAPI
                 SQLiteDataReader reader = cmd.ExecuteReader();
 
                 if (reader.Read())
-                    return Show.FromReader(reader).SetGenres(this).SetPeople(this);
+                    return Show.FromReader(reader).SetGenres(this).SetStudio(this).SetDirectors(this).SetPeople(this);
                 else
                     return null;
             }
@@ -295,6 +295,57 @@ namespace Kyoo.InternalAPI
                 else
                     return null;
             }
+        }
+
+        public Studio GetStudio(long showID)
+        {
+            string query = "SELECT studios.id, studios.slug, studios.name FROM studios JOIN studiosLinks l ON l.studioID = studios.id WHERE l.showID = $showID;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$showID", showID);
+                SQLiteDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                    return Studio.FromReader(reader);
+                else
+                    return Studio.Default();
+            }
+        }
+
+        public Studio GetStudioBySlug(string slug)
+        {
+            string query = "SELECT * FROM studios WHERE slug = $slug;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$slug", slug);
+                SQLiteDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                    return Studio.FromReader(reader);
+                else
+                    return null;
+            }
+        }
+
+        public List<People> GetDirectors(long showID)
+        {
+            return null;
+            //string query = "SELECT genres.id, genres.slug, genres.name FROM genres JOIN genresLinks l ON l.genreID = genres.id WHERE l.showID = $showID;";
+
+            //using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            //{
+            //    cmd.Parameters.AddWithValue("$showID", showID);
+            //    SQLiteDataReader reader = cmd.ExecuteReader();
+
+            //    List<Genre> genres = new List<Genre>();
+
+            //    while (reader.Read())
+            //        genres.Add(Genre.FromReader(reader));
+
+            //    return genres;
+            //}
         }
         #endregion
 
@@ -376,6 +427,25 @@ namespace Kyoo.InternalAPI
                 return (long)cmd.ExecuteScalar();
             }
         }
+
+        public long GetOrCreateStudio(Studio studio)
+        {
+            Studio existingStudio = GetStudioBySlug(studio.Slug);
+
+            if (existingStudio != null)
+                return existingStudio.id;
+
+            string query = "INSERT INTO studios (slug, name) VALUES($slug, $name);";
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$slug", studio.Slug);
+                cmd.Parameters.AddWithValue("$name", studio.Name);
+                cmd.ExecuteNonQuery();
+
+                cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
+                return (long)cmd.ExecuteScalar();
+            }
+        }
         #endregion
 
         #region Write Into The Database
@@ -410,6 +480,12 @@ namespace Kyoo.InternalAPI
                     cmd.Parameters.AddWithValue("$showID", showID);
                     cmd.ExecuteNonQuery();
                 }
+
+                cmd.CommandText = "INSERT INTO studiosLinks (studioID, showID) VALUES($studioID, $showID);";
+                long studioID = GetOrCreateStudio(show.studio);
+                cmd.Parameters.AddWithValue("$studioID", studioID);
+                cmd.Parameters.AddWithValue("$showID", showID);
+                cmd.ExecuteNonQuery();
 
                 return showID;
             }

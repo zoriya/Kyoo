@@ -1,25 +1,42 @@
 <div class="container pt-5">
   <div class="row">
-    <img class="poster" src="thumb/{{this.show.slug}}" />
-    <div class="main">
+    <img class="poster d-none d-sm-block" src="thumb/{{this.show.slug}}" />
+    <div class="main col">
       <div class="info">
         <h1>{{this.show.title}}</h1>
-        <h6 *ngIf="show.endYear; else elseBlock">{{show.startYear}} - {{show.endYear}}</h6>
+        <h2 *ngIf="show.endYear; else elseBlock">{{show.startYear}} - {{show.endYear}}</h2>
         <ng-template #elseBlock><h2>{{show.startYear}}</h2></ng-template>
       </div>
       <div class="buttons">
-        <button mat-fab>Play</button>
-        <button mat-mini-fab>Download</button>
-        <button mat-mini-fab>Watched</button>
-        <button mat-mini-fab>More</button>
+        <button mat-mini-fab data-toggle="tooltip" data-placement="top" title="Play" class="mr-3">
+          <mat-icon>play_arrow</mat-icon>
+        </button>
+        <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Download">
+          <mat-icon>cloud_download</mat-icon>
+        </button>
+        <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Watched">
+          <mat-icon>done</mat-icon>
+        </button>
+        <button mat-icon-button data-toggle="tooltip" data-placement="top" title="More">
+          <mat-icon>more_horiz</mat-icon>
+        </button>
       </div>
     </div>
-    <div class="logo">
+    <div class="col-3 secondary d-none d-md-block">
       <img src="logo/{{this.show.slug}}" />
+
+      <div>
+        <p>Studio: <b><a routerLink="/studio/{{this.show.studio.slug}}">{{this.show.studio.name}}</a></b></p>
+        <p>Directors: <b></b></p>
+      </div>
     </div>
-    <div>
-      <p>Studio</p>
-      <p>Director</p>
+  </div>
+
+  <div class="row pt-3 d-md-none">
+    <p class="mr-1">Studio: <b><a routerLink="/studio/{{this.show.studio.slug}}">{{this.show.studio.name}}</a></b></p>
+    <p>Directors: <b></b></p>
+    <div class="d-sm-none">
+      <p>Genres: <span *ngFor="let genre of this.show.genres; let isLast = last"><b><a routerLink="/genre/{{genre.slug}}">{{genre.name}}</a></b>{{isLast ? "" : ", "}}</span></p>
     </div>
   </div>
 
@@ -28,27 +45,33 @@
       <p class="text-justify">{{this.show.overview}}</p>
     </div>
     <mat-divider vertical></mat-divider>
-    <div class="col-2">
+    <div class="col-3 d-none d-sm-block">
       <h3>Genres</h3>
       <ul>
-        <li *ngFor="let genre of this.show.genres"><a  routerLink="/genre/{{genre.slug}}">{{genre.name}}</a></li>
+        <li *ngFor="let genre of this.show.genres"><b><a routerLink="/genre/{{genre.slug}}">{{genre.name}}</a></b></li>
       </ul>
-    </div>
-  </div>
-
-  <div class="row bg-primary" style="display: block;"> <!--For now we'll leave that for wireframing a bit-->
-    <h3>Staff</h3>
-    <div class="scroll-row" style="position: relative;">
-      <button mat-fab id="leftBtn"></button>
-      <div class="justify-content-left people-container">
-        <a class="people" *ngFor="let people of this.show.people" routerLink="/people/{{people.slug}}">
-          <img [style.background-image]="getPeopleIcon(people.slug)" />
-          <p class="title">{{people.name}}</p>
-          <p class="role">{{people.role}}</p>
-        </a>
-      </div>
-      <button mat-fab id="rightBtn"></button>
     </div>
   </div>
 </div>
 
+<div class="row bg-primary" style="display: block;">
+  <!--For now we'll leave that for wireframing a bit-->
+  <h3>Staff</h3>
+  <div class="scroll-row" style="position: relative;">
+    <button mat-fab id="leftBtn"></button>
+    <div class="justify-content-left people-container">
+      <a class="people" *ngFor="let people of this.show.people" routerLink="/people/{{people.slug}}">
+        <img [style.background-image]="getPeopleIcon(people.slug)" />
+        <p class="title">{{people.name}}</p>
+        <p class="role">{{people.role}}</p>
+      </a>
+    </div>
+    <button mat-fab id="rightBtn"></button>
+  </div>
+</div>
+
+<script>
+  $(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})
+</script>

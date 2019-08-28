@@ -1,13 +1,27 @@
+@import "~bootstrap//scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss//mixins/breakpoints";
+
+a
+{
+  color: #ffffff;
+}
+
+
 .poster
 {
-  width: 25%;
+  width: 33%;
   background-color: #333333;
+
+  @include media-breakpoint-up(md)
+  {
+    width: 25%;
+  }
 }
 
 .main
 {
-  align-self: end;
-  padding-bottom: 5em;
+  align-self: center;
   padding-left: 2.5em;
 
   .info
@@ -24,14 +38,19 @@
   }
 }
 
-.logo
+.secondary
 {
-  display: inline-block;
-  width: 15%;
+  position: relative;
 
-  >img
+  > img
   {
     max-width: 100%;
+  }
+
+  > div
+  {
+    position: absolute;
+    bottom: 0;
   }
 }
 
