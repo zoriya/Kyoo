@@ -1,4 +1,6 @@
-<div class="container pt-5">
+<img id="backdrop" class="backdrop" src="backdrop/{{this.show.slug}}" />
+
+<div class="header container pt-sm-5">
   <div class="row">
     <img class="poster d-none d-sm-block" src="thumb/{{this.show.slug}}" />
     <div class="main col">
@@ -33,16 +35,18 @@
   </div>
 
   <div class="row pt-3 d-md-none">
-    <p class="mr-1">Studio: <b><a routerLink="/studio/{{this.show.studio.slug}}">{{this.show.studio.name}}</a></b></p>
-    <p>Directors: <b></b></p>
-    <div class="d-sm-none">
-      <p>Genres: <span *ngFor="let genre of this.show.genres; let isLast = last"><b><a routerLink="/genre/{{genre.slug}}">{{genre.name}}</a></b>{{isLast ? "" : ", "}}</span></p>
+    <div class="col">
+      <p class="mr-1 d-inline-block">Studio: <b><a routerLink="/studio/{{this.show.studio.slug}}">{{this.show.studio.name}}</a></b></p>
+      <p class="d-inline-block">Directors: <b></b></p>
+      <div class="d-sm-none">
+        <p>Genres: <span *ngFor="let genre of this.show.genres; let isLast = last"><b><a routerLink="/genre/{{genre.slug}}">{{genre.name}}</a></b>{{isLast ? "" : ", "}}</span></p>
+      </div>
     </div>
   </div>
 
   <div class="row pt-3">
     <div class="col">
-      <p class="text-justify">{{this.show.overview}}</p>
+      <p class="text-justify overview">{{this.show.overview}}</p>
     </div>
     <mat-divider vertical></mat-divider>
     <div class="col-3 d-none d-sm-block">
@@ -69,9 +73,3 @@
     <button mat-fab id="rightBtn"></button>
   </div>
 </div>
-
-<script>
-  $(function () {
-  $('[data-toggle="tooltip"]').tooltip()
-})
-</script>

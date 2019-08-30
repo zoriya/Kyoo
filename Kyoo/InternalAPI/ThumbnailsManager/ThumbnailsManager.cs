@@ -19,9 +19,13 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
 
         public Show Validate(Show show)
         {
+            string localThumb = Path.Combine(show.Path, "poster.jpg");
+            string localLogo = Path.Combine(show.Path, "logo.png");
+            string localBackdrop = Path.Combine(show.Path, "backdrop.jpg");
+
+
             if (show.ImgPrimary != null)
             {
-                string localThumb = Path.Combine(show.Path, "poster.jpg");
                 if (!File.Exists(localThumb))
                 {
                     using (WebClient client = new WebClient())
@@ -29,12 +33,11 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
                         client.DownloadFileAsync(new Uri(show.ImgPrimary), localThumb);
                     }
                 }
-                show.ImgPrimary = localThumb;
             }
+            show.ImgPrimary = localThumb;
 
             if (show.ImgLogo != null)
             {
-                string localLogo = Path.Combine(show.Path, "logo.png");
                 if (!File.Exists(localLogo))
                 {
                     using (WebClient client = new WebClient())
@@ -42,12 +45,11 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
                         client.DownloadFileAsync(new Uri(show.ImgLogo), localLogo);
                     }
                 }
-                show.ImgLogo = localLogo;
             }
+            show.ImgLogo = localLogo;
 
             if (show.ImgBackdrop != null)
             {
-                string localBackdrop = Path.Combine(show.Path, "backdrop.jpg");
                 if (!File.Exists(localBackdrop))
                 {
                     using (WebClient client = new WebClient())
@@ -55,8 +57,8 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
                         client.DownloadFileAsync(new Uri(show.ImgBackdrop), localBackdrop);
                     }
                 }
-                show.ImgBackdrop = localBackdrop;
             }
+            show.ImgBackdrop = localBackdrop;
 
             return show;
         }
@@ -65,7 +67,10 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
         {
             for (int i = 0; i < people?.Count; i++)
             {
-                string localThumb = config.GetValue<string>("peoplePath") + "/" + people[i].slug + ".jpg";
+                string root = config.GetValue<string>("peoplePath");
+                Directory.CreateDirectory(root);
+
+                string localThumb = root + "/" + people[i].slug + ".jpg";
                 if (!File.Exists(localThumb))
                 {
                     using (WebClient client = new WebClient())

@@ -481,11 +481,14 @@ namespace Kyoo.InternalAPI
                     cmd.ExecuteNonQuery();
                 }
 
-                cmd.CommandText = "INSERT INTO studiosLinks (studioID, showID) VALUES($studioID, $showID);";
-                long studioID = GetOrCreateStudio(show.studio);
-                cmd.Parameters.AddWithValue("$studioID", studioID);
-                cmd.Parameters.AddWithValue("$showID", showID);
-                cmd.ExecuteNonQuery();
+                if(show.studio != null)
+                {
+                    cmd.CommandText = "INSERT INTO studiosLinks (studioID, showID) VALUES($studioID, $showID);";
+                    long studioID = GetOrCreateStudio(show.studio);
+                    cmd.Parameters.AddWithValue("$studioID", studioID);
+                    cmd.Parameters.AddWithValue("$showID", showID);
+                    cmd.ExecuteNonQuery();
+                }
 
                 return showID;
             }
