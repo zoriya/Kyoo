@@ -7,6 +7,36 @@ a
   color: #ffffff;
 }
 
+.backdrop
+{
+  width: 100%;
+  margin-top: -68px;
+  max-height: 75vh;
+  object-fit: cover;
+}
+
+.header
+{
+  @include media-breakpoint-up(sm)
+  {
+    margin-top: -14rem;
+  }
+
+  @include media-breakpoint-up(md)
+  {
+    margin-top: -14rem;
+  }
+
+  @include media-breakpoint-up(lg)
+  {
+    margin-top: -20rem;
+  }
+
+  @include media-breakpoint-up(xl)
+  {
+    margin-top: -24rem;
+  }
+}
 
 .poster
 {
@@ -26,6 +56,12 @@ a
 
   .info
   {
+    margin-top: -3.25rem;
+
+    @include media-breakpoint-up(sm)
+    {
+      margin-top: 0;
+    }
   }
 
   .buttons
@@ -38,39 +74,46 @@ a
   }
 }
 
-.secondary
-{
-  position: relative;
-
-  > img
+  .secondary
   {
-    max-width: 100%;
+    position: relative;
+
+    > img
+    {
+      max-width: 100%;
+    }
+
+    > div
+    {
+      position: absolute;
+      bottom: 0;
+    }
   }
 
-  > div
+  .overview
   {
-    position: absolute;
-    bottom: 0;
+    @include media-breakpoint-up(sm)
+    {
+      padding-top: 2.25rem;
+    }
   }
-}
 
-.people-container
-{
-  display: flex;
-  overflow: hidden;
-}
+  .people-container
+  {
+    display: flex;
+    overflow: hidden;
+  }
 
-.people
-{
-  width: 15%;
-  margin: 1em;
-  text-decoration: none;
-  color: inherit;
-  outline: none;
-  flex-shrink: 0;
-  flex-grow: 0;
-
-  /*@include media-breakpoint-up(md)
+  .people
+  {
+    width: 15%;
+    margin: 1em;
+    text-decoration: none;
+    color: inherit;
+    outline: none;
+    flex-shrink: 0;
+    flex-grow: 0;
+    /*@include media-breakpoint-up(md)
   {
     width: 25%;
   }
@@ -84,7 +127,7 @@ a
   {
     width: 18%;
   }*/
-  /*&:focus, &:hover
+    /*&:focus, &:hover
   {
     > img
     {
@@ -96,48 +139,48 @@ a
       text-decoration: underline;
     }
   }*/
-  > img
-  {
-    width: 100%;
-    height: 0;
-    padding-top: 147.0588%;
-    background-size: cover;
-    background-color: #333333;
-  }
-
-  > p
-  {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-align: center;
-    margin-bottom: 0px;
-
-    &.role
+    > img
     {
-      opacity: 0.8;
-      font-size: 0.8em;
+      width: 100%;
+      height: 0;
+      padding-top: 147.0588%;
+      background-size: cover;
+      background-color: #333333;
+    }
+
+    > p
+    {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: center;
+      margin-bottom: 0px;
+
+      &.role
+      {
+        opacity: 0.8;
+        font-size: 0.8em;
+      }
+    }
+
+    &:hover
+    {
+      cursor: pointer;
     }
   }
 
-  &:hover
+  #leftBtn
   {
-    cursor: pointer;
+    position: absolute;
+    left: 0;
+    top: 33%;
+    outline: none;
   }
-}
 
-#leftBtn
-{
-  position: absolute;
-  left: 0;
-  top: 33%;
-  outline: none;
-}
-
-#rightBtn
-{
-  position: absolute;
-  right: 0;
-  top: 33%;
-  outline: none;
-}
+  #rightBtn
+  {
+    position: absolute;
+    right: 0;
+    top: 33%;
+    outline: none;
+  }
