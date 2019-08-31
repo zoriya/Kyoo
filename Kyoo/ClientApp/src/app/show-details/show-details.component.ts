@@ -19,8 +19,6 @@ export class ShowDetailsComponent implements OnInit
   ngOnInit()
   {
     this.show = this.route.snapshot.data.show;
-    //document.body.style.backgroundImage = "url(/backdrop/" + this.show.slug + ")";
-
 
     this.toolbar = document.getElementById("toolbar");
     this.backdrop = document.getElementById("backdrop");
@@ -33,7 +31,7 @@ export class ShowDetailsComponent implements OnInit
     window.removeEventListener("scroll", this.scroll, true);
   }
 
-  scroll = (event) =>
+  scroll = () =>
   {
     let opacity: number = 2 * window.scrollY / this.backdrop.clientHeight;
     this.toolbar.setAttribute("style", `background-color: rgba(0, 0, 0, ${opacity}) !important`);
@@ -44,10 +42,5 @@ export class ShowDetailsComponent implements OnInit
   getPeopleIcon(slug: string)
   {
     return this.sanitizer.bypassSecurityTrustStyle("url(/peopleimg/" + slug + ")");
-  }
-
-  getBackdrop()
-  {
-    return this.sanitizer.bypassSecurityTrustStyle("url(/backdrop/" + this.show.slug + ")");
   }
 }
