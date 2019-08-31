@@ -223,7 +223,42 @@ namespace Kyoo.InternalAPI
                 SQLiteDataReader reader = cmd.ExecuteReader();
 
                 if (reader.Read())
-                    return Show.FromReader(reader).SetGenres(this).SetStudio(this).SetDirectors(this).SetPeople(this);
+                    return Show.FromReader(reader).SetGenres(this).SetStudio(this).SetDirectors(this).SetSeasons(this).SetPeople(this);
+                else
+                    return null;
+            }
+        }
+
+        public List<Season> GetSeasons(long showID)
+        {
+            string query = "SELECT * FROM seasons WHERE showID = $showID;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$showID", showID);
+                SQLiteDataReader reader = cmd.ExecuteReader();
+
+                List<Season> seasons = new List<Season>();
+
+                while (reader.Read())
+                    seasons.Add(Season.FromReader(reader));
+
+                return seasons;
+            }
+        }
+
+        public Season GetSeason(string showSlug, long seasonNumber)
+        {
+            string query = "SELECT * FROM seasons JOIN shows ON shows.id = seasons.showID WHERE shows.slug = $showSlug AND seasons.seasonNumber = $seasonNumber;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$showSlug", showSlug);
+                cmd.Parameters.AddWithValue("$seasonNumber", seasonNumber);
+                SQLiteDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                    return Season.FromReader(reader);
                 else
                     return null;
             }
