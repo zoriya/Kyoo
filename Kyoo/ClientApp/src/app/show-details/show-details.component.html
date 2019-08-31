@@ -5,9 +5,9 @@
     <img class="poster d-none d-sm-block" src="thumb/{{this.show.slug}}" />
     <div class="main col">
       <div class="info">
-        <h1>{{this.show.title}}</h1>
-        <h2 *ngIf="show.endYear; else elseBlock">{{show.startYear}} - {{show.endYear}}</h2>
-        <ng-template #elseBlock><h2>{{show.startYear}}</h2></ng-template>
+        <h1 class="title">{{this.show.title}}</h1>
+        <h2 class="date" *ngIf="show.endYear; else elseBlock">{{show.startYear}} - {{show.endYear}}</h2>
+        <ng-template #elseBlock><h2 class="date">{{show.startYear}}</h2></ng-template>
       </div>
       <div class="buttons">
         <button mat-mini-fab data-toggle="tooltip" data-placement="top" title="Play" class="mr-3">
@@ -48,7 +48,7 @@
     <div class="col">
       <p class="text-justify overview">{{this.show.overview}}</p>
     </div>
-    <mat-divider vertical></mat-divider>
+    <hr class="d-none d-sm-block">
     <div class="col-3 d-none d-sm-block">
       <h3>Genres</h3>
       <ul>
@@ -58,18 +58,19 @@
   </div>
 </div>
 
-<div class="row bg-primary" style="display: block;">
-  <!--For now we'll leave that for wireframing a bit-->
-  <h3>Staff</h3>
-  <div class="scroll-row" style="position: relative;">
-    <button mat-fab id="leftBtn"></button>
-    <div class="justify-content-left people-container">
-      <a class="people" *ngFor="let people of this.show.people" routerLink="/people/{{people.slug}}">
-        <img [style.background-image]="getPeopleIcon(people.slug)" />
-        <p class="title">{{people.name}}</p>
-        <p class="role">{{people.role}}</p>
-      </a>
+<!--<div class="container-fluid">
+  <div class="row">
+    <h3 class="col">Staff</h3>
+    <div class="scroll-row" style="position: relative;">
+      <button mat-raised-button color="accent" id="leftBtn"><mat-icon>arrow_left</mat-icon></button>
+      <div class="justify-content-left people-container">
+        <a class="people" *ngFor="let people of this.show.people" routerLink="/people/{{people.slug}}">
+          <img [style.background-image]="getPeopleIcon(people.slug)" />
+          <p class="title">{{people.name}}</p>
+          <p class="role">{{people.role}}</p>
+        </a>
+      </div>
+      <button mat-fab id="rightBtn"></button>
     </div>
-    <button mat-fab id="rightBtn"></button>
   </div>
-</div>
+</div>-->

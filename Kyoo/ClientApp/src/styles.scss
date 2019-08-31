@@ -1,13 +1,5 @@
 //Roboto font
-@font-face
-{
-  font-family: "Roboto";
-  src: url(/roboto/Roboto.eot); /* IE9 Compat Modes */
-  src: url(/roboto/roboto.eot?#iefix) format("embedded-opentype"), /* IE6-IE8 */
-  url(/roboto/roboto.woff) format("woff"), /* Modern Browsers */
-  url(/roboto/roboto.ttf) format("truetype"), /* Safari, Android, iOS */
-  url(/roboto/roboto.svg#svgFontName) format("svg"); /* Legacy iOS */
-}
+@import "../../wwwroot/roboto/sass/roboto.scss";
 
 //Bootstrap configuration
 @import "~bootstrap/scss/functions";
@@ -22,13 +14,13 @@ $theme-colors: (
 
 $body-bg: theme-color("primary");
 $body-color: theme-color("textPrimary");
-body
+$font-family-base: "Roboto", Arial, sans-serif;
+
+/*body
 {
   background-repeat: no-repeat;
   background-attachment: fixed;
-  font-family: 'Roboto', sans-serif;
-}
-
+}*/
 
 @import "~bootstrap/scss/bootstrap";
 

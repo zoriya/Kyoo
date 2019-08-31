@@ -1,0 +1,14 @@
+
+$font: 'roboto';
+
+@mixin roboto-font($weight, $style) {
+
+    @font-face {
+        font-family: 'Roboto';
+        src: url(/roboto/fonts/#{$font}-#{$weight}-#{$style}.woff2) format('woff2'),
+             url(/roboto/fonts/#{$font}-#{$weight}-#{$style}.woff) format('woff'),
+             url(/roboto/fonts/#{$font}-#{$weight}-#{$style}.ttf) format('truetype');
+        font-weight: $weight;
+        font-style: $style;
+    };
+};

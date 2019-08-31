@@ -62,6 +62,16 @@ a
     {
       margin-top: 0;
     }
+
+    .title
+    {
+      font-weight: 900 !important;
+    }
+
+    .date
+    {
+      font-weight: 300 !important;
+    }
   }
 
   .buttons
@@ -74,113 +84,121 @@ a
   }
 }
 
-  .secondary
+.secondary
+{
+  position: relative;
+
+  > img
   {
-    position: relative;
-
-    > img
-    {
-      max-width: 100%;
-    }
-
-    > div
-    {
-      position: absolute;
-      bottom: 0;
-    }
+    max-width: 100%;
   }
 
-  .overview
+  > div
   {
-    @include media-breakpoint-up(sm)
-    {
-      padding-top: 2.25rem;
-    }
+    position: absolute;
+    bottom: 0;
+  }
+}
+
+.overview
+{
+  @include media-breakpoint-up(sm)
+  {
+    padding-top: 2.25rem;
+  }
+}
+
+hr
+{
+  margin: 0 10px 0 10px;
+  border-right: 1px solid rgba(255, 255, 255, .60);
+  border-top: 0;
+  height: inherit;
+}
+
+.people-container
+{
+  display: flex;
+  overflow: hidden;
+}
+
+.people
+{
+  width: 15%;
+  margin: 1em;
+  text-decoration: none;
+  color: inherit;
+  outline: none;
+  flex-shrink: 0;
+  flex-grow: 0;
+  /*@include media-breakpoint-up(md)
+{
+  width: 25%;
+}
+
+@include media-breakpoint-up(lg)
+{
+  width: 20%;
+}
+
+@include media-breakpoint-up(xl)
+{
+  width: 18%;
+}*/
+  /*&:focus, &:hover
+{
+  > img
+  {
+    outline: solid var(--accentColor);
   }
 
-  .people-container
+  > .title
   {
-    display: flex;
+    text-decoration: underline;
+  }
+}*/
+  > img
+  {
+    width: 100%;
+    height: 0;
+    padding-top: 147.0588%;
+    background-size: cover;
+    background-color: #333333;
+  }
+
+  > p
+  {
+    white-space: nowrap;
     overflow: hidden;
-  }
+    text-overflow: ellipsis;
+    text-align: center;
+    margin-bottom: 0px;
 
-  .people
-  {
-    width: 15%;
-    margin: 1em;
-    text-decoration: none;
-    color: inherit;
-    outline: none;
-    flex-shrink: 0;
-    flex-grow: 0;
-    /*@include media-breakpoint-up(md)
-  {
-    width: 25%;
-  }
-
-  @include media-breakpoint-up(lg)
-  {
-    width: 20%;
-  }
-
-  @include media-breakpoint-up(xl)
-  {
-    width: 18%;
-  }*/
-    /*&:focus, &:hover
-  {
-    > img
+    &.role
     {
-      outline: solid var(--accentColor);
-    }
-
-    > .title
-    {
-      text-decoration: underline;
-    }
-  }*/
-    > img
-    {
-      width: 100%;
-      height: 0;
-      padding-top: 147.0588%;
-      background-size: cover;
-      background-color: #333333;
-    }
-
-    > p
-    {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      text-align: center;
-      margin-bottom: 0px;
-
-      &.role
-      {
-        opacity: 0.8;
-        font-size: 0.8em;
-      }
-    }
-
-    &:hover
-    {
-      cursor: pointer;
+      opacity: 0.8;
+      font-size: 0.8em;
     }
   }
 
-  #leftBtn
+  &:hover
   {
-    position: absolute;
-    left: 0;
-    top: 33%;
-    outline: none;
+    cursor: pointer;
   }
+}
 
-  #rightBtn
-  {
-    position: absolute;
-    right: 0;
-    top: 33%;
-    outline: none;
-  }
+#leftBtn
+{
+  position: absolute;
+  left: 0;
+  top: 33%;
+  outline: none;
+}
+
+#rightBtn
+{
+  position: absolute;
+  right: 0;
+  top: 33%;
+  outline: none;
+}

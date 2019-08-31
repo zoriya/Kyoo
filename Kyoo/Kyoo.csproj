@@ -39,6 +39,32 @@
     <None Include="wwwroot\iconfont\MaterialIcons-Regular.svg" />
     <None Include="wwwroot\iconfont\MaterialIcons-Regular.woff2" />
     <None Include="wwwroot\iconfont\README.md" />
+    <None Include="wwwroot\roboto\fonts\roboto-100-italic.woff2" />
+    <None Include="wwwroot\roboto\fonts\roboto-100-normal.woff2" />
+    <None Include="wwwroot\roboto\fonts\roboto-300-italic.woff2" />
+    <None Include="wwwroot\roboto\fonts\roboto-300-normal.woff2" />
+    <None Include="wwwroot\roboto\fonts\roboto-400-italic.woff2" />
+    <None Include="wwwroot\roboto\fonts\roboto-400-normal.woff2" />
+    <None Include="wwwroot\roboto\fonts\roboto-500-italic.woff2" />
+    <None Include="wwwroot\roboto\fonts\roboto-500-normal.woff2" />
+    <None Include="wwwroot\roboto\fonts\roboto-700-italic.woff2" />
+    <None Include="wwwroot\roboto\fonts\roboto-700-normal.woff2" />
+    <None Include="wwwroot\roboto\fonts\roboto-900-italic.woff2" />
+    <None Include="wwwroot\roboto\fonts\roboto-900-normal.woff2" />
+    <None Include="wwwroot\roboto\sass\roboto-100-italic.scss" />
+    <None Include="wwwroot\roboto\sass\roboto-100-normal.scss" />
+    <None Include="wwwroot\roboto\sass\roboto-300-italic.scss" />
+    <None Include="wwwroot\roboto\sass\roboto-300-normal.scss" />
+    <None Include="wwwroot\roboto\sass\roboto-400-italic.scss" />
+    <None Include="wwwroot\roboto\sass\roboto-400-normal.scss" />
+    <None Include="wwwroot\roboto\sass\roboto-500-italic.scss" />
+    <None Include="wwwroot\roboto\sass\roboto-500-normal.scss" />
+    <None Include="wwwroot\roboto\sass\roboto-700-italic.scss" />
+    <None Include="wwwroot\roboto\sass\roboto-700-normal.scss" />
+    <None Include="wwwroot\roboto\sass\roboto-900-italic.scss" />
+    <None Include="wwwroot\roboto\sass\roboto-900-normal.scss" />
+    <None Include="wwwroot\roboto\sass\roboto-mixin.scss" />
+    <None Include="wwwroot\roboto\sass\roboto.scss" />
   </ItemGroup>
 
   <ItemGroup>
