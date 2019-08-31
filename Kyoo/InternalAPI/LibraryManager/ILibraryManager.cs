@@ -12,10 +12,12 @@ namespace Kyoo.InternalAPI
         List<People> GetDirectors(long showID);
         List<People> GetPeople(long showID);
         List<Genre> GetGenreForShow(long showID);
+        List<Season> GetSeasons(long showID);
 
         //Public read
         IEnumerable<Library> GetLibraries();
         Show GetShowBySlug(string slug);
+        Season GetSeason(string showSlug, long seasonNumber);
         People GetPeopleBySlug(string slug);
         Genre GetGenreBySlug(string slug);
         Studio GetStudioBySlug(string slug);

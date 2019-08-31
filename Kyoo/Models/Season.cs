@@ -28,5 +28,17 @@ namespace Kyoo.Models
             ImgPrimary = imgPrimary;
             ExternalIDs = externalIDs;
         }
+
+        public static Season FromReader(System.Data.SQLite.SQLiteDataReader reader)
+        {
+            return new Season((long)reader["id"],
+                (long)reader["showID"],
+                (long)reader["seasonNumber"],
+                reader["title"] as string,
+                reader["overview"] as string,
+                reader["year"] as long?,
+                reader["imgPrimary"] as string,
+                reader["externalIDs"] as string);
+        }
     }
 }

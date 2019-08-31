@@ -30,6 +30,7 @@ namespace Kyoo.Models
         //Used in the rest API excusively.
         public Studio studio; 
         public IEnumerable<People> directors;
+        public IEnumerable<Season> seasons;
         public IEnumerable<People> people;
 
 
@@ -131,6 +132,12 @@ namespace Kyoo.Models
         public Show SetPeople(ILibraryManager manager)
         {
             people = manager.GetPeople(id);
+            return this;
+        }
+
+        public Show SetSeasons(ILibraryManager manager)
+        {
+            seasons = manager.GetSeasons(id);
             return this;
         }
     }
