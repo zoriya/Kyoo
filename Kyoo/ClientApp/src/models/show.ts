@@ -1,4 +1,6 @@
-interface Show
+import { Season } from "./season";
+
+export interface Show
 {
   id: number;
   slug: string;
@@ -18,4 +20,6 @@ interface Show
   imgBackdrop: string;
 
   externalIDs: string;
+
+  seasons: Season[];
 }

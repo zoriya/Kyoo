@@ -307,7 +307,7 @@ namespace Kyoo.InternalAPI.MetadataProvider
                         dynamic episode = data.data[index];
 
                         DateTime dateTime = DateTime.ParseExact((string)episode.firstAired, "yyyy-MM-dd", CultureInfo.InvariantCulture);
-                        return new Episode(episodeNumber, (string)episode.episodeName, (string)episode.overview, dateTime, -1, "https://www.thetvdb.com/banners/" + episode.filename, string.Format("TvDB={0}|", episode.id));
+                        return new Episode(seasonNumber, episodeNumber, (string)episode.episodeName, (string)episode.overview, dateTime, -1, "https://www.thetvdb.com/banners/" + episode.filename, string.Format("TvDB={0}|", episode.id));
                     }
                 }
                 else

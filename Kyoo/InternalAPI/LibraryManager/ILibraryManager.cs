@@ -18,6 +18,8 @@ namespace Kyoo.InternalAPI
         IEnumerable<Library> GetLibraries();
         Show GetShowBySlug(string slug);
         Season GetSeason(string showSlug, long seasonNumber);
+        List<Episode> GetEpisodes(string showSlug, long seasonNumber);
+        Episode GetEpisode(string showSlug, long seasonNumber, long episodeNumber);
         People GetPeopleBySlug(string slug);
         Genre GetGenreBySlug(string slug);
         Studio GetStudioBySlug(string slug);
