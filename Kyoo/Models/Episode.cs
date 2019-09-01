@@ -9,11 +9,12 @@ namespace Kyoo.Models
         [JsonIgnore] public long ShowID;
         [JsonIgnore] public long SeasonID;
 
+        public long seasonNumber;
         public long episodeNumber;
         [JsonIgnore] public string Path;
         public string Title;
         public string Overview;
-        public DateTime ReleaseDate;
+        public DateTime? ReleaseDate;
 
         public long Runtime; //This runtime variable should be in seconds (used by the video manager so we need precisions)
 
@@ -31,11 +32,12 @@ namespace Kyoo.Models
 
         public Episode() { }
 
-        public Episode(long episodeNumber, string title, string overview, DateTime releaseDate, long runtime, string imgPrimary, string externalIDs)
+        public Episode(long seasonNumber, long episodeNumber, string title, string overview, DateTime? releaseDate, long runtime, string imgPrimary, string externalIDs)
         {
             id = -1;
             ShowID = -1;
             SeasonID = -1;
+            this.seasonNumber = seasonNumber;
             this.episodeNumber = episodeNumber;
             Title = title;
             Overview = overview;
@@ -45,11 +47,12 @@ namespace Kyoo.Models
             ExternalIDs = externalIDs;
         }
 
-        public Episode(long id, long showID, long seasonID, long episodeNumber, string path, string title, string overview, DateTime releaseDate, long runtime, string imgPrimary, string externalIDs)
+        public Episode(long id, long showID, long seasonID, long seasonNumber, long episodeNumber, string path, string title, string overview, DateTime? releaseDate, long runtime, string imgPrimary, string externalIDs)
         {
             this.id = id;
             ShowID = showID;
             SeasonID = seasonID;
+            this.seasonNumber = seasonNumber;
             this.episodeNumber = episodeNumber;
             Path = path;
             Title = title;
@@ -58,6 +61,22 @@ namespace Kyoo.Models
             Runtime = runtime;
             ImgPrimary = imgPrimary;
             ExternalIDs = externalIDs;
+        }
+
+        public static Episode FromReader(System.Data.SQLite.SQLiteDataReader reader)
+        {
+            return new Episode((long)reader["id"],
+                (long)reader["showID"],
+                (long)reader["seasonID"],
+                (long)reader["seasonNumber"],
+                (long)reader["episodeNumber"],
+                reader["path"] as string,
+                reader["title"] as string,
+                reader["overview"] as string,
+                reader["releaseDate"] as DateTime?,
+                (long)reader["runtime"],
+                reader["imgPrimary"] as string,
+                reader["externalIDs"] as string);
         }
     }
 }

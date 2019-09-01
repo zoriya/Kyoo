@@ -32,7 +32,7 @@ $font-family-base: "Roboto", Arial, sans-serif;
 // Define the default theme (same as the example above).
 $primary: (default: #0a1128);
 $accent: (default: #e23c00, lighter: #ff9149);
-$theme: mat-light-theme($primary, $accent);
+$theme: mat-dark-theme($primary, $accent);
 
 // Include the default theme styles.
 @include angular-material-theme($theme);

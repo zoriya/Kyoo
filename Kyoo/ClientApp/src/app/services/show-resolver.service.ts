@@ -3,6 +3,7 @@ import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/r
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, EMPTY } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { Show } from "../../models/show";
 
 import { MatSnackBar } from '@angular/material/snack-bar'; 
 

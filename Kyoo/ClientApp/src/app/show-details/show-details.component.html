@@ -13,6 +13,9 @@
         <button mat-mini-fab data-toggle="tooltip" data-placement="top" title="Play" class="mr-3">
           <mat-icon>play_arrow</mat-icon>
         </button>
+        <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Trailer">
+          <mat-icon>local_movies</mat-icon>
+        </button>
         <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Download">
           <mat-icon>cloud_download</mat-icon>
         </button>
@@ -56,6 +59,19 @@
       </ul>
     </div>
   </div>
+</div>
+
+
+
+<div class="container-fluid">
+  <mat-form-field>
+    <mat-label>Season</mat-label>
+    <mat-select [(value)]="season">
+      <mat-option *ngFor="let season of this.show.seasons" [value]="season.seasonNumber">{{season.title}}</mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <p>You selected: {{season}}</p>
 </div>
 
 <!--<div class="container-fluid">

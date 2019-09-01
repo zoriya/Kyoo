@@ -56,6 +56,7 @@ namespace Kyoo.InternalAPI
 					    id INTEGER PRIMARY KEY UNIQUE, 
 					    showID INTEGER, 
 					    seasonID INTEGER, 
+					    seasonNumber INTEGER, 
 					    episodeNumber INTEGER, 
 					    path TEXT, 
 					    title TEXT, 
@@ -259,6 +260,43 @@ namespace Kyoo.InternalAPI
 
                 if (reader.Read())
                     return Season.FromReader(reader);
+                else
+                    return null;
+            }
+        }
+
+        public List<Episode> GetEpisodes(string showSlug, long seasonNumber)
+        {
+            string query = "SELECT * FROM episodes JOIN shows ON shows.id = episodes.showID WHERE shows.slug = $showSlug AND episodes.seasonNumber = $seasonNumber;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$showSlug", showSlug);
+                cmd.Parameters.AddWithValue("$seasonNumber", seasonNumber);
+                SQLiteDataReader reader = cmd.ExecuteReader();
+
+                List<Episode> episodes = new List<Episode>();
+
+                while (reader.Read())
+                    episodes.Add(Episode.FromReader(reader));
+
+                return episodes;
+            }
+        }
+
+        public Episode GetEpisode(string showSlug, long seasonNumber, long episodeNumber)
+        {
+            string query = "SELECT * FROM episodes JOIN shows ON shows.id = episodes.showID WHERE shows.slug = $showSlug AND episodes.seasonNumber = $seasonNumber AND episodes.episodeNumber = $episodeNumber;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$showSlug", showSlug);
+                cmd.Parameters.AddWithValue("$seasonNumber", seasonNumber);
+                cmd.Parameters.AddWithValue("$episodeNumber", episodeNumber);
+                SQLiteDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                    return Episode.FromReader(reader);
                 else
                     return null;
             }
@@ -550,11 +588,12 @@ namespace Kyoo.InternalAPI
 
         public long RegisterEpisode(Episode episode)
         {
-            string query = "INSERT INTO episodes (showID, seasonID, episodeNumber, path, title, overview, releaseDate, runtime, imgPrimary, externalIDs) VALUES($showID, $seasonID, $episodeNumber, $path, $title, $overview, $releaseDate, $runtime, $imgPrimary, $externalIDs);";
+            string query = "INSERT INTO episodes (showID, seasonID, seasonNumber, episodeNumber, path, title, overview, releaseDate, runtime, imgPrimary, externalIDs) VALUES($showID, $seasonID, $seasonNumber,$episodeNumber, $path, $title, $overview, $releaseDate, $runtime, $imgPrimary, $externalIDs);";
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
                 cmd.Parameters.AddWithValue("$showID", episode.ShowID);
                 cmd.Parameters.AddWithValue("$seasonID", episode.SeasonID);
+                cmd.Parameters.AddWithValue("$seasonNUmber", episode.seasonNumber);
                 cmd.Parameters.AddWithValue("$episodeNumber", episode.episodeNumber);
                 cmd.Parameters.AddWithValue("$path", episode.Path);
                 cmd.Parameters.AddWithValue("$title", episode.Title);
