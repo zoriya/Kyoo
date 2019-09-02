@@ -1,4 +1,6 @@
-<img id="backdrop" class="backdrop" src="backdrop/{{this.show.slug}}" />
+<div class="backdrop">
+  <img id="backdrop" src="backdrop/{{this.show.slug}}" />
+</div>
 
 <div class="header container pt-sm-5">
   <div class="row">
@@ -53,9 +55,9 @@
     </div>
     <hr class="d-none d-sm-block">
     <div class="col-3 d-none d-sm-block">
-      <h3>Genres</h3>
+      <h3 style="opacity: .8;">Genres</h3>
       <ul>
-        <li *ngFor="let genre of this.show.genres"><b><a routerLink="/genre/{{genre.slug}}">{{genre.name}}</a></b></li>
+        <li *ngFor="let genre of this.show.genres"><b><a class="genre" routerLink="/genre/{{genre.slug}}">{{genre.name}}</a></b></li>
       </ul>
     </div>
   </div>
@@ -80,7 +82,7 @@
   <div class="people-container" id="peopleScroll">
     <a class="people" *ngFor="let people of this.show.people" routerLink="/people/{{people.slug}}">
       <img [style.background-image]="getPeopleIcon(people.slug)" />
-      <p class="name">{{people.name}}</p>
+      <h6 class="name">{{people.name}}</h6>
       <p class="role">{{people.role}}</p>
     </a>
   </div>

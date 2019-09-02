@@ -14,6 +14,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
 import { EpisodesListComponent } from './episodes-list/episodes-list.component';
+import { PlayerComponent } from './player/player.component';
 
 
 @NgModule({
@@ -22,7 +23,8 @@ import { EpisodesListComponent } from './episodes-list/episodes-list.component';
     NotFoundComponent,
     BrowseComponent,
     ShowDetailsComponent,
-    EpisodesListComponent
+    EpisodesListComponent,
+    PlayerComponent
   ],
   imports: [
     BrowserModule,
