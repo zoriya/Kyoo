@@ -118,6 +118,7 @@ namespace Kyoo.InternalAPI.MetadataProvider
                                 data.aliases,
                                 showPath,
                                 data.overview,
+                                null, //trailer
                                 null, //genres (no info with this request)
                                 GetStatus(data.status),
                                 GetYear(data.firstAired),
@@ -176,6 +177,7 @@ namespace Kyoo.InternalAPI.MetadataProvider
                             data.aliases,
                             null, //Path
                             data.overview,
+                            null, //Trailer
                             GetGenres(data.genre),
                             GetStatus(data.status),
                             GetYear(data.firstAired),
@@ -281,10 +283,7 @@ namespace Kyoo.InternalAPI.MetadataProvider
             if (token == null)
                 return null;
 
-            int page = (int)episodeNumber / 100 + 1;
-            int index = (int)episodeNumber % 100 - 1; //The -1 is for array binding
-
-            WebRequest request = WebRequest.Create("https://api.thetvdb.com/series/" + id + "/episodes?page=" + page);
+            WebRequest request = WebRequest.Create("https://api.thetvdb.com/series/" + id + "/episodes/query?airedSeason=" + seasonNumber + "&airedEpisode=" + episodeNumber);
             request.Method = "GET";
             request.Timeout = 12000;
             request.ContentType = "application/json";
@@ -304,7 +303,7 @@ namespace Kyoo.InternalAPI.MetadataProvider
                         response.Close();
 
                         dynamic data = JsonConvert.DeserializeObject(content);
-                        dynamic episode = data.data[index];
+                        dynamic episode = data.data[0];
 
                         DateTime dateTime = DateTime.ParseExact((string)episode.firstAired, "yyyy-MM-dd", CultureInfo.InvariantCulture);
                         return new Episode(seasonNumber, episodeNumber, (string)episode.episodeName, (string)episode.overview, dateTime, -1, "https://www.thetvdb.com/banners/" + episode.filename, string.Format("TvDB={0}|", episode.id));

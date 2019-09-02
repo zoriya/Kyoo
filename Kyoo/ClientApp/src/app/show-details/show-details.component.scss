@@ -116,47 +116,110 @@ hr
   height: inherit;
 }
 
+.scroll-row
+{
+  position: relative;
+
+  &:hover
+  {
+    .scrollBtn
+    {
+      display: block;
+    }
+  }
+}
+
+.scrollBtn
+{
+  padding: 0;
+  outline: none;
+  min-width: 0;
+  position: absolute;
+  top: 30%;
+  bottom: 40%;
+  display: none;
+
+  &#pl-leftBtn
+  {
+    left: 0;
+    padding-left: 10px;
+    padding-right: 2px;
+  }
+
+  &#pl-rightBtn
+  {
+    right: 0;
+    padding-right: 10px;
+    padding-left: 2px;
+  }
+}
+
+
 .people-container
 {
   display: flex;
-  overflow: hidden;
+  padding-left: 15px;
+  padding-right: 15px;
+  overflow-x: auto;
+  min-width: 100%;
+  flex-shrink: 0;
+  flex-direction: row;
+  visibility: hidden;
+
+  &:hover
+  {
+    visibility: visible;
+  }
+
+  &::-webkit-scrollbar
+  {
+    height: 4px;
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb
+  {
+    background-color: #999;
+    border-radius: 90px;
+
+    &:hover
+    {
+      background-color: rgb(134, 127, 127);
+    }
+  }
 }
 
 .people
 {
-  width: 15%;
-  margin: 1em;
+  visibility: visible;
+  margin: .25rem;
   text-decoration: none;
   color: inherit;
   outline: none;
   flex-shrink: 0;
   flex-grow: 0;
-  /*@include media-breakpoint-up(md)
-{
-  width: 25%;
-}
+  width: 33%;
 
-@include media-breakpoint-up(lg)
-{
-  width: 20%;
-}
-
-@include media-breakpoint-up(xl)
-{
-  width: 18%;
-}*/
-  /*&:focus, &:hover
-{
-  > img
+  @include media-breakpoint-up(sm)
   {
-    outline: solid var(--accentColor);
+    width: 22%;
   }
 
-  > .title
+  @include media-breakpoint-up(md)
   {
-    text-decoration: underline;
+    width: 20%;
   }
-}*/
+
+  @include media-breakpoint-up(lg)
+  {
+    width: 15%;
+  }
+
+  @include media-breakpoint-up(xl)
+  {
+    width: 10%;
+  }
+
   > img
   {
     width: 100%;
@@ -184,6 +247,16 @@ hr
   &:hover
   {
     cursor: pointer;
+
+    > img
+    {
+      outline: solid var(--accentColor);
+    }
+
+    .name
+    {
+      text-decoration: underline;
+    }
   }
 }
 

@@ -8,6 +8,7 @@ export interface Show
   //IEnumerable < > Aliases;
   path: string;
   overview: string;
+  trailer: string;
   //IEnumerable < > Genres;
   //Status ? Status;
 

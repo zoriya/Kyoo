@@ -31,7 +31,8 @@ namespace Kyoo.InternalAPI
 					    title TEXT, 
 					    aliases TEXT, 
                         path TEXT UNIQUE,
-					    overview TEXT, 
+					    overview TEXT,
+					    trailerUrl TEXT,
 					    status TEXT, 
 					    startYear INTEGER, 
 					    endYear INTEGER, 
@@ -425,7 +426,7 @@ namespace Kyoo.InternalAPI
         #region Check if items exists
         public bool IsShowRegistered(string showPath)
         {
-            string query = "SELECT 1 FROM shows WHERE path = $path;";
+            string query = "SELECT (id) FROM shows WHERE path = $path;";
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
                 cmd.Parameters.AddWithValue("$path", showPath);
@@ -436,7 +437,7 @@ namespace Kyoo.InternalAPI
 
         public bool IsShowRegistered(string showPath, out long showID)
         {
-            string query = "SELECT 1 FROM shows WHERE path = $path;";
+            string query = "SELECT (id) FROM shows WHERE path = $path;";
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
                 cmd.Parameters.AddWithValue("$path", showPath);
@@ -448,7 +449,7 @@ namespace Kyoo.InternalAPI
 
         public bool IsSeasonRegistered(long showID, long seasonNumber)
         {
-            string query = "SELECT 1 FROM seasons WHERE showID = $showID AND seasonNumber = $seasonNumber;";
+            string query = "SELECT (id) FROM seasons WHERE showID = $showID AND seasonNumber = $seasonNumber;";
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
                 cmd.Parameters.AddWithValue("$showID", showID);
@@ -460,7 +461,7 @@ namespace Kyoo.InternalAPI
 
         public bool IsSeasonRegistered(long showID, long seasonNumber, out long seasonID)
         {
-            string query = "SELECT 1 FROM seasons WHERE showID = $showID AND seasonNumber = $seasonNumber;";
+            string query = "SELECT (id) FROM seasons WHERE showID = $showID AND seasonNumber = $seasonNumber;";
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
                 cmd.Parameters.AddWithValue("$showID", showID);
@@ -473,7 +474,7 @@ namespace Kyoo.InternalAPI
 
         public bool IsEpisodeRegistered(string episodePath)
         {
-            string query = "SELECT 1 FROM episodes WHERE path = $path;";
+            string query = "SELECT (id) FROM episodes WHERE path = $path;";
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
                 cmd.Parameters.AddWithValue("$path", episodePath);
@@ -524,7 +525,7 @@ namespace Kyoo.InternalAPI
         #region Write Into The Database
         public long RegisterShow(Show show)
         {
-            string query = "INSERT INTO shows (slug, title, aliases, path, overview, startYear, endYear, imgPrimary, imgThumb, imgLogo, imgBackdrop, externalIDs) VALUES($slug, $title, $aliases, $path, $overview, $startYear, $endYear, $imgPrimary, $imgThumb, $imgLogo, $imgBackdrop, $externalIDs);";
+            string query = "INSERT INTO shows (slug, title, aliases, path, overview, trailerUrl, startYear, endYear, imgPrimary, imgThumb, imgLogo, imgBackdrop, externalIDs) VALUES($slug, $title, $aliases, $path, $overview, $trailerUrl, $startYear, $endYear, $imgPrimary, $imgThumb, $imgLogo, $imgBackdrop, $externalIDs);";
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
                 cmd.Parameters.AddWithValue("$slug", show.Slug);
@@ -532,6 +533,7 @@ namespace Kyoo.InternalAPI
                 cmd.Parameters.AddWithValue("$aliases", show.GetAliases());
                 cmd.Parameters.AddWithValue("$path", show.Path);
                 cmd.Parameters.AddWithValue("$overview", show.Overview);
+                cmd.Parameters.AddWithValue("$trailerUrl", show.TrailerUrl);
                 cmd.Parameters.AddWithValue("$status", show.Status);
                 cmd.Parameters.AddWithValue("$startYear", show.StartYear);
                 cmd.Parameters.AddWithValue("$endYear", show.EndYear);

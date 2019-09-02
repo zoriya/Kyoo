@@ -29,25 +29,25 @@ export class EpisodesListComponent implements OnInit
     let scroll: number = this.roundScroll(this.root.offsetWidth * 0.80);
     this.root.scrollBy({ top: 0, left: -scroll, behavior: "smooth" });
 
-    document.getElementById("rightBtn").classList.remove("d-none");
+    document.getElementById("el-rightBtn").classList.remove("d-none");
 
     if (this.root.scrollLeft - scroll <= 0)
-      document.getElementById("leftBtn").classList.add("d-none");
+      document.getElementById("el-leftBtn").classList.add("d-none");
   }
 
   scrollRight()
   {
     let scroll: number = this.roundScroll(this.root.offsetWidth * 0.80);
     this.root.scrollBy({ top: 0, left: scroll, behavior: "smooth" });
-    document.getElementById("leftBtn").classList.remove("d-none");
+    document.getElementById("el-leftBtn").classList.remove("d-none");
 
     if (this.root.scrollLeft + scroll >= this.root.scrollWidth - this.root.clientWidth)
-      document.getElementById("rightBtn").classList.add("d-none");
+      document.getElementById("el-rightBtn").classList.add("d-none");
   }
 
   roundScroll(offset: number): number
   {
-    let episodeSize: number = document.getElementById("1").scrollWidth;
+    let episodeSize: number = document.getElementById("el-1").scrollWidth;
     offset = Math.round(offset / episodeSize) * episodeSize;
 
     if (offset == 0)
