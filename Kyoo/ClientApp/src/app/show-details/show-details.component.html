@@ -70,9 +70,8 @@
       <mat-option *ngFor="let season of this.show.seasons" [value]="season.seasonNumber">{{season.title}}</mat-option>
     </mat-select>
   </mat-form-field>
-
-  <p>You selected: {{season}}</p>
 </div>
+<app-episodes-list [episodes]="episodes"></app-episodes-list>
 
 <!--<div class="container-fluid">
   <div class="row">

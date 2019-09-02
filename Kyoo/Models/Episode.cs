@@ -21,6 +21,8 @@ namespace Kyoo.Models
         [JsonIgnore] public string ImgPrimary;
         public string ExternalIDs;
 
+        public string Thumb; //Used in the API response only
+
         public long RuntimeInMinutes
         {
             get
@@ -77,6 +79,13 @@ namespace Kyoo.Models
                 (long)reader["runtime"],
                 reader["imgPrimary"] as string,
                 reader["externalIDs"] as string);
+        }
+
+
+        public Episode SetThumb(string showSlug)
+        {
+            Thumb = "thumb/" + showSlug + "/s" + seasonNumber + "/e" + episodeNumber;
+            return this;
         }
     }
 }

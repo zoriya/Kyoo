@@ -13,6 +13,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatButtonModule } from '@angular/material/button'; 
 import { MatIconModule } from '@angular/material/icon';
 import { MatSelectModule } from '@angular/material/select';
+import { EpisodesListComponent } from './episodes-list/episodes-list.component';
 
 
 @NgModule({
@@ -20,7 +21,8 @@ import { MatSelectModule } from '@angular/material/select';
     AppComponent,
     NotFoundComponent,
     BrowseComponent,
-    ShowDetailsComponent
+    ShowDetailsComponent,
+    EpisodesListComponent
   ],
   imports: [
     BrowserModule,

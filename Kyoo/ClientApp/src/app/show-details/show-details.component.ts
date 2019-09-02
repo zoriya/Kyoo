@@ -1,11 +1,10 @@
+import { HttpClient } from "@angular/common/http";
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { DomSanitizer } from '@angular/platform-browser';
-import { Show } from "../../models/show";
-import { Episode } from "../../models/episode";
-import { HttpErrorResponse, HttpClient } from "@angular/common/http";
-import { catchError } from "rxjs/operators";
 import { MatSnackBar } from "@angular/material/snack-bar";
+import { DomSanitizer, Title } from '@angular/platform-browser';
+import { ActivatedRoute } from '@angular/router';
+import { Episode } from "../../models/episode";
+import { Show } from "../../models/show";
 
 @Component({
   selector: 'app-show-details',
@@ -15,12 +14,13 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 export class ShowDetailsComponent implements OnInit
 {
   show: Show;
-  season;
+  episodes: Episode[] = null;
+  season: number;
 
   private toolbar: HTMLElement
   private backdrop: HTMLElement
 
-  constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer, private http: HttpClient, private snackBar: MatSnackBar)
+  constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer, private http: HttpClient, private snackBar: MatSnackBar, private title: Title)
   {
     this.route.queryParams.subscribe(params =>
     {
@@ -31,6 +31,7 @@ export class ShowDetailsComponent implements OnInit
   ngOnInit()
   {
     this.show = this.route.snapshot.data.show;
+    this.title.setTitle(this.show.title + " - Kyoo");
 
     if (this.season == null || this.show.seasons.find(x => x.seasonNumber == this.season) == null)
       this.season = this.show.seasons[0].seasonNumber;
@@ -46,6 +47,7 @@ export class ShowDetailsComponent implements OnInit
   ngOnDestroy()
   {
     window.removeEventListener("scroll", this.scroll, true);
+    this.title.setTitle("Kyoo");
   }
 
   scroll = () =>
@@ -56,18 +58,22 @@ export class ShowDetailsComponent implements OnInit
 
   getEpisodes()
   {
-    console.log("getting episodes");
+    if (this.show == null)
+      return;
+
+    if (this.show.seasons[this.season - 1].episodes != null)
+      this.episodes = this.show.seasons[this.season - 1].episodes;
+
 
     this.http.get<Episode[]>("api/episodes/" + this.show.slug + "/season/" + this.season).subscribe((episodes: Episode[]) =>
     {
-      console.log(episodes.length);
+      this.show.seasons[this.season - 1].episodes = episodes;
+      this.episodes = episodes;
     }, error =>
     {
       console.log(error.status + " - " + error.message);
       this.snackBar.open("An unknow error occured while getting episodes.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
     });
-
-    console.log("Episodes got");
   }
 
 
