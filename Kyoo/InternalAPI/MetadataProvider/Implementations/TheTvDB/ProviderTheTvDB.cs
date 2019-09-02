@@ -282,7 +282,7 @@ namespace Kyoo.InternalAPI.MetadataProvider
                 return null;
 
             int page = (int)episodeNumber / 100 + 1;
-            int index = (int)episodeNumber % 100;
+            int index = (int)episodeNumber % 100 - 1; //The -1 is for array binding
 
             WebRequest request = WebRequest.Create("https://api.thetvdb.com/series/" + id + "/episodes?page=" + page);
             request.Method = "GET";

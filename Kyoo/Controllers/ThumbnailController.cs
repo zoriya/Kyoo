@@ -51,5 +51,15 @@ namespace Kyoo.Controllers
 
             return new PhysicalFileResult(thumbPath, "image/jpg");
         }
+
+        [HttpGet("thumb/{showSlug}/s{seasonNumber}/e{episodeNumber}")]
+        public IActionResult GetEpisodeThumb(string showSlug, long seasonNumber, long episodeNumber)
+        {
+            string thumbPath = libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber)?.ImgPrimary;
+            if (thumbPath == null)
+                return NotFound();
+
+            return new PhysicalFileResult(thumbPath, "image/jpg");
+        }
     }
 }

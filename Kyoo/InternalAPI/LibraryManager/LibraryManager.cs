@@ -278,7 +278,7 @@ namespace Kyoo.InternalAPI
                 List<Episode> episodes = new List<Episode>();
 
                 while (reader.Read())
-                    episodes.Add(Episode.FromReader(reader));
+                    episodes.Add(Episode.FromReader(reader).SetThumb(showSlug));
 
                 return episodes;
             }
@@ -296,7 +296,7 @@ namespace Kyoo.InternalAPI
                 SQLiteDataReader reader = cmd.ExecuteReader();
 
                 if (reader.Read())
-                    return Episode.FromReader(reader);
+                    return Episode.FromReader(reader).SetThumb(showSlug);
                 else
                     return null;
             }
