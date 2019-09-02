@@ -2,7 +2,7 @@
   <div class="episodes" id="episodes">
     <div class="episode" *ngFor="let episode of this.episodes" id="el-{{episode.episodeNumber}}">
       <div class="img" [style.background-image]="sanitize(episode.thumb, true)">
-        <button mat-icon-button class="playBtn" ><i class="material-icons playIcon">play_circle_outline</i></button>
+        <button mat-icon-button class="playBtn" routerLink="/watch/{{this.showSlug}}-s{{episode.seasonNumber}}e{{episode.episodeNumber}}"><i class="material-icons playIcon">play_circle_outline</i></button>
       </div>
       <h6 *ngIf="episode.seasonNumber != 0; else elseBlock;"  class="title">S{{episode.seasonNumber}}:E{{episode.episodeNumber}} - {{episode.title}}</h6>
       <ng-template #elseBlock><h6 class="title">{{episode.title}}</h6></ng-template>
