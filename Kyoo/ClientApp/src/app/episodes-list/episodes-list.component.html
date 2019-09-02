@@ -1,10 +1,11 @@
 <div class="root">
   <div class="episodes" id="episodes">
     <div class="episode" *ngFor="let episode of this.episodes" id="el-{{episode.episodeNumber}}">
-      <div class="img" [style.background-image]="sanitize(episode.thumb)">
-        <button mat-icon-button id="playBtn"><i class="material-icons playIcon">play_circle_outline</i></button>
+      <div class="img" [style.background-image]="sanitize(episode.thumb, true)">
+        <button mat-icon-button class="playBtn" ><i class="material-icons playIcon">play_circle_outline</i></button>
       </div>
-      <p class="title">S{{episode.seasonNumber}}E{{episode.episodeNumber}} - {{episode.title}}</p>
+      <h6 *ngIf="episode.seasonNumber != 0; else elseBlock;"  class="title">S{{episode.seasonNumber}}:E{{episode.episodeNumber}} - {{episode.title}}</h6>
+      <ng-template #elseBlock><h6 class="title">{{episode.title}}</h6></ng-template>
       <p class="overview">{{episode.overview}}</p>
     </div>
   </div>

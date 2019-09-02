@@ -16,11 +16,15 @@ $body-bg: theme-color("primary");
 $body-color: theme-color("textPrimary");
 $font-family-base: "Roboto", Arial, sans-serif;
 
-/*body
+p
 {
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-}*/
+  opacity: .6;
+}
+
+h6
+{
+  opacity: .87;
+}
 
 @import "~bootstrap/scss/bootstrap";
 

@@ -55,4 +55,9 @@ export class EpisodesListComponent implements OnInit
 
     return offset;
   }
+
+  play(episode: Episode)
+  {
+
+  }
 }
