@@ -34,7 +34,6 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
                     }
                 }
             }
-            show.ImgPrimary = localThumb;
 
             if (show.ImgLogo != null)
             {
@@ -46,7 +45,6 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
                     }
                 }
             }
-            show.ImgLogo = localLogo;
 
             if (show.ImgBackdrop != null)
             {
@@ -58,7 +56,6 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
                     }
                 }
             }
-            show.ImgBackdrop = localBackdrop;
 
             return show;
         }
@@ -79,8 +76,6 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
                         client.DownloadFileAsync(new Uri(people[i].imgPrimary), localThumb);
                     }
                 }
-
-                people[i].imgPrimary = localThumb;
             }
 
             return people;
@@ -97,7 +92,6 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
                 }
             }
 
-            episode.ImgPrimary = localThumb;
             return episode;
         }
     }

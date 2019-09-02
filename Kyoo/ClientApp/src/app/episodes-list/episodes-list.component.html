@@ -1,6 +1,6 @@
 <div class="root">
   <div class="episodes" id="episodes">
-    <div class="episode" *ngFor="let episode of this.episodes" id="{{episode.episodeNumber}}">
+    <div class="episode" *ngFor="let episode of this.episodes" id="el-{{episode.episodeNumber}}">
       <div class="img" [style.background-image]="sanitize(episode.thumb)">
         <button mat-icon-button id="playBtn"><i class="material-icons playIcon">play_circle_outline</i></button>
       </div>
@@ -8,6 +8,6 @@
       <p class="overview">{{episode.overview}}</p>
     </div>
   </div>
-  <button mat-raised-button color="accent" class="scrollBtn d-none" id="leftBtn" (click)="scrollLeft()"><mat-icon>arrow_left</mat-icon></button>
-  <button mat-raised-button color="accent" class="scrollBtn" id="rightBtn" (click)="scrollRight()"><mat-icon>arrow_right</mat-icon></button>
+  <button mat-raised-button color="accent" class="scrollBtn d-none" id="el-leftBtn" (click)="scrollLeft()"><mat-icon>arrow_left</mat-icon></button>
+  <button mat-raised-button color="accent" class="scrollBtn" id="el-rightBtn" (click)="scrollRight()"><mat-icon>arrow_right</mat-icon></button>
 </div>

@@ -13,7 +13,7 @@
         <button mat-mini-fab data-toggle="tooltip" data-placement="top" title="Play" class="mr-3">
           <mat-icon>play_arrow</mat-icon>
         </button>
-        <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Trailer">
+        <button *ngIf="this.show.trailerUrl" mat-icon-button data-toggle="tooltip" data-placement="top" title="Trailer">
           <mat-icon>local_movies</mat-icon>
         </button>
         <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Download">
@@ -63,29 +63,27 @@
 
 
 
-<div class="container-fluid">
+<div class="container-fluid mt-3">
   <mat-form-field>
     <mat-label>Season</mat-label>
-    <mat-select [(value)]="season">
+    <mat-select [(value)]="season" (selectionChange)="getEpisodes()">
       <mat-option *ngFor="let season of this.show.seasons" [value]="season.seasonNumber">{{season.title}}</mat-option>
     </mat-select>
   </mat-form-field>
 </div>
 <app-episodes-list [episodes]="episodes"></app-episodes-list>
 
-<!--<div class="container-fluid">
-  <div class="row">
-    <h3 class="col">Staff</h3>
-    <div class="scroll-row" style="position: relative;">
-      <button mat-raised-button color="accent" id="leftBtn"><mat-icon>arrow_left</mat-icon></button>
-      <div class="justify-content-left people-container">
-        <a class="people" *ngFor="let people of this.show.people" routerLink="/people/{{people.slug}}">
-          <img [style.background-image]="getPeopleIcon(people.slug)" />
-          <p class="title">{{people.name}}</p>
-          <p class="role">{{people.role}}</p>
-        </a>
-      </div>
-      <button mat-fab id="rightBtn"></button>
-    </div>
+<div class="container-fluid mt-5">
+  <h3>Staff</h3>
+</div>
+<div class="scroll-row mb-5">
+  <div class="people-container" id="peopleScroll">
+    <a class="people" *ngFor="let people of this.show.people" routerLink="/people/{{people.slug}}">
+      <img [style.background-image]="getPeopleIcon(people.slug)" />
+      <p class="name">{{people.name}}</p>
+      <p class="role">{{people.role}}</p>
+    </a>
   </div>
-</div>-->
+  <button mat-raised-button color="accent" class="scrollBtn d-none" id="pl-leftBtn" (click)="scrollLeft()"><mat-icon>arrow_left</mat-icon></button>
+  <button mat-raised-button color="accent" class="scrollBtn" id="pl-rightBtn" (click)="scrollRight()"><mat-icon>arrow_right</mat-icon></button>
+</div>

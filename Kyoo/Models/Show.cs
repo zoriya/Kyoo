@@ -16,6 +16,7 @@ namespace Kyoo.Models
         public string Overview;
         public IEnumerable<Genre> Genres;
         public Status? Status;
+        public string TrailerUrl;
 
         public long? StartYear;
         public long? EndYear;
@@ -53,7 +54,7 @@ namespace Kyoo.Models
 
         public Show() { }
 
-        public Show(long id, string slug, string title, IEnumerable<string> aliases, string path, string overview, IEnumerable<Genre> genres, Status? status, long? startYear, long? endYear, string externalIDs)
+        public Show(long id, string slug, string title, IEnumerable<string> aliases, string path, string overview, string trailerUrl, IEnumerable<Genre> genres, Status? status, long? startYear, long? endYear, string externalIDs)
         {
             this.id = id;
             Slug = slug;
@@ -61,6 +62,7 @@ namespace Kyoo.Models
             Aliases = aliases;
             Path = path;
             Overview = overview;
+            TrailerUrl = trailerUrl;
             Genres = genres;
             Status = status;
             StartYear = startYear;
@@ -68,7 +70,7 @@ namespace Kyoo.Models
             ExternalIDs = externalIDs;
         }
 
-        public Show(long id, string slug, string title, IEnumerable<string> aliases, string path, string overview, Status? status, long? startYear, long? endYear, string imgPrimary, string imgThumb, string imgLogo, string imgBackdrop, string externalIDs)
+        public Show(long id, string slug, string title, IEnumerable<string> aliases, string path, string overview, string trailerUrl, Status? status, long? startYear, long? endYear, string imgPrimary, string imgThumb, string imgLogo, string imgBackdrop, string externalIDs)
         {
             this.id = id;
             Slug = slug;
@@ -76,6 +78,7 @@ namespace Kyoo.Models
             Aliases = aliases;
             Path = path;
             Overview = overview;
+            TrailerUrl = trailerUrl;
             Status = status;
             StartYear = startYear;
             EndYear = endYear;
@@ -94,6 +97,7 @@ namespace Kyoo.Models
                 (reader["aliases"] as string)?.Split('|') ?? null,
                 reader["path"] as string,
                 reader["overview"] as string,
+                reader["trailerUrl"] as string,
                 reader["status"] as Status?,
                 reader["startYear"] as long?, 
                 reader["endYear"] as long?,

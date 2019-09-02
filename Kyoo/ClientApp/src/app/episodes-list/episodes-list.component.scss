@@ -24,10 +24,34 @@
   min-width: 100%;
   flex-shrink: 0;
   flex-direction: row;
+  visibility: hidden;
+
+  &:hover
+  {
+    visibility: visible;
+  }
+
+  &::-webkit-scrollbar
+  {
+    height: 4px;
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb
+  {
+    background-color: #999;
+    border-radius: 90px;
+
+    &:hover
+    {
+      background-color: rgb(134, 127, 127);
+    }
+  }
 }
 
 .episode
 {
+  visibility: visible;
   display: inline-block;
   padding: .25rem;
   flex-shrink: 0;
@@ -82,15 +106,28 @@
   {
     font-weight: 600;
     margin-bottom: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   .overview
   {
     font-weight: 300;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   &:hover
   {
+    .img
+    {
+      outline: solid var(--accentColor);
+    }
+
     .title
     {
       text-decoration: underline;
@@ -121,14 +158,14 @@
   bottom: 60%;
   display: none;
 
-  &#leftBtn
+  &#el-leftBtn
   {
     left: 0;
     padding-left: 10px;
     padding-right: 2px;
   }
 
-  &#rightBtn
+  &#el-rightBtn
   {
     right: 0;
     padding-right: 10px;

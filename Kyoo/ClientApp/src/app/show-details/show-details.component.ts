@@ -17,8 +17,9 @@ export class ShowDetailsComponent implements OnInit
   episodes: Episode[] = null;
   season: number;
 
-  private toolbar: HTMLElement
-  private backdrop: HTMLElement
+  private toolbar: HTMLElement;
+  private backdrop: HTMLElement;
+  private peopleScroll: HTMLElement;
 
   constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer, private http: HttpClient, private snackBar: MatSnackBar, private title: Title)
   {
@@ -34,10 +35,11 @@ export class ShowDetailsComponent implements OnInit
     this.title.setTitle(this.show.title + " - Kyoo");
 
     if (this.season == null || this.show.seasons.find(x => x.seasonNumber == this.season) == null)
-      this.season = this.show.seasons[0].seasonNumber;
+      this.season = 1;
 
     this.toolbar = document.getElementById("toolbar");
     this.backdrop = document.getElementById("backdrop");
+    this.peopleScroll = document.getElementById("peopleScroll");
     window.addEventListener("scroll", this.scroll, true);
     this.toolbar.setAttribute("style", `background-color: rgba(0, 0, 0, 0) !important`);
 
@@ -48,6 +50,7 @@ export class ShowDetailsComponent implements OnInit
   {
     window.removeEventListener("scroll", this.scroll, true);
     this.title.setTitle("Kyoo");
+    this.toolbar.setAttribute("style", `background-color: #000000 !important`);
   }
 
   scroll = () =>
@@ -61,13 +64,13 @@ export class ShowDetailsComponent implements OnInit
     if (this.show == null)
       return;
 
-    if (this.show.seasons[this.season - 1].episodes != null)
-      this.episodes = this.show.seasons[this.season - 1].episodes;
+    if (this.show.seasons.find(x => x.seasonNumber == this.season).episodes != null)
+      this.episodes = this.show.seasons.find(x => x.seasonNumber == this.season).episodes;
 
 
     this.http.get<Episode[]>("api/episodes/" + this.show.slug + "/season/" + this.season).subscribe((episodes: Episode[]) =>
     {
-      this.show.seasons[this.season - 1].episodes = episodes;
+      this.show.seasons.find(x => x.seasonNumber == this.season).episodes = episodes;
       this.episodes = episodes;
     }, error =>
     {
@@ -77,6 +80,27 @@ export class ShowDetailsComponent implements OnInit
   }
 
 
+  scrollLeft()
+  {
+    let scroll: number = this.peopleScroll.offsetWidth * 0.80;
+    this.peopleScroll.scrollBy({ top: 0, left: -scroll, behavior: "smooth" });
+
+    document.getElementById("pl-rightBtn").classList.remove("d-none");
+
+    if (this.peopleScroll.scrollLeft - scroll <= 0)
+      document.getElementById("pl-leftBtn").classList.add("d-none");
+  }
+
+  scrollRight()
+  {
+    let scroll: number = this.peopleScroll.offsetWidth * 0.80;
+    console.log("Scroll: " + scroll);
+    this.peopleScroll.scrollBy({ top: 0, left: scroll, behavior: "smooth" });
+    document.getElementById("pl-leftBtn").classList.remove("d-none");
+
+    if (this.peopleScroll.scrollLeft + scroll >= this.peopleScroll.scrollWidth - this.peopleScroll.clientWidth)
+      document.getElementById("pl-rightBtn").classList.add("d-none");
+  }
 
   getPeopleIcon(slug: string)
   {
