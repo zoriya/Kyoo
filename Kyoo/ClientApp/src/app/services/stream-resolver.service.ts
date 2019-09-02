@@ -14,15 +14,13 @@ export class StreamResolverService implements Resolve<Show>
 
   resolve(route: ActivatedRouteSnapshot): Show | Observable<Show> | Promise<Show>
   {
-    let slug: string = route.paramMap.get("show-slug");
-    let season: number = parseInt(route.paramMap.get("season-number"));
-    let episode: number = parseInt(route.paramMap.get("episode-number"));
-    return this.http.get<Show>("api/watch/" + slug + "/s" + season + "/e" + episode).pipe(catchError((error: HttpErrorResponse) =>
+    let item: string = route.paramMap.get("item");
+    return this.http.get<Show>("api/watch/" + item).pipe(catchError((error: HttpErrorResponse) =>
     {
       console.log(error.status + " - " + error.message);
       if (error.status == 404)
       {
-        this.snackBar.open("Can't find this episode \"" + slug + "S" + season + ":E" + episode + "\" not found.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
+        this.snackBar.open("Episode \"" + item + "\" not found.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
       }
       else
       {

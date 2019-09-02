@@ -9,7 +9,13 @@ export class PlayerComponent implements OnInit {
 
   constructor() { }
 
-  ngOnInit() {
+  ngOnInit()
+  {
+    document.getElementById("nav").classList.add("d-none");
   }
 
+  ngOnDestroy()
+  {
+    document.getElementById("nav").classList.remove("d-none");
+  }
 }
