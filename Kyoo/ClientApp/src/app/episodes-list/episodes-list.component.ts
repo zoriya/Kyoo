@@ -17,11 +17,6 @@ export class EpisodesListComponent implements OnInit
   ngOnInit()
   {
     this.root = document.getElementById("episodes");
-
-    document.getElementById("leftBtn").onclick = function ()
-    {
-      console.log(this.root);
-    }
   }
 
   sanitize(url: string)
@@ -29,21 +24,35 @@ export class EpisodesListComponent implements OnInit
     return this.sanitizer.bypassSecurityTrustStyle("url(" + url + ")");
   }
 
-  /*document.getElementById("left-scroll").onclick = function()
-    {
-        slider.scrollBy({ top: 0, left: -slider.offsetWidth * 0.66, behavior: "smooth" });
-        document.getElementById("right-scroll").style.display = "inline-block";
+  scrollLeft()
+  {
+    let scroll: number = this.roundScroll(this.root.offsetWidth * 0.80);
+    this.root.scrollBy({ top: 0, left: -scroll, behavior: "smooth" });
 
-        if (slider.scrollLeft - slider.offsetWidth * 0.66 <= 0)
-            document.getElementById("left-scroll").style.display = "none";
-    }
+    document.getElementById("rightBtn").classList.remove("d-none");
 
-    document.getElementById("right-scroll").onclick = function()
-    {
-        slider.scrollBy({ top: 0, left: slider.offsetWidth * 0.66, behavior: "smooth" });
-        document.getElementById("left-scroll").style.display = "inline-block";
+    if (this.root.scrollLeft - scroll <= 0)
+      document.getElementById("leftBtn").classList.add("d-none");
+  }
 
-        if (slider.scrollLeft + slider.offsetWidth * 0.66 + 10 >= slider.scrollWidth - slider.clientWidth)
-            document.getElementById("right-scroll").style.display = "none";
-    }*/
+  scrollRight()
+  {
+    let scroll: number = this.roundScroll(this.root.offsetWidth * 0.80);
+    this.root.scrollBy({ top: 0, left: scroll, behavior: "smooth" });
+    document.getElementById("leftBtn").classList.remove("d-none");
+
+    if (this.root.scrollLeft + scroll >= this.root.scrollWidth - this.root.clientWidth)
+      document.getElementById("rightBtn").classList.add("d-none");
+  }
+
+  roundScroll(offset: number): number
+  {
+    let episodeSize: number = document.getElementById("1").scrollWidth;
+    offset = Math.round(offset / episodeSize) * episodeSize;
+
+    if (offset == 0)
+      offset = episodeSize;
+
+    return offset;
+  }
 }
