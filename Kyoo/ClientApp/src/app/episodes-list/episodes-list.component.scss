@@ -2,15 +2,8 @@
 @import "~bootstrap/scss/variables";
 @import "~bootstrap/scss//mixins/breakpoints";
 
-.episodes
+.root
 {
-  display: flex;
-  padding-left: 15px;
-  padding-right: 15px;
-  overflow-x: auto;
-  min-width: 100%;
-  flex-shrink: 0;
-  flex-direction: row;
   position: relative;
 
   &:hover
@@ -22,10 +15,21 @@
   }
 }
 
+.episodes
+{
+  display: flex;
+  padding-left: 15px;
+  padding-right: 15px;
+  overflow-x: auto;
+  min-width: 100%;
+  flex-shrink: 0;
+  flex-direction: row;
+}
+
 .episode
 {
   display: inline-block;
-  margin: .25rem;
+  padding: .25rem;
   flex-shrink: 0;
   width: 55%;
   cursor: pointer;
