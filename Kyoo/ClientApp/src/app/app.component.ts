@@ -42,6 +42,11 @@ export class AppComponent
           }
       }
     });
+
+    $(document).ready(function ()
+    {
+      $('[data-toggle="tooltip"]').tooltip();
+    });
   }
 }
 

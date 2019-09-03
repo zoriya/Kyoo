@@ -1,6 +1,28 @@
 <div class="container justify-content-center">
+  <button mat-icon-button data-toggle="tooltip" data-placement="bottom" title="Filter">
+    <mat-icon>filter_list</mat-icon>
+  </button>
+  <button mat-button data-toggle="tooltip" data-placement="bottom" title="Sort" [matMenuTriggerFor]="sortMenu">
+    <mat-icon>sort</mat-icon> Sort by {{this.sortType}} <i *ngIf="this.sortUp" class="material-icons arrow">arrow_upward</i><i *ngIf="!this.sortUp" class="material-icons arrow">arrow_downward</i>
+  </button>
+</div>
+
+<mat-menu #sortMenu="matMenu">
+  <div *ngFor="let type of this.sortTypes">
+    <button *ngIf="type != this.sortType; else elseBlock;" mat-menu-item (click)="sort(type, true)">
+      Sort by {{type}}
+    </button>
+    <ng-template #elseBlock>
+      <button mat-menu-item (click)="sort(type, !this.sortUp)">
+        Sort by {{type}} <i *ngIf="!this.sortUp" class="material-icons arrow">arrow_upward</i><i *ngIf="this.sortUp" class="material-icons arrow">arrow_downward</i>
+      </button>
+    </ng-template>
+  </div>
+</mat-menu>
+
+<div class="container justify-content-center">
   <a class="show" *ngFor="let show of this.shows" routerLink="/show/{{show.slug}}">
-    <img [style.background-image]="getThumb(show.slug)"/> 
+    <img [style.background-image]="getThumb(show.slug)" />
     <p class="title">{{show.title}}</p>
     <p class="date" *ngIf="show.endYear; else elseBlock">{{show.startYear}} - {{show.endYear}}</p>
     <ng-template #elseBlock><p class="date">{{show.startYear}}</p></ng-template>

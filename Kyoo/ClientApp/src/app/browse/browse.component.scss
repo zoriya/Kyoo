@@ -2,6 +2,16 @@
 @import "~bootstrap/scss/variables";
 @import "~bootstrap/scss//mixins/breakpoints";
 
+button
+{
+  outline: none;
+}
+
+.arrow
+{
+  font-size: 12px;
+}
+
 .container
 {
   display: flex;
