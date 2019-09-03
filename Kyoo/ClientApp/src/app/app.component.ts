@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Event, Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
+import * as $ from "jquery";
+import "bootstrap";
 
 @Component({
   selector: 'app-root',
@@ -24,29 +26,30 @@ export class AppComponent
       switch (true)
       {
         case event instanceof NavigationStart:
-          {
-            this.isLoading = true;
-            break;
-          }
+        {
+          this.isLoading = true;
+          break;
+        }
 
         case event instanceof NavigationEnd:
         case event instanceof NavigationCancel:
         case event instanceof NavigationError:
-          {
-            this.isLoading = false;
-            break;
-          }
+        {
+          this.isLoading = false;
+          break;
+        }
         default:
-          {
-            break;
-          }
+        {
+          this.isLoading = false;
+          break;
+        }
       }
     });
+  }
 
-    $(document).ready(function ()
-    {
-      $('[data-toggle="tooltip"]').tooltip();
-    });
+  ngAfterViewInit()
+  {
+    $('[data-toggle="tooltip"]').tooltip();
   }
 }
 

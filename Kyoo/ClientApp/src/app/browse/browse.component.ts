@@ -21,11 +21,11 @@ export class BrowseComponent implements OnInit
   ngOnInit()
   {
     this.shows = this.route.snapshot.data.shows;
+  }
 
-    $(document).ready(function ()
-    {
-      $('[data-toggle="tooltip"]').tooltip();
-    });
+  ngAfterViewInit()
+  {
+    $('[data-toggle="tooltip"]').tooltip();
   }
 
   getThumb(slug: string)

@@ -44,11 +44,11 @@ export class ShowDetailsComponent implements OnInit
     this.toolbar.setAttribute("style", `background-color: rgba(0, 0, 0, 0) !important`);
 
     this.getEpisodes();
+  }
 
-    $(document).ready(function ()
-    {
-      $('[data-toggle="tooltip"]').tooltip();
-    });
+  ngAfterViewInit()
+  {
+    $('[data-toggle="tooltip"]').tooltip();
   }
 
   ngOnDestroy()
