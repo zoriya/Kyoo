@@ -1,6 +1,7 @@
 {
   "databasePath": "C://Projects/database.db",
   "peoplePath": "D://Videos/People",
+  "plugins": "C://Projects/Plugins/",
   "providerPlugins": "C://Projects/Plugins/Providers",
   "libraryPaths": [
     "D:\\Videos"
