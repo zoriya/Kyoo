@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.29123.88
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kyoo", "Kyoo\Kyoo.csproj", "{0F8275B6-C7DD-42DF-A168-755C81B1C329}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Kyoo.Transcoder", "Kyoo.Transcoder\Kyoo.Transcoder.vcxproj", "{E5EFA4B2-F09D-4C4F-83DD-A436CD60BB77}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,16 @@ Global
 		{0F8275B6-C7DD-42DF-A168-755C81B1C329}.Release|x64.Build.0 = Release|Any CPU
 		{0F8275B6-C7DD-42DF-A168-755C81B1C329}.Release|x86.ActiveCfg = Release|Any CPU
 		{0F8275B6-C7DD-42DF-A168-755C81B1C329}.Release|x86.Build.0 = Release|Any CPU
+		{E5EFA4B2-F09D-4C4F-83DD-A436CD60BB77}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{E5EFA4B2-F09D-4C4F-83DD-A436CD60BB77}.Debug|x64.ActiveCfg = Debug|x64
+		{E5EFA4B2-F09D-4C4F-83DD-A436CD60BB77}.Debug|x64.Build.0 = Debug|x64
+		{E5EFA4B2-F09D-4C4F-83DD-A436CD60BB77}.Debug|x86.ActiveCfg = Debug|Win32
+		{E5EFA4B2-F09D-4C4F-83DD-A436CD60BB77}.Debug|x86.Build.0 = Debug|Win32
+		{E5EFA4B2-F09D-4C4F-83DD-A436CD60BB77}.Release|Any CPU.ActiveCfg = Release|Win32
+		{E5EFA4B2-F09D-4C4F-83DD-A436CD60BB77}.Release|x64.ActiveCfg = Release|x64
+		{E5EFA4B2-F09D-4C4F-83DD-A436CD60BB77}.Release|x64.Build.0 = Release|x64
+		{E5EFA4B2-F09D-4C4F-83DD-A436CD60BB77}.Release|x86.ActiveCfg = Release|Win32
+		{E5EFA4B2-F09D-4C4F-83DD-A436CD60BB77}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
