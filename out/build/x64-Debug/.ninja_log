@@ -1,8 +1,0 @@
-# ninja log v5
-0	646	589221327	Kyoo.Transcoder/CMakeFiles/Kyoo.Transcoder.dir/Kyoo.Transcoder.cpp.obj	4def66597d9a7d6a
-646	847	589221327	Kyoo.Transcoder/Kyoo.Transcoder.exe	ab339e2869358325
-0	684	589222248	Kyoo.Transcoder/CMakeFiles/Kyoo.Transcoder.dir/Kyoo.Transcoder.cpp.obj	4def66597d9a7d6a
-0	82	589223662	build.ninja	d01bdaf4c0568222
-0	306	589223662	Kyoo.Transcoder/CMakeFiles/Kyoo.Transcoder.dir/Transcoder.cpp.obj	1c08a50fd128951b
-2	561	589223663	Kyoo.Transcoder/CMakeFiles/Kyoo.Transcoder.dir/Kyoo.Transcoder.cpp.obj	4def66597d9a7d6a
-561	668	589223663	Kyoo.Transcoder/Kyoo.Transcoder.exe	68bd8df9c7e5e968

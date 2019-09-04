@@ -1,16 +1,21 @@
-using AdvancedDLSupport;
+using Kyoo.InternalAPI.TranscoderLink;
 using Microsoft.Extensions.Configuration;
+using System.Diagnostics;
 
-namespace Kyoo.InternalAPI.Transcoder
+namespace Kyoo.InternalAPI
 {
     public class Transcoder : ITranscoder
     {
-        private readonly ITranscoderAPI api;
-
         public Transcoder(IConfiguration config)
         {
             string transcoderPath = config.GetValue<string>("plugins");
-            api = NativeLibraryBuilder.Default.ActivateInterface<ITranscoderAPI>(transcoderPath);
+            Debug.WriteLine("&Transcoder DLL Path: " + transcoderPath);
+            Debug.WriteLine("&Api INIT: " + TranscoderAPI.Init());
+        }
+
+        public void GetVideo(string path)
+        {
+            Debug.WriteLine("&Getting video...");
         }
     }
 }

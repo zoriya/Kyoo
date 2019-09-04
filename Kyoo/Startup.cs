@@ -32,6 +32,7 @@ namespace Kyoo
 
             //Services needed in the private and in the public API
             services.AddSingleton<ILibraryManager, LibraryManager>();
+            services.AddSingleton<ITranscoder, Transcoder>();
 
             //Services used to get informations about files and register them
             services.AddHostedService<Crawler>();
