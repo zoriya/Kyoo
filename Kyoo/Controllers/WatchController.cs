@@ -8,29 +8,25 @@ using System.Diagnostics;
 namespace Kyoo.Controllers
 {
     [Route("api/[controller]")]
-    public class WatchController : Controller
+    [ApiController]
+    public class WatchController : ControllerBase
     {
         private readonly ILibraryManager libraryManager;
-        private readonly ITranscoder transcoder;
 
-        public WatchController(ILibraryManager libraryManager, ITranscoder transcoder)
+        public WatchController(ILibraryManager libraryManager)
         {
             this.libraryManager = libraryManager;
-            this.transcoder = transcoder;
         }
 
-
         [HttpGet("{showSlug}-s{seasonNumber}e{episodeNumber}")]
-        public IActionResult Index(string showSlug, long seasonNumber, long episodeNumber)
+        public ActionResult<WatchItem> Index(string showSlug, long seasonNumber, long episodeNumber)
         {
-            Debug.WriteLine("&Trying to watch " + showSlug + " season " + seasonNumber + " episode " + episodeNumber);
+            WatchItem item = libraryManager.GetWatchItem(showSlug, seasonNumber, episodeNumber);
 
-            Episode episode = libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
+            if(item == null)
+                return NotFound();
 
-            Debug.WriteLine("&Transcoding at: " + episode.Path);
-            transcoder.GetVideo(episode.Path);
-
-            return NotFound();
+            return item;
         }
     }
 }

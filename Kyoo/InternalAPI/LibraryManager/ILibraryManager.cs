@@ -1,4 +1,5 @@
 ﻿using Kyoo.Models;
+using Kyoo.Models.Watch;
 using System.Collections.Generic;
 
 namespace Kyoo.InternalAPI
@@ -13,6 +14,7 @@ namespace Kyoo.InternalAPI
         List<People> GetPeople(long showID);
         List<Genre> GetGenreForShow(long showID);
         List<Season> GetSeasons(long showID);
+        (VideoStream video, List<Stream> audios, List<Stream> subtitles) GetStreams(long episodeID);
 
         //Public read
         IEnumerable<Library> GetLibraries();
@@ -20,6 +22,7 @@ namespace Kyoo.InternalAPI
         Season GetSeason(string showSlug, long seasonNumber);
         List<Episode> GetEpisodes(string showSlug, long seasonNumber);
         Episode GetEpisode(string showSlug, long seasonNumber, long episodeNumber);
+        WatchItem GetWatchItem(string showSlug, long seasonNumber, long episodeNumber);
         People GetPeopleBySlug(string slug);
         Genre GetGenreBySlug(string slug);
         Studio GetStudioBySlug(string slug);

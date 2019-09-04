@@ -16,20 +16,12 @@ namespace Kyoo.Models
         public string Overview;
         public DateTime? ReleaseDate;
 
-        public long Runtime; //This runtime variable should be in seconds (used by the video manager so we need precisions)
+        public long Runtime; //This runtime variable should be in minutes
 
         [JsonIgnore] public string ImgPrimary;
         public string ExternalIDs;
 
         public string Thumb; //Used in the API response only
-
-        public long RuntimeInMinutes
-        {
-            get
-            {
-                return Runtime / 60;
-            }
-        }
 
 
         public Episode() { }
