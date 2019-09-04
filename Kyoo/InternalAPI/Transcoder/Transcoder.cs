@@ -17,5 +17,10 @@ namespace Kyoo.InternalAPI
         {
             Debug.WriteLine("&Getting video...");
         }
+
+        public dynamic ScanVideo(string path)
+        {
+            return TranscoderAPI.ScanVideo(path);
+        }
     }
 }

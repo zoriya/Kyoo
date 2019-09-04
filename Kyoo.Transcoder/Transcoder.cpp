@@ -5,3 +5,8 @@ int Init()
 {
 	return 42;
 }
+
+Video ScanVideo(std::string path)
+{
+
+}

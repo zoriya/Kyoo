@@ -1,9 +1,9 @@
 ﻿using Kyoo.Models;
+using Kyoo.Models.Watch;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Diagnostics;
-using System.IO;
 
 namespace Kyoo.InternalAPI
 {
@@ -17,7 +17,7 @@ namespace Kyoo.InternalAPI
             string databasePath = configuration.GetValue<string>("databasePath");
 
             Debug.WriteLine("&Library Manager init, databasePath: " + databasePath);
-            if (!File.Exists(databasePath))
+            if (!System.IO.File.Exists(databasePath))
             {
                 Debug.WriteLine("&Database doesn't exist, creating one.");
 
@@ -301,6 +301,43 @@ namespace Kyoo.InternalAPI
                 else
                     return null;
             }
+        }
+
+        public WatchItem GetWatchItem(string showSlug, long seasonNumber, long episodeNumber)
+        {
+            string query = "SELECT episodes.id, shows.title as showTitle, seasonNumber, episodeNumber, episodes.title, releaseDate, episodes.path FROM episodes JOIN shows ON shows.id = episodes.showID WHERE shows.slug = $showSlug AND episodes.seasonNumber = $seasonNumber AND episodes.episodeNumber = $episodeNumber;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$showSlug", showSlug);
+                cmd.Parameters.AddWithValue("$seasonNumber", seasonNumber);
+                cmd.Parameters.AddWithValue("$episodeNumber", episodeNumber);
+                SQLiteDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                    return WatchItem.FromReader(reader).SetStreams(this);
+                else
+                    return null;
+            }
+        }
+
+        public (VideoStream video, List<Stream> audios, List<Stream> subtitles) GetStreams(long episodeID)
+        {
+            return (new VideoStream(), null, null);
+            //string query = "SELECT genres.id, genres.slug, genres.name FROM genres JOIN genresLinks l ON l.genreID = genres.id WHERE l.showID = $showID;";
+
+            //using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            //{
+            //    cmd.Parameters.AddWithValue("$episodeID", episodeID);
+            //    SQLiteDataReader reader = cmd.ExecuteReader();
+
+            //    List<Genre> genres = new List<Genre>();
+
+            //    while (reader.Read())
+            //        genres.Add(Stream.FromReader(reader));
+
+            //    return genres;
+            //}
         }
 
         public List<People> GetPeople(long showID)
