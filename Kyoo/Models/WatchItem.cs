@@ -15,8 +15,11 @@ namespace Kyoo.Models
         public long seasonNumber;
         public long episodeNumber;
         public string Title;
+        public string Link;
         public DateTime? ReleaseDate;
         [JsonIgnore] public string Path;
+        public string previousEpisode;
+        public Episode nextEpisode;
 
         [JsonIgnore] public VideoStream video;
         public IEnumerable<Stream> audios;
@@ -34,6 +37,8 @@ namespace Kyoo.Models
             Title = title;
             ReleaseDate = releaseDate;
             Path = path;
+
+            Link = ShowSlug + "-s" + seasonNumber + "e" + episodeNumber;
         }
 
         public WatchItem(long episodeID, string showTitle, string showSlug, long seasonNumber, long episodeNumber, string title, DateTime? releaseDate, string path, Stream[] audios, Stream[] subtitles) : this(episodeID, showTitle, showSlug, seasonNumber, episodeNumber, title, releaseDate, path)
@@ -60,6 +65,30 @@ namespace Kyoo.Models
             video = streams.video;
             audios = streams.audios;
             subtitles = streams.subtitles;
+            return this;
+        }
+
+        public WatchItem SetPrevious(ILibraryManager libraryManager)
+        {
+            long lastEp = episodeNumber - 1;
+            if(lastEp > 0)
+                previousEpisode = ShowSlug + "-s" + seasonNumber + "e" + lastEp;
+            else if(seasonNumber > 1)
+            {
+                int seasonCount = libraryManager.GetSeasonCount(ShowSlug, seasonNumber - 1);
+                previousEpisode = ShowSlug + "-s" + (seasonNumber - 1) + "e" + seasonCount;
+            }
+            return this;
+        }
+
+        public WatchItem SetNext(ILibraryManager libraryManager)
+        {
+            long seasonCount = libraryManager.GetSeasonCount(ShowSlug, seasonNumber);
+            if (episodeNumber >= seasonCount)
+                nextEpisode = libraryManager.GetEpisode(ShowSlug, seasonNumber + 1, 1);
+            else
+                nextEpisode = libraryManager.GetEpisode(ShowSlug, seasonNumber, episodeNumber + 1);
+
             return this;
         }
     }

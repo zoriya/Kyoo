@@ -14,6 +14,7 @@ namespace Kyoo.InternalAPI
         List<People> GetPeople(long showID);
         List<Genre> GetGenreForShow(long showID);
         List<Season> GetSeasons(long showID);
+        int GetSeasonCount(string showSlug, long seasonNumber);
         (VideoStream video, List<Stream> audios, List<Stream> subtitles) GetStreams(long episodeID);
 
         //Public read
@@ -22,7 +23,7 @@ namespace Kyoo.InternalAPI
         Season GetSeason(string showSlug, long seasonNumber);
         List<Episode> GetEpisodes(string showSlug, long seasonNumber);
         Episode GetEpisode(string showSlug, long seasonNumber, long episodeNumber);
-        WatchItem GetWatchItem(string showSlug, long seasonNumber, long episodeNumber);
+        WatchItem GetWatchItem(string showSlug, long seasonNumber, long episodeNumber, bool complete = true);
         People GetPeopleBySlug(string slug);
         Genre GetGenreBySlug(string slug);
         Studio GetStudioBySlug(string slug);

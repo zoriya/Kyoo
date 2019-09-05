@@ -12,22 +12,31 @@ import { Location } from "@angular/common";
 export class PlayerComponent implements OnInit
 {
   item: WatchItem;
-  video: string;
+
+  hours: number;
+  minutes: number;
+  seconds: number;
 
   playIcon: string = "pause"; //Icon used by the play btn.
   fullscreenIcon: string = "fullscreen"; //Icon used by the fullscreen btn.
 
   private player: HTMLVideoElement;
 
-  constructor(private route: ActivatedRoute, private location: Location)
-  {
-    this.video = this.route.snapshot.paramMap.get("item");
-  }
+  constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer, private location: Location) { }
 
   ngOnInit()
   {
     document.getElementById("nav").classList.add("d-none");
-    this.item = this.route.snapshot.data.item;
+    this.route.data.subscribe((data) =>
+    {
+      this.item = data.item;
+
+      if (this.player)
+      {
+        this.player.load();
+        this.initPlayBtn();
+      }
+    });
     console.log("Init");
   }
 
@@ -36,9 +45,25 @@ export class PlayerComponent implements OnInit
     this.player = document.getElementById("player") as HTMLVideoElement;
     this.player.controls = false;
 
-    $('[data-toggle="tooltip"]').tooltip();
+    this.player.onplay = () =>
+    {
+      this.initPlayBtn();
+    }
 
-    document.addEventListener("fullscreenchange", (event) =>
+    this.player.onpause = () =>
+    {
+      this.playIcon = "play_arrow"
+      $("#play").attr("data-original-title", "Play").tooltip("show");
+    }
+
+    this.player.ontimeupdate = () =>
+    {
+      this.seconds = Math.round(this.player.currentTime % 60);
+      this.minutes = Math.round(this.player.currentTime / 60);
+    };
+
+
+    document.addEventListener("fullscreenchange", () =>
     {
       if (document.fullscreenElement != null)
       {
@@ -51,6 +76,8 @@ export class PlayerComponent implements OnInit
         $("#fullscreen").attr("data-original-title", "Fullscreen").tooltip("show");
       }
     });
+
+    $('[data-toggle="tooltip"]').tooltip();
   }
 
   ngOnDestroy()
@@ -65,22 +92,16 @@ export class PlayerComponent implements OnInit
 
   tooglePlayback()
   {
-    let playBtn: HTMLElement = document.getElementById("play");
-
     if (this.player.paused)
-    {
       this.player.play();
-
-      this.playIcon = "pause"
-      $(playBtn).attr("data-original-title", "Pause").tooltip("show");
-    }
     else
-    {
       this.player.pause();
+  }
 
-      this.playIcon = "play_arrow"
-      $(playBtn).attr("data-original-title", "Play").tooltip("show");
-    }
+  initPlayBtn()
+  {
+    this.playIcon = "pause";
+    $("#play").attr("data-original-title", "Pause").tooltip("show");
   }
 
   fullscreen()
@@ -89,5 +110,11 @@ export class PlayerComponent implements OnInit
       document.getElementById("root").requestFullscreen();
     else
       document.exitFullscreen();
+  }
+
+
+  getThumb(url: string)
+  {
+    return this.sanitizer.bypassSecurityTrustStyle("url(" + url + ")");
   }
 }
