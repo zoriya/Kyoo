@@ -1,6 +1,7 @@
 ﻿using Kyoo.Models;
 using Kyoo.Models.Watch;
 using Microsoft.Extensions.Configuration;
+using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Diagnostics;
@@ -233,7 +234,7 @@ namespace Kyoo.InternalAPI
 
         public List<Season> GetSeasons(long showID)
         {
-            string query = "SELECT * FROM seasons WHERE showID = $showID;";
+            string query = "SELECT * FROM seasons WHERE showID = $showID ORDER BY seasonNumber;";
 
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
@@ -266,9 +267,23 @@ namespace Kyoo.InternalAPI
             }
         }
 
+        public int GetSeasonCount(string showSlug, long seasonNumber)
+        {
+            string query = "SELECT count(episodes.id) FROM episodes JOIN shows ON shows.id = episodes.showID WHERE shows.slug = $showSlug AND episodes.seasonNumber = $seasonNumber;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$showSlug", showSlug);
+                cmd.Parameters.AddWithValue("$seasonNumber", seasonNumber);
+
+                int count = Convert.ToInt32(cmd.ExecuteScalar());
+                return count;
+            }
+        }
+
         public List<Episode> GetEpisodes(string showSlug, long seasonNumber)
         {
-            string query = "SELECT * FROM episodes JOIN shows ON shows.id = episodes.showID WHERE shows.slug = $showSlug AND episodes.seasonNumber = $seasonNumber;";
+            string query = "SELECT * FROM episodes JOIN shows ON shows.id = episodes.showID WHERE shows.slug = $showSlug AND episodes.seasonNumber = $seasonNumber ORDER BY episodeNumber;";
 
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
@@ -303,7 +318,7 @@ namespace Kyoo.InternalAPI
             }
         }
 
-        public WatchItem GetWatchItem(string showSlug, long seasonNumber, long episodeNumber)
+        public WatchItem GetWatchItem(string showSlug, long seasonNumber, long episodeNumber, bool complete = true)
         {
             string query = "SELECT episodes.id, shows.title as showTitle, shows.slug as showSlug, seasonNumber, episodeNumber, episodes.title, releaseDate, episodes.path FROM episodes JOIN shows ON shows.id = episodes.showID WHERE shows.slug = $showSlug AND episodes.seasonNumber = $seasonNumber AND episodes.episodeNumber = $episodeNumber;";
 
@@ -315,7 +330,12 @@ namespace Kyoo.InternalAPI
                 SQLiteDataReader reader = cmd.ExecuteReader();
 
                 if (reader.Read())
-                    return WatchItem.FromReader(reader).SetStreams(this);
+                {
+                    if (complete)
+                        return WatchItem.FromReader(reader).SetStreams(this).SetPrevious(this).SetNext(this);
+                    else
+                        return WatchItem.FromReader(reader);
+                }
                 else
                     return null;
             }

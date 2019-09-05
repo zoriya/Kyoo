@@ -21,6 +21,7 @@ namespace Kyoo.Models
         [JsonIgnore] public string ImgPrimary;
         public string ExternalIDs;
 
+        public string Link; //Used only on the player
         public string Thumb; //Used in the API response only
 
 
@@ -77,6 +78,7 @@ namespace Kyoo.Models
         public Episode SetThumb(string showSlug)
         {
             Thumb = "thumb/" + showSlug + "/s" + seasonNumber + "/e" + episodeNumber;
+            Link = showSlug + "-s" + seasonNumber + "e" + episodeNumber;
             return this;
         }
     }
