@@ -31,6 +31,7 @@
 
   <ItemGroup>
     <None Remove="ClientApp\src\models\show.ts" />
+    <None Remove="ClientApp\src\models\watch-item.ts" />
   </ItemGroup>
 
   <ItemGroup>
@@ -69,6 +70,7 @@
 
   <ItemGroup>
     <TypeScriptCompile Include="ClientApp\src\models\show.ts" />
+    <TypeScriptCompile Include="ClientApp\src\models\watch-item.ts" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

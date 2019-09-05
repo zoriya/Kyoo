@@ -1,1 +1,58 @@
-<p>player works!</p>
+<div id="root">
+  <div class="player">
+    <video id="player" autoplay muted (click)="tooglePlayback()">
+      <source src="/api/video/{{this.video}}" type="video/mp4" />
+    </video>
+  </div>
+
+  <div class="back">
+    <button mat-icon-button data-toggle="tooltip" data-placement="bottom" title="Back" (click)="back()">
+      <mat-icon>arrow_back</mat-icon>
+    </button>
+    <h5>{{this.item.showTitle}}</h5>
+  </div>
+
+  <div class="controller container-fluid">
+    <div class="img">
+      <img src="thumb/{{this.item.showSlug}}" />
+    </div>
+    <div class="content">
+      <h3>S{{this.item.seasonNumber}}:E{{this.item.episodeNumber}} - {{this.item.title}}</h3>
+      <mat-progress-bar color="accent"></mat-progress-bar>
+      <div class="buttons">
+        <div class="left">
+          <button *ngIf="this.item.episodeNumber != 1" mat-icon-button data-toggle="tooltip" data-placement="top" title="Previous" routerLink="/watch/{{this.item.showSlug}}-s{{this.item.seasonNumber}}e{{this.item.episodeNumber - 1}}">
+            <mat-icon>skip_previous</mat-icon>
+          </button>
+          <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Play" id="play" (click)="tooglePlayback()">
+            <mat-icon>{{this.playIcon}}</mat-icon>
+          </button>
+          <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Next" routerLink="/watch/{{this.item.showSlug}}-s{{this.item.seasonNumber}}e{{this.item.episodeNumber + 1}}">
+            <mat-icon>skip_next</mat-icon>
+          </button>
+          <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Volume">
+            <mat-icon>volume_up</mat-icon>
+          </button>
+          <p>00:00 / --:--</p>
+        </div>
+        <div class="right">
+          <button *ngIf="this.item.audios != null" mat-icon-button data-toggle="tooltip" data-placement="top" title="Select audio track">
+            <mat-icon>music_note</mat-icon>
+          </button>
+          <button *ngIf="this.item.subtitles != null" mat-icon-button data-toggle="tooltip" data-placement="top" title="Select subtitle track">
+            <mat-icon>closed_caption</mat-icon>
+          </button>
+          <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Cast">
+            <mat-icon>cast</mat-icon>
+          </button>
+          <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Settings">
+            <mat-icon>settings</mat-icon>
+          </button>
+          <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Fullscreen" id="fullscreen" (click)="fullscreen()">
+            <mat-icon>{{fullscreenIcon}}</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
