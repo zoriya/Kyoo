@@ -305,7 +305,7 @@ namespace Kyoo.InternalAPI
 
         public WatchItem GetWatchItem(string showSlug, long seasonNumber, long episodeNumber)
         {
-            string query = "SELECT episodes.id, shows.title as showTitle, seasonNumber, episodeNumber, episodes.title, releaseDate, episodes.path FROM episodes JOIN shows ON shows.id = episodes.showID WHERE shows.slug = $showSlug AND episodes.seasonNumber = $seasonNumber AND episodes.episodeNumber = $episodeNumber;";
+            string query = "SELECT episodes.id, shows.title as showTitle, shows.slug as showSlug, seasonNumber, episodeNumber, episodes.title, releaseDate, episodes.path FROM episodes JOIN shows ON shows.id = episodes.showID WHERE shows.slug = $showSlug AND episodes.seasonNumber = $seasonNumber AND episodes.episodeNumber = $episodeNumber;";
 
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {

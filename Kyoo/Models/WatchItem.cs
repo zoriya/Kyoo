@@ -11,6 +11,7 @@ namespace Kyoo.Models
         [JsonIgnore] public readonly long episodeID;
 
         public string ShowTitle;
+        public string ShowSlug;
         public long seasonNumber;
         public long episodeNumber;
         public string Title;
@@ -23,10 +24,11 @@ namespace Kyoo.Models
 
         public WatchItem() { }
 
-        public WatchItem(long episodeID, string showTitle, long seasonNumber, long episodeNumber, string title, DateTime? releaseDate, string path)
+        public WatchItem(long episodeID, string showTitle, string showSlug, long seasonNumber, long episodeNumber, string title, DateTime? releaseDate, string path)
         {
             this.episodeID = episodeID;
             ShowTitle = showTitle;
+            ShowSlug = showSlug;
             this.seasonNumber = seasonNumber;
             this.episodeNumber = episodeNumber;
             Title = title;
@@ -34,7 +36,7 @@ namespace Kyoo.Models
             Path = path;
         }
 
-        public WatchItem(long episodeID, string showTitle, long seasonNumber, long episodeNumber, string title, DateTime? releaseDate, string path, Stream[] audios, Stream[] subtitles) : this(episodeID, showTitle, seasonNumber, episodeNumber, title, releaseDate, path)
+        public WatchItem(long episodeID, string showTitle, string showSlug, long seasonNumber, long episodeNumber, string title, DateTime? releaseDate, string path, Stream[] audios, Stream[] subtitles) : this(episodeID, showTitle, showSlug, seasonNumber, episodeNumber, title, releaseDate, path)
         {
             this.audios = audios;
             this.subtitles = subtitles;
@@ -44,6 +46,7 @@ namespace Kyoo.Models
         {
             return new WatchItem((long)reader["id"],
                 reader["showTitle"] as string,
+                reader["showSlug"] as string,
                 (long)reader["seasonNumber"],
                 (long)reader["episodeNumber"],
                 reader["title"] as string,
