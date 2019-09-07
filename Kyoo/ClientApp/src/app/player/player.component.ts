@@ -16,6 +16,7 @@ export class PlayerComponent implements OnInit
   item: WatchItem;
 
   volume: number = 100;
+  seeking: boolean = false;
 
   hours: number;
   minutes: number;
@@ -77,17 +78,13 @@ export class PlayerComponent implements OnInit
     this.player.onpause = () =>
     {
       this.playIcon = "play_arrow"
-      $("#play").attr("data-original-title", "Play").tooltip("show");
+      $("#play").attr("data-original-title", "Play");
     }
 
     this.player.ontimeupdate = () =>
     {
-      this.hours = Math.round(this.player.currentTime / 60 % 60);
-      this.seconds = Math.round(this.player.currentTime % 60);
-      this.minutes = Math.round(this.player.currentTime / 60);
-
-      this.thumb.style.transform = "translateX(" + (this.player.currentTime / this.item.duration * 100) + "%)";
-      this.progress.style.width = (this.player.currentTime / this.item.duration * 100) + "%";
+      if (!this.seeking)
+        this.updateTime(this.player.currentTime);
     };
 
     this.player.onprogress = () =>
@@ -96,6 +93,48 @@ export class PlayerComponent implements OnInit
         this.buffered.style.width = (this.player.buffered.end(this.player.buffered.length - 1) / this.item.duration * 100) + "%";
     };
 
+    let progressBar: HTMLElement = document.getElementById("progress-bar") as HTMLElement;
+    $(progressBar).click((event) =>
+    {
+      event.preventDefault();
+      let time: number = this.getTimeFromSeekbar(progressBar, event.pageX);
+      this.player.currentTime = time;
+      this.updateTime(time);
+    });
+
+    $(progressBar).mousedown((event) =>
+    {
+      event.preventDefault();
+      this.seeking = true;
+      progressBar.classList.add("seeking");
+      this.player.pause();
+
+      let time: number = this.getTimeFromSeekbar(progressBar, event.pageX);
+      this.updateTime(time);
+    });
+
+    $(document).mouseup((event) =>
+    {
+      if (this.seeking)
+      {
+        event.preventDefault();
+        this.seeking = false;
+        progressBar.classList.remove("seeking");
+
+        let time: number = this.getTimeFromSeekbar(progressBar, event.pageX);
+        this.player.currentTime = time;
+        this.player.play();
+      }
+    });
+
+    $(document).mousemove((event) =>
+    {
+      if (this.seeking)
+      {
+        let time: number = this.getTimeFromSeekbar(progressBar, event.pageX);
+        this.updateTime(time);
+      }
+    });
 
     document.addEventListener("fullscreenchange", () =>
     {
@@ -111,7 +150,22 @@ export class PlayerComponent implements OnInit
       }
     });
 
-    $('[data-toggle="tooltip"]').tooltip();
+    $('[data-toggle="tooltip"]').tooltip({ trigger: "hover" });
+  }
+
+  getTimeFromSeekbar(progressBar: HTMLElement, pageX: number)
+  {
+    return Math.max(0, Math.min((pageX - progressBar.offsetLeft) / progressBar.clientWidth, 1)) * this.item.duration;
+  }
+
+  updateTime(time: number)
+  {
+    this.hours = Math.round(time / 60 % 60);
+    this.seconds = Math.round(time % 60);
+    this.minutes = Math.round(time / 60);
+
+    this.thumb.style.transform = "translateX(" + (time / this.item.duration * 100) + "%)";
+    this.progress.style.width = (time / this.item.duration * 100) + "%";
   }
 
   ngOnDestroy()
@@ -133,10 +187,20 @@ export class PlayerComponent implements OnInit
       this.player.pause();
   }
 
+  toogleMute()
+  {
+    if (this.player.muted)
+      this.player.muted = false;
+    else
+      this.player.muted = true;
+
+    this.updateVolumeBtn()
+  }
+
   initPlayBtn()
   {
     this.playIcon = "pause";
-    $("#play").attr("data-original-title", "Pause").tooltip("show");
+    $("#play").attr("data-original-title", "Pause");
   }
 
   fullscreen()
@@ -149,22 +213,30 @@ export class PlayerComponent implements OnInit
 
   changeVolume(event: MatSliderChange)
   {
+    this.player.muted = false;
     this.player.volume = event.value / 100;
     this.volume = event.value;
 
-    this.changeVolumeBtn();
+    this.updateVolumeBtn();
   }
 
-  changeVolumeBtn()
+  updateVolumeBtn()
   {
-    if (this.volume == 0)
-      this.volumeIcon = "volume_off";
-    else if (this.volume < 25)
-      this.volumeIcon = "volume_mute";
-    else if (this.volume < 65)
-      this.volumeIcon = "volume_down";
+    if (this.player.muted)
+    {
+      this.volumeIcon = "volume_off"
+    }
     else
-      this.volumeIcon = "volume_up";
+    {
+      if (this.volume == 0)
+        this.volumeIcon = "volume_off";
+      else if (this.volume < 25)
+        this.volumeIcon = "volume_mute";
+      else if (this.volume < 65)
+        this.volumeIcon = "volume_down";
+      else
+        this.volumeIcon = "volume_up";
+    }
   }
 
 
