@@ -70,14 +70,6 @@
     display: flex;
     flex-direction: column;
 
-    > mat-progress-bar
-    {
-      width: 100%;
-      height: 2px;
-      margin-top: 1rem;
-      margin-bottom: 1rem;
-    }
-
     .buttons
     {
       display: flex;
@@ -111,6 +103,79 @@
           outline: none;
         }
       }
+    }
+  }
+}
+
+.seek-bar
+{
+  width: 100%;
+  height: auto;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  position: relative;
+
+  #progress-bar
+  {
+    width: 100%;
+    height: 4px;
+    position: relative;
+    background-color: rgba(255, 255, 255, .2);
+    transform: scaleY(.6);
+
+    #progress
+    {
+      width: 0;
+      height: 100%;
+      background-color: var(--accentColor);
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+    }
+
+    #buffered
+    {
+      width: 0;
+      height: 100%;
+      background-color: rgba(255, 255, 255, .5);
+      position: absolute;
+      top: 0;
+      left: 0;
+      bottom: 0;
+    }
+  }
+
+  #thumb
+  {
+    width: 100%;
+    height: 12px;
+    position: absolute;
+    left: -6px;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    opacity: 0;
+
+    > div
+    {
+      width: 12px;
+      height: 12px;
+      border-radius: 6px;
+      background-color: var(--accentColor);
+    }
+  }
+
+  &:hover
+  {
+    #progress-bar
+    {
+      transform: scaleY(1);
+    }
+
+    #thumb
+    {
+      opacity: 1;
     }
   }
 }
@@ -170,6 +235,41 @@
         overflow: hidden;
         margin: 0;
       }
+    }
+  }
+}
+
+#volume
+{
+  display: flex;
+
+  > button
+  {
+    outline: none;
+  }
+
+  &:hover, &:focus-within
+  {
+    > mat-slider
+    {
+      width: 100px;
+    }
+  }
+
+  > mat-slider
+  {
+    width: 0px;
+    min-width: 0px;
+    padding: 0;
+    height: 40px;
+    overflow: hidden;
+    transition: width .2s cubic-bezier(0.4,0, 1, 1);
+
+    &::ng-deep > div
+    {
+      top: 19px;
+      left: 10px;
+      right: 10px;
     }
   }
 }
