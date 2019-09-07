@@ -14,14 +14,14 @@
     </div>
 
     <div class="controller container-fluid">
-      <div class="img">
+      <div class="img d-none d-sm-block">
         <img src="thumb/{{this.item.showSlug}}" />
       </div>
       <div class="content">
         <h3>S{{this.item.seasonNumber}}:E{{this.item.episodeNumber}} - {{this.item.title}}</h3>
 
-        <div class="seek-bar">
-          <div id="progress-bar">
+        <div id="progress-bar">
+          <div class="seek-bar">
             <div id="buffered"></div>
             <div id="progress"></div>
           </div>
@@ -50,7 +50,7 @@
               </div>
             </button>
             <div id="volume">
-              <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Volume">
+              <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Volume" (click)="toogleMute()">
                 <mat-icon>{{this.volumeIcon}}</mat-icon>
               </button>
 
