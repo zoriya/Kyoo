@@ -9,6 +9,7 @@ export interface WatchItem
   video: string;
   title: string;
   link: string;
+  duration: number;
   releaseDate;
 
   previousEpisode: string;

@@ -19,7 +19,15 @@
       </div>
       <div class="content">
         <h3>S{{this.item.seasonNumber}}:E{{this.item.episodeNumber}} - {{this.item.title}}</h3>
-        <mat-progress-bar color="accent"></mat-progress-bar>
+
+        <div class="seek-bar">
+          <div id="progress-bar">
+            <div id="buffered"></div>
+            <div id="progress"></div>
+          </div>
+          <div id="thumb"><div></div></div>
+        </div>
+
         <div class="buttons">
           <div class="left">
             <button *ngIf="this.item.previousEpisode" mat-icon-button data-toggle="tooltip" data-placement="top" title="Previous" routerLink="/watch/{{this.item.previousEpisode}}">
@@ -41,12 +49,15 @@
                 </div>
               </div>
             </button>
-            <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Volume">
-              <mat-icon>volume_up</mat-icon>
+            <div id="volume">
+              <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Volume">
+                <mat-icon>{{this.volumeIcon}}</mat-icon>
+              </button>
 
-              <mat-slider></mat-slider>
-            </button>
-            <p>{{this.minutes | number: '2.0-0'}}:{{this.seconds | number: '2.0-0'}} / --:--</p>
+              <mat-slider [value]="volume" (input)="changeVolume($event)"></mat-slider>
+            </div>
+            <p *ngIf="this.maxHours; else elseBlock">{{this.hours | number: '2.0-0'}}:{{this.minutes | number: '2.0-0'}}:{{this.seconds | number: '2.0-0'}} / {{this.maxHours | number: '2.0-0'}}:{{this.maxMinutes | number: '2.0-0'}}:{{this.maxSeconds | number: '2.0-0'}}</p>
+            <ng-template #elseBlock><p>{{this.minutes | number: '2.0-0'}}:{{this.seconds | number: '2.0-0'}} / {{this.maxMinutes | number: '2.0-0'}}:{{this.maxSeconds | number: '2.0-0'}}</p></ng-template>
           </div>
           <div class="right">
             <button *ngIf="this.item.audios != null" mat-icon-button data-toggle="tooltip" data-placement="top" title="Select audio track">

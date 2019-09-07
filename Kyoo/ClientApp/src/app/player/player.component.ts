@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { WatchItem } from "../../models/watch-item";
 import { ActivatedRoute } from "@angular/router";
-import { DomSanitizer } from "@angular/platform-browser";
+import { DomSanitizer, Title } from "@angular/platform-browser";
 import { Location } from "@angular/common";
+import { MatSliderChange } from "@angular/material/slider";
+import { HtmlAstPath } from "@angular/compiler";
 
 @Component({
   selector: 'app-player',
@@ -13,16 +15,26 @@ export class PlayerComponent implements OnInit
 {
   item: WatchItem;
 
+  volume: number = 100;
+
   hours: number;
   minutes: number;
   seconds: number;
 
+  maxHours: number;
+  maxMinutes: number;
+  maxSeconds: number;
+
   playIcon: string = "pause"; //Icon used by the play btn.
+  volumeIcon: string = "volume_up"; //Icon used by the volume btn.
   fullscreenIcon: string = "fullscreen"; //Icon used by the fullscreen btn.
 
   private player: HTMLVideoElement;
+  private thumb: HTMLElement;
+  private progress: HTMLElement;
+  private buffered: HTMLElement;
 
-  constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer, private location: Location) { }
+  constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer, private location: Location, private title: Title) { }
 
   ngOnInit()
   {
@@ -30,20 +42,32 @@ export class PlayerComponent implements OnInit
     this.route.data.subscribe((data) =>
     {
       this.item = data.item;
+      this.item.duration = 20 * 60;
 
       if (this.player)
       {
         this.player.load();
         this.initPlayBtn();
       }
+
+      this.maxSeconds = Math.round(this.item.duration % 60);
+      this.maxMinutes = Math.round(this.item.duration / 60 % 60);
+      this.maxHours = Math.round(this.item.duration / 3600);
+
+      this.title.setTitle(this.item.showTitle + " S" + this.item.seasonNumber + ":E" + this.item.episodeNumber + " - Kyoo");
     });
-    console.log("Init");
   }
 
   ngAfterViewInit()
   {
     this.player = document.getElementById("player") as HTMLVideoElement;
+    this.thumb = document.getElementById("thumb") as HTMLElement;
+    this.progress = document.getElementById("progress") as HTMLElement;
+    this.buffered = document.getElementById("buffered") as HTMLElement;
     this.player.controls = false;
+    //console.log(this.player.volume * 100);
+    //this.volume = this.player.volume * 100;
+    //this.changeVolumeBtn();
 
     this.player.onplay = () =>
     {
@@ -58,8 +82,18 @@ export class PlayerComponent implements OnInit
 
     this.player.ontimeupdate = () =>
     {
+      this.hours = Math.round(this.player.currentTime / 60 % 60);
       this.seconds = Math.round(this.player.currentTime % 60);
       this.minutes = Math.round(this.player.currentTime / 60);
+
+      this.thumb.style.transform = "translateX(" + (this.player.currentTime / this.item.duration * 100) + "%)";
+      this.progress.style.width = (this.player.currentTime / this.item.duration * 100) + "%";
+    };
+
+    this.player.onprogress = () =>
+    {
+      if (this.player.buffered.length > 0)
+        this.buffered.style.width = (this.player.buffered.end(this.player.buffered.length - 1) / this.item.duration * 100) + "%";
     };
 
 
@@ -83,6 +117,7 @@ export class PlayerComponent implements OnInit
   ngOnDestroy()
   {
     document.getElementById("nav").classList.remove("d-none");
+    this.title.setTitle("Kyoo");
   }
 
   back()
@@ -110,6 +145,26 @@ export class PlayerComponent implements OnInit
       document.getElementById("root").requestFullscreen();
     else
       document.exitFullscreen();
+  }
+
+  changeVolume(event: MatSliderChange)
+  {
+    this.player.volume = event.value / 100;
+    this.volume = event.value;
+
+    this.changeVolumeBtn();
+  }
+
+  changeVolumeBtn()
+  {
+    if (this.volume == 0)
+      this.volumeIcon = "volume_off";
+    else if (this.volume < 25)
+      this.volumeIcon = "volume_mute";
+    else if (this.volume < 65)
+      this.volumeIcon = "volume_down";
+    else
+      this.volumeIcon = "volume_up";
   }
 
 
