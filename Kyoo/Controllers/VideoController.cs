@@ -23,10 +23,34 @@ namespace Kyoo.Controllers
             WatchItem episode = libraryManager.GetWatchItem(showSlug, seasonNumber, episodeNumber);
 
             if (System.IO.File.Exists(episode.Path))
+                return PhysicalFile(episode.Path, "video/x-matroska", true);
+            else
+                return NotFound();
+        }
+
+        [HttpGet("{showSlug}-s{seasonNumber}e{episodeNumber}/stream")]
+        public IActionResult Stream(string showSlug, long seasonNumber, long episodeNumber)
+        {
+            WatchItem episode = libraryManager.GetWatchItem(showSlug, seasonNumber, episodeNumber);
+
+            if (System.IO.File.Exists(episode.Path))
             {
-                //Should check if video is playable on the client and transcode if needed.
-                //Should use the right mime type
-                return PhysicalFile(episode.Path, "video/mp4", true);
+                string path = transcoder.Stream(episode.Path);
+                return PhysicalFile(path, "video/mp4", true);
+            }
+            else
+                return NotFound();
+        }
+
+        [HttpGet("{showSlug}-s{seasonNumber}e{episodeNumber}/transcode")]
+        public IActionResult Transcode(string showSlug, long seasonNumber, long episodeNumber)
+        {
+            WatchItem episode = libraryManager.GetWatchItem(showSlug, seasonNumber, episodeNumber);
+
+            if (System.IO.File.Exists(episode.Path))
+            {
+                string path = transcoder.Transcode(episode.Path);
+                return PhysicalFile(path, "video/mp4", true);
             }
             else
                 return NotFound();

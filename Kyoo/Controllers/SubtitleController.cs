@@ -1,4 +1,5 @@
 ﻿using Kyoo.InternalAPI;
+using Kyoo.Models.Watch;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kyoo.Controllers
@@ -14,10 +15,16 @@ namespace Kyoo.Controllers
             this.libraryManager = libraryManager;
         }
 
-        [HttpGet("{showSlug}-s{seasonNumber}e{episodeNumber}-{languageTag}.ass")]
-        public IActionResult GetSubtitle(string showSlug, long seasonNumber, long episodeNumber, string languageTag)
+        [HttpGet("{showSlug}-s{seasonNumber}e{episodeNumber}-{languageTag}.{format?}")]
+        public IActionResult GetSubtitle(string showSlug, long seasonNumber, long episodeNumber, string languageTag, string format)
         {
-            return PhysicalFile(@"D:\Videos\Devilman\Subtitles\fre\Devilman Crybaby S01E01.fre.ass", "text/x-ssa");
+            Stream subtitle = libraryManager.GetSubtitle(showSlug, seasonNumber, episodeNumber, languageTag);
+
+            if (subtitle == null)
+                return NotFound();
+
+            //Should use appropriate mime type here
+            return PhysicalFile(subtitle.Path, "text/x-ssa");
         }
     }
 }
