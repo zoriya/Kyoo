@@ -26,7 +26,7 @@ namespace Kyoo.Controllers
             {
                 //Should check if video is playable on the client and transcode if needed.
                 //Should use the right mime type
-                return new PhysicalFileResult(episode.Path, "video/mp4");
+                return PhysicalFile(episode.Path, "video/mp4", true);
             }
             else
                 return NotFound();
