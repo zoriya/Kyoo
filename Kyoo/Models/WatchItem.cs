@@ -21,7 +21,6 @@ namespace Kyoo.Models
         public string previousEpisode;
         public Episode nextEpisode;
 
-        [JsonIgnore] public VideoStream video;
         public IEnumerable<Stream> audios;
         public IEnumerable<Stream> subtitles;
 
@@ -61,8 +60,7 @@ namespace Kyoo.Models
 
         public WatchItem SetStreams(ILibraryManager libraryManager)
         {
-            (VideoStream video, IEnumerable<Stream> audios, IEnumerable<Stream> subtitles) streams = libraryManager.GetStreams(episodeID);
-            video = streams.video;
+            (IEnumerable<Stream> audios, IEnumerable<Stream> subtitles) streams = libraryManager.GetStreams(episodeID);
             audios = streams.audios;
             subtitles = streams.subtitles;
             return this;

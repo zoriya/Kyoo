@@ -73,24 +73,14 @@ namespace Kyoo.InternalAPI
 				    CREATE TABLE streams(
 					    id INTEGER PRIMARY KEY UNIQUE, 
 					    episodeID INTEGER, 
-					    streamIndex INTEGER, 
 					    streamType TEXT,
-					    codec TEXT, 
+                        tile TEXT,
 					    language TEXT, 
-					    channelLayout TEXT, 
-					    profile TEXT, 
-					    aspectRatio TEXT, 
-					    bitRate INTEGER, 
-					    sampleRate INTEGER, 
+                        codec TEXT, 
 					    isDefault BOOLEAN, 
 					    isForced BOOLEAN, 
-					    isExternal BOOLEAN, 
-					    height INTEGER, 
-					    width INTEGER, 
-					    frameRate NUMBER, 
-					    level NUMBER, 
-					    pixelFormat TEXT, 
-					    bitDepth INTEGER, 
+					    isExternal BOOLEAN,
+                        path TEXT,
 					    FOREIGN KEY(episodeID) REFERENCES episodes(id)
 				    );
 
@@ -195,6 +185,52 @@ namespace Kyoo.InternalAPI
                     return Show.FromReader(reader).ExternalIDs;
                 else
                     return null;
+            }
+        }
+
+
+        public (List<Stream> audios, List<Stream> subtitles) GetStreams(long episodeID)
+        {
+            string query = "SELECT * FROM streams WHERE episodeID = $episodeID;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$episodeID", episodeID);
+                SQLiteDataReader reader = cmd.ExecuteReader();
+
+                List<Stream> audios = new List<Stream>();
+                List<Stream> subtitles = new List<Stream>();
+
+                while (reader.Read())
+                {
+                    Stream stream = Stream.FromReader(reader);
+
+                    if (stream.type == StreamType.Audio)
+                        audios.Add(stream);
+                    else if (stream.type == StreamType.Subtitle)
+                        subtitles.Add(stream);
+                }
+
+                return (audios, subtitles);
+            }
+        }
+
+        public Stream GetSubtitle(string showSlug, long seasonNumber, long episodeNumber, string languageTag)
+        {
+            string query = "SELECT streams.* FROM streams JOIN episodes ON streams.episodeID = episodes.id JOIN shows ON episodes.showID = shows.id WHERE shows.showSlug = $showSlug, episodes.seasonNumber = $seasonNumber, episodes.episodeNumber = $episodeNumber, streams.language = $languageTag;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$showSlug", showSlug);
+                cmd.Parameters.AddWithValue("$seasonNumber", seasonNumber);
+                cmd.Parameters.AddWithValue("$episodeNumber", episodeNumber);
+                cmd.Parameters.AddWithValue("$languageTag", languageTag);
+                SQLiteDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                    return Stream.FromReader(reader);
+
+                return null;
             }
         }
 
@@ -339,25 +375,6 @@ namespace Kyoo.InternalAPI
                 else
                     return null;
             }
-        }
-
-        public (VideoStream video, List<Stream> audios, List<Stream> subtitles) GetStreams(long episodeID)
-        {
-            return (new VideoStream(), null, null);
-            //string query = "SELECT genres.id, genres.slug, genres.name FROM genres JOIN genresLinks l ON l.genreID = genres.id WHERE l.showID = $showID;";
-
-            //using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
-            //{
-            //    cmd.Parameters.AddWithValue("$episodeID", episodeID);
-            //    SQLiteDataReader reader = cmd.ExecuteReader();
-
-            //    List<Genre> genres = new List<Genre>();
-
-            //    while (reader.Read())
-            //        genres.Add(Stream.FromReader(reader));
-
-            //    return genres;
-            //}
         }
 
         public List<People> GetPeople(long showID)

@@ -22,5 +22,15 @@ namespace Kyoo.InternalAPI
         {
             return TranscoderAPI.ScanVideo(path);
         }
+
+        public string Stream(string path)
+        {
+            return @"D:\Videos\Anohana\AnoHana S01E01.mp4";
+        }
+
+        public string Transcode(string path)
+        {
+            return @"D:\Videos\Anohana\AnoHana S01E01.mp4";
+        }
     }
 }
