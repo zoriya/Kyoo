@@ -1,15 +1,17 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { WatchItem } from "../../models/watch-item";
 import { ActivatedRoute } from "@angular/router";
 import { DomSanitizer, Title } from "@angular/platform-browser";
 import { Location } from "@angular/common";
 import { MatSliderChange } from "@angular/material/slider";
-import { HtmlAstPath } from "@angular/compiler";
+
+declare var SubtitleManager: any;
 
 @Component({
   selector: 'app-player',
   templateUrl: './player.component.html',
-  styleUrls: ['./player.component.scss']
+  styleUrls: ['./player.component.scss'],
+  encapsulation: ViewEncapsulation.None
 })
 export class PlayerComponent implements OnInit
 {
@@ -17,10 +19,11 @@ export class PlayerComponent implements OnInit
 
   volume: number = 100;
   seeking: boolean = false;
+  videoHider;
 
   hours: number;
-  minutes: number;
-  seconds: number;
+  minutes: number = 0;
+  seconds: number = 0;
 
   maxHours: number;
   maxMinutes: number;
@@ -51,9 +54,7 @@ export class PlayerComponent implements OnInit
         this.initPlayBtn();
       }
 
-      this.maxSeconds = Math.round(this.item.duration % 60);
-      this.maxMinutes = Math.round(this.item.duration / 60 % 60);
-      this.maxHours = Math.round(this.item.duration / 3600);
+      this.setDuration(this.item.duration);
 
       this.title.setTitle(this.item.showTitle + " S" + this.item.seasonNumber + ":E" + this.item.episodeNumber + " - Kyoo");
     });
@@ -91,11 +92,15 @@ export class PlayerComponent implements OnInit
     {
       if (this.player.buffered.length > 0)
         this.buffered.style.width = (this.player.buffered.end(this.player.buffered.length - 1) / this.item.duration * 100) + "%";
+
+      if (this.player.duration != undefined && this.player.duration != Infinity)
+        this.setDuration(this.player.duration);
     };
 
     let progressBar: HTMLElement = document.getElementById("progress-bar") as HTMLElement;
     $(progressBar).click((event) =>
     {
+      console.log("Duration: " + this.player.duration);
       event.preventDefault();
       let time: number = this.getTimeFromSeekbar(progressBar, event.pageX);
       this.player.currentTime = time;
@@ -134,7 +139,33 @@ export class PlayerComponent implements OnInit
         let time: number = this.getTimeFromSeekbar(progressBar, event.pageX);
         this.updateTime(time);
       }
+      else
+      {
+        document.getElementById("hover").classList.remove("idle");
+        document.documentElement.style.cursor = "";
+
+        clearTimeout(this.videoHider);
+
+        this.videoHider = setTimeout(() =>
+        {
+          if (!this.player.paused)
+          {
+            document.getElementById("hover").classList.add("idle");
+            document.documentElement.style.cursor = "none";
+          }
+        }, 2000);
+      }
     });
+
+    //Initialize the timout at the document initialization.
+    this.videoHider = setTimeout(() =>
+    {
+      if (!this.player.paused)
+      {
+        document.getElementById("hover").classList.add("idle");
+        document.documentElement.style.cursor = "none";
+      }
+    }, 2000);
 
     document.addEventListener("fullscreenchange", () =>
     {
@@ -151,11 +182,22 @@ export class PlayerComponent implements OnInit
     });
 
     $('[data-toggle="tooltip"]').tooltip({ trigger: "hover" });
+
+    SubtitleManager.add(this.player, "/api/subtitle/" + this.item.link + "-fre.ass", true);
   }
 
   getTimeFromSeekbar(progressBar: HTMLElement, pageX: number)
   {
     return Math.max(0, Math.min((pageX - progressBar.offsetLeft) / progressBar.clientWidth, 1)) * this.item.duration;
+  }
+
+  setDuration(duration: number)
+  {
+    this.maxSeconds = Math.round(duration % 60);
+    this.maxMinutes = Math.round(duration / 60 % 60);
+    this.maxHours = Math.round(duration / 3600);
+
+    this.item.duration = duration;
   }
 
   updateTime(time: number)
