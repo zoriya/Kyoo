@@ -13,11 +13,6 @@ int Init()
 	return 42;
 }
 
-//Video ScanVideo(std::string path)
-//{
-//
-//}
-
 void ExtractSubtitles(const char* path)
 {
 	AVFormatContext* formatContext = NULL;
@@ -34,12 +29,24 @@ void ExtractSubtitles(const char* path)
 		return;
 	}
 
-	AVDictionaryEntry* metadata = NULL;
-
-	while ((metadata = av_dict_get(formatContext->metadata, "", metadata, AV_DICT_IGNORE_SUFFIX)))
+	for (unsigned int i = 0; i < formatContext->nb_streams; i++)
 	{
-		std::cout << metadata->key << " - " << metadata->value << std::endl;
+		AVStream* stream = formatContext->streams[i];
+		const AVCodecContext* streamContext = stream->codec;
+
+		if (streamContext->codec_type == AVMEDIA_TYPE_SUBTITLE)
+		{
+			const AVCodec* dec = streamContext->codec;
+			std::cout << "Stream #" << i << ", stream type: " << streamContext->codec_type << " codec: " << dec->long_name << std::endl;
+		}
 	}
+
+	//const char* outputPath = "subtitle.ass";
+	//if (avformat_alloc_output_context2(&formatContext, NULL, NULL, outputPath) < 0)
+	//{
+	//	std::cout << "Error: Can't create output file at " << outputPath << std::endl;
+	//	return;
+	//}
 
 	avformat_close_input(&formatContext);
 

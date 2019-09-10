@@ -13,7 +13,7 @@ namespace Kyoo.InternalAPI
 
         public void ExtractSubtitles(string path)
         {
-            Debug.WriteLine("&Transcoder extract subs: " + TranscoderAPI.ExtractSubtitles(path));
+            TranscoderAPI.ExtractSubtitles(path);
         }
 
         public void GetVideo(string path)

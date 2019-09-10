@@ -7,12 +7,12 @@
 
 #include <iostream>
 
-extern "C" API struct Stream
-{
-	std::string title;
-	std::string languageCode;
-	std::string format;
-	bool isDefault;
-	bool isForced;
-	std::string path;
-};
+//extern "C" API struct Stream
+//{
+//	std::string title;
+//	std::string languageCode;
+//	std::string format;
+//	bool isDefault;
+//	bool isForced;
+//	std::string path;
+//};

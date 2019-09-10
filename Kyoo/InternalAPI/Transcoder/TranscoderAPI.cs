@@ -7,9 +7,9 @@ namespace Kyoo.InternalAPI.TranscoderLink
         private const string TranscoderPath = @"C:\Projects\Kyoo\Debug\Kyoo.Transcoder.dll";
 
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-        public extern static string Init();
+        public extern static int Init();
 
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-        public extern static string ExtractSubtitles(string path);
+        public extern static void ExtractSubtitles(string path);
     }
 }
