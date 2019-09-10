@@ -1,7 +1,7 @@
 <div id="root">
   <div class="player">
     <video id="player" poster="backdrop/{{this.item.showSlug}}" autoplay muted (click)="tooglePlayback()">
-      <source src="/api/video/{{this.item.link}}" type="video/webm" />
+      <source src="/api/video/{{this.item.link}}" />
       <source src="/api/video/{{this.item.link}}/stream" type="video/mp4" />
     </video>
   </div>

@@ -8,19 +8,17 @@ namespace Kyoo.InternalAPI
     {
         public Transcoder(IConfiguration config)
         {
-            string transcoderPath = config.GetValue<string>("plugins");
-            Debug.WriteLine("&Transcoder DLL Path: " + transcoderPath);
             Debug.WriteLine("&Api INIT: " + TranscoderAPI.Init());
+        }
+
+        public void ExtractSubtitles(string path)
+        {
+            Debug.WriteLine("&Transcoder extract subs: " + TranscoderAPI.ExtractSubtitles(path));
         }
 
         public void GetVideo(string path)
         {
             Debug.WriteLine("&Getting video...");
-        }
-
-        public dynamic ScanVideo(string path)
-        {
-            return TranscoderAPI.ScanVideo(path);
         }
 
         public string Stream(string path)

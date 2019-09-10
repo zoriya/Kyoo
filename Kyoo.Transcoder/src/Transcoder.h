@@ -11,4 +11,4 @@
 
 extern "C" API int Init();
 
-extern "C" API Video ScanVideo(std::string path);
+extern "C" API void ExtractSubtitles(const char* path);
