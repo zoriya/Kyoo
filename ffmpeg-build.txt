@@ -1,0 +1,16 @@
+Make sure that the ffmpeg-src directory contains a blank snapshot of the ffmpeg source code.
+Open the Visual Studio Command Prompt with admin privilege (using the windows start menu).
+Make sure that msys64 is installed and nasm is inside the path
+Run: "C:\Program Files\Workspace\msys64\msys2_shell.cmd"  -mingw64 -use-full-path
+Verify that items are link inside the new cmd windows (run which cl and run which link)
+Then cd to the ffmpeg source file (cd /c/Projects/Kyoo/ffmpeg-src)
+
+Then configure the project: 
+./configure --toolchain=msvc --disable-shared
+Or, if you want x64 builds use:
+./configure --toolchain=msvc --target-os=win64 --arch=x86_64 --disable-shared
+If it doesn't work, try this command: I think that the last part are useless.
+./configure --toolchain=msvc --disable-shared --enable-static --extra-libs=-static --extra-cflags=--static
+Then run "make".
+Then run "make install"
+The build can be found in the usr/local/include and usr/local/lib subfolders of your msys64 folder.

@@ -1,4 +1,5 @@
 ﻿using Kyoo.InternalAPI;
+using Kyoo.Models;
 using Kyoo.Models.Watch;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,10 +10,12 @@ namespace Kyoo.Controllers
     public class SubtitleController : ControllerBase
     {
         private readonly ILibraryManager libraryManager;
+        private readonly ITranscoder transcoder;
 
-        public SubtitleController(ILibraryManager libraryManager)
+        public SubtitleController(ILibraryManager libraryManager, ITranscoder transcoder)
         {
             this.libraryManager = libraryManager;
+            this.transcoder = transcoder;
         }
 
         [HttpGet("{showSlug}-s{seasonNumber}e{episodeNumber}-{languageTag}.{format?}")]
@@ -25,6 +28,15 @@ namespace Kyoo.Controllers
 
             //Should use appropriate mime type here
             return PhysicalFile(subtitle.Path, "text/x-ssa");
+        }
+
+        [HttpGet("extract/{showSlug}-s{seasonNumber}e{episodeNumber}")]
+        public IActionResult ExtractSubtitle(string showSlug, long seasonNumber, long episodeNumber)
+        {
+            Episode episode = libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
+            transcoder.ExtractSubtitles(episode.Path);
+
+            return null;
         }
     }
 }

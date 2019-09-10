@@ -217,7 +217,7 @@ namespace Kyoo.InternalAPI
 
         public Stream GetSubtitle(string showSlug, long seasonNumber, long episodeNumber, string languageTag)
         {
-            string query = "SELECT streams.* FROM streams JOIN episodes ON streams.episodeID = episodes.id JOIN shows ON episodes.showID = shows.id WHERE shows.showSlug = $showSlug, episodes.seasonNumber = $seasonNumber, episodes.episodeNumber = $episodeNumber, streams.language = $languageTag;";
+            string query = "SELECT streams.* FROM streams JOIN episodes ON streams.episodeID = episodes.id JOIN shows ON episodes.showID = shows.id WHERE shows.showSlug = $showSlug AND episodes.seasonNumber = $seasonNumber AND episodes.episodeNumber = $episodeNumber AND streams.language = $languageTag;";
 
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {

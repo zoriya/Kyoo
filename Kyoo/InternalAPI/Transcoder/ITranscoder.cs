@@ -8,8 +8,7 @@ namespace Kyoo.InternalAPI
         //Should transcode to a mp4 container with a h264 video format and a AAC audio format, no subtitles.
         string Transcode(string path);
 
-        void GetVideo(string Path);
-
-        dynamic ScanVideo(string Path);
+        //Extract all subtitles of a video and save them in the subtitles sub-folder.
+        void ExtractSubtitles(string path);
     }
 }
