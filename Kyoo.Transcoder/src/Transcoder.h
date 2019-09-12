@@ -11,4 +11,4 @@
 
 extern "C" API int Init();
 
-extern "C" API void ExtractSubtitles(const char* path);
+extern "C" API void ExtractSubtitles(const char* path, const char* outPath);
