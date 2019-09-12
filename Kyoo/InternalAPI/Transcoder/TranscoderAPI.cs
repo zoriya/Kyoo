@@ -10,6 +10,6 @@ namespace Kyoo.InternalAPI.TranscoderLink
         public extern static int Init();
 
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-        public extern static void ExtractSubtitles(string path);
+        public extern static void ExtractSubtitles(string path, string outPath);
     }
 }

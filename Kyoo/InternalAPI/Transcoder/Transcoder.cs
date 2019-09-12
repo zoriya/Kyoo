@@ -1,6 +1,7 @@
 using Kyoo.InternalAPI.TranscoderLink;
 using Microsoft.Extensions.Configuration;
 using System.Diagnostics;
+using System.IO;
 
 namespace Kyoo.InternalAPI
 {
@@ -13,7 +14,9 @@ namespace Kyoo.InternalAPI
 
         public void ExtractSubtitles(string path)
         {
-            TranscoderAPI.ExtractSubtitles(path);
+            string output = Path.GetDirectoryName(path);
+            output = Path.Combine(output, "fre\\output.ass");
+            TranscoderAPI.ExtractSubtitles(path, output);
         }
 
         public void GetVideo(string path)

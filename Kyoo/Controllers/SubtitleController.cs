@@ -31,12 +31,12 @@ namespace Kyoo.Controllers
         }
 
         [HttpGet("extract/{showSlug}-s{seasonNumber}e{episodeNumber}")]
-        public IActionResult ExtractSubtitle(string showSlug, long seasonNumber, long episodeNumber)
+        public string ExtractSubtitle(string showSlug, long seasonNumber, long episodeNumber)
         {
             Episode episode = libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
             transcoder.ExtractSubtitles(episode.Path);
 
-            return null;
+            return "Processing...";
         }
     }
 }
