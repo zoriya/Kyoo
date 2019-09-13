@@ -16,8 +16,6 @@ constexpr enum AVRounding operator |(const enum AVRounding a, const enum AVRound
 	return (enum AVRounding)(uint32_t(a) | uint32_t(b));
 }
 
-
-
 int Init()
 {
 	return 42;
@@ -42,7 +40,7 @@ void ExtractSubtitles(const char* path, const char* outPath)
 	av_dump_format(inputContext, 0, path, false);
 
 	const unsigned int outputCount = inputContext->nb_streams;
-	AVFormatContext** outputList = new AVFormatContext*[outputCount]();
+	AVFormatContext* outputList[5];// = new AVFormatContext * [outputCount];
 
 	//Initialize output and set headers.
 	for (unsigned int i = 0; i < inputContext->nb_streams; i++)
@@ -51,7 +49,7 @@ void ExtractSubtitles(const char* path, const char* outPath)
 		const AVCodecParameters* inputCodecpar = inputStream->codecpar;
 
 		if (inputCodecpar->codec_type != AVMEDIA_TYPE_SUBTITLE)
-			outputList[i] = nullptr;
+			outputList[i] = NULL;
 		else
 		{
 			//Get metadata for file name
@@ -198,6 +196,9 @@ void ExtractSubtitles(const char* path, const char* outPath)
 	{
 		AVFormatContext* outputContext = outputList[i];
 
+		if (outputContext == NULL)
+			continue;
+
 		av_write_trailer(outputContext);
 
 		if (outputContext && !(outputContext->flags & AVFMT_NOFILE))
@@ -205,5 +206,5 @@ void ExtractSubtitles(const char* path, const char* outPath)
 		avformat_free_context(outputContext);
 	}
 
-	delete[] outputList;
+	//delete[] outputList;
 }
