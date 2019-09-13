@@ -40,7 +40,7 @@ void ExtractSubtitles(const char* path, const char* outPath)
 	av_dump_format(inputContext, 0, path, false);
 
 	const unsigned int outputCount = inputContext->nb_streams;
-	AVFormatContext* outputList[5];// = new AVFormatContext * [outputCount];
+	AVFormatContext** outputList = new AVFormatContext*[outputCount];
 
 	//Initialize output and set headers.
 	for (unsigned int i = 0; i < inputContext->nb_streams; i++)
@@ -80,7 +80,7 @@ void ExtractSubtitles(const char* path, const char* outPath)
 				continue;
 			}
 
-			//outputContext->metadata = inputContext->metadata; //ITS A FUCKING POINTER
+			av_dict_copy(&outputContext->metadata, inputContext->metadata, NULL);
 
 			AVStream* outputStream = avformat_new_stream(outputContext, NULL);
 			if (outputStream == NULL)
@@ -96,7 +96,30 @@ void ExtractSubtitles(const char* path, const char* outPath)
 			}
 			outputStream->codecpar->codec_tag = 0;
 
+			avformat_transfer_internal_stream_timing_info(outputContext->oformat, outputStream, inputStream, AVTimebaseSource::AVFMT_TBCF_AUTO);
+			outputStream->time_base = av_add_q(av_stream_get_codec_timebase(outputStream), AVRational { 0, 1 });
 			outputStream->duration = av_rescale_q(inputStream->duration, inputStream->time_base, outputStream->time_base);
+			outputStream->disposition = inputStream->disposition;
+
+			av_dict_copy(&outputStream->metadata, inputStream->metadata, NULL);
+
+			//if (inputStream->nb_side_data)
+			//{
+			//	for (int i = 0; i < inputStream->nb_side_data; i++)
+			//	{
+			//		std::cout << "Copying side packet #" << i << std::endl;
+
+			//		AVPacketSideData* sidePkt = &inputStream->side_data[i];
+			//		uint8_t* newPkt = av_stream_new_side_data(outputStream, sidePkt->type, sidePkt->size);
+			//		if (newPkt == NULL)
+			//		{
+			//			std::cout << "Error copying side package." << std::endl;
+			//			//Should handle return here
+			//			return;
+			//		}
+			//		memcpy(newPkt, sidePkt->data, sidePkt->size);
+			//	}
+			//}
 
 			av_dump_format(outputContext, 0, output, true);
 
@@ -117,32 +140,6 @@ void ExtractSubtitles(const char* path, const char* outPath)
 				goto end;
 			}
 
-			#pragma region global metadata try
-			//avformat_transfer_internal_stream_timing_info(outputContext->oformat, outputStream, inputStream, AVTimebaseSource::AVFMT_TBCF_AUTO);
-
-			//outputStream->time_base = av_add_q(av_stream_get_codec_timebase(outputStream), AVRational{ 0, 1 });
-
-			//outputStream->disposition = inputStream->disposition;
-
-			//if (inputStream->nb_side_data)
-			//{
-			//	for (int i = 0; i < inputStream->nb_side_data; i++)
-			//	{
-			//		std::cout << "Copying side packet #" << i << std::endl;
-
-			//		AVPacketSideData* sidePkt = &inputStream->side_data[i];
-			//		uint8_t* newPkt = av_stream_new_side_data(outputStream, sidePkt->type, sidePkt->size);
-			//		if (newPkt == NULL)
-			//		{
-			//			std::cout << "Error copying side package." << std::endl;
-			//			//Should handle return here
-			//			return;
-			//		}
-			//		memcpy(newPkt, sidePkt->data, sidePkt->size);
-			//	}
-			//}
-#pragma endregion
-
 			outputList[i] = outputContext;
 
 			if (false)
@@ -162,8 +159,8 @@ void ExtractSubtitles(const char* path, const char* outPath)
 	AVPacket pkt;
 	while (av_read_frame(inputContext, &pkt) == 0)
 	{
-		//if (pkt.stream_index >= outputCount)
-		//	continue;
+		if (pkt.stream_index >= outputCount)
+			continue;
 
 		AVFormatContext* outputContext = outputList[pkt.stream_index];
 		if(outputContext == nullptr)
@@ -206,5 +203,5 @@ void ExtractSubtitles(const char* path, const char* outPath)
 		avformat_free_context(outputContext);
 	}
 
-	//delete[] outputList;
+	delete[] outputList;
 }
