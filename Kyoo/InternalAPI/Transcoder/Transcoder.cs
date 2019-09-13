@@ -14,8 +14,8 @@ namespace Kyoo.InternalAPI
 
         public void ExtractSubtitles(string path)
         {
-            string output = Path.GetDirectoryName(path);
-            output = Path.Combine(output, "fre\\output.ass");
+            string output = Path.Combine(Path.GetDirectoryName(path), "Subtitles");
+            Directory.CreateDirectory(output);
             TranscoderAPI.ExtractSubtitles(path, output);
         }
 
