@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Stream = Kyoo.Models.Watch.Stream;
 
 namespace Kyoo.InternalAPI
 {
@@ -16,12 +17,14 @@ namespace Kyoo.InternalAPI
         private readonly IConfiguration config;
         private readonly ILibraryManager libraryManager;
         private readonly IMetadataProvider metadataProvider;
+        private readonly ITranscoder transcoder;
 
-        public Crawler(IConfiguration configuration, ILibraryManager libraryManager, IMetadataProvider metadataProvider)
+        public Crawler(IConfiguration configuration, ILibraryManager libraryManager, IMetadataProvider metadataProvider, ITranscoder transcoder)
         {
             config = configuration;
             this.libraryManager = libraryManager;
             this.metadataProvider = metadataProvider;
+            this.transcoder = transcoder;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -140,7 +143,10 @@ namespace Kyoo.InternalAPI
                 Episode episode = await metadataProvider.GetEpisode(showProviderIDs, seasonNumber, episodeNumber, path);
                 episode.ShowID = showID;
                 episode.SeasonID = seasonID;
-                libraryManager.RegisterEpisode(episode);
+                long episodeID = libraryManager.RegisterEpisode(episode);
+
+                Stream[] streams = transcoder.ExtractSubtitles(episode.Path);
+                //libraryManager.RegisterStreams(episodeID, streams);
             }
         }
 

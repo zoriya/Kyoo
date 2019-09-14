@@ -7,12 +7,15 @@
 
 #include <iostream>
 
-//extern "C" API struct Stream
-//{
-//	std::string title;
-//	std::string languageCode;
-//	std::string format;
-//	bool isDefault;
-//	bool isForced;
-//	std::string path;
-//};
+extern "C" struct Stream
+{
+	std::string title;
+	std::string language;
+	std::string format;
+	bool isDefault;
+	bool isForced;
+	std::string path;
+
+	Stream(std::string title, std::string languageCode, std::string format, bool isDefault, bool isForced, std::string path)
+	: title(title), language(languageCode), format(format), isDefault(isDefault), isForced(isForced), path(path) { }
+};

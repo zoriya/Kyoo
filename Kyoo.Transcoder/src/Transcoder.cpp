@@ -21,24 +21,25 @@ int Init()
 	return 42;
 }
 
-void ExtractSubtitles(const char* path, const char* outPath)
+int ExtractSubtitles(const char* path, const char* outPath, Stream* streams)
 {
 	AVFormatContext* inputContext = NULL;
 
 	if (avformat_open_input(&inputContext, path, NULL, NULL))
 	{
 		std::cout << "Error: Can't open the file at " << path << std::endl;
-		return;
+		return 0;
 	}
 
 	if (avformat_find_stream_info(inputContext, NULL) < 0)
 	{
 		std::cout << "Error: Could't find streams informations for the file at " << path << std::endl;
-		return;
+		return 0;
 	}
 
 	av_dump_format(inputContext, 0, path, false);
 
+	std::vector<Stream> subtitleStreams;
 	const unsigned int outputCount = inputContext->nb_streams;
 	AVFormatContext** outputList = new AVFormatContext*[outputCount];
 
@@ -53,13 +54,20 @@ void ExtractSubtitles(const char* path, const char* outPath)
 		else
 		{
 			//Get metadata for file name
-			const char* language = av_dict_get(inputStream->metadata, "language", NULL, 0)->value;
+			Stream stream("title", //title
+				av_dict_get(inputStream->metadata, "language", NULL, 0)->value, //language
+				"format", //format
+				false, //isDefault
+				false, //isForced
+				"path"); //path
 
-			std::cout << "Stream #" << i << "(" << language << "), stream type: " << inputCodecpar->codec_type << " codec: " << inputCodecpar->codec_tag << std::endl;
+			subtitleStreams.push_back(stream);
+
+			std::cout << "Stream #" << i << "(" << stream.language << "), stream type: " << inputCodecpar->codec_type << " codec: " << inputCodecpar->codec_tag << std::endl;
 
 			//Create output folder
 			std::stringstream outStream;
-			outStream << outPath << (char)std::filesystem::path::preferred_separator << language;
+			outStream << outPath << (char)std::filesystem::path::preferred_separator << stream.language;
 			std::filesystem::create_directory(outStream.str());
 			
 			//Get file name
@@ -68,7 +76,7 @@ void ExtractSubtitles(const char* path, const char* outPath)
 			fileName = fileName.substr(lastSeparator, fileName.find_last_of('.') - lastSeparator);
 
 			//Construct output file name
-			outStream << fileName << "." << language;
+			outStream << fileName << "." << stream.language;
 			outStream << ".ass";
 			std::string outStr = outStream.str();
 			const char* output = outStr.c_str();
@@ -204,4 +212,8 @@ void ExtractSubtitles(const char* path, const char* outPath)
 	}
 
 	delete[] outputList;
+
+	//std::copy()
+	//streams = subtitleStreams.data(); //SHOULDN'T COPY LIKE THAT, WE OVERRIDE THE POINTER HERE.
+	return subtitleStreams.size();
 }
