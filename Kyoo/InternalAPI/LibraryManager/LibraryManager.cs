@@ -205,10 +205,10 @@ namespace Kyoo.InternalAPI
                 {
                     Stream stream = Stream.FromReader(reader);
 
-                    if (stream.type == StreamType.Audio)
-                        audios.Add(stream);
-                    else if (stream.type == StreamType.Subtitle)
-                        subtitles.Add(stream);
+                    //if (stream.type == StreamType.Audio)
+                    //    audios.Add(stream);
+                    //else if (stream.type == StreamType.Subtitle)
+                    //    subtitles.Add(stream);
                 }
 
                 return (audios, subtitles);
