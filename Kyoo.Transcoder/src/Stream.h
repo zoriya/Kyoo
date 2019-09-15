@@ -9,13 +9,13 @@
 
 extern "C" struct Stream
 {
-	std::string title;
-	std::string language;
-	std::string format;
+	const char* title;
+	const char* language;
+	const char* format;
 	bool isDefault;
 	bool isForced;
-	std::string path;
+	const char* path;
 
-	Stream(std::string title, std::string languageCode, std::string format, bool isDefault, bool isForced, std::string path)
+	Stream(const char* title, const char* languageCode, const char* format, bool isDefault, bool isForced, const char* path)
 	: title(title), language(languageCode), format(format), isDefault(isDefault), isForced(isForced), path(path) { }
 };

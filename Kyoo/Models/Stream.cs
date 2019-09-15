@@ -8,14 +8,14 @@ namespace Kyoo.Models.Watch
         Audio, Subtitle, Unknow
     }
 
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
     public class Stream
     {
         public string Title;
         public string Language;
         public string Format;
-        public bool IsDefault;
-        public bool IsForced;
+        [MarshalAs(UnmanagedType.I1)] public bool IsDefault;
+        [MarshalAs(UnmanagedType.I1)] public bool IsForced;
         [JsonIgnore] public string Path;
 
         //[JsonIgnore] public StreamType type;

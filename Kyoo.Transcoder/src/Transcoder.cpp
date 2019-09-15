@@ -21,7 +21,7 @@ int Init()
 	return 42;
 }
 
-int ExtractSubtitles(const char* path, const char* outPath, Stream* streams)
+Stream* ExtractSubtitles(const char* path, const char* outPath, int* streamCount)
 {
 	AVFormatContext* inputContext = NULL;
 
@@ -39,7 +39,7 @@ int ExtractSubtitles(const char* path, const char* outPath, Stream* streams)
 
 	av_dump_format(inputContext, 0, path, false);
 
-	std::vector<Stream> subtitleStreams;
+	std::vector<Stream>* subtitleStreams = new std::vector<Stream>();
 	const unsigned int outputCount = inputContext->nb_streams;
 	AVFormatContext** outputList = new AVFormatContext*[outputCount];
 
@@ -61,7 +61,7 @@ int ExtractSubtitles(const char* path, const char* outPath, Stream* streams)
 				false, //isForced
 				"path"); //path
 
-			subtitleStreams.push_back(stream);
+			subtitleStreams->push_back(stream);
 
 			std::cout << "Stream #" << i << "(" << stream.language << "), stream type: " << inputCodecpar->codec_type << " codec: " << inputCodecpar->codec_tag << std::endl;
 
@@ -213,7 +213,6 @@ int ExtractSubtitles(const char* path, const char* outPath, Stream* streams)
 
 	delete[] outputList;
 
-	//std::copy()
-	//streams = subtitleStreams.data(); //SHOULDN'T COPY LIKE THAT, WE OVERRIDE THE POINTER HERE.
-	return subtitleStreams.size();
+	*streamCount = subtitleStreams->size();
+	return subtitleStreams->data();
 }
