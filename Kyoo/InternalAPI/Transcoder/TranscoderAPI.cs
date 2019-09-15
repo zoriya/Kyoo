@@ -12,13 +12,13 @@ namespace Kyoo.InternalAPI.TranscoderLink
         public extern static int Init();
 
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-        private extern static int ExtractSubtitles(string path, string outPath, out IntPtr streams);
+        private extern static IntPtr ExtractSubtitles(string path, string outPath, out int streams);
 
         public static void ExtractSubtitles(string path, string outPath, out Stream[] streams)
         {
             int size = Marshal.SizeOf<Stream>();
 
-            int length = ExtractSubtitles(path, outPath, out IntPtr streamsPtr); //The streamsPtr is always nullptr
+            IntPtr streamsPtr = ExtractSubtitles(path, outPath, out int length);
             if (length > 0)
             {
                 streams = new Stream[length];
