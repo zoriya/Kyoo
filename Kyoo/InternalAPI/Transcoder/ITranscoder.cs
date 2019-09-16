@@ -1,3 +1,4 @@
+using Kyoo.Models;
 using Kyoo.Models.Watch;
 
 namespace Kyoo.InternalAPI
@@ -11,6 +12,6 @@ namespace Kyoo.InternalAPI
         string Transcode(string path);
 
         //Extract all subtitles of a video and save them in the subtitles sub-folder.
-        Stream[] ExtractSubtitles(string path);
+        Track[] ExtractSubtitles(string path);
     }
 }

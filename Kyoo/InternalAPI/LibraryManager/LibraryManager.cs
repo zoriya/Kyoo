@@ -70,11 +70,11 @@ namespace Kyoo.InternalAPI
 					    FOREIGN KEY(showID) REFERENCES shows(id), 
 					    FOREIGN KEY(seasonID) REFERENCES seasons(id)
 				    );
-				    CREATE TABLE streams(
+				    CREATE TABLE tracks(
 					    id INTEGER PRIMARY KEY UNIQUE, 
 					    episodeID INTEGER, 
 					    streamType TEXT,
-                        tile TEXT,
+                        title TEXT,
 					    language TEXT, 
                         codec TEXT, 
 					    isDefault BOOLEAN, 
@@ -189,35 +189,35 @@ namespace Kyoo.InternalAPI
         }
 
 
-        public (List<Stream> audios, List<Stream> subtitles) GetStreams(long episodeID)
+        public (List<Track> audios, List<Track> subtitles) GetStreams(long episodeID)
         {
-            string query = "SELECT * FROM streams WHERE episodeID = $episodeID;";
+            string query = "SELECT * FROM tracks WHERE episodeID = $episodeID;";
 
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
                 cmd.Parameters.AddWithValue("$episodeID", episodeID);
                 SQLiteDataReader reader = cmd.ExecuteReader();
 
-                List<Stream> audios = new List<Stream>();
-                List<Stream> subtitles = new List<Stream>();
+                List<Track> audios = new List<Track>();
+                List<Track> subtitles = new List<Track>();
 
                 while (reader.Read())
                 {
-                    Stream stream = Stream.FromReader(reader);
+                    Track stream = Track.FromReader(reader);
 
-                    //if (stream.type == StreamType.Audio)
-                    //    audios.Add(stream);
-                    //else if (stream.type == StreamType.Subtitle)
-                    //    subtitles.Add(stream);
+                    if (stream.type == StreamType.Audio)
+                        audios.Add(stream);
+                    else if (stream.type == StreamType.Subtitle)
+                        subtitles.Add(stream);
                 }
 
                 return (audios, subtitles);
             }
         }
 
-        public Stream GetSubtitle(string showSlug, long seasonNumber, long episodeNumber, string languageTag)
+        public Track GetSubtitle(string showSlug, long seasonNumber, long episodeNumber, string languageTag)
         {
-            string query = "SELECT streams.* FROM streams JOIN episodes ON streams.episodeID = episodes.id JOIN shows ON episodes.showID = shows.id WHERE shows.showSlug = $showSlug AND episodes.seasonNumber = $seasonNumber AND episodes.episodeNumber = $episodeNumber AND streams.language = $languageTag;";
+            string query = "SELECT tracks.* FROM tracks JOIN episodes ON tracks.episodeID = episodes.id JOIN shows ON episodes.showID = shows.id WHERE shows.showSlug = $showSlug AND episodes.seasonNumber = $seasonNumber AND episodes.episodeNumber = $episodeNumber AND tracks.language = $languageTag;";
 
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
@@ -228,7 +228,7 @@ namespace Kyoo.InternalAPI
                 SQLiteDataReader reader = cmd.ExecuteReader();
 
                 if (reader.Read())
-                    return Stream.FromReader(reader);
+                    return Track.FromReader(reader);
 
                 return null;
             }
@@ -682,6 +682,24 @@ namespace Kyoo.InternalAPI
 
                 cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
                 return (long)cmd.ExecuteScalar();
+            }
+        }
+
+        public void RegisterTrack(Track track)
+        {
+            string query = "INSERT INTO tracks (episodeID, streamType, title, language, codec, isDefault, isForced, isExternal, path) VALUES($episodeID, $streamType, $title, $language, $codec, $isDefault, $isForced, $isExternal, $path);";
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$episodeID", track.episodeID);
+                cmd.Parameters.AddWithValue("$streamType", track.type);
+                cmd.Parameters.AddWithValue("$title", track.Title);
+                cmd.Parameters.AddWithValue("$language", track.Language);
+                cmd.Parameters.AddWithValue("$codec", track.Codec);
+                cmd.Parameters.AddWithValue("$isDefault", track.IsDefault);
+                cmd.Parameters.AddWithValue("$isForced", track.IsForced);
+                cmd.Parameters.AddWithValue("$isExternal", track.IsDefault);
+                cmd.Parameters.AddWithValue("$path", track.Path);
+                cmd.ExecuteNonQuery();
             }
         }
 

@@ -56,14 +56,14 @@ Stream* ExtractSubtitles(const char* path, const char* outPath, int* streamCount
 			//Get metadata for file name
 			Stream stream("title", //title
 				av_dict_get(inputStream->metadata, "language", NULL, 0)->value, //language
-				"format", //format
-				false, //isDefault
-				false, //isForced
-				"path"); //path
+				avcodec_get_name(inputCodecpar->codec_id), //format
+				inputStream->disposition & AV_DISPOSITION_DEFAULT, //isDefault
+				inputStream->disposition & AV_DISPOSITION_FORCED, //isForced
+				NULL); //The path is assigned afterward.
 
 			subtitleStreams->push_back(stream);
 
-			std::cout << "Stream #" << i << "(" << stream.language << "), stream type: " << inputCodecpar->codec_type << " codec: " << inputCodecpar->codec_tag << std::endl;
+			std::cout << "Stream #" << i << "(" << stream.language << "), stream type: " << inputCodecpar->codec_type << " codec: " << stream.codec << std::endl;
 
 			//Create output folder
 			std::stringstream outStream;
@@ -77,12 +77,23 @@ Stream* ExtractSubtitles(const char* path, const char* outPath, int* streamCount
 
 			//Construct output file name
 			outStream << fileName << "." << stream.language;
-			outStream << ".ass";
+
+			if (stream.isDefault)
+				outStream << ".default";
+			if (stream.isForced)
+				outStream << ".forced";
+
+			if (stream.codec == "subrip")
+				outStream << ".srt";
+			else if(stream.codec == "ass")
+				outStream << ".ass";
+
+
 			std::string outStr = outStream.str();
-			const char* output = outStr.c_str();
+			stream.path = outStr.c_str();
 
 			AVFormatContext* outputContext = NULL;
-			if (avformat_alloc_output_context2(&outputContext, NULL, NULL, output) < 0)
+			if (avformat_alloc_output_context2(&outputContext, NULL, NULL, stream.path) < 0)
 			{
 				std::cout << "Error: Couldn't create an output file." << std::endl;
 				continue;
@@ -129,13 +140,13 @@ Stream* ExtractSubtitles(const char* path, const char* outPath, int* streamCount
 			//	}
 			//}
 
-			av_dump_format(outputContext, 0, output, true);
+			av_dump_format(outputContext, 0, stream.path, true);
 
 			if (!(outputContext->flags & AVFMT_NOFILE))
 			{
-				if (avio_open(&outputContext->pb, output, AVIO_FLAG_WRITE) < 0)
+				if (avio_open(&outputContext->pb, stream.path, AVIO_FLAG_WRITE) < 0)
 				{
-					std::cout << "Error: Couldn't open file at " << output << std::endl;
+					std::cout << "Error: Couldn't open file at " << stream.path << std::endl;
 					goto end;
 				}
 			}
@@ -144,7 +155,7 @@ Stream* ExtractSubtitles(const char* path, const char* outPath, int* streamCount
 
 			if (avformat_write_header(outputContext, NULL) < 0)
 			{
-				std::cout << "Error: Couldn't write headers to file at " << output << std::endl;
+				std::cout << "Error: Couldn't write headers to file at " << stream.path << std::endl;
 				goto end;
 			}
 

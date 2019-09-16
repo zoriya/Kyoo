@@ -1,8 +1,8 @@
 using Kyoo.InternalAPI.TranscoderLink;
+using Kyoo.Models;
 using Microsoft.Extensions.Configuration;
 using System.Diagnostics;
 using System.IO;
-using Stream = Kyoo.Models.Watch.Stream;
 
 namespace Kyoo.InternalAPI
 {
@@ -13,13 +13,13 @@ namespace Kyoo.InternalAPI
             Debug.WriteLine("&Api INIT: " + TranscoderAPI.Init());
         }
 
-        public Stream[] ExtractSubtitles(string path)
+        public Track[] ExtractSubtitles(string path)
         {
             string output = Path.Combine(Path.GetDirectoryName(path), "Subtitles");
             Directory.CreateDirectory(output);
-            TranscoderAPI.ExtractSubtitles(path, output, out Stream[] streams);
+            TranscoderAPI.ExtractSubtitles(path, output, out Track[] tracks);
 
-            return streams;
+            return tracks;
         }
 
         public void GetVideo(string path)

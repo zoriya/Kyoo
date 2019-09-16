@@ -11,11 +11,11 @@ extern "C" struct Stream
 {
 	const char* title;
 	const char* language;
-	const char* format;
+	const char* codec;
 	bool isDefault;
 	bool isForced;
 	const char* path;
 
-	Stream(const char* title, const char* languageCode, const char* format, bool isDefault, bool isForced, const char* path)
-	: title(title), language(languageCode), format(format), isDefault(isDefault), isForced(isForced), path(path) { }
+	Stream(const char* title, const char* languageCode, const char* codec, bool isDefault, bool isForced, const char* path)
+	: title(title), language(languageCode), codec(codec), isDefault(isDefault), isForced(isForced), path(path) { }
 };

@@ -21,7 +21,7 @@ namespace Kyoo.Controllers
         [HttpGet("{showSlug}-s{seasonNumber}e{episodeNumber}-{languageTag}.{format?}")]
         public IActionResult GetSubtitle(string showSlug, long seasonNumber, long episodeNumber, string languageTag, string format)
         {
-            Stream subtitle = libraryManager.GetSubtitle(showSlug, seasonNumber, episodeNumber, languageTag);
+            Track subtitle = libraryManager.GetSubtitle(showSlug, seasonNumber, episodeNumber, languageTag);
 
             if (subtitle == null)
                 return NotFound();

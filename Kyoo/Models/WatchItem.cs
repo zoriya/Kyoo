@@ -21,8 +21,8 @@ namespace Kyoo.Models
         public string previousEpisode;
         public Episode nextEpisode;
 
-        public IEnumerable<Stream> audios;
-        public IEnumerable<Stream> subtitles;
+        public IEnumerable<Track> audios;
+        public IEnumerable<Track> subtitles;
 
         public WatchItem() { }
 
@@ -40,7 +40,7 @@ namespace Kyoo.Models
             Link = ShowSlug + "-s" + seasonNumber + "e" + episodeNumber;
         }
 
-        public WatchItem(long episodeID, string showTitle, string showSlug, long seasonNumber, long episodeNumber, string title, DateTime? releaseDate, string path, Stream[] audios, Stream[] subtitles) : this(episodeID, showTitle, showSlug, seasonNumber, episodeNumber, title, releaseDate, path)
+        public WatchItem(long episodeID, string showTitle, string showSlug, long seasonNumber, long episodeNumber, string title, DateTime? releaseDate, string path, Track[] audios, Track[] subtitles) : this(episodeID, showTitle, showSlug, seasonNumber, episodeNumber, title, releaseDate, path)
         {
             this.audios = audios;
             this.subtitles = subtitles;
@@ -60,7 +60,7 @@ namespace Kyoo.Models
 
         public WatchItem SetStreams(ILibraryManager libraryManager)
         {
-            (IEnumerable<Stream> audios, IEnumerable<Stream> subtitles) streams = libraryManager.GetStreams(episodeID);
+            (IEnumerable<Track> audios, IEnumerable<Track> subtitles) streams = libraryManager.GetStreams(episodeID);
             audios = streams.audios;
             subtitles = streams.subtitles;
             return this;
