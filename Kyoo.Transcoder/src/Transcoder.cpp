@@ -54,22 +54,18 @@ Stream* ExtractSubtitles(const char* path, const char* outPath, int* streamCount
 		else
 		{
 			//Get metadata for file name
-			Stream stream("title", //title
+			Stream stream(NULL, //title
 				av_dict_get(inputStream->metadata, "language", NULL, 0)->value, //language
 				avcodec_get_name(inputCodecpar->codec_id), //format
 				inputStream->disposition & AV_DISPOSITION_DEFAULT, //isDefault
 				inputStream->disposition & AV_DISPOSITION_FORCED, //isForced
-				NULL); //The path is assigned afterward.
+				NULL); //Path builder references 
 
-			subtitleStreams->push_back(stream);
-
-			std::cout << "Stream #" << i << "(" << stream.language << "), stream type: " << inputCodecpar->codec_type << " codec: " << stream.codec << std::endl;
-
-			//Create output folder
-			std::stringstream outStream;
+			//Create the language subfolder
+			std::stringstream outStream /*= new std::stringstream()*/;
 			outStream << outPath << (char)std::filesystem::path::preferred_separator << stream.language;
 			std::filesystem::create_directory(outStream.str());
-			
+
 			//Get file name
 			std::string fileName(path);
 			size_t lastSeparator = fileName.find_last_of((char)std::filesystem::path::preferred_separator);
@@ -83,14 +79,16 @@ Stream* ExtractSubtitles(const char* path, const char* outPath, int* streamCount
 			if (stream.isForced)
 				outStream << ".forced";
 
-			if (stream.codec == "subrip")
+			if (strcmp(stream.codec, "subrip") == 0)
 				outStream << ".srt";
-			else if(stream.codec == "ass")
+			else if (strcmp(stream.codec, "ass") == 0)
 				outStream << ".ass";
 
 
-			std::string outStr = outStream.str();
-			stream.path = outStr.c_str();
+			stream.path = _strdup(outStream.str().c_str());
+
+			subtitleStreams->push_back(stream);
+			std::cout << "Stream #" << i << "(" << stream.language << "), stream type: " << inputCodecpar->codec_type << " codec: " << stream.codec << std::endl;			
 
 			AVFormatContext* outputContext = NULL;
 			if (avformat_alloc_output_context2(&outputContext, NULL, NULL, stream.path) < 0)
