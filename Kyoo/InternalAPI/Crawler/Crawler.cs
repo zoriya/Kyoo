@@ -8,7 +8,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Stream = Kyoo.Models.Watch.Stream;
 
 namespace Kyoo.InternalAPI
 {
@@ -145,8 +144,15 @@ namespace Kyoo.InternalAPI
                 episode.SeasonID = seasonID;
                 long episodeID = libraryManager.RegisterEpisode(episode);
 
-                Stream[] streams = transcoder.ExtractSubtitles(episode.Path);
-                //libraryManager.RegisterStreams(episodeID, streams);
+                if (episode.Path.EndsWith(".mkv"))
+                {
+                    Track[] tracks = transcoder.ExtractSubtitles(episode.Path);
+                    foreach (Track track in tracks)
+                    {
+                        track.episodeID = episodeID;
+                        libraryManager.RegisterTrack(track);
+                    }
+                }
             }
         }
 
