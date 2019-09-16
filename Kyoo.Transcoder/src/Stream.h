@@ -6,6 +6,7 @@
 #endif
 
 #include <iostream>
+#include <sstream>
 
 extern "C" struct Stream
 {
@@ -14,8 +15,8 @@ extern "C" struct Stream
 	const char* codec;
 	bool isDefault;
 	bool isForced;
-	const char* path;
+	char* path;
 
-	Stream(const char* title, const char* languageCode, const char* codec, bool isDefault, bool isForced, const char* path)
-	: title(title), language(languageCode), codec(codec), isDefault(isDefault), isForced(isForced), path(path) { }
+	Stream(const char* title, const char* languageCode, const char* codec, bool isDefault, bool isForced, char* path)
+		: title(title), language(languageCode), codec(codec), isDefault(isDefault), isForced(isForced), path(path) { }
 };

@@ -61,10 +61,10 @@
             <ng-template #elseBlock><p>{{this.minutes | number: '2.0-0'}}:{{this.seconds | number: '2.0-0'}} / {{this.maxMinutes | number: '2.0-0'}}:{{this.maxSeconds | number: '2.0-0'}}</p></ng-template>
           </div>
           <div class="right">
-            <button *ngIf="this.item.audios != null" mat-icon-button data-toggle="tooltip" data-placement="top" title="Select audio track">
+            <button *ngIf="this.item.audios.length > 0" mat-icon-button data-toggle="tooltip" data-placement="top" title="Select audio track">
               <mat-icon>music_note</mat-icon>
             </button>
-            <button *ngIf="this.item.subtitles != null" mat-icon-button data-toggle="tooltip" data-placement="top" title="Select subtitle track">
+            <button *ngIf="this.item.subtitles.length > 0" mat-icon-button data-toggle="tooltip" data-placement="top" title="Select subtitle track">
               <mat-icon>closed_caption</mat-icon>
             </button>
             <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Cast">

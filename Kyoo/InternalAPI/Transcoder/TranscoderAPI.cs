@@ -26,8 +26,7 @@ namespace Kyoo.InternalAPI.TranscoderLink
 
                 for (int i = 0; i < length; i++)
                 {
-                    tracks[i] = (Track)Marshal.PtrToStructure<Stream>(streamsPtr);
-                    tracks[i].type = StreamType.Subtitle;
+                    tracks[i] = Track.From(Marshal.PtrToStructure<Stream>(streamsPtr), StreamType.Subtitle);
                     streamsPtr += size;
                 }
             }

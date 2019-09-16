@@ -217,7 +217,7 @@ namespace Kyoo.InternalAPI
 
         public Track GetSubtitle(string showSlug, long seasonNumber, long episodeNumber, string languageTag)
         {
-            string query = "SELECT tracks.* FROM tracks JOIN episodes ON tracks.episodeID = episodes.id JOIN shows ON episodes.showID = shows.id WHERE shows.showSlug = $showSlug AND episodes.seasonNumber = $seasonNumber AND episodes.episodeNumber = $episodeNumber AND tracks.language = $languageTag;";
+            string query = "SELECT tracks.* FROM tracks JOIN episodes ON tracks.episodeID = episodes.id JOIN shows ON episodes.showID = shows.id WHERE shows.slug = $showSlug AND episodes.seasonNumber = $seasonNumber AND episodes.episodeNumber = $episodeNumber AND tracks.language = $languageTag;";
 
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
