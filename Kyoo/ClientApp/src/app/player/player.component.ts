@@ -225,6 +225,7 @@ export class PlayerComponent implements OnInit
     this.title.setTitle("Kyoo");
 
     $(document).unbind();
+    $('[data-toggle="tooltip"]').hide();
   }
 
   back()

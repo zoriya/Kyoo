@@ -12,9 +12,9 @@
 
   <div id="hover">
     <div class="back">
-      <button mat-icon-button data-toggle="tooltip" data-placement="bottom" title="Back" (click)="back()">
+      <a mat-icon-button data-toggle="tooltip" data-placement="bottom" title="Back" href="/show/{{this.item.showSlug}}" routerLink="/show/{{this.item.showSlug}}">
         <mat-icon>arrow_back</mat-icon>
-      </button>
+      </a>
       <h5>{{this.item.showTitle}}</h5>
     </div>
 

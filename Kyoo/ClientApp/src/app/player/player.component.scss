@@ -41,9 +41,11 @@
   padding: .33%;
   display: flex;
 
-  > button
+  > a
   {
     outline: none;
+    color: inherit;
+    text-decoration: none;
   }
 
   > h5
