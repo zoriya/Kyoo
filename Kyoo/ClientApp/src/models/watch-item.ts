@@ -21,6 +21,7 @@ export interface WatchItem
 
 export interface Track
 {
+  displayName: string;
   title: string;
   language: string;
   isDefault: boolean;
