@@ -18,7 +18,7 @@ namespace Kyoo.InternalAPI
 
         //Internal HTML read
         (List<Track> audios, List<Track> subtitles) GetStreams(long episodeID);
-        Track GetSubtitle(string showSlug, long seasonNumber, long episodeNumber, string languageTag);
+        Track GetSubtitle(string showSlug, long seasonNumber, long episodeNumber, string languageTag, bool forced);
 
         //Public read
         IEnumerable<Library> GetLibraries();

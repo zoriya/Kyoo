@@ -73,7 +73,7 @@ namespace Kyoo.InternalAPI
 				    CREATE TABLE tracks(
 					    id INTEGER PRIMARY KEY UNIQUE, 
 					    episodeID INTEGER, 
-					    streamType TEXT,
+					    streamType INTEGER,
                         title TEXT,
 					    language TEXT, 
                         codec TEXT, 
@@ -203,21 +203,21 @@ namespace Kyoo.InternalAPI
 
                 while (reader.Read())
                 {
-                    Track stream = Track.FromReader(reader);
+                    Track track = Track.FromReader(reader);
 
-                    if (stream.type == StreamType.Audio)
-                        audios.Add(stream);
-                    else if (stream.type == StreamType.Subtitle)
-                        subtitles.Add(stream);
+                    if (track.type == StreamType.Audio)
+                        audios.Add(track);
+                    else if (track.type == StreamType.Subtitle)
+                        subtitles.Add(track);
                 }
 
                 return (audios, subtitles);
             }
         }
 
-        public Track GetSubtitle(string showSlug, long seasonNumber, long episodeNumber, string languageTag)
+        public Track GetSubtitle(string showSlug, long seasonNumber, long episodeNumber, string languageTag, bool forced)
         {
-            string query = "SELECT tracks.* FROM tracks JOIN episodes ON tracks.episodeID = episodes.id JOIN shows ON episodes.showID = shows.id WHERE shows.slug = $showSlug AND episodes.seasonNumber = $seasonNumber AND episodes.episodeNumber = $episodeNumber AND tracks.language = $languageTag;";
+            string query = "SELECT tracks.* FROM tracks JOIN episodes ON tracks.episodeID = episodes.id JOIN shows ON episodes.showID = shows.id WHERE shows.slug = $showSlug AND episodes.seasonNumber = $seasonNumber AND episodes.episodeNumber = $episodeNumber AND tracks.language = $languageTag AND tracks.isForced = $forced;";
 
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
@@ -225,6 +225,7 @@ namespace Kyoo.InternalAPI
                 cmd.Parameters.AddWithValue("$seasonNumber", seasonNumber);
                 cmd.Parameters.AddWithValue("$episodeNumber", episodeNumber);
                 cmd.Parameters.AddWithValue("$languageTag", languageTag);
+                cmd.Parameters.AddWithValue("$forced", forced);
                 SQLiteDataReader reader = cmd.ExecuteReader();
 
                 if (reader.Read())

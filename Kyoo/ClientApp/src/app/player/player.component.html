@@ -64,7 +64,7 @@
             <button *ngIf="this.item.audios.length > 0" mat-icon-button data-toggle="tooltip" data-placement="top" title="Select audio track">
               <mat-icon>music_note</mat-icon>
             </button>
-            <button *ngIf="this.item.subtitles.length > 0" mat-icon-button data-toggle="tooltip" data-placement="top" title="Select subtitle track">
+            <button *ngIf="this.item.subtitles.length > 0" mat-icon-button [matMenuTriggerFor]="subtitles" data-toggle="tooltip" data-placement="top" title="Select subtitle track">
               <mat-icon>closed_caption</mat-icon>
             </button>
             <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Cast">
@@ -79,6 +79,24 @@
           </div>
         </div>
       </div>
+
+      <mat-menu #subtitles="matMenu">
+        <button mat-menu-item (click)="selectSubtitle(null)">
+          <span>None</span>
+        </button>
+
+        <div *ngFor="let subtitle of this.item.subtitles">
+          <button mat-menu-item *ngIf="subtitle.codec == 'ass'; else elseBlock" (click)="selectSubtitle(subtitle)">
+            <span>{{subtitle.language}}</span>
+          </button>
+
+          <ng-template #elseBlock>
+            <button mat-menu-item disabled>
+              <span>{{subtitle.language}}</span>
+            </button>
+          </ng-template>
+        </div>
+      </mat-menu>
     </div>
   </div>
 </div>

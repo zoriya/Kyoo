@@ -1,5 +1,6 @@
 ﻿using Kyoo.Models.Watch;
 using Newtonsoft.Json;
+using System;
 using System.Runtime.InteropServices;
 
 namespace Kyoo.Models
@@ -44,7 +45,7 @@ namespace Kyoo.Models
 
         public static Track FromReader(System.Data.SQLite.SQLiteDataReader reader)
         {
-            return new Track(reader["streamType"] as StreamType? ?? StreamType.Unknow,
+            return new Track((StreamType)Enum.ToObject(typeof(StreamType), reader["streamType"]),
                 reader["title"] as string,
                 reader["language"] as string,
                 reader["isDefault"] as bool? ?? false,
