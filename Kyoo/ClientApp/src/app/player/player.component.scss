@@ -327,3 +327,13 @@
   display: flex;
   justify-content: center;
 }
+
+.volume
+{
+  min-width: 0px !important;
+}
+
+.info-panel
+{
+  min-width: 250px !important;
+}

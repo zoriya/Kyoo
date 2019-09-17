@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from "@angular/router";
 import { DomSanitizer, Title } from "@angular/platform-browser";
 import { Location } from "@angular/common";
 import { MatSliderChange } from "@angular/material/slider";
+import { MatSnackBar } from "@angular/material/snack-bar";
 
 declare var SubtitleManager: any;
 
@@ -20,6 +21,7 @@ export class PlayerComponent implements OnInit
   volume: number = 100;
   seeking: boolean = false;
   videoHider;
+  controllerHovered: boolean = false;
   selectedSubtitle: Track;
 
   hours: number;
@@ -39,7 +41,7 @@ export class PlayerComponent implements OnInit
   private progress: HTMLElement;
   private buffered: HTMLElement;
 
-  constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer, private location: Location, private title: Title, private router: Router) { }
+  constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer, private snackBar: MatSnackBar, private title: Title, private router: Router) { }
 
   ngOnInit()
   {
@@ -58,6 +60,9 @@ export class PlayerComponent implements OnInit
       this.setDuration(this.item.duration);
 
       this.title.setTitle(this.item.showTitle + " S" + this.item.seasonNumber + ":E" + this.item.episodeNumber + " - Kyoo");
+
+      if (this.player)
+        this.init();
     });
   }
 
@@ -109,6 +114,11 @@ export class PlayerComponent implements OnInit
       loadIndicator.classList.add("d-none");
     }
 
+    this.player.onended = () =>
+    {
+      this.router.navigate(["/watch/" + this.item.nextEpisode.link], { queryParamsHandling: "merge" });
+    }
+
     let progressBar: HTMLElement = document.getElementById("progress-bar") as HTMLElement;
     $(progressBar).click((event) =>
     {
@@ -157,9 +167,9 @@ export class PlayerComponent implements OnInit
 
         clearTimeout(this.videoHider);
 
-        this.videoHider = setTimeout(() =>
+        this.videoHider = setTimeout((ev: MouseEvent) =>
         {
-          if (!this.player.paused)
+          if (!this.player.paused && !this.controllerHovered)
           {
             document.getElementById("hover").classList.add("idle");
             document.documentElement.style.cursor = "none";
@@ -167,6 +177,9 @@ export class PlayerComponent implements OnInit
         }, 2000);
       }
     });
+
+    $("#controller").mouseenter(() => { this.controllerHovered = true; });
+    $("#controller").mouseleave(() => { this.controllerHovered = false; });
 
     //Initialize the timout at the document initialization.
     this.videoHider = setTimeout(() =>
@@ -192,6 +205,68 @@ export class PlayerComponent implements OnInit
       }
     });
 
+    $(window).keydown((e) =>
+    {
+      console.log(e.keyCode);
+      switch (e.keyCode)
+      {
+        case 32: //space
+          this.tooglePlayback();
+          break;
+
+        case 38: //Key up
+          this.changeVolume(this.volume + 5);
+          this.snackBar.open(this.volume + "%", null, { verticalPosition: "top", horizontalPosition: "right", duration: 300, panelClass: "volume" });
+          break;
+        case 40: //Key down
+          this.changeVolume(this.volume - 5);
+          this.snackBar.open(this.volume + "%", null, { verticalPosition: "top", horizontalPosition: "right", duration: 300, panelClass: "volume" });
+          break;
+
+        case 86: //V key
+          let subtitleIndex: number = this.item.subtitles.indexOf(this.selectedSubtitle);
+          let nextSub: Track;
+          if (subtitleIndex + 1 <= this.item.subtitles.length)
+            nextSub = this.item.subtitles[subtitleIndex + 1];
+          else
+            nextSub = this.item.subtitles[0];
+
+          this.selectSubtitle(nextSub);
+          break;
+
+        case 70: //F key
+          this.fullscreen();
+          break;
+
+        case 77: //M key
+          this.toogleMute();
+          if (this.player.muted)
+            this.snackBar.open("Sound muted.", null, { verticalPosition: "top", horizontalPosition: "right", duration: 750, panelClass: "info-panel" });
+          else
+            this.snackBar.open("Sound unmuted.", null, { verticalPosition: "top", horizontalPosition: "right", duration: 750, panelClass: "info-panel" });
+          break;
+
+        case 78: //N key
+          this.router.navigate(["/watch/" + this.item.nextEpisode.link], { queryParamsHandling: "merge" });
+          break;
+
+        case 80: //P key
+          if (this.item.previousEpisode != null)
+          this.router.navigate(["/watch/" + this.item.previousEpisode], { queryParamsHandling: "merge" });
+          break;
+
+        default:
+          break;
+      }
+    });
+
+    $('[data-toggle="tooltip"]').tooltip({ trigger: "hover" });
+
+    this.init();
+  }
+
+  init()
+  {
     //Load sub selected from the url.
     let sub: string = this.route.snapshot.queryParams["sub"];
     if (sub != null)
@@ -202,7 +277,10 @@ export class PlayerComponent implements OnInit
       this.selectSubtitle(this.item.subtitles.find(x => x.language == languageCode && x.isForced == forced), false);
     }
 
-    $('[data-toggle="tooltip"]').tooltip({ trigger: "hover" });
+    setTimeout(() =>
+    {
+      this.snackBar.open("Playing: " + this.item.showTitle + " S" + this.item.seasonNumber + ":E" + this.item.episodeNumber, null, { verticalPosition: "top", horizontalPosition: "right", duration: 2000, panelClass: "info-panel" });
+    }, 750);
   }
 
   getTimeFromSeekbar(progressBar: HTMLElement, pageX: number)
@@ -270,11 +348,14 @@ export class PlayerComponent implements OnInit
       document.exitFullscreen();
   }
 
-  changeVolume(event: MatSliderChange)
+  //Value from 0 to 100
+  changeVolume(value: number)
   {
+    value = Math.max(0, Math.min(value, 100));
+
     this.player.muted = false;
-    this.player.volume = event.value / 100;
-    this.volume = event.value;
+    this.player.volume = value / 100;
+    this.volume = value;
 
     this.updateVolumeBtn();
   }
@@ -317,12 +398,12 @@ export class PlayerComponent implements OnInit
 
     if (subtitle == null)
     {
-      console.log("Removing subtitle");
+      this.snackBar.open("Subtitle removed.", null, { verticalPosition: "top", horizontalPosition: "right", duration: 750, panelClass: "info-panel" });
       SubtitleManager.remove(this.player);
     }
     else
     {
-      console.log("Loading subtitle: " + subtitle.displayName);
+      this.snackBar.open(subtitle.displayName + " subtitle loaded.", null, { verticalPosition: "top", horizontalPosition: "right", duration: 750, panelClass: "info-panel" });
 
       if (subtitle.codec == "ass")
         SubtitleManager.add(this.player, subtitle.link, true);
