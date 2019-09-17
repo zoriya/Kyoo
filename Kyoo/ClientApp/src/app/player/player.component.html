@@ -35,13 +35,13 @@
 
         <div class="buttons">
           <div class="left">
-            <button *ngIf="this.item.previousEpisode" mat-icon-button data-toggle="tooltip" data-placement="top" title="Previous" routerLink="/watch/{{this.item.previousEpisode}}">
+            <a *ngIf="this.item.previousEpisode" mat-icon-button data-toggle="tooltip" data-placement="top" title="Previous" routerLink="/watch/{{this.item.previousEpisode}}" href="/watch/{{this.item.previousEpisode}}" queryParamsHandling="merge">
               <mat-icon>skip_previous</mat-icon>
-            </button>
+            </a>
             <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Play" id="play" (click)="tooglePlayback()">
               <mat-icon>{{this.playIcon}}</mat-icon>
             </button>
-            <button mat-icon-button id="nextBtn" *ngIf="this.item.nextEpisode" routerLink="/watch/{{this.item.nextEpisode.link}}">
+            <a mat-icon-button id="nextBtn" *ngIf="this.item.nextEpisode" routerLink="/watch/{{this.item.nextEpisode.link}}" href="/watch/{{this.item.nextEpisode.link}}" queryParamsHandling="merge">
               <mat-icon>skip_next</mat-icon>
 
               <div id="next">
@@ -53,7 +53,7 @@
                   <p>{{this.item.nextEpisode.overview}}</p>
                 </div>
               </div>
-            </button>
+            </a>
             <div id="volume">
               <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Volume" (click)="toogleMute()">
                 <mat-icon>{{this.volumeIcon}}</mat-icon>
@@ -85,21 +85,23 @@
       </div>
 
       <mat-menu #subtitles="matMenu">
-        <button [ngClass]="{'selected': this.selectedSubtitle == null}" mat-menu-item (click)="selectSubtitle(null)">
-          <span>None</span>
-        </button>
-
-        <div *ngFor="let subtitle of this.item.subtitles">
-          <button [ngClass]="{'selected': this.selectedSubtitle == subtitle}" mat-menu-item *ngIf="subtitle.codec == 'ass'; else elseBlock" (click)="selectSubtitle(subtitle)">
-            <span>{{subtitle.displayName}}</span>
+        <ng-template matMenuContent>
+          <button [ngClass]="{'selected': this.selectedSubtitle == null}" mat-menu-item (click)="selectSubtitle(null)">
+            <span>None</span>
           </button>
 
-          <ng-template #elseBlock>
-            <button mat-menu-item disabled>
-              <span>{{subtitle.displayName}} ({{subtitle.codec}})</span>
+          <div *ngFor="let subtitle of this.item.subtitles">
+            <button [ngClass]="{'selected': this.selectedSubtitle == subtitle}" mat-menu-item *ngIf="subtitle.codec == 'ass'; else elseBlock" (click)="selectSubtitle(subtitle)">
+              <span>{{subtitle.displayName}}</span>
             </button>
-          </ng-template>
-        </div>
+
+            <ng-template #elseBlock>
+              <button mat-menu-item disabled>
+                <span>{{subtitle.displayName}} ({{subtitle.codec}})</span>
+              </button>
+            </ng-template>
+          </div>
+        </ng-template>
       </mat-menu>
     </div>
   </div>

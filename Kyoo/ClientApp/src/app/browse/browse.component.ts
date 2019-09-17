@@ -30,7 +30,7 @@ export class BrowseComponent implements OnInit
 
   getThumb(slug: string)
   {
-    return this.sanitizer.bypassSecurityTrustStyle("url(/thumb/" + slug + ")");
+    return this.sanitizer.bypassSecurityTrustStyle("url(/poster/" + slug + ")");
   }
 
   sort(type: string, order: boolean)

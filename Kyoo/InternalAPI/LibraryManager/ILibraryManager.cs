@@ -17,7 +17,7 @@ namespace Kyoo.InternalAPI
         int GetSeasonCount(string showSlug, long seasonNumber);
 
         //Internal HTML read
-        (List<Track> audios, List<Track> subtitles) GetStreams(long episodeID);
+        (List<Track> audios, List<Track> subtitles) GetStreams(long episodeID, string showSlug);
         Track GetSubtitle(string showSlug, long seasonNumber, long episodeNumber, string languageTag, bool forced);
 
         //Public read

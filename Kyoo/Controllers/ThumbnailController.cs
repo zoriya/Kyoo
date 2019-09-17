@@ -17,7 +17,7 @@ namespace Kyoo.Controllers
             peoplePath = config.GetValue<string>("peoplePath");
         }
 
-        [HttpGet("thumb/{showSlug}")]
+        [HttpGet("poster/{showSlug}")]
         public IActionResult GetShowThumb(string showSlug)
         {
             string path = libraryManager.GetShowBySlug(showSlug)?.Path;
@@ -72,7 +72,7 @@ namespace Kyoo.Controllers
             return new PhysicalFileResult(thumbPath, "image/jpg");
         }
 
-        [HttpGet("thumb/{showSlug}/s{seasonNumber}/e{episodeNumber}")]
+        [HttpGet("thumb/{showSlug}-s{seasonNumber}e{episodeNumber}")]
         public IActionResult GetEpisodeThumb(string showSlug, long seasonNumber, long episodeNumber)
         {
             string path = libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber)?.Path;
