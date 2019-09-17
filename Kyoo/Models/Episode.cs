@@ -77,9 +77,14 @@ namespace Kyoo.Models
 
         public Episode SetThumb(string showSlug)
         {
-            Thumb = "thumb/" + showSlug + "/s" + seasonNumber + "/e" + episodeNumber;
-            Link = showSlug + "-s" + seasonNumber + "e" + episodeNumber;
+            Link = GetSlug(showSlug, seasonNumber, episodeNumber);
+            Thumb = "thumb/" + Link;
             return this;
+        }
+
+        public static string GetSlug(string showSlug, long seasonNumber, long episodeNumber)
+        {
+            return showSlug + "-s" + seasonNumber + "e" + episodeNumber;
         }
     }
 }

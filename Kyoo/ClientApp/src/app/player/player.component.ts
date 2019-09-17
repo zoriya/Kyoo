@@ -1,6 +1,6 @@
 import { Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
 import { WatchItem, Track } from "../../models/watch-item";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, Router } from "@angular/router";
 import { DomSanitizer, Title } from "@angular/platform-browser";
 import { Location } from "@angular/common";
 import { MatSliderChange } from "@angular/material/slider";
@@ -39,7 +39,7 @@ export class PlayerComponent implements OnInit
   private progress: HTMLElement;
   private buffered: HTMLElement;
 
-  constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer, private location: Location, private title: Title) { }
+  constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer, private location: Location, private title: Title, private router: Router) { }
 
   ngOnInit()
   {
@@ -192,6 +192,16 @@ export class PlayerComponent implements OnInit
       }
     });
 
+    //Load sub selected from the url.
+    let sub: string = this.route.snapshot.queryParams["sub"];
+    if (sub != null)
+    {
+      let languageCode: string = sub.substring(0, 3);
+      let forced: boolean = sub.length > 3 && sub.substring(4) == "for";
+
+      this.selectSubtitle(this.item.subtitles.find(x => x.language == languageCode && x.isForced == forced), false);
+    }
+
     $('[data-toggle="tooltip"]').tooltip({ trigger: "hover" });
   }
 
@@ -226,11 +236,6 @@ export class PlayerComponent implements OnInit
 
     $(document).unbind();
     $('[data-toggle="tooltip"]').hide();
-  }
-
-  back()
-  {
-    this.location.back();
   }
 
   tooglePlayback()
@@ -293,35 +298,35 @@ export class PlayerComponent implements OnInit
     }
   }
 
-  selectSubtitle(subtitle: Track)
+  selectSubtitle(subtitle: Track, changeUrl: boolean = true)
   {
+    if (changeUrl)
+    {
+      let subSlug: string;
+      if (subtitle != null)
+      {
+        subSlug = subtitle.language;
+        if (subtitle.isForced)
+          subSlug += "-for";
+      }
+
+      this.router.navigate([], { relativeTo: this.route, queryParams: { sub: subSlug }, replaceUrl: true, queryParamsHandling: "merge" });
+    }
+
     this.selectedSubtitle = subtitle;
 
     if (subtitle == null)
     {
+      console.log("Removing subtitle");
       SubtitleManager.remove(this.player);
     }
     else
     {
+      console.log("Loading subtitle: " + subtitle.displayName);
+
       if (subtitle.codec == "ass")
-        SubtitleManager.add(this.player, this.getSubtitleLink(subtitle), true);
+        SubtitleManager.add(this.player, subtitle.link, true);
     }
-  }
-
-  getSubtitleLink(subtitle: Track): string
-  {
-    let link: string = "/api/subtitle/" + this.item.link + "." + subtitle.language;
-
-    if (subtitle.isForced)
-      link += "-forced";
-
-    //The extension is not necesarry but we add this because it allow the user to quickly download the file in the good format if he wants.
-    if (subtitle.codec == "ass")
-      link += ".ass";
-    else if (subtitle.codec == "subrip")
-      link += ".srt"
-
-    return link;
   }
 
   getThumb(url: string)

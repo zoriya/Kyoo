@@ -189,7 +189,7 @@ namespace Kyoo.InternalAPI
         }
 
 
-        public (List<Track> audios, List<Track> subtitles) GetStreams(long episodeID)
+        public (List<Track> audios, List<Track> subtitles) GetStreams(long episodeID, string episodeSlug)
         {
             string query = "SELECT * FROM tracks WHERE episodeID = $episodeID;";
 
@@ -203,7 +203,7 @@ namespace Kyoo.InternalAPI
 
                 while (reader.Read())
                 {
-                    Track track = Track.FromReader(reader);
+                    Track track = Track.FromReader(reader).SetLink(episodeSlug);
 
                     if (track.type == StreamType.Audio)
                         audios.Add(track);
@@ -229,7 +229,7 @@ namespace Kyoo.InternalAPI
                 SQLiteDataReader reader = cmd.ExecuteReader();
 
                 if (reader.Read())
-                    return Track.FromReader(reader);
+                    return Track.FromReader(reader).SetLink(Episode.GetSlug(showSlug, seasonNumber, episodeNumber));
 
                 return null;
             }

@@ -29,6 +29,8 @@ namespace Kyoo.Models
     public class Track : Stream
     {
         public string DisplayName;
+        public string Link;
+
         [JsonIgnore] public readonly long id;
         [JsonIgnore] public long episodeID;
         [JsonIgnore] public StreamType type;
@@ -44,14 +46,6 @@ namespace Kyoo.Models
             Codec = codec;
             IsExternal = isExternal;
             Path = path;
-
-            //Converting mkv track language to c# system language tag.
-            if (language == "fre")
-                language = "fra";
-
-            DisplayName = CultureInfo.GetCultures(CultureTypes.NeutralCultures).Where(x => x.ThreeLetterISOLanguageName == language).FirstOrDefault()?.DisplayName ?? language;
-            if (Title != null && Title.Length > 1)
-                DisplayName += " - " + Title;
         }
 
         public static Track FromReader(System.Data.SQLite.SQLiteDataReader reader)
@@ -74,6 +68,33 @@ namespace Kyoo.Models
         public static Track From(Stream stream, StreamType type)
         {
             return new Track(type, stream.Title, stream.Language, stream.IsDefault, stream.IsForced, stream.Codec, false, stream.Path);
+        }
+
+        public Track SetLink(string episodeSlug)
+        {
+            string language = Language;
+            //Converting mkv track language to c# system language tag.
+            if (language == "fre")
+                language = "fra";
+
+            DisplayName = CultureInfo.GetCultures(CultureTypes.NeutralCultures).Where(x => x.ThreeLetterISOLanguageName == language).FirstOrDefault()?.DisplayName ?? language;
+            Link = "/api/subtitle/" + episodeSlug + "." + Language;
+
+            if (IsForced)
+            {
+                DisplayName += " Forced";
+                Link += "-forced";
+            }
+
+            if (Title != null && Title.Length > 1)
+                DisplayName += " - " + Title;
+
+            if (Codec == "ass")
+                Link += ".ass";
+            else if (Codec == "subrip")
+                Link += ".srt";
+
+            return this;
         }
     }
 }

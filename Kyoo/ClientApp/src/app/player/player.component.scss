@@ -120,6 +120,15 @@
           margin-right: .3rem;
           outline: none;
         }
+
+        > a
+        {
+          margin-left: .3rem;
+          margin-right: .3rem;
+          outline: none;
+          color: inherit;
+          text-decoration: inherit;
+        }
       }
     }
   }
