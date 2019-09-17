@@ -15,15 +15,15 @@ export interface WatchItem
   previousEpisode: string;
   nextEpisode: Episode;
 
-  audio: Stream[];
-  subtitles: Stream[];
+  audio: Track[];
+  subtitles: Track[];
 }
 
-export interface Stream
+export interface Track
 {
   title: string;
   language: string;
   isDefault: boolean;
   isForced: boolean;
-  format: string;
+  codec: string;
 }

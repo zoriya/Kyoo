@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
-import { WatchItem } from "../../models/watch-item";
+import { WatchItem, Track } from "../../models/watch-item";
 import { ActivatedRoute } from "@angular/router";
 import { DomSanitizer, Title } from "@angular/platform-browser";
 import { Location } from "@angular/common";
@@ -20,6 +20,7 @@ export class PlayerComponent implements OnInit
   volume: number = 100;
   seeking: boolean = false;
   videoHider;
+  selectedSubtitle: Track;
 
   hours: number;
   minutes: number = 0;
@@ -100,7 +101,6 @@ export class PlayerComponent implements OnInit
     let progressBar: HTMLElement = document.getElementById("progress-bar") as HTMLElement;
     $(progressBar).click((event) =>
     {
-      console.log("Duration: " + this.player.duration);
       event.preventDefault();
       let time: number = this.getTimeFromSeekbar(progressBar, event.pageX);
       this.player.currentTime = time;
@@ -182,8 +182,6 @@ export class PlayerComponent implements OnInit
     });
 
     $('[data-toggle="tooltip"]').tooltip({ trigger: "hover" });
-
-    SubtitleManager.add(this.player, "/api/subtitle/" + this.item.link + "-fre.ass", true);
   }
 
   getTimeFromSeekbar(progressBar: HTMLElement, pageX: number)
@@ -281,6 +279,36 @@ export class PlayerComponent implements OnInit
     }
   }
 
+  selectSubtitle(subtitle: Track)
+  {
+    this.selectedSubtitle = subtitle;
+
+    if (subtitle == null)
+    {
+      SubtitleManager.remove(this.player);
+    }
+    else
+    {
+      if (subtitle.codec == "ass")
+        SubtitleManager.add(this.player, this.getSubtitleLink(subtitle), true);
+    }
+  }
+
+  getSubtitleLink(subtitle: Track): string
+  {
+    let link: string = "/api/subtitle/" + this.item.link + "-" + subtitle.language;
+
+    if (subtitle.isForced)
+      link += "-forced";
+
+    //The extension is not necesarry but we add this because it allow the user to quickly download the file in the good format if he wants.
+    if (subtitle.codec == "ass")
+      link += ".ass";
+    else if (subtitle.codec == "subrip")
+      link += ".srt"
+
+    return link;
+  }
 
   getThumb(url: string)
   {
