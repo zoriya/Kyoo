@@ -6,6 +6,10 @@
     </video>
   </div>
 
+  <div id="loadIndicator">
+    <div class="spinner-border align-self-center" role="status"></div>
+  </div>
+
   <div id="hover">
     <div class="back">
       <button mat-icon-button data-toggle="tooltip" data-placement="bottom" title="Back" (click)="back()">
@@ -81,18 +85,18 @@
       </div>
 
       <mat-menu #subtitles="matMenu">
-        <button mat-menu-item (click)="selectSubtitle(null)">
+        <button [ngClass]="{'selected': this.selectedSubtitle == null}" mat-menu-item (click)="selectSubtitle(null)">
           <span>None</span>
         </button>
 
         <div *ngFor="let subtitle of this.item.subtitles">
-          <button mat-menu-item *ngIf="subtitle.codec == 'ass'; else elseBlock" (click)="selectSubtitle(subtitle)">
-            <span>{{subtitle.language}}</span>
+          <button [ngClass]="{'selected': this.selectedSubtitle == subtitle}" mat-menu-item *ngIf="subtitle.codec == 'ass'; else elseBlock" (click)="selectSubtitle(subtitle)">
+            <span>{{subtitle.displayName}}</span>
           </button>
 
           <ng-template #elseBlock>
             <button mat-menu-item disabled>
-              <span>{{subtitle.language}}</span>
+              <span>{{subtitle.displayName}} ({{subtitle.codec}})</span>
             </button>
           </ng-template>
         </div>

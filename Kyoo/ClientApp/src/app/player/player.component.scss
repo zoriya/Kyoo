@@ -291,3 +291,28 @@
     }
   }
 }
+
+.mat-menu-item
+{
+  outline: none !important;
+}
+
+.selected
+{
+  background: #595959 !important;
+  color: var(--accentColor);
+  font-weight: 900;
+}
+
+#loadIndicator
+{
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.3);
+  display: flex;
+  justify-content: center;
+}

@@ -98,6 +98,17 @@ export class PlayerComponent implements OnInit
         this.setDuration(this.player.duration);
     };
 
+    let loadIndicator: HTMLElement = document.getElementById("loadIndicator") as HTMLElement;
+    this.player.onwaiting = () =>
+    {
+      loadIndicator.classList.remove("d-none");
+    }
+
+    this.player.oncanplay = () =>
+    {
+      loadIndicator.classList.add("d-none");
+    }
+
     let progressBar: HTMLElement = document.getElementById("progress-bar") as HTMLElement;
     $(progressBar).click((event) =>
     {
@@ -212,6 +223,8 @@ export class PlayerComponent implements OnInit
   {
     document.getElementById("nav").classList.remove("d-none");
     this.title.setTitle("Kyoo");
+
+    $(document).unbind();
   }
 
   back()
@@ -296,7 +309,7 @@ export class PlayerComponent implements OnInit
 
   getSubtitleLink(subtitle: Track): string
   {
-    let link: string = "/api/subtitle/" + this.item.link + "-" + subtitle.language;
+    let link: string = "/api/subtitle/" + this.item.link + "." + subtitle.language;
 
     if (subtitle.isForced)
       link += "-forced";

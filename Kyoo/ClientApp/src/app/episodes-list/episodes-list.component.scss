@@ -57,6 +57,8 @@
   flex-shrink: 0;
   width: 55%;
   cursor: pointer;
+  color: inherit;
+  text-decoration: inherit;
 
   @include media-breakpoint-up(sm)
   {

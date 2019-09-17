@@ -2,11 +2,12 @@
 using Kyoo.Models;
 using Kyoo.Models.Watch;
 using Microsoft.AspNetCore.Mvc;
+using System.Diagnostics;
 
 namespace Kyoo.Controllers
 {
     [Route("api/[controller]")]
-    [ApiController]
+    //[ApiController]
     public class SubtitleController : ControllerBase
     {
         private readonly ILibraryManager libraryManager;
@@ -18,29 +19,25 @@ namespace Kyoo.Controllers
             this.transcoder = transcoder;
         }
 
-        [HttpGet("{showSlug}-s{seasonNumber}e{episodeNumber}-{languageTag}.{codec?}")]
-        public IActionResult GetSubtitle(string showSlug, long seasonNumber, long episodeNumber, string languageTag, string codec)
+        [HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}.{identifier}.{codec?}")]
+        public IActionResult GetSubtitle(string showSlug, int seasonNumber, int episodeNumber, string identifier, string codec)
         {
-            Track subtitle = libraryManager.GetSubtitle(showSlug, seasonNumber, episodeNumber, languageTag, false);
+            string languageTag = identifier.Substring(0, 3);
+            bool forced = identifier.Length > 3 && identifier.Substring(4) == "forced";
+
+            Track subtitle = libraryManager.GetSubtitle(showSlug, seasonNumber, episodeNumber, languageTag, forced);
 
             if (subtitle == null)
                 return NotFound();
 
-            //Should use appropriate mime type here
-            return PhysicalFile(subtitle.Path, "text/x-ssa");
-        }
-
-        //This one is never called.
-        [HttpGet("{showSlug}-s{seasonNumber}e{episodeNumber}-{languageTag}-{disposition}.{codec?}")] //Disposition can't be tagged as optional because there is a parametter after him.
-        public IActionResult GetForcedSubtitle(string showSlug, long seasonNumber, long episodeNumber, string languageTag, string disposition, string codec)
-        {
-            Track subtitle = libraryManager.GetSubtitle(showSlug, seasonNumber, episodeNumber, languageTag, disposition == "forced");
-
-            if (subtitle == null)
-                return NotFound();
+            string mime = "text/vtt";
+            if (subtitle.Codec == "ass")
+                mime = "text/x-ssa";
+            else if (subtitle.Codec == "subrip")
+                mime = "application/x-subrip";
 
             //Should use appropriate mime type here
-            return PhysicalFile(subtitle.Path, "text/x-ssa");
+            return PhysicalFile(subtitle.Path, mime);
         }
 
         [HttpGet("extract/{showSlug}-s{seasonNumber}e{episodeNumber}")]
