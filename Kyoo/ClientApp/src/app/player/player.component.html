@@ -18,7 +18,7 @@
       <h5>{{this.item.showTitle}}</h5>
     </div>
 
-    <div class="controller container-fluid">
+    <div class="controller container-fluid" id="controller">
       <div class="img d-none d-sm-block">
         <img src="thumb/{{this.item.showSlug}}" />
       </div>
@@ -59,7 +59,7 @@
                 <mat-icon>{{this.volumeIcon}}</mat-icon>
               </button>
 
-              <mat-slider [value]="volume" (input)="changeVolume($event)"></mat-slider>
+              <mat-slider [value]="volume" (input)="changeVolume($event.value)"></mat-slider>
             </div>
             <p *ngIf="this.maxHours; else elseBlock">{{this.hours | number: '2.0-0'}}:{{this.minutes | number: '2.0-0'}}:{{this.seconds | number: '2.0-0'}} / {{this.maxHours | number: '2.0-0'}}:{{this.maxMinutes | number: '2.0-0'}}:{{this.maxSeconds | number: '2.0-0'}}</p>
             <ng-template #elseBlock><p>{{this.minutes | number: '2.0-0'}}:{{this.seconds | number: '2.0-0'}} / {{this.maxMinutes | number: '2.0-0'}}:{{this.maxSeconds | number: '2.0-0'}}</p></ng-template>
