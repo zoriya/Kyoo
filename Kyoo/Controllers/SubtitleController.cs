@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 namespace Kyoo.Controllers
 {
     [Route("api/[controller]")]
-    //[ApiController]
+    [ApiController]
     public class SubtitleController : ControllerBase
     {
         private readonly ILibraryManager libraryManager;
@@ -133,7 +133,10 @@ namespace Kyoo.Controllers
                 line = null;
 
             if (lastLine == null) //The line is a timecode only if the last line is an index line and we already set it to null.
+            {
                 line = line.Replace(',', '.');
+                line += " line:93%";
+            }
 
             return line;
         }

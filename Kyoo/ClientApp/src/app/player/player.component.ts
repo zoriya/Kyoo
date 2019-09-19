@@ -189,7 +189,7 @@ export class PlayerComponent implements OnInit
         document.getElementById("hover").classList.add("idle");
         document.documentElement.style.cursor = "none";
       }
-    }, 2000);
+    }, 1000);
 
     document.addEventListener("fullscreenchange", () =>
     {
@@ -313,6 +313,7 @@ export class PlayerComponent implements OnInit
 
     $(document).unbind();
     $(window).unbind();
+    document.exitFullscreen();
     $('[data-toggle="tooltip"]').hide();
   }
 
@@ -419,6 +420,7 @@ export class PlayerComponent implements OnInit
         track.label = subtitle.displayName;
         track.srclang = subtitle.language;
         track.src = subtitle.link.replace(".srt", ".vtt");
+        track.classList.add("subtitle_container");
         track.default = true;
         track.onload = () => 
         {
