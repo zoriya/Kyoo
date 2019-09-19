@@ -207,7 +207,6 @@ export class PlayerComponent implements OnInit
 
     $(window).keydown((e) =>
     {
-      console.log(e.keyCode);
       switch (e.keyCode)
       {
         case 32: //space
@@ -313,6 +312,7 @@ export class PlayerComponent implements OnInit
     this.title.setTitle("Kyoo");
 
     $(document).unbind();
+    $(window).unbind();
     $('[data-toggle="tooltip"]').hide();
   }
 

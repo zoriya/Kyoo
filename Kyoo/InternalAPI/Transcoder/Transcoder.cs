@@ -1,8 +1,10 @@
 using Kyoo.InternalAPI.TranscoderLink;
 using Kyoo.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Kyoo.InternalAPI
 {

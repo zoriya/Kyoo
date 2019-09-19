@@ -318,6 +318,24 @@ namespace Kyoo.InternalAPI
             }
         }
 
+        public List<Episode> GetEpisodes(string showSlug)
+        {
+            string query = "SELECT * FROM episodes JOIN shows ON shows.id = episodes.showID WHERE shows.slug = $showSlug ORDER BY episodeNumber;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$showSlug", showSlug);
+                SQLiteDataReader reader = cmd.ExecuteReader();
+
+                List<Episode> episodes = new List<Episode>();
+
+                while (reader.Read())
+                    episodes.Add(Episode.FromReader(reader).SetThumb(showSlug));
+
+                return episodes;
+            }
+        }
+
         public List<Episode> GetEpisodes(string showSlug, long seasonNumber)
         {
             string query = "SELECT * FROM episodes JOIN shows ON shows.id = episodes.showID WHERE shows.slug = $showSlug AND episodes.seasonNumber = $seasonNumber ORDER BY episodeNumber;";
@@ -733,6 +751,17 @@ namespace Kyoo.InternalAPI
                     cmd.Parameters.AddWithValue("$type", people[i].Type);
                     cmd.ExecuteNonQuery();
                 }
+            }
+        }
+
+        public void ClearSubtitles(long episodeID)
+        {
+            string query = "DELETE FROM tracks WHERE episodeID = $episodeID;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$episodeID", episodeID);
+                cmd.ExecuteNonQuery();
             }
         }
         #endregion
