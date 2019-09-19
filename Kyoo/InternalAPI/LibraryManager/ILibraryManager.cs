@@ -24,6 +24,7 @@ namespace Kyoo.InternalAPI
         IEnumerable<Library> GetLibraries();
         Show GetShowBySlug(string slug);
         Season GetSeason(string showSlug, long seasonNumber);
+        List<Episode> GetEpisodes(string showSlug);
         List<Episode> GetEpisodes(string showSlug, long seasonNumber);
         Episode GetEpisode(string showSlug, long seasonNumber, long episodeNumber);
         WatchItem GetWatchItem(string showSlug, long seasonNumber, long episodeNumber, bool complete = true);
@@ -48,5 +49,7 @@ namespace Kyoo.InternalAPI
         long GetOrCreateStudio(Studio studio);
 
         void RegisterShowPeople(long showID, List<People> actors);
+
+        void ClearSubtitles(long episodeID);
     }
 }
