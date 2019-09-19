@@ -343,7 +343,7 @@ export class PlayerComponent implements OnInit
   fullscreen()
   {
     if (document.fullscreenElement == null)
-      document.getElementById("root").requestFullscreen();
+      document.body.requestFullscreen();
     else
       document.exitFullscreen();
   }
@@ -400,14 +400,40 @@ export class PlayerComponent implements OnInit
     {
       this.snackBar.open("Subtitle removed.", null, { verticalPosition: "top", horizontalPosition: "right", duration: 750, panelClass: "info-panel" });
       SubtitleManager.remove(this.player);
+      this.removeHtmlTrack();
     }
     else
     {
       this.snackBar.open(subtitle.displayName + " subtitle loaded.", null, { verticalPosition: "top", horizontalPosition: "right", duration: 750, panelClass: "info-panel" });
+      this.removeHtmlTrack();
 
       if (subtitle.codec == "ass")
         SubtitleManager.add(this.player, subtitle.link, true);
+
+      else if (subtitle.codec == "subrip")
+      {
+        SubtitleManager.remove(this.player);
+
+        let track = document.createElement("track");
+        track.kind = "subtitles";
+        track.label = subtitle.displayName;
+        track.srclang = subtitle.language;
+        track.src = subtitle.link.replace(".srt", ".vtt");
+        track.default = true;
+        track.onload = () => 
+        {
+          this.player.textTracks[0].mode = "showing";
+        };
+        this.player.appendChild(track);
+      }
     }
+  }
+
+  removeHtmlTrack()
+  {
+    let elements = this.player.getElementsByTagName("track");
+    if (elements.length > 0)
+      elements.item(0).remove();
   }
 
   getThumb(url: string)

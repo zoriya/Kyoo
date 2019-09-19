@@ -90,7 +90,7 @@ namespace Kyoo.Controllers
 
     public class ConvertSubripToVtt : IActionResult
     {
-        private string path;
+        private readonly string path;
         private string lastLine = "";
 
         public ConvertSubripToVtt(string subtitlePath)
@@ -133,7 +133,7 @@ namespace Kyoo.Controllers
                 line = null;
 
             if (lastLine == null) //The line is a timecode only if the last line is an index line and we already set it to null.
-                line = line.Replace(',', '.'); //This is never called.
+                line = line.Replace(',', '.');
 
             return line;
         }

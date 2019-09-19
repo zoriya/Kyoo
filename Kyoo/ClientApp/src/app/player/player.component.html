@@ -3,6 +3,8 @@
     <video id="player" poster="backdrop/{{this.item.showSlug}}" autoplay muted (click)="tooglePlayback()">
       <source src="/api/video/{{this.item.link}}" />
       <source src="/api/video/{{this.item.link}}/stream" type="video/mp4" />
+
+      <!--<track src="/api/subtitle/clannad-s1e1.eng.vtt" lang="English" srclang="en" default/>-->
     </video>
   </div>
 
@@ -91,7 +93,7 @@
           </button>
 
           <div *ngFor="let subtitle of this.item.subtitles">
-            <button [ngClass]="{'selected': this.selectedSubtitle == subtitle}" mat-menu-item *ngIf="subtitle.codec == 'ass'; else elseBlock" (click)="selectSubtitle(subtitle)">
+            <button [ngClass]="{'selected': this.selectedSubtitle == subtitle}" mat-menu-item *ngIf="subtitle.codec == 'ass' || subtitle.codec == 'subrip'; else elseBlock" (click)="selectSubtitle(subtitle)">
               <span>{{subtitle.displayName}}</span>
             </button>
 
