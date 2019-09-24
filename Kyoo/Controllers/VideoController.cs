@@ -22,35 +22,38 @@ namespace Kyoo.Controllers
         {
             WatchItem episode = libraryManager.GetWatchItem(showSlug, seasonNumber, episodeNumber);
 
-            if (System.IO.File.Exists(episode.Path))
+            if (episode != null && System.IO.File.Exists(episode.Path))
                 return PhysicalFile(episode.Path, "video/x-matroska", true);
             else
                 return NotFound();
         }
 
-        [HttpGet("{showSlug}-s{seasonNumber}e{episodeNumber}/stream")]
-        public IActionResult Stream(string showSlug, long seasonNumber, long episodeNumber)
+        [HttpGet("transmux/{showSlug}-s{seasonNumber}e{episodeNumber}")]
+        public IActionResult Transmux(string showSlug, long seasonNumber, long episodeNumber)
         {
             WatchItem episode = libraryManager.GetWatchItem(showSlug, seasonNumber, episodeNumber);
 
-            if (System.IO.File.Exists(episode.Path))
+            if (episode != null && System.IO.File.Exists(episode.Path))
             {
-                string path = transcoder.Stream(episode.Path);
-                return PhysicalFile(path, "video/mp4", true);
+                string path = transcoder.Transmux(episode);
+                if (path != null)
+                    return PhysicalFile(path, "video/mp4", true);
+                else
+                    return StatusCode(500);
             }
             else
                 return NotFound();
         }
 
-        [HttpGet("{showSlug}-s{seasonNumber}e{episodeNumber}/transcode")]
+        [HttpGet("transcode/{showSlug}-s{seasonNumber}e{episodeNumber}")]
         public IActionResult Transcode(string showSlug, long seasonNumber, long episodeNumber)
         {
             WatchItem episode = libraryManager.GetWatchItem(showSlug, seasonNumber, episodeNumber);
 
-            if (System.IO.File.Exists(episode.Path))
+            if (episode != null && System.IO.File.Exists(episode.Path))
             {
                 string path = transcoder.Transcode(episode.Path);
-                return PhysicalFile(path, "video/mp4", true);
+                return PhysicalFile(path, "video/mp4", true); //Should use mpeg dash
             }
             else
                 return NotFound();

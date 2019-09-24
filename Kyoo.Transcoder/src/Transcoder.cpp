@@ -21,33 +21,178 @@ int Init()
 	return 42;
 }
 
-Stream* ExtractSubtitles(const char* path, const char* outPath, int* streamCount)
-{
-	AVFormatContext* inputContext = NULL;
 
-	if (avformat_open_input(&inputContext, path, NULL, NULL))
+#pragma region InternalProcess
+int open_input_context(AVFormatContext **inputContext, const char *path)
+{
+	if (avformat_open_input(inputContext, path, NULL, NULL))
 	{
 		std::cout << "Error: Can't open the file at " << path << std::endl;
-		return 0;
+		return 1;
 	}
 
-	if (avformat_find_stream_info(inputContext, NULL) < 0)
+	if (avformat_find_stream_info(*inputContext, NULL) < 0)
 	{
 		std::cout << "Error: Could't find streams informations for the file at " << path << std::endl;
-		return 0;
+		return 1;
 	}
 
-	av_dump_format(inputContext, 0, path, false);
+	av_dump_format(*inputContext, 0, path, false);
+	return 0;
+}
 
-	std::vector<Stream>* subtitleStreams = new std::vector<Stream>();
+AVStream* copy_stream_to_output(AVFormatContext *outputContext, AVStream *inputStream)
+{
+	AVStream *outputStream = avformat_new_stream(outputContext, NULL);
+	if (outputStream == NULL)
+	{
+		std::cout << "Error: Couldn't create stream." << std::endl;
+		return NULL;
+	}
+
+	if (avcodec_parameters_copy(outputStream->codecpar, inputStream->codecpar) < 0)
+	{
+		std::cout << "Error: Couldn't copy parameters to the output file." << std::endl;
+		return NULL;
+	}
+	outputStream->codecpar->codec_tag = 0;
+
+	avformat_transfer_internal_stream_timing_info(outputContext->oformat, outputStream, inputStream, AVTimebaseSource::AVFMT_TBCF_AUTO);
+	outputStream->time_base = av_add_q(av_stream_get_codec_timebase(outputStream), AVRational{ 0, 1 });
+	outputStream->duration = av_rescale_q(inputStream->duration, inputStream->time_base, outputStream->time_base);
+	outputStream->disposition = inputStream->disposition;
+
+	av_dict_copy(&outputStream->metadata, inputStream->metadata, NULL);
+
+	//if (inputStream->nb_side_data)
+	//{
+	//	for (int i = 0; i < inputStream->nb_side_data; i++)
+	//	{
+	//		std::cout << "Copying side packet #" << i << std::endl;
+
+	//		AVPacketSideData *sidePkt = &inputStream->side_data[i];
+	//		uint8_t *newPkt = av_stream_new_side_data(outputStream, sidePkt->type, sidePkt->size);
+	//		if (newPkt == NULL)
+	//		{
+	//			std::cout << "Error copying side package." << std::endl;
+	//			//Should handle return here
+	//			return;
+	//		}
+	//		memcpy(newPkt, sidePkt->data, sidePkt->size);
+	//	}
+	//}
+
+	return outputStream;
+}
+
+int open_output_file_for_write(AVFormatContext *outputContext, const char* outputPath)
+{
+	if (!(outputContext->flags & AVFMT_NOFILE))
+	{
+		if (avio_open(&outputContext->pb, outputPath, AVIO_FLAG_WRITE) < 0)
+		{
+			std::cout << "Error: Couldn't open file at " << outputPath << std::endl;
+			return 1;
+		}
+	}
+	else
+		std::cout << "Output flag set to AVFMT_NOFILE." << std::endl;
+
+	if (avformat_write_header(outputContext, NULL) < 0)
+	{
+		std::cout << "Error: Couldn't write headers to file at " << outputPath << std::endl;
+		return 1;
+	}
+
+	return 0;
+}
+
+void process_packet(AVPacket pkt, AVStream* inputStream, AVStream* outputStream)
+{
+	pkt.pts = av_rescale_q_rnd(pkt.pts, inputStream->time_base, outputStream->time_base, AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX);
+	pkt.dts = av_rescale_q_rnd(pkt.dts, inputStream->time_base, outputStream->time_base, AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX);
+	pkt.duration = av_rescale_q(pkt.duration, inputStream->time_base, outputStream->time_base);
+	pkt.pos = -1;
+}
+#pragma endregion
+
+
+
+
+
+
+
+//Should add goto end;
+int Transmux(const char *path, const char *outPath)
+{
+	AVFormatContext *inputContext = NULL;
+	int ret = 0;
+
+	if (open_input_context(&inputContext, path) != 0)
+		return 1;
+
+	AVFormatContext *outputContext = NULL;
+	if (avformat_alloc_output_context2(&outputContext, NULL, NULL, outPath) < 0)
+	{
+		std::cout << "Error: Couldn't create an output file." << std::endl;
+		return 1;
+	}
+
+	for (unsigned int i = 0; i < inputContext->nb_streams; i++)
+	{
+		AVStream *stream = inputContext->streams[i];
+		if(stream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO || stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) //Should support multi-audio on a good format.
+			if (copy_stream_to_output(outputContext, stream) == NULL)
+				return 1;
+	}
+
+	av_dump_format(outputContext, 0, outPath, true);
+	if (open_output_file_for_write(outputContext, outPath) != 0)
+		return 1;
+
+	AVPacket pkt;
+	while (av_read_frame(inputContext, &pkt) == 0)
+	{
+		if (pkt.stream_index >= outputContext->nb_streams)
+			continue;
+
+		AVStream *inputStream = inputContext->streams[pkt.stream_index];
+		AVStream *outputStream = outputContext->streams[pkt.stream_index];
+
+		process_packet(pkt, inputStream, outputStream);
+		if (av_interleaved_write_frame(outputContext, &pkt) < 0)
+			std::cout << "Error while writing a packet to the output file." << std::endl;
+
+		av_packet_unref(&pkt);
+	}
+
+
+	avformat_close_input(&inputContext);
+	av_write_trailer(outputContext);
+
+	if (outputContext && !(outputContext->flags & AVFMT_NOFILE))
+		avio_closep(&outputContext->pb);
+	avformat_free_context(outputContext);
+	return ret;
+}
+
+
+Stream *ExtractSubtitles(const char *path, const char *outPath, int *streamCount)
+{
+	AVFormatContext *inputContext = NULL;
+
+	if (open_input_context(&inputContext, path) != 0)
+		return 0;
+
+	std::vector<Stream> *subtitleStreams = new std::vector<Stream>();
 	const unsigned int outputCount = inputContext->nb_streams;
-	AVFormatContext** outputList = new AVFormatContext*[outputCount];
+	AVFormatContext **outputList = new AVFormatContext*[outputCount];
 
 	//Initialize output and set headers.
 	for (unsigned int i = 0; i < inputContext->nb_streams; i++)
 	{
-		AVStream* inputStream = inputContext->streams[i];
-		const AVCodecParameters* inputCodecpar = inputStream->codecpar;
+		AVStream *inputStream = inputContext->streams[i];
+		const AVCodecParameters *inputCodecpar = inputStream->codecpar;
 
 		if (inputCodecpar->codec_type != AVMEDIA_TYPE_SUBTITLE)
 			outputList[i] = NULL;
@@ -62,7 +207,7 @@ Stream* ExtractSubtitles(const char* path, const char* outPath, int* streamCount
 				NULL); //Path builder references 
 
 			//Create the language subfolder
-			std::stringstream outStream /*= new std::stringstream()*/;
+			std::stringstream outStream;
 			outStream << outPath << (char)std::filesystem::path::preferred_separator << stream.language;
 			std::filesystem::create_directory(outStream.str());
 
@@ -90,7 +235,7 @@ Stream* ExtractSubtitles(const char* path, const char* outPath, int* streamCount
 			subtitleStreams->push_back(stream);
 			std::cout << "Stream #" << i << "(" << stream.language << "), stream type: " << inputCodecpar->codec_type << " codec: " << stream.codec << std::endl;			
 
-			AVFormatContext* outputContext = NULL;
+			AVFormatContext *outputContext = NULL;
 			if (avformat_alloc_output_context2(&outputContext, NULL, NULL, stream.path) < 0)
 			{
 				std::cout << "Error: Couldn't create an output file." << std::endl;
@@ -99,63 +244,14 @@ Stream* ExtractSubtitles(const char* path, const char* outPath, int* streamCount
 
 			av_dict_copy(&outputContext->metadata, inputContext->metadata, NULL);
 
-			AVStream* outputStream = avformat_new_stream(outputContext, NULL);
+			AVStream* outputStream = copy_stream_to_output(outputContext, inputStream);
 			if (outputStream == NULL)
-			{
-				std::cout << "Error: Couldn't create stream." << std::endl;
 				goto end;
-			}
-
-			if (avcodec_parameters_copy(outputStream->codecpar, inputCodecpar) < 0)
-			{
-				std::cout << "Error: Couldn't copy parameters to the output file." << std::endl;
-				goto end;
-			}
-			outputStream->codecpar->codec_tag = 0;
-
-			avformat_transfer_internal_stream_timing_info(outputContext->oformat, outputStream, inputStream, AVTimebaseSource::AVFMT_TBCF_AUTO);
-			outputStream->time_base = av_add_q(av_stream_get_codec_timebase(outputStream), AVRational { 0, 1 });
-			outputStream->duration = av_rescale_q(inputStream->duration, inputStream->time_base, outputStream->time_base);
-			outputStream->disposition = inputStream->disposition;
-
-			av_dict_copy(&outputStream->metadata, inputStream->metadata, NULL);
-
-			//if (inputStream->nb_side_data)
-			//{
-			//	for (int i = 0; i < inputStream->nb_side_data; i++)
-			//	{
-			//		std::cout << "Copying side packet #" << i << std::endl;
-
-			//		AVPacketSideData* sidePkt = &inputStream->side_data[i];
-			//		uint8_t* newPkt = av_stream_new_side_data(outputStream, sidePkt->type, sidePkt->size);
-			//		if (newPkt == NULL)
-			//		{
-			//			std::cout << "Error copying side package." << std::endl;
-			//			//Should handle return here
-			//			return;
-			//		}
-			//		memcpy(newPkt, sidePkt->data, sidePkt->size);
-			//	}
-			//}
 
 			av_dump_format(outputContext, 0, stream.path, true);
 
-			if (!(outputContext->flags & AVFMT_NOFILE))
-			{
-				if (avio_open(&outputContext->pb, stream.path, AVIO_FLAG_WRITE) < 0)
-				{
-					std::cout << "Error: Couldn't open file at " << stream.path << std::endl;
-					goto end;
-				}
-			}
-			else
-				std::cout << "Output flag set to AVFMT_NOFILE." << std::endl;
-
-			if (avformat_write_header(outputContext, NULL) < 0)
-			{
-				std::cout << "Error: Couldn't write headers to file at " << stream.path << std::endl;
+			if (open_output_file_for_write(outputContext, stream.path) != 0)
 				goto end;
-			}
 
 			outputList[i] = outputContext;
 
@@ -179,22 +275,18 @@ Stream* ExtractSubtitles(const char* path, const char* outPath, int* streamCount
 		if (pkt.stream_index >= outputCount)
 			continue;
 
-		AVFormatContext* outputContext = outputList[pkt.stream_index];
+		AVFormatContext *outputContext = outputList[pkt.stream_index];
 		if(outputContext == nullptr)
 		{
 			av_packet_unref(&pkt);
 			continue;
 		}
 
-		AVStream* inputStream = inputContext->streams[pkt.stream_index];
-		AVStream* outputStream = outputContext->streams[0];
+		AVStream *inputStream = inputContext->streams[pkt.stream_index];
+		AVStream *outputStream = outputContext->streams[0];
 
 		pkt.stream_index = 0;
-
-		pkt.pts = av_rescale_q_rnd(pkt.pts, inputStream->time_base, outputStream->time_base, AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX);
-		pkt.dts = av_rescale_q_rnd(pkt.dts, inputStream->time_base, outputStream->time_base, AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX);
-		pkt.duration = av_rescale_q(pkt.duration, inputStream->time_base, outputStream->time_base);
-		pkt.pos = -1;
+		process_packet(pkt, inputStream, outputStream);
 
 		if (av_interleaved_write_frame(outputContext, &pkt) < 0)
 		{
@@ -208,7 +300,7 @@ Stream* ExtractSubtitles(const char* path, const char* outPath, int* streamCount
 
 	for (unsigned int i = 0; i < outputCount; i++)
 	{
-		AVFormatContext* outputContext = outputList[i];
+		AVFormatContext *outputContext = outputList[i];
 
 		if (outputContext == NULL)
 			continue;

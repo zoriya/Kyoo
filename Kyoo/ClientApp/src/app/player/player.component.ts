@@ -1,10 +1,8 @@
-import { Component, OnInit, ViewChild, ViewEncapsulation } from '@angular/core';
-import { WatchItem, Track } from "../../models/watch-item";
-import { ActivatedRoute, Router } from "@angular/router";
-import { DomSanitizer, Title } from "@angular/platform-browser";
-import { Location } from "@angular/common";
-import { MatSliderChange } from "@angular/material/slider";
+import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatSnackBar } from "@angular/material/snack-bar";
+import { DomSanitizer, Title } from "@angular/platform-browser";
+import { ActivatedRoute, Router } from "@angular/router";
+import { Track, WatchItem } from "../../models/watch-item";
 
 declare var SubtitleManager: any;
 

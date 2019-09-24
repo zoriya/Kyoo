@@ -10,8 +10,12 @@ namespace Kyoo.InternalAPI
 {
     public class Transcoder : ITranscoder
     {
+        private readonly string tempPath;
+
         public Transcoder(IConfiguration config)
         {
+            tempPath = config.GetValue<string>("tempPath");
+
             Debug.WriteLine("&Api INIT: " + TranscoderAPI.Init());
         }
 
@@ -29,9 +33,14 @@ namespace Kyoo.InternalAPI
             Debug.WriteLine("&Getting video...");
         }
 
-        public string Stream(string path)
+        public string Transmux(WatchItem episode)
         {
-            return @"D:\Videos\Anohana\AnoHana S01E01.mp4";
+            string temp = Path.Combine(tempPath, episode.Link + ".mp4");
+            Debug.WriteLine("&Transmuxing " + episode.Link + " at " + episode.Path + ", outputPath: " + temp);
+            if (File.Exists(temp) || TranscoderAPI.Transmux(episode.Path, temp) == 0)
+                return temp;
+            else
+                return null;
         }
 
         public string Transcode(string path)
