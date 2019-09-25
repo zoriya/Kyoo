@@ -83,7 +83,8 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
 
         public Episode Validate(Episode episode)
         {
-            string localThumb = Path.ChangeExtension(episode.Path, "jpg");
+            //string localThumb = Path.ChangeExtension(episode.Path, "jpg");            
+            string localThumb = episode.Path.Replace(Path.GetExtension(episode.Path), "-thumb.jpg");
             if (!File.Exists(localThumb))
             {
                 using (WebClient client = new WebClient())
