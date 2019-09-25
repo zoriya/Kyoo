@@ -1,17 +1,13 @@
 ﻿using Kyoo.InternalAPI;
 using Kyoo.Models;
-using Kyoo.Models.Watch;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Kyoo.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     [ApiController]
     public class SubtitleController : ControllerBase
     {
