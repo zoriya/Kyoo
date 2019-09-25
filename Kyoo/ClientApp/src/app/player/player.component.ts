@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { DomSanitizer, Title } from "@angular/platform-browser";
-import { ActivatedRoute, Router } from "@angular/router";
+import { Event, ActivatedRoute, Router, NavigationStart } from "@angular/router";
 import { Track, WatchItem } from "../../models/watch-item";
 
 declare var SubtitleManager: any;
@@ -194,12 +194,12 @@ export class PlayerComponent implements OnInit
       if (document.fullscreenElement != null)
       {
         this.fullscreenIcon = "fullscreen_exit";
-        $("#fullscreen").attr("data-original-title", "Exit fullscreen").tooltip("show");
+        $("#fullscreen").attr("data-original-title", "Exit fullscreen");
       }
       else
       {
         this.fullscreenIcon = "fullscreen";
-        $("#fullscreen").attr("data-original-title", "Fullscreen").tooltip("show");
+        $("#fullscreen").attr("data-original-title", "Fullscreen");
       }
     });
 
@@ -249,9 +249,23 @@ export class PlayerComponent implements OnInit
 
         case 80: //P key
           if (this.item.previousEpisode != null)
-          this.router.navigate(["/watch/" + this.item.previousEpisode], { queryParamsHandling: "merge" });
+            this.router.navigate(["/watch/" + this.item.previousEpisode], { queryParamsHandling: "merge" });
           break;
 
+        default:
+          break;
+      }
+    });
+
+    this.router.events.subscribe((event: Event) =>
+    {
+      switch (true)
+      {
+        case event instanceof NavigationStart:
+        {
+          loadIndicator.classList.remove("d-none");
+          break;
+        }
         default:
           break;
       }
@@ -306,12 +320,14 @@ export class PlayerComponent implements OnInit
 
   ngOnDestroy()
   {
+    if (document.fullscreen)
+      document.exitFullscreen();
+
     document.getElementById("nav").classList.remove("d-none");
     this.title.setTitle("Kyoo");
 
     $(document).unbind();
     $(window).unbind();
-    document.exitFullscreen();
     $('[data-toggle="tooltip"]').hide();
   }
 
