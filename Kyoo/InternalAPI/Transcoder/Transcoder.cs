@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace Kyoo.InternalAPI
@@ -16,7 +17,7 @@ namespace Kyoo.InternalAPI
         {
             tempPath = config.GetValue<string>("tempPath");
 
-            Debug.WriteLine("&Api INIT: " + TranscoderAPI.Init());
+            Debug.WriteLine("&Api INIT (unmanaged stream size): " + TranscoderAPI.Init() + ", Stream size: " + Marshal.SizeOf<Models.Watch.Stream>());
         }
 
         public Track[] ExtractSubtitles(string path)

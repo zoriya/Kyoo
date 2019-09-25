@@ -18,7 +18,7 @@ constexpr enum AVRounding operator |(const enum AVRounding a, const enum AVRound
 
 int Init()
 {
-	return 42;
+	return sizeof(Stream);
 }
 
 
