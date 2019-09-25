@@ -61,8 +61,10 @@ AVStream* copy_stream_to_output(AVFormatContext *outputContext, AVStream *inputS
 	outputStream->time_base = av_add_q(av_stream_get_codec_timebase(outputStream), AVRational{ 0, 1 });
 	outputStream->duration = av_rescale_q(inputStream->duration, inputStream->time_base, outputStream->time_base);
 	outputStream->disposition = inputStream->disposition;
+	outputStream->avg_frame_rate = inputStream->avg_frame_rate;
+	outputStream->r_frame_rate = inputStream->r_frame_rate;
 
-	av_dict_copy(&outputStream->metadata, inputStream->metadata, NULL);
+	//av_dict_copy(&outputStream->metadata, inputStream->metadata, NULL);
 
 	//if (inputStream->nb_side_data)
 	//{
@@ -107,7 +109,7 @@ int open_output_file_for_write(AVFormatContext *outputContext, const char* outpu
 	return 0;
 }
 
-void process_packet(AVPacket pkt, AVStream* inputStream, AVStream* outputStream)
+void process_packet(AVPacket &pkt, AVStream* inputStream, AVStream* outputStream)
 {
 	pkt.pts = av_rescale_q_rnd(pkt.pts, inputStream->time_base, outputStream->time_base, AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX);
 	pkt.dts = av_rescale_q_rnd(pkt.dts, inputStream->time_base, outputStream->time_base, AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX);
@@ -119,10 +121,6 @@ void process_packet(AVPacket pkt, AVStream* inputStream, AVStream* outputStream)
 
 
 
-
-
-
-//Should add goto end;
 int Transmux(const char *path, const char *outPath)
 {
 	AVFormatContext *inputContext = NULL;
@@ -138,12 +136,28 @@ int Transmux(const char *path, const char *outPath)
 		return 1;
 	}
 
+	int *streamsMap = new int[inputContext->nb_streams];
+	int streamCount = 0;
+
 	for (unsigned int i = 0; i < inputContext->nb_streams; i++)
 	{
 		AVStream *stream = inputContext->streams[i];
-		if(stream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO || stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) //Should support multi-audio on a good format.
+		if (stream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
+		{
+			streamsMap[i] = streamCount;
+			streamCount++;
 			if (copy_stream_to_output(outputContext, stream) == NULL)
 				return 1;
+		}
+		else if (stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) //Should support multi-audio on a good format.
+		{
+			streamsMap[i] = streamCount;
+			streamCount++;
+			if (copy_stream_to_output(outputContext, stream) == NULL)
+				return 1;
+		}
+		else
+			streamsMap[i] = -1;
 	}
 
 	av_dump_format(outputContext, 0, outPath, true);
@@ -153,27 +167,36 @@ int Transmux(const char *path, const char *outPath)
 	AVPacket pkt;
 	while (av_read_frame(inputContext, &pkt) == 0)
 	{
-		if (pkt.stream_index >= outputContext->nb_streams)
+		if (pkt.stream_index >= inputContext->nb_streams || streamsMap[pkt.stream_index] < 0)
+		{
+			av_packet_unref(&pkt);
 			continue;
+		}
 
 		AVStream *inputStream = inputContext->streams[pkt.stream_index];
+		pkt.stream_index = streamsMap[pkt.stream_index];
 		AVStream *outputStream = outputContext->streams[pkt.stream_index];
 
 		process_packet(pkt, inputStream, outputStream);
+
 		if (av_interleaved_write_frame(outputContext, &pkt) < 0)
 			std::cout << "Error while writing a packet to the output file." << std::endl;
 
 		av_packet_unref(&pkt);
 	}
 
-
-	avformat_close_input(&inputContext);
 	av_write_trailer(outputContext);
+	avformat_close_input(&inputContext);
 
-	if (outputContext && !(outputContext->flags & AVFMT_NOFILE))
+	if (outputContext && !(outputContext->oformat->flags & AVFMT_NOFILE))
 		avio_closep(&outputContext->pb);
 	avformat_free_context(outputContext);
-	return ret;
+	delete[] streamsMap;
+
+	if (ret < 0 && ret != AVERROR_EOF)
+		return 1;
+
+	return 0;
 }
 
 

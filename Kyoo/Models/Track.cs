@@ -78,7 +78,7 @@ namespace Kyoo.Models
                 language = "fra";
 
             DisplayName = CultureInfo.GetCultures(CultureTypes.NeutralCultures).Where(x => x.ThreeLetterISOLanguageName == language).FirstOrDefault()?.DisplayName ?? language;
-            Link = "/api/subtitle/" + episodeSlug + "." + Language;
+            Link = "/subtitle/" + episodeSlug + "." + Language;
 
             if (IsForced)
             {
