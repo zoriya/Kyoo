@@ -1,6 +1,6 @@
 {
   "databasePath": "C://Projects/database.db",
-  "tempPath": "C:\\Projects",
+  "tempPath": "C://Projects/temp",
   "peoplePath": "D://Videos/People",
   "plugins": "C:\\Projects\\Kyoo\\Debug",
   "providerPlugins": "C://Projects/Plugins/Providers",
