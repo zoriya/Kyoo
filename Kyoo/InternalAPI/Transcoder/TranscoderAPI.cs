@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Kyoo.Models;
 using Kyoo.Models.Watch;
@@ -27,7 +28,7 @@ namespace Kyoo.InternalAPI.TranscoderLink
 
             IntPtr ptr = ExtractSubtitles(path, outPath, out int arrayLength, out int trackCount);
             IntPtr streamsPtr = ptr;
-            if (trackCount > 0)
+            if (trackCount > 0 && ptr != IntPtr.Zero)
             {
                 tracks = new Track[trackCount];
 
@@ -47,6 +48,11 @@ namespace Kyoo.InternalAPI.TranscoderLink
                 tracks = null;
 
             FreeMemory(ptr);
+            Debug.WriteLine("&One loop done");
         }
+
+        [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
+        private extern static IntPtr TestMemory(string path, string outPath, out int arrayLength, out int trackCount);
+
     }
 }
