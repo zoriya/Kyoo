@@ -16,33 +16,37 @@ namespace Kyoo.InternalAPI.TranscoderLink
         public extern static int Transmux(string path, string outPath);
 
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-        [return:MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStruct, SizeParamIndex = 3)]
-        private extern static Stream[] ExtractSubtitles(string path, string outPath, out int arrayLength/*, out int trackCount*/);
+        private extern static IntPtr ExtractSubtitles(string path, string outPath, out int arrayLength, out int trackCount);
+
+        [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
+        private extern static void FreeMemory(IntPtr streamsPtr);
 
         public static void ExtractSubtitles(string path, string outPath, out Track[] tracks)
         {
-            //int size = Marshal.SizeOf<Stream>();
+            int size = Marshal.SizeOf<Stream>();
 
-            Stream[] streamsPtr = ExtractSubtitles(path, outPath, out int count/*, out int trackCount*/);
-            tracks = null;
-            //if (trackCount > 0)
-            //{
-            //    tracks = new Track[trackCount];
+            IntPtr ptr = ExtractSubtitles(path, outPath, out int arrayLength, out int trackCount);
+            IntPtr streamsPtr = ptr;
+            if (trackCount > 0)
+            {
+                tracks = new Track[trackCount];
 
-            //    int j = 0;
-            //    for (int i = 0; i < arrayLength; i++)
-            //    {
-            //        Stream stream = Marshal.PtrToStructure<Stream>(streamsPtr);
-            //        if (stream.Codec != null) //If the codec is null, the stream doesn't represent a subtitle.
-            //        {
-            //            tracks[j] = Track.From(stream, StreamType.Subtitle);
-            //            j++;
-            //        }
-            //        streamsPtr += size;
-            //    }
-            //}
-            //else
-            //    tracks = null;
+                int j = 0;
+                for (int i = 0; i < arrayLength; i++)
+                {
+                    Stream stream = Marshal.PtrToStructure<Stream>(streamsPtr);
+                    if (stream.Codec != null) //If the codec is null, the stream doesn't represent a subtitle.
+                    {
+                        tracks[j] = Track.From(stream, StreamType.Subtitle);
+                        j++;
+                    }
+                    streamsPtr += size;
+                }
+            }
+            else
+                tracks = null;
+
+            FreeMemory(ptr);
         }
     }
 }
