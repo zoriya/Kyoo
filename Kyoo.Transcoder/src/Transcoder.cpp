@@ -222,7 +222,7 @@ Stream *ExtractSubtitles(const char *path, const char *outPath, int *streamCount
 		if (inputCodecpar->codec_type != AVMEDIA_TYPE_SUBTITLE)
 			outputList[i] = NULL;
 		else
-		{
+		{			
 			//Get metadata for file name
 			Stream stream(NULL, //title
 				av_dict_get(inputStream->metadata, "language", NULL, 0)->value, //language
@@ -344,4 +344,9 @@ Stream *ExtractSubtitles(const char *path, const char *outPath, int *streamCount
 	return subtitleStreams;
 	//*streamCount = subtitleStreams->size();
 	//return subtitleStreams->data();
+}
+
+void FreeMemory(Stream *streamsPtr)
+{
+	delete[] streamsPtr;
 }
