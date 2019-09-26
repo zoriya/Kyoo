@@ -166,32 +166,40 @@ namespace Kyoo.InternalAPI
             string path = Path.Combine(Path.GetDirectoryName(episode.Path), "Subtitles");
             if(Directory.Exists(path))
             {
+                bool ret = false;
                 foreach (string sub in Directory.EnumerateFiles(path, "", SearchOption.AllDirectories))
                 {
-                    string language = sub.Substring(Path.GetDirectoryName(sub).Length + Path.GetFileNameWithoutExtension(episode.Path).Length + 2, 3);
-                    bool isDefault = sub.Contains("default");
-                    bool isForced = sub.Contains("forced");
+                    string episodeLink = Path.GetFileNameWithoutExtension(episode.Path);
 
-                    string codec;
-                    switch (Path.GetExtension(sub))
+                    if (sub.Contains(episodeLink))
                     {
-                        case ".ass":
-                            codec = "ass";
-                            break;
-                        case ".str":
-                            codec = "subrip";
-                            break;
-                        default:
-                            codec = null;
-                            break;
+                        string language = sub.Substring(Path.GetDirectoryName(sub).Length + episodeLink.Length + 2, 3);
+                        bool isDefault = sub.Contains("default");
+                        bool isForced = sub.Contains("forced");
+
+                        string codec;
+                        switch (Path.GetExtension(sub))
+                        {
+                            case ".ass":
+                                codec = "ass";
+                                break;
+                            case ".str":
+                                codec = "subrip";
+                                break;
+                            default:
+                                codec = null;
+                                break;
+                        }
+
+
+                        Track track = new Track(Models.Watch.StreamType.Subtitle, null, language, isDefault, isForced, codec, false, sub) { episodeID = episode.id };
+                        libraryManager.RegisterTrack(track);
+
+                        ret = true;
                     }
-
-
-                    Track track = new Track(Models.Watch.StreamType.Subtitle, null, language, isDefault, isForced, codec, false, sub) { episodeID = episode.id };
-                    libraryManager.RegisterTrack(track);
                 }
 
-                return true;
+                return ret;
             }
 
             return false;
