@@ -16,25 +16,33 @@ namespace Kyoo.InternalAPI.TranscoderLink
         public extern static int Transmux(string path, string outPath);
 
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-        private extern static IntPtr ExtractSubtitles(string path, string outPath, out int streams);
+        [return:MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.LPStruct, SizeParamIndex = 3)]
+        private extern static Stream[] ExtractSubtitles(string path, string outPath, out int arrayLength/*, out int trackCount*/);
 
         public static void ExtractSubtitles(string path, string outPath, out Track[] tracks)
         {
-            int size = Marshal.SizeOf<Stream>();
+            //int size = Marshal.SizeOf<Stream>();
 
-            IntPtr streamsPtr = ExtractSubtitles(path, outPath, out int length);
-            if (length > 0)
-            {
-                tracks = new Track[length];
+            Stream[] streamsPtr = ExtractSubtitles(path, outPath, out int count/*, out int trackCount*/);
+            tracks = null;
+            //if (trackCount > 0)
+            //{
+            //    tracks = new Track[trackCount];
 
-                for (int i = 0; i < length; i++)
-                {
-                    tracks[i] = Track.From(Marshal.PtrToStructure<Stream>(streamsPtr), StreamType.Subtitle);
-                    streamsPtr += size;
-                }
-            }
-            else
-                tracks = null;
+            //    int j = 0;
+            //    for (int i = 0; i < arrayLength; i++)
+            //    {
+            //        Stream stream = Marshal.PtrToStructure<Stream>(streamsPtr);
+            //        if (stream.Codec != null) //If the codec is null, the stream doesn't represent a subtitle.
+            //        {
+            //            tracks[j] = Track.From(stream, StreamType.Subtitle);
+            //            j++;
+            //        }
+            //        streamsPtr += size;
+            //    }
+            //}
+            //else
+            //    tracks = null;
         }
     }
 }
