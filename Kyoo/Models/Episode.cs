@@ -5,7 +5,7 @@ namespace Kyoo.Models
 {
     public class Episode
     {
-        [JsonIgnore] public readonly long id;
+        [JsonIgnore] public long id;
         [JsonIgnore] public long ShowID;
         [JsonIgnore] public long SeasonID;
 
