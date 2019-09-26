@@ -143,19 +143,59 @@ namespace Kyoo.InternalAPI
                 episode.ShowID = showID;
                 episode.SeasonID = seasonID;
                 long episodeID = libraryManager.RegisterEpisode(episode);
+                episode.id = episodeID;
 
                 if (episode.Path.EndsWith(".mkv"))
                 {
-                    Track[] tracks = transcoder.ExtractSubtitles(episode.Path);
-                    foreach (Track track in tracks)
+                    if (!FindExtractedSubtitles(episode))
                     {
-                        track.episodeID = episodeID;
-                        libraryManager.RegisterTrack(track);
+                        Track[] tracks = transcoder.ExtractSubtitles(episode.Path);
+                        foreach (Track track in tracks)
+                        {
+                            track.episodeID = episode.id;
+                            libraryManager.RegisterTrack(track);
+                        }
                     }
                 }
             }
         }
 
+
+        private bool FindExtractedSubtitles(Episode episode)
+        {
+            string path = Path.Combine(Path.GetDirectoryName(episode.Path), "Subtitles");
+            if(Directory.Exists(path))
+            {
+                foreach (string sub in Directory.EnumerateFiles(path, "", SearchOption.AllDirectories))
+                {
+                    string language = sub.Substring(Path.GetDirectoryName(sub).Length + Path.GetFileNameWithoutExtension(episode.Path).Length + 2, 3);
+                    bool isDefault = sub.Contains("default");
+                    bool isForced = sub.Contains("forced");
+
+                    string codec;
+                    switch (Path.GetExtension(sub))
+                    {
+                        case ".ass":
+                            codec = "ass";
+                            break;
+                        case ".str":
+                            codec = "subrip";
+                            break;
+                        default:
+                            codec = null;
+                            break;
+                    }
+
+
+                    Track track = new Track(Models.Watch.StreamType.Subtitle, null, language, isDefault, isForced, codec, false, sub) { episodeID = episode.id };
+                    libraryManager.RegisterTrack(track);
+                }
+
+                return true;
+            }
+
+            return false;
+        }
 
 
         private static readonly string[] videoExtensions = { ".webm", ".mkv", ".flv", ".vob", ".ogg", ".ogv", ".avi", ".mts", ".m2ts", ".ts", ".mov", ".qt", ".asf", ".mp4", ".m4p", ".m4v", ".mpg", ".mp2", ".mpeg", ".mpe", ".mpv", ".m2v", ".3gp", ".3g2" };
