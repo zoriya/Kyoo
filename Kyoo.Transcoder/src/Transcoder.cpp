@@ -200,16 +200,18 @@ int Transmux(const char *path, const char *outPath)
 }
 
 
-Stream *ExtractSubtitles(const char *path, const char *outPath, int *streamCount)
+Stream *ExtractSubtitles(const char *path, const char *outPath, int *streamCount, int *subtitleCount)
 {
 	AVFormatContext *inputContext = NULL;
 
 	if (open_input_context(&inputContext, path) != 0)
 		return 0;
 
-	std::vector<Stream> *subtitleStreams = new std::vector<Stream>();
+	*streamCount = inputContext->nb_streams;
+	*subtitleCount = 0;
+	Stream *subtitleStreams = new Stream[*streamCount];
 	const unsigned int outputCount = inputContext->nb_streams;
-	AVFormatContext **outputList = new AVFormatContext*[outputCount];
+	AVFormatContext **outputList = new AVFormatContext * [outputCount];
 
 	//Initialize output and set headers.
 	for (unsigned int i = 0; i < inputContext->nb_streams; i++)
@@ -255,8 +257,10 @@ Stream *ExtractSubtitles(const char *path, const char *outPath, int *streamCount
 
 			stream.path = _strdup(outStream.str().c_str());
 
-			subtitleStreams->push_back(stream);
-			std::cout << "Stream #" << i << "(" << stream.language << "), stream type: " << inputCodecpar->codec_type << " codec: " << stream.codec << std::endl;			
+			subtitleStreams[i] = stream;
+			*subtitleCount += 1;
+			//subtitleStreams->push_back(stream);
+			std::cout << "Stream #" << i << "(" << stream.language << "), stream type: " << inputCodecpar->codec_type << " codec: " << stream.codec << std::endl;
 
 			AVFormatContext *outputContext = NULL;
 			if (avformat_alloc_output_context2(&outputContext, NULL, NULL, stream.path) < 0)
@@ -267,7 +271,7 @@ Stream *ExtractSubtitles(const char *path, const char *outPath, int *streamCount
 
 			av_dict_copy(&outputContext->metadata, inputContext->metadata, NULL);
 
-			AVStream* outputStream = copy_stream_to_output(outputContext, inputStream);
+			AVStream *outputStream = copy_stream_to_output(outputContext, inputStream);
 			if (outputStream == NULL)
 				goto end;
 
@@ -299,7 +303,7 @@ Stream *ExtractSubtitles(const char *path, const char *outPath, int *streamCount
 			continue;
 
 		AVFormatContext *outputContext = outputList[pkt.stream_index];
-		if(outputContext == nullptr)
+		if (outputContext == nullptr)
 		{
 			av_packet_unref(&pkt);
 			continue;
@@ -337,6 +341,7 @@ Stream *ExtractSubtitles(const char *path, const char *outPath, int *streamCount
 
 	delete[] outputList;
 
-	*streamCount = subtitleStreams->size();
-	return subtitleStreams->data();
+	return subtitleStreams;
+	//*streamCount = subtitleStreams->size();
+	//return subtitleStreams->data();
 }

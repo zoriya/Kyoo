@@ -10,6 +10,9 @@
 
     <!-- Set this to true if you enable server-side prerendering -->
     <BuildServerSideRenderer>false</BuildServerSideRenderer>
+    <Company>SDG</Company>
+    <Authors>Anonymus-Raccoon</Authors>
+    <RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>

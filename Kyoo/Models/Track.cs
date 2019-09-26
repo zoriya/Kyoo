@@ -62,11 +62,17 @@ namespace Kyoo.Models
 
         public static Track From(Stream stream)
         {
+            if (stream == null)
+                return null;
+
             return new Track(StreamType.Unknow, stream.Title, stream.Language, stream.IsDefault, stream.IsForced, stream.Codec, false, stream.Path);
         }
 
         public static Track From(Stream stream, StreamType type)
         {
+            if (stream == null)
+                return null;
+
             return new Track(type, stream.Title, stream.Language, stream.IsDefault, stream.IsForced, stream.Codec, false, stream.Path);
         }
 
