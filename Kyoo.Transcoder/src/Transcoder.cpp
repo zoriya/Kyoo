@@ -205,13 +205,14 @@ Stream *ExtractSubtitles(const char *path, const char *outPath, int *streamCount
 	AVFormatContext *inputContext = NULL;
 
 	if (open_input_context(&inputContext, path) != 0)
-		return 0;
+		return nullptr;
 
 	*streamCount = inputContext->nb_streams;
 	*subtitleCount = 0;
 	Stream *subtitleStreams = new Stream[*streamCount];
+
 	const unsigned int outputCount = inputContext->nb_streams;
-	AVFormatContext **outputList = new AVFormatContext * [outputCount];
+	AVFormatContext **outputList = new AVFormatContext*[outputCount];
 
 	//Initialize output and set headers.
 	for (unsigned int i = 0; i < inputContext->nb_streams; i++)
@@ -259,7 +260,7 @@ Stream *ExtractSubtitles(const char *path, const char *outPath, int *streamCount
 
 			subtitleStreams[i] = stream;
 			*subtitleCount += 1;
-			//subtitleStreams->push_back(stream);
+
 			std::cout << "Stream #" << i << "(" << stream.language << "), stream type: " << inputCodecpar->codec_type << " codec: " << stream.codec << std::endl;
 
 			AVFormatContext *outputContext = NULL;
@@ -340,13 +341,24 @@ Stream *ExtractSubtitles(const char *path, const char *outPath, int *streamCount
 	}
 
 	delete[] outputList;
-
 	return subtitleStreams;
-	//*streamCount = subtitleStreams->size();
-	//return subtitleStreams->data();
 }
 
 void FreeMemory(Stream *streamsPtr)
 {
 	delete[] streamsPtr;
+}
+
+Stream *TestMemory(const char *path, const char *outPath, int *streamCount, int *subtitleCount)
+{
+	*streamCount = 4;
+	*subtitleCount = 2;
+
+	Stream *streams = new Stream[*streamCount];
+	streams[0] = Stream(NULL, NULL, NULL, NULL, NULL, NULL);
+	streams[1] = Stream(NULL, "eng", "ass", false, false, NULL);
+	streams[2] = Stream(NULL, NULL, NULL, NULL, NULL, NULL);
+	streams[3] = Stream(NULL, "fre", "ass", false, false, NULL);
+
+	return streams;
 }
