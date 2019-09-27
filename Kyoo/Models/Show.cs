@@ -31,8 +31,8 @@ namespace Kyoo.Models
         //Used in the rest API excusively.
         public Studio studio; 
         public IEnumerable<People> directors;
-        public IEnumerable<Season> seasons;
         public IEnumerable<People> people;
+        public IEnumerable<Season> seasons;
 
 
         public string GetAliases()

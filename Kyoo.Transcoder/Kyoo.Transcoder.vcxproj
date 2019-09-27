@@ -74,10 +74,11 @@
     <LinkIncremental>true</LinkIncremental>
     <IncludePath>$(ProjectDir)\ffmpeg\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\ffmpeg\lib;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)Kyoo\Transcoder</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)Kyoo\Transcoder</OutDir>
     <IncludePath>$(ProjectDir)\ffmpeg\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\ffmpeg\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
@@ -85,10 +86,11 @@
     <LinkIncremental>false</LinkIncremental>
     <IncludePath>$(ProjectDir)\ffmpeg\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\ffmpeg\lib;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)Kyoo\Transcoder</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)Kyoo\Transcoder</OutDir>
     <IncludePath>$(ProjectDir)\ffmpeg\include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\ffmpeg\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
