@@ -1,26 +1,25 @@
 import { Season } from "./season";
+import { Genre } from "./genre";
+import { People } from "./people";
+import { Studio } from "./studio";
 
 export interface Show
 {
-  id: number;
   slug: string;
   title: string;
-  //IEnumerable < > Aliases;
-  path: string;
+  Aliases: string[];
   overview: string;
-  trailer: string;
-  //IEnumerable < > Genres;
-  //Status ? Status;
+  genres: Genre[];
+  status: string;
+  studio: Studio;
+  directors: People[];
+  people: People[];
+  seasons: Season[];
+  trailerUrl: string;
 
   startYear: number;
   endYear : number;
 
-  imgPrimary: string;
-  imgThumb: string;
-  imgLogo: string;
-  imgBackdrop: string;
-
   externalIDs: string;
 
-  seasons: Season[];
 }

@@ -613,6 +613,27 @@ namespace Kyoo.InternalAPI
                 return (long)cmd.ExecuteScalar();
             }
         }
+
+        public long GetOrCreatePeople(People people)
+        {
+            People existingPeople = GetPeopleBySlug(people.slug);
+
+            if (existingPeople != null)
+                return existingPeople.id;
+
+            string query = "INSERT INTO people (slug, name, imgPrimary, externalIDs) VALUES($slug, $name, $imgPrimary, $externalIDs);";
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$slug", people.slug);
+                cmd.Parameters.AddWithValue("$name", people.Name);
+                cmd.Parameters.AddWithValue("$imgPrimary", people.imgPrimary);
+                cmd.Parameters.AddWithValue("$externalIDs", people.externalIDs);
+                cmd.ExecuteNonQuery();
+
+                cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
+                return (long)cmd.ExecuteScalar();
+            }
+        }
         #endregion
 
         #region Write Into The Database
@@ -724,28 +745,13 @@ namespace Kyoo.InternalAPI
 
         public void RegisterShowPeople(long showID, List<People> people)
         {
-            string query = "INSERT INTO people (slug, name, imgPrimary, externalIDs) VALUES($slug, $name, $imgPrimary, $externalIDs);";
             string linkQuery = "INSERT INTO peopleLinks (peopleID, showID, role, type) VALUES($peopleID, $showID, $role, $type);";
 
             for (int i = 0; i < people.Count; i++)
             {
-                long peopleID;
-
-                using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
-                {
-                    cmd.Parameters.AddWithValue("$slug", people[i].slug);
-                    cmd.Parameters.AddWithValue("$name", people[i].Name);
-                    cmd.Parameters.AddWithValue("$imgPrimary", people[i].imgPrimary);
-                    cmd.Parameters.AddWithValue("$externalIDs", people[i].externalIDs);
-                    cmd.ExecuteNonQuery();
-
-                    cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
-                    peopleID = (long)cmd.ExecuteScalar();
-                }
-
                 using (SQLiteCommand cmd = new SQLiteCommand(linkQuery, sqlConnection))
                 {
-                    cmd.Parameters.AddWithValue("$peopleID", peopleID);
+                    cmd.Parameters.AddWithValue("$peopleID", GetOrCreatePeople(people[i]));
                     cmd.Parameters.AddWithValue("$showID", showID);
                     cmd.Parameters.AddWithValue("$role", people[i].Role);
                     cmd.Parameters.AddWithValue("$type", people[i].Type);

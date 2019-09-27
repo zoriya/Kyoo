@@ -8,7 +8,7 @@ namespace Kyoo.InternalAPI.TranscoderLink
 {
     public class TranscoderAPI
     {
-        private const string TranscoderPath = @"C:\Projects\Kyoo\Debug\Kyoo.Transcoder.dll";
+        private const string TranscoderPath = @"Transcoder\Kyoo.Transcoder.dll";
 
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
         public extern static int Init();
@@ -42,15 +42,13 @@ namespace Kyoo.InternalAPI.TranscoderLink
                         j++;
                     }
                     streamsPtr += size;
-
-                    Debug.WriteLine("&Stream got: " + stream.Language);
                 }
             }
             else
                 tracks = null;
 
             FreeMemory(ptr);
-            Debug.WriteLine("&File done: " + path);
+            Debug.WriteLine("&" + tracks?.Length + " tracks got at: " + path);
         }
 
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]

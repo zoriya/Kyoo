@@ -33,7 +33,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="ClientApp\src\models\genre.ts" />
+    <None Remove="ClientApp\src\models\people.ts" />
     <None Remove="ClientApp\src\models\show.ts" />
+    <None Remove="ClientApp\src\models\studio.ts" />
     <None Remove="ClientApp\src\models\watch-item.ts" />
   </ItemGroup>
 
@@ -72,8 +75,53 @@
   </ItemGroup>
 
   <ItemGroup>
+    <TypeScriptCompile Include="ClientApp\src\models\genre.ts" />
+    <TypeScriptCompile Include="ClientApp\src\models\people.ts" />
     <TypeScriptCompile Include="ClientApp\src\models\show.ts" />
+    <TypeScriptCompile Include="ClientApp\src\models\studio.ts" />
     <TypeScriptCompile Include="ClientApp\src\models\watch-item.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Transcoder\avcodec-58.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Transcoder\avdevice-58.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Transcoder\avfilter-7.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Transcoder\avformat-58.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Transcoder\avutil-56.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Transcoder\Kyoo.Transcoder.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Transcoder\Kyoo.Transcoder.exp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Transcoder\Kyoo.Transcoder.ilk">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Transcoder\Kyoo.Transcoder.lib">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Transcoder\Kyoo.Transcoder.pdb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Transcoder\postproc-55.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Transcoder\swresample-3.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Transcoder\swscale-5.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
