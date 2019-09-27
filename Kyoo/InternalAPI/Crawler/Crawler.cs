@@ -150,10 +150,13 @@ namespace Kyoo.InternalAPI
                     if (!FindExtractedSubtitles(episode))
                     {
                         Track[] tracks = transcoder.ExtractSubtitles(episode.Path);
-                        foreach (Track track in tracks)
+                        if (tracks != null)
                         {
-                            track.episodeID = episode.id;
-                            libraryManager.RegisterTrack(track);
+                            foreach (Track track in tracks)
+                            {
+                                track.episodeID = episode.id;
+                                libraryManager.RegisterTrack(track);
+                            }
                         }
                     }
                 }

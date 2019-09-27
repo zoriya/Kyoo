@@ -10,9 +10,9 @@
 
 extern "C" struct Stream
 {
-	const char *title;
-	const char *language;
-	const char *codec;
+	char *title;
+	char *language;
+	char *codec;
 	bool isDefault;
 	bool isForced;
 	char *path;
@@ -20,6 +20,15 @@ extern "C" struct Stream
 	Stream()
 		: title(NULL), language(NULL), codec(NULL), isDefault(NULL), isForced(NULL), path(NULL) {}
 
-	Stream(const char* title, const char* languageCode, const char* codec, bool isDefault, bool isForced, char* path)
-		: title(title), language(languageCode), codec(codec), isDefault(isDefault), isForced(isForced), path(path) { }
+	Stream(const char* title, const char* languageCode, const char* codec, bool isDefault, bool isForced)
+		: title(NULL), language(NULL), codec(NULL), isDefault(isDefault), isForced(isForced), path(NULL) 
+	{
+		if(title != NULL)
+			this->title= _strdup(title);
+		if(languageCode != NULL)
+			language = _strdup(languageCode);
+
+		if (codec != NULL)
+			this->codec = _strdup(codec);
+	}
 };
