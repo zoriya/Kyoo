@@ -42,13 +42,15 @@ namespace Kyoo.InternalAPI.TranscoderLink
                         j++;
                     }
                     streamsPtr += size;
+
+                    Debug.WriteLine("&Stream got: " + stream.Language);
                 }
             }
             else
                 tracks = null;
 
             FreeMemory(ptr);
-            Debug.WriteLine("&One loop done");
+            Debug.WriteLine("&File done: " + path);
         }
 
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]

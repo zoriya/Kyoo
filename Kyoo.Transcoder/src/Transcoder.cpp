@@ -209,7 +209,7 @@ Stream *ExtractSubtitles(const char *path, const char *outPath, int *streamCount
 
 	*streamCount = inputContext->nb_streams;
 	*subtitleCount = 0;
-	Stream *subtitleStreams = new Stream[*streamCount];
+	Stream *streams = new Stream[*streamCount];
 
 	const unsigned int outputCount = inputContext->nb_streams;
 	AVFormatContext **outputList = new AVFormatContext*[outputCount];
@@ -225,16 +225,15 @@ Stream *ExtractSubtitles(const char *path, const char *outPath, int *streamCount
 		else
 		{			
 			//Get metadata for file name
-			Stream stream(NULL, //title
+			streams[i] = Stream(NULL, //title
 				av_dict_get(inputStream->metadata, "language", NULL, 0)->value, //language
 				avcodec_get_name(inputCodecpar->codec_id), //format
 				inputStream->disposition & AV_DISPOSITION_DEFAULT, //isDefault
-				inputStream->disposition & AV_DISPOSITION_FORCED, //isForced
-				NULL); //Path builder references 
+				inputStream->disposition & AV_DISPOSITION_FORCED);  //isForced
 
 			//Create the language subfolder
 			std::stringstream outStream;
-			outStream << outPath << (char)std::filesystem::path::preferred_separator << stream.language;
+			outStream << outPath << (char)std::filesystem::path::preferred_separator << streams[i].language;
 			std::filesystem::create_directory(outStream.str());
 
 			//Get file name
@@ -243,28 +242,27 @@ Stream *ExtractSubtitles(const char *path, const char *outPath, int *streamCount
 			fileName = fileName.substr(lastSeparator, fileName.find_last_of('.') - lastSeparator);
 
 			//Construct output file name
-			outStream << fileName << "." << stream.language;
+			outStream << fileName << "." << streams[i].language;
 
-			if (stream.isDefault)
+			if (streams[i].isDefault)
 				outStream << ".default";
-			if (stream.isForced)
+			if (streams[i].isForced)
 				outStream << ".forced";
 
-			if (strcmp(stream.codec, "subrip") == 0)
+			if (strcmp(streams[i].codec, "subrip") == 0)
 				outStream << ".srt";
-			else if (strcmp(stream.codec, "ass") == 0)
+			else if (strcmp(streams[i].codec, "ass") == 0)
 				outStream << ".ass";
 
 
-			stream.path = _strdup(outStream.str().c_str());
+			streams[i].path = _strdup(outStream.str().c_str());
 
-			subtitleStreams[i] = stream;
 			*subtitleCount += 1;
 
-			std::cout << "Stream #" << i << "(" << stream.language << "), stream type: " << inputCodecpar->codec_type << " codec: " << stream.codec << std::endl;
+			std::cout << "Stream #" << i << "(" << streams[i].language << "), stream type: " << inputCodecpar->codec_type << " codec: " << streams[i].codec << std::endl;
 
 			AVFormatContext *outputContext = NULL;
-			if (avformat_alloc_output_context2(&outputContext, NULL, NULL, stream.path) < 0)
+			if (avformat_alloc_output_context2(&outputContext, NULL, NULL, streams[i].path) < 0)
 			{
 				std::cout << "Error: Couldn't create an output file." << std::endl;
 				continue;
@@ -276,9 +274,9 @@ Stream *ExtractSubtitles(const char *path, const char *outPath, int *streamCount
 			if (outputStream == NULL)
 				goto end;
 
-			av_dump_format(outputContext, 0, stream.path, true);
+			av_dump_format(outputContext, 0, streams[i].path, true);
 
-			if (open_output_file_for_write(outputContext, stream.path) != 0)
+			if (open_output_file_for_write(outputContext, streams[i].path) != 0)
 				goto end;
 
 			outputList[i] = outputContext;
@@ -317,9 +315,7 @@ Stream *ExtractSubtitles(const char *path, const char *outPath, int *streamCount
 		process_packet(pkt, inputStream, outputStream);
 
 		if (av_interleaved_write_frame(outputContext, &pkt) < 0)
-		{
 			std::cout << "Error while writing a packet to the output file." << std::endl;
-		}
 
 		av_packet_unref(&pkt);
 	}
@@ -341,24 +337,10 @@ Stream *ExtractSubtitles(const char *path, const char *outPath, int *streamCount
 	}
 
 	delete[] outputList;
-	return subtitleStreams;
+	return streams;
 }
 
 void FreeMemory(Stream *streamsPtr)
 {
 	delete[] streamsPtr;
-}
-
-Stream *TestMemory(const char *path, const char *outPath, int *streamCount, int *subtitleCount)
-{
-	*streamCount = 4;
-	*subtitleCount = 2;
-
-	Stream *streams = new Stream[*streamCount];
-	streams[0] = Stream(NULL, NULL, NULL, NULL, NULL, NULL);
-	streams[1] = Stream(NULL, "eng", "ass", false, false, NULL);
-	streams[2] = Stream(NULL, NULL, NULL, NULL, NULL, NULL);
-	streams[3] = Stream(NULL, "fre", "ass", false, false, NULL);
-
-	return streams;
 }
