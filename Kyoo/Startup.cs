@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
-using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System.Web.Http;
@@ -36,7 +35,7 @@ namespace Kyoo
             services.AddSingleton<ITranscoder, Transcoder>();
 
             //Services used to get informations about files and register them
-            services.AddHostedService<Crawler>();
+            services.AddSingleton<ICrawler, Crawler>();
             services.AddSingleton<IThumbnailsManager, ThumbnailsManager>();
             services.AddSingleton<IMetadataProvider, ProviderManager>();
         }
@@ -54,7 +53,7 @@ namespace Kyoo
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 

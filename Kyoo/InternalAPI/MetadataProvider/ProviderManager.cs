@@ -74,7 +74,7 @@ namespace Kyoo.InternalAPI
 
         public Episode Merge(IEnumerable<Episode> episodes)
         {
-            return episodes.FirstOrDefault();
+            return episodes.FirstOrDefault(); //Should do something if the return is null;
         }
 
         //For all the following methods, it should use all providers and merge the data.

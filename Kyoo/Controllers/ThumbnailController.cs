@@ -79,7 +79,8 @@ namespace Kyoo.Controllers
             if (path == null)
                 return NotFound();
 
-            string thumb = Path.ChangeExtension(path, "jpg");
+            //string thumb = Path.ChangeExtension(path, "jpg");
+            string thumb = path.Replace(Path.GetExtension(path), "-thumb.jpg");
 
             if (System.IO.File.Exists(thumb))
                 return new PhysicalFileResult(thumb, "image/jpg");

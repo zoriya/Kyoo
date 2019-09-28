@@ -11,7 +11,7 @@ namespace Kyoo.InternalAPI.MetadataProvider
         
         public string GetID(string externalIDs)
         {
-            if (externalIDs.Contains(Provider))
+            if (externalIDs?.Contains(Provider) == true)
             {
                 int startIndex = externalIDs.IndexOf(Provider) + Provider.Length + 1; //The + 1 is for the '='
                 return externalIDs.Substring(startIndex, externalIDs.IndexOf('|', startIndex) - startIndex);

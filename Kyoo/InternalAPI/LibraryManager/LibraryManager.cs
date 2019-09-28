@@ -661,13 +661,16 @@ namespace Kyoo.InternalAPI
                 cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
                 long showID = (long)cmd.ExecuteScalar();
 
-                cmd.CommandText = "INSERT INTO genresLinks (genreID, showID) VALUES($genreID, $showID);";
-                foreach (Genre genre in show.Genres)
+                if (show.Genres != null)
                 {
-                    long genreID = GetOrCreateGenre(genre);
-                    cmd.Parameters.AddWithValue("$genreID", genreID);
-                    cmd.Parameters.AddWithValue("$showID", showID);
-                    cmd.ExecuteNonQuery();
+                    cmd.CommandText = "INSERT INTO genresLinks (genreID, showID) VALUES($genreID, $showID);";
+                    foreach (Genre genre in show.Genres)
+                    {
+                        long genreID = GetOrCreateGenre(genre);
+                        cmd.Parameters.AddWithValue("$genreID", genreID);
+                        cmd.Parameters.AddWithValue("$showID", showID);
+                        cmd.ExecuteNonQuery();
+                    }
                 }
 
                 if(show.studio != null)
