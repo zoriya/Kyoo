@@ -13,6 +13,7 @@
     <Company>SDG</Company>
     <Authors>Anonymus-Raccoon</Authors>
     <RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
+    <StartupObject>Kyoo.Program</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>

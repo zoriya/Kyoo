@@ -11,8 +11,10 @@ using System.Threading.Tasks;
 
 namespace Kyoo.InternalAPI
 {
-    public class Crawler : IHostedService
+    public class Crawler : ICrawler
     {
+        private readonly CancellationTokenSource cancellation;
+
         private readonly IConfiguration config;
         private readonly ILibraryManager libraryManager;
         private readonly IMetadataProvider metadataProvider;
@@ -24,31 +26,43 @@ namespace Kyoo.InternalAPI
             this.libraryManager = libraryManager;
             this.metadataProvider = metadataProvider;
             this.transcoder = transcoder;
+
+            cancellation = new CancellationTokenSource();
         }
 
-        public Task StartAsync(CancellationToken cancellationToken)
+        public Task Start(bool watch)
+        {
+            return StartAsync(watch, cancellation.Token);
+        }
+
+        private Task StartAsync(bool watch, CancellationToken cancellationToken)
         {
             Debug.WriteLine("&Crawler started");
             string[] paths = config.GetSection("libraryPaths").Get<string[]>();
 
             foreach (string path in paths)
             {
-                Scan(path);
-                Watch(path, cancellationToken);
+                Scan(path, cancellationToken);
+
+                if(watch)
+                    Watch(path, cancellationToken);
             }
 
-            while (!cancellationToken.IsCancellationRequested) ;
+            while (!cancellationToken.IsCancellationRequested);
 
             Debug.WriteLine("&Crawler stopped");
             return null;
         }
 
-        public async void Scan(string folderPath)
+        public async void Scan(string folderPath, CancellationToken cancellationToken)
         {
             string[] files = Directory.GetFiles(folderPath, "*", SearchOption.AllDirectories);
 
             foreach (string file in files)
             {
+                if (cancellationToken.IsCancellationRequested)
+                    return;
+
                 if (IsVideo(file))
                     await TryRegisterEpisode(file);
             }
@@ -75,7 +89,7 @@ namespace Kyoo.InternalAPI
 
                 watcher.EnableRaisingEvents = true;
 
-                while (!cancellationToken.IsCancellationRequested) ;
+                while (!cancellationToken.IsCancellationRequested);
             }
         }
 
@@ -217,8 +231,9 @@ namespace Kyoo.InternalAPI
         }
 
 
-        public Task StopAsync(CancellationToken cancellationToken)
+        public Task StopAsync()
         {
+            cancellation.Cancel();
             return null;
         }
     }
