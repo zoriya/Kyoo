@@ -11,6 +11,7 @@ namespace Kyoo.Models
 
         public long seasonNumber;
         public long episodeNumber;
+        public long absoluteNumber;
         [JsonIgnore] public string Path;
         public string Title;
         public string Overview;
@@ -27,13 +28,14 @@ namespace Kyoo.Models
 
         public Episode() { }
 
-        public Episode(long seasonNumber, long episodeNumber, string title, string overview, DateTime? releaseDate, long runtime, string imgPrimary, string externalIDs)
+        public Episode(long seasonNumber, long episodeNumber, long absoluteNumber, string title, string overview, DateTime? releaseDate, long runtime, string imgPrimary, string externalIDs)
         {
             id = -1;
             ShowID = -1;
             SeasonID = -1;
             this.seasonNumber = seasonNumber;
             this.episodeNumber = episodeNumber;
+            this.absoluteNumber = absoluteNumber;
             Title = title;
             Overview = overview;
             ReleaseDate = releaseDate;
@@ -42,13 +44,14 @@ namespace Kyoo.Models
             ExternalIDs = externalIDs;
         }
 
-        public Episode(long id, long showID, long seasonID, long seasonNumber, long episodeNumber, string path, string title, string overview, DateTime? releaseDate, long runtime, string imgPrimary, string externalIDs)
+        public Episode(long id, long showID, long seasonID, long seasonNumber, long episodeNumber, long absoluteNumber, string path, string title, string overview, DateTime? releaseDate, long runtime, string imgPrimary, string externalIDs)
         {
             this.id = id;
             ShowID = showID;
             SeasonID = seasonID;
             this.seasonNumber = seasonNumber;
             this.episodeNumber = episodeNumber;
+            this.absoluteNumber = absoluteNumber;
             Path = path;
             Title = title;
             Overview = overview;
@@ -65,6 +68,7 @@ namespace Kyoo.Models
                 (long)reader["seasonID"],
                 (long)reader["seasonNumber"],
                 (long)reader["episodeNumber"],
+                (long)reader["absoluteNumber"],
                 reader["path"] as string,
                 reader["title"] as string,
                 reader["overview"] as string,

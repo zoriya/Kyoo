@@ -136,12 +136,12 @@ namespace Kyoo.InternalAPI
             return providers[0].GetSeasonImage(showName, seasonNumber);
         }
 
-        public async Task<Episode> GetEpisode(string externalIDs, long seasonNumber, long episodeNumber, string episodePath)
+        public async Task<Episode> GetEpisode(string externalIDs, long seasonNumber, long episodeNumber, long absoluteNumber, string episodePath)
         {
             List<Episode> datas = new List<Episode>();
             for (int i = 0; i < providers.Count; i++)
             {
-                datas.Add(await providers[i].GetEpisode(externalIDs, seasonNumber, episodeNumber, episodePath));
+                datas.Add(await providers[i].GetEpisode(externalIDs, seasonNumber, episodeNumber, absoluteNumber, episodePath));
             }
 
             Episode episode = Merge(datas);

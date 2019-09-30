@@ -271,19 +271,24 @@ namespace Kyoo.InternalAPI.MetadataProvider
             return null;
         }
 
-        public async Task<Episode> GetEpisode(string externalIDs, long seasonNumber, long episodeNumber, string episodePath)
+        public async Task<Episode> GetEpisode(string externalIDs, long seasonNumber, long episodeNumber, long absoluteNumber, string episodePath)
         {
             string id = GetID(externalIDs);
 
             if (id == null)
-                return new Episode(seasonNumber, episodeNumber, null, null, null, -1, null, externalIDs);
+                return new Episode(seasonNumber, episodeNumber, absoluteNumber, null, null, null, -1, null, externalIDs);
 
             string token = await Authentificate();
 
             if (token == null)
-                return new Episode(seasonNumber, episodeNumber, null, null, null, -1, null, externalIDs);
+                return new Episode(seasonNumber, episodeNumber, absoluteNumber, null, null, null, -1, null, externalIDs);
 
-            WebRequest request = WebRequest.Create("https://api.thetvdb.com/series/" + id + "/episodes/query?airedSeason=" + seasonNumber + "&airedEpisode=" + episodeNumber);
+            WebRequest request;
+            if(absoluteNumber != -1)
+                request = WebRequest.Create("https://api.thetvdb.com/series/" + id + "/episodes/query?absoluteNumber=" + absoluteNumber);
+            else
+                request = WebRequest.Create("https://api.thetvdb.com/series/" + id + "/episodes/query?airedSeason=" + seasonNumber + "&airedEpisode=" + episodeNumber);
+
             request.Method = "GET";
             request.Timeout = 12000;
             request.ContentType = "application/json";
@@ -306,20 +311,30 @@ namespace Kyoo.InternalAPI.MetadataProvider
                         dynamic episode = data.data[0];
 
                         DateTime dateTime = DateTime.ParseExact((string)episode.firstAired, "yyyy-MM-dd", CultureInfo.InvariantCulture);
-                        return new Episode(seasonNumber, episodeNumber, (string)episode.episodeName, (string)episode.overview, dateTime, -1, "https://www.thetvdb.com/banners/" + episode.filename, string.Format("TvDB={0}|", episode.id));
+
+                        if (absoluteNumber == -1)
+                            absoluteNumber = episode.absoluteNumber as long? ?? -1;
+                        else
+                        {
+                            seasonNumber = episode.airedSeason;
+                            episodeNumber = episode.airedEpisodeNumber;
+                        }
+
+
+                        return new Episode(seasonNumber, episodeNumber, absoluteNumber, (string)episode.episodeName, (string)episode.overview, dateTime, -1, "https://www.thetvdb.com/banners/" + episode.filename, string.Format("TvDB={0}|", episode.id));
                     }
                 }
                 else
                 {
                     Debug.WriteLine("&TheTvDB Provider couldn't work for the episode number: " + episodeNumber + ".\nError Code: " + response.StatusCode + " Message: " + response.StatusDescription);
                     response.Close();
-                    return new Episode(seasonNumber, episodeNumber, null, null, null, -1, null, externalIDs);
+                    return new Episode(seasonNumber, episodeNumber, absoluteNumber, null, null, null, -1, null, externalIDs);
                 }
             }
             catch (WebException ex)
             {
                 Debug.WriteLine("&TheTvDB Provider couldn't work for the episode number: " + episodeNumber + ".\nError Code: " + ex.Status);
-                return new Episode(seasonNumber, episodeNumber, null, null, null, -1, null, externalIDs);
+                return new Episode(seasonNumber, episodeNumber, absoluteNumber, null, null, null, -1, null, externalIDs);
             }
         }
 
