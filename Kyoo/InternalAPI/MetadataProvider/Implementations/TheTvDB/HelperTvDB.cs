@@ -71,7 +71,7 @@ namespace Kyoo.InternalAPI.MetadataProvider.TheTvDB
 
         public long? GetYear(string firstAired)
         {
-            if (long.TryParse(firstAired?.Substring(0, 4), out long year))
+            if (firstAired?.Length >= 4 && long.TryParse(firstAired?.Substring(0, 4), out long year))
                 return year;
 
             return null;

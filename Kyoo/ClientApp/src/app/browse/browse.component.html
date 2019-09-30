@@ -1,4 +1,4 @@
-<div class="container justify-content-center">
+<div class="container-fluid justify-content-center">
   <button mat-icon-button data-toggle="tooltip" data-placement="bottom" title="Filter">
     <mat-icon>filter_list</mat-icon>
   </button>
@@ -20,7 +20,7 @@
   </div>
 </mat-menu>
 
-<div class="container justify-content-center">
+<div class="container-fluid justify-content-center">
   <a class="show" *ngFor="let show of this.shows" routerLink="/show/{{show.slug}}">
     <img [style.background-image]="getThumb(show.slug)" />
     <p class="title">{{show.title}}</p>

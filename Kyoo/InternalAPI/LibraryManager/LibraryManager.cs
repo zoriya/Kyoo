@@ -748,6 +748,9 @@ namespace Kyoo.InternalAPI
 
         public void RegisterShowPeople(long showID, List<People> people)
         {
+            if (people == null)
+                return;
+
             string linkQuery = "INSERT INTO peopleLinks (peopleID, showID, role, type) VALUES($peopleID, $showID, $role, $type);";
 
             for (int i = 0; i < people.Count; i++)

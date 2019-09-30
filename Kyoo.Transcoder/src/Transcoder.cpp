@@ -223,7 +223,9 @@ Stream *ExtractSubtitles(const char *path, const char *outPath, int *streamCount
 		if (inputCodecpar->codec_type != AVMEDIA_TYPE_SUBTITLE)
 			outputList[i] = NULL;
 		else
-		{			
+		{
+			*subtitleCount += 1;
+
 			//Get metadata for file name
 			streams[i] = Stream(NULL, //title
 				av_dict_get(inputStream->metadata, "language", NULL, 0)->value, //language
@@ -253,11 +255,14 @@ Stream *ExtractSubtitles(const char *path, const char *outPath, int *streamCount
 				outStream << ".srt";
 			else if (strcmp(streams[i].codec, "ass") == 0)
 				outStream << ".ass";
-
+			else
+			{
+				std::cout << "Unsupported subtitle codec: " << streams[i].codec << std::endl;
+				outputList[i] = NULL;
+				continue;
+			}
 
 			streams[i].path = _strdup(outStream.str().c_str());
-
-			*subtitleCount += 1;
 
 			std::cout << "Stream #" << i << "(" << streams[i].language << "), stream type: " << inputCodecpar->codec_type << " codec: " << streams[i].codec << std::endl;
 
@@ -293,7 +298,6 @@ Stream *ExtractSubtitles(const char *path, const char *outPath, int *streamCount
 			}
 		}
 	}
-
 	//Write subtitle data to files.
 	AVPacket pkt;
 	while (av_read_frame(inputContext, &pkt) == 0)

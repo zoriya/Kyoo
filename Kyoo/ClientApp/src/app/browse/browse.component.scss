@@ -12,7 +12,7 @@ button
   font-size: 12px;
 }
 
-.container
+.container-fluid
 {
   display: flex;
   flex-wrap: wrap;
@@ -21,26 +21,33 @@ button
 .show
 {
   width: 33%;
+  max-width: 200px;
   list-style: none;
   padding: 1em;
   text-decoration: none;
   color: inherit;
   outline: none;
 
-  @include media-breakpoint-up(md)
+  @include media-breakpoint-up(sm)
   {
     width: 25%;
   }
 
-  @include media-breakpoint-up(lg)
+  @include media-breakpoint-up(md)
   {
     width: 20%;
   }
 
-  @include media-breakpoint-up(xl)
+  @include media-breakpoint-up(lg)
   {
     width: 18%;
   }
+
+  @include media-breakpoint-up(xl)
+  {
+    width: 15%;
+  }
+
 
   &:focus, &:hover
   {
