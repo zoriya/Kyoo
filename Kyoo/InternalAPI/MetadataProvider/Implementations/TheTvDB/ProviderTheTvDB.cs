@@ -276,12 +276,12 @@ namespace Kyoo.InternalAPI.MetadataProvider
             string id = GetID(externalIDs);
 
             if (id == null)
-                return null;
+                return new Episode(seasonNumber, episodeNumber, null, null, null, -1, null, externalIDs);
 
             string token = await Authentificate();
 
             if (token == null)
-                return null;
+                return new Episode(seasonNumber, episodeNumber, null, null, null, -1, null, externalIDs);
 
             WebRequest request = WebRequest.Create("https://api.thetvdb.com/series/" + id + "/episodes/query?airedSeason=" + seasonNumber + "&airedEpisode=" + episodeNumber);
             request.Method = "GET";
@@ -313,13 +313,13 @@ namespace Kyoo.InternalAPI.MetadataProvider
                 {
                     Debug.WriteLine("&TheTvDB Provider couldn't work for the episode number: " + episodeNumber + ".\nError Code: " + response.StatusCode + " Message: " + response.StatusDescription);
                     response.Close();
-                    return null;
+                    return new Episode(seasonNumber, episodeNumber, null, null, null, -1, null, externalIDs);
                 }
             }
             catch (WebException ex)
             {
                 Debug.WriteLine("&TheTvDB Provider couldn't work for the episode number: " + episodeNumber + ".\nError Code: " + ex.Status);
-                return null;
+                return new Episode(seasonNumber, episodeNumber, null, null, null, -1, null, externalIDs);
             }
         }
 
