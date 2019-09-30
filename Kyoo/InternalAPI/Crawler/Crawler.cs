@@ -132,6 +132,26 @@ namespace Kyoo.InternalAPI
                 string showName = match.Groups["ShowTitle"].Value;
                 bool seasonSuccess = long.TryParse(match.Groups["Season"].Value, out long seasonNumber);
                 bool episodeSucess = long.TryParse(match.Groups["Episode"].Value, out long episodeNumber);
+                long absoluteNumber = -1;
+
+                if(!seasonSuccess || !episodeSucess)
+                {
+                    //Considering that the episode is using absolute path.
+                    seasonNumber = -1;
+                    episodeNumber = -1;
+
+                    regex = new Regex(config.GetValue<string>("absoluteRegex"));
+                    match = regex.Match(path);
+
+                    showName = match.Groups["ShowTitle"].Value;
+                    bool absoluteSucess = long.TryParse(match.Groups["AbsoluteNumber"].Value, out absoluteNumber);
+
+                    if (!absoluteSucess)
+                    {
+                        Debug.WriteLine("&Couldn't find basic data for the episode (regexs didn't match) at " + path);
+                        return;
+                    }
+                }
 
                 string showProviderIDs;
                 if (!libraryManager.IsShowRegistered(showPath, out long showID))
@@ -146,15 +166,30 @@ namespace Kyoo.InternalAPI
                 else
                     showProviderIDs = libraryManager.GetShowExternalIDs(showID);
 
-                if (!libraryManager.IsSeasonRegistered(showID, seasonNumber, out long seasonID))
+                long seasonID = -1;
+                if (seasonNumber != -1)
                 {
-                    Season season = await metadataProvider.GetSeason(showName, seasonNumber);
-                    season.ShowID = showID;
-                    seasonID = libraryManager.RegisterSeason(season);
+                    if (!libraryManager.IsSeasonRegistered(showID, seasonNumber, out seasonID))
+                    {
+                        Season season = await metadataProvider.GetSeason(showName, seasonNumber);
+                        season.ShowID = showID;
+                        seasonID = libraryManager.RegisterSeason(season);
+                    }
                 }
 
-                Episode episode = await metadataProvider.GetEpisode(showProviderIDs, seasonNumber, episodeNumber, path);
+                Episode episode = await metadataProvider.GetEpisode(showProviderIDs, seasonNumber, episodeNumber, absoluteNumber, path);
                 episode.ShowID = showID;
+
+                if(seasonID == -1)
+                {
+                    if (!libraryManager.IsSeasonRegistered(showID, episode.seasonNumber, out seasonID))
+                    {
+                        Season season = await metadataProvider.GetSeason(showName, episode.seasonNumber);
+                        season.ShowID = showID;
+                        seasonID = libraryManager.RegisterSeason(season);
+                    }
+                }
+
                 episode.SeasonID = seasonID;
                 long episodeID = libraryManager.RegisterEpisode(episode);
                 episode.id = episodeID;

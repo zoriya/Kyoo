@@ -7,5 +7,6 @@
   "libraryPaths": [
     "\\\\sdg\\video\\Anime"
   ],
-  "regex": ".*\\\\(?<ShowTitle>.+?) S(?<Season>\\d+)E(?<Episode>\\d+)"
+  "regex": ".*\\\\(?<ShowTitle>.+?) S(?<Season>\\d+)E(?<Episode>\\d+)",
+  "absoluteRegex": ".*\\\\(?<ShowTitle>.+?) (?<AbsoluteNumber>\\d+)"
 }

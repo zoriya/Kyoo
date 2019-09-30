@@ -60,6 +60,7 @@ namespace Kyoo.InternalAPI
 					    seasonID INTEGER, 
 					    seasonNumber INTEGER, 
 					    episodeNumber INTEGER, 
+					    absoluteNumber INTEGER, 
 					    path TEXT, 
 					    title TEXT, 
 					    overview TEXT, 
@@ -707,13 +708,14 @@ namespace Kyoo.InternalAPI
 
         public long RegisterEpisode(Episode episode)
         {
-            string query = "INSERT INTO episodes (showID, seasonID, seasonNumber, episodeNumber, path, title, overview, releaseDate, runtime, imgPrimary, externalIDs) VALUES($showID, $seasonID, $seasonNumber,$episodeNumber, $path, $title, $overview, $releaseDate, $runtime, $imgPrimary, $externalIDs);";
+            string query = "INSERT INTO episodes (showID, seasonID, seasonNumber, episodeNumber, absoluteNumber, path, title, overview, releaseDate, runtime, imgPrimary, externalIDs) VALUES($showID, $seasonID, $seasonNumber, $episodeNumber, $absoluteNumber, $path, $title, $overview, $releaseDate, $runtime, $imgPrimary, $externalIDs);";
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
                 cmd.Parameters.AddWithValue("$showID", episode.ShowID);
                 cmd.Parameters.AddWithValue("$seasonID", episode.SeasonID);
                 cmd.Parameters.AddWithValue("$seasonNUmber", episode.seasonNumber);
                 cmd.Parameters.AddWithValue("$episodeNumber", episode.episodeNumber);
+                cmd.Parameters.AddWithValue("$absoluteNumber", episode.absoluteNumber);
                 cmd.Parameters.AddWithValue("$path", episode.Path);
                 cmd.Parameters.AddWithValue("$title", episode.Title);
                 cmd.Parameters.AddWithValue("$overview", episode.Overview);
