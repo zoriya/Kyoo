@@ -226,9 +226,11 @@ Stream *ExtractSubtitles(const char *path, const char *outPath, int *streamCount
 		{
 			*subtitleCount += 1;
 
+			AVDictionaryEntry *languagePtr = av_dict_get(inputStream->metadata, "language", NULL, 0);
+
 			//Get metadata for file name
 			streams[i] = Stream(NULL, //title
-				av_dict_get(inputStream->metadata, "language", NULL, 0)->value, //language
+				languagePtr ? languagePtr->value : NULL, //language
 				avcodec_get_name(inputCodecpar->codec_id), //format
 				inputStream->disposition & AV_DISPOSITION_DEFAULT, //isDefault
 				inputStream->disposition & AV_DISPOSITION_FORCED);  //isForced

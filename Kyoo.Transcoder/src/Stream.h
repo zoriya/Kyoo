@@ -25,8 +25,11 @@ extern "C" struct Stream
 	{
 		if(title != NULL)
 			this->title= _strdup(title);
-		if(languageCode != NULL)
+
+		if (languageCode != NULL)
 			language = _strdup(languageCode);
+		else
+			language = _strdup("und");
 
 		if (codec != NULL)
 			this->codec = _strdup(codec);
