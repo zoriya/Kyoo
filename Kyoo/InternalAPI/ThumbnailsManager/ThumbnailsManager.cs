@@ -68,7 +68,7 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
                 Directory.CreateDirectory(root);
 
                 string localThumb = root + "/" + people[i].slug + ".jpg";
-                if (!File.Exists(localThumb))
+                if (people[i].imgPrimary != null && !File.Exists(localThumb))
                 {
                     using (WebClient client = new WebClient())
                     {
@@ -85,7 +85,7 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
         {
             //string localThumb = Path.ChangeExtension(episode.Path, "jpg");            
             string localThumb = episode.Path.Replace(Path.GetExtension(episode.Path), "-thumb.jpg");
-            if (!File.Exists(localThumb))
+            if (episode.ImgPrimary != null && !File.Exists(localThumb))
             {
                 using (WebClient client = new WebClient())
                 {
