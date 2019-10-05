@@ -23,7 +23,7 @@ button
   width: 33%;
   max-width: 200px;
   list-style: none;
-  padding: 1em;
+  padding: .5em;
   text-decoration: none;
   color: inherit;
   outline: none;
@@ -36,6 +36,7 @@ button
   @include media-breakpoint-up(md)
   {
     width: 20%;
+    padding: 1em;
   }
 
   @include media-breakpoint-up(lg)

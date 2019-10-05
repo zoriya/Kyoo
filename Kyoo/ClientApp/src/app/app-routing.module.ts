@@ -8,18 +8,24 @@ import { ShowResolverService } from './services/show-resolver.service';
 import { LibraryResolverService } from './services/library-resolver.service';
 import { PlayerComponent } from "./player/player.component";
 import { StreamResolverService } from "./services/stream-resolver.service";
+import { CollectionComponent } from "./collection/collection.component";
+import { CollectionResolverService } from "./services/collection-resolver.service";
 
 
 const routes: Routes = [
   { path: "browse", component: BrowseComponent, pathMatch: "full", resolve: { shows: LibraryResolverService } },
   { path: "browse/:library-slug", component: BrowseComponent, resolve: { shows: LibraryResolverService } },
   { path: "show/:show-slug", component: ShowDetailsComponent, resolve: { show: ShowResolverService } },
+  { path: "collection/:collection-slug", component: CollectionComponent, resolve: { shows: CollectionResolverService } },
   { path: "watch/:item", component: PlayerComponent, resolve: { item: StreamResolverService } },
   { path: "**", component: NotFoundComponent }
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes)],
+  imports: [RouterModule.forRoot(routes,
+  {
+    scrollPositionRestoration: "enabled"
+  })],
   exports: [RouterModule],
   providers: [LibraryResolverService, ShowResolverService, StreamResolverService]
 })

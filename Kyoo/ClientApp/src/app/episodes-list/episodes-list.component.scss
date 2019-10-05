@@ -13,14 +13,6 @@
       display: block;
     }
   }
-
-  &:hover
-  {
-    .episodes
-    {
-      visibility: visible;
-    }
-  }
 }
 
 .episodes
@@ -32,7 +24,6 @@
   min-width: 100%;
   flex-shrink: 0;
   flex-direction: row;
-  visibility: hidden;
 
   &::-webkit-scrollbar
   {

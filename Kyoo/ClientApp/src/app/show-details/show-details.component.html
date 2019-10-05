@@ -12,19 +12,19 @@
         <ng-template #elseBlock><h2 class="date">{{show.startYear}}</h2></ng-template>
       </div>
       <div class="buttons">
-        <button mat-mini-fab data-toggle="tooltip" data-placement="top" title="Play" class="mr-3">
+        <button mat-mini-fab matTooltipPosition="above" matTooltip="Play" class="mr-3">
           <mat-icon>play_arrow</mat-icon>
         </button>
-        <button *ngIf="this.show.trailerUrl" mat-icon-button data-toggle="tooltip" data-placement="top" title="Trailer">
+        <button *ngIf="this.show.trailerUrl" mat-icon-button matTooltipPosition="above" matTooltip="Trailer">
           <mat-icon>local_movies</mat-icon>
         </button>
-        <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Download">
+        <button mat-icon-button matTooltipPosition="above" matTooltip="Download">
           <mat-icon>cloud_download</mat-icon>
         </button>
-        <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Watched">
+        <button mat-icon-button matTooltipPosition="above" matTooltip="Watched">
           <mat-icon>done</mat-icon>
         </button>
-        <button mat-icon-button data-toggle="tooltip" data-placement="top" title="More">
+        <button mat-icon-button matTooltipPosition="above" matTooltip="More">
           <mat-icon>more_horiz</mat-icon>
         </button>
       </div>
