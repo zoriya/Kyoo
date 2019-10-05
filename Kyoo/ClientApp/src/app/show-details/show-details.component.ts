@@ -46,11 +46,6 @@ export class ShowDetailsComponent implements OnInit
     this.getEpisodes();
   }
 
-  ngAfterViewInit()
-  {
-    $('[data-toggle="tooltip"]').tooltip({ trigger: "hover" });
-  }
-
   ngOnDestroy()
   {
     window.removeEventListener("scroll", this.scroll, true);

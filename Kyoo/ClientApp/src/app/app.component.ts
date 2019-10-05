@@ -1,8 +1,7 @@
 import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Event, Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
-//import * as $ from "jquery";
-//import "bootstrap";
+import * as $ from "jquery";
 
 @Component({
   selector: 'app-root',

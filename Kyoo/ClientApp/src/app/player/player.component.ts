@@ -34,6 +34,9 @@ export class PlayerComponent implements OnInit
   volumeIcon: string = "volume_up"; //Icon used by the volume btn.
   fullscreenIcon: string = "fullscreen"; //Icon used by the fullscreen btn.
 
+  playTooltip: string = "Pause"; //Text used in the play tooltip
+  fullscreenTooltip: string = "Fullscreen"; //Text used in the fullscreen tooltip
+
   private player: HTMLVideoElement;
   private thumb: HTMLElement;
   private progress: HTMLElement;
@@ -83,7 +86,7 @@ export class PlayerComponent implements OnInit
     this.player.onpause = () =>
     {
       this.playIcon = "play_arrow"
-      $("#play").attr("data-original-title", "Play");
+      this.playTooltip = "Play";
     }
 
     this.player.ontimeupdate = () =>
@@ -194,12 +197,12 @@ export class PlayerComponent implements OnInit
       if (document.fullscreenElement != null)
       {
         this.fullscreenIcon = "fullscreen_exit";
-        $("#fullscreen").attr("data-original-title", "Exit fullscreen");
+        this.fullscreenTooltip = "Exit fullscreen";
       }
       else
       {
         this.fullscreenIcon = "fullscreen";
-        $("#fullscreen").attr("data-original-title", "Fullscreen");
+        this.fullscreenTooltip = "Fullscreen";
       }
     });
 
@@ -271,8 +274,6 @@ export class PlayerComponent implements OnInit
       }
     });
 
-    $('[data-toggle="tooltip"]').tooltip({ trigger: "hover" });
-
     this.init();
   }
 
@@ -328,7 +329,6 @@ export class PlayerComponent implements OnInit
 
     $(document).unbind();
     $(window).unbind();
-    $('[data-toggle="tooltip"]').hide();
   }
 
   tooglePlayback()
@@ -352,7 +352,7 @@ export class PlayerComponent implements OnInit
   initPlayBtn()
   {
     this.playIcon = "pause";
-    $("#play").attr("data-original-title", "Pause");
+    this.playTooltip = "Pause";
   }
 
   fullscreen()

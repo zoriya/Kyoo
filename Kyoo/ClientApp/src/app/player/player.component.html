@@ -38,7 +38,7 @@
             <a *ngIf="this.item.previousEpisode" mat-icon-button matTooltipPosition="above" matTooltip="Previous" routerLink="/watch/{{this.item.previousEpisode}}" href="/watch/{{this.item.previousEpisode}}" queryParamsHandling="merge">
               <mat-icon>skip_previous</mat-icon>
             </a>
-            <button mat-icon-button matTooltipPosition="above" matTooltip="Play" id="play" (click)="tooglePlayback()">
+            <button mat-icon-button matTooltipPosition="above" [matTooltip]="playTooltip" id="play" (click)="tooglePlayback()">
               <mat-icon>{{this.playIcon}}</mat-icon>
             </button>
             <a mat-icon-button id="nextBtn" *ngIf="this.item.nextEpisode" routerLink="/watch/{{this.item.nextEpisode.link}}" href="/watch/{{this.item.nextEpisode.link}}" queryParamsHandling="merge">
@@ -77,7 +77,7 @@
             <button mat-icon-button matTooltipPosition="above" matTooltip="Settings">
               <mat-icon>settings</mat-icon>
             </button>
-            <button mat-icon-button matTooltipPosition="above" matTooltip="Fullscreen" id="fullscreen" (click)="fullscreen()">
+            <button mat-icon-button matTooltipPosition="above" [matTooltip]="fullscreenTooltip" id="fullscreen" (click)="fullscreen()">
               <mat-icon>{{fullscreenIcon}}</mat-icon>
             </button>
           </div>
