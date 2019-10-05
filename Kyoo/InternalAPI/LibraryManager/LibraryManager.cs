@@ -97,6 +97,20 @@ namespace Kyoo.InternalAPI
 					    FOREIGN KEY(showID) REFERENCES shows(id)
 				    );
 
+                    CREATE TABLE collections(
+					    id INTEGER PRIMARY KEY UNIQUE, 
+					    slug TEXT UNIQUE,
+					    name TEXT,
+                        overview TEXT,
+                        imgPrimary TEXT
+				    );
+				    CREATE TABLE collectionsLinks(
+					    collectionID INTEGER, 
+					    showID INTEGER, 
+					    FOREIGN KEY(collectionID) REFERENCES collections(id), 
+					    FOREIGN KEY(showID) REFERENCES shows(id)
+				    );
+
 				    CREATE TABLE studios(
 					    id INTEGER PRIMARY KEY UNIQUE, 
 					    slug TEXT UNIQUE, 
@@ -515,6 +529,38 @@ namespace Kyoo.InternalAPI
             //    return genres;
             //}
         }
+
+        public Collection GetCollection(string slug)
+        {
+            string query = "SELECT * FROM collections WHERE slug = $slug;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$slug", slug);
+                SQLiteDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                    return Collection.FromReader(reader).SetShows(this);
+                else
+                    return null;
+            }
+        }
+
+        public IEnumerable<Show> GetShowsInCollection(long collectionID)
+        {
+            string query = "SELECT * FROM shows JOIN collectionsLink l ON l.showID = shows.id WHERE l.collectionID = $id;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$id", collectionID);
+                SQLiteDataReader reader = cmd.ExecuteReader();
+                List<Show> shows = new List<Show>();
+                while (reader.Read())
+                    shows.Add(Show.FromReader(reader));
+
+                return shows;
+            }
+        }
         #endregion
 
         #region Check if items exists
@@ -638,6 +684,23 @@ namespace Kyoo.InternalAPI
         #endregion
 
         #region Write Into The Database
+        public long RegisterCollection(Collection collection)
+        {
+            string query = "INSERT INTO collections (slug, name, overview, imgPrimary) VALUES($slug, $name, $overview, $imgPrimary);";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$slug", collection.Slug);
+                cmd.Parameters.AddWithValue("$name", collection.Name);
+                cmd.Parameters.AddWithValue("$overview", collection.Overview);
+                cmd.Parameters.AddWithValue("$imgPrimary", collection.ImgPrimary);
+                cmd.ExecuteNonQuery();
+
+                cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
+                return (long)cmd.ExecuteScalar();
+            }
+        }
+
         public long RegisterShow(Show show)
         {
             string query = "INSERT INTO shows (slug, title, aliases, path, overview, trailerUrl, startYear, endYear, imgPrimary, imgThumb, imgLogo, imgBackdrop, externalIDs) VALUES($slug, $title, $aliases, $path, $overview, $trailerUrl, $startYear, $endYear, $imgPrimary, $imgThumb, $imgLogo, $imgBackdrop, $externalIDs);";

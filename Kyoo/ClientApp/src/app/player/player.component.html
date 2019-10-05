@@ -12,7 +12,7 @@
 
   <div id="hover">
     <div class="back">
-      <a mat-icon-button data-toggle="tooltip" data-placement="bottom" title="Back" href="/show/{{this.item.showSlug}}" routerLink="/show/{{this.item.showSlug}}">
+      <a mat-icon-button matTooltipPosition="below" matTooltip="Back" href="/show/{{this.item.showSlug}}" routerLink="/show/{{this.item.showSlug}}">
         <mat-icon>arrow_back</mat-icon>
       </a>
       <h5>{{this.item.showTitle}}</h5>
@@ -35,10 +35,10 @@
 
         <div class="buttons">
           <div class="left">
-            <a *ngIf="this.item.previousEpisode" mat-icon-button data-toggle="tooltip" data-placement="top" title="Previous" routerLink="/watch/{{this.item.previousEpisode}}" href="/watch/{{this.item.previousEpisode}}" queryParamsHandling="merge">
+            <a *ngIf="this.item.previousEpisode" mat-icon-button matTooltipPosition="above" matTooltip="Previous" routerLink="/watch/{{this.item.previousEpisode}}" href="/watch/{{this.item.previousEpisode}}" queryParamsHandling="merge">
               <mat-icon>skip_previous</mat-icon>
             </a>
-            <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Play" id="play" (click)="tooglePlayback()">
+            <button mat-icon-button matTooltipPosition="above" matTooltip="Play" id="play" (click)="tooglePlayback()">
               <mat-icon>{{this.playIcon}}</mat-icon>
             </button>
             <a mat-icon-button id="nextBtn" *ngIf="this.item.nextEpisode" routerLink="/watch/{{this.item.nextEpisode.link}}" href="/watch/{{this.item.nextEpisode.link}}" queryParamsHandling="merge">
@@ -55,7 +55,7 @@
               </div>
             </a>
             <div id="volume">
-              <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Volume" (click)="toogleMute()">
+              <button mat-icon-button matTooltipPosition="above" matTooltip="Volume" (click)="toogleMute()">
                 <mat-icon>{{this.volumeIcon}}</mat-icon>
               </button>
 
@@ -65,19 +65,19 @@
             <ng-template #elseBlock><p>{{this.minutes | number: '2.0-0'}}:{{this.seconds | number: '2.0-0'}} / {{this.maxMinutes | number: '2.0-0'}}:{{this.maxSeconds | number: '2.0-0'}}</p></ng-template>
           </div>
           <div class="right">
-            <button *ngIf="this.item.audios.length > 0" mat-icon-button data-toggle="tooltip" data-placement="top" title="Select audio track">
+            <button *ngIf="this.item.audios.length > 0" mat-icon-button matTooltipPosition="above" matTooltip="Select audio track">
               <mat-icon>music_note</mat-icon>
             </button>
-            <button *ngIf="this.item.subtitles.length > 0" mat-icon-button [matMenuTriggerFor]="subtitles" data-toggle="tooltip" data-placement="top" title="Select subtitle track">
+            <button *ngIf="this.item.subtitles.length > 0" mat-icon-button [matMenuTriggerFor]="subtitles" matTooltipPosition="above" matTooltip="Select subtitle track">
               <mat-icon>closed_caption</mat-icon>
             </button>
-            <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Cast">
+            <button mat-icon-button matTooltipPosition="above" matTooltip="Cast">
               <mat-icon>cast</mat-icon>
             </button>
-            <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Settings">
+            <button mat-icon-button matTooltipPosition="above" matTooltip="Settings">
               <mat-icon>settings</mat-icon>
             </button>
-            <button mat-icon-button data-toggle="tooltip" data-placement="top" title="Fullscreen" id="fullscreen" (click)="fullscreen()">
+            <button mat-icon-button matTooltipPosition="above" matTooltip="Fullscreen" id="fullscreen" (click)="fullscreen()">
               <mat-icon>{{fullscreenIcon}}</mat-icon>
             </button>
           </div>

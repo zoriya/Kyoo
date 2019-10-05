@@ -15,6 +15,7 @@ namespace Kyoo.InternalAPI
         List<Genre> GetGenreForShow(long showID);
         List<Season> GetSeasons(long showID);
         int GetSeasonCount(string showSlug, long seasonNumber);
+        IEnumerable<Show> GetShowsInCollection(long collectionID);
 
         //Internal HTML read
         (List<Track> audios, List<Track> subtitles) GetStreams(long episodeID, string showSlug);
@@ -31,6 +32,7 @@ namespace Kyoo.InternalAPI
         People GetPeopleBySlug(string slug);
         Genre GetGenreBySlug(string slug);
         Studio GetStudioBySlug(string slug);
+        Collection GetCollection(string slug);
 
         //Check if value exists
         bool IsShowRegistered(string showPath);
@@ -40,6 +42,7 @@ namespace Kyoo.InternalAPI
         bool IsEpisodeRegistered(string episodePath);
 
         //Register values
+        long RegisterCollection(Collection collection);
         long RegisterShow(Show show);
         long RegisterSeason(Season season);
         long RegisterEpisode(Episode episode);

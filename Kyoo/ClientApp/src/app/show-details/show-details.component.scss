@@ -17,8 +17,13 @@ a
   {
     width: 100%;
     max-height: 75vh;
-    min-height: 60vh;
     object-fit: cover;
+    min-height: 20vh;
+
+    @include media-breakpoint-up(md)
+    {
+      min-height: 60vh;
+    }
   }
 
   &:after
@@ -194,12 +199,6 @@ hr
   min-width: 100%;
   flex-shrink: 0;
   flex-direction: row;
-  visibility: hidden;
-
-  &:hover
-  {
-    visibility: visible;
-  }
 
   &::-webkit-scrollbar
   {

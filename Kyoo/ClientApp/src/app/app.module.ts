@@ -7,6 +7,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
@@ -16,6 +17,7 @@ import { EpisodesListComponent } from './episodes-list/episodes-list.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { PlayerComponent } from './player/player.component';
 import { ShowDetailsComponent } from './show-details/show-details.component';
+import { CollectionComponent } from './collection/collection.component';
 
 
 @NgModule({
@@ -25,7 +27,8 @@ import { ShowDetailsComponent } from './show-details/show-details.component';
     BrowseComponent,
     ShowDetailsComponent,
     EpisodesListComponent,
-    PlayerComponent
+    PlayerComponent,
+    CollectionComponent
   ],
   imports: [
     BrowserModule,
@@ -38,7 +41,8 @@ import { ShowDetailsComponent } from './show-details/show-details.component';
     MatIconModule,
     MatSelectModule,
     MatMenuModule,
-    MatSliderModule
+    MatSliderModule,
+    MatTooltipModule
   ],
   providers: [],
   bootstrap: [AppComponent]
