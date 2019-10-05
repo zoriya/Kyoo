@@ -23,11 +23,6 @@ export class BrowseComponent implements OnInit
     this.shows = this.route.snapshot.data.shows;
   }
 
-  ngAfterViewInit()
-  {
-    $('[data-toggle="tooltip"]').tooltip({ trigger: "hover" });
-  }
-
   getThumb(slug: string)
   {
     return this.sanitizer.bypassSecurityTrustStyle("url(/poster/" + slug + ")");
