@@ -16,10 +16,10 @@ export interface Show
   people: People[];
   seasons: Season[];
   trailerUrl: string;
+  isCollection: boolean;
 
   startYear: number;
   endYear : number;
 
   externalIDs: string;
-
 }

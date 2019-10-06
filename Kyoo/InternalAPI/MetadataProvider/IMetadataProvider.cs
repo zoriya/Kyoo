@@ -6,6 +6,9 @@ namespace Kyoo.InternalAPI
 {
     public interface IMetadataProvider
     {
+        //For the collection
+        Task<Collection> GetCollectionFromName(string name);
+
         //For the show
         Task<Show> GetShowByID(string id);
         Task<Show> GetShowFromName(string showName, string showPath);
