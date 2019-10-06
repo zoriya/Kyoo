@@ -1,14 +1,13 @@
-﻿using Kyoo.Models;
+﻿using Kyoo.InternalAPI.Utility;
+using Kyoo.Models;
 using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
 
 namespace Kyoo.InternalAPI.MetadataProvider
 {
     public abstract class ProviderHelper
     {
         public abstract string Provider { get; }
-        
+
         public string GetID(string externalIDs)
         {
             if (externalIDs?.Contains(Provider) == true)
@@ -22,29 +21,7 @@ namespace Kyoo.InternalAPI.MetadataProvider
 
         public string ToSlug(string showTitle)
         {
-            if (showTitle == null)
-                return null;
-
-            //First to lower case 
-            showTitle = showTitle.ToLowerInvariant();
-
-            //Remove all accents
-            //var bytes = Encoding.GetEncoding("Cyrillic").GetBytes(showTitle);
-            //showTitle = Encoding.ASCII.GetString(bytes);
-
-            //Replace spaces 
-            showTitle = Regex.Replace(showTitle, @"\s", "-", RegexOptions.Compiled);
-
-            //Remove invalid chars 
-            showTitle = Regex.Replace(showTitle, @"[^\w\s\p{Pd}]", "", RegexOptions.Compiled);
-
-            //Trim dashes from end 
-            showTitle = showTitle.Trim('-', '_');
-
-            //Replace double occurences of - or \_ 
-            showTitle = Regex.Replace(showTitle, @"([-_]){2,}", "$1", RegexOptions.Compiled);
-
-            return showTitle;
+            return Slugifier.ToSlug(showTitle);
         }
 
         public enum ImageType { Poster, Background, Thumbnail, Logo }

@@ -33,6 +33,11 @@ namespace Kyoo.Models
                 reader["imgPrimary"] as string);
         }
 
+        public Show AsShow()
+        {
+            return new Show(-1, Slug, Name, null, null, Overview, null, null, null, null, null, null);
+        }
+
         public Collection SetShows(ILibraryManager libraryManager)
         {
             Shows = libraryManager.GetShowsInCollection(id);

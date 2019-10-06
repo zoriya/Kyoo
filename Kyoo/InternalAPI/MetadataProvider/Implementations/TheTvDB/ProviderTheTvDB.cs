@@ -1,6 +1,8 @@
 ﻿using Kyoo.InternalAPI.MetadataProvider.TheTvDB;
+using Kyoo.InternalAPI.Utility;
 using Kyoo.Models;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -16,73 +18,12 @@ namespace Kyoo.InternalAPI.MetadataProvider
     [MetaProvider]
     public class ProviderTheTvDB : HelperTvDB, IMetadataProvider
     {
-        private struct SearchTbDB
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+        public async Task<Collection> GetCollectionFromName(string name)
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
-            public string seriesName;
-            public string overview;
-            public string slug;
-            public string network;
-            public string status;
-            public int id;
-            public string firstAired;
-            public string banner;
-            public string[] aliases;
+            return new Collection(-1, Slugifier.ToSlug(name), name, null, null);
         }
-
-        private struct DataTvDb
-        {
-            public string seriesName;
-            public string overview;
-            public string slug;
-            public string network;
-            public string status;
-
-            public int id;
-            public string seriesId;
-            public string imdbId;
-            public string zap2itId;
-
-            public string firstAired;
-            public string banner;
-            public string[] aliases;
-            public string[] genre;
-
-            public string added;
-            public string airsDayOfWeek;
-            public string airsTime;
-            public string lastUpdated;
-            public string runtime;
-
-            public string networkId;
-            public string rating;
-            public float siteRating;
-            public int siteRatingCount;
-        }
-
-        private struct RatingInfo
-        {
-            public float average;
-            public int count;
-        }
-        private struct ImageTvDb
-        {
-            public string fileName;
-            public int id;
-            public string keyType;
-            public int languageId;
-            public RatingInfo ratingsInfo;
-            public string resolution;
-            public string subKey;
-            public string thumbnail;
-        }
-
-        private struct ErrorsTvDB
-        {
-            public string[] invalidFilters;
-            public string invalidLanguage;
-            public string[] invalidQueryParams;
-        }
-
 
         public async Task<Show> GetShowFromName(string showName, string showPath)
         {
@@ -109,21 +50,21 @@ namespace Kyoo.InternalAPI.MetadataProvider
                             stream.Close();
                             response.Close();
 
-                            var model = new { data = new SearchTbDB[0] };
-                            SearchTbDB data = JsonConvert.DeserializeAnonymousType(content, model).data[0];                            
+                            dynamic obj = JsonConvert.DeserializeObject(content);
+                            dynamic data = obj.data[0];
 
                             Show show = new Show(-1,
                                 ToSlug(showName),
-                                data.seriesName,
-                                data.aliases,
+                                (string)data.seriesName,
+                                ((JArray)data.aliases).ToObject<IEnumerable<string>>(),
                                 showPath,
-                                data.overview,
+                                (string)data.overview,
                                 null, //trailer
                                 null, //genres (no info with this request)
-                                GetStatus(data.status),
-                                GetYear(data.firstAired),
+                                GetStatus((string)data.status),
+                                GetYear((string)data.firstAired),
                                 null, //endYear
-                                string.Format("{0}={1}|", Provider, data.id));
+                                string.Format("{0}={1}|", Provider, (string)data.id));
                             return (await GetShowByID(GetID(show.ExternalIDs))).Set(show.Slug, show.Path) ?? show;
                         }
                     }
@@ -168,19 +109,19 @@ namespace Kyoo.InternalAPI.MetadataProvider
                         stream.Close();
                         response.Close();
 
-                        var model = new { data = new DataTvDb(), errors = new ErrorsTvDB() };
-                        DataTvDb data = JsonConvert.DeserializeAnonymousType(content, model).data;
+                        dynamic model = JsonConvert.DeserializeObject(content);
+                        dynamic data = model.data;
 
                         Show show = new Show(-1, 
                             null, //Slug
-                            data.seriesName,
-                            data.aliases,
+                            (string)data.seriesName,
+                            ((JArray)data.aliases).ToObject<IEnumerable<string>>(),
                             null, //Path
-                            data.overview,
+                            (string)data.overview,
                             null, //Trailer
-                            GetGenres(data.genre),
-                            GetStatus(data.status),
-                            GetYear(data.firstAired),
+                            GetGenres(((JArray)data.genre).ToObject<string[]>()),
+                            GetStatus((string)data.status),
+                            GetYear((string)data.firstAired),
                             null, //endYear
                             string.Format("TvDB={0}|", id));
                         await GetImages(show);
@@ -237,10 +178,9 @@ namespace Kyoo.InternalAPI.MetadataProvider
                             stream.Close();
                             response.Close();
 
-                            var model = new { data = new ImageTvDb[0], error = new ErrorsTvDB() };
+                            dynamic model = JsonConvert.DeserializeObject(content);
                             //Should implement language selection here
-                            ImageTvDb data = JsonConvert.DeserializeAnonymousType(content, model).data.OrderByDescending(x => x.ratingsInfo.average).ThenByDescending(x => x.ratingsInfo.count).FirstOrDefault();
-                            IEnumerable<ImageTvDb> datas = JsonConvert.DeserializeAnonymousType(content, model).data.OrderByDescending(x => x.ratingsInfo.average).ThenByDescending(x => x.ratingsInfo.count);
+                            dynamic data = ((IEnumerable<dynamic>)model.data).OrderByDescending(x => x.ratingsInfo.average).ThenByDescending(x => x.ratingsInfo.count).FirstOrDefault();
                             SetImage(show, "https://www.thetvdb.com/banners/" + data.fileName, type.Key);
                         }
                     }

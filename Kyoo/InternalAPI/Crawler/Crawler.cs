@@ -1,4 +1,5 @@
-﻿using Kyoo.Models;
+﻿using Kyoo.InternalAPI.Utility;
+using Kyoo.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using System.Collections.Generic;
@@ -15,17 +16,17 @@ namespace Kyoo.InternalAPI
     {
         private readonly CancellationTokenSource cancellation;
 
-        private readonly IConfiguration config;
         private readonly ILibraryManager libraryManager;
         private readonly IMetadataProvider metadataProvider;
         private readonly ITranscoder transcoder;
+        private readonly IConfiguration config;
 
-        public Crawler(IConfiguration configuration, ILibraryManager libraryManager, IMetadataProvider metadataProvider, ITranscoder transcoder)
+        public Crawler(ILibraryManager libraryManager, IMetadataProvider metadataProvider, ITranscoder transcoder, IConfiguration configuration)
         {
-            config = configuration;
             this.libraryManager = libraryManager;
             this.metadataProvider = metadataProvider;
             this.transcoder = transcoder;
+            config = configuration;
 
             cancellation = new CancellationTokenSource();
         }
@@ -129,12 +130,13 @@ namespace Kyoo.InternalAPI
                 Match match = regex.Match(path);
 
                 string showPath = Path.GetDirectoryName(path);
+                string collectionName = match.Groups["Collection"]?.Value;
                 string showName = match.Groups["ShowTitle"].Value;
                 bool seasonSuccess = long.TryParse(match.Groups["Season"].Value, out long seasonNumber);
                 bool episodeSucess = long.TryParse(match.Groups["Episode"].Value, out long episodeNumber);
                 long absoluteNumber = -1;
 
-                if(!seasonSuccess || !episodeSucess)
+                if (!seasonSuccess || !episodeSucess)
                 {
                     //Considering that the episode is using absolute path.
                     seasonNumber = -1;
@@ -160,6 +162,16 @@ namespace Kyoo.InternalAPI
                     showProviderIDs = show.ExternalIDs;
                     showID = libraryManager.RegisterShow(show);
 
+                    if (collectionName != null)
+                    {
+                        if (!libraryManager.IsCollectionRegistered(Slugifier.ToSlug(collectionName), out long collectionID))
+                        {
+                            Collection collection = await metadataProvider.GetCollectionFromName(collectionName);
+                            collectionID = libraryManager.RegisterCollection(collection);
+                        }
+                        libraryManager.AddShowToCollection(showID, collectionID);
+                    }
+
                     List<People> actors = await metadataProvider.GetPeople(show.ExternalIDs);
                     libraryManager.RegisterShowPeople(showID, actors);
                 }
@@ -180,7 +192,7 @@ namespace Kyoo.InternalAPI
                 Episode episode = await metadataProvider.GetEpisode(showProviderIDs, seasonNumber, episodeNumber, absoluteNumber, path);
                 episode.ShowID = showID;
 
-                if(seasonID == -1)
+                if (seasonID == -1)
                 {
                     if (!libraryManager.IsSeasonRegistered(showID, episode.seasonNumber, out seasonID))
                     {

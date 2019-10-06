@@ -28,6 +28,14 @@ export class BrowseComponent implements OnInit
     return this.sanitizer.bypassSecurityTrustStyle("url(/poster/" + slug + ")");
   }
 
+  getLink(show: Show)
+  {
+    if (show.isCollection)
+      return "/collection/" + show.slug;
+    else
+      return "/show/" + show.slug;
+  }
+
   sort(type: string, order: boolean)
   {
     this.sortType = type;

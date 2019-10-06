@@ -1,7 +1,6 @@
 ﻿using Kyoo.InternalAPI;
 using Newtonsoft.Json;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Kyoo.Models
 {
@@ -29,10 +28,11 @@ namespace Kyoo.Models
         public string ExternalIDs;
 
         //Used in the rest API excusively.
-        public Studio studio; 
+        public Studio studio;
         public IEnumerable<People> directors;
         public IEnumerable<People> people;
         public IEnumerable<Season> seasons;
+        public bool IsCollection;
 
 
         public string GetAliases()
@@ -68,6 +68,7 @@ namespace Kyoo.Models
             StartYear = startYear;
             EndYear = endYear;
             ExternalIDs = externalIDs;
+            IsCollection = false;
         }
 
         public Show(long id, string slug, string title, IEnumerable<string> aliases, string path, string overview, string trailerUrl, Status? status, long? startYear, long? endYear, string imgPrimary, string imgThumb, string imgLogo, string imgBackdrop, string externalIDs)
@@ -87,6 +88,19 @@ namespace Kyoo.Models
             ImgLogo = imgLogo;
             ImgBackdrop = imgBackdrop;
             ExternalIDs = externalIDs;
+            IsCollection = false;
+        }
+
+        public static Show FromQueryReader(System.Data.SQLite.SQLiteDataReader reader)
+        {
+            return new Show()
+            {
+                Slug = reader["slug"] as string,
+                Title = reader["title"] as string,
+                StartYear = reader["startYear"] as long?,
+                EndYear = reader["endYear"] as long?,
+                IsCollection = reader[4] as string == "1"
+            };
         }
 
         public static Show FromReader(System.Data.SQLite.SQLiteDataReader reader)
@@ -99,9 +113,9 @@ namespace Kyoo.Models
                 reader["overview"] as string,
                 reader["trailerUrl"] as string,
                 reader["status"] as Status?,
-                reader["startYear"] as long?, 
+                reader["startYear"] as long?,
                 reader["endYear"] as long?,
-                reader["imgPrimary"] as string, 
+                reader["imgPrimary"] as string,
                 reader["imgThumb"] as string,
                 reader["imgLogo"] as string,
                 reader["imgBackdrop"] as string,

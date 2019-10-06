@@ -79,6 +79,11 @@ namespace Kyoo.InternalAPI
 
         //For all the following methods, it should use all providers and merge the data.
 
+        public Task<Collection> GetCollectionFromName(string name)
+        {
+            return providers[0].GetCollectionFromName(name);
+        }
+
         public Task<Show> GetImages(Show show)
         {
             return providers[0].GetImages(show);

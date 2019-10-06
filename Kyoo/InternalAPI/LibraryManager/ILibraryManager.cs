@@ -35,6 +35,8 @@ namespace Kyoo.InternalAPI
         Collection GetCollection(string slug);
 
         //Check if value exists
+        bool IsCollectionRegistered(string collectionSlug);
+        bool IsCollectionRegistered(string collectionSlug, out long collectionID);
         bool IsShowRegistered(string showPath);
         bool IsShowRegistered(string showPath, out long showID);
         bool IsSeasonRegistered(long showID, long seasonNumber);
@@ -52,6 +54,7 @@ namespace Kyoo.InternalAPI
         long GetOrCreateStudio(Studio studio);
 
         void RegisterShowPeople(long showID, List<People> actors);
+        void AddShowToCollection(long showID, long collectionID);
 
         void ClearSubtitles(long episodeID);
     }

@@ -102,6 +102,8 @@ namespace Kyoo.InternalAPI
 					    slug TEXT UNIQUE,
 					    name TEXT,
                         overview TEXT,
+                        starYear INTEGER,
+                        endYear INTEGER,
                         imgPrimary TEXT
 				    );
 				    CREATE TABLE collectionsLinks(
@@ -253,19 +255,17 @@ namespace Kyoo.InternalAPI
 
         public IEnumerable<Show> QueryShows(string selection)
         {
-            string query = "SELECT * FROM shows ORDER BY title;";
+            List<Show> shows = new List<Show>();
+            SQLiteDataReader reader;
+            string query = "SELECT slug, title, startYear, endYear, '0' FROM shows LEFT JOIN collectionsLinks l ON l.showID = shows.id WHERE l.showID IS NULL UNION SELECT slug, name, startYear, endYear, '1' FROM collections ORDER BY title;";
 
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
-                SQLiteDataReader reader = cmd.ExecuteReader();
-
-                List<Show> shows = new List<Show>();
-
+                reader = cmd.ExecuteReader();
                 while (reader.Read())
-                    shows.Add(Show.FromReader(reader));
-
-                return shows;
+                    shows.Add(Show.FromQueryReader(reader));
             }
+            return shows;
         }
 
         public Show GetShowBySlug(string slug)
@@ -564,6 +564,31 @@ namespace Kyoo.InternalAPI
         #endregion
 
         #region Check if items exists
+        public bool IsCollectionRegistered(string collectionSlug)
+        {
+            string query = "SELECT (id) FROM collections WHERE slug = $slug;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$slug", collectionSlug);
+
+                return cmd.ExecuteScalar() != null;
+            }
+        }
+
+        public bool IsCollectionRegistered(string collectionSlug, out long collectionID)
+        {
+            string query = "SELECT (id) FROM collections WHERE slug = $slug;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$slug", collectionSlug);
+                collectionID = cmd.ExecuteScalar() as long? ?? -1;
+
+                return collectionID != -1;
+            }
+        }
+
         public bool IsShowRegistered(string showPath)
         {
             string query = "SELECT (id) FROM shows WHERE path = $path;";
@@ -828,6 +853,18 @@ namespace Kyoo.InternalAPI
                     cmd.Parameters.AddWithValue("$type", people[i].Type);
                     cmd.ExecuteNonQuery();
                 }
+            }
+        }
+
+        public void AddShowToCollection(long showID, long collectionID)
+        {
+            string linkQuery = "INSERT INTO collectionsLinks (collectionID, showID) VALUES($collectionID, $showID);";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(linkQuery, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$collectionID", collectionID);
+                cmd.Parameters.AddWithValue("$showID", showID);
+                cmd.ExecuteNonQuery();
             }
         }
 
