@@ -1,11 +1,11 @@
-import { Injectable } from '@angular/core';
-import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, EMPTY } from 'rxjs';
+import { Injectable } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
+import { EMPTY, Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Show } from "../../models/show";
 
-import { MatSnackBar } from '@angular/material/snack-bar'; 
 
 @Injectable()
 export class LibraryResolverService implements Resolve<Show[]>

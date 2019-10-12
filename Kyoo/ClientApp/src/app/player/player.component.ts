@@ -1,7 +1,7 @@
 import { Component, OnInit, ViewEncapsulation } from '@angular/core';
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { DomSanitizer, Title } from "@angular/platform-browser";
-import { Event, ActivatedRoute, Router, NavigationStart } from "@angular/router";
+import { ActivatedRoute, Event, NavigationCancel, NavigationEnd, NavigationStart, Router } from "@angular/router";
 import { Track, WatchItem } from "../../models/watch-item";
 
 declare var SubtitleManager: any;
@@ -267,6 +267,12 @@ export class PlayerComponent implements OnInit
         case event instanceof NavigationStart:
         {
           loadIndicator.classList.remove("d-none");
+          break;
+        }
+        case event instanceof NavigationEnd:
+        case event instanceof NavigationCancel:
+        {
+          loadIndicator.classList.add("d-none");
           break;
         }
         default:

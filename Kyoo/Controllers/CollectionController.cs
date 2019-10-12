@@ -16,7 +16,7 @@ namespace Kyoo.Controllers
             this.libraryManager = libraryManager;
         }
 
-        [HttpGet]
+        [HttpGet("{collectionSlug}")]
         public ActionResult<Collection> GetShows(string collectionSlug)
         {
             Collection collection = libraryManager.GetCollection(collectionSlug);

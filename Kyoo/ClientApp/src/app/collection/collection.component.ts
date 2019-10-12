@@ -1,15 +1,21 @@
 import { Component, OnInit } from '@angular/core';
+import { Collection } from "../../models/collection";
+import { ActivatedRoute } from "@angular/router";
 
 @Component({
   selector: 'app-collection',
   templateUrl: './collection.component.html',
   styleUrls: ['./collection.component.scss']
 })
-export class CollectionComponent implements OnInit {
+export class CollectionComponent implements OnInit
+{
+  collection: Collection;
 
-  constructor() { }
+  constructor(private route: ActivatedRoute) { }
 
-  ngOnInit() {
+  ngOnInit()
+  {
+    this.collection = this.route.snapshot.data.collection;
   }
 
 }
