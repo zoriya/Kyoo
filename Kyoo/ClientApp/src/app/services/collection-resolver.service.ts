@@ -3,11 +3,12 @@ import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
 import { EMPTY, Observable } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { catchError } from 'rxjs/operators'
 import { Collection } from "../../models/collection";
 
-
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class CollectionResolverService implements Resolve<Collection>
 {
   constructor(private http: HttpClient, private snackBar: MatSnackBar) { }

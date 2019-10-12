@@ -548,7 +548,7 @@ namespace Kyoo.InternalAPI
 
         public IEnumerable<Show> GetShowsInCollection(long collectionID)
         {
-            string query = "SELECT * FROM shows JOIN collectionsLink l ON l.showID = shows.id WHERE l.collectionID = $id;";
+            string query = "SELECT * FROM shows JOIN collectionsLinks l ON l.showID = shows.id WHERE l.collectionID = $id;";
 
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {

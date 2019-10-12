@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { DomSanitizer } from '@angular/platform-browser';
 import { Show } from "../../models/show";
@@ -10,7 +10,7 @@ import { Show } from "../../models/show";
 })
 export class BrowseComponent implements OnInit
 {
-  shows: Show[];
+  @Input() shows: Show[];
   sortType: string = "title";
   sortUp: boolean = true;
 
@@ -20,7 +20,8 @@ export class BrowseComponent implements OnInit
 
   ngOnInit()
   {
-    this.shows = this.route.snapshot.data.shows;
+    if (this.shows == null)
+      this.shows = this.route.snapshot.data.shows;
   }
 
   getThumb(slug: string)

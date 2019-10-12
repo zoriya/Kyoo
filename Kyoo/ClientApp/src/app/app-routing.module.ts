@@ -16,7 +16,7 @@ const routes: Routes = [
   { path: "browse", component: BrowseComponent, pathMatch: "full", resolve: { shows: LibraryResolverService } },
   { path: "browse/:library-slug", component: BrowseComponent, resolve: { shows: LibraryResolverService } },
   { path: "show/:show-slug", component: ShowDetailsComponent, resolve: { show: ShowResolverService } },
-  { path: "collection/:collection-slug", component: CollectionComponent, resolve: { shows: CollectionResolverService } },
+  { path: "collection/:collection-slug", component: CollectionComponent, resolve: { collection: CollectionResolverService } },
   { path: "watch/:item", component: PlayerComponent, resolve: { item: StreamResolverService } },
   { path: "**", component: NotFoundComponent }
 ];
