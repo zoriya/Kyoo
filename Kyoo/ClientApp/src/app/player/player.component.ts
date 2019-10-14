@@ -62,6 +62,12 @@ export class PlayerComponent implements OnInit
 
       this.title.setTitle(this.item.showTitle + " S" + this.item.seasonNumber + ":E" + this.item.episodeNumber + " - Kyoo");
 
+		  if (navigator.userAgent.match(/Mobi/))
+		  {
+			  this.fullscreen();
+			  screen.orientation.lock("landscape");
+			  $("#fullscreen").addClass("d-none");
+		  }
       if (this.player)
         this.init();
     });
@@ -154,33 +160,36 @@ export class PlayerComponent implements OnInit
       }
     });
 
-    $(document).mousemove((event) =>
-    {
-      if (this.seeking)
-      {
-        let time: number = this.getTimeFromSeekbar(progressBar, event.pageX);
-        this.updateTime(time);
-      }
-      else
-      {
-        document.getElementById("hover").classList.remove("idle");
-        document.documentElement.style.cursor = "";
+	  if (!navigator.userAgent.match(/Mobi/))
+	  {
+		  $(document).mousemove((event) =>
+		  {
+			  if (this.seeking)
+			  {
+				  let time: number = this.getTimeFromSeekbar(progressBar, event.pageX);
+				  this.updateTime(time);
+			  }
+			  else
+			  {
+				  document.getElementById("hover").classList.remove("idle");
+				  document.documentElement.style.cursor = "";
 
-        clearTimeout(this.videoHider);
+				  clearTimeout(this.videoHider);
 
-        this.videoHider = setTimeout((ev: MouseEvent) =>
-        {
-          if (!this.player.paused && !this.controllerHovered)
-          {
-            document.getElementById("hover").classList.add("idle");
-            document.documentElement.style.cursor = "none";
-          }
-        }, 2000);
-      }
-    });
+				  this.videoHider = setTimeout((ev: MouseEvent) =>
+				  {
+					  if (!this.player.paused && !this.controllerHovered)
+					  {
+						  document.getElementById("hover").classList.add("idle");
+						  document.documentElement.style.cursor = "none";
+					  }
+				  }, 2000);
+			  }
+		  });
 
-    $("#controller").mouseenter(() => { this.controllerHovered = true; });
-    $("#controller").mouseleave(() => { this.controllerHovered = false; });
+		  $("#controller").mouseenter(() => { this.controllerHovered = true; });
+		  $("#controller").mouseleave(() => { this.controllerHovered = false; });
+	  }
 
     //Initialize the timout at the document initialization.
     this.videoHider = setTimeout(() =>
@@ -335,7 +344,33 @@ export class PlayerComponent implements OnInit
 
     $(document).unbind();
     $(window).unbind();
-  }
+	}
+
+	videoClicked()
+	{
+		if (!navigator.userAgent.match(/Mobi/))
+			this.tooglePlayback();
+		else
+		{
+			if ($("#hover").hasClass("idle"))
+			{
+				$("#hover").removeClass("idle");
+				clearTimeout(this.videoHider);
+				this.videoHider = setTimeout((ev: MouseEvent) =>
+				{
+					if (!this.player.paused)
+					{
+						document.getElementById("hover").classList.add("idle");
+					}
+				}, 1000);
+			}
+			else
+			{
+				$("#hover").addClass("idle");
+				clearTimeout(this.videoHider);
+			}
+		}
+	}
 
   tooglePlayback()
   {
