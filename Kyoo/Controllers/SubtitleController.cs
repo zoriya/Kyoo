@@ -2,6 +2,7 @@
 using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -87,7 +88,6 @@ namespace Kyoo.Controllers
     public class ConvertSubripToVtt : IActionResult
     {
         private readonly string path;
-        private string lastLine = "";
 
         public ConvertSubripToVtt(string subtitlePath)
         {
@@ -96,8 +96,10 @@ namespace Kyoo.Controllers
 
         public async Task ExecuteResultAsync(ActionContext context)
         {
+            string line;
+            List<string> lines = new List<string>();
+
             context.HttpContext.Response.StatusCode = 200;
-            //HttpContext.Response.Headers.Add("Content-Disposition", "attachement");
             context.HttpContext.Response.Headers.Add("Content-Type", "text/vtt");
 
             using (StreamWriter writer = new StreamWriter(context.HttpContext.Response.Body))
@@ -106,16 +108,20 @@ namespace Kyoo.Controllers
                 await writer.WriteLineAsync("");
                 await writer.WriteLineAsync("");
 
-                string line;
                 using (StreamReader reader = new StreamReader(path))
                 {
                     while ((line = await reader.ReadLineAsync()) != null)
                     {
-                        string processedLine = ConvertLine(line);
-                        if(processedLine != null)
-                            await writer.WriteLineAsync(processedLine);
-
-                        lastLine = processedLine;
+                        if (line == "")
+                        {
+                            lines.Add("");
+                            List<string> processedBlock = ConvertBlock(lines);
+                            for (int i = 0; i < processedBlock.Count; i++)
+                                await writer.WriteLineAsync(processedBlock[i]);
+                            lines.Clear();
+                        }
+                        else
+                            lines.Add(line);
                     }
                 }
             }
@@ -123,18 +129,51 @@ namespace Kyoo.Controllers
             await context.HttpContext.Response.Body.FlushAsync();
         }
 
-        public string ConvertLine(string line)
+        public List<string> ConvertBlock(List<string> lines)
         {
-            if (lastLine == "")
-                line = null;
-
-            if (lastLine == null) //The line is a timecode only if the last line is an index line and we already set it to null.
+            lines[1] = lines[1].Replace(',', '.');
+            if (lines[2].Length > 5)
             {
-                line = line.Replace(',', '.');
-                line += " line:93%";
+                Debug.WriteLine("&Line2 sub: " + lines[2].Substring(0, 6));
+                switch (lines[2].Substring(0, 6))
+                {
+                    case "{\\an1}":
+                        lines[1] += " line:93% position:15%";
+                        break;
+                    case "{\\an2}":
+                        lines[1] += " line:93%";
+                        break;
+                    case "{\\an3}":
+                        lines[1] += " line:93% position:85%";
+                        break;
+                    case "{\\an4}":
+                        lines[1] += " line:50% position:15%";
+                        break;
+                    case "{\\an5}":
+                        lines[1] += " line:50%";
+                        break;
+                    case "{\\an6}":
+                        lines[1] += " line:50% position:85%";
+                        break;
+                    case "{\\an7}":
+                        lines[1] += " line:7% position:15%";
+                        break;
+                    case "{\\an8}":
+                        lines[1] += " line:7%";
+                        break;
+                    case "{\\an9}":
+                        lines[1] += " line:7% position:85%";
+                        break;
+                    default:
+                        lines[1] += " line:93%";
+                        break;
+                }
             }
 
-            return line;
+            if (lines[2].StartsWith("{\\an"))
+                lines[2] = lines[2].Substring(6);
+
+            return lines;
         }
     }
 }
