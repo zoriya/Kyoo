@@ -1,6 +1,6 @@
 <div id="root">
   <div class="player">
-    <video id="player" poster="backdrop/{{this.item.showSlug}}" autoplay muted (click)="tooglePlayback()" class="video-js">
+    <video id="player" poster="backdrop/{{this.item.showSlug}}" autoplay muted (click)="videoClicked()" class="video-js">
       <source src="/video/{{this.item.link}}" />
       <source src="/video/transmux/{{this.item.link}}" type="video/mp4" />
     </video>
