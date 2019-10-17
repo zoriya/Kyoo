@@ -1,6 +1,7 @@
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatRippleModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
@@ -13,11 +14,11 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { BrowseComponent } from './browse/browse.component';
+import { CollectionComponent } from './collection/collection.component';
 import { EpisodesListComponent } from './episodes-list/episodes-list.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { PlayerComponent } from './player/player.component';
 import { ShowDetailsComponent } from './show-details/show-details.component';
-import { CollectionComponent } from './collection/collection.component';
 
 
 @NgModule({
@@ -42,7 +43,8 @@ import { CollectionComponent } from './collection/collection.component';
     MatSelectModule,
     MatMenuModule,
     MatSliderModule,
-    MatTooltipModule
+	  MatTooltipModule,
+	  MatRippleModule
   ],
   providers: [],
   bootstrap: [AppComponent]

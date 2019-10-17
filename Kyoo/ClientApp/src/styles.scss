@@ -41,6 +41,10 @@ $theme: mat-dark-theme($primary, $accent);
 // Include the default theme styles.
 @include angular-material-theme($theme);
 
+.mat-ripple-element
+{
+  background-color: rgba(255, 255, 255, .3) !important;
+}
 
 //Material Icons
 @font-face {
