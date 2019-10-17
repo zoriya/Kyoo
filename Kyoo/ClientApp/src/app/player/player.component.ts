@@ -202,17 +202,26 @@ export class PlayerComponent implements OnInit
     }, 1000);
 
     document.addEventListener("fullscreenchange", () =>
-    {
-      if (document.fullscreenElement != null)
-      {
-        this.fullscreenIcon = "fullscreen_exit";
-        this.fullscreenTooltip = "Exit fullscreen";
-      }
-      else
-      {
-        this.fullscreenIcon = "fullscreen";
-        this.fullscreenTooltip = "Fullscreen";
-      }
+	  {
+		  if (navigator.userAgent.match(/Mobi/))
+		  {
+			  if (document.fullscreenElement == null)
+			    this.router.navigate(["/show/" + this.item.showSlug]);
+		  }
+		  else
+		  {
+			  if (document.fullscreenElement != null)
+			  {
+				  this.fullscreenIcon = "fullscreen_exit";
+				  this.fullscreenTooltip = "Exit fullscreen";
+			  }
+			  else
+			  {
+				  this.fullscreenIcon = "fullscreen";
+				  this.fullscreenTooltip = "Fullscreen";
+			  }
+		  }
+      
     });
 
     $(window).keydown((e) =>
