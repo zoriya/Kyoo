@@ -16,6 +16,8 @@ namespace Kyoo.InternalAPI
         List<Season> GetSeasons(long showID);
         int GetSeasonCount(string showSlug, long seasonNumber);
         IEnumerable<Show> GetShowsInCollection(long collectionID);
+        IEnumerable<Show> GetShowsByPeople(long peopleID);
+        IEnumerable<string> GetLibrariesPath();
 
         //Internal HTML read
         (List<Track> audios, List<Track> subtitles) GetStreams(long episodeID, string showSlug);
@@ -55,6 +57,7 @@ namespace Kyoo.InternalAPI
 
         void RegisterShowPeople(long showID, List<People> actors);
         void AddShowToCollection(long showID, long collectionID);
+        void RegisterInLibrary(long showID, string libraryPath);
 
         void ClearSubtitles(long episodeID);
     }

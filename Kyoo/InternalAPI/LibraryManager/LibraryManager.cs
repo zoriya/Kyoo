@@ -88,12 +88,13 @@ namespace Kyoo.InternalAPI
 				    CREATE TABLE libraries(
 					    id INTEGER PRIMARY KEY UNIQUE, 
 					    slug TEXT UNIQUE, 
-					    name TEXT
+					    name TEXT,
+					    path TEXT
 				    );
 				    CREATE TABLE librariesLinks(
-					    librarieID INTEGER, 
+					    libraryID INTEGER, 
 					    showID INTEGER, 
-					    FOREIGN KEY(librarieID) REFERENCES libraries(id), 
+					    FOREIGN KEY(libraryID) REFERENCES libraries(id), 
 					    FOREIGN KEY(showID) REFERENCES shows(id)
 				    );
 
@@ -185,6 +186,23 @@ namespace Kyoo.InternalAPI
 
                 while (reader.Read())
                     libraries.Add(Library.FromReader(reader));
+
+                return libraries;
+            }
+        }
+
+        public IEnumerable<string> GetLibrariesPath()
+        {
+            string query = "SELECT path FROM libraries;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                SQLiteDataReader reader = cmd.ExecuteReader();
+
+                List<string> libraries = new List<string>();
+
+                while (reader.Read())
+                    libraries.Add(reader["path"] as string);
 
                 return libraries;
             }
@@ -561,6 +579,22 @@ namespace Kyoo.InternalAPI
                 return shows;
             }
         }
+
+        public IEnumerable<Show> GetShowsByPeople(long peopleID)
+        {
+            string query = "SELECT * FROM shows JOIN peopleLinks l ON l.showID = shows.id WHERE l.peopleID = $id;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$id", peopleID);
+                SQLiteDataReader reader = cmd.ExecuteReader();
+                List<Show> shows = new List<Show>();
+                while (reader.Read())
+                    shows.Add(Show.FromReader(reader));
+
+                return shows;
+            }
+        }
         #endregion
 
         #region Check if items exists
@@ -723,6 +757,18 @@ namespace Kyoo.InternalAPI
 
                 cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
                 return (long)cmd.ExecuteScalar();
+            }
+        }
+
+        public void RegisterInLibrary(long showID, string libraryPath)
+        {
+            string query = "INSERT INTO librariesLinks (libraryID, showID) SELECT id, $showID FROM libraries WHERE libraries.path = $libraryPath;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$libraryPath", libraryPath);
+                cmd.Parameters.AddWithValue("$showID", showID);
+                cmd.ExecuteNonQuery();
             }
         }
 
