@@ -2,7 +2,7 @@
 
 namespace Kyoo.Models
 {
-    public struct Library
+    public class Library
     {
         [JsonIgnore] public readonly long id;
         public string Slug;

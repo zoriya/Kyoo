@@ -27,7 +27,7 @@ export class LibraryResolverService implements Resolve<Show[]>
     }
     else
     {
-      return this.http.get<Show[]>("api/library/" + slug).pipe(catchError((error: HttpErrorResponse) =>
+      return this.http.get<Show[]>("api/libraries/" + slug).pipe(catchError((error: HttpErrorResponse) =>
       {
         console.log(error.status + " - " + error.message);
         if (error.status == 404)

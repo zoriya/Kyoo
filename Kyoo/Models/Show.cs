@@ -99,7 +99,7 @@ namespace Kyoo.Models
                 Title = reader["title"] as string,
                 StartYear = reader["startYear"] as long?,
                 EndYear = reader["endYear"] as long?,
-                IsCollection = reader[4] as string == "1"
+                IsCollection = reader["'0'"] as string == "1"
             };
         }
 

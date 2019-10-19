@@ -19,7 +19,7 @@ namespace Kyoo.Controllers
         [HttpGet]
         public IEnumerable<Show> GetShows()
         {
-            return libraryManager.QueryShows(null);
+            return libraryManager.GetShows();
         }
 
         [HttpGet("{slug}")]

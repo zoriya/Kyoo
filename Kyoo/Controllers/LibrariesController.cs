@@ -21,5 +21,16 @@ namespace Kyoo.Controllers
         {
             return libraryManager.GetLibraries();
         }
+
+        [HttpGet("{librarySlug}")]
+        public ActionResult<IEnumerable<Show>> GetShows(string librarySlug)
+        {
+            Library library = libraryManager.GetLibrary(librarySlug);
+
+            if (library == null)
+                return NotFound();
+
+            return libraryManager.GetShowsInLibrary(library.id);
+        }
     }
 }

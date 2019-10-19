@@ -271,7 +271,23 @@ namespace Kyoo.InternalAPI
         }
 
 
-        public IEnumerable<Show> QueryShows(string selection)
+        public Library GetLibrary(string librarySlug)
+        {
+            string query = "SELECT * FROM libraries WHERE slug = $slug;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$slug", librarySlug);
+                SQLiteDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                    return Library.FromReader(reader);
+                else
+                    return null;
+            }
+        }
+
+        public IEnumerable<Show> GetShows()
         {
             List<Show> shows = new List<Show>();
             SQLiteDataReader reader;
@@ -578,6 +594,22 @@ namespace Kyoo.InternalAPI
 
                 return shows;
             }
+        }
+
+        public List<Show> GetShowsInLibrary(long libraryID)
+        {
+            List<Show> shows = new List<Show>();
+            SQLiteDataReader reader;
+            string query = "SELECT id, slug, title, startYear, endYear, '0' FROM (SELECT id, slug, title, startYear, endYear, '0' FROM shows JOIN librariesLinks lb ON lb.showID = id WHERE lb.libraryID = $libraryID) LEFT JOIN collectionsLinks l ON l.showID = id WHERE l.showID IS NULL UNION SELECT id, slug, name, startYear, endYear, '1' FROM collections JOIN collectionsLinks l ON l.collectionID = collections.id JOIN librariesLinks lb ON lb.showID = l.showID WHERE lb.libraryID = $libraryID ORDER BY title;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$libraryID", libraryID);
+                reader = cmd.ExecuteReader();
+                while (reader.Read())
+                    shows.Add(Show.FromQueryReader(reader));
+            }
+            return shows;
         }
 
         public IEnumerable<Show> GetShowsByPeople(long peopleID)
