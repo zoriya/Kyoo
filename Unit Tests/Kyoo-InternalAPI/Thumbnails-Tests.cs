@@ -1,8 +1,6 @@
-﻿using Kyoo;
-using Kyoo.InternalAPI;
+﻿using Kyoo.InternalAPI;
 using Kyoo.InternalAPI.ThumbnailsManager;
 using Kyoo.Models;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
 using System.Diagnostics;
@@ -12,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace UnitTests.Kyoo_InternalAPI
 {
-    public class Tests
+    public class ThumbnailsTests
     {
         private IConfiguration config;
 
@@ -29,7 +27,7 @@ namespace UnitTests.Kyoo_InternalAPI
         {
             LibraryManager library = new LibraryManager(config);
             ThumbnailsManager manager = new ThumbnailsManager(config);
-            Show show = library.GetShowBySlug(library.QueryShows(null).FirstOrDefault().Slug);
+            Show show = library.GetShowBySlug(library.GetShows().FirstOrDefault().Slug);
             Debug.WriteLine("&Show: " + show.Path);
             string posterPath = Path.Combine(show.Path, "poster.jpg");
             File.Delete(posterPath);
