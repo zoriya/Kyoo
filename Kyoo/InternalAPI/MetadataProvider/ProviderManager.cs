@@ -120,7 +120,7 @@ namespace Kyoo.InternalAPI
             }
 
             Show show = Merge(datas);
-            return thumbnailsManager.Validate(show);
+            return await thumbnailsManager.Validate(show);
         }
 
         public async Task<Season> GetSeason(string showName, long seasonNumber)
@@ -151,13 +151,13 @@ namespace Kyoo.InternalAPI
 
             Episode episode = Merge(datas);
             episode.Path = episodePath;
-            return thumbnailsManager.Validate(episode);
+            return await thumbnailsManager.Validate(episode);
         }
 
         public async Task<List<People>> GetPeople(string id)
         {
             List<People> actors = await providers[0].GetPeople(id);
-            return thumbnailsManager.Validate(actors);
+            return await thumbnailsManager.Validate(actors);
         }
     }
 }

@@ -26,7 +26,7 @@ namespace Kyoo.InternalAPI
             this.libraryManager = libraryManager;
             this.metadataProvider = metadataProvider;
             this.transcoder = transcoder;
-            config = configuration;
+            this.config = configuration;
 
             cancellation = new CancellationTokenSource();
         }
@@ -39,7 +39,7 @@ namespace Kyoo.InternalAPI
         private Task StartAsync(bool watch, CancellationToken cancellationToken)
         {
             Debug.WriteLine("&Crawler started");
-            string[] paths = config.GetSection("libraryPaths").Get<string[]>();
+            IEnumerable<string> paths = libraryManager.GetLibrariesPath();
 
             foreach (string path in paths)
             {
@@ -65,71 +65,72 @@ namespace Kyoo.InternalAPI
                     return;
 
                 if (IsVideo(file))
-                    await TryRegisterEpisode(file);
+                    await ExtractEpisodeData(file, folderPath);
             }
         }
 
         public void Watch(string folderPath, CancellationToken cancellationToken)
         {
-            Debug.WriteLine("&Watching " + folderPath + " for changes");
-            using (FileSystemWatcher watcher = new FileSystemWatcher())
+            //Debug.WriteLine("&Watching " + folderPath + " for changes");
+            //using (FileSystemWatcher watcher = new FileSystemWatcher())
+            //{
+            //    watcher.Path = folderPath;
+            //    watcher.IncludeSubdirectories = true;
+            //    watcher.NotifyFilter = NotifyFilters.LastAccess
+            //                     | NotifyFilters.LastWrite
+            //                     | NotifyFilters.FileName
+            //                     | NotifyFilters.Size
+            //                     | NotifyFilters.DirectoryName;
+
+            //    watcher.Created += FileCreated;
+            //    watcher.Changed += FileChanged;
+            //    watcher.Renamed += FileRenamed;
+            //    watcher.Deleted += FileDeleted;
+
+
+            //    watcher.EnableRaisingEvents = true;
+
+            //    while (!cancellationToken.IsCancellationRequested);
+            //}
+        }
+
+        //private void FileCreated(object sender, FileSystemEventArgs e)
+        //{
+        //    Debug.WriteLine("&File Created at " + e.FullPath);
+        //    if (IsVideo(e.FullPath))
+        //    {
+        //        Debug.WriteLine("&Created file is a video");
+        //        _ = TryRegisterEpisode(e.FullPath);
+        //    }
+        //}
+
+        //private void FileChanged(object sender, FileSystemEventArgs e)
+        //{
+        //    Debug.WriteLine("&File Changed at " + e.FullPath);
+        //}
+
+        //private void FileRenamed(object sender, RenamedEventArgs e)
+        //{
+        //    Debug.WriteLine("&File Renamed at " + e.FullPath);
+        //}
+
+        //private void FileDeleted(object sender, FileSystemEventArgs e)
+        //{
+        //    Debug.WriteLine("&File Deleted at " + e.FullPath);
+        //}
+
+
+
+        private async Task ExtractEpisodeData(string episodePath, string libraryPath)
+        {
+            if (!libraryManager.IsEpisodeRegistered(episodePath))
             {
-                watcher.Path = folderPath;
-                watcher.IncludeSubdirectories = true;
-                watcher.NotifyFilter = NotifyFilters.LastAccess
-                                 | NotifyFilters.LastWrite
-                                 | NotifyFilters.FileName
-                                 | NotifyFilters.Size
-                                 | NotifyFilters.DirectoryName;
-
-                watcher.Created += FileCreated;
-                watcher.Changed += FileChanged;
-                watcher.Renamed += FileRenamed;
-                watcher.Deleted += FileDeleted;
-
-
-                watcher.EnableRaisingEvents = true;
-
-                while (!cancellationToken.IsCancellationRequested);
-            }
-        }
-
-        private void FileCreated(object sender, FileSystemEventArgs e)
-        {
-            Debug.WriteLine("&File Created at " + e.FullPath);
-            if (IsVideo(e.FullPath))
-            {
-                Debug.WriteLine("&Created file is a video");
-                _ = TryRegisterEpisode(e.FullPath);
-            }
-        }
-
-        private void FileChanged(object sender, FileSystemEventArgs e)
-        {
-            Debug.WriteLine("&File Changed at " + e.FullPath);
-        }
-
-        private void FileRenamed(object sender, RenamedEventArgs e)
-        {
-            Debug.WriteLine("&File Renamed at " + e.FullPath);
-        }
-
-        private void FileDeleted(object sender, FileSystemEventArgs e)
-        {
-            Debug.WriteLine("&File Deleted at " + e.FullPath);
-        }
-
-
-
-        private async Task TryRegisterEpisode(string path)
-        {
-            if (!libraryManager.IsEpisodeRegistered(path))
-            {
+                string relativePath = episodePath.Substring(libraryPath.Length);
                 string patern = config.GetValue<string>("regex");
                 Regex regex = new Regex(patern, RegexOptions.IgnoreCase);
-                Match match = regex.Match(path);
+                Match match = regex.Match(relativePath);
 
-                string showPath = Path.GetDirectoryName(path);
+                string showPath = Path.GetDirectoryName(episodePath);
                 string collectionName = match.Groups["Collection"]?.Value;
                 string showName = match.Groups["ShowTitle"].Value;
                 bool seasonSuccess = long.TryParse(match.Groups["Season"].Value, out long seasonNumber);
@@ -143,81 +144,93 @@ namespace Kyoo.InternalAPI
                     episodeNumber = -1;
 
                     regex = new Regex(config.GetValue<string>("absoluteRegex"));
-                    match = regex.Match(path);
+                    match = regex.Match(relativePath);
 
                     showName = match.Groups["ShowTitle"].Value;
                     bool absoluteSucess = long.TryParse(match.Groups["AbsoluteNumber"].Value, out absoluteNumber);
 
                     if (!absoluteSucess)
                     {
-                        Debug.WriteLine("&Couldn't find basic data for the episode (regexs didn't match) at " + path);
+                        Debug.WriteLine("&Couldn't find basic data for the episode (regexs didn't match) at " + episodePath);
                         return;
                     }
                 }
 
-                string showProviderIDs;
-                if (!libraryManager.IsShowRegistered(showPath, out long showID))
-                {
-                    Show show = await metadataProvider.GetShowFromName(showName, showPath);
-                    showProviderIDs = show.ExternalIDs;
-                    showID = libraryManager.RegisterShow(show);
+                Show show = await RegisterOrGetShow(collectionName, showName, showPath, libraryPath);
+                await RegisterEpisode(show, seasonNumber, episodeNumber, absoluteNumber, episodePath);
+            }
+        }
 
-                    if (collectionName != null)
+        private async Task<Show> RegisterOrGetShow(string collectionName, string showTitle, string showPath, string libraryPath)
+        {
+            string showProviderIDs;
+
+            if (!libraryManager.IsShowRegistered(showPath, out long showID))
+            {
+                Show show = await metadataProvider.GetShowFromName(showTitle, showPath);
+                showProviderIDs = show.ExternalIDs;
+                showID = libraryManager.RegisterShow(show);
+
+                libraryManager.RegisterInLibrary(showID, libraryPath);
+                if (collectionName != null)
+                {
+                    if (!libraryManager.IsCollectionRegistered(Slugifier.ToSlug(collectionName), out long collectionID))
                     {
-                        if (!libraryManager.IsCollectionRegistered(Slugifier.ToSlug(collectionName), out long collectionID))
+                        Collection collection = await metadataProvider.GetCollectionFromName(collectionName);
+                        collectionID = libraryManager.RegisterCollection(collection);
+                    }
+                    libraryManager.AddShowToCollection(showID, collectionID);
+                }
+
+                List<People> actors = await metadataProvider.GetPeople(show.ExternalIDs);
+                libraryManager.RegisterShowPeople(showID, actors);
+            }
+            else
+                showProviderIDs = libraryManager.GetShowExternalIDs(showID);
+
+            return new Show { id = showID, ExternalIDs = showProviderIDs, Title = showTitle };
+        }
+
+        private async Task RegisterEpisode(Show show, long seasonNumber, long episodeNumber, long absoluteNumber, string episodePath)
+        {
+            long seasonID = -1;
+            if (seasonNumber != -1)
+            {
+                if (!libraryManager.IsSeasonRegistered(show.id, seasonNumber, out seasonID))
+                {
+                    Season season = await metadataProvider.GetSeason(show.Title, seasonNumber);
+                    season.ShowID = show.id;
+                    seasonID = libraryManager.RegisterSeason(season);
+                }
+            }
+
+            Episode episode = await metadataProvider.GetEpisode(show.ExternalIDs, seasonNumber, episodeNumber, absoluteNumber, episodePath);
+            episode.ShowID = show.id;
+
+            if (seasonID == -1)
+            {
+                if (!libraryManager.IsSeasonRegistered(show.id, episode.seasonNumber, out seasonID))
+                {
+                    Season season = await metadataProvider.GetSeason(show.Title, episode.seasonNumber);
+                    season.ShowID = show.id;
+                    seasonID = libraryManager.RegisterSeason(season);
+                }
+            }
+
+            episode.SeasonID = seasonID;
+            episode.id = libraryManager.RegisterEpisode(episode);
+
+            if (episode.Path.EndsWith(".mkv"))
+            {
+                if (!FindExtractedSubtitles(episode))
+                {
+                    Track[] tracks = transcoder.ExtractSubtitles(episode.Path);
+                    if (tracks != null)
+                    {
+                        foreach (Track track in tracks)
                         {
-                            Collection collection = await metadataProvider.GetCollectionFromName(collectionName);
-                            collectionID = libraryManager.RegisterCollection(collection);
-                        }
-                        libraryManager.AddShowToCollection(showID, collectionID);
-                    }
-
-                    List<People> actors = await metadataProvider.GetPeople(show.ExternalIDs);
-                    libraryManager.RegisterShowPeople(showID, actors);
-                }
-                else
-                    showProviderIDs = libraryManager.GetShowExternalIDs(showID);
-
-                long seasonID = -1;
-                if (seasonNumber != -1)
-                {
-                    if (!libraryManager.IsSeasonRegistered(showID, seasonNumber, out seasonID))
-                    {
-                        Season season = await metadataProvider.GetSeason(showName, seasonNumber);
-                        season.ShowID = showID;
-                        seasonID = libraryManager.RegisterSeason(season);
-                    }
-                }
-
-                Episode episode = await metadataProvider.GetEpisode(showProviderIDs, seasonNumber, episodeNumber, absoluteNumber, path);
-                episode.ShowID = showID;
-
-                if (seasonID == -1)
-                {
-                    if (!libraryManager.IsSeasonRegistered(showID, episode.seasonNumber, out seasonID))
-                    {
-                        Season season = await metadataProvider.GetSeason(showName, episode.seasonNumber);
-                        season.ShowID = showID;
-                        seasonID = libraryManager.RegisterSeason(season);
-                    }
-                }
-
-                episode.SeasonID = seasonID;
-                long episodeID = libraryManager.RegisterEpisode(episode);
-                episode.id = episodeID;
-
-                if (episode.Path.EndsWith(".mkv"))
-                {
-                    if (!FindExtractedSubtitles(episode))
-                    {
-                        Track[] tracks = transcoder.ExtractSubtitles(episode.Path);
-                        if (tracks != null)
-                        {
-                            foreach (Track track in tracks)
-                            {
-                                track.episodeID = episode.id;
-                                libraryManager.RegisterTrack(track);
-                            }
+                            track.episodeID = episode.id;
+                            libraryManager.RegisterTrack(track);
                         }
                     }
                 }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace Kyoo.InternalAPI.ThumbnailsManager
 {
@@ -17,7 +18,7 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
             config = configuration;
         }
 
-        public Show Validate(Show show)
+        public async Task<Show> Validate(Show show)
         {
             string localThumb = Path.Combine(show.Path, "poster.jpg");
             string localLogo = Path.Combine(show.Path, "logo.png");
@@ -30,7 +31,7 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
                 {
                     using (WebClient client = new WebClient())
                     {
-                        client.DownloadFileAsync(new Uri(show.ImgPrimary), localThumb);
+                        await client.DownloadFileTaskAsync(new Uri(show.ImgPrimary), localThumb);
                     }
                 }
             }
@@ -41,7 +42,7 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
                 {
                     using (WebClient client = new WebClient())
                     {
-                        client.DownloadFileAsync(new Uri(show.ImgLogo), localLogo);
+                        await client.DownloadFileTaskAsync(new Uri(show.ImgLogo), localLogo);
                     }
                 }
             }
@@ -52,7 +53,7 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
                 {
                     using (WebClient client = new WebClient())
                     {
-                        client.DownloadFileAsync(new Uri(show.ImgBackdrop), localBackdrop);
+                        await client.DownloadFileTaskAsync(new Uri(show.ImgBackdrop), localBackdrop);
                     }
                 }
             }
@@ -60,7 +61,7 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
             return show;
         }
 
-        public List<People> Validate(List<People> people)
+        public async Task<List<People>> Validate(List<People> people)
         {
             for (int i = 0; i < people?.Count; i++)
             {
@@ -73,7 +74,7 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
                     using (WebClient client = new WebClient())
                     {
                         Debug.WriteLine("&" + localThumb);
-                        client.DownloadFileAsync(new Uri(people[i].imgPrimary), localThumb);
+                        await client.DownloadFileTaskAsync(new Uri(people[i].imgPrimary), localThumb);
                     }
                 }
             }
@@ -81,7 +82,7 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
             return people;
         }
 
-        public Episode Validate(Episode episode)
+        public async Task<Episode> Validate(Episode episode)
         {
             //string localThumb = Path.ChangeExtension(episode.Path, "jpg");            
             string localThumb = episode.Path.Replace(Path.GetExtension(episode.Path), "-thumb.jpg");
@@ -89,7 +90,7 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
             {
                 using (WebClient client = new WebClient())
                 {
-                    client.DownloadFileAsync(new Uri(episode.ImgPrimary), localThumb);
+                    await client.DownloadFileTaskAsync(new Uri(episode.ImgPrimary), localThumb);
                 }
             }
 

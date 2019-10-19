@@ -6,7 +6,7 @@ namespace Kyoo.Models
 {
     public class Show
     {
-        [JsonIgnore] public readonly long id = -1;
+        [JsonIgnore] public long id = -1;
 
         public string Slug;
         public string Title;
