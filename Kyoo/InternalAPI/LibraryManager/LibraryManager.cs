@@ -52,7 +52,7 @@ namespace Kyoo.InternalAPI
 					    imgPrimary TEXT, 
 					    year INTEGER, 
 					    externalIDs TEXT, 
-					    FOREIGN KEY(showID) REFERENCES shows(id)
+					    FOREIGN KEY(showID) REFERENCES shows(id) ON DELETE CASCADE
 				    );
 				    CREATE TABLE episodes(
 					    id INTEGER PRIMARY KEY UNIQUE, 
@@ -61,15 +61,15 @@ namespace Kyoo.InternalAPI
 					    seasonNumber INTEGER, 
 					    episodeNumber INTEGER, 
 					    absoluteNumber INTEGER, 
-					    path TEXT, 
+					    path TEXT UNIQUE, 
 					    title TEXT, 
 					    overview TEXT, 
 					    imgPrimary TEXT, 
 					    releaseDate TEXT,  
 					    runtime INTEGER, 
 					    externalIDs TEXT, 
-					    FOREIGN KEY(showID) REFERENCES shows(id), 
-					    FOREIGN KEY(seasonID) REFERENCES seasons(id)
+					    FOREIGN KEY(showID) REFERENCES shows(id) ON DELETE CASCADE, 
+					    FOREIGN KEY(seasonID) REFERENCES seasons(id) ON DELETE CASCADE
 				    );
 				    CREATE TABLE tracks(
 					    id INTEGER PRIMARY KEY UNIQUE, 
@@ -82,7 +82,7 @@ namespace Kyoo.InternalAPI
 					    isForced BOOLEAN, 
 					    isExternal BOOLEAN,
                         path TEXT,
-					    FOREIGN KEY(episodeID) REFERENCES episodes(id)
+					    FOREIGN KEY(episodeID) REFERENCES episodes(id) ON DELETE CASCADE
 				    );
 
 				    CREATE TABLE libraries(
@@ -94,8 +94,8 @@ namespace Kyoo.InternalAPI
 				    CREATE TABLE librariesLinks(
 					    libraryID INTEGER, 
 					    showID INTEGER, 
-					    FOREIGN KEY(libraryID) REFERENCES libraries(id), 
-					    FOREIGN KEY(showID) REFERENCES shows(id)
+					    FOREIGN KEY(libraryID) REFERENCES libraries(id) ON DELETE CASCADE, 
+					    FOREIGN KEY(showID) REFERENCES shows(id) ON DELETE CASCADE
 				    );
 
                     CREATE TABLE collections(
@@ -103,15 +103,15 @@ namespace Kyoo.InternalAPI
 					    slug TEXT UNIQUE,
 					    name TEXT,
                         overview TEXT,
-                        starYear INTEGER,
+                        startYear INTEGER,
                         endYear INTEGER,
                         imgPrimary TEXT
 				    );
 				    CREATE TABLE collectionsLinks(
 					    collectionID INTEGER, 
 					    showID INTEGER, 
-					    FOREIGN KEY(collectionID) REFERENCES collections(id), 
-					    FOREIGN KEY(showID) REFERENCES shows(id)
+					    FOREIGN KEY(collectionID) REFERENCES collections(id) ON DELETE CASCADE, 
+					    FOREIGN KEY(showID) REFERENCES shows(id) ON DELETE CASCADE
 				    );
 
 				    CREATE TABLE studios(
@@ -122,8 +122,8 @@ namespace Kyoo.InternalAPI
 				    CREATE TABLE studiosLinks(
 					    studioID INTEGER, 
 					    showID INTEGER, 
-					    FOREIGN KEY(studioID) REFERENCES studios(id), 
-					    FOREIGN KEY(showID) REFERENCES shows(id)
+					    FOREIGN KEY(studioID) REFERENCES studios(id) ON DELETE CASCADE, 
+					    FOREIGN KEY(showID) REFERENCES shows(id) ON DELETE CASCADE
 				    );
 
 				    CREATE TABLE people(
@@ -138,8 +138,8 @@ namespace Kyoo.InternalAPI
 					    showID INTEGER, 
 					    role TEXT, 
 					    type TEXT, 
-					    FOREIGN KEY(peopleID) REFERENCES people(id), 
-					    FOREIGN KEY(showID) REFERENCES shows(id)
+					    FOREIGN KEY(peopleID) REFERENCES people(id) ON DELETE CASCADE, 
+					    FOREIGN KEY(showID) REFERENCES shows(id) ON DELETE CASCADE
 				    );
 
 				    CREATE TABLE genres(
@@ -150,8 +150,8 @@ namespace Kyoo.InternalAPI
 				    CREATE TABLE genresLinks(
 					    genreID INTEGER, 
 					    showID INTEGER, 
-					    FOREIGN KEY(genreID) REFERENCES genres(id), 
-					    FOREIGN KEY(showID) REFERENCES shows(id)
+					    FOREIGN KEY(genreID) REFERENCES genres(id) ON DELETE CASCADE, 
+					    FOREIGN KEY(showID) REFERENCES shows(id) ON DELETE CASCADE
 				    );";
 
                 using (SQLiteCommand createCmd = new SQLiteCommand(createStatement, sqlConnection))
@@ -404,6 +404,25 @@ namespace Kyoo.InternalAPI
             }
         }
 
+        public List<Episode> GetEpisodes(long showID, long seasonNumber)
+        {
+            string query = "SELECT * FROM episodes WHERE episodes.showID = $showID AND episodes.seasonNumber = $seasonNumber ORDER BY episodeNumber;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$showID", showID);
+                cmd.Parameters.AddWithValue("$seasonNumber", seasonNumber);
+                SQLiteDataReader reader = cmd.ExecuteReader();
+
+                List<Episode> episodes = new List<Episode>();
+
+                while (reader.Read())
+                    episodes.Add(Episode.FromReader(reader));
+
+                return episodes;
+            }
+        }
+
         public Episode GetEpisode(string showSlug, long seasonNumber, long episodeNumber)
         {
             string query = "SELECT * FROM episodes JOIN shows ON shows.id = episodes.showID WHERE shows.slug = $showSlug AND episodes.seasonNumber = $seasonNumber AND episodes.episodeNumber = $episodeNumber;";
@@ -627,6 +646,21 @@ namespace Kyoo.InternalAPI
                 return shows;
             }
         }
+
+        public IEnumerable<Episode> GetAllEpisodes()
+        {
+            List<Episode> episodes = new List<Episode>();
+            string query = "SELECT * FROM episodes;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                SQLiteDataReader reader = cmd.ExecuteReader();
+
+                while (reader.Read())
+                    episodes.Add(Episode.FromReader(reader));
+                return episodes;
+            }
+        }
         #endregion
 
         #region Check if items exists
@@ -724,12 +758,22 @@ namespace Kyoo.InternalAPI
             string query = "INSERT INTO genres (slug, name) VALUES($slug, $name);";
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
-                cmd.Parameters.AddWithValue("$slug", genre.Slug);
-                cmd.Parameters.AddWithValue("$name", genre.Name);
-                cmd.ExecuteNonQuery();
+                try
+                {
+                    cmd.Parameters.AddWithValue("$slug", genre.Slug);
+                    cmd.Parameters.AddWithValue("$name", genre.Name);
+                    cmd.ExecuteNonQuery();
 
-                cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
-                return (long)cmd.ExecuteScalar();
+                    cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
+                    return (long)cmd.ExecuteScalar();
+                }
+                catch
+                {
+                    Console.Error.WriteLine("SQL error while trying to insert a people ({0}).", genre.Name);
+                    cmd.CommandText = "SELECT * FROM genres WHERE slug = $slug";
+                    cmd.Parameters.AddWithValue("$slug", genre.Slug);
+                    return (long)cmd.ExecuteScalar();
+                }
             }
         }
 
@@ -743,12 +787,22 @@ namespace Kyoo.InternalAPI
             string query = "INSERT INTO studios (slug, name) VALUES($slug, $name);";
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
-                cmd.Parameters.AddWithValue("$slug", studio.Slug);
-                cmd.Parameters.AddWithValue("$name", studio.Name);
-                cmd.ExecuteNonQuery();
+                try
+                {
+                    cmd.Parameters.AddWithValue("$slug", studio.Slug);
+                    cmd.Parameters.AddWithValue("$name", studio.Name);
+                    cmd.ExecuteNonQuery();
 
-                cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
-                return (long)cmd.ExecuteScalar();
+                    cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
+                    return (long)cmd.ExecuteScalar();
+                }
+                catch (SQLiteException)
+                {
+                    Console.Error.WriteLine("SQL error while trying to insert a studio ({0}).", studio.Name);
+                    cmd.CommandText = "SELECT * FROM studios WHERE slug = $slug";
+                    cmd.Parameters.AddWithValue("$slug", studio.Slug);
+                    return (long)cmd.ExecuteScalar();
+                }
             }
         }
 
@@ -762,14 +816,25 @@ namespace Kyoo.InternalAPI
             string query = "INSERT INTO people (slug, name, imgPrimary, externalIDs) VALUES($slug, $name, $imgPrimary, $externalIDs);";
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
-                cmd.Parameters.AddWithValue("$slug", people.slug);
-                cmd.Parameters.AddWithValue("$name", people.Name);
-                cmd.Parameters.AddWithValue("$imgPrimary", people.imgPrimary);
-                cmd.Parameters.AddWithValue("$externalIDs", people.externalIDs);
-                cmd.ExecuteNonQuery();
+                try
+                {
+                    cmd.Parameters.AddWithValue("$slug", people.slug);
+                    cmd.Parameters.AddWithValue("$name", people.Name);
+                    cmd.Parameters.AddWithValue("$imgPrimary", people.imgPrimary);
+                    cmd.Parameters.AddWithValue("$externalIDs", people.externalIDs);
+                    cmd.ExecuteNonQuery();
 
-                cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
-                return (long)cmd.ExecuteScalar();
+                    cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
+                    return (long)cmd.ExecuteScalar();
+                }
+                catch
+                {
+                    Console.Error.WriteLine("SQL error while trying to insert a people ({0}).", people.Name);
+                    cmd.CommandText = "SELECT * FROM people WHERE slug = $slug";
+                    cmd.Parameters.AddWithValue("$slug", people.slug);
+                    return (long)cmd.ExecuteScalar();
+                }
+
             }
         }
         #endregion
@@ -781,14 +846,24 @@ namespace Kyoo.InternalAPI
 
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
-                cmd.Parameters.AddWithValue("$slug", collection.Slug);
-                cmd.Parameters.AddWithValue("$name", collection.Name);
-                cmd.Parameters.AddWithValue("$overview", collection.Overview);
-                cmd.Parameters.AddWithValue("$imgPrimary", collection.ImgPrimary);
-                cmd.ExecuteNonQuery();
+                try
+                {
+                    cmd.Parameters.AddWithValue("$slug", collection.Slug);
+                    cmd.Parameters.AddWithValue("$name", collection.Name);
+                    cmd.Parameters.AddWithValue("$overview", collection.Overview);
+                    cmd.Parameters.AddWithValue("$imgPrimary", collection.ImgPrimary);
+                    cmd.ExecuteNonQuery();
 
-                cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
-                return (long)cmd.ExecuteScalar();
+                    cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
+                    return (long)cmd.ExecuteScalar();
+                }
+                catch
+                {
+                    Console.Error.WriteLine("SQL error while trying to create a collection. Collection probably already registered.");
+                    cmd.CommandText = "SELECT * FROM collections WHERE slug = $slug";
+                    cmd.Parameters.AddWithValue("$slug", collection.Slug);
+                    return (long)cmd.ExecuteScalar();
+                }
             }
         }
 
@@ -809,47 +884,55 @@ namespace Kyoo.InternalAPI
             string query = "INSERT INTO shows (slug, title, aliases, path, overview, trailerUrl, startYear, endYear, imgPrimary, imgThumb, imgLogo, imgBackdrop, externalIDs) VALUES($slug, $title, $aliases, $path, $overview, $trailerUrl, $startYear, $endYear, $imgPrimary, $imgThumb, $imgLogo, $imgBackdrop, $externalIDs);";
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
-                cmd.Parameters.AddWithValue("$slug", show.Slug);
-                cmd.Parameters.AddWithValue("$title", show.Title);
-                cmd.Parameters.AddWithValue("$aliases", show.GetAliases());
-                cmd.Parameters.AddWithValue("$path", show.Path);
-                cmd.Parameters.AddWithValue("$overview", show.Overview);
-                cmd.Parameters.AddWithValue("$trailerUrl", show.TrailerUrl);
-                cmd.Parameters.AddWithValue("$status", show.Status);
-                cmd.Parameters.AddWithValue("$startYear", show.StartYear);
-                cmd.Parameters.AddWithValue("$endYear", show.EndYear);
-                cmd.Parameters.AddWithValue("$imgPrimary", show.ImgPrimary);
-                cmd.Parameters.AddWithValue("$imgThumb", show.ImgThumb);
-                cmd.Parameters.AddWithValue("$imgLogo", show.ImgLogo);
-                cmd.Parameters.AddWithValue("$imgBackdrop", show.ImgBackdrop);
-                cmd.Parameters.AddWithValue("$externalIDs", show.ExternalIDs);
-                cmd.ExecuteNonQuery();
-
-                cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
-                long showID = (long)cmd.ExecuteScalar();
-
-                if (show.Genres != null)
+                try
                 {
-                    cmd.CommandText = "INSERT INTO genresLinks (genreID, showID) VALUES($genreID, $showID);";
-                    foreach (Genre genre in show.Genres)
+                    cmd.Parameters.AddWithValue("$slug", show.Slug);
+                    cmd.Parameters.AddWithValue("$title", show.Title);
+                    cmd.Parameters.AddWithValue("$aliases", show.GetAliases());
+                    cmd.Parameters.AddWithValue("$path", show.Path);
+                    cmd.Parameters.AddWithValue("$overview", show.Overview);
+                    cmd.Parameters.AddWithValue("$trailerUrl", show.TrailerUrl);
+                    cmd.Parameters.AddWithValue("$status", show.Status);
+                    cmd.Parameters.AddWithValue("$startYear", show.StartYear);
+                    cmd.Parameters.AddWithValue("$endYear", show.EndYear);
+                    cmd.Parameters.AddWithValue("$imgPrimary", show.ImgPrimary);
+                    cmd.Parameters.AddWithValue("$imgThumb", show.ImgThumb);
+                    cmd.Parameters.AddWithValue("$imgLogo", show.ImgLogo);
+                    cmd.Parameters.AddWithValue("$imgBackdrop", show.ImgBackdrop);
+                    cmd.Parameters.AddWithValue("$externalIDs", show.ExternalIDs);
+                    cmd.ExecuteNonQuery();
+
+                    cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
+                    long showID = (long)cmd.ExecuteScalar();
+
+                    if (show.Genres != null)
                     {
-                        long genreID = GetOrCreateGenre(genre);
-                        cmd.Parameters.AddWithValue("$genreID", genreID);
+                        cmd.CommandText = "INSERT INTO genresLinks (genreID, showID) VALUES($genreID, $showID);";
+                        foreach (Genre genre in show.Genres)
+                        {
+                            long genreID = GetOrCreateGenre(genre);
+                            cmd.Parameters.AddWithValue("$genreID", genreID);
+                            cmd.Parameters.AddWithValue("$showID", showID);
+                            cmd.ExecuteNonQuery();
+                        }
+                    }
+
+                    if (show.studio != null)
+                    {
+                        cmd.CommandText = "INSERT INTO studiosLinks (studioID, showID) VALUES($studioID, $showID);";
+                        long studioID = GetOrCreateStudio(show.studio);
+                        cmd.Parameters.AddWithValue("$studioID", studioID);
                         cmd.Parameters.AddWithValue("$showID", showID);
                         cmd.ExecuteNonQuery();
                     }
-                }
 
-                if(show.studio != null)
+                    return showID;
+                }
+                catch
                 {
-                    cmd.CommandText = "INSERT INTO studiosLinks (studioID, showID) VALUES($studioID, $showID);";
-                    long studioID = GetOrCreateStudio(show.studio);
-                    cmd.Parameters.AddWithValue("$studioID", studioID);
-                    cmd.Parameters.AddWithValue("$showID", showID);
-                    cmd.ExecuteNonQuery();
+                    Console.Error.WriteLine("SQL error while trying to insert a show ({0}), show probably already registered.", show.Title);
+                    return -1;
                 }
-
-                return showID;
             }
         }
 
@@ -858,17 +941,28 @@ namespace Kyoo.InternalAPI
             string query = "INSERT INTO seasons (showID, seasonNumber, title, overview, year, imgPrimary, externalIDs) VALUES($showID, $seasonNumber, $title, $overview, $year, $imgPrimary, $externalIDs);";
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
-                cmd.Parameters.AddWithValue("$showID", season.ShowID);
-                cmd.Parameters.AddWithValue("$seasonNumber", season.seasonNumber);
-                cmd.Parameters.AddWithValue("$title", season.Title);
-                cmd.Parameters.AddWithValue("$overview", season.Overview);
-                cmd.Parameters.AddWithValue("$year", season.year);
-                cmd.Parameters.AddWithValue("$imgPrimary", season.ImgPrimary);
-                cmd.Parameters.AddWithValue("$externalIDs", season.ExternalIDs);
-                cmd.ExecuteNonQuery();
+                try
+                {
+                    cmd.Parameters.AddWithValue("$showID", season.ShowID);
+                    cmd.Parameters.AddWithValue("$seasonNumber", season.seasonNumber);
+                    cmd.Parameters.AddWithValue("$title", season.Title);
+                    cmd.Parameters.AddWithValue("$overview", season.Overview);
+                    cmd.Parameters.AddWithValue("$year", season.year);
+                    cmd.Parameters.AddWithValue("$imgPrimary", season.ImgPrimary);
+                    cmd.Parameters.AddWithValue("$externalIDs", season.ExternalIDs);
+                    cmd.ExecuteNonQuery();
 
-                cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
-                return (long)cmd.ExecuteScalar();
+                    cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
+                    return (long)cmd.ExecuteScalar();
+                }
+                catch
+                {
+                    Console.Error.WriteLine("SQL error while trying to insert a season ({0}), season probably already registered.", season.Title);
+                    cmd.CommandText = "SELECT * FROM seasons WHERE showID = $showID AND seasonNumber = $seasonNumber";
+                    cmd.Parameters.AddWithValue("$showID", season.ShowID);
+                    cmd.Parameters.AddWithValue("$seasonNumber", season.seasonNumber);
+                    return (long)cmd.ExecuteScalar();
+                }
             }
         }
 
@@ -877,22 +971,34 @@ namespace Kyoo.InternalAPI
             string query = "INSERT INTO episodes (showID, seasonID, seasonNumber, episodeNumber, absoluteNumber, path, title, overview, releaseDate, runtime, imgPrimary, externalIDs) VALUES($showID, $seasonID, $seasonNumber, $episodeNumber, $absoluteNumber, $path, $title, $overview, $releaseDate, $runtime, $imgPrimary, $externalIDs);";
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
-                cmd.Parameters.AddWithValue("$showID", episode.ShowID);
-                cmd.Parameters.AddWithValue("$seasonID", episode.SeasonID);
-                cmd.Parameters.AddWithValue("$seasonNUmber", episode.seasonNumber);
-                cmd.Parameters.AddWithValue("$episodeNumber", episode.episodeNumber);
-                cmd.Parameters.AddWithValue("$absoluteNumber", episode.absoluteNumber);
-                cmd.Parameters.AddWithValue("$path", episode.Path);
-                cmd.Parameters.AddWithValue("$title", episode.Title);
-                cmd.Parameters.AddWithValue("$overview", episode.Overview);
-                cmd.Parameters.AddWithValue("$releaseDate", episode.ReleaseDate);
-                cmd.Parameters.AddWithValue("$runtime", episode.Runtime);
-                cmd.Parameters.AddWithValue("$imgPrimary", episode.ImgPrimary);
-                cmd.Parameters.AddWithValue("$externalIDs", episode.ExternalIDs);
-                cmd.ExecuteNonQuery();
+                try
+                {
+                    cmd.Parameters.AddWithValue("$showID", episode.ShowID);
+                    cmd.Parameters.AddWithValue("$seasonID", episode.SeasonID);
+                    cmd.Parameters.AddWithValue("$seasonNUmber", episode.seasonNumber);
+                    cmd.Parameters.AddWithValue("$episodeNumber", episode.episodeNumber);
+                    cmd.Parameters.AddWithValue("$absoluteNumber", episode.absoluteNumber);
+                    cmd.Parameters.AddWithValue("$path", episode.Path);
+                    cmd.Parameters.AddWithValue("$title", episode.Title);
+                    cmd.Parameters.AddWithValue("$overview", episode.Overview);
+                    cmd.Parameters.AddWithValue("$releaseDate", episode.ReleaseDate);
+                    cmd.Parameters.AddWithValue("$runtime", episode.Runtime);
+                    cmd.Parameters.AddWithValue("$imgPrimary", episode.ImgPrimary);
+                    cmd.Parameters.AddWithValue("$externalIDs", episode.ExternalIDs);
+                    cmd.ExecuteNonQuery();
 
-                cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
-                return (long)cmd.ExecuteScalar();
+                    cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
+                    return (long)cmd.ExecuteScalar();
+                }
+                catch
+                {
+                    Console.Error.WriteLine("SQL error while trying to insert an episode ({0}), episode probably already registered.", episode.Link);
+                    cmd.CommandText = "SELECT * FROM episodes WHERE showID = $showID AND seasonNumber = $seasonNumber AND episodeNumber = $episodeNumber";
+                    cmd.Parameters.AddWithValue("$showID", episode.ShowID);
+                    cmd.Parameters.AddWithValue("$seasonNumber", episode.seasonNumber);
+                    cmd.Parameters.AddWithValue("$episodeNumber", episode.episodeNumber);
+                    return (long)cmd.ExecuteScalar();
+                }
             }
         }
 
@@ -944,6 +1050,44 @@ namespace Kyoo.InternalAPI
                 cmd.Parameters.AddWithValue("$showID", showID);
                 cmd.ExecuteNonQuery();
             }
+        }
+
+        public void RemoveShow(long showID)
+        {
+            string query = "DELETE FROM shows WHERE id = $showID;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$showID", showID);
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public void RemoveSeason(long showID, long seasonID)
+        {
+            string query = "DELETE FROM seasons WHERE id = $seasonID;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$seasonID", seasonID);
+                cmd.ExecuteNonQuery();
+            }
+            if (GetSeasons(showID).Count == 0)
+                RemoveShow(showID);
+        }
+
+        public void RemoveEpisode(Episode episode)
+        {
+            string query = "DELETE FROM episodes WHERE id = $episodeID;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$episodeID", episode.id);
+                cmd.ExecuteNonQuery();
+            }
+
+            if (GetEpisodes(episode.ShowID, episode.seasonNumber).Count == 0)
+                RemoveSeason(episode.ShowID, episode.SeasonID);
         }
 
         public void ClearSubtitles(long episodeID)

@@ -253,7 +253,7 @@ namespace Kyoo.InternalAPI.MetadataProvider
                         DateTime dateTime = DateTime.ParseExact((string)episode.firstAired, "yyyy-MM-dd", CultureInfo.InvariantCulture);
 
                         if (absoluteNumber == -1)
-                            absoluteNumber = episode.absoluteNumber as long? ?? -1;
+                            absoluteNumber = (long?)episode.absoluteNumber ?? -1;
                         else
                         {
                             seasonNumber = episode.airedSeason;
