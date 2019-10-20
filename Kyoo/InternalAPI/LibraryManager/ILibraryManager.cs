@@ -37,6 +37,7 @@ namespace Kyoo.InternalAPI
         Genre GetGenreBySlug(string slug);
         Studio GetStudioBySlug(string slug);
         Collection GetCollection(string slug);
+        IEnumerable<Episode> GetAllEpisodes();
 
         //Check if value exists
         bool IsCollectionRegistered(string collectionSlug);
@@ -61,6 +62,7 @@ namespace Kyoo.InternalAPI
         void AddShowToCollection(long showID, long collectionID);
         void RegisterInLibrary(long showID, string libraryPath);
 
+        void RemoveEpisode(Episode episode);
         void ClearSubtitles(long episodeID);
     }
 }

@@ -49,12 +49,12 @@ namespace Kyoo.Controllers
         }
 
         [HttpGet("extract/{showSlug}-s{seasonNumber}e{episodeNumber}")]
-        public string ExtractSubtitle(string showSlug, long seasonNumber, long episodeNumber)
+        public async Task<string> ExtractSubtitle(string showSlug, long seasonNumber, long episodeNumber)
         {
             Episode episode = libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
             libraryManager.ClearSubtitles(episode.id);
 
-            Track[] tracks = transcoder.ExtractSubtitles(episode.Path);
+            Track[] tracks = await transcoder.ExtractSubtitles(episode.Path);
             foreach (Track track in tracks)
             {
                 track.episodeID = episode.id;
@@ -65,14 +65,14 @@ namespace Kyoo.Controllers
         }
 
         [HttpGet("extract/{showSlug}")]
-        public string ExtractSubtitle(string showSlug)
+        public async Task<string> ExtractSubtitle(string showSlug)
         {
             List<Episode> episodes = libraryManager.GetEpisodes(showSlug);
             foreach (Episode episode in episodes)
             {
                 libraryManager.ClearSubtitles(episode.id);
 
-                Track[] tracks = transcoder.ExtractSubtitles(episode.Path);
+                Track[] tracks = await transcoder.ExtractSubtitles(episode.Path);
                 foreach (Track track in tracks)
                 {
                     track.episodeID = episode.id;

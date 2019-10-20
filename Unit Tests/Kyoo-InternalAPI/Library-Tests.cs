@@ -1,11 +1,6 @@
 ﻿using Kyoo.InternalAPI;
-using Kyoo.Models;
 using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace UnitTests.Kyoo_InternalAPI
 {

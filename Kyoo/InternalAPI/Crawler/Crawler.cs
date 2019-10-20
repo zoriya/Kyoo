@@ -14,6 +14,7 @@ namespace Kyoo.InternalAPI
 {
     public class Crawler : ICrawler
     {
+        private static ICrawler runningCrawler;
         private readonly CancellationTokenSource cancellation;
 
         private readonly ILibraryManager libraryManager;
@@ -33,15 +34,27 @@ namespace Kyoo.InternalAPI
 
         public Task Start(bool watch)
         {
-            return StartAsync(watch, cancellation.Token);
+            if (runningCrawler == null)
+            {
+                runningCrawler = this;
+                return StartAsync(watch, cancellation.Token);
+            }
+            return null;
         }
 
         private Task StartAsync(bool watch, CancellationToken cancellationToken)
         {
-            Debug.WriteLine("&Crawler started");
-            IEnumerable<string> paths = libraryManager.GetLibrariesPath();
+            IEnumerable<Episode> episodes = libraryManager.GetAllEpisodes();
+            IEnumerable<string> libraryPaths = libraryManager.GetLibrariesPath();
 
-            foreach (string path in paths)
+            Debug.WriteLine("&Crawler started");
+            foreach (Episode episode in episodes)
+            {
+                if (!File.Exists(episode.Path))
+                    libraryManager.RemoveEpisode(episode);
+            }
+
+            foreach (string path in libraryPaths)
             {
                 Scan(path, cancellationToken);
 
@@ -50,8 +63,8 @@ namespace Kyoo.InternalAPI
             }
 
             while (!cancellationToken.IsCancellationRequested);
-
             Debug.WriteLine("&Crawler stopped");
+            runningCrawler = null;
             return null;
         }
 
@@ -65,7 +78,10 @@ namespace Kyoo.InternalAPI
                     return;
 
                 if (IsVideo(file))
+                {
+                    Debug.WriteLine("&Registering episode at: " + file);
                     await ExtractEpisodeData(file, folderPath);
+                }
             }
         }
 
@@ -157,7 +173,8 @@ namespace Kyoo.InternalAPI
                 }
 
                 Show show = await RegisterOrGetShow(collectionName, showName, showPath, libraryPath);
-                await RegisterEpisode(show, seasonNumber, episodeNumber, absoluteNumber, episodePath);
+                if (show != null)
+                    await RegisterEpisode(show, seasonNumber, episodeNumber, absoluteNumber, episodePath);
             }
         }
 
@@ -171,8 +188,11 @@ namespace Kyoo.InternalAPI
                 showProviderIDs = show.ExternalIDs;
                 showID = libraryManager.RegisterShow(show);
 
+                if (showID == -1)
+                    return null;
+
                 libraryManager.RegisterInLibrary(showID, libraryPath);
-                if (collectionName != null)
+                if (collectionName != null && collectionName.Length > 0)
                 {
                     if (!libraryManager.IsCollectionRegistered(Slugifier.ToSlug(collectionName), out long collectionID))
                     {
@@ -224,7 +244,7 @@ namespace Kyoo.InternalAPI
             {
                 if (!FindExtractedSubtitles(episode))
                 {
-                    Track[] tracks = transcoder.ExtractSubtitles(episode.Path);
+                    Track[] tracks = await transcoder.ExtractSubtitles(episode.Path);
                     if (tracks != null)
                     {
                         foreach (Track track in tracks)
@@ -281,7 +301,6 @@ namespace Kyoo.InternalAPI
 
             return false;
         }
-
 
         private static readonly string[] videoExtensions = { ".webm", ".mkv", ".flv", ".vob", ".ogg", ".ogv", ".avi", ".mts", ".m2ts", ".ts", ".mov", ".qt", ".asf", ".mp4", ".m4p", ".m4v", ".mpg", ".mp2", ".mpeg", ".mpe", ".mpv", ".m2v", ".3gp", ".3g2" };
 
