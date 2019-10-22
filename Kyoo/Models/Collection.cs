@@ -9,6 +9,7 @@ namespace Kyoo.Models
         [JsonIgnore] public long id;
         public string Slug;
         public string Name;
+        public string Poster;
         public string Overview;
         [JsonIgnore] public string ImgPrimary;
         public IEnumerable<Show> Shows;
@@ -26,11 +27,13 @@ namespace Kyoo.Models
 
         public static Collection FromReader(System.Data.SQLite.SQLiteDataReader reader)
         {
-            return new Collection((long)reader["id"],
+            Collection col = new Collection((long)reader["id"],
                 reader["slug"] as string,
                 reader["name"] as string,
                 reader["overview"] as string,
                 reader["imgPrimary"] as string);
+            col.Poster = "poster/" + col.Slug;
+            return col;
         }
 
         public Show AsShow()

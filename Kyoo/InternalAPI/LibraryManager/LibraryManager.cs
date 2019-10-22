@@ -601,7 +601,7 @@ namespace Kyoo.InternalAPI
 
         public IEnumerable<Show> GetShowsInCollection(long collectionID)
         {
-            string query = "SELECT * FROM shows JOIN collectionsLinks l ON l.showID = shows.id WHERE l.collectionID = $id;";
+            string query = "SELECT * FROM shows JOIN collectionsLinks l ON l.showID = shows.id WHERE l.collectionID = $id ORDER BY title;";
 
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
@@ -633,7 +633,7 @@ namespace Kyoo.InternalAPI
 
         public IEnumerable<Show> GetShowsByPeople(long peopleID)
         {
-            string query = "SELECT * FROM shows JOIN peopleLinks l ON l.showID = shows.id WHERE l.peopleID = $id;";
+            string query = "SELECT * FROM shows JOIN peopleLinks l ON l.showID = shows.id WHERE l.peopleID = $id ORDER BY title;";
 
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {

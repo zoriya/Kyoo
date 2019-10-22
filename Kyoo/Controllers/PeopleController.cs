@@ -16,19 +16,17 @@ namespace Kyoo.Controllers
             this.libraryManager = libraryManager;
         }
 
-        [HttpGet("{people-slug}")]
-        public ActionResult<Collection> GetPeople(string slug)
+        [HttpGet("{peopleSlug}")]
+        public ActionResult<Collection> GetPeople(string peopleSlug)
         {
-            People people = libraryManager.GetPeopleBySlug(slug);
+            People people = libraryManager.GetPeopleBySlug(peopleSlug);
 
-            //This always return not found
             if (people == null)
                 return NotFound();
-
-            Debug.WriteLine("&People: " + people.Name);
             Collection collection = new Collection(0, people.slug, people.Name, null, null)
             {
-                Shows = libraryManager.GetShowsByPeople(people.id)
+                Shows = libraryManager.GetShowsByPeople(people.id),
+                Poster = "peopleimg/" + people.slug
             };
             return collection;
         }
