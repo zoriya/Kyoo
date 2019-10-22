@@ -4,6 +4,7 @@ export interface Collection
 {
   slug: string;
   name: string;
+  poster: string;
   overview: string;
   startYear: number,
 	endYear: number,
