@@ -39,6 +39,19 @@ export class AppComponent
 			}
 		});
 	}
+
+	openSearch()
+	{
+		let input = <HTMLInputElement>document.getElementById("search");
+
+		input.value = "";
+		input.focus();
+	}
+
+	onUpdateValue(value: string)
+	{
+		console.log("Value: " + value);
+	}
 }
 
 interface Library

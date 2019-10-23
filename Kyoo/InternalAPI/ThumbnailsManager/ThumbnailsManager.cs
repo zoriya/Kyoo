@@ -25,36 +25,48 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
             string localBackdrop = Path.Combine(show.Path, "backdrop.jpg");
 
 
-            if (show.ImgPrimary != null)
+            if (show.ImgPrimary != null && !File.Exists(localThumb))
             {
-                if (!File.Exists(localThumb))
+                try
                 {
                     using (WebClient client = new WebClient())
                     {
                         await client.DownloadFileTaskAsync(new Uri(show.ImgPrimary), localThumb);
                     }
                 }
+                catch (WebException)
+                {
+                    Console.Error.WriteLine("Couldn't download an image.");
+                }
             }
 
-            if (show.ImgLogo != null)
+            if (show.ImgLogo != null && !File.Exists(localLogo))
             {
-                if (!File.Exists(localLogo))
+                try
                 {
                     using (WebClient client = new WebClient())
                     {
                         await client.DownloadFileTaskAsync(new Uri(show.ImgLogo), localLogo);
                     }
                 }
+                catch (WebException)
+                {
+                    Console.Error.WriteLine("Couldn't download an image.");
+                }
             }
 
-            if (show.ImgBackdrop != null)
+            if (show.ImgBackdrop != null && !File.Exists(localBackdrop))
             {
-                if (!File.Exists(localBackdrop))
+                try
                 {
                     using (WebClient client = new WebClient())
                     {
                         await client.DownloadFileTaskAsync(new Uri(show.ImgBackdrop), localBackdrop);
                     }
+                }
+                catch (WebException)
+                {
+                    Console.Error.WriteLine("Couldn't download an image.");
                 }
             }
 
@@ -71,10 +83,16 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
                 string localThumb = root + "/" + people[i].slug + ".jpg";
                 if (people[i].imgPrimary != null && !File.Exists(localThumb))
                 {
-                    using (WebClient client = new WebClient())
+                    try
                     {
-                        Debug.WriteLine("&" + localThumb);
-                        await client.DownloadFileTaskAsync(new Uri(people[i].imgPrimary), localThumb);
+                        using (WebClient client = new WebClient())
+                        {
+                            await client.DownloadFileTaskAsync(new Uri(people[i].imgPrimary), localThumb);
+                        }
+                    }
+                    catch (WebException)
+                    {
+                        Console.Error.WriteLine("Couldn't download an image.");
                     }
                 }
             }
@@ -88,9 +106,16 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
             string localThumb = episode.Path.Replace(Path.GetExtension(episode.Path), "-thumb.jpg");
             if (episode.ImgPrimary != null && !File.Exists(localThumb))
             {
-                using (WebClient client = new WebClient())
+                try
                 {
-                    await client.DownloadFileTaskAsync(new Uri(episode.ImgPrimary), localThumb);
+                    using (WebClient client = new WebClient())
+                    {
+                        await client.DownloadFileTaskAsync(new Uri(episode.ImgPrimary), localThumb);
+                    }
+                }
+                catch (WebException)
+                {
+                    Console.Error.WriteLine("Couldn't download an image.");
                 }
             }
 
