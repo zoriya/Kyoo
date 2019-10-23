@@ -15,8 +15,9 @@
       </ul>
 
       <ul class="navbar-nav flex-row ml-auto">
-        <li class="nav-item icon">
-          <mat-icon matTooltipPosition="below" matTooltip="Search">search</mat-icon>
+        <li class="nav-item icon searchbar">
+          <input placeholder="Search" id="search" type="search" (oninit)="onUpdateValue(this.value)"/>
+          <mat-icon matTooltipPosition="below" matTooltip="Search" (click)="openSearch()">search</mat-icon>
         </li>
         <li class="nav-item">
           <a class="icon" routerLink="/login" routerLinkActive="active" matTooltipPosition="below" matTooltip="Login">

@@ -37,6 +37,7 @@
     <None Remove="ClientApp\src\models\collection.ts" />
     <None Remove="ClientApp\src\models\genre.ts" />
     <None Remove="ClientApp\src\models\people.ts" />
+    <None Remove="ClientApp\src\models\search-result.ts" />
     <None Remove="ClientApp\src\models\show.ts" />
     <None Remove="ClientApp\src\models\studio.ts" />
     <None Remove="ClientApp\src\models\watch-item.ts" />
@@ -77,6 +78,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <TypeScriptCompile Include="ClientApp\src\models\search-result.ts">
+      <SubType>Code</SubType>
+    </TypeScriptCompile>
     <TypeScriptCompile Include="ClientApp\src\models\collection.ts" />
     <TypeScriptCompile Include="ClientApp\src\models\genre.ts" />
     <TypeScriptCompile Include="ClientApp\src\models\people.ts" />

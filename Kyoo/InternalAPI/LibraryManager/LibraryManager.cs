@@ -302,6 +302,22 @@ namespace Kyoo.InternalAPI
             return shows;
         }
 
+        public IEnumerable<Show> GetShows(string searchQuery)
+        {
+            List<Show> shows = new List<Show>();
+            SQLiteDataReader reader;
+            string query = "SELECT slug, title, aliases, startYear, endYear, '0' FROM (SELECT slug, title, aliases, startYear, endYear, '0' FROM shows LEFT JOIN collectionsLinks l ON l.showID = shows.id WHERE l.showID IS NULL UNION SELECT slug, name, null, startYear, endYear, '1' FROM collections) WHERE title LIKE $query OR aliases LIKE $query ORDER BY title;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$query", "%" + searchQuery + "%");
+                reader = cmd.ExecuteReader();
+                while (reader.Read())
+                    shows.Add(Show.FromQueryReader(reader, true));
+            }
+            return shows;
+        }
+
         public Show GetShowBySlug(string slug)
         {
             string query = "SELECT * FROM shows WHERE slug = $slug;";
@@ -660,6 +676,70 @@ namespace Kyoo.InternalAPI
                     episodes.Add(Episode.FromReader(reader));
                 return episodes;
             }
+        }
+
+        public IEnumerable<Episode> SearchEpisodes(string searchQuery)
+        {
+            List<Episode> episodes = new List<Episode>();
+            SQLiteDataReader reader;
+            string query = "SELECT * FROM episodes WHERE title LIKE $query ORDER BY seasonNumber, episodeNumber;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$query", "%" + searchQuery + "%");
+                reader = cmd.ExecuteReader();
+                while (reader.Read())
+                    episodes.Add(Episode.FromReader(reader));
+            }
+            return episodes;
+        }
+        
+        public IEnumerable<People> SearchPeople(string searchQuery)
+        {
+            List<People> people = new List<People>();
+            SQLiteDataReader reader;
+            string query = "SELECT * FROM people WHERE name LIKE $query ORDER BY name;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$query", "%" + searchQuery + "%");
+                reader = cmd.ExecuteReader();
+                while (reader.Read())
+                    people.Add(People.FromReader(reader));
+            }
+            return people;
+        }
+        
+        public IEnumerable<Genre> SearchGenres(string searchQuery)
+        {
+            List<Genre> genres = new List<Genre>();
+            SQLiteDataReader reader;
+            string query = "SELECT * FROM genres WHERE name LIKE $query ORDER BY name;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$query", "%" + searchQuery + "%");
+                reader = cmd.ExecuteReader();
+                while (reader.Read())
+                    genres.Add(Genre.FromReader(reader));
+            }
+            return genres;
+        }
+        
+        public IEnumerable<Studio> SearchStudios(string searchQuery)
+        {
+            List<Studio> studios = new List<Studio>();
+            SQLiteDataReader reader;
+            string query = "SELECT * FROM studios WHERE name LIKE $query ORDER BY name;";
+
+            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
+            {
+                cmd.Parameters.AddWithValue("$query", "%" + searchQuery + "%");
+                reader = cmd.ExecuteReader();
+                while (reader.Read())
+                    studios.Add(Studio.FromReader(reader));
+            }
+            return studios;
         }
         #endregion
 

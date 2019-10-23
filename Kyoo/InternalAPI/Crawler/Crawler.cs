@@ -280,7 +280,7 @@ namespace Kyoo.InternalAPI
                             case ".ass":
                                 codec = "ass";
                                 break;
-                            case ".str":
+                            case ".srt":
                                 codec = "subrip";
                                 break;
                             default:

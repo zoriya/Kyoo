@@ -19,6 +19,7 @@ import { EpisodesListComponent } from './episodes-list/episodes-list.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { PlayerComponent } from './player/player.component';
 import { ShowDetailsComponent } from './show-details/show-details.component';
+import { SearchComponent } from './search/search.component';
 
 
 @NgModule({
@@ -29,7 +30,8 @@ import { ShowDetailsComponent } from './show-details/show-details.component';
     ShowDetailsComponent,
     EpisodesListComponent,
     PlayerComponent,
-    CollectionComponent
+    CollectionComponent,
+    SearchComponent
   ],
   imports: [
     BrowserModule,

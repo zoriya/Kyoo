@@ -134,7 +134,6 @@ namespace Kyoo.Controllers
             lines[1] = lines[1].Replace(',', '.');
             if (lines[2].Length > 5)
             {
-                Debug.WriteLine("&Line2 sub: " + lines[2].Substring(0, 6));
                 switch (lines[2].Substring(0, 6))
                 {
                     case "{\\an1}":

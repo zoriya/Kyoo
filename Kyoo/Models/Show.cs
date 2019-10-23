@@ -91,9 +91,9 @@ namespace Kyoo.Models
             IsCollection = false;
         }
 
-        public static Show FromQueryReader(System.Data.SQLite.SQLiteDataReader reader)
+        public static Show FromQueryReader(System.Data.SQLite.SQLiteDataReader reader, bool containsAliases = false)
         {
-            return new Show()
+            Show show = new Show()
             {
                 Slug = reader["slug"] as string,
                 Title = reader["title"] as string,
@@ -101,6 +101,9 @@ namespace Kyoo.Models
                 EndYear = reader["endYear"] as long?,
                 IsCollection = reader["'0'"] as string == "1"
             };
+            if (containsAliases)
+                show.Aliases = (reader["aliases"] as string)?.Split('|');
+            return show;
         }
 
         public static Show FromReader(System.Data.SQLite.SQLiteDataReader reader)

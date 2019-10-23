@@ -1,3 +1,7 @@
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins/breakpoints";
+
 .navbar
 {
   justify-content: left;
@@ -33,6 +37,33 @@
 .navbar-brand:hover
 {
   color: var(--accentColor);
+}
+
+.searchbar
+{
+  border-radius: 30px;
+
+  > input
+  {
+    background: none !important;
+    color: white;
+    outline: none;
+    border: none;
+    border-bottom: 1px solid #cfcfcf;
+    width: 0;
+    padding: 0;
+    transition: width 0.4s ease-in-out;
+
+    &:focus, .searching
+    {
+      width: 12rem;
+
+      @include media-breakpoint-up(sm)
+      {
+        width: 20rem;
+      }
+    }
+  }
 }
 
 .icon
