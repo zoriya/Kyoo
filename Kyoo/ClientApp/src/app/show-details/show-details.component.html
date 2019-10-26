@@ -73,19 +73,9 @@
     </mat-select>
   </mat-form-field>
 </div>
-<app-episodes-list [showSlug]="this.show.slug" [episodes]="episodes"></app-episodes-list>
+<app-episodes-list [episodes]="episodes"></app-episodes-list>
 
 <div class="container-fluid mt-5">
   <h3>Staff</h3>
 </div>
-<div class="scroll-row mb-5">
-  <div class="people-container" id="peopleScroll">
-    <a class="people" *ngFor="let people of this.show.people" routerLink="/people/{{people.slug}}">
-      <div matRipple [style.background-image]="getPeopleIcon(people.slug)" > </div>
-      <h6 class="name">{{people.name}}</h6>
-      <p class="role">{{people.role}}</p>
-    </a>
-  </div>
-  <button mat-raised-button color="accent" class="scrollBtn d-none" id="pl-leftBtn" (click)="scrollLeft()"><mat-icon>arrow_left</mat-icon></button>
-  <button mat-raised-button color="accent" class="scrollBtn" id="pl-rightBtn" (click)="scrollRight()"><mat-icon>arrow_right</mat-icon></button>
-</div>
+<app-people-list [people]="show.people"></app-people-list>

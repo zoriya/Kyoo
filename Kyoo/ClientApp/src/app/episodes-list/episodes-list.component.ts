@@ -9,8 +9,8 @@ import { DomSanitizer } from "@angular/platform-browser";
 })
 export class EpisodesListComponent implements OnInit
 {
+	@Input() displayShowTitle: boolean = false;
   @Input() episodes: Episode[];
-  @Input() showSlug: string;
   private root: HTMLElement;
 
   constructor(private sanitizer: DomSanitizer) { }

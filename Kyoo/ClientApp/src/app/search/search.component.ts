@@ -15,6 +15,9 @@ export class SearchComponent implements OnInit
 
 	ngOnInit()
 	{
-		this.items = this.route.snapshot.data.items;
+		this.route.data.subscribe((data) =>
+		{
+			this.items = data.items;
+		});
 	}
 }

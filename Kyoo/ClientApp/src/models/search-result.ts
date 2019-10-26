@@ -9,6 +9,6 @@ export interface SearchResut
 	shows: Show[];
 	episodes: Episode[];
 	people: People[];
-	genres: Genre[];
+	genrwes: Genre[];
 	studios: Studio[];
 }
