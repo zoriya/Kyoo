@@ -30,6 +30,13 @@ const routes: Routes = [
     scrollPositionRestoration: "enabled"
   })],
   exports: [RouterModule],
-  providers: [LibraryResolverService, ShowResolverService, StreamResolverService]
+	providers: [
+		LibraryResolverService,
+		ShowResolverService,
+		CollectionResolverService,
+		PeopleResolverService,
+		StreamResolverService,
+		SearchResolverService
+	]
 })
 export class AppRoutingModule { }

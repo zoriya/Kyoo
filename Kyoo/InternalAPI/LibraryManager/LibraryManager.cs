@@ -682,14 +682,14 @@ namespace Kyoo.InternalAPI
         {
             List<Episode> episodes = new List<Episode>();
             SQLiteDataReader reader;
-            string query = "SELECT * FROM episodes WHERE title LIKE $query ORDER BY seasonNumber, episodeNumber;";
+            string query = "SELECT episodes.*, shows.slug, shows.title as showTitle FROM episodes JOIN shows ON showID = shows.id WHERE episodes.title LIKE $query ORDER BY seasonNumber, episodeNumber LIMIT 20;";
 
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
                 cmd.Parameters.AddWithValue("$query", "%" + searchQuery + "%");
                 reader = cmd.ExecuteReader();
                 while (reader.Read())
-                    episodes.Add(Episode.FromReader(reader));
+                    episodes.Add(Episode.FromReader(reader).SetThumb(reader["slug"] as string).SetShowTitle(reader["showTitle"] as string));
             }
             return episodes;
         }
@@ -698,7 +698,7 @@ namespace Kyoo.InternalAPI
         {
             List<People> people = new List<People>();
             SQLiteDataReader reader;
-            string query = "SELECT * FROM people WHERE name LIKE $query ORDER BY name;";
+            string query = "SELECT * FROM people WHERE name LIKE $query ORDER BY name LIMIT 40;";
 
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {

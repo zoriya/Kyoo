@@ -1,7 +1,7 @@
 import { HttpClient } from "@angular/common/http";
 import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { DomSanitizer, Title } from '@angular/platform-browser';
+import { Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { Episode } from "../../models/episode";
 import { Show } from "../../models/show";
@@ -19,9 +19,8 @@ export class ShowDetailsComponent implements OnInit
 
   private toolbar: HTMLElement;
   private backdrop: HTMLElement;
-  private peopleScroll: HTMLElement;
 
-  constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer, private http: HttpClient, private snackBar: MatSnackBar, private title: Title)
+  constructor(private route: ActivatedRoute, private http: HttpClient, private snackBar: MatSnackBar, private title: Title)
   {
     this.route.queryParams.subscribe(params =>
     {
@@ -39,7 +38,6 @@ export class ShowDetailsComponent implements OnInit
 
     this.toolbar = document.getElementById("toolbar");
     this.backdrop = document.getElementById("backdrop");
-    this.peopleScroll = document.getElementById("peopleScroll");
     window.addEventListener("scroll", this.scroll, true);
     this.toolbar.setAttribute("style", `background-color: rgba(0, 0, 0, 0) !important`);
 
@@ -77,33 +75,5 @@ export class ShowDetailsComponent implements OnInit
       console.log(error.status + " - " + error.message);
       this.snackBar.open("An unknow error occured while getting episodes.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
     });
-  }
-
-
-  scrollLeft()
-  {
-    let scroll: number = this.peopleScroll.offsetWidth * 0.80;
-    this.peopleScroll.scrollBy({ top: 0, left: -scroll, behavior: "smooth" });
-
-    document.getElementById("pl-rightBtn").classList.remove("d-none");
-
-    if (this.peopleScroll.scrollLeft - scroll <= 0)
-      document.getElementById("pl-leftBtn").classList.add("d-none");
-  }
-
-  scrollRight()
-  {
-    let scroll: number = this.peopleScroll.offsetWidth * 0.80;
-    console.log("Scroll: " + scroll);
-    this.peopleScroll.scrollBy({ top: 0, left: scroll, behavior: "smooth" });
-    document.getElementById("pl-leftBtn").classList.remove("d-none");
-
-    if (this.peopleScroll.scrollLeft + scroll >= this.peopleScroll.scrollWidth - this.peopleScroll.clientWidth)
-      document.getElementById("pl-rightBtn").classList.add("d-none");
-  }
-
-  getPeopleIcon(slug: string)
-  {
-    return this.sanitizer.bypassSecurityTrustStyle("url(/peopleimg/" + slug + ")");
   }
 }

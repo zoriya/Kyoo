@@ -8,5 +8,6 @@ export interface Episode
   overview: string;
   releaseDate;
   runtime: number;
-  externalIDs: string;
+	externalIDs: string;
+	showTitle: string;
 }

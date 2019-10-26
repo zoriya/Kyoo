@@ -20,6 +20,8 @@ import { NotFoundComponent } from './not-found/not-found.component';
 import { PlayerComponent } from './player/player.component';
 import { ShowDetailsComponent } from './show-details/show-details.component';
 import { SearchComponent } from './search/search.component';
+import { PeopleListComponent } from './people-list/people-list.component';
+import { ShowsListComponent } from './shows-list/shows-list.component';
 
 
 @NgModule({
@@ -31,7 +33,9 @@ import { SearchComponent } from './search/search.component';
     EpisodesListComponent,
     PlayerComponent,
     CollectionComponent,
-    SearchComponent
+    SearchComponent,
+    PeopleListComponent,
+    ShowsListComponent
   ],
   imports: [
     BrowserModule,

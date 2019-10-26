@@ -48,9 +48,10 @@ export class AppComponent
 		input.focus();
 	}
 
-	onUpdateValue(value: string)
+	onUpdateValue(event)
 	{
-		console.log("Value: " + value);
+		console.log("Value: " + event.target.value);
+		this.router.navigate(["/search/" + event.target.value]);
 	}
 }
 
