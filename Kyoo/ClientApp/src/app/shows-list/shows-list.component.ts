@@ -1,4 +1,5 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { MatButton } from "@angular/material/button";
 import { DomSanitizer } from "@angular/platform-browser";
 import { Show } from "../../models/show";
 
@@ -7,37 +8,37 @@ import { Show } from "../../models/show";
 	templateUrl: './shows-list.component.html',
 	styleUrls: ['./shows-list.component.scss']
 })
-export class ShowsListComponent implements OnInit
+export class ShowsListComponent
 {
 	@Input() shows: Show[];
-	private showsScroll: HTMLElement;
+	@ViewChild("scrollView", { static: true }) private scrollView: ElementRef;
+	@ViewChild("leftBtn", { static: false }) private leftBtn: MatButton;
+	@ViewChild("rightBtn", { static: false }) private rightBtn: MatButton;
 
 	constructor(private sanitizer: DomSanitizer) { }
 
-	ngOnInit()
-	{
-		this.showsScroll = document.getElementById("showsScroll");
-	}
-
 	scrollLeft()
 	{
-		let scroll: number = this.showsScroll.offsetWidth * 0.80;
-		this.showsScroll.scrollBy({ top: 0, left: -scroll, behavior: "smooth" });
-
-		document.getElementById("pl-rightBtn").classList.remove("d-none");
-
-		if (this.showsScroll.scrollLeft - scroll <= 0)
-			document.getElementById("pl-leftBtn").classList.add("d-none");
+		let scroll: number = this.scrollView.nativeElement.offsetWidth * 0.80;
+		this.scrollView.nativeElement.scrollBy({ top: 0, left: -scroll, behavior: "smooth" });
 	}
 
 	scrollRight()
 	{
-		let scroll: number = this.showsScroll.offsetWidth * 0.80;
-		this.showsScroll.scrollBy({ top: 0, left: scroll, behavior: "smooth" });
-		document.getElementById("pl-leftBtn").classList.remove("d-none");
+		let scroll: number = this.scrollView.nativeElement.offsetWidth * 0.80;
+		this.scrollView.nativeElement.scrollBy({ top: 0, left: scroll, behavior: "smooth" });
+	}
 
-		if (this.showsScroll.scrollLeft + scroll >= this.showsScroll.scrollWidth - this.showsScroll.clientWidth)
-			document.getElementById("pl-rightBtn").classList.add("d-none");
+	onScroll()
+	{
+		if (this.scrollView.nativeElement.scrollLeft <= 0)
+			this.leftBtn._elementRef.nativeElement.classList.add("d-none");
+		else
+			this.leftBtn._elementRef.nativeElement.classList.remove("d-none");
+		if (this.scrollView.nativeElement.scrollLeft >= this.scrollView.nativeElement.scrollWidth - this.scrollView.nativeElement.clientWidth)
+			this.rightBtn._elementRef.nativeElement.classList.add("d-none");
+		else
+			this.rightBtn._elementRef.nativeElement.classList.remove("d-none");
 	}
 
 	getThumb(slug: string)

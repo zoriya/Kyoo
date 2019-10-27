@@ -1,4 +1,5 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { MatButton } from "@angular/material/button";
 import { DomSanitizer } from "@angular/platform-browser";
 import { People } from "../../models/people";
 
@@ -7,38 +8,37 @@ import { People } from "../../models/people";
 	templateUrl: './people-list.component.html',
 	styleUrls: ['./people-list.component.scss']
 })
-export class PeopleListComponent implements OnInit
+export class PeopleListComponent
 {
 	@Input() people: People[];
-	private peopleScroll: HTMLElement;
+	@ViewChild("scrollView", { static: true }) private scrollView: ElementRef;
+	@ViewChild("leftBtn", { static: false }) private leftBtn: MatButton;
+	@ViewChild("rightBtn", { static: false }) private rightBtn: MatButton;
 
 	constructor(private sanitizer: DomSanitizer) { }
 
-	ngOnInit()
-	{
-		this.peopleScroll = document.getElementById("peopleScroll");
-	}
-
 	scrollLeft()
 	{
-		let scroll: number = this.peopleScroll.offsetWidth * 0.80;
-		this.peopleScroll.scrollBy({ top: 0, left: -scroll, behavior: "smooth" });
-
-		document.getElementById("pl-rightBtn").classList.remove("d-none");
-
-		if (this.peopleScroll.scrollLeft - scroll <= 0)
-			document.getElementById("pl-leftBtn").classList.add("d-none");
+		let scroll: number = this.scrollView.nativeElement.offsetWidth * 0.80;
+		this.scrollView.nativeElement.scrollBy({ top: 0, left: -scroll, behavior: "smooth" });
 	}
 
 	scrollRight()
 	{
-		let scroll: number = this.peopleScroll.offsetWidth * 0.80;
-		this.peopleScroll.scrollBy({ top: 0, left: scroll, behavior: "smooth" });
-		console.log(document.getElementById("pl-leftBtn"));
-		document.getElementById("pl-leftBtn").classList.remove("d-none");
+		let scroll: number = this.scrollView.nativeElement.offsetWidth * 0.80;
+		this.scrollView.nativeElement.scrollBy({ top: 0, left: scroll, behavior: "smooth" });
+	}
 
-		if (this.peopleScroll.scrollLeft + scroll >= this.peopleScroll.scrollWidth - this.peopleScroll.clientWidth)
-			document.getElementById("pl-rightBtn").classList.add("d-none");
+	onScroll()
+	{
+		if (this.scrollView.nativeElement.scrollLeft <= 0)
+			this.leftBtn._elementRef.nativeElement.classList.add("d-none");
+		else
+			this.leftBtn._elementRef.nativeElement.classList.remove("d-none");
+		if (this.scrollView.nativeElement.scrollLeft >= this.scrollView.nativeElement.scrollWidth - this.scrollView.nativeElement.clientWidth)
+			this.rightBtn._elementRef.nativeElement.classList.add("d-none");
+		else
+			this.rightBtn._elementRef.nativeElement.classList.remove("d-none");
 	}
 
 	getPeopleIcon(slug: string)
