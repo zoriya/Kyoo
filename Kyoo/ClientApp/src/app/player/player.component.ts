@@ -63,7 +63,7 @@ export class PlayerComponent implements OnInit
 
 			this.title.setTitle(this.item.showTitle + " S" + this.item.seasonNumber + ":E" + this.item.episodeNumber + " - Kyoo");
 
-			if (navigator.userAgent.match(/Mobi/))
+			if (navigator.userAgent.match(/Mobi/) && document.fullscreenElement == null)
 			{
 				this.fullscreen();
 				screen.orientation.lock("landscape");
@@ -81,9 +81,6 @@ export class PlayerComponent implements OnInit
 		this.progress = document.getElementById("progress") as HTMLElement;
 		this.buffered = document.getElementById("buffered") as HTMLElement;
 		this.player.controls = false;
-		//console.log(this.player.volume * 100);
-		//this.volume = this.player.volume * 100;
-		//this.changeVolumeBtn();
 
 		this.player.onplay = () =>
 		{
@@ -206,7 +203,7 @@ export class PlayerComponent implements OnInit
 		{
 			if (navigator.userAgent.match(/Mobi/))
 			{
-				if (document.fullscreenElement == null)
+				if (document.fullscreenElement == null && this.router.url.startsWith("/watch"))
 					this.back();
 			}
 			else
