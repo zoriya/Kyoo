@@ -12,7 +12,7 @@
 
   <div id="hover">
     <div class="back">
-      <a mat-icon-button matTooltipPosition="below" matTooltip="Back" href="/show/{{this.item.showSlug}}" routerLink="/show/{{this.item.showSlug}}">
+      <a mat-icon-button matTooltipPosition="below" matTooltip="Back" (click)="back()">
         <mat-icon>arrow_back</mat-icon>
       </a>
       <h5>{{this.item.showTitle}}</h5>
@@ -35,13 +35,13 @@
 
         <div class="buttons">
           <div class="left">
-            <a *ngIf="this.item.previousEpisode" mat-icon-button matTooltipPosition="above" matTooltip="Previous" routerLink="/watch/{{this.item.previousEpisode}}" href="/watch/{{this.item.previousEpisode}}" queryParamsHandling="merge">
+            <a *ngIf="this.item.previousEpisode" mat-icon-button matTooltipPosition="above" matTooltip="Previous" (click)="previous()">
               <mat-icon>skip_previous</mat-icon>
             </a>
             <button mat-icon-button matTooltipPosition="above" [matTooltip]="playTooltip" id="play" (click)="tooglePlayback()">
               <mat-icon>{{this.playIcon}}</mat-icon>
             </button>
-            <a mat-icon-button id="nextBtn" *ngIf="this.item.nextEpisode" routerLink="/watch/{{this.item.nextEpisode.link}}" href="/watch/{{this.item.nextEpisode.link}}" queryParamsHandling="merge">
+            <a mat-icon-button id="nextBtn" *ngIf="this.item.nextEpisode" (click)="next()">
               <mat-icon>skip_next</mat-icon>
 
               <div id="next">
