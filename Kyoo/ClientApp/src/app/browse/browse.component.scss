@@ -89,7 +89,7 @@ button
     }
   }
 
-  &:hover
+  &:host-context(.hoverEnabled) &:hover
   {
     cursor: pointer;
   }

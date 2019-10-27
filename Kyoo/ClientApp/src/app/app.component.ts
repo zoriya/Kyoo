@@ -39,6 +39,9 @@ export class AppComponent
 					break;
 			}
 		});
+
+		if (!navigator.userAgent.match(/Mobi/))
+			document.body.classList.add("hoverEnabled");
 	}
 
 	openSearch()
