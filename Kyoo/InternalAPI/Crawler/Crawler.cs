@@ -14,6 +14,8 @@ namespace Kyoo.InternalAPI
 {
     public class Crawler : ICrawler
     {
+        public bool IsScanning = false;
+
         private static ICrawler runningCrawler;
         private readonly CancellationTokenSource cancellation;
 
@@ -27,19 +29,27 @@ namespace Kyoo.InternalAPI
             this.libraryManager = libraryManager;
             this.metadataProvider = metadataProvider;
             this.transcoder = transcoder;
-            this.config = configuration;
-
+            config = configuration;
             cancellation = new CancellationTokenSource();
         }
 
-        public Task Start(bool watch)
+        public async Task Start(bool watch)
         {
             if (runningCrawler == null)
             {
                 runningCrawler = this;
-                return StartAsync(watch, cancellation.Token);
+                await StartAsync(watch, cancellation.Token);
             }
-            return null;
+            else if (runningCrawler is Crawler)
+            {
+                Crawler crawler = (Crawler)runningCrawler;
+                if (!crawler.IsScanning) 
+                {
+                    await crawler.StopAsync();
+                    runningCrawler = this;
+                    await StartAsync(watch, cancellation.Token);
+                }
+            }
         }
 
         private Task StartAsync(bool watch, CancellationToken cancellationToken)
@@ -47,6 +57,7 @@ namespace Kyoo.InternalAPI
             IEnumerable<Episode> episodes = libraryManager.GetAllEpisodes();
             IEnumerable<string> libraryPaths = libraryManager.GetLibrariesPath();
 
+            IsScanning = true;
             Debug.WriteLine("&Crawler started");
             foreach (Episode episode in episodes)
             {
@@ -62,6 +73,7 @@ namespace Kyoo.InternalAPI
                     Watch(path, cancellationToken);
             }
 
+            IsScanning = false;
             while (!cancellationToken.IsCancellationRequested);
             Debug.WriteLine("&Crawler stopped");
             runningCrawler = null;

@@ -2275,9 +2275,6 @@ let SubtitleManager = (function() {
 
 
 				if (hasLineBreaks || hasProblematicOverride) {
-					// Split on newlines, then into block-text pairs, then split the pair.
-					let lines = data.Text.split(/\\[Nn]/g).map(x => combineAdjacentBlocks("{}"+x).split("{").slice(1).map(y => y.split("}")));
-
 					// Merge subtitle line pieces into non-problematic strings. Each piece can still have more
 					// than one block in it, but problematic blocks will start a new piece. For example, a block
 					// that is scaled differently will start a piece and every other block in that piece must have
@@ -2288,11 +2285,32 @@ let SubtitleManager = (function() {
 					// transitions, every block after a transition will have to be split on, even if it doesn't
 					// itself contain a transition.
 					let megablock = "{";
-					for (let line of lines) {
+					for (let line of data.Text.split(/\\[Nn]/g)) {
+						// Remove leading and trailing whitespace.
+						let lastSeenText = '';
+						line = combineAdjacentBlocks("{}" + line.replace(/([^{]*)(?:{[^\\]*([^}]*)})?/g, (match,text,overrides) => {
+							// If there is no text or overrides, this is the end of the line.
+							if (!text && !overrides) return "";
+
+							// If we haven't seen any text yet, remove whitespace from the left.
+							if (!lastSeenText) text = text.replace(/^[^\S\xA0]+/,"");
+							lastSeenText = text;
+
+							// If there was no override block, `overrides` will be undefined.
+							// Otherwise it will be an empty string.
+							return text + (overrides === undefined ? "" : "{" + overrides + "}");
+						}));
+						// Trim everything to the right of the last text we saw.
+						if (lastSeenText) {
+							lastSeenText = lastSeenText.replace(/[^\S\xA0]+$/,"");
+							let i = line.lastIndexOf(lastSeenText);
+							line = line.slice(0, i + lastSeenText.length);
+						}
+
 						let currblock = "", pieces = [], currPiece = "", hasTransition = false;
 
 						// Loop through line pieces checking which ones need to be separated.
-						for (let [overrides,text] of line) {
+						for (let [overrides,text] of line.split("{").slice(1).map(y => y.split("}"))) {
 							// if we need to start a new piece
 							if (currPiece && (hasTransition || reProblem.test(overrides))) {
 								hasTransition = hasTransition || /\\t(?!e)/.test(overrides);
@@ -2750,16 +2768,18 @@ let SubtitleManager = (function() {
 				if (map[j] == "Text") new_event.Text = elems.slice(j).join(",").trim();
 				else continue;
 
-				// Remove all overrides from the Text and check if there's anything left.
-				// If there isn't, there's no reason to add the line.
-				if (!new_event.Text.replace(/{[^}]*}/g,""))
-					continue;
+				// Remove leading and trailing whitespace and fix some issues that could exist in the override blocks.
+				let last_seen_text = '', pathVal = 0;
+				new_event.Text = combineAdjacentBlocks(new_event.Text.replace(/([^{]*)(?:{[^\\]*([^}]*)})?/g, (match,text,overrides) => {
+					// If there is no text or overrides, this is the end of the line.
+					if (!text && !overrides) return "";
 
-				// Fix some issues that could exist in the override blocks.
-				let pathVal = 0;
-				new_event.Text = combineAdjacentBlocks(new_event.Text).replace(/([^{]*)(?:{[^\\]*([^}]*)})?/g, (match,text,overrides) => {
+					// If we haven't seen any text yet, remove whitespace from the left.
+					if (!last_seen_text) text = text.replace(/^\s+/,"");
+
 					// Replace '\h' in the text with the non-breaking space.
 					text = text.replace(/\\h/g,"\xA0");
+					last_seen_text = text;
 
 					// If there are no overrides, we can return here.
 					// If there was no override block, `overrides` will be undefined.
@@ -2793,9 +2813,16 @@ let SubtitleManager = (function() {
 					if (pathVal) overrides += `\\p${pathVal}`;
 
 					return text + "{" + overrides + "}";
-				});
+				}));
 
-				events.push(new_event);
+				// Only add the line if we actually saw any text in it.
+				if (last_seen_text) {
+					// But first trim everything to the right of the last text we saw.
+					last_seen_text = last_seen_text.replace(/[^\S\xA0]+$/,"");
+					let i = new_event.Text.lastIndexOf(last_seen_text);
+					new_event.Text = new_event.Text.slice(0, i + last_seen_text.length);
+					events.push(new_event);
+				}
 			}
 			return [events,i-1];
 		}

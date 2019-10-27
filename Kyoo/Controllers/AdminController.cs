@@ -22,7 +22,6 @@ namespace Kyoo.Controllers
         public IActionResult ScanLibrary(bool watch)
         {
             crawler.Start(watch);
-
             return Ok("Scanning");
         }
     }
