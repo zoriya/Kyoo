@@ -68,6 +68,7 @@ export class PlayerComponent implements OnInit
 				this.fullscreen();
 				screen.orientation.lock("landscape");
 				$("#fullscreen").addClass("d-none");
+				$("#volume").addClass("d-none");
 			}
 			if (this.player)
 				this.init();
@@ -133,31 +134,6 @@ export class PlayerComponent implements OnInit
 			this.updateTime(time);
 		});
 
-		$(progressBar).mousedown((event) =>
-		{
-			event.preventDefault();
-			this.seeking = true;
-			progressBar.classList.add("seeking");
-			this.player.pause();
-
-			let time: number = this.getTimeFromSeekbar(progressBar, event.pageX);
-			this.updateTime(time);
-		});
-
-		$(document).mouseup((event) =>
-		{
-			if (this.seeking)
-			{
-				event.preventDefault();
-				this.seeking = false;
-				progressBar.classList.remove("seeking");
-
-				let time: number = this.getTimeFromSeekbar(progressBar, event.pageX);
-				this.player.currentTime = time;
-				this.player.play();
-			}
-		});
-
 		if (!navigator.userAgent.match(/Mobi/))
 		{
 			$(document).mousemove((event) =>
@@ -185,8 +161,69 @@ export class PlayerComponent implements OnInit
 				}
 			});
 
+			$(progressBar).mousedown((event) =>
+			{
+				event.preventDefault();
+				this.seeking = true;
+				progressBar.classList.add("seeking");
+				this.player.pause();
+
+				let time: number = this.getTimeFromSeekbar(progressBar, event.pageX);
+				this.updateTime(time);
+			});
+
+			$(document).mouseup((event) =>
+			{
+				if (this.seeking)
+				{
+					event.preventDefault();
+					this.seeking = false;
+					progressBar.classList.remove("seeking");
+
+					let time: number = this.getTimeFromSeekbar(progressBar, event.pageX);
+					this.player.currentTime = time;
+					this.player.play();
+				}
+			});
+
 			$("#controller").mouseenter(() => { this.controllerHovered = true; });
 			$("#controller").mouseleave(() => { this.controllerHovered = false; });
+		}
+		else
+		{
+			$(progressBar).on("touchstart", (event) =>
+			{
+				event.preventDefault();
+				this.seeking = true;
+				progressBar.classList.add("seeking");
+				this.player.pause();
+
+				let time: number = this.getTimeFromSeekbar(progressBar, event.changedTouches[0].pageX);
+				this.updateTime(time);
+			});
+
+			$(document).on("touchend", (event) =>
+			{
+				if (this.seeking)
+				{
+					event.preventDefault();
+					this.seeking = false;
+					progressBar.classList.remove("seeking");
+
+					let time: number = this.getTimeFromSeekbar(progressBar, event.changedTouches[0].pageX);
+					this.player.currentTime = time;
+					this.player.play();
+				}
+			});
+
+			$(document).on("touchmove", (event) =>
+			{
+				if (this.seeking)
+				{
+					let time: number = this.getTimeFromSeekbar(progressBar, event.changedTouches[0].pageX);
+					this.updateTime(time);
+				}
+			});
 		}
 
 		//Initialize the timout at the document initialization.

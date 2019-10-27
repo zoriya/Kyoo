@@ -65,7 +65,7 @@
             <ng-template #elseBlock><p>{{this.minutes | number: '2.0-0'}}:{{this.seconds | number: '2.0-0'}} / {{this.maxMinutes | number: '2.0-0'}}:{{this.maxSeconds | number: '2.0-0'}}</p></ng-template>
           </div>
           <div class="right">
-            <button *ngIf="this.item.audios.length > 0" mat-icon-button matTooltipPosition="above" matTooltip="Select audio track">
+            <button id="volume" *ngIf="this.item.audios.length > 0" mat-icon-button matTooltipPosition="above" matTooltip="Select audio track">
               <mat-icon>music_note</mat-icon>
             </button>
             <button *ngIf="this.item.subtitles.length > 0" mat-icon-button [matMenuTriggerFor]="subtitles" matTooltipPosition="above" matTooltip="Select subtitle track">
