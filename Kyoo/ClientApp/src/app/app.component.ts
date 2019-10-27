@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Event, Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
 import * as $ from "jquery";
+import { Location } from "@angular/common";
 
 @Component({
 	selector: 'app-root',
@@ -13,7 +14,7 @@ export class AppComponent
 	libraries: Library[];
 	isLoading: boolean = false;
 
-	constructor(http: HttpClient, private router: Router)
+	constructor(http: HttpClient, private router: Router, private location: Location)
 	{
 		http.get<Library[]>("api/libraries").subscribe(result =>
 		{
@@ -50,8 +51,11 @@ export class AppComponent
 
 	onUpdateValue(event)
 	{
-		console.log("Value: " + event.target.value);
-		this.router.navigate(["/search/" + event.target.value]);
+		let query: string = event.target.value;
+		if (query != "")
+			this.router.navigate(["/search/" + query], { replaceUrl: this.router.url.startsWith("/search/") });
+		else
+			this.location.back();
 	}
 }
 

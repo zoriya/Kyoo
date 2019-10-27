@@ -15,7 +15,7 @@ export class EpisodesListComponent
 	@ViewChild("scrollView", { static: true }) private scrollView: ElementRef;
 	@ViewChild("leftBtn", { static: false }) private leftBtn: MatButton;
 	@ViewChild("rightBtn", { static: false }) private rightBtn: MatButton;
-	@ViewChild("episode", { static: false }) private episode: ElementRef;
+	@ViewChild("episodeDom", { static: false }) private episode: ElementRef;
 
 	constructor(private sanitizer: DomSanitizer) { }
 

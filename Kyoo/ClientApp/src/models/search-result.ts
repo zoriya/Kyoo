@@ -6,6 +6,7 @@ import { Genre } from "./genre";
 
 export interface SearchResut
 {
+	query: string;
 	shows: Show[];
 	episodes: Episode[];
 	people: People[];

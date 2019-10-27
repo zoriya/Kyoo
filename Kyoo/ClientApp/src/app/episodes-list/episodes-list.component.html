@@ -1,6 +1,6 @@
 <div class="root">
   <div class="episodes" #scrollView (scroll)="onScroll()">
-    <a class="episode" *ngFor="let episode of this.episodes" #episode routerLink="/watch/{{episode.link}}" href="/watch/{{this.showSlug}}-s{{episode.seasonNumber}}e{{episode.episodeNumber}}">
+    <a class="episode" *ngFor="let episode of this.episodes" #episodeDom routerLink="/watch/{{episode.link}}" href="/watch/{{this.showSlug}}-s{{episode.seasonNumber}}e{{episode.episodeNumber}}">
       <div matRipple class="img" [style.background-image]="sanitize(episode.thumb)">
         <button mat-icon-button class="playBtn"><i class="material-icons playIcon">play_circle_outline</i></button>
       </div>

@@ -20,6 +20,7 @@ namespace Kyoo.Controllers
         {
             SearchResult result = new SearchResult
             {
+                query = query,
                 shows = libraryManager.GetShows(query),
                 episodes = libraryManager.SearchEpisodes(query),
                 people = libraryManager.SearchPeople(query),
