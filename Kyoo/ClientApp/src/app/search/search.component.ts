@@ -22,4 +22,11 @@ export class SearchComponent implements OnInit
 			this.title.setTitle(this.items.query + " - Kyoo");
 		});
 	}
+
+	ngAfterViewInit()
+	{
+		let searchBar: HTMLInputElement = <HTMLInputElement>document.getElementById("search");
+		searchBar.classList.add("searching");
+		searchBar.value = this.items.query;
+	}
 }

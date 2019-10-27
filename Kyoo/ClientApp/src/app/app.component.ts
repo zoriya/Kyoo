@@ -43,7 +43,7 @@ export class AppComponent
 
 	openSearch()
 	{
-		let input = <HTMLInputElement>document.getElementById("search");
+		let input: HTMLInputElement = <HTMLInputElement>document.getElementById("search");
 
 		input.value = "";
 		input.focus();
@@ -53,9 +53,15 @@ export class AppComponent
 	{
 		let query: string = event.target.value;
 		if (query != "")
+		{
+			event.target.classList.add("searching");
 			this.router.navigate(["/search/" + query], { replaceUrl: this.router.url.startsWith("/search/") });
+		}
 		else
+		{
+			event.target.classList.remove("searching");
 			this.location.back();
+		}
 	}
 }
 
