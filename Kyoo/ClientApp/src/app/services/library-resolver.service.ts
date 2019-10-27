@@ -10,7 +10,7 @@ import { Show } from "../../models/show";
 @Injectable()
 export class LibraryResolverService implements Resolve<Show[]>
 {
-  constructor(private http: HttpClient, private snackBar: MatSnackBar) { console.log("Library Resolver Created"); }
+  constructor(private http: HttpClient, private snackBar: MatSnackBar) { }
 
   resolve(route: ActivatedRouteSnapshot): Show[] | Observable<Show[]> | Promise<Show[]>
   {
