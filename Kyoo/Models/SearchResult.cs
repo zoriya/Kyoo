@@ -4,6 +4,7 @@ namespace Kyoo.Models
 {
     public class SearchResult
     {
+        public string query;
         public IEnumerable<Show> shows;
         public IEnumerable<Episode> episodes;
         public IEnumerable<People> people;
