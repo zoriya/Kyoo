@@ -123,33 +123,17 @@
   bottom: 40%;
   display: none;
 
-  &#pl-leftBtn
+  &.leftBtn
   {
     left: 0;
     padding-left: 10px;
     padding-right: 2px;
   }
 
-  &#pl-rightBtn
+  &.rightBtn
   {
     right: 0;
     padding-right: 10px;
     padding-left: 2px;
   }
-}
-
-#leftBtn
-{
-  position: absolute;
-  left: 0;
-  top: 33%;
-  outline: none;
-}
-
-#rightBtn
-{
-  position: absolute;
-  right: 0;
-  top: 33%;
-  outline: none;
 }

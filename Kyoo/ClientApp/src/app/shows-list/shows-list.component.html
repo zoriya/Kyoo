@@ -1,5 +1,5 @@
 <div class="scroll-row mb-5">
-  <div class="shows-container">
+  <div class="shows-container" #scrollView (scroll)="onScroll()">
     <a class="show" *ngFor="let show of this.shows" routerLink="/show/{{show.slug}}" href="/show/{{show.slug}}">
       <div matRipple [style.background-image]="getThumb(show.slug)"> </div>
       <p class="title">{{show.title}}</p>
@@ -7,6 +7,6 @@
       <ng-template #elseBlock><p class="date">{{show.startYear}}</p></ng-template>
     </a>
   </div>
-  <button mat-raised-button color="accent" class="scrollBtn d-none" (click)="scrollLeft()"><mat-icon>arrow_left</mat-icon></button>
-  <button mat-raised-button color="accent" class="scrollBtn" (click)="scrollRight()"><mat-icon>arrow_right</mat-icon></button>
+  <button mat-raised-button color="accent" class="scrollBtn leftBtn d-none" #leftBtn (click)="scrollLeft()"><mat-icon>arrow_left</mat-icon></button>
+  <button mat-raised-button color="accent" class="scrollBtn rightBtn" #rightBtn (click)="scrollRight()"><mat-icon>arrow_right</mat-icon></button>
 </div>
