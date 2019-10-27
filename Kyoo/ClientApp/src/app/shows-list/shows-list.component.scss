@@ -23,7 +23,7 @@
     background-color: #999;
     border-radius: 90px;
 
-    &:hover
+    &:host-context(.hoverEnabled) &:hover
     {
       background-color: rgb(134, 127, 127);
     }
@@ -103,7 +103,7 @@
     }
   }
 
-  &:hover
+  &:host-context(.hoverEnabled) &:hover
   {
     cursor: pointer;
   }
@@ -113,7 +113,7 @@
 {
   position: relative;
 
-  &:hover
+  &:host-context(.hoverEnabled) &:hover
   {
     .scrollBtn
     {

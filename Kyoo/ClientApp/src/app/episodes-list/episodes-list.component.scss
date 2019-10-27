@@ -6,7 +6,7 @@
 {
   position: relative;
 
-  &:hover
+  &:host-context(.hoverEnabled) &:hover
   {
     .scrollBtn
     {
@@ -36,7 +36,7 @@
     background-color: #999;
     border-radius: 90px;
 
-    &:hover
+    &:host-context(.hoverEnabled) &:hover
     {
       background-color: rgb(134, 127, 127);
     }
@@ -127,7 +127,7 @@
     overflow: hidden;
   }
 
-  &:hover
+  &:host-context(.hoverEnabled) &:hover
   {
     .img
     {

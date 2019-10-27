@@ -23,7 +23,7 @@
   padding: 12px;
   color: rgba(255, 255, 255, 0.7) !important;
 
-  &:hover
+  &:host-context(.hoverEnabled) &:hover
   {
     color: white !important;
   }
@@ -78,7 +78,7 @@ input::-webkit-search-cancel-button
   display: inline-block;
   opacity: 0.7;
 
-  &:hover
+  &:host-context(.hoverEnabled) &:hover
   {
     cursor: pointer;
     opacity: 1;

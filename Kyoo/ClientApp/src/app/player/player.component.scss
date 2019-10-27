@@ -194,7 +194,7 @@
     }
   }
 
-  &:hover, &.seeking
+  .hoverEnabled &:hover, &.seeking
   {
     cursor: pointer;
 
@@ -215,7 +215,7 @@
 {
   position: relative;
 
-  &:hover
+  .hoverEnabled &:hover
   {
     #next
     {
@@ -278,7 +278,7 @@
     outline: none;
   }
 
-  &:hover, &:focus-within
+  .hoverEnabled &:hover, &:focus-within
   {
     > mat-slider
     {
