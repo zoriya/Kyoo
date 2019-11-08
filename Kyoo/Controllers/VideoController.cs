@@ -37,7 +37,7 @@ namespace Kyoo.Controllers
             {
                 string path = transcoder.Transmux(episode);
                 if (path != null)
-                    return PhysicalFile(path, "video/mp4", true);
+                    return PhysicalFile(path, "application/dash+xml", true);
                 else
                     return StatusCode(500);
             }

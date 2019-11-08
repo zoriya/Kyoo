@@ -24,14 +24,14 @@ extern "C" struct Stream
 		: title(NULL), language(NULL), codec(NULL), isDefault(isDefault), isForced(isForced), path(NULL) 
 	{
 		if(title != NULL)
-			this->title= _strdup(title);
+			this->title= strdup(title);
 
 		if (languageCode != NULL)
-			language = _strdup(languageCode);
+			language = strdup(languageCode);
 		else
-			language = _strdup("und");
+			language = strdup("und");
 
 		if (codec != NULL)
-			this->codec = _strdup(codec);
+			this->codec = strdup(codec);
 	}
 };

@@ -32,8 +32,8 @@
             "scripts": [
               "./node_modules/jquery/dist/jquery.min.js",
               "./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js",
-              "./src/libraries/subtitles.js",
-              "./node_modules/video.js/dist/video.min.js"
+              "./node_modules/dashjs/dist/dash.all.min.js",
+              "./src/libraries/subtitles.js"
             ]
           },
           "configurations": {

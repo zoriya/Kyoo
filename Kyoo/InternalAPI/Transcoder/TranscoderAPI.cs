@@ -14,19 +14,19 @@ namespace Kyoo.InternalAPI.TranscoderLink
         public extern static int Init();
 
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int Transmux(string path, string outPath);
+        public extern static int transmux(string path, string out_path);
 
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-        private extern static IntPtr ExtractSubtitles(string path, string outPath, out int arrayLength, out int trackCount);
+        private extern static IntPtr extract_subtitles(string path, string out_path, out int array_length, out int track_count);
 
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-        private extern static void FreeMemory(IntPtr streamsPtr);
+        private extern static void free_memory(IntPtr stream_ptr);
 
         public static void ExtractSubtitles(string path, string outPath, out Track[] tracks)
         {
             int size = Marshal.SizeOf<Stream>();
 
-            IntPtr ptr = ExtractSubtitles(path, outPath, out int arrayLength, out int trackCount);
+            IntPtr ptr = extract_subtitles(path, outPath, out int arrayLength, out int trackCount);
             IntPtr streamsPtr = ptr;
             if (trackCount > 0 && ptr != IntPtr.Zero)
             {
@@ -47,12 +47,8 @@ namespace Kyoo.InternalAPI.TranscoderLink
             else
                 tracks = null;
 
-            FreeMemory(ptr);
+            free_memory(ptr);
             Debug.WriteLine("&" + tracks?.Length + " tracks got at: " + path);
         }
-
-        [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-        private extern static IntPtr TestMemory(string path, string outPath, out int arrayLength, out int trackCount);
-
     }
 }

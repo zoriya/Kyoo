@@ -4,6 +4,7 @@ import { DomSanitizer, Title } from "@angular/platform-browser";
 import { ActivatedRoute, Event, NavigationCancel, NavigationEnd, NavigationStart, Router } from "@angular/router";
 import { Track, WatchItem } from "../../models/watch-item";
 import { Location } from "@angular/common";
+import { MediaPlayer } from "dashjs";
 
 declare var SubtitleManager: any;
 
@@ -337,7 +338,9 @@ export class PlayerComponent implements OnInit
 
 	init()
 	{
-		//Load sub selected from the url.
+		var dashPlayer = MediaPlayer().create();
+		dashPlayer.initialize(this.player, "/video/transmux/" + this.item.link, true);
+
 		let sub: string = this.route.snapshot.queryParams["sub"];
 		if (sub != null)
 		{

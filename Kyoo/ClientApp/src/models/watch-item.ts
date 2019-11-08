@@ -6,7 +6,6 @@ export interface WatchItem
   showSlug: string;
   seasonNumber: number;
   episodeNumber: number;
-  video: string;
   title: string;
   link: string;
   duration: number;
