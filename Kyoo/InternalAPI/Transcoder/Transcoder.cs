@@ -38,9 +38,9 @@ namespace Kyoo.InternalAPI
 
         public string Transmux(WatchItem episode)
         {
-            string temp = Path.Combine(tempPath, episode.Link + ".mp4");
+            string temp = Path.Combine(tempPath, episode.Link + "/" + episode.Link + ".mpd");
             Debug.WriteLine("&Transmuxing " + episode.Link + " at " + episode.Path + ", outputPath: " + temp);
-            if (File.Exists(temp) || TranscoderAPI.Transmux(episode.Path, temp) == 0)
+            if (File.Exists(temp) || TranscoderAPI.transmux(episode.Path, temp) == 0)
                 return temp;
             else
                 return null;
