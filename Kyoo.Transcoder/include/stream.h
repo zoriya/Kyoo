@@ -13,15 +13,15 @@ extern "C" struct Stream
 	char *title;
 	char *language;
 	char *codec;
-	bool isDefault;
-	bool isForced;
+	bool is_default;
+	bool is_forced;
 	char *path;
 
 	Stream()
-		: title(NULL), language(NULL), codec(NULL), isDefault(NULL), isForced(NULL), path(NULL) {}
+		: title(NULL), language(NULL), codec(NULL), is_default(NULL), is_forced(NULL), path(NULL) {}
 
 	Stream(const char* title, const char* languageCode, const char* codec, bool isDefault, bool isForced)
-		: title(NULL), language(NULL), codec(NULL), isDefault(isDefault), isForced(isForced), path(NULL) 
+		: title(NULL), language(NULL), codec(NULL), is_default(isDefault), is_forced(isForced), path(NULL) 
 	{
 		if(title != NULL)
 			this->title= strdup(title);

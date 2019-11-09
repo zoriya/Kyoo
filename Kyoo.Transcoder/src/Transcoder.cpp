@@ -8,13 +8,14 @@ int Init()
 	return sizeof(Stream);
 }
 
-int transmux(const char *path, const char *out_path)
+int transmux(const char *path, const char *out_path, const char *get_uri)
 {
 	AVFormatContext *in_ctx = NULL;
-	AVFormatContext* out_ctx = NULL;
-	AVStream* stream;
+	AVFormatContext *out_ctx = NULL;
+	AVStream *stream;
 	AVPacket pkt;
-	int* stream_map;
+	AVDictionary *options = NULL;
+	int *stream_map;
 	int stream_count;
 	int ret = 0;
 
@@ -52,7 +53,10 @@ int transmux(const char *path, const char *out_path)
 	}
 
 	av_dump_format(out_ctx, 0, out_path, true);
-	if (open_output_file_for_write(out_ctx, out_path) != 0)
+
+	av_dict_set(&options, "init_seg_name", ((std::string)get_uri + (std::string)"/init-stream$RepresentationID$.m4s").c_str(), AV_DICT_DONT_STRDUP_VAL);
+	av_dict_set(&options, "media_seg_name", ((std::string)get_uri + (std::string)"/chunk-stream$RepresentationID$-$Number%05d$.m4s").c_str(), AV_DICT_DONT_STRDUP_VAL);
+	if (open_output_file_for_write(out_ctx, out_path, &options) != 0)
 		return 1;
 
 	while (av_read_frame(in_ctx, &pkt) == 0)
@@ -91,8 +95,8 @@ int transmux(const char *path, const char *out_path)
 Stream *extract_subtitles(const char *path, const char *out_path, int *stream_count, int *subtitle_count)
 {
 	AVFormatContext *int_ctx = NULL;
-	AVFormatContext** output_list;
-	Stream* streams;
+	AVFormatContext **output_list;
+	Stream *streams;
 	AVPacket pkt;
 	unsigned int out_count;
 
@@ -104,51 +108,51 @@ Stream *extract_subtitles(const char *path, const char *out_path, int *stream_co
 	streams = new Stream[*stream_count];
 
 	out_count = int_ctx->nb_streams;
-	output_list = new AVFormatContext*[out_count];
+	output_list = new AVFormatContext *[out_count];
 
 	//Initialize output and set headers.
 	for (unsigned int i = 0; i < int_ctx->nb_streams; i++)
 	{
-		AVStream *inputStream = int_ctx->streams[i];
-		const AVCodecParameters *inputCodecpar = inputStream->codecpar;
+		AVStream *in_stream = int_ctx->streams[i];
+		const AVCodecParameters *in_codecpar = in_stream->codecpar;
 
-		if (inputCodecpar->codec_type != AVMEDIA_TYPE_SUBTITLE)
+		if (in_codecpar->codec_type != AVMEDIA_TYPE_SUBTITLE)
 			output_list[i] = NULL;
 		else
 		{
 			*subtitle_count += 1;
 
-			AVDictionaryEntry *languagePtr = av_dict_get(inputStream->metadata, "language", NULL, 0);
+			AVDictionaryEntry *languageptr = av_dict_get(in_stream->metadata, "language", NULL, 0);
 
 			//Get metadata for file name
 			streams[i] = Stream(NULL, //title
-				languagePtr ? languagePtr->value : NULL, //language
-				avcodec_get_name(inputCodecpar->codec_id), //format
-				inputStream->disposition & AV_DISPOSITION_DEFAULT, //isDefault
-				inputStream->disposition & AV_DISPOSITION_FORCED);  //isForced
+				languageptr ? languageptr->value : NULL, //language
+				avcodec_get_name(in_codecpar->codec_id), //format
+				in_stream->disposition & AV_DISPOSITION_DEFAULT, //isDefault
+				in_stream->disposition & AV_DISPOSITION_FORCED);  //isForced
 
 			//Create the language subfolder
-			std::stringstream outStream;
-			outStream << out_path << (char)std::filesystem::path::preferred_separator << streams[i].language;
-			std::filesystem::create_directory(outStream.str());
+			std::stringstream out_strstream;
+			out_strstream << out_path << (char)std::filesystem::path::preferred_separator << streams[i].language;
+			std::filesystem::create_directory(out_strstream.str());
 
 			//Get file name
-			std::string fileName(path);
-			size_t lastSeparator = fileName.find_last_of((char)std::filesystem::path::preferred_separator);
-			fileName = fileName.substr(lastSeparator, fileName.find_last_of('.') - lastSeparator);
+			std::string file_name(path);
+			size_t last_separator = file_name.find_last_of((char)std::filesystem::path::preferred_separator);
+			file_name = file_name.substr(last_separator, file_name.find_last_of('.') - last_separator);
 
 			//Construct output file name
-			outStream << fileName << "." << streams[i].language;
+			out_strstream << file_name << "." << streams[i].language;
 
-			if (streams[i].isDefault)
-				outStream << ".default";
-			if (streams[i].isForced)
-				outStream << ".forced";
+			if (streams[i].is_default)
+				out_strstream << ".default";
+			if (streams[i].is_forced)
+				out_strstream << ".forced";
 
 			if (strcmp(streams[i].codec, "subrip") == 0)
-				outStream << ".srt";
+				out_strstream << ".srt";
 			else if (strcmp(streams[i].codec, "ass") == 0)
-				outStream << ".ass";
+				out_strstream << ".ass";
 			else
 			{
 				std::cout << "Unsupported subtitle codec: " << streams[i].codec << std::endl;
@@ -156,36 +160,36 @@ Stream *extract_subtitles(const char *path, const char *out_path, int *stream_co
 				continue;
 			}
 
-			streams[i].path = strdup(outStream.str().c_str());
+			streams[i].path = strdup(out_strstream.str().c_str());
 
-			std::cout << "Stream #" << i << "(" << streams[i].language << "), stream type: " << inputCodecpar->codec_type << " codec: " << streams[i].codec << std::endl;
+			std::cout << "Stream #" << i << "(" << streams[i].language << "), stream type: " << in_codecpar->codec_type << " codec: " << streams[i].codec << std::endl;
 
-			AVFormatContext *outputContext = NULL;
-			if (avformat_alloc_output_context2(&outputContext, NULL, NULL, streams[i].path) < 0)
+			AVFormatContext *out_ctx = NULL;
+			if (avformat_alloc_output_context2(&out_ctx, NULL, NULL, streams[i].path) < 0)
 			{
 				std::cout << "Error: Couldn't create an output file." << std::endl;
 				continue;
 			}
 
-			av_dict_copy(&outputContext->metadata, int_ctx->metadata, NULL);
+			av_dict_copy(&out_ctx->metadata, int_ctx->metadata, NULL);
 
-			AVStream *outputStream = copy_stream_to_output(outputContext, inputStream);
-			if (outputStream == NULL)
+			AVStream *out_stream = copy_stream_to_output(out_ctx, in_stream);
+			if (out_stream == NULL)
 				goto end;
 
-			av_dump_format(outputContext, 0, streams[i].path, true);
+			av_dump_format(out_ctx, 0, streams[i].path, true);
 
-			if (open_output_file_for_write(outputContext, streams[i].path) != 0)
+			if (open_output_file_for_write(out_ctx, streams[i].path, NULL) != 0)
 				goto end;
 
-			output_list[i] = outputContext;
+			output_list[i] = out_ctx;
 
 			if (false)
 			{
 			end:
-				if (outputContext && !(outputContext->flags & AVFMT_NOFILE))
-					avio_closep(&outputContext->pb);
-				avformat_free_context(outputContext);
+				if (out_ctx && !(out_ctx->flags & AVFMT_NOFILE))
+					avio_closep(&out_ctx->pb);
+				avformat_free_context(out_ctx);
 
 				output_list[i] = nullptr;
 				std::cout << "An error occured, cleaning up th output context for the stream #" << i << std::endl;
@@ -199,17 +203,17 @@ Stream *extract_subtitles(const char *path, const char *out_path, int *stream_co
 		if ((unsigned int)pkt.stream_index >= out_count)
 			continue;
 
-		AVFormatContext *outputContext = output_list[pkt.stream_index];
-		if (outputContext == nullptr)
+		AVFormatContext *out_ctx = output_list[pkt.stream_index];
+		if (out_ctx == nullptr)
 		{
 			av_packet_unref(&pkt);
 			continue;
 		}
 
-		process_packet(pkt, int_ctx->streams[pkt.stream_index], outputContext->streams[0]);
+		process_packet(pkt, int_ctx->streams[pkt.stream_index], out_ctx->streams[0]);
 		pkt.stream_index = 0;
 
-		if (av_interleaved_write_frame(outputContext, &pkt) < 0)
+		if (av_interleaved_write_frame(out_ctx, &pkt) < 0)
 			std::cout << "Error while writing a packet to the output file." << std::endl;
 
 		av_packet_unref(&pkt);
@@ -219,16 +223,16 @@ Stream *extract_subtitles(const char *path, const char *out_path, int *stream_co
 
 	for (unsigned int i = 0; i < out_count; i++)
 	{
-		AVFormatContext *outputContext = output_list[i];
+		AVFormatContext *out_ctx = output_list[i];
 
-		if (outputContext == NULL)
+		if (out_ctx == NULL)
 			continue;
 
-		av_write_trailer(outputContext);
+		av_write_trailer(out_ctx);
 
-		if (outputContext && !(outputContext->flags & AVFMT_NOFILE))
-			avio_closep(&outputContext->pb);
-		avformat_free_context(outputContext);
+		if (out_ctx && !(out_ctx->flags & AVFMT_NOFILE))
+			avio_closep(&out_ctx->pb);
+		avformat_free_context(out_ctx);
 	}
 
 	delete[] output_list;
