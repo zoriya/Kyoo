@@ -31,14 +31,11 @@ namespace Kyoo.InternalAPI
             });
         }
 
-        public void GetVideo(string path)
-        {
-            Debug.WriteLine("&Getting video...");
-        }
-
         public string Transmux(WatchItem episode)
         {
-            string temp = Path.Combine(tempPath, episode.Link + "/" + episode.Link + ".mpd");
+            string temp = Path.Combine(tempPath, episode.Link);
+            Directory.CreateDirectory(temp);
+            temp = Path.Combine(temp, episode.Link + ".mpd");
             Debug.WriteLine("&Transmuxing " + episode.Link + " at " + episode.Path + ", outputPath: " + temp);
             if (File.Exists(temp) || TranscoderAPI.transmux(episode.Path, temp) == 0)
                 return temp;
