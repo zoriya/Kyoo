@@ -14,7 +14,7 @@ namespace Kyoo.InternalAPI.TranscoderLink
         public extern static int Init();
 
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int transmux(string path, string out_path);
+        public extern static int transmux(string path, string out_path, string stream_uri);
 
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
         private extern static IntPtr extract_subtitles(string path, string out_path, out int array_length, out int track_count);

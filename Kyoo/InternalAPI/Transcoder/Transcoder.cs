@@ -33,12 +33,15 @@ namespace Kyoo.InternalAPI
 
         public string Transmux(WatchItem episode)
         {
-            string temp = Path.Combine(tempPath, episode.Link);
-            Directory.CreateDirectory(temp);
-            temp = Path.Combine(temp, episode.Link + ".mpd");
-            Debug.WriteLine("&Transmuxing " + episode.Link + " at " + episode.Path + ", outputPath: " + temp);
-            if (File.Exists(temp) || TranscoderAPI.transmux(episode.Path, temp) == 0)
-                return temp;
+            string folder = Path.Combine(tempPath, episode.Link);
+            string manifest = Path.Combine(folder, episode.Link + ".mpd");
+
+            Directory.CreateDirectory(folder);
+            Debug.WriteLine("&Transmuxing " + episode.Link + " at " + episode.Path + ", outputPath: " + folder);
+
+            //FFMPEG require us to put DirectorySeparaorChar as '/' for his internal regex.
+            if (File.Exists(manifest) || TranscoderAPI.transmux(episode.Path, manifest.Replace('\\', '/'), (folder + Path.DirectorySeparatorChar).Replace('\\', '/')) == 0)
+                return manifest;
             else
                 return null;
         }
