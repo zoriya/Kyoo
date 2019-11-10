@@ -8,7 +8,7 @@ int Init()
 	return sizeof(Stream);
 }
 
-int transmux(const char *path, const char *out_path, const char *get_uri)
+int transmux(const char *path, const char *out_path, const char *stream_uri)
 {
 	AVFormatContext *in_ctx = NULL;
 	AVFormatContext *out_ctx = NULL;
@@ -54,8 +54,11 @@ int transmux(const char *path, const char *out_path, const char *get_uri)
 
 	av_dump_format(out_ctx, 0, out_path, true);
 
-	av_dict_set(&options, "init_seg_name", ((std::string)get_uri + (std::string)"/init-stream$RepresentationID$.m4s").c_str(), AV_DICT_DONT_STRDUP_VAL);
-	av_dict_set(&options, "media_seg_name", ((std::string)get_uri + (std::string)"/chunk-stream$RepresentationID$-$Number%05d$.m4s").c_str(), AV_DICT_DONT_STRDUP_VAL);
+	//std::string val = (std::string)stream_uri + (std::string)"init-stream$RepresentationID$.m4s";
+	//av_dict_set(&options, "dirname", val.c_str(), 0);
+	//av_dict_set(&options, "init_seg_name", val.c_str(), 0);
+	//val = (std::string)stream_uri + (std::string)"chunk-stream$RepresentationID$-$Number%05d$.m4s";
+	//av_dict_set(&options, "media_seg_name", val.c_str(), 0);
 	if (open_output_file_for_write(out_ctx, out_path, &options) != 0)
 		return 1;
 
