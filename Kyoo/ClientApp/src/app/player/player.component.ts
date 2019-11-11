@@ -339,7 +339,7 @@ export class PlayerComponent implements OnInit
 	init()
 	{
 		var dashPlayer = MediaPlayer().create();
-		dashPlayer.initialize(this.player, "http://localhost:5005/" + this.item.link + "/" + this.item.link + ".mpd", true);
+		dashPlayer.initialize(this.player, "/video/transmux/" + this.item.link + "/", true);
 
 		let sub: string = this.route.snapshot.queryParams["sub"];
 		if (sub != null)

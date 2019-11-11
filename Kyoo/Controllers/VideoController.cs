@@ -1,6 +1,8 @@
 ﻿using Kyoo.InternalAPI;
 using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using System.IO;
 
 namespace Kyoo.Controllers
 {
@@ -10,11 +12,13 @@ namespace Kyoo.Controllers
     {
         private readonly ILibraryManager libraryManager;
         private readonly ITranscoder transcoder;
+        private readonly string transmuxPath;
 
-        public VideoController(ILibraryManager libraryManager, ITranscoder transcoder)
+        public VideoController(ILibraryManager libraryManager, ITranscoder transcoder, IConfiguration config)
         {
             this.libraryManager = libraryManager;
             this.transcoder = transcoder;
+            transmuxPath = config.GetValue<string>("transmuxTempPath");
         }
 
         [HttpGet("{showSlug}-s{seasonNumber}e{episodeNumber}")]
@@ -28,7 +32,7 @@ namespace Kyoo.Controllers
                 return NotFound();
         }
 
-        [HttpGet("transmux/{showSlug}-s{seasonNumber}e{episodeNumber}")]
+        [HttpGet("transmux/{showSlug}-s{seasonNumber}e{episodeNumber}/")]
         public IActionResult Transmux(string showSlug, long seasonNumber, long episodeNumber)
         {
             WatchItem episode = libraryManager.GetWatchItem(showSlug, seasonNumber, episodeNumber);
@@ -43,6 +47,15 @@ namespace Kyoo.Controllers
             }
             else
                 return NotFound();
+        }
+
+        [HttpGet("transmux/{episodeLink}/dash/{chunk}")]
+        public IActionResult GetTransmuxedChunk(string episodeLink, string chunk)
+        {
+            string path = Path.Combine(transmuxPath, episodeLink);
+            path = Path.Combine(path, "dash" + Path.DirectorySeparatorChar + chunk);
+
+            return PhysicalFile(path, "video/iso.segment");
         }
 
         [HttpGet("transcode/{showSlug}-s{seasonNumber}e{episodeNumber}")]
