@@ -48,7 +48,7 @@ constexpr enum AVRounding operator |(const enum AVRounding a, const enum AVRound
 
 int open_output_file_for_write(AVFormatContext *out_ctx, const char *out_path, AVDictionary **options)
 {
-	if (!(out_ctx->flags & AVFMT_NOFILE))
+	if (!(out_ctx->oformat->flags & AVFMT_NOFILE))
 	{
 		if (avio_open(&out_ctx->pb, out_path, AVIO_FLAG_WRITE) < 0)
 		{
