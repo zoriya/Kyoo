@@ -54,11 +54,11 @@ int transmux(const char *path, const char *out_path, const char *stream_uri)
 
 	av_dump_format(out_ctx, 0, out_path, true);
 
-	//std::string val = (std::string)stream_uri + (std::string)"init-stream$RepresentationID$.m4s";
-	//av_dict_set(&options, "dirname", val.c_str(), 0);
-	//av_dict_set(&options, "init_seg_name", val.c_str(), 0);
-	//val = (std::string)stream_uri + (std::string)"chunk-stream$RepresentationID$-$Number%05d$.m4s";
-	//av_dict_set(&options, "media_seg_name", val.c_str(), 0);
+	std::filesystem::create_directory(((std::string)out_path).substr(0, strrchr(out_path, '/') - out_path).append("/dash/"));
+	av_dict_set(&options, "init_seg_name", "dash/init-stream$RepresentationID$.m4s", 0);
+	av_dict_set(&options, "media_seg_name", "dash/chunk-stream$RepresentationID$-$Number%05d$.m4s", 0);
+	av_dict_set(&options, "streaming", "1", 0);
+
 	if (open_output_file_for_write(out_ctx, out_path, &options) != 0)
 		return 1;
 
@@ -80,11 +80,12 @@ int transmux(const char *path, const char *out_path, const char *stream_uri)
 		av_packet_unref(&pkt);
 	}
 
+	av_dict_free(&options);
 	av_write_trailer(out_ctx);
 	avformat_close_input(&in_ctx);
 
 	if (out_ctx && !(out_ctx->oformat->flags & AVFMT_NOFILE))
-		avio_closep(&out_ctx->pb);
+		avio_close(out_ctx->pb);
 	avformat_free_context(out_ctx);
 	delete[] stream_map;
 
