@@ -8,7 +8,7 @@ int Init()
 	return sizeof(Stream);
 }
 
-int transmux(const char *path, const char *out_path, const char *stream_uri)
+int transmux(const char *path, const char *out_path)
 {
 	AVFormatContext *in_ctx = NULL;
 	AVFormatContext *out_ctx = NULL;

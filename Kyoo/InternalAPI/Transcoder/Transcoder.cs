@@ -40,7 +40,7 @@ namespace Kyoo.InternalAPI
             Debug.WriteLine("&Transmuxing " + episode.Link + " at " + episode.Path + ", outputPath: " + folder);
 
             //FFMPEG require us to put DirectorySeparaorChar as '/' for his internal regex.
-            if (File.Exists(manifest) || TranscoderAPI.transmux(episode.Path, manifest.Replace('\\', '/'), (folder + Path.DirectorySeparatorChar).Replace('\\', '/')) == 0)
+            if (File.Exists(manifest) || TranscoderAPI.transmux(episode.Path, manifest.Replace('\\', '/')) == 0)
                 return manifest;
             else
                 return null;
