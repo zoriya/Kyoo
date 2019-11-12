@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Watch;
 
@@ -14,7 +15,7 @@ namespace Kyoo.InternalAPI.TranscoderLink
         public extern static int Init();
 
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int transmux(string path, string out_path);
+        public extern static int transmux(string path, string out_path, out float playableDuration);
 
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
         private extern static IntPtr extract_subtitles(string path, string out_path, out int array_length, out int track_count);
