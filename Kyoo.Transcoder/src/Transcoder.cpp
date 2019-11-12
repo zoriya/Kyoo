@@ -8,7 +8,7 @@ int Init()
 	return sizeof(Stream);
 }
 
-int transmux(const char *path, const char *out_path)
+int transmux(const char *path, const char *out_path, float *playable_duration)
 {
 	AVFormatContext *in_ctx = NULL;
 	AVFormatContext *out_ctx = NULL;
@@ -19,6 +19,7 @@ int transmux(const char *path, const char *out_path)
 	int stream_count;
 	int ret = 0;
 
+	*playable_duration = 0;
 	if (open_input_context(&in_ctx, path) != 0)
 		return 1;
 
@@ -73,6 +74,8 @@ int transmux(const char *path, const char *out_path)
 		stream = in_ctx->streams[pkt.stream_index];
 		pkt.stream_index = stream_map[pkt.stream_index];
 		process_packet(pkt, stream, out_ctx->streams[pkt.stream_index]);
+		if (pkt.stream_index == 0)
+			*playable_duration += pkt.duration * (float)out_ctx->streams[pkt.stream_index]->time_base.num / out_ctx->streams[pkt.stream_index]->time_base.den;
 
 		if (av_interleaved_write_frame(out_ctx, &pkt) < 0)
 			std::cout << "Error while writing a packet to the output file." << std::endl;

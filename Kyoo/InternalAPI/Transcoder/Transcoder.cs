@@ -31,22 +31,29 @@ namespace Kyoo.InternalAPI
             });
         }
 
-        public string Transmux(WatchItem episode)
+        public async Task<string> Transmux(WatchItem episode)
         {
             string folder = Path.Combine(transmuxPath, episode.Link);
             string manifest = Path.Combine(folder, episode.Link + ".mpd");
+            float playableDuration = 0;
+            bool transmuxFailed = false;
 
             Directory.CreateDirectory(folder);
             Debug.WriteLine("&Transmuxing " + episode.Link + " at " + episode.Path + ", outputPath: " + folder);
 
-            //FFMPEG require us to put DirectorySeparaorChar as '/' for his internal regex.
-            if (File.Exists(manifest) || TranscoderAPI.transmux(episode.Path, manifest.Replace('\\', '/')) == 0)
+            if (File.Exists(manifest))
                 return manifest;
-            else
-                return null;
+            Task.Run(() => 
+            { 
+                transmuxFailed = TranscoderAPI.transmux(episode.Path, manifest.Replace('\\', '/'), out playableDuration) != 0;
+                playableDuration = float.MaxValue;
+            });
+            while (playableDuration < 20 || (!File.Exists(manifest) && !transmuxFailed))
+                await Task.Delay(10);
+            return transmuxFailed ? null : manifest;
         }
 
-        public string Transcode(string path)
+        public Task<string> Transcode(WatchItem episode)
         {
             //NOT IMPLEMENTED YET
             return null;

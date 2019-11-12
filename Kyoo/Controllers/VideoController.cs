@@ -3,6 +3,7 @@ using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Kyoo.Controllers
 {
@@ -33,13 +34,13 @@ namespace Kyoo.Controllers
         }
 
         [HttpGet("transmux/{showSlug}-s{seasonNumber}e{episodeNumber}/")]
-        public IActionResult Transmux(string showSlug, long seasonNumber, long episodeNumber)
+        public async Task<IActionResult> Transmux(string showSlug, long seasonNumber, long episodeNumber)
         {
             WatchItem episode = libraryManager.GetWatchItem(showSlug, seasonNumber, episodeNumber);
 
             if (episode != null && System.IO.File.Exists(episode.Path))
             {
-                string path = transcoder.Transmux(episode);
+                string path = await transcoder.Transmux(episode);
                 if (path != null)
                     return PhysicalFile(path, "application/dash+xml", true);
                 else
@@ -61,15 +62,16 @@ namespace Kyoo.Controllers
         [HttpGet("transcode/{showSlug}-s{seasonNumber}e{episodeNumber}")]
         public IActionResult Transcode(string showSlug, long seasonNumber, long episodeNumber)
         {
-            WatchItem episode = libraryManager.GetWatchItem(showSlug, seasonNumber, episodeNumber);
+            return null;
+            //WatchItem episode = libraryManager.GetWatchItem(showSlug, seasonNumber, episodeNumber);
 
-            if (episode != null && System.IO.File.Exists(episode.Path))
-            {
-                string path = transcoder.Transcode(episode.Path);
-                return PhysicalFile(path, "video/mp4", true); //Should use mpeg dash
-            }
-            else
-                return NotFound();
+            //if (episode != null && System.IO.File.Exists(episode.Path))
+            //{
+            //    string path = transcoder.Transcode(episode.Path);
+            //    return PhysicalFile(path, "video/mp4", true); //Should use mpeg dash
+            //}
+            //else
+            //    return NotFound();
         }
     }
 }
