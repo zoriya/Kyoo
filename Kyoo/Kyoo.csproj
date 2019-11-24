@@ -41,6 +41,7 @@
     <None Remove="ClientApp\src\models\show.ts" />
     <None Remove="ClientApp\src\models\studio.ts" />
     <None Remove="ClientApp\src\models\watch-item.ts" />
+    <None Remove="ClientApp\src\videoSupport\playbackMethodDetector.ts" />
     <None Remove="Transcoder\Kyoo.Transcoder.exp" />
   </ItemGroup>
 
@@ -88,6 +89,7 @@
     <TypeScriptCompile Include="ClientApp\src\models\show.ts" />
     <TypeScriptCompile Include="ClientApp\src\models\studio.ts" />
     <TypeScriptCompile Include="ClientApp\src\models\watch-item.ts" />
+    <TypeScriptCompile Include="ClientApp\src\videoSupport\playbackMethodDetector.ts" />
   </ItemGroup>
 
   <ItemGroup>

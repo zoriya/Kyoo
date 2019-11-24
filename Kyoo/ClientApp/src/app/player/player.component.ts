@@ -5,6 +5,7 @@ import { ActivatedRoute, Event, NavigationCancel, NavigationEnd, NavigationStart
 import { Track, WatchItem } from "../../models/watch-item";
 import { Location } from "@angular/common";
 import { MediaPlayer } from "dashjs";
+import { getPlaybackMethod, method } from "../../videoSupport/playbackMethodDetector";
 
 declare var SubtitleManager: any;
 
@@ -338,8 +339,21 @@ export class PlayerComponent implements OnInit
 
 	init()
 	{
-		var dashPlayer = MediaPlayer().create();
-		dashPlayer.initialize(this.player, "/video/transmux/" + this.item.link + "/", true);
+		let playbackMethod = getPlaybackMethod(this.item);
+		if (playbackMethod == method.direct)
+		{
+			this.player.src = "/video/" + this.item.link;
+		}
+		else if (playbackMethod == method.transmux)
+		{
+			var dashPlayer = MediaPlayer().create();
+			dashPlayer.initialize(this.player, "/video/transmux/" + this.item.link + "/", true);
+		}
+		else
+		{
+			var dashPlayer = MediaPlayer().create();
+			dashPlayer.initialize(this.player, "/video/transcode/" + this.item.link + "/", true);
+		}
 
 		let sub: string = this.route.snapshot.queryParams["sub"];
 		if (sub != null)
