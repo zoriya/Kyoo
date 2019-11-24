@@ -339,7 +339,7 @@ export class PlayerComponent implements OnInit
 
 	init()
 	{
-		let playbackMethod = getPlaybackMethod(this.item);
+		let playbackMethod = getPlaybackMethod(this.player, this.item);
 		if (playbackMethod == method.direct)
 		{
 			this.player.src = "/video/" + this.item.link;

@@ -43,13 +43,14 @@ namespace Kyoo.InternalAPI
 
             if (File.Exists(manifest))
                 return manifest;
-            Task.Run(() => 
+            // Added an await and removed the while -> await because the dynamic dash file can't be played for now (maybe ffmpeg doesn't process in the playback order).
+            await Task.Run(() => 
             { 
                 transmuxFailed = TranscoderAPI.transmux(episode.Path, manifest.Replace('\\', '/'), out playableDuration) != 0;
                 playableDuration = float.MaxValue;
             });
-            while (playableDuration < 20 || (!File.Exists(manifest) && !transmuxFailed))
-                await Task.Delay(10);
+            //while (playableDuration < 20 || (!File.Exists(manifest) && !transmuxFailed))
+            //    await Task.Delay(10);
             return transmuxFailed ? null : manifest;
         }
 

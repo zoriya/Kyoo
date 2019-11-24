@@ -14,6 +14,8 @@ export interface WatchItem
   previousEpisode: string;
   nextEpisode: Episode;
 
+	container: string;
+	video: Track;
   audios: Track[];
   subtitles: Track[];
 }
