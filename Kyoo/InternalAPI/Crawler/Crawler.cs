@@ -269,7 +269,6 @@ namespace Kyoo.InternalAPI
             }
         }
 
-
         private bool FindExtractedSubtitles(Episode episode)
         {
             string path = Path.Combine(Path.GetDirectoryName(episode.Path), "Subtitles");
