@@ -13,7 +13,7 @@ function getPlaybackMethod(player, item) {
     // If we can't find the browser, transcode (It may or may not support containers/codecs)
     if (!browser)
         return method.transcode;
-    if (containerIsSupported(player, item.container, browser.name)) {
+    if (containerIsSupported(player, item.container, browser.name) && item.audios.length <= 1) {
         if (videoCodecIsSupported(player, item.video.codec, browser.name) &&
             audioCodecIsSupported(player, item.audios.map(function (value) { return value.codec; }), browser.name))
             return method.direct;

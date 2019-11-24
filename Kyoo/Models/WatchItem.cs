@@ -1,5 +1,4 @@
 ﻿using Kyoo.InternalAPI;
-using Kyoo.Models.Watch;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -21,6 +20,8 @@ namespace Kyoo.Models
         public string previousEpisode;
         public Episode nextEpisode;
 
+        public string container;
+        public Track video;
         public IEnumerable<Track> audios;
         public IEnumerable<Track> subtitles;
 
@@ -60,7 +61,10 @@ namespace Kyoo.Models
 
         public WatchItem SetStreams(ILibraryManager libraryManager)
         {
-            (IEnumerable<Track> audios, IEnumerable<Track> subtitles) streams = libraryManager.GetStreams(episodeID, Link);
+            (Track video, IEnumerable<Track> audios, IEnumerable<Track> subtitles) streams = libraryManager.GetStreams(episodeID, Link);
+
+            container = Path.Substring(Path.LastIndexOf('.') + 1);
+            video = streams.video;
             audios = streams.audios;
             subtitles = streams.subtitles;
             return this;

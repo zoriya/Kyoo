@@ -19,8 +19,8 @@ namespace Kyoo.InternalAPI
         IEnumerable<Show> GetShowsByPeople(long peopleID);
         IEnumerable<string> GetLibrariesPath();
 
-        //Internal HTML read
-        (List<Track> audios, List<Track> subtitles) GetStreams(long episodeID, string showSlug);
+        //Internal read
+        (Track video, List<Track> audios, List<Track> subtitles) GetStreams(long episodeID, string showSlug);
         Track GetSubtitle(string showSlug, long seasonNumber, long episodeNumber, string languageTag, bool forced);
 
         //Public read

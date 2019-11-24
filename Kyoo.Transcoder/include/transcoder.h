@@ -13,6 +13,8 @@ extern "C" API int Init();
 
 extern "C" API int transmux(const char *path, const char *out_path, float *playable_duration);
 
+extern "C" API Stream *get_track_info(const char *path, int *stream_count, int *track_count);
+
 //Take the path of the file and the path of the output directory. It will return the list of subtitle streams in the streams variable. The int returned is the number of subtitles extracted.
 extern "C" API Stream* extract_subtitles(const char *path, const char *outPath, int *streamCount, int *subtitleCount);
 

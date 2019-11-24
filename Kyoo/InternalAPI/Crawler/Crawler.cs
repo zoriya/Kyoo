@@ -252,14 +252,21 @@ namespace Kyoo.InternalAPI
             episode.SeasonID = seasonID;
             episode.id = libraryManager.RegisterEpisode(episode);
 
+            Track[] tracks = await transcoder.GetTrackInfo(episode.Path);
+            foreach (Track track in tracks)
+            {
+                track.episodeID = episode.id;
+                libraryManager.RegisterTrack(track);
+            }
+
             if (episode.Path.EndsWith(".mkv"))
             {
                 if (!FindExtractedSubtitles(episode))
                 {
-                    Track[] tracks = await transcoder.ExtractSubtitles(episode.Path);
-                    if (tracks != null)
+                    Track[] subtitles = await transcoder.ExtractSubtitles(episode.Path);
+                    if (subtitles != null)
                     {
-                        foreach (Track track in tracks)
+                        foreach (Track track in subtitles)
                         {
                             track.episodeID = episode.id;
                             libraryManager.RegisterTrack(track);

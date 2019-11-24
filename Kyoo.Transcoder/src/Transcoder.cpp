@@ -98,6 +98,43 @@ int transmux(const char *path, const char *out_path, float *playable_duration)
 	return 0;
 }
 
+Stream *get_track_info(const char *path, int *stream_count, int *track_count)
+{
+	AVFormatContext *ctx = NULL;
+	Stream *streams;
+
+	if (open_input_context(&ctx, path) != 0)
+		return nullptr;
+
+	*stream_count = ctx->nb_streams;
+	*track_count = 0;
+	streams = new Stream[*stream_count];
+
+	//Initialize output and set headers.
+	for (int i = 0; i < *stream_count; i++)
+	{
+		AVStream *stream = ctx->streams[i];
+		const AVCodecParameters *codecpar = stream->codecpar;
+
+		if (codecpar->codec_type == AVMEDIA_TYPE_VIDEO || codecpar->codec_type == AVMEDIA_TYPE_AUDIO)
+		{
+			AVDictionaryEntry *languageptr = av_dict_get(stream->metadata, "language", NULL, 0);
+
+			*track_count += 1;
+			
+			streams[i] = Stream(codecpar->codec_type == AVMEDIA_TYPE_VIDEO ? "VIDEO" : NULL, // title
+				languageptr ? languageptr->value : NULL, // language
+				avcodec_get_name(codecpar->codec_id), // format
+				stream->disposition & AV_DISPOSITION_DEFAULT, // isDefault
+				stream->disposition & AV_DISPOSITION_FORCED, // isForced
+				path);  // path
+		}
+		else
+			streams[i] = Stream();
+	}
+	avformat_close_input(&ctx);
+	return streams;
+}
 
 Stream *extract_subtitles(const char *path, const char *out_path, int *stream_count, int *subtitle_count)
 {
@@ -124,7 +161,10 @@ Stream *extract_subtitles(const char *path, const char *out_path, int *stream_co
 		const AVCodecParameters *in_codecpar = in_stream->codecpar;
 
 		if (in_codecpar->codec_type != AVMEDIA_TYPE_SUBTITLE)
+		{
 			output_list[i] = NULL;
+			streams[i] = Stream();
+		}
 		else
 		{
 			*subtitle_count += 1;

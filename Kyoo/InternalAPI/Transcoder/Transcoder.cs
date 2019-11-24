@@ -20,6 +20,15 @@ namespace Kyoo.InternalAPI
             Debug.WriteLine("&Api INIT (unmanaged stream size): " + TranscoderAPI.Init() + ", Stream size: " + Marshal.SizeOf<Models.Watch.Stream>());
         }
 
+        public async Task<Track[]> GetTrackInfo(string path)
+        {
+            return await Task.Run(() =>
+            {
+                TranscoderAPI.GetTrackInfo(path, out Track[] tracks);
+                return tracks;
+            });
+        }
+
         public async Task<Track[]> ExtractSubtitles(string path)
         {
             string output = Path.Combine(Path.GetDirectoryName(path), "Subtitles");
