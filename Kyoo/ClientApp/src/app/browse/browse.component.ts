@@ -8,7 +8,7 @@ import { Show } from "../../models/show";
   templateUrl: './browse.component.html',
   styleUrls: ['./browse.component.scss']
 })
-export class BrowseComponent implements OnInit
+export class BrowseComponent
 {
   @Input() shows: Show[];
   sortType: string = "title";
@@ -16,13 +16,13 @@ export class BrowseComponent implements OnInit
 
   sortTypes: string[] = ["title", "release date"];
 
-  constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer) { }
-
-  ngOnInit()
-  {
-    if (this.shows == null)
-      this.shows = this.route.snapshot.data.shows;
-  }
+	constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer)
+	{
+		this.route.data.subscribe((data) =>
+		{
+			this.shows = data.shows;
+		});
+	}
 
   getThumb(slug: string)
   {

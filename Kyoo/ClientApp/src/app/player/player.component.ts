@@ -40,6 +40,8 @@ export class PlayerComponent implements OnInit
 	playTooltip: string = "Pause"; //Text used in the play tooltip
 	fullscreenTooltip: string = "Fullscreen"; //Text used in the fullscreen tooltip
 
+	playMethod: method;
+
 	private player: HTMLVideoElement;
 	private thumb: HTMLElement;
 	private progress: HTMLElement;
@@ -125,6 +127,19 @@ export class PlayerComponent implements OnInit
 		this.player.onended = () =>
 		{
 			this.next();
+		}
+
+		this.player.onerror = () =>
+		{
+			if (this.playMethod == method.transcode)
+			{
+				this.snackBar.open("This episode can't be played.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 10000 });
+			}
+			else
+			{
+				this.playMethod += 1;
+				this.selectPlayMethod();
+			}
 		}
 
 		let progressBar: HTMLElement = document.getElementById("progress-bar") as HTMLElement;
@@ -339,21 +354,14 @@ export class PlayerComponent implements OnInit
 
 	init()
 	{
-		let playbackMethod = getPlaybackMethod(this.player, this.item);
-		if (playbackMethod == method.direct)
-		{
-			this.player.src = "/video/" + this.item.link;
-		}
-		else if (playbackMethod == method.transmux)
-		{
-			var dashPlayer = MediaPlayer().create();
-			dashPlayer.initialize(this.player, "/video/transmux/" + this.item.link + "/", true);
-		}
-		else
-		{
-			var dashPlayer = MediaPlayer().create();
-			dashPlayer.initialize(this.player, "/video/transcode/" + this.item.link + "/", true);
-		}
+		let queryMethod: string = this.route.snapshot.queryParams["method"];
+		console.log("Query method: " + queryMethod);
+		if (queryMethod)
+			this.playMethod = method[queryMethod];
+    else
+			this.playMethod = getPlaybackMethod(this.player, this.item);
+			
+		this.selectPlayMethod();
 
 		let sub: string = this.route.snapshot.queryParams["sub"];
 		if (sub != null)
@@ -368,6 +376,24 @@ export class PlayerComponent implements OnInit
 		{
 			this.snackBar.open("Playing: " + this.item.showTitle + " S" + this.item.seasonNumber + ":E" + this.item.episodeNumber, null, { verticalPosition: "top", horizontalPosition: "right", duration: 2000, panelClass: "info-panel" });
 		}, 750);
+	}
+
+	selectPlayMethod()
+	{
+		if (this.playMethod == method.direct)
+		{
+			this.player.src = "/video/" + this.item.link;
+		}
+		else if (this.playMethod == method.transmux)
+		{
+			var dashPlayer = MediaPlayer().create();
+			dashPlayer.initialize(this.player, "/video/transmux/" + this.item.link + "/", true);
+		}
+		else
+		{
+			var dashPlayer = MediaPlayer().create();
+			dashPlayer.initialize(this.player, "/video/transcode/" + this.item.link + "/", true);
+		}
 	}
 
 	back()
