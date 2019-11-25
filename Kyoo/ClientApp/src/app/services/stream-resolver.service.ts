@@ -1,21 +1,21 @@
-import { Injectable } from '@angular/core';
-import { Resolve, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Observable, EMPTY } from 'rxjs';
-import { catchError } from 'rxjs/operators';
-import { Show } from "../../models/show";
-
+import { Injectable } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
+import { EMPTY, Observable } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { WatchItem } from "../../models/watch-item";
+
 
 @Injectable()
-export class StreamResolverService implements Resolve<Show>
+export class StreamResolverService implements Resolve<WatchItem>
 {
   constructor(private http: HttpClient, private snackBar: MatSnackBar) { }
 
-  resolve(route: ActivatedRouteSnapshot): Show | Observable<Show> | Promise<Show>
+	resolve(route: ActivatedRouteSnapshot): WatchItem | Observable<WatchItem> | Promise<WatchItem>
   {
     let item: string = route.paramMap.get("item");
-    return this.http.get<Show>("api/watch/" + item).pipe(catchError((error: HttpErrorResponse) =>
+		return this.http.get<WatchItem>("api/watch/" + item).pipe(catchError((error: HttpErrorResponse) =>
     {
       console.log(error.status + " - " + error.message);
       if (error.status == 404)

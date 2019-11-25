@@ -14,22 +14,22 @@ import { StreamResolverService } from "./services/stream-resolver.service";
 import { ShowDetailsComponent } from './show-details/show-details.component';
 
 const routes: Routes = [
-  { path: "browse", component: BrowseComponent, pathMatch: "full", resolve: { shows: LibraryResolverService } },
-  { path: "browse/:library-slug", component: BrowseComponent, resolve: { shows: LibraryResolverService } },
-  { path: "show/:show-slug", component: ShowDetailsComponent, resolve: { show: ShowResolverService } },
+	{ path: "browse", component: BrowseComponent, pathMatch: "full", resolve: { shows: LibraryResolverService } },
+	{ path: "browse/:library-slug", component: BrowseComponent, resolve: { shows: LibraryResolverService } },
+	{ path: "show/:show-slug", component: ShowDetailsComponent, resolve: { show: ShowResolverService } },
 	{ path: "collection/:collection-slug", component: CollectionComponent, resolve: { collection: CollectionResolverService } },
 	{ path: "people/:people-slug", component: CollectionComponent, resolve: { collection: PeopleResolverService } },
 	{ path: "watch/:item", component: PlayerComponent, resolve: { item: StreamResolverService } },
 	{ path: "search/:query", component: SearchComponent, resolve: { items: SearchResolverService } },
-  { path: "**", component: NotFoundComponent }
+	{ path: "**", component: NotFoundComponent }
 ];
 
 @NgModule({
-  imports: [RouterModule.forRoot(routes,
-  {
-    scrollPositionRestoration: "enabled"
-  })],
-  exports: [RouterModule],
+	imports: [RouterModule.forRoot(routes,
+		{
+			scrollPositionRestoration: "enabled"
+		})],
+	exports: [RouterModule],
 	providers: [
 		LibraryResolverService,
 		ShowResolverService,

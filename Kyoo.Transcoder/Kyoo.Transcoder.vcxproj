@@ -72,35 +72,35 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>$(ProjectDir)\ffmpeg\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\ffmpeg\include;./include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\ffmpeg\lib;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)Kyoo\Transcoder</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)Kyoo\Transcoder</OutDir>
-    <IncludePath>$(ProjectDir)\ffmpeg\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\ffmpeg\include;./include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\ffmpeg\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir)\ffmpeg\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\ffmpeg\include;./include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\ffmpeg\lib;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)Kyoo\Transcoder</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)Kyoo\Transcoder</OutDir>
-    <IncludePath>$(ProjectDir)\ffmpeg\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir)\ffmpeg\include;./include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ProjectDir)\ffmpeg\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;_DEBUG;KYOOTRANSCODER_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);TRANSCODER_EXPORTS=1</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;KYOOTRANSCODER_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);TRANSCODER_EXPORTS=1;_CRT_NONSTDC_NO_DEPRECATE</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -115,11 +115,11 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;KYOOTRANSCODER_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);TRANSCODER_EXPORTS=1</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;KYOOTRANSCODER_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);TRANSCODER_EXPORTS=1;_CRT_NONSTDC_NO_DEPRECATE</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -135,13 +135,13 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>WIN32;NDEBUG;KYOOTRANSCODER_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);TRANSCODER_EXPORTS=1</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;KYOOTRANSCODER_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);TRANSCODER_EXPORTS=1;_CRT_NONSTDC_NO_DEPRECATE</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -158,13 +158,13 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;KYOOTRANSCODER_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);TRANSCODER_EXPORTS=1</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;KYOOTRANSCODER_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions);TRANSCODER_EXPORTS=1;_CRT_NONSTDC_NO_DEPRECATE</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -181,19 +181,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src/framework.h" />
-    <ClInclude Include="src/pch.h" />
-    <ClInclude Include="src/Stream.h" />
-    <ClInclude Include="src/Transcoder.h" />
+    <ClInclude Include="include/helper.h" />
+    <ClInclude Include="include/Stream.h" />
+    <ClInclude Include="include/Transcoder.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src/dllmain.cpp" />
-    <ClCompile Include="src/pch.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-    </ClCompile>
+    <ClCompile Include="src/helper.cpp" />
     <ClCompile Include="src/Transcoder.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

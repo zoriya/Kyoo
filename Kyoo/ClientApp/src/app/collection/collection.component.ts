@@ -8,16 +8,17 @@ import { DomSanitizer } from "@angular/platform-browser";
   templateUrl: './collection.component.html',
   styleUrls: ['./collection.component.scss']
 })
-export class CollectionComponent implements OnInit
+export class CollectionComponent
 {
   collection: Collection;
 
-	constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer) { }
-
-  ngOnInit()
-  {
-    this.collection = this.route.snapshot.data.collection;
-  }
+	constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer)
+	{
+		this.route.data.subscribe((data) =>
+		{
+			this.collection = data.collection;
+		});
+	}
 
 	getThumb()
 	{

@@ -6,7 +6,6 @@ export interface WatchItem
   showSlug: string;
   seasonNumber: number;
   episodeNumber: number;
-  video: string;
   title: string;
   link: string;
   duration: number;
@@ -15,6 +14,8 @@ export interface WatchItem
   previousEpisode: string;
   nextEpisode: Episode;
 
+	container: string;
+	video: Track;
   audios: Track[];
   subtitles: Track[];
 }

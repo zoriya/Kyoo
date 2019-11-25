@@ -25,23 +25,26 @@ export class ShowDetailsComponent implements OnInit
     this.route.queryParams.subscribe(params =>
     {
       this.season = params["season"];
-    });
+	  });
+
+	  this.route.data.subscribe(data =>
+	  {
+		  this.show = data.show;
+		  this.title.setTitle(this.show.title + " - Kyoo");
+
+		  if (this.season == null || this.show.seasons.find(x => x.seasonNumber == this.season) == null)
+			  this.season = 1;
+
+		  this.getEpisodes();
+	  });
   }
 
   ngOnInit()
   {
-    this.show = this.route.snapshot.data.show;
-    this.title.setTitle(this.show.title + " - Kyoo");
-
-    if (this.season == null || this.show.seasons.find(x => x.seasonNumber == this.season) == null)
-      this.season = 1;
-
     this.toolbar = document.getElementById("toolbar");
     this.backdrop = document.getElementById("backdrop");
     window.addEventListener("scroll", this.scroll, true);
     this.toolbar.setAttribute("style", `background-color: rgba(0, 0, 0, 0) !important`);
-
-    this.getEpisodes();
   }
 
   ngOnDestroy()

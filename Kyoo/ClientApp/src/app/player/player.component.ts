@@ -4,6 +4,8 @@ import { DomSanitizer, Title } from "@angular/platform-browser";
 import { ActivatedRoute, Event, NavigationCancel, NavigationEnd, NavigationStart, Router } from "@angular/router";
 import { Track, WatchItem } from "../../models/watch-item";
 import { Location } from "@angular/common";
+import { MediaPlayer } from "dashjs";
+import { getPlaybackMethod, method } from "../../videoSupport/playbackMethodDetector";
 
 declare var SubtitleManager: any;
 
@@ -38,7 +40,11 @@ export class PlayerComponent implements OnInit
 	playTooltip: string = "Pause"; //Text used in the play tooltip
 	fullscreenTooltip: string = "Fullscreen"; //Text used in the fullscreen tooltip
 
+	playMethod: method;
+
 	private player: HTMLVideoElement;
+	private dashPlayer: dashjs.MediaPlayerClass = MediaPlayer().create();
+	private dashPlayerInitialized: boolean = false;
 	private thumb: HTMLElement;
 	private progress: HTMLElement;
 	private buffered: HTMLElement;
@@ -123,6 +129,19 @@ export class PlayerComponent implements OnInit
 		this.player.onended = () =>
 		{
 			this.next();
+		}
+
+		this.player.onerror = () =>
+		{
+			if (this.playMethod == method.transcode)
+			{
+				this.snackBar.open("This episode can't be played.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 10000 });
+			}
+			else
+			{
+				this.playMethod += 1;
+				this.selectPlayMethod();
+			}
 		}
 
 		let progressBar: HTMLElement = document.getElementById("progress-bar") as HTMLElement;
@@ -337,7 +356,14 @@ export class PlayerComponent implements OnInit
 
 	init()
 	{
-		//Load sub selected from the url.
+		let queryMethod: string = this.route.snapshot.queryParams["method"];
+		if (queryMethod)
+			this.playMethod = method[queryMethod];
+    else
+			this.playMethod = getPlaybackMethod(this.player, this.item);
+			
+		this.selectPlayMethod();
+
 		let sub: string = this.route.snapshot.queryParams["sub"];
 		if (sub != null)
 		{
@@ -351,6 +377,27 @@ export class PlayerComponent implements OnInit
 		{
 			this.snackBar.open("Playing: " + this.item.showTitle + " S" + this.item.seasonNumber + ":E" + this.item.episodeNumber, null, { verticalPosition: "top", horizontalPosition: "right", duration: 2000, panelClass: "info-panel" });
 		}, 750);
+	}
+
+	selectPlayMethod()
+	{
+		if (this.dashPlayerInitialized)
+		  this.dashPlayer.reset();
+		if (this.playMethod == method.direct)
+		{
+			this.player.src = "/video/" + this.item.link;
+			this.dashPlayerInitialized = false;
+		}
+		else if (this.playMethod == method.transmux)
+		{
+			this.dashPlayer.initialize(this.player, "/video/transmux/" + this.item.link + "/", true);
+			this.dashPlayerInitialized = true;
+		}
+		else
+		{
+			this.dashPlayer.initialize(this.player, "/video/transcode/" + this.item.link + "/", true);
+			this.dashPlayerInitialized = true;
+		}
 	}
 
 	back()

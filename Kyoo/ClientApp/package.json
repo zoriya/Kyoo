@@ -22,12 +22,11 @@
     "@angular/platform-browser-dynamic": "~8.2.0",
     "@angular/router": "~8.2.0",
     "bootstrap": "^4.3.1",
+    "dashjs": "^3.0.0",
+    "detect-browser": "^4.8.0",
     "hammerjs": "^2.0.8",
     "jquery": "^3.4.1",
     "popper.js": "^1.15.0",
-    "rxjs": "~6.4.0",
-    "tslib": "^1.10.0",
-    "video.js": "^7.6.5",
     "zone.js": "~0.9.1"
   },
   "devDependencies": {
@@ -40,6 +39,7 @@
     "@types/jasminewd2": "~2.0.3",
     "@types/jquery": "^3.3.31",
     "@types/node": "~8.9.4",
+    "@types/video.js": "^7.3.2",
     "codelyzer": "^5.0.0",
     "jasmine-core": "~3.4.0",
     "jasmine-spec-reporter": "~4.2.1",

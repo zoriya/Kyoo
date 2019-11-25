@@ -1,8 +1,6 @@
 <div id="root">
-  <div class="player">
-    <video id="player" poster="backdrop/{{this.item.showSlug}}" autoplay muted (click)="videoClicked()" class="video-js">
-      <source src="/video/{{this.item.link}}" />
-      <source src="/video/transmux/{{this.item.link}}" type="video/mp4" />
+  <div class="player data-vjs-player">
+    <video id="player" poster="backdrop/{{this.item.showSlug}}" autoplay muted (click)="videoClicked()">
     </video>
   </div>
 
@@ -65,7 +63,7 @@
             <ng-template #elseBlock><p>{{this.minutes | number: '2.0-0'}}:{{this.seconds | number: '2.0-0'}} / {{this.maxMinutes | number: '2.0-0'}}:{{this.maxSeconds | number: '2.0-0'}}</p></ng-template>
           </div>
           <div class="right">
-            <button id="volume" *ngIf="this.item.audios.length > 0" mat-icon-button matTooltipPosition="above" matTooltip="Select audio track">
+            <button id="volume" *ngIf="this.item.audios.length > 1" mat-icon-button matTooltipPosition="above" matTooltip="Select audio track">
               <mat-icon>music_note</mat-icon>
             </button>
             <button *ngIf="this.item.subtitles.length > 0" mat-icon-button [matMenuTriggerFor]="subtitles" matTooltipPosition="above" matTooltip="Select subtitle track">

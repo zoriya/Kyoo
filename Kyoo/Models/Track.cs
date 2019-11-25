@@ -11,7 +11,7 @@ namespace Kyoo.Models
     {
         public enum StreamType
         {
-            Audio, Subtitle, Unknow
+            Video, Audio, Subtitle, Unknow
         }
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
@@ -78,28 +78,32 @@ namespace Kyoo.Models
 
         public Track SetLink(string episodeSlug)
         {
-            string language = Language;
-            //Converting mkv track language to c# system language tag.
-            if (language == "fre")
-                language = "fra";
-
-            DisplayName = CultureInfo.GetCultures(CultureTypes.NeutralCultures).Where(x => x.ThreeLetterISOLanguageName == language).FirstOrDefault()?.DisplayName ?? language;
-            Link = "/subtitle/" + episodeSlug + "." + Language;
-
-            if (IsForced)
+            if (type == StreamType.Subtitle)
             {
-                DisplayName += " Forced";
-                Link += "-forced";
+                string language = Language;
+                //Converting mkv track language to c# system language tag.
+                if (language == "fre")
+                    language = "fra";
+
+                DisplayName = CultureInfo.GetCultures(CultureTypes.NeutralCultures).Where(x => x.ThreeLetterISOLanguageName == language).FirstOrDefault()?.DisplayName ?? language;
+                Link = "/subtitle/" + episodeSlug + "." + Language;
+
+                if (IsForced)
+                {
+                    DisplayName += " Forced";
+                    Link += "-forced";
+                }
+
+                if (Title != null && Title.Length > 1)
+                    DisplayName += " - " + Title;
+
+                if (Codec == "ass")
+                    Link += ".ass";
+                else if (Codec == "subrip")
+                    Link += ".srt";
             }
-
-            if (Title != null && Title.Length > 1)
-                DisplayName += " - " + Title;
-
-            if (Codec == "ass")
-                Link += ".ass";
-            else if (Codec == "subrip")
-                Link += ".srt";
-
+            else
+                Link = null;
             return this;
         }
     }
