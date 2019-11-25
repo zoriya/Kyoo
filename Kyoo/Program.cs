@@ -13,7 +13,7 @@ namespace Kyoo
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseKestrel()
+                .UseKestrel((config) => { config.AddServerHeader = false; })
                 .UseUrls("http://*:5000")
                 .UseStartup<Startup>();
     }
