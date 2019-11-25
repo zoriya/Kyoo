@@ -1,197 +1,96 @@
-#include "pch.h"
 #include <filesystem>
 #include <sstream>
-#include "Transcoder.h"
-
-//ffmpeg imports
-extern "C"
-{
-	#include <libavformat/avformat.h>
-	#include <libavutil/dict.h>
-	#include <libavutil/timestamp.h>
-}
-
-constexpr enum AVRounding operator |(const enum AVRounding a, const enum AVRounding b)
-{
-	return (enum AVRounding)(uint32_t(a) | uint32_t(b));
-}
+#include "transcoder.h"
+#include "helper.h"
 
 int Init()
 {
 	return sizeof(Stream);
 }
 
-
-#pragma region InternalProcess
-int open_input_context(AVFormatContext **inputContext, const char *path)
+int transmux(const char *path, const char *out_path, float *playable_duration)
 {
-	if (avformat_open_input(inputContext, path, NULL, NULL))
-	{
-		std::cout << "Error: Can't open the file at " << path << std::endl;
-		return 1;
-	}
-
-	if (avformat_find_stream_info(*inputContext, NULL) < 0)
-	{
-		std::cout << "Error: Could't find streams informations for the file at " << path << std::endl;
-		return 1;
-	}
-
-	av_dump_format(*inputContext, 0, path, false);
-	return 0;
-}
-
-AVStream* copy_stream_to_output(AVFormatContext *outputContext, AVStream *inputStream)
-{
-	AVStream *outputStream = avformat_new_stream(outputContext, NULL);
-	if (outputStream == NULL)
-	{
-		std::cout << "Error: Couldn't create stream." << std::endl;
-		return NULL;
-	}
-
-	if (avcodec_parameters_copy(outputStream->codecpar, inputStream->codecpar) < 0)
-	{
-		std::cout << "Error: Couldn't copy parameters to the output file." << std::endl;
-		return NULL;
-	}
-	outputStream->codecpar->codec_tag = 0;
-
-	avformat_transfer_internal_stream_timing_info(outputContext->oformat, outputStream, inputStream, AVTimebaseSource::AVFMT_TBCF_AUTO);
-	outputStream->time_base = av_add_q(av_stream_get_codec_timebase(outputStream), AVRational{ 0, 1 });
-	outputStream->duration = av_rescale_q(inputStream->duration, inputStream->time_base, outputStream->time_base);
-	outputStream->disposition = inputStream->disposition;
-	outputStream->avg_frame_rate = inputStream->avg_frame_rate;
-	outputStream->r_frame_rate = inputStream->r_frame_rate;
-
-	//av_dict_copy(&outputStream->metadata, inputStream->metadata, NULL);
-
-	//if (inputStream->nb_side_data)
-	//{
-	//	for (int i = 0; i < inputStream->nb_side_data; i++)
-	//	{
-	//		std::cout << "Copying side packet #" << i << std::endl;
-
-	//		AVPacketSideData *sidePkt = &inputStream->side_data[i];
-	//		uint8_t *newPkt = av_stream_new_side_data(outputStream, sidePkt->type, sidePkt->size);
-	//		if (newPkt == NULL)
-	//		{
-	//			std::cout << "Error copying side package." << std::endl;
-	//			//Should handle return here
-	//			return;
-	//		}
-	//		memcpy(newPkt, sidePkt->data, sidePkt->size);
-	//	}
-	//}
-
-	return outputStream;
-}
-
-int open_output_file_for_write(AVFormatContext *outputContext, const char* outputPath)
-{
-	if (!(outputContext->flags & AVFMT_NOFILE))
-	{
-		if (avio_open(&outputContext->pb, outputPath, AVIO_FLAG_WRITE) < 0)
-		{
-			std::cout << "Error: Couldn't open file at " << outputPath << std::endl;
-			return 1;
-		}
-	}
-	else
-		std::cout << "Output flag set to AVFMT_NOFILE." << std::endl;
-
-	if (avformat_write_header(outputContext, NULL) < 0)
-	{
-		std::cout << "Error: Couldn't write headers to file at " << outputPath << std::endl;
-		return 1;
-	}
-
-	return 0;
-}
-
-void process_packet(AVPacket &pkt, AVStream* inputStream, AVStream* outputStream)
-{
-	pkt.pts = av_rescale_q_rnd(pkt.pts, inputStream->time_base, outputStream->time_base, AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX);
-	pkt.dts = av_rescale_q_rnd(pkt.dts, inputStream->time_base, outputStream->time_base, AV_ROUND_NEAR_INF | AV_ROUND_PASS_MINMAX);
-	pkt.duration = av_rescale_q(pkt.duration, inputStream->time_base, outputStream->time_base);
-	pkt.pos = -1;
-}
-#pragma endregion
-
-
-
-
-int Transmux(const char *path, const char *outPath)
-{
-	AVFormatContext *inputContext = NULL;
+	AVFormatContext *in_ctx = NULL;
+	AVFormatContext *out_ctx = NULL;
+	AVStream *stream;
+	AVPacket pkt;
+	AVDictionary *options = NULL;
+	int *stream_map;
+	int stream_count;
 	int ret = 0;
 
-	if (open_input_context(&inputContext, path) != 0)
+	*playable_duration = 0;
+	if (open_input_context(&in_ctx, path) != 0)
 		return 1;
 
-	AVFormatContext *outputContext = NULL;
-	if (avformat_alloc_output_context2(&outputContext, NULL, NULL, outPath) < 0)
+	if (avformat_alloc_output_context2(&out_ctx, NULL, NULL, out_path) < 0)
 	{
 		std::cout << "Error: Couldn't create an output file." << std::endl;
 		return 1;
 	}
 
-	int *streamsMap = new int[inputContext->nb_streams];
-	int streamCount = 0;
+	stream_map = new int[in_ctx->nb_streams];
+	stream_count = 0;
 
-	for (unsigned int i = 0; i < inputContext->nb_streams; i++)
+	for (unsigned int i = 0; i < in_ctx->nb_streams; i++)
 	{
-		AVStream *stream = inputContext->streams[i];
+		stream = in_ctx->streams[i];
 		if (stream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
 		{
-			streamsMap[i] = streamCount;
-			streamCount++;
-			if (copy_stream_to_output(outputContext, stream) == NULL)
+			stream_map[i] = stream_count;
+			stream_count++;
+			if (copy_stream_to_output(out_ctx, stream) == NULL)
 				return 1;
 		}
 		else if (stream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) //Should support multi-audio on a good format.
 		{
-			streamsMap[i] = streamCount;
-			streamCount++;
-			if (copy_stream_to_output(outputContext, stream) == NULL)
+			stream_map[i] = stream_count;
+			stream_count++;
+			if (copy_stream_to_output(out_ctx, stream) == NULL)
 				return 1;
 		}
 		else
-			streamsMap[i] = -1;
+			stream_map[i] = -1;
 	}
 
-	av_dump_format(outputContext, 0, outPath, true);
-	if (open_output_file_for_write(outputContext, outPath) != 0)
+	av_dump_format(out_ctx, 0, out_path, true);
+
+	std::filesystem::create_directory(((std::string)out_path).substr(0, strrchr(out_path, '/') - out_path).append("/dash/"));
+	av_dict_set(&options, "init_seg_name", "dash/init-stream$RepresentationID$.m4s", 0);
+	av_dict_set(&options, "media_seg_name", "dash/chunk-stream$RepresentationID$-$Number%05d$.m4s", 0);
+	av_dict_set(&options, "streaming", "1", 0);
+
+	if (open_output_file_for_write(out_ctx, out_path, &options) != 0)
 		return 1;
 
-	AVPacket pkt;
-	while (av_read_frame(inputContext, &pkt) == 0)
+	while (av_read_frame(in_ctx, &pkt) == 0)
 	{
-		if (pkt.stream_index >= inputContext->nb_streams || streamsMap[pkt.stream_index] < 0)
+		if ((unsigned int)pkt.stream_index >= in_ctx->nb_streams || stream_map[pkt.stream_index] < 0)
 		{
 			av_packet_unref(&pkt);
 			continue;
 		}
 
-		AVStream *inputStream = inputContext->streams[pkt.stream_index];
-		pkt.stream_index = streamsMap[pkt.stream_index];
-		AVStream *outputStream = outputContext->streams[pkt.stream_index];
+		stream = in_ctx->streams[pkt.stream_index];
+		pkt.stream_index = stream_map[pkt.stream_index];
+		process_packet(pkt, stream, out_ctx->streams[pkt.stream_index]);
+		if (pkt.stream_index == 0)
+			*playable_duration += pkt.duration * (float)out_ctx->streams[pkt.stream_index]->time_base.num / out_ctx->streams[pkt.stream_index]->time_base.den;
 
-		process_packet(pkt, inputStream, outputStream);
-
-		if (av_interleaved_write_frame(outputContext, &pkt) < 0)
+		if (av_interleaved_write_frame(out_ctx, &pkt) < 0)
 			std::cout << "Error while writing a packet to the output file." << std::endl;
 
 		av_packet_unref(&pkt);
 	}
 
-	av_write_trailer(outputContext);
-	avformat_close_input(&inputContext);
+	av_dict_free(&options);
+	av_write_trailer(out_ctx);
+	avformat_close_input(&in_ctx);
 
-	if (outputContext && !(outputContext->oformat->flags & AVFMT_NOFILE))
-		avio_closep(&outputContext->pb);
-	avformat_free_context(outputContext);
-	delete[] streamsMap;
+	if (out_ctx && !(out_ctx->oformat->flags & AVFMT_NOFILE))
+		avio_close(out_ctx->pb);
+	avformat_free_context(out_ctx);
+	delete[] stream_map;
 
 	if (ret < 0 && ret != AVERROR_EOF)
 		return 1;
@@ -199,154 +98,195 @@ int Transmux(const char *path, const char *outPath)
 	return 0;
 }
 
-
-Stream *ExtractSubtitles(const char *path, const char *outPath, int *streamCount, int *subtitleCount)
+Stream *get_track_info(const char *path, int *stream_count, int *track_count)
 {
-	AVFormatContext *inputContext = NULL;
+	AVFormatContext *ctx = NULL;
+	Stream *streams;
 
-	if (open_input_context(&inputContext, path) != 0)
+	if (open_input_context(&ctx, path) != 0)
 		return nullptr;
 
-	*streamCount = inputContext->nb_streams;
-	*subtitleCount = 0;
-	Stream *streams = new Stream[*streamCount];
-
-	const unsigned int outputCount = inputContext->nb_streams;
-	AVFormatContext **outputList = new AVFormatContext*[outputCount];
+	*stream_count = ctx->nb_streams;
+	*track_count = 0;
+	streams = new Stream[*stream_count];
 
 	//Initialize output and set headers.
-	for (unsigned int i = 0; i < inputContext->nb_streams; i++)
+	for (int i = 0; i < *stream_count; i++)
 	{
-		AVStream *inputStream = inputContext->streams[i];
-		const AVCodecParameters *inputCodecpar = inputStream->codecpar;
+		AVStream *stream = ctx->streams[i];
+		const AVCodecParameters *codecpar = stream->codecpar;
 
-		if (inputCodecpar->codec_type != AVMEDIA_TYPE_SUBTITLE)
-			outputList[i] = NULL;
+		if (codecpar->codec_type == AVMEDIA_TYPE_VIDEO || codecpar->codec_type == AVMEDIA_TYPE_AUDIO)
+		{
+			AVDictionaryEntry *languageptr = av_dict_get(stream->metadata, "language", NULL, 0);
+
+			*track_count += 1;
+			
+			streams[i] = Stream(codecpar->codec_type == AVMEDIA_TYPE_VIDEO ? "VIDEO" : NULL, // title
+				languageptr ? languageptr->value : NULL, // language
+				avcodec_get_name(codecpar->codec_id), // format
+				stream->disposition & AV_DISPOSITION_DEFAULT, // isDefault
+				stream->disposition & AV_DISPOSITION_FORCED, // isForced
+				path);  // path
+		}
+		else
+			streams[i] = Stream();
+	}
+	avformat_close_input(&ctx);
+	return streams;
+}
+
+Stream *extract_subtitles(const char *path, const char *out_path, int *stream_count, int *subtitle_count)
+{
+	AVFormatContext *int_ctx = NULL;
+	AVFormatContext **output_list;
+	Stream *streams;
+	AVPacket pkt;
+	unsigned int out_count;
+
+	if (open_input_context(&int_ctx, path) != 0)
+		return nullptr;
+
+	*stream_count = int_ctx->nb_streams;
+	*subtitle_count = 0;
+	streams = new Stream[*stream_count];
+
+	out_count = int_ctx->nb_streams;
+	output_list = new AVFormatContext *[out_count];
+
+	//Initialize output and set headers.
+	for (unsigned int i = 0; i < int_ctx->nb_streams; i++)
+	{
+		AVStream *in_stream = int_ctx->streams[i];
+		const AVCodecParameters *in_codecpar = in_stream->codecpar;
+
+		if (in_codecpar->codec_type != AVMEDIA_TYPE_SUBTITLE)
+		{
+			output_list[i] = NULL;
+			streams[i] = Stream();
+		}
 		else
 		{
-			*subtitleCount += 1;
+			*subtitle_count += 1;
 
-			AVDictionaryEntry *languagePtr = av_dict_get(inputStream->metadata, "language", NULL, 0);
+			AVDictionaryEntry *languageptr = av_dict_get(in_stream->metadata, "language", NULL, 0);
 
 			//Get metadata for file name
 			streams[i] = Stream(NULL, //title
-				languagePtr ? languagePtr->value : NULL, //language
-				avcodec_get_name(inputCodecpar->codec_id), //format
-				inputStream->disposition & AV_DISPOSITION_DEFAULT, //isDefault
-				inputStream->disposition & AV_DISPOSITION_FORCED);  //isForced
+				languageptr ? languageptr->value : NULL, //language
+				avcodec_get_name(in_codecpar->codec_id), //format
+				in_stream->disposition & AV_DISPOSITION_DEFAULT, //isDefault
+				in_stream->disposition & AV_DISPOSITION_FORCED);  //isForced
 
 			//Create the language subfolder
-			std::stringstream outStream;
-			outStream << outPath << (char)std::filesystem::path::preferred_separator << streams[i].language;
-			std::filesystem::create_directory(outStream.str());
+			std::stringstream out_strstream;
+			out_strstream << out_path << (char)std::filesystem::path::preferred_separator << streams[i].language;
+			std::filesystem::create_directory(out_strstream.str());
 
 			//Get file name
-			std::string fileName(path);
-			size_t lastSeparator = fileName.find_last_of((char)std::filesystem::path::preferred_separator);
-			fileName = fileName.substr(lastSeparator, fileName.find_last_of('.') - lastSeparator);
+			std::string file_name(path);
+			size_t last_separator = file_name.find_last_of((char)std::filesystem::path::preferred_separator);
+			file_name = file_name.substr(last_separator, file_name.find_last_of('.') - last_separator);
 
 			//Construct output file name
-			outStream << fileName << "." << streams[i].language;
+			out_strstream << file_name << "." << streams[i].language;
 
-			if (streams[i].isDefault)
-				outStream << ".default";
-			if (streams[i].isForced)
-				outStream << ".forced";
+			if (streams[i].is_default)
+				out_strstream << ".default";
+			if (streams[i].is_forced)
+				out_strstream << ".forced";
 
 			if (strcmp(streams[i].codec, "subrip") == 0)
-				outStream << ".srt";
+				out_strstream << ".srt";
 			else if (strcmp(streams[i].codec, "ass") == 0)
-				outStream << ".ass";
+				out_strstream << ".ass";
 			else
 			{
 				std::cout << "Unsupported subtitle codec: " << streams[i].codec << std::endl;
-				outputList[i] = NULL;
+				output_list[i] = NULL;
 				continue;
 			}
 
-			streams[i].path = _strdup(outStream.str().c_str());
+			streams[i].path = strdup(out_strstream.str().c_str());
 
-			std::cout << "Stream #" << i << "(" << streams[i].language << "), stream type: " << inputCodecpar->codec_type << " codec: " << streams[i].codec << std::endl;
+			std::cout << "Stream #" << i << "(" << streams[i].language << "), stream type: " << in_codecpar->codec_type << " codec: " << streams[i].codec << std::endl;
 
-			AVFormatContext *outputContext = NULL;
-			if (avformat_alloc_output_context2(&outputContext, NULL, NULL, streams[i].path) < 0)
+			AVFormatContext *out_ctx = NULL;
+			if (avformat_alloc_output_context2(&out_ctx, NULL, NULL, streams[i].path) < 0)
 			{
 				std::cout << "Error: Couldn't create an output file." << std::endl;
 				continue;
 			}
 
-			av_dict_copy(&outputContext->metadata, inputContext->metadata, NULL);
+			av_dict_copy(&out_ctx->metadata, int_ctx->metadata, NULL);
 
-			AVStream *outputStream = copy_stream_to_output(outputContext, inputStream);
-			if (outputStream == NULL)
+			AVStream *out_stream = copy_stream_to_output(out_ctx, in_stream);
+			if (out_stream == NULL)
 				goto end;
 
-			av_dump_format(outputContext, 0, streams[i].path, true);
+			av_dump_format(out_ctx, 0, streams[i].path, true);
 
-			if (open_output_file_for_write(outputContext, streams[i].path) != 0)
+			if (open_output_file_for_write(out_ctx, streams[i].path, NULL) != 0)
 				goto end;
 
-			outputList[i] = outputContext;
+			output_list[i] = out_ctx;
 
 			if (false)
 			{
 			end:
-				if (outputContext && !(outputContext->flags & AVFMT_NOFILE))
-					avio_closep(&outputContext->pb);
-				avformat_free_context(outputContext);
+				if (out_ctx && !(out_ctx->flags & AVFMT_NOFILE))
+					avio_closep(&out_ctx->pb);
+				avformat_free_context(out_ctx);
 
-				outputList[i] = nullptr;
+				output_list[i] = nullptr;
 				std::cout << "An error occured, cleaning up th output context for the stream #" << i << std::endl;
 			}
 		}
 	}
+
 	//Write subtitle data to files.
-	AVPacket pkt;
-	while (av_read_frame(inputContext, &pkt) == 0)
+	while (av_read_frame(int_ctx, &pkt) == 0)
 	{
-		if (pkt.stream_index >= outputCount)
+		if ((unsigned int)pkt.stream_index >= out_count)
 			continue;
 
-		AVFormatContext *outputContext = outputList[pkt.stream_index];
-		if (outputContext == nullptr)
+		AVFormatContext *out_ctx = output_list[pkt.stream_index];
+		if (out_ctx == nullptr)
 		{
 			av_packet_unref(&pkt);
 			continue;
 		}
 
-		AVStream *inputStream = inputContext->streams[pkt.stream_index];
-		AVStream *outputStream = outputContext->streams[0];
-
+		process_packet(pkt, int_ctx->streams[pkt.stream_index], out_ctx->streams[0]);
 		pkt.stream_index = 0;
-		process_packet(pkt, inputStream, outputStream);
 
-		if (av_interleaved_write_frame(outputContext, &pkt) < 0)
+		if (av_interleaved_write_frame(out_ctx, &pkt) < 0)
 			std::cout << "Error while writing a packet to the output file." << std::endl;
 
 		av_packet_unref(&pkt);
 	}
 
-	avformat_close_input(&inputContext);
+	avformat_close_input(&int_ctx);
 
-	for (unsigned int i = 0; i < outputCount; i++)
+	for (unsigned int i = 0; i < out_count; i++)
 	{
-		AVFormatContext *outputContext = outputList[i];
+		AVFormatContext *out_ctx = output_list[i];
 
-		if (outputContext == NULL)
+		if (out_ctx == NULL)
 			continue;
 
-		av_write_trailer(outputContext);
+		av_write_trailer(out_ctx);
 
-		if (outputContext && !(outputContext->flags & AVFMT_NOFILE))
-			avio_closep(&outputContext->pb);
-		avformat_free_context(outputContext);
+		if (out_ctx && !(out_ctx->flags & AVFMT_NOFILE))
+			avio_closep(&out_ctx->pb);
+		avformat_free_context(out_ctx);
 	}
 
-	delete[] outputList;
+	delete[] output_list;
 	return streams;
 }
 
-void FreeMemory(Stream *streamsPtr)
+void free_memory(Stream *stream_ptr)
 {
-	delete[] streamsPtr;
+	delete[] stream_ptr;
 }

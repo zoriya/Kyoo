@@ -1,6 +1,9 @@
 ﻿using Kyoo.InternalAPI;
 using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace Kyoo.Controllers
 {
@@ -10,11 +13,13 @@ namespace Kyoo.Controllers
     {
         private readonly ILibraryManager libraryManager;
         private readonly ITranscoder transcoder;
+        private readonly string transmuxPath;
 
-        public VideoController(ILibraryManager libraryManager, ITranscoder transcoder)
+        public VideoController(ILibraryManager libraryManager, ITranscoder transcoder, IConfiguration config)
         {
             this.libraryManager = libraryManager;
             this.transcoder = transcoder;
+            transmuxPath = config.GetValue<string>("transmuxTempPath");
         }
 
         [HttpGet("{showSlug}-s{seasonNumber}e{episodeNumber}")]
@@ -28,16 +33,16 @@ namespace Kyoo.Controllers
                 return NotFound();
         }
 
-        [HttpGet("transmux/{showSlug}-s{seasonNumber}e{episodeNumber}")]
-        public IActionResult Transmux(string showSlug, long seasonNumber, long episodeNumber)
+        [HttpGet("transmux/{showSlug}-s{seasonNumber}e{episodeNumber}/")]
+        public async Task<IActionResult> Transmux(string showSlug, long seasonNumber, long episodeNumber)
         {
             WatchItem episode = libraryManager.GetWatchItem(showSlug, seasonNumber, episodeNumber);
 
             if (episode != null && System.IO.File.Exists(episode.Path))
             {
-                string path = transcoder.Transmux(episode);
+                string path = await transcoder.Transmux(episode);
                 if (path != null)
-                    return PhysicalFile(path, "video/mp4", true);
+                    return PhysicalFile(path, "application/dash+xml", true);
                 else
                     return StatusCode(500);
             }
@@ -45,18 +50,28 @@ namespace Kyoo.Controllers
                 return NotFound();
         }
 
+        [HttpGet("transmux/{episodeLink}/dash/{chunk}")]
+        public IActionResult GetTransmuxedChunk(string episodeLink, string chunk)
+        {
+            string path = Path.Combine(transmuxPath, episodeLink);
+            path = Path.Combine(path, "dash" + Path.DirectorySeparatorChar + chunk);
+
+            return PhysicalFile(path, "video/iso.segment");
+        }
+
         [HttpGet("transcode/{showSlug}-s{seasonNumber}e{episodeNumber}")]
         public IActionResult Transcode(string showSlug, long seasonNumber, long episodeNumber)
         {
-            WatchItem episode = libraryManager.GetWatchItem(showSlug, seasonNumber, episodeNumber);
+            return null;
+            //WatchItem episode = libraryManager.GetWatchItem(showSlug, seasonNumber, episodeNumber);
 
-            if (episode != null && System.IO.File.Exists(episode.Path))
-            {
-                string path = transcoder.Transcode(episode.Path);
-                return PhysicalFile(path, "video/mp4", true); //Should use mpeg dash
-            }
-            else
-                return NotFound();
+            //if (episode != null && System.IO.File.Exists(episode.Path))
+            //{
+            //    string path = transcoder.Transcode(episode.Path);
+            //    return PhysicalFile(path, "video/mp4", true); //Should use mpeg dash
+            //}
+            //else
+            //    return NotFound();
         }
     }
 }

@@ -11,13 +11,22 @@ namespace Kyoo.InternalAPI
 {
     public class Transcoder : ITranscoder
     {
-        private readonly string tempPath;
+        private readonly string transmuxPath;
 
         public Transcoder(IConfiguration config)
         {
-            tempPath = config.GetValue<string>("tempPath");
+            transmuxPath = config.GetValue<string>("transmuxTempPath");
 
             Debug.WriteLine("&Api INIT (unmanaged stream size): " + TranscoderAPI.Init() + ", Stream size: " + Marshal.SizeOf<Models.Watch.Stream>());
+        }
+
+        public async Task<Track[]> GetTrackInfo(string path)
+        {
+            return await Task.Run(() =>
+            {
+                TranscoderAPI.GetTrackInfo(path, out Track[] tracks);
+                return tracks;
+            });
         }
 
         public async Task<Track[]> ExtractSubtitles(string path)
@@ -31,24 +40,33 @@ namespace Kyoo.InternalAPI
             });
         }
 
-        public void GetVideo(string path)
+        public async Task<string> Transmux(WatchItem episode)
         {
-            Debug.WriteLine("&Getting video...");
+            string folder = Path.Combine(transmuxPath, episode.Link);
+            string manifest = Path.Combine(folder, episode.Link + ".mpd");
+            float playableDuration = 0;
+            bool transmuxFailed = false;
+
+            Directory.CreateDirectory(folder);
+            Debug.WriteLine("&Transmuxing " + episode.Link + " at " + episode.Path + ", outputPath: " + folder);
+
+            if (File.Exists(manifest))
+                return manifest;
+            // Added an await and removed the while -> await because the dynamic dash file can't be played for now (maybe ffmpeg doesn't process in the playback order).
+            /*await */Task.Run(() => 
+            { 
+                transmuxFailed = TranscoderAPI.transmux(episode.Path, manifest.Replace('\\', '/'), out playableDuration) != 0;
+                //playableDuration = float.MaxValue;
+            });
+            while (playableDuration < 20 || (!File.Exists(manifest) && !transmuxFailed))
+                await Task.Delay(10);
+            return transmuxFailed ? null : manifest;
         }
 
-        public string Transmux(WatchItem episode)
+        public Task<string> Transcode(WatchItem episode)
         {
-            string temp = Path.Combine(tempPath, episode.Link + ".mp4");
-            Debug.WriteLine("&Transmuxing " + episode.Link + " at " + episode.Path + ", outputPath: " + temp);
-            if (File.Exists(temp) || TranscoderAPI.Transmux(episode.Path, temp) == 0)
-                return temp;
-            else
-                return null;
-        }
-
-        public string Transcode(string path)
-        {
-            return @"D:\Videos\Anohana\AnoHana S01E01.mp4";
+            //NOT IMPLEMENTED YET
+            return null;
         }
     }
 }

@@ -224,7 +224,7 @@ namespace Kyoo.InternalAPI
         }
 
 
-        public (List<Track> audios, List<Track> subtitles) GetStreams(long episodeID, string episodeSlug)
+        public (Track video, List<Track> audios, List<Track> subtitles) GetStreams(long episodeID, string episodeSlug)
         {
             string query = "SELECT * FROM tracks WHERE episodeID = $episodeID;";
 
@@ -233,6 +233,7 @@ namespace Kyoo.InternalAPI
                 cmd.Parameters.AddWithValue("$episodeID", episodeID);
                 SQLiteDataReader reader = cmd.ExecuteReader();
 
+                Track video = null;
                 List<Track> audios = new List<Track>();
                 List<Track> subtitles = new List<Track>();
 
@@ -240,13 +241,15 @@ namespace Kyoo.InternalAPI
                 {
                     Track track = Track.FromReader(reader).SetLink(episodeSlug);
 
-                    if (track.type == StreamType.Audio)
+                    if (track.type == StreamType.Video)
+                        video = track;
+                    else if (track.type == StreamType.Audio)
                         audios.Add(track);
                     else if (track.type == StreamType.Subtitle)
                         subtitles.Add(track);
                 }
 
-                return (audios, subtitles);
+                return (video, audios, subtitles);
             }
         }
 

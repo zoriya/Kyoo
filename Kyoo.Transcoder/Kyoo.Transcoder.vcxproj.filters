@@ -12,30 +12,27 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{851d2dff-3186-4d12-9f4a-4144143be6fb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src/Transcoder.h">
-      <Filter>Source Files</Filter>
+    <ClInclude Include="include/helper.h">
+      <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src/pch.h">
-      <Filter>Compiler Files</Filter>
+    <ClInclude Include="include/Stream.h">
+      <Filter>Headers</Filter>
     </ClInclude>
-    <ClInclude Include="src/framework.h">
-      <Filter>Compiler Files</Filter>
-    </ClInclude>
-    <ClInclude Include="src/Stream.h">
-      <Filter>Models</Filter>
+    <ClInclude Include="include/Transcoder.h">
+      <Filter>Headers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src/Transcoder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src/pch.cpp">
-      <Filter>Compiler Files</Filter>
-    </ClCompile>
-    <ClCompile Include="src/dllmain.cpp">
-      <Filter>Compiler Files</Filter>
+    <ClCompile Include="src/helper.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
