@@ -43,6 +43,8 @@ export class PlayerComponent implements OnInit
 	playMethod: method;
 
 	private player: HTMLVideoElement;
+	private dashPlayer: dashjs.MediaPlayerClass = MediaPlayer().create();
+	private dashPlayerInitialized: boolean = false;
 	private thumb: HTMLElement;
 	private progress: HTMLElement;
 	private buffered: HTMLElement;
@@ -355,7 +357,6 @@ export class PlayerComponent implements OnInit
 	init()
 	{
 		let queryMethod: string = this.route.snapshot.queryParams["method"];
-		console.log("Query method: " + queryMethod);
 		if (queryMethod)
 			this.playMethod = method[queryMethod];
     else
@@ -380,19 +381,22 @@ export class PlayerComponent implements OnInit
 
 	selectPlayMethod()
 	{
+		if (this.dashPlayerInitialized)
+		  this.dashPlayer.reset();
 		if (this.playMethod == method.direct)
 		{
 			this.player.src = "/video/" + this.item.link;
+			this.dashPlayerInitialized = false;
 		}
 		else if (this.playMethod == method.transmux)
 		{
-			var dashPlayer = MediaPlayer().create();
-			dashPlayer.initialize(this.player, "/video/transmux/" + this.item.link + "/", true);
+			this.dashPlayer.initialize(this.player, "/video/transmux/" + this.item.link + "/", true);
+			this.dashPlayerInitialized = true;
 		}
 		else
 		{
-			var dashPlayer = MediaPlayer().create();
-			dashPlayer.initialize(this.player, "/video/transcode/" + this.item.link + "/", true);
+			this.dashPlayer.initialize(this.player, "/video/transcode/" + this.item.link + "/", true);
+			this.dashPlayerInitialized = true;
 		}
 	}
 
