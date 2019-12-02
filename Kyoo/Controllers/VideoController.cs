@@ -33,7 +33,7 @@ namespace Kyoo.Controllers
                 return NotFound();
         }
 
-        [HttpGet("transmux/{showSlug}-s{seasonNumber}e{episodeNumber}/")]
+        [HttpGet("transmux/{showSlug}-s{seasonNumber}e{episodeNumber}")]
         public async Task<IActionResult> Transmux(string showSlug, long seasonNumber, long episodeNumber)
         {
             WatchItem episode = libraryManager.GetWatchItem(showSlug, seasonNumber, episodeNumber);
@@ -42,7 +42,7 @@ namespace Kyoo.Controllers
             {
                 string path = await transcoder.Transmux(episode);
                 if (path != null)
-                    return PhysicalFile(path, "application/dash+xml", true);
+                    return PhysicalFile(path, "application/x-mpegURL ", true);
                 else
                     return StatusCode(500);
             }
@@ -50,13 +50,13 @@ namespace Kyoo.Controllers
                 return NotFound();
         }
 
-        [HttpGet("transmux/{episodeLink}/dash/{chunk}")]
+        [HttpGet("transmux/{episodeLink}/segment/{chunk}")]
         public IActionResult GetTransmuxedChunk(string episodeLink, string chunk)
         {
             string path = Path.Combine(transmuxPath, episodeLink);
-            path = Path.Combine(path, "dash" + Path.DirectorySeparatorChar + chunk);
+            path = Path.Combine(path, "segments" + Path.DirectorySeparatorChar + chunk);
 
-            return PhysicalFile(path, "video/iso.segment");
+            return PhysicalFile(path, "video/MP2T");
         }
 
         [HttpGet("transcode/{showSlug}-s{seasonNumber}e{episodeNumber}")]
