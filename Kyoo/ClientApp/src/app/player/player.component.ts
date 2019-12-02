@@ -4,7 +4,7 @@ import { DomSanitizer, Title } from "@angular/platform-browser";
 import { ActivatedRoute, Event, NavigationCancel, NavigationEnd, NavigationStart, Router } from "@angular/router";
 import { Track, WatchItem } from "../../models/watch-item";
 import { Location } from "@angular/common";
-import { MediaPlayer } from "dashjs";
+import * as Hls from "hls.js"
 import { getPlaybackMethod, method } from "../../videoSupport/playbackMethodDetector";
 
 declare var SubtitleManager: any;
@@ -43,8 +43,7 @@ export class PlayerComponent implements OnInit
 	playMethod: method;
 
 	private player: HTMLVideoElement;
-	private dashPlayer: dashjs.MediaPlayerClass = MediaPlayer().create();
-	private dashPlayerInitialized: boolean = false;
+	private hlsPlayer: Hls = new Hls();
 	private thumb: HTMLElement;
 	private progress: HTMLElement;
 	private buffered: HTMLElement;
@@ -381,22 +380,27 @@ export class PlayerComponent implements OnInit
 
 	selectPlayMethod()
 	{
-		if (this.dashPlayerInitialized)
-		  this.dashPlayer.reset();
 		if (this.playMethod == method.direct)
 		{
 			this.player.src = "/video/" + this.item.link;
-			this.dashPlayerInitialized = false;
 		}
 		else if (this.playMethod == method.transmux)
 		{
-			this.dashPlayer.initialize(this.player, "/video/transmux/" + this.item.link + "/", true);
-			this.dashPlayerInitialized = true;
+			this.hlsPlayer.loadSource("/video/transmux/" + this.item.link + "/");
+			this.hlsPlayer.attachMedia(this.player);
+			this.hlsPlayer.on(Hls.Events.MANIFEST_LOADED, () =>
+			{
+				this.player.play();
+			});
 		}
 		else
 		{
-			this.dashPlayer.initialize(this.player, "/video/transcode/" + this.item.link + "/", true);
-			this.dashPlayerInitialized = true;
+			this.hlsPlayer.loadSource("/video/transcode/" + this.item.link + "/");
+			this.hlsPlayer.attachMedia(this.player);
+			this.hlsPlayer.on(Hls.Events.MANIFEST_LOADED, () =>
+			{
+				this.player.play();
+			});
 		}
 	}
 

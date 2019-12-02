@@ -18,6 +18,7 @@ int transmux(const char *path, const char *out_path, float *playable_duration)
 	int *stream_map;
 	int stream_count;
 	int ret = 0;
+	std::string seg_path = ((std::string)out_path).substr(0, strrchr(out_path, '/') - out_path).append("/segments/");
 
 	*playable_duration = 0;
 	if (open_input_context(&in_ctx, path) != 0)
@@ -54,10 +55,10 @@ int transmux(const char *path, const char *out_path, float *playable_duration)
 	}
 
 	av_dump_format(out_ctx, 0, out_path, true);
-
-	std::filesystem::create_directory(((std::string)out_path).substr(0, strrchr(out_path, '/') - out_path).append("/dash/"));
-	av_dict_set(&options, "init_seg_name", "dash/init-stream$RepresentationID$.m4s", 0);
-	av_dict_set(&options, "media_seg_name", "dash/chunk-stream$RepresentationID$-$Number%05d$.m4s", 0);
+	std::filesystem::create_directory(seg_path);
+	av_dict_set(&options, "hls_segment_filename", seg_path.append("%v-%03d.ts").c_str(), 0);
+	av_dict_set(&options, "hls_base_url", "segment/", 0);
+	av_dict_set(&options, "hls_list_size", "0", 0);
 	av_dict_set(&options, "streaming", "1", 0);
 
 	if (open_output_file_for_write(out_ctx, out_path, &options) != 0)
