@@ -43,7 +43,7 @@ namespace Kyoo.InternalAPI
         public async Task<string> Transmux(WatchItem episode)
         {
             string folder = Path.Combine(transmuxPath, episode.Link);
-            string manifest = Path.Combine(folder, episode.Link + ".mpd");
+            string manifest = Path.Combine(folder, episode.Link + ".m3u8");
             float playableDuration = 0;
             bool transmuxFailed = false;
 
