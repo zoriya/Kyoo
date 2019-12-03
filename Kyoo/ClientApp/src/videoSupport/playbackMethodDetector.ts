@@ -1,33 +1,54 @@
-import { WatchItem, Track } from "../models/watch-item";
-import { detect, BrowserInfo } from "detect-browser";
+import { detect } from "detect-browser";
+import { Track, WatchItem } from "../models/watch-item";
 
 export enum method
 {
-	direct,
-	transmux,
-	transcode
+	direct = "Direct Play",
+	transmux = "Transmux",
+	transcode = "Transcode"
 };
+
+export class SupportList
+{
+	container: boolean;
+	videoCodec: boolean;
+	audioCodec: boolean;
+}
 
 export function getPlaybackMethod(player: HTMLVideoElement, item: WatchItem): method
 {
-	let browser = detect();
+	let supportList: SupportList = getWhatIsSupported(player, item);
 
-	// If we can't find the browser, transcode (It may or may not support containers/codecs)
-	if (!browser)
-		return method.transcode;
-
-	if (containerIsSupported(player, item.container, browser.name) && item.audios.length <= 1)
+	if (supportList.container)
 	{
-		if (videoCodecIsSupported(player, item.video.codec, browser.name) &&
-			audioCodecIsSupported(player, item.audios.map((value: Track) => value.codec), browser.name))
+		if (supportList.videoCodec && supportList.audioCodec)
 			return method.direct;
 		return method.transcode;
 	}
 
-	if (videoCodecIsSupported(player, item.video.codec, browser.name) &&
-		audioCodecIsSupported(player, item.audios.map((value: Track) => value.codec), browser.name))
+	if (supportList.videoCodec && supportList.audioCodec)
 		return method.transmux;
 	return method.transcode;
+}
+
+export function getWhatIsSupported(player: HTMLVideoElement, item: WatchItem): SupportList
+{
+	let supportList: SupportList = new SupportList();
+	let browser = detect();
+
+	if (!browser)
+	{
+		supportList.container = false;
+		supportList.videoCodec = false;
+		supportList.audioCodec = false;
+	}
+	else
+	{
+		supportList.container = containerIsSupported(player, item.container, browser.name) && item.audios.length <= 1;
+		supportList.videoCodec = videoCodecIsSupported(player, item.video.codec, browser.name);
+		supportList.videoCodec = audioCodecIsSupported(player, item.audios.map((value: Track) => value.codec), browser.name);
+	}
+	return (supportList);
 }
 
 function containerIsSupported(player: HTMLVideoElement, container: string, browser: string): boolean

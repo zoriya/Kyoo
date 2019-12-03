@@ -1,6 +1,7 @@
 import { HttpClientModule } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCardModule } from '@angular/material/card';
 import { MatRippleModule } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
@@ -17,10 +18,10 @@ import { BrowseComponent } from './browse/browse.component';
 import { CollectionComponent } from './collection/collection.component';
 import { EpisodesListComponent } from './episodes-list/episodes-list.component';
 import { NotFoundComponent } from './not-found/not-found.component';
-import { PlayerComponent } from './player/player.component';
-import { ShowDetailsComponent } from './show-details/show-details.component';
-import { SearchComponent } from './search/search.component';
 import { PeopleListComponent } from './people-list/people-list.component';
+import { PlayerComponent } from './player/player.component';
+import { SearchComponent } from './search/search.component';
+import { ShowDetailsComponent } from './show-details/show-details.component';
 import { ShowsListComponent } from './shows-list/shows-list.component';
 
 
@@ -50,8 +51,9 @@ import { ShowsListComponent } from './shows-list/shows-list.component';
     MatMenuModule,
     MatSliderModule,
 	  MatTooltipModule,
-	  MatRippleModule
-  ],
+		MatRippleModule,
+		MatCardModule
+	],
   providers: [],
   bootstrap: [AppComponent]
 })
