@@ -5,7 +5,7 @@ import { ActivatedRoute, Event, NavigationCancel, NavigationEnd, NavigationStart
 import { Track, WatchItem } from "../../models/watch-item";
 import { Location } from "@angular/common";
 import * as Hls from "hls.js"
-import { getPlaybackMethod, method } from "../../videoSupport/playbackMethodDetector";
+import { getPlaybackMethod, method, getWhatIsSupported, SupportList } from "../../videoSupport/playbackMethodDetector";
 
 declare var SubtitleManager: any;
 
@@ -40,7 +40,10 @@ export class PlayerComponent implements OnInit
 	playTooltip: string = "Pause"; //Text used in the play tooltip
 	fullscreenTooltip: string = "Fullscreen"; //Text used in the fullscreen tooltip
 
-	playMethod: method;
+	playMethod: method = method.direct;
+
+	displayStats: boolean = false;
+	supportList: SupportList;
 
 	private player: HTMLVideoElement;
 	private hlsPlayer: Hls = new Hls();
@@ -75,8 +78,11 @@ export class PlayerComponent implements OnInit
 				$("#fullscreen").addClass("d-none");
 				$("#volume").addClass("d-none");
 			}
-			if (this.player)
-				this.init();
+			setTimeout(() =>
+			{
+				if (this.player)
+					this.init();
+			});
 		});
 	}
 
@@ -138,8 +144,11 @@ export class PlayerComponent implements OnInit
 			}
 			else
 			{
-				this.playMethod += 1;
-				this.selectPlayMethod();
+				if (this.playMethod == method.direct)
+					this.playMethod = method.transmux;
+				else
+					this.playMethod = method.transcode;
+				this.selectPlayMethod(this.playMethod);
 			}
 		}
 
@@ -350,7 +359,10 @@ export class PlayerComponent implements OnInit
 			}
 		});
 
-		this.init();
+		setTimeout(() =>
+		{
+			this.init();
+		});
 	}
 
 	init()
@@ -360,8 +372,8 @@ export class PlayerComponent implements OnInit
 			this.playMethod = method[queryMethod];
     else
 			this.playMethod = getPlaybackMethod(this.player, this.item);
-			
-		this.selectPlayMethod();
+
+		this.selectPlayMethod(this.playMethod);
 
 		let sub: string = this.route.snapshot.queryParams["sub"];
 		if (sub != null)
@@ -372,14 +384,17 @@ export class PlayerComponent implements OnInit
 			this.selectSubtitle(this.item.subtitles.find(x => x.language == languageCode && x.isForced == forced), false);
 		}
 
+		this.supportList = getWhatIsSupported(this.player, this.item);
+
 		setTimeout(() =>
 		{
 			this.snackBar.open("Playing: " + this.item.showTitle + " S" + this.item.seasonNumber + ":E" + this.item.episodeNumber, null, { verticalPosition: "top", horizontalPosition: "right", duration: 2000, panelClass: "info-panel" });
 		}, 750);
 	}
 
-	selectPlayMethod()
+	selectPlayMethod(playMethod: method)
 	{
+		this.playMethod = playMethod;
 		if (this.playMethod == method.direct)
 		{
 			this.player.src = "/video/" + this.item.link;

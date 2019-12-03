@@ -3,28 +3,45 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var detect_browser_1 = require("detect-browser");
 var method;
 (function (method) {
-    method[method["direct"] = 0] = "direct";
-    method[method["transmux"] = 1] = "transmux";
-    method[method["transcode"] = 2] = "transcode";
+    method["direct"] = "Direct Play";
+    method["transmux"] = "Transmux";
+    method["transcode"] = "Transcode";
 })(method = exports.method || (exports.method = {}));
 ;
+var SupportList = /** @class */ (function () {
+    function SupportList() {
+    }
+    return SupportList;
+}());
+exports.SupportList = SupportList;
 function getPlaybackMethod(player, item) {
-    var browser = detect_browser_1.detect();
-    // If we can't find the browser, transcode (It may or may not support containers/codecs)
-    if (!browser)
-        return method.transcode;
-    if (containerIsSupported(player, item.container, browser.name) && item.audios.length <= 1) {
-        if (videoCodecIsSupported(player, item.video.codec, browser.name) &&
-            audioCodecIsSupported(player, item.audios.map(function (value) { return value.codec; }), browser.name))
+    var supportList = getWhatIsSupported(player, item);
+    if (supportList.container) {
+        if (supportList.videoCodec && supportList.audioCodec)
             return method.direct;
         return method.transcode;
     }
-    if (videoCodecIsSupported(player, item.video.codec, browser.name) &&
-        audioCodecIsSupported(player, item.audios.map(function (value) { return value.codec; }), browser.name))
+    if (supportList.videoCodec && supportList.audioCodec)
         return method.transmux;
     return method.transcode;
 }
 exports.getPlaybackMethod = getPlaybackMethod;
+function getWhatIsSupported(player, item) {
+    var supportList = new SupportList();
+    var browser = detect_browser_1.detect();
+    if (!browser) {
+        supportList.container = false;
+        supportList.videoCodec = false;
+        supportList.audioCodec = false;
+    }
+    else {
+        supportList.container = containerIsSupported(player, item.container, browser.name) && item.audios.length <= 1;
+        supportList.videoCodec = videoCodecIsSupported(player, item.video.codec, browser.name);
+        supportList.videoCodec = audioCodecIsSupported(player, item.audios.map(function (value) { return value.codec; }), browser.name);
+    }
+    return (supportList);
+}
+exports.getWhatIsSupported = getWhatIsSupported;
 function containerIsSupported(player, container, browser) {
     var supported = false;
     switch (container) {
