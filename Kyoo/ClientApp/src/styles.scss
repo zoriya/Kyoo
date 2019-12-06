@@ -46,6 +46,11 @@ $theme: mat-dark-theme($primary, $accent);
   background-color: rgba(255, 255, 255, .3) !important;
 }
 
+.mat-card-header-text
+{
+  margin: 0 5px !important;
+}
+
 //Material Icons
 @font-face {
   font-family: 'Material Icons';
