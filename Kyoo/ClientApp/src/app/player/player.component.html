@@ -24,13 +24,13 @@
         Play method: <span style="float: right">{{this.playMethod}}</span>
         <br />
         <br />
-        Video Container: <span style="float: right"><i class="material-icons" style="vertical-align: middle">{{this.supportList?.container ? check_circle : cancel}}</i>{{this.item.container}}</span>
+        Video Container: <span style="float: right">{{this.item.container}} <i class="material-icons" style="vertical-align: middle; font-size: 14px">{{getSupportedFeature("container")}}</i></span>
         <br />
-        Video Codec: <span style="float: right"><i class="material-icons" style="vertical-align: middle">cancel</i> {{this.item.video.codec}}</span>
+        Video Codec: <span style="float: right">{{this.item.video.codec}} <i class="material-icons" style="vertical-align: middle; font-size: 14px">{{getSupportedFeature("video")}}</i></span>
         <br />
-        Audio Codec: <span style="float: right">{{this.item.audios[0].codec}}</span>
+        Audio Codec: <span style="float: right">{{this.item.audios[0].codec}} <i class="material-icons" style="vertical-align: middle; font-size: 14px">{{getSupportedFeature("audio")}}</i></span>
         <br />
-        Subtitle Codec: <span style="float: right">{{this.selectedSubtitle ? this.selectedSubtitle.codec : "none"}}</span>
+        Subtitle Codec: <span style="float: right">{{this.selectedSubtitle ? this.selectedSubtitle.codec : "none"}} <i class="material-icons" style="vertical-align: middle; font-size: 14px">{{getSupportedFeature("subtitle")}}</i></span>
         <br/>
       </mat-card-content>
     </mat-card>
