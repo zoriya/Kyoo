@@ -612,6 +612,23 @@ export class PlayerComponent implements OnInit
 		}
 	}
 
+	getSupportedFeature(feature: string) : string
+	{
+		if (!this.supportList)
+			return "help";
+		switch (feature)
+		{
+			case "container":
+				return this.supportList.container ? "check_circle" : "cancel";
+			case "video":
+				return this.supportList.videoCodec ? "check_circle" : "cancel";
+			case "audio":
+				return this.supportList.audioCodec ? "check_circle" : "cancel";
+			default:
+				return "help";
+		}
+	}
+
 	removeHtmlTrack()
 	{
 		let elements = this.player.getElementsByTagName("track");
