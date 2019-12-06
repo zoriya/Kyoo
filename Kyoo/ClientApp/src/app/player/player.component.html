@@ -138,13 +138,13 @@
 
       <mat-menu #method="matMenu">
         <ng-template matMenuContent>
-          <button mat-menu-item (click)="selectPlayMethod('Direct Play')">
+          <button mat-menu-item (click)="selectPlayMethod(methodType.direct)">
             <span>Direct Play</span>
           </button>
-          <button mat-menu-item (click)="selectPlayMethod('Transmux')">
+          <button mat-menu-item (click)="selectPlayMethod(methodType.transmux)">
             <span>Transmux</span>
           </button>
-          <button mat-menu-item (click)="selectPlayMethod('Transcode')">
+          <button mat-menu-item (click)="selectPlayMethod(methodType.transcode)">
             <span>Transcode</span>
           </button>
         </ng-template>

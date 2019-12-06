@@ -41,6 +41,7 @@ export class PlayerComponent implements OnInit
 	fullscreenTooltip: string = "Fullscreen"; //Text used in the fullscreen tooltip
 
 	playMethod: method = method.direct;
+	methodType = method;
 
 	displayStats: boolean = false;
 	supportList: SupportList;
