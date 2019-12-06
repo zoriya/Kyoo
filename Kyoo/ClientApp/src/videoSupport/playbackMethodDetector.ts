@@ -46,7 +46,7 @@ export function getWhatIsSupported(player: HTMLVideoElement, item: WatchItem): S
 	{
 		supportList.container = containerIsSupported(player, item.container, browser.name) && item.audios.length <= 1;
 		supportList.videoCodec = videoCodecIsSupported(player, item.video.codec, browser.name);
-		supportList.videoCodec = audioCodecIsSupported(player, item.audios.map((value: Track) => value.codec), browser.name);
+		supportList.audioCodec = audioCodecIsSupported(player, item.audios.map((value: Track) => value.codec), browser.name);
 	}
 	return (supportList);
 }
