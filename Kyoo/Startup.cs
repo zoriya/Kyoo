@@ -2,11 +2,10 @@ using Kyoo.InternalAPI;
 using Kyoo.InternalAPI.ThumbnailsManager;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System.Web.Http;
+using Microsoft.Extensions.Hosting;
 
 namespace Kyoo
 {
@@ -22,13 +21,13 @@ namespace Kyoo
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-
             // In production, the Angular files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
             {
                 configuration.RootPath = "ClientApp/dist";
             });
+
+            services.AddControllers().AddNewtonsoftJson();
 
             //Services needed in the private and in the public API
             services.AddSingleton<ILibraryManager, LibraryManager>();
@@ -41,7 +40,7 @@ namespace Kyoo
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -70,12 +69,11 @@ namespace Kyoo
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
-            app.UseMvc(routes =>
+            app.UseRouting();
+
+            app.UseEndpoints(endpoints =>
             {
-                routes.MapRoute(
-                    name: "API Route",
-                    template: "api/{controller}/{id}",
-                    defaults: new { id = RouteParameter.Optional });
+                endpoints.MapControllerRoute("API Route", "api/{controller=Home}/{action=Index}/{id?}");
             });
 
             app.UseSpa(spa =>
