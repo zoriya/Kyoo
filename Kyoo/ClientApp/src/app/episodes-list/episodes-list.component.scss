@@ -24,6 +24,8 @@
   min-width: 100%;
   flex-shrink: 0;
   flex-direction: row;
+  scrollbar-width: thin;
+  scrollbar-color: #999 transparent;
 
   &::-webkit-scrollbar
   {
