@@ -8,6 +8,29 @@
     <div class="spinner-border align-self-center" role="status"></div>
   </div>
 
+  <mat-card class="d-none w-25 m-5" [ngClass]="{'d-block': this.displayStats}">
+    <mat-card-header style="margin-bottom: 0.5rem;">
+      <h4 style="align-self: center; margin-bottom: 0;">Stats</h4>
+      <div style="flex: 1 1 auto"></div>
+      <button mat-icon-button aria-label="Close" (click)="this.displayStats = false" style="outline: none;">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-card-header>
+    <mat-card-content>
+      Play method: <span style="float: right">{{this.playMethod}}</span>
+      <br />
+      <br />
+      Video Container: <span style="float: right">{{this.item.container}} <i class="material-icons" style="vertical-align: middle; font-size: 14px">{{getSupportedFeature("container")}}</i></span>
+      <br />
+      Video Codec: <span style="float: right">{{this.item.video.codec}} <i class="material-icons" style="vertical-align: middle; font-size: 14px">{{getSupportedFeature("video")}}</i></span>
+      <br />
+      Audio Codec: <span style="float: right">{{this.item.audios[0].codec}} <i class="material-icons" style="vertical-align: middle; font-size: 14px">{{getSupportedFeature("audio")}}</i></span>
+      <br />
+      Subtitle Codec: <span style="float: right">{{this.selectedSubtitle ? this.selectedSubtitle.codec : "none"}} <i class="material-icons" style="vertical-align: middle; font-size: 14px">{{getSupportedFeature("subtitle")}}</i></span>
+      <br />
+    </mat-card-content>
+  </mat-card>
+
   <div id="hover">
     <div class="back">
       <a mat-icon-button matTooltipPosition="below" matTooltip="Back" (click)="back()">
@@ -15,29 +38,6 @@
       </a>
       <h5>{{this.item.showTitle}}</h5>
     </div>
-
-    <mat-card class="d-none w-25 m-5" [ngClass]="{'d-block': this.displayStats}">
-      <mat-card-header style="margin-bottom: 0.5rem;">
-        <h4 style="align-self: center; margin-bottom: 0;">Stats</h4>
-        <div style="flex: 1 1 auto"></div>
-        <button mat-icon-button aria-label="Close" (click)="this.displayStats = false" style="outline: none;">
-          <mat-icon>close</mat-icon>
-        </button>
-      </mat-card-header>
-      <mat-card-content>
-        Play method: <span style="float: right">{{this.playMethod}}</span>
-        <br />
-        <br />
-        Video Container: <span style="float: right">{{this.item.container}} <i class="material-icons" style="vertical-align: middle; font-size: 14px">{{getSupportedFeature("container")}}</i></span>
-        <br />
-        Video Codec: <span style="float: right">{{this.item.video.codec}} <i class="material-icons" style="vertical-align: middle; font-size: 14px">{{getSupportedFeature("video")}}</i></span>
-        <br />
-        Audio Codec: <span style="float: right">{{this.item.audios[0].codec}} <i class="material-icons" style="vertical-align: middle; font-size: 14px">{{getSupportedFeature("audio")}}</i></span>
-        <br />
-        Subtitle Codec: <span style="float: right">{{this.selectedSubtitle ? this.selectedSubtitle.codec : "none"}} <i class="material-icons" style="vertical-align: middle; font-size: 14px">{{getSupportedFeature("subtitle")}}</i></span>
-        <br/>
-      </mat-card-content>
-    </mat-card>
 
     <div class="controller container-fluid" id="controller">
       <div class="img d-none d-sm-block">
