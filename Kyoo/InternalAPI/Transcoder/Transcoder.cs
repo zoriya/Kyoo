@@ -12,10 +12,12 @@ namespace Kyoo.InternalAPI
     public class Transcoder : ITranscoder
     {
         private readonly string transmuxPath;
+        private readonly string transcodePath;
 
         public Transcoder(IConfiguration config)
         {
             transmuxPath = config.GetValue<string>("transmuxTempPath");
+            transcodePath = config.GetValue<string>("transcodeTempPath");
 
             Debug.WriteLine("&Api INIT (unmanaged stream size): " + TranscoderAPI.Init() + ", Stream size: " + Marshal.SizeOf<Models.Watch.Stream>());
         }
@@ -61,10 +63,25 @@ namespace Kyoo.InternalAPI
             return transmuxFailed ? null : manifest;
         }
 
-        public Task<string> Transcode(WatchItem episode)
+        public async Task<string> Transcode(WatchItem episode)
         {
-            //NOT IMPLEMENTED YET
-            return null;
+            string folder = Path.Combine(transcodePath, episode.Link);
+            string manifest = Path.Combine(folder, episode.Link + ".m3u8");
+            float playableDuration = 0;
+            bool transmuxFailed = false;
+
+            Directory.CreateDirectory(folder);
+            Debug.WriteLine("&Transcoding " + episode.Link + " at " + episode.Path + ", outputPath: " + folder);
+
+            if (File.Exists(manifest))
+                return manifest;
+            Task.Run(() =>
+            {
+                transmuxFailed = TranscoderAPI.transcode(episode.Path, manifest.Replace('\\', '/'), out playableDuration) != 0;
+            });
+            while (playableDuration < 10 || (!File.Exists(manifest) && !transmuxFailed))
+                await Task.Delay(10);
+            return transmuxFailed ? null : manifest;
         }
     }
 }

@@ -60,18 +60,20 @@ namespace Kyoo.Controllers
         }
 
         [HttpGet("transcode/{showSlug}-s{seasonNumber}e{episodeNumber}")]
-        public IActionResult Transcode(string showSlug, long seasonNumber, long episodeNumber)
+        public async Task<IActionResult> Transcode(string showSlug, long seasonNumber, long episodeNumber)
         {
-            return null;
-            //WatchItem episode = libraryManager.GetWatchItem(showSlug, seasonNumber, episodeNumber);
+            WatchItem episode = libraryManager.GetWatchItem(showSlug, seasonNumber, episodeNumber);
 
-            //if (episode != null && System.IO.File.Exists(episode.Path))
-            //{
-            //    string path = transcoder.Transcode(episode.Path);
-            //    return PhysicalFile(path, "video/mp4", true); //Should use mpeg dash
-            //}
-            //else
-            //    return NotFound();
+            if (episode != null && System.IO.File.Exists(episode.Path))
+            {
+                string path = await transcoder.Transcode(episode);
+                if (path != null)
+                    return PhysicalFile(path, "application/x-mpegURL ", true);
+                else
+                    return StatusCode(500);
+            }
+            else
+                return NotFound();
         }
     }
 }

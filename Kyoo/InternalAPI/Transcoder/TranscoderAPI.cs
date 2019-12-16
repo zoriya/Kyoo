@@ -16,6 +16,9 @@ namespace Kyoo.InternalAPI.TranscoderLink
 
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
         public extern static int transmux(string path, string out_path, out float playableDuration);
+        
+        [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
+        public extern static int transcode(string path, string out_path, out float playableDuration);
 
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
         private extern static IntPtr get_track_info(string path, out int array_length, out int track_count);
