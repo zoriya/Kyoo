@@ -1,7 +1,6 @@
 ﻿using Kyoo.InternalAPI.Utility;
 using Kyoo.Models;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -14,9 +13,8 @@ namespace Kyoo.InternalAPI
 {
     public class Crawler : ICrawler
     {
-        public bool IsScanning = false;
-
         private static ICrawler runningCrawler;
+        private bool isScanning;
         private readonly CancellationTokenSource cancellation;
 
         private readonly ILibraryManager libraryManager;
@@ -40,10 +38,9 @@ namespace Kyoo.InternalAPI
                 runningCrawler = this;
                 await StartAsync(watch, cancellation.Token);
             }
-            else if (runningCrawler is Crawler)
+            else if (runningCrawler is Crawler crawler)
             {
-                Crawler crawler = (Crawler)runningCrawler;
-                if (!crawler.IsScanning) 
+                if (!crawler.isScanning) 
                 {
                     await crawler.StopAsync();
                     runningCrawler = this;
@@ -57,7 +54,7 @@ namespace Kyoo.InternalAPI
             IEnumerable<Episode> episodes = libraryManager.GetAllEpisodes();
             IEnumerable<string> libraryPaths = libraryManager.GetLibrariesPath();
 
-            IsScanning = true;
+            isScanning = true;
             Debug.WriteLine("&Crawler started");
             foreach (Episode episode in episodes)
             {
@@ -73,14 +70,14 @@ namespace Kyoo.InternalAPI
                     Watch(path, cancellationToken);
             }
 
-            IsScanning = false;
+            isScanning = false;
             while (!cancellationToken.IsCancellationRequested);
             Debug.WriteLine("&Crawler stopped");
             runningCrawler = null;
             return null;
         }
 
-        public async void Scan(string folderPath, CancellationToken cancellationToken)
+        private async void Scan(string folderPath, CancellationToken cancellationToken)
         {
             string[] files = Directory.GetFiles(folderPath, "*", SearchOption.AllDirectories);
 
@@ -97,8 +94,9 @@ namespace Kyoo.InternalAPI
             }
         }
 
-        public void Watch(string folderPath, CancellationToken cancellationToken)
+        private void Watch(string folderPath, CancellationToken cancellationToken)
         {
+            Debug.WriteLine("Folder watching not implemented yet.");
             //Debug.WriteLine("&Watching " + folderPath + " for changes");
             //using (FileSystemWatcher watcher = new FileSystemWatcher())
             //{
@@ -153,7 +151,7 @@ namespace Kyoo.InternalAPI
         {
             if (!libraryManager.IsEpisodeRegistered(episodePath))
             {
-                string relativePath = episodePath.Substring(libraryPath.Length);
+                string relativePath = episodePath.Substring(libraryPath.Length - 1);
                 string patern = config.GetValue<string>("regex");
                 Regex regex = new Regex(patern, RegexOptions.IgnoreCase);
                 Match match = regex.Match(relativePath);
@@ -179,7 +177,7 @@ namespace Kyoo.InternalAPI
 
                     if (!absoluteSucess)
                     {
-                        Debug.WriteLine("&Couldn't find basic data for the episode (regexs didn't match) at " + episodePath);
+                        Debug.WriteLine("&Couldn't find basic data for the episode (regexs didn't match)" + relativePath);
                         return;
                     }
                 }
@@ -204,7 +202,7 @@ namespace Kyoo.InternalAPI
                     return null;
 
                 libraryManager.RegisterInLibrary(showID, libraryPath);
-                if (collectionName != null && collectionName.Length > 0)
+                if (!string.IsNullOrEmpty(collectionName))
                 {
                     if (!libraryManager.IsCollectionRegistered(Slugifier.ToSlug(collectionName), out long collectionID))
                     {
@@ -320,11 +318,11 @@ namespace Kyoo.InternalAPI
             return false;
         }
 
-        private static readonly string[] videoExtensions = { ".webm", ".mkv", ".flv", ".vob", ".ogg", ".ogv", ".avi", ".mts", ".m2ts", ".ts", ".mov", ".qt", ".asf", ".mp4", ".m4p", ".m4v", ".mpg", ".mp2", ".mpeg", ".mpe", ".mpv", ".m2v", ".3gp", ".3g2" };
+        private static readonly string[] VideoExtensions = { ".webm", ".mkv", ".flv", ".vob", ".ogg", ".ogv", ".avi", ".mts", ".m2ts", ".ts", ".mov", ".qt", ".asf", ".mp4", ".m4p", ".m4v", ".mpg", ".mp2", ".mpeg", ".mpe", ".mpv", ".m2v", ".3gp", ".3g2" };
 
-        private bool IsVideo(string filePath)
+        private static bool IsVideo(string filePath)
         {
-            return videoExtensions.Contains(Path.GetExtension(filePath));
+            return VideoExtensions.Contains(Path.GetExtension(filePath));
         }
 
 

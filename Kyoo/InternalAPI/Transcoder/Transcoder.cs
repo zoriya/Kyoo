@@ -1,6 +1,5 @@
-using Kyoo.InternalAPI.TranscoderLink;
 using Kyoo.Models;
-using Microsoft.AspNetCore.Http;
+using Kyoo.InternalAPI.TranscoderLink;
 using Microsoft.Extensions.Configuration;
 using System.Diagnostics;
 using System.IO;
@@ -19,7 +18,7 @@ namespace Kyoo.InternalAPI
             transmuxPath = config.GetValue<string>("transmuxTempPath");
             transcodePath = config.GetValue<string>("transcodeTempPath");
 
-            Debug.WriteLine("&Api INIT (unmanaged stream size): " + TranscoderAPI.Init() + ", Stream size: " + Marshal.SizeOf<Models.Watch.Stream>());
+            Debug.WriteLine("&Api INIT (unmanaged stream size): " + TranscoderAPI.init() + ", Stream size: " + Marshal.SizeOf<Models.Watch.Stream>());
         }
 
         public async Task<Track[]> GetTrackInfo(string path)
