@@ -16,9 +16,9 @@ namespace Kyoo.InternalAPI.MetadataProvider.TheTvDB
         private string token;
         private DateTime tokenDate;
 
-        public async Task<string> Authentificate()
+        protected async Task<string> Authentificate()
         {
-            if (tokenDate != null && tokenDate > DateTime.UtcNow.AddDays(-1))
+            if (DateTime.Now.Subtract(tokenDate) < TimeSpan.FromDays(1))
                 return token;
 
             WebRequest request = WebRequest.Create("https://api.thetvdb.com/login");
@@ -31,7 +31,7 @@ namespace Kyoo.InternalAPI.MetadataProvider.TheTvDB
 
             request.ContentLength = bytes.Length;
 
-            using (Stream stream = request.GetRequestStream())
+            await using (Stream stream = request.GetRequestStream())
             {
                 stream.Write(bytes, 0, bytes.Length);
             }
@@ -42,34 +42,34 @@ namespace Kyoo.InternalAPI.MetadataProvider.TheTvDB
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     Stream stream = response.GetResponseStream();
-                    using (StreamReader reader = new StreamReader(stream))
+                    if (stream != null)
                     {
+                        using StreamReader reader = new StreamReader(stream);
+
                         string content = await reader.ReadToEndAsync();
                         stream.Close();
                         response.Close();
 
-                        var obj = new { Token = "" };
+                        var obj = new {Token = ""};
                         token = JsonConvert.DeserializeAnonymousType(content, obj).Token;
                         tokenDate = DateTime.UtcNow;
                         return token;
                     }
                 }
-                else
-                    Debug.WriteLine("&Couldn't authentificate in TheTvDB API.\nError status: " + response.StatusCode + " Message: " + response.StatusDescription);
+                Debug.WriteLine("&Couldn't authentificate in TheTvDB API.\nError status: " + response.StatusCode + " Message: " + response.StatusDescription);
             }
             catch (WebException ex)
             {
                 Debug.WriteLine("&Couldn't authentificate in TheTvDB API.\nError status: " + ex.Status);
                 return null;
             }
-
             return null;
         }
 
 
-        public long? GetYear(string firstAired)
+        protected static long? GetYear(string firstAired)
         {
-            if (firstAired?.Length >= 4 && long.TryParse(firstAired?.Substring(0, 4), out long year))
+            if (firstAired?.Length >= 4 && long.TryParse(firstAired.Substring(0, 4), out long year))
                 return year;
 
             return null;
@@ -77,15 +77,11 @@ namespace Kyoo.InternalAPI.MetadataProvider.TheTvDB
 
         public Status? GetStatus(string status)
         {
-            switch (status)
-            {
-                case "Ended":
-                    return Status.Finished;
-                case "Continuing":
-                    return Status.Airing;
-                default:
-                    return null;
-            }
+            if (status == "Ended")
+                return Status.Finished;
+            if (status == "Continuing")
+                return Status.Airing;
+            return null;
         }
     }
 }

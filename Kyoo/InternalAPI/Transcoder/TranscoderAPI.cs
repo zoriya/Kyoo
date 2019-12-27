@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Watch;
 
@@ -9,10 +8,10 @@ namespace Kyoo.InternalAPI.TranscoderLink
 {
     public class TranscoderAPI
     {
-        private const string TranscoderPath = @"Transcoder\Kyoo.Transcoder.dll";
+        private const string TranscoderPath = @"/home/anonymus-raccoon/Projects/Kyoo/transcoder/cmake-build-debug/libtranscoder.so";
 
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int Init();
+        public extern static int init();
 
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
         public extern static int transmux(string path, string out_path, out float playableDuration);

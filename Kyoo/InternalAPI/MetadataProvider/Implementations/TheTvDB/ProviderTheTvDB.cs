@@ -12,15 +12,14 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using System.Web;
+#pragma warning disable 1998
 
 namespace Kyoo.InternalAPI.MetadataProvider
 {
     [MetaProvider]
     public class ProviderTheTvDB : HelperTvDB, IMetadataProvider
     {
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task<Collection> GetCollectionFromName(string name)
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             return new Collection(-1, Slugifier.ToSlug(name), name, null, null);
         }
@@ -44,8 +43,9 @@ namespace Kyoo.InternalAPI.MetadataProvider
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
                         Stream stream = response.GetResponseStream();
-                        using (StreamReader reader = new StreamReader(stream))
+                        if (stream != null)
                         {
+                            using StreamReader reader = new StreamReader(stream);
                             string content = await reader.ReadToEndAsync();
                             stream.Close();
                             response.Close();
@@ -55,16 +55,16 @@ namespace Kyoo.InternalAPI.MetadataProvider
 
                             Show show = new Show(-1,
                                 ToSlug(showName),
-                                (string)data.seriesName,
-                                ((JArray)data.aliases).ToObject<IEnumerable<string>>(),
+                                (string) data.seriesName,
+                                ((JArray) data.aliases).ToObject<IEnumerable<string>>(),
                                 showPath,
-                                (string)data.overview,
+                                (string) data.overview,
                                 null, //trailer
                                 null, //genres (no info with this request)
-                                GetStatus((string)data.status),
-                                GetYear((string)data.firstAired),
+                                GetStatus((string) data.status),
+                                GetYear((string) data.firstAired),
                                 null, //endYear
-                                string.Format("{0}={1}|", Provider, (string)data.id));
+                                string.Format("{0}={1}|", Provider, (string) data.id));
                             return (await GetShowByID(GetID(show.ExternalIDs))).Set(show.Slug, show.Path) ?? show;
                         }
                     }
@@ -103,8 +103,9 @@ namespace Kyoo.InternalAPI.MetadataProvider
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     Stream stream = response.GetResponseStream();
-                    using (StreamReader reader = new StreamReader(stream))
+                    if (stream != null)
                     {
+                        using StreamReader reader = new StreamReader(stream);
                         string content = await reader.ReadToEndAsync();
                         stream.Close();
                         response.Close();
@@ -112,28 +113,25 @@ namespace Kyoo.InternalAPI.MetadataProvider
                         dynamic model = JsonConvert.DeserializeObject(content);
                         dynamic data = model.data;
 
-                        Show show = new Show(-1, 
+                        Show show = new Show(-1,
                             null, //Slug
-                            (string)data.seriesName,
-                            ((JArray)data.aliases).ToObject<IEnumerable<string>>(),
+                            (string) data.seriesName,
+                            ((JArray) data.aliases).ToObject<IEnumerable<string>>(),
                             null, //Path
-                            (string)data.overview,
+                            (string) data.overview,
                             null, //Trailer
-                            GetGenres(((JArray)data.genre).ToObject<string[]>()),
-                            GetStatus((string)data.status),
-                            GetYear((string)data.firstAired),
+                            GetGenres(((JArray) data.genre).ToObject<string[]>()),
+                            GetStatus((string) data.status),
+                            GetYear((string) data.firstAired),
                             null, //endYear
-                            string.Format("TvDB={0}|", id));
+                            $"TvDB={id}|");
                         await GetImages(show);
                         return show;
                     }
                 }
-                else
-                {
-                    Debug.WriteLine("&TheTvDB Provider couldn't work for the show with the id: " + id + ".\nError Code: " + response.StatusCode + " Message: " + response.StatusDescription);
-                    response.Close();
-                    return null;
-                }
+                Debug.WriteLine("&TheTvDB Provider couldn't work for the show with the id: " + id + ".\nError Code: " + response.StatusCode + " Message: " + response.StatusDescription);
+                response.Close();
+                return null;
             }
             catch(WebException ex)
             {
@@ -172,16 +170,20 @@ namespace Kyoo.InternalAPI.MetadataProvider
                     if (response.StatusCode == HttpStatusCode.OK)
                     {
                         Stream stream = response.GetResponseStream();
-                        using (StreamReader reader = new StreamReader(stream))
+                        if (stream != null)
                         {
+                            using StreamReader reader = new StreamReader(stream);
                             string content = await reader.ReadToEndAsync();
                             stream.Close();
                             response.Close();
 
                             dynamic model = JsonConvert.DeserializeObject(content);
                             //Should implement language selection here
-                            dynamic data = ((IEnumerable<dynamic>)model.data).OrderByDescending(x => x.ratingsInfo.average).ThenByDescending(x => x.ratingsInfo.count).FirstOrDefault();
-                            SetImage(show, "https://www.thetvdb.com/banners/" + data.fileName, type.Key);
+                            dynamic data = ((IEnumerable<dynamic>) model.data)
+                                .OrderByDescending(x => x.ratingsInfo.average)
+                                .ThenByDescending(x => x.ratingsInfo.count).FirstOrDefault();
+                            if (data != null)
+                                SetImage(show, "https://www.thetvdb.com/banners/" + data.fileName, type.Key);
                         }
                     }
                     else
@@ -199,9 +201,7 @@ namespace Kyoo.InternalAPI.MetadataProvider
             return show;
         }
 
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task<Season> GetSeason(string showName, long seasonNumber)
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             return new Season(-1, -1, seasonNumber, "Season " + seasonNumber, null, null, null, null);
         }
@@ -224,7 +224,7 @@ namespace Kyoo.InternalAPI.MetadataProvider
                 return new Episode(seasonNumber, episodeNumber, absoluteNumber, null, null, null, -1, null, externalIDs);
 
             WebRequest request;
-            if(absoluteNumber != -1)
+            if (absoluteNumber != -1)
                 request = WebRequest.Create("https://api.thetvdb.com/series/" + id + "/episodes/query?absoluteNumber=" + absoluteNumber);
             else
                 request = WebRequest.Create("https://api.thetvdb.com/series/" + id + "/episodes/query?airedSeason=" + seasonNumber + "&airedEpisode=" + episodeNumber);
@@ -241,8 +241,9 @@ namespace Kyoo.InternalAPI.MetadataProvider
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     Stream stream = response.GetResponseStream();
-                    using (StreamReader reader = new StreamReader(stream))
+                    if (stream != null)
                     {
+                        using StreamReader reader = new StreamReader(stream);
                         string content = await reader.ReadToEndAsync();
                         stream.Close();
                         response.Close();
@@ -259,17 +260,13 @@ namespace Kyoo.InternalAPI.MetadataProvider
                             seasonNumber = episode.airedSeason;
                             episodeNumber = episode.airedEpisodeNumber;
                         }
-
-
+                    
                         return new Episode(seasonNumber, episodeNumber, absoluteNumber, (string)episode.episodeName, (string)episode.overview, dateTime, -1, "https://www.thetvdb.com/banners/" + episode.filename, string.Format("TvDB={0}|", episode.id));
                     }
                 }
-                else
-                {
-                    Debug.WriteLine("&TheTvDB Provider couldn't work for the episode number: " + episodeNumber + ".\nError Code: " + response.StatusCode + " Message: " + response.StatusDescription);
-                    response.Close();
-                    return new Episode(seasonNumber, episodeNumber, absoluteNumber, null, null, null, -1, null, externalIDs);
-                }
+                Debug.WriteLine("&TheTvDB Provider couldn't work for the episode number: " + episodeNumber + ".\nError Code: " + response.StatusCode + " Message: " + response.StatusDescription);
+                response.Close();
+                return new Episode(seasonNumber, episodeNumber, absoluteNumber, null, null, null, -1, null, externalIDs);
             }
             catch (WebException ex)
             {
@@ -303,8 +300,9 @@ namespace Kyoo.InternalAPI.MetadataProvider
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
                     Stream stream = response.GetResponseStream();
-                    using (StreamReader reader = new StreamReader(stream))
+                    if (stream != null)
                     {
+                        using StreamReader reader = new StreamReader(stream);
                         string content = await reader.ReadToEndAsync();
                         stream.Close();
                         response.Close();
@@ -313,12 +311,9 @@ namespace Kyoo.InternalAPI.MetadataProvider
                         return (((IEnumerable<dynamic>)data.data).OrderBy(x => x.sortOrder)).ToList().ConvertAll(x => { return new People(-1, ToSlug((string)x.name), (string)x.name, (string)x.role, null, "https://www.thetvdb.com/banners/" + (string)x.image, string.Format("TvDB={0}|", x.id)); });
                     }
                 }
-                else
-                {
-                    Debug.WriteLine("&TheTvDB Provider couldn't work for the actors of the show: " + id + ".\nError Code: " + response.StatusCode + " Message: " + response.StatusDescription);
-                    response.Close();
-                    return null;
-                }
+                Debug.WriteLine("&TheTvDB Provider couldn't work for the actors of the show: " + id + ".\nError Code: " + response.StatusCode + " Message: " + response.StatusDescription);
+                response.Close();
+                return null;
             }
             catch (WebException ex)
             {

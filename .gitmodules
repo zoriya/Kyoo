@@ -1,0 +1,3 @@
+[submodule "transcoder"]
+	path = transcoder
+	url = https://github.com/AnonymusRaccoon/Kyoo.Transcoder
