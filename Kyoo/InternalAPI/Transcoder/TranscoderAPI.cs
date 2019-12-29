@@ -27,7 +27,10 @@ namespace Kyoo.InternalAPI.TranscoderLink
         private static extern IntPtr extract_subtitles(string path, string out_path, out int array_length, out int track_count);
 
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-        private static extern void free_streams(IntPtr stream_ptr);
+        private static extern void free_streams(IntPtr stream_ptr);   
+        
+        [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
+        private static extern void free(IntPtr ptr);
 
 
         public static void GetTrackInfo(string path, out Track[] tracks)
@@ -46,7 +49,7 @@ namespace Kyoo.InternalAPI.TranscoderLink
                     Stream stream = Marshal.PtrToStructure<Stream>(streamsPtr);
                     if (stream.Type != StreamType.Unknow)
                     {
-                        tracks[j] = (Track)stream;
+                        tracks[j] = new Track(stream);
                         j++;
                     }
                     streamsPtr += size;
@@ -55,8 +58,8 @@ namespace Kyoo.InternalAPI.TranscoderLink
             else
                 tracks = null;
 
-            free_streams(ptr);
-            Debug.WriteLine("&" + tracks?.Length + " tracks got at: " + path);
+            free(ptr);
+            Console.WriteLine("&" + tracks?.Length + " tracks got at: " + path);
         }
 
         public static void ExtractSubtitles(string path, string outPath, out Track[] tracks)
@@ -75,7 +78,7 @@ namespace Kyoo.InternalAPI.TranscoderLink
                     Stream stream = Marshal.PtrToStructure<Stream>(streamsPtr);
                     if (stream.Type != StreamType.Unknow)
                     {
-                        tracks[j] = (Track)stream;
+                        tracks[j] = new Track(stream);
                         j++;
                     }
                     streamsPtr += size;
@@ -84,8 +87,8 @@ namespace Kyoo.InternalAPI.TranscoderLink
             else
                 tracks = null;
 
-            free_streams(ptr);
-            Debug.WriteLine("&" + tracks?.Length + " tracks got at: " + path);
+            free(ptr);
+            Console.WriteLine("&" + tracks?.Length + " tracks got at: " + path);
         }
     }
 }
