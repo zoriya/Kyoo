@@ -2,8 +2,8 @@
 using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -21,42 +21,23 @@ namespace Kyoo.InternalAPI.MetadataProvider.TheTvDB
             if (DateTime.Now.Subtract(tokenDate) < TimeSpan.FromDays(1))
                 return token;
 
-            WebRequest request = WebRequest.Create("https://api.thetvdb.com/login");
-            request.Method = "POST";
-            request.Timeout = 12000;
-            request.ContentType = "application/json";
-
-            string json = "{ \"apikey\": \"IM2OXA8UHUIU0GH6\" }";
-            byte[] bytes = Encoding.ASCII.GetBytes(json);
-
-            request.ContentLength = bytes.Length;
-
-            await using (Stream stream = request.GetRequestStream())
-            {
-                stream.Write(bytes, 0, bytes.Length);
-            }
-
+            HttpClient client = new HttpClient();
+            HttpContent content = new StringContent("{ \"apikey\": \"IM2OXA8UHUIU0GH6\" }", Encoding.UTF8, "application/json"); 
+            
             try
             {
-                HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
+                HttpResponseMessage response = await client.PostAsync("https://api.thetvdb.com/login", content);
+                
                 if (response.StatusCode == HttpStatusCode.OK)
                 {
-                    Stream stream = response.GetResponseStream();
-                    if (stream != null)
-                    {
-                        using StreamReader reader = new StreamReader(stream);
-
-                        string content = await reader.ReadToEndAsync();
-                        stream.Close();
-                        response.Close();
-
-                        var obj = new {Token = ""};
-                        token = JsonConvert.DeserializeAnonymousType(content, obj).Token;
-                        tokenDate = DateTime.UtcNow;
-                        return token;
-                    }
+                    string resp = await response.Content.ReadAsStringAsync();
+                    var obj = new {Token = ""};
+                    
+                    token = JsonConvert.DeserializeAnonymousType(resp, obj).Token;
+                    tokenDate = DateTime.UtcNow;
+                    return token;
                 }
-                Debug.WriteLine("&Couldn't authentificate in TheTvDB API.\nError status: " + response.StatusCode + " Message: " + response.StatusDescription);
+                Debug.WriteLine("&Couldn't authentificate in TheTvDB API.\nError status: " + response.StatusCode + " Message: " + response.RequestMessage);
             }
             catch (WebException ex)
             {

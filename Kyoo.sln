@@ -4,9 +4,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 16.0.29123.88
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kyoo", "Kyoo\Kyoo.csproj", "{0F8275B6-C7DD-42DF-A168-755C81B1C329}"
-	ProjectSection(ProjectDependencies) = postProject
-		{E5EFA4B2-F09D-4C4F-83DD-A436CD60BB77} = {E5EFA4B2-F09D-4C4F-83DD-A436CD60BB77}
-	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unit Tests", "Unit Tests\Unit Tests.csproj", "{CC8144B5-8868-4EA7-B171-4E47746ED003}"
 EndProject
