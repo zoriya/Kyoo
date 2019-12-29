@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Kyoo.Models.Watch;
 
 namespace Kyoo.InternalAPI
 {
@@ -249,15 +250,21 @@ namespace Kyoo.InternalAPI
             episode.id = libraryManager.RegisterEpisode(episode);
 
             Track[] tracks = await transcoder.GetTrackInfo(episode.Path);
+            int subcount = 0;
             foreach (Track track in tracks)
             {
+                if (track.Type == StreamType.Subtitle)
+                {
+                    subcount++;
+                    continue;
+                }
                 track.episodeID = episode.id;
                 libraryManager.RegisterTrack(track);
             }
 
             if (episode.Path.EndsWith(".mkv"))
             {
-                if (!FindExtractedSubtitles(episode))
+                if (CountExtractedSubtitles(episode) != subcount)
                 {
                     Track[] subtitles = await transcoder.ExtractSubtitles(episode.Path);
                     if (subtitles != null)
@@ -272,48 +279,35 @@ namespace Kyoo.InternalAPI
             }
         }
 
-        private bool FindExtractedSubtitles(Episode episode)
+        private int CountExtractedSubtitles(Episode episode)
         {
             string path = Path.Combine(Path.GetDirectoryName(episode.Path), "Subtitles");
-            if(Directory.Exists(path))
+            int subcount = 0;
+            
+            if (!Directory.Exists(path)) 
+                return 0;
+            foreach (string sub in Directory.EnumerateFiles(path, "", SearchOption.AllDirectories))
             {
-                bool ret = false;
-                foreach (string sub in Directory.EnumerateFiles(path, "", SearchOption.AllDirectories))
+                string episodeLink = Path.GetFileNameWithoutExtension(episode.Path);
+
+                if (sub.Contains(episodeLink))
                 {
-                    string episodeLink = Path.GetFileNameWithoutExtension(episode.Path);
+                    string language = sub.Substring(Path.GetDirectoryName(sub).Length + episodeLink.Length + 2, 3);
+                    bool isDefault = sub.Contains("default");
+                    bool isForced = sub.Contains("forced");
+                    Track track = new Track(StreamType.Subtitle, null, language, isDefault, isForced, null, false, sub) { episodeID = episode.id };
 
-                    if (sub.Contains(episodeLink))
-                    {
-                        string language = sub.Substring(Path.GetDirectoryName(sub).Length + episodeLink.Length + 2, 3);
-                        bool isDefault = sub.Contains("default");
-                        bool isForced = sub.Contains("forced");
-
-                        string codec;
-                        switch (Path.GetExtension(sub))
-                        {
-                            case ".ass":
-                                codec = "ass";
-                                break;
-                            case ".srt":
-                                codec = "subrip";
-                                break;
-                            default:
-                                codec = null;
-                                break;
-                        }
-
-
-                        Track track = new Track(Models.Watch.StreamType.Subtitle, null, language, isDefault, isForced, codec, false, sub) { episodeID = episode.id };
-                        libraryManager.RegisterTrack(track);
-
-                        ret = true;
-                    }
+                    if (Path.GetExtension(sub) == ".ass")
+                        track.Codec = "ass";
+                    else if (Path.GetExtension(sub) == ".srt")
+                        track.Codec = "subrip";
+                    else
+                        track.Codec = null;
+                    libraryManager.RegisterTrack(track);
+                    subcount++;
                 }
-
-                return ret;
             }
-
-            return false;
+            return subcount;
         }
 
         private static readonly string[] VideoExtensions = { ".webm", ".mkv", ".flv", ".vob", ".ogg", ".ogv", ".avi", ".mts", ".m2ts", ".ts", ".mov", ".qt", ".asf", ".mp4", ".m4p", ".m4v", ".mpg", ".mp2", ".mpeg", ".mpe", ".mpv", ".m2v", ".3gp", ".3g2" };
