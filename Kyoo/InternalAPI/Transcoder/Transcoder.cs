@@ -1,3 +1,4 @@
+using System;
 using Kyoo.Models;
 using Kyoo.InternalAPI.TranscoderLink;
 using Microsoft.Extensions.Configuration;
@@ -5,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+#pragma warning disable 4014
 
 namespace Kyoo.InternalAPI
 {
@@ -18,7 +20,7 @@ namespace Kyoo.InternalAPI
             transmuxPath = config.GetValue<string>("transmuxTempPath");
             transcodePath = config.GetValue<string>("transcodeTempPath");
 
-            Debug.WriteLine("&Api INIT (unmanaged stream size): " + TranscoderAPI.init() + ", Stream size: " + Marshal.SizeOf<Models.Watch.Stream>());
+            Console.WriteLine("&Api INIT (unmanaged stream size): " + TranscoderAPI.init() + ", Stream size: " + Marshal.SizeOf<Models.Watch.Stream>());
         }
 
         public async Task<Track[]> GetTrackInfo(string path)
@@ -48,11 +50,19 @@ namespace Kyoo.InternalAPI
             float playableDuration = 0;
             bool transmuxFailed = false;
 
-            Directory.CreateDirectory(folder);
-            Debug.WriteLine("&Transmuxing " + episode.Link + " at " + episode.Path + ", outputPath: " + folder);
+            try
+            {
+                Directory.CreateDirectory(folder);
+                Debug.WriteLine("&Transmuxing " + episode.Link + " at " + episode.Path + ", outputPath: " + folder);
 
-            if (File.Exists(manifest))
-                return manifest;
+                if (File.Exists(manifest))
+                    return manifest;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                Console.Error.WriteLine($"Access to the path {manifest} is denied. Please change your transmux path in the config.");
+                return null;
+            }
             Task.Run(() => 
             { 
                 transmuxFailed = TranscoderAPI.transmux(episode.Path, manifest.Replace('\\', '/'), out playableDuration) != 0;
@@ -69,11 +79,20 @@ namespace Kyoo.InternalAPI
             float playableDuration = 0;
             bool transmuxFailed = false;
 
-            Directory.CreateDirectory(folder);
-            Debug.WriteLine("&Transcoding " + episode.Link + " at " + episode.Path + ", outputPath: " + folder);
+            try
+            {
+                Directory.CreateDirectory(folder);
+                Debug.WriteLine("&Transcoding " + episode.Link + " at " + episode.Path + ", outputPath: " + folder);
 
-            if (File.Exists(manifest))
-                return manifest;
+                if (File.Exists(manifest))
+                    return manifest;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                Console.Error.WriteLine($"Access to the path {manifest} is denied. Please change your transmux path in the config.");
+                return null;
+            }
+
             Task.Run(() =>
             {
                 transmuxFailed = TranscoderAPI.transcode(episode.Path, manifest.Replace('\\', '/'), out playableDuration) != 0;

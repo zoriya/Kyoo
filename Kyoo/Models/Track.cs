@@ -27,6 +27,29 @@ namespace Kyoo.Models
             [MarshalAs(UnmanagedType.I1)] public bool IsForced;
             [JsonIgnore] public string Path;
             [JsonIgnore] public StreamType Type;
+            
+            public Stream() {}
+            
+            public Stream(string title, string language, string codec, bool isDefault, bool isForced, string path, StreamType type)
+            {
+                Title = title;
+                Language = language;
+                Codec = codec;
+                IsDefault = isDefault;
+                IsForced = isForced;
+                Path = path;
+                Type = type;
+            }
+            
+            public Stream(Stream stream)
+            {
+                Title  = stream.Title;
+                Language  = stream.Language;
+                IsDefault  = stream.IsDefault;
+                IsForced  = stream.IsForced;
+                Codec  = stream.Codec;
+                Type  = stream.Type;
+            }
         }
     }
 
@@ -39,15 +62,15 @@ namespace Kyoo.Models
         [JsonIgnore] public bool IsExternal;
 
         public Track(StreamType type, string title, string language, bool isDefault, bool isForced, string codec, bool isExternal, string path)
+            : base(title, language, codec, isDefault, isForced, path, type)
         {
-            this.Type = type;
-            Title = title;
-            Language = language;
-            IsDefault = isDefault;
-            IsForced = isForced;
-            Codec = codec;
             IsExternal = isExternal;
-            Path = path;
+        }
+
+        public Track(Stream stream)
+            : base(stream)
+        {
+            IsExternal = false;
         }
 
         public static Track FromReader(System.Data.SQLite.SQLiteDataReader reader)
