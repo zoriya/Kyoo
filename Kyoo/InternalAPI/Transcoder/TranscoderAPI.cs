@@ -3,30 +3,31 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Kyoo.Models;
 using Kyoo.Models.Watch;
+// ReSharper disable InconsistentNaming
 
 namespace Kyoo.InternalAPI.TranscoderLink
 {
-    public class TranscoderAPI
+    public static class TranscoderAPI
     {
         private const string TranscoderPath = @"/home/anonymus-raccoon/Projects/Kyoo/transcoder/cmake-build-debug/libtranscoder.so";
 
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int init();
+        public static extern int init();
 
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int transmux(string path, string out_path, out float playableDuration);
+        public static extern int transmux(string path, string out_path, out float playableDuration);
         
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-        public extern static int transcode(string path, string out_path, out float playableDuration);
+        public static extern int transcode(string path, string out_path, out float playableDuration);
 
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-        private extern static IntPtr get_track_info(string path, out int array_length, out int track_count);
+        private static extern IntPtr get_track_info(string path, out int array_length, out int track_count);
         
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-        private extern static IntPtr extract_subtitles(string path, string out_path, out int array_length, out int track_count);
+        private static extern IntPtr extract_subtitles(string path, string out_path, out int array_length, out int track_count);
 
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-        private extern static void free_memory(IntPtr stream_ptr);
+        private static extern void free_streams(IntPtr stream_ptr);
 
 
         public static void GetTrackInfo(string path, out Track[] tracks)
@@ -43,9 +44,9 @@ namespace Kyoo.InternalAPI.TranscoderLink
                 for (int i = 0; i < arrayLength; i++)
                 {
                     Stream stream = Marshal.PtrToStructure<Stream>(streamsPtr);
-                    if (stream.Codec != null) //If the codec is null, the stream doesn't represent a usfull thing.
+                    if (stream.Type != StreamType.Unknow)
                     {
-                        tracks[j] = Track.From(stream, stream.Title == "VIDEO" ? StreamType.Video : StreamType.Audio);
+                        tracks[j] = (Track)stream;
                         j++;
                     }
                     streamsPtr += size;
@@ -54,7 +55,7 @@ namespace Kyoo.InternalAPI.TranscoderLink
             else
                 tracks = null;
 
-            free_memory(ptr);
+            free_streams(ptr);
             Debug.WriteLine("&" + tracks?.Length + " tracks got at: " + path);
         }
 
@@ -72,9 +73,9 @@ namespace Kyoo.InternalAPI.TranscoderLink
                 for (int i = 0; i < arrayLength; i++)
                 {
                     Stream stream = Marshal.PtrToStructure<Stream>(streamsPtr);
-                    if (stream.Codec != null) //If the codec is null, the stream doesn't represent a subtitle.
+                    if (stream.Type != StreamType.Unknow)
                     {
-                        tracks[j] = Track.From(stream, StreamType.Subtitle);
+                        tracks[j] = (Track)stream;
                         j++;
                     }
                     streamsPtr += size;
@@ -83,7 +84,7 @@ namespace Kyoo.InternalAPI.TranscoderLink
             else
                 tracks = null;
 
-            free_memory(ptr);
+            free_streams(ptr);
             Debug.WriteLine("&" + tracks?.Length + " tracks got at: " + path);
         }
     }

@@ -11,7 +11,10 @@ namespace Kyoo.Models
     {
         public enum StreamType
         {
-            Video, Audio, Subtitle, Unknow
+            Unknow = 0,
+            Video = 1,
+            Audio = 2,
+            Subtitle = 3
         }
 
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
@@ -23,6 +26,7 @@ namespace Kyoo.Models
             [MarshalAs(UnmanagedType.I1)] public bool IsDefault;
             [MarshalAs(UnmanagedType.I1)] public bool IsForced;
             [JsonIgnore] public string Path;
+            [JsonIgnore] public StreamType Type;
         }
     }
 
@@ -31,14 +35,12 @@ namespace Kyoo.Models
         public string DisplayName;
         public string Link;
 
-        [JsonIgnore] public readonly long id;
         [JsonIgnore] public long episodeID;
-        [JsonIgnore] public StreamType type;
         [JsonIgnore] public bool IsExternal;
 
         public Track(StreamType type, string title, string language, bool isDefault, bool isForced, string codec, bool isExternal, string path)
         {
-            this.type = type;
+            this.Type = type;
             Title = title;
             Language = language;
             IsDefault = isDefault;
@@ -60,32 +62,16 @@ namespace Kyoo.Models
                 reader["path"] as string);
         }
 
-        public static Track From(Stream stream)
-        {
-            if (stream == null)
-                return null;
-
-            return new Track(StreamType.Unknow, stream.Title, stream.Language, stream.IsDefault, stream.IsForced, stream.Codec, false, stream.Path);
-        }
-
-        public static Track From(Stream stream, StreamType type)
-        {
-            if (stream == null)
-                return null;
-
-            return new Track(type, stream.Title, stream.Language, stream.IsDefault, stream.IsForced, stream.Codec, false, stream.Path);
-        }
-
         public Track SetLink(string episodeSlug)
         {
-            if (type == StreamType.Subtitle)
+            if (Type == StreamType.Subtitle)
             {
                 string language = Language;
                 //Converting mkv track language to c# system language tag.
                 if (language == "fre")
                     language = "fra";
 
-                DisplayName = CultureInfo.GetCultures(CultureTypes.NeutralCultures).Where(x => x.ThreeLetterISOLanguageName == language).FirstOrDefault()?.DisplayName ?? language;
+                DisplayName = CultureInfo.GetCultures(CultureTypes.NeutralCultures).FirstOrDefault(x => x.ThreeLetterISOLanguageName == language)?.DisplayName ?? language;
                 Link = "/subtitle/" + episodeSlug + "." + Language;
 
                 if (IsForced)
@@ -97,10 +83,15 @@ namespace Kyoo.Models
                 if (Title != null && Title.Length > 1)
                     DisplayName += " - " + Title;
 
-                if (Codec == "ass")
-                    Link += ".ass";
-                else if (Codec == "subrip")
-                    Link += ".srt";
+                switch (Codec)
+                {
+                    case "ass":
+                        Link += ".ass";
+                        break;
+                    case "subrip":
+                        Link += ".srt";
+                        break;
+                }
             }
             else
                 Link = null;

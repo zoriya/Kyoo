@@ -145,13 +145,11 @@ namespace Kyoo.InternalAPI
         //    Debug.WriteLine("&File Deleted at " + e.FullPath);
         //}
 
-
-
         private async Task ExtractEpisodeData(string episodePath, string libraryPath)
         {
             if (!libraryManager.IsEpisodeRegistered(episodePath))
             {
-                string relativePath = episodePath.Substring(libraryPath.Length - 1);
+                string relativePath = episodePath.Substring(libraryPath.Length);
                 string patern = config.GetValue<string>("regex");
                 Regex regex = new Regex(patern, RegexOptions.IgnoreCase);
                 Match match = regex.Match(relativePath);

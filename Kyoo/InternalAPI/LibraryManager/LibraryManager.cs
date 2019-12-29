@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.SQLite;
 using System.Diagnostics;
+using System.IO;
 
 namespace Kyoo.InternalAPI
 {
@@ -18,12 +19,14 @@ namespace Kyoo.InternalAPI
             string databasePath = configuration.GetValue<string>("databasePath");
 
             Debug.WriteLine("&Library Manager init, databasePath: " + databasePath);
-            if (!System.IO.File.Exists(databasePath))
+            if (!File.Exists(databasePath))
             {
                 Debug.WriteLine("&Database doesn't exist, creating one.");
 
+                if (!Directory.Exists(Path.GetDirectoryName(databasePath)))
+                    Directory.CreateDirectory(databasePath);
                 SQLiteConnection.CreateFile(databasePath);
-                sqlConnection = new SQLiteConnection(string.Format("Data Source={0};Version=3", databasePath));
+                sqlConnection = new SQLiteConnection($"Data Source={databasePath};Version=3");
                 sqlConnection.Open();
 
                 string createStatement = @"CREATE TABLE shows(
@@ -154,14 +157,12 @@ namespace Kyoo.InternalAPI
 					    FOREIGN KEY(showID) REFERENCES shows(id) ON DELETE CASCADE
 				    );";
 
-                using (SQLiteCommand createCmd = new SQLiteCommand(createStatement, sqlConnection))
-                {
-                    createCmd.ExecuteNonQuery();
-                }
+                using SQLiteCommand createCmd = new SQLiteCommand(createStatement, sqlConnection);
+                createCmd.ExecuteNonQuery();
             }
             else
             {
-                sqlConnection = new SQLiteConnection(string.Format("Data Source={0};Version=3", databasePath));
+                sqlConnection = new SQLiteConnection($"Data Source={databasePath};Version=3");
                 sqlConnection.Open();
             }
 
@@ -176,24 +177,22 @@ namespace Kyoo.InternalAPI
         #region Read the database
         public IEnumerable<Library> GetLibraries()
         {
-            string query = "SELECT * FROM libraries;";
+            const string query = "SELECT * FROM libraries;";
 
-            using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
-            {
-                SQLiteDataReader reader = cmd.ExecuteReader();
+            using SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection);
+            SQLiteDataReader reader = cmd.ExecuteReader();
 
-                List<Library> libraries = new List<Library>();
+            List<Library> libraries = new List<Library>();
 
-                while (reader.Read())
-                    libraries.Add(Library.FromReader(reader));
+            while (reader.Read())
+                libraries.Add(Library.FromReader(reader));
 
-                return libraries;
-            }
+            return libraries;
         }
 
         public IEnumerable<string> GetLibrariesPath()
         {
-            string query = "SELECT path FROM libraries;";
+            const string query = "SELECT path FROM libraries;";
 
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
@@ -241,11 +240,11 @@ namespace Kyoo.InternalAPI
                 {
                     Track track = Track.FromReader(reader).SetLink(episodeSlug);
 
-                    if (track.type == StreamType.Video)
+                    if (track.Type == StreamType.Video)
                         video = track;
-                    else if (track.type == StreamType.Audio)
+                    else if (track.Type == StreamType.Audio)
                         audios.Add(track);
-                    else if (track.type == StreamType.Subtitle)
+                    else if (track.Type == StreamType.Subtitle)
                         subtitles.Add(track);
                 }
 
@@ -1091,7 +1090,7 @@ namespace Kyoo.InternalAPI
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
                 cmd.Parameters.AddWithValue("$episodeID", track.episodeID);
-                cmd.Parameters.AddWithValue("$streamType", track.type);
+                cmd.Parameters.AddWithValue("$streamType", track.Type);
                 cmd.Parameters.AddWithValue("$title", track.Title);
                 cmd.Parameters.AddWithValue("$language", track.Language);
                 cmd.Parameters.AddWithValue("$codec", track.Codec);
