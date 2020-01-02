@@ -29,10 +29,8 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
             {
                 try
                 {
-                    using (WebClient client = new WebClient())
-                    {
-                        await client.DownloadFileTaskAsync(new Uri(show.ImgPrimary), localThumb);
-                    }
+                    using WebClient client = new WebClient();
+                    await client.DownloadFileTaskAsync(new Uri(show.ImgPrimary), localThumb);
                 }
                 catch (WebException)
                 {
@@ -44,10 +42,8 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
             {
                 try
                 {
-                    using (WebClient client = new WebClient())
-                    {
-                        await client.DownloadFileTaskAsync(new Uri(show.ImgLogo), localLogo);
-                    }
+                    using WebClient client = new WebClient();
+                    await client.DownloadFileTaskAsync(new Uri(show.ImgLogo), localLogo);
                 }
                 catch (WebException)
                 {
@@ -59,10 +55,8 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
             {
                 try
                 {
-                    using (WebClient client = new WebClient())
-                    {
-                        await client.DownloadFileTaskAsync(new Uri(show.ImgBackdrop), localBackdrop);
-                    }
+                    using WebClient client = new WebClient();
+                    await client.DownloadFileTaskAsync(new Uri(show.ImgBackdrop), localBackdrop);
                 }
                 catch (WebException)
                 {
@@ -85,10 +79,8 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
                 {
                     try
                     {
-                        using (WebClient client = new WebClient())
-                        {
-                            await client.DownloadFileTaskAsync(new Uri(people[i].imgPrimary), localThumb);
-                        }
+                        using WebClient client = new WebClient();
+                        await client.DownloadFileTaskAsync(new Uri(people[i].imgPrimary), localThumb);
                     }
                     catch (WebException)
                     {
@@ -102,16 +94,13 @@ namespace Kyoo.InternalAPI.ThumbnailsManager
 
         public async Task<Episode> Validate(Episode episode)
         {
-            //string localThumb = Path.ChangeExtension(episode.Path, "jpg");            
-            string localThumb = episode.Path.Replace(Path.GetExtension(episode.Path), "-thumb.jpg");
+            string localThumb = Path.ChangeExtension(episode.Path, "jpg");            
             if (episode.ImgPrimary != null && !File.Exists(localThumb))
             {
                 try
                 {
-                    using (WebClient client = new WebClient())
-                    {
-                        await client.DownloadFileTaskAsync(new Uri(episode.ImgPrimary), localThumb);
-                    }
+                    using WebClient client = new WebClient();
+                    await client.DownloadFileTaskAsync(new Uri(episode.ImgPrimary), localThumb);
                 }
                 catch (WebException)
                 {
