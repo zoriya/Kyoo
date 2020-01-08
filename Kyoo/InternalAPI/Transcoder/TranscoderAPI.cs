@@ -9,7 +9,7 @@ namespace Kyoo.InternalAPI.TranscoderLink
 {
     public static class TranscoderAPI
     {
-        private const string TranscoderPath = @"/home/anonymus-raccoon/Projects/Kyoo/transcoder/cmake-build-debug/libtranscoder.so";
+        private const string TranscoderPath = "libtranscoder.so";
 
         [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
         public static extern int init();
