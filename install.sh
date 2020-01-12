@@ -1,6 +1,6 @@
 #!/bin/bash
 
-git clone https://github.com/AnonymusRaccoo/Kyoo --recurse
+git clone https://github.com/AnonymusRaccoon/Kyoo --recurse
 cd Kyoo
 git pull --recurse
 chmod +x build.sh
