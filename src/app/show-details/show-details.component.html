@@ -1,0 +1,81 @@
+<div class="backdrop">
+  <img id="backdrop" src="backdrop/{{this.show.slug}}" />
+</div>
+
+<div class="header container pt-sm-5">
+  <div class="row">
+    <img class="poster d-none d-sm-block" src="poster/{{this.show.slug}}" />
+    <div class="main col">
+      <div class="info">
+        <h1 class="title">{{this.show.title}}</h1>
+        <h2 class="date" *ngIf="show.endYear; else elseBlock">{{show.startYear}} - {{show.endYear}}</h2>
+        <ng-template #elseBlock><h2 class="date">{{show.startYear}}</h2></ng-template>
+      </div>
+      <div class="buttons">
+        <button mat-mini-fab matTooltipPosition="above" matTooltip="Play" class="mr-3">
+          <mat-icon>play_arrow</mat-icon>
+        </button>
+        <button *ngIf="this.show.trailerUrl" mat-icon-button matTooltipPosition="above" matTooltip="Trailer">
+          <mat-icon>local_movies</mat-icon>
+        </button>
+        <button mat-icon-button matTooltipPosition="above" matTooltip="Download">
+          <mat-icon>cloud_download</mat-icon>
+        </button>
+        <button mat-icon-button matTooltipPosition="above" matTooltip="Watched">
+          <mat-icon>done</mat-icon>
+        </button>
+        <button mat-icon-button matTooltipPosition="above" matTooltip="More">
+          <mat-icon>more_horiz</mat-icon>
+        </button>
+      </div>
+    </div>
+    <div class="col-3 secondary d-none d-md-block">
+      <img src="logo/{{this.show.slug}}" />
+
+      <div>
+        <p>Studio: <b><a routerLink="/studio/{{this.show.studio.slug}}">{{this.show.studio.name}}</a></b></p>
+        <p>Directors: <b></b></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row pt-3 d-md-none">
+    <div class="col">
+      <p class="mr-1 d-inline-block">Studio: <b><a routerLink="/studio/{{this.show.studio.slug}}">{{this.show.studio.name}}</a></b></p>
+      <p class="d-inline-block">Directors: <b></b></p>
+      <div class="d-sm-none">
+        <p>Genres: <span *ngFor="let genre of this.show.genres; let isLast = last"><b><a routerLink="/genre/{{genre.slug}}">{{genre.name}}</a></b>{{isLast ? "" : ", "}}</span></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="row pt-3">
+    <div class="col">
+      <p class="text-justify overview">{{this.show.overview}}</p>
+    </div>
+    <hr class="d-none d-sm-block">
+    <div class="col-3 d-none d-sm-block">
+      <h3 style="opacity: .8;">Genres</h3>
+      <ul>
+        <li *ngFor="let genre of this.show.genres"><b><a class="genre" routerLink="/genre/{{genre.slug}}">{{genre.name}}</a></b></li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="container-fluid mt-3">
+  <mat-form-field>
+    <mat-label>Season</mat-label>
+    <mat-select [(value)]="season" (selectionChange)="getEpisodes()">
+      <mat-option *ngFor="let season of this.show.seasons" [value]="season.seasonNumber">{{season.title}}</mat-option>
+    </mat-select>
+  </mat-form-field>
+</div>
+<app-episodes-list [episodes]="episodes"></app-episodes-list>
+
+<div class="container-fluid mt-5">
+  <h3>Staff</h3>
+</div>
+<app-people-list [people]="show.people"></app-people-list>

@@ -1,0 +1,86 @@
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins/breakpoints";
+
+.navbar
+{
+  justify-content: left;
+}
+
+.nav-item
+{
+  outline: none;
+
+  > a
+  {
+    outline: none;
+    color: inherit;
+  }
+}
+
+.nav-link
+{
+  padding: 12px;
+  color: rgba(255, 255, 255, 0.7) !important;
+
+  &:host-context(.hoverEnabled) &:hover
+  {
+    color: white !important;
+  }
+
+  &.active
+  {
+    color: var(--accentColor) !important;
+  }
+}
+
+.navbar-brand:hover
+{
+  color: var(--accentColor);
+}
+
+.searchbar
+{
+  border-radius: 30px;
+
+  > input
+  {
+    background: none !important;
+    color: white;
+    outline: none;
+    border: none;
+    border-bottom: 1px solid #cfcfcf;
+    width: 0;
+    padding: 0;
+    transition: width 0.4s ease-in-out;
+
+    &:focus, &.searching
+    {
+      width: 12rem;
+
+      @include media-breakpoint-up(sm)
+      {
+        width: 20rem;
+      }
+    }
+  }
+}
+
+input::-webkit-search-cancel-button
+{
+  display: none;
+}
+
+
+.icon
+{
+  padding: 8px;
+  display: inline-block;
+  opacity: 0.7;
+
+  &:host-context(.hoverEnabled) &:hover
+  {
+    cursor: pointer;
+    opacity: 1;
+  }
+}

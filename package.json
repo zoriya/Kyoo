@@ -1,0 +1,50 @@
+{
+  "name": "kyoo",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "test": "ng test",
+    "lint": "ng lint",
+    "e2e": "ng e2e"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/animations": "^8.2.14",
+    "@angular/cdk": "^8.2.3",
+    "@angular/common": "^8.2.14",
+    "@angular/compiler": "^8.2.14",
+    "@angular/core": "^8.2.14",
+    "@angular/forms": "^8.2.14",
+    "@angular/material": "^8.2.3",
+    "@angular/platform-browser": "^8.2.14",
+    "@angular/platform-browser-dynamic": "^8.2.14",
+    "@angular/router": "^8.2.14",
+    "bootstrap": "^4.4.1",
+    "detect-browser": "^4.8.0",
+    "hammerjs": "^2.0.8",
+    "hls.js": "^0.12.4",
+    "jquery": "^3.4.1",
+    "popper.js": "^1.16.0",
+    "zone.js": "~0.9.1"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^0.803.22",
+    "@angular/cli": "^8.3.22",
+    "@angular/compiler-cli": "^8.2.14",
+    "@angular/language-service": "^8.2.14",
+    "@types/bootstrap": "^4.3.1",
+    "@types/hls.js": "^0.12.5",
+    "@types/jasmine": "~3.3.8",
+    "@types/jasminewd2": "^2.0.8",
+    "@types/jquery": "^3.3.31",
+    "@types/node": "~8.9.4",
+    "@types/video.js": "^7.3.3",
+    "codelyzer": "^5.2.1",
+    "protractor": "~5.4.0",
+    "ts-node": "~7.0.0",
+    "tslint": "~5.15.0",
+    "typescript": "~3.5.3"
+  }
+}

@@ -1,0 +1,12 @@
+<div *ngIf="items.shows.length > 0" class="container-fluid mt-3">
+  <h3>Shows</h3>
+</div>
+<app-shows-list [shows]="items.shows"></app-shows-list>
+<div *ngIf="items.episodes.length > 0" class="container-fluid mt-5">
+  <h3>Episodes</h3>
+</div>
+<app-episodes-list displayShowTitle="true" [episodes]="items.episodes"></app-episodes-list>
+<div *ngIf="items.people.length > 0" class="container-fluid mt-5">
+  <h3>People</h3>
+</div>
+<app-people-list [people]="items.people"></app-people-list>

@@ -1,0 +1,11 @@
+<div class="scroll-row mb-5">
+  <div class="people-container" #scrollView (scroll)="onScroll()">
+    <a class="people" *ngFor="let people of this.people" routerLink="/people/{{people.slug}}" href="/people/{{people.slug}}">
+      <div matRipple [style.background-image]="getPeopleIcon(people.slug)"> </div>
+      <h6 class="name">{{people.name}}</h6>
+      <p class="role">{{people.role}}</p>
+    </a>
+  </div>
+  <button mat-raised-button color="accent" class="scrollBtn leftBtn d-none" #leftBtn (click)="scrollLeft()"><mat-icon>arrow_left</mat-icon></button>
+  <button mat-raised-button color="accent" class="scrollBtn rightBtn" #rightBtn (click)="scrollRight()"><mat-icon>arrow_right</mat-icon></button>
+</div>

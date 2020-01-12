@@ -1,0 +1,152 @@
+@import "~bootstrap/scss/functions";
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/mixins/breakpoints";
+
+a
+{
+  color: #ffffff;
+}
+
+.backdrop
+{
+  margin-top: -68px;
+  position: relative;
+  z-index: -1;
+
+  > img
+  {
+    width: 100%;
+    max-height: 75vh;
+    object-fit: cover;
+    min-height: 20vh;
+
+    @include media-breakpoint-up(md)
+    {
+      min-height: 60vh;
+    }
+  }
+
+  &:after
+  {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-image: linear-gradient(to bottom, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.6) 100%);
+  }
+}
+
+.header
+{
+  @include media-breakpoint-up(sm)
+  {
+    margin-top: -12rem;
+  }
+
+  @include media-breakpoint-up(md)
+  {
+    margin-top: -13rem;
+  }
+
+  @include media-breakpoint-up(lg)
+  {
+    margin-top: -19rem;
+  }
+
+  @include media-breakpoint-up(xl)
+  {
+    margin-top: -23rem;
+  }
+}
+
+.poster
+{
+  width: 33%;
+  background-color: #333333;
+
+  @include media-breakpoint-up(md)
+  {
+    width: 25%;
+  }
+}
+
+.main
+{
+  align-self: center;
+  padding-left: 2.5em;
+
+  .info
+  {
+    margin-top: -3.25rem;
+
+    @include media-breakpoint-up(sm)
+    {
+      margin-top: 0;
+    }
+
+    .title
+    {
+      font-weight: 900 !important;
+    }
+
+    .date
+    {
+      font-weight: 300 !important;
+    }
+  }
+
+  .buttons
+  {
+    > button
+    {
+      outline: none;
+      margin: .3em;
+    }
+  }
+}
+
+.secondary
+{
+  position: relative;
+
+  > img
+  {
+    max-width: 100%;
+  }
+
+  > div
+  {
+    position: absolute;
+    bottom: 0;
+  }
+
+  > div > p
+  {
+    opacity: .87;
+  }
+}
+
+.overview
+{
+  opacity: .87;
+
+  @include media-breakpoint-up(sm)
+  {
+    padding-top: 2.25rem;
+  }
+}
+
+hr
+{
+  margin: 0 10px 0 10px;
+  border-right: 1px solid rgba(255, 255, 255, .60);
+  border-top: 0;
+  height: inherit;
+}
+
+.genre
+{
+  opacity: .8;
+}
