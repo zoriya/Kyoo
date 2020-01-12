@@ -1,138 +1,66 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>netcoreapp3.0</TargetFramework>
-    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
-    <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
-    <IsPackable>false</IsPackable>
-    <SpaRoot>ClientApp\</SpaRoot>
-    <DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
+	<PropertyGroup>
+		<TargetFramework>netcoreapp3.0</TargetFramework>
+		<TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+		<TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
+		<IsPackable>false</IsPackable>
+		<SpaRoot>ClientApp\</SpaRoot>
+		<DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules\**</DefaultItemExcludes>
 
-    <!-- Set this to true if you enable server-side prerendering -->
-    <BuildServerSideRenderer>false</BuildServerSideRenderer>
-    <Company>SDG</Company>
-    <Authors>Anonymus-Raccoon</Authors>
-    <RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
-    <StartupObject>Kyoo.Program</StartupObject>
-  </PropertyGroup>
+		<!-- Set this to true if you enable server-side prerendering -->
+		<BuildServerSideRenderer>false</BuildServerSideRenderer>
+		<Company>SDG</Company>
+		<Authors>Anonymus-Raccoon</Authors>
+		<RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
+		<StartupObject>Kyoo.Program</StartupObject>
+	</PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <DefineConstants>TRACE</DefineConstants>
-  </PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="3.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.0.0" />
+		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+		<PackageReference Include="System.Data.SQLite.Core" Version="1.0.112" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <!-- Don't publish the SPA source files, but do show them in the project files list -->
-    <Content Remove="$(SpaRoot)**" />
-    <None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
-  </ItemGroup>
+	<ItemGroup>
+		<!-- Don't publish the SPA source files, but do show them in the project files list -->
+		<Content Remove="$(SpaRoot)**" />
+		<None Remove="$(SpaRoot)**" />
+		<None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <None Remove="ClientApp\src\models\collection.ts" />
-    <None Remove="ClientApp\src\models\genre.ts" />
-    <None Remove="ClientApp\src\models\people.ts" />
-    <None Remove="ClientApp\src\models\search-result.ts" />
-    <None Remove="ClientApp\src\models\show.ts" />
-    <None Remove="ClientApp\src\models\studio.ts" />
-    <None Remove="ClientApp\src\models\watch-item.ts" />
-    <None Remove="ClientApp\src\videoSupport\playbackMethodDetector.ts" />
-    <None Remove="Transcoder\Kyoo.Transcoder.exp" />
-  </ItemGroup>
+	<ItemGroup>
+	  <_ContentIncludedByDefault Remove="ClientApp\e2e\tsconfig.json" />
+	</ItemGroup>
+	
+	<Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
+		<!-- Ensure Node.js is installed -->
+		<Exec Command="node --version" ContinueOnError="true">
+			<Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
+		</Exec>
+		<Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />
+		<Message Importance="high" Text="Restoring dependencies using 'npm'. This may take several minutes..." />
+		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
+	</Target>
 
-  <ItemGroup>
-    <None Include="wwwroot\iconfont\codepoints" />
-    <None Include="wwwroot\iconfont\MaterialIcons-Regular.ijmap" />
-    <None Include="wwwroot\iconfont\MaterialIcons-Regular.svg" />
-    <None Include="wwwroot\iconfont\MaterialIcons-Regular.woff2" />
-    <None Include="wwwroot\iconfont\README.md" />
-    <None Include="wwwroot\roboto\fonts\roboto-100-italic.woff2" />
-    <None Include="wwwroot\roboto\fonts\roboto-100-normal.woff2" />
-    <None Include="wwwroot\roboto\fonts\roboto-300-italic.woff2" />
-    <None Include="wwwroot\roboto\fonts\roboto-300-normal.woff2" />
-    <None Include="wwwroot\roboto\fonts\roboto-400-italic.woff2" />
-    <None Include="wwwroot\roboto\fonts\roboto-400-normal.woff2" />
-    <None Include="wwwroot\roboto\fonts\roboto-500-italic.woff2" />
-    <None Include="wwwroot\roboto\fonts\roboto-500-normal.woff2" />
-    <None Include="wwwroot\roboto\fonts\roboto-700-italic.woff2" />
-    <None Include="wwwroot\roboto\fonts\roboto-700-normal.woff2" />
-    <None Include="wwwroot\roboto\fonts\roboto-900-italic.woff2" />
-    <None Include="wwwroot\roboto\fonts\roboto-900-normal.woff2" />
-    <None Include="wwwroot\roboto\sass\roboto-100-italic.scss" />
-    <None Include="wwwroot\roboto\sass\roboto-100-normal.scss" />
-    <None Include="wwwroot\roboto\sass\roboto-300-italic.scss" />
-    <None Include="wwwroot\roboto\sass\roboto-300-normal.scss" />
-    <None Include="wwwroot\roboto\sass\roboto-400-italic.scss" />
-    <None Include="wwwroot\roboto\sass\roboto-400-normal.scss" />
-    <None Include="wwwroot\roboto\sass\roboto-500-italic.scss" />
-    <None Include="wwwroot\roboto\sass\roboto-500-normal.scss" />
-    <None Include="wwwroot\roboto\sass\roboto-700-italic.scss" />
-    <None Include="wwwroot\roboto\sass\roboto-700-normal.scss" />
-    <None Include="wwwroot\roboto\sass\roboto-900-italic.scss" />
-    <None Include="wwwroot\roboto\sass\roboto-900-normal.scss" />
-    <None Include="wwwroot\roboto\sass\roboto-mixin.scss" />
-    <None Include="wwwroot\roboto\sass\roboto.scss" />
-  </ItemGroup>
+	<Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
+		<!-- As part of publishing, ensure the JS resources are freshly built in production mode -->
+		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
+		<Exec WorkingDirectory="$(SpaRoot)" Command="npm run build -- --prod" />
+		<Exec WorkingDirectory="$(SpaRoot)" Command="npm run build:ssr -- --prod" Condition=" '$(BuildServerSideRenderer)' == 'true' " />
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="3.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.112" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <TypeScriptCompile Include="ClientApp\src\models\search-result.ts">
-      <SubType>Code</SubType>
-    </TypeScriptCompile>
-    <TypeScriptCompile Include="ClientApp\src\models\collection.ts" />
-    <TypeScriptCompile Include="ClientApp\src\models\genre.ts" />
-    <TypeScriptCompile Include="ClientApp\src\models\people.ts" />
-    <TypeScriptCompile Include="ClientApp\src\models\show.ts" />
-    <TypeScriptCompile Include="ClientApp\src\models\studio.ts" />
-    <TypeScriptCompile Include="ClientApp\src\models\watch-item.ts" />
-    <TypeScriptCompile Include="ClientApp\src\videoSupport\playbackMethodDetector.ts" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Transcoder\Kyoo.Transcoder.dll">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Transcoder\Kyoo.Transcoder.ilk">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Transcoder\Kyoo.Transcoder.lib">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="Transcoder\Kyoo.Transcoder.pdb">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
-  <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
-    <!-- Ensure Node.js is installed -->
-    <Exec Command="node --version" ContinueOnError="true">
-      <Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
-    </Exec>
-    <Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />
-    <Message Importance="high" Text="Restoring dependencies using 'npm'. This may take several minutes..." />
-    <Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
-  </Target>
-
-  <Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
-    <!-- As part of publishing, ensure the JS resources are freshly built in production mode -->
-    <Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
-    <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build -- --prod" />
-    <Exec WorkingDirectory="$(SpaRoot)" Command="npm run build:ssr -- --prod" Condition=" '$(BuildServerSideRenderer)' == 'true' " />
-
-    <!-- Include the newly-built files in the publish output -->
-    <ItemGroup>
-      <DistFiles Include="$(SpaRoot)dist\**; $(SpaRoot)dist-server\**" />
-      <DistFiles Include="$(SpaRoot)node_modules\**" Condition="'$(BuildServerSideRenderer)' == 'true'" />
-      <ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
-        <RelativePath>%(DistFiles.Identity)</RelativePath>
-        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-      </ResolvedFileToPublish>
-    </ItemGroup>
-  </Target>
+		<!-- Include the newly-built files in the publish output -->
+		<ItemGroup>
+			<DistFiles Include="$(SpaRoot)dist\**; $(SpaRoot)dist-server\**" />
+			<DistFiles Include="$(SpaRoot)node_modules\**" Condition="'$(BuildServerSideRenderer)' == 'true'" />
+			<ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
+				<RelativePath>%(DistFiles.Identity)</RelativePath>
+				<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+				<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			</ResolvedFileToPublish>
+		</ItemGroup>
+	</Target>
 
 </Project>
