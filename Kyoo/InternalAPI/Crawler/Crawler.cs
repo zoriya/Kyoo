@@ -72,7 +72,8 @@ namespace Kyoo.InternalAPI
             }
 
             isScanning = false;
-            while (!cancellationToken.IsCancellationRequested);
+            if (watch)
+                while (!cancellationToken.IsCancellationRequested);
             Debug.WriteLine("&Crawler stopped");
             runningCrawler = null;
             return null;
