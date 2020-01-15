@@ -8,10 +8,4 @@ fi
 git clone https://github.com/AnonymusRaccoon/Kyoo --recurse
 cd Kyoo
 git pull --recurse
-chmod +x build.sh
-./build.sh
-dotnet publish -c Release -o /opt/kyoo Kyoo/Kyoo.csproj
-useradd -rU kyoo
-chown -R kyoo /opt/kyoo
-chgrp -R kyoo /opt/kyoo
-chmod +x /opt/kyoo/kyoo.sh
+make install
