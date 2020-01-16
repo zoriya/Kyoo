@@ -1,7 +1,6 @@
 FFMPEG = transcoder/ffmpeg
-CONF_FFMEG = $(FFMPEG)/config.h
-FFMPEG_CONF = $(FFMPEG)/configure
-FFMPEG_OPT =	--pkg-config-flags=--static \
+CONFIG = $(FFMPEG)/config.h
+OPTIONS =	--pkg-config-flags=--static \
 		--disable-shared \
 		--enable-static \
 		--disable-asm \
@@ -11,7 +10,7 @@ FFMPEG_OPT =	--pkg-config-flags=--static \
 		--disable-ffprobe \
 		--disable-ffmpeg
 
-TRANSCODER_DIR = transcoder/build
+TRANSCODERDIR = transcoder/build
 
 NEEDED = 	dotnet \
 		cmake \
@@ -32,19 +31,19 @@ dependencies:
 		$$pkg --version >> /dev/null 2>&1 || ($(ECHO) "$(RED)ERROR: $$pkg could not be found.$(NOCOL)"; exit 1); \
 	done
 
-$(CONF_FFMPEG):
+$(CONFIG):
 	$(ECHO) "$(COL)Configuring FFMPEG$(NOCOL)"
-	$(FFMPEG_CONF) $(FFMPEG_OPT)
+	cd $(FFMPEG) && ./configure $(OPTIONS)
 
-ffmpeg: $(CONF_FFMPEG)
+ffmpeg: $(CONFIG)
 	$(ECHO) "$(COL)Building FFMPEG$(NOCOL)"
 	$(MAKE) -C $(FFMPEG)
 
 transcoder: ffmpeg
 	$(ECHO) "$(COL)Building the transcoder$(NOCOL)"
-	mkdir --parent $(TRANSCODER_DIR)
-	cd $(TRANSCODER_DIR) && cmake .. && make
-	mv $(TRANSCODER_DIR)/libtranscoder.so Kyoo/
+	mkdir --parent $(TRANSCODERDIR)
+	cd $(TRANSCODERDIR) && cmake .. && make
+	mv $(TRANSCODERDIR)/libtranscoder.so Kyoo/
 	$(ECHO) "$(COL)Transcoder built$(NOCOL)"
 
 
