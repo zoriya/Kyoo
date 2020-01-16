@@ -45,6 +45,10 @@
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </EmbeddedResource>
 	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Kyoo.Common\Kyoo.Common.csproj" />
+	</ItemGroup>
 	
 	<Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
 		<!-- Ensure Node.js is installed -->
