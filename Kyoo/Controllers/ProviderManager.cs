@@ -27,8 +27,6 @@ namespace Kyoo.InternalAPI
         void LoadProviders()
         {
             providers.Clear();
-            providers.Add(new ProviderTheTvDB());
-
             string pluginFolder = config.GetValue<string>("providerPlugins");
 
             if (Directory.Exists(pluginFolder))
