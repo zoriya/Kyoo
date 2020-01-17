@@ -1,6 +1,4 @@
-﻿using Kyoo.InternalAPI.MetadataProvider;
-using Kyoo.InternalAPI.ThumbnailsManager;
-using Kyoo.Models;
+﻿using Kyoo.Models;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -8,56 +6,21 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Kyoo.Controllers.ThumbnailsManager;
 
-namespace Kyoo.InternalAPI
+namespace Kyoo.Controllers
 {
     public class ProviderManager : IMetadataProvider
     {
-        private readonly List<IMetadataProvider> providers = new List<IMetadataProvider>();
+        private readonly IEnumerable<IMetadataProvider> providers;
         private readonly IThumbnailsManager thumbnailsManager;
         private readonly IConfiguration config;
 
-        public ProviderManager(IThumbnailsManager thumbnailsManager, IConfiguration configuration)
+        public ProviderManager(IThumbnailsManager thumbnailsManager, IPluginManager pluginManager, IConfiguration config)
         {
             this.thumbnailsManager = thumbnailsManager;
-            config = configuration;
-            LoadProviders();
-        }
-
-        void LoadProviders()
-        {
-            providers.Clear();
-            string pluginFolder = config.GetValue<string>("providerPlugins");
-
-            if (Directory.Exists(pluginFolder))
-            {
-                string[] pluginsPaths = Directory.GetFiles(pluginFolder);
-                List<Assembly> plugins = new List<Assembly>();
-                List<Type> types = new List<Type>();
-
-                for (int i = 0; i < pluginsPaths.Length; i++)
-                {
-                    plugins.Add(Assembly.LoadFile(pluginsPaths[i]));
-                    types.AddRange(plugins[i].GetTypes());
-                }
-
-                List<Type> providersPlugins = types.FindAll(x =>
-                {
-                    object[] atr = x.GetCustomAttributes(typeof(MetaProvider), false);
-
-                    if (atr == null || atr.Length == 0)
-                        return false;
-
-                    List<Type> interfaces = new List<Type>(x.GetInterfaces());
-
-                    if (interfaces.Contains(typeof(IMetadataProvider)))
-                        return true;
-
-                    return false;
-                });
-
-                providers.AddRange(providersPlugins.ConvertAll<IMetadataProvider>(x => Activator.CreateInstance(x) as IMetadataProvider));
-            }
+            this.config = config;
+            providers = pluginManager.GetPlugins<IMetadataProvider>();
         }
 
         public Show Merge(IEnumerable<Show> shows)

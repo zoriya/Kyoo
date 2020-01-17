@@ -7,7 +7,7 @@ using System.Data.SQLite;
 using System.Diagnostics;
 using System.IO;
 
-namespace Kyoo.InternalAPI
+namespace Kyoo.Controllers
 {
     public class LibraryManager : ILibraryManager
     {

@@ -2,7 +2,7 @@
 using Kyoo.Models.Watch;
 using System.Collections.Generic;
 
-namespace Kyoo.InternalAPI
+namespace Kyoo.Controllers
 {
     public interface ILibraryManager
     {

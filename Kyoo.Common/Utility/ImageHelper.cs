@@ -1,6 +1,6 @@
 using Kyoo.Models;
 
-namespace Kyoo.InternalAPI.Utility
+namespace Kyoo.Controllers.Utility
 {
 	public static class ImageHelper
 	{

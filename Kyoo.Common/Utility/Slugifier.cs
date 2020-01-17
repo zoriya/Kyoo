@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace Kyoo.InternalAPI.Utility
+namespace Kyoo.Controllers.Utility
 {
     public class Slugifier
     {

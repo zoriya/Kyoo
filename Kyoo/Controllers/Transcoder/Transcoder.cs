@@ -1,14 +1,15 @@
 using System;
 using Kyoo.Models;
-using Kyoo.InternalAPI.TranscoderLink;
 using Microsoft.Extensions.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Kyoo.Controllers.TranscoderLink;
+
 #pragma warning disable 4014
 
-namespace Kyoo.InternalAPI
+namespace Kyoo.Controllers
 {
     public class Transcoder : ITranscoder
     {

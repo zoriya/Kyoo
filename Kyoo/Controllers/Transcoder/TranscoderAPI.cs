@@ -5,7 +5,7 @@ using Kyoo.Models;
 using Kyoo.Models.Watch;
 // ReSharper disable InconsistentNaming
 
-namespace Kyoo.InternalAPI.TranscoderLink
+namespace Kyoo.Controllers.TranscoderLink
 {
     public static class TranscoderAPI
     {

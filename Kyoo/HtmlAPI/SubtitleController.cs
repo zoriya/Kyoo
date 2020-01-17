@@ -1,8 +1,6 @@
-﻿using Kyoo.InternalAPI;
-using Kyoo.Models;
+﻿using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 

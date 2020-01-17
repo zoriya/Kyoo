@@ -1,5 +1,5 @@
-using Kyoo.InternalAPI;
-using Kyoo.InternalAPI.ThumbnailsManager;
+using Kyoo.Controllers;
+using Kyoo.Controllers.ThumbnailsManager;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
@@ -30,12 +30,9 @@ namespace Kyoo
             });
 
             services.AddControllers().AddNewtonsoftJson();
-
-            //Services needed in the private and in the public API
+            
             services.AddSingleton<ILibraryManager, LibraryManager>();
             services.AddSingleton<ITranscoder, Transcoder>();
-
-            //Services used to get informations about files and register them
             services.AddSingleton<ICrawler, Crawler>();
             services.AddSingleton<IThumbnailsManager, ThumbnailsManager>();
             services.AddSingleton<IMetadataProvider, ProviderManager>();

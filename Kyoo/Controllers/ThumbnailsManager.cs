@@ -7,7 +7,7 @@ using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Kyoo.InternalAPI.ThumbnailsManager
+namespace Kyoo.Controllers.ThumbnailsManager
 {
     public class ThumbnailsManager : IThumbnailsManager
     {
