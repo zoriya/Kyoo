@@ -1,5 +1,4 @@
-﻿using Kyoo.InternalAPI.Utility;
-using Kyoo.Models;
+﻿using Kyoo.Models;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -8,9 +7,10 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Kyoo.Controllers.Utility;
 using Kyoo.Models.Watch;
 
-namespace Kyoo.InternalAPI
+namespace Kyoo.Controllers
 {
     public class Crawler : ICrawler
     {

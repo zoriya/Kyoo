@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Kyoo.InternalAPI
+namespace Kyoo.Controllers
 {
     public interface IMetadataProvider
     {

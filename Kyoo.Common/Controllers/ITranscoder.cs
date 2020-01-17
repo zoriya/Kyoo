@@ -2,7 +2,7 @@ using Kyoo.Models;
 using Kyoo.Models.Watch;
 using System.Threading.Tasks;
 
-namespace Kyoo.InternalAPI
+namespace Kyoo.Controllers
 {
     public interface ITranscoder
     {

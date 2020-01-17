@@ -1,11 +1,10 @@
-﻿using Kyoo.InternalAPI;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System.IO;
 
 namespace Kyoo.Controllers
 {
-    public class ThumbnailController : Controller
+    public class ThumbnailController : ControllerBase
     {
         private readonly ILibraryManager libraryManager;
         private readonly string peoplePath;
