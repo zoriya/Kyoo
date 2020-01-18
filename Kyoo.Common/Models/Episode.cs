@@ -1,9 +1,10 @@
 ﻿using Newtonsoft.Json;
 using System;
+using Kyoo.Utility;
 
 namespace Kyoo.Models
 {
-    public class Episode
+    public class Episode : IMergable<Episode>
     {
         [JsonIgnore] public long id;
         [JsonIgnore] public long ShowID;
@@ -96,6 +97,36 @@ namespace Kyoo.Models
         public static string GetSlug(string showSlug, long seasonNumber, long episodeNumber)
         {
             return showSlug + "-s" + seasonNumber + "e" + episodeNumber;
+        }
+
+        public Episode Merge(Episode other)
+        {
+            if (id == -1)
+                id = other.id;
+            if (ShowID == -1)
+                ShowID = other.ShowID;
+            if (SeasonID == -1)
+                SeasonID = other.SeasonID;
+            if (seasonNumber == -1)
+                seasonNumber = other.seasonNumber;
+            if (episodeNumber == -1)
+                episodeNumber = other.episodeNumber;
+            if (absoluteNumber == -1)
+                absoluteNumber = other.absoluteNumber;
+            if (Path == null)
+                Path = other.Path;
+            if (Title == null)
+                Title = other.Title;
+            if (Overview == null)
+                Overview = other.Overview;
+            if (ReleaseDate == null)
+                ReleaseDate = other.ReleaseDate;
+            if (Runtime == -1)
+                Runtime = other.Runtime;
+            if (ImgPrimary == null)
+                ImgPrimary = other.ImgPrimary;
+            ExternalIDs += '|' + other.ExternalIDs;
+            return this;
         }
     }
 }

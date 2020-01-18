@@ -7,7 +7,7 @@ namespace Kyoo.Controllers.ThumbnailsManager
     public interface IThumbnailsManager
     {
         Task<Show> Validate(Show show);
-        Task<List<People>> Validate(List<People> actors);
+        Task<IEnumerable<People>> Validate(IEnumerable<People> actors);
         Task<Episode> Validate(Episode episode);
     }
 }
