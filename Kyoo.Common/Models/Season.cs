@@ -1,8 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using System.Linq;
+using Kyoo.Utility;
+using Newtonsoft.Json;
 
 namespace Kyoo.Models
 {
-    public class Season
+    public class Season : IMergable<Season>
     {
         [JsonIgnore] public readonly long id;
         [JsonIgnore] public long ShowID;
@@ -39,6 +41,24 @@ namespace Kyoo.Models
                 reader["year"] as long?,
                 reader["imgPrimary"] as string,
                 reader["externalIDs"] as string);
+        }
+
+        public Season Merge(Season other)
+        {
+	        if (ShowID == -1)
+		        ShowID = other.ShowID;
+	        if (seasonNumber == -1)
+		        seasonNumber = other.seasonNumber;
+	        if (Title == null)
+		        Title = other.Title;
+	        if (Overview == null)
+		        Overview = other.Overview;
+	        if (year == null)
+		        year = other.year;
+	        if (ImgPrimary == null)
+		        ImgPrimary = other.ImgPrimary;
+		    ExternalIDs += '|' + other.ExternalIDs;
+            return this;
         }
     }
 }

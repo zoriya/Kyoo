@@ -1,124 +1,87 @@
-﻿using Kyoo.Models;
-using Microsoft.Extensions.Configuration;
-using System;
+﻿using System;
+using Kyoo.Models;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using Kyoo.Controllers.ThumbnailsManager;
+using Kyoo.Utility;
 
 namespace Kyoo.Controllers
 {
-    public class ProviderManager : IMetadataProvider
+    public class ProviderManager : IProviderManager
     {
         private readonly IEnumerable<IMetadataProvider> providers;
         private readonly IThumbnailsManager thumbnailsManager;
-        private readonly IConfiguration config;
 
-        public ProviderManager(IThumbnailsManager thumbnailsManager, IPluginManager pluginManager, IConfiguration config)
+        public ProviderManager(IThumbnailsManager thumbnailsManager, IPluginManager pluginManager)
         {
             this.thumbnailsManager = thumbnailsManager;
-            this.config = config;
             providers = pluginManager.GetPlugins<IMetadataProvider>();
         }
 
-        public Show Merge(IEnumerable<Show> shows)
+        public async Task<T> GetMetadata<T>(Func<IMetadataProvider, Task<T>> providerCall, Library library, string what) where T : IMergable<T>, new()
         {
-            return shows.FirstOrDefault();
-        }
-
-        public Season Merge(IEnumerable<Season> seasons)
-        {
-            return seasons.FirstOrDefault();
-        }
-
-        public Episode Merge(IEnumerable<Episode> episodes)
-        {
-            return episodes.FirstOrDefault(); //Should do something if the return is null;
-        }
-
-        //For all the following methods, it should use all providers and merge the data.
-
-        public Task<Collection> GetCollectionFromName(string name)
-        {
-            return providers[0].GetCollectionFromName(name);
-        }
-
-        public Task<Show> GetImages(Show show)
-        {
-            return providers[0].GetImages(show);
-        }
-
-        public async Task<Season> GetSeason(string showName, int seasonNumber)
-        {
-            List<Season> datas = new List<Season>();
-            for (int i = 0; i < providers.Count; i++)
+            T ret = new T();
+            
+            foreach (IMetadataProvider provider in providers.OrderBy(provider => Array.IndexOf(library.Providers, provider.Name)))
             {
-                datas.Add(await providers[i].GetSeason(showName, seasonNumber));
+                try
+                {
+                    if (library.Providers.Contains(provider.Name))
+                        ret = ret.Merge(await providerCall(provider));
+                } catch (Exception ex) {
+                    Console.Error.WriteLine($"The provider {provider.Name} coudln't work for {what}. (Excepetion: {ex.Message}");
+                }
             }
-
-            return Merge(datas);
+            return ret;
         }
-
-        public async Task<Show> GetShowByID(string id)
+        
+        public async Task<IEnumerable<T>> GetMetadata<T>(Func<IMetadataProvider, Task<IEnumerable<T>>> providerCall, Library library, string what)
         {
-            List<Show> datas = new List<Show>();
-            for (int i = 0; i < providers.Count; i++)
+            List<T> ret = new List<T>();
+            
+            foreach (IMetadataProvider provider in providers.OrderBy(provider => Array.IndexOf(library.Providers, provider.Name)))
             {
-                datas.Add(await providers[i].GetShowByID(id));
+                try
+                {
+                    if (library.Providers.Contains(provider.Name))
+                        ret.AddRange(await providerCall(provider));
+                } catch (Exception ex) {
+                    Console.Error.WriteLine($"The provider {provider.Name} coudln't work for {what}. (Excepetion: {ex.Message}");
+                }
             }
-
-            return Merge(datas);
+            return ret;
+        }
+        
+        public async Task<Collection> GetCollectionFromName(string name, Library library)
+        {
+            return await GetMetadata(provider => provider.GetCollectionFromName(name), library, $"the collection {name}");
         }
 
-        public async Task<Show> GetShowFromName(string showName, string showPath)
+        public async Task<Show> GetShowFromName(string showName, string showPath, Library library)
         {
-            List<Show> datas = new List<Show>();
-            for (int i = 0; i < providers.Count; i++)
-            {
-                datas.Add(await providers[i].GetShowFromName(showName, showPath));
-            }
-
-            Show show = Merge(datas);
-            return await thumbnailsManager.Validate(show);
+            Show show = await GetMetadata(provider => provider.GetShowFromName(showName, showPath), library, $"the show {showName}");
+            await thumbnailsManager.Validate(show);
+            return show;
         }
 
-        public async Task<Season> GetSeason(string showName, long seasonNumber)
+        public async Task<Season> GetSeason(string showName, long seasonNumber, Library library)
         {
-            List<Season> datas = new List<Season>();
-            for (int i = 0; i < providers.Count; i++)
-            {
-                datas.Add(await providers[i].GetSeason(showName, seasonNumber));
-            }
-
-            return Merge(datas);
+            return await GetMetadata(provider => provider.GetSeason(showName, seasonNumber), library, $"the season ${seasonNumber} of {showName}");
         }
 
-        public Task<string> GetSeasonImage(string showName, long seasonNumber)
+        public async Task<Episode> GetEpisode(string externalIDs, long seasonNumber, long episodeNumber, long absoluteNumber, string episodePath,  Library library)
         {
-            //Should select the best provider for this show.
-
-            return providers[0].GetSeasonImage(showName, seasonNumber);
+            Episode episode = await GetMetadata(provider => provider.GetEpisode(externalIDs, seasonNumber, episodeNumber, absoluteNumber, episodePath), library, $"the episode at {episodePath}");
+            await thumbnailsManager.Validate(episode);
+            return episode;
         }
 
-        public async Task<Episode> GetEpisode(string externalIDs, long seasonNumber, long episodeNumber, long absoluteNumber, string episodePath)
+        public async Task<IEnumerable<People>> GetPeople(string showExternalIDs, Library library)
         {
-            List<Episode> datas = new List<Episode>();
-            for (int i = 0; i < providers.Count; i++)
-            {
-                datas.Add(await providers[i].GetEpisode(externalIDs, seasonNumber, episodeNumber, absoluteNumber, episodePath));
-            }
-
-            Episode episode = Merge(datas);
-            episode.Path = episodePath;
-            return await thumbnailsManager.Validate(episode);
-        }
-
-        public async Task<List<People>> GetPeople(string id)
-        {
-            List<People> actors = await providers[0].GetPeople(id);
-            return await thumbnailsManager.Validate(actors);
+            IEnumerable<People> people = await GetMetadata(provider => provider.GetPeople(showExternalIDs), library, $"unknown data");
+            people = await thumbnailsManager.Validate(people);
+            return people;
         }
     }
 }

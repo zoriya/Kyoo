@@ -18,10 +18,10 @@ namespace Kyoo.Controllers
             this.crawler = crawler;
         }
 
-        [HttpGet("scan/{watch}")]
-        public IActionResult ScanLibrary(bool watch)
+        [HttpGet("scan")]
+        public IActionResult ScanLibrary()
         {
-            crawler.Start(watch);
+            crawler.Start();
             return Ok("Scanning");
         }
     }

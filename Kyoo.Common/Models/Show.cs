@@ -1,10 +1,12 @@
 ﻿using Kyoo.Controllers;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Linq;
+using Kyoo.Utility;
 
 namespace Kyoo.Models
 {
-    public class Show
+    public class Show : IMergable<Show>
     {
         [JsonIgnore] public long id = -1;
 
@@ -111,7 +113,7 @@ namespace Kyoo.Models
             return new Show((long)reader["id"],
                 reader["slug"] as string,
                 reader["title"] as string,
-                (reader["aliases"] as string)?.Split('|') ?? null,
+                (reader["aliases"] as string)?.Split('|'),
                 reader["path"] as string,
                 reader["overview"] as string,
                 reader["trailerUrl"] as string,
@@ -159,6 +161,46 @@ namespace Kyoo.Models
         public Show SetSeasons(ILibraryManager manager)
         {
             seasons = manager.GetSeasons(id);
+            return this;
+        }
+
+        public Show Merge(Show other)
+        {
+            if (id == -1)
+                id = other.id;
+            if (Slug == null)
+                Slug = other.Slug;
+            if (Title == null)
+                Title = other.Title;
+            if (Aliases == null)
+                Aliases = other.Aliases;
+            else
+                Aliases = Aliases.Concat(other.Aliases);
+            if (Genres == null)
+                Genres = other.Genres;
+            else
+                Genres = Genres.Concat(other.Genres);
+            if (Path == null)
+                Path = other.Path;
+            if (Overview == null)
+                Overview = other.Overview;
+            if (TrailerUrl == null)
+                TrailerUrl = other.TrailerUrl;
+            if (Status == null)
+                Status = other.Status;
+            if (StartYear == null)
+                StartYear = other.StartYear;
+            if (EndYear == null)
+                EndYear = other.EndYear;
+            if (ImgPrimary == null)
+                ImgPrimary = other.ImgPrimary;
+            if (ImgThumb == null)
+                ImgThumb = other.ImgThumb;
+            if (ImgLogo == null)
+                ImgLogo = other.ImgLogo;
+            if (ImgBackdrop == null)
+                ImgBackdrop = other.ImgBackdrop;
+            ExternalIDs += '|' + other.ExternalIDs;
             return this;
         }
     }

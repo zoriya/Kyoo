@@ -63,9 +63,9 @@ namespace Kyoo.Controllers
         long GetOrCreateGenre(Genre genre);
         long GetOrCreateStudio(Studio studio);
 
-        void RegisterShowPeople(long showID, List<People> actors);
+        void RegisterShowPeople(long showID, IEnumerable<People> actors);
         void AddShowToCollection(long showID, long collectionID);
-        void RegisterInLibrary(long showID, string libraryPath);
+        void RegisterInLibrary(long showID, Library library);
 
         void RemoveEpisode(Episode episode);
         void ClearSubtitles(long episodeID);

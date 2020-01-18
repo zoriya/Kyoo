@@ -1,8 +1,9 @@
-﻿using Newtonsoft.Json;
+﻿using Kyoo.Utility;
+using Newtonsoft.Json;
 
 namespace Kyoo.Models
 {
-    public class People
+    public class People : IMergable<People>
     {
         [JsonIgnore] public long id;
         public string slug;
@@ -51,6 +52,24 @@ namespace Kyoo.Models
                 reader["type"] as string,
                 reader["imgPrimary"] as string,
                 reader["externalIDs"] as string);
+        }
+
+        public People Merge(People other)
+        {
+            if (id == -1)
+                id = other.id;
+            if (slug == null)
+                slug = other.slug;
+            if (Name == null)
+                Name = other.Name;
+            if (Role == null)
+                Role = other.Role;
+            if (Type == null)
+                Type = other.Type;
+            if (imgPrimary == null)
+                imgPrimary = other.imgPrimary;
+            externalIDs += '|' + other.externalIDs;
+            return this;
         }
     }
 }

@@ -14,16 +14,15 @@ namespace Kyoo.Controllers
 {
     public class Crawler : ICrawler
     {
-        private static ICrawler runningCrawler;
-        private bool isScanning;
+        private bool isRunning;
         private readonly CancellationTokenSource cancellation;
 
         private readonly ILibraryManager libraryManager;
-        private readonly IMetadataProvider metadataProvider;
+        private readonly IProviderManager metadataProvider;
         private readonly ITranscoder transcoder;
         private readonly IConfiguration config;
 
-        public Crawler(ILibraryManager libraryManager, IMetadataProvider metadataProvider, ITranscoder transcoder, IConfiguration configuration)
+        public Crawler(ILibraryManager libraryManager, IProviderManager metadataProvider, ITranscoder transcoder, IConfiguration configuration)
         {
             this.libraryManager = libraryManager;
             this.metadataProvider = metadataProvider;
@@ -32,30 +31,27 @@ namespace Kyoo.Controllers
             cancellation = new CancellationTokenSource();
         }
 
-        public async Task Start(bool watch)
+        public void Start()
         {
-            if (runningCrawler == null)
-            {
-                runningCrawler = this;
-                await StartAsync(watch, cancellation.Token);
-            }
-            else if (runningCrawler is Crawler crawler)
-            {
-                if (!crawler.isScanning) 
-                {
-                    await crawler.StopAsync();
-                    runningCrawler = this;
-                    await StartAsync(watch, cancellation.Token);
-                }
-            }
+            if (isRunning)
+                return;
+            isRunning = true;
+            StartAsync(cancellation.Token);
         }
 
-        private Task StartAsync(bool watch, CancellationToken cancellationToken)
+        public void Cancel()
+        {
+            if (!isRunning)
+                return;
+            isRunning = false;
+            cancellation.Cancel();
+        }
+
+        private async void StartAsync(CancellationToken cancellationToken)
         {
             IEnumerable<Episode> episodes = libraryManager.GetAllEpisodes();
-            IEnumerable<string> libraryPaths = libraryManager.GetLibrariesPath();
+            IEnumerable<Library> libraries = libraryManager.GetLibraries();
 
-            isScanning = true;
             Debug.WriteLine("&Crawler started");
             foreach (Episode episode in episodes)
             {
@@ -63,106 +59,46 @@ namespace Kyoo.Controllers
                     libraryManager.RemoveEpisode(episode);
             }
 
-            foreach (string path in libraryPaths)
-            {
-                Scan(path, cancellationToken);
+            foreach (Library library in libraries)
+                await Scan(library, cancellationToken);
 
-                if(watch)
-                    Watch(path, cancellationToken);
-            }
-
-            isScanning = false;
-            if (watch)
-                while (!cancellationToken.IsCancellationRequested);
+            isRunning = false;
             Debug.WriteLine("&Crawler stopped");
-            runningCrawler = null;
-            return null;
         }
 
-        private async void Scan(string folderPath, CancellationToken cancellationToken)
+        private async Task Scan(Library library, CancellationToken cancellationToken)
         {
-            string[] files = Directory.GetFiles(folderPath, "*", SearchOption.AllDirectories);
+            IEnumerable<string> files = new List<string>();
 
+            files = library.Paths.Aggregate(files, (current, path) => 
+                current.Concat(Directory.GetFiles(path, "*", SearchOption.AllDirectories)));
             foreach (string file in files)
             {
                 if (cancellationToken.IsCancellationRequested)
                     return;
-
-                if (IsVideo(file))
-                {
-                    Debug.WriteLine("&Registering episode at: " + file);
-                    await ExtractEpisodeData(file, folderPath);
-                }
+                if (!IsVideo(file))
+                    continue;
+                await RegisterFile(file, library);
             }
         }
 
-        private void Watch(string folderPath, CancellationToken cancellationToken)
+        private async Task RegisterFile(string path, Library library)
         {
-            Debug.WriteLine("Folder watching not implemented yet.");
-            //Debug.WriteLine("&Watching " + folderPath + " for changes");
-            //using (FileSystemWatcher watcher = new FileSystemWatcher())
-            //{
-            //    watcher.Path = folderPath;
-            //    watcher.IncludeSubdirectories = true;
-            //    watcher.NotifyFilter = NotifyFilters.LastAccess
-            //                     | NotifyFilters.LastWrite
-            //                     | NotifyFilters.FileName
-            //                     | NotifyFilters.Size
-            //                     | NotifyFilters.DirectoryName;
-
-            //    watcher.Created += FileCreated;
-            //    watcher.Changed += FileChanged;
-            //    watcher.Renamed += FileRenamed;
-            //    watcher.Deleted += FileDeleted;
-
-
-            //    watcher.EnableRaisingEvents = true;
-
-            //    while (!cancellationToken.IsCancellationRequested);
-            //}
-        }
-
-        //private void FileCreated(object sender, FileSystemEventArgs e)
-        //{
-        //    Debug.WriteLine("&File Created at " + e.FullPath);
-        //    if (IsVideo(e.FullPath))
-        //    {
-        //        Debug.WriteLine("&Created file is a video");
-        //        _ = TryRegisterEpisode(e.FullPath);
-        //    }
-        //}
-
-        //private void FileChanged(object sender, FileSystemEventArgs e)
-        //{
-        //    Debug.WriteLine("&File Changed at " + e.FullPath);
-        //}
-
-        //private void FileRenamed(object sender, RenamedEventArgs e)
-        //{
-        //    Debug.WriteLine("&File Renamed at " + e.FullPath);
-        //}
-
-        //private void FileDeleted(object sender, FileSystemEventArgs e)
-        //{
-        //    Debug.WriteLine("&File Deleted at " + e.FullPath);
-        //}
-
-        private async Task ExtractEpisodeData(string episodePath, string libraryPath)
-        {
-            if (!libraryManager.IsEpisodeRegistered(episodePath))
+            if (!libraryManager.IsEpisodeRegistered(path))
             {
-                string relativePath = episodePath.Substring(libraryPath.Length);
+                string relativePath = path.Substring(library.Paths.Length);
                 string patern = config.GetValue<string>("regex");
                 Regex regex = new Regex(patern, RegexOptions.IgnoreCase);
                 Match match = regex.Match(relativePath);
 
-                string showPath = Path.GetDirectoryName(episodePath);
+                string showPath = Path.GetDirectoryName(path);
                 string collectionName = match.Groups["Collection"]?.Value;
                 string showName = match.Groups["ShowTitle"].Value;
                 bool seasonSuccess = long.TryParse(match.Groups["Season"].Value, out long seasonNumber);
                 bool episodeSucess = long.TryParse(match.Groups["Episode"].Value, out long episodeNumber);
                 long absoluteNumber = -1;
 
+                Debug.WriteLine("&Registering episode at: " + path);
                 if (!seasonSuccess || !episodeSucess)
                 {
                     //Considering that the episode is using absolute path.
@@ -182,37 +118,37 @@ namespace Kyoo.Controllers
                     }
                 }
 
-                Show show = await RegisterOrGetShow(collectionName, showName, showPath, libraryPath);
+                Show show = await RegisterOrGetShow(collectionName, showName, showPath, library);
                 if (show != null)
-                    await RegisterEpisode(show, seasonNumber, episodeNumber, absoluteNumber, episodePath);
+                    await RegisterEpisode(show, seasonNumber, episodeNumber, absoluteNumber, path, library);
             }
         }
 
-        private async Task<Show> RegisterOrGetShow(string collectionName, string showTitle, string showPath, string libraryPath)
+        private async Task<Show> RegisterOrGetShow(string collectionName, string showTitle, string showPath, Library library)
         {
             string showProviderIDs;
 
             if (!libraryManager.IsShowRegistered(showPath, out long showID))
             {
-                Show show = await metadataProvider.GetShowFromName(showTitle, showPath);
+                Show show = await metadataProvider.GetShowFromName(showTitle, showPath, library);
                 showProviderIDs = show.ExternalIDs;
                 showID = libraryManager.RegisterShow(show);
 
                 if (showID == -1)
                     return null;
 
-                libraryManager.RegisterInLibrary(showID, libraryPath);
+                libraryManager.RegisterInLibrary(showID, library);
                 if (!string.IsNullOrEmpty(collectionName))
                 {
                     if (!libraryManager.IsCollectionRegistered(Slugifier.ToSlug(collectionName), out long collectionID))
                     {
-                        Collection collection = await metadataProvider.GetCollectionFromName(collectionName);
+                        Collection collection = await metadataProvider.GetCollectionFromName(collectionName, library);
                         collectionID = libraryManager.RegisterCollection(collection);
                     }
                     libraryManager.AddShowToCollection(showID, collectionID);
                 }
 
-                List<People> actors = await metadataProvider.GetPeople(show.ExternalIDs);
+                IEnumerable<People> actors = await metadataProvider.GetPeople(show.ExternalIDs, library);
                 libraryManager.RegisterShowPeople(showID, actors);
             }
             else
@@ -221,27 +157,27 @@ namespace Kyoo.Controllers
             return new Show { id = showID, ExternalIDs = showProviderIDs, Title = showTitle };
         }
 
-        private async Task RegisterEpisode(Show show, long seasonNumber, long episodeNumber, long absoluteNumber, string episodePath)
+        private async Task RegisterEpisode(Show show, long seasonNumber, long episodeNumber, long absoluteNumber, string episodePath, Library library)
         {
             long seasonID = -1;
             if (seasonNumber != -1)
             {
                 if (!libraryManager.IsSeasonRegistered(show.id, seasonNumber, out seasonID))
                 {
-                    Season season = await metadataProvider.GetSeason(show.Title, seasonNumber);
+                    Season season = await metadataProvider.GetSeason(show.Title, seasonNumber, library);
                     season.ShowID = show.id;
                     seasonID = libraryManager.RegisterSeason(season);
                 }
             }
 
-            Episode episode = await metadataProvider.GetEpisode(show.ExternalIDs, seasonNumber, episodeNumber, absoluteNumber, episodePath);
+            Episode episode = await metadataProvider.GetEpisode(show.ExternalIDs, seasonNumber, episodeNumber, absoluteNumber, episodePath, library);
             episode.ShowID = show.id;
 
             if (seasonID == -1)
             {
                 if (!libraryManager.IsSeasonRegistered(show.id, episode.seasonNumber, out seasonID))
                 {
-                    Season season = await metadataProvider.GetSeason(show.Title, episode.seasonNumber);
+                    Season season = await metadataProvider.GetSeason(show.Title, episode.seasonNumber, library);
                     season.ShowID = show.id;
                     seasonID = libraryManager.RegisterSeason(season);
                 }
@@ -263,18 +199,15 @@ namespace Kyoo.Controllers
                 libraryManager.RegisterTrack(track);
             }
 
-            if (episode.Path.EndsWith(".mkv"))
+            if (episode.Path.EndsWith(".mkv") && CountExtractedSubtitles(episode) != subcount)
             {
-                if (CountExtractedSubtitles(episode) != subcount)
+                Track[] subtitles = await transcoder.ExtractSubtitles(episode.Path);
+                if (subtitles != null)
                 {
-                    Track[] subtitles = await transcoder.ExtractSubtitles(episode.Path);
-                    if (subtitles != null)
+                    foreach (Track track in subtitles)
                     {
-                        foreach (Track track in subtitles)
-                        {
-                            track.episodeID = episode.id;
-                            libraryManager.RegisterTrack(track);
-                        }
+                        track.episodeID = episode.id;
+                        libraryManager.RegisterTrack(track);
                     }
                 }
             }

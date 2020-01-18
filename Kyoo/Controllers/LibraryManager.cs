@@ -29,7 +29,7 @@ namespace Kyoo.Controllers
                 sqlConnection = new SQLiteConnection($"Data Source={databasePath};Version=3");
                 sqlConnection.Open();
 
-                string createStatement = @"CREATE TABLE shows(
+                const string createStatement = @"CREATE TABLE shows(
 					    id INTEGER PRIMARY KEY UNIQUE, 
 					    slug TEXT UNIQUE, 
 					    title TEXT, 
@@ -92,7 +92,8 @@ namespace Kyoo.Controllers
 					    id INTEGER PRIMARY KEY UNIQUE, 
 					    slug TEXT UNIQUE, 
 					    name TEXT,
-					    path TEXT
+					    path TEXT,
+					    providers TEXT
 				    );
 				    CREATE TABLE librariesLinks(
 					    libraryID INTEGER, 
@@ -209,10 +210,11 @@ namespace Kyoo.Controllers
 
         public string GetShowExternalIDs(long showID)
         {
-            string query = string.Format("SELECT * FROM shows WHERE id = {0};", showID);
-
+            string query = "SELECT * FROM shows WHERE id = $showID;";
+            
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
+                cmd.Parameters.AddWithValue("$showID", showID);
                 SQLiteDataReader reader = cmd.ExecuteReader();
 
                 if (reader.Read())
@@ -949,13 +951,14 @@ namespace Kyoo.Controllers
             }
         }
 
-        public void RegisterInLibrary(long showID, string libraryPath)
+        public void RegisterInLibrary(long showID, Library library)
         {
-            string query = "INSERT INTO librariesLinks (libraryID, showID) SELECT id, $showID FROM libraries WHERE libraries.path = $libraryPath;";
+            string query =
+                "INSERT INTO librariesLinks (libraryID, showID) SELECT id, $showID FROM libraries WHERE libraries.id = $libraryID;";
 
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
-                cmd.Parameters.AddWithValue("$libraryPath", libraryPath);
+                cmd.Parameters.AddWithValue("$libraryID", library.id);
                 cmd.Parameters.AddWithValue("$showID", showID);
                 cmd.ExecuteNonQuery();
             }
@@ -1102,21 +1105,21 @@ namespace Kyoo.Controllers
             }
         }
 
-        public void RegisterShowPeople(long showID, List<People> people)
+        public void RegisterShowPeople(long showID, IEnumerable<People> people)
         {
             if (people == null)
                 return;
 
             string linkQuery = "INSERT INTO peopleLinks (peopleID, showID, role, type) VALUES($peopleID, $showID, $role, $type);";
 
-            for (int i = 0; i < people.Count; i++)
+            foreach (People peop in people)
             {
                 using (SQLiteCommand cmd = new SQLiteCommand(linkQuery, sqlConnection))
                 {
-                    cmd.Parameters.AddWithValue("$peopleID", GetOrCreatePeople(people[i]));
+                    cmd.Parameters.AddWithValue("$peopleID", GetOrCreatePeople(peop));
                     cmd.Parameters.AddWithValue("$showID", showID);
-                    cmd.Parameters.AddWithValue("$role", people[i].Role);
-                    cmd.Parameters.AddWithValue("$type", people[i].Type);
+                    cmd.Parameters.AddWithValue("$role", peop.Role);
+                    cmd.Parameters.AddWithValue("$type", peop.Type);
                     cmd.ExecuteNonQuery();
                 }
             }
