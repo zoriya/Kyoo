@@ -130,7 +130,8 @@ namespace Kyoo.Controllers
 
             if (!libraryManager.IsShowRegistered(showPath, out long showID))
             {
-                Show show = await metadataProvider.GetShowFromName(showTitle, showPath, library);
+                Show show = await metadataProvider.GetShowFromName(showTitle, library);
+                show.Path = showPath;
                 showProviderIDs = show.ExternalIDs;
                 showID = libraryManager.RegisterShow(show);
 
@@ -170,8 +171,9 @@ namespace Kyoo.Controllers
                 }
             }
 
-            Episode episode = await metadataProvider.GetEpisode(show.ExternalIDs, seasonNumber, episodeNumber, absoluteNumber, episodePath, library);
+            Episode episode = await metadataProvider.GetEpisode(show.ExternalIDs, seasonNumber, episodeNumber, absoluteNumber, library);
             episode.ShowID = show.id;
+            episode.Path = episodePath;
 
             if (seasonID == -1)
             {

@@ -13,13 +13,13 @@ namespace Kyoo.Controllers
 
         //For the show
         Task<Show> GetShowByID(string id);
-        Task<Show> GetShowFromName(string showName, string showPath);
+        Task<Show> GetShowFromName(string showName);
         Task<IEnumerable<People>> GetPeople(string id);
 
         //For the seasons
         Task<Season> GetSeason(string showName, long seasonNumber);
 
         //For the episodes
-        Task<Episode> GetEpisode(string externalIDs, long seasonNumber, long episodeNumber, long absoluteNumber, string episodePath);
+        Task<Episode> GetEpisode(string externalIDs, long seasonNumber, long episodeNumber, long absoluteNumber);
     }
 }

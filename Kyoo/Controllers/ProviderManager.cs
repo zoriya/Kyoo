@@ -58,9 +58,9 @@ namespace Kyoo.Controllers
             return await GetMetadata(provider => provider.GetCollectionFromName(name), library, $"the collection {name}");
         }
 
-        public async Task<Show> GetShowFromName(string showName, string showPath, Library library)
+        public async Task<Show> GetShowFromName(string showName, Library library)
         {
-            Show show = await GetMetadata(provider => provider.GetShowFromName(showName, showPath), library, $"the show {showName}");
+            Show show = await GetMetadata(provider => provider.GetShowFromName(showName), library, $"the show {showName}");
             await thumbnailsManager.Validate(show);
             return show;
         }
@@ -70,9 +70,9 @@ namespace Kyoo.Controllers
             return await GetMetadata(provider => provider.GetSeason(showName, seasonNumber), library, $"the season ${seasonNumber} of {showName}");
         }
 
-        public async Task<Episode> GetEpisode(string externalIDs, long seasonNumber, long episodeNumber, long absoluteNumber, string episodePath,  Library library)
+        public async Task<Episode> GetEpisode(string externalIDs, long seasonNumber, long episodeNumber, long absoluteNumber,  Library library)
         {
-            Episode episode = await GetMetadata(provider => provider.GetEpisode(externalIDs, seasonNumber, episodeNumber, absoluteNumber, episodePath), library, $"the episode at {episodePath}");
+            Episode episode = await GetMetadata(provider => provider.GetEpisode(externalIDs, seasonNumber, episodeNumber, absoluteNumber), library, $"an episode");
             await thumbnailsManager.Validate(episode);
             return episode;
         }
