@@ -30,6 +30,7 @@ namespace Kyoo
             });
 
             services.AddControllers().AddNewtonsoftJson();
+            services.AddHttpClient();
             
             services.AddSingleton<ILibraryManager, LibraryManager>();
             services.AddSingleton<ITranscoder, Transcoder>();
