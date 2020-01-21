@@ -1,8 +1,8 @@
-﻿using Kyoo.Controllers;
+﻿using System;
+using Kyoo.Controllers;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
-using Kyoo.Utility;
 
 namespace Kyoo.Models
 {
@@ -127,6 +127,14 @@ namespace Kyoo.Models
                 reader["externalIDs"] as string);
         }
 
+        public string GetID(string provider)
+        {
+            if (ExternalIDs?.Contains(provider) != true)
+                return null;
+            int startIndex = ExternalIDs.IndexOf(provider, StringComparison.Ordinal) + provider.Length + 1; //The + 1 is for the '='
+            return ExternalIDs.Substring(startIndex, ExternalIDs.IndexOf('|', startIndex) - startIndex);
+        }
+        
         public Show Set(string slug, string path)
         {
             Slug = slug;

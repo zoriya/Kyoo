@@ -2,7 +2,6 @@
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
-using Kyoo.Utility;
 
 namespace Kyoo.Models
 {

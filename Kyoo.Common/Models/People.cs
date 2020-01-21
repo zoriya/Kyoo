@@ -1,5 +1,4 @@
-﻿using Kyoo.Utility;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
 namespace Kyoo.Models
 {

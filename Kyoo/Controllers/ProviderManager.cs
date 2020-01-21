@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Controllers.ThumbnailsManager;
-using Kyoo.Utility;
 
 namespace Kyoo.Controllers
 {

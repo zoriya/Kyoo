@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using System;
-using Kyoo.Utility;
 
 namespace Kyoo.Models
 {

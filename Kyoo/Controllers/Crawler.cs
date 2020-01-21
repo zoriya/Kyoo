@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Kyoo.Controllers.Utility;
 using Kyoo.Models.Watch;
 
 namespace Kyoo.Controllers
@@ -141,7 +140,7 @@ namespace Kyoo.Controllers
                 libraryManager.RegisterInLibrary(showID, library);
                 if (!string.IsNullOrEmpty(collectionName))
                 {
-                    if (!libraryManager.IsCollectionRegistered(Slugifier.ToSlug(collectionName), out long collectionID))
+                    if (!libraryManager.IsCollectionRegistered(Utility.ToSlug(collectionName), out long collectionID))
                     {
                         Collection collection = await metadataProvider.GetCollectionFromName(collectionName, library);
                         collectionID = libraryManager.RegisterCollection(collection);
