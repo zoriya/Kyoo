@@ -19,7 +19,6 @@ namespace Kyoo.Controllers
 		{
 			this.provider = provider;
 			this.config = config;
-			ReloadPlugins();
 		}
 
 		public T GetPlugin<T>(string name)

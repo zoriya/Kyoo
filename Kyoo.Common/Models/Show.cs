@@ -132,9 +132,11 @@ namespace Kyoo.Models
             if (ExternalIDs?.Contains(provider) != true)
                 return null;
             int startIndex = ExternalIDs.IndexOf(provider, StringComparison.Ordinal) + provider.Length + 1; //The + 1 is for the '='
+            if (ExternalIDs.IndexOf('|', startIndex) == -1)
+                return ExternalIDs.Substring(startIndex);
             return ExternalIDs.Substring(startIndex, ExternalIDs.IndexOf('|', startIndex) - startIndex);
         }
-        
+
         public Show Set(string slug, string path)
         {
             Slug = slug;
