@@ -148,7 +148,7 @@ namespace Kyoo.Controllers
                     libraryManager.AddShowToCollection(showID, collectionID);
                 }
 
-                IEnumerable<People> actors = await metadataProvider.GetPeople(show.ExternalIDs, library);
+                IEnumerable<People> actors = await metadataProvider.GetPeople(show, library);
                 libraryManager.RegisterShowPeople(showID, actors);
             }
             else
@@ -170,7 +170,7 @@ namespace Kyoo.Controllers
                 }
             }
 
-            Episode episode = await metadataProvider.GetEpisode(show.ExternalIDs, seasonNumber, episodeNumber, absoluteNumber, library);
+            Episode episode = await metadataProvider.GetEpisode(show, seasonNumber, episodeNumber, absoluteNumber, library);
             episode.ShowID = show.id;
             episode.Path = episodePath;
 
