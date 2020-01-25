@@ -47,7 +47,7 @@ transcoder: ffmpeg
 	$(ECHO) "$(COL)Transcoder built$(NOCOL)"
 
 
-install: all
+install_kyoo: all
 	$(ECHO) "$(COL)Building the app$(NOCOL)"
 	@if ! [[ $$(mkdir --parent /opt/kyoo) -eq 0 && -w /opt/kyoo ]]; then echo -e "$(RED)You don't have permissions to install Kyoo. Try to re run with sudo privileges.$(NOCOL)"; exit 1; fi
 	dotnet publish -c Release -o /opt/kyoo Kyoo/Kyoo.csproj
@@ -55,5 +55,8 @@ install: all
 	chown -R kyoo /opt/kyoo
 	chgrp -R kyoo /opt/kyoo
 	chmod +x /opt/kyoo/kyoo.sh
+
+install: install_kyoo
+	curl https://raw.githubusercontent.com/AnonymusRaccoon/Kyoo.TheTVDB/master/install.sh | sh
 
 .PHONY = all dependencies ffmpeg transcoder
