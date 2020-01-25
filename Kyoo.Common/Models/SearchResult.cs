@@ -4,11 +4,11 @@ namespace Kyoo.Models
 {
     public class SearchResult
     {
-        public string query;
-        public IEnumerable<Show> shows;
-        public IEnumerable<Episode> episodes;
-        public IEnumerable<People> people;
-        public IEnumerable<Genre> genres;
-        public IEnumerable<Studio> studios;
+        public string Query;
+        public IEnumerable<Show> Shows;
+        public IEnumerable<Episode> Episodes;
+        public IEnumerable<People> People;
+        public IEnumerable<Genre> Genres;
+        public IEnumerable<Studio> Studios;
     }
 }

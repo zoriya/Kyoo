@@ -7,33 +7,33 @@ namespace Kyoo.Models
 {
     public class WatchItem
     {
-        [JsonIgnore] public readonly long episodeID;
+        [JsonIgnore] public readonly long EpisodeID = -1;
 
         public string ShowTitle;
         public string ShowSlug;
-        public long seasonNumber;
-        public long episodeNumber;
+        public long SeasonNumber;
+        public long EpisodeNumber;
         public string Title;
         public string Link;
         public DateTime? ReleaseDate;
         [JsonIgnore] public string Path;
-        public string previousEpisode;
-        public Episode nextEpisode;
+        public string PreviousEpisode;
+        public Episode NextEpisode;
 
-        public string container;
-        public Track video;
-        public IEnumerable<Track> audios;
-        public IEnumerable<Track> subtitles;
+        public string Container;
+        public Track Video;
+        public IEnumerable<Track> Audios;
+        public IEnumerable<Track> Subtitles;
 
         public WatchItem() { }
 
         public WatchItem(long episodeID, string showTitle, string showSlug, long seasonNumber, long episodeNumber, string title, DateTime? releaseDate, string path)
         {
-            this.episodeID = episodeID;
+            EpisodeID = episodeID;
             ShowTitle = showTitle;
             ShowSlug = showSlug;
-            this.seasonNumber = seasonNumber;
-            this.episodeNumber = episodeNumber;
+            SeasonNumber = seasonNumber;
+            EpisodeNumber = episodeNumber;
             Title = title;
             ReleaseDate = releaseDate;
             Path = path;
@@ -43,8 +43,8 @@ namespace Kyoo.Models
 
         public WatchItem(long episodeID, string showTitle, string showSlug, long seasonNumber, long episodeNumber, string title, DateTime? releaseDate, string path, Track[] audios, Track[] subtitles) : this(episodeID, showTitle, showSlug, seasonNumber, episodeNumber, title, releaseDate, path)
         {
-            this.audios = audios;
-            this.subtitles = subtitles;
+            Audios = audios;
+            Subtitles = subtitles;
         }
 
         public static WatchItem FromReader(System.Data.SQLite.SQLiteDataReader reader)
@@ -61,35 +61,35 @@ namespace Kyoo.Models
 
         public WatchItem SetStreams(ILibraryManager libraryManager)
         {
-            (Track video, IEnumerable<Track> audios, IEnumerable<Track> subtitles) streams = libraryManager.GetStreams(episodeID, Link);
+            (Track video, IEnumerable<Track> audios, IEnumerable<Track> subtitles) streams = libraryManager.GetStreams(EpisodeID, Link);
 
-            container = Path.Substring(Path.LastIndexOf('.') + 1);
-            video = streams.video;
-            audios = streams.audios;
-            subtitles = streams.subtitles;
+            Container = Path.Substring(Path.LastIndexOf('.') + 1);
+            Video = streams.video;
+            Audios = streams.audios;
+            Subtitles = streams.subtitles;
             return this;
         }
 
         public WatchItem SetPrevious(ILibraryManager libraryManager)
         {
-            long lastEp = episodeNumber - 1;
+            long lastEp = EpisodeNumber - 1;
             if(lastEp > 0)
-                previousEpisode = ShowSlug + "-s" + seasonNumber + "e" + lastEp;
-            else if(seasonNumber > 1)
+                PreviousEpisode = ShowSlug + "-s" + SeasonNumber + "e" + lastEp;
+            else if(SeasonNumber > 1)
             {
-                int seasonCount = libraryManager.GetSeasonCount(ShowSlug, seasonNumber - 1);
-                previousEpisode = ShowSlug + "-s" + (seasonNumber - 1) + "e" + seasonCount;
+                int seasonCount = libraryManager.GetSeasonCount(ShowSlug, SeasonNumber - 1);
+                PreviousEpisode = ShowSlug + "-s" + (SeasonNumber - 1) + "e" + seasonCount;
             }
             return this;
         }
 
         public WatchItem SetNext(ILibraryManager libraryManager)
         {
-            long seasonCount = libraryManager.GetSeasonCount(ShowSlug, seasonNumber);
-            if (episodeNumber >= seasonCount)
-                nextEpisode = libraryManager.GetEpisode(ShowSlug, seasonNumber + 1, 1);
+            long seasonCount = libraryManager.GetSeasonCount(ShowSlug, SeasonNumber);
+            if (EpisodeNumber >= seasonCount)
+                NextEpisode = libraryManager.GetEpisode(ShowSlug, SeasonNumber + 1, 1);
             else
-                nextEpisode = libraryManager.GetEpisode(ShowSlug, seasonNumber, episodeNumber + 1);
+                NextEpisode = libraryManager.GetEpisode(ShowSlug, SeasonNumber, EpisodeNumber + 1);
 
             return this;
         }

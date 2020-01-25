@@ -4,7 +4,7 @@ namespace Kyoo.Models
 {
     public class Library
     {
-        [JsonIgnore] public readonly long id;
+        [JsonIgnore] public readonly long ID;
         public string Slug;
         public string Name;
         public string[] Paths;
@@ -12,7 +12,7 @@ namespace Kyoo.Models
 
         public Library(long id, string slug, string name, string[] paths, string[] providers)
         {
-            this.id = id;
+            ID = id;
             Slug = slug;
             Name = name;
             Paths = paths;

@@ -8,7 +8,7 @@ namespace Kyoo.Models
     public class Collection : IMergable<Collection>
 
     {
-    [JsonIgnore] public long id = -1;
+    [JsonIgnore] public long ID = -1;
     public string Slug;
     public string Name;
     public string Poster;
@@ -16,13 +16,11 @@ namespace Kyoo.Models
     [JsonIgnore] public string ImgPrimary;
     public IEnumerable<Show> Shows;
 
-    public Collection()
-    {
-    }
+    public Collection() { }
 
     public Collection(long id, string slug, string name, string overview, string imgPrimary)
     {
-        this.id = id;
+        ID = id;
         Slug = slug;
         Name = name;
         Overview = overview;
@@ -47,14 +45,14 @@ namespace Kyoo.Models
 
     public Collection SetShows(ILibraryManager libraryManager)
     {
-        Shows = libraryManager.GetShowsInCollection(id);
+        Shows = libraryManager.GetShowsInCollection(ID);
         return this;
     }
 
     public Collection Merge(Collection collection)
     {
-        if (id == -1)
-            id = collection.id;
+        if (ID == -1)
+            ID = collection.ID;
         if (Slug == null)
             Slug = collection.Slug;
         if (Name == null)

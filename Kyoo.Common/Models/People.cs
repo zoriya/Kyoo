@@ -4,33 +4,35 @@ namespace Kyoo.Models
 {
     public class People : IMergable<People>
     {
-        [JsonIgnore] public long id;
-        public string slug;
+        [JsonIgnore] public long ID = -1;
+        public string Slug;
         public string Name;
         public string Role; //Dynamic data not stored as it in the database
         public string Type; //Dynamic data not stored as it in the database ---- Null for now
-        [JsonIgnore] public string imgPrimary;
+        [JsonIgnore] public string ImgPrimary;
 
-        public string externalIDs;
+        public string ExternalIDs;
+        
+        public People() {}
 
         public People(long id, string slug, string name, string imgPrimary, string externalIDs)
         {
-            this.id = id;
-            this.slug = slug;
+            ID = id;
+            Slug = slug;
             Name = name;
-            this.imgPrimary = imgPrimary;
-            this.externalIDs = externalIDs;
+            ImgPrimary = imgPrimary;
+            ExternalIDs = externalIDs;
         }
 
         public People(long id, string slug, string name, string role, string type, string imgPrimary, string externalIDs)
         {
-            this.id = id;
-            this.slug = slug;
+            ID = id;
+            Slug = slug;
             Name = name;
             Role = role;
             Type = type;
-            this.imgPrimary = imgPrimary;
-            this.externalIDs = externalIDs;
+            ImgPrimary = imgPrimary;
+            ExternalIDs = externalIDs;
         }
 
         public static People FromReader(System.Data.SQLite.SQLiteDataReader reader)
@@ -55,19 +57,19 @@ namespace Kyoo.Models
 
         public People Merge(People other)
         {
-            if (id == -1)
-                id = other.id;
-            if (slug == null)
-                slug = other.slug;
+            if (ID == -1)
+                ID = other.ID;
+            if (Slug == null)
+                Slug = other.Slug;
             if (Name == null)
                 Name = other.Name;
             if (Role == null)
                 Role = other.Role;
             if (Type == null)
                 Type = other.Type;
-            if (imgPrimary == null)
-                imgPrimary = other.imgPrimary;
-            externalIDs += '|' + other.externalIDs;
+            if (ImgPrimary == null)
+                ImgPrimary = other.ImgPrimary;
+            ExternalIDs += '|' + other.ExternalIDs;
             return this;
         }
     }

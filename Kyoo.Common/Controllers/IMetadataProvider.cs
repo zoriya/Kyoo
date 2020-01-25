@@ -17,7 +17,7 @@ namespace Kyoo.Controllers
         Task<IEnumerable<People>> GetPeople(Show show);
 
         //For the seasons
-        Task<Season> GetSeason(string showName, long seasonNumber);
+        Task<Season> GetSeason(Show show, long seasonNumber);
 
         //For the episodes
         Task<Episode> GetEpisode(Show show, long seasonNumber, long episodeNumber, long absoluteNumber);

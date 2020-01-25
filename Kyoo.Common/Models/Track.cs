@@ -58,7 +58,7 @@ namespace Kyoo.Models
         public string DisplayName;
         public string Link;
 
-        [JsonIgnore] public long episodeID;
+        [JsonIgnore] public long EpisodeID;
         [JsonIgnore] public bool IsExternal;
 
         public Track(StreamType type, string title, string language, bool isDefault, bool isForced, string codec, bool isExternal, string path)

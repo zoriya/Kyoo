@@ -32,12 +32,12 @@ namespace Kyoo
             services.AddControllers().AddNewtonsoftJson();
             services.AddHttpClient();
             
-            services.AddSingleton<IPluginManager, PluginManager>();
             services.AddSingleton<ILibraryManager, LibraryManager>();
             services.AddSingleton<ITranscoder, Transcoder>();
             services.AddSingleton<IThumbnailsManager, ThumbnailsManager>();
             services.AddSingleton<IProviderManager, ProviderManager>();
             services.AddSingleton<ICrawler, Crawler>();
+            services.AddSingleton<IPluginManager, PluginManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

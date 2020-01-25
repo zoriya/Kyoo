@@ -23,10 +23,10 @@ namespace Kyoo.Controllers
 
             if (people == null)
                 return NotFound();
-            Collection collection = new Collection(0, people.slug, people.Name, null, null)
+            Collection collection = new Collection(0, people.Slug, people.Name, null, null)
             {
-                Shows = libraryManager.GetShowsByPeople(people.id),
-                Poster = "peopleimg/" + people.slug
+                Shows = libraryManager.GetShowsByPeople(people.ID),
+                Poster = "peopleimg/" + people.Slug
             };
             return collection;
         }

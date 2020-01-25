@@ -4,13 +4,13 @@ namespace Kyoo.Models
 {
     public class Season : IMergable<Season>
     {
-        [JsonIgnore] public readonly long id;
-        [JsonIgnore] public long ShowID;
+        [JsonIgnore] public readonly long ID = -1;
+        [JsonIgnore] public long ShowID = -1;
 
-        public long seasonNumber;
+        public long SeasonNumber = -1;
         public string Title;
         public string Overview;
-        public long? year;
+        public long? Year;
 
         [JsonIgnore] public string ImgPrimary;
         public string ExternalIDs;
@@ -19,12 +19,12 @@ namespace Kyoo.Models
 
         public Season(long id, long showID, long seasonNumber, string title, string overview, long? year, string imgPrimary, string externalIDs)
         {
-            this.id = id;
+            ID = id;
             ShowID = showID;
-            this.seasonNumber = seasonNumber;
+            SeasonNumber = seasonNumber;
             Title = title;
             Overview = overview;
-            this.year = year;
+            Year = year;
             ImgPrimary = imgPrimary;
             ExternalIDs = externalIDs;
         }
@@ -45,14 +45,14 @@ namespace Kyoo.Models
         {
 	        if (ShowID == -1)
 		        ShowID = other.ShowID;
-	        if (seasonNumber == -1)
-		        seasonNumber = other.seasonNumber;
+	        if (SeasonNumber == -1)
+		        SeasonNumber = other.SeasonNumber;
 	        if (Title == null)
 		        Title = other.Title;
 	        if (Overview == null)
 		        Overview = other.Overview;
-	        if (year == null)
-		        year = other.year;
+	        if (Year == null)
+		        Year = other.Year;
 	        if (ImgPrimary == null)
 		        ImgPrimary = other.ImgPrimary;
 		    ExternalIDs += '|' + other.ExternalIDs;

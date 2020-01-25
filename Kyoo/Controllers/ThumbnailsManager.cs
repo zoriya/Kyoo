@@ -20,6 +20,8 @@ namespace Kyoo.Controllers.ThumbnailsManager
 
         public async Task<Show> Validate(Show show)
         {
+            if (show == null || show.Path == null)
+                return null;
             string localThumb = Path.Combine(show.Path, "poster.jpg");
             string localLogo = Path.Combine(show.Path, "logo.png");
             string localBackdrop = Path.Combine(show.Path, "backdrop.jpg");
@@ -69,23 +71,24 @@ namespace Kyoo.Controllers.ThumbnailsManager
 
         public async Task<IEnumerable<People>> Validate(IEnumerable<People> people)
         {
+            if (people == null)
+                return null;
             foreach (People peop in people)
             {
                 string root = config.GetValue<string>("peoplePath");
                 Directory.CreateDirectory(root);
 
-                string localThumb = root + "/" + peop.slug + ".jpg";
-                if (peop.imgPrimary != null && !File.Exists(localThumb))
+                string localThumb = root + "/" + peop.Slug + ".jpg";
+                if (peop.ImgPrimary == null || File.Exists(localThumb))
+                    continue;
+                try
                 {
-                    try
-                    {
-                        using WebClient client = new WebClient();
-                        await client.DownloadFileTaskAsync(new Uri(peop.imgPrimary), localThumb);
-                    }
-                    catch (WebException)
-                    {
-                        Console.Error.WriteLine("Couldn't download an image.");
-                    }
+                    using WebClient client = new WebClient();
+                    await client.DownloadFileTaskAsync(new Uri(peop.ImgPrimary), localThumb);
+                }
+                catch (WebException)
+                {
+                    Console.Error.WriteLine("Couldn't download an image.");
                 }
             }
 
@@ -94,18 +97,19 @@ namespace Kyoo.Controllers.ThumbnailsManager
 
         public async Task<Episode> Validate(Episode episode)
         {
-            string localThumb = Path.ChangeExtension(episode.Path, "jpg");            
-            if (episode.ImgPrimary != null && !File.Exists(localThumb))
+            if (episode == null || episode.Path == null)
+                return null;
+            string localThumb = Path.ChangeExtension(episode.Path, "jpg");
+            if (episode.ImgPrimary == null || File.Exists(localThumb))
+                return episode;
+            try
             {
-                try
-                {
-                    using WebClient client = new WebClient();
-                    await client.DownloadFileTaskAsync(new Uri(episode.ImgPrimary), localThumb);
-                }
-                catch (WebException)
-                {
-                    Console.Error.WriteLine("Couldn't download an image.");
-                }
+                using WebClient client = new WebClient();
+                await client.DownloadFileTaskAsync(new Uri(episode.ImgPrimary), localThumb);
+            }
+            catch (WebException)
+            {
+                Console.Error.WriteLine("Couldn't download an image.");
             }
 
             return episode;
