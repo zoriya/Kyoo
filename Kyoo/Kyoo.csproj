@@ -17,6 +17,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="3.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.0.0" />
@@ -29,6 +30,8 @@
 		<Content Remove="$(SpaRoot)**" />
 		<None Remove="$(SpaRoot)**" />
 		<None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
+		<None Remove="Controllers\MetadataProvider\**" />
+		<Content Remove="Controllers\MetadataProvider\**" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -44,6 +47,15 @@
 	  <EmbeddedResource Include="kyoo.sh">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </EmbeddedResource>
+	  <EmbeddedResource Remove="Controllers\MetadataProvider\**" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Kyoo.Common\Kyoo.Common.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Remove="Controllers\MetadataProvider\**" />
 	</ItemGroup>
 	
 	<Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
