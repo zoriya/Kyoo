@@ -57,6 +57,8 @@ namespace Kyoo.Models
 
         public People Merge(People other)
         {
+            if (other == null)
+                return this;
             if (ID == -1)
                 ID = other.ID;
             if (Slug == null)

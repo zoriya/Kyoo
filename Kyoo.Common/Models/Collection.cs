@@ -51,6 +51,8 @@ namespace Kyoo.Models
 
     public Collection Merge(Collection collection)
     {
+        if (collection == null)
+            return this;
         if (ID == -1)
             ID = collection.ID;
         if (Slug == null)

@@ -94,7 +94,7 @@ namespace Kyoo.Models
                 if (language == "fre")
                     language = "fra";
 
-                DisplayName = CultureInfo.GetCultures(CultureTypes.NeutralCultures).FirstOrDefault(x => x.ThreeLetterISOLanguageName == language)?.DisplayName ?? language;
+                DisplayName = CultureInfo.GetCultures(CultureTypes.NeutralCultures).FirstOrDefault(x => x.ThreeLetterISOLanguageName == language)?.EnglishName ?? language;
                 Link = "/subtitle/" + episodeSlug + "." + Language;
 
                 if (IsForced)
