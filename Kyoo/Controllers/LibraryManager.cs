@@ -837,7 +837,7 @@ namespace Kyoo.Controllers
             Genre existingGenre = GetGenreBySlug(genre.Slug);
 
             if (existingGenre != null)
-                return existingGenre.id;
+                return existingGenre.ID;
 
             string query = "INSERT INTO genres (slug, name) VALUES($slug, $name);";
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
@@ -866,7 +866,7 @@ namespace Kyoo.Controllers
             Studio existingStudio = GetStudioBySlug(studio.Slug);
 
             if (existingStudio != null)
-                return existingStudio.id;
+                return existingStudio.ID;
 
             string query = "INSERT INTO studios (slug, name) VALUES($slug, $name);";
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
@@ -892,20 +892,20 @@ namespace Kyoo.Controllers
 
         public long GetOrCreatePeople(People people)
         {
-            People existingPeople = GetPeopleBySlug(people.slug);
+            People existingPeople = GetPeopleBySlug(people.Slug);
 
             if (existingPeople != null)
-                return existingPeople.id;
+                return existingPeople.ID;
 
             string query = "INSERT INTO people (slug, name, imgPrimary, externalIDs) VALUES($slug, $name, $imgPrimary, $externalIDs);";
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
                 try
                 {
-                    cmd.Parameters.AddWithValue("$slug", people.slug);
+                    cmd.Parameters.AddWithValue("$slug", people.Slug);
                     cmd.Parameters.AddWithValue("$name", people.Name);
-                    cmd.Parameters.AddWithValue("$imgPrimary", people.imgPrimary);
-                    cmd.Parameters.AddWithValue("$externalIDs", people.externalIDs);
+                    cmd.Parameters.AddWithValue("$imgPrimary", people.ImgPrimary);
+                    cmd.Parameters.AddWithValue("$externalIDs", people.ExternalIDs);
                     cmd.ExecuteNonQuery();
 
                     cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
@@ -915,7 +915,7 @@ namespace Kyoo.Controllers
                 {
                     Console.Error.WriteLine("SQL error while trying to insert a people ({0}).", people.Name);
                     cmd.CommandText = "SELECT * FROM people WHERE slug = $slug";
-                    cmd.Parameters.AddWithValue("$slug", people.slug);
+                    cmd.Parameters.AddWithValue("$slug", people.Slug);
                     return (long)cmd.ExecuteScalar();
                 }
 
@@ -958,7 +958,7 @@ namespace Kyoo.Controllers
 
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
-                cmd.Parameters.AddWithValue("$libraryID", library.id);
+                cmd.Parameters.AddWithValue("$libraryID", library.ID);
                 cmd.Parameters.AddWithValue("$showID", showID);
                 cmd.ExecuteNonQuery();
             }
@@ -1002,10 +1002,10 @@ namespace Kyoo.Controllers
                         }
                     }
 
-                    if (show.studio != null)
+                    if (show.Studio != null)
                     {
                         cmd.CommandText = "INSERT INTO studiosLinks (studioID, showID) VALUES($studioID, $showID);";
-                        long studioID = GetOrCreateStudio(show.studio);
+                        long studioID = GetOrCreateStudio(show.Studio);
                         cmd.Parameters.AddWithValue("$studioID", studioID);
                         cmd.Parameters.AddWithValue("$showID", showID);
                         cmd.ExecuteNonQuery();
@@ -1029,10 +1029,10 @@ namespace Kyoo.Controllers
                 try
                 {
                     cmd.Parameters.AddWithValue("$showID", season.ShowID);
-                    cmd.Parameters.AddWithValue("$seasonNumber", season.seasonNumber);
+                    cmd.Parameters.AddWithValue("$seasonNumber", season.SeasonNumber);
                     cmd.Parameters.AddWithValue("$title", season.Title);
                     cmd.Parameters.AddWithValue("$overview", season.Overview);
-                    cmd.Parameters.AddWithValue("$year", season.year);
+                    cmd.Parameters.AddWithValue("$year", season.Year);
                     cmd.Parameters.AddWithValue("$imgPrimary", season.ImgPrimary);
                     cmd.Parameters.AddWithValue("$externalIDs", season.ExternalIDs);
                     cmd.ExecuteNonQuery();
@@ -1045,7 +1045,7 @@ namespace Kyoo.Controllers
                     Console.Error.WriteLine("SQL error while trying to insert a season ({0}), season probably already registered.", season.Title);
                     cmd.CommandText = "SELECT * FROM seasons WHERE showID = $showID AND seasonNumber = $seasonNumber";
                     cmd.Parameters.AddWithValue("$showID", season.ShowID);
-                    cmd.Parameters.AddWithValue("$seasonNumber", season.seasonNumber);
+                    cmd.Parameters.AddWithValue("$seasonNumber", season.SeasonNumber);
                     return (long)cmd.ExecuteScalar();
                 }
             }
@@ -1060,9 +1060,9 @@ namespace Kyoo.Controllers
                 {
                     cmd.Parameters.AddWithValue("$showID", episode.ShowID);
                     cmd.Parameters.AddWithValue("$seasonID", episode.SeasonID);
-                    cmd.Parameters.AddWithValue("$seasonNUmber", episode.seasonNumber);
-                    cmd.Parameters.AddWithValue("$episodeNumber", episode.episodeNumber);
-                    cmd.Parameters.AddWithValue("$absoluteNumber", episode.absoluteNumber);
+                    cmd.Parameters.AddWithValue("$seasonNUmber", episode.SeasonNumber);
+                    cmd.Parameters.AddWithValue("$episodeNumber", episode.EpisodeNumber);
+                    cmd.Parameters.AddWithValue("$absoluteNumber", episode.AbsoluteNumber);
                     cmd.Parameters.AddWithValue("$path", episode.Path);
                     cmd.Parameters.AddWithValue("$title", episode.Title);
                     cmd.Parameters.AddWithValue("$overview", episode.Overview);
@@ -1080,8 +1080,8 @@ namespace Kyoo.Controllers
                     Console.Error.WriteLine("SQL error while trying to insert an episode ({0}), episode probably already registered.", episode.Link);
                     cmd.CommandText = "SELECT * FROM episodes WHERE showID = $showID AND seasonNumber = $seasonNumber AND episodeNumber = $episodeNumber";
                     cmd.Parameters.AddWithValue("$showID", episode.ShowID);
-                    cmd.Parameters.AddWithValue("$seasonNumber", episode.seasonNumber);
-                    cmd.Parameters.AddWithValue("$episodeNumber", episode.episodeNumber);
+                    cmd.Parameters.AddWithValue("$seasonNumber", episode.SeasonNumber);
+                    cmd.Parameters.AddWithValue("$episodeNumber", episode.EpisodeNumber);
                     return (long)cmd.ExecuteScalar();
                 }
             }
@@ -1092,7 +1092,7 @@ namespace Kyoo.Controllers
             string query = "INSERT INTO tracks (episodeID, streamType, title, language, codec, isDefault, isForced, isExternal, path) VALUES($episodeID, $streamType, $title, $language, $codec, $isDefault, $isForced, $isExternal, $path);";
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
-                cmd.Parameters.AddWithValue("$episodeID", track.episodeID);
+                cmd.Parameters.AddWithValue("$episodeID", track.EpisodeID);
                 cmd.Parameters.AddWithValue("$streamType", track.Type);
                 cmd.Parameters.AddWithValue("$title", track.Title);
                 cmd.Parameters.AddWithValue("$language", track.Language);
@@ -1167,11 +1167,11 @@ namespace Kyoo.Controllers
 
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
-                cmd.Parameters.AddWithValue("$episodeID", episode.id);
+                cmd.Parameters.AddWithValue("$episodeID", episode.ID);
                 cmd.ExecuteNonQuery();
             }
 
-            if (GetEpisodes(episode.ShowID, episode.seasonNumber).Count == 0)
+            if (GetEpisodes(episode.ShowID, episode.SeasonNumber).Count == 0)
                 RemoveSeason(episode.ShowID, episode.SeasonID);
         }
 

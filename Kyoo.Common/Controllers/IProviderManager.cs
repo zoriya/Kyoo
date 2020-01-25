@@ -8,7 +8,7 @@ namespace Kyoo.Controllers
 	{
 		Task<Collection> GetCollectionFromName(string name, Library library);
 		Task<Show> GetShowFromName(string showName, Library library);
-		Task<Season> GetSeason(string showName, long seasonNumber, Library library);
+		Task<Season> GetSeason(Show show, long seasonNumber, Library library);
 		Task<Episode> GetEpisode(Show show, long seasonNumber, long episodeNumber, long absoluteNumber, Library library);
 		Task<IEnumerable<People>> GetPeople(Show show, Library library);
 	}

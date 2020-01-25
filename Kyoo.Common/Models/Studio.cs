@@ -4,7 +4,7 @@ namespace Kyoo.Models
 {
     public class Studio
     {
-        [JsonIgnore] public readonly long id;
+        [JsonIgnore] public readonly long ID = -1;
         public string Slug;
         public string Name;
 
@@ -16,7 +16,7 @@ namespace Kyoo.Models
 
         public Studio(long id, string slug, string name)
         {
-            this.id = id;
+            this.ID = id;
             Slug = slug;
             Name = name;
         }

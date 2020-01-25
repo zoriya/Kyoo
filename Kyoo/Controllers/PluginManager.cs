@@ -43,11 +43,19 @@ namespace Kyoo.Controllers
 
 			plugins = pluginsPaths.Select(path =>
 			{
-				Assembly ass = Assembly.LoadFile(path);
-				return (from type in ass.GetTypes() 
-					where typeof(IPlugin).IsAssignableFrom(type) 
-					select (IPlugin)ActivatorUtilities.CreateInstance(provider, type, null)).FirstOrDefault();
-			}).Where(x => x != null).ToList();
+                try
+                {
+                    Assembly ass = Assembly.LoadFile(Path.GetFullPath(path));
+                    return (from type in ass.GetTypes()
+                        where typeof(IPlugin).IsAssignableFrom(type)
+                        select (IPlugin) ActivatorUtilities.CreateInstance(provider, type)).FirstOrDefault();
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"Error loading the plugin at ${path}.\nException: {ex.Message}");
+                    return null;
+                }
+            }).Where(x => x != null).ToList();
 		}
 	}
 }

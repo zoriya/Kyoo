@@ -8,7 +8,7 @@ namespace Kyoo.Models
 {
     public class Show : IMergable<Show>
     {
-        [JsonIgnore] public long id = -1;
+        [JsonIgnore] public long ID = -1;
 
         public string Slug;
         public string Title;
@@ -30,27 +30,21 @@ namespace Kyoo.Models
         public string ExternalIDs;
 
         //Used in the rest API excusively.
-        public Studio studio;
-        public IEnumerable<People> directors;
-        public IEnumerable<People> people;
-        public IEnumerable<Season> seasons;
+        public Studio Studio;
+        public IEnumerable<People> Directors;
+        public IEnumerable<People> People;
+        public IEnumerable<Season> Seasons;
         public bool IsCollection;
 
 
         public string GetAliases()
         {
-            if (Aliases == null)
-                return null;
-
-            return string.Join('|', Aliases);
+            return Aliases == null ? null : string.Join('|', Aliases);
         }
 
         public string GetGenres()
         {
-            if (Genres == null)
-                return null;
-
-            return string.Join('|', Genres);
+            return Genres == null ? null : string.Join('|', Genres);
         }
 
 
@@ -58,7 +52,7 @@ namespace Kyoo.Models
 
         public Show(long id, string slug, string title, IEnumerable<string> aliases, string path, string overview, string trailerUrl, IEnumerable<Genre> genres, Status? status, long? startYear, long? endYear, string externalIDs)
         {
-            this.id = id;
+            ID = id;
             Slug = slug;
             Title = title;
             Aliases = aliases;
@@ -75,7 +69,7 @@ namespace Kyoo.Models
 
         public Show(long id, string slug, string title, IEnumerable<string> aliases, string path, string overview, string trailerUrl, Status? status, long? startYear, long? endYear, string imgPrimary, string imgThumb, string imgLogo, string imgBackdrop, string externalIDs)
         {
-            this.id = id;
+            ID = id;
             Slug = slug;
             Title = title;
             Aliases = aliases;
@@ -146,38 +140,38 @@ namespace Kyoo.Models
 
         public Show SetGenres(ILibraryManager manager)
         {
-            Genres = manager.GetGenreForShow(id);
+            Genres = manager.GetGenreForShow(ID);
             return this;
         }
 
         public Show SetStudio(ILibraryManager manager)
         {
-            studio = manager.GetStudio(id);
+            Studio = manager.GetStudio(ID);
             return this;
         }
 
         public Show SetDirectors(ILibraryManager manager)
         {
-            directors = manager.GetDirectors(id);
+            Directors = manager.GetDirectors(ID);
             return this;
         }
 
         public Show SetPeople(ILibraryManager manager)
         {
-            people = manager.GetPeople(id);
+            People = manager.GetPeople(ID);
             return this;
         }
 
         public Show SetSeasons(ILibraryManager manager)
         {
-            seasons = manager.GetSeasons(id);
+            Seasons = manager.GetSeasons(ID);
             return this;
         }
 
         public Show Merge(Show other)
         {
-            if (id == -1)
-                id = other.id;
+            if (ID == -1)
+                ID = other.ID;
             if (Slug == null)
                 Slug = other.Slug;
             if (Title == null)

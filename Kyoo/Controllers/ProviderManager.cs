@@ -64,9 +64,9 @@ namespace Kyoo.Controllers
             return show;
         }
 
-        public async Task<Season> GetSeason(string showName, long seasonNumber, Library library)
+        public async Task<Season> GetSeason(Show show, long seasonNumber, Library library)
         {
-            return await GetMetadata(provider => provider.GetSeason(showName, seasonNumber), library, $"the season ${seasonNumber} of {showName}");
+            return await GetMetadata(provider => provider.GetSeason(show, seasonNumber), library, $"the season ${seasonNumber} of {show.Title}");
         }
 
         public async Task<Episode> GetEpisode(Show show, long seasonNumber, long episodeNumber, long absoluteNumber,  Library library)

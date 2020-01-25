@@ -5,13 +5,13 @@ namespace Kyoo.Models
 {
     public class Episode : IMergable<Episode>
     {
-        [JsonIgnore] public long id;
+        [JsonIgnore] public long ID;
         [JsonIgnore] public long ShowID;
         [JsonIgnore] public long SeasonID;
 
-        public long seasonNumber;
-        public long episodeNumber;
-        public long absoluteNumber;
+        public long SeasonNumber;
+        public long EpisodeNumber;
+        public long AbsoluteNumber;
         [JsonIgnore] public string Path;
         public string Title;
         public string Overview;
@@ -27,16 +27,24 @@ namespace Kyoo.Models
         public string Thumb; //Used in the API response only
 
 
-        public Episode() { }
+        public Episode()
+        {
+            ID = -1;
+            ShowID = -1;
+            SeasonID = -1;
+            SeasonNumber = -1;
+            EpisodeNumber = -1;
+            AbsoluteNumber = -1;
+        }
 
         public Episode(long seasonNumber, long episodeNumber, long absoluteNumber, string title, string overview, DateTime? releaseDate, long runtime, string imgPrimary, string externalIDs)
         {
-            id = -1;
+            ID = -1;
             ShowID = -1;
             SeasonID = -1;
-            this.seasonNumber = seasonNumber;
-            this.episodeNumber = episodeNumber;
-            this.absoluteNumber = absoluteNumber;
+            SeasonNumber = seasonNumber;
+            EpisodeNumber = episodeNumber;
+            AbsoluteNumber = absoluteNumber;
             Title = title;
             Overview = overview;
             ReleaseDate = releaseDate;
@@ -47,12 +55,12 @@ namespace Kyoo.Models
 
         public Episode(long id, long showID, long seasonID, long seasonNumber, long episodeNumber, long absoluteNumber, string path, string title, string overview, DateTime? releaseDate, long runtime, string imgPrimary, string externalIDs)
         {
-            this.id = id;
+            ID = id;
             ShowID = showID;
             SeasonID = seasonID;
-            this.seasonNumber = seasonNumber;
-            this.episodeNumber = episodeNumber;
-            this.absoluteNumber = absoluteNumber;
+            SeasonNumber = seasonNumber;
+            EpisodeNumber = episodeNumber;
+            AbsoluteNumber = absoluteNumber;
             Path = path;
             Title = title;
             Overview = overview;
@@ -82,7 +90,7 @@ namespace Kyoo.Models
 
         public Episode SetThumb(string showSlug)
         {
-            Link = GetSlug(showSlug, seasonNumber, episodeNumber);
+            Link = GetSlug(showSlug, SeasonNumber, EpisodeNumber);
             Thumb = "thumb/" + Link;
             return this;
         }
@@ -100,18 +108,18 @@ namespace Kyoo.Models
 
         public Episode Merge(Episode other)
         {
-            if (id == -1)
-                id = other.id;
+            if (ID == -1)
+                ID = other.ID;
             if (ShowID == -1)
                 ShowID = other.ShowID;
             if (SeasonID == -1)
                 SeasonID = other.SeasonID;
-            if (seasonNumber == -1)
-                seasonNumber = other.seasonNumber;
-            if (episodeNumber == -1)
-                episodeNumber = other.episodeNumber;
-            if (absoluteNumber == -1)
-                absoluteNumber = other.absoluteNumber;
+            if (SeasonNumber == -1)
+                SeasonNumber = other.SeasonNumber;
+            if (EpisodeNumber == -1)
+                EpisodeNumber = other.EpisodeNumber;
+            if (AbsoluteNumber == -1)
+                AbsoluteNumber = other.AbsoluteNumber;
             if (Path == null)
                 Path = other.Path;
             if (Title == null)
