@@ -16,7 +16,7 @@ namespace Kyoo.Models
 
         public Genre(long id, string slug, string name)
         {
-            this.ID = id;
+            ID = id;
             Slug = slug;
             Name = name;
         }

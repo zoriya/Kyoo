@@ -18,10 +18,9 @@ namespace Kyoo.Controllers
         {
             string databasePath = configuration.GetValue<string>("databasePath");
 
-            Debug.WriteLine("&Library Manager init, databasePath: " + databasePath);
             if (!File.Exists(databasePath))
             {
-                Debug.WriteLine("&Database doesn't exist, creating one.");
+                Console.WriteLine($"Creating the database at {databasePath}.");
 
                 if (!Directory.Exists(Path.GetDirectoryName(databasePath)))
                     Directory.CreateDirectory(databasePath);

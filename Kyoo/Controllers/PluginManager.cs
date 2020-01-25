@@ -22,13 +22,17 @@ namespace Kyoo.Controllers
 		}
 
 		public T GetPlugin<T>(string name)
-		{
+        {
+            if (plugins == null)
+                return default;
 			return (T)(from plugin in plugins where plugin.Name == name && plugin is T
 				select plugin).FirstOrDefault();
 		}
 
 		public IEnumerable<T> GetPlugins<T>()
-		{
+        {
+            if (plugins == null)
+                return null;
 			return from plugin in plugins where plugin is T
 				select (T)plugin;
 		}
@@ -52,7 +56,7 @@ namespace Kyoo.Controllers
                 }
                 catch (Exception ex)
                 {
-                    Console.Error.WriteLine($"Error loading the plugin at ${path}.\nException: {ex.Message}");
+                    Console.Error.WriteLine($"Error loading the plugin at {path}.\nException: {ex.Message}");
                     return null;
                 }
             }).Where(x => x != null).ToList();

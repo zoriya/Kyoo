@@ -17,6 +17,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="3.0.0" />
 		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.0.0" />

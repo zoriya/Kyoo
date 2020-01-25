@@ -43,6 +43,8 @@ namespace Kyoo.Models
 
         public Season Merge(Season other)
         {
+            if (other == null)
+                return this;
 	        if (ShowID == -1)
 		        ShowID = other.ShowID;
 	        if (SeasonNumber == -1)

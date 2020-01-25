@@ -29,7 +29,7 @@ namespace Kyoo.Controllers
                     if (library.Providers.Contains(provider.Name))
                         ret = ret.Merge(await providerCall(provider));
                 } catch (Exception ex) {
-                    Console.Error.WriteLine($"The provider {provider.Name} coudln't work for {what}. (Excepetion: {ex.Message}");
+                    Console.Error.WriteLine($"The provider {provider.Name} coudln't work for {what}. (Exception: {ex.Message}");
                 }
             }
             return ret;
@@ -66,19 +66,19 @@ namespace Kyoo.Controllers
 
         public async Task<Season> GetSeason(Show show, long seasonNumber, Library library)
         {
-            return await GetMetadata(provider => provider.GetSeason(show, seasonNumber), library, $"the season ${seasonNumber} of {show.Title}");
+            return await GetMetadata(provider => provider.GetSeason(show, seasonNumber), library, $"the season {seasonNumber} of {show.Title}");
         }
 
         public async Task<Episode> GetEpisode(Show show, long seasonNumber, long episodeNumber, long absoluteNumber,  Library library)
         {
-            Episode episode = await GetMetadata(provider => provider.GetEpisode(show, seasonNumber, episodeNumber, absoluteNumber), library, $"an episode");
+            Episode episode = await GetMetadata(provider => provider.GetEpisode(show, seasonNumber, episodeNumber, absoluteNumber), library, "an episode");
             await thumbnailsManager.Validate(episode);
             return episode;
         }
 
         public async Task<IEnumerable<People>> GetPeople(Show show, Library library)
         {
-            IEnumerable<People> people = await GetMetadata(provider => provider.GetPeople(show), library, $"unknown data");
+            IEnumerable<People> people = await GetMetadata(provider => provider.GetPeople(show), library, "unknown data");
             people = await thumbnailsManager.Validate(people);
             return people;
         }
