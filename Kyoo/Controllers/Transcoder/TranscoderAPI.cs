@@ -60,7 +60,7 @@ namespace Kyoo.Controllers.TranscoderLink
                 tracks = new Track[0];
 
             free(ptr);
-            Console.WriteLine($"\t{tracks.Length} non subtitles tracks got at: {path}");
+            Console.WriteLine($"\t{tracks.Length} tracks got at: {path}");
         }
 
         public static void ExtractSubtitles(string path, string outPath, out Track[] tracks)
