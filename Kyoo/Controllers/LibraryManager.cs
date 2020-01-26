@@ -1098,7 +1098,7 @@ namespace Kyoo.Controllers
                 cmd.Parameters.AddWithValue("$codec", track.Codec);
                 cmd.Parameters.AddWithValue("$isDefault", track.IsDefault);
                 cmd.Parameters.AddWithValue("$isForced", track.IsForced);
-                cmd.Parameters.AddWithValue("$isExternal", track.IsDefault);
+                cmd.Parameters.AddWithValue("$isExternal", track.IsExternal);
                 cmd.Parameters.AddWithValue("$path", track.Path);
                 cmd.ExecuteNonQuery();
             }
