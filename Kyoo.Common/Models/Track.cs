@@ -48,6 +48,7 @@ namespace Kyoo.Models
                 IsDefault  = stream.IsDefault;
                 IsForced  = stream.IsForced;
                 Codec  = stream.Codec;
+                Path = stream.Path;
                 Type  = stream.Type;
             }
         }
