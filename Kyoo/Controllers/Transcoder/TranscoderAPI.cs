@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Kyoo.Models;
 using Kyoo.Models.Watch;
@@ -59,7 +60,7 @@ namespace Kyoo.Controllers.TranscoderLink
                 tracks = new Track[0];
 
             free(ptr);
-            Console.WriteLine(tracks.Length + " tracks got at: " + path);
+            Console.WriteLine($"\t {tracks.Length} non subtitles tracks got at: {path}");
         }
 
         public static void ExtractSubtitles(string path, string outPath, out Track[] tracks)
@@ -85,10 +86,10 @@ namespace Kyoo.Controllers.TranscoderLink
                 }
             }
             else
-                tracks = null;
+                tracks = new Track[0];
 
             free(ptr);
-            Console.WriteLine("&" + tracks?.Length + " tracks got at: " + path);
+            Console.WriteLine($"\t{tracks.Count(x => x.Type == StreamType.Subtitle)} subtitles got at: {path}");
         }
     }
 }
