@@ -104,7 +104,7 @@ namespace Kyoo.Controllers
                 bool episodeSucess = long.TryParse(match.Groups["Episode"].Value, out long episodeNumber);
                 long absoluteNumber = -1;
 
-                Console.WriteLine("&Registering episode at: " + path);
+                Console.WriteLine("Registering episode at: " + path);
                 if (!seasonSuccess || !episodeSucess)
                 {
                     //Considering that the episode is using absolute path.
