@@ -36,7 +36,14 @@ namespace Kyoo.Controllers
             if (isRunning)
                 return;
             isRunning = true;
-            StartAsync(cancellation.Token);
+            try
+            {
+                StartAsync(cancellation.Token);
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Unknown exception thrown durring libraries scan.\nException: {ex.Message}");
+            }
         }
 
         public void Cancel()
@@ -52,7 +59,6 @@ namespace Kyoo.Controllers
             IEnumerable<Episode> episodes = libraryManager.GetAllEpisodes();
             IEnumerable<Library> libraries = libraryManager.GetLibraries();
 
-            Debug.WriteLine("&Crawler started");
             foreach (Episode episode in episodes)
             {
                 if (!File.Exists(episode.Path))
@@ -63,7 +69,7 @@ namespace Kyoo.Controllers
                 await Scan(library, cancellationToken);
 
             isRunning = false;
-            Debug.WriteLine("&Crawler stopped");
+            Console.WriteLine("Scan finished!");
         }
 
         private async Task Scan(Library library, CancellationToken cancellationToken)

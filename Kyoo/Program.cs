@@ -1,9 +1,9 @@
+using System;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace Kyoo
 {
@@ -13,6 +13,7 @@ namespace Kyoo
         {
             IWebHost host = CreateWebHostBuilder(args).Build();
 
+            Console.WriteLine($"Running as: {Environment.UserName}");
             using (IServiceScope serviceScope = host.Services.CreateScope())
             {
                 IPluginManager pluginManager = serviceScope.ServiceProvider.GetService<IPluginManager>();
