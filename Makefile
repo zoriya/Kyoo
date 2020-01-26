@@ -58,5 +58,7 @@ install_kyoo: all
 
 install: install_kyoo
 	curl https://raw.githubusercontent.com/AnonymusRaccoon/Kyoo.TheTVDB/master/install.sh | sh
+	chown -R kyoo /opt/kyoo
+	chgrp -R kyoo /opt/kyoo
 
 .PHONY = all dependencies ffmpeg transcoder

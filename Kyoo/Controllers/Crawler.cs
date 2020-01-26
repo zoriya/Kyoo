@@ -127,7 +127,7 @@ namespace Kyoo.Controllers
                 if (show != null)
                     await RegisterEpisode(show, seasonNumber, episodeNumber, absoluteNumber, path, library);
                 else
-                    Console.Error.WriteLine($"Coudld not get informations about the show ${showName}.");
+                    Console.Error.WriteLine($"Coudld not get informations about the show {showName}.");
             }
         }
 
