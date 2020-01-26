@@ -56,10 +56,10 @@ namespace Kyoo.Controllers.TranscoderLink
                 }
             }
             else
-                tracks = null;
+                tracks = new Track[0];
 
             free(ptr);
-            Console.WriteLine("&" + tracks?.Length + " tracks got at: " + path);
+            Console.WriteLine(tracks.Length + " tracks got at: " + path);
         }
 
         public static void ExtractSubtitles(string path, string outPath, out Track[] tracks)
