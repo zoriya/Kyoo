@@ -53,7 +53,10 @@ namespace Kyoo.Controllers
         
         public async Task<Collection> GetCollectionFromName(string name, Library library)
         {
-            return await GetMetadata(provider => provider.GetCollectionFromName(name), library, $"the collection {name}");
+            Collection collection = await GetMetadata(provider => provider.GetCollectionFromName(name), library, $"the collection {name}");
+            collection.Name ??= name;
+            collection.Slug ??= Utility.ToSlug(name);
+            return collection;
         }
 
         public async Task<Show> GetShowFromName(string showName, string showPath, Library library)
