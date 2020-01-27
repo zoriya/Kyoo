@@ -2,12 +2,11 @@
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace Kyoo.Controllers.ThumbnailsManager
+namespace Kyoo.Controllers
 {
     public class ThumbnailsManager : IThumbnailsManager
     {
@@ -20,7 +19,7 @@ namespace Kyoo.Controllers.ThumbnailsManager
 
         public async Task<Show> Validate(Show show)
         {
-            if (show == null || show.Path == null)
+            if (show?.Path == null)
                 return null;
             string localThumb = Path.Combine(show.Path, "poster.jpg");
             string localLogo = Path.Combine(show.Path, "logo.png");

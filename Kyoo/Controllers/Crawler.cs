@@ -2,7 +2,6 @@
 using Kyoo.Models;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -137,10 +136,7 @@ namespace Kyoo.Controllers
 
             if (!libraryManager.IsShowRegistered(showPath, out long showID))
             {
-                Show show = await metadataProvider.GetShowFromName(showTitle, library);
-                show.Path = showPath;
-                show.Title = show.Title ?? showTitle;
-                show.Slug = show.Slug ?? Utility.ToSlug(showTitle);
+                Show show = await metadataProvider.GetShowFromName(showTitle, showPath, library);
                 showProviderIDs = show.ExternalIDs;
                 showID = libraryManager.RegisterShow(show);
 
@@ -170,15 +166,11 @@ namespace Kyoo.Controllers
 
         private async Task<long> RegisterSeason(Show show, long seasonNumber, Library library)
         {
-            if (!libraryManager.IsSeasonRegistered(show.ID, seasonNumber, out long seasonID))
-            {
-                Season season = await metadataProvider.GetSeason(show, seasonNumber, library);
-                season.ShowID = show.ID;
-                season.SeasonNumber = season.SeasonNumber == -1 ? seasonNumber : season.SeasonNumber;
-                season.Title ??= $"Season {season.SeasonNumber}";
-                seasonID = libraryManager.RegisterSeason(season);
-            }
-
+            if (libraryManager.IsSeasonRegistered(show.ID, seasonNumber, out long seasonID))
+                return seasonID;
+            
+            Season season = await metadataProvider.GetSeason(show, seasonNumber, library);
+            seasonID = libraryManager.RegisterSeason(season);
             return seasonID;
         }
         
@@ -188,13 +180,7 @@ namespace Kyoo.Controllers
             if (seasonNumber != -1)
                 seasonID = await RegisterSeason(show, seasonNumber, library);
 
-            Episode episode = await metadataProvider.GetEpisode(show, seasonNumber, episodeNumber, absoluteNumber, library);
-            episode.ShowID = show.ID;
-            episode.Path = episodePath;
-            episode.SeasonNumber = episode.SeasonNumber != -1 ? episode.SeasonNumber : seasonNumber;
-            episode.EpisodeNumber = episode.EpisodeNumber != -1 ? episode.EpisodeNumber : episodeNumber;
-            episode.AbsoluteNumber = episode.AbsoluteNumber != -1 ? episode.AbsoluteNumber : absoluteNumber;
-
+            Episode episode = await metadataProvider.GetEpisode(show, episodePath, seasonNumber, episodeNumber, absoluteNumber, library);
             if (seasonID == -1)
                 seasonID = await RegisterSeason(show, seasonNumber, library);
             episode.SeasonID = seasonID;
