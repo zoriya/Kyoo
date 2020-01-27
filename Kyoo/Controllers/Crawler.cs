@@ -149,7 +149,6 @@ namespace Kyoo.Controllers
                     if (!libraryManager.IsCollectionRegistered(Utility.ToSlug(collectionName), out long collectionID))
                     {
                         Collection collection = await metadataProvider.GetCollectionFromName(collectionName, library);
-                        collection.Name = collection.Name ?? collectionName;
                         collectionID = libraryManager.RegisterCollection(collection);
                     }
                     libraryManager.AddShowToCollection(showID, collectionID);
