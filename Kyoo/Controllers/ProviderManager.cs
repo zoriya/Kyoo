@@ -3,7 +3,6 @@ using Kyoo.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Kyoo.Controllers.ThumbnailsManager;
 
 namespace Kyoo.Controllers
 {
@@ -57,21 +56,33 @@ namespace Kyoo.Controllers
             return await GetMetadata(provider => provider.GetCollectionFromName(name), library, $"the collection {name}");
         }
 
-        public async Task<Show> GetShowFromName(string showName, Library library)
+        public async Task<Show> GetShowFromName(string showName, string showPath, Library library)
         {
             Show show = await GetMetadata(provider => provider.GetShowFromName(showName), library, $"the show {showName}");
+            show.Path = showPath;
+            show.Slug = Utility.ToSlug(showName);
+            show.Title ??= showName;
             await thumbnailsManager.Validate(show);
             return show;
         }
 
         public async Task<Season> GetSeason(Show show, long seasonNumber, Library library)
         {
-            return await GetMetadata(provider => provider.GetSeason(show, seasonNumber), library, $"the season {seasonNumber} of {show.Title}");
+            Season season = await GetMetadata(provider => provider.GetSeason(show, seasonNumber), library, $"the season {seasonNumber} of {show.Title}");
+            season.ShowID = show.ID;
+            season.SeasonNumber = season.SeasonNumber == -1 ? seasonNumber : season.SeasonNumber;
+            season.Title ??= $"Season {season.SeasonNumber}";
+            return season;
         }
 
-        public async Task<Episode> GetEpisode(Show show, long seasonNumber, long episodeNumber, long absoluteNumber,  Library library)
+        public async Task<Episode> GetEpisode(Show show, string episodePath, long seasonNumber, long episodeNumber, long absoluteNumber,  Library library)
         {
             Episode episode = await GetMetadata(provider => provider.GetEpisode(show, seasonNumber, episodeNumber, absoluteNumber), library, "an episode");
+            episode.ShowID = show.ID;
+            episode.Path = episodePath;
+            episode.SeasonNumber = episode.SeasonNumber != -1 ? episode.SeasonNumber : seasonNumber;
+            episode.EpisodeNumber = episode.EpisodeNumber != -1 ? episode.EpisodeNumber : episodeNumber;
+            episode.AbsoluteNumber = episode.AbsoluteNumber != -1 ? episode.AbsoluteNumber : absoluteNumber;
             await thumbnailsManager.Validate(episode);
             return episode;
         }

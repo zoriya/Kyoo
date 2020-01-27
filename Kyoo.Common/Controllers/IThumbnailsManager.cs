@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Kyoo.Controllers.ThumbnailsManager
+namespace Kyoo.Controllers
 {
     public interface IThumbnailsManager
     {
