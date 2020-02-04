@@ -9,18 +9,18 @@ namespace Kyoo.Controllers
         //Read values
         string GetShowExternalIDs(long showID);
         Studio GetStudio(long showID);
-        List<People> GetDirectors(long showID);
-        List<People> GetPeople(long showID);
-        List<Genre> GetGenreForShow(long showID);
-        List<Season> GetSeasons(long showID);
+        IEnumerable<People> GetDirectors(long showID);
+        IEnumerable<People> GetPeople(long showID);
+        IEnumerable<Genre> GetGenreForShow(long showID);
+        IEnumerable<Season> GetSeasons(long showID);
         int GetSeasonCount(string showSlug, long seasonNumber);
         IEnumerable<Show> GetShowsInCollection(long collectionID);
-        List<Show> GetShowsInLibrary(long libraryID);
+        IEnumerable<Show> GetShowsInLibrary(long libraryID);
         IEnumerable<Show> GetShowsByPeople(long peopleID);
         IEnumerable<string> GetLibrariesPath();
 
         //Internal read
-        (Track video, List<Track> audios, List<Track> subtitles) GetStreams(long episodeID, string showSlug);
+        (Track video, IEnumerable<Track> audios, IEnumerable<Track> subtitles) GetStreams(long episodeID, string showSlug);
         Track GetSubtitle(string showSlug, long seasonNumber, long episodeNumber, string languageTag, bool forced);
 
         //Public read
@@ -30,8 +30,8 @@ namespace Kyoo.Controllers
         IEnumerable<Library> GetLibraries();
         Show GetShowBySlug(string slug);
         Season GetSeason(string showSlug, long seasonNumber);
-        List<Episode> GetEpisodes(string showSlug);
-        List<Episode> GetEpisodes(string showSlug, long seasonNumber);
+        IEnumerable<Episode> GetEpisodes(string showSlug);
+        IEnumerable<Episode> GetEpisodes(string showSlug, long seasonNumber);
         Episode GetEpisode(string showSlug, long seasonNumber, long episodeNumber);
         WatchItem GetWatchItem(string showSlug, long seasonNumber, long episodeNumber, bool complete = true);
         People GetPeopleBySlug(string slug);

@@ -39,7 +39,10 @@ namespace Kyoo.Models
 
     public Show AsShow()
     {
-        return new Show(-1, Slug, Name, null, null, Overview, null, null, null, null, null, null);
+	    return new Show(-1, Slug, Name, null, null, Overview, null, null, null, null, null, null)
+	    {
+			IsCollection = true
+	    };
     }
 
     public Collection SetShows(ILibraryManager libraryManager)

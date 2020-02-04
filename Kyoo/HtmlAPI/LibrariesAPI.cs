@@ -2,6 +2,7 @@
 using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Kyoo.Controllers
 {
@@ -9,28 +10,28 @@ namespace Kyoo.Controllers
     [ApiController]
     public class LibrariesController : ControllerBase
     {
-        private readonly ILibraryManager libraryManager;
+        private readonly ILibraryManager _libraryManager;
 
         public LibrariesController(ILibraryManager libraryManager)
         {
-            this.libraryManager = libraryManager;
+            _libraryManager = libraryManager;
         }
 
         [HttpGet]
         public IEnumerable<Library> GetLibraries()
         {
-            return libraryManager.GetLibraries();
+            return _libraryManager.GetLibraries();
         }
 
         [HttpGet("{librarySlug}")]
         public ActionResult<IEnumerable<Show>> GetShows(string librarySlug)
         {
-            Library library = libraryManager.GetLibrary(librarySlug);
+            Library library = _libraryManager.GetLibrary(librarySlug);
 
             if (library == null)
                 return NotFound();
 
-            return libraryManager.GetShowsInLibrary(library.Id);
+            return _libraryManager.GetShowsInLibrary(library.Id).ToList();
         }
     }
 }
