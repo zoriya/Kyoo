@@ -4,9 +4,11 @@ namespace Kyoo.Models
 {
     public class Studio
     {
-        [JsonIgnore] public readonly long ID = -1;
-        public string Slug;
-        public string Name;
+        [JsonIgnore] public long ID { get; set; } = -1;
+        public string Slug { get; set; }
+        public string Name { get; set; }
+
+        public Studio() { }
 
         public Studio(string slug, string name)
         {

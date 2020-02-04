@@ -1,18 +1,21 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Kyoo.Models
 {
     public class Library
     {
-        [JsonIgnore] public readonly long ID;
-        public string Slug;
-        public string Name;
-        public string[] Paths;
-        public string[] Providers;
+        [JsonIgnore] public long Id { get; set; }
+        public string Slug { get; set; }
+        public string Name { get; set; }
+        public string[] Paths { get; set; }
+        public string[] Providers { get; set; }
 
+        public Library()  { }
+        
         public Library(long id, string slug, string name, string[] paths, string[] providers)
         {
-            ID = id;
+            Id = id;
             Slug = slug;
             Name = name;
             Paths = paths;

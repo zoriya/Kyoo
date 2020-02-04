@@ -30,7 +30,7 @@ namespace Kyoo.Controllers
             if (library == null)
                 return NotFound();
 
-            return libraryManager.GetShowsInLibrary(library.ID);
+            return libraryManager.GetShowsInLibrary(library.Id);
         }
     }
 }

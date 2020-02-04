@@ -20,13 +20,13 @@ namespace Kyoo.Models
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
         public class Stream
         {
-            public string Title;
-            public string Language;
-            public string Codec;
-            [MarshalAs(UnmanagedType.I1)] public bool IsDefault;
-            [MarshalAs(UnmanagedType.I1)] public bool IsForced;
-            [JsonIgnore] public string Path;
-            [JsonIgnore] public StreamType Type;
+            public string Title { get; set; }
+            public string Language { get; set; }
+            public string Codec { get; set; }
+            [MarshalAs(UnmanagedType.I1)] public bool isDefault;
+            [MarshalAs(UnmanagedType.I1)] public bool isForced;
+            [JsonIgnore] public string Path { get; set; }
+            [JsonIgnore] public StreamType Type { get; set; }
             
             public Stream() {}
             
@@ -35,8 +35,8 @@ namespace Kyoo.Models
                 Title = title;
                 Language = language;
                 Codec = codec;
-                IsDefault = isDefault;
-                IsForced = isForced;
+                this.isDefault = isDefault;
+                this.isForced = isForced;
                 Path = path;
                 Type = type;
             }
@@ -45,8 +45,8 @@ namespace Kyoo.Models
             {
                 Title  = stream.Title;
                 Language  = stream.Language;
-                IsDefault  = stream.IsDefault;
-                IsForced  = stream.IsForced;
+                isDefault  = stream.isDefault;
+                isForced  = stream.isForced;
                 Codec  = stream.Codec;
                 Path = stream.Path;
                 Type  = stream.Type;
@@ -56,11 +56,25 @@ namespace Kyoo.Models
 
     public class Track : Stream
     {
+        public int ID { get; set; }
+        [JsonIgnore] public long EpisodeID { get; set; }
+        public bool IsDefault
+        {
+            get => isDefault;
+            set => isDefault = value;
+        }
+        public bool IsForced
+        {
+            get => isForced;
+            set => isForced = value;
+        }
         public string DisplayName;
         public string Link;
 
-        [JsonIgnore] public long EpisodeID;
-        [JsonIgnore] public bool IsExternal;
+        [JsonIgnore] public bool IsExternal { get; set; }
+        public virtual Episode Episode { get; set; }
+        
+        public Track() { }
 
         public Track(StreamType type, string title, string language, bool isDefault, bool isForced, string codec, bool isExternal, string path)
             : base(title, language, codec, isDefault, isForced, path, type)

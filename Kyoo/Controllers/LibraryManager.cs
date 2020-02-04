@@ -11,162 +11,13 @@ namespace Kyoo.Controllers
 {
     public class LibraryManager : ILibraryManager
     {
+        private readonly DatabaseContext _database;
         private readonly SQLiteConnection sqlConnection;
 
 
-        public LibraryManager(IConfiguration configuration)
+        public LibraryManager(DatabaseContext database)
         {
-            string databasePath = configuration.GetValue<string>("databasePath");
-
-            if (!File.Exists(databasePath))
-            {
-                Console.WriteLine($"Creating the database at {databasePath}.");
-
-                if (!Directory.Exists(Path.GetDirectoryName(databasePath)))
-                    Directory.CreateDirectory(databasePath);
-                SQLiteConnection.CreateFile(databasePath);
-                sqlConnection = new SQLiteConnection($"Data Source={databasePath};Version=3");
-                sqlConnection.Open();
-
-                const string createStatement = @"CREATE TABLE shows(
-					    id INTEGER PRIMARY KEY UNIQUE, 
-					    slug TEXT UNIQUE, 
-					    title TEXT, 
-					    aliases TEXT, 
-                        path TEXT UNIQUE,
-					    overview TEXT,
-					    trailerUrl TEXT,
-					    status TEXT, 
-					    startYear INTEGER, 
-					    endYear INTEGER, 
-					    imgPrimary TEXT, 
-					    imgThumb TEXT, 
-					    imgLogo TEXT, 
-					    imgBackdrop TEXT, 
-					    externalIDs TEXT
-				    );
-				    CREATE TABLE seasons(
-					    id INTEGER PRIMARY KEY UNIQUE, 
-					    showID INTEGER, 
-					    seasonNumber INTEGER, 
-					    title TEXT, 
-					    overview TEXT, 
-					    imgPrimary TEXT, 
-					    year INTEGER, 
-					    externalIDs TEXT, 
-					    FOREIGN KEY(showID) REFERENCES shows(id) ON DELETE CASCADE
-				    );
-				    CREATE TABLE episodes(
-					    id INTEGER PRIMARY KEY UNIQUE, 
-					    showID INTEGER, 
-					    seasonID INTEGER, 
-					    seasonNumber INTEGER, 
-					    episodeNumber INTEGER, 
-					    absoluteNumber INTEGER, 
-					    path TEXT UNIQUE, 
-					    title TEXT, 
-					    overview TEXT, 
-					    imgPrimary TEXT, 
-					    releaseDate TEXT,  
-					    runtime INTEGER, 
-					    externalIDs TEXT, 
-					    FOREIGN KEY(showID) REFERENCES shows(id) ON DELETE CASCADE, 
-					    FOREIGN KEY(seasonID) REFERENCES seasons(id) ON DELETE CASCADE
-				    );
-				    CREATE TABLE tracks(
-					    id INTEGER PRIMARY KEY UNIQUE, 
-					    episodeID INTEGER, 
-					    streamType INTEGER,
-                        title TEXT,
-					    language TEXT, 
-                        codec TEXT, 
-					    isDefault BOOLEAN, 
-					    isForced BOOLEAN, 
-					    isExternal BOOLEAN,
-                        path TEXT,
-					    FOREIGN KEY(episodeID) REFERENCES episodes(id) ON DELETE CASCADE
-				    );
-
-				    CREATE TABLE libraries(
-					    id INTEGER PRIMARY KEY UNIQUE, 
-					    slug TEXT UNIQUE, 
-					    name TEXT,
-					    path TEXT,
-					    providers TEXT
-				    );
-				    CREATE TABLE librariesLinks(
-					    libraryID INTEGER, 
-					    showID INTEGER, 
-					    FOREIGN KEY(libraryID) REFERENCES libraries(id) ON DELETE CASCADE, 
-					    FOREIGN KEY(showID) REFERENCES shows(id) ON DELETE CASCADE
-				    );
-
-                    CREATE TABLE collections(
-					    id INTEGER PRIMARY KEY UNIQUE, 
-					    slug TEXT UNIQUE,
-					    name TEXT,
-                        overview TEXT,
-                        startYear INTEGER,
-                        endYear INTEGER,
-                        imgPrimary TEXT
-				    );
-				    CREATE TABLE collectionsLinks(
-					    collectionID INTEGER, 
-					    showID INTEGER, 
-					    FOREIGN KEY(collectionID) REFERENCES collections(id) ON DELETE CASCADE, 
-					    FOREIGN KEY(showID) REFERENCES shows(id) ON DELETE CASCADE
-				    );
-
-				    CREATE TABLE studios(
-					    id INTEGER PRIMARY KEY UNIQUE, 
-					    slug TEXT UNIQUE, 
-					    name TEXT
-					    );
-				    CREATE TABLE studiosLinks(
-					    studioID INTEGER, 
-					    showID INTEGER, 
-					    FOREIGN KEY(studioID) REFERENCES studios(id) ON DELETE CASCADE, 
-					    FOREIGN KEY(showID) REFERENCES shows(id) ON DELETE CASCADE
-				    );
-
-				    CREATE TABLE people(
-					    id INTEGER PRIMARY KEY UNIQUE, 
-					    slug TEXT UNIQUE, 
-					    name TEXT, 
-					    imgPrimary TEXT, 
-					    externalIDs TEXT
-				    );
-				    CREATE TABLE peopleLinks(
-					    peopleID INTEGER, 
-					    showID INTEGER, 
-					    role TEXT, 
-					    type TEXT, 
-					    FOREIGN KEY(peopleID) REFERENCES people(id) ON DELETE CASCADE, 
-					    FOREIGN KEY(showID) REFERENCES shows(id) ON DELETE CASCADE
-				    );
-
-				    CREATE TABLE genres(
-					    id INTEGER PRIMARY KEY UNIQUE, 
-					    slug TEXT UNIQUE, 
-					    name TEXT
-				    );
-				    CREATE TABLE genresLinks(
-					    genreID INTEGER, 
-					    showID INTEGER, 
-					    FOREIGN KEY(genreID) REFERENCES genres(id) ON DELETE CASCADE, 
-					    FOREIGN KEY(showID) REFERENCES shows(id) ON DELETE CASCADE
-				    );";
-
-                using SQLiteCommand createCmd = new SQLiteCommand(createStatement, sqlConnection);
-                createCmd.ExecuteNonQuery();
-            }
-            else
-            {
-                sqlConnection = new SQLiteConnection($"Data Source={databasePath};Version=3");
-                sqlConnection.Open();
-            }
-
-            Debug.WriteLine("&Sql Database initated.");
+            _database = database;
         }
 
         ~LibraryManager()
@@ -177,17 +28,7 @@ namespace Kyoo.Controllers
         #region Read the database
         public IEnumerable<Library> GetLibraries()
         {
-            const string query = "SELECT * FROM libraries;";
-
-            using SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection);
-            SQLiteDataReader reader = cmd.ExecuteReader();
-
-            List<Library> libraries = new List<Library>();
-
-            while (reader.Read())
-                libraries.Add(Library.FromReader(reader));
-
-            return libraries;
+            return _database.Libraries;
         }
 
         public IEnumerable<string> GetLibrariesPath()
@@ -836,7 +677,7 @@ namespace Kyoo.Controllers
             Genre existingGenre = GetGenreBySlug(genre.Slug);
 
             if (existingGenre != null)
-                return existingGenre.ID;
+                return existingGenre.Id;
 
             string query = "INSERT INTO genres (slug, name) VALUES($slug, $name);";
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
@@ -957,7 +798,7 @@ namespace Kyoo.Controllers
 
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
-                cmd.Parameters.AddWithValue("$libraryID", library.ID);
+                cmd.Parameters.AddWithValue("$libraryID", library.Id);
                 cmd.Parameters.AddWithValue("$showID", showID);
                 cmd.ExecuteNonQuery();
             }
@@ -1166,7 +1007,7 @@ namespace Kyoo.Controllers
 
             using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
             {
-                cmd.Parameters.AddWithValue("$episodeID", episode.ID);
+                cmd.Parameters.AddWithValue("$episodeID", episode.Id);
                 cmd.ExecuteNonQuery();
             }
 
