@@ -183,7 +183,7 @@ namespace Kyoo.Controllers
             if (seasonID == -1)
                 seasonID = await RegisterSeason(show, seasonNumber, library);
             episode.SeasonID = seasonID;
-            episode.ID = libraryManager.RegisterEpisode(episode);
+            episode.Id = libraryManager.RegisterEpisode(episode);
 
             Track[] tracks = await transcoder.GetTrackInfo(episode.Path);
             int subcount = 0;
@@ -194,7 +194,7 @@ namespace Kyoo.Controllers
                     subcount++;
                     continue;
                 }
-                track.EpisodeID = episode.ID;
+                track.EpisodeID = episode.Id;
                 libraryManager.RegisterTrack(track);
             }
 
@@ -205,7 +205,7 @@ namespace Kyoo.Controllers
                 {
                     foreach (Track track in subtitles)
                     {
-                        track.EpisodeID = episode.ID;
+                        track.EpisodeID = episode.Id;
                         libraryManager.RegisterTrack(track);
                     }
                 }
@@ -228,7 +228,7 @@ namespace Kyoo.Controllers
                 string language = sub.Substring(Path.GetDirectoryName(sub).Length + episodeLink.Length + 2, 3);
                 bool isDefault = sub.Contains("default");
                 bool isForced = sub.Contains("forced");
-                Track track = new Track(StreamType.Subtitle, null, language, isDefault, isForced, null, false, sub) { EpisodeID = episode.ID };
+                Track track = new Track(StreamType.Subtitle, null, language, isDefault, isForced, null, false, sub) { EpisodeID = episode.Id };
 
                 if (Path.GetExtension(sub) == ".ass")
                     track.Codec = "ass";

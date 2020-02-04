@@ -6,21 +6,20 @@ using System.Linq;
 namespace Kyoo.Models
 {
     public class Collection : IMergable<Collection>
-
     {
-    [JsonIgnore] public long ID = -1;
-    public string Slug;
-    public string Name;
-    public string Poster;
-    public string Overview;
-    [JsonIgnore] public string ImgPrimary;
+    [JsonIgnore] public long Id { get; set; } = -1;
+    public string Slug { get; set; }
+    public string Name { get; set; }
+    public string Poster { get; set; }
+    public string Overview { get; set; }
+    [JsonIgnore] public string ImgPrimary { get; set; }
     public IEnumerable<Show> Shows;
 
     public Collection() { }
 
     public Collection(long id, string slug, string name, string overview, string imgPrimary)
     {
-        ID = id;
+        Id = id;
         Slug = slug;
         Name = name;
         Overview = overview;
@@ -45,7 +44,7 @@ namespace Kyoo.Models
 
     public Collection SetShows(ILibraryManager libraryManager)
     {
-        Shows = libraryManager.GetShowsInCollection(ID);
+        Shows = libraryManager.GetShowsInCollection(Id);
         return this;
     }
 
@@ -53,8 +52,8 @@ namespace Kyoo.Models
     {
         if (collection == null)
             return this;
-        if (ID == -1)
-            ID = collection.ID;
+        if (Id == -1)
+            Id = collection.Id;
         if (Slug == null)
             Slug = collection.Slug;
         if (Name == null)

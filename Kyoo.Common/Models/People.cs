@@ -1,17 +1,20 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections;
+using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Kyoo.Models
 {
     public class People : IMergable<People>
     {
-        [JsonIgnore] public long ID = -1;
-        public string Slug;
-        public string Name;
-        public string Role; //Dynamic data not stored as it in the database
+        [JsonIgnore] public long ID { get; set; } = -1;
+        public string Slug { get; set; }
+        public string Name { get; set; }
+        public string Role;//Dynamic data not stored as it in the database
         public string Type; //Dynamic data not stored as it in the database ---- Null for now
-        [JsonIgnore] public string ImgPrimary;
-
-        public string ExternalIDs;
+        [JsonIgnore] public string ImgPrimary { get; set; }
+        public string ExternalIDs { get; set; }
+        
+        public virtual IEnumerable<PeopleLink> Roles { get; set; }
         
         public People() {}
 

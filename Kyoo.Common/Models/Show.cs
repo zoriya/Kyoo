@@ -8,33 +8,33 @@ namespace Kyoo.Models
 {
     public class Show : IMergable<Show>
     {
-        [JsonIgnore] public long ID = -1;
+        [JsonIgnore] public long ID { get; set; } = -1;
 
-        public string Slug;
-        public string Title;
-        public IEnumerable<string> Aliases;
-        [JsonIgnore] public string Path;
-        public string Overview;
-        public IEnumerable<Genre> Genres;
-        public Status? Status;
-        public string TrailerUrl;
+        public string Slug { get; set; }
+        public string Title { get; set; }
+        public string[] Aliases { get; set; }
+        [JsonIgnore] public string Path { get; set; }
+        public string Overview { get; set; }
+        public Status? Status { get; set; }
+        public string TrailerUrl { get; set; }
 
-        public long? StartYear;
-        public long? EndYear;
+        public long? StartYear { get; set; }
+        public long? EndYear { get; set; }
 
-        [JsonIgnore] public string ImgPrimary;
-        [JsonIgnore] public string ImgThumb;
-        [JsonIgnore] public string ImgLogo;
-        [JsonIgnore] public string ImgBackdrop;
+        [JsonIgnore] public string ImgPrimary { get; set; }
+        [JsonIgnore] public string ImgThumb { get; set; }
+        [JsonIgnore] public string ImgLogo { get; set; }
+        [JsonIgnore] public string ImgBackdrop { get; set; }
 
-        public string ExternalIDs;
-
-        //Used in the rest API excusively.
-        public Studio Studio;
-        public IEnumerable<People> Directors;
-        public IEnumerable<People> People;
-        public IEnumerable<Season> Seasons;
+        public string ExternalIDs { get; set; }
+        
         public bool IsCollection;
+
+        public IEnumerable<Genre> Genres;
+        public virtual Studio Studio { get; set; }
+        public virtual IEnumerable<PeopleLink> People { get; set; }
+        public virtual IEnumerable<Season> Seasons { get; set; }
+        public virtual IEnumerable<Episode> Episodes { get; set; }
 
 
         public string GetAliases()
@@ -55,7 +55,7 @@ namespace Kyoo.Models
             ID = id;
             Slug = slug;
             Title = title;
-            Aliases = aliases;
+            Aliases = aliases.ToArray();
             Path = path;
             Overview = overview;
             TrailerUrl = trailerUrl;
@@ -72,7 +72,7 @@ namespace Kyoo.Models
             ID = id;
             Slug = slug;
             Title = title;
-            Aliases = aliases;
+            Aliases = aliases.ToArray();
             Path = path;
             Overview = overview;
             TrailerUrl = trailerUrl;
@@ -152,13 +152,13 @@ namespace Kyoo.Models
 
         public Show SetDirectors(ILibraryManager manager)
         {
-            Directors = manager.GetDirectors(ID);
+            //Directors = manager.GetDirectors(ID);
             return this;
         }
 
         public Show SetPeople(ILibraryManager manager)
         {
-            People = manager.GetPeople(ID);
+            //People = manager.GetPeople(ID);
             return this;
         }
 
@@ -181,7 +181,7 @@ namespace Kyoo.Models
             if (Aliases == null)
                 Aliases = other.Aliases;
             else
-                Aliases = Aliases.Concat(other.Aliases);
+                Aliases = Aliases.Concat(other.Aliases).ToArray();
             if (Genres == null)
                 Genres = other.Genres;
             else

@@ -1,7 +1,9 @@
 using Kyoo.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -30,17 +32,23 @@ namespace Kyoo
 
             services.AddControllers().AddNewtonsoftJson();
             services.AddHttpClient();
-            
-            services.AddSingleton<ILibraryManager, LibraryManager>();
-            services.AddSingleton<ITranscoder, Transcoder>();
-            services.AddSingleton<IThumbnailsManager, ThumbnailsManager>();
-            services.AddSingleton<IProviderManager, ProviderManager>();
-            services.AddSingleton<ICrawler, Crawler>();
-            services.AddSingleton<IPluginManager, PluginManager>();
+
+            services.AddDbContext<DatabaseContext>(options => options.UseSqlite(Configuration.GetConnectionString("Database")));
+
+            // services.AddIdentity<ApplicationUser, IdentityRole>()
+            //     .AddEntityFrameworkStores()
+            // services.AddIdentityServer();
+
+            services.AddScoped<ILibraryManager, LibraryManager>();
+            services.AddScoped<ITranscoder, Transcoder>();
+            services.AddScoped<IThumbnailsManager, ThumbnailsManager>();
+            services.AddScoped<IProviderManager, ProviderManager>();
+            services.AddScoped<ICrawler, Crawler>();
+            services.AddScoped<IPluginManager, PluginManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DatabaseContext database)
         {
             if (env.IsDevelopment())
             {
@@ -86,6 +94,10 @@ namespace Kyoo
                     spa.UseAngularCliServer(npmScript: "start");
                 }
             });
+            
+            database.Database.EnsureCreated();;
+            // Use the next line if the database is not SQLite (SQLite doesn't support complexe migrations).
+            // database.Database.Migrate();;
         }
     }
 }

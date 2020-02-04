@@ -5,22 +5,24 @@ namespace Kyoo.Models
 {
     public class Episode : IMergable<Episode>
     {
-        [JsonIgnore] public long ID;
-        [JsonIgnore] public long ShowID;
-        [JsonIgnore] public long SeasonID;
+        [JsonIgnore] public long Id { get; set; }
+        [JsonIgnore] public long ShowID { get; set; }
+        public virtual Show Show { get; set; }
+        [JsonIgnore] public long SeasonID { get; set; }
+        public virtual Season Season { get; set; }
 
-        public long SeasonNumber;
-        public long EpisodeNumber;
-        public long AbsoluteNumber;
-        [JsonIgnore] public string Path;
-        public string Title;
-        public string Overview;
-        public DateTime? ReleaseDate;
+        public long SeasonNumber { get; set; }
+        public long EpisodeNumber { get; set; }
+        public long AbsoluteNumber { get; set; }
+        [JsonIgnore] public string Path { get; set; }
+        public string Title { get; set; }
+        public string Overview { get; set; }
+        public DateTime? ReleaseDate { get; set; }
 
-        public long Runtime; //This runtime variable should be in minutes
+        public long Runtime { get; set; } //This runtime variable should be in minutes
 
-        [JsonIgnore] public string ImgPrimary;
-        public string ExternalIDs;
+        [JsonIgnore] public string ImgPrimary { get; set; }
+        public string ExternalIDs { get; set; }
 
         public string ShowTitle; //Used in the API response only
         public string Link; //Used in the API response only
@@ -29,7 +31,7 @@ namespace Kyoo.Models
 
         public Episode()
         {
-            ID = -1;
+            Id = -1;
             ShowID = -1;
             SeasonID = -1;
             SeasonNumber = -1;
@@ -39,7 +41,7 @@ namespace Kyoo.Models
 
         public Episode(long seasonNumber, long episodeNumber, long absoluteNumber, string title, string overview, DateTime? releaseDate, long runtime, string imgPrimary, string externalIDs)
         {
-            ID = -1;
+            Id = -1;
             ShowID = -1;
             SeasonID = -1;
             SeasonNumber = seasonNumber;
@@ -55,7 +57,7 @@ namespace Kyoo.Models
 
         public Episode(long id, long showID, long seasonID, long seasonNumber, long episodeNumber, long absoluteNumber, string path, string title, string overview, DateTime? releaseDate, long runtime, string imgPrimary, string externalIDs)
         {
-            ID = id;
+            Id = id;
             ShowID = showID;
             SeasonID = seasonID;
             SeasonNumber = seasonNumber;
@@ -110,8 +112,8 @@ namespace Kyoo.Models
         {
             if (other == null)
                 return this;
-            if (ID == -1)
-                ID = other.ID;
+            if (Id == -1)
+                Id = other.Id;
             if (ShowID == -1)
                 ShowID = other.ShowID;
             if (SeasonID == -1)

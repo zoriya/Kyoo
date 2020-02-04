@@ -1,19 +1,24 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections;
+using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Kyoo.Models
 {
     public class Season : IMergable<Season>
     {
-        [JsonIgnore] public readonly long ID = -1;
-        [JsonIgnore] public long ShowID = -1;
+        [JsonIgnore] public long ID  { get; set; } = -1;
+        [JsonIgnore] public long ShowID { get; set; } = -1;
 
-        public long SeasonNumber = -1;
-        public string Title;
-        public string Overview;
-        public long? Year;
+        public long SeasonNumber { get; set; } = -1;
+        public string Title { get; set; }
+        public string Overview { get; set; }
+        public long? Year { get; set; }
 
-        [JsonIgnore] public string ImgPrimary;
-        public string ExternalIDs;
+        [JsonIgnore] public string ImgPrimary { get; set; }
+        public string ExternalIDs { get; set; }
+
+        public virtual Show Show { get; set; }
+        public virtual IEnumerable<Episode> Episodes { get; set; }
 
         public Season() { }
 

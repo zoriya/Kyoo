@@ -4,9 +4,9 @@ namespace Kyoo.Models
 {
     public class Genre
     {
-        [JsonIgnore] public readonly long ID;
-        public string Slug;
-        public string Name;
+        [JsonIgnore] public long Id { get; set; }
+        public string Slug { get; set; }
+        public string Name { get; set; }
 
         public Genre(string slug, string name)
         {
@@ -16,7 +16,7 @@ namespace Kyoo.Models
 
         public Genre(long id, string slug, string name)
         {
-            ID = id;
+            Id = id;
             Slug = slug;
             Name = name;
         }
