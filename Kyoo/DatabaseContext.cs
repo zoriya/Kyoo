@@ -19,8 +19,11 @@ namespace Kyoo
         public DbSet<Track> Tracks { get; set; }
         public DbSet<Genre> Genres { get; set; }
         public DbSet<People> Peoples { get; set; }
-        public DbSet<PeopleLink> PeopleLinks { get; set; }
         public DbSet<Studio> Studios { get; set; }
+        
+        public DbSet<LibraryLink> LibraryLinks { get; set; }
+        public DbSet<CollectionLink> CollectionLinks { get; set; }
+        public DbSet<PeopleLink> PeopleLinks { get; set; }
         
         private ValueConverter<string[], string> stringArrayConverter = new ValueConverter<string[], string>(
             arr => string.Join("|", arr),
@@ -37,16 +40,6 @@ namespace Kyoo
             modelBuilder.Entity<Library>().Property(e => e.Paths).HasConversion(stringArrayConverter).Metadata.SetValueComparer(stringArrayComparer);
             modelBuilder.Entity<Library>().Property(e => e.Providers).HasConversion(stringArrayConverter).Metadata.SetValueComparer(stringArrayComparer);
             modelBuilder.Entity<Show>().Property(e => e.Aliases).HasConversion(stringArrayConverter).Metadata.SetValueComparer(stringArrayComparer);
-            
-            modelBuilder.Entity<PeopleLink>()
-                .HasOne(l => l.Show)
-                .WithMany(s => s.People)
-                .HasForeignKey(l => l.ShowID);
-            
-            modelBuilder.Entity<PeopleLink>()
-                .HasOne(l => l.People)
-                .WithMany(p => p.Roles)
-                .HasForeignKey(l => l.PeopleID);
 
             modelBuilder.Entity<Track>()
                 .Property(t => t.IsDefault)

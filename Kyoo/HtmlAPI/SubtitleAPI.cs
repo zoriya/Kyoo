@@ -65,7 +65,7 @@ namespace Kyoo.Controllers
         [HttpGet("extract/{showSlug}")]
         public async Task<string> ExtractSubtitle(string showSlug)
         {
-            List<Episode> episodes = libraryManager.GetEpisodes(showSlug);
+            IEnumerable<Episode> episodes = libraryManager.GetEpisodes(showSlug);
             foreach (Episode episode in episodes)
             {
                 libraryManager.ClearSubtitles(episode.Id);
