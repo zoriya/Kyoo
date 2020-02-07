@@ -33,18 +33,18 @@ namespace Kyoo
             services.AddControllers().AddNewtonsoftJson();
             services.AddHttpClient();
 
-            services.AddDbContext<DatabaseContext>(options => options.UseSqlite(Configuration.GetConnectionString("Database")));
+            services.AddDbContext<DatabaseContext>(options => options.UseSqlite(Configuration.GetConnectionString("Database")), ServiceLifetime.Singleton);
 
             // services.AddIdentity<ApplicationUser, IdentityRole>()
             //     .AddEntityFrameworkStores()
             // services.AddIdentityServer();
 
-            services.AddScoped<ILibraryManager, LibraryManager>();
-            services.AddScoped<ITranscoder, Transcoder>();
-            services.AddScoped<IThumbnailsManager, ThumbnailsManager>();
-            services.AddScoped<IProviderManager, ProviderManager>();
-            services.AddScoped<ICrawler, Crawler>();
-            services.AddScoped<IPluginManager, PluginManager>();
+            services.AddSingleton<ILibraryManager, LibraryManager>();
+            services.AddSingleton<ITranscoder, Transcoder>();
+            services.AddSingleton<IThumbnailsManager, ThumbnailsManager>();
+            services.AddSingleton<IProviderManager, ProviderManager>();
+            services.AddSingleton<ICrawler, Crawler>();
+            services.AddSingleton<IPluginManager, PluginManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

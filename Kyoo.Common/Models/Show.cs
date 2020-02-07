@@ -8,7 +8,7 @@ namespace Kyoo.Models
 {
     public class Show : IMergable<Show>
     {
-        [JsonIgnore] public long ID { get; set; } = -1;
+        [JsonIgnore] public long ID { get; set; }
 
         public string Slug { get; set; }
         public string Title { get; set; }

@@ -8,20 +8,20 @@ namespace Kyoo.Controllers
 {
     public class ProviderManager : IProviderManager
     {
-        private readonly IEnumerable<IMetadataProvider> providers;
-        private readonly IThumbnailsManager thumbnailsManager;
+        private readonly IEnumerable<IMetadataProvider> _providers;
+        private readonly IThumbnailsManager _thumbnailsManager;
 
         public ProviderManager(IThumbnailsManager thumbnailsManager, IPluginManager pluginManager)
         {
-            this.thumbnailsManager = thumbnailsManager;
-            providers = pluginManager.GetPlugins<IMetadataProvider>();
+            _thumbnailsManager = thumbnailsManager;
+            _providers = pluginManager.GetPlugins<IMetadataProvider>();
         }
 
         public async Task<T> GetMetadata<T>(Func<IMetadataProvider, Task<T>> providerCall, Library library, string what) where T : IMergable<T>, new()
         {
             T ret = new T();
             
-            foreach (IMetadataProvider provider in providers.OrderBy(provider => Array.IndexOf(library.Providers, provider.Name)))
+            foreach (IMetadataProvider provider in _providers.OrderBy(provider => Array.IndexOf(library.Providers, provider.Name)))
             {
                 try
                 {
@@ -38,7 +38,7 @@ namespace Kyoo.Controllers
         {
             List<T> ret = new List<T>();
             
-            foreach (IMetadataProvider provider in providers.OrderBy(provider => Array.IndexOf(library.Providers, provider.Name)))
+            foreach (IMetadataProvider provider in _providers.OrderBy(provider => Array.IndexOf(library.Providers, provider.Name)))
             {
                 try
                 {
@@ -65,7 +65,7 @@ namespace Kyoo.Controllers
             show.Path = showPath;
             show.Slug = Utility.ToSlug(showName);
             show.Title ??= showName;
-            await thumbnailsManager.Validate(show);
+            await _thumbnailsManager.Validate(show);
             return show;
         }
 
@@ -86,14 +86,14 @@ namespace Kyoo.Controllers
             episode.SeasonNumber = episode.SeasonNumber != -1 ? episode.SeasonNumber : seasonNumber;
             episode.EpisodeNumber = episode.EpisodeNumber != -1 ? episode.EpisodeNumber : episodeNumber;
             episode.AbsoluteNumber = episode.AbsoluteNumber != -1 ? episode.AbsoluteNumber : absoluteNumber;
-            await thumbnailsManager.Validate(episode);
+            await _thumbnailsManager.Validate(episode);
             return episode;
         }
 
         public async Task<IEnumerable<People>> GetPeople(Show show, Library library)
         {
             IEnumerable<People> people = await GetMetadata(provider => provider.GetPeople(show), library, "unknown data");
-            people = await thumbnailsManager.Validate(people);
+            people = await _thumbnailsManager.Validate(people);
             return people;
         }
     }

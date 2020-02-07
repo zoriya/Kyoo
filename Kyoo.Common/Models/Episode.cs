@@ -5,7 +5,7 @@ namespace Kyoo.Models
 {
     public class Episode : IMergable<Episode>
     {
-        [JsonIgnore] public long Id { get; set; }
+        [JsonIgnore] public long ID { get; set; }
         [JsonIgnore] public long ShowID { get; set; }
         public virtual Show Show { get; set; }
         [JsonIgnore] public long SeasonID { get; set; }
@@ -31,7 +31,7 @@ namespace Kyoo.Models
 
         public Episode()
         {
-            Id = -1;
+            ID = -1;
             ShowID = -1;
             SeasonID = -1;
             SeasonNumber = -1;
@@ -41,7 +41,7 @@ namespace Kyoo.Models
 
         public Episode(long seasonNumber, long episodeNumber, long absoluteNumber, string title, string overview, DateTime? releaseDate, long runtime, string imgPrimary, string externalIDs)
         {
-            Id = -1;
+            ID = -1;
             ShowID = -1;
             SeasonID = -1;
             SeasonNumber = seasonNumber;
@@ -57,7 +57,7 @@ namespace Kyoo.Models
 
         public Episode(long id, long showID, long seasonID, long seasonNumber, long episodeNumber, long absoluteNumber, string path, string title, string overview, DateTime? releaseDate, long runtime, string imgPrimary, string externalIDs)
         {
-            Id = id;
+            ID = id;
             ShowID = showID;
             SeasonID = seasonID;
             SeasonNumber = seasonNumber;
@@ -112,8 +112,8 @@ namespace Kyoo.Models
         {
             if (other == null)
                 return this;
-            if (Id == -1)
-                Id = other.Id;
+            if (ID == -1)
+                ID = other.ID;
             if (ShowID == -1)
                 ShowID = other.ShowID;
             if (SeasonID == -1)
