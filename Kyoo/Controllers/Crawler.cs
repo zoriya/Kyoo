@@ -89,7 +89,7 @@ namespace Kyoo.Controllers
 
         private async Task RegisterFile(string path, string relativePath, Library library)
         {
-            if (!libraryManager.IsEpisodeRegistered(path))
+            if (!libraryManager.IsEpisodeRegistered(path, out long _))
             {
                 string patern = config.GetValue<string>("regex");
                 Regex regex = new Regex(patern, RegexOptions.IgnoreCase);
@@ -117,7 +117,7 @@ namespace Kyoo.Controllers
 
                     if (!absoluteSucess)
                     {
-                        Console.WriteLine("&Couldn't find basic data for the episode (regexs didn't match) " + relativePath);
+                        Console.Error.WriteLine("Couldn't find basic data for the episode (regexs didn't match) " + relativePath);
                         return;
                     }
                 }
@@ -183,7 +183,7 @@ namespace Kyoo.Controllers
             if (seasonID == -1)
                 seasonID = await RegisterSeason(show, seasonNumber, library);
             episode.SeasonID = seasonID;
-            episode.Id = libraryManager.RegisterEpisode(episode);
+            episode.ID = libraryManager.RegisterEpisode(episode);
 
             Track[] tracks = await transcoder.GetTrackInfo(episode.Path);
             int subcount = 0;
@@ -194,7 +194,7 @@ namespace Kyoo.Controllers
                     subcount++;
                     continue;
                 }
-                track.EpisodeID = episode.Id;
+                track.EpisodeID = episode.ID;
                 libraryManager.RegisterTrack(track);
             }
 
@@ -205,7 +205,7 @@ namespace Kyoo.Controllers
                 {
                     foreach (Track track in subtitles)
                     {
-                        track.EpisodeID = episode.Id;
+                        track.EpisodeID = episode.ID;
                         libraryManager.RegisterTrack(track);
                     }
                 }
@@ -228,7 +228,7 @@ namespace Kyoo.Controllers
                 string language = sub.Substring(Path.GetDirectoryName(sub).Length + episodeLink.Length + 2, 3);
                 bool isDefault = sub.Contains("default");
                 bool isForced = sub.Contains("forced");
-                Track track = new Track(StreamType.Subtitle, null, language, isDefault, isForced, null, false, sub) { EpisodeID = episode.Id };
+                Track track = new Track(StreamType.Subtitle, null, language, isDefault, isForced, null, false, sub) { EpisodeID = episode.ID };
 
                 if (Path.GetExtension(sub) == ".ass")
                     track.Codec = "ass";

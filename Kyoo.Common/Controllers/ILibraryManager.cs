@@ -9,7 +9,6 @@ namespace Kyoo.Controllers
         //Read values
         string GetShowExternalIDs(long showID);
         Studio GetStudio(long showID);
-        IEnumerable<People> GetDirectors(long showID);
         IEnumerable<People> GetPeople(long showID);
         IEnumerable<Genre> GetGenreForShow(long showID);
         IEnumerable<Season> GetSeasons(long showID);
@@ -45,13 +44,10 @@ namespace Kyoo.Controllers
         IEnumerable<Studio> SearchStudios(string searchQuery);
 
         //Check if value exists
-        bool IsCollectionRegistered(string collectionSlug);
         bool IsCollectionRegistered(string collectionSlug, out long collectionID);
-        bool IsShowRegistered(string showPath);
         bool IsShowRegistered(string showPath, out long showID);
-        bool IsSeasonRegistered(long showID, long seasonNumber);
         bool IsSeasonRegistered(long showID, long seasonNumber, out long seasonID);
-        bool IsEpisodeRegistered(string episodePath);
+        bool IsEpisodeRegistered(string episodePath, out long episodeID);
 
         //Register values
         long RegisterCollection(Collection collection);

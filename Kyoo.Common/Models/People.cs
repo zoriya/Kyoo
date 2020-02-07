@@ -9,8 +9,8 @@ namespace Kyoo.Models
         [JsonIgnore] public long ID { get; set; } = -1;
         public string Slug { get; set; }
         public string Name { get; set; }
-        public string Role;//Dynamic data not stored as it in the database
-        public string Type; //Dynamic data not stored as it in the database ---- Null for now
+        public string Role;
+        public string Type;
         [JsonIgnore] public string ImgPrimary { get; set; }
         public string ExternalIDs { get; set; }
         
@@ -38,24 +38,11 @@ namespace Kyoo.Models
             ExternalIDs = externalIDs;
         }
 
-        public static People FromReader(System.Data.SQLite.SQLiteDataReader reader)
+        public People SetRoleType(string role, string type)
         {
-            return new People((long)reader["id"],
-                reader["slug"] as string,
-                reader["name"] as string,
-                reader["imgPrimary"] as string,
-                reader["externalIDs"] as string);
-        }
-
-        public static People FromFullReader(System.Data.SQLite.SQLiteDataReader reader)
-        {
-            return new People((long)reader["id"],
-                reader["slug"] as string,
-                reader["name"] as string,
-                reader["role"] as string,
-                reader["type"] as string,
-                reader["imgPrimary"] as string,
-                reader["externalIDs"] as string);
+	        Role = role;
+	        Type = type;
+	        return this;
         }
 
         public People Merge(People other)

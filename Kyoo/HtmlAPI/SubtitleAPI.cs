@@ -50,12 +50,12 @@ namespace Kyoo.Controllers
         public async Task<string> ExtractSubtitle(string showSlug, long seasonNumber, long episodeNumber)
         {
             Episode episode = libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
-            libraryManager.ClearSubtitles(episode.Id);
+            libraryManager.ClearSubtitles(episode.ID);
 
             Track[] tracks = await transcoder.ExtractSubtitles(episode.Path);
             foreach (Track track in tracks)
             {
-                track.EpisodeID = episode.Id;
+                track.EpisodeID = episode.ID;
                 libraryManager.RegisterTrack(track);
             }
 
@@ -68,12 +68,12 @@ namespace Kyoo.Controllers
             IEnumerable<Episode> episodes = libraryManager.GetEpisodes(showSlug);
             foreach (Episode episode in episodes)
             {
-                libraryManager.ClearSubtitles(episode.Id);
+                libraryManager.ClearSubtitles(episode.ID);
 
                 Track[] tracks = await transcoder.ExtractSubtitles(episode.Path);
                 foreach (Track track in tracks)
                 {
-                    track.EpisodeID = episode.Id;
+                    track.EpisodeID = episode.ID;
                     libraryManager.RegisterTrack(track);
                 }
             }
