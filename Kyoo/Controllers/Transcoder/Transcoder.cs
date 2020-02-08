@@ -11,17 +11,20 @@ using Kyoo.Controllers.TranscoderLink;
 
 namespace Kyoo.Controllers
 {
+	public class BadTranscoderException : Exception {}
+	
     public class Transcoder : ITranscoder
     {
-        private readonly string transmuxPath;
-        private readonly string transcodePath;
+        private readonly string _transmuxPath;
+        private readonly string _transcodePath;
 
         public Transcoder(IConfiguration config)
         {
-            transmuxPath = config.GetValue<string>("transmuxTempPath");
-            transcodePath = config.GetValue<string>("transcodeTempPath");
+            _transmuxPath = config.GetValue<string>("transmuxTempPath");
+            _transcodePath = config.GetValue<string>("transcodeTempPath");
 
-            Console.WriteLine("&Api INIT (unmanaged stream size): " + TranscoderAPI.init() + ", Stream size: " + Marshal.SizeOf<Models.Watch.Stream>());
+            if (TranscoderAPI.init() != Marshal.SizeOf<Models.Watch.Stream>())
+	            throw new BadTranscoderException();
         }
 
         public async Task<Track[]> GetTrackInfo(string path)
@@ -46,7 +49,7 @@ namespace Kyoo.Controllers
 
         public async Task<string> Transmux(WatchItem episode)
         {
-            string folder = Path.Combine(transmuxPath, episode.Link);
+            string folder = Path.Combine(_transmuxPath, episode.Link);
             string manifest = Path.Combine(folder, episode.Link + ".m3u8");
             float playableDuration = 0;
             bool transmuxFailed = false;
@@ -75,7 +78,7 @@ namespace Kyoo.Controllers
 
         public async Task<string> Transcode(WatchItem episode)
         {
-            string folder = Path.Combine(transcodePath, episode.Link);
+            string folder = Path.Combine(_transcodePath, episode.Link);
             string manifest = Path.Combine(folder, episode.Link + ".m3u8");
             float playableDuration = 0;
             bool transmuxFailed = false;

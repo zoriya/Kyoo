@@ -10,11 +10,11 @@ namespace Kyoo.Controllers
 {
     public class ThumbnailsManager : IThumbnailsManager
     {
-        private readonly IConfiguration config;
+        private readonly IConfiguration _config;
 
         public ThumbnailsManager(IConfiguration configuration)
         {
-            config = configuration;
+            _config = configuration;
         }
 
         public async Task<Show> Validate(Show show)
@@ -74,7 +74,7 @@ namespace Kyoo.Controllers
                 return null;
             foreach (People peop in people)
             {
-                string root = config.GetValue<string>("peoplePath");
+                string root = _config.GetValue<string>("peoplePath");
                 Directory.CreateDirectory(root);
 
                 string localThumb = root + "/" + peop.Slug + ".jpg";
