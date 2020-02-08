@@ -1,12 +1,11 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace Kyoo.Models
 {
     public class People : IMergable<People>
     {
-        [JsonIgnore] public long ID { get; set; } = -1;
+        [JsonIgnore] public long ID { get; set; }
         public string Slug { get; set; }
         public string Name { get; set; }
         public string Role;
@@ -18,18 +17,16 @@ namespace Kyoo.Models
         
         public People() {}
 
-        public People(long id, string slug, string name, string imgPrimary, string externalIDs)
+        public People(string slug, string name, string imgPrimary, string externalIDs)
         {
-            ID = id;
             Slug = slug;
             Name = name;
             ImgPrimary = imgPrimary;
             ExternalIDs = externalIDs;
         }
 
-        public People(long id, string slug, string name, string role, string type, string imgPrimary, string externalIDs)
+        public People(string slug, string name, string role, string type, string imgPrimary, string externalIDs)
         {
-            ID = id;
             Slug = slug;
             Name = name;
             Role = role;
@@ -43,6 +40,19 @@ namespace Kyoo.Models
 	        Role = role;
 	        Type = type;
 	        return this;
+        }
+
+        public PeopleLink ToLink(Show show)
+        {
+	        return new PeopleLink
+	        {
+		        People = this,
+			    PeopleID = ID,
+			    Role = Role,
+			    Type = Type,
+			    Show = show,
+			    ShowID = show.ID
+	        };
         }
 
         public People Merge(People other)

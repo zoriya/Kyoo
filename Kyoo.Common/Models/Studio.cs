@@ -4,7 +4,7 @@ namespace Kyoo.Models
 {
     public class Studio
     {
-        [JsonIgnore] public long ID { get; set; } = -1;
+        [JsonIgnore] public long ID { get; set; }
         public string Slug { get; set; }
         public string Name { get; set; }
 
@@ -15,21 +15,7 @@ namespace Kyoo.Models
             Slug = slug;
             Name = name;
         }
-
-        public Studio(long id, string slug, string name)
-        {
-            ID = id;
-            Slug = slug;
-            Name = name;
-        }
-
-        public static Studio FromReader(System.Data.SQLite.SQLiteDataReader reader)
-        {
-            return new Studio((long)reader["id"],
-                reader["slug"] as string,
-                reader["name"] as string);
-        }
-
+        
         public static Studio Default()
         {
             return new Studio("unknow", "Unknow Studio");

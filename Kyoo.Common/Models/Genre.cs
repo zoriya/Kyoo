@@ -20,12 +20,5 @@ namespace Kyoo.Models
             Slug = slug;
             Name = name;
         }
-
-        public static Genre FromReader(System.Data.SQLite.SQLiteDataReader reader)
-        {
-            return new Genre((long)reader["id"],
-                reader["slug"] as string,
-                reader["name"] as string);
-        }
     }
 }

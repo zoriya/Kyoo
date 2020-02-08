@@ -1,13 +1,12 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace Kyoo.Models
 {
     public class Season : IMergable<Season>
     {
-        [JsonIgnore] public long ID  { get; set; } = -1;
-        [JsonIgnore] public long ShowID { get; set; } = -1;
+        [JsonIgnore] public long ID  { get; set; }
+        [JsonIgnore] public long ShowID { get; set; }
 
         public long SeasonNumber { get; set; } = -1;
         public string Title { get; set; }
@@ -17,14 +16,13 @@ namespace Kyoo.Models
         [JsonIgnore] public string ImgPrimary { get; set; }
         public string ExternalIDs { get; set; }
 
-        public virtual Show Show { get; set; }
-        public virtual IEnumerable<Episode> Episodes { get; set; }
+        [JsonIgnore] public virtual Show Show { get; set; }
+        [JsonIgnore] public virtual IEnumerable<Episode> Episodes { get; set; }
 
         public Season() { }
 
-        public Season(long id, long showID, long seasonNumber, string title, string overview, long? year, string imgPrimary, string externalIDs)
+        public Season(long showID, long seasonNumber, string title, string overview, long? year, string imgPrimary, string externalIDs)
         {
-            ID = id;
             ShowID = showID;
             SeasonNumber = seasonNumber;
             Title = title;
@@ -32,18 +30,6 @@ namespace Kyoo.Models
             Year = year;
             ImgPrimary = imgPrimary;
             ExternalIDs = externalIDs;
-        }
-
-        public static Season FromReader(System.Data.SQLite.SQLiteDataReader reader)
-        {
-            return new Season((long)reader["id"],
-                (long)reader["showID"],
-                (long)reader["seasonNumber"],
-                reader["title"] as string,
-                reader["overview"] as string,
-                reader["year"] as long?,
-                reader["imgPrimary"] as string,
-                reader["externalIDs"] as string);
         }
 
         public Season Merge(Season other)

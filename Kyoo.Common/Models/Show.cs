@@ -1,5 +1,4 @@
 ﻿using System;
-using Kyoo.Controllers;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,9 +31,9 @@ namespace Kyoo.Models
 
         public IEnumerable<Genre> Genres;
         public virtual Studio Studio { get; set; }
-        public virtual IEnumerable<PeopleLink> People { get; set; }
-        public virtual IEnumerable<Season> Seasons { get; set; }
-        public virtual IEnumerable<Episode> Episodes { get; set; }
+        [JsonIgnore] public virtual IEnumerable<PeopleLink> People { get; set; }
+        [JsonIgnore] public virtual IEnumerable<Season> Seasons { get; set; }
+        [JsonIgnore] public virtual IEnumerable<Episode> Episodes { get; set; }
 
 
         public string GetAliases()
@@ -50,9 +49,8 @@ namespace Kyoo.Models
 
         public Show() { }
 
-        public Show(long id, string slug, string title, IEnumerable<string> aliases, string path, string overview, string trailerUrl, IEnumerable<Genre> genres, Status? status, long? startYear, long? endYear, string externalIDs)
+        public Show(string slug, string title, IEnumerable<string> aliases, string path, string overview, string trailerUrl, IEnumerable<Genre> genres, Status? status, long? startYear, long? endYear, string externalIDs)
         {
-            ID = id;
             Slug = slug;
             Title = title;
             Aliases = aliases.ToArray();
@@ -67,9 +65,8 @@ namespace Kyoo.Models
             IsCollection = false;
         }
 
-        public Show(long id, string slug, string title, IEnumerable<string> aliases, string path, string overview, string trailerUrl, Status? status, long? startYear, long? endYear, string imgPrimary, string imgThumb, string imgLogo, string imgBackdrop, string externalIDs)
+        public Show(string slug, string title, IEnumerable<string> aliases, string path, string overview, string trailerUrl, Status? status, long? startYear, long? endYear, string imgPrimary, string imgThumb, string imgLogo, string imgBackdrop, string externalIDs)
         {
-            ID = id;
             Slug = slug;
             Title = title;
             Aliases = aliases.ToArray();
@@ -86,41 +83,7 @@ namespace Kyoo.Models
             ExternalIDs = externalIDs;
             IsCollection = false;
         }
-
-        public static Show FromQueryReader(System.Data.SQLite.SQLiteDataReader reader, bool containsAliases = false)
-        {
-            Show show = new Show()
-            {
-                Slug = reader["slug"] as string,
-                Title = reader["title"] as string,
-                StartYear = reader["startYear"] as long?,
-                EndYear = reader["endYear"] as long?,
-                IsCollection = reader["'0'"] as string == "1"
-            };
-            if (containsAliases)
-                show.Aliases = (reader["aliases"] as string)?.Split('|');
-            return show;
-        }
-
-        public static Show FromReader(System.Data.SQLite.SQLiteDataReader reader)
-        {
-            return new Show((long)reader["id"],
-                reader["slug"] as string,
-                reader["title"] as string,
-                (reader["aliases"] as string)?.Split('|'),
-                reader["path"] as string,
-                reader["overview"] as string,
-                reader["trailerUrl"] as string,
-                reader["status"] as Status?,
-                reader["startYear"] as long?,
-                reader["endYear"] as long?,
-                reader["imgPrimary"] as string,
-                reader["imgThumb"] as string,
-                reader["imgLogo"] as string,
-                reader["imgBackdrop"] as string,
-                reader["externalIDs"] as string);
-        }
-
+        
         public string GetID(string provider)
         {
             if (ExternalIDs?.Contains(provider) != true)
@@ -130,44 +93,7 @@ namespace Kyoo.Models
                 return ExternalIDs.Substring(startIndex);
             return ExternalIDs.Substring(startIndex, ExternalIDs.IndexOf('|', startIndex) - startIndex);
         }
-
-        public Show Set(string slug, string path)
-        {
-            Slug = slug;
-            Path = path;
-            return this;
-        }
-
-        public Show SetGenres(ILibraryManager manager)
-        {
-            Genres = manager.GetGenreForShow(ID);
-            return this;
-        }
-
-        public Show SetStudio(ILibraryManager manager)
-        {
-            Studio = manager.GetStudio(ID);
-            return this;
-        }
-
-        public Show SetDirectors(ILibraryManager manager)
-        {
-            //Directors = manager.GetDirectors(ID);
-            return this;
-        }
-
-        public Show SetPeople(ILibraryManager manager)
-        {
-            //People = manager.GetPeople(ID);
-            return this;
-        }
-
-        public Show SetSeasons(ILibraryManager manager)
-        {
-            Seasons = manager.GetSeasons(ID);
-            return this;
-        }
-
+        
         public Show Merge(Show other)
         {
             if (other == null)

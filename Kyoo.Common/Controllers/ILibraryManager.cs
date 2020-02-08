@@ -54,16 +54,12 @@ namespace Kyoo.Controllers
         long RegisterShow(Show show);
         long RegisterSeason(Season season);
         long RegisterEpisode(Episode episode);
-        void RegisterTrack(Track track);
+        long RegisterTrack(Track track);
+        void RegisterShowLinks(Library library, Collection collection, Show show);
 
-        long GetOrCreateGenre(Genre genre);
-        long GetOrCreateStudio(Studio studio);
-
-        void RegisterShowPeople(long showID, IEnumerable<People> actors);
-        void AddShowToCollection(long showID, long collectionID);
-        void RegisterInLibrary(long showID, Library library);
-
-        void RemoveEpisode(Episode episode);
+        void RemoveShow(long showID);
+        void RemoveSeason(long seasonID);
+        void RemoveEpisode(long episodeID);
         void ClearSubtitles(long episodeID);
     }
 }

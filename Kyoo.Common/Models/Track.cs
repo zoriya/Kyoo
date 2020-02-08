@@ -88,18 +88,6 @@ namespace Kyoo.Models
             IsExternal = false;
         }
 
-        public static Track FromReader(System.Data.SQLite.SQLiteDataReader reader)
-        {
-            return new Track((StreamType)Enum.ToObject(typeof(StreamType), reader["streamType"]),
-                reader["title"] as string,
-                reader["language"] as string,
-                reader["isDefault"] as bool? ?? false,
-                reader["isForced"] as bool? ?? false,
-                reader["codec"] as string,
-                reader["isExternal"] as bool? ?? false,
-                reader["path"] as string);
-        }
-
         public Track SetLink(string episodeSlug)
         {
             if (Type == StreamType.Subtitle)

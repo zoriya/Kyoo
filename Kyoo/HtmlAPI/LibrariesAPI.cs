@@ -31,7 +31,7 @@ namespace Kyoo.Controllers
             if (library == null)
                 return NotFound();
 
-            return _libraryManager.GetShowsInLibrary(library.Id).ToList();
+            return _libraryManager.GetShowsInLibrary(library.ID).ToList();
         }
     }
 }

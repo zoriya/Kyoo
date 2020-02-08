@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 
 namespace Kyoo.Models
 {
@@ -7,9 +8,9 @@ namespace Kyoo.Models
     {
         [JsonIgnore] public long ID { get; set; }
         [JsonIgnore] public long ShowID { get; set; }
-        public virtual Show Show { get; set; }
+        [JsonIgnore] public virtual Show Show { get; set; }
         [JsonIgnore] public long SeasonID { get; set; }
-        public virtual Season Season { get; set; }
+        [JsonIgnore] public virtual Season Season { get; set; }
 
         public long SeasonNumber { get; set; }
         public long EpisodeNumber { get; set; }
@@ -24,6 +25,8 @@ namespace Kyoo.Models
         [JsonIgnore] public string ImgPrimary { get; set; }
         public string ExternalIDs { get; set; }
 
+        public IEnumerable<Track> Tracks { get; set; }
+
         public string ShowTitle; //Used in the API response only
         public string Link; //Used in the API response only
         public string Thumb; //Used in the API response only
@@ -31,20 +34,14 @@ namespace Kyoo.Models
 
         public Episode()
         {
-            ID = -1;
-            ShowID = -1;
-            SeasonID = -1;
-            SeasonNumber = -1;
+	        SeasonNumber = -1;
             EpisodeNumber = -1;
             AbsoluteNumber = -1;
         }
 
         public Episode(long seasonNumber, long episodeNumber, long absoluteNumber, string title, string overview, DateTime? releaseDate, long runtime, string imgPrimary, string externalIDs)
         {
-            ID = -1;
-            ShowID = -1;
-            SeasonID = -1;
-            SeasonNumber = seasonNumber;
+	        SeasonNumber = seasonNumber;
             EpisodeNumber = episodeNumber;
             AbsoluteNumber = absoluteNumber;
             Title = title;
@@ -55,9 +52,8 @@ namespace Kyoo.Models
             ExternalIDs = externalIDs;
         }
 
-        public Episode(long id, long showID, long seasonID, long seasonNumber, long episodeNumber, long absoluteNumber, string path, string title, string overview, DateTime? releaseDate, long runtime, string imgPrimary, string externalIDs)
+        public Episode(long showID, long seasonID, long seasonNumber, long episodeNumber, long absoluteNumber, string path, string title, string overview, DateTime? releaseDate, long runtime, string imgPrimary, string externalIDs)
         {
-            ID = id;
             ShowID = showID;
             SeasonID = seasonID;
             SeasonNumber = seasonNumber;
@@ -70,37 +66,6 @@ namespace Kyoo.Models
             Runtime = runtime;
             ImgPrimary = imgPrimary;
             ExternalIDs = externalIDs;
-        }
-
-        public static Episode FromReader(System.Data.SQLite.SQLiteDataReader reader)
-        {
-            return new Episode((long)reader["id"],
-                (long)reader["showID"],
-                (long)reader["seasonID"],
-                (long)reader["seasonNumber"],
-                (long)reader["episodeNumber"],
-                (long)reader["absoluteNumber"],
-                reader["path"] as string,
-                reader["title"] as string,
-                reader["overview"] as string,
-                reader["releaseDate"] as DateTime?,
-                (long)reader["runtime"],
-                reader["imgPrimary"] as string,
-                reader["externalIDs"] as string);
-        }
-
-
-        public Episode SetThumb(string showSlug)
-        {
-            Link = GetSlug(showSlug, SeasonNumber, EpisodeNumber);
-            Thumb = "thumb/" + Link;
-            return this;
-        }
-
-        public Episode SetShowTitle(string showTite)
-        {
-            ShowTitle = showTite;
-            return this;
         }
 
         public static string GetSlug(string showSlug, long seasonNumber, long episodeNumber)
