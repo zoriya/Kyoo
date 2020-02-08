@@ -33,13 +33,13 @@ namespace Kyoo
             services.AddControllers().AddNewtonsoftJson();
             services.AddHttpClient();
 
-            services.AddDbContext<DatabaseContext>(options => options.UseSqlite(Configuration.GetConnectionString("Database")), ServiceLifetime.Singleton);
+            services.AddDbContext<DatabaseContext>(options => options.UseSqlite(Configuration.GetConnectionString("Database")));
 
             // services.AddIdentity<ApplicationUser, IdentityRole>()
             //     .AddEntityFrameworkStores()
             // services.AddIdentityServer();
 
-            services.AddSingleton<ILibraryManager, LibraryManager>();
+            services.AddScoped<ILibraryManager, LibraryManager>();
             services.AddSingleton<ITranscoder, Transcoder>();
             services.AddSingleton<IThumbnailsManager, ThumbnailsManager>();
             services.AddSingleton<IProviderManager, ProviderManager>();
