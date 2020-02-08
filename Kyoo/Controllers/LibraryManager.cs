@@ -78,6 +78,11 @@ namespace Kyoo.Controllers
 		{
 			return (from show in _database.Shows where show.Slug == slug select show).FirstOrDefault();
 		}
+		
+		public Show GetShow(string path)
+		{
+			return (from show in _database.Shows where show.Path == path select show).FirstOrDefault();
+		}
 
 		public IEnumerable<Season> GetSeasons(long showID)
 		{
