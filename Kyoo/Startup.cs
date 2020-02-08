@@ -48,9 +48,9 @@ namespace Kyoo
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, DatabaseContext database)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
+	        if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
@@ -94,10 +94,6 @@ namespace Kyoo
                     spa.UseAngularCliServer(npmScript: "start");
                 }
             });
-            
-            database.Database.EnsureCreated();;
-            // Use the next line if the database is not SQLite (SQLite doesn't support complexe migrations).
-            // database.Database.Migrate();;
         }
     }
 }
