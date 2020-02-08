@@ -152,16 +152,13 @@ namespace Kyoo.Controllers
 		        return await Task.FromResult(new Season {ID = seasonID, ShowID = show.ID, Show = show});
 	        Season season = await _metadataProvider.GetSeason(show, seasonNumber, library);
             season.Show = show;
-            season.ShowID = show.ID;
             return season;
         }
         
         private async Task<Episode> GetEpisode(Show show, Season season, long episodeNumber, long absoluteNumber, string episodePath, Library library)
         {
             Episode episode = await _metadataProvider.GetEpisode(show, episodePath, season.SeasonNumber, episodeNumber, absoluteNumber, library);
-            episode.ShowID = show.ID;
             episode.Show = show;
-            episode.SeasonID = season.ID;
             episode.Season = season;
             
             IEnumerable<Track> tracks = await _transcoder.GetTrackInfo(episode.Path);
