@@ -132,25 +132,25 @@ namespace Kyoo.Controllers
         {
 	        if (string.IsNullOrEmpty(collectionName))
 		        return await Task.FromResult<Collection>(null);
-	        if (_libraryManager.IsCollectionRegistered(Utility.ToSlug(collectionName), out long collectionID))
-		        return new Collection {ID = collectionID};
-	        return await _metadataProvider.GetCollectionFromName(collectionName, library);
+	        return _libraryManager.GetCollection(Utility.ToSlug(collectionName)) ?? await _metadataProvider.GetCollectionFromName(collectionName, library);
         }
         
         private async Task<Show> GetShow(string showTitle, string showPath, Library library)
         {
-            if (_libraryManager.IsShowRegistered(showPath, out long showID))
-	            return new Show { ID = showID, Title = showTitle, ExternalIDs = _libraryManager.GetShowExternalIDs(showID) };
-            Show show = await _metadataProvider.GetShowFromName(showTitle, showPath, library);
+	        Show show = _libraryManager.GetShow(showPath);
+            if (show != null)
+	            return show;
+            show = await _metadataProvider.GetShowFromName(showTitle, showPath, library);
             show.People = from people in await _metadataProvider.GetPeople(show, library) select people.ToLink(show);
             return show;
         }
 
         private async Task<Season> GetSeason(Show show, long seasonNumber, Library library)
         {
-	        if (_libraryManager.IsSeasonRegistered(show.ID, seasonNumber, out long seasonID))
-		        return await Task.FromResult(new Season {ID = seasonID, ShowID = show.ID, Show = show});
-	        Season season = await _metadataProvider.GetSeason(show, seasonNumber, library);
+	        Season season = _libraryManager.GetSeason(show.Slug, seasonNumber);
+	        if (season != null)
+		        return await Task.FromResult(season);
+	        season = await _metadataProvider.GetSeason(show, seasonNumber, library);
             season.Show = show;
             return season;
         }
