@@ -1,8 +1,6 @@
 ﻿using Kyoo.Models;
 using Kyoo.Models.Watch;
-using System;
 using System.Collections.Generic;
-using System.Data.SQLite;
 using System.Linq;
 
 namespace Kyoo.Controllers
@@ -10,7 +8,6 @@ namespace Kyoo.Controllers
 	public class LibraryManager : ILibraryManager
 	{
 		private readonly DatabaseContext _database;
-		private readonly SQLiteConnection sqlConnection;
 		
 		
 		public LibraryManager(DatabaseContext database)
@@ -63,9 +60,8 @@ namespace Kyoo.Controllers
 
 		public IEnumerable<Show> GetShows()
 		{
-			return (from show in _database.Shows join link in _database.CollectionLinks on show equals link.Show into gj
-				from l in gj.DefaultIfEmpty()
-				where l.CollectionID == null select l.Show).AsEnumerable().Union(
+			return (from show in _database.Shows from l in _database.CollectionLinks.DefaultIfEmpty()
+				where l.CollectionID == null select show).AsEnumerable().Union(
 				from collection in _database.Collections select collection.AsShow()).OrderBy(x => x.Title);
 		}
 
@@ -303,43 +299,9 @@ namespace Kyoo.Controllers
 		#region Write Into The Database
 		public long RegisterCollection(Collection collection)
 		{
-			// string query = "INSERT INTO collections (slug, name, overview, imgPrimary) VALUES($slug, $name, $overview, $imgPrimary);";
-			//
-			// using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
-			// {
-			// 	try
-			// 	{
-			// 		cmd.Parameters.AddWithValue("$slug", collection.Slug);
-			// 		cmd.Parameters.AddWithValue("$name", collection.Name);
-			// 		cmd.Parameters.AddWithValue("$overview", collection.Overview);
-			// 		cmd.Parameters.AddWithValue("$imgPrimary", collection.ImgPrimary);
-			// 		cmd.ExecuteNonQuery();
-			//
-			// 		cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
-			// 		return (long)cmd.ExecuteScalar();
-			// 	}
-			// 	catch
-			// 	{
-			// 		Console.Error.WriteLine("SQL error while trying to create a collection. Collection probably already registered.");
-			// 		cmd.CommandText = "SELECT * FROM collections WHERE slug = $slug";
-			// 		cmd.Parameters.AddWithValue("$slug", collection.Slug);
-			// 		return (long)cmd.ExecuteScalar();
-			// 	}
-			// }
-			return -1;
-		}
-
-		public void RegisterInLibrary(long showID, Library library)
-		{
-			// string query =
-			// 	"INSERT INTO librariesLinks (libraryID, showID) SELECT id, $showID FROM libraries WHERE libraries.id = $libraryID;";
-			//
-			// using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
-			// {
-			// 	cmd.Parameters.AddWithValue("$libraryID", library.Id);
-			// 	cmd.Parameters.AddWithValue("$showID", showID);
-			// 	cmd.ExecuteNonQuery();
-			// }
+			_database.Collections.Add(collection);
+			_database.SaveChanges();
+			return collection.ID;
 		}
 
 		public long RegisterShow(Show show)
@@ -351,167 +313,54 @@ namespace Kyoo.Controllers
 
 		public long RegisterSeason(Season season)
 		{
-			string query = "INSERT INTO seasons (showID, seasonNumber, title, overview, year, imgPrimary, externalIDs) VALUES($showID, $seasonNumber, $title, $overview, $year, $imgPrimary, $externalIDs);";
-			using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
-			{
-				try
-				{
-					cmd.Parameters.AddWithValue("$showID", season.ShowID);
-					cmd.Parameters.AddWithValue("$seasonNumber", season.SeasonNumber);
-					cmd.Parameters.AddWithValue("$title", season.Title);
-					cmd.Parameters.AddWithValue("$overview", season.Overview);
-					cmd.Parameters.AddWithValue("$year", season.Year);
-					cmd.Parameters.AddWithValue("$imgPrimary", season.ImgPrimary);
-					cmd.Parameters.AddWithValue("$externalIDs", season.ExternalIDs);
-					cmd.ExecuteNonQuery();
-
-					cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
-					return (long)cmd.ExecuteScalar();
-				}
-				catch
-				{
-					Console.Error.WriteLine("SQL error while trying to insert a season ({0}), season probably already registered.", season.Title);
-					cmd.CommandText = "SELECT * FROM seasons WHERE showID = $showID AND seasonNumber = $seasonNumber";
-					cmd.Parameters.AddWithValue("$showID", season.ShowID);
-					cmd.Parameters.AddWithValue("$seasonNumber", season.SeasonNumber);
-					return (long)cmd.ExecuteScalar();
-				}
-			}
+			_database.Seasons.Add(season);
+			_database.SaveChanges();
+			return season.ID;
 		}
 
 		public long RegisterEpisode(Episode episode)
 		{
-			string query = "INSERT INTO episodes (showID, seasonID, seasonNumber, episodeNumber, absoluteNumber, path, title, overview, releaseDate, runtime, imgPrimary, externalIDs) VALUES($showID, $seasonID, $seasonNumber, $episodeNumber, $absoluteNumber, $path, $title, $overview, $releaseDate, $runtime, $imgPrimary, $externalIDs);";
-			using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
-			{
-				try
-				{
-					cmd.Parameters.AddWithValue("$showID", episode.ShowID);
-					cmd.Parameters.AddWithValue("$seasonID", episode.SeasonID);
-					cmd.Parameters.AddWithValue("$seasonNUmber", episode.SeasonNumber);
-					cmd.Parameters.AddWithValue("$episodeNumber", episode.EpisodeNumber);
-					cmd.Parameters.AddWithValue("$absoluteNumber", episode.AbsoluteNumber);
-					cmd.Parameters.AddWithValue("$path", episode.Path);
-					cmd.Parameters.AddWithValue("$title", episode.Title);
-					cmd.Parameters.AddWithValue("$overview", episode.Overview);
-					cmd.Parameters.AddWithValue("$releaseDate", episode.ReleaseDate);
-					cmd.Parameters.AddWithValue("$runtime", episode.Runtime);
-					cmd.Parameters.AddWithValue("$imgPrimary", episode.ImgPrimary);
-					cmd.Parameters.AddWithValue("$externalIDs", episode.ExternalIDs);
-					cmd.ExecuteNonQuery();
-
-					cmd.CommandText = "SELECT LAST_INSERT_ROWID()";
-					return (long)cmd.ExecuteScalar();
-				}
-				catch
-				{
-					Console.Error.WriteLine("SQL error while trying to insert an episode ({0}), episode probably already registered.", episode.Link);
-					cmd.CommandText = "SELECT * FROM episodes WHERE showID = $showID AND seasonNumber = $seasonNumber AND episodeNumber = $episodeNumber";
-					cmd.Parameters.AddWithValue("$showID", episode.ShowID);
-					cmd.Parameters.AddWithValue("$seasonNumber", episode.SeasonNumber);
-					cmd.Parameters.AddWithValue("$episodeNumber", episode.EpisodeNumber);
-					return (long)cmd.ExecuteScalar();
-				}
-			}
+			_database.Episodes.Add(episode);
+			_database.SaveChanges();
+			return episode.ID;
 		}
 
-		public void RegisterTrack(Track track)
+		public long RegisterTrack(Track track)
 		{
-			string query = "INSERT INTO tracks (episodeID, streamType, title, language, codec, isDefault, isForced, isExternal, path) VALUES($episodeID, $streamType, $title, $language, $codec, $isDefault, $isForced, $isExternal, $path);";
-			using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
-			{
-				cmd.Parameters.AddWithValue("$episodeID", track.EpisodeID);
-				cmd.Parameters.AddWithValue("$streamType", track.Type);
-				cmd.Parameters.AddWithValue("$title", track.Title);
-				cmd.Parameters.AddWithValue("$language", track.Language);
-				cmd.Parameters.AddWithValue("$codec", track.Codec);
-				cmd.Parameters.AddWithValue("$isDefault", track.IsDefault);
-				cmd.Parameters.AddWithValue("$isForced", track.IsForced);
-				cmd.Parameters.AddWithValue("$isExternal", track.IsExternal);
-				cmd.Parameters.AddWithValue("$path", track.Path);
-				cmd.ExecuteNonQuery();
-			}
+			_database.Tracks.Add(track);
+			_database.SaveChanges();
+			return track.ID;
 		}
 
-		public void RegisterShowPeople(long showID, IEnumerable<People> people)
+		public void RegisterShowLinks(Library library, Collection collection, Show show)
 		{
-			if (people == null)
-				return;
-
-			string linkQuery = "INSERT INTO peopleLinks (peopleID, showID, role, type) VALUES($peopleID, $showID, $role, $type);";
-
-			foreach (People peop in people)
+			if (collection != null) 
 			{
-				using (SQLiteCommand cmd = new SQLiteCommand(linkQuery, sqlConnection))
-				{
-					cmd.Parameters.AddWithValue("$peopleID", GetOrCreatePeople(peop));
-					cmd.Parameters.AddWithValue("$showID", showID);
-					cmd.Parameters.AddWithValue("$role", peop.Role);
-					cmd.Parameters.AddWithValue("$type", peop.Type);
-					cmd.ExecuteNonQuery();
-				}
+				_database.LibraryLinks.Add(new LibraryLink {LibraryID = library.ID, CollectionID = collection.ID});
+				_database.CollectionLinks.Add(new CollectionLink { CollectionID = collection.ID, ShowID = show.ID});
 			}
+			_database.LibraryLinks.Add(new LibraryLink {LibraryID = library.ID, ShowID = show.ID});
+			_database.SaveChanges();
 		}
-
-		public void AddShowToCollection(long showID, long collectionID)
-		{
-			string linkQuery = "INSERT INTO collectionsLinks (collectionID, showID) VALUES($collectionID, $showID);";
-
-			using (SQLiteCommand cmd = new SQLiteCommand(linkQuery, sqlConnection))
-			{
-				cmd.Parameters.AddWithValue("$collectionID", collectionID);
-				cmd.Parameters.AddWithValue("$showID", showID);
-				cmd.ExecuteNonQuery();
-			}
-		}
-
+		
 		public void RemoveShow(long showID)
 		{
-			string query = "DELETE FROM shows WHERE id = $showID;";
-
-			using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
-			{
-				cmd.Parameters.AddWithValue("$showID", showID);
-				cmd.ExecuteNonQuery();
-			}
+			_database.Shows.Remove(new Show {ID = showID});
 		}
 
-		public void RemoveSeason(long showID, long seasonID)
+		public void RemoveSeason(long seasonID)
 		{
-			string query = "DELETE FROM seasons WHERE id = $seasonID;";
-
-			using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
-			{
-				cmd.Parameters.AddWithValue("$seasonID", seasonID);
-				cmd.ExecuteNonQuery();
-			}
-			if (GetSeasons(showID).Count() == 0)
-				RemoveShow(showID);
+			_database.Seasons.Remove(new Season {ID = seasonID});
 		}
 
-		public void RemoveEpisode(Episode episode)
+		public void RemoveEpisode(long episodeID)
 		{
-			string query = "DELETE FROM episodes WHERE id = $episodeID;";
-
-			using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
-			{
-				cmd.Parameters.AddWithValue("$episodeID", episode.ID);
-				cmd.ExecuteNonQuery();
-			}
-
-			if (GetEpisodes(episode.ShowID, episode.SeasonNumber).Count() == 0)
-				RemoveSeason(episode.ShowID, episode.SeasonID);
+			_database.Episodes.Remove(new Episode {ID = episodeID});
 		}
 
 		public void ClearSubtitles(long episodeID)
 		{
-			string query = "DELETE FROM tracks WHERE episodeID = $episodeID;";
-
-			using (SQLiteCommand cmd = new SQLiteCommand(query, sqlConnection))
-			{
-				cmd.Parameters.AddWithValue("$episodeID", episodeID);
-				cmd.ExecuteNonQuery();
-			}
+			_database.Tracks.RemoveRange(_database.Tracks.Where(x => x.EpisodeID == episodeID));
 		}
 		#endregion
 	}
