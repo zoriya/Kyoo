@@ -1,3 +1,6 @@
+using System;
+
+#nullable enable
 namespace Kyoo.Models
 {
 	public class LibraryLink
