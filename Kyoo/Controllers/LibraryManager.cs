@@ -345,12 +345,12 @@ namespace Kyoo.Controllers
 
 		public void RegisterShowLinks(Library library, Collection collection, Show show)
 		{
-			if (collection != null) 
+			if (collection != null)
 			{
-				_database.LibraryLinks.Add(new LibraryLink {LibraryID = library.ID, CollectionID = collection.ID});
-				_database.CollectionLinks.Add(new CollectionLink { CollectionID = collection.ID, ShowID = show.ID});
+				_database.LibraryLinks.AddIfNotExist(new LibraryLink {LibraryID = library.ID, CollectionID = collection.ID}, x => x.LibraryID == library.ID && x.CollectionID == collection.ID && x.ShowID == null);
+				_database.CollectionLinks.AddIfNotExist(new CollectionLink { CollectionID = collection.ID, ShowID = show.ID}, x => x.CollectionID == collection.ID && x.ShowID == show.ID);
 			}
-			_database.LibraryLinks.Add(new LibraryLink {LibraryID = library.ID, ShowID = show.ID});
+			_database.LibraryLinks.AddIfNotExist(new LibraryLink {LibraryID = library.ID, ShowID = show.ID}, x => x.LibraryID == library.ID && x.CollectionID == null && x.ShowID == show.ID);
 			_database.SaveChanges();
 		}
 		

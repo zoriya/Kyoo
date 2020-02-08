@@ -51,3 +51,12 @@ namespace Kyoo
         }
     }
 }
+
+public static class DbSetExtension
+{
+	public static EntityEntry<T> AddIfNotExist<T>(this DbSet<T> db, T entity, Func<T, bool> predicate) where T : class
+	{
+		bool exists = db.Any(predicate);
+		return exists ? null : db.Add(entity);
+	}
+}
