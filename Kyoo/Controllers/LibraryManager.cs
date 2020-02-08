@@ -2,6 +2,7 @@
 using Kyoo.Models.Watch;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers
 {
@@ -194,8 +195,14 @@ namespace Kyoo.Controllers
 
 		public IEnumerable<Show> GetShowsInLibrary(long libraryID)
 		{
-			return (from link in _database.LibraryLinks where link.LibraryID == libraryID select link).AsEnumerable()
-				.Select(link => link.Show ?? link.Collection.AsShow())
+			return (from link in _database.LibraryLinks where link.LibraryID == libraryID select link)
+				.AsEnumerable()
+				.Select(link =>
+				{
+					_database.Entry(link).Reference(l => l.Show).Load();
+					_database.Entry(link).Reference(l => l.Collection).Load();
+					return link.Show ?? link.Collection.AsShow();
+				})
 				.OrderBy(x => x.Title);
 		}
 
