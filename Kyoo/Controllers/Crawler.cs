@@ -141,7 +141,7 @@ namespace Kyoo.Controllers
             if (show != null)
 	            return show;
             show = await _metadataProvider.GetShowFromName(showTitle, showPath, library);
-            show.People = from people in await _metadataProvider.GetPeople(show, library) select people.ToLink(show);
+            show.People = (from people in await _metadataProvider.GetPeople(show, library) select people.ToLink(show)).ToList();
             return show;
         }
 
