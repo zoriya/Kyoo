@@ -6,9 +6,9 @@ namespace Kyoo.Models
     {
 	    [JsonIgnore] public long ID { get; set; }
 	    [JsonIgnore] public long PeopleID { get; set; }
-        public People People { get; set; }
+        public virtual People People { get; set; }
         [JsonIgnore] public long ShowID { get; set; }
-        [JsonIgnore] public Show Show { get; set; }
+        [JsonIgnore] public virtual Show Show { get; set; }
         public string Role { get; set; }
         public string Type { get; set; }
 
