@@ -45,6 +45,8 @@ namespace Kyoo
             services.AddSingleton<IProviderManager, ProviderManager>();
             services.AddScoped<ICrawler, Crawler>();
             services.AddSingleton<IPluginManager, PluginManager>();
+            
+            services.AddHostedService<StartupCode>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

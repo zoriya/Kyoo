@@ -13,9 +13,6 @@ namespace Kyoo.Controllers
 {
     public class Crawler : ICrawler
     {
-        private bool _isRunning;
-        private readonly CancellationTokenSource _cancellation;
-
         private readonly ILibraryManager _libraryManager;
         private readonly IProviderManager _metadataProvider;
         private readonly ITranscoder _transcoder;
@@ -27,26 +24,9 @@ namespace Kyoo.Controllers
             _metadataProvider = metadataProvider;
             _transcoder = transcoder;
             _config = configuration;
-            _cancellation = new CancellationTokenSource();
         }
 
-        public void Start()
-        {
-            if (_isRunning)
-                return;
-            _isRunning = true;
-            StartAsync(_cancellation.Token);
-        }
-
-        public void Cancel()
-        {
-            if (!_isRunning)
-                return;
-            _isRunning = false;
-            _cancellation.Cancel();
-        }
-
-        private async void StartAsync(CancellationToken cancellationToken)
+        public async Task StartAsync(CancellationToken cancellationToken)
         {
             try
             {
@@ -66,7 +46,6 @@ namespace Kyoo.Controllers
             {
                 Console.Error.WriteLine($"Unknown exception thrown durring libraries scan.\nException: {ex.Message}");
             }
-            _isRunning = false;
             Console.WriteLine("Scan finished!");
         }
 
@@ -203,13 +182,6 @@ namespace Kyoo.Controllers
         private static bool IsVideo(string filePath)
         {
             return VideoExtensions.Contains(Path.GetExtension(filePath));
-        }
-
-
-        public Task StopAsync()
-        {
-            _cancellation.Cancel();
-            return null;
         }
     }
 }

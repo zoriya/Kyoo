@@ -5,8 +5,6 @@ namespace Kyoo.Controllers
 {
     public interface ICrawler
     {
-        void Start();
-
-        void Cancel();
+	    Task StartAsync(CancellationToken cancellationToken);
     }
 }
