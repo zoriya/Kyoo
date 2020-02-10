@@ -25,6 +25,10 @@ namespace Kyoo
         public DbSet<CollectionLink> CollectionLinks { get; set; }
         public DbSet<PeopleLink> PeopleLinks { get; set; }
         
+        // This is used because EF doesn't support Many-To-Many relationships so for now we need to override the getter/setters to store this.
+        public DbSet<GenreLink> GenreLinks { get; set; }
+        
+        
         private ValueConverter<string[], string> stringArrayConverter = new ValueConverter<string[], string>(
             arr => string.Join("|", arr),
             str => str.Split("|", StringSplitOptions.None));
@@ -48,6 +52,16 @@ namespace Kyoo
             modelBuilder.Entity<Track>()
                 .Property(t => t.IsForced)
                 .ValueGeneratedNever();
+
+
+            modelBuilder.Entity<GenreLink>()
+	            .HasKey(x => new {x.ShowID, x.GenreID});
+	                        
+            modelBuilder.Entity<Show>()
+	            .Ignore(x => x.Genres);
+            
+            // modelBuilder.Entity<Genre>()
+	           //  .Ignore(x => x.Shows);
         }
     }
 }

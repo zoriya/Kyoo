@@ -56,7 +56,7 @@ namespace Kyoo.Models
 
     public class Track : Stream
     {
-        public int ID { get; set; }
+	    [JsonIgnore] public long ID { get; set; }
         [JsonIgnore] public long EpisodeID { get; set; }
         public bool IsDefault
         {
@@ -72,7 +72,7 @@ namespace Kyoo.Models
         public string Link;
 
         [JsonIgnore] public bool IsExternal { get; set; }
-        public virtual Episode Episode { get; set; }
+        [JsonIgnore] public virtual Episode Episode { get; set; }
         
         public Track() { }
 

@@ -76,14 +76,7 @@ namespace Kyoo.Controllers
 
 		public Show GetShowBySlug(string slug)
 		{
-			Show ret = (from show in _database.Shows where show.Slug == slug select show).FirstOrDefault();
-			// if (ret == null)
-			// 	return null;
-			//_database.Entry(ret).Collection(x => x.Genres).Load();
-			// _database.Entry(ret).Reference(x => x.Studio).Load();
-			// _database.Entry(ret).Collection(x => x.People).Load();
-			// _database.Entry(ret).Collection(x => x.Seasons).Load();
-			return ret;
+			return (from show in _database.Shows where show.Slug == slug select show).FirstOrDefault();
 		}
 		
 		public Show GetShow(string path)
