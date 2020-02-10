@@ -86,7 +86,8 @@ namespace Kyoo.Controllers
 
 		public IEnumerable<Season> GetSeasons(long showID)
 		{
-			return from season in _database.Seasons where season.ShowID == showID select season;
+			return (from season in _database.Seasons where season.ShowID == showID select season)
+				.OrderBy(x => x.SeasonNumber);
 		}
 
 		public Season GetSeason(string showSlug, long seasonNumber)
@@ -112,8 +113,9 @@ namespace Kyoo.Controllers
 
 		public IEnumerable<Episode> GetEpisodes(string showSlug, long seasonNumber)
 		{
-			return from episode in _database.Episodes where episode.SeasonNumber == seasonNumber 
-			                                             && episode.Show.Slug == showSlug select episode.SetLink(showSlug);
+			return (from episode in _database.Episodes where episode.SeasonNumber == seasonNumber 
+			                                             && episode.Show.Slug == showSlug select episode.SetLink(showSlug))
+				.OrderBy(x => x.EpisodeNumber);
 		}
 
 		public IEnumerable<Episode> GetEpisodes(long showID, long seasonNumber)
@@ -169,7 +171,7 @@ namespace Kyoo.Controllers
 
 		public IEnumerable<Genre> GetGenreForShow(long showID)
 		{
-			return (from show in _database.Shows where show.ID == showID select show.Genres).FirstOrDefault();
+			return ((from show in _database.Shows where show.ID == showID select show.Genres).FirstOrDefault());
 		}
 
 		public Genre GetGenreBySlug(string slug)
