@@ -67,10 +67,9 @@ namespace Kyoo.Controllers
 
 		public IEnumerable<Show> GetShows(string searchQuery)
 		{
-			return (from show in _database.Shows join link in _database.CollectionLinks on show equals link.Show into gj
-				from l in gj.DefaultIfEmpty()
-				where l.CollectionID == null select l.Show).Union(
-				from collection in _database.Collections select collection.AsShow())
+			return (from show in _database.Shows from l in _database.CollectionLinks.DefaultIfEmpty()
+					where l.CollectionID == null select show).AsEnumerable().Union(
+					from collection in _database.Collections select collection.AsShow())
 				.Where(x => x.Title.Contains(searchQuery)).OrderBy(x => x.Title);
 		}
 
