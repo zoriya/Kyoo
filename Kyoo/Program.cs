@@ -11,22 +11,8 @@ namespace Kyoo
     {
         public static async Task Main(string[] args)
         {
-            IWebHost host = CreateWebHostBuilder(args).Build();
-
             Console.WriteLine($"Running as: {Environment.UserName}");
-            using (IServiceScope serviceScope = host.Services.CreateScope())
-            {
-	            serviceScope.ServiceProvider.GetService<DatabaseContext>().Database.EnsureCreated();;
-	            // Use the next line if the database is not SQLite (SQLite doesn't support complexe migrations).
-	            // serviceScope.ServiceProvider.GetService<DatabaseContext>().Database.Migrate();;
-	            
-                IPluginManager pluginManager = serviceScope.ServiceProvider.GetService<IPluginManager>();
-                pluginManager.ReloadPlugins();
-
-                ICrawler crawler = serviceScope.ServiceProvider.GetService<ICrawler>();
-                crawler.Start();
-            }
-            await host.RunAsync();
+            await CreateWebHostBuilder(args).Build().RunAsync();
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
