@@ -8,7 +8,7 @@ namespace Kyoo.Controllers
     public class AdminController : ControllerBase
     {
 	    [HttpGet("scan")]
-        public IActionResult ScanLibrary(ICrawler crawler)
+        public IActionResult ScanLibrary([FromServices] ICrawler crawler)
         {
             crawler.StartAsync(new CancellationToken());
             return Ok("Scanning");
