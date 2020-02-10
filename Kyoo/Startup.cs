@@ -41,10 +41,10 @@ namespace Kyoo
             // services.AddIdentityServer();
 
             services.AddScoped<ILibraryManager, LibraryManager>();
+            services.AddScoped<ICrawler, Crawler>();
             services.AddSingleton<ITranscoder, Transcoder>();
             services.AddSingleton<IThumbnailsManager, ThumbnailsManager>();
             services.AddSingleton<IProviderManager, ProviderManager>();
-            services.AddScoped<ICrawler, Crawler>();
             services.AddSingleton<IPluginManager, PluginManager>();
             
             services.AddHostedService<StartupCode>();
