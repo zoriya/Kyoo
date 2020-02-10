@@ -14,7 +14,7 @@ namespace Kyoo.Controllers
         //For the show
         Task<Show> GetShowByID(string id);
         Task<Show> GetShowFromName(string showName);
-        Task<IEnumerable<People>> GetPeople(Show show);
+        Task<IEnumerable<PeopleLink>> GetPeople(Show show);
 
         //For the seasons
         Task<Season> GetSeason(Show show, long seasonNumber);

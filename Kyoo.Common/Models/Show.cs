@@ -29,10 +29,10 @@ namespace Kyoo.Models
         
         public bool IsCollection;
 
-        public IEnumerable<Genre> Genres;
+        public virtual IEnumerable<Genre> Genres { get; set; }
         public virtual Studio Studio { get; set; }
-        [JsonIgnore] public virtual IEnumerable<PeopleLink> People { get; set; }
-        [JsonIgnore] public virtual IEnumerable<Season> Seasons { get; set; }
+        public virtual IEnumerable<PeopleLink> People { get; set; }
+        public virtual IEnumerable<Season> Seasons { get; set; }
         [JsonIgnore] public virtual IEnumerable<Episode> Episodes { get; set; }
 
 

@@ -9,7 +9,7 @@ namespace Kyoo.Controllers
         //Read values
         string GetShowExternalIDs(long showID);
         Studio GetStudio(long showID);
-        IEnumerable<People> GetPeople(long showID);
+        IEnumerable<PeopleLink> GetPeople(long showID);
         IEnumerable<Genre> GetGenreForShow(long showID);
         IEnumerable<Season> GetSeasons(long showID);
         int GetSeasonCount(string showSlug, long seasonNumber);
