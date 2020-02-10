@@ -8,11 +8,11 @@ namespace Kyoo.Controllers
     [ApiController]
     public class SearchController : ControllerBase
     {
-        private readonly ILibraryManager libraryManager;
+        private readonly ILibraryManager _libraryManager;
 
         public SearchController(ILibraryManager libraryManager)
         {
-            this.libraryManager = libraryManager;
+            _libraryManager = libraryManager;
         }
 
         [HttpGet("{query}")]
@@ -21,11 +21,11 @@ namespace Kyoo.Controllers
             SearchResult result = new SearchResult
             {
                 Query = query,
-                Shows = libraryManager.GetShows(query),
-                Episodes = libraryManager.SearchEpisodes(query),
-                People = libraryManager.SearchPeople(query),
-                Genres = libraryManager.SearchGenres(query),
-                Studios = libraryManager.SearchStudios(query)
+                Shows = _libraryManager.GetShows(query),
+                Episodes = _libraryManager.SearchEpisodes(query),
+                People = _libraryManager.SearchPeople(query),
+                Genres = _libraryManager.SearchGenres(query),
+                Studios = _libraryManager.SearchStudios(query)
             };
             return result;
         }
