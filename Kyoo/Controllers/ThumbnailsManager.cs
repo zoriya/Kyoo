@@ -33,9 +33,9 @@ namespace Kyoo.Controllers
                     using WebClient client = new WebClient();
                     await client.DownloadFileTaskAsync(new Uri(show.ImgPrimary), localThumb);
                 }
-                catch (WebException)
+                catch (WebException exception)
                 {
-                    Console.Error.WriteLine("Couldn't download an image.");
+                    Console.Error.WriteLine($"\tThe poster of {show.Title} could not be downloaded.\n\tError: {exception.Message}. ");
                 }
             }
 
@@ -46,9 +46,9 @@ namespace Kyoo.Controllers
                     using WebClient client = new WebClient();
                     await client.DownloadFileTaskAsync(new Uri(show.ImgLogo), localLogo);
                 }
-                catch (WebException)
+                catch (WebException exception)
                 {
-                    Console.Error.WriteLine("Couldn't download an image.");
+	                Console.Error.WriteLine($"\tThe logo of {show.Title} could not be downloaded.\n\tError: {exception.Message}. ");
                 }
             }
 
@@ -59,9 +59,9 @@ namespace Kyoo.Controllers
                     using WebClient client = new WebClient();
                     await client.DownloadFileTaskAsync(new Uri(show.ImgBackdrop), localBackdrop);
                 }
-                catch (WebException)
+                catch (WebException exception)
                 {
-                    Console.Error.WriteLine("Couldn't download an image.");
+	                Console.Error.WriteLine($"\tThe backdrop of {show.Title} could not be downloaded.\n\tError: {exception.Message}. ");
                 }
             }
 
@@ -85,9 +85,9 @@ namespace Kyoo.Controllers
                     using WebClient client = new WebClient();
                     await client.DownloadFileTaskAsync(new Uri(peop.People.ImgPrimary), localThumb);
                 }
-                catch (WebException)
+                catch (WebException exception)
                 {
-                    Console.Error.WriteLine("Couldn't download an image.");
+                    Console.Error.WriteLine($"\tThe profile picture of {peop.People.Name} could not be downloaded.\n\tError: {exception.Message}. ");
                 }
             }
 
@@ -106,9 +106,9 @@ namespace Kyoo.Controllers
                 using WebClient client = new WebClient();
                 await client.DownloadFileTaskAsync(new Uri(episode.ImgPrimary), localThumb);
             }
-            catch (WebException)
+            catch (WebException exception)
             {
-                Console.Error.WriteLine("Couldn't download an image.");
+                Console.Error.WriteLine($"\tThe thumbnail of {episode.Show.Title} s{episode.SeasonNumber}e{episode.EpisodeNumber} could not be downloaded.\n\tError: {exception.Message}. ");
             }
 
             return episode;
