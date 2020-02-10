@@ -25,7 +25,7 @@ namespace Kyoo.Models
         [JsonIgnore] public string ImgPrimary { get; set; }
         public string ExternalIDs { get; set; }
 
-        public IEnumerable<Track> Tracks { get; set; }
+        public virtual IEnumerable<Track> Tracks { get; set; }
 
         public string ShowTitle; //Used in the API response only
         public string Link; //Used in the API response only
@@ -71,6 +71,13 @@ namespace Kyoo.Models
         public static string GetSlug(string showSlug, long seasonNumber, long episodeNumber)
         {
             return showSlug + "-s" + seasonNumber + "e" + episodeNumber;
+        }
+
+        public Episode SetLink(string showSlug)
+        {
+	        Link = GetSlug(showSlug, SeasonNumber, EpisodeNumber);
+	        Thumb = "thumb/" + Link;
+	        return this;
         }
 
         public Episode Merge(Episode other)

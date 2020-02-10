@@ -33,7 +33,8 @@ namespace Kyoo
             services.AddControllers().AddNewtonsoftJson();
             services.AddHttpClient();
 
-            services.AddDbContext<DatabaseContext>(options => options.UseSqlite(Configuration.GetConnectionString("Database")));
+            services.AddDbContext<DatabaseContext>(options => options.UseLazyLoadingProxies()
+	            .UseSqlite(Configuration.GetConnectionString("Database")));
 
             // services.AddIdentity<ApplicationUser, IdentityRole>()
             //     .AddEntityFrameworkStores()

@@ -77,12 +77,12 @@ namespace Kyoo.Controllers
 		public Show GetShowBySlug(string slug)
 		{
 			Show ret = (from show in _database.Shows where show.Slug == slug select show).FirstOrDefault();
-			if (ret == null)
-				return null;
+			// if (ret == null)
+			// 	return null;
 			//_database.Entry(ret).Collection(x => x.Genres).Load();
-			_database.Entry(ret).Reference(x => x.Studio).Load();
-			_database.Entry(ret).Collection(x => x.People).Load();
-			_database.Entry(ret).Collection(x => x.Seasons).Load();
+			// _database.Entry(ret).Reference(x => x.Studio).Load();
+			// _database.Entry(ret).Collection(x => x.People).Load();
+			// _database.Entry(ret).Collection(x => x.Seasons).Load();
 			return ret;
 		}
 		
@@ -114,26 +114,26 @@ namespace Kyoo.Controllers
 
 		public IEnumerable<Episode> GetEpisodes(string showSlug)
 		{
-			return from episode in _database.Episodes where episode.Show.Slug == showSlug select episode;
+			return from episode in _database.Episodes where episode.Show.Slug == showSlug select episode.SetLink(showSlug);
 		}
 
 		public IEnumerable<Episode> GetEpisodes(string showSlug, long seasonNumber)
 		{
 			return from episode in _database.Episodes where episode.SeasonNumber == seasonNumber 
-			                                             && episode.Show.Slug == showSlug select episode;
+			                                             && episode.Show.Slug == showSlug select episode.SetLink(showSlug);
 		}
 
 		public IEnumerable<Episode> GetEpisodes(long showID, long seasonNumber)
 		{
 			return from episode in _database.Episodes where episode.ShowID == showID 
-			                                                && episode.SeasonNumber == seasonNumber select episode;
+			                                             && episode.SeasonNumber == seasonNumber select episode.SetLink(episode.Show.Slug);
 		}
 
 		public Episode GetEpisode(string showSlug, long seasonNumber, long episodeNumber)
 		{
 			return (from episode in _database.Episodes where episode.EpisodeNumber == episodeNumber
 															&& episode.SeasonNumber == seasonNumber 
-			                                                && episode.Show.Slug == showSlug select episode).FirstOrDefault();
+			                                                && episode.Show.Slug == showSlug select episode.SetLink(showSlug)).FirstOrDefault();
 		}
 
 		public WatchItem GetWatchItem(string showSlug, long seasonNumber, long episodeNumber, bool complete = true)
