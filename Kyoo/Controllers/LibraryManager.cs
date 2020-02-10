@@ -70,7 +70,8 @@ namespace Kyoo.Controllers
 			return (from show in _database.Shows from l in _database.CollectionLinks.DefaultIfEmpty()
 					where l.CollectionID == null select show).AsEnumerable().Union(
 					from collection in _database.Collections select collection.AsShow())
-				.Where(x => x.Title.Contains(searchQuery)).OrderBy(x => x.Title);
+				.Where(x => x.Title.Contains(searchQuery))
+				.Take(20).OrderBy(x => x.Title);
 		}
 
 		public Show GetShowBySlug(string slug)
@@ -227,22 +228,26 @@ namespace Kyoo.Controllers
 
 		public IEnumerable<Episode> SearchEpisodes(string searchQuery)
 		{
-			return from episode in _database.Episodes where episode.Title.Contains(searchQuery) select episode;
+			return (from episode in _database.Episodes where episode.Title.Contains(searchQuery) select episode)
+				.Take(20);
 		}
 		
 		public IEnumerable<People> SearchPeople(string searchQuery)
 		{
-			return from people in _database.Peoples where people.Name.Contains(searchQuery) select people;
+			return (from people in _database.Peoples where people.Name.Contains(searchQuery) select people)
+				.Take(20);
 		}
 		
 		public IEnumerable<Genre> SearchGenres(string searchQuery)
 		{
-			return from genre in _database.Genres where genre.Name.Contains(searchQuery) select genre;
+			return (from genre in _database.Genres where genre.Name.Contains(searchQuery) select genre)
+				.Take(20);
 		}
 		
 		public IEnumerable<Studio> SearchStudios(string searchQuery)
 		{
-			return from studio in _database.Studios where studio.Name.Contains(searchQuery) select studio;
+			return (from studio in _database.Studios where studio.Name.Contains(searchQuery) select studio)
+				.Take(20);
 		}
 		#endregion
 
