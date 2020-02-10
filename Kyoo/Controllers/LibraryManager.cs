@@ -114,8 +114,9 @@ namespace Kyoo.Controllers
 		public IEnumerable<Episode> GetEpisodes(string showSlug, long seasonNumber)
 		{
 			return (from episode in _database.Episodes where episode.SeasonNumber == seasonNumber 
-			                                             && episode.Show.Slug == showSlug select episode.SetLink(showSlug))
-				.OrderBy(x => x.EpisodeNumber);
+			                                             && episode.Show.Slug == showSlug select episode)
+				.OrderBy(x => x.EpisodeNumber)
+				.Select(x => x.SetLink(showSlug));
 		}
 
 		public IEnumerable<Episode> GetEpisodes(long showID, long seasonNumber)
