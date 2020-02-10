@@ -68,22 +68,22 @@ namespace Kyoo.Controllers
             return show;
         }
 
-        public async Task<IEnumerable<People>> Validate(IEnumerable<People> people)
+        public async Task<IEnumerable<PeopleLink>> Validate(List<PeopleLink> people)
         {
             if (people == null)
                 return null;
-            foreach (People peop in people)
+            foreach (PeopleLink peop in people)
             {
                 string root = _config.GetValue<string>("peoplePath");
                 Directory.CreateDirectory(root);
 
-                string localThumb = root + "/" + peop.Slug + ".jpg";
-                if (peop.ImgPrimary == null || File.Exists(localThumb))
+                string localThumb = root + "/" + peop.People.Slug + ".jpg";
+                if (peop.People.ImgPrimary == null || File.Exists(localThumb))
                     continue;
                 try
                 {
                     using WebClient client = new WebClient();
-                    await client.DownloadFileTaskAsync(new Uri(peop.ImgPrimary), localThumb);
+                    await client.DownloadFileTaskAsync(new Uri(peop.People.ImgPrimary), localThumb);
                 }
                 catch (WebException)
                 {

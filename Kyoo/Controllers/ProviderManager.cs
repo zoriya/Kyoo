@@ -90,10 +90,10 @@ namespace Kyoo.Controllers
             return episode;
         }
 
-        public async Task<IEnumerable<People>> GetPeople(Show show, Library library)
+        public async Task<IEnumerable<PeopleLink>> GetPeople(Show show, Library library)
         {
-            IEnumerable<People> people = await GetMetadata(provider => provider.GetPeople(show), library, "unknown data");
-            people = await _thumbnailsManager.Validate(people);
+            IEnumerable<PeopleLink> people = await GetMetadata(provider => provider.GetPeople(show), library, "unknown data");
+            people = await _thumbnailsManager.Validate(people.ToList());
             return people;
         }
     }

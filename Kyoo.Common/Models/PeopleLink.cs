@@ -1,13 +1,31 @@
+using Newtonsoft.Json;
+
 namespace Kyoo.Models
 {
     public class PeopleLink
     {
-        public long ID { get; set; }
-        public long PeopleID { get; set; }
+	    [JsonIgnore] public long ID { get; set; }
+	    [JsonIgnore] public long PeopleID { get; set; }
         public People People { get; set; }
-        public long ShowID { get; set; }
-        public Show Show { get; set; }
+        [JsonIgnore] public long ShowID { get; set; }
+        [JsonIgnore] public Show Show { get; set; }
         public string Role { get; set; }
         public string Type { get; set; }
+
+        public PeopleLink() {}
+        
+        public PeopleLink(People people, string role, string type)
+        {
+	        People = people;
+	        Role = role;
+	        Type = type;
+        }
+
+        public PeopleLink(string slug, string name, string role, string type, string imgPrimary, string externalIDs)
+        {
+	        People = new People(slug, name, imgPrimary, externalIDs);
+	        Role = role;
+	        Type = type;
+        }
     }
 }

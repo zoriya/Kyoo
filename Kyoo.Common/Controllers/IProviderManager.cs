@@ -10,6 +10,6 @@ namespace Kyoo.Controllers
 		Task<Show> GetShowFromName(string showName, string showPath, Library library);
 		Task<Season> GetSeason(Show show, long seasonNumber, Library library);
 		Task<Episode> GetEpisode(Show show, string episodePath, long seasonNumber, long episodeNumber, long absoluteNumber, Library library);
-		Task<IEnumerable<People>> GetPeople(Show show, Library library);
+		Task<IEnumerable<PeopleLink>> GetPeople(Show show, Library library);
 	}
 }

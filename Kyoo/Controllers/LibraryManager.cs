@@ -76,7 +76,14 @@ namespace Kyoo.Controllers
 
 		public Show GetShowBySlug(string slug)
 		{
-			return (from show in _database.Shows where show.Slug == slug select show).FirstOrDefault();
+			Show ret = (from show in _database.Shows where show.Slug == slug select show).FirstOrDefault();
+			if (ret == null)
+				return null;
+			//_database.Entry(ret).Collection(x => x.Genres).Load();
+			_database.Entry(ret).Reference(x => x.Studio).Load();
+			_database.Entry(ret).Collection(x => x.People).Load();
+			_database.Entry(ret).Collection(x => x.Seasons).Load();
+			return ret;
 		}
 		
 		public Show GetShow(string path)
@@ -157,9 +164,9 @@ namespace Kyoo.Controllers
 			return item;
 		}
 
-		public IEnumerable<People> GetPeople(long showID)
+		public IEnumerable<PeopleLink> GetPeople(long showID)
 		{
-			return from link in _database.PeopleLinks where link.ShowID == showID select link.People.SetRoleType(link.Role, link.Type);
+			return from link in _database.PeopleLinks where link.ShowID == showID select link;
 		}
 
 		public People GetPeopleBySlug(string slug)

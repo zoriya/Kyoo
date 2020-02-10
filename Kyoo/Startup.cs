@@ -43,7 +43,7 @@ namespace Kyoo
             services.AddSingleton<ITranscoder, Transcoder>();
             services.AddSingleton<IThumbnailsManager, ThumbnailsManager>();
             services.AddSingleton<IProviderManager, ProviderManager>();
-            services.AddSingleton<ICrawler, Crawler>();
+            services.AddScoped<ICrawler, Crawler>();
             services.AddSingleton<IPluginManager, PluginManager>();
         }
 
