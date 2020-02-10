@@ -12,7 +12,6 @@ export interface Show
   genres: Genre[];
   status: string;
   studio: Studio;
-  directors: People[];
   people: People[];
   seasons: Season[];
   trailerUrl: string;
