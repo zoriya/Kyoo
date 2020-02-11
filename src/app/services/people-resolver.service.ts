@@ -8,7 +8,7 @@ import { Collection } from "../../models/collection";
 import { People } from "../../models/people";
 
 @Injectable({
-  providedIn: 'root'
+	providedIn: 'root'
 })
 export class PeopleResolverService implements Resolve<Collection>
 {

@@ -5,20 +5,20 @@ import { Studio } from "./studio";
 
 export interface Show
 {
-  slug: string;
-  title: string;
-  Aliases: string[];
-  overview: string;
-  genres: Genre[];
-  status: string;
-  studio: Studio;
-  people: People[];
-  seasons: Season[];
-  trailerUrl: string;
-  isCollection: boolean;
+	slug: string;
+	title: string;
+	Aliases: string[];
+	overview: string;
+	genres: Genre[];
+	status: string;
+	studio: Studio;
+	people: People[];
+	seasons: Season[];
+	trailerUrl: string;
+	isCollection: boolean;
 
-  startYear: number;
-  endYear : number;
+	startYear: number;
+	endYear : number;
 
-  externalIDs: string;
+	externalIDs: string;
 }

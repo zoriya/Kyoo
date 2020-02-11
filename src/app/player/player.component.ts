@@ -371,7 +371,7 @@ export class PlayerComponent implements OnInit
 		let queryMethod: string = this.route.snapshot.queryParams["method"];
 		if (queryMethod)
 			this.playMethod = method[queryMethod];
-    else
+		else
 			this.playMethod = getPlaybackMethod(this.player, this.item);
 
 		this.selectPlayMethod(this.playMethod);
@@ -428,7 +428,7 @@ export class PlayerComponent implements OnInit
 	next()
 	{
 		if (this.item.nextEpisode != null)
-		  this.router.navigate(["/watch/" + this.item.nextEpisode.link], { queryParamsHandling: "merge", replaceUrl: true });
+			this.router.navigate(["/watch/" + this.item.nextEpisode.link], { queryParamsHandling: "merge", replaceUrl: true });
 	}
 
 	previous()

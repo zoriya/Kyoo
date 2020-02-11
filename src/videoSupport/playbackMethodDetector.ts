@@ -121,16 +121,16 @@ function videoCodecIsSupported(player: HTMLVideoElement, codec: string, browser:
 		case "hevc":
 			if (browser == "tizen" || browser == "orsay" || browser == "xboxOne" || browser == "ios")
 				return true;
-      //SHOULD SUPPORT CHROMECAST ULTRA
-			//  if (browser.chromecast)
-      //	{
+			//SHOULD SUPPORT CHROMECAST ULTRA
+			//	if (browser.chromecast)
+			//	{
 
-      //		var isChromecastUltra = userAgent.indexOf('aarch64') !== -1;
-      //		if (isChromecastUltra)
-      //		{
-      //			return true;
-      //		}
-      //	}
+			//		var isChromecastUltra = userAgent.indexOf('aarch64') !== -1;
+			//		if (isChromecastUltra)
+			//		{
+			//			return true;
+			//		}
+			//	}
 			return !!player.canPlayType('video/hevc; codecs="hevc, aac"');
 		case "mpeg2video":
 			return browser == "orsay" || browser == "tizen" || browser == "edge";
@@ -145,7 +145,7 @@ function videoCodecIsSupported(player: HTMLVideoElement, codec: string, browser:
 		case "vorbis":
 			return browser == "orsay" || browser == "tizen" || !!player.canPlayType('video/webm; codecs="vp8');
 		default:
-      return false;
+			return false;
 	}
 }
 
@@ -175,5 +175,5 @@ function audioCodecIsSupported(player: HTMLVideoElement, codecs: string[], brows
 			default:
 				return false;
 		}
-  }
+	}
 }

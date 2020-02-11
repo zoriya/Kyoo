@@ -7,20 +7,20 @@ import { catchError } from 'rxjs/operators';
 import { SearchResut } from "../../models/search-result";
 
 @Injectable({
-  providedIn: 'root'
+	providedIn: 'root'
 })
 export class SearchResolverService implements Resolve<SearchResut>
 {
-  constructor(private http: HttpClient, private snackBar: MatSnackBar) { }
+	constructor(private http: HttpClient, private snackBar: MatSnackBar) { }
 
 	resolve(route: ActivatedRouteSnapshot): SearchResut | Observable<SearchResut> | Promise<SearchResut>
-  {
-    let query: string = route.paramMap.get("query");
+	{
+		let query: string = route.paramMap.get("query");
 		return this.http.get<SearchResut>("api/search/" + query).pipe(catchError((error: HttpErrorResponse) =>
-    {
-      console.log(error.status + " - " + error.message);
-      this.snackBar.open("An unknow error occured.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
-      return EMPTY;
-    }));
-  }
+		{
+			console.log(error.status + " - " + error.message);
+			this.snackBar.open("An unknow error occured.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
+			return EMPTY;
+		}));
+	}
 }

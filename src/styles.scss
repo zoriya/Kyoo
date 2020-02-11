@@ -6,10 +6,10 @@
 @import "~bootstrap/scss/variables";
 
 $theme-colors: (
-  "primary": #0a1128,
-  "secondary": #000000,
-  "accentColor": #e23c00,
-  "textPrimary": #ffffff
+	"primary": #0a1128,
+	"secondary": #000000,
+	"accentColor": #e23c00,
+	"textPrimary": #ffffff
 );
 
 $body-bg: theme-color("primary");
@@ -18,12 +18,12 @@ $font-family-base: "Roboto", Arial, sans-serif;
 
 p
 {
-  opacity: .6;
+	opacity: .6;
 }
 
 h6
 {
-  opacity: .87;
+	opacity: .87;
 }
 
 @import "~bootstrap/scss/bootstrap";
@@ -43,63 +43,63 @@ $theme: mat-dark-theme($primary, $accent);
 
 .mat-ripple-element
 {
-  background-color: rgba(255, 255, 255, .3) !important;
+	background-color: rgba(255, 255, 255, .3) !important;
 }
 
 .mat-card-header-text
 {
-  margin: 0 5px !important;
+	margin: 0 5px !important;
 }
 
 //Material Icons
 @font-face {
-  font-family: 'Material Icons';
-  font-style: normal;
-  font-weight: 400;
-  src: url(/iconfont/MaterialIcons-Regular.eot); /* For IE6-8 */
-  src: local('Material Icons'),
-    local('MaterialIcons-Regular'),
-    url(/iconfont/MaterialIcons-Regular.woff2) format('woff2'),
-    url(/iconfont/MaterialIcons-Regular.woff) format('woff'),
-    url(/iconfont/MaterialIcons-Regular.ttf) format('truetype');
+	font-family: 'Material Icons';
+	font-style: normal;
+	font-weight: 400;
+	src: url(/iconfont/MaterialIcons-Regular.eot); /* For IE6-8 */
+	src: local('Material Icons'),
+		local('MaterialIcons-Regular'),
+		url(/iconfont/MaterialIcons-Regular.woff2) format('woff2'),
+		url(/iconfont/MaterialIcons-Regular.woff) format('woff'),
+		url(/iconfont/MaterialIcons-Regular.ttf) format('truetype');
 }
 
 .material-icons
 {
-  font-family: 'Material Icons';
-  font-weight: normal;
-  font-style: normal;
-  font-size: 24px; /* Preferred icon size */
-  display: inline-block;
-  line-height: 1;
-  text-transform: none;
-  letter-spacing: normal;
-  word-wrap: normal;
-  white-space: nowrap;
-  direction: ltr;
-  /* Support for all WebKit browsers. */
-  -webkit-font-smoothing: antialiased;
-  /* Support for Safari and Chrome. */
-  text-rendering: optimizeLegibility;
-  /* Support for Firefox. */
-  -moz-osx-font-smoothing: grayscale;
-  /* Support for IE. */
-  font-feature-settings: 'liga';
+	font-family: 'Material Icons';
+	font-weight: normal;
+	font-style: normal;
+	font-size: 24px; /* Preferred icon size */
+	display: inline-block;
+	line-height: 1;
+	text-transform: none;
+	letter-spacing: normal;
+	word-wrap: normal;
+	white-space: nowrap;
+	direction: ltr;
+	/* Support for all WebKit browsers. */
+	-webkit-font-smoothing: antialiased;
+	/* Support for Safari and Chrome. */
+	text-rendering: optimizeLegibility;
+	/* Support for Firefox. */
+	-moz-osx-font-smoothing: grayscale;
+	/* Support for IE. */
+	font-feature-settings: 'liga';
 }
 
 mat-icon
 {
-  vertical-align: middle;
+	vertical-align: middle;
 }
 
 .snackError
 {
-  background-color: theme-color("accentColor");
-  color: theme-color("textPrimary");
+	background-color: theme-color("accentColor");
+	color: theme-color("textPrimary");
 }
 
 .scroll-row
 {
-  padding-left: 0;
-  padding-right: 0;
+	padding-left: 0;
+	padding-right: 0;
 }

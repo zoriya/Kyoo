@@ -1,21 +1,21 @@
 <div class="root">
-  <div class="episodes" #scrollView (scroll)="onScroll()">
-    <a class="episode" *ngFor="let episode of this.episodes" #episodeDom routerLink="/watch/{{episode.link}}" href="/watch/{{episode.link}}">
-      <div matRipple class="img" [style.background-image]="sanitize(episode.thumb)">
-        <button mat-icon-button class="playBtn"><i class="material-icons playIcon">play_circle_outline</i></button>
-      </div>
-      <ng-container *ngIf="displayShowTitle; else noTitle;">
-        <h6 *ngIf="episode.seasonNumber != 0; else elseBlock;" class="title">{{episode.showTitle}} - S{{episode.seasonNumber}}:E{{episode.episodeNumber}}</h6>
-        <ng-template #elseBlock><h6 class="title">{{episode.showTitle}}</h6></ng-template>
-        <p class="subtitle">{{episode.title}}</p>
-      </ng-container>
-      <ng-template #noTitle>
-        <h6 *ngIf="episode.seasonNumber != 0; else elseBlock;" class="title">S{{episode.seasonNumber}}:E{{episode.episodeNumber}} - {{episode.title}}</h6>
-        <ng-template #elseBlock><h6 class="title">{{episode.title}}</h6></ng-template>
-        <p class="overview">{{episode.overview}}</p>
-      </ng-template>
-    </a>
-  </div>
-  <button mat-raised-button color="accent" class="scrollBtn leftBtn d-none" #leftBtn (click)="scrollLeft()"><mat-icon>arrow_left</mat-icon></button>
-  <button mat-raised-button color="accent" class="scrollBtn rightBtn" #rightBtn (click)="scrollRight()"><mat-icon>arrow_right</mat-icon></button>
+	<div class="episodes" #scrollView (scroll)="onScroll()">
+		<a class="episode" *ngFor="let episode of this.episodes" #episodeDom routerLink="/watch/{{episode.link}}" href="/watch/{{episode.link}}">
+			<div matRipple class="img" [style.background-image]="sanitize(episode.thumb)">
+				<button mat-icon-button class="playBtn"><i class="material-icons playIcon">play_circle_outline</i></button>
+			</div>
+			<ng-container *ngIf="displayShowTitle; else noTitle;">
+				<h6 *ngIf="episode.seasonNumber != 0; else elseBlock;" class="title">{{episode.showTitle}} - S{{episode.seasonNumber}}:E{{episode.episodeNumber}}</h6>
+				<ng-template #elseBlock><h6 class="title">{{episode.showTitle}}</h6></ng-template>
+				<p class="subtitle">{{episode.title}}</p>
+			</ng-container>
+			<ng-template #noTitle>
+				<h6 *ngIf="episode.seasonNumber != 0; else elseBlock;" class="title">S{{episode.seasonNumber}}:E{{episode.episodeNumber}} - {{episode.title}}</h6>
+				<ng-template #elseBlock><h6 class="title">{{episode.title}}</h6></ng-template>
+				<p class="overview">{{episode.overview}}</p>
+			</ng-template>
+		</a>
+	</div>
+	<button mat-raised-button color="accent" class="scrollBtn leftBtn d-none" #leftBtn (click)="scrollLeft()"><mat-icon>arrow_left</mat-icon></button>
+	<button mat-raised-button color="accent" class="scrollBtn rightBtn" #rightBtn (click)="scrollRight()"><mat-icon>arrow_right</mat-icon></button>
 </div>

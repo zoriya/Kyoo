@@ -1,35 +1,35 @@
 <header id="nav" style="height: 68px;">
-  <div class="fixed-top">
-    <nav id="toolbar" class="navbar navbar-dark bg-secondary">
-      <a class="navbar-brand nav-item ml-3" routerLink="/">
-        Kyoo
-      </a>
+	<div class="fixed-top">
+		<nav id="toolbar" class="navbar navbar-dark bg-secondary">
+			<a class="navbar-brand nav-item ml-3" routerLink="/">
+				Kyoo
+			</a>
 
-      <ul class="navbar-nav flex-row">
-        <li class="nav-item">
-          <a class="nav-link" routerLink="/browse" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">All</a>
-        </li>
-        <li class="nav-item" *ngFor="let library of this.libraries">
-          <a class="nav-link" routerLink="/browse/{{library.slug}}" routerLinkActive="active">{{library.name}}</a>
-        </li>
-      </ul>
+			<ul class="navbar-nav flex-row">
+				<li class="nav-item">
+					<a class="nav-link" routerLink="/browse" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">All</a>
+				</li>
+				<li class="nav-item" *ngFor="let library of this.libraries">
+					<a class="nav-link" routerLink="/browse/{{library.slug}}" routerLinkActive="active">{{library.name}}</a>
+				</li>
+			</ul>
 
-      <ul class="navbar-nav flex-row ml-auto">
-        <li class="nav-item icon searchbar">
-          <input placeholder="Search" id="search" type="search" (input)="onUpdateValue($event)"/>
-          <mat-icon matTooltipPosition="below" matTooltip="Search" (click)="openSearch()">search</mat-icon>
-        </li>
-        <li class="nav-item">
-          <a class="icon" routerLink="/login" routerLinkActive="active" matTooltipPosition="below" matTooltip="Login">
-            <mat-icon>account_circle</mat-icon>
-          </a>
-        </li>
-      </ul>
-    </nav>
-    <mat-progress-bar *ngIf="this.isLoading" color="accent" mode="indeterminate"> </mat-progress-bar>
-  </div>
+			<ul class="navbar-nav flex-row ml-auto">
+				<li class="nav-item icon searchbar">
+					<input placeholder="Search" id="search" type="search" (input)="onUpdateValue($event)"/>
+					<mat-icon matTooltipPosition="below" matTooltip="Search" (click)="openSearch()">search</mat-icon>
+				</li>
+				<li class="nav-item">
+					<a class="icon" routerLink="/login" routerLinkActive="active" matTooltipPosition="below" matTooltip="Login">
+						<mat-icon>account_circle</mat-icon>
+					</a>
+				</li>
+			</ul>
+		</nav>
+		<mat-progress-bar *ngIf="this.isLoading" color="accent" mode="indeterminate"> </mat-progress-bar>
+	</div>
 </header>
 
 <main >
-  <router-outlet></router-outlet>
+	<router-outlet></router-outlet>
 </main>

@@ -26,35 +26,35 @@ import { ShowsListComponent } from './shows-list/shows-list.component';
 
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    NotFoundComponent,
-    BrowseComponent,
-    ShowDetailsComponent,
-    EpisodesListComponent,
-    PlayerComponent,
-    CollectionComponent,
-    SearchComponent,
-    PeopleListComponent,
-    ShowsListComponent
-  ],
-  imports: [
-    BrowserModule,
-    HttpClientModule,
-    AppRoutingModule,
-    BrowserAnimationsModule,
-    MatSnackBarModule,
-    MatProgressBarModule,
-    MatButtonModule,
-    MatIconModule,
-    MatSelectModule,
-    MatMenuModule,
-    MatSliderModule,
-	  MatTooltipModule,
+	declarations: [
+		AppComponent,
+		NotFoundComponent,
+		BrowseComponent,
+		ShowDetailsComponent,
+		EpisodesListComponent,
+		PlayerComponent,
+		CollectionComponent,
+		SearchComponent,
+		PeopleListComponent,
+		ShowsListComponent
+	],
+	imports: [
+		BrowserModule,
+		HttpClientModule,
+		AppRoutingModule,
+		BrowserAnimationsModule,
+		MatSnackBarModule,
+		MatProgressBarModule,
+		MatButtonModule,
+		MatIconModule,
+		MatSelectModule,
+		MatMenuModule,
+		MatSliderModule,
+		MatTooltipModule,
 		MatRippleModule,
 		MatCardModule
 	],
-  providers: [],
-  bootstrap: [AppComponent]
+	providers: [],
+	bootstrap: [AppComponent]
 })
 export class AppModule { }

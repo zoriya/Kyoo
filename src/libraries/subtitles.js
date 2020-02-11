@@ -72,8 +72,8 @@ let SubtitleManager = (function() {
 		}
 
 		var det_C0_C1 = (C[0] * C[3]) - (C[2] * C[1]);
-		var det_C0_X  = (C[0] * X[1]) - (C[2] * X[0]);
-		var det_X_C1  = (X[0] * C[3]) - (X[1] * C[1]);
+		var det_C0_X	= (C[0] * X[1]) - (C[2] * X[0]);
+		var det_X_C1	= (X[0] * C[3]) - (X[1] * C[1]);
 		var alpha_l = det_C0_C1 === 0 ? 0 : det_X_C1 / det_C0_C1;
 		var alpha_r = det_C0_C1 === 0 ? 0 : det_C0_X / det_C0_C1;
 		var segLength = norm(subtract(points[0], points[len-1]));
@@ -209,8 +209,8 @@ let SubtitleManager = (function() {
 				} else if (curr.start_time < prev.end_time) {
 					let [prev_start_time,prev_start_value,prev_prev_accel] = points[points.length-2];
 					let last = points[points.length-1];
-					    last[0] = curr.start_time;
-					    last[1] = prev_start_value + (prev.end_value - prev_start_value) * Math.pow((curr.start_time - prev_start_time) / (prev.end_time - prev_start_time), last[2]);
+							last[0] = curr.start_time;
+							last[1] = prev_start_value + (prev.end_value - prev_start_value) * Math.pow((curr.start_time - prev_start_time) / (prev.end_time - prev_start_time), last[2]);
 				}
 
 				points.push([curr.end_time,curr.end_value,curr.accel]);
@@ -251,8 +251,8 @@ let SubtitleManager = (function() {
 	let combineAdjacentBlocks = text => text.replace(reAdjacentBlocks,"$1$2").replace(reAdjacentBlocks,"$1$2");
 
 	// Map to convert SSAv4 alignment values to ASSv4+ values.
-	//                          1, 2, 3,    5, 6, 7,    9, 10, 11
-	let SSA_ALIGNMENT_MAP = [0, 1, 2, 3, 0, 7, 8, 9, 0, 4,  5,  6];
+	//													1, 2, 3,		5, 6, 7,		9, 10, 11
+	let SSA_ALIGNMENT_MAP = [0, 1, 2, 3, 0, 7, 8, 9, 0, 4,	5,	6];
 
 	// Alias for creating SVG elements.
 	let createSVGElement = document.createElementNS.bind(document,"http://www.w3.org/2000/svg");
@@ -803,10 +803,10 @@ let SubtitleManager = (function() {
 				return computedPaths[pathID];
 
 			path = path.toLowerCase();
-			path = path.replace(/b/g,"C");   // cubic bézier curve to point 3 using point 1 and 2 as the control points
-			path = path.replace(/l/g,"L");   // line-to <x>, <y>
+			path = path.replace(/b/g,"C");	 // cubic bézier curve to point 3 using point 1 and 2 as the control points
+			path = path.replace(/l/g,"L");	 // line-to <x>, <y>
 			path = path.replace(/m/g,"Z M"); // move-to <x>, <y> (closing the shape first)
-			path = path.replace(/n/g,"M");   // move-to <x>, <y> (without closing the shape)
+			path = path.replace(/n/g,"M");	 // move-to <x>, <y> (without closing the shape)
 
 			// extend b-spline to <x>, <y>
 			// The "p" command is only supposed to be used after an "s" command,
@@ -829,7 +829,7 @@ let SubtitleManager = (function() {
 			// done by copying the starting location and the first two points
 			// to the end of the spline.
 			// before: x0 y0 s x1 y1 x2 y2 ... c
-			// after:  x0 y0 s x1 y1 x2 y2 ... x0 y0 x1 y1 x2 y2
+			// after:	x0 y0 s x1 y1 x2 y2 ... x0 y0 x1 y1 x2 y2
 			changes = true;
 			while (changes) {
 				changes = false;
@@ -842,10 +842,10 @@ let SubtitleManager = (function() {
 			// 3rd degree uniform b-spline
 			// SVG doesn't have this, so we have convert them to a series of
 			// Bézier curves.
-			//   x0 y0 s x1 y1 x2 y2 x3 y3 x4 y4 x5 y5
-			//   |-----------------------| Bézier 1
-			//           |---------------------| Bézier 2
-			//                 |---------------------| Bézier 3
+			//	 x0 y0 s x1 y1 x2 y2 x3 y3 x4 y4 x5 y5
+			//	 |-----------------------| Bézier 1
+			//					 |---------------------| Bézier 2
+			//								 |---------------------| Bézier 3
 			// Since the start point for a Bézier is different from a spline,
 			// we also need to add a move before the first Bézier and after the
 			// last Bézier. However, the bounding box of b-splines is different
@@ -1099,8 +1099,8 @@ let SubtitleManager = (function() {
 				let newPieces = [];
 				for (let piece of pieces) {
 					// convert text
-					//   from "{overide1}some text here{overridde2}more text ..."
-					//     to [["override1",["some"," ","text"," ","here"]], ["override2",["more"," ","text"]], ...]
+					//	 from "{overide1}some text here{overridde2}more text ..."
+					//		 to [["override1",["some"," ","text"," ","here"]], ["override2",["more"," ","text"]], ...]
 					// taking care not to split on non-breaking spaces or paths
 					let data = piece.text.split("{").slice(1).map(a => a.split("}")).map(b => [b[0], isPath(b[0]) ? [b[1]] : b[1].split(/([^\S\xA0]+)/g)]);
 
@@ -1230,19 +1230,19 @@ let SubtitleManager = (function() {
 						if (slice.width) slices.push(slice);
 
 						// Bubble pieces down through the slices while keeping the constraints:
-						//   don't make a line shorter than the one after it
-						//   don't include whitespace at the start or end
+						//	 don't make a line shorter than the one after it
+						//	 don't include whitespace at the start or end
 						let bubbled, last_slice = slices.length - 1;
 						do {
 							bubbled = false;
 							for (let i = last_slice; i > 0; --i) {
 								let curr = slices[i], prev = slices[i-1];
 
-								/*      prev      curr
-								    |----------|  |--|   Before
-									XXXXXXXX  XX  XXXX
-									|------|  |------|   After
-									  prev      curr
+								/*			prev			curr
+										|----------|	|--|	 Before
+									XXXXXXXX	XX	XXXX
+									|------|	|------|	 After
+										prev			curr
 								*/
 								while (true) {
 									// Find the next non-whitespace piece
@@ -1376,19 +1376,19 @@ let SubtitleManager = (function() {
 						if (slice.width) slices.unshift(slice);
 
 						// Bubble pieces up through the slices while keeping the constraints:
-						//   don't make a line shorter than the one before it
-						//   don't include whitespace at the start or end
+						//	 don't make a line shorter than the one before it
+						//	 don't include whitespace at the start or end
 						let bubbled, last_slice = slices.length - 1;
 						do {
 							bubbled = false;
 							for (let i = 0; i < last_slice; ++i) {
 								let curr = slices[i], next = slices[i+1];
 
-								/*  curr      next
-								    |--|  |----------|   Before
-									XXXX  XX  XXXXXXXX
-									|------|  |------|   After
-									  curr      next
+								/*	curr			next
+										|--|	|----------|	 Before
+									XXXX	XX	XXXXXXXX
+									|------|	|------|	 After
+										curr			next
 								*/
 								while (true) {
 									// Find the next non-whitespace piece
@@ -2196,8 +2196,8 @@ let SubtitleManager = (function() {
 				this.group = null;
 
 				this.Margin = {"L" : (data.MarginL && parseInt(data.MarginL,10)) || renderer.styles[data.Style].MarginL,
-							   "R" : (data.MarginR && parseInt(data.MarginR,10)) || renderer.styles[data.Style].MarginR,
-							   "V" : (data.MarginV && parseInt(data.MarginV,10)) || renderer.styles[data.Style].MarginV};
+								 "R" : (data.MarginR && parseInt(data.MarginR,10)) || renderer.styles[data.Style].MarginR,
+								 "V" : (data.MarginV && parseInt(data.MarginV,10)) || renderer.styles[data.Style].MarginV};
 
 				this.time = {"start" : timeConvert(data.Start), "end" : timeConvert(data.End)};
 				this.time.milliseconds = (this.time.end - this.time.start) * 1000;
@@ -2982,8 +2982,8 @@ let SubtitleManager = (function() {
 
 				// Create the font-face CSS.
 				css += "@font-face {\n";
-				css += "  font-family: \"" + fontname + "\";\n";
-				css += "  src: url(data:font/" + submime + ";charset=utf-8;base64," + btoa(fontdata) + ");\n";
+				css += "	font-family: \"" + fontname + "\";\n";
+				css += "	src: url(data:font/" + submime + ";charset=utf-8;base64," + btoa(fontdata) + ");\n";
 				css += "}\n\n";
 			}
 

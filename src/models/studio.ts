@@ -1,5 +1,5 @@
 export interface Studio
 {
-  slug: string;
-  name: string;
+	slug: string;
+	name: string;
 }

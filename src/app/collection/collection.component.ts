@@ -4,13 +4,13 @@ import { ActivatedRoute } from "@angular/router";
 import { DomSanitizer } from "@angular/platform-browser";
 
 @Component({
-  selector: 'app-collection',
-  templateUrl: './collection.component.html',
-  styleUrls: ['./collection.component.scss']
+	selector: 'app-collection',
+	templateUrl: './collection.component.html',
+	styleUrls: ['./collection.component.scss']
 })
 export class CollectionComponent
 {
-  collection: Collection;
+	collection: Collection;
 
 	constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer)
 	{

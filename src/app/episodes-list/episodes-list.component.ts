@@ -4,14 +4,14 @@ import { DomSanitizer } from "@angular/platform-browser";
 import { Episode } from "../../models/episode";
 
 @Component({
-  selector: 'app-episodes-list',
-  templateUrl: './episodes-list.component.html',
-  styleUrls: ['./episodes-list.component.scss']
+	selector: 'app-episodes-list',
+	templateUrl: './episodes-list.component.html',
+	styleUrls: ['./episodes-list.component.scss']
 })
 export class EpisodesListComponent
 {
 	@Input() displayShowTitle: boolean = false;
-  @Input() episodes: Episode[];
+	@Input() episodes: Episode[];
 	@ViewChild("scrollView", { static: true }) private scrollView: ElementRef;
 	@ViewChild("leftBtn", { static: false }) private leftBtn: MatButton;
 	@ViewChild("rightBtn", { static: false }) private rightBtn: MatButton;
@@ -53,8 +53,8 @@ export class EpisodesListComponent
 			this.rightBtn._elementRef.nativeElement.classList.remove("d-none");
 	}
 
-  sanitize(url: string)
-  {
-    return this.sanitizer.bypassSecurityTrustStyle("url(" + url + ")");
-  }
+	sanitize(url: string)
+	{
+		return this.sanitizer.bypassSecurityTrustStyle("url(" + url + ")");
+	}
 }

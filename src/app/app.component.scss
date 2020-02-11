@@ -4,83 +4,83 @@
 
 .navbar
 {
-  justify-content: left;
+	justify-content: left;
 }
 
 .nav-item
 {
-  outline: none;
+	outline: none;
 
-  > a
-  {
-    outline: none;
-    color: inherit;
-  }
+	> a
+	{
+		outline: none;
+		color: inherit;
+	}
 }
 
 .nav-link
 {
-  padding: 12px;
-  color: rgba(255, 255, 255, 0.7) !important;
+	padding: 12px;
+	color: rgba(255, 255, 255, 0.7) !important;
 
-  &:host-context(.hoverEnabled) &:hover
-  {
-    color: white !important;
-  }
+	&:host-context(.hoverEnabled) &:hover
+	{
+		color: white !important;
+	}
 
-  &.active
-  {
-    color: var(--accentColor) !important;
-  }
+	&.active
+	{
+		color: var(--accentColor) !important;
+	}
 }
 
 .navbar-brand:hover
 {
-  color: var(--accentColor);
+	color: var(--accentColor);
 }
 
 .searchbar
 {
-  border-radius: 30px;
+	border-radius: 30px;
 
-  > input
-  {
-    background: none !important;
-    color: white;
-    outline: none;
-    border: none;
-    border-bottom: 1px solid #cfcfcf;
-    width: 0;
-    padding: 0;
-    transition: width 0.4s ease-in-out;
+	> input
+	{
+		background: none !important;
+		color: white;
+		outline: none;
+		border: none;
+		border-bottom: 1px solid #cfcfcf;
+		width: 0;
+		padding: 0;
+		transition: width 0.4s ease-in-out;
 
-    &:focus, &.searching
-    {
-      width: 12rem;
+		&:focus, &.searching
+		{
+			width: 12rem;
 
-      @include media-breakpoint-up(sm)
-      {
-        width: 20rem;
-      }
-    }
-  }
+			@include media-breakpoint-up(sm)
+			{
+				width: 20rem;
+			}
+		}
+	}
 }
 
 input::-webkit-search-cancel-button
 {
-  display: none;
+	display: none;
 }
 
 
 .icon
 {
-  padding: 8px;
-  display: inline-block;
-  opacity: 0.7;
+	padding: 8px;
+	display: inline-block;
+	opacity: 0.7;
 
-  &:host-context(.hoverEnabled) &:hover
-  {
-    cursor: pointer;
-    opacity: 1;
-  }
+	&:host-context(.hoverEnabled) &:hover
+	{
+		cursor: pointer;
+		opacity: 1;
+	}
 }
