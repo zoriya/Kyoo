@@ -25,7 +25,7 @@ namespace Kyoo.Models
         [JsonIgnore] public string ImgPrimary { get; set; }
         public string ExternalIDs { get; set; }
 
-        public virtual IEnumerable<Track> Tracks { get; set; }
+        [JsonIgnore] public virtual IEnumerable<Track> Tracks { get; set; }
 
         public string ShowTitle; //Used in the API response only
         public string Link; //Used in the API response only

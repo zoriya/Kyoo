@@ -2,7 +2,7 @@
 using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Kyoo.Controllers
+namespace Kyoo.Api
 {
     [Route("api/[controller]")]
     [ApiController]

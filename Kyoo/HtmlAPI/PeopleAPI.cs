@@ -1,31 +1,30 @@
 ﻿using Kyoo.Controllers;
 using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 
-namespace Kyoo.Controllers
+namespace Kyoo.Api
 {
     [Route("api/[controller]")]
     [ApiController]
     public class PeopleController : ControllerBase
     {
-        private readonly ILibraryManager libraryManager;
+        private readonly ILibraryManager _libraryManager;
 
         public PeopleController(ILibraryManager libraryManager)
         {
-            this.libraryManager = libraryManager;
+            _libraryManager = libraryManager;
         }
 
         [HttpGet("{peopleSlug}")]
         public ActionResult<Collection> GetPeople(string peopleSlug)
         {
-            People people = libraryManager.GetPeopleBySlug(peopleSlug);
+            People people = _libraryManager.GetPeopleBySlug(peopleSlug);
 
             if (people == null)
                 return NotFound();
             Collection collection = new Collection(people.Slug, people.Name, null, null)
             {
-                Shows = libraryManager.GetShowsByPeople(people.ID),
+                Shows = _libraryManager.GetShowsByPeople(people.ID),
                 Poster = "peopleimg/" + people.Slug
             };
             return collection;

@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading;
+using Kyoo.Controllers;
 
-namespace Kyoo.Controllers
+namespace Kyoo.Api
 {
     [Route("api/[controller]")]
     [ApiController]

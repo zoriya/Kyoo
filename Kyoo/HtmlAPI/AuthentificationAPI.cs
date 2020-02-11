@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Kyoo.Controllers
+namespace Kyoo.Api
 {
     public class AuthentificationAPI : Controller
     {
