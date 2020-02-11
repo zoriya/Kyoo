@@ -71,7 +71,8 @@ namespace Kyoo.Controllers
 			return (from show in _database.Shows from l in _database.CollectionLinks.DefaultIfEmpty()
 					where l.CollectionID == null select show).AsEnumerable().Union(
 					from collection in _database.Collections select collection.AsShow())
-				.Where(x => EF.Functions.Like(x.Title, $"%{searchQuery}%"))
+				.Where(x => EF.Functions.Like(x.Title, $"%{searchQuery}%") 
+				            || EF.Functions.Like(x.GetAliases(), $"%{searchQuery}%"))
 				.Take(20).OrderBy(x => x.Title);
 		}
 
