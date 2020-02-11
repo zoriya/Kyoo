@@ -18,9 +18,9 @@ export class ShowResolverService implements Resolve<Show>
 	{
 		console.log(error.status + " - " + error.message);
 		if (error.status == 404)
-		this.snackBar.open("Show \"" + slug + "\" not found.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
+			this.snackBar.open("Show \"" + slug + "\" not found.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
 		else
-		this.snackBar.open("An unknow error occured.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
+			this.snackBar.open("An unknown error occured.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
 		return EMPTY;
 	}));
 	}
