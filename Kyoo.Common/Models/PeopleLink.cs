@@ -19,9 +19,10 @@ namespace Kyoo.Models
 
         public PeopleLink() {}
         
-        public PeopleLink(People people, string role, string type)
+        public PeopleLink(People people, Show show, string role, string type)
         {
 	        People = people;
+	        Show = show;
 	        Role = role;
 	        Type = type;
         }
