@@ -15,7 +15,7 @@ namespace Kyoo.Controllers
         int GetSeasonCount(string showSlug, long seasonNumber);
         IEnumerable<Show> GetShowsInCollection(long collectionID);
         IEnumerable<Show> GetShowsInLibrary(long libraryID);
-        IEnumerable<Show> GetShowsByPeople(long peopleID);
+        IEnumerable<Show> GetShowsByPeople(string peopleSlug);
         IEnumerable<string> GetLibrariesPath();
 
         //Internal read

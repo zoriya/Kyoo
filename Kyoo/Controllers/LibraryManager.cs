@@ -218,9 +218,9 @@ namespace Kyoo.Controllers
 				.OrderBy(x => x.Title);
 		}
 
-		public IEnumerable<Show> GetShowsByPeople(long peopleID)
+		public IEnumerable<Show> GetShowsByPeople(string peopleSlug)
 		{
-			return (from link in _database.PeopleLinks where link.PeopleID == peopleID select link.Show).OrderBy(x => x.Title);
+			return (from link in _database.PeopleLinks where link.PeopleID == peopleSlug select link.Show).OrderBy(x => x.Title);
 		}
 
 		public IEnumerable<Episode> GetAllEpisodes()
@@ -304,18 +304,6 @@ namespace Kyoo.Controllers
 			_database.Studios.Add(studio);
 			_database.SaveChanges();
 			return studio.ID;
-		}
-
-		public long GetOrCreatePeople(People people)
-		{
-			People existingPeople = GetPeopleBySlug(people.Slug);
-
-			if (existingPeople != null)
-				return existingPeople.ID;
-
-			_database.Peoples.Add(people);
-			_database.SaveChanges();
-			return people.ID;
 		}
 		#endregion
 

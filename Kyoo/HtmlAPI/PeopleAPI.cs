@@ -24,7 +24,7 @@ namespace Kyoo.Api
                 return NotFound();
             Collection collection = new Collection(people.Slug, people.Name, null, null)
             {
-                Shows = _libraryManager.GetShowsByPeople(people.ID),
+                Shows = _libraryManager.GetShowsByPeople(people.Slug),
                 Poster = "peopleimg/" + people.Slug
             };
             return collection;

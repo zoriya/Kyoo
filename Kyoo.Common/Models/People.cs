@@ -5,7 +5,6 @@ namespace Kyoo.Models
 {
     public class People : IMergable<People>
     {
-        [JsonIgnore] public long ID { get; set; }
         public string Slug { get; set; }
         public string Name { get; set; }
         [JsonIgnore] public string ImgPrimary { get; set; }
@@ -27,8 +26,6 @@ namespace Kyoo.Models
         {
             if (other == null)
                 return this;
-            if (ID == -1)
-                ID = other.ID;
             if (Slug == null)
                 Slug = other.Slug;
             if (Name == null)
