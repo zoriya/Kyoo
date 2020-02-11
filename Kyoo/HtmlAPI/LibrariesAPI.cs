@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Kyoo.Controllers
+namespace Kyoo.Api
 {
     [Route("api/libraries")]
     [ApiController]

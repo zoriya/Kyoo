@@ -1,25 +1,26 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System.IO;
+using Kyoo.Controllers;
 
-namespace Kyoo.Controllers
+namespace Kyoo.Api
 {
     public class ThumbnailController : ControllerBase
     {
-        private readonly ILibraryManager libraryManager;
-        private readonly string peoplePath;
+        private readonly ILibraryManager _libraryManager;
+        private readonly string _peoplePath;
 
 
         public ThumbnailController(ILibraryManager libraryManager, IConfiguration config)
         {
-            this.libraryManager = libraryManager;
-            peoplePath = config.GetValue<string>("peoplePath");
+            _libraryManager = libraryManager;
+            _peoplePath = config.GetValue<string>("peoplePath");
         }
 
         [HttpGet("poster/{showSlug}")]
         public IActionResult GetShowThumb(string showSlug)
         {
-            string path = libraryManager.GetShowBySlug(showSlug)?.Path;
+            string path = _libraryManager.GetShowBySlug(showSlug)?.Path;
             if (path == null)
                 return NotFound();
 
@@ -27,14 +28,13 @@ namespace Kyoo.Controllers
 
             if (System.IO.File.Exists(thumb))
                 return new PhysicalFileResult(thumb, "image/jpg");
-            else
-                return NotFound();
+            return NotFound();
         }
 
         [HttpGet("logo/{showSlug}")]
         public IActionResult GetShowLogo(string showSlug)
         {
-            string path = libraryManager.GetShowBySlug(showSlug)?.Path;
+            string path = _libraryManager.GetShowBySlug(showSlug)?.Path;
             if (path == null)
                 return NotFound();
 
@@ -42,14 +42,13 @@ namespace Kyoo.Controllers
 
             if (System.IO.File.Exists(thumb))
                 return new PhysicalFileResult(thumb, "image/jpg");
-            else
-                return NotFound();
+            return NotFound();
         }
 
         [HttpGet("backdrop/{showSlug}")]
         public IActionResult GetShowBackdrop(string showSlug)
         {
-            string path = libraryManager.GetShowBySlug(showSlug)?.Path;
+            string path = _libraryManager.GetShowBySlug(showSlug)?.Path;
             if (path == null)
                 return NotFound();
 
@@ -57,14 +56,13 @@ namespace Kyoo.Controllers
 
             if (System.IO.File.Exists(thumb))
                 return new PhysicalFileResult(thumb, "image/jpg");
-            else
-                return NotFound();
+            return NotFound();
         }
 
         [HttpGet("peopleimg/{peopleSlug}")]
         public IActionResult GetPeopleIcon(string peopleSlug)
         {
-            string thumbPath = Path.Combine(peoplePath, peopleSlug + ".jpg");
+            string thumbPath = Path.Combine(_peoplePath, peopleSlug + ".jpg");
             if (!System.IO.File.Exists(thumbPath))
                 return NotFound();
 
@@ -74,7 +72,7 @@ namespace Kyoo.Controllers
         [HttpGet("thumb/{showSlug}-s{seasonNumber}e{episodeNumber}")]
         public IActionResult GetEpisodeThumb(string showSlug, long seasonNumber, long episodeNumber)
         {
-            string path = libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber)?.Path;
+            string path = _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber)?.Path;
             if (path == null)
                 return NotFound();
 

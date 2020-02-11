@@ -29,15 +29,15 @@ namespace Kyoo.Models
         
         public bool IsCollection;
 
-        public virtual IEnumerable<Genre> Genres
+        [JsonIgnore] public virtual IEnumerable<Genre> Genres
         {
 	        get { return GenreLinks?.Select(x => x.Genre).OrderBy(x => x.Name); }
 	        set { GenreLinks = value?.Select(x => new GenreLink(this, x)).ToList(); }
         }
         [JsonIgnore] public virtual List<GenreLink> GenreLinks { get; set; }
-        public virtual Studio Studio { get; set; }
-        public virtual IEnumerable<PeopleLink> People { get; set; }
-        public virtual IEnumerable<Season> Seasons { get; set; }
+        [JsonIgnore] public virtual Studio Studio { get; set; }
+        [JsonIgnore] public virtual IEnumerable<PeopleLink> People { get; set; }
+        [JsonIgnore] public virtual IEnumerable<Season> Seasons { get; set; }
         [JsonIgnore] public virtual IEnumerable<Episode> Episodes { get; set; }
 
 

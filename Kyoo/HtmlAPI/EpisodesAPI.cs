@@ -2,8 +2,9 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
+using Kyoo.Controllers;
 
-namespace Kyoo.Controllers
+namespace Kyoo.Api
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -28,6 +29,7 @@ namespace Kyoo.Controllers
         }
 
         [HttpGet("{showSlug}/season/{seasonNumber}/episode/{episodeNumber}")]
+        [JsonDetailed]
         public ActionResult<Episode> GetEpisode(string showSlug, long seasonNumber, long episodeNumber)
         {
             Episode episode = _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);

@@ -1,35 +1,36 @@
-﻿using Kyoo.Controllers;
-using Kyoo.Models;
+﻿using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using Kyoo.Controllers;
 
-namespace Kyoo.Controllers
+namespace Kyoo.Api
 {
     [Route("api/shows")]
     [ApiController]
     public class ShowsController : ControllerBase
     {
-        private readonly ILibraryManager libraryManager;
+        private readonly ILibraryManager _libraryManager;
 
         public ShowsController(ILibraryManager libraryManager)
         {
-            this.libraryManager = libraryManager;
+            _libraryManager = libraryManager;
         }
 
         [HttpGet]
         public IEnumerable<Show> GetShows()
         {
-            return libraryManager.GetShows();
+            return _libraryManager.GetShows();
         }
 
         [HttpGet("{slug}")]
+        [JsonDetailed]
         public ActionResult<Show> GetShow(string slug)
         {
-            Show show = libraryManager.GetShowBySlug(slug);
+            Show show = _libraryManager.GetShowBySlug(slug);
 
             if (show == null)
                 return NotFound();
-
+			
             return show;
         }
     }

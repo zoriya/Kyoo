@@ -3,20 +3,21 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Kyoo.Controllers;
 
-namespace Kyoo.Controllers
+namespace Kyoo.Api
 {
     [Route("[controller]")]
     [ApiController]
     public class SubtitleController : ControllerBase
     {
-        private readonly ILibraryManager libraryManager;
-        private readonly ITranscoder transcoder;
+        private readonly ILibraryManager _libraryManager;
+        private readonly ITranscoder _transcoder;
 
         public SubtitleController(ILibraryManager libraryManager, ITranscoder transcoder)
         {
-            this.libraryManager = libraryManager;
-            this.transcoder = transcoder;
+            _libraryManager = libraryManager;
+            _transcoder = transcoder;
         }
 
         [HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}.{identifier}.{extension?}")]
@@ -25,7 +26,7 @@ namespace Kyoo.Controllers
             string languageTag = identifier.Substring(0, 3);
             bool forced = identifier.Length > 3 && identifier.Substring(4) == "forced";
 
-            Track subtitle = libraryManager.GetSubtitle(showSlug, seasonNumber, episodeNumber, languageTag, forced);
+            Track subtitle = _libraryManager.GetSubtitle(showSlug, seasonNumber, episodeNumber, languageTag, forced);
 
             if (subtitle == null)
                 return NotFound();
@@ -49,14 +50,14 @@ namespace Kyoo.Controllers
         [HttpGet("extract/{showSlug}-s{seasonNumber}e{episodeNumber}")]
         public async Task<string> ExtractSubtitle(string showSlug, long seasonNumber, long episodeNumber)
         {
-            Episode episode = libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
-            libraryManager.ClearSubtitles(episode.ID);
+            Episode episode = _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
+            _libraryManager.ClearSubtitles(episode.ID);
 
-            Track[] tracks = await transcoder.ExtractSubtitles(episode.Path);
+            Track[] tracks = await _transcoder.ExtractSubtitles(episode.Path);
             foreach (Track track in tracks)
             {
                 track.EpisodeID = episode.ID;
-                libraryManager.RegisterTrack(track);
+                _libraryManager.RegisterTrack(track);
             }
 
             return "Done. " + tracks.Length + " track(s) extracted.";
@@ -65,16 +66,16 @@ namespace Kyoo.Controllers
         [HttpGet("extract/{showSlug}")]
         public async Task<string> ExtractSubtitle(string showSlug)
         {
-            IEnumerable<Episode> episodes = libraryManager.GetEpisodes(showSlug);
+            IEnumerable<Episode> episodes = _libraryManager.GetEpisodes(showSlug);
             foreach (Episode episode in episodes)
             {
-                libraryManager.ClearSubtitles(episode.ID);
+                _libraryManager.ClearSubtitles(episode.ID);
 
-                Track[] tracks = await transcoder.ExtractSubtitles(episode.Path);
+                Track[] tracks = await _transcoder.ExtractSubtitles(episode.Path);
                 foreach (Track track in tracks)
                 {
                     track.EpisodeID = episode.ID;
-                    libraryManager.RegisterTrack(track);
+                    _libraryManager.RegisterTrack(track);
                 }
             }
 
@@ -85,11 +86,11 @@ namespace Kyoo.Controllers
 
     public class ConvertSubripToVtt : IActionResult
     {
-        private readonly string path;
+        private readonly string _path;
 
         public ConvertSubripToVtt(string subtitlePath)
         {
-            path = subtitlePath;
+            _path = subtitlePath;
         }
 
         public async Task ExecuteResultAsync(ActionContext context)
@@ -100,13 +101,13 @@ namespace Kyoo.Controllers
             context.HttpContext.Response.StatusCode = 200;
             context.HttpContext.Response.Headers.Add("Content-Type", "text/vtt");
 
-            using (StreamWriter writer = new StreamWriter(context.HttpContext.Response.Body))
+            await using (StreamWriter writer = new StreamWriter(context.HttpContext.Response.Body))
             {
                 await writer.WriteLineAsync("WEBVTT");
                 await writer.WriteLineAsync("");
                 await writer.WriteLineAsync("");
 
-                using (StreamReader reader = new StreamReader(path))
+                using (StreamReader reader = new StreamReader(_path))
                 {
                     while ((line = await reader.ReadLineAsync()) != null)
                     {
@@ -127,7 +128,7 @@ namespace Kyoo.Controllers
             await context.HttpContext.Response.Body.FlushAsync();
         }
 
-        public List<string> ConvertBlock(List<string> lines)
+        private static List<string> ConvertBlock(List<string> lines)
         {
             lines[1] = lines[1].Replace(',', '.');
             if (lines[2].Length > 5)
