@@ -124,7 +124,7 @@ namespace Kyoo.Controllers
 	            .Select(x =>
 	            {
 		            People existing = _libraryManager.GetPeopleBySlug(x.Slug);
-		            return existing != null ? new PeopleLink(existing, x.Role, x.Type) : x;
+		            return existing != null ? new PeopleLink(existing, show, x.Role, x.Type) : x;
 	            }).ToList();
             return show;
         }
