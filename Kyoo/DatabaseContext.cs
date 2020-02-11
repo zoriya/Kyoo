@@ -52,7 +52,13 @@ namespace Kyoo
             modelBuilder.Entity<Track>()
                 .Property(t => t.IsForced)
                 .ValueGeneratedNever();
-
+            
+            modelBuilder.Entity<Show>().Property(x => x.Title).HasColumnType("TEXT COLLATE NOCASE");
+            modelBuilder.Entity<Collection>().Property(x => x.Name).HasColumnType("TEXT COLLATE NOCASE");
+            modelBuilder.Entity<Episode>().Property(x => x.Title).HasColumnType("TEXT COLLATE NOCASE");
+            modelBuilder.Entity<People>().Property(x => x.Name).HasColumnType("TEXT COLLATE NOCASE");
+            modelBuilder.Entity<Genre>().Property(x => x.Name).HasColumnType("TEXT COLLATE NOCASE");
+            modelBuilder.Entity<Studio>().Property(x => x.Name).HasColumnType("TEXT COLLATE NOCASE");
 
             modelBuilder.Entity<GenreLink>()
 	            .HasKey(x => new {x.ShowID, x.GenreID});

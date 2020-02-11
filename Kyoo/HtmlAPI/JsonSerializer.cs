@@ -13,7 +13,7 @@ using Newtonsoft.Json.Serialization;
 
 namespace Kyoo.Controllers
 {
-	public class JsonPropertySelector : DefaultContractResolver
+	public class JsonPropertySelector : CamelCasePropertyNamesContractResolver
 	{
 		private readonly Dictionary<Type, HashSet<string>> _ignored;
 		private readonly Dictionary<Type, HashSet<string>> _forceSerialize;
@@ -21,7 +21,7 @@ namespace Kyoo.Controllers
 		public JsonPropertySelector()
 		{
 			_ignored = new Dictionary<Type, HashSet<string>>();	
-			_forceSerialize = new Dictionary<Type, HashSet<string>>();	
+			_forceSerialize = new Dictionary<Type, HashSet<string>>();
 		}
 		
 		public JsonPropertySelector(Dictionary<Type, HashSet<string>> ignored, Dictionary<Type, HashSet<string>> forceSerialize)
@@ -77,8 +77,8 @@ namespace Kyoo.Controllers
 					{
 						ContractResolver = new JsonPropertySelector(null, new Dictionary<Type, HashSet<string>>()
 						{
-							{typeof(Show), new HashSet<string> {"Genres", "Studio", "People", "Seasons"}},
-							{typeof(Episode), new HashSet<string> {"Tracks"}}
+							{typeof(Show), new HashSet<string> {"genres", "studio", "people", "seasons"}},
+							{typeof(Episode), new HashSet<string> {"tracks"}}
 						})
 					},
 				context.HttpContext.RequestServices.GetRequiredService<ArrayPool<char>>(), 

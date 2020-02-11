@@ -67,7 +67,6 @@ namespace Kyoo.Controllers
 
 		public IEnumerable<Show> GetShows(string searchQuery)
 		{
-			// TODO use case insensitive queries.
 			return (from show in _database.Shows from l in _database.CollectionLinks.DefaultIfEmpty()
 					where l.CollectionID == null select show).AsEnumerable().Union(
 					from collection in _database.Collections select collection.AsShow())

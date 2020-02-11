@@ -6,6 +6,7 @@ using Kyoo.Controllers;
 namespace Kyoo.Api
 {
     [Route("api/shows")]
+    [Route("api/show")]
     [ApiController]
     public class ShowsController : ControllerBase
     {
