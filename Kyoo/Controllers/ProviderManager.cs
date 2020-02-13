@@ -59,12 +59,13 @@ namespace Kyoo.Controllers
             return collection;
         }
 
-        public async Task<Show> GetShowFromName(string showName, string showPath, Library library)
+        public async Task<Show> GetShowFromName(string showName, string showPath, bool isMovie, Library library)
         {
-            Show show = await GetMetadata(provider => provider.GetShowFromName(showName), library, $"the show {showName}");
+            Show show = await GetMetadata(provider => provider.GetShowFromName(showName, isMovie), library, $"the show {showName}");
             show.Path = showPath;
             show.Slug = Utility.ToSlug(showName);
             show.Title ??= showName;
+            show.IsMovie = isMovie;
             await _thumbnailsManager.Validate(show);
             return show;
         }
