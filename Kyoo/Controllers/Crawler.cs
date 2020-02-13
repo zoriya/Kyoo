@@ -101,7 +101,7 @@ namespace Kyoo.Controllers
 
             Collection collection = await GetCollection(collectionName, library);
             Show show = await GetShow(showName, showPath, library);
-            Season season = await GetSeason(show, seasonNumber, library);
+            Season season = seasonNumber != -1 ? await GetSeason(show, seasonNumber, library) : null;
             Episode episode = await GetEpisode(show, season, episodeNumber, absoluteNumber, path, library);
             _libraryManager.RegisterEpisode(episode);
             _libraryManager.RegisterShowLinks(library, collection, show);
@@ -141,8 +141,10 @@ namespace Kyoo.Controllers
         
         private async Task<Episode> GetEpisode(Show show, Season season, long episodeNumber, long absoluteNumber, string episodePath, Library library)
         {
-            Episode episode = await _metadataProvider.GetEpisode(show, episodePath, season.SeasonNumber, episodeNumber, absoluteNumber, library);
+            Episode episode = await _metadataProvider.GetEpisode(show, episodePath, season?.SeasonNumber ?? -1, episodeNumber, absoluteNumber, library);
             episode.Show = show;
+            if (season == null)
+	            season = await GetSeason(show, episode.SeasonNumber, library);
             episode.Season = season;
             
             IEnumerable<Track> tracks = await _transcoder.GetTrackInfo(episode.Path);
