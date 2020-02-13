@@ -26,9 +26,11 @@ namespace Kyoo.Models
         [JsonIgnore] public string ImgBackdrop { get; set; }
 
         public string ExternalIDs { get; set; }
+
+        public bool IsMovie { get; set; }
         
         public bool IsCollection;
-
+        
         [JsonIgnore] public virtual IEnumerable<Genre> Genres
         {
 	        get { return GenreLinks?.Select(x => x.Genre).OrderBy(x => x.Name); }
