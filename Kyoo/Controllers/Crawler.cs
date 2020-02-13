@@ -81,12 +81,10 @@ namespace Kyoo.Controllers
             long absoluteNumber = long.TryParse(match.Groups["Absolute"].Value, out tmp) ? tmp : -1;
 
             Collection collection = await GetCollection(collectionName, library);
-            Show show = await GetShow(showName, showPath, library);
-            if (seasonNumber == -1 && episodeNumber == -1 && absoluteNumber == -1)
-            {
-	            show.IsMovie = true;
+            bool isMovie = seasonNumber == -1 && episodeNumber == -1 && absoluteNumber == -1;
+            Show show = await GetShow(showName, showPath, isMovie, library);
+            if (isMovie)
 	            _libraryManager.RegisterShow(show);
-            }
 			else
             {
 	            Season season = await GetSeason(show, seasonNumber, library);
@@ -103,12 +101,12 @@ namespace Kyoo.Controllers
 	        return _libraryManager.GetCollection(Utility.ToSlug(collectionName)) ?? await _metadataProvider.GetCollectionFromName(collectionName, library);
         }
         
-        private async Task<Show> GetShow(string showTitle, string showPath, Library library)
+        private async Task<Show> GetShow(string showTitle, string showPath, bool isMovie, Library library)
         {
 	        Show show = _libraryManager.GetShow(showPath);
             if (show != null)
 	            return show;
-            show = await _metadataProvider.GetShowFromName(showTitle, showPath, library);
+            show = await _metadataProvider.GetShowFromName(showTitle, showPath, isMovie, library);
             show.People = (await _metadataProvider.GetPeople(show, library)).GroupBy(x => x.Slug).Select(x => x.First())
 	            .Select(x =>
 	            {
