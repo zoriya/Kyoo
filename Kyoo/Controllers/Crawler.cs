@@ -68,6 +68,7 @@ namespace Kyoo.Controllers
 
         private async Task RegisterFile(string path, string relativePath, Library library)
         {
+	        Console.WriteLine("Registering episode at: " + path);
 	        string patern = _config.GetValue<string>("regex");
             Regex regex = new Regex(patern, RegexOptions.IgnoreCase);
             Match match = regex.Match(relativePath);
@@ -75,35 +76,23 @@ namespace Kyoo.Controllers
             string showPath = Path.GetDirectoryName(path);
             string collectionName = match.Groups["Collection"]?.Value;
             string showName = match.Groups["ShowTitle"].Value;
-            bool seasonSuccess = long.TryParse(match.Groups["Season"].Value, out long seasonNumber);
-            bool episodeSucess = long.TryParse(match.Groups["Episode"].Value, out long episodeNumber);
-            long absoluteNumber = -1;
-
-            Console.WriteLine("Registering episode at: " + path);
-            if (!seasonSuccess || !episodeSucess)
-            {
-                //Considering that the episode is using absolute path.
-                seasonNumber = -1;
-                episodeNumber = -1;
-
-                regex = new Regex(_config.GetValue<string>("absoluteRegex"));
-                match = regex.Match(relativePath);
-
-                showName = match.Groups["ShowTitle"].Value;
-                bool absoluteSucess = long.TryParse(match.Groups["AbsoluteNumber"].Value, out absoluteNumber);
-
-                if (!absoluteSucess)
-                {
-                    Console.Error.WriteLine("Couldn't find basic data for the episode (regexs didn't match) " + relativePath);
-                    return;
-                }
-            }
+            long seasonNumber = long.TryParse(match.Groups["Season"].Value, out long tmp) ? tmp : -1;
+            long episodeNumber = long.TryParse(match.Groups["Episode"].Value, out tmp) ? tmp : -1;
+            long absoluteNumber = long.TryParse(match.Groups["Absolute"].Value, out tmp) ? tmp : -1;
 
             Collection collection = await GetCollection(collectionName, library);
             Show show = await GetShow(showName, showPath, library);
-            Season season = seasonNumber != -1 ? await GetSeason(show, seasonNumber, library) : null;
-            Episode episode = await GetEpisode(show, season, episodeNumber, absoluteNumber, path, library);
-            _libraryManager.RegisterEpisode(episode);
+            if (seasonNumber == -1 && episodeNumber == -1 && absoluteNumber == -1)
+            {
+	            show.IsMovie = true;
+	            _libraryManager.RegisterShow(show);
+            }
+			else
+            {
+	            Season season = await GetSeason(show, seasonNumber, library);
+	            Episode episode = await GetEpisode(show, season, episodeNumber, absoluteNumber, path, library);
+	            _libraryManager.RegisterEpisode(episode);
+            }
             _libraryManager.RegisterShowLinks(library, collection, show);
         }
 
@@ -131,6 +120,8 @@ namespace Kyoo.Controllers
 
         private async Task<Season> GetSeason(Show show, long seasonNumber, Library library)
         {
+	        if (seasonNumber == -1)
+		        return null;
 	        Season season = _libraryManager.GetSeason(show.Slug, seasonNumber);
 	        if (season != null)
 		        return await Task.FromResult(season);
