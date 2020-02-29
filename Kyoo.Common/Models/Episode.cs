@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Kyoo.Models
 {
@@ -103,7 +104,7 @@ namespace Kyoo.Models
 			if (Runtime == -1)
 				Runtime = other.Runtime;
 			ImgPrimary ??= other.ImgPrimary;
-			ExternalIDs = string.Join('|', ExternalIDs, other.ExternalIDs);
+			ExternalIDs = string.Join('|', new [] { ExternalIDs, other.ExternalIDs }.Where(x => !string.IsNullOrEmpty(x)));
 			return this;
 		}
 	}

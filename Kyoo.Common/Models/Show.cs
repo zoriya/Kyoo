@@ -123,7 +123,7 @@ namespace Kyoo.Models
 			ImgBackdrop ??= other.ImgBackdrop;
 			if (other.Studio != null)
 				Studio ??= other.Studio;
-			ExternalIDs = string.Join('|', ExternalIDs, other.ExternalIDs);
+			ExternalIDs = string.Join('|', new [] { ExternalIDs, other.ExternalIDs }.Where(x => !string.IsNullOrEmpty(x)));
 			return this;
 		}
 	}
