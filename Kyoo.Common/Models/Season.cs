@@ -44,7 +44,7 @@ namespace Kyoo.Models
 			Overview ??= other.Overview;
 			Year ??= other.Year;
 			ImgPrimary ??= other.ImgPrimary;
-			ExternalIDs += '|' + other.ExternalIDs;
+			ExternalIDs = string.Join('|', ExternalIDs, other.ExternalIDs);
 			return this;
 		}
 	}
