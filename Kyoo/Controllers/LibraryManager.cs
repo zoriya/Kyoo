@@ -328,6 +328,16 @@ namespace Kyoo.Controllers
 			return show.ID;
 		}
 
+		public long RegisterMovie(Episode movie)
+		{
+			if (movie == null)
+				return 0;
+			if (_database.Entry(movie).State == EntityState.Detached)
+				_database.Episodes.Add(movie);
+			_database.SaveChanges();
+			return movie.ID;
+		}
+
 		public long RegisterSeason(Season season)
 		{
 			if (season == null)
