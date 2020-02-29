@@ -310,6 +310,8 @@ namespace Kyoo.Controllers
 		#region Write Into The Database
 		public long RegisterCollection(Collection collection)
 		{
+			if (collection == null)
+				return 0;
 			if (_database.Entry(collection).State == EntityState.Detached)
 				_database.Collections.Add(collection);
 			_database.SaveChanges();
@@ -318,6 +320,8 @@ namespace Kyoo.Controllers
 
 		public long RegisterShow(Show show)
 		{
+			if (show == null)
+				return 0;
 			if (_database.Entry(show).State == EntityState.Detached)
 				_database.Shows.Add(show);
 			_database.SaveChanges();
@@ -326,6 +330,8 @@ namespace Kyoo.Controllers
 
 		public long RegisterSeason(Season season)
 		{
+			if (season == null)
+				return 0;
 			if (_database.Entry(season).State == EntityState.Detached)
 				_database.Seasons.Add(season);
 			_database.SaveChanges();
@@ -334,6 +340,8 @@ namespace Kyoo.Controllers
 
 		public long RegisterEpisode(Episode episode)
 		{
+			if (episode == null)
+				return 0;
 			if (_database.Entry(episode).State == EntityState.Detached)
 				_database.Episodes.Add(episode);
 			_database.SaveChanges();

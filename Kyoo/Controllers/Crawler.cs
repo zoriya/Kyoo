@@ -89,7 +89,8 @@ namespace Kyoo.Controllers
 			{
 				Season season = await GetSeason(show, seasonNumber, library);
 				Episode episode = await GetEpisode(show, season, episodeNumber, absoluteNumber, path, library);
-				_libraryManager.RegisterEpisode(episode);
+				if (_libraryManager.RegisterEpisode(episode) == 0)
+					return;
 			}
 			_libraryManager.RegisterShowLinks(library, collection, show);
 		}
@@ -123,18 +124,20 @@ namespace Kyoo.Controllers
 			Season season = _libraryManager.GetSeason(show.Slug, seasonNumber);
 			if (season != null)
 				return await Task.FromResult(season);
-			season = await _metadataProvider.GetSeason(show, seasonNumber, library);
-			season.Show = show;
-			return season;
+			return await _metadataProvider.GetSeason(show, seasonNumber, library);
 		}
 		
 		private async Task<Episode> GetEpisode(Show show, Season season, long episodeNumber, long absoluteNumber, string episodePath, Library library)
 		{
 			Episode episode = await _metadataProvider.GetEpisode(show, episodePath, season?.SeasonNumber ?? -1, episodeNumber, absoluteNumber, library);
-			episode.Show = show;
 			if (season == null)
 				season = await GetSeason(show, episode.SeasonNumber, library);
 			episode.Season = season;
+			if (season == null)
+			{
+				Console.Error.WriteLine("\tError: You don't have any provider that support absolute epiode numbering. Install one and try again.");
+				return null;
+			}
 			
 			IEnumerable<Track> tracks = await _transcoder.GetTrackInfo(episode.Path);
 			List<Track> epTracks = tracks.Where(x => x.Type != StreamType.Subtitle).Concat(GetExtractedSubtitles(episode)).ToList();
