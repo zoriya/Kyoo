@@ -1,3 +1,7 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Kyoo.Models;
 
@@ -57,6 +61,18 @@ namespace Kyoo
 				default:
 					break;
 			}
+		}
+
+		public static IEnumerable<T> MergeLists<T>(IEnumerable<T> first, IEnumerable<T> second, Func<T, T, bool> isEqual = null)
+		{
+			if (first == null)
+				return second;
+			if (second == null)
+				return first;
+			List<T> list = first.ToList();
+			if (isEqual == null)
+				isEqual = (x, y) => x.Equals(y);
+			return list.Concat(second.Where(x => !list.Any(y => isEqual(x, y))));
 		}
 	}
 }

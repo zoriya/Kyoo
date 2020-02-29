@@ -109,8 +109,8 @@ namespace Kyoo.Models
 				ID = other.ID;
 			Slug ??= other.Slug;
 			Title ??= other.Title;
-			Aliases = Aliases == null ? other.Aliases : Aliases.Concat(other.Aliases).ToArray();
-			Genres = Genres == null ? other.Genres : Genres.Concat(other.Genres);
+			Aliases = Utility.MergeLists(Aliases, other.Aliases).ToArray();
+			Genres = Utility.MergeLists(Genres, other.Genres, (x, y) => x.Slug == y.Slug);
 			Path ??= other.Path;
 			Overview ??= other.Overview;
 			TrailerUrl ??= other.TrailerUrl;
@@ -121,6 +121,8 @@ namespace Kyoo.Models
 			ImgThumb ??= other.ImgThumb;
 			ImgLogo ??= other.ImgLogo;
 			ImgBackdrop ??= other.ImgBackdrop;
+			if (other.Studio != null)
+				Studio ??= other.Studio;
 			ExternalIDs = string.Join('|', ExternalIDs, other.ExternalIDs);
 			return this;
 		}
