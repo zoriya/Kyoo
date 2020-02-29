@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using Kyoo.Models;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
@@ -84,7 +85,7 @@ namespace Kyoo.Controllers
 			bool isMovie = seasonNumber == -1 && episodeNumber == -1 && absoluteNumber == -1;
 			Show show = await GetShow(showName, showPath, isMovie, library);
 			if (isMovie)
-				_libraryManager.RegisterShow(show);
+				_libraryManager.RegisterMovie(await GetMovie(show, path));
 			else
 			{
 				Season season = await GetSeason(show, seasonNumber, library);
@@ -138,13 +139,29 @@ namespace Kyoo.Controllers
 				Console.Error.WriteLine("\tError: You don't have any provider that support absolute epiode numbering. Install one and try again.");
 				return null;
 			}
-			
+
+			await GetTracks(episode);
+			return episode;
+		}
+
+		private async Task<Episode> GetMovie(Show show, string episodePath)
+		{
+			Episode episode = new Episode();
+			episode.Title = show.Title;
+			episode.Path = episodePath;
+			episode.Show = show;
+			episode.Tracks = await GetTracks(episode);
+			return episode;
+		}
+
+		private async Task<IEnumerable<Track>> GetTracks(Episode episode)
+		{
 			IEnumerable<Track> tracks = await _transcoder.GetTrackInfo(episode.Path);
 			List<Track> epTracks = tracks.Where(x => x.Type != StreamType.Subtitle).Concat(GetExtractedSubtitles(episode)).ToList();
 			if (epTracks.Count(x => !x.IsExternal) < tracks.Count())
 				epTracks.AddRange(await _transcoder.ExtractSubtitles(episode.Path));
 			episode.Tracks = epTracks;
-			return episode;
+			return epTracks;
 		}
 
 		private static IEnumerable<Track> GetExtractedSubtitles(Episode episode)
