@@ -41,8 +41,6 @@
 		<Content Remove="$(SpaRoot)**" />
 		<None Remove="$(SpaRoot)**" />
 		<None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
-		<None Remove="Controllers\MetadataProvider\**" />
-		<Content Remove="Controllers\MetadataProvider\**" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -58,15 +56,10 @@
 	  <EmbeddedResource Include="kyoo.sh">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </EmbeddedResource>
-	  <EmbeddedResource Remove="Controllers\MetadataProvider\**" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="..\Kyoo.Common\Kyoo.Common.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Compile Remove="Controllers\MetadataProvider\**" />
 	</ItemGroup>
 	
 	<Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

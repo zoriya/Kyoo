@@ -43,7 +43,7 @@ namespace Kyoo.Controllers
 				try
 				{
 					if (library.Providers.Contains(provider.Name))
-						ret.AddRange(await providerCall(provider));
+						ret.AddRange(await providerCall(provider) ?? new List<T>());
 				} catch (Exception ex) {
 					Console.Error.WriteLine($"The provider {provider.Name} coudln't work for {what}. Exception: {ex.Message}");
 				}
@@ -73,7 +73,7 @@ namespace Kyoo.Controllers
 		public async Task<Season> GetSeason(Show show, long seasonNumber, Library library)
 		{
 			Season season = await GetMetadata(provider => provider.GetSeason(show, seasonNumber), library, $"the season {seasonNumber} of {show.Title}");
-			season.ShowID = show.ID;
+			season.Show = show;
 			season.SeasonNumber = season.SeasonNumber == -1 ? seasonNumber : season.SeasonNumber;
 			season.Title ??= $"Season {season.SeasonNumber}";
 			return season;
@@ -82,7 +82,7 @@ namespace Kyoo.Controllers
 		public async Task<Episode> GetEpisode(Show show, string episodePath, long seasonNumber, long episodeNumber, long absoluteNumber,  Library library)
 		{
 			Episode episode = await GetMetadata(provider => provider.GetEpisode(show, seasonNumber, episodeNumber, absoluteNumber), library, "an episode");
-			episode.ShowID = show.ID;
+			episode.Show = show;
 			episode.Path = episodePath;
 			episode.SeasonNumber = episode.SeasonNumber != -1 ? episode.SeasonNumber : seasonNumber;
 			episode.EpisodeNumber = episode.EpisodeNumber != -1 ? episode.EpisodeNumber : episodeNumber;
@@ -93,7 +93,7 @@ namespace Kyoo.Controllers
 
 		public async Task<IEnumerable<PeopleLink>> GetPeople(Show show, Library library)
 		{
-			IEnumerable<PeopleLink> people = await GetMetadata(provider => provider.GetPeople(show), library, "unknown data");
+			IEnumerable<PeopleLink> people = await GetMetadata(provider => provider.GetPeople(show), library, $"a cast member of {show.Title}");
 			people = await _thumbnailsManager.Validate(people.ToList());
 			return people;
 		}
