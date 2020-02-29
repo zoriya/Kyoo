@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
-		<TargetFramework>netcoreapp3.0</TargetFramework>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
 		<TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
 		<TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
 		<IsPackable>false</IsPackable>
@@ -17,22 +17,22 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="IdentityServer4" Version="3.0.2" />
-		<PackageReference Include="IdentityServer4.AspNetIdentity" Version="3.0.2" />
+		<PackageReference Include="IdentityServer4" Version="3.1.2" />
+		<PackageReference Include="IdentityServer4.AspNetIdentity" Version="3.1.2" />
 		<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="3.0.2" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="3.0.0" />
-		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.0.0" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.1" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="3.1.1" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.1">
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="3.1.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.2" />
+		<PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="3.1.2" />
+		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.1.2" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.2" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="3.1.2" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.2">
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		  <PrivateAssets>all</PrivateAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="3.1.1" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.1" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="3.1.2" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.2" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.2" />
 		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
 	</ItemGroup>
 

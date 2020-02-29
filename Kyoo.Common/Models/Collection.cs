@@ -48,10 +48,7 @@ namespace Kyoo.Models
 				Overview = collection.Overview;
 			if (ImgPrimary == null)
 				ImgPrimary = collection.ImgPrimary;
-			if (Shows == null)
-				Shows = collection.Shows;
-			else
-				Shows = Shows.Concat(collection.Shows);
+			Shows = Shows == null ? collection.Shows : Shows.Concat(collection.Shows);
 			return this;
 		}
 	}

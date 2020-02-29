@@ -121,7 +121,7 @@ namespace Kyoo.Models
 			ImgThumb ??= other.ImgThumb;
 			ImgLogo ??= other.ImgLogo;
 			ImgBackdrop ??= other.ImgBackdrop;
-			ExternalIDs += '|' + other.ExternalIDs;
+			ExternalIDs = string.Join('|', ExternalIDs, other.ExternalIDs);
 			return this;
 		}
 	}

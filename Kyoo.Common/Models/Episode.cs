@@ -103,7 +103,7 @@ namespace Kyoo.Models
 			if (Runtime == -1)
 				Runtime = other.Runtime;
 			ImgPrimary ??= other.ImgPrimary;
-			ExternalIDs += '|' + other.ExternalIDs;
+			ExternalIDs = string.Join('|', ExternalIDs, other.ExternalIDs);
 			return this;
 		}
 	}
