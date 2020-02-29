@@ -48,7 +48,7 @@ namespace Kyoo.Models
 				Overview = collection.Overview;
 			if (ImgPrimary == null)
 				ImgPrimary = collection.ImgPrimary;
-			Shows = Shows == null ? collection.Shows : Shows.Concat(collection.Shows);
+			Shows = Utility.MergeLists(Shows, collection.Shows, (x, y) => x.Slug == y.Slug);
 			return this;
 		}
 	}
