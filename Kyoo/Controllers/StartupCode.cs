@@ -22,7 +22,7 @@ namespace Kyoo.Controllers
 				serviceScope.ServiceProvider.GetService<DatabaseContext>().Database.EnsureCreated();
 				// Use the next line if the database is not SQLite (SQLite doesn't support complexe migrations).
 				// serviceScope.ServiceProvider.GetService<DatabaseContext>().Database.Migrate();;
-	            
+				
 				IPluginManager pluginManager = serviceScope.ServiceProvider.GetService<IPluginManager>();
 				pluginManager.ReloadPlugins();
 
