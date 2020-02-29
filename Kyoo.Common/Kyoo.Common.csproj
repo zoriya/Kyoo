@@ -11,7 +11,7 @@
         <Company>SDG</Company>
         <PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-        <PackageVersion>1.0.9</PackageVersion>
+        <PackageVersion>1.0.10</PackageVersion>
     </PropertyGroup>
 
     <ItemGroup>
