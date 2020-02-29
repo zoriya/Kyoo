@@ -49,16 +49,16 @@ namespace Kyoo.Controllers
 		}
 
 		public T GetPlugin<T>(string name)
-        {
-            if (_plugins == null)
-                return default;
+		{
+			if (_plugins == null)
+				return default;
 			return (T)(from plugin in _plugins where plugin.Name == name && plugin is T select plugin).FirstOrDefault();
 		}
 
 		public IEnumerable<T> GetPlugins<T>()
-        {
-            if (_plugins == null)
-                return new List<T>();
+		{
+			if (_plugins == null)
+				return new List<T>();
 			return from plugin in _plugins where plugin is T select (T)plugin;
 		}
 
@@ -72,20 +72,20 @@ namespace Kyoo.Controllers
 
 			_plugins = pluginsPaths.Select(path =>
 			{
-                try
-                {
-	                PluginDependencyLoader loader = new PluginDependencyLoader(Path.GetFullPath(path));
-	                Assembly ass = loader.LoadFromAssemblyPath(Path.GetFullPath(path));
-                    return (from type in ass.GetTypes()
-                        where typeof(IPlugin).IsAssignableFrom(type)
-                        select (IPlugin) ActivatorUtilities.CreateInstance(_provider, type)).FirstOrDefault();
-                }
-                catch (Exception ex)
-                {
-                    Console.Error.WriteLine($"Error loading the plugin at {path}.\nException: {ex.Message}");
-                    return null;
-                }
-            }).Where(x => x != null).ToList();
+				try
+				{
+					PluginDependencyLoader loader = new PluginDependencyLoader(Path.GetFullPath(path));
+					Assembly ass = loader.LoadFromAssemblyPath(Path.GetFullPath(path));
+					return (from type in ass.GetTypes()
+						where typeof(IPlugin).IsAssignableFrom(type)
+						select (IPlugin) ActivatorUtilities.CreateInstance(_provider, type)).FirstOrDefault();
+				}
+				catch (Exception ex)
+				{
+					Console.Error.WriteLine($"Error loading the plugin at {path}.\nException: {ex.Message}");
+					return null;
+				}
+			}).Where(x => x != null).ToList();
 		}
 	}
 }

@@ -48,9 +48,9 @@ namespace Kyoo.Controllers
 			if (showID == null)
 				return null;
 			return (from track in _database.Tracks where track.Episode.ShowID == showID 
-			                                          && track.Episode.SeasonNumber == seasonNumber 
-			                                          && track.Episode.EpisodeNumber == episodeNumber
-			                                          && track.Language == languageTag select track).FirstOrDefault();
+													  && track.Episode.SeasonNumber == seasonNumber 
+													  && track.Episode.EpisodeNumber == episodeNumber
+													  && track.Language == languageTag select track).FirstOrDefault();
 		}
 
 
@@ -72,7 +72,7 @@ namespace Kyoo.Controllers
 					where l.CollectionID == null select show).AsEnumerable().Union(
 					from collection in _database.Collections select collection.AsShow())
 				.Where(x => EF.Functions.Like(x.Title, $"%{searchQuery}%") 
-				            || EF.Functions.Like(x.GetAliases(), $"%{searchQuery}%"))
+							|| EF.Functions.Like(x.GetAliases(), $"%{searchQuery}%"))
 				.Take(20).OrderBy(x => x.Title);
 		}
 
@@ -99,7 +99,7 @@ namespace Kyoo.Controllers
 		{
 			return (from season in _database.Seasons
 				where season.SeasonNumber == seasonNumber
-				      && season.Show.Slug == showSlug
+					  && season.Show.Slug == showSlug
 				select season).FirstOrDefault();
 		}
 
@@ -107,7 +107,7 @@ namespace Kyoo.Controllers
 		{
 			return (from season in _database.Seasons
 				where season.SeasonNumber == seasonNumber
-				      && season.Show.Slug == showSlug
+					  && season.Show.Slug == showSlug
 				select season).FirstOrDefault()?.Episodes.Count() ?? 0;
 		}
 
@@ -119,7 +119,7 @@ namespace Kyoo.Controllers
 		public IEnumerable<Episode> GetEpisodes(string showSlug, long seasonNumber)
 		{
 			return (from episode in _database.Episodes where episode.SeasonNumber == seasonNumber 
-			                                             && episode.Show.Slug == showSlug select episode)
+														 && episode.Show.Slug == showSlug select episode)
 				.OrderBy(x => x.EpisodeNumber)
 				.Select(x => x.SetLink(showSlug));
 		}
@@ -127,20 +127,20 @@ namespace Kyoo.Controllers
 		public IEnumerable<Episode> GetEpisodes(long showID, long seasonNumber)
 		{
 			return from episode in _database.Episodes where episode.ShowID == showID 
-			                                             && episode.SeasonNumber == seasonNumber select episode.SetLink(episode.Show.Slug);
+														 && episode.SeasonNumber == seasonNumber select episode.SetLink(episode.Show.Slug);
 		}
 
 		public Episode GetEpisode(string showSlug, long seasonNumber, long episodeNumber)
 		{
 			return (from episode in _database.Episodes where episode.EpisodeNumber == episodeNumber
 															&& episode.SeasonNumber == seasonNumber 
-			                                                && episode.Show.Slug == showSlug select episode.SetLink(showSlug)).FirstOrDefault();
+															&& episode.Show.Slug == showSlug select episode.SetLink(showSlug)).FirstOrDefault();
 		}
 
 		public WatchItem GetWatchItem(string showSlug, long seasonNumber, long episodeNumber, bool complete = true)
 		{
 			WatchItem item = (from episode in _database.Episodes where episode.SeasonNumber == seasonNumber 
-               && episode.EpisodeNumber == episodeNumber && episode.Show.Slug == showSlug 
+			   && episode.EpisodeNumber == episodeNumber && episode.Show.Slug == showSlug 
 				select new WatchItem(episode.ID, 
 					episode.Show.Title,
 					episode.Show.Slug,
