@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Newtonsoft.Json;
 
 namespace Kyoo.Models
@@ -29,7 +30,7 @@ namespace Kyoo.Models
 			Slug ??= other.Slug;
 			Name ??= other.Name;
 			ImgPrimary ??= other.ImgPrimary;
-			ExternalIDs += '|' + other.ExternalIDs;
+			ExternalIDs = string.Join('|', new [] { ExternalIDs, other.ExternalIDs }.Where(x => !string.IsNullOrEmpty(x)));
 			return this;
 		}
 	}
