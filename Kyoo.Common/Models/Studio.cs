@@ -10,6 +10,12 @@ namespace Kyoo.Models
 
 		public Studio() { }
 
+		public Studio(string name)
+		{
+			Slug = Utility.ToSlug(name);
+			Name = name;
+		}
+		
 		public Studio(string slug, string name)
 		{
 			Slug = slug;
