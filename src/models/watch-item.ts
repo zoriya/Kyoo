@@ -10,6 +10,7 @@ export interface WatchItem
 	link: string;
 	duration: number;
 	releaseDate;
+	isMovie: boolean;
 
 	previousEpisode: string;
 	nextEpisode: Episode;

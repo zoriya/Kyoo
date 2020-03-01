@@ -70,10 +70,10 @@ export class PlayerComponent implements OnInit
 
 			this.setDuration(this.item.duration);
 
-			if (this.item.seasonNumber != -1)
-				this.title.setTitle(this.item.showTitle + " S" + this.item.seasonNumber + ":E" + this.item.episodeNumber + " - Kyoo");
-			else
+			if (this.item.isMovie)
 				this.title.setTitle(this.item.showTitle + " - Kyoo");
+			else
+				this.title.setTitle(this.item.showTitle + " S" + this.item.seasonNumber + ":E" + this.item.episodeNumber + " - Kyoo");
 			
 			if (navigator.userAgent.match(/Mobi/) && document.fullscreenElement == null)
 			{
