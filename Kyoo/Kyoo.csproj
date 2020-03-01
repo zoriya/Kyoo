@@ -86,4 +86,8 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
+
+	<Target Name="CreatePluginFolder" AfterTargets="Build">
+		<MakeDir Directories="$(OutputPath)/plugins"/>
+	</Target>
 </Project>
