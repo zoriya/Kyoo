@@ -44,7 +44,8 @@
 				<img src="poster/{{this.item.showSlug}}" />
 			</div>
 			<div class="content">
-				<h3>S{{this.item.seasonNumber}}:E{{this.item.episodeNumber}} - {{this.item.title}}</h3>
+				<h3 *ngIf="this.item.seasonNumber != -1">S{{this.item.seasonNumber}}:E{{this.item.episodeNumber}} - {{this.item.title}}</h3>
+				<h3 *ngIf="this.item.seasonNumber == -1">{{this.item.title}}</h3>
 
 				<div id="progress-bar">
 					<div class="seek-bar">

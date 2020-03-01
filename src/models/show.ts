@@ -16,6 +16,7 @@ export interface Show
 	seasons: Season[];
 	trailerUrl: string;
 	isCollection: boolean;
+	isMovie: boolean;
 
 	startYear: number;
 	endYear : number;

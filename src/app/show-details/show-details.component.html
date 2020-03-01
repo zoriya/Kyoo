@@ -62,17 +62,18 @@
 </div>
 
 
-
-<div class="container-fluid mt-3">
-	<mat-form-field>
-		<mat-label>Season</mat-label>
-		<mat-select [(value)]="season" (selectionChange)="getEpisodes()">
-			<mat-option *ngFor="let season of this.show.seasons" [value]="season.seasonNumber">{{season.title}}</mat-option>
-		</mat-select>
-	</mat-form-field>
+<div *ngIf="!this.show.isMovie">
+	<div class="container-fluid mt-3">
+		<mat-form-field>
+			<mat-label>Season</mat-label>
+			<mat-select [(value)]="season" (selectionChange)="getEpisodes()">
+				<mat-option *ngFor="let season of this.show.seasons" [value]="season.seasonNumber">{{season.title}}</mat-option>
+			</mat-select>
+		</mat-form-field>
+	</div>
+	<app-episodes-list [episodes]="episodes"></app-episodes-list>
 </div>
-<app-episodes-list [episodes]="episodes"></app-episodes-list>
-
+	
 <div class="container-fluid mt-5">
 	<h3>Staff</h3>
 </div>
