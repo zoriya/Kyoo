@@ -2,7 +2,7 @@ import { HttpClient } from "@angular/common/http";
 import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { Title } from '@angular/platform-browser';
-import { ActivatedRoute } from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import { Episode } from "../../models/episode";
 import { Show } from "../../models/show";
 
@@ -20,7 +20,7 @@ export class ShowDetailsComponent implements OnInit
 	private toolbar: HTMLElement;
 	private backdrop: HTMLElement;
 
-	constructor(private route: ActivatedRoute, private http: HttpClient, private snackBar: MatSnackBar, private title: Title)
+	constructor(private route: ActivatedRoute, private http: HttpClient, private snackBar: MatSnackBar, private title: Title, private router: Router)
 	{
 		this.route.queryParams.subscribe(params =>
 		{
@@ -58,6 +58,14 @@ export class ShowDetailsComponent implements OnInit
 	{
 		let opacity: number = 2 * window.scrollY / this.backdrop.clientHeight;
 		this.toolbar.setAttribute("style", `background-color: rgba(0, 0, 0, ${opacity}) !important`);
+	};
+
+	playClicked()
+	{
+		if (this.show.isMovie)
+			this.router.navigate(["/watch/" + this.show.slug]);
+		else
+			this.router.navigate(["/watch/" + this.show.slug + "-s1e1"]);
 	}
 
 	getEpisodes()

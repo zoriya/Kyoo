@@ -12,7 +12,7 @@
 				<ng-template #elseBlock><h2 class="date">{{show.startYear}}</h2></ng-template>
 			</div>
 			<div class="buttons">
-				<button mat-mini-fab matTooltipPosition="above" matTooltip="Play" class="mr-3">
+				<button mat-mini-fab matTooltipPosition="above" matTooltip="Play" class="mr-3" (click)="playClicked()">
 					<mat-icon>play_arrow</mat-icon>
 				</button>
 				<button *ngIf="this.show.trailerUrl" mat-icon-button matTooltipPosition="above" matTooltip="Trailer">
