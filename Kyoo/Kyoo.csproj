@@ -6,6 +6,7 @@
 		<TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
 		<IsPackable>false</IsPackable>
 		<SpaRoot>Views/WebClient/</SpaRoot>
+		<TranscoderRoot>../transcoder</TranscoderRoot>
 		<DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules/**</DefaultItemExcludes>
 
 		<!-- Set this to true if you enable server-side prerendering -->
@@ -70,4 +71,17 @@
 		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
 	</Target>
 
+	<Target Name="Compile the transcoder" BeforeTargets="BeforeBuild">
+		<Exec WorkingDirectory="$(TranscoderRoot)" Command="mkdir --parent build; cd build; cmake ..; make -j" />
+		<Copy SourceFiles="$(TranscoderRoot)/build/libtranscoder.so" DestinationFolder="." />
+	</Target>
+	
+	<ItemGroup>
+		<None Include="transcoder.dll" Condition="$(OS) == 'Windows_NT'">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+		<None Include="libtranscoder.so" Condition="$(OS) == 'Unix'">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 </Project>
