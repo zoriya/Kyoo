@@ -66,5 +66,42 @@ namespace Kyoo.Api
 				return PhysicalFile(path, "application/x-mpegURL ", true);
 			return StatusCode(500);
 		}
+		
+		
+		[HttpGet("{movieSlug}")]
+		public IActionResult Index(string movieSlug)
+		{
+			WatchItem episode = _libraryManager.GetMovieWatchItem(movieSlug);
+
+			if (episode != null && System.IO.File.Exists(episode.Path))
+				return PhysicalFile(episode.Path, "video/x-matroska", true);
+			return NotFound();
+		}
+
+		[HttpGet("transmux/{movieSlug}")]
+		public async Task<IActionResult> Transmux(string movieSlug)
+		{
+			WatchItem episode = _libraryManager.GetMovieWatchItem(movieSlug);
+
+			if (episode == null || !System.IO.File.Exists(episode.Path))
+				return NotFound();
+			string path = await _transcoder.Transmux(episode);
+			if (path != null)
+				return PhysicalFile(path, "application/x-mpegURL ", true);
+			return StatusCode(500);
+		}
+
+		[HttpGet("transcode/{movieSlug}")]
+		public async Task<IActionResult> Transcode(string movieSlug)
+		{
+			WatchItem episode = _libraryManager.GetMovieWatchItem(movieSlug);
+
+			if (episode == null || !System.IO.File.Exists(episode.Path))
+				return NotFound();
+			string path = await _transcoder.Transcode(episode);
+			if (path != null)
+				return PhysicalFile(path, "application/x-mpegURL ", true);
+			return StatusCode(500);
+		}
 	}
 }

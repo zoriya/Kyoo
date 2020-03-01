@@ -18,6 +18,7 @@ namespace Kyoo.Models
 		[JsonIgnore] public string Path;
 		public string PreviousEpisode;
 		public Episode NextEpisode;
+		public bool IsMovie;
 
 		public string Container;
 		public Track Video;
