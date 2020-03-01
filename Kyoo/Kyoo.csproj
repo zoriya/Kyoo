@@ -80,6 +80,8 @@
 		<None Include="transcoder.dll" Condition="$(OS) == 'Windows_NT'">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+	</ItemGroup>
+	<ItemGroup>
 		<None Include="libtranscoder.so" Condition="$(OS) == 'Unix'">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
