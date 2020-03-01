@@ -7,8 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-// ReSharper disable MemberCanBePrivate.Global
-// ReSharper disable UnusedAutoPropertyAccessor.Global
 
 namespace Kyoo
 {
@@ -27,7 +25,7 @@ namespace Kyoo
 			// In production, the Angular files will be served from this directory
 			services.AddSpaStaticFiles(configuration =>
 			{
-				configuration.RootPath = "ClientApp/dist";
+				configuration.RootPath = "wwwroot";
 			});
 
 			services.AddControllers().AddNewtonsoftJson();
@@ -90,7 +88,7 @@ namespace Kyoo
 
 			app.UseSpa(spa =>
 			{
-				spa.Options.SourcePath = "ClientApp";
+				spa.Options.SourcePath = "Views/WebClient";
 
 				if (env.IsDevelopment())
 				{

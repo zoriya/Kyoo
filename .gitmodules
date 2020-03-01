@@ -3,6 +3,6 @@
 	url = https://github.com/AnonymusRaccoon/Kyoo.Transcoder
 	branch = master
 [submodule "WebApp"]
-	path = Kyoo/ClientApp
+	path = Kyoo/Views/WebClient
 	url = https://github.com/AnonymusRaccoon/Kyoo.WebApp
 	branch = master
