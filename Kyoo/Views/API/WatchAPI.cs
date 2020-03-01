@@ -25,5 +25,15 @@ namespace Kyoo.Api
 
 			return item;
 		}
+		
+		[HttpGet("{movieSlug}")]
+		public ActionResult<WatchItem> Index(string movieSlug)
+		{
+			WatchItem item = _libraryManager.GetMovieWatchItem(movieSlug);
+
+			if(item == null)
+				return NotFound();
+			return item;
+		}
 	}
 }

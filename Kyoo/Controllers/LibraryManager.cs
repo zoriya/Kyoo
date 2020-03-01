@@ -1,4 +1,5 @@
-﻿using Kyoo.Models;
+﻿using System;
+using Kyoo.Models;
 using Kyoo.Models.Watch;
 using System.Collections.Generic;
 using System.Linq;
@@ -162,6 +163,28 @@ namespace Kyoo.Controllers
 				item.NextEpisode = GetEpisode(showSlug, seasonNumber + 1, 1);
 			else
 				item.NextEpisode = GetEpisode(showSlug, seasonNumber, episodeNumber + 1);
+			return item;
+		}
+
+		public WatchItem GetMovieWatchItem(string movieSlug)
+		{
+			Show movie = _database.Shows.FirstOrDefault(x => x.Slug == movieSlug);
+			if (movie == null)
+				return null;
+			Episode episode = _database.Episodes.FirstOrDefault(x => x.ShowID == movie.ID);
+			if (episode == null)
+				return null;
+			WatchItem item = new WatchItem(movie.ID, 
+				movie.Title,
+				movie.Slug,
+				-1, 
+				-1, 
+				movie.Title,
+				null,
+				episode.Path);
+			item.Link = movie.Slug;
+			item.IsMovie = true;
+			(item.Video, item.Audios, item.Subtitles) = GetStreams(item.EpisodeID, item.Link);
 			return item;
 		}
 
