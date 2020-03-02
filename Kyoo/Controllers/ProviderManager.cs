@@ -20,6 +20,9 @@ namespace Kyoo.Controllers
 		public async Task<T> GetMetadata<T>(Func<IMetadataProvider, Task<T>> providerCall, Library library, string what) where T : IMergable<T>, new()
 		{
 			T ret = new T();
+
+			if (library.Providers == null)
+				return ret;
 			
 			foreach (IMetadataProvider provider in _providers.OrderBy(provider => Array.IndexOf(library.Providers, provider.Name)))
 			{
@@ -37,6 +40,9 @@ namespace Kyoo.Controllers
 		public async Task<IEnumerable<T>> GetMetadata<T>(Func<IMetadataProvider, Task<IEnumerable<T>>> providerCall, Library library, string what)
 		{
 			List<T> ret = new List<T>();
+			
+			if (library.Providers == null)
+				return ret;
 			
 			foreach (IMetadataProvider provider in _providers.OrderBy(provider => Array.IndexOf(library.Providers, provider.Name)))
 			{
