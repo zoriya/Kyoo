@@ -1,3 +1,7 @@
+using System.Collections.Generic;
+using IdentityServer4.EntityFramework.DbContexts;
+using IdentityServer4.Models;
+using IdentityServer4.Stores;
 using Kyoo.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -34,9 +38,18 @@ namespace Kyoo
 			services.AddDbContext<DatabaseContext>(options => options.UseLazyLoadingProxies()
 				.UseSqlite(Configuration.GetConnectionString("Database")));
 
-			// services.AddIdentity<ApplicationUser, IdentityRole>()
-			//	 .AddEntityFrameworkStores()
-			// services.AddIdentityServer();
+			services.AddIdentityServer()
+				.AddConfigurationStore(options =>
+				{
+					options.ConfigureDbContext = builder => builder.UseSqlite(Configuration.GetConnectionString("Database"));
+				})
+				.AddOperationalStore(options =>
+				{
+					options.ConfigureDbContext = builder => builder.UseSqlite(Configuration.GetConnectionString("Database"));
+					options.EnableTokenCleanup = true;
+				})
+				.AddInMemoryIdentityResources(IdentityContext.GetIdentityResources())
+				.AddInMemoryApiResources(IdentityContext.GetApis());
 
 			services.AddScoped<ILibraryManager, LibraryManager>();
 			services.AddScoped<ICrawler, Crawler>();
@@ -74,12 +87,13 @@ namespace Kyoo
 				return next();
 			});
 
-			//app.UseHttpsRedirection();
 			app.UseStaticFiles();
 			if (!env.IsDevelopment())
 				app.UseSpaStaticFiles();
 
 			app.UseRouting();
+
+			app.UseIdentityServer();
 
 			app.UseEndpoints(endpoints =>
 			{
