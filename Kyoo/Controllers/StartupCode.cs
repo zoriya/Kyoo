@@ -1,6 +1,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using IdentityServer4.EntityFramework.DbContexts;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -20,6 +21,8 @@ namespace Kyoo.Controllers
 			using (IServiceScope serviceScope = _serviceProvider.CreateScope())
 			{
 				serviceScope.ServiceProvider.GetService<DatabaseContext>().Database.EnsureCreated();
+				serviceScope.ServiceProvider.GetService<ConfigurationDbContext>().Database.EnsureCreated();
+				serviceScope.ServiceProvider.GetService<PersistedGrantDbContext>().Database.EnsureCreated();
 				// Use the next line if the database is not SQLite (SQLite doesn't support complexe migrations).
 				// serviceScope.ServiceProvider.GetService<DatabaseContext>().Database.Migrate();;
 				
