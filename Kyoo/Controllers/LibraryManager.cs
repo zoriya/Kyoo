@@ -62,7 +62,8 @@ namespace Kyoo.Controllers
 
 		public IEnumerable<Show> GetShows()
 		{
-			return _database.LibraryLinks.AsEnumerable().Select(x => x.Show ?? x.Collection.AsShow());
+			return _database.LibraryLinks.AsEnumerable().Select(x => x.Show ?? x.Collection.AsShow())
+				.OrderBy(x => x.Title);
 		}
 
 		public IEnumerable<Show> GetShows(string searchQuery)
