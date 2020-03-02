@@ -93,6 +93,8 @@ namespace Kyoo.Controllers
 				if (_libraryManager.RegisterEpisode(episode) == 0)
 					return;
 			}
+			if (collection != null)
+				_libraryManager.RegisterCollection(collection);
 			_libraryManager.RegisterShowLinks(library, collection, show);
 		}
 

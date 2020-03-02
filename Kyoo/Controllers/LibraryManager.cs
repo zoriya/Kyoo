@@ -62,9 +62,7 @@ namespace Kyoo.Controllers
 
 		public IEnumerable<Show> GetShows()
 		{
-			return (from show in _database.Shows from l in _database.CollectionLinks.DefaultIfEmpty()
-				where l.CollectionID == null select show).AsEnumerable().Union(
-				from collection in _database.Collections select collection.AsShow()).OrderBy(x => x.Title);
+			return _database.LibraryLinks.AsEnumerable().Select(x => x.Show ?? x.Collection.AsShow());
 		}
 
 		public IEnumerable<Show> GetShows(string searchQuery)
@@ -220,7 +218,10 @@ namespace Kyoo.Controllers
 
 		public Collection GetCollection(string slug)
 		{
-			return (from collection in _database.Collections where collection.Slug == slug select collection).FirstOrDefault();
+			Collection collection = _database.Collections.Where(collection => collection.Slug == slug).FirstOrDefault();
+			if (collection != null)
+				collection.Shows = GetShowsInCollection(collection.ID);
+			return collection;
 		}
 
 		public IEnumerable<Show> GetShowsInCollection(long collectionID)
@@ -232,12 +233,7 @@ namespace Kyoo.Controllers
 		{
 			return (from link in _database.LibraryLinks where link.LibraryID == libraryID select link)
 				.AsEnumerable()
-				.Select(link =>
-				{
-					_database.Entry(link).Reference(l => l.Show).Load();
-					_database.Entry(link).Reference(l => l.Collection).Load();
-					return link.Show ?? link.Collection.AsShow();
-				})
+				.Select(link => link.Show ?? link.Collection.AsShow())
 				.OrderBy(x => x.Title);
 		}
 
@@ -395,7 +391,8 @@ namespace Kyoo.Controllers
 				_database.LibraryLinks.AddIfNotExist(new LibraryLink {LibraryID = library.ID, CollectionID = collection.ID}, x => x.LibraryID == library.ID && x.CollectionID == collection.ID && x.ShowID == null);
 				_database.CollectionLinks.AddIfNotExist(new CollectionLink { CollectionID = collection.ID, ShowID = show.ID}, x => x.CollectionID == collection.ID && x.ShowID == show.ID);
 			}
-			_database.LibraryLinks.AddIfNotExist(new LibraryLink {LibraryID = library.ID, ShowID = show.ID}, x => x.LibraryID == library.ID && x.CollectionID == null && x.ShowID == show.ID);
+			else
+				_database.LibraryLinks.AddIfNotExist(new LibraryLink {LibraryID = library.ID, ShowID = show.ID}, x => x.LibraryID == library.ID && x.CollectionID == null && x.ShowID == show.ID);
 			_database.SaveChanges();
 		}
 		

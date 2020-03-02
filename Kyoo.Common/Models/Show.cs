@@ -60,7 +60,7 @@ namespace Kyoo.Models
 		{
 			Slug = slug;
 			Title = title;
-			Aliases = aliases.ToArray();
+			Aliases = aliases?.ToArray();
 			Path = path;
 			Overview = overview;
 			TrailerUrl = trailerUrl;
@@ -76,7 +76,7 @@ namespace Kyoo.Models
 		{
 			Slug = slug;
 			Title = title;
-			Aliases = aliases.ToArray();
+			Aliases = aliases?.ToArray();
 			Path = path;
 			Overview = overview;
 			TrailerUrl = trailerUrl;
