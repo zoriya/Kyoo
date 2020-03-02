@@ -28,7 +28,7 @@ namespace Kyoo.Controllers
 					if (library.Providers.Contains(provider.Name))
 						ret = ret.Merge(await providerCall(provider));
 				} catch (Exception ex) {
-					Console.Error.WriteLine($"The provider {provider.Name} coudln't work for {what}. Exception: {ex.Message}");
+					Console.Error.WriteLine($"\tThe provider {provider.Name} coudln't work for {what}. Exception: {ex.Message}");
 				}
 			}
 			return ret;
@@ -45,7 +45,7 @@ namespace Kyoo.Controllers
 					if (library.Providers.Contains(provider.Name))
 						ret.AddRange(await providerCall(provider) ?? new List<T>());
 				} catch (Exception ex) {
-					Console.Error.WriteLine($"The provider {provider.Name} coudln't work for {what}. Exception: {ex.Message}");
+					Console.Error.WriteLine($"\tThe provider {provider.Name} coudln't work for {what}. Exception: {ex.Message}");
 				}
 			}
 			return ret;
