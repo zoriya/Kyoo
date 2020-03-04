@@ -12,6 +12,7 @@ import { SearchResolverService } from "./services/search-resolver.service";
 import { ShowResolverService } from './services/show-resolver.service';
 import { StreamResolverService } from "./services/stream-resolver.service";
 import { ShowDetailsComponent } from './show-details/show-details.component';
+import {LoginComponent} from "./login/login.component";
 
 const routes: Routes = [
 	{ path: "browse", component: BrowseComponent, pathMatch: "full", resolve: { shows: LibraryResolverService } },
@@ -21,6 +22,7 @@ const routes: Routes = [
 	{ path: "people/:people-slug", component: CollectionComponent, resolve: { collection: PeopleResolverService } },
 	{ path: "watch/:item", component: PlayerComponent, resolve: { item: StreamResolverService } },
 	{ path: "search/:query", component: SearchComponent, resolve: { items: SearchResolverService } },
+	{ path: "login", component: LoginComponent },
 	{ path: "**", component: NotFoundComponent }
 ];
 

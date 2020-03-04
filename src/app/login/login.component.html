@@ -1,0 +1,76 @@
+<div class="container d-flex justify-content-center pt-5">
+	<mat-card class="col-xl-5 col-md-7">
+		<mat-tab-group mat-stretch-tabs>
+			<mat-tab label="Login">
+				<br/>
+				<mat-card-content>
+					<form>
+						<mat-form-field appearance="fill" class="w-75">
+							<mat-label>Username</mat-label>
+							<input matInput [formControl]="username">
+							<mat-error *ngIf="username.hasError('required')">
+								An username is <strong>required</strong>
+							</mat-error>
+						</mat-form-field>
+						<br/>
+						<br/>
+						<mat-form-field appearance="fill" class="w-75">
+							<mat-label>Password</mat-label>
+							<input matInput [formControl]="password" [type]="hidePassword ? 'password' : 'text'">
+							<button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hidePassword">
+								<mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+							</button>
+							<mat-error *ngIf="password.hasError('required')">
+								A password is <strong>required</strong>
+							</mat-error>
+						</mat-form-field>
+					</form>
+				</mat-card-content>
+				<div fxFlexAlign="end" align="end">
+					<button mat-button>Login</button>
+				</div>
+			</mat-tab>
+			<mat-tab label="Signin">
+				<br/>
+				<mat-card-content>
+					<form class="form-group">
+						<mat-form-field appearance="fill" class="w-75">
+							<mat-label>Username</mat-label>
+							<input matInput [formControl]="username">
+							<mat-error *ngIf="username.hasError('required')">
+								An username is <strong>required</strong>
+							</mat-error>
+						</mat-form-field>
+						<br/>
+						<br/>
+						<mat-form-field appearance="fill" class="w-75">
+							<mat-label>Email</mat-label>
+							<input matInput [formControl]="email">
+							<mat-error *ngIf="email.hasError('required')">
+								An email is <strong>required</strong>
+							</mat-error>
+							<mat-error *ngIf="email.hasError('email')">
+								Please enter a valid email
+							</mat-error>
+						</mat-form-field>
+						<br/>
+						<br/>
+						<mat-form-field appearance="fill" class="w-75">
+							<mat-label>Password</mat-label>
+							<input matInput [formControl]="password" [type]="hidePassword ? 'password' : 'text'">
+							<button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hidePassword">
+								<mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+							</button>
+							<mat-error *ngIf="password.hasError('required')">
+								A password is <strong>required</strong>
+							</mat-error>
+						</mat-form-field>
+					</form>
+				</mat-card-content>
+				<div fxFlexAlign="end" align="end">
+					<button mat-button>Sigin</button>
+				</div>
+			</mat-tab>
+		</mat-tab-group>
+	</mat-card>
+</div>

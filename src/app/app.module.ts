@@ -23,7 +23,11 @@ import { PlayerComponent } from './player/player.component';
 import { SearchComponent } from './search/search.component';
 import { ShowDetailsComponent } from './show-details/show-details.component';
 import { ShowsListComponent } from './shows-list/shows-list.component';
-
+import { LoginComponent } from './login/login.component';
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
+import { MatInputModule } from "@angular/material/input";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import {MatTabsModule} from "@angular/material/tabs";
 
 @NgModule({
 	declarations: [
@@ -36,7 +40,8 @@ import { ShowsListComponent } from './shows-list/shows-list.component';
 		CollectionComponent,
 		SearchComponent,
 		PeopleListComponent,
-		ShowsListComponent
+		ShowsListComponent,
+		LoginComponent
 	],
 	imports: [
 		BrowserModule,
@@ -52,7 +57,12 @@ import { ShowsListComponent } from './shows-list/shows-list.component';
 		MatSliderModule,
 		MatTooltipModule,
 		MatRippleModule,
-		MatCardModule
+		MatCardModule,
+		ReactiveFormsModule,
+		MatInputModule,
+		MatFormFieldModule,
+		FormsModule,
+		MatTabsModule
 	],
 	providers: [],
 	bootstrap: [AppComponent]
