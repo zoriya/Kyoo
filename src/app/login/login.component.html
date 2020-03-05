@@ -19,12 +19,15 @@
 						<br/>
 						<mat-form-field appearance="outline" class="w-75">
 							<mat-label>Password</mat-label>
-							<input matInput  name="loginPassword" #loginPassword="ngModel" [(ngModel)]="loginInformation.password" [type]="hidePassword ? 'password' : 'text'" required>
+							<input matInput  name="loginPassword" #loginPassword="ngModel" [(ngModel)]="loginInformation.password" [type]="hidePassword ? 'password' : 'text'" required passwordValidator>
 							<button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hidePassword">
 								<mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
 							</button>
 							<mat-error *ngIf="loginPassword.hasError('required')">
 								A password is <strong>required</strong>
+							</mat-error>
+							<mat-error *ngIf="loginPassword.hasError('passwordError')">
+								Error: {{signinPassword.getError("passwordError")["error"]}}
 							</mat-error>
 						</mat-form-field>
 					</form>
@@ -60,12 +63,15 @@
 						<br/>
 						<mat-form-field appearance="outline" class="w-75">
 							<mat-label>Password</mat-label>
-							<input matInput name="signinPassword" #signinPassword="ngModel" [(ngModel)]="signinInformation.password" [type]="hidePassword ? 'password' : 'text'" required>
+							<input matInput name="signinPassword" #signinPassword="ngModel" [(ngModel)]="signinInformation.password" [type]="hidePassword ? 'password' : 'text'" required passwordValidator>
 							<button mat-icon-button matSuffix (click)="hidePassword = !hidePassword" [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hidePassword">
 								<mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
 							</button>
 							<mat-error *ngIf="signinPassword.hasError('required')">
 								A password is <strong>required</strong>
+							</mat-error>
+							<mat-error *ngIf="signinPassword.hasError('passwordError')">
+								Error: {{signinPassword.getError("passwordError")["error"]}}
 							</mat-error>
 						</mat-form-field>
 					</mat-card-content>

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import {FormControl, FormGroup, Validators} from "@angular/forms";
+import {AuthService} from "../services/auth.service";
 
 @Component({
 	selector: 'app-login',
@@ -12,7 +12,7 @@ export class LoginComponent
 	signinInformation: {email: string, username: string, password: string} = {email: "", username: "", password: ""};
 	hidePassword: boolean = true;
 	
-	constructor() { }
+	constructor(private authService: AuthService) { }
 	
 	async login()
 	{
@@ -21,6 +21,13 @@ export class LoginComponent
 
 	async signin()
 	{
-		console.log("Signing in")
+		this.authService.register(this.signinInformation)
+			.subscribe(result => 
+			{
+				console.log("Sucess: " + result);
+			}, error => {
+				console.log("Register error: " + error);
+			});
+		console.log("Register returned");
 	}
 }
