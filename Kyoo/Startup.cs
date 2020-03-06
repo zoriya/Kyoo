@@ -1,8 +1,6 @@
-using System.Collections.Generic;
-using IdentityServer4.EntityFramework.DbContexts;
-using IdentityServer4.Models;
-using IdentityServer4.Stores;
+using System.Reflection;
 using Kyoo.Controllers;
+using Kyoo.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -35,21 +33,34 @@ namespace Kyoo
 			services.AddControllers().AddNewtonsoftJson();
 			services.AddHttpClient();
 
+			string assemblyName = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
+			string publicUrl = Configuration.GetValue<string>("public_url");
+			
 			services.AddDbContext<DatabaseContext>(options => options.UseLazyLoadingProxies()
 				.UseSqlite(Configuration.GetConnectionString("Database")));
 
-			services.AddIdentityServer()
+			services.AddIdentity<Account, IdentityRole>()
+				.AddEntityFrameworkStores<DatabaseContext>()
+				.AddDefaultTokenProviders();
+			
+			services.AddIdentityServer(options =>
+				{
+					options.UserInteraction.LoginUrl = publicUrl + "/login";
+					options.UserInteraction.ErrorUrl = publicUrl + "/error";
+					options.UserInteraction.LogoutUrl = publicUrl + "/logout";
+				})
 				.AddConfigurationStore(options =>
 				{
-					options.ConfigureDbContext = builder => builder.UseSqlite(Configuration.GetConnectionString("Database"));
+					options.ConfigureDbContext = builder => builder.UseSqlite(Configuration.GetConnectionString("Database"), sql => sql.MigrationsAssembly(assemblyName));
 				})
 				.AddOperationalStore(options =>
 				{
-					options.ConfigureDbContext = builder => builder.UseSqlite(Configuration.GetConnectionString("Database"));
+					options.ConfigureDbContext = builder => builder.UseSqlite(Configuration.GetConnectionString("Database"), sql => sql.MigrationsAssembly(assemblyName));
 					options.EnableTokenCleanup = true;
 				})
 				.AddInMemoryIdentityResources(IdentityContext.GetIdentityResources())
-				.AddInMemoryApiResources(IdentityContext.GetApis());
+				.AddInMemoryApiResources(IdentityContext.GetApis())
+				.AddAspNetIdentity<Account>();
 
 			services.AddScoped<ILibraryManager, LibraryManager>();
 			services.AddScoped<ICrawler, Crawler>();

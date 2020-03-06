@@ -11,6 +11,8 @@ namespace Kyoo
 	{
 		public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) { }
 
+		public DbSet<Account> Accounts { get; set; }
+		
 		public DbSet<Library> Libraries { get; set; }
 		public DbSet<Collection> Collections { get; set; }
 		public DbSet<Show> Shows { get; set; }
