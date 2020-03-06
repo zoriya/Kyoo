@@ -14,6 +14,22 @@ namespace Kyoo
 				new IdentityResources.Profile()
 			};
 		}
+
+		public static IEnumerable<Client> GetClients()
+		{
+			return new List<Client>
+			{
+				new Client
+				{
+					ClientId = "kyoo.webapp",
+					ClientSecrets = { new Secret("secret".Sha256()) },
+					AllowedGrantTypes = GrantTypes.Implicit,
+					AllowedScopes = { "kyoo.admin", "kyoo.write", "kyoo.read", "openid", "profile" },
+					AllowAccessTokensViaBrowser = true,
+					RequireConsent = false
+				}
+			};
+		}
 		
 		public static IEnumerable<ApiResource> GetApis()
 		{

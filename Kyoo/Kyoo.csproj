@@ -25,6 +25,7 @@
 		<PackageReference Include="IdentityServer4.EntityFramework" Version="3.1.2" />
 		<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="3.1.2" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="3.1.2" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.2" />
 		<PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="3.1.2" />
 		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.1.2" />
@@ -86,6 +87,9 @@
 		<None Include="libtranscoder.so" Condition="$(OS) == 'Unix'">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
+	</ItemGroup>
+	<ItemGroup>
+	  <Folder Include="Models\DatabaseMigrations\IdentityPeristant" />
 	</ItemGroup>
 
 	<Target Name="CreatePluginFolder" AfterTargets="Build">
