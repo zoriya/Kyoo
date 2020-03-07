@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { UserManager, UserManagerSettings, User } from 'oidc-client';
 import {HttpClient} from "@angular/common/http";
 import { catchError } from 'rxjs/operators';
-import {EMPTY} from "rxjs";
+import {EMPTY, Observable} from "rxjs";
 import {MatSnackBar} from "@angular/material/snack-bar";
 
 @Injectable({
@@ -23,14 +23,20 @@ export class AuthService
 		});
 	}
 
-	login()
+	login(loginInformation: any)
 	{
-		return this._userManager.signinRedirect();
+		return this.http.post("/api/account/login", loginInformation).pipe(catchError((error =>
+		{
+			console.log(error.status + " - " + error.message);
+			this.snackBar.open(`An unknown error occured: ${error.message}.`, null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
+			return EMPTY;
+		})));
 	}
 	
-	register(userRegistration: any)
+	register(userRegistration: any) : Observable<string>
 	{
-		return this.http.post("/api/account/register", userRegistration).pipe(catchError((error => 
+		// @ts-ignore
+		return this.http.post<string>("/api/account/register", userRegistration, {responseType: "text"}).pipe(catchError((error => 
 		{
 			console.log(error.status + " - " + error.message);
 			this.snackBar.open(`An unknown error occured: ${error.message}.`, null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });

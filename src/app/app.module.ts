@@ -29,6 +29,7 @@ import { MatInputModule } from "@angular/material/input";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import {MatTabsModule} from "@angular/material/tabs";
 import {PasswordValidator} from "./misc/password-validator";
+import {MatCheckboxModule} from "@angular/material/checkbox";
 
 @NgModule({
 	declarations: [
@@ -64,7 +65,8 @@ import {PasswordValidator} from "./misc/password-validator";
 		MatInputModule,
 		MatFormFieldModule,
 		FormsModule,
-		MatTabsModule
+		MatTabsModule,
+		MatCheckboxModule
 	],
 	providers: [],
 	bootstrap: [AppComponent]

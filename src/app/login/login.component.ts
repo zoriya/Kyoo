@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import {AuthService} from "../services/auth.service";
+import {ActivatedRoute, Router} from "@angular/router";
 
 @Component({
 	selector: 'app-login',
@@ -8,15 +9,33 @@ import {AuthService} from "../services/auth.service";
 })
 export class LoginComponent 
 {
-	loginInformation: {email: string, password: string} = {email: "", password: ""};
+	loginInformation: {username: string, password: string, stayLoggedIn: boolean} = {username: "", password: "", stayLoggedIn: false};
 	signinInformation: {email: string, username: string, password: string} = {email: "", username: "", password: ""};
 	hidePassword: boolean = true;
+	redirectURI: string = "/";
 	
-	constructor(private authService: AuthService) { }
+	constructor(private authService: AuthService, private router: Router, private route: ActivatedRoute) 
+	{
+		if (this.route.snapshot.queryParams["redirectURI"])
+			this.redirectURI = this.route.snapshot.queryParams["redirectURI"];
+		if (this.route.snapshot.queryParams["otac"])
+			this.useOTAC(this.route.snapshot.queryParams["otac"]);
+	}
 	
 	async login()
 	{
-		
+		this.authService.login(this.loginInformation)
+			.subscribe(() =>
+			{
+				this.router.navigateByUrl(this.redirectURI);
+			}, error => {
+				console.log("Login error: " + error);
+			});
+	}
+	
+	useOTAC(otac: string)
+	{
+		console.log("Got an OTAC: " + otac);
 	}
 
 	async signin()
@@ -24,10 +43,9 @@ export class LoginComponent
 		this.authService.register(this.signinInformation)
 			.subscribe(result => 
 			{
-				console.log("Sucess: " + result);
+				this.useOTAC(result);
 			}, error => {
 				console.log("Register error: " + error);
 			});
-		console.log("Register returned");
 	}
 }
