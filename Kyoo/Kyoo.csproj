@@ -90,6 +90,7 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <Folder Include="Models\DatabaseMigrations\IdentityPeristant" />
+	  <Folder Include="Models\DatabaseMigrations\Internal" />
 	</ItemGroup>
 
 	<Target Name="CreatePluginFolder" AfterTargets="Build">

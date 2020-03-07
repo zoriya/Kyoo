@@ -1,13 +1,15 @@
 using System;
 using System.Linq;
 using Kyoo.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Kyoo
 {
-	public class DatabaseContext : DbContext
+	public class DatabaseContext : IdentityDbContext<Account>
 	{
 		public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) { }
 
@@ -63,9 +65,14 @@ namespace Kyoo
 							
 			modelBuilder.Entity<Show>()
 				.Ignore(x => x.Genres);
-			
-			// modelBuilder.Entity<Genre>()
-			   //  .Ignore(x => x.Shows);
+
+			modelBuilder.Entity<Account>().ToTable("Account");
+			modelBuilder.Entity<IdentityUserRole<string>>().ToTable("UserRole");
+			modelBuilder.Entity<IdentityUserLogin<string>>().ToTable("UserLogin");
+			modelBuilder.Entity<IdentityUserClaim<string>>().ToTable("UserClaim");
+			modelBuilder.Entity<IdentityRole>().ToTable("UserRoles");
+			modelBuilder.Entity<IdentityRoleClaim<string>>().ToTable("UserRoleClaim");
+			modelBuilder.Entity<IdentityUserToken<string>>().ToTable("UserToken");
 		}
 	}
 }
