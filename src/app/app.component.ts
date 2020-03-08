@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Event, Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
 import * as $ from "jquery";
 import { Location } from "@angular/common";
+import {AuthService} from "./services/auth.service";
 
 @Component({
 	selector: 'app-root',
@@ -14,7 +15,7 @@ export class AppComponent
 	libraries: Library[];
 	isLoading: boolean = false;
 
-	constructor(http: HttpClient, private router: Router, private location: Location)
+	constructor(http: HttpClient, private router: Router, private location: Location, private authManager: AuthService)
 	{
 		http.get<Library[]>("api/libraries").subscribe(result =>
 		{
@@ -65,6 +66,16 @@ export class AppComponent
 			event.target.classList.remove("searching");
 			this.location.back();
 		}
+	}
+	
+	isLoggedIn(): boolean
+	{
+		return this.authManager.isLoggedIn();
+	}
+	
+	login()
+	{
+		this.authManager.login();
 	}
 }
 

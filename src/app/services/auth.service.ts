@@ -1,9 +1,5 @@
 import { Injectable } from '@angular/core';
-import { UserManager, UserManagerSettings, User } from 'oidc-client';
-import {HttpClient} from "@angular/common/http";
-import { catchError } from 'rxjs/operators';
-import {EMPTY, Observable} from "rxjs";
-import {MatSnackBar} from "@angular/material/snack-bar";
+import {UserManager, UserManagerSettings, User, Profile} from 'oidc-client';
 
 @Injectable({
 	providedIn: 'root'
@@ -13,45 +9,52 @@ export class AuthService
 	user: User | null;
 	private _userManager = new UserManager(this.getClientSettings());
 	
-	constructor(private http: HttpClient, private snackBar: MatSnackBar)
+	constructor()
 	{
 		this._userManager.getUser().then(user => 
 		{
 			this.user = user;
 			if (user)
 				console.log("Logged in as: " + user.profile.name);
+			else 
+				console.log("Not logged in.");
 		});
 	}
 
-	login(loginInformation: any)
+	isLoggedIn(): boolean 
 	{
-		return this.http.post("/api/account/login", loginInformation).pipe(catchError((error =>
-		{
-			console.log(error.status + " - " + error.message);
-			this.snackBar.open(`An unknown error occured: ${error.message}.`, null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
-			return EMPTY;
-		})));
+		return this.user != null && !this.user.expired;
 	}
-	
-	register(userRegistration: any) : Observable<string>
+
+	getClaims(): Profile 
 	{
-		// @ts-ignore
-		return this.http.post<string>("/api/account/register", userRegistration, {responseType: "text"}).pipe(catchError((error => 
+		return this.user.profile;
+	}
+
+	login()
+	{
+		return this._userManager.signinRedirect();
+	}
+
+	loginCallback()
+	{
+		return this._userManager.signinCallback().then(user => 
 		{
-			console.log(error.status + " - " + error.message);
-			this.snackBar.open(`An unknown error occured: ${error.message}.`, null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
-			return EMPTY;
-		})));
+			this.user = user;
+			console.log("Logged in!");
+		});
 	}
 	
 	getClientSettings(): UserManagerSettings 
 	{
 		return {
-			authority: "",
+			authority: window.location.origin,
 			client_id: "kyoo.webapp",
 			redirect_uri: "/logged",
-			response_type:"id_token token",
-			scope:"openid profile kyoo.read"
+			silent_redirect_uri: "/silent",
+			response_type: "code",
+			scope: "openid profile kyoo.read offline_access",
+			automaticSilentRenew: true
 		};
 	}
 }

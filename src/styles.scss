@@ -103,3 +103,8 @@ mat-icon
 	padding-left: 0;
 	padding-right: 0;
 }
+
+.cdk-overlay-container
+{
+  z-index: 2000 !important;
+}
