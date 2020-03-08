@@ -3,6 +3,7 @@ using Kyoo.Controllers;
 using Kyoo.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,11 @@ namespace Kyoo
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
+			services.Configure<CookiePolicyOptions>(options =>
+			{
+				options.MinimumSameSitePolicy = SameSiteMode.Lax;
+			});
+			
 			// In production, the Angular files will be served from this directory
 			services.AddSpaStaticFiles(configuration =>
 			{
@@ -67,7 +73,6 @@ namespace Kyoo
 				.AddAspNetIdentity<User>()
 				.AddDeveloperSigningCredential();
 
-
 			services.AddScoped<ILibraryManager, LibraryManager>();
 			services.AddScoped<ICrawler, Crawler>();
 			services.AddSingleton<ITranscoder, Transcoder>();
@@ -104,6 +109,8 @@ namespace Kyoo
 				return next();
 			});
 
+			app.UseCookiePolicy();
+			
 			app.UseStaticFiles();
 			if (!env.IsDevelopment())
 				app.UseSpaStaticFiles();
