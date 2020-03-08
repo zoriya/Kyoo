@@ -15,7 +15,7 @@ export class AuthService
 		{
 			this.user = user;
 			if (user)
-				console.log("Logged in as: " + user.profile.name);
+				console.log("Logged in as: " + user.profile.name + " Access token: " + user.access_token);
 			else 
 				console.log("Not logged in.");
 		});
@@ -33,7 +33,10 @@ export class AuthService
 
 	login()
 	{
-		return this._userManager.signinRedirect();
+		if (!this.user)
+			return this._userManager.signinRedirect();
+		console.log("Already logged in");
+		return;
 	}
 
 	loginCallback()
