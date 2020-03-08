@@ -22,11 +22,13 @@ namespace Kyoo
 				new Client
 				{
 					ClientId = "kyoo.webapp",
-					ClientSecrets = { new Secret("secret".Sha256()) },
-					AllowedGrantTypes = GrantTypes.Implicit,
+					AllowedGrantTypes = GrantTypes.Code,
+					AllowOfflineAccess = true,
+					RequireClientSecret = false,
+					RequireConsent = false,
 					AllowedScopes = { "kyoo.admin", "kyoo.write", "kyoo.read", "openid", "profile" },
-					AllowAccessTokensViaBrowser = true,
-					RequireConsent = false
+					RedirectUris =  { "/logged", "/silent" },
+					PostLogoutRedirectUris = { "/logout" }
 				}
 			};
 		}

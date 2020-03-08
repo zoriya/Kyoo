@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Kyoo
 {
-	public class DatabaseContext : IdentityDbContext<Account>
+	public class DatabaseContext : IdentityDbContext<User>
 	{
 		public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) { }
 
-		public DbSet<Account> Accounts { get; set; }
+		public DbSet<User> Accounts { get; set; }
 		
 		public DbSet<Library> Libraries { get; set; }
 		public DbSet<Collection> Collections { get; set; }
@@ -66,7 +66,7 @@ namespace Kyoo
 			modelBuilder.Entity<Show>()
 				.Ignore(x => x.Genres);
 
-			modelBuilder.Entity<Account>().ToTable("Account");
+			modelBuilder.Entity<User>().ToTable("User");
 			modelBuilder.Entity<IdentityUserRole<string>>().ToTable("UserRole");
 			modelBuilder.Entity<IdentityUserLogin<string>>().ToTable("UserLogin");
 			modelBuilder.Entity<IdentityUserClaim<string>>().ToTable("UserClaim");

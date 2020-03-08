@@ -39,28 +39,34 @@ namespace Kyoo
 			services.AddDbContext<DatabaseContext>(options => options.UseLazyLoadingProxies()
 				.UseSqlite(Configuration.GetConnectionString("Database")));
 
-			services.AddIdentity<Account, IdentityRole>()
+			services.AddIdentity<User, IdentityRole>()
 				.AddEntityFrameworkStores<DatabaseContext>()
 				.AddDefaultTokenProviders();
-			
+
 			services.AddIdentityServer(options =>
 				{
-					options.UserInteraction.LoginUrl = publicUrl + "/login";
-					options.UserInteraction.ErrorUrl = publicUrl + "/error";
-					options.UserInteraction.LogoutUrl = publicUrl + "/logout";
+					options.UserInteraction.LoginUrl = publicUrl + "login";
+					options.UserInteraction.ErrorUrl = publicUrl + "error";
+					options.UserInteraction.LogoutUrl = publicUrl + "logout";
 				})
 				.AddConfigurationStore(options =>
 				{
-					options.ConfigureDbContext = builder => builder.UseSqlite(Configuration.GetConnectionString("Database"), sql => sql.MigrationsAssembly(assemblyName));
+					options.ConfigureDbContext = builder =>
+						builder.UseSqlite(Configuration.GetConnectionString("Database"),
+							sql => sql.MigrationsAssembly(assemblyName));
 				})
 				.AddOperationalStore(options =>
 				{
-					options.ConfigureDbContext = builder => builder.UseSqlite(Configuration.GetConnectionString("Database"), sql => sql.MigrationsAssembly(assemblyName));
+					options.ConfigureDbContext = builder =>
+						builder.UseSqlite(Configuration.GetConnectionString("Database"),
+							sql => sql.MigrationsAssembly(assemblyName));
 					options.EnableTokenCleanup = true;
 				})
 				.AddInMemoryIdentityResources(IdentityContext.GetIdentityResources())
 				.AddInMemoryApiResources(IdentityContext.GetApis())
-				.AddAspNetIdentity<Account>();
+				.AddAspNetIdentity<User>()
+				.AddDeveloperSigningCredential();
+
 
 			services.AddScoped<ILibraryManager, LibraryManager>();
 			services.AddScoped<ICrawler, Crawler>();
@@ -105,6 +111,7 @@ namespace Kyoo
 			app.UseRouting();
 
 			app.UseIdentityServer();
+			app.UseAuthorization();
 
 			app.UseEndpoints(endpoints =>
 			{
