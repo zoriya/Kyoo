@@ -1,6 +1,9 @@
 using System;
 using System.Threading.Tasks;
+using IdentityServer4.Services;
 using Kyoo.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
@@ -25,12 +28,12 @@ namespace Kyoo.Api
 	[ApiController]
 	public class AccountController : Controller
 	{
-		private readonly UserManager<Account> _accountManager;
-		private readonly SignInManager<Account> _signInManager;
+		private readonly UserManager<User> _userManager;
+		private readonly SignInManager<User> _signInManager;
 		
-		public AccountController(UserManager<Account> accountManager, SignInManager<Account> siginInManager)
+		public AccountController(UserManager<User> userManager, SignInManager<User> siginInManager)
 		{
-			_accountManager = accountManager;
+			_userManager = userManager;
 			_signInManager = siginInManager;
 		}
 		
@@ -39,12 +42,12 @@ namespace Kyoo.Api
 		{
 			if (!ModelState.IsValid)
 				return BadRequest(user);
-			Account account = new Account {UserName = user.Username, Email = user.Email};
-			IdentityResult result = await _accountManager.CreateAsync(account, user.Password);
+			User account = new User {UserName = user.Username, Email = user.Email};
+			IdentityResult result = await _userManager.CreateAsync(account, user.Password);
 			if (!result.Succeeded)
 				return BadRequest(result.Errors);
 			string otac = account.GenerateOTAC(TimeSpan.FromMinutes(1));
-			await _accountManager.UpdateAsync(account);
+			await _userManager.UpdateAsync(account);
 			return Ok(otac);
 		}
 		
@@ -54,9 +57,30 @@ namespace Kyoo.Api
 			if (!ModelState.IsValid)
 				return BadRequest(login);
 			SignInResult result = await _signInManager.PasswordSignInAsync(login.Username, login.Password, login.StayLoggedIn, false);
-			if (result.Succeeded)
-				return Ok();
-			return BadRequest("Invalid username/password");
+			if (!result.Succeeded)
+				return BadRequest("Invalid username/password");
+			return Ok();
+		}
+		
+		[HttpGet]
+		[Authorize]
+		public async Task<ActionResult<Account>> Index()
+		{
+			User account = await _userManager.GetUserAsync(HttpContext.User);
+			return new Account{
+				Username = account.UserName,
+				Email = account.Email,
+				Picture = "api/account/picture/" + account.UserName
+			};
+		}
+		
+		[HttpGet("picture/{username}")]
+		public IActionResult Picture(string username)
+		{
+			string path = $"account/{username}.png";
+			if (System.IO.File.Exists(path))
+				return new PhysicalFileResult(path, "image");
+			return NotFound();
 		}
 	}
 }

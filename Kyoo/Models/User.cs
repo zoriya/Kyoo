@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace Kyoo.Models
 {
-	public class Account : IdentityUser
+	public class User : IdentityUser
 	{
 		public string OTAC { get; set; }
 		public DateTime? OTACExpires { get; set; }
