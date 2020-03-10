@@ -62,6 +62,14 @@ namespace Kyoo.Api
 			return Ok();
 		}
 		
+		[HttpGet("logout")]
+		[Authorize]
+		public async Task<IActionResult> Logout()
+		{
+			await _signInManager.SignOutAsync();
+			return Ok();
+		}
+		
 		[HttpGet]
 		[Authorize]
 		public async Task<ActionResult<Account>> Index()
