@@ -18,6 +18,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Serilog" Version="2.9.0" />
+		<PackageReference Include="Serilog.AspNetCore" Version="3.2.0" />
 		<ProjectReference Include="../Kyoo.Common/Kyoo.Common.csproj" />
 		
 		<PackageReference Include="IdentityServer4" Version="3.1.2" />

@@ -23,11 +23,14 @@ namespace Kyoo
 				{
 					ClientId = "kyoo.webapp",
 					AllowedGrantTypes = GrantTypes.Code,
+					RequirePkce = true,
+					AllowAccessTokensViaBrowser = true,
 					AllowOfflineAccess = true,
 					RequireClientSecret = false,
 					RequireConsent = false,
+					AccessTokenType = AccessTokenType.Reference,
 					AllowedScopes = { "kyoo.admin", "kyoo.write", "kyoo.read", "openid", "profile" },
-					RedirectUris =  { "/logged", "/silent" },
+					RedirectUris =  { "/silent", "/" },
 					PostLogoutRedirectUris = { "/logout" }
 				}
 			};
