@@ -18,6 +18,17 @@
 	}
 }
 
+.link
+{
+  outline: none;
+  color: inherit;
+  
+  &:hover
+  {
+	text-decoration: none !important;
+  }
+}
+
 .nav-link
 {
 	padding: 12px;

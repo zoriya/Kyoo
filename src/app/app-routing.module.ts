@@ -13,6 +13,9 @@ import { ShowResolverService } from './services/show-resolver.service';
 import { StreamResolverService } from "./services/stream-resolver.service";
 import { ShowDetailsComponent } from './show-details/show-details.component';
 import {LoginComponent} from "./login/login.component";
+import {AccountComponent} from "./account/account.component";
+import {AuthenticatedGuard} from "./guards/authenticated-guard.service";
+import {UnauthorizedComponent} from "./unauthorized/unauthorized.component";
 
 const routes: Routes = [
 	{ path: "browse", component: BrowseComponent, pathMatch: "full", resolve: { shows: LibraryResolverService } },
@@ -23,6 +26,8 @@ const routes: Routes = [
 	{ path: "watch/:item", component: PlayerComponent, resolve: { item: StreamResolverService } },
 	{ path: "search/:query", component: SearchComponent, resolve: { items: SearchResolverService } },
 	{ path: "login", component: LoginComponent },
+	{ path: "account", component: AccountComponent, canActivate: [AuthenticatedGuard], canLoad: [AuthenticatedGuard] },
+	{ path: "unauthorized", component: UnauthorizedComponent },
 	{ path: "**", component: NotFoundComponent }
 ];
 

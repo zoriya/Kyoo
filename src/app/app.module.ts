@@ -37,6 +37,9 @@ import {
 	OidcSecurityService,
 	OpenIdConfiguration
 } from "angular-auth-oidc-client";
+import { AccountComponent } from './account/account.component';
+import {AuthenticatedGuard} from "./guards/authenticated-guard.service";
+import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 
 export function loadConfig(oidcConfigService: OidcConfigService)
 {
@@ -56,7 +59,9 @@ export function loadConfig(oidcConfigService: OidcConfigService)
 		PeopleListComponent,
 		ShowsListComponent,
 		LoginComponent,
-		PasswordValidator
+		PasswordValidator,
+		AccountComponent,
+		UnauthorizedComponent
 	],
 	imports: [
 		BrowserModule,
@@ -88,7 +93,9 @@ export function loadConfig(oidcConfigService: OidcConfigService)
 			useFactory: loadConfig,
 			deps: [OidcConfigService],
 			multi: true
-		},],
+		},
+		AuthenticatedGuard
+	],
 	bootstrap: [AppComponent]
 })
 export class AppModule 
