@@ -1,5 +1,5 @@
 import { HttpClientModule } from '@angular/common/http';
-import { NgModule } from '@angular/core';
+import {APP_INITIALIZER, NgModule} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatRippleModule } from '@angular/material/core';
@@ -30,7 +30,18 @@ import { MatFormFieldModule } from "@angular/material/form-field";
 import {MatTabsModule} from "@angular/material/tabs";
 import {PasswordValidator} from "./misc/password-validator";
 import {MatCheckboxModule} from "@angular/material/checkbox";
-import { LoggedComponent } from './logged/logged.component';
+import {
+	AuthModule,
+	ConfigResult,
+	OidcConfigService,
+	OidcSecurityService,
+	OpenIdConfiguration
+} from "angular-auth-oidc-client";
+
+export function loadConfig(oidcConfigService: OidcConfigService)
+{
+	return () => oidcConfigService.load_using_stsServer(window.location.origin);
+}
 
 @NgModule({
 	declarations: [
@@ -45,8 +56,7 @@ import { LoggedComponent } from './logged/logged.component';
 		PeopleListComponent,
 		ShowsListComponent,
 		LoginComponent,
-		PasswordValidator,
-		LoggedComponent
+		PasswordValidator
 	],
 	imports: [
 		BrowserModule,
@@ -68,9 +78,42 @@ import { LoggedComponent } from './logged/logged.component';
 		MatFormFieldModule,
 		FormsModule,
 		MatTabsModule,
-		MatCheckboxModule
+		MatCheckboxModule,
+		AuthModule.forRoot()
 	],
-	providers: [],
+	providers: [
+		OidcConfigService,
+		{
+			provide: APP_INITIALIZER,
+			useFactory: loadConfig,
+			deps: [OidcConfigService],
+			multi: true
+		},],
 	bootstrap: [AppComponent]
 })
-export class AppModule { }
+export class AppModule 
+{
+	constructor(private oidcSecurityService: OidcSecurityService, private oidcConfigService: OidcConfigService)
+	{
+		this.oidcConfigService.onConfigurationLoaded.subscribe((configResult: ConfigResult) =>
+		{
+			const config: OpenIdConfiguration = {
+				stsServer: configResult.customConfig.stsServer,
+				redirect_url: "/",
+				client_id: 'kyoo.webapp',
+				response_type: "code",
+				scope: "openid profile kyoo.read offline_access",
+				silent_renew: true,
+				silent_renew_url: "/silent",
+				use_refresh_token: true,
+
+				forbidden_route: '/Forbidden',
+				unauthorized_route: '/Unauthorized',
+				log_console_warning_active: true,
+				log_console_debug_active: true
+			};
+			
+			this.oidcSecurityService.setupModule(config, configResult.authWellknownEndpoints);
+		});
+	}
+}

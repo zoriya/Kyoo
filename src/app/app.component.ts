@@ -70,12 +70,7 @@ export class AppComponent
 	
 	isLoggedIn(): boolean
 	{
-		return this.authManager.isLoggedIn();
-	}
-	
-	login()
-	{
-		this.authManager.login();
+		return this.authManager.isAuthenticated;
 	}
 }
 

@@ -20,19 +20,19 @@
 					<mat-icon matTooltipPosition="below" matTooltip="Search" (click)="openSearch()">search</mat-icon>
 				</li>
 				<li class="nav-item" *ngIf="!isLoggedIn(); else accountDrop">
-					<a class="icon" (click)="login()" matTooltipPosition="below" matTooltip="Login">
+					<a class="icon" (click)="this.authManager.login()" matTooltipPosition="below" matTooltip="Login">
 						<mat-icon>account_circle</mat-icon>
 					</a>
 				</li>
 				<ng-template #accountDrop>
 					<li class="nav-item">
-						<button mat-icon-button [matMenuTriggerFor]="accountMenu" class="icon" matTooltipPosition="below" [matTooltip]="authManager.user.profile.name">
+						<button mat-icon-button [matMenuTriggerFor]="accountMenu" class="icon" matTooltipPosition="below" [matTooltip]="authManager.user.name">
 							<mat-icon>more_vert</mat-icon>
 						</button>
 					</li>
 					<mat-menu #accountMenu="matMenu">
 						<button mat-menu-item>Settings</button>
-						<button mat-menu-item>Logout</button>
+						<button mat-menu-item (click)="this.authManager.logout()">Logout</button>
 					</mat-menu>
 				</ng-template>
 			</ul>

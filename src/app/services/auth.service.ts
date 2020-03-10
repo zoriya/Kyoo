@@ -1,63 +1,47 @@
 import { Injectable } from '@angular/core';
-import {UserManager, UserManagerSettings, User, Profile} from 'oidc-client';
+import {OidcSecurityService} from "angular-auth-oidc-client";
 
 @Injectable({
 	providedIn: 'root'
 })
 export class AuthService 
 {
-	user: User | null;
-	private _userManager = new UserManager(this.getClientSettings());
+	isAuthenticated: boolean;
+	user: any;
 	
-	constructor()
+	constructor(public oidcSecurityService: OidcSecurityService)
 	{
-		this._userManager.getUser().then(user => 
+		if (this.oidcSecurityService.moduleSetup)
+			this.authorizeCallback();
+		else 
+			this.oidcSecurityService.onModuleSetup.subscribe(() => 
+			{
+				this.authorizeCallback();
+			});
+
+		this.oidcSecurityService.getIsAuthorized().subscribe(auth => 
 		{
-			this.user = user;
-			if (user)
-				console.log("Logged in as: " + user.profile.name + " Access token: " + user.access_token);
-			else 
-				console.log("Not logged in.");
+			this.isAuthenticated = auth;
 		});
-	}
 
-	isLoggedIn(): boolean 
-	{
-		return this.user != null && !this.user.expired;
-	}
-
-	getClaims(): Profile 
-	{
-		return this.user.profile;
+		this.oidcSecurityService.getUserData().subscribe(userData => 
+		{
+			this.user = userData;
+		});
 	}
 
 	login()
 	{
-		if (!this.user)
-			return this._userManager.signinRedirect();
-		console.log("Already logged in");
-		return;
+		this.oidcSecurityService.authorize();
 	}
 
-	loginCallback()
+	logout() 
 	{
-		return this._userManager.signinCallback().then(user => 
-		{
-			this.user = user;
-			console.log("Logged in!");
-		});
+		this.oidcSecurityService.logoff();
 	}
-	
-	getClientSettings(): UserManagerSettings 
+
+	private authorizeCallback() 
 	{
-		return {
-			authority: window.location.origin,
-			client_id: "kyoo.webapp",
-			redirect_uri: "/logged",
-			silent_redirect_uri: "/silent",
-			response_type: "code",
-			scope: "openid profile kyoo.read offline_access",
-			automaticSilentRenew: true
-		};
+		this.oidcSecurityService.authorizedCallbackWithCode(window.location.toString());
 	}
 }

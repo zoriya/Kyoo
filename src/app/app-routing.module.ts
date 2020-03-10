@@ -13,7 +13,6 @@ import { ShowResolverService } from './services/show-resolver.service';
 import { StreamResolverService } from "./services/stream-resolver.service";
 import { ShowDetailsComponent } from './show-details/show-details.component';
 import {LoginComponent} from "./login/login.component";
-import {LoggedComponent} from "./logged/logged.component";
 
 const routes: Routes = [
 	{ path: "browse", component: BrowseComponent, pathMatch: "full", resolve: { shows: LibraryResolverService } },
@@ -24,7 +23,6 @@ const routes: Routes = [
 	{ path: "watch/:item", component: PlayerComponent, resolve: { item: StreamResolverService } },
 	{ path: "search/:query", component: SearchComponent, resolve: { items: SearchResolverService } },
 	{ path: "login", component: LoginComponent },
-	{ path: "logged", component: LoggedComponent },
 	{ path: "**", component: NotFoundComponent }
 ];
 
