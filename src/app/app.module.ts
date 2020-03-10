@@ -103,10 +103,11 @@ export class AppModule
 				post_logout_redirect_uri: "/logout",
 				client_id: 'kyoo.webapp',
 				response_type: "code",
+				trigger_authorization_result_event: true,
 				scope: "openid profile kyoo.read offline_access",
-				silent_renew: true,
+				silent_renew: false,
 				silent_renew_url: "/silent",
-				use_refresh_token: true,
+				use_refresh_token: false,
 				start_checksession: true,
 
 				forbidden_route: '/Forbidden',
