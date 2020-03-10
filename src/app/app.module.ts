@@ -100,12 +100,14 @@ export class AppModule
 			const config: OpenIdConfiguration = {
 				stsServer: configResult.customConfig.stsServer,
 				redirect_url: "/",
+				post_logout_redirect_uri: "/logout",
 				client_id: 'kyoo.webapp',
 				response_type: "code",
 				scope: "openid profile kyoo.read offline_access",
 				silent_renew: true,
 				silent_renew_url: "/silent",
 				use_refresh_token: true,
+				start_checksession: true,
 
 				forbidden_route: '/Forbidden',
 				unauthorized_route: '/Unauthorized',
