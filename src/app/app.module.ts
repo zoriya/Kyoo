@@ -40,6 +40,7 @@ import {
 import { AccountComponent } from './account/account.component';
 import {AuthenticatedGuard} from "./guards/authenticated-guard.service";
 import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
+import { LogoutComponent } from './logout/logout.component';
 
 export function loadConfig(oidcConfigService: OidcConfigService)
 {
@@ -61,7 +62,8 @@ export function loadConfig(oidcConfigService: OidcConfigService)
 		LoginComponent,
 		PasswordValidator,
 		AccountComponent,
-		UnauthorizedComponent
+		UnauthorizedComponent,
+		LogoutComponent
 	],
 	imports: [
 		BrowserModule,
