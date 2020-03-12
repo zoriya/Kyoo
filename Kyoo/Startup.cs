@@ -1,4 +1,5 @@
 using System.Reflection;
+using Kyoo.Api;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Microsoft.AspNetCore.Builder;
@@ -71,6 +72,7 @@ namespace Kyoo
 				.AddInMemoryIdentityResources(IdentityContext.GetIdentityResources())
 				.AddInMemoryApiResources(IdentityContext.GetApis())
 				.AddAspNetIdentity<User>()
+				.AddProfileService<AccountController>()
 				.AddDeveloperSigningCredential();
 
 			services.AddScoped<ILibraryManager, LibraryManager>();

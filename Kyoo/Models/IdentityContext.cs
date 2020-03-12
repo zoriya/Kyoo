@@ -25,6 +25,7 @@ namespace Kyoo
 					AllowedGrantTypes = GrantTypes.Code,
 					RequirePkce = true,
 					AllowAccessTokensViaBrowser = true,
+					AlwaysIncludeUserClaimsInIdToken = true,
 					AllowOfflineAccess = true,
 					RequireClientSecret = false,
 					RequireConsent = false,
