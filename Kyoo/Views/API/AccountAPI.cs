@@ -1,5 +1,9 @@
 using System;
+using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using IdentityServer4.Extensions;
+using IdentityServer4.Models;
 using IdentityServer4.Services;
 using Kyoo.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -26,7 +30,7 @@ namespace Kyoo.Api
 	
 	[Route("api/[controller]")]
 	[ApiController]
-	public class AccountController : Controller
+	public class AccountController : Controller, IProfileService
 	{
 		private readonly UserManager<User> _userManager;
 		private readonly SignInManager<User> _signInManager;
@@ -69,26 +73,26 @@ namespace Kyoo.Api
 			await _signInManager.SignOutAsync();
 			return Ok();
 		}
-		
-		[HttpGet]
-		[Authorize]
-		public async Task<ActionResult<Account>> Index()
+
+		public async Task GetProfileDataAsync(ProfileDataRequestContext context)
 		{
-			User account = await _userManager.GetUserAsync(HttpContext.User);
-			return new Account{
-				Username = account.UserName,
-				Email = account.Email,
-				Picture = "api/account/picture/" + account.UserName
-			};
+			User user = await _userManager.GetUserAsync(context.Subject);
+			if (user != null)
+			{
+				List<Claim> claims = new List<Claim>
+				{
+					new Claim("email", user.Email),
+					new Claim("username", user.UserName),
+				};
+
+				context.IssuedClaims.AddRange(claims);
+			}
 		}
-		
-		[HttpGet("picture/{username}")]
-		public IActionResult Picture(string username)
+
+		public async Task IsActiveAsync(IsActiveContext context)
 		{
-			string path = $"account/{username}.png";
-			if (System.IO.File.Exists(path))
-				return new PhysicalFileResult(path, "image");
-			return NotFound();
+			User user = await _userManager.GetUserAsync(context.Subject);
+			context.IsActive = user != null;
 		}
 	}
 }
