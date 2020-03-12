@@ -31,7 +31,7 @@
 						</button>
 					</li>
 					<mat-menu #accountMenu="matMenu">
-						<a class="link" mat-menu-item href="/account" routerLink="/account">Settings</a>
+						<button mat-menu-item (click)="this.openAccountDialog()">Settings</button>
 						<button mat-menu-item (click)="this.authManager.logout()">Logout</button>
 					</mat-menu>
 				</ng-template>

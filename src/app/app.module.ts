@@ -41,6 +41,7 @@ import { AccountComponent } from './account/account.component';
 import {AuthenticatedGuard} from "./guards/authenticated-guard.service";
 import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 import { LogoutComponent } from './logout/logout.component';
+import {MatDialogModule} from '@angular/material/dialog';
 
 export function loadConfig(oidcConfigService: OidcConfigService)
 {
@@ -83,10 +84,14 @@ export function loadConfig(oidcConfigService: OidcConfigService)
 		ReactiveFormsModule,
 		MatInputModule,
 		MatFormFieldModule,
+		MatDialogModule,
 		FormsModule,
 		MatTabsModule,
 		MatCheckboxModule,
 		AuthModule.forRoot()
+	],
+	entryComponents: [
+		AccountComponent	
 	],
 	providers: [
 		OidcConfigService,

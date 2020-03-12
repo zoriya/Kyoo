@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import {OidcSecurityService} from "angular-auth-oidc-client";
 import {HttpClient} from "@angular/common/http";
+import {Account} from "../../models/account";
 
 @Injectable({
 	providedIn: 'root'
@@ -28,6 +29,8 @@ export class AuthService
 		this.oidcSecurityService.getUserData().subscribe(userData => 
 		{
 			this.user = userData;
+			console.log("Got user data:");
+			console.log(this.user);
 		});
 	}
 
@@ -47,5 +50,13 @@ export class AuthService
 	private authorizeCallback() 
 	{
 		this.oidcSecurityService.authorizedCallbackWithCode(window.location.toString());
+	}
+
+	getAccount(): Account
+	{
+		if (!this.isAuthenticated)
+			return null;
+		console.log(this.user);
+		return {email: this.user.email, username: this.user.username};
 	}
 }

@@ -1,1 +1,16 @@
-<p>Soon</p>
+<h1 mat-dialog-title>Account</h1>
+<div mat-dialog-content>
+	<mat-form-field>
+		<mat-label>Email</mat-label>
+		<input matInput name="accountEmail" #accountEmail="ngModel" [(ngModel)]="account.email" required email>
+	</mat-form-field>
+	<br/>
+	<mat-form-field>
+		<mat-label>Username</mat-label>
+		<input matInput name="accountUsername" #accountUsername="ngModel" [(ngModel)]="account.username">
+	</mat-form-field>
+</div>
+<div mat-dialog-actions fxFlexAlign="end" align="end" style="text-align: end">
+	<button mat-button (click)="cancel()">Cancel</button>
+	<button mat-button [mat-dialog-close]="this.account" cdkFocusInitial>Ok</button>
+</div>

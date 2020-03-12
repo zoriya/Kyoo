@@ -28,7 +28,6 @@ const routes: Routes = [
 	{ path: "search/:query", component: SearchComponent, resolve: { items: SearchResolverService } },
 	{ path: "login", component: LoginComponent },
 	{ path: "logout", component: LogoutComponent },
-	{ path: "account", component: AccountComponent, canActivate: [AuthenticatedGuard], canLoad: [AuthenticatedGuard] },
 	{ path: "unauthorized", component: UnauthorizedComponent },
 	{ path: "**", component: NotFoundComponent }
 ];

@@ -4,6 +4,9 @@ import { Event, Router, NavigationStart, NavigationEnd, NavigationCancel, Naviga
 import * as $ from "jquery";
 import { Location } from "@angular/common";
 import {AuthService} from "./services/auth.service";
+import {MatDialog} from "@angular/material/dialog";
+import {AccountComponent} from "./account/account.component";
+import {Account} from "../models/account";
 
 @Component({
 	selector: 'app-root',
@@ -14,8 +17,9 @@ export class AppComponent
 {
 	libraries: Library[];
 	isLoading: boolean = false;
+	account: Account;
 
-	constructor(http: HttpClient, private router: Router, private location: Location, private authManager: AuthService)
+	constructor(http: HttpClient, private router: Router, private location: Location, private authManager: AuthService, public dialog: MatDialog)
 	{
 		http.get<Library[]>("api/libraries").subscribe(result =>
 		{
@@ -43,6 +47,8 @@ export class AppComponent
 
 		if (!navigator.userAgent.match(/Mobi/))
 			document.body.classList.add("hoverEnabled");
+		
+		this.account = this.authManager.getAccount();
 	}
 
 	openSearch()
@@ -71,6 +77,11 @@ export class AppComponent
 	isLoggedIn(): boolean
 	{
 		return this.authManager.isAuthenticated;
+	}
+	
+	openAccountDialog()
+	{
+		this.dialog.open(AccountComponent, {width: "500px", data: this.account});
 	}
 }
 
