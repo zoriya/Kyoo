@@ -84,7 +84,8 @@ export class AppComponent
 		const dialog = this.dialog.open(AccountComponent, {width: "500px", data: this.account});
 		dialog.afterClosed().subscribe((result: Account) => 
 		{
-			this.account = result;
+			if (result)
+				this.account = result;
 		});
 	}
 }

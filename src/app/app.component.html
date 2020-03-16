@@ -25,8 +25,8 @@
 					</a>
 				</li>
 				<ng-template #accountDrop>
-					<li class="nav-item icon" style="opacity: 1 !important;">
-						<img matRipple [src]="authManager.user.picture" [matMenuTriggerFor]="accountMenu" class="profilePicture" matTooltipPosition="below" [matTooltip]="authManager.user.name" />
+					<li #accountParent class="nav-item icon" style="opacity: 1 !important;">
+						<img matRipple [src]="authManager.user.picture" [matMenuTriggerFor]="accountMenu" class="profilePicture" matTooltipPosition="below" [matTooltip]="authManager.user.name" fallback="more.svg" (error)="accountParent.style.removeProperty('opacity');" />
 					</li>
 					<mat-menu #accountMenu="matMenu">
 						<button class="dropButton" mat-menu-item (click)="this.openAccountDialog()">Settings</button>

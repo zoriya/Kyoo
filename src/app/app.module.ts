@@ -93,7 +93,7 @@ export function loadConfig(oidcConfigService: OidcConfigService)
 		AuthModule.forRoot()
 	],
 	entryComponents: [
-		AccountComponent	
+		AccountComponent
 	],
 	providers: [
 		OidcConfigService,

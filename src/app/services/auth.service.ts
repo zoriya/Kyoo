@@ -56,6 +56,7 @@ export class AuthService
 	{
 		if (!this.isAuthenticated)
 			return null;
+		console.log("Running get account");
 		console.log(this.user);
 		return {email: this.user.email, username: this.user.username, picture: this.user.picture};
 	}
