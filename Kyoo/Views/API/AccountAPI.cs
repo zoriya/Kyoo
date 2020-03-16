@@ -31,11 +31,11 @@ namespace Kyoo.Api
 	
 	public class AccountData
 	{
-		[FromQuery(Name = "email")]
+		[FromForm(Name = "email")]
 		public string Email { get; set; }
-		[FromQuery(Name = "username")]
+		[FromForm(Name = "username")]
 		public string Username { get; set; }
-		[FromQuery(Name = "picture")]
+		[FromForm(Name = "picture")]
 		public IFormFile Picture { get; set; }
 	}
 	
@@ -116,7 +116,10 @@ namespace Kyoo.Api
 			User user = await _userManager.FindByNameAsync(username);
 			if (user == null)
 				return BadRequest();
-			return new PhysicalFileResult(Path.Combine(_picturePath, user.Id), "image/png");
+			string path = Path.Combine(_picturePath, user.Id);
+			if (!System.IO.File.Exists(path))
+				return NotFound();
+			return new PhysicalFileResult(path, "image");
 		}
 		
 		[HttpPost("update")]
