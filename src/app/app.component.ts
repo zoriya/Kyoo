@@ -17,7 +17,6 @@ export class AppComponent
 {
 	libraries: Library[];
 	isLoading: boolean = false;
-	account: Account;
 
 	constructor(private http: HttpClient, private router: Router, private location: Location, private authManager: AuthService, public dialog: MatDialog)
 	{
@@ -47,8 +46,6 @@ export class AppComponent
 
 		if (!navigator.userAgent.match(/Mobi/))
 			document.body.classList.add("hoverEnabled");
-		
-		this.account = this.authManager.getAccount();
 	}
 
 	openSearch()
@@ -81,11 +78,10 @@ export class AppComponent
 	
 	openAccountDialog()
 	{
-		const dialog = this.dialog.open(AccountComponent, {width: "500px", data: this.account});
+		const dialog = this.dialog.open(AccountComponent, {width: "500px", data: this.authManager.getAccount()});
 		dialog.afterClosed().subscribe((result: Account) => 
 		{
-			if (result)
-				this.account = result;
+			this.authManager.getUser();
 		});
 	}
 }

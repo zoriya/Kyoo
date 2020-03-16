@@ -26,14 +26,17 @@ export class AuthService
 			this.isAuthenticated = auth;
 		});
 
-		this.oidcSecurityService.getUserData().subscribe(userData => 
-		{
-			this.user = userData;
-			console.log("Got user data:");
-			console.log(this.user);
-		});
+		this.getUser();
 	}
 
+	getUser()
+	{
+		this.oidcSecurityService.getUserData().subscribe(userData =>
+		{
+			this.user = userData;
+		});
+	}
+	
 	login()
 	{
 		this.oidcSecurityService.authorize();
@@ -56,8 +59,6 @@ export class AuthService
 	{
 		if (!this.isAuthenticated)
 			return null;
-		console.log("Running get account");
-		console.log(this.user);
 		return {email: this.user.email, username: this.user.username, picture: this.user.picture};
 	}
 }
