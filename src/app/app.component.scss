@@ -94,3 +94,17 @@ input::-webkit-search-cancel-button
 		opacity: 1;
 	}
 }
+
+.profilePicture
+{
+	width: 24px;
+	height: 24px;
+	display: inline-block;
+	vertical-align: middle;
+	border-radius: 50%;
+}
+
+.dropButton
+{
+	outline: none;
+}

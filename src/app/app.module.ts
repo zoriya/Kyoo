@@ -38,10 +38,11 @@ import {
 	OpenIdConfiguration
 } from "angular-auth-oidc-client";
 import { AccountComponent } from './account/account.component';
-import {AuthenticatedGuard} from "./guards/authenticated-guard.service";
 import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 import { LogoutComponent } from './logout/logout.component';
 import {MatDialogModule} from '@angular/material/dialog';
+import {FallbackDirective} from "./misc/fallback.directive";
+import {AuthenticatedGuard} from "./misc/guards/authenticated-guard.service";
 
 export function loadConfig(oidcConfigService: OidcConfigService)
 {
@@ -64,7 +65,8 @@ export function loadConfig(oidcConfigService: OidcConfigService)
 		PasswordValidator,
 		AccountComponent,
 		UnauthorizedComponent,
-		LogoutComponent
+		LogoutComponent,
+		FallbackDirective
 	],
 	imports: [
 		BrowserModule,

@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "Kyoo": {
+    "kyoo": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -71,18 +71,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "Kyoo:build"
+            "browserTarget": "kyoo:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "Kyoo:build:production"
+              "browserTarget": "kyoo:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "Kyoo:build"
+            "browserTarget": "kyoo:build"
           }
         },
         "lint": {
@@ -100,5 +100,5 @@
         }
       }
     }},
-  "defaultProject": "Kyoo"
+  "defaultProject": "kyoo"
 }

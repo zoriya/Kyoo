@@ -57,6 +57,6 @@ export class AuthService
 		if (!this.isAuthenticated)
 			return null;
 		console.log(this.user);
-		return {email: this.user.email, username: this.user.username};
+		return {email: this.user.email, username: this.user.username, picture: this.user.picture};
 	}
 }

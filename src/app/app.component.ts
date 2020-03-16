@@ -19,7 +19,7 @@ export class AppComponent
 	isLoading: boolean = false;
 	account: Account;
 
-	constructor(http: HttpClient, private router: Router, private location: Location, private authManager: AuthService, public dialog: MatDialog)
+	constructor(private http: HttpClient, private router: Router, private location: Location, private authManager: AuthService, public dialog: MatDialog)
 	{
 		http.get<Library[]>("api/libraries").subscribe(result =>
 		{
@@ -81,7 +81,11 @@ export class AppComponent
 	
 	openAccountDialog()
 	{
-		this.dialog.open(AccountComponent, {width: "500px", data: this.account});
+		const dialog = this.dialog.open(AccountComponent, {width: "500px", data: this.account});
+		dialog.afterClosed().subscribe((result: Account) => 
+		{
+			this.account = result;
+		});
 	}
 }
 

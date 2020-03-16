@@ -13,8 +13,6 @@ import { ShowResolverService } from './services/show-resolver.service';
 import { StreamResolverService } from "./services/stream-resolver.service";
 import { ShowDetailsComponent } from './show-details/show-details.component';
 import {LoginComponent} from "./login/login.component";
-import {AccountComponent} from "./account/account.component";
-import {AuthenticatedGuard} from "./guards/authenticated-guard.service";
 import {UnauthorizedComponent} from "./unauthorized/unauthorized.component";
 import {LogoutComponent} from "./logout/logout.component";
 

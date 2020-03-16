@@ -1,16 +1,27 @@
 <h1 mat-dialog-title>Account</h1>
-<div mat-dialog-content>
-	<mat-form-field>
-		<mat-label>Email</mat-label>
-		<input matInput name="accountEmail" #accountEmail="ngModel" [(ngModel)]="account.email" required email>
-	</mat-form-field>
-	<br/>
-	<mat-form-field>
-		<mat-label>Username</mat-label>
-		<input matInput name="accountUsername" #accountUsername="ngModel" [(ngModel)]="account.username">
-	</mat-form-field>
+<div class="row">
+	<div class="col-8">
+		<mat-form-field class="w-75">
+			<mat-label>Email</mat-label>
+			<input matInput name="accountEmail" [(ngModel)]="account.email" required email>
+		</mat-form-field>
+		<br/>
+		<mat-form-field class="w-75">
+			<mat-label>Username</mat-label>
+			<input matInput name="accountUsername" [(ngModel)]="account.username">
+		</mat-form-field>
+	</div>
+	<div class="col-4">
+		<input type="file" class="d-none" (change)="onPictureSelected($event)" #fileInput/>
+		<div class="w-100 profilePicture">
+			<img [src]="account.picture" alt="Profile picture" fallback="account.svg" #accountImg/>
+		</div>
+		<button mat-icon-button class="upload_picture" matTooltipPosition="above" matTooltip="Upload picture" (click)="fileInput.click()">
+			<mat-icon>photo_camera</mat-icon>
+		</button>
+	</div>
 </div>
 <div mat-dialog-actions fxFlexAlign="end" align="end" style="text-align: end">
 	<button mat-button (click)="cancel()">Cancel</button>
-	<button mat-button [mat-dialog-close]="this.account" cdkFocusInitial>Ok</button>
+	<button mat-button (click)="finish()" cdkFocusInitial>Ok</button>
 </div>

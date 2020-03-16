@@ -25,14 +25,12 @@
 					</a>
 				</li>
 				<ng-template #accountDrop>
-					<li class="nav-item">
-						<button mat-icon-button [matMenuTriggerFor]="accountMenu" class="icon" matTooltipPosition="below" [matTooltip]="authManager.user.name">
-							<mat-icon>more_vert</mat-icon>
-						</button>
+					<li class="nav-item icon" style="opacity: 1 !important;">
+						<img matRipple [src]="authManager.user.picture" [matMenuTriggerFor]="accountMenu" class="profilePicture" matTooltipPosition="below" [matTooltip]="authManager.user.name" />
 					</li>
 					<mat-menu #accountMenu="matMenu">
-						<button mat-menu-item (click)="this.openAccountDialog()">Settings</button>
-						<button mat-menu-item (click)="this.authManager.logout()">Logout</button>
+						<button class="dropButton" mat-menu-item (click)="this.openAccountDialog()">Settings</button>
+						<button class="dropButton" mat-menu-item (click)="this.authManager.logout()">Logout</button>
 					</mat-menu>
 				</ng-template>
 			</ul>
