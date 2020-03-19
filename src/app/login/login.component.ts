@@ -16,6 +16,9 @@ export class LoginComponent
 	signinInformation: {email: string, username: string, password: string} = {email: "", username: "", password: ""};
 	hidePassword: boolean = true;
 	redirectURI: string;
+
+	loginErrors: [{code: string, description: string}];
+	registerErrors: [{code: string, description: string}];
 	
 	constructor(private router: Router, private route: ActivatedRoute, private http: HttpClient, private snackBar: MatSnackBar) 
 	{
@@ -29,14 +32,11 @@ export class LoginComponent
 	{
 		this.http.post("/api/account/login", this.loginInformation).pipe(catchError((error =>
 		{
-			console.log(error.status + " - " + error.message);
-			this.snackBar.open(`An unknown error occured: ${error.message}.`, null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
+			this.loginErrors = error.error;
 			return EMPTY;
 		}))).subscribe(() =>
 		{
 			window.location.href = this.redirectURI;
-		}, error => {
-			console.log("Login error: " + error);
 		});
 	}
 	
@@ -50,8 +50,7 @@ export class LoginComponent
 		// @ts-ignore
 		this.http.post<string>("/api/account/register", this.signinInformation, {responseType: "text"}).pipe(catchError((error =>
 		{
-			console.log(error.status + " - " + error.message);
-			this.snackBar.open(`An unknown error occured: ${error.message}.`, null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
+			this.registerErrors = JSON.parse(error.error);
 			return EMPTY;
 		}))).subscribe(otac => { this.useOTAC(otac); });
 	}

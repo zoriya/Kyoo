@@ -29,6 +29,11 @@
 						</mat-form-field>
 						<br/>
 						<mat-checkbox class="pl-3" [(ngModel)]="loginInformation.stayLoggedIn" name="rememberme">Stay logged in</mat-checkbox>
+						<br/>
+						<br/>
+						<mat-error *ngFor="let item of this.loginErrors;">
+							{{item.description}}
+						</mat-error>
 					</mat-card-content>
 					<div fxFlexAlign="end" align="end" style="text-align: end">
 						<button mat-button type="submit" [disabled]="!loginForm.valid">Login</button>
@@ -38,7 +43,7 @@
 			<mat-tab label="Register">
 				<br/>
 				<form #signinForm="ngForm" (ngSubmit)="register()">
-					<mat-card-content>
+					<mat-card-content>						
 						<mat-form-field appearance="outline" class="w-75">
 							<mat-label>Email</mat-label>
 							<input matInput name="signinEmail" #signinEmail="ngModel" [(ngModel)]="signinInformation.email" required email>
@@ -73,6 +78,10 @@
 								Error: {{signinPassword.getError("passwordError")["error"]}}
 							</mat-error>
 						</mat-form-field>
+
+						<mat-error *ngFor="let item of this.registerErrors;">
+							{{item.description}}
+						</mat-error>
 					</mat-card-content>
 					<div fxFlexAlign="end" align="end" style="text-align: end">
 						<button mat-button type="submit" [disabled]="!signinForm.valid">Sigin</button>
