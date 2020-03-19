@@ -1,7 +1,9 @@
+using System;
 using System.Reflection;
 using Kyoo.Api;
 using Kyoo.Controllers;
 using Kyoo.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -133,7 +135,7 @@ namespace Kyoo
 
 				if (env.IsDevelopment())
 				{
-					spa.UseAngularCliServer(npmScript: "start");
+					spa.UseAngularCliServer("start");
 				}
 			});
 		}

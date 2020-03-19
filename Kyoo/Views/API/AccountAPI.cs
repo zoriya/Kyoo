@@ -52,7 +52,8 @@ namespace Kyoo.Api
 			_userManager = userManager;
 			_signInManager = siginInManager;
 			_picturePath = configuration.GetValue<string>("profilePicturePath");
-
+			if (!Path.IsPathRooted(_picturePath))
+				_picturePath = Path.GetFullPath(_picturePath);
 		}
 		
 		[HttpPost("register")]
@@ -119,7 +120,7 @@ namespace Kyoo.Api
 			string path = Path.Combine(_picturePath, user.Id);
 			if (!System.IO.File.Exists(path))
 				return NotFound();
-			return new PhysicalFileResult(path, "image");
+			return new PhysicalFileResult(path, "image/png");
 		}
 		
 		[HttpPost("update")]

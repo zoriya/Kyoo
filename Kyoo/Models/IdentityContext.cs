@@ -30,8 +30,8 @@ namespace Kyoo
 					RequireClientSecret = false,
 					RequireConsent = false,
 					AccessTokenType = AccessTokenType.Reference,
-					AllowedScopes = { "kyoo.admin", "kyoo.write", "kyoo.read", "openid", "profile" },
-					RedirectUris =  { "/silent", "/" },
+					AllowedScopes = { "openid", "profile", "kyoo.read", "kyoo.write", "kyoo.play", "kyoo.download", "kyoo.admin" },
+					RedirectUris =  { "/", "/silent" },
 					PostLogoutRedirectUris = { "/logout" }
 				}
 			};
@@ -55,6 +55,16 @@ namespace Kyoo
 						{
 							Name = "kyoo.write",
 							DisplayName = "Read and write access to the public API"
+						},
+						new Scope
+						{
+							Name = "kyoo.play",
+							DisplayName = "Allow playback of movies and episodes."
+						},
+						new Scope
+						{
+							Name = "kyoo.download",
+							DisplayName = "Allow downloading of episodes and movies from kyoo."
 						},
 						new Scope
 						{
