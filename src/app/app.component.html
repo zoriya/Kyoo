@@ -19,7 +19,7 @@
 					<input placeholder="Search" id="search" type="search" (input)="onUpdateValue($event)"/>
 					<mat-icon matTooltipPosition="below" matTooltip="Search" (click)="openSearch()">search</mat-icon>
 				</li>
-				<li class="nav-item" *ngIf="!isLoggedIn(); else accountDrop">
+				<li class="nav-item" *ngIf="!this.isAuthenticated else accountDrop">
 					<a class="icon" (click)="this.authManager.login()" matTooltipPosition="below" matTooltip="Login">
 						<mat-icon>account_circle</mat-icon>
 					</a>

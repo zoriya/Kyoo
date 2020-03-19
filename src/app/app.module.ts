@@ -1,5 +1,5 @@
 import { HttpClientModule } from '@angular/common/http';
-import {APP_INITIALIZER, NgModule} from '@angular/core';
+import {APP_INITIALIZER, ChangeDetectorRef, NgModule} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatRippleModule } from '@angular/material/core';
@@ -43,6 +43,7 @@ import { LogoutComponent } from './logout/logout.component';
 import {MatDialogModule} from '@angular/material/dialog';
 import {FallbackDirective} from "./misc/fallback.directive";
 import {AuthenticatedGuard} from "./misc/guards/authenticated-guard.service";
+import { AutologinComponent } from './autologin/autologin.component';
 
 export function loadConfig(oidcConfigService: OidcConfigService)
 {
@@ -66,7 +67,8 @@ export function loadConfig(oidcConfigService: OidcConfigService)
 		AccountComponent,
 		UnauthorizedComponent,
 		LogoutComponent,
-		FallbackDirective
+		FallbackDirective,
+		AutologinComponent
 	],
 	imports: [
 		BrowserModule,

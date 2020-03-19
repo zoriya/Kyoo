@@ -99,6 +99,10 @@
           }
         }
       }
-    }},
-  "defaultProject": "kyoo"
+    }
+  },
+  "defaultProject": "kyoo",
+  "cli": {
+    "analytics": false
+  }
 }

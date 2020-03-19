@@ -15,6 +15,7 @@ import { ShowDetailsComponent } from './show-details/show-details.component';
 import {LoginComponent} from "./login/login.component";
 import {UnauthorizedComponent} from "./unauthorized/unauthorized.component";
 import {LogoutComponent} from "./logout/logout.component";
+import {AutologinComponent} from "./autologin/autologin.component";
 
 const routes: Routes = [
 	{ path: "browse", component: BrowseComponent, pathMatch: "full", resolve: { shows: LibraryResolverService } },
@@ -26,6 +27,7 @@ const routes: Routes = [
 	{ path: "search/:query", component: SearchComponent, resolve: { items: SearchResolverService } },
 	{ path: "login", component: LoginComponent },
 	{ path: "logout", component: LogoutComponent },
+	{ path: "autologin", component: AutologinComponent },
 	{ path: "unauthorized", component: UnauthorizedComponent },
 	{ path: "**", component: NotFoundComponent }
 ];

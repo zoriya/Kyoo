@@ -1,17 +1,18 @@
-import { Injectable } from '@angular/core';
-import {OidcSecurityService} from "angular-auth-oidc-client";
+import {Injectable} from '@angular/core';
+import {AuthorizationResult, AuthorizationState, OidcSecurityService, ValidationResult} from "angular-auth-oidc-client";
 import {HttpClient} from "@angular/common/http";
 import {Account} from "../../models/account";
+import {Router} from "@angular/router";
 
 @Injectable({
 	providedIn: 'root'
 })
 export class AuthService 
 {
-	isAuthenticated: boolean;
+	isAuthenticated: boolean = false;
 	user: any;
 	
-	constructor(public oidcSecurityService: OidcSecurityService, private http: HttpClient)
+	constructor(public oidcSecurityService: OidcSecurityService, private http: HttpClient, private router: Router)
 	{
 		if (this.oidcSecurityService.moduleSetup)
 			this.authorizeCallback();
@@ -21,12 +22,13 @@ export class AuthService
 				this.authorizeCallback();
 			});
 
-		this.oidcSecurityService.getIsAuthorized().subscribe(auth => 
+		this.oidcSecurityService.onAuthorizationResult.subscribe((authorizationResult: AuthorizationResult) => 
 		{
-			this.isAuthenticated = auth;
+			this.getUser();
+			this.isAuthenticated = authorizationResult.authorizationState == AuthorizationState.authorized;
+			this.router.navigate(["/"]);
 		});
 
-		this.getUser();
 	}
 
 	getUser()
@@ -34,6 +36,13 @@ export class AuthService
 		this.oidcSecurityService.getUserData().subscribe(userData =>
 		{
 			this.user = userData;
+			console.log("Got user data");
+			console.log(this.user);
+			// this.zone.run(() => 
+			// {
+			// 	this.user = userData; 
+			// 	this.isAuthenticated = userData !== undefined;
+			// });
 		});
 	}
 	
@@ -44,6 +53,7 @@ export class AuthService
 
 	logout() 
 	{
+		document.cookie = "Authenticated=false; expires=" + new Date(2147483647 * 1000).toUTCString();
 		this.http.get("api/account/logout").subscribe(() => 
 		{
 			this.oidcSecurityService.logoff();
@@ -52,7 +62,23 @@ export class AuthService
 
 	private authorizeCallback() 
 	{
-		this.oidcSecurityService.authorizedCallbackWithCode(window.location.toString());
+		if (window.location.href.indexOf("?code=") != -1)
+			this.oidcSecurityService.authorizedCallbackWithCode(window.location.toString());
+		else if (window.location.href.indexOf("/login") == -1)
+		{
+			this.oidcSecurityService.getIsAuthorized().subscribe((authorized: boolean) =>
+			{
+				console.log("Is authorized: " + authorized);
+				this.isAuthenticated = authorized;
+				if (!authorized)
+				{
+					if (document.cookie.indexOf("Authenticated=true") != -1)
+						this.router.navigate(['/autologin']);
+				}
+				else
+					document.cookie = "Authenticated=true; expires=" + new Date(2147483647 * 1000).toUTCString();
+			});
+		}
 	}
 
 	getAccount(): Account

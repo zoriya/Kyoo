@@ -71,11 +71,6 @@ export class AppComponent
 		}
 	}
 	
-	isLoggedIn(): boolean
-	{
-		return this.authManager.isAuthenticated;
-	}
-	
 	openAccountDialog()
 	{
 		const dialog = this.dialog.open(AccountComponent, {width: "500px", data: this.authManager.getAccount()});
@@ -83,6 +78,11 @@ export class AppComponent
 		{
 			this.authManager.getUser();
 		});
+	}
+	
+	get isAuthenticated(): boolean
+	{
+		return this.authManager.isAuthenticated;
 	}
 }
 
