@@ -77,7 +77,7 @@ namespace Kyoo.Api
 				return BadRequest(login);
 			SignInResult result = await _signInManager.PasswordSignInAsync(login.Username, login.Password, login.StayLoggedIn, false);
 			if (!result.Succeeded)
-				return BadRequest("Invalid username/password");
+				return BadRequest(new [] { new {code = "InvalidCredentials", description = "Invalid username/password"}});
 			return Ok();
 		}
 		
