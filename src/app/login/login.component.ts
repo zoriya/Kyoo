@@ -42,7 +42,14 @@ export class LoginComponent
 	
 	useOTAC(otac: string)
 	{
-		console.log("Got an OTAC: " + otac);
+		this.http.post("/api/account/otac-login", {"otac": otac}).pipe(catchError((error =>
+		{
+			this.registerErrors = error.error;
+			return EMPTY;
+		}))).subscribe(() =>
+		{
+			window.location.href = this.redirectURI;
+		});
 	}
 
 	async register()
