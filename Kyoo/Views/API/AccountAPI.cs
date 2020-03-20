@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using IdentityServer4.Models;
@@ -27,6 +28,11 @@ namespace Kyoo.Api
 		public string Username;
 		public string Password;
 		public bool StayLoggedIn;
+	}
+
+	public class OtacRequest
+	{
+		public string Otac;
 	}
 	
 	public class AccountData
@@ -78,6 +84,18 @@ namespace Kyoo.Api
 			SignInResult result = await _signInManager.PasswordSignInAsync(login.Username, login.Password, login.StayLoggedIn, false);
 			if (!result.Succeeded)
 				return BadRequest(new [] { new {code = "InvalidCredentials", description = "Invalid username/password"}});
+			return Ok();
+		}
+		
+		[HttpPost("otac-login")]
+		public async Task<IActionResult> OtacLogin([FromBody] OtacRequest otac)
+		{
+			User user = _userManager.Users.FirstOrDefault(x => x.OTAC == otac.Otac);
+			if (user == null)
+				return BadRequest(new [] { new {code = "InvalidOTAC", description = "No user was found for this OTAC."}});
+			if (user.OTACExpires <= DateTime.UtcNow)
+				return BadRequest(new [] { new {code = "ExpiredOTAC", description = "The OTAC has expired. Try to login with your password."}});
+			await _signInManager.SignInAsync(user, true);
 			return Ok();
 		}
 		
