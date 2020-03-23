@@ -23,17 +23,13 @@ namespace Kyoo.Api
 		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}.{identifier}.{extension?}")]
 		public IActionResult GetSubtitle(string showSlug, int seasonNumber, int episodeNumber, string identifier, string extension)
 		{
+			string languageTag = identifier.Substring(0, 3);
 			bool forced = identifier.Length > 3 && identifier.Substring(4) == "forced";
-			Track subtitle;
+			Track subtitle = _libraryManager.GetSubtitle(showSlug, seasonNumber, episodeNumber, languageTag, forced);
 			
-			if (identifier.Length >= 3 && identifier[3] == '-')
+			if (subtitle == null)
 			{
-				string languageTag = identifier.Substring(0, 3);
-				subtitle = _libraryManager.GetSubtitle(showSlug, seasonNumber, episodeNumber, languageTag, forced);
-			}
-			else
-			{
-				long.TryParse(identifier.Substring(0, 3), out long id);
+				long.TryParse(identifier.Substring(0, identifier.IndexOf('-')), out long id);
 				subtitle = _libraryManager.GetSubtitleById(id);
 			}
 			
