@@ -21,6 +21,7 @@ namespace Kyoo.Controllers
 		//Internal read
 		(Track video, IEnumerable<Track> audios, IEnumerable<Track> subtitles) GetStreams(long episodeID, string showSlug);
 		Track GetSubtitle(string showSlug, long seasonNumber, long episodeNumber, string languageTag, bool forced);
+		Track GetSubtitleById(long id);
 
 		//Public read
 		IEnumerable<Show> GetShows();

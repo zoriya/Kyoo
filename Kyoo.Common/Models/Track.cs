@@ -96,8 +96,14 @@ namespace Kyoo.Models
 				//Converting mkv track language to c# system language tag.
 				if (language == "fre")
 					language = "fra";
-
-				DisplayName = CultureInfo.GetCultures(CultureTypes.NeutralCultures).FirstOrDefault(x => x.ThreeLetterISOLanguageName == language)?.EnglishName ?? language;
+				
+				if (language == null)
+				{
+					Language = ID.ToString();
+					DisplayName = $"Unknown Language (id: {ID.ToString()})";
+				}
+				else
+					DisplayName = CultureInfo.GetCultures(CultureTypes.NeutralCultures).FirstOrDefault(x => x.ThreeLetterISOLanguageName == language)?.EnglishName ?? language;
 				Link = "/subtitle/" + episodeSlug + "." + Language;
 
 				if (IsForced)
