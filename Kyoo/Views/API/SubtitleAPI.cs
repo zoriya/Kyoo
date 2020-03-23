@@ -1,4 +1,5 @@
-﻿using Kyoo.Models;
+﻿using System;
+using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.IO;
@@ -23,13 +24,17 @@ namespace Kyoo.Api
 		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}.{identifier}.{extension?}")]
 		public IActionResult GetSubtitle(string showSlug, int seasonNumber, int episodeNumber, string identifier, string extension)
 		{
-			string languageTag = identifier.Substring(0, 3);
-			bool forced = identifier.Length > 3 && identifier.Substring(4) == "forced";
-			Track subtitle = _libraryManager.GetSubtitle(showSlug, seasonNumber, episodeNumber, languageTag, forced);
+			string languageTag = identifier.Length == 3 ? identifier.Substring(0, 3) : null;
+			bool forced = identifier.Length > 4 && identifier.Substring(4) == "forced";
+			Track subtitle = null;
 			
+			if (languageTag != null)
+				subtitle = _libraryManager.GetSubtitle(showSlug, seasonNumber, episodeNumber, languageTag, forced);
+				
 			if (subtitle == null)
 			{
-				long.TryParse(identifier.Substring(0, identifier.IndexOf('-')), out long id);
+				string idString = identifier.IndexOf('-') != -1 ? identifier.Substring(0, identifier.IndexOf('-')) : identifier;
+				long.TryParse(idString, out long id);
 				subtitle = _libraryManager.GetSubtitleById(id);
 			}
 			
