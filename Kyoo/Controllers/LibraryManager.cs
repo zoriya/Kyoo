@@ -54,7 +54,11 @@ namespace Kyoo.Controllers
 													  && track.Language == languageTag select track).FirstOrDefault();
 		}
 
-
+		public Track GetSubtitleById(long id)
+		{
+			return (from track in _database.Tracks where track.ID == id select track).FirstOrDefault();
+		}
+		
 		public Library GetLibrary(string librarySlug)
 		{
 			return (from library in _database.Libraries where library.Slug == librarySlug select library).FirstOrDefault();

@@ -23,15 +23,23 @@ namespace Kyoo.Api
 		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}.{identifier}.{extension?}")]
 		public IActionResult GetSubtitle(string showSlug, int seasonNumber, int episodeNumber, string identifier, string extension)
 		{
-			string languageTag = identifier.Substring(0, 3);
 			bool forced = identifier.Length > 3 && identifier.Substring(4) == "forced";
-
-			Track subtitle = _libraryManager.GetSubtitle(showSlug, seasonNumber, episodeNumber, languageTag, forced);
-
+			Track subtitle;
+			
+			if (identifier.Length >= 3 && identifier[3] == '-')
+			{
+				string languageTag = identifier.Substring(0, 3);
+				subtitle = _libraryManager.GetSubtitle(showSlug, seasonNumber, episodeNumber, languageTag, forced);
+			}
+			else
+			{
+				long.TryParse(identifier.Substring(0, 3), out long id);
+				subtitle = _libraryManager.GetSubtitleById(id);
+			}
+			
 			if (subtitle == null)
 				return NotFound();
-
-
+			
 			if (subtitle.Codec == "subrip" && extension == "vtt") //The request wants a WebVTT from a Subrip subtitle, convert it on the fly and send it.
 			{
 				return new ConvertSubripToVtt(subtitle.Path);
