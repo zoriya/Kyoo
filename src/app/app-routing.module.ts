@@ -16,15 +16,16 @@ import {LoginComponent} from "./login/login.component";
 import {UnauthorizedComponent} from "./unauthorized/unauthorized.component";
 import {LogoutComponent} from "./logout/logout.component";
 import {AutologinComponent} from "./autologin/autologin.component";
+import {AuthenticatedGuard} from "./misc/guards/authenticated-guard.service";
 
 const routes: Routes = [
-	{ path: "browse", component: BrowseComponent, pathMatch: "full", resolve: { shows: LibraryResolverService } },
-	{ path: "browse/:library-slug", component: BrowseComponent, resolve: { shows: LibraryResolverService } },
-	{ path: "show/:show-slug", component: ShowDetailsComponent, resolve: { show: ShowResolverService } },
-	{ path: "collection/:collection-slug", component: CollectionComponent, resolve: { collection: CollectionResolverService } },
-	{ path: "people/:people-slug", component: CollectionComponent, resolve: { collection: PeopleResolverService } },
-	{ path: "watch/:item", component: PlayerComponent, resolve: { item: StreamResolverService } },
-	{ path: "search/:query", component: SearchComponent, resolve: { items: SearchResolverService } },
+	{ path: "browse", component: BrowseComponent, pathMatch: "full", resolve: { shows: LibraryResolverService }, canLoad: [AuthenticatedGuard], canActivate: [AuthenticatedGuard] },
+	{ path: "browse/:library-slug", component: BrowseComponent, resolve: { shows: LibraryResolverService }, canLoad: [AuthenticatedGuard], canActivate: [AuthenticatedGuard] },
+	{ path: "show/:show-slug", component: ShowDetailsComponent, resolve: { show: ShowResolverService }, canLoad: [AuthenticatedGuard], canActivate: [AuthenticatedGuard] },
+	{ path: "collection/:collection-slug", component: CollectionComponent, resolve: { collection: CollectionResolverService }, canLoad: [AuthenticatedGuard], canActivate: [AuthenticatedGuard] },
+	{ path: "people/:people-slug", component: CollectionComponent, resolve: { collection: PeopleResolverService }, canLoad: [AuthenticatedGuard], canActivate: [AuthenticatedGuard] },
+	{ path: "watch/:item", component: PlayerComponent, resolve: { item: StreamResolverService }, canLoad: [AuthenticatedGuard], canActivate: [AuthenticatedGuard] },
+	{ path: "search/:query", component: SearchComponent, resolve: { items: SearchResolverService }, canLoad: [AuthenticatedGuard], canActivate: [AuthenticatedGuard] },
 	{ path: "login", component: LoginComponent },
 	{ path: "logout", component: LogoutComponent },
 	{ path: "autologin", component: AutologinComponent },
