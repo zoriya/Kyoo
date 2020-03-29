@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using System.IO;
 using Kyoo.Controllers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Kyoo.Api
 {
@@ -18,6 +19,7 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet("poster/{showSlug}")]
+		[Authorize(Policy="Read")]
 		public IActionResult GetShowThumb(string showSlug)
 		{
 			string path = _libraryManager.GetShowBySlug(showSlug)?.Path;
@@ -27,11 +29,12 @@ namespace Kyoo.Api
 			string thumb = Path.Combine(path, "poster.jpg");
 
 			if (System.IO.File.Exists(thumb))
-				return new PhysicalFileResult(thumb, "image/jpg");
+				return new PhysicalFileResult(Path.GetFullPath(thumb), "image/jpg");
 			return NotFound();
 		}
 
 		[HttpGet("logo/{showSlug}")]
+		[Authorize(Policy="Read")]
 		public IActionResult GetShowLogo(string showSlug)
 		{
 			string path = _libraryManager.GetShowBySlug(showSlug)?.Path;
@@ -41,11 +44,12 @@ namespace Kyoo.Api
 			string thumb = Path.Combine(path, "logo.png");
 
 			if (System.IO.File.Exists(thumb))
-				return new PhysicalFileResult(thumb, "image/jpg");
+				return new PhysicalFileResult(Path.GetFullPath(thumb), "image/jpg");
 			return NotFound();
 		}
 
 		[HttpGet("backdrop/{showSlug}")]
+		[Authorize(Policy="Read")]
 		public IActionResult GetShowBackdrop(string showSlug)
 		{
 			string path = _libraryManager.GetShowBySlug(showSlug)?.Path;
@@ -55,21 +59,23 @@ namespace Kyoo.Api
 			string thumb = Path.Combine(path, "backdrop.jpg");
 
 			if (System.IO.File.Exists(thumb))
-				return new PhysicalFileResult(thumb, "image/jpg");
+				return new PhysicalFileResult(Path.GetFullPath(thumb), "image/jpg");
 			return NotFound();
 		}
 
 		[HttpGet("peopleimg/{peopleSlug}")]
+		[Authorize(Policy="Read")]
 		public IActionResult GetPeopleIcon(string peopleSlug)
 		{
 			string thumbPath = Path.Combine(_peoplePath, peopleSlug + ".jpg");
 			if (!System.IO.File.Exists(thumbPath))
 				return NotFound();
 
-			return new PhysicalFileResult(thumbPath, "image/jpg");
+			return new PhysicalFileResult(Path.GetFullPath(thumbPath), "image/jpg");
 		}
 
 		[HttpGet("thumb/{showSlug}-s{seasonNumber}e{episodeNumber}")]
+		[Authorize(Policy="Read")]
 		public IActionResult GetEpisodeThumb(string showSlug, long seasonNumber, long episodeNumber)
 		{
 			string path = _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber)?.Path;
@@ -79,7 +85,7 @@ namespace Kyoo.Api
 			string thumb = Path.ChangeExtension(path, "jpg");
 
 			if (System.IO.File.Exists(thumb))
-				return new PhysicalFileResult(thumb, "image/jpg");
+				return new PhysicalFileResult(Path.GetFullPath(thumb), "image/jpg");
 			return NotFound();
 		}
 	}

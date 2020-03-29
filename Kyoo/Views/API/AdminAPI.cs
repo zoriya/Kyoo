@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Threading;
 using Kyoo.Controllers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Kyoo.Api
 {
@@ -9,6 +10,7 @@ namespace Kyoo.Api
 	public class AdminController : ControllerBase
 	{
 		[HttpGet("scan")]
+		[Authorize(Policy="Admin")]
 		public IActionResult ScanLibrary([FromServices] ICrawler crawler)
 		{
 			// The crawler is destroyed before the completion of this task.

@@ -52,6 +52,12 @@ namespace Kyoo.Api
 		private readonly UserManager<User> _userManager;
 		private readonly SignInManager<User> _signInManager;
 		private readonly string _picturePath;
+
+		public Claim[] defaultClaims =
+		{
+			new Claim("read", ""),
+			new Claim("play", "")
+		}; // TODO should add this field on the server's configuration page.
 		
 		public AccountController(UserManager<User> userManager, SignInManager<User> siginInManager, IConfiguration configuration)
 		{
@@ -73,6 +79,7 @@ namespace Kyoo.Api
 				return BadRequest(result.Errors);
 			string otac = account.GenerateOTAC(TimeSpan.FromMinutes(1));
 			await _userManager.UpdateAsync(account);
+			await _userManager.AddClaimsAsync(account, defaultClaims);
 			return Ok(otac);
 		}
 		
@@ -118,7 +125,7 @@ namespace Kyoo.Api
 					new Claim("username", user.UserName),
 					new Claim("picture", $"api/account/picture/{user.UserName}")
 				};
-
+				
 				context.IssuedClaims.AddRange(claims);
 			}
 		}

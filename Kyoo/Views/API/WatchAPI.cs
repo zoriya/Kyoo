@@ -1,5 +1,6 @@
 ﻿using Kyoo.Controllers;
 using Kyoo.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kyoo.Api
@@ -16,6 +17,7 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet("{showSlug}-s{seasonNumber}e{episodeNumber}")]
+		[Authorize(Policy="Read")]
 		public ActionResult<WatchItem> Index(string showSlug, long seasonNumber, long episodeNumber)
 		{
 			WatchItem item = _libraryManager.GetWatchItem(showSlug, seasonNumber, episodeNumber);
@@ -27,6 +29,7 @@ namespace Kyoo.Api
 		}
 		
 		[HttpGet("{movieSlug}")]
+		[Authorize(Policy="Read")]
 		public ActionResult<WatchItem> Index(string movieSlug)
 		{
 			WatchItem item = _libraryManager.GetMovieWatchItem(movieSlug);

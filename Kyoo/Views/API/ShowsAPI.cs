@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using Kyoo.Controllers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Kyoo.Api
 {
@@ -18,12 +19,14 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet]
+		[Authorize(Policy="Read")]
 		public IEnumerable<Show> GetShows()
 		{
 			return _libraryManager.GetShows();
 		}
 
 		[HttpGet("{slug}")]
+		[Authorize(Policy="Read")]
 		[JsonDetailed]
 		public ActionResult<Show> GetShow(string slug)
 		{

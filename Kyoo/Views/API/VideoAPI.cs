@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Kyoo.Api
 {
@@ -23,6 +24,7 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet("{showSlug}-s{seasonNumber}e{episodeNumber}")]
+		[Authorize(Policy="Play")]
 		public IActionResult Index(string showSlug, long seasonNumber, long episodeNumber)
 		{
 			WatchItem episode = _libraryManager.GetWatchItem(showSlug, seasonNumber, episodeNumber);
@@ -33,6 +35,7 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet("transmux/{showSlug}-s{seasonNumber}e{episodeNumber}")]
+		[Authorize(Policy="Play")]
 		public async Task<IActionResult> Transmux(string showSlug, long seasonNumber, long episodeNumber)
 		{
 			WatchItem episode = _libraryManager.GetWatchItem(showSlug, seasonNumber, episodeNumber);
@@ -55,6 +58,7 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet("transcode/{showSlug}-s{seasonNumber}e{episodeNumber}")]
+		[Authorize(Policy="Play")]
 		public async Task<IActionResult> Transcode(string showSlug, long seasonNumber, long episodeNumber)
 		{
 			WatchItem episode = _libraryManager.GetWatchItem(showSlug, seasonNumber, episodeNumber);
@@ -69,6 +73,7 @@ namespace Kyoo.Api
 		
 		
 		[HttpGet("{movieSlug}")]
+		[Authorize(Policy="Play")]
 		public IActionResult Index(string movieSlug)
 		{
 			WatchItem episode = _libraryManager.GetMovieWatchItem(movieSlug);
@@ -79,6 +84,7 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet("transmux/{movieSlug}")]
+		[Authorize(Policy="Play")]
 		public async Task<IActionResult> Transmux(string movieSlug)
 		{
 			WatchItem episode = _libraryManager.GetMovieWatchItem(movieSlug);
@@ -92,6 +98,7 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet("transcode/{movieSlug}")]
+		[Authorize(Policy="Play")]
 		public async Task<IActionResult> Transcode(string movieSlug)
 		{
 			WatchItem episode = _libraryManager.GetMovieWatchItem(movieSlug);

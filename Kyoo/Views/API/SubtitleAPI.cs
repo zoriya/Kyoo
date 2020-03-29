@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Kyoo.Api
 {
@@ -22,6 +23,7 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}.{identifier}.{extension?}")]
+		[Authorize(Policy="Play")]
 		public IActionResult GetSubtitle(string showSlug, int seasonNumber, int episodeNumber, string identifier, string extension)
 		{
 			string languageTag = identifier.Length == 3 ? identifier.Substring(0, 3) : null;
@@ -57,6 +59,7 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet("extract/{showSlug}-s{seasonNumber}e{episodeNumber}")]
+		[Authorize(Policy="Admin")]
 		public async Task<string> ExtractSubtitle(string showSlug, long seasonNumber, long episodeNumber)
 		{
 			Episode episode = _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
@@ -73,6 +76,7 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet("extract/{showSlug}")]
+		[Authorize(Policy="Admin")]
 		public async Task<string> ExtractSubtitle(string showSlug)
 		{
 			IEnumerable<Episode> episodes = _libraryManager.GetEpisodes(showSlug);
