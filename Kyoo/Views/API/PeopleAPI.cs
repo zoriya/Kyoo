@@ -1,5 +1,6 @@
 ﻿using Kyoo.Controllers;
 using Kyoo.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kyoo.Api
@@ -16,6 +17,7 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet("{peopleSlug}")]
+		[Authorize(Policy="Read")]
 		public ActionResult<Collection> GetPeople(string peopleSlug)
 		{
 			People people = _libraryManager.GetPeopleBySlug(peopleSlug);
