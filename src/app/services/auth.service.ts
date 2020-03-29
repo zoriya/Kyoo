@@ -28,7 +28,7 @@ export class AuthService
 			this.isAuthenticated = authorizationResult.authorizationState == AuthorizationState.authorized;
 			this.router.navigate(["/"]);
 		});
-
+		this.getUser();
 	}
 
 	getUser()
@@ -38,11 +38,6 @@ export class AuthService
 			this.user = userData;
 			console.log("Got user data");
 			console.log(this.user);
-			// this.zone.run(() => 
-			// {
-			// 	this.user = userData; 
-			// 	this.isAuthenticated = userData !== undefined;
-			// });
 		});
 	}
 	
