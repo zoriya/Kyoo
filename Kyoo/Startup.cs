@@ -4,6 +4,7 @@ using Kyoo.Controllers;
 using Kyoo.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -83,11 +84,11 @@ namespace Kyoo
 			
 			services.AddAuthorization(options =>
 			{
-				options.AddPolicy("Read", policy => policy.RequireClaim("read"));
-				options.AddPolicy("Write", policy => policy.RequireClaim("write"));
-				options.AddPolicy("Play", policy => policy.RequireClaim("play"));
-				options.AddPolicy("Download", policy => policy.RequireClaim("download"));
-				options.AddPolicy("Admin", policy => policy.RequireClaim("admin"));
+				options.AddPolicy("Read", policy => policy.RequireScope("kyoo.read").RequireClaim("read"));
+				options.AddPolicy("Write", policy => policy.RequireScope("kyoo.write").RequireClaim("write"));
+				options.AddPolicy("Play", policy => policy.RequireScope("kyoo.play").RequireClaim("play"));
+				options.AddPolicy("Download", policy => policy.RequireScope("kyoo.download").RequireClaim("download"));
+				options.AddPolicy("Admin", policy => policy.RequireScope("kyoo.admin").RequireClaim("admin"));
 			});
 
 			services.AddScoped<ILibraryManager, LibraryManager>();
