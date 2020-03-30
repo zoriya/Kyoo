@@ -69,13 +69,13 @@ namespace Kyoo
 			modelBuilder.Entity<Show>()
 				.Ignore(x => x.Genres);
 
-			// modelBuilder.Entity<User>().ToTable("User");
-			// modelBuilder.Entity<IdentityUserRole<string>>().ToTable("UserRole");
-			// modelBuilder.Entity<IdentityUserLogin<string>>().ToTable("UserLogin");
-			// modelBuilder.Entity<IdentityUserClaim<string>>().ToTable("UserClaim");
-			// modelBuilder.Entity<IdentityRole>().ToTable("UserRoles");
-			// modelBuilder.Entity<IdentityRoleClaim<string>>().ToTable("UserRoleClaim");
-			// modelBuilder.Entity<IdentityUserToken<string>>().ToTable("UserToken");
+			modelBuilder.Entity<User>().ToTable("User");
+			modelBuilder.Entity<IdentityUserRole<string>>().ToTable("UserRole");
+			modelBuilder.Entity<IdentityUserLogin<string>>().ToTable("UserLogin");
+			modelBuilder.Entity<IdentityUserClaim<string>>().ToTable("UserClaim");
+			modelBuilder.Entity<IdentityRole>().ToTable("UserRoles");
+			modelBuilder.Entity<IdentityRoleClaim<string>>().ToTable("UserRoleClaim");
+			modelBuilder.Entity<IdentityUserToken<string>>().ToTable("UserToken");
 		}
 	}
 }

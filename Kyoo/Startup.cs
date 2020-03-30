@@ -84,11 +84,11 @@ namespace Kyoo
 			
 			services.AddAuthorization(options =>
 			{
-				options.AddPolicy("Read", policy => policy.RequireScope("kyoo.read").RequireClaim("read"));
-				options.AddPolicy("Write", policy => policy.RequireScope("kyoo.write").RequireClaim("write"));
-				options.AddPolicy("Play", policy => policy.RequireScope("kyoo.play").RequireClaim("play"));
-				options.AddPolicy("Download", policy => policy.RequireScope("kyoo.download").RequireClaim("download"));
-				options.AddPolicy("Admin", policy => policy.RequireScope("kyoo.admin").RequireClaim("admin"));
+				options.AddPolicy("Read", policy => policy.RequireScope("kyoo.read").RequireClaim("kyoo.read")); //Checked from the access token so kyoo.read is not here but it is inside the permissions string-array.
+				options.AddPolicy("Write", policy => policy.RequireScope("kyoo.write").RequireClaim("kyoo.write"));
+				options.AddPolicy("Play", policy => policy.RequireScope("kyoo.play").RequireClaim("kyoo.play"));
+				options.AddPolicy("Download", policy => policy.RequireScope("kyoo.download").RequireClaim("kyoo.download"));
+				options.AddPolicy("Admin", policy => policy.RequireScope("kyoo.admin").RequireClaim("kyoo.admin"));
 			});
 
 			services.AddScoped<ILibraryManager, LibraryManager>();

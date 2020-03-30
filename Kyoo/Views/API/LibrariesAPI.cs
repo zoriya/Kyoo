@@ -3,6 +3,7 @@ using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Kyoo.Api
 {
@@ -24,6 +25,7 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet("{librarySlug}")]
+		[Authorize(Policy="Read")]
 		public ActionResult<IEnumerable<Show>> GetShows(string librarySlug)
 		{
 			Library library = _libraryManager.GetLibrary(librarySlug);
