@@ -6,17 +6,17 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace Kyoo.Models.DatabaseMigrations
+namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
 {
     [DbContext(typeof(ConfigurationDbContext))]
-    [Migration("20200303213949_IS_Configuration")]
-    partial class IS_Configuration
+    [Migration("20200330032447_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.2");
+                .HasAnnotation("ProductVersion", "3.1.3");
 
             modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ApiResource", b =>
                 {

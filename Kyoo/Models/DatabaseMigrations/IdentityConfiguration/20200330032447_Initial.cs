@@ -1,9 +1,9 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Kyoo.Models.DatabaseMigrations
+namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
 {
-    public partial class IS_Configuration : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

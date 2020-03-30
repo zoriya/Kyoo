@@ -1,17 +1,20 @@
 using System;
 using System.Linq;
+using IdentityServer4.EntityFramework.Options;
 using Kyoo.Models;
+using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Microsoft.Extensions.Options;
 
 namespace Kyoo
 {
-	public class DatabaseContext : IdentityDbContext<User>
+	public class DatabaseContext : ApiAuthorizationDbContext<User>
 	{
-		public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) { }
+		public DatabaseContext(DbContextOptions<DatabaseContext> options, IOptions<OperationalStoreOptions> operationalStoreOptions) 
+			: base(options, operationalStoreOptions) { }
 
 		public DbSet<User> Accounts { get; set; }
 		
@@ -66,13 +69,13 @@ namespace Kyoo
 			modelBuilder.Entity<Show>()
 				.Ignore(x => x.Genres);
 
-			modelBuilder.Entity<User>().ToTable("User");
-			modelBuilder.Entity<IdentityUserRole<string>>().ToTable("UserRole");
-			modelBuilder.Entity<IdentityUserLogin<string>>().ToTable("UserLogin");
-			modelBuilder.Entity<IdentityUserClaim<string>>().ToTable("UserClaim");
-			modelBuilder.Entity<IdentityRole>().ToTable("UserRoles");
-			modelBuilder.Entity<IdentityRoleClaim<string>>().ToTable("UserRoleClaim");
-			modelBuilder.Entity<IdentityUserToken<string>>().ToTable("UserToken");
+			// modelBuilder.Entity<User>().ToTable("User");
+			// modelBuilder.Entity<IdentityUserRole<string>>().ToTable("UserRole");
+			// modelBuilder.Entity<IdentityUserLogin<string>>().ToTable("UserLogin");
+			// modelBuilder.Entity<IdentityUserClaim<string>>().ToTable("UserClaim");
+			// modelBuilder.Entity<IdentityRole>().ToTable("UserRoles");
+			// modelBuilder.Entity<IdentityRoleClaim<string>>().ToTable("UserRoleClaim");
+			// modelBuilder.Entity<IdentityUserToken<string>>().ToTable("UserToken");
 		}
 	}
 }
