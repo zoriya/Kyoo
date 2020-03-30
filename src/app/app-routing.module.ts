@@ -19,7 +19,7 @@ import {AutologinComponent} from "./autologin/autologin.component";
 import {AuthGuard} from "./misc/guards/authenticated-guard.service";
 
 const routes: Routes = [
-	{ path: "browse", component: BrowseComponent, pathMatch: "full", resolve: { shows: LibraryResolverService }, },// canLoad: [AuthGuard.forPermissions("read")], canActivate: [AuthGuard.forPermissions("read")] },
+	{ path: "browse", component: BrowseComponent, pathMatch: "full", resolve: { shows: LibraryResolverService }, canLoad: [AuthGuard.forPermissions("read")], canActivate: [AuthGuard.forPermissions("read")] },
 	{ path: "browse/:library-slug", component: BrowseComponent, resolve: { shows: LibraryResolverService }, canLoad: [AuthGuard.forPermissions("read")], canActivate: [AuthGuard.forPermissions("read")] },
 	{ path: "show/:show-slug", component: ShowDetailsComponent, resolve: { show: ShowResolverService }, canLoad: [AuthGuard.forPermissions("read")], canActivate: [AuthGuard.forPermissions("read")] },
 	{ path: "collection/:collection-slug", component: CollectionComponent, resolve: { collection: CollectionResolverService }, canLoad: [AuthGuard.forPermissions("read")], canActivate: [AuthGuard.forPermissions("read")] },

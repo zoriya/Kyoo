@@ -15,7 +15,9 @@ import {AuthService} from "../../services/auth.service";
 @Injectable({providedIn: "root"})
 export class AuthGuard 
 {
-	static forPermissions(permissions: string | string[])
+	public static guards: any[] = [];
+	
+	static forPermissions(...permissions: string[])
 	{
 		@Injectable()
 		class AuthenticatedGuard implements CanActivate, CanLoad
@@ -24,24 +26,40 @@ export class AuthGuard
 	
 			canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree
 			{
-				return this.checkPermissions();
+				if (!this.checkPermissions())
+				{
+					this.router.navigate(["/unauthorized"]);
+					return false;
+				}
+				return true;
 			}
 	
 			canLoad(route: Route, segments: UrlSegment[]): Observable<boolean> | Promise<boolean> | boolean
 			{
-				return this.checkPermissions();
+				if (!this.checkPermissions())
+				{
+					this.router.navigate(["/unauthorized"]);
+					return false;
+				}
+				return true;
 			}
 	
 			checkPermissions(): boolean
 			{
 				if (this.authManager.isAuthenticated)
 				{
-					// if (this.authManager.user.claims)
+					let perms = this.authManager.user.permissions.split(",");
+					for (let perm of permissions) {
+						if (!perms.includes(perm))
+							return false;
+					}
 					return true;
 				}
-				this.router.navigate(["/unauthorized"]);
 				return false;
 			}
 		}
+
+		AuthGuard.guards.push(AuthenticatedGuard);
+		return AuthenticatedGuard;
 	}
 }

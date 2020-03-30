@@ -106,7 +106,7 @@ export function loadConfig(oidcConfigService: OidcConfigService)
 			deps: [OidcConfigService],
 			multi: true
 		},
-		AuthGuard,
+		AuthGuard.guards,
 		{
 			provide: HTTP_INTERCEPTORS,
 			useClass: AuthorizerInterceptor,
