@@ -42,7 +42,7 @@ import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
 import { LogoutComponent } from './logout/logout.component';
 import {MatDialogModule} from '@angular/material/dialog';
 import {FallbackDirective} from "./misc/fallback.directive";
-import {AuthenticatedGuard} from "./misc/guards/authenticated-guard.service";
+import {AuthGuard} from "./misc/guards/authenticated-guard.service";
 import { AutologinComponent } from './autologin/autologin.component';
 
 export function loadConfig(oidcConfigService: OidcConfigService)
@@ -105,7 +105,7 @@ export function loadConfig(oidcConfigService: OidcConfigService)
 			deps: [OidcConfigService],
 			multi: true
 		},
-		AuthenticatedGuard
+		AuthGuard
 	],
 	bootstrap: [AppComponent]
 })
