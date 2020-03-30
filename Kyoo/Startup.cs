@@ -3,6 +3,7 @@ using Kyoo.Api;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -26,16 +27,14 @@ namespace Kyoo
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
-			// services.AddSpaStaticFiles(configuration =>
-			// {
-			// 	configuration.RootPath = "wwwroot";
-			// });
-			//
-			// services.AddControllers().AddNewtonsoftJson();
-			// services.AddHttpClient();
-			//
-			// string publicUrl = Configuration.GetValue<string>("public_url");
-			//
+			services.AddSpaStaticFiles(configuration =>
+			{
+				configuration.RootPath = "wwwroot";
+			});
+			
+			services.AddControllers().AddNewtonsoftJson();
+			services.AddHttpClient();
+
 			services.AddDbContext<DatabaseContext>(options =>
 			{
 				options.UseLazyLoadingProxies()
@@ -74,31 +73,22 @@ namespace Kyoo
 				.AddProfileService<AccountController>()
 				.AddDeveloperSigningCredential(); // TODO remove the developer signin
 
-			services.AddAuthentication()
-				.AddIdentityServerJwt();
-
-			// services.ConfigureApplicationCookie(options => 
-			// {
-			// 	options.Events.OnRedirectToAccessDenied = context =>
-			// 	{
-			// 		context.Response.StatusCode = (int)HttpStatusCode.Forbidden;
-			// 		return Task.CompletedTask;
-			// 	};
-			// 	options.Events.OnRedirectToLogin = context =>
-			// 	{
-			// 		context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-			// 		return Task.CompletedTask;
-			// 	};
-			// });
+			services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+				.AddJwtBearer(options =>
+				{
+					options.Authority = publicUrl;
+					options.Audience = "Kyoo";
+					options.RequireHttpsMetadata = false;
+				});
 			
-			// services.AddAuthorization(options =>
-			// {
-			// 	options.AddPolicy("Read", policy => policy.RequireClaim("read"));
-			// 	options.AddPolicy("Write", policy => policy.RequireClaim("write"));
-			// 	options.AddPolicy("Play", policy => policy.RequireClaim("play"));
-			// 	options.AddPolicy("Download", policy => policy.RequireClaim("download"));
-			// 	options.AddPolicy("Admin", policy => policy.RequireClaim("admin"));
-			// });
+			services.AddAuthorization(options =>
+			{
+				options.AddPolicy("Read", policy => policy.RequireClaim("read"));
+				options.AddPolicy("Write", policy => policy.RequireClaim("write"));
+				options.AddPolicy("Play", policy => policy.RequireClaim("play"));
+				options.AddPolicy("Download", policy => policy.RequireClaim("download"));
+				options.AddPolicy("Admin", policy => policy.RequireClaim("admin"));
+			});
 
 			services.AddScoped<ILibraryManager, LibraryManager>();
 			services.AddScoped<ICrawler, Crawler>();
@@ -123,18 +113,18 @@ namespace Kyoo
 				app.UseHsts();
 			}
 
-			// app.Use((ctx, next) => 
-			// {
-			// 	ctx.Response.Headers.Remove("X-Powered-By");
-			// 	ctx.Response.Headers.Remove("Server");
-			// 	ctx.Response.Headers.Add("Feature-Policy", "autoplay 'self'; fullscreen");
-			// 	ctx.Response.Headers.Add("Content-Security-Policy", "default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; style-src 'self' 'unsafe-inline'");
-			// 	ctx.Response.Headers.Add("X-Frame-Options", "SAMEORIGIN");
-			// 	ctx.Response.Headers.Add("Referrer-Policy", "no-referrer");
-			// 	ctx.Response.Headers.Add("Access-Control-Allow-Origin", "null");
-			// 	ctx.Response.Headers.Add("X-Content-Type-Options", "nosniff");
-			// 	return next();
-			// });
+			app.Use((ctx, next) => 
+			{
+				ctx.Response.Headers.Remove("X-Powered-By");
+				ctx.Response.Headers.Remove("Server");
+				ctx.Response.Headers.Add("Feature-Policy", "autoplay 'self'; fullscreen");
+				ctx.Response.Headers.Add("Content-Security-Policy", "default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; style-src 'self' 'unsafe-inline'");
+				ctx.Response.Headers.Add("X-Frame-Options", "SAMEORIGIN");
+				ctx.Response.Headers.Add("Referrer-Policy", "no-referrer");
+				ctx.Response.Headers.Add("Access-Control-Allow-Origin", "null");
+				ctx.Response.Headers.Add("X-Content-Type-Options", "nosniff");
+				return next();
+			});
 			
 			app.UseStaticFiles();
 			if (!env.IsDevelopment())

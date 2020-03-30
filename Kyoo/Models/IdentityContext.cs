@@ -29,7 +29,7 @@ namespace Kyoo
 					AllowOfflineAccess = true,
 					RequireClientSecret = false,
 					RequireConsent = false,
-					AccessTokenType = AccessTokenType.Reference,
+					AccessTokenType = AccessTokenType.Jwt,
 					AllowedScopes = { "openid", "profile", "kyoo.read", "kyoo.write", "kyoo.play", "kyoo.download", "kyoo.admin" },
 					RedirectUris =  { "/", "/silent" },
 					PostLogoutRedirectUris = { "/logout" }
