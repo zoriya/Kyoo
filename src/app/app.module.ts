@@ -1,4 +1,4 @@
-import { HttpClientModule } from '@angular/common/http';
+import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 import {APP_INITIALIZER, ChangeDetectorRef, NgModule} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -44,6 +44,7 @@ import {MatDialogModule} from '@angular/material/dialog';
 import {FallbackDirective} from "./misc/fallback.directive";
 import {AuthGuard} from "./misc/guards/authenticated-guard.service";
 import { AutologinComponent } from './autologin/autologin.component';
+import {AuthorizerInterceptor} from "./misc/authorizer-interceptor.service";
 
 export function loadConfig(oidcConfigService: OidcConfigService)
 {
@@ -105,7 +106,12 @@ export function loadConfig(oidcConfigService: OidcConfigService)
 			deps: [OidcConfigService],
 			multi: true
 		},
-		AuthGuard
+		AuthGuard,
+		{
+			provide: HTTP_INTERCEPTORS,
+			useClass: AuthorizerInterceptor,
+			multi: true
+		}
 	],
 	bootstrap: [AppComponent]
 })
