@@ -18,16 +18,16 @@ namespace Kyoo.Api
 {
 	public class RegisterRequest
 	{
-		public string Email;
-		public string Username;
-		public string Password;
+		public string Email { get; set; }
+		public string Username { get; set; }
+		public string Password { get; set; }
 	}	
 	
 	public class LoginRequest
 	{
-		public string Username;
-		public string Password;
-		public bool StayLoggedIn;
+		public string Username { get; set; }
+		public string Password { get; set; }
+		public bool StayLoggedIn { get; set; }
 	}
 
 	public class OtacRequest

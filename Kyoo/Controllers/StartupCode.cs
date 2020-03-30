@@ -25,8 +25,7 @@ namespace Kyoo.Controllers
 			using (IServiceScope serviceScope = _serviceProvider.CreateScope())
 			{
 				serviceScope.ServiceProvider.GetService<DatabaseContext>().Database.Migrate();;
-				serviceScope.ServiceProvider.GetService<PersistedGrantDbContext>().Database.Migrate();
-
+				
 				ConfigurationDbContext identityContext = serviceScope.ServiceProvider.GetService<ConfigurationDbContext>();
 				identityContext.Database.Migrate();
 				if (!identityContext.Clients.Any())

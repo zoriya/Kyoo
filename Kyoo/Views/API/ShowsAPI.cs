@@ -19,7 +19,7 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet]
-		[Authorize(Policy="Read")]
+		[Authorize]
 		public IEnumerable<Show> GetShows()
 		{
 			return _libraryManager.GetShows();
