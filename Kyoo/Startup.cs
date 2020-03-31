@@ -1,4 +1,7 @@
+using System.Linq;
 using System.Reflection;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Kyoo.Api;
 using Kyoo.Controllers;
 using Kyoo.Models;
@@ -10,6 +13,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -84,11 +88,31 @@ namespace Kyoo
 			
 			services.AddAuthorization(options =>
 			{
-				options.AddPolicy("Read", policy => policy.RequireScope("kyoo.read").RequireClaim("kyoo.read")); //Checked from the access token so kyoo.read is not here but it is inside the permissions string-array.
-				options.AddPolicy("Write", policy => policy.RequireScope("kyoo.write").RequireClaim("kyoo.write"));
-				options.AddPolicy("Play", policy => policy.RequireScope("kyoo.play").RequireClaim("kyoo.play"));
-				options.AddPolicy("Download", policy => policy.RequireScope("kyoo.download").RequireClaim("kyoo.download"));
-				options.AddPolicy("Admin", policy => policy.RequireScope("kyoo.admin").RequireClaim("kyoo.admin"));
+				options.AddPolicy("Read", policy => policy.RequireAssertion(context =>
+				{
+					Claim perms = context.User.Claims.FirstOrDefault(x => x.Type == "permissions");
+					return perms != null && perms.Value.Split(",").Contains("read");
+				}).RequireScope("kyoo.read"));
+				options.AddPolicy("Write", policy => policy.RequireAssertion(context =>
+				{
+					Claim perms = context.User.Claims.FirstOrDefault(x => x.Type == "permissions");
+					return perms != null && perms.Value.Split(",").Contains("write");
+				}).RequireScope("kyoo.write"));
+				options.AddPolicy("Play", policy => policy.RequireAssertion(context =>
+				{
+					Claim perms = context.User.Claims.FirstOrDefault(x => x.Type == "permissions");
+					return perms != null && perms.Value.Split(",").Contains("play");
+				}).RequireScope("kyoo.play"));
+				options.AddPolicy("Download", policy => policy.RequireAssertion(context =>
+				{
+					Claim perms = context.User.Claims.FirstOrDefault(x => x.Type == "permissions");
+					return perms != null && perms.Value.Split(",").Contains("download");
+				}).RequireScope("kyoo.download"));
+				options.AddPolicy("Admin", policy => policy.RequireAssertion(context =>
+				{
+					Claim perms = context.User.Claims.FirstOrDefault(x => x.Type == "permissions");
+					return perms != null && perms.Value.Split(",").Contains("admin");
+				}).RequireScope("kyoo.admin"));
 			});
 
 			services.AddScoped<ILibraryManager, LibraryManager>();
