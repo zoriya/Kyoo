@@ -19,7 +19,6 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet("poster/{showSlug}")]
-		[Authorize(Policy="Read")]
 		public IActionResult GetShowThumb(string showSlug)
 		{
 			string path = _libraryManager.GetShowBySlug(showSlug)?.Path;
@@ -34,7 +33,6 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet("logo/{showSlug}")]
-		[Authorize(Policy="Read")]
 		public IActionResult GetShowLogo(string showSlug)
 		{
 			string path = _libraryManager.GetShowBySlug(showSlug)?.Path;
@@ -49,7 +47,6 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet("backdrop/{showSlug}")]
-		[Authorize(Policy="Read")]
 		public IActionResult GetShowBackdrop(string showSlug)
 		{
 			string path = _libraryManager.GetShowBySlug(showSlug)?.Path;
@@ -64,7 +61,6 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet("peopleimg/{peopleSlug}")]
-		[Authorize(Policy="Read")]
 		public IActionResult GetPeopleIcon(string peopleSlug)
 		{
 			string thumbPath = Path.Combine(_peoplePath, peopleSlug + ".jpg");
@@ -75,7 +71,6 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet("thumb/{showSlug}-s{seasonNumber}e{episodeNumber}")]
-		[Authorize(Policy="Read")]
 		public IActionResult GetEpisodeThumb(string showSlug, long seasonNumber, long episodeNumber)
 		{
 			string path = _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber)?.Path;
