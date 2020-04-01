@@ -20,8 +20,8 @@ namespace Kyoo.Controllers
 
 		public Transcoder(IConfiguration config)
 		{
-			_transmuxPath = config.GetValue<string>("transmuxTempPath");
-			_transcodePath = config.GetValue<string>("transcodeTempPath");
+			_transmuxPath = Path.GetFullPath(config.GetValue<string>("transmuxTempPath"));
+			_transcodePath = Path.GetFullPath(config.GetValue<string>("transcodeTempPath"));
 
 			if (TranscoderAPI.init() != Marshal.SizeOf<Models.Watch.Stream>())
 				throw new BadTranscoderException();
@@ -78,10 +78,11 @@ namespace Kyoo.Controllers
 
 		public async Task<string> Transcode(WatchItem episode)
 		{
+			return null; // Not implemented yet.
 			string folder = Path.Combine(_transcodePath, episode.Link);
 			string manifest = Path.Combine(folder, episode.Link + ".m3u8");
 			float playableDuration = 0;
-			bool transmuxFailed = false;
+			bool transcodeFailed = false;
 
 			try
 			{
@@ -99,11 +100,11 @@ namespace Kyoo.Controllers
 
 			Task.Run(() =>
 			{
-				transmuxFailed = TranscoderAPI.transcode(episode.Path, manifest.Replace('\\', '/'), out playableDuration) != 0;
+				transcodeFailed = TranscoderAPI.transcode(episode.Path, manifest.Replace('\\', '/'), out playableDuration) != 0;
 			});
-			while (playableDuration < 10 || (!File.Exists(manifest) && !transmuxFailed))
+			while (playableDuration < 10 || (!File.Exists(manifest) && !transcodeFailed))
 				await Task.Delay(10);
-			return transmuxFailed ? null : manifest;
+			return transcodeFailed ? null : manifest;
 		}
 	}
 }

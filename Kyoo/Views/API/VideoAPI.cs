@@ -15,12 +15,14 @@ namespace Kyoo.Api
 		private readonly ILibraryManager _libraryManager;
 		private readonly ITranscoder _transcoder;
 		private readonly string _transmuxPath;
+		private readonly string _transcodePath;
 
 		public VideoController(ILibraryManager libraryManager, ITranscoder transcoder, IConfiguration config)
 		{
 			_libraryManager = libraryManager;
 			_transcoder = transcoder;
 			_transmuxPath = config.GetValue<string>("transmuxTempPath");
+			_transcodePath = config.GetValue<string>("transcodeTempPath");
 		}
 
 		[HttpGet("{showSlug}-s{seasonNumber}e{episodeNumber}")]
@@ -51,7 +53,7 @@ namespace Kyoo.Api
 		[HttpGet("transmux/{episodeLink}/segment/{chunk}")]
 		public IActionResult GetTransmuxedChunk(string episodeLink, string chunk)
 		{
-			string path = Path.Combine(_transmuxPath, episodeLink);
+			string path = Path.GetFullPath(Path.Combine(_transmuxPath, episodeLink));
 			path = Path.Combine(path, "segments" + Path.DirectorySeparatorChar + chunk);
 
 			return PhysicalFile(path, "video/MP2T");
@@ -69,6 +71,15 @@ namespace Kyoo.Api
 			if (path != null)
 				return PhysicalFile(path, "application/x-mpegURL ", true);
 			return StatusCode(500);
+		}
+		
+		[HttpGet("transcode/{episodeLink}/segment/{chunk}")]
+		public IActionResult GetTranscodedChunk(string episodeLink, string chunk)
+		{
+			string path = Path.GetFullPath(Path.Combine(_transcodePath, episodeLink));
+			path = Path.Combine(path, "segments" + Path.DirectorySeparatorChar + chunk);
+
+			return PhysicalFile(path, "video/MP2T");
 		}
 		
 		
