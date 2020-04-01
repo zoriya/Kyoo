@@ -45,6 +45,7 @@ import {FallbackDirective} from "./misc/fallback.directive";
 import {AuthGuard} from "./misc/guards/authenticated-guard.service";
 import { AutologinComponent } from './autologin/autologin.component';
 import {AuthorizerInterceptor} from "./misc/authorizer-interceptor.service";
+import { AuthPipe } from './misc/auth.pipe';
 
 export function loadConfig(oidcConfigService: OidcConfigService)
 {
@@ -69,7 +70,8 @@ export function loadConfig(oidcConfigService: OidcConfigService)
 		UnauthorizedComponent,
 		LogoutComponent,
 		FallbackDirective,
-		AutologinComponent
+		AutologinComponent,
+		AuthPipe
 	],
 	imports: [
 		BrowserModule,
