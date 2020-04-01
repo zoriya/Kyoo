@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewEncapsulation } from '@angular/core';
+import {Component, Inject, Injector, OnInit, ViewEncapsulation} from '@angular/core';
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { DomSanitizer, Title } from "@angular/platform-browser";
 import { ActivatedRoute, Event, NavigationCancel, NavigationEnd, NavigationStart, Router } from "@angular/router";
@@ -6,6 +6,7 @@ import { Track, WatchItem } from "../../models/watch-item";
 import { Location } from "@angular/common";
 import * as Hls from "hls.js"
 import { getPlaybackMethod, method, getWhatIsSupported, SupportList } from "../../videoSupport/playbackMethodDetector";
+import {OidcSecurityService} from "angular-auth-oidc-client";
 
 declare var SubtitleManager: any;
 
@@ -51,8 +52,11 @@ export class PlayerComponent implements OnInit
 	private thumb: HTMLElement;
 	private progress: HTMLElement;
 	private buffered: HTMLElement;
+	
+	
+	private oidcSecurity: OidcSecurityService;
 
-	constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer, private snackBar: MatSnackBar, private title: Title, private router: Router, private location: Location) { }
+	constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer, private snackBar: MatSnackBar, private title: Title, private router: Router, private location: Location, private injector: Injector) { }
 
 	ngOnInit()
 	{
@@ -399,6 +403,16 @@ export class PlayerComponent implements OnInit
 	selectPlayMethod(playMethod: method)
 	{
 		this.playMethod = playMethod;
+
+		if (this.oidcSecurity === undefined)
+			this.oidcSecurity = this.injector.get(OidcSecurityService);
+		this.hlsPlayer.config.xhrSetup = (xhr, url) =>
+		{
+			const token = this.oidcSecurity.getToken();
+			if (token)
+				xhr.setRequestHeader("Authorization", "Bearer " + token);
+		};
+
 		if (this.playMethod == method.direct)
 		{
 			this.player.src = "/video/" + this.item.link;

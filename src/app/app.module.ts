@@ -130,7 +130,7 @@ export class AppModule
 				client_id: 'kyoo.webapp',
 				response_type: "code",
 				trigger_authorization_result_event: true,
-				scope: "openid profile kyoo.read offline_access",
+				scope: "openid profile offline_access kyoo.read kyoo.play",
 				silent_renew: false,
 				silent_renew_url: "/silent",
 				use_refresh_token: false,
