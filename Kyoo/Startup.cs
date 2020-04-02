@@ -2,6 +2,7 @@ using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using IdentityServer4.Extensions;
 using Kyoo.Api;
 using Kyoo.Controllers;
 using Kyoo.Models;
@@ -99,16 +100,12 @@ namespace Kyoo
 					{
 						policy.AuthenticationSchemes.Add(IdentityConstants.ApplicationScheme);
 						policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
-						policy.RequireAuthenticatedUser();
-						policy.RequireAssertion(context =>
-						{
-							Claim perms = context.User.Claims.FirstOrDefault(x => x.Type == "permissions");
-							return perms != null && perms.Value.Split(",").Contains(permission.ToLower());
-						});
+						policy.AddRequirements(new AuthorizationValidator(permission));
 						// policy.RequireScope($"kyoo.{permission.ToLower()}");
 					});
 				}
 			});
+			services.AddSingleton<IAuthorizationHandler, AuthorizationValidatorHandler>();
 
 			services.AddScoped<ILibraryManager, LibraryManager>();
 			services.AddScoped<ICrawler, Crawler>();
