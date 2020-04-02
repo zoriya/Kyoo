@@ -55,9 +55,8 @@ namespace Kyoo.Api
 
 		public Claim[] defaultClaims =
 		{
-			new Claim("kyoo.read", ""),
-			new Claim("kyoo.play", "")
-		}; // TODO should add this field on the server's configuration page.
+			new Claim("permissions", "read,play") // TODO should add this field on the server's configuration page.
+		};
 		
 		public AccountController(UserManager<User> userManager, SignInManager<User> siginInManager, IConfiguration configuration)
 		{
@@ -126,9 +125,9 @@ namespace Kyoo.Api
 					new Claim("picture", $"api/account/picture/{user.UserName}")
 				};
 
-				IList<Claim> userClaims = await _userManager.GetClaimsAsync(user);
-				IEnumerable<string> permissions = from claim in userClaims where claim.Type.StartsWith("kyoo.") select claim.Type.Substring(claim.Type.IndexOf(".") + 1);
-				claims.Add(new Claim("permissions", string.Join(",", permissions)));
+				Claim perms = (await _userManager.GetClaimsAsync(user)).FirstOrDefault(x => x.Type == "permissions");
+				if (perms != null)
+					claims.Add(perms);
 				
 				context.IssuedClaims.AddRange(claims);
 			}

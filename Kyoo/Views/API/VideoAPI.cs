@@ -90,7 +90,7 @@ namespace Kyoo.Api
 			WatchItem episode = _libraryManager.GetMovieWatchItem(movieSlug);
 
 			if (episode != null && System.IO.File.Exists(episode.Path))
-				return PhysicalFile(episode.Path, "video/x-matroska", true);
+				return PhysicalFile(episode.Path, "video/webm", true);
 			return NotFound();
 		}
 

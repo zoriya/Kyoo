@@ -79,7 +79,7 @@ namespace Kyoo
 				.AddProfileService<AccountController>()
 				.AddDeveloperSigningCredential(); // TODO remove the developer signin
 
-			services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+			services.AddAuthentication()
 				.AddJwtBearer(options =>
 				{
 					options.Authority = publicUrl;
@@ -89,31 +89,25 @@ namespace Kyoo
 			
 			services.AddAuthorization(options =>
 			{
-				options.AddPolicy("Read", policy => policy.RequireAssertion(context =>
+				AuthorizationPolicyBuilder scheme = new AuthorizationPolicyBuilder(IdentityConstants.ApplicationScheme, JwtBearerDefaults.AuthenticationScheme);
+				options.DefaultPolicy = scheme.RequireAuthenticatedUser().Build();
+
+				string[] permissions = {"Read", "Write", "Play", "Download", "Admin"};
+				foreach (string permission in permissions)
 				{
-					Claim perms = context.User.Claims.FirstOrDefault(x => x.Type == "permissions");
-					return perms != null && perms.Value.Split(",").Contains("read");
-				}).RequireScope("kyoo.read"));
-				options.AddPolicy("Write", policy => policy.RequireAssertion(context =>
-				{
-					Claim perms = context.User.Claims.FirstOrDefault(x => x.Type == "permissions");
-					return perms != null && perms.Value.Split(",").Contains("write");
-				}).RequireScope("kyoo.write"));
-				options.AddPolicy("Play", policy => policy.RequireAssertion(context =>
-				{
-					Claim perms = context.User.Claims.FirstOrDefault(x => x.Type == "permissions");
-					return perms != null && perms.Value.Split(",").Contains("play");
-				}).RequireScope("kyoo.play"));
-				options.AddPolicy("Download", policy => policy.RequireAssertion(context =>
-				{
-					Claim perms = context.User.Claims.FirstOrDefault(x => x.Type == "permissions");
-					return perms != null && perms.Value.Split(",").Contains("download");
-				}).RequireScope("kyoo.download"));
-				options.AddPolicy("Admin", policy => policy.RequireAssertion(context =>
-				{
-					Claim perms = context.User.Claims.FirstOrDefault(x => x.Type == "permissions");
-					return perms != null && perms.Value.Split(",").Contains("admin");
-				}).RequireScope("kyoo.admin"));
+					options.AddPolicy(permission, policy =>
+					{
+						policy.AuthenticationSchemes.Add(IdentityConstants.ApplicationScheme);
+						policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
+						policy.RequireAuthenticatedUser();
+						policy.RequireAssertion(context =>
+						{
+							Claim perms = context.User.Claims.FirstOrDefault(x => x.Type == "permissions");
+							return perms != null && perms.Value.Split(",").Contains(permission.ToLower());
+						});
+						// policy.RequireScope($"kyoo.{permission.ToLower()}");
+					});
+				}
 			});
 
 			services.AddScoped<ILibraryManager, LibraryManager>();
