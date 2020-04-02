@@ -1,4 +1,4 @@
-import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
+import {HTTP_INTERCEPTORS, HttpClient, HttpClientModule} from '@angular/common/http';
 import {APP_INITIALIZER, ChangeDetectorRef, NgModule} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -119,7 +119,7 @@ export function loadConfig(oidcConfigService: OidcConfigService)
 })
 export class AppModule 
 {
-	constructor(private oidcSecurityService: OidcSecurityService, private oidcConfigService: OidcConfigService)
+	constructor(private oidcSecurityService: OidcSecurityService, private oidcConfigService: OidcConfigService, http: HttpClient)
 	{
 		this.oidcConfigService.onConfigurationLoaded.subscribe((configResult: ConfigResult) =>
 		{
@@ -144,5 +144,7 @@ export class AppModule
 			
 			this.oidcSecurityService.setupModule(config, configResult.authWellknownEndpoints);
 		});
+
+		http.get("/api/account/default-permissions").subscribe((result: string[]) => AuthGuard.defaultPermissions = result);
 	}
 }

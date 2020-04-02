@@ -16,7 +16,8 @@ import {AuthService} from "../../services/auth.service";
 export class AuthGuard 
 {
 	public static guards: any[] = [];
-	
+	public static defaultPermissions: string[];
+
 	static forPermissions(...permissions: string[])
 	{
 		@Injectable()
@@ -55,7 +56,13 @@ export class AuthGuard
 					}
 					return true;
 				}
-				return false;
+				else 
+				{
+					for (let perm of permissions)
+						if (!AuthGuard.defaultPermissions.includes(perm))
+							return false;
+					return true;
+				}
 			}
 		}
 
