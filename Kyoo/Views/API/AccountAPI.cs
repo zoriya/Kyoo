@@ -51,6 +51,7 @@ namespace Kyoo.Api
 	{
 		private readonly UserManager<User> _userManager;
 		private readonly SignInManager<User> _signInManager;
+		private readonly IConfiguration _configuration;
 		private readonly string _picturePath;
 
 		public Claim[] defaultClaims =
@@ -63,6 +64,7 @@ namespace Kyoo.Api
 			_userManager = userManager;
 			_signInManager = siginInManager;
 			_picturePath = configuration.GetValue<string>("profilePicturePath");
+			_configuration = configuration;
 			if (!Path.IsPathRooted(_picturePath))
 				_picturePath = Path.GetFullPath(_picturePath);
 		}
@@ -171,6 +173,12 @@ namespace Kyoo.Api
 			}
 			await _userManager.UpdateAsync(user);
 			return Ok();
+		}
+
+		[HttpGet("default-permissions")]
+		public ActionResult<IEnumerable<string>> GetDefaultPermissions()
+		{
+			return _configuration.GetValue<string>("defaultPermissions").Split(",");
 		}
 	}
 }
