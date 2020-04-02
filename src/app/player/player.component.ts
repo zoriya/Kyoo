@@ -1,11 +1,11 @@
-import {Component, Inject, Injector, OnInit, ViewEncapsulation} from '@angular/core';
-import { MatSnackBar } from "@angular/material/snack-bar";
-import { DomSanitizer, Title } from "@angular/platform-browser";
-import { ActivatedRoute, Event, NavigationCancel, NavigationEnd, NavigationStart, Router } from "@angular/router";
-import { Track, WatchItem } from "../../models/watch-item";
-import { Location } from "@angular/common";
+import {Component, Injector, OnInit, ViewEncapsulation} from '@angular/core';
+import {MatSnackBar} from "@angular/material/snack-bar";
+import {DomSanitizer, Title} from "@angular/platform-browser";
+import {ActivatedRoute, Event, NavigationCancel, NavigationEnd, NavigationStart, Router} from "@angular/router";
+import {Track, WatchItem} from "../../models/watch-item";
+import {Location} from "@angular/common";
 import * as Hls from "hls.js"
-import { getPlaybackMethod, method, getWhatIsSupported, SupportList } from "../../videoSupport/playbackMethodDetector";
+import {getPlaybackMethod, getWhatIsSupported, method, SupportList} from "../../videoSupport/playbackMethodDetector";
 import {OidcSecurityService} from "angular-auth-oidc-client";
 
 declare var SubtitleManager: any;
@@ -105,13 +105,13 @@ export class PlayerComponent implements OnInit
 		this.player.onplay = () =>
 		{
 			this.initPlayBtn();
-		}
+		};
 
 		this.player.onpause = () =>
 		{
-			this.playIcon = "play_arrow"
+			this.playIcon = "play_arrow";
 			this.playTooltip = "Play";
-		}
+		};
 
 		this.player.ontimeupdate = () =>
 		{
@@ -132,17 +132,17 @@ export class PlayerComponent implements OnInit
 		this.player.onwaiting = () =>
 		{
 			loadIndicator.classList.remove("d-none");
-		}
+		};
 
 		this.player.oncanplay = () =>
 		{
 			loadIndicator.classList.add("d-none");
-		}
+		};
 
 		this.player.onended = () =>
 		{
 			this.next();
-		}
+		};
 
 		this.player.onerror = () =>
 		{
@@ -158,7 +158,7 @@ export class PlayerComponent implements OnInit
 					this.playMethod = method.transcode;
 				this.selectPlayMethod(this.playMethod);
 			}
-		}
+		};
 
 		let progressBar: HTMLElement = document.getElementById("progress-bar") as HTMLElement;
 		$(progressBar).click((event) =>
@@ -245,8 +245,7 @@ export class PlayerComponent implements OnInit
 					this.seeking = false;
 					progressBar.classList.remove("seeking");
 
-					let time: number = this.getTimeFromSeekbar(progressBar, event.changedTouches[0].pageX);
-					this.player.currentTime = time;
+					this.player.currentTime = this.getTimeFromSeekbar(progressBar, event.changedTouches[0].pageX);
 					this.player.play();
 				}
 			});
