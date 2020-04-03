@@ -4,11 +4,11 @@
 
 <div class="header container pt-sm-5">
 	<div class="row">
-		<img class="poster d-none d-sm-block" src="poster/{{this.show.slug}}" />
+		<img class="poster d-none d-sm-block" src="poster/{{this.show.slug}}" alt=""/>
 		<div class="main col">
 			<div class="info">
 				<h1 class="title">{{this.show.title}}</h1>
-				<h2 class="date" *ngIf="show.endYear; else elseBlock">{{show.startYear}} - {{show.endYear}}</h2>
+				<h2 class="date" *ngIf="show.endYear && show.startYear != show.endYear; else elseBlock">{{show.startYear}} - {{show.endYear}}</h2>
 				<ng-template #elseBlock><h2 class="date">{{show.startYear}}</h2></ng-template>
 			</div>
 			<div class="buttons">
@@ -30,7 +30,7 @@
 			</div>
 		</div>
 		<div class="col-3 secondary d-none d-md-block">
-			<img src="logo/{{this.show.slug}}" />
+			<img src="logo/{{this.show.slug}}" #logo alt="" (error)="logo.style.display = 'none'" />
 
 			<div>
 				<p>Studio: <b><a routerLink="/studio/{{this.show.studio?.slug}}">{{this.show.studio?.name}}</a></b></p>

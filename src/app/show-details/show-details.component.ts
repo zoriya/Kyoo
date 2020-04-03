@@ -32,7 +32,7 @@ export class ShowDetailsComponent implements OnInit
 			this.show = data.show;
 			this.title.setTitle(this.show.title + " - Kyoo");
 
-			if (this.season == null || this.show.seasons.find(x => x.seasonNumber == this.season) == null)
+			if (this.season == undefined || this.show.seasons == undefined || this.show.seasons.find(x => x.seasonNumber == this.season) == null)
 				this.season = 1;
 
 			this.getEpisodes();
@@ -70,7 +70,7 @@ export class ShowDetailsComponent implements OnInit
 
 	getEpisodes()
 	{
-		if (this.show == null)
+		if (this.show == undefined || this.show.seasons == undefined)
 			return;
 
 		if (this.show.seasons.find(x => x.seasonNumber == this.season).episodes != null)
