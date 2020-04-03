@@ -1,5 +1,5 @@
-import {HTTP_INTERCEPTORS, HttpClient, HttpClientModule} from '@angular/common/http';
-import {APP_INITIALIZER, ChangeDetectorRef, NgModule} from '@angular/core';
+import {HttpClientModule} from '@angular/common/http';
+import {NgModule} from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatRippleModule } from '@angular/material/core';
@@ -23,34 +23,17 @@ import { PlayerComponent } from './player/player.component';
 import { SearchComponent } from './search/search.component';
 import { ShowDetailsComponent } from './show-details/show-details.component';
 import { ShowsListComponent } from './shows-list/shows-list.component';
-import { LoginComponent } from './login/login.component';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import { MatInputModule } from "@angular/material/input";
 import { MatFormFieldModule } from "@angular/material/form-field";
 import {MatTabsModule} from "@angular/material/tabs";
 import {PasswordValidator} from "./misc/password-validator";
 import {MatCheckboxModule} from "@angular/material/checkbox";
-import {
-	AuthModule,
-	ConfigResult,
-	OidcConfigService,
-	OidcSecurityService,
-	OpenIdConfiguration
-} from "angular-auth-oidc-client";
-import { AccountComponent } from './account/account.component';
-import { UnauthorizedComponent } from './unauthorized/unauthorized.component';
-import { LogoutComponent } from './logout/logout.component';
 import {MatDialogModule} from '@angular/material/dialog';
 import {FallbackDirective} from "./misc/fallback.directive";
-import {AuthGuard} from "./misc/guards/authenticated-guard.service";
-import { AutologinComponent } from './autologin/autologin.component';
-import {AuthorizerInterceptor} from "./misc/authorizer-interceptor.service";
-import { AuthPipe } from './misc/auth.pipe';
+import {AuthModule} from "./auth/auth.module";
+import {AuthRoutingModule} from "./auth/auth-routing.module";
 
-export function loadConfig(oidcConfigService: OidcConfigService)
-{
-	return () => oidcConfigService.load_using_stsServer(window.location.origin);
-}
 
 @NgModule({
 	declarations: [
@@ -64,18 +47,13 @@ export function loadConfig(oidcConfigService: OidcConfigService)
 		SearchComponent,
 		PeopleListComponent,
 		ShowsListComponent,
-		LoginComponent,
 		PasswordValidator,
-		AccountComponent,
-		UnauthorizedComponent,
-		LogoutComponent,
-		FallbackDirective,
-		AutologinComponent,
-		AuthPipe
+		FallbackDirective
 	],
 	imports: [
 		BrowserModule,
 		HttpClientModule,
+		AuthRoutingModule,
 		AppRoutingModule,
 		BrowserAnimationsModule,
 		MatSnackBarModule,
@@ -95,56 +73,8 @@ export function loadConfig(oidcConfigService: OidcConfigService)
 		FormsModule,
 		MatTabsModule,
 		MatCheckboxModule,
-		AuthModule.forRoot()
-	],
-	entryComponents: [
-		AccountComponent
-	],
-	providers: [
-		OidcConfigService,
-		{
-			provide: APP_INITIALIZER,
-			useFactory: loadConfig,
-			deps: [OidcConfigService],
-			multi: true
-		},
-		AuthGuard.guards,
-		{
-			provide: HTTP_INTERCEPTORS,
-			useClass: AuthorizerInterceptor,
-			multi: true
-		}
+		AuthModule
 	],
 	bootstrap: [AppComponent]
 })
-export class AppModule 
-{
-	constructor(private oidcSecurityService: OidcSecurityService, private oidcConfigService: OidcConfigService, http: HttpClient)
-	{
-		this.oidcConfigService.onConfigurationLoaded.subscribe((configResult: ConfigResult) =>
-		{
-			const config: OpenIdConfiguration = {
-				stsServer: configResult.customConfig.stsServer,
-				redirect_url: "/",
-				post_logout_redirect_uri: "/logout",
-				client_id: 'kyoo.webapp',
-				response_type: "code",
-				trigger_authorization_result_event: true,
-				scope: "openid profile offline_access kyoo.read kyoo.play",
-				silent_renew: false,
-				silent_renew_url: "/silent",
-				use_refresh_token: false,
-				start_checksession: true,
-
-				forbidden_route: '/Forbidden',
-				unauthorized_route: '/Unauthorized',
-				log_console_warning_active: true,
-				log_console_debug_active: true
-			};
-			
-			this.oidcSecurityService.setupModule(config, configResult.authWellknownEndpoints);
-		});
-
-		http.get("/api/account/default-permissions").subscribe((result: string[]) => AuthGuard.defaultPermissions = result);
-	}
-}
+export class AppModule { }

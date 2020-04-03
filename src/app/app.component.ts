@@ -3,10 +3,10 @@ import { HttpClient } from '@angular/common/http';
 import { Event, Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
 import * as $ from "jquery";
 import { Location } from "@angular/common";
-import {AuthService} from "./services/auth.service";
 import {MatDialog} from "@angular/material/dialog";
-import {AccountComponent} from "./account/account.component";
 import {Account} from "../models/account";
+import {AccountComponent} from "./auth/account/account.component";
+import {AuthService} from "./auth/auth.service";
 
 @Component({
 	selector: 'app-root',

@@ -3,7 +3,6 @@ import {ActivatedRoute, Router} from "@angular/router";
 import {catchError} from "rxjs/operators";
 import {EMPTY} from "rxjs";
 import {HttpClient} from "@angular/common/http";
-import {MatSnackBar} from "@angular/material/snack-bar";
 
 @Component({
 	selector: 'app-login',
@@ -20,7 +19,7 @@ export class LoginComponent
 	loginErrors: [{code: string, description: string}];
 	registerErrors: [{code: string, description: string}];
 	
-	constructor(private router: Router, private route: ActivatedRoute, private http: HttpClient, private snackBar: MatSnackBar) 
+	constructor(private router: Router, private route: ActivatedRoute, private http: HttpClient) 
 	{
 		if (this.route.snapshot.queryParams["ReturnUrl"])
 			this.redirectURI = this.route.snapshot.queryParams["ReturnUrl"];

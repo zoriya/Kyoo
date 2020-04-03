@@ -1,5 +1,4 @@
 import {Injector, Pipe, PipeTransform} from '@angular/core';
-import {AuthService} from "../services/auth.service";
 import {HttpClient, HttpHeaders} from "@angular/common/http";
 import {OidcSecurityService} from "angular-auth-oidc-client";
 
@@ -8,7 +7,7 @@ import {OidcSecurityService} from "angular-auth-oidc-client";
 })
 export class AuthPipe implements PipeTransform 
 {
-	private oidcSecurity: OidcSecurityService
+	private oidcSecurity: OidcSecurityService;
 	
 	constructor(private injector: Injector, private http: HttpClient) {}
 	
