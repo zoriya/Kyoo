@@ -33,6 +33,7 @@ import {MatDialogModule} from '@angular/material/dialog';
 import {FallbackDirective} from "./misc/fallback.directive";
 import {AuthModule} from "./auth/auth.module";
 import {AuthRoutingModule} from "./auth/auth-routing.module";
+import { TrailerDialogComponent } from './trailer-dialog/trailer-dialog.component';
 
 
 @NgModule({
@@ -48,7 +49,8 @@ import {AuthRoutingModule} from "./auth/auth-routing.module";
 		PeopleListComponent,
 		ShowsListComponent,
 		PasswordValidator,
-		FallbackDirective
+		FallbackDirective,
+		TrailerDialogComponent
 	],
 	imports: [
 		BrowserModule,

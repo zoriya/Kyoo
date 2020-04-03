@@ -5,6 +5,8 @@ import { Title } from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
 import { Episode } from "../../models/episode";
 import { Show } from "../../models/show";
+import {MatDialog} from "@angular/material/dialog";
+import {TrailerDialogComponent} from "../trailer-dialog/trailer-dialog.component";
 
 @Component({
 	selector: 'app-show-details',
@@ -20,7 +22,7 @@ export class ShowDetailsComponent implements OnInit
 	private toolbar: HTMLElement;
 	private backdrop: HTMLElement;
 
-	constructor(private route: ActivatedRoute, private http: HttpClient, private snackBar: MatSnackBar, private title: Title, private router: Router)
+	constructor(private route: ActivatedRoute, private http: HttpClient, private snackBar: MatSnackBar, private title: Title, private router: Router, private dialog: MatDialog)
 	{
 		this.route.queryParams.subscribe(params =>
 		{
@@ -86,5 +88,10 @@ export class ShowDetailsComponent implements OnInit
 			console.log(error.status + " - " + error.message);
 			this.snackBar.open("An unknow error occured while getting episodes.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
 		});
+	}
+
+	openTrailer()
+	{
+		this.dialog.open(TrailerDialogComponent, {width: "80%", height: "50vw", data: this.show.trailerUrl});
 	}
 }
