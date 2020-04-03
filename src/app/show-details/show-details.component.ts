@@ -92,6 +92,6 @@ export class ShowDetailsComponent implements OnInit
 
 	openTrailer()
 	{
-		this.dialog.open(TrailerDialogComponent, {width: "80%", height: "50vw", data: this.show.trailerUrl});
+		this.dialog.open(TrailerDialogComponent, {width: "80%", height: "45vw", data: this.show.trailerUrl});
 	}
 }
