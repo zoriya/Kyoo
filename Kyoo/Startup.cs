@@ -93,7 +93,7 @@ namespace Kyoo
 				AuthorizationPolicyBuilder scheme = new AuthorizationPolicyBuilder(IdentityConstants.ApplicationScheme, JwtBearerDefaults.AuthenticationScheme);
 				options.DefaultPolicy = scheme.RequireAuthenticatedUser().Build();
 
-				string[] permissions = {"Read", "Write", "Play", "Download", "Admin"};
+				string[] permissions = {"Read", "Write", "Play", "Admin"};
 				foreach (string permission in permissions)
 				{
 					options.AddPolicy(permission, policy =>
@@ -130,19 +130,6 @@ namespace Kyoo
 				app.UseHsts();
 			}
 
-			app.Use((ctx, next) => 
-			{
-				ctx.Response.Headers.Remove("X-Powered-By");
-				ctx.Response.Headers.Remove("Server");
-				ctx.Response.Headers.Add("Feature-Policy", "autoplay 'self'; fullscreen");
-				ctx.Response.Headers.Add("Content-Security-Policy", "default-src 'self' data: blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob:; style-src 'self' 'unsafe-inline'");
-				ctx.Response.Headers.Add("X-Frame-Options", "SAMEORIGIN");
-				ctx.Response.Headers.Add("Referrer-Policy", "no-referrer");
-				ctx.Response.Headers.Add("Access-Control-Allow-Origin", "null");
-				ctx.Response.Headers.Add("X-Content-Type-Options", "nosniff");
-				return next();
-			});
-			
 			app.UseStaticFiles();
 			if (!env.IsDevelopment())
 				app.UseSpaStaticFiles();
