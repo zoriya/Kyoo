@@ -188,7 +188,7 @@ namespace Kyoo.Controllers
 
 		public IEnumerable<PeopleLink> GetPeople(long showID)
 		{
-			return from link in _database.PeopleLinks where link.ShowID == showID select link;
+			return from link in _database.PeopleLinks where link.ShowID == showID orderby link.People.ImgPrimary == null, link.Name select link;
 		}
 
 		public People GetPeopleBySlug(string slug)
@@ -263,6 +263,8 @@ namespace Kyoo.Controllers
 		public IEnumerable<People> SearchPeople(string searchQuery)
 		{
 			return (from people in _database.Peoples where EF.Functions.Like(people.Name, $"%{searchQuery}%") select people)
+				.OrderBy(x => x.ImgPrimary == null)
+				.ThenBy(x => x.Name)
 				.Take(20);
 		}
 		
