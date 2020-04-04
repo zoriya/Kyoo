@@ -23,7 +23,8 @@ namespace Kyoo.Api
 			SearchResult result = new SearchResult
 			{
 				Query = query,
-				Shows = _libraryManager.GetShows(query),
+				Collections = _libraryManager.SearchCollections(query),
+				Shows = _libraryManager.SearchShows(query),
 				Episodes = _libraryManager.SearchEpisodes(query),
 				People = _libraryManager.SearchPeople(query),
 				Genres = _libraryManager.SearchGenres(query),

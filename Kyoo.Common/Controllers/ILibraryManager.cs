@@ -1,5 +1,4 @@
 ﻿using Kyoo.Models;
-using Kyoo.Models.Watch;
 using System.Collections.Generic;
 
 namespace Kyoo.Controllers
@@ -25,7 +24,8 @@ namespace Kyoo.Controllers
 
 		//Public read
 		IEnumerable<Show> GetShows();
-		IEnumerable<Show> GetShows(string searchQuery);
+		IEnumerable<Show> SearchShows(string searchQuery);
+		IEnumerable<Collection> SearchCollections(string searchQuery);
 		Library GetLibrary(string librarySlug);
 		IEnumerable<Library> GetLibraries();
 		Show GetShowBySlug(string slug);

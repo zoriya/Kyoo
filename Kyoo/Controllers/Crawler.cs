@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using Kyoo.Models;
 using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;

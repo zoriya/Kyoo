@@ -1,5 +1,4 @@
-﻿using System;
-using Kyoo.Models;
+﻿using Kyoo.Models;
 using Kyoo.Models.Watch;
 using System.Collections.Generic;
 using System.Linq;
@@ -58,7 +57,7 @@ namespace Kyoo.Controllers
 		{
 			return (from track in _database.Tracks where track.ID == id select track).FirstOrDefault();
 		}
-		
+
 		public Library GetLibrary(string librarySlug)
 		{
 			return (from library in _database.Libraries where library.Slug == librarySlug select library).FirstOrDefault();
@@ -70,14 +69,10 @@ namespace Kyoo.Controllers
 				.OrderBy(x => x.Title);
 		}
 
-		public IEnumerable<Show> GetShows(string searchQuery)
+		public IEnumerable<Show> SearchShows(string searchQuery)
 		{
-			return (from show in _database.Shows from l in _database.CollectionLinks.DefaultIfEmpty()
-					where l.CollectionID == null select show).AsEnumerable().Union(
-					from collection in _database.Collections select collection.AsShow())
-				.Where(x => EF.Functions.Like(x.Title, $"%{searchQuery}%") 
-							|| EF.Functions.Like(x.GetAliases(), $"%{searchQuery}%"))
-				.Take(20).OrderBy(x => x.Title);
+			return _database.Shows.FromSqlInterpolated($"SELECT * FROM Shows WHERE Shows.Title LIKE {"%" + searchQuery + "%"} OR Shows.Aliases LIKE {"%" + searchQuery + "%"}")
+				.OrderBy(x => x.Title).Take(20);
 		}
 
 		public Show GetShowBySlug(string slug)
@@ -223,7 +218,7 @@ namespace Kyoo.Controllers
 
 		public Collection GetCollection(string slug)
 		{
-			Collection collection = _database.Collections.Where(collection => collection.Slug == slug).FirstOrDefault();
+			Collection collection = _database.Collections.FirstOrDefault(col => col.Slug == slug);
 			if (collection != null)
 				collection.Shows = GetShowsInCollection(collection.ID);
 			return collection;
@@ -254,8 +249,15 @@ namespace Kyoo.Controllers
 
 		public IEnumerable<Episode> SearchEpisodes(string searchQuery)
 		{
-			return (from episode in _database.Episodes where EF.Functions.Like(episode.Title, $"%{searchQuery}%") select episode)
+			return (from episode in _database.Episodes where EF.Functions.Like(episode.Title, $"%{searchQuery}%") 
+					select episode.LoadShowDetails())
 				.Take(20);
+		}
+		
+		public IEnumerable<Collection> SearchCollections(string searchQuery)
+		{
+			return (from collection in _database.Collections where EF.Functions.Like(collection.Name, $"%{searchQuery}%") select collection)
+				.OrderBy(x => x.Name).Take(20);
 		}
 		
 		public IEnumerable<People> SearchPeople(string searchQuery)
