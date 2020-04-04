@@ -18,9 +18,11 @@
 				<button *ngIf="this.show.trailerUrl" mat-icon-button matTooltipPosition="above" matTooltip="Trailer" (click)="openTrailer()">
 					<mat-icon>local_movies</mat-icon>
 				</button>
-				<button mat-icon-button matTooltipPosition="above" matTooltip="Download">
-					<mat-icon>cloud_download</mat-icon>
-				</button>
+				<a *ngIf="this.show.isMovie" [href]="'/video/' + this.show.slug" download>
+					<button mat-icon-button matTooltipPosition="above" matTooltip="Download">
+						<mat-icon>cloud_download</mat-icon>
+					</button>
+				</a>
 				<button mat-icon-button matTooltipPosition="above" matTooltip="Watched">
 					<mat-icon>done</mat-icon>
 				</button>
