@@ -34,6 +34,7 @@ import {FallbackDirective} from "./misc/fallback.directive";
 import {AuthModule} from "./auth/auth.module";
 import {AuthRoutingModule} from "./auth/auth-routing.module";
 import { TrailerDialogComponent } from './trailer-dialog/trailer-dialog.component';
+import {CollectionsListComponent} from "./collection-list/collections-list.component";
 
 
 @NgModule({
@@ -50,7 +51,8 @@ import { TrailerDialogComponent } from './trailer-dialog/trailer-dialog.componen
 		ShowsListComponent,
 		PasswordValidator,
 		FallbackDirective,
-		TrailerDialogComponent
+		TrailerDialogComponent,
+		CollectionsListComponent
 	],
 	imports: [
 		BrowserModule,

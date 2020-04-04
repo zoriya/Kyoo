@@ -3,10 +3,12 @@ import { Episode } from "./episode";
 import { People } from "./people";
 import { Studio } from "./studio";
 import { Genre } from "./genre";
+import {Collection} from "./collection";
 
-export interface SearchResut
+export interface SearchResult
 {
 	query: string;
+	collections: Collection[];
 	shows: Show[];
 	episodes: Episode[];
 	people: People[];

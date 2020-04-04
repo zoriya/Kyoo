@@ -1,0 +1,10 @@
+<div class="scroll-row mb-5">
+	<div class="collections-container" #scrollView (scroll)="onScroll()">
+		<a class="collection" *ngFor="let collection of this.collections" routerLink="/collection/{{collection.slug}}" href="/collection/{{collection.slug}}">
+			<div matRipple [style.background-image]="getThumb(collection.slug)"> </div>
+			<p class="title">{{collection.name}}</p>
+		</a>
+	</div>
+	<button mat-raised-button color="accent" class="scrollBtn leftBtn d-none" #leftBtn (click)="scrollLeft()"><mat-icon>arrow_left</mat-icon></button>
+	<button mat-raised-button color="accent" class="scrollBtn rightBtn" #rightBtn (click)="scrollRight()"><mat-icon>arrow_right</mat-icon></button>
+</div>

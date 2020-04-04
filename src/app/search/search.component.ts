@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from "@angular/router";
-import { SearchResut } from "../../models/search-result";
+import { SearchResult } from "../../models/search-result";
 import { Title } from "@angular/platform-browser";
 
 @Component({
@@ -10,7 +10,7 @@ import { Title } from "@angular/platform-browser";
 })
 export class SearchComponent implements OnInit, OnDestroy
 {
-	items: SearchResut;
+	items: SearchResult;
 
 	constructor(private route: ActivatedRoute, private title: Title) { }
 

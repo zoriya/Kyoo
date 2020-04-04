@@ -1,3 +1,7 @@
+<div *ngIf="items.collections.length > 0" class="container-fluid mt-3">
+	<h3>Collections</h3>
+</div>
+<app-collections-list [collections]="items.collections"></app-collections-list>
 <div *ngIf="items.shows.length > 0" class="container-fluid mt-3">
 	<h3>Shows</h3>
 </div>
