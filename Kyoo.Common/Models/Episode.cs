@@ -81,6 +81,13 @@ namespace Kyoo.Models
 			return this;
 		}
 
+		public Episode LoadShowDetails()
+		{
+			SetLink(Show.Slug);
+			ShowTitle = Show.Title;
+			return this;
+		}
+
 		public Episode Merge(Episode other)
 		{
 			if (other == null)
