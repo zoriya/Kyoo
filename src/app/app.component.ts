@@ -18,7 +18,7 @@ export class AppComponent
 	libraries: Library[];
 	isLoading: boolean = false;
 
-	constructor(private http: HttpClient, private router: Router, private location: Location, private authManager: AuthService, public dialog: MatDialog)
+	constructor(private http: HttpClient, private router: Router, private location: Location, public authManager: AuthService, public dialog: MatDialog)
 	{
 		http.get<Library[]>("api/libraries").subscribe(result =>
 		{
