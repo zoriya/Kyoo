@@ -86,6 +86,9 @@ namespace Kyoo.Controllers
 					return null;
 				}
 			}).Where(x => x != null).ToList();
+			Console.WriteLine("Plugin enabled:");
+			foreach (IPlugin plugin in _plugins)
+				Console.WriteLine($"\t{plugin.Name}");
 		}
 	}
 }

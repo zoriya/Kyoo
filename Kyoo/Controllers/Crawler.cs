@@ -51,7 +51,7 @@ namespace Kyoo.Controllers
 
 		private async Task Scan(Library library, CancellationToken cancellationToken)
 		{
-			Console.WriteLine($"Scanning library {library.Name} at {string.Concat(library.Paths)}");
+			Console.WriteLine($"Scanning library {library.Name} at {string.Join(", ", library.Paths)}.");
 			foreach (string path in library.Paths)
 			{
 				foreach (string file in Directory.GetFiles(path, "*", SearchOption.AllDirectories))
