@@ -77,7 +77,7 @@ namespace Kyoo
 				.AddInMemoryIdentityResources(IdentityContext.GetIdentityResources())
 				.AddInMemoryApiResources(IdentityContext.GetApis())
 				.AddProfileService<AccountController>()
-				.AddSigningCredential(AuthManager.GetSiginCredential(Configuration));
+				.AddSigninKeys(Configuration);
 
 			services.AddAuthentication()
 				.AddJwtBearer(options =>

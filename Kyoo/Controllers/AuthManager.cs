@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 using IdentityServer4.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Generators;
 using Org.BouncyCastle.Crypto.Operators;
-using Org.BouncyCastle.Crypto.Prng;
 using Org.BouncyCastle.Math;
 using Org.BouncyCastle.Pkcs;
 using Org.BouncyCastle.Security;
@@ -21,21 +21,45 @@ using X509Certificate = Org.BouncyCastle.X509.X509Certificate;
 
 namespace Kyoo.Controllers
 {
-	public class AuthManager
+	public static class AuthExtension
 	{
-		public const string CertificateFile = "certificate.pfx";
+		private const string CertificateFile = "certificate.pfx";
+		private const string OldCertificateFile = "oldCertificate.pfx";
 
-		public static X509Certificate2 GetSiginCredential(IConfiguration configuration)
+		public static IIdentityServerBuilder AddSigninKeys(this IIdentityServerBuilder builder, IConfiguration configuration)
+		{
+			X509Certificate2 certificate = GetSiginCredential(configuration);
+			builder.AddSigningCredential(certificate);
+			
+			if (certificate.NotAfter.AddDays(7) <= DateTime.UtcNow)
+			{
+				Console.WriteLine("Signin certificate will expire soon, renewing it.");
+				File.Move(CertificateFile, OldCertificateFile);
+				builder.AddValidationKey(GenerateCertificate(CertificateFile, configuration.GetValue<string>("certificatePassword")));
+			}
+			else if (File.Exists(OldCertificateFile))
+				builder.AddValidationKey(GetExistingCredential(OldCertificateFile, configuration.GetValue<string>("certificatePassword")));
+			return builder;
+		}
+
+		private static X509Certificate2 GetSiginCredential(IConfiguration configuration)
 		{
 			if (File.Exists(CertificateFile))
-			{
-				return new X509Certificate2(CertificateFile, configuration.GetValue<string>("certificatePassword"),
-					X509KeyStorageFlags.MachineKeySet |
-					X509KeyStorageFlags.PersistKeySet |
-					X509KeyStorageFlags.Exportable
-				);
-			}
+				return GetExistingCredential(CertificateFile, configuration.GetValue<string>("certificatePassword"));
+			return GenerateCertificate(CertificateFile, configuration.GetValue<string>("certificatePassword"));
+		}
 
+		private static X509Certificate2 GetExistingCredential(string file, string password)
+		{
+			return new X509Certificate2(file, password,
+				X509KeyStorageFlags.MachineKeySet |
+				X509KeyStorageFlags.PersistKeySet |
+				X509KeyStorageFlags.Exportable
+			);
+		}
+
+		private static X509Certificate2 GenerateCertificate(string file, string password)
+		{
 			SecureRandom random = new SecureRandom();
 			
             X509V3CertificateGenerator certificateGenerator = new X509V3CertificateGenerator();
@@ -43,7 +67,7 @@ namespace Kyoo.Controllers
             certificateGenerator.SetIssuerDN(new X509Name($"C=NL, O=SDG, CN=Kyoo"));
             certificateGenerator.SetSubjectDN(new X509Name($"C=NL, O=SDG, CN=Kyoo"));
             certificateGenerator.SetNotBefore(DateTime.UtcNow.Date);
-            certificateGenerator.SetNotAfter(DateTime.UtcNow.Date.AddYears(1));
+            certificateGenerator.SetNotAfter(DateTime.UtcNow.Date.AddMonths(3));
  
             KeyGenerationParameters keyGenerationParameters = new KeyGenerationParameters(random, 2048);
             RsaKeyPairGenerator keyPairGenerator = new RsaKeyPairGenerator();
@@ -53,22 +77,21 @@ namespace Kyoo.Controllers
             certificateGenerator.SetPublicKey(subjectKeyPair.Public);
  
             AsymmetricCipherKeyPair issuerKeyPair = subjectKeyPair;
-            const string signatureAlgorithm = "SHA256WithRSA";
-            Asn1SignatureFactory signatureFactory = new Asn1SignatureFactory(signatureAlgorithm,issuerKeyPair.Private);
+            const string signatureAlgorithm = "MD5WithRSA";
+            Asn1SignatureFactory signatureFactory = new Asn1SignatureFactory(signatureAlgorithm, issuerKeyPair.Private);
             X509Certificate bouncyCert = certificateGenerator.Generate(signatureFactory);
  
             X509Certificate2 certificate;
  
             Pkcs12Store store = new Pkcs12StoreBuilder().Build();
             store.SetKeyEntry("Kyoo_key", new AsymmetricKeyEntry(subjectKeyPair.Private), new [] {new X509CertificateEntry(bouncyCert)});
-            string pass = configuration.GetValue<string>("certificatePassword"); //Guid.NewGuid().ToString("x");
  
             using (MemoryStream pfxStream = new MemoryStream())
             {
-                store.Save(pfxStream, pass.ToCharArray(), random);
-                certificate = new X509Certificate2(pfxStream.ToArray(), pass, X509KeyStorageFlags.Exportable);
-                using (FileStream fileStream = File.OpenWrite(CertificateFile))
-					pfxStream.WriteTo(fileStream);
+                store.Save(pfxStream, password.ToCharArray(), random);
+                certificate = new X509Certificate2(pfxStream.ToArray(), password, X509KeyStorageFlags.Exportable);
+                using FileStream fileStream = File.OpenWrite(file);
+                pfxStream.WriteTo(fileStream);
             }
             return certificate;
 		}
