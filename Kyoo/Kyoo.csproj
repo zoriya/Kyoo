@@ -18,6 +18,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Portable.BouncyCastle" Version="1.8.6.7" />
 		<ProjectReference Include="../Kyoo.Common/Kyoo.Common.csproj" />
 		<PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
 		<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
