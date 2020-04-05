@@ -61,7 +61,6 @@ namespace Kyoo
 					options.UserInteraction.LogoutUrl = publicUrl + "logout";
 				})
 				.AddAspNetIdentity<User>()
-				.AddSigningCredentials()
 				.AddConfigurationStore(options =>
 				{
 					options.ConfigureDbContext = builder =>
@@ -78,7 +77,7 @@ namespace Kyoo
 				.AddInMemoryIdentityResources(IdentityContext.GetIdentityResources())
 				.AddInMemoryApiResources(IdentityContext.GetApis())
 				.AddProfileService<AccountController>()
-				.AddDeveloperSigningCredential(); // TODO remove the developer signin
+				.AddSigningCredential(AuthManager.GetSiginCredential(Configuration));
 
 			services.AddAuthentication()
 				.AddJwtBearer(options =>
