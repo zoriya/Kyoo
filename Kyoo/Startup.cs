@@ -110,7 +110,7 @@ namespace Kyoo
 			
 			services.AddSingleton<ICorsPolicyService>(new DefaultCorsPolicyService(_loggerFactory.CreateLogger<DefaultCorsPolicyService>())
 			{
-				AllowedOrigins = { new Uri(publicUrl).Authority }
+				AllowedOrigins = { new Uri(publicUrl).GetLeftPart(UriPartial.Authority) }
 			});
 
 			services.AddScoped<ILibraryManager, LibraryManager>();
