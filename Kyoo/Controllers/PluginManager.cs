@@ -62,6 +62,11 @@ namespace Kyoo.Controllers
 			return from plugin in _plugins where plugin is T select (T)plugin;
 		}
 
+		public IEnumerable<IPlugin> GetAllPlugins()
+		{
+			return _plugins ?? new  List<IPlugin>();
+		}
+
 		public void ReloadPlugins()
 		{
 			string pluginFolder = _config.GetValue<string>("plugins");
@@ -86,6 +91,12 @@ namespace Kyoo.Controllers
 					return null;
 				}
 			}).Where(x => x != null).ToList();
+			if (!_plugins.Any())
+			{
+				Console.WriteLine("No plugin enabled.");
+				return;
+			}
+
 			Console.WriteLine("Plugin enabled:");
 			foreach (IPlugin plugin in _plugins)
 				Console.WriteLine($"\t{plugin.Name}");

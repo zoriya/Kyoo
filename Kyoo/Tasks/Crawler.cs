@@ -8,26 +8,33 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Kyoo.Models.Watch;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
-	public class Crawler : ICrawler
+	public class Crawler : ITask
 	{
-		private readonly ILibraryManager _libraryManager;
-		private readonly IProviderManager _metadataProvider;
-		private readonly ITranscoder _transcoder;
-		private readonly IConfiguration _config;
-
-		public Crawler(ILibraryManager libraryManager, IProviderManager metadataProvider, ITranscoder transcoder, IConfiguration configuration)
+		public string Slug => "scan";
+		public string Name => "Scan libraries";
+		public string Description => "Scan your libraries, load data for new shows and remove shows that don't exist anymore.";
+		public string HelpMessage => "Reloading all libraries is a long process and may take up to 24 hours if it is the first scan in a while.";
+		public bool RunOnStartup => true;
+		public int Priority => 0;
+		
+		private ILibraryManager _libraryManager;
+		private IProviderManager _metadataProvider;
+		private ITranscoder _transcoder;
+		private IConfiguration _config;
+		
+		
+		public async Task Run(IServiceProvider serviceProvider, CancellationToken cancellationToken)
 		{
-			_libraryManager = libraryManager;
-			_metadataProvider = metadataProvider;
-			_transcoder = transcoder;
-			_config = configuration;
-		}
+			using IServiceScope serviceScope = serviceProvider.CreateScope();
+			_libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
+			_metadataProvider = serviceScope.ServiceProvider.GetService<IProviderManager>();
+			_transcoder = serviceScope.ServiceProvider.GetService<ITranscoder>();
+			_config = serviceScope.ServiceProvider.GetService<IConfiguration>();
 
-		public async Task StartAsync(CancellationToken cancellationToken)
-		{
 			try
 			{
 				IEnumerable<Episode> episodes = _libraryManager.GetAllEpisodes();

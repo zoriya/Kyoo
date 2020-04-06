@@ -114,13 +114,13 @@ namespace Kyoo
 			});
 
 			services.AddScoped<ILibraryManager, LibraryManager>();
-			services.AddScoped<ICrawler, Crawler>();
 			services.AddSingleton<ITranscoder, Transcoder>();
 			services.AddSingleton<IThumbnailsManager, ThumbnailsManager>();
 			services.AddSingleton<IProviderManager, ProviderManager>();
 			services.AddSingleton<IPluginManager, PluginManager>();
+			services.AddSingleton<ITaskManager, TaskManager>();
 			
-			services.AddHostedService<StartupCode>();
+			services.AddHostedService<TaskManager>(provider => (TaskManager)provider.GetService<ITaskManager>());
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
