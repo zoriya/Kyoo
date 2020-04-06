@@ -1,4 +1,6 @@
+using System;
 using System.Reflection;
+using IdentityServer4.Services;
 using Kyoo.Api;
 using Kyoo.Controllers;
 using Kyoo.Models;
@@ -12,17 +14,22 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Kyoo
 {
 	public class Startup
 	{
-		public Startup(IConfiguration configuration)
+		private readonly IConfiguration _configuration;
+		private readonly ILoggerFactory _loggerFactory;
+
+
+		public Startup(IConfiguration configuration, ILoggerFactory loggerFactory)
 		{
-			Configuration = configuration;
+			_configuration = configuration;
+			_loggerFactory = loggerFactory;
 		}
 
-		public IConfiguration Configuration { get; }
 
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
@@ -38,11 +45,11 @@ namespace Kyoo
 			services.AddDbContext<DatabaseContext>(options =>
 			{
 				options.UseLazyLoadingProxies()
-					.UseSqlite(Configuration.GetConnectionString("Database"));
+					.UseSqlite(_configuration.GetConnectionString("Database"));
 			});
 
 			string assemblyName = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
-			string publicUrl = Configuration.GetValue<string>("public_url");
+			string publicUrl = _configuration.GetValue<string>("public_url");
 
 			services.AddDefaultIdentity<User>()
 				.AddEntityFrameworkStores<DatabaseContext>();
@@ -59,20 +66,20 @@ namespace Kyoo
 				.AddConfigurationStore(options =>
 				{
 					options.ConfigureDbContext = builder =>
-						builder.UseSqlite(Configuration.GetConnectionString("Database"),
+						builder.UseSqlite(_configuration.GetConnectionString("Database"),
 							sql => sql.MigrationsAssembly(assemblyName));
 				})
 				.AddOperationalStore(options =>
 				{
 					options.ConfigureDbContext = builder =>
-						builder.UseSqlite(Configuration.GetConnectionString("Database"),
+						builder.UseSqlite(_configuration.GetConnectionString("Database"),
 							sql => sql.MigrationsAssembly(assemblyName));
 					options.EnableTokenCleanup = true;
 				})
 				.AddInMemoryIdentityResources(IdentityContext.GetIdentityResources())
 				.AddInMemoryApiResources(IdentityContext.GetApis())
 				.AddProfileService<AccountController>()
-				.AddSigninKeys(Configuration);
+				.AddSigninKeys(_configuration);
 
 			services.AddAuthentication()
 				.AddJwtBearer(options =>
@@ -100,6 +107,11 @@ namespace Kyoo
 				}
 			});
 			services.AddSingleton<IAuthorizationHandler, AuthorizationValidatorHandler>();
+			
+			services.AddSingleton<ICorsPolicyService>(new DefaultCorsPolicyService(_loggerFactory.CreateLogger<DefaultCorsPolicyService>())
+			{
+				AllowedOrigins = { new Uri(publicUrl).Authority }
+			});
 
 			services.AddScoped<ILibraryManager, LibraryManager>();
 			services.AddScoped<ICrawler, Crawler>();
