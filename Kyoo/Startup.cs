@@ -50,6 +50,7 @@ namespace Kyoo
 			services.AddIdentityServer(options =>
 				{
 					options.IssuerUri = publicUrl;
+					options.PublicOrigin = publicUrl;
 					options.UserInteraction.LoginUrl = publicUrl + "login";
 					options.UserInteraction.ErrorUrl = publicUrl + "error";
 					options.UserInteraction.LogoutUrl = publicUrl + "logout";
