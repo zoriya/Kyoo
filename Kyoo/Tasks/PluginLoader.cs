@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
@@ -21,6 +22,16 @@ namespace Kyoo.Tasks
 			IPluginManager pluginManager = serviceScope.ServiceProvider.GetService<IPluginManager>();
 			pluginManager.ReloadPlugins();
 			return Task.CompletedTask;
+		}
+
+		public IEnumerable<string> GetPossibleParameters()
+		{
+			return null;
+		}
+
+		public int? Progress()
+		{
+			return null;
 		}
 	}
 }

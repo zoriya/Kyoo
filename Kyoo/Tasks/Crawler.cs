@@ -26,6 +26,16 @@ namespace Kyoo.Controllers
 		private ITranscoder _transcoder;
 		private IConfiguration _config;
 		
+		public IEnumerable<string> GetPossibleParameters()
+		{
+			return _libraryManager.GetLibraries().Select(x => x.Slug);
+		}
+
+		public int? Progress()
+		{
+			// TODO implement this later.
+			return null;
+		}
 		
 		public async Task Run(IServiceProvider serviceProvider, CancellationToken cancellationToken, string argument = null)
 		{
