@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -48,6 +49,16 @@ namespace Kyoo.Tasks
 				identityContext.SaveChanges();
 			}
 			return Task.CompletedTask;
+		}
+
+		public IEnumerable<string> GetPossibleParameters()
+		{
+			return null;
+		}
+
+		public int? Progress()
+		{
+			return null;
 		}
 	}
 }
