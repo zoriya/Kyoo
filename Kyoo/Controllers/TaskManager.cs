@@ -36,7 +36,14 @@ namespace Kyoo.Controllers
 				{
 					(ITask task, string arguments) = _queuedTasks.Dequeue();
 					_runningTask = task;
-					await task.Run(_serviceProvider, _taskToken.Token, arguments);
+					try
+					{
+						await task.Run(_serviceProvider, _taskToken.Token, arguments);
+					}
+					catch (Exception e)
+					{
+						Console.Error.WriteLine($"An unhandled exception occured while running the task {task.Name}.\nInner exception: {e.Message}\n\n");
+					}
 				}
 				else
 				{
@@ -106,7 +113,8 @@ namespace Kyoo.Controllers
 			foreach (ITask task in prerunTasks)
 				task.Run(_serviceProvider, _taskToken.Token);
 			foreach (IPlugin plugin in _pluginManager.GetAllPlugins())
-				_tasks.AddRange(plugin.Tasks.Select(x => (x, DateTime.Now + GetTaskDelay(x.Slug))));
+				if (plugin.Tasks != null)
+					_tasks.AddRange(plugin.Tasks.Select(x => (x, DateTime.Now + GetTaskDelay(x.Slug))));
 		}
 
 		public IEnumerable<ITask> GetAllTasks()

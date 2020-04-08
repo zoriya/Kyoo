@@ -87,7 +87,7 @@ namespace Kyoo.Controllers
 				}
 				catch (Exception ex)
 				{
-					Console.Error.WriteLine($"Error loading the plugin at {path}.\nException: {ex.Message}");
+					Console.Error.WriteLine($"Error loading the plugin at {path}.\nException: {ex.Message}\n\n");
 					return null;
 				}
 			}).Where(x => x != null).ToList();
