@@ -20,7 +20,7 @@ namespace Kyoo.Tasks
 		public bool RunOnStartup => true;
 		public int Priority => Int32.MaxValue;
 		
-		public Task Run(IServiceProvider serviceProvider, CancellationToken cancellationToken)
+		public Task Run(IServiceProvider serviceProvider, CancellationToken cancellationToken, string arguments = null)
 		{
 			using IServiceScope serviceScope = serviceProvider.CreateScope();
 			DatabaseContext databaseContext = serviceScope.ServiceProvider.GetService<DatabaseContext>();

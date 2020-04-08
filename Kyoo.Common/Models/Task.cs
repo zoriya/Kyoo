@@ -12,6 +12,6 @@ namespace Kyoo.Models
 		public string HelpMessage { get; }
 		public bool RunOnStartup { get; }
 		public int Priority { get; }
-		public Task Run(IServiceProvider serviceProvider, CancellationToken cancellationToken);
+		public Task Run(IServiceProvider serviceProvider, CancellationToken cancellationToken, string arguments = null);
 	}
 }

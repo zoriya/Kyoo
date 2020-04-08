@@ -27,7 +27,7 @@ namespace Kyoo.Controllers
 		private IConfiguration _config;
 		
 		
-		public async Task Run(IServiceProvider serviceProvider, CancellationToken cancellationToken)
+		public async Task Run(IServiceProvider serviceProvider, CancellationToken cancellationToken, string argument = null)
 		{
 			using IServiceScope serviceScope = serviceProvider.CreateScope();
 			_libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
@@ -39,6 +39,9 @@ namespace Kyoo.Controllers
 			{
 				IEnumerable<Episode> episodes = _libraryManager.GetAllEpisodes();
 				IEnumerable<Library> libraries = _libraryManager.GetLibraries();
+
+				if (argument != null)
+					libraries = libraries.Where(x => x.Slug == argument);
 
 				foreach (Episode episode in episodes)
 				{
