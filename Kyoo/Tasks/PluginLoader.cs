@@ -15,7 +15,7 @@ namespace Kyoo.Tasks
 		public string HelpMessage => null;
 		public bool RunOnStartup => true;
 		public int Priority => Int32.MaxValue;
-		public Task Run(IServiceProvider serviceProvider, CancellationToken cancellationToken)
+		public Task Run(IServiceProvider serviceProvider, CancellationToken cancellationToken, string arguments = null)
 		{
 			using IServiceScope serviceScope = serviceProvider.CreateScope();
 			IPluginManager pluginManager = serviceScope.ServiceProvider.GetService<IPluginManager>();

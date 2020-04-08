@@ -16,7 +16,7 @@ namespace Kyoo.Controllers
 		
 		private List<ITask> _tasks = new List<ITask>();
 		private CancellationTokenSource _taskToken = new CancellationTokenSource();
-		private Queue<ITask> _queuedTasks = new Queue<ITask>();
+		private Queue<(ITask, string)> _queuedTasks = new Queue<(ITask, string)>();
 		
 		public TaskManager(IServiceProvider serviceProvider, IPluginManager pluginManager)
 		{
@@ -29,9 +29,12 @@ namespace Kyoo.Controllers
 			while (!cancellationToken.IsCancellationRequested)
 			{
 				if (_queuedTasks.Any())
-					await _queuedTasks.Dequeue().Run(_serviceProvider, _taskToken.Token);
+				{
+					(ITask task, string arguments) = _queuedTasks.Dequeue();
+					await task.Run(_serviceProvider, _taskToken.Token, arguments);
+				}
 				else
-					await Task.Delay(10);
+					await Task.Delay(1000, cancellationToken);
 			}
 		}
 
@@ -39,7 +42,7 @@ namespace Kyoo.Controllers
 		{
 			ReloadTask();
 			foreach (ITask task in _tasks.Where(x => x.RunOnStartup && x.Priority != Int32.MaxValue).OrderByDescending(x => x.Priority))
-				_queuedTasks.Enqueue(task);
+				_queuedTasks.Enqueue((task, null));
 			return base.StartAsync(cancellationToken);
 		}
 
@@ -49,12 +52,12 @@ namespace Kyoo.Controllers
 			return base.StopAsync(cancellationToken);
 		}
 
-		public bool StartTask(string taskSlug)
+		public bool StartTask(string taskSlug, string arguments = null)
 		{
 			ITask task = _tasks.FirstOrDefault(x => x.Slug == taskSlug);
 			if (task == null)
 				return false;
-			_queuedTasks.Enqueue(task);
+			_queuedTasks.Enqueue((task, arguments));
 			return true;
 		}
 

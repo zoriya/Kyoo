@@ -16,11 +16,11 @@ namespace Kyoo.Api
 		}
 		
 		
-		[HttpGet("{taskSlug}")]
-		[Authorize(Policy="Admin")]
-		public IActionResult RunTask(string taskSlug)
+		[HttpGet("{taskSlug}/{args?}")]
+		// [Authorize(Policy="Admin")]
+		public IActionResult RunTask(string taskSlug, string args = null)
 		{
-			if (_taskManager.StartTask(taskSlug))
+			if (_taskManager.StartTask(taskSlug, args))
 				return Ok();
 			return NotFound();
 		}
