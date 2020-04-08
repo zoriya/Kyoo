@@ -30,6 +30,14 @@ namespace Kyoo.Controllers
 		
 		protected override async Task ExecuteAsync(CancellationToken cancellationToken)
 		{
+			ReloadTask();
+
+			IEnumerable<ITask> startupTasks = _tasks.Select(x => x.task)
+				.Where(x => x.RunOnStartup && x.Priority != Int32.MaxValue)
+				.OrderByDescending(x => x.Priority);
+			foreach (ITask task in startupTasks)
+				_queuedTasks.Enqueue((task, null));
+			
 			while (!cancellationToken.IsCancellationRequested)
 			{
 				if (_queuedTasks.Any())
@@ -63,14 +71,8 @@ namespace Kyoo.Controllers
 
 		public override Task StartAsync(CancellationToken cancellationToken)
 		{
-			ReloadTask();
-
-			IEnumerable<ITask> startupTasks = _tasks.Select(x => x.task)
-				.Where(x => x.RunOnStartup && x.Priority != Int32.MaxValue)
-				.OrderByDescending(x => x.Priority);
-			foreach (ITask task in startupTasks)
-				_queuedTasks.Enqueue((task, null));
-			return base.StartAsync(cancellationToken);
+			Task.Run(() => base.StartAsync(cancellationToken));
+			return Task.CompletedTask;
 		}
 
 		public override Task StopAsync(CancellationToken cancellationToken)
