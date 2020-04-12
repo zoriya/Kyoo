@@ -33,7 +33,7 @@ namespace Kyoo
 					RequireConsent = false,
 					
 					AllowedScopes = { "openid", "profile", "kyoo.read", "kyoo.write", "kyoo.play", "kyoo.download", "kyoo.admin" },
-					RedirectUris =  { "/", "/silent" },
+					RedirectUris =  { "/", "/silent.html" },
 					PostLogoutRedirectUris = { "/logout" }
 				}
 			};
