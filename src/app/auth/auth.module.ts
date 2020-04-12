@@ -5,7 +5,6 @@ import {AuthPipe} from "./misc/auth.pipe";
 import {AutologinComponent} from "./autologin/autologin.component";
 import {UnauthorizedComponent} from "./unauthorized/unauthorized.component";
 import {LogoutComponent} from "./logout/logout.component";
-import {LoginComponent} from "./login/login.component";
 import {ConfigResult, OidcConfigService, OidcSecurityService, OpenIdConfiguration, AuthModule as OidcModule} from "angular-auth-oidc-client";
 import {HTTP_INTERCEPTORS, HttpClient, HttpClientModule} from "@angular/common/http";
 import {AuthGuard} from "./misc/authenticated-guard.service";
@@ -13,14 +12,8 @@ import {AuthorizerInterceptor} from "./misc/authorizer-interceptor.service";
 import {MatFormFieldModule} from "@angular/material/form-field";
 import {MatIconModule} from "@angular/material/icon";
 import {MatInputModule} from "@angular/material/input";
-import {AppComponent} from "../app.component";
 import {MatDialogModule} from "@angular/material/dialog";
 import {MatButtonModule} from "@angular/material/button";
-import {BrowserModule} from "@angular/platform-browser";
-import {AppRoutingModule} from "../app-routing.module";
-import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
-import {MatSnackBarModule} from "@angular/material/snack-bar";
-import {MatProgressBarModule} from "@angular/material/progress-bar";
 import {MatSelectModule} from "@angular/material/select";
 import {MatMenuModule} from "@angular/material/menu";
 import {MatSliderModule} from "@angular/material/slider";
@@ -42,8 +35,7 @@ export function loadConfig(oidcConfigService: OidcConfigService)
 		AuthPipe,
 		AccountComponent,
 		UnauthorizedComponent,
-		LogoutComponent,
-		LoginComponent,
+		LogoutComponent
 	],
 	imports: [
 		CommonModule,
@@ -95,8 +87,8 @@ export class AuthModule
 				client_id: 'kyoo.webapp',
 				response_type: "code",
 				trigger_authorization_result_event: true,
-				scope: "openid profile offline_access kyoo.read kyoo.play",
-				silent_renew: false,
+				scope: "openid profile",
+				silent_renew: true,
 				silent_renew_url: "/silent",
 				use_refresh_token: false,
 				start_checksession: true,

@@ -33,7 +33,6 @@ h6
 @import '~@angular/material/theming';
 @include mat-core();
 
-// Define the default theme (same as the example above).
 $primary: (default: #0a1128);
 $accent: (default: #e23c00, lighter: #ff9149);
 $theme: mat-dark-theme($primary, $accent);
