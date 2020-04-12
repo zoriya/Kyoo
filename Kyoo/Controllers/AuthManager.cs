@@ -62,38 +62,38 @@ namespace Kyoo.Controllers
 		{
 			SecureRandom random = new SecureRandom();
 			
-            X509V3CertificateGenerator certificateGenerator = new X509V3CertificateGenerator();
-            certificateGenerator.SetSerialNumber(BigIntegers.CreateRandomInRange(BigInteger.One, BigInteger.ValueOf(Int64.MaxValue), random));
-            certificateGenerator.SetIssuerDN(new X509Name($"C=NL, O=SDG, CN=Kyoo"));
-            certificateGenerator.SetSubjectDN(new X509Name($"C=NL, O=SDG, CN=Kyoo"));
-            certificateGenerator.SetNotBefore(DateTime.UtcNow.Date);
-            certificateGenerator.SetNotAfter(DateTime.UtcNow.Date.AddMonths(3));
+			X509V3CertificateGenerator certificateGenerator = new X509V3CertificateGenerator();
+			certificateGenerator.SetSerialNumber(BigIntegers.CreateRandomInRange(BigInteger.One, BigInteger.ValueOf(Int64.MaxValue), random));
+			certificateGenerator.SetIssuerDN(new X509Name($"C=NL, O=SDG, CN=Kyoo"));
+			certificateGenerator.SetSubjectDN(new X509Name($"C=NL, O=SDG, CN=Kyoo"));
+			certificateGenerator.SetNotBefore(DateTime.UtcNow.Date);
+			certificateGenerator.SetNotAfter(DateTime.UtcNow.Date.AddMonths(3));
  
-            KeyGenerationParameters keyGenerationParameters = new KeyGenerationParameters(random, 2048);
-            RsaKeyPairGenerator keyPairGenerator = new RsaKeyPairGenerator();
-            keyPairGenerator.Init(keyGenerationParameters);
+			KeyGenerationParameters keyGenerationParameters = new KeyGenerationParameters(random, 2048);
+			RsaKeyPairGenerator keyPairGenerator = new RsaKeyPairGenerator();
+			keyPairGenerator.Init(keyGenerationParameters);
  
-            AsymmetricCipherKeyPair subjectKeyPair = keyPairGenerator.GenerateKeyPair();
-            certificateGenerator.SetPublicKey(subjectKeyPair.Public);
+			AsymmetricCipherKeyPair subjectKeyPair = keyPairGenerator.GenerateKeyPair();
+			certificateGenerator.SetPublicKey(subjectKeyPair.Public);
  
-            AsymmetricCipherKeyPair issuerKeyPair = subjectKeyPair;
-            const string signatureAlgorithm = "MD5WithRSA";
-            Asn1SignatureFactory signatureFactory = new Asn1SignatureFactory(signatureAlgorithm, issuerKeyPair.Private);
-            X509Certificate bouncyCert = certificateGenerator.Generate(signatureFactory);
+			AsymmetricCipherKeyPair issuerKeyPair = subjectKeyPair;
+			const string signatureAlgorithm = "MD5WithRSA";
+			Asn1SignatureFactory signatureFactory = new Asn1SignatureFactory(signatureAlgorithm, issuerKeyPair.Private);
+			X509Certificate bouncyCert = certificateGenerator.Generate(signatureFactory);
  
-            X509Certificate2 certificate;
+			X509Certificate2 certificate;
  
-            Pkcs12Store store = new Pkcs12StoreBuilder().Build();
-            store.SetKeyEntry("Kyoo_key", new AsymmetricKeyEntry(subjectKeyPair.Private), new [] {new X509CertificateEntry(bouncyCert)});
+			Pkcs12Store store = new Pkcs12StoreBuilder().Build();
+			store.SetKeyEntry("Kyoo_key", new AsymmetricKeyEntry(subjectKeyPair.Private), new [] {new X509CertificateEntry(bouncyCert)});
  
-            using (MemoryStream pfxStream = new MemoryStream())
-            {
-                store.Save(pfxStream, password.ToCharArray(), random);
-                certificate = new X509Certificate2(pfxStream.ToArray(), password, X509KeyStorageFlags.Exportable);
-                using FileStream fileStream = File.OpenWrite(file);
-                pfxStream.WriteTo(fileStream);
-            }
-            return certificate;
+			using (MemoryStream pfxStream = new MemoryStream())
+			{
+				store.Save(pfxStream, password.ToCharArray(), random);
+				certificate = new X509Certificate2(pfxStream.ToArray(), password, X509KeyStorageFlags.Exportable);
+				using FileStream fileStream = File.OpenWrite(file);
+				pfxStream.WriteTo(fileStream);
+			}
+			return certificate;
 		}
 	}
 	

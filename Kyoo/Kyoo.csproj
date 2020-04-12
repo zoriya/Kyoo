@@ -6,6 +6,7 @@
 		<TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
 		<IsPackable>false</IsPackable>
 		<SpaRoot>Views/WebClient/</SpaRoot>
+		<LoginRoot>Views/Login/</LoginRoot>
 		<TranscoderRoot>../transcoder</TranscoderRoot>
 		<DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules/**</DefaultItemExcludes>
 
@@ -44,6 +45,8 @@
 		<Content Remove="$(SpaRoot)**" />
 		<None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
 		<StaticFiles Include="$(SpaRoot)static/**" />
+		<LoginFiles Include="$(LoginRoot)**" />
+		<StaticFiles Include="Views\Login\material-icons.css" />
 	</ItemGroup>
 	
 	<Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
@@ -64,11 +67,17 @@
 				<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 				<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 			</ResolvedFileToPublish>
+			<ResolvedFileToPublish Include="@(LoginFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
+				<RelativePath>login/%(LoginFiles.RecursiveDir)%(LoginFiles.Filename)%(LoginFiles.Extension)</RelativePath>
+				<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+				<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			</ResolvedFileToPublish>
 		</ItemGroup>
 	</Target>
 	
 	<Target Name="Prepare the web app" AfterTargets="Build" Condition="$(Configuration) == 'Debug'">
 		<Copy SourceFiles="@(StaticFiles)" DestinationFolder="$(OutputPath)/wwwroot/%(RecursiveDir)" />
+		<Copy SourceFiles="@(LoginFiles)" DestinationFolder="$(OutputPath)/login/%(RecursiveDir)" />
 		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
 	</Target>
 
@@ -87,8 +96,4 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
-
-	<Target Name="CreatePluginFolder" AfterTargets="Build">
-		<MakeDir Directories="$(OutputPath)/plugins" />
-	</Target>
 </Project>
