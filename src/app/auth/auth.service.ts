@@ -36,8 +36,6 @@ export class AuthService
 		this.oidcSecurityService.getUserData().subscribe(userData =>
 		{
 			this.user = userData;
-			console.log("Got user data");
-			console.log(this.user);
 		});
 	}
 	
@@ -63,7 +61,6 @@ export class AuthService
 		{
 			this.oidcSecurityService.getIsAuthorized().subscribe((authorized: boolean) =>
 			{
-				console.log("Is authorized: " + authorized);
 				this.isAuthenticated = authorized;
 				if (!authorized)
 				{

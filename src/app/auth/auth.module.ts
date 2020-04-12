@@ -96,7 +96,7 @@ export class AuthModule
 				forbidden_route: '/Forbidden',
 				unauthorized_route: '/Unauthorized',
 				log_console_warning_active: true,
-				log_console_debug_active: true
+				log_console_debug_active: false
 			};
 
 			this.oidcSecurityService.setupModule(config, configResult.authWellknownEndpoints);
