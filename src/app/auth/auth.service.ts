@@ -62,13 +62,6 @@ export class AuthService
 			this.oidcSecurityService.getIsAuthorized().subscribe((authorized: boolean) =>
 			{
 				this.isAuthenticated = authorized;
-				if (!authorized)
-				{
-					if (document.cookie.indexOf("Authenticated=true") != -1)
-						this.router.navigate(['/autologin']);
-				}
-				else
-					document.cookie = "Authenticated=true; expires=" + new Date(2147483647 * 1000).toUTCString();
 			});
 		}
 	}

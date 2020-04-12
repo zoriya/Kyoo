@@ -2,11 +2,10 @@ import {APP_INITIALIZER, NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {AccountComponent} from "./account/account.component";
 import {AuthPipe} from "./misc/auth.pipe";
-import {AutologinComponent} from "./autologin/autologin.component";
 import {UnauthorizedComponent} from "./unauthorized/unauthorized.component";
 import {LogoutComponent} from "./logout/logout.component";
 import {ConfigResult, OidcConfigService, OidcSecurityService, OpenIdConfiguration, AuthModule as OidcModule} from "angular-auth-oidc-client";
-import {HTTP_INTERCEPTORS, HttpClient, HttpClientModule} from "@angular/common/http";
+import {HTTP_INTERCEPTORS, HttpClient} from "@angular/common/http";
 import {AuthGuard} from "./misc/authenticated-guard.service";
 import {AuthorizerInterceptor} from "./misc/authorizer-interceptor.service";
 import {MatFormFieldModule} from "@angular/material/form-field";
@@ -20,7 +19,7 @@ import {MatSliderModule} from "@angular/material/slider";
 import {MatTooltipModule} from "@angular/material/tooltip";
 import {MatRippleModule} from "@angular/material/core";
 import {MatCardModule} from "@angular/material/card";
-import {FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {FormsModule} from "@angular/forms";
 import {MatTabsModule} from "@angular/material/tabs";
 import {MatCheckboxModule} from "@angular/material/checkbox";
 
@@ -31,7 +30,6 @@ export function loadConfig(oidcConfigService: OidcConfigService)
 
 @NgModule({
 	declarations: [
-		AutologinComponent,
 		AuthPipe,
 		AccountComponent,
 		UnauthorizedComponent,
@@ -86,17 +84,17 @@ export class AuthModule
 				post_logout_redirect_uri: "/logout",
 				client_id: 'kyoo.webapp',
 				response_type: "code",
-				trigger_authorization_result_event: true,
+				trigger_authorization_result_event: false,
 				scope: "openid profile",
 				silent_renew: true,
-				silent_renew_url: "/silent",
+				silent_renew_url: "/silent.html",
 				use_refresh_token: false,
 				start_checksession: true,
 
 				forbidden_route: '/Forbidden',
 				unauthorized_route: '/Unauthorized',
 				log_console_warning_active: true,
-				log_console_debug_active: false
+				log_console_debug_active: true
 			};
 
 			this.oidcSecurityService.setupModule(config, configResult.authWellknownEndpoints);
