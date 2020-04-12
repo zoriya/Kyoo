@@ -1,9 +1,13 @@
 using System;
 using System.Linq;
+using System.Threading.Tasks;
+using IdentityServer4.EntityFramework.Entities;
+using IdentityServer4.EntityFramework.Extensions;
+using IdentityServer4.EntityFramework.Interfaces;
 using IdentityServer4.EntityFramework.Options;
 using Kyoo.Models;
-using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -11,12 +15,24 @@ using Microsoft.Extensions.Options;
 
 namespace Kyoo
 {
-	public class DatabaseContext : ApiAuthorizationDbContext<User>
+	public class DatabaseContext : IdentityDbContext<User>, IPersistedGrantDbContext
 	{
-		public DatabaseContext(DbContextOptions<DatabaseContext> options, IOptions<OperationalStoreOptions> operationalStoreOptions) 
-			: base(options, operationalStoreOptions) { }
+		private readonly IOptions<OperationalStoreOptions> _operationalStoreOptions;
 
+		public DatabaseContext(DbContextOptions<DatabaseContext> options, IOptions<OperationalStoreOptions> operationalStoreOptions)
+			: base(options)
+		{
+			_operationalStoreOptions = operationalStoreOptions;
+		}
+
+		public Task<int> SaveChangesAsync() => base.SaveChangesAsync();
+
+		public DbSet<PersistedGrant> PersistedGrants { get; set; }
+		public DbSet<DeviceFlowCodes> DeviceFlowCodes { get; set; }
+		
 		public DbSet<User> Accounts { get; set; }
+		
+		
 		
 		public DbSet<Library> Libraries { get; set; }
 		public DbSet<Collection> Collections { get; set; }
@@ -76,6 +92,7 @@ namespace Kyoo
 			modelBuilder.Entity<IdentityRole>().ToTable("UserRoles");
 			modelBuilder.Entity<IdentityRoleClaim<string>>().ToTable("UserRoleClaim");
 			modelBuilder.Entity<IdentityUserToken<string>>().ToTable("UserToken");
+			modelBuilder.ConfigurePersistedGrantContext(_operationalStoreOptions.Value);
 		}
 	}
 }
