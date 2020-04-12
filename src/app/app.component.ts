@@ -39,7 +39,6 @@ export class AppComponent
 					this.isLoading = false;
 					break;
 				default:
-					this.isLoading = false;
 					break;
 			}
 		});

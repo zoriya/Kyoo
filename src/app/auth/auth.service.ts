@@ -26,7 +26,6 @@ export class AuthService
 		{
 			this.getUser();
 			this.isAuthenticated = authorizationResult.authorizationState == AuthorizationState.authorized;
-			this.router.navigate(["/"]);
 		});
 		this.getUser();
 	}
