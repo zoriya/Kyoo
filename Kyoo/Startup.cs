@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
@@ -88,7 +89,7 @@ namespace Kyoo
 					options.Audience = "Kyoo";
 					options.RequireHttpsMetadata = false;
 				});
-			
+
 			services.AddAuthorization(options =>
 			{
 				AuthorizationPolicyBuilder scheme = new AuthorizationPolicyBuilder(IdentityConstants.ApplicationScheme, JwtBearerDefaults.AuthenticationScheme);
@@ -145,7 +146,11 @@ namespace Kyoo
 			app.UseAuthentication();
 			app.UseIdentityServer();
 			app.UseAuthorization();
-			
+			app.UseCookiePolicy(new CookiePolicyOptions 
+			{
+				MinimumSameSitePolicy = SameSiteMode.Lax
+			});
+
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapControllerRoute("Kyoo", "api/{controller=Home}/{action=Index}/{id?}");

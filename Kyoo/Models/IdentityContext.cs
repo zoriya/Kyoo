@@ -22,14 +22,16 @@ namespace Kyoo
 				new Client
 				{
 					ClientId = "kyoo.webapp",
+					
+					AccessTokenType = AccessTokenType.Jwt,
 					AllowedGrantTypes = GrantTypes.Code,
 					RequirePkce = true,
-					AllowAccessTokensViaBrowser = true,
-					AlwaysIncludeUserClaimsInIdToken = true,
-					AllowOfflineAccess = true,
 					RequireClientSecret = false,
+					
+					AllowAccessTokensViaBrowser = true,
+					AllowOfflineAccess = true,
 					RequireConsent = false,
-					AccessTokenType = AccessTokenType.Jwt,
+					
 					AllowedScopes = { "openid", "profile", "kyoo.read", "kyoo.write", "kyoo.play", "kyoo.download", "kyoo.admin" },
 					RedirectUris =  { "/", "/silent" },
 					PostLogoutRedirectUris = { "/logout" }

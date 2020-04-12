@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
@@ -32,7 +34,8 @@ namespace Kyoo.Api
 
 	public class OtacRequest
 	{
-		public string Otac;
+		public string Otac { get; set; }
+		public bool StayLoggedIn { get; set; }
 	}
 	
 	public class AccountData
@@ -43,6 +46,28 @@ namespace Kyoo.Api
 		public string Username { get; set; }
 		[FromForm(Name = "picture")]
 		public IFormFile Picture { get; set; }
+	}
+	
+	[ApiController]
+	public class AccountUiController : Controller
+	{
+		[HttpGet("login")]
+		public IActionResult Index()
+		{
+			return new PhysicalFileResult(Path.GetFullPath("login/login.html"), "text/html");
+		}
+		
+		[HttpGet("login/{*file}")]
+		public IActionResult Index(string file)
+		{
+			string path = Path.Combine(Path.GetFullPath("login/"), file);
+			if (!System.IO.File.Exists(path))
+				return NotFound();
+			FileExtensionContentTypeProvider provider = new FileExtensionContentTypeProvider();
+			if (!provider.TryGetContentType(path, out string contentType))
+				contentType = "text/plain";			
+			return new PhysicalFileResult(path, contentType);
+		}
 	}
 	
 	[Route("api/[controller]")]
@@ -74,6 +99,10 @@ namespace Kyoo.Api
 		{
 			if (!ModelState.IsValid)
 				return BadRequest(user);
+			if (user.Username.Length < 4)
+				return BadRequest(new[] {new {code = "username", description = "Username must be at least 4 characters."}});
+			if (!new EmailAddressAttribute().IsValid(user.Email))
+				return BadRequest(new[] {new {code = "email", description = "Email must be valid."}});
 			User account = new User {UserName = user.Username, Email = user.Email};
 			IdentityResult result = await _userManager.CreateAsync(account, user.Password);
 			if (!result.Succeeded)
@@ -81,7 +110,7 @@ namespace Kyoo.Api
 			string otac = account.GenerateOTAC(TimeSpan.FromMinutes(1));
 			await _userManager.UpdateAsync(account);
 			await _userManager.AddClaimsAsync(account, defaultClaims);
-			return Ok(otac);
+			return Ok(new {otac});
 		}
 		
 		[HttpPost("login")]
@@ -98,12 +127,14 @@ namespace Kyoo.Api
 		[HttpPost("otac-login")]
 		public async Task<IActionResult> OtacLogin([FromBody] OtacRequest otac)
 		{
+			if (!ModelState.IsValid)
+				return BadRequest(otac);
 			User user = _userManager.Users.FirstOrDefault(x => x.OTAC == otac.Otac);
 			if (user == null)
 				return BadRequest(new [] { new {code = "InvalidOTAC", description = "No user was found for this OTAC."}});
 			if (user.OTACExpires <= DateTime.UtcNow)
 				return BadRequest(new [] { new {code = "ExpiredOTAC", description = "The OTAC has expired. Try to login with your password."}});
-			await _signInManager.SignInAsync(user, true);
+			await _signInManager.SignInAsync(user, otac.StayLoggedIn);
 			return Ok();
 		}
 		
