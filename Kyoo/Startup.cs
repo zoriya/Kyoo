@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -52,7 +53,12 @@ namespace Kyoo
 			string assemblyName = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
 			string publicUrl = _configuration.GetValue<string>("public_url");
 
-			services.AddDefaultIdentity<User>()
+			services.AddIdentityCore<User>(o =>
+				{
+					o.Stores.MaxLengthForKeys = 128;
+				})
+				.AddSignInManager()
+				.AddDefaultTokenProviders()
 				.AddEntityFrameworkStores<DatabaseContext>();
 
 			services.AddIdentityServer(options =>
@@ -81,7 +87,13 @@ namespace Kyoo
 				.AddInMemoryApiResources(IdentityContext.GetApis())
 				.AddProfileService<AccountController>()
 				.AddSigninKeys(_configuration);
-
+			
+			services.AddAuthentication(o =>
+				{
+					o.DefaultScheme = IdentityConstants.ApplicationScheme;
+					o.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+				})
+				.AddIdentityCookies(o => { });
 			services.AddAuthentication()
 				.AddJwtBearer(options =>
 				{
