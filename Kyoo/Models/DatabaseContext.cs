@@ -124,6 +124,26 @@ namespace Kyoo
 				.Ignore(x => x.Name);
 			modelBuilder.Entity<PeopleLink>()
 				.Ignore(x => x.ExternalIDs);
+
+
+			modelBuilder.Entity<Collection>()
+				.HasIndex(x => x.Slug)
+				.IsUnique();
+			modelBuilder.Entity<Genre>()
+				.HasIndex(x => x.Slug)
+				.IsUnique();
+			modelBuilder.Entity<Library>()
+				.HasIndex(x => x.Slug)
+				.IsUnique();
+			modelBuilder.Entity<People>()
+				.HasIndex(x => x.Slug)
+				.IsUnique();
+			modelBuilder.Entity<Show>()
+				.HasIndex(x => x.Slug)
+				.IsUnique();
+			modelBuilder.Entity<Studio>()
+				.HasIndex(x => x.Slug)
+				.IsUnique();
 		}
 	}
 }

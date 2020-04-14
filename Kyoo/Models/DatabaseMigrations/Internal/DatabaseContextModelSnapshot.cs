@@ -39,6 +39,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
                     b.HasKey("ID");
 
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
                     b.ToTable("Collections");
                 });
 
@@ -128,6 +131,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
                     b.HasKey("ID");
 
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
                     b.ToTable("Genres");
                 });
 
@@ -165,6 +171,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         .HasColumnType("TEXT");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
 
                     b.ToTable("Libraries");
                 });
@@ -210,6 +219,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         .HasColumnType("TEXT");
 
                     b.HasKey("Slug");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
 
                     b.ToTable("Peoples");
                 });
@@ -331,6 +343,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
                     b.HasKey("ID");
 
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
                     b.HasIndex("StudioID");
 
                     b.ToTable("Shows");
@@ -349,6 +364,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         .HasColumnType("TEXT");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
 
                     b.ToTable("Studios");
                 });

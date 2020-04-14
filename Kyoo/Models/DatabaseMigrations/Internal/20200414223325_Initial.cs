@@ -326,6 +326,12 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 column: "ShowID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Collections_Slug",
+                table: "Collections",
+                column: "Slug",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Episodes_SeasonID",
                 table: "Episodes",
                 column: "SeasonID");
@@ -339,6 +345,18 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "IX_GenreLinks_GenreID",
                 table: "GenreLinks",
                 column: "GenreID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Genres_Slug",
+                table: "Genres",
+                column: "Slug",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Libraries_Slug",
+                table: "Libraries",
+                column: "Slug",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_LibraryLinks_CollectionID",
@@ -366,14 +384,32 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 column: "ShowID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Peoples_Slug",
+                table: "Peoples",
+                column: "Slug",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Seasons_ShowID",
                 table: "Seasons",
                 column: "ShowID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Shows_Slug",
+                table: "Shows",
+                column: "Slug",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Shows_StudioID",
                 table: "Shows",
                 column: "StudioID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Studios_Slug",
+                table: "Studios",
+                column: "Slug",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tracks_EpisodeID",
