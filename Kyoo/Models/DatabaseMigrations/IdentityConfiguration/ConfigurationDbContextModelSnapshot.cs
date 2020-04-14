@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
+namespace Kyoo.Models.DatabaseMigrations.IdentitiyConfiguration
 {
     [DbContext(typeof(ConfigurationDbContext))]
     partial class ConfigurationDbContextModelSnapshot : ModelSnapshot

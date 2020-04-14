@@ -6,10 +6,10 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
+namespace Kyoo.Models.DatabaseMigrations.IdentitiyConfiguration
 {
     [DbContext(typeof(ConfigurationDbContext))]
-    [Migration("20200330032447_Initial")]
+    [Migration("20200413152957_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

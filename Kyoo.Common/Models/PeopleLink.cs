@@ -8,9 +8,23 @@ namespace Kyoo.Models
 		[JsonIgnore] public string PeopleID { get; set; }
 		[JsonIgnore] public virtual People People { get; set; }
 		
-		public string Slug => People.Slug;
-		public string Name => People.Name;
-		public string ExternalIDs => People.ExternalIDs;
+		public string Slug
+		{
+			get => People.Slug;
+			set => People.Slug = value;
+		}
+		
+		public string Name
+		{
+			get => People.Name;
+			set => People.Name = value;
+		}
+		
+		public string ExternalIDs
+		{
+			get => People.ExternalIDs;
+			set => People.ExternalIDs = value;
+		}
 
 		[JsonIgnore] public long ShowID { get; set; }
 		[JsonIgnore] public virtual Show Show { get; set; }

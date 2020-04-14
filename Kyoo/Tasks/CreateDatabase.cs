@@ -25,9 +25,11 @@ namespace Kyoo.Tasks
 		{
 			using IServiceScope serviceScope = serviceProvider.CreateScope();
 			DatabaseContext databaseContext = serviceScope.ServiceProvider.GetService<DatabaseContext>();
+			IdentityDatabase identityDatabase = serviceScope.ServiceProvider.GetService<IdentityDatabase>();
 			ConfigurationDbContext identityContext = serviceScope.ServiceProvider.GetService<ConfigurationDbContext>();
 			
 			databaseContext.Database.Migrate();
+			identityDatabase.Database.Migrate();
 			identityContext.Database.Migrate();
 			
 			if (!identityContext.Clients.Any())

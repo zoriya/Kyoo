@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
+namespace Kyoo.Models.DatabaseMigrations.IdentitiyConfiguration
 {
     public partial class Initial : Migration
     {
