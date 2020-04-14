@@ -15,25 +15,58 @@ using Microsoft.Extensions.Options;
 
 namespace Kyoo
 {
-	public class DatabaseContext : IdentityDbContext<User>, IPersistedGrantDbContext
+	public class IdentityDatabase : IdentityDbContext<User>, IPersistedGrantDbContext
 	{
 		private readonly IOptions<OperationalStoreOptions> _operationalStoreOptions;
 
-		public DatabaseContext(DbContextOptions<DatabaseContext> options, IOptions<OperationalStoreOptions> operationalStoreOptions)
+		public IdentityDatabase(DbContextOptions<IdentityDatabase> options, IOptions<OperationalStoreOptions> operationalStoreOptions)
 			: base(options)
 		{
 			_operationalStoreOptions = operationalStoreOptions;
+		}
+
+		public DbSet<User> Accounts { get; set; }
+		
+		protected override void OnModelCreating(ModelBuilder modelBuilder)
+		{
+			base.OnModelCreating(modelBuilder);
+			modelBuilder.ConfigurePersistedGrantContext(_operationalStoreOptions.Value);
+			
+			modelBuilder.Entity<User>().ToTable("User");
+			modelBuilder.Entity<IdentityUserRole<string>>().ToTable("UserRole");
+			modelBuilder.Entity<IdentityUserLogin<string>>().ToTable("UserLogin");
+			modelBuilder.Entity<IdentityUserClaim<string>>().ToTable("UserClaim");
+			modelBuilder.Entity<IdentityRole>().ToTable("UserRoles");
+			modelBuilder.Entity<IdentityRoleClaim<string>>().ToTable("UserRoleClaim");
+			modelBuilder.Entity<IdentityUserToken<string>>().ToTable("UserToken");
 		}
 
 		public Task<int> SaveChangesAsync() => base.SaveChangesAsync();
 
 		public DbSet<PersistedGrant> PersistedGrants { get; set; }
 		public DbSet<DeviceFlowCodes> DeviceFlowCodes { get; set; }
+
+	}
+
+	public class DatabaseFactory
+	{
+		private readonly DbContextOptions<DatabaseContext> _options;
 		
-		public DbSet<User> Accounts { get; set; }
-		
-		
-		
+		public DatabaseFactory(DbContextOptions<DatabaseContext> options)
+		{
+			_options = options;
+		}
+
+		public DatabaseContext NewDatabaseConnection()
+		{
+			return new DatabaseContext(_options);
+		}
+	}
+
+	public class DatabaseContext : DbContext
+	{
+		public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) {}
+
 		public DbSet<Library> Libraries { get; set; }
 		public DbSet<Collection> Collections { get; set; }
 		public DbSet<Show> Shows { get; set; }
@@ -84,15 +117,13 @@ namespace Kyoo
 							
 			modelBuilder.Entity<Show>()
 				.Ignore(x => x.Genres);
-
-			modelBuilder.Entity<User>().ToTable("User");
-			modelBuilder.Entity<IdentityUserRole<string>>().ToTable("UserRole");
-			modelBuilder.Entity<IdentityUserLogin<string>>().ToTable("UserLogin");
-			modelBuilder.Entity<IdentityUserClaim<string>>().ToTable("UserClaim");
-			modelBuilder.Entity<IdentityRole>().ToTable("UserRoles");
-			modelBuilder.Entity<IdentityRoleClaim<string>>().ToTable("UserRoleClaim");
-			modelBuilder.Entity<IdentityUserToken<string>>().ToTable("UserToken");
-			modelBuilder.ConfigurePersistedGrantContext(_operationalStoreOptions.Value);
+			
+			modelBuilder.Entity<PeopleLink>()
+				.Ignore(x => x.Slug);
+			modelBuilder.Entity<PeopleLink>()
+				.Ignore(x => x.Name);
+			modelBuilder.Entity<PeopleLink>()
+				.Ignore(x => x.ExternalIDs);
 		}
 	}
 }

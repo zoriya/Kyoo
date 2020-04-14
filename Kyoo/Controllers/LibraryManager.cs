@@ -77,10 +77,7 @@ namespace Kyoo.Controllers
 
 		public Show GetShowBySlug(string slug)
 		{
-			Show ret = (from show in _database.Shows where show.Slug == slug select show).FirstOrDefault();
-			if (ret != null)
-				ret.Seasons = ret.Seasons.OrderBy(x => x.SeasonNumber);
-			return ret;
+			return _database.Shows.FirstOrDefault(show => show.Slug == slug);
 		}
 		
 		public Show GetShow(string path)
@@ -350,7 +347,7 @@ namespace Kyoo.Controllers
 		{
 			if (show == null)
 				return 0;
-			if (_database.Entry(show).State == EntityState.Detached)
+			if (!_database.Entry(show).IsKeySet)
 				_database.Shows.Add(show);
 			_database.SaveChanges();
 			return show.ID;

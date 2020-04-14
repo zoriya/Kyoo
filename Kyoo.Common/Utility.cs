@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using Kyoo.Models;
 
@@ -58,8 +59,6 @@ namespace Kyoo
 				case ImageType.Background:
 					show.ImgBackdrop = imgUrl;
 					break;
-				default:
-					break;
 			}
 		}
 
@@ -73,6 +72,29 @@ namespace Kyoo
 			if (isEqual == null)
 				isEqual = (x, y) => x.Equals(y);
 			return list.Concat(second.Where(x => !list.Any(y => isEqual(x, y))));
+		}
+
+		public static T Complete<T>(T first, T second)
+		{
+			Type type = typeof(T);
+			foreach (PropertyInfo property in type.GetProperties())
+			{
+				MethodInfo getter = property.GetGetMethod();
+				MethodInfo setter = property.GetSetMethod();
+				
+				object value = getter != null ? getter.Invoke(second, null) : property.GetValue(second);
+				object defaultValue = property.PropertyType.IsValueType ? Activator.CreateInstance(property.PropertyType) : null;
+				
+				if (value?.Equals(defaultValue) == false)
+				{
+					if (setter != null)
+						setter.Invoke(first, new[] {value});
+					else
+						property.SetValue(second, value);
+				}
+			}
+
+			return first;
 		}
 	}
 }

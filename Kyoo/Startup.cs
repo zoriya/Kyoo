@@ -44,10 +44,21 @@ namespace Kyoo
 			services.AddControllers().AddNewtonsoftJson();
 			services.AddHttpClient();
 
+			services.AddSingleton<DatabaseFactory>(x => new DatabaseFactory(
+				new DbContextOptionsBuilder<DatabaseContext>()
+					.UseLazyLoadingProxies()
+					.UseSqlite(_configuration.GetConnectionString("Database")).Options));
+			
 			services.AddDbContext<DatabaseContext>(options =>
 			{
 				options.UseLazyLoadingProxies()
-					.UseSqlite(_configuration.GetConnectionString("Database"));
+					.UseSqlite(_configuration.GetConnectionString("Database"))
+					.UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()));
+			});
+			
+			services.AddDbContext<IdentityDatabase>(options =>
+			{
+				options.UseSqlite(_configuration.GetConnectionString("Database"));
 			});
 
 			string assemblyName = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
@@ -59,7 +70,7 @@ namespace Kyoo
 				})
 				.AddSignInManager()
 				.AddDefaultTokenProviders()
-				.AddEntityFrameworkStores<DatabaseContext>();
+				.AddEntityFrameworkStores<IdentityDatabase>();
 
 			services.AddIdentityServer(options =>
 				{

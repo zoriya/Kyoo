@@ -37,7 +37,7 @@ namespace Kyoo.Models
 			set { GenreLinks = value?.Select(x => new GenreLink(this, x)).ToList(); }
 		}
 		[JsonIgnore] public virtual List<GenreLink> GenreLinks { get; set; }
-		[JsonIgnore] public virtual Studio Studio { get; set; }
+		public virtual Studio Studio { get; set; }
 		[JsonIgnore] public virtual IEnumerable<PeopleLink> People { get; set; }
 		[JsonIgnore] public virtual IEnumerable<Season> Seasons { get; set; }
 		[JsonIgnore] public virtual IEnumerable<Episode> Episodes { get; set; }
@@ -121,8 +121,7 @@ namespace Kyoo.Models
 			ImgThumb ??= other.ImgThumb;
 			ImgLogo ??= other.ImgLogo;
 			ImgBackdrop ??= other.ImgBackdrop;
-			if (other.Studio != null)
-				Studio ??= other.Studio;
+			Studio ??= other.Studio;
 			ExternalIDs = string.Join('|', new [] { ExternalIDs, other.ExternalIDs }.Where(x => !string.IsNullOrEmpty(x)));
 			return this;
 		}
