@@ -144,9 +144,10 @@ namespace Kyoo.Controllers
 			if (seasonNumber == -1)
 				return null;
 			Season season = _libraryManager.GetSeason(show.Slug, seasonNumber);
-			if (season != null)
-				return await Task.FromResult(season);
-			return await _metadataProvider.GetSeason(show, seasonNumber, library);
+			if (season == null)
+				return await _metadataProvider.GetSeason(show, seasonNumber, library);
+			season.Show = show;
+			return await Task.FromResult(season);
 		}
 		
 		private async Task<Episode> GetEpisode(Show show, Season season, long episodeNumber, long absoluteNumber, string episodePath, Library library)
