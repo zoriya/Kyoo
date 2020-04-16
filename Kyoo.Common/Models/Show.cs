@@ -36,7 +36,7 @@ namespace Kyoo.Models
 			get { return GenreLinks?.Select(x => x.Genre).OrderBy(x => x.Name); }
 			set { GenreLinks = value?.Select(x => new GenreLink(this, x)).ToList(); }
 		}
-		[JsonIgnore] public virtual List<GenreLink> GenreLinks { get; set; }
+		[JsonIgnore] public virtual IEnumerable<GenreLink> GenreLinks { get; set; }
 		public virtual Studio Studio { get; set; }
 		[JsonIgnore] public virtual IEnumerable<PeopleLink> People { get; set; }
 		[JsonIgnore] public virtual IEnumerable<Season> Seasons { get; set; }

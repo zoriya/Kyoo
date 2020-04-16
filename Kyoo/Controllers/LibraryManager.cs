@@ -347,8 +347,25 @@ namespace Kyoo.Controllers
 		{
 			if (show == null)
 				return 0;
+			
 			if (!_database.Entry(show).IsKeySet)
 				_database.Shows.Add(show);
+			
+			if (show.Studio != null) // Do not query it if the studio is already attached. // Do not set this value if the database does not found the studio.
+				show.Studio = _database.Studios.FirstOrDefault(x => x.Slug == show.Studio.Slug);
+			// show.GenreLinks = show.GenreLinks?.Select(x =>
+			// {
+			// 	x.Genre = _database.Genres.FirstOrDefault(y => y.Slug == x.Genre.Slug) ?? x.Genre;
+			// 	return x;
+			// });
+			// show.People = show.People?.Select(x =>
+			// {
+			// 	x.People = _database.Peoples.FirstOrDefault(y => y.Slug == x.Slug) ?? x.People;
+			// 	return x;
+			// });
+			// show.Seasons = show.Seasons?.Select(x => _database.Seasons.FirstOrDefault(y => y.SeasonNumber == x.SeasonNumber) ?? x);
+			// show.Episodes = show.Episodes?.Select(x => _database.Episodes.FirstOrDefault(y => y.EpisodeNumber == x.EpisodeNumber && y.SeasonNumber == x.SeasonNumber) ?? x);
+			//
 			_database.SaveChanges();
 			return show.ID;
 		}

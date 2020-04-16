@@ -65,7 +65,7 @@ namespace Kyoo
 
 	public class DatabaseContext : DbContext
 	{
-		public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) {}
+		public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) { }
 
 		public DbSet<Library> Libraries { get; set; }
 		public DbSet<Collection> Collections { get; set; }

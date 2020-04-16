@@ -47,13 +47,11 @@ namespace Kyoo.Api
 		{
 			if (!ModelState.IsValid)
 				return BadRequest(show);
-
+			show.ID = 0;
 			Show old = _libraryManager.GetShowBySlug(slug);
 			if (old == null)
 				return NotFound();
-			show.ID = 0;
-			//Should prevent duplicates (If the user put another studio, it is always created even if there is already a studio with the same slug.
-			old = Utility.Complete(old, show);
+			//old = Utility.Complete(old, show);
 			_libraryManager.RegisterShow(old);
 			return Ok();
 		}
