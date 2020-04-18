@@ -31,7 +31,7 @@ namespace Kyoo.Models
 		
 		public bool IsCollection;
 		
-		[JsonIgnore] public virtual IEnumerable<Genre> Genres
+		public virtual IEnumerable<Genre> Genres
 		{
 			get { return GenreLinks?.Select(x => x.Genre).OrderBy(x => x.Name); }
 			set { GenreLinks = value?.Select(x => new GenreLink(this, x)).ToList(); }
