@@ -55,6 +55,7 @@ namespace Kyoo.Controllers
 		//Register values
 		long RegisterCollection(Collection collection);
 		long RegisterShow(Show show);
+		long EditShow(Show show);
 		long RegisterMovie(Episode movie);
 		long RegisterSeason(Season season);
 		long RegisterEpisode(Episode episode);

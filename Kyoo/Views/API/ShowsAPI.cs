@@ -1,11 +1,10 @@
-﻿using Kyoo.Models;
+﻿using System;
+using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
-using System.Linq;
 using Kyoo.Controllers;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Kyoo.Models.Exceptions;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Api
 {
@@ -42,17 +41,21 @@ namespace Kyoo.Api
 		}
 		
 		[HttpPost("edit/{slug}")]
-		// [Authorize(Policy="Write")]
+		[Authorize(Policy="Write")]
 		public IActionResult EditShow(string slug, [FromBody] Show show)
-		{
-			if (!ModelState.IsValid)
-				return BadRequest(show);
+		{ 
+			if (!ModelState.IsValid) 
+				return BadRequest(show); 
 			show.ID = 0;
-			Show old = _libraryManager.GetShowBySlug(slug);
-			if (old == null)
+			show.Slug = slug;
+			try
+			{
+				_libraryManager.EditShow(show);
+			}
+			catch (ItemNotFound)
+			{
 				return NotFound();
-			//old = Utility.Complete(old, show);
-			_libraryManager.RegisterShow(old);
+			}
 			return Ok();
 		}
 	}

@@ -11,6 +11,8 @@ namespace Kyoo.Models
 		
 		// public IEnumerable<Show> Shows { get; set; }
 
+		public Genre() {}
+		
 		public Genre(string name)
 		{
 			Slug = Utility.ToSlug(name);

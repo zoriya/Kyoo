@@ -1,7 +1,10 @@
-﻿using Kyoo.Models;
+﻿using System;
+using Kyoo.Models;
 using Kyoo.Models.Watch;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers
@@ -347,27 +350,68 @@ namespace Kyoo.Controllers
 		{
 			if (show == null)
 				return 0;
-			
 			if (!_database.Entry(show).IsKeySet)
 				_database.Shows.Add(show);
-			
-			if (show.Studio != null) // Do not query it if the studio is already attached. // Do not set this value if the database does not found the studio.
-				show.Studio = _database.Studios.FirstOrDefault(x => x.Slug == show.Studio.Slug);
-			// show.GenreLinks = show.GenreLinks?.Select(x =>
-			// {
-			// 	x.Genre = _database.Genres.FirstOrDefault(y => y.Slug == x.Genre.Slug) ?? x.Genre;
-			// 	return x;
-			// });
-			// show.People = show.People?.Select(x =>
-			// {
-			// 	x.People = _database.Peoples.FirstOrDefault(y => y.Slug == x.Slug) ?? x.People;
-			// 	return x;
-			// });
-			// show.Seasons = show.Seasons?.Select(x => _database.Seasons.FirstOrDefault(y => y.SeasonNumber == x.SeasonNumber) ?? x);
-			// show.Episodes = show.Episodes?.Select(x => _database.Episodes.FirstOrDefault(y => y.EpisodeNumber == x.EpisodeNumber && y.SeasonNumber == x.SeasonNumber) ?? x);
-			//
 			_database.SaveChanges();
 			return show.ID;
+		}
+
+		public long EditShow(Show edited)
+		{
+			if (edited == null)
+				throw new ArgumentNullException(nameof(edited));
+
+			_database.ChangeTracker.LazyLoadingEnabled = false;
+			_database.ChangeTracker.AutoDetectChangesEnabled = false;
+
+			try
+			{
+				Show show = _database.Entry(edited).IsKeySet
+					? _database.Shows.FirstOrDefault(x => x.ID == edited.ID)
+					: GetShowBySlug(edited.Slug);
+
+				if (show == null)
+					throw new ItemNotFound($"No show could be found with the id {edited.ID} or the slug {edited.Slug}");
+				
+				Utility.Complete(show, edited);
+				
+				Studio tmp = _database.Studios.FirstOrDefault(x => x.Slug == edited.Studio.Slug);
+				if (tmp != null)
+					show.Studio = tmp;
+
+				show.GenreLinks = edited.GenreLinks?.Select(x =>
+				{
+					x.Genre = _database.Genres.FirstOrDefault(y => y.Slug == x.Genre.Slug) ?? x.Genre;
+					x.GenreID = x.Genre.ID;
+					return x;
+				}).ToList();
+				show.People = edited.People?.Select(x =>
+				{
+					x.People = _database.Peoples.FirstOrDefault(y => y.Slug == x.People.Slug) ?? x.People;
+					return x;
+				}).ToList();
+				show.Seasons = edited.Seasons?.Select(x =>
+				{
+					return _database.Seasons.FirstOrDefault(y => y.ShowID == x.ShowID
+					                                             && y.SeasonNumber == x.SeasonNumber) ?? x;
+				}).ToList();
+				show.Episodes = edited.Episodes?.Select(x =>
+				{
+					return _database.Episodes.FirstOrDefault(y => y.ShowID == x.ShowID 
+					                                              && y.SeasonNumber == x.SeasonNumber
+					                                              && y.EpisodeNumber == x.EpisodeNumber) ?? x;
+				}).ToList();
+
+				_database.ChangeTracker.DetectChanges();
+				_database.SaveChanges();
+			}
+			finally
+			{
+				_database.ChangeTracker.LazyLoadingEnabled = true;
+				_database.ChangeTracker.AutoDetectChangesEnabled = true;
+			}
+
+			return edited.ID;
 		}
 
 		public long RegisterMovie(Episode movie)
