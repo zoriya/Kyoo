@@ -1,5 +1,4 @@
-﻿using System;
-using Kyoo.Models;
+﻿using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using Kyoo.Controllers;

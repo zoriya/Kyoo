@@ -37,6 +37,7 @@ namespace Kyoo.Controllers
 		WatchItem GetWatchItem(string showSlug, long seasonNumber, long episodeNumber, bool complete = true);
 		WatchItem GetMovieWatchItem(string movieSlug);
 		People GetPeopleBySlug(string slug);
+		IEnumerable<Genre> GetGenres();
 		Genre GetGenreBySlug(string slug);
 		Studio GetStudioBySlug(string slug);
 		Collection GetCollection(string slug);
