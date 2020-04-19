@@ -127,5 +127,5 @@ namespace Kyoo.Models
 		}
 	}
 
-	public enum Status { Finished, Airing }
+	public enum Status { Finished, Airing, Planned }
 }
