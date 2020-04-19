@@ -24,6 +24,11 @@ namespace Kyoo.Controllers
 			return _database.Libraries;
 		}
 
+		public Library GetLibraryForShow(string showSlug)
+		{
+			return _database.LibraryLinks.FirstOrDefault(x => x.Show.Slug == showSlug)?.Library;
+		}
+
 		public IEnumerable<string> GetLibrariesPath()
 		{
 			IEnumerable<string> paths = new List<string>();

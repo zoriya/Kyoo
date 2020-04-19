@@ -67,5 +67,13 @@ namespace Kyoo.Api
 		{
 			return await _providerManager.SearchShows(name, isMovie, null);
 		}
+		
+		[HttpGet("details")]
+		[Authorize(Policy = "Read")]
+		public async Task<Show> IdentityShow([FromBody] Show show)
+		{
+			Library library = _libraryManager.GetLibraryForShow(show.Slug);
+			return await _providerManager.CompleteShow(show, library);
+		}
 	}
 }
