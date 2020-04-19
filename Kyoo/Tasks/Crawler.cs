@@ -136,6 +136,11 @@ namespace Kyoo.Controllers
 					People existing = _libraryManager.GetPeopleBySlug(x.Slug);
 					return existing != null ? new PeopleLink(existing, show, x.Role, x.Type) : x;
 				}).ToList();
+			show.Genres = show.Genres.Select(x =>
+			{
+				Genre existing = _libraryManager.GetGenreBySlug(x.Slug);
+				return existing ?? x;
+			});
 			return show;
 		}
 

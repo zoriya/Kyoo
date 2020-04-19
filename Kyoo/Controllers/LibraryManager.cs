@@ -2,7 +2,6 @@
 using Kyoo.Models;
 using Kyoo.Models.Watch;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
@@ -196,9 +195,14 @@ namespace Kyoo.Controllers
 			return (from people in _database.Peoples where people.Slug == slug select people).FirstOrDefault();
 		}
 
+		public IEnumerable<Genre> GetGenres()
+		{
+			return _database.Genres;
+		}
+		
 		public IEnumerable<Genre> GetGenreForShow(long showID)
 		{
-			return ((from show in _database.Shows where show.ID == showID select show.Genres).FirstOrDefault());
+			return (from show in _database.Shows where show.ID == showID select show.Genres).FirstOrDefault();
 		}
 
 		public Genre GetGenreBySlug(string slug)
@@ -368,7 +372,7 @@ namespace Kyoo.Controllers
 			{
 				Show show = _database.Entry(edited).IsKeySet
 					? _database.Shows.FirstOrDefault(x => x.ID == edited.ID)
-					: GetShowBySlug(edited.Slug);
+					: _database.Shows.FirstOrDefault(x => x.Slug == edited.Slug);
 
 				if (show == null)
 					throw new ItemNotFound($"No show could be found with the id {edited.ID} or the slug {edited.Slug}");
