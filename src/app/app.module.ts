@@ -38,6 +38,7 @@ import {CollectionsListComponent} from "./collection-list/collections-list.compo
 import { MetadataEditComponent } from './metadata-edit/metadata-edit.component';
 import {MatChipsModule} from "@angular/material/chips";
 import {MatAutocompleteModule} from "@angular/material/autocomplete";
+import {MatExpansionModule} from "@angular/material/expansion";
 
 
 @NgModule({
@@ -83,7 +84,8 @@ import {MatAutocompleteModule} from "@angular/material/autocomplete";
 		MatCheckboxModule,
 		AuthModule,
 		MatChipsModule,
-		MatAutocompleteModule
+		MatAutocompleteModule,
+		MatExpansionModule
 	],
 	bootstrap: [AppComponent]
 })
