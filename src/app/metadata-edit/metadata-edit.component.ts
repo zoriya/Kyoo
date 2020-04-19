@@ -43,6 +43,22 @@ export class MetadataEditComponent implements OnInit
 			this.dialogRef.close(this.show);	
 		});
 	}
+	
+	addAlias(event: MatChipInputEvent)
+	{
+		const input = event.input;
+		const value = event.value;
+
+		this.show.aliases.push(value);
+		if (input)
+			input.value = "";
+	}
+	
+	removeAlias(alias: string)
+	{
+		const i = this.show.aliases.indexOf(alias);
+		this.show.aliases.splice(i, 1);
+	}
 
 	addGenre(event: MatChipInputEvent)
 	{
@@ -57,8 +73,6 @@ export class MetadataEditComponent implements OnInit
 	
 	removeGenre(genre: Genre): void
 	{
-		console.log("Removing a genre");
-		console.log(genre);
 		const i = this.show.genres.indexOf(genre);
 		this.show.genres.splice(i, 1);
 	}

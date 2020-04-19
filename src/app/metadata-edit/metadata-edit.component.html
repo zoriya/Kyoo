@@ -5,6 +5,17 @@
 			<mat-label>Title</mat-label>
 			<input matInput [(ngModel)]="this.show.title" name="title">
 		</mat-form-field>
+
+        <mat-form-field class="w-100">
+            <mat-label>Aliases</mat-label>
+            <mat-chip-list #aliasList>
+                <mat-chip *ngFor="let alias of this.show.aliases" (removed)="removeAlias(alias)" removable="true">
+                    {{alias}}
+                    <mat-icon matChipRemove>cancel</mat-icon>
+                </mat-chip>
+                <input #aliasInput placeholder="New alias..." [matChipInputFor]="aliasList" (matChipInputTokenEnd)="addAlias($event)" />
+            </mat-chip-list>
+        </mat-form-field>
 	
 		<mat-form-field class="w-100">
 			<mat-label>Overview</mat-label>
@@ -52,10 +63,10 @@
 
         <mat-form-field class="w-100">
             <mat-label>Studio</mat-label>
-            <input matInput [value]="this.show.studio?.name" (input)="this.show.studio = {slug: null, name: $event.target.value}"
+            <input matInput [value]="this.show.studio?.name" (input)="this.show.studio = {slug: null, name: $event.target.value}; console.log(this.show.studio)"
                    [matAutocomplete]="studioAuto" name="studio">
-            <mat-autocomplete #studioAuto="matAutocomplete">
-                <mat-option *ngFor="let studio of this.allStudios" [value]="studio.name">
+            <mat-autocomplete #studioAuto="matAutocomplete"  (optionSelected)="this.show.studio = $event.option.value">
+                <mat-option *ngFor="let studio of this.allStudios" [value]="studio">
                     {{studio.name}}
                 </mat-option>
             </mat-autocomplete>
