@@ -1,0 +1,68 @@
+<h2 mat-dialog-title>Editing metadata of {{this.show.title}}</h2>
+<div matDialogContent>
+	<form #showForm="ngForm">
+		<mat-form-field class="w-100">
+			<mat-label>Title</mat-label>
+			<input matInput [(ngModel)]="this.show.title" name="title">
+		</mat-form-field>
+	
+		<mat-form-field class="w-100">
+			<mat-label>Overview</mat-label>
+			<textarea matInput [(ngModel)]="this.show.overview" name="overview"></textarea>
+		</mat-form-field>
+
+        <mat-form-field class="w-25 pr-3">
+            <mat-label>Start Year</mat-label>
+            <input matInput [(ngModel)]="this.show.startYear" name="startYear" type="number" [max]="this.show.endYear"/>
+        </mat-form-field>
+        <mat-form-field class="w-25 pr-3">
+            <mat-label>End Year</mat-label>
+            <input matInput [(ngModel)]="this.show.endYear" name="endYear" type="number" [min]="this.show.startYear"/>
+        </mat-form-field>
+        <mat-form-field class="w-50">
+            <mat-label>Status</mat-label>
+            <mat-select>
+                <mat-option value="Finished">Finished</mat-option>
+                <mat-option value="Airing">Airing</mat-option>
+                <mat-option value="Planned">Planned</mat-option>
+            </mat-select>
+        </mat-form-field>
+        
+        <mat-form-field class="w-100">
+            <mat-label>Genres</mat-label>
+            <mat-chip-list #genreList>
+                <mat-chip *ngFor="let genre of this.show.genres" (removed)="removeGenre(genre)" removable="true">
+                    {{genre.name}}
+                    <mat-icon matChipRemove>cancel</mat-icon>
+                </mat-chip>
+                <input #genreInput placeholder="New genre..." [matChipInputFor]="genreList" (matChipInputTokenEnd)="addGenre($event)"
+                       [matAutocomplete]="genreAuto" />
+                <mat-autocomplete #genreAuto="matAutocomplete" (optionSelected)="autocompleteGenre($event)">
+                    <mat-option *ngFor="let genre of this.allGenres" [value]="genre">
+                        {{genre.name}}
+                    </mat-option>
+                </mat-autocomplete>
+            </mat-chip-list>
+        </mat-form-field>
+
+        <mat-form-field class="w-100">
+            <mat-label>Trailer</mat-label>
+            <input matInput [(ngModel)]="this.show.trailerUrl" name="trailer">
+        </mat-form-field>
+
+        <mat-form-field class="w-100">
+            <mat-label>Studio</mat-label>
+            <input matInput [value]="this.show.studio?.name" (input)="this.show.studio = {slug: null, name: $event.target.value}"
+                   [matAutocomplete]="studioAuto" name="studio">
+            <mat-autocomplete #studioAuto="matAutocomplete">
+                <mat-option *ngFor="let studio of this.allStudios" [value]="studio.name">
+                    {{studio.name}}
+                </mat-option>
+            </mat-autocomplete>
+        </mat-form-field>
+	</form>
+</div>
+<div mat-dialog-actions align="end">
+	<button mat-button mat-dialog-close>Cancel</button>
+	<button mat-button (click)="apply()">Apply</button>
+</div>

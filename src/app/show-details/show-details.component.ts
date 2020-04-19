@@ -7,6 +7,8 @@ import { Episode } from "../../models/episode";
 import { Show } from "../../models/show";
 import {MatDialog} from "@angular/material/dialog";
 import {TrailerDialogComponent} from "../trailer-dialog/trailer-dialog.component";
+import {MetadataEditComponent} from "../metadata-edit/metadata-edit.component";
+import {Account} from "../../models/account";
 
 @Component({
 	selector: 'app-show-details',
@@ -92,6 +94,15 @@ export class ShowDetailsComponent implements OnInit
 
 	openTrailer()
 	{
-		this.dialog.open(TrailerDialogComponent, {width: "80%", height: "45vw", data: this.show.trailerUrl});
+		this.dialog.open(TrailerDialogComponent, {width: "80%", height: "45vw", data: this.show.trailerUrl, panelClass: "panel"});
+	}
+	
+	editMetadata()
+	{
+		this.dialog.open(MetadataEditComponent, {width: "80%", data: this.show}).afterClosed().subscribe((result: Show) =>
+		{
+			if (result)
+				this.show = result;
+		});
 	}
 }

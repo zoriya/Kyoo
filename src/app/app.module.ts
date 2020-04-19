@@ -35,6 +35,9 @@ import {AuthModule} from "./auth/auth.module";
 import {AuthRoutingModule} from "./auth/auth-routing.module";
 import { TrailerDialogComponent } from './trailer-dialog/trailer-dialog.component';
 import {CollectionsListComponent} from "./collection-list/collections-list.component";
+import { MetadataEditComponent } from './metadata-edit/metadata-edit.component';
+import {MatChipsModule} from "@angular/material/chips";
+import {MatAutocompleteModule} from "@angular/material/autocomplete";
 
 
 @NgModule({
@@ -52,7 +55,8 @@ import {CollectionsListComponent} from "./collection-list/collections-list.compo
 		PasswordValidator,
 		FallbackDirective,
 		TrailerDialogComponent,
-		CollectionsListComponent
+		CollectionsListComponent,
+		MetadataEditComponent
 	],
 	imports: [
 		BrowserModule,
@@ -77,7 +81,9 @@ import {CollectionsListComponent} from "./collection-list/collections-list.compo
 		FormsModule,
 		MatTabsModule,
 		MatCheckboxModule,
-		AuthModule
+		AuthModule,
+		MatChipsModule,
+		MatAutocompleteModule
 	],
 	bootstrap: [AppComponent]
 })

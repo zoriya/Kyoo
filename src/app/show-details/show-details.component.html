@@ -26,7 +26,7 @@
 				<button mat-icon-button matTooltipPosition="above" matTooltip="Watched">
 					<mat-icon>done</mat-icon>
 				</button>
-				<button mat-icon-button matTooltipPosition="above" matTooltip="More">
+				<button mat-icon-button matTooltipPosition="above" matTooltip="More" [matMenuTriggerFor]="showMenu">
 					<mat-icon>more_horiz</mat-icon>
 				</button>
 			</div>
@@ -39,12 +39,16 @@
 			</div>
 		</div>
 	</div>
+    
+    <mat-menu #showMenu="matMenu">
+        <button mat-menu-item (click)="editMetadata()">Edit metadata</button>
+    </mat-menu>
 
 	<div class="row pt-3 d-md-none">
 		<div class="col">
 			<p class="mr-1 d-inline-block">Studio: <b><a routerLink="/studio/{{this.show.studio?.slug}}">{{this.show.studio?.name}}</a></b></p>
 			 <div class="d-sm-none">
-				<p>Genres: <span *ngFor="let genre of this.show.genres; let isLast = last"><b><a routerLink="/genre/{{genre.slug}}">{{genre.name}}</a></b>{{isLast ? "" : ", "}}</span></p>
+                 <p>Genres: <span *ngFor="let genre of this.show.genres; let isLast = last"><b><a routerLink="/genre/{{genre.slug}}">{{genre.name}}</a></b>{{isLast ? "" : ", "}}</span></p>
 			</div>
 		</div>
 	</div>

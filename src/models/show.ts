@@ -7,7 +7,7 @@ export interface Show
 {
 	slug: string;
 	title: string;
-	Aliases: string[];
+	aliases: string[];
 	overview: string;
 	genres: Genre[];
 	status: string;
