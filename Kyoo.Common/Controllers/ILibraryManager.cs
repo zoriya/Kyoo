@@ -27,6 +27,7 @@ namespace Kyoo.Controllers
 		IEnumerable<Show> SearchShows(string searchQuery);
 		IEnumerable<Collection> SearchCollections(string searchQuery);
 		Library GetLibrary(string librarySlug);
+		Library GetLibraryForShow(string showSlug);
 		IEnumerable<Library> GetLibraries();
 		IEnumerable<Studio> GetStudios();
 		Show GetShowBySlug(string slug);

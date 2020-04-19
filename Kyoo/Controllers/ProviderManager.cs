@@ -2,6 +2,7 @@
 using Kyoo.Models;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Mail;
 using System.Threading.Tasks;
 
 namespace Kyoo.Controllers
@@ -20,14 +21,15 @@ namespace Kyoo.Controllers
 		{
 			T ret = new T();
 
-			if (library.Providers == null)
-				return ret;
+			IEnumerable<IMetadataProvider> providers = library?.Providers != null
+				? _providers.OrderBy(provider => Array.IndexOf(library.Providers, provider.Name))
+				: _providers;
 			
-			foreach (IMetadataProvider provider in _providers.OrderBy(provider => Array.IndexOf(library.Providers, provider.Name)))
+			foreach (IMetadataProvider provider in providers)
 			{
 				try
 				{
-					if (library.Providers.Contains(provider.Name))
+					if (library?.Providers == null || library.Providers.Contains(provider.Name))
 						ret = ret.Merge(await providerCall(provider));
 				} catch (Exception ex) {
 					Console.Error.WriteLine($"\tThe provider {provider.Name} coudln't work for {what}. Exception: {ex.Message}");
@@ -40,14 +42,15 @@ namespace Kyoo.Controllers
 		{
 			List<T> ret = new List<T>();
 			
-			if (library.Providers == null)
-				return ret;
+			IEnumerable<IMetadataProvider> providers = library?.Providers != null
+				? _providers.OrderBy(provider => Array.IndexOf(library.Providers, provider.Name))
+				: _providers;
 			
-			foreach (IMetadataProvider provider in _providers.OrderBy(provider => Array.IndexOf(library.Providers, provider.Name)))
+			foreach (IMetadataProvider provider in providers)
 			{
 				try
 				{
-					if (library.Providers.Contains(provider.Name))
+					if (library?.Providers == null || library.Providers.Contains(provider.Name))
 						ret.AddRange(await providerCall(provider) ?? new List<T>());
 				} catch (Exception ex) {
 					Console.Error.WriteLine($"\tThe provider {provider.Name} coudln't work for {what}. Exception: {ex.Message}");
@@ -64,9 +67,20 @@ namespace Kyoo.Controllers
 			return collection;
 		}
 
+		public async Task<Show> CompleteShow(Show show, Library library)
+		{
+			return await GetMetadata(provider => provider.GetShowByID(show), library, $"the show {show.Title}");
+		}
+
 		public async Task<Show> SearchShow(string showName, bool isMovie, Library library)
 		{
-			Show show = await GetMetadata(async provider => (await provider.GetShowsFromName(showName, isMovie))?.FirstOrDefault(), library, $"the show {showName}");
+			Show show = await GetMetadata(async provider =>
+			{
+				Show searchResult = (await provider.SearchShows(showName, isMovie))?.FirstOrDefault();
+				if (searchResult == null)
+					return null;
+				return await provider.GetShowByID(searchResult);
+			}, library, $"the show {showName}");
 			show.Slug = Utility.ToSlug(showName);
 			show.Title ??= showName;
 			show.IsMovie = isMovie;
@@ -75,7 +89,7 @@ namespace Kyoo.Controllers
 		
 		public async Task<IEnumerable<Show>> SearchShows(string showName, bool isMovie, Library library)
 		{
-			IEnumerable<Show> shows = await GetMetadata(provider => provider.GetShowsFromName(showName, isMovie), library, $"the show {showName}");
+			IEnumerable<Show> shows = await GetMetadata(provider => provider.SearchShows(showName, isMovie), library, $"the show {showName}");
 			return shows.Select(show =>
 			{
 				show.Slug = Utility.ToSlug(showName);
