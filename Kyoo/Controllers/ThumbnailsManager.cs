@@ -68,7 +68,7 @@ namespace Kyoo.Controllers
 			return show;
 		}
 
-		public async Task<IEnumerable<PeopleLink>> Validate(List<PeopleLink> people)
+		public async Task<IEnumerable<PeopleLink>> Validate(IEnumerable<PeopleLink> people)
 		{
 			if (people == null)
 				return null;

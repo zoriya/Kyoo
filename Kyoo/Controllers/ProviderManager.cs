@@ -9,15 +9,14 @@ namespace Kyoo.Controllers
 	public class ProviderManager : IProviderManager
 	{
 		private readonly IEnumerable<IMetadataProvider> _providers;
-		private readonly IThumbnailsManager _thumbnailsManager;
 
-		public ProviderManager(IThumbnailsManager thumbnailsManager, IPluginManager pluginManager)
+		public ProviderManager(IPluginManager pluginManager)
 		{
-			_thumbnailsManager = thumbnailsManager;
 			_providers = pluginManager.GetPlugins<IMetadataProvider>();
 		}
 
-		public async Task<T> GetMetadata<T>(Func<IMetadataProvider, Task<T>> providerCall, Library library, string what) where T : IMergable<T>, new()
+		private async Task<T> GetMetadata<T>(Func<IMetadataProvider, Task<T>> providerCall, Library library, string what) 
+			where T : IMergable<T>, new()
 		{
 			T ret = new T();
 
@@ -36,8 +35,8 @@ namespace Kyoo.Controllers
 			}
 			return ret;
 		}
-		
-		public async Task<IEnumerable<T>> GetMetadata<T>(Func<IMetadataProvider, Task<IEnumerable<T>>> providerCall, Library library, string what)
+
+		private async Task<IEnumerable<T>> GetMetadata<T>(Func<IMetadataProvider, Task<IEnumerable<T>>> providerCall, Library library, string what)
 		{
 			List<T> ret = new List<T>();
 			
@@ -65,15 +64,25 @@ namespace Kyoo.Controllers
 			return collection;
 		}
 
-		public async Task<Show> GetShowFromName(string showName, string showPath, bool isMovie, Library library)
+		public async Task<Show> SearchShow(string showName, bool isMovie, Library library)
 		{
-			Show show = await GetMetadata(provider => provider.GetShowFromName(showName, isMovie), library, $"the show {showName}");
-			show.Path = showPath;
+			Show show = await GetMetadata(async provider => (await provider.GetShowsFromName(showName, isMovie))?.FirstOrDefault(), library, $"the show {showName}");
 			show.Slug = Utility.ToSlug(showName);
 			show.Title ??= showName;
 			show.IsMovie = isMovie;
-			await _thumbnailsManager.Validate(show);
 			return show;
+		}
+		
+		public async Task<IEnumerable<Show>> SearchShows(string showName, bool isMovie, Library library)
+		{
+			IEnumerable<Show> shows = await GetMetadata(provider => provider.GetShowsFromName(showName, isMovie), library, $"the show {showName}");
+			return shows.Select(show =>
+			{
+				show.Slug = Utility.ToSlug(showName);
+				show.Title ??= showName;
+				show.IsMovie = isMovie;
+				return show;
+			});
 		}
 
 		public async Task<Season> GetSeason(Show show, long seasonNumber, Library library)
@@ -93,14 +102,12 @@ namespace Kyoo.Controllers
 			episode.SeasonNumber = episode.SeasonNumber != -1 ? episode.SeasonNumber : seasonNumber;
 			episode.EpisodeNumber = episode.EpisodeNumber != -1 ? episode.EpisodeNumber : episodeNumber;
 			episode.AbsoluteNumber = episode.AbsoluteNumber != -1 ? episode.AbsoluteNumber : absoluteNumber;
-			await _thumbnailsManager.Validate(episode);
 			return episode;
 		}
 
 		public async Task<IEnumerable<PeopleLink>> GetPeople(Show show, Library library)
 		{
 			IEnumerable<PeopleLink> people = await GetMetadata(provider => provider.GetPeople(show), library, $"a cast member of {show.Title}");
-			people = await _thumbnailsManager.Validate(people.ToList());
 			return people;
 		}
 	}
