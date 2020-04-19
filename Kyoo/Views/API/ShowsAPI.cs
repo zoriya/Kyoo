@@ -1,6 +1,7 @@
 ﻿using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models.Exceptions;
 using Microsoft.AspNetCore.Authorization;
@@ -10,13 +11,15 @@ namespace Kyoo.Api
 	[Route("api/shows")]
 	[Route("api/show")]
 	[ApiController]
-	public class ShowsController : ControllerBase
+	public class ShowsAPI : ControllerBase
 	{
 		private readonly ILibraryManager _libraryManager;
+		private readonly IProviderManager _providerManager;
 
-		public ShowsController(ILibraryManager libraryManager)
+		public ShowsAPI(ILibraryManager libraryManager, IProviderManager providerManager)
 		{
 			_libraryManager = libraryManager;
+			_providerManager = providerManager;
 		}
 
 		[HttpGet]
@@ -56,6 +59,13 @@ namespace Kyoo.Api
 				return NotFound();
 			}
 			return Ok();
+		}
+
+		[HttpGet("identify/{name}")]
+		[Authorize(Policy = "Read")]
+		public async Task<IEnumerable<Show>> IdentityShow(string name, [FromQuery] bool isMovie)
+		{
+			return await _providerManager.SearchShows(name, isMovie, null);
 		}
 	}
 }

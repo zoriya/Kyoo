@@ -22,6 +22,7 @@ namespace Kyoo.Controllers
 		public int Priority => 0;
 		
 		private ILibraryManager _libraryManager;
+		private IThumbnailsManager _thumbnailsManager;
 		private IProviderManager _metadataProvider;
 		private ITranscoder _transcoder;
 		private IConfiguration _config;
@@ -41,6 +42,7 @@ namespace Kyoo.Controllers
 		{
 			using IServiceScope serviceScope = serviceProvider.CreateScope();
 			_libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
+			_thumbnailsManager = serviceScope.ServiceProvider.GetService<IThumbnailsManager>();
 			_metadataProvider = serviceScope.ServiceProvider.GetService<IProviderManager>();
 			_transcoder = serviceScope.ServiceProvider.GetService<ITranscoder>();
 			_config = serviceScope.ServiceProvider.GetService<IConfiguration>();
@@ -129,18 +131,21 @@ namespace Kyoo.Controllers
 			Show show = _libraryManager.GetShow(showPath);
 			if (show != null)
 				return show;
-			show = await _metadataProvider.GetShowFromName(showTitle, showPath, isMovie, library);
+			show = await _metadataProvider.SearchShow(showTitle, isMovie, library);
+			show.Path = showPath;
 			show.People = (await _metadataProvider.GetPeople(show, library)).GroupBy(x => x.Slug).Select(x => x.First())
 				.Select(x =>
 				{
 					People existing = _libraryManager.GetPeopleBySlug(x.Slug);
 					return existing != null ? new PeopleLink(existing, show, x.Role, x.Type) : x;
 				}).ToList();
+			show.People = await _thumbnailsManager.Validate(show.People);
 			show.Genres = show.Genres.Select(x =>
 			{
 				Genre existing = _libraryManager.GetGenreBySlug(x.Slug);
 				return existing ?? x;
 			});
+			await _thumbnailsManager.Validate(show);
 			return show;
 		}
 
@@ -166,7 +171,8 @@ namespace Kyoo.Controllers
 				Console.Error.WriteLine("\tError: You don't have any provider that support absolute epiode numbering. Install one and try again.");
 				return null;
 			}
-
+			
+			await _thumbnailsManager.Validate(episode);
 			await GetTracks(episode);
 			return episode;
 		}
@@ -193,8 +199,11 @@ namespace Kyoo.Controllers
 
 		private static IEnumerable<Track> GetExtractedSubtitles(Episode episode)
 		{
-			string path = Path.Combine(Path.GetDirectoryName(episode.Path), "Subtitles");
 			List<Track> tracks = new List<Track>();
+			
+			if (episode.Path == null)
+				return tracks;
+			string path = Path.Combine(Path.GetDirectoryName(episode.Path)!, "Subtitles");
 			
 			if (!Directory.Exists(path)) 
 				return tracks;
@@ -202,7 +211,7 @@ namespace Kyoo.Controllers
 			{
 				string episodeLink = Path.GetFileNameWithoutExtension(episode.Path);
 
-				if (!sub.Contains(episodeLink))
+				if (!sub.Contains(episodeLink!))
 					continue;
 				string language = sub.Substring(Path.GetDirectoryName(sub).Length + episodeLink.Length + 2, 3);
 				bool isDefault = sub.Contains("default");
