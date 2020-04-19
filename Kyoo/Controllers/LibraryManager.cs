@@ -210,6 +210,11 @@ namespace Kyoo.Controllers
 			return (from genre in _database.Genres where genre.Slug == slug select genre).FirstOrDefault();
 		}
 
+		public IEnumerable<Studio> GetStudios()
+		{
+			return _database.Studios;
+		}
+		
 		public Studio GetStudio(long showID)
 		{
 			return (from show in _database.Shows where show.ID == showID select show.Studio).FirstOrDefault();
@@ -371,20 +376,27 @@ namespace Kyoo.Controllers
 			try
 			{
 				Show show = _database.Entry(edited).IsKeySet
-					? _database.Shows.FirstOrDefault(x => x.ID == edited.ID)
-					: _database.Shows.FirstOrDefault(x => x.Slug == edited.Slug);
+					? _database.Shows.Include(x => x.GenreLinks).FirstOrDefault(x => x.ID == edited.ID)
+					: _database.Shows.Include(x => x.GenreLinks).FirstOrDefault(x => x.Slug == edited.Slug);
 
 				if (show == null)
 					throw new ItemNotFound($"No show could be found with the id {edited.ID} or the slug {edited.Slug}");
 				
 				Utility.Complete(show, edited);
-				
-				Studio tmp = _database.Studios.FirstOrDefault(x => x.Slug == edited.Studio.Slug);
-				if (tmp != null)
-					show.Studio = tmp;
+
+				if (edited.Studio != null)
+				{
+					if (edited.Studio.Slug == null)
+						edited.Studio.Slug = Utility.ToSlug(edited.Studio.Name);
+					Studio tmp = _database.Studios.FirstOrDefault(x => x.Slug == edited.Studio.Slug);
+					if (tmp != null)
+						show.Studio = tmp;
+				}
 
 				show.GenreLinks = edited.GenreLinks?.Select(x =>
 				{
+					if (x.Genre.Slug == null)
+						x.Genre.Slug = Utility.ToSlug(x.Genre.Name);
 					x.Genre = _database.Genres.FirstOrDefault(y => y.Slug == x.Genre.Slug) ?? x.Genre;
 					x.GenreID = x.Genre.ID;
 					return x;

@@ -28,6 +28,7 @@ namespace Kyoo.Controllers
 		IEnumerable<Collection> SearchCollections(string searchQuery);
 		Library GetLibrary(string librarySlug);
 		IEnumerable<Library> GetLibraries();
+		IEnumerable<Studio> GetStudios();
 		Show GetShowBySlug(string slug);
 		Show GetShow(string path);
 		Season GetSeason(string showSlug, long seasonNumber);
