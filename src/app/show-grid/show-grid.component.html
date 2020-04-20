@@ -1,0 +1,11 @@
+<div class="container-fluid">
+    <a class="show" *ngFor="let show of this.shows" href="/show/{{show.slug}}" routerLink="show/{{show.slug}}">
+        <mat-card>
+            <div matRipple [style.background-image]="getThumb(show.slug)" > </div>
+            <p class="title">{{show.title}}</p>
+            <p class="date" *ngIf="show.endYear && show.startYear != show.endYear; else elseBlock">{{show.startYear}} - {{show.endYear}}</p>
+            <ng-template #elseBlock><p class="date">{{show.startYear}}</p></ng-template>
+            <p class="overview">{{show.overview}}</p>
+        </mat-card>
+    </a>
+</div>

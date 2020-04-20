@@ -39,6 +39,7 @@ import { MetadataEditComponent } from './metadata-edit/metadata-edit.component';
 import {MatChipsModule} from "@angular/material/chips";
 import {MatAutocompleteModule} from "@angular/material/autocomplete";
 import {MatExpansionModule} from "@angular/material/expansion";
+import { ShowGridComponent } from './show-grid/show-grid.component';
 
 
 @NgModule({
@@ -57,7 +58,8 @@ import {MatExpansionModule} from "@angular/material/expansion";
 		FallbackDirective,
 		TrailerDialogComponent,
 		CollectionsListComponent,
-		MetadataEditComponent
+		MetadataEditComponent,
+		ShowGridComponent
 	],
 	imports: [
 		BrowserModule,

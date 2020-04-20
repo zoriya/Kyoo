@@ -20,36 +20,23 @@ button
 
 .show
 {
-	width: 28%;
-	min-width: 120px;
-	max-width: 168px;
+	width: 100%;
+	min-width: 300px;
 	list-style: none;
 	margin: .5em;
 	text-decoration: none;
 	color: inherit;
 	outline: none;
-
-	@include media-breakpoint-up(sm)
-	{
-		width: 20%;
-	}
-
-	@include media-breakpoint-up(md)
-	{
-		width: 18%;
-		margin: 1em;
-	}
-
+	
 	@include media-breakpoint-up(lg)
 	{
-		width: 18%;
+		width: 50%;
 	}
 
 	@include media-breakpoint-up(xl)
 	{
-		width: 15%;
+		width: 33%;
 	}
-
 
 	&:focus, &:hover
 	{
