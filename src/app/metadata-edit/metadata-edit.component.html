@@ -84,7 +84,7 @@
                 <mat-panel-title>Identify show</mat-panel-title>
                 <mat-panel-description>Search on metadata providers</mat-panel-description>
             </mat-expansion-panel-header>
-            <p>Comming soon</p>
+            <app-browse [sortEnabled]="false" [shows]="this.identityShow(this.show.title) | async"></app-browse>
         </mat-expansion-panel>
     </mat-accordion>
 </div>

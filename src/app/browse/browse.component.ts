@@ -11,6 +11,7 @@ import { Show } from "../../models/show";
 export class BrowseComponent
 {
 	@Input() shows: Show[];
+	@Input() sortEnabled: boolean = true;
 	sortType: string = "title";
 	sortUp: boolean = true;
 
