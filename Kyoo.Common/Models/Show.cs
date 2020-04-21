@@ -20,7 +20,7 @@ namespace Kyoo.Models
 		public long? StartYear { get; set; }
 		public long? EndYear { get; set; }
 
-		[JsonIgnore] public string ImgPrimary { get; set; }
+		public string ImgPrimary { get; set; }
 		[JsonIgnore] public string ImgThumb { get; set; }
 		[JsonIgnore] public string ImgLogo { get; set; }
 		[JsonIgnore] public string ImgBackdrop { get; set; }
