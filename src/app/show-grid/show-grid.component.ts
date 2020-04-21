@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {AfterViewInit, Component, Input, OnInit} from '@angular/core';
 import {Show} from "../../models/show";
 import {DomSanitizer} from "@angular/platform-browser";
 
