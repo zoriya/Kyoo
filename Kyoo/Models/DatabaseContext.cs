@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using IdentityServer4.EntityFramework.Entities;
@@ -92,6 +93,7 @@ namespace Kyoo
 		private ValueComparer<string[]> stringArrayComparer = new ValueComparer<string[]>(
 			(l1, l2) => l1.SequenceEqual(l2),
 			arr => arr.Aggregate(0, (i, s) => s.GetHashCode()));
+		
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
@@ -100,6 +102,12 @@ namespace Kyoo
 			modelBuilder.Entity<Library>().Property(e => e.Paths).HasConversion(stringArrayConverter).Metadata.SetValueComparer(stringArrayComparer);
 			modelBuilder.Entity<Library>().Property(e => e.Providers).HasConversion(stringArrayConverter).Metadata.SetValueComparer(stringArrayComparer);
 			modelBuilder.Entity<Show>().Property(e => e.Aliases).HasConversion(stringArrayConverter).Metadata.SetValueComparer(stringArrayComparer);
+			modelBuilder.Entity<Show>().Property(e => e.ExternalIDs).HasConversion(new ValueConverter<IEnumerable<MetadataID>, string>(
+				ids => string.Join("|", ids.Select(x => $"{x.ProviderName}={x.ID}")),
+				ids => ids.Split('|', StringSplitOptions.None).Select(x => new MetadataID(x))))
+				.Metadata.SetValueComparer( new ValueComparer<IEnumerable<MetadataID>>(
+					(l1, l2) => l1.SequenceEqual(l2),
+					arr => arr.Aggregate(0, (i, s) => s.GetHashCode())));
 
 			modelBuilder.Entity<Track>()
 				.Property(t => t.IsDefault)
