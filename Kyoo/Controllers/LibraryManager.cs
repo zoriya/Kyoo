@@ -35,12 +35,6 @@ namespace Kyoo.Controllers
 			return Enumerable.Aggregate(_database.Libraries, paths, (current, lib) => current.Concat(lib.Paths));
 		}
 
-		public string GetShowExternalIDs(long showID)
-		{
-			return (from show in _database.Shows where show.ID == showID select show.ExternalIDs).FirstOrDefault();
-		}
-
-
 		public (Track video, IEnumerable<Track> audios, IEnumerable<Track> subtitles) GetStreams(long episodeID, string episodeSlug)
 		{
 			IEnumerable<Track> tracks = _database.Tracks.Where(track => track.EpisodeID == episodeID);

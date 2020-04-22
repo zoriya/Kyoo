@@ -6,7 +6,6 @@ namespace Kyoo.Controllers
 	public interface ILibraryManager
 	{
 		//Read values
-		string GetShowExternalIDs(long showID);
 		Studio GetStudio(long showID);
 		IEnumerable<PeopleLink> GetPeople(long showID);
 		IEnumerable<Genre> GetGenreForShow(long showID);

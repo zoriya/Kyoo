@@ -25,7 +25,7 @@ namespace Kyoo.Models
 		[JsonIgnore] public string ImgLogo { get; set; }
 		[JsonIgnore] public string ImgBackdrop { get; set; }
 
-		public string ExternalIDs { get; set; }
+		public IEnumerable<MetadataID> ExternalIDs { get; set; }
 
 		public bool IsMovie { get; set; }
 		
@@ -42,21 +42,18 @@ namespace Kyoo.Models
 		[JsonIgnore] public virtual IEnumerable<Season> Seasons { get; set; }
 		[JsonIgnore] public virtual IEnumerable<Episode> Episodes { get; set; }
 
-
-		public string GetAliases()
-		{
-			return Aliases == null ? null : string.Join('|', Aliases);
-		}
-
-		public string GetGenres()
-		{
-			return Genres == null ? null : string.Join('|', Genres);
-		}
-
-
 		public Show() { }
 
-		public Show(string slug, string title, IEnumerable<string> aliases, string path, string overview, string trailerUrl, IEnumerable<Genre> genres, Status? status, long? startYear, long? endYear, string externalIDs)
+		public Show(string slug, 
+			string title,
+			IEnumerable<string> aliases,
+			string path, string overview,
+			string trailerUrl,
+			IEnumerable<Genre> genres,
+			Status? status,
+			long? startYear,
+			long? endYear,
+			IEnumerable<MetadataID> externalIDs)
 		{
 			Slug = slug;
 			Title = title;
@@ -72,7 +69,20 @@ namespace Kyoo.Models
 			IsCollection = false;
 		}
 
-		public Show(string slug, string title, IEnumerable<string> aliases, string path, string overview, string trailerUrl, Status? status, long? startYear, long? endYear, string imgPrimary, string imgThumb, string imgLogo, string imgBackdrop, string externalIDs)
+		public Show(string slug,
+			string title, 
+			IEnumerable<string> aliases, 
+			string path,
+			string overview, 
+			string trailerUrl,
+			Status? status, 
+			long? startYear,
+			long? endYear,
+			string imgPrimary,
+			string imgThumb, 
+			string imgLogo, 
+			string imgBackdrop,
+			IEnumerable<MetadataID> externalIDs)
 		{
 			Slug = slug;
 			Title = title;
@@ -93,12 +103,7 @@ namespace Kyoo.Models
 
 		public string GetID(string provider)
 		{
-			if (ExternalIDs?.Contains(provider) != true)
-				return null;
-			int startIndex = ExternalIDs.IndexOf(provider, StringComparison.Ordinal) + provider.Length + 1; //The + 1 is for the '='
-			if (ExternalIDs.IndexOf('|', startIndex) == -1)
-				return ExternalIDs.Substring(startIndex);
-			return ExternalIDs.Substring(startIndex, ExternalIDs.IndexOf('|', startIndex) - startIndex);
+			return ExternalIDs.FirstOrDefault(x => x.ProviderName == provider)?.ID;
 		}
 		
 		public Show Merge(Show other)
@@ -122,7 +127,7 @@ namespace Kyoo.Models
 			ImgLogo ??= other.ImgLogo;
 			ImgBackdrop ??= other.ImgBackdrop;
 			Studio ??= other.Studio;
-			ExternalIDs = string.Join('|', new [] { ExternalIDs, other.ExternalIDs }.Where(x => !string.IsNullOrEmpty(x)));
+			ExternalIDs = Utility.MergeLists(ExternalIDs, other.ExternalIDs, (x, y) => x.ProviderName == y.ProviderName);
 			return this;
 		}
 	}
