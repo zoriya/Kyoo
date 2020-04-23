@@ -111,9 +111,6 @@ namespace Kyoo
 			modelBuilder.Entity<Track>()
 				.Property(t => t.IsForced)
 				.ValueGeneratedNever();
-			
-			modelBuilder.Entity<People>()
-				.HasKey(x => x.Slug);
 
 			modelBuilder.Entity<GenreLink>()
 				.HasKey(x => new {x.ShowID, x.GenreID});

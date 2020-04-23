@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Newtonsoft.Json;
 
 namespace Kyoo.Models
@@ -15,14 +14,20 @@ namespace Kyoo.Models
 		public long? Year { get; set; }
 
 		[JsonIgnore] public string ImgPrimary { get; set; }
-		public string ExternalIDs { get; set; }
+		public virtual IEnumerable<MetadataID> ExternalIDs { get; set; }
 
 		[JsonIgnore] public virtual Show Show { get; set; }
 		[JsonIgnore] public virtual IEnumerable<Episode> Episodes { get; set; }
 
 		public Season() { }
 
-		public Season(long showID, long seasonNumber, string title, string overview, long? year, string imgPrimary, string externalIDs)
+		public Season(long showID, 
+			long seasonNumber,
+			string title, 
+			string overview,
+			long? year,
+			string imgPrimary,
+			IEnumerable<MetadataID> externalIDs)
 		{
 			ShowID = showID;
 			SeasonNumber = seasonNumber;
@@ -45,7 +50,8 @@ namespace Kyoo.Models
 			Overview ??= other.Overview;
 			Year ??= other.Year;
 			ImgPrimary ??= other.ImgPrimary;
-			ExternalIDs = string.Join('|', new [] { ExternalIDs, other.ExternalIDs }.Where(x => !string.IsNullOrEmpty(x)));
+			ExternalIDs = Utility.MergeLists(ExternalIDs, other.ExternalIDs,
+				(x, y) => x.Provider.Name == y.Provider.Name);
 			return this;
 		}
 	}

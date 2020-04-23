@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace Kyoo.Models
@@ -20,7 +21,7 @@ namespace Kyoo.Models
 			set => People.Name = value;
 		}
 		
-		public string ExternalIDs
+		public IEnumerable<MetadataID> ExternalIDs
 		{
 			get => People.ExternalIDs;
 			set => People.ExternalIDs = value;
@@ -41,7 +42,7 @@ namespace Kyoo.Models
 			Type = type;
 		}
 
-		public PeopleLink(string slug, string name, string role, string type, string imgPrimary, string externalIDs)
+		public PeopleLink(string slug, string name, string role, string type, string imgPrimary, IEnumerable<MetadataID> externalIDs)
 		{
 			People = new People(slug, name, imgPrimary, externalIDs);
 			Role = role;

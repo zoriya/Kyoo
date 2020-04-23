@@ -57,14 +57,15 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "Peoples",
                 columns: table => new
                 {
-                    Slug = table.Column<string>(nullable: false),
+                    ID = table.Column<long>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Slug = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true),
-                    ImgPrimary = table.Column<string>(nullable: true),
-                    ExternalIDs = table.Column<string>(nullable: true)
+                    ImgPrimary = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Peoples", x => x.Slug);
+                    table.PrimaryKey("PK_Peoples", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -212,40 +213,13 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 });
 
             migrationBuilder.CreateTable(
-                name: "MetadataIds",
-                columns: table => new
-                {
-                    ID = table.Column<long>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    ShowID = table.Column<long>(nullable: false),
-                    ProviderID = table.Column<long>(nullable: false),
-                    DataID = table.Column<string>(nullable: true),
-                    Link = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MetadataIds", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_MetadataIds_ProviderIds_ProviderID",
-                        column: x => x.ProviderID,
-                        principalTable: "ProviderIds",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_MetadataIds_Shows_ShowID",
-                        column: x => x.ShowID,
-                        principalTable: "Shows",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "PeopleLinks",
                 columns: table => new
                 {
                     ID = table.Column<long>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     PeopleID = table.Column<string>(nullable: true),
+                    PeopleID1 = table.Column<long>(nullable: true),
                     ShowID = table.Column<long>(nullable: false),
                     Role = table.Column<string>(nullable: true),
                     Type = table.Column<string>(nullable: true)
@@ -254,10 +228,10 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 {
                     table.PrimaryKey("PK_PeopleLinks", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_PeopleLinks_Peoples_PeopleID",
-                        column: x => x.PeopleID,
+                        name: "FK_PeopleLinks_Peoples_PeopleID1",
+                        column: x => x.PeopleID1,
                         principalTable: "Peoples",
-                        principalColumn: "Slug",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_PeopleLinks_Shows_ShowID",
@@ -311,8 +285,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     Title = table.Column<string>(nullable: true),
                     Overview = table.Column<string>(nullable: true),
                     Year = table.Column<long>(nullable: true),
-                    ImgPrimary = table.Column<string>(nullable: true),
-                    ExternalIDs = table.Column<string>(nullable: true)
+                    ImgPrimary = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -341,8 +314,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     Overview = table.Column<string>(nullable: true),
                     ReleaseDate = table.Column<DateTime>(nullable: true),
                     Runtime = table.Column<long>(nullable: false),
-                    ImgPrimary = table.Column<string>(nullable: true),
-                    ExternalIDs = table.Column<string>(nullable: true)
+                    ImgPrimary = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -359,6 +331,55 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         principalTable: "Shows",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MetadataIds",
+                columns: table => new
+                {
+                    ID = table.Column<long>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ProviderID = table.Column<long>(nullable: false),
+                    ShowID = table.Column<long>(nullable: true),
+                    EpisodeID = table.Column<long>(nullable: true),
+                    SeasonID = table.Column<long>(nullable: true),
+                    PeopleID = table.Column<long>(nullable: true),
+                    DataID = table.Column<string>(nullable: true),
+                    Link = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MetadataIds", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_MetadataIds_Episodes_EpisodeID",
+                        column: x => x.EpisodeID,
+                        principalTable: "Episodes",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_MetadataIds_Peoples_PeopleID",
+                        column: x => x.PeopleID,
+                        principalTable: "Peoples",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_MetadataIds_ProviderIds_ProviderID",
+                        column: x => x.ProviderID,
+                        principalTable: "ProviderIds",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_MetadataIds_Seasons_SeasonID",
+                        column: x => x.SeasonID,
+                        principalTable: "Seasons",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_MetadataIds_Shows_ShowID",
+                        column: x => x.ShowID,
+                        principalTable: "Shows",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -447,9 +468,24 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 column: "ShowID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_MetadataIds_EpisodeID",
+                table: "MetadataIds",
+                column: "EpisodeID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MetadataIds_PeopleID",
+                table: "MetadataIds",
+                column: "PeopleID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_MetadataIds_ProviderID",
                 table: "MetadataIds",
                 column: "ProviderID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MetadataIds_SeasonID",
+                table: "MetadataIds",
+                column: "SeasonID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MetadataIds_ShowID",
@@ -457,9 +493,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 column: "ShowID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PeopleLinks_PeopleID",
+                name: "IX_PeopleLinks_PeopleID1",
                 table: "PeopleLinks",
-                column: "PeopleID");
+                column: "PeopleID1");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PeopleLinks_ShowID",
