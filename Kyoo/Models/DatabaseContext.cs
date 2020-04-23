@@ -85,6 +85,7 @@ namespace Kyoo
 		
 		// This is used because EF doesn't support Many-To-Many relationships so for now we need to override the getter/setters to store this.
 		public DbSet<GenreLink> GenreLinks { get; set; }
+		public DbSet<ProviderLink> ProviderLinks { get; set; }
 		
 		
 		private ValueConverter<string[], string> stringArrayConverter = new ValueConverter<string[], string>(
@@ -101,7 +102,6 @@ namespace Kyoo
 			base.OnModelCreating(modelBuilder);
 
 			modelBuilder.Entity<Library>().Property(e => e.Paths).HasConversion(stringArrayConverter).Metadata.SetValueComparer(stringArrayComparer);
-			modelBuilder.Entity<Library>().Property(e => e.Providers).HasConversion(stringArrayConverter).Metadata.SetValueComparer(stringArrayComparer);
 			modelBuilder.Entity<Show>().Property(e => e.Aliases).HasConversion(stringArrayConverter).Metadata.SetValueComparer(stringArrayComparer);
 
 			modelBuilder.Entity<Track>()

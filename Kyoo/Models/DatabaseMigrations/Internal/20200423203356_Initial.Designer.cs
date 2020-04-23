@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kyoo.Models.DatabaseMigrations.Internal
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20200414223325_Initial")]
+    [Migration("20200423203356_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -166,9 +166,6 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     b.Property<string>("Paths")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("Providers")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Slug")
                         .HasColumnType("TEXT");
 
@@ -204,6 +201,33 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     b.HasIndex("ShowID");
 
                     b.ToTable("LibraryLinks");
+                });
+
+            modelBuilder.Entity("Kyoo.Models.MetadataID", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("DataID")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Link")
+                        .HasColumnType("TEXT");
+
+                    b.Property<long>("ProviderID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("ShowID")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("ProviderID");
+
+                    b.HasIndex("ShowID");
+
+                    b.ToTable("MetadataIds");
                 });
 
             modelBuilder.Entity("Kyoo.Models.People", b =>
@@ -255,6 +279,49 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     b.ToTable("PeopleLinks");
                 });
 
+            modelBuilder.Entity("Kyoo.Models.ProviderID", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Logo")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ID");
+
+                    b.ToTable("ProviderIds");
+                });
+
+            modelBuilder.Entity("Kyoo.Models.ProviderLink", b =>
+                {
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("LibraryID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long>("ProviderID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("ShowID")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ID");
+
+                    b.HasIndex("LibraryID");
+
+                    b.HasIndex("ProviderID");
+
+                    b.HasIndex("ShowID");
+
+                    b.ToTable("ProviderLinks");
+                });
+
             modelBuilder.Entity("Kyoo.Models.Season", b =>
                 {
                     b.Property<long>("ID")
@@ -300,9 +367,6 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
                     b.Property<long?>("EndYear")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("ExternalIDs")
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("ImgBackdrop")
                         .HasColumnType("TEXT");
@@ -471,6 +535,21 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         .HasForeignKey("ShowID");
                 });
 
+            modelBuilder.Entity("Kyoo.Models.MetadataID", b =>
+                {
+                    b.HasOne("Kyoo.Models.ProviderID", "Provider")
+                        .WithMany()
+                        .HasForeignKey("ProviderID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kyoo.Models.Show", "Show")
+                        .WithMany("ExternalIDs")
+                        .HasForeignKey("ShowID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Kyoo.Models.PeopleLink", b =>
                 {
                     b.HasOne("Kyoo.Models.People", "People")
@@ -482,6 +561,23 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         .HasForeignKey("ShowID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Kyoo.Models.ProviderLink", b =>
+                {
+                    b.HasOne("Kyoo.Models.Library", "Library")
+                        .WithMany("Providers")
+                        .HasForeignKey("LibraryID");
+
+                    b.HasOne("Kyoo.Models.ProviderID", "Provider")
+                        .WithMany()
+                        .HasForeignKey("ProviderID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kyoo.Models.Show", "Show")
+                        .WithMany()
+                        .HasForeignKey("ShowID");
                 });
 
             modelBuilder.Entity("Kyoo.Models.Season", b =>

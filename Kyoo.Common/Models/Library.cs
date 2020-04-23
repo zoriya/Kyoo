@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Kyoo.Models
 {
@@ -8,11 +9,11 @@ namespace Kyoo.Models
 		public string Slug { get; set; }
 		public string Name { get; set; }
 		public string[] Paths { get; set; }
-		public ProviderID[] Providers { get; set; }
+		public virtual IEnumerable<ProviderLink> Providers { get; set; }
 
 		public Library()  { }
 		
-		public Library(string slug, string name, string[] paths, ProviderID[] providers)
+		public Library(string slug, string name, string[] paths, IEnumerable<ProviderLink> providers)
 		{
 			Slug = slug;
 			Name = name;
