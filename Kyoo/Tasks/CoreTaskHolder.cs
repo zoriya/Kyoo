@@ -9,7 +9,8 @@ namespace Kyoo.Tasks
 		{
 			new CreateDatabase(),
 			new PluginLoader(),
-			new Crawler()
+			new Crawler(),
+			new MetadataLoader()
 		};
 	}
 }

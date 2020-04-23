@@ -1,16 +1,19 @@
+using Newtonsoft.Json;
+
 namespace Kyoo.Models
 {
 	public class ProviderLink
 	{
-		public long ID { get; set; }
-		public long ProviderID { get; set; }
-		public virtual ProviderID Provider { get; set; }
-		public long? ShowID { get; set; }
-		public virtual Show Show { get; set; }
-		public long? LibraryID { get; set; }
-		public virtual Library Library { get; set; }
+		[JsonIgnore] public long ID { get; set; }
+		[JsonIgnore] public long ProviderID { get; set; }
+		[JsonIgnore] public virtual ProviderID Provider { get; set; }
+		[JsonIgnore] public long? ShowID { get; set; }
+		[JsonIgnore] public virtual Show Show { get; set; }
+		[JsonIgnore] public long? LibraryID { get; set; }
+		[JsonIgnore] public virtual Library Library { get; set; }
 
 		public string Name => Provider.Name;
+		public string Logo => Provider.Logo;
 		
 		public ProviderLink() { }
 	}

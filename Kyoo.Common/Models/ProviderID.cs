@@ -1,8 +1,10 @@
+using Newtonsoft.Json;
+
 namespace Kyoo.Models
 {
 	public class ProviderID
 	{
-		public long ID { get; set; }
+		[JsonIgnore] public long ID { get; set; }
 		public string Name { get; set; }
 		public string Logo { get; set; }
 
