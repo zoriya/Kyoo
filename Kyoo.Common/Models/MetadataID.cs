@@ -1,22 +1,24 @@
+using Newtonsoft.Json;
+
 namespace Kyoo.Models
 {
 	public class MetadataID
 	{
-		public long ID { get; set; }
-		public long ProviderID { get; set; }
+		[JsonIgnore] public long ID { get; set; }
+		[JsonIgnore] public long ProviderID { get; set; }
 		public virtual ProviderID Provider {get; set; }
 		
-		public long? ShowID { get; set; } 
-		public virtual Show Show { get; set; }
+		[JsonIgnore] public long? ShowID { get; set; } 
+		[JsonIgnore] public virtual Show Show { get; set; }
 		
-		public long? EpisodeID { get; set; } 
-		public virtual Episode Episode { get; set; }
+		[JsonIgnore] public long? EpisodeID { get; set; } 
+		[JsonIgnore] public virtual Episode Episode { get; set; }
 		
-		public long? SeasonID { get; set; } 
-		public virtual Season Season { get; set; }
+		[JsonIgnore] public long? SeasonID { get; set; } 
+		[JsonIgnore] public virtual Season Season { get; set; }
 		
-		public long? PeopleID { get; set; } 
-		public virtual People People { get; set; }
+		[JsonIgnore] public long? PeopleID { get; set; } 
+		[JsonIgnore] public virtual People People { get; set; }
 		
 		public string DataID { get; set; }
 		public string Link { get; set; }

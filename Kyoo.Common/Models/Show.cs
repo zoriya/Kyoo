@@ -102,7 +102,7 @@ namespace Kyoo.Models
 
 		public string GetID(string provider)
 		{
-			return ExternalIDs.FirstOrDefault(x => x.Provider.Name == provider)?.DataID;
+			return ExternalIDs?.FirstOrDefault(x => x.Provider.Name == provider)?.DataID;
 		}
 		
 		public Show Merge(Show other)

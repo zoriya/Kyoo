@@ -140,7 +140,7 @@ namespace Kyoo.Controllers
 					return existing != null ? new PeopleLink(existing, show, x.Role, x.Type) : x;
 				}).ToList();
 			show.People = await _thumbnailsManager.Validate(show.People);
-			show.Genres = show.Genres.Select(x =>
+			show.Genres = show.Genres?.Select(x =>
 			{
 				Genre existing = _libraryManager.GetGenreBySlug(x.Slug);
 				return existing ?? x;

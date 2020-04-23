@@ -144,6 +144,9 @@ namespace Kyoo
 			modelBuilder.Entity<Studio>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
+			modelBuilder.Entity<ProviderID>()
+				.HasIndex(x => x.Name)
+				.IsUnique();
 		}
 	}
 }
