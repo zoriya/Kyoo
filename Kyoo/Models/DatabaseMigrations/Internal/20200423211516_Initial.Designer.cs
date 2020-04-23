@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kyoo.Models.DatabaseMigrations.Internal
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20200423203356_Initial")]
+    [Migration("20200423211516_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -79,9 +79,6 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
                     b.Property<long>("EpisodeNumber")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("ExternalIDs")
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("ImgPrimary")
                         .HasColumnType("TEXT");
@@ -212,18 +209,33 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     b.Property<string>("DataID")
                         .HasColumnType("TEXT");
 
+                    b.Property<long?>("EpisodeID")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Link")
                         .HasColumnType("TEXT");
+
+                    b.Property<long?>("PeopleID")
+                        .HasColumnType("INTEGER");
 
                     b.Property<long>("ProviderID")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long>("ShowID")
+                    b.Property<long?>("SeasonID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("ShowID")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("ID");
 
+                    b.HasIndex("EpisodeID");
+
+                    b.HasIndex("PeopleID");
+
                     b.HasIndex("ProviderID");
+
+                    b.HasIndex("SeasonID");
 
                     b.HasIndex("ShowID");
 
@@ -232,11 +244,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
             modelBuilder.Entity("Kyoo.Models.People", b =>
                 {
-                    b.Property<string>("Slug")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ExternalIDs")
-                        .HasColumnType("TEXT");
+                    b.Property<long>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("ImgPrimary")
                         .HasColumnType("TEXT");
@@ -244,7 +254,10 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
-                    b.HasKey("Slug");
+                    b.Property<string>("Slug")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("ID");
 
                     b.HasIndex("Slug")
                         .IsUnique();
@@ -261,6 +274,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     b.Property<string>("PeopleID")
                         .HasColumnType("TEXT");
 
+                    b.Property<long?>("PeopleID1")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Role")
                         .HasColumnType("TEXT");
 
@@ -272,7 +288,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
                     b.HasKey("ID");
 
-                    b.HasIndex("PeopleID");
+                    b.HasIndex("PeopleID1");
 
                     b.HasIndex("ShowID");
 
@@ -327,9 +343,6 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     b.Property<long>("ID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("ExternalIDs")
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("ImgPrimary")
                         .HasColumnType("TEXT");
@@ -537,24 +550,34 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
             modelBuilder.Entity("Kyoo.Models.MetadataID", b =>
                 {
+                    b.HasOne("Kyoo.Models.Episode", "Episode")
+                        .WithMany("ExternalIDs")
+                        .HasForeignKey("EpisodeID");
+
+                    b.HasOne("Kyoo.Models.People", "People")
+                        .WithMany("ExternalIDs")
+                        .HasForeignKey("PeopleID");
+
                     b.HasOne("Kyoo.Models.ProviderID", "Provider")
                         .WithMany()
                         .HasForeignKey("ProviderID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Kyoo.Models.Season", "Season")
+                        .WithMany("ExternalIDs")
+                        .HasForeignKey("SeasonID");
+
                     b.HasOne("Kyoo.Models.Show", "Show")
                         .WithMany("ExternalIDs")
-                        .HasForeignKey("ShowID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ShowID");
                 });
 
             modelBuilder.Entity("Kyoo.Models.PeopleLink", b =>
                 {
                     b.HasOne("Kyoo.Models.People", "People")
                         .WithMany("Roles")
-                        .HasForeignKey("PeopleID");
+                        .HasForeignKey("PeopleID1");
 
                     b.HasOne("Kyoo.Models.Show", "Show")
                         .WithMany("People")

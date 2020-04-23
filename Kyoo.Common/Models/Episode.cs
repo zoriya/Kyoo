@@ -1,7 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Kyoo.Models
 {
@@ -24,7 +23,7 @@ namespace Kyoo.Models
 		public long Runtime { get; set; } //This runtime variable should be in minutes
 
 		[JsonIgnore] public string ImgPrimary { get; set; }
-		public string ExternalIDs { get; set; }
+		public virtual IEnumerable<MetadataID> ExternalIDs { get; set; }
 
 		[JsonIgnore] public virtual IEnumerable<Track> Tracks { get; set; }
 
@@ -33,14 +32,17 @@ namespace Kyoo.Models
 		public string Thumb; //Used in the API response only
 
 
-		public Episode()
-		{
-			SeasonNumber = -1;
-			EpisodeNumber = -1;
-			AbsoluteNumber = -1;
-		}
+		public Episode() { }
 
-		public Episode(long seasonNumber, long episodeNumber, long absoluteNumber, string title, string overview, DateTime? releaseDate, long runtime, string imgPrimary, string externalIDs)
+		public Episode(long seasonNumber, 
+			long episodeNumber,
+			long absoluteNumber,
+			string title,
+			string overview,
+			DateTime? releaseDate,
+			long runtime,
+			string imgPrimary,
+			IEnumerable<MetadataID> externalIDs)
 		{
 			SeasonNumber = seasonNumber;
 			EpisodeNumber = episodeNumber;
@@ -53,7 +55,18 @@ namespace Kyoo.Models
 			ExternalIDs = externalIDs;
 		}
 
-		public Episode(long showID, long seasonID, long seasonNumber, long episodeNumber, long absoluteNumber, string path, string title, string overview, DateTime? releaseDate, long runtime, string imgPrimary, string externalIDs)
+		public Episode(long showID, 
+			long seasonID,
+			long seasonNumber, 
+			long episodeNumber, 
+			long absoluteNumber, 
+			string path,
+			string title, 
+			string overview, 
+			DateTime? releaseDate, 
+			long runtime, 
+			string imgPrimary,
+			IEnumerable<MetadataID> externalIDs)
 		{
 			ShowID = showID;
 			SeasonID = seasonID;
@@ -111,7 +124,8 @@ namespace Kyoo.Models
 			if (Runtime == -1)
 				Runtime = other.Runtime;
 			ImgPrimary ??= other.ImgPrimary;
-			ExternalIDs = string.Join('|', new [] { ExternalIDs, other.ExternalIDs }.Where(x => !string.IsNullOrEmpty(x)));
+			ExternalIDs = Utility.MergeLists(ExternalIDs, other.ExternalIDs,
+				(x, y) => x.Provider.Name == y.Provider.Name);
 			return this;
 		}
 	}

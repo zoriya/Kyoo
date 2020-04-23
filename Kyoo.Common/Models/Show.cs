@@ -114,7 +114,8 @@ namespace Kyoo.Models
 			Slug ??= other.Slug;
 			Title ??= other.Title;
 			Aliases = Utility.MergeLists(Aliases, other.Aliases).ToArray();
-			Genres = Utility.MergeLists(Genres, other.Genres, (x, y) => x.Slug == y.Slug);
+			Genres = Utility.MergeLists(Genres, other.Genres, 
+				(x, y) => x.Slug == y.Slug);
 			Path ??= other.Path;
 			Overview ??= other.Overview;
 			TrailerUrl ??= other.TrailerUrl;
@@ -126,7 +127,8 @@ namespace Kyoo.Models
 			ImgLogo ??= other.ImgLogo;
 			ImgBackdrop ??= other.ImgBackdrop;
 			Studio ??= other.Studio;
-			ExternalIDs = Utility.MergeLists(ExternalIDs, other.ExternalIDs, (x, y) => x.Provider != y.Provider);
+			ExternalIDs = Utility.MergeLists(ExternalIDs, other.ExternalIDs, 
+				(x, y) => x.Provider.Name == y.Provider.Name);
 			return this;
 		}
 	}
