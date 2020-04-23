@@ -2,31 +2,21 @@ namespace Kyoo.Models
 {
 	public class MetadataID
 	{
-		public string ProviderName;
-		public string ProviderLogo;
-		public string ID;
-		public string Link;
+		public long ID { get; set; }
+		public long ShowID { get; set; } 
+		public virtual Show Show { get; set; }
+		public long ProviderID { get; set; }
+		public virtual ProviderID Provider {get; set; }
+		
+		public string DataID { get; set; }
+		public string Link { get; set; }
 
 		public MetadataID() { }
 
-		public MetadataID(string providerValue)
+		public MetadataID(ProviderID provider, string dataID, string link)
 		{
-			string[] values = providerValue.Split('=');
-			ProviderName = values[0];
-			ID = values[1];
-		}
-		
-		public MetadataID(string providerName, string id)
-		{
-			ProviderName = providerName;
-			ID = id;
-		}
-		
-		public MetadataID(string providerName, string providerLogo, string id, string link)
-		{
-			ProviderName = providerName;
-			ProviderLogo = providerLogo;
-			ID = id;
+			Provider = provider;
+			DataID = dataID;
 			Link = link;
 		}
 	}

@@ -127,9 +127,9 @@ namespace Kyoo.Api
 						if (line == "")
 						{
 							lines.Add("");
-							List<string> processedBlock = ConvertBlock(lines);
-							for (int i = 0; i < processedBlock.Count; i++)
-								await writer.WriteLineAsync(processedBlock[i]);
+							IEnumerable<string> processedBlock = ConvertBlock(lines);
+							foreach (string t in processedBlock)
+								await writer.WriteLineAsync(t);
 							lines.Clear();
 						}
 						else
@@ -141,44 +141,24 @@ namespace Kyoo.Api
 			await context.HttpContext.Response.Body.FlushAsync();
 		}
 
-		private static List<string> ConvertBlock(List<string> lines)
+		private static IEnumerable<string> ConvertBlock(IList<string> lines)
 		{
 			lines[1] = lines[1].Replace(',', '.');
 			if (lines[2].Length > 5)
 			{
-				switch (lines[2].Substring(0, 6))
+				lines[1] += lines[2].Substring(0, 6) switch
 				{
-					case "{\\an1}":
-						lines[1] += " line:93% position:15%";
-						break;
-					case "{\\an2}":
-						lines[1] += " line:93%";
-						break;
-					case "{\\an3}":
-						lines[1] += " line:93% position:85%";
-						break;
-					case "{\\an4}":
-						lines[1] += " line:50% position:15%";
-						break;
-					case "{\\an5}":
-						lines[1] += " line:50%";
-						break;
-					case "{\\an6}":
-						lines[1] += " line:50% position:85%";
-						break;
-					case "{\\an7}":
-						lines[1] += " line:7% position:15%";
-						break;
-					case "{\\an8}":
-						lines[1] += " line:7%";
-						break;
-					case "{\\an9}":
-						lines[1] += " line:7% position:85%";
-						break;
-					default:
-						lines[1] += " line:93%";
-						break;
-				}
+					"{\\an1}" => " line:93% position:15%",
+					"{\\an2}" => " line:93%",
+					"{\\an3}" => " line:93% position:85%",
+					"{\\an4}" => " line:50% position:15%",
+					"{\\an5}" => " line:50%",
+					"{\\an6}" => " line:50% position:85%",
+					"{\\an7}" => " line:7% position:15%",
+					"{\\an8}" => " line:7%",
+					"{\\an9}" => " line:7% position:85%",
+					_ => " line:93%"
+				};
 			}
 
 			if (lines[2].StartsWith("{\\an"))

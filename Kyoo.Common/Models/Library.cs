@@ -8,11 +8,11 @@ namespace Kyoo.Models
 		public string Slug { get; set; }
 		public string Name { get; set; }
 		public string[] Paths { get; set; }
-		public string[] Providers { get; set; }
+		public ProviderID[] Providers { get; set; }
 
 		public Library()  { }
 		
-		public Library(string slug, string name, string[] paths, string[] providers)
+		public Library(string slug, string name, string[] paths, ProviderID[] providers)
 		{
 			Slug = slug;
 			Name = name;
