@@ -20,10 +20,10 @@ namespace Kyoo.Controllers
 		{
 			T ret = new T();
 
-			IEnumerable<IMetadataProvider> providers = library?.Providers != null
-				? _providers.Where(x => library.Providers.Contains(x.Provider))
-					.OrderBy(provider => Array.IndexOf(library.Providers, provider.Provider))
-				: _providers;
+			IEnumerable<IMetadataProvider> providers = library?.Providers
+                   .Select(x => _providers.FirstOrDefault(y => y.Provider.Name == x.Name))
+                   .Where(x => x != null)
+               ?? _providers;
 			
 			foreach (IMetadataProvider provider in providers)
 			{
@@ -41,10 +41,10 @@ namespace Kyoo.Controllers
 		{
 			List<T> ret = new List<T>();
 			
-			IEnumerable<IMetadataProvider> providers = library?.Providers != null
-				? _providers.Where(x => library.Providers.Contains(x.Provider))
-					.OrderBy(provider => Array.IndexOf(library.Providers, provider.Provider))
-				: _providers;
+			IEnumerable<IMetadataProvider> providers = library?.Providers
+					.Select(x => _providers.FirstOrDefault(y => y.Provider.Name == x.Name))
+					.Where(x => x != null)
+			    ?? _providers;
 			
 			foreach (IMetadataProvider provider in providers)
 			{

@@ -24,7 +24,7 @@ namespace Kyoo.Models
 		[JsonIgnore] public string ImgLogo { get; set; }
 		[JsonIgnore] public string ImgBackdrop { get; set; }
 
-		public IEnumerable<MetadataID> ExternalIDs { get; set; }
+		public virtual IEnumerable<MetadataID> ExternalIDs { get; set; }
 
 		public bool IsMovie { get; set; }
 		
