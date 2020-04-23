@@ -1,5 +1,4 @@
-﻿using System;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -103,7 +102,7 @@ namespace Kyoo.Models
 
 		public string GetID(string provider)
 		{
-			return ExternalIDs.FirstOrDefault(x => x.ProviderName == provider)?.ID;
+			return ExternalIDs.FirstOrDefault(x => x.Provider.Name == provider)?.DataID;
 		}
 		
 		public Show Merge(Show other)
@@ -127,7 +126,7 @@ namespace Kyoo.Models
 			ImgLogo ??= other.ImgLogo;
 			ImgBackdrop ??= other.ImgBackdrop;
 			Studio ??= other.Studio;
-			ExternalIDs = Utility.MergeLists(ExternalIDs, other.ExternalIDs, (x, y) => x.ProviderName == y.ProviderName);
+			ExternalIDs = Utility.MergeLists(ExternalIDs, other.ExternalIDs, (x, y) => x.Provider != y.Provider);
 			return this;
 		}
 	}

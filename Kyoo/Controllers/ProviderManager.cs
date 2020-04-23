@@ -2,7 +2,6 @@
 using Kyoo.Models;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Mail;
 using System.Threading.Tasks;
 
 namespace Kyoo.Controllers
@@ -22,17 +21,17 @@ namespace Kyoo.Controllers
 			T ret = new T();
 
 			IEnumerable<IMetadataProvider> providers = library?.Providers != null
-				? _providers.OrderBy(provider => Array.IndexOf(library.Providers, provider.Name))
+				? _providers.Where(x => library.Providers.Contains(x.Provider))
+					.OrderBy(provider => Array.IndexOf(library.Providers, provider.Provider))
 				: _providers;
 			
 			foreach (IMetadataProvider provider in providers)
 			{
 				try
 				{
-					if (library?.Providers == null || library.Providers.Contains(provider.Name))
-						ret = ret.Merge(await providerCall(provider));
+					ret = ret.Merge(await providerCall(provider));
 				} catch (Exception ex) {
-					Console.Error.WriteLine($"\tThe provider {provider.Name} coudln't work for {what}. Exception: {ex.Message}");
+					Console.Error.WriteLine($"\tThe provider {provider.Provider.Name} coudln't work for {what}. Exception: {ex.Message}");
 				}
 			}
 			return ret;
@@ -43,17 +42,17 @@ namespace Kyoo.Controllers
 			List<T> ret = new List<T>();
 			
 			IEnumerable<IMetadataProvider> providers = library?.Providers != null
-				? _providers.OrderBy(provider => Array.IndexOf(library.Providers, provider.Name))
+				? _providers.Where(x => library.Providers.Contains(x.Provider))
+					.OrderBy(provider => Array.IndexOf(library.Providers, provider.Provider))
 				: _providers;
 			
 			foreach (IMetadataProvider provider in providers)
 			{
 				try
 				{
-					if (library?.Providers == null || library.Providers.Contains(provider.Name))
-						ret.AddRange(await providerCall(provider) ?? new List<T>());
+					ret.AddRange(await providerCall(provider) ?? new List<T>());
 				} catch (Exception ex) {
-					Console.Error.WriteLine($"\tThe provider {provider.Name} coudln't work for {what}. Exception: {ex.Message}");
+					Console.Error.WriteLine($"\tThe provider {provider.Provider.Name} coudln't work for {what}. Exception: {ex.Message}");
 				}
 			}
 			return ret;
