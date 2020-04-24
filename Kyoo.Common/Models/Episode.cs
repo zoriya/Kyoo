@@ -32,7 +32,12 @@ namespace Kyoo.Models
 		public string Thumb; //Used in the API response only
 
 
-		public Episode() { }
+		public Episode()
+		{
+			SeasonNumber = -1;
+			EpisodeNumber = -1;
+			AbsoluteNumber = -1;
+		}
 
 		public Episode(long seasonNumber, 
 			long episodeNumber,

@@ -70,7 +70,7 @@ namespace Kyoo
 			List<T> list = first.ToList();
 			if (isEqual == null)
 				isEqual = (x, y) => x.Equals(y);
-			return list.Concat(second.Where(x => !list.Any(y => isEqual(x, y))));
+			return list.Concat(second.Where(x => !list.Any(y => isEqual(x, y)))).ToList();
 		}
 
 		public static T Complete<T>(T first, T second)
