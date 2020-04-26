@@ -1,12 +1,12 @@
 <h2 mat-dialog-title>Editing metadata of {{this.show.title}}</h2>
-<div matDialogContent class="pb-2">
+<div matDialogContent class="pb-4">
     <mat-accordion>
         <mat-expansion-panel expanded="true">
             <mat-expansion-panel-header>
                 <mat-panel-title>Edit metadata</mat-panel-title>
                 <mat-panel-description>Manually edit each property</mat-panel-description>
             </mat-expansion-panel-header>
-            <form #showForm="ngForm">
+            <form #showForm="ngForm" class="pt-3">
                 <mat-form-field class="w-100">
                     <mat-label>Title</mat-label>
                     <input matInput [(ngModel)]="this.show.title" name="title">

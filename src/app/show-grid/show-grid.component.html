@@ -10,6 +10,11 @@
                     <p class="date" *ngIf="show.endYear && show.startYear != show.endYear; else elseBlock">{{show.startYear}} - {{show.endYear}}</p>
                     <ng-template #elseBlock><p class="date">{{show.startYear}}</p></ng-template>
                     <p class="overview">{{show.overview}}</p>
+                    <ul>
+                        <li class="provider" *ngFor="let id of this.show.externalIDs">
+                            <a [href]="id.link"><img [src]="id.provider.logo" [alt]="id.provider.name"/></a>
+                        </li>
+                    </ul>
                 </div>
             </a>
         </mat-card>

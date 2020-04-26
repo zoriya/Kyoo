@@ -153,14 +153,28 @@ hr
 
 .provider
 {
-	display: inline;
-	width: 4rem;
-	height: 4rem;
+	display: inline-block;
+	width: 3rem;
+	height: 3rem;
 	margin: .5rem;
-}
-
-.provider-icon
-{
-	max-width: 4rem;
-	max-height: 4rem;
+	
+	> a
+	{
+		width: 3rem;
+		height: 3rem;
+		position: relative;
+		display: inline-block;
+		
+		> img
+		{
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			right: 0;
+			left: 0;
+			margin: auto;
+			max-width: 3rem;
+			max-height: 3rem;
+		}
+	}
 }

@@ -100,15 +100,45 @@ button
 			> .overview
 			{
 				overflow-y: auto;
-				height: calc(100% - 2rem);
+				height: calc(100% - 4rem);
 				text-align: justify;
 				padding-right: .5rem;
+				margin-bottom: 0;
 			}
 
 			&:host-context(.hoverEnabled) &:hover
 			{
 				cursor: pointer;
 			}
+		}
+	}
+}
+
+
+.provider
+{
+	display: inline-block;
+	width: 2.5rem;
+	height: 2.5rem;
+	margin: .25rem;
+
+	> a
+	{
+		width: 2.5rem;
+		height: 2.5rem;
+		position: relative;
+		display: inline-block;
+
+		> img
+		{
+			position: absolute;
+			top: 0;
+			bottom: 0;
+			right: 0;
+			left: 0;
+			margin: auto;
+			max-width: 2.5rem;
+			max-height: 2.5rem;
 		}
 	}
 }
