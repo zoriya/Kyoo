@@ -55,6 +55,7 @@ namespace Kyoo.Controllers
 		bool IsEpisodeRegistered(string episodePath, out long episodeID);
 
 		//Register values
+		long RegisterLibrary(Library library);
 		long RegisterCollection(Collection collection);
 		long RegisterShow(Show show);
 		long EditShow(Show show);
