@@ -56,6 +56,11 @@
 	<div class="row pt-3">
 		<div class="col">
 			<p class="text-justify overview">{{this.show.overview}}</p>
+            <ul>
+                <li class="provider" *ngFor="let id of this.show.externalIDs">
+                    <a [href]="id.link"><img class="provider-icon" [src]="id.provider.logo" [alt]="id.provider.name"/></a>
+                </li>
+            </ul>
 		</div>
 		<hr class="d-none d-sm-block">
 		<div class="col-3 d-none d-sm-block">

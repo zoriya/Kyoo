@@ -21,5 +21,5 @@ export interface Show
 	startYear: number;
 	endYear : number;
 
-	externalIDs: string;
+	externalIDs: [string, string][];
 }
