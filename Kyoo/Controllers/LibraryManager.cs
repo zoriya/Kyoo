@@ -354,11 +354,28 @@ namespace Kyoo.Controllers
 			return collection.ID;
 		}
 
+		public long RegisterLibrary(Library library)
+		{
+			if (library == null)
+				return 0;
+			library.Providers = library.Providers.Select(x =>
+			{
+				x.Provider = _database.Providers.FirstOrDefault(y => y.Name == x.Name);
+				if (x.Provider != null)
+					x.ProviderID = x.Provider.ID;
+				return x;
+			}).Where(x => x.Provider != null).ToList();
+			if (_database.Entry(library).State == EntityState.Detached)
+				_database.Libraries.Add(library);
+			_database.SaveChanges();
+			return library.ID;
+		}
+
 		public long RegisterShow(Show show)
 		{
 			if (show == null)
 				return 0;
-			if (!_database.Entry(show).IsKeySet)
+			if (_database.Entry(show).State == EntityState.Detached)
 				_database.Shows.Add(show);
 			_database.SaveChanges();
 			return show.ID;

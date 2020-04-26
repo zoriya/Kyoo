@@ -124,6 +124,11 @@ namespace Kyoo
 				.Ignore(x => x.Name);
 			modelBuilder.Entity<PeopleLink>()
 				.Ignore(x => x.ExternalIDs);
+			
+			modelBuilder.Entity<ProviderLink>()
+				.Ignore(x => x.Name);
+			modelBuilder.Entity<ProviderLink>()
+				.Ignore(x => x.Logo);
 
 
 			modelBuilder.Entity<Collection>()
