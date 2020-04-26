@@ -76,7 +76,7 @@ namespace Kyoo
 		public DbSet<Genre> Genres { get; set; }
 		public DbSet<People> Peoples { get; set; }
 		public DbSet<Studio> Studios { get; set; }
-		public DbSet<ProviderID> ProviderIds { get; set; }
+		public DbSet<ProviderID> Providers { get; set; }
 		public DbSet<MetadataID> MetadataIds { get; set; }
 		
 		public DbSet<LibraryLink> LibraryLinks { get; set; }

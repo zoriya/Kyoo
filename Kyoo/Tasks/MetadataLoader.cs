@@ -23,7 +23,7 @@ namespace Kyoo.Tasks
 			DatabaseContext database = serviceScope.ServiceProvider.GetService<DatabaseContext>();
 			IPluginManager pluginManager = serviceScope.ServiceProvider.GetService<IPluginManager>();
 			foreach (IMetadataProvider provider in pluginManager.GetPlugins<IMetadataProvider>())
-				database.ProviderIds.AddIfNotExist(provider.Provider, x => x.Name == provider.Provider.Name);
+				database.Providers.AddIfNotExist(provider.Provider, x => x.Name == provider.Provider.Name);
 			database.SaveChanges();
 			return Task.CompletedTask;
 		}

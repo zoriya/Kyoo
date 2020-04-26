@@ -145,6 +145,7 @@ namespace Kyoo.Controllers
 				Genre existing = _libraryManager.GetGenreBySlug(x.Slug);
 				return existing ?? x;
 			});
+			show.ExternalIDs = _libraryManager.ValidateExternalIDs(show.ExternalIDs);
 			await _thumbnailsManager.Validate(show);
 			return show;
 		}
@@ -152,12 +153,13 @@ namespace Kyoo.Controllers
 		private async Task<Season> GetSeason(Show show, long seasonNumber, Library library)
 		{
 			if (seasonNumber == -1)
-				return null;
+				return default;
 			Season season = _libraryManager.GetSeason(show.Slug, seasonNumber);
 			if (season == null)
-				return await _metadataProvider.GetSeason(show, seasonNumber, library);
+				season = await _metadataProvider.GetSeason(show, seasonNumber, library);
 			season.Show = show;
-			return await Task.FromResult(season);
+			season.ExternalIDs = _libraryManager.ValidateExternalIDs(season.ExternalIDs);
+			return season;
 		}
 		
 		private async Task<Episode> GetEpisode(Show show, Season season, long episodeNumber, long absoluteNumber, string episodePath, Library library)
@@ -172,6 +174,7 @@ namespace Kyoo.Controllers
 				return null;
 			}
 			
+			episode.ExternalIDs = _libraryManager.ValidateExternalIDs(episode.ExternalIDs);
 			await _thumbnailsManager.Validate(episode);
 			await GetTracks(episode);
 			return episode;
@@ -179,10 +182,7 @@ namespace Kyoo.Controllers
 
 		private async Task<Episode> GetMovie(Show show, string episodePath)
 		{
-			Episode episode = new Episode();
-			episode.Title = show.Title;
-			episode.Path = episodePath;
-			episode.Show = show;
+			Episode episode = new Episode {Title = show.Title, Path = episodePath, Show = show};
 			episode.Tracks = await GetTracks(episode);
 			return episode;
 		}

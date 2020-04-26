@@ -429,6 +429,16 @@ namespace Kyoo.Controllers
 			return edited.ID;
 		}
 
+		public IEnumerable<MetadataID> ValidateExternalIDs(IEnumerable<MetadataID> ids)
+		{
+			return ids.Select(x =>
+			{
+				x.Provider = _database.Providers.FirstOrDefault(y => y.Name == x.Provider.Name) ?? x.Provider;
+				x.ProviderID = x.Provider.ID;
+				return x;
+			}).ToList();
+		}
+
 		public long RegisterMovie(Episode movie)
 		{
 			if (movie == null)
@@ -453,6 +463,9 @@ namespace Kyoo.Controllers
 		{
 			if (episode == null)
 				return 0;
+			episode.ExternalIDs = new List<MetadataID>();
+			episode.Show.ExternalIDs = new List<MetadataID>();
+			episode.Season.ExternalIDs = new List<MetadataID>();
 			if (_database.Entry(episode).State == EntityState.Detached)
 				_database.Episodes.Add(episode);
 			_database.SaveChanges();
