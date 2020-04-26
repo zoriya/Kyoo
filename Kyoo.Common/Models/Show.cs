@@ -19,10 +19,9 @@ namespace Kyoo.Models
 		public long? StartYear { get; set; }
 		public long? EndYear { get; set; }
 
-		public string ImgPrimary { get; set; }
-		[JsonIgnore] public string ImgThumb { get; set; }
-		[JsonIgnore] public string ImgLogo { get; set; }
-		[JsonIgnore] public string ImgBackdrop { get; set; }
+		public string Poster { get; set; }
+		public string Logo { get; set; }
+		public string Backdrop { get; set; }
 
 		public virtual IEnumerable<MetadataID> ExternalIDs { get; set; }
 
@@ -77,10 +76,9 @@ namespace Kyoo.Models
 			Status? status, 
 			long? startYear,
 			long? endYear,
-			string imgPrimary,
-			string imgThumb, 
-			string imgLogo, 
-			string imgBackdrop,
+			string poster,
+			string logo, 
+			string backdrop,
 			IEnumerable<MetadataID> externalIDs)
 		{
 			Slug = slug;
@@ -92,10 +90,9 @@ namespace Kyoo.Models
 			Status = status;
 			StartYear = startYear;
 			EndYear = endYear;
-			ImgPrimary = imgPrimary;
-			ImgThumb = imgThumb;
-			ImgLogo = imgLogo;
-			ImgBackdrop = imgBackdrop;
+			Poster = poster;
+			Logo = logo;
+			Backdrop = backdrop;
 			ExternalIDs = externalIDs;
 			IsCollection = false;
 		}
@@ -122,10 +119,9 @@ namespace Kyoo.Models
 			Status ??= other.Status;
 			StartYear ??= other.StartYear;
 			EndYear ??= other.EndYear;
-			ImgPrimary ??= other.ImgPrimary;
-			ImgThumb ??= other.ImgThumb;
-			ImgLogo ??= other.ImgLogo;
-			ImgBackdrop ??= other.ImgBackdrop;
+			Poster ??= other.Poster;
+			Logo ??= other.Logo;
+			Backdrop ??= other.Backdrop;
 			Studio ??= other.Studio;
 			ExternalIDs = Utility.MergeLists(ExternalIDs, other.ExternalIDs, 
 				(x, y) => x.Provider.Name == y.Provider.Name);

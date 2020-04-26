@@ -26,12 +26,12 @@ namespace Kyoo.Controllers
 			string localBackdrop = Path.Combine(show.Path, "backdrop.jpg");
 
 
-			if (show.ImgPrimary != null && !File.Exists(localThumb))
+			if (show.Poster != null && !File.Exists(localThumb))
 			{
 				try
 				{
 					using WebClient client = new WebClient();
-					await client.DownloadFileTaskAsync(new Uri(show.ImgPrimary), localThumb);
+					await client.DownloadFileTaskAsync(new Uri(show.Poster), localThumb);
 				}
 				catch (WebException exception)
 				{
@@ -39,12 +39,12 @@ namespace Kyoo.Controllers
 				}
 			}
 
-			if (show.ImgLogo != null && !File.Exists(localLogo))
+			if (show.Logo != null && !File.Exists(localLogo))
 			{
 				try
 				{
 					using WebClient client = new WebClient();
-					await client.DownloadFileTaskAsync(new Uri(show.ImgLogo), localLogo);
+					await client.DownloadFileTaskAsync(new Uri(show.Logo), localLogo);
 				}
 				catch (WebException exception)
 				{
@@ -52,12 +52,12 @@ namespace Kyoo.Controllers
 				}
 			}
 
-			if (show.ImgBackdrop != null && !File.Exists(localBackdrop))
+			if (show.Backdrop != null && !File.Exists(localBackdrop))
 			{
 				try
 				{
 					using WebClient client = new WebClient();
-					await client.DownloadFileTaskAsync(new Uri(show.ImgBackdrop), localBackdrop);
+					await client.DownloadFileTaskAsync(new Uri(show.Backdrop), localBackdrop);
 				}
 				catch (WebException exception)
 				{

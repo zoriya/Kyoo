@@ -307,6 +307,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
                     b.HasKey("ID");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("ProviderIds");
                 });
 
@@ -322,16 +325,11 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     b.Property<long>("ProviderID")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long?>("ShowID")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("ID");
 
                     b.HasIndex("LibraryID");
 
                     b.HasIndex("ProviderID");
-
-                    b.HasIndex("ShowID");
 
                     b.ToTable("ProviderLinks");
                 });
@@ -376,28 +374,25 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     b.Property<string>("Aliases")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Backdrop")
+                        .HasColumnType("TEXT");
+
                     b.Property<long?>("EndYear")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ImgBackdrop")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ImgLogo")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ImgPrimary")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("ImgThumb")
-                        .HasColumnType("TEXT");
-
                     b.Property<bool>("IsMovie")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Logo")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Overview")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Path")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Poster")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Slug")
@@ -595,10 +590,6 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         .HasForeignKey("ProviderID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Kyoo.Models.Show", "Show")
-                        .WithMany()
-                        .HasForeignKey("ShowID");
                 });
 
             modelBuilder.Entity("Kyoo.Models.Season", b =>

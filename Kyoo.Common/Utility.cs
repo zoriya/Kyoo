@@ -47,17 +47,16 @@ namespace Kyoo
 			switch(type)
 			{
 				case ImageType.Poster:
-					show.ImgPrimary = imgUrl;
-					break;
-				case ImageType.Thumbnail:
-					show.ImgThumb = imgUrl;
+					show.Poster = imgUrl;
 					break;
 				case ImageType.Logo:
-					show.ImgLogo = imgUrl;
+					show.Logo = imgUrl;
 					break;
 				case ImageType.Background:
-					show.ImgBackdrop = imgUrl;
+					show.Backdrop = imgUrl;
 					break;
+				default:
+					throw new ArgumentOutOfRangeException(nameof(type), type, null);
 			}
 		}
 

@@ -1,4 +1,4 @@
 namespace Kyoo.Models
 {
-	public enum ImageType { Poster, Background, Thumbnail, Logo }
+	public enum ImageType { Poster, Background, Logo }
 }
