@@ -480,11 +480,8 @@ namespace Kyoo.Controllers
 		{
 			if (episode == null)
 				return 0;
-			episode.ExternalIDs = new List<MetadataID>();
-			episode.Show.ExternalIDs = new List<MetadataID>();
-			episode.Season.ExternalIDs = new List<MetadataID>();
-			if (_database.Entry(episode).State == EntityState.Detached)
-				_database.Episodes.Add(episode);
+			// if (!_database.Entry(episode).IsKeySet)
+			_database.Episodes.Add(episode);
 			_database.SaveChanges();
 			return episode.ID;
 		}

@@ -52,7 +52,8 @@ namespace Kyoo
 			services.AddDbContext<DatabaseContext>(options =>
 			{
 				options.UseLazyLoadingProxies()
-					.UseSqlite(_configuration.GetConnectionString("Database"));
+					.UseSqlite(_configuration.GetConnectionString("Database"))
+					.EnableSensitiveDataLogging();
 				//.UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()));
 			});
 			
