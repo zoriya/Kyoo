@@ -156,9 +156,11 @@ namespace Kyoo.Controllers
 				return default;
 			Season season = _libraryManager.GetSeason(show.Slug, seasonNumber);
 			if (season == null)
+			{
 				season = await _metadataProvider.GetSeason(show, seasonNumber, library);
+				season.ExternalIDs = _libraryManager.ValidateExternalIDs(season.ExternalIDs);
+			}
 			season.Show = show;
-			season.ExternalIDs = _libraryManager.ValidateExternalIDs(season.ExternalIDs);
 			return season;
 		}
 		
@@ -167,6 +169,8 @@ namespace Kyoo.Controllers
 			Episode episode = await _metadataProvider.GetEpisode(show, episodePath, season?.SeasonNumber ?? -1, episodeNumber, absoluteNumber, library);
 			if (season == null)
 				season = await GetSeason(show, episode.SeasonNumber, library);
+			else
+				episode.ExternalIDs = _libraryManager.ValidateExternalIDs(episode.ExternalIDs);
 			episode.Season = season;
 			if (season == null)
 			{
@@ -174,7 +178,6 @@ namespace Kyoo.Controllers
 				return null;
 			}
 			
-			episode.ExternalIDs = _libraryManager.ValidateExternalIDs(episode.ExternalIDs);
 			await _thumbnailsManager.Validate(episode);
 			await GetTracks(episode);
 			return episode;
