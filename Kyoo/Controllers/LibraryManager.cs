@@ -448,7 +448,7 @@ namespace Kyoo.Controllers
 
 		public IEnumerable<MetadataID> ValidateExternalIDs(IEnumerable<MetadataID> ids)
 		{
-			return ids.Select(x =>
+			return ids?.Select(x =>
 			{
 				x.Provider = _database.Providers.FirstOrDefault(y => y.Name == x.Provider.Name) ?? x.Provider;
 				x.ProviderID = x.Provider.ID;
@@ -480,8 +480,8 @@ namespace Kyoo.Controllers
 		{
 			if (episode == null)
 				return 0;
-			// if (!_database.Entry(episode).IsKeySet)
-			_database.Episodes.Add(episode);
+			if (!_database.Entry(episode).IsKeySet)
+				_database.Add(episode);
 			_database.SaveChanges();
 			return episode.ID;
 		}
