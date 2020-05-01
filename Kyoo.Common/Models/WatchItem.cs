@@ -27,7 +27,14 @@ namespace Kyoo.Models
 
 		public WatchItem() { }
 
-		public WatchItem(long episodeID, string showTitle, string showSlug, long seasonNumber, long episodeNumber, string title, DateTime? releaseDate, string path)
+		public WatchItem(long episodeID, 
+			string showTitle,
+			string showSlug,
+			long seasonNumber,
+			long episodeNumber,
+			string title, 
+			DateTime? releaseDate,
+			string path)
 		{
 			EpisodeID = episodeID;
 			ShowTitle = showTitle;
@@ -42,11 +49,31 @@ namespace Kyoo.Models
 			Link = Episode.GetSlug(ShowSlug, seasonNumber, episodeNumber);
 		}
 
-		public WatchItem(long episodeID, string showTitle, string showSlug, long seasonNumber, long episodeNumber, string title, DateTime? releaseDate, string path, Track[] audios, Track[] subtitles) 
+		public WatchItem(long episodeID,
+			string showTitle,
+			string showSlug, 
+			long seasonNumber, 
+			long episodeNumber, 
+			string title, 
+			DateTime? releaseDate, 
+			string path, 
+			IEnumerable<Track> audios,
+			IEnumerable<Track> subtitles) 
 			: this(episodeID, showTitle, showSlug, seasonNumber, episodeNumber, title, releaseDate, path)
 		{
 			Audios = audios;
 			Subtitles = subtitles;
 		}
+
+		public WatchItem(Episode episode) 
+			: this(episode.ID, 
+			episode.Show.Title,
+			episode.Show.Slug,
+			episode.SeasonNumber,
+			episode.EpisodeNumber,
+			episode.Title,
+			episode.ReleaseDate,
+			episode.Path) 
+		{ }
 	}
 }

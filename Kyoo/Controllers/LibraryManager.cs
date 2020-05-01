@@ -110,55 +110,51 @@ namespace Kyoo.Controllers
 
 		public IEnumerable<Episode> GetEpisodes(string showSlug)
 		{
-			return from episode in _database.Episodes where episode.Show.Slug == showSlug select episode.SetLink(showSlug);
+			return _database.Episodes.Where(episode => episode.Show.Slug == showSlug);
 		}
 
 		public IEnumerable<Episode> GetEpisodes(string showSlug, long seasonNumber)
 		{
-			return (from episode in _database.Episodes where episode.SeasonNumber == seasonNumber 
-														 && episode.Show.Slug == showSlug select episode)
-				.OrderBy(x => x.EpisodeNumber)
-				.Select(x => x.SetLink(showSlug));
+			return _database.Episodes.Where(x => x.SeasonNumber == seasonNumber
+			                                           && x.Show.Slug == showSlug)
+				.OrderBy(x => x.EpisodeNumber);
 		}
 
 		public IEnumerable<Episode> GetEpisodes(long showID, long seasonNumber)
 		{
-			return from episode in _database.Episodes where episode.ShowID == showID 
-														 && episode.SeasonNumber == seasonNumber select episode.SetLink(episode.Show.Slug);
+			return _database.Episodes.Where(x => x.ShowID == showID
+			                                           && x.SeasonNumber == seasonNumber);
 		}
 
 		public Episode GetEpisode(string showSlug, long seasonNumber, long episodeNumber)
 		{
-			return (from episode in _database.Episodes where episode.EpisodeNumber == episodeNumber
-															&& episode.SeasonNumber == seasonNumber 
-															&& episode.Show.Slug == showSlug select episode.SetLink(showSlug)).FirstOrDefault();
+			return _database.Episodes.FirstOrDefault(x => x.EpisodeNumber == episodeNumber
+			                                                    && x.SeasonNumber == seasonNumber 
+			                                                    && x.Show.Slug == showSlug);
 		}
 
 		public WatchItem GetWatchItem(string showSlug, long seasonNumber, long episodeNumber, bool complete = true)
 		{
-			WatchItem item = (from episode in _database.Episodes where episode.SeasonNumber == seasonNumber 
-			   && episode.EpisodeNumber == episodeNumber && episode.Show.Slug == showSlug 
-				select new WatchItem(episode.ID, 
-					episode.Show.Title,
-					episode.Show.Slug,
-					seasonNumber,
-					episodeNumber,
-					episode.Title,
-					episode.ReleaseDate,
-					episode.Path)).FirstOrDefault();
+			WatchItem item = _database.Episodes.Where(x => x.SeasonNumber == seasonNumber
+			                                               && x.EpisodeNumber == episodeNumber
+			                                               && x.Show.Slug == showSlug)
+				.Select(x => new WatchItem(x)).FirstOrDefault();
+			
 			if (item == null)
 				return null;
 			
 			(item.Video, item.Audios, item.Subtitles) = GetStreams(item.EpisodeID, item.Link);
-			if(episodeNumber > 1)
-				item.PreviousEpisode = showSlug + "-s" + seasonNumber + "e" + (episodeNumber - 1);
-			else if(seasonNumber > 1)
-				item.PreviousEpisode = showSlug + "-s" + (seasonNumber - 1) + "e" + GetSeasonCount(showSlug, seasonNumber - 1);
+			
+			if (episodeNumber > 1)
+				item.PreviousEpisode = Episode.GetSlug(showSlug, seasonNumber, episodeNumber - 1);
+			else if (seasonNumber > 1)
+				item.PreviousEpisode = Episode.GetSlug(showSlug, seasonNumber - 1, GetSeasonCount(showSlug, seasonNumber - 1));
 			
 			if (episodeNumber >= GetSeasonCount(showSlug, seasonNumber))
 				item.NextEpisode = GetEpisode(showSlug, seasonNumber + 1, 1);
 			else
 				item.NextEpisode = GetEpisode(showSlug, seasonNumber, episodeNumber + 1);
+			
 			return item;
 		}
 
@@ -257,9 +253,7 @@ namespace Kyoo.Controllers
 
 		public IEnumerable<Episode> SearchEpisodes(string searchQuery)
 		{
-			return (from episode in _database.Episodes where EF.Functions.Like(episode.Title, $"%{searchQuery}%") 
-					select episode.LoadShowDetails())
-				.Take(20);
+			return _database.Episodes.Where(x => EF.Functions.Like(x.Title, $"%{searchQuery}%")).Take(20);
 		}
 		
 		public IEnumerable<Collection> SearchCollections(string searchQuery)
