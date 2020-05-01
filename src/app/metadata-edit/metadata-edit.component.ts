@@ -8,6 +8,7 @@ import {MatAutocompleteSelectedEvent} from "@angular/material/autocomplete";
 import {Observable, of} from "rxjs";
 import {tap} from "rxjs/operators";
 import {Studio} from "../../models/studio";
+import {ShowGridComponent} from "../show-grid/show-grid.component";
 
 @Component({
 	selector: 'app-metadata-edit',
@@ -23,6 +24,7 @@ export class MetadataEditComponent implements OnInit
 	
 	private identifing: Observable<Show[]>;
 	private identifiedShows: [string, Show[]];
+	@ViewChild("identifyGrid") private identifyGrid: ShowGridComponent;
 	
 	constructor(public dialogRef: MatDialogRef<MetadataEditComponent>, @Inject(MAT_DIALOG_DATA) public show: Show, private http: HttpClient) 
 	{
@@ -34,6 +36,8 @@ export class MetadataEditComponent implements OnInit
 		{
 			this.allStudios = result;
 		});
+
+		this.reIdentify(this.show.title);
 	}
 
 	ngOnInit(): void 
@@ -89,13 +93,17 @@ export class MetadataEditComponent implements OnInit
 
 	identityShow(name: string): Observable<Show[]>
 	{
-		if (this.identifing)
-			return this.identifing;
 		if (this.identifiedShows && this.identifiedShows[0] === name)
 			return of(this.identifiedShows[1]);
 		this.identifing = this.http.get<Show[]>("/api/show/identify/" + name + "?isMovie=" + this.show.isMovie).pipe(
 			tap(result => this.identifiedShows = [name, result])
 		);
 		return this.identifing;
+	}
+	
+	reIdentify(search: string)
+	{
+		console.log("Searching for " + search);
+		this.identityShow(search).subscribe(x => this.identifyGrid.shows = x);
 	}
 }

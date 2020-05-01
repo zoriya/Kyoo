@@ -1,7 +1,7 @@
 <div class="container-fluid">
     <div *ngFor="let show of this.shows" class="show-container">
         <mat-card class="show">
-            <a href="/show/{{show.slug}}" routerLink="show/{{show.slug}}" class="d-flex">
+            <a [href]="getLink(show)" [routerLink]="getLink(show)" class="d-flex">
                 <div class="thumb">
                     <div [style.background-image]="getThumb(show)"> </div>
                 </div>

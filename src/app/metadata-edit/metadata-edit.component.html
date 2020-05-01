@@ -84,7 +84,11 @@
                 <mat-panel-title>Identify show</mat-panel-title>
                 <mat-panel-description>Search on metadata providers</mat-panel-description>
             </mat-expansion-panel-header>
-            <app-show-grid [shows]="this.identityShow(this.show.title) | async"></app-show-grid>
+            <mat-form-field class="w-100 mx-5">
+                <mat-label>Search for</mat-label>
+                <input matInput value="{{show.title}}" (input)="this.reIdentify($event.target.value)">
+            </mat-form-field>
+            <app-show-grid #identifyGrid [externalShows]="true"></app-show-grid>
         </mat-expansion-panel>
     </mat-accordion>
 </div>

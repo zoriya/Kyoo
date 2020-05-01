@@ -18,4 +18,11 @@ export class ShowGridComponent
 	{
 		return this.sanitizer.bypassSecurityTrustStyle(`url(${show.poster})`);
 	}
+	
+	getLink(show: Show)
+	{
+		if (this.externalShows)
+			return null;
+		return `/show/${show.slug}`;
+	}
 }
