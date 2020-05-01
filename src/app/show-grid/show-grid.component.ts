@@ -10,11 +10,12 @@ import {DomSanitizer} from "@angular/platform-browser";
 export class ShowGridComponent
 {
 	@Input() shows: Show[]
+	@Input() externalShows: boolean = false;
 	
 	constructor(private sanitizer: DomSanitizer) { }
 
-	getThumb(slug: string)
+	getThumb(show: Show)
 	{
-		return this.sanitizer.bypassSecurityTrustStyle("url(/poster/" + slug + ")");
+		return this.sanitizer.bypassSecurityTrustStyle(`url(${show.poster})`);
 	}
 }

@@ -2,6 +2,7 @@ import { Season } from "./season";
 import { Genre } from "./genre";
 import { People } from "./people";
 import { Studio } from "./studio";
+import {ExternalID} from "./external-id";
 
 export interface Show
 {
@@ -17,9 +18,11 @@ export interface Show
 	trailerUrl: string;
 	isCollection: boolean;
 	isMovie: boolean;
-
 	startYear: number;
 	endYear : number;
+	poster: string;
+	logo: string;
+	backdrop: string;
 
-	externalIDs: [string, string][];
+	externalIDs: ExternalID[];
 }

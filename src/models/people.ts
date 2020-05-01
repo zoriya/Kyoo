@@ -1,3 +1,5 @@
+import {ExternalID} from "./external-id";
+
 export interface People
 {
 	slug: string;
@@ -5,5 +7,5 @@ export interface People
 	role: string; 
 	type: string; 
 
-	externalIDs: string;
+	externalIDs: ExternalID[];
 }

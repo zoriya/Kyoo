@@ -1,3 +1,5 @@
+import {ExternalID} from "./external-id";
+
 export interface Episode
 {
 	seasonNumber: number;
@@ -8,6 +10,6 @@ export interface Episode
 	overview: string;
 	releaseDate;
 	runtime: number;
-	externalIDs: string;
 	showTitle: string;
+	externalIDs: ExternalID[];
 }
