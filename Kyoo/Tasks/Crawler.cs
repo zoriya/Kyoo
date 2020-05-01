@@ -137,7 +137,10 @@ namespace Kyoo.Controllers
 				.Select(x =>
 				{
 					People existing = _libraryManager.GetPeopleBySlug(x.Slug);
-					return existing != null ? new PeopleLink(existing, show, x.Role, x.Type) : x;
+					if (existing != null)
+						return new PeopleLink(existing, show, x.Role, x.Type);
+					x.People.ExternalIDs = _libraryManager.ValidateExternalIDs(x.People.ExternalIDs);
+					return x;
 				}).ToList();
 			show.People = await _thumbnailsManager.Validate(show.People);
 			show.Genres = show.Genres?.Select(x =>
@@ -169,8 +172,6 @@ namespace Kyoo.Controllers
 			Episode episode = await _metadataProvider.GetEpisode(show, episodePath, season?.SeasonNumber ?? -1, episodeNumber, absoluteNumber, library);
 			if (season == null)
 				season = await GetSeason(show, episode.SeasonNumber, library);
-			else
-				episode.ExternalIDs = _libraryManager.ValidateExternalIDs(episode.ExternalIDs);
 			episode.Season = season;
 			if (season == null)
 			{
@@ -178,6 +179,7 @@ namespace Kyoo.Controllers
 				return null;
 			}
 			
+			episode.ExternalIDs = _libraryManager.ValidateExternalIDs(episode.ExternalIDs);
 			await _thumbnailsManager.Validate(episode);
 			await GetTracks(episode);
 			return episode;
