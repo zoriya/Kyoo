@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, Input, OnInit} from '@angular/core';
+import {AfterViewInit, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {Show} from "../../models/show";
 import {DomSanitizer} from "@angular/platform-browser";
 
@@ -11,6 +11,7 @@ export class ShowGridComponent
 {
 	@Input() shows: Show[]
 	@Input() externalShows: boolean = false;
+	@Output() clickCallback: EventEmitter<Show> = new EventEmitter();
 	
 	constructor(private sanitizer: DomSanitizer) { }
 

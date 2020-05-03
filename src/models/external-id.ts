@@ -1,6 +1,8 @@
+import {Provider} from "./provider"
+
 export interface ExternalID
 {
-	provider: {name: string, logo: string};
-	id: string;
+	provider: Provider;
+	dataID: string;
 	link: string;
 }

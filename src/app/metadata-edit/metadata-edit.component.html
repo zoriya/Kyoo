@@ -84,15 +84,22 @@
                 <mat-panel-title>Identify show</mat-panel-title>
                 <mat-panel-description>Search on metadata providers</mat-panel-description>
             </mat-expansion-panel-header>
-            <mat-form-field class="w-100 mx-5">
+            <mat-form-field class="w-100 mx-2">
                 <mat-label>Search for</mat-label>
                 <input matInput value="{{show.title}}" (input)="this.reIdentify($event.target.value)">
             </mat-form-field>
-            <app-show-grid #identifyGrid [externalShows]="true"></app-show-grid>
+            <mat-form-field *ngFor="let provider of this.providers" class="provider px-1">
+                <mat-label>{{provider.name}} ID</mat-label>
+                <input matInput [value]="this.getMetadataID(show, provider)?.dataID" (input)="this.setMetadataID(show, provider, $event.target.value)" >
+            </mat-form-field>   
+            <app-show-grid #identifyGrid [externalShows]="true" (clickCallback)="this.identifyID($event)"></app-show-grid>
         </mat-expansion-panel>
     </mat-accordion>
 </div>
 <div mat-dialog-actions align="end">
 	<button mat-button mat-dialog-close>Cancel</button>
-	<button mat-button (click)="apply()">Apply</button>
+	<button mat-button (click)="apply()">
+        <mat-icon *ngIf="this.metadataChanged" style="color: red;" class="mr-2" matTooltip="You changed an external id, the whole show's metadata will be refreshed. Individual changes made won't last." matTooltipPosition="above">warning</mat-icon>
+        Apply
+    </button>
 </div>

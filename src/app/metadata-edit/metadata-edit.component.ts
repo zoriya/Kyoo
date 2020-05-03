@@ -9,22 +9,25 @@ import {Observable, of} from "rxjs";
 import {tap} from "rxjs/operators";
 import {Studio} from "../../models/studio";
 import {ShowGridComponent} from "../show-grid/show-grid.component";
+import {Provider} from "../../models/provider";
 
 @Component({
 	selector: 'app-metadata-edit',
 	templateUrl: './metadata-edit.component.html',
 	styleUrls: ['./metadata-edit.component.scss']
 })
-export class MetadataEditComponent implements OnInit
+export class MetadataEditComponent
 {
-	@ViewChild("genreInput") genreInput: ElementRef<HTMLInputElement>;
-	
+	@ViewChild("genreInput") private genreInput: ElementRef<HTMLInputElement>;
 	private allGenres: Genre[];
 	private allStudios: Studio[];
 	
+	@ViewChild("identifyGrid") private identifyGrid: ShowGridComponent;
 	private identifing: Observable<Show[]>;
 	private identifiedShows: [string, Show[]];
-	@ViewChild("identifyGrid") private identifyGrid: ShowGridComponent;
+	private providers: Provider[];
+
+	public metadataChanged: boolean = false;
 	
 	constructor(public dialogRef: MatDialogRef<MetadataEditComponent>, @Inject(MAT_DIALOG_DATA) public show: Show, private http: HttpClient) 
 	{
@@ -36,12 +39,12 @@ export class MetadataEditComponent implements OnInit
 		{
 			this.allStudios = result;
 		});
+		this.http.get<Provider[]>("/api/providers").subscribe(result =>
+		{
+			this.providers = result;
+		});
 
 		this.reIdentify(this.show.title);
-	}
-
-	ngOnInit(): void 
-	{
 	}
 	
 	apply(): void
@@ -103,7 +106,28 @@ export class MetadataEditComponent implements OnInit
 	
 	reIdentify(search: string)
 	{
-		console.log("Searching for " + search);
 		this.identityShow(search).subscribe(x => this.identifyGrid.shows = x);
+	}
+
+	getMetadataID(show: Show, provider: Provider)
+	{
+		return show.externalIDs.find(x => x.provider.name == provider.name);
+	}
+	
+	setMetadataID(show: Show, provider: Provider, id: string)
+	{
+		let i = show.externalIDs.findIndex(x => x.provider.name == provider.name);
+		
+		this.metadataChanged = true;
+		if (i != -1)
+			show.externalIDs[i].dataID = id;
+		else
+			show.externalIDs.push({provider: provider, dataID: id, link: undefined});
+	}
+
+	identifyID(show: Show)
+	{
+		for (let id of show.externalIDs)
+			this.setMetadataID(this.show, id.provider, id.dataID);
 	}
 }
