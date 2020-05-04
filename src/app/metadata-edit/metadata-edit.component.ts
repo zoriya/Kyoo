@@ -1,15 +1,16 @@
 import {Component, ElementRef, Inject, OnInit, ViewChild} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
-import {HttpClient} from "@angular/common/http";
+import {HttpClient, HttpErrorResponse} from "@angular/common/http";
 import {Show} from "../../models/show";
 import {Genre} from "../../models/genre";
 import {MatChipInputEvent} from "@angular/material/chips";
 import {MatAutocompleteSelectedEvent} from "@angular/material/autocomplete";
 import {Observable, of} from "rxjs";
-import {tap} from "rxjs/operators";
+import {catchError, tap} from "rxjs/operators";
 import {Studio} from "../../models/studio";
 import {ShowGridComponent} from "../show-grid/show-grid.component";
 import {Provider} from "../../models/provider";
+import {MatSnackBar} from "@angular/material/snack-bar";
 
 @Component({
 	selector: 'app-metadata-edit',
@@ -29,7 +30,7 @@ export class MetadataEditComponent
 
 	public metadataChanged: boolean = false;
 	
-	constructor(public dialogRef: MatDialogRef<MetadataEditComponent>, @Inject(MAT_DIALOG_DATA) public show: Show, private http: HttpClient) 
+	constructor(public dialogRef: MatDialogRef<MetadataEditComponent>, @Inject(MAT_DIALOG_DATA) public show: Show, private http: HttpClient, private snackBar: MatSnackBar) 
 	{
 		this.http.get<Genre[]>("/api/genres").subscribe(result => 
 		{
@@ -49,10 +50,27 @@ export class MetadataEditComponent
 	
 	apply(): void
 	{
-		this.http.post("/api/show/edit/" + this.show.slug, this.show).subscribe(() => 
+		if (this.metadataChanged) 
 		{
-			this.dialogRef.close(this.show);	
-		});
+			this.http.post("/api/show/re-identify/" + this.show.slug, this.show).subscribe(
+				(show: Show) => 
+				{
+					return;
+				},
+				(error) => 
+				{
+					this.snackBar.open("An unknown error occured.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
+				}
+			);
+			this.dialogRef.close(this.show);
+		}
+		else
+		{
+			this.http.post("/api/show/edit/" + this.show.slug, this.show).subscribe(() =>
+			{
+				this.dialogRef.close(this.show);
+			});
+		}
 	}
 	
 	addAlias(event: MatChipInputEvent)

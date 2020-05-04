@@ -105,4 +105,13 @@ export class ShowDetailsComponent implements OnInit
 				this.show = result;
 		});
 	}
+
+	redownloadImages()
+	{
+		this.http.post("api/show/download-images/" + this.show.slug, undefined).subscribe(() => { }, error =>
+		{
+			console.log(error.status + " - " + error.message);
+			this.snackBar.open("An unknown error occured while re-downloading images.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
+		});
+	}
 }
