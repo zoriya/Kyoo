@@ -1,10 +1,12 @@
 ﻿using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models.Exceptions;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Api
 {
@@ -15,11 +17,15 @@ namespace Kyoo.Api
 	{
 		private readonly ILibraryManager _libraryManager;
 		private readonly IProviderManager _providerManager;
+		private readonly DatabaseContext _database;
+		private readonly IThumbnailsManager _thumbnailsManager;
 
-		public ShowsAPI(ILibraryManager libraryManager, IProviderManager providerManager)
+		public ShowsAPI(ILibraryManager libraryManager, IProviderManager providerManager, DatabaseContext database, IThumbnailsManager thumbnailsManager)
 		{
 			_libraryManager = libraryManager;
 			_providerManager = providerManager;
+			_database = database;
+			_thumbnailsManager = thumbnailsManager;
 		}
 
 		[HttpGet]
@@ -47,17 +53,33 @@ namespace Kyoo.Api
 		public IActionResult EditShow(string slug, [FromBody] Show show)
 		{ 
 			if (!ModelState.IsValid) 
-				return BadRequest(show); 
-			show.ID = 0;
-			show.Slug = slug;
-			try
-			{
-				_libraryManager.EditShow(show);
-			}
-			catch (ItemNotFound)
-			{
+				return BadRequest(show);
+
+			Show old = _database.Shows.AsNoTracking().FirstOrDefault(x => x.Slug == slug);
+			if (old == null)
 				return NotFound();
-			}
+			show.ID = old.ID;
+			show.Slug = slug;
+			show.Path = old.Path;
+			_libraryManager.EditShow(show);
+			return Ok();
+		}
+		
+		[HttpPost("re-identify/{slug}")]
+		[Authorize(Policy = "Write")]
+		public async Task<IActionResult> ReIdentityShow(string slug, [FromBody] Show show)
+		{
+			if (!ModelState.IsValid)
+				return BadRequest(show);
+			Show old = _database.Shows.FirstOrDefault(x => x.Slug == slug);
+			if (old == null)
+				return NotFound();
+			Show edited = await _providerManager.CompleteShow(show, _libraryManager.GetLibraryForShow(slug));
+			edited.ID = old.ID;
+			edited.Slug = old.Slug;
+			edited.Path = old.Path;
+			_libraryManager.EditShow(edited);
+			await _thumbnailsManager.Validate(edited, true);
 			return Ok();
 		}
 
@@ -67,13 +89,16 @@ namespace Kyoo.Api
 		{
 			return await _providerManager.SearchShows(name, isMovie, null);
 		}
-		
-		[HttpGet("details")]
-		[Authorize(Policy = "Read")]
-		public async Task<Show> IdentityShow([FromBody] Show show)
+
+		[HttpPost("download-images/{slug}")]
+		[Authorize(Policy = "Write")]
+		public async Task<IActionResult> DownloadImages(string slug)
 		{
-			Library library = _libraryManager.GetLibraryForShow(show.Slug);
-			return await _providerManager.CompleteShow(show, library);
+			Show show = _libraryManager.GetShowBySlug(slug);
+			if (show == null)
+				return NotFound();
+			await _thumbnailsManager.Validate(show, true);
+			return Ok();
 		}
 	}
 }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace Kyoo.Controllers
 {
@@ -385,9 +386,12 @@ namespace Kyoo.Controllers
 
 			try
 			{
+				var query = _database.Shows.Include(x => x.GenreLinks)
+					.Include(x => x.People)
+					.Include(x => x.ExternalIDs);
 				Show show = _database.Entry(edited).IsKeySet
-					? _database.Shows.Include(x => x.GenreLinks).FirstOrDefault(x => x.ID == edited.ID)
-					: _database.Shows.Include(x => x.GenreLinks).FirstOrDefault(x => x.Slug == edited.Slug);
+					? query.FirstOrDefault(x => x.ID == edited.ID)
+					: query.FirstOrDefault(x => x.Slug == edited.Slug);
 
 				if (show == null)
 					throw new ItemNotFound($"No show could be found with the id {edited.ID} or the slug {edited.Slug}");
@@ -413,7 +417,11 @@ namespace Kyoo.Controllers
 				}).ToList();
 				show.People = edited.People?.Select(x =>
 				{
-					x.People = _database.Peoples.FirstOrDefault(y => y.Slug == x.People.Slug) ?? x.People;
+					People people = _database.Peoples.FirstOrDefault(y => y.Slug == x.People.Slug);
+					if (people != null)
+						x.People = people;
+					else
+						x.People.ExternalIDs = ValidateExternalIDs(x.People.ExternalIDs);
 					return x;
 				}).ToList();
 				show.Seasons = edited.Seasons?.Select(x =>
@@ -427,6 +435,7 @@ namespace Kyoo.Controllers
 					                                              && y.SeasonNumber == x.SeasonNumber
 					                                              && y.EpisodeNumber == x.EpisodeNumber) ?? x;
 				}).ToList();
+				show.ExternalIDs = ValidateExternalIDs(show.ExternalIDs);
 
 				_database.ChangeTracker.DetectChanges();
 				_database.SaveChanges();

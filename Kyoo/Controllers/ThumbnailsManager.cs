@@ -17,100 +17,77 @@ namespace Kyoo.Controllers
 			_config = configuration;
 		}
 
-		public async Task<Show> Validate(Show show)
+		private static async Task DownloadImage(string url, string localPath, string what)
+		{
+			try
+			{
+				using WebClient client = new WebClient();
+				await client.DownloadFileTaskAsync(new Uri(url), localPath);
+			}
+			catch (WebException exception)
+			{
+				await Console.Error.WriteLineAsync($"\t{what} could not be downloaded.\n\tError: {exception.Message}.");
+			}
+		}
+
+		public async Task<Show> Validate(Show show, bool alwaysDownload)
 		{
 			if (show?.Path == null)
-				return null;
-			string localThumb = Path.Combine(show.Path, "poster.jpg");
-			string localLogo = Path.Combine(show.Path, "logo.png");
-			string localBackdrop = Path.Combine(show.Path, "backdrop.jpg");
+				return default;
 
-
-			if (show.Poster != null && !File.Exists(localThumb))
+			if (show.Poster != null)
 			{
-				try
-				{
-					using WebClient client = new WebClient();
-					await client.DownloadFileTaskAsync(new Uri(show.Poster), localThumb);
-				}
-				catch (WebException exception)
-				{
-					Console.Error.WriteLine($"\tThe poster of {show.Title} could not be downloaded.\n\tError: {exception.Message}. ");
-				}
+				string posterPath = Path.Combine(show.Path, "poster.jpg");
+				if (alwaysDownload || !File.Exists(posterPath))
+					await DownloadImage(show.Poster, posterPath, $"The poster of {show.Title}");
 			}
-
-			if (show.Logo != null && !File.Exists(localLogo))
+			if (show.Logo != null)
 			{
-				try
-				{
-					using WebClient client = new WebClient();
-					await client.DownloadFileTaskAsync(new Uri(show.Logo), localLogo);
-				}
-				catch (WebException exception)
-				{
-					Console.Error.WriteLine($"\tThe logo of {show.Title} could not be downloaded.\n\tError: {exception.Message}. ");
-				}
+				string logoPath = Path.Combine(show.Path, "logo.png");
+				if (alwaysDownload || !File.Exists(logoPath))
+					await DownloadImage(show.Logo, logoPath, $"The logo of {show.Title}");
 			}
-
-			if (show.Backdrop != null && !File.Exists(localBackdrop))
+			if (show.Backdrop != null)
 			{
-				try
-				{
-					using WebClient client = new WebClient();
-					await client.DownloadFileTaskAsync(new Uri(show.Backdrop), localBackdrop);
-				}
-				catch (WebException exception)
-				{
-					Console.Error.WriteLine($"\tThe backdrop of {show.Title} could not be downloaded.\n\tError: {exception.Message}. ");
-				}
+				string backdropPath = Path.Combine(show.Path, "backdrop.jpg");
+				if (alwaysDownload || !File.Exists(backdropPath))
+					await DownloadImage(show.Backdrop, backdropPath, $"The backdrop of {show.Title}");
 			}
 
 			return show;
 		}
 
-		public async Task<IEnumerable<PeopleLink>> Validate(IEnumerable<PeopleLink> people)
+		public async Task<IEnumerable<PeopleLink>> Validate(IEnumerable<PeopleLink> people, bool alwaysDownload)
 		{
 			if (people == null)
 				return null;
+			
+			string root = _config.GetValue<string>("peoplePath");
+			Directory.CreateDirectory(root);
+			
 			foreach (PeopleLink peop in people)
 			{
-				string root = _config.GetValue<string>("peoplePath");
-				Directory.CreateDirectory(root);
-
-				string localThumb = root + "/" + peop.People.Slug + ".jpg";
-				if (peop.People.ImgPrimary == null || File.Exists(localThumb))
+				string localPath = Path.Combine(root, peop.People.Slug + ".jpg");
+				if (peop.People.ImgPrimary == null)
 					continue;
-				try
-				{
-					using WebClient client = new WebClient();
-					await client.DownloadFileTaskAsync(new Uri(peop.People.ImgPrimary), localThumb);
-				}
-				catch (WebException exception)
-				{
-					Console.Error.WriteLine($"\tThe profile picture of {peop.People.Name} could not be downloaded.\n\tError: {exception.Message}. ");
-				}
+				if (alwaysDownload || !File.Exists(localPath))
+					await DownloadImage(peop.People.ImgPrimary, localPath, $"The profile picture of {peop.People.Name}");
 			}
-
+			
 			return people;
 		}
 
-		public async Task<Episode> Validate(Episode episode)
+		public async Task<Episode> Validate(Episode episode, bool alwaysDownload)
 		{
-			if (episode == null || episode.Path == null)
-				return null;
-			string localThumb = Path.ChangeExtension(episode.Path, "jpg");
-			if (episode.ImgPrimary == null || File.Exists(localThumb))
-				return episode;
-			try
-			{
-				using WebClient client = new WebClient();
-				await client.DownloadFileTaskAsync(new Uri(episode.ImgPrimary), localThumb);
-			}
-			catch (WebException exception)
-			{
-				Console.Error.WriteLine($"\tThe thumbnail of {episode.Show.Title} s{episode.SeasonNumber}e{episode.EpisodeNumber} could not be downloaded.\n\tError: {exception.Message}. ");
-			}
+			if (episode?.Path == null)
+				return default;
 
+			if (episode.ImgPrimary == null)
+			{
+				string localPath = Path.ChangeExtension(episode.Path, "jpg");
+				if (alwaysDownload || !File.Exists(localPath))
+					await DownloadImage(episode.ImgPrimary, localPath, $"The thumbnail of {episode.Show.Title}");
+			}
 			return episode;
 		}
 	}
