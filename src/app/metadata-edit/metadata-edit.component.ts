@@ -52,7 +52,7 @@ export class MetadataEditComponent
 	{
 		if (this.metadataChanged) 
 		{
-			this.http.post("/api/show/re-identify/" + this.show.slug, this.show).subscribe(
+			this.http.post("/api/show/re-identify/" + this.show.slug, this.show.externalIDs).subscribe(
 				(show: Show) => 
 				{
 					return;
