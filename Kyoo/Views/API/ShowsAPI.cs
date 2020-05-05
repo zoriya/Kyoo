@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
-using Kyoo.Models.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,13 +18,19 @@ namespace Kyoo.Api
 		private readonly IProviderManager _providerManager;
 		private readonly DatabaseContext _database;
 		private readonly IThumbnailsManager _thumbnailsManager;
+		private readonly ITaskManager _taskManager;
 
-		public ShowsAPI(ILibraryManager libraryManager, IProviderManager providerManager, DatabaseContext database, IThumbnailsManager thumbnailsManager)
+		public ShowsAPI(ILibraryManager libraryManager,
+			IProviderManager providerManager,
+			DatabaseContext database,
+			IThumbnailsManager thumbnailsManager,
+			ITaskManager taskManager)
 		{
 			_libraryManager = libraryManager;
 			_providerManager = providerManager;
 			_database = database;
 			_thumbnailsManager = thumbnailsManager;
+			_taskManager = taskManager;
 		}
 
 		[HttpGet]
@@ -67,19 +72,16 @@ namespace Kyoo.Api
 		
 		[HttpPost("re-identify/{slug}")]
 		[Authorize(Policy = "Write")]
-		public async Task<IActionResult> ReIdentityShow(string slug, [FromBody] Show show)
+		public IActionResult ReIdentityShow(string slug, [FromBody] IEnumerable<MetadataID> externalIDs)
 		{
 			if (!ModelState.IsValid)
-				return BadRequest(show);
-			Show old = _database.Shows.FirstOrDefault(x => x.Slug == slug);
-			if (old == null)
+				return BadRequest(externalIDs);
+			Show show = _database.Shows.FirstOrDefault(x => x.Slug == slug);
+			if (show == null)
 				return NotFound();
-			Show edited = await _providerManager.CompleteShow(show, _libraryManager.GetLibraryForShow(slug));
-			edited.ID = old.ID;
-			edited.Slug = old.Slug;
-			edited.Path = old.Path;
-			_libraryManager.EditShow(edited);
-			await _thumbnailsManager.Validate(edited, true);
+			show.ExternalIDs = externalIDs;
+			_libraryManager.EditShow(show);
+			_taskManager.StartTask("re-scan-show", $"show/{slug}");
 			return Ok();
 		}
 

@@ -77,6 +77,20 @@ namespace Kyoo.Controllers
 			return people;
 		}
 
+		public async Task<Season> Validate(Season season, bool alwaysDownload)
+		{
+			if (season?.Show?.Path == null)
+				return default;
+
+			if (season.ImgPrimary == null)
+			{
+				string localPath = Path.Combine(season.Show.Path, $"season-{season.SeasonNumber}.jpg");
+				if (alwaysDownload || !File.Exists(localPath))
+					await DownloadImage(season.ImgPrimary, localPath, $"The poster of {season.Show.Title}'s season {season.SeasonNumber}");
+			}
+			return season;
+		}
+		
 		public async Task<Episode> Validate(Episode episode, bool alwaysDownload)
 		{
 			if (episode?.Path == null)

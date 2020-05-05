@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Text.RegularExpressions;
 using Kyoo.Models;
 
@@ -14,31 +16,28 @@ namespace Kyoo
 	
 	public static class Utility
 	{
-		public static string ToSlug(string name)
+		public static string ToSlug(string str)
 		{
-			if (name == null)
+			if (str == null)
 				return null;
 
-			//First to lower case 
-			name = name.ToLowerInvariant();
+			str = str.ToLowerInvariant();
+			
+			string normalizedString = str.Normalize(NormalizationForm.FormD);
+			StringBuilder stringBuilder = new StringBuilder();
+			foreach (char c in normalizedString)
+			{
+				UnicodeCategory unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+				if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+					stringBuilder.Append(c);
+			}
+			str = stringBuilder.ToString().Normalize(NormalizationForm.FormC);
 
-			//Remove all accents
-			//var bytes = Encoding.GetEncoding("Cyrillic").GetBytes(showTitle);
-			//showTitle = Encoding.ASCII.GetString(bytes);
-
-			//Replace spaces 
-			name = Regex.Replace(name, @"\s", "-", RegexOptions.Compiled);
-
-			//Remove invalid chars 
-			name = Regex.Replace(name, @"[^\w\s\p{Pd}]", "", RegexOptions.Compiled);
-
-			//Trim dashes from end 
-			name = name.Trim('-', '_');
-
-			//Replace double occurences of - or \_ 
-			name = Regex.Replace(name, @"([-_]){2,}", "$1", RegexOptions.Compiled);
-
-			return name;
+			str = Regex.Replace(str, @"\s", "-", RegexOptions.Compiled);
+			str = Regex.Replace(str, @"[^\w\s\p{Pd}]", "", RegexOptions.Compiled);
+			str = str.Trim('-', '_');
+			str = Regex.Replace(str, @"([-_]){2,}", "$1", RegexOptions.Compiled);
+			return str;
 		}
 		
 		

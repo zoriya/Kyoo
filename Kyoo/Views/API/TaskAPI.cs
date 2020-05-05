@@ -16,7 +16,7 @@ namespace Kyoo.Api
 		}
 		
 		
-		[HttpGet("{taskSlug}/{args?}")]
+		[HttpGet("{taskSlug}/{*args}")]
 		[Authorize(Policy="Admin")]
 		public IActionResult RunTask(string taskSlug, string args = null)
 		{

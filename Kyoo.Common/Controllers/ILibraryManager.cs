@@ -61,7 +61,9 @@ namespace Kyoo.Controllers
 		long EditShow(Show show);
 		long RegisterMovie(Episode movie);
 		long RegisterSeason(Season season);
+		long EditSeason(Season season);
 		long RegisterEpisode(Episode episode);
+		long EditEpisode(Episode episode);
 		long RegisterTrack(Track track);
 		void RegisterShowLinks(Library library, Collection collection, Show show);
 		IEnumerable<MetadataID> ValidateExternalIDs(IEnumerable<MetadataID> ids);
