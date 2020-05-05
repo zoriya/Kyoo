@@ -162,6 +162,7 @@ namespace Kyoo.Controllers
 			{
 				season = await _metadataProvider.GetSeason(show, seasonNumber, library);
 				season.ExternalIDs = _libraryManager.ValidateExternalIDs(season.ExternalIDs);
+				await _thumbnailsManager.Validate(season);
 			}
 			season.Show = show;
 			return season;

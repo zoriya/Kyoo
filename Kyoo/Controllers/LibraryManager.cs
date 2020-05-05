@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
 
 namespace Kyoo.Controllers
 {
@@ -39,9 +38,9 @@ namespace Kyoo.Controllers
 		public (Track video, IEnumerable<Track> audios, IEnumerable<Track> subtitles) GetStreams(long episodeID, string episodeSlug)
 		{
 			IEnumerable<Track> tracks = _database.Tracks.Where(track => track.EpisodeID == episodeID);
-			return ((from track in tracks where track.Type == StreamType.Video select track.SetLink(episodeSlug)).FirstOrDefault(),
-				from track in tracks where track.Type == StreamType.Audio select track.SetLink(episodeSlug),
-				from track in tracks where track.Type == StreamType.Subtitle select track.SetLink(episodeSlug));
+			return (tracks.FirstOrDefault(x => x.Type == StreamType.Video),
+				tracks.Where(x => x.Type == StreamType.Audio),
+				tracks.Where(track => track.Type == StreamType.Subtitle));
 		}
 
 		public Track GetSubtitle(string showSlug, long seasonNumber, long episodeNumber, string languageTag, bool forced)
@@ -478,6 +477,48 @@ namespace Kyoo.Controllers
 			_database.SaveChanges();
 			return season.ID;
 		}
+		
+		public long EditSeason(Season edited)
+		{
+			if (edited == null)
+				throw new ArgumentNullException(nameof(edited));
+
+			_database.ChangeTracker.LazyLoadingEnabled = false;
+			_database.ChangeTracker.AutoDetectChangesEnabled = false;
+
+			try
+			{
+				var query = _database.Seasons
+					.Include(x => x.ExternalIDs)
+					.Include(x => x.Episodes);
+				Season season = _database.Entry(edited).IsKeySet
+					? query.FirstOrDefault(x => x.ID == edited.ID)
+					: query.FirstOrDefault(x => x.Slug == edited.Slug);
+
+				if (season == null)
+					throw new ItemNotFound($"No season could be found with the id {edited.ID} or the slug {edited.Slug}");
+				
+				Utility.Complete(season, edited);
+				
+				season.Episodes = edited.Episodes?.Select(x =>
+				{
+					return _database.Episodes.FirstOrDefault(y => y.ShowID == x.ShowID 
+					                                              && y.SeasonNumber == x.SeasonNumber
+					                                              && y.EpisodeNumber == x.EpisodeNumber) ?? x;
+				}).ToList();
+				season.ExternalIDs = ValidateExternalIDs(season.ExternalIDs);
+
+				_database.ChangeTracker.DetectChanges();
+				_database.SaveChanges();
+			}
+			finally
+			{
+				_database.ChangeTracker.LazyLoadingEnabled = true;
+				_database.ChangeTracker.AutoDetectChangesEnabled = true;
+			}
+
+			return edited.ID;
+		}
 
 		public long RegisterEpisode(Episode episode)
 		{
@@ -487,6 +528,45 @@ namespace Kyoo.Controllers
 				_database.Add(episode);
 			_database.SaveChanges();
 			return episode.ID;
+		}
+		
+		public long EditEpisode(Episode edited)
+		{
+			if (edited == null)
+				throw new ArgumentNullException(nameof(edited));
+
+			_database.ChangeTracker.LazyLoadingEnabled = false;
+			_database.ChangeTracker.AutoDetectChangesEnabled = false;
+
+			try
+			{
+				var query = _database.Episodes
+					.Include(x => x.Tracks)
+					.Include(x => x.Season)
+					.Include(x => x.ExternalIDs);
+				Episode episode = query.FirstOrDefault(x => x.ID == edited.ID);
+
+				if (episode == null)
+					throw new ItemNotFound($"No episode could be found with the id {edited.ID}");
+				
+				Utility.Complete(episode, edited);
+
+				episode.Season = _database.Seasons
+					.FirstOrDefault(x => x.ShowID == episode.ShowID
+					                     && x.SeasonNumber == edited.SeasonNumber) ?? episode.Season;
+				episode.Season.ExternalIDs = ValidateExternalIDs(episode.Season.ExternalIDs);
+				episode.ExternalIDs = ValidateExternalIDs(episode.ExternalIDs);
+
+				_database.ChangeTracker.DetectChanges();
+				_database.SaveChanges();
+			}
+			finally
+			{
+				_database.ChangeTracker.LazyLoadingEnabled = true;
+				_database.ChangeTracker.AutoDetectChangesEnabled = true;
+			}
+
+			return edited.ID;
 		}
 
 		public long RegisterTrack(Track track)

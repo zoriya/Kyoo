@@ -9,6 +9,8 @@ namespace Kyoo.Models
 		[JsonIgnore] public long ShowID { get; set; }
 
 		public long SeasonNumber { get; set; } = -1;
+
+		public string Slug => $"{Show.Title}-s{SeasonNumber}";
 		public string Title { get; set; }
 		public string Overview { get; set; }
 		public long? Year { get; set; }

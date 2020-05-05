@@ -1,6 +1,5 @@
 ﻿using Kyoo.Models.Watch;
 using Newtonsoft.Json;
-using System;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -68,8 +67,47 @@ namespace Kyoo.Models
 			get => isForced;
 			set => isForced = value;
 		}
-		public string DisplayName;
-		public string Link;
+
+		public string DisplayName
+		{
+			get
+			{
+				string language = GetLanguage(Language);
+
+				if (language == null)
+					return $"Unknown Language (id: {ID.ToString()})";
+				CultureInfo info = CultureInfo.GetCultures(CultureTypes.NeutralCultures)
+					.FirstOrDefault(x => x.ThreeLetterISOLanguageName == language);
+				string name = info?.EnglishName ?? language;
+				if (IsForced)
+					name += " Forced";
+				if (Title != null && Title.Length > 1)
+					name += " - " + Title;
+				return name;
+			}
+		}
+
+		public string Link
+		{
+			get
+			{
+				if (Type != StreamType.Subtitle)
+					return null;
+				string link = "/subtitle/" + Episode.Link + "." + Language;
+				if (IsForced)
+					link += "-forced";
+				switch (Codec)
+				{
+					case "ass":
+						link += ".ass";
+						break;
+					case "subrip":
+						link += ".srt";
+						break;
+				}
+				return link;
+			}
+		}
 
 		[JsonIgnore] public bool IsExternal { get; set; }
 		[JsonIgnore] public virtual Episode Episode { get; set; }
@@ -88,46 +126,12 @@ namespace Kyoo.Models
 			IsExternal = false;
 		}
 
-		public Track SetLink(string episodeSlug)
+		//Converting mkv track language to c# system language tag.
+		public static string GetLanguage(string mkvLanguage)
 		{
-			if (Type == StreamType.Subtitle)
-			{
-				string language = Language;
-				//Converting mkv track language to c# system language tag.
-				if (language == "fre")
-					language = "fra";
-				
-				if (language == null)
-				{
-					Language = ID.ToString();
-					DisplayName = $"Unknown Language (id: {ID.ToString()})";
-				}
-				else
-					DisplayName = CultureInfo.GetCultures(CultureTypes.NeutralCultures).FirstOrDefault(x => x.ThreeLetterISOLanguageName == language)?.EnglishName ?? language;
-				Link = "/subtitle/" + episodeSlug + "." + Language;
-
-				if (IsForced)
-				{
-					DisplayName += " Forced";
-					Link += "-forced";
-				}
-
-				if (Title != null && Title.Length > 1)
-					DisplayName += " - " + Title;
-
-				switch (Codec)
-				{
-					case "ass":
-						Link += ".ass";
-						break;
-					case "subrip":
-						Link += ".srt";
-						break;
-				}
-			}
-			else
-				Link = null;
-			return this;
+			if (mkvLanguage == "fre")
+				return "fra";
+			return mkvLanguage;
 		}
 	}
 }
