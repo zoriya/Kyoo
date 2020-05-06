@@ -76,12 +76,12 @@ namespace Kyoo.Api
 		{
 			if (!ModelState.IsValid)
 				return BadRequest(externalIDs);
-			Show show = _database.Shows.FirstOrDefault(x => x.Slug == slug);
+			Show show = _database.Shows.Include(x => x.ExternalIDs).FirstOrDefault(x => x.Slug == slug);
 			if (show == null)
 				return NotFound();
-			show.ExternalIDs = externalIDs;
-			_libraryManager.EditShow(show);
-			_taskManager.StartTask("re-scan-show", $"show/{slug}");
+			show.ExternalIDs = _libraryManager.ValidateExternalIDs(externalIDs);
+			_database.SaveChanges();
+			_taskManager.StartTask("re-scan", $"show/{slug}");
 			return Ok();
 		}
 

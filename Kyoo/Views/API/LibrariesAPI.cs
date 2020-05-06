@@ -13,10 +13,12 @@ namespace Kyoo.Api
 	public class LibrariesAPI : ControllerBase
 	{
 		private readonly ILibraryManager _libraryManager;
+		private readonly ITaskManager _taskManager;
 
-		public LibrariesAPI(ILibraryManager libraryManager)
+		public LibrariesAPI(ILibraryManager libraryManager, ITaskManager taskManager)
 		{
 			_libraryManager = libraryManager;
+			_taskManager = taskManager;
 		}
 
 		[HttpGet]
@@ -41,6 +43,7 @@ namespace Kyoo.Api
 			if (_libraryManager.GetLibrary(library.Slug) != null)
 				return BadRequest(new {error = "Duplicated library slug"});
 			_libraryManager.RegisterLibrary(library);
+			_taskManager.StartTask("scan", library.Slug);
 			return Ok();
 		}
 

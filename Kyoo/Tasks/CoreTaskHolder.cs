@@ -5,12 +5,13 @@ namespace Kyoo.Tasks
 {
 	public static class CoreTaskHolder
 	{
-		public static ITask[] Tasks =
+		public static readonly ITask[] Tasks =
 		{
 			new CreateDatabase(),
 			new PluginLoader(),
 			new Crawler(),
-			new MetadataLoader()
+			new MetadataLoader(),
+			new ReScan()
 		};
 	}
 }
