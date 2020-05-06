@@ -148,6 +148,8 @@ namespace Kyoo.Controllers
 				return existing ?? x;
 			});
 			show.ExternalIDs = _libraryManager.ValidateExternalIDs(show.ExternalIDs);
+			if (show.Studio != null)
+				show.Studio = _libraryManager.GetStudioBySlug(show.Studio.Slug) ?? show.Studio;
 			await _thumbnailsManager.Validate(show);
 			return show;
 		}
