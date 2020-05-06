@@ -69,7 +69,7 @@
         
                 <mat-form-field class="w-100">
                     <mat-label>Studio</mat-label>
-                    <input matInput [value]="this.show.studio?.name" (input)="this.show.studio = {slug: null, name: $event.target.value}; console.log(this.show.studio)"
+                    <input matInput [value]="this.show.studio?.name" (input)="this.show.studio = {slug: null, name: $event.target.value};"
                            [matAutocomplete]="studioAuto" name="studio">
                     <mat-autocomplete #studioAuto="matAutocomplete"  (optionSelected)="this.show.studio = $event.option.value">
                         <mat-option *ngFor="let studio of this.allStudios" [value]="studio">

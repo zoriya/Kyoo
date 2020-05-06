@@ -20,13 +20,13 @@ import {MatSnackBar} from "@angular/material/snack-bar";
 export class MetadataEditComponent
 {
 	@ViewChild("genreInput") private genreInput: ElementRef<HTMLInputElement>;
-	private allGenres: Genre[];
-	private allStudios: Studio[];
+	public allGenres: Genre[];
+	public allStudios: Studio[];
 	
 	@ViewChild("identifyGrid") private identifyGrid: ShowGridComponent;
-	private identifing: Observable<Show[]>;
+	private identifying: Observable<Show[]>;
 	private identifiedShows: [string, Show[]];
-	private providers: Provider[];
+	public providers: Provider[];
 
 	public metadataChanged: boolean = false;
 	
@@ -57,7 +57,7 @@ export class MetadataEditComponent
 				{
 					return;
 				},
-				(error) => 
+				() => 
 				{
 					this.snackBar.open("An unknown error occured.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
 				}
@@ -116,10 +116,10 @@ export class MetadataEditComponent
 	{
 		if (this.identifiedShows && this.identifiedShows[0] === name)
 			return of(this.identifiedShows[1]);
-		this.identifing = this.http.get<Show[]>("/api/show/identify/" + name + "?isMovie=" + this.show.isMovie).pipe(
+		this.identifying = this.http.get<Show[]>("/api/show/identify/" + name + "?isMovie=" + this.show.isMovie).pipe(
 			tap(result => this.identifiedShows = [name, result])
 		);
-		return this.identifing;
+		return this.identifying;
 	}
 	
 	reIdentify(search: string)
