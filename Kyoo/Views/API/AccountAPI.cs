@@ -79,11 +79,6 @@ namespace Kyoo.Api
 		private readonly IConfiguration _configuration;
 		private readonly string _picturePath;
 
-		public Claim[] defaultClaims =
-		{
-			new Claim("permissions", "read,play") // TODO should add this field on the server's configuration page.
-		};
-		
 		public AccountController(UserManager<User> userManager, SignInManager<User> siginInManager, IConfiguration configuration)
 		{
 			_userManager = userManager;
@@ -109,7 +104,9 @@ namespace Kyoo.Api
 				return BadRequest(result.Errors);
 			string otac = account.GenerateOTAC(TimeSpan.FromMinutes(1));
 			await _userManager.UpdateAsync(account);
-			await _userManager.AddClaimsAsync(account, defaultClaims);
+			await _userManager.AddClaimAsync(account, new Claim(
+				"permissions",
+				_configuration.GetValue<string>("newUserPermissions")));
 			return Ok(new {otac});
 		}
 		
