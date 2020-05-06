@@ -455,7 +455,7 @@ namespace Kyoo.Controllers
 				x.Provider = _database.Providers.FirstOrDefault(y => y.Name == x.Provider.Name) ?? x.Provider;
 				x.ProviderID = x.Provider.ID;
 				return x;
-			}).ToList();
+			}).GroupBy(x => x.Provider.Name).Select(x => x.First()).ToList();
 		}
 
 		public long RegisterMovie(Episode movie)
@@ -551,10 +551,12 @@ namespace Kyoo.Controllers
 				
 				Utility.Complete(episode, edited);
 
-				episode.Season = _database.Seasons
-					.FirstOrDefault(x => x.ShowID == episode.ShowID
-					                     && x.SeasonNumber == edited.SeasonNumber) ?? episode.Season;
-				episode.Season.ExternalIDs = ValidateExternalIDs(episode.Season.ExternalIDs);
+				if (episode.SeasonNumber != -1)
+				{
+					episode.Season = _database.Seasons.FirstOrDefault(x => x.ShowID == episode.ShowID
+					                                                       && x.SeasonNumber == edited.SeasonNumber) ?? episode.Season;
+					episode.Season.ExternalIDs = ValidateExternalIDs(episode.Season.ExternalIDs);
+				}
 				episode.ExternalIDs = ValidateExternalIDs(episode.ExternalIDs);
 
 				_database.ChangeTracker.DetectChanges();

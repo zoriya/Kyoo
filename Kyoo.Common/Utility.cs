@@ -76,19 +76,14 @@ namespace Kyoo
 			Type type = typeof(T);
 			foreach (PropertyInfo property in type.GetProperties())
 			{
-				MethodInfo getter = property.GetGetMethod();
-				MethodInfo setter = property.GetSetMethod();
+				if (!property.CanRead || !property.CanWrite)
+					continue;
 				
-				object value = getter != null ? getter.Invoke(second, null) : property.GetValue(second);
+				object value = property.GetValue(second);
 				object defaultValue = property.PropertyType.IsValueType ? Activator.CreateInstance(property.PropertyType) : null;
 				
 				if (value?.Equals(defaultValue) == false)
-				{
-					if (setter != null)
-						setter.Invoke(first, new[] {value});
-					else
-						property.SetValue(second, value);
-				}
+					property.SetValue(first, value);
 			}
 
 			return first;

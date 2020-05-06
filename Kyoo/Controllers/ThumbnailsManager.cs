@@ -82,7 +82,7 @@ namespace Kyoo.Controllers
 			if (season?.Show?.Path == null)
 				return default;
 
-			if (season.ImgPrimary == null)
+			if (season.ImgPrimary != null)
 			{
 				string localPath = Path.Combine(season.Show.Path, $"season-{season.SeasonNumber}.jpg");
 				if (alwaysDownload || !File.Exists(localPath))
@@ -96,7 +96,7 @@ namespace Kyoo.Controllers
 			if (episode?.Path == null)
 				return default;
 
-			if (episode.ImgPrimary == null)
+			if (episode.ImgPrimary != null)
 			{
 				string localPath = Path.ChangeExtension(episode.Path, "jpg");
 				if (alwaysDownload || !File.Exists(localPath))

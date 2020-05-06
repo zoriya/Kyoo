@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Tasks
@@ -26,7 +25,7 @@ namespace Kyoo.Tasks
 		private IProviderManager _providerManager;
 		private DatabaseContext _database;
 
-		public Task Run(IServiceProvider serviceProvider, CancellationToken cancellationToken, string arguments = null)
+		public async Task Run(IServiceProvider serviceProvider, CancellationToken cancellationToken, string arguments = null)
 		{
 			using IServiceScope serviceScope = serviceProvider.CreateScope();
 			_libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
@@ -35,20 +34,24 @@ namespace Kyoo.Tasks
 			_database = serviceScope.ServiceProvider.GetService<DatabaseContext>();
 		
 			if (arguments == null || !arguments.Contains('/'))
-				return Task.CompletedTask;
+				return;
 
 			string slug = arguments.Substring(arguments.IndexOf('/') + 1);
-			return arguments.Substring(0, arguments.IndexOf('/')) switch
+			switch (arguments.Substring(0, arguments.IndexOf('/')))
 			{
-				"show" => ReScanShow(slug),
-				"season" => ReScanSeason(slug),
-				_ => Task.CompletedTask
-			};
+				case "show":
+					await ReScanShow(slug);
+					break;
+				//case "season":
+					// await ReScanSeason(slug):
+				default:
+					break;
+			}
 		}
 
 		private async Task ReScanShow(string slug)
 		{
-			Show old = _database.Shows.AsNoTracking().FirstOrDefault(x => x.Slug == slug);
+			Show old = _database.Shows.FirstOrDefault(x => x.Slug == slug);
 			if (old == null)
 				return;
 			Library library = _libraryManager.GetLibraryForShow(slug);
@@ -58,7 +61,11 @@ namespace Kyoo.Tasks
 			edited.Path = old.Path;
 			_libraryManager.EditShow(edited);
 			await _thumbnailsManager.Validate(edited, true);
-			await Task.WhenAll(edited.Seasons.Select(x => ReScanSeason(edited, x)));
+			if (old.Seasons != null)
+				await Task.WhenAll(old.Seasons.Select(x => ReScanSeason(old, x)));
+			IEnumerable<Episode> orphans = old.Episodes.Where(x => x.Season == null).ToList();
+			if (orphans.Any())
+				await Task.WhenAll(orphans.Select(x => ReScanEpisode(old, x)));
 		}
 
 		private async Task ReScanSeason(Show show, Season old)
@@ -68,13 +75,14 @@ namespace Kyoo.Tasks
 			edited.ID = old.ID;
 			_libraryManager.EditSeason(edited);
 			await _thumbnailsManager.Validate(edited, true);
-			await Task.WhenAll(edited.Episodes.Select(x => ReScanEpisode(show, x)));
+			if (old.Episodes != null)
+				await Task.WhenAll(old.Episodes.Select(x => ReScanEpisode(show, x)));
 		}
 
-		private async Task ReScanSeason(string slug)
-		{
-			
-		}
+		// private async Task ReScanSeason(string slug)
+		// {
+		// 	
+		// }
 
 		private async Task ReScanEpisode(Show show, Episode old)
 		{

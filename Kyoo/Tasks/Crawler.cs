@@ -50,10 +50,9 @@ namespace Kyoo.Controllers
 			try
 			{
 				IEnumerable<Episode> episodes = _libraryManager.GetAllEpisodes();
-				IEnumerable<Library> libraries = _libraryManager.GetLibraries();
-
-				if (argument != null)
-					libraries = libraries.Where(x => x.Slug == argument);
+				IEnumerable<Library> libraries = argument == null 
+					? _libraryManager.GetLibraries()
+					: new [] {_libraryManager.GetLibrary(argument)};
 
 				foreach (Episode episode in episodes)
 				{
