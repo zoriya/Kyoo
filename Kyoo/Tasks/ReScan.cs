@@ -42,9 +42,8 @@ namespace Kyoo.Tasks
 				case "show":
 					await ReScanShow(slug);
 					break;
-				//case "season":
-					// await ReScanSeason(slug):
-				default:
+				case "season":
+					await ReScanSeason(slug);
 					break;
 			}
 		}
@@ -67,6 +66,21 @@ namespace Kyoo.Tasks
 			if (orphans.Any())
 				await Task.WhenAll(orphans.Select(x => ReScanEpisode(old, x)));
 		}
+		
+		private async Task ReScanSeason(string seasonSlug)
+		{
+			string[] infos = seasonSlug.Split('-');
+			if (infos.Length != 2 || int.TryParse(infos[1], out int seasonNumber))
+				return;
+			string slug = infos[0];
+			Show show = _database.Shows.FirstOrDefault(x => x.Slug == slug);
+			if (show == null)
+				return;
+			Season old = _database.Seasons.FirstOrDefault(x => x.SeasonNumber == seasonNumber && x.Show.ID == show.ID);
+			if (old == null)
+				return;
+			await ReScanSeason(show, old);
+		}
 
 		private async Task ReScanSeason(Show show, Season old)
 		{
@@ -78,11 +92,6 @@ namespace Kyoo.Tasks
 			if (old.Episodes != null)
 				await Task.WhenAll(old.Episodes.Select(x => ReScanEpisode(show, x)));
 		}
-
-		// private async Task ReScanSeason(string slug)
-		// {
-		// 	
-		// }
 
 		private async Task ReScanEpisode(Show show, Episode old)
 		{
