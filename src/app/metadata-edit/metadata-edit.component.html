@@ -90,8 +90,8 @@
             </mat-form-field>
             <mat-form-field *ngFor="let provider of this.providers" class="provider px-1">
                 <mat-label>{{provider.name}} ID</mat-label>
-                <input matInput [value]="this.getMetadataID(show, provider)?.dataID" (input)="this.setMetadataID(show, provider, $event.target.value)" >
-            </mat-form-field>   
+                <input matInput [value]="this.getMetadataID(provider)?.dataID" (input)="this.setMetadataID(provider, $event.target.value)" >
+            </mat-form-field>
             <app-show-grid #identifyGrid [externalShows]="true" (clickCallback)="this.identifyID($event)"></app-show-grid>
         </mat-expansion-panel>
     </mat-accordion>

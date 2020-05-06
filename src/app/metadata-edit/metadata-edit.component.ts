@@ -127,25 +127,28 @@ export class MetadataEditComponent
 		this.identityShow(search).subscribe(x => this.identifyGrid.shows = x);
 	}
 
-	getMetadataID(show: Show, provider: Provider)
+	getMetadataID(provider: Provider)
 	{
-		return show.externalIDs.find(x => x.provider.name == provider.name);
+		return this.show.externalIDs.find(x => x.provider.name == provider.name);
 	}
 	
-	setMetadataID(show: Show, provider: Provider, id: string)
+	setMetadataID(provider: Provider, id: string, link: string = undefined)
 	{
-		let i = show.externalIDs.findIndex(x => x.provider.name == provider.name);
+		let i = this.show.externalIDs.findIndex(x => x.provider.name == provider.name);
 		
 		this.metadataChanged = true;
 		if (i != -1)
-			show.externalIDs[i].dataID = id;
+		{
+			this.show.externalIDs[i].dataID = id;
+			this.show.externalIDs[i].link = link;
+		}
 		else
-			show.externalIDs.push({provider: provider, dataID: id, link: undefined});
+			this.show.externalIDs.push({provider: provider, dataID: id, link: link});
 	}
 
 	identifyID(show: Show)
 	{
 		for (let id of show.externalIDs)
-			this.setMetadataID(this.show, id.provider, id.dataID);
+			this.setMetadataID(id.provider, id.dataID, id.link);
 	}
 }
