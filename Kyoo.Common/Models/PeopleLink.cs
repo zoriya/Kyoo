@@ -6,7 +6,7 @@ namespace Kyoo.Models
 	public class PeopleLink
 	{
 		[JsonIgnore] public long ID { get; set; }
-		[JsonIgnore] public string PeopleID { get; set; }
+		[JsonIgnore] public long PeopleID { get; set; }
 		[JsonIgnore] public virtual People People { get; set; }
 		
 		public string Slug

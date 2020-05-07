@@ -47,24 +47,22 @@ namespace Kyoo.Controllers
 			});
 		}
 
-		public async Task<string> Transmux(WatchItem episode)
+		public async Task<string> Transmux(Episode episode)
 		{
-			string folder = Path.Combine(_transmuxPath, episode.Link);
-			string manifest = Path.Combine(folder, episode.Link + ".m3u8");
+			string folder = Path.Combine(_transmuxPath, episode.Slug);
+			string manifest = Path.Combine(folder, episode.Slug + ".m3u8");
 			float playableDuration = 0;
 			bool transmuxFailed = false;
 
 			try
 			{
 				Directory.CreateDirectory(folder);
-				Debug.WriteLine("&Transmuxing " + episode.Link + " at " + episode.Path + ", outputPath: " + folder);
-
 				if (File.Exists(manifest))
 					return manifest;
 			}
 			catch (UnauthorizedAccessException)
 			{
-				Console.Error.WriteLine($"Access to the path {manifest} is denied. Please change your transmux path in the config.");
+				await Console.Error.WriteLineAsync($"Access to the path {manifest} is denied. Please change your transmux path in the config.");
 				return null;
 			}
 			Task.Run(() => 
@@ -76,35 +74,9 @@ namespace Kyoo.Controllers
 			return transmuxFailed ? null : manifest;
 		}
 
-		public async Task<string> Transcode(WatchItem episode)
+		public Task<string> Transcode(Episode episode)
 		{
 			return null; // Not implemented yet.
-			string folder = Path.Combine(_transcodePath, episode.Link);
-			string manifest = Path.Combine(folder, episode.Link + ".m3u8");
-			float playableDuration = 0;
-			bool transcodeFailed = false;
-
-			try
-			{
-				Directory.CreateDirectory(folder);
-				Debug.WriteLine("&Transcoding " + episode.Link + " at " + episode.Path + ", outputPath: " + folder);
-
-				if (File.Exists(manifest))
-					return manifest;
-			}
-			catch (UnauthorizedAccessException)
-			{
-				Console.Error.WriteLine($"Access to the path {manifest} is denied. Please change your transmux path in the config.");
-				return null;
-			}
-
-			Task.Run(() =>
-			{
-				transcodeFailed = TranscoderAPI.transcode(episode.Path, manifest.Replace('\\', '/'), out playableDuration) != 0;
-			});
-			while (playableDuration < 10 || (!File.Exists(manifest) && !transcodeFailed))
-				await Task.Delay(10);
-			return transcodeFailed ? null : manifest;
 		}
 	}
 }

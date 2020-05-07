@@ -93,7 +93,7 @@ namespace Kyoo.Models
 			{
 				if (Type != StreamType.Subtitle)
 					return null;
-				string link = "/subtitle/" + Episode.Link + "." + Language;
+				string link = "/subtitle/" + Episode.Slug + "." + Language;
 				if (IsForced)
 					link += "-forced";
 				switch (Codec)

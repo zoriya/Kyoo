@@ -22,7 +22,7 @@ namespace Kyoo.Api
 		[Authorize(Policy="Read")]
 		public IActionResult GetShowThumb(string showSlug)
 		{
-			string path = _libraryManager.GetShowBySlug(showSlug)?.Path;
+			string path = _libraryManager.GetShow(showSlug)?.Path;
 			if (path == null)
 				return NotFound();
 
@@ -37,7 +37,7 @@ namespace Kyoo.Api
 		[Authorize(Policy="Read")]
 		public IActionResult GetShowLogo(string showSlug)
 		{
-			string path = _libraryManager.GetShowBySlug(showSlug)?.Path;
+			string path = _libraryManager.GetShow(showSlug)?.Path;
 			if (path == null)
 				return NotFound();
 
@@ -52,7 +52,7 @@ namespace Kyoo.Api
 		[Authorize(Policy="Read")]
 		public IActionResult GetShowBackdrop(string showSlug)
 		{
-			string path = _libraryManager.GetShowBySlug(showSlug)?.Path;
+			string path = _libraryManager.GetShow(showSlug)?.Path;
 			if (path == null)
 				return NotFound();
 
