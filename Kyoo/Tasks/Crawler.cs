@@ -57,9 +57,10 @@ namespace Kyoo.Controllers
 				foreach (Episode episode in episodes)
 				{
 					if (!File.Exists(episode.Path))
-						_libraryManager.RemoveEpisode(episode.ID);
+						_libraryManager.RemoveEpisode(episode);
 				}
-
+				await _libraryManager.SaveChanges();
+				
 				foreach (Library library in libraries)
 					await Scan(library, cancellationToken);
 			}
@@ -75,21 +76,25 @@ namespace Kyoo.Controllers
 			Console.WriteLine($"Scanning library {library.Name} at {string.Join(", ", library.Paths)}.");
 			foreach (string path in library.Paths)
 			{
-				foreach (string file in Directory.GetFiles(path, "*", SearchOption.AllDirectories))
+				if (cancellationToken.IsCancellationRequested)
+					return;
+				
+				await Task.WhenAll(Directory.GetFiles(path, "*", SearchOption.AllDirectories).Select(file =>
 				{
-					if (cancellationToken.IsCancellationRequested)
-						return;
-					if (!IsVideo(file) || _libraryManager.IsEpisodeRegistered(file, out long _))
-						continue;
+					if (!IsVideo(file) || _libraryManager.GetEpisodes().Any(x => x.Path == file))
+						return null;
 					string relativePath = file.Substring(path.Length);
-					await RegisterFile(file, relativePath, library);
-				}
+					return RegisterFile(file, relativePath, library, cancellationToken);
+				}));
 			}
 		}
 
-		private async Task RegisterFile(string path, string relativePath, Library library)
+		private async Task RegisterFile(string path, string relativePath, Library library, CancellationToken token)
 		{
-			Console.WriteLine("Registering episode at: " + path);
+			if (token.IsCancellationRequested)
+				return;
+			
+			Console.WriteLine($"Registering episode at: {path}");
 			string patern = _config.GetValue<string>("regex");
 			Regex regex = new Regex(patern, RegexOptions.IgnoreCase);
 			Match match = regex.Match(relativePath);
@@ -105,17 +110,17 @@ namespace Kyoo.Controllers
 			bool isMovie = seasonNumber == -1 && episodeNumber == -1 && absoluteNumber == -1;
 			Show show = await GetShow(showName, showPath, isMovie, library);
 			if (isMovie)
-				_libraryManager.RegisterMovie(await GetMovie(show, path));
+				_libraryManager.Register(await GetMovie(show, path));
 			else
 			{
 				Season season = await GetSeason(show, seasonNumber, library);
 				Episode episode = await GetEpisode(show, season, episodeNumber, absoluteNumber, path, library);
-				if (_libraryManager.RegisterEpisode(episode) == 0)
-					return;
+				_libraryManager.Register(episode);
 			}
 			if (collection != null)
-				_libraryManager.RegisterCollection(collection);
+				_libraryManager.Register(collection);
 			_libraryManager.RegisterShowLinks(library, collection, show);
+			await _libraryManager.SaveChanges();
 		}
 
 		private async Task<Collection> GetCollection(string collectionName, Library library)
@@ -132,24 +137,10 @@ namespace Kyoo.Controllers
 				return show;
 			show = await _metadataProvider.SearchShow(showTitle, isMovie, library);
 			show.Path = showPath;
-			show.People = (await _metadataProvider.GetPeople(show, library)).GroupBy(x => x.Slug).Select(x => x.First())
-				.Select(x =>
-				{
-					People existing = _libraryManager.GetPeople(x.Slug);
-					if (existing != null)
-						return new PeopleLink(existing, show, x.Role, x.Type);
-					x.People.ExternalIDs = _libraryManager.ValidateExternalIDs(x.People.ExternalIDs);
-					return x;
-				}).ToList();
-			show.People = await _thumbnailsManager.Validate(show.People);
-			show.Genres = show.Genres?.Select(x =>
-			{
-				Genre existing = _libraryManager.GetGenre(x.Slug);
-				return existing ?? x;
-			});
-			show.ExternalIDs = _libraryManager.ValidateExternalIDs(show.ExternalIDs);
-			if (show.Studio != null)
-				show.Studio = _libraryManager.GetStudio(show.Studio.Slug) ?? show.Studio;
+			show.People = (await _metadataProvider.GetPeople(show, library))
+				.GroupBy(x => x.Slug)
+				.Select(x => x.First());
+			await _thumbnailsManager.Validate(show.People);
 			await _thumbnailsManager.Validate(show);
 			return show;
 		}
@@ -162,7 +153,6 @@ namespace Kyoo.Controllers
 			if (season == null)
 			{
 				season = await _metadataProvider.GetSeason(show, seasonNumber, library);
-				season.ExternalIDs = _libraryManager.ValidateExternalIDs(season.ExternalIDs);
 				await _thumbnailsManager.Validate(season);
 			}
 			season.Show = show;
@@ -177,11 +167,10 @@ namespace Kyoo.Controllers
 			episode.Season = season;
 			if (season == null)
 			{
-				Console.Error.WriteLine("\tError: You don't have any provider that support absolute epiode numbering. Install one and try again.");
-				return null;
+				await Console.Error.WriteLineAsync("\tError: You don't have any provider that support absolute epiode numbering. Install one and try again.");
+				return default;
 			}
 			
-			episode.ExternalIDs = _libraryManager.ValidateExternalIDs(episode.ExternalIDs);
 			await _thumbnailsManager.Validate(episode);
 			await GetTracks(episode);
 			return episode;

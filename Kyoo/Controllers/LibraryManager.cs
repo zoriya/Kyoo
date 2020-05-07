@@ -153,11 +153,14 @@ namespace Kyoo.Controllers
 		{
 			if (collection != null)
 			{
-				_database.LibraryLinks.AddIfNotExist(new LibraryLink {LibraryID = library.ID, CollectionID = collection.ID}, x => x.LibraryID == library.ID && x.CollectionID == collection.ID && x.ShowID == null);
-				_database.CollectionLinks.AddIfNotExist(new CollectionLink { CollectionID = collection.ID, ShowID = show.ID}, x => x.CollectionID == collection.ID && x.ShowID == show.ID);
+				_database.LibraryLinks.AddIfNotExist(new LibraryLink {Library = library, Collection = collection},
+					x => x.Library == library && x.Collection == collection && x.ShowID == null);
+				_database.CollectionLinks.AddIfNotExist(new CollectionLink { Collection = collection, Show = show},
+					x => x.Collection == collection && x.Show == show);
 			}
 			else
-				_database.LibraryLinks.AddIfNotExist(new LibraryLink {LibraryID = library.ID, ShowID = show.ID}, x => x.LibraryID == library.ID && x.CollectionID == null && x.ShowID == show.ID);
+				_database.LibraryLinks.AddIfNotExist(new LibraryLink {Library = library, Show = show},
+					x => x.Library == library && x.Collection == null && x.Show == show);
 		}
 		
 		public Task SaveChanges()

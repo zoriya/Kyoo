@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Tasks
@@ -53,12 +52,12 @@ namespace Kyoo.Tasks
 			Show old = _database.Shows.FirstOrDefault(x => x.Slug == slug);
 			if (old == null)
 				return;
-			Library library = _libraryManager.GetLibraryForShow(slug);
+			Library library = _database.LibraryLinks.First(x => x.Show == old && x.Library != null).Library;
 			Show edited = await _providerManager.CompleteShow(old, library);
 			edited.ID = old.ID;
 			edited.Slug = old.Slug;
 			edited.Path = old.Path;
-			_libraryManager.EditShow(edited);
+			_libraryManager.Edit(edited, true);
 			await _thumbnailsManager.Validate(edited, true);
 			if (old.Seasons != null)
 				await Task.WhenAll(old.Seasons.Select(x => ReScanSeason(old, x)));
@@ -84,10 +83,10 @@ namespace Kyoo.Tasks
 
 		private async Task ReScanSeason(Show show, Season old)
 		{
-			Library library = _libraryManager.GetLibraryForShow(show.Slug);
+			Library library = _database.LibraryLinks.First(x => x.Show == show && x.Library != null).Library;
 			Season edited = await _providerManager.GetSeason(show, old.SeasonNumber, library);
 			edited.ID = old.ID;
-			_libraryManager.EditSeason(edited);
+			_libraryManager.Edit(edited, true);
 			await _thumbnailsManager.Validate(edited, true);
 			if (old.Episodes != null)
 				await Task.WhenAll(old.Episodes.Select(x => ReScanEpisode(show, x)));
@@ -95,10 +94,10 @@ namespace Kyoo.Tasks
 
 		private async Task ReScanEpisode(Show show, Episode old)
 		{
-			Library library = _libraryManager.GetLibraryForShow(show.Slug);
+			Library library = _database.LibraryLinks.First(x => x.Show == show && x.Library != null).Library;
 			Episode edited = await _providerManager.GetEpisode(show, old.Path, old.SeasonNumber, old.EpisodeNumber, old.AbsoluteNumber, library);
 			edited.ID = old.ID;
-			_libraryManager.EditEpisode(edited);
+			_libraryManager.Edit(edited, true);
 			await _thumbnailsManager.Validate(edited, true);
 		}
 

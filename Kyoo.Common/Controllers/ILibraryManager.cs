@@ -23,10 +23,6 @@ namespace Kyoo.Controllers
 		IEnumerable<Studio> GetStudios();
 		IEnumerable<Genre> GetGenres();
 
-		// Other get helpers
-		Show GetShowByPath(string path);
-		IEnumerable<string> GetLibrariesPath();
-		
 		// Search
 		IEnumerable<Collection> SearchCollections(string searchQuery);
 		IEnumerable<Show> SearchShows(string searchQuery);
@@ -34,6 +30,10 @@ namespace Kyoo.Controllers
 		IEnumerable<Genre> SearchGenres(string searchQuery);
 		IEnumerable<Studio> SearchStudios(string searchQuery);
 		IEnumerable<People> SearchPeople(string searchQuery);
+		
+		// Other get helpers
+		Show GetShowByPath(string path);
+		IEnumerable<string> GetLibrariesPath();
 
 		//Register values
 		void Register(object obj);
