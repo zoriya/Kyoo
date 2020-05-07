@@ -79,14 +79,38 @@ namespace Kyoo.Controllers
 			{
 				if (cancellationToken.IsCancellationRequested)
 					return;
-				
-				await Task.WhenAll(Directory.GetFiles(path, "*", SearchOption.AllDirectories).Select(file =>
+				string[] files;
+				try
+				{
+					files = Directory.GetFiles(path, "*", SearchOption.AllDirectories);
+				}
+				catch (DirectoryNotFoundException)
+				{
+					Console.Error.WriteLine($"The library's directory {path} could not be found (library slug: {library.Slug})");
+					continue;
+				}
+				catch (PathTooLongException)
+				{
+					Console.Error.WriteLine($"The library's directory {path} is too long for this system. (library slug: {library.Slug})");
+					continue;
+				}
+				catch (ArgumentException)
+				{
+					Console.Error.WriteLine($"The library's directory {path} is invalid. (library slug: {library.Slug})");
+					continue;
+				}
+				catch (UnauthorizedAccessException)
+				{
+					Console.Error.WriteLine($"Permission denied: can't access library's directory at {path}. (library slug: {library.Slug})");
+					continue;
+				}
+				await Task.WhenAll(files.Select(file =>
 				{
 					if (!IsVideo(file) || _libraryManager.GetEpisodes().Any(x => x.Path == file))
 						return null;
 					string relativePath = file.Substring(path.Length);
 					return RegisterFile(file, relativePath, library, cancellationToken);
-				}));
+				}).Where(x => x != null));
 			}
 		}
 
