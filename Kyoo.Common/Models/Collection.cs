@@ -12,7 +12,7 @@ namespace Kyoo.Models
 		public string Poster { get; set; }
 		public string Overview { get; set; }
 		[JsonIgnore] public string ImgPrimary { get; set; }
-		public IEnumerable<Show> Shows;
+		public virtual IEnumerable<Show> Shows { get; set; }
 
 		public Collection() { }
 
@@ -38,17 +38,11 @@ namespace Kyoo.Models
 				return this;
 			if (ID == -1)
 				ID = collection.ID;
-			if (Slug == null)
-				Slug = collection.Slug;
-			if (Name == null)
-				Name = collection.Name;
-			if (Poster == null)
-				Poster = collection.Poster;
-			if (Overview == null)
-				Overview = collection.Overview;
-			if (ImgPrimary == null)
-				ImgPrimary = collection.ImgPrimary;
-			Shows = Utility.MergeLists(Shows, collection.Shows, (x, y) => x.Slug == y.Slug);
+			Slug ??= collection.Slug;
+			Name ??= collection.Name;
+			Poster ??= collection.Poster;
+			Overview ??= collection.Overview;
+			ImgPrimary ??= collection.ImgPrimary;
 			return this;
 		}
 	}

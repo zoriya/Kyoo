@@ -56,7 +56,7 @@ namespace Kyoo.Api
 			if (library == null)
 				return NotFound();
 
-			return _libraryManager.GetShowsInLibrary(library.ID).ToList();
+			return library.Shows.Concat(library.Collections.Select(x => x.AsShow())).ToList();
 		}
 	}
 }

@@ -28,13 +28,13 @@ namespace Kyoo.Models
 		[JsonIgnore] public virtual IEnumerable<Track> Tracks { get; set; }
 
 		public string ShowTitle => Show.Title; // Used in the API response only
-		public string Link => GetSlug(Show.Slug, SeasonNumber, EpisodeNumber);
+		public string Slug => GetSlug(Show.Slug, SeasonNumber, EpisodeNumber);
 		public string Thumb
 		{
 			get
 			{
 				if (Show != null)
-					return "thumb/" + Link;
+					return "thumb/" + Slug;
 				return ImgPrimary;
 			}
 		}

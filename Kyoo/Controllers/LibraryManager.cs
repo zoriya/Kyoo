@@ -1,8 +1,8 @@
 ﻿using System;
 using Kyoo.Models;
-using Kyoo.Models.Watch;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,340 +18,358 @@ namespace Kyoo.Controllers
 			_database = database;
 		}
 
-		#region Read the database
-		public IEnumerable<Library> GetLibraries()
-		{
-			return _database.Libraries;
-		}
-
-		public Library GetLibraryForShow(string showSlug)
-		{
-			return _database.LibraryLinks.FirstOrDefault(x => x.Show.Slug == showSlug)?.Library;
-		}
-
-		public IEnumerable<string> GetLibrariesPath()
-		{
-			IEnumerable<string> paths = new List<string>();
-			return Enumerable.Aggregate(_database.Libraries, paths, (current, lib) => current.Concat(lib.Paths));
-		}
-
-		public (Track video, IEnumerable<Track> audios, IEnumerable<Track> subtitles) GetStreams(long episodeID, string episodeSlug)
-		{
-			IEnumerable<Track> tracks = _database.Tracks.Where(track => track.EpisodeID == episodeID);
-			return (tracks.FirstOrDefault(x => x.Type == StreamType.Video),
-				tracks.Where(x => x.Type == StreamType.Audio),
-				tracks.Where(track => track.Type == StreamType.Subtitle));
-		}
-
-		public Track GetSubtitle(string showSlug, long seasonNumber, long episodeNumber, string languageTag, bool forced)
-		{
-			long? showID = _database.Shows.FirstOrDefault(x => x.Slug == showSlug)?.ID;
-			if (showID == null)
-				return null;
-			return (from track in _database.Tracks where track.Episode.ShowID == showID 
-													  && track.Episode.SeasonNumber == seasonNumber 
-													  && track.Episode.EpisodeNumber == episodeNumber
-													  && track.Language == languageTag select track).FirstOrDefault();
-		}
-
-		public Track GetSubtitleById(long id)
-		{
-			return (from track in _database.Tracks where track.ID == id select track).FirstOrDefault();
-		}
-
+		#region GetBySlug
 		public Library GetLibrary(string librarySlug)
 		{
-			return (from library in _database.Libraries where library.Slug == librarySlug select library).FirstOrDefault();
+			return _database.Libraries.FirstOrDefault(library => library.Slug == librarySlug);
 		}
-
-		public IEnumerable<Show> GetShows()
+		
+		public Collection GetCollection(string slug)
 		{
-			return _database.LibraryLinks.AsEnumerable().Select(x => x.Show ?? x.Collection.AsShow())
-				.OrderBy(x => x.Title);
+			return _database.Collections.FirstOrDefault(col => col.Slug == slug);
 		}
 
-		public IEnumerable<Show> SearchShows(string searchQuery)
-		{
-			return _database.Shows.FromSqlInterpolated($"SELECT * FROM Shows WHERE Shows.Title LIKE {"%" + searchQuery + "%"} OR Shows.Aliases LIKE {"%" + searchQuery + "%"}")
-				.OrderBy(x => x.Title).Take(20);
-		}
-
-		public Show GetShowBySlug(string slug)
+		public Show GetShow(string slug)
 		{
 			return _database.Shows.FirstOrDefault(show => show.Slug == slug);
 		}
 		
-		public Show GetShow(string path)
-		{
-			return (from show in _database.Shows where show.Path == path select show).FirstOrDefault();
-		}
-
-		public IEnumerable<Season> GetSeasons(long showID)
-		{
-			return (from season in _database.Seasons where season.ShowID == showID select season)
-				.OrderBy(x => x.SeasonNumber);
-		}
-
-		public Season GetSeason(string showSlug, long seasonNumber)
-		{
-			return (from season in _database.Seasons
-				where season.SeasonNumber == seasonNumber
-					  && season.Show.Slug == showSlug
-				select season).FirstOrDefault();
-		}
-
-		public int GetSeasonCount(string showSlug, long seasonNumber)
-		{
-			return (from season in _database.Seasons
-				where season.SeasonNumber == seasonNumber
-					  && season.Show.Slug == showSlug
-				select season).FirstOrDefault()?.Episodes.Count() ?? 0;
-		}
-
-		public IEnumerable<Episode> GetEpisodes(string showSlug)
-		{
-			return _database.Episodes.Where(episode => episode.Show.Slug == showSlug);
-		}
-
-		public IEnumerable<Episode> GetEpisodes(string showSlug, long seasonNumber)
-		{
-			return _database.Episodes.Where(x => x.SeasonNumber == seasonNumber
-			                                           && x.Show.Slug == showSlug)
-				.OrderBy(x => x.EpisodeNumber);
-		}
-
-		public IEnumerable<Episode> GetEpisodes(long showID, long seasonNumber)
-		{
-			return _database.Episodes.Where(x => x.ShowID == showID
-			                                           && x.SeasonNumber == seasonNumber);
-		}
-
 		public Episode GetEpisode(string showSlug, long seasonNumber, long episodeNumber)
 		{
 			return _database.Episodes.FirstOrDefault(x => x.EpisodeNumber == episodeNumber
-			                                                    && x.SeasonNumber == seasonNumber 
-			                                                    && x.Show.Slug == showSlug);
+			                                              && x.SeasonNumber == seasonNumber 
+			                                              && x.Show.Slug == showSlug);
 		}
-
-		public WatchItem GetWatchItem(string showSlug, long seasonNumber, long episodeNumber, bool complete = true)
+		
+		public Episode GetMovieEpisode(string movieSlug)
 		{
-			WatchItem item = _database.Episodes.Where(x => x.SeasonNumber == seasonNumber
-			                                               && x.EpisodeNumber == episodeNumber
-			                                               && x.Show.Slug == showSlug)
-				.Select(x => new WatchItem(x)).FirstOrDefault();
-			
-			if (item == null)
-				return null;
-			
-			(item.Video, item.Audios, item.Subtitles) = GetStreams(item.EpisodeID, item.Link);
-			
-			if (episodeNumber > 1)
-				item.PreviousEpisode = Episode.GetSlug(showSlug, seasonNumber, episodeNumber - 1);
-			else if (seasonNumber > 1)
-				item.PreviousEpisode = Episode.GetSlug(showSlug, seasonNumber - 1, GetSeasonCount(showSlug, seasonNumber - 1));
-			
-			if (episodeNumber >= GetSeasonCount(showSlug, seasonNumber))
-				item.NextEpisode = GetEpisode(showSlug, seasonNumber + 1, 1);
-			else
-				item.NextEpisode = GetEpisode(showSlug, seasonNumber, episodeNumber + 1);
-			
-			return item;
+			return _database.Episodes.FirstOrDefault(x => x.Show.Slug == movieSlug);	
 		}
 
-		public WatchItem GetMovieWatchItem(string movieSlug)
+		public Genre GetGenre(string slug)
 		{
-			Show movie = _database.Shows.FirstOrDefault(x => x.Slug == movieSlug);
-			if (movie == null)
-				return null;
-			Episode episode = _database.Episodes.FirstOrDefault(x => x.ShowID == movie.ID);
-			if (episode == null)
-				return null;
-			WatchItem item = new WatchItem(movie.ID, 
-				movie.Title,
-				movie.Slug,
-				-1, 
-				-1, 
-				movie.Title,
-				null,
-				episode.Path);
-			item.Link = movie.Slug;
-			item.IsMovie = true;
-			(item.Video, item.Audios, item.Subtitles) = GetStreams(item.EpisodeID, item.Link);
-			return item;
+			return _database.Genres.FirstOrDefault(genre => genre.Slug == slug);
 		}
 
-		public IEnumerable<PeopleLink> GetPeople(long showID)
+		public Studio GetStudio(string slug)
 		{
-			return from link in _database.PeopleLinks where link.ShowID == showID orderby link.People.ImgPrimary == null, link.Name select link;
+			return _database.Studios.FirstOrDefault(studio => studio.Slug == slug);
 		}
 
-		public People GetPeopleBySlug(string slug)
+		public People GetPeople(string slug)
 		{
-			return (from people in _database.Peoples where people.Slug == slug select people).FirstOrDefault();
+			return _database.Peoples.FirstOrDefault(people => people.Slug == slug);
 		}
-
+		#endregion
+		
+		#region GetAll
+		public IEnumerable<Library> GetLibraries()
+		{
+			return _database.Libraries;
+		}
+		
+		public IEnumerable<Show> GetShows()
+		{
+			return _database.LibraryLinks.AsEnumerable().Select(x => x.Show ?? x.Collection.AsShow());
+		}
+		
+		public IEnumerable<Episode> GetEpisodes()
+		{
+			return _database.Episodes;
+		}
+		
 		public IEnumerable<Genre> GetGenres()
 		{
 			return _database.Genres;
 		}
 		
-		public IEnumerable<Genre> GetGenreForShow(long showID)
-		{
-			return (from show in _database.Shows where show.ID == showID select show.Genres).FirstOrDefault();
-		}
-
-		public Genre GetGenreBySlug(string slug)
-		{
-			return (from genre in _database.Genres where genre.Slug == slug select genre).FirstOrDefault();
-		}
-
 		public IEnumerable<Studio> GetStudios()
 		{
 			return _database.Studios;
 		}
+		#endregion
 		
-		public Studio GetStudio(long showID)
+		#region GetHelper
+		public IEnumerable<string> GetLibrariesPath()
 		{
-			return (from show in _database.Shows where show.ID == showID select show.Studio).FirstOrDefault();
+			IEnumerable<string> paths = new List<string>();
+			return Enumerable.Aggregate(_database.Libraries, paths, (current, lib) => current.Concat(lib.Paths));
 		}
-
-		public Studio GetStudioBySlug(string slug)
+		
+		public Show GetShowByPath(string path)
 		{
-			return (from studio in _database.Studios where studio.Slug == slug select studio).FirstOrDefault();
+			return _database.Shows.FirstOrDefault(show => show.Path == path);
 		}
+		#endregion
 
-		public Collection GetCollection(string slug)
+		#region Search
+		public IEnumerable<Collection> SearchCollections(string searchQuery)
 		{
-			Collection collection = _database.Collections.FirstOrDefault(col => col.Slug == slug);
-			if (collection != null)
-				collection.Shows = GetShowsInCollection(collection.ID);
-			return collection;
+			return _database.Collections.Where(collection => EF.Functions.Like(collection.Name, $"%{searchQuery}%"))
+				.Take(20);
 		}
-
-		public IEnumerable<Show> GetShowsInCollection(long collectionID)
+		
+		public IEnumerable<Show> SearchShows(string searchQuery)
 		{
-			return from link in _database.CollectionLinks where link.CollectionID == collectionID select link.Show;
+			return _database.Shows.FromSqlInterpolated($@"SELECT * FROM Shows WHERE Shows.Title LIKE {$"%{searchQuery}%"}
+			                                           OR Shows.Aliases LIKE {$"%{searchQuery}%"}").Take(20);
 		}
-
-		public IEnumerable<Show> GetShowsInLibrary(long libraryID)
-		{
-			return (from link in _database.LibraryLinks where link.LibraryID == libraryID select link)
-				.AsEnumerable()
-				.Select(link => link.Show ?? link.Collection.AsShow())
-				.OrderBy(x => x.Title);
-		}
-
-		public IEnumerable<Show> GetShowsByPeople(string peopleSlug)
-		{
-			return (from link in _database.PeopleLinks where link.PeopleID == peopleSlug select link.Show).OrderBy(x => x.Title);
-		}
-
-		public IEnumerable<Episode> GetAllEpisodes()
-		{
-			return _database.Episodes;
-		}
-
+		
 		public IEnumerable<Episode> SearchEpisodes(string searchQuery)
 		{
 			return _database.Episodes.Where(x => EF.Functions.Like(x.Title, $"%{searchQuery}%")).Take(20);
 		}
-		
-		public IEnumerable<Collection> SearchCollections(string searchQuery)
-		{
-			return (from collection in _database.Collections where EF.Functions.Like(collection.Name, $"%{searchQuery}%") select collection)
-				.OrderBy(x => x.Name).Take(20);
-		}
-		
-		public IEnumerable<People> SearchPeople(string searchQuery)
-		{
-			return (from people in _database.Peoples where EF.Functions.Like(people.Name, $"%{searchQuery}%") select people)
-				.OrderBy(x => x.ImgPrimary == null)
-				.ThenBy(x => x.Name)
-				.Take(20);
-		}
-		
+
 		public IEnumerable<Genre> SearchGenres(string searchQuery)
 		{
-			return (from genre in _database.Genres where EF.Functions.Like(genre.Name, $"%{searchQuery}%") select genre)
+			return _database.Genres.Where(genre => EF.Functions.Like(genre.Name, $"%{searchQuery}%"))
 				.Take(20);
 		}
 		
 		public IEnumerable<Studio> SearchStudios(string searchQuery)
 		{
-			return (from studio in _database.Studios where EF.Functions.Like(studio.Name, $"%{searchQuery}%") select studio)
+			return _database.Studios.Where(studio => EF.Functions.Like(studio.Name, $"%{searchQuery}%"))
+				.Take(20);
+		}
+		
+		public IEnumerable<People> SearchPeople(string searchQuery)
+		{
+			return _database.Peoples.Where(people => EF.Functions.Like(people.Name, $"%{searchQuery}%"))
+				.OrderBy(x => x.ImgPrimary == null)
+				.ThenBy(x => x.Name)
 				.Take(20);
 		}
 		#endregion
 
-		#region Check if items exists
-		public bool IsCollectionRegistered(string collectionSlug, out long collectionID)
+		#region Register
+		public void Register(object obj)
 		{
-			Collection col = (from collection in _database.Collections where collection.Slug == collectionSlug select collection).FirstOrDefault();
-			collectionID = col?.ID ?? -1;
-			return collectionID != -1;
+			if (obj == null)
+				return;
+			_database.Entry(obj).State = EntityState.Added;
 		}
-
-		public bool IsShowRegistered(string showPath, out long showID)
+		
+		public void RegisterShowLinks(Library library, Collection collection, Show show)
 		{
-			Show tmp = (from show in _database.Shows where show.Path == showPath select show).FirstOrDefault();
-			showID = tmp?.ID ?? -1;
-			return showID != -1;
+			if (collection != null)
+			{
+				_database.LibraryLinks.AddIfNotExist(new LibraryLink {LibraryID = library.ID, CollectionID = collection.ID}, x => x.LibraryID == library.ID && x.CollectionID == collection.ID && x.ShowID == null);
+				_database.CollectionLinks.AddIfNotExist(new CollectionLink { CollectionID = collection.ID, ShowID = show.ID}, x => x.CollectionID == collection.ID && x.ShowID == show.ID);
+			}
+			else
+				_database.LibraryLinks.AddIfNotExist(new LibraryLink {LibraryID = library.ID, ShowID = show.ID}, x => x.LibraryID == library.ID && x.CollectionID == null && x.ShowID == show.ID);
 		}
-
-		public bool IsSeasonRegistered(long showID, long seasonNumber, out long seasonID)
+		
+		public Task SaveChanges()
 		{
-			Season tmp = (from season in _database.Seasons where season.SeasonNumber == seasonNumber && season.ShowID == showID select season).FirstOrDefault();
-			seasonID = tmp?.ID ?? -1;
-			return seasonID != -1;
-		}
-
-		public bool IsEpisodeRegistered(string episodePath, out long episodeID)
-		{
-			Episode tmp = (from episode in _database.Episodes where episode.Path == episodePath select episode).FirstOrDefault();
-			episodeID = tmp?.ID ?? -1;
-			return episodeID != -1;
-		}
-
-		public long GetOrCreateGenre(Genre genre)
-		{
-			Genre existingGenre = GetGenreBySlug(genre.Slug);
-
-			if (existingGenre != null)
-				return existingGenre.ID;
-
-			_database.Genres.Add(genre);
-			_database.SaveChanges();
-			return genre.ID;
-		}
-
-		public long GetOrCreateStudio(Studio studio)
-		{
-			Studio existingStudio = GetStudioBySlug(studio.Slug);
-
-			if (existingStudio != null)
-				return existingStudio.ID;
-			
-			_database.Studios.Add(studio);
-			_database.SaveChanges();
-			return studio.ID;
+			return _database.SaveChangesAsync();
 		}
 		#endregion
 
-		#region Write Into The Database
-		public long RegisterCollection(Collection collection)
+		#region Edit
+
+		public void Edit(Library edited, bool resetOld)
 		{
-			if (collection == null)
-				return 0;
-			if (_database.Entry(collection).State == EntityState.Detached)
-				_database.Collections.Add(collection);
-			_database.SaveChanges();
-			return collection.ID;
+			Edit(() =>
+			{
+				var query = _database.Libraries
+					.Include(x => x.Providers);
+				Library old = _database.Entry(edited).IsKeySet
+					? query.FirstOrDefault(x => x.ID == edited.ID)
+					: query.FirstOrDefault(x => x.Slug == edited.Slug);
+				
+				if (old == null)
+					throw new ItemNotFound($"No library could be found with the id {edited.ID} or the slug {edited.Slug}");
+				
+				if (resetOld)
+					Utility.Nullify(old);
+				Utility.Complete(old, edited);
+				Validate(old);
+			});
+		}
+		
+		public void Edit(Collection edited, bool resetOld)
+		{
+			Edit(() =>
+			{
+				var query = _database.Collections;
+				Collection old = _database.Entry(edited).IsKeySet
+					? query.FirstOrDefault(x => x.ID == edited.ID)
+					: query.FirstOrDefault(x => x.Slug == edited.Slug);
+				
+				if (old == null)
+					throw new ItemNotFound($"No collection could be found with the id {edited.ID} or the slug {edited.Slug}");
+				
+				if (resetOld)
+					Utility.Nullify(old);
+				Utility.Complete(old, edited);
+				Validate(old);
+			});
 		}
 
-		public long RegisterLibrary(Library library)
+		public void Edit(Show edited, bool resetOld)
+		{
+			Edit(() =>
+			{
+				var query = _database.Shows
+					.Include(x => x.GenreLinks)
+					.Include(x => x.People)
+					.Include(x => x.ExternalIDs);
+				Show old = _database.Entry(edited).IsKeySet
+					? query.FirstOrDefault(x => x.ID == edited.ID)
+					: query.FirstOrDefault(x => x.Slug == edited.Slug);
+
+				if (old == null)
+					throw new ItemNotFound($"No show could be found with the id {edited.ID} or the slug {edited.Slug}");
+				
+				if (resetOld)
+					Utility.Nullify(old);
+				Utility.Complete(old, edited);
+				Validate(old);
+			});
+		}
+
+		public void Edit(Season edited, bool resetOld)
+		{
+			Edit(() =>
+			{
+				var query = _database.Seasons
+					.Include(x => x.ExternalIDs)
+					.Include(x => x.Episodes);
+				Season old = _database.Entry(edited).IsKeySet
+					? query.FirstOrDefault(x => x.ID == edited.ID)
+					: query.FirstOrDefault(x => x.Slug == edited.Slug);
+
+				if (old == null)
+					throw new ItemNotFound($"No season could be found with the id {edited.ID} or the slug {edited.Slug}");
+				
+				if (resetOld)
+					Utility.Nullify(old);
+				Utility.Complete(old, edited);
+				Validate(old);
+			});
+		}
+		
+		public void Edit(Episode edited, bool resetOld)
+		{
+			Edit(() =>
+			{
+				var query = _database.Episodes
+					.Include(x => x.ExternalIDs)
+					.Include(x => x.Season)
+					.Include(x => x.Tracks);
+				Episode old = _database.Entry(edited).IsKeySet
+					? query.FirstOrDefault(x => x.ID == edited.ID)
+					: query.FirstOrDefault(x => x.Slug == edited.Slug);
+
+				if (old == null)
+					throw new ItemNotFound($"No episode could be found with the id {edited.ID} or the slug {edited.Slug}");
+
+				if (resetOld)
+					Utility.Nullify(old);
+				Utility.Complete(old, edited);
+				Validate(old);
+			});
+		}
+
+		public void Edit(Track edited, bool resetOld)
+		{
+			Edit(() =>
+			{
+				Track old = _database.Tracks.FirstOrDefault(x => x.ID == edited.ID);
+				
+				if (old == null)
+					throw new ItemNotFound($"No library track could be found with the id {edited.ID}");
+				
+				if (resetOld)
+					Utility.Nullify(old);
+				Utility.Complete(old, edited);
+			});
+		}
+		
+		public void Edit(People edited, bool resetOld)
+		{
+			Edit(() =>
+			{
+				var query = _database.Peoples
+					.Include(x => x.ExternalIDs);
+				People old = _database.Entry(edited).IsKeySet
+					? query.FirstOrDefault(x => x.ID == edited.ID)
+					: query.FirstOrDefault(x => x.Slug == edited.Slug);
+				
+				if (old == null)
+					throw new ItemNotFound($"No people could be found with the id {edited.ID} or the slug {edited.Slug}");
+				
+				if (resetOld)
+					Utility.Nullify(old);
+				Utility.Complete(old, edited);
+				Validate(old);
+			});
+		}
+		
+		public void Edit(Studio edited, bool resetOld)
+		{
+			Edit(() =>
+			{
+				var query = _database.Studios;
+				Studio old = _database.Entry(edited).IsKeySet
+					? query.FirstOrDefault(x => x.ID == edited.ID)
+					: query.FirstOrDefault(x => x.Slug == edited.Slug);
+				
+				if (old == null)
+					throw new ItemNotFound($"No studio could be found with the id {edited.ID} or the slug {edited.Slug}");
+				
+				if (resetOld)
+					Utility.Nullify(old);
+				Utility.Complete(old, edited);
+				Validate(old);
+			});
+		}
+		
+		public void Edit(Genre edited, bool resetOld)
+		{
+			Edit(() =>
+			{
+				var query = _database.Genres;
+				Genre old = _database.Entry(edited).IsKeySet
+					? query.FirstOrDefault(x => x.ID == edited.ID)
+					: query.FirstOrDefault(x => x.Slug == edited.Slug);
+				
+				if (old == null)
+					throw new ItemNotFound($"No genre could be found with the id {edited.ID} or the slug {edited.Slug}");
+				
+				if (resetOld)
+					Utility.Nullify(old);
+				Utility.Complete(old, edited);
+				Validate(old);
+			});
+		}
+		
+		private void Edit(Action applyFunction)
+		{
+			_database.ChangeTracker.LazyLoadingEnabled = false;
+			_database.ChangeTracker.AutoDetectChangesEnabled = false;
+
+			try
+			{
+				applyFunction.Invoke();
+				
+				_database.ChangeTracker.DetectChanges();
+				_database.SaveChanges();
+			}
+			finally
+			{
+				_database.ChangeTracker.LazyLoadingEnabled = true;
+				_database.ChangeTracker.AutoDetectChangesEnabled = true;
+			}
+		}
+		#endregion
+		
+		#region ValidateValue
+		public Library Validate(Library library)
 		{
 			if (library == null)
-				return 0;
+				return null;
 			library.Providers = library.Providers.Select(x =>
 			{
 				x.Provider = _database.Providers.FirstOrDefault(y => y.Name == x.Name);
@@ -359,21 +377,124 @@ namespace Kyoo.Controllers
 					x.ProviderID = x.Provider.ID;
 				return x;
 			}).Where(x => x.Provider != null).ToList();
-			if (_database.Entry(library).State == EntityState.Detached)
-				_database.Libraries.Add(library);
-			_database.SaveChanges();
-			return library.ID;
+			return library;
 		}
 
-		public long RegisterShow(Show show)
+		public Collection Validate(Collection collection)
+		{
+			if (collection == null)
+				return null;
+			if (collection.Slug == null)
+				collection.Slug = Utility.ToSlug(collection.Name);
+			return collection;
+		}
+
+		public Show Validate(Show show)
 		{
 			if (show == null)
-				return 0;
-			if (_database.Entry(show).State == EntityState.Detached)
-				_database.Shows.Add(show);
-			_database.SaveChanges();
-			return show.ID;
+				return null;
+			
+			show.Studio = Validate(show.Studio);
+
+			show.GenreLinks = show.GenreLinks?.Select(x =>
+			{
+				x.Genre = Validate(x.Genre);
+				x.GenreID = x.Genre.ID;
+				return x;
+			}).ToList();
+			
+			show.People = show.People?.Select(x =>
+			{
+				x.People = Validate(x.People);
+				x.PeopleID = x.People.ID;
+				return x;
+			}).ToList();
+			
+			show.Seasons = show.Seasons?.Select(x =>
+			{
+				return _database.Seasons.FirstOrDefault(y => y.ShowID == x.ShowID
+				                                             && y.SeasonNumber == x.SeasonNumber) ?? Validate(x);
+			}).ToList();
+			show.Episodes = show.Episodes?.Select(x =>
+			{
+				return _database.Episodes.FirstOrDefault(y => y.ShowID == x.ShowID 
+				                                              && y.SeasonNumber == x.SeasonNumber
+				                                              && y.EpisodeNumber == x.EpisodeNumber) ?? Validate(x);
+			}).ToList();
+			
+			show.ExternalIDs = Validate(show.ExternalIDs);
+			return show;
 		}
+
+		public Season Validate(Season season)
+		{
+			if (season == null)
+				return null;
+			
+			season.Episodes = season.Episodes?.Select(x =>
+			{
+				return _database.Episodes.FirstOrDefault(y => y.ShowID == x.ShowID 
+				                                              && y.SeasonNumber == x.SeasonNumber
+				                                              && y.EpisodeNumber == x.EpisodeNumber) ?? Validate(x);
+			}).ToList();
+			season.ExternalIDs = Validate(season.ExternalIDs);
+			return season;
+		}
+
+		public Episode Validate(Episode episode)
+		{
+			if (episode == null)
+				return null;
+			
+			Season old = _database.Seasons.FirstOrDefault(x => x.ShowID == episode.ShowID 
+			                                                       && x.SeasonNumber == episode.SeasonNumber);
+			if (old != null)
+				episode.Season = old;
+			else
+				episode.Season.ExternalIDs = Validate(episode.Season.ExternalIDs);
+			episode.ExternalIDs = Validate(episode.ExternalIDs);
+			return episode;
+		}
+
+		public Studio Validate(Studio studio)
+		{
+			if (studio == null)
+				return null;
+			if (studio.Slug == null)
+				studio.Slug = Utility.ToSlug(studio.Name);
+			return _database.Studios.FirstOrDefault(x => x.Slug == studio.Slug) ?? studio;
+		}
+
+		public People Validate(People people)
+		{
+			if (people == null)
+				return null;
+			if (people.Slug == null)
+				people.Slug = Utility.ToSlug(people.Name);
+			People old = _database.Peoples.FirstOrDefault(y => y.Slug == people.Slug);
+			if (old != null)
+				return old;
+			people.ExternalIDs = Validate(people.ExternalIDs);
+			return people;
+		}
+
+		public Genre Validate(Genre genre)
+		{
+			if (genre.Slug == null)
+				genre.Slug = Utility.ToSlug(genre.Name);
+			return _database.Genres.FirstOrDefault(y => y.Slug == genre.Slug) ?? genre;
+		}
+		
+		public IEnumerable<MetadataID> Validate(IEnumerable<MetadataID> ids)
+		{
+			return ids?.Select(x =>
+			{
+				x.Provider = _database.Providers.FirstOrDefault(y => y.Name == x.Provider.Name) ?? x.Provider;
+				x.ProviderID = x.Provider.ID;
+				return x;
+			}).GroupBy(x => x.Provider.Name).Select(x => x.First()).ToList();
+		}
+		#endregion
 
 		public long EditShow(Show edited)
 		{
@@ -397,45 +518,6 @@ namespace Kyoo.Controllers
 				
 				Utility.Complete(show, edited);
 
-				if (edited.Studio != null)
-				{
-					if (edited.Studio.Slug == null)
-						edited.Studio.Slug = Utility.ToSlug(edited.Studio.Name);
-					Studio tmp = _database.Studios.FirstOrDefault(x => x.Slug == edited.Studio.Slug);
-					if (tmp != null)
-						show.Studio = tmp;
-				}
-
-				show.GenreLinks = edited.GenreLinks?.Select(x =>
-				{
-					if (x.Genre.Slug == null)
-						x.Genre.Slug = Utility.ToSlug(x.Genre.Name);
-					x.Genre = _database.Genres.FirstOrDefault(y => y.Slug == x.Genre.Slug) ?? x.Genre;
-					x.GenreID = x.Genre.ID;
-					return x;
-				}).ToList();
-				show.People = edited.People?.Select(x =>
-				{
-					People people = _database.Peoples.FirstOrDefault(y => y.Slug == x.People.Slug);
-					if (people != null)
-						x.People = people;
-					else
-						x.People.ExternalIDs = ValidateExternalIDs(x.People.ExternalIDs);
-					return x;
-				}).ToList();
-				show.Seasons = edited.Seasons?.Select(x =>
-				{
-					return _database.Seasons.FirstOrDefault(y => y.ShowID == x.ShowID
-					                                             && y.SeasonNumber == x.SeasonNumber) ?? x;
-				}).ToList();
-				show.Episodes = edited.Episodes?.Select(x =>
-				{
-					return _database.Episodes.FirstOrDefault(y => y.ShowID == x.ShowID 
-					                                              && y.SeasonNumber == x.SeasonNumber
-					                                              && y.EpisodeNumber == x.EpisodeNumber) ?? x;
-				}).ToList();
-				show.ExternalIDs = ValidateExternalIDs(show.ExternalIDs);
-
 				_database.ChangeTracker.DetectChanges();
 				_database.SaveChanges();
 			}
@@ -447,17 +529,7 @@ namespace Kyoo.Controllers
 
 			return edited.ID;
 		}
-
-		public IEnumerable<MetadataID> ValidateExternalIDs(IEnumerable<MetadataID> ids)
-		{
-			return ids?.Select(x =>
-			{
-				x.Provider = _database.Providers.FirstOrDefault(y => y.Name == x.Provider.Name) ?? x.Provider;
-				x.ProviderID = x.Provider.ID;
-				return x;
-			}).GroupBy(x => x.Provider.Name).Select(x => x.First()).ToList();
-		}
-
+		
 		public long RegisterMovie(Episode movie)
 		{
 			if (movie == null)
@@ -500,13 +572,7 @@ namespace Kyoo.Controllers
 				
 				Utility.Complete(season, edited);
 				
-				season.Episodes = edited.Episodes?.Select(x =>
-				{
-					return _database.Episodes.FirstOrDefault(y => y.ShowID == x.ShowID 
-					                                              && y.SeasonNumber == x.SeasonNumber
-					                                              && y.EpisodeNumber == x.EpisodeNumber) ?? x;
-				}).ToList();
-				season.ExternalIDs = ValidateExternalIDs(season.ExternalIDs);
+				
 
 				_database.ChangeTracker.DetectChanges();
 				_database.SaveChanges();
@@ -551,13 +617,7 @@ namespace Kyoo.Controllers
 				
 				Utility.Complete(episode, edited);
 
-				if (episode.SeasonNumber != -1)
-				{
-					episode.Season = _database.Seasons.FirstOrDefault(x => x.ShowID == episode.ShowID
-					                                                       && x.SeasonNumber == edited.SeasonNumber) ?? episode.Season;
-					episode.Season.ExternalIDs = ValidateExternalIDs(episode.Season.ExternalIDs);
-				}
-				episode.ExternalIDs = ValidateExternalIDs(episode.ExternalIDs);
+				
 
 				_database.ChangeTracker.DetectChanges();
 				_database.SaveChanges();
@@ -571,43 +631,26 @@ namespace Kyoo.Controllers
 			return edited.ID;
 		}
 
-		public long RegisterTrack(Track track)
+		#region Remove
+		public void RemoveShow(Show show)
 		{
-			_database.Tracks.Add(track);
-			_database.SaveChanges();
-			return track.ID;
+			if (_database.Entry(show).State == EntityState.Detached)
+				_database.Shows.Attach(show);
+			_database.Shows.Remove(show);
 		}
 
-		public void RegisterShowLinks(Library library, Collection collection, Show show)
+		public void RemoveSeason(Season season)
 		{
-			if (collection != null)
-			{
-				_database.LibraryLinks.AddIfNotExist(new LibraryLink {LibraryID = library.ID, CollectionID = collection.ID}, x => x.LibraryID == library.ID && x.CollectionID == collection.ID && x.ShowID == null);
-				_database.CollectionLinks.AddIfNotExist(new CollectionLink { CollectionID = collection.ID, ShowID = show.ID}, x => x.CollectionID == collection.ID && x.ShowID == show.ID);
-			}
-			else
-				_database.LibraryLinks.AddIfNotExist(new LibraryLink {LibraryID = library.ID, ShowID = show.ID}, x => x.LibraryID == library.ID && x.CollectionID == null && x.ShowID == show.ID);
-			_database.SaveChanges();
-		}
-		
-		public void RemoveShow(long showID)
-		{
-			_database.Shows.Remove(new Show {ID = showID});
+			if (_database.Entry(season).State == EntityState.Detached)
+				_database.Seasons.Attach(season);
+			_database.Seasons.Remove(season);
 		}
 
-		public void RemoveSeason(long seasonID)
+		public void RemoveEpisode(Episode episode)
 		{
-			_database.Seasons.Remove(new Season {ID = seasonID});
-		}
-
-		public void RemoveEpisode(long episodeID)
-		{
-			_database.Episodes.Remove(new Episode {ID = episodeID});
-		}
-
-		public void ClearSubtitles(long episodeID)
-		{
-			_database.Tracks.RemoveRange(_database.Tracks.Where(x => x.EpisodeID == episodeID));
+			if (_database.Entry(episode).State == EntityState.Detached)
+				_database.Episodes.Attach(episode);
+			_database.Episodes.Remove(episode);
 		}
 		#endregion
 	}

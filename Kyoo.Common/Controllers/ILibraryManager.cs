@@ -1,76 +1,70 @@
 ﻿using Kyoo.Models;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Kyoo.Controllers
 {
 	public interface ILibraryManager
 	{
-		//Read values
-		Studio GetStudio(long showID);
-		IEnumerable<PeopleLink> GetPeople(long showID);
-		IEnumerable<Genre> GetGenreForShow(long showID);
-		IEnumerable<Season> GetSeasons(long showID);
-		int GetSeasonCount(string showSlug, long seasonNumber);
-		IEnumerable<Show> GetShowsInCollection(long collectionID);
-		IEnumerable<Show> GetShowsInLibrary(long libraryID);
-		IEnumerable<Show> GetShowsByPeople(string peopleSlug);
-		IEnumerable<string> GetLibrariesPath();
-
-		//Internal read
-		(Track video, IEnumerable<Track> audios, IEnumerable<Track> subtitles) GetStreams(long episodeID, string showSlug);
-		Track GetSubtitle(string showSlug, long seasonNumber, long episodeNumber, string languageTag, bool forced);
-		Track GetSubtitleById(long id);
-
-		//Public read
-		IEnumerable<Show> GetShows();
-		IEnumerable<Show> SearchShows(string searchQuery);
-		IEnumerable<Collection> SearchCollections(string searchQuery);
+		// Get by slug
 		Library GetLibrary(string librarySlug);
-		Library GetLibraryForShow(string showSlug);
-		IEnumerable<Library> GetLibraries();
-		IEnumerable<Studio> GetStudios();
-		Show GetShowBySlug(string slug);
-		Show GetShow(string path);
-		Season GetSeason(string showSlug, long seasonNumber);
-		IEnumerable<Episode> GetEpisodes(string showSlug);
-		IEnumerable<Episode> GetEpisodes(string showSlug, long seasonNumber);
-		Episode GetEpisode(string showSlug, long seasonNumber, long episodeNumber);
-		WatchItem GetWatchItem(string showSlug, long seasonNumber, long episodeNumber, bool complete = true);
-		WatchItem GetMovieWatchItem(string movieSlug);
-		People GetPeopleBySlug(string slug);
-		IEnumerable<Genre> GetGenres();
-		Genre GetGenreBySlug(string slug);
-		Studio GetStudioBySlug(string slug);
 		Collection GetCollection(string slug);
-		IEnumerable<Episode> GetAllEpisodes();
+		Show GetShow(string slug);
+		Episode GetEpisode(string showSlug, long seasonNumber, long episodeNumber);
+		Episode GetMovieEpisode(string movieSlug);
+		Genre GetGenre(string slug);
+		Studio GetStudio(string slug);
+		People GetPeople(string slug);
+
+		// Get all
+		IEnumerable<Library> GetLibraries();
+		IEnumerable<Show> GetShows();
+		IEnumerable<Episode> GetEpisodes();
+		IEnumerable<Studio> GetStudios();
+		IEnumerable<Genre> GetGenres();
+
+		// Other get helpers
+		Show GetShowByPath(string path);
+		IEnumerable<string> GetLibrariesPath();
+		
+		// Search
+		IEnumerable<Collection> SearchCollections(string searchQuery);
+		IEnumerable<Show> SearchShows(string searchQuery);
 		IEnumerable<Episode> SearchEpisodes(string searchQuery);
-		IEnumerable<People> SearchPeople(string searchQuery);
 		IEnumerable<Genre> SearchGenres(string searchQuery);
 		IEnumerable<Studio> SearchStudios(string searchQuery);
-
-		//Check if value exists
-		bool IsCollectionRegistered(string collectionSlug, out long collectionID);
-		bool IsShowRegistered(string showPath, out long showID);
-		bool IsSeasonRegistered(long showID, long seasonNumber, out long seasonID);
-		bool IsEpisodeRegistered(string episodePath, out long episodeID);
+		IEnumerable<People> SearchPeople(string searchQuery);
 
 		//Register values
-		long RegisterLibrary(Library library);
-		long RegisterCollection(Collection collection);
-		long RegisterShow(Show show);
-		long EditShow(Show show);
-		long RegisterMovie(Episode movie);
-		long RegisterSeason(Season season);
-		long EditSeason(Season season);
-		long RegisterEpisode(Episode episode);
-		long EditEpisode(Episode episode);
-		long RegisterTrack(Track track);
+		void Register(object obj);
 		void RegisterShowLinks(Library library, Collection collection, Show show);
-		IEnumerable<MetadataID> ValidateExternalIDs(IEnumerable<MetadataID> ids);
+		Task SaveChanges();
+		
+		// Edit values
+		void Edit(Library library, bool resetOld);
+		void Edit(Collection collection, bool resetOld);
+		void Edit(Show show, bool resetOld);
+		void Edit(Season season, bool resetOld);
+		void Edit(Episode episode, bool resetOld);
+		void Edit(Track track, bool resetOld);
+		void Edit(People people, bool resetOld);
+		void Edit(Studio studio, bool resetOld);
+		void Edit(Genre genre, bool resetOld);
 
-		void RemoveShow(long showID);
-		void RemoveSeason(long seasonID);
-		void RemoveEpisode(long episodeID);
-		void ClearSubtitles(long episodeID);
+		// Validate values
+		Library Validate(Library library);
+		Collection Validate(Collection collection);
+		Show Validate(Show show);
+		Season Validate(Season season);
+		Episode Validate(Episode episode);
+		People Validate(People people);
+		Studio Validate(Studio studio);
+		Genre Validate(Genre genre);
+		IEnumerable<MetadataID> Validate(IEnumerable<MetadataID> id);
+		
+		// Remove values
+		void RemoveShow(Show show);
+		void RemoveSeason(Season season);
+		void RemoveEpisode(Episode episode);
 	}
 }

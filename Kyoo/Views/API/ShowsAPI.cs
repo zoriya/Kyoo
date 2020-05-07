@@ -45,7 +45,7 @@ namespace Kyoo.Api
 		[JsonDetailed]
 		public ActionResult<Show> GetShow(string slug)
 		{
-			Show show = _libraryManager.GetShowBySlug(slug);
+			Show show = _libraryManager.GetShow(slug);
 
 			if (show == null)
 				return NotFound();
@@ -96,7 +96,7 @@ namespace Kyoo.Api
 		[Authorize(Policy = "Write")]
 		public async Task<IActionResult> DownloadImages(string slug)
 		{
-			Show show = _libraryManager.GetShowBySlug(slug);
+			Show show = _libraryManager.GetShow(slug);
 			if (show == null)
 				return NotFound();
 			await _thumbnailsManager.Validate(show, true);

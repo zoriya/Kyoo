@@ -49,7 +49,7 @@ namespace Kyoo.Controllers
 
 			try
 			{
-				IEnumerable<Episode> episodes = _libraryManager.GetAllEpisodes();
+				IEnumerable<Episode> episodes = _libraryManager.GetEpisodes();
 				IEnumerable<Library> libraries = argument == null 
 					? _libraryManager.GetLibraries()
 					: new [] {_libraryManager.GetLibrary(argument)};
@@ -127,7 +127,7 @@ namespace Kyoo.Controllers
 		
 		private async Task<Show> GetShow(string showTitle, string showPath, bool isMovie, Library library)
 		{
-			Show show = _libraryManager.GetShow(showPath);
+			Show show = _libraryManager.GetShowByPath(showPath);
 			if (show != null)
 				return show;
 			show = await _metadataProvider.SearchShow(showTitle, isMovie, library);
@@ -135,7 +135,7 @@ namespace Kyoo.Controllers
 			show.People = (await _metadataProvider.GetPeople(show, library)).GroupBy(x => x.Slug).Select(x => x.First())
 				.Select(x =>
 				{
-					People existing = _libraryManager.GetPeopleBySlug(x.Slug);
+					People existing = _libraryManager.GetPeople(x.Slug);
 					if (existing != null)
 						return new PeopleLink(existing, show, x.Role, x.Type);
 					x.People.ExternalIDs = _libraryManager.ValidateExternalIDs(x.People.ExternalIDs);
@@ -144,12 +144,12 @@ namespace Kyoo.Controllers
 			show.People = await _thumbnailsManager.Validate(show.People);
 			show.Genres = show.Genres?.Select(x =>
 			{
-				Genre existing = _libraryManager.GetGenreBySlug(x.Slug);
+				Genre existing = _libraryManager.GetGenre(x.Slug);
 				return existing ?? x;
 			});
 			show.ExternalIDs = _libraryManager.ValidateExternalIDs(show.ExternalIDs);
 			if (show.Studio != null)
-				show.Studio = _libraryManager.GetStudioBySlug(show.Studio.Slug) ?? show.Studio;
+				show.Studio = _libraryManager.GetStudio(show.Studio.Slug) ?? show.Studio;
 			await _thumbnailsManager.Validate(show);
 			return show;
 		}

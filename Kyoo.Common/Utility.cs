@@ -80,13 +80,32 @@ namespace Kyoo
 					continue;
 				
 				object value = property.GetValue(second);
-				object defaultValue = property.PropertyType.IsValueType ? Activator.CreateInstance(property.PropertyType) : null;
+				object defaultValue = property.PropertyType.IsValueType
+					? Activator.CreateInstance(property.PropertyType) 
+					: null;
 				
 				if (value?.Equals(defaultValue) == false)
 					property.SetValue(first, value);
 			}
 
 			return first;
+		}
+
+		public static T Nullify<T>(T obj)
+		{
+			Type type = typeof(T);
+			foreach (PropertyInfo property in type.GetProperties())
+			{
+				if (!property.CanWrite)
+					continue;
+				
+				object defaultValue = property.PropertyType.IsValueType 
+					? Activator.CreateInstance(property.PropertyType) 
+					: null;
+				property.SetValue(obj, defaultValue);
+			}
+
+			return obj;
 		}
 	}
 }
