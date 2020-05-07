@@ -1,8 +1,8 @@
-﻿using System;
-using Kyoo.Models;
+﻿using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Microsoft.AspNetCore.Authorization;
@@ -31,22 +31,21 @@ namespace Kyoo.Api
 			Track subtitle = null;
 			
 			if (languageTag != null)
-				subtitle = _libraryManager.GetSubtitle(showSlug, seasonNumber, episodeNumber, languageTag, forced);
+				subtitle = _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber)?.Tracks
+					.FirstOrDefault(x => x.Language == languageTag && x.IsForced == forced);
 				
 			if (subtitle == null)
 			{
 				string idString = identifier.IndexOf('-') != -1 ? identifier.Substring(0, identifier.IndexOf('-')) : identifier;
 				long.TryParse(idString, out long id);
-				subtitle = _libraryManager.GetSubtitleById(id);
+				subtitle = _libraryManager.GetTracks().FirstOrDefault(x => x.ID == id);
 			}
 			
 			if (subtitle == null)
 				return NotFound();
 			
-			if (subtitle.Codec == "subrip" && extension == "vtt") //The request wants a WebVTT from a Subrip subtitle, convert it on the fly and send it.
-			{
+			if (subtitle.Codec == "subrip" && extension == "vtt")
 				return new ConvertSubripToVtt(subtitle.Path);
-			}
 
 			string mime;
 			if (subtitle.Codec == "ass")
@@ -54,7 +53,7 @@ namespace Kyoo.Api
 			else
 				mime = "application/x-subrip";
 
-			//Should use appropriate mime type here
+			// TODO Should use appropriate mime type here
 			return PhysicalFile(subtitle.Path, mime);
 		}
 
@@ -63,15 +62,15 @@ namespace Kyoo.Api
 		public async Task<string> ExtractSubtitle(string showSlug, long seasonNumber, long episodeNumber)
 		{
 			Episode episode = _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
-			_libraryManager.ClearSubtitles(episode.ID);
+			episode.Tracks = null;
 
 			Track[] tracks = await _transcoder.ExtractSubtitles(episode.Path);
 			foreach (Track track in tracks)
 			{
 				track.EpisodeID = episode.ID;
-				_libraryManager.RegisterTrack(track);
+				_libraryManager.Register(track);
 			}
-
+			await _libraryManager.SaveChanges();
 			return "Done. " + tracks.Length + " track(s) extracted.";
 		}
 
@@ -79,17 +78,18 @@ namespace Kyoo.Api
 		[Authorize(Policy="Admin")]
 		public async Task<string> ExtractSubtitle(string showSlug)
 		{
-			IEnumerable<Episode> episodes = _libraryManager.GetEpisodes(showSlug);
+			IEnumerable<Episode> episodes = _libraryManager.GetShow(showSlug).Episodes;
 			foreach (Episode episode in episodes)
 			{
-				_libraryManager.ClearSubtitles(episode.ID);
+				episode.Tracks = null;
 
 				Track[] tracks = await _transcoder.ExtractSubtitles(episode.Path);
 				foreach (Track track in tracks)
 				{
 					track.EpisodeID = episode.ID;
-					_libraryManager.RegisterTrack(track);
+					_libraryManager.Register(track);
 				}
+				await _libraryManager.SaveChanges();
 			}
 
 			return "Done.";
