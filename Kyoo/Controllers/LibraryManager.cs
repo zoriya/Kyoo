@@ -33,7 +33,12 @@ namespace Kyoo.Controllers
 		{
 			return _database.Shows.FirstOrDefault(show => show.Slug == slug);
 		}
-		
+
+		public Season GetSeason(string showSlug, long seasonNumber)
+		{
+			return _database.Seasons.FirstOrDefault(x => x.Show.Slug == showSlug && x.SeasonNumber == seasonNumber);
+		}
+
 		public Episode GetEpisode(string showSlug, long seasonNumber, long episodeNumber)
 		{
 			return _database.Episodes.FirstOrDefault(x => x.EpisodeNumber == episodeNumber
@@ -67,10 +72,15 @@ namespace Kyoo.Controllers
 		{
 			return _database.Libraries;
 		}
-		
+
+		public IEnumerable<Collection> GetCollections()
+		{
+			return _database.Collections;
+		}
+
 		public IEnumerable<Show> GetShows()
 		{
-			return _database.LibraryLinks.AsEnumerable().Select(x => x.Show ?? x.Collection.AsShow());
+			return _database.Shows;
 		}
 		
 		public IEnumerable<Episode> GetEpisodes()
@@ -87,6 +97,17 @@ namespace Kyoo.Controllers
 		{
 			return _database.Studios;
 		}
+
+		public IEnumerable<People> GetPeoples()
+		{
+			return _database.Peoples;
+		}
+
+		public IEnumerable<Track> GetTracks()
+		{
+			return _database.Tracks;
+		}
+
 		#endregion
 		
 		#region GetHelper

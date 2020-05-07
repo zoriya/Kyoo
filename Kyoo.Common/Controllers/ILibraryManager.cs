@@ -10,6 +10,7 @@ namespace Kyoo.Controllers
 		Library GetLibrary(string librarySlug);
 		Collection GetCollection(string slug);
 		Show GetShow(string slug);
+		Season GetSeason(string showSlug, long seasonNumber);
 		Episode GetEpisode(string showSlug, long seasonNumber, long episodeNumber);
 		Episode GetMovieEpisode(string movieSlug);
 		Genre GetGenre(string slug);
@@ -18,9 +19,12 @@ namespace Kyoo.Controllers
 
 		// Get all
 		IEnumerable<Library> GetLibraries();
+		IEnumerable<Collection> GetCollections();
 		IEnumerable<Show> GetShows();
 		IEnumerable<Episode> GetEpisodes();
+		IEnumerable<Track> GetTracks();
 		IEnumerable<Studio> GetStudios();
+		IEnumerable<People> GetPeoples();
 		IEnumerable<Genre> GetGenres();
 
 		// Search
