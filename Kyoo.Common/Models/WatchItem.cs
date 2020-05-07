@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Kyoo.Models
 {
@@ -16,7 +17,7 @@ namespace Kyoo.Models
 		public string Link;
 		public DateTime? ReleaseDate;
 		[JsonIgnore] public string Path;
-		public string PreviousEpisode;
+		public Episode PreviousEpisode;
 		public Episode NextEpisode;
 		public bool IsMovie;
 
@@ -65,15 +66,34 @@ namespace Kyoo.Models
 			Subtitles = subtitles;
 		}
 
-		public WatchItem(Episode episode) 
-			: this(episode.ID, 
-			episode.Show.Title,
-			episode.Show.Slug,
-			episode.SeasonNumber,
-			episode.EpisodeNumber,
-			episode.Title,
-			episode.ReleaseDate,
-			episode.Path) 
-		{ }
+		public WatchItem(Episode episode)
+			: this(episode.ID,
+				episode.Show.Title,
+				episode.Show.Slug,
+				episode.SeasonNumber,
+				episode.EpisodeNumber,
+				episode.Title,
+				episode.ReleaseDate,
+				episode.Path)
+		{
+			if (EpisodeNumber > 1)
+				PreviousEpisode = episode.Season.Episodes.FirstOrDefault(x => x.EpisodeNumber == EpisodeNumber - 1);
+			else if (SeasonNumber > 1)
+			{
+				Season previousSeason = episode.Show.Seasons
+					.FirstOrDefault(x => x.SeasonNumber == SeasonNumber - 1);
+				PreviousEpisode = previousSeason?.Episodes
+					.FirstOrDefault(x => x.EpisodeNumber == previousSeason.Episodes.Count());
+			}
+
+			if (EpisodeNumber >= episode.Season.Episodes.Count())
+			{
+				NextEpisode = episode.Show.Seasons
+					.FirstOrDefault(x => x.SeasonNumber == SeasonNumber - 1)?.Episodes
+					.FirstOrDefault(x => x.EpisodeNumber == 1);
+			}
+			else
+				NextEpisode = episode.Season.Episodes.FirstOrDefault(x => x.EpisodeNumber == EpisodeNumber + 1);
+		}
 	}
 }

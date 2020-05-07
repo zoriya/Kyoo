@@ -34,6 +34,7 @@ namespace Kyoo.Controllers
 		// Other get helpers
 		Show GetShowByPath(string path);
 		IEnumerable<string> GetLibrariesPath();
+		IEnumerable<Episode> GetEpisodes(string showSlug, long seasonNumber);
 
 		//Register values
 		void Register(object obj);

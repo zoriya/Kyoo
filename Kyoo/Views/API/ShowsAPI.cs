@@ -66,7 +66,7 @@ namespace Kyoo.Api
 			show.ID = old.ID;
 			show.Slug = slug;
 			show.Path = old.Path;
-			_libraryManager.EditShow(show);
+			_libraryManager.Edit(show, false);
 			return Ok();
 		}
 		
@@ -79,7 +79,7 @@ namespace Kyoo.Api
 			Show show = _database.Shows.Include(x => x.ExternalIDs).FirstOrDefault(x => x.Slug == slug);
 			if (show == null)
 				return NotFound();
-			show.ExternalIDs = _libraryManager.ValidateExternalIDs(externalIDs);
+			show.ExternalIDs = _libraryManager.Validate(externalIDs);
 			_database.SaveChanges();
 			_taskManager.StartTask("re-scan", $"show/{slug}");
 			return Ok();

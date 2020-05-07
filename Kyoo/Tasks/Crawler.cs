@@ -40,6 +40,7 @@ namespace Kyoo.Controllers
 		
 		public async Task Run(IServiceProvider serviceProvider, CancellationToken cancellationToken, string argument = null)
 		{
+			// TODO Should use more scopes of the library manager (one per episodes to register).
 			using IServiceScope serviceScope = serviceProvider.CreateScope();
 			_libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
 			_thumbnailsManager = serviceScope.ServiceProvider.GetService<IThumbnailsManager>();
