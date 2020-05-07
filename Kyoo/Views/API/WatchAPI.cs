@@ -20,23 +20,23 @@ namespace Kyoo.Api
 		[Authorize(Policy="Read")]
 		public ActionResult<WatchItem> Index(string showSlug, long seasonNumber, long episodeNumber)
 		{
-			WatchItem item = _libraryManager.GetWatchItem(showSlug, seasonNumber, episodeNumber);
+			Episode item = _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
 
 			if(item == null)
 				return NotFound();
 
-			return item;
+			return new WatchItem(item);;
 		}
 		
 		[HttpGet("{movieSlug}")]
 		[Authorize(Policy="Read")]
 		public ActionResult<WatchItem> Index(string movieSlug)
 		{
-			WatchItem item = _libraryManager.GetMovieWatchItem(movieSlug);
+			Episode item = _libraryManager.GetMovieEpisode(movieSlug);
 
 			if(item == null)
 				return NotFound();
-			return item;
+			return new WatchItem(item);
 		}
 	}
 }

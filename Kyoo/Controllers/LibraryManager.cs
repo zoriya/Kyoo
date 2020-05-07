@@ -100,6 +100,11 @@ namespace Kyoo.Controllers
 		{
 			return _database.Shows.FirstOrDefault(show => show.Path == path);
 		}
+
+		public IEnumerable<Episode> GetEpisodes(string showSlug, long seasonNumber)
+		{
+			return _database.Episodes.Where(x => x.Show.Slug == showSlug && x.SeasonNumber == seasonNumber);
+		}
 		#endregion
 
 		#region Search
@@ -170,7 +175,6 @@ namespace Kyoo.Controllers
 		#endregion
 
 		#region Edit
-
 		public void Edit(Library edited, bool resetOld)
 		{
 			Edit(() =>
@@ -209,7 +213,6 @@ namespace Kyoo.Controllers
 				Validate(old);
 			});
 		}
-
 		public void Edit(Show edited, bool resetOld)
 		{
 			Edit(() =>
@@ -498,141 +501,6 @@ namespace Kyoo.Controllers
 			}).GroupBy(x => x.Provider.Name).Select(x => x.First()).ToList();
 		}
 		#endregion
-
-		public long EditShow(Show edited)
-		{
-			if (edited == null)
-				throw new ArgumentNullException(nameof(edited));
-
-			_database.ChangeTracker.LazyLoadingEnabled = false;
-			_database.ChangeTracker.AutoDetectChangesEnabled = false;
-
-			try
-			{
-				var query = _database.Shows.Include(x => x.GenreLinks)
-					.Include(x => x.People)
-					.Include(x => x.ExternalIDs);
-				Show show = _database.Entry(edited).IsKeySet
-					? query.FirstOrDefault(x => x.ID == edited.ID)
-					: query.FirstOrDefault(x => x.Slug == edited.Slug);
-
-				if (show == null)
-					throw new ItemNotFound($"No show could be found with the id {edited.ID} or the slug {edited.Slug}");
-				
-				Utility.Complete(show, edited);
-
-				_database.ChangeTracker.DetectChanges();
-				_database.SaveChanges();
-			}
-			finally
-			{
-				_database.ChangeTracker.LazyLoadingEnabled = true;
-				_database.ChangeTracker.AutoDetectChangesEnabled = true;
-			}
-
-			return edited.ID;
-		}
-		
-		public long RegisterMovie(Episode movie)
-		{
-			if (movie == null)
-				return 0;
-			if (_database.Entry(movie).State == EntityState.Detached)
-				_database.Episodes.Add(movie);
-			_database.SaveChanges();
-			return movie.ID;
-		}
-
-		public long RegisterSeason(Season season)
-		{
-			if (season == null)
-				return 0;
-			if (_database.Entry(season).State == EntityState.Detached)
-				_database.Seasons.Add(season);
-			_database.SaveChanges();
-			return season.ID;
-		}
-		
-		public long EditSeason(Season edited)
-		{
-			if (edited == null)
-				throw new ArgumentNullException(nameof(edited));
-
-			_database.ChangeTracker.LazyLoadingEnabled = false;
-			_database.ChangeTracker.AutoDetectChangesEnabled = false;
-
-			try
-			{
-				var query = _database.Seasons
-					.Include(x => x.ExternalIDs)
-					.Include(x => x.Episodes);
-				Season season = _database.Entry(edited).IsKeySet
-					? query.FirstOrDefault(x => x.ID == edited.ID)
-					: query.FirstOrDefault(x => x.Slug == edited.Slug);
-
-				if (season == null)
-					throw new ItemNotFound($"No season could be found with the id {edited.ID} or the slug {edited.Slug}");
-				
-				Utility.Complete(season, edited);
-				
-				
-
-				_database.ChangeTracker.DetectChanges();
-				_database.SaveChanges();
-			}
-			finally
-			{
-				_database.ChangeTracker.LazyLoadingEnabled = true;
-				_database.ChangeTracker.AutoDetectChangesEnabled = true;
-			}
-
-			return edited.ID;
-		}
-
-		public long RegisterEpisode(Episode episode)
-		{
-			if (episode == null)
-				return 0;
-			if (!_database.Entry(episode).IsKeySet)
-				_database.Add(episode);
-			_database.SaveChanges();
-			return episode.ID;
-		}
-		
-		public long EditEpisode(Episode edited)
-		{
-			if (edited == null)
-				throw new ArgumentNullException(nameof(edited));
-
-			_database.ChangeTracker.LazyLoadingEnabled = false;
-			_database.ChangeTracker.AutoDetectChangesEnabled = false;
-
-			try
-			{
-				var query = _database.Episodes
-					.Include(x => x.Tracks)
-					.Include(x => x.Season)
-					.Include(x => x.ExternalIDs);
-				Episode episode = query.FirstOrDefault(x => x.ID == edited.ID);
-
-				if (episode == null)
-					throw new ItemNotFound($"No episode could be found with the id {edited.ID}");
-				
-				Utility.Complete(episode, edited);
-
-				
-
-				_database.ChangeTracker.DetectChanges();
-				_database.SaveChanges();
-			}
-			finally
-			{
-				_database.ChangeTracker.LazyLoadingEnabled = true;
-				_database.ChangeTracker.AutoDetectChangesEnabled = true;
-			}
-
-			return edited.ID;
-		}
 
 		#region Remove
 		public void RemoveShow(Show show)

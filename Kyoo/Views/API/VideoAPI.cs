@@ -87,7 +87,7 @@ namespace Kyoo.Api
 		[Authorize(Policy="Play")]
 		public IActionResult Index(string movieSlug)
 		{
-			WatchItem episode = _libraryManager.GetMovieWatchItem(movieSlug);
+			Episode episode = _libraryManager.GetMovieEpisode(movieSlug);
 
 			if (episode != null && System.IO.File.Exists(episode.Path))
 				return PhysicalFile(episode.Path, "video/webm", true);

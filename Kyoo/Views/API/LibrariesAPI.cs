@@ -42,7 +42,8 @@ namespace Kyoo.Api
 				return BadRequest(new {error = "The library should have a least one path."});
 			if (_libraryManager.GetLibrary(library.Slug) != null)
 				return BadRequest(new {error = "Duplicated library slug"});
-			_libraryManager.RegisterLibrary(library);
+			_libraryManager.Register(library);
+			_libraryManager.SaveChanges();
 			_taskManager.StartTask("scan", library.Slug);
 			return Ok();
 		}
