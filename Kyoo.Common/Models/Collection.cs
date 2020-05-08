@@ -12,7 +12,12 @@ namespace Kyoo.Models
 		public string Poster { get; set; }
 		public string Overview { get; set; }
 		[JsonIgnore] public string ImgPrimary { get; set; }
-		public virtual IEnumerable<Show> Shows { get; set; }
+		[JsonIgnore] public virtual IEnumerable<CollectionLink> Links { get; set; }
+		public virtual IEnumerable<Show> Shows
+		{
+			get => Links.Select(x => x.Show);
+			set => Links = value.Select(x => new CollectionLink(this, x));
+		}
 
 		public Collection() { }
 

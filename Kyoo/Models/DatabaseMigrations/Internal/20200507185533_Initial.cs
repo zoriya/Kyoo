@@ -8,23 +8,6 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Collections",
-                columns: table => new
-                {
-                    ID = table.Column<long>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Slug = table.Column<string>(nullable: true),
-                    Name = table.Column<string>(nullable: true),
-                    Poster = table.Column<string>(nullable: true),
-                    Overview = table.Column<string>(nullable: true),
-                    ImgPrimary = table.Column<string>(nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Collections", x => x.ID);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Genres",
                 columns: table => new
                 {
@@ -97,6 +80,30 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 });
 
             migrationBuilder.CreateTable(
+                name: "Collections",
+                columns: table => new
+                {
+                    ID = table.Column<long>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Slug = table.Column<string>(nullable: true),
+                    Name = table.Column<string>(nullable: true),
+                    Poster = table.Column<string>(nullable: true),
+                    Overview = table.Column<string>(nullable: true),
+                    ImgPrimary = table.Column<string>(nullable: true),
+                    LibraryID = table.Column<long>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Collections", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Collections_Libraries_LibraryID",
+                        column: x => x.LibraryID,
+                        principalTable: "Libraries",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ProviderLinks",
                 columns: table => new
                 {
@@ -141,11 +148,18 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     Logo = table.Column<string>(nullable: true),
                     Backdrop = table.Column<string>(nullable: true),
                     IsMovie = table.Column<bool>(nullable: false),
-                    StudioID = table.Column<long>(nullable: true)
+                    StudioID = table.Column<long>(nullable: true),
+                    LibraryID = table.Column<long>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Shows", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Shows_Libraries_LibraryID",
+                        column: x => x.LibraryID,
+                        principalTable: "Libraries",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Shows_Studios_StudioID",
                         column: x => x.StudioID,
@@ -243,8 +257,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 {
                     ID = table.Column<long>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    PeopleID = table.Column<string>(nullable: true),
-                    PeopleID1 = table.Column<long>(nullable: true),
+                    PeopleID = table.Column<long>(nullable: false),
                     ShowID = table.Column<long>(nullable: false),
                     Role = table.Column<string>(nullable: true),
                     Type = table.Column<string>(nullable: true)
@@ -253,11 +266,11 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 {
                     table.PrimaryKey("PK_PeopleLinks", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_PeopleLinks_Peoples_PeopleID1",
-                        column: x => x.PeopleID1,
+                        name: "FK_PeopleLinks_Peoples_PeopleID",
+                        column: x => x.PeopleID,
                         principalTable: "Peoples",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_PeopleLinks_Shows_ShowID",
                         column: x => x.ShowID,
@@ -412,6 +425,11 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 column: "ShowID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Collections_LibraryID",
+                table: "Collections",
+                column: "LibraryID");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Collections_Slug",
                 table: "Collections",
                 column: "Slug",
@@ -485,9 +503,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 column: "ShowID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PeopleLinks_PeopleID1",
+                name: "IX_PeopleLinks_PeopleID",
                 table: "PeopleLinks",
-                column: "PeopleID1");
+                column: "PeopleID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PeopleLinks_ShowID",
@@ -520,6 +538,11 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "IX_Seasons_ShowID",
                 table: "Seasons",
                 column: "ShowID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Shows_LibraryID",
+                table: "Shows",
+                column: "LibraryID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Shows_Slug",
@@ -577,9 +600,6 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "Peoples");
 
             migrationBuilder.DropTable(
-                name: "Libraries");
-
-            migrationBuilder.DropTable(
                 name: "Providers");
 
             migrationBuilder.DropTable(
@@ -590,6 +610,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
             migrationBuilder.DropTable(
                 name: "Shows");
+
+            migrationBuilder.DropTable(
+                name: "Libraries");
 
             migrationBuilder.DropTable(
                 name: "Studios");

@@ -117,17 +117,17 @@ namespace Kyoo
 							
 			modelBuilder.Entity<Show>()
 				.Ignore(x => x.Genres);
+
+			modelBuilder.Entity<Collection>()
+				.Ignore(x => x.Shows);
 			
 			modelBuilder.Entity<PeopleLink>()
-				.Ignore(x => x.Slug);
-			modelBuilder.Entity<PeopleLink>()
-				.Ignore(x => x.Name);
-			modelBuilder.Entity<PeopleLink>()
+				.Ignore(x => x.Slug)
+				.Ignore(x => x.Name)
 				.Ignore(x => x.ExternalIDs);
 			
 			modelBuilder.Entity<ProviderLink>()
-				.Ignore(x => x.Name);
-			modelBuilder.Entity<ProviderLink>()
+				.Ignore(x => x.Name)
 				.Ignore(x => x.Logo);
 
 
