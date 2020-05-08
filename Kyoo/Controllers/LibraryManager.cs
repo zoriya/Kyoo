@@ -168,14 +168,15 @@ namespace Kyoo.Controllers
 		#endregion
 
 		#region Register
-		public void Register(object obj)
+		public Task Register(object obj)
 		{
 			if (obj == null)
-				return;
+				return Task.CompletedTask;
 			_database.Entry(obj).State = EntityState.Added;
+			return _database.SaveChangesAsync();
 		}
 		
-		public void RegisterShowLinks(Library library, Collection collection, Show show)
+		public Task RegisterShowLinks(Library library, Collection collection, Show show)
 		{
 			if (collection != null)
 			{
@@ -187,6 +188,8 @@ namespace Kyoo.Controllers
 			else
 				_database.LibraryLinks.AddIfNotExist(new LibraryLink {Library = library, Show = show},
 					x => x.Library == library && x.Collection == null && x.Show == show);
+
+			return _database.SaveChangesAsync();
 		}
 		
 		public Task SaveChanges()
@@ -196,9 +199,9 @@ namespace Kyoo.Controllers
 		#endregion
 
 		#region Edit
-		public void Edit(Library edited, bool resetOld)
+		public Task Edit(Library edited, bool resetOld)
 		{
-			Edit(() =>
+			return Edit(() =>
 			{
 				var query = _database.Libraries
 					.Include(x => x.Providers);
@@ -216,9 +219,9 @@ namespace Kyoo.Controllers
 			});
 		}
 		
-		public void Edit(Collection edited, bool resetOld)
+		public Task Edit(Collection edited, bool resetOld)
 		{
-			Edit(() =>
+			return Edit(() =>
 			{
 				var query = _database.Collections;
 				Collection old = _database.Entry(edited).IsKeySet
@@ -234,9 +237,9 @@ namespace Kyoo.Controllers
 				Validate(old);
 			});
 		}
-		public void Edit(Show edited, bool resetOld)
+		public Task Edit(Show edited, bool resetOld)
 		{
-			Edit(() =>
+			return Edit(() =>
 			{
 				var query = _database.Shows
 					.Include(x => x.GenreLinks)
@@ -256,9 +259,9 @@ namespace Kyoo.Controllers
 			});
 		}
 
-		public void Edit(Season edited, bool resetOld)
+		public Task Edit(Season edited, bool resetOld)
 		{
-			Edit(() =>
+			return Edit(() =>
 			{
 				var query = _database.Seasons
 					.Include(x => x.ExternalIDs)
@@ -277,9 +280,9 @@ namespace Kyoo.Controllers
 			});
 		}
 		
-		public void Edit(Episode edited, bool resetOld)
+		public Task Edit(Episode edited, bool resetOld)
 		{
-			Edit(() =>
+			return Edit(() =>
 			{
 				var query = _database.Episodes
 					.Include(x => x.ExternalIDs)
@@ -299,9 +302,9 @@ namespace Kyoo.Controllers
 			});
 		}
 
-		public void Edit(Track edited, bool resetOld)
+		public Task Edit(Track edited, bool resetOld)
 		{
-			Edit(() =>
+			return Edit(() =>
 			{
 				Track old = _database.Tracks.FirstOrDefault(x => x.ID == edited.ID);
 				
@@ -314,9 +317,9 @@ namespace Kyoo.Controllers
 			});
 		}
 		
-		public void Edit(People edited, bool resetOld)
+		public Task Edit(People edited, bool resetOld)
 		{
-			Edit(() =>
+			return Edit(() =>
 			{
 				var query = _database.Peoples
 					.Include(x => x.ExternalIDs);
@@ -334,9 +337,9 @@ namespace Kyoo.Controllers
 			});
 		}
 		
-		public void Edit(Studio edited, bool resetOld)
+		public Task Edit(Studio edited, bool resetOld)
 		{
-			Edit(() =>
+			return Edit(() =>
 			{
 				var query = _database.Studios;
 				Studio old = _database.Entry(edited).IsKeySet
@@ -353,9 +356,9 @@ namespace Kyoo.Controllers
 			});
 		}
 		
-		public void Edit(Genre edited, bool resetOld)
+		public Task Edit(Genre edited, bool resetOld)
 		{
-			Edit(() =>
+			return Edit(() =>
 			{
 				var query = _database.Genres;
 				Genre old = _database.Entry(edited).IsKeySet
@@ -372,7 +375,7 @@ namespace Kyoo.Controllers
 			});
 		}
 		
-		private void Edit(Action applyFunction)
+		private async Task Edit(Action applyFunction)
 		{
 			_database.ChangeTracker.LazyLoadingEnabled = false;
 			_database.ChangeTracker.AutoDetectChangesEnabled = false;
@@ -382,7 +385,7 @@ namespace Kyoo.Controllers
 				applyFunction.Invoke();
 				
 				_database.ChangeTracker.DetectChanges();
-				_database.SaveChanges();
+				await _database.SaveChangesAsync();
 			}
 			finally
 			{

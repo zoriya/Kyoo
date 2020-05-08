@@ -142,17 +142,16 @@ namespace Kyoo.Controllers
 			bool isMovie = seasonNumber == -1 && episodeNumber == -1 && absoluteNumber == -1;
 			Show show = await GetShow(libraryManager, showName, showPath, isMovie, library);
 			if (isMovie)
-				libraryManager.Register(await GetMovie(show, path));
+				await libraryManager.Register(await GetMovie(show, path));
 			else
 			{
 				Season season = await GetSeason(libraryManager, show, seasonNumber, library);
 				Episode episode = await GetEpisode(libraryManager, show, season, episodeNumber, absoluteNumber, path, library);
-				libraryManager.Register(episode);
+				await libraryManager.Register(episode);
 			}
 			if (collection != null)
-				libraryManager.Register(collection);
-			libraryManager.RegisterShowLinks(library, collection, show);
-			await libraryManager.SaveChanges();
+				await libraryManager.Register(collection);
+			await libraryManager.RegisterShowLinks(library, collection, show);
 		}
 
 		private async Task<Collection> GetCollection(ILibraryManager libraryManager, string collectionName, Library library)

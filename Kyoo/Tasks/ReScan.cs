@@ -19,7 +19,7 @@ namespace Kyoo.Tasks
 		public int Priority => 0;
 		
 		
-		private ILibraryManager _libraryManager;
+		private IServiceProvider _serviceProvider;
 		private IThumbnailsManager _thumbnailsManager;
 		private IProviderManager _providerManager;
 		private DatabaseContext _database;
@@ -27,9 +27,9 @@ namespace Kyoo.Tasks
 		public async Task Run(IServiceProvider serviceProvider, CancellationToken cancellationToken, string arguments = null)
 		{
 			using IServiceScope serviceScope = serviceProvider.CreateScope();
-			_libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
-			_thumbnailsManager = serviceScope.ServiceProvider.GetService<IThumbnailsManager>();
-			_providerManager = serviceScope.ServiceProvider.GetService<IProviderManager>();
+			_serviceProvider = serviceProvider;
+			_thumbnailsManager = serviceProvider.GetService<IThumbnailsManager>();
+			_providerManager = serviceProvider.GetService<IProviderManager>();
 			_database = serviceScope.ServiceProvider.GetService<DatabaseContext>();
 		
 			if (arguments == null || !arguments.Contains('/'))
@@ -49,16 +49,22 @@ namespace Kyoo.Tasks
 
 		private async Task ReScanShow(string slug)
 		{
-			Show old = _database.Shows.FirstOrDefault(x => x.Slug == slug);
-			if (old == null)
-				return;
-			Library library = _database.LibraryLinks.First(x => x.Show == old && x.Library != null).Library;
-			Show edited = await _providerManager.CompleteShow(old, library);
-			edited.ID = old.ID;
-			edited.Slug = old.Slug;
-			edited.Path = old.Path;
-			_libraryManager.Edit(edited, true);
-			await _thumbnailsManager.Validate(edited, true);
+			Show old;
+			
+			using (IServiceScope serviceScope = _serviceProvider.CreateScope())
+			{
+				ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
+				old = _database.Shows.FirstOrDefault(x => x.Slug == slug);
+				if (old == null)
+					return;
+				Library library = _database.LibraryLinks.First(x => x.Show == old && x.Library != null).Library;
+				Show edited = await _providerManager.CompleteShow(old, library);
+				edited.ID = old.ID;
+				edited.Slug = old.Slug;
+				edited.Path = old.Path;
+				await libraryManager.Edit(edited, true);
+				await _thumbnailsManager.Validate(edited, true);
+			}
 			if (old.Seasons != null)
 				await Task.WhenAll(old.Seasons.Select(x => ReScanSeason(old, x)));
 			IEnumerable<Episode> orphans = old.Episodes.Where(x => x.Season == null).ToList();
@@ -83,21 +89,28 @@ namespace Kyoo.Tasks
 
 		private async Task ReScanSeason(Show show, Season old)
 		{
-			Library library = _database.LibraryLinks.First(x => x.Show == show && x.Library != null).Library;
-			Season edited = await _providerManager.GetSeason(show, old.SeasonNumber, library);
-			edited.ID = old.ID;
-			_libraryManager.Edit(edited, true);
-			await _thumbnailsManager.Validate(edited, true);
+			using (IServiceScope serviceScope = _serviceProvider.CreateScope())
+			{
+				ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
+				Library library = _database.LibraryLinks.First(x => x.Show == show && x.Library != null).Library;
+				Season edited = await _providerManager.GetSeason(show, old.SeasonNumber, library);
+				edited.ID = old.ID;
+				await libraryManager.Edit(edited, true);
+				await _thumbnailsManager.Validate(edited, true);
+			}
 			if (old.Episodes != null)
 				await Task.WhenAll(old.Episodes.Select(x => ReScanEpisode(show, x)));
 		}
 
 		private async Task ReScanEpisode(Show show, Episode old)
 		{
+			using IServiceScope serviceScope = _serviceProvider.CreateScope();
+			ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
+
 			Library library = _database.LibraryLinks.First(x => x.Show == show && x.Library != null).Library;
 			Episode edited = await _providerManager.GetEpisode(show, old.Path, old.SeasonNumber, old.EpisodeNumber, old.AbsoluteNumber, library);
 			edited.ID = old.ID;
-			_libraryManager.Edit(edited, true);
+			await libraryManager.Edit(edited, true);
 			await _thumbnailsManager.Validate(edited, true);
 		}
 
