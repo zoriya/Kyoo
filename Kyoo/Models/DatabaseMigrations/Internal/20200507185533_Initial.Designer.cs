@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kyoo.Models.DatabaseMigrations.Internal
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20200426223831_Initial")]
+    [Migration("20200507185533_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,6 +27,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     b.Property<string>("ImgPrimary")
                         .HasColumnType("TEXT");
 
+                    b.Property<long?>("LibraryID")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
@@ -40,6 +43,8 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         .HasColumnType("TEXT");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("LibraryID");
 
                     b.HasIndex("Slug")
                         .IsUnique();
@@ -271,10 +276,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("PeopleID")
-                        .HasColumnType("TEXT");
-
-                    b.Property<long?>("PeopleID1")
+                    b.Property<long>("PeopleID")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Role")
@@ -288,7 +290,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
                     b.HasKey("ID");
 
-                    b.HasIndex("PeopleID1");
+                    b.HasIndex("PeopleID");
 
                     b.HasIndex("ShowID");
 
@@ -385,6 +387,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     b.Property<bool>("IsMovie")
                         .HasColumnType("INTEGER");
 
+                    b.Property<long?>("LibraryID")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Logo")
                         .HasColumnType("TEXT");
 
@@ -416,6 +421,8 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         .HasColumnType("TEXT");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("LibraryID");
 
                     b.HasIndex("Slug")
                         .IsUnique();
@@ -485,10 +492,17 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     b.ToTable("Tracks");
                 });
 
+            modelBuilder.Entity("Kyoo.Models.Collection", b =>
+                {
+                    b.HasOne("Kyoo.Models.Library", null)
+                        .WithMany("Collections")
+                        .HasForeignKey("LibraryID");
+                });
+
             modelBuilder.Entity("Kyoo.Models.CollectionLink", b =>
                 {
                     b.HasOne("Kyoo.Models.Collection", "Collection")
-                        .WithMany()
+                        .WithMany("Links")
                         .HasForeignKey("CollectionID");
 
                     b.HasOne("Kyoo.Models.Show", "Show")
@@ -572,7 +586,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 {
                     b.HasOne("Kyoo.Models.People", "People")
                         .WithMany("Roles")
-                        .HasForeignKey("PeopleID1");
+                        .HasForeignKey("PeopleID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Kyoo.Models.Show", "Show")
                         .WithMany("People")
@@ -605,6 +621,10 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
             modelBuilder.Entity("Kyoo.Models.Show", b =>
                 {
+                    b.HasOne("Kyoo.Models.Library", null)
+                        .WithMany("Shows")
+                        .HasForeignKey("LibraryID");
+
                     b.HasOne("Kyoo.Models.Studio", "Studio")
                         .WithMany()
                         .HasForeignKey("StudioID");

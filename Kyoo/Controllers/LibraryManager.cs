@@ -430,25 +430,14 @@ namespace Kyoo.Controllers
 				return x;
 			}).ToList();
 			
-			show.People = show.People?.Select(x =>
-			{
-				x.People = Validate(x.People);
-				x.PeopleID = x.People.ID;
-				return x;
-			}).ToList();
-			
-			show.Seasons = show.Seasons?.Select(x =>
-			{
-				return _database.Seasons.FirstOrDefault(y => y.ShowID == x.ShowID
-				                                             && y.SeasonNumber == x.SeasonNumber) ?? Validate(x);
-			}).ToList();
-			show.Episodes = show.Episodes?.Select(x =>
-			{
-				return _database.Episodes.FirstOrDefault(y => y.ShowID == x.ShowID 
-				                                              && y.SeasonNumber == x.SeasonNumber
-				                                              && y.EpisodeNumber == x.EpisodeNumber) ?? Validate(x);
-			}).ToList();
-			
+			show.People = show.People?.GroupBy(x => x.Slug)
+				.Select(x => x.First())
+				.Select(x =>
+				{
+					x.People = Validate(x.People);
+					x.PeopleID = x.People.ID;
+					return x;
+				}).ToList();
 			show.ExternalIDs = Validate(show.ExternalIDs);
 			return show;
 		}
@@ -457,13 +446,8 @@ namespace Kyoo.Controllers
 		{
 			if (season == null)
 				return null;
-			
-			season.Episodes = season.Episodes?.Select(x =>
-			{
-				return _database.Episodes.FirstOrDefault(y => y.ShowID == x.ShowID 
-				                                              && y.SeasonNumber == x.SeasonNumber
-				                                              && y.EpisodeNumber == x.EpisodeNumber) ?? Validate(x);
-			}).ToList();
+
+			season.Show = Validate(season.Show);
 			season.ExternalIDs = Validate(season.ExternalIDs);
 			return season;
 		}
@@ -472,13 +456,9 @@ namespace Kyoo.Controllers
 		{
 			if (episode == null)
 				return null;
-			
-			Season old = _database.Seasons.FirstOrDefault(x => x.ShowID == episode.ShowID 
-			                                                       && x.SeasonNumber == episode.SeasonNumber);
-			if (old != null)
-				episode.Season = old;
-			else
-				episode.Season.ExternalIDs = Validate(episode.Season.ExternalIDs);
+
+			episode.Show = GetShow(episode.Show.Slug) ?? Validate(episode.Show);
+			episode.Season = GetSeason(episode.Show.Slug, episode.SeasonNumber) ?? Validate(episode.Season);
 			episode.ExternalIDs = Validate(episode.ExternalIDs);
 			return episode;
 		}

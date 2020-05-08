@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Kyoo.Models.Watch;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
@@ -21,7 +22,7 @@ namespace Kyoo.Controllers
 		public bool RunOnStartup => true;
 		public int Priority => 0;
 		
-		private ILibraryManager _libraryManager;
+		private IServiceProvider _serviceProvider;
 		private IThumbnailsManager _thumbnailsManager;
 		private IProviderManager _metadataProvider;
 		private ITranscoder _transcoder;
@@ -29,7 +30,9 @@ namespace Kyoo.Controllers
 		
 		public IEnumerable<string> GetPossibleParameters()
 		{
-			return _libraryManager.GetLibraries().Select(x => x.Slug);
+			using IServiceScope serviceScope = _serviceProvider.CreateScope();
+			ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
+			return libraryManager.GetLibraries().Select(x => x.Slug);
 		}
 
 		public int? Progress()
@@ -40,30 +43,30 @@ namespace Kyoo.Controllers
 		
 		public async Task Run(IServiceProvider serviceProvider, CancellationToken cancellationToken, string argument = null)
 		{
-			// TODO Should use more scopes of the library manager (one per episodes to register).
-			using IServiceScope serviceScope = serviceProvider.CreateScope();
-			_libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
-			_thumbnailsManager = serviceScope.ServiceProvider.GetService<IThumbnailsManager>();
-			_metadataProvider = serviceScope.ServiceProvider.GetService<IProviderManager>();
-			_transcoder = serviceScope.ServiceProvider.GetService<ITranscoder>();
-			_config = serviceScope.ServiceProvider.GetService<IConfiguration>();
+			_serviceProvider = serviceProvider;
+			_thumbnailsManager = serviceProvider.GetService<IThumbnailsManager>();
+			_metadataProvider = serviceProvider.GetService<IProviderManager>();
+			_transcoder = serviceProvider.GetService<ITranscoder>();
+			_config = serviceProvider.GetService<IConfiguration>();
 
 			try
 			{
-				IEnumerable<Episode> episodes = _libraryManager.GetEpisodes();
+				using IServiceScope serviceScope = _serviceProvider.CreateScope();
+				ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
+				IEnumerable<Episode> episodes = libraryManager.GetEpisodes();
 				IEnumerable<Library> libraries = argument == null 
-					? _libraryManager.GetLibraries()
-					: new [] {_libraryManager.GetLibrary(argument)};
+					? libraryManager.GetLibraries()
+					: new [] {libraryManager.GetLibrary(argument)};
 
 				foreach (Episode episode in episodes)
 				{
 					if (!File.Exists(episode.Path))
-						_libraryManager.RemoveEpisode(episode);
+						libraryManager.RemoveEpisode(episode);
 				}
-				await _libraryManager.SaveChanges();
+				await libraryManager.SaveChanges();
 				
 				foreach (Library library in libraries)
-					await Scan(library, cancellationToken);
+					await Scan(library, libraryManager, cancellationToken);
 			}
 			catch (Exception ex)
 			{
@@ -72,7 +75,7 @@ namespace Kyoo.Controllers
 			Console.WriteLine("Scan finished!");
 		}
 
-		private async Task Scan(Library library, CancellationToken cancellationToken)
+		private async Task Scan(Library library, ILibraryManager libraryManager, CancellationToken cancellationToken)
 		{
 			Console.WriteLine($"Scanning library {library.Name} at {string.Join(", ", library.Paths)}.");
 			foreach (string path in library.Paths)
@@ -106,11 +109,11 @@ namespace Kyoo.Controllers
 				}
 				await Task.WhenAll(files.Select(file =>
 				{
-					if (!IsVideo(file) || _libraryManager.GetEpisodes().Any(x => x.Path == file))
-						return null;
+					if (!IsVideo(file) || libraryManager.GetEpisodes().Any(x => x.Path == file))
+						return Task.CompletedTask;
 					string relativePath = file.Substring(path.Length);
 					return RegisterFile(file, relativePath, library, cancellationToken);
-				}).Where(x => x != null));
+				}));
 			}
 		}
 
@@ -119,6 +122,10 @@ namespace Kyoo.Controllers
 			if (token.IsCancellationRequested)
 				return;
 			
+			using IServiceScope serviceScope = _serviceProvider.CreateScope();
+			ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
+			((DbSet<Library>)libraryManager.GetLibraries()).Attach(library);
+
 			Console.WriteLine($"Registering episode at: {path}");
 			string patern = _config.GetValue<string>("regex");
 			Regex regex = new Regex(patern, RegexOptions.IgnoreCase);
@@ -131,33 +138,36 @@ namespace Kyoo.Controllers
 			long episodeNumber = long.TryParse(match.Groups["Episode"].Value, out tmp) ? tmp : -1;
 			long absoluteNumber = long.TryParse(match.Groups["Absolute"].Value, out tmp) ? tmp : -1;
 
-			Collection collection = await GetCollection(collectionName, library);
+			Collection collection = await GetCollection(libraryManager, collectionName, library);
 			bool isMovie = seasonNumber == -1 && episodeNumber == -1 && absoluteNumber == -1;
-			Show show = await GetShow(showName, showPath, isMovie, library);
+			Show show = await GetShow(libraryManager, showName, showPath, isMovie, library);
 			if (isMovie)
-				_libraryManager.Register(await GetMovie(show, path));
+				libraryManager.Register(await GetMovie(show, path));
 			else
 			{
-				Season season = await GetSeason(show, seasonNumber, library);
-				Episode episode = await GetEpisode(show, season, episodeNumber, absoluteNumber, path, library);
-				_libraryManager.Register(episode);
+				Season season = await GetSeason(libraryManager, show, seasonNumber, library);
+				Episode episode = await GetEpisode(libraryManager, show, season, episodeNumber, absoluteNumber, path, library);
+				libraryManager.Register(episode);
 			}
 			if (collection != null)
-				_libraryManager.Register(collection);
-			_libraryManager.RegisterShowLinks(library, collection, show);
-			await _libraryManager.SaveChanges();
+				libraryManager.Register(collection);
+			libraryManager.RegisterShowLinks(library, collection, show);
+			await libraryManager.SaveChanges();
 		}
 
-		private async Task<Collection> GetCollection(string collectionName, Library library)
+		private async Task<Collection> GetCollection(ILibraryManager libraryManager, string collectionName, Library library)
 		{
 			if (string.IsNullOrEmpty(collectionName))
 				return await Task.FromResult<Collection>(null);
-			return _libraryManager.GetCollection(Utility.ToSlug(collectionName)) ?? await _metadataProvider.GetCollectionFromName(collectionName, library);
+			Collection name = libraryManager.GetCollection(Utility.ToSlug(collectionName));
+			if (name != null)
+				return name;
+			return await _metadataProvider.GetCollectionFromName(collectionName, library);
 		}
 		
-		private async Task<Show> GetShow(string showTitle, string showPath, bool isMovie, Library library)
+		private async Task<Show> GetShow(ILibraryManager libraryManager, string showTitle, string showPath, bool isMovie, Library library)
 		{
-			Show show = _libraryManager.GetShowByPath(showPath);
+			Show show = libraryManager.GetShowByPath(showPath);
 			if (show != null)
 				return show;
 			show = await _metadataProvider.SearchShow(showTitle, isMovie, library);
@@ -170,11 +180,11 @@ namespace Kyoo.Controllers
 			return show;
 		}
 
-		private async Task<Season> GetSeason(Show show, long seasonNumber, Library library)
+		private async Task<Season> GetSeason(ILibraryManager libraryManager, Show show, long seasonNumber, Library library)
 		{
 			if (seasonNumber == -1)
 				return default;
-			Season season = _libraryManager.GetSeason(show.Slug, seasonNumber);
+			Season season = libraryManager.GetSeason(show.Slug, seasonNumber);
 			if (season == null)
 			{
 				season = await _metadataProvider.GetSeason(show, seasonNumber, library);
@@ -184,11 +194,11 @@ namespace Kyoo.Controllers
 			return season;
 		}
 		
-		private async Task<Episode> GetEpisode(Show show, Season season, long episodeNumber, long absoluteNumber, string episodePath, Library library)
+		private async Task<Episode> GetEpisode(ILibraryManager libraryManager, Show show, Season season, long episodeNumber, long absoluteNumber, string episodePath, Library library)
 		{
 			Episode episode = await _metadataProvider.GetEpisode(show, episodePath, season?.SeasonNumber ?? -1, episodeNumber, absoluteNumber, library);
 			if (season == null)
-				season = await GetSeason(show, episode.SeasonNumber, library);
+				season = await GetSeason(libraryManager, show, episode.SeasonNumber, library);
 			episode.Season = season;
 			if (season == null)
 			{

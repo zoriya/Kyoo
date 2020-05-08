@@ -25,12 +25,11 @@ namespace Kyoo.Api
 
 			if (people == null)
 				return NotFound();
-			Collection collection = new Collection(people.Slug, people.Name, null, null)
+			return new Collection(people.Slug, people.Name, null, null)
 			{
 				Shows = people.Roles.Select(x => x.Show),
 				Poster = "peopleimg/" + people.Slug
 			};
-			return collection;
 		}
 	}
 }
