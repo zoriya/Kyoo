@@ -41,20 +41,20 @@ namespace Kyoo.Controllers
 		IEnumerable<Episode> GetEpisodes(string showSlug, long seasonNumber);
 
 		//Register values
-		void Register(object obj);
-		void RegisterShowLinks(Library library, Collection collection, Show show);
+		Task Register(object obj);
+		Task RegisterShowLinks(Library library, Collection collection, Show show);
 		Task SaveChanges();
 		
 		// Edit values
-		void Edit(Library library, bool resetOld);
-		void Edit(Collection collection, bool resetOld);
-		void Edit(Show show, bool resetOld);
-		void Edit(Season season, bool resetOld);
-		void Edit(Episode episode, bool resetOld);
-		void Edit(Track track, bool resetOld);
-		void Edit(People people, bool resetOld);
-		void Edit(Studio studio, bool resetOld);
-		void Edit(Genre genre, bool resetOld);
+		Task Edit(Library library, bool resetOld);
+		Task Edit(Collection collection, bool resetOld);
+		Task Edit(Show show, bool resetOld);
+		Task Edit(Season season, bool resetOld);
+		Task Edit(Episode episode, bool resetOld);
+		Task Edit(Track track, bool resetOld);
+		Task Edit(People people, bool resetOld);
+		Task Edit(Studio studio, bool resetOld);
+		Task Edit(Genre genre, bool resetOld);
 
 		// Validate values
 		Library Validate(Library library);
