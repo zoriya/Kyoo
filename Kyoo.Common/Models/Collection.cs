@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Kyoo.Models
 {
-	public class Collection : IMergable<Collection>
+	public class Collection
 	{
 		[JsonIgnore] public long ID { get; set; }
 		public string Slug { get; set; }
@@ -35,20 +35,6 @@ namespace Kyoo.Models
 			{
 				IsCollection = true
 			};
-		}
-
-		public Collection Merge(Collection collection)
-		{
-			if (collection == null)
-				return this;
-			if (ID == -1)
-				ID = collection.ID;
-			Slug ??= collection.Slug;
-			Name ??= collection.Name;
-			Poster ??= collection.Poster;
-			Overview ??= collection.Overview;
-			ImgPrimary ??= collection.ImgPrimary;
-			return this;
 		}
 	}
 }

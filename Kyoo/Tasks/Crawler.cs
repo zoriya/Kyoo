@@ -107,13 +107,15 @@ namespace Kyoo.Controllers
 					Console.Error.WriteLine($"Permission denied: can't access library's directory at {path}. (library slug: {library.Slug})");
 					continue;
 				}
-				await Task.WhenAll(files.Select(file =>
+				// await Task.WhenAll(files.Select(file =>
+				foreach (var file in files)
 				{
 					if (!IsVideo(file) || libraryManager.GetEpisodes().Any(x => x.Path == file))
-						return Task.CompletedTask;
+						continue;
+						// return Task.CompletedTask;
 					string relativePath = file.Substring(path.Length);
-					return RegisterFile(file, relativePath, library, cancellationToken);
-				}));
+					await RegisterFile(file, relativePath, library, cancellationToken);
+				}//));
 			}
 		}
 
@@ -142,16 +144,17 @@ namespace Kyoo.Controllers
 			bool isMovie = seasonNumber == -1 && episodeNumber == -1 && absoluteNumber == -1;
 			Show show = await GetShow(libraryManager, showName, showPath, isMovie, library);
 			if (isMovie)
-				await libraryManager.Register(await GetMovie(show, path));
+				libraryManager.Register(await GetMovie(show, path));
 			else
 			{
 				Season season = await GetSeason(libraryManager, show, seasonNumber, library);
 				Episode episode = await GetEpisode(libraryManager, show, season, episodeNumber, absoluteNumber, path, library);
-				await libraryManager.Register(episode);
+				libraryManager.Register(episode);
 			}
 			if (collection != null)
-				await libraryManager.Register(collection);
-			await libraryManager.RegisterShowLinks(library, collection, show);
+				libraryManager.Register(collection);
+			libraryManager.RegisterShowLinks(library, collection, show);
+			await libraryManager.SaveChanges();
 		}
 
 		private async Task<Collection> GetCollection(ILibraryManager libraryManager, string collectionName, Library library)

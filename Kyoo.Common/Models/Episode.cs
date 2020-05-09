@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Kyoo.Models
 {
-	public class Episode : IMergable<Episode>
+	public class Episode
 	{
 		[JsonIgnore] public long ID { get; set; }
 		[JsonIgnore] public long ShowID { get; set; }
@@ -40,12 +40,7 @@ namespace Kyoo.Models
 		}
 
 
-		public Episode()
-		{
-			SeasonNumber = -1;
-			EpisodeNumber = -1;
-			AbsoluteNumber = -1;
-		}
+		public Episode() { }
 
 		public Episode(long seasonNumber, 
 			long episodeNumber,
@@ -98,34 +93,6 @@ namespace Kyoo.Models
 		public static string GetSlug(string showSlug, long seasonNumber, long episodeNumber)
 		{
 			return showSlug + "-s" + seasonNumber + "e" + episodeNumber;
-		}
-		
-		public Episode Merge(Episode other)
-		{
-			if (other == null)
-				return this;
-			if (ID == -1)
-				ID = other.ID;
-			if (ShowID == -1)
-				ShowID = other.ShowID;
-			if (SeasonID == -1)
-				SeasonID = other.SeasonID;
-			if (SeasonNumber == -1)
-				SeasonNumber = other.SeasonNumber;
-			if (EpisodeNumber == -1)
-				EpisodeNumber = other.EpisodeNumber;
-			if (AbsoluteNumber == -1)
-				AbsoluteNumber = other.AbsoluteNumber;
-			Path ??= other.Path;
-			Title ??= other.Title;
-			Overview ??= other.Overview;
-			ReleaseDate ??= other.ReleaseDate;
-			if (Runtime == -1)
-				Runtime = other.Runtime;
-			ImgPrimary ??= other.ImgPrimary;
-			ExternalIDs = Utility.MergeLists(ExternalIDs, other.ExternalIDs,
-				(x, y) => x.Provider.Name == y.Provider.Name);
-			return this;
 		}
 	}
 }

@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Kyoo.Models
 {
-	public class Season : IMergable<Season>
+	public class Season
 	{
 		[JsonIgnore] public long ID  { get; set; }
 		[JsonIgnore] public long ShowID { get; set; }
@@ -38,23 +38,6 @@ namespace Kyoo.Models
 			Year = year;
 			ImgPrimary = imgPrimary;
 			ExternalIDs = externalIDs;
-		}
-
-		public Season Merge(Season other)
-		{
-			if (other == null)
-				return this;
-			if (ShowID == -1)
-				ShowID = other.ShowID;
-			if (SeasonNumber == -1)
-				SeasonNumber = other.SeasonNumber;
-			Title ??= other.Title;
-			Overview ??= other.Overview;
-			Year ??= other.Year;
-			ImgPrimary ??= other.ImgPrimary;
-			ExternalIDs = Utility.MergeLists(ExternalIDs, other.ExternalIDs,
-				(x, y) => x.Provider.Name == y.Provider.Name);
-			return this;
 		}
 	}
 }

@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -9,11 +11,6 @@ using Kyoo.Models;
 
 namespace Kyoo
 {
-	public interface IMergable<T>
-	{
-		public T Merge(T other);
-	}
-	
 	public static class Utility
 	{
 		public static string ToSlug(string str)
@@ -59,7 +56,9 @@ namespace Kyoo
 			}
 		}
 
-		public static IEnumerable<T> MergeLists<T>(IEnumerable<T> first, IEnumerable<T> second, Func<T, T, bool> isEqual = null)
+		public static IEnumerable<T> MergeLists<T>(IEnumerable<T> first,
+			IEnumerable<T> second, 
+			Func<T, T, bool> isEqual = null)
 		{
 			if (first == null)
 				return second;
@@ -91,6 +90,29 @@ namespace Kyoo
 			return first;
 		}
 
+		public static T Merge<T>(T first, T second)
+		{
+			Type type = typeof(T);
+			foreach (PropertyInfo property in type.GetProperties().Where(x => x.CanRead && x.CanWrite))
+			{
+				object oldValue = property.GetValue(first);
+				object newValue = property.GetValue(second);
+				object defaultValue = property.PropertyType.IsValueType
+					? Activator.CreateInstance(property.PropertyType) 
+					: null;
+				
+				if (oldValue?.Equals(defaultValue) == true)
+					property.SetValue(first, newValue);
+				else if (typeof(IEnumerable).IsAssignableFrom(property.PropertyType)
+				         && property.PropertyType != typeof(string))
+				{
+					property.SetValue((IEnumerable<object>)oldValue, (IEnumerable<object>)newValue);
+				}
+			}
+
+			return first;
+		}
+
 		public static T Nullify<T>(T obj)
 		{
 			Type type = typeof(T);
@@ -107,5 +129,23 @@ namespace Kyoo
 
 			return obj;
 		}
+
+		public static object RunGenericMethod([NotNull] object instance, 
+			[NotNull] string methodName,
+			[NotNull] Type type,
+			IEnumerable<object> args)
+		{
+			if (instance == null)
+				throw new ArgumentNullException(nameof(instance));
+			if (methodName == null)
+				throw new ArgumentNullException(nameof(methodName));
+			if (type == null)
+				throw new ArgumentNullException(nameof(type));
+			MethodInfo method = instance.GetType().GetMethod(methodName);
+			if (method == null)
+				throw new NullReferenceException($"A method named {methodName} could not be found on {instance.GetType().FullName}");
+			return method.MakeGenericMethod(type).Invoke(instance, args?.ToArray());
+		}
+
 	}
 }
