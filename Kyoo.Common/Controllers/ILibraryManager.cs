@@ -16,6 +16,7 @@ namespace Kyoo.Controllers
 		Genre GetGenre(string slug);
 		Studio GetStudio(string slug);
 		People GetPeople(string slug);
+		ProviderID GetProvider(string name);
 
 		// Get all
 		IEnumerable<Library> GetLibraries();
@@ -41,8 +42,8 @@ namespace Kyoo.Controllers
 		IEnumerable<Episode> GetEpisodes(string showSlug, long seasonNumber);
 
 		//Register values
-		Task Register(object obj);
-		Task RegisterShowLinks(Library library, Collection collection, Show show);
+		void Register(object obj);
+		void RegisterShowLinks(Library library, Collection collection, Show show);
 		Task SaveChanges();
 		
 		// Edit values

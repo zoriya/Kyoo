@@ -16,7 +16,7 @@ namespace Kyoo.Controllers
 		}
 
 		private async Task<T> GetMetadata<T>(Func<IMetadataProvider, Task<T>> providerCall, Library library, string what) 
-			where T : IMergable<T>, new()
+			where T : new()
 		{
 			T ret = new T();
 
@@ -29,8 +29,9 @@ namespace Kyoo.Controllers
 			{
 				try
 				{
-					ret = ret.Merge(await providerCall(provider));
-				} catch (Exception ex) {
+					ret = Utility.Merge(ret, await providerCall(provider));
+				} catch (Exception ex) 
+				{
 					Console.Error.WriteLine($"\tThe provider {provider.Provider.Name} coudln't work for {what}. Exception: {ex.Message}");
 				}
 			}
@@ -51,7 +52,8 @@ namespace Kyoo.Controllers
 				try
 				{
 					ret.AddRange(await providerCall(provider) ?? new List<T>());
-				} catch (Exception ex) {
+				} catch (Exception ex) 
+				{
 					Console.Error.WriteLine($"\tThe provider {provider.Provider.Name} coudln't work for {what}. Exception: {ex.Message}");
 				}
 			}

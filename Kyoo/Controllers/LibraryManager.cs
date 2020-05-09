@@ -1,15 +1,18 @@
 ﻿using System;
+using System.Collections;
 using Kyoo.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Kyoo.Controllers
 {
 	public class LibraryManager : ILibraryManager
 	{
+		private const int MaxSaveRetry = 3;
 		private readonly DatabaseContext _database;
 		
 		
@@ -65,6 +68,12 @@ namespace Kyoo.Controllers
 		{
 			return _database.Peoples.FirstOrDefault(people => people.Slug == slug);
 		}
+
+		public ProviderID GetProvider(string name)
+		{
+			return _database.Providers.FirstOrDefault(x => x.Name == name);
+		}
+
 		#endregion
 		
 		#region GetAll
@@ -168,15 +177,14 @@ namespace Kyoo.Controllers
 		#endregion
 
 		#region Register
-		public Task Register(object obj)
+		public void Register(object obj)
 		{
 			if (obj == null)
-				return Task.CompletedTask;
-			_database.Entry(obj).State = EntityState.Added;
-			return _database.SaveChangesAsync();
+				return;
+			_database.Add(obj);
 		}
 		
-		public Task RegisterShowLinks(Library library, Collection collection, Show show)
+		public void RegisterShowLinks(Library library, Collection collection, Show show)
 		{
 			if (collection != null)
 			{
@@ -188,13 +196,48 @@ namespace Kyoo.Controllers
 			else
 				_database.LibraryLinks.AddIfNotExist(new LibraryLink {Library = library, Show = show},
 					x => x.Library == library && x.Collection == null && x.Show == show);
-
-			return _database.SaveChangesAsync();
 		}
-		
+
 		public Task SaveChanges()
 		{
-			return _database.SaveChangesAsync();
+			return SaveChanges(0);
+		}
+
+		private async Task SaveChanges(int retryCount)
+		{
+			ValidateChanges();
+			try
+			{
+				await _database.SaveChangesAsync();
+			}
+			catch (DbUpdateException)
+			{
+				ValidateChanges();
+				if (retryCount < MaxSaveRetry)
+					await SaveChanges(retryCount + 1);
+				else
+					throw;
+			}
+		}
+
+		private void ValidateChanges()
+		{
+			foreach (EntityEntry sourceEntry in _database.ChangeTracker.Entries())
+			{
+				if (sourceEntry.State != EntityState.Added && sourceEntry.State != EntityState.Modified)
+					continue;
+
+				foreach (NavigationEntry navigation in sourceEntry.Navigations)
+				{
+					if (navigation.IsModified == false)
+						continue;
+					
+					object value = navigation.Metadata.PropertyInfo.GetValue(sourceEntry.Entity);
+					if (value == null)
+						continue;
+					navigation.Metadata.PropertyInfo.SetValue(sourceEntry.Entity, Validate(value));
+				}
+			}
 		}
 		#endregion
 
@@ -396,6 +439,54 @@ namespace Kyoo.Controllers
 		#endregion
 		
 		#region ValidateValue
+
+		private T Validate<T>(T obj) where T : class
+		{
+			if (obj == null)
+				return null;
+			
+			if (!(obj is IEnumerable) && _database.Entry(obj).IsKeySet)
+				return obj;
+			
+			switch(obj)
+			{
+				case ProviderLink link:
+					link.Provider = Validate(link.Provider);
+					link.Library = Validate(link.Library);
+					return obj;
+				case GenreLink link:
+					link.Show = Validate(link.Show);
+					link.Genre = Validate(link.Genre);
+					return obj;
+				case PeopleLink link:
+					link.Show = Validate(link.Show);
+					link.People = Validate(link.People);
+					return obj;
+			}
+			
+			return (T)(obj switch
+			{
+				Library library => GetLibrary(library.Slug) ?? library,
+				Collection collection => GetCollection(collection.Slug) ?? collection,
+				Show show => GetShow(show.Slug) ?? show,
+				Season season => GetSeason(season.Show.Slug, season.SeasonNumber) ?? season,
+				Episode episode => GetEpisode(episode.Show.Slug, episode.SeasonNumber, episode.SeasonNumber) ?? episode,
+				Studio studio => GetStudio(studio.Slug) ?? studio,
+				People people => GetPeople(people.Slug) ?? people,
+				Genre genre => GetGenre(genre.Slug) ?? genre,
+				ProviderID provider => GetProvider(provider.Name) ?? provider,
+
+				IEnumerable<dynamic> list => Utility.RunGenericMethod(this, "ValidateList", 
+					list.GetType().GetGenericArguments().First(), new [] {list}),
+				_ => obj
+			});
+		}
+
+		public IEnumerable<T> ValidateList<T>(IEnumerable<T> list) where T : class
+		{
+			return list.Select(Validate).Where(x => x != null);
+		}
+
 		public Library Validate(Library library)
 		{
 			if (library == null)
@@ -403,8 +494,6 @@ namespace Kyoo.Controllers
 			library.Providers = library.Providers.Select(x =>
 			{
 				x.Provider = _database.Providers.FirstOrDefault(y => y.Name == x.Name);
-				if (x.Provider != null)
-					x.ProviderID = x.Provider.ID;
 				return x;
 			}).Where(x => x.Provider != null).ToList();
 			return library;
@@ -414,8 +503,7 @@ namespace Kyoo.Controllers
 		{
 			if (collection == null)
 				return null;
-			if (collection.Slug == null)
-				collection.Slug = Utility.ToSlug(collection.Name);
+			collection.Slug ??= Utility.ToSlug(collection.Name);
 			return collection;
 		}
 
@@ -429,7 +517,6 @@ namespace Kyoo.Controllers
 			show.GenreLinks = show.GenreLinks?.Select(x =>
 			{
 				x.Genre = Validate(x.Genre);
-				x.GenreID = x.Genre.ID;
 				return x;
 			}).ToList();
 			
@@ -438,7 +525,6 @@ namespace Kyoo.Controllers
 				.Select(x =>
 				{
 					x.People = Validate(x.People);
-					x.PeopleID = x.People.ID;
 					return x;
 				}).ToList();
 			show.ExternalIDs = Validate(show.ExternalIDs);
@@ -470,8 +556,7 @@ namespace Kyoo.Controllers
 		{
 			if (studio == null)
 				return null;
-			if (studio.Slug == null)
-				studio.Slug = Utility.ToSlug(studio.Name);
+			studio.Slug ??= Utility.ToSlug(studio.Name);
 			return _database.Studios.FirstOrDefault(x => x.Slug == studio.Slug) ?? studio;
 		}
 
@@ -479,8 +564,7 @@ namespace Kyoo.Controllers
 		{
 			if (people == null)
 				return null;
-			if (people.Slug == null)
-				people.Slug = Utility.ToSlug(people.Name);
+			people.Slug ??= Utility.ToSlug(people.Name);
 			People old = _database.Peoples.FirstOrDefault(y => y.Slug == people.Slug);
 			if (old != null)
 				return old;
@@ -500,7 +584,6 @@ namespace Kyoo.Controllers
 			return ids?.Select(x =>
 			{
 				x.Provider = _database.Providers.FirstOrDefault(y => y.Name == x.Provider.Name) ?? x.Provider;
-				x.ProviderID = x.Provider.ID;
 				return x;
 			}).GroupBy(x => x.Provider.Name).Select(x => x.First()).ToList();
 		}

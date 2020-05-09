@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Kyoo.Models
 {
-	public class People : IMergable<People>
+	public class People
 	{
 		public long ID { get; set; }
 		public string Slug { get; set; }
@@ -22,18 +22,6 @@ namespace Kyoo.Models
 			Name = name;
 			ImgPrimary = imgPrimary;
 			ExternalIDs = externalIDs;
-		}
-
-		public People Merge(People other)
-		{
-			if (other == null)
-				return this;
-			Slug ??= other.Slug;
-			Name ??= other.Name;
-			ImgPrimary ??= other.ImgPrimary;
-			ExternalIDs = Utility.MergeLists(ExternalIDs, other.ExternalIDs,
-				(x, y) => x.Provider.Name == y.Provider.Name);
-			return this;
 		}
 	}
 }

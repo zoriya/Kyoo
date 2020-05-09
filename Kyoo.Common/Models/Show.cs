@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Kyoo.Models
 {
-	public class Show : IMergable<Show>
+	public class Show
 	{
 		[JsonIgnore] public long ID { get; set; }
 
@@ -100,32 +100,6 @@ namespace Kyoo.Models
 		public string GetID(string provider)
 		{
 			return ExternalIDs?.FirstOrDefault(x => x.Provider.Name == provider)?.DataID;
-		}
-		
-		public Show Merge(Show other)
-		{
-			if (other == null)
-				return this;
-			if (ID == -1)
-				ID = other.ID;
-			Slug ??= other.Slug;
-			Title ??= other.Title;
-			Aliases = Utility.MergeLists(Aliases, other.Aliases).ToArray();
-			Genres = Utility.MergeLists(Genres, other.Genres, 
-				(x, y) => x.Slug == y.Slug);
-			Path ??= other.Path;
-			Overview ??= other.Overview;
-			TrailerUrl ??= other.TrailerUrl;
-			Status ??= other.Status;
-			StartYear ??= other.StartYear;
-			EndYear ??= other.EndYear;
-			Poster ??= other.Poster;
-			Logo ??= other.Logo;
-			Backdrop ??= other.Backdrop;
-			Studio ??= other.Studio;
-			ExternalIDs = Utility.MergeLists(ExternalIDs, other.ExternalIDs, 
-				(x, y) => x.Provider.Name == y.Provider.Name);
-			return this;
 		}
 	}
 
