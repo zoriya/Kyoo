@@ -222,21 +222,36 @@ namespace Kyoo.Controllers
 
 		private void ValidateChanges()
 		{
-			foreach (EntityEntry sourceEntry in _database.ChangeTracker.Entries())
+			_database.ChangeTracker.AutoDetectChangesEnabled = false;
+			try
 			{
-				if (sourceEntry.State != EntityState.Added && sourceEntry.State != EntityState.Modified)
-					continue;
-
-				foreach (NavigationEntry navigation in sourceEntry.Navigations)
+				foreach (EntityEntry sourceEntry in _database.ChangeTracker.Entries())
 				{
-					if (navigation.IsModified == false)
+					if (sourceEntry.State != EntityState.Added && sourceEntry.State != EntityState.Modified)
 						continue;
-					
-					object value = navigation.Metadata.PropertyInfo.GetValue(sourceEntry.Entity);
-					if (value == null)
-						continue;
-					navigation.Metadata.PropertyInfo.SetValue(sourceEntry.Entity, Validate(value));
+
+					foreach (NavigationEntry navigation in sourceEntry.Navigations)
+					{
+						if (navigation.IsModified == false)
+							continue;
+
+						object value = navigation.Metadata.PropertyInfo.GetValue(sourceEntry.Entity);
+						if (value == null)
+							continue;
+						object newValue = Validate(value);
+						if (newValue != value)
+							navigation.Metadata.PropertyInfo.SetValue(sourceEntry.Entity, newValue);
+						else
+							_database.Entry(value).State = EntityState.Detached;
+					}
+
+					break;
 				}
+			}
+			finally
+			{
+				_database.ChangeTracker.AutoDetectChangesEnabled = true;
+				_database.ChangeTracker.DetectChanges();
 			}
 		}
 		#endregion
@@ -439,28 +454,27 @@ namespace Kyoo.Controllers
 		#endregion
 		
 		#region ValidateValue
-
 		private T Validate<T>(T obj) where T : class
 		{
 			if (obj == null)
 				return null;
 			
-			if (!(obj is IEnumerable) && _database.Entry(obj).IsKeySet)
+			if (!(obj is IEnumerable) && _database.Entry(obj).State != EntityState.Added)
 				return obj;
-			
+
 			switch(obj)
 			{
 				case ProviderLink link:
-					link.Provider = Validate(link.Provider);
-					link.Library = Validate(link.Library);
+					link.Provider = ValidateLink(() => link.Provider); //TODO Calling this methods make the obj in a deteached state. Don't know why.
+					link.Library = ValidateLink(() => link.Library);
 					return obj;
 				case GenreLink link:
-					link.Show = Validate(link.Show);
-					link.Genre = Validate(link.Genre);
+					link.Show = ValidateLink(() => link.Show);
+					link.Genre = ValidateLink(() => link.Genre);
 					return obj;
 				case PeopleLink link:
-					link.Show = Validate(link.Show);
-					link.People = Validate(link.People);
+					link.Show = ValidateLink(() => link.Show);
+					link.People = ValidateLink(() => link.People);
 					return obj;
 			}
 			
@@ -484,7 +498,24 @@ namespace Kyoo.Controllers
 
 		public IEnumerable<T> ValidateList<T>(IEnumerable<T> list) where T : class
 		{
-			return list.Select(Validate).Where(x => x != null);
+			return list.Select(x =>
+			{
+				T tmp = Validate(x);
+				if (tmp != x)
+					_database.Entry(x).State = EntityState.Detached;
+				return tmp ?? x;
+			}).Where(x => x != null).ToList();
+		}
+
+		private T ValidateLink<T>(Func<T> linkGet) where T : class
+		{
+			if (linkGet == null)
+				throw new ArgumentNullException(nameof(linkGet));
+			T oldValue = linkGet();
+			T newValue = Validate(oldValue);
+			if (!ReferenceEquals(oldValue, newValue))
+				_database.Entry(linkGet()).State = EntityState.Detached;
+			return newValue;
 		}
 
 		public Library Validate(Library library)
