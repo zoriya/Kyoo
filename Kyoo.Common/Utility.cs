@@ -1,13 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using JetBrains.Annotations;
 using Kyoo.Models;
+using Kyoo.Models.Attributes;
 
 namespace Kyoo
 {
@@ -64,9 +65,9 @@ namespace Kyoo
 				return second;
 			if (second == null)
 				return first;
-			List<T> list = first.ToList();
 			if (isEqual == null)
-				isEqual = (x, y) => x.Equals(y);
+				return first.Concat(second).ToList();
+			List<T> list = first.ToList();
 			return list.Concat(second.Where(x => !list.Any(y => isEqual(x, y)))).ToList();
 		}
 
@@ -92,9 +93,18 @@ namespace Kyoo
 
 		public static T Merge<T>(T first, T second)
 		{
+			// TODO During the merge, reference to the second values are not set to the first value (for child objects).
+			if (first == null)
+				return second;
+			if (second == null)
+				return first;
+			
 			Type type = typeof(T);
 			foreach (PropertyInfo property in type.GetProperties().Where(x => x.CanRead && x.CanWrite))
 			{
+				if (Attribute.GetCustomAttribute(property, typeof(NotMergableAttribute)) != null)
+					continue;
+				
 				object oldValue = property.GetValue(first);
 				object newValue = property.GetValue(second);
 				object defaultValue = property.PropertyType.IsValueType
@@ -106,7 +116,11 @@ namespace Kyoo
 				else if (typeof(IEnumerable).IsAssignableFrom(property.PropertyType)
 				         && property.PropertyType != typeof(string))
 				{
-					property.SetValue((IEnumerable<object>)oldValue, (IEnumerable<object>)newValue);
+					property.SetValue(first, RunGenericMethod(
+						typeof(Utility), 
+						"MergeLists",
+						GetEnumerableType(property.PropertyType),
+						new []{ oldValue, newValue, null}));
 				}
 			}
 
@@ -130,7 +144,26 @@ namespace Kyoo
 			return obj;
 		}
 
-		public static object RunGenericMethod([NotNull] object instance, 
+		public static object RunGenericMethod(
+			[NotNull] Type owner, 
+			[NotNull] string methodName,
+			[NotNull] Type type,
+			IEnumerable<object> args)
+		{
+			if (owner == null)
+				throw new ArgumentNullException(nameof(owner));
+			if (methodName == null)
+				throw new ArgumentNullException(nameof(methodName));
+			if (type == null)
+				throw new ArgumentNullException(nameof(type));
+			MethodInfo method = owner.GetMethod(methodName);
+			if (method == null)
+				throw new NullReferenceException($"A method named {methodName} could not be found on {owner.FullName}");
+			return method.MakeGenericMethod(type).Invoke(null, args?.ToArray());
+		}
+		
+		public static object RunGenericMethod(
+			[NotNull] object instance, 
 			[NotNull] string methodName,
 			[NotNull] Type type,
 			IEnumerable<object> args)
@@ -147,5 +180,24 @@ namespace Kyoo
 			return method.MakeGenericMethod(type).Invoke(instance, args?.ToArray());
 		}
 
+		public static Type GetEnumerableType([NoEnumeration] [NotNull] IEnumerable list)
+		{
+			if (list == null)
+				throw new ArgumentNullException(nameof(list));
+			Type type = list.GetType().GetInterfaces().FirstOrDefault(t => typeof(IEnumerable).IsAssignableFrom(t) 
+			                                                         && t.GetGenericArguments().Any()) ?? list.GetType();
+			return type.GetGenericArguments().First();
+		}
+		
+		public static Type GetEnumerableType([NotNull] Type listType)
+		{
+			if (listType == null)
+				throw new ArgumentNullException(nameof(listType));
+			if (!typeof(IEnumerable).IsAssignableFrom(listType))
+				throw new InvalidOperationException($"The {nameof(listType)} parameter was not an IEnumerable.");
+			Type type = listType.GetInterfaces().FirstOrDefault(t => typeof(IEnumerable).IsAssignableFrom(t) 
+			                                                && t.GetGenericArguments().Any()) ?? listType;
+			return type.GetGenericArguments().First();
+		}
 	}
 }

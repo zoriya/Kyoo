@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
+using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
 {
@@ -10,7 +11,7 @@ namespace Kyoo.Models
 
 		public string Slug { get; set; }
 		public string Title { get; set; }
-		public string[] Aliases { get; set; }
+		public IEnumerable<string> Aliases { get; set; }
 		[JsonIgnore] public string Path { get; set; }
 		public string Overview { get; set; }
 		public Status? Status { get; set; }
@@ -31,10 +32,10 @@ namespace Kyoo.Models
 		
 		public virtual IEnumerable<Genre> Genres
 		{
-			get { return GenreLinks?.Select(x => x.Genre).OrderBy(x => x.Name); }
-			set { GenreLinks = value?.Select(x => new GenreLink(this, x)).ToList(); }
+			get => GenreLinks?.Select(x => x.Genre);
+			set => GenreLinks = value?.Select(x => new GenreLink(this, x)).ToList();
 		}
-		[JsonIgnore] public virtual IEnumerable<GenreLink> GenreLinks { get; set; }
+		[NotMergable] [JsonIgnore] public virtual IEnumerable<GenreLink> GenreLinks { get; set; }
 		public virtual Studio Studio { get; set; }
 		[JsonIgnore] public virtual IEnumerable<PeopleLink> People { get; set; }
 		[JsonIgnore] public virtual IEnumerable<Season> Seasons { get; set; }
@@ -55,7 +56,7 @@ namespace Kyoo.Models
 		{
 			Slug = slug;
 			Title = title;
-			Aliases = aliases?.ToArray();
+			Aliases = aliases;
 			Path = path;
 			Overview = overview;
 			TrailerUrl = trailerUrl;
@@ -83,7 +84,7 @@ namespace Kyoo.Models
 		{
 			Slug = slug;
 			Title = title;
-			Aliases = aliases?.ToArray();
+			Aliases = aliases;
 			Path = path;
 			Overview = overview;
 			TrailerUrl = trailerUrl;

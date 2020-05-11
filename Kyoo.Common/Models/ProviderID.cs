@@ -16,26 +16,5 @@ namespace Kyoo.Models
 			Name = name;
 			Logo = logo;
 		}
-
-		protected bool Equals(ProviderID other)
-		{
-			return Name == other.Name;
-		}
-
-		public override bool Equals(object obj)
-		{
-			if (ReferenceEquals(null, obj))
-				return false;
-			if (ReferenceEquals(this, obj))
-				return true;
-			if (obj.GetType() != this.GetType())
-				return false;
-			return Equals((ProviderID)obj);
-		}
-
-		public override int GetHashCode()
-		{
-			return Name != null ? Name.GetHashCode() : 0;
-		}
 	}
 }

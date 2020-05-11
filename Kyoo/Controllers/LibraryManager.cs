@@ -181,7 +181,28 @@ namespace Kyoo.Controllers
 		{
 			if (obj == null)
 				return;
-			_database.Add(obj);
+			ValidateNewEntry(_database.Entry(obj));
+		}
+
+		private void ValidateNewEntry(EntityEntry entry)
+		{
+			if (entry.State != EntityState.Detached)
+				return;
+			entry.State = EntityState.Added;
+			foreach (NavigationEntry navigation in entry.Navigations)
+			{
+				ValidateNavigation(navigation);
+				if (navigation.CurrentValue == null)
+					continue;
+				if (navigation.Metadata.IsCollection())
+				{
+					IEnumerable entities = (IEnumerable)navigation.CurrentValue;
+					foreach (object childEntry in entities)
+						ValidateNewEntry(_database.Entry(childEntry));
+				}
+				else
+					ValidateNewEntry(_database.Entry(navigation.CurrentValue));	
+			}
 		}
 		
 		public void RegisterShowLinks(Library library, Collection collection, Show show)
@@ -212,7 +233,6 @@ namespace Kyoo.Controllers
 			}
 			catch (DbUpdateException)
 			{
-				ValidateChanges();
 				if (retryCount < MaxSaveRetry)
 					await SaveChanges(retryCount + 1);
 				else
@@ -231,21 +251,7 @@ namespace Kyoo.Controllers
 						continue;
 
 					foreach (NavigationEntry navigation in sourceEntry.Navigations)
-					{
-						if (navigation.IsModified == false)
-							continue;
-
-						object value = navigation.Metadata.PropertyInfo.GetValue(sourceEntry.Entity);
-						if (value == null)
-							continue;
-						object newValue = Validate(value);
-						if (newValue != value)
-							navigation.Metadata.PropertyInfo.SetValue(sourceEntry.Entity, newValue);
-						else
-							_database.Entry(value).State = EntityState.Detached;
-					}
-
-					break;
+						ValidateNavigation(navigation);
 				}
 			}
 			finally
@@ -253,6 +259,22 @@ namespace Kyoo.Controllers
 				_database.ChangeTracker.AutoDetectChangesEnabled = true;
 				_database.ChangeTracker.DetectChanges();
 			}
+		}
+
+		private void ValidateNavigation(NavigationEntry navigation)
+		{
+			// if (navigation.IsModified == false)
+			// 	return;
+
+			object oldValue = navigation.CurrentValue;
+			if (oldValue == null)
+				return;
+			object newValue = Validate(oldValue);
+			if (oldValue == newValue)
+				return;
+			navigation.CurrentValue = newValue;
+			if (!navigation.Metadata.IsCollection())
+				_database.Entry(oldValue).State = EntityState.Detached;
 		}
 		#endregion
 
@@ -465,16 +487,19 @@ namespace Kyoo.Controllers
 			switch(obj)
 			{
 				case ProviderLink link:
-					link.Provider = ValidateLink(() => link.Provider); //TODO Calling this methods make the obj in a deteached state. Don't know why.
-					link.Library = ValidateLink(() => link.Library);
+					link.Provider = ValidateLink(link.Provider);
+					link.Library = ValidateLink(link.Library);
+					_database.Entry(link).State = EntityState.Added;
 					return obj;
 				case GenreLink link:
-					link.Show = ValidateLink(() => link.Show);
-					link.Genre = ValidateLink(() => link.Genre);
+					link.Show = ValidateLink(link.Show);
+					link.Genre = ValidateLink(link.Genre);
+					_database.Entry(link).State = EntityState.Added;
 					return obj;
 				case PeopleLink link:
-					link.Show = ValidateLink(() => link.Show);
-					link.People = ValidateLink(() => link.People);
+					link.Show = ValidateLink(link.Show);
+					link.People = ValidateLink(link.People);
+					_database.Entry(link).State = EntityState.Added;
 					return obj;
 			}
 			
@@ -491,7 +516,7 @@ namespace Kyoo.Controllers
 				ProviderID provider => GetProvider(provider.Name) ?? provider,
 
 				IEnumerable<dynamic> list => Utility.RunGenericMethod(this, "ValidateList", 
-					list.GetType().GetGenericArguments().First(), new [] {list}),
+					Utility.GetEnumerableType(list), new [] {list}),
 				_ => obj
 			});
 		}
@@ -504,17 +529,38 @@ namespace Kyoo.Controllers
 				if (tmp != x)
 					_database.Entry(x).State = EntityState.Detached;
 				return tmp ?? x;
-			}).Where(x => x != null).ToList();
+			}).GroupBy(GetSlug).Select(x => x.First()).Where(x => x != null).ToList();
 		}
 
-		private T ValidateLink<T>(Func<T> linkGet) where T : class
+		private static object GetSlug(object obj)
 		{
-			if (linkGet == null)
-				throw new ArgumentNullException(nameof(linkGet));
-			T oldValue = linkGet();
+			return obj switch
+			{
+				Library library => library.Slug,
+				LibraryLink link => (link.Library.Slug, link.Collection.Slug),
+				Collection collection => collection.Slug,
+				CollectionLink link => (link.Collection.Slug, link.Show.Slug),
+				Show show => show.Slug,
+				Season season => (season.Show.Slug, season.SeasonNumber),
+				Episode episode => (episode.Show.Slug, episode.SeasonNumber, episode.EpisodeNumber),
+				Track track => track.ID,
+				Studio studio => studio.Slug,
+				People people => people.Slug,
+				PeopleLink link => (link.Show.Slug, link.People.Slug),
+				Genre genre => genre.Slug,
+				GenreLink link => (link.Show.Slug, link.Genre.Slug),
+				MetadataID id => (id.ProviderID, id.ShowID, id.SeasonID, id.EpisodeID, id.PeopleID),
+				ProviderID id => id.Name,
+				ProviderLink link => (link.ProviderID, link.LibraryID),
+				_ => obj
+			};
+		}
+
+		private T ValidateLink<T>(T oldValue) where T : class
+		{
 			T newValue = Validate(oldValue);
 			if (!ReferenceEquals(oldValue, newValue))
-				_database.Entry(linkGet()).State = EntityState.Detached;
+				_database.Entry(oldValue).State = EntityState.Detached;
 			return newValue;
 		}
 
@@ -522,11 +568,11 @@ namespace Kyoo.Controllers
 		{
 			if (library == null)
 				return null;
-			library.Providers = library.Providers.Select(x =>
-			{
-				x.Provider = _database.Providers.FirstOrDefault(y => y.Name == x.Name);
-				return x;
-			}).Where(x => x.Provider != null).ToList();
+			// library.Providers = library.Providers.Select(x =>
+			// {
+			// 	x.Provider = _database.Providers.FirstOrDefault(y => y.Name == x.Name);
+			// 	return x;
+			// }).Where(x => x.Provider != null).ToList();
 			return library;
 		}
 

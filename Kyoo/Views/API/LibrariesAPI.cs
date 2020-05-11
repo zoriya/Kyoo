@@ -38,7 +38,7 @@ namespace Kyoo.Api
 				return BadRequest(new {error = "The library's slug must be set and not empty"});
 			if (string.IsNullOrEmpty(library.Name))
 				return BadRequest(new {error = "The library's name must be set and not empty"});
-			if (library.Paths == null || library.Paths.Length == 0)
+			if (library.Paths == null || !library.Paths.Any())
 				return BadRequest(new {error = "The library should have a least one path."});
 			if (_libraryManager.GetLibrary(library.Slug) != null)
 				return BadRequest(new {error = "Duplicated library slug"});
