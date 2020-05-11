@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Linq;
+using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
 {
@@ -12,7 +13,7 @@ namespace Kyoo.Models
 		public string Poster { get; set; }
 		public string Overview { get; set; }
 		[JsonIgnore] public string ImgPrimary { get; set; }
-		[JsonIgnore] public virtual IEnumerable<CollectionLink> Links { get; set; }
+		[NotMergable] [JsonIgnore] public virtual IEnumerable<CollectionLink> Links { get; set; }
 		public virtual IEnumerable<Show> Shows
 		{
 			get => Links.Select(x => x.Show);

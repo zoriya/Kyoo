@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using IdentityServer4.EntityFramework.Entities;
@@ -88,11 +89,13 @@ namespace Kyoo
 		public DbSet<ProviderLink> ProviderLinks { get; set; }
 		
 		
-		private ValueConverter<string[], string> stringArrayConverter = new ValueConverter<string[], string>(
+		private readonly ValueConverter<IEnumerable<string>, string> _stringArrayConverter = 
+			new ValueConverter<IEnumerable<string>, string>(
 			arr => string.Join("|", arr),
 			str => str.Split("|", StringSplitOptions.None));
 
-		private ValueComparer<string[]> stringArrayComparer = new ValueComparer<string[]>(
+		private readonly ValueComparer<IEnumerable<string>> _stringArrayComparer = 
+			new ValueComparer<IEnumerable<string>>(
 			(l1, l2) => l1.SequenceEqual(l2),
 			arr => arr.Aggregate(0, (i, s) => s.GetHashCode()));
 		
@@ -101,8 +104,12 @@ namespace Kyoo
 		{
 			base.OnModelCreating(modelBuilder);
 
-			modelBuilder.Entity<Library>().Property(e => e.Paths).HasConversion(stringArrayConverter).Metadata.SetValueComparer(stringArrayComparer);
-			modelBuilder.Entity<Show>().Property(e => e.Aliases).HasConversion(stringArrayConverter).Metadata.SetValueComparer(stringArrayComparer);
+			modelBuilder.Entity<Library>().Property(e => e.Paths)
+				.HasConversion(_stringArrayConverter).Metadata
+				.SetValueComparer(_stringArrayComparer);
+			modelBuilder.Entity<Show>().Property(e => e.Aliases)
+				.HasConversion(_stringArrayConverter).Metadata
+				.SetValueComparer(_stringArrayComparer);
 
 			modelBuilder.Entity<Track>()
 				.Property(t => t.IsDefault)
@@ -114,21 +121,22 @@ namespace Kyoo
 
 			modelBuilder.Entity<GenreLink>()
 				.HasKey(x => new {x.ShowID, x.GenreID});
-							
-			modelBuilder.Entity<Show>()
-				.Ignore(x => x.Genres);
 
+			modelBuilder.Entity<Library>()
+				.Ignore(x => x.Shows)
+				.Ignore(x => x.Collections)
+				.Ignore(x => x.Providers);
+			
 			modelBuilder.Entity<Collection>()
 				.Ignore(x => x.Shows);
+			
+			modelBuilder.Entity<Show>()
+				.Ignore(x => x.Genres);
 			
 			modelBuilder.Entity<PeopleLink>()
 				.Ignore(x => x.Slug)
 				.Ignore(x => x.Name)
 				.Ignore(x => x.ExternalIDs);
-			
-			modelBuilder.Entity<ProviderLink>()
-				.Ignore(x => x.Name)
-				.Ignore(x => x.Logo);
 
 
 			modelBuilder.Entity<Collection>()

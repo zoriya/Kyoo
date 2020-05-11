@@ -9,5 +9,19 @@ namespace Kyoo.Models
 		public virtual Show Show { get; set; }
 		public long? CollectionID { get; set; }
 		public virtual Collection Collection { get; set; }
+
+		public LibraryLink() { }
+
+		public LibraryLink(Library library, Show show)
+		{
+			Library = library;
+			Show = show;
+		}
+
+		public LibraryLink(Library library, Collection collection)
+		{
+			Library = library;
+			Collection = collection;
+		}
 	}
 }
