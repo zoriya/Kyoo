@@ -174,9 +174,7 @@ namespace Kyoo.Controllers
 				return show;
 			show = await _metadataProvider.SearchShow(showTitle, isMovie, library);
 			show.Path = showPath;
-			show.People = (await _metadataProvider.GetPeople(show, library))
-				.GroupBy(x => x.Slug)
-				.Select(x => x.First());
+			show.People = await _metadataProvider.GetPeople(show, library);
 			await _thumbnailsManager.Validate(show.People);
 			await _thumbnailsManager.Validate(show);
 			return show;

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections;
-using Kyoo.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -184,27 +184,6 @@ namespace Kyoo.Controllers
 			ValidateNewEntry(_database.Entry(obj));
 		}
 
-		private void ValidateNewEntry(EntityEntry entry)
-		{
-			if (entry.State != EntityState.Detached)
-				return;
-			entry.State = EntityState.Added;
-			foreach (NavigationEntry navigation in entry.Navigations)
-			{
-				ValidateNavigation(navigation);
-				if (navigation.CurrentValue == null)
-					continue;
-				if (navigation.Metadata.IsCollection())
-				{
-					IEnumerable entities = (IEnumerable)navigation.CurrentValue;
-					foreach (object childEntry in entities)
-						ValidateNewEntry(_database.Entry(childEntry));
-				}
-				else
-					ValidateNewEntry(_database.Entry(navigation.CurrentValue));	
-			}
-		}
-		
 		public void RegisterShowLinks(Library library, Collection collection, Show show)
 		{
 			if (collection != null)
@@ -238,43 +217,6 @@ namespace Kyoo.Controllers
 				else
 					throw;
 			}
-		}
-
-		private void ValidateChanges()
-		{
-			_database.ChangeTracker.AutoDetectChangesEnabled = false;
-			try
-			{
-				foreach (EntityEntry sourceEntry in _database.ChangeTracker.Entries())
-				{
-					if (sourceEntry.State != EntityState.Added && sourceEntry.State != EntityState.Modified)
-						continue;
-
-					foreach (NavigationEntry navigation in sourceEntry.Navigations)
-						ValidateNavigation(navigation);
-				}
-			}
-			finally
-			{
-				_database.ChangeTracker.AutoDetectChangesEnabled = true;
-				_database.ChangeTracker.DetectChanges();
-			}
-		}
-
-		private void ValidateNavigation(NavigationEntry navigation)
-		{
-			// if (navigation.IsModified == false)
-			// 	return;
-
-			object oldValue = navigation.CurrentValue;
-			if (oldValue == null)
-				return;
-			object newValue = Validate(oldValue);
-			if (oldValue == newValue)
-				return;
-			navigation.CurrentValue = newValue;
-			if (!navigation.Metadata.IsCollection())
-				_database.Entry(oldValue).State = EntityState.Detached;
 		}
 		#endregion
 
@@ -476,30 +418,82 @@ namespace Kyoo.Controllers
 		#endregion
 		
 		#region ValidateValue
-		private T Validate<T>(T obj) where T : class
+		private void ValidateChanges()
+		{
+			_database.ChangeTracker.AutoDetectChangesEnabled = false;
+			try
+			{
+				foreach (EntityEntry sourceEntry in _database.ChangeTracker.Entries())
+				{
+					if (sourceEntry.State != EntityState.Added && sourceEntry.State != EntityState.Modified)
+						continue;
+
+					foreach (NavigationEntry navigation in sourceEntry.Navigations)
+						ValidateNavigation(navigation, EntityState.Added);
+				}
+			}
+			finally
+			{
+				_database.ChangeTracker.AutoDetectChangesEnabled = true;
+				_database.ChangeTracker.DetectChanges();
+			}
+		}
+		
+		private void ValidateNewEntry(EntityEntry entry)
+		{
+			if (entry.State != EntityState.Detached)
+				return;
+			entry.State = EntityState.Added;
+			foreach (NavigationEntry navigation in entry.Navigations)
+			{
+				ValidateNavigation(navigation, EntityState.Detached);
+				if (navigation.CurrentValue == null)
+					continue;
+				if (navigation.Metadata.IsCollection())
+				{
+					IEnumerable entities = (IEnumerable)navigation.CurrentValue;
+					foreach (object childEntry in entities)
+						ValidateNewEntry(_database.Entry(childEntry));
+				}
+				else
+					ValidateNewEntry(_database.Entry(navigation.CurrentValue));	
+			}
+		}
+
+		private void ValidateNavigation(NavigationEntry navigation, EntityState? skipOtherState)
+		{
+			object oldValue = navigation.CurrentValue;
+			if (oldValue == null)
+				return;
+			object newValue = Validate(oldValue, skipOtherState);
+			if (oldValue == newValue)
+				return;
+			navigation.CurrentValue = newValue;
+			if (!navigation.Metadata.IsCollection())
+				_database.Entry(oldValue).State = EntityState.Detached;
+		}
+		
+		private T Validate<T>(T obj, EntityState? skipOtherState) where T : class
 		{
 			if (obj == null)
 				return null;
 			
-			if (!(obj is IEnumerable) && _database.Entry(obj).State != EntityState.Added)
+			if (skipOtherState != null && !(obj is IEnumerable) && _database.Entry(obj).State != skipOtherState)
 				return obj;
 
 			switch(obj)
 			{
 				case ProviderLink link:
-					link.Provider = ValidateLink(link.Provider);
-					link.Library = ValidateLink(link.Library);
-					_database.Entry(link).State = EntityState.Added;
+					link.Provider = ValidateLink(link.Provider, skipOtherState);
+					link.Library = ValidateLink(link.Library, skipOtherState);
 					return obj;
 				case GenreLink link:
-					link.Show = ValidateLink(link.Show);
-					link.Genre = ValidateLink(link.Genre);
-					_database.Entry(link).State = EntityState.Added;
+					link.Show = ValidateLink(link.Show, skipOtherState);
+					link.Genre = ValidateLink(link.Genre, skipOtherState);
 					return obj;
 				case PeopleLink link:
-					link.Show = ValidateLink(link.Show);
-					link.People = ValidateLink(link.People);
-					_database.Entry(link).State = EntityState.Added;
+					link.Show = ValidateLink(link.Show, skipOtherState);
+					link.People = ValidateLink(link.People, skipOtherState);
 					return obj;
 			}
 			
@@ -509,27 +503,27 @@ namespace Kyoo.Controllers
 				Collection collection => GetCollection(collection.Slug) ?? collection,
 				Show show => GetShow(show.Slug) ?? show,
 				Season season => GetSeason(season.Show.Slug, season.SeasonNumber) ?? season,
-				Episode episode => GetEpisode(episode.Show.Slug, episode.SeasonNumber, episode.SeasonNumber) ?? episode,
+				Episode episode => GetEpisode(episode.Show.Slug, episode.SeasonNumber, episode.EpisodeNumber) ?? episode,
 				Studio studio => GetStudio(studio.Slug) ?? studio,
 				People people => GetPeople(people.Slug) ?? people,
 				Genre genre => GetGenre(genre.Slug) ?? genre,
 				ProviderID provider => GetProvider(provider.Name) ?? provider,
 
 				IEnumerable<dynamic> list => Utility.RunGenericMethod(this, "ValidateList", 
-					Utility.GetEnumerableType(list), new [] {list}),
+					Utility.GetEnumerableType(list), new object[] {list, skipOtherState}),
 				_ => obj
 			});
 		}
 
-		public IEnumerable<T> ValidateList<T>(IEnumerable<T> list) where T : class
+		public IEnumerable<T> ValidateList<T>(IEnumerable<T> list, EntityState? skipOtherState) where T : class
 		{
 			return list.Select(x =>
 			{
-				T tmp = Validate(x);
+				T tmp = Validate(x, skipOtherState);
 				if (tmp != x)
 					_database.Entry(x).State = EntityState.Detached;
 				return tmp ?? x;
-			}).GroupBy(GetSlug).Select(x => x.First()).Where(x => x != null).ToList();
+			})/*.GroupBy(GetSlug).Select(x => x.First()).Where(x => x != null)*/.ToList();
 		}
 
 		private static object GetSlug(object obj)
@@ -556,9 +550,9 @@ namespace Kyoo.Controllers
 			};
 		}
 
-		private T ValidateLink<T>(T oldValue) where T : class
+		private T ValidateLink<T>(T oldValue, EntityState? skipOtherState) where T : class
 		{
-			T newValue = Validate(oldValue);
+			T newValue = Validate(oldValue, skipOtherState);
 			if (!ReferenceEquals(oldValue, newValue))
 				_database.Entry(oldValue).State = EntityState.Detached;
 			return newValue;
