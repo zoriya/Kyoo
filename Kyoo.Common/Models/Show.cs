@@ -5,7 +5,7 @@ using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
 {
-	public class Show
+	public class Show : IOnMerge
 	{
 		[JsonIgnore] public long ID { get; set; }
 
@@ -101,6 +101,25 @@ namespace Kyoo.Models
 		public string GetID(string provider)
 		{
 			return ExternalIDs?.FirstOrDefault(x => x.Provider.Name == provider)?.DataID;
+		}
+
+		public void OnMerge(object merged)
+		{
+			if (ExternalIDs != null)
+				foreach (MetadataID id in ExternalIDs)
+					id.Show = this;
+			if (GenreLinks != null)
+				foreach (GenreLink genre in GenreLinks)
+					genre.Show = this;
+			if (People != null)
+				foreach (PeopleLink link in People)
+					link.Show = this;
+			if (Seasons != null)
+				foreach (Season season in Seasons)
+					season.Show = this;
+			if (Episodes != null)
+				foreach (Episode episode in Episodes)
+					episode.Show = this;
 		}
 	}
 

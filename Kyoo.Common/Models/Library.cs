@@ -15,22 +15,22 @@ namespace Kyoo.Models
 
 		public IEnumerable<ProviderID> Providers
 		{
-			get => ProviderLinks.Select(x => x.Provider);
-			set => ProviderLinks = value.Select(x => new ProviderLink(x, this));
+			get => ProviderLinks?.Select(x => x.Provider);
+			set => ProviderLinks = value.Select(x => new ProviderLink(x, this)).ToList();
 		}
 		[NotMergable] [JsonIgnore] public virtual IEnumerable<ProviderLink> ProviderLinks { get; set; }
 		[NotMergable] [JsonIgnore] public virtual IEnumerable<LibraryLink> Links { get; set; }
 
 		[JsonIgnore] public IEnumerable<Show> Shows
 		{
-			get => Links.Where(x => x.Show != null).Select(x => x.Show);
+			get => Links?.Where(x => x.Show != null).Select(x => x.Show);
 			set => Links = Utility.MergeLists(
 				value?.Select(x => new LibraryLink(this, x)), 
 				Links?.Where(x => x.Show == null));
 		}
 		[JsonIgnore] public IEnumerable<Collection> Collections
 		{
-			get => Links.Where(x => x.Collection != null).Select(x => x.Collection);
+			get => Links?.Where(x => x.Collection != null).Select(x => x.Collection);
 			set => Links = Utility.MergeLists(
 				value?.Select(x => new LibraryLink(this, x)), 
 				Links?.Where(x => x.Collection == null));

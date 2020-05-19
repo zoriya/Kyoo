@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Kyoo.Models
 {
@@ -7,6 +8,8 @@ namespace Kyoo.Models
 		[JsonIgnore] public long ID { get; set; }
 		public string Slug { get; set; }
 		public string Name { get; set; }
+		
+		public virtual IEnumerable<Show> Shows { get; set; }
 
 		public Studio() { }
 

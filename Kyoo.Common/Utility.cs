@@ -124,6 +124,8 @@ namespace Kyoo
 				}
 			}
 
+			if (first is IOnMerge)
+				((IOnMerge)first).OnMerge(second);
 			return first;
 		}
 
