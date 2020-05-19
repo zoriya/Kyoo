@@ -111,7 +111,7 @@ namespace Kyoo
 					? Activator.CreateInstance(property.PropertyType) 
 					: null;
 				
-				if (oldValue?.Equals(defaultValue) == true)
+				if (oldValue?.Equals(defaultValue) != false)
 					property.SetValue(first, newValue);
 				else if (typeof(IEnumerable).IsAssignableFrom(property.PropertyType)
 				         && property.PropertyType != typeof(string))
