@@ -43,29 +43,11 @@ namespace Kyoo.Controllers
 
 		//Register values
 		void Register(object obj);
+		Task Edit(object obj, bool resetOld);
 		void RegisterShowLinks(Library library, Collection collection, Show show);
 		Task SaveChanges();
 		
-		// Edit values
-		Task Edit(Library library, bool resetOld);
-		Task Edit(Collection collection, bool resetOld);
-		Task Edit(Show show, bool resetOld);
-		Task Edit(Season season, bool resetOld);
-		Task Edit(Episode episode, bool resetOld);
-		Task Edit(Track track, bool resetOld);
-		Task Edit(People people, bool resetOld);
-		Task Edit(Studio studio, bool resetOld);
-		Task Edit(Genre genre, bool resetOld);
-
 		// Validate values
-		Library Validate(Library library);
-		Collection Validate(Collection collection);
-		Show Validate(Show show);
-		Season Validate(Season season);
-		Episode Validate(Episode episode);
-		People Validate(People people);
-		Studio Validate(Studio studio);
-		Genre Validate(Genre genre);
 		IEnumerable<MetadataID> Validate(IEnumerable<MetadataID> id);
 		
 		// Remove values
