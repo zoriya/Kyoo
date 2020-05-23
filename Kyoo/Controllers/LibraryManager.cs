@@ -181,7 +181,14 @@ namespace Kyoo.Controllers
 		{
 			if (obj == null)
 				return;
-			ValidateNewEntry(_database.Entry(obj));
+			ValidateRootEntry(_database.Entry(obj), entry =>
+			{
+				if (entry.State != EntityState.Detached)
+					return false;
+				
+				entry.State = EntityState.Added;
+				return true;
+			});
 		}
 
 		public void RegisterShowLinks(Library library, Collection collection, Show show)
@@ -218,193 +225,24 @@ namespace Kyoo.Controllers
 					throw;
 			}
 		}
-		#endregion
-
-		#region Edit
-		public Task Edit(Library edited, bool resetOld)
-		{
-			return Edit(() =>
-			{
-				var query = _database.Libraries
-					.Include(x => x.Providers);
-				Library old = _database.Entry(edited).IsKeySet
-					? query.FirstOrDefault(x => x.ID == edited.ID)
-					: query.FirstOrDefault(x => x.Slug == edited.Slug);
-				
-				if (old == null)
-					throw new ItemNotFound($"No library could be found with the id {edited.ID} or the slug {edited.Slug}");
-				
-				if (resetOld)
-					Utility.Nullify(old);
-				Utility.Complete(old, edited);
-				Validate(old);
-			});
-		}
 		
-		public Task Edit(Collection edited, bool resetOld)
-		{
-			return Edit(() =>
-			{
-				var query = _database.Collections;
-				Collection old = _database.Entry(edited).IsKeySet
-					? query.FirstOrDefault(x => x.ID == edited.ID)
-					: query.FirstOrDefault(x => x.Slug == edited.Slug);
-				
-				if (old == null)
-					throw new ItemNotFound($"No collection could be found with the id {edited.ID} or the slug {edited.Slug}");
-				
-				if (resetOld)
-					Utility.Nullify(old);
-				Utility.Complete(old, edited);
-				Validate(old);
-			});
-		}
-		public Task Edit(Show edited, bool resetOld)
-		{
-			return Edit(() =>
-			{
-				var query = _database.Shows
-					.Include(x => x.GenreLinks)
-					.Include(x => x.People)
-					.Include(x => x.ExternalIDs);
-				Show old = _database.Entry(edited).IsKeySet
-					? query.FirstOrDefault(x => x.ID == edited.ID)
-					: query.FirstOrDefault(x => x.Slug == edited.Slug);
-
-				if (old == null)
-					throw new ItemNotFound($"No show could be found with the id {edited.ID} or the slug {edited.Slug}");
-				
-				if (resetOld)
-					Utility.Nullify(old);
-				Utility.Complete(old, edited);
-				Validate(old);
-			});
-		}
-
-		public Task Edit(Season edited, bool resetOld)
-		{
-			return Edit(() =>
-			{
-				var query = _database.Seasons
-					.Include(x => x.ExternalIDs)
-					.Include(x => x.Episodes);
-				Season old = _database.Entry(edited).IsKeySet
-					? query.FirstOrDefault(x => x.ID == edited.ID)
-					: query.FirstOrDefault(x => x.Slug == edited.Slug);
-
-				if (old == null)
-					throw new ItemNotFound($"No season could be found with the id {edited.ID} or the slug {edited.Slug}");
-				
-				if (resetOld)
-					Utility.Nullify(old);
-				Utility.Complete(old, edited);
-				Validate(old);
-			});
-		}
-		
-		public Task Edit(Episode edited, bool resetOld)
-		{
-			return Edit(() =>
-			{
-				var query = _database.Episodes
-					.Include(x => x.ExternalIDs)
-					.Include(x => x.Season)
-					.Include(x => x.Tracks);
-				Episode old = _database.Entry(edited).IsKeySet
-					? query.FirstOrDefault(x => x.ID == edited.ID)
-					: query.FirstOrDefault(x => x.Slug == edited.Slug);
-
-				if (old == null)
-					throw new ItemNotFound($"No episode could be found with the id {edited.ID} or the slug {edited.Slug}");
-
-				if (resetOld)
-					Utility.Nullify(old);
-				Utility.Complete(old, edited);
-				Validate(old);
-			});
-		}
-
-		public Task Edit(Track edited, bool resetOld)
-		{
-			return Edit(() =>
-			{
-				Track old = _database.Tracks.FirstOrDefault(x => x.ID == edited.ID);
-				
-				if (old == null)
-					throw new ItemNotFound($"No library track could be found with the id {edited.ID}");
-				
-				if (resetOld)
-					Utility.Nullify(old);
-				Utility.Complete(old, edited);
-			});
-		}
-		
-		public Task Edit(People edited, bool resetOld)
-		{
-			return Edit(() =>
-			{
-				var query = _database.Peoples
-					.Include(x => x.ExternalIDs);
-				People old = _database.Entry(edited).IsKeySet
-					? query.FirstOrDefault(x => x.ID == edited.ID)
-					: query.FirstOrDefault(x => x.Slug == edited.Slug);
-				
-				if (old == null)
-					throw new ItemNotFound($"No people could be found with the id {edited.ID} or the slug {edited.Slug}");
-				
-				if (resetOld)
-					Utility.Nullify(old);
-				Utility.Complete(old, edited);
-				Validate(old);
-			});
-		}
-		
-		public Task Edit(Studio edited, bool resetOld)
-		{
-			return Edit(() =>
-			{
-				var query = _database.Studios;
-				Studio old = _database.Entry(edited).IsKeySet
-					? query.FirstOrDefault(x => x.ID == edited.ID)
-					: query.FirstOrDefault(x => x.Slug == edited.Slug);
-				
-				if (old == null)
-					throw new ItemNotFound($"No studio could be found with the id {edited.ID} or the slug {edited.Slug}");
-				
-				if (resetOld)
-					Utility.Nullify(old);
-				Utility.Complete(old, edited);
-				Validate(old);
-			});
-		}
-		
-		public Task Edit(Genre edited, bool resetOld)
-		{
-			return Edit(() =>
-			{
-				var query = _database.Genres;
-				Genre old = _database.Entry(edited).IsKeySet
-					? query.FirstOrDefault(x => x.ID == edited.ID)
-					: query.FirstOrDefault(x => x.Slug == edited.Slug);
-				
-				if (old == null)
-					throw new ItemNotFound($"No genre could be found with the id {edited.ID} or the slug {edited.Slug}");
-				
-				if (resetOld)
-					Utility.Nullify(old);
-				Utility.Complete(old, edited);
-				Validate(old);
-			});
-		}
-		
-		private async Task Edit(Action applyFunction)
+		public async Task Edit(object obj, bool resetOld)
 		{
 			_database.ChangeTracker.LazyLoadingEnabled = false;
 			_database.ChangeTracker.AutoDetectChangesEnabled = false;
 
 			try
 			{
-				applyFunction.Invoke();
+				object existing = FindExisting(obj);
+				
+				if (existing == null)
+					throw new ItemNotFound($"No existing object (of type {obj.GetType().Name}) found on the databse.");
+
+				if (resetOld)
+					Utility.Nullify(existing);
+				Utility.Merge(existing, obj);
+				
+				ValidateRootEntry(_database.Entry(existing), entry => entry.State != EntityState.Added);
 				
 				_database.ChangeTracker.DetectChanges();
 				await _database.SaveChangesAsync();
@@ -429,7 +267,7 @@ namespace Kyoo.Controllers
 						continue;
 
 					foreach (NavigationEntry navigation in sourceEntry.Navigations)
-						ValidateNavigation(navigation, EntityState.Added);
+						ValidateNavigation(navigation);
 				}
 			}
 			finally
@@ -439,217 +277,87 @@ namespace Kyoo.Controllers
 			}
 		}
 		
-		private void ValidateNewEntry(EntityEntry entry)
+		private void ValidateRootEntry(EntityEntry entry, Func<EntityEntry, bool> shouldRun)
 		{
-			if (entry.State != EntityState.Detached)
+			if (!shouldRun.Invoke(entry))
 				return;
-			entry.State = EntityState.Added;
 			foreach (NavigationEntry navigation in entry.Navigations)
 			{
-				ValidateNavigation(navigation, EntityState.Detached);
+				ValidateNavigation(navigation);
 				if (navigation.CurrentValue == null)
 					continue;
 				if (navigation.Metadata.IsCollection())
 				{
 					IEnumerable entities = (IEnumerable)navigation.CurrentValue;
 					foreach (object childEntry in entities)
-						ValidateNewEntry(_database.Entry(childEntry));
+						ValidateRootEntry(_database.Entry(childEntry), shouldRun);
 				}
 				else
-					ValidateNewEntry(_database.Entry(navigation.CurrentValue));	
+					ValidateRootEntry(_database.Entry(navigation.CurrentValue), shouldRun);
 			}
 		}
 
-		private void ValidateNavigation(NavigationEntry navigation, EntityState? skipOtherState)
+		private void ValidateNavigation(NavigationEntry navigation)
 		{
 			object oldValue = navigation.CurrentValue;
 			if (oldValue == null)
 				return;
-			object newValue = Validate(oldValue, skipOtherState);
-			if (oldValue == newValue)
+			object newValue = Validate(oldValue);
+			if (ReferenceEquals(oldValue, newValue))
 				return;
 			navigation.CurrentValue = newValue;
 			if (!navigation.Metadata.IsCollection())
 				_database.Entry(oldValue).State = EntityState.Detached;
 		}
 		
-		private T Validate<T>(T obj, EntityState? skipOtherState) where T : class
+		private T Validate<T>(T obj) where T : class
 		{
-			if (obj == null)
-				return null;
-			
-			if (skipOtherState != null && !(obj is IEnumerable) && _database.Entry(obj).State != skipOtherState)
+			switch (obj)
+			{
+				case null:
+					return null;
+				case IEnumerable<object> enumerable:
+					return (T)Utility.RunGenericMethod(
+						this, 
+						"ValidateList",
+						Utility.GetEnumerableType(enumerable), new [] {obj});
+			}
+
+			EntityState state = _database.Entry(obj).State;
+			if (state != EntityState.Added && state != EntityState.Detached)
 				return obj;
 
-			switch(obj)
-			{
-				case ProviderLink link:
-					link.Provider = ValidateLink(link.Provider, skipOtherState);
-					link.Library = ValidateLink(link.Library, skipOtherState);
-					return obj;
-				case GenreLink link:
-					link.Show = ValidateLink(link.Show, skipOtherState);
-					link.Genre = ValidateLink(link.Genre, skipOtherState);
-					return obj;
-				case PeopleLink link:
-					link.Show = ValidateLink(link.Show, skipOtherState);
-					link.People = ValidateLink(link.People, skipOtherState);
-					return obj;
-			}
-			
-			return (T)(obj switch
-			{
-				Library library => GetLibrary(library.Slug) ?? library,
-				Collection collection => GetCollection(collection.Slug) ?? collection,
-				Show show => GetShow(show.Slug) ?? show,
-				Season season => GetSeason(season.Show.Slug, season.SeasonNumber) ?? season,
-				Episode episode => GetEpisode(episode.Show.Slug, episode.SeasonNumber, episode.EpisodeNumber) ?? episode,
-				Studio studio => GetStudio(studio.Slug) ?? studio,
-				People people => GetPeople(people.Slug) ?? people,
-				Genre genre => GetGenre(genre.Slug) ?? genre,
-				ProviderID provider => GetProvider(provider.Name) ?? provider,
-
-				IEnumerable<dynamic> list => Utility.RunGenericMethod(this, "ValidateList", 
-					Utility.GetEnumerableType(list), new object[] {list, skipOtherState}),
-				_ => obj
-			});
+			return (T)(FindExisting(obj) ?? obj);
 		}
 
-		public IEnumerable<T> ValidateList<T>(IEnumerable<T> list, EntityState? skipOtherState) where T : class
+		public IEnumerable<T> ValidateList<T>(IEnumerable<T> list) where T : class
 		{
 			return list.Select(x =>
 			{
-				T tmp = Validate(x, skipOtherState);
+				T tmp = Validate(x);
 				if (tmp != x)
 					_database.Entry(x).State = EntityState.Detached;
 				return tmp ?? x;
 			})/*.GroupBy(GetSlug).Select(x => x.First()).Where(x => x != null)*/.ToList();
 		}
 
-		private static object GetSlug(object obj)
+		private object FindExisting(object obj)
 		{
 			return obj switch
 			{
-				Library library => library.Slug,
-				LibraryLink link => (link.Library.Slug, link.Collection.Slug),
-				Collection collection => collection.Slug,
-				CollectionLink link => (link.Collection.Slug, link.Show.Slug),
-				Show show => show.Slug,
-				Season season => (season.Show.Slug, season.SeasonNumber),
-				Episode episode => (episode.Show.Slug, episode.SeasonNumber, episode.EpisodeNumber),
-				Track track => track.ID,
-				Studio studio => studio.Slug,
-				People people => people.Slug,
-				PeopleLink link => (link.Show.Slug, link.People.Slug),
-				Genre genre => genre.Slug,
-				GenreLink link => (link.Show.Slug, link.Genre.Slug),
-				MetadataID id => (id.ProviderID, id.ShowID, id.SeasonID, id.EpisodeID, id.PeopleID),
-				ProviderID id => id.Name,
-				ProviderLink link => (link.ProviderID, link.LibraryID),
-				_ => obj
+				Library library => GetLibrary(library.Slug),
+				Collection collection => GetCollection(collection.Slug),
+				Show show => GetShow(show.Slug),
+				Season season => GetSeason(season.Show.Slug, season.SeasonNumber),
+				Episode episode => GetEpisode(episode.Show.Slug, episode.SeasonNumber, episode.EpisodeNumber),
+				Studio studio => GetStudio(studio.Slug),
+				People people => GetPeople(people.Slug),
+				Genre genre => GetGenre(genre.Slug),
+				ProviderID provider => GetProvider(provider.Name),
+				_ => null
 			};
 		}
 
-		private T ValidateLink<T>(T oldValue, EntityState? skipOtherState) where T : class
-		{
-			T newValue = Validate(oldValue, skipOtherState);
-			if (!ReferenceEquals(oldValue, newValue))
-				_database.Entry(oldValue).State = EntityState.Detached;
-			return newValue;
-		}
-
-		public Library Validate(Library library)
-		{
-			if (library == null)
-				return null;
-			// library.Providers = library.Providers.Select(x =>
-			// {
-			// 	x.Provider = _database.Providers.FirstOrDefault(y => y.Name == x.Name);
-			// 	return x;
-			// }).Where(x => x.Provider != null).ToList();
-			return library;
-		}
-
-		public Collection Validate(Collection collection)
-		{
-			if (collection == null)
-				return null;
-			collection.Slug ??= Utility.ToSlug(collection.Name);
-			return collection;
-		}
-
-		public Show Validate(Show show)
-		{
-			if (show == null)
-				return null;
-			
-			show.Studio = Validate(show.Studio);
-
-			show.GenreLinks = show.GenreLinks?.Select(x =>
-			{
-				x.Genre = Validate(x.Genre);
-				return x;
-			}).ToList();
-			
-			show.People = show.People?.GroupBy(x => x.Slug)
-				.Select(x => x.First())
-				.Select(x =>
-				{
-					x.People = Validate(x.People);
-					return x;
-				}).ToList();
-			show.ExternalIDs = Validate(show.ExternalIDs);
-			return show;
-		}
-
-		public Season Validate(Season season)
-		{
-			if (season == null)
-				return null;
-
-			season.Show = Validate(season.Show);
-			season.ExternalIDs = Validate(season.ExternalIDs);
-			return season;
-		}
-
-		public Episode Validate(Episode episode)
-		{
-			if (episode == null)
-				return null;
-
-			episode.Show = GetShow(episode.Show.Slug) ?? Validate(episode.Show);
-			episode.Season = GetSeason(episode.Show.Slug, episode.SeasonNumber) ?? Validate(episode.Season);
-			episode.ExternalIDs = Validate(episode.ExternalIDs);
-			return episode;
-		}
-
-		public Studio Validate(Studio studio)
-		{
-			if (studio == null)
-				return null;
-			studio.Slug ??= Utility.ToSlug(studio.Name);
-			return _database.Studios.FirstOrDefault(x => x.Slug == studio.Slug) ?? studio;
-		}
-
-		public People Validate(People people)
-		{
-			if (people == null)
-				return null;
-			people.Slug ??= Utility.ToSlug(people.Name);
-			People old = _database.Peoples.FirstOrDefault(y => y.Slug == people.Slug);
-			if (old != null)
-				return old;
-			people.ExternalIDs = Validate(people.ExternalIDs);
-			return people;
-		}
-
-		public Genre Validate(Genre genre)
-		{
-			if (genre.Slug == null)
-				genre.Slug = Utility.ToSlug(genre.Name);
-			return _database.Genres.FirstOrDefault(y => y.Slug == genre.Slug) ?? genre;
-		}
-		
 		public IEnumerable<MetadataID> Validate(IEnumerable<MetadataID> ids)
 		{
 			return ids?.Select(x =>
