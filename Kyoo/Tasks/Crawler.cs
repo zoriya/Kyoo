@@ -64,7 +64,8 @@ namespace Kyoo.Controllers
 						libraryManager.RemoveEpisode(episode);
 				}
 				await libraryManager.SaveChanges();
-				
+
+				// await Task.WhenAll(libraries.Select(x => Scan(x, libraryManager, cancellationToken)));
 				foreach (Library library in libraries)
 					await Scan(library, libraryManager, cancellationToken);
 			}
@@ -75,13 +76,15 @@ namespace Kyoo.Controllers
 			Console.WriteLine("Scan finished!");
 		}
 
-		private async Task Scan(Library library, ILibraryManager libraryManager, CancellationToken cancellationToken)
+		private async Task<Task> Scan(Library library, ILibraryManager libraryManager, CancellationToken cancellationToken)
 		{
 			Console.WriteLine($"Scanning library {library.Name} at {string.Join(", ", library.Paths)}.");
+			// return Task.WhenAll(library.Paths.Select(path =>
 			foreach (string path in library.Paths)
 			{
 				if (cancellationToken.IsCancellationRequested)
-					return;
+					return Task.CompletedTask;
+				
 				string[] files;
 				try
 				{
@@ -90,33 +93,34 @@ namespace Kyoo.Controllers
 				catch (DirectoryNotFoundException)
 				{
 					Console.Error.WriteLine($"The library's directory {path} could not be found (library slug: {library.Slug})");
-					continue;
+					return Task.CompletedTask;
 				}
 				catch (PathTooLongException)
 				{
 					Console.Error.WriteLine($"The library's directory {path} is too long for this system. (library slug: {library.Slug})");
-					continue;
+					return Task.CompletedTask;
 				}
 				catch (ArgumentException)
 				{
 					Console.Error.WriteLine($"The library's directory {path} is invalid. (library slug: {library.Slug})");
-					continue;
+					return Task.CompletedTask;
 				}
 				catch (UnauthorizedAccessException)
 				{
 					Console.Error.WriteLine($"Permission denied: can't access library's directory at {path}. (library slug: {library.Slug})");
-					continue;
+					return Task.CompletedTask;
 				}
-				// await Task.WhenAll(files.Select(file =>
-				foreach (var file in files)
+
+				// return Task.WhenAll(files.Select(file =>
+				foreach (string file in files)
 				{
 					if (!IsVideo(file) || libraryManager.GetEpisodes().Any(x => x.Path == file))
-						continue;
-						// return Task.CompletedTask;
+						continue; //return Task.CompletedTask;
 					string relativePath = file.Substring(path.Length);
-					await RegisterFile(file, relativePath, library, cancellationToken);
+					/*return*/ await RegisterFile(file, relativePath, library, cancellationToken);
 				}//));
-			}
+			}//));
+			return Task.CompletedTask;
 		}
 
 		private async Task RegisterFile(string path, string relativePath, Library library, CancellationToken token)
@@ -127,8 +131,7 @@ namespace Kyoo.Controllers
 			using IServiceScope serviceScope = _serviceProvider.CreateScope();
 			ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
 			((DbSet<Library>)libraryManager.GetLibraries()).Attach(library);
-
-			Console.WriteLine($"Registering episode at: {path}");
+			
 			string patern = _config.GetValue<string>("regex");
 			Regex regex = new Regex(patern, RegexOptions.IgnoreCase);
 			Match match = regex.Match(relativePath);
@@ -154,6 +157,7 @@ namespace Kyoo.Controllers
 			if (collection != null)
 				libraryManager.Register(collection);
 			libraryManager.RegisterShowLinks(library, collection, show);
+			Console.WriteLine($"Registering episode at: {path}");
 			await libraryManager.SaveChanges();
 		}
 
