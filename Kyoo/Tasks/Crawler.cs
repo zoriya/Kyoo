@@ -65,9 +65,7 @@ namespace Kyoo.Controllers
 				}
 				await libraryManager.SaveChanges();
 
-				// await Task.WhenAll(libraries.Select(x => Scan(x, libraryManager, cancellationToken)));
-				foreach (Library library in libraries)
-					await Scan(library, libraryManager, cancellationToken);
+				await Task.WhenAll(libraries.ToList().Select(x => Scan(x, libraryManager, cancellationToken)));
 			}
 			catch (Exception ex)
 			{
@@ -76,11 +74,10 @@ namespace Kyoo.Controllers
 			Console.WriteLine("Scan finished!");
 		}
 
-		private async Task<Task> Scan(Library library, ILibraryManager libraryManager, CancellationToken cancellationToken)
+		private Task Scan(Library library, ILibraryManager libraryManager, CancellationToken cancellationToken)
 		{
 			Console.WriteLine($"Scanning library {library.Name} at {string.Join(", ", library.Paths)}.");
-			// return Task.WhenAll(library.Paths.Select(path =>
-			foreach (string path in library.Paths)
+			return Task.WhenAll(library.Paths.Select(async path =>
 			{
 				if (cancellationToken.IsCancellationRequested)
 					return Task.CompletedTask;
@@ -119,8 +116,9 @@ namespace Kyoo.Controllers
 					string relativePath = file.Substring(path.Length);
 					/*return*/ await RegisterFile(file, relativePath, library, cancellationToken);
 				}//));
-			}//));
-			return Task.CompletedTask;
+
+				return Task.CompletedTask;
+			}));
 		}
 
 		private async Task RegisterFile(string path, string relativePath, Library library, CancellationToken token)

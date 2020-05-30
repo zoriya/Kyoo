@@ -19,7 +19,7 @@ namespace Kyoo.Tasks
 		public string Description => "Create the database if it does not exit and initialize it with defaults value.";
 		public string HelpMessage => null;
 		public bool RunOnStartup => true;
-		public int Priority => Int32.MaxValue;
+		public int Priority => int.MaxValue;
 		
 		public Task Run(IServiceProvider serviceProvider, CancellationToken cancellationToken, string arguments = null)
 		{
@@ -27,7 +27,12 @@ namespace Kyoo.Tasks
 			DatabaseContext databaseContext = serviceScope.ServiceProvider.GetService<DatabaseContext>();
 			IdentityDatabase identityDatabase = serviceScope.ServiceProvider.GetService<IdentityDatabase>();
 			ConfigurationDbContext identityContext = serviceScope.ServiceProvider.GetService<ConfigurationDbContext>();
-			
+
+			if (!databaseContext.Database.CanConnect()
+			    || !identityDatabase.Database.CanConnect()
+			    || !identityContext.Database.CanConnect())
+				throw new SystemException("Coudln't connect to the database.");
+
 			databaseContext.Database.Migrate();
 			identityDatabase.Database.Migrate();
 			identityContext.Database.Migrate();

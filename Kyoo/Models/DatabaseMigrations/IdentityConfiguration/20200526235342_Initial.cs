@@ -1,7 +1,8 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace Kyoo.Models.DatabaseMigrations.IdentitiyConfiguration
+namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
 {
     public partial class Initial : Migration
     {
@@ -12,7 +13,7 @@ namespace Kyoo.Models.DatabaseMigrations.IdentitiyConfiguration
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Enabled = table.Column<bool>(nullable: false),
                     Name = table.Column<string>(maxLength: 200, nullable: false),
                     DisplayName = table.Column<string>(maxLength: 200, nullable: true),
@@ -32,7 +33,7 @@ namespace Kyoo.Models.DatabaseMigrations.IdentitiyConfiguration
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Enabled = table.Column<bool>(nullable: false),
                     ClientId = table.Column<string>(maxLength: 200, nullable: false),
                     ProtocolType = table.Column<string>(maxLength: 200, nullable: false),
@@ -85,7 +86,7 @@ namespace Kyoo.Models.DatabaseMigrations.IdentitiyConfiguration
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Enabled = table.Column<bool>(nullable: false),
                     Name = table.Column<string>(maxLength: 200, nullable: false),
                     DisplayName = table.Column<string>(maxLength: 200, nullable: true),
@@ -107,7 +108,7 @@ namespace Kyoo.Models.DatabaseMigrations.IdentitiyConfiguration
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Type = table.Column<string>(maxLength: 200, nullable: false),
                     ApiResourceId = table.Column<int>(nullable: false)
                 },
@@ -127,7 +128,7 @@ namespace Kyoo.Models.DatabaseMigrations.IdentitiyConfiguration
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Key = table.Column<string>(maxLength: 250, nullable: false),
                     Value = table.Column<string>(maxLength: 2000, nullable: false),
                     ApiResourceId = table.Column<int>(nullable: false)
@@ -148,7 +149,7 @@ namespace Kyoo.Models.DatabaseMigrations.IdentitiyConfiguration
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(maxLength: 200, nullable: false),
                     DisplayName = table.Column<string>(maxLength: 200, nullable: true),
                     Description = table.Column<string>(maxLength: 1000, nullable: true),
@@ -173,7 +174,7 @@ namespace Kyoo.Models.DatabaseMigrations.IdentitiyConfiguration
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Description = table.Column<string>(maxLength: 1000, nullable: true),
                     Value = table.Column<string>(maxLength: 4000, nullable: false),
                     Expiration = table.Column<DateTime>(nullable: true),
@@ -197,7 +198,7 @@ namespace Kyoo.Models.DatabaseMigrations.IdentitiyConfiguration
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Type = table.Column<string>(maxLength: 250, nullable: false),
                     Value = table.Column<string>(maxLength: 250, nullable: false),
                     ClientId = table.Column<int>(nullable: false)
@@ -218,7 +219,7 @@ namespace Kyoo.Models.DatabaseMigrations.IdentitiyConfiguration
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Origin = table.Column<string>(maxLength: 150, nullable: false),
                     ClientId = table.Column<int>(nullable: false)
                 },
@@ -238,7 +239,7 @@ namespace Kyoo.Models.DatabaseMigrations.IdentitiyConfiguration
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     GrantType = table.Column<string>(maxLength: 250, nullable: false),
                     ClientId = table.Column<int>(nullable: false)
                 },
@@ -258,7 +259,7 @@ namespace Kyoo.Models.DatabaseMigrations.IdentitiyConfiguration
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Provider = table.Column<string>(maxLength: 200, nullable: false),
                     ClientId = table.Column<int>(nullable: false)
                 },
@@ -278,7 +279,7 @@ namespace Kyoo.Models.DatabaseMigrations.IdentitiyConfiguration
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     PostLogoutRedirectUri = table.Column<string>(maxLength: 2000, nullable: false),
                     ClientId = table.Column<int>(nullable: false)
                 },
@@ -298,7 +299,7 @@ namespace Kyoo.Models.DatabaseMigrations.IdentitiyConfiguration
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Key = table.Column<string>(maxLength: 250, nullable: false),
                     Value = table.Column<string>(maxLength: 2000, nullable: false),
                     ClientId = table.Column<int>(nullable: false)
@@ -319,7 +320,7 @@ namespace Kyoo.Models.DatabaseMigrations.IdentitiyConfiguration
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     RedirectUri = table.Column<string>(maxLength: 2000, nullable: false),
                     ClientId = table.Column<int>(nullable: false)
                 },
@@ -339,7 +340,7 @@ namespace Kyoo.Models.DatabaseMigrations.IdentitiyConfiguration
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Scope = table.Column<string>(maxLength: 200, nullable: false),
                     ClientId = table.Column<int>(nullable: false)
                 },
@@ -359,7 +360,7 @@ namespace Kyoo.Models.DatabaseMigrations.IdentitiyConfiguration
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Description = table.Column<string>(maxLength: 2000, nullable: true),
                     Value = table.Column<string>(maxLength: 4000, nullable: false),
                     Expiration = table.Column<DateTime>(nullable: true),
@@ -383,7 +384,7 @@ namespace Kyoo.Models.DatabaseMigrations.IdentitiyConfiguration
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Type = table.Column<string>(maxLength: 200, nullable: false),
                     IdentityResourceId = table.Column<int>(nullable: false)
                 },
@@ -403,7 +404,7 @@ namespace Kyoo.Models.DatabaseMigrations.IdentitiyConfiguration
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Key = table.Column<string>(maxLength: 250, nullable: false),
                     Value = table.Column<string>(maxLength: 2000, nullable: false),
                     IdentityResourceId = table.Column<int>(nullable: false)
@@ -424,7 +425,7 @@ namespace Kyoo.Models.DatabaseMigrations.IdentitiyConfiguration
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Type = table.Column<string>(maxLength: 200, nullable: false),
                     ApiScopeId = table.Column<int>(nullable: false)
                 },

@@ -14,7 +14,6 @@ using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -44,22 +43,22 @@ namespace Kyoo
 			services.AddControllers().AddNewtonsoftJson();
 			services.AddHttpClient();
 
-			services.AddSingleton<DatabaseFactory>(x => new DatabaseFactory(
+			services.AddSingleton(x => new DatabaseFactory(
 				new DbContextOptionsBuilder<DatabaseContext>()
 					.UseLazyLoadingProxies()
-					.UseSqlite(_configuration.GetConnectionString("Database")).Options));
+					.UseNpgsql(_configuration.GetConnectionString("Database")).Options));
 			
 			services.AddDbContext<DatabaseContext>(options =>
 			{
 				options.UseLazyLoadingProxies()
-					.UseSqlite(_configuration.GetConnectionString("Database"));
+					.UseNpgsql(_configuration.GetConnectionString("Database"));
 				// .EnableSensitiveDataLogging()
 				// .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()));
 			});
 			
 			services.AddDbContext<IdentityDatabase>(options =>
 			{
-				options.UseSqlite(_configuration.GetConnectionString("Database"));
+				options.UseNpgsql(_configuration.GetConnectionString("Database"));
 			});
 
 			string assemblyName = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
@@ -85,13 +84,13 @@ namespace Kyoo
 				.AddConfigurationStore(options =>
 				{
 					options.ConfigureDbContext = builder =>
-						builder.UseSqlite(_configuration.GetConnectionString("Database"),
+						builder.UseNpgsql(_configuration.GetConnectionString("Database"),
 							sql => sql.MigrationsAssembly(assemblyName));
 				})
 				.AddOperationalStore(options =>
 				{
 					options.ConfigureDbContext = builder =>
-						builder.UseSqlite(_configuration.GetConnectionString("Database"),
+						builder.UseNpgsql(_configuration.GetConnectionString("Database"),
 							sql => sql.MigrationsAssembly(assemblyName));
 					options.EnableTokenCleanup = true;
 				})
@@ -145,7 +144,7 @@ namespace Kyoo
 			services.AddSingleton<IPluginManager, PluginManager>();
 			services.AddSingleton<ITaskManager, TaskManager>();
 			
-			services.AddHostedService<TaskManager>(provider => (TaskManager)provider.GetService<ITaskManager>());
+			services.AddHostedService(provider => (TaskManager)provider.GetService<ITaskManager>());
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
