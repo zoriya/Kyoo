@@ -99,7 +99,10 @@ namespace Kyoo
 			if (second == null)
 				return first;
 			
-			Type type = typeof(T);
+			Type type = first.GetType();
+			if (second.GetType() != type && second.GetType().IsAssignableFrom(type))
+				type = second.GetType();
+			
 			foreach (PropertyInfo property in type.GetProperties().Where(x => x.CanRead && x.CanWrite))
 			{
 				if (Attribute.GetCustomAttribute(property, typeof(NotMergableAttribute)) != null)
@@ -131,10 +134,10 @@ namespace Kyoo
 
 		public static T Nullify<T>(T obj)
 		{
-			Type type = typeof(T);
+			Type type = obj.GetType();
 			foreach (PropertyInfo property in type.GetProperties())
 			{
-				if (!property.CanWrite)
+				if (!property.CanWrite || Attribute.GetCustomAttribute(property, typeof(NotMergableAttribute)) != null)
 					continue;
 				
 				object defaultValue = property.PropertyType.IsValueType 

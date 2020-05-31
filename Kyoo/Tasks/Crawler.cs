@@ -142,8 +142,12 @@ namespace Kyoo.Controllers
 			long absoluteNumber = long.TryParse(match.Groups["Absolute"].Value, out tmp) ? tmp : -1;
 
 			Collection collection = await GetCollection(libraryManager, collectionName, library);
+			
+			if (collection != null)
+				libraryManager.Register(collection);
+			
 			bool isMovie = seasonNumber == -1 && episodeNumber == -1 && absoluteNumber == -1;
-			Show show = await GetShow(libraryManager, showName, showPath, isMovie, library);
+			Show show = await GetShow(libraryManager, collection, showName, showPath, isMovie, library);
 			if (isMovie)
 				libraryManager.Register(await GetMovie(show, path));
 			else
@@ -152,9 +156,6 @@ namespace Kyoo.Controllers
 				Episode episode = await GetEpisode(libraryManager, show, season, episodeNumber, absoluteNumber, path, library);
 				libraryManager.Register(episode);
 			}
-			if (collection != null)
-				libraryManager.Register(collection);
-			libraryManager.RegisterShowLinks(library, collection, show);
 			Console.WriteLine($"Registering episode at: {path}");
 			await libraryManager.SaveChanges();
 		}
@@ -162,14 +163,19 @@ namespace Kyoo.Controllers
 		private async Task<Collection> GetCollection(ILibraryManager libraryManager, string collectionName, Library library)
 		{
 			if (string.IsNullOrEmpty(collectionName))
-				return await Task.FromResult<Collection>(null);
+				return default;
 			Collection name = libraryManager.GetCollection(Utility.ToSlug(collectionName));
 			if (name != null)
 				return name;
 			return await _metadataProvider.GetCollectionFromName(collectionName, library);
 		}
 		
-		private async Task<Show> GetShow(ILibraryManager libraryManager, string showTitle, string showPath, bool isMovie, Library library)
+		private async Task<Show> GetShow(ILibraryManager libraryManager,
+			Collection collection,
+			string showTitle,
+			string showPath,
+			bool isMovie,
+			Library library)
 		{
 			Show show = libraryManager.GetShowByPath(showPath);
 			if (show != null)
@@ -179,6 +185,15 @@ namespace Kyoo.Controllers
 			show.People = await _metadataProvider.GetPeople(show, library);
 			await _thumbnailsManager.Validate(show.People);
 			await _thumbnailsManager.Validate(show);
+			
+			if (collection != null)
+			{
+				libraryManager.Register(new LibraryLink {Library = library, Collection = collection});
+				libraryManager.Register(new CollectionLink { Collection = collection, Show = show});
+			}
+			else
+				libraryManager.Register(new LibraryLink {Library = library, Show = show});
+			
 			return show;
 		}
 
@@ -196,9 +211,20 @@ namespace Kyoo.Controllers
 			return season;
 		}
 		
-		private async Task<Episode> GetEpisode(ILibraryManager libraryManager, Show show, Season season, long episodeNumber, long absoluteNumber, string episodePath, Library library)
+		private async Task<Episode> GetEpisode(ILibraryManager libraryManager,
+			Show show, 
+			Season season, 
+			long episodeNumber,
+			long absoluteNumber,
+			string episodePath,
+			Library library)
 		{
-			Episode episode = await _metadataProvider.GetEpisode(show, episodePath, season?.SeasonNumber ?? -1, episodeNumber, absoluteNumber, library);
+			Episode episode = await _metadataProvider.GetEpisode(show, 
+				episodePath,
+				season?.SeasonNumber ?? -1, 
+				episodeNumber, 
+				absoluteNumber,
+				library);
 			if (season == null)
 				season = await GetSeason(libraryManager, show, episode.SeasonNumber, library);
 			episode.Season = season;
@@ -223,7 +249,8 @@ namespace Kyoo.Controllers
 		private async Task<IEnumerable<Track>> GetTracks(Episode episode)
 		{
 			IEnumerable<Track> tracks = await _transcoder.GetTrackInfo(episode.Path);
-			List<Track> epTracks = tracks.Where(x => x.Type != StreamType.Subtitle).Concat(GetExtractedSubtitles(episode)).ToList();
+			List<Track> epTracks = tracks.Where(x => x.Type != StreamType.Subtitle)
+				.Concat(GetExtractedSubtitles(episode)).ToList();
 			if (epTracks.Count(x => !x.IsExternal) < tracks.Count())
 				epTracks.AddRange(await _transcoder.ExtractSubtitles(episode.Path));
 			episode.Tracks = epTracks;
@@ -262,7 +289,33 @@ namespace Kyoo.Controllers
 			return tracks;
 		}
 
-		private static readonly string[] VideoExtensions = { ".webm", ".mkv", ".flv", ".vob", ".ogg", ".ogv", ".avi", ".mts", ".m2ts", ".ts", ".mov", ".qt", ".asf", ".mp4", ".m4p", ".m4v", ".mpg", ".mp2", ".mpeg", ".mpe", ".mpv", ".m2v", ".3gp", ".3g2" };
+		private static readonly string[] VideoExtensions =
+		{
+			".webm",
+			".mkv",
+			".flv",
+			".vob",
+			".ogg",
+			".ogv",
+			".avi",
+			".mts",
+			".m2ts",
+			".ts",
+			".mov",
+			".qt",
+			".asf",
+			".mp4",
+			".m4p",
+			".m4v",
+			".mpg",
+			".mp2",
+			".mpeg", 
+			".mpe",
+			".mpv",
+			".m2v",
+			".3gp",
+			".3g2"
+		};
 
 		private static bool IsVideo(string filePath)
 		{

@@ -7,7 +7,7 @@ namespace Kyoo.Models
 {
 	public class Show : IOnMerge
 	{
-		[JsonIgnore] public long ID { get; set; }
+		[NotMergableAttribute] [JsonIgnore] public long ID { get; set; }
 
 		public string Slug { get; set; }
 		public string Title { get; set; }

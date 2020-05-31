@@ -191,20 +191,6 @@ namespace Kyoo.Controllers
 			});
 		}
 
-		public void RegisterShowLinks(Library library, Collection collection, Show show)
-		{
-			if (collection != null)
-			{
-				_database.LibraryLinks.AddIfNotExist(new LibraryLink {Library = library, Collection = collection},
-					x => x.Library == library && x.Collection == collection && x.ShowID == null);
-				_database.CollectionLinks.AddIfNotExist(new CollectionLink { Collection = collection, Show = show},
-					x => x.Collection == collection && x.Show == show);
-			}
-			else
-				_database.LibraryLinks.AddIfNotExist(new LibraryLink {Library = library, Show = show},
-					x => x.Library == library && x.Collection == null && x.Show == show);
-		}
-
 		public Task SaveChanges()
 		{
 			return SaveChanges(0);
@@ -240,11 +226,12 @@ namespace Kyoo.Controllers
 
 				if (resetOld)
 					Utility.Nullify(existing);
+				_database.ChangeTracker.DetectChanges();
 				Utility.Merge(existing, obj);
 				
-				ValidateRootEntry(_database.Entry(existing), entry => entry.State != EntityState.Added);
-				
 				_database.ChangeTracker.DetectChanges();
+				ValidateRootEntry(_database.Entry(existing), entry => entry.State != EntityState.Unchanged 
+				                                                      && entry.State != EntityState.Deleted);
 				await _database.SaveChangesAsync();
 			}
 			finally
@@ -277,12 +264,14 @@ namespace Kyoo.Controllers
 			}
 		}
 		
-		private void ValidateRootEntry(EntityEntry entry, Func<EntityEntry, bool> shouldRun)
+		private void ValidateRootEntry(EntityEntry entry, Func<EntityEntry, bool> shouldRun, object parentObject = null)
 		{
 			if (!shouldRun.Invoke(entry))
 				return;
 			foreach (NavigationEntry navigation in entry.Navigations)
 			{
+				if (!navigation.Metadata.IsCollection() && ReferenceEquals(navigation.CurrentValue, parentObject))
+					continue;
 				ValidateNavigation(navigation);
 				if (navigation.CurrentValue == null)
 					continue;
@@ -290,10 +279,14 @@ namespace Kyoo.Controllers
 				{
 					IEnumerable entities = (IEnumerable)navigation.CurrentValue;
 					foreach (object childEntry in entities)
-						ValidateRootEntry(_database.Entry(childEntry), shouldRun);
+					{
+						if (ReferenceEquals(childEntry, parentObject))
+							continue;
+						ValidateRootEntry(_database.Entry(childEntry), shouldRun, entry.Entity);
+					}
 				}
 				else
-					ValidateRootEntry(_database.Entry(navigation.CurrentValue), shouldRun);
+					ValidateRootEntry(_database.Entry(navigation.CurrentValue), shouldRun, entry.Entity);
 			}
 		}
 
@@ -335,7 +328,7 @@ namespace Kyoo.Controllers
 			return list.Select(x =>
 			{
 				T tmp = Validate(x);
-				if (tmp != x)
+				if (!ReferenceEquals(x, tmp))
 					_database.Entry(x).State = EntityState.Detached;
 				return tmp ?? x;
 			})/*.GroupBy(GetSlug).Select(x => x.First()).Where(x => x != null)*/.ToList();
@@ -345,13 +338,41 @@ namespace Kyoo.Controllers
 		{
 			return obj switch
 			{
-				Library library => GetLibrary(library.Slug),
-				Collection collection => GetCollection(collection.Slug),
-				Show show => GetShow(show.Slug),
-				Season season => GetSeason(season.Show.Slug, season.SeasonNumber),
-				Episode episode => GetEpisode(episode.Show.Slug, episode.SeasonNumber, episode.EpisodeNumber),
-				Studio studio => GetStudio(studio.Slug),
-				People people => GetPeople(people.Slug),
+				Library library => _database.Libraries
+					.Include(x => x.Links)
+					.Include(x => x.Providers)
+					.FirstOrDefault(x => x.Slug == library.Slug),
+				Collection collection => _database.Collections
+					.Include(x => x.Links)
+					.FirstOrDefault(x => x.Slug == collection.Slug),
+				Show show => _database.Shows
+					.Include(x => x.Seasons)
+					.Include(x => x.Episodes)
+					.Include(x => x.People)
+					.Include(x => x.GenreLinks)
+					.Include(x => x.Studio)
+					.Include(x => x.ExternalIDs)
+					.FirstOrDefault(x => x.Slug == show.Slug),
+				Season season => _database.Seasons
+					.Include(x => x.Episodes)
+					.Include(x => x.ExternalIDs)
+					.Include(x => x.Show)
+					.FirstOrDefault(x => x.Show.Slug == season.Show.Slug && x.SeasonNumber == season.SeasonNumber),
+				Episode episode => _database.Episodes
+					.Include(x => x.Season)
+					.Include(x => x.Show)
+					.Include(x => x.ExternalIDs)
+					.Include(x => x.Tracks)
+					.FirstOrDefault(x => x.EpisodeNumber == episode.EpisodeNumber
+					                     && x.SeasonNumber == episode.SeasonNumber 
+					                     && x.Show.Slug == episode.Show.Slug),
+				Studio studio => _database.Studios
+					.Include(x => x.Shows)
+					.FirstOrDefault(x => x.Slug == studio.Slug),
+				People people => _database.Peoples
+					.Include(x => x.Roles)
+					.Include(x => x.ExternalIDs)
+					.FirstOrDefault(x => x.Slug == people.Slug),
 				Genre genre => GetGenre(genre.Slug),
 				ProviderID provider => GetProvider(provider.Name),
 				_ => null
