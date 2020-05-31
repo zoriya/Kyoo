@@ -62,8 +62,6 @@ namespace Kyoo.Tasks
 				edited.ID = old.ID;
 				edited.Slug = old.Slug;
 				edited.Path = old.Path;
-				edited.Seasons = old.Seasons;
-				edited.Episodes = old.Episodes;
 				await libraryManager.Edit(edited, true);
 				await _thumbnailsManager.Validate(edited, true);
 			}
