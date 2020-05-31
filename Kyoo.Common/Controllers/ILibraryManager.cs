@@ -44,6 +44,7 @@ namespace Kyoo.Controllers
 		//Register values
 		void Register(object obj);
 		Task Edit(object obj, bool resetOld);
+		void RegisterShowLinks(Library library, Collection collection, Show show);
 		Task SaveChanges();
 		
 		// Validate values

@@ -76,12 +76,9 @@ namespace Kyoo.Controllers
 			return collection;
 		}
 
-		public async Task<Show> CompleteShow(Show old, Library library)
+		public async Task<Show> CompleteShow(Show show, Library library)
 		{
-			Show show = await GetMetadata(provider => provider.GetShowByID(old), library, $"the show {old.Title}");
-			show.GenreLinks = show.GenreLinks?.GroupBy(x => x.Genre.Slug).Select(x => x.First()).ToList();
-			show.People = show.People?.GroupBy(x => x.Slug).Select(x => x.First()).ToList();
-			return show;
+			return await GetMetadata(provider => provider.GetShowByID(show), library, $"the show {show.Title}");
 		}
 
 		public async Task<Show> SearchShow(string showName, bool isMovie, Library library)
