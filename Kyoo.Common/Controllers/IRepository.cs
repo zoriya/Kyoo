@@ -35,4 +35,5 @@ namespace Kyoo.Controllers
 	public interface IGenreRepository : IRepository<Genre> {}
 	public interface IStudioRepository : IRepository<Studio> {}
 	public interface IPeopleRepository : IRepository<People> {}
+	public interface IProviderRepository : IRepository<ProviderID> {}
 }

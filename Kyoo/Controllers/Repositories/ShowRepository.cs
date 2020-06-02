@@ -14,16 +14,19 @@ namespace Kyoo.Controllers
 		private readonly IGenreRepository _genres;
 		private readonly IPeopleRepository _people;
 		private readonly IStudioRepository _studio;
+		private readonly IProviderRepository _providers;
 
 		public ShowRepository(DatabaseContext database,
 			IGenreRepository genres,
 			IPeopleRepository people,
-			IStudioRepository studio)
+			IStudioRepository studio, 
+			IProviderRepository providers)
 		{
 			_database = database;
 			_genres = genres;
 			_people = people;
 			_studio = studio;
+			_providers = providers;
 		}
 		
 		public Task<Show> Get(long id)
@@ -52,8 +55,7 @@ namespace Kyoo.Controllers
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
-
-			// TODO handle ExternalIDs.
+			
 			obj.StudioID = await _studio.CreateIfNotExists(obj.Studio);
 			obj.GenreLinks = (await Task.WhenAll(obj.GenreLinks.Select(async x =>
 			{
@@ -63,6 +65,11 @@ namespace Kyoo.Controllers
 			obj.People = (await Task.WhenAll(obj.People.Select(async x =>
 			{
 				x.PeopleID = await _people.CreateIfNotExists(x.People);
+				return x;
+			}))).ToList();
+			obj.ExternalIDs = (await Task.WhenAll(obj.ExternalIDs.Select(async x =>
+			{
+				x.ProviderID = await _providers.CreateIfNotExists(x.Provider);
 				return x;
 			}))).ToList();
 			
