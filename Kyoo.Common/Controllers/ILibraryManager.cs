@@ -1,9 +1,10 @@
-﻿using Kyoo.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Kyoo.Models;
 
 namespace Kyoo.Controllers
 {
+	// ReSharper disable once PossibleInterfaceMemberAmbiguity
 	public interface ILibraryManager
 	{
 		// Get by slug
@@ -16,21 +17,22 @@ namespace Kyoo.Controllers
 		Genre GetGenre(string slug);
 		Studio GetStudio(string slug);
 		People GetPeople(string slug);
-		ProviderID GetProvider(string name);
 
 		// Get all
 		IEnumerable<Library> GetLibraries();
 		IEnumerable<Collection> GetCollections();
 		IEnumerable<Show> GetShows();
+		IEnumerable<Season> GetSeasons();
 		IEnumerable<Episode> GetEpisodes();
-		IEnumerable<Track> GetTracks();
 		IEnumerable<Studio> GetStudios();
 		IEnumerable<People> GetPeoples();
 		IEnumerable<Genre> GetGenres();
 
 		// Search
+		IEnumerable<Library> SearchLibraries(string searchQuery);
 		IEnumerable<Collection> SearchCollections(string searchQuery);
 		IEnumerable<Show> SearchShows(string searchQuery);
+		IEnumerable<Season> SearchSeasons(string searchQuery);
 		IEnumerable<Episode> SearchEpisodes(string searchQuery);
 		IEnumerable<Genre> SearchGenres(string searchQuery);
 		IEnumerable<Studio> SearchStudios(string searchQuery);
@@ -42,17 +44,34 @@ namespace Kyoo.Controllers
 		IEnumerable<Episode> GetEpisodes(string showSlug, long seasonNumber);
 
 		//Register values
-		void Register(object obj);
-		Task Edit(object obj, bool resetOld);
-		void RegisterShowLinks(Library library, Collection collection, Show show);
-		Task SaveChanges();
+		void RegisterLibrary(Library library);
+		void RegisterCollection(Collection collection);
+		void RegisterShow(Show show);
+		void RegisterSeason(Season season);
+		void RegisterEpisode(Episode episode);
+		void RegisterGenre(Genre genre);
+		void RegisterStudio(Studio studio);
+		void RegisterPeople(People people);
 		
-		// Validate values
-		IEnumerable<MetadataID> Validate(IEnumerable<MetadataID> id);
+		// Edit values
+		void EditLibrary(Library library, bool resetOld);
+		void EditCollection(Collection collection, bool resetOld);
+		void EditShow(Show show, bool resetOld);
+		void EditSeason(Season season, bool resetOld);
+		void EditEpisode(Episode episode, bool resetOld);
+		void EditGenre(Genre genre, bool resetOld);
+		void EditStudio(Studio studio, bool resetOld);
+		void EditPeople(People people, bool resetOld);
+
 		
-		// Remove values
-		void RemoveShow(Show show);
-		void RemoveSeason(Season season);
-		void RemoveEpisode(Episode episode);
+		// Delete values
+		void DelteLibrary(Library library);
+		void DeleteCollection(Collection collection);
+		void DeleteShow(Show show);
+		void DeleteSeason(Season season);
+		void DeleteEpisode(Episode episode);
+		void DeleteGenre(Genre genre);
+		void DeleteStudio(Studio studio);
+		void DeletePeople(People people);
 	}
 }
