@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Kyoo.Models;
+using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers
@@ -9,59 +11,100 @@ namespace Kyoo.Controllers
 	public class ShowRepository : IShowRepository
 	{
 		private readonly DatabaseContext _database;
-		private readonly ILibraryManager _library;
+		private readonly IGenreRepository _genres;
+		private readonly IPeopleRepository _people;
+		private readonly IStudioRepository _studio;
 
-		public ShowRepository(DatabaseContext database, ILibraryManager library)
+		public ShowRepository(DatabaseContext database,
+			IGenreRepository genres,
+			IPeopleRepository people,
+			IStudioRepository studio)
 		{
 			_database = database;
-			_library = library;
+			_genres = genres;
+			_people = people;
+			_studio = studio;
 		}
 		
-		public Show Get(string slug)
+		public Task<Show> Get(long id)
 		{
-			return _database.Shows.FirstOrDefault(x => x.Slug == slug);
+			return Task.FromResult(_database.Shows.FirstOrDefault(x => x.ID == id));
+		}
+		
+		public Task<Show> Get(string slug)
+		{
+			return Task.FromResult(_database.Shows.FirstOrDefault(x => x.Slug == slug));
 		}
 
-		public IEnumerable<Show> Search(string query)
+		public Task<IEnumerable<Show>> Search(string query)
 		{
-			return _database.Shows.FromSqlInterpolated($@"SELECT * FROM Shows WHERE Shows.Title LIKE {$"%{query}%"}
-			                                           OR Shows.Aliases LIKE {$"%{query}%"}").Take(20);
+			return Task.FromResult<IEnumerable<Show>>(
+				_database.Shows.FromSqlInterpolated($@"SELECT * FROM Shows WHERE Shows.Title LIKE {$"%{query}%"}
+			                                           OR Shows.Aliases LIKE {$"%{query}%"}").Take(20).ToList());
 		}
 
-		public IEnumerable<Show> GetAll()
+		public Task<IEnumerable<Show>> GetAll()
 		{
-			return _database.Shows.ToList();
+			return Task.FromResult<IEnumerable<Show>>(_database.Shows.ToList());
 		}
 
-		public Show Create(Show obj)
+		public async Task<long> Create(Show obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
-			obj.Genres = obj.Genres.Select(_library.CreateIfNotExists).ToList();
+			// TODO handle ExternalIDs.
+			obj.StudioID = await _studio.CreateIfNotExists(obj.Studio);
+			obj.GenreLinks = (await Task.WhenAll(obj.GenreLinks.Select(async x =>
+			{
+				x.GenreID = await _genres.CreateIfNotExists(x.Genre);
+				return x;
+			}))).ToList();
+			obj.People = (await Task.WhenAll(obj.People.Select(async x =>
+			{
+				x.PeopleID = await _people.CreateIfNotExists(x.People);
+				return x;
+			}))).ToList();
 			
+			obj.Seasons = null;
+			obj.Episodes = null;
 			
-			_database.Shows.Add(obj);
-			_database.SaveChanges();
-			return obj;
+			await _database.Shows.AddAsync(obj);
+			await _database.SaveChangesAsync();
+			return obj.ID;
 		}
 		
-		public Show CreateIfNotExists(Show obj)
+		public async Task<long> CreateIfNotExists(Show obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
+
+			Show old = await Get(obj.Slug);
+			if (old != null)
+				return old.ID;
+			return await Create(obj);
+		}
+
+		public async Task Edit(Show edited, bool resetOld)
+		{
+			if (edited == null)
+				throw new ArgumentNullException(nameof(edited));
 			
-			return Get(obj.Slug) ?? Create(obj);
+			Show old = await Get(edited.Slug);
+
+			if (old == null)
+				throw new ItemNotFound($"No show found with the slug {edited.Slug}.");
+			
+			if (resetOld)
+				Utility.Nullify(old);
+			Utility.Merge(old, edited);
+			await _database.SaveChangesAsync();
 		}
 
-		public void Edit(Show edited, bool resetOld)
+		public async Task Delete(Show show)
 		{
-			throw new System.NotImplementedException();
-		}
-
-		public void Delete(string slug)
-		{
-			throw new System.NotImplementedException();
+			_database.Shows.Remove(show);
+			await _database.SaveChangesAsync();
 		}
 	}
 }

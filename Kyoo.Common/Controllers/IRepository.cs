@@ -1,31 +1,35 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Kyoo.Models;
 
 namespace Kyoo.Controllers
 {
 	public interface IRepository<T>
 	{
-		T Get(string slug);
-		IEnumerable<T> Search(string query);
-		IEnumerable<T> GetAll();
-		T Create(T obj);
-		T CreateIfNotExists(T obj);
-		void Edit(T edited, bool resetOld);
-		void Delete(string slug);
+		Task<T> Get(long id);
+		Task<T> Get(string slug);
+		Task<IEnumerable<T>> Search(string query);
+		Task<IEnumerable<T>> GetAll();
+		Task<long> Create([NotNull] T obj);
+		Task<long> CreateIfNotExists([NotNull] T obj);
+		Task Edit([NotNull] T edited, bool resetOld);
+		Task Delete(T obj);
 	}
 	
 	public interface IShowRepository : IRepository<Show> {}
 
 	public interface ISeasonRepository : IRepository<Season>
 	{
-		Season Get(string showSlug, int seasonNumber);
+		Season Get(string showSlug, long seasonNumber);
 	}
 	
 	public interface IEpisodeRepository : IRepository<Episode>
 	{
-		Episode Get(string showSlug, int seasonNumber, int episodeNumber);
+		Episode Get(string showSlug, long seasonNumber, long episodeNumber);
 	}
 	
+	public interface ITrackRepository : IRepository<Track> {}
 	public interface ILibraryRepository : IRepository<Library> {}
 	public interface ICollectionRepository : IRepository<Collection> {}
 	public interface IGenreRepository : IRepository<Genre> {}
