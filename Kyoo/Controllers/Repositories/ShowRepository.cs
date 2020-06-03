@@ -29,49 +29,36 @@ namespace Kyoo.Controllers
 			_providers = providers;
 		}
 		
-		public Task<Show> Get(long id)
+		public async Task<Show> Get(long id)
 		{
-			return Task.FromResult(_database.Shows.FirstOrDefault(x => x.ID == id));
+			return await _database.Shows.FirstOrDefaultAsync(x => x.ID == id);
 		}
 		
-		public Task<Show> Get(string slug)
+		public async Task<Show> Get(string slug)
 		{
-			return Task.FromResult(_database.Shows.FirstOrDefault(x => x.Slug == slug));
+			return await _database.Shows.FirstOrDefaultAsync(x => x.Slug == slug);
 		}
 
-		public Task<IEnumerable<Show>> Search(string query)
+		public async Task<IEnumerable<Show>> Search(string query)
 		{
-			return Task.FromResult<IEnumerable<Show>>(
-				_database.Shows.FromSqlInterpolated($@"SELECT * FROM Shows WHERE Shows.Title LIKE {$"%{query}%"}
-			                                           OR Shows.Aliases LIKE {$"%{query}%"}").Take(20).ToList());
+			return await _database.Shows
+				.FromSqlInterpolated($@"SELECT * FROM Shows WHERE Shows.Title LIKE {$"%{query}%"}
+			                                           OR Shows.Aliases LIKE {$"%{query}%"}")
+				.Take(20)
+				.ToListAsync();
 		}
 
-		public Task<IEnumerable<Show>> GetAll()
+		public async Task<IEnumerable<Show>> GetAll()
 		{
-			return Task.FromResult<IEnumerable<Show>>(_database.Shows.ToList());
+			return await _database.Shows.ToListAsync();
 		}
 
 		public async Task<long> Create(Show obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
-			
-			obj.StudioID = await _studio.CreateIfNotExists(obj.Studio);
-			obj.GenreLinks = (await Task.WhenAll(obj.GenreLinks.Select(async x =>
-			{
-				x.GenreID = await _genres.CreateIfNotExists(x.Genre);
-				return x;
-			}))).ToList();
-			obj.People = (await Task.WhenAll(obj.People.Select(async x =>
-			{
-				x.PeopleID = await _people.CreateIfNotExists(x.People);
-				return x;
-			}))).ToList();
-			obj.ExternalIDs = (await Task.WhenAll(obj.ExternalIDs.Select(async x =>
-			{
-				x.ProviderID = await _providers.CreateIfNotExists(x.Provider);
-				return x;
-			}))).ToList();
+
+			await Validate(obj);
 			
 			obj.Seasons = null;
 			obj.Episodes = null;
@@ -105,7 +92,28 @@ namespace Kyoo.Controllers
 			if (resetOld)
 				Utility.Nullify(old);
 			Utility.Merge(old, edited);
+			await Validate(old);
 			await _database.SaveChangesAsync();
+		}
+
+		private async Task Validate(Show obj)
+		{
+			obj.StudioID = await _studio.CreateIfNotExists(obj.Studio);
+			obj.GenreLinks = (await Task.WhenAll(obj.GenreLinks.Select(async x =>
+			{
+				x.GenreID = await _genres.CreateIfNotExists(x.Genre);
+				return x;
+			}))).ToList();
+			obj.People = (await Task.WhenAll(obj.People.Select(async x =>
+			{
+				x.PeopleID = await _people.CreateIfNotExists(x.People);
+				return x;
+			}))).ToList();
+			obj.ExternalIDs = (await Task.WhenAll(obj.ExternalIDs.Select(async x =>
+			{
+				x.ProviderID = await _providers.CreateIfNotExists(x.Provider);
+				return x;
+			}))).ToList();
 		}
 
 		public async Task Delete(Show show)
