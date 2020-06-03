@@ -27,12 +27,12 @@ namespace Kyoo.Controllers
 
 		public Task<Season> Get(string slug)
 		{
-			int index = slug.IndexOf('-');
+			int index = slug.IndexOf("-s", StringComparison.Ordinal);
 			if (index == -1)
-				throw new InvalidOperationException("Invalid season slug. Format: showSlug-seasonNumber");
+				throw new InvalidOperationException("Invalid season slug. Format: {showSlug}-s{seasonNumber}");
 			string showSlug = slug.Substring(0, index);
-			if (!long.TryParse(slug.Substring(index + 1), out long seasonNumber))
-				throw new InvalidOperationException("Invalid season slug. Format: showSlug-seasonNumber");
+			if (!long.TryParse(slug.Substring(index + 2), out long seasonNumber))
+				throw new InvalidOperationException("Invalid season slug. Format: {showSlug}-s{seasonNumber}");
 			return Get(showSlug, seasonNumber);
 		}
 		
@@ -93,6 +93,8 @@ namespace Kyoo.Controllers
 			if (resetOld)
 				Utility.Nullify(old);
 			Utility.Merge(old, edited);
+
+			await Validate(old);
 			await _database.SaveChangesAsync();
 		}
 
