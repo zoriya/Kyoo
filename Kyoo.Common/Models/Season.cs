@@ -10,7 +10,7 @@ namespace Kyoo.Models
 
 		public long SeasonNumber { get; set; } = -1;
 
-		public string Slug => $"{Show.Title}-s{SeasonNumber}";
+		public string Slug => $"{Show.Slug}-s{SeasonNumber}";
 		public string Title { get; set; }
 		public string Overview { get; set; }
 		public long? Year { get; set; }
