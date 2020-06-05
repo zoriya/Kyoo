@@ -100,6 +100,9 @@ namespace Kyoo.Controllers
 
 		private async Task Validate(Season obj)
 		{
+			if (obj.ShowID <= 0)
+				throw new InvalidOperationException($"Can't store a season not related to any show (showID: {obj.ShowID}).");
+			
 			obj.ExternalIDs = (await Task.WhenAll(obj.ExternalIDs.Select(async x =>
 			{
 				x.ProviderID = await _providers.CreateIfNotExists(x.Provider);

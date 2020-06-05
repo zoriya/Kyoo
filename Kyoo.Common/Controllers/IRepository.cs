@@ -28,8 +28,11 @@ namespace Kyoo.Controllers
 	{
 		Task<Episode> Get(string showSlug, long seasonNumber, long episodeNumber);
 	}
-	
-	public interface ITrackRepository : IRepository<Track> {}
+
+	public interface ITrackRepository : IRepository<Track>
+	{
+		Task<Track> Get(long episodeID, string languageTag, bool isForced);
+	}
 	public interface ILibraryRepository : IRepository<Library> {}
 	public interface ICollectionRepository : IRepository<Collection> {}
 	public interface IGenreRepository : IRepository<Genre> {}
