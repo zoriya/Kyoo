@@ -63,8 +63,7 @@ namespace Kyoo.Controllers
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
-
-			// TODO initialize ShowID & SeaosnID here. (same for the season repository). OR null check the ID and throw on invalid.
+			
 			obj.Show = null;
 			obj.Season = null;
 			await Validate(obj);
@@ -105,6 +104,9 @@ namespace Kyoo.Controllers
 
 		private async Task Validate(Episode obj)
 		{
+			if (obj.ShowID <= 0)
+				throw new InvalidOperationException($"Can't store an episode not related to any show (showID: {obj.ShowID}).");
+
 			obj.ExternalIDs = (await Task.WhenAll(obj.ExternalIDs.Select(async x =>
 			{
 				x.ProviderID = await _providers.CreateIfNotExists(x.Provider);
