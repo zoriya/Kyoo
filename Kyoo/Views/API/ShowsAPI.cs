@@ -43,9 +43,9 @@ namespace Kyoo.Api
 		[HttpGet("{slug}")]
 		[Authorize(Policy="Read")]
 		[JsonDetailed]
-		public ActionResult<Show> GetShow(string slug)
+		public async Task<ActionResult<Show>> GetShow(string slug)
 		{
-			Show show = _libraryManager.GetShow(slug);
+			Show show = await _libraryManager.GetShow(slug);
 
 			if (show == null)
 				return NotFound();
@@ -55,7 +55,7 @@ namespace Kyoo.Api
 		
 		[HttpPost("edit/{slug}")]
 		[Authorize(Policy="Write")]
-		public IActionResult EditShow(string slug, [FromBody] Show show)
+		public async Task<IActionResult> EditShow(string slug, [FromBody] Show show)
 		{ 
 			if (!ModelState.IsValid) 
 				return BadRequest(show);
@@ -66,7 +66,7 @@ namespace Kyoo.Api
 			show.ID = old.ID;
 			show.Slug = slug;
 			show.Path = old.Path;
-			_libraryManager.Edit(show, false);
+			await _libraryManager.EditShow(show, false);
 			return Ok();
 		}
 		
@@ -79,7 +79,6 @@ namespace Kyoo.Api
 			Show show = _database.Shows.Include(x => x.ExternalIDs).FirstOrDefault(x => x.Slug == slug);
 			if (show == null)
 				return NotFound();
-			show.ExternalIDs = _libraryManager.Validate(externalIDs);
 			_database.SaveChanges();
 			_taskManager.StartTask("re-scan", $"show/{slug}");
 			return Ok();
@@ -96,7 +95,7 @@ namespace Kyoo.Api
 		[Authorize(Policy = "Write")]
 		public async Task<IActionResult> DownloadImages(string slug)
 		{
-			Show show = _libraryManager.GetShow(slug);
+			Show show = await _libraryManager.GetShow(slug);
 			if (show == null)
 				return NotFound();
 			await _thumbnailsManager.Validate(show, true);

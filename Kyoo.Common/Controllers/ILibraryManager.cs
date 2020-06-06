@@ -13,11 +13,21 @@ namespace Kyoo.Controllers
 		Task<Season> GetSeason(string showSlug, long seasonNumber);
 		Task<Episode> GetEpisode(string showSlug, long seasonNumber, long episodeNumber);
 		Task<Episode> GetMovieEpisode(string movieSlug);
+		Task<Track> GetTrack(long id);
 		Task<Track> GetTrack(long episodeID, string language, bool isForced);
 		Task<Genre> GetGenre(string slug);
 		Task<Studio> GetStudio(string slug);
 		Task<People> GetPeople(string slug);
 
+		// Get by relations
+		Task<IEnumerable<Season>> GetSeasons(long showID);
+		Task<IEnumerable<Season>> GetSeasons(string showSlug);
+		
+		Task<IEnumerable<Episode>> GetEpisodes(long showID, long seasonNumber);
+		Task<IEnumerable<Episode>> GetEpisodes(string showSlug, long seasonNumber);
+		Task<IEnumerable<Episode>> GetEpisodes(long seasonID);
+		
+		
 		// Get all
 		Task<IEnumerable<Library>> GetLibraries();
 		Task<IEnumerable<Collection>> GetCollections();
