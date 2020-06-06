@@ -39,7 +39,12 @@ namespace Kyoo.Controllers
 			return await _database.Shows.FirstOrDefaultAsync(x => x.Slug == slug);
 		}
 
-		public async Task<IEnumerable<Show>> Search(string query)
+		public async Task<Show> GetByPath(string path)
+		{
+			return await _database.Shows.FirstOrDefaultAsync(x => x.Path == path);
+		}
+
+		public async Task<ICollection<Show>> Search(string query)
 		{
 			return await _database.Shows
 				.FromSqlInterpolated($@"SELECT * FROM Shows WHERE Shows.Title LIKE {$"%{query}%"}
@@ -48,7 +53,7 @@ namespace Kyoo.Controllers
 				.ToListAsync();
 		}
 
-		public async Task<IEnumerable<Show>> GetAll()
+		public async Task<ICollection<Show>> GetAll()
 		{
 			return await _database.Shows.ToListAsync();
 		}
@@ -120,6 +125,29 @@ namespace Kyoo.Controllers
 		{
 			_database.Shows.Remove(show);
 			await _database.SaveChangesAsync();
+		}
+		
+		public Task AddShowLink(long showID, long? libraryID, long? collectionID)
+		{
+			if (collectionID != null)
+			{
+				_database.CollectionLinks.AddIfNotExist(new CollectionLink { CollectionID = collectionID, ShowID = showID},
+					x => x.CollectionID == collectionID && x.ShowID == showID);
+			}
+			if (libraryID != null)
+			{
+				_database.LibraryLinks.AddIfNotExist(new LibraryLink {LibraryID = libraryID.Value, ShowID = showID},
+					x => x.LibraryID == libraryID.Value && x.CollectionID == null && x.ShowID == showID);
+			}
+
+			if (libraryID != null && collectionID != null)
+			{
+				_database.LibraryLinks.AddIfNotExist(
+					new LibraryLink {LibraryID = libraryID.Value, CollectionID = collectionID.Value},
+					x => x.LibraryID == libraryID && x.CollectionID == collectionID && x.ShowID == null);
+			}
+
+			return Task.CompletedTask;
 		}
 	}
 }

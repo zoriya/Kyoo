@@ -114,9 +114,9 @@ namespace Kyoo.Tasks
 			await _thumbnailsManager.Validate(edited, true);
 		}
 
-		public IEnumerable<string> GetPossibleParameters()
+		public Task<IEnumerable<string>> GetPossibleParameters()
 		{
-			return default;
+			return Task.FromResult<IEnumerable<string>>(null);
 		}
 
 		public int? Progress()

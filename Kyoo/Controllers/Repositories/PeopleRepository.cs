@@ -29,7 +29,7 @@ namespace Kyoo.Controllers
 			return _database.Peoples.FirstOrDefaultAsync(x => x.Slug == slug);
 		}
 
-		public async Task<IEnumerable<People>> Search(string query)
+		public async Task<ICollection<People>> Search(string query)
 		{
 			return await _database.Peoples
 				.Where(people => EF.Functions.Like(people.Name, $"%{query}%"))
@@ -37,7 +37,7 @@ namespace Kyoo.Controllers
 				.ToListAsync();
 		}
 
-		public async Task<IEnumerable<People>> GetAll()
+		public async Task<ICollection<People>> GetAll()
 		{
 			return await _database.Peoples.ToListAsync();
 		}

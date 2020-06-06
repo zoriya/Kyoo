@@ -34,12 +34,12 @@ namespace Kyoo.Controllers
 			                                                       && x.IsForced == isForced);
 		}
 
-		public Task<IEnumerable<Track>> Search(string query)
+		public Task<ICollection<Track>> Search(string query)
 		{
 			throw new InvalidOperationException("Tracks do not support the search method.");
 		}
 
-		public async Task<IEnumerable<Track>> GetAll()
+		public async Task<ICollection<Track>> GetAll()
 		{
 			return await _database.Tracks.ToListAsync();
 		}
