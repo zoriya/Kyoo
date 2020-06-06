@@ -46,7 +46,7 @@ namespace Kyoo.Controllers
 			                                                         && x.EpisodeNumber == episodeNumber);
 		}
 		
-		public async Task<IEnumerable<Episode>> Search(string query)
+		public async Task<ICollection<Episode>> Search(string query)
 		{
 			return await _database.Episodes
 				.Where(x => EF.Functions.Like(x.Title, $"%{query}%"))
@@ -54,7 +54,7 @@ namespace Kyoo.Controllers
 				.ToListAsync();
 		}
 
-		public async Task<IEnumerable<Episode>> GetAll()
+		public async Task<ICollection<Episode>> GetAll()
 		{
 			return await _database.Episodes.ToListAsync();
 		}
@@ -64,10 +64,7 @@ namespace Kyoo.Controllers
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 			
-			obj.Show = null;
-			obj.Season = null;
 			await Validate(obj);
-
 			await _database.Episodes.AddAsync(obj);
 			await _database.SaveChangesAsync();
 			return obj.ID;
@@ -120,19 +117,19 @@ namespace Kyoo.Controllers
 			await _database.SaveChangesAsync();
 		}
 		
-		public async Task<IEnumerable<Episode>> GetEpisodes(long showID, long seasonNumber)
+		public async Task<ICollection<Episode>> GetEpisodes(long showID, long seasonNumber)
 		{
 			return await _database.Episodes.Where(x => x.ShowID == showID
 			                                     && x.SeasonNumber == seasonNumber).ToListAsync();
 		}
 
-		public async Task<IEnumerable<Episode>> GetEpisodes(string showSlug, long seasonNumber)
+		public async Task<ICollection<Episode>> GetEpisodes(string showSlug, long seasonNumber)
 		{
 			return await _database.Episodes.Where(x => x.Show.Slug == showSlug
 			                                           && x.SeasonNumber == seasonNumber).ToListAsync();
 		}
 
-		public async Task<IEnumerable<Episode>> GetEpisodes(long seasonID)
+		public async Task<ICollection<Episode>> GetEpisodes(long seasonID)
 		{
 			return await _database.Episodes.Where(x => x.SeasonID == seasonID).ToListAsync();
 		}

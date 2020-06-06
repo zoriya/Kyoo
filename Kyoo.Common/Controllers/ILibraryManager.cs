@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Kyoo.Models;
 
 namespace Kyoo.Controllers
@@ -20,35 +21,40 @@ namespace Kyoo.Controllers
 		Task<People> GetPeople(string slug);
 
 		// Get by relations
-		Task<IEnumerable<Season>> GetSeasons(long showID);
-		Task<IEnumerable<Season>> GetSeasons(string showSlug);
+		Task<ICollection<Season>> GetSeasons(long showID);
+		Task<ICollection<Season>> GetSeasons(string showSlug);
 		
-		Task<IEnumerable<Episode>> GetEpisodes(long showID, long seasonNumber);
-		Task<IEnumerable<Episode>> GetEpisodes(string showSlug, long seasonNumber);
-		Task<IEnumerable<Episode>> GetEpisodes(long seasonID);
+		Task<ICollection<Episode>> GetEpisodes(long showID, long seasonNumber);
+		Task<ICollection<Episode>> GetEpisodes(string showSlug, long seasonNumber);
+		Task<ICollection<Episode>> GetEpisodes(long seasonID);
 		
+		
+		// Helpers
+		Task<Show> GetShowByPath(string path);
+		Task AddShowLink(long showID, long? libraryID, long? collectionID);
+		Task AddShowLink([NotNull] Show show, Library library, Collection collection);
 		
 		// Get all
-		Task<IEnumerable<Library>> GetLibraries();
-		Task<IEnumerable<Collection>> GetCollections();
-		Task<IEnumerable<Show>> GetShows();
-		Task<IEnumerable<Season>> GetSeasons();
-		Task<IEnumerable<Episode>> GetEpisodes();
-		Task<IEnumerable<Track>> GetTracks();
-		Task<IEnumerable<Studio>> GetStudios();
-		Task<IEnumerable<People>> GetPeoples();
-		Task<IEnumerable<Genre>> GetGenres();
-		Task<IEnumerable<ProviderID>> GetProviders();
+		Task<ICollection<Library>> GetLibraries();
+		Task<ICollection<Collection>> GetCollections();
+		Task<ICollection<Show>> GetShows();
+		Task<ICollection<Season>> GetSeasons();
+		Task<ICollection<Episode>> GetEpisodes();
+		Task<ICollection<Track>> GetTracks();
+		Task<ICollection<Studio>> GetStudios();
+		Task<ICollection<People>> GetPeoples();
+		Task<ICollection<Genre>> GetGenres();
+		Task<ICollection<ProviderID>> GetProviders();
 
 		// Search
-		Task<IEnumerable<Library>> SearchLibraries(string searchQuery);
-		Task<IEnumerable<Collection>> SearchCollections(string searchQuery);
-		Task<IEnumerable<Show>> SearchShows(string searchQuery);
-		Task<IEnumerable<Season>> SearchSeasons(string searchQuery);
-		Task<IEnumerable<Episode>> SearchEpisodes(string searchQuery);
-		Task<IEnumerable<Genre>> SearchGenres(string searchQuery);
-		Task<IEnumerable<Studio>> SearchStudios(string searchQuery);
-		Task<IEnumerable<People>> SearchPeople(string searchQuery);
+		Task<ICollection<Library>> SearchLibraries(string searchQuery);
+		Task<ICollection<Collection>> SearchCollections(string searchQuery);
+		Task<ICollection<Show>> SearchShows(string searchQuery);
+		Task<ICollection<Season>> SearchSeasons(string searchQuery);
+		Task<ICollection<Episode>> SearchEpisodes(string searchQuery);
+		Task<ICollection<Genre>> SearchGenres(string searchQuery);
+		Task<ICollection<Studio>> SearchStudios(string searchQuery);
+		Task<ICollection<People>> SearchPeople(string searchQuery);
 		
 		//Register values
 		Task RegisterLibrary(Library library);

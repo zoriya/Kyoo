@@ -28,7 +28,7 @@ namespace Kyoo.Controllers
 			return await _database.Genres.FirstOrDefaultAsync(x => x.Slug == slug);
 		}
 
-		public async Task<IEnumerable<Genre>> Search(string query)
+		public async Task<ICollection<Genre>> Search(string query)
 		{
 			return await _database.Genres
 				.Where(genre => EF.Functions.Like(genre.Name, $"%{query}%"))
@@ -36,7 +36,7 @@ namespace Kyoo.Controllers
 				.ToListAsync();
 		}
 
-		public async Task<IEnumerable<Genre>> GetAll()
+		public async Task<ICollection<Genre>> GetAll()
 		{
 			return await _database.Genres.ToListAsync();
 		}

@@ -42,7 +42,7 @@ namespace Kyoo.Controllers
 			                                                        && x.SeasonNumber == seasonNumber);
 		}
 
-		public async Task<IEnumerable<Season>> Search(string query)
+		public async Task<ICollection<Season>> Search(string query)
 		{
 			return await _database.Seasons
 				.Where(x => EF.Functions.Like(x.Title, $"%{query}%"))
@@ -50,7 +50,7 @@ namespace Kyoo.Controllers
 				.ToListAsync();
 		}
 
-		public async Task<IEnumerable<Season>> GetAll()
+		public async Task<ICollection<Season>> GetAll()
 		{
 			return await _database.Seasons.ToListAsync();
 		}
@@ -116,12 +116,12 @@ namespace Kyoo.Controllers
 			await _database.SaveChangesAsync();
 		}
 		
-		public async Task<IEnumerable<Season>> GetSeasons(long showID)
+		public async Task<ICollection<Season>> GetSeasons(long showID)
 		{
 			return await _database.Seasons.Where(x => x.ShowID == showID).ToListAsync();
 		}
 
-		public async Task<IEnumerable<Season>> GetSeasons(string showSlug)
+		public async Task<ICollection<Season>> GetSeasons(string showSlug)
 		{
 			return await _database.Seasons.Where(x => x.Show.Slug == showSlug).ToListAsync();
 		}

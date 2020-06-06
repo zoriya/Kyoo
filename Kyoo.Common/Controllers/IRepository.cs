@@ -9,31 +9,35 @@ namespace Kyoo.Controllers
 	{
 		Task<T> Get(long id);
 		Task<T> Get(string slug);
-		Task<IEnumerable<T>> Search(string query);
-		Task<IEnumerable<T>> GetAll();
+		Task<ICollection<T>> Search(string query);
+		Task<ICollection<T>> GetAll();
 		Task<long> Create([NotNull] T obj);
 		Task<long> CreateIfNotExists([NotNull] T obj);
 		Task Edit([NotNull] T edited, bool resetOld);
 		Task Delete(T obj);
 	}
-	
-	public interface IShowRepository : IRepository<Show> {}
+
+	public interface IShowRepository : IRepository<Show>
+	{
+		Task<Show> GetByPath(string path);
+		Task AddShowLink(long showID, long? libraryID, long? collectionID);
+	}
 
 	public interface ISeasonRepository : IRepository<Season>
 	{
 		Task<Season> Get(string showSlug, long seasonNumber);
 		
-		Task<IEnumerable<Season>> GetSeasons(long showID);
-		Task<IEnumerable<Season>> GetSeasons(string showSlug);
+		Task<ICollection<Season>> GetSeasons(long showID);
+		Task<ICollection<Season>> GetSeasons(string showSlug);
 	}
 	
 	public interface IEpisodeRepository : IRepository<Episode>
 	{
 		Task<Episode> Get(string showSlug, long seasonNumber, long episodeNumber);
 		
-		Task<IEnumerable<Episode>> GetEpisodes(long showID, long seasonNumber);
-		Task<IEnumerable<Episode>> GetEpisodes(string showSlug, long seasonNumber);
-		Task<IEnumerable<Episode>> GetEpisodes(long seasonID);
+		Task<ICollection<Episode>> GetEpisodes(long showID, long seasonNumber);
+		Task<ICollection<Episode>> GetEpisodes(string showSlug, long seasonNumber);
+		Task<ICollection<Episode>> GetEpisodes(long seasonID);
 	}
 
 	public interface ITrackRepository : IRepository<Track>

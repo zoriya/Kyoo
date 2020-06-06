@@ -8,7 +8,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Kyoo.Models.Watch;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
@@ -28,11 +27,11 @@ namespace Kyoo.Controllers
 		private ITranscoder _transcoder;
 		private IConfiguration _config;
 		
-		public IEnumerable<string> GetPossibleParameters()
+		public async Task<IEnumerable<string>> GetPossibleParameters()
 		{
 			using IServiceScope serviceScope = _serviceProvider.CreateScope();
 			ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
-			return libraryManager.GetLibraries().Select(x => x.Slug);
+			return (await libraryManager.GetLibraries()).Select(x => x.Slug);
 		}
 
 		public int? Progress()
@@ -53,28 +52,27 @@ namespace Kyoo.Controllers
 			{
 				using IServiceScope serviceScope = _serviceProvider.CreateScope();
 				ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
-				IEnumerable<Episode> episodes = libraryManager.GetEpisodes();
-				IEnumerable<Library> libraries = argument == null 
-					? libraryManager.GetLibraries()
-					: new [] {libraryManager.GetLibrary(argument)};
+				ICollection<Episode> episodes = await libraryManager.GetEpisodes();
+				ICollection<Library> libraries = argument == null 
+					? await libraryManager.GetLibraries()
+					: new [] { await libraryManager.GetLibrary(argument)};
 
 				foreach (Episode episode in episodes)
 				{
 					if (!File.Exists(episode.Path))
-						libraryManager.RemoveEpisode(episode);
+						await libraryManager.DeleteEpisode(episode);
 				}
-				await libraryManager.SaveChanges();
 
-				await Task.WhenAll(libraries.ToList().Select(x => Scan(x, libraryManager, cancellationToken)));
+				await Task.WhenAll(libraries.Select(x => Scan(x, episodes, cancellationToken)));
 			}
 			catch (Exception ex)
 			{
-				Console.Error.WriteLine($"Unknown exception thrown durring libraries scan.\nException: {ex.Message}");
+				await Console.Error.WriteLineAsync($"Unknown exception thrown durring libraries scan.\nException: {ex.Message}");
 			}
 			Console.WriteLine("Scan finished!");
 		}
 
-		private Task Scan(Library library, ILibraryManager libraryManager, CancellationToken cancellationToken)
+		private Task Scan(Library library, ICollection<Episode> episodes, CancellationToken cancellationToken)
 		{
 			Console.WriteLine($"Scanning library {library.Name} at {string.Join(", ", library.Paths)}.");
 			return Task.WhenAll(library.Paths.Select(async path =>
@@ -89,29 +87,29 @@ namespace Kyoo.Controllers
 				}
 				catch (DirectoryNotFoundException)
 				{
-					Console.Error.WriteLine($"The library's directory {path} could not be found (library slug: {library.Slug})");
+					await Console.Error.WriteLineAsync($"The library's directory {path} could not be found (library slug: {library.Slug})");
 					return Task.CompletedTask;
 				}
 				catch (PathTooLongException)
 				{
-					Console.Error.WriteLine($"The library's directory {path} is too long for this system. (library slug: {library.Slug})");
+					await Console.Error.WriteLineAsync($"The library's directory {path} is too long for this system. (library slug: {library.Slug})");
 					return Task.CompletedTask;
 				}
 				catch (ArgumentException)
 				{
-					Console.Error.WriteLine($"The library's directory {path} is invalid. (library slug: {library.Slug})");
+					await Console.Error.WriteLineAsync($"The library's directory {path} is invalid. (library slug: {library.Slug})");
 					return Task.CompletedTask;
 				}
 				catch (UnauthorizedAccessException)
 				{
-					Console.Error.WriteLine($"Permission denied: can't access library's directory at {path}. (library slug: {library.Slug})");
+					await Console.Error.WriteLineAsync($"Permission denied: can't access library's directory at {path}. (library slug: {library.Slug})");
 					return Task.CompletedTask;
 				}
 
 				// return Task.WhenAll(files.Select(file =>
 				foreach (string file in files)
 				{
-					if (!IsVideo(file) || libraryManager.GetEpisodes().Any(x => x.Path == file))
+					if (!IsVideo(file) || episodes.Any(x => x.Path == file))
 						continue; //return Task.CompletedTask;
 					string relativePath = file.Substring(path.Length);
 					/*return*/ await RegisterFile(file, relativePath, library, cancellationToken);
@@ -128,7 +126,6 @@ namespace Kyoo.Controllers
 			
 			using IServiceScope serviceScope = _serviceProvider.CreateScope();
 			ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
-			((DbSet<Library>)libraryManager.GetLibraries()).Attach(library);
 			
 			string patern = _config.GetValue<string>("regex");
 			Regex regex = new Regex(patern, RegexOptions.IgnoreCase);
@@ -145,66 +142,88 @@ namespace Kyoo.Controllers
 			bool isMovie = seasonNumber == -1 && episodeNumber == -1 && absoluteNumber == -1;
 			Show show = await GetShow(libraryManager, showName, showPath, isMovie, library);
 			if (isMovie)
-				libraryManager.Register(await GetMovie(show, path));
+				await libraryManager.RegisterEpisode(await GetMovie(show, path));
 			else
 			{
 				Season season = await GetSeason(libraryManager, show, seasonNumber, library);
 				Episode episode = await GetEpisode(libraryManager, show, season, episodeNumber, absoluteNumber, path, library);
-				libraryManager.Register(episode);
+				await libraryManager.RegisterEpisode(episode);
 			}
-			if (collection != null)
-				libraryManager.Register(collection);
-			libraryManager.RegisterShowLinks(library, collection, show);
-			Console.WriteLine($"Registering episode at: {path}");
-			await libraryManager.SaveChanges();
+
+			await libraryManager.AddShowLink(show, library, collection);
+			Console.WriteLine($"Episode at {path} registered.");
 		}
 
-		private async Task<Collection> GetCollection(ILibraryManager libraryManager, string collectionName, Library library)
+		private async Task<Collection> GetCollection(ILibraryManager libraryManager, 
+			string collectionName, 
+			Library library)
 		{
 			if (string.IsNullOrEmpty(collectionName))
-				return await Task.FromResult<Collection>(null);
-			Collection name = libraryManager.GetCollection(Utility.ToSlug(collectionName));
-			if (name != null)
-				return name;
-			return await _metadataProvider.GetCollectionFromName(collectionName, library);
+				return null;
+			Collection collection = await libraryManager.GetCollection(Utility.ToSlug(collectionName));
+			if (collection != null)
+				return collection;
+			collection = await _metadataProvider.GetCollectionFromName(collectionName, library);
+			await libraryManager.RegisterCollection(collection);
+			return collection;
 		}
 		
-		private async Task<Show> GetShow(ILibraryManager libraryManager, string showTitle, string showPath, bool isMovie, Library library)
+		private async Task<Show> GetShow(ILibraryManager libraryManager, 
+			string showTitle, 
+			string showPath,
+			bool isMovie, 
+			Library library)
 		{
-			Show show = libraryManager.GetShowByPath(showPath);
+			Show show = await libraryManager.GetShowByPath(showPath);
 			if (show != null)
 				return show;
 			show = await _metadataProvider.SearchShow(showTitle, isMovie, library);
 			show.Path = showPath;
 			show.People = await _metadataProvider.GetPeople(show, library);
+			await libraryManager.RegisterShow(show);
 			await _thumbnailsManager.Validate(show.People);
 			await _thumbnailsManager.Validate(show);
 			return show;
 		}
 
-		private async Task<Season> GetSeason(ILibraryManager libraryManager, Show show, long seasonNumber, Library library)
+		private async Task<Season> GetSeason(ILibraryManager libraryManager, 
+			Show show, 
+			long seasonNumber, 
+			Library library)
 		{
 			if (seasonNumber == -1)
 				return default;
-			Season season = libraryManager.GetSeason(show.Slug, seasonNumber);
+			Season season = await libraryManager.GetSeason(show.Slug, seasonNumber);
 			if (season == null)
 			{
 				season = await _metadataProvider.GetSeason(show, seasonNumber, library);
+				await libraryManager.RegisterSeason(season);
 				await _thumbnailsManager.Validate(season);
 			}
 			season.Show = show;
 			return season;
 		}
 		
-		private async Task<Episode> GetEpisode(ILibraryManager libraryManager, Show show, Season season, long episodeNumber, long absoluteNumber, string episodePath, Library library)
+		private async Task<Episode> GetEpisode(ILibraryManager libraryManager, 
+			Show show, 
+			Season season,
+			long episodeNumber,
+			long absoluteNumber, 
+			string episodePath, 
+			Library library)
 		{
-			Episode episode = await _metadataProvider.GetEpisode(show, episodePath, season?.SeasonNumber ?? -1, episodeNumber, absoluteNumber, library);
-			if (season == null)
-				season = await GetSeason(libraryManager, show, episode.SeasonNumber, library);
+			Episode episode = await _metadataProvider.GetEpisode(show,
+				episodePath, 
+				season?.SeasonNumber ?? -1, 
+				episodeNumber,
+				absoluteNumber,
+				library);
+			
+			season ??= await GetSeason(libraryManager, show, episode.SeasonNumber, library);
 			episode.Season = season;
 			if (season == null)
 			{
-				await Console.Error.WriteLineAsync("\tError: You don't have any provider that support absolute epiode numbering. Install one and try again.");
+				await Console.Error.WriteLineAsync("Error: You don't have any provider that support absolute epiode numbering. Install one and try again.");
 				return default;
 			}
 			

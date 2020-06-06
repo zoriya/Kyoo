@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Kyoo.Models;
 
@@ -86,117 +87,134 @@ namespace Kyoo.Controllers
 			return _people.Get(slug);
 		}
 
-		public Task<IEnumerable<Library>> GetLibraries()
+		public Task<ICollection<Library>> GetLibraries()
 		{
 			return _libraries.GetAll();
 		}
 
-		public Task<IEnumerable<Collection>> GetCollections()
+		public Task<ICollection<Collection>> GetCollections()
 		{
 			return _collections.GetAll();
 		}
 
-		public Task<IEnumerable<Show>> GetShows()
+		public Task<ICollection<Show>> GetShows()
 		{
 			return _shows.GetAll();
 		}
 
-		public Task<IEnumerable<Season>> GetSeasons()
+		public Task<ICollection<Season>> GetSeasons()
 		{
 			return _seasons.GetAll();
 		}
 
-		public Task<IEnumerable<Episode>> GetEpisodes()
+		public Task<ICollection<Episode>> GetEpisodes()
 		{
 			return _episodes.GetAll();
 		}
 
-		public Task<IEnumerable<Track>> GetTracks()
+		public Task<ICollection<Track>> GetTracks()
 		{
 			return _tracks.GetAll();
 		}
 
-		public Task<IEnumerable<Studio>> GetStudios()
+		public Task<ICollection<Studio>> GetStudios()
 		{
 			return _studios.GetAll();
 		}
 
-		public Task<IEnumerable<People>> GetPeoples()
+		public Task<ICollection<People>> GetPeoples()
 		{
 			return _people.GetAll();
 		}
 
-		public Task<IEnumerable<Genre>> GetGenres()
+		public Task<ICollection<Genre>> GetGenres()
 		{
 			return _genres.GetAll();
 		}
 
-		public Task<IEnumerable<ProviderID>> GetProviders()
+		public Task<ICollection<ProviderID>> GetProviders()
 		{
 			return _providers.GetAll();
 		}
 
-		public Task<IEnumerable<Season>> GetSeasons(long showID)
+		public Task<ICollection<Season>> GetSeasons(long showID)
 		{
 			return _seasons.GetSeasons(showID);
 		}
 
-		public Task<IEnumerable<Season>> GetSeasons(string showSlug)
+		public Task<ICollection<Season>> GetSeasons(string showSlug)
 		{
 			return _seasons.GetSeasons(showSlug);
 		}
 
-		public Task<IEnumerable<Episode>> GetEpisodes(long showID, long seasonNumber)
+		public Task<ICollection<Episode>> GetEpisodes(long showID, long seasonNumber)
 		{
 			return _episodes.GetEpisodes(showID, seasonNumber);
 		}
 
-		public Task<IEnumerable<Episode>> GetEpisodes(string showSlug, long seasonNumber)
+		public Task<ICollection<Episode>> GetEpisodes(string showSlug, long seasonNumber)
 		{
 			return _episodes.GetEpisodes(showSlug, seasonNumber);
 		}
 
-		public Task<IEnumerable<Episode>> GetEpisodes(long seasonID)
+		public Task<ICollection<Episode>> GetEpisodes(long seasonID)
 		{
 			return _episodes.GetEpisodes(seasonID);
 		}
 
-		public Task<IEnumerable<Library>> SearchLibraries(string searchQuery)
+		public Task<Show> GetShowByPath(string path)
+		{
+			return _shows.GetByPath(path);
+		}
+
+		public Task AddShowLink(long showID, long? libraryID, long? collectionID)
+		{
+			return _shows.AddShowLink(showID, libraryID, collectionID);
+		}
+
+		public Task AddShowLink(Show show, Library library, Collection collection)
+		{
+			if (show == null)
+				throw new ArgumentNullException(nameof(show));
+			return AddShowLink(show.ID, library?.ID, collection?.ID);
+		}
+		
+		public Task<ICollection<Library>> SearchLibraries(string searchQuery)
 		{
 			return _libraries.Search(searchQuery);
 		}
 
-		public Task<IEnumerable<Collection>> SearchCollections(string searchQuery)
+		public Task<ICollection<Collection>> SearchCollections(string searchQuery)
 		{
 			return _collections.Search(searchQuery);
 		}
 
-		public Task<IEnumerable<Show>> SearchShows(string searchQuery)
+		public Task<ICollection<Show>> SearchShows(string searchQuery)
 		{
 			return _shows.Search(searchQuery);
 		}
 
-		public Task<IEnumerable<Season>> SearchSeasons(string searchQuery)
+		public Task<ICollection<Season>> SearchSeasons(string searchQuery)
 		{
 			return _seasons.Search(searchQuery);
 		}
 
-		public Task<IEnumerable<Episode>> SearchEpisodes(string searchQuery)
+		public Task<ICollection<Episode>> SearchEpisodes(string searchQuery)
 		{
 			return _episodes.Search(searchQuery);
 		}
 
-		public Task<IEnumerable<Genre>> SearchGenres(string searchQuery)
+		public Task<ICollection<Genre>> SearchGenres(string searchQuery)
 		{
 			return _genres.Search(searchQuery);
 		}
 
-		public Task<IEnumerable<Studio>> SearchStudios(string searchQuery)
+		public Task<ICollection<Studio>> SearchStudios(string searchQuery)
 		{
 			return _studios.Search(searchQuery);
 		}
 
-		public Task<IEnumerable<People>> SearchPeople(string searchQuery)
+		public Task<ICollection<People>> SearchPeople(string searchQuery)
 		{
 			return _people.Search(searchQuery);
 		}

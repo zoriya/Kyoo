@@ -30,7 +30,7 @@ namespace Kyoo.Controllers
 			return _database.Libraries.FirstOrDefaultAsync(x => x.Name == slug);
 		}
 
-		public async Task<IEnumerable<Library>> Search(string query)
+		public async Task<ICollection<Library>> Search(string query)
 		{
 			return await _database.Libraries
 				.Where(x => EF.Functions.Like(x.Name, $"%{query}%"))
@@ -38,7 +38,7 @@ namespace Kyoo.Controllers
 				.ToListAsync();
 		}
 
-		public async Task<IEnumerable<Library>> GetAll()
+		public async Task<ICollection<Library>> GetAll()
 		{
 			return await _database.Libraries.ToListAsync();
 		}
