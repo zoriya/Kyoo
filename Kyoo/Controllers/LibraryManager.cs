@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Kyoo.Models;
 
 namespace Kyoo.Controllers
@@ -14,297 +15,295 @@ namespace Kyoo.Controllers
 		private readonly IGenreRepository _genres;
 		private readonly IStudioRepository _studios;
 		private readonly IPeopleRepository _people;
+		private readonly IProviderRepository _providers;
 		
-		public LibraryManager(ILibraryRepository libraries,
-			ICollectionRepository collections,
-			IShowRepository shows,
-			ISeasonRepository seasons,
-			IEpisodeRepository episodes,
-			ITrackRepository tracks,
-			IGenreRepository genres,
-			IStudioRepository studios,
-			IPeopleRepository people)
+		public LibraryManager(DatabaseContext database)
 		{
-			_libraries = libraries;
-			_collections = collections;
-			_shows = shows;
-			_seasons = seasons;
-			_episodes = episodes;
-			_tracks = tracks;
-			_genres = genres;
-			_studios = studios;
-			_people = people;
+			_providers = new ProviderRepository(database);
+			_libraries = new LibraryRepository(database, _providers);
+			_collections = new CollectionRepository(database);
+			_genres = new GenreRepository(database);
+			_people = new PeopleRepository(database, _providers);
+			_studios = new StudioRepository(database);
+			_shows = new ShowRepository(database, _genres, _people, _studios, _providers);
+			_seasons = new SeasonRepository(database, _providers);
+			_episodes = new EpisodeRepository(database, _providers);
+			_tracks = new TrackRepository(database);
 		}
 
-		public Library GetLibrary(string slug)
+		public Task<Library> GetLibrary(string slug)
 		{
 			return _libraries.Get(slug);
 		}
 
-		public Collection GetCollection(string slug)
+		public Task<Collection> GetCollection(string slug)
 		{
 			return _collections.Get(slug);
 		}
 
-		public Show GetShow(string slug)
+		public Task<Show> GetShow(string slug)
 		{
 			return _shows.Get(slug);
 		}
 
-		public Season GetSeason(string showSlug, long seasonNumber)
+		public Task<Season> GetSeason(string showSlug, long seasonNumber)
 		{
 			return _seasons.Get(showSlug, seasonNumber);
 		}
 
-		public Episode GetEpisode(string showSlug, long seasonNumber, long episodeNumber)
+		public Task<Episode> GetEpisode(string showSlug, long seasonNumber, long episodeNumber)
 		{
 			return _episodes.Get(showSlug, seasonNumber, episodeNumber);
 		}
 
-		public Episode GetMovieEpisode(string movieSlug)
+		public Task<Episode> GetMovieEpisode(string movieSlug)
 		{
 			return _episodes.Get(movieSlug);
 		}
 
-		public Track GetTrack(string slug)
+		public Task<Track> GetTrack(long episodeID, string language, bool isForced)
 		{
-			return _tracks.Get(slug);
+			return _tracks.Get(episodeID, language, isForced);
 		}
 
-		public Genre GetGenre(string slug)
+		public Task<Genre> GetGenre(string slug)
 		{
 			return _genres.Get(slug);
 		}
 
-		public Studio GetStudio(string slug)
+		public Task<Studio> GetStudio(string slug)
 		{
 			return _studios.Get(slug);
 		}
 
-		public People GetPeople(string slug)
+		public Task<People> GetPeople(string slug)
 		{
 			return _people.Get(slug);
 		}
 
-		public IEnumerable<Library> GetLibraries()
+		public Task<IEnumerable<Library>> GetLibraries()
 		{
 			return _libraries.GetAll();
 		}
 
-		public IEnumerable<Collection> GetCollections()
+		public Task<IEnumerable<Collection>> GetCollections()
 		{
 			return _collections.GetAll();
 		}
 
-		public IEnumerable<Show> GetShows()
+		public Task<IEnumerable<Show>> GetShows()
 		{
 			return _shows.GetAll();
 		}
 
-		public IEnumerable<Season> GetSeasons()
+		public Task<IEnumerable<Season>> GetSeasons()
 		{
 			return _seasons.GetAll();
 		}
 
-		public IEnumerable<Episode> GetEpisodes()
+		public Task<IEnumerable<Episode>> GetEpisodes()
 		{
 			return _episodes.GetAll();
 		}
 
-		public IEnumerable<Track> GetTracks()
+		public Task<IEnumerable<Track>> GetTracks()
 		{
 			return _tracks.GetAll();
 		}
 
-		public IEnumerable<Studio> GetStudios()
+		public Task<IEnumerable<Studio>> GetStudios()
 		{
 			return _studios.GetAll();
 		}
 
-		public IEnumerable<People> GetPeoples()
+		public Task<IEnumerable<People>> GetPeoples()
 		{
 			return _people.GetAll();
 		}
 
-		public IEnumerable<Genre> GetGenres()
+		public Task<IEnumerable<Genre>> GetGenres()
 		{
 			return _genres.GetAll();
 		}
 
-		public IEnumerable<Library> SearchLibraries(string searchQuery)
+		public Task<IEnumerable<ProviderID>> GetProviders()
+		{
+			return _providers.GetAll();
+		}
+
+		public Task<IEnumerable<Library>> SearchLibraries(string searchQuery)
 		{
 			return _libraries.Search(searchQuery);
 		}
 
-		public IEnumerable<Collection> SearchCollections(string searchQuery)
+		public Task<IEnumerable<Collection>> SearchCollections(string searchQuery)
 		{
 			return _collections.Search(searchQuery);
 		}
 
-		public IEnumerable<Show> SearchShows(string searchQuery)
+		public Task<IEnumerable<Show>> SearchShows(string searchQuery)
 		{
 			return _shows.Search(searchQuery);
 		}
 
-		public IEnumerable<Season> SearchSeasons(string searchQuery)
+		public Task<IEnumerable<Season>> SearchSeasons(string searchQuery)
 		{
 			return _seasons.Search(searchQuery);
 		}
 
-		public IEnumerable<Episode> SearchEpisodes(string searchQuery)
+		public Task<IEnumerable<Episode>> SearchEpisodes(string searchQuery)
 		{
 			return _episodes.Search(searchQuery);
 		}
 
-		public IEnumerable<Genre> SearchGenres(string searchQuery)
+		public Task<IEnumerable<Genre>> SearchGenres(string searchQuery)
 		{
 			return _genres.Search(searchQuery);
 		}
 
-		public IEnumerable<Studio> SearchStudios(string searchQuery)
+		public Task<IEnumerable<Studio>> SearchStudios(string searchQuery)
 		{
 			return _studios.Search(searchQuery);
 		}
 
-		public IEnumerable<People> SearchPeople(string searchQuery)
+		public Task<IEnumerable<People>> SearchPeople(string searchQuery)
 		{
 			return _people.Search(searchQuery);
 		}
 		
-		public void RegisterLibrary(Library library)
+		public Task RegisterLibrary(Library library)
 		{
-			_libraries.Create(library);
+			return _libraries.Create(library);
 		}
 
-		public void RegisterCollection(Collection collection)
+		public Task RegisterCollection(Collection collection)
 		{
-			_collections.Create(collection);
+			return _collections.Create(collection);
 		}
 
-		public void RegisterShow(Show show)
+		public Task RegisterShow(Show show)
 		{
-			_shows.Create(show);
+			return _shows.Create(show);
 		}
 
-		public void RegisterSeason(Season season)
+		public Task RegisterSeason(Season season)
 		{
-			_seasons.Create(season);
+			return _seasons.Create(season);
 		}
 
-		public void RegisterEpisode(Episode episode)
+		public Task RegisterEpisode(Episode episode)
 		{
-			_episodes.Create(episode);
+			return _episodes.Create(episode);
 		}
 
-		public void RegisterTrack(Track track)
+		public Task RegisterTrack(Track track)
 		{
-			_tracks.Create(track);
+			return _tracks.Create(track);
 		}
 
-		public void RegisterGenre(Genre genre)
+		public Task RegisterGenre(Genre genre)
 		{
-			_genres.Create(genre);
-
+			return _genres.Create(genre);
 		}
 
-		public void RegisterStudio(Studio studio)
+		public Task RegisterStudio(Studio studio)
 		{
-			_studios.Create(studio);
+			return _studios.Create(studio);
 		}
 
-		public void RegisterPeople(People people)
+		public Task RegisterPeople(People people)
 		{
-			_people.Create(people);
+			return _people.Create(people);
 		}
 
-		public void EditLibrary(Library library, bool resetOld)
+		public Task EditLibrary(Library library, bool resetOld)
 		{
-			_libraries.Edit(library, resetOld);
+			return _libraries.Edit(library, resetOld);
 		}
 
-		public void EditCollection(Collection collection, bool resetOld)
+		public Task EditCollection(Collection collection, bool resetOld)
 		{
-			throw new System.NotImplementedException();
+			return _collections.Edit(collection, resetOld);
 		}
 
-		public void EditShow(Show show, bool resetOld)
+		public Task EditShow(Show show, bool resetOld)
 		{
-			throw new System.NotImplementedException();
+			return _shows.Edit(show, resetOld);
 		}
 
-		public void EditSeason(Season season, bool resetOld)
+		public Task EditSeason(Season season, bool resetOld)
 		{
-			throw new System.NotImplementedException();
+			return _seasons.Edit(season, resetOld);
 		}
 
-		public void EditEpisode(Episode episode, bool resetOld)
+		public Task EditEpisode(Episode episode, bool resetOld)
 		{
-			throw new System.NotImplementedException();
+			return _episodes.Edit(episode, resetOld);
 		}
 
-		public void EditTrack(Track track, bool resetOld)
+		public Task EditTrack(Track track, bool resetOld)
 		{
-			throw new System.NotImplementedException();
+			return _tracks.Edit(track, resetOld);
 		}
 
-		public void EditGenre(Genre genre, bool resetOld)
+		public Task EditGenre(Genre genre, bool resetOld)
 		{
-			throw new System.NotImplementedException();
+			return _genres.Edit(genre, resetOld);
 		}
 
-		public void EditStudio(Studio studio, bool resetOld)
+		public Task EditStudio(Studio studio, bool resetOld)
 		{
-			throw new System.NotImplementedException();
+			return _studios.Edit(studio, resetOld);
 		}
 
-		public void EditPeople(People people, bool resetOld)
+		public Task EditPeople(People people, bool resetOld)
 		{
-			throw new System.NotImplementedException();
+			return _people.Edit(people, resetOld);
 		}
 
-		public void DelteLibrary(Library library)
+		public Task DelteLibrary(Library library)
 		{
-			throw new System.NotImplementedException();
+			return _libraries.Delete(library);
 		}
 
-		public void DeleteCollection(Collection collection)
+		public Task DeleteCollection(Collection collection)
 		{
-			throw new System.NotImplementedException();
+			return _collections.Delete(collection);
 		}
 
-		public void DeleteShow(Show show)
+		public Task DeleteShow(Show show)
 		{
-			throw new System.NotImplementedException();
+			return _shows.Delete(show);
 		}
 
-		public void DeleteSeason(Season season)
+		public Task DeleteSeason(Season season)
 		{
-			throw new System.NotImplementedException();
+			return _seasons.Delete(season);
 		}
 
-		public void DeleteEpisode(Episode episode)
+		public Task DeleteEpisode(Episode episode)
 		{
-			throw new System.NotImplementedException();
+			return _episodes.Delete(episode);
 		}
 
-		public void DeleteTrack(Track track)
+		public Task DeleteTrack(Track track)
 		{
-			throw new System.NotImplementedException();
+			return _tracks.Delete(track);
 		}
 
-		public void DeleteGenre(Genre genre)
+		public Task DeleteGenre(Genre genre)
 		{
-			throw new System.NotImplementedException();
+			return _genres.Delete(genre);
 		}
 
-		public void DeleteStudio(Studio studio)
+		public Task DeleteStudio(Studio studio)
 		{
-			throw new System.NotImplementedException();
+			return _studios.Delete(studio);
 		}
 
-		public void DeletePeople(People people)
+		public Task DeletePeople(People people)
 		{
-			throw new System.NotImplementedException();
+			return _people.Delete(people);
 		}
 	}
 }
