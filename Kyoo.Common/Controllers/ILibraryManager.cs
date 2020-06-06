@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Kyoo.Models;
 
 namespace Kyoo.Controllers
@@ -6,70 +7,71 @@ namespace Kyoo.Controllers
 	public interface ILibraryManager
 	{
 		// Get by slug
-		Library GetLibrary(string slug);
-		Collection GetCollection(string slug);
-		Show GetShow(string slug);
-		Season GetSeason(string showSlug, long seasonNumber);
-		Episode GetEpisode(string showSlug, long seasonNumber, long episodeNumber);
-		Episode GetMovieEpisode(string movieSlug);
-		Track GetTrack(string slug);
-		Genre GetGenre(string slug);
-		Studio GetStudio(string slug);
-		People GetPeople(string slug);
+		Task<Library> GetLibrary(string slug);
+		Task<Collection> GetCollection(string slug);
+		Task<Show> GetShow(string slug);
+		Task<Season> GetSeason(string showSlug, long seasonNumber);
+		Task<Episode> GetEpisode(string showSlug, long seasonNumber, long episodeNumber);
+		Task<Episode> GetMovieEpisode(string movieSlug);
+		Task<Track> GetTrack(long episodeID, string language, bool isForced);
+		Task<Genre> GetGenre(string slug);
+		Task<Studio> GetStudio(string slug);
+		Task<People> GetPeople(string slug);
 
 		// Get all
-		IEnumerable<Library> GetLibraries();
-		IEnumerable<Collection> GetCollections();
-		IEnumerable<Show> GetShows();
-		IEnumerable<Season> GetSeasons();
-		IEnumerable<Episode> GetEpisodes();
-		IEnumerable<Track> GetTracks();
-		IEnumerable<Studio> GetStudios();
-		IEnumerable<People> GetPeoples();
-		IEnumerable<Genre> GetGenres();
+		Task<IEnumerable<Library>> GetLibraries();
+		Task<IEnumerable<Collection>> GetCollections();
+		Task<IEnumerable<Show>> GetShows();
+		Task<IEnumerable<Season>> GetSeasons();
+		Task<IEnumerable<Episode>> GetEpisodes();
+		Task<IEnumerable<Track>> GetTracks();
+		Task<IEnumerable<Studio>> GetStudios();
+		Task<IEnumerable<People>> GetPeoples();
+		Task<IEnumerable<Genre>> GetGenres();
+		Task<IEnumerable<ProviderID>> GetProviders();
 
 		// Search
-		IEnumerable<Library> SearchLibraries(string searchQuery);
-		IEnumerable<Collection> SearchCollections(string searchQuery);
-		IEnumerable<Show> SearchShows(string searchQuery);
-		IEnumerable<Season> SearchSeasons(string searchQuery);
-		IEnumerable<Episode> SearchEpisodes(string searchQuery);
-		IEnumerable<Genre> SearchGenres(string searchQuery);
-		IEnumerable<Studio> SearchStudios(string searchQuery);
-		IEnumerable<People> SearchPeople(string searchQuery);
+		Task<IEnumerable<Library>> SearchLibraries(string searchQuery);
+		Task<IEnumerable<Collection>> SearchCollections(string searchQuery);
+		Task<IEnumerable<Show>> SearchShows(string searchQuery);
+		Task<IEnumerable<Season>> SearchSeasons(string searchQuery);
+		Task<IEnumerable<Episode>> SearchEpisodes(string searchQuery);
+		Task<IEnumerable<Genre>> SearchGenres(string searchQuery);
+		Task<IEnumerable<Studio>> SearchStudios(string searchQuery);
+		Task<IEnumerable<People>> SearchPeople(string searchQuery);
 		
 		//Register values
-		void RegisterLibrary(Library library);
-		void RegisterCollection(Collection collection);
-		void RegisterShow(Show show);
-		void RegisterSeason(Season season);
-		void RegisterEpisode(Episode episode);
-		void RegisterTrack(Track track);
-		void RegisterGenre(Genre genre);
-		void RegisterStudio(Studio studio);
-		void RegisterPeople(People people);
+		Task RegisterLibrary(Library library);
+		Task RegisterCollection(Collection collection);
+		Task RegisterShow(Show show);
+		Task RegisterSeason(Season season);
+		Task RegisterEpisode(Episode episode);
+		Task RegisterTrack(Track track);
+		Task RegisterGenre(Genre genre);
+		Task RegisterStudio(Studio studio);
+		Task RegisterPeople(People people);
 		
 		// Edit values
-		void EditLibrary(Library library, bool resetOld);
-		void EditCollection(Collection collection, bool resetOld);
-		void EditShow(Show show, bool resetOld);
-		void EditSeason(Season season, bool resetOld);
-		void EditEpisode(Episode episode, bool resetOld);
-		void EditTrack(Track track, bool resetOld);
-		void EditGenre(Genre genre, bool resetOld);
-		void EditStudio(Studio studio, bool resetOld);
-		void EditPeople(People people, bool resetOld);
+		Task EditLibrary(Library library, bool resetOld);
+		Task EditCollection(Collection collection, bool resetOld);
+		Task EditShow(Show show, bool resetOld);
+		Task EditSeason(Season season, bool resetOld);
+		Task EditEpisode(Episode episode, bool resetOld);
+		Task EditTrack(Track track, bool resetOld);
+		Task EditGenre(Genre genre, bool resetOld);
+		Task EditStudio(Studio studio, bool resetOld);
+		Task EditPeople(People people, bool resetOld);
 
 		
 		// Delete values
-		void DelteLibrary(Library library);
-		void DeleteCollection(Collection collection);
-		void DeleteShow(Show show);
-		void DeleteSeason(Season season);
-		void DeleteEpisode(Episode episode);
-		void DeleteTrack(Track track);
-		void DeleteGenre(Genre genre);
-		void DeleteStudio(Studio studio);
-		void DeletePeople(People people);
+		Task DelteLibrary(Library library);
+		Task DeleteCollection(Collection collection);
+		Task DeleteShow(Show show);
+		Task DeleteSeason(Season season);
+		Task DeleteEpisode(Episode episode);
+		Task DeleteTrack(Track track);
+		Task DeleteGenre(Genre genre);
+		Task DeleteStudio(Studio studio);
+		Task DeletePeople(People people);
 	}
 }
