@@ -22,11 +22,18 @@ namespace Kyoo.Controllers
 	public interface ISeasonRepository : IRepository<Season>
 	{
 		Task<Season> Get(string showSlug, long seasonNumber);
+		
+		Task<IEnumerable<Season>> GetSeasons(long showID);
+		Task<IEnumerable<Season>> GetSeasons(string showSlug);
 	}
 	
 	public interface IEpisodeRepository : IRepository<Episode>
 	{
 		Task<Episode> Get(string showSlug, long seasonNumber, long episodeNumber);
+		
+		Task<IEnumerable<Episode>> GetEpisodes(long showID, long seasonNumber);
+		Task<IEnumerable<Episode>> GetEpisodes(string showSlug, long seasonNumber);
+		Task<IEnumerable<Episode>> GetEpisodes(long seasonID);
 	}
 
 	public interface ITrackRepository : IRepository<Track>

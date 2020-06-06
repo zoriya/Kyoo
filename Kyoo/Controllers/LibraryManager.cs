@@ -61,6 +61,11 @@ namespace Kyoo.Controllers
 			return _episodes.Get(movieSlug);
 		}
 
+		public Task<Track> GetTrack(long id)
+		{
+			return _tracks.Get(id);
+		}
+		
 		public Task<Track> GetTrack(long episodeID, string language, bool isForced)
 		{
 			return _tracks.Get(episodeID, language, isForced);
@@ -129,6 +134,31 @@ namespace Kyoo.Controllers
 		public Task<IEnumerable<ProviderID>> GetProviders()
 		{
 			return _providers.GetAll();
+		}
+
+		public Task<IEnumerable<Season>> GetSeasons(long showID)
+		{
+			return _seasons.GetSeasons(showID);
+		}
+
+		public Task<IEnumerable<Season>> GetSeasons(string showSlug)
+		{
+			return _seasons.GetSeasons(showSlug);
+		}
+
+		public Task<IEnumerable<Episode>> GetEpisodes(long showID, long seasonNumber)
+		{
+			return _episodes.GetEpisodes(showID, seasonNumber);
+		}
+
+		public Task<IEnumerable<Episode>> GetEpisodes(string showSlug, long seasonNumber)
+		{
+			return _episodes.GetEpisodes(showSlug, seasonNumber);
+		}
+
+		public Task<IEnumerable<Episode>> GetEpisodes(long seasonID)
+		{
+			return _episodes.GetEpisodes(seasonID);
 		}
 
 		public Task<IEnumerable<Library>> SearchLibraries(string searchQuery)

@@ -27,9 +27,9 @@ namespace Kyoo.Api
 
 		[HttpGet("{showSlug}-s{seasonNumber}e{episodeNumber}")]
 		[Authorize(Policy="Play")]
-		public IActionResult Index(string showSlug, long seasonNumber, long episodeNumber)
+		public async Task<IActionResult> Index(string showSlug, long seasonNumber, long episodeNumber)
 		{
-			Episode episode = _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
+			Episode episode = await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
 
 			if (episode != null && System.IO.File.Exists(episode.Path))
 				return PhysicalFile(episode.Path, "video/x-matroska", true);
@@ -40,7 +40,7 @@ namespace Kyoo.Api
 		[Authorize(Policy="Play")]
 		public async Task<IActionResult> Transmux(string showSlug, long seasonNumber, long episodeNumber)
 		{
-			Episode episode = _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
+			Episode episode = await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
 
 			if (episode == null || !System.IO.File.Exists(episode.Path))
 				return NotFound();
@@ -63,7 +63,7 @@ namespace Kyoo.Api
 		[Authorize(Policy="Play")]
 		public async Task<IActionResult> Transcode(string showSlug, long seasonNumber, long episodeNumber)
 		{
-			Episode episode = _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
+			Episode episode = await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
 
 			if (episode == null || !System.IO.File.Exists(episode.Path))
 				return NotFound();
@@ -85,9 +85,9 @@ namespace Kyoo.Api
 		
 		[HttpGet("{movieSlug}")]
 		[Authorize(Policy="Play")]
-		public IActionResult Index(string movieSlug)
+		public async Task<IActionResult> Index(string movieSlug)
 		{
-			Episode episode = _libraryManager.GetMovieEpisode(movieSlug);
+			Episode episode = await _libraryManager.GetMovieEpisode(movieSlug);
 
 			if (episode != null && System.IO.File.Exists(episode.Path))
 				return PhysicalFile(episode.Path, "video/webm", true);
@@ -98,7 +98,7 @@ namespace Kyoo.Api
 		[Authorize(Policy="Play")]
 		public async Task<IActionResult> Transmux(string movieSlug)
 		{
-			Episode episode = _libraryManager.GetMovieEpisode(movieSlug);
+			Episode episode = await _libraryManager.GetMovieEpisode(movieSlug);
 
 			if (episode == null || !System.IO.File.Exists(episode.Path))
 				return NotFound();
@@ -112,7 +112,7 @@ namespace Kyoo.Api
 		[Authorize(Policy="Play")]
 		public async Task<IActionResult> Transcode(string movieSlug)
 		{
-			Episode episode = _libraryManager.GetMovieEpisode(movieSlug);
+			Episode episode = await _libraryManager.GetMovieEpisode(movieSlug);
 
 			if (episode == null || !System.IO.File.Exists(episode.Path))
 				return NotFound();

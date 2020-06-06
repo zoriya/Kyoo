@@ -45,7 +45,7 @@ namespace Kyoo.Controllers
 			                                                         && x.SeasonNumber == seasonNumber
 			                                                         && x.EpisodeNumber == episodeNumber);
 		}
-
+		
 		public async Task<IEnumerable<Episode>> Search(string query)
 		{
 			return await _database.Episodes
@@ -118,6 +118,23 @@ namespace Kyoo.Controllers
 		{
 			_database.Episodes.Remove(obj);
 			await _database.SaveChangesAsync();
+		}
+		
+		public async Task<IEnumerable<Episode>> GetEpisodes(long showID, long seasonNumber)
+		{
+			return await _database.Episodes.Where(x => x.ShowID == showID
+			                                     && x.SeasonNumber == seasonNumber).ToListAsync();
+		}
+
+		public async Task<IEnumerable<Episode>> GetEpisodes(string showSlug, long seasonNumber)
+		{
+			return await _database.Episodes.Where(x => x.Show.Slug == showSlug
+			                                           && x.SeasonNumber == seasonNumber).ToListAsync();
+		}
+
+		public async Task<IEnumerable<Episode>> GetEpisodes(long seasonID)
+		{
+			return await _database.Episodes.Where(x => x.SeasonID == seasonID).ToListAsync();
 		}
 	}
 }

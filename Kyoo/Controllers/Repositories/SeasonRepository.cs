@@ -115,5 +115,15 @@ namespace Kyoo.Controllers
 			_database.Seasons.Remove(obj);
 			await _database.SaveChangesAsync();
 		}
+		
+		public async Task<IEnumerable<Season>> GetSeasons(long showID)
+		{
+			return await _database.Seasons.Where(x => x.ShowID == showID).ToListAsync();
+		}
+
+		public async Task<IEnumerable<Season>> GetSeasons(string showSlug)
+		{
+			return await _database.Seasons.Where(x => x.Show.Slug == showSlug).ToListAsync();
+		}
 	}
 }
