@@ -3,6 +3,7 @@ using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Kyoo.Api
@@ -22,15 +23,15 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet]
-		public IEnumerable<Library> GetLibraries()
+		public async Task<IEnumerable<Library>> GetLibraries()
 		{
-			return _libraryManager.GetLibraries();
+			return await _libraryManager.GetLibraries();
 		}
 		
 		[Route("/api/library/create")]
 		[HttpPost]
 		[Authorize(Policy="Admin")]
-		public IActionResult CreateLibrary([FromBody] Library library)
+		public async Task<IActionResult> CreateLibrary([FromBody] Library library)
 		{
 			if (!ModelState.IsValid)
 				return BadRequest(library);
@@ -40,19 +41,18 @@ namespace Kyoo.Api
 				return BadRequest(new {error = "The library's name must be set and not empty"});
 			if (library.Paths == null || !library.Paths.Any())
 				return BadRequest(new {error = "The library should have a least one path."});
-			if (_libraryManager.GetLibrary(library.Slug) != null)
+			if (await _libraryManager.GetLibrary(library.Slug) != null)
 				return BadRequest(new {error = "Duplicated library slug"});
-			_libraryManager.Register(library);
-			_libraryManager.SaveChanges();
+			await _libraryManager.RegisterLibrary(library);
 			_taskManager.StartTask("scan", library.Slug);
 			return Ok();
 		}
 
 		[HttpGet("{librarySlug}")]
 		[Authorize(Policy="Read")]
-		public ActionResult<IEnumerable<Show>> GetShows(string librarySlug)
+		public async Task<ActionResult<IEnumerable<Show>>> GetShows(string librarySlug)
 		{
-			Library library = _libraryManager.GetLibrary(librarySlug);
+			Library library = await _libraryManager.GetLibrary(librarySlug);
 
 			if (library == null)
 				return NotFound();

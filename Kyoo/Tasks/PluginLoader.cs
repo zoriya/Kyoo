@@ -24,9 +24,9 @@ namespace Kyoo.Tasks
 			return Task.CompletedTask;
 		}
 
-		public IEnumerable<string> GetPossibleParameters()
+		public Task<IEnumerable<string>> GetPossibleParameters()
 		{
-			return null;
+			return Task.FromResult<IEnumerable<string>>(null);
 		}
 
 		public int? Progress()

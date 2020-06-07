@@ -62,7 +62,7 @@ namespace Kyoo.Tasks
 				edited.ID = old.ID;
 				edited.Slug = old.Slug;
 				edited.Path = old.Path;
-				await libraryManager.Edit(edited, true);
+				await libraryManager.EditShow(edited, true);
 				await _thumbnailsManager.Validate(edited, true);
 			}
 			if (old.Seasons != null)
@@ -95,7 +95,7 @@ namespace Kyoo.Tasks
 				Library library = _database.LibraryLinks.First(x => x.Show == show && x.Library != null).Library;
 				Season edited = await _providerManager.GetSeason(show, old.SeasonNumber, library);
 				edited.ID = old.ID;
-				await libraryManager.Edit(edited, true);
+				await libraryManager.EditSeason(edited, true);
 				await _thumbnailsManager.Validate(edited, true);
 			}
 			if (old.Episodes != null)
@@ -110,13 +110,13 @@ namespace Kyoo.Tasks
 			Library library = _database.LibraryLinks.First(x => x.Show == show && x.Library != null).Library;
 			Episode edited = await _providerManager.GetEpisode(show, old.Path, old.SeasonNumber, old.EpisodeNumber, old.AbsoluteNumber, library);
 			edited.ID = old.ID;
-			await libraryManager.Edit(edited, true);
+			await libraryManager.EditEpisode(edited, true);
 			await _thumbnailsManager.Validate(edited, true);
 		}
 
-		public IEnumerable<string> GetPossibleParameters()
+		public Task<IEnumerable<string>> GetPossibleParameters()
 		{
-			return default;
+			return Task.FromResult<IEnumerable<string>>(null);
 		}
 
 		public int? Progress()

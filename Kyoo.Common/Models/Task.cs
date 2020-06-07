@@ -14,7 +14,7 @@ namespace Kyoo.Models
 		public bool RunOnStartup { get; }
 		public int Priority { get; }
 		public Task Run(IServiceProvider serviceProvider, CancellationToken cancellationToken, string arguments = null);
-		public IEnumerable<string> GetPossibleParameters();
+		public Task<IEnumerable<string>> GetPossibleParameters();
 		public int? Progress();
 	}
 }

@@ -55,8 +55,8 @@ namespace Kyoo.Models
 
 	public class Track : Stream
 	{
-		[JsonIgnore] public long ID { get; set; }
-		[JsonIgnore] public long EpisodeID { get; set; }
+		[JsonIgnore] public int ID { get; set; }
+		[JsonIgnore] public int EpisodeID { get; set; }
 		public bool IsDefault
 		{
 			get => isDefault;

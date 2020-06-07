@@ -12,7 +12,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "Collections",
                 columns: table => new
                 {
-                    ID = table.Column<long>(nullable: false)
+                    ID = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Slug = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true),
@@ -29,7 +29,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "Genres",
                 columns: table => new
                 {
-                    ID = table.Column<long>(nullable: false)
+                    ID = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Slug = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true)
@@ -43,7 +43,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "Libraries",
                 columns: table => new
                 {
-                    ID = table.Column<long>(nullable: false)
+                    ID = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Slug = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true),
@@ -58,7 +58,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "Peoples",
                 columns: table => new
                 {
-                    ID = table.Column<long>(nullable: false)
+                    ID = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Slug = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true),
@@ -73,7 +73,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "Providers",
                 columns: table => new
                 {
-                    ID = table.Column<long>(nullable: false)
+                    ID = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(nullable: true),
                     Logo = table.Column<string>(nullable: true)
@@ -87,7 +87,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "Studios",
                 columns: table => new
                 {
-                    ID = table.Column<long>(nullable: false)
+                    ID = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Slug = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true)
@@ -101,10 +101,10 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "ProviderLinks",
                 columns: table => new
                 {
-                    ID = table.Column<long>(nullable: false)
+                    ID = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ProviderID = table.Column<long>(nullable: false),
-                    LibraryID = table.Column<long>(nullable: true)
+                    ProviderID = table.Column<int>(nullable: false),
+                    LibraryID = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -127,7 +127,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "Shows",
                 columns: table => new
                 {
-                    ID = table.Column<long>(nullable: false)
+                    ID = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Slug = table.Column<string>(nullable: true),
                     Title = table.Column<string>(nullable: true),
@@ -136,13 +136,13 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     Overview = table.Column<string>(nullable: true),
                     Status = table.Column<int>(nullable: true),
                     TrailerUrl = table.Column<string>(nullable: true),
-                    StartYear = table.Column<long>(nullable: true),
-                    EndYear = table.Column<long>(nullable: true),
+                    StartYear = table.Column<int>(nullable: true),
+                    EndYear = table.Column<int>(nullable: true),
                     Poster = table.Column<string>(nullable: true),
                     Logo = table.Column<string>(nullable: true),
                     Backdrop = table.Column<string>(nullable: true),
                     IsMovie = table.Column<bool>(nullable: false),
-                    StudioID = table.Column<long>(nullable: true)
+                    StudioID = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -159,10 +159,10 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "CollectionLinks",
                 columns: table => new
                 {
-                    ID = table.Column<long>(nullable: false)
+                    ID = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    CollectionID = table.Column<long>(nullable: true),
-                    ShowID = table.Column<long>(nullable: false)
+                    CollectionID = table.Column<int>(nullable: true),
+                    ShowID = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -185,8 +185,8 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "GenreLinks",
                 columns: table => new
                 {
-                    ShowID = table.Column<long>(nullable: false),
-                    GenreID = table.Column<long>(nullable: false)
+                    ShowID = table.Column<int>(nullable: false),
+                    GenreID = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -209,11 +209,11 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "LibraryLinks",
                 columns: table => new
                 {
-                    ID = table.Column<long>(nullable: false)
+                    ID = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    LibraryID = table.Column<long>(nullable: false),
-                    ShowID = table.Column<long>(nullable: true),
-                    CollectionID = table.Column<long>(nullable: true)
+                    LibraryID = table.Column<int>(nullable: false),
+                    ShowID = table.Column<int>(nullable: true),
+                    CollectionID = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -242,10 +242,10 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "PeopleLinks",
                 columns: table => new
                 {
-                    ID = table.Column<long>(nullable: false)
+                    ID = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    PeopleID = table.Column<long>(nullable: false),
-                    ShowID = table.Column<long>(nullable: false),
+                    PeopleID = table.Column<int>(nullable: false),
+                    ShowID = table.Column<int>(nullable: false),
                     Role = table.Column<string>(nullable: true),
                     Type = table.Column<string>(nullable: true)
                 },
@@ -270,13 +270,13 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "Seasons",
                 columns: table => new
                 {
-                    ID = table.Column<long>(nullable: false)
+                    ID = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ShowID = table.Column<long>(nullable: false),
-                    SeasonNumber = table.Column<long>(nullable: false),
+                    ShowID = table.Column<int>(nullable: false),
+                    SeasonNumber = table.Column<int>(nullable: false),
                     Title = table.Column<string>(nullable: true),
                     Overview = table.Column<string>(nullable: true),
-                    Year = table.Column<long>(nullable: true),
+                    Year = table.Column<int>(nullable: true),
                     ImgPrimary = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -294,18 +294,18 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "Episodes",
                 columns: table => new
                 {
-                    ID = table.Column<long>(nullable: false)
+                    ID = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ShowID = table.Column<long>(nullable: false),
-                    SeasonID = table.Column<long>(nullable: true),
-                    SeasonNumber = table.Column<long>(nullable: false),
-                    EpisodeNumber = table.Column<long>(nullable: false),
-                    AbsoluteNumber = table.Column<long>(nullable: false),
+                    ShowID = table.Column<int>(nullable: false),
+                    SeasonID = table.Column<int>(nullable: true),
+                    SeasonNumber = table.Column<int>(nullable: false),
+                    EpisodeNumber = table.Column<int>(nullable: false),
+                    AbsoluteNumber = table.Column<int>(nullable: false),
                     Path = table.Column<string>(nullable: true),
                     Title = table.Column<string>(nullable: true),
                     Overview = table.Column<string>(nullable: true),
                     ReleaseDate = table.Column<DateTime>(nullable: true),
-                    Runtime = table.Column<long>(nullable: false),
+                    Runtime = table.Column<int>(nullable: false),
                     ImgPrimary = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -329,13 +329,13 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "MetadataIds",
                 columns: table => new
                 {
-                    ID = table.Column<long>(nullable: false)
+                    ID = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ProviderID = table.Column<long>(nullable: false),
-                    ShowID = table.Column<long>(nullable: true),
-                    EpisodeID = table.Column<long>(nullable: true),
-                    SeasonID = table.Column<long>(nullable: true),
-                    PeopleID = table.Column<long>(nullable: true),
+                    ProviderID = table.Column<int>(nullable: false),
+                    ShowID = table.Column<int>(nullable: true),
+                    EpisodeID = table.Column<int>(nullable: true),
+                    SeasonID = table.Column<int>(nullable: true),
+                    PeopleID = table.Column<int>(nullable: true),
                     DataID = table.Column<string>(nullable: true),
                     Link = table.Column<string>(nullable: true)
                 },
@@ -378,14 +378,14 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "Tracks",
                 columns: table => new
                 {
-                    ID = table.Column<long>(nullable: false)
+                    ID = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Title = table.Column<string>(nullable: true),
                     Language = table.Column<string>(nullable: true),
                     Codec = table.Column<string>(nullable: true),
                     Path = table.Column<string>(nullable: true),
                     Type = table.Column<int>(nullable: false),
-                    EpisodeID = table.Column<long>(nullable: false),
+                    EpisodeID = table.Column<int>(nullable: false),
                     IsDefault = table.Column<bool>(nullable: false),
                     IsForced = table.Column<bool>(nullable: false),
                     IsExternal = table.Column<bool>(nullable: false)

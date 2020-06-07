@@ -1,4 +1,5 @@
-﻿using Kyoo.Controllers;
+﻿using System.Threading.Tasks;
+using Kyoo.Controllers;
 using Kyoo.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,9 +19,9 @@ namespace Kyoo.Api
 
 		[HttpGet("{showSlug}-s{seasonNumber}e{episodeNumber}")]
 		[Authorize(Policy="Read")]
-		public ActionResult<WatchItem> Index(string showSlug, long seasonNumber, long episodeNumber)
+		public async Task<ActionResult<WatchItem>> Index(string showSlug, int seasonNumber, int episodeNumber)
 		{
-			Episode item = _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
+			Episode item = await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
 
 			if(item == null)
 				return NotFound();
@@ -30,9 +31,9 @@ namespace Kyoo.Api
 		
 		[HttpGet("{movieSlug}")]
 		[Authorize(Policy="Read")]
-		public ActionResult<WatchItem> Index(string movieSlug)
+		public async Task<ActionResult<WatchItem>> Index(string movieSlug)
 		{
-			Episode item = _libraryManager.GetMovieEpisode(movieSlug);
+			Episode item = await _libraryManager.GetMovieEpisode(movieSlug);
 
 			if(item == null)
 				return NotFound();

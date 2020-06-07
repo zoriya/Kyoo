@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Kyoo.Models.Attributes;
 using Newtonsoft.Json;
@@ -8,7 +7,7 @@ namespace Kyoo.Models
 {
 	public class Library
 	{
-		[JsonIgnore] public long ID { get; set; }
+		[JsonIgnore] public int ID { get; set; }
 		public string Slug { get; set; }
 		public string Name { get; set; }
 		public IEnumerable<string> Paths { get; set; }

@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -19,9 +20,9 @@ namespace Kyoo.Api
 
 		[HttpGet("{peopleSlug}")]
 		[Authorize(Policy="Read")]
-		public ActionResult<Collection> GetPeople(string peopleSlug)
+		public async Task<ActionResult<Collection>> GetPeople(string peopleSlug)
 		{
-			People people = _libraryManager.GetPeople(peopleSlug);
+			People people = await _libraryManager.GetPeople(peopleSlug);
 
 			if (people == null)
 				return NotFound();
