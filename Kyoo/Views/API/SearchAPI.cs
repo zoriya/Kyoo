@@ -1,4 +1,5 @@
-﻿using Kyoo.Controllers;
+﻿using System.Threading.Tasks;
+using Kyoo.Controllers;
 using Kyoo.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,17 +19,17 @@ namespace Kyoo.Api
 
 		[HttpGet("{query}")]
 		[Authorize(Policy="Read")]
-		public ActionResult<SearchResult> Search(string query)
+		public async Task<ActionResult<SearchResult>> Search(string query)
 		{
 			SearchResult result = new SearchResult
 			{
 				Query = query,
-				Collections = _libraryManager.SearchCollections(query),
-				Shows = _libraryManager.SearchShows(query),
-				Episodes = _libraryManager.SearchEpisodes(query),
-				People = _libraryManager.SearchPeople(query),
-				Genres = _libraryManager.SearchGenres(query),
-				Studios = _libraryManager.SearchStudios(query)
+				Collections = await _libraryManager.SearchCollections(query),
+				Shows = await _libraryManager.SearchShows(query),
+				Episodes = await _libraryManager.SearchEpisodes(query),
+				People = await _libraryManager.SearchPeople(query),
+				Genres = await _libraryManager.SearchGenres(query),
+				Studios = await _libraryManager.SearchStudios(query)
 			};
 			return result;
 		}

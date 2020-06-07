@@ -113,13 +113,14 @@ namespace Kyoo.Controllers
 			});
 		}
 
-		public async Task<Season> GetSeason(Show show, long seasonNumber, Library library)
+		public async Task<Season> GetSeason(Show show, int seasonNumber, Library library)
 		{
 			Season season = await GetMetadata(
 				provider => provider.GetSeason(show, seasonNumber), 
 				library, 
 				$"the season {seasonNumber} of {show.Title}");
 			season.Show = show;
+			season.ShowID = show.ID;
 			season.SeasonNumber = season.SeasonNumber == -1 ? seasonNumber : season.SeasonNumber;
 			season.Title ??= $"Season {season.SeasonNumber}";
 			return season;
@@ -127,9 +128,9 @@ namespace Kyoo.Controllers
 
 		public async Task<Episode> GetEpisode(Show show, 
 			string episodePath,
-			long seasonNumber, 
-			long episodeNumber,
-			long absoluteNumber,
+			int seasonNumber, 
+			int episodeNumber,
+			int absoluteNumber,
 			Library library)
 		{
 			Episode episode = await GetMetadata(
@@ -137,6 +138,7 @@ namespace Kyoo.Controllers
 				library, 
 				"an episode");
 			episode.Show = show;
+			episode.ShowID = show.ID;
 			episode.Path = episodePath;
 			episode.SeasonNumber = episode.SeasonNumber != -1 ? episode.SeasonNumber : seasonNumber;
 			episode.EpisodeNumber = episode.EpisodeNumber != -1 ? episode.EpisodeNumber : episodeNumber;
@@ -155,6 +157,7 @@ namespace Kyoo.Controllers
 				.Select(x =>
 				{
 					x.Show = show;
+					x.ShowID = show.ID;
 					return x;
 				}).ToList();
 		}
