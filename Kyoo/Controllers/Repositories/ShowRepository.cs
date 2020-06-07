@@ -60,6 +60,15 @@ namespace Kyoo.Controllers
 
 			await Validate(obj);
 			_database.Entry(obj).State = EntityState.Added;
+			if (obj.GenreLinks != null)
+				foreach (GenreLink entry in obj.GenreLinks)
+					_database.Entry(entry).State = EntityState.Added;
+			if (obj.People != null)
+				foreach (PeopleLink entry in obj.People)
+					_database.Entry(entry).State = EntityState.Added;
+			if (obj.ExternalIDs != null)
+				foreach (MetadataID entry in obj.ExternalIDs)
+					_database.Entry(entry).State = EntityState.Added;
 			await _database.SaveChangesAsync();
 			return obj.ID;
 		}

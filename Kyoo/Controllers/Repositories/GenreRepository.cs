@@ -58,7 +58,7 @@ namespace Kyoo.Controllers
 
 			Genre old = await Get(obj.Slug);
 			if (old != null)
-				return obj.ID;
+				return old.ID;
 			return await Create(obj);
 		}
 
