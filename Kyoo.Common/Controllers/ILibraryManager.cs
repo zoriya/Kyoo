@@ -11,27 +11,27 @@ namespace Kyoo.Controllers
 		Task<Library> GetLibrary(string slug);
 		Task<Collection> GetCollection(string slug);
 		Task<Show> GetShow(string slug);
-		Task<Season> GetSeason(string showSlug, long seasonNumber);
-		Task<Episode> GetEpisode(string showSlug, long seasonNumber, long episodeNumber);
+		Task<Season> GetSeason(string showSlug, int seasonNumber);
+		Task<Episode> GetEpisode(string showSlug, int seasonNumber, int episodeNumber);
 		Task<Episode> GetMovieEpisode(string movieSlug);
-		Task<Track> GetTrack(long id);
-		Task<Track> GetTrack(long episodeID, string language, bool isForced);
+		Task<Track> GetTrack(int id);
+		Task<Track> GetTrack(int episodeID, string language, bool isForced);
 		Task<Genre> GetGenre(string slug);
 		Task<Studio> GetStudio(string slug);
 		Task<People> GetPeople(string slug);
 
 		// Get by relations
-		Task<ICollection<Season>> GetSeasons(long showID);
+		Task<ICollection<Season>> GetSeasons(int showID);
 		Task<ICollection<Season>> GetSeasons(string showSlug);
 		
-		Task<ICollection<Episode>> GetEpisodes(long showID, long seasonNumber);
-		Task<ICollection<Episode>> GetEpisodes(string showSlug, long seasonNumber);
-		Task<ICollection<Episode>> GetEpisodes(long seasonID);
+		Task<ICollection<Episode>> GetEpisodes(int showID, int seasonNumber);
+		Task<ICollection<Episode>> GetEpisodes(string showSlug, int seasonNumber);
+		Task<ICollection<Episode>> GetEpisodes(int seasonID);
 		
 		
 		// Helpers
 		Task<Show> GetShowByPath(string path);
-		Task AddShowLink(long showID, long? libraryID, long? collectionID);
+		Task AddShowLink(int showID, int? libraryID, int? collectionID);
 		Task AddShowLink([NotNull] Show show, Library library, Collection collection);
 		
 		// Get all

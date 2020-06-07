@@ -21,7 +21,7 @@ namespace Kyoo.Api
 
 		[HttpGet("{showSlug}/season/{seasonNumber}")]
 		[Authorize(Policy="Read")]
-		public async Task<ActionResult<IEnumerable<Episode>>> GetEpisodesForSeason(string showSlug, long seasonNumber)
+		public async Task<ActionResult<IEnumerable<Episode>>> GetEpisodesForSeason(string showSlug, int seasonNumber)
 		{
 			IEnumerable<Episode> episodes = await _libraryManager.GetEpisodes(showSlug, seasonNumber);
 
@@ -34,7 +34,7 @@ namespace Kyoo.Api
 		[HttpGet("{showSlug}/season/{seasonNumber}/episode/{episodeNumber}")]
 		[Authorize(Policy="Read")]
 		[JsonDetailed]
-		public async Task<ActionResult<Episode>> GetEpisode(string showSlug, long seasonNumber, long episodeNumber)
+		public async Task<ActionResult<Episode>> GetEpisode(string showSlug, int seasonNumber, int episodeNumber)
 		{
 			Episode episode = await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
 

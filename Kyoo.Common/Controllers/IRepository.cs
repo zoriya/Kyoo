@@ -7,12 +7,12 @@ namespace Kyoo.Controllers
 {
 	public interface IRepository<T>
 	{
-		Task<T> Get(long id);
+		Task<T> Get(int id);
 		Task<T> Get(string slug);
 		Task<ICollection<T>> Search(string query);
 		Task<ICollection<T>> GetAll();
-		Task<long> Create([NotNull] T obj);
-		Task<long> CreateIfNotExists([NotNull] T obj);
+		Task<int> Create([NotNull] T obj);
+		Task<int> CreateIfNotExists([NotNull] T obj);
 		Task Edit([NotNull] T edited, bool resetOld);
 		Task Delete(T obj);
 	}
@@ -20,29 +20,29 @@ namespace Kyoo.Controllers
 	public interface IShowRepository : IRepository<Show>
 	{
 		Task<Show> GetByPath(string path);
-		Task AddShowLink(long showID, long? libraryID, long? collectionID);
+		Task AddShowLink(int showID, int? libraryID, int? collectionID);
 	}
 
 	public interface ISeasonRepository : IRepository<Season>
 	{
-		Task<Season> Get(string showSlug, long seasonNumber);
+		Task<Season> Get(string showSlug, int seasonNumber);
 		
-		Task<ICollection<Season>> GetSeasons(long showID);
+		Task<ICollection<Season>> GetSeasons(int showID);
 		Task<ICollection<Season>> GetSeasons(string showSlug);
 	}
 	
 	public interface IEpisodeRepository : IRepository<Episode>
 	{
-		Task<Episode> Get(string showSlug, long seasonNumber, long episodeNumber);
+		Task<Episode> Get(string showSlug, int seasonNumber, int episodeNumber);
 		
-		Task<ICollection<Episode>> GetEpisodes(long showID, long seasonNumber);
-		Task<ICollection<Episode>> GetEpisodes(string showSlug, long seasonNumber);
-		Task<ICollection<Episode>> GetEpisodes(long seasonID);
+		Task<ICollection<Episode>> GetEpisodes(int showID, int seasonNumber);
+		Task<ICollection<Episode>> GetEpisodes(string showSlug, int seasonNumber);
+		Task<ICollection<Episode>> GetEpisodes(int seasonID);
 	}
 
 	public interface ITrackRepository : IRepository<Track>
 	{
-		Task<Track> Get(long episodeID, string languageTag, bool isForced);
+		Task<Track> Get(int episodeID, string languageTag, bool isForced);
 	}
 	public interface ILibraryRepository : IRepository<Library> {}
 	public interface ICollectionRepository : IRepository<Collection> {}

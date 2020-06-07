@@ -7,7 +7,7 @@ namespace Kyoo.Models
 {
 	public class Collection
 	{
-		[JsonIgnore] public long ID { get; set; }
+		[JsonIgnore] public int ID { get; set; }
 		public string Slug { get; set; }
 		public string Name { get; set; }
 		public string Poster { get; set; }

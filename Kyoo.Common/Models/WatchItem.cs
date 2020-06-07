@@ -7,12 +7,12 @@ namespace Kyoo.Models
 {
 	public class WatchItem
 	{
-		[JsonIgnore] public readonly long EpisodeID = -1;
+		[JsonIgnore] public readonly int EpisodeID = -1;
 
 		public string ShowTitle;
 		public string ShowSlug;
-		public long SeasonNumber;
-		public long EpisodeNumber;
+		public int SeasonNumber;
+		public int EpisodeNumber;
 		public string Title;
 		public string Link;
 		public DateTime? ReleaseDate;
@@ -28,11 +28,11 @@ namespace Kyoo.Models
 
 		public WatchItem() { }
 
-		public WatchItem(long episodeID, 
+		public WatchItem(int episodeID, 
 			string showTitle,
 			string showSlug,
-			long seasonNumber,
-			long episodeNumber,
+			int seasonNumber,
+			int episodeNumber,
 			string title, 
 			DateTime? releaseDate,
 			string path)
@@ -50,11 +50,11 @@ namespace Kyoo.Models
 			Link = Episode.GetSlug(ShowSlug, seasonNumber, episodeNumber);
 		}
 
-		public WatchItem(long episodeID,
+		public WatchItem(int episodeID,
 			string showTitle,
 			string showSlug, 
-			long seasonNumber, 
-			long episodeNumber, 
+			int seasonNumber, 
+			int episodeNumber, 
 			string title, 
 			DateTime? releaseDate, 
 			string path, 

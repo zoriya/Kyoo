@@ -7,7 +7,7 @@ namespace Kyoo.Models
 {
 	public class Show : IOnMerge
 	{
-		[JsonIgnore] public long ID { get; set; }
+		[JsonIgnore] public int ID { get; set; }
 
 		public string Slug { get; set; }
 		public string Title { get; set; }
@@ -17,8 +17,8 @@ namespace Kyoo.Models
 		public Status? Status { get; set; }
 		public string TrailerUrl { get; set; }
 
-		public long? StartYear { get; set; }
-		public long? EndYear { get; set; }
+		public int? StartYear { get; set; }
+		public int? EndYear { get; set; }
 
 		public string Poster { get; set; }
 		public string Logo { get; set; }
@@ -36,7 +36,7 @@ namespace Kyoo.Models
 			set => GenreLinks = value?.Select(x => new GenreLink(this, x)).ToList();
 		}
 		[NotMergable] [JsonIgnore] public virtual IEnumerable<GenreLink> GenreLinks { get; set; }
-		[JsonIgnore] public long StudioID { get; set; }
+		[JsonIgnore] public int? StudioID { get; set; }
 		public virtual Studio Studio { get; set; }
 		[JsonIgnore] public virtual IEnumerable<PeopleLink> People { get; set; }
 		[JsonIgnore] public virtual IEnumerable<Season> Seasons { get; set; }
@@ -51,8 +51,8 @@ namespace Kyoo.Models
 			string trailerUrl,
 			IEnumerable<Genre> genres,
 			Status? status,
-			long? startYear,
-			long? endYear,
+			int? startYear,
+			int? endYear,
 			IEnumerable<MetadataID> externalIDs)
 		{
 			Slug = slug;
@@ -76,8 +76,8 @@ namespace Kyoo.Models
 			string overview, 
 			string trailerUrl,
 			Status? status, 
-			long? startYear,
-			long? endYear,
+			int? startYear,
+			int? endYear,
 			string poster,
 			string logo, 
 			string backdrop,

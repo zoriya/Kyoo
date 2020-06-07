@@ -5,29 +5,30 @@ using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
 	public class LibraryRepository : ILibraryRepository
 	{
 		private readonly DatabaseContext _database;
-		private readonly IProviderRepository _providers;
+		private readonly IServiceProvider _serviceProvider;
 
 
-		public LibraryRepository(DatabaseContext database, IProviderRepository providers)
+		public LibraryRepository(DatabaseContext database, IServiceProvider serviceProvider)
 		{
 			_database = database;
-			_providers = providers;
+			_serviceProvider = serviceProvider;
 		}
 		
-		public Task<Library> Get(long id)
+		public Task<Library> Get(int id)
 		{
 			return _database.Libraries.FirstOrDefaultAsync(x => x.ID == id);
 		}
 		
 		public Task<Library> Get(string slug)
 		{
-			return _database.Libraries.FirstOrDefaultAsync(x => x.Name == slug);
+			return _database.Libraries.FirstOrDefaultAsync(x => x.Slug == slug);
 		}
 
 		public async Task<ICollection<Library>> Search(string query)
@@ -43,19 +44,19 @@ namespace Kyoo.Controllers
 			return await _database.Libraries.ToListAsync();
 		}
 
-		public async Task<long> Create(Library obj)
+		public async Task<int> Create(Library obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
 			obj.Links = null;
 			await Validate(obj);
-			await _database.Libraries.AddAsync(obj);
+			_database.Entry(obj).State = EntityState.Added;
 			await _database.SaveChangesAsync();
 			return obj.ID;
 		}
 		
-		public async Task<long> CreateIfNotExists(Library obj)
+		public async Task<int> CreateIfNotExists(Library obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -87,7 +88,10 @@ namespace Kyoo.Controllers
 		{
 			obj.ProviderLinks = (await Task.WhenAll(obj.ProviderLinks.Select(async x =>
 			{
-				x.ProviderID = await _providers.CreateIfNotExists(x.Provider);
+				using IServiceScope serviceScope = _serviceProvider.CreateScope();
+				IProviderRepository providers = serviceScope.ServiceProvider.GetService<IProviderRepository>();
+				
+				x.ProviderID = await providers.CreateIfNotExists(x.Provider);
 				return x;
 			}))).ToList();
 		}

@@ -43,7 +43,7 @@ namespace Kyoo.Api
 				string idString = identifier.IndexOf('-') != -1 
 					? identifier.Substring(0, identifier.IndexOf('-')) 
 					: identifier;
-				long.TryParse(idString, out long id);
+				int.TryParse(idString, out int id);
 				subtitle = await _libraryManager.GetTrack(id);
 			}
 			

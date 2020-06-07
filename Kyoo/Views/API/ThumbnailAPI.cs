@@ -77,7 +77,7 @@ namespace Kyoo.Api
 
 		[HttpGet("thumb/{showSlug}-s{seasonNumber}e{episodeNumber}")]
 		[Authorize(Policy="Read")]
-		public async Task<IActionResult> GetEpisodeThumb(string showSlug, long seasonNumber, long episodeNumber)
+		public async Task<IActionResult> GetEpisodeThumb(string showSlug, int seasonNumber, int episodeNumber)
 		{
 			string path = (await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber))?.Path;
 			if (path == null)

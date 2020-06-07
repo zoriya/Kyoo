@@ -5,22 +5,23 @@ using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
 	public class EpisodeRepository : IEpisodeRepository
 	{
 		private readonly DatabaseContext _database;
-		private readonly IProviderRepository _providers;
+		private readonly IServiceProvider _serviceProvider;
 
 
-		public EpisodeRepository(DatabaseContext database, IProviderRepository providers)
+		public EpisodeRepository(DatabaseContext database, IServiceProvider serviceProvider)
 		{
 			_database = database;
-			_providers = providers;
+			_serviceProvider = serviceProvider;
 		}
 		
-		public async Task<Episode> Get(long id)
+		public async Task<Episode> Get(int id)
 		{
 			return await _database.Episodes.FirstOrDefaultAsync(x => x.ID == id);
 		}
@@ -32,14 +33,14 @@ namespace Kyoo.Controllers
 			if (sIndex == -1 || eIndex == -1 || eIndex < sIndex)
 				throw new InvalidOperationException("Invalid episode slug. Format: {showSlug}-s{seasonNumber}-e{episodeNumber}");
 			string showSlug = slug.Substring(0, sIndex);
-			if (!long.TryParse(slug.Substring(sIndex + 2), out long seasonNumber))
+			if (!int.TryParse(slug.Substring(sIndex + 2), out int seasonNumber))
 				throw new InvalidOperationException("Invalid episode slug. Format: {showSlug}-s{seasonNumber}-e{episodeNumber}");
-			if (!long.TryParse(slug.Substring(eIndex + 2), out long episodeNumber))
+			if (!int.TryParse(slug.Substring(eIndex + 2), out int episodeNumber))
 				throw new InvalidOperationException("Invalid episode slug. Format: {showSlug}-s{seasonNumber}-e{episodeNumber}");
 			return Get(showSlug, seasonNumber, episodeNumber);
 		}
 		
-		public async Task<Episode> Get(string showSlug, long seasonNumber, long episodeNumber)
+		public async Task<Episode> Get(string showSlug, int seasonNumber, int episodeNumber)
 		{
 			return await _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == showSlug 
 			                                                         && x.SeasonNumber == seasonNumber
@@ -59,7 +60,7 @@ namespace Kyoo.Controllers
 			return await _database.Episodes.ToListAsync();
 		}
 
-		public async Task<long> Create(Episode obj)
+		public async Task<int> Create(Episode obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -70,7 +71,7 @@ namespace Kyoo.Controllers
 			return obj.ID;
 		}
 		
-		public async Task<long> CreateIfNotExists(Episode obj)
+		public async Task<int> CreateIfNotExists(Episode obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -104,11 +105,17 @@ namespace Kyoo.Controllers
 			if (obj.ShowID <= 0)
 				throw new InvalidOperationException($"Can't store an episode not related to any show (showID: {obj.ShowID}).");
 
-			obj.ExternalIDs = (await Task.WhenAll(obj.ExternalIDs.Select(async x =>
+			if (obj.ExternalIDs != null)
 			{
-				x.ProviderID = await _providers.CreateIfNotExists(x.Provider);
-				return x;
-			}))).ToList();
+				obj.ExternalIDs = (await Task.WhenAll(obj.ExternalIDs.Select(async x =>
+				{
+					using IServiceScope serviceScope = _serviceProvider.CreateScope();
+					IProviderRepository providers = serviceScope.ServiceProvider.GetService<IProviderRepository>();
+
+					x.ProviderID = await providers.CreateIfNotExists(x.Provider);
+					return x;
+				}))).ToList();
+			}
 		}
 		
 		public async Task Delete(Episode obj)
@@ -117,19 +124,19 @@ namespace Kyoo.Controllers
 			await _database.SaveChangesAsync();
 		}
 		
-		public async Task<ICollection<Episode>> GetEpisodes(long showID, long seasonNumber)
+		public async Task<ICollection<Episode>> GetEpisodes(int showID, int seasonNumber)
 		{
 			return await _database.Episodes.Where(x => x.ShowID == showID
 			                                     && x.SeasonNumber == seasonNumber).ToListAsync();
 		}
 
-		public async Task<ICollection<Episode>> GetEpisodes(string showSlug, long seasonNumber)
+		public async Task<ICollection<Episode>> GetEpisodes(string showSlug, int seasonNumber)
 		{
 			return await _database.Episodes.Where(x => x.Show.Slug == showSlug
 			                                           && x.SeasonNumber == seasonNumber).ToListAsync();
 		}
 
-		public async Task<ICollection<Episode>> GetEpisodes(long seasonID)
+		public async Task<ICollection<Episode>> GetEpisodes(int seasonID)
 		{
 			return await _database.Episodes.Where(x => x.SeasonID == seasonID).ToListAsync();
 		}

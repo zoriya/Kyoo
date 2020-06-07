@@ -17,7 +17,7 @@ namespace Kyoo.Controllers
 			_database = database;
 		}
 		
-		public async Task<Track> Get(long id)
+		public async Task<Track> Get(int id)
 		{
 			return await _database.Tracks.FirstOrDefaultAsync(x => x.ID == id);
 		}
@@ -27,7 +27,7 @@ namespace Kyoo.Controllers
 			throw new InvalidOperationException("Tracks do not support the get by slug method.");
 		}
 
-		public Task<Track> Get(long episodeID, string languageTag, bool isForced)
+		public Task<Track> Get(int episodeID, string languageTag, bool isForced)
 		{
 			return _database.Tracks.FirstOrDefaultAsync(x => x.EpisodeID == episodeID
 			                                                       && x.Language == languageTag
@@ -44,7 +44,7 @@ namespace Kyoo.Controllers
 			return await _database.Tracks.ToListAsync();
 		}
 
-		public async Task<long> Create(Track obj)
+		public async Task<int> Create(Track obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -58,7 +58,7 @@ namespace Kyoo.Controllers
 			return obj.ID;
 		}
 		
-		public Task<long> CreateIfNotExists(Track obj)
+		public Task<int> CreateIfNotExists(Track obj)
 		{
 			return Create(obj);
 		}

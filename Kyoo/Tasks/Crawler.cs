@@ -134,9 +134,9 @@ namespace Kyoo.Controllers
 			string showPath = Path.GetDirectoryName(path);
 			string collectionName = match.Groups["Collection"]?.Value;
 			string showName = match.Groups["ShowTitle"].Value;
-			long seasonNumber = long.TryParse(match.Groups["Season"].Value, out long tmp) ? tmp : -1;
-			long episodeNumber = long.TryParse(match.Groups["Episode"].Value, out tmp) ? tmp : -1;
-			long absoluteNumber = long.TryParse(match.Groups["Absolute"].Value, out tmp) ? tmp : -1;
+			int seasonNumber = int.TryParse(match.Groups["Season"].Value, out int tmp) ? tmp : -1;
+			int episodeNumber = int.TryParse(match.Groups["Episode"].Value, out tmp) ? tmp : -1;
+			int absoluteNumber = int.TryParse(match.Groups["Absolute"].Value, out tmp) ? tmp : -1;
 
 			Collection collection = await GetCollection(libraryManager, collectionName, library);
 			bool isMovie = seasonNumber == -1 && episodeNumber == -1 && absoluteNumber == -1;
@@ -188,7 +188,7 @@ namespace Kyoo.Controllers
 
 		private async Task<Season> GetSeason(ILibraryManager libraryManager, 
 			Show show, 
-			long seasonNumber, 
+			int seasonNumber, 
 			Library library)
 		{
 			if (seasonNumber == -1)
@@ -207,8 +207,8 @@ namespace Kyoo.Controllers
 		private async Task<Episode> GetEpisode(ILibraryManager libraryManager, 
 			Show show, 
 			Season season,
-			long episodeNumber,
-			long absoluteNumber, 
+			int episodeNumber,
+			int absoluteNumber, 
 			string episodePath, 
 			Library library)
 		{
@@ -221,6 +221,7 @@ namespace Kyoo.Controllers
 			
 			season ??= await GetSeason(libraryManager, show, episode.SeasonNumber, library);
 			episode.Season = season;
+			episode.SeasonID = season?.ID;
 			if (season == null)
 			{
 				await Console.Error.WriteLineAsync("Error: You don't have any provider that support absolute epiode numbering. Install one and try again.");
@@ -234,7 +235,13 @@ namespace Kyoo.Controllers
 
 		private async Task<Episode> GetMovie(Show show, string episodePath)
 		{
-			Episode episode = new Episode {Title = show.Title, Path = episodePath, Show = show};
+			Episode episode = new Episode
+			{
+				Title = show.Title,
+				Path = episodePath,
+				Show = show,
+				ShowID = show.ID
+			};
 			episode.Tracks = await GetTracks(episode);
 			return episode;
 		}
