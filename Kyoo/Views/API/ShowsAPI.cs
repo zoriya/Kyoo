@@ -37,7 +37,10 @@ namespace Kyoo.Api
 		[Authorize(Policy="Read")]
 		public IEnumerable<Show> GetShows()
 		{
-			return _database.LibraryLinks.AsEnumerable().Select(x => x.Show ?? x.Collection.AsShow());
+			return _database.LibraryLinks
+				.Include(x => x.Show)
+				.Include(x => x.Collection)
+				.AsEnumerable().Select(x => x.Show ?? x.Collection.AsShow()).ToList();
 		}
 
 		[HttpGet("{slug}")]

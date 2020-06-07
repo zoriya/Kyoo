@@ -49,9 +49,11 @@ namespace Kyoo.Controllers
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
-			obj.Links = null;
 			await Validate(obj);
 			_database.Entry(obj).State = EntityState.Added;
+			if (obj.ProviderLinks != null)
+				foreach (ProviderLink entry in obj.ProviderLinks)
+					_database.Entry(entry).State = EntityState.Added;
 			await _database.SaveChangesAsync();
 			return obj.ID;
 		}

@@ -5,18 +5,19 @@ using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
 	public class PeopleRepository : IPeopleRepository
 	{
 		private readonly DatabaseContext _database;
-		private readonly IProviderRepository _providers;
+		private readonly IServiceProvider _serviceProvider;
 
-		public PeopleRepository(DatabaseContext database, IProviderRepository providers)
+		public PeopleRepository(DatabaseContext database, IServiceProvider serviceProvider)
 		{
 			_database = database;
-			_providers = providers;
+			_serviceProvider = serviceProvider;
 		}
 
 		public Task<People> Get(int id)
@@ -48,9 +49,10 @@ namespace Kyoo.Controllers
 				throw new ArgumentNullException(nameof(obj));
 			
 			await Validate(obj);
-			obj.Roles = null;
-			
-			await _database.Peoples.AddAsync(obj);
+			_database.Entry(obj).State = EntityState.Added;
+			if (obj.ExternalIDs != null)
+				foreach (MetadataID entry in obj.ExternalIDs)
+					_database.Entry(entry).State = EntityState.Added;
 			await _database.SaveChangesAsync();
 			return obj.ID;
 		}
@@ -87,7 +89,10 @@ namespace Kyoo.Controllers
 		{
 			obj.ExternalIDs = (await Task.WhenAll(obj.ExternalIDs.Select(async x =>
 			{
-				x.ProviderID = await _providers.CreateIfNotExists(x.Provider);
+				using IServiceScope serviceScope = _serviceProvider.CreateScope();
+				IProviderRepository providers = serviceScope.ServiceProvider.GetService<IProviderRepository>();
+				
+				x.ProviderID = await providers.CreateIfNotExists(x.Provider);
 				return x;
 			}))).ToList();
 		}
