@@ -66,7 +66,10 @@ namespace Kyoo.Controllers
 				throw new ArgumentNullException(nameof(obj));
 			
 			await Validate(obj);
-			await _database.Episodes.AddAsync(obj);
+			_database.Entry(obj).State = EntityState.Added;
+			if (obj.ExternalIDs != null)
+				foreach (MetadataID entry in obj.ExternalIDs)
+					_database.Entry(entry).State = EntityState.Added;
 			await _database.SaveChangesAsync();
 			return obj.ID;
 		}
