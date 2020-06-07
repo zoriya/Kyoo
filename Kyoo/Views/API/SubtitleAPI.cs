@@ -14,31 +14,37 @@ namespace Kyoo.Api
 	public class SubtitleController : ControllerBase
 	{
 		private readonly ILibraryManager _libraryManager;
-		private readonly ITranscoder _transcoder;
+		//private readonly ITranscoder _transcoder;
 
-		public SubtitleController(ILibraryManager libraryManager, ITranscoder transcoder)
+		public SubtitleController(ILibraryManager libraryManager/*, ITranscoder transcoder*/)
 		{
 			_libraryManager = libraryManager;
-			_transcoder = transcoder;
+		//	_transcoder = transcoder;
 		}
 
 		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}.{identifier}.{extension?}")]
 		[Authorize(Policy="Play")]
-		public IActionResult GetSubtitle(string showSlug, int seasonNumber, int episodeNumber, string identifier, string extension)
+		public async Task<IActionResult> GetSubtitle(string showSlug,
+			int seasonNumber, 
+			int episodeNumber, 
+			string identifier,
+			string extension)
 		{
 			string languageTag = identifier.Length == 3 ? identifier.Substring(0, 3) : null;
 			bool forced = identifier.Length > 4 && identifier.Substring(4) == "forced";
 			Track subtitle = null;
 			
 			if (languageTag != null)
-				subtitle = _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber)?.Tracks
+				subtitle = (await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber))?.Tracks
 					.FirstOrDefault(x => x.Language == languageTag && x.IsForced == forced);
 				
 			if (subtitle == null)
 			{
-				string idString = identifier.IndexOf('-') != -1 ? identifier.Substring(0, identifier.IndexOf('-')) : identifier;
-				long.TryParse(idString, out long id);
-				subtitle = _libraryManager.GetTracks().FirstOrDefault(x => x.ID == id);
+				string idString = identifier.IndexOf('-') != -1 
+					? identifier.Substring(0, identifier.IndexOf('-')) 
+					: identifier;
+				int.TryParse(idString, out int id);
+				subtitle = await _libraryManager.GetTrack(id);
 			}
 			
 			if (subtitle == null)
@@ -57,43 +63,43 @@ namespace Kyoo.Api
 			return PhysicalFile(subtitle.Path, mime);
 		}
 
-		[HttpGet("extract/{showSlug}-s{seasonNumber}e{episodeNumber}")]
-		[Authorize(Policy="Admin")]
-		public async Task<string> ExtractSubtitle(string showSlug, long seasonNumber, long episodeNumber)
-		{
-			Episode episode = _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
-			episode.Tracks = null;
-
-			Track[] tracks = await _transcoder.ExtractSubtitles(episode.Path);
-			foreach (Track track in tracks)
-			{
-				track.EpisodeID = episode.ID;
-				_libraryManager.Register(track);
-			}
-			await _libraryManager.SaveChanges();
-			return "Done. " + tracks.Length + " track(s) extracted.";
-		}
-
-		[HttpGet("extract/{showSlug}")]
-		[Authorize(Policy="Admin")]
-		public async Task<string> ExtractSubtitle(string showSlug)
-		{
-			IEnumerable<Episode> episodes = _libraryManager.GetShow(showSlug).Episodes;
-			foreach (Episode episode in episodes)
-			{
-				episode.Tracks = null;
-
-				Track[] tracks = await _transcoder.ExtractSubtitles(episode.Path);
-				foreach (Track track in tracks)
-				{
-					track.EpisodeID = episode.ID;
-					_libraryManager.Register(track);
-				}
-				await _libraryManager.SaveChanges();
-			}
-
-			return "Done.";
-		}
+		// [HttpGet("extract/{showSlug}-s{seasonNumber}e{episodeNumber}")]
+		// [Authorize(Policy="Admin")]
+		// public async Task<string> ExtractSubtitle(string showSlug, long seasonNumber, long episodeNumber)
+		// {
+		// 	Episode episode = _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
+		// 	episode.Tracks = null;
+		//
+		// 	Track[] tracks = await _transcoder.ExtractSubtitles(episode.Path);
+		// 	foreach (Track track in tracks)
+		// 	{
+		// 		track.EpisodeID = episode.ID;
+		// 		_libraryManager.Register(track);
+		// 	}
+		// 	await _libraryManager.SaveChanges();
+		// 	return "Done. " + tracks.Length + " track(s) extracted.";
+		// }
+		//
+		// [HttpGet("extract/{showSlug}")]
+		// [Authorize(Policy="Admin")]
+		// public async Task<string> ExtractSubtitle(string showSlug)
+		// {
+		// 	IEnumerable<Episode> episodes = _libraryManager.GetShow(showSlug).Episodes;
+		// 	foreach (Episode episode in episodes)
+		// 	{
+		// 		episode.Tracks = null;
+		//
+		// 		Track[] tracks = await _transcoder.ExtractSubtitles(episode.Path);
+		// 		foreach (Track track in tracks)
+		// 		{
+		// 			track.EpisodeID = episode.ID;
+		// 			_libraryManager.Register(track);
+		// 		}
+		// 		await _libraryManager.SaveChanges();
+		// 	}
+		//
+		// 	return "Done.";
+		// }
 	}
 
 

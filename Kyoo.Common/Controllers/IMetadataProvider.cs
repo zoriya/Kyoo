@@ -14,8 +14,8 @@ namespace Kyoo.Controllers
 		Task<IEnumerable<Show>> SearchShows(string showName, bool isMovie);
 		Task<IEnumerable<PeopleLink>> GetPeople(Show show);
 
-		Task<Season> GetSeason(Show show, long seasonNumber);
+		Task<Season> GetSeason(Show show, int seasonNumber);
 
-		Task<Episode> GetEpisode(Show show, long seasonNumber, long episodeNumber, long absoluteNumber);
+		Task<Episode> GetEpisode(Show show, int seasonNumber, int episodeNumber, int absoluteNumber);
 	}
 }

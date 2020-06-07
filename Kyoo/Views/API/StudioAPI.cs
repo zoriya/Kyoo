@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -18,9 +19,9 @@ namespace Kyoo.API
 			_libraryManager = libraryManager;
 		}
 		
-		public ActionResult<IEnumerable<Studio>> Index()
+		public async Task<ActionResult<IEnumerable<Studio>>> Index()
 		{
-			return _libraryManager.GetStudios().ToList();
+			return (await _libraryManager.GetStudios()).ToList();
 		}
 	}
 }

@@ -6,21 +6,21 @@ namespace Kyoo.Models
 {
 	public class Episode
 	{
-		[JsonIgnore] public long ID { get; set; }
-		[JsonIgnore] public long ShowID { get; set; }
+		[JsonIgnore] public int ID { get; set; }
+		[JsonIgnore] public int ShowID { get; set; }
 		[JsonIgnore] public virtual Show Show { get; set; }
-		[JsonIgnore] public long? SeasonID { get; set; }
+		[JsonIgnore] public int? SeasonID { get; set; }
 		[JsonIgnore] public virtual Season Season { get; set; }
 
-		public long SeasonNumber { get; set; }
-		public long EpisodeNumber { get; set; }
-		public long AbsoluteNumber { get; set; }
+		public int SeasonNumber { get; set; }
+		public int EpisodeNumber { get; set; }
+		public int AbsoluteNumber { get; set; }
 		[JsonIgnore] public string Path { get; set; }
 		public string Title { get; set; }
 		public string Overview { get; set; }
 		public DateTime? ReleaseDate { get; set; }
 
-		public long Runtime { get; set; } //This runtime variable should be in minutes
+		public int Runtime { get; set; } //This runtime variable should be in minutes
 
 		[JsonIgnore] public string ImgPrimary { get; set; }
 		public virtual IEnumerable<MetadataID> ExternalIDs { get; set; }
@@ -42,13 +42,13 @@ namespace Kyoo.Models
 
 		public Episode() { }
 
-		public Episode(long seasonNumber, 
-			long episodeNumber,
-			long absoluteNumber,
+		public Episode(int seasonNumber, 
+			int episodeNumber,
+			int absoluteNumber,
 			string title,
 			string overview,
 			DateTime? releaseDate,
-			long runtime,
+			int runtime,
 			string imgPrimary,
 			IEnumerable<MetadataID> externalIDs)
 		{
@@ -63,16 +63,16 @@ namespace Kyoo.Models
 			ExternalIDs = externalIDs;
 		}
 
-		public Episode(long showID, 
-			long seasonID,
-			long seasonNumber, 
-			long episodeNumber, 
-			long absoluteNumber, 
+		public Episode(int showID, 
+			int seasonID,
+			int seasonNumber, 
+			int episodeNumber, 
+			int absoluteNumber, 
 			string path,
 			string title, 
 			string overview, 
 			DateTime? releaseDate, 
-			long runtime, 
+			int runtime, 
 			string imgPrimary,
 			IEnumerable<MetadataID> externalIDs)
 		{
@@ -90,7 +90,7 @@ namespace Kyoo.Models
 			ExternalIDs = externalIDs;
 		}
 
-		public static string GetSlug(string showSlug, long seasonNumber, long episodeNumber)
+		public static string GetSlug(string showSlug, int seasonNumber, int episodeNumber)
 		{
 			return showSlug + "-s" + seasonNumber + "e" + episodeNumber;
 		}

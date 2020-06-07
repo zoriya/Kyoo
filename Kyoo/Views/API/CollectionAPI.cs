@@ -2,6 +2,7 @@
 using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Kyoo.Api
@@ -19,9 +20,9 @@ namespace Kyoo.Api
 
 		[HttpGet("{collectionSlug}")]
 		[Authorize(Policy="Read")]
-		public ActionResult<Collection> GetShows(string collectionSlug)
+		public async Task<ActionResult<Collection>> GetShows(string collectionSlug)
 		{
-			Collection collection = _libraryManager.GetCollection(collectionSlug);
+			Collection collection = await _libraryManager.GetCollection(collectionSlug);
 
 			if (collection == null)
 				return NotFound();

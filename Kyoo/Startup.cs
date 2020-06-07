@@ -137,6 +137,18 @@ namespace Kyoo
 				AllowedOrigins = { new Uri(publicUrl).GetLeftPart(UriPartial.Authority) }
 			});
 
+
+			services.AddTransient<ILibraryRepository, LibraryRepository>();
+			services.AddTransient<ICollectionRepository, CollectionRepository>();
+			services.AddTransient<IShowRepository, ShowRepository>();
+			services.AddTransient<ISeasonRepository, SeasonRepository>();
+			services.AddTransient<IEpisodeRepository, EpisodeRepository>();
+			services.AddTransient<ITrackRepository, TrackRepository>();
+			services.AddTransient<IPeopleRepository, PeopleRepository>();
+			services.AddTransient<IStudioRepository, StudioRepository>();
+			services.AddTransient<IGenreRepository, GenreRepository>();
+			services.AddTransient<IProviderRepository, ProviderRepository>();
+			
 			services.AddScoped<ILibraryManager, LibraryManager>();
 			services.AddSingleton<ITranscoder, Transcoder>();
 			services.AddSingleton<IThumbnailsManager, ThumbnailsManager>();

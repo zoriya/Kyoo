@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Microsoft.AspNetCore.Authorization;
 
@@ -20,9 +21,9 @@ namespace Kyoo.Api
 
 		[HttpGet("{showSlug}/season/{seasonNumber}")]
 		[Authorize(Policy="Read")]
-		public ActionResult<IEnumerable<Episode>> GetEpisodesForSeason(string showSlug, long seasonNumber)
+		public async Task<ActionResult<IEnumerable<Episode>>> GetEpisodesForSeason(string showSlug, int seasonNumber)
 		{
-			IEnumerable<Episode> episodes = _libraryManager.GetEpisodes(showSlug, seasonNumber);
+			IEnumerable<Episode> episodes = await _libraryManager.GetEpisodes(showSlug, seasonNumber);
 
 			if(episodes == null)
 				return NotFound();
@@ -33,9 +34,9 @@ namespace Kyoo.Api
 		[HttpGet("{showSlug}/season/{seasonNumber}/episode/{episodeNumber}")]
 		[Authorize(Policy="Read")]
 		[JsonDetailed]
-		public ActionResult<Episode> GetEpisode(string showSlug, long seasonNumber, long episodeNumber)
+		public async Task<ActionResult<Episode>> GetEpisode(string showSlug, int seasonNumber, int episodeNumber)
 		{
-			Episode episode = _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
+			Episode episode = await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
 
 			if (episode == null)
 				return NotFound();
