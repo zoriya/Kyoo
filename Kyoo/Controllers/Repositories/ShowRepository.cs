@@ -5,31 +5,26 @@ using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
 	public class ShowRepository : IShowRepository
 	{
 		private readonly DatabaseContext _database;
-		private readonly IGenreRepository _genres;
-		private readonly IPeopleRepository _people;
-		private readonly IStudioRepository _studio;
-		private readonly IProviderRepository _providers;
+		private readonly IServiceProvider _serviceProvider;
+		private readonly IStudioRepository _studios;
 
 		public ShowRepository(DatabaseContext database,
-			IGenreRepository genres,
-			IPeopleRepository people,
-			IStudioRepository studio, 
-			IProviderRepository providers)
+			IServiceProvider serviceProvider, 
+			IStudioRepository studios)
 		{
 			_database = database;
-			_genres = genres;
-			_people = people;
-			_studio = studio;
-			_providers = providers;
+			_serviceProvider = serviceProvider;
+			_studios = studios;
 		}
 		
-		public async Task<Show> Get(long id)
+		public async Task<Show> Get(int id)
 		{
 			return await _database.Shows.FirstOrDefaultAsync(x => x.ID == id);
 		}
@@ -58,22 +53,18 @@ namespace Kyoo.Controllers
 			return await _database.Shows.ToListAsync();
 		}
 
-		public async Task<long> Create(Show obj)
+		public async Task<int> Create(Show obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
 			await Validate(obj);
-			
-			obj.Seasons = null;
-			obj.Episodes = null;
-			
-			await _database.Shows.AddAsync(obj);
+			_database.Entry(obj).State = EntityState.Added;
 			await _database.SaveChangesAsync();
 			return obj.ID;
 		}
 		
-		public async Task<long> CreateIfNotExists(Show obj)
+		public async Task<int> CreateIfNotExists(Show obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -103,22 +94,44 @@ namespace Kyoo.Controllers
 
 		private async Task Validate(Show obj)
 		{
-			obj.StudioID = await _studio.CreateIfNotExists(obj.Studio);
-			obj.GenreLinks = (await Task.WhenAll(obj.GenreLinks.Select(async x =>
+			if (obj.Studio != null)
+				obj.StudioID = await _studios.CreateIfNotExists(obj.Studio);
+			
+			if (obj.GenreLinks != null)
 			{
-				x.GenreID = await _genres.CreateIfNotExists(x.Genre);
-				return x;
-			}))).ToList();
-			obj.People = (await Task.WhenAll(obj.People.Select(async x =>
+				obj.GenreLinks = (await Task.WhenAll(obj.GenreLinks.Select(async x =>
+				{
+					using IServiceScope serviceScope = _serviceProvider.CreateScope();
+					IGenreRepository genres = serviceScope.ServiceProvider.GetService<IGenreRepository>();
+					
+					x.GenreID = await genres.CreateIfNotExists(x.Genre);
+					return x;
+				}))).ToList();
+			}
+
+			if (obj.People != null)
 			{
-				x.PeopleID = await _people.CreateIfNotExists(x.People);
-				return x;
-			}))).ToList();
-			obj.ExternalIDs = (await Task.WhenAll(obj.ExternalIDs.Select(async x =>
+				obj.People = (await Task.WhenAll(obj.People.Select(async x =>
+				{
+					using IServiceScope serviceScope = _serviceProvider.CreateScope();
+					IPeopleRepository people = serviceScope.ServiceProvider.GetService<IPeopleRepository>();
+					
+					x.PeopleID = await people.CreateIfNotExists(x.People);
+					return x;
+				}))).ToList();
+			}
+
+			if (obj.ExternalIDs != null)
 			{
-				x.ProviderID = await _providers.CreateIfNotExists(x.Provider);
-				return x;
-			}))).ToList();
+				obj.ExternalIDs = (await Task.WhenAll(obj.ExternalIDs.Select(async x =>
+				{
+					using IServiceScope serviceScope = _serviceProvider.CreateScope();
+					IProviderRepository providers = serviceScope.ServiceProvider.GetService<IProviderRepository>();
+					
+					x.ProviderID = await providers.CreateIfNotExists(x.Provider);
+					return x;
+				}))).ToList();
+			}
 		}
 
 		public async Task Delete(Show show)
@@ -127,7 +140,7 @@ namespace Kyoo.Controllers
 			await _database.SaveChangesAsync();
 		}
 		
-		public Task AddShowLink(long showID, long? libraryID, long? collectionID)
+		public async Task AddShowLink(int showID, int? libraryID, int? collectionID)
 		{
 			if (collectionID != null)
 			{
@@ -147,7 +160,7 @@ namespace Kyoo.Controllers
 					x => x.LibraryID == libraryID && x.CollectionID == collectionID && x.ShowID == null);
 			}
 
-			return Task.CompletedTask;
+			await _database.SaveChangesAsync();
 		}
 	}
 }

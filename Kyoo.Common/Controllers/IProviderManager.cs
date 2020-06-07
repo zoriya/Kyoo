@@ -10,8 +10,8 @@ namespace Kyoo.Controllers
 		Task<Show> CompleteShow(Show show, Library library);
 		Task<Show> SearchShow(string showName, bool isMovie, Library library);
 		Task<IEnumerable<Show>> SearchShows(string showName, bool isMovie, Library library);
-		Task<Season> GetSeason(Show show, long seasonNumber, Library library);
-		Task<Episode> GetEpisode(Show show, string episodePath, long seasonNumber, long episodeNumber, long absoluteNumber, Library library);
+		Task<Season> GetSeason(Show show, int seasonNumber, Library library);
+		Task<Episode> GetEpisode(Show show, string episodePath, int seasonNumber, int episodeNumber, int absoluteNumber, Library library);
 		Task<IEnumerable<PeopleLink>> GetPeople(Show show, Library library);
 	}
 }

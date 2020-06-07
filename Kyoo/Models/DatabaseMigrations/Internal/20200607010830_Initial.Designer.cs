@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Kyoo.Models.DatabaseMigrations.Internal
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20200526235513_Initial")]
+    [Migration("20200607010830_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,9 +23,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
             modelBuilder.Entity("Kyoo.Models.Collection", b =>
                 {
-                    b.Property<long>("ID")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("ImgPrimary")
@@ -53,16 +53,16 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
             modelBuilder.Entity("Kyoo.Models.CollectionLink", b =>
                 {
-                    b.Property<long>("ID")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<long?>("CollectionID")
-                        .HasColumnType("bigint");
+                    b.Property<int?>("CollectionID")
+                        .HasColumnType("integer");
 
-                    b.Property<long>("ShowID")
-                        .HasColumnType("bigint");
+                    b.Property<int>("ShowID")
+                        .HasColumnType("integer");
 
                     b.HasKey("ID");
 
@@ -75,16 +75,16 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
             modelBuilder.Entity("Kyoo.Models.Episode", b =>
                 {
-                    b.Property<long>("ID")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<long>("AbsoluteNumber")
-                        .HasColumnType("bigint");
+                    b.Property<int>("AbsoluteNumber")
+                        .HasColumnType("integer");
 
-                    b.Property<long>("EpisodeNumber")
-                        .HasColumnType("bigint");
+                    b.Property<int>("EpisodeNumber")
+                        .HasColumnType("integer");
 
                     b.Property<string>("ImgPrimary")
                         .HasColumnType("text");
@@ -98,17 +98,17 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     b.Property<DateTime?>("ReleaseDate")
                         .HasColumnType("timestamp without time zone");
 
-                    b.Property<long>("Runtime")
-                        .HasColumnType("bigint");
+                    b.Property<int>("Runtime")
+                        .HasColumnType("integer");
 
-                    b.Property<long?>("SeasonID")
-                        .HasColumnType("bigint");
+                    b.Property<int?>("SeasonID")
+                        .HasColumnType("integer");
 
-                    b.Property<long>("SeasonNumber")
-                        .HasColumnType("bigint");
+                    b.Property<int>("SeasonNumber")
+                        .HasColumnType("integer");
 
-                    b.Property<long>("ShowID")
-                        .HasColumnType("bigint");
+                    b.Property<int>("ShowID")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Title")
                         .HasColumnType("text");
@@ -124,9 +124,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
             modelBuilder.Entity("Kyoo.Models.Genre", b =>
                 {
-                    b.Property<long>("ID")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("Name")
@@ -145,11 +145,11 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
             modelBuilder.Entity("Kyoo.Models.GenreLink", b =>
                 {
-                    b.Property<long>("ShowID")
-                        .HasColumnType("bigint");
+                    b.Property<int>("ShowID")
+                        .HasColumnType("integer");
 
-                    b.Property<long>("GenreID")
-                        .HasColumnType("bigint");
+                    b.Property<int>("GenreID")
+                        .HasColumnType("integer");
 
                     b.HasKey("ShowID", "GenreID");
 
@@ -160,9 +160,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
             modelBuilder.Entity("Kyoo.Models.Library", b =>
                 {
-                    b.Property<long>("ID")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("Name")
@@ -184,19 +184,19 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
             modelBuilder.Entity("Kyoo.Models.LibraryLink", b =>
                 {
-                    b.Property<long>("ID")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<long?>("CollectionID")
-                        .HasColumnType("bigint");
+                    b.Property<int?>("CollectionID")
+                        .HasColumnType("integer");
 
-                    b.Property<long>("LibraryID")
-                        .HasColumnType("bigint");
+                    b.Property<int>("LibraryID")
+                        .HasColumnType("integer");
 
-                    b.Property<long?>("ShowID")
-                        .HasColumnType("bigint");
+                    b.Property<int?>("ShowID")
+                        .HasColumnType("integer");
 
                     b.HasKey("ID");
 
@@ -211,31 +211,31 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
             modelBuilder.Entity("Kyoo.Models.MetadataID", b =>
                 {
-                    b.Property<long>("ID")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("DataID")
                         .HasColumnType("text");
 
-                    b.Property<long?>("EpisodeID")
-                        .HasColumnType("bigint");
+                    b.Property<int?>("EpisodeID")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Link")
                         .HasColumnType("text");
 
-                    b.Property<long?>("PeopleID")
-                        .HasColumnType("bigint");
+                    b.Property<int?>("PeopleID")
+                        .HasColumnType("integer");
 
-                    b.Property<long>("ProviderID")
-                        .HasColumnType("bigint");
+                    b.Property<int>("ProviderID")
+                        .HasColumnType("integer");
 
-                    b.Property<long?>("SeasonID")
-                        .HasColumnType("bigint");
+                    b.Property<int?>("SeasonID")
+                        .HasColumnType("integer");
 
-                    b.Property<long?>("ShowID")
-                        .HasColumnType("bigint");
+                    b.Property<int?>("ShowID")
+                        .HasColumnType("integer");
 
                     b.HasKey("ID");
 
@@ -254,9 +254,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
             modelBuilder.Entity("Kyoo.Models.People", b =>
                 {
-                    b.Property<long>("ID")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("ImgPrimary")
@@ -278,19 +278,19 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
             modelBuilder.Entity("Kyoo.Models.PeopleLink", b =>
                 {
-                    b.Property<long>("ID")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<long>("PeopleID")
-                        .HasColumnType("bigint");
+                    b.Property<int>("PeopleID")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Role")
                         .HasColumnType("text");
 
-                    b.Property<long>("ShowID")
-                        .HasColumnType("bigint");
+                    b.Property<int>("ShowID")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Type")
                         .HasColumnType("text");
@@ -306,9 +306,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
             modelBuilder.Entity("Kyoo.Models.ProviderID", b =>
                 {
-                    b.Property<long>("ID")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("Logo")
@@ -327,16 +327,16 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
             modelBuilder.Entity("Kyoo.Models.ProviderLink", b =>
                 {
-                    b.Property<long>("ID")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<long?>("LibraryID")
-                        .HasColumnType("bigint");
+                    b.Property<int?>("LibraryID")
+                        .HasColumnType("integer");
 
-                    b.Property<long>("ProviderID")
-                        .HasColumnType("bigint");
+                    b.Property<int>("ProviderID")
+                        .HasColumnType("integer");
 
                     b.HasKey("ID");
 
@@ -349,9 +349,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
             modelBuilder.Entity("Kyoo.Models.Season", b =>
                 {
-                    b.Property<long>("ID")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("ImgPrimary")
@@ -360,17 +360,17 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     b.Property<string>("Overview")
                         .HasColumnType("text");
 
-                    b.Property<long>("SeasonNumber")
-                        .HasColumnType("bigint");
+                    b.Property<int>("SeasonNumber")
+                        .HasColumnType("integer");
 
-                    b.Property<long>("ShowID")
-                        .HasColumnType("bigint");
+                    b.Property<int>("ShowID")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Title")
                         .HasColumnType("text");
 
-                    b.Property<long?>("Year")
-                        .HasColumnType("bigint");
+                    b.Property<int?>("Year")
+                        .HasColumnType("integer");
 
                     b.HasKey("ID");
 
@@ -381,9 +381,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
             modelBuilder.Entity("Kyoo.Models.Show", b =>
                 {
-                    b.Property<long>("ID")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("Aliases")
@@ -392,8 +392,8 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     b.Property<string>("Backdrop")
                         .HasColumnType("text");
 
-                    b.Property<long?>("EndYear")
-                        .HasColumnType("bigint");
+                    b.Property<int?>("EndYear")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("IsMovie")
                         .HasColumnType("boolean");
@@ -413,14 +413,14 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     b.Property<string>("Slug")
                         .HasColumnType("text");
 
-                    b.Property<long?>("StartYear")
-                        .HasColumnType("bigint");
+                    b.Property<int?>("StartYear")
+                        .HasColumnType("integer");
 
                     b.Property<int?>("Status")
                         .HasColumnType("integer");
 
-                    b.Property<long?>("StudioID")
-                        .HasColumnType("bigint");
+                    b.Property<int?>("StudioID")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Title")
                         .HasColumnType("text");
@@ -440,9 +440,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
             modelBuilder.Entity("Kyoo.Models.Studio", b =>
                 {
-                    b.Property<long>("ID")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("Name")
@@ -461,16 +461,16 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
             modelBuilder.Entity("Kyoo.Models.Track", b =>
                 {
-                    b.Property<long>("ID")
+                    b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
+                        .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("Codec")
                         .HasColumnType("text");
 
-                    b.Property<long>("EpisodeID")
-                        .HasColumnType("bigint");
+                    b.Property<int>("EpisodeID")
+                        .HasColumnType("integer");
 
                     b.Property<bool>("IsDefault")
                         .HasColumnType("boolean");

@@ -27,7 +27,7 @@ namespace Kyoo.Api
 
 		[HttpGet("{showSlug}-s{seasonNumber}e{episodeNumber}")]
 		[Authorize(Policy="Play")]
-		public async Task<IActionResult> Index(string showSlug, long seasonNumber, long episodeNumber)
+		public async Task<IActionResult> Index(string showSlug, int seasonNumber, int episodeNumber)
 		{
 			Episode episode = await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
 
@@ -38,7 +38,7 @@ namespace Kyoo.Api
 
 		[HttpGet("transmux/{showSlug}-s{seasonNumber}e{episodeNumber}")]
 		[Authorize(Policy="Play")]
-		public async Task<IActionResult> Transmux(string showSlug, long seasonNumber, long episodeNumber)
+		public async Task<IActionResult> Transmux(string showSlug, int seasonNumber, int episodeNumber)
 		{
 			Episode episode = await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
 
@@ -61,7 +61,7 @@ namespace Kyoo.Api
 
 		[HttpGet("transcode/{showSlug}-s{seasonNumber}e{episodeNumber}")]
 		[Authorize(Policy="Play")]
-		public async Task<IActionResult> Transcode(string showSlug, long seasonNumber, long episodeNumber)
+		public async Task<IActionResult> Transcode(string showSlug, int seasonNumber, int episodeNumber)
 		{
 			Episode episode = await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
 

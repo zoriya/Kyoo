@@ -5,22 +5,23 @@ using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
 	public class SeasonRepository : ISeasonRepository
 	{
 		private readonly DatabaseContext _database;
-		private readonly IProviderRepository _providers;
+		private readonly IServiceProvider _serviceProvider;
 
 
-		public SeasonRepository(DatabaseContext database, IProviderRepository providers)
+		public SeasonRepository(DatabaseContext database, IServiceProvider serviceProvider)
 		{
 			_database = database;
-			_providers = providers;
+			_serviceProvider = serviceProvider;
 		}
 		
-		public async Task<Season> Get(long id)
+		public async Task<Season> Get(int id)
 		{
 			return await _database.Seasons.FirstOrDefaultAsync(x => x.ID == id);
 		}
@@ -31,12 +32,12 @@ namespace Kyoo.Controllers
 			if (index == -1)
 				throw new InvalidOperationException("Invalid season slug. Format: {showSlug}-s{seasonNumber}");
 			string showSlug = slug.Substring(0, index);
-			if (!long.TryParse(slug.Substring(index + 2), out long seasonNumber))
+			if (!int.TryParse(slug.Substring(index + 2), out int seasonNumber))
 				throw new InvalidOperationException("Invalid season slug. Format: {showSlug}-s{seasonNumber}");
 			return Get(showSlug, seasonNumber);
 		}
 		
-		public async Task<Season> Get(string showSlug, long seasonNumber)
+		public async Task<Season> Get(string showSlug, int seasonNumber)
 		{
 			return await _database.Seasons.FirstOrDefaultAsync(x => x.Show.Slug == showSlug 
 			                                                        && x.SeasonNumber == seasonNumber);
@@ -55,7 +56,7 @@ namespace Kyoo.Controllers
 			return await _database.Seasons.ToListAsync();
 		}
 
-		public async Task<long> Create(Season obj)
+		public async Task<int> Create(Season obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -69,7 +70,7 @@ namespace Kyoo.Controllers
 			return obj.ID;
 		}
 		
-		public async Task<long> CreateIfNotExists(Season obj)
+		public async Task<int> CreateIfNotExists(Season obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -102,12 +103,18 @@ namespace Kyoo.Controllers
 		{
 			if (obj.ShowID <= 0)
 				throw new InvalidOperationException($"Can't store a season not related to any show (showID: {obj.ShowID}).");
-			
-			obj.ExternalIDs = (await Task.WhenAll(obj.ExternalIDs.Select(async x =>
+
+			if (obj.ExternalIDs != null)
 			{
-				x.ProviderID = await _providers.CreateIfNotExists(x.Provider);
-				return x;
-			}))).ToList();
+				obj.ExternalIDs = (await Task.WhenAll(obj.ExternalIDs.Select(async x =>
+				{
+					using IServiceScope serviceScope = _serviceProvider.CreateScope();
+					IProviderRepository providers = serviceScope.ServiceProvider.GetService<IProviderRepository>();
+					
+					x.ProviderID = await providers.CreateIfNotExists(x.Provider);
+					return x;
+				}))).ToList();
+			}
 		}
 
 		public async Task Delete(Season obj)
@@ -116,7 +123,7 @@ namespace Kyoo.Controllers
 			await _database.SaveChangesAsync();
 		}
 		
-		public async Task<ICollection<Season>> GetSeasons(long showID)
+		public async Task<ICollection<Season>> GetSeasons(int showID)
 		{
 			return await _database.Seasons.Where(x => x.ShowID == showID).ToListAsync();
 		}

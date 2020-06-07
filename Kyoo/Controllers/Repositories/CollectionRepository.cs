@@ -18,7 +18,7 @@ namespace Kyoo.Controllers
 			_database = database;
 		}
 		
-		public Task<Collection> Get(long id)
+		public Task<Collection> Get(int id)
 		{
 			return _database.Collections.FirstOrDefaultAsync(x => x.ID == id);
 		}
@@ -41,7 +41,7 @@ namespace Kyoo.Controllers
 			return await _database.Collections.ToListAsync();
 		}
 
-		public async Task<long> Create(Collection obj)
+		public async Task<int> Create(Collection obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -51,7 +51,7 @@ namespace Kyoo.Controllers
 			return obj.ID;
 		}
 		
-		public async Task<long> CreateIfNotExists(Collection obj)
+		public async Task<int> CreateIfNotExists(Collection obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));

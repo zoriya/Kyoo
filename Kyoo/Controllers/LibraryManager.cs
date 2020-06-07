@@ -18,18 +18,27 @@ namespace Kyoo.Controllers
 		private readonly IPeopleRepository _people;
 		private readonly IProviderRepository _providers;
 		
-		public LibraryManager(DatabaseContext database)
+		public LibraryManager(ILibraryRepository libraries, 
+			ICollectionRepository collections, 
+			IShowRepository shows, 
+			ISeasonRepository seasons, 
+			IEpisodeRepository episodes,
+			ITrackRepository tracks, 
+			IGenreRepository genres, 
+			IStudioRepository studios,
+			IProviderRepository providers, 
+			IPeopleRepository people)
 		{
-			_providers = new ProviderRepository(database);
-			_libraries = new LibraryRepository(database, _providers);
-			_collections = new CollectionRepository(database);
-			_genres = new GenreRepository(database);
-			_people = new PeopleRepository(database, _providers);
-			_studios = new StudioRepository(database);
-			_shows = new ShowRepository(database, _genres, _people, _studios, _providers);
-			_seasons = new SeasonRepository(database, _providers);
-			_episodes = new EpisodeRepository(database, _providers);
-			_tracks = new TrackRepository(database);
+			_libraries = libraries;
+			_collections = collections;
+			_shows = shows;
+			_seasons = seasons;
+			_episodes = episodes;
+			_tracks = tracks;
+			_genres = genres;
+			_studios = studios;
+			_providers = providers;
+			_people = people;
 		}
 
 		public Task<Library> GetLibrary(string slug)
@@ -47,12 +56,12 @@ namespace Kyoo.Controllers
 			return _shows.Get(slug);
 		}
 
-		public Task<Season> GetSeason(string showSlug, long seasonNumber)
+		public Task<Season> GetSeason(string showSlug, int seasonNumber)
 		{
 			return _seasons.Get(showSlug, seasonNumber);
 		}
 
-		public Task<Episode> GetEpisode(string showSlug, long seasonNumber, long episodeNumber)
+		public Task<Episode> GetEpisode(string showSlug, int seasonNumber, int episodeNumber)
 		{
 			return _episodes.Get(showSlug, seasonNumber, episodeNumber);
 		}
@@ -62,12 +71,12 @@ namespace Kyoo.Controllers
 			return _episodes.Get(movieSlug);
 		}
 
-		public Task<Track> GetTrack(long id)
+		public Task<Track> GetTrack(int id)
 		{
 			return _tracks.Get(id);
 		}
 		
-		public Task<Track> GetTrack(long episodeID, string language, bool isForced)
+		public Task<Track> GetTrack(int episodeID, string language, bool isForced)
 		{
 			return _tracks.Get(episodeID, language, isForced);
 		}
@@ -137,7 +146,7 @@ namespace Kyoo.Controllers
 			return _providers.GetAll();
 		}
 
-		public Task<ICollection<Season>> GetSeasons(long showID)
+		public Task<ICollection<Season>> GetSeasons(int showID)
 		{
 			return _seasons.GetSeasons(showID);
 		}
@@ -147,17 +156,17 @@ namespace Kyoo.Controllers
 			return _seasons.GetSeasons(showSlug);
 		}
 
-		public Task<ICollection<Episode>> GetEpisodes(long showID, long seasonNumber)
+		public Task<ICollection<Episode>> GetEpisodes(int showID, int seasonNumber)
 		{
 			return _episodes.GetEpisodes(showID, seasonNumber);
 		}
 
-		public Task<ICollection<Episode>> GetEpisodes(string showSlug, long seasonNumber)
+		public Task<ICollection<Episode>> GetEpisodes(string showSlug, int seasonNumber)
 		{
 			return _episodes.GetEpisodes(showSlug, seasonNumber);
 		}
 
-		public Task<ICollection<Episode>> GetEpisodes(long seasonID)
+		public Task<ICollection<Episode>> GetEpisodes(int seasonID)
 		{
 			return _episodes.GetEpisodes(seasonID);
 		}
@@ -167,7 +176,7 @@ namespace Kyoo.Controllers
 			return _shows.GetByPath(path);
 		}
 
-		public Task AddShowLink(long showID, long? libraryID, long? collectionID)
+		public Task AddShowLink(int showID, int? libraryID, int? collectionID)
 		{
 			return _shows.AddShowLink(showID, libraryID, collectionID);
 		}

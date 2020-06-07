@@ -19,7 +19,7 @@ namespace Kyoo.Api
 
 		[HttpGet("{showSlug}-s{seasonNumber}e{episodeNumber}")]
 		[Authorize(Policy="Read")]
-		public async Task<ActionResult<WatchItem>> Index(string showSlug, long seasonNumber, long episodeNumber)
+		public async Task<ActionResult<WatchItem>> Index(string showSlug, int seasonNumber, int episodeNumber)
 		{
 			Episode item = await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
 

@@ -18,7 +18,7 @@ namespace Kyoo.Controllers
 			_database = database;
 		}
 		
-		public async Task<ProviderID> Get(long id)
+		public async Task<ProviderID> Get(int id)
 		{
 			return await _database.Providers.FirstOrDefaultAsync(x => x.ID == id);
 		}
@@ -41,17 +41,17 @@ namespace Kyoo.Controllers
 			return await _database.Providers.ToListAsync();
 		}
 
-		public async Task<long> Create(ProviderID obj)
+		public async Task<int> Create(ProviderID obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
-			
+
 			await _database.Providers.AddAsync(obj);
 			await _database.SaveChangesAsync();
 			return obj.ID;
 		}
 		
-		public async Task<long> CreateIfNotExists(ProviderID obj)
+		public async Task<int> CreateIfNotExists(ProviderID obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));

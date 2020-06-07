@@ -6,7 +6,7 @@ namespace Kyoo.Models
 {
 	public class People
 	{
-		public long ID { get; set; }
+		public int ID { get; set; }
 		public string Slug { get; set; }
 		public string Name { get; set; }
 		[JsonIgnore] public string ImgPrimary { get; set; }
