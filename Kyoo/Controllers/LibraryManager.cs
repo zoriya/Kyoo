@@ -1,394 +1,366 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Models;
-using Kyoo.Models.Exceptions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Kyoo.Controllers
 {
 	public class LibraryManager : ILibraryManager
 	{
-		private const int MaxSaveRetry = 3;
-		private readonly DatabaseContext _database;
+		private readonly ILibraryRepository _libraries;
+		private readonly ICollectionRepository _collections;
+		private readonly IShowRepository _shows;
+		private readonly ISeasonRepository _seasons;
+		private readonly IEpisodeRepository _episodes;
+		private readonly ITrackRepository _tracks;
+		private readonly IGenreRepository _genres;
+		private readonly IStudioRepository _studios;
+		private readonly IPeopleRepository _people;
+		private readonly IProviderRepository _providers;
 		
-		
-		public LibraryManager(DatabaseContext database)
+		public LibraryManager(ILibraryRepository libraries, 
+			ICollectionRepository collections, 
+			IShowRepository shows, 
+			ISeasonRepository seasons, 
+			IEpisodeRepository episodes,
+			ITrackRepository tracks, 
+			IGenreRepository genres, 
+			IStudioRepository studios,
+			IProviderRepository providers, 
+			IPeopleRepository people)
 		{
-			_database = database;
+			_libraries = libraries;
+			_collections = collections;
+			_shows = shows;
+			_seasons = seasons;
+			_episodes = episodes;
+			_tracks = tracks;
+			_genres = genres;
+			_studios = studios;
+			_providers = providers;
+			_people = people;
 		}
 
-		#region GetBySlug
-		public Library GetLibrary(string librarySlug)
+		public Task<Library> GetLibrary(string slug)
 		{
-			return _database.Libraries.FirstOrDefault(library => library.Slug == librarySlug);
-		}
-		
-		public Collection GetCollection(string slug)
-		{
-			return _database.Collections.FirstOrDefault(col => col.Slug == slug);
+			return _libraries.Get(slug);
 		}
 
-		public Show GetShow(string slug)
+		public Task<Collection> GetCollection(string slug)
 		{
-			return _database.Shows.FirstOrDefault(show => show.Slug == slug);
+			return _collections.Get(slug);
 		}
 
-		public Season GetSeason(string showSlug, long seasonNumber)
+		public Task<Show> GetShow(string slug)
 		{
-			return _database.Seasons.FirstOrDefault(x => x.Show.Slug == showSlug && x.SeasonNumber == seasonNumber);
+			return _shows.Get(slug);
 		}
 
-		public Episode GetEpisode(string showSlug, long seasonNumber, long episodeNumber)
+		public Task<Season> GetSeason(string showSlug, int seasonNumber)
 		{
-			return _database.Episodes.FirstOrDefault(x => x.EpisodeNumber == episodeNumber
-			                                              && x.SeasonNumber == seasonNumber 
-			                                              && x.Show.Slug == showSlug);
-		}
-		
-		public Episode GetMovieEpisode(string movieSlug)
-		{
-			return _database.Episodes.FirstOrDefault(x => x.Show.Slug == movieSlug);	
+			return _seasons.Get(showSlug, seasonNumber);
 		}
 
-		public Genre GetGenre(string slug)
+		public Task<Episode> GetEpisode(string showSlug, int seasonNumber, int episodeNumber)
 		{
-			return _database.Genres.FirstOrDefault(genre => genre.Slug == slug);
+			return _episodes.Get(showSlug, seasonNumber, episodeNumber);
 		}
 
-		public Studio GetStudio(string slug)
+		public Task<Episode> GetMovieEpisode(string movieSlug)
 		{
-			return _database.Studios.FirstOrDefault(studio => studio.Slug == slug);
+			return _episodes.Get(movieSlug);
 		}
 
-		public People GetPeople(string slug)
+		public Task<Track> GetTrack(int id)
 		{
-			return _database.Peoples.FirstOrDefault(people => people.Slug == slug);
-		}
-
-		public ProviderID GetProvider(string name)
-		{
-			return _database.Providers.FirstOrDefault(x => x.Name == name);
-		}
-
-		#endregion
-		
-		#region GetAll
-		public IEnumerable<Library> GetLibraries()
-		{
-			return _database.Libraries;
-		}
-
-		public IEnumerable<Collection> GetCollections()
-		{
-			return _database.Collections;
-		}
-
-		public IEnumerable<Show> GetShows()
-		{
-			return _database.Shows;
+			return _tracks.Get(id);
 		}
 		
-		public IEnumerable<Episode> GetEpisodes()
+		public Task<Track> GetTrack(int episodeID, string language, bool isForced)
 		{
-			return _database.Episodes;
+			return _tracks.Get(episodeID, language, isForced);
+		}
+
+		public Task<Genre> GetGenre(string slug)
+		{
+			return _genres.Get(slug);
+		}
+
+		public Task<Studio> GetStudio(string slug)
+		{
+			return _studios.Get(slug);
+		}
+
+		public Task<People> GetPeople(string slug)
+		{
+			return _people.Get(slug);
+		}
+
+		public Task<ICollection<Library>> GetLibraries()
+		{
+			return _libraries.GetAll();
+		}
+
+		public Task<ICollection<Collection>> GetCollections()
+		{
+			return _collections.GetAll();
+		}
+
+		public Task<ICollection<Show>> GetShows()
+		{
+			return _shows.GetAll();
+		}
+
+		public Task<ICollection<Season>> GetSeasons()
+		{
+			return _seasons.GetAll();
+		}
+
+		public Task<ICollection<Episode>> GetEpisodes()
+		{
+			return _episodes.GetAll();
+		}
+
+		public Task<ICollection<Track>> GetTracks()
+		{
+			return _tracks.GetAll();
+		}
+
+		public Task<ICollection<Studio>> GetStudios()
+		{
+			return _studios.GetAll();
+		}
+
+		public Task<ICollection<People>> GetPeoples()
+		{
+			return _people.GetAll();
+		}
+
+		public Task<ICollection<Genre>> GetGenres()
+		{
+			return _genres.GetAll();
+		}
+
+		public Task<ICollection<ProviderID>> GetProviders()
+		{
+			return _providers.GetAll();
+		}
+
+		public Task<ICollection<Season>> GetSeasons(int showID)
+		{
+			return _seasons.GetSeasons(showID);
+		}
+
+		public Task<ICollection<Season>> GetSeasons(string showSlug)
+		{
+			return _seasons.GetSeasons(showSlug);
+		}
+
+		public Task<ICollection<Episode>> GetEpisodes(int showID, int seasonNumber)
+		{
+			return _episodes.GetEpisodes(showID, seasonNumber);
+		}
+
+		public Task<ICollection<Episode>> GetEpisodes(string showSlug, int seasonNumber)
+		{
+			return _episodes.GetEpisodes(showSlug, seasonNumber);
+		}
+
+		public Task<ICollection<Episode>> GetEpisodes(int seasonID)
+		{
+			return _episodes.GetEpisodes(seasonID);
+		}
+
+		public Task<Show> GetShowByPath(string path)
+		{
+			return _shows.GetByPath(path);
+		}
+
+		public Task AddShowLink(int showID, int? libraryID, int? collectionID)
+		{
+			return _shows.AddShowLink(showID, libraryID, collectionID);
+		}
+
+		public Task AddShowLink(Show show, Library library, Collection collection)
+		{
+			if (show == null)
+				throw new ArgumentNullException(nameof(show));
+			return AddShowLink(show.ID, library?.ID, collection?.ID);
 		}
 		
-		public IEnumerable<Genre> GetGenres()
+		public Task<ICollection<Library>> SearchLibraries(string searchQuery)
 		{
-			return _database.Genres;
+			return _libraries.Search(searchQuery);
+		}
+
+		public Task<ICollection<Collection>> SearchCollections(string searchQuery)
+		{
+			return _collections.Search(searchQuery);
+		}
+
+		public Task<ICollection<Show>> SearchShows(string searchQuery)
+		{
+			return _shows.Search(searchQuery);
+		}
+
+		public Task<ICollection<Season>> SearchSeasons(string searchQuery)
+		{
+			return _seasons.Search(searchQuery);
+		}
+
+		public Task<ICollection<Episode>> SearchEpisodes(string searchQuery)
+		{
+			return _episodes.Search(searchQuery);
+		}
+
+		public Task<ICollection<Genre>> SearchGenres(string searchQuery)
+		{
+			return _genres.Search(searchQuery);
+		}
+
+		public Task<ICollection<Studio>> SearchStudios(string searchQuery)
+		{
+			return _studios.Search(searchQuery);
+		}
+
+		public Task<ICollection<People>> SearchPeople(string searchQuery)
+		{
+			return _people.Search(searchQuery);
 		}
 		
-		public IEnumerable<Studio> GetStudios()
+		public Task RegisterLibrary(Library library)
 		{
-			return _database.Studios;
+			return _libraries.Create(library);
 		}
 
-		public IEnumerable<People> GetPeoples()
+		public Task RegisterCollection(Collection collection)
 		{
-			return _database.Peoples;
+			return _collections.Create(collection);
 		}
 
-		public IEnumerable<Track> GetTracks()
+		public Task RegisterShow(Show show)
 		{
-			return _database.Tracks;
+			return _shows.Create(show);
 		}
 
-		#endregion
-		
-		#region GetHelper
-		public IEnumerable<string> GetLibrariesPath()
+		public Task RegisterSeason(Season season)
 		{
-			IEnumerable<string> paths = new List<string>();
-			return Enumerable.Aggregate(_database.Libraries, paths, (current, lib) => current.Concat(lib.Paths));
-		}
-		
-		public Show GetShowByPath(string path)
-		{
-			return _database.Shows.FirstOrDefault(show => show.Path == path);
+			return _seasons.Create(season);
 		}
 
-		public IEnumerable<Episode> GetEpisodes(string showSlug, long seasonNumber)
+		public Task RegisterEpisode(Episode episode)
 		{
-			return _database.Episodes.Where(x => x.Show.Slug == showSlug && x.SeasonNumber == seasonNumber);
-		}
-		#endregion
-
-		#region Search
-		public IEnumerable<Collection> SearchCollections(string searchQuery)
-		{
-			return _database.Collections.Where(collection => EF.Functions.Like(collection.Name, $"%{searchQuery}%"))
-				.Take(20);
-		}
-		
-		public IEnumerable<Show> SearchShows(string searchQuery)
-		{
-			return _database.Shows.FromSqlInterpolated($@"SELECT * FROM Shows WHERE Shows.Title LIKE {$"%{searchQuery}%"}
-			                                           OR Shows.Aliases LIKE {$"%{searchQuery}%"}").Take(20);
-		}
-		
-		public IEnumerable<Episode> SearchEpisodes(string searchQuery)
-		{
-			return _database.Episodes.Where(x => EF.Functions.Like(x.Title, $"%{searchQuery}%")).Take(20);
+			return _episodes.Create(episode);
 		}
 
-		public IEnumerable<Genre> SearchGenres(string searchQuery)
+		public Task RegisterTrack(Track track)
 		{
-			return _database.Genres.Where(genre => EF.Functions.Like(genre.Name, $"%{searchQuery}%"))
-				.Take(20);
-		}
-		
-		public IEnumerable<Studio> SearchStudios(string searchQuery)
-		{
-			return _database.Studios.Where(studio => EF.Functions.Like(studio.Name, $"%{searchQuery}%"))
-				.Take(20);
-		}
-		
-		public IEnumerable<People> SearchPeople(string searchQuery)
-		{
-			return _database.Peoples.Where(people => EF.Functions.Like(people.Name, $"%{searchQuery}%"))
-				.OrderBy(x => x.ImgPrimary == null)
-				.ThenBy(x => x.Name)
-				.Take(20);
-		}
-		#endregion
-
-		#region Register
-		public void Register(object obj)
-		{
-			if (obj == null)
-				return;
-			ValidateRootEntry(_database.Entry(obj), entry =>
-			{
-				if (entry.State != EntityState.Detached)
-					return false;
-				
-				entry.State = EntityState.Added;
-				return true;
-			});
+			return _tracks.Create(track);
 		}
 
-		public void RegisterShowLinks(Library library, Collection collection, Show show)
+		public Task RegisterGenre(Genre genre)
 		{
-			if (collection != null)
-			{
-				_database.LibraryLinks.AddIfNotExist(new LibraryLink {Library = library, Collection = collection},
-					x => x.Library == library && x.Collection == collection && x.ShowID == null);
-				_database.CollectionLinks.AddIfNotExist(new CollectionLink { Collection = collection, Show = show},
-					x => x.Collection == collection && x.Show == show);
-			}
-			else
-				_database.LibraryLinks.AddIfNotExist(new LibraryLink {Library = library, Show = show},
-					x => x.Library == library && x.Collection == null && x.Show == show);
+			return _genres.Create(genre);
 		}
 
-		public Task SaveChanges()
+		public Task RegisterStudio(Studio studio)
 		{
-			return SaveChanges(0);
+			return _studios.Create(studio);
 		}
 
-		private async Task SaveChanges(int retryCount)
+		public Task RegisterPeople(People people)
 		{
-			ValidateChanges();
-			try
-			{
-				await _database.SaveChangesAsync();
-			}
-			catch (DbUpdateException)
-			{
-				if (retryCount < MaxSaveRetry)
-					await SaveChanges(retryCount + 1);
-				else
-					throw;
-			}
-		}
-		
-		public async Task Edit(object obj, bool resetOld)
-		{
-			_database.ChangeTracker.LazyLoadingEnabled = false;
-			_database.ChangeTracker.AutoDetectChangesEnabled = false;
-
-			try
-			{
-				object existing = FindExisting(obj);
-				
-				if (existing == null)
-					throw new ItemNotFound($"No existing object (of type {obj.GetType().Name}) found on the databse.");
-
-				if (resetOld)
-					Utility.Nullify(existing);
-				Utility.Merge(existing, obj);
-				
-				ValidateRootEntry(_database.Entry(existing), entry => entry.State != EntityState.Added);
-				
-				_database.ChangeTracker.DetectChanges();
-				await _database.SaveChangesAsync();
-			}
-			finally
-			{
-				_database.ChangeTracker.LazyLoadingEnabled = true;
-				_database.ChangeTracker.AutoDetectChangesEnabled = true;
-			}
-		}
-		#endregion
-		
-		#region ValidateValue
-		private void ValidateChanges()
-		{
-			_database.ChangeTracker.AutoDetectChangesEnabled = false;
-			try
-			{
-				foreach (EntityEntry sourceEntry in _database.ChangeTracker.Entries())
-				{
-					if (sourceEntry.State != EntityState.Added && sourceEntry.State != EntityState.Modified)
-						continue;
-
-					foreach (NavigationEntry navigation in sourceEntry.Navigations)
-						ValidateNavigation(navigation);
-				}
-			}
-			finally
-			{
-				_database.ChangeTracker.AutoDetectChangesEnabled = true;
-				_database.ChangeTracker.DetectChanges();
-			}
-		}
-		
-		private void ValidateRootEntry(EntityEntry entry, Func<EntityEntry, bool> shouldRun)
-		{
-			if (!shouldRun.Invoke(entry))
-				return;
-			foreach (NavigationEntry navigation in entry.Navigations)
-			{
-				ValidateNavigation(navigation);
-				if (navigation.CurrentValue == null)
-					continue;
-				if (navigation.Metadata.IsCollection())
-				{
-					IEnumerable entities = (IEnumerable)navigation.CurrentValue;
-					foreach (object childEntry in entities)
-						ValidateRootEntry(_database.Entry(childEntry), shouldRun);
-				}
-				else
-					ValidateRootEntry(_database.Entry(navigation.CurrentValue), shouldRun);
-			}
+			return _people.Create(people);
 		}
 
-		private void ValidateNavigation(NavigationEntry navigation)
+		public Task EditLibrary(Library library, bool resetOld)
 		{
-			object oldValue = navigation.CurrentValue;
-			if (oldValue == null)
-				return;
-			object newValue = Validate(oldValue);
-			if (ReferenceEquals(oldValue, newValue))
-				return;
-			navigation.CurrentValue = newValue;
-			if (!navigation.Metadata.IsCollection())
-				_database.Entry(oldValue).State = EntityState.Detached;
-		}
-		
-		private T Validate<T>(T obj) where T : class
-		{
-			switch (obj)
-			{
-				case null:
-					return null;
-				case IEnumerable<object> enumerable:
-					return (T)Utility.RunGenericMethod(
-						this, 
-						"ValidateList",
-						Utility.GetEnumerableType(enumerable), new [] {obj});
-			}
-
-			EntityState state = _database.Entry(obj).State;
-			if (state != EntityState.Added && state != EntityState.Detached)
-				return obj;
-
-			return (T)(FindExisting(obj) ?? obj);
+			return _libraries.Edit(library, resetOld);
 		}
 
-		public IEnumerable<T> ValidateList<T>(IEnumerable<T> list) where T : class
+		public Task EditCollection(Collection collection, bool resetOld)
 		{
-			return list.Select(x =>
-			{
-				T tmp = Validate(x);
-				if (tmp != x)
-					_database.Entry(x).State = EntityState.Detached;
-				return tmp ?? x;
-			})/*.GroupBy(GetSlug).Select(x => x.First()).Where(x => x != null)*/.ToList();
+			return _collections.Edit(collection, resetOld);
 		}
 
-		private object FindExisting(object obj)
+		public Task EditShow(Show show, bool resetOld)
 		{
-			return obj switch
-			{
-				Library library => GetLibrary(library.Slug),
-				Collection collection => GetCollection(collection.Slug),
-				Show show => GetShow(show.Slug),
-				Season season => GetSeason(season.Show.Slug, season.SeasonNumber),
-				Episode episode => GetEpisode(episode.Show.Slug, episode.SeasonNumber, episode.EpisodeNumber),
-				Studio studio => GetStudio(studio.Slug),
-				People people => GetPeople(people.Slug),
-				Genre genre => GetGenre(genre.Slug),
-				ProviderID provider => GetProvider(provider.Name),
-				_ => null
-			};
+			return _shows.Edit(show, resetOld);
 		}
 
-		public IEnumerable<MetadataID> Validate(IEnumerable<MetadataID> ids)
+		public Task EditSeason(Season season, bool resetOld)
 		{
-			return ids?.Select(x =>
-			{
-				x.Provider = _database.Providers.FirstOrDefault(y => y.Name == x.Provider.Name) ?? x.Provider;
-				return x;
-			}).GroupBy(x => x.Provider.Name).Select(x => x.First()).ToList();
-		}
-		#endregion
-
-		#region Remove
-		public void RemoveShow(Show show)
-		{
-			if (_database.Entry(show).State == EntityState.Detached)
-				_database.Shows.Attach(show);
-			_database.Shows.Remove(show);
+			return _seasons.Edit(season, resetOld);
 		}
 
-		public void RemoveSeason(Season season)
+		public Task EditEpisode(Episode episode, bool resetOld)
 		{
-			if (_database.Entry(season).State == EntityState.Detached)
-				_database.Seasons.Attach(season);
-			_database.Seasons.Remove(season);
+			return _episodes.Edit(episode, resetOld);
 		}
 
-		public void RemoveEpisode(Episode episode)
+		public Task EditTrack(Track track, bool resetOld)
 		{
-			if (_database.Entry(episode).State == EntityState.Detached)
-				_database.Episodes.Attach(episode);
-			_database.Episodes.Remove(episode);
+			return _tracks.Edit(track, resetOld);
 		}
-		#endregion
+
+		public Task EditGenre(Genre genre, bool resetOld)
+		{
+			return _genres.Edit(genre, resetOld);
+		}
+
+		public Task EditStudio(Studio studio, bool resetOld)
+		{
+			return _studios.Edit(studio, resetOld);
+		}
+
+		public Task EditPeople(People people, bool resetOld)
+		{
+			return _people.Edit(people, resetOld);
+		}
+
+		public Task DelteLibrary(Library library)
+		{
+			return _libraries.Delete(library);
+		}
+
+		public Task DeleteCollection(Collection collection)
+		{
+			return _collections.Delete(collection);
+		}
+
+		public Task DeleteShow(Show show)
+		{
+			return _shows.Delete(show);
+		}
+
+		public Task DeleteSeason(Season season)
+		{
+			return _seasons.Delete(season);
+		}
+
+		public Task DeleteEpisode(Episode episode)
+		{
+			return _episodes.Delete(episode);
+		}
+
+		public Task DeleteTrack(Track track)
+		{
+			return _tracks.Delete(track);
+		}
+
+		public Task DeleteGenre(Genre genre)
+		{
+			return _genres.Delete(genre);
+		}
+
+		public Task DeleteStudio(Studio studio)
+		{
+			return _studios.Delete(studio);
+		}
+
+		public Task DeletePeople(People people)
+		{
+			return _people.Delete(people);
+		}
 	}
 }

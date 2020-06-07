@@ -5,8 +5,8 @@ namespace Kyoo.Models
 {
 	public class PeopleLink
 	{
-		[JsonIgnore] public long ID { get; set; }
-		[JsonIgnore] public long PeopleID { get; set; }
+		[JsonIgnore] public int ID { get; set; }
+		[JsonIgnore] public int PeopleID { get; set; }
 		[JsonIgnore] public virtual People People { get; set; }
 		
 		public string Slug
@@ -27,7 +27,7 @@ namespace Kyoo.Models
 			set => People.ExternalIDs = value;
 		}
 
-		[JsonIgnore] public long ShowID { get; set; }
+		[JsonIgnore] public int ShowID { get; set; }
 		[JsonIgnore] public virtual Show Show { get; set; }
 		public string Role { get; set; }
 		public string Type { get; set; }

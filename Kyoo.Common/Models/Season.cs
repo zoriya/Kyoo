@@ -5,15 +5,15 @@ namespace Kyoo.Models
 {
 	public class Season
 	{
-		[JsonIgnore] public long ID  { get; set; }
-		[JsonIgnore] public long ShowID { get; set; }
+		[JsonIgnore] public int ID  { get; set; }
+		[JsonIgnore] public int ShowID { get; set; }
 
-		public long SeasonNumber { get; set; } = -1;
+		public int SeasonNumber { get; set; } = -1;
 
-		public string Slug => $"{Show.Title}-s{SeasonNumber}";
+		public string Slug => $"{Show.Slug}-s{SeasonNumber}";
 		public string Title { get; set; }
 		public string Overview { get; set; }
-		public long? Year { get; set; }
+		public int? Year { get; set; }
 
 		[JsonIgnore] public string ImgPrimary { get; set; }
 		public virtual IEnumerable<MetadataID> ExternalIDs { get; set; }
@@ -23,11 +23,11 @@ namespace Kyoo.Models
 
 		public Season() { }
 
-		public Season(long showID, 
-			long seasonNumber,
+		public Season(int showID, 
+			int seasonNumber,
 			string title, 
 			string overview,
-			long? year,
+			int? year,
 			string imgPrimary,
 			IEnumerable<MetadataID> externalIDs)
 		{

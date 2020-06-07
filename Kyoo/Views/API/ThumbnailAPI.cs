@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System.IO;
+using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Microsoft.AspNetCore.Authorization;
 
@@ -20,9 +21,9 @@ namespace Kyoo.Api
 
 		[HttpGet("poster/{showSlug}")]
 		[Authorize(Policy="Read")]
-		public IActionResult GetShowThumb(string showSlug)
+		public async Task<IActionResult> GetShowThumb(string showSlug)
 		{
-			string path = _libraryManager.GetShow(showSlug)?.Path;
+			string path = (await _libraryManager.GetShow(showSlug))?.Path;
 			if (path == null)
 				return NotFound();
 
@@ -35,9 +36,9 @@ namespace Kyoo.Api
 
 		[HttpGet("logo/{showSlug}")]
 		[Authorize(Policy="Read")]
-		public IActionResult GetShowLogo(string showSlug)
+		public async Task<IActionResult> GetShowLogo(string showSlug)
 		{
-			string path = _libraryManager.GetShow(showSlug)?.Path;
+			string path = (await _libraryManager.GetShow(showSlug))?.Path;
 			if (path == null)
 				return NotFound();
 
@@ -50,9 +51,9 @@ namespace Kyoo.Api
 
 		[HttpGet("backdrop/{showSlug}")]
 		[Authorize(Policy="Read")]
-		public IActionResult GetShowBackdrop(string showSlug)
+		public async Task<IActionResult> GetShowBackdrop(string showSlug)
 		{
-			string path = _libraryManager.GetShow(showSlug)?.Path;
+			string path = (await _libraryManager.GetShow(showSlug))?.Path;
 			if (path == null)
 				return NotFound();
 
@@ -76,9 +77,9 @@ namespace Kyoo.Api
 
 		[HttpGet("thumb/{showSlug}-s{seasonNumber}e{episodeNumber}")]
 		[Authorize(Policy="Read")]
-		public IActionResult GetEpisodeThumb(string showSlug, long seasonNumber, long episodeNumber)
+		public async Task<IActionResult> GetEpisodeThumb(string showSlug, int seasonNumber, int episodeNumber)
 		{
-			string path = _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber)?.Path;
+			string path = (await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber))?.Path;
 			if (path == null)
 				return NotFound();
 
