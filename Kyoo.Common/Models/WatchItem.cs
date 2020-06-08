@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Kyoo.Models.Watch;
 
 namespace Kyoo.Models
 {
@@ -14,7 +15,7 @@ namespace Kyoo.Models
 		public int SeasonNumber;
 		public int EpisodeNumber;
 		public string Title;
-		public string Link;
+		public string Slug;
 		public DateTime? ReleaseDate;
 		[JsonIgnore] public string Path;
 		public Episode PreviousEpisode;
@@ -47,7 +48,7 @@ namespace Kyoo.Models
 			Path = path;
 
 			Container = Path.Substring(Path.LastIndexOf('.') + 1);
-			Link = Episode.GetSlug(ShowSlug, seasonNumber, episodeNumber);
+			Slug = Episode.GetSlug(ShowSlug, seasonNumber, episodeNumber);
 		}
 
 		public WatchItem(int episodeID,
@@ -59,11 +60,13 @@ namespace Kyoo.Models
 			DateTime? releaseDate, 
 			string path, 
 			IEnumerable<Track> audios,
-			IEnumerable<Track> subtitles) 
+			IEnumerable<Track> subtitles,
+			Track video)
 			: this(episodeID, showTitle, showSlug, seasonNumber, episodeNumber, title, releaseDate, path)
 		{
 			Audios = audios;
 			Subtitles = subtitles;
+			Video = video;
 		}
 
 		public WatchItem(Episode episode)
@@ -74,7 +77,10 @@ namespace Kyoo.Models
 				episode.EpisodeNumber,
 				episode.Title,
 				episode.ReleaseDate,
-				episode.Path)
+				episode.Path,
+				episode.Tracks.Where(x => x.Type == StreamType.Audio),
+				episode.Tracks.Where(x => x.Type == StreamType.Subtitle),
+				episode.Tracks.FirstOrDefault(x => x.Type == StreamType.Video))
 		{
 			if (EpisodeNumber > 1)
 				PreviousEpisode = episode.Season.Episodes.FirstOrDefault(x => x.EpisodeNumber == EpisodeNumber - 1);

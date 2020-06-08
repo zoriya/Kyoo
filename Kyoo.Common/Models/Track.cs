@@ -87,25 +87,25 @@ namespace Kyoo.Models
 			}
 		}
 
-		public string Link
+		public string Slug
 		{
 			get
 			{
 				if (Type != StreamType.Subtitle)
 					return null;
-				string link = "/subtitle/" + Episode.Slug + "." + Language;
+				string slug = $"/subtitle/{Episode.Slug}.{Language ?? ID.ToString()}";
 				if (IsForced)
-					link += "-forced";
+					slug += "-forced";
 				switch (Codec)
 				{
 					case "ass":
-						link += ".ass";
+						slug += ".ass";
 						break;
 					case "subrip":
-						link += ".srt";
+						slug += ".srt";
 						break;
 				}
-				return link;
+				return slug;
 			}
 		}
 
@@ -127,11 +127,13 @@ namespace Kyoo.Models
 		}
 
 		//Converting mkv track language to c# system language tag.
-		public static string GetLanguage(string mkvLanguage)
+		private static string GetLanguage(string mkvLanguage)
 		{
-			if (mkvLanguage == "fre")
-				return "fra";
-			return mkvLanguage;
+			return mkvLanguage switch
+			{
+				"fre" => "fra",
+				_ => mkvLanguage
+			};
 		}
 	}
 }

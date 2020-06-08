@@ -70,6 +70,9 @@ namespace Kyoo.Controllers
 			if (obj.ExternalIDs != null)
 				foreach (MetadataID entry in obj.ExternalIDs)
 					_database.Entry(entry).State = EntityState.Added;
+			if (obj.Tracks != null)
+				foreach (Track entry in obj.Tracks)
+					_database.Entry(entry).State = EntityState.Added;
 			await _database.SaveChangesAsync();
 			return obj.ID;
 		}
