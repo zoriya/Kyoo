@@ -607,7 +607,7 @@ export class PlayerComponent implements OnInit
 			this.removeHtmlTrack();
 
 			if (subtitle.codec == "ass")
-				SubtitleManager.add(this.player, subtitle.link, true);
+				SubtitleManager.add(this.player, subtitle.slug, true);
 
 			else if (subtitle.codec == "subrip")
 			{
@@ -617,7 +617,7 @@ export class PlayerComponent implements OnInit
 				track.kind = "subtitles";
 				track.label = subtitle.displayName;
 				track.srclang = subtitle.language;
-				track.src = subtitle.link.replace(".srt", ".vtt");
+				track.src = subtitle.slug.replace(".srt", ".vtt");
 				track.classList.add("subtitle_container");
 				track.default = true;
 				track.onload = () =>

@@ -29,5 +29,5 @@ export interface Track
 	isDefault: boolean;
 	isForced: boolean;
 	codec: string;
-	link: string;
+	slug: string;
 }
