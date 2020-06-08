@@ -6,7 +6,7 @@ export interface Episode
 	episodeNumber: number;
 	title: string;
 	thumb: string;
-	link: string;
+	slug: string;
 	overview: string;
 	releaseDate;
 	runtime: number;

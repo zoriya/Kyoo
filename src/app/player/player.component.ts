@@ -52,8 +52,8 @@ export class PlayerComponent implements OnInit
 	private thumb: HTMLElement;
 	private progress: HTMLElement;
 	private buffered: HTMLElement;
-	
-	
+
+
 	private oidcSecurity: OidcSecurityService;
 
 	constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer, private snackBar: MatSnackBar, private title: Title, private router: Router, private location: Location, private injector: Injector) { }
@@ -78,7 +78,7 @@ export class PlayerComponent implements OnInit
 				this.title.setTitle(this.item.showTitle + " - Kyoo");
 			else
 				this.title.setTitle(this.item.showTitle + " S" + this.item.seasonNumber + ":E" + this.item.episodeNumber + " - Kyoo");
-			
+
 			if (navigator.userAgent.match(/Mobi/) && document.fullscreenElement == null)
 			{
 				this.fullscreen();
@@ -414,11 +414,11 @@ export class PlayerComponent implements OnInit
 
 		if (this.playMethod == method.direct)
 		{
-			this.player.src = "/video/" + this.item.link;
+			this.player.src = "/video/" + this.item.slug;
 		}
 		else if (this.playMethod == method.transmux)
 		{
-			this.hlsPlayer.loadSource("/video/transmux/" + this.item.link + "/");
+			this.hlsPlayer.loadSource("/video/transmux/" + this.item.slug + "/");
 			this.hlsPlayer.attachMedia(this.player);
 			this.hlsPlayer.on(Hls.Events.MANIFEST_LOADED, () =>
 			{
@@ -427,7 +427,7 @@ export class PlayerComponent implements OnInit
 		}
 		else
 		{
-			this.hlsPlayer.loadSource("/video/transcode/" + this.item.link + "/");
+			this.hlsPlayer.loadSource("/video/transcode/" + this.item.slug + "/");
 			this.hlsPlayer.attachMedia(this.player);
 			this.hlsPlayer.on(Hls.Events.MANIFEST_LOADED, () =>
 			{
@@ -444,7 +444,7 @@ export class PlayerComponent implements OnInit
 	next()
 	{
 		if (this.item.nextEpisode != null)
-			this.router.navigate(["/watch/" + this.item.nextEpisode.link], { queryParamsHandling: "merge", replaceUrl: true });
+			this.router.navigate(["/watch/" + this.item.nextEpisode.slug], { queryParamsHandling: "merge", replaceUrl: true });
 	}
 
 	previous()
@@ -620,7 +620,7 @@ export class PlayerComponent implements OnInit
 				track.src = subtitle.link.replace(".srt", ".vtt");
 				track.classList.add("subtitle_container");
 				track.default = true;
-				track.onload = () => 
+				track.onload = () =>
 				{
 					this.player.textTracks[0].mode = "showing";
 				};

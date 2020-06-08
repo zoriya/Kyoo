@@ -7,7 +7,7 @@ export interface WatchItem
 	seasonNumber: number;
 	episodeNumber: number;
 	title: string;
-	link: string;
+	slug: string;
 	duration: number;
 	releaseDate;
 	isMovie: boolean;

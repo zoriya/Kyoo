@@ -2,7 +2,7 @@
 	<div class="episodes" #scrollView (scroll)="onScroll()">
 		<div class="episode" *ngFor="let episode of this.episodes" #episodeDom >
 			<button mat-icon-button class="moreBtn" [matMenuTriggerFor]="more" [matMenuTriggerData]="{episode: episode}"><i class="material-icons">more_vert</i></button>
-			<a routerLink="/watch/{{episode.link}}" href="/watch/{{episode.link}}">
+			<a routerLink="/watch/{{episode.slug}}" href="/watch/{{episode.slug}}">
 				<div matRipple class="img" [style.background-image]="sanitize(episode.thumb)">
 					<button mat-icon-button class="playBtn"><i class="material-icons playIcon">play_circle_outline</i></button>
 				</div>
@@ -19,13 +19,13 @@
 			</a>
 		</div>
 	</div>
-	
+
 	<mat-menu #more="matMenu">
 		<ng-template matMenuContent let-episode="episode">
 			<a [href]="'/video/' + episode.link" download><button mat-menu-item>Download episode</button></a>
 		</ng-template>
 	</mat-menu>
-	
+
 	<button mat-raised-button color="accent" class="scrollBtn leftBtn d-none" #leftBtn (click)="scrollLeft()"><mat-icon>arrow_left</mat-icon></button>
 	<button mat-raised-button color="accent" class="scrollBtn rightBtn" #rightBtn (click)="scrollRight()"><mat-icon>arrow_right</mat-icon></button>
 </div>
