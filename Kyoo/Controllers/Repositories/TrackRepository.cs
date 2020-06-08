@@ -52,7 +52,6 @@ namespace Kyoo.Controllers
 			if (obj.EpisodeID <= 0)
 				throw new InvalidOperationException($"Can't store a track not related to any episode (episodeID: {obj.EpisodeID}).");
 			
-			obj.Episode = null;
 			await _database.Tracks.AddAsync(obj);
 			await _database.SaveChangesAsync();
 			return obj.ID;
