@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -5,7 +6,7 @@ using Kyoo.Models;
 
 namespace Kyoo.Controllers
 {
-	public interface IRepository<T>
+	public interface IRepository<T> : IDisposable, IAsyncDisposable
 	{
 		Task<T> Get(int id);
 		Task<T> Get(string slug);

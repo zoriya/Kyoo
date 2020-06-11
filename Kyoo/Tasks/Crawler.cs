@@ -63,6 +63,10 @@ namespace Kyoo.Controllers
 						await libraryManager.DeleteEpisode(episode);
 				}
 
+				// TODO replace this grotesque way to load the providers.
+				foreach (Library library in libraries)
+					library.Providers = library.Providers;
+				
 				await Task.WhenAll(libraries.Select(x => Scan(x, episodes, cancellationToken)));
 			}
 			catch (Exception ex)
@@ -72,7 +76,7 @@ namespace Kyoo.Controllers
 			Console.WriteLine("Scan finished!");
 		}
 
-		private Task Scan(Library library, ICollection<Episode> episodes, CancellationToken cancellationToken)
+		private Task Scan(Library library, IEnumerable<Episode> episodes, CancellationToken cancellationToken)
 		{
 			Console.WriteLine($"Scanning library {library.Name} at {string.Join(", ", library.Paths)}.");
 			return Task.WhenAll(library.Paths.Select(async path =>
@@ -106,16 +110,16 @@ namespace Kyoo.Controllers
 					return Task.CompletedTask;
 				}
 
-				// return Task.WhenAll(files.Select(file =>
-				foreach (string file in files)
+				return Task.WhenAll(files.Select(file =>
+				//foreach (string file in files)
 				{
 					if (!IsVideo(file) || episodes.Any(x => x.Path == file))
-						continue; //return Task.CompletedTask;
+						/*continue;*/ return Task.CompletedTask;
 					string relativePath = file.Substring(path.Length);
-					/*return*/ await RegisterFile(file, relativePath, library, cancellationToken);
-				}//));
+					return /*await*/ RegisterFile(file, relativePath, library, cancellationToken);
+				}));
 
-				return Task.CompletedTask;
+				// return Task.CompletedTask;
 			}));
 		}
 
