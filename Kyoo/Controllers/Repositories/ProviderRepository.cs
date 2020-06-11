@@ -80,7 +80,17 @@ namespace Kyoo.Controllers
 			ProviderID old = await Get(obj.Name);
 			if (old != null)
 				return old.ID;
-			return await Create(obj);
+			try
+			{
+				return await Create(obj);
+			}
+			catch (DuplicatedItemException)
+			{
+				old = await Get(obj.Name);
+				if (old == null)
+					throw new SystemException("Unknown database state.");
+				return old.ID;
+			}
 		}
 
 		public async Task Edit(ProviderID edited, bool resetOld)

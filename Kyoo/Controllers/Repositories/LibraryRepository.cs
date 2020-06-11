@@ -84,10 +84,20 @@ namespace Kyoo.Controllers
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
-			Library old = await Get(obj.Name);
+			Library old = await Get(obj.Slug);
 			if (old != null)
 				return old.ID;
-			return await Create(obj);
+			try
+			{
+				return await Create(obj);
+			}
+			catch (DuplicatedItemException)
+			{
+				old = await Get(obj.Slug);
+				if (old == null)
+					throw new SystemException("Unknown database state.");
+				return old.ID;
+			}
 		}
 
 		public async Task Edit(Library edited, bool resetOld)
