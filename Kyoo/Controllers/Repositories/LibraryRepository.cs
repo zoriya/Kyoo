@@ -101,7 +101,7 @@ namespace Kyoo.Controllers
 			obj.ProviderLinks = (await Task.WhenAll(obj.ProviderLinks.Select(async x =>
 			{
 				using IServiceScope serviceScope = _serviceProvider.CreateScope();
-				IProviderRepository providers = serviceScope.ServiceProvider.GetService<IProviderRepository>();
+				await using IProviderRepository providers = serviceScope.ServiceProvider.GetService<IProviderRepository>();
 				
 				x.ProviderID = await providers.CreateIfNotExists(x.Provider);
 				return x;

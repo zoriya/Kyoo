@@ -51,7 +51,7 @@ namespace Kyoo.Controllers
 			try
 			{
 				using IServiceScope serviceScope = _serviceProvider.CreateScope();
-				ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
+				await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
 				ICollection<Episode> episodes = await libraryManager.GetEpisodes();
 				ICollection<Library> libraries = argument == null 
 					? await libraryManager.GetLibraries()
@@ -129,7 +129,7 @@ namespace Kyoo.Controllers
 				return;
 			
 			using IServiceScope serviceScope = _serviceProvider.CreateScope();
-			ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
+			await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
 			
 			string patern = _config.GetValue<string>("regex");
 			Regex regex = new Regex(patern, RegexOptions.IgnoreCase);
