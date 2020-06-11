@@ -20,7 +20,17 @@ namespace Kyoo.Controllers
 			_database = database;
 			_serviceProvider = serviceProvider;
 		}
-		
+
+		public void Dispose()
+		{
+			_database.Dispose();
+		}
+
+		public ValueTask DisposeAsync()
+		{
+			return _database.DisposeAsync();
+		}
+
 		public Task<Library> Get(int id)
 		{
 			return _database.Libraries.FirstOrDefaultAsync(x => x.ID == id);

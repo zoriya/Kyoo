@@ -43,24 +43,32 @@ namespace Kyoo.Controllers
 		
 		public void Dispose()
 		{
-			_libraries?.Dispose();
-			_collections?.Dispose();
-			_shows?.Dispose();
-			_seasons?.Dispose();
-			_episodes?.Dispose();
-			_tracks?.Dispose();
-			_genres?.Dispose();
-			_studios?.Dispose();
-			_people?.Dispose();
-			_providers?.Dispose();
+			_libraries.Dispose();
+			_collections.Dispose();
+			_shows.Dispose();
+			_seasons.Dispose();
+			_episodes.Dispose();
+			_tracks.Dispose();
+			_genres.Dispose();
+			_studios.Dispose();
+			_people.Dispose();
+			_providers.Dispose();
 		}
 		
 		public async ValueTask DisposeAsync()
 		{
-			return ValueTask.(new []
-			{
-				_libraries.DisposeAsync()
-			});
+			await Task.WhenAll(
+				_libraries.DisposeAsync().AsTask(),
+				_collections.DisposeAsync().AsTask(),
+				_shows.DisposeAsync().AsTask(),
+				_seasons.DisposeAsync().AsTask(),
+				_episodes.DisposeAsync().AsTask(),
+				_tracks.DisposeAsync().AsTask(),
+				_genres.DisposeAsync().AsTask(),
+				_studios.DisposeAsync().AsTask(),
+				_people.DisposeAsync().AsTask(),
+				_providers.DisposeAsync().AsTask()
+			);
 		}
 
 		public Task<Library> GetLibrary(string slug)
