@@ -122,7 +122,7 @@ namespace Kyoo.Controllers
 				obj.GenreLinks = (await Task.WhenAll(obj.GenreLinks.Select(async x =>
 				{
 					using IServiceScope serviceScope = _serviceProvider.CreateScope();
-					IGenreRepository genres = serviceScope.ServiceProvider.GetService<IGenreRepository>();
+					await using IGenreRepository genres = serviceScope.ServiceProvider.GetService<IGenreRepository>();
 					
 					x.GenreID = await genres.CreateIfNotExists(x.Genre);
 					return x;
@@ -134,7 +134,7 @@ namespace Kyoo.Controllers
 				obj.People = (await Task.WhenAll(obj.People.Select(async x =>
 				{
 					using IServiceScope serviceScope = _serviceProvider.CreateScope();
-					IPeopleRepository people = serviceScope.ServiceProvider.GetService<IPeopleRepository>();
+					await using IPeopleRepository people = serviceScope.ServiceProvider.GetService<IPeopleRepository>();
 					
 					x.PeopleID = await people.CreateIfNotExists(x.People);
 					return x;
@@ -146,7 +146,7 @@ namespace Kyoo.Controllers
 				obj.ExternalIDs = (await Task.WhenAll(obj.ExternalIDs.Select(async x =>
 				{
 					using IServiceScope serviceScope = _serviceProvider.CreateScope();
-					IProviderRepository providers = serviceScope.ServiceProvider.GetService<IProviderRepository>();
+					await using IProviderRepository providers = serviceScope.ServiceProvider.GetService<IProviderRepository>();
 					
 					x.ProviderID = await providers.CreateIfNotExists(x.Provider);
 					return x;
