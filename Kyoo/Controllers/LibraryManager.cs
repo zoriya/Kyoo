@@ -40,6 +40,28 @@ namespace Kyoo.Controllers
 			_providers = providers;
 			_people = people;
 		}
+		
+		public void Dispose()
+		{
+			_libraries?.Dispose();
+			_collections?.Dispose();
+			_shows?.Dispose();
+			_seasons?.Dispose();
+			_episodes?.Dispose();
+			_tracks?.Dispose();
+			_genres?.Dispose();
+			_studios?.Dispose();
+			_people?.Dispose();
+			_providers?.Dispose();
+		}
+		
+		public async ValueTask DisposeAsync()
+		{
+			return ValueTask.(new []
+			{
+				_libraries.DisposeAsync()
+			});
+		}
 
 		public Task<Library> GetLibrary(string slug)
 		{
