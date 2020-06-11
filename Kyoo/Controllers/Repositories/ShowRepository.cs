@@ -24,6 +24,17 @@ namespace Kyoo.Controllers
 			_studios = studios;
 		}
 		
+		public void Dispose()
+		{
+			_database.Dispose();
+			_studios.Dispose();
+		}
+
+		public async ValueTask DisposeAsync()
+		{
+			await Task.WhenAll(_database.DisposeAsync().AsTask(), _studios.DisposeAsync().AsTask());
+		}
+		
 		public async Task<Show> Get(int id)
 		{
 			return await _database.Shows.FirstOrDefaultAsync(x => x.ID == id);

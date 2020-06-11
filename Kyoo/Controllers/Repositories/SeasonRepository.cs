@@ -21,6 +21,16 @@ namespace Kyoo.Controllers
 			_serviceProvider = serviceProvider;
 		}
 		
+		public void Dispose()
+		{
+			_database.Dispose();
+		}
+
+		public ValueTask DisposeAsync()
+		{
+			return _database.DisposeAsync();
+		}
+		
 		public async Task<Season> Get(int id)
 		{
 			return await _database.Seasons.FirstOrDefaultAsync(x => x.ID == id);

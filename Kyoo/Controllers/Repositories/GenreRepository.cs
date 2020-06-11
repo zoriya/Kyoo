@@ -17,6 +17,16 @@ namespace Kyoo.Controllers
 		{
 			_database = database;
 		}
+		
+		public void Dispose()
+		{
+			_database.Dispose();
+		}
+
+		public ValueTask DisposeAsync()
+		{
+			return _database.DisposeAsync();
+		}
 
 		public async Task<Genre> Get(int id)
 		{
