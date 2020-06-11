@@ -56,8 +56,19 @@ namespace Kyoo.Controllers
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
-			await _database.Providers.AddAsync(obj);
-			await _database.SaveChangesAsync();
+			_database.Entry(obj).State = EntityState.Added;
+
+			try
+			{
+				await _database.SaveChangesAsync();
+			}
+			catch (DbUpdateException ex)
+			{
+				if (Helper.IsDuplicateException(ex))
+					throw new DuplicatedItemException($"Trying to insert a duplicated provider (name {obj.Name} already exists).");
+				throw;
+			}
+			
 			return obj.ID;
 		}
 		

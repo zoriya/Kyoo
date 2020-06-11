@@ -57,7 +57,18 @@ namespace Kyoo.Controllers
 				throw new ArgumentNullException(nameof(obj));
 
 			await _database.Genres.AddAsync(obj);
-			await _database.SaveChangesAsync();
+			
+			try
+			{
+				await _database.SaveChangesAsync();
+			}
+			catch (DbUpdateException ex)
+			{
+				if (Helper.IsDuplicateException(ex))
+					throw new DuplicatedItemException($"Trying to insert a duplicated genre (slug {obj.Slug} already exists).");
+				throw;
+			}
+			
 			return obj.ID;
 		}
 
