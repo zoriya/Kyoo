@@ -6,6 +6,7 @@ using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 
 namespace Kyoo.Controllers
 {
@@ -83,7 +84,17 @@ namespace Kyoo.Controllers
 			if (obj.Tracks != null)
 				foreach (Track entry in obj.Tracks)
 					_database.Entry(entry).State = EntityState.Added;
-			await _database.SaveChangesAsync();
+			
+			try
+			{
+				await _database.SaveChangesAsync();
+			}
+			catch (DbUpdateException ex)
+			{
+				if (Helper.IsDuplicateException(ex))
+					throw new DuplicatedItemException($"Trying to insert a duplicated episode (slug {obj.Slug} already exists).");
+				throw;
+			}
 			return obj.ID;
 		}
 		

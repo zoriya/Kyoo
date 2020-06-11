@@ -57,14 +57,15 @@ namespace Kyoo.Controllers
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
+			_database.Entry(obj).State = EntityState.Added;
+			
 			try
 			{
-				await _database.Collections.AddAsync(obj);
 				await _database.SaveChangesAsync();
 			}
 			catch (DbUpdateException ex)
 			{
-				if (ex.InnerException is PostgresException inner && inner.SqlState == PostgresErrorCodes.UniqueViolation)
+				if (Helper.IsDuplicateException(ex))
 					throw new DuplicatedItemException($"Trying to insert a duplicated collection (slug {obj.Slug} already exists).");
 				throw;
 			}

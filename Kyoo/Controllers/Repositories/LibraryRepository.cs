@@ -64,7 +64,18 @@ namespace Kyoo.Controllers
 			if (obj.ProviderLinks != null)
 				foreach (ProviderLink entry in obj.ProviderLinks)
 					_database.Entry(entry).State = EntityState.Added;
-			await _database.SaveChangesAsync();
+			
+			try
+			{
+				await _database.SaveChangesAsync();
+			}
+			catch (DbUpdateException ex)
+			{
+				if (Helper.IsDuplicateException(ex))
+					throw new DuplicatedItemException($"Trying to insert a duplicated library (slug {obj.Slug} already exists).");
+				throw;
+			}
+			
 			return obj.ID;
 		}
 		
