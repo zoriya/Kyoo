@@ -49,21 +49,6 @@ namespace Kyoo
 
 	}
 
-	public class DatabaseFactory
-	{
-		private readonly DbContextOptions<DatabaseContext> _options;
-		
-		public DatabaseFactory(DbContextOptions<DatabaseContext> options)
-		{
-			_options = options;
-		}
-
-		public DatabaseContext NewDatabaseConnection()
-		{
-			return new DatabaseContext(_options);
-		}
-	}
-
 	public class DatabaseContext : DbContext
 	{
 		public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) { }

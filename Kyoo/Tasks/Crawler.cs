@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Kyoo.Models.Exceptions;
 using Kyoo.Models.Watch;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -40,7 +41,9 @@ namespace Kyoo.Controllers
 			return null;
 		}
 		
-		public async Task Run(IServiceProvider serviceProvider, CancellationToken cancellationToken, string argument = null)
+		public async Task Run(IServiceProvider serviceProvider, 
+			CancellationToken cancellationToken, 
+			string argument = null)
 		{
 			_serviceProvider = serviceProvider;
 			_thumbnailsManager = serviceProvider.GetService<IThumbnailsManager>();
@@ -68,7 +71,6 @@ namespace Kyoo.Controllers
 					library.Providers = library.Providers;
 				
 				await Task.WhenAll(libraries.Select(x => Scan(x, episodes, cancellationToken)).ToArray());
-				Console.WriteLine("Done.");
 			}
 			catch (Exception ex)
 			{
@@ -111,6 +113,8 @@ namespace Kyoo.Controllers
 					return Task.CompletedTask;
 				}
 
+				// TODO Should register shows first to prevent all tasks of a same show to register it 150+ times.
+				
 				return Task.WhenAll(files.Select(file =>
 				{
 					if (!IsVideo(file) || episodes.Any(x => x.Path == file))
@@ -118,6 +122,7 @@ namespace Kyoo.Controllers
 					string relativePath = file.Substring(path.Length);
 					return RegisterFile(file, relativePath, library, cancellationToken);
 				}).ToArray());
+				
 			}).ToArray());
 		}
 
@@ -166,8 +171,16 @@ namespace Kyoo.Controllers
 			if (collection != null)
 				return collection;
 			collection = await _metadataProvider.GetCollectionFromName(collectionName, library);
-			await libraryManager.RegisterCollection(collection);
-			return collection;
+
+			try
+			{
+				await libraryManager.RegisterCollection(collection);
+				return collection;
+			}
+			catch (DuplicatedItemException)
+			{
+				return await libraryManager.GetCollection(collection.Slug);
+			}
 		}
 		
 		private async Task<Show> GetShow(ILibraryManager libraryManager, 
@@ -182,10 +195,18 @@ namespace Kyoo.Controllers
 			show = await _metadataProvider.SearchShow(showTitle, isMovie, library);
 			show.Path = showPath;
 			show.People = await _metadataProvider.GetPeople(show, library);
-			await libraryManager.RegisterShow(show);
-			await _thumbnailsManager.Validate(show.People);
-			await _thumbnailsManager.Validate(show);
-			return show;
+
+			try
+			{
+				await libraryManager.RegisterShow(show);
+				await _thumbnailsManager.Validate(show.People);
+				await _thumbnailsManager.Validate(show);
+				return show;
+			}
+			catch (DuplicatedItemException)
+			{
+				return await libraryManager.GetShow(show.Slug);
+			}
 		}
 
 		private async Task<Season> GetSeason(ILibraryManager libraryManager, 
@@ -199,8 +220,15 @@ namespace Kyoo.Controllers
 			if (season == null)
 			{
 				season = await _metadataProvider.GetSeason(show, seasonNumber, library);
-				await libraryManager.RegisterSeason(season);
-				await _thumbnailsManager.Validate(season);
+				try
+				{
+					await libraryManager.RegisterSeason(season);
+					await _thumbnailsManager.Validate(season);
+				}
+				catch (DuplicatedItemException)
+				{
+					season = await libraryManager.GetSeason(show.Slug, season.SeasonNumber);
+				}
 			}
 			season.Show = show;
 			return season;

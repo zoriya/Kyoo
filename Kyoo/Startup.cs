@@ -43,11 +43,6 @@ namespace Kyoo
 			services.AddControllers().AddNewtonsoftJson();
 			services.AddHttpClient();
 
-			services.AddSingleton(x => new DatabaseFactory(
-				new DbContextOptionsBuilder<DatabaseContext>()
-					.UseLazyLoadingProxies()
-					.UseNpgsql(_configuration.GetConnectionString("Database")).Options));
-			
 			services.AddDbContext<DatabaseContext>(options =>
 			{
 				options.UseLazyLoadingProxies()
