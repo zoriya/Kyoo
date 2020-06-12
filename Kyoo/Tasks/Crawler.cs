@@ -67,7 +67,8 @@ namespace Kyoo.Controllers
 				foreach (Library library in libraries)
 					library.Providers = library.Providers;
 				
-				await Task.WhenAll(libraries.Select(x => Scan(x, episodes, cancellationToken)));
+				await Task.WhenAll(libraries.Select(x => Scan(x, episodes, cancellationToken)).ToArray());
+				Console.WriteLine("Done.");
 			}
 			catch (Exception ex)
 			{
@@ -79,7 +80,7 @@ namespace Kyoo.Controllers
 		private Task Scan(Library library, IEnumerable<Episode> episodes, CancellationToken cancellationToken)
 		{
 			Console.WriteLine($"Scanning library {library.Name} at {string.Join(", ", library.Paths)}.");
-			return Task.WhenAll(library.Paths.Select(async path =>
+			return Task.WhenAll(library.Paths.Select(path =>
 			{
 				if (cancellationToken.IsCancellationRequested)
 					return Task.CompletedTask;
@@ -91,36 +92,33 @@ namespace Kyoo.Controllers
 				}
 				catch (DirectoryNotFoundException)
 				{
-					await Console.Error.WriteLineAsync($"The library's directory {path} could not be found (library slug: {library.Slug})");
+					Console.Error.WriteLine($"The library's directory {path} could not be found (library slug: {library.Slug})");
 					return Task.CompletedTask;
 				}
 				catch (PathTooLongException)
 				{
-					await Console.Error.WriteLineAsync($"The library's directory {path} is too long for this system. (library slug: {library.Slug})");
+					Console.Error.WriteLine($"The library's directory {path} is too long for this system. (library slug: {library.Slug})");
 					return Task.CompletedTask;
 				}
 				catch (ArgumentException)
 				{
-					await Console.Error.WriteLineAsync($"The library's directory {path} is invalid. (library slug: {library.Slug})");
+					Console.Error.WriteLine($"The library's directory {path} is invalid. (library slug: {library.Slug})");
 					return Task.CompletedTask;
 				}
 				catch (UnauthorizedAccessException)
 				{
-					await Console.Error.WriteLineAsync($"Permission denied: can't access library's directory at {path}. (library slug: {library.Slug})");
+					Console.Error.WriteLine($"Permission denied: can't access library's directory at {path}. (library slug: {library.Slug})");
 					return Task.CompletedTask;
 				}
 
 				return Task.WhenAll(files.Select(file =>
-				//foreach (string file in files)
 				{
 					if (!IsVideo(file) || episodes.Any(x => x.Path == file))
-						/*continue;*/ return Task.CompletedTask;
+						return Task.CompletedTask;
 					string relativePath = file.Substring(path.Length);
-					return /*await*/ RegisterFile(file, relativePath, library, cancellationToken);
-				}));
-
-				// return Task.CompletedTask;
-			}));
+					return RegisterFile(file, relativePath, library, cancellationToken);
+				}).ToArray());
+			}).ToArray());
 		}
 
 		private async Task RegisterFile(string path, string relativePath, Library library, CancellationToken token)
