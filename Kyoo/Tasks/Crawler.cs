@@ -72,13 +72,13 @@ namespace Kyoo.Controllers
 			Console.WriteLine("Scan finished!");
 		}
 
-		private Task Scan(Library library, ICollection<Episode> episodes, CancellationToken cancellationToken)
+		private async Task Scan(Library library, ICollection<Episode> episodes, CancellationToken cancellationToken)
 		{
 			Console.WriteLine($"Scanning library {library.Name} at {string.Join(", ", library.Paths)}.");
-			return Task.WhenAll(library.Paths.Select(async path =>
+			foreach (string path in library.Paths)
 			{
 				if (cancellationToken.IsCancellationRequested)
-					return Task.CompletedTask;
+					return;
 				
 				string[] files;
 				try
@@ -87,23 +87,23 @@ namespace Kyoo.Controllers
 				}
 				catch (DirectoryNotFoundException)
 				{
-					await Console.Error.WriteLineAsync($"The library's directory {path} could not be found (library slug: {library.Slug})");
-					return Task.CompletedTask;
+					Console.Error.WriteLine($"The library's directory {path} could not be found (library slug: {library.Slug})");
+					return;
 				}
 				catch (PathTooLongException)
 				{
-					await Console.Error.WriteLineAsync($"The library's directory {path} is too long for this system. (library slug: {library.Slug})");
-					return Task.CompletedTask;
+					Console.Error.WriteLine($"The library's directory {path} is too long for this system. (library slug: {library.Slug})");
+					return;
 				}
 				catch (ArgumentException)
 				{
-					await Console.Error.WriteLineAsync($"The library's directory {path} is invalid. (library slug: {library.Slug})");
-					return Task.CompletedTask;
+					Console.Error.WriteLine($"The library's directory {path} is invalid. (library slug: {library.Slug})");
+					return;
 				}
 				catch (UnauthorizedAccessException)
 				{
-					await Console.Error.WriteLineAsync($"Permission denied: can't access library's directory at {path}. (library slug: {library.Slug})");
-					return Task.CompletedTask;
+					Console.Error.WriteLine($"Permission denied: can't access library's directory at {path}. (library slug: {library.Slug})");
+					return;
 				}
 
 				// return Task.WhenAll(files.Select(file =>
@@ -114,9 +114,7 @@ namespace Kyoo.Controllers
 					string relativePath = file.Substring(path.Length);
 					/*return*/ await RegisterFile(file, relativePath, library, cancellationToken);
 				}//));
-
-				return Task.CompletedTask;
-			}));
+			}//));
 		}
 
 		private async Task RegisterFile(string path, string relativePath, Library library, CancellationToken token)
