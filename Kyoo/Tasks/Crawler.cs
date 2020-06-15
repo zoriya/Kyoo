@@ -31,7 +31,7 @@ namespace Kyoo.Controllers
 		public async Task<IEnumerable<string>> GetPossibleParameters()
 		{
 			using IServiceScope serviceScope = _serviceProvider.CreateScope();
-			ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
+			await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
 			return (await libraryManager.GetLibraries()).Select(x => x.Slug);
 		}
 
@@ -82,10 +82,10 @@ namespace Kyoo.Controllers
 		private Task Scan(Library library, IEnumerable<Episode> episodes, CancellationToken cancellationToken)
 		{
 			Console.WriteLine($"Scanning library {library.Name} at {string.Join(", ", library.Paths)}.");
-			return Task.WhenAll(library.Paths.Select(path =>
+			return Task.WhenAll(library.Paths.Select(async path =>
 			{
 				if (cancellationToken.IsCancellationRequested)
-					return Task.CompletedTask;
+					return;
 				
 				string[] files;
 				try
@@ -94,35 +94,39 @@ namespace Kyoo.Controllers
 				}
 				catch (DirectoryNotFoundException)
 				{
-					Console.Error.WriteLine($"The library's directory {path} could not be found (library slug: {library.Slug})");
-					return Task.CompletedTask;
+					await Console.Error.WriteLineAsync($"The library's directory {path} could not be found (library slug: {library.Slug})");
+					return;
 				}
 				catch (PathTooLongException)
 				{
-					Console.Error.WriteLine($"The library's directory {path} is too long for this system. (library slug: {library.Slug})");
-					return Task.CompletedTask;
+					await Console.Error.WriteLineAsync($"The library's directory {path} is too long for this system. (library slug: {library.Slug})");
+					return;
 				}
 				catch (ArgumentException)
 				{
-					Console.Error.WriteLine($"The library's directory {path} is invalid. (library slug: {library.Slug})");
-					return Task.CompletedTask;
+					await Console.Error.WriteLineAsync($"The library's directory {path} is invalid. (library slug: {library.Slug})");
+					return;
 				}
 				catch (UnauthorizedAccessException)
 				{
-					Console.Error.WriteLine($"Permission denied: can't access library's directory at {path}. (library slug: {library.Slug})");
-					return Task.CompletedTask;
+					await Console.Error.WriteLineAsync($"Permission denied: can't access library's directory at {path}. (library slug: {library.Slug})");
+					return;
 				}
 
-				// TODO Should register shows first to prevent all tasks of a same show to register it 150+ times.
+				List<IGrouping<string, string>> shows =  files
+					.Where(x => IsVideo(x) && episodes.All(y => y.Path != x))
+					.GroupBy(Path.GetDirectoryName)
+					.ToList();
 				
-				return Task.WhenAll(files.Select(file =>
-				{
-					if (!IsVideo(file) || episodes.Any(x => x.Path == file))
-						return Task.CompletedTask;
-					string relativePath = file.Substring(path.Length);
-					return RegisterFile(file, relativePath, library, cancellationToken);
-				}).ToArray());
+				await Task.WhenAll(shows
+					.Select(x => x.First())
+					.Select(x => RegisterFile(x, x.Substring(path.Length), library, cancellationToken))
+					.ToArray());
 				
+				await Task.WhenAll(shows
+					.SelectMany(x => x.Skip(1))
+					.Select(x => RegisterFile(x, x.Substring(path.Length), library, cancellationToken))
+					.ToArray());
 			}).ToArray());
 		}
 
