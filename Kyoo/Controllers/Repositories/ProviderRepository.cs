@@ -18,6 +18,16 @@ namespace Kyoo.Controllers
 			_database = database;
 		}
 		
+		public void Dispose()
+		{
+			_database.Dispose();
+		}
+
+		public ValueTask DisposeAsync()
+		{
+			return _database.DisposeAsync();
+		}
+		
 		public async Task<ProviderID> Get(int id)
 		{
 			return await _database.Providers.FirstOrDefaultAsync(x => x.ID == id);
@@ -46,8 +56,19 @@ namespace Kyoo.Controllers
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
-			await _database.Providers.AddAsync(obj);
-			await _database.SaveChangesAsync();
+			_database.Entry(obj).State = EntityState.Added;
+
+			try
+			{
+				await _database.SaveChangesAsync();
+			}
+			catch (DbUpdateException ex)
+			{
+				if (Helper.IsDuplicateException(ex))
+					throw new DuplicatedItemException($"Trying to insert a duplicated provider (name {obj.Name} already exists).");
+				throw;
+			}
+			
 			return obj.ID;
 		}
 		
@@ -59,7 +80,17 @@ namespace Kyoo.Controllers
 			ProviderID old = await Get(obj.Name);
 			if (old != null)
 				return old.ID;
-			return await Create(obj);
+			try
+			{
+				return await Create(obj);
+			}
+			catch (DuplicatedItemException)
+			{
+				old = await Get(obj.Name);
+				if (old == null)
+					throw new SystemException("Unknown database state.");
+				return old.ID;
+			}
 		}
 
 		public async Task Edit(ProviderID edited, bool resetOld)

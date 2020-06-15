@@ -24,6 +24,17 @@ namespace Kyoo.Controllers
 			_studios = studios;
 		}
 		
+		public void Dispose()
+		{
+			_database.Dispose();
+			_studios.Dispose();
+		}
+
+		public async ValueTask DisposeAsync()
+		{
+			await Task.WhenAll(_database.DisposeAsync().AsTask(), _studios.DisposeAsync().AsTask());
+		}
+		
 		public async Task<Show> Get(int id)
 		{
 			return await _database.Shows.FirstOrDefaultAsync(x => x.ID == id);
@@ -69,7 +80,18 @@ namespace Kyoo.Controllers
 			if (obj.ExternalIDs != null)
 				foreach (MetadataID entry in obj.ExternalIDs)
 					_database.Entry(entry).State = EntityState.Added;
-			await _database.SaveChangesAsync();
+			
+			try
+			{
+				await _database.SaveChangesAsync();
+			}
+			catch (DbUpdateException ex)
+			{
+				if (Helper.IsDuplicateException(ex))
+					throw new DuplicatedItemException($"Trying to insert a duplicated show (slug {obj.Slug} already exists).");
+				throw;
+			}
+			
 			return obj.ID;
 		}
 		
@@ -81,7 +103,17 @@ namespace Kyoo.Controllers
 			Show old = await Get(obj.Slug);
 			if (old != null)
 				return old.ID;
-			return await Create(obj);
+			try
+			{
+				return await Create(obj);
+			}
+			catch (DuplicatedItemException)
+			{
+				old = await Get(obj.Slug);
+				if (old == null)
+					throw new SystemException("Unknown database state.");
+				return old.ID;
+			}
 		}
 
 		public async Task Edit(Show edited, bool resetOld)
@@ -111,7 +143,7 @@ namespace Kyoo.Controllers
 				obj.GenreLinks = (await Task.WhenAll(obj.GenreLinks.Select(async x =>
 				{
 					using IServiceScope serviceScope = _serviceProvider.CreateScope();
-					IGenreRepository genres = serviceScope.ServiceProvider.GetService<IGenreRepository>();
+					await using IGenreRepository genres = serviceScope.ServiceProvider.GetService<IGenreRepository>();
 					
 					x.GenreID = await genres.CreateIfNotExists(x.Genre);
 					return x;
@@ -123,7 +155,7 @@ namespace Kyoo.Controllers
 				obj.People = (await Task.WhenAll(obj.People.Select(async x =>
 				{
 					using IServiceScope serviceScope = _serviceProvider.CreateScope();
-					IPeopleRepository people = serviceScope.ServiceProvider.GetService<IPeopleRepository>();
+					await using IPeopleRepository people = serviceScope.ServiceProvider.GetService<IPeopleRepository>();
 					
 					x.PeopleID = await people.CreateIfNotExists(x.People);
 					return x;
@@ -135,7 +167,7 @@ namespace Kyoo.Controllers
 				obj.ExternalIDs = (await Task.WhenAll(obj.ExternalIDs.Select(async x =>
 				{
 					using IServiceScope serviceScope = _serviceProvider.CreateScope();
-					IProviderRepository providers = serviceScope.ServiceProvider.GetService<IProviderRepository>();
+					await using IProviderRepository providers = serviceScope.ServiceProvider.GetService<IProviderRepository>();
 					
 					x.ProviderID = await providers.CreateIfNotExists(x.Provider);
 					return x;

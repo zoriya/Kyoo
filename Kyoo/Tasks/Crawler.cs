@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Kyoo.Models.Exceptions;
 using Kyoo.Models.Watch;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -30,7 +31,7 @@ namespace Kyoo.Controllers
 		public async Task<IEnumerable<string>> GetPossibleParameters()
 		{
 			using IServiceScope serviceScope = _serviceProvider.CreateScope();
-			ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
+			await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
 			return (await libraryManager.GetLibraries()).Select(x => x.Slug);
 		}
 
@@ -40,7 +41,9 @@ namespace Kyoo.Controllers
 			return null;
 		}
 		
-		public async Task Run(IServiceProvider serviceProvider, CancellationToken cancellationToken, string argument = null)
+		public async Task Run(IServiceProvider serviceProvider, 
+			CancellationToken cancellationToken, 
+			string argument = null)
 		{
 			_serviceProvider = serviceProvider;
 			_thumbnailsManager = serviceProvider.GetService<IThumbnailsManager>();
@@ -51,7 +54,7 @@ namespace Kyoo.Controllers
 			try
 			{
 				using IServiceScope serviceScope = _serviceProvider.CreateScope();
-				ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
+				await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
 				ICollection<Episode> episodes = await libraryManager.GetEpisodes();
 				ICollection<Library> libraries = argument == null 
 					? await libraryManager.GetLibraries()
@@ -63,7 +66,11 @@ namespace Kyoo.Controllers
 						await libraryManager.DeleteEpisode(episode);
 				}
 
-				await Task.WhenAll(libraries.Select(x => Scan(x, episodes, cancellationToken)));
+				// TODO replace this grotesque way to load the providers.
+				foreach (Library library in libraries)
+					library.Providers = library.Providers;
+				
+				await Task.WhenAll(libraries.Select(x => Scan(x, episodes, cancellationToken)).ToArray());
 			}
 			catch (Exception ex)
 			{
@@ -72,10 +79,10 @@ namespace Kyoo.Controllers
 			Console.WriteLine("Scan finished!");
 		}
 
-		private async Task Scan(Library library, ICollection<Episode> episodes, CancellationToken cancellationToken)
+		private Task Scan(Library library, IEnumerable<Episode> episodes, CancellationToken cancellationToken)
 		{
 			Console.WriteLine($"Scanning library {library.Name} at {string.Join(", ", library.Paths)}.");
-			foreach (string path in library.Paths)
+			return Task.WhenAll(library.Paths.Select(async path =>
 			{
 				if (cancellationToken.IsCancellationRequested)
 					return;
@@ -87,34 +94,40 @@ namespace Kyoo.Controllers
 				}
 				catch (DirectoryNotFoundException)
 				{
-					Console.Error.WriteLine($"The library's directory {path} could not be found (library slug: {library.Slug})");
+					await Console.Error.WriteLineAsync($"The library's directory {path} could not be found (library slug: {library.Slug})");
 					return;
 				}
 				catch (PathTooLongException)
 				{
-					Console.Error.WriteLine($"The library's directory {path} is too long for this system. (library slug: {library.Slug})");
+					await Console.Error.WriteLineAsync($"The library's directory {path} is too long for this system. (library slug: {library.Slug})");
 					return;
 				}
 				catch (ArgumentException)
 				{
-					Console.Error.WriteLine($"The library's directory {path} is invalid. (library slug: {library.Slug})");
+					await Console.Error.WriteLineAsync($"The library's directory {path} is invalid. (library slug: {library.Slug})");
 					return;
 				}
 				catch (UnauthorizedAccessException)
 				{
-					Console.Error.WriteLine($"Permission denied: can't access library's directory at {path}. (library slug: {library.Slug})");
+					await Console.Error.WriteLineAsync($"Permission denied: can't access library's directory at {path}. (library slug: {library.Slug})");
 					return;
 				}
 
-				// return Task.WhenAll(files.Select(file =>
-				foreach (string file in files)
-				{
-					if (!IsVideo(file) || episodes.Any(x => x.Path == file))
-						continue; //return Task.CompletedTask;
-					string relativePath = file.Substring(path.Length);
-					/*return*/ await RegisterFile(file, relativePath, library, cancellationToken);
-				}//));
-			}//));
+				List<IGrouping<string, string>> shows =  files
+					.Where(x => IsVideo(x) && episodes.All(y => y.Path != x))
+					.GroupBy(Path.GetDirectoryName)
+					.ToList();
+				
+				await Task.WhenAll(shows
+					.Select(x => x.First())
+					.Select(x => RegisterFile(x, x.Substring(path.Length), library, cancellationToken))
+					.ToArray());
+				
+				await Task.WhenAll(shows
+					.SelectMany(x => x.Skip(1))
+					.Select(x => RegisterFile(x, x.Substring(path.Length), library, cancellationToken))
+					.ToArray());
+			}).ToArray());
 		}
 
 		private async Task RegisterFile(string path, string relativePath, Library library, CancellationToken token)
@@ -123,7 +136,7 @@ namespace Kyoo.Controllers
 				return;
 			
 			using IServiceScope serviceScope = _serviceProvider.CreateScope();
-			ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
+			await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
 			
 			string patern = _config.GetValue<string>("regex");
 			Regex regex = new Regex(patern, RegexOptions.IgnoreCase);
@@ -162,8 +175,16 @@ namespace Kyoo.Controllers
 			if (collection != null)
 				return collection;
 			collection = await _metadataProvider.GetCollectionFromName(collectionName, library);
-			await libraryManager.RegisterCollection(collection);
-			return collection;
+
+			try
+			{
+				await libraryManager.RegisterCollection(collection);
+				return collection;
+			}
+			catch (DuplicatedItemException)
+			{
+				return await libraryManager.GetCollection(collection.Slug);
+			}
 		}
 		
 		private async Task<Show> GetShow(ILibraryManager libraryManager, 
@@ -178,10 +199,18 @@ namespace Kyoo.Controllers
 			show = await _metadataProvider.SearchShow(showTitle, isMovie, library);
 			show.Path = showPath;
 			show.People = await _metadataProvider.GetPeople(show, library);
-			await libraryManager.RegisterShow(show);
-			await _thumbnailsManager.Validate(show.People);
-			await _thumbnailsManager.Validate(show);
-			return show;
+
+			try
+			{
+				await libraryManager.RegisterShow(show);
+				await _thumbnailsManager.Validate(show.People);
+				await _thumbnailsManager.Validate(show);
+				return show;
+			}
+			catch (DuplicatedItemException)
+			{
+				return await libraryManager.GetShow(show.Slug);
+			}
 		}
 
 		private async Task<Season> GetSeason(ILibraryManager libraryManager, 
@@ -195,8 +224,15 @@ namespace Kyoo.Controllers
 			if (season == null)
 			{
 				season = await _metadataProvider.GetSeason(show, seasonNumber, library);
-				await libraryManager.RegisterSeason(season);
-				await _thumbnailsManager.Validate(season);
+				try
+				{
+					await libraryManager.RegisterSeason(season);
+					await _thumbnailsManager.Validate(season);
+				}
+				catch (DuplicatedItemException)
+				{
+					season = await libraryManager.GetSeason(show.Slug, season.SeasonNumber);
+				}
 			}
 			season.Show = show;
 			return season;

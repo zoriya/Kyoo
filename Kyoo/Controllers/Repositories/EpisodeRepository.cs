@@ -6,6 +6,7 @@ using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Npgsql;
 
 namespace Kyoo.Controllers
 {
@@ -19,6 +20,16 @@ namespace Kyoo.Controllers
 		{
 			_database = database;
 			_serviceProvider = serviceProvider;
+		}
+		
+		public void Dispose()
+		{
+			_database.Dispose();
+		}
+
+		public ValueTask DisposeAsync()
+		{
+			return _database.DisposeAsync();
 		}
 		
 		public async Task<Episode> Get(int id)
@@ -73,7 +84,17 @@ namespace Kyoo.Controllers
 			if (obj.Tracks != null)
 				foreach (Track entry in obj.Tracks)
 					_database.Entry(entry).State = EntityState.Added;
-			await _database.SaveChangesAsync();
+			
+			try
+			{
+				await _database.SaveChangesAsync();
+			}
+			catch (DbUpdateException ex)
+			{
+				if (Helper.IsDuplicateException(ex))
+					throw new DuplicatedItemException($"Trying to insert a duplicated episode (slug {obj.Slug} already exists).");
+				throw;
+			}
 			return obj.ID;
 		}
 		
@@ -85,7 +106,17 @@ namespace Kyoo.Controllers
 			Episode old = await Get(obj.Slug);
 			if (old != null)
 				return old.ID;
-			return await Create(obj);
+			try
+			{
+				return await Create(obj);
+			}
+			catch (DuplicatedItemException)
+			{
+				old = await Get(obj.Slug);
+				if (old == null)
+					throw new SystemException("Unknown database state.");
+				return old.ID;
+			}
 		}
 
 		public async Task Edit(Episode edited, bool resetOld)
@@ -116,7 +147,7 @@ namespace Kyoo.Controllers
 				obj.ExternalIDs = (await Task.WhenAll(obj.ExternalIDs.Select(async x =>
 				{
 					using IServiceScope serviceScope = _serviceProvider.CreateScope();
-					IProviderRepository providers = serviceScope.ServiceProvider.GetService<IProviderRepository>();
+					await using IProviderRepository providers = serviceScope.ServiceProvider.GetService<IProviderRepository>();
 
 					x.ProviderID = await providers.CreateIfNotExists(x.Provider);
 					return x;
