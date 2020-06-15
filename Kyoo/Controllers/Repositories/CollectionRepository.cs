@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace Kyoo.Controllers
 {
@@ -16,6 +17,16 @@ namespace Kyoo.Controllers
 		public CollectionRepository(DatabaseContext database)
 		{
 			_database = database;
+		}
+		
+		public void Dispose()
+		{
+			_database.Dispose();
+		}
+
+		public ValueTask DisposeAsync()
+		{
+			return _database.DisposeAsync();
 		}
 		
 		public Task<Collection> Get(int id)
@@ -45,9 +56,20 @@ namespace Kyoo.Controllers
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
+
+			_database.Entry(obj).State = EntityState.Added;
 			
-			await _database.Collections.AddAsync(obj);
-			await _database.SaveChangesAsync();
+			try
+			{
+				await _database.SaveChangesAsync();
+			}
+			catch (DbUpdateException ex)
+			{
+				if (Helper.IsDuplicateException(ex))
+					throw new DuplicatedItemException($"Trying to insert a duplicated collection (slug {obj.Slug} already exists).");
+				throw;
+			}
+
 			return obj.ID;
 		}
 		
@@ -59,7 +81,17 @@ namespace Kyoo.Controllers
 			Collection old = await Get(obj.Slug);
 			if (old != null)
 				return old.ID;
-			return await Create(obj);
+			try
+			{
+				return await Create(obj);
+			}
+			catch (DuplicatedItemException)
+			{
+				old = await Get(obj.Slug);
+				if (old == null)
+					throw new SystemException("Unknown database state.");
+				return old.ID;
+			}
 		}
 
 		public async Task Edit(Collection edited, bool resetOld)

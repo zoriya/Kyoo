@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Kyoo.Models;
 
 namespace Kyoo.Controllers
 {
-	public interface ILibraryManager
+	public interface ILibraryManager : IDisposable, IAsyncDisposable
 	{
 		// Get by slug
 		Task<Library> GetLibrary(string slug);

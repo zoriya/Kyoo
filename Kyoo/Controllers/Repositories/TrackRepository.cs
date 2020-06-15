@@ -17,6 +17,16 @@ namespace Kyoo.Controllers
 			_database = database;
 		}
 		
+		public void Dispose()
+		{
+			_database.Dispose();
+		}
+
+		public ValueTask DisposeAsync()
+		{
+			return _database.DisposeAsync();
+		}
+		
 		public async Task<Track> Get(int id)
 		{
 			return await _database.Tracks.FirstOrDefaultAsync(x => x.ID == id);
@@ -51,9 +61,19 @@ namespace Kyoo.Controllers
 
 			if (obj.EpisodeID <= 0)
 				throw new InvalidOperationException($"Can't store a track not related to any episode (episodeID: {obj.EpisodeID}).");
+
+			_database.Entry(obj).State = EntityState.Added;
 			
-			await _database.Tracks.AddAsync(obj);
-			await _database.SaveChangesAsync();
+			try
+			{
+				await _database.SaveChangesAsync();
+			}
+			catch (DbUpdateException ex)
+			{
+				if (Helper.IsDuplicateException(ex))
+					throw new DuplicatedItemException($"Trying to insert a duplicated track (slug {obj.Slug} already exists).");
+				throw;
+			}
 			return obj.ID;
 		}
 		

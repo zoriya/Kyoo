@@ -21,6 +21,16 @@ namespace Kyoo.Controllers
 			_serviceProvider = serviceProvider;
 		}
 		
+		public void Dispose()
+		{
+			_database.Dispose();
+		}
+
+		public ValueTask DisposeAsync()
+		{
+			return _database.DisposeAsync();
+		}
+		
 		public async Task<Season> Get(int id)
 		{
 			return await _database.Seasons.FirstOrDefaultAsync(x => x.ID == id);
@@ -66,7 +76,18 @@ namespace Kyoo.Controllers
 			if (obj.ExternalIDs != null)
 				foreach (MetadataID entry in obj.ExternalIDs)
 					_database.Entry(entry).State = EntityState.Added;
-			await _database.SaveChangesAsync();
+			
+			try
+			{
+				await _database.SaveChangesAsync();
+			}
+			catch (DbUpdateException ex)
+			{
+				if (Helper.IsDuplicateException(ex))
+					throw new DuplicatedItemException($"Trying to insert a duplicated season (slug {obj.Slug} already exists).");
+				throw;
+			}
+			
 			return obj.ID;
 		}
 		
@@ -78,7 +99,17 @@ namespace Kyoo.Controllers
 			Season old = await Get(obj.Slug);
 			if (old != null)
 				return old.ID;
-			return await Create(obj);
+			try
+			{
+				return await Create(obj);
+			}
+			catch (DuplicatedItemException)
+			{
+				old = await Get(obj.Slug);
+				if (old == null)
+					throw new SystemException("Unknown database state.");
+				return old.ID;
+			}
 		}
 
 		public async Task Edit(Season edited, bool resetOld)
@@ -109,7 +140,7 @@ namespace Kyoo.Controllers
 				obj.ExternalIDs = (await Task.WhenAll(obj.ExternalIDs.Select(async x =>
 				{
 					using IServiceScope serviceScope = _serviceProvider.CreateScope();
-					IProviderRepository providers = serviceScope.ServiceProvider.GetService<IProviderRepository>();
+					await using IProviderRepository providers = serviceScope.ServiceProvider.GetService<IProviderRepository>();
 					
 					x.ProviderID = await providers.CreateIfNotExists(x.Provider);
 					return x;
