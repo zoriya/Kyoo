@@ -51,31 +51,24 @@ namespace Kyoo.Controllers
 			_transcoder = serviceProvider.GetService<ITranscoder>();
 			_config = serviceProvider.GetService<IConfiguration>();
 
-			try
-			{
-				using IServiceScope serviceScope = _serviceProvider.CreateScope();
-				await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
-				ICollection<Episode> episodes = await libraryManager.GetEpisodes();
-				ICollection<Library> libraries = argument == null 
-					? await libraryManager.GetLibraries()
-					: new [] { await libraryManager.GetLibrary(argument)};
+			using IServiceScope serviceScope = _serviceProvider.CreateScope();
+			await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
+			ICollection<Episode> episodes = await libraryManager.GetEpisodes();
+			ICollection<Library> libraries = argument == null 
+				? await libraryManager.GetLibraries()
+				: new [] { await libraryManager.GetLibrary(argument)};
 
-				foreach (Episode episode in episodes)
-				{
-					if (!File.Exists(episode.Path))
-						await libraryManager.DeleteEpisode(episode);
-				}
-
-				// TODO replace this grotesque way to load the providers.
-				foreach (Library library in libraries)
-					library.Providers = library.Providers;
-				
-				await Task.WhenAll(libraries.Select(x => Scan(x, episodes, cancellationToken)).ToArray());
-			}
-			catch (Exception ex)
+			foreach (Episode episode in episodes)
 			{
-				await Console.Error.WriteLineAsync($"Unknown exception thrown durring libraries scan.\nException: {ex.Message}");
+				if (!File.Exists(episode.Path))
+					await libraryManager.DeleteEpisode(episode);
 			}
+
+			// TODO replace this grotesque way to load the providers.
+			foreach (Library library in libraries)
+				library.Providers = library.Providers;
+			
+			await Task.WhenAll(libraries.Select(x => Scan(x, episodes, cancellationToken)).ToArray());
 			Console.WriteLine("Scan finished!");
 		}
 
@@ -135,34 +128,49 @@ namespace Kyoo.Controllers
 			if (token.IsCancellationRequested)
 				return;
 			
-			using IServiceScope serviceScope = _serviceProvider.CreateScope();
-			await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
-			
-			string patern = _config.GetValue<string>("regex");
-			Regex regex = new Regex(patern, RegexOptions.IgnoreCase);
-			Match match = regex.Match(relativePath);
-
-			string showPath = Path.GetDirectoryName(path);
-			string collectionName = match.Groups["Collection"]?.Value;
-			string showName = match.Groups["ShowTitle"].Value;
-			int seasonNumber = int.TryParse(match.Groups["Season"].Value, out int tmp) ? tmp : -1;
-			int episodeNumber = int.TryParse(match.Groups["Episode"].Value, out tmp) ? tmp : -1;
-			int absoluteNumber = int.TryParse(match.Groups["Absolute"].Value, out tmp) ? tmp : -1;
-
-			Collection collection = await GetCollection(libraryManager, collectionName, library);
-			bool isMovie = seasonNumber == -1 && episodeNumber == -1 && absoluteNumber == -1;
-			Show show = await GetShow(libraryManager, showName, showPath, isMovie, library);
-			if (isMovie)
-				await libraryManager.RegisterEpisode(await GetMovie(show, path));
-			else
+			try 
 			{
-				Season season = await GetSeason(libraryManager, show, seasonNumber, library);
-				Episode episode = await GetEpisode(libraryManager, show, season, episodeNumber, absoluteNumber, path, library);
-				await libraryManager.RegisterEpisode(episode);
-			}
+				using IServiceScope serviceScope = _serviceProvider.CreateScope();
+				await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
+				
+				string patern = _config.GetValue<string>("regex");
+				Regex regex = new Regex(patern, RegexOptions.IgnoreCase);
+				Match match = regex.Match(relativePath);
 
-			await libraryManager.AddShowLink(show, library, collection);
-			Console.WriteLine($"Episode at {path} registered.");
+				string showPath = Path.GetDirectoryName(path);
+				string collectionName = match.Groups["Collection"]?.Value;
+				string showName = match.Groups["ShowTitle"].Value;
+				int seasonNumber = int.TryParse(match.Groups["Season"].Value, out int tmp) ? tmp : -1;
+				int episodeNumber = int.TryParse(match.Groups["Episode"].Value, out tmp) ? tmp : -1;
+				int absoluteNumber = int.TryParse(match.Groups["Absolute"].Value, out tmp) ? tmp : -1;
+
+				Collection collection = await GetCollection(libraryManager, collectionName, library);
+				bool isMovie = seasonNumber == -1 && episodeNumber == -1 && absoluteNumber == -1;
+				Show show = await GetShow(libraryManager, showName, showPath, isMovie, library);
+				if (isMovie)
+					await libraryManager.RegisterEpisode(await GetMovie(show, path));
+				else
+				{
+					Season season = await GetSeason(libraryManager, show, seasonNumber, library);
+					Episode episode = await GetEpisode(libraryManager, 
+						show, 
+						season, 
+						episodeNumber, 
+						absoluteNumber,
+						path, 
+						library);
+					await libraryManager.RegisterEpisode(episode);
+				}
+
+				await libraryManager.AddShowLink(show, library, collection);
+				Console.WriteLine($"Episode at {path} registered.");
+			}
+			catch (Exception ex)
+			{
+				await Console.Error.WriteLineAsync($"Unknown exception thrown while registering episode at {path}." +
+				                                   $"\nException: {ex.Message}" +
+				                                   $"\nAt {ex.StackTrace}");
+			}
 		}
 
 		private async Task<Collection> GetCollection(ILibraryManager libraryManager, 
