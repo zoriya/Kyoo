@@ -32,15 +32,19 @@ namespace Kyoo.Controllers
 			return _database.DisposeAsync();
 		}
 		
-		public async Task<Episode> Get(int id)
+		public Task<Episode> Get(int id)
 		{
-			return await _database.Episodes.FirstOrDefaultAsync(x => x.ID == id);
+			return _database.Episodes.FirstOrDefaultAsync(x => x.ID == id);
 		}
 
 		public Task<Episode> Get(string slug)
 		{
 			int sIndex = slug.IndexOf("-s", StringComparison.Ordinal);
 			int eIndex = slug.IndexOf("-e", StringComparison.Ordinal);
+
+			if (sIndex == -1 && eIndex == -1)
+				return _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == slug);
+			
 			if (sIndex == -1 || eIndex == -1 || eIndex < sIndex)
 				throw new InvalidOperationException("Invalid episode slug. Format: {showSlug}-s{seasonNumber}-e{episodeNumber}");
 			string showSlug = slug.Substring(0, sIndex);
@@ -51,9 +55,9 @@ namespace Kyoo.Controllers
 			return Get(showSlug, seasonNumber, episodeNumber);
 		}
 		
-		public async Task<Episode> Get(string showSlug, int seasonNumber, int episodeNumber)
+		public Task<Episode> Get(string showSlug, int seasonNumber, int episodeNumber)
 		{
-			return await _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == showSlug 
+			return _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == showSlug 
 			                                                         && x.SeasonNumber == seasonNumber
 			                                                         && x.EpisodeNumber == episodeNumber);
 		}
