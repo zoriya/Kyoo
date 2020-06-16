@@ -201,5 +201,11 @@ namespace Kyoo
 			                                                && t.GetGenericArguments().Any()) ?? listType;
 			return type.GetGenericArguments().First();
 		}
+
+		public static IEnumerable<List<T>> BatchBy<T>(this List<T> list, int countPerList)
+		{
+			for (int i = 0; i < list.Count; i += countPerList)
+				yield return list.GetRange(i, Math.Min(list.Count - i, i + countPerList));
+		}
 	}
 }
