@@ -27,6 +27,8 @@ namespace Kyoo.Controllers
 		private IProviderManager _metadataProvider;
 		private ITranscoder _transcoder;
 		private IConfiguration _config;
+
+		private int _parallelRegisters;
 		
 		public async Task<IEnumerable<string>> GetPossibleParameters()
 		{
@@ -50,6 +52,10 @@ namespace Kyoo.Controllers
 			_metadataProvider = serviceProvider.GetService<IProviderManager>();
 			_transcoder = serviceProvider.GetService<ITranscoder>();
 			_config = serviceProvider.GetService<IConfiguration>();
+			_parallelRegisters = _config.GetValue<int>("parallelRegisters");
+
+			if (_parallelRegisters <= 0)
+				_parallelRegisters = 10;
 
 			using IServiceScope serviceScope = _serviceProvider.CreateScope();
 			await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
@@ -111,15 +117,19 @@ namespace Kyoo.Controllers
 					.GroupBy(Path.GetDirectoryName)
 					.ToList();
 				
-				await Task.WhenAll(shows
+				List<Task> tasks = shows
 					.Select(x => x.First())
 					.Select(x => RegisterFile(x, x.Substring(path.Length), library, cancellationToken))
-					.ToArray());
+					.ToList();
+				foreach (List<Task> showTasks in tasks.BatchBy(_parallelRegisters))
+					await Task.WhenAll(showTasks);
 				
-				await Task.WhenAll(shows
+				tasks = shows
 					.SelectMany(x => x.Skip(1))
 					.Select(x => RegisterFile(x, x.Substring(path.Length), library, cancellationToken))
-					.ToArray());
+					.ToList();
+				foreach (List<Task> episodeTasks in tasks.BatchBy(_parallelRegisters * 3))
+					await Task.WhenAll(episodeTasks);
 			}).ToArray());
 		}
 
@@ -169,7 +179,7 @@ namespace Kyoo.Controllers
 			{
 				await Console.Error.WriteLineAsync($"Unknown exception thrown while registering episode at {path}." +
 				                                   $"\nException: {ex.Message}" +
-				                                   $"\nAt {ex.StackTrace}");
+				                                   $"\n{ex.StackTrace}");
 			}
 		}
 
