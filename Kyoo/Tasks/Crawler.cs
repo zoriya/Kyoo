@@ -113,20 +113,17 @@ namespace Kyoo.Controllers
 					.ToList();
 				
 				// Todo batch wth higher numbers per list once multi-services has been implemented.
-				
-				List<Task> tasks = shows
+
+				IEnumerable<Task> tasks = shows
 					.Select(x => x.First())
-					.Select(x => RegisterFile(x, x.Substring(path.Length), library, cancellationToken))
-					.ToList();
-					// TODO EXECUTION OF THE TASKS ARE CALCULATED DURING THE .ToList() CALL, NO BACHING/ASYNC IS DONE.
-				foreach (List<Task> showTasks in tasks.BatchBy(1))
+					.Select(x => RegisterFile(x, x.Substring(path.Length), library, cancellationToken));
+				foreach (Task[] showTasks in tasks.BatchBy(30))
 					await Task.WhenAll(showTasks);
-				
+
 				tasks = shows
 					.SelectMany(x => x.Skip(1))
-					.Select(x => RegisterFile(x, x.Substring(path.Length), library, cancellationToken))
-					.ToList();
-				foreach (List<Task> episodeTasks in tasks.BatchBy(1))
+					.Select(x => RegisterFile(x, x.Substring(path.Length), library, cancellationToken));
+				foreach (Task[] episodeTasks in tasks.BatchBy(50))
 					await Task.WhenAll(episodeTasks);
 			}
 		}
