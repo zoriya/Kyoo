@@ -207,5 +207,22 @@ namespace Kyoo
 			for (int i = 0; i < list.Count; i += countPerList)
 				yield return list.GetRange(i, Math.Min(list.Count - i, countPerList));
 		}
+		
+		public static IEnumerable<T[]> BatchBy<T>(this IEnumerable<T> list, int countPerList)
+		{
+			T[] ret = new T[countPerList];
+			int i = 0;
+			
+			using IEnumerator<T> enumerator = list.GetEnumerator();
+			while (enumerator.MoveNext())
+			{
+				ret[i] = enumerator.Current;
+				i++;
+				if (i < countPerList)
+					continue;
+				i = 0;
+				yield return ret;
+			}
+		}
 	}
 }
