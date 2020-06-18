@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 using Kyoo.Models;
 using Kyoo.Models.Attributes;
+using Microsoft.VisualBasic;
 
 namespace Kyoo
 {
@@ -93,7 +94,6 @@ namespace Kyoo
 
 		public static T Merge<T>(T first, T second)
 		{
-			// TODO During the merge, reference to the second values are not set to the first value (for child objects).
 			if (first == null)
 				return second;
 			if (second == null)
@@ -124,8 +124,8 @@ namespace Kyoo
 				}
 			}
 
-			if (first is IOnMerge)
-				((IOnMerge)first).OnMerge(second);
+			if (first is IOnMerge merge)
+				merge.OnMerge(second);
 			return first;
 		}
 

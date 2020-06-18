@@ -147,7 +147,7 @@ namespace Kyoo.Controllers
 
 				string showPath = Path.GetDirectoryName(path);
 				string collectionName = match.Groups["Collection"]?.Value;
-				string showName = match.Groups["ShowTitle"].Value;
+				string showName = match.Groups["Show"].Value;
 				int seasonNumber = int.TryParse(match.Groups["Season"].Value, out int tmp) ? tmp : -1;
 				int episodeNumber = int.TryParse(match.Groups["Episode"].Value, out tmp) ? tmp : -1;
 				int absoluteNumber = int.TryParse(match.Groups["Absolute"].Value, out tmp) ? tmp : -1;
@@ -272,12 +272,6 @@ namespace Kyoo.Controllers
 			season ??= await GetSeason(libraryManager, show, episode.SeasonNumber, library);
 			episode.Season = season;
 			episode.SeasonID = season?.ID;
-			if (season == null)
-			{
-				await Console.Error.WriteLineAsync("Error: You don't have any provider that support absolute epiode numbering. Install one and try again.");
-				return default;
-			}
-			
 			await _thumbnailsManager.Validate(episode);
 			await GetTracks(episode);
 			return episode;
