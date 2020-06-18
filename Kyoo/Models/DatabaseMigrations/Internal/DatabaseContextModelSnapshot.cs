@@ -115,7 +115,8 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
                     b.HasIndex("SeasonID");
 
-                    b.HasIndex("ShowID");
+                    b.HasIndex("ShowID", "SeasonNumber", "EpisodeNumber", "AbsoluteNumber")
+                        .IsUnique();
 
                     b.ToTable("Episodes");
                 });
@@ -372,7 +373,8 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
                     b.HasKey("ID");
 
-                    b.HasIndex("ShowID");
+                    b.HasIndex("ShowID", "SeasonNumber")
+                        .IsUnique();
 
                     b.ToTable("Seasons");
                 });
@@ -427,9 +429,6 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         .HasColumnType("text");
 
                     b.HasKey("ID");
-
-                    b.HasIndex("Slug")
-                        .IsUnique();
 
                     b.HasIndex("StudioID");
 
