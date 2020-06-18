@@ -58,8 +58,8 @@ namespace Kyoo.Controllers
 		public async Task<ICollection<Show>> Search(string query)
 		{
 			return await _database.Shows
-				.FromSqlInterpolated($@"SELECT * FROM Shows WHERE Shows.Title LIKE {$"%{query}%"}
-			                                           OR Shows.Aliases LIKE {$"%{query}%"}")
+				.FromSqlInterpolated($@"SELECT * FROM Shows WHERE 'Shows.Title' LIKE {$"%{query}%"}
+			                                           OR 'Shows.Aliases' LIKE {$"%{query}%"}")
 				.Take(20)
 				.ToListAsync();
 		}

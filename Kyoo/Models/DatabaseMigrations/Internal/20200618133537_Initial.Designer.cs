@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Kyoo.Models.DatabaseMigrations.Internal
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20200607010830_Initial")]
+    [Migration("20200618133537_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -117,7 +117,8 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
                     b.HasIndex("SeasonID");
 
-                    b.HasIndex("ShowID");
+                    b.HasIndex("ShowID", "SeasonNumber", "EpisodeNumber", "AbsoluteNumber")
+                        .IsUnique();
 
                     b.ToTable("Episodes");
                 });
@@ -374,7 +375,8 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
                     b.HasKey("ID");
 
-                    b.HasIndex("ShowID");
+                    b.HasIndex("ShowID", "SeasonNumber")
+                        .IsUnique();
 
                     b.ToTable("Seasons");
                 });
@@ -429,9 +431,6 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         .HasColumnType("text");
 
                     b.HasKey("ID");
-
-                    b.HasIndex("Slug")
-                        .IsUnique();
 
                     b.HasIndex("StudioID");
 

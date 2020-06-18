@@ -27,6 +27,8 @@ namespace Kyoo.Controllers
 		private IProviderManager _metadataProvider;
 		private ITranscoder _transcoder;
 		private IConfiguration _config;
+
+		private int _parallelTasks;
 		
 		public async Task<IEnumerable<string>> GetPossibleParameters()
 		{
@@ -50,6 +52,9 @@ namespace Kyoo.Controllers
 			_metadataProvider = serviceProvider.GetService<IProviderManager>();
 			_transcoder = serviceProvider.GetService<ITranscoder>();
 			_config = serviceProvider.GetService<IConfiguration>();
+			_parallelTasks = _config.GetValue<int>("parallelTasks");
+			if (_parallelTasks <= 0)
+				_parallelTasks = 30;
 
 			using IServiceScope serviceScope = _serviceProvider.CreateScope();
 			await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
@@ -112,18 +117,16 @@ namespace Kyoo.Controllers
 					.GroupBy(Path.GetDirectoryName)
 					.ToList();
 				
-				// Todo batch wth higher numbers per list once multi-services has been implemented.
-
 				IEnumerable<Task> tasks = shows
 					.Select(x => x.First())
 					.Select(x => RegisterFile(x, x.Substring(path.Length), library, cancellationToken));
-				foreach (Task[] showTasks in tasks.BatchBy(30))
+				foreach (Task[] showTasks in tasks.BatchBy(_parallelTasks))
 					await Task.WhenAll(showTasks);
 
 				tasks = shows
 					.SelectMany(x => x.Skip(1))
 					.Select(x => RegisterFile(x, x.Substring(path.Length), library, cancellationToken));
-				foreach (Task[] episodeTasks in tasks.BatchBy(50))
+				foreach (Task[] episodeTasks in tasks.BatchBy(_parallelTasks * 2))
 					await Task.WhenAll(episodeTasks);
 			}
 		}

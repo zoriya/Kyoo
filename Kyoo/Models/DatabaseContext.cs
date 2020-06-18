@@ -136,14 +136,17 @@ namespace Kyoo
 			modelBuilder.Entity<People>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
-			modelBuilder.Entity<Show>()
-				.HasIndex(x => x.Slug)
-				.IsUnique();
 			modelBuilder.Entity<Studio>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
 			modelBuilder.Entity<ProviderID>()
 				.HasIndex(x => x.Name)
+				.IsUnique();
+			modelBuilder.Entity<Season>()
+				.HasIndex(x => new {x.ShowID, x.SeasonNumber})
+				.IsUnique();
+			modelBuilder.Entity<Episode>()
+				.HasIndex(x => new {x.ShowID, x.SeasonNumber, x.EpisodeNumber, x.AbsoluteNumber})
 				.IsUnique();
 		}
 			

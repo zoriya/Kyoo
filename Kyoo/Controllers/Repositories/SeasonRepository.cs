@@ -30,9 +30,9 @@ namespace Kyoo.Controllers
 			return _database.DisposeAsync();
 		}
 		
-		public async Task<Season> Get(int id)
+		public Task<Season> Get(int id)
 		{
-			return await _database.Seasons.FirstOrDefaultAsync(x => x.ID == id);
+			return _database.Seasons.FirstOrDefaultAsync(x => x.ID == id);
 		}
 
 		public Task<Season> Get(string slug)
@@ -46,9 +46,9 @@ namespace Kyoo.Controllers
 			return Get(showSlug, seasonNumber);
 		}
 		
-		public async Task<Season> Get(string showSlug, int seasonNumber)
+		public Task<Season> Get(string showSlug, int seasonNumber)
 		{
-			return await _database.Seasons.FirstOrDefaultAsync(x => x.Show.Slug == showSlug 
+			return _database.Seasons.FirstOrDefaultAsync(x => x.Show.Slug == showSlug 
 			                                                        && x.SeasonNumber == seasonNumber);
 		}
 

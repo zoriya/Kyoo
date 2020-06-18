@@ -423,9 +423,10 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 column: "SeasonID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Episodes_ShowID",
+                name: "IX_Episodes_ShowID_SeasonNumber_EpisodeNumber_AbsoluteNumber",
                 table: "Episodes",
-                column: "ShowID");
+                columns: new[] { "ShowID", "SeasonNumber", "EpisodeNumber", "AbsoluteNumber" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_GenreLinks_GenreID",
@@ -517,14 +518,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Seasons_ShowID",
+                name: "IX_Seasons_ShowID_SeasonNumber",
                 table: "Seasons",
-                column: "ShowID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Shows_Slug",
-                table: "Shows",
-                column: "Slug",
+                columns: new[] { "ShowID", "SeasonNumber" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
