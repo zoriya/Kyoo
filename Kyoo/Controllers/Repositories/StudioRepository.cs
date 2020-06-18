@@ -64,6 +64,7 @@ namespace Kyoo.Controllers
 			}
 			catch (DbUpdateException ex)
 			{
+				_database.DiscardChanges();
 				if (Helper.IsDuplicateException(ex))
 					throw new DuplicatedItemException($"Trying to insert a duplicated studio (slug {obj.Slug} already exists).");
 				throw;

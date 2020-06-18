@@ -5,19 +5,18 @@ using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
 	public class PeopleRepository : IPeopleRepository
 	{
 		private readonly DatabaseContext _database;
-		private readonly IServiceProvider _serviceProvider;
+		private readonly IProviderRepository _providers;
 
-		public PeopleRepository(DatabaseContext database, IServiceProvider serviceProvider)
+		public PeopleRepository(DatabaseContext database, IProviderRepository providers)
 		{
 			_database = database;
-			_serviceProvider = serviceProvider;
+			_providers = providers;
 		}
 		
 		public void Dispose()
@@ -70,6 +69,7 @@ namespace Kyoo.Controllers
 			}
 			catch (DbUpdateException ex)
 			{
+				_database.DiscardChanges();
 				if (Helper.IsDuplicateException(ex))
 					throw new DuplicatedItemException($"Trying to insert a duplicated people (slug {obj.Slug} already exists).");
 				throw;
@@ -118,14 +118,9 @@ namespace Kyoo.Controllers
 		
 		private async Task Validate(People obj)
 		{
-			obj.ExternalIDs = (await Task.WhenAll(obj.ExternalIDs.Select(async x =>
-			{
-				using IServiceScope serviceScope = _serviceProvider.CreateScope();
-				await using IProviderRepository providers = serviceScope.ServiceProvider.GetService<IProviderRepository>();
-				
-				x.ProviderID = await providers.CreateIfNotExists(x.Provider);
-				return x;
-			}))).ToList();
+			if (obj.ExternalIDs != null)
+				foreach (MetadataID link in obj.ExternalIDs)
+					link.ProviderID = await _providers.CreateIfNotExists(link.Provider);
 		}
 
 		public async Task Delete(People obj)

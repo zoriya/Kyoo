@@ -27,8 +27,6 @@ namespace Kyoo.Controllers
 		private IProviderManager _metadataProvider;
 		private ITranscoder _transcoder;
 		private IConfiguration _config;
-
-		private int _parallelRegisters;
 		
 		public async Task<IEnumerable<string>> GetPossibleParameters()
 		{
@@ -52,10 +50,6 @@ namespace Kyoo.Controllers
 			_metadataProvider = serviceProvider.GetService<IProviderManager>();
 			_transcoder = serviceProvider.GetService<ITranscoder>();
 			_config = serviceProvider.GetService<IConfiguration>();
-			_parallelRegisters = _config.GetValue<int>("parallelRegisters");
-
-			if (_parallelRegisters <= 0)
-				_parallelRegisters = 10;
 
 			using IServiceScope serviceScope = _serviceProvider.CreateScope();
 			await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
@@ -74,17 +68,18 @@ namespace Kyoo.Controllers
 			foreach (Library library in libraries)
 				library.Providers = library.Providers;
 			
-			await Task.WhenAll(libraries.Select(x => Scan(x, episodes, cancellationToken)).ToArray());
+			foreach (Library library in libraries)
+				await Scan(library, episodes, cancellationToken);
 			Console.WriteLine("Scan finished!");
 		}
 
-		private Task Scan(Library library, IEnumerable<Episode> episodes, CancellationToken cancellationToken)
+		private async Task Scan(Library library, IEnumerable<Episode> episodes, CancellationToken cancellationToken)
 		{
 			Console.WriteLine($"Scanning library {library.Name} at {string.Join(", ", library.Paths)}.");
-			return Task.WhenAll(library.Paths.Select(async path =>
+			foreach (string path in library.Paths)
 			{
 				if (cancellationToken.IsCancellationRequested)
-					return;
+					continue;
 				
 				string[] files;
 				try
@@ -94,22 +89,22 @@ namespace Kyoo.Controllers
 				catch (DirectoryNotFoundException)
 				{
 					await Console.Error.WriteLineAsync($"The library's directory {path} could not be found (library slug: {library.Slug})");
-					return;
+					continue;
 				}
 				catch (PathTooLongException)
 				{
 					await Console.Error.WriteLineAsync($"The library's directory {path} is too long for this system. (library slug: {library.Slug})");
-					return;
+					continue;
 				}
 				catch (ArgumentException)
 				{
 					await Console.Error.WriteLineAsync($"The library's directory {path} is invalid. (library slug: {library.Slug})");
-					return;
+					continue;
 				}
-				catch (UnauthorizedAccessException)
+				catch (UnauthorizedAccessException ex)
 				{
-					await Console.Error.WriteLineAsync($"Permission denied: can't access library's directory at {path}. (library slug: {library.Slug})");
-					return;
+					await Console.Error.WriteLineAsync($"{ex.Message} (library slug: {library.Slug})");
+					continue;
 				}
 
 				List<IGrouping<string, string>> shows =  files
@@ -117,20 +112,23 @@ namespace Kyoo.Controllers
 					.GroupBy(Path.GetDirectoryName)
 					.ToList();
 				
+				// Todo batch wth higher numbers per list once multi-services has been implemented.
+				
 				List<Task> tasks = shows
 					.Select(x => x.First())
 					.Select(x => RegisterFile(x, x.Substring(path.Length), library, cancellationToken))
 					.ToList();
-				foreach (List<Task> showTasks in tasks.BatchBy(_parallelRegisters))
+					// TODO EXECUTION OF THE TASKS ARE CALCULATED DURING THE .ToList() CALL, NO BACHING/ASYNC IS DONE.
+				foreach (List<Task> showTasks in tasks.BatchBy(1))
 					await Task.WhenAll(showTasks);
 				
 				tasks = shows
 					.SelectMany(x => x.Skip(1))
 					.Select(x => RegisterFile(x, x.Substring(path.Length), library, cancellationToken))
 					.ToList();
-				foreach (List<Task> episodeTasks in tasks.BatchBy(_parallelRegisters * 3))
+				foreach (List<Task> episodeTasks in tasks.BatchBy(1))
 					await Task.WhenAll(episodeTasks);
-			}).ToArray());
+			}
 		}
 
 		private async Task RegisterFile(string path, string relativePath, Library library, CancellationToken token)

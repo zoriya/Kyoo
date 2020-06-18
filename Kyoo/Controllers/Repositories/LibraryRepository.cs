@@ -5,20 +5,19 @@ using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
 	public class LibraryRepository : ILibraryRepository
 	{
 		private readonly DatabaseContext _database;
-		private readonly IServiceProvider _serviceProvider;
+		private readonly IProviderRepository _providers;
 
 
-		public LibraryRepository(DatabaseContext database, IServiceProvider serviceProvider)
+		public LibraryRepository(DatabaseContext database, IProviderRepository providers)
 		{
 			_database = database;
-			_serviceProvider = serviceProvider;
+			_providers = providers;
 		}
 
 		public void Dispose()
@@ -71,6 +70,7 @@ namespace Kyoo.Controllers
 			}
 			catch (DbUpdateException ex)
 			{
+				_database.DiscardChanges();
 				if (Helper.IsDuplicateException(ex))
 					throw new DuplicatedItemException($"Trying to insert a duplicated library (slug {obj.Slug} already exists).");
 				throw;
@@ -119,14 +119,9 @@ namespace Kyoo.Controllers
 
 		private async Task Validate(Library obj)
 		{
-			obj.ProviderLinks = (await Task.WhenAll(obj.ProviderLinks.Select(async x =>
-			{
-				using IServiceScope serviceScope = _serviceProvider.CreateScope();
-				await using IProviderRepository providers = serviceScope.ServiceProvider.GetService<IProviderRepository>();
-				
-				x.ProviderID = await providers.CreateIfNotExists(x.Provider);
-				return x;
-			}))).ToList();
+			if (obj.ProviderLinks != null)
+				foreach (ProviderLink link in obj.ProviderLinks)
+					link.ProviderID = await _providers.CreateIfNotExists(link.Provider);
 		}
 
 		public async Task Delete(Library obj)
