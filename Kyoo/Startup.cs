@@ -49,7 +49,7 @@ namespace Kyoo
 					.UseNpgsql(_configuration.GetConnectionString("Database"))
 					.EnableSensitiveDataLogging();
 				// .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()));
-			});
+			}, ServiceLifetime.Transient);
 			
 			services.AddDbContext<IdentityDatabase>(options =>
 			{

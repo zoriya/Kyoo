@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 
 namespace Kyoo.Controllers
 {
@@ -65,6 +64,7 @@ namespace Kyoo.Controllers
 			}
 			catch (DbUpdateException ex)
 			{
+				_database.DiscardChanges();
 				if (Helper.IsDuplicateException(ex))
 					throw new DuplicatedItemException($"Trying to insert a duplicated collection (slug {obj.Slug} already exists).");
 				throw;

@@ -146,6 +146,15 @@ namespace Kyoo
 				.HasIndex(x => x.Name)
 				.IsUnique();
 		}
+			
+		public void DiscardChanges()
+		{
+			foreach (EntityEntry entry in ChangeTracker.Entries().Where(x => x.State != EntityState.Unchanged
+			                                                                 && x.State != EntityState.Detached))
+			{
+				entry.State = EntityState.Detached;
+			}
+		}
 	}
 }
 

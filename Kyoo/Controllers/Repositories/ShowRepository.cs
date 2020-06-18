@@ -5,23 +5,28 @@ using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
 	public class ShowRepository : IShowRepository
 	{
 		private readonly DatabaseContext _database;
-		private readonly IServiceProvider _serviceProvider;
 		private readonly IStudioRepository _studios;
+		private readonly IPeopleRepository _people;
+		private readonly IGenreRepository _genres;
+		private readonly IProviderRepository _providers;
 
 		public ShowRepository(DatabaseContext database,
-			IServiceProvider serviceProvider, 
-			IStudioRepository studios)
+			IStudioRepository studios,
+			IPeopleRepository people, 
+			IGenreRepository genres, 
+			IProviderRepository providers)
 		{
 			_database = database;
-			_serviceProvider = serviceProvider;
 			_studios = studios;
+			_people = people;
+			_genres = genres;
+			_providers = providers;
 		}
 		
 		public void Dispose()
@@ -87,6 +92,7 @@ namespace Kyoo.Controllers
 			}
 			catch (DbUpdateException ex)
 			{
+				_database.DiscardChanges();
 				if (Helper.IsDuplicateException(ex))
 					throw new DuplicatedItemException($"Trying to insert a duplicated show (slug {obj.Slug} already exists).");
 				throw;
@@ -140,38 +146,20 @@ namespace Kyoo.Controllers
 			
 			if (obj.GenreLinks != null)
 			{
-				obj.GenreLinks = (await Task.WhenAll(obj.GenreLinks.Select(async x =>
-				{
-					using IServiceScope serviceScope = _serviceProvider.CreateScope();
-					await using IGenreRepository genres = serviceScope.ServiceProvider.GetService<IGenreRepository>();
-					
-					x.GenreID = await genres.CreateIfNotExists(x.Genre);
-					return x;
-				}))).ToList();
+				foreach (GenreLink link in obj.GenreLinks)
+					link.GenreID = await _genres.CreateIfNotExists(link.Genre);
 			}
 
 			if (obj.People != null)
 			{
-				obj.People = (await Task.WhenAll(obj.People.Select(async x =>
-				{
-					using IServiceScope serviceScope = _serviceProvider.CreateScope();
-					await using IPeopleRepository people = serviceScope.ServiceProvider.GetService<IPeopleRepository>();
-					
-					x.PeopleID = await people.CreateIfNotExists(x.People);
-					return x;
-				}))).ToList();
+				foreach (PeopleLink link in obj.People)
+					link.PeopleID = await _people.CreateIfNotExists(link.People);
 			}
 
 			if (obj.ExternalIDs != null)
 			{
-				obj.ExternalIDs = (await Task.WhenAll(obj.ExternalIDs.Select(async x =>
-				{
-					using IServiceScope serviceScope = _serviceProvider.CreateScope();
-					await using IProviderRepository providers = serviceScope.ServiceProvider.GetService<IProviderRepository>();
-					
-					x.ProviderID = await providers.CreateIfNotExists(x.Provider);
-					return x;
-				}))).ToList();
+				foreach (MetadataID link in obj.ExternalIDs)
+					link.ProviderID = await _providers.CreateIfNotExists(link.Provider);
 			}
 		}
 

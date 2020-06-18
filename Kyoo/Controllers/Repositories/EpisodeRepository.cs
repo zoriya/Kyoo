@@ -5,21 +5,19 @@ using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Npgsql;
 
 namespace Kyoo.Controllers
 {
 	public class EpisodeRepository : IEpisodeRepository
 	{
 		private readonly DatabaseContext _database;
-		private readonly IServiceProvider _serviceProvider;
+		private readonly IProviderRepository _providers;
 
 
-		public EpisodeRepository(DatabaseContext database, IServiceProvider serviceProvider)
+		public EpisodeRepository(DatabaseContext database, IProviderRepository providers)
 		{
 			_database = database;
-			_serviceProvider = serviceProvider;
+			_providers = providers;
 		}
 		
 		public void Dispose()
@@ -95,6 +93,8 @@ namespace Kyoo.Controllers
 			}
 			catch (DbUpdateException ex)
 			{
+				_database.DiscardChanges();
+				
 				if (Helper.IsDuplicateException(ex))
 					throw new DuplicatedItemException($"Trying to insert a duplicated episode (slug {obj.Slug} already exists).");
 				throw;
@@ -148,14 +148,8 @@ namespace Kyoo.Controllers
 
 			if (obj.ExternalIDs != null)
 			{
-				obj.ExternalIDs = (await Task.WhenAll(obj.ExternalIDs.Select(async x =>
-				{
-					using IServiceScope serviceScope = _serviceProvider.CreateScope();
-					await using IProviderRepository providers = serviceScope.ServiceProvider.GetService<IProviderRepository>();
-
-					x.ProviderID = await providers.CreateIfNotExists(x.Provider);
-					return x;
-				}))).ToList();
+				foreach (MetadataID link in obj.ExternalIDs)
+					link.ProviderID = await _providers.CreateIfNotExists(link.Provider);
 			}
 		}
 		
