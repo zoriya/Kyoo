@@ -1,10 +1,11 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
 {
-	public class Episode
+	public class Episode : IOnMerge
 	{
 		[JsonIgnore] public int ID { get; set; }
 		[JsonIgnore] public int ShowID { get; set; }
@@ -12,9 +13,9 @@ namespace Kyoo.Models
 		[JsonIgnore] public int? SeasonID { get; set; }
 		[JsonIgnore] public virtual Season Season { get; set; }
 
-		public int SeasonNumber { get; set; }
-		public int EpisodeNumber { get; set; }
-		public int AbsoluteNumber { get; set; }
+		public int SeasonNumber { get; set; } = -1;
+		public int EpisodeNumber { get; set; } = -1;
+		public int AbsoluteNumber { get; set; } = -1;
 		[JsonIgnore] public string Path { get; set; }
 		public string Title { get; set; }
 		public string Overview { get; set; }
@@ -93,6 +94,17 @@ namespace Kyoo.Models
 		public static string GetSlug(string showSlug, int seasonNumber, int episodeNumber)
 		{
 			return showSlug + "-s" + seasonNumber + "e" + episodeNumber;
+		}
+
+		public void OnMerge(object merged)
+		{
+			Episode other = (Episode)merged;
+			if (SeasonNumber == -1 && other.SeasonNumber != -1)
+				SeasonNumber = other.SeasonNumber;
+			if (EpisodeNumber == -1 && other.EpisodeNumber != -1)
+				EpisodeNumber = other.EpisodeNumber;
+			if (AbsoluteNumber == -1 && other.AbsoluteNumber != -1)
+				AbsoluteNumber = other.AbsoluteNumber;
 		}
 	}
 }
