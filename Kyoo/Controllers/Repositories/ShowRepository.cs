@@ -167,6 +167,7 @@ namespace Kyoo.Controllers
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
+			
 			_database.Entry(obj).State = EntityState.Deleted;
 			if (obj.GenreLinks != null)
 				foreach (GenreLink entry in obj.GenreLinks)

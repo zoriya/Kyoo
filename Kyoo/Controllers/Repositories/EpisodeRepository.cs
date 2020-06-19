@@ -155,6 +155,9 @@ namespace Kyoo.Controllers
 		
 		public async Task Delete(Episode obj)
 		{
+			if (obj == null)
+				throw new ArgumentNullException(nameof(obj));
+			
 			if (obj.ExternalIDs != null)
 				foreach (MetadataID entry in obj.ExternalIDs)
 					_database.Entry(entry).State = EntityState.Deleted;

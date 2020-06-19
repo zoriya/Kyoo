@@ -146,6 +146,7 @@ namespace Kyoo.Controllers
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
+			
 			_database.Entry(obj).State = EntityState.Deleted;
 			if (obj.ExternalIDs != null)
 				foreach (MetadataID entry in obj.ExternalIDs)

@@ -113,6 +113,9 @@ namespace Kyoo.Controllers
 
 		public async Task Delete(Genre obj)
 		{
+			if (obj == null)
+				throw new ArgumentNullException(nameof(obj));
+			
 			_database.Genres.Remove(obj);
 			await _database.SaveChangesAsync();
 		}

@@ -128,6 +128,7 @@ namespace Kyoo.Controllers
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
+			
 			_database.Entry(obj).State = EntityState.Deleted;
 			if (obj.ProviderLinks != null)
 				foreach (ProviderLink entry in obj.ProviderLinks)
