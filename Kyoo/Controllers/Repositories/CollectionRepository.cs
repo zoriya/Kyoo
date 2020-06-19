@@ -115,7 +115,14 @@ namespace Kyoo.Controllers
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
-			_database.Collections.Remove(obj);
+
+			_database.Entry(obj).State = EntityState.Deleted;
+			if (obj.Links != null)
+				foreach (CollectionLink link in obj.Links)
+					_database.Entry(link).State = EntityState.Deleted;
+			if (obj.LibraryLinks != null)
+				foreach (LibraryLink link in obj.LibraryLinks)
+					_database.Entry(link).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
 		}
 	}
