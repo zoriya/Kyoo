@@ -132,6 +132,9 @@ namespace Kyoo.Controllers
 			if (obj.ExternalIDs != null)
 				foreach (MetadataID entry in obj.ExternalIDs)
 					_database.Entry(entry).State = EntityState.Deleted;
+			if (obj.Roles != null)
+				foreach (PeopleLink link in obj.Roles)
+					_database.Entry(link).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
 		}
 	}

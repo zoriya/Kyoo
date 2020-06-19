@@ -116,6 +116,7 @@ namespace Kyoo.Controllers
 				throw new ArgumentNullException(nameof(obj));
 			
 			_database.Entry(obj).State = EntityState.Deleted;
+			// TODO handle ExternalID deletion when they refer to this providerID.
 			await _database.SaveChangesAsync();
 		}
 	}
