@@ -133,6 +133,9 @@ namespace Kyoo.Controllers
 			if (obj.ProviderLinks != null)
 				foreach (ProviderLink entry in obj.ProviderLinks)
 					_database.Entry(entry).State = EntityState.Deleted;
+			if (obj.Links != null)
+				foreach (LibraryLink entry in obj.Links)
+					_database.Entry(entry).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
 		}
 	}
