@@ -115,8 +115,11 @@ namespace Kyoo.Controllers
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
-			
-			_database.Genres.Remove(obj);
+
+			_database.Entry(obj).State = EntityState.Deleted;
+			if (obj.Links != null)
+				foreach (GenreLink link in obj.Links)
+					_database.Entry(link).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
 		}
 	}
