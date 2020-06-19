@@ -56,7 +56,7 @@ namespace Kyoo.Controllers
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
-			await _database.Genres.AddAsync(obj);
+			_database.Entry(obj).State = EntityState.Added;
 			
 			try
 			{

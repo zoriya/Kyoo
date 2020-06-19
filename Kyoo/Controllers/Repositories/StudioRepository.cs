@@ -111,7 +111,9 @@ namespace Kyoo.Controllers
 
 		public async Task Delete(Studio obj)
 		{
-			_database.Studios.Remove(obj);
+			if (obj == null)
+				throw new ArgumentNullException(nameof(obj));
+			_database.Entry(obj).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
 		}
 	}

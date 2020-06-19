@@ -163,9 +163,26 @@ namespace Kyoo.Controllers
 			}
 		}
 
-		public async Task Delete(Show show)
+		public async Task Delete(Show obj)
 		{
-			_database.Shows.Remove(show);
+			if (obj == null)
+				throw new ArgumentNullException(nameof(obj));
+			_database.Entry(obj).State = EntityState.Deleted;
+			if (obj.GenreLinks != null)
+				foreach (GenreLink entry in obj.GenreLinks)
+					_database.Entry(entry).State = EntityState.Deleted;
+			if (obj.People != null)
+				foreach (PeopleLink entry in obj.People)
+					_database.Entry(entry).State = EntityState.Deleted;
+			if (obj.ExternalIDs != null)
+				foreach (MetadataID entry in obj.ExternalIDs)
+					_database.Entry(entry).State = EntityState.Deleted;
+			if (obj.CollectionLinks != null)
+				foreach (CollectionLink entry in obj.CollectionLinks)
+					_database.Entry(entry).State = EntityState.Deleted;
+			if (obj.LibraryLinks != null)
+				foreach (LibraryLink entry in obj.LibraryLinks)
+					_database.Entry(entry).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
 		}
 		

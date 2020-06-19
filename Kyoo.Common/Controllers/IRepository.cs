@@ -15,7 +15,7 @@ namespace Kyoo.Controllers
 		Task<int> Create([NotNull] T obj);
 		Task<int> CreateIfNotExists([NotNull] T obj);
 		Task Edit([NotNull] T edited, bool resetOld);
-		Task Delete(T obj);
+		Task Delete([NotNull] T obj);
 	}
 
 	public interface IShowRepository : IRepository<Show>
