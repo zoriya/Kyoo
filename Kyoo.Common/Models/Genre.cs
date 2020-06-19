@@ -1,4 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Kyoo.Models.Attributes;
+using Newtonsoft.Json;
 
 namespace Kyoo.Models
 {
@@ -8,7 +11,13 @@ namespace Kyoo.Models
 		public string Slug { get; set; }
 		public string Name { get; set; }
 		
-		// public IEnumerable<Show> Shows { get; set; }
+		[NotMergable] [JsonIgnore] public IEnumerable<GenreLink> Links { get; set; }
+
+		[NotMergable] [JsonIgnore] public IEnumerable<Show> Shows
+		{
+			get => Links.Select(x => x.Show);
+			set => Links = value?.Select(x => new GenreLink(x, this));
+		}
 
 		public Genre() {}
 		
