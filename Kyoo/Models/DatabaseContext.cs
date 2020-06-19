@@ -116,7 +116,9 @@ namespace Kyoo
 				.Ignore(x => x.Shows);
 			
 			modelBuilder.Entity<Show>()
-				.Ignore(x => x.Genres);
+				.Ignore(x => x.Genres)
+				.Ignore(x => x.Libraries)
+				.Ignore(x => x.Collections);
 			
 			modelBuilder.Entity<PeopleLink>()
 				.Ignore(x => x.Slug)

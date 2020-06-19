@@ -41,6 +41,22 @@ namespace Kyoo.Models
 		[JsonIgnore] public virtual IEnumerable<PeopleLink> People { get; set; }
 		[JsonIgnore] public virtual IEnumerable<Season> Seasons { get; set; }
 		[JsonIgnore] public virtual IEnumerable<Episode> Episodes { get; set; }
+		
+		[NotMergable] [JsonIgnore] public virtual IEnumerable<LibraryLink> LibraryLinks { get; set; }
+
+		[NotMergable] [JsonIgnore] public IEnumerable<Library> Libraries
+		{
+			get => LibraryLinks?.Select(x => x.Library);
+			set => LibraryLinks = value?.Select(x => new LibraryLink(x, this));
+		}
+		
+		[NotMergable] [JsonIgnore] public IEnumerable<CollectionLink> CollectionLinks { get; set; }
+		
+		[NotMergable] [JsonIgnore] public IEnumerable<Collection> Collections
+		{
+			get => CollectionLinks.Select(x => x.Collection);
+			set => CollectionLinks = value?.Select(x => new CollectionLink(x, this));
+		}
 
 		public Show() { }
 

@@ -144,7 +144,12 @@ namespace Kyoo.Controllers
 
 		public async Task Delete(Season obj)
 		{
-			_database.Seasons.Remove(obj);
+			if (obj == null)
+				throw new ArgumentNullException(nameof(obj));
+			_database.Entry(obj).State = EntityState.Deleted;
+			if (obj.ExternalIDs != null)
+				foreach (MetadataID entry in obj.ExternalIDs)
+					_database.Entry(entry).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
 		}
 		
