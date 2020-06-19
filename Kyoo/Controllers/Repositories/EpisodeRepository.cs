@@ -12,12 +12,14 @@ namespace Kyoo.Controllers
 	{
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
+		private readonly ITrackRepository _tracks;
 
 
-		public EpisodeRepository(DatabaseContext database, IProviderRepository providers)
+		public EpisodeRepository(DatabaseContext database, IProviderRepository providers, ITrackRepository tracks)
 		{
 			_database = database;
 			_providers = providers;
+			_tracks = tracks;
 		}
 		
 		public void Dispose()
@@ -83,10 +85,11 @@ namespace Kyoo.Controllers
 			if (obj.ExternalIDs != null)
 				foreach (MetadataID entry in obj.ExternalIDs)
 					_database.Entry(entry).State = EntityState.Added;
-			if (obj.Tracks != null)
-				foreach (Track entry in obj.Tracks)
-					_database.Entry(entry).State = EntityState.Added;
 			
+			if (obj.Tracks != null)
+				foreach (Track track in obj.Tracks)
+					await _tracks.Create(track);
+
 			try
 			{
 				await _database.SaveChangesAsync();
@@ -163,7 +166,7 @@ namespace Kyoo.Controllers
 					_database.Entry(entry).State = EntityState.Deleted;
 			if (obj.Tracks != null)
 				foreach (Track entry in obj.Tracks)
-					_database.Entry(entry).State = EntityState.Deleted;
+					await _tracks.Delete(entry);
 			_database.Episodes.Remove(obj);
 			await _database.SaveChangesAsync();
 		}
