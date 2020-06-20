@@ -12,12 +12,14 @@ namespace Kyoo.Controllers
 	{
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
+		private readonly IEpisodeRepository _episodes;
 
 
-		public SeasonRepository(DatabaseContext database, IProviderRepository providers)
+		public SeasonRepository(DatabaseContext database, IProviderRepository providers, IEpisodeRepository episodes)
 		{
 			_database = database;
 			_providers = providers;
+			_episodes = episodes;
 		}
 		
 		public void Dispose()
@@ -151,6 +153,9 @@ namespace Kyoo.Controllers
 			if (obj.ExternalIDs != null)
 				foreach (MetadataID entry in obj.ExternalIDs)
 					_database.Entry(entry).State = EntityState.Deleted;
+			if (obj.Episodes != null)
+				foreach (Episode episode in obj.Episodes)
+					await _episodes.Delete(episode);
 			await _database.SaveChangesAsync();
 		}
 		
