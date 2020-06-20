@@ -115,6 +115,10 @@ namespace Kyoo.Controllers
 				throw new ArgumentNullException(nameof(obj));
 			
 			_database.Entry(obj).State = EntityState.Deleted;
+			
+			// Using Dotnet-EF change discovery service to remove references to this studio on shows.
+			foreach (Show show in obj.Shows)
+				show.StudioID = null;
 			await _database.SaveChangesAsync();
 		}
 	}
