@@ -124,6 +124,18 @@ namespace Kyoo.Controllers
 					link.ProviderID = await _providers.CreateIfNotExists(link.Provider);
 		}
 
+		public async Task Delete(int id)
+		{
+			Library obj = await Get(id);
+			await Delete(obj);
+		}
+
+		public async Task Delete(string slug)
+		{
+			Library obj = await Get(slug);
+			await Delete(obj);
+		}
+		
 		public async Task Delete(Library obj)
 		{
 			if (obj == null)

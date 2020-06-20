@@ -156,6 +156,24 @@ namespace Kyoo.Controllers
 			}
 		}
 		
+		public async Task Delete(int id)
+		{
+			Episode obj = await Get(id);
+			await Delete(obj);
+		}
+
+		public async Task Delete(string slug)
+		{
+			Episode obj = await Get(slug);
+			await Delete(obj);
+		}
+
+		public async Task Delete(string showSlug, int seasonNumber, int episodeNumber)
+		{
+			Episode obj = await Get(showSlug, seasonNumber, episodeNumber);
+			await Delete(obj);
+		}
+
 		public async Task Delete(Episode obj)
 		{
 			if (obj == null)

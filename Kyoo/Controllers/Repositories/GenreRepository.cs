@@ -110,6 +110,18 @@ namespace Kyoo.Controllers
 			Utility.Merge(old, edited);
 			await _database.SaveChangesAsync();
 		}
+		
+		public async Task Delete(int id)
+		{
+			Genre obj = await Get(id);
+			await Delete(obj);
+		}
+
+		public async Task Delete(string slug)
+		{
+			Genre obj = await Get(slug);
+			await Delete(obj);
+		}
 
 		public async Task Delete(Genre obj)
 		{
