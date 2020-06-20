@@ -122,6 +122,18 @@ namespace Kyoo.Controllers
 				foreach (MetadataID link in obj.ExternalIDs)
 					link.ProviderID = await _providers.CreateIfNotExists(link.Provider);
 		}
+		
+		public async Task Delete(int id)
+		{
+			People obj = await Get(id);
+			await Delete(obj);
+		}
+
+		public async Task Delete(string slug)
+		{
+			People obj = await Get(slug);
+			await Delete(obj);
+		}
 
 		public async Task Delete(People obj)
 		{

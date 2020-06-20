@@ -143,6 +143,24 @@ namespace Kyoo.Controllers
 					link.ProviderID = await _providers.CreateIfNotExists(link.Provider);
 			}
 		}
+		
+		public async Task Delete(int id)
+		{
+			Season obj = await Get(id);
+			await Delete(obj);
+		}
+
+		public async Task Delete(string slug)
+		{
+			Season obj = await Get(slug);
+			await Delete(obj);
+		}
+
+		public async Task Delete(string showSlug, int seasonNumber)
+		{
+			Season obj = await Get(showSlug, seasonNumber);
+			await Delete(obj);
+		}
 
 		public async Task Delete(Season obj)
 		{

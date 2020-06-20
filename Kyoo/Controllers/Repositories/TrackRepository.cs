@@ -99,6 +99,18 @@ namespace Kyoo.Controllers
 			await _database.SaveChangesAsync();
 		}
 
+		public async Task Delete(int id)
+		{
+			Track obj = await Get(id);
+			await Delete(obj);
+		}
+
+		public async Task Delete(string slug)
+		{
+			Track obj = await Get(slug);
+			await Delete(obj);
+		}
+		
 		public async Task Delete(Track obj)
 		{
 			if (obj == null)

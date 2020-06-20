@@ -15,6 +15,8 @@ namespace Kyoo.Controllers
 		Task<int> Create([NotNull] T obj);
 		Task<int> CreateIfNotExists([NotNull] T obj);
 		Task Edit([NotNull] T edited, bool resetOld);
+		Task Delete(int id);
+		Task Delete(string slug);
 		Task Delete([NotNull] T obj);
 	}
 
@@ -27,6 +29,7 @@ namespace Kyoo.Controllers
 	public interface ISeasonRepository : IRepository<Season>
 	{
 		Task<Season> Get(string showSlug, int seasonNumber);
+		Task Delete(string showSlug, int seasonNumber);
 		
 		Task<ICollection<Season>> GetSeasons(int showID);
 		Task<ICollection<Season>> GetSeasons(string showSlug);
@@ -35,6 +38,7 @@ namespace Kyoo.Controllers
 	public interface IEpisodeRepository : IRepository<Episode>
 	{
 		Task<Episode> Get(string showSlug, int seasonNumber, int episodeNumber);
+		Task Delete(string showSlug, int seasonNumber, int episodeNumber);
 		
 		Task<ICollection<Episode>> GetEpisodes(int showID, int seasonNumber);
 		Task<ICollection<Episode>> GetEpisodes(string showSlug, int seasonNumber);
