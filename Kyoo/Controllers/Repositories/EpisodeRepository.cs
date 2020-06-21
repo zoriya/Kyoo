@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Kyoo.Controllers
 {
@@ -86,9 +87,10 @@ namespace Kyoo.Controllers
 				foreach (MetadataID entry in obj.ExternalIDs)
 					_database.Entry(entry).State = EntityState.Added;
 			
+			// Since Episodes & Tracks are on the same DB, using a single commit is quicker.
 			if (obj.Tracks != null)
-				foreach (Track track in obj.Tracks)
-					await _tracks.Create(track);
+				foreach (Track entry in obj.Tracks)
+					_database.Entry(entry).State = EntityState.Added;
 
 			try
 			{
@@ -102,6 +104,16 @@ namespace Kyoo.Controllers
 					throw new DuplicatedItemException($"Trying to insert a duplicated episode (slug {obj.Slug} already exists).");
 				throw;
 			}
+			
+			// Since Episodes & Tracks are on the same DB, using a single commit is quicker.
+			/*if (obj.Tracks != null)
+			 *	foreach (Track track in obj.Tracks)
+			 *	{
+			 * 		track.EpisodeID = obj.ID;
+			 *		await _tracks.Create(track);
+			 *	}
+			 */
+			
 			return obj.ID;
 		}
 		
@@ -179,13 +191,17 @@ namespace Kyoo.Controllers
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 			
+			_database.Entry(obj).State = EntityState.Deleted;
 			if (obj.ExternalIDs != null)
 				foreach (MetadataID entry in obj.ExternalIDs)
 					_database.Entry(entry).State = EntityState.Deleted;
-			if (obj.Tracks != null)
-				foreach (Track entry in obj.Tracks)
-					await _tracks.Delete(entry);
-			_database.Episodes.Remove(obj);
+			
+			// Since Tracks & Episodes are on the same database and handled by dotnet-ef, we can't use the repository to delete them. 
+			/*if (obj.Tracks != null)
+			 *	foreach (Track entry in obj.Tracks)
+			 *		await _tracks.Delete(entry);
+			 */
+
 			await _database.SaveChangesAsync();
 		}
 		
