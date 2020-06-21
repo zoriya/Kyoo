@@ -11,7 +11,7 @@ namespace Kyoo.Models
 		public string Slug { get; set; }
 		public string Name { get; set; }
 		
-		[NotMergable] [JsonIgnore] public IEnumerable<GenreLink> Links { get; set; }
+		[NotMergable] [JsonIgnore] public virtual IEnumerable<GenreLink> Links { get; set; }
 
 		[NotMergable] [JsonIgnore] public IEnumerable<Show> Shows
 		{

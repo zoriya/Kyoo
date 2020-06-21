@@ -58,6 +58,11 @@ namespace Kyoo.Controllers
 
 			using IServiceScope serviceScope = _serviceProvider.CreateScope();
 			await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
+			
+			// foreach (Show show in await libraryManager.GetShows())
+			// 	if (!Directory.Exists(show.Path))
+			// 		await libraryManager.DeleteShow(show);
+			
 			ICollection<Episode> episodes = await libraryManager.GetEpisodes();
 			ICollection<Library> libraries = argument == null 
 				? await libraryManager.GetLibraries()
@@ -135,12 +140,12 @@ namespace Kyoo.Controllers
 		{
 			if (token.IsCancellationRequested)
 				return;
-			
-			try 
+
+			try
 			{
 				using IServiceScope serviceScope = _serviceProvider.CreateScope();
 				await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
-				
+
 				string patern = _config.GetValue<string>("regex");
 				Regex regex = new Regex(patern, RegexOptions.IgnoreCase);
 				Match match = regex.Match(relativePath);
@@ -160,18 +165,22 @@ namespace Kyoo.Controllers
 				else
 				{
 					Season season = await GetSeason(libraryManager, show, seasonNumber, library);
-					Episode episode = await GetEpisode(libraryManager, 
-						show, 
-						season, 
-						episodeNumber, 
+					Episode episode = await GetEpisode(libraryManager,
+						show,
+						season,
+						episodeNumber,
 						absoluteNumber,
-						path, 
+						path,
 						library);
 					await libraryManager.RegisterEpisode(episode);
 				}
 
 				await libraryManager.AddShowLink(show, library, collection);
 				Console.WriteLine($"Episode at {path} registered.");
+			}
+			catch (DuplicatedItemException ex)
+			{
+				await Console.Error.WriteLineAsync($"{path}: {ex.Message}");
 			}
 			catch (Exception ex)
 			{

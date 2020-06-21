@@ -50,7 +50,7 @@ namespace Kyoo.Models
 			set => LibraryLinks = value?.Select(x => new LibraryLink(x, this));
 		}
 		
-		[NotMergable] [JsonIgnore] public IEnumerable<CollectionLink> CollectionLinks { get; set; }
+		[NotMergable] [JsonIgnore] public virtual IEnumerable<CollectionLink> CollectionLinks { get; set; }
 		
 		[NotMergable] [JsonIgnore] public IEnumerable<Collection> Collections
 		{
