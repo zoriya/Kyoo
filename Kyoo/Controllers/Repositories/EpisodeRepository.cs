@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Kyoo.Controllers
 {
@@ -13,14 +12,13 @@ namespace Kyoo.Controllers
 	{
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
-		private readonly ITrackRepository _tracks;
+		// private readonly ITrackRepository _tracks;
 
 
-		public EpisodeRepository(DatabaseContext database, IProviderRepository providers, ITrackRepository tracks)
+		public EpisodeRepository(DatabaseContext database, IProviderRepository providers)
 		{
 			_database = database;
 			_providers = providers;
-			_tracks = tracks;
 		}
 		
 		public void Dispose()
@@ -168,6 +166,23 @@ namespace Kyoo.Controllers
 			}
 		}
 		
+		public async Task<ICollection<Episode>> GetEpisodes(int showID, int seasonNumber)
+		{
+			return await _database.Episodes.Where(x => x.ShowID == showID
+			                                           && x.SeasonNumber == seasonNumber).ToListAsync();
+		}
+
+		public async Task<ICollection<Episode>> GetEpisodes(string showSlug, int seasonNumber)
+		{
+			return await _database.Episodes.Where(x => x.Show.Slug == showSlug
+			                                           && x.SeasonNumber == seasonNumber).ToListAsync();
+		}
+
+		public async Task<ICollection<Episode>> GetEpisodes(int seasonID)
+		{
+			return await _database.Episodes.Where(x => x.SeasonID == seasonID).ToListAsync();
+		}
+		
 		public async Task Delete(int id)
 		{
 			Episode obj = await Get(id);
@@ -195,31 +210,26 @@ namespace Kyoo.Controllers
 			if (obj.ExternalIDs != null)
 				foreach (MetadataID entry in obj.ExternalIDs)
 					_database.Entry(entry).State = EntityState.Deleted;
-			
 			// Since Tracks & Episodes are on the same database and handled by dotnet-ef, we can't use the repository to delete them. 
-			/*if (obj.Tracks != null)
-			 *	foreach (Track entry in obj.Tracks)
-			 *		await _tracks.Delete(entry);
-			 */
-
 			await _database.SaveChangesAsync();
 		}
+
+		public async Task DeleteRange(IEnumerable<Episode> objs)
+		{
+			foreach (Episode obj in objs)
+				await Delete(obj);
+		}
 		
-		public async Task<ICollection<Episode>> GetEpisodes(int showID, int seasonNumber)
+		public async Task DeleteRange(IEnumerable<int> ids)
 		{
-			return await _database.Episodes.Where(x => x.ShowID == showID
-			                                     && x.SeasonNumber == seasonNumber).ToListAsync();
+			foreach (int id in ids)
+				await Delete(id);
 		}
-
-		public async Task<ICollection<Episode>> GetEpisodes(string showSlug, int seasonNumber)
+		
+		public async Task DeleteRange(IEnumerable<string> slugs)
 		{
-			return await _database.Episodes.Where(x => x.Show.Slug == showSlug
-			                                           && x.SeasonNumber == seasonNumber).ToListAsync();
-		}
-
-		public async Task<ICollection<Episode>> GetEpisodes(int seasonID)
-		{
-			return await _database.Episodes.Where(x => x.SeasonID == seasonID).ToListAsync();
+			foreach (string slug in slugs)
+				await Delete(slug);
 		}
 	}
 }

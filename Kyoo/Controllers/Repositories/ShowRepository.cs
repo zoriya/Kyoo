@@ -162,6 +162,29 @@ namespace Kyoo.Controllers
 				foreach (MetadataID link in obj.ExternalIDs)
 					link.ProviderID = await _providers.CreateIfNotExists(link.Provider);
 		}
+		
+		public async Task AddShowLink(int showID, int? libraryID, int? collectionID)
+		{
+			if (collectionID != null)
+			{
+				_database.CollectionLinks.AddIfNotExist(new CollectionLink { CollectionID = collectionID, ShowID = showID},
+					x => x.CollectionID == collectionID && x.ShowID == showID);
+			}
+			if (libraryID != null)
+			{
+				_database.LibraryLinks.AddIfNotExist(new LibraryLink {LibraryID = libraryID.Value, ShowID = showID},
+					x => x.LibraryID == libraryID.Value && x.CollectionID == null && x.ShowID == showID);
+			}
+
+			if (libraryID != null && collectionID != null)
+			{
+				_database.LibraryLinks.AddIfNotExist(
+					new LibraryLink {LibraryID = libraryID.Value, CollectionID = collectionID.Value},
+					x => x.LibraryID == libraryID && x.CollectionID == collectionID && x.ShowID == null);
+			}
+
+			await _database.SaveChangesAsync();
+		}
 
 		public async Task Delete(int id)
 		{
@@ -198,35 +221,28 @@ namespace Kyoo.Controllers
 					_database.Entry(entry).State = EntityState.Deleted;
 			
 			if (obj.Seasons != null)
-				foreach (Season season in obj.Seasons)
-					await _seasons.Delete(season);
+				await _seasons.DeleteRange(obj.Seasons);
 			if (obj.Episodes != null)
-				foreach (Episode episode in obj.Episodes.Where(x => x.SeasonID == null))
-					await _episodes.Delete(episode);
+				await _episodes.DeleteRange(obj.Episodes);
 			await _database.SaveChangesAsync();
 		}
 		
-		public async Task AddShowLink(int showID, int? libraryID, int? collectionID)
+		public async Task DeleteRange(IEnumerable<Show> objs)
 		{
-			if (collectionID != null)
-			{
-				_database.CollectionLinks.AddIfNotExist(new CollectionLink { CollectionID = collectionID, ShowID = showID},
-					x => x.CollectionID == collectionID && x.ShowID == showID);
-			}
-			if (libraryID != null)
-			{
-				_database.LibraryLinks.AddIfNotExist(new LibraryLink {LibraryID = libraryID.Value, ShowID = showID},
-					x => x.LibraryID == libraryID.Value && x.CollectionID == null && x.ShowID == showID);
-			}
-
-			if (libraryID != null && collectionID != null)
-			{
-				_database.LibraryLinks.AddIfNotExist(
-					new LibraryLink {LibraryID = libraryID.Value, CollectionID = collectionID.Value},
-					x => x.LibraryID == libraryID && x.CollectionID == collectionID && x.ShowID == null);
-			}
-
-			await _database.SaveChangesAsync();
+			foreach (Show obj in objs)
+				await Delete(obj);
+		}
+		
+		public async Task DeleteRange(IEnumerable<int> ids)
+		{
+			foreach (int id in ids)
+				await Delete(id);
+		}
+		
+		public async Task DeleteRange(IEnumerable<string> slugs)
+		{
+			foreach (string slug in slugs)
+				await Delete(slug);
 		}
 	}
 }

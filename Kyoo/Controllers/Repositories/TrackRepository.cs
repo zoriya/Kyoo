@@ -119,5 +119,23 @@ namespace Kyoo.Controllers
 			_database.Entry(obj).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
 		}
+		
+		public async Task DeleteRange(IEnumerable<Track> objs)
+		{
+			foreach (Track obj in objs)
+				await Delete(obj);
+		}
+		
+		public async Task DeleteRange(IEnumerable<int> ids)
+		{
+			foreach (int id in ids)
+				await Delete(id);
+		}
+		
+		public async Task DeleteRange(IEnumerable<string> slugs)
+		{
+			foreach (string slug in slugs)
+				await Delete(slug);
+		}
 	}
 }

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Kyoo.Models;
@@ -15,9 +16,17 @@ namespace Kyoo.Controllers
 		Task<int> Create([NotNull] T obj);
 		Task<int> CreateIfNotExists([NotNull] T obj);
 		Task Edit([NotNull] T edited, bool resetOld);
+		
 		Task Delete(int id);
 		Task Delete(string slug);
 		Task Delete([NotNull] T obj);
+
+		Task DeleteRange(params T[] objs) => DeleteRange(objs.AsEnumerable());
+		Task DeleteRange(IEnumerable<T> objs);
+		Task DeleteRange(params int[] ids) => DeleteRange(ids.AsEnumerable());
+		Task DeleteRange(IEnumerable<int> ids);
+		Task DeleteRange(params string[] slugs) => DeleteRange(slugs.AsEnumerable());
+		Task DeleteRange(IEnumerable<string> slugs);
 	}
 
 	public interface IShowRepository : IRepository<Show>
