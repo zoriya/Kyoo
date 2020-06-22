@@ -133,5 +133,23 @@ namespace Kyoo.Controllers
 				show.StudioID = null;
 			await _database.SaveChangesAsync();
 		}
+		
+		public async Task DeleteRange(IEnumerable<Studio> objs)
+		{
+			foreach (Studio obj in objs)
+				await Delete(obj);
+		}
+		
+		public async Task DeleteRange(IEnumerable<int> ids)
+		{
+			foreach (int id in ids)
+				await Delete(id);
+		}
+		
+		public async Task DeleteRange(IEnumerable<string> slugs)
+		{
+			foreach (string slug in slugs)
+				await Delete(slug);
+		}
 	}
 }

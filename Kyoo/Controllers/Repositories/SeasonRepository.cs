@@ -144,6 +144,16 @@ namespace Kyoo.Controllers
 			}
 		}
 		
+		public async Task<ICollection<Season>> GetSeasons(int showID)
+		{
+			return await _database.Seasons.Where(x => x.ShowID == showID).ToListAsync();
+		}
+
+		public async Task<ICollection<Season>> GetSeasons(string showSlug)
+		{
+			return await _database.Seasons.Where(x => x.Show.Slug == showSlug).ToListAsync();
+		}
+		
 		public async Task Delete(int id)
 		{
 			Season obj = await Get(id);
@@ -172,19 +182,26 @@ namespace Kyoo.Controllers
 				foreach (MetadataID entry in obj.ExternalIDs)
 					_database.Entry(entry).State = EntityState.Deleted;
 			if (obj.Episodes != null)
-				foreach (Episode episode in obj.Episodes)
-					await _episodes.Delete(episode);
+				await _episodes.DeleteRange(obj.Episodes);
 			await _database.SaveChangesAsync();
 		}
 		
-		public async Task<ICollection<Season>> GetSeasons(int showID)
+		public async Task DeleteRange(IEnumerable<Season> objs)
 		{
-			return await _database.Seasons.Where(x => x.ShowID == showID).ToListAsync();
+			foreach (Season obj in objs)
+				await Delete(obj);
 		}
-
-		public async Task<ICollection<Season>> GetSeasons(string showSlug)
+		
+		public async Task DeleteRange(IEnumerable<int> ids)
 		{
-			return await _database.Seasons.Where(x => x.Show.Slug == showSlug).ToListAsync();
+			foreach (int id in ids)
+				await Delete(id);
+		}
+		
+		public async Task DeleteRange(IEnumerable<string> slugs)
+		{
+			foreach (string slug in slugs)
+				await Delete(slug);
 		}
 	}
 }

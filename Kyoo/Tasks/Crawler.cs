@@ -59,9 +59,9 @@ namespace Kyoo.Controllers
 			using IServiceScope serviceScope = _serviceProvider.CreateScope();
 			await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
 			
-			// foreach (Show show in await libraryManager.GetShows())
-			// 	if (!Directory.Exists(show.Path))
-			// 		await libraryManager.DeleteShow(show);
+			foreach (Show show in await libraryManager.GetShows())
+				if (!Directory.Exists(show.Path))
+					await libraryManager.DeleteShow(show);
 			
 			ICollection<Episode> episodes = await libraryManager.GetEpisodes();
 			ICollection<Library> libraries = argument == null 

@@ -131,5 +131,23 @@ namespace Kyoo.Controllers
 			// TODO handle ExternalID deletion when they refer to this providerID.
 			await _database.SaveChangesAsync();
 		}
+		
+		public async Task DeleteRange(IEnumerable<ProviderID> objs)
+		{
+			foreach (ProviderID obj in objs)
+				await Delete(obj);
+		}
+		
+		public async Task DeleteRange(IEnumerable<int> ids)
+		{
+			foreach (int id in ids)
+				await Delete(id);
+		}
+		
+		public async Task DeleteRange(IEnumerable<string> slugs)
+		{
+			foreach (string slug in slugs)
+				await Delete(slug);
+		}
 	}
 }
