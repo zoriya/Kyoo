@@ -56,7 +56,7 @@ namespace Kyoo.Controllers
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
-			await _database.Genres.AddAsync(obj);
+			_database.Entry(obj).State = EntityState.Added;
 			
 			try
 			{
@@ -110,11 +110,47 @@ namespace Kyoo.Controllers
 			Utility.Merge(old, edited);
 			await _database.SaveChangesAsync();
 		}
+		
+		public async Task Delete(int id)
+		{
+			Genre obj = await Get(id);
+			await Delete(obj);
+		}
+
+		public async Task Delete(string slug)
+		{
+			Genre obj = await Get(slug);
+			await Delete(obj);
+		}
 
 		public async Task Delete(Genre obj)
 		{
-			_database.Genres.Remove(obj);
+			if (obj == null)
+				throw new ArgumentNullException(nameof(obj));
+
+			_database.Entry(obj).State = EntityState.Deleted;
+			if (obj.Links != null)
+				foreach (GenreLink link in obj.Links)
+					_database.Entry(link).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
+		}
+		
+		public async Task DeleteRange(IEnumerable<Genre> objs)
+		{
+			foreach (Genre obj in objs)
+				await Delete(obj);
+		}
+		
+		public async Task DeleteRange(IEnumerable<int> ids)
+		{
+			foreach (int id in ids)
+				await Delete(id);
+		}
+		
+		public async Task DeleteRange(IEnumerable<string> slugs)
+		{
+			foreach (string slug in slugs)
+				await Delete(slug);
 		}
 	}
 }

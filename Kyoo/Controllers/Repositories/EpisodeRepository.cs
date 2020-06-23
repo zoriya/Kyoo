@@ -12,6 +12,7 @@ namespace Kyoo.Controllers
 	{
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
+		// private readonly ITrackRepository _tracks;
 
 
 		public EpisodeRepository(DatabaseContext database, IProviderRepository providers)
@@ -83,10 +84,12 @@ namespace Kyoo.Controllers
 			if (obj.ExternalIDs != null)
 				foreach (MetadataID entry in obj.ExternalIDs)
 					_database.Entry(entry).State = EntityState.Added;
+			
+			// Since Episodes & Tracks are on the same DB, using a single commit is quicker.
 			if (obj.Tracks != null)
 				foreach (Track entry in obj.Tracks)
 					_database.Entry(entry).State = EntityState.Added;
-			
+
 			try
 			{
 				await _database.SaveChangesAsync();
@@ -99,6 +102,16 @@ namespace Kyoo.Controllers
 					throw new DuplicatedItemException($"Trying to insert a duplicated episode (slug {obj.Slug} already exists).");
 				throw;
 			}
+			
+			// Since Episodes & Tracks are on the same DB, using a single commit is quicker.
+			/*if (obj.Tracks != null)
+			 *	foreach (Track track in obj.Tracks)
+			 *	{
+			 * 		track.EpisodeID = obj.ID;
+			 *		await _tracks.Create(track);
+			 *	}
+			 */
+			
 			return obj.ID;
 		}
 		
@@ -153,16 +166,10 @@ namespace Kyoo.Controllers
 			}
 		}
 		
-		public async Task Delete(Episode obj)
-		{
-			_database.Episodes.Remove(obj);
-			await _database.SaveChangesAsync();
-		}
-		
 		public async Task<ICollection<Episode>> GetEpisodes(int showID, int seasonNumber)
 		{
 			return await _database.Episodes.Where(x => x.ShowID == showID
-			                                     && x.SeasonNumber == seasonNumber).ToListAsync();
+			                                           && x.SeasonNumber == seasonNumber).ToListAsync();
 		}
 
 		public async Task<ICollection<Episode>> GetEpisodes(string showSlug, int seasonNumber)
@@ -174,6 +181,55 @@ namespace Kyoo.Controllers
 		public async Task<ICollection<Episode>> GetEpisodes(int seasonID)
 		{
 			return await _database.Episodes.Where(x => x.SeasonID == seasonID).ToListAsync();
+		}
+		
+		public async Task Delete(int id)
+		{
+			Episode obj = await Get(id);
+			await Delete(obj);
+		}
+
+		public async Task Delete(string slug)
+		{
+			Episode obj = await Get(slug);
+			await Delete(obj);
+		}
+
+		public async Task Delete(string showSlug, int seasonNumber, int episodeNumber)
+		{
+			Episode obj = await Get(showSlug, seasonNumber, episodeNumber);
+			await Delete(obj);
+		}
+
+		public async Task Delete(Episode obj)
+		{
+			if (obj == null)
+				throw new ArgumentNullException(nameof(obj));
+			
+			_database.Entry(obj).State = EntityState.Deleted;
+			if (obj.ExternalIDs != null)
+				foreach (MetadataID entry in obj.ExternalIDs)
+					_database.Entry(entry).State = EntityState.Deleted;
+			// Since Tracks & Episodes are on the same database and handled by dotnet-ef, we can't use the repository to delete them. 
+			await _database.SaveChangesAsync();
+		}
+
+		public async Task DeleteRange(IEnumerable<Episode> objs)
+		{
+			foreach (Episode obj in objs)
+				await Delete(obj);
+		}
+		
+		public async Task DeleteRange(IEnumerable<int> ids)
+		{
+			foreach (int id in ids)
+				await Delete(id);
+		}
+		
+		public async Task DeleteRange(IEnumerable<string> slugs)
+		{
+			foreach (string slug in slugs)
+				await Delete(slug);
 		}
 	}
 }

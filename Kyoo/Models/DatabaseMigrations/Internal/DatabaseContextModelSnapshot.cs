@@ -504,7 +504,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         .HasForeignKey("CollectionID");
 
                     b.HasOne("Kyoo.Models.Show", "Show")
-                        .WithMany()
+                        .WithMany("CollectionLinks")
                         .HasForeignKey("ShowID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -526,7 +526,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
             modelBuilder.Entity("Kyoo.Models.GenreLink", b =>
                 {
                     b.HasOne("Kyoo.Models.Genre", "Genre")
-                        .WithMany()
+                        .WithMany("Links")
                         .HasForeignKey("GenreID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -541,7 +541,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
             modelBuilder.Entity("Kyoo.Models.LibraryLink", b =>
                 {
                     b.HasOne("Kyoo.Models.Collection", "Collection")
-                        .WithMany()
+                        .WithMany("LibraryLinks")
                         .HasForeignKey("CollectionID");
 
                     b.HasOne("Kyoo.Models.Library", "Library")
@@ -551,7 +551,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         .IsRequired();
 
                     b.HasOne("Kyoo.Models.Show", "Show")
-                        .WithMany()
+                        .WithMany("LibraryLinks")
                         .HasForeignKey("ShowID");
                 });
 
@@ -559,11 +559,13 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 {
                     b.HasOne("Kyoo.Models.Episode", "Episode")
                         .WithMany("ExternalIDs")
-                        .HasForeignKey("EpisodeID");
+                        .HasForeignKey("EpisodeID")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Kyoo.Models.People", "People")
                         .WithMany("ExternalIDs")
-                        .HasForeignKey("PeopleID");
+                        .HasForeignKey("PeopleID")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Kyoo.Models.ProviderID", "Provider")
                         .WithMany()
@@ -573,11 +575,13 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
                     b.HasOne("Kyoo.Models.Season", "Season")
                         .WithMany("ExternalIDs")
-                        .HasForeignKey("SeasonID");
+                        .HasForeignKey("SeasonID")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Kyoo.Models.Show", "Show")
                         .WithMany("ExternalIDs")
-                        .HasForeignKey("ShowID");
+                        .HasForeignKey("ShowID")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Kyoo.Models.PeopleLink", b =>

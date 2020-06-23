@@ -113,15 +113,39 @@ namespace Kyoo
 				.Ignore(x => x.Providers);
 			
 			modelBuilder.Entity<Collection>()
-				.Ignore(x => x.Shows);
+				.Ignore(x => x.Shows)
+				.Ignore(x => x.Libraries);
 			
 			modelBuilder.Entity<Show>()
-				.Ignore(x => x.Genres);
-			
+				.Ignore(x => x.Genres)
+				.Ignore(x => x.Libraries)
+				.Ignore(x => x.Collections);
+
 			modelBuilder.Entity<PeopleLink>()
 				.Ignore(x => x.Slug)
 				.Ignore(x => x.Name)
 				.Ignore(x => x.ExternalIDs);
+
+			modelBuilder.Entity<Genre>()
+				.Ignore(x => x.Shows);
+
+			
+			modelBuilder.Entity<MetadataID>()
+				.HasOne(x => x.Show)
+				.WithMany(x => x.ExternalIDs)
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<MetadataID>()
+				.HasOne(x => x.Season)
+				.WithMany(x => x.ExternalIDs)
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<MetadataID>()
+				.HasOne(x => x.Episode)
+				.WithMany(x => x.ExternalIDs)
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<MetadataID>()
+				.HasOne(x => x.People)
+				.WithMany(x => x.ExternalIDs)
+				.OnDelete(DeleteBehavior.Cascade);
 
 
 			modelBuilder.Entity<Collection>()

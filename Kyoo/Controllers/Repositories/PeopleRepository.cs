@@ -122,11 +122,50 @@ namespace Kyoo.Controllers
 				foreach (MetadataID link in obj.ExternalIDs)
 					link.ProviderID = await _providers.CreateIfNotExists(link.Provider);
 		}
+		
+		public async Task Delete(int id)
+		{
+			People obj = await Get(id);
+			await Delete(obj);
+		}
+
+		public async Task Delete(string slug)
+		{
+			People obj = await Get(slug);
+			await Delete(obj);
+		}
 
 		public async Task Delete(People obj)
 		{
-			_database.Peoples.Remove(obj);
+			if (obj == null)
+				throw new ArgumentNullException(nameof(obj));
+			
+			_database.Entry(obj).State = EntityState.Deleted;
+			if (obj.ExternalIDs != null)
+				foreach (MetadataID entry in obj.ExternalIDs)
+					_database.Entry(entry).State = EntityState.Deleted;
+			if (obj.Roles != null)
+				foreach (PeopleLink link in obj.Roles)
+					_database.Entry(link).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
+		}
+		
+		public async Task DeleteRange(IEnumerable<People> objs)
+		{
+			foreach (People obj in objs)
+				await Delete(obj);
+		}
+		
+		public async Task DeleteRange(IEnumerable<int> ids)
+		{
+			foreach (int id in ids)
+				await Delete(id);
+		}
+		
+		public async Task DeleteRange(IEnumerable<string> slugs)
+		{
+			foreach (string slug in slugs)
+				await Delete(slug);
 		}
 	}
 }
