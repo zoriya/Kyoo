@@ -524,6 +524,12 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Shows_Slug",
+                table: "Shows",
+                column: "Slug",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Shows_StudioID",
                 table: "Shows",
                 column: "StudioID");

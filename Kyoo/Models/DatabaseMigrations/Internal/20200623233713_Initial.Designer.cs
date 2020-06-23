@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Kyoo.Models.DatabaseMigrations.Internal
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20200623000428_Initial")]
+    [Migration("20200623233713_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -431,6 +431,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         .HasColumnType("text");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
 
                     b.HasIndex("StudioID");
 

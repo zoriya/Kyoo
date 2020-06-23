@@ -150,6 +150,12 @@ namespace Kyoo.Controllers
 				Regex regex = new Regex(patern, RegexOptions.IgnoreCase);
 				Match match = regex.Match(relativePath);
 
+				if (!match.Success)
+				{
+					await Console.Error.WriteLineAsync($"The episode at {path} does not match the episode's regex.");
+					return;
+				}
+				
 				string showPath = Path.GetDirectoryName(path);
 				string collectionName = match.Groups["Collection"]?.Value;
 				string showName = match.Groups["Show"].Value;
