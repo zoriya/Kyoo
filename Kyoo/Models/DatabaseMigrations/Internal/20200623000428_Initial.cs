@@ -347,13 +347,13 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         column: x => x.EpisodeID,
                         principalTable: "Episodes",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_MetadataIds_Peoples_PeopleID",
                         column: x => x.PeopleID,
                         principalTable: "Peoples",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_MetadataIds_Providers_ProviderID",
                         column: x => x.ProviderID,
@@ -365,13 +365,13 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         column: x => x.SeasonID,
                         principalTable: "Seasons",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_MetadataIds_Shows_ShowID",
                         column: x => x.ShowID,
                         principalTable: "Shows",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
