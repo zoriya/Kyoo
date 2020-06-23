@@ -204,27 +204,34 @@ namespace Kyoo.Controllers
 				throw new ArgumentNullException(nameof(obj));
 			
 			_database.Entry(obj).State = EntityState.Deleted;
+			
 			if (obj.GenreLinks != null)
 				foreach (GenreLink entry in obj.GenreLinks)
 					_database.Entry(entry).State = EntityState.Deleted;
+			
 			if (obj.People != null)
 				foreach (PeopleLink entry in obj.People)
 					_database.Entry(entry).State = EntityState.Deleted;
+			
 			if (obj.ExternalIDs != null)
 				foreach (MetadataID entry in obj.ExternalIDs)
 					_database.Entry(entry).State = EntityState.Deleted;
+			
 			if (obj.CollectionLinks != null)
 				foreach (CollectionLink entry in obj.CollectionLinks)
 					_database.Entry(entry).State = EntityState.Deleted;
+			
 			if (obj.LibraryLinks != null)
 				foreach (LibraryLink entry in obj.LibraryLinks)
 					_database.Entry(entry).State = EntityState.Deleted;
 			
+			await _database.SaveChangesAsync();
+
 			if (obj.Seasons != null)
 				await _seasons.DeleteRange(obj.Seasons);
-			if (obj.Episodes != null)
+
+			if (obj.Episodes != null) 
 				await _episodes.DeleteRange(obj.Episodes);
-			await _database.SaveChangesAsync();
 		}
 		
 		public async Task DeleteRange(IEnumerable<Show> objs)
