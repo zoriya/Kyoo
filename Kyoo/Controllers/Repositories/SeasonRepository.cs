@@ -12,12 +12,14 @@ namespace Kyoo.Controllers
 	{
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
+		private readonly IEpisodeRepository _episodes;
 
 
-		public SeasonRepository(DatabaseContext database, IProviderRepository providers)
+		public SeasonRepository(DatabaseContext database, IProviderRepository providers, IEpisodeRepository episodes)
 		{
 			_database = database;
 			_providers = providers;
+			_episodes = episodes;
 		}
 		
 		public void Dispose()
@@ -141,12 +143,6 @@ namespace Kyoo.Controllers
 					link.ProviderID = await _providers.CreateIfNotExists(link.Provider);
 			}
 		}
-
-		public async Task Delete(Season obj)
-		{
-			_database.Seasons.Remove(obj);
-			await _database.SaveChangesAsync();
-		}
 		
 		public async Task<ICollection<Season>> GetSeasons(int showID)
 		{
@@ -156,6 +152,59 @@ namespace Kyoo.Controllers
 		public async Task<ICollection<Season>> GetSeasons(string showSlug)
 		{
 			return await _database.Seasons.Where(x => x.Show.Slug == showSlug).ToListAsync();
+		}
+		
+		public async Task Delete(int id)
+		{
+			Season obj = await Get(id);
+			await Delete(obj);
+		}
+
+		public async Task Delete(string slug)
+		{
+			Season obj = await Get(slug);
+			await Delete(obj);
+		}
+
+		public async Task Delete(string showSlug, int seasonNumber)
+		{
+			Season obj = await Get(showSlug, seasonNumber);
+			await Delete(obj);
+		}
+
+		public async Task Delete(Season obj)
+		{
+			if (obj == null)
+				throw new ArgumentNullException(nameof(obj));
+			
+			_database.Entry(obj).State = EntityState.Deleted;
+			
+			if (obj.ExternalIDs != null)
+				foreach (MetadataID entry in obj.ExternalIDs)
+					_database.Entry(entry).State = EntityState.Deleted;
+			
+			await _database.SaveChangesAsync();
+
+			if (obj.Episodes != null)
+				await _episodes.DeleteRange(obj.Episodes);
+		}
+		
+		public async Task DeleteRange(IEnumerable<Season> objs)
+		{
+			foreach (Season obj in objs)
+				await Delete(obj);
+		}
+		
+		public async Task DeleteRange(IEnumerable<int> ids)
+		{
+			foreach (int id in ids)
+				await Delete(id);
+		}
+		
+		public async Task DeleteRange(IEnumerable<string> slugs)
+		{
+			foreach (string slug in slugs)
+				await Delete(slug);
 		}
 	}
 }

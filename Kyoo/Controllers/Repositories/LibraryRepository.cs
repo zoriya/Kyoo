@@ -124,10 +124,49 @@ namespace Kyoo.Controllers
 					link.ProviderID = await _providers.CreateIfNotExists(link.Provider);
 		}
 
+		public async Task Delete(int id)
+		{
+			Library obj = await Get(id);
+			await Delete(obj);
+		}
+
+		public async Task Delete(string slug)
+		{
+			Library obj = await Get(slug);
+			await Delete(obj);
+		}
+		
 		public async Task Delete(Library obj)
 		{
-			_database.Libraries.Remove(obj);
+			if (obj == null)
+				throw new ArgumentNullException(nameof(obj));
+			
+			_database.Entry(obj).State = EntityState.Deleted;
+			if (obj.ProviderLinks != null)
+				foreach (ProviderLink entry in obj.ProviderLinks)
+					_database.Entry(entry).State = EntityState.Deleted;
+			if (obj.Links != null)
+				foreach (LibraryLink entry in obj.Links)
+					_database.Entry(entry).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
+		}
+		
+		public async Task DeleteRange(IEnumerable<Library> objs)
+		{
+			foreach (Library obj in objs)
+				await Delete(obj);
+		}
+		
+		public async Task DeleteRange(IEnumerable<int> ids)
+		{
+			foreach (int id in ids)
+				await Delete(id);
+		}
+		
+		public async Task DeleteRange(IEnumerable<string> slugs)
+		{
+			foreach (string slug in slugs)
+				await Delete(slug);
 		}
 	}
 }
