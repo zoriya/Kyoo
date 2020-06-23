@@ -19,6 +19,14 @@ namespace Kyoo.Models
 			get => Links.Select(x => x.Show);
 			set => Links = value.Select(x => new CollectionLink(this, x));
 		}
+		
+		[NotMergable] [JsonIgnore] public virtual IEnumerable<LibraryLink> LibraryLinks { get; set; }
+
+		[NotMergable] [JsonIgnore] public IEnumerable<Library> Libraries
+		{
+			get => LibraryLinks?.Select(x => x.Library);
+			set => LibraryLinks = value?.Select(x => new LibraryLink(x, this));
+		}
 
 		public Collection() { }
 

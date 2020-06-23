@@ -15,18 +15,24 @@ namespace Kyoo.Controllers
 		private readonly IPeopleRepository _people;
 		private readonly IGenreRepository _genres;
 		private readonly IProviderRepository _providers;
+		private readonly ISeasonRepository _seasons;
+		private readonly IEpisodeRepository _episodes;
 
 		public ShowRepository(DatabaseContext database,
 			IStudioRepository studios,
 			IPeopleRepository people, 
 			IGenreRepository genres, 
-			IProviderRepository providers)
+			IProviderRepository providers, 
+			ISeasonRepository seasons, 
+			IEpisodeRepository episodes)
 		{
 			_database = database;
 			_studios = studios;
 			_people = people;
 			_genres = genres;
 			_providers = providers;
+			_seasons = seasons;
+			_episodes = episodes;
 		}
 		
 		public void Dispose()
@@ -40,19 +46,19 @@ namespace Kyoo.Controllers
 			await Task.WhenAll(_database.DisposeAsync().AsTask(), _studios.DisposeAsync().AsTask());
 		}
 		
-		public async Task<Show> Get(int id)
+		public Task<Show> Get(int id)
 		{
-			return await _database.Shows.FirstOrDefaultAsync(x => x.ID == id);
+			return _database.Shows.FirstOrDefaultAsync(x => x.ID == id);
 		}
 		
-		public async Task<Show> Get(string slug)
+		public Task<Show> Get(string slug)
 		{
-			return await _database.Shows.FirstOrDefaultAsync(x => x.Slug == slug);
+			return _database.Shows.FirstOrDefaultAsync(x => x.Slug == slug);
 		}
 
-		public async Task<Show> GetByPath(string path)
+		public Task<Show> GetByPath(string path)
 		{
-			return await _database.Shows.FirstOrDefaultAsync(x => x.Path == path);
+			return _database.Shows.FirstOrDefaultAsync(x => x.Path == path);
 		}
 
 		public async Task<ICollection<Show>> Search(string query)
@@ -145,28 +151,16 @@ namespace Kyoo.Controllers
 				obj.StudioID = await _studios.CreateIfNotExists(obj.Studio);
 			
 			if (obj.GenreLinks != null)
-			{
 				foreach (GenreLink link in obj.GenreLinks)
 					link.GenreID = await _genres.CreateIfNotExists(link.Genre);
-			}
 
 			if (obj.People != null)
-			{
 				foreach (PeopleLink link in obj.People)
 					link.PeopleID = await _people.CreateIfNotExists(link.People);
-			}
 
 			if (obj.ExternalIDs != null)
-			{
 				foreach (MetadataID link in obj.ExternalIDs)
 					link.ProviderID = await _providers.CreateIfNotExists(link.Provider);
-			}
-		}
-
-		public async Task Delete(Show show)
-		{
-			_database.Shows.Remove(show);
-			await _database.SaveChangesAsync();
 		}
 		
 		public async Task AddShowLink(int showID, int? libraryID, int? collectionID)
@@ -190,6 +184,72 @@ namespace Kyoo.Controllers
 			}
 
 			await _database.SaveChangesAsync();
+		}
+
+		public async Task Delete(int id)
+		{
+			Show obj = await Get(id);
+			await Delete(obj);
+		}
+
+		public async Task Delete(string slug)
+		{
+			Show obj = await Get(slug);
+			await Delete(obj);
+		}
+		
+		public async Task Delete(Show obj)
+		{
+			if (obj == null)
+				throw new ArgumentNullException(nameof(obj));
+			
+			_database.Entry(obj).State = EntityState.Deleted;
+			
+			if (obj.GenreLinks != null)
+				foreach (GenreLink entry in obj.GenreLinks)
+					_database.Entry(entry).State = EntityState.Deleted;
+			
+			if (obj.People != null)
+				foreach (PeopleLink entry in obj.People)
+					_database.Entry(entry).State = EntityState.Deleted;
+			
+			if (obj.ExternalIDs != null)
+				foreach (MetadataID entry in obj.ExternalIDs)
+					_database.Entry(entry).State = EntityState.Deleted;
+			
+			if (obj.CollectionLinks != null)
+				foreach (CollectionLink entry in obj.CollectionLinks)
+					_database.Entry(entry).State = EntityState.Deleted;
+			
+			if (obj.LibraryLinks != null)
+				foreach (LibraryLink entry in obj.LibraryLinks)
+					_database.Entry(entry).State = EntityState.Deleted;
+			
+			await _database.SaveChangesAsync();
+
+			if (obj.Seasons != null)
+				await _seasons.DeleteRange(obj.Seasons);
+
+			if (obj.Episodes != null) 
+				await _episodes.DeleteRange(obj.Episodes);
+		}
+		
+		public async Task DeleteRange(IEnumerable<Show> objs)
+		{
+			foreach (Show obj in objs)
+				await Delete(obj);
+		}
+		
+		public async Task DeleteRange(IEnumerable<int> ids)
+		{
+			foreach (int id in ids)
+				await Delete(id);
+		}
+		
+		public async Task DeleteRange(IEnumerable<string> slugs)
+		{
+			foreach (string slug in slugs)
+				await Delete(slug);
 		}
 	}
 }
