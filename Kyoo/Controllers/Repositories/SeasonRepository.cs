@@ -178,12 +178,15 @@ namespace Kyoo.Controllers
 				throw new ArgumentNullException(nameof(obj));
 			
 			_database.Entry(obj).State = EntityState.Deleted;
+			
 			if (obj.ExternalIDs != null)
 				foreach (MetadataID entry in obj.ExternalIDs)
 					_database.Entry(entry).State = EntityState.Deleted;
+			
+			await _database.SaveChangesAsync();
+
 			if (obj.Episodes != null)
 				await _episodes.DeleteRange(obj.Episodes);
-			await _database.SaveChangesAsync();
 		}
 		
 		public async Task DeleteRange(IEnumerable<Season> objs)
