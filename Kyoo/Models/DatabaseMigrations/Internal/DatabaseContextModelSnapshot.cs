@@ -430,6 +430,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
                     b.HasKey("ID");
 
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
                     b.HasIndex("StudioID");
 
                     b.ToTable("Shows");
