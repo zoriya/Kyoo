@@ -136,6 +136,9 @@ namespace Kyoo
 			modelBuilder.Entity<People>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
+			modelBuilder.Entity<Show>()
+				.HasIndex(x => x.Slug)
+				.IsUnique();
 			modelBuilder.Entity<Studio>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
