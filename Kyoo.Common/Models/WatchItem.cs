@@ -83,7 +83,10 @@ namespace Kyoo.Models
 				episode.Tracks.FirstOrDefault(x => x.Type == StreamType.Video))
 		{
 			if (episode.Show.IsMovie)
+			{
+				IsMovie = true;
 				return;
+			}
 
 			if (EpisodeNumber > 1)
 				PreviousEpisode = episode.Season.Episodes.FirstOrDefault(x => x.EpisodeNumber == EpisodeNumber - 1);
