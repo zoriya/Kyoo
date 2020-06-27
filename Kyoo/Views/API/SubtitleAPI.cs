@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
+using Kyoo.Models.Watch;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Kyoo.Api
@@ -21,6 +22,8 @@ namespace Kyoo.Api
 			_libraryManager = libraryManager;
 		//	_transcoder = transcoder;
 		}
+		
+		//TODO Create a real route for movie's subtitles.
 
 		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}.{identifier}.{extension?}")]
 		[Authorize(Policy="Play")]
@@ -36,7 +39,7 @@ namespace Kyoo.Api
 			
 			if (languageTag != null)
 				subtitle = (await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber))?.Tracks
-					.FirstOrDefault(x => x.Language == languageTag && x.IsForced == forced);
+					.FirstOrDefault(x => x.Type == StreamType.Subtitle && x.Language == languageTag && x.IsForced == forced);
 				
 			if (subtitle == null)
 			{
