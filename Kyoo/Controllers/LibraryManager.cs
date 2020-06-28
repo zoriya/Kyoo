@@ -127,54 +127,74 @@ namespace Kyoo.Controllers
 			return _people.Get(slug);
 		}
 
-		public Task<ICollection<Library>> GetLibraries()
+		public Task<ICollection<Library>> GetLibraries(Expression<Func<Library, bool>> where = null, 
+			Sort<Library> sort = default,
+			Pagination page = default)
 		{
-			return _libraries.GetAll();
+			return _libraries.GetAll(where, sort, page);
 		}
 
-		public Task<ICollection<Collection>> GetCollections()
+		public Task<ICollection<Collection>> GetCollections(Expression<Func<Collection, bool>> where = null, 
+			Sort<Collection> sort = default,
+			Pagination page = default)
 		{
-			return _collections.GetAll();
+			return _collections.GetAll(where, sort, page);
 		}
 
-		public Task<ICollection<Show>> GetShows()
+		public Task<ICollection<Show>> GetShows(Expression<Func<Show, bool>> where = null, 
+			Sort<Show> sort = default,
+			Pagination page = default)
 		{
-			return _shows.GetAll();
+			return _shows.GetAll(where, sort, page);
 		}
 
-		public Task<ICollection<Season>> GetSeasons()
+		public Task<ICollection<Season>> GetSeasons(Expression<Func<Season, bool>> where = null, 
+			Sort<Season> sort = default,
+			Pagination page = default)
 		{
-			return _seasons.GetAll();
+			return _seasons.GetAll(where, sort, page);
 		}
 
-		public Task<ICollection<Episode>> GetEpisodes()
+		public Task<ICollection<Episode>> GetEpisodes(Expression<Func<Episode, bool>> where = null, 
+			Sort<Episode> sort = default,
+			Pagination page = default)
 		{
-			return _episodes.GetAll();
+			return _episodes.GetAll(where, sort, page);
 		}
 
-		public Task<ICollection<Track>> GetTracks()
+		public Task<ICollection<Track>> GetTracks(Expression<Func<Track, bool>> where = null, 
+			Sort<Track> sort = default,
+			Pagination page = default)
 		{
-			return _tracks.GetAll();
+			return _tracks.GetAll(where, sort, page);
 		}
 
-		public Task<ICollection<Studio>> GetStudios()
+		public Task<ICollection<Studio>> GetStudios(Expression<Func<Studio, bool>> where = null, 
+			Sort<Studio> sort = default,
+			Pagination page = default)
 		{
-			return _studios.GetAll();
+			return _studios.GetAll(where, sort, page);
 		}
 
-		public Task<ICollection<People>> GetPeoples()
+		public Task<ICollection<People>> GetPeoples(Expression<Func<People, bool>> where = null, 
+			Sort<People> sort = default,
+			Pagination page = default)
 		{
-			return _people.GetAll();
+			return _people.GetAll(where, sort, page);
 		}
 
-		public Task<ICollection<Genre>> GetGenres()
+		public Task<ICollection<Genre>> GetGenres(Expression<Func<Genre, bool>> where = null, 
+			Sort<Genre> sort = default,
+			Pagination page = default)
 		{
-			return _genres.GetAll();
+			return _genres.GetAll(where, sort, page);
 		}
 
-		public Task<ICollection<ProviderID>> GetProviders()
+		public Task<ICollection<ProviderID>> GetProviders(Expression<Func<ProviderID, bool>> where = null, 
+			Sort<ProviderID> sort = default,
+			Pagination page = default)
 		{
-			return _providers.GetAll();
+			return _providers.GetAll(where, sort, page); 
 		}
 
 		public Task<ICollection<Season>> GetSeasons(int showID)
@@ -364,7 +384,7 @@ namespace Kyoo.Controllers
 			return _shows.Delete(show);
 		}
 
-		public Task DeleteSeason(Season season, IShowRepository repo)
+		public Task DeleteSeason(Season season)
 		{
 			return _seasons.Delete(season);
 		}

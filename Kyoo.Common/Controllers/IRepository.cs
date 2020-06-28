@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Kyoo.Models;
@@ -42,8 +43,8 @@ namespace Kyoo.Controllers
 			Sort<T> sort = default,
 			Pagination page = default);
 
-		Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null,
-			Expression<Func<T, object>> sort = default,
+		Task<ICollection<T>> GetAll([Optional] Expression<Func<T, bool>> where,
+			Expression<Func<T, object>> sort,
 			Pagination page = default
 		) => GetAll(where, new Sort<T>(sort), page);
 		
