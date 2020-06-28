@@ -101,7 +101,7 @@ namespace Kyoo.Models
 			if (EpisodeNumber >= episode.Season.Episodes.Count())
 			{
 				NextEpisode = episode.Show.Seasons
-					.FirstOrDefault(x => x.SeasonNumber == SeasonNumber - 1)?.Episodes
+					.FirstOrDefault(x => x.SeasonNumber == SeasonNumber + 1)?.Episodes
 					.FirstOrDefault(x => x.EpisodeNumber == 1);
 			}
 			else
