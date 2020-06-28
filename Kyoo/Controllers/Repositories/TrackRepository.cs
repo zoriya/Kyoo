@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
@@ -49,7 +50,9 @@ namespace Kyoo.Controllers
 			throw new InvalidOperationException("Tracks do not support the search method.");
 		}
 
-		public async Task<ICollection<Track>> GetAll()
+		public async Task<ICollection<Track>> GetAll(Expression<Func<Track, bool>> where = null, 
+			Sort<Track> sort = default,
+			Pagination page = default)
 		{
 			return await _database.Tracks.ToListAsync();
 		}

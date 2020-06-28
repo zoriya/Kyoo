@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
@@ -70,7 +71,9 @@ namespace Kyoo.Controllers
 				.ToListAsync();
 		}
 
-		public async Task<ICollection<Show>> GetAll()
+		public async Task<ICollection<Show>> GetAll(Expression<Func<Show, bool>> where = null, 
+			Sort<Show> sort = default,
+			Pagination page = default)
 		{
 			return await _database.Shows.ToListAsync();
 		}

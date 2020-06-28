@@ -56,11 +56,19 @@ namespace Kyoo.Controllers
 			if (where != null)
 				query = query.Where(where);
 
-			Expression<Func<Collection, object>> sortOrder = sort.Key ?? (x => x.Name);
-			query = sort.Descendant ? query.OrderByDescending(sortOrder) : query.OrderBy(sortOrder);
-			
-			query.Where(x => x.ID )
-			
+			Expression<Func<Collection, object>> sortKey = sort.Key ?? (x => x.Name);
+			query = sort.Descendant ? query.OrderByDescending(sortKey) : query.OrderBy(sortKey);
+
+			if (page.AfterID != 0)
+			{
+				Collection after = await Get(page.AfterID);
+				object afterObj = sortKey.Compile()(after);
+				query = query.Where(Expression.Lambda<Func<Collection, bool>>(
+					Expression.GreaterThan(sortKey, Expression.Constant(afterObj))
+					));
+			}
+			query = query.Take(page.Count <= 0 ? 20 : page.Count);
+
 			return await query.ToListAsync();
 		}
 
