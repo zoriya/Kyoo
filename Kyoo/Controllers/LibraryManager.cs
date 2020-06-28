@@ -176,7 +176,7 @@ namespace Kyoo.Controllers
 			return _studios.GetAll(where, sort, page);
 		}
 
-		public Task<ICollection<People>> GetPeoples(Expression<Func<People, bool>> where = null, 
+		public Task<ICollection<People>> GetPeople(Expression<Func<People, bool>> where = null, 
 			Sort<People> sort = default,
 			Pagination page = default)
 		{
