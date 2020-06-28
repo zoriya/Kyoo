@@ -8,32 +8,27 @@ using Kyoo.Models;
 
 namespace Kyoo.Controllers
 {
-	public struct Pagination
+	public readonly struct Pagination
 	{
-		public int Count;
-		public int AfterID;
+		public int Count { get; }
+		public int AfterID { get; }
+
+		public Pagination(int count, int afterID = 0)
+		{
+			Count = count;
+			AfterID = afterID;
+		}
 	}
 
 	public readonly struct Sort<T>
 	{
-		public string Key { get; }
+		public Expression<Func<T, object>> Key { get; }
 		public bool Descendant { get; }
-		
-		public Sort(string key, bool descendant = false)
+
+		public Sort(Expression<Func<T, object>> key, bool descendant = false)
 		{
 			Key = key;
 			Descendant = descendant;
-		}
-
-		public Sort(Expression<Func<T, object>> key)
-		{
-			Key = Utility.GetMemberName(key);
-			Descendant = false;
-		}
-
-		public static implicit operator Sort<T>([NotNull] Expression<Func<T, object>> key)
-		{
-			return new Sort<T>(Utility.GetMemberName(key));	
 		}
 	}
 	
@@ -49,7 +44,8 @@ namespace Kyoo.Controllers
 
 		Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null,
 			Expression<Func<T, object>> sort = default,
-			Pagination page = default) => GetAll(where, new Sort<T>(sort), page);
+			Pagination page = default
+		) => GetAll(where, new Sort<T>(sort), page);
 		
 		Task<int> Create([NotNull] T obj);
 		Task<int> CreateIfNotExists([NotNull] T obj);

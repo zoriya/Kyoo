@@ -51,7 +51,17 @@ namespace Kyoo.Controllers
 			Sort<Collection> sort = default,
 			Pagination page = default)
 		{
-			return await _database.Collections.ToListAsync();
+			IQueryable<Collection> query = _database.Collections;
+
+			if (where != null)
+				query = query.Where(where);
+
+			Expression<Func<Collection, object>> sortOrder = sort.Key ?? (x => x.Name);
+			query = sort.Descendant ? query.OrderByDescending(sortOrder) : query.OrderBy(sortOrder);
+			
+			query.Where(x => x.ID )
+			
+			return await query.ToListAsync();
 		}
 
 		public async Task<int> Create(Collection obj)
