@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
 
@@ -364,7 +363,7 @@ namespace Kyoo.Controllers
 			return _shows.Delete(show);
 		}
 
-		public Task DeleteSeason(Season season, IShowRepository repo)
+		public Task DeleteSeason(Season season)
 		{
 			return _seasons.Delete(season);
 		}

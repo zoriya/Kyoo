@@ -3,7 +3,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -224,17 +223,6 @@ namespace Kyoo
 				i = 0;
 				yield return ret;
 			}
-		}
-
-		public static string GetMemberName<T>(Expression<Func<T, object>> key)
-		{
-			if (key == null)
-				throw new ArgumentNullException(nameof(key));
-			
-			if (!(key.Body is MemberExpression member))
-				throw new ArgumentException("Key should be a member of the object.");
-			
-			return member.Member.Name;
 		}
 	}
 }
