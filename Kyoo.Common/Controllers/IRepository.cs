@@ -1,56 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Kyoo.Models;
 
 namespace Kyoo.Controllers
 {
-	public struct Pagination
-	{
-		public int Count;
-		public int AfterID;
-	}
-
-	public readonly struct Sort<T>
-	{
-		public string Key { get; }
-		public bool Descendant { get; }
-		
-		public Sort(string key, bool descendant = false)
-		{
-			Key = key;
-			Descendant = descendant;
-		}
-
-		public Sort(Expression<Func<T, object>> key)
-		{
-			Key = Utility.GetMemberName(key);
-			Descendant = false;
-		}
-
-		public static implicit operator Sort<T>([NotNull] Expression<Func<T, object>> key)
-		{
-			return new Sort<T>(Utility.GetMemberName(key));	
-		}
-	}
-	
 	public interface IRepository<T> : IDisposable, IAsyncDisposable
 	{
 		Task<T> Get(int id);
 		Task<T> Get(string slug);
 		Task<ICollection<T>> Search(string query);
-		
-		Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null, 
-			Sort<T> sort = default,
-			Pagination page = default);
-
-		Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null,
-			Expression<Func<T, object>> sort = default,
-			Pagination page = default) => GetAll(where, new Sort<T>(sort), page);
-		
+		Task<ICollection<T>> GetAll();
 		Task<int> Create([NotNull] T obj);
 		Task<int> CreateIfNotExists([NotNull] T obj);
 		Task Edit([NotNull] T edited, bool resetOld);
