@@ -31,6 +31,27 @@ namespace Kyoo.Controllers
 			Key = key;
 			Descendant = descendant;
 		}
+
+		public Sort(string sortBy)
+		{
+			if (string.IsNullOrEmpty(sortBy))
+			{
+				Key = null;
+				Descendant = false;
+				return;
+			}
+			
+			string key = sortBy.Contains(':') ? sortBy.Substring(0, sortBy.IndexOf(':')) : sortBy;
+			string order = sortBy.Contains(':') ? sortBy.Substring(sortBy.IndexOf(':') + 1) : null;
+			
+			Key = Expression.Lambda<Func<T, object>>(Expression.Property(Expression.Parameter(typeof(T), "x"), key));
+			Descendant = order switch
+			{
+				"desc" => true,
+				"asc" => false,
+				_ => throw new ArgumentException($"The sort order, if set, should be :asc or :desc but it was :{order}.")
+			};
+		}
 	}
 	
 	public interface IRepository<T> : IDisposable, IAsyncDisposable
