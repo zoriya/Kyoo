@@ -236,5 +236,49 @@ namespace Kyoo
 			
 			return member.Member.Name;
 		}
+
+		public static Expression<Func<T, bool>> ParseWhere<T>(Dictionary<string, string> where)
+		{
+			if (where == null || where.Count == 0)
+				return null;
+			
+			ParameterExpression param = Expression.Parameter(typeof(T));
+			Expression expression = null;
+
+			foreach (KeyValuePair<string, string> cond in where)
+			{
+				string value = cond.Value;
+				string operand = "eq";
+				if (value.Contains(':'))
+				{
+					operand = value.Substring(0, value.IndexOf(':'));
+					value = value.Substring(value.IndexOf(':') + 1);
+				}
+
+				PropertyInfo valueParam = typeof(T).GetProperty(cond.Key); // TODO get this property with case insensitive.
+				// TODO throw if valueParam is null.
+				MemberExpression property = Expression.Property(param, valueParam);
+				ConstantExpression condValue = Expression.Constant(value); // TODO Cast this to the right type (take nullable into account).
+				
+				Expression condition = operand switch
+				{
+					"eq" => Expression.Equal(property, condValue),
+					"not" => Expression.NotEqual(property, condValue),
+					"lt" => Expression.LessThan(property, condValue),
+					"lte" => Expression.LessThanOrEqual(property, condValue),
+					"gt" => Expression.GreaterThan(property, condValue),
+					"gte" => Expression.GreaterThanOrEqual(property, condValue),
+					"like" => throw new NotImplementedException("Like not implemented yet"),
+					_ => throw new ArgumentException($"Invalid operand: {operand}")	
+				};
+
+				if (expression != null)
+					expression = Expression.AndAlso(expression, condition);
+				else
+					expression = condition;
+			}
+			
+			return Expression.Lambda<Func<T, bool>>(expression!);
+		}
 	}
 }

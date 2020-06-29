@@ -75,7 +75,25 @@ namespace Kyoo.Controllers
 			Sort<Show> sort = default,
 			Pagination page = default)
 		{
-			return await _database.Shows.ToListAsync();
+			IQueryable<Show> query = _database.Shows;
+
+			if (where != null)
+				query = query.Where(where);
+
+			Expression<Func<Show, object>> sortKey = sort.Key ?? (x => x.Title);
+			query = sort.Descendant ? query.OrderByDescending(sortKey) : query.OrderBy(sortKey);
+
+			if (page.AfterID != 0)
+			{
+				Show after = await Get(page.AfterID);
+				object afterObj = sortKey.Compile()(after);
+				query = query.Where(Expression.Lambda<Func<Show, bool>>(
+					Expression.GreaterThan(sortKey, Expression.Constant(afterObj))
+				));
+			}
+			query = query.Take(page.Count <= 0 ? 20 : page.Count);
+
+			return await query.ToListAsync();
 		}
 
 		public async Task<int> Create(Show obj)

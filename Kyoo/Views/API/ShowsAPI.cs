@@ -1,8 +1,11 @@
-﻿using Kyoo.Models;
+﻿using System;
+using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
 using Kyoo.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -35,12 +38,14 @@ namespace Kyoo.Api
 
 		[HttpGet]
 		[Authorize(Policy="Read")]
-		public IEnumerable<Show> GetShows()
+		public async Task<IEnumerable<Show>> GetShows([FromQuery] string sortBy, 
+			[FromQuery] int limit, 
+			[FromQuery] int afterID,
+			[FromQuery] Dictionary<string, string> where)
 		{
-			return _database.LibraryLinks
-				.Include(x => x.Show)
-				.Include(x => x.Collection)
-				.AsEnumerable().Select(x => x.Show ?? x.Collection.AsShow()).ToList();
+			return await _libraryManager.GetShows(Utility.ParseWhere<Show>(where),
+				new Sort<Show>(sortBy),
+				new Pagination(limit, afterID));
 		}
 
 		[HttpGet("{slug}")]
