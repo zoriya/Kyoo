@@ -245,29 +245,31 @@ namespace Kyoo
 			ParameterExpression param = Expression.Parameter(typeof(T));
 			Expression expression = null;
 
-			foreach (KeyValuePair<string, string> cond in where)
+			foreach ((string key, string desired) in where)
 			{
-				string value = cond.Value;
+				string value = desired;
 				string operand = "eq";
-				if (value.Contains(':'))
+				if (desired.Contains(':'))
 				{
-					operand = value.Substring(0, value.IndexOf(':'));
-					value = value.Substring(value.IndexOf(':') + 1);
+					operand = desired.Substring(0, desired.IndexOf(':'));
+					value = desired.Substring(desired.IndexOf(':') + 1);
 				}
 
-				PropertyInfo valueParam = typeof(T).GetProperty(cond.Key); // TODO get this property with case insensitive.
-				// TODO throw if valueParam is null.
-				MemberExpression property = Expression.Property(param, valueParam);
-				ConstantExpression condValue = Expression.Constant(value); // TODO Cast this to the right type (take nullable into account).
+				PropertyInfo property = typeof(T).GetProperty(key, BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
+				if (property == null)
+					throw new ArgumentException($"No filterable parameter with the name {key}.");
+				MemberExpression propertyExpr = Expression.Property(param, property);
+				ConstantExpression valueExpr = Expression.Constant(Convert.ChangeType(value, property.PropertyType));
 				
 				Expression condition = operand switch
 				{
-					"eq" => Expression.Equal(property, condValue),
-					"not" => Expression.NotEqual(property, condValue),
-					"lt" => Expression.LessThan(property, condValue),
-					"lte" => Expression.LessThanOrEqual(property, condValue),
-					"gt" => Expression.GreaterThan(property, condValue),
-					"gte" => Expression.GreaterThanOrEqual(property, condValue),
+					"eq" => Expression.Equal(propertyExpr, valueExpr),
+					"not" => Expression.NotEqual(propertyExpr, valueExpr),
+					"lt" => Expression.LessThan(propertyExpr, valueExpr),
+					"lte" => Expression.LessThanOrEqual(propertyExpr, valueExpr),
+					"gt" => Expression.GreaterThan(propertyExpr, valueExpr),
+					"gte" => Expression.GreaterThanOrEqual(propertyExpr, valueExpr),
+					// TODO Implement the Like expression
 					"like" => throw new NotImplementedException("Like not implemented yet"),
 					_ => throw new ArgumentException($"Invalid operand: {operand}")	
 				};
