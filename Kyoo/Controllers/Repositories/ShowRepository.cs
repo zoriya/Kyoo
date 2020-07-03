@@ -88,7 +88,8 @@ namespace Kyoo.Controllers
 				Show after = await Get(page.AfterID);
 				object afterObj = sortKey.Compile()(after);
 				query = query.Where(Expression.Lambda<Func<Show, bool>>(
-					Expression.GreaterThan(sortKey, Expression.Constant(afterObj))
+					Utility.StringCompatibleExpression(Expression.GreaterThan, sortKey.Body, Expression.Constant(afterObj)),
+					(ParameterExpression)((MemberExpression)sortKey.Body).Expression
 				));
 			}
 			query = query.Take(page.Count <= 0 ? 20 : page.Count);
