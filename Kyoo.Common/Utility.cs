@@ -237,6 +237,18 @@ namespace Kyoo
 			return member.Member.Name;
 		}
 
+		public static Expression StringCompatibleExpression(Func<Expression, Expression, BinaryExpression> operand,
+			Expression left,
+			Expression right)
+		{
+			if (left is MemberExpression member && ((PropertyInfo)member.Member).PropertyType == typeof(string))
+			{
+				MethodCallExpression call = Expression.Call(typeof(string), "Compare", null, left, right);
+				return operand(call, Expression.Constant(0));
+			}
+			return operand(left, right);
+		}
+		
 		public static Expression<Func<T, bool>> ParseWhere<T>(Dictionary<string, string> where)
 		{
 			if (where == null || where.Count == 0)
@@ -259,16 +271,21 @@ namespace Kyoo
 				if (property == null)
 					throw new ArgumentException($"No filterable parameter with the name {key}.");
 				MemberExpression propertyExpr = Expression.Property(param, property);
-				ConstantExpression valueExpr = Expression.Constant(Convert.ChangeType(value, property.PropertyType));
+				
+				Type propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+				object val = string.IsNullOrEmpty(value) || value.Equals("null", StringComparison.OrdinalIgnoreCase)
+					? null 
+					: Convert.ChangeType(value, propertyType);
+				ConstantExpression valueExpr = Expression.Constant(val);
 				
 				Expression condition = operand switch
 				{
 					"eq" => Expression.Equal(propertyExpr, valueExpr),
 					"not" => Expression.NotEqual(propertyExpr, valueExpr),
-					"lt" => Expression.LessThan(propertyExpr, valueExpr),
-					"lte" => Expression.LessThanOrEqual(propertyExpr, valueExpr),
-					"gt" => Expression.GreaterThan(propertyExpr, valueExpr),
-					"gte" => Expression.GreaterThanOrEqual(propertyExpr, valueExpr),
+					"lt" => StringCompatibleExpression(Expression.LessThan, propertyExpr, valueExpr),
+					"lte" => StringCompatibleExpression(Expression.LessThanOrEqual, propertyExpr, valueExpr),
+					"gt" => StringCompatibleExpression(Expression.GreaterThan, propertyExpr, valueExpr),
+					"gte" => StringCompatibleExpression(Expression.GreaterThanOrEqual, propertyExpr, valueExpr),
 					// TODO Implement the Like expression
 					"like" => throw new NotImplementedException("Like not implemented yet"),
 					_ => throw new ArgumentException($"Invalid operand: {operand}")	

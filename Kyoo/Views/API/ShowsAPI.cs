@@ -1,11 +1,8 @@
-﻿using System;
-using Kyoo.Models;
+﻿using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Castle.DynamicProxy.Generators.Emitters.SimpleAST;
 using Kyoo.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
@@ -43,6 +40,10 @@ namespace Kyoo.Api
 			[FromQuery] int afterID,
 			[FromQuery] Dictionary<string, string> where)
 		{
+			where.Remove("sortBy");
+			where.Remove("limit");
+			where.Remove("afterID");
+			
 			return await _libraryManager.GetShows(Utility.ParseWhere<Show>(where),
 				new Sort<Show>(sortBy),
 				new Pagination(limit, afterID));

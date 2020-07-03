@@ -39,7 +39,7 @@ namespace Kyoo
 			{
 				configuration.RootPath = "wwwroot";
 			});
-			
+
 			services.AddControllers().AddNewtonsoftJson();
 			services.AddHttpClient();
 
