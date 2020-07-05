@@ -1,4 +1,5 @@
-﻿using Kyoo.Models;
+﻿using System;
+using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace Kyoo.Api
 {
@@ -19,23 +21,26 @@ namespace Kyoo.Api
 		private readonly DatabaseContext _database;
 		private readonly IThumbnailsManager _thumbnailsManager;
 		private readonly ITaskManager _taskManager;
+		private readonly string _baseURL;
 
 		public ShowsAPI(ILibraryManager libraryManager,
 			IProviderManager providerManager,
 			DatabaseContext database,
 			IThumbnailsManager thumbnailsManager,
-			ITaskManager taskManager)
+			ITaskManager taskManager,
+			IConfiguration configuration)
 		{
 			_libraryManager = libraryManager;
 			_providerManager = providerManager;
 			_database = database;
 			_thumbnailsManager = thumbnailsManager;
 			_taskManager = taskManager;
+			_baseURL = configuration.GetValue<string>("public_url").TrimEnd('/');
 		}
 
 		[HttpGet]
 		[Authorize(Policy="Read")]
-		public async Task<IEnumerable<Show>> GetShows([FromQuery] string sortBy, 
+		public async Task<ActionResult<Page<Show>>> GetShows([FromQuery] string sortBy, 
 			[FromQuery] int limit, 
 			[FromQuery] int afterID,
 			[FromQuery] Dictionary<string, string> where)
@@ -43,10 +48,26 @@ namespace Kyoo.Api
 			where.Remove("sortBy");
 			where.Remove("limit");
 			where.Remove("afterID");
-			
-			return await _libraryManager.GetShows(Utility.ParseWhere<Show>(where),
-				new Sort<Show>(sortBy),
-				new Pagination(limit, afterID));
+			if (limit <= 0)
+				limit = 20;
+
+			ICollection<Show> shows;
+			try
+			{
+				shows = await _libraryManager.GetShows(Utility.ParseWhere<Show>(where),
+					new Sort<Show>(sortBy),
+					new Pagination(limit, afterID));
+			}
+			catch (ArgumentException ex)
+			{
+				return BadRequest(new { Error = ex.Message });
+			}
+
+			return new Page<Show>(shows,
+				x => $"{x.ID}",
+				_baseURL + Request.Path,
+				Request.Query.ToDictionary(x => x.Key, x => x.Value.ToString(), StringComparer.InvariantCultureIgnoreCase),
+				limit);
 		}
 
 		[HttpGet("{slug}")]
