@@ -277,7 +277,7 @@ namespace Kyoo
 					? null 
 					: Convert.ChangeType(value, propertyType);
 				ConstantExpression valueExpr = Expression.Constant(val, property.PropertyType);
-				
+
 				Expression condition = operand switch
 				{
 					"eq" => Expression.Equal(propertyExpr, valueExpr),
@@ -286,8 +286,6 @@ namespace Kyoo
 					"lte" => StringCompatibleExpression(Expression.LessThanOrEqual, propertyExpr, valueExpr),
 					"gt" => StringCompatibleExpression(Expression.GreaterThan, propertyExpr, valueExpr),
 					"gte" => StringCompatibleExpression(Expression.GreaterThanOrEqual, propertyExpr, valueExpr),
-					// TODO Implement the Like expression
-					"like" => throw new NotImplementedException("Like not implemented yet"),
 					_ => throw new ArgumentException($"Invalid operand: {operand}")	
 				};
 

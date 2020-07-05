@@ -92,7 +92,8 @@ namespace Kyoo.Controllers
 					(ParameterExpression)((MemberExpression)sortKey.Body).Expression
 				));
 			}
-			query = query.Take(page.Count);
+			if (page.Count > 0)
+				query = query.Take(page.Count);
 
 			return await query.ToListAsync();
 		}

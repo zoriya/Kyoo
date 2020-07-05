@@ -48,7 +48,7 @@ namespace Kyoo.Api
 			where.Remove("sortBy");
 			where.Remove("limit");
 			where.Remove("afterID");
-			if (limit <= 0)
+			if (limit == 0)
 				limit = 20;
 
 			ICollection<Show> shows;
