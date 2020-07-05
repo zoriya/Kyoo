@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
@@ -39,20 +40,13 @@ namespace Kyoo.Controllers
 
 		public Task<Episode> Get(string slug)
 		{
-			int sIndex = slug.IndexOf("-s", StringComparison.Ordinal);
-			int eIndex = slug.IndexOf("-e", StringComparison.Ordinal);
-
-			if (sIndex == -1 && eIndex == -1)
-				return _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == slug);
+			Match match = Regex.Match(slug, @"(<show>.*)-s(<season>\d*)-e(<episode>\d*)");
 			
-			if (sIndex == -1 || eIndex == -1 || eIndex < sIndex)
-				throw new InvalidOperationException("Invalid episode slug. Format: {showSlug}-s{seasonNumber}-e{episodeNumber}");
-			string showSlug = slug.Substring(0, sIndex);
-			if (!int.TryParse(slug.Substring(sIndex + 2), out int seasonNumber))
-				throw new InvalidOperationException("Invalid episode slug. Format: {showSlug}-s{seasonNumber}-e{episodeNumber}");
-			if (!int.TryParse(slug.Substring(eIndex + 2), out int episodeNumber))
-				throw new InvalidOperationException("Invalid episode slug. Format: {showSlug}-s{seasonNumber}-e{episodeNumber}");
-			return Get(showSlug, seasonNumber, episodeNumber);
+			if (!match.Success)
+				return _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == slug);
+			return Get(match.Groups["show"].Value,
+				int.Parse(match.Groups["season"].Value), 
+				int.Parse(match.Groups["episode"].Value));
 		}
 		
 		public Task<Episode> Get(string showSlug, int seasonNumber, int episodeNumber)

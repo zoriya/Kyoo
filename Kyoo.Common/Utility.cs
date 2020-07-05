@@ -276,7 +276,7 @@ namespace Kyoo
 				object val = string.IsNullOrEmpty(value) || value.Equals("null", StringComparison.OrdinalIgnoreCase)
 					? null 
 					: Convert.ChangeType(value, propertyType);
-				ConstantExpression valueExpr = Expression.Constant(val);
+				ConstantExpression valueExpr = Expression.Constant(val, property.PropertyType);
 				
 				Expression condition = operand switch
 				{
@@ -297,7 +297,14 @@ namespace Kyoo
 					expression = condition;
 			}
 			
-			return Expression.Lambda<Func<T, bool>>(expression!);
+			return Expression.Lambda<Func<T, bool>>(expression!, param);
+		}
+
+		public static string ToQueryString(this Dictionary<string, string> query)
+		{
+			if (!query.Any())
+				return string.Empty;
+			return "?" + string.Join('&', query.Select(x => $"{x.Key}={x.Value}"));
 		}
 	}
 }

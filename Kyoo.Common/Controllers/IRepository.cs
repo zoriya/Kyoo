@@ -25,11 +25,14 @@ namespace Kyoo.Controllers
 	{
 		public Expression<Func<T, object>> Key { get; }
 		public bool Descendant { get; }
-
+		
 		public Sort(Expression<Func<T, object>> key, bool descendant = false)
 		{
 			Key = key;
 			Descendant = descendant;
+			
+			if (!(Key.Body is MemberExpression))
+				throw new ArgumentException("The given sort key is not valid.");
 		}
 
 		public Sort(string sortBy)
