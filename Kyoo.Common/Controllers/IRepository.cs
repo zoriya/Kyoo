@@ -31,8 +31,11 @@ namespace Kyoo.Controllers
 			Key = key;
 			Descendant = descendant;
 			
-			if (!(Key.Body is MemberExpression))
-				throw new ArgumentException("The given sort key is not valid.");
+			if (Key.Body is MemberExpression || 
+			    Key.Body.NodeType == ExpressionType.Convert && ((UnaryExpression)Key.Body).Operand is MemberExpression)
+				return;
+				
+			throw new ArgumentException("The given sort key is not valid.");
 		}
 
 		public Sort(string sortBy)
@@ -48,12 +51,16 @@ namespace Kyoo.Controllers
 			string order = sortBy.Contains(':') ? sortBy.Substring(sortBy.IndexOf(':') + 1) : null;
 
 			ParameterExpression param = Expression.Parameter(typeof(T), "x");
-			Key = Expression.Lambda<Func<T, object>>(Expression.Property(param, key), param);
+			MemberExpression property = Expression.Property(param, key);
+			Key = property.Type.IsValueType
+				? Expression.Lambda<Func<T, object>>(Expression.Convert(property, typeof(object)), param)
+				: Expression.Lambda<Func<T, object>>(property, param);
+					
 			Descendant = order switch
 			{
 				"desc" => true,
 				"asc" => false,
-				"" => false,
+				null => false,
 				_ => throw new ArgumentException($"The sort order, if set, should be :asc or :desc but it was :{order}.")
 			};
 		}
