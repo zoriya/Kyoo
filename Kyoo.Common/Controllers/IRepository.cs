@@ -46,12 +46,14 @@ namespace Kyoo.Controllers
 			
 			string key = sortBy.Contains(':') ? sortBy.Substring(0, sortBy.IndexOf(':')) : sortBy;
 			string order = sortBy.Contains(':') ? sortBy.Substring(sortBy.IndexOf(':') + 1) : null;
-			
-			Key = Expression.Lambda<Func<T, object>>(Expression.Property(Expression.Parameter(typeof(T), "x"), key));
+
+			ParameterExpression param = Expression.Parameter(typeof(T), "x");
+			Key = Expression.Lambda<Func<T, object>>(Expression.Property(param, key), param);
 			Descendant = order switch
 			{
 				"desc" => true,
 				"asc" => false,
+				"" => false,
 				_ => throw new ArgumentException($"The sort order, if set, should be :asc or :desc but it was :{order}.")
 			};
 		}
