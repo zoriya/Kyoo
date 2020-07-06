@@ -27,7 +27,6 @@ install_kyoo: all
 	chmod +x /opt/kyoo/kyoo.sh
 
 install: install_kyoo
-	curl https://raw.githubusercontent.com/AnonymusRaccoon/Kyoo.TheTVDB/master/install.sh | sh
 	chown -R kyoo /opt/kyoo
 	chgrp -R kyoo /opt/kyoo
 
