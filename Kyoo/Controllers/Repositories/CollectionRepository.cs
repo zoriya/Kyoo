@@ -72,7 +72,7 @@ namespace Kyoo.Controllers
 			return await query.ToListAsync();
 		}
 
-		public async Task<int> Create(Collection obj)
+		public async Task<Collection> Create(Collection obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -91,17 +91,17 @@ namespace Kyoo.Controllers
 				throw;
 			}
 
-			return obj.ID;
+			return obj;
 		}
 		
-		public async Task<int> CreateIfNotExists(Collection obj)
+		public async Task<Collection> CreateIfNotExists(Collection obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
 			Collection old = await Get(obj.Slug);
 			if (old != null)
-				return old.ID;
+				return old;
 			try
 			{
 				return await Create(obj);
@@ -111,11 +111,11 @@ namespace Kyoo.Controllers
 				old = await Get(obj.Slug);
 				if (old == null)
 					throw new SystemException("Unknown database state.");
-				return old.ID;
+				return old;
 			}
 		}
 
-		public async Task Edit(Collection edited, bool resetOld)
+		public async Task<Collection> Edit(Collection edited, bool resetOld)
 		{
 			if (edited == null)
 				throw new ArgumentNullException(nameof(edited));
@@ -130,6 +130,7 @@ namespace Kyoo.Controllers
 			Utility.Merge(old, edited);
 
 			await _database.SaveChangesAsync();
+			return old;
 		}
 
 		public async Task Delete(int id)

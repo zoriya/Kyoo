@@ -81,9 +81,9 @@ namespace Kyoo.Controllers
 			Pagination page = default
 		) => GetAll(where, new Sort<T>(sort), page);
 		
-		Task<int> Create([NotNull] T obj);
-		Task<int> CreateIfNotExists([NotNull] T obj);
-		Task Edit([NotNull] T edited, bool resetOld);
+		Task<T> Create([NotNull] T obj);
+		Task<T> CreateIfNotExists([NotNull] T obj);
+		Task<T> Edit([NotNull] T edited, bool resetOld);
 		
 		Task Delete(int id);
 		Task Delete(string slug);
@@ -99,7 +99,6 @@ namespace Kyoo.Controllers
 
 	public interface IShowRepository : IRepository<Show>
 	{
-		Task<Show> GetByPath(string path);
 		Task AddShowLink(int showID, int? libraryID, int? collectionID);
 	}
 

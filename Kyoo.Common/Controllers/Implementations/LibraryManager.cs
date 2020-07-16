@@ -221,12 +221,7 @@ namespace Kyoo.Controllers
 		{
 			return _episodes.GetEpisodes(seasonID);
 		}
-
-		public Task<Show> GetShowByPath(string path)
-		{
-			return _shows.GetByPath(path);
-		}
-
+		
 		public Task AddShowLink(int showID, int? libraryID, int? collectionID)
 		{
 			return _shows.AddShowLink(showID, libraryID, collectionID);
@@ -279,92 +274,92 @@ namespace Kyoo.Controllers
 			return _people.Search(searchQuery);
 		}
 		
-		public Task RegisterLibrary(Library library)
+		public Task<Library> RegisterLibrary(Library library)
 		{
 			return _libraries.Create(library);
 		}
 
-		public Task RegisterCollection(Collection collection)
+		public Task<Collection> RegisterCollection(Collection collection)
 		{
 			return _collections.Create(collection);
 		}
 
-		public Task RegisterShow(Show show)
+		public Task<Show> RegisterShow(Show show)
 		{
 			return _shows.Create(show);
 		}
 
-		public Task RegisterSeason(Season season)
+		public Task<Season> RegisterSeason(Season season)
 		{
 			return _seasons.Create(season);
 		}
 
-		public Task RegisterEpisode(Episode episode)
+		public Task<Episode> RegisterEpisode(Episode episode)
 		{
 			return _episodes.Create(episode);
 		}
 
-		public Task RegisterTrack(Track track)
+		public Task<Track> RegisterTrack(Track track)
 		{
 			return _tracks.Create(track);
 		}
 
-		public Task RegisterGenre(Genre genre)
+		public Task<Genre> RegisterGenre(Genre genre)
 		{
 			return _genres.Create(genre);
 		}
 
-		public Task RegisterStudio(Studio studio)
+		public Task<Studio> RegisterStudio(Studio studio)
 		{
 			return _studios.Create(studio);
 		}
 
-		public Task RegisterPeople(People people)
+		public Task<People> RegisterPeople(People people)
 		{
 			return _people.Create(people);
 		}
 
-		public Task EditLibrary(Library library, bool resetOld)
+		public Task<Library> EditLibrary(Library library, bool resetOld)
 		{
 			return _libraries.Edit(library, resetOld);
 		}
 
-		public Task EditCollection(Collection collection, bool resetOld)
+		public Task<Collection> EditCollection(Collection collection, bool resetOld)
 		{
 			return _collections.Edit(collection, resetOld);
 		}
 
-		public Task EditShow(Show show, bool resetOld)
+		public Task<Show> EditShow(Show show, bool resetOld)
 		{
 			return _shows.Edit(show, resetOld);
 		}
 
-		public Task EditSeason(Season season, bool resetOld)
+		public Task<Season> EditSeason(Season season, bool resetOld)
 		{
 			return _seasons.Edit(season, resetOld);
 		}
 
-		public Task EditEpisode(Episode episode, bool resetOld)
+		public Task<Episode> EditEpisode(Episode episode, bool resetOld)
 		{
 			return _episodes.Edit(episode, resetOld);
 		}
 
-		public Task EditTrack(Track track, bool resetOld)
+		public Task<Track> EditTrack(Track track, bool resetOld)
 		{
 			return _tracks.Edit(track, resetOld);
 		}
 
-		public Task EditGenre(Genre genre, bool resetOld)
+		public Task<Genre> EditGenre(Genre genre, bool resetOld)
 		{
 			return _genres.Edit(genre, resetOld);
 		}
 
-		public Task EditStudio(Studio studio, bool resetOld)
+		public Task<Studio> EditStudio(Studio studio, bool resetOld)
 		{
 			return _studios.Edit(studio, resetOld);
 		}
 
-		public Task EditPeople(People people, bool resetOld)
+		public Task<People> EditPeople(People people, bool resetOld)
 		{
 			return _people.Edit(people, resetOld);
 		}
@@ -410,6 +405,96 @@ namespace Kyoo.Controllers
 		}
 
 		public Task DeletePeople(People people)
+		{
+			return _people.Delete(people);
+		}
+		
+		public Task DelteLibrary(string library)
+		{
+			return _libraries.Delete(library);
+		}
+
+		public Task DeleteCollection(string collection)
+		{
+			return _collections.Delete(collection);
+		}
+
+		public Task DeleteShow(string show)
+		{
+			return _shows.Delete(show);
+		}
+
+		public Task DeleteSeason(string season)
+		{
+			return _seasons.Delete(season);
+		}
+
+		public Task DeleteEpisode(string episode)
+		{
+			return _episodes.Delete(episode);
+		}
+
+		public Task DeleteTrack(string track)
+		{
+			return _tracks.Delete(track);
+		}
+
+		public Task DeleteGenre(string genre)
+		{
+			return _genres.Delete(genre);
+		}
+
+		public Task DeleteStudio(string studio)
+		{
+			return _studios.Delete(studio);
+		}
+
+		public Task DeletePeople(string people)
+		{
+			return _people.Delete(people);
+		}
+		
+		public Task DelteLibrary(int library)
+		{
+			return _libraries.Delete(library);
+		}
+
+		public Task DeleteCollection(int collection)
+		{
+			return _collections.Delete(collection);
+		}
+
+		public Task DeleteShow(int show)
+		{
+			return _shows.Delete(show);
+		}
+
+		public Task DeleteSeason(int season)
+		{
+			return _seasons.Delete(season);
+		}
+
+		public Task DeleteEpisode(int episode)
+		{
+			return _episodes.Delete(episode);
+		}
+
+		public Task DeleteTrack(int track)
+		{
+			return _tracks.Delete(track);
+		}
+
+		public Task DeleteGenre(int genre)
+		{
+			return _genres.Delete(genre);
+		}
+
+		public Task DeleteStudio(int studio)
+		{
+			return _studios.Delete(studio);
+		}
+
+		public Task DeletePeople(int people)
 		{
 			return _people.Delete(people);
 		}

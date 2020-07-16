@@ -33,7 +33,6 @@ namespace Kyoo.Controllers
 		
 		
 		// Helpers
-		Task<Show> GetShowByPath(string path);
 		Task AddShowLink(int showID, int? libraryID, int? collectionID);
 		Task AddShowLink([NotNull] Show show, Library library, Collection collection);
 		
@@ -122,26 +121,26 @@ namespace Kyoo.Controllers
 		Task<ICollection<People>> SearchPeople(string searchQuery);
 		
 		//Register values
-		Task RegisterLibrary(Library library);
-		Task RegisterCollection(Collection collection);
-		Task RegisterShow(Show show);
-		Task RegisterSeason(Season season);
-		Task RegisterEpisode(Episode episode);
-		Task RegisterTrack(Track track);
-		Task RegisterGenre(Genre genre);
-		Task RegisterStudio(Studio studio);
-		Task RegisterPeople(People people);
+		Task<Library> RegisterLibrary(Library library);
+		Task<Collection> RegisterCollection(Collection collection);
+		Task<Show> RegisterShow(Show show);
+		Task<Season> RegisterSeason(Season season);
+		Task<Episode> RegisterEpisode(Episode episode);
+		Task<Track> RegisterTrack(Track track);
+		Task<Genre> RegisterGenre(Genre genre);
+		Task<Studio> RegisterStudio(Studio studio);
+		Task<People> RegisterPeople(People people);
 		
 		// Edit values
-		Task EditLibrary(Library library, bool resetOld);
-		Task EditCollection(Collection collection, bool resetOld);
-		Task EditShow(Show show, bool resetOld);
-		Task EditSeason(Season season, bool resetOld);
-		Task EditEpisode(Episode episode, bool resetOld);
-		Task EditTrack(Track track, bool resetOld);
-		Task EditGenre(Genre genre, bool resetOld);
-		Task EditStudio(Studio studio, bool resetOld);
-		Task EditPeople(People people, bool resetOld);
+		Task<Library> EditLibrary(Library library, bool resetOld);
+		Task<Collection> EditCollection(Collection collection, bool resetOld);
+		Task<Show> EditShow(Show show, bool resetOld);
+		Task<Season> EditSeason(Season season, bool resetOld);
+		Task<Episode> EditEpisode(Episode episode, bool resetOld);
+		Task<Track> EditTrack(Track track, bool resetOld);
+		Task<Genre> EditGenre(Genre genre, bool resetOld);
+		Task<Studio> EditStudio(Studio studio, bool resetOld);
+		Task<People> EditPeople(People people, bool resetOld);
 
 		
 		// Delete values
@@ -154,5 +153,27 @@ namespace Kyoo.Controllers
 		Task DeleteGenre(Genre genre);
 		Task DeleteStudio(Studio studio);
 		Task DeletePeople(People people);
+		
+		//Delete by slug
+		Task DelteLibrary(string slug);
+		Task DeleteCollection(string slug);
+		Task DeleteShow(string slug);
+		Task DeleteSeason(string slug);
+		Task DeleteEpisode(string slug);
+		Task DeleteTrack(string slug);
+		Task DeleteGenre(string slug);
+		Task DeleteStudio(string slug);
+		Task DeletePeople(string slug);
+		
+		//Delete by id
+		Task DelteLibrary(int id);
+		Task DeleteCollection(int id);
+		Task DeleteShow(int id);
+		Task DeleteSeason(int id);
+		Task DeleteEpisode(int id);
+		Task DeleteTrack(int id);
+		Task DeleteGenre(int id);
+		Task DeleteStudio(int id);
+		Task DeletePeople(int id);
 	}
 }

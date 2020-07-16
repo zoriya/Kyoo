@@ -16,7 +16,7 @@ using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
-namespace Kyoo.Api
+namespace Kyoo.API
 {
 	public class RegisterRequest
 	{

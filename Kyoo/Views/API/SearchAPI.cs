@@ -4,7 +4,7 @@ using Kyoo.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Kyoo.Api
+namespace Kyoo.API
 {
 	[Route("api/[controller]")]
 	[ApiController]
