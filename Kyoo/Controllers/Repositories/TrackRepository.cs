@@ -57,7 +57,7 @@ namespace Kyoo.Controllers
 			return await _database.Tracks.ToListAsync();
 		}
 
-		public async Task<int> Create(Track obj)
+		public async Task<Track> Create(Track obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -78,15 +78,15 @@ namespace Kyoo.Controllers
 					throw new DuplicatedItemException($"Trying to insert a duplicated track (slug {obj.Slug} already exists).");
 				throw;
 			}
-			return obj.ID;
+			return obj;
 		}
 		
-		public Task<int> CreateIfNotExists(Track obj)
+		public Task<Track> CreateIfNotExists(Track obj)
 		{
 			return Create(obj);
 		}
 
-		public async Task Edit(Track edited, bool resetOld)
+		public async Task<Track> Edit(Track edited, bool resetOld)
 		{
 			if (edited == null)
 				throw new ArgumentNullException(nameof(edited));
@@ -100,6 +100,7 @@ namespace Kyoo.Controllers
 				Utility.Nullify(old);
 			Utility.Merge(old, edited);
 			await _database.SaveChangesAsync();
+			return old;
 		}
 
 		public async Task Delete(int id)

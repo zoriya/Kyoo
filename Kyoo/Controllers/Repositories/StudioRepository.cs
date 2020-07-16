@@ -54,7 +54,7 @@ namespace Kyoo.Controllers
 			return await _database.Studios.ToListAsync();
 		}
 
-		public async Task<int> Create(Studio obj)
+		public async Task<Studio> Create(Studio obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -72,17 +72,17 @@ namespace Kyoo.Controllers
 					throw new DuplicatedItemException($"Trying to insert a duplicated studio (slug {obj.Slug} already exists).");
 				throw;
 			}
-			return obj.ID;
+			return obj;
 		}
 		
-		public async Task<int> CreateIfNotExists(Studio obj)
+		public async Task<Studio> CreateIfNotExists(Studio obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
 			Studio old = await Get(obj.Slug);
 			if (old != null)
-				return old.ID;
+				return old;
 			try
 			{
 				return await Create(obj);
@@ -92,11 +92,11 @@ namespace Kyoo.Controllers
 				old = await Get(obj.Slug);
 				if (old == null)
 					throw new SystemException("Unknown database state.");
-				return old.ID;
+				return old;
 			}
 		}
 
-		public async Task Edit(Studio edited, bool resetOld)
+		public async Task<Studio> Edit(Studio edited, bool resetOld)
 		{
 			if (edited == null)
 				throw new ArgumentNullException(nameof(edited));
@@ -110,6 +110,7 @@ namespace Kyoo.Controllers
 				Utility.Nullify(old);
 			Utility.Merge(old, edited);
 			await _database.SaveChangesAsync();
+			return old;
 		}
 
 		public async Task Delete(int id)
