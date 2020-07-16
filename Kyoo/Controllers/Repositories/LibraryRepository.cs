@@ -56,7 +56,7 @@ namespace Kyoo.Controllers
 			return await _database.Libraries.ToListAsync();
 		}
 
-		public async Task<int> Create(Library obj)
+		public async Task<Library> Create(Library obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -79,17 +79,17 @@ namespace Kyoo.Controllers
 				throw;
 			}
 			
-			return obj.ID;
+			return obj;
 		}
 		
-		public async Task<int> CreateIfNotExists(Library obj)
+		public async Task<Library> CreateIfNotExists(Library obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
 			Library old = await Get(obj.Slug);
 			if (old != null)
-				return old.ID;
+				return old;
 			try
 			{
 				return await Create(obj);
@@ -99,11 +99,11 @@ namespace Kyoo.Controllers
 				old = await Get(obj.Slug);
 				if (old == null)
 					throw new SystemException("Unknown database state.");
-				return old.ID;
+				return old;
 			}
 		}
 
-		public async Task Edit(Library edited, bool resetOld)
+		public async Task<Library> Edit(Library edited, bool resetOld)
 		{
 			if (edited == null)
 				throw new ArgumentNullException(nameof(edited));
@@ -118,13 +118,14 @@ namespace Kyoo.Controllers
 			Utility.Merge(old, edited);
 			await Validate(old);
 			await _database.SaveChangesAsync();
+			return old;
 		}
 
 		private async Task Validate(Library obj)
 		{
 			if (obj.ProviderLinks != null)
 				foreach (ProviderLink link in obj.ProviderLinks)
-					link.ProviderID = await _providers.CreateIfNotExists(link.Provider);
+					link.Provider = await _providers.CreateIfNotExists(link.Provider);
 		}
 
 		public async Task Delete(int id)

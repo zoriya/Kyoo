@@ -70,7 +70,7 @@ namespace Kyoo.Controllers
 			return await _database.Seasons.ToListAsync();
 		}
 
-		public async Task<int> Create(Season obj)
+		public async Task<Season> Create(Season obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -93,17 +93,17 @@ namespace Kyoo.Controllers
 				throw;
 			}
 			
-			return obj.ID;
+			return obj;
 		}
 		
-		public async Task<int> CreateIfNotExists(Season obj)
+		public async Task<Season> CreateIfNotExists(Season obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
 			Season old = await Get(obj.Slug);
 			if (old != null)
-				return old.ID;
+				return old;
 			try
 			{
 				return await Create(obj);
@@ -113,11 +113,11 @@ namespace Kyoo.Controllers
 				old = await Get(obj.Slug);
 				if (old == null)
 					throw new SystemException("Unknown database state.");
-				return old.ID;
+				return old;
 			}
 		}
 
-		public async Task Edit(Season edited, bool resetOld)
+		public async Task<Season> Edit(Season edited, bool resetOld)
 		{
 			if (edited == null)
 				throw new ArgumentNullException(nameof(edited));
@@ -133,6 +133,7 @@ namespace Kyoo.Controllers
 
 			await Validate(old);
 			await _database.SaveChangesAsync();
+			return old;
 		}
 
 		private async Task Validate(Season obj)
@@ -143,7 +144,7 @@ namespace Kyoo.Controllers
 			if (obj.ExternalIDs != null)
 			{
 				foreach (MetadataID link in obj.ExternalIDs)
-					link.ProviderID = await _providers.CreateIfNotExists(link.Provider);
+					link.Provider = await _providers.CreateIfNotExists(link.Provider);
 			}
 		}
 		

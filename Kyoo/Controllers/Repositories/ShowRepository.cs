@@ -98,7 +98,7 @@ namespace Kyoo.Controllers
 			return await query.ToListAsync();
 		}
 
-		public async Task<int> Create(Show obj)
+		public async Task<Show> Create(Show obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -127,17 +127,17 @@ namespace Kyoo.Controllers
 				throw;
 			}
 			
-			return obj.ID;
+			return obj;
 		}
 		
-		public async Task<int> CreateIfNotExists(Show obj)
+		public async Task<Show> CreateIfNotExists(Show obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
 			Show old = await Get(obj.Slug);
 			if (old != null)
-				return old.ID;
+				return old;
 			try
 			{
 				return await Create(obj);
@@ -147,11 +147,11 @@ namespace Kyoo.Controllers
 				old = await Get(obj.Slug);
 				if (old == null)
 					throw new SystemException("Unknown database state.");
-				return old.ID;
+				return old;
 			}
 		}
 
-		public async Task Edit(Show edited, bool resetOld)
+		public async Task<Show> Edit(Show edited, bool resetOld)
 		{
 			if (edited == null)
 				throw new ArgumentNullException(nameof(edited));
@@ -166,24 +166,25 @@ namespace Kyoo.Controllers
 			Utility.Merge(old, edited);
 			await Validate(old);
 			await _database.SaveChangesAsync();
+			return old;
 		}
 
 		private async Task Validate(Show obj)
 		{
 			if (obj.Studio != null)
-				obj.StudioID = await _studios.CreateIfNotExists(obj.Studio);
+				obj.Studio = await _studios.CreateIfNotExists(obj.Studio);
 			
 			if (obj.GenreLinks != null)
 				foreach (GenreLink link in obj.GenreLinks)
-					link.GenreID = await _genres.CreateIfNotExists(link.Genre);
+					link.Genre = await _genres.CreateIfNotExists(link.Genre);
 
 			if (obj.People != null)
 				foreach (PeopleLink link in obj.People)
-					link.PeopleID = await _people.CreateIfNotExists(link.People);
+					link.People = await _people.CreateIfNotExists(link.People);
 
 			if (obj.ExternalIDs != null)
 				foreach (MetadataID link in obj.ExternalIDs)
-					link.ProviderID = await _providers.CreateIfNotExists(link.Provider);
+					link.Provider = await _providers.CreateIfNotExists(link.Provider);
 		}
 		
 		public async Task AddShowLink(int showID, int? libraryID, int? collectionID)

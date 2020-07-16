@@ -54,7 +54,7 @@ namespace Kyoo.Controllers
 			return await _database.Genres.ToListAsync();
 		}
 
-		public async Task<int> Create(Genre obj)
+		public async Task<Genre> Create(Genre obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -74,17 +74,17 @@ namespace Kyoo.Controllers
 				throw;
 			}
 			
-			return obj.ID;
+			return obj;
 		}
 
-		public async Task<int> CreateIfNotExists(Genre obj)
+		public async Task<Genre> CreateIfNotExists(Genre obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
 			Genre old = await Get(obj.Slug);
 			if (old != null)
-				return old.ID;
+				return old;
 			try
 			{
 				return await Create(obj);
@@ -94,11 +94,11 @@ namespace Kyoo.Controllers
 				old = await Get(obj.Slug);
 				if (old == null)
 					throw new SystemException("Unknown database state.");
-				return old.ID;
+				return old;
 			}
 		}
 
-		public async Task Edit(Genre edited, bool resetOld)
+		public async Task<Genre> Edit(Genre edited, bool resetOld)
 		{
 			if (edited == null)
 				throw new ArgumentNullException(nameof(edited));
@@ -112,6 +112,7 @@ namespace Kyoo.Controllers
 				Utility.Nullify(old);
 			Utility.Merge(old, edited);
 			await _database.SaveChangesAsync();
+			return old;
 		}
 		
 		public async Task Delete(int id)
