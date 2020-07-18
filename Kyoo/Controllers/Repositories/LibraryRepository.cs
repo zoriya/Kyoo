@@ -51,7 +51,7 @@ namespace Kyoo.Controllers
 
 		public async Task<ICollection<Library>> GetAll(Expression<Func<Library, bool>> where = null, 
 			Sort<Library> sort = default,
-			Pagination page = default)
+			Pagination limit = default)
 		{
 			return await _database.Libraries.ToListAsync();
 		}

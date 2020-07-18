@@ -50,7 +50,7 @@ namespace Kyoo.Controllers
 
 		public async Task<ICollection<People>> GetAll(Expression<Func<People, bool>> where = null, 
 			Sort<People> sort = default,
-			Pagination page = default)
+			Pagination limit = default)
 		{
 			return await _database.Peoples.ToListAsync();
 		}

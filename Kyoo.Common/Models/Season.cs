@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Kyoo.Models
 {
-	public class Season
+	public class Season : IRessource
 	{
 		[JsonIgnore] public int ID  { get; set; }
 		[JsonIgnore] public int ShowID { get; set; }

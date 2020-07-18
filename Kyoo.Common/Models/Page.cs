@@ -1,10 +1,9 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Kyoo.Models
 {
-	public class Page<T>
+	public class Page<T> where T : IRessource
 	{
 		public string This { get; set; }
 		public string First { get; set; }
@@ -29,7 +28,6 @@ namespace Kyoo.Models
 		}
 
 		public Page(ICollection<T> items, 
-			Func<T, string> getID, 
 			string url,
 			Dictionary<string, string> query,
 			int limit)
@@ -39,7 +37,7 @@ namespace Kyoo.Models
 
 			if (items.Count == limit)
 			{
-				query["afterID"] = getID(items.Last());
+				query["afterID"] = items.Last().ID.ToString();
 				Next = url + query.ToQueryString();
 			}
 			

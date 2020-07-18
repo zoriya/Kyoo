@@ -10,35 +10,33 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers
 {
-	public class EpisodeRepository : IEpisodeRepository
+	public class EpisodeRepository : LocalRepository<Episode>, IEpisodeRepository
 	{
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
-		// private readonly ITrackRepository _tracks;
+		protected override Expression<Func<Episode, object>> DefaultSort => x => x.EpisodeNumber;
 
 
-		public EpisodeRepository(DatabaseContext database, IProviderRepository providers)
+		public EpisodeRepository(DatabaseContext database, IProviderRepository providers) : base(database)
 		{
 			_database = database;
 			_providers = providers;
 		}
-		
-		public void Dispose()
+
+
+		public override void Dispose()
 		{
 			_database.Dispose();
+			_providers.Dispose();
 		}
 
-		public ValueTask DisposeAsync()
+		public override async ValueTask DisposeAsync()
 		{
-			return _database.DisposeAsync();
-		}
-		
-		public Task<Episode> Get(int id)
-		{
-			return _database.Episodes.FirstOrDefaultAsync(x => x.ID == id);
+			await _database.DisposeAsync();
+			await _providers.DisposeAsync();
 		}
 
-		public Task<Episode> Get(string slug)
+		public override Task<Episode> Get(string slug)
 		{
 			Match match = Regex.Match(slug, @"(<show>.*)-s(<season>\d*)-e(<episode>\d*)");
 			
@@ -56,7 +54,7 @@ namespace Kyoo.Controllers
 			                                                         && x.EpisodeNumber == episodeNumber);
 		}
 		
-		public async Task<ICollection<Episode>> Search(string query)
+		public override async Task<ICollection<Episode>> Search(string query)
 		{
 			return await _database.Episodes
 				.Where(x => EF.Functions.Like(x.Title, $"%{query}%"))
@@ -64,14 +62,7 @@ namespace Kyoo.Controllers
 				.ToListAsync();
 		}
 
-		public async Task<ICollection<Episode>> GetAll(Expression<Func<Episode, bool>> where = null, 
-			Sort<Episode> sort = default,
-			Pagination page = default)
-		{
-			return await _database.Episodes.ToListAsync();
-		}
-
-		public async Task<Episode> Create(Episode obj)
+		public override async Task<Episode> Create(Episode obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -82,7 +73,6 @@ namespace Kyoo.Controllers
 				foreach (MetadataID entry in obj.ExternalIDs)
 					_database.Entry(entry).State = EntityState.Added;
 			
-			// Since Episodes & Tracks are on the same DB, using a single commit is quicker.
 			if (obj.Tracks != null)
 				foreach (Track entry in obj.Tracks)
 					_database.Entry(entry).State = EntityState.Added;
@@ -95,64 +85,15 @@ namespace Kyoo.Controllers
 			{
 				_database.DiscardChanges();
 				
-				if (Helper.IsDuplicateException(ex))
+				if (IsDuplicateException(ex))
 					throw new DuplicatedItemException($"Trying to insert a duplicated episode (slug {obj.Slug} already exists).");
 				throw;
 			}
-			
-			// Since Episodes & Tracks are on the same DB, using a single commit is quicker.
-			/*if (obj.Tracks != null)
-			 *	foreach (Track track in obj.Tracks)
-			 *	{
-			 * 		track.EpisodeID = obj.ID;
-			 *		await _tracks.Create(track);
-			 *	}
-			 */
-			
+
 			return obj;
 		}
-		
-		public async Task<Episode> CreateIfNotExists(Episode obj)
-		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
 
-			Episode old = await Get(obj.Slug);
-			if (old != null)
-				return old;
-			try
-			{
-				return await Create(obj);
-			}
-			catch (DuplicatedItemException)
-			{
-				old = await Get(obj.Slug);
-				if (old == null)
-					throw new SystemException("Unknown database state.");
-				return old;
-			}
-		}
-
-		public async Task<Episode> Edit(Episode edited, bool resetOld)
-		{
-			if (edited == null)
-				throw new ArgumentNullException(nameof(edited));
-			
-			Episode old = await Get(edited.Slug);
-
-			if (old == null)
-				throw new ItemNotFound($"No episode found with the slug {edited.Slug}.");
-			
-			if (resetOld)
-				Utility.Nullify(old);
-			Utility.Merge(old, edited);
-
-			await Validate(old);
-			await _database.SaveChangesAsync();
-			return old;
-		}
-
-		private async Task Validate(Episode obj)
+		protected override async Task Validate(Episode obj)
 		{
 			if (obj.ShowID <= 0)
 				throw new InvalidOperationException($"Can't store an episode not related to any show (showID: {obj.ShowID}).");
@@ -181,25 +122,13 @@ namespace Kyoo.Controllers
 			return await _database.Episodes.Where(x => x.SeasonID == seasonID).ToListAsync();
 		}
 		
-		public async Task Delete(int id)
-		{
-			Episode obj = await Get(id);
-			await Delete(obj);
-		}
-
-		public async Task Delete(string slug)
-		{
-			Episode obj = await Get(slug);
-			await Delete(obj);
-		}
-
 		public async Task Delete(string showSlug, int seasonNumber, int episodeNumber)
 		{
 			Episode obj = await Get(showSlug, seasonNumber, episodeNumber);
 			await Delete(obj);
 		}
 
-		public async Task Delete(Episode obj)
+		public override async Task Delete(Episode obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -210,24 +139,6 @@ namespace Kyoo.Controllers
 					_database.Entry(entry).State = EntityState.Deleted;
 			// Since Tracks & Episodes are on the same database and handled by dotnet-ef, we can't use the repository to delete them. 
 			await _database.SaveChangesAsync();
-		}
-
-		public async Task DeleteRange(IEnumerable<Episode> objs)
-		{
-			foreach (Episode obj in objs)
-				await Delete(obj);
-		}
-		
-		public async Task DeleteRange(IEnumerable<int> ids)
-		{
-			foreach (int id in ids)
-				await Delete(id);
-		}
-		
-		public async Task DeleteRange(IEnumerable<string> slugs)
-		{
-			foreach (string slug in slugs)
-				await Delete(slug);
 		}
 	}
 }
