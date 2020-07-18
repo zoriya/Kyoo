@@ -65,7 +65,7 @@ namespace Kyoo.Controllers
 
 		public async Task<ICollection<Season>> GetAll(Expression<Func<Season, bool>> where = null, 
 			Sort<Season> sort = default,
-			Pagination page = default)
+			Pagination limit = default)
 		{
 			return await _database.Seasons.ToListAsync();
 		}

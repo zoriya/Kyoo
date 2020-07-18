@@ -5,7 +5,7 @@ using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
 {
-	public class Collection
+	public class Collection : IRessource
 	{
 		[JsonIgnore] public int ID { get; set; }
 		public string Slug { get; set; }

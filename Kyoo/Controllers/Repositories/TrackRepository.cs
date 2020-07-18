@@ -52,7 +52,7 @@ namespace Kyoo.Controllers
 
 		public async Task<ICollection<Track>> GetAll(Expression<Func<Track, bool>> where = null, 
 			Sort<Track> sort = default,
-			Pagination page = default)
+			Pagination limit = default)
 		{
 			return await _database.Tracks.ToListAsync();
 		}

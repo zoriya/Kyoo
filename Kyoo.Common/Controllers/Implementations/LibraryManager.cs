@@ -143,9 +143,9 @@ namespace Kyoo.Controllers
 
 		public Task<ICollection<Show>> GetShows(Expression<Func<Show, bool>> where = null, 
 			Sort<Show> sort = default,
-			Pagination page = default)
+			Pagination limit = default)
 		{
-			return _shows.GetAll(where, sort, page);
+			return _shows.GetAll(where, sort, limit);
 		}
 
 		public Task<ICollection<Season>> GetSeasons(Expression<Func<Season, bool>> where = null, 

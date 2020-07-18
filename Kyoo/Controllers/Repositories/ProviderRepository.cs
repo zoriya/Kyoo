@@ -49,7 +49,7 @@ namespace Kyoo.Controllers
 
 		public async Task<ICollection<ProviderID>> GetAll(Expression<Func<ProviderID, bool>> where = null, 
 			Sort<ProviderID> sort = default,
-			Pagination page = default)
+			Pagination limit = default)
 		{
 			return await _database.Providers.ToListAsync();
 		}

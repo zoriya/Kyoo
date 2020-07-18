@@ -9,35 +9,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers
 {
-	public class GenreRepository : IGenreRepository
+	public class GenreRepository : LocalRepository<Genre>, IGenreRepository
 	{
 		private readonly DatabaseContext _database;
+		protected override Expression<Func<Genre, object>> DefaultSort => x => x.Slug;
 		
 		
-		public GenreRepository(DatabaseContext database)
+		public GenreRepository(DatabaseContext database) : base(database)
 		{
 			_database = database;
 		}
 		
-		public void Dispose()
-		{
-			_database.Dispose();
-		}
-
-		public ValueTask DisposeAsync()
-		{
-			return _database.DisposeAsync();
-		}
-
-		public async Task<Genre> Get(int id)
-		{
-			return await _database.Genres.FirstOrDefaultAsync(x => x.ID == id);
-		}
-
-		public async Task<Genre> Get(string slug)
-		{
-			return await _database.Genres.FirstOrDefaultAsync(x => x.Slug == slug);
-		}
 
 		public async Task<ICollection<Genre>> Search(string query)
 		{
@@ -47,14 +29,7 @@ namespace Kyoo.Controllers
 				.ToListAsync();
 		}
 
-		public async Task<ICollection<Genre>> GetAll(Expression<Func<Genre, bool>> where = null, 
-			Sort<Genre> sort = default,
-			Pagination page = default)
-		{
-			return await _database.Genres.ToListAsync();
-		}
-
-		public async Task<Genre> Create(Genre obj)
+		public override async Task<Genre> Create(Genre obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -69,7 +44,7 @@ namespace Kyoo.Controllers
 			{
 				_database.DiscardChanges();
 				
-				if (Helper.IsDuplicateException(ex))
+				if (IsDuplicateException(ex))
 					throw new DuplicatedItemException($"Trying to insert a duplicated genre (slug {obj.Slug} already exists).");
 				throw;
 			}
@@ -77,54 +52,9 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 
-		public async Task<Genre> CreateIfNotExists(Genre obj)
+		protected override Task Validate(Genre ressource)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-
-			Genre old = await Get(obj.Slug);
-			if (old != null)
-				return old;
-			try
-			{
-				return await Create(obj);
-			}
-			catch (DuplicatedItemException)
-			{
-				old = await Get(obj.Slug);
-				if (old == null)
-					throw new SystemException("Unknown database state.");
-				return old;
-			}
-		}
-
-		public async Task<Genre> Edit(Genre edited, bool resetOld)
-		{
-			if (edited == null)
-				throw new ArgumentNullException(nameof(edited));
-			
-			Genre old = await Get(edited.Slug);
-
-			if (old == null)
-				throw new ItemNotFound($"No genre found with the slug {edited.Slug}.");
-			
-			if (resetOld)
-				Utility.Nullify(old);
-			Utility.Merge(old, edited);
-			await _database.SaveChangesAsync();
-			return old;
-		}
-		
-		public async Task Delete(int id)
-		{
-			Genre obj = await Get(id);
-			await Delete(obj);
-		}
-
-		public async Task Delete(string slug)
-		{
-			Genre obj = await Get(slug);
-			await Delete(obj);
+			return Task.CompletedTask;
 		}
 
 		public async Task Delete(Genre obj)
@@ -137,24 +67,6 @@ namespace Kyoo.Controllers
 				foreach (GenreLink link in obj.Links)
 					_database.Entry(link).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
-		}
-		
-		public async Task DeleteRange(IEnumerable<Genre> objs)
-		{
-			foreach (Genre obj in objs)
-				await Delete(obj);
-		}
-		
-		public async Task DeleteRange(IEnumerable<int> ids)
-		{
-			foreach (int id in ids)
-				await Delete(id);
-		}
-		
-		public async Task DeleteRange(IEnumerable<string> slugs)
-		{
-			foreach (string slug in slugs)
-				await Delete(slug);
 		}
 	}
 }

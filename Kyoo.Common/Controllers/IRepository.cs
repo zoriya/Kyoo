@@ -19,6 +19,8 @@ namespace Kyoo.Controllers
 			Count = count;
 			AfterID = afterID;
 		}
+		
+		public static implicit operator Pagination(int limit) => new Pagination(limit);
 	}
 
 	public readonly struct Sort<T>
@@ -66,7 +68,7 @@ namespace Kyoo.Controllers
 		}
 	}
 	
-	public interface IRepository<T> : IDisposable, IAsyncDisposable
+	public interface IRepository<T> : IDisposable, IAsyncDisposable where T : IRessource
 	{
 		Task<T> Get(int id);
 		Task<T> Get(string slug);
@@ -74,12 +76,12 @@ namespace Kyoo.Controllers
 		
 		Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null, 
 			Sort<T> sort = default,
-			Pagination page = default);
+			Pagination limit = default);
 
 		Task<ICollection<T>> GetAll([Optional] Expression<Func<T, bool>> where,
 			Expression<Func<T, object>> sort,
-			Pagination page = default
-		) => GetAll(where, new Sort<T>(sort), page);
+			Pagination limit = default
+		) => GetAll(where, new Sort<T>(sort), limit);
 		
 		Task<T> Create([NotNull] T obj);
 		Task<T> CreateIfNotExists([NotNull] T obj);

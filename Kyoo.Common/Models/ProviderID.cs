@@ -2,9 +2,10 @@ using Newtonsoft.Json;
 
 namespace Kyoo.Models
 {
-	public class ProviderID
+	public class ProviderID : IRessource
 	{
 		[JsonIgnore] public int ID { get; set; }
+		public string Slug => Name;
 		public string Name { get; set; }
 		public string Logo { get; set; }
 

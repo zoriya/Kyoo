@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Kyoo.CommonApi;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
@@ -73,7 +74,7 @@ namespace Kyoo.Controllers
 
 		public async Task<ICollection<Show>> GetAll(Expression<Func<Show, bool>> where = null, 
 			Sort<Show> sort = default,
-			Pagination page = default)
+			Pagination limit = default)
 		{
 			IQueryable<Show> query = _database.Shows;
 
@@ -83,17 +84,17 @@ namespace Kyoo.Controllers
 			Expression<Func<Show, object>> sortKey = sort.Key ?? (x => x.Title);
 			query = sort.Descendant ? query.OrderByDescending(sortKey) : query.OrderBy(sortKey);
 
-			if (page.AfterID != 0)
+			if (limit.AfterID != 0)
 			{
-				Show after = await Get(page.AfterID);
+				Show after = await Get(limit.AfterID);
 				object afterObj = sortKey.Compile()(after);
 				query = query.Where(Expression.Lambda<Func<Show, bool>>(
-					Utility.StringCompatibleExpression(Expression.GreaterThan, sortKey.Body, Expression.Constant(afterObj)),
+					ApiHelper.StringCompatibleExpression(Expression.GreaterThan, sortKey.Body, Expression.Constant(afterObj)),
 					(ParameterExpression)((MemberExpression)sortKey.Body).Expression
 				));
 			}
-			if (page.Count > 0)
-				query = query.Take(page.Count);
+			if (limit.Count > 0)
+				query = query.Take(limit.Count);
 
 			return await query.ToListAsync();
 		}
