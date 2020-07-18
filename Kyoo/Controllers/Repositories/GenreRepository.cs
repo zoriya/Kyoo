@@ -21,10 +21,10 @@ namespace Kyoo.Controllers
 		}
 		
 
-		public async Task<ICollection<Genre>> Search(string query)
+		public override async Task<ICollection<Genre>> Search(string query)
 		{
 			return await _database.Genres
-				.Where(genre => EF.Functions.Like(genre.Name, $"%{query}%"))
+				.Where(genre => EF.Functions.ILike(genre.Name, $"%{query}%"))
 				.Take(20)
 				.ToListAsync();
 		}
@@ -57,7 +57,7 @@ namespace Kyoo.Controllers
 			return Task.CompletedTask;
 		}
 
-		public async Task Delete(Genre obj)
+		public override async Task Delete(Genre obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));

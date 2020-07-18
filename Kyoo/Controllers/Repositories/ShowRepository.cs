@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Kyoo.CommonApi;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers
 {
-	public class ShowRepository : IShowRepository
+	public class ShowRepository : LocalRepository<Show>, IShowRepository
 	{
 		private readonly DatabaseContext _database;
 		private readonly IStudioRepository _studios;
@@ -19,6 +18,7 @@ namespace Kyoo.Controllers
 		private readonly IProviderRepository _providers;
 		private readonly ISeasonRepository _seasons;
 		private readonly IEpisodeRepository _episodes;
+		protected override Expression<Func<Show, object>> DefaultSort => x => x.Title;
 
 		public ShowRepository(DatabaseContext database,
 			IStudioRepository studios,
@@ -27,6 +27,7 @@ namespace Kyoo.Controllers
 			IProviderRepository providers, 
 			ISeasonRepository seasons, 
 			IEpisodeRepository episodes)
+			: base(database)
 		{
 			_database = database;
 			_studios = studios;
@@ -36,70 +37,39 @@ namespace Kyoo.Controllers
 			_seasons = seasons;
 			_episodes = episodes;
 		}
-		
-		public void Dispose()
+
+		public override void Dispose()
 		{
 			_database.Dispose();
 			_studios.Dispose();
+			_people.Dispose();
+			_genres.Dispose();
+			_providers.Dispose();
+			_seasons.Dispose();
+			_episodes.Dispose();
 		}
 
-		public async ValueTask DisposeAsync()
+		public override async ValueTask DisposeAsync()
 		{
-			await Task.WhenAll(_database.DisposeAsync().AsTask(), _studios.DisposeAsync().AsTask());
-		}
-		
-		public Task<Show> Get(int id)
-		{
-			return _database.Shows.FirstOrDefaultAsync(x => x.ID == id);
-		}
-		
-		public Task<Show> Get(string slug)
-		{
-			return _database.Shows.FirstOrDefaultAsync(x => x.Slug == slug);
+			await _database.DisposeAsync();
+			await _studios.DisposeAsync();
+			await _people.DisposeAsync();
+			await _genres.DisposeAsync();
+			await _providers.DisposeAsync();
+			await _seasons.DisposeAsync();
+			await _episodes.DisposeAsync();
 		}
 
-		public Task<Show> GetByPath(string path)
-		{
-			return _database.Shows.FirstOrDefaultAsync(x => x.Path == path);
-		}
-
-		public async Task<ICollection<Show>> Search(string query)
+		public override async Task<ICollection<Show>> Search(string query)
 		{
 			return await _database.Shows
-				.FromSqlInterpolated($@"SELECT * FROM Shows WHERE 'Shows.Title' LIKE {$"%{query}%"}
-			                                           OR 'Shows.Aliases' LIKE {$"%{query}%"}")
+				.Where(x => EF.Functions.ILike(x.Title, $"%{query}%") 
+				            /*|| EF.Functions.ILike(x.Aliases, $"%{query}%")*/)
 				.Take(20)
 				.ToListAsync();
 		}
 
-		public async Task<ICollection<Show>> GetAll(Expression<Func<Show, bool>> where = null, 
-			Sort<Show> sort = default,
-			Pagination limit = default)
-		{
-			IQueryable<Show> query = _database.Shows;
-
-			if (where != null)
-				query = query.Where(where);
-
-			Expression<Func<Show, object>> sortKey = sort.Key ?? (x => x.Title);
-			query = sort.Descendant ? query.OrderByDescending(sortKey) : query.OrderBy(sortKey);
-
-			if (limit.AfterID != 0)
-			{
-				Show after = await Get(limit.AfterID);
-				object afterObj = sortKey.Compile()(after);
-				query = query.Where(Expression.Lambda<Func<Show, bool>>(
-					ApiHelper.StringCompatibleExpression(Expression.GreaterThan, sortKey.Body, Expression.Constant(afterObj)),
-					(ParameterExpression)((MemberExpression)sortKey.Body).Expression
-				));
-			}
-			if (limit.Count > 0)
-				query = query.Take(limit.Count);
-
-			return await query.ToListAsync();
-		}
-
-		public async Task<Show> Create(Show obj)
+		public override async Task<Show> Create(Show obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -123,7 +93,7 @@ namespace Kyoo.Controllers
 			catch (DbUpdateException ex)
 			{
 				_database.DiscardChanges();
-				if (Helper.IsDuplicateException(ex))
+				if (IsDuplicateException(ex))
 					throw new DuplicatedItemException($"Trying to insert a duplicated show (slug {obj.Slug} already exists).");
 				throw;
 			}
@@ -131,46 +101,7 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 		
-		public async Task<Show> CreateIfNotExists(Show obj)
-		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-
-			Show old = await Get(obj.Slug);
-			if (old != null)
-				return old;
-			try
-			{
-				return await Create(obj);
-			}
-			catch (DuplicatedItemException)
-			{
-				old = await Get(obj.Slug);
-				if (old == null)
-					throw new SystemException("Unknown database state.");
-				return old;
-			}
-		}
-
-		public async Task<Show> Edit(Show edited, bool resetOld)
-		{
-			if (edited == null)
-				throw new ArgumentNullException(nameof(edited));
-			
-			Show old = await Get(edited.Slug);
-
-			if (old == null)
-				throw new ItemNotFound($"No show found with the slug {edited.Slug}.");
-			
-			if (resetOld)
-				Utility.Nullify(old);
-			Utility.Merge(old, edited);
-			await Validate(old);
-			await _database.SaveChangesAsync();
-			return old;
-		}
-
-		private async Task Validate(Show obj)
+		protected override async Task Validate(Show obj)
 		{
 			if (obj.Studio != null)
 				obj.Studio = await _studios.CreateIfNotExists(obj.Studio);
@@ -210,20 +141,8 @@ namespace Kyoo.Controllers
 
 			await _database.SaveChangesAsync();
 		}
-
-		public async Task Delete(int id)
-		{
-			Show obj = await Get(id);
-			await Delete(obj);
-		}
-
-		public async Task Delete(string slug)
-		{
-			Show obj = await Get(slug);
-			await Delete(obj);
-		}
 		
-		public async Task Delete(Show obj)
+		public override async Task Delete(Show obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -257,24 +176,6 @@ namespace Kyoo.Controllers
 
 			if (obj.Episodes != null) 
 				await _episodes.DeleteRange(obj.Episodes);
-		}
-		
-		public async Task DeleteRange(IEnumerable<Show> objs)
-		{
-			foreach (Show obj in objs)
-				await Delete(obj);
-		}
-		
-		public async Task DeleteRange(IEnumerable<int> ids)
-		{
-			foreach (int id in ids)
-				await Delete(id);
-		}
-		
-		public async Task DeleteRange(IEnumerable<string> slugs)
-		{
-			foreach (string slug in slugs)
-				await Delete(slug);
 		}
 	}
 }

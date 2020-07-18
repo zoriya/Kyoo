@@ -9,53 +9,40 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers
 {
-	public class PeopleRepository : IPeopleRepository
+	public class PeopleRepository : LocalRepository<People>, IPeopleRepository
 	{
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
+		protected override Expression<Func<People, object>> DefaultSort => x => x.Name;
 
-		public PeopleRepository(DatabaseContext database, IProviderRepository providers)
+		public PeopleRepository(DatabaseContext database, IProviderRepository providers) : base(database)
 		{
 			_database = database;
 			_providers = providers;
 		}
-		
-		public void Dispose()
+
+
+		public override void Dispose()
 		{
 			_database.Dispose();
+			_providers.Dispose();
 		}
 
-		public ValueTask DisposeAsync()
+		public override async ValueTask DisposeAsync()
 		{
-			return _database.DisposeAsync();
+			await _database.DisposeAsync();
+			await _providers.DisposeAsync();
 		}
 
-		public Task<People> Get(int id)
-		{
-			return _database.Peoples.FirstOrDefaultAsync(x => x.ID == id);
-		}
-
-		public Task<People> Get(string slug)
-		{
-			return _database.Peoples.FirstOrDefaultAsync(x => x.Slug == slug);
-		}
-
-		public async Task<ICollection<People>> Search(string query)
+		public override async Task<ICollection<People>> Search(string query)
 		{
 			return await _database.Peoples
-				.Where(people => EF.Functions.Like(people.Name, $"%{query}%"))
+				.Where(people => EF.Functions.ILike(people.Name, $"%{query}%"))
 				.Take(20)
 				.ToListAsync();
 		}
 
-		public async Task<ICollection<People>> GetAll(Expression<Func<People, bool>> where = null, 
-			Sort<People> sort = default,
-			Pagination limit = default)
-		{
-			return await _database.Peoples.ToListAsync();
-		}
-
-		public async Task<People> Create(People obj)
+		public override async Task<People> Create(People obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -73,7 +60,7 @@ namespace Kyoo.Controllers
 			catch (DbUpdateException ex)
 			{
 				_database.DiscardChanges();
-				if (Helper.IsDuplicateException(ex))
+				if (IsDuplicateException(ex))
 					throw new DuplicatedItemException($"Trying to insert a duplicated people (slug {obj.Slug} already exists).");
 				throw;
 			}
@@ -81,65 +68,14 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 
-		public async Task<People> CreateIfNotExists(People obj)
-		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-
-			People old = await Get(obj.Slug);
-			if (old != null)
-				return old;
-			try
-			{
-				return await Create(obj);
-			}
-			catch (DuplicatedItemException)
-			{
-				old = await Get(obj.Slug);
-				if (old == null)
-					throw new SystemException("Unknown database state.");
-				return old;
-			}
-		}
-
-		public async Task<People> Edit(People edited, bool resetOld)
-		{
-			if (edited == null)
-				throw new ArgumentNullException(nameof(edited));
-			
-			People old = await Get(edited.Slug);
-
-			if (old == null)
-				throw new ItemNotFound($"No people found with the slug {edited.Slug}.");
-			
-			if (resetOld)
-				Utility.Nullify(old);
-			Utility.Merge(old, edited);
-			await Validate(old);
-			await _database.SaveChangesAsync();
-			return old;
-		}
-		
-		private async Task Validate(People obj)
+		protected override async Task Validate(People obj)
 		{
 			if (obj.ExternalIDs != null)
 				foreach (MetadataID link in obj.ExternalIDs)
 					link.Provider = await _providers.CreateIfNotExists(link.Provider);
 		}
 		
-		public async Task Delete(int id)
-		{
-			People obj = await Get(id);
-			await Delete(obj);
-		}
-
-		public async Task Delete(string slug)
-		{
-			People obj = await Get(slug);
-			await Delete(obj);
-		}
-
-		public async Task Delete(People obj)
+		public override async Task Delete(People obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -152,24 +88,6 @@ namespace Kyoo.Controllers
 				foreach (PeopleLink link in obj.Roles)
 					_database.Entry(link).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
-		}
-		
-		public async Task DeleteRange(IEnumerable<People> objs)
-		{
-			foreach (People obj in objs)
-				await Delete(obj);
-		}
-		
-		public async Task DeleteRange(IEnumerable<int> ids)
-		{
-			foreach (int id in ids)
-				await Delete(id);
-		}
-		
-		public async Task DeleteRange(IEnumerable<string> slugs)
-		{
-			foreach (string slug in slugs)
-				await Delete(slug);
 		}
 	}
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
@@ -8,34 +9,39 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers
 {
-	public class TrackRepository : ITrackRepository
+	public class TrackRepository : LocalRepository<Track>, ITrackRepository
 	{
 		private readonly DatabaseContext _database;
+		protected override Expression<Func<Track, object>> DefaultSort => x => x.ID;
 
 
-		public TrackRepository(DatabaseContext database)
+		public TrackRepository(DatabaseContext database) : base(database)
 		{
 			_database = database;
 		}
-		
-		public void Dispose()
-		{
-			_database.Dispose();
-		}
 
-		public ValueTask DisposeAsync()
+		public override Task<Track> Get(string slug)
 		{
-			return _database.DisposeAsync();
-		}
-		
-		public async Task<Track> Get(int id)
-		{
-			return await _database.Tracks.FirstOrDefaultAsync(x => x.ID == id);
-		}
-		
-		public Task<Track> Get(string slug)
-		{
-			throw new InvalidOperationException("Tracks do not support the get by slug method.");
+			Match match = Regex.Match(slug,
+				@"(?<show>.*)-s(?<season>\d*)-e(?<episode>\d*).(?<language>.{0,3})(?<forced>-forced)?(\..*)?");
+
+			if (!match.Success)
+			{
+				if (int.TryParse(slug, out int id))
+					return Get(id);
+				throw new ArgumentException("Invalid track slug. Format: {episodeSlug}.{language}[-forced][.{extension}]");
+			}
+
+			string showSlug = match.Groups["show"].Value;
+			int seasonNumber = int.Parse(match.Groups["season"].Value);
+			int episodeNumber = int.Parse(match.Groups["episode"].Value);
+			string language = match.Groups["language"].Value;
+			bool forced = match.Groups["forced"].Success;
+			return _database.Tracks.FirstOrDefaultAsync(x => x.Episode.Show.Slug == showSlug
+			                                                 && x.Episode.SeasonNumber == seasonNumber
+			                                                 && x.Episode.EpisodeNumber == episodeNumber
+			                                                 && x.Language == language
+			                                                 && x.IsForced == forced);
 		}
 
 		public Task<Track> Get(int episodeID, string languageTag, bool isForced)
@@ -45,19 +51,12 @@ namespace Kyoo.Controllers
 			                                                       && x.IsForced == isForced);
 		}
 
-		public Task<ICollection<Track>> Search(string query)
+		public override Task<ICollection<Track>> Search(string query)
 		{
 			throw new InvalidOperationException("Tracks do not support the search method.");
 		}
 
-		public async Task<ICollection<Track>> GetAll(Expression<Func<Track, bool>> where = null, 
-			Sort<Track> sort = default,
-			Pagination limit = default)
-		{
-			return await _database.Tracks.ToListAsync();
-		}
-
-		public async Task<Track> Create(Track obj)
+		public override async Task<Track> Create(Track obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -74,72 +73,25 @@ namespace Kyoo.Controllers
 			catch (DbUpdateException ex)
 			{
 				_database.DiscardChanges();
-				if (Helper.IsDuplicateException(ex))
+				if (IsDuplicateException(ex))
 					throw new DuplicatedItemException($"Trying to insert a duplicated track (slug {obj.Slug} already exists).");
 				throw;
 			}
 			return obj;
 		}
 		
-		public Task<Track> CreateIfNotExists(Track obj)
+		protected override Task Validate(Track ressource)
 		{
-			return Create(obj);
-		}
-
-		public async Task<Track> Edit(Track edited, bool resetOld)
-		{
-			if (edited == null)
-				throw new ArgumentNullException(nameof(edited));
-			
-			Track old = await Get(edited.ID);
-
-			if (old == null)
-				throw new ItemNotFound($"No track found with the ID {edited.ID}.");
-			
-			if (resetOld)
-				Utility.Nullify(old);
-			Utility.Merge(old, edited);
-			await _database.SaveChangesAsync();
-			return old;
-		}
-
-		public async Task Delete(int id)
-		{
-			Track obj = await Get(id);
-			await Delete(obj);
-		}
-
-		public async Task Delete(string slug)
-		{
-			Track obj = await Get(slug);
-			await Delete(obj);
+			return Task.CompletedTask;
 		}
 		
-		public async Task Delete(Track obj)
+		public override async Task Delete(Track obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 			
 			_database.Entry(obj).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
-		}
-		
-		public async Task DeleteRange(IEnumerable<Track> objs)
-		{
-			foreach (Track obj in objs)
-				await Delete(obj);
-		}
-		
-		public async Task DeleteRange(IEnumerable<int> ids)
-		{
-			foreach (int id in ids)
-				await Delete(id);
-		}
-		
-		public async Task DeleteRange(IEnumerable<string> slugs)
-		{
-			foreach (string slug in slugs)
-				await Delete(slug);
 		}
 	}
 }

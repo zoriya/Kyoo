@@ -38,7 +38,7 @@ namespace Kyoo.Controllers
 
 		public override Task<Episode> Get(string slug)
 		{
-			Match match = Regex.Match(slug, @"(<show>.*)-s(<season>\d*)-e(<episode>\d*)");
+			Match match = Regex.Match(slug, @"(?<show>.*)-s(?<season>\d*)-e(?<episode>\d*)");
 			
 			if (!match.Success)
 				return _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == slug);
@@ -57,7 +57,7 @@ namespace Kyoo.Controllers
 		public override async Task<ICollection<Episode>> Search(string query)
 		{
 			return await _database.Episodes
-				.Where(x => EF.Functions.Like(x.Title, $"%{query}%"))
+				.Where(x => EF.Functions.ILike(x.Title, $"%{query}%"))
 				.Take(20)
 				.ToListAsync();
 		}
