@@ -9,54 +9,41 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers
 {
-	public class LibraryRepository : ILibraryRepository
+	public class LibraryRepository : LocalRepository<Library>, ILibraryRepository
 	{
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
+		protected override Expression<Func<Library, object>> DefaultSort => x => x.ID;
 
 
-		public LibraryRepository(DatabaseContext database, IProviderRepository providers)
+		public LibraryRepository(DatabaseContext database, IProviderRepository providers) : base(database)
 		{
 			_database = database;
 			_providers = providers;
 		}
 
-		public void Dispose()
+
+		public override void Dispose()
 		{
 			_database.Dispose();
+			_providers.Dispose();
 		}
 
-		public ValueTask DisposeAsync()
+		public override async ValueTask DisposeAsync()
 		{
-			return _database.DisposeAsync();
+			await _database.DisposeAsync();
+			await _providers.DisposeAsync();
 		}
 
-		public Task<Library> Get(int id)
-		{
-			return _database.Libraries.FirstOrDefaultAsync(x => x.ID == id);
-		}
-		
-		public Task<Library> Get(string slug)
-		{
-			return _database.Libraries.FirstOrDefaultAsync(x => x.Slug == slug);
-		}
-
-		public async Task<ICollection<Library>> Search(string query)
+		public override async Task<ICollection<Library>> Search(string query)
 		{
 			return await _database.Libraries
-				.Where(x => EF.Functions.Like(x.Name, $"%{query}%"))
+				.Where(x => EF.Functions.ILike(x.Name, $"%{query}%"))
 				.Take(20)
 				.ToListAsync();
 		}
 
-		public async Task<ICollection<Library>> GetAll(Expression<Func<Library, bool>> where = null, 
-			Sort<Library> sort = default,
-			Pagination limit = default)
-		{
-			return await _database.Libraries.ToListAsync();
-		}
-
-		public async Task<Library> Create(Library obj)
+		public override async Task<Library> Create(Library obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -74,73 +61,22 @@ namespace Kyoo.Controllers
 			catch (DbUpdateException ex)
 			{
 				_database.DiscardChanges();
-				if (Helper.IsDuplicateException(ex))
+				if (IsDuplicateException(ex))
 					throw new DuplicatedItemException($"Trying to insert a duplicated library (slug {obj.Slug} already exists).");
 				throw;
 			}
 			
 			return obj;
 		}
-		
-		public async Task<Library> CreateIfNotExists(Library obj)
-		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
 
-			Library old = await Get(obj.Slug);
-			if (old != null)
-				return old;
-			try
-			{
-				return await Create(obj);
-			}
-			catch (DuplicatedItemException)
-			{
-				old = await Get(obj.Slug);
-				if (old == null)
-					throw new SystemException("Unknown database state.");
-				return old;
-			}
-		}
-
-		public async Task<Library> Edit(Library edited, bool resetOld)
-		{
-			if (edited == null)
-				throw new ArgumentNullException(nameof(edited));
-			
-			Library old = await Get(edited.Name);
-
-			if (old == null)
-				throw new ItemNotFound($"No library found with the name {edited.Name}.");
-			
-			if (resetOld)
-				Utility.Nullify(old);
-			Utility.Merge(old, edited);
-			await Validate(old);
-			await _database.SaveChangesAsync();
-			return old;
-		}
-
-		private async Task Validate(Library obj)
+		protected override async Task Validate(Library obj)
 		{
 			if (obj.ProviderLinks != null)
 				foreach (ProviderLink link in obj.ProviderLinks)
 					link.Provider = await _providers.CreateIfNotExists(link.Provider);
 		}
 
-		public async Task Delete(int id)
-		{
-			Library obj = await Get(id);
-			await Delete(obj);
-		}
-
-		public async Task Delete(string slug)
-		{
-			Library obj = await Get(slug);
-			await Delete(obj);
-		}
-		
-		public async Task Delete(Library obj)
+		public override async Task Delete(Library obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -153,24 +89,6 @@ namespace Kyoo.Controllers
 				foreach (LibraryLink entry in obj.Links)
 					_database.Entry(entry).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
-		}
-		
-		public async Task DeleteRange(IEnumerable<Library> objs)
-		{
-			foreach (Library obj in objs)
-				await Delete(obj);
-		}
-		
-		public async Task DeleteRange(IEnumerable<int> ids)
-		{
-			foreach (int id in ids)
-				await Delete(id);
-		}
-		
-		public async Task DeleteRange(IEnumerable<string> slugs)
-		{
-			foreach (string slug in slugs)
-				await Delete(slug);
 		}
 	}
 }

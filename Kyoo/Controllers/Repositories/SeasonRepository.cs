@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
@@ -9,44 +10,44 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers
 {
-	public class SeasonRepository : ISeasonRepository
+	public class SeasonRepository : LocalRepository<Season>, ISeasonRepository
 	{
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
 		private readonly IEpisodeRepository _episodes;
+		protected override Expression<Func<Season, object>> DefaultSort => x => x.SeasonNumber;
 
 
 		public SeasonRepository(DatabaseContext database, IProviderRepository providers, IEpisodeRepository episodes)
+			: base(database)
 		{
 			_database = database;
 			_providers = providers;
 			_episodes = episodes;
 		}
-		
-		public void Dispose()
+
+
+		public override void Dispose()
 		{
 			_database.Dispose();
+			_providers.Dispose();
+			_episodes.Dispose();
 		}
 
-		public ValueTask DisposeAsync()
+		public override async ValueTask DisposeAsync()
 		{
-			return _database.DisposeAsync();
-		}
-		
-		public Task<Season> Get(int id)
-		{
-			return _database.Seasons.FirstOrDefaultAsync(x => x.ID == id);
+			await _database.DisposeAsync();
+			await _providers.DisposeAsync();
+			await _episodes.DisposeAsync();
 		}
 
-		public Task<Season> Get(string slug)
+		public override Task<Season> Get(string slug)
 		{
-			int index = slug.IndexOf("-s", StringComparison.Ordinal);
-			if (index == -1)
-				throw new InvalidOperationException("Invalid season slug. Format: {showSlug}-s{seasonNumber}");
-			string showSlug = slug.Substring(0, index);
-			if (!int.TryParse(slug.Substring(index + 2), out int seasonNumber))
-				throw new InvalidOperationException("Invalid season slug. Format: {showSlug}-s{seasonNumber}");
-			return Get(showSlug, seasonNumber);
+			Match match = Regex.Match(slug, @"(?<show>.*)-s(?<season>\d*)");
+			
+			if (!match.Success)
+				throw new ArgumentException("Invalid season slug. Format: {showSlug}-s{seasonNumber}");
+			return Get(match.Groups["show"].Value, int.Parse(match.Groups["season"].Value));
 		}
 		
 		public Task<Season> Get(string showSlug, int seasonNumber)
@@ -55,22 +56,15 @@ namespace Kyoo.Controllers
 			                                                        && x.SeasonNumber == seasonNumber);
 		}
 
-		public async Task<ICollection<Season>> Search(string query)
+		public override async Task<ICollection<Season>> Search(string query)
 		{
 			return await _database.Seasons
-				.Where(x => EF.Functions.Like(x.Title, $"%{query}%"))
+				.Where(x => EF.Functions.ILike(x.Title, $"%{query}%"))
 				.Take(20)
 				.ToListAsync();
 		}
-
-		public async Task<ICollection<Season>> GetAll(Expression<Func<Season, bool>> where = null, 
-			Sort<Season> sort = default,
-			Pagination limit = default)
-		{
-			return await _database.Seasons.ToListAsync();
-		}
-
-		public async Task<Season> Create(Season obj)
+		
+		public override async Task<Season> Create(Season obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -88,55 +82,15 @@ namespace Kyoo.Controllers
 			catch (DbUpdateException ex)
 			{
 				_database.DiscardChanges();
-				if (Helper.IsDuplicateException(ex))
+				if (IsDuplicateException(ex))
 					throw new DuplicatedItemException($"Trying to insert a duplicated season (slug {obj.Slug} already exists).");
 				throw;
 			}
 			
 			return obj;
 		}
-		
-		public async Task<Season> CreateIfNotExists(Season obj)
-		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
 
-			Season old = await Get(obj.Slug);
-			if (old != null)
-				return old;
-			try
-			{
-				return await Create(obj);
-			}
-			catch (DuplicatedItemException)
-			{
-				old = await Get(obj.Slug);
-				if (old == null)
-					throw new SystemException("Unknown database state.");
-				return old;
-			}
-		}
-
-		public async Task<Season> Edit(Season edited, bool resetOld)
-		{
-			if (edited == null)
-				throw new ArgumentNullException(nameof(edited));
-			
-			Season old = await Get(edited.Slug);
-
-			if (old == null)
-				throw new ItemNotFound($"No season found with the slug {edited.Slug}.");
-			
-			if (resetOld)
-				Utility.Nullify(old);
-			Utility.Merge(old, edited);
-
-			await Validate(old);
-			await _database.SaveChangesAsync();
-			return old;
-		}
-
-		private async Task Validate(Season obj)
+		protected override async Task Validate(Season obj)
 		{
 			if (obj.ShowID <= 0)
 				throw new InvalidOperationException($"Can't store a season not related to any show (showID: {obj.ShowID}).");
@@ -158,25 +112,13 @@ namespace Kyoo.Controllers
 			return await _database.Seasons.Where(x => x.Show.Slug == showSlug).ToListAsync();
 		}
 		
-		public async Task Delete(int id)
-		{
-			Season obj = await Get(id);
-			await Delete(obj);
-		}
-
-		public async Task Delete(string slug)
-		{
-			Season obj = await Get(slug);
-			await Delete(obj);
-		}
-
 		public async Task Delete(string showSlug, int seasonNumber)
 		{
 			Season obj = await Get(showSlug, seasonNumber);
 			await Delete(obj);
 		}
 
-		public async Task Delete(Season obj)
+		public override async Task Delete(Season obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -191,24 +133,6 @@ namespace Kyoo.Controllers
 
 			if (obj.Episodes != null)
 				await _episodes.DeleteRange(obj.Episodes);
-		}
-		
-		public async Task DeleteRange(IEnumerable<Season> objs)
-		{
-			foreach (Season obj in objs)
-				await Delete(obj);
-		}
-		
-		public async Task DeleteRange(IEnumerable<int> ids)
-		{
-			foreach (int id in ids)
-				await Delete(id);
-		}
-		
-		public async Task DeleteRange(IEnumerable<string> slugs)
-		{
-			foreach (string slug in slugs)
-				await Delete(slug);
 		}
 	}
 }
