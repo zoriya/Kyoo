@@ -6,6 +6,7 @@
 		<RootNamespace>Kyoo.CommonApi</RootNamespace>
 		<PackageId>Kyoo.CommonApi</PackageId>
 		<Authors>AnonymusRaccoon</Authors>
+		<OutputType>Library</OutputType>
 	</PropertyGroup>
 
 	<ItemGroup>

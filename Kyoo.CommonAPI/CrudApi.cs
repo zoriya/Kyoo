@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Configuration;
 
 namespace Kyoo.CommonApi
@@ -50,15 +53,13 @@ namespace Kyoo.CommonApi
 		[HttpGet]
 		[Authorize(Policy = "Read")]
 		public async Task<ActionResult<Page<T>>> GetAll([FromQuery] string sortBy,
-			[FromQuery] int limit,
 			[FromQuery] int afterID,
-			[FromQuery] Dictionary<string, string> where)
+			[FromQuery] Dictionary<string, string> where,
+			[FromQuery] int limit = 20)
 		{
 			where.Remove("sortBy");
 			where.Remove("limit");
 			where.Remove("afterID");
-			if (limit == 0)
-				limit = 20;
 
 			try
 			{
@@ -66,15 +67,21 @@ namespace Kyoo.CommonApi
 					new Sort<T>(sortBy),
 					new Pagination(limit, afterID));
 
-				return new Page<T>(ressources,
-					_baseURL + Request.Path,
-					Request.Query.ToDictionary(x => x.Key, x => x.Value.ToString(), StringComparer.InvariantCultureIgnoreCase),
-					limit);
+				return Page(ressources, limit);
 			}
 			catch (ArgumentException ex)
 			{
 				return BadRequest(new {Error = ex.Message});
 			}
+		}
+
+		protected Page<TResult> Page<TResult>(ICollection<TResult> ressources, int limit)
+			where TResult : IRessource
+		{
+			return new Page<TResult>(ressources, 
+				_baseURL + Request.Path,
+				Request.Query.ToDictionary(x => x.Key, x => x.Value.ToString(), StringComparer.InvariantCultureIgnoreCase),
+				limit);
 		}
 
 		[HttpPost]
@@ -90,6 +97,20 @@ namespace Kyoo.CommonApi
 				T existing = await _repository.Get(ressource.Slug);
 				return Conflict(existing);
 			}
+		}
+		
+		[HttpPut]
+		[Authorize(Policy = "Write")]
+		public async Task<ActionResult<T>> Edit([FromQuery] bool resetOld, [FromBody] T ressource)
+		{
+			if (ressource.ID <= 0)
+			{
+				T old = await _repository.Get(ressource.Slug);
+				if (old == null)
+					return NotFound();
+				ressource.ID = old.ID;
+			}
+			return await _repository.Edit(ressource, resetOld);
 		}
 
 		[HttpPut("{id}")]

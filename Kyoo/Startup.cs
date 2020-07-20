@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 using IdentityServer4.Services;
-using Kyoo.API;
+using Kyoo.Api;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

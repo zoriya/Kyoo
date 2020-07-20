@@ -2,7 +2,7 @@
 using Kyoo.Controllers;
 using Microsoft.AspNetCore.Authorization;
 
-namespace Kyoo.API
+namespace Kyoo.Api
 {
 	[Route("api/[controller]")]
 	[ApiController]

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Microsoft.AspNetCore.Authorization;
 
-namespace Kyoo.API
+namespace Kyoo.Api
 {
 	[Route("api/[controller]")]
 	[ApiController]
