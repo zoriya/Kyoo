@@ -26,7 +26,7 @@ namespace Kyoo.CommonApi
 			_baseURL = configuration.GetValue<string>("public_url").TrimEnd('/');
 		}
 		
-		[HttpGet("{id}")]
+		[HttpGet("{id:int}")]
 		[Authorize(Policy = "Read")]
 		[JsonDetailed]
 		public async Task<ActionResult<T>> Get(int id)
@@ -113,7 +113,7 @@ namespace Kyoo.CommonApi
 			return await _repository.Edit(ressource, resetOld);
 		}
 
-		[HttpPut("{id}")]
+		[HttpPut("{id:int}")]
 		[Authorize(Policy = "Write")]
 		public async Task<ActionResult<T>> Edit(int id, [FromQuery] bool resetOld, [FromBody] T ressource)
 		{
@@ -139,7 +139,7 @@ namespace Kyoo.CommonApi
 			return await _repository.Edit(ressource, resetOld);
 		}
 
-		[HttpDelete("{id}")]
+		[HttpDelete("{id:int}")]
 		[Authorize(Policy = "Write")]
 		public async Task<IActionResult> Delete(int id)
 		{
