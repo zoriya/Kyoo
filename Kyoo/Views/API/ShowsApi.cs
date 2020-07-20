@@ -24,14 +24,14 @@ namespace Kyoo.Api
 			_libraryManager = libraryManager;
 		}
 
-		[HttpGet("{showID}/season")]
-		[HttpGet("{showID}/seasons")]
+		[HttpGet("{showID:int}/season")]
+		[HttpGet("{showID:int}/seasons")]
 		[Authorize(Policy = "Read")]
 		public async Task<ActionResult<Page<Season>>> GetSeasons(int showID,
 			[FromQuery] string sortBy,
-			[FromQuery] int limit,
 			[FromQuery] int afterID,
-			[FromQuery] Dictionary<string, string> where)
+			[FromQuery] Dictionary<string, string> where,
+			[FromQuery] int limit = 20)
 		{
 			where.Remove("showID");
 			where.Remove("sortBy");
@@ -58,9 +58,9 @@ namespace Kyoo.Api
 		[Authorize(Policy = "Read")]
 		public async Task<ActionResult<Page<Season>>> GetSeasons(string slug,
 			[FromQuery] string sortBy,
-			[FromQuery] int limit,
 			[FromQuery] int afterID,
-			[FromQuery] Dictionary<string, string> where)
+			[FromQuery] Dictionary<string, string> where,
+			[FromQuery] int limit = 20)
 		{
 			where.Remove("slug");
 			where.Remove("sortBy");
