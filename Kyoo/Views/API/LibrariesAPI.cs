@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 
-namespace Kyoo.API
+namespace Kyoo.Api
 {
 	[Route("api/libraries")]
 	[Route("api/library")]

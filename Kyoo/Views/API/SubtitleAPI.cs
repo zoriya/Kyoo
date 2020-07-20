@@ -8,7 +8,7 @@ using Kyoo.Controllers;
 using Kyoo.Models.Watch;
 using Microsoft.AspNetCore.Authorization;
 
-namespace Kyoo.API
+namespace Kyoo.Api
 {
 	[Route("[controller]")]
 	[ApiController]

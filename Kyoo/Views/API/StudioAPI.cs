@@ -5,7 +5,7 @@ using Kyoo.Controllers;
 using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Kyoo.API
+namespace Kyoo.Api
 {
 	[Route("api/studios")]
 	[Route("api/studio")]

@@ -10,6 +10,18 @@ namespace Kyoo.Controllers
 {
 	public interface ILibraryManager : IDisposable, IAsyncDisposable
 	{
+		// Repositories
+		ILibraryRepository LibraryRepository { get; }
+		ICollectionRepository CollectionRepository { get; }
+		IShowRepository ShowRepository { get; }
+		ISeasonRepository SeasonRepository { get; }
+		IEpisodeRepository EpisodeRepository { get; }
+		ITrackRepository TrackRepository { get; }
+		IPeopleRepository PeopleRepository { get; }
+		IStudioRepository StudioRepository { get; }
+		IGenreRepository GenreRepository { get; }
+		IProviderRepository ProviderRepository { get; }
+		
 		// Get by slug
 		Task<Library> GetLibrary(string slug);
 		Task<Collection> GetCollection(string slug);
@@ -24,8 +36,24 @@ namespace Kyoo.Controllers
 		Task<People> GetPeople(string slug);
 
 		// Get by relations
-		Task<ICollection<Season>> GetSeasons(int showID);
-		Task<ICollection<Season>> GetSeasons(string showSlug);
+		Task<ICollection<Season>> GetSeasons(int showID,
+			Expression<Func<Season, bool>> where = null, 
+			Sort<Season> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Season>> GetSeasons(int showID,
+			[Optional] Expression<Func<Season, bool>> where,
+			Expression<Func<Season, object>> sort,
+			Pagination limit = default
+		) => GetSeasons(showID, where, new Sort<Season>(sort), limit);
+		Task<ICollection<Season>> GetSeasons(string showSlug,
+			Expression<Func<Season, bool>> where = null, 
+			Sort<Season> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Season>> GetSeasons(string showSlug,
+			[Optional] Expression<Func<Season, bool>> where,
+			Expression<Func<Season, object>> sort,
+			Pagination limit = default
+		) => GetSeasons(showSlug, where, new Sort<Season>(sort), limit);
 		
 		Task<ICollection<Episode>> GetEpisodes(int showID, int seasonNumber);
 		Task<ICollection<Episode>> GetEpisodes(string showSlug, int seasonNumber);

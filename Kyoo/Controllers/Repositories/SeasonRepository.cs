@@ -102,14 +102,26 @@ namespace Kyoo.Controllers
 			}
 		}
 		
-		public async Task<ICollection<Season>> GetSeasons(int showID)
+		public Task<ICollection<Season>> GetSeasons(int showID,
+			Expression<Func<Season, bool>> where = null, 
+			Sort<Season> sort = default,
+			Pagination limit = default)
 		{
-			return await _database.Seasons.Where(x => x.ShowID == showID).ToListAsync();
+			return ApplyFilters(_database.Seasons.Where(x => x.ShowID == showID),
+				where,
+				sort,
+				limit);
 		}
 
-		public async Task<ICollection<Season>> GetSeasons(string showSlug)
+		public Task<ICollection<Season>> GetSeasons(string showSlug,
+			Expression<Func<Season, bool>> where = null, 
+			Sort<Season> sort = default,
+			Pagination limit = default)
 		{
-			return await _database.Seasons.Where(x => x.Show.Slug == showSlug).ToListAsync();
+			return ApplyFilters(_database.Seasons.Where(x => x.Show.Slug == showSlug),
+				where,
+				sort,
+				limit);
 		}
 		
 		public async Task Delete(string showSlug, int seasonNumber)

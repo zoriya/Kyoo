@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Microsoft.AspNetCore.Authorization;
 
-namespace Kyoo.API
+namespace Kyoo.Api
 {
 	public class ThumbnailController : ControllerBase
 	{

@@ -109,8 +109,26 @@ namespace Kyoo.Controllers
 		Task<Season> Get(string showSlug, int seasonNumber);
 		Task Delete(string showSlug, int seasonNumber);
 		
-		Task<ICollection<Season>> GetSeasons(int showID);
-		Task<ICollection<Season>> GetSeasons(string showSlug);
+		Task<ICollection<Season>> GetSeasons(int showID,
+			Expression<Func<Season, bool>> where = null, 
+			Sort<Season> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Season>> GetSeasons(int showID,
+			[Optional] Expression<Func<Season, bool>> where,
+			Expression<Func<Season, object>> sort,
+			Pagination limit = default
+		) => GetSeasons(showID, where, new Sort<Season>(sort), limit);
+		
+		Task<ICollection<Season>> GetSeasons(string showSlug,
+			Expression<Func<Season, bool>> where = null, 
+			Sort<Season> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Season>> GetSeasons(string showSlug,
+			[Optional] Expression<Func<Season, bool>> where,
+			Expression<Func<Season, object>> sort,
+			Pagination limit = default
+		) => GetSeasons(showSlug, where, new Sort<Season>(sort), limit);
+		
 	}
 	
 	public interface IEpisodeRepository : IRepository<Episode>

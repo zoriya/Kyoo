@@ -45,12 +45,18 @@ namespace Kyoo.Controllers
 
 		public abstract Task<ICollection<T>> Search(string query);
 
-		public virtual async Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null,
+		public Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null,
+			Sort<T> sort = default,
+			Pagination limit = default)
+		{
+			return ApplyFilters(_database.Set<T>(), where, sort, limit);
+		}
+
+		protected async Task<ICollection<T>> ApplyFilters(IQueryable<T> query,
+			Expression<Func<T, bool>> where = null,
 			Sort<T> sort = default, 
 			Pagination limit = default)
 		{
-			IQueryable<T> query = _database.Set<T>();
-
 			if (where != null)
 				query = query.Where(where);
 
