@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
@@ -16,17 +17,16 @@ namespace Kyoo.Controllers
 		private readonly IPeopleRepository _people;
 		private readonly IGenreRepository _genres;
 		private readonly IProviderRepository _providers;
-		private readonly ISeasonRepository _seasons;
-		private readonly IEpisodeRepository _episodes;
+		private readonly Lazy<ISeasonRepository> _seasons;
+		private readonly Lazy<IEpisodeRepository> _episodes;
 		protected override Expression<Func<Show, object>> DefaultSort => x => x.Title;
 
 		public ShowRepository(DatabaseContext database,
 			IStudioRepository studios,
 			IPeopleRepository people, 
 			IGenreRepository genres, 
-			IProviderRepository providers, 
-			ISeasonRepository seasons, 
-			IEpisodeRepository episodes)
+			IProviderRepository providers,
+			IServiceProvider services)
 			: base(database)
 		{
 			_database = database;
@@ -34,8 +34,8 @@ namespace Kyoo.Controllers
 			_people = people;
 			_genres = genres;
 			_providers = providers;
-			_seasons = seasons;
-			_episodes = episodes;
+			_seasons = new Lazy<ISeasonRepository>(services.GetRequiredService<ISeasonRepository>);
+			_episodes = new Lazy<IEpisodeRepository>(services.GetRequiredService<IEpisodeRepository>);
 		}
 
 		public override void Dispose()
@@ -45,8 +45,10 @@ namespace Kyoo.Controllers
 			_people.Dispose();
 			_genres.Dispose();
 			_providers.Dispose();
-			_seasons.Dispose();
-			_episodes.Dispose();
+			if (_seasons.IsValueCreated)
+				_seasons.Value.Dispose();
+			if (_episodes.IsValueCreated)
+				_episodes.Value.Dispose();
 		}
 
 		public override async ValueTask DisposeAsync()
@@ -56,8 +58,10 @@ namespace Kyoo.Controllers
 			await _people.DisposeAsync();
 			await _genres.DisposeAsync();
 			await _providers.DisposeAsync();
-			await _seasons.DisposeAsync();
-			await _episodes.DisposeAsync();
+			if (_seasons.IsValueCreated)
+				await _seasons.Value.DisposeAsync();
+			if (_episodes.IsValueCreated)
+				await _episodes.Value.DisposeAsync();
 		}
 
 		public override async Task<ICollection<Show>> Search(string query)
@@ -168,15 +172,14 @@ namespace Kyoo.Controllers
 			if (obj.LibraryLinks != null)
 				foreach (LibraryLink entry in obj.LibraryLinks)
 					_database.Entry(entry).State = EntityState.Deleted;
-			
-			await _database.SaveChangesAsync();
 
-			// TODO fix circular references of Show/Season/Episode Repository.
+			await _database.SaveChangesAsync();
+			
 			if (obj.Seasons != null)
-				await _seasons.DeleteRange(obj.Seasons);
+				await _seasons.Value.DeleteRange(obj.Seasons);
 
 			if (obj.Episodes != null) 
-				await _episodes.DeleteRange(obj.Episodes);
+				await _episodes.Value.DeleteRange(obj.Episodes);
 		}
 	}
 }
