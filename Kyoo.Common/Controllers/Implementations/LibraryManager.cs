@@ -213,21 +213,48 @@ namespace Kyoo.Controllers
 			return SeasonRepository.GetSeasons(showSlug, where, sort, limit);
 		}
 
-		public Task<ICollection<Episode>> GetEpisodes(int showID, int seasonNumber)
+		public Task<ICollection<Episode>> GetEpisodes(int showID,
+			Expression<Func<Episode, bool>> where = null,
+			Sort<Episode> sort = default, 
+			Pagination limit = default)
 		{
-			return EpisodeRepository.GetEpisodes(showID, seasonNumber);
-		}
-
-		public Task<ICollection<Episode>> GetEpisodes(string showSlug, int seasonNumber)
-		{
-			return EpisodeRepository.GetEpisodes(showSlug, seasonNumber);
-		}
-
-		public Task<ICollection<Episode>> GetEpisodes(int seasonID)
-		{
-			return EpisodeRepository.GetEpisodes(seasonID);
+			return EpisodeRepository.GetEpisodes(showID, where, sort, limit);
 		}
 		
+		public Task<ICollection<Episode>> GetEpisodes(string showSlug,
+			Expression<Func<Episode, bool>> where = null,
+			Sort<Episode> sort = default, 
+			Pagination limit = default)
+		{
+			return EpisodeRepository.GetEpisodes(showSlug, where, sort, limit);
+		}
+		
+		public Task<ICollection<Episode>> GetEpisodesFromSeason(int seasonID,
+			Expression<Func<Episode, bool>> where = null,
+			Sort<Episode> sort = default, 
+			Pagination limit = default)
+		{
+			return EpisodeRepository.GetEpisodesFromSeason(seasonID, where, sort, limit);
+		}
+		
+		public Task<ICollection<Episode>> GetEpisodesFromSeason(int showID,
+			int seasonNumber,
+			Expression<Func<Episode, bool>> where = null,
+			Sort<Episode> sort = default, 
+			Pagination limit = default)
+		{
+			return EpisodeRepository.GetEpisodesFromSeason(showID, seasonNumber, where, sort, limit);
+		}
+		
+		public Task<ICollection<Episode>> GetEpisodesFromSeason(string showSlug,
+			int seasonNumber,
+			Expression<Func<Episode, bool>> where = null,
+			Sort<Episode> sort = default, 
+			Pagination limit = default)
+		{
+			return EpisodeRepository.GetEpisodesFromSeason(showSlug, seasonNumber, where, sort, limit);
+		}
+
 		public Task AddShowLink(int showID, int? libraryID, int? collectionID)
 		{
 			return ShowRepository.AddShowLink(showID, libraryID, collectionID);

@@ -15,15 +15,20 @@ namespace Kyoo.Controllers
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
 		private readonly IEpisodeRepository _episodes;
+		private readonly IShowRepository _shows;
 		protected override Expression<Func<Season, object>> DefaultSort => x => x.SeasonNumber;
 
 
-		public SeasonRepository(DatabaseContext database, IProviderRepository providers, IEpisodeRepository episodes)
+		public SeasonRepository(DatabaseContext database, 
+			IProviderRepository providers,
+			IEpisodeRepository episodes,
+			IShowRepository shows)
 			: base(database)
 		{
 			_database = database;
 			_providers = providers;
 			_episodes = episodes;
+			_shows = shows;
 		}
 
 
@@ -48,6 +53,12 @@ namespace Kyoo.Controllers
 			if (!match.Success)
 				throw new ArgumentException("Invalid season slug. Format: {showSlug}-s{seasonNumber}");
 			return Get(match.Groups["show"].Value, int.Parse(match.Groups["season"].Value));
+		}
+		
+		public Task<Season> Get(int showID, int seasonNumber)
+		{
+			return _database.Seasons.FirstOrDefaultAsync(x => x.ShowID == showID 
+			                                                  && x.SeasonNumber == seasonNumber);
 		}
 		
 		public Task<Season> Get(string showSlug, int seasonNumber)
@@ -102,26 +113,32 @@ namespace Kyoo.Controllers
 			}
 		}
 		
-		public Task<ICollection<Season>> GetSeasons(int showID,
+		public async Task<ICollection<Season>> GetSeasons(int showID,
 			Expression<Func<Season, bool>> where = null, 
 			Sort<Season> sort = default,
 			Pagination limit = default)
 		{
-			return ApplyFilters(_database.Seasons.Where(x => x.ShowID == showID),
+			ICollection<Season> seasons = await ApplyFilters(_database.Seasons.Where(x => x.ShowID == showID),
 				where,
 				sort,
 				limit);
+			if (!seasons.Any() && await _shows.Get(showID) == null)
+				throw new ItemNotFound();
+			return seasons;
 		}
 
-		public Task<ICollection<Season>> GetSeasons(string showSlug,
+		public async Task<ICollection<Season>> GetSeasons(string showSlug,
 			Expression<Func<Season, bool>> where = null, 
 			Sort<Season> sort = default,
 			Pagination limit = default)
 		{
-			return ApplyFilters(_database.Seasons.Where(x => x.Show.Slug == showSlug),
+			ICollection<Season> seasons = await ApplyFilters(_database.Seasons.Where(x => x.Show.Slug == showSlug),
 				where,
 				sort,
 				limit);
+			if (!seasons.Any() && await _shows.Get(showSlug) == null)
+				throw new ItemNotFound();
+			return seasons;
 		}
 		
 		public async Task Delete(string showSlug, int seasonNumber)

@@ -6,6 +6,8 @@ namespace Kyoo.Models.Exceptions
 	{
 		public override string Message { get; }
 
+		public ItemNotFound() {}
+		
 		public ItemNotFound(string message)
 		{
 			Message = message;
