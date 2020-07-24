@@ -1,4 +1,5 @@
-﻿using Kyoo.Models;
+﻿using System;
+using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,14 +22,9 @@ namespace Kyoo.Api
 
 		[HttpGet("{showSlug}/season/{seasonNumber}")]
 		[Authorize(Policy="Read")]
-		public async Task<ActionResult<IEnumerable<Episode>>> GetEpisodesForSeason(string showSlug, int seasonNumber)
+		public Task<ActionResult<IEnumerable<Episode>>> GetEpisodesForSeason(string showSlug, int seasonNumber)
 		{
-			IEnumerable<Episode> episodes = await _libraryManager.GetEpisodes(showSlug, seasonNumber);
-
-			if(episodes == null)
-				return NotFound();
-
-			return episodes.ToList();
+			throw new NotImplementedException();
 		}
 
 		[HttpGet("{showSlug}/season/{seasonNumber}/episode/{episodeNumber}")]

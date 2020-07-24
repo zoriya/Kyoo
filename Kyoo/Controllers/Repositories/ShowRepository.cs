@@ -171,6 +171,7 @@ namespace Kyoo.Controllers
 			
 			await _database.SaveChangesAsync();
 
+			// TODO fix circular references of Show/Season/Episode Repository.
 			if (obj.Seasons != null)
 				await _seasons.DeleteRange(obj.Seasons);
 
