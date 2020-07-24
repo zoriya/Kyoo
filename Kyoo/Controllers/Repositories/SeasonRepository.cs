@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
@@ -14,20 +15,20 @@ namespace Kyoo.Controllers
 	{
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
-		private readonly IEpisodeRepository _episodes;
+		private readonly Lazy<IEpisodeRepository> _episodes;
 		private readonly IShowRepository _shows;
 		protected override Expression<Func<Season, object>> DefaultSort => x => x.SeasonNumber;
 
 
 		public SeasonRepository(DatabaseContext database, 
 			IProviderRepository providers,
-			IEpisodeRepository episodes,
-			IShowRepository shows)
+			IShowRepository shows,
+			IServiceProvider services)
 			: base(database)
 		{
 			_database = database;
 			_providers = providers;
-			_episodes = episodes;
+			_episodes = new Lazy<IEpisodeRepository>(services.GetRequiredService<IEpisodeRepository>);
 			_shows = shows;
 		}
 
@@ -36,14 +37,16 @@ namespace Kyoo.Controllers
 		{
 			_database.Dispose();
 			_providers.Dispose();
-			_episodes.Dispose();
+			if (_episodes.IsValueCreated)
+				_episodes.Value.Dispose();
 		}
 
 		public override async ValueTask DisposeAsync()
 		{
 			await _database.DisposeAsync();
 			await _providers.DisposeAsync();
-			await _episodes.DisposeAsync();
+			if (_episodes.IsValueCreated)
+				await _episodes.Value.DisposeAsync();
 		}
 
 		public override Task<Season> Get(string slug)
@@ -161,7 +164,7 @@ namespace Kyoo.Controllers
 			await _database.SaveChangesAsync();
 
 			if (obj.Episodes != null)
-				await _episodes.DeleteRange(obj.Episodes);
+				await _episodes.Value.DeleteRange(obj.Episodes);
 		}
 	}
 }
