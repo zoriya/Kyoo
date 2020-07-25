@@ -55,7 +55,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 });
 
             migrationBuilder.CreateTable(
-                name: "Peoples",
+                name: "People",
                 columns: table => new
                 {
                     ID = table.Column<int>(nullable: false)
@@ -66,7 +66,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Peoples", x => x.ID);
+                    table.PrimaryKey("PK_People", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -75,6 +75,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Slug = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true),
                     Logo = table.Column<string>(nullable: true)
                 },
@@ -253,9 +254,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 {
                     table.PrimaryKey("PK_PeopleLinks", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_PeopleLinks_Peoples_PeopleID",
+                        name: "FK_PeopleLinks_People_PeopleID",
                         column: x => x.PeopleID,
-                        principalTable: "Peoples",
+                        principalTable: "People",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -349,9 +350,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_MetadataIds_Peoples_PeopleID",
+                        name: "FK_MetadataIds_People_PeopleID",
                         column: x => x.PeopleID,
-                        principalTable: "Peoples",
+                        principalTable: "People",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -486,6 +487,12 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 column: "ShowID");
 
             migrationBuilder.CreateIndex(
+                name: "IX_People_Slug",
+                table: "People",
+                column: "Slug",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PeopleLinks_PeopleID",
                 table: "PeopleLinks",
                 column: "PeopleID");
@@ -494,12 +501,6 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "IX_PeopleLinks_ShowID",
                 table: "PeopleLinks",
                 column: "ShowID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Peoples_Slug",
-                table: "Peoples",
-                column: "Slug",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProviderLinks_LibraryID",
@@ -512,9 +513,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 column: "ProviderID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Providers_Name",
+                name: "IX_Providers_Slug",
                 table: "Providers",
-                column: "Name",
+                column: "Slug",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -576,7 +577,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "Collections");
 
             migrationBuilder.DropTable(
-                name: "Peoples");
+                name: "People");
 
             migrationBuilder.DropTable(
                 name: "Libraries");

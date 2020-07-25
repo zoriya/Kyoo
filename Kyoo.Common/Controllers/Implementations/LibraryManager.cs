@@ -148,14 +148,14 @@ namespace Kyoo.Controllers
 			return ShowRepository.GetAll(where, sort, limit);
 		}
 
-		public Task<ICollection<Season>> GetSeasons(Expression<Func<Season, bool>> where = null, 
+		public Task<ICollection<Season>> GetSeasonsFromShow(Expression<Func<Season, bool>> where = null, 
 			Sort<Season> sort = default,
 			Pagination page = default)
 		{
 			return SeasonRepository.GetAll(where, sort, page);
 		}
 
-		public Task<ICollection<Episode>> GetEpisodes(Expression<Func<Episode, bool>> where = null, 
+		public Task<ICollection<Episode>> GetEpisodesFromShow(Expression<Func<Episode, bool>> where = null, 
 			Sort<Episode> sort = default,
 			Pagination page = default)
 		{
@@ -197,36 +197,36 @@ namespace Kyoo.Controllers
 			return ProviderRepository.GetAll(where, sort, page); 
 		}
 
-		public Task<ICollection<Season>> GetSeasons(int showID,
+		public Task<ICollection<Season>> GetSeasonsFromShow(int showID,
 			Expression<Func<Season, bool>> where = null, 
 			Sort<Season> sort = default,
 			Pagination limit = default)
 		{
-			return SeasonRepository.GetSeasons(showID, where, sort, limit);
+			return SeasonRepository.GetFromShow(showID, where, sort, limit);
 		}
 
-		public Task<ICollection<Season>> GetSeasons(string showSlug,
+		public Task<ICollection<Season>> GetSeasonsFromShow(string showSlug,
 			Expression<Func<Season, bool>> where = null, 
 			Sort<Season> sort = default,
 			Pagination limit = default)
 		{
-			return SeasonRepository.GetSeasons(showSlug, where, sort, limit);
+			return SeasonRepository.GetFromShow(showSlug, where, sort, limit);
 		}
 
-		public Task<ICollection<Episode>> GetEpisodes(int showID,
+		public Task<ICollection<Episode>> GetEpisodesFromShow(int showID,
 			Expression<Func<Episode, bool>> where = null,
 			Sort<Episode> sort = default, 
 			Pagination limit = default)
 		{
-			return EpisodeRepository.GetEpisodes(showID, where, sort, limit);
+			return EpisodeRepository.GetFromShow(showID, where, sort, limit);
 		}
 		
-		public Task<ICollection<Episode>> GetEpisodes(string showSlug,
+		public Task<ICollection<Episode>> GetEpisodesFromShow(string showSlug,
 			Expression<Func<Episode, bool>> where = null,
 			Sort<Episode> sort = default, 
 			Pagination limit = default)
 		{
-			return EpisodeRepository.GetEpisodes(showSlug, where, sort, limit);
+			return EpisodeRepository.GetFromShow(showSlug, where, sort, limit);
 		}
 		
 		public Task<ICollection<Episode>> GetEpisodesFromSeason(int seasonID,
@@ -234,7 +234,7 @@ namespace Kyoo.Controllers
 			Sort<Episode> sort = default, 
 			Pagination limit = default)
 		{
-			return EpisodeRepository.GetEpisodesFromSeason(seasonID, where, sort, limit);
+			return EpisodeRepository.GetFromSeason(seasonID, where, sort, limit);
 		}
 		
 		public Task<ICollection<Episode>> GetEpisodesFromSeason(int showID,
@@ -243,7 +243,7 @@ namespace Kyoo.Controllers
 			Sort<Episode> sort = default, 
 			Pagination limit = default)
 		{
-			return EpisodeRepository.GetEpisodesFromSeason(showID, seasonNumber, where, sort, limit);
+			return EpisodeRepository.GetFromSeason(showID, seasonNumber, where, sort, limit);
 		}
 		
 		public Task<ICollection<Episode>> GetEpisodesFromSeason(string showSlug,
@@ -252,7 +252,23 @@ namespace Kyoo.Controllers
 			Sort<Episode> sort = default, 
 			Pagination limit = default)
 		{
-			return EpisodeRepository.GetEpisodesFromSeason(showSlug, seasonNumber, where, sort, limit);
+			return EpisodeRepository.GetFromSeason(showSlug, seasonNumber, where, sort, limit);
+		}
+
+		public Task<ICollection<PeopleLink>> GetPeopleFromShow(int showID,
+			Expression<Func<PeopleLink, bool>> where = null,
+			Sort<PeopleLink> sort = default,
+			Pagination limit = default)
+		{
+			return PeopleRepository.GetFromShow(showID, where, sort, limit);
+		}
+		
+		public Task<ICollection<PeopleLink>> GetPeopleFromShow(string showSlug,
+			Expression<Func<PeopleLink, bool>> where = null,
+			Sort<PeopleLink> sort = default,
+			Pagination limit = default)
+		{
+			return PeopleRepository.GetFromShow(showSlug, where, sort, limit);
 		}
 
 		public Task AddShowLink(int showID, int? libraryID, int? collectionID)

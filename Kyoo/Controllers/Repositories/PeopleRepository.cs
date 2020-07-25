@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
@@ -13,12 +14,15 @@ namespace Kyoo.Controllers
 	{
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
+		private readonly Lazy<IShowRepository> _shows;
 		protected override Expression<Func<People, object>> DefaultSort => x => x.Name;
 
-		public PeopleRepository(DatabaseContext database, IProviderRepository providers) : base(database)
+		public PeopleRepository(DatabaseContext database, IProviderRepository providers, IServiceProvider services) 
+			: base(database)
 		{
 			_database = database;
 			_providers = providers;
+			_shows = new Lazy<IShowRepository>(services.GetRequiredService<IShowRepository>);
 		}
 
 
@@ -26,17 +30,21 @@ namespace Kyoo.Controllers
 		{
 			_database.Dispose();
 			_providers.Dispose();
+			if (_shows.IsValueCreated)
+				_shows.Value.Dispose();
 		}
 
 		public override async ValueTask DisposeAsync()
 		{
 			await _database.DisposeAsync();
 			await _providers.DisposeAsync();
+			if (_shows.IsValueCreated)
+				await _shows.Value.DisposeAsync();
 		}
 
 		public override async Task<ICollection<People>> Search(string query)
 		{
-			return await _database.Peoples
+			return await _database.People
 				.Where(people => EF.Functions.ILike(people.Name, $"%{query}%"))
 				.Take(20)
 				.ToListAsync();
@@ -88,6 +96,58 @@ namespace Kyoo.Controllers
 				foreach (PeopleLink link in obj.Roles)
 					_database.Entry(link).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
+		}
+
+		public async Task<ICollection<PeopleLink>> GetFromShow(int showID, 
+			Expression<Func<PeopleLink, bool>> where = null, 
+			Sort<PeopleLink> sort = default, 
+			Pagination limit = default)
+		{
+			if (sort.Key?.Body is MemberExpression member)
+			{
+				sort.Key = member.Member.Name switch
+				{
+					"Name" => x => x.People.Name,
+					"Slug" => x => x.People.Slug,
+					_ => sort.Key
+				};
+			}
+
+			ICollection<PeopleLink> people = await ApplyFilters(_database.PeopleLinks.Where(x => x.ShowID == showID),
+				id => _database.PeopleLinks.FirstOrDefaultAsync(x => x.ID == id),
+				x => x.People.Name,
+				where,
+				sort,
+				limit);
+			if (!people.Any() && await _shows.Value.Get(showID) == null)
+				throw new ItemNotFound();
+			return people;
+		}
+
+		public async Task<ICollection<PeopleLink>> GetFromShow(string showSlug,
+			Expression<Func<PeopleLink, bool>> where = null,
+			Sort<PeopleLink> sort = default, 
+			Pagination limit = default)
+		{
+			if (sort.Key?.Body is MemberExpression member)
+			{
+				sort.Key = member.Member.Name switch
+				{
+					"Name" => x => x.People.Name,
+					"Slug" => x => x.People.Slug,
+					_ => sort.Key
+				};
+			}
+			
+			ICollection<PeopleLink> people = await ApplyFilters(_database.PeopleLinks.Where(x => x.Show.Slug == showSlug),
+				id => _database.PeopleLinks.FirstOrDefaultAsync(x => x.ID == id),
+				x => x.People.Name,
+				where,
+				sort,
+				limit);
+			if (!people.Any() && await _shows.Value.Get(showSlug) == null)
+				throw new ItemNotFound();
+			return people;
 		}
 	}
 }

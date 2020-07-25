@@ -41,7 +41,7 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Season> ressources = await _libraryManager.GetSeasons(showID,
+				ICollection<Season> ressources = await _libraryManager.GetSeasonsFromShow(showID,
 					ApiHelper.ParseWhere<Season>(where),
 					new Sort<Season>(sortBy),
 					new Pagination(limit, afterID));
@@ -74,7 +74,7 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Season> ressources = await _libraryManager.GetSeasons(slug,
+				ICollection<Season> ressources = await _libraryManager.GetSeasonsFromShow(slug,
 					ApiHelper.ParseWhere<Season>(where),
 					new Sort<Season>(sortBy),
 					new Pagination(limit, afterID));
@@ -107,7 +107,7 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Episode> ressources = await _libraryManager.GetEpisodes(showID,
+				ICollection<Episode> ressources = await _libraryManager.GetEpisodesFromShow(showID,
 					ApiHelper.ParseWhere<Episode>(where),
 					new Sort<Episode>(sortBy),
 					new Pagination(limit, afterID));
@@ -131,7 +131,7 @@ namespace Kyoo.Api
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
 			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 20)
+			[FromQuery] int limit = 50)
 		{
 			where.Remove("slug");
 			where.Remove("sortBy");
@@ -140,9 +140,73 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Episode> ressources = await _libraryManager.GetEpisodes(slug,
+				ICollection<Episode> ressources = await _libraryManager.GetEpisodesFromShow(slug,
 					ApiHelper.ParseWhere<Episode>(where),
 					new Sort<Episode>(sortBy),
+					new Pagination(limit, afterID));
+
+				return Page(ressources, limit);
+			}
+			catch (ItemNotFound)
+			{
+				return NotFound();
+			}
+			catch (ArgumentException ex)
+			{
+				return BadRequest(new {Error = ex.Message});
+			}
+		}
+		
+		[HttpGet("{showID:int}/people")]
+		[Authorize(Policy = "Read")]
+		public async Task<ActionResult<Page<PeopleLink>>> GetPeople(int showID,
+			[FromQuery] string sortBy,
+			[FromQuery] int afterID,
+			[FromQuery] Dictionary<string, string> where,
+			[FromQuery] int limit = 30)
+		{
+			where.Remove("showID");
+			where.Remove("sortBy");
+			where.Remove("limit");
+			where.Remove("afterID");
+
+			try
+			{
+				ICollection<PeopleLink> ressources = await _libraryManager.GetPeopleFromShow(showID,
+					ApiHelper.ParseWhere<PeopleLink>(where),
+					new Sort<PeopleLink>(sortBy),
+					new Pagination(limit, afterID));
+
+				return Page(ressources, limit);
+			}
+			catch (ItemNotFound)
+			{
+				return NotFound();
+			}
+			catch (ArgumentException ex)
+			{
+				return BadRequest(new {Error = ex.Message});
+			}
+		}
+
+		[HttpGet("{slug}/people")]
+		[Authorize(Policy = "Read")]
+		public async Task<ActionResult<Page<PeopleLink>>> GetPeople(string slug,
+			[FromQuery] string sortBy,
+			[FromQuery] int afterID,
+			[FromQuery] Dictionary<string, string> where,
+			[FromQuery] int limit = 30)
+		{
+			where.Remove("slug");
+			where.Remove("sortBy");
+			where.Remove("limit");
+			where.Remove("afterID");
+
+			try
+			{
+				ICollection<PeopleLink> ressources = await _libraryManager.GetPeopleFromShow(slug,
+					ApiHelper.ParseWhere<PeopleLink>(where),
+					new Sort<PeopleLink>(sortBy),
 					new Pagination(limit, afterID));
 
 				return Page(ressources, limit);

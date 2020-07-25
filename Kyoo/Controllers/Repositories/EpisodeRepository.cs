@@ -113,7 +113,7 @@ namespace Kyoo.Controllers
 			}
 		}
 		
-		public async Task<ICollection<Episode>> GetEpisodes(int showID, 
+		public async Task<ICollection<Episode>> GetFromShow(int showID, 
 			Expression<Func<Episode, bool>> where = null, 
 			Sort<Episode> sort = default, 
 			Pagination limit = default)
@@ -127,7 +127,7 @@ namespace Kyoo.Controllers
 			return episodes;
 		}
 		
-		public async Task<ICollection<Episode>> GetEpisodes(string showSlug, 
+		public async Task<ICollection<Episode>> GetFromShow(string showSlug, 
 			Expression<Func<Episode, bool>> where = null, 
 			Sort<Episode> sort = default, 
 			Pagination limit = default)
@@ -141,7 +141,7 @@ namespace Kyoo.Controllers
 			return episodes;
 		}
 
-		public async Task<ICollection<Episode>> GetEpisodesFromSeason(int seasonID, 
+		public async Task<ICollection<Episode>> GetFromSeason(int seasonID, 
 			Expression<Func<Episode, bool>> where = null, 
 			Sort<Episode> sort = default, 
 			Pagination limit = default)
@@ -155,7 +155,7 @@ namespace Kyoo.Controllers
 			return episodes;
 		}
 
-		public async Task<ICollection<Episode>> GetEpisodesFromSeason(int showID, 
+		public async Task<ICollection<Episode>> GetFromSeason(int showID, 
 			int seasonNumber,
 			Expression<Func<Episode, bool>> where = null, 
 			Sort<Episode> sort = default, 
@@ -171,7 +171,7 @@ namespace Kyoo.Controllers
 			return episodes;
 		}
 
-		public async Task<ICollection<Episode>> GetEpisodesFromSeason(string showSlug, 
+		public async Task<ICollection<Episode>> GetFromSeason(string showSlug, 
 			int seasonNumber,
 			Expression<Func<Episode, bool>> where = null, 
 			Sort<Episode> sort = default, 
