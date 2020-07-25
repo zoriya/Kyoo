@@ -128,6 +128,26 @@ namespace Kyoo.Controllers
 			Expression<Func<PeopleLink, object>> sort,
 			Pagination limit = default
 		) => GetPeopleFromShow(showSlug, where, new Sort<PeopleLink>(sort), limit);
+		
+		Task<ICollection<Genre>> GetGenresFromShow(int showID,
+			Expression<Func<Genre, bool>> where = null, 
+			Sort<Genre> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Genre>> GetGenresFromShow(int showID,
+			[Optional] Expression<Func<Genre, bool>> where,
+			Expression<Func<Genre, object>> sort,
+			Pagination limit = default
+		) => GetGenresFromShow(showID, where, new Sort<Genre>(sort), limit);
+		
+		Task<ICollection<Genre>> GetGenresFromShow(string showSlug,
+			Expression<Func<Genre, bool>> where = null, 
+			Sort<Genre> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Genre>> GetGenresFromShow(string showSlug,
+			[Optional] Expression<Func<Genre, bool>> where,
+			Expression<Func<Genre, object>> sort,
+			Pagination limit = default
+		) => GetGenresFromShow(showSlug, where, new Sort<Genre>(sort), limit);
 
 
 		// Helpers

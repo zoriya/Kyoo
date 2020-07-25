@@ -195,7 +195,29 @@ namespace Kyoo.Controllers
 	}
 	public interface ILibraryRepository : IRepository<Library> {}
 	public interface ICollectionRepository : IRepository<Collection> {}
-	public interface IGenreRepository : IRepository<Genre> {}
+
+	public interface IGenreRepository : IRepository<Genre>
+	{
+		Task<ICollection<Genre>> GetFromShow(int showID,
+			Expression<Func<Genre, bool>> where = null, 
+			Sort<Genre> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Genre>> GetFromShow(int showID,
+			[Optional] Expression<Func<Genre, bool>> where,
+			Expression<Func<Genre, object>> sort,
+			Pagination limit = default
+		) => GetFromShow(showID, where, new Sort<Genre>(sort), limit);
+		
+		Task<ICollection<Genre>> GetFromShow(string showSlug,
+			Expression<Func<Genre, bool>> where = null, 
+			Sort<Genre> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Genre>> GetFromShow(string showSlug,
+			[Optional] Expression<Func<Genre, bool>> where,
+			Expression<Func<Genre, object>> sort,
+			Pagination limit = default
+		) => GetFromShow(showSlug, where, new Sort<Genre>(sort), limit);
+	}
 	public interface IStudioRepository : IRepository<Studio> {}
 
 	public interface IPeopleRepository : IRepository<People>
