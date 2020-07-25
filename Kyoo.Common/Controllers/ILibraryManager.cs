@@ -151,6 +151,46 @@ namespace Kyoo.Controllers
 		
 		Task<Studio> GetStudioFromShow(int showID);
 		Task<Studio> GetStudioFromShow(string showSlug);
+		
+		Task<ICollection<Library>> GetLibrariesFromShow(int showID,
+			Expression<Func<Library, bool>> where = null, 
+			Sort<Library> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Library>> GetLibrariesFromShow(int showID,
+			[Optional] Expression<Func<Library, bool>> where,
+			Expression<Func<Library, object>> sort,
+			Pagination limit = default
+		) => GetLibrariesFromShow(showID, where, new Sort<Library>(sort), limit);
+		
+		Task<ICollection<Library>> GetLibrariesFromShow(string showSlug,
+			Expression<Func<Library, bool>> where = null, 
+			Sort<Library> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Library>> GetLibrariesFromShow(string showSlug,
+			[Optional] Expression<Func<Library, bool>> where,
+			Expression<Func<Library, object>> sort,
+			Pagination limit = default
+		) => GetLibrariesFromShow(showSlug, where, new Sort<Library>(sort), limit);
+		
+		Task<ICollection<Collection>> GetCollectionsFromShow(int showID,
+			Expression<Func<Collection, bool>> where = null, 
+			Sort<Collection> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Collection>> GetCollectionsFromShow(int showID,
+			[Optional] Expression<Func<Collection, bool>> where,
+			Expression<Func<Collection, object>> sort,
+			Pagination limit = default
+		) => GetCollectionsFromShow(showID, where, new Sort<Collection>(sort), limit);
+		
+		Task<ICollection<Collection>> GetCollectionsFromShow(string showSlug,
+			Expression<Func<Collection, bool>> where = null, 
+			Sort<Collection> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Collection>> GetCollectionsFromShow(string showSlug,
+			[Optional] Expression<Func<Collection, bool>> where,
+			Expression<Func<Collection, object>> sort,
+			Pagination limit = default
+		) => GetCollectionsFromShow(showSlug, where, new Sort<Collection>(sort), limit);
 
 
 		// Helpers

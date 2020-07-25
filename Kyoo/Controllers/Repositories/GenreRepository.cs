@@ -22,7 +22,20 @@ namespace Kyoo.Controllers
 			_database = database;
 			_shows = new Lazy<IShowRepository>(services.GetRequiredService<IShowRepository>);
 		}
-		
+
+		public override void Dispose()
+		{
+			base.Dispose();
+			if (_shows.IsValueCreated)
+				_shows.Value.Dispose();
+		}
+
+		public override async ValueTask DisposeAsync()
+		{
+			await _database.DisposeAsync();
+			if (_shows.IsValueCreated)
+				await _shows.Value.DisposeAsync();
+		}
 
 		public override async Task<ICollection<Genre>> Search(string query)
 		{
@@ -92,7 +105,8 @@ namespace Kyoo.Controllers
 			Sort<Genre> sort = default,
 			Pagination limit = default)
 		{
-			ICollection<Genre> genres = await ApplyFilters(_database.GenreLinks.Where(x => x.Show.Slug == showSlug)
+			ICollection<Genre> genres = await ApplyFilters(_database.GenreLinks
+					.Where(x => x.Show.Slug == showSlug)
 					.Select(x => x.Genre),
 				where,
 				sort,
