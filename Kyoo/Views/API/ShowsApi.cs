@@ -220,5 +220,71 @@ namespace Kyoo.Api
 				return BadRequest(new {Error = ex.Message});
 			}
 		}
+		
+		[HttpGet("{showID:int}/genre")]
+		[HttpGet("{showID:int}/genres")]
+		[Authorize(Policy = "Read")]
+		public async Task<ActionResult<Page<Genre>>> GetGenres(int showID,
+			[FromQuery] string sortBy,
+			[FromQuery] int afterID,
+			[FromQuery] Dictionary<string, string> where,
+			[FromQuery] int limit = 30)
+		{
+			where.Remove("showID");
+			where.Remove("sortBy");
+			where.Remove("limit");
+			where.Remove("afterID");
+
+			try
+			{
+				ICollection<Genre> ressources = await _libraryManager.GetGenresFromShow(showID,
+					ApiHelper.ParseWhere<Genre>(where),
+					new Sort<Genre>(sortBy),
+					new Pagination(limit, afterID));
+
+				return Page(ressources, limit);
+			}
+			catch (ItemNotFound)
+			{
+				return NotFound();
+			}
+			catch (ArgumentException ex)
+			{
+				return BadRequest(new {Error = ex.Message});
+			}
+		}
+
+		[HttpGet("{slug}/genre")]
+		[HttpGet("{slug}/genres")]
+		[Authorize(Policy = "Read")]
+		public async Task<ActionResult<Page<Genre>>> GetGenre(string slug,
+			[FromQuery] string sortBy,
+			[FromQuery] int afterID,
+			[FromQuery] Dictionary<string, string> where,
+			[FromQuery] int limit = 30)
+		{
+			where.Remove("slug");
+			where.Remove("sortBy");
+			where.Remove("limit");
+			where.Remove("afterID");
+
+			try
+			{
+				ICollection<Genre> ressources = await _libraryManager.GetGenresFromShow(slug,
+					ApiHelper.ParseWhere<Genre>(where),
+					new Sort<Genre>(sortBy),
+					new Pagination(limit, afterID));
+
+				return Page(ressources, limit);
+			}
+			catch (ItemNotFound)
+			{
+				return NotFound();
+			}
+			catch (ArgumentException ex)
+			{
+				return BadRequest(new {Error = ex.Message});
+			}
+		}
 	}
 }

@@ -271,6 +271,22 @@ namespace Kyoo.Controllers
 			return PeopleRepository.GetFromShow(showSlug, where, sort, limit);
 		}
 
+		public Task<ICollection<Genre>> GetGenresFromShow(int showID,
+			Expression<Func<Genre, bool>> where = null,
+			Sort<Genre> sort = default,
+			Pagination limit = default)
+		{
+			return GenreRepository.GetFromShow(showID, where, sort, limit);
+		}
+		
+		public Task<ICollection<Genre>> GetGenresFromShow(string showSlug,
+			Expression<Func<Genre, bool>> where = null,
+			Sort<Genre> sort = default,
+			Pagination limit = default)
+		{
+			return GenreRepository.GetFromShow(showSlug, where, sort, limit);
+		}
+		
 		public Task AddShowLink(int showID, int? libraryID, int? collectionID)
 		{
 			return ShowRepository.AddShowLink(showID, libraryID, collectionID);
