@@ -286,5 +286,33 @@ namespace Kyoo.Api
 				return BadRequest(new {Error = ex.Message});
 			}
 		}
+		
+		[HttpGet("{showID:int}/studio")]
+		[Authorize(Policy = "Read")]
+		public async Task<ActionResult<Studio>> GetStudio(int showID)
+		{
+			try
+			{
+				return await _libraryManager.GetStudioFromShow(showID);
+			}
+			catch (ItemNotFound)
+			{
+				return NotFound();
+			}
+		}
+
+		[HttpGet("{slug}/studio")]
+		[Authorize(Policy = "Read")]
+		public async Task<ActionResult<Studio>> GetStudio(string slug)
+		{
+			try
+			{
+				return await _libraryManager.GetStudioFromShow(slug);
+			}
+			catch (ItemNotFound)
+			{
+				return NotFound();
+			}
+		}
 	}
 }

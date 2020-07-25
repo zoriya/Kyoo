@@ -286,7 +286,17 @@ namespace Kyoo.Controllers
 		{
 			return GenreRepository.GetFromShow(showSlug, where, sort, limit);
 		}
-		
+
+		public Task<Studio> GetStudioFromShow(int showID)
+		{
+			return StudioRepository.GetFromShow(showID);
+		}
+
+		public Task<Studio> GetStudioFromShow(string showSlug)
+		{
+			return StudioRepository.GetFromShow(showSlug);
+		}
+
 		public Task AddShowLink(int showID, int? libraryID, int? collectionID)
 		{
 			return ShowRepository.AddShowLink(showID, libraryID, collectionID);

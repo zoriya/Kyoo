@@ -218,7 +218,12 @@ namespace Kyoo.Controllers
 			Pagination limit = default
 		) => GetFromShow(showSlug, where, new Sort<Genre>(sort), limit);
 	}
-	public interface IStudioRepository : IRepository<Studio> {}
+
+	public interface IStudioRepository : IRepository<Studio>
+	{
+		Task<Studio> GetFromShow(int showID);
+		Task<Studio> GetFromShow(string showSlug);
+	}
 
 	public interface IPeopleRepository : IRepository<People>
 	{
