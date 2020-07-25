@@ -148,6 +148,9 @@ namespace Kyoo.Controllers
 			Expression<Func<Genre, object>> sort,
 			Pagination limit = default
 		) => GetGenresFromShow(showSlug, where, new Sort<Genre>(sort), limit);
+		
+		Task<Studio> GetStudioFromShow(int showID);
+		Task<Studio> GetStudioFromShow(string showSlug);
 
 
 		// Helpers
