@@ -272,7 +272,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     b.HasIndex("Slug")
                         .IsUnique();
 
-                    b.ToTable("Peoples");
+                    b.ToTable("People");
                 });
 
             modelBuilder.Entity("Kyoo.Models.PeopleLink", b =>
@@ -316,9 +316,12 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
+                    b.Property<string>("Slug")
+                        .HasColumnType("text");
+
                     b.HasKey("ID");
 
-                    b.HasIndex("Name")
+                    b.HasIndex("Slug")
                         .IsUnique();
 
                     b.ToTable("Providers");

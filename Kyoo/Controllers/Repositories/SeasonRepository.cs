@@ -116,7 +116,7 @@ namespace Kyoo.Controllers
 			}
 		}
 		
-		public async Task<ICollection<Season>> GetSeasons(int showID,
+		public async Task<ICollection<Season>> GetFromShow(int showID,
 			Expression<Func<Season, bool>> where = null, 
 			Sort<Season> sort = default,
 			Pagination limit = default)
@@ -130,7 +130,7 @@ namespace Kyoo.Controllers
 			return seasons;
 		}
 
-		public async Task<ICollection<Season>> GetSeasons(string showSlug,
+		public async Task<ICollection<Season>> GetFromShow(string showSlug,
 			Expression<Func<Season, bool>> where = null, 
 			Sort<Season> sort = default,
 			Pagination limit = default)

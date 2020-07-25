@@ -60,7 +60,7 @@ namespace Kyoo
 		public DbSet<Episode> Episodes { get; set; }
 		public DbSet<Track> Tracks { get; set; }
 		public DbSet<Genre> Genres { get; set; }
-		public DbSet<People> Peoples { get; set; }
+		public DbSet<People> People { get; set; }
 		public DbSet<Studio> Studios { get; set; }
 		public DbSet<ProviderID> Providers { get; set; }
 		public DbSet<MetadataID> MetadataIds { get; set; }
@@ -167,7 +167,7 @@ namespace Kyoo
 				.HasIndex(x => x.Slug)
 				.IsUnique();
 			modelBuilder.Entity<ProviderID>()
-				.HasIndex(x => x.Name)
+				.HasIndex(x => x.Slug)
 				.IsUnique();
 			modelBuilder.Entity<Season>()
 				.HasIndex(x => new {x.ShowID, x.SeasonNumber})

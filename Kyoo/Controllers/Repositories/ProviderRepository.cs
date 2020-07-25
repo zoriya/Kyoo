@@ -43,13 +43,13 @@ namespace Kyoo.Controllers
 			{
 				_database.DiscardChanges();
 				if (IsDuplicateException(ex))
-					throw new DuplicatedItemException($"Trying to insert a duplicated provider (name {obj.Name} already exists).");
+					throw new DuplicatedItemException($"Trying to insert a duplicated provider (slug {obj.Slug} already exists).");
 				throw;
 			}
 			
 			return obj;
 		}
-		
+
 		protected override Task Validate(ProviderID ressource)
 		{
 			return Task.CompletedTask;

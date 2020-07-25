@@ -52,24 +52,34 @@ namespace Kyoo.Controllers
 			return ApplyFilters(_database.Set<T>(), where, sort, limit);
 		}
 
-		protected async Task<ICollection<T>> ApplyFilters(IQueryable<T> query,
+		protected Task<ICollection<T>> ApplyFilters(IQueryable<T> query,
 			Expression<Func<T, bool>> where = null,
 			Sort<T> sort = default, 
+			Pagination limit = default)
+		{
+			return ApplyFilters(query, Get, DefaultSort, where, sort, limit);
+		}
+		
+		protected async Task<ICollection<TValue>> ApplyFilters<TValue>(IQueryable<TValue> query,
+			Func<int, Task<TValue>> get,
+			Expression<Func<TValue, object>> defaultSort,
+			Expression<Func<TValue, bool>> where = null,
+			Sort<TValue> sort = default, 
 			Pagination limit = default)
 		{
 			if (where != null)
 				query = query.Where(where);
 
-			Expression<Func<T, object>> sortKey = sort.Key ?? DefaultSort;
+			Expression<Func<TValue, object>> sortKey = sort.Key ?? defaultSort;
 			query = sort.Descendant ? query.OrderByDescending(sortKey) : query.OrderBy(sortKey);
 
 			if (limit.AfterID != 0)
 			{
-				T after = await Get(limit.AfterID);
+				TValue after = await get(limit.AfterID);
 				object afterObj = sortKey.Compile()(after);
-				query = query.Where(Expression.Lambda<Func<T, bool>>(
+				query = query.Where(Expression.Lambda<Func<TValue, bool>>(
 					ApiHelper.StringCompatibleExpression(Expression.GreaterThan, sortKey.Body, Expression.Constant(afterObj)),
-					(ParameterExpression)((MemberExpression)sortKey.Body).Expression
+					sortKey.Parameters.First()
 				));
 			}
 			if (limit.Count > 0)

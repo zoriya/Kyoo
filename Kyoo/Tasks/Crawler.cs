@@ -63,7 +63,7 @@ namespace Kyoo.Controllers
 				if (!Directory.Exists(show.Path))
 					await libraryManager.DeleteShow(show);
 			
-			ICollection<Episode> episodes = await libraryManager.GetEpisodes();
+			ICollection<Episode> episodes = await libraryManager.GetEpisodesFromShow();
 			ICollection<Library> libraries = argument == null 
 				? await libraryManager.GetLibraries()
 				: new [] { await libraryManager.GetLibrary(argument)};
