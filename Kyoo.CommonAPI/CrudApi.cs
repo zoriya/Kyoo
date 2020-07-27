@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Configuration;
 
 namespace Kyoo.CommonApi
@@ -29,7 +26,7 @@ namespace Kyoo.CommonApi
 		[HttpGet("{id:int}")]
 		[Authorize(Policy = "Read")]
 		[JsonDetailed]
-		public async Task<ActionResult<T>> Get(int id)
+		public virtual async Task<ActionResult<T>> Get(int id)
 		{
 			T ressource = await _repository.Get(id);
 			if (ressource == null)
@@ -41,7 +38,7 @@ namespace Kyoo.CommonApi
 		[HttpGet("{slug}")]
 		[Authorize(Policy = "Read")]
 		[JsonDetailed]
-		public async Task<ActionResult<T>> Get(string slug)
+		public virtual async Task<ActionResult<T>> Get(string slug)
 		{
 			T ressource = await _repository.Get(slug);
 			if (ressource == null)
@@ -52,7 +49,7 @@ namespace Kyoo.CommonApi
 
 		[HttpGet]
 		[Authorize(Policy = "Read")]
-		public async Task<ActionResult<Page<T>>> GetAll([FromQuery] string sortBy,
+		public virtual async Task<ActionResult<Page<T>>> GetAll([FromQuery] string sortBy,
 			[FromQuery] int afterID,
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 20)
@@ -86,11 +83,15 @@ namespace Kyoo.CommonApi
 
 		[HttpPost]
 		[Authorize(Policy = "Write")]
-		public async Task<ActionResult<T>> Create([FromBody] T ressource)
+		public virtual async Task<ActionResult<T>> Create([FromBody] T ressource)
 		{
 			try
 			{
 				return await _repository.Create(ressource);
+			}
+			catch (ArgumentException ex)
+			{
+				return BadRequest(new {Error = ex.Message});
 			}
 			catch (DuplicatedItemException)
 			{
@@ -101,21 +102,22 @@ namespace Kyoo.CommonApi
 		
 		[HttpPut]
 		[Authorize(Policy = "Write")]
-		public async Task<ActionResult<T>> Edit([FromQuery] bool resetOld, [FromBody] T ressource)
+		public virtual async Task<ActionResult<T>> Edit([FromQuery] bool resetOld, [FromBody] T ressource)
 		{
-			if (ressource.ID <= 0)
-			{
-				T old = await _repository.Get(ressource.Slug);
-				if (old == null)
-					return NotFound();
-				ressource.ID = old.ID;
-			}
+			if (ressource.ID > 0)
+				return await _repository.Edit(ressource, resetOld);
+			
+			T old = await _repository.Get(ressource.Slug);
+			if (old == null)
+				return NotFound();
+			
+			ressource.ID = old.ID;
 			return await _repository.Edit(ressource, resetOld);
 		}
 
 		[HttpPut("{id:int}")]
 		[Authorize(Policy = "Write")]
-		public async Task<ActionResult<T>> Edit(int id, [FromQuery] bool resetOld, [FromBody] T ressource)
+		public virtual async Task<ActionResult<T>> Edit(int id, [FromQuery] bool resetOld, [FromBody] T ressource)
 		{
 			ressource.ID = id;
 			try
@@ -130,7 +132,7 @@ namespace Kyoo.CommonApi
 		
 		[HttpPut("{slug}")]
 		[Authorize(Policy = "Write")]
-		public async Task<ActionResult<T>> Edit(string slug, [FromQuery] bool resetOld, [FromBody] T ressource)
+		public virtual async Task<ActionResult<T>> Edit(string slug, [FromQuery] bool resetOld, [FromBody] T ressource)
 		{
 			T old = await _repository.Get(slug);
 			if (old == null)
@@ -141,7 +143,7 @@ namespace Kyoo.CommonApi
 
 		[HttpDelete("{id:int}")]
 		[Authorize(Policy = "Write")]
-		public async Task<IActionResult> Delete(int id)
+		public virtual async Task<IActionResult> Delete(int id)
 		{
 			try
 			{
@@ -157,7 +159,7 @@ namespace Kyoo.CommonApi
 		
 		[HttpDelete("{slug}")]
 		[Authorize(Policy = "Write")]
-		public async Task<IActionResult> Delete(string slug)
+		public virtual async Task<IActionResult> Delete(string slug)
 		{
 			try
 			{

@@ -191,6 +191,46 @@ namespace Kyoo.Controllers
 			Expression<Func<Collection, object>> sort,
 			Pagination limit = default
 		) => GetCollectionsFromShow(showSlug, where, new Sort<Collection>(sort), limit);
+		
+		Task<ICollection<Show>> GetShowsFromLibrary(int id,
+			Expression<Func<Show, bool>> where = null, 
+			Sort<Show> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Show>> GetShowsFromLibrary(int id,
+			[Optional] Expression<Func<Show, bool>> where,
+			Expression<Func<Show, object>> sort,
+			Pagination limit = default
+		) => GetShowsFromLibrary(id, where, new Sort<Show>(sort), limit);
+		
+		Task<ICollection<Show>> GetShowsFromLibrary(string slug,
+			Expression<Func<Show, bool>> where = null, 
+			Sort<Show> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Show>> GetShowsFromLibrary(string slug,
+			[Optional] Expression<Func<Show, bool>> where,
+			Expression<Func<Show, object>> sort,
+			Pagination limit = default
+		) => GetShowsFromLibrary(slug, where, new Sort<Show>(sort), limit);
+		
+		Task<ICollection<Collection>> GetCollectionsFromLibrary(int id,
+			Expression<Func<Collection, bool>> where = null, 
+			Sort<Collection> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Collection>> GetCollectionsFromLibrary(int id,
+			[Optional] Expression<Func<Collection, bool>> where,
+			Expression<Func<Collection, object>> sort,
+			Pagination limit = default
+		) => GetCollectionsFromLibrary(id, where, new Sort<Collection>(sort), limit);
+		
+		Task<ICollection<Collection>> GetCollectionsFromLibrary(string showSlug,
+			Expression<Func<Collection, bool>> where = null, 
+			Sort<Collection> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Collection>> GetCollectionsFromLibrary(string showSlug,
+			[Optional] Expression<Func<Collection, bool>> where,
+			Expression<Func<Collection, object>> sort,
+			Pagination limit = default
+		) => GetCollectionsFromLibrary(showSlug, where, new Sort<Collection>(sort), limit);
 
 
 		// Helpers
