@@ -78,6 +78,13 @@ namespace Kyoo.Controllers
 
 		protected override async Task Validate(Library obj)
 		{
+			if (string.IsNullOrEmpty(obj.Slug))
+				throw new ArgumentException("The library's slug must be set and not empty");
+			if (string.IsNullOrEmpty(obj.Name))
+				throw new ArgumentException("The library's name must be set and not empty");
+			if (obj.Paths == null || !obj.Paths.Any())
+				throw new ArgumentException("The library should have a least one path.");
+			
 			if (obj.ProviderLinks != null)
 				foreach (ProviderLink link in obj.ProviderLinks)
 					link.Provider = await _providers.CreateIfNotExists(link.Provider);

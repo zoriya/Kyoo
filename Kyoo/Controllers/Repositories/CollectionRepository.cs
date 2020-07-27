@@ -14,12 +14,14 @@ namespace Kyoo.Controllers
 	{
 		private readonly DatabaseContext _database;
 		private readonly Lazy<IShowRepository> _shows;
+		private readonly Lazy<ILibraryRepository> _libraries;
 		protected override Expression<Func<Collection, object>> DefaultSort => x => x.Name;
 
 		public CollectionRepository(DatabaseContext database, IServiceProvider services) : base(database)
 		{
 			_database = database;
 			_shows = new Lazy<IShowRepository>(services.GetRequiredService<IShowRepository>);
+			_libraries = new Lazy<ILibraryRepository>(services.GetRequiredService<ILibraryRepository>);
 		}
 
 		public override void Dispose()
@@ -27,6 +29,8 @@ namespace Kyoo.Controllers
 			base.Dispose();
 			if (_shows.IsValueCreated)
 				_shows.Value.Dispose();
+			if (_libraries.IsValueCreated)
+				_libraries.Value.Dispose();
 		}
 
 		public override async ValueTask DisposeAsync()
@@ -34,6 +38,8 @@ namespace Kyoo.Controllers
 			await _database.DisposeAsync();
 			if (_shows.IsValueCreated)
 				await _shows.Value.DisposeAsync();
+			if (_libraries.IsValueCreated)
+				await _libraries.Value.DisposeAsync();
 		}
 
 		public override async Task<ICollection<Collection>> Search(string query)
@@ -117,5 +123,39 @@ namespace Kyoo.Controllers
 				throw new ItemNotFound();
 			return collections;
 		}
+
+		public async Task<ICollection<Collection>> GetFromLibrary(int id,
+			Expression<Func<Collection, bool>> where = null,
+			Sort<Collection> sort = default,
+			Pagination limit = default)
+		{
+			ICollection<Collection> collections = await ApplyFilters(_database.LibraryLinks
+					.Where(x => x.LibraryID == id && x.CollectionID != null)
+					.Select(x => x.Collection),
+				where,
+				sort,
+				limit);
+			if (!collections.Any() && await _libraries.Value.Get(id) == null)
+				throw new ItemNotFound();
+			return collections;
+		}
+
+		public async Task<ICollection<Collection>> GetFromLibrary(string slug,
+			Expression<Func<Collection, bool>> where = null,
+			Sort<Collection> sort = default,
+			Pagination limit = default)
+		{
+			ICollection<Collection> collections = await ApplyFilters(_database.LibraryLinks
+					.Where(x => x.Library.Slug == slug && x.CollectionID != null)
+					.Select(x => x.Collection),
+				where,
+				sort,
+				limit);
+			if (!collections.Any() && await _libraries.Value.Get(slug) == null)
+				throw new ItemNotFound();
+			return collections;
+		}
 	}
+	
+	
 }

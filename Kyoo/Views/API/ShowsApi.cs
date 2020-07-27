@@ -18,8 +18,7 @@ namespace Kyoo.Api
 	{
 		private readonly ILibraryManager _libraryManager;
 
-		public ShowsApi(ILibraryManager libraryManager,
-			IConfiguration configuration)
+		public ShowsApi(ILibraryManager libraryManager, IConfiguration configuration)
 			: base(libraryManager.ShowRepository, configuration)
 		{
 			_libraryManager = libraryManager;
