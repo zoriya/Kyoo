@@ -47,8 +47,8 @@ namespace Kyoo
 			{
 				options.UseLazyLoadingProxies()
 					.UseNpgsql(_configuration.GetConnectionString("Database"))
-				 .EnableSensitiveDataLogging()
-				 .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()));
+				.EnableSensitiveDataLogging()
+				.UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()));
 			}, ServiceLifetime.Transient);
 			
 			services.AddDbContext<IdentityDatabase>(options =>
@@ -134,6 +134,7 @@ namespace Kyoo
 
 
 			services.AddScoped<ILibraryRepository, LibraryRepository>();
+			services.AddScoped<ILibraryItemRepository, LibraryItemRepository>();
 			services.AddScoped<ICollectionRepository, CollectionRepository>();
 			services.AddScoped<IShowRepository, ShowRepository>();
 			services.AddScoped<ISeasonRepository, SeasonRepository>();

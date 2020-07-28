@@ -45,7 +45,7 @@ namespace Kyoo.Controllers
 
 		public abstract Task<ICollection<T>> Search(string query);
 
-		public Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null,
+		public virtual Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null,
 			Sort<T> sort = default,
 			Pagination limit = default)
 		{

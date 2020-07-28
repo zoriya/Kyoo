@@ -12,6 +12,7 @@ namespace Kyoo.Controllers
 	{
 		// Repositories
 		ILibraryRepository LibraryRepository { get; }
+		ILibraryItemRepository LibraryItemRepository { get; }
 		ICollectionRepository CollectionRepository { get; }
 		IShowRepository ShowRepository { get; }
 		ISeasonRepository SeasonRepository { get; }
@@ -231,6 +232,28 @@ namespace Kyoo.Controllers
 			Expression<Func<Collection, object>> sort,
 			Pagination limit = default
 		) => GetCollectionsFromLibrary(showSlug, where, new Sort<Collection>(sort), limit);
+		
+		Task<ICollection<LibraryItem>> GetItemsFromLibrary(int id,
+			Expression<Func<LibraryItem, bool>> where = null,
+			Sort<LibraryItem> sort = default,
+			Pagination limit = default);
+
+		Task<ICollection<LibraryItem>> GetItemsFromLibrary(int id,
+			[Optional] Expression<Func<LibraryItem, bool>> where,
+			Expression<Func<LibraryItem, object>> sort,
+			Pagination limit = default
+		) => GetItemsFromLibrary(id, where, new Sort<LibraryItem>(sort), limit);
+		
+		Task<ICollection<LibraryItem>> GetItemsFromLibrary(string librarySlug,
+			Expression<Func<LibraryItem, bool>> where = null,
+			Sort<LibraryItem> sort = default,
+			Pagination limit = default);
+
+		Task<ICollection<LibraryItem>> GetItemsFromLibrary(string librarySlug,
+			[Optional] Expression<Func<LibraryItem, bool>> where,
+			Expression<Func<LibraryItem, object>> sort,
+			Pagination limit = default
+		) => GetItemsFromLibrary(librarySlug, where, new Sort<LibraryItem>(sort), limit);
 
 
 		// Helpers
