@@ -167,38 +167,38 @@ namespace Kyoo.Api
 			}
 		}
 		
-		// [HttpGet("{id:int}/item")]
-		// [HttpGet("{id:int}/items")]
-		// [Authorize(Policy = "Read")]
-		// public async Task<ActionResult<Page<Collection>>> GetItems(int id,
-		// 	[FromQuery] string sortBy,
-		// 	[FromQuery] int afterID,
-		// 	[FromQuery] Dictionary<string, string> where,
-		// 	[FromQuery] int limit = 50)
-		// {
-		// 	where.Remove("id");
-		// 	where.Remove("sortBy");
-		// 	where.Remove("limit");
-		// 	where.Remove("afterID");
-		//
-		// 	try
-		// 	{
-		// 		ICollection<Collection> ressources = await _libraryManager.GetItemsFromLibrary(id,
-		// 			ApiHelper.ParseWhere<Collection>(where),
-		// 			new Sort<Collection>(sortBy),
-		// 			new Pagination(limit, afterID));
-		//
-		// 		return Page(ressources, limit);
-		// 	}
-		// 	catch (ItemNotFound)
-		// 	{
-		// 		return NotFound();
-		// 	}
-		// 	catch (ArgumentException ex)
-		// 	{
-		// 		return BadRequest(new {Error = ex.Message});
-		// 	}
-		// }
+		[HttpGet("{id:int}/item")]
+		[HttpGet("{id:int}/items")]
+		[Authorize(Policy = "Read")]
+		public async Task<ActionResult<Page<LibraryItem>>> GetItems(int id,
+			[FromQuery] string sortBy,
+			[FromQuery] int afterID,
+			[FromQuery] Dictionary<string, string> where,
+			[FromQuery] int limit = 50)
+		{
+			where.Remove("id");
+			where.Remove("sortBy");
+			where.Remove("limit");
+			where.Remove("afterID");
+
+			try
+			{
+				ICollection<LibraryItem> ressources = await ((LibraryRepository)_libraryManager.LibraryRepository).GetItems("",
+					ApiHelper.ParseWhere<LibraryItem>(where),
+					new Sort<LibraryItem>(sortBy),
+					new Pagination(limit, afterID));
+
+				return Page(ressources, limit);
+			}
+			catch (ItemNotFound)
+			{
+				return NotFound();
+			}
+			catch (ArgumentException ex)
+			{
+				return BadRequest(new {Error = ex.Message});
+			}
+		}
 		//
 		// [HttpGet("{slug}/collection")]
 		// [HttpGet("{slug}/collections")]
