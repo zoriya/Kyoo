@@ -257,6 +257,31 @@ namespace Kyoo.Controllers
 		) => GetFromShow(showSlug, where, new Sort<Library>(sort), limit);
 	}
 
+	public interface ILibraryItemRepository : IRepository<LibraryItem>
+	{
+		public Task<ICollection<LibraryItem>> GetFromLibrary(int id,
+			Expression<Func<LibraryItem, bool>> where = null,
+			Sort<LibraryItem> sort = default,
+			Pagination limit = default);
+
+		public Task<ICollection<LibraryItem>> GetFromLibrary(int id,
+			[Optional] Expression<Func<LibraryItem, bool>> where,
+			Expression<Func<LibraryItem, object>> sort,
+			Pagination limit = default
+		) => GetFromLibrary(id, where, new Sort<LibraryItem>(sort), limit);
+		
+		public Task<ICollection<LibraryItem>> GetFromLibrary(string librarySlug,
+			Expression<Func<LibraryItem, bool>> where = null,
+			Sort<LibraryItem> sort = default,
+			Pagination limit = default);
+
+		public Task<ICollection<LibraryItem>> GetFromLibrary(string librarySlug,
+			[Optional] Expression<Func<LibraryItem, bool>> where,
+			Expression<Func<LibraryItem, object>> sort,
+			Pagination limit = default
+		) => GetFromLibrary(librarySlug, where, new Sort<LibraryItem>(sort), limit);
+	}
+
 	public interface ICollectionRepository : IRepository<Collection>
 	{
 		Task<ICollection<Collection>> GetFromShow(int showID,

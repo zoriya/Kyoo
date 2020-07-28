@@ -9,6 +9,7 @@ namespace Kyoo.Controllers
 	public class LibraryManager : ILibraryManager
 	{
 		public ILibraryRepository LibraryRepository { get; }
+		public ILibraryItemRepository LibraryItemRepository { get; }
 		public ICollectionRepository CollectionRepository { get; }
 		public IShowRepository ShowRepository { get; }
 		public ISeasonRepository SeasonRepository { get; }
@@ -20,6 +21,7 @@ namespace Kyoo.Controllers
 		public IProviderRepository ProviderRepository { get; }
 		
 		public LibraryManager(ILibraryRepository libraryRepository, 
+			ILibraryItemRepository libraryItemRepository,
 			ICollectionRepository collectionRepository, 
 			IShowRepository showRepository, 
 			ISeasonRepository seasonRepository, 
@@ -31,6 +33,7 @@ namespace Kyoo.Controllers
 			IPeopleRepository peopleRepository)
 		{
 			LibraryRepository = libraryRepository;
+			LibraryItemRepository = libraryItemRepository;
 			CollectionRepository = collectionRepository;
 			ShowRepository = showRepository;
 			SeasonRepository = seasonRepository;
@@ -359,6 +362,22 @@ namespace Kyoo.Controllers
 			Pagination limit = default)
 		{
 			return CollectionRepository.GetFromLibrary(slug, where, sort, limit);
+		}
+
+		public Task<ICollection<LibraryItem>> GetItemsFromLibrary(int id, 
+			Expression<Func<LibraryItem, bool>> where = null, 
+			Sort<LibraryItem> sort = default, 
+			Pagination limit = default)
+		{
+			return LibraryItemRepository.GetFromLibrary(id, where, sort, limit);
+		}
+
+		public Task<ICollection<LibraryItem>> GetItemsFromLibrary(string librarySlug,
+			Expression<Func<LibraryItem, bool>> where = null,
+			Sort<LibraryItem> sort = default, 
+			Pagination limit = default)
+		{
+			return LibraryItemRepository.GetFromLibrary(librarySlug, where, sort, limit);
 		}
 
 		public Task AddShowLink(int showID, int? libraryID, int? collectionID)

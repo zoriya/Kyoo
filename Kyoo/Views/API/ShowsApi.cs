@@ -33,7 +33,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 20)
 		{
-			where.Remove("showID");
 			where.Remove("sortBy");
 			where.Remove("limit");
 			where.Remove("afterID");
@@ -66,7 +65,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 20)
 		{
-			where.Remove("slug");
 			where.Remove("sortBy");
 			where.Remove("limit");
 			where.Remove("afterID");
@@ -99,7 +97,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 50)
 		{
-			where.Remove("showID");
 			where.Remove("sortBy");
 			where.Remove("limit");
 			where.Remove("afterID");
@@ -132,7 +129,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 50)
 		{
-			where.Remove("slug");
 			where.Remove("sortBy");
 			where.Remove("limit");
 			where.Remove("afterID");
@@ -164,7 +160,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 30)
 		{
-			where.Remove("showID");
 			where.Remove("sortBy");
 			where.Remove("limit");
 			where.Remove("afterID");
@@ -196,7 +191,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 30)
 		{
-			where.Remove("slug");
 			where.Remove("sortBy");
 			where.Remove("limit");
 			where.Remove("afterID");
@@ -229,7 +223,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 30)
 		{
-			where.Remove("showID");
 			where.Remove("sortBy");
 			where.Remove("limit");
 			where.Remove("afterID");
@@ -262,7 +255,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 30)
 		{
-			where.Remove("slug");
 			where.Remove("sortBy");
 			where.Remove("limit");
 			where.Remove("afterID");
@@ -323,7 +315,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 30)
 		{
-			where.Remove("showID");
 			where.Remove("sortBy");
 			where.Remove("limit");
 			where.Remove("afterID");
@@ -356,7 +347,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 30)
 		{
-			where.Remove("slug");
 			where.Remove("sortBy");
 			where.Remove("limit");
 			where.Remove("afterID");
@@ -389,7 +379,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 30)
 		{
-			where.Remove("showID");
 			where.Remove("sortBy");
 			where.Remove("limit");
 			where.Remove("afterID");
@@ -422,7 +411,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 30)
 		{
-			where.Remove("slug");
 			where.Remove("sortBy");
 			where.Remove("limit");
 			where.Remove("afterID");
