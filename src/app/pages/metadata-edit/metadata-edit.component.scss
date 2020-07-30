@@ -1,0 +1,18 @@
+@import "../../../../node_modules/bootstrap/scss/functions";
+@import "../../../../node_modules/bootstrap/scss/variables";
+@import "../../../../node_modules/bootstrap/scss/mixins/breakpoints";
+
+.provider
+{
+	width: 100%;
+	
+	@include media-breakpoint-up(md)
+	{
+		width: 33%;
+	}
+
+	@include media-breakpoint-up(lg)
+	{
+		width: 25%;
+	}
+}

@@ -6,7 +6,7 @@ export enum method
 	direct = "Direct Play",
 	transmux = "Transmux",
 	transcode = "Transcode"
-};
+}
 
 export class SupportList
 {

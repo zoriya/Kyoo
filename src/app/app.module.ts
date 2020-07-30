@@ -14,15 +14,15 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { BrowseComponent } from './browse/browse.component';
+import { LibraryItemGridComponent } from './components/library-item-grid/library-item-grid.component';
 import { CollectionComponent } from './collection/collection.component';
-import { EpisodesListComponent } from './episodes-list/episodes-list.component';
+import { EpisodesListComponent } from './components/episodes-list/episodes-list.component';
 import { NotFoundComponent } from './not-found/not-found.component';
-import { PeopleListComponent } from './people-list/people-list.component';
-import { PlayerComponent } from './player/player.component';
-import { SearchComponent } from './search/search.component';
-import { ShowDetailsComponent } from './show-details/show-details.component';
-import { ShowsListComponent } from './shows-list/shows-list.component';
+import { PeopleListComponent } from './components/people-list/people-list.component';
+import { PlayerComponent } from './pages/player/player.component';
+import { SearchComponent } from './pages/search/search.component';
+import { ShowDetailsComponent } from './pages/show-details/show-details.component';
+import { ShowsListComponent } from './components/shows-list/shows-list.component';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import { MatInputModule } from "@angular/material/input";
 import { MatFormFieldModule } from "@angular/material/form-field";
@@ -33,20 +33,20 @@ import {MatDialogModule} from '@angular/material/dialog';
 import {FallbackDirective} from "./misc/fallback.directive";
 import {AuthModule} from "./auth/auth.module";
 import {AuthRoutingModule} from "./auth/auth-routing.module";
-import { TrailerDialogComponent } from './trailer-dialog/trailer-dialog.component';
+import { TrailerDialogComponent } from './pages/trailer-dialog/trailer-dialog.component';
 import {CollectionsListComponent} from "./collection-list/collections-list.component";
-import { MetadataEditComponent } from './metadata-edit/metadata-edit.component';
+import { MetadataEditComponent } from './pages/metadata-edit/metadata-edit.component';
 import {MatChipsModule} from "@angular/material/chips";
 import {MatAutocompleteModule} from "@angular/material/autocomplete";
 import {MatExpansionModule} from "@angular/material/expansion";
-import { ShowGridComponent } from './show-grid/show-grid.component';
+import { ShowGridComponent } from './components/show-grid/show-grid.component';
 
 
 @NgModule({
 	declarations: [
 		AppComponent,
 		NotFoundComponent,
-		BrowseComponent,
+		LibraryItemGridComponent,
 		ShowDetailsComponent,
 		EpisodesListComponent,
 		PlayerComponent,

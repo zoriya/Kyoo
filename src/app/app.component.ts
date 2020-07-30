@@ -7,6 +7,8 @@ import {MatDialog} from "@angular/material/dialog";
 import {Account} from "../models/account";
 import {AccountComponent} from "./auth/account/account.component";
 import {AuthService} from "./auth/auth.service";
+import {Library} from "../models/library";
+import {Page} from "../models/page";
 
 @Component({
 	selector: 'app-root',
@@ -18,11 +20,15 @@ export class AppComponent
 	libraries: Library[];
 	isLoading: boolean = false;
 
-	constructor(private http: HttpClient, private router: Router, private location: Location, public authManager: AuthService, public dialog: MatDialog)
+	constructor(private http: HttpClient,
+	            private router: Router,
+	            private location: Location,
+	            public authManager: AuthService,
+	            public dialog: MatDialog)
 	{
-		http.get<Library[]>("api/libraries").subscribe(result =>
+		http.get<Page<Library>>("api/libraries").subscribe(result =>
 		{
-			this.libraries = result;
+			this.libraries = result.items;
 		}, error => console.error(error));
 
 		this.router.events.subscribe((event: Event) =>
@@ -83,11 +89,4 @@ export class AppComponent
 	{
 		return this.authManager.isAuthenticated;
 	}
-}
-
-interface Library
-{
-	id: number;
-	slug: string;
-	name: string;
 }

@@ -1,22 +1,22 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
-import {BrowseComponent} from './browse/browse.component';
+import {LibraryItemGridComponent} from './components/library-item-grid/library-item-grid.component';
 import {CollectionComponent} from "./collection/collection.component";
 import {NotFoundComponent} from './not-found/not-found.component';
-import {PlayerComponent} from "./player/player.component";
-import {SearchComponent} from "./search/search.component";
-import {CollectionResolverService} from "./services/collection-resolver.service";
-import {LibraryResolverService} from './services/library-resolver.service';
-import {PeopleResolverService} from "./services/people-resolver.service";
-import {SearchResolverService} from "./services/search-resolver.service";
-import {ShowResolverService} from './services/show-resolver.service';
-import {StreamResolverService} from "./services/stream-resolver.service";
-import {ShowDetailsComponent} from './show-details/show-details.component';
+import {PlayerComponent} from "./pages/player/player.component";
+import {SearchComponent} from "./pages/search/search.component";
+import {CollectionResolverService} from "./services/resolvers/collection-resolver.service";
+import {LibraryResolverService} from './services/resolvers/library-resolver.service';
+import {PeopleResolverService} from "./services/resolvers/people-resolver.service";
+import {SearchResolverService} from "./services/resolvers/search-resolver.service";
+import {ShowResolverService} from './services/resolvers/show-resolver.service';
+import {StreamResolverService} from "./services/resolvers/stream-resolver.service";
+import {ShowDetailsComponent} from './pages/show-details/show-details.component';
 import {AuthGuard} from "./auth/misc/authenticated-guard.service";
 
 const routes: Routes = [
-	{path: "browse", component: BrowseComponent, pathMatch: "full", resolve: { shows: LibraryResolverService }, canLoad: [AuthGuard.forPermissions("read")], canActivate: [AuthGuard.forPermissions("read")]},
-	{path: "browse/:library-slug", component: BrowseComponent, resolve: { shows: LibraryResolverService }, canLoad: [AuthGuard.forPermissions("read")], canActivate: [AuthGuard.forPermissions("read")]},
+	{path: "browse", component: LibraryItemGridComponent, pathMatch: "full", resolve: { shows: LibraryResolverService }, canLoad: [AuthGuard.forPermissions("read")], canActivate: [AuthGuard.forPermissions("read")]},
+	{path: "browse/:library-slug", component: LibraryItemGridComponent, resolve: { shows: LibraryResolverService }, canLoad: [AuthGuard.forPermissions("read")], canActivate: [AuthGuard.forPermissions("read")]},
 	{path: "show/:show-slug", component: ShowDetailsComponent, resolve: { show: ShowResolverService }, canLoad: [AuthGuard.forPermissions("read")], canActivate: [AuthGuard.forPermissions("read")]},
 	{path: "collection/:collection-slug", component: CollectionComponent, resolve: { collection: CollectionResolverService }, canLoad: [AuthGuard.forPermissions("read")], canActivate: [AuthGuard.forPermissions("read")]},
 	{path: "people/:people-slug", component: CollectionComponent, resolve: { collection: PeopleResolverService }, canLoad: [AuthGuard.forPermissions("read")], canActivate: [AuthGuard.forPermissions("read")]},
