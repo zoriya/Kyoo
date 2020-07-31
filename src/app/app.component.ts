@@ -1,14 +1,13 @@
-import { Component } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Event, Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
-import * as $ from "jquery";
-import { Location } from "@angular/common";
+import {Component} from '@angular/core';
+import {Event, Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError} from '@angular/router';
+import {Location} from "@angular/common";
 import {MatDialog} from "@angular/material/dialog";
 import {Account} from "../models/account";
 import {AccountComponent} from "./auth/account/account.component";
 import {AuthService} from "./auth/auth.service";
 import {Library} from "../models/library";
-import {Page} from "../models/page";
+import {LibraryService} from "./services/api.service";
+import * as $ from "jquery";
 
 @Component({
 	selector: 'app-root',
@@ -20,13 +19,13 @@ export class AppComponent
 	libraries: Library[];
 	isLoading: boolean = false;
 
-	constructor(private http: HttpClient,
+	constructor(private libraryService: LibraryService,
 	            private router: Router,
 	            private location: Location,
 	            public authManager: AuthService,
 	            public dialog: MatDialog)
 	{
-		http.get<Page<Library>>("api/libraries").subscribe(result =>
+		libraryService.getAll().subscribe(result =>
 		{
 			this.libraries = result.items;
 		}, error => console.error(error));

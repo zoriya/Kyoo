@@ -1,20 +1,20 @@
-enum ItemType
+import {IResource} from "./resources/resource";
+
+export enum ItemType
 {
 	Show,
 	Movie,
 	Collection
 }
 
-export interface LibraryItem
+export interface LibraryItem extends IResource
 {
-	ID: number
-	Slug: string
-	Title: string
-	Overview: string
-	Status: string
-	TrailerUrl: string
-	StartYear: number
-	EndYear: number
-	Poster: string
-	Type: ItemType
+	title: string
+	overview: string
+	status: string
+	trailerUrl: string
+	startYear: number
+	endYear: number
+	poster: string
+	type: ItemType
 }

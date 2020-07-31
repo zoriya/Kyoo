@@ -1,7 +1,9 @@
-import { Component, OnInit, Input } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { DomSanitizer } from '@angular/platform-browser';
-import { Show } from "../../../models/show";
+import {Component, Input} from '@angular/core';
+import {ActivatedRoute} from '@angular/router';
+import {DomSanitizer} from '@angular/platform-browser';
+import {ItemType, LibraryItem} from "../../../models/library-item";
+import {Page} from "../../../models/page";
+import {LibraryItemService} from "../../services/api.service";
 
 @Component({
 	selector: 'app-browse',
@@ -10,18 +12,17 @@ import { Show } from "../../../models/show";
 })
 export class LibraryItemGridComponent
 {
-	@Input() shows: Show[];
+	@Input() page: Page<LibraryItem>;
 	@Input() sortEnabled: boolean = true;
 	sortType: string = "title";
+	sortKeys: string[] = ["title", "start year", "end year", "status", "type"]
 	sortUp: boolean = true;
 
-	sortTypes: string[] = ["title", "release date"];
-
-	constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer)
+	constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer, private items: LibraryItemService)
 	{
 		this.route.data.subscribe((data) =>
 		{
-			this.shows = data.shows;
+			this.page = data.items;
 		});
 	}
 
@@ -30,9 +31,9 @@ export class LibraryItemGridComponent
 		return this.sanitizer.bypassSecurityTrustStyle("url(/poster/" + slug + ")");
 	}
 
-	getLink(show: Show)
+	getLink(show: LibraryItem)
 	{
-		if (show.isCollection)
+		if (show.type == ItemType.Collection)
 			return "/collection/" + show.slug;
 		else
 			return "/show/" + show.slug;
@@ -43,19 +44,7 @@ export class LibraryItemGridComponent
 		this.sortType = type;
 		this.sortUp = order;
 
-		if (type == this.sortTypes[0])
-		{
-			if (order)
-				this.shows.sort((a, b) => { if (a.title < b.title) return -1; else if (a.title > b.title) return 1; return 0; });
-			else
-				this.shows.sort((a, b) => { if (a.title < b.title) return 1; else if (a.title > b.title) return -1; return 0; });
-		}
-		else if (type == this.sortTypes[1])
-		{
-			if (order)
-				this.shows.sort((a, b) => a.startYear - b.startYear);
-			else
-				this.shows.sort((a, b) => b.startYear - a.startYear);
-		}
+		this.items.getAll({sort: `${this.sortType.replace(/\s/g, "")}:${this.sortUp ? "asc" : "desc"}`})
+			.subscribe(x => this.page = x);
 	}
 }

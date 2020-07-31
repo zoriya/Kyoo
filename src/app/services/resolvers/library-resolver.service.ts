@@ -4,42 +4,36 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
 import { EMPTY, Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { Show } from "../../../models/show";
-
+import {Page} from "../../../models/page";
+import {IResource} from "../../../models/resources/resource";
 
 @Injectable()
-export class LibraryResolverService implements Resolve<Show[]>
+export class PageResolver
 {
-	constructor(private http: HttpClient, private snackBar: MatSnackBar) { }
+	public static resolvers: any[] = [];
 
-	resolve(route: ActivatedRouteSnapshot): Show[] | Observable<Show[]> | Promise<Show[]>
+	static forResource<T extends IResource>(resource: string)
 	{
-		let slug: string = route.paramMap.get("library-slug");
+		@Injectable()
+		class Resolver<T> implements Resolve<Page<T>>
+		{
+			constructor(private http: HttpClient, private snackBar: MatSnackBar) { }
 
-		if (slug == null)
-		{
-			return this.http.get<Show[]>("api/shows").pipe(catchError((error: HttpErrorResponse) =>
+			resolve(route: ActivatedRouteSnapshot): Page<T> | Observable<Page<T>> | Promise<Page<T>>
 			{
-				console.log(error.status + " - " + error.message);
-				this.snackBar.open("An unknow error occured.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
-				return EMPTY;
-			}));
-		}
-		else
-		{
-			return this.http.get<Show[]>("api/libraries/" + slug).pipe(catchError((error: HttpErrorResponse) =>
-			{
-				console.log(error.status + " - " + error.message);
-				if (error.status == 404)
+				return this.http.get<Page<T>>(`api/${resource}`).pipe(catchError((error: HttpErrorResponse) =>
 				{
-					this.snackBar.open("Library \"" + slug + "\" not found.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
-				}
-				else
-				{
-					this.snackBar.open("An unknow error occured.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
-				}
-				return EMPTY;
-			}));
+					console.log(error.status + " - " + error.message);
+					this.snackBar.open(`An unknown error occurred: ${error.message}.`, null, {
+						horizontalPosition: "left",
+						panelClass: ['snackError'],
+						duration: 2500 }
+					);
+					return EMPTY;
+				}));
+			}
 		}
+		PageResolver.resolvers.push(Resolver);
+		return Resolver;
 	}
 }
