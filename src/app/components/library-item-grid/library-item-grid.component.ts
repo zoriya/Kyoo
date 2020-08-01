@@ -4,6 +4,7 @@ import {DomSanitizer} from '@angular/platform-browser';
 import {ItemType, LibraryItem} from "../../../models/library-item";
 import {Page} from "../../../models/page";
 import {LibraryItemService} from "../../services/api.service";
+import {HttpClient} from "@angular/common/http";
 
 @Component({
 	selector: 'app-browse',
@@ -18,7 +19,10 @@ export class LibraryItemGridComponent
 	sortKeys: string[] = ["title", "start year", "end year", "status", "type"]
 	sortUp: boolean = true;
 
-	constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer, private items: LibraryItemService)
+	constructor(private route: ActivatedRoute,
+	            private sanitizer: DomSanitizer,
+	            private items: LibraryItemService,
+	            public client: HttpClient)
 	{
 		this.route.data.subscribe((data) =>
 		{

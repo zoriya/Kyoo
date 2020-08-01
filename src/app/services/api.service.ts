@@ -1,11 +1,11 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs"
-import {map} from "rxjs/operators"
 import {Page} from "../../models/page";
 import {IResource} from "../../models/resources/resource";
 import {Library} from "../../models/library";
 import {LibraryItem} from "../../models/library-item";
+import {map} from "rxjs/operators";
 
 class CrudApi<T extends IResource>
 {
@@ -23,20 +23,9 @@ class CrudApi<T extends IResource>
 			params += "sortBy=" + args.sort;
 		if (params == "?")
 			params = "";
-		return this.client.get<Page<T>>(`/api/${this.route}${params}`);
+		return this.client.get<Page<T>>(`/api/${this.route}${params}`)
+			.pipe(map(x => Object.assign(new Page<T>(), x)));
 	}
-
-	loadNext(page: Page<T>): Observable<Page<T>>
-    {
-	    if (page.next == null)
-	    	return;
-		return this.client.get<Page<T>>(page.next).pipe(map(x =>
-		{
-			x.items = page.items.concat(x.items);
-			x.count += page.count;
-			return x;
-		}));
-    }
 
 	create(item: T): Observable<T>
 	{

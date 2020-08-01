@@ -33,13 +33,14 @@ import {MatDialogModule} from '@angular/material/dialog';
 import {FallbackDirective} from "./misc/fallback.directive";
 import {AuthModule} from "./auth/auth.module";
 import {AuthRoutingModule} from "./auth/auth-routing.module";
-import { TrailerDialogComponent } from './pages/trailer-dialog/trailer-dialog.component';
+import {TrailerDialogComponent} from './pages/trailer-dialog/trailer-dialog.component';
 import {CollectionsListComponent} from "./collection-list/collections-list.component";
-import { MetadataEditComponent } from './pages/metadata-edit/metadata-edit.component';
+import {MetadataEditComponent} from './pages/metadata-edit/metadata-edit.component';
 import {MatChipsModule} from "@angular/material/chips";
 import {MatAutocompleteModule} from "@angular/material/autocomplete";
 import {MatExpansionModule} from "@angular/material/expansion";
-import { ShowGridComponent } from './components/show-grid/show-grid.component';
+import {ShowGridComponent} from './components/show-grid/show-grid.component';
+import {InfiniteScrollModule} from "ngx-infinite-scroll";
 
 
 @NgModule({
@@ -87,7 +88,8 @@ import { ShowGridComponent } from './components/show-grid/show-grid.component';
 		AuthModule,
 		MatChipsModule,
 		MatAutocompleteModule,
-		MatExpansionModule
+		MatExpansionModule,
+		InfiniteScrollModule
 	],
 	bootstrap: [AppComponent]
 })

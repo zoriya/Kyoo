@@ -14,7 +14,7 @@ import {StreamResolverService} from "./services/resolvers/stream-resolver.servic
 import {ShowDetailsComponent} from './pages/show-details/show-details.component';
 import {AuthGuard} from "./auth/misc/authenticated-guard.service";
 import {LibraryItem} from "../models/library-item";
-import {CrudApi, LibraryItemService, LibraryService} from "./services/api.service";
+import {LibraryItemService, LibraryService} from "./services/api.service";
 
 const routes: Routes = [
 	{path: "browse", component: LibraryItemGridComponent, pathMatch: "full",
