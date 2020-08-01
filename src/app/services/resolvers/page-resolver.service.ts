@@ -1,8 +1,8 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { ActivatedRouteSnapshot, Resolve } from '@angular/router';
-import { EMPTY, Observable } from 'rxjs';
+import {HttpClient, HttpErrorResponse} from '@angular/common/http';
+import {Injectable} from '@angular/core';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {ActivatedRouteSnapshot, Resolve} from '@angular/router';
+import {Observable, EMPTY} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
 import {Page} from "../../../models/page";
 import {IResource} from "../../../models/resources/resource";
@@ -17,11 +17,15 @@ export class PageResolver
 		@Injectable()
 		class Resolver implements Resolve<Page<T>>
 		{
-			constructor(private http: HttpClient, private snackBar: MatSnackBar) { }
+			constructor(private http: HttpClient,
+			            private snackBar: MatSnackBar)
+			{ }
 
 			resolve(route: ActivatedRouteSnapshot): Page<T> | Observable<Page<T>> | Promise<Page<T>>
 			{
-				return this.http.get<Page<T>>(`api/${resource}`)
+				let res: string = resource.replace(/:(.*?)\//, (x, y) => `${route.paramMap.get(y)}/`);
+
+				return this.http.get<Page<T>>(`api/${res}`)
 					.pipe(
 						map(x => Object.assign(new Page<T>(), x)),
 						catchError((error: HttpErrorResponse) =>
