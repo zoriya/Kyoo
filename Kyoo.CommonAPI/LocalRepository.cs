@@ -69,16 +69,20 @@ namespace Kyoo.Controllers
 		{
 			if (where != null)
 				query = query.Where(where);
-
+			
 			Expression<Func<TValue, object>> sortKey = sort.Key ?? defaultSort;
+			Expression sortExpression = sortKey.Body.NodeType == ExpressionType.Convert
+				? ((UnaryExpression)sortKey.Body).Operand
+				: sortKey.Body;
+			
+			if (typeof(Enum).IsAssignableFrom(sortExpression.Type))
+				throw new ArgumentException("Invalid sort key.");
+
 			query = sort.Descendant ? query.OrderByDescending(sortKey) : query.OrderBy(sortKey);
 
 			if (limit.AfterID != 0)
 			{
 				TValue after = await get(limit.AfterID);
-				Expression sortExpression = sortKey.Body.NodeType == ExpressionType.Convert
-					? ((UnaryExpression)sortKey.Body).Operand
-					: sortKey.Body;
 				Expression key = Expression.Constant(sortKey.Compile()(after), sortExpression.Type);
 				query = query.Where(Expression.Lambda<Func<TValue, bool>>(
 					ApiHelper.StringCompatibleExpression(Expression.GreaterThan, sortExpression, key),
