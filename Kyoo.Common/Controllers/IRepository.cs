@@ -68,7 +68,7 @@ namespace Kyoo.Controllers
 		}
 	}
 	
-	public interface IRepository<T> : IDisposable, IAsyncDisposable where T : IRessource
+	public interface IRepository<T> : IDisposable, IAsyncDisposable where T : IResource
 	{
 		Task<T> Get(int id);
 		Task<T> Get(string slug);

@@ -1,6 +1,6 @@
 namespace Kyoo.Models
 {
-	public interface IRessource
+	public interface IResource
 	{
 		public int ID { get; set; }
 		public string Slug { get; } 

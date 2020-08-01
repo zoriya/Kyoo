@@ -11,7 +11,7 @@ using Npgsql;
 
 namespace Kyoo.Controllers
 {
-	public abstract class LocalRepository<T> : IRepository<T> where T : class, IRessource
+	public abstract class LocalRepository<T> : IRepository<T> where T : class, IResource
 	{
 		private readonly DbContext _database;
 
@@ -76,9 +76,12 @@ namespace Kyoo.Controllers
 			if (limit.AfterID != 0)
 			{
 				TValue after = await get(limit.AfterID);
-				object afterObj = sortKey.Compile()(after);
+				Expression sortExpression = sortKey.Body.NodeType == ExpressionType.Convert
+					? ((UnaryExpression)sortKey.Body).Operand
+					: sortKey.Body;
+				Expression key = Expression.Constant(sortKey.Compile()(after), sortExpression.Type);
 				query = query.Where(Expression.Lambda<Func<TValue, bool>>(
-					ApiHelper.StringCompatibleExpression(Expression.GreaterThan, sortKey.Body, Expression.Constant(afterObj)),
+					ApiHelper.StringCompatibleExpression(Expression.GreaterThan, sortExpression, key),
 					sortKey.Parameters.First()
 				));
 			}

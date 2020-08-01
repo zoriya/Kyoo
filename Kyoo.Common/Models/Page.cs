@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace Kyoo.Models
 {
-	public class Page<T> where T : IRessource
+	public class Page<T> where T : IResource
 	{
 		public string This { get; set; }
 		public string First { get; set; }

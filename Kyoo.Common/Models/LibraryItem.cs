@@ -10,7 +10,7 @@ namespace Kyoo.Models
 		Collection
 	}
 	
-	public class LibraryItem : IRessource
+	public class LibraryItem : IResource
 	{
 		public int ID { get; set; }
 		public string Slug { get; set; }

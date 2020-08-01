@@ -53,7 +53,7 @@ namespace Kyoo.Models
 		}
 	}
 
-	public class Track : Stream, IRessource
+	public class Track : Stream, IResource
 	{
 		[JsonIgnore] public int ID { get; set; }
 		[JsonIgnore] public int EpisodeID { get; set; }

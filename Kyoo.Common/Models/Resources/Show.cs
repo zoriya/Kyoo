@@ -5,7 +5,7 @@ using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
 {
-	public class Show : IRessource, IOnMerge
+	public class Show : IResource, IOnMerge
 	{
 		[JsonIgnore] public int ID { get; set; }
 
