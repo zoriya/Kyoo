@@ -12,7 +12,7 @@ using Microsoft.Extensions.Configuration;
 namespace Kyoo.CommonApi
 {
 	[ApiController]
-	public class CrudApi<T> : ControllerBase where T : IRessource
+	public class CrudApi<T> : ControllerBase where T : IResource
 	{
 		private readonly IRepository<T> _repository;
 		private readonly string _baseURL;
@@ -73,7 +73,7 @@ namespace Kyoo.CommonApi
 		}
 
 		protected Page<TResult> Page<TResult>(ICollection<TResult> ressources, int limit)
-			where TResult : IRessource
+			where TResult : IResource
 		{
 			return new Page<TResult>(ressources, 
 				_baseURL + Request.Path,
