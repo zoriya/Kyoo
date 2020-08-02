@@ -1,4 +1,3 @@
-import { HttpClient } from "@angular/common/http";
 import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { Title } from '@angular/platform-browser';
@@ -8,7 +7,9 @@ import { Show } from "../../../models/show";
 import {MatDialog} from "@angular/material/dialog";
 import {TrailerDialogComponent} from "../trailer-dialog/trailer-dialog.component";
 import {MetadataEditComponent} from "../metadata-edit/metadata-edit.component";
-import {Account} from "../../../models/account";
+import {Season} from "../../../models/season";
+import {EpisodeService, SeasonService} from "../../services/api.service";
+import {Page} from "../../../models/page";
 
 @Component({
 	selector: 'app-show-details',
@@ -18,17 +19,24 @@ import {Account} from "../../../models/account";
 export class ShowDetailsComponent implements OnInit
 {
 	show: Show;
-	episodes: Episode[] = null;
-	season: number;
+	seasons: Season[];
+	season: number = 1;
+	episodes: Page<Episode>[] = [];
 
 	private toolbar: HTMLElement;
 	private backdrop: HTMLElement;
 
-	constructor(private route: ActivatedRoute, private http: HttpClient, private snackBar: MatSnackBar, private title: Title, private router: Router, private dialog: MatDialog)
+	constructor(private route: ActivatedRoute,
+	            private snackBar: MatSnackBar,
+	            private title: Title,
+	            private router: Router,
+	            private dialog: MatDialog,
+	            private seasonService: SeasonService,
+	            private episodeService: EpisodeService)
 	{
 		this.route.queryParams.subscribe(params =>
 		{
-			this.season = params["season"];
+			this.season = params["season"] ?? 1;
 		});
 
 		this.route.data.subscribe(data =>
@@ -36,10 +44,19 @@ export class ShowDetailsComponent implements OnInit
 			this.show = data.show;
 			this.title.setTitle(this.show.title + " - Kyoo");
 
-			if (this.season == undefined || this.show.seasons == undefined || this.show.seasons.find(x => x.seasonNumber == this.season) == null)
-				this.season = 1;
+			if (this.show.isMovie)
+				return;
 
-			this.getEpisodes();
+			this.seasonService.getForShow(this.show.slug, {limit: 0}).subscribe(x =>
+			{
+				this.seasons = x.items;
+				if (x.items.find(x => x.seasonNumber == this.season) == null)
+				{
+					this.season = 1;
+					this.getEpisodes(1);
+				}
+			});
+			this.getEpisodes(this.season);
 		});
 	}
 
@@ -72,23 +89,17 @@ export class ShowDetailsComponent implements OnInit
 			this.router.navigate(["/watch/" + this.show.slug + "-s1e1"]);
 	}
 
-	getEpisodes()
+	getEpisodes(season: number)
 	{
-		if (this.show == undefined || this.show.seasons == undefined)
+		if (season < 0)
 			return;
 
-		if (this.show.seasons.find(x => x.seasonNumber == this.season).episodes != null)
-			this.episodes = this.show.seasons.find(x => x.seasonNumber == this.season).episodes;
+		if (this.episodes[season] != undefined)
+			return;
 
-
-		this.http.get<Episode[]>("api/episodes/" + this.show.slug + "/season/" + this.season).subscribe((episodes: Episode[]) =>
+		this.episodeService.getFromSeasonNumber(this.show.slug, this.season).subscribe(x =>
 		{
-			this.show.seasons.find(x => x.seasonNumber == this.season).episodes = episodes;
-			this.episodes = episodes;
-		}, error =>
-		{
-			console.log(error.status + " - " + error.message);
-			this.snackBar.open("An unknow error occured while getting episodes.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
+			this.episodes[season] = x;
 		});
 	}
 
@@ -108,10 +119,10 @@ export class ShowDetailsComponent implements OnInit
 
 	redownloadImages()
 	{
-		this.http.post("api/show/download-images/" + this.show.slug, undefined).subscribe(() => { }, error =>
-		{
-			console.log(error.status + " - " + error.message);
-			this.snackBar.open("An unknown error occured while re-downloading images.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
-		});
+	// 	this.http.post("api/show/download-images/" + this.show.slug, undefined).subscribe(() => { }, error =>
+	// 	{
+	// 		console.log(error.status + " - " + error.message);
+	// 		this.snackBar.open("An unknown error occured while re-downloading images.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
+	// 	});
 	}
 }

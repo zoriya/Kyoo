@@ -3,31 +3,29 @@ import {Injectable} from '@angular/core';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {ActivatedRouteSnapshot, Resolve} from '@angular/router';
 import {Observable, EMPTY} from 'rxjs';
-import {catchError, map} from 'rxjs/operators';
-import {Page} from "../../../models/page";
+import {catchError} from 'rxjs/operators';
 import {IResource} from "../../../models/resources/resource";
 
 @Injectable()
-export class PageResolver
+export class ItemResolver
 {
 	public static resolvers: any[] = [];
 
 	static forResource<T extends IResource>(resource: string)
 	{
 		@Injectable()
-		class Resolver implements Resolve<Page<T>>
+		class Resolver implements Resolve<T>
 		{
 			constructor(private http: HttpClient,
 			            private snackBar: MatSnackBar)
 			{ }
 
-			resolve(route: ActivatedRouteSnapshot): Page<T> | Observable<Page<T>> | Promise<Page<T>>
+			resolve(route: ActivatedRouteSnapshot): T | Observable<T> | Promise<T>
 			{
 				let res: string = resource.replace(/:(.*?)(\/|$)/, (x, y) => `${route.paramMap.get(y)}/`);
 
-				return this.http.get<Page<T>>(`api/${res}`)
+				return this.http.get<T>(`api/${res}`)
 					.pipe(
-						map(x => Object.assign(new Page<T>(), x)),
 						catchError((error: HttpErrorResponse) =>
 						{
 							console.log(error.status + " - " + error.message);
@@ -40,7 +38,7 @@ export class PageResolver
 						}));
 			}
 		}
-		PageResolver.resolvers.push(Resolver);
+		ItemResolver.resolvers.push(Resolver);
 		return Resolver;
 	}
 }

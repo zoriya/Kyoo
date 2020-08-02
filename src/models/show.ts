@@ -1,12 +1,12 @@
-import { Season } from "./season";
-import { Genre } from "./genre";
-import { People } from "./people";
-import { Studio } from "./studio";
+import {Season} from "./season";
+import {Genre} from "./genre";
+import {People} from "./people";
+import {Studio} from "./studio";
 import {ExternalID} from "./external-id";
+import {IResource} from "./resources/resource";
 
-export interface Show
+export interface Show extends IResource
 {
-	slug: string;
 	title: string;
 	aliases: string[];
 	overview: string;
@@ -16,7 +16,6 @@ export interface Show
 	people: People[];
 	seasons: Season[];
 	trailerUrl: string;
-	isCollection: boolean;
 	isMovie: boolean;
 	startYear: number;
 	endYear : number;

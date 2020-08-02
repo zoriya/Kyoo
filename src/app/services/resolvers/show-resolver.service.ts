@@ -13,15 +13,15 @@ export class ShowResolverService implements Resolve<Show>
 
 	resolve(route: ActivatedRouteSnapshot): Show | Observable<Show> | Promise<Show>
 	{
-	let slug: string = route.paramMap.get("show-slug");
-	return this.http.get<Show>("api/shows/" + slug).pipe(catchError((error: HttpErrorResponse) =>
-	{
-		console.log(error.status + " - " + error.message);
-		if (error.status == 404)
-			this.snackBar.open("Show \"" + slug + "\" not found.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
-		else
-			this.snackBar.open("An unknown error occured.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
-		return EMPTY;
-	}));
+		let slug: string = route.paramMap.get("show-slug");
+		return this.http.get<Show>("api/shows/" + slug).pipe(catchError((error: HttpErrorResponse) =>
+		{
+			console.log(error.status + " - " + error.message);
+			if (error.status == 404)
+				this.snackBar.open("Show \"" + slug + "\" not found.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
+			else
+				this.snackBar.open("An unknown error occured.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
+			return EMPTY;
+		}));
 	}
 }

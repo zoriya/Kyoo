@@ -16,7 +16,7 @@ export class LibraryItemGridComponent
 	@Input() page: Page<LibraryItem>;
 	@Input() sortEnabled: boolean = true;
 	sortType: string = "title";
-	sortKeys: string[] = ["title", "start year", "end year", "status", "type"]
+	sortKeys: string[] = ["title", "start year", "end year"]
 	sortUp: boolean = true;
 
 	constructor(private route: ActivatedRoute,
@@ -48,7 +48,7 @@ export class LibraryItemGridComponent
 		this.sortType = type;
 		this.sortUp = order;
 
-		this.items.getAll({sort: `${this.sortType.replace(/\s/g, "")}:${this.sortUp ? "asc" : "desc"}`})
+		this.items.getAll({sortBy: `${this.sortType.replace(/\s/g, "")}:${this.sortUp ? "asc" : "desc"}`})
 			.subscribe(x => this.page = x);
 	}
 }

@@ -1,7 +1,8 @@
 import { Episode } from "./episode";
 import {ExternalID} from "./external-id";
+import {IResource} from "./resources/resource";
 
-export interface Season
+export interface Season extends IResource
 {
 	seasonNumber: number;
 	title: string;

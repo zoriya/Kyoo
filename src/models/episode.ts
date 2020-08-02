@@ -1,6 +1,7 @@
 import {ExternalID} from "./external-id";
+import {IResource} from "./resources/resource";
 
-export interface Episode
+export interface Episode extends IResource
 {
 	seasonNumber: number;
 	episodeNumber: number;
