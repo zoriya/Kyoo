@@ -1,8 +1,8 @@
 import {ExternalID} from "./external-id";
+import {IResource} from "./resources/resource";
 
-export interface People
+export interface People extends IResource
 {
-	slug: string;
 	name: string;
 	role: string; 
 	type: string; 

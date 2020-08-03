@@ -1,6 +1,6 @@
 <div class="scroll-row mb-5">
-	<div class="people-container" #scrollView (scroll)="onScroll()">
-		<a class="people" *ngFor="let people of this.people" routerLink="/people/{{people.slug}}" href="/people/{{people.slug}}">
+	<div class="people-container" #scrollView (scroll)="onScroll()" infinite-scroll (scrolled)="this.people?.loadNext(this.client)" [horizontal]="true" [scrollWindow]="false">
+		<a class="people" *ngFor="let people of this.people?.items" routerLink="/people/{{people.slug}}" href="/people/{{people.slug}}" #itemsDom>
 			<div matRipple [style.background-image]="getPeopleIcon(people.slug)"> </div>
 			<h6 class="name">{{people.name}}</h6>
 			<p class="role">{{people.role}}</p>

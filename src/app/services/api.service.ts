@@ -8,6 +8,7 @@ import {LibraryItem} from "../../models/library-item";
 import {map} from "rxjs/operators";
 import {Season} from "../../models/season";
 import {Episode} from "../../models/episode";
+import {People} from "../../models/people";
 
 export interface ApiArgs
 {
@@ -116,5 +117,22 @@ export class EpisodeService extends CrudApi<Episode>
 	{
 		return this.client.get(`/api/seasons/${show}-${seasonNumber}/episodes${this.ArgsAsQuery(args)}`)
 			.pipe(map(x => Object.assign(new Page<Episode>(), x)));
+	}
+}
+
+@Injectable({
+	providedIn: 'root'
+})
+export class PeopleService extends CrudApi<People>
+{
+	constructor(client: HttpClient)
+	{
+		super(client, "people");
+	}
+
+	getFromShow(show: string | number, args?: ApiArgs): Observable<Page<People>>
+	{
+		return this.client.get(`/api/shows/${show}/people${this.ArgsAsQuery(args)}`)
+			.pipe(map(x => Object.assign(new Page<People>(), x)));
 	}
 }

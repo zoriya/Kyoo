@@ -8,8 +8,9 @@ import {MatDialog} from "@angular/material/dialog";
 import {TrailerDialogComponent} from "../trailer-dialog/trailer-dialog.component";
 import {MetadataEditComponent} from "../metadata-edit/metadata-edit.component";
 import {Season} from "../../../models/season";
-import {EpisodeService, SeasonService} from "../../services/api.service";
+import {EpisodeService, PeopleService, SeasonService} from "../../services/api.service";
 import {Page} from "../../../models/page";
+import {People} from "../../../models/people";
 
 @Component({
 	selector: 'app-show-details',
@@ -22,6 +23,7 @@ export class ShowDetailsComponent implements OnInit
 	seasons: Season[];
 	season: number = 1;
 	episodes: Page<Episode>[] = [];
+	people: Page<People>;
 
 	private toolbar: HTMLElement;
 	private backdrop: HTMLElement;
@@ -32,7 +34,8 @@ export class ShowDetailsComponent implements OnInit
 	            private router: Router,
 	            private dialog: MatDialog,
 	            private seasonService: SeasonService,
-	            private episodeService: EpisodeService)
+	            private episodeService: EpisodeService,
+	            private peopleService: PeopleService)
 	{
 		this.route.queryParams.subscribe(params =>
 		{
@@ -57,6 +60,7 @@ export class ShowDetailsComponent implements OnInit
 				}
 			});
 			this.getEpisodes(this.season);
+			this.peopleService.getFromShow(this.show.slug).subscribe(x => this.people = x);
 		});
 	}
 
