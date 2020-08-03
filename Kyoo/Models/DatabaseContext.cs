@@ -179,7 +179,10 @@ namespace Kyoo
 				.HasIndex(x => new {x.ShowID, x.SeasonNumber, x.EpisodeNumber, x.AbsoluteNumber})
 				.IsUnique();
 			modelBuilder.Entity<LibraryLink>()
-				.HasIndex(x => new {x.LibraryID, x.ShowID, x.CollectionID})
+				.HasIndex(x => new {x.LibraryID, x.ShowID})
+				.IsUnique();
+			modelBuilder.Entity<LibraryLink>()
+				.HasIndex(x => new {x.LibraryID, x.CollectionID})
 				.IsUnique();
 			modelBuilder.Entity<CollectionLink>()
 				.HasIndex(x => new {x.CollectionID, x.ShowID})
@@ -275,6 +278,18 @@ namespace Kyoo
 				if (IsDuplicateException(ex))
 					throw new DuplicatedItemException(duplicateMessage);
 				throw;
+			}
+		}
+
+		public async Task<int> SaveIfNoDuplicates(CancellationToken cancellationToken = new CancellationToken())
+		{
+			try
+			{
+				return await SaveChangesAsync(cancellationToken);
+			}
+			catch (DuplicatedItemException)
+			{
+				return -1;
 			}
 		}
 
