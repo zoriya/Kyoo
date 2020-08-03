@@ -84,20 +84,8 @@ namespace Kyoo.Controllers
 			if (obj.Tracks != null)
 				foreach (Track entry in obj.Tracks)
 					_database.Entry(entry).State = EntityState.Added;
-
-			try
-			{
-				await _database.SaveChangesAsync();
-			}
-			catch (DbUpdateException ex)
-			{
-				_database.DiscardChanges();
-				
-				if (IsDuplicateException(ex))
-					throw new DuplicatedItemException($"Trying to insert a duplicated episode (slug {obj.Slug} already exists).");
-				throw;
-			}
-
+			
+			await _database.SaveChangesAsync($"Trying to insert a duplicated episode (slug {obj.Slug} already exists).");
 			return obj;
 		}
 

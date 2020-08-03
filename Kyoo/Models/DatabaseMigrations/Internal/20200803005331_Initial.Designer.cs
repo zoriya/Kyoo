@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Kyoo.Models.DatabaseMigrations.Internal
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20200724211017_Initial")]
+    [Migration("20200803005331_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,9 +27,6 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<string>("ImgPrimary")
-                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .HasColumnType("text");
@@ -66,9 +63,10 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
                     b.HasKey("ID");
 
-                    b.HasIndex("CollectionID");
-
                     b.HasIndex("ShowID");
+
+                    b.HasIndex("CollectionID", "ShowID")
+                        .IsUnique();
 
                     b.ToTable("CollectionLinks");
                 });
@@ -203,9 +201,10 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
                     b.HasIndex("CollectionID");
 
-                    b.HasIndex("LibraryID");
-
                     b.HasIndex("ShowID");
+
+                    b.HasIndex("LibraryID", "ShowID", "CollectionID")
+                        .IsUnique();
 
                     b.ToTable("LibraryLinks");
                 });

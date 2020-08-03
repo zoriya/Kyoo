@@ -34,18 +34,7 @@ namespace Kyoo.Controllers
 				throw new ArgumentNullException(nameof(obj));
 
 			_database.Entry(obj).State = EntityState.Added;
-			
-			try
-			{
-				await _database.SaveChangesAsync();
-			}
-			catch (DbUpdateException ex)
-			{
-				_database.DiscardChanges();
-				if (IsDuplicateException(ex))
-					throw new DuplicatedItemException($"Trying to insert a duplicated studio (slug {obj.Slug} already exists).");
-				throw;
-			}
+			await _database.SaveChangesAsync($"Trying to insert a duplicated studio (slug {obj.Slug} already exists).");
 			return obj;
 		}
 

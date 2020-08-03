@@ -17,8 +17,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     Slug = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true),
                     Poster = table.Column<string>(nullable: true),
-                    Overview = table.Column<string>(nullable: true),
-                    ImgPrimary = table.Column<string>(nullable: true)
+                    Overview = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -403,14 +402,15 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_CollectionLinks_CollectionID",
-                table: "CollectionLinks",
-                column: "CollectionID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_CollectionLinks_ShowID",
                 table: "CollectionLinks",
                 column: "ShowID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CollectionLinks_CollectionID_ShowID",
+                table: "CollectionLinks",
+                columns: new[] { "CollectionID", "ShowID" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Collections_Slug",
@@ -452,14 +452,15 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 column: "CollectionID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LibraryLinks_LibraryID",
-                table: "LibraryLinks",
-                column: "LibraryID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_LibraryLinks_ShowID",
                 table: "LibraryLinks",
                 column: "ShowID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LibraryLinks_LibraryID_ShowID_CollectionID",
+                table: "LibraryLinks",
+                columns: new[] { "LibraryID", "ShowID", "CollectionID" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_MetadataIds_EpisodeID",

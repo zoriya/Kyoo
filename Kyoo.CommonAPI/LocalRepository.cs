@@ -169,11 +169,5 @@ namespace Kyoo.Controllers
 			foreach (string slug in slugs)
 				await Delete(slug);
 		}
-		
-		public static bool IsDuplicateException(DbUpdateException ex)
-		{
-			return ex.InnerException is PostgresException inner
-			       && inner.SqlState == PostgresErrorCodes.UniqueViolation;
-		}
 	}
 }
