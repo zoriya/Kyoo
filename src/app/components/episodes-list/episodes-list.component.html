@@ -1,6 +1,6 @@
 <div class="root">
-	<div class="episodes" #scrollView (scroll)="onScroll()">
-		<div class="episode" *ngFor="let episode of this.episodes?.items" #itemsDom >
+	<div class="episodes" #scrollView (scroll)="onScroll()" infinite-scroll (scrolled)="this.episodes?.loadNext(this.client)" [horizontal]="true" [scrollWindow]="false">
+		<div class="episode" *ngFor="let episode of this.episodes?.items" #itemsDom>
 			<button mat-icon-button class="moreBtn" [matMenuTriggerFor]="more" [matMenuTriggerData]="{episode: episode}"><i class="material-icons">more_vert</i></button>
 			<a routerLink="/watch/{{episode.slug}}" href="/watch/{{episode.slug}}">
 				<div matRipple class="img" [style.background-image]="sanitize(episode.thumb)">
