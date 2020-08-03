@@ -237,7 +237,6 @@ namespace Kyoo.Controllers
 			Expression<Func<LibraryItem, bool>> where = null,
 			Sort<LibraryItem> sort = default,
 			Pagination limit = default);
-
 		Task<ICollection<LibraryItem>> GetItemsFromLibrary(int id,
 			[Optional] Expression<Func<LibraryItem, bool>> where,
 			Expression<Func<LibraryItem, object>> sort,
@@ -248,12 +247,51 @@ namespace Kyoo.Controllers
 			Expression<Func<LibraryItem, bool>> where = null,
 			Sort<LibraryItem> sort = default,
 			Pagination limit = default);
-
 		Task<ICollection<LibraryItem>> GetItemsFromLibrary(string librarySlug,
 			[Optional] Expression<Func<LibraryItem, bool>> where,
 			Expression<Func<LibraryItem, object>> sort,
 			Pagination limit = default
 		) => GetItemsFromLibrary(librarySlug, where, new Sort<LibraryItem>(sort), limit);
+		
+		Task<ICollection<Show>> GetShowsFromCollection(int id,
+			Expression<Func<Show, bool>> where = null, 
+			Sort<Show> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Show>> GetShowsFromCollection(int id,
+			[Optional] Expression<Func<Show, bool>> where,
+			Expression<Func<Show, object>> sort,
+			Pagination limit = default
+		) => GetShowsFromCollection(id, where, new Sort<Show>(sort), limit);
+		
+		Task<ICollection<Show>> GetShowsFromCollection(string slug,
+			Expression<Func<Show, bool>> where = null, 
+			Sort<Show> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Show>> GetShowsFromCollection(string slug,
+			[Optional] Expression<Func<Show, bool>> where,
+			Expression<Func<Show, object>> sort,
+			Pagination limit = default
+		) => GetShowsFromCollection(slug, where, new Sort<Show>(sort), limit);
+		
+		Task<ICollection<Library>> GetLibrariesFromCollection(int id,
+			Expression<Func<Library, bool>> where = null, 
+			Sort<Library> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Library>> GetLibrariesFromCollection(int id,
+			[Optional] Expression<Func<Library, bool>> where,
+			Expression<Func<Library, object>> sort,
+			Pagination limit = default
+		) => GetLibrariesFromCollection(id, where, new Sort<Library>(sort), limit);
+		
+		Task<ICollection<Library>> GetLibrariesFromCollection(string slug,
+			Expression<Func<Library, bool>> where = null, 
+			Sort<Library> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Library>> GetLibrariesFromCollection(string slug,
+			[Optional] Expression<Func<Library, bool>> where,
+			Expression<Func<Library, object>> sort,
+			Pagination limit = default
+		) => GetLibrariesFromCollection(slug, where, new Sort<Library>(sort), limit);
 
 
 		// Helpers

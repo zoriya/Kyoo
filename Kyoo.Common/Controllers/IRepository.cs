@@ -123,25 +123,25 @@ namespace Kyoo.Controllers
 			Pagination limit = default
 		) => GetFromLibrary(slug, where, new Sort<Show>(sort), limit);
 		
-		// Task<ICollection<Show>> GetFromCollection(int id,
-		// 	Expression<Func<Show, bool>> where = null, 
-		// 	Sort<Show> sort = default,
-		// 	Pagination limit = default);
-		// Task<ICollection<Show>> GetFromCollection(int id,
-		// 	[Optional] Expression<Func<Show, bool>> where,
-		// 	Expression<Func<Show, object>> sort,
-		// 	Pagination limit = default
-		// ) => GetFromCollection(id, where, new Sort<Show>(sort), limit);
-		//
-		// Task<ICollection<Show>> GetFromCollection(string slug,
-		// 	Expression<Func<Show, bool>> where = null, 
-		// 	Sort<Show> sort = default,
-		// 	Pagination limit = default);
-		// Task<ICollection<Show>> GetFromCollection(string slug,
-		// 	[Optional] Expression<Func<Show, bool>> where,
-		// 	Expression<Func<Show, object>> sort,
-		// 	Pagination limit = default
-		// ) => GetFromCollection(slug, where, new Sort<Show>(sort), limit);
+		Task<ICollection<Show>> GetFromCollection(int id,
+			Expression<Func<Show, bool>> where = null, 
+			Sort<Show> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Show>> GetFromCollection(int id,
+			[Optional] Expression<Func<Show, bool>> where,
+			Expression<Func<Show, object>> sort,
+			Pagination limit = default
+		) => GetFromCollection(id, where, new Sort<Show>(sort), limit);
+		
+		Task<ICollection<Show>> GetFromCollection(string slug,
+			Expression<Func<Show, bool>> where = null, 
+			Sort<Show> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Show>> GetFromCollection(string slug,
+			[Optional] Expression<Func<Show, bool>> where,
+			Expression<Func<Show, object>> sort,
+			Pagination limit = default
+		) => GetFromCollection(slug, where, new Sort<Show>(sort), limit);
 	}
 
 	public interface ISeasonRepository : IRepository<Season>
@@ -255,6 +255,26 @@ namespace Kyoo.Controllers
 			Expression<Func<Library, object>> sort,
 			Pagination limit = default
 		) => GetFromShow(showSlug, where, new Sort<Library>(sort), limit);
+		
+		Task<ICollection<Library>> GetFromCollection(int id,
+			Expression<Func<Library, bool>> where = null, 
+			Sort<Library> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Library>> GetFromCollection(int id,
+			[Optional] Expression<Func<Library, bool>> where,
+			Expression<Func<Library, object>> sort,
+			Pagination limit = default
+		) => GetFromCollection(id, where, new Sort<Library>(sort), limit);
+		
+		Task<ICollection<Library>> GetFromCollection(string slug,
+			Expression<Func<Library, bool>> where = null, 
+			Sort<Library> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Library>> GetFromCollection(string slug,
+			[Optional] Expression<Func<Library, bool>> where,
+			Expression<Func<Library, object>> sort,
+			Pagination limit = default
+		) => GetFromCollection(slug, where, new Sort<Library>(sort), limit);
 	}
 
 	public interface ILibraryItemRepository : IRepository<LibraryItem>
