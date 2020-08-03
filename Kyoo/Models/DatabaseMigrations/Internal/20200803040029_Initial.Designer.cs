@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Kyoo.Models.DatabaseMigrations.Internal
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20200803005331_Initial")]
+    [Migration("20200803040029_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -203,7 +203,10 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
                     b.HasIndex("ShowID");
 
-                    b.HasIndex("LibraryID", "ShowID", "CollectionID")
+                    b.HasIndex("LibraryID", "CollectionID")
+                        .IsUnique();
+
+                    b.HasIndex("LibraryID", "ShowID")
                         .IsUnique();
 
                     b.ToTable("LibraryLinks");

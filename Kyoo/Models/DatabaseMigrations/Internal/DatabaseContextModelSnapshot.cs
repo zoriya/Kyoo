@@ -201,7 +201,10 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
                     b.HasIndex("ShowID");
 
-                    b.HasIndex("LibraryID", "ShowID", "CollectionID")
+                    b.HasIndex("LibraryID", "CollectionID")
+                        .IsUnique();
+
+                    b.HasIndex("LibraryID", "ShowID")
                         .IsUnique();
 
                     b.ToTable("LibraryLinks");

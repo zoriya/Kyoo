@@ -457,9 +457,15 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 column: "ShowID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LibraryLinks_LibraryID_ShowID_CollectionID",
+                name: "IX_LibraryLinks_LibraryID_CollectionID",
                 table: "LibraryLinks",
-                columns: new[] { "LibraryID", "ShowID", "CollectionID" },
+                columns: new[] { "LibraryID", "CollectionID" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LibraryLinks_LibraryID_ShowID",
+                table: "LibraryLinks",
+                columns: new[] { "LibraryID", "ShowID" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
