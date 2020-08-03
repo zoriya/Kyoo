@@ -8,7 +8,7 @@
 			<h5 class="date" *ngIf="collection.endYear; else elseBlock">{{collection.startYear}} - {{collection.endYear}}</h5>
 			<ng-template #elseBlock><h5 class="date">{{collection.startYear}}</h5></ng-template>
 			<hr />
-			<app-browse [shows]="collection.shows"></app-browse>
+			<app-items [page]="shows"></app-items>
 		</div>
 	</div>
 </div>

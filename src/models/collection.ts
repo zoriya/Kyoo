@@ -1,8 +1,8 @@
 import { Show } from "./show";
+import {IResource} from "./resources/resource";
 
-export interface Collection
+export interface Collection extends IResource
 {
-	slug: string;
 	name: string;
 	poster: string;
 	overview: string;

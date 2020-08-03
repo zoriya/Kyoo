@@ -3,17 +3,17 @@ import {ActivatedRoute} from '@angular/router';
 import {DomSanitizer} from '@angular/platform-browser';
 import {ItemType, LibraryItem} from "../../../models/library-item";
 import {Page} from "../../../models/page";
-import {LibraryItemService} from "../../services/api.service";
 import {HttpClient} from "@angular/common/http";
+import {Show} from "../../../models/show";
 
 @Component({
-	selector: 'app-browse',
-	templateUrl: './library-item-grid.component.html',
-	styleUrls: ['./library-item-grid.component.scss']
+	selector: 'app-items',
+	templateUrl: './items-grid.component.html',
+	styleUrls: ['./items-grid.component.scss']
 })
-export class LibraryItemGridComponent
+export class ItemsGridComponent
 {
-	@Input() page: Page<LibraryItem>;
+	@Input() page: Page<LibraryItem | Show>;
 	@Input() sortEnabled: boolean = true;
 	sortType: string = "title";
 	sortKeys: string[] = ["title", "start year", "end year"]
@@ -21,7 +21,6 @@ export class LibraryItemGridComponent
 
 	constructor(private route: ActivatedRoute,
 	            private sanitizer: DomSanitizer,
-	            private items: LibraryItemService,
 	            public client: HttpClient)
 	{
 		this.route.data.subscribe((data) =>
@@ -35,12 +34,12 @@ export class LibraryItemGridComponent
 		return this.sanitizer.bypassSecurityTrustStyle("url(/poster/" + slug + ")");
 	}
 
-	getLink(show: LibraryItem)
+	getLink(item: LibraryItem | Show)
 	{
-		if (show.type == ItemType.Collection)
-			return "/collection/" + show.slug;
+		if ("type" in item && item.type == ItemType.Collection)
+			return "/collection/" + item.slug;
 		else
-			return "/show/" + show.slug;
+			return "/show/" + item.slug;
 	}
 
 	sort(type: string, order: boolean)
@@ -48,7 +47,9 @@ export class LibraryItemGridComponent
 		this.sortType = type;
 		this.sortUp = order;
 
-		this.items.getAll({sortBy: `${this.sortType.replace(/\s/g, "")}:${this.sortUp ? "asc" : "desc"}`})
-			.subscribe(x => this.page = x);
+		let url: URL = new URL(this.page.first);
+		url.searchParams.set("sortBy", `${this.sortType.replace(/\s/g, "")}:${this.sortUp ? "asc" : "desc"}`);
+		this.client.get<Page<LibraryItem | Show>>(url.toString())
+			.subscribe(x => this.page = Object.assign(new Page<LibraryItem | Show>(), x));
 	}
 }

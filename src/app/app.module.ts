@@ -14,8 +14,8 @@ import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
-import { LibraryItemGridComponent } from './components/library-item-grid/library-item-grid.component';
-import { CollectionComponent } from './collection/collection.component';
+import { ItemsGridComponent } from './components/items-grid/items-grid.component';
+import { CollectionComponent } from './pages/collection/collection.component';
 import { EpisodesListComponent } from './components/episodes-list/episodes-list.component';
 import { NotFoundComponent } from './not-found/not-found.component';
 import { PeopleListComponent } from './components/people-list/people-list.component';
@@ -47,7 +47,7 @@ import {InfiniteScrollModule} from "ngx-infinite-scroll";
 	declarations: [
 		AppComponent,
 		NotFoundComponent,
-		LibraryItemGridComponent,
+		ItemsGridComponent,
 		ShowDetailsComponent,
 		EpisodesListComponent,
 		PlayerComponent,
