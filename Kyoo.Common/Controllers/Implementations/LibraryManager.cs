@@ -380,6 +380,38 @@ namespace Kyoo.Controllers
 			return LibraryItemRepository.GetFromLibrary(librarySlug, where, sort, limit);
 		}
 
+		public Task<ICollection<Show>> GetShowsFromCollection(int id, 
+			Expression<Func<Show, bool>> where = null, 
+			Sort<Show> sort = default, 
+			Pagination limit = default)
+		{
+			return ShowRepository.GetFromCollection(id, where, sort, limit);
+		}
+
+		public Task<ICollection<Show>> GetShowsFromCollection(string slug, 
+			Expression<Func<Show, bool>> where = null, 
+			Sort<Show> sort = default, 
+			Pagination limit = default)
+		{
+			return ShowRepository.GetFromCollection(slug, where, sort, limit);
+		}
+		
+		public Task<ICollection<Library>> GetLibrariesFromCollection(int id, 
+			Expression<Func<Library, bool>> where = null, 
+			Sort<Library> sort = default, 
+			Pagination limit = default)
+		{
+			return LibraryRepository.GetFromCollection(id, where, sort, limit);
+		}
+
+		public Task<ICollection<Library>> GetLibrariesFromCollection(string slug, 
+			Expression<Func<Library, bool>> where = null, 
+			Sort<Library> sort = default, 
+			Pagination limit = default)
+		{
+			return LibraryRepository.GetFromCollection(slug, where, sort, limit);
+		}
+
 		public Task AddShowLink(int showID, int? libraryID, int? collectionID)
 		{
 			return ShowRepository.AddShowLink(showID, libraryID, collectionID);

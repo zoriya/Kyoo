@@ -125,5 +125,37 @@ namespace Kyoo.Controllers
 				throw new ItemNotFound();
 			return libraries;
 		}
+		
+		public async Task<ICollection<Library>> GetFromCollection(int id, 
+			Expression<Func<Library, bool>> where = null, 
+			Sort<Library> sort = default, 
+			Pagination limit = default)
+		{
+			ICollection<Library> libraries = await ApplyFilters(_database.LibraryLinks
+					.Where(x => x.CollectionID == id)
+					.Select(x => x.Library),
+				where,
+				sort,
+				limit);
+			if (!libraries.Any() && await _shows.Value.Get(id) == null)
+				throw new ItemNotFound();
+			return libraries;
+		}
+
+		public async Task<ICollection<Library>> GetFromCollection(string slug, 
+			Expression<Func<Library, bool>> where = null, 
+			Sort<Library> sort = default, 
+			Pagination limit = default)
+		{
+			ICollection<Library> libraries = await ApplyFilters(_database.LibraryLinks
+					.Where(x => x.Collection.Slug == slug)
+					.Select(x => x.Library),
+				where,
+				sort,
+				limit);
+			if (!libraries.Any() && await _shows.Value.Get(slug) == null)
+				throw new ItemNotFound();
+			return libraries;
+		}
 	}
 }
