@@ -26,9 +26,6 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<string>("ImgPrimary")
-                        .HasColumnType("text");
-
                     b.Property<string>("Name")
                         .HasColumnType("text");
 
@@ -64,9 +61,10 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
                     b.HasKey("ID");
 
-                    b.HasIndex("CollectionID");
-
                     b.HasIndex("ShowID");
+
+                    b.HasIndex("CollectionID", "ShowID")
+                        .IsUnique();
 
                     b.ToTable("CollectionLinks");
                 });
@@ -201,9 +199,10 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
                     b.HasIndex("CollectionID");
 
-                    b.HasIndex("LibraryID");
-
                     b.HasIndex("ShowID");
+
+                    b.HasIndex("LibraryID", "ShowID", "CollectionID")
+                        .IsUnique();
 
                     b.ToTable("LibraryLinks");
                 });

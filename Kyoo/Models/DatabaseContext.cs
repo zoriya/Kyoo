@@ -1,18 +1,21 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using IdentityServer4.EntityFramework.Entities;
 using IdentityServer4.EntityFramework.Extensions;
 using IdentityServer4.EntityFramework.Interfaces;
 using IdentityServer4.EntityFramework.Options;
 using Kyoo.Models;
+using Kyoo.Models.Exceptions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Options;
+using Npgsql;
 
 namespace Kyoo
 {
@@ -175,8 +178,112 @@ namespace Kyoo
 			modelBuilder.Entity<Episode>()
 				.HasIndex(x => new {x.ShowID, x.SeasonNumber, x.EpisodeNumber, x.AbsoluteNumber})
 				.IsUnique();
+			modelBuilder.Entity<LibraryLink>()
+				.HasIndex(x => new {x.LibraryID, x.ShowID, x.CollectionID})
+				.IsUnique();
+			modelBuilder.Entity<CollectionLink>()
+				.HasIndex(x => new {x.CollectionID, x.ShowID})
+				.IsUnique();
 		}
-			
+
+		public override int SaveChanges()
+		{
+			try
+			{
+				return base.SaveChanges();
+			}
+			catch (DbUpdateException ex)
+			{
+				DiscardChanges();
+				if (IsDuplicateException(ex))
+					throw new DuplicatedItemException();
+				throw;
+			}
+		}
+
+		public override int SaveChanges(bool acceptAllChangesOnSuccess)
+		{
+			try
+			{
+				return base.SaveChanges(acceptAllChangesOnSuccess);
+			}
+			catch (DbUpdateException ex)
+			{
+				DiscardChanges();
+				if (IsDuplicateException(ex))
+					throw new DuplicatedItemException();
+				throw;
+			}
+		}
+		
+		public int SaveChanges(string duplicateMessage)
+		{
+			try
+			{
+				return base.SaveChanges();
+			}
+			catch (DbUpdateException ex)
+			{
+				DiscardChanges();
+				if (IsDuplicateException(ex))
+					throw new DuplicatedItemException(duplicateMessage);
+				throw;
+			}
+		}
+
+		public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, 
+			CancellationToken cancellationToken = new CancellationToken())
+		{
+			try
+			{
+				return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+			}
+			catch (DbUpdateException ex)
+			{
+				DiscardChanges();
+				if (IsDuplicateException(ex))
+					throw new DuplicatedItemException();
+				throw;
+			}
+		}
+
+		public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
+		{
+			try
+			{
+				return await base.SaveChangesAsync(cancellationToken);
+			}
+			catch (DbUpdateException ex)
+			{
+				DiscardChanges();
+				if (IsDuplicateException(ex))
+					throw new DuplicatedItemException();
+				throw;
+			}
+		}
+		
+		public async Task<int> SaveChangesAsync(string duplicateMessage,
+			CancellationToken cancellationToken = new CancellationToken())
+		{
+			try
+			{
+				return await base.SaveChangesAsync(cancellationToken);
+			}
+			catch (DbUpdateException ex)
+			{
+				DiscardChanges();
+				if (IsDuplicateException(ex))
+					throw new DuplicatedItemException(duplicateMessage);
+				throw;
+			}
+		}
+
+		public static bool IsDuplicateException(DbUpdateException ex)
+		{
+			return ex.InnerException is PostgresException inner
+			       && inner.SqlState == PostgresErrorCodes.UniqueViolation;
+		}
+
 		public void DiscardChanges()
 		{
 			foreach (EntityEntry entry in ChangeTracker.Entries().Where(x => x.State != EntityState.Unchanged
@@ -185,14 +292,5 @@ namespace Kyoo
 				entry.State = EntityState.Detached;
 			}
 		}
-	}
-}
-
-public static class DbSetExtension
-{
-	public static EntityEntry<T> AddIfNotExist<T>(this DbSet<T> db, T entity, Func<T, bool> predicate) where T : class
-	{
-		bool exists = db.Any(predicate);
-		return exists ? null : db.Add(entity);
 	}
 }

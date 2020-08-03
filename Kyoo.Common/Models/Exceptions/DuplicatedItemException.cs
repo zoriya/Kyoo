@@ -6,6 +6,8 @@ namespace Kyoo.Models.Exceptions
 	{
 		public override string Message { get; }
 
+		public DuplicatedItemException() {}
+		
 		public DuplicatedItemException(string message)
 		{
 			Message = message;

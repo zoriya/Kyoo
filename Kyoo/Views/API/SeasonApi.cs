@@ -24,14 +24,14 @@ namespace Kyoo.Api
 			_libraryManager = libraryManager;
 		}
 		
-		[HttpGet("{seasonID:int}/season")]
-		[HttpGet("{seasonID:int}/seasons")]
+		[HttpGet("{seasonID:int}/episode")]
+		[HttpGet("{seasonID:int}/episodes")]
 		[Authorize(Policy = "Read")]
-		public async Task<ActionResult<Page<Episode>>> GetSeasons(int seasonID,
+		public async Task<ActionResult<Page<Episode>>> GetEpisode(int seasonID,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
 			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 20)
+			[FromQuery] int limit = 30)
 		{
 			where.Remove("sortBy");
 			where.Remove("limit");
@@ -56,15 +56,15 @@ namespace Kyoo.Api
 			}
 		}
 		
-		[HttpGet("{showSlug}-{seasonNumber:int}/season")]
-		[HttpGet("{showSlug}-{seasonNumber:int}/seasons")]
+		[HttpGet("{showSlug}-{seasonNumber:int}/episode")]
+		[HttpGet("{showSlug}-{seasonNumber:int}/episodes")]
 		[Authorize(Policy = "Read")]
-		public async Task<ActionResult<Page<Episode>>> GetSeasons(string showSlug,
+		public async Task<ActionResult<Page<Episode>>> GetEpisode(string showSlug,
 			int seasonNumber,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
 			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 20)
+			[FromQuery] int limit = 30)
 		{
 			where.Remove("sortBy");
 			where.Remove("limit");
@@ -90,15 +90,15 @@ namespace Kyoo.Api
 			}
 		}
 		
-		[HttpGet("{showID:int}-{seasonNumber:int}/season")]
-		[HttpGet("{showID:int}-{seasonNumber:int}/seasons")]
+		[HttpGet("{showID:int}-{seasonNumber:int}/episode")]
+		[HttpGet("{showID:int}-{seasonNumber:int}/episodes")]
 		[Authorize(Policy = "Read")]
-		public async Task<ActionResult<Page<Episode>>> GetSeasons(int showID,
+		public async Task<ActionResult<Page<Episode>>> GetEpisode(int showID,
 			int seasonNumber,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
 			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 20)
+			[FromQuery] int limit = 30)
 		{
 			where.Remove("sortBy");
 			where.Remove("limit");

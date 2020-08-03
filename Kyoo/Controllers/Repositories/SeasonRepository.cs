@@ -89,18 +89,7 @@ namespace Kyoo.Controllers
 				foreach (MetadataID entry in obj.ExternalIDs)
 					_database.Entry(entry).State = EntityState.Added;
 			
-			try
-			{
-				await _database.SaveChangesAsync();
-			}
-			catch (DbUpdateException ex)
-			{
-				_database.DiscardChanges();
-				if (IsDuplicateException(ex))
-					throw new DuplicatedItemException($"Trying to insert a duplicated season (slug {obj.Slug} already exists).");
-				throw;
-			}
-			
+			await _database.SaveChangesAsync($"Trying to insert a duplicated season (slug {obj.Slug} already exists).");
 			return obj;
 		}
 

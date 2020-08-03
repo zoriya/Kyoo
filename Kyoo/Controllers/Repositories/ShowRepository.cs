@@ -102,18 +102,7 @@ namespace Kyoo.Controllers
 				foreach (MetadataID entry in obj.ExternalIDs)
 					_database.Entry(entry).State = EntityState.Added;
 			
-			try
-			{
-				await _database.SaveChangesAsync();
-			}
-			catch (DbUpdateException ex)
-			{
-				_database.DiscardChanges();
-				if (IsDuplicateException(ex))
-					throw new DuplicatedItemException($"Trying to insert a duplicated show (slug {obj.Slug} already exists).");
-				throw;
-			}
-			
+			await _database.SaveChangesAsync($"Trying to insert a duplicated show (slug {obj.Slug} already exists).");
 			return obj;
 		}
 		
@@ -139,23 +128,17 @@ namespace Kyoo.Controllers
 		{
 			if (collectionID != null)
 			{
-				_database.CollectionLinks.AddIfNotExist(new CollectionLink { CollectionID = collectionID, ShowID = showID},
-					x => x.CollectionID == collectionID && x.ShowID == showID);
+				await _database.CollectionLinks.AddAsync(new CollectionLink {CollectionID = collectionID, ShowID = showID});
 			}
 			if (libraryID != null)
 			{
-				_database.LibraryLinks.AddIfNotExist(new LibraryLink {LibraryID = libraryID.Value, ShowID = showID},
-					x => x.LibraryID == libraryID.Value && x.CollectionID == null && x.ShowID == showID);
+				await _database.LibraryLinks.AddAsync(new LibraryLink {LibraryID = libraryID.Value, ShowID = showID});
 			}
 
 			if (libraryID != null && collectionID != null)
 			{
-				_database.LibraryLinks.AddIfNotExist(
-					new LibraryLink {LibraryID = libraryID.Value, CollectionID = collectionID.Value},
-					x => x.LibraryID == libraryID && x.CollectionID == collectionID && x.ShowID == null);
+				await _database.LibraryLinks.AddAsync(new LibraryLink {LibraryID = libraryID.Value, CollectionID = collectionID.Value});
 			}
-
-			await _database.SaveChangesAsync();
 		}
 		
 		public override async Task Delete(Show obj)
