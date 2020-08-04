@@ -155,5 +155,10 @@ namespace Kyoo.Controllers
 			if (obj.Episodes != null)
 				await _episodes.Value.DeleteRange(obj.Episodes);
 		}
+
+		public Task<Season> GetFromEpisode(int episodeID)
+		{
+			return _database.Seasons.FirstOrDefaultAsync(x => x.Episodes.Any(y => y.ID == episodeID));
+		}
 	}
 }

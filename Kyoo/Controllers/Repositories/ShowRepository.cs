@@ -244,5 +244,15 @@ namespace Kyoo.Controllers
 				throw new ItemNotFound();
 			return shows;
 		}
+
+		public Task<Show> GetFromSeason(int seasonID)
+		{
+			return _database.Shows.FirstOrDefaultAsync(x => x.Seasons.Any(y => y.ID == seasonID));
+		}
+		
+		public Task<Show> GetFromEpisode(int episodeID)
+		{
+			return _database.Shows.FirstOrDefaultAsync(x => x.Episodes.Any(y => y.ID == episodeID));
+		}
 	}
 }

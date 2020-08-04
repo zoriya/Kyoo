@@ -56,8 +56,8 @@ namespace Kyoo.Api
 			}
 		}
 		
-		[HttpGet("{showSlug}-{seasonNumber:int}/episode")]
-		[HttpGet("{showSlug}-{seasonNumber:int}/episodes")]
+		[HttpGet("{showSlug}-s{seasonNumber:int}/episode")]
+		[HttpGet("{showSlug}-s{seasonNumber:int}/episodes")]
 		[Authorize(Policy = "Read")]
 		public async Task<ActionResult<Page<Episode>>> GetEpisode(string showSlug,
 			int seasonNumber,
@@ -90,8 +90,8 @@ namespace Kyoo.Api
 			}
 		}
 		
-		[HttpGet("{showID:int}-{seasonNumber:int}/episode")]
-		[HttpGet("{showID:int}-{seasonNumber:int}/episodes")]
+		[HttpGet("{showID:int}-s{seasonNumber:int}/episode")]
+		[HttpGet("{showID:int}-s{seasonNumber:int}/episodes")]
 		[Authorize(Policy = "Read")]
 		public async Task<ActionResult<Page<Episode>>> GetEpisode(int showID,
 			int seasonNumber,
@@ -122,6 +122,27 @@ namespace Kyoo.Api
 			{
 				return BadRequest(new {Error = ex.Message});
 			}
+		}
+		
+		[HttpGet("{seasonID:int}/show")]
+		[Authorize(Policy = "Read")]
+		public async Task<ActionResult<Show>> GetShow(int seasonID)
+		{
+			return await _libraryManager.GetShowFromSeason(seasonID);
+		}
+		
+		[HttpGet("{showSlug}-s{seasonNumber:int}/show")]
+		[Authorize(Policy = "Read")]
+		public async Task<ActionResult<Show>> GetShow(string showSlug, int _)
+		{
+			return await _libraryManager.GetShow(showSlug);
+		}
+		
+		[HttpGet("{showID:int}-s{seasonNumber:int}/show")]
+		[Authorize(Policy = "Read")]
+		public async Task<ActionResult<Show>> GetShow(int showID, int _)
+		{
+			return await _libraryManager.GetShow(showID);
 		}
 	}
 }

@@ -142,6 +142,9 @@ namespace Kyoo.Controllers
 			Expression<Func<Show, object>> sort,
 			Pagination limit = default
 		) => GetFromCollection(slug, where, new Sort<Show>(sort), limit);
+
+		Task<Show> GetFromSeason(int seasonID);
+		Task<Show> GetFromEpisode(int episodeID);
 	}
 
 	public interface ISeasonRepository : IRepository<Season>
@@ -169,11 +172,17 @@ namespace Kyoo.Controllers
 			Expression<Func<Season, object>> sort,
 			Pagination limit = default
 		) => GetFromShow(showSlug, where, new Sort<Season>(sort), limit);
+
+		Task<Season> GetFromEpisode(int episodeID);
 	}
 	
 	public interface IEpisodeRepository : IRepository<Episode>
 	{
+		Task<Episode> Get(int showID, int seasonNumber, int episodeNumber);
 		Task<Episode> Get(string showSlug, int seasonNumber, int episodeNumber);
+		Task<Episode> Get(int seasonID, int episodeNumber);
+		Task<Episode> GetAbsolute(int showID, int absoluteNumber);
+		Task<Episode> GetAbsolute(string showSlug, int absoluteNumber);
 		Task Delete(string showSlug, int seasonNumber, int episodeNumber);
 		
 		Task<ICollection<Episode>> GetFromShow(int showID,
@@ -231,7 +240,43 @@ namespace Kyoo.Controllers
 
 	public interface ITrackRepository : IRepository<Track>
 	{
-		Task<Track> Get(int episodeID, string languageTag, bool isForced);
+		Task<ICollection<Track>> GetFromEpisode(int episodeID,
+			Expression<Func<Track, bool>> where = null, 
+			Sort<Track> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Track>> GetFromEpisode(int episodeID,
+			[Optional] Expression<Func<Track, bool>> where,
+			Expression<Func<Track, object>> sort,
+			Pagination limit = default
+		) => GetFromEpisode(episodeID, where, new Sort<Track>(sort), limit);
+		
+		Task<ICollection<Track>> GetFromEpisode(int showID,
+			int seasonNumber,
+			int episodeNumber,
+			Expression<Func<Track, bool>> where = null, 
+			Sort<Track> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Track>> GetFromEpisode(int showID,
+			int seasonNumber,
+			int episodeNumber,
+			[Optional] Expression<Func<Track, bool>> where,
+			Expression<Func<Track, object>> sort,
+			Pagination limit = default
+		) => GetFromEpisode(showID, seasonNumber, episodeNumber, where, new Sort<Track>(sort), limit);
+		
+		Task<ICollection<Track>> GetFromEpisode(string showSlug,
+			int seasonNumber,
+			int episodeNumber,
+			Expression<Func<Track, bool>> where = null, 
+			Sort<Track> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Track>> GetFromEpisode(string showSlug,
+			int seasonNumber,
+			int episodeNumber,
+			[Optional] Expression<Func<Track, bool>> where,
+			Expression<Func<Track, object>> sort,
+			Pagination limit = default
+		) => GetFromEpisode(showSlug, seasonNumber, episodeNumber, where, new Sort<Track>(sort), limit);
 	}
 
 	public interface ILibraryRepository : IRepository<Library>
