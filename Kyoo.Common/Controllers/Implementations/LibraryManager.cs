@@ -75,6 +75,56 @@ namespace Kyoo.Controllers
 			);
 		}
 
+		public Task<Library> GetLibrary(int id)
+		{
+			return LibraryRepository.Get(id);
+		}
+
+		public Task<Collection> GetCollection(int id)
+		{
+			return CollectionRepository.Get(id);
+		}
+
+		public Task<Show> GetShow(int id)
+		{
+			return ShowRepository.Get(id);
+		}
+
+		public Task<Season> GetSeason(int id)
+		{
+			return SeasonRepository.Get(id);
+		}
+		
+		public Task<Season> GetSeason(int showID, int seasonNumber)
+		{
+			return SeasonRepository.Get(showID, seasonNumber);
+		}
+		
+		public Task<Episode> GetEpisode(int id)
+		{
+			return EpisodeRepository.Get(id);
+		}
+
+		public Task<Episode> GetEpisode(int showID, int seasonNumber, int episodeNumber)
+		{
+			return EpisodeRepository.Get(showID, seasonNumber, episodeNumber);
+		}
+		
+		public Task<Genre> GetGenre(int id)
+		{
+			return GenreRepository.Get(id);
+		}
+
+		public Task<Studio> GetStudio(int id)
+		{
+			return StudioRepository.Get(id);
+		}
+
+		public Task<People> GetPeople(int id)
+		{
+			return PeopleRepository.Get(id);
+		}
+
 		public Task<Library> GetLibrary(string slug)
 		{
 			return LibraryRepository.Get(slug);
@@ -108,11 +158,6 @@ namespace Kyoo.Controllers
 		public Task<Track> GetTrack(int id)
 		{
 			return TrackRepository.Get(id);
-		}
-		
-		public Task<Track> GetTrack(int episodeID, string language, bool isForced)
-		{
-			return TrackRepository.Get(episodeID, language, isForced);
 		}
 
 		public Task<Genre> GetGenre(string slug)
@@ -290,6 +335,34 @@ namespace Kyoo.Controllers
 			return GenreRepository.GetFromShow(showSlug, where, sort, limit);
 		}
 
+		public Task<ICollection<Track>> GetTracksFromEpisode(int episodeID, 
+			Expression<Func<Track, bool>> where = null,
+			Sort<Track> sort = default,
+			Pagination limit = default)
+		{
+			return TrackRepository.GetFromEpisode(episodeID, where, sort, limit);
+		}
+
+		public Task<ICollection<Track>> GetTracksFromEpisode(int showID, 
+			int seasonNumber, 
+			int episodeNumber,
+			Expression<Func<Track, bool>> where = null,
+			Sort<Track> sort = default,
+			Pagination limit = default)
+		{
+			return TrackRepository.GetFromEpisode(showID, seasonNumber, episodeNumber, where, sort, limit);
+		}
+
+		public Task<ICollection<Track>> GetTracksFromEpisode(string showSlug, 
+			int seasonNumber,
+			int episodeNumber, 
+			Expression<Func<Track, bool>> where = null,
+			Sort<Track> sort = default, 
+			Pagination limit = default)
+		{
+			return TrackRepository.GetFromEpisode(showSlug, seasonNumber, episodeNumber, where, sort, limit);
+		}
+
 		public Task<Studio> GetStudioFromShow(int showID)
 		{
 			return StudioRepository.GetFromShow(showID);
@@ -298,6 +371,21 @@ namespace Kyoo.Controllers
 		public Task<Studio> GetStudioFromShow(string showSlug)
 		{
 			return StudioRepository.GetFromShow(showSlug);
+		}
+
+		public Task<Show> GetShowFromSeason(int seasonID)
+		{
+			return ShowRepository.GetFromSeason(seasonID);
+		}
+		
+		public Task<Show> GetShowFromEpisode(int episodeID)
+		{
+			return ShowRepository.GetFromEpisode(episodeID);
+		}
+
+		public Task<Season> GetSeasonFromEpisode(int episodeID)
+		{
+			return SeasonRepository.GetFromEpisode(episodeID);
 		}
 
 		public Task<ICollection<Library>> GetLibrariesFromShow(int showID, 

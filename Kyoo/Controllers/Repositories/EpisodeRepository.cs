@@ -61,7 +61,32 @@ namespace Kyoo.Controllers
 			                                                         && x.SeasonNumber == seasonNumber
 			                                                         && x.EpisodeNumber == episodeNumber);
 		}
-		
+
+		public Task<Episode> Get(int showID, int seasonNumber, int episodeNumber)
+		{
+			return _database.Episodes.FirstOrDefaultAsync(x => x.ShowID == showID 
+			                                                   && x.SeasonNumber == seasonNumber
+			                                                   && x.EpisodeNumber == episodeNumber);
+		}
+
+		public Task<Episode> Get(int seasonID, int episodeNumber)
+		{
+			return _database.Episodes.FirstOrDefaultAsync(x => x.SeasonID == seasonID
+			                                                   && x.EpisodeNumber == episodeNumber);
+		}
+
+		public Task<Episode> GetAbsolute(int showID, int absoluteNumber)
+		{
+			return _database.Episodes.FirstOrDefaultAsync(x => x.ShowID == showID
+			                                                   && x.AbsoluteNumber == absoluteNumber);
+		}
+
+		public Task<Episode> GetAbsolute(string showSlug, int absoluteNumber)
+		{
+			return _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == showSlug
+			                                                   && x.AbsoluteNumber == absoluteNumber);
+		}
+
 		public override async Task<ICollection<Episode>> Search(string query)
 		{
 			return await _database.Episodes
