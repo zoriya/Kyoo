@@ -4,14 +4,13 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {ActivatedRouteSnapshot, Resolve} from '@angular/router';
 import {Observable, EMPTY} from 'rxjs';
 import {catchError} from 'rxjs/operators';
-import {IResource} from "../../../models/resources/resource";
 
 @Injectable()
 export class ItemResolver
 {
 	public static resolvers: any[] = [];
 
-	static forResource<T extends IResource>(resource: string)
+	static forResource<T>(resource: string)
 	{
 		@Injectable()
 		class Resolver implements Resolve<T>
@@ -28,12 +27,23 @@ export class ItemResolver
 					.pipe(
 						catchError((error: HttpErrorResponse) =>
 						{
-							console.log(error.status + " - " + error.message);
-							this.snackBar.open(`An unknown error occurred: ${error.message}.`, null, {
-								horizontalPosition: "left",
-								panelClass: ['snackError'],
-								duration: 2500
-							});
+							if (error.status == 404)
+							{
+								this.snackBar.open(`Item not found.`, null, {
+									horizontalPosition: "left",
+									panelClass: ['snackError'],
+									duration: 2500
+								});
+							}
+							else
+							{
+								console.log(error.status + " - " + error.message);
+								this.snackBar.open(`An unknown error occurred: ${error.message}.`, null, {
+									horizontalPosition: "left",
+									panelClass: ['snackError'],
+									duration: 2500
+								});
+							}
 							return EMPTY;
 						}));
 			}

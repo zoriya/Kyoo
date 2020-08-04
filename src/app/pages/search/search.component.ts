@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from "@angular/router";
 import { SearchResult } from "../../../models/search-result";
 import { Title } from "@angular/platform-browser";
+import {Page} from "../../../models/page";
 
 @Component({
 	selector: 'app-search',
@@ -35,5 +36,10 @@ export class SearchComponent implements OnInit, OnDestroy
 		let searchBar: HTMLInputElement = <HTMLInputElement>document.getElementById("search");
 		searchBar.classList.remove("searching");
 		searchBar.value = "";
+	}
+
+	AsPage<T>(collection: T[]): Page<T>
+	{
+		return new Page<T>({this: "", items: collection, next: null, count: collection.length});
 	}
 }

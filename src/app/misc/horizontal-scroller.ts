@@ -6,7 +6,7 @@ export class HorizontalScroller
 	@ViewChild("scrollView", { static: true }) private scrollView: ElementRef;
 	@ViewChild("leftBtn", { static: false }) private leftBtn: MatButton;
 	@ViewChild("rightBtn", { static: false }) private rightBtn: MatButton;
-	@ViewChild("itemsDom", { static: false }) private items: ElementRef;
+	@ViewChild("itemsDom", { static: false }) private itemsDom: ElementRef;
 
 	scrollLeft()
 	{
@@ -22,7 +22,7 @@ export class HorizontalScroller
 
 	roundScroll(offset: number): number
 	{
-		let itemSize: number = this.items.nativeElement.scrollWidth;
+		let itemSize: number = this.itemsDom.nativeElement.scrollWidth;
 
 		offset = Math.round(offset / itemSize) * itemSize;
 		if (offset == 0)

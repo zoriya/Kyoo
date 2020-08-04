@@ -1,16 +1,16 @@
 <div *ngIf="items.collections.length > 0" class="container-fluid mt-3">
 	<h3>Collections</h3>
 </div>
-<app-collections-list [collections]="items.collections"></app-collections-list>
+<app-items-list [items]="AsPage(items.collections)"></app-items-list>
 <div *ngIf="items.shows.length > 0" class="container-fluid mt-3">
 	<h3>Shows</h3>
 </div>
-<app-shows-list [shows]="items.shows"></app-shows-list>
+<app-items-list [items]="AsPage(items.shows)"></app-items-list>
 <div *ngIf="items.episodes.length > 0" class="container-fluid mt-5">
 	<h3>Episodes</h3>
 </div>
-<app-episodes-list displayShowTitle="true" [episodes]="items.episodes"></app-episodes-list>
+<app-episodes-list displayShowTitle="true" [episodes]="AsPage(items.episodes)"></app-episodes-list>
 <div *ngIf="items.people.length > 0" class="container-fluid mt-5">
 	<h3>People</h3>
 </div>
-<app-people-list [people]="items.people"></app-people-list>
+<app-people-list [people]="AsPage(items.people)"></app-people-list>

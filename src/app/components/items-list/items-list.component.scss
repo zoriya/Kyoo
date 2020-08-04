@@ -1,8 +1,8 @@
-@import "~bootstrap/scss/functions";
-@import "~bootstrap/scss/variables";
-@import "~bootstrap/scss/mixins/breakpoints";
+@import "../../../../node_modules/bootstrap/scss/functions";
+@import "../../../../node_modules/bootstrap/scss/variables";
+@import "../../../../node_modules/bootstrap/scss/mixins/breakpoints";
 
-.collections-container
+.container
 {
 	display: flex;
 	padding-left: 15px;
@@ -11,6 +11,8 @@
 	min-width: 100%;
 	flex-shrink: 0;
 	flex-direction: row;
+	scrollbar-width: thin;
+	scrollbar-color: #999 transparent;
 
 	&::-webkit-scrollbar
 	{
@@ -30,7 +32,7 @@
 	}
 }
 
-.collection
+.item
 {
 	width: 33%;
 	min-width: 120px;
@@ -93,8 +95,14 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		text-align: center;
-		margin-bottom: 0px;
+		margin-bottom: 0;
 		opacity: 1;
+
+		&.date
+		{
+			opacity: 0.8;
+			font-size: 0.8em;
+		}
 	}
 
 	&:host-context(.hoverEnabled) &:hover

@@ -1,0 +1,11 @@
+<div class="scroll-row mb-5">
+	<div class="container" #scrollView (scroll)="onScroll()" infinite-scroll (scrolled)="this.items?.loadNext(this.client)" [horizontal]="true" [scrollWindow]="false">
+		<a class="item" *ngFor="let item of this.items?.items" [routerLink]="getLink(item)" [href]="getLink(item)" #itemsDom>
+			<div matRipple [style.background-image]="getThumb(item.slug)"> </div>
+			<p class="title">{{item.title ? item.title : item.name}}</p>
+			<p class="date">{{getDate(item)}}</p>
+		</a>
+	</div>
+	<button mat-raised-button color="accent" class="scrollBtn leftBtn d-none" #leftBtn (click)="scrollLeft()"><mat-icon>arrow_left</mat-icon></button>
+	<button mat-raised-button color="accent" class="scrollBtn rightBtn" #rightBtn (click)="scrollRight()"><mat-icon>arrow_right</mat-icon></button>
+</div>

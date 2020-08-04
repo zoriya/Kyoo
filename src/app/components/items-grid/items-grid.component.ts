@@ -1,10 +1,12 @@
 import {Component, Input} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {DomSanitizer} from '@angular/platform-browser';
-import {ItemType, LibraryItem} from "../../../models/library-item";
+import {LibraryItem} from "../../../models/library-item";
 import {Page} from "../../../models/page";
 import {HttpClient} from "@angular/common/http";
 import {Show, ShowRole} from "../../../models/show";
+import {Collection} from "../../../models/collection";
+import {ItemsUtils} from "../../misc/items-utils";
 
 @Component({
 	selector: 'app-items',
@@ -13,7 +15,7 @@ import {Show, ShowRole} from "../../../models/show";
 })
 export class ItemsGridComponent
 {
-	@Input() page: Page<LibraryItem | Show | ShowRole>;
+	@Input() page: Page<LibraryItem | Show | ShowRole | Collection>;
 	@Input() sortEnabled: boolean = true;
 	sortType: string = "title";
 	sortKeys: string[] = ["title", "start year", "end year"]
@@ -34,12 +36,14 @@ export class ItemsGridComponent
 		return this.sanitizer.bypassSecurityTrustStyle("url(/poster/" + slug + ")");
 	}
 
-	getLink(item: LibraryItem | Show | ShowRole)
+	getDate(item: LibraryItem | Show | ShowRole | Collection)
 	{
-		if ("type" in item && item.type == ItemType.Collection)
-			return "/collection/" + item.slug;
-		else
-			return "/show/" + item.slug;
+		return ItemsUtils.getDate(item);
+	}
+
+	getLink(item: LibraryItem | Show | ShowRole | Collection)
+	{
+		return ItemsUtils.getLink(item);
 	}
 
 	sort(type: string, order: boolean)
@@ -51,21 +55,5 @@ export class ItemsGridComponent
 		url.searchParams.set("sortBy", `${this.sortType.replace(/\s/g, "")}:${this.sortUp ? "asc" : "desc"}`);
 		this.client.get<Page<LibraryItem | Show>>(url.toString())
 			.subscribe(x => this.page = Object.assign(new Page<LibraryItem | Show>(), x));
-	}
-
-	getDate(item: LibraryItem | Show | ShowRole): string
-	{
-		if ("role" in item && item.role)
-		{
-			if ("type" in item && item.type)
-				return `as ${item.role} (${item.type})`;
-			return `as ${item.role}`;
-		}
-		if ("type" in item && item.type && typeof item.type == "string")
-			return item.type;
-
-		if (item.endYear && item.startYear != item.endYear)
-			return `${item.startYear} - ${item.endYear}`
-		return item.startYear?.toString();
 	}
 }

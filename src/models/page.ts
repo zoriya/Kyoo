@@ -8,7 +8,10 @@ export class Page<T>
 	count: number
 	items: T[]
 
-	constructor() {}
+	constructor(init?:Partial<Page<T>>)
+	{
+		Object.assign(this, init);
+	}
 
 	loadNext(client: HttpClient)
 	{

@@ -1,7 +1,7 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 import {ItemsGridComponent} from './components/items-grid/items-grid.component';
-import {NotFoundComponent} from './not-found/not-found.component';
+import {NotFoundComponent} from './pages/not-found/not-found.component';
 import {PageResolver} from './services/resolvers/page-resolver.service';
 import {ShowDetailsComponent} from './pages/show-details/show-details.component';
 import {AuthGuard} from "./auth/misc/authenticated-guard.service";
@@ -18,7 +18,8 @@ import {Show} from "../models/show";
 import {ItemResolver} from "./services/resolvers/item-resolver.service";
 import {CollectionComponent} from "./pages/collection/collection.component";
 import {Collection} from "../models/collection";
-import {People} from "../models/people";
+import {SearchComponent} from "./pages/search/search.component";
+import {SearchResult} from "../models/search-result";
 
 const routes: Routes = [
 	{path: "browse", component: ItemsGridComponent, pathMatch: "full",
@@ -55,8 +56,14 @@ const routes: Routes = [
 		canLoad: [AuthGuard.forPermissions("read")],
 		canActivate: [AuthGuard.forPermissions("read")]
 	},
+
+	{path: "search/:query", component: SearchComponent,
+		resolve: { items: ItemResolver.forResource<SearchResult>("search/:query") },
+		canLoad: [AuthGuard.forPermissions("read")],
+		canActivate: [AuthGuard.forPermissions("read")]
+	},
+
 	// {path: "watch/:item", component: PlayerComponent, resolve: { item: StreamResolverService }, canLoad: [AuthGuard.forPermissions("play")], canActivate: [AuthGuard.forPermissions("play")]},
-	// {path: "search/:query", component: SearchComponent, resolve: { items: SearchResolverService }, canLoad: [AuthGuard.forPermissions("read")], canActivate: [AuthGuard.forPermissions("read")]},
 	// TODO implement missing pages: /genre, /studio & an home page.
 	{path: "**", component: NotFoundComponent}
 ];
