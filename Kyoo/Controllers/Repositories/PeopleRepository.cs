@@ -102,8 +102,8 @@ namespace Kyoo.Controllers
 				};
 			}
 
-			ICollection<PeopleLink> people = await ApplyFilters(_database.PeopleLinks.Where(x => x.ShowID == showID),
-				id => _database.PeopleLinks.FirstOrDefaultAsync(x => x.ID == id),
+			ICollection<PeopleLink> people = await ApplyFilters(_database.PeopleRoles.Where(x => x.ShowID == showID),
+				id => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id),
 				x => x.People.Name,
 				where,
 				sort,
@@ -128,8 +128,8 @@ namespace Kyoo.Controllers
 				};
 			}
 			
-			ICollection<PeopleLink> people = await ApplyFilters(_database.PeopleLinks.Where(x => x.Show.Slug == showSlug),
-				id => _database.PeopleLinks.FirstOrDefaultAsync(x => x.ID == id),
+			ICollection<PeopleLink> people = await ApplyFilters(_database.PeopleRoles.Where(x => x.Show.Slug == showSlug),
+				id => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id),
 				x => x.People.Name,
 				where,
 				sort,
@@ -137,6 +137,40 @@ namespace Kyoo.Controllers
 			if (!people.Any() && await _shows.Value.Get(showSlug) == null)
 				throw new ItemNotFound();
 			return people;
+		}
+		
+		public async Task<ICollection<ShowRole>> GetFromPeople(int peopleID,
+			Expression<Func<ShowRole, bool>> where = null,
+			Sort<ShowRole> sort = default, 
+			Pagination limit = default)
+		{
+			ICollection<ShowRole> roles = await ApplyFilters(_database.PeopleRoles.Where(x => x.PeopleID == peopleID)
+					.Select(ShowRole.FromPeopleRole),
+				async id => new ShowRole(await _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id)),
+				x => x.Title,
+				where,
+				sort,
+				limit);
+			if (!roles.Any() && await Get(peopleID) == null)
+				throw new ItemNotFound();
+			return roles;
+		}
+		
+		public async Task<ICollection<ShowRole>> GetFromPeople(string slug,
+			Expression<Func<ShowRole, bool>> where = null,
+			Sort<ShowRole> sort = default, 
+			Pagination limit = default)
+		{
+			ICollection<ShowRole> roles = await ApplyFilters(_database.PeopleRoles.Where(x => x.People.Slug == slug)
+					.Select(ShowRole.FromPeopleRole),
+				async id => new ShowRole(await _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id)),
+				x => x.Title,
+				where,
+				sort,
+				limit);
+			if (!roles.Any() && await Get(slug) == null)
+				throw new ItemNotFound();
+			return roles;
 		}
 	}
 }

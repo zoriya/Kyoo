@@ -395,6 +395,26 @@ namespace Kyoo.Controllers
 			Expression<Func<PeopleLink, object>> sort,
 			Pagination limit = default
 		) => GetFromShow(showSlug, where, new Sort<PeopleLink>(sort), limit);
+		
+		Task<ICollection<ShowRole>> GetFromPeople(int showID,
+			Expression<Func<ShowRole, bool>> where = null, 
+			Sort<ShowRole> sort = default,
+			Pagination limit = default);
+		Task<ICollection<ShowRole>> GetFromPeople(int showID,
+			[Optional] Expression<Func<ShowRole, bool>> where,
+			Expression<Func<ShowRole, object>> sort,
+			Pagination limit = default
+		) => GetFromPeople(showID, where, new Sort<ShowRole>(sort), limit);
+		
+		Task<ICollection<ShowRole>> GetFromPeople(string showSlug,
+			Expression<Func<ShowRole, bool>> where = null, 
+			Sort<ShowRole> sort = default,
+			Pagination limit = default);
+		Task<ICollection<ShowRole>> GetFromPeople(string showSlug,
+			[Optional] Expression<Func<ShowRole, bool>> where,
+			Expression<Func<ShowRole, object>> sort,
+			Pagination limit = default
+		) => GetFromPeople(showSlug, where, new Sort<ShowRole>(sort), limit);
 	}
 	public interface IProviderRepository : IRepository<ProviderID> {}
 }

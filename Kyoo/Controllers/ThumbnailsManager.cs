@@ -68,10 +68,10 @@ namespace Kyoo.Controllers
 			foreach (PeopleLink peop in people)
 			{
 				string localPath = Path.Combine(root, peop.People.Slug + ".jpg");
-				if (peop.People.ImgPrimary == null)
+				if (peop.People.Poster == null)
 					continue;
 				if (alwaysDownload || !File.Exists(localPath))
-					await DownloadImage(peop.People.ImgPrimary, localPath, $"The profile picture of {peop.People.Name}");
+					await DownloadImage(peop.People.Poster, localPath, $"The profile picture of {peop.People.Name}");
 			}
 			
 			return people;

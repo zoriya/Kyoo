@@ -8,6 +8,11 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:Enum:item_type", "show,movie,collection")
+                .Annotation("Npgsql:Enum:status", "finished,airing,planned,unknown")
+                .Annotation("Npgsql:Enum:stream_type", "unknow,video,audio,subtitle");
+
             migrationBuilder.CreateTable(
                 name: "Collections",
                 columns: table => new
@@ -46,7 +51,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Slug = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true),
-                    Paths = table.Column<string>(nullable: true)
+                    Paths = table.Column<string[]>(type: "text[]", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -61,7 +66,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Slug = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true),
-                    ImgPrimary = table.Column<string>(nullable: true)
+                    Poster = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -131,7 +136,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Slug = table.Column<string>(nullable: true),
                     Title = table.Column<string>(nullable: true),
-                    Aliases = table.Column<string>(nullable: true),
+                    Aliases = table.Column<string[]>(type: "text[]", nullable: true),
                     Path = table.Column<string>(nullable: true),
                     Overview = table.Column<string>(nullable: true),
                     Status = table.Column<int>(nullable: true),
@@ -239,7 +244,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 });
 
             migrationBuilder.CreateTable(
-                name: "PeopleLinks",
+                name: "PeopleRoles",
                 columns: table => new
                 {
                     ID = table.Column<int>(nullable: false)
@@ -251,15 +256,15 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PeopleLinks", x => x.ID);
+                    table.PrimaryKey("PK_PeopleRoles", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_PeopleLinks_People_PeopleID",
+                        name: "FK_PeopleRoles_People_PeopleID",
                         column: x => x.PeopleID,
                         principalTable: "People",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PeopleLinks_Shows_ShowID",
+                        name: "FK_PeopleRoles_Shows_ShowID",
                         column: x => x.ShowID,
                         principalTable: "Shows",
                         principalColumn: "ID",
@@ -500,13 +505,13 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_PeopleLinks_PeopleID",
-                table: "PeopleLinks",
+                name: "IX_PeopleRoles_PeopleID",
+                table: "PeopleRoles",
                 column: "PeopleID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PeopleLinks_ShowID",
-                table: "PeopleLinks",
+                name: "IX_PeopleRoles_ShowID",
+                table: "PeopleRoles",
                 column: "ShowID");
 
             migrationBuilder.CreateIndex(
@@ -569,7 +574,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "MetadataIds");
 
             migrationBuilder.DropTable(
-                name: "PeopleLinks");
+                name: "PeopleRoles");
 
             migrationBuilder.DropTable(
                 name: "ProviderLinks");
