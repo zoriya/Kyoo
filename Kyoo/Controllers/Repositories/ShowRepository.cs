@@ -78,9 +78,10 @@ namespace Kyoo.Controllers
 
 		public override async Task<ICollection<Show>> Search(string query)
 		{
+			query = $"%{query}%";
 			return await _database.Shows
-				.Where(x => EF.Functions.ILike(x.Title, $"%{query}%") 
-				            /*|| EF.Functions.ILike(x.Aliases, $"%{query}%")*/)
+				.Where(x => EF.Functions.ILike(x.Title, query) 
+				            /*|| x.Aliases.Any(y => EF.Functions.ILike(y, query))*/) // NOT TRANSLATABLE.
 				.Take(20)
 				.ToListAsync();
 		}

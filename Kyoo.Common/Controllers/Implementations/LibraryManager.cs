@@ -411,6 +411,22 @@ namespace Kyoo.Controllers
 		{
 			return LibraryRepository.GetFromCollection(slug, where, sort, limit);
 		}
+		
+		public Task<ICollection<ShowRole>> GetRolesFromPeople(int id, 
+			Expression<Func<ShowRole, bool>> where = null, 
+			Sort<ShowRole> sort = default, 
+			Pagination limit = default)
+		{
+			return PeopleRepository.GetFromPeople(id, where, sort, limit);
+		}
+
+		public Task<ICollection<ShowRole>> GetRolesFromPeople(string slug, 
+			Expression<Func<ShowRole, bool>> where = null, 
+			Sort<ShowRole> sort = default, 
+			Pagination limit = default)
+		{
+			return PeopleRepository.GetFromPeople(slug, where, sort, limit);
+		}
 
 		public Task AddShowLink(int showID, int? libraryID, int? collectionID)
 		{

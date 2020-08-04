@@ -9,6 +9,7 @@ using IdentityServer4.EntityFramework.Interfaces;
 using IdentityServer4.EntityFramework.Options;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
+using Kyoo.Models.Watch;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -68,37 +69,46 @@ namespace Kyoo
 		public DbSet<ProviderID> Providers { get; set; }
 		public DbSet<MetadataID> MetadataIds { get; set; }
 		
-		public DbSet<LibraryLink> LibraryLinks { get; set; }
-		public DbSet<CollectionLink> CollectionLinks { get; set; }
-		public DbSet<PeopleLink> PeopleLinks { get; set; }
+		public DbSet<PeopleLink> PeopleRoles { get; set; }
+		
 		
 		// This is used because EF doesn't support Many-To-Many relationships so for now we need to override the getter/setters to store this.
+		public DbSet<LibraryLink> LibraryLinks { get; set; }
+		public DbSet<CollectionLink> CollectionLinks { get; set; }
 		public DbSet<GenreLink> GenreLinks { get; set; }
 		public DbSet<ProviderLink> ProviderLinks { get; set; }
-		
-		
-		private readonly ValueConverter<IEnumerable<string>, string> _stringArrayConverter = 
-			new ValueConverter<IEnumerable<string>, string>(
-			arr => string.Join("|", arr),
-			str => str.Split("|", StringSplitOptions.None));
 
+		public DatabaseContext()
+		{
+			NpgsqlConnection.GlobalTypeMapper.MapEnum<Status>();
+			NpgsqlConnection.GlobalTypeMapper.MapEnum<ItemType>();
+			NpgsqlConnection.GlobalTypeMapper.MapEnum<StreamType>();
+		}
+		
 		private readonly ValueComparer<IEnumerable<string>> _stringArrayComparer = 
 			new ValueComparer<IEnumerable<string>>(
-			(l1, l2) => l1.SequenceEqual(l2),
-			arr => arr.Aggregate(0, (i, s) => s.GetHashCode()));
-		
+				(l1, l2) => l1.SequenceEqual(l2),
+				arr => arr.Aggregate(0, (i, s) => s.GetHashCode()));
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
 
-			modelBuilder.Entity<Library>().Property(e => e.Paths)
-				.HasConversion(_stringArrayConverter).Metadata
-				.SetValueComparer(_stringArrayComparer);
-			modelBuilder.Entity<Show>().Property(e => e.Aliases)
-				.HasConversion(_stringArrayConverter).Metadata
-				.SetValueComparer(_stringArrayComparer);
+			modelBuilder.HasPostgresEnum<Status>();
+			modelBuilder.HasPostgresEnum<ItemType>();
+			modelBuilder.HasPostgresEnum<StreamType>();
 
+			modelBuilder.Entity<Library>()
+				.Property(x => x.Paths)
+				.HasColumnType("text[]")
+				.Metadata.SetValueComparer(_stringArrayComparer);
+
+			modelBuilder.Entity<Show>()
+				.Property(x => x.Aliases)
+				.HasColumnType("text[]")
+				.Metadata.SetValueComparer(_stringArrayComparer);
+			
+			
 			modelBuilder.Entity<Track>()
 				.Property(t => t.IsDefault)
 				.ValueGeneratedNever();
@@ -127,6 +137,7 @@ namespace Kyoo
 			modelBuilder.Entity<PeopleLink>()
 				.Ignore(x => x.Slug)
 				.Ignore(x => x.Name)
+				.Ignore(x => x.Poster)
 				.Ignore(x => x.ExternalIDs);
 
 			modelBuilder.Entity<Genre>()

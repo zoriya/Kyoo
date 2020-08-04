@@ -292,6 +292,26 @@ namespace Kyoo.Controllers
 			Expression<Func<Library, object>> sort,
 			Pagination limit = default
 		) => GetLibrariesFromCollection(slug, where, new Sort<Library>(sort), limit);
+		
+		Task<ICollection<ShowRole>> GetRolesFromPeople(int showID,
+			Expression<Func<ShowRole, bool>> where = null, 
+			Sort<ShowRole> sort = default,
+			Pagination limit = default);
+		Task<ICollection<ShowRole>> GetRolesFromPeople(int showID,
+			[Optional] Expression<Func<ShowRole, bool>> where,
+			Expression<Func<ShowRole, object>> sort,
+			Pagination limit = default
+		) => GetRolesFromPeople(showID, where, new Sort<ShowRole>(sort), limit);
+		
+		Task<ICollection<ShowRole>> GetRolesFromPeople(string showSlug,
+			Expression<Func<ShowRole, bool>> where = null, 
+			Sort<ShowRole> sort = default,
+			Pagination limit = default);
+		Task<ICollection<ShowRole>> GetRolesFromPeople(string showSlug,
+			[Optional] Expression<Func<ShowRole, bool>> where,
+			Expression<Func<ShowRole, object>> sort,
+			Pagination limit = default
+		) => GetRolesFromPeople(showSlug, where, new Sort<ShowRole>(sort), limit);
 
 
 		// Helpers
