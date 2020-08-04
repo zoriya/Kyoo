@@ -18,6 +18,7 @@ import {Show} from "../models/show";
 import {ItemResolver} from "./services/resolvers/item-resolver.service";
 import {CollectionComponent} from "./pages/collection/collection.component";
 import {Collection} from "../models/collection";
+import {People} from "../models/people";
 
 const routes: Routes = [
 	{path: "browse", component: ItemsGridComponent, pathMatch: "full",
@@ -37,14 +38,26 @@ const routes: Routes = [
 		canActivate: [AuthGuard.forPermissions("read")]
 	},
 	{path: "collection/:slug", component: CollectionComponent,
-		resolve: { collection: ItemResolver.forResource<Collection>("collections/:slug") },
+		resolve:
+		{
+			collection: ItemResolver.forResource<Collection>("collections/:slug"),
+			shows: PageResolver.forResource<Show>("collections/:slug/shows")
+		},
 		canLoad: [AuthGuard.forPermissions("read")],
 		canActivate: [AuthGuard.forPermissions("read")]
 	},
-
-	// {path: "people/:people-slug", component: CollectionComponent, resolve: { collection: PeopleResolverService }, canLoad: [AuthGuard.forPermissions("read")], canActivate: [AuthGuard.forPermissions("read")]},
+	{path: "people/:slug", component: CollectionComponent,
+		resolve:
+		{
+			collection: ItemResolver.forResource<Collection>("people/:slug"),
+			shows: PageResolver.forResource<Show>("people/:slug/roles")
+		},
+		canLoad: [AuthGuard.forPermissions("read")],
+		canActivate: [AuthGuard.forPermissions("read")]
+	},
 	// {path: "watch/:item", component: PlayerComponent, resolve: { item: StreamResolverService }, canLoad: [AuthGuard.forPermissions("play")], canActivate: [AuthGuard.forPermissions("play")]},
 	// {path: "search/:query", component: SearchComponent, resolve: { items: SearchResolverService }, canLoad: [AuthGuard.forPermissions("read")], canActivate: [AuthGuard.forPermissions("read")]},
+	// TODO implement missing pages: /genre, /studio & an home page.
 	{path: "**", component: NotFoundComponent}
 ];
 

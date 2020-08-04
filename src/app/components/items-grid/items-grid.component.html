@@ -28,7 +28,6 @@
 	<a class="show" *ngFor="let item of this.page?.items" [href]="getLink(item)" [routerLink]="getLink(item)">
 		<div matRipple [style.background-image]="getThumb(item.slug)" > </div>
 		<p class="title">{{item.title}}</p>
-		<p class="date" *ngIf="item.endYear && item.startYear != item.endYear; else elseBlock">{{item.startYear}} - {{item.endYear}}</p>
-		<ng-template #elseBlock><p class="date">{{item.startYear}}</p></ng-template>
+		<p class="date">{{getDate(item)}}</p>
 	</a>
 </div>

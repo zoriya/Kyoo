@@ -4,7 +4,7 @@ import {ActivatedRoute} from "@angular/router";
 import {DomSanitizer} from "@angular/platform-browser";
 import {Show} from "../../../models/show";
 import {Page} from "../../../models/page";
-import {ShowService} from "../../services/api.service";
+import {People} from "../../../models/people";
 
 @Component({
 	selector: 'app-collection',
@@ -13,15 +13,15 @@ import {ShowService} from "../../services/api.service";
 })
 export class CollectionComponent
 {
-	collection: Collection;
+	collection: Collection | People;
 	shows: Page<Show>;
 
-	constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer, private showService: ShowService)
+	constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer)
 	{
 		this.route.data.subscribe((data) =>
 		{
 			this.collection = data.collection;
-			this.showService.getForCollection(this.collection.slug).subscribe(x => this.shows = x);
+			this.shows = data.shows;
 		});
 	}
 

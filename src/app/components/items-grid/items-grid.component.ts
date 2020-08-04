@@ -4,7 +4,7 @@ import {DomSanitizer} from '@angular/platform-browser';
 import {ItemType, LibraryItem} from "../../../models/library-item";
 import {Page} from "../../../models/page";
 import {HttpClient} from "@angular/common/http";
-import {Show} from "../../../models/show";
+import {Show, ShowRole} from "../../../models/show";
 
 @Component({
 	selector: 'app-items',
@@ -13,7 +13,7 @@ import {Show} from "../../../models/show";
 })
 export class ItemsGridComponent
 {
-	@Input() page: Page<LibraryItem | Show>;
+	@Input() page: Page<LibraryItem | Show | ShowRole>;
 	@Input() sortEnabled: boolean = true;
 	sortType: string = "title";
 	sortKeys: string[] = ["title", "start year", "end year"]
@@ -34,7 +34,7 @@ export class ItemsGridComponent
 		return this.sanitizer.bypassSecurityTrustStyle("url(/poster/" + slug + ")");
 	}
 
-	getLink(item: LibraryItem | Show)
+	getLink(item: LibraryItem | Show | ShowRole)
 	{
 		if ("type" in item && item.type == ItemType.Collection)
 			return "/collection/" + item.slug;
@@ -51,5 +51,21 @@ export class ItemsGridComponent
 		url.searchParams.set("sortBy", `${this.sortType.replace(/\s/g, "")}:${this.sortUp ? "asc" : "desc"}`);
 		this.client.get<Page<LibraryItem | Show>>(url.toString())
 			.subscribe(x => this.page = Object.assign(new Page<LibraryItem | Show>(), x));
+	}
+
+	getDate(item: LibraryItem | Show | ShowRole): string
+	{
+		if ("role" in item && item.role)
+		{
+			if ("type" in item && item.type)
+				return `as ${item.role} (${item.type})`;
+			return `as ${item.role}`;
+		}
+		if ("type" in item && item.type && typeof item.type == "string")
+			return item.type;
+
+		if (item.endYear && item.startYear != item.endYear)
+			return `${item.startYear} - ${item.endYear}`
+		return item.startYear?.toString();
 	}
 }

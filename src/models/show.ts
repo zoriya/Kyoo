@@ -25,3 +25,21 @@ export interface Show extends IResource
 
 	externalIDs: ExternalID[];
 }
+
+export interface ShowRole extends IResource
+{
+	role: string;
+	type: string;
+
+	title: string;
+	aliases: string[];
+	overview: string;
+	status: string;
+	trailerUrl: string;
+	isMovie: boolean;
+	startYear: number;
+	endYear : number;
+	poster: string;
+	logo: string;
+	backdrop: string;
+}
