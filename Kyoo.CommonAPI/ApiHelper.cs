@@ -20,13 +20,14 @@ namespace Kyoo.CommonApi
 			return operand(left, right);
 		}
 		
-		public static Expression<Func<T, bool>> ParseWhere<T>(Dictionary<string, string> where)
+		public static Expression<Func<T, bool>> ParseWhere<T>(Dictionary<string, string> where, 
+			Expression<Func<T, bool>> defaultWhere = null)
 		{
 			if (where == null || where.Count == 0)
 				return null;
 			
 			ParameterExpression param = Expression.Parameter(typeof(T));
-			Expression expression = null;
+			Expression expression = defaultWhere?.Body;
 
 			foreach ((string key, string desired) in where)
 			{
@@ -42,21 +43,26 @@ namespace Kyoo.CommonApi
 				if (property == null)
 					throw new ArgumentException($"No filterable parameter with the name {key}.");
 				MemberExpression propertyExpr = Expression.Property(param, property);
-				
-				Type propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
-				object val = string.IsNullOrEmpty(value) || value.Equals("null", StringComparison.OrdinalIgnoreCase)
-					? null 
-					: Convert.ChangeType(value, propertyType);
-				ConstantExpression valueExpr = Expression.Constant(val, property.PropertyType);
+
+				ConstantExpression valueExpr = null;
+				if (operand != "ctn")
+				{
+					Type propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
+					object val = string.IsNullOrEmpty(value) || value.Equals("null", StringComparison.OrdinalIgnoreCase)
+							? null
+							: Convert.ChangeType(value, propertyType);
+					valueExpr = Expression.Constant(val, property.PropertyType);
+				}
 
 				Expression condition = operand switch
 				{
-					"eq" => Expression.Equal(propertyExpr, valueExpr),
-					"not" => Expression.NotEqual(propertyExpr, valueExpr),
+					"eq" => Expression.Equal(propertyExpr, valueExpr!),
+					"not" => Expression.NotEqual(propertyExpr, valueExpr!),
 					"lt" => StringCompatibleExpression(Expression.LessThan, propertyExpr, valueExpr),
 					"lte" => StringCompatibleExpression(Expression.LessThanOrEqual, propertyExpr, valueExpr),
 					"gt" => StringCompatibleExpression(Expression.GreaterThan, propertyExpr, valueExpr),
 					"gte" => StringCompatibleExpression(Expression.GreaterThanOrEqual, propertyExpr, valueExpr),
+					"ctn" => ContainsResourceExpression(propertyExpr, value),
 					_ => throw new ArgumentException($"Invalid operand: {operand}")	
 				};
 
@@ -67,6 +73,38 @@ namespace Kyoo.CommonApi
 			}
 			
 			return Expression.Lambda<Func<T, bool>>(expression!, param);
+		}
+
+		private static Expression ContainsResourceExpression(MemberExpression xProperty, string value)
+		{
+			// x => x.PROPERTY.Any(y => y.Slug == value)
+			Expression ret = null;
+			ParameterExpression y = Expression.Parameter(xProperty.Type.GenericTypeArguments.First(), "y");
+			foreach (string val in value.Split(','))
+			{
+				MemberExpression yProperty;
+				ConstantExpression yValue;
+				if (int.TryParse(val, out int id))
+				{
+					yProperty = Expression.Property(y, "ID");
+					yValue = Expression.Constant(id);
+				}
+				else
+				{
+					yProperty = Expression.Property(y, "Slug");
+					yValue = Expression.Constant(val);
+				}
+
+				LambdaExpression lambda = Expression.Lambda(Expression.Equal(yProperty, yValue), y);
+				Expression iteration = Expression.Call(typeof(Enumerable), "Any", xProperty.Type.GenericTypeArguments, 
+					xProperty, lambda);
+
+				if (ret == null)
+					ret = iteration;
+				else
+					ret = Expression.AndAlso(ret, iteration);
+			}
+			return ret;
 		}
 	}
 }
