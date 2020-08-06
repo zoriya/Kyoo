@@ -5,7 +5,7 @@ using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
 {
-	public class Show : IOnMerge
+	public class Show : IResource, IOnMerge
 	{
 		[JsonIgnore] public int ID { get; set; }
 
@@ -28,7 +28,6 @@ namespace Kyoo.Models
 
 		public bool IsMovie { get; set; }
 		
-		public bool IsCollection;
 		
 		public virtual IEnumerable<Genre> Genres
 		{
@@ -82,7 +81,6 @@ namespace Kyoo.Models
 			StartYear = startYear;
 			EndYear = endYear;
 			ExternalIDs = externalIDs;
-			IsCollection = false;
 		}
 
 		public Show(string slug,
@@ -112,7 +110,6 @@ namespace Kyoo.Models
 			Logo = logo;
 			Backdrop = backdrop;
 			ExternalIDs = externalIDs;
-			IsCollection = false;
 		}
 
 		public string GetID(string provider)
@@ -140,5 +137,5 @@ namespace Kyoo.Models
 		}
 	}
 
-	public enum Status { Finished, Airing, Planned }
+	public enum Status { Finished, Airing, Planned, Unknown }
 }

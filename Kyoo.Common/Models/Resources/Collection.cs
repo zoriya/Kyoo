@@ -5,16 +5,15 @@ using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
 {
-	public class Collection
+	public class Collection : IResource
 	{
 		[JsonIgnore] public int ID { get; set; }
 		public string Slug { get; set; }
 		public string Name { get; set; }
 		public string Poster { get; set; }
 		public string Overview { get; set; }
-		[JsonIgnore] public string ImgPrimary { get; set; }
 		[NotMergable] [JsonIgnore] public virtual IEnumerable<CollectionLink> Links { get; set; }
-		public virtual IEnumerable<Show> Shows
+		[JsonIgnore] public virtual IEnumerable<Show> Shows
 		{
 			get => Links.Select(x => x.Show);
 			set => Links = value.Select(x => new CollectionLink(this, x));
@@ -30,20 +29,12 @@ namespace Kyoo.Models
 
 		public Collection() { }
 
-		public Collection(string slug, string name, string overview, string imgPrimary)
+		public Collection(string slug, string name, string overview, string poster)
 		{
 			Slug = slug;
 			Name = name;
 			Overview = overview;
-			ImgPrimary = imgPrimary;
-		}
-
-		public Show AsShow()
-		{
-			return new Show(Slug, Name, null, null, Overview, null, null, null, null, null, null)
-			{
-				IsCollection = true
-			};
+			Poster = poster;
 		}
 	}
 }

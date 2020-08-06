@@ -21,7 +21,7 @@ namespace Kyoo.Controllers
 			T ret = new T();
 
 			IEnumerable<IMetadataProvider> providers = library?.Providers
-                   .Select(x => _providers.FirstOrDefault(y => y.Provider.Name == x.Name))
+                   .Select(x => _providers.FirstOrDefault(y => y.Provider.Slug == x.Slug))
                    .Where(x => x != null)
                ?? _providers;
 			
@@ -47,7 +47,7 @@ namespace Kyoo.Controllers
 			List<T> ret = new List<T>();
 			
 			IEnumerable<IMetadataProvider> providers = library?.Providers
-					.Select(x => _providers.FirstOrDefault(y => y.Provider.Name == x.Name))
+					.Select(x => _providers.FirstOrDefault(y => y.Provider.Slug == x.Slug))
 					.Where(x => x != null)
 			    ?? _providers;
 			

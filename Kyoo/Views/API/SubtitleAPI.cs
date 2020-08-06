@@ -33,7 +33,7 @@ namespace Kyoo.Api
 			string identifier,
 			string extension)
 		{
-			string languageTag = identifier.Length == 3 ? identifier.Substring(0, 3) : null;
+			string languageTag = identifier.Length >= 3 ? identifier.Substring(0, 3) : null;
 			bool forced = identifier.Length > 4 && identifier.Substring(4) == "forced";
 			Track subtitle = null;
 			

@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace Kyoo.Models
 {
-	public class Genre
+	public class Genre : IResource
 	{
 		[JsonIgnore] public int ID { get; set; }
 		public string Slug { get; set; }

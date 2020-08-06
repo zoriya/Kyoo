@@ -6,13 +6,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Kyoo.Api
 {
-	[Route("api/[controller]")]
+	[Route("api/search")]
 	[ApiController]
-	public class SearchController : ControllerBase
+	public class SearchApi : ControllerBase
 	{
 		private readonly ILibraryManager _libraryManager;
 
-		public SearchController(ILibraryManager libraryManager)
+		public SearchApi(ILibraryManager libraryManager)
 		{
 			_libraryManager = libraryManager;
 		}
@@ -21,7 +21,7 @@ namespace Kyoo.Api
 		[Authorize(Policy="Read")]
 		public async Task<ActionResult<SearchResult>> Search(string query)
 		{
-			SearchResult result = new SearchResult
+			return new SearchResult
 			{
 				Query = query,
 				Collections = await _libraryManager.SearchCollections(query),
@@ -31,7 +31,6 @@ namespace Kyoo.Api
 				Genres = await _libraryManager.SearchGenres(query),
 				Studios = await _libraryManager.SearchStudios(query)
 			};
-			return result;
 		}
 	}
 }

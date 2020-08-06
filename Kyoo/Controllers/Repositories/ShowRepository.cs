@@ -1,81 +1,92 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
-	public class ShowRepository : IShowRepository
+	public class ShowRepository : LocalRepository<Show>, IShowRepository
 	{
 		private readonly DatabaseContext _database;
 		private readonly IStudioRepository _studios;
 		private readonly IPeopleRepository _people;
 		private readonly IGenreRepository _genres;
 		private readonly IProviderRepository _providers;
-		private readonly ISeasonRepository _seasons;
-		private readonly IEpisodeRepository _episodes;
+		private readonly Lazy<ISeasonRepository> _seasons;
+		private readonly Lazy<IEpisodeRepository> _episodes;
+		private readonly Lazy<ILibraryRepository> _libraries;
+		private readonly Lazy<ICollectionRepository> _collections;
+		protected override Expression<Func<Show, object>> DefaultSort => x => x.Title;
 
 		public ShowRepository(DatabaseContext database,
 			IStudioRepository studios,
 			IPeopleRepository people, 
 			IGenreRepository genres, 
-			IProviderRepository providers, 
-			ISeasonRepository seasons, 
-			IEpisodeRepository episodes)
+			IProviderRepository providers,
+			IServiceProvider services)
+			: base(database)
 		{
 			_database = database;
 			_studios = studios;
 			_people = people;
 			_genres = genres;
 			_providers = providers;
-			_seasons = seasons;
-			_episodes = episodes;
+			_seasons = new Lazy<ISeasonRepository>(services.GetRequiredService<ISeasonRepository>);
+			_episodes = new Lazy<IEpisodeRepository>(services.GetRequiredService<IEpisodeRepository>);
+			_libraries = new Lazy<ILibraryRepository>(services.GetRequiredService<ILibraryRepository>);
+			_collections = new Lazy<ICollectionRepository>(services.GetRequiredService<ICollectionRepository>);
 		}
-		
-		public void Dispose()
+
+		public override void Dispose()
 		{
 			_database.Dispose();
 			_studios.Dispose();
+			_people.Dispose();
+			_genres.Dispose();
+			_providers.Dispose();
+			if (_seasons.IsValueCreated)
+				_seasons.Value.Dispose();
+			if (_episodes.IsValueCreated)
+				_episodes.Value.Dispose();
+			if (_libraries.IsValueCreated)
+				_libraries.Value.Dispose();
+			if (_collections.IsValueCreated)
+				_collections.Value.Dispose();
 		}
 
-		public async ValueTask DisposeAsync()
+		public override async ValueTask DisposeAsync()
 		{
-			await Task.WhenAll(_database.DisposeAsync().AsTask(), _studios.DisposeAsync().AsTask());
-		}
-		
-		public Task<Show> Get(int id)
-		{
-			return _database.Shows.FirstOrDefaultAsync(x => x.ID == id);
-		}
-		
-		public Task<Show> Get(string slug)
-		{
-			return _database.Shows.FirstOrDefaultAsync(x => x.Slug == slug);
-		}
-
-		public Task<Show> GetByPath(string path)
-		{
-			return _database.Shows.FirstOrDefaultAsync(x => x.Path == path);
+			await _database.DisposeAsync();
+			await _studios.DisposeAsync();
+			await _people.DisposeAsync();
+			await _genres.DisposeAsync();
+			await _providers.DisposeAsync();
+			if (_seasons.IsValueCreated)
+				await _seasons.Value.DisposeAsync();
+			if (_episodes.IsValueCreated)
+				await _episodes.Value.DisposeAsync();
+			if (_libraries.IsValueCreated)
+				await _libraries.Value.DisposeAsync();
+			if (_collections.IsValueCreated)
+				await _collections.Value.DisposeAsync();
 		}
 
-		public async Task<ICollection<Show>> Search(string query)
+		public override async Task<ICollection<Show>> Search(string query)
 		{
+			query = $"%{query}%";
 			return await _database.Shows
-				.FromSqlInterpolated($@"SELECT * FROM Shows WHERE 'Shows.Title' LIKE {$"%{query}%"}
-			                                           OR 'Shows.Aliases' LIKE {$"%{query}%"}")
+				.Where(x => EF.Functions.ILike(x.Title, query) 
+				            /*|| x.Aliases.Any(y => EF.Functions.ILike(y, query))*/) // NOT TRANSLATABLE.
 				.Take(20)
 				.ToListAsync();
 		}
 
-		public async Task<ICollection<Show>> GetAll()
-		{
-			return await _database.Shows.ToListAsync();
-		}
-
-		public async Task<int> Create(Show obj)
+		public override async Task<Show> Create(Show obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -92,113 +103,49 @@ namespace Kyoo.Controllers
 				foreach (MetadataID entry in obj.ExternalIDs)
 					_database.Entry(entry).State = EntityState.Added;
 			
-			try
-			{
-				await _database.SaveChangesAsync();
-			}
-			catch (DbUpdateException ex)
-			{
-				_database.DiscardChanges();
-				if (Helper.IsDuplicateException(ex))
-					throw new DuplicatedItemException($"Trying to insert a duplicated show (slug {obj.Slug} already exists).");
-				throw;
-			}
-			
-			return obj.ID;
+			await _database.SaveChangesAsync($"Trying to insert a duplicated show (slug {obj.Slug} already exists).");
+			return obj;
 		}
 		
-		public async Task<int> CreateIfNotExists(Show obj)
-		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-
-			Show old = await Get(obj.Slug);
-			if (old != null)
-				return old.ID;
-			try
-			{
-				return await Create(obj);
-			}
-			catch (DuplicatedItemException)
-			{
-				old = await Get(obj.Slug);
-				if (old == null)
-					throw new SystemException("Unknown database state.");
-				return old.ID;
-			}
-		}
-
-		public async Task Edit(Show edited, bool resetOld)
-		{
-			if (edited == null)
-				throw new ArgumentNullException(nameof(edited));
-			
-			Show old = await Get(edited.Slug);
-
-			if (old == null)
-				throw new ItemNotFound($"No show found with the slug {edited.Slug}.");
-			
-			if (resetOld)
-				Utility.Nullify(old);
-			Utility.Merge(old, edited);
-			await Validate(old);
-			await _database.SaveChangesAsync();
-		}
-
-		private async Task Validate(Show obj)
+		protected override async Task Validate(Show obj)
 		{
 			if (obj.Studio != null)
-				obj.StudioID = await _studios.CreateIfNotExists(obj.Studio);
+				obj.Studio = await _studios.CreateIfNotExists(obj.Studio);
 			
 			if (obj.GenreLinks != null)
 				foreach (GenreLink link in obj.GenreLinks)
-					link.GenreID = await _genres.CreateIfNotExists(link.Genre);
+					link.Genre = await _genres.CreateIfNotExists(link.Genre);
 
 			if (obj.People != null)
 				foreach (PeopleLink link in obj.People)
-					link.PeopleID = await _people.CreateIfNotExists(link.People);
+					link.People = await _people.CreateIfNotExists(link.People);
 
 			if (obj.ExternalIDs != null)
 				foreach (MetadataID link in obj.ExternalIDs)
-					link.ProviderID = await _providers.CreateIfNotExists(link.Provider);
+					link.Provider = await _providers.CreateIfNotExists(link.Provider);
 		}
 		
 		public async Task AddShowLink(int showID, int? libraryID, int? collectionID)
 		{
 			if (collectionID != null)
 			{
-				_database.CollectionLinks.AddIfNotExist(new CollectionLink { CollectionID = collectionID, ShowID = showID},
-					x => x.CollectionID == collectionID && x.ShowID == showID);
+				await _database.CollectionLinks.AddAsync(new CollectionLink {CollectionID = collectionID, ShowID = showID});
+				await _database.SaveIfNoDuplicates();
 			}
 			if (libraryID != null)
 			{
-				_database.LibraryLinks.AddIfNotExist(new LibraryLink {LibraryID = libraryID.Value, ShowID = showID},
-					x => x.LibraryID == libraryID.Value && x.CollectionID == null && x.ShowID == showID);
+				await _database.LibraryLinks.AddAsync(new LibraryLink {LibraryID = libraryID.Value, ShowID = showID});
+				await _database.SaveIfNoDuplicates();
 			}
 
 			if (libraryID != null && collectionID != null)
 			{
-				_database.LibraryLinks.AddIfNotExist(
-					new LibraryLink {LibraryID = libraryID.Value, CollectionID = collectionID.Value},
-					x => x.LibraryID == libraryID && x.CollectionID == collectionID && x.ShowID == null);
+				await _database.LibraryLinks.AddAsync(new LibraryLink {LibraryID = libraryID.Value, CollectionID = collectionID.Value});
+				await _database.SaveIfNoDuplicates();
 			}
-
-			await _database.SaveChangesAsync();
-		}
-
-		public async Task Delete(int id)
-		{
-			Show obj = await Get(id);
-			await Delete(obj);
-		}
-
-		public async Task Delete(string slug)
-		{
-			Show obj = await Get(slug);
-			await Delete(obj);
 		}
 		
-		public async Task Delete(Show obj)
+		public override async Task Delete(Show obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -224,32 +171,88 @@ namespace Kyoo.Controllers
 			if (obj.LibraryLinks != null)
 				foreach (LibraryLink entry in obj.LibraryLinks)
 					_database.Entry(entry).State = EntityState.Deleted;
-			
-			await _database.SaveChangesAsync();
 
+			await _database.SaveChangesAsync();
+			
 			if (obj.Seasons != null)
-				await _seasons.DeleteRange(obj.Seasons);
+				await _seasons.Value.DeleteRange(obj.Seasons);
 
 			if (obj.Episodes != null) 
-				await _episodes.DeleteRange(obj.Episodes);
+				await _episodes.Value.DeleteRange(obj.Episodes);
+		}
+
+		public async Task<ICollection<Show>> GetFromLibrary(int id, 
+			Expression<Func<Show, bool>> where = null,
+			Sort<Show> sort = default,
+			Pagination limit = default)
+		{
+			ICollection<Show> shows = await ApplyFilters(_database.LibraryLinks
+					.Where(x => x.LibraryID == id && x.ShowID != null)
+					.Select(x => x.Show),
+				where,
+				sort,
+				limit);
+			if (!shows.Any() && await _libraries.Value.Get(id) == null)
+				throw new ItemNotFound();
+			return shows;
+		}
+
+		public async Task<ICollection<Show>> GetFromLibrary(string slug,
+			Expression<Func<Show, bool>> where = null,
+			Sort<Show> sort = default, 
+			Pagination limit = default)
+		{
+			ICollection<Show> shows = await ApplyFilters(_database.LibraryLinks
+					.Where(x => x.Library.Slug == slug && x.ShowID != null)
+					.Select(x => x.Show),
+				where,
+				sort,
+				limit);
+			if (!shows.Any() && await _libraries.Value.Get(slug) == null)
+				throw new ItemNotFound();
+			return shows;
 		}
 		
-		public async Task DeleteRange(IEnumerable<Show> objs)
+		public async Task<ICollection<Show>> GetFromCollection(int id, 
+			Expression<Func<Show, bool>> where = null,
+			Sort<Show> sort = default,
+			Pagination limit = default)
 		{
-			foreach (Show obj in objs)
-				await Delete(obj);
+			ICollection<Show> shows = await ApplyFilters(_database.CollectionLinks
+					.Where(x => x.CollectionID== id)
+					.Select(x => x.Show),
+				where,
+				sort,
+				limit);
+			if (!shows.Any() && await _libraries.Value.Get(id) == null)
+				throw new ItemNotFound();
+			return shows;
+		}
+
+		public async Task<ICollection<Show>> GetFromCollection(string slug,
+			Expression<Func<Show, bool>> where = null,
+			Sort<Show> sort = default, 
+			Pagination limit = default)
+		{
+			ICollection<Show> shows = await ApplyFilters(_database.CollectionLinks
+					.Where(x => x.Collection.Slug == slug)
+					.Select(x => x.Show),
+				where,
+				sort,
+				limit);
+			if (!shows.Any() && await _libraries.Value.Get(slug) == null)
+				throw new ItemNotFound();
+			return shows;
+		}
+
+		public Task<Show> GetFromSeason(int seasonID)
+		{
+			return _database.Shows.FirstOrDefaultAsync(x => x.Seasons.Any(y => y.ID == seasonID));
 		}
 		
-		public async Task DeleteRange(IEnumerable<int> ids)
+		public Task<Show> GetFromEpisode(int episodeID)
 		{
-			foreach (int id in ids)
-				await Delete(id);
-		}
-		
-		public async Task DeleteRange(IEnumerable<string> slugs)
-		{
-			foreach (string slug in slugs)
-				await Delete(slug);
+			return _database.Shows.FirstOrDefaultAsync(x => x.Episodes.Any(y => y.ID == episodeID));
 		}
 	}
 }

@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 
 namespace Kyoo.Models
 {
-	public class Studio
+	public class Studio : IResource
 	{
 		[JsonIgnore] public int ID { get; set; }
 		public string Slug { get; set; }
