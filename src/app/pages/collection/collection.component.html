@@ -5,8 +5,7 @@
 		</div>
 		<div class="col-md-8 col-lg-9 col-xl-10">
 			<h3 class="text-center text-md-left p-2 p-md-3">{{collection.name}}</h3>
-			<h5 class="date" *ngIf="collection.endYear; else elseBlock">{{collection.startYear}} - {{collection.endYear}}</h5>
-			<ng-template #elseBlock><h5 class="date">{{collection.startYear}}</h5></ng-template>
+			<h5 class="date">{{getDate(collection)}}</h5>
 			<hr />
 			<app-items-grid [page]="shows"></app-items-grid>
 		</div>
