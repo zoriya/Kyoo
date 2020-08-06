@@ -92,7 +92,7 @@
                 <mat-label>{{provider.name}} ID</mat-label>
                 <input matInput [value]="this.getMetadataID(provider)?.dataID" (input)="this.setMetadataID(provider, $event.target.value)" >
             </mat-form-field>
-            <app-show-grid #identifyGrid [externalShows]="true" (clickCallback)="this.identifyID($event)"></app-show-grid>
+            <app-shows-grid #identifyGrid [externalShows]="true" (clickCallback)="this.identifyID($event)"></app-shows-grid>
         </mat-expansion-panel>
     </mat-accordion>
 </div>

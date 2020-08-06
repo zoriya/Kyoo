@@ -2,10 +2,10 @@ import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 import {ItemsGridComponent} from './components/items-grid/items-grid.component';
 import {NotFoundComponent} from './pages/not-found/not-found.component';
-import {PageResolver} from './services/resolvers/page-resolver.service';
+import {PageResolver} from './services/page-resolver.service';
 import {ShowDetailsComponent} from './pages/show-details/show-details.component';
 import {AuthGuard} from "./auth/misc/authenticated-guard.service";
-import {LibraryItem} from "../models/library-item";
+import {LibraryItem} from "../models/resources/library-item";
 import {
 	EpisodeService,
 	LibraryItemService,
@@ -14,12 +14,14 @@ import {
 	SeasonService,
 	ShowService
 } from "./services/api.service";
-import {Show} from "../models/show";
-import {ItemResolver} from "./services/resolvers/item-resolver.service";
+import {Show} from "../models/resources/show";
+import {ItemResolver} from "./services/item-resolver.service";
 import {CollectionComponent} from "./pages/collection/collection.component";
-import {Collection} from "../models/collection";
+import {Collection} from "../models/resources/collection";
 import {SearchComponent} from "./pages/search/search.component";
 import {SearchResult} from "../models/search-result";
+import {PlayerComponent} from "./pages/player/player.component";
+import {WatchItem} from "../models/watch-item";
 
 const routes: Routes = [
 	{path: "browse", component: ItemsGridComponent, pathMatch: "full",
@@ -63,8 +65,15 @@ const routes: Routes = [
 		canActivate: [AuthGuard.forPermissions("read")]
 	},
 
-	// {path: "watch/:item", component: PlayerComponent, resolve: { item: StreamResolverService }, canLoad: [AuthGuard.forPermissions("play")], canActivate: [AuthGuard.forPermissions("play")]},
+	{path: "watch/:item", component: PlayerComponent,
+		resolve: { item: ItemResolver.forResource<WatchItem>("watch/:item") },
+		canLoad: [AuthGuard.forPermissions("play")],
+		canActivate: [AuthGuard.forPermissions("play")]
+	},
+
 	// TODO implement missing pages: /genre, /studio & an home page.
+
+	{path: "", pathMatch: 'full', redirectTo: "/browse"},
 	{path: "**", component: NotFoundComponent}
 ];
 

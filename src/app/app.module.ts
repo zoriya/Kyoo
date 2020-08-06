@@ -39,6 +39,7 @@ import {MatChipsModule} from "@angular/material/chips";
 import {MatAutocompleteModule} from "@angular/material/autocomplete";
 import {MatExpansionModule} from "@angular/material/expansion";
 import {InfiniteScrollModule} from "ngx-infinite-scroll";
+import {ShowGridComponent} from "./components/show-grid/show-grid.component";
 
 
 @NgModule({
@@ -57,6 +58,7 @@ import {InfiniteScrollModule} from "ngx-infinite-scroll";
 		TrailerDialogComponent,
 		ItemsListComponent,
 		MetadataEditComponent,
+		ShowGridComponent
 	],
 	imports: [
 		BrowserModule,

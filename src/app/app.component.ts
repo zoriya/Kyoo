@@ -5,7 +5,7 @@ import {MatDialog} from "@angular/material/dialog";
 import {Account} from "../models/account";
 import {AccountComponent} from "./auth/account/account.component";
 import {AuthService} from "./auth/auth.service";
-import {Library} from "../models/library";
+import {Library} from "../models/resources/library";
 import {LibraryService} from "./services/api.service";
 import * as $ from "jquery";
 

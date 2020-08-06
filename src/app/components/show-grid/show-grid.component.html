@@ -1,0 +1,22 @@
+<div class="container-fluid">
+    <div *ngFor="let show of this.shows?.items" class="show-container">
+        <mat-card class="show">
+            <a [href]="getLink(show)" [routerLink]="getLink(show)" class="d-flex" (click)="this.clickCallback.emit(show)">
+                <div class="thumb">
+                    <div [style.background-image]="getThumb(show)"> </div>
+                </div>
+                <div class="data">
+                    <p class="title">{{show.title}}</p>
+                    <p class="date" *ngIf="show.endYear && show.startYear != show.endYear; else elseBlock">{{show.startYear}} - {{show.endYear}}</p>
+                    <ng-template #elseBlock><p class="date">{{show.startYear}}</p></ng-template>
+                    <p class="overview">{{show.overview}}</p>
+                    <ul>
+                        <li class="provider" *ngFor="let id of this.show.externalIDs">
+                            <a [href]="id.link"><img [src]="id.provider.logo" [alt]="id.provider.name"/></a>
+                        </li>
+                    </ul>
+                </div>
+            </a>
+        </mat-card>
+    </div>
+</div>

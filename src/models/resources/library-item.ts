@@ -1,4 +1,4 @@
-import {IResource} from "./resources/resource";
+import {IResource} from "./resource";
 
 export enum ItemType
 {

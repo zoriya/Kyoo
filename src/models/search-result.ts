@@ -1,9 +1,9 @@
-import { Show } from "./show";
-import { Episode } from "./episode";
-import { People } from "./people";
-import { Studio } from "./studio";
-import { Genre } from "./genre";
-import {Collection} from "./collection";
+import { Show } from "./resources/show";
+import { Episode } from "./resources/episode";
+import { People } from "./resources/people";
+import { Studio } from "./resources/studio";
+import { Genre } from "./resources/genre";
+import {Collection} from "./resources/collection";
 
 export interface SearchResult
 {

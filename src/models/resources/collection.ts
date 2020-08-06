@@ -1,5 +1,5 @@
 import { Show } from "./show";
-import {IResource} from "./resources/resource";
+import {IResource} from "./resource";
 
 export interface Collection extends IResource
 {

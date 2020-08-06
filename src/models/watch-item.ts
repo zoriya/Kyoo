@@ -1,4 +1,4 @@
-import { Episode } from "./episode";
+import { Episode } from "./resources/episode";
 
 export interface WatchItem
 {

@@ -1,15 +1,15 @@
 import {Component, Input} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {DomSanitizer} from '@angular/platform-browser';
-import {LibraryItem} from "../../../models/library-item";
+import {LibraryItem} from "../../../models/resources/library-item";
 import {Page} from "../../../models/page";
 import {HttpClient} from "@angular/common/http";
-import {Show, ShowRole} from "../../../models/show";
-import {Collection} from "../../../models/collection";
+import {Show, ShowRole} from "../../../models/resources/show";
+import {Collection} from "../../../models/resources/collection";
 import {ItemsUtils} from "../../misc/items-utils";
 
 @Component({
-	selector: 'app-items',
+	selector: 'app-items-grid',
 	templateUrl: './items-grid.component.html',
 	styleUrls: ['./items-grid.component.scss']
 })

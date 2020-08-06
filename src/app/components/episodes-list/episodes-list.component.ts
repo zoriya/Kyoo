@@ -1,6 +1,6 @@
 import { Component, Input} from '@angular/core';
 import { DomSanitizer } from "@angular/platform-browser";
-import { Episode } from "../../../models/episode";
+import { Episode } from "../../../models/resources/episode";
 import {HorizontalScroller} from "../../misc/horizontal-scroller";
 import {Page} from "../../../models/page";
 import {HttpClient} from "@angular/common/http";

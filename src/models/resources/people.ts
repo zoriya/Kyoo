@@ -1,5 +1,5 @@
-import {ExternalID} from "./external-id";
-import {IResource} from "./resources/resource";
+import {ExternalID} from "../external-id";
+import {IResource} from "./resource";
 import {Show} from "./show";
 
 export interface People extends IResource

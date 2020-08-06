@@ -2,15 +2,15 @@ import { Component, OnInit } from '@angular/core';
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { Title } from '@angular/platform-browser';
 import {ActivatedRoute, Router} from '@angular/router';
-import { Episode } from "../../../models/episode";
-import { Show } from "../../../models/show";
+import { Episode } from "../../../models/resources/episode";
+import { Show } from "../../../models/resources/show";
 import {MatDialog} from "@angular/material/dialog";
 import {TrailerDialogComponent} from "../trailer-dialog/trailer-dialog.component";
 import {MetadataEditComponent} from "../metadata-edit/metadata-edit.component";
-import {Season} from "../../../models/season";
+import {Season} from "../../../models/resources/season";
 import {EpisodeService, PeopleService, SeasonService} from "../../services/api.service";
 import {Page} from "../../../models/page";
-import {People} from "../../../models/people";
+import {People} from "../../../models/resources/people";
 
 @Component({
 	selector: 'app-show-details',

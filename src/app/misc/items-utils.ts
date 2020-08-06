@@ -1,6 +1,6 @@
-import {ItemType, LibraryItem} from "../../models/library-item";
-import {Show, ShowRole} from "../../models/show";
-import {Collection} from "../../models/collection";
+import {ItemType, LibraryItem} from "../../models/resources/library-item";
+import {Show, ShowRole} from "../../models/resources/show";
+import {Collection} from "../../models/resources/collection";
 
 export class ItemsUtils
 {

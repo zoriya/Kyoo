@@ -1,10 +1,10 @@
 import {Component} from '@angular/core';
-import {Collection} from "../../../models/collection";
+import {Collection} from "../../../models/resources/collection";
 import {ActivatedRoute} from "@angular/router";
 import {DomSanitizer} from "@angular/platform-browser";
-import {Show} from "../../../models/show";
+import {Show} from "../../../models/resources/show";
 import {Page} from "../../../models/page";
-import {People} from "../../../models/people";
+import {People} from "../../../models/resources/people";
 
 @Component({
 	selector: 'app-collection',

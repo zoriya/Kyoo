@@ -2,8 +2,8 @@ import {Season} from "./season";
 import {Genre} from "./genre";
 import {People} from "./people";
 import {Studio} from "./studio";
-import {ExternalID} from "./external-id";
-import {IResource} from "./resources/resource";
+import {ExternalID} from "../external-id";
+import {IResource} from "./resource";
 
 export interface Show extends IResource
 {

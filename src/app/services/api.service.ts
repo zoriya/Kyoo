@@ -3,13 +3,13 @@ import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs"
 import {Page} from "../../models/page";
 import {IResource} from "../../models/resources/resource";
-import {Library} from "../../models/library";
-import {LibraryItem} from "../../models/library-item";
+import {Library} from "../../models/resources/library";
+import {LibraryItem} from "../../models/resources/library-item";
 import {map} from "rxjs/operators";
-import {Season} from "../../models/season";
-import {Episode} from "../../models/episode";
-import {People} from "../../models/people";
-import {Show} from "../../models/show";
+import {Season} from "../../models/resources/season";
+import {Episode} from "../../models/resources/episode";
+import {People} from "../../models/resources/people";
+import {Show} from "../../models/resources/show";
 
 export interface ApiArgs
 {
@@ -116,7 +116,7 @@ export class EpisodeService extends CrudApi<Episode>
 
 	getFromSeasonNumber(show: string | number, seasonNumber: number, args?: ApiArgs): Observable<Page<Episode>>
 	{
-		return this.client.get(`/api/seasons/${show}-${seasonNumber}/episodes${this.ArgsAsQuery(args)}`)
+		return this.client.get(`/api/seasons/${show}-s${seasonNumber}/episodes${this.ArgsAsQuery(args)}`)
 			.pipe(map(x => Object.assign(new Page<Episode>(), x)));
 	}
 }
