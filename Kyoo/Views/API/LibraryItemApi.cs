@@ -15,13 +15,13 @@ namespace Kyoo.Api
 	[Route("api/item")]
 	[Route("api/items")]
 	[ApiController]
-	public class LibraryItemsApi : ControllerBase
+	public class LibraryItemApi : ControllerBase
 	{
 		private readonly ILibraryItemRepository _libraryItems;
 		private readonly string _baseURL;
 
 
-		public LibraryItemsApi(ILibraryItemRepository libraryItems, IConfiguration configuration)
+		public LibraryItemApi(ILibraryItemRepository libraryItems, IConfiguration configuration)
 		{
 			_libraryItems = libraryItems;
 			_baseURL = configuration.GetValue<string>("public_url").TrimEnd('/');

@@ -14,11 +14,11 @@ namespace Kyoo.Api
 	[Route("api/show")]
 	[Route("api/shows")]
 	[ApiController]
-	public class ShowsApi : CrudApi<Show>
+	public class ShowApi : CrudApi<Show>
 	{
 		private readonly ILibraryManager _libraryManager;
 
-		public ShowsApi(ILibraryManager libraryManager, IConfiguration configuration)
+		public ShowApi(ILibraryManager libraryManager, IConfiguration configuration)
 			: base(libraryManager.ShowRepository, configuration)
 		{
 			_libraryManager = libraryManager;

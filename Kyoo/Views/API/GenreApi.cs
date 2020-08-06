@@ -15,11 +15,11 @@ namespace Kyoo.Api
 	[Route("api/genre")]
 	[Route("api/genres")]
 	[ApiController]
-	public class GenresAPI : CrudApi<Genre>
+	public class GenreApi : CrudApi<Genre>
 	{
 		private readonly ILibraryManager _libraryManager;
 
-		public GenresAPI(ILibraryManager libraryManager, IConfiguration config)
+		public GenreApi(ILibraryManager libraryManager, IConfiguration config)
 			: base(libraryManager.GenreRepository, config)
 		{
 			_libraryManager = libraryManager;
