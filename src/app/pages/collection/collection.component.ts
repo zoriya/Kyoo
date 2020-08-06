@@ -32,7 +32,7 @@ export class CollectionComponent
 		return this.sanitizer.bypassSecurityTrustStyle("url(" + this.collection.poster + ")");
 	}
 
-	getDate(item: LibraryItem | Show | ShowRole | Collection)
+	getDate(item: LibraryItem | Show | ShowRole | Collection | People)
 	{
 		return ItemsUtils.getDate(item);
 	}

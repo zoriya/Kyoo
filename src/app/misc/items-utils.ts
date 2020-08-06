@@ -1,6 +1,7 @@
 import {ItemType, LibraryItem} from "../../models/resources/library-item";
 import {Show, ShowRole} from "../../models/resources/show";
 import {Collection} from "../../models/resources/collection";
+import {People} from "../../models/resources/people";
 
 export class ItemsUtils
 {
@@ -12,7 +13,7 @@ export class ItemsUtils
 			return "/show/" + item.slug;
 	}
 
-	static getDate(item: LibraryItem | Show | ShowRole | Collection): string
+	static getDate(item: LibraryItem | Show | ShowRole | Collection | People): string
 	{
 		if ("role" in item && item.role)
 		{
@@ -23,6 +24,8 @@ export class ItemsUtils
 		if ("type" in item && item.type && typeof item.type == "string")
 			return item.type;
 
+		if (!("startYear" in item))
+			return "";
 		if (item.endYear && item.startYear != item.endYear)
 			return `${item.startYear} - ${item.endYear}`
 		return item.startYear?.toString();

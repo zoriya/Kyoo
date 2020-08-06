@@ -78,7 +78,7 @@
 	<div class="container-fluid mt-3">
 		<mat-form-field>
 			<mat-label>Season</mat-label>
-			<mat-select [(value)]="season" (selectionChange)="getEpisodes(season.seasonNumber)">
+			<mat-select [(value)]="season" (selectionChange)="getEpisodes(season)">
 				<mat-option *ngFor="let season of this.seasons" [value]="season.seasonNumber">{{season.title}}</mat-option>
 			</mat-select>
 		</mat-form-field>
