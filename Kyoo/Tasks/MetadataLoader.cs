@@ -17,15 +17,13 @@ namespace Kyoo.Tasks
 		public bool RunOnStartup => true;
 		public int Priority => 1000;
 		
-		public Task Run(IServiceProvider serviceProvider, CancellationToken cancellationToken, string arguments = null)
+		public async Task Run(IServiceProvider serviceProvider, CancellationToken cancellationToken, string arguments = null)
 		{
 			using IServiceScope serviceScope = serviceProvider.CreateScope();
-			DatabaseContext database = serviceScope.ServiceProvider.GetService<DatabaseContext>();
+			IProviderRepository providers = serviceScope.ServiceProvider.GetService<IProviderRepository>();
 			IPluginManager pluginManager = serviceScope.ServiceProvider.GetService<IPluginManager>();
 			foreach (IMetadataProvider provider in pluginManager.GetPlugins<IMetadataProvider>())
-				database.Providers.AddIfNotExist(provider.Provider, x => x.Name == provider.Provider.Name);
-			database.SaveChanges();
-			return Task.CompletedTask;
+				await providers.CreateIfNotExists(provider.Provider);
 		}
 
 		public Task<IEnumerable<string>> GetPossibleParameters()

@@ -1,129 +1,71 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
-	public class CollectionRepository : ICollectionRepository
+	public class CollectionRepository : LocalRepository<Collection>, ICollectionRepository
 	{
 		private readonly DatabaseContext _database;
+		private readonly Lazy<IShowRepository> _shows;
+		private readonly Lazy<ILibraryRepository> _libraries;
+		protected override Expression<Func<Collection, object>> DefaultSort => x => x.Name;
 
-
-		public CollectionRepository(DatabaseContext database)
+		public CollectionRepository(DatabaseContext database, IServiceProvider services) : base(database)
 		{
 			_database = database;
-		}
-		
-		public void Dispose()
-		{
-			_database.Dispose();
+			_shows = new Lazy<IShowRepository>(services.GetRequiredService<IShowRepository>);
+			_libraries = new Lazy<ILibraryRepository>(services.GetRequiredService<ILibraryRepository>);
 		}
 
-		public ValueTask DisposeAsync()
+		public override void Dispose()
 		{
-			return _database.DisposeAsync();
-		}
-		
-		public Task<Collection> Get(int id)
-		{
-			return _database.Collections.FirstOrDefaultAsync(x => x.ID == id);
+			base.Dispose();
+			if (_shows.IsValueCreated)
+				_shows.Value.Dispose();
+			if (_libraries.IsValueCreated)
+				_libraries.Value.Dispose();
 		}
 
-		public Task<Collection> Get(string slug)
+		public override async ValueTask DisposeAsync()
 		{
-			return _database.Collections.FirstOrDefaultAsync(x => x.Slug == slug);
+			await _database.DisposeAsync();
+			if (_shows.IsValueCreated)
+				await _shows.Value.DisposeAsync();
+			if (_libraries.IsValueCreated)
+				await _libraries.Value.DisposeAsync();
 		}
-		
-		public async Task<ICollection<Collection>> Search(string query)
+
+		public override async Task<ICollection<Collection>> Search(string query)
 		{
 			return await _database.Collections
-				.Where(x => EF.Functions.Like(x.Name, $"%{query}%"))
+				.Where(x => EF.Functions.ILike(x.Name, $"%{query}%"))
 				.Take(20)
 				.ToListAsync();
 		}
 
-		public async Task<ICollection<Collection>> GetAll()
-		{
-			return await _database.Collections.ToListAsync();
-		}
-
-		public async Task<int> Create(Collection obj)
+		public override async Task<Collection> Create(Collection obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
 			_database.Entry(obj).State = EntityState.Added;
-			
-			try
-			{
-				await _database.SaveChangesAsync();
-			}
-			catch (DbUpdateException ex)
-			{
-				_database.DiscardChanges();
-				if (Helper.IsDuplicateException(ex))
-					throw new DuplicatedItemException($"Trying to insert a duplicated collection (slug {obj.Slug} already exists).");
-				throw;
-			}
-
-			return obj.ID;
+			await _database.SaveChangesAsync($"Trying to insert a duplicated collection (slug {obj.Slug} already exists).");
+			return obj;
 		}
-		
-		public async Task<int> CreateIfNotExists(Collection obj)
+
+		protected override Task Validate(Collection ressource)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-
-			Collection old = await Get(obj.Slug);
-			if (old != null)
-				return old.ID;
-			try
-			{
-				return await Create(obj);
-			}
-			catch (DuplicatedItemException)
-			{
-				old = await Get(obj.Slug);
-				if (old == null)
-					throw new SystemException("Unknown database state.");
-				return old.ID;
-			}
+			return Task.CompletedTask;
 		}
 
-		public async Task Edit(Collection edited, bool resetOld)
-		{
-			if (edited == null)
-				throw new ArgumentNullException(nameof(edited));
-			
-			Collection old = await Get(edited.Slug);
-
-			if (old == null)
-				throw new ItemNotFound($"No collection found with the slug {edited.Slug}.");
-			
-			if (resetOld)
-				Utility.Nullify(old);
-			Utility.Merge(old, edited);
-
-			await _database.SaveChangesAsync();
-		}
-
-		public async Task Delete(int id)
-		{
-			Collection obj = await Get(id);
-			await Delete(obj);
-		}
-
-		public async Task Delete(string slug)
-		{
-			Collection obj = await Get(slug);
-			await Delete(obj);
-		}
-
-		public async Task Delete(Collection obj)
+		public override async Task Delete(Collection obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -138,22 +80,70 @@ namespace Kyoo.Controllers
 			await _database.SaveChangesAsync();
 		}
 
-		public async Task DeleteRange(IEnumerable<Collection> objs)
+		public async Task<ICollection<Collection>> GetFromShow(int showID, 
+			Expression<Func<Collection, bool>> where = null,
+			Sort<Collection> sort = default,
+			Pagination limit = default)
 		{
-			foreach (Collection obj in objs)
-				await Delete(obj);
+			ICollection<Collection> collections = await ApplyFilters(_database.CollectionLinks
+					.Where(x => x.ShowID == showID)
+					.Select(x => x.Collection),
+				where,
+				sort,
+				limit);
+			if (!collections.Any() & await _shows.Value.Get(showID) == null)
+				throw new ItemNotFound();
+			return collections;
 		}
-		
-		public async Task DeleteRange(IEnumerable<int> ids)
+
+		public async Task<ICollection<Collection>> GetFromShow(string showSlug, 
+			Expression<Func<Collection, bool>> where = null,
+			Sort<Collection> sort = default,
+			Pagination limit = default)
 		{
-			foreach (int id in ids)
-				await Delete(id);
+			ICollection<Collection> collections = await ApplyFilters(_database.CollectionLinks
+					.Where(x => x.Show.Slug == showSlug)
+					.Select(x => x.Collection),
+				where,
+				sort,
+				limit);
+			if (!collections.Any() & await _shows.Value.Get(showSlug) == null)
+				throw new ItemNotFound();
+			return collections;
 		}
-		
-		public async Task DeleteRange(IEnumerable<string> slugs)
+
+		public async Task<ICollection<Collection>> GetFromLibrary(int id,
+			Expression<Func<Collection, bool>> where = null,
+			Sort<Collection> sort = default,
+			Pagination limit = default)
 		{
-			foreach (string slug in slugs)
-				await Delete(slug);
+			ICollection<Collection> collections = await ApplyFilters(_database.LibraryLinks
+					.Where(x => x.LibraryID == id && x.CollectionID != null)
+					.Select(x => x.Collection),
+				where,
+				sort,
+				limit);
+			if (!collections.Any() && await _libraries.Value.Get(id) == null)
+				throw new ItemNotFound();
+			return collections;
+		}
+
+		public async Task<ICollection<Collection>> GetFromLibrary(string slug,
+			Expression<Func<Collection, bool>> where = null,
+			Sort<Collection> sort = default,
+			Pagination limit = default)
+		{
+			ICollection<Collection> collections = await ApplyFilters(_database.LibraryLinks
+					.Where(x => x.Library.Slug == slug && x.CollectionID != null)
+					.Select(x => x.Collection),
+				where,
+				sort,
+				limit);
+			if (!collections.Any() && await _libraries.Value.Get(slug) == null)
+				throw new ItemNotFound();
+			return collections;
 		}
 	}
+	
+	
 }

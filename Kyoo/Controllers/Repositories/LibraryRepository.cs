@@ -1,59 +1,56 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
-	public class LibraryRepository : ILibraryRepository
+	public class LibraryRepository : LocalRepository<Library>, ILibraryRepository
 	{
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
+		private readonly Lazy<IShowRepository> _shows;
+		protected override Expression<Func<Library, object>> DefaultSort => x => x.ID;
 
 
-		public LibraryRepository(DatabaseContext database, IProviderRepository providers)
+		public LibraryRepository(DatabaseContext database, IProviderRepository providers, IServiceProvider services)
+			: base(database)
 		{
 			_database = database;
 			_providers = providers;
-		}
-
-		public void Dispose()
-		{
-			_database.Dispose();
-		}
-
-		public ValueTask DisposeAsync()
-		{
-			return _database.DisposeAsync();
-		}
-
-		public Task<Library> Get(int id)
-		{
-			return _database.Libraries.FirstOrDefaultAsync(x => x.ID == id);
+			_shows = new Lazy<IShowRepository>(services.GetRequiredService<IShowRepository>);
 		}
 		
-		public Task<Library> Get(string slug)
+		public override void Dispose()
 		{
-			return _database.Libraries.FirstOrDefaultAsync(x => x.Slug == slug);
+			_database.Dispose();
+			_providers.Dispose();
+			if (_shows.IsValueCreated)
+				_shows.Value.Dispose();
 		}
 
-		public async Task<ICollection<Library>> Search(string query)
+		public override async ValueTask DisposeAsync()
+		{
+			await _database.DisposeAsync();
+			await _providers.DisposeAsync();
+			if (_shows.IsValueCreated)
+				await _shows.Value.DisposeAsync();
+		}
+
+		public override async Task<ICollection<Library>> Search(string query)
 		{
 			return await _database.Libraries
-				.Where(x => EF.Functions.Like(x.Name, $"%{query}%"))
+				.Where(x => EF.Functions.ILike(x.Name, $"%{query}%"))
 				.Take(20)
 				.ToListAsync();
 		}
 
-		public async Task<ICollection<Library>> GetAll()
-		{
-			return await _database.Libraries.ToListAsync();
-		}
-
-		public async Task<int> Create(Library obj)
+		public override async Task<Library> Create(Library obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -64,79 +61,25 @@ namespace Kyoo.Controllers
 				foreach (ProviderLink entry in obj.ProviderLinks)
 					_database.Entry(entry).State = EntityState.Added;
 			
-			try
-			{
-				await _database.SaveChangesAsync();
-			}
-			catch (DbUpdateException ex)
-			{
-				_database.DiscardChanges();
-				if (Helper.IsDuplicateException(ex))
-					throw new DuplicatedItemException($"Trying to insert a duplicated library (slug {obj.Slug} already exists).");
-				throw;
-			}
-			
-			return obj.ID;
-		}
-		
-		public async Task<int> CreateIfNotExists(Library obj)
-		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-
-			Library old = await Get(obj.Slug);
-			if (old != null)
-				return old.ID;
-			try
-			{
-				return await Create(obj);
-			}
-			catch (DuplicatedItemException)
-			{
-				old = await Get(obj.Slug);
-				if (old == null)
-					throw new SystemException("Unknown database state.");
-				return old.ID;
-			}
+			await _database.SaveChangesAsync($"Trying to insert a duplicated library (slug {obj.Slug} already exists).");
+			return obj;
 		}
 
-		public async Task Edit(Library edited, bool resetOld)
+		protected override async Task Validate(Library obj)
 		{
-			if (edited == null)
-				throw new ArgumentNullException(nameof(edited));
+			if (string.IsNullOrEmpty(obj.Slug))
+				throw new ArgumentException("The library's slug must be set and not empty");
+			if (string.IsNullOrEmpty(obj.Name))
+				throw new ArgumentException("The library's name must be set and not empty");
+			if (obj.Paths == null || !obj.Paths.Any())
+				throw new ArgumentException("The library should have a least one path.");
 			
-			Library old = await Get(edited.Name);
-
-			if (old == null)
-				throw new ItemNotFound($"No library found with the name {edited.Name}.");
-			
-			if (resetOld)
-				Utility.Nullify(old);
-			Utility.Merge(old, edited);
-			await Validate(old);
-			await _database.SaveChangesAsync();
-		}
-
-		private async Task Validate(Library obj)
-		{
 			if (obj.ProviderLinks != null)
 				foreach (ProviderLink link in obj.ProviderLinks)
-					link.ProviderID = await _providers.CreateIfNotExists(link.Provider);
+					link.Provider = await _providers.CreateIfNotExists(link.Provider);
 		}
 
-		public async Task Delete(int id)
-		{
-			Library obj = await Get(id);
-			await Delete(obj);
-		}
-
-		public async Task Delete(string slug)
-		{
-			Library obj = await Get(slug);
-			await Delete(obj);
-		}
-		
-		public async Task Delete(Library obj)
+		public override async Task Delete(Library obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -150,23 +93,69 @@ namespace Kyoo.Controllers
 					_database.Entry(entry).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
 		}
-		
-		public async Task DeleteRange(IEnumerable<Library> objs)
+
+		public async Task<ICollection<Library>> GetFromShow(int showID, 
+			Expression<Func<Library, bool>> where = null, 
+			Sort<Library> sort = default, 
+			Pagination limit = default)
 		{
-			foreach (Library obj in objs)
-				await Delete(obj);
+			ICollection<Library> libraries = await ApplyFilters(_database.LibraryLinks
+					.Where(x => x.ShowID == showID)
+					.Select(x => x.Library),
+				where,
+				sort,
+				limit);
+			if (!libraries.Any() && await _shows.Value.Get(showID) == null)
+				throw new ItemNotFound();
+			return libraries;
+		}
+
+		public async Task<ICollection<Library>> GetFromShow(string showSlug, 
+			Expression<Func<Library, bool>> where = null, 
+			Sort<Library> sort = default, 
+			Pagination limit = default)
+		{
+			ICollection<Library> libraries = await ApplyFilters(_database.LibraryLinks
+					.Where(x => x.Show.Slug == showSlug)
+					.Select(x => x.Library),
+				where,
+				sort,
+				limit);
+			if (!libraries.Any() && await _shows.Value.Get(showSlug) == null)
+				throw new ItemNotFound();
+			return libraries;
 		}
 		
-		public async Task DeleteRange(IEnumerable<int> ids)
+		public async Task<ICollection<Library>> GetFromCollection(int id, 
+			Expression<Func<Library, bool>> where = null, 
+			Sort<Library> sort = default, 
+			Pagination limit = default)
 		{
-			foreach (int id in ids)
-				await Delete(id);
+			ICollection<Library> libraries = await ApplyFilters(_database.LibraryLinks
+					.Where(x => x.CollectionID == id)
+					.Select(x => x.Library),
+				where,
+				sort,
+				limit);
+			if (!libraries.Any() && await _shows.Value.Get(id) == null)
+				throw new ItemNotFound();
+			return libraries;
 		}
-		
-		public async Task DeleteRange(IEnumerable<string> slugs)
+
+		public async Task<ICollection<Library>> GetFromCollection(string slug, 
+			Expression<Func<Library, bool>> where = null, 
+			Sort<Library> sort = default, 
+			Pagination limit = default)
 		{
-			foreach (string slug in slugs)
-				await Delete(slug);
+			ICollection<Library> libraries = await ApplyFilters(_database.LibraryLinks
+					.Where(x => x.Collection.Slug == slug)
+					.Select(x => x.Library),
+				where,
+				sort,
+				limit);
+			if (!libraries.Any() && await _shows.Value.Get(slug) == null)
+				throw new ItemNotFound();
+			return libraries;
 		}
 	}
 }

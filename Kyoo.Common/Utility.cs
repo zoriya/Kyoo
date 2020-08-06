@@ -9,7 +9,6 @@ using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 using Kyoo.Models;
 using Kyoo.Models.Attributes;
-using Microsoft.VisualBasic;
 
 namespace Kyoo
 {
@@ -223,6 +222,13 @@ namespace Kyoo
 				i = 0;
 				yield return ret;
 			}
+		}
+		
+		public static string ToQueryString(this Dictionary<string, string> query)
+		{
+			if (!query.Any())
+				return string.Empty;
+			return "?" + string.Join('&', query.Select(x => $"{x.Key}={x.Value}"));
 		}
 	}
 }

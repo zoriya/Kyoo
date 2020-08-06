@@ -1,58 +1,56 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
-	public class PeopleRepository : IPeopleRepository
+	public class PeopleRepository : LocalRepository<People>, IPeopleRepository
 	{
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
+		private readonly Lazy<IShowRepository> _shows;
+		protected override Expression<Func<People, object>> DefaultSort => x => x.Name;
 
-		public PeopleRepository(DatabaseContext database, IProviderRepository providers)
+		public PeopleRepository(DatabaseContext database, IProviderRepository providers, IServiceProvider services) 
+			: base(database)
 		{
 			_database = database;
 			_providers = providers;
+			_shows = new Lazy<IShowRepository>(services.GetRequiredService<IShowRepository>);
 		}
-		
-		public void Dispose()
+
+
+		public override void Dispose()
 		{
 			_database.Dispose();
+			_providers.Dispose();
+			if (_shows.IsValueCreated)
+				_shows.Value.Dispose();
 		}
 
-		public ValueTask DisposeAsync()
+		public override async ValueTask DisposeAsync()
 		{
-			return _database.DisposeAsync();
+			await _database.DisposeAsync();
+			await _providers.DisposeAsync();
+			if (_shows.IsValueCreated)
+				await _shows.Value.DisposeAsync();
 		}
 
-		public Task<People> Get(int id)
+		public override async Task<ICollection<People>> Search(string query)
 		{
-			return _database.Peoples.FirstOrDefaultAsync(x => x.ID == id);
-		}
-
-		public Task<People> Get(string slug)
-		{
-			return _database.Peoples.FirstOrDefaultAsync(x => x.Slug == slug);
-		}
-
-		public async Task<ICollection<People>> Search(string query)
-		{
-			return await _database.Peoples
-				.Where(people => EF.Functions.Like(people.Name, $"%{query}%"))
+			return await _database.People
+				.Where(people => EF.Functions.ILike(people.Name, $"%{query}%"))
 				.Take(20)
 				.ToListAsync();
 		}
 
-		public async Task<ICollection<People>> GetAll()
-		{
-			return await _database.Peoples.ToListAsync();
-		}
-
-		public async Task<int> Create(People obj)
+		public override async Task<People> Create(People obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -63,79 +61,18 @@ namespace Kyoo.Controllers
 				foreach (MetadataID entry in obj.ExternalIDs)
 					_database.Entry(entry).State = EntityState.Added;
 			
-			try
-			{
-				await _database.SaveChangesAsync();
-			}
-			catch (DbUpdateException ex)
-			{
-				_database.DiscardChanges();
-				if (Helper.IsDuplicateException(ex))
-					throw new DuplicatedItemException($"Trying to insert a duplicated people (slug {obj.Slug} already exists).");
-				throw;
-			}
-			
-			return obj.ID;
+			await _database.SaveChangesAsync($"Trying to insert a duplicated people (slug {obj.Slug} already exists).");
+			return obj;
 		}
 
-		public async Task<int> CreateIfNotExists(People obj)
-		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-
-			People old = await Get(obj.Slug);
-			if (old != null)
-				return old.ID;
-			try
-			{
-				return await Create(obj);
-			}
-			catch (DuplicatedItemException)
-			{
-				old = await Get(obj.Slug);
-				if (old == null)
-					throw new SystemException("Unknown database state.");
-				return old.ID;
-			}
-		}
-
-		public async Task Edit(People edited, bool resetOld)
-		{
-			if (edited == null)
-				throw new ArgumentNullException(nameof(edited));
-			
-			People old = await Get(edited.Slug);
-
-			if (old == null)
-				throw new ItemNotFound($"No people found with the slug {edited.Slug}.");
-			
-			if (resetOld)
-				Utility.Nullify(old);
-			Utility.Merge(old, edited);
-			await Validate(old);
-			await _database.SaveChangesAsync();
-		}
-		
-		private async Task Validate(People obj)
+		protected override async Task Validate(People obj)
 		{
 			if (obj.ExternalIDs != null)
 				foreach (MetadataID link in obj.ExternalIDs)
-					link.ProviderID = await _providers.CreateIfNotExists(link.Provider);
+					link.Provider = await _providers.CreateIfNotExists(link.Provider);
 		}
 		
-		public async Task Delete(int id)
-		{
-			People obj = await Get(id);
-			await Delete(obj);
-		}
-
-		public async Task Delete(string slug)
-		{
-			People obj = await Get(slug);
-			await Delete(obj);
-		}
-
-		public async Task Delete(People obj)
+		public override async Task Delete(People obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -149,23 +86,91 @@ namespace Kyoo.Controllers
 					_database.Entry(link).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
 		}
-		
-		public async Task DeleteRange(IEnumerable<People> objs)
+
+		public async Task<ICollection<PeopleLink>> GetFromShow(int showID, 
+			Expression<Func<PeopleLink, bool>> where = null, 
+			Sort<PeopleLink> sort = default, 
+			Pagination limit = default)
 		{
-			foreach (People obj in objs)
-				await Delete(obj);
+			if (sort.Key?.Body is MemberExpression member)
+			{
+				sort.Key = member.Member.Name switch
+				{
+					"Name" => x => x.People.Name,
+					"Slug" => x => x.People.Slug,
+					_ => sort.Key
+				};
+			}
+
+			ICollection<PeopleLink> people = await ApplyFilters(_database.PeopleRoles.Where(x => x.ShowID == showID),
+				id => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id),
+				x => x.People.Name,
+				where,
+				sort,
+				limit);
+			if (!people.Any() && await _shows.Value.Get(showID) == null)
+				throw new ItemNotFound();
+			return people;
+		}
+
+		public async Task<ICollection<PeopleLink>> GetFromShow(string showSlug,
+			Expression<Func<PeopleLink, bool>> where = null,
+			Sort<PeopleLink> sort = default, 
+			Pagination limit = default)
+		{
+			if (sort.Key?.Body is MemberExpression member)
+			{
+				sort.Key = member.Member.Name switch
+				{
+					"Name" => x => x.People.Name,
+					"Slug" => x => x.People.Slug,
+					_ => sort.Key
+				};
+			}
+			
+			ICollection<PeopleLink> people = await ApplyFilters(_database.PeopleRoles.Where(x => x.Show.Slug == showSlug),
+				id => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id),
+				x => x.People.Name,
+				where,
+				sort,
+				limit);
+			if (!people.Any() && await _shows.Value.Get(showSlug) == null)
+				throw new ItemNotFound();
+			return people;
 		}
 		
-		public async Task DeleteRange(IEnumerable<int> ids)
+		public async Task<ICollection<ShowRole>> GetFromPeople(int peopleID,
+			Expression<Func<ShowRole, bool>> where = null,
+			Sort<ShowRole> sort = default, 
+			Pagination limit = default)
 		{
-			foreach (int id in ids)
-				await Delete(id);
+			ICollection<ShowRole> roles = await ApplyFilters(_database.PeopleRoles.Where(x => x.PeopleID == peopleID)
+					.Select(ShowRole.FromPeopleRole),
+				async id => new ShowRole(await _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id)),
+				x => x.Title,
+				where,
+				sort,
+				limit);
+			if (!roles.Any() && await Get(peopleID) == null)
+				throw new ItemNotFound();
+			return roles;
 		}
 		
-		public async Task DeleteRange(IEnumerable<string> slugs)
+		public async Task<ICollection<ShowRole>> GetFromPeople(string slug,
+			Expression<Func<ShowRole, bool>> where = null,
+			Sort<ShowRole> sort = default, 
+			Pagination limit = default)
 		{
-			foreach (string slug in slugs)
-				await Delete(slug);
+			ICollection<ShowRole> roles = await ApplyFilters(_database.PeopleRoles.Where(x => x.People.Slug == slug)
+					.Select(ShowRole.FromPeopleRole),
+				async id => new ShowRole(await _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id)),
+				x => x.Title,
+				where,
+				sort,
+				limit);
+			if (!roles.Any() && await Get(slug) == null)
+				throw new ItemNotFound();
+			return roles;
 		}
 	}
 }

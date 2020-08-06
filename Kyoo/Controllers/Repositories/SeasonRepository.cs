@@ -1,51 +1,67 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
-	public class SeasonRepository : ISeasonRepository
+	public class SeasonRepository : LocalRepository<Season>, ISeasonRepository
 	{
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
-		private readonly IEpisodeRepository _episodes;
+		private readonly Lazy<IEpisodeRepository> _episodes;
+		private readonly IShowRepository _shows;
+		protected override Expression<Func<Season, object>> DefaultSort => x => x.SeasonNumber;
 
 
-		public SeasonRepository(DatabaseContext database, IProviderRepository providers, IEpisodeRepository episodes)
+		public SeasonRepository(DatabaseContext database, 
+			IProviderRepository providers,
+			IShowRepository shows,
+			IServiceProvider services)
+			: base(database)
 		{
 			_database = database;
 			_providers = providers;
-			_episodes = episodes;
+			_episodes = new Lazy<IEpisodeRepository>(services.GetRequiredService<IEpisodeRepository>);
+			_shows = shows;
 		}
-		
-		public void Dispose()
+
+
+		public override void Dispose()
 		{
 			_database.Dispose();
+			_providers.Dispose();
+			if (_episodes.IsValueCreated)
+				_episodes.Value.Dispose();
 		}
 
-		public ValueTask DisposeAsync()
+		public override async ValueTask DisposeAsync()
 		{
-			return _database.DisposeAsync();
+			await _database.DisposeAsync();
+			await _providers.DisposeAsync();
+			if (_episodes.IsValueCreated)
+				await _episodes.Value.DisposeAsync();
+		}
+
+		public override Task<Season> Get(string slug)
+		{
+			Match match = Regex.Match(slug, @"(?<show>.*)-s(?<season>\d*)");
+			
+			if (!match.Success)
+				throw new ArgumentException("Invalid season slug. Format: {showSlug}-s{seasonNumber}");
+			return Get(match.Groups["show"].Value, int.Parse(match.Groups["season"].Value));
 		}
 		
-		public Task<Season> Get(int id)
+		public Task<Season> Get(int showID, int seasonNumber)
 		{
-			return _database.Seasons.FirstOrDefaultAsync(x => x.ID == id);
-		}
-
-		public Task<Season> Get(string slug)
-		{
-			int index = slug.IndexOf("-s", StringComparison.Ordinal);
-			if (index == -1)
-				throw new InvalidOperationException("Invalid season slug. Format: {showSlug}-s{seasonNumber}");
-			string showSlug = slug.Substring(0, index);
-			if (!int.TryParse(slug.Substring(index + 2), out int seasonNumber))
-				throw new InvalidOperationException("Invalid season slug. Format: {showSlug}-s{seasonNumber}");
-			return Get(showSlug, seasonNumber);
+			return _database.Seasons.FirstOrDefaultAsync(x => x.ShowID == showID 
+			                                                  && x.SeasonNumber == seasonNumber);
 		}
 		
 		public Task<Season> Get(string showSlug, int seasonNumber)
@@ -54,20 +70,15 @@ namespace Kyoo.Controllers
 			                                                        && x.SeasonNumber == seasonNumber);
 		}
 
-		public async Task<ICollection<Season>> Search(string query)
+		public override async Task<ICollection<Season>> Search(string query)
 		{
 			return await _database.Seasons
-				.Where(x => EF.Functions.Like(x.Title, $"%{query}%"))
+				.Where(x => EF.Functions.ILike(x.Title, $"%{query}%"))
 				.Take(20)
 				.ToListAsync();
 		}
-
-		public async Task<ICollection<Season>> GetAll()
-		{
-			return await _database.Seasons.ToListAsync();
-		}
-
-		public async Task<int> Create(Season obj)
+		
+		public override async Task<Season> Create(Season obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -78,61 +89,11 @@ namespace Kyoo.Controllers
 				foreach (MetadataID entry in obj.ExternalIDs)
 					_database.Entry(entry).State = EntityState.Added;
 			
-			try
-			{
-				await _database.SaveChangesAsync();
-			}
-			catch (DbUpdateException ex)
-			{
-				_database.DiscardChanges();
-				if (Helper.IsDuplicateException(ex))
-					throw new DuplicatedItemException($"Trying to insert a duplicated season (slug {obj.Slug} already exists).");
-				throw;
-			}
-			
-			return obj.ID;
-		}
-		
-		public async Task<int> CreateIfNotExists(Season obj)
-		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-
-			Season old = await Get(obj.Slug);
-			if (old != null)
-				return old.ID;
-			try
-			{
-				return await Create(obj);
-			}
-			catch (DuplicatedItemException)
-			{
-				old = await Get(obj.Slug);
-				if (old == null)
-					throw new SystemException("Unknown database state.");
-				return old.ID;
-			}
+			await _database.SaveChangesAsync($"Trying to insert a duplicated season (slug {obj.Slug} already exists).");
+			return obj;
 		}
 
-		public async Task Edit(Season edited, bool resetOld)
-		{
-			if (edited == null)
-				throw new ArgumentNullException(nameof(edited));
-			
-			Season old = await Get(edited.Slug);
-
-			if (old == null)
-				throw new ItemNotFound($"No season found with the slug {edited.Slug}.");
-			
-			if (resetOld)
-				Utility.Nullify(old);
-			Utility.Merge(old, edited);
-
-			await Validate(old);
-			await _database.SaveChangesAsync();
-		}
-
-		private async Task Validate(Season obj)
+		protected override async Task Validate(Season obj)
 		{
 			if (obj.ShowID <= 0)
 				throw new InvalidOperationException($"Can't store a season not related to any show (showID: {obj.ShowID}).");
@@ -140,39 +101,45 @@ namespace Kyoo.Controllers
 			if (obj.ExternalIDs != null)
 			{
 				foreach (MetadataID link in obj.ExternalIDs)
-					link.ProviderID = await _providers.CreateIfNotExists(link.Provider);
+					link.Provider = await _providers.CreateIfNotExists(link.Provider);
 			}
 		}
 		
-		public async Task<ICollection<Season>> GetSeasons(int showID)
+		public async Task<ICollection<Season>> GetFromShow(int showID,
+			Expression<Func<Season, bool>> where = null, 
+			Sort<Season> sort = default,
+			Pagination limit = default)
 		{
-			return await _database.Seasons.Where(x => x.ShowID == showID).ToListAsync();
+			ICollection<Season> seasons = await ApplyFilters(_database.Seasons.Where(x => x.ShowID == showID),
+				where,
+				sort,
+				limit);
+			if (!seasons.Any() && await _shows.Get(showID) == null)
+				throw new ItemNotFound();
+			return seasons;
 		}
 
-		public async Task<ICollection<Season>> GetSeasons(string showSlug)
+		public async Task<ICollection<Season>> GetFromShow(string showSlug,
+			Expression<Func<Season, bool>> where = null, 
+			Sort<Season> sort = default,
+			Pagination limit = default)
 		{
-			return await _database.Seasons.Where(x => x.Show.Slug == showSlug).ToListAsync();
+			ICollection<Season> seasons = await ApplyFilters(_database.Seasons.Where(x => x.Show.Slug == showSlug),
+				where,
+				sort,
+				limit);
+			if (!seasons.Any() && await _shows.Get(showSlug) == null)
+				throw new ItemNotFound();
+			return seasons;
 		}
 		
-		public async Task Delete(int id)
-		{
-			Season obj = await Get(id);
-			await Delete(obj);
-		}
-
-		public async Task Delete(string slug)
-		{
-			Season obj = await Get(slug);
-			await Delete(obj);
-		}
-
 		public async Task Delete(string showSlug, int seasonNumber)
 		{
 			Season obj = await Get(showSlug, seasonNumber);
 			await Delete(obj);
 		}
 
-		public async Task Delete(Season obj)
+		public override async Task Delete(Season obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -186,25 +153,12 @@ namespace Kyoo.Controllers
 			await _database.SaveChangesAsync();
 
 			if (obj.Episodes != null)
-				await _episodes.DeleteRange(obj.Episodes);
+				await _episodes.Value.DeleteRange(obj.Episodes);
 		}
-		
-		public async Task DeleteRange(IEnumerable<Season> objs)
+
+		public Task<Season> GetFromEpisode(int episodeID)
 		{
-			foreach (Season obj in objs)
-				await Delete(obj);
-		}
-		
-		public async Task DeleteRange(IEnumerable<int> ids)
-		{
-			foreach (int id in ids)
-				await Delete(id);
-		}
-		
-		public async Task DeleteRange(IEnumerable<string> slugs)
-		{
-			foreach (string slug in slugs)
-				await Delete(slug);
+			return _database.Seasons.FirstOrDefaultAsync(x => x.Episodes.Any(y => y.ID == episodeID));
 		}
 	}
 }

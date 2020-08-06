@@ -53,7 +53,7 @@ namespace Kyoo.Models
 		}
 	}
 
-	public class Track : Stream
+	public class Track : Stream, IResource
 	{
 		[JsonIgnore] public int ID { get; set; }
 		[JsonIgnore] public int EpisodeID { get; set; }
@@ -93,9 +93,10 @@ namespace Kyoo.Models
 			{
 				if (Type != StreamType.Subtitle)
 					return null;
-				string slug = $"/subtitle/{Episode.Slug}.{Language ?? ID.ToString()}";
-				if (IsForced)
-					slug += "-forced";
+
+				string slug = string.IsNullOrEmpty(Language) 
+					? ID.ToString()
+					: $"{Episode.Slug}.{Language}{(IsForced ? "-forced" : "")}";
 				switch (Codec)
 				{
 					case "ass":

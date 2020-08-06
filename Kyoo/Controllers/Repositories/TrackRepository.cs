@@ -1,60 +1,72 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
-	public class TrackRepository : ITrackRepository
+	public class TrackRepository : LocalRepository<Track>, ITrackRepository
 	{
 		private readonly DatabaseContext _database;
+		private readonly Lazy<IEpisodeRepository> _episodes;
+		protected override Expression<Func<Track, object>> DefaultSort => x => x.ID;
 
 
-		public TrackRepository(DatabaseContext database)
+		public TrackRepository(DatabaseContext database, IServiceProvider services) : base(database)
 		{
 			_database = database;
+			_episodes = new Lazy<IEpisodeRepository>(services.GetRequiredService<IEpisodeRepository>);
 		}
-		
-		public void Dispose()
+
+		public override void Dispose()
 		{
 			_database.Dispose();
+			if (_episodes.IsValueCreated)
+				_episodes.Value.Dispose();
 		}
 
-		public ValueTask DisposeAsync()
+		public override async ValueTask DisposeAsync()
 		{
-			return _database.DisposeAsync();
-		}
-		
-		public async Task<Track> Get(int id)
-		{
-			return await _database.Tracks.FirstOrDefaultAsync(x => x.ID == id);
-		}
-		
-		public Task<Track> Get(string slug)
-		{
-			throw new InvalidOperationException("Tracks do not support the get by slug method.");
+			await _database.DisposeAsync();
+			if (_episodes.IsValueCreated)
+				await _episodes.Value.DisposeAsync();
 		}
 
-		public Task<Track> Get(int episodeID, string languageTag, bool isForced)
+		public override Task<Track> Get(string slug)
 		{
-			return _database.Tracks.FirstOrDefaultAsync(x => x.EpisodeID == episodeID
-			                                                       && x.Language == languageTag
-			                                                       && x.IsForced == isForced);
-		}
+			Match match = Regex.Match(slug,
+				@"(?<show>.*)-s(?<season>\d*)-e(?<episode>\d*).(?<language>.{0,3})(?<forced>-forced)?(\..*)?");
 
-		public Task<ICollection<Track>> Search(string query)
+			if (!match.Success)
+			{
+				if (int.TryParse(slug, out int id))
+					return Get(id);
+				throw new ArgumentException("Invalid track slug. Format: {episodeSlug}.{language}[-forced][.{extension}]");
+			}
+
+			string showSlug = match.Groups["show"].Value;
+			int seasonNumber = int.Parse(match.Groups["season"].Value);
+			int episodeNumber = int.Parse(match.Groups["episode"].Value);
+			string language = match.Groups["language"].Value;
+			bool forced = match.Groups["forced"].Success;
+			return _database.Tracks.FirstOrDefaultAsync(x => x.Episode.Show.Slug == showSlug
+			                                                 && x.Episode.SeasonNumber == seasonNumber
+			                                                 && x.Episode.EpisodeNumber == episodeNumber
+			                                                 && x.Language == language
+			                                                 && x.IsForced == forced);
+		}
+		public override Task<ICollection<Track>> Search(string query)
 		{
 			throw new InvalidOperationException("Tracks do not support the search method.");
 		}
 
-		public async Task<ICollection<Track>> GetAll()
-		{
-			return await _database.Tracks.ToListAsync();
-		}
-
-		public async Task<int> Create(Track obj)
+		public override async Task<Track> Create(Track obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -64,54 +76,16 @@ namespace Kyoo.Controllers
 
 			_database.Entry(obj).State = EntityState.Added;
 			
-			try
-			{
-				await _database.SaveChangesAsync();
-			}
-			catch (DbUpdateException ex)
-			{
-				_database.DiscardChanges();
-				if (Helper.IsDuplicateException(ex))
-					throw new DuplicatedItemException($"Trying to insert a duplicated track (slug {obj.Slug} already exists).");
-				throw;
-			}
-			return obj.ID;
+			await _database.SaveChangesAsync($"Trying to insert a duplicated track (slug {obj.Slug} already exists).");
+			return obj;
 		}
 		
-		public Task<int> CreateIfNotExists(Track obj)
+		protected override Task Validate(Track ressource)
 		{
-			return Create(obj);
-		}
-
-		public async Task Edit(Track edited, bool resetOld)
-		{
-			if (edited == null)
-				throw new ArgumentNullException(nameof(edited));
-			
-			Track old = await Get(edited.ID);
-
-			if (old == null)
-				throw new ItemNotFound($"No track found with the ID {edited.ID}.");
-			
-			if (resetOld)
-				Utility.Nullify(old);
-			Utility.Merge(old, edited);
-			await _database.SaveChangesAsync();
-		}
-
-		public async Task Delete(int id)
-		{
-			Track obj = await Get(id);
-			await Delete(obj);
-		}
-
-		public async Task Delete(string slug)
-		{
-			Track obj = await Get(slug);
-			await Delete(obj);
+			return Task.CompletedTask;
 		}
 		
-		public async Task Delete(Track obj)
+		public override async Task Delete(Track obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -119,23 +93,55 @@ namespace Kyoo.Controllers
 			_database.Entry(obj).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
 		}
-		
-		public async Task DeleteRange(IEnumerable<Track> objs)
+
+		public async Task<ICollection<Track>> GetFromEpisode(int episodeID, 
+			Expression<Func<Track, bool>> where = null, 
+			Sort<Track> sort = default,
+			Pagination limit = default)
 		{
-			foreach (Track obj in objs)
-				await Delete(obj);
+			ICollection<Track> tracks = await ApplyFilters(_database.Tracks.Where(x => x.EpisodeID == episodeID),
+				where,
+				sort,
+				limit);
+			if (!tracks.Any() && await _episodes.Value.Get(episodeID) == null)
+				throw new ItemNotFound();
+			return tracks;
 		}
-		
-		public async Task DeleteRange(IEnumerable<int> ids)
+
+		public async Task<ICollection<Track>> GetFromEpisode(int showID, 
+			int seasonNumber, 
+			int episodeNumber,
+			Expression<Func<Track, bool>> where = null,
+			Sort<Track> sort = default,
+			Pagination limit = default)
 		{
-			foreach (int id in ids)
-				await Delete(id);
+			ICollection<Track> tracks = await ApplyFilters(_database.Tracks.Where(x => x.Episode.ShowID == showID 
+			                                                                           && x.Episode.SeasonNumber == seasonNumber
+			                                                                           && x.Episode.EpisodeNumber == episodeNumber),
+				where,
+				sort,
+				limit);
+			if (!tracks.Any() && await _episodes.Value.Get(showID, seasonNumber, episodeNumber) == null)
+				throw new ItemNotFound();
+			return tracks;
 		}
-		
-		public async Task DeleteRange(IEnumerable<string> slugs)
+
+		public async Task<ICollection<Track>> GetFromEpisode(string showSlug,
+			int seasonNumber, 
+			int episodeNumber, 
+			Expression<Func<Track, bool>> where = null, 
+			Sort<Track> sort = default,
+			Pagination limit = default)
 		{
-			foreach (string slug in slugs)
-				await Delete(slug);
+			ICollection<Track> tracks = await ApplyFilters(_database.Tracks.Where(x => x.Episode.Show.Slug == showSlug 
+			                                                                           && x.Episode.SeasonNumber == seasonNumber
+			                                                                           && x.Episode.EpisodeNumber == episodeNumber),
+				where,
+				sort,
+				limit);
+			if (!tracks.Any() && await _episodes.Value.Get(showSlug, seasonNumber, episodeNumber) == null)
+				throw new ItemNotFound();
+			return tracks;
 		}
 	}
 }

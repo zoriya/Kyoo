@@ -63,7 +63,7 @@ namespace Kyoo.Controllers
 				if (!Directory.Exists(show.Path))
 					await libraryManager.DeleteShow(show);
 			
-			ICollection<Episode> episodes = await libraryManager.GetEpisodes();
+			ICollection<Episode> episodes = await libraryManager.GetEpisodesFromShow();
 			ICollection<Library> libraries = argument == null 
 				? await libraryManager.GetLibraries()
 				: new [] { await libraryManager.GetLibrary(argument)};
@@ -224,7 +224,8 @@ namespace Kyoo.Controllers
 			bool isMovie, 
 			Library library)
 		{
-			Show show = await libraryManager.GetShowByPath(showPath);
+			Show show = (await libraryManager.GetShows(x => x.Path == showPath, limit: 1))
+				.FirstOrDefault();
 			if (show != null)
 				return show;
 			show = await _metadataProvider.SearchShow(showTitle, isMovie, library);
@@ -308,7 +309,9 @@ namespace Kyoo.Controllers
 		private async Task<IEnumerable<Track>> GetTracks(Episode episode)
 		{
 			IEnumerable<Track> tracks = await _transcoder.GetTrackInfo(episode.Path);
-			List<Track> epTracks = tracks.Where(x => x.Type != StreamType.Subtitle).Concat(GetExtractedSubtitles(episode)).ToList();
+			List<Track> epTracks = tracks.Where(x => x.Type != StreamType.Subtitle)
+				.Concat(GetExtractedSubtitles(episode))
+				.ToList();
 			if (epTracks.Count(x => !x.IsExternal) < tracks.Count())
 				epTracks.AddRange(await _transcoder.ExtractSubtitles(episode.Path));
 			episode.Tracks = epTracks;
@@ -328,26 +331,58 @@ namespace Kyoo.Controllers
 			foreach (string sub in Directory.EnumerateFiles(path, "", SearchOption.AllDirectories))
 			{
 				string episodeLink = Path.GetFileNameWithoutExtension(episode.Path);
-
-				if (!sub.Contains(episodeLink!))
+				string subName = Path.GetFileName(sub);
+				
+				if (episodeLink == null 
+				    || subName?.Contains(episodeLink) == false 
+				    || subName.Length < episodeLink.Length + 5)
 					continue;
-				string language = sub.Substring(Path.GetDirectoryName(sub).Length + episodeLink.Length + 2, 3);
+				string language = subName.Substring(episodeLink.Length + 2, 3);
 				bool isDefault = sub.Contains("default");
 				bool isForced = sub.Contains("forced");
-				Track track = new Track(StreamType.Subtitle, null, language, isDefault, isForced, null, false, sub) { EpisodeID = episode.ID };
+				Track track = new Track(StreamType.Subtitle, null, language, isDefault, isForced, null, false, sub)
+				{
+					EpisodeID = episode.ID,
+					Codec = Path.GetExtension(sub) switch
+					{
+						".ass" => "ass",
+						".srt" => "subrip",
+						_ => null
+					}
+				};
 
-				if (Path.GetExtension(sub) == ".ass")
-					track.Codec = "ass";
-				else if (Path.GetExtension(sub) == ".srt")
-					track.Codec = "subrip";
-				else
-					track.Codec = null;
 				tracks.Add(track);
 			}
 			return tracks;
 		}
 
-		private static readonly string[] VideoExtensions = { ".webm", ".mkv", ".flv", ".vob", ".ogg", ".ogv", ".avi", ".mts", ".m2ts", ".ts", ".mov", ".qt", ".asf", ".mp4", ".m4p", ".m4v", ".mpg", ".mp2", ".mpeg", ".mpe", ".mpv", ".m2v", ".3gp", ".3g2" };
+		private static readonly string[] VideoExtensions =
+		{
+			".webm",
+			".mkv",
+			".flv",
+			".vob",
+			".ogg", 
+			".ogv",
+			".avi",
+			".mts",
+			".m2ts",
+			".ts",
+			".mov",
+			".qt",
+			".asf", 
+			".mp4",
+			".m4p",
+			".m4v",
+			".mpg",
+			".mp2",
+			".mpeg",
+			".mpe",
+			".mpv",
+			".m2v",
+			".3gp",
+			".3g2"
+		};
 
 		private static bool IsVideo(string filePath)
 		{

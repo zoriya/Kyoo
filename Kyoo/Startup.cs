@@ -39,7 +39,7 @@ namespace Kyoo
 			{
 				configuration.RootPath = "wwwroot";
 			});
-			
+
 			services.AddControllers().AddNewtonsoftJson();
 			services.AddHttpClient();
 
@@ -47,8 +47,8 @@ namespace Kyoo
 			{
 				options.UseLazyLoadingProxies()
 					.UseNpgsql(_configuration.GetConnectionString("Database"));
-				// .EnableSensitiveDataLogging()
-				// .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()));
+					// .EnableSensitiveDataLogging()
+					// .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()));
 			}, ServiceLifetime.Transient);
 			
 			services.AddDbContext<IdentityDatabase>(options =>
@@ -133,16 +133,17 @@ namespace Kyoo
 			});
 
 
-			services.AddTransient<ILibraryRepository, LibraryRepository>();
-			services.AddTransient<ICollectionRepository, CollectionRepository>();
-			services.AddTransient<IShowRepository, ShowRepository>();
-			services.AddTransient<ISeasonRepository, SeasonRepository>();
-			services.AddTransient<IEpisodeRepository, EpisodeRepository>();
-			services.AddTransient<ITrackRepository, TrackRepository>();
-			services.AddTransient<IPeopleRepository, PeopleRepository>();
-			services.AddTransient<IStudioRepository, StudioRepository>();
-			services.AddTransient<IGenreRepository, GenreRepository>();
-			services.AddTransient<IProviderRepository, ProviderRepository>();
+			services.AddScoped<ILibraryRepository, LibraryRepository>();
+			services.AddScoped<ILibraryItemRepository, LibraryItemRepository>();
+			services.AddScoped<ICollectionRepository, CollectionRepository>();
+			services.AddScoped<IShowRepository, ShowRepository>();
+			services.AddScoped<ISeasonRepository, SeasonRepository>();
+			services.AddScoped<IEpisodeRepository, EpisodeRepository>();
+			services.AddScoped<ITrackRepository, TrackRepository>();
+			services.AddScoped<IPeopleRepository, PeopleRepository>();
+			services.AddScoped<IStudioRepository, StudioRepository>();
+			services.AddScoped<IGenreRepository, GenreRepository>();
+			services.AddScoped<IProviderRepository, ProviderRepository>();
 			
 			services.AddScoped<ILibraryManager, LibraryManager>();
 			services.AddSingleton<ITranscoder, Transcoder>();

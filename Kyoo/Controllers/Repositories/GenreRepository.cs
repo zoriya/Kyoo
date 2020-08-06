@@ -1,129 +1,66 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
-	public class GenreRepository : IGenreRepository
+	public class GenreRepository : LocalRepository<Genre>, IGenreRepository
 	{
 		private readonly DatabaseContext _database;
+		private readonly Lazy<IShowRepository> _shows;
+		protected override Expression<Func<Genre, object>> DefaultSort => x => x.Slug;
 		
 		
-		public GenreRepository(DatabaseContext database)
+		public GenreRepository(DatabaseContext database, IServiceProvider services) : base(database)
 		{
 			_database = database;
-		}
-		
-		public void Dispose()
-		{
-			_database.Dispose();
+			_shows = new Lazy<IShowRepository>(services.GetRequiredService<IShowRepository>);
 		}
 
-		public ValueTask DisposeAsync()
+		public override void Dispose()
 		{
-			return _database.DisposeAsync();
+			base.Dispose();
+			if (_shows.IsValueCreated)
+				_shows.Value.Dispose();
 		}
 
-		public async Task<Genre> Get(int id)
+		public override async ValueTask DisposeAsync()
 		{
-			return await _database.Genres.FirstOrDefaultAsync(x => x.ID == id);
+			await _database.DisposeAsync();
+			if (_shows.IsValueCreated)
+				await _shows.Value.DisposeAsync();
 		}
 
-		public async Task<Genre> Get(string slug)
-		{
-			return await _database.Genres.FirstOrDefaultAsync(x => x.Slug == slug);
-		}
-
-		public async Task<ICollection<Genre>> Search(string query)
+		public override async Task<ICollection<Genre>> Search(string query)
 		{
 			return await _database.Genres
-				.Where(genre => EF.Functions.Like(genre.Name, $"%{query}%"))
+				.Where(genre => EF.Functions.ILike(genre.Name, $"%{query}%"))
 				.Take(20)
 				.ToListAsync();
 		}
 
-		public async Task<ICollection<Genre>> GetAll()
-		{
-			return await _database.Genres.ToListAsync();
-		}
-
-		public async Task<int> Create(Genre obj)
+		public override async Task<Genre> Create(Genre obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
 			_database.Entry(obj).State = EntityState.Added;
-			
-			try
-			{
-				await _database.SaveChangesAsync();
-			}
-			catch (DbUpdateException ex)
-			{
-				_database.DiscardChanges();
-				
-				if (Helper.IsDuplicateException(ex))
-					throw new DuplicatedItemException($"Trying to insert a duplicated genre (slug {obj.Slug} already exists).");
-				throw;
-			}
-			
-			return obj.ID;
+			await _database.SaveChangesAsync($"Trying to insert a duplicated genre (slug {obj.Slug} already exists).");
+			return obj;
 		}
 
-		public async Task<int> CreateIfNotExists(Genre obj)
+		protected override Task Validate(Genre ressource)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-
-			Genre old = await Get(obj.Slug);
-			if (old != null)
-				return old.ID;
-			try
-			{
-				return await Create(obj);
-			}
-			catch (DuplicatedItemException)
-			{
-				old = await Get(obj.Slug);
-				if (old == null)
-					throw new SystemException("Unknown database state.");
-				return old.ID;
-			}
+			return Task.CompletedTask;
 		}
 
-		public async Task Edit(Genre edited, bool resetOld)
-		{
-			if (edited == null)
-				throw new ArgumentNullException(nameof(edited));
-			
-			Genre old = await Get(edited.Slug);
-
-			if (old == null)
-				throw new ItemNotFound($"No genre found with the slug {edited.Slug}.");
-			
-			if (resetOld)
-				Utility.Nullify(old);
-			Utility.Merge(old, edited);
-			await _database.SaveChangesAsync();
-		}
-		
-		public async Task Delete(int id)
-		{
-			Genre obj = await Get(id);
-			await Delete(obj);
-		}
-
-		public async Task Delete(string slug)
-		{
-			Genre obj = await Get(slug);
-			await Delete(obj);
-		}
-
-		public async Task Delete(Genre obj)
+		public override async Task Delete(Genre obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -134,23 +71,36 @@ namespace Kyoo.Controllers
 					_database.Entry(link).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
 		}
-		
-		public async Task DeleteRange(IEnumerable<Genre> objs)
+
+		public async Task<ICollection<Genre>> GetFromShow(int showID, 
+			Expression<Func<Genre, bool>> where = null, 
+			Sort<Genre> sort = default, 
+			Pagination limit = default)
 		{
-			foreach (Genre obj in objs)
-				await Delete(obj);
+			ICollection<Genre> genres = await ApplyFilters(_database.GenreLinks.Where(x => x.ShowID == showID)
+					.Select(x => x.Genre),
+				where,
+				sort,
+				limit);
+			if (!genres.Any() && await _shows.Value.Get(showID) == null)
+				throw new ItemNotFound();
+			return genres;
 		}
-		
-		public async Task DeleteRange(IEnumerable<int> ids)
+
+		public async Task<ICollection<Genre>> GetFromShow(string showSlug, 
+			Expression<Func<Genre, bool>> where = null, 
+			Sort<Genre> sort = default,
+			Pagination limit = default)
 		{
-			foreach (int id in ids)
-				await Delete(id);
-		}
-		
-		public async Task DeleteRange(IEnumerable<string> slugs)
-		{
-			foreach (string slug in slugs)
-				await Delete(slug);
+			ICollection<Genre> genres = await ApplyFilters(_database.GenreLinks
+					.Where(x => x.Show.Slug == showSlug)
+					.Select(x => x.Genre),
+				where,
+				sort,
+				limit);
+			if (!genres.Any() && await _shows.Value.Get(showSlug) == null)
+				throw new ItemNotFound();
+			return genres;
 		}
 	}
 }

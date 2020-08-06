@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
@@ -8,120 +9,41 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers
 {
-	public class StudioRepository : IStudioRepository
+	public class StudioRepository : LocalRepository<Studio>, IStudioRepository
 	{
 		private readonly DatabaseContext _database;
+		protected override Expression<Func<Studio, object>> DefaultSort => x => x.Name;
 
 
-		public StudioRepository(DatabaseContext database)
+		public StudioRepository(DatabaseContext database) : base(database)
 		{
 			_database = database;
 		}
 		
-		public void Dispose()
-		{
-			_database.Dispose();
-		}
-
-		public ValueTask DisposeAsync()
-		{
-			return _database.DisposeAsync();
-		}
-		
-		public async Task<Studio> Get(int id)
-		{
-			return await _database.Studios.FirstOrDefaultAsync(x => x.ID == id);
-		}
-		
-		public async Task<Studio> Get(string slug)
-		{
-			return await _database.Studios.FirstOrDefaultAsync(x => x.Slug == slug);
-		}
-
-		public async Task<ICollection<Studio>> Search(string query)
+		public override async Task<ICollection<Studio>> Search(string query)
 		{
 			return await _database.Studios
-				.Where(x => EF.Functions.Like(x.Name, $"%{query}%"))
+				.Where(x => EF.Functions.ILike(x.Name, $"%{query}%"))
 				.Take(20)
 				.ToListAsync();
 		}
 
-		public async Task<ICollection<Studio>> GetAll()
-		{
-			return await _database.Studios.ToListAsync();
-		}
-
-		public async Task<int> Create(Studio obj)
+		public override async Task<Studio> Create(Studio obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
 			_database.Entry(obj).State = EntityState.Added;
-			
-			try
-			{
-				await _database.SaveChangesAsync();
-			}
-			catch (DbUpdateException ex)
-			{
-				_database.DiscardChanges();
-				if (Helper.IsDuplicateException(ex))
-					throw new DuplicatedItemException($"Trying to insert a duplicated studio (slug {obj.Slug} already exists).");
-				throw;
-			}
-			return obj.ID;
+			await _database.SaveChangesAsync($"Trying to insert a duplicated studio (slug {obj.Slug} already exists).");
+			return obj;
+		}
+
+		protected override Task Validate(Studio ressource)
+		{
+			return Task.CompletedTask;
 		}
 		
-		public async Task<int> CreateIfNotExists(Studio obj)
-		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-
-			Studio old = await Get(obj.Slug);
-			if (old != null)
-				return old.ID;
-			try
-			{
-				return await Create(obj);
-			}
-			catch (DuplicatedItemException)
-			{
-				old = await Get(obj.Slug);
-				if (old == null)
-					throw new SystemException("Unknown database state.");
-				return old.ID;
-			}
-		}
-
-		public async Task Edit(Studio edited, bool resetOld)
-		{
-			if (edited == null)
-				throw new ArgumentNullException(nameof(edited));
-			
-			Studio old = await Get(edited.Name);
-
-			if (old == null)
-				throw new ItemNotFound($"No studio found with the name {edited.Name}.");
-			
-			if (resetOld)
-				Utility.Nullify(old);
-			Utility.Merge(old, edited);
-			await _database.SaveChangesAsync();
-		}
-
-		public async Task Delete(int id)
-		{
-			Studio obj = await Get(id);
-			await Delete(obj);
-		}
-
-		public async Task Delete(string slug)
-		{
-			Studio obj = await Get(slug);
-			await Delete(obj);
-		}
-		
-		public async Task Delete(Studio obj)
+		public override async Task Delete(Studio obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -133,23 +55,27 @@ namespace Kyoo.Controllers
 				show.StudioID = null;
 			await _database.SaveChangesAsync();
 		}
-		
-		public async Task DeleteRange(IEnumerable<Studio> objs)
+
+		public async Task<Studio> GetFromShow(int showID)
 		{
-			foreach (Studio obj in objs)
-				await Delete(obj);
+			Studio studio = await _database.Shows
+				.Where(x => x.ID == showID)
+				.Select(x => x.Studio)
+				.FirstOrDefaultAsync();
+			if (studio == null && !_database.Shows.Any(x => x.ID == showID))
+				throw new ItemNotFound();
+			return studio;
 		}
-		
-		public async Task DeleteRange(IEnumerable<int> ids)
+
+		public async Task<Studio> GetFromShow(string showSlug)
 		{
-			foreach (int id in ids)
-				await Delete(id);
-		}
-		
-		public async Task DeleteRange(IEnumerable<string> slugs)
-		{
-			foreach (string slug in slugs)
-				await Delete(slug);
+			Studio studio = await _database.Shows
+				.Where(x => x.Slug == showSlug)
+				.Select(x => x.Studio)
+				.FirstOrDefaultAsync();
+			if (studio == null && !_database.Shows.Any(x => x.Slug == showSlug))
+				throw new ItemNotFound();
+			return studio;
 		}
 	}
 }

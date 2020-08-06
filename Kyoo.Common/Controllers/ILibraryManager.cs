@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Kyoo.Models;
@@ -8,6 +10,31 @@ namespace Kyoo.Controllers
 {
 	public interface ILibraryManager : IDisposable, IAsyncDisposable
 	{
+		// Repositories
+		ILibraryRepository LibraryRepository { get; }
+		ILibraryItemRepository LibraryItemRepository { get; }
+		ICollectionRepository CollectionRepository { get; }
+		IShowRepository ShowRepository { get; }
+		ISeasonRepository SeasonRepository { get; }
+		IEpisodeRepository EpisodeRepository { get; }
+		ITrackRepository TrackRepository { get; }
+		IPeopleRepository PeopleRepository { get; }
+		IStudioRepository StudioRepository { get; }
+		IGenreRepository GenreRepository { get; }
+		IProviderRepository ProviderRepository { get; }
+		
+		// Get by id
+		Task<Library> GetLibrary(int id);
+		Task<Collection> GetCollection(int id);
+		Task<Show> GetShow(int id);
+		Task<Season> GetSeason(int id);
+		Task<Season> GetSeason(int showID, int seasonNumber);
+		Task<Episode> GetEpisode(int id);
+		Task<Episode> GetEpisode(int showID, int seasonNumber, int episodeNumber);
+		Task<Genre> GetGenre(int id);
+		Task<Studio> GetStudio(int id);
+		Task<People> GetPeople(int id);
+		
 		// Get by slug
 		Task<Library> GetLibrary(string slug);
 		Task<Collection> GetCollection(string slug);
@@ -16,38 +43,408 @@ namespace Kyoo.Controllers
 		Task<Episode> GetEpisode(string showSlug, int seasonNumber, int episodeNumber);
 		Task<Episode> GetMovieEpisode(string movieSlug);
 		Task<Track> GetTrack(int id);
-		Task<Track> GetTrack(int episodeID, string language, bool isForced);
 		Task<Genre> GetGenre(string slug);
 		Task<Studio> GetStudio(string slug);
 		Task<People> GetPeople(string slug);
 
 		// Get by relations
-		Task<ICollection<Season>> GetSeasons(int showID);
-		Task<ICollection<Season>> GetSeasons(string showSlug);
+		Task<ICollection<Season>> GetSeasonsFromShow(int showID,
+			Expression<Func<Season, bool>> where = null, 
+			Sort<Season> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Season>> GetSeasonsFromShow(int showID,
+			[Optional] Expression<Func<Season, bool>> where,
+			Expression<Func<Season, object>> sort,
+			Pagination limit = default
+		) => GetSeasonsFromShow(showID, where, new Sort<Season>(sort), limit);
+		Task<ICollection<Season>> GetSeasonsFromShow(string showSlug,
+			Expression<Func<Season, bool>> where = null, 
+			Sort<Season> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Season>> GetSeasonsFromShow(string showSlug,
+			[Optional] Expression<Func<Season, bool>> where,
+			Expression<Func<Season, object>> sort,
+			Pagination limit = default
+		) => GetSeasonsFromShow(showSlug, where, new Sort<Season>(sort), limit);
 		
-		Task<ICollection<Episode>> GetEpisodes(int showID, int seasonNumber);
-		Task<ICollection<Episode>> GetEpisodes(string showSlug, int seasonNumber);
-		Task<ICollection<Episode>> GetEpisodes(int seasonID);
+		Task<ICollection<Episode>> GetEpisodesFromShow(int showID,
+			Expression<Func<Episode, bool>> where = null, 
+			Sort<Episode> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Episode>> GetEpisodesFromShow(int showID,
+			[Optional] Expression<Func<Episode, bool>> where,
+			Expression<Func<Episode, object>> sort,
+			Pagination limit = default
+		) => GetEpisodesFromShow(showID, where, new Sort<Episode>(sort), limit);
 		
+		Task<ICollection<Episode>> GetEpisodesFromShow(string showSlug,
+			Expression<Func<Episode, bool>> where = null, 
+			Sort<Episode> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Episode>> GetEpisodesFromShow(string showSlug,
+			[Optional] Expression<Func<Episode, bool>> where,
+			Expression<Func<Episode, object>> sort,
+			Pagination limit = default
+		) => GetEpisodesFromShow(showSlug, where, new Sort<Episode>(sort), limit);
 		
+		Task<ICollection<Episode>> GetEpisodesFromSeason(int seasonID,
+			Expression<Func<Episode, bool>> where = null, 
+			Sort<Episode> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Episode>> GetEpisodesFromSeason(int seasonID,
+			[Optional] Expression<Func<Episode, bool>> where,
+			Expression<Func<Episode, object>> sort,
+			Pagination limit = default
+		) => GetEpisodesFromSeason(seasonID, where, new Sort<Episode>(sort), limit);
+		
+		Task<ICollection<Episode>> GetEpisodesFromSeason(int showID,
+			int seasonNumber,
+			Expression<Func<Episode, bool>> where = null, 
+			Sort<Episode> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Episode>> GetEpisodesFromSeason(int showID,
+			int seasonNumber,
+			[Optional] Expression<Func<Episode, bool>> where,
+			Expression<Func<Episode, object>> sort,
+			Pagination limit = default
+		) => GetEpisodesFromSeason(showID, seasonNumber, where, new Sort<Episode>(sort), limit);
+		
+		Task<ICollection<Episode>> GetEpisodesFromSeason(string showSlug,
+			int seasonNumber,
+			Expression<Func<Episode, bool>> where = null, 
+			Sort<Episode> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Episode>> GetEpisodesFromSeason(string showSlug,
+			int seasonNumber,
+			[Optional] Expression<Func<Episode, bool>> where,
+			Expression<Func<Episode, object>> sort,
+			Pagination limit = default
+		) => GetEpisodesFromSeason(showSlug, seasonNumber, where, new Sort<Episode>(sort), limit);
+		
+		Task<ICollection<PeopleLink>> GetPeopleFromShow(int showID,
+			Expression<Func<PeopleLink, bool>> where = null, 
+			Sort<PeopleLink> sort = default,
+			Pagination limit = default);
+		Task<ICollection<PeopleLink>> GetPeopleFromShow(int showID,
+			[Optional] Expression<Func<PeopleLink, bool>> where,
+			Expression<Func<PeopleLink, object>> sort,
+			Pagination limit = default
+		) => GetPeopleFromShow(showID, where, new Sort<PeopleLink>(sort), limit);
+		
+		Task<ICollection<PeopleLink>> GetPeopleFromShow(string showSlug,
+			Expression<Func<PeopleLink, bool>> where = null, 
+			Sort<PeopleLink> sort = default,
+			Pagination limit = default);
+		Task<ICollection<PeopleLink>> GetPeopleFromShow(string showSlug,
+			[Optional] Expression<Func<PeopleLink, bool>> where,
+			Expression<Func<PeopleLink, object>> sort,
+			Pagination limit = default
+		) => GetPeopleFromShow(showSlug, where, new Sort<PeopleLink>(sort), limit);
+		
+		Task<ICollection<Genre>> GetGenresFromShow(int showID,
+			Expression<Func<Genre, bool>> where = null, 
+			Sort<Genre> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Genre>> GetGenresFromShow(int showID,
+			[Optional] Expression<Func<Genre, bool>> where,
+			Expression<Func<Genre, object>> sort,
+			Pagination limit = default
+		) => GetGenresFromShow(showID, where, new Sort<Genre>(sort), limit);
+		
+		Task<ICollection<Genre>> GetGenresFromShow(string showSlug,
+			Expression<Func<Genre, bool>> where = null, 
+			Sort<Genre> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Genre>> GetGenresFromShow(string showSlug,
+			[Optional] Expression<Func<Genre, bool>> where,
+			Expression<Func<Genre, object>> sort,
+			Pagination limit = default
+		) => GetGenresFromShow(showSlug, where, new Sort<Genre>(sort), limit);
+		
+		Task<ICollection<Track>> GetTracksFromEpisode(int episodeID,
+			Expression<Func<Track, bool>> where = null, 
+			Sort<Track> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Track>> GetTracksFromEpisode(int episodeID,
+			[Optional] Expression<Func<Track, bool>> where,
+			Expression<Func<Track, object>> sort,
+			Pagination limit = default
+		) => GetTracksFromEpisode(episodeID, where, new Sort<Track>(sort), limit);
+		
+		Task<ICollection<Track>> GetTracksFromEpisode(int showID,
+			int seasonNumber,
+			int episodeNumber,
+			Expression<Func<Track, bool>> where = null, 
+			Sort<Track> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Track>> GetTracksFromEpisode(int showID,
+			int seasonNumber,
+			int episodeNumber,
+			[Optional] Expression<Func<Track, bool>> where,
+			Expression<Func<Track, object>> sort,
+			Pagination limit = default
+		) => GetTracksFromEpisode(showID, seasonNumber, episodeNumber, where, new Sort<Track>(sort), limit);
+		
+		Task<ICollection<Track>> GetTracksFromEpisode(string showSlug,
+			int seasonNumber,
+			int episodeNumber,
+			Expression<Func<Track, bool>> where = null, 
+			Sort<Track> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Track>> GetTracksFromEpisode(string showSlug,
+			int seasonNumber,
+			int episodeNumber,
+			[Optional] Expression<Func<Track, bool>> where,
+			Expression<Func<Track, object>> sort,
+			Pagination limit = default
+		) => GetTracksFromEpisode(showSlug, seasonNumber, episodeNumber, where, new Sort<Track>(sort), limit);
+		
+		Task<Studio> GetStudioFromShow(int showID);
+		Task<Studio> GetStudioFromShow(string showSlug);
+		Task<Show> GetShowFromSeason(int seasonID);
+		Task<Show> GetShowFromEpisode(int episodeID);
+		Task<Season> GetSeasonFromEpisode(int episodeID);
+		
+		Task<ICollection<Library>> GetLibrariesFromShow(int showID,
+			Expression<Func<Library, bool>> where = null, 
+			Sort<Library> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Library>> GetLibrariesFromShow(int showID,
+			[Optional] Expression<Func<Library, bool>> where,
+			Expression<Func<Library, object>> sort,
+			Pagination limit = default
+		) => GetLibrariesFromShow(showID, where, new Sort<Library>(sort), limit);
+		
+		Task<ICollection<Library>> GetLibrariesFromShow(string showSlug,
+			Expression<Func<Library, bool>> where = null, 
+			Sort<Library> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Library>> GetLibrariesFromShow(string showSlug,
+			[Optional] Expression<Func<Library, bool>> where,
+			Expression<Func<Library, object>> sort,
+			Pagination limit = default
+		) => GetLibrariesFromShow(showSlug, where, new Sort<Library>(sort), limit);
+		
+		Task<ICollection<Collection>> GetCollectionsFromShow(int showID,
+			Expression<Func<Collection, bool>> where = null, 
+			Sort<Collection> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Collection>> GetCollectionsFromShow(int showID,
+			[Optional] Expression<Func<Collection, bool>> where,
+			Expression<Func<Collection, object>> sort,
+			Pagination limit = default
+		) => GetCollectionsFromShow(showID, where, new Sort<Collection>(sort), limit);
+		
+		Task<ICollection<Collection>> GetCollectionsFromShow(string showSlug,
+			Expression<Func<Collection, bool>> where = null, 
+			Sort<Collection> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Collection>> GetCollectionsFromShow(string showSlug,
+			[Optional] Expression<Func<Collection, bool>> where,
+			Expression<Func<Collection, object>> sort,
+			Pagination limit = default
+		) => GetCollectionsFromShow(showSlug, where, new Sort<Collection>(sort), limit);
+		
+		Task<ICollection<Show>> GetShowsFromLibrary(int id,
+			Expression<Func<Show, bool>> where = null, 
+			Sort<Show> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Show>> GetShowsFromLibrary(int id,
+			[Optional] Expression<Func<Show, bool>> where,
+			Expression<Func<Show, object>> sort,
+			Pagination limit = default
+		) => GetShowsFromLibrary(id, where, new Sort<Show>(sort), limit);
+		
+		Task<ICollection<Show>> GetShowsFromLibrary(string slug,
+			Expression<Func<Show, bool>> where = null, 
+			Sort<Show> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Show>> GetShowsFromLibrary(string slug,
+			[Optional] Expression<Func<Show, bool>> where,
+			Expression<Func<Show, object>> sort,
+			Pagination limit = default
+		) => GetShowsFromLibrary(slug, where, new Sort<Show>(sort), limit);
+		
+		Task<ICollection<Collection>> GetCollectionsFromLibrary(int id,
+			Expression<Func<Collection, bool>> where = null, 
+			Sort<Collection> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Collection>> GetCollectionsFromLibrary(int id,
+			[Optional] Expression<Func<Collection, bool>> where,
+			Expression<Func<Collection, object>> sort,
+			Pagination limit = default
+		) => GetCollectionsFromLibrary(id, where, new Sort<Collection>(sort), limit);
+		
+		Task<ICollection<Collection>> GetCollectionsFromLibrary(string showSlug,
+			Expression<Func<Collection, bool>> where = null, 
+			Sort<Collection> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Collection>> GetCollectionsFromLibrary(string showSlug,
+			[Optional] Expression<Func<Collection, bool>> where,
+			Expression<Func<Collection, object>> sort,
+			Pagination limit = default
+		) => GetCollectionsFromLibrary(showSlug, where, new Sort<Collection>(sort), limit);
+		
+		Task<ICollection<LibraryItem>> GetItemsFromLibrary(int id,
+			Expression<Func<LibraryItem, bool>> where = null,
+			Sort<LibraryItem> sort = default,
+			Pagination limit = default);
+		Task<ICollection<LibraryItem>> GetItemsFromLibrary(int id,
+			[Optional] Expression<Func<LibraryItem, bool>> where,
+			Expression<Func<LibraryItem, object>> sort,
+			Pagination limit = default
+		) => GetItemsFromLibrary(id, where, new Sort<LibraryItem>(sort), limit);
+		
+		Task<ICollection<LibraryItem>> GetItemsFromLibrary(string librarySlug,
+			Expression<Func<LibraryItem, bool>> where = null,
+			Sort<LibraryItem> sort = default,
+			Pagination limit = default);
+		Task<ICollection<LibraryItem>> GetItemsFromLibrary(string librarySlug,
+			[Optional] Expression<Func<LibraryItem, bool>> where,
+			Expression<Func<LibraryItem, object>> sort,
+			Pagination limit = default
+		) => GetItemsFromLibrary(librarySlug, where, new Sort<LibraryItem>(sort), limit);
+		
+		Task<ICollection<Show>> GetShowsFromCollection(int id,
+			Expression<Func<Show, bool>> where = null, 
+			Sort<Show> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Show>> GetShowsFromCollection(int id,
+			[Optional] Expression<Func<Show, bool>> where,
+			Expression<Func<Show, object>> sort,
+			Pagination limit = default
+		) => GetShowsFromCollection(id, where, new Sort<Show>(sort), limit);
+		
+		Task<ICollection<Show>> GetShowsFromCollection(string slug,
+			Expression<Func<Show, bool>> where = null, 
+			Sort<Show> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Show>> GetShowsFromCollection(string slug,
+			[Optional] Expression<Func<Show, bool>> where,
+			Expression<Func<Show, object>> sort,
+			Pagination limit = default
+		) => GetShowsFromCollection(slug, where, new Sort<Show>(sort), limit);
+		
+		Task<ICollection<Library>> GetLibrariesFromCollection(int id,
+			Expression<Func<Library, bool>> where = null, 
+			Sort<Library> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Library>> GetLibrariesFromCollection(int id,
+			[Optional] Expression<Func<Library, bool>> where,
+			Expression<Func<Library, object>> sort,
+			Pagination limit = default
+		) => GetLibrariesFromCollection(id, where, new Sort<Library>(sort), limit);
+		
+		Task<ICollection<Library>> GetLibrariesFromCollection(string slug,
+			Expression<Func<Library, bool>> where = null, 
+			Sort<Library> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Library>> GetLibrariesFromCollection(string slug,
+			[Optional] Expression<Func<Library, bool>> where,
+			Expression<Func<Library, object>> sort,
+			Pagination limit = default
+		) => GetLibrariesFromCollection(slug, where, new Sort<Library>(sort), limit);
+		
+		Task<ICollection<ShowRole>> GetRolesFromPeople(int showID,
+			Expression<Func<ShowRole, bool>> where = null, 
+			Sort<ShowRole> sort = default,
+			Pagination limit = default);
+		Task<ICollection<ShowRole>> GetRolesFromPeople(int showID,
+			[Optional] Expression<Func<ShowRole, bool>> where,
+			Expression<Func<ShowRole, object>> sort,
+			Pagination limit = default
+		) => GetRolesFromPeople(showID, where, new Sort<ShowRole>(sort), limit);
+		
+		Task<ICollection<ShowRole>> GetRolesFromPeople(string showSlug,
+			Expression<Func<ShowRole, bool>> where = null, 
+			Sort<ShowRole> sort = default,
+			Pagination limit = default);
+		Task<ICollection<ShowRole>> GetRolesFromPeople(string showSlug,
+			[Optional] Expression<Func<ShowRole, bool>> where,
+			Expression<Func<ShowRole, object>> sort,
+			Pagination limit = default
+		) => GetRolesFromPeople(showSlug, where, new Sort<ShowRole>(sort), limit);
+
+
 		// Helpers
-		Task<Show> GetShowByPath(string path);
 		Task AddShowLink(int showID, int? libraryID, int? collectionID);
 		Task AddShowLink([NotNull] Show show, Library library, Collection collection);
 		
 		// Get all
-		Task<ICollection<Library>> GetLibraries();
-		Task<ICollection<Collection>> GetCollections();
-		Task<ICollection<Show>> GetShows();
-		Task<ICollection<Season>> GetSeasons();
-		Task<ICollection<Episode>> GetEpisodes();
-		Task<ICollection<Track>> GetTracks();
-		Task<ICollection<Studio>> GetStudios();
-		Task<ICollection<People>> GetPeoples();
-		Task<ICollection<Genre>> GetGenres();
-		Task<ICollection<ProviderID>> GetProviders();
+		Task<ICollection<Library>> GetLibraries(Expression<Func<Library, bool>> where = null, 
+			Sort<Library> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Collection>> GetCollections(Expression<Func<Collection, bool>> where = null, 
+			Sort<Collection> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Show>> GetShows(Expression<Func<Show, bool>> where = null, 
+			Sort<Show> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Season>> GetSeasonsFromShow(Expression<Func<Season, bool>> where = null, 
+			Sort<Season> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Episode>> GetEpisodesFromShow(Expression<Func<Episode, bool>> where = null, 
+			Sort<Episode> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Track>> GetTracks(Expression<Func<Track, bool>> where = null, 
+			Sort<Track> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Studio>> GetStudios(Expression<Func<Studio, bool>> where = null, 
+			Sort<Studio> sort = default,
+			Pagination limit = default);
+		Task<ICollection<People>> GetPeople(Expression<Func<People, bool>> where = null, 
+			Sort<People> sort = default,
+			Pagination limit = default);
+		Task<ICollection<Genre>> GetGenres(Expression<Func<Genre, bool>> where = null, 
+			Sort<Genre> sort = default,
+			Pagination limit = default);
+		Task<ICollection<ProviderID>> GetProviders(Expression<Func<ProviderID, bool>> where = null, 
+			Sort<ProviderID> sort = default,
+			Pagination limit = default);
+		
+		Task<ICollection<Library>> GetLibraries([Optional] Expression<Func<Library, bool>> where,
+			Expression<Func<Library, object>> sort,
+			Pagination limit = default
+		) => GetLibraries(where, new Sort<Library>(sort), limit);
+		Task<ICollection<Collection>> GetCollections([Optional] Expression<Func<Collection, bool>> where,
+			Expression<Func<Collection, object>> sort,
+			Pagination limit = default
+		) => GetCollections(where, new Sort<Collection>(sort), limit);
+		Task<ICollection<Show>> GetShows([Optional] Expression<Func<Show, bool>> where,
+			Expression<Func<Show, object>> sort,
+			Pagination limit = default
+		) => GetShows(where, new Sort<Show>(sort), limit);
+		Task<ICollection<Season>> GetSeasonsFromShow([Optional] Expression<Func<Season, bool>> where,
+			Expression<Func<Season, object>> sort,
+			Pagination limit = default
+		) => GetSeasonsFromShow(where, new Sort<Season>(sort), limit);
+		Task<ICollection<Episode>> GetEpisodesFromShow([Optional] Expression<Func<Episode, bool>> where,
+			Expression<Func<Episode, object>> sort,
+			Pagination limit = default
+		) => GetEpisodesFromShow(where, new Sort<Episode>(sort), limit);
+		Task<ICollection<Track>> GetTracks([Optional] Expression<Func<Track, bool>> where,
+			Expression<Func<Track, object>> sort,
+			Pagination limit = default
+		) => GetTracks(where, new Sort<Track>(sort), limit);
+		Task<ICollection<Studio>> GetStudios([Optional] Expression<Func<Studio, bool>> where,
+			Expression<Func<Studio, object>> sort,
+			Pagination limit = default
+		) => GetStudios(where, new Sort<Studio>(sort), limit);
+		Task<ICollection<People>> GetPeople([Optional] Expression<Func<People, bool>> where,
+			Expression<Func<People, object>> sort,
+			Pagination limit = default
+		) => GetPeople(where, new Sort<People>(sort), limit);
+		Task<ICollection<Genre>> GetGenres([Optional] Expression<Func<Genre, bool>> where,
+			Expression<Func<Genre, object>> sort,
+			Pagination limit = default
+		) => GetGenres(where, new Sort<Genre>(sort), limit);
+		Task<ICollection<ProviderID>> GetProviders([Optional] Expression<Func<ProviderID, bool>> where,
+			Expression<Func<ProviderID, object>> sort,
+			Pagination limit = default
+		) => GetProviders(where, new Sort<ProviderID>(sort), limit);
 
-		// Search
+
+			// Search
 		Task<ICollection<Library>> SearchLibraries(string searchQuery);
 		Task<ICollection<Collection>> SearchCollections(string searchQuery);
 		Task<ICollection<Show>> SearchShows(string searchQuery);
@@ -58,26 +455,26 @@ namespace Kyoo.Controllers
 		Task<ICollection<People>> SearchPeople(string searchQuery);
 		
 		//Register values
-		Task RegisterLibrary(Library library);
-		Task RegisterCollection(Collection collection);
-		Task RegisterShow(Show show);
-		Task RegisterSeason(Season season);
-		Task RegisterEpisode(Episode episode);
-		Task RegisterTrack(Track track);
-		Task RegisterGenre(Genre genre);
-		Task RegisterStudio(Studio studio);
-		Task RegisterPeople(People people);
+		Task<Library> RegisterLibrary(Library library);
+		Task<Collection> RegisterCollection(Collection collection);
+		Task<Show> RegisterShow(Show show);
+		Task<Season> RegisterSeason(Season season);
+		Task<Episode> RegisterEpisode(Episode episode);
+		Task<Track> RegisterTrack(Track track);
+		Task<Genre> RegisterGenre(Genre genre);
+		Task<Studio> RegisterStudio(Studio studio);
+		Task<People> RegisterPeople(People people);
 		
 		// Edit values
-		Task EditLibrary(Library library, bool resetOld);
-		Task EditCollection(Collection collection, bool resetOld);
-		Task EditShow(Show show, bool resetOld);
-		Task EditSeason(Season season, bool resetOld);
-		Task EditEpisode(Episode episode, bool resetOld);
-		Task EditTrack(Track track, bool resetOld);
-		Task EditGenre(Genre genre, bool resetOld);
-		Task EditStudio(Studio studio, bool resetOld);
-		Task EditPeople(People people, bool resetOld);
+		Task<Library> EditLibrary(Library library, bool resetOld);
+		Task<Collection> EditCollection(Collection collection, bool resetOld);
+		Task<Show> EditShow(Show show, bool resetOld);
+		Task<Season> EditSeason(Season season, bool resetOld);
+		Task<Episode> EditEpisode(Episode episode, bool resetOld);
+		Task<Track> EditTrack(Track track, bool resetOld);
+		Task<Genre> EditGenre(Genre genre, bool resetOld);
+		Task<Studio> EditStudio(Studio studio, bool resetOld);
+		Task<People> EditPeople(People people, bool resetOld);
 
 		
 		// Delete values
@@ -90,5 +487,27 @@ namespace Kyoo.Controllers
 		Task DeleteGenre(Genre genre);
 		Task DeleteStudio(Studio studio);
 		Task DeletePeople(People people);
+		
+		//Delete by slug
+		Task DelteLibrary(string slug);
+		Task DeleteCollection(string slug);
+		Task DeleteShow(string slug);
+		Task DeleteSeason(string slug);
+		Task DeleteEpisode(string slug);
+		Task DeleteTrack(string slug);
+		Task DeleteGenre(string slug);
+		Task DeleteStudio(string slug);
+		Task DeletePeople(string slug);
+		
+		//Delete by id
+		Task DelteLibrary(int id);
+		Task DeleteCollection(int id);
+		Task DeleteShow(int id);
+		Task DeleteSeason(int id);
+		Task DeleteEpisode(int id);
+		Task DeleteTrack(int id);
+		Task DeleteGenre(int id);
+		Task DeleteStudio(int id);
+		Task DeletePeople(int id);
 	}
 }

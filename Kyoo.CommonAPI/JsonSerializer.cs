@@ -77,8 +77,9 @@ namespace Kyoo.Controllers
 					{
 						ContractResolver = new JsonPropertySelector(null, new Dictionary<Type, HashSet<string>>()
 						{
-							{typeof(Show), new HashSet<string> {"genres", "studio", "people", "seasons"}},
-							{typeof(Episode), new HashSet<string> {"tracks"}}
+							{typeof(Show), new HashSet<string> {"genres", "studio"}},
+							{typeof(Episode), new HashSet<string> {"tracks"}},
+							{typeof(PeopleLink), new HashSet<string> {"show"}}
 						})
 					},
 				context.HttpContext.RequestServices.GetRequiredService<ArrayPool<char>>(), 

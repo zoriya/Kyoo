@@ -8,6 +8,11 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:Enum:item_type", "show,movie,collection")
+                .Annotation("Npgsql:Enum:status", "finished,airing,planned,unknown")
+                .Annotation("Npgsql:Enum:stream_type", "unknow,video,audio,subtitle");
+
             migrationBuilder.CreateTable(
                 name: "Collections",
                 columns: table => new
@@ -17,8 +22,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     Slug = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true),
                     Poster = table.Column<string>(nullable: true),
-                    Overview = table.Column<string>(nullable: true),
-                    ImgPrimary = table.Column<string>(nullable: true)
+                    Overview = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -47,7 +51,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Slug = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true),
-                    Paths = table.Column<string>(nullable: true)
+                    Paths = table.Column<string[]>(type: "text[]", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -55,18 +59,18 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 });
 
             migrationBuilder.CreateTable(
-                name: "Peoples",
+                name: "People",
                 columns: table => new
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Slug = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true),
-                    ImgPrimary = table.Column<string>(nullable: true)
+                    Poster = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Peoples", x => x.ID);
+                    table.PrimaryKey("PK_People", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -75,6 +79,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 {
                     ID = table.Column<int>(nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Slug = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true),
                     Logo = table.Column<string>(nullable: true)
                 },
@@ -131,7 +136,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Slug = table.Column<string>(nullable: true),
                     Title = table.Column<string>(nullable: true),
-                    Aliases = table.Column<string>(nullable: true),
+                    Aliases = table.Column<string[]>(type: "text[]", nullable: true),
                     Path = table.Column<string>(nullable: true),
                     Overview = table.Column<string>(nullable: true),
                     Status = table.Column<int>(nullable: true),
@@ -239,7 +244,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 });
 
             migrationBuilder.CreateTable(
-                name: "PeopleLinks",
+                name: "PeopleRoles",
                 columns: table => new
                 {
                     ID = table.Column<int>(nullable: false)
@@ -251,15 +256,15 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PeopleLinks", x => x.ID);
+                    table.PrimaryKey("PK_PeopleRoles", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_PeopleLinks_Peoples_PeopleID",
+                        name: "FK_PeopleRoles_People_PeopleID",
                         column: x => x.PeopleID,
-                        principalTable: "Peoples",
+                        principalTable: "People",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_PeopleLinks_Shows_ShowID",
+                        name: "FK_PeopleRoles_Shows_ShowID",
                         column: x => x.ShowID,
                         principalTable: "Shows",
                         principalColumn: "ID",
@@ -349,9 +354,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_MetadataIds_Peoples_PeopleID",
+                        name: "FK_MetadataIds_People_PeopleID",
                         column: x => x.PeopleID,
-                        principalTable: "Peoples",
+                        principalTable: "People",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
@@ -402,14 +407,15 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_CollectionLinks_CollectionID",
-                table: "CollectionLinks",
-                column: "CollectionID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_CollectionLinks_ShowID",
                 table: "CollectionLinks",
                 column: "ShowID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_CollectionLinks_CollectionID_ShowID",
+                table: "CollectionLinks",
+                columns: new[] { "CollectionID", "ShowID" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Collections_Slug",
@@ -451,14 +457,21 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 column: "CollectionID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LibraryLinks_LibraryID",
-                table: "LibraryLinks",
-                column: "LibraryID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_LibraryLinks_ShowID",
                 table: "LibraryLinks",
                 column: "ShowID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LibraryLinks_LibraryID_CollectionID",
+                table: "LibraryLinks",
+                columns: new[] { "LibraryID", "CollectionID" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_LibraryLinks_LibraryID_ShowID",
+                table: "LibraryLinks",
+                columns: new[] { "LibraryID", "ShowID" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_MetadataIds_EpisodeID",
@@ -486,20 +499,20 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 column: "ShowID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PeopleLinks_PeopleID",
-                table: "PeopleLinks",
+                name: "IX_People_Slug",
+                table: "People",
+                column: "Slug",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PeopleRoles_PeopleID",
+                table: "PeopleRoles",
                 column: "PeopleID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_PeopleLinks_ShowID",
-                table: "PeopleLinks",
+                name: "IX_PeopleRoles_ShowID",
+                table: "PeopleRoles",
                 column: "ShowID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Peoples_Slug",
-                table: "Peoples",
-                column: "Slug",
-                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProviderLinks_LibraryID",
@@ -512,9 +525,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 column: "ProviderID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Providers_Name",
+                name: "IX_Providers_Slug",
                 table: "Providers",
-                column: "Name",
+                column: "Slug",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -561,7 +574,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "MetadataIds");
 
             migrationBuilder.DropTable(
-                name: "PeopleLinks");
+                name: "PeopleRoles");
 
             migrationBuilder.DropTable(
                 name: "ProviderLinks");
@@ -576,7 +589,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "Collections");
 
             migrationBuilder.DropTable(
-                name: "Peoples");
+                name: "People");
 
             migrationBuilder.DropTable(
                 name: "Libraries");
