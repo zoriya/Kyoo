@@ -14,11 +14,11 @@ namespace Kyoo.Api
 	[Route("api/episode")]
 	[Route("api/episodes")]
 	[ApiController]
-	public class EpisodesApi : CrudApi<Episode>
+	public class EpisodeApi : CrudApi<Episode>
 	{
 		private readonly ILibraryManager _libraryManager;
 
-		public EpisodesApi(ILibraryManager libraryManager, IConfiguration configuration) 
+		public EpisodeApi(ILibraryManager libraryManager, IConfiguration configuration) 
 			: base(libraryManager.EpisodeRepository, configuration)
 		{
 			_libraryManager = libraryManager;

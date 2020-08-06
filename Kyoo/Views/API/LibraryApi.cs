@@ -14,12 +14,12 @@ namespace Kyoo.Api
 	[Route("api/library")]
 	[Route("api/libraries")]
 	[ApiController]
-	public class LibrariesAPI : CrudApi<Library>
+	public class LibraryAPI : CrudApi<Library>
 	{
 		private readonly ILibraryManager _libraryManager;
 		private readonly ITaskManager _taskManager;
 
-		public LibrariesAPI(ILibraryManager libraryManager, ITaskManager taskManager, IConfiguration configuration)
+		public LibraryAPI(ILibraryManager libraryManager, ITaskManager taskManager, IConfiguration configuration)
 			: base(libraryManager.LibraryRepository, configuration)
 		{
 			_libraryManager = libraryManager;
