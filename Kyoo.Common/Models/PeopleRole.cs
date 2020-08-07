@@ -5,7 +5,7 @@ using Newtonsoft.Json;
 
 namespace Kyoo.Models
 {
-	public class PeopleLink : IResource
+	public class PeopleRole : IResource
 	{
 		[JsonIgnore] public int ID { get; set; }
 		[JsonIgnore] public int PeopleID { get; set; }
@@ -40,9 +40,9 @@ namespace Kyoo.Models
 		public string Role { get; set; }
 		public string Type { get; set; }
 
-		public PeopleLink() {}
+		public PeopleRole() {}
 		
-		public PeopleLink(People people, Show show, string role, string type)
+		public PeopleRole(People people, Show show, string role, string type)
 		{
 			People = people;
 			Show = show;
@@ -50,7 +50,7 @@ namespace Kyoo.Models
 			Type = type;
 		}
 
-		public PeopleLink(string slug, 
+		public PeopleRole(string slug, 
 			string name, 
 			string role, 
 			string type,
@@ -85,7 +85,7 @@ namespace Kyoo.Models
 		
 		public ShowRole() {}
 
-		public ShowRole(PeopleLink x)
+		public ShowRole(PeopleRole x)
 		{
 			ID = x.ID;
 			Role = x.Role;
@@ -105,7 +105,7 @@ namespace Kyoo.Models
 			IsMovie = x.Show.IsMovie;
 		}
 
-		public static Expression<Func<PeopleLink, ShowRole>> FromPeopleRole => x => new ShowRole
+		public static Expression<Func<PeopleRole, ShowRole>> FromPeopleRole => x => new ShowRole
 		{
 			ID = x.ID,
 			Role = x.Role,

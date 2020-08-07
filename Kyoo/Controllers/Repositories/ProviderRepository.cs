@@ -32,16 +32,13 @@ namespace Kyoo.Controllers
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
+			if (obj.Slug == null)
+				throw new ArgumentException($"Provider's slug can't be null (name: {obj.Name}).");
 
 			_database.Entry(obj).State = EntityState.Added;
 
 			await _database.SaveChangesAsync($"Trying to insert a duplicated provider (slug {obj.Slug} already exists).");
 			return obj;
-		}
-
-		protected override Task Validate(ProviderID ressource)
-		{
-			return Task.CompletedTask;
 		}
 
 		public override async Task Delete(ProviderID obj)

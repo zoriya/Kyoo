@@ -98,6 +98,8 @@ namespace Kyoo.Controllers
 			if (obj.ShowID <= 0)
 				throw new InvalidOperationException($"Can't store a season not related to any show (showID: {obj.ShowID}).");
 
+			await base.Validate(obj);
+			
 			if (obj.ExternalIDs != null)
 			{
 				foreach (MetadataID link in obj.ExternalIDs)

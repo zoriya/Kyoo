@@ -12,7 +12,7 @@ namespace Kyoo.Controllers
 
 		Task<Show> GetShowByID(Show show);
 		Task<IEnumerable<Show>> SearchShows(string showName, bool isMovie);
-		Task<IEnumerable<PeopleLink>> GetPeople(Show show);
+		Task<IEnumerable<PeopleRole>> GetPeople(Show show);
 
 		Task<Season> GetSeason(Show show, int seasonNumber);
 

@@ -67,6 +67,8 @@ namespace Kyoo.Controllers
 
 		protected override async Task Validate(People obj)
 		{
+			await base.Validate(obj);
+			
 			if (obj.ExternalIDs != null)
 				foreach (MetadataID link in obj.ExternalIDs)
 					link.Provider = await _providers.CreateIfNotExists(link.Provider);
@@ -82,14 +84,14 @@ namespace Kyoo.Controllers
 				foreach (MetadataID entry in obj.ExternalIDs)
 					_database.Entry(entry).State = EntityState.Deleted;
 			if (obj.Roles != null)
-				foreach (PeopleLink link in obj.Roles)
+				foreach (PeopleRole link in obj.Roles)
 					_database.Entry(link).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
 		}
 
-		public async Task<ICollection<PeopleLink>> GetFromShow(int showID, 
-			Expression<Func<PeopleLink, bool>> where = null, 
-			Sort<PeopleLink> sort = default, 
+		public async Task<ICollection<PeopleRole>> GetFromShow(int showID, 
+			Expression<Func<PeopleRole, bool>> where = null, 
+			Sort<PeopleRole> sort = default, 
 			Pagination limit = default)
 		{
 			if (sort.Key?.Body is MemberExpression member)
@@ -102,7 +104,7 @@ namespace Kyoo.Controllers
 				};
 			}
 
-			ICollection<PeopleLink> people = await ApplyFilters(_database.PeopleRoles.Where(x => x.ShowID == showID),
+			ICollection<PeopleRole> people = await ApplyFilters(_database.PeopleRoles.Where(x => x.ShowID == showID),
 				id => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id),
 				x => x.People.Name,
 				where,
@@ -113,9 +115,9 @@ namespace Kyoo.Controllers
 			return people;
 		}
 
-		public async Task<ICollection<PeopleLink>> GetFromShow(string showSlug,
-			Expression<Func<PeopleLink, bool>> where = null,
-			Sort<PeopleLink> sort = default, 
+		public async Task<ICollection<PeopleRole>> GetFromShow(string showSlug,
+			Expression<Func<PeopleRole, bool>> where = null,
+			Sort<PeopleRole> sort = default, 
 			Pagination limit = default)
 		{
 			if (sort.Key?.Body is MemberExpression member)
@@ -128,7 +130,7 @@ namespace Kyoo.Controllers
 				};
 			}
 			
-			ICollection<PeopleLink> people = await ApplyFilters(_database.PeopleRoles.Where(x => x.Show.Slug == showSlug),
+			ICollection<PeopleRole> people = await ApplyFilters(_database.PeopleRoles.Where(x => x.Show.Slug == showSlug),
 				id => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id),
 				x => x.People.Name,
 				where,

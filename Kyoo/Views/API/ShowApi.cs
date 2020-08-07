@@ -154,7 +154,7 @@ namespace Kyoo.Api
 		
 		[HttpGet("{showID:int}/people")]
 		[Authorize(Policy = "Read")]
-		public async Task<ActionResult<Page<PeopleLink>>> GetPeople(int showID,
+		public async Task<ActionResult<Page<PeopleRole>>> GetPeople(int showID,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
 			[FromQuery] Dictionary<string, string> where,
@@ -166,9 +166,9 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<PeopleLink> ressources = await _libraryManager.GetPeopleFromShow(showID,
-					ApiHelper.ParseWhere<PeopleLink>(where),
-					new Sort<PeopleLink>(sortBy),
+				ICollection<PeopleRole> ressources = await _libraryManager.GetPeopleFromShow(showID,
+					ApiHelper.ParseWhere<PeopleRole>(where),
+					new Sort<PeopleRole>(sortBy),
 					new Pagination(limit, afterID));
 
 				return Page(ressources, limit);
@@ -185,7 +185,7 @@ namespace Kyoo.Api
 
 		[HttpGet("{slug}/people")]
 		[Authorize(Policy = "Read")]
-		public async Task<ActionResult<Page<PeopleLink>>> GetPeople(string slug,
+		public async Task<ActionResult<Page<PeopleRole>>> GetPeople(string slug,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
 			[FromQuery] Dictionary<string, string> where,
@@ -197,9 +197,9 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<PeopleLink> ressources = await _libraryManager.GetPeopleFromShow(slug,
-					ApiHelper.ParseWhere<PeopleLink>(where),
-					new Sort<PeopleLink>(sortBy),
+				ICollection<PeopleRole> ressources = await _libraryManager.GetPeopleFromShow(slug,
+					ApiHelper.ParseWhere<PeopleRole>(where),
+					new Sort<PeopleRole>(sortBy),
 					new Pagination(limit, afterID));
 
 				return Page(ressources, limit);

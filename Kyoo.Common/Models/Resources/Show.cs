@@ -37,7 +37,7 @@ namespace Kyoo.Models
 		[NotMergable] [JsonIgnore] public virtual IEnumerable<GenreLink> GenreLinks { get; set; }
 		[JsonIgnore] public int? StudioID { get; set; }
 		public virtual Studio Studio { get; set; }
-		[JsonIgnore] public virtual IEnumerable<PeopleLink> People { get; set; }
+		[JsonIgnore] public virtual IEnumerable<PeopleRole> People { get; set; }
 		[JsonIgnore] public virtual IEnumerable<Season> Seasons { get; set; }
 		[JsonIgnore] public virtual IEnumerable<Episode> Episodes { get; set; }
 		
@@ -53,7 +53,7 @@ namespace Kyoo.Models
 		
 		[NotMergable] [JsonIgnore] public IEnumerable<Collection> Collections
 		{
-			get => CollectionLinks.Select(x => x.Collection);
+			get => CollectionLinks?.Select(x => x.Collection);
 			set => CollectionLinks = value?.Select(x => new CollectionLink(x, this));
 		}
 
@@ -126,7 +126,7 @@ namespace Kyoo.Models
 				foreach (GenreLink genre in GenreLinks)
 					genre.Show = this;
 			if (People != null)
-				foreach (PeopleLink link in People)
+				foreach (PeopleRole link in People)
 					link.Show = this;
 			if (Seasons != null)
 				foreach (Season season in Seasons)

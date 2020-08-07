@@ -66,9 +66,12 @@ namespace Kyoo.Controllers
 		public void ReloadPlugins()
 		{
 			string pluginFolder = _config.GetValue<string>("plugins");
-			if (!Directory.Exists(pluginFolder)) 
+			if (!Directory.Exists(pluginFolder))
+			{
+				Console.WriteLine("\nPlugin directory does not exist. No plugin loaded.\n");
 				return;
-			
+			}
+
 			string[] pluginsPaths = Directory.GetFiles(pluginFolder);
 			_plugins = pluginsPaths.SelectMany(path =>
 			{
@@ -83,20 +86,21 @@ namespace Kyoo.Controllers
 				}
 				catch (Exception ex)
 				{
-					Console.Error.WriteLine($"Error loading the plugin at {path}.\nException: {ex.Message}\n\n");
-					return null;
+					Console.Error.WriteLine($"\nError loading the plugin at {path}.\n{ex.GetType().Name}: {ex.Message}\n");
+					return Array.Empty<IPlugin>();
 				}
-			}).Where(x => x != null).ToList();
+			}).ToList();
 			
 			if (!_plugins.Any())
 			{
-				Console.WriteLine("No plugin enabled.");
+				Console.WriteLine("\nNo plugin enabled.\n");
 				return;
 			}
 
-			Console.WriteLine("Plugin enabled:");
+			Console.WriteLine("\nPlugin enabled:");
 			foreach (IPlugin plugin in _plugins)
 				Console.WriteLine($"\t{plugin.Name}");
+			Console.WriteLine();
 		}
 	}
 }

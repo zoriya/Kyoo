@@ -303,17 +303,17 @@ namespace Kyoo.Controllers
 			return EpisodeRepository.GetFromSeason(showSlug, seasonNumber, where, sort, limit);
 		}
 
-		public Task<ICollection<PeopleLink>> GetPeopleFromShow(int showID,
-			Expression<Func<PeopleLink, bool>> where = null,
-			Sort<PeopleLink> sort = default,
+		public Task<ICollection<PeopleRole>> GetPeopleFromShow(int showID,
+			Expression<Func<PeopleRole, bool>> where = null,
+			Sort<PeopleRole> sort = default,
 			Pagination limit = default)
 		{
 			return PeopleRepository.GetFromShow(showID, where, sort, limit);
 		}
 		
-		public Task<ICollection<PeopleLink>> GetPeopleFromShow(string showSlug,
-			Expression<Func<PeopleLink, bool>> where = null,
-			Sort<PeopleLink> sort = default,
+		public Task<ICollection<PeopleRole>> GetPeopleFromShow(string showSlug,
+			Expression<Func<PeopleRole, bool>> where = null,
+			Sort<PeopleRole> sort = default,
 			Pagination limit = default)
 		{
 			return PeopleRepository.GetFromShow(showSlug, where, sort, limit);

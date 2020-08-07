@@ -97,7 +97,7 @@ namespace Kyoo.Controllers
 				foreach (GenreLink entry in obj.GenreLinks)
 					_database.Entry(entry).State = EntityState.Added;
 			if (obj.People != null)
-				foreach (PeopleLink entry in obj.People)
+				foreach (PeopleRole entry in obj.People)
 					_database.Entry(entry).State = EntityState.Added;
 			if (obj.ExternalIDs != null)
 				foreach (MetadataID entry in obj.ExternalIDs)
@@ -109,6 +109,8 @@ namespace Kyoo.Controllers
 		
 		protected override async Task Validate(Show obj)
 		{
+			await base.Validate(obj);
+			
 			if (obj.Studio != null)
 				obj.Studio = await _studios.CreateIfNotExists(obj.Studio);
 			
@@ -117,7 +119,7 @@ namespace Kyoo.Controllers
 					link.Genre = await _genres.CreateIfNotExists(link.Genre);
 
 			if (obj.People != null)
-				foreach (PeopleLink link in obj.People)
+				foreach (PeopleRole link in obj.People)
 					link.People = await _people.CreateIfNotExists(link.People);
 
 			if (obj.ExternalIDs != null)
@@ -157,7 +159,7 @@ namespace Kyoo.Controllers
 					_database.Entry(entry).State = EntityState.Deleted;
 			
 			if (obj.People != null)
-				foreach (PeopleLink entry in obj.People)
+				foreach (PeopleRole entry in obj.People)
 					_database.Entry(entry).State = EntityState.Deleted;
 			
 			if (obj.ExternalIDs != null)

@@ -79,7 +79,7 @@ namespace Kyoo.Controllers
 						{
 							{typeof(Show), new HashSet<string> {"genres", "studio"}},
 							{typeof(Episode), new HashSet<string> {"tracks"}},
-							{typeof(PeopleLink), new HashSet<string> {"show"}}
+							{typeof(PeopleRole), new HashSet<string> {"show"}}
 						})
 					},
 				context.HttpContext.RequestServices.GetRequiredService<ArrayPool<char>>(), 

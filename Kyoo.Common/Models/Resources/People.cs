@@ -12,7 +12,7 @@ namespace Kyoo.Models
 		public string Poster { get; set; }
 		public virtual IEnumerable<MetadataID> ExternalIDs { get; set; }
 		
-		[JsonIgnore] public virtual IEnumerable<PeopleLink> Roles { get; set; }
+		[JsonIgnore] public virtual IEnumerable<PeopleRole> Roles { get; set; }
 		
 		public People() {}
 
