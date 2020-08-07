@@ -69,7 +69,7 @@ namespace Kyoo
 		public DbSet<ProviderID> Providers { get; set; }
 		public DbSet<MetadataID> MetadataIds { get; set; }
 		
-		public DbSet<PeopleLink> PeopleRoles { get; set; }
+		public DbSet<PeopleRole> PeopleRoles { get; set; }
 		
 		
 		// This is used because EF doesn't support Many-To-Many relationships so for now we need to override the getter/setters to store this.
@@ -134,7 +134,7 @@ namespace Kyoo
 				.Ignore(x => x.Libraries)
 				.Ignore(x => x.Collections);
 
-			modelBuilder.Entity<PeopleLink>()
+			modelBuilder.Entity<PeopleRole>()
 				.Ignore(x => x.Slug)
 				.Ignore(x => x.Name)
 				.Ignore(x => x.Poster)

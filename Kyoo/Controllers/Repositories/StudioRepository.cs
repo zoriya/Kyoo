@@ -38,11 +38,6 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 
-		protected override Task Validate(Studio ressource)
-		{
-			return Task.CompletedTask;
-		}
-		
 		public override async Task Delete(Studio obj)
 		{
 			if (obj == null)

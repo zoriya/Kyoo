@@ -1,7 +1,9 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Threading.Tasks;
 using Kyoo.CommonApi;
 using Kyoo.Models;
@@ -136,7 +138,20 @@ namespace Kyoo.Controllers
 			return old;
 		}
 
-		protected abstract Task Validate(T ressource);
+		protected virtual Task Validate(T ressource)
+		{
+			foreach (PropertyInfo property in typeof(T).GetProperties()
+				.Where(x => typeof(IEnumerable).IsAssignableFrom(x.PropertyType) 
+				            && !typeof(string).IsAssignableFrom(x.PropertyType)))
+			{
+				object value = property.GetValue(ressource);
+				if (value is ICollection || value == null)
+					continue;
+				value = Utility.RunGenericMethod(typeof(Enumerable), "ToList", Utility.GetEnumerableType((IEnumerable)value), new [] { value});
+				property.SetValue(ressource, value);
+			}
+			return Task.CompletedTask;
+		}
 
 		public virtual async Task Delete(int id)
 		{

@@ -57,7 +57,7 @@ namespace Kyoo.Controllers
 			return show;
 		}
 
-		public async Task<IEnumerable<PeopleLink>> Validate(IEnumerable<PeopleLink> people, bool alwaysDownload)
+		public async Task<IEnumerable<PeopleRole>> Validate(IEnumerable<PeopleRole> people, bool alwaysDownload)
 		{
 			if (people == null)
 				return null;
@@ -65,7 +65,7 @@ namespace Kyoo.Controllers
 			string root = _config.GetValue<string>("peoplePath");
 			Directory.CreateDirectory(root);
 			
-			foreach (PeopleLink peop in people)
+			foreach (PeopleRole peop in people)
 			{
 				string localPath = Path.Combine(root, peop.People.Slug + ".jpg");
 				if (peop.People.Poster == null)

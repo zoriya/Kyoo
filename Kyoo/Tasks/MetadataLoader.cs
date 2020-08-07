@@ -22,8 +22,13 @@ namespace Kyoo.Tasks
 			using IServiceScope serviceScope = serviceProvider.CreateScope();
 			IProviderRepository providers = serviceScope.ServiceProvider.GetService<IProviderRepository>();
 			IPluginManager pluginManager = serviceScope.ServiceProvider.GetService<IPluginManager>();
+			
 			foreach (IMetadataProvider provider in pluginManager.GetPlugins<IMetadataProvider>())
+			{
+				if (string.IsNullOrEmpty(provider.Provider.Slug))
+					throw new ArgumentException($"Empty provider slug (name: {provider.Provider.Name}).");
 				await providers.CreateIfNotExists(provider.Provider);
+			}
 		}
 
 		public Task<IEnumerable<string>> GetPossibleParameters()

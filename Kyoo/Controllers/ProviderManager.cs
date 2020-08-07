@@ -146,9 +146,9 @@ namespace Kyoo.Controllers
 			return episode;
 		}
 
-		public async Task<IEnumerable<PeopleLink>> GetPeople(Show show, Library library)
+		public async Task<IEnumerable<PeopleRole>> GetPeople(Show show, Library library)
 		{
-			List<PeopleLink> people = await GetMetadata(
+			List<PeopleRole> people = await GetMetadata(
 				provider => provider.GetPeople(show),
 				library, 
 				$"a cast member of {show.Title}");

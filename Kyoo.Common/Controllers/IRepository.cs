@@ -421,25 +421,25 @@ namespace Kyoo.Controllers
 
 	public interface IPeopleRepository : IRepository<People>
 	{
-		Task<ICollection<PeopleLink>> GetFromShow(int showID,
-			Expression<Func<PeopleLink, bool>> where = null, 
-			Sort<PeopleLink> sort = default,
+		Task<ICollection<PeopleRole>> GetFromShow(int showID,
+			Expression<Func<PeopleRole, bool>> where = null, 
+			Sort<PeopleRole> sort = default,
 			Pagination limit = default);
-		Task<ICollection<PeopleLink>> GetFromShow(int showID,
-			[Optional] Expression<Func<PeopleLink, bool>> where,
-			Expression<Func<PeopleLink, object>> sort,
+		Task<ICollection<PeopleRole>> GetFromShow(int showID,
+			[Optional] Expression<Func<PeopleRole, bool>> where,
+			Expression<Func<PeopleRole, object>> sort,
 			Pagination limit = default
-		) => GetFromShow(showID, where, new Sort<PeopleLink>(sort), limit);
+		) => GetFromShow(showID, where, new Sort<PeopleRole>(sort), limit);
 		
-		Task<ICollection<PeopleLink>> GetFromShow(string showSlug,
-			Expression<Func<PeopleLink, bool>> where = null, 
-			Sort<PeopleLink> sort = default,
+		Task<ICollection<PeopleRole>> GetFromShow(string showSlug,
+			Expression<Func<PeopleRole, bool>> where = null, 
+			Sort<PeopleRole> sort = default,
 			Pagination limit = default);
-		Task<ICollection<PeopleLink>> GetFromShow(string showSlug,
-			[Optional] Expression<Func<PeopleLink, bool>> where,
-			Expression<Func<PeopleLink, object>> sort,
+		Task<ICollection<PeopleRole>> GetFromShow(string showSlug,
+			[Optional] Expression<Func<PeopleRole, bool>> where,
+			Expression<Func<PeopleRole, object>> sort,
 			Pagination limit = default
-		) => GetFromShow(showSlug, where, new Sort<PeopleLink>(sort), limit);
+		) => GetFromShow(showSlug, where, new Sort<PeopleRole>(sort), limit);
 		
 		Task<ICollection<ShowRole>> GetFromPeople(int showID,
 			Expression<Func<ShowRole, bool>> where = null, 

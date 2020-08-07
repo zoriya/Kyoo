@@ -74,6 +74,8 @@ namespace Kyoo.Controllers
 			if (obj.Paths == null || !obj.Paths.Any())
 				throw new ArgumentException("The library should have a least one path.");
 			
+			await base.Validate(obj);
+			
 			if (obj.ProviderLinks != null)
 				foreach (ProviderLink link in obj.ProviderLinks)
 					link.Provider = await _providers.CreateIfNotExists(link.Provider);
