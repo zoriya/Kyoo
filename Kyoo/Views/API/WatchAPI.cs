@@ -26,7 +26,7 @@ namespace Kyoo.Api
 			if(item == null)
 				return NotFound();
 
-			return new WatchItem(item);;
+			return new WatchItem(item);
 		}
 		
 		[HttpGet("{movieSlug}")]
