@@ -337,7 +337,7 @@ namespace Kyoo.Controllers
 				    || subName?.Contains(episodeLink) == false 
 				    || subName.Length < episodeLink.Length + 5)
 					continue;
-				string language = subName.Substring(episodeLink.Length + 2, 3);
+				string language = subName.Substring(episodeLink.Length + 1, 3);
 				bool isDefault = sub.Contains("default");
 				bool isForced = sub.Contains("forced");
 				Track track = new Track(StreamType.Subtitle, null, language, isDefault, isForced, null, false, sub)
