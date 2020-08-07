@@ -47,6 +47,8 @@ export class ShowDetailsComponent implements OnInit
 			this.show = data.show;
 			this.title.setTitle(this.show.title + " - Kyoo");
 
+			this.peopleService.getFromShow(this.show.slug).subscribe(x => this.people = x);
+
 			if (this.show.isMovie)
 				return;
 
@@ -59,9 +61,7 @@ export class ShowDetailsComponent implements OnInit
 					this.getEpisodes(1);
 				}
 			});
-			this.getEpisodes(this.season);
-			this.peopleService.getFromShow(this.show.slug).subscribe(x => this.people = x);
-		});
+			this.getEpisodes(this.season);});
 	}
 
 	ngOnInit()
