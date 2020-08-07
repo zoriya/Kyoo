@@ -607,7 +607,7 @@ export class PlayerComponent implements OnInit
 			this.removeHtmlTrack();
 
 			if (subtitle.codec == "ass")
-				SubtitleManager.add(this.player, subtitle.slug, true);
+				SubtitleManager.add(this.player, `subtitle/${subtitle.slug}`, true);
 
 			else if (subtitle.codec == "subrip")
 			{
