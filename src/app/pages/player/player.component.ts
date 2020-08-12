@@ -617,7 +617,7 @@ export class PlayerComponent implements OnInit
 				track.kind = "subtitles";
 				track.label = subtitle.displayName;
 				track.srclang = subtitle.language;
-				track.src = subtitle.slug.replace(".srt", ".vtt");
+				track.src = `subtitle/${subtitle.slug.replace(".srt", ".vtt")}`;
 				track.classList.add("subtitle_container");
 				track.default = true;
 				track.onload = () =>
