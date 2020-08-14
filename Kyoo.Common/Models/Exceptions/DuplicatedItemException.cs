@@ -6,7 +6,10 @@ namespace Kyoo.Models.Exceptions
 	{
 		public override string Message { get; }
 
-		public DuplicatedItemException() {}
+		public DuplicatedItemException()
+		{
+			Message = "Already exists in the databse.";
+		}
 		
 		public DuplicatedItemException(string message)
 		{

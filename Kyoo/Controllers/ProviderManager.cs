@@ -93,7 +93,7 @@ namespace Kyoo.Controllers
 			show.Slug = Utility.ToSlug(showName);
 			show.Title ??= showName;
 			show.IsMovie = isMovie;
-			show.GenreLinks = show.GenreLinks?.GroupBy(x => x.Genre.Slug).Select(x => x.First()).ToList();
+			show.Genres = show.Genres?.GroupBy(x => x.Slug).Select(x => x.First()).ToList();
 			show.People = show.People?.GroupBy(x => x.Slug).Select(x => x.First()).ToList();
 			return show;
 		}

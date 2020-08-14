@@ -7,8 +7,7 @@ namespace Kyoo.Models
 {
 	public class Show : IResource, IOnMerge
 	{
-		[JsonIgnore] public int ID { get; set; }
-
+		public int ID { get; set; }
 		public string Slug { get; set; }
 		public string Title { get; set; }
 		public IEnumerable<string> Aliases { get; set; }
@@ -24,38 +23,19 @@ namespace Kyoo.Models
 		public string Logo { get; set; }
 		public string Backdrop { get; set; }
 
-		public virtual IEnumerable<MetadataID> ExternalIDs { get; set; }
-
 		public bool IsMovie { get; set; }
+
+		public virtual IEnumerable<MetadataID> ExternalIDs { get; set; }
 		
 		
-		public virtual IEnumerable<Genre> Genres
-		{
-			get => GenreLinks?.Select(x => x.Genre);
-			set => GenreLinks = value?.Select(x => new GenreLink(this, x)).ToList();
-		}
-		[NotMergable] [JsonIgnore] public virtual IEnumerable<GenreLink> GenreLinks { get; set; }
 		[JsonIgnore] public int? StudioID { get; set; }
-		public virtual Studio Studio { get; set; }
+		[JsonIgnore] public virtual Studio Studio { get; set; }
+		[JsonIgnore] public virtual IEnumerable<Genre> Genres { get; set; }
 		[JsonIgnore] public virtual IEnumerable<PeopleRole> People { get; set; }
 		[JsonIgnore] public virtual IEnumerable<Season> Seasons { get; set; }
 		[JsonIgnore] public virtual IEnumerable<Episode> Episodes { get; set; }
-		
-		[NotMergable] [JsonIgnore] public virtual IEnumerable<LibraryLink> LibraryLinks { get; set; }
-
-		[NotMergable] [JsonIgnore] public IEnumerable<Library> Libraries
-		{
-			get => LibraryLinks?.Select(x => x.Library);
-			set => LibraryLinks = value?.Select(x => new LibraryLink(x, this));
-		}
-		
-		[NotMergable] [JsonIgnore] public virtual IEnumerable<CollectionLink> CollectionLinks { get; set; }
-		
-		[NotMergable] [JsonIgnore] public IEnumerable<Collection> Collections
-		{
-			get => CollectionLinks?.Select(x => x.Collection);
-			set => CollectionLinks = value?.Select(x => new CollectionLink(x, this));
-		}
+		[JsonIgnore] public virtual IEnumerable<Library> Libraries { get; set; }
+		[JsonIgnore] public virtual IEnumerable<Collection> Collections { get; set; }
 
 		public Show() { }
 
@@ -117,14 +97,11 @@ namespace Kyoo.Models
 			return ExternalIDs?.FirstOrDefault(x => x.Provider.Name == provider)?.DataID;
 		}
 
-		public void OnMerge(object merged)
+		public virtual void OnMerge(object merged)
 		{
 			if (ExternalIDs != null)
 				foreach (MetadataID id in ExternalIDs)
 					id.Show = this;
-			if (GenreLinks != null)
-				foreach (GenreLink genre in GenreLinks)
-					genre.Show = this;
 			if (People != null)
 				foreach (PeopleRole link in People)
 					link.Show = this;

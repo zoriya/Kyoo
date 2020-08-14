@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
-	public class ShowRepository : LocalRepository<Show>, IShowRepository
+	public class ShowRepository : LocalRepository<Show, ShowDE>, IShowRepository
 	{
 		private readonly DatabaseContext _database;
 		private readonly IStudioRepository _studios;
@@ -21,7 +21,7 @@ namespace Kyoo.Controllers
 		private readonly Lazy<IEpisodeRepository> _episodes;
 		private readonly Lazy<ILibraryRepository> _libraries;
 		private readonly Lazy<ICollectionRepository> _collections;
-		protected override Expression<Func<Show, object>> DefaultSort => x => x.Title;
+		protected override Expression<Func<ShowDE, object>> DefaultSort => x => x.Title;
 
 		public ShowRepository(DatabaseContext database,
 			IStudioRepository studios,
@@ -83,13 +83,14 @@ namespace Kyoo.Controllers
 				.Where(x => EF.Functions.ILike(x.Title, query) 
 				            /*|| x.Aliases.Any(y => EF.Functions.ILike(y, query))*/) // NOT TRANSLATABLE.
 				.Take(20)
-				.ToListAsync();
+				.ToListAsync<Show>();
 		}
 
-		public override async Task<Show> Create(Show obj)
+		public override async Task<Show> Create(Show item)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
+			if (item == null)
+				throw new ArgumentNullException(nameof(item));
+			ShowDE obj = new ShowDE(item);
 
 			await Validate(obj);
 			_database.Entry(obj).State = EntityState.Added;
@@ -107,7 +108,7 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 		
-		protected override async Task Validate(Show obj)
+		protected override async Task Validate(ShowDE obj)
 		{
 			await base.Validate(obj);
 			
@@ -147,10 +148,11 @@ namespace Kyoo.Controllers
 			}
 		}
 		
-		public override async Task Delete(Show obj)
+		public override async Task Delete(Show item)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
+			if (item == null)
+				throw new ArgumentNullException(nameof(item));
+			ShowDE obj = new ShowDE(item);
 			
 			_database.Entry(obj).State = EntityState.Deleted;
 			
@@ -190,7 +192,7 @@ namespace Kyoo.Controllers
 		{
 			ICollection<Show> shows = await ApplyFilters(_database.LibraryLinks
 					.Where(x => x.LibraryID == id && x.ShowID != null)
-					.Select(x => x.Show),
+					.Select(x => x.Show as ShowDE),
 				where,
 				sort,
 				limit);
@@ -206,7 +208,7 @@ namespace Kyoo.Controllers
 		{
 			ICollection<Show> shows = await ApplyFilters(_database.LibraryLinks
 					.Where(x => x.Library.Slug == slug && x.ShowID != null)
-					.Select(x => x.Show),
+					.Select(x => x.Show as ShowDE),
 				where,
 				sort,
 				limit);
@@ -222,7 +224,7 @@ namespace Kyoo.Controllers
 		{
 			ICollection<Show> shows = await ApplyFilters(_database.CollectionLinks
 					.Where(x => x.CollectionID== id)
-					.Select(x => x.Show),
+					.Select(x => x.Show as ShowDE),
 				where,
 				sort,
 				limit);
@@ -238,7 +240,7 @@ namespace Kyoo.Controllers
 		{
 			ICollection<Show> shows = await ApplyFilters(_database.CollectionLinks
 					.Where(x => x.Collection.Slug == slug)
-					.Select(x => x.Show),
+					.Select(x => x.Show as ShowDE),
 				where,
 				sort,
 				limit);
@@ -249,12 +251,16 @@ namespace Kyoo.Controllers
 
 		public Task<Show> GetFromSeason(int seasonID)
 		{
-			return _database.Shows.FirstOrDefaultAsync(x => x.Seasons.Any(y => y.ID == seasonID));
+			return _database.Shows
+				.FirstOrDefaultAsync(x => x.Seasons.Any(y => y.ID == seasonID))
+				.Cast<Show>();
 		}
 		
 		public Task<Show> GetFromEpisode(int episodeID)
 		{
-			return _database.Shows.FirstOrDefaultAsync(x => x.Episodes.Any(y => y.ID == episodeID));
+			return _database.Shows
+				.FirstOrDefaultAsync(x => x.Episodes.Any(y => y.ID == episodeID))
+				.Cast<Show>();
 		}
 	}
 }

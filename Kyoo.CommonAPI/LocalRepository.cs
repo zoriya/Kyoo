@@ -9,15 +9,16 @@ using Kyoo.CommonApi;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 
 namespace Kyoo.Controllers
 {
-	public abstract class LocalRepository<T> : IRepository<T> where T : class, IResource
+	public abstract class LocalRepository<T, TInternal> : IRepository<T>
+		where T : class, IResource
+		where TInternal : class, T
 	{
 		private readonly DbContext _database;
 
-		protected abstract Expression<Func<T, object>> DefaultSort { get; }
+		protected abstract Expression<Func<TInternal, object>> DefaultSort { get; }
 
 
 		protected LocalRepository(DbContext database)
@@ -35,31 +36,57 @@ namespace Kyoo.Controllers
 			return _database.DisposeAsync();
 		}
 
-		public virtual Task<T> Get(int id)
+		public Task<T> Get(int id)
 		{
-			return _database.Set<T>().FirstOrDefaultAsync(x => x.ID == id);
+			return _Get(id).Cast<T>();
+		}
+		
+		public Task<T> Get(string slug)
+		{
+			return _Get(slug).Cast<T>();
+		}
+		
+		protected virtual Task<TInternal> _Get(int id)
+		{
+			return _database.Set<TInternal>().FirstOrDefaultAsync(x => x.ID == id);
 		}
 
-		public virtual Task<T> Get(string slug)
+		protected virtual Task<TInternal> _Get(string slug)
 		{
-			return _database.Set<T>().FirstOrDefaultAsync(x => x.Slug == slug);
+			return _database.Set<TInternal>().FirstOrDefaultAsync(x => x.Slug == slug);
 		}
 
 		public abstract Task<ICollection<T>> Search(string query);
-
+		
 		public virtual Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null,
 			Sort<T> sort = default,
 			Pagination limit = default)
 		{
-			return ApplyFilters(_database.Set<T>(), where, sort, limit);
+			return ApplyFilters(_database.Set<TInternal>(), where, sort, limit);
 		}
-
-		protected Task<ICollection<T>> ApplyFilters(IQueryable<T> query,
+		
+		protected async Task<ICollection<T>> ApplyFilters(IQueryable<TInternal> query,
 			Expression<Func<T, bool>> where = null,
 			Sort<T> sort = default, 
 			Pagination limit = default)
 		{
-			return ApplyFilters(query, Get, DefaultSort, where, sort, limit);
+			ICollection<TInternal> items = await ApplyFilters(query, 
+				_Get,
+				DefaultSort,
+				where.Convert<Func<TInternal, bool>>(), 
+				sort.To<TInternal>(), 
+				limit);
+
+			return items.ToList<T>();
+		}
+
+		protected async Task<ICollection<T>> ApplyFilters(IQueryable<TInternal> query,
+			Expression<Func<TInternal, bool>> where = null,
+			Sort<TInternal> sort = default, 
+			Pagination limit = default)
+		{
+			ICollection<TInternal> items = await ApplyFilters(query, _Get, DefaultSort, where, sort, limit);
+			return items.ToList<T>();
 		}
 		
 		protected async Task<ICollection<TValue>> ApplyFilters<TValue>(IQueryable<TValue> query,
@@ -125,7 +152,7 @@ namespace Kyoo.Controllers
 			if (edited == null)
 				throw new ArgumentNullException(nameof(edited));
 			
-			T old = await Get(edited.Slug);
+			TInternal old = (TInternal)await Get(edited.Slug);
 
 			if (old == null)
 				throw new ItemNotFound($"No ressource found with the slug {edited.Slug}.");
@@ -138,9 +165,9 @@ namespace Kyoo.Controllers
 			return old;
 		}
 
-		protected virtual Task Validate(T ressource)
+		protected virtual Task Validate(TInternal ressource)
 		{
-			foreach (PropertyInfo property in typeof(T).GetProperties()
+			foreach (PropertyInfo property in typeof(TInternal).GetProperties()
 				.Where(x => typeof(IEnumerable).IsAssignableFrom(x.PropertyType) 
 				            && !typeof(string).IsAssignableFrom(x.PropertyType)))
 			{

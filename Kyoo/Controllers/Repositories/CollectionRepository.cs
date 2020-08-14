@@ -10,12 +10,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
-	public class CollectionRepository : LocalRepository<Collection>, ICollectionRepository
+	public class CollectionRepository : LocalRepository<Collection, CollectionDE>, ICollectionRepository
 	{
 		private readonly DatabaseContext _database;
 		private readonly Lazy<IShowRepository> _shows;
 		private readonly Lazy<ILibraryRepository> _libraries;
-		protected override Expression<Func<Collection, object>> DefaultSort => x => x.Name;
+		protected override Expression<Func<CollectionDE, object>> DefaultSort => x => x.Name;
 
 		public CollectionRepository(DatabaseContext database, IServiceProvider services) : base(database)
 		{
@@ -47,7 +47,7 @@ namespace Kyoo.Controllers
 			return await _database.Collections
 				.Where(x => EF.Functions.ILike(x.Name, $"%{query}%"))
 				.Take(20)
-				.ToListAsync();
+				.ToListAsync<Collection>();
 		}
 
 		public override async Task<Collection> Create(Collection obj)
@@ -60,10 +60,11 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 
-		public override async Task Delete(Collection obj)
+		public override async Task Delete(Collection item)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
+			if (item == null)
+				throw new ArgumentNullException(nameof(item));
+			CollectionDE obj = new CollectionDE(item);
 
 			_database.Entry(obj).State = EntityState.Deleted;
 			if (obj.Links != null)
@@ -82,7 +83,7 @@ namespace Kyoo.Controllers
 		{
 			ICollection<Collection> collections = await ApplyFilters(_database.CollectionLinks
 					.Where(x => x.ShowID == showID)
-					.Select(x => x.Collection),
+					.Select(x => x.Collection as CollectionDE),
 				where,
 				sort,
 				limit);
@@ -98,7 +99,7 @@ namespace Kyoo.Controllers
 		{
 			ICollection<Collection> collections = await ApplyFilters(_database.CollectionLinks
 					.Where(x => x.Show.Slug == showSlug)
-					.Select(x => x.Collection),
+					.Select(x => x.Collection as CollectionDE),
 				where,
 				sort,
 				limit);
@@ -114,7 +115,7 @@ namespace Kyoo.Controllers
 		{
 			ICollection<Collection> collections = await ApplyFilters(_database.LibraryLinks
 					.Where(x => x.LibraryID == id && x.CollectionID != null)
-					.Select(x => x.Collection),
+					.Select(x => x.Collection as CollectionDE),
 				where,
 				sort,
 				limit);
@@ -130,7 +131,7 @@ namespace Kyoo.Controllers
 		{
 			ICollection<Collection> collections = await ApplyFilters(_database.LibraryLinks
 					.Where(x => x.Library.Slug == slug && x.CollectionID != null)
-					.Select(x => x.Collection),
+					.Select(x => x.Collection as CollectionDE),
 				where,
 				sort,
 				limit);

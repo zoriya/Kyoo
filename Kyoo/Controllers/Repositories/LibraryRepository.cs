@@ -10,12 +10,12 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
-	public class LibraryRepository : LocalRepository<Library>, ILibraryRepository
+	public class LibraryRepository : LocalRepository<Library, LibraryDE>, ILibraryRepository
 	{
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
 		private readonly Lazy<IShowRepository> _shows;
-		protected override Expression<Func<Library, object>> DefaultSort => x => x.ID;
+		protected override Expression<Func<LibraryDE, object>> DefaultSort => x => x.ID;
 
 
 		public LibraryRepository(DatabaseContext database, IProviderRepository providers, IServiceProvider services)
@@ -47,13 +47,14 @@ namespace Kyoo.Controllers
 			return await _database.Libraries
 				.Where(x => EF.Functions.ILike(x.Name, $"%{query}%"))
 				.Take(20)
-				.ToListAsync();
+				.ToListAsync<Library>();
 		}
 
-		public override async Task<Library> Create(Library obj)
+		public override async Task<Library> Create(Library item)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
+			if (item == null)
+				throw new ArgumentNullException(nameof(item));
+			LibraryDE obj = new LibraryDE(item);
 
 			await Validate(obj);
 			_database.Entry(obj).State = EntityState.Added;
@@ -65,7 +66,7 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 
-		protected override async Task Validate(Library obj)
+		protected override async Task Validate(LibraryDE obj)
 		{
 			if (string.IsNullOrEmpty(obj.Slug))
 				throw new ArgumentException("The library's slug must be set and not empty");
@@ -81,10 +82,11 @@ namespace Kyoo.Controllers
 					link.Provider = await _providers.CreateIfNotExists(link.Provider);
 		}
 
-		public override async Task Delete(Library obj)
+		public override async Task Delete(Library item)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
+			if (item == null)
+				throw new ArgumentNullException(nameof(item));
+			LibraryDE obj = new LibraryDE(item);
 			
 			_database.Entry(obj).State = EntityState.Deleted;
 			if (obj.ProviderLinks != null)
@@ -103,7 +105,7 @@ namespace Kyoo.Controllers
 		{
 			ICollection<Library> libraries = await ApplyFilters(_database.LibraryLinks
 					.Where(x => x.ShowID == showID)
-					.Select(x => x.Library),
+					.Select(x => x.Library as LibraryDE),
 				where,
 				sort,
 				limit);
@@ -119,7 +121,7 @@ namespace Kyoo.Controllers
 		{
 			ICollection<Library> libraries = await ApplyFilters(_database.LibraryLinks
 					.Where(x => x.Show.Slug == showSlug)
-					.Select(x => x.Library),
+					.Select(x => x.Library as LibraryDE),
 				where,
 				sort,
 				limit);
@@ -135,7 +137,7 @@ namespace Kyoo.Controllers
 		{
 			ICollection<Library> libraries = await ApplyFilters(_database.LibraryLinks
 					.Where(x => x.CollectionID == id)
-					.Select(x => x.Library),
+					.Select(x => x.Library as LibraryDE),
 				where,
 				sort,
 				limit);
@@ -151,7 +153,7 @@ namespace Kyoo.Controllers
 		{
 			ICollection<Library> libraries = await ApplyFilters(_database.LibraryLinks
 					.Where(x => x.Collection.Slug == slug)
-					.Select(x => x.Library),
+					.Select(x => x.Library as LibraryDE),
 				where,
 				sort,
 				limit);

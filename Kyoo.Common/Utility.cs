@@ -3,9 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Kyoo.Models;
 using Kyoo.Models.Attributes;
@@ -71,6 +73,21 @@ namespace Kyoo
 			return list.Concat(second.Where(x => !list.Any(y => isEqual(x, y)))).ToList();
 		}
 
+		public static T Assign<T>(T first, T second)
+		{
+			Type type = typeof(T);
+			foreach (PropertyInfo property in type.GetProperties())
+			{
+				if (!property.CanRead || !property.CanWrite)
+					continue;
+				
+				object value = property.GetValue(second);
+				property.SetValue(first, value);
+			}
+
+			return first;
+		}
+		
 		public static T Complete<T>(T first, T second)
 		{
 			Type type = typeof(T);
@@ -149,7 +166,7 @@ namespace Kyoo
 			[NotNull] Type owner, 
 			[NotNull] string methodName,
 			[NotNull] Type type,
-			IEnumerable<object> args)
+			params object[] args)
 		{
 			if (owner == null)
 				throw new ArgumentNullException(nameof(owner));
@@ -157,7 +174,7 @@ namespace Kyoo
 				throw new ArgumentNullException(nameof(methodName));
 			if (type == null)
 				throw new ArgumentNullException(nameof(type));
-			MethodInfo method = owner.GetMethod(methodName);
+			MethodInfo method = owner.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 			if (method == null)
 				throw new NullReferenceException($"A method named {methodName} could not be found on {owner.FullName}");
 			return method.MakeGenericMethod(type).Invoke(null, args?.ToArray());
@@ -167,7 +184,7 @@ namespace Kyoo
 			[NotNull] object instance, 
 			[NotNull] string methodName,
 			[NotNull] Type type,
-			IEnumerable<object> args)
+			params object[] args)
 		{
 			if (instance == null)
 				throw new ArgumentNullException(nameof(instance));
@@ -175,7 +192,7 @@ namespace Kyoo
 				throw new ArgumentNullException(nameof(methodName));
 			if (type == null)
 				throw new ArgumentNullException(nameof(type));
-			MethodInfo method = instance.GetType().GetMethod(methodName);
+			MethodInfo method = instance.GetType().GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
 			if (method == null)
 				throw new NullReferenceException($"A method named {methodName} could not be found on {instance.GetType().FullName}");
 			return method.MakeGenericMethod(type).Invoke(instance, args?.ToArray());
@@ -229,6 +246,67 @@ namespace Kyoo
 			if (!query.Any())
 				return string.Empty;
 			return "?" + string.Join('&', query.Select(x => $"{x.Key}={x.Value}"));
+		}
+
+		public static Task<T> Cast<T>(this Task task)
+		{
+			return (Task<T>)task;
+		}
+
+		public static Expression<T> Convert<T>(this Expression expr)
+			where T : Delegate
+		{
+			if (expr is LambdaExpression lambda)
+				return new ExpressionConverter<T>(lambda).VisitAndConvert();
+			throw new ArgumentException("Can't convert a non lambda.");
+		}
+
+		private class ExpressionConverter<TTo> : ExpressionVisitor
+			where TTo : Delegate
+		{
+			private readonly LambdaExpression _expression;
+			private readonly ParameterExpression[] _newParams;
+			
+			internal ExpressionConverter(LambdaExpression expression)
+			{
+				_expression = expression;
+
+				Type[] paramTypes = typeof(TTo).GetGenericArguments()[..^1];
+				if (paramTypes.Length != _expression.Parameters.Count)
+					throw new ArgumentException("Parameter count from internal and external lambda are not matched.");
+				
+				_newParams = new ParameterExpression[paramTypes.Length];
+				for (int i = 0; i < paramTypes.Length; i++)
+				{
+					if (_expression.Parameters[i].Type == paramTypes[i])
+						_newParams[i] = _expression.Parameters[i];
+					else
+						_newParams[i] = Expression.Parameter(paramTypes[i], _expression.Parameters[i].Name);
+				}
+			}
+
+			internal Expression<TTo> VisitAndConvert()
+			{
+				return (Expression<TTo>)RunGenericMethod(
+					this,
+					"VisitLambda",
+					_expression.GetType().GetGenericArguments().First(), 
+					_expression);
+			}
+			
+			protected override Expression VisitLambda<T>(Expression<T> node)
+			{
+				Type returnType = _expression.Type.GetGenericArguments().Last();
+				Expression body = node.ReturnType == returnType
+					? Visit(node.Body)
+					: Expression.Convert(Visit(node.Body)!, returnType);
+				return Expression.Lambda<TTo>(body!, _newParams);
+			}
+
+			protected override Expression VisitParameter(ParameterExpression node)
+			{
+				return _newParams.First(x => x.Name == node.Name);
+			}
 		}
 	}
 }
