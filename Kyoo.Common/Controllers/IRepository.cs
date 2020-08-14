@@ -66,6 +66,11 @@ namespace Kyoo.Controllers
 				_ => throw new ArgumentException($"The sort order, if set, should be :asc or :desc but it was :{order}.")
 			};
 		}
+
+		public Sort<TValue> To<TValue>()
+		{
+			return new Sort<TValue>(Key.Convert<Func<TValue, object>>(), Descendant);
+		}
 	}
 	
 	public interface IRepository<T> : IDisposable, IAsyncDisposable where T : IResource

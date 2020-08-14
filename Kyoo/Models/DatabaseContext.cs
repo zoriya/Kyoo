@@ -1,69 +1,27 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using IdentityServer4.EntityFramework.Entities;
-using IdentityServer4.EntityFramework.Extensions;
-using IdentityServer4.EntityFramework.Interfaces;
-using IdentityServer4.EntityFramework.Options;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Kyoo.Models.Watch;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Microsoft.Extensions.Options;
 using Npgsql;
 
 namespace Kyoo
 {
-	public class IdentityDatabase : IdentityDbContext<User>, IPersistedGrantDbContext
-	{
-		private readonly IOptions<OperationalStoreOptions> _operationalStoreOptions;
-
-		public IdentityDatabase(DbContextOptions<IdentityDatabase> options, IOptions<OperationalStoreOptions> operationalStoreOptions)
-			: base(options)
-		{
-			_operationalStoreOptions = operationalStoreOptions;
-		}
-
-		public DbSet<User> Accounts { get; set; }
-		
-		protected override void OnModelCreating(ModelBuilder modelBuilder)
-		{
-			base.OnModelCreating(modelBuilder);
-			modelBuilder.ConfigurePersistedGrantContext(_operationalStoreOptions.Value);
-			
-			modelBuilder.Entity<User>().ToTable("User");
-			modelBuilder.Entity<IdentityUserRole<string>>().ToTable("UserRole");
-			modelBuilder.Entity<IdentityUserLogin<string>>().ToTable("UserLogin");
-			modelBuilder.Entity<IdentityUserClaim<string>>().ToTable("UserClaim");
-			modelBuilder.Entity<IdentityRole>().ToTable("UserRoles");
-			modelBuilder.Entity<IdentityRoleClaim<string>>().ToTable("UserRoleClaim");
-			modelBuilder.Entity<IdentityUserToken<string>>().ToTable("UserToken");
-		}
-
-		public Task<int> SaveChangesAsync() => base.SaveChangesAsync();
-
-		public DbSet<PersistedGrant> PersistedGrants { get; set; }
-		public DbSet<DeviceFlowCodes> DeviceFlowCodes { get; set; }
-
-	}
-
 	public class DatabaseContext : DbContext
 	{
 		public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) { }
 
-		public DbSet<Library> Libraries { get; set; }
-		public DbSet<Collection> Collections { get; set; }
-		public DbSet<Show> Shows { get; set; }
+		public DbSet<LibraryDE> Libraries { get; set; }
+		public DbSet<CollectionDE> Collections { get; set; }
+		public DbSet<ShowDE> Shows { get; set; }
 		public DbSet<Season> Seasons { get; set; }
 		public DbSet<Episode> Episodes { get; set; }
 		public DbSet<Track> Tracks { get; set; }
-		public DbSet<Genre> Genres { get; set; }
+		public DbSet<GenreDE> Genres { get; set; }
 		public DbSet<People> People { get; set; }
 		public DbSet<Studio> Studios { get; set; }
 		public DbSet<ProviderID> Providers { get; set; }
@@ -72,7 +30,6 @@ namespace Kyoo
 		public DbSet<PeopleRole> PeopleRoles { get; set; }
 		
 		
-		// This is used because EF doesn't support Many-To-Many relationships so for now we need to override the getter/setters to store this.
 		public DbSet<LibraryLink> LibraryLinks { get; set; }
 		public DbSet<CollectionLink> CollectionLinks { get; set; }
 		public DbSet<GenreLink> GenreLinks { get; set; }

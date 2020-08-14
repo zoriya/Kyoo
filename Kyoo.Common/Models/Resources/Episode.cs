@@ -7,10 +7,10 @@ namespace Kyoo.Models
 {
 	public class Episode : IResource, IOnMerge
 	{
-		[JsonIgnore] public int ID { get; set; }
-		[JsonIgnore] public int ShowID { get; set; }
+		public int ID { get; set; }
+		public int ShowID { get; set; }
 		[JsonIgnore] public virtual Show Show { get; set; }
-		[JsonIgnore] public int? SeasonID { get; set; }
+		public int? SeasonID { get; set; }
 		[JsonIgnore] public virtual Season Season { get; set; }
 
 		public int SeasonNumber { get; set; } = -1;
@@ -23,12 +23,12 @@ namespace Kyoo.Models
 
 		public int Runtime { get; set; } //This runtime variable should be in minutes
 
-		[JsonIgnore] public string ImgPrimary { get; set; }
+		[JsonIgnore] public string Poster { get; set; }
 		public virtual IEnumerable<MetadataID> ExternalIDs { get; set; }
 
 		[JsonIgnore] public virtual IEnumerable<Track> Tracks { get; set; }
 
-		public string ShowTitle => Show.Title; // Used in the API response only
+		public string ShowTitle => Show.Title;
 		public string Slug => GetSlug(Show.Slug, SeasonNumber, EpisodeNumber);
 		public string Thumb
 		{
@@ -36,7 +36,7 @@ namespace Kyoo.Models
 			{
 				if (Show != null)
 					return "thumb/" + Slug;
-				return ImgPrimary;
+				return Poster;
 			}
 		}
 
@@ -50,7 +50,7 @@ namespace Kyoo.Models
 			string overview,
 			DateTime? releaseDate,
 			int runtime,
-			string imgPrimary,
+			string poster,
 			IEnumerable<MetadataID> externalIDs)
 		{
 			SeasonNumber = seasonNumber;
@@ -60,7 +60,7 @@ namespace Kyoo.Models
 			Overview = overview;
 			ReleaseDate = releaseDate;
 			Runtime = runtime;
-			ImgPrimary = imgPrimary;
+			Poster = poster;
 			ExternalIDs = externalIDs;
 		}
 
@@ -74,7 +74,7 @@ namespace Kyoo.Models
 			string overview, 
 			DateTime? releaseDate, 
 			int runtime, 
-			string imgPrimary,
+			string poster,
 			IEnumerable<MetadataID> externalIDs)
 		{
 			ShowID = showID;
@@ -87,7 +87,7 @@ namespace Kyoo.Models
 			Overview = overview;
 			ReleaseDate = releaseDate;
 			Runtime = runtime;
-			ImgPrimary = imgPrimary;
+			Poster = poster;
 			ExternalIDs = externalIDs;
 		}
 
