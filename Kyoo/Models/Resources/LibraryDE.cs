@@ -10,7 +10,7 @@ namespace Kyoo.Models
 		public override IEnumerable<ProviderID> Providers
 		{
 			get => ProviderLinks?.Select(x => x.Provider);
-			set => ProviderLinks = value.Select(x => new ProviderLink(x, this)).ToList();
+			set => ProviderLinks = value?.Select(x => new ProviderLink(x, this)).ToList();
 		}
 		
 		[NotMergable] public virtual IEnumerable<LibraryLink> Links { get; set; }

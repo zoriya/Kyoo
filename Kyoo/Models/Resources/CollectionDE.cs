@@ -9,7 +9,7 @@ namespace Kyoo.Models
 		[NotMergable] public virtual IEnumerable<CollectionLink> Links { get; set; }
 		public override IEnumerable<Show> Shows
 		{
-			get => Links.Select(x => x.Show);
+			get => Links?.Select(x => x.Show);
 			set => Links = value?.Select(x => new CollectionLink(this, x));
 		}
 		
