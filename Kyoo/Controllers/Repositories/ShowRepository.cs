@@ -86,11 +86,10 @@ namespace Kyoo.Controllers
 				.ToListAsync<Show>();
 		}
 
-		public override async Task<Show> Create(Show item)
+		public override async Task<ShowDE> Create(ShowDE obj)
 		{
-			if (item == null)
-				throw new ArgumentNullException(nameof(item));
-			ShowDE obj = new ShowDE(item);
+			if (obj == null)
+				throw new ArgumentNullException(nameof(obj));
 
 			await Validate(obj);
 			_database.Entry(obj).State = EntityState.Added;
@@ -148,11 +147,10 @@ namespace Kyoo.Controllers
 			}
 		}
 		
-		public override async Task Delete(Show item)
+		public override async Task Delete(ShowDE obj)
 		{
-			if (item == null)
-				throw new ArgumentNullException(nameof(item));
-			ShowDE obj = new ShowDE(item);
+			if (obj == null)
+				throw new ArgumentNullException(nameof(obj));
 			
 			_database.Entry(obj).State = EntityState.Deleted;
 			

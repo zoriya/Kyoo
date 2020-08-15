@@ -4,7 +4,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
-using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers
@@ -20,7 +19,7 @@ namespace Kyoo.Controllers
 			_database = database;
 		}
 
-		public override async Task<ICollection<ProviderID>> Search(string query)
+		public async Task<ICollection<ProviderID>> Search(string query)
 		{
 			return await _database.Providers
 				.Where(x => EF.Functions.ILike(x.Name, $"%{query}%"))
