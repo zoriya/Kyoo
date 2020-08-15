@@ -10,11 +10,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
-	public class GenreRepository : LocalRepository<Genre>, IGenreRepository
+	public class GenreRepository : LocalRepository<Genre, GenreDE>, IGenreRepository
 	{
 		private readonly DatabaseContext _database;
 		private readonly Lazy<IShowRepository> _shows;
-		protected override Expression<Func<Genre, object>> DefaultSort => x => x.Slug;
+		protected override Expression<Func<GenreDE, object>> DefaultSort => x => x.Slug;
 		
 		
 		public GenreRepository(DatabaseContext database, IServiceProvider services) : base(database)
@@ -42,10 +42,10 @@ namespace Kyoo.Controllers
 			return await _database.Genres
 				.Where(genre => EF.Functions.ILike(genre.Name, $"%{query}%"))
 				.Take(20)
-				.ToListAsync();
+				.ToListAsync<Genre>();
 		}
 
-		public override async Task<Genre> Create(Genre obj)
+		public override async Task<GenreDE> Create(GenreDE obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -55,7 +55,7 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 
-		public override async Task Delete(Genre obj)
+		public override async Task Delete(GenreDE obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -73,7 +73,7 @@ namespace Kyoo.Controllers
 			Pagination limit = default)
 		{
 			ICollection<Genre> genres = await ApplyFilters(_database.GenreLinks.Where(x => x.ShowID == showID)
-					.Select(x => x.Genre),
+					.Select(x => x.Genre as GenreDE),
 				where,
 				sort,
 				limit);
@@ -89,7 +89,7 @@ namespace Kyoo.Controllers
 		{
 			ICollection<Genre> genres = await ApplyFilters(_database.GenreLinks
 					.Where(x => x.Show.Slug == showSlug)
-					.Select(x => x.Genre),
+					.Select(x => x.Genre as GenreDE),
 				where,
 				sort,
 				limit);

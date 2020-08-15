@@ -50,11 +50,10 @@ namespace Kyoo.Controllers
 				.ToListAsync<Library>();
 		}
 
-		public override async Task<Library> Create(Library item)
+		public override async Task<LibraryDE> Create(LibraryDE obj)
 		{
-			if (item == null)
-				throw new ArgumentNullException(nameof(item));
-			LibraryDE obj = new LibraryDE(item);
+			if (obj == null)
+				throw new ArgumentNullException(nameof(obj));
 
 			await Validate(obj);
 			_database.Entry(obj).State = EntityState.Added;
@@ -82,11 +81,10 @@ namespace Kyoo.Controllers
 					link.Provider = await _providers.CreateIfNotExists(link.Provider);
 		}
 
-		public override async Task Delete(Library item)
+		public override async Task Delete(LibraryDE obj)
 		{
-			if (item == null)
-				throw new ArgumentNullException(nameof(item));
-			LibraryDE obj = new LibraryDE(item);
+			if (obj == null)
+				throw new ArgumentNullException(nameof(obj));
 			
 			_database.Entry(obj).State = EntityState.Deleted;
 			if (obj.ProviderLinks != null)

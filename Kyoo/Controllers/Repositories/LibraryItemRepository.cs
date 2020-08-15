@@ -76,7 +76,7 @@ namespace Kyoo.Controllers
 			return ApplyFilters(ItemsQuery, where, sort, limit);
 		}
 
-		public override async Task<ICollection<LibraryItem>> Search(string query)
+		public async Task<ICollection<LibraryItem>> Search(string query)
 		{
 			return await ItemsQuery
 				.Where(x => EF.Functions.ILike(x.Title, $"%{query}%"))

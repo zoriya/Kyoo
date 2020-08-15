@@ -96,7 +96,7 @@ namespace Kyoo.Controllers
 			return await query.ToListAsync();
 		}
 		
-		public abstract Task<T> Create(T obj);
+		public abstract Task<T> Create([NotNull] T obj);
 
 		public virtual async Task<T> CreateIfNotExists(T obj)
 		{
