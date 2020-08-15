@@ -10,7 +10,7 @@ namespace Kyoo.Models
 
 		[NotMergable] public override IEnumerable<Show> Shows
 		{
-			get => Links.Select(x => x.Show);
+			get => Links?.Select(x => x.Show);
 			set => Links = value?.Select(x => new GenreLink(x, this));
 		}
 
