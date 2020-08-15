@@ -174,7 +174,7 @@ namespace Kyoo
 				throw new ArgumentNullException(nameof(methodName));
 			if (type == null)
 				throw new ArgumentNullException(nameof(type));
-			MethodInfo method = owner.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+			MethodInfo method = owner.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
 			if (method == null)
 				throw new NullReferenceException($"A method named {methodName} could not be found on {owner.FullName}");
 			return method.MakeGenericMethod(type).Invoke(null, args?.ToArray());
@@ -192,7 +192,7 @@ namespace Kyoo
 				throw new ArgumentNullException(nameof(methodName));
 			if (type == null)
 				throw new ArgumentNullException(nameof(type));
-			MethodInfo method = instance.GetType().GetMethod(methodName, BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
+			MethodInfo method = instance.GetType().GetMethod(methodName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
 			if (method == null)
 				throw new NullReferenceException($"A method named {methodName} could not be found on {instance.GetType().FullName}");
 			return method.MakeGenericMethod(type).Invoke(instance, args?.ToArray());
@@ -250,15 +250,19 @@ namespace Kyoo
 
 		public static Task<T> Cast<T>(this Task task)
 		{
-			return (Task<T>)task;
+			return task.ContinueWith(x => (T)((dynamic)x).Result,
+				TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnRanToCompletion);
 		}
 
-		public static Expression<T> Convert<T>(this Expression expr)
+		public static Expression<T> Convert<T>([CanBeNull] this Expression expr)
 			where T : Delegate
 		{
-			if (expr is LambdaExpression lambda)
-				return new ExpressionConverter<T>(lambda).VisitAndConvert();
-			throw new ArgumentException("Can't convert a non lambda.");
+			return expr switch
+			{
+				null => null,
+				LambdaExpression lambda => new ExpressionConverter<T>(lambda).VisitAndConvert(),
+				_ => throw new ArgumentException("Can't convert a non lambda.")
+			};
 		}
 
 		private class ExpressionConverter<TTo> : ExpressionVisitor

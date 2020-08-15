@@ -33,7 +33,8 @@ namespace Kyoo.Controllers
 			Key = key;
 			Descendant = descendant;
 			
-			if (Key.Body is MemberExpression || 
+			if (Key == null || 
+			    Key.Body is MemberExpression || 
 			    Key.Body.NodeType == ExpressionType.Convert && ((UnaryExpression)Key.Body).Operand is MemberExpression)
 				return;
 				
