@@ -50,7 +50,7 @@ namespace Kyoo.Controllers
 				.ToListAsync<Collection>();
 		}
 
-		public override async Task<Collection> Create(Collection obj)
+		public override async Task<CollectionDE> Create(CollectionDE obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -60,11 +60,10 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 
-		public override async Task Delete(Collection item)
+		public override async Task Delete(CollectionDE obj)
 		{
-			if (item == null)
-				throw new ArgumentNullException(nameof(item));
-			CollectionDE obj = new CollectionDE(item);
+			if (obj == null)
+				throw new ArgumentNullException(nameof(obj));
 
 			_database.Entry(obj).State = EntityState.Deleted;
 			if (obj.Links != null)

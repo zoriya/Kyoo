@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers
 {
-	public class EpisodeRepository : LocalRepository<Episode, Episode>, IEpisodeRepository
+	public class EpisodeRepository : LocalRepository<Episode>, IEpisodeRepository
 	{
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
@@ -87,7 +87,7 @@ namespace Kyoo.Controllers
 			                                                   && x.AbsoluteNumber == absoluteNumber);
 		}
 
-		public override async Task<ICollection<Episode>> Search(string query)
+		public async Task<ICollection<Episode>> Search(string query)
 		{
 			return await _database.Episodes
 				.Where(x => EF.Functions.ILike(x.Title, $"%{query}%"))
@@ -133,7 +133,7 @@ namespace Kyoo.Controllers
 			Sort<Episode> sort = default, 
 			Pagination limit = default)
 		{
-			ICollection<Episode> episodes = await ApplyFilters<Episode>(_database.Episodes.Where(x => x.ShowID == showID),
+			ICollection<Episode> episodes = await ApplyFilters(_database.Episodes.Where(x => x.ShowID == showID),
 				where,
 				sort,
 				limit);
