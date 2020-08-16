@@ -1,14 +1,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using Kyoo.Models.Attributes;
+using Newtonsoft.Json;
 
 namespace Kyoo.Models
 {
 	public class GenreDE : Genre
 	{
-		[NotMergable] public virtual IEnumerable<GenreLink> Links { get; set; }
+		[JsonIgnore] [NotMergable] public virtual IEnumerable<GenreLink> Links { get; set; }
 
-		[NotMergable] public override IEnumerable<Show> Shows
+		[JsonIgnore] [NotMergable] public override IEnumerable<Show> Shows
 		{
 			get => Links?.Select(x => x.Show);
 			set => Links = value?.Select(x => new GenreLink(x, this));

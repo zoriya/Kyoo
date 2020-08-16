@@ -82,11 +82,11 @@ namespace Kyoo.Controllers
 			if (season?.Show?.Path == null)
 				return default;
 
-			if (season.ImgPrimary != null)
+			if (season.Poster != null)
 			{
 				string localPath = Path.Combine(season.Show.Path, $"season-{season.SeasonNumber}.jpg");
 				if (alwaysDownload || !File.Exists(localPath))
-					await DownloadImage(season.ImgPrimary, localPath, $"The poster of {season.Show.Title}'s season {season.SeasonNumber}");
+					await DownloadImage(season.Poster, localPath, $"The poster of {season.Show.Title}'s season {season.SeasonNumber}");
 			}
 			return season;
 		}

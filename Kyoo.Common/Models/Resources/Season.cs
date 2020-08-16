@@ -15,7 +15,7 @@ namespace Kyoo.Models
 		public string Overview { get; set; }
 		public int? Year { get; set; }
 
-		[JsonIgnore] public string ImgPrimary { get; set; }
+		[JsonIgnore] public string Poster { get; set; }
 		public virtual IEnumerable<MetadataID> ExternalIDs { get; set; }
 
 		[JsonIgnore] public virtual Show Show { get; set; }
@@ -28,7 +28,7 @@ namespace Kyoo.Models
 			string title, 
 			string overview,
 			int? year,
-			string imgPrimary,
+			string poster,
 			IEnumerable<MetadataID> externalIDs)
 		{
 			ShowID = showID;
@@ -36,7 +36,7 @@ namespace Kyoo.Models
 			Title = title;
 			Overview = overview;
 			Year = year;
-			ImgPrimary = imgPrimary;
+			Poster = poster;
 			ExternalIDs = externalIDs;
 		}
 	}

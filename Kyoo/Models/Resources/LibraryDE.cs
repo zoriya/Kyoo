@@ -1,19 +1,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using Kyoo.Models.Attributes;
+using Newtonsoft.Json;
 
 namespace Kyoo.Models
 {
 	public class LibraryDE : Library
 	{
-		[NotMergable] public virtual IEnumerable<ProviderLink> ProviderLinks { get; set; }
+		[JsonIgnore] [NotMergable] public virtual IEnumerable<ProviderLink> ProviderLinks { get; set; }
 		public override IEnumerable<ProviderID> Providers
 		{
 			get => ProviderLinks?.Select(x => x.Provider);
 			set => ProviderLinks = value?.Select(x => new ProviderLink(x, this)).ToList();
 		}
 		
-		[NotMergable] public virtual IEnumerable<LibraryLink> Links { get; set; }
+		[JsonIgnore] [NotMergable] public virtual IEnumerable<LibraryLink> Links { get; set; }
 		public override IEnumerable<Show> Shows
 		{
 			get => Links?.Where(x => x.Show != null).Select(x => x.Show);
