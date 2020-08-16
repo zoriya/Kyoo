@@ -76,26 +76,35 @@ namespace Kyoo
 		public static T Assign<T>(T first, T second)
 		{
 			Type type = typeof(T);
-			foreach (PropertyInfo property in type.GetProperties())
+			IEnumerable<PropertyInfo> properties = type.GetProperties()
+				.Where(x => x.CanRead && x.CanWrite
+				                      && Attribute.GetCustomAttribute(x, typeof(NotMergableAttribute)) == null);
+			
+			foreach (PropertyInfo property in properties)
 			{
-				if (!property.CanRead || !property.CanWrite)
-					continue;
-				
 				object value = property.GetValue(second);
 				property.SetValue(first, value);
 			}
 
+			if (first is IOnMerge merge)
+				merge.OnMerge(second);
 			return first;
 		}
 		
 		public static T Complete<T>(T first, T second)
 		{
+			if (first == null)
+				throw new ArgumentNullException(nameof(first));
+			if (second == null)
+				return first;
+			
 			Type type = typeof(T);
-			foreach (PropertyInfo property in type.GetProperties())
+			IEnumerable<PropertyInfo> properties = type.GetProperties()
+				.Where(x => x.CanRead && x.CanWrite
+				                      && Attribute.GetCustomAttribute(x, typeof(NotMergableAttribute)) == null);
+			
+			foreach (PropertyInfo property in properties)
 			{
-				if (!property.CanRead || !property.CanWrite)
-					continue;
-				
 				object value = property.GetValue(second);
 				object defaultValue = property.PropertyType.IsValueType
 					? Activator.CreateInstance(property.PropertyType) 
@@ -105,6 +114,8 @@ namespace Kyoo
 					property.SetValue(first, value);
 			}
 
+			if (first is IOnMerge merge)
+				merge.OnMerge(second);
 			return first;
 		}
 
@@ -116,11 +127,12 @@ namespace Kyoo
 				return first;
 			
 			Type type = typeof(T);
-			foreach (PropertyInfo property in type.GetProperties().Where(x => x.CanRead && x.CanWrite))
+			IEnumerable<PropertyInfo> properties = type.GetProperties()
+				.Where(x => x.CanRead && x.CanWrite
+				                      && Attribute.GetCustomAttribute(x, typeof(NotMergableAttribute)) == null);
+			
+			foreach (PropertyInfo property in properties)
 			{
-				if (Attribute.GetCustomAttribute(property, typeof(NotMergableAttribute)) != null)
-					continue;
-				
 				object oldValue = property.GetValue(first);
 				object newValue = property.GetValue(second);
 				object defaultValue = property.PropertyType.IsValueType
@@ -135,8 +147,8 @@ namespace Kyoo
 					property.SetValue(first, RunGenericMethod(
 						typeof(Utility), 
 						"MergeLists",
-						GetEnumerableType(property.PropertyType),
-						new []{ oldValue, newValue, null}));
+						GetEnumerableType(property.PropertyType), 
+						oldValue, newValue, null));
 				}
 			}
 
@@ -247,11 +259,42 @@ namespace Kyoo
 				return string.Empty;
 			return "?" + string.Join('&', query.Select(x => $"{x.Key}={x.Value}"));
 		}
+		
+		public static Task<T> Then<T>(this Task<T> task, Action<T> map)
+		{
+			return task.ContinueWith(x =>
+			{
+				if (x.IsFaulted)
+					throw x.Exception!.InnerException!;
+				if (x.IsCanceled)
+					throw new TaskCanceledException();
+				map(x.Result);
+				return x.Result;
+			}, TaskContinuationOptions.ExecuteSynchronously);
+		}
+
+		public static Task<TResult> Map<T, TResult>(this Task<T> task, Func<T, TResult> map)
+		{
+			return task.ContinueWith(x =>
+			{
+				if (x.IsFaulted)
+					throw x.Exception!.InnerException!;
+				if (x.IsCanceled)
+					throw new TaskCanceledException();
+				return map(x.Result);
+			}, TaskContinuationOptions.ExecuteSynchronously);
+		}
 
 		public static Task<T> Cast<T>(this Task task)
 		{
-			return task.ContinueWith(x => (T)((dynamic)x).Result,
-				TaskContinuationOptions.ExecuteSynchronously | TaskContinuationOptions.OnlyOnRanToCompletion);
+			return task.ContinueWith(x =>
+			{
+				if (x.IsFaulted)
+					throw x.Exception!.InnerException!;
+				if (x.IsCanceled)
+					throw new TaskCanceledException();
+				return (T)((dynamic)x).Result;
+			}, TaskContinuationOptions.ExecuteSynchronously);
 		}
 
 		public static Expression<T> Convert<T>([CanBeNull] this Expression expr)

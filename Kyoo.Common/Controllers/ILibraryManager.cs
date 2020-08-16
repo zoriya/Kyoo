@@ -46,6 +46,17 @@ namespace Kyoo.Controllers
 		Task<Genre> GetGenre(string slug);
 		Task<Studio> GetStudio(string slug);
 		Task<People> GetPeople(string slug);
+		
+		// Get by predicate
+		Task<Library> GetLibrary(Expression<Func<Library, bool>> where);
+		Task<Collection> GetCollection(Expression<Func<Collection, bool>> where);
+		Task<Show> GetShow(Expression<Func<Show, bool>> where);
+		Task<Season> GetSeason(Expression<Func<Season, bool>> where);
+		Task<Episode> GetEpisode(Expression<Func<Episode, bool>> where);
+		Task<Track> GetTrack(Expression<Func<Track, bool>> where);
+		Task<Genre> GetGenre(Expression<Func<Genre, bool>> where);
+		Task<Studio> GetStudio(Expression<Func<Studio, bool>> where);
+		Task<People> GetPerson(Expression<Func<People, bool>> where);
 
 		// Get by relations
 		Task<ICollection<Season>> GetSeasonsFromShow(int showID,

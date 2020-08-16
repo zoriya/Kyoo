@@ -224,8 +224,7 @@ namespace Kyoo.Controllers
 			bool isMovie, 
 			Library library)
 		{
-			Show show = (await libraryManager.GetShows(x => x.Path == showPath, limit: 1))
-				.FirstOrDefault();
+			Show show = await libraryManager.GetShow(x => x.Path == showPath);
 			if (show != null)
 				return show;
 			show = await _metadataProvider.SearchShow(showTitle, isMovie, library);

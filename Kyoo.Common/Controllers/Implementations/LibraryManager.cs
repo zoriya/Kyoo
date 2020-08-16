@@ -175,6 +175,51 @@ namespace Kyoo.Controllers
 			return PeopleRepository.Get(slug);
 		}
 
+		public Task<Library> GetLibrary(Expression<Func<Library, bool>> where)
+		{
+			return LibraryRepository.Get(where);
+		}
+
+		public Task<Collection> GetCollection(Expression<Func<Collection, bool>> where)
+		{
+			return CollectionRepository.Get(where);
+		}
+
+		public Task<Show> GetShow(Expression<Func<Show, bool>> where)
+		{
+			return ShowRepository.Get(where);
+		}
+
+		public Task<Season> GetSeason(Expression<Func<Season, bool>> where)
+		{
+			return SeasonRepository.Get(where);
+		}
+
+		public Task<Episode> GetEpisode(Expression<Func<Episode, bool>> where)
+		{
+			return EpisodeRepository.Get(where);
+		}
+
+		public Task<Track> GetTrack(Expression<Func<Track, bool>> where)
+		{
+			return TrackRepository.Get(where);
+		}
+
+		public Task<Genre> GetGenre(Expression<Func<Genre, bool>> where)
+		{
+			return GenreRepository.Get(where);
+		}
+
+		public Task<Studio> GetStudio(Expression<Func<Studio, bool>> where)
+		{
+			return StudioRepository.Get(where);
+		}
+
+		public Task<People> GetPerson(Expression<Func<People, bool>> where)
+		{
+			return PeopleRepository.Get(where);
+		}
+
 		public Task<ICollection<Library>> GetLibraries(Expression<Func<Library, bool>> where = null, 
 			Sort<Library> sort = default,
 			Pagination page = default)

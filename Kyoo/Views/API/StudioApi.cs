@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.CommonApi;
 using Kyoo.Controllers;
@@ -44,6 +45,8 @@ namespace Kyoo.Api
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!ressources.Any() && await _libraryManager.GetStudio(id) == null)
+					return NotFound();
 				return Page(ressources, limit);
 			}
 			catch (ItemNotFound)
@@ -75,7 +78,9 @@ namespace Kyoo.Api
 					ApiHelper.ParseWhere<Show>(where, x => x.Studio.Slug == slug),
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
-
+				
+				if (!ressources.Any() && await _libraryManager.GetStudio(slug) == null)
+					return NotFound();
 				return Page(ressources, limit);
 			}
 			catch (ItemNotFound)
