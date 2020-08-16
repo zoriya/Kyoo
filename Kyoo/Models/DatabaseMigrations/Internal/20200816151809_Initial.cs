@@ -119,7 +119,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         column: x => x.LibraryID,
                         principalTable: "Libraries",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_ProviderLinks_Providers_ProviderID",
                         column: x => x.ProviderID,
@@ -177,7 +177,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         column: x => x.CollectionID,
                         principalTable: "Collections",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_CollectionLinks_Shows_ShowID",
                         column: x => x.ShowID,
@@ -228,7 +228,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         column: x => x.CollectionID,
                         principalTable: "Collections",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_LibraryLinks_Libraries_LibraryID",
                         column: x => x.LibraryID,
@@ -240,7 +240,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         column: x => x.ShowID,
                         principalTable: "Shows",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(

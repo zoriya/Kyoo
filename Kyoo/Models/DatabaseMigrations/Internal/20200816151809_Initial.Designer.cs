@@ -11,7 +11,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Kyoo.Models.DatabaseMigrations.Internal
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20200816150752_Initial")]
+    [Migration("20200816151809_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -530,7 +530,8 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 {
                     b.HasOne("Kyoo.Models.CollectionDE", "Collection")
                         .WithMany("Links")
-                        .HasForeignKey("CollectionID");
+                        .HasForeignKey("CollectionID")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Kyoo.Models.ShowDE", "Show")
                         .WithMany("CollectionLinks")
@@ -571,7 +572,8 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 {
                     b.HasOne("Kyoo.Models.CollectionDE", "Collection")
                         .WithMany("LibraryLinks")
-                        .HasForeignKey("CollectionID");
+                        .HasForeignKey("CollectionID")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Kyoo.Models.LibraryDE", "Library")
                         .WithMany("Links")
@@ -581,7 +583,8 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
                     b.HasOne("Kyoo.Models.ShowDE", "Show")
                         .WithMany("LibraryLinks")
-                        .HasForeignKey("ShowID");
+                        .HasForeignKey("ShowID")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("Kyoo.Models.MetadataID", b =>
@@ -632,7 +635,8 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 {
                     b.HasOne("Kyoo.Models.LibraryDE", "Library")
                         .WithMany("ProviderLinks")
-                        .HasForeignKey("LibraryID");
+                        .HasForeignKey("LibraryID")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Kyoo.Models.ProviderID", "Provider")
                         .WithMany()
