@@ -55,17 +55,21 @@ namespace Kyoo
 			modelBuilder.HasPostgresEnum<ItemType>();
 			modelBuilder.HasPostgresEnum<StreamType>();
 
-			modelBuilder.Entity<Library>()
+			modelBuilder.Ignore<Library>();
+			modelBuilder.Ignore<Collection>();
+			modelBuilder.Ignore<Show>();
+			modelBuilder.Ignore<Genre>();
+				
+			modelBuilder.Entity<LibraryDE>()
 				.Property(x => x.Paths)
 				.HasColumnType("text[]")
 				.Metadata.SetValueComparer(_stringArrayComparer);
 
-			modelBuilder.Entity<Show>()
+			modelBuilder.Entity<ShowDE>()
 				.Property(x => x.Aliases)
 				.HasColumnType("text[]")
 				.Metadata.SetValueComparer(_stringArrayComparer);
-			
-			
+
 			modelBuilder.Entity<Track>()
 				.Property(t => t.IsDefault)
 				.ValueGeneratedNever();
@@ -77,16 +81,16 @@ namespace Kyoo
 			modelBuilder.Entity<GenreLink>()
 				.HasKey(x => new {x.ShowID, x.GenreID});
 
-			modelBuilder.Entity<Library>()
+			modelBuilder.Entity<LibraryDE>()
 				.Ignore(x => x.Shows)
 				.Ignore(x => x.Collections)
 				.Ignore(x => x.Providers);
 			
-			modelBuilder.Entity<Collection>()
+			modelBuilder.Entity<CollectionDE>()
 				.Ignore(x => x.Shows)
 				.Ignore(x => x.Libraries);
 			
-			modelBuilder.Entity<Show>()
+			modelBuilder.Entity<ShowDE>()
 				.Ignore(x => x.Genres)
 				.Ignore(x => x.Libraries)
 				.Ignore(x => x.Collections);
@@ -97,12 +101,52 @@ namespace Kyoo
 				.Ignore(x => x.Poster)
 				.Ignore(x => x.ExternalIDs);
 
-			modelBuilder.Entity<Genre>()
+			modelBuilder.Entity<GenreDE>()
 				.Ignore(x => x.Shows);
-
 			
+
+			modelBuilder.Entity<LibraryLink>()
+				.HasOne(x => x.Library as LibraryDE)
+				.WithMany(x => x.Links);
+			modelBuilder.Entity<LibraryLink>()
+				.HasOne(x => x.Show as ShowDE)
+				.WithMany(x => x.LibraryLinks);
+			modelBuilder.Entity<LibraryLink>()
+				.HasOne(x => x.Collection as CollectionDE)
+				.WithMany(x => x.LibraryLinks);
+			
+			modelBuilder.Entity<CollectionLink>()
+				.HasOne(x => x.Collection as CollectionDE)
+				.WithMany(x => x.Links);
+			modelBuilder.Entity<CollectionLink>()
+				.HasOne(x => x.Show as ShowDE)
+				.WithMany(x => x.CollectionLinks);
+			
+			modelBuilder.Entity<GenreLink>()
+				.HasOne(x => x.Genre as GenreDE)
+				.WithMany(x => x.Links);
+			modelBuilder.Entity<GenreLink>()
+				.HasOne(x => x.Show as ShowDE)
+				.WithMany(x => x.GenreLinks);
+
+			modelBuilder.Entity<ProviderLink>()
+				.HasOne(x => x.Library as LibraryDE)
+				.WithMany(x => x.ProviderLinks);
+
+			modelBuilder.Entity<Season>()
+				.HasOne(x => x.Show as ShowDE)
+				.WithMany(x => x.Seasons);
+			modelBuilder.Entity<Episode>()
+				.HasOne(x => x.Show as ShowDE)
+				.WithMany(x => x.Episodes);
+			modelBuilder.Entity<PeopleRole>()
+				.HasOne(x => x.Show as ShowDE)
+				.WithMany(x => x.People);
+			
+			
+
 			modelBuilder.Entity<MetadataID>()
-				.HasOne(x => x.Show)
+				.HasOne(x => x.Show as ShowDE)
 				.WithMany(x => x.ExternalIDs)
 				.OnDelete(DeleteBehavior.Cascade);
 			modelBuilder.Entity<MetadataID>()
@@ -118,20 +162,27 @@ namespace Kyoo
 				.WithMany(x => x.ExternalIDs)
 				.OnDelete(DeleteBehavior.Cascade);
 
+			modelBuilder.Entity<CollectionDE>().Property(x => x.Slug).IsRequired();
+			modelBuilder.Entity<GenreDE>().Property(x => x.Slug).IsRequired();
+			modelBuilder.Entity<LibraryDE>().Property(x => x.Slug).IsRequired();
+			modelBuilder.Entity<People>().Property(x => x.Slug).IsRequired();
+			modelBuilder.Entity<ProviderID>().Property(x => x.Slug).IsRequired();
+			modelBuilder.Entity<ShowDE>().Property(x => x.Slug).IsRequired();
+			modelBuilder.Entity<Studio>().Property(x => x.Slug).IsRequired();
 
-			modelBuilder.Entity<Collection>()
+			modelBuilder.Entity<CollectionDE>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
-			modelBuilder.Entity<Genre>()
+			modelBuilder.Entity<GenreDE>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
-			modelBuilder.Entity<Library>()
+			modelBuilder.Entity<LibraryDE>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
 			modelBuilder.Entity<People>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
-			modelBuilder.Entity<Show>()
+			modelBuilder.Entity<ShowDE>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
 			modelBuilder.Entity<Studio>()
