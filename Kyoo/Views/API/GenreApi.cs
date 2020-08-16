@@ -45,6 +45,8 @@ namespace Kyoo.Api
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!ressources.Any() && await _libraryManager.GetGenre(id) == null)
+					return NotFound();
 				return Page(ressources, limit);
 			}
 			catch (ItemNotFound)
@@ -77,6 +79,8 @@ namespace Kyoo.Api
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!ressources.Any() && await _libraryManager.GetGenre(slug) == null)
+					return NotFound();
 				return Page(ressources, limit);
 			}
 			catch (ItemNotFound)

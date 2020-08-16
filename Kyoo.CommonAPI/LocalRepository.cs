@@ -231,14 +231,16 @@ namespace Kyoo.Controllers
 		{
 			TInternal obj = new TInternal();
 			Utility.Assign(obj, item);
-			return Create(obj).Cast<T>();
+			return Create(obj).Cast<T>()
+				.Then(x => item.ID = x.ID);
 		}
 
 		Task<T> IRepository<T>.CreateIfNotExists(T item)
 		{
 			TInternal obj = new TInternal();
 			Utility.Assign(obj, item);
-			return CreateIfNotExists(obj).Cast<T>();
+			return CreateIfNotExists(obj).Cast<T>()
+				.Then(x => item.ID = x.ID);
 		}
 
 		public Task<T> Edit(T edited, bool resetOld)

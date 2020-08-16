@@ -24,7 +24,7 @@ namespace Kyoo.CommonApi
 			Expression<Func<T, bool>> defaultWhere = null)
 		{
 			if (where == null || where.Count == 0)
-				return null;
+				return defaultWhere;
 			
 			ParameterExpression param = Expression.Parameter(typeof(T));
 			Expression expression = defaultWhere?.Body;
