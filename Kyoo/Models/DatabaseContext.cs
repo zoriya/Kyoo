@@ -107,31 +107,39 @@ namespace Kyoo
 
 			modelBuilder.Entity<LibraryLink>()
 				.HasOne(x => x.Library as LibraryDE)
-				.WithMany(x => x.Links);
+				.WithMany(x => x.Links)
+				.OnDelete(DeleteBehavior.Cascade);
 			modelBuilder.Entity<LibraryLink>()
 				.HasOne(x => x.Show as ShowDE)
-				.WithMany(x => x.LibraryLinks);
+				.WithMany(x => x.LibraryLinks)
+				.OnDelete(DeleteBehavior.Cascade);
 			modelBuilder.Entity<LibraryLink>()
 				.HasOne(x => x.Collection as CollectionDE)
-				.WithMany(x => x.LibraryLinks);
+				.WithMany(x => x.LibraryLinks)
+				.OnDelete(DeleteBehavior.Cascade);
 			
 			modelBuilder.Entity<CollectionLink>()
 				.HasOne(x => x.Collection as CollectionDE)
-				.WithMany(x => x.Links);
+				.WithMany(x => x.Links)
+				.OnDelete(DeleteBehavior.Cascade);
 			modelBuilder.Entity<CollectionLink>()
 				.HasOne(x => x.Show as ShowDE)
-				.WithMany(x => x.CollectionLinks);
+				.WithMany(x => x.CollectionLinks)
+				.OnDelete(DeleteBehavior.Cascade);
 			
 			modelBuilder.Entity<GenreLink>()
 				.HasOne(x => x.Genre as GenreDE)
-				.WithMany(x => x.Links);
+				.WithMany(x => x.Links)
+				.OnDelete(DeleteBehavior.Cascade);
 			modelBuilder.Entity<GenreLink>()
 				.HasOne(x => x.Show as ShowDE)
-				.WithMany(x => x.GenreLinks);
+				.WithMany(x => x.GenreLinks)
+				.OnDelete(DeleteBehavior.Cascade);
 
 			modelBuilder.Entity<ProviderLink>()
 				.HasOne(x => x.Library as LibraryDE)
-				.WithMany(x => x.ProviderLinks);
+				.WithMany(x => x.ProviderLinks)
+				.OnDelete(DeleteBehavior.Cascade);
 
 			modelBuilder.Entity<Season>()
 				.HasOne(x => x.Show as ShowDE)
