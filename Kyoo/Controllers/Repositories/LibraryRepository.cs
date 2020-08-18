@@ -52,10 +52,7 @@ namespace Kyoo.Controllers
 
 		public override async Task<LibraryDE> Create(LibraryDE obj)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-
-			await Validate(obj);
+			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
 			if (obj.ProviderLinks != null)
 				foreach (ProviderLink entry in obj.ProviderLinks)
@@ -103,7 +100,7 @@ namespace Kyoo.Controllers
 		{
 			ICollection<Library> libraries = await ApplyFilters(_database.LibraryLinks
 					.Where(x => x.ShowID == showID)
-					.Select(x => x.Library as LibraryDE),
+					.Select(x => (LibraryDE)x.Library),
 				where,
 				sort,
 				limit);
@@ -119,7 +116,7 @@ namespace Kyoo.Controllers
 		{
 			ICollection<Library> libraries = await ApplyFilters(_database.LibraryLinks
 					.Where(x => x.Show.Slug == showSlug)
-					.Select(x => x.Library as LibraryDE),
+					.Select(x => (LibraryDE)x.Library),
 				where,
 				sort,
 				limit);
@@ -135,7 +132,7 @@ namespace Kyoo.Controllers
 		{
 			ICollection<Library> libraries = await ApplyFilters(_database.LibraryLinks
 					.Where(x => x.CollectionID == id)
-					.Select(x => x.Library as LibraryDE),
+					.Select(x => (LibraryDE)x.Library),
 				where,
 				sort,
 				limit);
@@ -151,7 +148,7 @@ namespace Kyoo.Controllers
 		{
 			ICollection<Library> libraries = await ApplyFilters(_database.LibraryLinks
 					.Where(x => x.Collection.Slug == slug)
-					.Select(x => x.Library as LibraryDE),
+					.Select(x => (LibraryDE)x.Library),
 				where,
 				sort,
 				limit);

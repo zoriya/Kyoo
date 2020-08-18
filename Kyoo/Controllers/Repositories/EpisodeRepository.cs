@@ -97,10 +97,7 @@ namespace Kyoo.Controllers
 
 		public override async Task<Episode> Create(Episode obj)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-			
-			await Validate(obj);
+			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
 			if (obj.ExternalIDs != null)
 				foreach (MetadataID entry in obj.ExternalIDs)

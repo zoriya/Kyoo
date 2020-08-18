@@ -27,7 +27,7 @@ namespace Kyoo.Models
 		
 		public static Studio Default()
 		{
-			return new Studio("unknow", "Unknow Studio");
+			return new Studio("unknown", "Unknown Studio");
 		}
 	}
 }

@@ -78,7 +78,7 @@ namespace Kyoo.Controllers
 	{
 		Task<T> Get(int id);
 		Task<T> Get(string slug);
-		async Task<T> Get(Expression<Func<T, bool>> where) => (await GetAll(where, limit: 1)).FirstOrDefault();
+		Task<T> Get(Expression<Func<T, bool>> where);
 		Task<ICollection<T>> Search(string query);
 		
 		Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null, 

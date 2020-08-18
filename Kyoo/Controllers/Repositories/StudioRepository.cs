@@ -30,9 +30,7 @@ namespace Kyoo.Controllers
 
 		public override async Task<Studio> Create(Studio obj)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-
+			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
 			await _database.SaveChangesAsync($"Trying to insert a duplicated studio (slug {obj.Slug} already exists).");
 			return obj;

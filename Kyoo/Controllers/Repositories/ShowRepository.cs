@@ -88,10 +88,7 @@ namespace Kyoo.Controllers
 
 		public override async Task<ShowDE> Create(ShowDE obj)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-
-			await Validate(obj);
+			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
 			if (obj.GenreLinks != null)
 				foreach (GenreLink entry in obj.GenreLinks)
@@ -190,7 +187,7 @@ namespace Kyoo.Controllers
 		{
 			ICollection<Show> shows = await ApplyFilters(_database.LibraryLinks
 					.Where(x => x.LibraryID == id && x.ShowID != null)
-					.Select(x => x.Show as ShowDE),
+					.Select(x => (ShowDE)x.Show),
 				where,
 				sort,
 				limit);
@@ -206,7 +203,7 @@ namespace Kyoo.Controllers
 		{
 			ICollection<Show> shows = await ApplyFilters(_database.LibraryLinks
 					.Where(x => x.Library.Slug == slug && x.ShowID != null)
-					.Select(x => x.Show as ShowDE),
+					.Select(x => (ShowDE)x.Show),
 				where,
 				sort,
 				limit);
@@ -222,7 +219,7 @@ namespace Kyoo.Controllers
 		{
 			ICollection<Show> shows = await ApplyFilters(_database.CollectionLinks
 					.Where(x => x.CollectionID== id)
-					.Select(x => x.Show as ShowDE),
+					.Select(x => (ShowDE)x.Show),
 				where,
 				sort,
 				limit);
@@ -238,7 +235,7 @@ namespace Kyoo.Controllers
 		{
 			ICollection<Show> shows = await ApplyFilters(_database.CollectionLinks
 					.Where(x => x.Collection.Slug == slug)
-					.Select(x => x.Show as ShowDE),
+					.Select(x => (ShowDE)x.Show),
 				where,
 				sort,
 				limit);
