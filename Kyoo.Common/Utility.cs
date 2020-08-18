@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -259,13 +260,21 @@ namespace Kyoo
 				return string.Empty;
 			return "?" + string.Join('&', query.Select(x => $"{x.Key}={x.Value}"));
 		}
+
+		[System.Diagnostics.CodeAnalysis.DoesNotReturn]
+		public static void ReThrow([NotNull] this Exception ex)
+		{
+			if (ex == null)
+				throw new ArgumentNullException(nameof(ex));
+			ExceptionDispatchInfo.Capture(ex).Throw();
+		}
 		
 		public static Task<T> Then<T>(this Task<T> task, Action<T> map)
 		{
 			return task.ContinueWith(x =>
 			{
 				if (x.IsFaulted)
-					throw x.Exception!.InnerException!;
+					x.Exception!.InnerException!.ReThrow();
 				if (x.IsCanceled)
 					throw new TaskCanceledException();
 				map(x.Result);
@@ -278,7 +287,7 @@ namespace Kyoo
 			return task.ContinueWith(x =>
 			{
 				if (x.IsFaulted)
-					throw x.Exception!.InnerException!;
+					x.Exception!.InnerException!.ReThrow();
 				if (x.IsCanceled)
 					throw new TaskCanceledException();
 				return map(x.Result);
@@ -290,7 +299,7 @@ namespace Kyoo
 			return task.ContinueWith(x =>
 			{
 				if (x.IsFaulted)
-					throw x.Exception!.InnerException!;
+					x.Exception!.InnerException!.ReThrow();
 				if (x.IsCanceled)
 					throw new TaskCanceledException();
 				return (T)((dynamic)x).Result;

@@ -47,9 +47,7 @@ namespace Kyoo.Controllers
 
 		public override async Task<GenreDE> Create(GenreDE obj)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-
+			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
 			await _database.SaveChangesAsync($"Trying to insert a duplicated genre (slug {obj.Slug} already exists).");
 			return obj;
@@ -73,7 +71,7 @@ namespace Kyoo.Controllers
 			Pagination limit = default)
 		{
 			ICollection<Genre> genres = await ApplyFilters(_database.GenreLinks.Where(x => x.ShowID == showID)
-					.Select(x => x.Genre as GenreDE),
+					.Select(x => (GenreDE)x.Genre),
 				where,
 				sort,
 				limit);
@@ -89,7 +87,7 @@ namespace Kyoo.Controllers
 		{
 			ICollection<Genre> genres = await ApplyFilters(_database.GenreLinks
 					.Where(x => x.Show.Slug == showSlug)
-					.Select(x => x.Genre as GenreDE),
+					.Select(x => (GenreDE)x.Genre),
 				where,
 				sort,
 				limit);

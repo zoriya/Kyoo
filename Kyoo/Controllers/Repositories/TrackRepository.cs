@@ -68,14 +68,11 @@ namespace Kyoo.Controllers
 
 		public override async Task<Track> Create(Track obj)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-
 			if (obj.EpisodeID <= 0)
 				throw new InvalidOperationException($"Can't store a track not related to any episode (episodeID: {obj.EpisodeID}).");
 
+			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
-			
 			await _database.SaveChangesAsync($"Trying to insert a duplicated track (slug {obj.Slug} already exists).");
 			return obj;
 		}

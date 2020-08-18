@@ -45,6 +45,11 @@ namespace Kyoo.Controllers
 		{
 			return Database.Set<T>().FirstOrDefaultAsync(x => x.Slug == slug);
 		}
+
+		public virtual Task<T> Get(Expression<Func<T, bool>> predicate)
+		{
+			return Database.Set<T>().FirstOrDefaultAsync(predicate);
+		}
 		
 		public virtual Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null,
 			Sort<T> sort = default,
@@ -95,8 +100,14 @@ namespace Kyoo.Controllers
 
 			return await query.ToListAsync();
 		}
-		
-		public abstract Task<T> Create([NotNull] T obj);
+
+		public virtual async Task<T> Create([NotNull] T obj)
+		{
+			if (obj == null)
+				throw new ArgumentNullException(nameof(obj));
+			await Validate(obj);
+			return obj;
+		}
 
 		public virtual async Task<T> CreateIfNotExists(T obj)
 		{
@@ -139,6 +150,9 @@ namespace Kyoo.Controllers
 		
 		protected virtual Task Validate(T ressource)
 		{
+			if (ressource.Slug == null)
+				throw new ArgumentException("Ressource can't have null as a slug.");
+			
 			foreach (PropertyInfo property in typeof(T).GetProperties()
 				.Where(x => typeof(IEnumerable).IsAssignableFrom(x.PropertyType) 
 				            && !typeof(string).IsAssignableFrom(x.PropertyType)))
@@ -201,6 +215,11 @@ namespace Kyoo.Controllers
 			return base.Get(slug).Cast<T>();
 		}
 
+		public Task<T> Get(Expression<Func<T, bool>> predicate)
+		{
+			return Get(predicate.Convert<Func<TInternal, bool>>()).Cast<T>();
+		}
+
 		public abstract Task<ICollection<T>> Search(string query);
 		
 		public virtual Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null,
@@ -224,8 +243,6 @@ namespace Kyoo.Controllers
 
 			return items.ToList<T>();
 		}
-		
-		public abstract override Task<TInternal> Create(TInternal obj);
 
 		Task<T> IRepository<T>.Create(T item)
 		{

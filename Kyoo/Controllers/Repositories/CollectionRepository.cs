@@ -52,9 +52,7 @@ namespace Kyoo.Controllers
 
 		public override async Task<CollectionDE> Create(CollectionDE obj)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-
+			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
 			await _database.SaveChangesAsync($"Trying to insert a duplicated collection (slug {obj.Slug} already exists).");
 			return obj;
@@ -82,7 +80,7 @@ namespace Kyoo.Controllers
 		{
 			ICollection<Collection> collections = await ApplyFilters(_database.CollectionLinks
 					.Where(x => x.ShowID == showID)
-					.Select(x => x.Collection as CollectionDE),
+					.Select(x => (CollectionDE)x.Collection),
 				where,
 				sort,
 				limit);
@@ -98,7 +96,7 @@ namespace Kyoo.Controllers
 		{
 			ICollection<Collection> collections = await ApplyFilters(_database.CollectionLinks
 					.Where(x => x.Show.Slug == showSlug)
-					.Select(x => x.Collection as CollectionDE),
+					.Select(x => (CollectionDE)x.Collection),
 				where,
 				sort,
 				limit);
@@ -114,7 +112,7 @@ namespace Kyoo.Controllers
 		{
 			ICollection<Collection> collections = await ApplyFilters(_database.LibraryLinks
 					.Where(x => x.LibraryID == id && x.CollectionID != null)
-					.Select(x => x.Collection as CollectionDE),
+					.Select(x => (CollectionDE)x.Collection),
 				where,
 				sort,
 				limit);
@@ -130,7 +128,7 @@ namespace Kyoo.Controllers
 		{
 			ICollection<Collection> collections = await ApplyFilters(_database.LibraryLinks
 					.Where(x => x.Library.Slug == slug && x.CollectionID != null)
-					.Select(x => x.Collection as CollectionDE),
+					.Select(x => (CollectionDE)x.Collection),
 				where,
 				sort,
 				limit);
