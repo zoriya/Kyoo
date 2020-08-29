@@ -13,6 +13,7 @@ namespace Kyoo.Controllers
 {
 	public class SeasonRepository : LocalRepository<Season>, ISeasonRepository
 	{
+		private bool _disposed;
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
 		private readonly Lazy<IEpisodeRepository> _episodes;
@@ -35,6 +36,9 @@ namespace Kyoo.Controllers
 
 		public override void Dispose()
 		{
+			if (_disposed)
+				return;
+			_disposed = true;
 			_database.Dispose();
 			_providers.Dispose();
 			if (_episodes.IsValueCreated)
@@ -43,6 +47,9 @@ namespace Kyoo.Controllers
 
 		public override async ValueTask DisposeAsync()
 		{
+			if (_disposed)
+				return;
+			_disposed = true;
 			await _database.DisposeAsync();
 			await _providers.DisposeAsync();
 			if (_episodes.IsValueCreated)

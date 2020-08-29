@@ -15,7 +15,7 @@ namespace Kyoo.Models
 		}
 		
 		[JsonIgnore] [NotMergable] public virtual IEnumerable<LibraryLink> LibraryLinks { get; set; }
-		public override IEnumerable<Library> Libraries
+		/*[ExpressionRewrite(x => x.LibraryLinks, y => y.Genre)]*/ public override IEnumerable<Library> Libraries
 		{
 			get => LibraryLinks?.Select(x => x.Library);
 			set => LibraryLinks = value?.Select(x => new LibraryLink(x, this));

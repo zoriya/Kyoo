@@ -12,6 +12,7 @@ namespace Kyoo.Controllers
 {
 	public class GenreRepository : LocalRepository<Genre, GenreDE>, IGenreRepository
 	{
+		private bool _disposed;
 		private readonly DatabaseContext _database;
 		private readonly Lazy<IShowRepository> _shows;
 		protected override Expression<Func<GenreDE, object>> DefaultSort => x => x.Slug;
@@ -25,13 +26,19 @@ namespace Kyoo.Controllers
 
 		public override void Dispose()
 		{
-			base.Dispose();
+			if (_disposed)
+				return;
+			_disposed = true;
+			_database.Dispose();
 			if (_shows.IsValueCreated)
 				_shows.Value.Dispose();
 		}
 
 		public override async ValueTask DisposeAsync()
 		{
+			if (_disposed)
+				return;
+			_disposed = true;
 			await _database.DisposeAsync();
 			if (_shows.IsValueCreated)
 				await _shows.Value.DisposeAsync();
