@@ -12,6 +12,7 @@ namespace Kyoo.Controllers
 {
 	public class LibraryItemRepository : LocalRepository<LibraryItem>, ILibraryItemRepository
 	{
+		private bool _disposed;
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
 		private readonly Lazy<ILibraryRepository> _libraries;
@@ -32,6 +33,9 @@ namespace Kyoo.Controllers
 		
 		public override void Dispose()
 		{
+			if (_disposed)
+				return;
+			_disposed = true;
 			_database.Dispose();
 			_providers.Dispose();
 			if (_shows.IsValueCreated)
@@ -42,6 +46,9 @@ namespace Kyoo.Controllers
 
 		public override async ValueTask DisposeAsync()
 		{
+			if (_disposed)
+				return;
+			_disposed = true;
 			await _database.DisposeAsync();
 			await _providers.DisposeAsync();
 			if (_shows.IsValueCreated)

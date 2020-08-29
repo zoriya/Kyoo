@@ -12,6 +12,7 @@ namespace Kyoo.Controllers
 {
 	public class ShowRepository : LocalRepository<Show, ShowDE>, IShowRepository
 	{
+		private bool _disposed;
 		private readonly DatabaseContext _database;
 		private readonly IStudioRepository _studios;
 		private readonly IPeopleRepository _people;
@@ -44,6 +45,9 @@ namespace Kyoo.Controllers
 
 		public override void Dispose()
 		{
+			if (_disposed)
+				return;
+			_disposed = true;
 			_database.Dispose();
 			_studios.Dispose();
 			_people.Dispose();
@@ -61,6 +65,9 @@ namespace Kyoo.Controllers
 
 		public override async ValueTask DisposeAsync()
 		{
+			if (_disposed)
+				return;
+			_disposed = true;
 			await _database.DisposeAsync();
 			await _studios.DisposeAsync();
 			await _people.DisposeAsync();

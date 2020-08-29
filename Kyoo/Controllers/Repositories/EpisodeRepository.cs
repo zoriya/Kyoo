@@ -12,6 +12,7 @@ namespace Kyoo.Controllers
 {
 	public class EpisodeRepository : LocalRepository<Episode>, IEpisodeRepository
 	{
+		private bool _disposed;
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
 		private readonly IShowRepository _shows;
@@ -34,12 +35,18 @@ namespace Kyoo.Controllers
 
 		public override void Dispose()
 		{
+			if (_disposed)
+				return;
+			_disposed = true;
 			_database.Dispose();
 			_providers.Dispose();
 		}
 
 		public override async ValueTask DisposeAsync()
 		{
+			if (_disposed)
+				return;
+			_disposed = true;
 			await _database.DisposeAsync();
 			await _providers.DisposeAsync();
 		}

@@ -13,6 +13,7 @@ namespace Kyoo.Controllers
 {
 	public class TrackRepository : LocalRepository<Track>, ITrackRepository
 	{
+		private bool _disposed;
 		private readonly DatabaseContext _database;
 		private readonly Lazy<IEpisodeRepository> _episodes;
 		protected override Expression<Func<Track, object>> DefaultSort => x => x.ID;
@@ -26,6 +27,9 @@ namespace Kyoo.Controllers
 
 		public override void Dispose()
 		{
+			if (_disposed)
+				return;
+			_disposed = true;
 			_database.Dispose();
 			if (_episodes.IsValueCreated)
 				_episodes.Value.Dispose();
@@ -33,6 +37,9 @@ namespace Kyoo.Controllers
 
 		public override async ValueTask DisposeAsync()
 		{
+			if (_disposed)
+				return;
+			_disposed = true;
 			await _database.DisposeAsync();
 			if (_episodes.IsValueCreated)
 				await _episodes.Value.DisposeAsync();

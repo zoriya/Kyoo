@@ -14,7 +14,7 @@ namespace Kyoo.Models
 		public override IEnumerable<Genre> Genres
 		{
 			get => GenreLinks?.Select(x => x.Genre);
-			set => GenreLinks = value?.Select(x => new GenreLink(this, x)).ToList();
+			set => GenreLinks = value?.Select(x => new GenreLink(this, x));
 		}
 		
 		[JsonIgnore] [NotMergable] public virtual IEnumerable<LibraryLink> LibraryLinks { get; set; }
@@ -32,15 +32,6 @@ namespace Kyoo.Models
 			set => CollectionLinks = value?.Select(x => new CollectionLink(x, this));
 		}
 
-		public override void OnMerge(object merged)
-		{
-			base.OnMerge(merged);
-			
-			if (GenreLinks != null)
-				foreach (GenreLink genre in GenreLinks)
-					genre.Show = this;
-		}
-		
 		public ShowDE() {}
 
 		public ShowDE(Show show)
