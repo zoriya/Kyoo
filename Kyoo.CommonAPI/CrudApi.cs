@@ -40,11 +40,11 @@ namespace Kyoo.CommonApi
 		[JsonDetailed]
 		public virtual async Task<ActionResult<T>> Get(string slug)
 		{
-			T ressource = await _repository.Get(slug);
-			if (ressource == null)
+			T resource = await _repository.Get(slug);
+			if (resource == null)
 				return NotFound();
-
-			return ressource;
+			
+			return resource;
 		}
 
 		[HttpGet]

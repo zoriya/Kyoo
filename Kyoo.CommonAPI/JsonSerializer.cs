@@ -32,20 +32,26 @@ namespace Kyoo.Controllers
 
 		private bool IsIgnored(Type type, string propertyName)
 		{
-			if (_ignored.ContainsKey(type) && _ignored[type].Contains(propertyName))
-				return true;
-			if (type.BaseType == null)
-				return false;
-			return _ignored.ContainsKey(type.BaseType) && _ignored[type.BaseType].Contains(propertyName);
+			while (type != null)
+			{
+				if (_ignored.ContainsKey(type) && _ignored[type].Contains(propertyName))
+					return true;
+				type = type.BaseType;
+			}
+
+			return false;
 		}
 
 		private bool IsSerializationForced(Type type, string propertyName)
 		{
-			if (_forceSerialize.ContainsKey(type) && _forceSerialize[type].Contains(propertyName))
-				return true;
-			if (type.BaseType == null)
-				return false;
-			return _forceSerialize.ContainsKey(type.BaseType) && _forceSerialize[type.BaseType].Contains(propertyName);
+			while (type != null)
+			{
+				if (_forceSerialize.ContainsKey(type) && _forceSerialize[type].Contains(propertyName))
+					return true;
+				type = type.BaseType;
+			}
+
+			return false;
 		}
 
 		protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
@@ -75,7 +81,7 @@ namespace Kyoo.Controllers
 				result.Formatters.Add(new NewtonsoftJsonOutputFormatter(
 					new JsonSerializerSettings
 					{
-						ContractResolver = new JsonPropertySelector(null, new Dictionary<Type, HashSet<string>>()
+						ContractResolver = new JsonPropertySelector(null, new Dictionary<Type, HashSet<string>>
 						{
 							{typeof(Show), new HashSet<string> {"genres", "studio"}},
 							{typeof(Episode), new HashSet<string> {"tracks"}},
