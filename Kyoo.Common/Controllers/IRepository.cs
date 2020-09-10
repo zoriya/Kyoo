@@ -30,7 +30,7 @@ namespace Kyoo.Controllers
 		
 		public Sort(Expression<Func<T, object>> key, bool descendant = false)
 		{
-			Key = key;
+			Key = ExpressionRewrite.Rewrite<Func<T, object>>(key);
 			Descendant = descendant;
 			
 			if (Key == null || 
@@ -58,6 +58,7 @@ namespace Kyoo.Controllers
 			Key = property.Type.IsValueType
 				? Expression.Lambda<Func<T, object>>(Expression.Convert(property, typeof(object)), param)
 				: Expression.Lambda<Func<T, object>>(property, param);
+			Key = ExpressionRewrite.Rewrite<Func<T, object>>(Key);
 					
 			Descendant = order switch
 			{

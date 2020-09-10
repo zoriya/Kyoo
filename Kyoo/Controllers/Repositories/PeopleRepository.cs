@@ -98,16 +98,6 @@ namespace Kyoo.Controllers
 			Sort<PeopleRole> sort = default, 
 			Pagination limit = default)
 		{
-			if (sort.Key?.Body is MemberExpression member)
-			{
-				sort.Key = member.Member.Name switch
-				{
-					"Name" => x => x.People.Name,
-					"Slug" => x => x.People.Slug,
-					_ => sort.Key
-				};
-			}
-
 			ICollection<PeopleRole> people = await ApplyFilters(_database.PeopleRoles.Where(x => x.ShowID == showID),
 				id => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id),
 				x => x.People.Name,
@@ -124,16 +114,6 @@ namespace Kyoo.Controllers
 			Sort<PeopleRole> sort = default, 
 			Pagination limit = default)
 		{
-			if (sort.Key?.Body is MemberExpression member)
-			{
-				sort.Key = member.Member.Name switch
-				{
-					"Name" => x => x.People.Name,
-					"Slug" => x => x.People.Slug,
-					_ => sort.Key
-				};
-			}
-			
 			ICollection<PeopleRole> people = await ApplyFilters(_database.PeopleRoles.Where(x => x.Show.Slug == showSlug),
 				id => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id),
 				x => x.People.Name,
