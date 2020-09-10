@@ -71,8 +71,9 @@ namespace Kyoo.CommonApi
 				else
 					expression = condition;
 			}
-			
-			return Expression.Lambda<Func<T, bool>>(expression!, param);
+
+			expression = ExpressionRewrite.Rewrite(expression);
+			return Expression.Lambda<Func<T, bool>>(expression, param);
 		}
 
 		private static Expression ContainsResourceExpression(MemberExpression xProperty, string value)

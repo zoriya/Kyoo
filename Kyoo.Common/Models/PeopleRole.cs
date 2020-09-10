@@ -11,12 +11,14 @@ namespace Kyoo.Models
 		[JsonIgnore] public int PeopleID { get; set; }
 		[JsonIgnore] public virtual People People { get; set; }
 		
+		[ExpressionRewrite(nameof(People) + "." + nameof(Models.People.Slug))]
 		public string Slug
 		{
 			get => People.Slug;
 			set => People.Slug = value;
 		}
 		
+		[ExpressionRewrite(nameof(People) + "."+ nameof(Models.People.Name))]
 		public string Name
 		{
 			get => People.Name;
