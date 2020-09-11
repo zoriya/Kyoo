@@ -23,8 +23,6 @@ namespace Kyoo.CommonApi
 		public static Expression<Func<T, bool>> ParseWhere<T>(Dictionary<string, string> where, 
 			Expression<Func<T, bool>> defaultWhere = null)
 		{
-			return defaultWhere;
-			
 			if (where == null || where.Count == 0)
 				return defaultWhere;
 			
