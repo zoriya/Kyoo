@@ -352,7 +352,6 @@ namespace Kyoo
 
 			protected override Expression VisitParameter(ParameterExpression node)
 			{
-				Console.WriteLine($"Rewritting parameter: {node.Name}");
 				return _newParams.FirstOrDefault(x => x.Name == node.Name) ?? node;
 			}
 		}
