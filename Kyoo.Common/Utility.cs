@@ -343,25 +343,17 @@ namespace Kyoo
 
 			internal Expression<TTo> VisitAndConvert()
 			{
-				return (Expression<TTo>)RunGenericMethod(
-					this,
-					"VisitLambda",
-					_expression.GetType().GetGenericArguments().First(), 
-					_expression);
-			}
-			
-			protected override Expression VisitLambda<T>(Expression<T> node)
-			{
 				Type returnType = _expression.Type.GetGenericArguments().Last();
-				Expression body = node.ReturnType == returnType
-					? Visit(node.Body)
-					: Expression.Convert(Visit(node.Body)!, returnType);
+				Expression body = _expression.ReturnType == returnType
+					? Visit(_expression.Body)
+					: Expression.Convert(Visit(_expression.Body)!, returnType);
 				return Expression.Lambda<TTo>(body!, _newParams);
 			}
 
 			protected override Expression VisitParameter(ParameterExpression node)
 			{
-				return _newParams.First(x => x.Name == node.Name);
+				Console.WriteLine($"Rewritting parameter: {node.Name}");
+				return _newParams.FirstOrDefault(x => x.Name == node.Name) ?? node;
 			}
 		}
 	}
