@@ -309,12 +309,14 @@ namespace Kyoo
 		public static Expression<T> Convert<T>([CanBeNull] this Expression expr)
 			where T : Delegate
 		{
-			return expr switch
+			Expression<T> e = expr switch
 			{
 				null => null,
 				LambdaExpression lambda => new ExpressionConverter<T>(lambda).VisitAndConvert(),
 				_ => throw new ArgumentException("Can't convert a non lambda.")
 			};
+
+			return ExpressionRewrite.Rewrite<T>(e);
 		}
 
 		private class ExpressionConverter<TTo> : ExpressionVisitor
@@ -343,25 +345,16 @@ namespace Kyoo
 
 			internal Expression<TTo> VisitAndConvert()
 			{
-				return (Expression<TTo>)RunGenericMethod(
-					this,
-					"VisitLambda",
-					_expression.GetType().GetGenericArguments().First(), 
-					_expression);
-			}
-			
-			protected override Expression VisitLambda<T>(Expression<T> node)
-			{
 				Type returnType = _expression.Type.GetGenericArguments().Last();
-				Expression body = node.ReturnType == returnType
-					? Visit(node.Body)
-					: Expression.Convert(Visit(node.Body)!, returnType);
+				Expression body = _expression.ReturnType == returnType
+					? Visit(_expression.Body)
+					: Expression.Convert(Visit(_expression.Body)!, returnType);
 				return Expression.Lambda<TTo>(body!, _newParams);
 			}
 
 			protected override Expression VisitParameter(ParameterExpression node)
 			{
-				return _newParams.First(x => x.Name == node.Name);
+				return _newParams.FirstOrDefault(x => x.Name == node.Name) ?? node;
 			}
 		}
 	}

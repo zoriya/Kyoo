@@ -9,6 +9,7 @@ namespace Kyoo.Models
 	{
 		[JsonIgnore] [NotMergable] public virtual IEnumerable<GenreLink> Links { get; set; }
 
+		[ExpressionRewrite(nameof(Links), nameof(GenreLink.Genre))]
 		[JsonIgnore] [NotMergable] public override IEnumerable<Show> Shows
 		{
 			get => Links?.Select(x => x.Show);
