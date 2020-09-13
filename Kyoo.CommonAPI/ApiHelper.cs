@@ -24,9 +24,14 @@ namespace Kyoo.CommonApi
 			Expression<Func<T, bool>> defaultWhere = null)
 		{
 			if (where == null || where.Count == 0)
-				return defaultWhere;
-			
-			ParameterExpression param = Expression.Parameter(typeof(T));
+			{
+				if (defaultWhere == null)
+					return null;
+				Expression body = ExpressionRewrite.Rewrite(defaultWhere.Body);
+				return Expression.Lambda<Func<T, bool>>(body, defaultWhere.Parameters.First());
+			}
+
+			ParameterExpression param = defaultWhere?.Parameters.First() ?? Expression.Parameter(typeof(T));
 			Expression expression = defaultWhere?.Body;
 
 			foreach ((string key, string desired) in where)
@@ -71,8 +76,9 @@ namespace Kyoo.CommonApi
 				else
 					expression = condition;
 			}
-			
-			return Expression.Lambda<Func<T, bool>>(expression!, param);
+
+			expression = ExpressionRewrite.Rewrite(expression);
+			return Expression.Lambda<Func<T, bool>>(expression, param);
 		}
 
 		private static Expression ContainsResourceExpression(MemberExpression xProperty, string value)

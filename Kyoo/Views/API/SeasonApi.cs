@@ -7,6 +7,7 @@ using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
 using Microsoft.Extensions.Configuration;
 
 namespace Kyoo.Api
@@ -39,8 +40,8 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Episode> ressources = await _libraryManager.GetEpisodesFromSeason(seasonID,
-					ApiHelper.ParseWhere<Episode>(where),
+				ICollection<Episode> ressources = await _libraryManager.GetEpisodes(
+					ApiHelper.ParseWhere<Episode>(where, x => x.SeasonID == seasonID),
 					new Sort<Episode>(sortBy),
 					new Pagination(limit, afterID));
 
@@ -72,9 +73,9 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Episode> ressources = await _libraryManager.GetEpisodesFromSeason(showSlug,
-					seasonNumber,
-					ApiHelper.ParseWhere<Episode>(where),
+				ICollection<Episode> ressources = await _libraryManager.GetEpisodes(
+					ApiHelper.ParseWhere<Episode>(where, x => x.Show.Slug == showSlug 
+					                                          && x.SeasonNumber == seasonNumber),
 					new Sort<Episode>(sortBy),
 					new Pagination(limit, afterID));
 
@@ -106,9 +107,8 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Episode> ressources = await _libraryManager.GetEpisodesFromSeason(showID,
-					seasonNumber,
-					ApiHelper.ParseWhere<Episode>(where),
+				ICollection<Episode> ressources = await _libraryManager.GetEpisodes(
+					ApiHelper.ParseWhere<Episode>(where, x => x.ShowID == showID && x.SeasonNumber == seasonNumber),
 					new Sort<Episode>(sortBy),
 					new Pagination(limit, afterID));
 
@@ -128,7 +128,7 @@ namespace Kyoo.Api
 		[Authorize(Policy = "Read")]
 		public async Task<ActionResult<Show>> GetShow(int seasonID)
 		{
-			return await _libraryManager.GetShowFromSeason(seasonID);
+			return await _libraryManager.GetShow(x => x.Seasons.Any(y => y.ID == seasonID));
 		}
 		
 		[HttpGet("{showSlug}-s{seasonNumber:int}/show")]

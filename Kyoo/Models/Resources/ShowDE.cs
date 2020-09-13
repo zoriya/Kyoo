@@ -11,6 +11,7 @@ namespace Kyoo.Models
 	public class ShowDE : Show
 	{
 		[JsonIgnore] [NotMergable] public virtual IEnumerable<GenreLink> GenreLinks { get; set; }
+		[ExpressionRewrite(nameof(GenreLinks), nameof(GenreLink.Genre))]
 		public override IEnumerable<Genre> Genres
 		{
 			get => GenreLinks?.Select(x => x.Genre);
@@ -18,6 +19,7 @@ namespace Kyoo.Models
 		}
 		
 		[JsonIgnore] [NotMergable] public virtual IEnumerable<LibraryLink> LibraryLinks { get; set; }
+		[ExpressionRewrite(nameof(LibraryLinks), nameof(LibraryLink.Library))]
 		public override IEnumerable<Library> Libraries
 		{
 			get => LibraryLinks?.Select(x => x.Library);
@@ -25,7 +27,7 @@ namespace Kyoo.Models
 		}
 		
 		[JsonIgnore] [NotMergable] public virtual IEnumerable<CollectionLink> CollectionLinks { get; set; }
-		
+		[ExpressionRewrite(nameof(CollectionLinks), nameof(CollectionLink.Collection))]
 		public override IEnumerable<Collection> Collections
 		{
 			get => CollectionLinks?.Select(x => x.Collection);

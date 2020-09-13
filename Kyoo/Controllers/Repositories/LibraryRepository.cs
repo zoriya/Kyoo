@@ -15,16 +15,14 @@ namespace Kyoo.Controllers
 		private bool _disposed;
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
-		private readonly Lazy<IShowRepository> _shows;
 		protected override Expression<Func<LibraryDE, object>> DefaultSort => x => x.ID;
 
 
-		public LibraryRepository(DatabaseContext database, IProviderRepository providers, IServiceProvider services)
+		public LibraryRepository(DatabaseContext database, IProviderRepository providers)
 			: base(database)
 		{
 			_database = database;
 			_providers = providers;
-			_shows = new Lazy<IShowRepository>(services.GetRequiredService<IShowRepository>);
 		}
 		
 		public override void Dispose()
@@ -34,8 +32,6 @@ namespace Kyoo.Controllers
 			_disposed = true;
 			_database.Dispose();
 			_providers.Dispose();
-			if (_shows.IsValueCreated)
-				_shows.Value.Dispose();
 		}
 
 		public override async ValueTask DisposeAsync()
@@ -45,8 +41,6 @@ namespace Kyoo.Controllers
 			_disposed = true;
 			await _database.DisposeAsync();
 			await _providers.DisposeAsync();
-			if (_shows.IsValueCreated)
-				await _shows.Value.DisposeAsync();
 		}
 
 		public override async Task<ICollection<Library>> Search(string query)
@@ -98,70 +92,6 @@ namespace Kyoo.Controllers
 				foreach (LibraryLink entry in obj.Links)
 					_database.Entry(entry).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
-		}
-
-		public async Task<ICollection<Library>> GetFromShow(int showID, 
-			Expression<Func<Library, bool>> where = null, 
-			Sort<Library> sort = default, 
-			Pagination limit = default)
-		{
-			ICollection<Library> libraries = await ApplyFilters(_database.LibraryLinks
-					.Where(x => x.ShowID == showID)
-					.Select(x => (LibraryDE)x.Library),
-				where,
-				sort,
-				limit);
-			if (!libraries.Any() && await _shows.Value.Get(showID) == null)
-				throw new ItemNotFound();
-			return libraries;
-		}
-
-		public async Task<ICollection<Library>> GetFromShow(string showSlug, 
-			Expression<Func<Library, bool>> where = null, 
-			Sort<Library> sort = default, 
-			Pagination limit = default)
-		{
-			ICollection<Library> libraries = await ApplyFilters(_database.LibraryLinks
-					.Where(x => x.Show.Slug == showSlug)
-					.Select(x => (LibraryDE)x.Library),
-				where,
-				sort,
-				limit);
-			if (!libraries.Any() && await _shows.Value.Get(showSlug) == null)
-				throw new ItemNotFound();
-			return libraries;
-		}
-		
-		public async Task<ICollection<Library>> GetFromCollection(int id, 
-			Expression<Func<Library, bool>> where = null, 
-			Sort<Library> sort = default, 
-			Pagination limit = default)
-		{
-			ICollection<Library> libraries = await ApplyFilters(_database.LibraryLinks
-					.Where(x => x.CollectionID == id)
-					.Select(x => (LibraryDE)x.Library),
-				where,
-				sort,
-				limit);
-			if (!libraries.Any() && await _shows.Value.Get(id) == null)
-				throw new ItemNotFound();
-			return libraries;
-		}
-
-		public async Task<ICollection<Library>> GetFromCollection(string slug, 
-			Expression<Func<Library, bool>> where = null, 
-			Sort<Library> sort = default, 
-			Pagination limit = default)
-		{
-			ICollection<Library> libraries = await ApplyFilters(_database.LibraryLinks
-					.Where(x => x.Collection.Slug == slug)
-					.Select(x => (LibraryDE)x.Library),
-				where,
-				sort,
-				limit);
-			if (!libraries.Any() && await _shows.Value.Get(slug) == null)
-				throw new ItemNotFound();
-			return libraries;
 		}
 	}
 }

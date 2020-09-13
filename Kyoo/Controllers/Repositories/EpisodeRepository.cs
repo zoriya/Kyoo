@@ -15,21 +15,13 @@ namespace Kyoo.Controllers
 		private bool _disposed;
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
-		private readonly IShowRepository _shows;
-		private readonly ISeasonRepository _seasons;
 		protected override Expression<Func<Episode, object>> DefaultSort => x => x.EpisodeNumber;
 
 
-		public EpisodeRepository(DatabaseContext database,
-			IProviderRepository providers,
-			IShowRepository shows,
-			ISeasonRepository seasons)
-			: base(database)
+		public EpisodeRepository(DatabaseContext database, IProviderRepository providers) : base(database)
 		{
 			_database = database;
 			_providers = providers;
-			_shows = shows;
-			_seasons = seasons;
 		}
 
 
@@ -130,80 +122,6 @@ namespace Kyoo.Controllers
 				foreach (MetadataID link in obj.ExternalIDs)
 					link.Provider = await _providers.CreateIfNotExists(link.Provider);
 			}
-		}
-		
-		public async Task<ICollection<Episode>> GetFromShow(int showID, 
-			Expression<Func<Episode, bool>> where = null, 
-			Sort<Episode> sort = default, 
-			Pagination limit = default)
-		{
-			ICollection<Episode> episodes = await ApplyFilters(_database.Episodes.Where(x => x.ShowID == showID),
-				where,
-				sort,
-				limit);
-			if (!episodes.Any() && await _shows.Get(showID) == null)
-				throw new ItemNotFound();
-			return episodes;
-		}
-		
-		public async Task<ICollection<Episode>> GetFromShow(string showSlug, 
-			Expression<Func<Episode, bool>> where = null, 
-			Sort<Episode> sort = default, 
-			Pagination limit = default)
-		{
-			ICollection<Episode> episodes = await ApplyFilters(_database.Episodes.Where(x => x.Show.Slug == showSlug),
-				where,
-				sort,
-				limit);
-			if (!episodes.Any() && await _shows.Get(showSlug) == null)
-				throw new ItemNotFound();
-			return episodes;
-		}
-
-		public async Task<ICollection<Episode>> GetFromSeason(int seasonID, 
-			Expression<Func<Episode, bool>> where = null, 
-			Sort<Episode> sort = default, 
-			Pagination limit = default)
-		{
-			ICollection<Episode> episodes = await ApplyFilters(_database.Episodes.Where(x => x.SeasonID == seasonID),
-				where,
-				sort,
-				limit);
-			if (!episodes.Any() && await _seasons.Get(seasonID) == null)
-				throw new ItemNotFound();
-			return episodes;
-		}
-
-		public async Task<ICollection<Episode>> GetFromSeason(int showID, 
-			int seasonNumber,
-			Expression<Func<Episode, bool>> where = null, 
-			Sort<Episode> sort = default, 
-			Pagination limit = default)
-		{
-			ICollection<Episode> episodes = await ApplyFilters(_database.Episodes.Where(x => x.ShowID == showID
-			                                                                           && x.SeasonNumber == seasonNumber),
-				where,
-				sort,
-				limit);
-			if (!episodes.Any() && await _seasons.Get(showID, seasonNumber) == null)
-				throw new ItemNotFound();
-			return episodes;
-		}
-
-		public async Task<ICollection<Episode>> GetFromSeason(string showSlug, 
-			int seasonNumber,
-			Expression<Func<Episode, bool>> where = null, 
-			Sort<Episode> sort = default, 
-			Pagination limit = default)
-		{
-			ICollection<Episode> episodes = await ApplyFilters(_database.Episodes.Where(x => x.Show.Slug == showSlug
-			                                                                                 && x.SeasonNumber == seasonNumber),
-				where,
-				sort,
-				limit);
-			if (!episodes.Any() && await _seasons.Get(showSlug, seasonNumber) == null)
-				throw new ItemNotFound();
-			return episodes;
 		}
 
 		public async Task Delete(string showSlug, int seasonNumber, int episodeNumber)
