@@ -309,12 +309,14 @@ namespace Kyoo
 		public static Expression<T> Convert<T>([CanBeNull] this Expression expr)
 			where T : Delegate
 		{
-			return expr switch
+			Expression<T> e = expr switch
 			{
 				null => null,
 				LambdaExpression lambda => new ExpressionConverter<T>(lambda).VisitAndConvert(),
 				_ => throw new ArgumentException("Can't convert a non lambda.")
 			};
+
+			return ExpressionRewrite.Rewrite<T>(e);
 		}
 
 		private class ExpressionConverter<TTo> : ExpressionVisitor
