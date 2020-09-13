@@ -4,7 +4,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
-using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers
@@ -47,28 +46,6 @@ namespace Kyoo.Controllers
 			foreach (Show show in obj.Shows)
 				show.StudioID = null;
 			await _database.SaveChangesAsync();
-		}
-
-		public async Task<Studio> GetFromShow(int showID)
-		{
-			Studio studio = await _database.Shows
-				.Where(x => x.ID == showID)
-				.Select(x => x.Studio)
-				.FirstOrDefaultAsync();
-			if (studio == null && !_database.Shows.Any(x => x.ID == showID))
-				throw new ItemNotFound();
-			return studio;
-		}
-
-		public async Task<Studio> GetFromShow(string showSlug)
-		{
-			Studio studio = await _database.Shows
-				.Where(x => x.Slug == showSlug)
-				.Select(x => x.Studio)
-				.FirstOrDefaultAsync();
-			if (studio == null && !_database.Shows.Any(x => x.Slug == showSlug))
-				throw new ItemNotFound();
-			return studio;
 		}
 	}
 }

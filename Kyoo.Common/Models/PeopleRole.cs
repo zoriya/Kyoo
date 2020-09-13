@@ -25,12 +25,14 @@ namespace Kyoo.Models
 			set => People.Name = value;
 		}
 		
+		[ExpressionRewrite(nameof(People) + "."+ nameof(Models.People.Poster))]
 		public string Poster
 		{
 			get => People.Poster;
 			set => People.Poster = value;
 		}
 		
+		[ExpressionRewrite(nameof(People) + "."+ nameof(Models.People.ExternalIDs))]
 		public IEnumerable<MetadataID> ExternalIDs
 		{
 			get => People.ExternalIDs;

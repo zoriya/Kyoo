@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -39,8 +40,8 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Show> ressources = await _libraryManager.GetShowsFromCollection(id,
-					ApiHelper.ParseWhere<Show>(where),
+				ICollection<Show> ressources = await _libraryManager.GetShows(
+					ApiHelper.ParseWhere<Show>(where, x => x.Collections.Any(y => y.ID == id)),
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
@@ -71,8 +72,8 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Show> ressources = await _libraryManager.GetShowsFromCollection(slug,
-					ApiHelper.ParseWhere<Show>(where),
+				ICollection<Show> ressources = await _libraryManager.GetShows(
+					ApiHelper.ParseWhere<Show>(where, x => x.Collections.Any(y => y.Slug == slug)),
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
@@ -103,8 +104,8 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Library> ressources = await _libraryManager.GetLibrariesFromCollection(id,
-					ApiHelper.ParseWhere<Library>(where),
+				ICollection<Library> ressources = await _libraryManager.GetLibraries(
+					ApiHelper.ParseWhere<Library>(where, x => x.Collections.Any(y => y.ID == id)),
 					new Sort<Library>(sortBy),
 					new Pagination(limit, afterID));
 
@@ -135,8 +136,8 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Library> ressources = await _libraryManager.GetLibrariesFromCollection(slug,
-					ApiHelper.ParseWhere<Library>(where),
+				ICollection<Library> ressources = await _libraryManager.GetLibraries(
+					ApiHelper.ParseWhere<Library>(where, x => x.Collections.Any(y => y.Slug == slug)),
 					new Sort<Library>(sortBy),
 					new Pagination(limit, afterID));
 
