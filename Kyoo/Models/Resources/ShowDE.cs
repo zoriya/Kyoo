@@ -11,6 +11,7 @@ namespace Kyoo.Models
 	public class ShowDE : Show
 	{
 		[JsonIgnore] [NotMergable] public virtual IEnumerable<GenreLink> GenreLinks { get; set; }
+		[ExpressionRewrite(nameof(GenreLinks), nameof(GenreLink.Genre))]
 		public override IEnumerable<Genre> Genres
 		{
 			get => GenreLinks?.Select(x => x.Genre);
