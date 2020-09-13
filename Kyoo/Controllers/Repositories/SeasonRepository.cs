@@ -17,20 +17,17 @@ namespace Kyoo.Controllers
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
 		private readonly Lazy<IEpisodeRepository> _episodes;
-		private readonly IShowRepository _shows;
 		protected override Expression<Func<Season, object>> DefaultSort => x => x.SeasonNumber;
 
 
 		public SeasonRepository(DatabaseContext database, 
 			IProviderRepository providers,
-			IShowRepository shows,
 			IServiceProvider services)
 			: base(database)
 		{
 			_database = database;
 			_providers = providers;
 			_episodes = new Lazy<IEpisodeRepository>(services.GetRequiredService<IEpisodeRepository>);
-			_shows = shows;
 		}
 
 
@@ -111,34 +108,6 @@ namespace Kyoo.Controllers
 			}
 		}
 		
-		public async Task<ICollection<Season>> GetFromShow(int showID,
-			Expression<Func<Season, bool>> where = null, 
-			Sort<Season> sort = default,
-			Pagination limit = default)
-		{
-			ICollection<Season> seasons = await ApplyFilters(_database.Seasons.Where(x => x.ShowID == showID),
-				where,
-				sort,
-				limit);
-			if (!seasons.Any() && await _shows.Get(showID) == null)
-				throw new ItemNotFound();
-			return seasons;
-		}
-
-		public async Task<ICollection<Season>> GetFromShow(string showSlug,
-			Expression<Func<Season, bool>> where = null, 
-			Sort<Season> sort = default,
-			Pagination limit = default)
-		{
-			ICollection<Season> seasons = await ApplyFilters(_database.Seasons.Where(x => x.Show.Slug == showSlug),
-				where,
-				sort,
-				limit);
-			if (!seasons.Any() && await _shows.Get(showSlug) == null)
-				throw new ItemNotFound();
-			return seasons;
-		}
-		
 		public async Task Delete(string showSlug, int seasonNumber)
 		{
 			Season obj = await Get(showSlug, seasonNumber);
@@ -160,11 +129,6 @@ namespace Kyoo.Controllers
 
 			if (obj.Episodes != null)
 				await _episodes.Value.DeleteRange(obj.Episodes);
-		}
-
-		public Task<Season> GetFromEpisode(int episodeID)
-		{
-			return _database.Seasons.FirstOrDefaultAsync(x => x.Episodes.Any(y => y.ID == episodeID));
 		}
 	}
 }

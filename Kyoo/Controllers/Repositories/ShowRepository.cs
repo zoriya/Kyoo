@@ -4,7 +4,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
-using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,8 +19,6 @@ namespace Kyoo.Controllers
 		private readonly IProviderRepository _providers;
 		private readonly Lazy<ISeasonRepository> _seasons;
 		private readonly Lazy<IEpisodeRepository> _episodes;
-		private readonly Lazy<ILibraryRepository> _libraries;
-		private readonly Lazy<ICollectionRepository> _collections;
 		protected override Expression<Func<ShowDE, object>> DefaultSort => x => x.Title;
 
 		public ShowRepository(DatabaseContext database,
@@ -39,8 +36,6 @@ namespace Kyoo.Controllers
 			_providers = providers;
 			_seasons = new Lazy<ISeasonRepository>(services.GetRequiredService<ISeasonRepository>);
 			_episodes = new Lazy<IEpisodeRepository>(services.GetRequiredService<IEpisodeRepository>);
-			_libraries = new Lazy<ILibraryRepository>(services.GetRequiredService<ILibraryRepository>);
-			_collections = new Lazy<ICollectionRepository>(services.GetRequiredService<ICollectionRepository>);
 		}
 
 		public override void Dispose()
@@ -57,10 +52,6 @@ namespace Kyoo.Controllers
 				_seasons.Value.Dispose();
 			if (_episodes.IsValueCreated)
 				_episodes.Value.Dispose();
-			if (_libraries.IsValueCreated)
-				_libraries.Value.Dispose();
-			if (_collections.IsValueCreated)
-				_collections.Value.Dispose();
 		}
 
 		public override async ValueTask DisposeAsync()
@@ -77,10 +68,6 @@ namespace Kyoo.Controllers
 				await _seasons.Value.DisposeAsync();
 			if (_episodes.IsValueCreated)
 				await _episodes.Value.DisposeAsync();
-			if (_libraries.IsValueCreated)
-				await _libraries.Value.DisposeAsync();
-			if (_collections.IsValueCreated)
-				await _collections.Value.DisposeAsync();
 		}
 
 		public override async Task<ICollection<Show>> Search(string query)
@@ -185,84 +172,6 @@ namespace Kyoo.Controllers
 
 			if (obj.Episodes != null) 
 				await _episodes.Value.DeleteRange(obj.Episodes);
-		}
-
-		public async Task<ICollection<Show>> GetFromLibrary(int id, 
-			Expression<Func<Show, bool>> where = null,
-			Sort<Show> sort = default,
-			Pagination limit = default)
-		{
-			ICollection<Show> shows = await ApplyFilters(_database.LibraryLinks
-					.Where(x => x.LibraryID == id && x.ShowID != null)
-					.Select(x => (ShowDE)x.Show),
-				where,
-				sort,
-				limit);
-			if (!shows.Any() && await _libraries.Value.Get(id) == null)
-				throw new ItemNotFound();
-			return shows;
-		}
-
-		public async Task<ICollection<Show>> GetFromLibrary(string slug,
-			Expression<Func<Show, bool>> where = null,
-			Sort<Show> sort = default, 
-			Pagination limit = default)
-		{
-			ICollection<Show> shows = await ApplyFilters(_database.LibraryLinks
-					.Where(x => x.Library.Slug == slug && x.ShowID != null)
-					.Select(x => (ShowDE)x.Show),
-				where,
-				sort,
-				limit);
-			if (!shows.Any() && await _libraries.Value.Get(slug) == null)
-				throw new ItemNotFound();
-			return shows;
-		}
-		
-		public async Task<ICollection<Show>> GetFromCollection(int id, 
-			Expression<Func<Show, bool>> where = null,
-			Sort<Show> sort = default,
-			Pagination limit = default)
-		{
-			ICollection<Show> shows = await ApplyFilters(_database.CollectionLinks
-					.Where(x => x.CollectionID== id)
-					.Select(x => (ShowDE)x.Show),
-				where,
-				sort,
-				limit);
-			if (!shows.Any() && await _libraries.Value.Get(id) == null)
-				throw new ItemNotFound();
-			return shows;
-		}
-
-		public async Task<ICollection<Show>> GetFromCollection(string slug,
-			Expression<Func<Show, bool>> where = null,
-			Sort<Show> sort = default, 
-			Pagination limit = default)
-		{
-			ICollection<Show> shows = await ApplyFilters(_database.CollectionLinks
-					.Where(x => x.Collection.Slug == slug)
-					.Select(x => (ShowDE)x.Show),
-				where,
-				sort,
-				limit);
-			if (!shows.Any() && await _libraries.Value.Get(slug) == null)
-				throw new ItemNotFound();
-			return shows;
-		}
-
-		public Task<Show> GetFromSeason(int seasonID)
-		{
-			return _database.Shows
-				.FirstOrDefaultAsync(x => x.Seasons.Any(y => y.ID == seasonID))
-				.Cast<Show>();
-		}
-		
-		public Task<Show> GetFromEpisode(int episodeID)
-		{
-			return _database.Shows
-				.FirstOrDefaultAsync(x => x.Episodes.Any(y => y.ID == episodeID))
-				.Cast<Show>();
 		}
 	}
 }

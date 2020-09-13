@@ -2,6 +2,7 @@
 using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.CommonApi;
 using Kyoo.Controllers;
@@ -28,7 +29,7 @@ namespace Kyoo.Api
 		[Authorize(Policy = "Read")]
 		public async Task<ActionResult<Show>> GetShow(int episodeID)
 		{
-			return await _libraryManager.GetShowFromEpisode(episodeID);
+			return await _libraryManager.GetShow(x => x.Episodes.Any(y => y.ID  == episodeID));
 		}
 		
 		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}/show")]
@@ -49,7 +50,7 @@ namespace Kyoo.Api
 		[Authorize(Policy = "Read")]
 		public async Task<ActionResult<Season>> GetSeason(int episodeID)
 		{
-			return await _libraryManager.GetSeasonFromEpisode(episodeID);
+			return await _libraryManager.GetSeason(x => x.Episodes.Any(y => y.ID == episodeID));
 		}
 		
 		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}/season")]
@@ -81,8 +82,8 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Track> ressources = await _libraryManager.GetTracksFromEpisode(episodeID,
-					ApiHelper.ParseWhere<Track>(where),
+				ICollection<Track> ressources = await _libraryManager.GetTracks(
+					ApiHelper.ParseWhere<Track>(where, x => x.Episode.ID == episodeID),
 					new Sort<Track>(sortBy),
 					new Pagination(limit, afterID));
 
@@ -115,10 +116,10 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Track> ressources = await _libraryManager.GetTracksFromEpisode(showID,
-					seasonNumber,
-					episodeNumber,
-					ApiHelper.ParseWhere<Track>(where),
+				ICollection<Track> ressources = await _libraryManager.GetTracks(
+					ApiHelper.ParseWhere<Track>(where, x => x.Episode.ShowID == showID 
+					                                        && x.Episode.SeasonNumber == seasonNumber
+					                                        && x.Episode.EpisodeNumber == episodeNumber),
 					new Sort<Track>(sortBy),
 					new Pagination(limit, afterID));
 
@@ -151,10 +152,9 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Track> ressources = await _libraryManager.GetTracksFromEpisode(showSlug,
-					seasonNumber,
-					episodeNumber,
-					ApiHelper.ParseWhere<Track>(where),
+				ICollection<Track> ressources = await _libraryManager.GetTracks(ApiHelper.ParseWhere<Track>(where, x => x.Episode.Show.Slug == showSlug 
+						&& x.Episode.SeasonNumber == seasonNumber
+						&& x.Episode.EpisodeNumber == episodeNumber),
 					new Sort<Track>(sortBy),
 					new Pagination(limit, afterID));
 
