@@ -8,6 +8,7 @@ namespace Kyoo.Models
 	public class CollectionDE : Collection
 	{
 		[JsonIgnore] [NotMergable] public virtual IEnumerable<CollectionLink> Links { get; set; }
+		[ExpressionRewrite(nameof(Links), nameof(CollectionLink.Show))]
 		public override IEnumerable<Show> Shows
 		{
 			get => Links?.Select(x => x.Show);
