@@ -1,6 +1,9 @@
 <div class="container-fluid justify-content-center" *ngIf="this.sortEnabled">
-	<button mat-icon-button matTooltipPosition="below" matTooltip="Filter">
-		<mat-icon>filter_list</mat-icon>
+	<button mat-icon-button matTooltipPosition="below" matTooltip="Filter" [matMenuTriggerFor]="filterMenu">
+		<mat-icon [matBadge]="this.filters.length.toString()" [matBadgeHidden]="this.filters.length == 0"
+		          matBadgeColor="warn" matBadgeSize="small">
+			filter_list
+		</mat-icon>
 	</button>
 	<button mat-button matTooltipPosition="below" matTooltip="Sort" [matMenuTriggerFor]="sortMenu">
 		<mat-icon>sort</mat-icon> Sort by {{this.sortType}}
@@ -8,6 +11,12 @@
 		<i *ngIf="!this.sortUp" class="material-icons arrow">arrow_downward</i>
 	</button>
 </div>
+
+<mat-menu #filterMenu="matMenu">
+	<mat-chip-list>
+		<mat-chip *ngFor="let genre of this.genres">{{genre.name}}</mat-chip>
+	</mat-chip-list>
+</mat-menu>
 
 <mat-menu #sortMenu="matMenu">
 	<div *ngFor="let type of this.sortKeys">

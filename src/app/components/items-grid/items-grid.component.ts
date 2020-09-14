@@ -1,12 +1,14 @@
 import {Component, Input} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {DomSanitizer} from '@angular/platform-browser';
+import { Genre } from "../../../models/resources/genre";
 import {LibraryItem} from "../../../models/resources/library-item";
 import {Page} from "../../../models/page";
 import {HttpClient} from "@angular/common/http";
 import {Show, ShowRole} from "../../../models/resources/show";
 import {Collection} from "../../../models/resources/collection";
 import {ItemsUtils} from "../../misc/items-utils";
+import { PreLoaderService } from "../../services/pre-loader.service";
 
 @Component({
 	selector: 'app-items-grid',
@@ -20,14 +22,21 @@ export class ItemsGridComponent
 	sortType: string = "title";
 	sortKeys: string[] = ["title", "start year", "end year"]
 	sortUp: boolean = true;
+	filters: string[] = [];
+	genres: Genre[];
 
 	constructor(private route: ActivatedRoute,
 	            private sanitizer: DomSanitizer,
+	            private loader: PreLoaderService,
 	            public client: HttpClient)
 	{
 		this.route.data.subscribe((data) =>
 		{
 			this.page = data.items;
+		});
+		this.loader.load<Genre>("/api/genres?limit=0").subscribe(data =>
+		{
+			this.genres = data;
 		});
 	}
 

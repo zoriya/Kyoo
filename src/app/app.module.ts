@@ -40,6 +40,7 @@ import {MatAutocompleteModule} from "@angular/material/autocomplete";
 import {MatExpansionModule} from "@angular/material/expansion";
 import {InfiniteScrollModule} from "ngx-infinite-scroll";
 import {ShowGridComponent} from "./components/show-grid/show-grid.component";
+import {MatBadgeModule} from "@angular/material/badge";
 
 
 @NgModule({
@@ -87,7 +88,8 @@ import {ShowGridComponent} from "./components/show-grid/show-grid.component";
 		MatChipsModule,
 		MatAutocompleteModule,
 		MatExpansionModule,
-		InfiniteScrollModule
+		InfiniteScrollModule,
+		MatBadgeModule
 	],
 	bootstrap: [AppComponent]
 })
