@@ -22,8 +22,8 @@ export class ItemsGridComponent
 	sortType: string = "title";
 	sortKeys: string[] = ["title", "start year", "end year"]
 	sortUp: boolean = true;
-	filters: string[] = [];
-	genres: Genre[];
+	filters: {genres: Genre[]} = {genres: []};
+	genres: Genre[] = [];
 
 	constructor(private route: ActivatedRoute,
 	            private sanitizer: DomSanitizer,
@@ -38,6 +38,11 @@ export class ItemsGridComponent
 		{
 			this.genres = data;
 		});
+	}
+
+	getFilterCount()
+	{
+		return this.filters.genres.length;
 	}
 
 	getThumb(slug: string)

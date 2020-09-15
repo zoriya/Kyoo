@@ -1,6 +1,6 @@
 <div class="container-fluid justify-content-center" *ngIf="this.sortEnabled">
 	<button mat-icon-button matTooltipPosition="below" matTooltip="Filter" [matMenuTriggerFor]="filterMenu">
-		<mat-icon [matBadge]="this.filters.length.toString()" [matBadgeHidden]="this.filters.length == 0"
+		<mat-icon [matBadge]="getFilterCount().toString()" [matBadgeHidden]="getFilterCount() == 0"
 		          matBadgeColor="warn" matBadgeSize="small">
 			filter_list
 		</mat-icon>
@@ -14,7 +14,14 @@
 
 <mat-menu #filterMenu="matMenu">
 	<mat-chip-list>
-		<mat-chip *ngFor="let genre of this.genres">{{genre.name}}</mat-chip>
+		<!--suppress AngularInvalidExpressionResultType ('default' color is valid for mat-chip)-->
+		<mat-chip *ngFor="let genre of this.genres"
+		          [color]="this.filters.genres.includes(genre) ? 'accent' : 'default'" selected
+		          (click)="this.filters.genres.includes(genre)
+		          	? this.filters.genres.pop(genre)
+		          	: this.filters.genres.push(genre)">
+			{{genre.name}}
+		</mat-chip>
 	</mat-chip-list>
 </mat-menu>
 
