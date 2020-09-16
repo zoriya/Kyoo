@@ -18,7 +18,7 @@
 		<mat-chip *ngFor="let genre of this.genres"
 		          [color]="this.filters.genres.includes(genre) ? 'accent' : 'default'" selected
 		          (click)="this.filters.genres.includes(genre)
-		          	? this.filters.genres.pop(genre)
+		          	? this.filters.genres.splice(this.filters.genres.indexOf(genre), 1)
 		          	: this.filters.genres.push(genre)">
 			{{genre.name}}
 		</mat-chip>
