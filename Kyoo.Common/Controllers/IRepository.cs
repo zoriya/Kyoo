@@ -75,7 +75,7 @@ namespace Kyoo.Controllers
 		}
 	}
 	
-	public interface IRepository<T> : IDisposable, IAsyncDisposable where T : IResource
+	public interface IRepository<T> : IDisposable, IAsyncDisposable where T : class, IResource
 	{
 		Task<T> Get(int id);
 		Task<T> Get(string slug);
@@ -93,11 +93,11 @@ namespace Kyoo.Controllers
 		
 		Task<T> Create([NotNull] T obj);
 		Task<T> CreateIfNotExists([NotNull] T obj);
-		Task<T> CreateIfNotExists([NotNull] T obj, bool silentFail)
+		async Task<T> CreateIfNotExists([NotNull] T obj, bool silentFail)
 		{
 			try
 			{
-				return CreateIfNotExists(obj);
+				return await CreateIfNotExists(obj);
 			}
 			catch
 			{
