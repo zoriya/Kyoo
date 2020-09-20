@@ -13,26 +13,30 @@
 </div>
 
 <mat-menu #filterMenu="matMenu" class="big-panel">
-	<h4><b>Genres</b></h4>
-	<mat-chip-list>
-		<!--suppress AngularInvalidExpressionResultType ('default' color is valid for mat-chip)-->
-		<mat-chip *ngFor="let genre of this.genres"
-		          [color]="this.filters.genres.includes(genre) ? 'accent' : 'default'" selected
-		          (click)="this.addFilter('genres', genre)">
-			{{genre.name}}
-		</mat-chip>
-	</mat-chip-list>
+	<ng-container *ngIf="this.genres.length > 0">
+		<h4><b>Genres</b></h4>
+		<mat-chip-list>
+			<!--suppress AngularInvalidExpressionResultType ('default' color is valid for mat-chip)-->
+			<mat-chip *ngFor="let genre of this.genres"
+			          [color]="this.filters.genres.includes(genre) ? 'accent' : 'default'" selected
+			          (click)="this.addFilter('genres', genre)">
+				{{genre.name}}
+			</mat-chip>
+		</mat-chip-list>
+	</ng-container>
 
-	<br/>
-	<h4><b>Studios</b></h4>
-	<mat-chip-list>
-		<!--suppress AngularInvalidExpressionResultType ('default' color is valid for mat-chip)-->
-		<mat-chip *ngFor="let studio of this.studios"
-		          [color]="this.filters.studio == studio ? 'accent' : 'default'" selected
-		          (click)="this.addFilter('studio', studio, false)">
-		{{studio.name}}
-		</mat-chip>
-	</mat-chip-list>
+	<ng-container *ngIf="this.studios.length > 0">
+		<br/>
+		<h4><b>Studios</b></h4>
+		<mat-chip-list>
+			<!--suppress AngularInvalidExpressionResultType ('default' color is valid for mat-chip)-->
+			<mat-chip *ngFor="let studio of this.studios"
+			          [color]="this.filters.studio == studio ? 'accent' : 'default'" selected
+			          (click)="this.addFilter('studio', studio, false)">
+			{{studio.name}}
+			</mat-chip>
+		</mat-chip-list>
+	</ng-container>
 </mat-menu>
 
 <mat-menu #sortMenu="matMenu">
