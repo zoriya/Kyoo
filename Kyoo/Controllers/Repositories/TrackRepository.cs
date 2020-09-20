@@ -75,7 +75,7 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 		
-		protected override Task Validate(Track ressource)
+		protected override Task Validate(Track resource)
 		{
 			return Task.CompletedTask;
 		}

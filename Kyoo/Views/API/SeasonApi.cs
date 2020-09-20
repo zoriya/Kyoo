@@ -40,12 +40,12 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Episode> ressources = await _libraryManager.GetEpisodes(
+				ICollection<Episode> resources = await _libraryManager.GetEpisodes(
 					ApiHelper.ParseWhere<Episode>(where, x => x.SeasonID == seasonID),
 					new Sort<Episode>(sortBy),
 					new Pagination(limit, afterID));
 
-				return Page(ressources, limit);
+				return Page(resources, limit);
 			}
 			catch (ItemNotFound)
 			{
@@ -73,13 +73,13 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Episode> ressources = await _libraryManager.GetEpisodes(
+				ICollection<Episode> resources = await _libraryManager.GetEpisodes(
 					ApiHelper.ParseWhere<Episode>(where, x => x.Show.Slug == showSlug 
 					                                          && x.SeasonNumber == seasonNumber),
 					new Sort<Episode>(sortBy),
 					new Pagination(limit, afterID));
 
-				return Page(ressources, limit);
+				return Page(resources, limit);
 			}
 			catch (ItemNotFound)
 			{
@@ -107,12 +107,12 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Episode> ressources = await _libraryManager.GetEpisodes(
+				ICollection<Episode> resources = await _libraryManager.GetEpisodes(
 					ApiHelper.ParseWhere<Episode>(where, x => x.ShowID == showID && x.SeasonNumber == seasonNumber),
 					new Sort<Episode>(sortBy),
 					new Pagination(limit, afterID));
 
-				return Page(ressources, limit);
+				return Page(resources, limit);
 			}
 			catch (ItemNotFound)
 			{

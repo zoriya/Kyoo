@@ -94,17 +94,17 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 
-		protected override async Task Validate(Season obj)
+		protected override async Task Validate(Season resource)
 		{
-			if (obj.ShowID <= 0)
-				throw new InvalidOperationException($"Can't store a season not related to any show (showID: {obj.ShowID}).");
+			if (resource.ShowID <= 0)
+				throw new InvalidOperationException($"Can't store a season not related to any show (showID: {resource.ShowID}).");
 
-			await base.Validate(obj);
+			await base.Validate(resource);
 			
-			if (obj.ExternalIDs != null)
+			if (resource.ExternalIDs != null)
 			{
-				foreach (MetadataID link in obj.ExternalIDs)
-					link.Provider = await _providers.CreateIfNotExists(link.Provider);
+				foreach (MetadataID link in resource.ExternalIDs)
+					link.Provider = await _providers.CreateIfNotExists(link.Provider, true);
 			}
 		}
 		

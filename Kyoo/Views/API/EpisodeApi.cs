@@ -82,12 +82,12 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Track> ressources = await _libraryManager.GetTracks(
+				ICollection<Track> resources = await _libraryManager.GetTracks(
 					ApiHelper.ParseWhere<Track>(where, x => x.Episode.ID == episodeID),
 					new Sort<Track>(sortBy),
 					new Pagination(limit, afterID));
 
-				return Page(ressources, limit);
+				return Page(resources, limit);
 			}
 			catch (ItemNotFound)
 			{
@@ -116,14 +116,14 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Track> ressources = await _libraryManager.GetTracks(
+				ICollection<Track> resources = await _libraryManager.GetTracks(
 					ApiHelper.ParseWhere<Track>(where, x => x.Episode.ShowID == showID 
 					                                        && x.Episode.SeasonNumber == seasonNumber
 					                                        && x.Episode.EpisodeNumber == episodeNumber),
 					new Sort<Track>(sortBy),
 					new Pagination(limit, afterID));
 
-				return Page(ressources, limit);
+				return Page(resources, limit);
 			}
 			catch (ItemNotFound)
 			{
@@ -152,13 +152,13 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Track> ressources = await _libraryManager.GetTracks(ApiHelper.ParseWhere<Track>(where, x => x.Episode.Show.Slug == showSlug 
+				ICollection<Track> resources = await _libraryManager.GetTracks(ApiHelper.ParseWhere<Track>(where, x => x.Episode.Show.Slug == showSlug 
 						&& x.Episode.SeasonNumber == seasonNumber
 						&& x.Episode.EpisodeNumber == episodeNumber),
 					new Sort<Track>(sortBy),
 					new Pagination(limit, afterID));
 
-				return Page(ressources, limit);
+				return Page(resources, limit);
 			}
 			catch (ItemNotFound)
 			{

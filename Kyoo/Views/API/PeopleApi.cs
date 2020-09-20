@@ -73,12 +73,12 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<ShowRole> ressources = await _libraryManager.GetRolesFromPeople(slug,
+				ICollection<ShowRole> resources = await _libraryManager.GetRolesFromPeople(slug,
 					ApiHelper.ParseWhere<ShowRole>(where),
 					new Sort<ShowRole>(sortBy),
 					new Pagination(limit, afterID));
 
-				return Page(ressources, limit);
+				return Page(resources, limit);
 			}
 			catch (ItemNotFound)
 			{

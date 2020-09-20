@@ -138,7 +138,7 @@ namespace Kyoo.Controllers
 			T old = await Get(edited.Slug);
 
 			if (old == null)
-				throw new ItemNotFound($"No ressource found with the slug {edited.Slug}.");
+				throw new ItemNotFound($"No resource found with the slug {edited.Slug}.");
 			
 			if (resetOld)
 				Utility.Nullify(old);
@@ -148,34 +148,49 @@ namespace Kyoo.Controllers
 			return old;
 		}
 		
-		protected virtual Task Validate(T ressource)
+		protected virtual Task Validate(T resource)
 		{
-			if (ressource.Slug == null)
-				throw new ArgumentException("Ressource can't have null as a slug.");
+			if (string.IsNullOrEmpty(resource.Slug))
+				throw new ArgumentException("Resource can't have null as a slug.");
+			if (int.TryParse(resource.Slug, out int _))
+			{
+				try
+				{
+					MethodInfo setter = typeof(T).GetProperty(nameof(resource.Slug))!.GetSetMethod();
+					if (setter != null)
+						setter.Invoke(resource, new object[] {resource.Slug + '!'});
+					else
+						throw new ArgumentException("Resources slug can't be number only.");
+				}
+				catch
+				{
+					throw new ArgumentException("Resources slug can't be number only.");
+				}
+			}
 			
 			foreach (PropertyInfo property in typeof(T).GetProperties()
 				.Where(x => typeof(IEnumerable).IsAssignableFrom(x.PropertyType) 
 				            && !typeof(string).IsAssignableFrom(x.PropertyType)))
 			{
-				object value = property.GetValue(ressource);
+				object value = property.GetValue(resource);
 				if (value is ICollection || value == null)
 					continue;
 				value = Utility.RunGenericMethod(typeof(Enumerable), "ToList", Utility.GetEnumerableType((IEnumerable)value), value);
-				property.SetValue(ressource, value);
+				property.SetValue(resource, value);
 			}
 			return Task.CompletedTask;
 		}
 		
 		public virtual async Task Delete(int id)
 		{
-			T ressource = await Get(id);
-			await Delete(ressource);
+			T resource = await Get(id);
+			await Delete(resource);
 		}
 
 		public virtual async Task Delete(string slug)
 		{
-			T ressource = await Get(slug);
-			await Delete(ressource);
+			T resource = await Get(slug);
+			await Delete(resource);
 		}
 
 		public abstract Task Delete(T obj);

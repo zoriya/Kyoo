@@ -63,20 +63,20 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 
-		protected override async Task Validate(LibraryDE obj)
+		protected override async Task Validate(LibraryDE resource)
 		{
-			if (string.IsNullOrEmpty(obj.Slug))
+			if (string.IsNullOrEmpty(resource.Slug))
 				throw new ArgumentException("The library's slug must be set and not empty");
-			if (string.IsNullOrEmpty(obj.Name))
+			if (string.IsNullOrEmpty(resource.Name))
 				throw new ArgumentException("The library's name must be set and not empty");
-			if (obj.Paths == null || !obj.Paths.Any())
+			if (resource.Paths == null || !resource.Paths.Any())
 				throw new ArgumentException("The library should have a least one path.");
 			
-			await base.Validate(obj);
+			await base.Validate(resource);
 			
-			if (obj.ProviderLinks != null)
-				foreach (ProviderLink link in obj.ProviderLinks)
-					link.Provider = await _providers.CreateIfNotExists(link.Provider);
+			if (resource.ProviderLinks != null)
+				foreach (ProviderLink link in resource.ProviderLinks)
+					link.Provider = await _providers.CreateIfNotExists(link.Provider, true);
 		}
 
 		public override async Task Delete(LibraryDE obj)

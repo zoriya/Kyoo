@@ -93,6 +93,19 @@ namespace Kyoo.Controllers
 		
 		Task<T> Create([NotNull] T obj);
 		Task<T> CreateIfNotExists([NotNull] T obj);
+		Task<T> CreateIfNotExists([NotNull] T obj, bool silentFail)
+		{
+			try
+			{
+				return CreateIfNotExists(obj);
+			}
+			catch
+			{
+				if (!silentFail)
+					throw;
+				return null;
+			}
+		}
 		Task<T> Edit([NotNull] T edited, bool resetOld);
 		
 		Task Delete(int id);

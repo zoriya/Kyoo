@@ -94,7 +94,7 @@ namespace Kyoo.Controllers
 		public override Task<LibraryItem> Create(LibraryItem obj) => throw new InvalidOperationException();
 		public override Task<LibraryItem> CreateIfNotExists(LibraryItem obj) => throw new InvalidOperationException();
 		public override Task<LibraryItem> Edit(LibraryItem obj, bool reset) => throw new InvalidOperationException();
-		protected override Task Validate(LibraryItem obj) => throw new InvalidOperationException();
+		protected override Task Validate(LibraryItem resource) => throw new InvalidOperationException();
 		public override Task Delete(int id) => throw new InvalidOperationException();
 		public override Task Delete(string slug) => throw new InvalidOperationException();
 		public override Task Delete(LibraryItem obj) => throw new InvalidOperationException();
