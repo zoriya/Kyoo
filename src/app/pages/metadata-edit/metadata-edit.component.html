@@ -1,3 +1,4 @@
+<!--suppress TypeScriptUnresolvedVariable ($event.target.value does exist) -->
 <h2 mat-dialog-title>Editing metadata of {{this.show.title}}</h2>
 <div matDialogContent class="pb-4">
     <mat-accordion>
@@ -11,7 +12,7 @@
                     <mat-label>Title</mat-label>
                     <input matInput [(ngModel)]="this.show.title" name="title">
                 </mat-form-field>
-        
+
                 <mat-form-field class="w-100">
                     <mat-label>Aliases</mat-label>
                     <mat-chip-list #aliasList>
@@ -22,7 +23,7 @@
                         <input #aliasInput placeholder="New alias..." [matChipInputFor]="aliasList" (matChipInputTokenEnd)="addAlias($event)" />
                     </mat-chip-list>
                 </mat-form-field>
-            
+
                 <mat-form-field class="w-100">
                     <mat-label>Overview</mat-label>
                     <textarea matInput [(ngModel)]="this.show.overview" name="overview"></textarea>
@@ -69,7 +70,8 @@
         
                 <mat-form-field class="w-100">
                     <mat-label>Studio</mat-label>
-                    <input matInput [value]="this.show.studio?.name" (input)="this.show.studio = {slug: null, name: $event.target.value};"
+                    <input matInput [value]="this.show.studio?.name"
+                           (input)="this.show.studio = {id: 0, slug: null, name: $event.target.value};"
                            [matAutocomplete]="studioAuto" name="studio">
                     <mat-autocomplete #studioAuto="matAutocomplete"  (optionSelected)="this.show.studio = $event.option.value">
                         <mat-option *ngFor="let studio of this.allStudios" [value]="studio">
