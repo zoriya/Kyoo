@@ -12,7 +12,7 @@ using Microsoft.Extensions.Configuration;
 namespace Kyoo.CommonApi
 {
 	[ApiController]
-	public class CrudApi<T> : ControllerBase where T : IResource
+	public class CrudApi<T> : ControllerBase where T : class, IResource
 	{
 		private readonly IRepository<T> _repository;
 		private readonly string _baseURL;
