@@ -10,28 +10,28 @@ namespace Kyoo.Models
 {
 	public class ShowDE : Show
 	{
-		[JsonIgnore] [NotMergable] public virtual IEnumerable<GenreLink> GenreLinks { get; set; }
+		[JsonIgnore] [NotMergable] public virtual ICollection<GenreLink> GenreLinks { get; set; }
 		[ExpressionRewrite(nameof(GenreLinks), nameof(GenreLink.Genre))]
 		public override IEnumerable<Genre> Genres
 		{
 			get => GenreLinks?.Select(x => x.Genre);
-			set => GenreLinks = value?.Select(x => new GenreLink(this, x));
+			set => GenreLinks = value?.Select(x => new GenreLink(this, x)).ToList();
 		}
 		
-		[JsonIgnore] [NotMergable] public virtual IEnumerable<LibraryLink> LibraryLinks { get; set; }
+		[JsonIgnore] [NotMergable] public virtual ICollection<LibraryLink> LibraryLinks { get; set; }
 		[ExpressionRewrite(nameof(LibraryLinks), nameof(LibraryLink.Library))]
 		public override IEnumerable<Library> Libraries
 		{
 			get => LibraryLinks?.Select(x => x.Library);
-			set => LibraryLinks = value?.Select(x => new LibraryLink(x, this));
+			set => LibraryLinks = value?.Select(x => new LibraryLink(x, this)).ToList();
 		}
 		
-		[JsonIgnore] [NotMergable] public virtual IEnumerable<CollectionLink> CollectionLinks { get; set; }
+		[JsonIgnore] [NotMergable] public virtual ICollection<CollectionLink> CollectionLinks { get; set; }
 		[ExpressionRewrite(nameof(CollectionLinks), nameof(CollectionLink.Collection))]
 		public override IEnumerable<Collection> Collections
 		{
 			get => CollectionLinks?.Select(x => x.Collection);
-			set => CollectionLinks = value?.Select(x => new CollectionLink(x, this));
+			set => CollectionLinks = value?.Select(x => new CollectionLink(x, this)).ToList();
 		}
 
 		public ShowDE() {}
