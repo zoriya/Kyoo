@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using Kyoo.Models;
 
 namespace Kyoo.CommonApi
 {
@@ -50,7 +51,7 @@ namespace Kyoo.CommonApi
 				MemberExpression propertyExpr = Expression.Property(param, property);
 
 				ConstantExpression valueExpr = null;
-				if (operand != "ctn")
+				if (operand != "ctn" && !typeof(IResource).IsAssignableFrom(propertyExpr.Type))
 				{
 					Type propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
 					object val = string.IsNullOrEmpty(value) || value.Equals("null", StringComparison.OrdinalIgnoreCase)
@@ -61,7 +62,9 @@ namespace Kyoo.CommonApi
 
 				Expression condition = operand switch
 				{
-					"eq" => Expression.Equal(propertyExpr, valueExpr!),
+					"eq" when valueExpr == null => ResourceEqual(propertyExpr, value),
+					"not" when valueExpr == null => ResourceEqual(propertyExpr, value, true),
+					"eq" => Expression.Equal(propertyExpr, valueExpr),
 					"not" => Expression.NotEqual(propertyExpr, valueExpr!),
 					"lt" => StringCompatibleExpression(Expression.LessThan, propertyExpr, valueExpr),
 					"lte" => StringCompatibleExpression(Expression.LessThanOrEqual, propertyExpr, valueExpr),
@@ -81,6 +84,26 @@ namespace Kyoo.CommonApi
 			return Expression.Lambda<Func<T, bool>>(expression, param);
 		}
 
+		private static Expression ResourceEqual(Expression parameter, string value, bool notEqual = false)
+		{
+			MemberExpression field;
+			ConstantExpression valueConst;
+			if (int.TryParse(value, out int id))
+			{
+				field = Expression.Property(parameter, "ID");
+				valueConst = Expression.Constant(id);
+			}
+			else
+			{
+				field = Expression.Property(parameter, "Slug");
+				valueConst = Expression.Constant(value);
+			}
+
+			if (notEqual)
+				return Expression.NotEqual(field, valueConst);
+			return Expression.Equal(field, valueConst);
+		}
+		
 		private static Expression ContainsResourceExpression(MemberExpression xProperty, string value)
 		{
 			// x => x.PROPERTY.Any(y => y.Slug == value)
@@ -88,21 +111,8 @@ namespace Kyoo.CommonApi
 			ParameterExpression y = Expression.Parameter(xProperty.Type.GenericTypeArguments.First(), "y");
 			foreach (string val in value.Split(','))
 			{
-				MemberExpression yProperty;
-				ConstantExpression yValue;
-				if (int.TryParse(val, out int id))
-				{
-					yProperty = Expression.Property(y, "ID");
-					yValue = Expression.Constant(id);
-				}
-				else
-				{
-					yProperty = Expression.Property(y, "Slug");
-					yValue = Expression.Constant(val);
-				}
-
-				LambdaExpression lambda = Expression.Lambda(Expression.Equal(yProperty, yValue), y);
-				Expression iteration = Expression.Call(typeof(Enumerable), "Any", xProperty.Type.GenericTypeArguments, 
+				LambdaExpression lambda = Expression.Lambda(ResourceEqual(y, val), y);
+				Expression iteration = Expression.Call(typeof(Enumerable), "Any", xProperty.Type.GenericTypeArguments,
 					xProperty, lambda);
 
 				if (ret == null)
