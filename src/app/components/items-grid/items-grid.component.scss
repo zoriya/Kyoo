@@ -20,7 +20,7 @@ button
 
 .show
 {
-	width: 28%;
+	width: 27%;
 	min-width: 120px;
 	max-width: 168px;
 	list-style: none;
@@ -92,5 +92,25 @@ button
 	&:host-context(.hoverEnabled) &:hover
 	{
 		cursor: pointer;
+	}
+}
+
+::ng-deep .big-panel
+{
+	width: 50vw !important;
+	max-width: none !important;
+	margin-left: -20vw;
+	margin-right: -20vw;
+	overflow-x: hidden;
+
+	> div
+	{
+		text-align: center;
+
+		> mat-chip-list > div
+		{
+			justify-content: center;
+			margin: 0;
+		}
 	}
 }

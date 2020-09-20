@@ -12,7 +12,8 @@
 	</button>
 </div>
 
-<mat-menu #filterMenu="matMenu">
+<mat-menu #filterMenu="matMenu" class="big-panel">
+	<h4><b>Genres</b></h4>
 	<mat-chip-list>
 		<!--suppress AngularInvalidExpressionResultType ('default' color is valid for mat-chip)-->
 		<mat-chip *ngFor="let genre of this.genres"
@@ -21,6 +22,19 @@
 		          	? this.filters.genres.splice(this.filters.genres.indexOf(genre), 1)
 		          	: this.filters.genres.push(genre)">
 			{{genre.name}}
+		</mat-chip>
+	</mat-chip-list>
+
+	<br/>
+	<h4><b>Studios</b></h4>
+	<mat-chip-list>
+		<!--suppress AngularInvalidExpressionResultType ('default' color is valid for mat-chip)-->
+		<mat-chip *ngFor="let studio of this.studios"
+		          [color]="this.filters.studios.includes(studio) ? 'accent' : 'default'" selected
+		          (click)="this.filters.studios.includes(studio)
+		          	? this.filters.studios.splice(this.filters.studios.indexOf(studio), 1)
+		          	: this.filters.studios.push(studio)">
+			{{studio.name}}
 		</mat-chip>
 	</mat-chip-list>
 </mat-menu>

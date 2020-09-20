@@ -7,6 +7,7 @@ import {Page} from "../../../models/page";
 import {HttpClient} from "@angular/common/http";
 import {Show, ShowRole} from "../../../models/resources/show";
 import {Collection} from "../../../models/resources/collection";
+import { Studio } from "../../../models/resources/studio";
 import {ItemsUtils} from "../../misc/items-utils";
 import { PreLoaderService } from "../../services/pre-loader.service";
 
@@ -22,8 +23,9 @@ export class ItemsGridComponent
 	sortType: string = "title";
 	sortKeys: string[] = ["title", "start year", "end year"]
 	sortUp: boolean = true;
-	filters: {genres: Genre[]} = {genres: []};
+	filters: {genres: Genre[], studios: Studio[]} = {genres: [], studios: []};
 	genres: Genre[] = [];
+	studios: Studio[] = [];
 
 	constructor(private route: ActivatedRoute,
 	            private sanitizer: DomSanitizer,
@@ -38,11 +40,15 @@ export class ItemsGridComponent
 		{
 			this.genres = data;
 		});
+		this.loader.load<Studio>("/api/studios?limit=0").subscribe(data =>
+		{
+			this.studios = data;
+		});
 	}
 
 	getFilterCount()
 	{
-		return this.filters.genres.length;
+		return this.filters.genres.length + this.filters.studios.length;
 	}
 
 	getThumb(slug: string)
