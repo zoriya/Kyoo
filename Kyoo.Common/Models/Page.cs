@@ -35,7 +35,7 @@ namespace Kyoo.Models
 			Items = items;
 			This = url + query.ToQueryString();
 
-			if (items.Count == limit)
+			if (items.Count == limit && limit > 0)
 			{
 				query["afterID"] = items.Last().ID.ToString();
 				Next = url + query.ToQueryString();
