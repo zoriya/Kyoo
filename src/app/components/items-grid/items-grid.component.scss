@@ -97,11 +97,21 @@ button
 
 ::ng-deep .big-panel
 {
-	width: 50vw !important;
+	width: 80vw !important;
 	max-width: none !important;
 	margin-left: -20vw;
 	margin-right: -20vw;
 	overflow-x: hidden;
+
+	@include media-breakpoint-up(sm)
+	{
+		width: 70vw !important;
+	}
+
+	@include media-breakpoint-up(md)
+	{
+		width: 50vw !important;
+	}
 
 	> div
 	{
