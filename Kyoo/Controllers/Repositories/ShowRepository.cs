@@ -84,9 +84,17 @@ namespace Kyoo.Controllers
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
+			
 			if (obj.GenreLinks != null)
+			{
 				foreach (GenreLink entry in obj.GenreLinks)
+				{
+					if (!(entry.Genre is GenreDE))
+						entry.Genre = new GenreDE(entry.Genre);
 					_database.Entry(entry).State = EntityState.Added;
+				}
+			}
+
 			if (obj.People != null)
 				foreach (PeopleRole entry in obj.People)
 					_database.Entry(entry).State = EntityState.Added;

@@ -71,7 +71,7 @@ namespace Kyoo
 			if (isEqual == null)
 				return first.Concat(second).ToList();
 			List<T> list = first.ToList();
-			return list.Concat(second.Where(x => !list.Any(y => isEqual(x, y)))).ToList();
+			return list.Concat(second.Where(x => !list.Any(y => isEqual(x, y))));
 		}
 
 		public static T Assign<T>(T first, T second)
