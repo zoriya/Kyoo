@@ -40,12 +40,12 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Show> ressources = await _libraryManager.GetShows(
+				ICollection<Show> resources = await _libraryManager.GetShows(
 					ApiHelper.ParseWhere<Show>(where, x => x.Collections.Any(y => y.ID == id)),
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
-				return Page(ressources, limit);
+				return Page(resources, limit);
 			}
 			catch (ItemNotFound)
 			{
@@ -72,12 +72,12 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Show> ressources = await _libraryManager.GetShows(
+				ICollection<Show> resources = await _libraryManager.GetShows(
 					ApiHelper.ParseWhere<Show>(where, x => x.Collections.Any(y => y.Slug == slug)),
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
-				return Page(ressources, limit);
+				return Page(resources, limit);
 			}
 			catch (ItemNotFound)
 			{
@@ -104,12 +104,12 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Library> ressources = await _libraryManager.GetLibraries(
+				ICollection<Library> resources = await _libraryManager.GetLibraries(
 					ApiHelper.ParseWhere<Library>(where, x => x.Collections.Any(y => y.ID == id)),
 					new Sort<Library>(sortBy),
 					new Pagination(limit, afterID));
 
-				return Page(ressources, limit);
+				return Page(resources, limit);
 			}
 			catch (ItemNotFound)
 			{
@@ -136,12 +136,12 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Library> ressources = await _libraryManager.GetLibraries(
+				ICollection<Library> resources = await _libraryManager.GetLibraries(
 					ApiHelper.ParseWhere<Library>(where, x => x.Collections.Any(y => y.Slug == slug)),
 					new Sort<Library>(sortBy),
 					new Pagination(limit, afterID));
 
-				return Page(ressources, limit);
+				return Page(resources, limit);
 			}
 			catch (ItemNotFound)
 			{

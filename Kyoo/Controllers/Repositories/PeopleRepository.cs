@@ -69,13 +69,13 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 
-		protected override async Task Validate(People obj)
+		protected override async Task Validate(People resource)
 		{
-			await base.Validate(obj);
+			await base.Validate(resource);
 			
-			if (obj.ExternalIDs != null)
-				foreach (MetadataID link in obj.ExternalIDs)
-					link.Provider = await _providers.CreateIfNotExists(link.Provider);
+			if (resource.ExternalIDs != null)
+				foreach (MetadataID link in resource.ExternalIDs)
+					link.Provider = await _providers.CreateIfNotExists(link.Provider, true);
 		}
 		
 		public override async Task Delete(People obj)

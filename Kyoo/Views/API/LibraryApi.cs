@@ -28,9 +28,9 @@ namespace Kyoo.Api
 		}
 
 		[Authorize(Policy = "Admin")]
-		public override async Task<ActionResult<Library>> Create(Library ressource)
+		public override async Task<ActionResult<Library>> Create(Library resource)
 		{
-			ActionResult<Library> result = await base.Create(ressource);
+			ActionResult<Library> result = await base.Create(resource);
 			if (result.Value != null)
 				_taskManager.StartTask("scan", result.Value.Slug);
 			return result;
@@ -51,12 +51,12 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Show> ressources = await _libraryManager.GetShows(
+				ICollection<Show> resources = await _libraryManager.GetShows(
 					ApiHelper.ParseWhere<Show>(where, x => x.Libraries.Any(y => y.ID == id)),
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
-				return Page(ressources, limit);
+				return Page(resources, limit);
 			}
 			catch (ItemNotFound)
 			{
@@ -83,12 +83,12 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Show> ressources = await _libraryManager.GetShows(
+				ICollection<Show> resources = await _libraryManager.GetShows(
 					ApiHelper.ParseWhere<Show>(where, x => x.Libraries.Any(y => y.Slug == slug)),
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
-				return Page(ressources, limit);
+				return Page(resources, limit);
 			}
 			catch (ItemNotFound)
 			{
@@ -115,12 +115,12 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Collection> ressources = await _libraryManager.GetCollections(
+				ICollection<Collection> resources = await _libraryManager.GetCollections(
 					ApiHelper.ParseWhere<Collection>(where, x => x.Libraries.Any(y => y.ID == id)),
 					new Sort<Collection>(sortBy),
 					new Pagination(limit, afterID));
 
-				return Page(ressources, limit);
+				return Page(resources, limit);
 			}
 			catch (ItemNotFound)
 			{
@@ -147,12 +147,12 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<Collection> ressources = await _libraryManager.GetCollections(
+				ICollection<Collection> resources = await _libraryManager.GetCollections(
 					ApiHelper.ParseWhere<Collection>(where, x => x.Libraries.Any(y => y.Slug == slug)),
 					new Sort<Collection>(sortBy),
 					new Pagination(limit, afterID));
 
-				return Page(ressources, limit);
+				return Page(resources, limit);
 			}
 			catch (ItemNotFound)
 			{
@@ -179,12 +179,12 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<LibraryItem> ressources = await _libraryManager.GetItemsFromLibrary(id,
+				ICollection<LibraryItem> resources = await _libraryManager.GetItemsFromLibrary(id,
 					ApiHelper.ParseWhere<LibraryItem>(where),
 					new Sort<LibraryItem>(sortBy),
 					new Pagination(limit, afterID));
 
-				return Page(ressources, limit);
+				return Page(resources, limit);
 			}
 			catch (ItemNotFound)
 			{
@@ -211,12 +211,12 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<LibraryItem> ressources = await _libraryManager.GetItemsFromLibrary(slug,
+				ICollection<LibraryItem> resources = await _libraryManager.GetItemsFromLibrary(slug,
 					ApiHelper.ParseWhere<LibraryItem>(where),
 					new Sort<LibraryItem>(sortBy),
 					new Pagination(limit, afterID));
 
-				return Page(ressources, limit);
+				return Page(resources, limit);
 			}
 			catch (ItemNotFound)
 			{

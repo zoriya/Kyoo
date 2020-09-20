@@ -40,12 +40,12 @@ namespace Kyoo.Api
 
 			try
 			{
-				ICollection<LibraryItem> ressources = await _libraryItems.GetAll(
+				ICollection<LibraryItem> resources = await _libraryItems.GetAll(
 					ApiHelper.ParseWhere<LibraryItem>(where),
 					new Sort<LibraryItem>(sortBy),
 					new Pagination(limit, afterID));
 
-				return new Page<LibraryItem>(ressources, 
+				return new Page<LibraryItem>(resources, 
 					_baseURL + Request.Path,
 					Request.Query.ToDictionary(x => x.Key, x => x.Value.ToString(), StringComparer.InvariantCultureIgnoreCase),
 					limit);

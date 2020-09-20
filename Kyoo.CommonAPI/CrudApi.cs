@@ -28,11 +28,11 @@ namespace Kyoo.CommonApi
 		[JsonDetailed]
 		public virtual async Task<ActionResult<T>> Get(int id)
 		{
-			T ressource = await _repository.Get(id);
-			if (ressource == null)
+			T resource = await _repository.Get(id);
+			if (resource == null)
 				return NotFound();
 
-			return ressource;
+			return resource;
 		}
 
 		[HttpGet("{slug}")]
@@ -60,11 +60,11 @@ namespace Kyoo.CommonApi
 
 			try
 			{
-				ICollection<T> ressources = await _repository.GetAll(ApiHelper.ParseWhere<T>(where),
+				ICollection<T> resources = await _repository.GetAll(ApiHelper.ParseWhere<T>(where),
 					new Sort<T>(sortBy),
 					new Pagination(limit, afterID));
 
-				return Page(ressources, limit);
+				return Page(resources, limit);
 			}
 			catch (ArgumentException ex)
 			{
@@ -72,10 +72,10 @@ namespace Kyoo.CommonApi
 			}
 		}
 
-		protected Page<TResult> Page<TResult>(ICollection<TResult> ressources, int limit)
+		protected Page<TResult> Page<TResult>(ICollection<TResult> resources, int limit)
 			where TResult : IResource
 		{
-			return new Page<TResult>(ressources, 
+			return new Page<TResult>(resources, 
 				_baseURL + Request.Path,
 				Request.Query.ToDictionary(x => x.Key, x => x.Value.ToString(), StringComparer.InvariantCultureIgnoreCase),
 				limit);
@@ -83,11 +83,11 @@ namespace Kyoo.CommonApi
 
 		[HttpPost]
 		[Authorize(Policy = "Write")]
-		public virtual async Task<ActionResult<T>> Create([FromBody] T ressource)
+		public virtual async Task<ActionResult<T>> Create([FromBody] T resource)
 		{
 			try
 			{
-				return await _repository.Create(ressource);
+				return await _repository.Create(resource);
 			}
 			catch (ArgumentException ex)
 			{
@@ -95,34 +95,34 @@ namespace Kyoo.CommonApi
 			}
 			catch (DuplicatedItemException)
 			{
-				T existing = await _repository.Get(ressource.Slug);
+				T existing = await _repository.Get(resource.Slug);
 				return Conflict(existing);
 			}
 		}
 		
 		[HttpPut]
 		[Authorize(Policy = "Write")]
-		public virtual async Task<ActionResult<T>> Edit([FromQuery] bool resetOld, [FromBody] T ressource)
+		public virtual async Task<ActionResult<T>> Edit([FromQuery] bool resetOld, [FromBody] T resource)
 		{
-			if (ressource.ID > 0)
-				return await _repository.Edit(ressource, resetOld);
+			if (resource.ID > 0)
+				return await _repository.Edit(resource, resetOld);
 			
-			T old = await _repository.Get(ressource.Slug);
+			T old = await _repository.Get(resource.Slug);
 			if (old == null)
 				return NotFound();
 			
-			ressource.ID = old.ID;
-			return await _repository.Edit(ressource, resetOld);
+			resource.ID = old.ID;
+			return await _repository.Edit(resource, resetOld);
 		}
 
 		[HttpPut("{id:int}")]
 		[Authorize(Policy = "Write")]
-		public virtual async Task<ActionResult<T>> Edit(int id, [FromQuery] bool resetOld, [FromBody] T ressource)
+		public virtual async Task<ActionResult<T>> Edit(int id, [FromQuery] bool resetOld, [FromBody] T resource)
 		{
-			ressource.ID = id;
+			resource.ID = id;
 			try
 			{
-				return await _repository.Edit(ressource, resetOld);
+				return await _repository.Edit(resource, resetOld);
 			}
 			catch (ItemNotFound)
 			{
@@ -132,13 +132,13 @@ namespace Kyoo.CommonApi
 		
 		[HttpPut("{slug}")]
 		[Authorize(Policy = "Write")]
-		public virtual async Task<ActionResult<T>> Edit(string slug, [FromQuery] bool resetOld, [FromBody] T ressource)
+		public virtual async Task<ActionResult<T>> Edit(string slug, [FromQuery] bool resetOld, [FromBody] T resource)
 		{
 			T old = await _repository.Get(slug);
 			if (old == null)
 				return NotFound();
-			ressource.ID = old.ID;
-			return await _repository.Edit(ressource, resetOld);
+			resource.ID = old.ID;
+			return await _repository.Edit(resource, resetOld);
 		}
 
 		[HttpDelete("{id:int}")]

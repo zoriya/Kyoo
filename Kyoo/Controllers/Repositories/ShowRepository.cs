@@ -106,24 +106,24 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 		
-		protected override async Task Validate(ShowDE obj)
+		protected override async Task Validate(ShowDE resource)
 		{
-			await base.Validate(obj);
+			await base.Validate(resource);
 			
-			if (obj.Studio != null)
-				obj.Studio = await _studios.CreateIfNotExists(obj.Studio);
+			if (resource.Studio != null)
+				resource.Studio = await _studios.CreateIfNotExists(resource.Studio, true);
 			
-			if (obj.GenreLinks != null)
-				foreach (GenreLink link in obj.GenreLinks)
-					link.Genre = await _genres.CreateIfNotExists(link.Genre);
+			if (resource.GenreLinks != null)
+				foreach (GenreLink link in resource.GenreLinks)
+					link.Genre = await _genres.CreateIfNotExists(link.Genre, true);
 
-			if (obj.People != null)
-				foreach (PeopleRole link in obj.People)
-					link.People = await _people.CreateIfNotExists(link.People);
+			if (resource.People != null)
+				foreach (PeopleRole link in resource.People)
+					link.People = await _people.CreateIfNotExists(link.People, true);
 
-			if (obj.ExternalIDs != null)
-				foreach (MetadataID link in obj.ExternalIDs)
-					link.Provider = await _providers.CreateIfNotExists(link.Provider);
+			if (resource.ExternalIDs != null)
+				foreach (MetadataID link in resource.ExternalIDs)
+					link.Provider = await _providers.CreateIfNotExists(link.Provider, true);
 		}
 		
 		public async Task AddShowLink(int showID, int? libraryID, int? collectionID)
