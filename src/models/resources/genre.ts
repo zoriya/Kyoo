@@ -1,5 +1,6 @@
-export interface Genre
+import { IResource } from "./resource";
+
+export interface Genre extends IResource
 {
-	slug: string;
 	name: string;
 }

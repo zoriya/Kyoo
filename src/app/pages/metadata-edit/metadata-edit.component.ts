@@ -93,7 +93,7 @@ export class MetadataEditComponent
 	{
 		const input = event.input;
 		const value = event.value;
-		let genre: Genre = {slug: null, name: value};
+		let genre: Genre = {id: 0, slug: null, name: value};
 		
 		this.show.genres.push(genre);
 		if (input)

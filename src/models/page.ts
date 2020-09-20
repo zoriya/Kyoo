@@ -26,4 +26,8 @@ export class Page<T>
 			this.this = x.this;
 		});
 	}
+	changeType(type: string)
+	{
+		return this.first.replace(/\/\w*($|\?)/, `/${type}$1`)
+	}
 }

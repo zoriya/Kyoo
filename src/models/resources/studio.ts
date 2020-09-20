@@ -1,5 +1,6 @@
-export interface Studio
+import { IResource } from "./resource";
+
+export interface Studio extends IResource
 {
-	slug: string;
 	name: string;
 }
