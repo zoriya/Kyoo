@@ -1,12 +1,10 @@
 using System;
 using Kyoo.Models;
 using Microsoft.Extensions.Configuration;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Kyoo.Controllers.TranscoderLink;
-
 #pragma warning disable 4014
 
 namespace Kyoo.Controllers
@@ -27,24 +25,28 @@ namespace Kyoo.Controllers
 				throw new BadTranscoderException();
 		}
 
-		public async Task<Track[]> GetTrackInfo(string path)
+		public Task<Track[]> GetTrackInfo(string path)
 		{
-			return await Task.Run(() =>
+			return Task.Factory.StartNew(() =>
 			{
 				TranscoderAPI.GetTrackInfo(path, out Track[] tracks);
 				return tracks;
-			});
+			}, TaskCreationOptions.LongRunning);
 		}
 
-		public async Task<Track[]> ExtractSubtitles(string path)
+		public Task<Track[]> ExtractSubtitles(string path)
 		{
-			string output = Path.Combine(Path.GetDirectoryName(path), "Subtitles");
+			string dir = Path.GetDirectoryName(path);
+			if (dir == null)
+				throw new ArgumentException("Invalid path.");
+			
+			string output = Path.Combine(dir, "Subtitles");
 			Directory.CreateDirectory(output);
-			return await Task.Run(() => 
+			return Task.Factory.StartNew(() => 
 			{ 
 				TranscoderAPI.ExtractSubtitles(path, output, out Track[] tracks);
 				return tracks;
-			});
+			}, TaskCreationOptions.LongRunning);
 		}
 
 		public async Task<string> Transmux(Episode episode)
@@ -65,11 +67,12 @@ namespace Kyoo.Controllers
 				await Console.Error.WriteLineAsync($"Access to the path {manifest} is denied. Please change your transmux path in the config.");
 				return null;
 			}
-			Task.Run(() => 
+			
+			Task.Factory.StartNew(() => 
 			{ 
 				transmuxFailed = TranscoderAPI.transmux(episode.Path, manifest.Replace('\\', '/'), out playableDuration) != 0;
-			});
-			while (playableDuration < 10 || (!File.Exists(manifest) && !transmuxFailed))
+			}, TaskCreationOptions.LongRunning);
+			while (playableDuration < 10 || !File.Exists(manifest) && !transmuxFailed)
 				await Task.Delay(10);
 			return transmuxFailed ? null : manifest;
 		}

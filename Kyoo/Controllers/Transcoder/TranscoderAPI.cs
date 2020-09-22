@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Linq;
 using System.Runtime.InteropServices;
 using Kyoo.Models;
 using Kyoo.Models.Watch;
@@ -27,8 +25,8 @@ namespace Kyoo.Controllers.TranscoderLink
 		[DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
 		private static extern IntPtr extract_subtitles(string path, string out_path, out int array_length, out int track_count);
 
-		[DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-		private static extern void free_streams(IntPtr stream_ptr);   
+		// [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
+		// private static extern void free_streams(IntPtr stream_ptr);   
 		
 		[DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
 		private static extern void free(IntPtr ptr);
@@ -48,7 +46,7 @@ namespace Kyoo.Controllers.TranscoderLink
 				for (int i = 0; i < arrayLength; i++)
 				{
 					Stream stream = Marshal.PtrToStructure<Stream>(streamsPtr);
-					if (stream.Type != StreamType.Unknow)
+					if (stream!.Type != StreamType.Unknow)
 					{
 						tracks[j] = new Track(stream);
 						j++;
@@ -76,7 +74,7 @@ namespace Kyoo.Controllers.TranscoderLink
 				for (int i = 0; i < arrayLength; i++)
 				{
 					Stream stream = Marshal.PtrToStructure<Stream>(streamsPtr);
-					if (stream.Type != StreamType.Unknow)
+					if (stream!.Type != StreamType.Unknow)
 					{
 						tracks[j] = new Track(stream);
 						j++;
