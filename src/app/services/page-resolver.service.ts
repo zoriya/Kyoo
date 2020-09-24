@@ -7,14 +7,16 @@ import {catchError, map} from 'rxjs/operators';
 import {Page} from "../../models/page";
 import {IResource} from "../../models/resources/resource";
 
-type RouteMapper = (route: ActivatedRouteSnapshot, endpoint: string) => string;
+type RouteMapper = (route: ActivatedRouteSnapshot, endpoint: string, queryParams: [string, string][]) => string;
 
 @Injectable()
 export class PageResolver
 {
 	public static resolvers: any[] = [];
 
-	static forResource<T extends IResource>(resource: string, copyParams: boolean | string[] | RouteMapper = false)
+	static forResource<T extends IResource>(resource: string,
+	                                        copyParams: boolean | string[] | RouteMapper = false,
+	                                        defaultQuery: string = null)
 	{
 		@Injectable()
 		class Resolver implements Resolve<Page<T>>
@@ -25,17 +27,23 @@ export class PageResolver
 
 			resolve(route: ActivatedRouteSnapshot): Page<T> | Observable<Page<T>> | Promise<Page<T>>
 			{
-				let res: string = resource.replace(/:(.*?)(\/|$)/, (x, y) => `${route.paramMap.get(y)}/`);
+				let res: string = resource.replace(/:([^:]*?)(\/|$|&)/, (x, y, z) => `${route.paramMap.get(y)}${z}`);
+				let query: [string, string][] = defaultQuery
+					?.replace(/:([^:]*?)(\/|$|&)/, (x, y, z) => `${route.paramMap.get(y)}${z}`)
+					.split('&')
+					.map(x => x.split('=') as [string, string]);
 				let uri: string;
 				if (typeof copyParams == "function")
-					uri = copyParams(route, res);
+					uri = copyParams(route, res, query);
 				else
 				{
-					let queryParams: [string, string][] = copyParams == true
+					let entries: [string, string][] = copyParams == true
 						? Object.entries(route.queryParams)
 						: Object.entries(route.queryParams).filter(x => copyParams && copyParams.includes(x[0]));
-					let params: string = queryParams.length > 0
-						? '?' + queryParams.map(x => `${x[0]}=${x[1]}`).join('&')
+					if (query)
+						entries.push(...query);
+					let params: string = entries.length > 0
+						? '?' + entries.map(x => `${x[0]}=${x[1]}`).join('&')
 						: "";
 					uri = `api/${res}${params}`;
 				}

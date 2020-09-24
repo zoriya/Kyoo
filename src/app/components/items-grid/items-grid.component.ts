@@ -58,10 +58,12 @@ export class ItemsGridComponent implements OnInit
 		});
 	}
 
-	static routeMapper(route: ActivatedRouteSnapshot, endpoint: string): string
+	static routeMapper(route: ActivatedRouteSnapshot, endpoint: string, query: [string, string][]): string
 	{
 		const filter: string[] = ["genres", "studio"];
 		let queryParams: [string, string][] = Object.entries(route.queryParams).filter(x => filter.includes(x[0]));
+		if (query)
+			queryParams.push(...query)
 		if (queryParams.length > 0)
 			endpoint = "shows";
 

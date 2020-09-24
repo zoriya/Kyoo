@@ -35,6 +35,12 @@ const routes: Routes = [
 		canActivate: [AuthGuard.forPermissions("read")]
 	},
 
+	{path: "genre/:slug", component: ItemsGridComponent, pathMatch: "full",
+		resolve: {items: PageResolver.forResource<LibraryItem>("shows", ["genres", "studio"], "genres=ctn::slug")},
+		canLoad: [AuthGuard.forPermissions("read")],
+		canActivate: [AuthGuard.forPermissions("read")]
+	},
+
 	{path: "show/:slug", component: ShowDetailsComponent,
 		resolve: {show: ItemResolver.forResource<Show>("shows/:slug")},
 		canLoad: [AuthGuard.forPermissions("read")],
