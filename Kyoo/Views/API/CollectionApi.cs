@@ -45,11 +45,9 @@ namespace Kyoo.Api
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!resources.Any() && await _libraryManager.GetCollection(id) == null)
+					return NotFound();
 				return Page(resources, limit);
-			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{
@@ -77,11 +75,9 @@ namespace Kyoo.Api
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!resources.Any() && await _libraryManager.GetCollection(slug) == null)
+					return NotFound();
 				return Page(resources, limit);
-			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{
@@ -109,11 +105,9 @@ namespace Kyoo.Api
 					new Sort<Library>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!resources.Any() && await _libraryManager.GetCollection(id) == null)
+					return NotFound();
 				return Page(resources, limit);
-			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{
@@ -141,11 +135,9 @@ namespace Kyoo.Api
 					new Sort<Library>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!resources.Any() && await _libraryManager.GetCollection(slug) == null)
+					return NotFound();
 				return Page(resources, limit);
-			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{
