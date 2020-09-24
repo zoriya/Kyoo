@@ -56,11 +56,9 @@ namespace Kyoo.Api
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!resources.Any() && await _libraryManager.GetLibrary(id) == null)
+					return NotFound();
 				return Page(resources, limit);
-			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{
@@ -88,11 +86,9 @@ namespace Kyoo.Api
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!resources.Any() && await _libraryManager.GetLibrary(slug) == null)
+					return NotFound();
 				return Page(resources, limit);
-			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{
@@ -120,11 +116,9 @@ namespace Kyoo.Api
 					new Sort<Collection>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!resources.Any() && await _libraryManager.GetLibrary(id) == null)
+					return NotFound();
 				return Page(resources, limit);
-			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{
@@ -152,11 +146,9 @@ namespace Kyoo.Api
 					new Sort<Collection>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!resources.Any() && await _libraryManager.GetLibrary(slug) == null)
+					return NotFound();
 				return Page(resources, limit);
-			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{
@@ -184,11 +176,9 @@ namespace Kyoo.Api
 					new Sort<LibraryItem>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!resources.Any() && await _libraryManager.GetLibrary(id) == null)
+					return NotFound();
 				return Page(resources, limit);
-			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{
@@ -216,11 +206,9 @@ namespace Kyoo.Api
 					new Sort<LibraryItem>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!resources.Any() && await _libraryManager.GetLibrary(slug) == null)
+					return NotFound();
 				return Page(resources, limit);
-			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{

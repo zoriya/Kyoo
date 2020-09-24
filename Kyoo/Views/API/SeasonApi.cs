@@ -45,11 +45,9 @@ namespace Kyoo.Api
 					new Sort<Episode>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!resources.Any() && await _libraryManager.GetSeason(seasonID) == null)
+					return NotFound();
 				return Page(resources, limit);
-			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{
@@ -79,11 +77,9 @@ namespace Kyoo.Api
 					new Sort<Episode>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!resources.Any() && await _libraryManager.GetSeason(showSlug, seasonNumber) == null)
+					return NotFound();
 				return Page(resources, limit);
-			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{
@@ -112,11 +108,9 @@ namespace Kyoo.Api
 					new Sort<Episode>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!resources.Any() && await _libraryManager.GetSeason(showID, seasonNumber) == null)
+					return NotFound();
 				return Page(resources, limit);
-			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{

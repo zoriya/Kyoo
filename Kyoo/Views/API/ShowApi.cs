@@ -45,11 +45,9 @@ namespace Kyoo.Api
 					new Sort<Season>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!resources.Any() && await _libraryManager.GetShow(showID) == null)
+					return NotFound();
 				return Page(resources, limit);
-			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{
@@ -77,11 +75,9 @@ namespace Kyoo.Api
 					new Sort<Season>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!resources.Any() && await _libraryManager.GetShow(slug) == null)
+					return NotFound();
 				return Page(resources, limit);
-			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{
@@ -109,11 +105,9 @@ namespace Kyoo.Api
 					new Sort<Episode>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!resources.Any() && await _libraryManager.GetShow(showID) == null)
+					return NotFound();
 				return Page(resources, limit);
-			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{
@@ -141,11 +135,9 @@ namespace Kyoo.Api
 					new Sort<Episode>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!resources.Any() && await _libraryManager.GetShow(slug) == null)
+					return NotFound();
 				return Page(resources, limit);
-			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{
@@ -172,11 +164,9 @@ namespace Kyoo.Api
 					new Sort<PeopleRole>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!resources.Any() && await _libraryManager.GetShow(showID) == null)
+					return NotFound();
 				return Page(resources, limit);
-			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{
@@ -203,11 +193,9 @@ namespace Kyoo.Api
 					new Sort<PeopleRole>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!resources.Any() && await _libraryManager.GetShow(slug) == null)
+					return NotFound();
 				return Page(resources, limit);
-			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{
@@ -235,11 +223,9 @@ namespace Kyoo.Api
 					new Sort<Genre>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!resources.Any() && await _libraryManager.GetShow(showID) == null)
+					return NotFound();
 				return Page(resources, limit);
-			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{
@@ -267,11 +253,9 @@ namespace Kyoo.Api
 					new Sort<Genre>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!resources.Any() && await _libraryManager.GetShow(slug) == null)
+					return NotFound();
 				return Page(resources, limit);
-			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{
@@ -327,11 +311,9 @@ namespace Kyoo.Api
 					new Sort<Library>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!resources.Any() && await _libraryManager.GetShow(showID) == null)
+					return NotFound();
 				return Page(resources, limit);
-			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{
@@ -359,11 +341,9 @@ namespace Kyoo.Api
 					new Sort<Library>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!resources.Any() && await _libraryManager.GetShow(slug) == null)
+					return NotFound();
 				return Page(resources, limit);
-			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{
@@ -391,11 +371,9 @@ namespace Kyoo.Api
 					new Sort<Collection>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!resources.Any() && await _libraryManager.GetShow(showID) == null)
+					return NotFound();
 				return Page(resources, limit);
-			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{
@@ -423,11 +401,9 @@ namespace Kyoo.Api
 					new Sort<Collection>(sortBy),
 					new Pagination(limit, afterID));
 
+				if (!resources.Any() && await _libraryManager.GetShow(slug) == null)
+					return NotFound();
 				return Page(resources, limit);
-			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{

@@ -49,10 +49,6 @@ namespace Kyoo.Api
 					return NotFound();
 				return Page(resources, limit);
 			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
-			}
 			catch (ArgumentException ex)
 			{
 				return BadRequest(new {Error = ex.Message});
@@ -82,10 +78,6 @@ namespace Kyoo.Api
 				if (!resources.Any() && await _libraryManager.GetGenre(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
-			}
-			catch (ItemNotFound)
-			{
-				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{
