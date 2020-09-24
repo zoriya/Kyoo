@@ -58,6 +58,10 @@ export class ItemsGridComponent implements OnInit
 		});
 	}
 
+	// TODO need to put every filter available in one place (it is everywhere for now)
+	// TODO clean route change
+	// TODO support dynamic switching between /genre & /browse & /whatever.
+
 	static routeMapper(route: ActivatedRouteSnapshot, endpoint: string, query: [string, string][]): string
 	{
 		const filter: string[] = ["genres", "studio"];
