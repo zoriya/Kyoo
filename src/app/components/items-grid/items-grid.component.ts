@@ -1,5 +1,5 @@
 import { Component, Input, OnInit } from "@angular/core";
-import { ActivatedRoute } from "@angular/router";
+import { ActivatedRoute, ActivatedRouteSnapshot, Router } from "@angular/router";
 import { DomSanitizer } from '@angular/platform-browser';
 import { Genre } from "../../../models/resources/genre";
 import { LibraryItem } from "../../../models/resources/library-item";
@@ -36,7 +36,8 @@ export class ItemsGridComponent implements OnInit
 	constructor(private route: ActivatedRoute,
 	            private sanitizer: DomSanitizer,
 	            private loader: PreLoaderService,
-	            public client: HttpClient)
+	            public client: HttpClient,
+	            private router: Router)
 	{
 		this.route.data.subscribe((data) =>
 		{
@@ -45,11 +46,27 @@ export class ItemsGridComponent implements OnInit
 		this.loader.load<Genre>("/api/genres?limit=0").subscribe(data =>
 		{
 			this.genres = data;
+			let selectedGenres: string[] = [];
+			if (this.route.snapshot.queryParams.genres?.startsWith("ctn:"))
+				selectedGenres = this.route.snapshot.queryParams.genres.substr(4).split(',');
+			this.filters.genres = this.genres.filter(x => selectedGenres.includes(x.slug));
 		});
 		this.loader.load<Studio>("/api/studios?limit=0").subscribe(data =>
 		{
 			this.studios = data;
+			this.filters.studio = this.studios.find(x => x.slug == this.route.params["studio"]);
 		});
+	}
+
+	static routeMapper(route: ActivatedRouteSnapshot, endpoint: string): string
+	{
+		const filter: string[] = ["genres", "studio"];
+		let queryParams: [string, string][] = Object.entries(route.queryParams).filter(x => filter.includes(x[0]));
+		if (queryParams.length > 0)
+			endpoint = "shows";
+
+		let params: string = '?' + queryParams.map(x => `${x[0]}=${x[1]}`).join('&');
+		return `api/${endpoint}${params}`
 	}
 
 	ngOnInit()
@@ -107,12 +124,22 @@ export class ItemsGridComponent implements OnInit
 				: new URL(this.page.changeType(this.defaultType));
 		}
 
+		let param: string;
 		if (isArray && this.filters[category].length > 0)
-			url.searchParams.set(category, `ctn:${this.filters[category].map(x => x.slug).join(',')}`);
+			param = `ctn:${this.filters[category].map(x => x.slug).join(',')}`;
 		else if (!isArray && this.filters[category] != null)
-			url.searchParams.set(category, filter.slug)
+			param = filter.slug;
+
+		if (param != null)
+			url.searchParams.set(category, param);
 		else
 			url.searchParams.delete(category)
+		this.router.navigate([], {
+			relativeTo: this.route,
+			queryParams: { [category]: param },
+			replaceUrl: true,
+			queryParamsHandling: "merge"
+		});
 		this.client.get<Page<Show>>(url.toString())
 			.subscribe(x => this.page = Object.assign(new Page<Show>(), x));
 	}
