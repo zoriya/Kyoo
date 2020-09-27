@@ -1,6 +1,7 @@
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { RouteReuseStrategy, RouterModule, Routes } from "@angular/router";
 import { ItemsGridComponent } from './components/items-grid/items-grid.component';
+import { CustomRouteReuseStrategy } from "./misc/custom-route-reuse-strategy";
 import { NotFoundComponent } from './pages/not-found/not-found.component';
 import { PageResolver } from './services/page-resolver.service';
 import { ShowDetailsComponent } from './pages/show-details/show-details.component';
@@ -96,7 +97,7 @@ const routes: Routes = [
 @NgModule({
 	imports: [RouterModule.forRoot(routes,
 		{
-			scrollPositionRestoration: "enabled",
+			scrollPositionRestoration: "enabled"
 		})],
 	exports: [RouterModule],
 	providers: [
@@ -108,6 +109,7 @@ const routes: Routes = [
 		EpisodeService,
 		PageResolver.resolvers,
 		ItemResolver.resolvers,
+		{provide: RouteReuseStrategy, useClass: CustomRouteReuseStrategy}
 	]
 })
 export class AppRoutingModule { }

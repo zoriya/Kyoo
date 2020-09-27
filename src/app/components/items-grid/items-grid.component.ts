@@ -1,5 +1,5 @@
 import { Component, Input } from "@angular/core";
-import { ActivatedRoute, ActivatedRouteSnapshot, Router } from "@angular/router";
+import { ActivatedRoute, ActivatedRouteSnapshot, Params, Router } from "@angular/router";
 import { DomSanitizer } from '@angular/platform-browser';
 import { Genre } from "../../../models/resources/genre";
 import { LibraryItem } from "../../../models/resources/library-item";
@@ -44,41 +44,54 @@ export class ItemsGridComponent
 		{
 			this.page = data.items;
 		});
+		this.route.queryParams.subscribe((data) =>
+		{
+			this.updateGenresFilterFromQuery(data);
+			this.updateStudioFilterFromQuery(data);
+		});
 		this.loader.load<Genre>("/api/genres?limit=0").subscribe(data =>
 		{
 			this.genres = data;
-
-			let selectedGenres: string[] = [];
-			if (this.route.snapshot.queryParams.genres?.startsWith("ctn:"))
-				selectedGenres = this.route.snapshot.queryParams.genres.substr(4).split(',');
-			else if (this.route.snapshot.queryParams.genres != null)
-				selectedGenres = this.route.snapshot.queryParams.genres.split(',');
-			if (this.router.url.startsWith("/genre"))
-				selectedGenres.push(this.route.snapshot.params.slug);
-
-			this.filters.genres = this.genres.filter(x => selectedGenres.includes(x.slug));
+			this.updateGenresFilterFromQuery(this.route.snapshot.queryParams);
 		});
 		this.loader.load<Studio>("/api/studios?limit=0").subscribe(data =>
 		{
 			this.studios = data;
-			this.filters.studio = this.studios.find(x => x.slug == this.route.snapshot.queryParams.studio
-			                                             || x.slug == this.route.snapshot.params.slug);
+			this.updateStudioFilterFromQuery(this.route.snapshot.queryParams);
 		});
 	}
 
-	// TODO disable page refresh when swiching from /browse to /studio to /genre.
+	updateGenresFilterFromQuery(query: Params)
+	{
+		let selectedGenres: string[] = [];
+		if (query.genres?.startsWith("ctn:"))
+			selectedGenres = query.genres.substr(4).split(',');
+		else if (query.genres != null)
+			selectedGenres = query.genres.split(',');
+		if (this.router.url.startsWith("/genre"))
+			selectedGenres.push(query.slug);
+
+		this.filters.genres = this.genres.filter(x => selectedGenres.includes(x.slug));
+	}
+
+	updateStudioFilterFromQuery(query: Params)
+	{
+		this.filters.studio = this.studios.find(x => x.slug == query.studio
+			|| x.slug == this.route.snapshot.params.slug);
+	}
+
 	// TODO /collection & /people does not get refreshed data from the provider when using a new filter/sort.
 	// TODO add /people to the switch list.
 
 	/*
-	* /browse           -> /api/items | /api/shows
-	* /browse/:library  -> /api/library/:slug/items | /api/library/:slug/shows
-	* /genre/:slug      -> /api/shows
-	* /studio/:slug     -> /api/shows
-	*
-	* /collection/:slug -> /api/collection/:slug/shows   |> AS @Input
-	* /people/:slug     -> /api/people/:slug/roles       |> AS @Input
-	*/
+	 * /browse           -> /api/items | /api/shows
+	 * /browse/:library  -> /api/library/:slug/items | /api/library/:slug/shows
+	 * /genre/:slug      -> /api/shows
+	 * /studio/:slug     -> /api/shows
+	 *
+	 * /collection/:slug -> /api/collection/:slug/shows   |> AS @Input
+	 * /people/:slug     -> /api/people/:slug/roles       |> AS @Input
+	 */
 
 	static routeMapper(route: ActivatedRouteSnapshot, endpoint: string, query: [string, string][]): string
 	{
@@ -135,8 +148,7 @@ export class ItemsGridComponent
 			{
 				this.router.navigate(["genre", this.filters.genres[0].slug], {
 					replaceUrl: true,
-					queryParams: {[category]: null},
-					queryParamsHandling: "merge"
+					queryParams: {sortBy: this.route.snapshot.queryParams.sortBy}
 				});
 				return;
 			}
@@ -144,15 +156,14 @@ export class ItemsGridComponent
 			{
 				this.router.navigate(["studio", this.filters.studio.slug], {
 					replaceUrl: true,
-					queryParams: {[category]: null},
-					queryParamsHandling: "merge"
+					queryParams: {sortBy: this.route.snapshot.queryParams.sortBy}
 				});
 				return;
 			}
  			if (this.getFilterCount() == 0 || this.router.url != "/browse")
 			{
 				let params = {[category]: param}
-				if (this.router.url.startsWith("/studio"))
+				if (this.router.url.startsWith("/studio") && category != "studio")
 					params.studio = this.route.snapshot.params.slug;
 				if (this.router.url.startsWith("/genre") && category != "genres")
 					params.genres = `${this.route.snapshot.params.slug}`;
