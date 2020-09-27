@@ -78,8 +78,9 @@ namespace Kyoo
 		{
 			Type type = typeof(T);
 			IEnumerable<PropertyInfo> properties = type.GetProperties()
-				.Where(x => x.CanRead && x.CanWrite
-				                      && Attribute.GetCustomAttribute(x, typeof(NotMergableAttribute)) == null);
+				.Where(x => x.CanRead 
+				            && x.CanWrite 
+				            && Attribute.GetCustomAttribute(x, typeof(NotMergableAttribute)) == null);
 			
 			foreach (PropertyInfo property in properties)
 			{
@@ -101,8 +102,9 @@ namespace Kyoo
 			
 			Type type = typeof(T);
 			IEnumerable<PropertyInfo> properties = type.GetProperties()
-				.Where(x => x.CanRead && x.CanWrite
-				                      && Attribute.GetCustomAttribute(x, typeof(NotMergableAttribute)) == null);
+				.Where(x => x.CanRead 
+				            && x.CanWrite 
+				            && Attribute.GetCustomAttribute(x, typeof(NotMergableAttribute)) == null);
 			
 			foreach (PropertyInfo property in properties)
 			{
@@ -129,8 +131,9 @@ namespace Kyoo
 			
 			Type type = typeof(T);
 			IEnumerable<PropertyInfo> properties = type.GetProperties()
-				.Where(x => x.CanRead && x.CanWrite
-				                      && Attribute.GetCustomAttribute(x, typeof(NotMergableAttribute)) == null);
+				.Where(x => x.CanRead
+				            && x.CanWrite 
+				            && Attribute.GetCustomAttribute(x, typeof(NotMergableAttribute)) == null);
 			
 			foreach (PropertyInfo property in properties)
 			{
