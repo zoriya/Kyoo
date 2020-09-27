@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -51,27 +52,40 @@ namespace Kyoo.CommonApi
 				MemberExpression propertyExpr = Expression.Property(param, property);
 
 				ConstantExpression valueExpr = null;
-				if (operand != "ctn" && !typeof(IResource).IsAssignableFrom(propertyExpr.Type))
+				bool isList = typeof(IEnumerable).IsAssignableFrom(propertyExpr.Type);
+				if (operand != "ctn" && !typeof(IResource).IsAssignableFrom(propertyExpr.Type) && !isList)
 				{
 					Type propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
-					object val = string.IsNullOrEmpty(value) || value.Equals("null", StringComparison.OrdinalIgnoreCase)
+					object val;
+					try
+					{
+						val = string.IsNullOrEmpty(value) || value.Equals("null", StringComparison.OrdinalIgnoreCase)
 							? null
 							: Convert.ChangeType(value, propertyType);
+					}
+					catch (InvalidCastException)
+					{
+						throw new ArgumentException("Comparing two differents value's type.");
+					}
+
 					valueExpr = Expression.Constant(val, property.PropertyType);
 				}
-
+				
 				Expression condition = operand switch
 				{
+					"eq" when isList => ContainsResourceExpression(propertyExpr, value),
+					"ctn" => ContainsResourceExpression(propertyExpr, value),
+					
 					"eq" when valueExpr == null => ResourceEqual(propertyExpr, value),
 					"not" when valueExpr == null => ResourceEqual(propertyExpr, value, true),
+					
 					"eq" => Expression.Equal(propertyExpr, valueExpr),
 					"not" => Expression.NotEqual(propertyExpr, valueExpr!),
 					"lt" => StringCompatibleExpression(Expression.LessThan, propertyExpr, valueExpr),
 					"lte" => StringCompatibleExpression(Expression.LessThanOrEqual, propertyExpr, valueExpr),
 					"gt" => StringCompatibleExpression(Expression.GreaterThan, propertyExpr, valueExpr),
 					"gte" => StringCompatibleExpression(Expression.GreaterThanOrEqual, propertyExpr, valueExpr),
-					"ctn" => ContainsResourceExpression(propertyExpr, value),
-					_ => throw new ArgumentException($"Invalid operand: {operand}")	
+					_ => throw new ArgumentException($"Invalid operand: {operand}")
 				};
 
 				if (expression != null)
