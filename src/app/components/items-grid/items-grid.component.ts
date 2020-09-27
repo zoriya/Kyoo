@@ -29,6 +29,8 @@ export class ItemsGridComponent implements OnInit
 	sortKeys: string[] = ["title", "start year", "end year"]
 	sortUp: boolean = true;
 
+	public static readonly showOnlyFilters: string[] = ["genres", "studio"]
+	public static readonly filters: string[] = [].concat(...ItemsGridComponent.showOnlyFilters)
 	filters: {genres: Genre[], studio: Studio} = {genres: [], studio: null};
 	genres: Genre[] = [];
 	studios: Studio[] = [];
@@ -58,20 +60,31 @@ export class ItemsGridComponent implements OnInit
 		});
 	}
 
-	// TODO need to put every filter available in one place (it is everywhere for now)
-	// TODO clean route change
 	// TODO support dynamic switching between /genre & /browse & /whatever.
+
+	/*
+	* /browse           -> /api/items | /api/shows
+	* /browse/:library  -> /api/library/:slug/items | /api/library/:slug/shows
+	* /genre/:slug      -> /api/shows
+	* /studio/:slug     -> /api/shows
+	*
+	* /collection/:slug -> /api/collection/:slug/shows   |> AS @Input
+	* /people/:slug     -> /api/people/:slug/roles       |> AS @Input
+	*/
 
 	static routeMapper(route: ActivatedRouteSnapshot, endpoint: string, query: [string, string][]): string
 	{
-		const filter: string[] = ["genres", "studio"];
-		let queryParams: [string, string][] = Object.entries(route.queryParams).filter(x => filter.includes(x[0]));
+		let queryParams: [string, string][] = Object.entries(route.queryParams)
+			.filter(x => ItemsGridComponent.filters.includes(x[0]) || x[0] == "sortBy");
 		if (query)
 			queryParams.push(...query)
-		if (queryParams.length > 0)
-			endpoint = "shows";
 
-		let params: string = '?' + queryParams.map(x => `${x[0]}=${x[1]}`).join('&');
+		if (queryParams.some(x => ItemsGridComponent.showOnlyFilters.includes(x[0])))
+			endpoint = endpoint.replace(/items?$/, "show");
+
+		let params: string = queryParams.length > 0
+			? '?' + queryParams.map(x => `${x[0]}=${x[1]}`).join('&')
+			: "";
 		return `api/${endpoint}${params}`
 	}
 
@@ -91,63 +104,36 @@ export class ItemsGridComponent implements OnInit
 
 	addFilter(category: string, filter: IResource, isArray: boolean = true, isShowOnly: boolean = true)
 	{
-		if (!this.complexFiltersEnabled)
+		if (!this.complexFiltersEnabled && isShowOnly)
 			return;
-		let useShow: boolean;
 
 		if (isArray)
 		{
 			if (this.filters[category].includes(filter))
-			{
 				this.filters[category].splice(this.filters[category].indexOf(filter), 1);
-				useShow = this.getFilterCount() != 0;
-			}
 			else
-			{
 				this.filters[category].push(filter);
-				useShow = true;
-			}
 		}
 		else
 		{
 			if (this.filters[category] == filter)
-			{
 				this.filters[category] = null;
-				useShow = false;
-			}
 			else
-			{
 				this.filters[category] = filter;
-				useShow = filter != null;
-			}
 		}
 
-		let url: URL = new URL(this.page.first);
-		if (isShowOnly)
-		{
-			url = useShow
-				? new URL(this.page.changeType("shows"))
-				: new URL(this.page.changeType(this.defaultType));
-		}
-
-		let param: string;
+		let param: string = null;
 		if (isArray && this.filters[category].length > 0)
 			param = `ctn:${this.filters[category].map(x => x.slug).join(',')}`;
 		else if (!isArray && this.filters[category] != null)
 			param = filter.slug;
 
-		if (param != null)
-			url.searchParams.set(category, param);
-		else
-			url.searchParams.delete(category)
 		this.router.navigate([], {
 			relativeTo: this.route,
 			queryParams: { [category]: param },
 			replaceUrl: true,
 			queryParamsHandling: "merge"
 		});
-		this.client.get<Page<Show>>(url.toString())
-			.subscribe(x => this.page = Object.assign(new Page<Show>(), x));
 	}
 
 	getThumb(slug: string)
@@ -170,9 +156,12 @@ export class ItemsGridComponent implements OnInit
 		this.sortType = type;
 		this.sortUp = order;
 
-		let url: URL = new URL(this.page.first);
-		url.searchParams.set("sortBy", `${this.sortType.replace(/\s/g, "")}:${this.sortUp ? "asc" : "desc"}`);
-		this.client.get<Page<LibraryItem | Show>>(url.toString())
-			.subscribe(x => this.page = Object.assign(new Page<LibraryItem | Show>(), x));
+		let param: string = `${this.sortType.replace(/\s/g, "")}:${this.sortUp ? "asc" : "desc"}`;
+		this.router.navigate([], {
+			relativeTo: this.route,
+			queryParams: { sortBy: param },
+			replaceUrl: true,
+			queryParamsHandling: "merge"
+		});
 	}
 }

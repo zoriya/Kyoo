@@ -27,30 +27,34 @@ const routes: Routes = [
 	{path: "browse", component: ItemsGridComponent, pathMatch: "full",
 		resolve: {items: PageResolver.forResource<LibraryItem>("items", ItemsGridComponent.routeMapper)},
 		canLoad: [AuthGuard.forPermissions("read")],
-		canActivate: [AuthGuard.forPermissions("read")]
+		canActivate: [AuthGuard.forPermissions("read")],
+		runGuardsAndResolvers: "always"
 	},
 	{path: "browse/:slug", component: ItemsGridComponent,
 		resolve: {items: PageResolver.forResource<LibraryItem>("library/:slug/items", ItemsGridComponent.routeMapper)},
 		canLoad: [AuthGuard.forPermissions("read")],
-		canActivate: [AuthGuard.forPermissions("read")]
+		canActivate: [AuthGuard.forPermissions("read")],
+		runGuardsAndResolvers: "always"
 	},
 
 	{path: "genre/:slug", component: ItemsGridComponent, pathMatch: "full",
-		resolve: {items: PageResolver.forResource<LibraryItem>("shows", ["genres", "studio"], "genres=ctn::slug")},
+		resolve: {items: PageResolver.forResource<Show>("shows", ItemsGridComponent.routeMapper, "genres=ctn::slug")},
 		canLoad: [AuthGuard.forPermissions("read")],
-		canActivate: [AuthGuard.forPermissions("read")]
+		canActivate: [AuthGuard.forPermissions("read")],
+		runGuardsAndResolvers: "always"
+	},
+	{path: "studio/:slug", component: ItemsGridComponent, pathMatch: "full",
+		resolve: {items: PageResolver.forResource<Show>("shows", ItemsGridComponent.routeMapper, "studio=:slug")},
+		canLoad: [AuthGuard.forPermissions("read")],
+		canActivate: [AuthGuard.forPermissions("read")],
+		runGuardsAndResolvers: "always"
 	},
 
-	{path: "show/:slug", component: ShowDetailsComponent,
-		resolve: {show: ItemResolver.forResource<Show>("shows/:slug")},
-		canLoad: [AuthGuard.forPermissions("read")],
-		canActivate: [AuthGuard.forPermissions("read")]
-	},
 	{path: "collection/:slug", component: CollectionComponent,
 		resolve:
 		{
 			collection: ItemResolver.forResource<Collection>("collections/:slug"),
-			shows: PageResolver.forResource<Show>("collections/:slug/shows")
+			shows: PageResolver.forResource<Show>("collections/:slug/shows", ItemsGridComponent.routeMapper)
 		},
 		canLoad: [AuthGuard.forPermissions("read")],
 		canActivate: [AuthGuard.forPermissions("read")]
@@ -59,8 +63,14 @@ const routes: Routes = [
 		resolve:
 		{
 			collection: ItemResolver.forResource<Collection>("people/:slug"),
-			shows: PageResolver.forResource<Show>("people/:slug/roles")
+			shows: PageResolver.forResource<Show>("people/:slug/roles", ItemsGridComponent.routeMapper)
 		},
+		canLoad: [AuthGuard.forPermissions("read")],
+		canActivate: [AuthGuard.forPermissions("read")]
+	},
+
+	{path: "show/:slug", component: ShowDetailsComponent,
+		resolve: {show: ItemResolver.forResource<Show>("shows/:slug")},
 		canLoad: [AuthGuard.forPermissions("read")],
 		canActivate: [AuthGuard.forPermissions("read")]
 	},
@@ -77,7 +87,7 @@ const routes: Routes = [
 		canActivate: [AuthGuard.forPermissions("play")]
 	},
 
-	// TODO implement missing pages: /genre, /studio & an home page.
+	// TODO implement an home page.
 
 	{path: "", pathMatch: 'full', redirectTo: "/browse"},
 	{path: "**", component: NotFoundComponent}
