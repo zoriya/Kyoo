@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, Input } from "@angular/core";
 import { ActivatedRoute, ActivatedRouteSnapshot, Router } from "@angular/router";
 import { DomSanitizer } from '@angular/platform-browser';
 import { Genre } from "../../../models/resources/genre";
@@ -17,13 +17,12 @@ import { PreLoaderService } from "../../services/pre-loader.service";
 	templateUrl: './items-grid.component.html',
 	styleUrls: ['./items-grid.component.scss']
 })
-export class ItemsGridComponent implements OnInit
+export class ItemsGridComponent
 {
 	@Input() page: Page<LibraryItem | Show | ShowRole | Collection>;
 	@Input() sortEnabled: boolean = true;
 
 	complexFiltersEnabled: boolean;
-	defaultType: string;
 
 	sortType: string = "title";
 	sortKeys: string[] = ["title", "start year", "end year"]
@@ -48,19 +47,27 @@ export class ItemsGridComponent implements OnInit
 		this.loader.load<Genre>("/api/genres?limit=0").subscribe(data =>
 		{
 			this.genres = data;
+
 			let selectedGenres: string[] = [];
 			if (this.route.snapshot.queryParams.genres?.startsWith("ctn:"))
 				selectedGenres = this.route.snapshot.queryParams.genres.substr(4).split(',');
+			else if (this.route.snapshot.queryParams.genre != null)
+				selectedGenres = this.route.snapshot.queryParams.genres.split(',');
+			if (this.router.url.startsWith("/genre"))
+				selectedGenres.push(this.route.snapshot.params.slug);
+
 			this.filters.genres = this.genres.filter(x => selectedGenres.includes(x.slug));
 		});
 		this.loader.load<Studio>("/api/studios?limit=0").subscribe(data =>
 		{
 			this.studios = data;
-			this.filters.studio = this.studios.find(x => x.slug == this.route.params["studio"]);
+			this.filters.studio = this.studios.find(x => x.slug == this.route.snapshot.queryParams.studio
+			                                     || x.slug == this.route.snapshot.params.slug);
 		});
 	}
 
 	// TODO support dynamic switching between /genre & /browse & /whatever.
+	// TODO /collection & /people does not get refreshed data from the provider when using a new filter/sort.
 
 	/*
 	* /browse           -> /api/items | /api/shows
@@ -88,12 +95,6 @@ export class ItemsGridComponent implements OnInit
 		return `api/${endpoint}${params}`
 	}
 
-	ngOnInit()
-	{
-		this.defaultType = this.page.this.match(/\/(\w*)($|\?)/)[1];
-		this.complexFiltersEnabled = this.defaultType == "shows" || this.defaultType == "items";
-	}
-
 	getFilterCount()
 	{
 		let count: number = this.filters.genres.length;
@@ -102,11 +103,8 @@ export class ItemsGridComponent implements OnInit
 		return count;
 	}
 
-	addFilter(category: string, filter: IResource, isArray: boolean = true, isShowOnly: boolean = true)
+	addFilter(category: string, filter: IResource, isArray: boolean = true)
 	{
-		if (!this.complexFiltersEnabled && isShowOnly)
-			return;
-
 		if (isArray)
 		{
 			if (this.filters[category].includes(filter))
@@ -128,9 +126,45 @@ export class ItemsGridComponent implements OnInit
 		else if (!isArray && this.filters[category] != null)
 			param = filter.slug;
 
+		if (/\/browse($|\?)/.test(this.router.url)
+			|| this.router.url.startsWith("/genre")
+			|| this.router.url.startsWith("/studio"))
+		{
+			if (this.filters.genres.length == 1 && this.getFilterCount() == 1)
+			{
+				this.router.navigate(["genre", this.filters.genres[0].slug], {
+					replaceUrl: true,
+					queryParamsHandling: "merge"
+				});
+				return;
+			}
+			if (this.filters.studio != null && this.getFilterCount() == 1)
+			{
+				this.router.navigate(["studio", this.filters.studio.slug], {
+					replaceUrl: true,
+					queryParamsHandling: "merge"
+				});
+				return;
+			}
+ 			if (this.getFilterCount() == 0 || this.router.url != "/browse")
+			{
+				let params = {[category]: param}
+				if (this.router.url.startsWith("/studio"))
+					params.studio = this.route.snapshot.params.slug;
+				if (this.router.url.startsWith("/genre") && category != "genres")
+					params.genres = `ctn:${this.route.snapshot.params.slug}`;
+
+				this.router.navigate(["/browse"], {
+					queryParams: params,
+					replaceUrl: true,
+					queryParamsHandling: "merge"
+				});
+				return;
+			}
+		}
 		this.router.navigate([], {
 			relativeTo: this.route,
-			queryParams: { [category]: param },
+			queryParams: {[category]: param},
 			replaceUrl: true,
 			queryParamsHandling: "merge"
 		});
