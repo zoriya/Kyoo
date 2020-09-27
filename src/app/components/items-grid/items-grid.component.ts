@@ -80,7 +80,6 @@ export class ItemsGridComponent
 			|| x.slug == this.route.snapshot.params.slug);
 	}
 
-	// TODO /collection & /people does not get refreshed data from the provider when using a new filter/sort.
 	// TODO add /people to the switch list.
 
 	/*

@@ -58,7 +58,8 @@ const routes: Routes = [
 			shows: PageResolver.forResource<Show>("collections/:slug/shows", ItemsGridComponent.routeMapper)
 		},
 		canLoad: [AuthGuard.forPermissions("read")],
-		canActivate: [AuthGuard.forPermissions("read")]
+		canActivate: [AuthGuard.forPermissions("read")],
+		runGuardsAndResolvers: "always"
 	},
 	{path: "people/:slug", component: CollectionComponent,
 		resolve:
@@ -67,7 +68,8 @@ const routes: Routes = [
 			shows: PageResolver.forResource<Show>("people/:slug/roles", ItemsGridComponent.routeMapper)
 		},
 		canLoad: [AuthGuard.forPermissions("read")],
-		canActivate: [AuthGuard.forPermissions("read")]
+		canActivate: [AuthGuard.forPermissions("read")],
+		runGuardsAndResolvers: "always"
 	},
 
 	{path: "show/:slug", component: ShowDetailsComponent,
