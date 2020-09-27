@@ -69,7 +69,7 @@ export class ItemsGridComponent
 		else if (query.genres != null)
 			selectedGenres = query.genres.split(',');
 		if (this.router.url.startsWith("/genre"))
-			selectedGenres.push(query.slug);
+			selectedGenres.push(this.route.snapshot.params.slug);
 
 		this.filters.genres = this.genres.filter(x => selectedGenres.includes(x.slug));
 	}
