@@ -51,7 +51,7 @@ export class ItemsGridComponent
 			let selectedGenres: string[] = [];
 			if (this.route.snapshot.queryParams.genres?.startsWith("ctn:"))
 				selectedGenres = this.route.snapshot.queryParams.genres.substr(4).split(',');
-			else if (this.route.snapshot.queryParams.genre != null)
+			else if (this.route.snapshot.queryParams.genres != null)
 				selectedGenres = this.route.snapshot.queryParams.genres.split(',');
 			if (this.router.url.startsWith("/genre"))
 				selectedGenres.push(this.route.snapshot.params.slug);
@@ -62,12 +62,13 @@ export class ItemsGridComponent
 		{
 			this.studios = data;
 			this.filters.studio = this.studios.find(x => x.slug == this.route.snapshot.queryParams.studio
-			                                     || x.slug == this.route.snapshot.params.slug);
+			                                             || x.slug == this.route.snapshot.params.slug);
 		});
 	}
 
-	// TODO support dynamic switching between /genre & /browse & /whatever.
+	// TODO disable page refresh when swiching from /browse to /studio to /genre.
 	// TODO /collection & /people does not get refreshed data from the provider when using a new filter/sort.
+	// TODO add /people to the switch list.
 
 	/*
 	* /browse           -> /api/items | /api/shows
@@ -122,7 +123,7 @@ export class ItemsGridComponent
 
 		let param: string = null;
 		if (isArray && this.filters[category].length > 0)
-			param = `ctn:${this.filters[category].map(x => x.slug).join(',')}`;
+			param = `${this.filters[category].map(x => x.slug).join(',')}`;
 		else if (!isArray && this.filters[category] != null)
 			param = filter.slug;
 
@@ -134,6 +135,7 @@ export class ItemsGridComponent
 			{
 				this.router.navigate(["genre", this.filters.genres[0].slug], {
 					replaceUrl: true,
+					queryParams: {[category]: null},
 					queryParamsHandling: "merge"
 				});
 				return;
@@ -142,6 +144,7 @@ export class ItemsGridComponent
 			{
 				this.router.navigate(["studio", this.filters.studio.slug], {
 					replaceUrl: true,
+					queryParams: {[category]: null},
 					queryParamsHandling: "merge"
 				});
 				return;
@@ -152,7 +155,7 @@ export class ItemsGridComponent
 				if (this.router.url.startsWith("/studio"))
 					params.studio = this.route.snapshot.params.slug;
 				if (this.router.url.startsWith("/genre") && category != "genres")
-					params.genres = `ctn:${this.route.snapshot.params.slug}`;
+					params.genres = `${this.route.snapshot.params.slug}`;
 
 				this.router.navigate(["/browse"], {
 					queryParams: params,

@@ -34,16 +34,16 @@ const routes: Routes = [
 		resolve: {items: PageResolver.forResource<LibraryItem>("library/:slug/items", ItemsGridComponent.routeMapper)},
 		canLoad: [AuthGuard.forPermissions("read")],
 		canActivate: [AuthGuard.forPermissions("read")],
-		runGuardsAndResolvers: "always"
+		runGuardsAndResolvers: "always",
 	},
 
-	{path: "genre/:slug", component: ItemsGridComponent, pathMatch: "full",
+	{path: "genre/:slug", component: ItemsGridComponent,
 		resolve: {items: PageResolver.forResource<Show>("shows", ItemsGridComponent.routeMapper, "genres=ctn::slug")},
 		canLoad: [AuthGuard.forPermissions("read")],
 		canActivate: [AuthGuard.forPermissions("read")],
 		runGuardsAndResolvers: "always"
 	},
-	{path: "studio/:slug", component: ItemsGridComponent, pathMatch: "full",
+	{path: "studio/:slug", component: ItemsGridComponent,
 		resolve: {items: PageResolver.forResource<Show>("shows", ItemsGridComponent.routeMapper, "studio=:slug")},
 		canLoad: [AuthGuard.forPermissions("read")],
 		canActivate: [AuthGuard.forPermissions("read")],
