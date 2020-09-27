@@ -1,4 +1,5 @@
-import { Component, Input } from "@angular/core";
+import { Component, Input, OnInit } from "@angular/core";
+import { FormControl } from "@angular/forms";
 import { ActivatedRoute, ActivatedRouteSnapshot, Params, Router } from "@angular/router";
 import { DomSanitizer } from '@angular/platform-browser';
 import { Genre } from "../../../models/resources/genre";
@@ -11,13 +12,15 @@ import { Collection } from "../../../models/resources/collection";
 import { Studio } from "../../../models/resources/studio";
 import { ItemsUtils } from "../../misc/items-utils";
 import { PreLoaderService } from "../../services/pre-loader.service";
+import { Observable } from "rxjs"
+import { map, startWith, tap } from "rxjs/operators"
 
 @Component({
 	selector: 'app-items-grid',
 	templateUrl: './items-grid.component.html',
 	styleUrls: ['./items-grid.component.scss']
 })
-export class ItemsGridComponent
+export class ItemsGridComponent implements OnInit
 {
 	@Input() page: Page<LibraryItem | Show | ShowRole | Collection>;
 	@Input() sortEnabled: boolean = true;
@@ -33,6 +36,9 @@ export class ItemsGridComponent
 	filters: {genres: Genre[], studio: Studio} = {genres: [], studio: null};
 	genres: Genre[] = [];
 	studios: Studio[] = [];
+
+	studioForm: FormControl = new FormControl();
+	filteredStudios: Observable<Studio[]>;
 
 	constructor(private route: ActivatedRoute,
 	            private sanitizer: DomSanitizer,
@@ -80,6 +86,21 @@ export class ItemsGridComponent
 			|| x.slug == this.route.snapshot.params.slug);
 	}
 
+	ngOnInit()
+	{
+		this.filteredStudios = this.studioForm.valueChanges
+			.pipe(
+				map(x => x == null ? "" : x),
+				map(x => typeof x === "string" ? x : x.name),
+				map(x => this.studios.filter(y => y.name.toLowerCase().indexOf(x.toLowerCase()) != -1))
+			);
+	}
+
+	shouldDisplayNoneStudio()
+	{
+		return this.studioForm.value == '' || typeof this.studioForm.value != "string";
+	}
+
 	// TODO add /people to the switch list.
 
 	/*
@@ -116,7 +137,7 @@ export class ItemsGridComponent
 		return count;
 	}
 
-	addFilter(category: string, filter: IResource, isArray: boolean = true)
+	addFilter(category: string, filter: IResource, isArray: boolean = true, toggle: boolean = false)
 	{
 		if (isArray)
 		{
@@ -128,7 +149,11 @@ export class ItemsGridComponent
 		else
 		{
 			if (this.filters[category] == filter)
+			{
+				if (!toggle)
+					return;
 				this.filters[category] = null;
+			}
 			else
 				this.filters[category] = filter;
 		}
@@ -181,6 +206,11 @@ export class ItemsGridComponent
 			replaceUrl: true,
 			queryParamsHandling: "merge"
 		});
+	}
+
+	nameGetter(obj: Studio)
+	{
+		return obj?.name ?? "None";
 	}
 
 	getThumb(slug: string)

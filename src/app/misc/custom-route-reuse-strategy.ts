@@ -8,7 +8,6 @@ export class CustomRouteReuseStrategy extends RouteReuseStrategy
 			|| curr.routeConfig?.path == "genre/:slug"
 			|| curr.routeConfig?.path == "studio/:slug")
 		{
-			console.log(`${curr.routeConfig?.path} - ${future.routeConfig?.path}`)
 			return future.routeConfig.path == "browse"
 				|| future.routeConfig.path == "genre/:slug"
 				|| future.routeConfig.path == "studio/:slug";
