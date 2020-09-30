@@ -1,9 +1,9 @@
-import {HttpClient, HttpErrorResponse} from '@angular/common/http';
-import {Injectable} from '@angular/core';
-import {MatSnackBar} from '@angular/material/snack-bar';
-import {ActivatedRouteSnapshot, Resolve} from '@angular/router';
-import {Observable, EMPTY} from 'rxjs';
-import {catchError} from 'rxjs/operators';
+import { HttpClient, HttpErrorResponse } from "@angular/common/http";
+import { Injectable } from "@angular/core";
+import { MatSnackBar } from "@angular/material/snack-bar";
+import { ActivatedRouteSnapshot, Resolve } from "@angular/router";
+import { Observable, EMPTY } from "rxjs";
+import { catchError } from "rxjs/operators";
 
 @Injectable()
 export class ItemResolver
@@ -21,17 +21,17 @@ export class ItemResolver
 
 			resolve(route: ActivatedRouteSnapshot): T | Observable<T> | Promise<T>
 			{
-				let res: string = resource.replace(/:(.*?)(\/|$)/, (x, y) => `${route.paramMap.get(y)}/`);
+				const res: string = resource.replace(/:(.*?)(\/|$)/, (x, y) => `${route.paramMap.get(y)}/`);
 
 				return this.http.get<T>(`api/${res}`)
 					.pipe(
 						catchError((error: HttpErrorResponse) =>
 						{
-							if (error.status == 404)
+							if (error.status === 404)
 							{
-								this.snackBar.open(`Item not found.`, null, {
+								this.snackBar.open("Item not found.", null, {
 									horizontalPosition: "left",
-									panelClass: ['snackError'],
+									panelClass: ["snackError"],
 									duration: 2500
 								});
 							}
@@ -40,7 +40,7 @@ export class ItemResolver
 								console.log(error.status + " - " + error.message);
 								this.snackBar.open(`An unknown error occurred: ${error.message}.`, null, {
 									horizontalPosition: "left",
-									panelClass: ['snackError'],
+									panelClass: ["snackError"],
 									duration: 2500
 								});
 							}
