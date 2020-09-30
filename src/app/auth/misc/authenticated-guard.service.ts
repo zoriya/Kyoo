@@ -59,7 +59,7 @@ export class AuthGuard
 				else 
 				{
 					for (let perm of permissions)
-						if (!AuthGuard.defaultPermissions.includes(perm))
+						if (AuthGuard.defaultPermissions?.includes(perm) === true)
 							return false;
 					return true;
 				}
