@@ -1,11 +1,11 @@
 import { HttpClient } from "@angular/common/http";
-import { Injectable } from '@angular/core';
+import { Injectable } from "@angular/core";
 import { Page } from "../models/page";
-import { Observable, of } from "rxjs"
-import { map } from "rxjs/operators"
+import { Observable, of } from "rxjs";
+import { map } from "rxjs/operators";
 
 @Injectable({
-	providedIn: 'root'
+	providedIn: "root"
 })
 export class PreLoaderService
 {
@@ -15,7 +15,7 @@ export class PreLoaderService
 
 	load<T>(route: string): Observable<T[]>
 	{
-		let loaded = this.cache.find(x => x[0] == route);
+		let loaded = this.cache.find(x => x[0] === route);
 		if (loaded != null)
 			return of(loaded[1]);
 		return this.http.get<Page<T>>(route).pipe(map(newData =>
