@@ -174,13 +174,13 @@ namespace Kyoo
 
 			app.UseRouting();
 
+			app.UseCookiePolicy(new CookiePolicyOptions 
+			{
+				MinimumSameSitePolicy = SameSiteMode.Strict
+			});
 			app.UseAuthentication();
 			app.UseIdentityServer();
 			app.UseAuthorization();
-			app.UseCookiePolicy(new CookiePolicyOptions 
-			{
-				MinimumSameSitePolicy = SameSiteMode.Lax
-			});
 
 			app.UseEndpoints(endpoints =>
 			{

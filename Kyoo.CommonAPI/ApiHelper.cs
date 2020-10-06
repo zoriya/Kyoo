@@ -38,6 +38,9 @@ namespace Kyoo.CommonApi
 
 			foreach ((string key, string desired) in where)
 			{
+				if (key == null || desired == null)
+					throw new ArgumentException("Invalid key/value pair. Can't be null.");
+				
 				string value = desired;
 				string operand = "eq";
 				if (desired.Contains(':'))

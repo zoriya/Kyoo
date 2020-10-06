@@ -79,7 +79,9 @@ namespace Kyoo.Api
 		private readonly IConfiguration _configuration;
 		private readonly string _picturePath;
 
-		public AccountController(UserManager<User> userManager, SignInManager<User> siginInManager, IConfiguration configuration)
+		public AccountController(UserManager<User> userManager, 
+			SignInManager<User> siginInManager, 
+			IConfiguration configuration)
 		{
 			_userManager = userManager;
 			_signInManager = siginInManager;
@@ -115,10 +117,11 @@ namespace Kyoo.Api
 		{
 			if (!ModelState.IsValid)
 				return BadRequest(login);
-			SignInResult result = await _signInManager.PasswordSignInAsync(login.Username, login.Password, login.StayLoggedIn, false);
-			if (!result.Succeeded)
-				return BadRequest(new [] { new {code = "InvalidCredentials", description = "Invalid username/password"}});
-			return Ok();
+			SignInResult result = await _signInManager
+				.PasswordSignInAsync(login.Username, login.Password, login.StayLoggedIn, false);
+			if (result.Succeeded)
+				return Ok();
+			return BadRequest(new [] { new {code = "InvalidCredentials", description = "Invalid username/password"}});
 		}
 		
 		[HttpPost("otac-login")]
@@ -194,10 +197,8 @@ namespace Kyoo.Api
 			if (data.Picture?.Length > 0)
 			{
 				string path = Path.Combine(_picturePath, user.Id);
-				await using (FileStream file = System.IO.File.Create(path))
-				{
-					await data.Picture.CopyToAsync(file);
-				}
+				await using FileStream file = System.IO.File.Create(path);
+				await data.Picture.CopyToAsync(file);
 			}
 			await _userManager.UpdateAsync(user);
 			return Ok();
