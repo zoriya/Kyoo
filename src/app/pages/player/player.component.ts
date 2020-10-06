@@ -2,7 +2,7 @@ import {Component, Injector, OnInit, ViewEncapsulation} from '@angular/core';
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {DomSanitizer, Title} from "@angular/platform-browser";
 import {ActivatedRoute, Event, NavigationCancel, NavigationEnd, NavigationStart, Router} from "@angular/router";
-import {Track, WatchItem} from "../../../models/watch-item";
+import {Track, WatchItem} from "../../models/watch-item";
 import {Location} from "@angular/common";
 import * as Hls from "hls.js"
 import {getPlaybackMethod, getWhatIsSupported, method, SupportList} from "../../../videoSupport/playbackMethodDetector";

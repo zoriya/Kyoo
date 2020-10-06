@@ -4,8 +4,8 @@ import {MatSnackBar} from '@angular/material/snack-bar';
 import {ActivatedRouteSnapshot, Resolve} from '@angular/router';
 import {Observable, EMPTY} from 'rxjs';
 import {catchError, map} from 'rxjs/operators';
-import {Page} from "../../models/page";
-import {IResource} from "../../models/resources/resource";
+import {Page} from "../models/page";
+import {IResource} from "../models/resources/resource";
 
 type RouteMapper = (route: ActivatedRouteSnapshot, endpoint: string, queryParams: [string, string][]) => string;
 

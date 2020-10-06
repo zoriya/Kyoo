@@ -2,10 +2,9 @@ import {Component} from '@angular/core';
 import {Event, Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError} from '@angular/router';
 import {Location} from "@angular/common";
 import {MatDialog} from "@angular/material/dialog";
-import {Account} from "../models/account";
 import {AccountComponent} from "./auth/account/account.component";
 import {AuthService} from "./auth/auth.service";
-import {Library} from "../models/resources/library";
+import {Library} from "./models/resources/library";
 import {LibraryService} from "./services/api.service";
 import * as $ from "jquery";
 
@@ -77,11 +76,7 @@ export class AppComponent
 	
 	openAccountDialog()
 	{
-		const dialog = this.dialog.open(AccountComponent, {width: "500px", data: this.authManager.getAccount()});
-		dialog.afterClosed().subscribe((result: Account) => 
-		{
-			this.authManager.getUser();
-		});
+		this.dialog.open(AccountComponent, {width: "500px", data: this.authManager.account});
 	}
 	
 	get isAuthenticated(): boolean

@@ -25,17 +25,47 @@
 		</mat-chip-list>
 	</ng-container>
 
-	<ng-container *ngIf="this.studios.length > 0">
-		<br/>
-		<h4><b>Studios</b></h4>
+	<br/>
+	
+	<ng-container>
 		<mat-form-field class="w-100 px-3" (click)="$event.stopPropagation();">
-			<input type="text" matInput [matAutocomplete]="auto" [formControl]="studioForm">
-			<mat-autocomplete autoActiveFirstOption #auto="matAutocomplete"
+			<mat-label>Studio</mat-label>
+			<input type="text" matInput [matAutocomplete]="autoStudio" [formControl]="studioForm" placeholder="None">
+			<mat-autocomplete autoActiveFirstOption #autoStudio="matAutocomplete"
 			                  (optionSelected)="this.addFilter('studio', $event.option.value, false)"
 			                  [displayWith]="this.nameGetter">
 				<mat-option *ngIf="this.shouldDisplayNoneStudio()" [value]="null">None</mat-option>
 				<mat-option *ngFor="let studio of this.filteredStudios | async" [value]="studio">
 					{{studio.name}}
+				</mat-option>
+			</mat-autocomplete>
+		</mat-form-field>
+	</ng-container>
+
+	<ng-container>
+		<mat-form-field class="w-100 px-3" (click)="$event.stopPropagation();">
+			<mat-label>People</mat-label>
+			<mat-chip-list #peopleList>
+				<mat-chip *ngFor="let people of this.filters.people"
+				          color="accent" selected
+				          removable="true"
+				          (removed)="this.addFilter('people', people)"
+				          (click)="this.addFilter('people', people)">
+					{{people.name || people.slug}}
+					<mat-icon matChipRemove>cancel</mat-icon>
+				</mat-chip>
+				<input #peopleInput
+				       [matAutocomplete]="autoPpl"
+				       [matChipInputFor]="peopleList"
+				       [formControl]="peopleForm"
+				       (matChipInputTokenEnd)="this.addFilter('people', {id: 0, slug: $event.value});
+				                               $event.input.value = null;"/>
+			</mat-chip-list>
+			<mat-autocomplete #autoPpl="matAutocomplete"
+			                  (optionSelected)="this.addFilter('people', $event.option.value);
+			                                    peopleInput.value = null;">
+				<mat-option *ngFor="let people of this.filteredPeople | async" [value]="people">
+					{{people.name}}
 				</mat-option>
 			</mat-autocomplete>
 		</mat-form-field>

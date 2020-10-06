@@ -1,31 +1,49 @@
-import {APP_INITIALIZER, NgModule} from '@angular/core';
-import {CommonModule} from '@angular/common';
-import {AccountComponent} from "./account/account.component";
-import {AuthPipe} from "./misc/auth.pipe";
-import {UnauthorizedComponent} from "./unauthorized/unauthorized.component";
-import {LogoutComponent} from "./logout/logout.component";
-import {ConfigResult, OidcConfigService, OidcSecurityService, OpenIdConfiguration, AuthModule as OidcModule} from "angular-auth-oidc-client";
-import {HTTP_INTERCEPTORS, HttpClient} from "@angular/common/http";
-import {AuthGuard} from "./misc/authenticated-guard.service";
-import {AuthorizerInterceptor} from "./misc/authorizer-interceptor.service";
-import {MatFormFieldModule} from "@angular/material/form-field";
-import {MatIconModule} from "@angular/material/icon";
-import {MatInputModule} from "@angular/material/input";
-import {MatDialogModule} from "@angular/material/dialog";
-import {MatButtonModule} from "@angular/material/button";
-import {MatSelectModule} from "@angular/material/select";
-import {MatMenuModule} from "@angular/material/menu";
-import {MatSliderModule} from "@angular/material/slider";
-import {MatTooltipModule} from "@angular/material/tooltip";
-import {MatRippleModule} from "@angular/material/core";
-import {MatCardModule} from "@angular/material/card";
-import {FormsModule} from "@angular/forms";
-import {MatTabsModule} from "@angular/material/tabs";
-import {MatCheckboxModule} from "@angular/material/checkbox";
+import { CommonModule } from "@angular/common";
+import { HTTP_INTERCEPTORS, HttpClient } from "@angular/common/http";
+import { APP_INITIALIZER, NgModule } from "@angular/core";
+import { FormsModule } from "@angular/forms";
+import { MatButtonModule } from "@angular/material/button";
+import { MatCardModule } from "@angular/material/card";
+import { MatCheckboxModule } from "@angular/material/checkbox";
+import { MatRippleModule } from "@angular/material/core";
+import { MatDialogModule } from "@angular/material/dialog";
+import { MatFormFieldModule } from "@angular/material/form-field";
+import { MatIconModule } from "@angular/material/icon";
+import { MatInputModule } from "@angular/material/input";
+import { MatMenuModule } from "@angular/material/menu";
+import { MatSelectModule } from "@angular/material/select";
+import { MatSliderModule } from "@angular/material/slider";
+import { MatTabsModule } from "@angular/material/tabs";
+import { MatTooltipModule } from "@angular/material/tooltip";
+import { RouterModule } from "@angular/router";
+import { AuthModule as OidcModule, LogLevel, OidcConfigService } from "angular-auth-oidc-client";
+import { tap } from "rxjs/operators";
+import { AccountComponent } from "./account/account.component";
+import { LogoutComponent } from "./logout/logout.component";
+import { AuthPipe } from "./misc/auth.pipe";
+import { AuthGuard } from "./misc/authenticated-guard.service";
+import { AuthorizerInterceptor } from "./misc/authorizer-interceptor.service";
+import { UnauthorizedComponent } from "./unauthorized/unauthorized.component";
 
 export function loadConfig(oidcConfigService: OidcConfigService)
 {
-	return () => oidcConfigService.load_using_stsServer(window.location.origin);
+	return () => oidcConfigService.withConfig({
+		stsServer: window.location.origin,
+		redirectUrl: "/",
+		postLogoutRedirectUri: "/logout",
+		clientId: "kyoo.webapp",
+		responseType: "code",
+		triggerAuthorizationResultEvent: false,
+		scope: "openid profile offline_access",
+		silentRenew: true,
+		silentRenewUrl: "/silent.html",
+		useRefreshToken: true,
+		startCheckSession: true,
+
+		forbiddenRoute: "/forbidden",
+		unauthorizedRoute: "/unauthorized",
+		logLevel: LogLevel.Debug
+	});
 }
 
 @NgModule({
@@ -51,7 +69,8 @@ export function loadConfig(oidcConfigService: OidcConfigService)
 		FormsModule,
 		MatTabsModule,
 		MatCheckboxModule,
-		OidcModule.forRoot()
+		OidcModule.forRoot(),
+		RouterModule
 	],
 	entryComponents: [
 		AccountComponent
@@ -74,32 +93,9 @@ export function loadConfig(oidcConfigService: OidcConfigService)
 })
 export class AuthModule 
 {
-	constructor(private oidcSecurityService: OidcSecurityService, private oidcConfigService: OidcConfigService, http: HttpClient)
+	constructor(http: HttpClient)
 	{
-		this.oidcConfigService.onConfigurationLoaded.subscribe((configResult: ConfigResult) =>
-		{
-			const config: OpenIdConfiguration = {
-				stsServer: configResult.customConfig.stsServer,
-				redirect_url: "/",
-				post_logout_redirect_uri: "/logout",
-				client_id: 'kyoo.webapp',
-				response_type: "code",
-				trigger_authorization_result_event: false,
-				scope: "openid profile",
-				silent_renew: true,
-				silent_renew_url: "/silent.html",
-				use_refresh_token: false,
-				start_checksession: true,
-
-				forbidden_route: '/Forbidden',
-				unauthorized_route: '/Unauthorized',
-				log_console_warning_active: true,
-				log_console_debug_active: true
-			};
-
-			this.oidcSecurityService.setupModule(config, configResult.authWellknownEndpoints);
-		});
-
-		http.get("/api/account/default-permissions").subscribe((result: string[]) => AuthGuard.defaultPermissions = result);
+		AuthGuard.permissionsObservable = http.get<string[]>("/api/account/default-permissions")
+			.pipe(tap(x => AuthGuard.defaultPermissions = x));
 	}
 }

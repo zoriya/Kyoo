@@ -1,8 +1,7 @@
-import {Injectable} from '@angular/core';
-import {AuthorizationResult, AuthorizationState, OidcSecurityService, ValidationResult} from "angular-auth-oidc-client";
-import {HttpClient} from "@angular/common/http";
-import {Account} from "../../models/account";
-import {Router} from "@angular/router";
+import { HttpClient } from "@angular/common/http";
+import { Injectable } from '@angular/core';
+import { OidcSecurityService } from "angular-auth-oidc-client";
+import { Account } from "../models/account";
 
 @Injectable({
 	providedIn: 'root'
@@ -10,31 +9,23 @@ import {Router} from "@angular/router";
 export class AuthService 
 {
 	isAuthenticated: boolean = false;
-	user: any;
-	
-	constructor(public oidcSecurityService: OidcSecurityService, private http: HttpClient, private router: Router)
-	{
-		if (this.oidcSecurityService.moduleSetup)
-			this.authorizeCallback();
-		else 
-			this.oidcSecurityService.onModuleSetup.subscribe(() => 
-			{
-				this.authorizeCallback();
-			});
+	account: Account = null;
 
-		this.oidcSecurityService.onAuthorizationResult.subscribe((authorizationResult: AuthorizationResult) => 
-		{
-			this.getUser();
-			this.isAuthenticated = authorizationResult.authorizationState == AuthorizationState.authorized;
-		});
-		this.getUser();
-	}
-
-	getUser()
+	constructor(private oidcSecurityService: OidcSecurityService,
+	            private http: HttpClient)
 	{
-		this.oidcSecurityService.getUserData().subscribe(userData =>
+		this.oidcSecurityService.checkAuth()
+			.subscribe((auth: boolean) => this.isAuthenticated = auth);
+		this.oidcSecurityService.userData$.subscribe(x =>
 		{
-			this.user = userData;
+			if (x == null)
+				return;
+			this.account = {
+				email: x.email,
+				username: x.username,
+				picture: x.picture,
+				permissions: x.permissions.split(',')
+			};
 		});
 	}
 	
@@ -45,30 +36,10 @@ export class AuthService
 
 	logout() 
 	{
-		document.cookie = "Authenticated=false; expires=" + new Date(2147483647 * 1000).toUTCString();
-		this.http.get("api/account/logout").subscribe(() => 
-		{
+		// this.http.get("api/account/logout").subscribe(() =>
+		// {
 			this.oidcSecurityService.logoff();
-		});
-	}
-
-	private authorizeCallback() 
-	{
-		if (window.location.href.indexOf("?code=") != -1)
-			this.oidcSecurityService.authorizedCallbackWithCode(window.location.toString());
-		else if (window.location.href.indexOf("/login") == -1)
-		{
-			this.oidcSecurityService.getIsAuthorized().subscribe((authorized: boolean) =>
-			{
-				this.isAuthenticated = authorized;
-			});
-		}
-	}
-
-	getAccount(): Account
-	{
-		if (!this.isAuthenticated)
-			return null;
-		return {email: this.user.email, username: this.user.username, picture: this.user.picture};
+			// document.cookie = "Authenticated=false; expires=" + new Date(2147483647 * 1000).toUTCString();
+		// });
 	}
 }

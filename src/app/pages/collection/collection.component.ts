@@ -1,11 +1,11 @@
 import {Component} from '@angular/core';
-import {Collection} from "../../../models/resources/collection";
+import {Collection} from "../../models/resources/collection";
 import {ActivatedRoute} from "@angular/router";
 import {DomSanitizer} from "@angular/platform-browser";
-import {Show, ShowRole} from "../../../models/resources/show";
-import {Page} from "../../../models/page";
-import {People} from "../../../models/resources/people";
-import {LibraryItem} from "../../../models/resources/library-item";
+import {Show, ShowRole} from "../../models/resources/show";
+import {Page} from "../../models/page";
+import {People} from "../../models/resources/people";
+import {LibraryItem} from "../../models/resources/library-item";
 import {ItemsUtils} from "../../misc/items-utils";
 
 @Component({

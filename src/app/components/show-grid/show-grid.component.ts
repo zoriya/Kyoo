@@ -1,7 +1,7 @@
 import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {DomSanitizer} from "@angular/platform-browser";
-import {Show} from "../../../models/resources/show";
-import {Page} from "../../../models/page";
+import {Show} from "../../models/resources/show";
+import {Page} from "../../models/page";
 
 @Component({
 	selector: 'app-shows-grid',

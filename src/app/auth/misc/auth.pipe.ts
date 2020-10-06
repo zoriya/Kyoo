@@ -21,7 +21,7 @@ export class AuthPipe implements PipeTransform
 		const headers = new HttpHeaders({"Authorization": "Bearer " + token});
 		const img = await this.http.get(uri, {headers, responseType: 'blob'}).toPromise();
 		const reader = new FileReader();
-		return new Promise((resolve, reject) => {
+		return new Promise((resolve) => {
 			reader.onloadend = () => resolve(reader.result as string);
 			reader.readAsDataURL(img);
 		});

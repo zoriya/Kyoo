@@ -6,7 +6,6 @@ import {
 	UrlSegment,
 	ActivatedRouteSnapshot,
 	RouterStateSnapshot,
-	UrlTree,
 	Router
 } from '@angular/router';
 import {Observable} from 'rxjs';
@@ -17,6 +16,7 @@ export class AuthGuard
 {
 	public static guards: any[] = [];
 	public static defaultPermissions: string[];
+	public static permissionsObservable: Observable<string[]>;
 
 	static forPermissions(...permissions: string[])
 	{
@@ -25,31 +25,31 @@ export class AuthGuard
 		{
 			constructor(private router: Router, private authManager: AuthService)  {}
 	
-			canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree
+			async canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean>
 			{
-				if (!this.checkPermissions())
+				if (!await this.checkPermissions())
 				{
-					this.router.navigate(["/unauthorized"]);
+					await this.router.navigate(["/unauthorized"]);
 					return false;
 				}
 				return true;
 			}
 	
-			canLoad(route: Route, segments: UrlSegment[]): Observable<boolean> | Promise<boolean> | boolean
+			async canLoad(route: Route, segments: UrlSegment[]): Promise<boolean>
 			{
-				if (!this.checkPermissions())
+				if (!await this.checkPermissions())
 				{
-					this.router.navigate(["/unauthorized"]);
+					await this.router.navigate(["/unauthorized"]);
 					return false;
 				}
 				return true;
 			}
 	
-			checkPermissions(): boolean
+			async checkPermissions(): Promise<boolean>
 			{
 				if (this.authManager.isAuthenticated)
 				{
-					let perms = this.authManager.user.permissions.split(",");
+					const perms: string[] = this.authManager.account.permissions;
 					for (let perm of permissions) {
 						if (!perms.includes(perm))
 							return false;
@@ -58,8 +58,11 @@ export class AuthGuard
 				}
 				else 
 				{
+					if (AuthGuard.defaultPermissions == undefined)
+						await AuthGuard.permissionsObservable.toPromise()
+
 					for (let perm of permissions)
-						if (AuthGuard.defaultPermissions?.includes(perm) === true)
+						if (!AuthGuard.defaultPermissions.includes(perm))
 							return false;
 					return true;
 				}

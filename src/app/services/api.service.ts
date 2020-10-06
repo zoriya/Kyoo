@@ -1,15 +1,16 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs"
-import {Page} from "../../models/page";
-import {IResource} from "../../models/resources/resource";
-import {Library} from "../../models/resources/library";
-import {LibraryItem} from "../../models/resources/library-item";
+import {Page} from "../models/page";
+import {IResource} from "../models/resources/resource";
+import {Library} from "../models/resources/library";
+import {LibraryItem} from "../models/resources/library-item";
 import {map} from "rxjs/operators";
-import {Season} from "../../models/resources/season";
-import {Episode} from "../../models/resources/episode";
-import {People} from "../../models/resources/people";
-import {Show} from "../../models/resources/show";
+import {Season} from "../models/resources/season";
+import {Episode} from "../models/resources/episode";
+import {People} from "../models/resources/people";
+import {Show} from "../models/resources/show";
+import { Studio } from "../models/resources/studio";
 
 export interface ApiArgs
 {
@@ -56,6 +57,11 @@ class CrudApi<T extends IResource>
 	delete(item: T): Observable<T>
 	{
 		return this.client.delete<T>(`/api/${this.route}/${item.slug}`);
+	}
+
+	search(name: string): Observable<T[]>
+	{
+		return this.client.get<T[]>(`/api/search/${name}/${this.route}`);
 	}
 }
 
@@ -152,6 +158,22 @@ export class ShowService extends CrudApi<Show>
 	{
 		return this.client.get<Page<Show>>(`/api/collections/${collection}/shows${this.ArgsAsQuery(args)}`)
 			.pipe(map(x => Object.assign(new Page<Show>(), x)));
+	}
+}
+
+@Injectable({
+	providedIn: 'root'
+})
+export class StudioService extends CrudApi<Studio>
+{
+	constructor(client: HttpClient)
+	{
+		super(client, "studios");
+	}
+
+	getForShow(show: string | number) : Observable<Studio>
+	{
+		return this.client.get<Studio>(`/api/show/${show}/studio}`);
 	}
 }
 

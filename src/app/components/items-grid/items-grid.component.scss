@@ -21,7 +21,7 @@ button
 .show
 {
 	width: 27%;
-	min-width: 120px;
+	min-width: 100px;
 	max-width: 168px;
 	list-style: none;
 	margin: .5em;
@@ -32,6 +32,7 @@ button
 	@include media-breakpoint-up(sm)
 	{
 		width: 22%;
+		min-width: 120px;
 	}
 
 	@include media-breakpoint-up(md)

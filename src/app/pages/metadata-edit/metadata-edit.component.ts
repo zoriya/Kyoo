@@ -1,14 +1,14 @@
 import {Component, ElementRef, Inject, ViewChild} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
 import {HttpClient} from "@angular/common/http";
-import {Show} from "../../../models/resources/show";
-import {Genre} from "../../../models/resources/genre";
+import {Show} from "../../models/resources/show";
+import {Genre} from "../../models/resources/genre";
 import {MatChipInputEvent} from "@angular/material/chips";
 import {MatAutocompleteSelectedEvent} from "@angular/material/autocomplete";
 import {Observable, of} from "rxjs";
 import {tap} from "rxjs/operators";
-import {Studio} from "../../../models/resources/studio";
-import {Provider} from "../../../models/provider";
+import {Studio} from "../../models/resources/studio";
+import {Provider} from "../../models/provider";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {ShowGridComponent} from "../../components/show-grid/show-grid.component";
 

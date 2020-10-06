@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from '@angular/core';
-import { Page } from "../../models/page";
+import { Page } from "../models/page";
 import { Observable, of } from "rxjs"
 import { map } from "rxjs/operators"
 

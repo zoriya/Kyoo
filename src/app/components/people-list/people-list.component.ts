@@ -1,9 +1,9 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { MatButton } from "@angular/material/button";
 import { DomSanitizer } from "@angular/platform-browser";
-import { People } from "../../../models/resources/people";
+import { People } from "../../models/resources/people";
 import {HorizontalScroller} from "../../misc/horizontal-scroller";
-import {Page} from "../../../models/page";
+import {Page} from "../../models/page";
 import {HttpClient} from "@angular/common/http";
 
 @Component({

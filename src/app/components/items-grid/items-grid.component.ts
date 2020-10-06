@@ -2,18 +2,20 @@ import { Component, Input, OnInit } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { ActivatedRoute, ActivatedRouteSnapshot, Params, Router } from "@angular/router";
 import { DomSanitizer } from '@angular/platform-browser';
-import { Genre } from "../../../models/resources/genre";
-import { LibraryItem } from "../../../models/resources/library-item";
-import { Page } from "../../../models/page";
+import { Genre } from "../../models/resources/genre";
+import { LibraryItem } from "../../models/resources/library-item";
+import { Page } from "../../models/page";
 import { HttpClient } from "@angular/common/http";
-import { IResource } from "../../../models/resources/resource";
-import { Show, ShowRole } from "../../../models/resources/show";
-import { Collection } from "../../../models/resources/collection";
-import { Studio } from "../../../models/resources/studio";
+import { People } from "../../models/resources/people";
+import { IResource } from "../../models/resources/resource";
+import { Show, ShowRole } from "../../models/resources/show";
+import { Collection } from "../../models/resources/collection";
+import { Studio } from "../../models/resources/studio";
 import { ItemsUtils } from "../../misc/items-utils";
+import { PeopleService, StudioService } from "../../services/api.service";
 import { PreLoaderService } from "../../services/pre-loader.service";
 import { Observable } from "rxjs"
-import { map, startWith, tap } from "rxjs/operators"
+import { catchError, filter, map, mergeAll } from "rxjs/operators";
 
 @Component({
 	selector: 'app-items-grid',
@@ -31,20 +33,25 @@ export class ItemsGridComponent implements OnInit
 	sortKeys: string[] = ["title", "start year", "end year"]
 	sortUp: boolean = true;
 
-	public static readonly showOnlyFilters: string[] = ["genres", "studio"]
+	public static readonly showOnlyFilters: string[] = ["genres", "studio", "people"]
 	public static readonly filters: string[] = [].concat(...ItemsGridComponent.showOnlyFilters)
-	filters: {genres: Genre[], studio: Studio} = {genres: [], studio: null};
+	filters: {genres: Genre[], studio: Studio, people: People[]} = {genres: [], studio: null, people: []};
+
 	genres: Genre[] = [];
-	studios: Studio[] = [];
 
 	studioForm: FormControl = new FormControl();
 	filteredStudios: Observable<Studio[]>;
 
+	peopleForm: FormControl = new FormControl();
+	filteredPeople: Observable<People[]>;
+
 	constructor(private route: ActivatedRoute,
 	            private sanitizer: DomSanitizer,
 	            private loader: PreLoaderService,
-	            public client: HttpClient,
-	            private router: Router)
+	            private router: Router,
+	            private studioApi: StudioService,
+	            private peopleApi: PeopleService,
+	            public client: HttpClient)
 	{
 		this.route.data.subscribe((data) =>
 		{
@@ -59,11 +66,6 @@ export class ItemsGridComponent implements OnInit
 		{
 			this.genres = data;
 			this.updateGenresFilterFromQuery(this.route.snapshot.queryParams);
-		});
-		this.loader.load<Studio>("/api/studios?limit=0").subscribe(data =>
-		{
-			this.studios = data;
-			this.updateStudioFilterFromQuery(this.route.snapshot.queryParams);
 		});
 	}
 
@@ -82,17 +84,41 @@ export class ItemsGridComponent implements OnInit
 
 	updateStudioFilterFromQuery(query: Params)
 	{
-		this.filters.studio = this.studios.find(x => x.slug == query.studio
-			|| x.slug == this.route.snapshot.params.slug);
+		const slug: string = query.studio ?? this.route.snapshot.params.slug;
+
+		if (slug && this.filters.studio?.slug != slug)
+		{
+			this.filters.studio = {id: 0, slug: slug, name: slug};
+			this.studioApi.get(slug).subscribe(x => this.filters.studio = x);
+		}
 	}
 
 	ngOnInit()
 	{
 		this.filteredStudios = this.studioForm.valueChanges
 			.pipe(
-				map(x => x == null ? "" : x),
+				filter(x => x),
 				map(x => typeof x === "string" ? x : x.name),
-				map(x => this.studios.filter(y => y.name.toLowerCase().indexOf(x.toLowerCase()) != -1))
+				map(x => this.studioApi.search(x)),
+				mergeAll(),
+				catchError(x =>
+				{
+					console.log(x);
+					return [];
+				})
+			);
+
+		this.filteredPeople = this.peopleForm.valueChanges
+			.pipe(
+				filter(x => x),
+				map(x => typeof x === "string" ? x : x.name),
+				map(x => this.peopleApi.search(x)),
+				mergeAll(),
+				catchError(x =>
+				{
+					console.log(x);
+					return [];
+				})
 			);
 	}
 
@@ -102,6 +128,7 @@ export class ItemsGridComponent implements OnInit
 	}
 
 	// TODO add /people to the switch list.
+	// TODO only load studios & people when the user open the menu or load them from the server when typing.
 
 	/*
 	 * /browse           -> /api/items | /api/shows
@@ -141,14 +168,14 @@ export class ItemsGridComponent implements OnInit
 	{
 		if (isArray)
 		{
-			if (this.filters[category].includes(filter))
+			if (this.filters[category].includes(filter) || this.filters[category].some(x => x.slug == filter.slug))
 				this.filters[category].splice(this.filters[category].indexOf(filter), 1);
 			else
 				this.filters[category].push(filter);
 		}
 		else
 		{
-			if (this.filters[category] == filter)
+			if (this.filters[category] == filter || this.filters[category]?.slug == filter.slug)
 			{
 				if (!toggle)
 					return;
@@ -184,6 +211,14 @@ export class ItemsGridComponent implements OnInit
 				});
 				return;
 			}
+			if (this.filters.people.length == 1 && this.getFilterCount() == 1)
+			{
+				this.router.navigate(["people", this.filters.people[0].slug], {
+					replaceUrl: true,
+					queryParams: {sortBy: this.route.snapshot.queryParams.sortBy}
+				});
+				return;
+			}
  			if (this.getFilterCount() == 0 || this.router.url != "/browse")
 			{
 				let params = {[category]: param}
@@ -191,6 +226,8 @@ export class ItemsGridComponent implements OnInit
 					params.studio = this.route.snapshot.params.slug;
 				if (this.router.url.startsWith("/genre") && category != "genres")
 					params.genres = `${this.route.snapshot.params.slug}`;
+				if (this.router.url.startsWith("/people") && category != "people")
+					params.people = `${this.route.snapshot.params.slug}`;
 
 				this.router.navigate(["/browse"], {
 					queryParams: params,

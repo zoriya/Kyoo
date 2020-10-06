@@ -1,5 +1,5 @@
 import { detect } from "detect-browser";
-import { Track, WatchItem } from "../models/watch-item";
+import { Track, WatchItem } from "../app/models/watch-item";
 
 export enum method
 {

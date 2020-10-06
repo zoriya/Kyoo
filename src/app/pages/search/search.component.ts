@@ -1,8 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from "@angular/router";
-import { SearchResult } from "../../../models/search-result";
+import { SearchResult } from "../../models/search-result";
 import { Title } from "@angular/platform-browser";
-import {Page} from "../../../models/page";
+import {Page} from "../../models/page";
 
 @Component({
 	selector: 'app-search',

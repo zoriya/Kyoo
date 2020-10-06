@@ -1,7 +1,7 @@
 import {Component, ElementRef, Inject, ViewChild} from '@angular/core';
 import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
 import {HttpClient} from "@angular/common/http";
-import {Account} from "../../../models/account";
+import {Account} from "../../models/account";
 
 
 @Component({
@@ -14,7 +14,9 @@ export class AccountComponent
 	selectedPicture: File;
 	@ViewChild("accountImg") accountImg: ElementRef;
 	
-	constructor(public dialogRef: MatDialogRef<AccountComponent>, @Inject(MAT_DIALOG_DATA) public account: Account, private http: HttpClient) {}
+	constructor(public dialogRef: MatDialogRef<AccountComponent>,
+	            @Inject(MAT_DIALOG_DATA) public account: Account,
+	            private http: HttpClient) {}
 
 	finish()
 	{
