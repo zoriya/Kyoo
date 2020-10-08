@@ -1,6 +1,10 @@
-import {ElementRef, ViewChild} from "@angular/core";
+import { Component, ElementRef, ViewChild } from "@angular/core";
 import {MatButton} from "@angular/material/button";
 
+// noinspection AngularMissingOrInvalidDeclarationInModule
+@Component({
+	template: ""
+})
 export class HorizontalScroller
 {
 	@ViewChild("scrollView", { static: true }) private scrollView: ElementRef;

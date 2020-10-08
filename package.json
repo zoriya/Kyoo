@@ -22,7 +22,6 @@
     "angular-auth-oidc-client": "11.2.0",
     "bootstrap": "^4.5.2",
     "detect-browser": "^5.1.1",
-    "hammerjs": "^2.0.8",
     "hls.js": "^0.14.13",
     "jquery": "^3.5.1",
     "ngx-infinite-scroll": "^9.1.0",

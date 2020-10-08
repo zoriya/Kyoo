@@ -42,7 +42,7 @@ export function loadConfig(oidcConfigService: OidcConfigService)
 
 		forbiddenRoute: "/forbidden",
 		unauthorizedRoute: "/unauthorized",
-		logLevel: LogLevel.Debug
+		logLevel: LogLevel.Warn
 	});
 }
 
