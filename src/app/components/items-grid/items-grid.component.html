@@ -30,7 +30,9 @@
 	<ng-container>
 		<mat-form-field class="w-100 px-3" (click)="$event.stopPropagation();">
 			<mat-label>Studio</mat-label>
-			<input type="text" matInput [matAutocomplete]="autoStudio" [formControl]="studioForm" placeholder="None">
+			<input type="text" matInput [formControl]="studioForm"
+			       [matAutocomplete]="autoStudio"
+			       [value]="this.nameGetter(this.filters.studio)">
 			<mat-autocomplete autoActiveFirstOption #autoStudio="matAutocomplete"
 			                  (optionSelected)="this.addFilter('studio', $event.option.value, false)"
 			                  [displayWith]="this.nameGetter">

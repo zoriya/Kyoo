@@ -94,7 +94,6 @@ export class ItemsGridComponent implements OnInit
 		}
 		else if (!slug)
 			this.filters.studio = null;
-		this.studioForm.setValue(this.filters.studio?.name ?? "None", {emitEvent: false});
 	}
 
 	updatePeopleFilterFromQuery(query: Params)
@@ -200,7 +199,7 @@ export class ItemsGridComponent implements OnInit
 		}
 		else
 		{
-			if (this.filters[category] == filter || this.filters[category]?.slug == filter.slug)
+			if (filter && (this.filters[category] == filter || this.filters[category]?.slug == filter.slug))
 			{
 				if (!toggle)
 					return;
