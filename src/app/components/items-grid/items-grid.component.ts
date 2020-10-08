@@ -61,6 +61,7 @@ export class ItemsGridComponent implements OnInit
 		{
 			this.updateGenresFilterFromQuery(data);
 			this.updateStudioFilterFromQuery(data);
+			this.updatePeopleFilterFromQuery(data);
 		});
 		this.loader.load<Genre>("/api/genres?limit=0").subscribe(data =>
 		{
@@ -84,12 +85,39 @@ export class ItemsGridComponent implements OnInit
 
 	updateStudioFilterFromQuery(query: Params)
 	{
-		const slug: string = query.studio ?? this.route.snapshot.params.slug;
+		const slug: string = this.router.url.startsWith("/studio") ? this.route.snapshot.params.slug : query.studio;
 
 		if (slug && this.filters.studio?.slug != slug)
 		{
 			this.filters.studio = {id: 0, slug: slug, name: slug};
 			this.studioApi.get(slug).subscribe(x => this.filters.studio = x);
+		}
+		else if (!slug)
+			this.filters.studio = null;
+		this.studioForm.setValue(this.filters.studio?.name ?? "None", {emitEvent: false});
+	}
+
+	updatePeopleFilterFromQuery(query: Params)
+	{
+		let slugs: string[] = [];
+		if (query.people != null)
+		{
+			if (query.people.startsWith("ctn:"))
+				slugs = query.people.substr(4).split(',');
+			else
+				slugs = query.people.split(',');
+		}
+		else if (this.route.snapshot.params.slug && this.router.url.startsWith("/people"))
+			slugs = [this.route.snapshot.params.slug];
+
+		this.filters.people = slugs.map(x => ({slug: x, name: x} as People));
+		for (let slug of slugs)
+		{
+			this.peopleApi.get(slug).subscribe(x =>
+			{
+				let i: number = this.filters.people.findIndex(x => x.slug == slug);
+				this.filters.people[i] = x
+			});
 		}
 	}
 
@@ -127,17 +155,14 @@ export class ItemsGridComponent implements OnInit
 		return this.studioForm.value == '' || typeof this.studioForm.value != "string";
 	}
 
-	// TODO add /people to the switch list.
-	// TODO only load studios & people when the user open the menu or load them from the server when typing.
-
 	/*
 	 * /browse           -> /api/items | /api/shows
 	 * /browse/:library  -> /api/library/:slug/items | /api/library/:slug/shows
 	 * /genre/:slug      -> /api/shows
 	 * /studio/:slug     -> /api/shows
 	 *
-	 * /collection/:slug -> /api/collection/:slug/shows   |> AS @Input
-	 * /people/:slug     -> /api/people/:slug/roles       |> AS @Input
+	 * /collection/:slug -> /api/collection/:slug/shows   |> /api/collections/:slug/shows
+	 * /people/:slug     -> /api/people/:slug/roles       |> /api/people/:slug/roles
 	 */
 
 	static routeMapper(route: ActivatedRouteSnapshot, endpoint: string, query: [string, string][]): string
@@ -158,7 +183,7 @@ export class ItemsGridComponent implements OnInit
 
 	getFilterCount()
 	{
-		let count: number = this.filters.genres.length;
+		let count: number = this.filters.genres.length + this.filters.people.length;
 		if (this.filters.studio != null)
 			count++;
 		return count;
@@ -193,7 +218,8 @@ export class ItemsGridComponent implements OnInit
 
 		if (/\/browse($|\?)/.test(this.router.url)
 			|| this.router.url.startsWith("/genre")
-			|| this.router.url.startsWith("/studio"))
+			|| this.router.url.startsWith("/studio")
+			|| this.router.url.startsWith("/people"))
 		{
 			if (this.filters.genres.length == 1 && this.getFilterCount() == 1)
 			{
