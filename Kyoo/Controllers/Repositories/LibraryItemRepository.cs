@@ -83,6 +83,14 @@ namespace Kyoo.Controllers
 			return ApplyFilters(ItemsQuery, where, sort, limit);
 		}
 
+		public override Task<int> GetCount(Expression<Func<LibraryItem, bool>> where = null)
+		{
+			IQueryable<LibraryItem> query = ItemsQuery;
+			if (where != null)
+				query = query.Where(where);
+			return query.CountAsync();
+		}
+
 		public async Task<ICollection<LibraryItem>> Search(string query)
 		{
 			return await ItemsQuery

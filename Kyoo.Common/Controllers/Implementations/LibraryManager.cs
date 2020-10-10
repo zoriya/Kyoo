@@ -338,6 +338,51 @@ namespace Kyoo.Controllers
 			return PeopleRepository.GetFromPeople(slug, where, sort, limit);
 		}
 
+		public Task<int> GetLibrariesCount(Expression<Func<Library, bool>> where = null)
+		{
+			return LibraryRepository.GetCount(where);
+		}
+
+		public Task<int> GetCollectionsCount(Expression<Func<Collection, bool>> where = null)
+		{
+			return CollectionRepository.GetCount(where);
+		}
+
+		public Task<int> GetShowsCount(Expression<Func<Show, bool>> where = null)
+		{
+			return ShowRepository.GetCount(where);
+		}
+
+		public Task<int> GetSeasonsCount(Expression<Func<Season, bool>> where = null)
+		{
+			return SeasonRepository.GetCount(where);
+		}
+
+		public Task<int> GetEpisodesCount(Expression<Func<Episode, bool>> where = null)
+		{
+			return EpisodeRepository.GetCount(where);
+		}
+
+		public Task<int> GetTracksCount(Expression<Func<Track, bool>> where = null)
+		{
+			return TrackRepository.GetCount(where);
+		}
+
+		public Task<int> GetGenresCount(Expression<Func<Genre, bool>> where = null)
+		{
+			return GenreRepository.GetCount(where);
+		}
+
+		public Task<int> GetStudiosCount(Expression<Func<Studio, bool>> where = null)
+		{
+			return StudioRepository.GetCount(where);
+		}
+
+		public Task<int> GetPeopleCount(Expression<Func<People, bool>> where = null)
+		{
+			return PeopleRepository.GetCount(where);
+		}
+
 		public Task AddShowLink(int showID, int? libraryID, int? collectionID)
 		{
 			return ShowRepository.AddShowLink(showID, libraryID, collectionID);

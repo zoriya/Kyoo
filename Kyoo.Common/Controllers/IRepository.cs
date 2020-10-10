@@ -90,6 +90,9 @@ namespace Kyoo.Controllers
 			Expression<Func<T, object>> sort,
 			Pagination limit = default
 		) => GetAll(where, new Sort<T>(sort), limit);
+
+		Task<int> GetCount(Expression<Func<T, bool>> where = null);
+		
 		
 		Task<T> Create([NotNull] T obj);
 		Task<T> CreateIfNotExists([NotNull] T obj);

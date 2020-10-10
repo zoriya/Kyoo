@@ -47,6 +47,20 @@ namespace Kyoo.CommonApi
 			return resource;
 		}
 
+		[HttpGet("count")]
+		[Authorize(Policy = "Read")]
+		public virtual async Task<ActionResult<int>> GetCount([FromQuery] Dictionary<string, string> where)
+		{
+			try
+			{
+				return await _repository.GetCount(ApiHelper.ParseWhere<T>(where));
+			}
+			catch (ArgumentException ex)
+			{
+				return BadRequest(new {Error = ex.Message});
+			}
+		}
+		
 		[HttpGet]
 		[Authorize(Policy = "Read")]
 		public virtual async Task<ActionResult<Page<T>>> GetAll([FromQuery] string sortBy,

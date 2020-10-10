@@ -101,6 +101,14 @@ namespace Kyoo.Controllers
 			return await query.ToListAsync();
 		}
 
+		public virtual Task<int> GetCount(Expression<Func<T, bool>> where = null)
+		{
+			IQueryable<T> query = Database.Set<T>();
+			if (where != null)
+				query = query.Where(where);
+			return query.CountAsync();
+		}
+
 		public virtual async Task<T> Create([NotNull] T obj)
 		{
 			if (obj == null)
@@ -257,6 +265,14 @@ namespace Kyoo.Controllers
 				limit);
 
 			return items.ToList<T>();
+		}
+		
+		public virtual Task<int> GetCount(Expression<Func<T, bool>> where = null)
+		{
+			IQueryable<TInternal> query = Database.Set<TInternal>();
+			if (where != null)
+				query = query.Where(where.Convert<Func<TInternal, bool>>());
+			return query.CountAsync();
 		}
 
 		Task<T> IRepository<T>.Create(T item)

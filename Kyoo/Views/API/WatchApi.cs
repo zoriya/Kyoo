@@ -6,38 +6,35 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Kyoo.Api
 {
-	[Route("api/[controller]")]
+	[Route("api/watch")]
 	[ApiController]
-	public class WatchController : ControllerBase
+	public class WatchApi : ControllerBase
 	{
 		private readonly ILibraryManager _libraryManager;
 
-		public WatchController(ILibraryManager libraryManager)
+		public WatchApi(ILibraryManager libraryManager)
 		{
 			_libraryManager = libraryManager;
 		}
 
 		[HttpGet("{showSlug}-s{seasonNumber}e{episodeNumber}")]
 		[Authorize(Policy="Read")]
-		public async Task<ActionResult<WatchItem>> Index(string showSlug, int seasonNumber, int episodeNumber)
+		public async Task<ActionResult<WatchItem>> GetWatchItem(string showSlug, int seasonNumber, int episodeNumber)
 		{
 			Episode item = await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
-
-			if(item == null)
+			if (item == null)
 				return NotFound();
-
-			return new WatchItem(item);
+			return await WatchItem.FromEpisode(item, _libraryManager);
 		}
 		
 		[HttpGet("{movieSlug}")]
 		[Authorize(Policy="Read")]
-		public async Task<ActionResult<WatchItem>> Index(string movieSlug)
+		public async Task<ActionResult<WatchItem>> GetWatchItem(string movieSlug)
 		{
 			Episode item = await _libraryManager.GetMovieEpisode(movieSlug);
-
-			if(item == null)
+			if (item == null)
 				return NotFound();
-			return new WatchItem(item);
+			return await WatchItem.FromEpisode(item, _libraryManager);
 		}
 	}
 }
