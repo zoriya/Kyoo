@@ -190,7 +190,18 @@ namespace Kyoo.Controllers
 			Pagination limit = default
 		) => GetProviders(where, new Sort<ProviderID>(sort), limit);
 
-
+		
+		// Counts
+		Task<int> GetLibrariesCount(Expression<Func<Library, bool>> where = null);
+		Task<int> GetCollectionsCount(Expression<Func<Collection, bool>> where = null);
+		Task<int> GetShowsCount(Expression<Func<Show, bool>> where = null);
+		Task<int> GetSeasonsCount(Expression<Func<Season, bool>> where = null);
+		Task<int> GetEpisodesCount(Expression<Func<Episode, bool>> where = null);
+		Task<int> GetTracksCount(Expression<Func<Track, bool>> where = null);
+		Task<int> GetGenresCount(Expression<Func<Genre, bool>> where = null);
+		Task<int> GetStudiosCount(Expression<Func<Studio, bool>> where = null);
+		Task<int> GetPeopleCount(Expression<Func<People, bool>> where = null);
+		
 		// Search
 		Task<ICollection<Library>> SearchLibraries(string searchQuery);
 		Task<ICollection<Collection>> SearchCollections(string searchQuery);

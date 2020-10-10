@@ -1,7 +1,8 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Threading.Tasks;
+using Kyoo.Controllers;
 using Kyoo.Models.Watch;
 
 namespace Kyoo.Models
@@ -59,53 +60,55 @@ namespace Kyoo.Models
 			string title, 
 			DateTime? releaseDate, 
 			string path, 
+			Track video,
 			IEnumerable<Track> audios,
-			IEnumerable<Track> subtitles,
-			Track video)
+			IEnumerable<Track> subtitles)
 			: this(episodeID, showTitle, showSlug, seasonNumber, episodeNumber, title, releaseDate, path)
 		{
+			Video = video;
 			Audios = audios;
 			Subtitles = subtitles;
-			Video = video;
 		}
 
-		public WatchItem(Episode episode)
-			: this(episode.ID,
-				episode.Show.Title,
-				episode.Show.Slug,
-				episode.SeasonNumber,
-				episode.EpisodeNumber,
-				episode.Title,
-				episode.ReleaseDate,
-				episode.Path,
-				episode.Tracks.Where(x => x.Type == StreamType.Audio),
-				episode.Tracks.Where(x => x.Type == StreamType.Subtitle),
-				episode.Tracks.FirstOrDefault(x => x.Type == StreamType.Video))
+		public static async Task<WatchItem> FromEpisode(Episode ep, ILibraryManager library)
 		{
-			if (episode.Show.IsMovie)
-			{
-				IsMovie = true;
-				return;
-			}
+			Show show = await library.GetShow(ep.ShowID); // TODO load only the title, the slug & the IsMovie with the library manager.
+			Episode previous = null;
+			Episode next = null;
 
-			if (EpisodeNumber > 1)
-				PreviousEpisode = episode.Season.Episodes.FirstOrDefault(x => x.EpisodeNumber == EpisodeNumber - 1);
-			else if (SeasonNumber > 1)
+			if (!show.IsMovie)
 			{
-				Season previousSeason = episode.Show.Seasons
-					.FirstOrDefault(x => x.SeasonNumber == SeasonNumber - 1);
-				PreviousEpisode = previousSeason?.Episodes
-					.FirstOrDefault(x => x.EpisodeNumber == previousSeason.Episodes.Count());
-			}
+				if (ep.EpisodeNumber > 1)
+					previous = await library.GetEpisode(ep.ShowID, ep.SeasonNumber, ep.EpisodeNumber - 1);
+				else if (ep.SeasonNumber > 1)
+				{
+					int count = await library.GetEpisodesCount(x => x.ShowID == ep.ShowID 
+					                                                && x.SeasonNumber == ep.SeasonNumber - 1);
+					previous = await library.GetEpisode(ep.ShowID, ep.SeasonNumber - 1, count);
+				}
 
-			if (EpisodeNumber >= episode.Season.Episodes.Count())
-			{
-				NextEpisode = episode.Show.Seasons
-					.FirstOrDefault(x => x.SeasonNumber == SeasonNumber + 1)?.Episodes
-					.FirstOrDefault(x => x.EpisodeNumber == 1);
+				if (ep.EpisodeNumber >= await library.GetEpisodesCount(x => x.SeasonID == ep.SeasonID))
+					next = await library.GetEpisode(ep.ShowID, ep.SeasonNumber + 1, 1);
+				else
+					next = await library.GetEpisode(ep.ShowID, ep.SeasonNumber, ep.EpisodeNumber + 1);
 			}
-			else
-				NextEpisode = episode.Season.Episodes.FirstOrDefault(x => x.EpisodeNumber == EpisodeNumber + 1);
+			
+			return new WatchItem(ep.ID,
+				show.Title,
+				show.Slug,
+				ep.SeasonNumber,
+				ep.EpisodeNumber,
+				ep.Title,
+				ep.ReleaseDate,
+				ep.Path,
+				await library.GetTrack(x => x.EpisodeID == ep.ID && x.Type == StreamType.Video),
+				await library.GetTracks(x => x.EpisodeID == ep.ID && x.Type == StreamType.Audio),
+				await library.GetTracks(x => x.EpisodeID == ep.ID && x.Type == StreamType.Subtitle))
+			{
+				IsMovie = show.IsMovie,
+				PreviousEpisode = previous,
+				NextEpisode = next
+			};
 		}
 	}
 }
