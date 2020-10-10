@@ -18,6 +18,8 @@ export class AppComponent
 	libraries: Library[];
 	isLoading: boolean = false;
 
+	static isMobile: boolean = false;
+
 	constructor(private libraryService: LibraryService,
 	            private router: Router,
 	            private location: Location,
@@ -47,7 +49,8 @@ export class AppComponent
 			}
 		});
 
-		if (!navigator.userAgent.match(/Mobi/))
+		AppComponent.isMobile = !!navigator.userAgent.match(/Mobi/);
+		if (!AppComponent.isMobile)
 			document.body.classList.add("hoverEnabled");
 	}
 

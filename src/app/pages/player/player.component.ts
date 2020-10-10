@@ -1,26 +1,34 @@
-import {Component, Injector, OnInit, ViewEncapsulation} from '@angular/core';
-import {MatSnackBar} from "@angular/material/snack-bar";
-import {DomSanitizer, Title} from "@angular/platform-browser";
-import {ActivatedRoute, Event, NavigationCancel, NavigationEnd, NavigationStart, Router} from "@angular/router";
-import {Track, WatchItem} from "../../models/watch-item";
-import {Location} from "@angular/common";
+import { Component, Injector, OnInit, ViewEncapsulation } from "@angular/core";
+import { MatSnackBar } from "@angular/material/snack-bar";
+import { DomSanitizer, Title } from "@angular/platform-browser";
+import { ActivatedRoute, Event, NavigationCancel, NavigationEnd, NavigationStart, Router } from "@angular/router";
+import { AppComponent } from "../../app.component";
+import { Track, WatchItem } from "../../models/watch-item";
+import { Location } from "@angular/common";
+import { getPlaybackMethod, getWhatIsSupported, method, SupportList } from "../../../videoSupport/playbackMethodDetector";
+import { OidcSecurityService } from "angular-auth-oidc-client";
 import * as Hls from "hls.js"
-import {getPlaybackMethod, getWhatIsSupported, method, SupportList} from "../../../videoSupport/playbackMethodDetector";
-import {OidcSecurityService} from "angular-auth-oidc-client";
 
 declare var SubtitleManager: any;
 
 @Component({
-	selector: 'app-player',
-	templateUrl: './player.component.html',
-	styleUrls: ['./player.component.scss'],
+	selector: "app-player",
+	templateUrl: "./player.component.html",
+	styleUrls: ["./player.component.scss"],
 	encapsulation: ViewEncapsulation.None
 })
 export class PlayerComponent implements OnInit
 {
 	item: WatchItem;
+	playing: boolean = true;
+	muted: boolean = false;
 
-	volume: number = 100;
+	private _volume: number = 100;
+	get volume(): number { return this._volume; }
+	set volume(value: number) { this._volume = Math.max(0, Math.min(value, 100)); }
+
+
+
 	seeking: boolean = false;
 	videoHider;
 	controllerHovered: boolean = false;
@@ -33,13 +41,6 @@ export class PlayerComponent implements OnInit
 	maxHours: number;
 	maxMinutes: number;
 	maxSeconds: number;
-
-	playIcon: string = "pause"; //Icon used by the play btn.
-	volumeIcon: string = "volume_up"; //Icon used by the volume btn.
-	fullscreenIcon: string = "fullscreen"; //Icon used by the fullscreen btn.
-
-	playTooltip: string = "Pause"; //Text used in the play tooltip
-	fullscreenTooltip: string = "Fullscreen"; //Text used in the fullscreen tooltip
 
 	playMethod: method = method.direct;
 	methodType = method;
@@ -56,7 +57,14 @@ export class PlayerComponent implements OnInit
 
 	private oidcSecurity: OidcSecurityService;
 
-	constructor(private route: ActivatedRoute, private sanitizer: DomSanitizer, private snackBar: MatSnackBar, private title: Title, private router: Router, private location: Location, private injector: Injector) { }
+	constructor(private route: ActivatedRoute,
+	            private sanitizer: DomSanitizer,
+	            private snackBar: MatSnackBar,
+	            private title: Title,
+	            private router: Router,
+	            private location: Location,
+	            private injector: Injector)
+	{ }
 
 	ngOnInit()
 	{
@@ -64,27 +72,21 @@ export class PlayerComponent implements OnInit
 		this.route.data.subscribe((data) =>
 		{
 			this.item = data.item;
-			this.item.duration = 20 * 60;
 
 			if (this.player)
-			{
 				this.player.load();
-				this.initPlayBtn();
-			}
 
 			this.setDuration(this.item.duration);
 
 			if (this.item.isMovie)
-				this.title.setTitle(this.item.showTitle + " - Kyoo");
+				this.title.setTitle(`${this.item.showTitle} - Kyoo`);
 			else
-				this.title.setTitle(this.item.showTitle + " S" + this.item.seasonNumber + ":E" + this.item.episodeNumber + " - Kyoo");
+				this.title.setTitle(`${this.item.showTitle} S${this.item.seasonNumber}:E${this.item.episodeNumber} - Kyoo`);
 
-			if (navigator.userAgent.match(/Mobi/) && document.fullscreenElement == null)
+			if (AppComponent.isMobile && !this.isFullScreen)
 			{
 				this.fullscreen();
 				screen.orientation.lock("landscape");
-				$("#fullscreen").addClass("d-none");
-				$("#volume").addClass("d-none");
 			}
 			setTimeout(() =>
 			{
@@ -94,24 +96,22 @@ export class PlayerComponent implements OnInit
 		});
 	}
 
+	get isFullScreen(): boolean
+	{
+		return document.fullscreenElement != null;
+	}
+
+	get isMobile(): boolean
+	{
+		return AppComponent.isMobile;
+	}
+
 	ngAfterViewInit()
 	{
 		this.player = document.getElementById("player") as HTMLVideoElement;
 		this.thumb = document.getElementById("thumb") as HTMLElement;
 		this.progress = document.getElementById("progress") as HTMLElement;
 		this.buffered = document.getElementById("buffered") as HTMLElement;
-		this.player.controls = false;
-
-		this.player.onplay = () =>
-		{
-			this.initPlayBtn();
-		};
-
-		this.player.onpause = () =>
-		{
-			this.playIcon = "play_arrow";
-			this.playTooltip = "Play";
-		};
 
 		this.player.ontimeupdate = () =>
 		{
@@ -139,16 +139,11 @@ export class PlayerComponent implements OnInit
 			loadIndicator.classList.add("d-none");
 		};
 
-		this.player.onended = () =>
-		{
-			this.next();
-		};
-
 		this.player.onerror = () =>
 		{
 			if (this.playMethod == method.transcode)
 			{
-				this.snackBar.open("This episode can't be played.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 10000 });
+				this.snackBar.open("This episode can't be played.", null, { horizontalPosition: "left", panelClass: ["snackError"], duration: 10000 });
 			}
 			else
 			{
@@ -277,20 +272,6 @@ export class PlayerComponent implements OnInit
 				if (document.fullscreenElement == null && this.router.url.startsWith("/watch"))
 					this.back();
 			}
-			else
-			{
-				if (document.fullscreenElement != null)
-				{
-					this.fullscreenIcon = "fullscreen_exit";
-					this.fullscreenTooltip = "Exit fullscreen";
-				}
-				else
-				{
-					this.fullscreenIcon = "fullscreen";
-					this.fullscreenTooltip = "Fullscreen";
-				}
-			}
-
 		});
 
 		$(window).keydown((e) =>
@@ -298,15 +279,15 @@ export class PlayerComponent implements OnInit
 			switch (e.keyCode)
 			{
 				case 32: //space
-					this.tooglePlayback();
+					this.togglePlayback();
 					break;
 
 				case 38: //Key up
-					this.changeVolume(this.volume + 5);
+					this.volume += 5;
 					this.snackBar.open(this.volume + "%", null, { verticalPosition: "top", horizontalPosition: "right", duration: 300, panelClass: "volume" });
 					break;
 				case 40: //Key down
-					this.changeVolume(this.volume - 5);
+					this.volume += 5;
 					this.snackBar.open(this.volume + "%", null, { verticalPosition: "top", horizontalPosition: "right", duration: 300, panelClass: "volume" });
 					break;
 
@@ -326,7 +307,7 @@ export class PlayerComponent implements OnInit
 					break;
 
 				case 77: //M key
-					this.toogleMute();
+					this.muted = !this.muted;
 					if (this.player.muted)
 						this.snackBar.open("Sound muted.", null, { verticalPosition: "top", horizontalPosition: "right", duration: 750, panelClass: "info-panel" });
 					else
@@ -351,16 +332,12 @@ export class PlayerComponent implements OnInit
 			switch (true)
 			{
 				case event instanceof NavigationStart:
-					{
-						loadIndicator.classList.remove("d-none");
-						break;
-					}
+					loadIndicator.classList.remove("d-none");
+					break;
 				case event instanceof NavigationEnd:
 				case event instanceof NavigationCancel:
-					{
-						loadIndicator.classList.add("d-none");
-						break;
-					}
+					loadIndicator.classList.add("d-none");
+					break;
 				default:
 					break;
 			}
@@ -395,7 +372,12 @@ export class PlayerComponent implements OnInit
 
 		setTimeout(() =>
 		{
-			this.snackBar.open("Playing: " + this.item.showTitle + " S" + this.item.seasonNumber + ":E" + this.item.episodeNumber, null, { verticalPosition: "top", horizontalPosition: "right", duration: 2000, panelClass: "info-panel" });
+			this.snackBar.open(`Playing: ${this.item.showTitle} S${this.item.seasonNumber}:E${this.item.episodeNumber}`, null, {
+				verticalPosition: "top",
+				horizontalPosition: "right",
+				duration: 2000,
+				panelClass: "info-panel"
+			});
 		}, 750);
 	}
 
@@ -405,7 +387,7 @@ export class PlayerComponent implements OnInit
 
 		if (this.oidcSecurity === undefined)
 			this.oidcSecurity = this.injector.get(OidcSecurityService);
-		this.hlsPlayer.config.xhrSetup = (xhr, url) =>
+		this.hlsPlayer.config.xhrSetup = xhr =>
 		{
 			const token = this.oidcSecurity.getToken();
 			if (token)
@@ -413,9 +395,7 @@ export class PlayerComponent implements OnInit
 		};
 
 		if (this.playMethod == method.direct)
-		{
-			this.player.src = "/video/" + this.item.slug;
-		}
+			this.player.src = `/video/${this.item.slug}`;
 		else if (this.playMethod == method.transmux)
 		{
 			this.hlsPlayer.loadSource("/video/transmux/" + this.item.slug + "/");
@@ -438,19 +418,25 @@ export class PlayerComponent implements OnInit
 
 	back()
 	{
-		this.location.back();
+		this.router.navigate(["/show", this.item.showSlug]);
 	}
 
 	next()
 	{
-		if (this.item.nextEpisode != null)
-			this.router.navigate(["/watch/" + this.item.nextEpisode.slug], { queryParamsHandling: "merge", replaceUrl: true });
+		if (this.item.nextEpisode == null)
+			return;
+		this.router.navigate(["/watch", this.item.nextEpisode.slug], {
+			queryParamsHandling: "merge"
+		});
 	}
 
 	previous()
 	{
-		if (this.item.previousEpisode != null)
-			this.router.navigate(["/watch/" + this.item.previousEpisode], { queryParamsHandling: "merge", replaceUrl: true });
+		if (this.item.previousEpisode == null)
+			return;
+		this.router.navigate(["/watch", this.item.previousEpisode], {
+			queryParamsHandling: "merge"
+		});
 	}
 
 	getTimeFromSeekbar(progressBar: HTMLElement, pageX: number)
@@ -492,7 +478,7 @@ export class PlayerComponent implements OnInit
 	videoClicked()
 	{
 		if (!navigator.userAgent.match(/Mobi/))
-			this.tooglePlayback();
+			this.togglePlayback();
 		else
 		{
 			if ($("#hover").hasClass("idle"))
@@ -515,28 +501,12 @@ export class PlayerComponent implements OnInit
 		}
 	}
 
-	tooglePlayback()
+	togglePlayback()
 	{
 		if (this.player.paused)
 			this.player.play();
 		else
 			this.player.pause();
-	}
-
-	toogleMute()
-	{
-		if (this.player.muted)
-			this.player.muted = false;
-		else
-			this.player.muted = true;
-
-		this.updateVolumeBtn()
-	}
-
-	initPlayBtn()
-	{
-		this.playIcon = "pause";
-		this.playTooltip = "Pause";
 	}
 
 	fullscreen()
@@ -547,35 +517,16 @@ export class PlayerComponent implements OnInit
 			document.exitFullscreen();
 	}
 
-	//Value from 0 to 100
-	changeVolume(value: number)
+	getVolumeBtn(): string
 	{
-		value = Math.max(0, Math.min(value, 100));
-
-		this.player.muted = false;
-		this.player.volume = value / 100;
-		this.volume = value;
-
-		this.updateVolumeBtn();
-	}
-
-	updateVolumeBtn()
-	{
-		if (this.player.muted)
-		{
-			this.volumeIcon = "volume_off"
-		}
+		if (this.volume == 0 || this.muted)
+			return "volume_off";
+		else if (this.volume < 25)
+			return "volume_mute";
+		else if (this.volume < 65)
+			return "volume_down";
 		else
-		{
-			if (this.volume == 0)
-				this.volumeIcon = "volume_off";
-			else if (this.volume < 25)
-				this.volumeIcon = "volume_mute";
-			else if (this.volume < 65)
-				this.volumeIcon = "volume_down";
-			else
-				this.volumeIcon = "volume_up";
-		}
+			return "volume_up";
 	}
 
 	selectSubtitle(subtitle: Track, changeUrl: boolean = true)
@@ -590,25 +541,39 @@ export class PlayerComponent implements OnInit
 					subSlug += "-for";
 			}
 
-			this.router.navigate([], { relativeTo: this.route, queryParams: { sub: subSlug }, replaceUrl: true, queryParamsHandling: "merge" });
+			this.router.navigate([], {
+				relativeTo: this.route,
+				queryParams: {sub: subSlug},
+				replaceUrl: true,
+				queryParamsHandling: "merge"
+			});
 		}
 
 		this.selectedSubtitle = subtitle;
 
 		if (subtitle == null)
 		{
-			this.snackBar.open("Subtitle removed.", null, { verticalPosition: "top", horizontalPosition: "right", duration: 750, panelClass: "info-panel" });
+			this.snackBar.open("Subtitle removed.", null, {
+				verticalPosition: "top",
+				horizontalPosition: "right",
+				duration: 750,
+				panelClass: "info-panel"
+			});
 			SubtitleManager.remove(this.player);
 			this.removeHtmlTrack();
 		}
 		else
 		{
-			this.snackBar.open(subtitle.displayName + " subtitle loaded.", null, { verticalPosition: "top", horizontalPosition: "right", duration: 750, panelClass: "info-panel" });
+			this.snackBar.open(`${subtitle.displayName} subtitle loaded.`, null, {
+				verticalPosition: "top",
+				horizontalPosition: "right",
+				duration: 750,
+				panelClass: "info-panel"
+			});
 			this.removeHtmlTrack();
 
 			if (subtitle.codec == "ass")
 				SubtitleManager.add(this.player, `subtitle/${subtitle.slug}`, true);
-
 			else if (subtitle.codec == "subrip")
 			{
 				SubtitleManager.remove(this.player);

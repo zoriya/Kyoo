@@ -1,6 +1,14 @@
 <div id="root">
 	<div class="player data-vjs-player">
-		<video id="player" poster="backdrop/{{this.item.showSlug}}" autoplay muted (click)="videoClicked()">
+		<video id="player"
+		       poster="backdrop/{{this.item.showSlug}}"
+		       autoplay muted
+		       (click)="this.videoClicked()"
+		       (play)="this.playing = true"
+		       (pause)="this.playing = false"
+		       (ended)="this.next()"
+		       [volume]="this.volume / 100"
+		       [muted]="this.muted">
 		</video>
 	</div>
 
@@ -8,25 +16,41 @@
 		<div class="spinner-border align-self-center" role="status"></div>
 	</div>
 
-	<mat-card class="d-none w-25 m-5" [ngClass]="{'d-block': this.displayStats}">
-		<mat-card-header style="margin-bottom: 0.5rem;">
-			<h4 style="align-self: center; margin-bottom: 0;">Stats</h4>
+	<mat-card class="d-none w-25 m-5 stats" [ngClass]="{'d-block': this.displayStats}">
+		<mat-card-header>
+			<h4>Stats</h4>
 			<div style="flex: 1 1 auto"></div>
-			<button mat-icon-button aria-label="Close" (click)="this.displayStats = false" style="outline: none;">
+			<button mat-icon-button aria-label="Close" (click)="this.displayStats = false">
 				<mat-icon>close</mat-icon>
 			</button>
 		</mat-card-header>
 		<mat-card-content>
-			Play method: <span style="float: right">{{this.playMethod}}</span>
+			Play method: <span>{{this.playMethod}}</span>
 			<br />
 			<br />
-			Video Container: <span style="float: right">{{this.item.container}} <i class="material-icons" style="vertical-align: middle; font-size: 14px">{{getSupportedFeature("container")}}</i></span>
+			Video Container:
+			<span>
+				{{this.item.container}}
+				<i class="material-icons">{{getSupportedFeature("container")}}</i>
+			</span>
 			<br />
-			Video Codec: <span style="float: right">{{this.item.video.codec}} <i class="material-icons" style="vertical-align: middle; font-size: 14px">{{getSupportedFeature("video")}}</i></span>
+			Video Codec:
+			<span>
+				{{this.item.video.codec}}
+				<i class="material-icons">{{getSupportedFeature("video")}}</i>
+			</span>
 			<br />
-			Audio Codec: <span style="float: right">{{this.item.audios[0].codec}} <i class="material-icons" style="vertical-align: middle; font-size: 14px">{{getSupportedFeature("audio")}}</i></span>
+			Audio Codec:
+			<span>
+				{{this.item.audios[0].codec}}
+				<i class="material-icons">{{getSupportedFeature("audio")}}</i>
+			</span>
 			<br />
-			Subtitle Codec: <span style="float: right">{{this.selectedSubtitle ? this.selectedSubtitle.codec : "none"}} <i class="material-icons" style="vertical-align: middle; font-size: 14px">{{getSupportedFeature("subtitle")}}</i></span>
+			Subtitle Codec:
+			<span>
+				{{this.selectedSubtitle ? this.selectedSubtitle.codec : "none"}}
+				<i class="material-icons">{{getSupportedFeature("subtitle")}}</i>
+			</span>
 			<br />
 		</mat-card-content>
 	</mat-card>
@@ -60,8 +84,10 @@
 						<a *ngIf="this.item.previousEpisode" mat-icon-button matTooltipPosition="above" matTooltip="Previous" (click)="previous()">
 							<mat-icon>skip_previous</mat-icon>
 						</a>
-						<button mat-icon-button matTooltipPosition="above" [matTooltip]="playTooltip" id="play" (click)="tooglePlayback()">
-							<mat-icon>{{this.playIcon}}</mat-icon>
+						<button mat-icon-button matTooltipPosition="above" id="play"
+						        [matTooltip]="this.playing ? 'Pause' : 'Play'"
+						        (click)="togglePlayback()">
+							<mat-icon>{{this.playing ? 'pause' : 'play_arrow'}}</mat-icon>
 						</button>
 						<a mat-icon-button id="nextBtn" *ngIf="this.item.nextEpisode" (click)="next()">
 							<mat-icon>skip_next</mat-icon>
@@ -76,13 +102,15 @@
 								</div>
 							</div>
 						</a>
-						<div id="volume">
-							<button mat-icon-button matTooltipPosition="above" matTooltip="Volume" (click)="toogleMute()">
-								<mat-icon>{{this.volumeIcon}}</mat-icon>
+						<div id="volume" [ngClass]="{'d-none': this.isMobile}">
+							<button mat-icon-button matTooltipPosition="above" matTooltip="Volume"
+							        (click)="this.muted = !this.muted">
+								<mat-icon>{{this.getVolumeBtn()}}</mat-icon>
 							</button>
 
-							<mat-slider [value]="volume" (input)="changeVolume($event.value)"></mat-slider>
+							<mat-slider [value]="this.volume" (input)="this.volume = $event.value"></mat-slider>
 						</div>
+						<!-- TODO REWORK THIS DUMPSTER FIRE OF A TIMER. -->
 						<p *ngIf="this.maxHours; else elseBlock">{{this.hours | number: '2.0-0'}}:{{this.minutes | number: '2.0-0'}}:{{this.seconds | number: '2.0-0'}} / {{this.maxHours | number: '2.0-0'}}:{{this.maxMinutes | number: '2.0-0'}}:{{this.maxSeconds | number: '2.0-0'}}</p>
 						<ng-template #elseBlock><p>{{this.minutes | number: '2.0-0'}}:{{this.seconds | number: '2.0-0'}} / {{this.maxMinutes | number: '2.0-0'}}:{{this.maxSeconds | number: '2.0-0'}}</p></ng-template>
 					</div>
@@ -90,7 +118,8 @@
 						<button id="volume" *ngIf="this.item.audios.length > 1" mat-icon-button matTooltipPosition="above" matTooltip="Select audio track">
 							<mat-icon>music_note</mat-icon>
 						</button>
-						<button *ngIf="this.item.subtitles.length > 0" mat-icon-button [matMenuTriggerFor]="subtitles" matTooltipPosition="above" matTooltip="Select subtitle track">
+						<button *ngIf="this.item.subtitles.length > 0" mat-icon-button [matMenuTriggerFor]="subtitles"
+						        matTooltipPosition="above" matTooltip="Select subtitle track">
 							<mat-icon>closed_caption</mat-icon>
 						</button>
 						<button mat-icon-button matTooltipPosition="above" matTooltip="Cast">
@@ -99,8 +128,11 @@
 						<button mat-icon-button matTooltipPosition="above" [matMenuTriggerFor]="settings" matTooltip="Settings">
 							<mat-icon>settings</mat-icon>
 						</button>
-						<button mat-icon-button matTooltipPosition="above" [matTooltip]="fullscreenTooltip" id="fullscreen" (click)="fullscreen()">
-							<mat-icon>{{fullscreenIcon}}</mat-icon>
+						<button mat-icon-button matTooltipPosition="above"
+						        [ngClass]="{'d-none': this.isMobile}"
+						        [matTooltip]="this.isFullScreen ? 'Exit fullscreen' : 'Fullscreen'"
+						        (click)="fullscreen()">
+							<mat-icon>{{this.isFullScreen ? "fullscreen_exit" : "fullscreen"}}</mat-icon>
 						</button>
 					</div>
 				</div>
@@ -113,7 +145,10 @@
 					</button>
 
 					<div *ngFor="let subtitle of this.item.subtitles">
-						<button [ngClass]="{'selected': this.selectedSubtitle == subtitle}" mat-menu-item *ngIf="subtitle.codec == 'ass' || subtitle.codec == 'subrip'; else elseBlock" (click)="selectSubtitle(subtitle)">
+						<button [ngClass]="{'selected': this.selectedSubtitle == subtitle}"
+						        mat-menu-item *ngIf="subtitle.codec === 'ass' || subtitle.codec === 'subrip';
+						                             else elseBlock"
+						        (click)="selectSubtitle(subtitle)">
 							<span>{{subtitle.displayName}}</span>
 						</button>
 
