@@ -1,15 +1,61 @@
-import { Component, Injector, OnInit, ViewEncapsulation } from "@angular/core";
+import { Location } from "@angular/common";
+import {
+	AfterViewInit,
+	Component, ElementRef, HostListener,
+	Injector,
+	OnDestroy,
+	OnInit,
+	Pipe,
+	PipeTransform,
+	ViewChild,
+	ViewEncapsulation
+} from "@angular/core";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { DomSanitizer, Title } from "@angular/platform-browser";
 import { ActivatedRoute, Event, NavigationCancel, NavigationEnd, NavigationStart, Router } from "@angular/router";
+import { OidcSecurityService } from "angular-auth-oidc-client";
+import * as Hls from "hls.js";
+import {
+	getPlaybackMethod,
+	getWhatIsSupported,
+	method,
+	SupportList
+} from "../../../videoSupport/playbackMethodDetector";
 import { AppComponent } from "../../app.component";
 import { Track, WatchItem } from "../../models/watch-item";
-import { Location } from "@angular/common";
-import { getPlaybackMethod, getWhatIsSupported, method, SupportList } from "../../../videoSupport/playbackMethodDetector";
-import { OidcSecurityService } from "angular-auth-oidc-client";
-import * as Hls from "hls.js"
 
 declare var SubtitleManager: any;
+
+@Pipe({
+	name: "formatTime",
+	pure: true
+})
+export class FormatTimePipe implements PipeTransform
+{
+	transform(value: number, hourCheck: number = null): string
+	{
+		if (isNaN(value) || value === null || value === undefined)
+			return `??:??`;
+		hourCheck ??= value;
+		if (hourCheck >= 3600)
+			return new Date(value * 1000).toISOString().substr(11, 8);
+		return new Date(value * 1000).toISOString().substr(14, 5);
+	}
+}
+
+@Pipe({
+	name: "bufferToWidth",
+	pure: true
+})
+export class BufferToWidthPipe implements PipeTransform
+{
+	transform(buffered: TimeRanges, duration: number): string
+	{
+		if (buffered.length == 0)
+			return "0";
+		return `${buffered.end(buffered.length - 1) / duration * 100}%`;
+	}
+}
 
 @Component({
 	selector: "app-player",
@@ -17,30 +63,26 @@ declare var SubtitleManager: any;
 	styleUrls: ["./player.component.scss"],
 	encapsulation: ViewEncapsulation.None
 })
-export class PlayerComponent implements OnInit
+export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 {
 	item: WatchItem;
 	playing: boolean = true;
+	loading: boolean = false;
+	seeking: boolean = false;
 	muted: boolean = false;
 
 	private _volume: number = 100;
 	get volume(): number { return this._volume; }
 	set volume(value: number) { this._volume = Math.max(0, Math.min(value, 100)); }
 
+	@ViewChild("player") private playerRef: ElementRef;
+	private get player() { return this.playerRef.nativeElement; }
+	@ViewChild("progressBar") private progressBar: HTMLElement;
 
 
-	seeking: boolean = false;
 	videoHider;
 	controllerHovered: boolean = false;
 	selectedSubtitle: Track;
-
-	hours: number;
-	minutes: number = 0;
-	seconds: number = 0;
-
-	maxHours: number;
-	maxMinutes: number;
-	maxSeconds: number;
 
 	playMethod: method = method.direct;
 	methodType = method;
@@ -48,11 +90,7 @@ export class PlayerComponent implements OnInit
 	displayStats: boolean = false;
 	supportList: SupportList;
 
-	private player: HTMLVideoElement;
 	private hlsPlayer: Hls = new Hls();
-	private thumb: HTMLElement;
-	private progress: HTMLElement;
-	private buffered: HTMLElement;
 
 
 	private oidcSecurity: OidcSecurityService;
@@ -69,31 +107,132 @@ export class PlayerComponent implements OnInit
 	ngOnInit()
 	{
 		document.getElementById("nav").classList.add("d-none");
-		this.route.data.subscribe((data) =>
+		if (AppComponent.isMobile)
+		{
+			if (!this.isFullScreen)
+				this.fullscreen();
+			screen.orientation.lock("landscape");
+			$(document).on("fullscreenchange", () =>
+			{
+				if (document.fullscreenElement == null && this.router.url.startsWith("/watch"))
+					this.back();
+			});
+		}
+
+		$(document).on("touchmove", (event) =>
+		{
+			if (this.seeking)
+				this.player.currentTime = this.getTimeFromSeekbar(event.changedTouches[0].pageX);
+		});
+
+		$(document).on("mousemove", (event) =>
+		{
+			if (this.seeking)
+				this.player.currentTime = this.getTimeFromSeekbar(event.pageX);
+			else
+			{
+				document.getElementById("hover").classList.remove("idle");
+				document.documentElement.style.cursor = "";
+
+				clearTimeout(this.videoHider);
+
+				this.videoHider = setTimeout((ev: MouseEvent) =>
+				{
+					if (!this.player.paused && !this.controllerHovered)
+					{
+						document.getElementById("hover").classList.add("idle");
+						document.documentElement.style.cursor = "none";
+					}
+				}, 2000);
+			}
+		});
+
+		this.route.data.subscribe(data =>
 		{
 			this.item = data.item;
 
-			if (this.player)
-				this.player.load();
-
-			this.setDuration(this.item.duration);
+			const name: string = this.item.isMovie
+				? this.item.showTitle
+				: `${this.item.showTitle} S${this.item.seasonNumber}:E${this.item.episodeNumber}`;
 
 			if (this.item.isMovie)
-				this.title.setTitle(`${this.item.showTitle} - Kyoo`);
+				this.title.setTitle(`${name} - Kyoo`);
 			else
-				this.title.setTitle(`${this.item.showTitle} S${this.item.seasonNumber}:E${this.item.episodeNumber} - Kyoo`);
+				this.title.setTitle(`${name} - Kyoo`);
 
-			if (AppComponent.isMobile && !this.isFullScreen)
-			{
-				this.fullscreen();
-				screen.orientation.lock("landscape");
-			}
 			setTimeout(() =>
 			{
-				if (this.player)
-					this.init();
-			});
+				this.snackBar.open(`Playing: ${name}`, null, {
+					verticalPosition: "top",
+					horizontalPosition: "right",
+					duration: 2000,
+					panelClass: "info-panel"
+				});
+			}, 750);
 		});
+
+		this.router.events.subscribe((event: Event) =>
+		{
+			switch (true)
+			{
+				case event instanceof NavigationStart:
+					this.loading = false;
+					break;
+				case event instanceof NavigationEnd:
+				case event instanceof NavigationCancel:
+					this.loading = true;
+					break;
+				default:
+					break;
+			}
+		});
+	}
+
+	ngOnDestroy()
+	{
+		if (this.isFullScreen)
+			document.exitFullscreen();
+
+		document.getElementById("nav").classList.remove("d-none");
+		this.title.setTitle("Kyoo");
+
+		$(document).off();
+	}
+
+	ngAfterViewInit()
+	{
+		this.route.data.subscribe(data =>
+		{
+			let queryMethod: string = this.route.snapshot.queryParams["method"];
+			this.selectPlayMethod(queryMethod ? method[queryMethod] : getPlaybackMethod(this.player, this.item));
+
+			const subSlug: string = this.route.snapshot.queryParams["sub"];
+			if (subSlug != null)
+			{
+				const languageCode: string = subSlug.substring(0, 3);
+				const forced: boolean = subSlug.length > 3 && subSlug.substring(4) == "for";
+				const sub: Track = this.item.subtitles.find(x => x.language == languageCode && x.isForced == forced);
+				this.selectSubtitle(sub, false);
+			}
+
+			this.supportList = getWhatIsSupported(this.player, this.item);
+		});
+
+		if (!navigator.userAgent.match(/Mobi/))
+		{
+			$("#controller").mouseenter(() => { this.controllerHovered = true; });
+			$("#controller").mouseleave(() => { this.controllerHovered = false; });
+		}
+
+		//Initialize the timout at the document initialization.
+		this.videoHider = setTimeout(() =>
+		{
+			if (!this.player.paused)
+			{
+				document.getElementById("hover").classList.add("idle");
+				document.documentElement.style.cursor = "none";
+			}
+		}, 1000);
 	}
 
 	get isFullScreen(): boolean
@@ -106,279 +245,51 @@ export class PlayerComponent implements OnInit
 		return AppComponent.isMobile;
 	}
 
-	ngAfterViewInit()
+	getTimeFromSeekbar(pageX: number)
 	{
-		this.player = document.getElementById("player") as HTMLVideoElement;
-		this.thumb = document.getElementById("thumb") as HTMLElement;
-		this.progress = document.getElementById("progress") as HTMLElement;
-		this.buffered = document.getElementById("buffered") as HTMLElement;
-
-		this.player.ontimeupdate = () =>
-		{
-			if (!this.seeking)
-				this.updateTime(this.player.currentTime);
-		};
-
-		this.player.onprogress = () =>
-		{
-			if (this.player.buffered.length > 0)
-				this.buffered.style.width = (this.player.buffered.end(this.player.buffered.length - 1) / this.item.duration * 100) + "%";
-
-			if (this.player.duration != undefined && this.player.duration != Infinity)
-				this.setDuration(this.player.duration);
-		};
-
-		let loadIndicator: HTMLElement = document.getElementById("loadIndicator") as HTMLElement;
-		this.player.onwaiting = () =>
-		{
-			loadIndicator.classList.remove("d-none");
-		};
-
-		this.player.oncanplay = () =>
-		{
-			loadIndicator.classList.add("d-none");
-		};
-
-		this.player.onerror = () =>
-		{
-			if (this.playMethod == method.transcode)
-			{
-				this.snackBar.open("This episode can't be played.", null, { horizontalPosition: "left", panelClass: ["snackError"], duration: 10000 });
-			}
-			else
-			{
-				if (this.playMethod == method.direct)
-					this.playMethod = method.transmux;
-				else
-					this.playMethod = method.transcode;
-				this.selectPlayMethod(this.playMethod);
-			}
-		};
-
-		let progressBar: HTMLElement = document.getElementById("progress-bar") as HTMLElement;
-		$(progressBar).click((event) =>
-		{
-			event.preventDefault();
-			let time: number = this.getTimeFromSeekbar(progressBar, event.pageX);
-			this.player.currentTime = time;
-			this.updateTime(time);
-		});
-
-		if (!navigator.userAgent.match(/Mobi/))
-		{
-			$(document).mousemove((event) =>
-			{
-				if (this.seeking)
-				{
-					let time: number = this.getTimeFromSeekbar(progressBar, event.pageX);
-					this.updateTime(time);
-				}
-				else
-				{
-					document.getElementById("hover").classList.remove("idle");
-					document.documentElement.style.cursor = "";
-
-					clearTimeout(this.videoHider);
-
-					this.videoHider = setTimeout((ev: MouseEvent) =>
-					{
-						if (!this.player.paused && !this.controllerHovered)
-						{
-							document.getElementById("hover").classList.add("idle");
-							document.documentElement.style.cursor = "none";
-						}
-					}, 2000);
-				}
-			});
-
-			$(progressBar).mousedown((event) =>
-			{
-				event.preventDefault();
-				this.seeking = true;
-				progressBar.classList.add("seeking");
-				this.player.pause();
-
-				let time: number = this.getTimeFromSeekbar(progressBar, event.pageX);
-				this.updateTime(time);
-			});
-
-			$(document).mouseup((event) =>
-			{
-				if (this.seeking)
-				{
-					event.preventDefault();
-					this.seeking = false;
-					progressBar.classList.remove("seeking");
-
-					let time: number = this.getTimeFromSeekbar(progressBar, event.pageX);
-					this.player.currentTime = time;
-					this.player.play();
-				}
-			});
-
-			$("#controller").mouseenter(() => { this.controllerHovered = true; });
-			$("#controller").mouseleave(() => { this.controllerHovered = false; });
-		}
-		else
-		{
-			$(progressBar).on("touchstart", (event) =>
-			{
-				event.preventDefault();
-				this.seeking = true;
-				progressBar.classList.add("seeking");
-				this.player.pause();
-
-				let time: number = this.getTimeFromSeekbar(progressBar, event.changedTouches[0].pageX);
-				this.updateTime(time);
-			});
-
-			$(document).on("touchend", (event) =>
-			{
-				if (this.seeking)
-				{
-					event.preventDefault();
-					this.seeking = false;
-					progressBar.classList.remove("seeking");
-
-					this.player.currentTime = this.getTimeFromSeekbar(progressBar, event.changedTouches[0].pageX);
-					this.player.play();
-				}
-			});
-
-			$(document).on("touchmove", (event) =>
-			{
-				if (this.seeking)
-				{
-					let time: number = this.getTimeFromSeekbar(progressBar, event.changedTouches[0].pageX);
-					this.updateTime(time);
-				}
-			});
-		}
-
-		//Initialize the timout at the document initialization.
-		this.videoHider = setTimeout(() =>
-		{
-			if (!this.player.paused)
-			{
-				document.getElementById("hover").classList.add("idle");
-				document.documentElement.style.cursor = "none";
-			}
-		}, 1000);
-
-		document.addEventListener("fullscreenchange", () =>
-		{
-			if (navigator.userAgent.match(/Mobi/))
-			{
-				if (document.fullscreenElement == null && this.router.url.startsWith("/watch"))
-					this.back();
-			}
-		});
-
-		$(window).keydown((e) =>
-		{
-			switch (e.keyCode)
-			{
-				case 32: //space
-					this.togglePlayback();
-					break;
-
-				case 38: //Key up
-					this.volume += 5;
-					this.snackBar.open(this.volume + "%", null, { verticalPosition: "top", horizontalPosition: "right", duration: 300, panelClass: "volume" });
-					break;
-				case 40: //Key down
-					this.volume += 5;
-					this.snackBar.open(this.volume + "%", null, { verticalPosition: "top", horizontalPosition: "right", duration: 300, panelClass: "volume" });
-					break;
-
-				case 86: //V key
-					let subtitleIndex: number = this.item.subtitles.indexOf(this.selectedSubtitle);
-					let nextSub: Track;
-					if (subtitleIndex + 1 <= this.item.subtitles.length)
-						nextSub = this.item.subtitles[subtitleIndex + 1];
-					else
-						nextSub = this.item.subtitles[0];
-
-					this.selectSubtitle(nextSub);
-					break;
-
-				case 70: //F key
-					this.fullscreen();
-					break;
-
-				case 77: //M key
-					this.muted = !this.muted;
-					if (this.player.muted)
-						this.snackBar.open("Sound muted.", null, { verticalPosition: "top", horizontalPosition: "right", duration: 750, panelClass: "info-panel" });
-					else
-						this.snackBar.open("Sound unmuted.", null, { verticalPosition: "top", horizontalPosition: "right", duration: 750, panelClass: "info-panel" });
-					break;
-
-				case 78: //N key
-					this.next();
-					break;
-
-				case 80: //P key
-					this.previous();
-					break;
-
-				default:
-					break;
-			}
-		});
-
-		this.router.events.subscribe((event: Event) =>
-		{
-			switch (true)
-			{
-				case event instanceof NavigationStart:
-					loadIndicator.classList.remove("d-none");
-					break;
-				case event instanceof NavigationEnd:
-				case event instanceof NavigationCancel:
-					loadIndicator.classList.add("d-none");
-					break;
-				default:
-					break;
-			}
-		});
-
-		setTimeout(() =>
-		{
-			this.init();
-		});
+		const value: number = (pageX - this.progressBar.offsetLeft) / this.progressBar.clientWidth;
+		const percent: number = Math.max(0, Math.min(value, 1));
+		return percent * this.player.duration;
 	}
 
-	init()
+	startSeeking(event: MouseEvent | TouchEvent): void
 	{
-		let queryMethod: string = this.route.snapshot.queryParams["method"];
-		if (queryMethod)
-			this.playMethod = method[queryMethod];
-		else
-			this.playMethod = getPlaybackMethod(this.player, this.item);
+		event.preventDefault();
+		this.seeking = true;
+		this.player.pause();
+		const pageX: number = "pageX" in event ? event.pageX : event.changedTouches[0].pageX;
+		this.player.currentTime = this.getTimeFromSeekbar(pageX);
+	}
 
-		this.selectPlayMethod(this.playMethod);
+	endSeeking(event: MouseEvent | TouchEvent): void
+	{
+		if (!this.seeking)
+			return;
+		event.preventDefault();
+		this.seeking = false;
+		const pageX: number = "pageX" in event ? event.pageX : event.changedTouches[0].pageX;
+		this.player.currentTime = this.getTimeFromSeekbar(pageX);
+		this.player.play();
+	}
 
-		let sub: string = this.route.snapshot.queryParams["sub"];
-		if (sub != null)
+	playbackError(): void
+	{
+		if (this.playMethod == method.transcode)
 		{
-			let languageCode: string = sub.substring(0, 3);
-			let forced: boolean = sub.length > 3 && sub.substring(4) == "for";
-
-			this.selectSubtitle(this.item.subtitles.find(x => x.language == languageCode && x.isForced == forced), false);
-		}
-
-		this.supportList = getWhatIsSupported(this.player, this.item);
-
-		setTimeout(() =>
-		{
-			this.snackBar.open(`Playing: ${this.item.showTitle} S${this.item.seasonNumber}:E${this.item.episodeNumber}`, null, {
-				verticalPosition: "top",
-				horizontalPosition: "right",
-				duration: 2000,
-				panelClass: "info-panel"
+			this.snackBar.open("This episode can't be played.", null, {
+				horizontalPosition: "left",
+				panelClass: ["snackError"],
+				duration: 10000
 			});
-		}, 750);
+		}
+		else
+		{
+			if (this.playMethod == method.direct)
+				this.playMethod = method.transmux;
+			else
+				this.playMethod = method.transcode;
+			this.selectPlayMethod(this.playMethod);
+		}
 	}
 
 	selectPlayMethod(playMethod: method)
@@ -396,18 +307,9 @@ export class PlayerComponent implements OnInit
 
 		if (this.playMethod == method.direct)
 			this.player.src = `/video/${this.item.slug}`;
-		else if (this.playMethod == method.transmux)
-		{
-			this.hlsPlayer.loadSource("/video/transmux/" + this.item.slug + "/");
-			this.hlsPlayer.attachMedia(this.player);
-			this.hlsPlayer.on(Hls.Events.MANIFEST_LOADED, () =>
-			{
-				this.player.play();
-			});
-		}
 		else
 		{
-			this.hlsPlayer.loadSource("/video/transcode/" + this.item.slug + "/");
+			this.hlsPlayer.loadSource(`/video/${this.playMethod.toLowerCase()}/${this.item.slug}/`);
 			this.hlsPlayer.attachMedia(this.player);
 			this.hlsPlayer.on(Hls.Events.MANIFEST_LOADED, () =>
 			{
@@ -437,42 +339,6 @@ export class PlayerComponent implements OnInit
 		this.router.navigate(["/watch", this.item.previousEpisode], {
 			queryParamsHandling: "merge"
 		});
-	}
-
-	getTimeFromSeekbar(progressBar: HTMLElement, pageX: number)
-	{
-		return Math.max(0, Math.min((pageX - progressBar.offsetLeft) / progressBar.clientWidth, 1)) * this.item.duration;
-	}
-
-	setDuration(duration: number)
-	{
-		this.maxSeconds = Math.round(duration % 60);
-		this.maxMinutes = Math.round(duration / 60 % 60);
-		this.maxHours = Math.round(duration / 3600);
-
-		this.item.duration = duration;
-	}
-
-	updateTime(time: number)
-	{
-		this.hours = Math.round(time / 60 % 60);
-		this.seconds = Math.round(time % 60);
-		this.minutes = Math.round(time / 60);
-
-		this.thumb.style.transform = "translateX(" + (time / this.item.duration * 100) + "%)";
-		this.progress.style.width = (time / this.item.duration * 100) + "%";
-	}
-
-	ngOnDestroy()
-	{
-		if (document.fullscreen)
-			document.exitFullscreen();
-
-		document.getElementById("nav").classList.remove("d-none");
-		this.title.setTitle("Kyoo");
-
-		$(document).unbind();
-		$(window).unbind();
 	}
 
 	videoClicked()
@@ -621,5 +487,68 @@ export class PlayerComponent implements OnInit
 	getThumb(url: string)
 	{
 		return this.sanitizer.bypassSecurityTrustStyle("url(" + url + ")");
+	}
+
+	@HostListener("document:keyup", ["$event"])
+	keypress(event: KeyboardEvent): void
+	{
+		switch (event.key)
+		{
+			case " ":
+				this.togglePlayback();
+				break;
+
+			case "ArrowUp":
+				this.volume += 5;
+				this.snackBar.open(`${this.volume}%`, null, {
+					verticalPosition: "top",
+					horizontalPosition: "right",
+					duration: 300,
+					panelClass: "volume"
+				});
+				break;
+			case "ArrowDown":
+				this.volume += 5;
+				this.snackBar.open(`${this.volume}%`, null, {
+					verticalPosition: "top",
+					horizontalPosition: "right",
+					duration: 300,
+					panelClass: "volume"
+				});
+				break;
+
+			case "V":
+				const subtitleIndex: number = this.item.subtitles.indexOf(this.selectedSubtitle);
+				const nextSub: Track = subtitleIndex + 1 <= this.item.subtitles.length
+					? this.item.subtitles[subtitleIndex + 1]
+					: this.item.subtitles[0];
+				this.selectSubtitle(nextSub);
+				break;
+
+			case "F":
+				this.fullscreen();
+				break;
+
+			case "M":
+				this.muted = !this.muted;
+				this.snackBar.open(this.player.muted ? "Sound muted." : "Sound unmuted", null, {
+					verticalPosition: "top",
+					horizontalPosition: "right",
+					duration: 750,
+					panelClass: "info-panel"
+				});
+				break;
+
+			case "N":
+				this.next();
+				break;
+
+			case "P":
+				this.previous();
+				break;
+
+			default:
+				break;
+		}
 	}
 }

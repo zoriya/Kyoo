@@ -19,7 +19,7 @@ import {CollectionComponent} from './pages/collection/collection.component';
 import {EpisodesListComponent} from './components/episodes-list/episodes-list.component';
 import {NotFoundComponent} from './pages/not-found/not-found.component';
 import {PeopleListComponent} from './components/people-list/people-list.component';
-import {PlayerComponent} from './pages/player/player.component';
+import { BufferToWidthPipe, FormatTimePipe, PlayerComponent } from "./pages/player/player.component";
 import {SearchComponent} from './pages/search/search.component';
 import {ShowDetailsComponent} from './pages/show-details/show-details.component';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
@@ -59,7 +59,9 @@ import {MatBadgeModule} from "@angular/material/badge";
 		TrailerDialogComponent,
 		ItemsListComponent,
 		MetadataEditComponent,
-		ShowGridComponent
+		ShowGridComponent,
+		FormatTimePipe,
+		BufferToWidthPipe
 	],
 	imports: [
 		BrowserModule,

@@ -1,6 +1,6 @@
 <div id="root">
 	<div class="player data-vjs-player">
-		<video id="player"
+		<video id="player" #player
 		       poster="backdrop/{{this.item.showSlug}}"
 		       autoplay muted
 		       (click)="this.videoClicked()"
@@ -8,11 +8,14 @@
 		       (pause)="this.playing = false"
 		       (ended)="this.next()"
 		       [volume]="this.volume / 100"
-		       [muted]="this.muted">
+		       [muted]="this.muted"
+		       (waiting)="this.loading = true"
+		       (canplay)="this.loading = false"
+		       (error)="this.playbackError()">
 		</video>
 	</div>
 
-	<div id="loadIndicator">
+	<div id="loadIndicator" [ngClass]="{'d-none': !this.loading}">
 		<div class="spinner-border align-self-center" role="status"></div>
 	</div>
 
@@ -71,17 +74,27 @@
 				<h3 *ngIf="!this.item.isMovie">S{{this.item.seasonNumber}}:E{{this.item.episodeNumber}} - {{this.item.title}}</h3>
 				<h3 *ngIf="this.item.isMovie">{{this.item.title}}</h3>
 
-				<div id="progress-bar">
+				<div id="progress-bar" #progressBar
+				     [ngClass]="{'seeking': this.seeking}"
+				     (click)="player.currentTime = this.getTimeFromSeekbar($event.pageX);"
+				     (mousedown)="this.startSeeking($event)"
+				     (touchstart)="this.startSeeking($event)"
+				     (mouseup)="this.endSeeking($event)"
+				     (touchend)="this.endSeeking($event)">
 					<div class="seek-bar">
-						<div id="buffered"></div>
-						<div id="progress"></div>
+						<div id="buffered" [style.width]="player.buffered | bufferToWidth: player.duration">
+						</div>
+						<div id="progress" [style.width]="(player.currentTime / player.duration * 100) + '%'"></div>
 					</div>
-					<div id="thumb"><div></div></div>
+					<div id="thumb" [style.transform]="'translateX(' + (player.currentTime / player.duration * 100) + '%)'">
+						<div></div>
+					</div>
 				</div>
 
 				<div class="buttons">
 					<div class="left">
-						<a *ngIf="this.item.previousEpisode" mat-icon-button matTooltipPosition="above" matTooltip="Previous" (click)="previous()">
+						<a *ngIf="this.item.previousEpisode" mat-icon-button matTooltipPosition="above" matTooltip="Previous"
+						   (click)="previous()">
 							<mat-icon>skip_previous</mat-icon>
 						</a>
 						<button mat-icon-button matTooltipPosition="above" id="play"
@@ -110,9 +123,7 @@
 
 							<mat-slider [value]="this.volume" (input)="this.volume = $event.value"></mat-slider>
 						</div>
-						<!-- TODO REWORK THIS DUMPSTER FIRE OF A TIMER. -->
-						<p *ngIf="this.maxHours; else elseBlock">{{this.hours | number: '2.0-0'}}:{{this.minutes | number: '2.0-0'}}:{{this.seconds | number: '2.0-0'}} / {{this.maxHours | number: '2.0-0'}}:{{this.maxMinutes | number: '2.0-0'}}:{{this.maxSeconds | number: '2.0-0'}}</p>
-						<ng-template #elseBlock><p>{{this.minutes | number: '2.0-0'}}:{{this.seconds | number: '2.0-0'}} / {{this.maxMinutes | number: '2.0-0'}}:{{this.maxSeconds | number: '2.0-0'}}</p></ng-template>
+						<p>{{player.currentTime | formatTime: player.duration}} / {{player.duration | formatTime}}</p>
 					</div>
 					<div class="right">
 						<button id="volume" *ngIf="this.item.audios.length > 1" mat-icon-button matTooltipPosition="above" matTooltip="Select audio track">
