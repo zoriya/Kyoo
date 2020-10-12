@@ -66,6 +66,7 @@ export class BufferToWidthPipe implements PipeTransform
 export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 {
 	item: WatchItem;
+	playMethod: method = method.direct;
 	playing: boolean = true;
 	loading: boolean = false;
 	seeking: boolean = false;
@@ -76,15 +77,15 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 	set volume(value: number) { this._volume = Math.max(0, Math.min(value, 100)); }
 
 	@ViewChild("player") private playerRef: ElementRef;
-	private get player() { return this.playerRef.nativeElement; }
-	@ViewChild("progressBar") private progressBar: HTMLElement;
+	private get player(): HTMLVideoElement { return this.playerRef.nativeElement; }
+	@ViewChild("progressBar") private progressBarRef: ElementRef;
+	private get progressBar(): HTMLElement { return this.progressBarRef.nativeElement; }
 
 
 	videoHider;
 	controllerHovered: boolean = false;
 	selectedSubtitle: Track;
 
-	playMethod: method = method.direct;
 	methodType = method;
 
 	displayStats: boolean = false;
@@ -118,34 +119,6 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 					this.back();
 			});
 		}
-
-		$(document).on("touchmove", (event) =>
-		{
-			if (this.seeking)
-				this.player.currentTime = this.getTimeFromSeekbar(event.changedTouches[0].pageX);
-		});
-
-		$(document).on("mousemove", (event) =>
-		{
-			if (this.seeking)
-				this.player.currentTime = this.getTimeFromSeekbar(event.pageX);
-			else
-			{
-				document.getElementById("hover").classList.remove("idle");
-				document.documentElement.style.cursor = "";
-
-				clearTimeout(this.videoHider);
-
-				this.videoHider = setTimeout((ev: MouseEvent) =>
-				{
-					if (!this.player.paused && !this.controllerHovered)
-					{
-						document.getElementById("hover").classList.add("idle");
-						document.documentElement.style.cursor = "none";
-					}
-				}, 2000);
-			}
-		});
 
 		this.route.data.subscribe(data =>
 		{
@@ -201,7 +174,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 
 	ngAfterViewInit()
 	{
-		this.route.data.subscribe(data =>
+		setTimeout(() => this.route.data.subscribe(data =>
 		{
 			let queryMethod: string = this.route.snapshot.queryParams["method"];
 			this.selectPlayMethod(queryMethod ? method[queryMethod] : getPlaybackMethod(this.player, this.item));
@@ -216,7 +189,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 			}
 
 			this.supportList = getWhatIsSupported(this.player, this.item);
-		});
+		}));
 
 		if (!navigator.userAgent.match(/Mobi/))
 		{
@@ -261,6 +234,8 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 		this.player.currentTime = this.getTimeFromSeekbar(pageX);
 	}
 
+	@HostListener("document:mouseup", ["$event"])
+	@HostListener("document:touchend", ["$event"])
 	endSeeking(event: MouseEvent | TouchEvent): void
 	{
 		if (!this.seeking)
@@ -270,6 +245,36 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 		const pageX: number = "pageX" in event ? event.pageX : event.changedTouches[0].pageX;
 		this.player.currentTime = this.getTimeFromSeekbar(pageX);
 		this.player.play();
+	}
+
+	@HostListener("document:touchmove", ["$event"])
+	touchSeek(event)
+	{
+		if (this.seeking)
+			this.player.currentTime = this.getTimeFromSeekbar(event.changedTouches[0].pageX);
+	}
+
+	@HostListener("document:mousemove", ["$event"])
+	mouseMove(event)
+	{
+		if (this.seeking)
+			this.player.currentTime = this.getTimeFromSeekbar(event.pageX);
+		else
+		{
+			document.getElementById("hover").classList.remove("idle");
+			document.documentElement.style.cursor = "";
+
+			clearTimeout(this.videoHider);
+
+			this.videoHider = setTimeout((ev: MouseEvent) =>
+			{
+				if (!this.player.paused && !this.controllerHovered)
+				{
+					document.getElementById("hover").classList.add("idle");
+					document.documentElement.style.cursor = "none";
+				}
+			}, 2000);
+		}
 	}
 
 	playbackError(): void

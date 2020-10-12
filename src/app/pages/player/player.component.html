@@ -78,9 +78,7 @@
 				     [ngClass]="{'seeking': this.seeking}"
 				     (click)="player.currentTime = this.getTimeFromSeekbar($event.pageX);"
 				     (mousedown)="this.startSeeking($event)"
-				     (touchstart)="this.startSeeking($event)"
-				     (mouseup)="this.endSeeking($event)"
-				     (touchend)="this.endSeeking($event)">
+				     (touchstart)="this.startSeeking($event)">
 					<div class="seek-bar">
 						<div id="buffered" [style.width]="player.buffered | bufferToWidth: player.duration">
 						</div>
