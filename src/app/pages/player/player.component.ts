@@ -257,7 +257,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 	{
 		if (this.seeking)
 			this.player.currentTime = this.getTimeFromSeekbar(event.pageX);
-		else
+		else if (!AppComponent.isMobile)
 			this.showControls = true;
 	}
 
@@ -332,9 +332,13 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 
 	videoClicked()
 	{
-		this.showControls = !this.player.paused;
-		if (!AppComponent.isMobile)
+		if (AppComponent.isMobile)
+			this.showControls = !this.showControls;
+		else
+		{
+			this.showControls = !this.player.paused;
 			this.togglePlayback();
+		}
 	}
 
 	togglePlayback()

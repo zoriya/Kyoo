@@ -1,6 +1,6 @@
 <div id="root"
-     (mouseenter)="this.showControls = true;"
-     (mouseleave)="!this.player.paused ? this.showControls = false : null"
+     (mouseenter)="!isMobile ? this.showControls = true : null"
+     (mouseleave)="!this.player.paused && !isMobile ? this.showControls = false : null"
      [style.cursor]="this.showControls ? '' : 'none'">
 	<div class="player data-vjs-player">
 		<video id="player" #player
