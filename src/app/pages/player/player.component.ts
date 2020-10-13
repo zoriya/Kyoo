@@ -66,7 +66,9 @@ export class BufferToWidthPipe implements PipeTransform
 export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 {
 	item: WatchItem;
+	selectedSubtitle: Track;
 	playMethod: method = method.direct;
+	supportList: SupportList;
 	playing: boolean = true;
 	loading: boolean = false;
 	seeking: boolean = false;
@@ -81,21 +83,34 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 	@ViewChild("progressBar") private progressBarRef: ElementRef;
 	private get progressBar(): HTMLElement { return this.progressBarRef.nativeElement; }
 
-
-	videoHider;
-	controllerHovered: boolean = false;
-	selectedSubtitle: Track;
+	controlHider: NodeJS.Timeout = null;
+	areControlHovered: boolean = false;
+	private _showControls: boolean = true;
+	get showControls(): boolean { return this._showControls; }
+	set showControls(value: boolean)
+	{
+		this._showControls = value;
+		if (this.controlHider)
+			clearTimeout(this.controlHider);
+		if (value)
+		{
+			this.controlHider = setTimeout(() =>
+			{
+				if (!this.player.paused && !this.areControlHovered)
+					this.showControls = false;
+				// else restart timer
+			}, 2500);
+		}
+		else
+			this.controlHider = null;
+	}
 
 	methodType = method;
-
 	displayStats: boolean = false;
-	supportList: SupportList;
+
 
 	private hlsPlayer: Hls = new Hls();
-
-
 	private oidcSecurity: OidcSecurityService;
-
 	constructor(private route: ActivatedRoute,
 	            private sanitizer: DomSanitizer,
 	            private snackBar: MatSnackBar,
@@ -174,7 +189,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 
 	ngAfterViewInit()
 	{
-		setTimeout(() => this.route.data.subscribe(data =>
+		setTimeout(() => this.route.data.subscribe(() =>
 		{
 			let queryMethod: string = this.route.snapshot.queryParams["method"];
 			this.selectPlayMethod(queryMethod ? method[queryMethod] : getPlaybackMethod(this.player, this.item));
@@ -190,22 +205,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 
 			this.supportList = getWhatIsSupported(this.player, this.item);
 		}));
-
-		if (!navigator.userAgent.match(/Mobi/))
-		{
-			$("#controller").mouseenter(() => { this.controllerHovered = true; });
-			$("#controller").mouseleave(() => { this.controllerHovered = false; });
-		}
-
-		//Initialize the timout at the document initialization.
-		this.videoHider = setTimeout(() =>
-		{
-			if (!this.player.paused)
-			{
-				document.getElementById("hover").classList.add("idle");
-				document.documentElement.style.cursor = "none";
-			}
-		}, 1000);
+		this.showControls = true;
 	}
 
 	get isFullScreen(): boolean
@@ -260,21 +260,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 		if (this.seeking)
 			this.player.currentTime = this.getTimeFromSeekbar(event.pageX);
 		else
-		{
-			document.getElementById("hover").classList.remove("idle");
-			document.documentElement.style.cursor = "";
-
-			clearTimeout(this.videoHider);
-
-			this.videoHider = setTimeout((ev: MouseEvent) =>
-			{
-				if (!this.player.paused && !this.controllerHovered)
-				{
-					document.getElementById("hover").classList.add("idle");
-					document.documentElement.style.cursor = "none";
-				}
-			}, 2000);
-		}
+			this.showControls = true;
 	}
 
 	playbackError(): void
@@ -355,8 +341,8 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 			if ($("#hover").hasClass("idle"))
 			{
 				$("#hover").removeClass("idle");
-				clearTimeout(this.videoHider);
-				this.videoHider = setTimeout((ev: MouseEvent) =>
+				clearTimeout(this.controlHider);
+				this.controlHider = setTimeout((ev: MouseEvent) =>
 				{
 					if (!this.player.paused)
 					{
@@ -367,7 +353,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 			else
 			{
 				$("#hover").addClass("idle");
-				clearTimeout(this.videoHider);
+				clearTimeout(this.controlHider);
 			}
 		}
 	}

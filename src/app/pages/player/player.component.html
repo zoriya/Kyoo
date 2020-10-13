@@ -1,4 +1,7 @@
-<div id="root">
+<div id="root"
+     (mouseenter)="this.showControls = true;"
+     (mouseleave)="!this.player.paused ? this.showControls = false : null"
+     [style.cursor]="this.showControls ? '' : 'none'">
 	<div class="player data-vjs-player">
 		<video id="player" #player
 		       poster="backdrop/{{this.item.showSlug}}"
@@ -58,7 +61,10 @@
 		</mat-card-content>
 	</mat-card>
 
-	<div id="hover">
+	<div id="hover"
+	     (mouseenter)="this.areControlHovered = true"
+	     (mouseleave)="this.areControlHovered = false"
+	     [ngClass]="{'idle': !this.showControls}">
 		<div class="back">
 			<a mat-icon-button matTooltipPosition="below" matTooltip="Back" (click)="back()">
 				<mat-icon>arrow_back</mat-icon>
