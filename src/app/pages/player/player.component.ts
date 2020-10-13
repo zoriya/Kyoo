@@ -96,9 +96,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 		{
 			this.controlHider = setTimeout(() =>
 			{
-				if (!this.player.paused && !this.areControlHovered)
-					this.showControls = false;
-				// else restart timer
+				this.showControls = this.player.paused || this.areControlHovered;
 			}, 2500);
 		}
 		else
@@ -334,28 +332,9 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 
 	videoClicked()
 	{
-		if (!navigator.userAgent.match(/Mobi/))
+		this.showControls = !this.player.paused;
+		if (!AppComponent.isMobile)
 			this.togglePlayback();
-		else
-		{
-			if ($("#hover").hasClass("idle"))
-			{
-				$("#hover").removeClass("idle");
-				clearTimeout(this.controlHider);
-				this.controlHider = setTimeout((ev: MouseEvent) =>
-				{
-					if (!this.player.paused)
-					{
-						document.getElementById("hover").classList.add("idle");
-					}
-				}, 1000);
-			}
-			else
-			{
-				$("#hover").addClass("idle");
-				clearTimeout(this.controlHider);
-			}
-		}
 	}
 
 	togglePlayback()
@@ -368,10 +347,10 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 
 	fullscreen()
 	{
-		if (document.fullscreenElement == null)
-			document.body.requestFullscreen();
-		else
+		if (this.isFullScreen)
 			document.exitFullscreen();
+		else
+			document.body.requestFullscreen();
 	}
 
 	getVolumeBtn(): string
