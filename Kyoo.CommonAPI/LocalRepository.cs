@@ -277,22 +277,28 @@ namespace Kyoo.Controllers
 
 		Task<T> IRepository<T>.Create(T item)
 		{
-			TInternal obj = new TInternal();
-			Utility.Assign(obj, item);
+			TInternal obj = item as TInternal ?? new TInternal();
+			if (!(item is TInternal))
+				Utility.Assign(obj, item);
+			
 			return Create(obj).Cast<T>()
 				.Then(x => item.ID = x.ID);
 		}
 
 		Task<T> IRepository<T>.CreateIfNotExists(T item)
 		{
-			TInternal obj = new TInternal();
-			Utility.Assign(obj, item);
+			TInternal obj = item as TInternal ?? new TInternal();
+			if (!(item is TInternal))
+				Utility.Assign(obj, item);
+			
 			return CreateIfNotExists(obj).Cast<T>()
 				.Then(x => item.ID = x.ID);
 		}
 
 		public Task<T> Edit(T edited, bool resetOld)
 		{
+			if (edited is TInternal intern)
+				return Edit(intern, resetOld).Cast<T>();
 			TInternal obj = new TInternal();
 			Utility.Assign(obj, edited);
 			return base.Edit(obj, resetOld).Cast<T>();
@@ -302,6 +308,8 @@ namespace Kyoo.Controllers
 
 		Task IRepository<T>.Delete(T obj)
 		{
+			if (obj is TInternal intern)
+				return Delete(intern);
 			TInternal item = new TInternal();
 			Utility.Assign(item, obj);
 			return Delete(item);
