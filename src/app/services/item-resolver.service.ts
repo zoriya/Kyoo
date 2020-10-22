@@ -21,7 +21,7 @@ export class ItemResolver
 
 			resolve(route: ActivatedRouteSnapshot): T | Observable<T> | Promise<T>
 			{
-				const res: string = resource.replace(/:(.*?)(\/|$)/, (x, y) => `${route.paramMap.get(y)}/`);
+				const res: string = resource.replace(/:(.*?)(\/|$)/g, (x, y) => `${route.paramMap.get(y)}/`);
 
 				return this.http.get<T>(`api/${res}`)
 					.pipe(

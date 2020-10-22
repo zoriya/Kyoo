@@ -27,9 +27,9 @@ export class PageResolver
 
 			resolve(route: ActivatedRouteSnapshot): Page<T> | Observable<Page<T>> | Promise<Page<T>>
 			{
-				let res: string = resource.replace(/:([^:]*?)(\/|$|&)/, (x, y, z) => `${route.paramMap.get(y)}${z}`);
+				let res: string = resource.replace(/:([^:]*?)(\/|$|&)/g, (x, y, z) => `${route.paramMap.get(y)}${z}`);
 				let query: [string, string][] = defaultQuery
-					?.replace(/:([^:]*?)(\/|$|&)/, (x, y, z) => `${route.paramMap.get(y)}${z}`)
+					?.replace(/:([^:]*?)(\/|$|&)/g, (x, y, z) => `${route.paramMap.get(y)}${z}`)
 					.split('&')
 					.map(x => x.split('=') as [string, string]);
 				let uri: string;
