@@ -57,6 +57,25 @@ export class BufferToWidthPipe implements PipeTransform
 	}
 }
 
+@Pipe({
+	name: "volumeToButton",
+	pure: true
+})
+export class VolumeToButtonPipe implements PipeTransform
+{
+	transform(volume: number, muted: boolean): string
+	{
+		if (volume == 0 || muted)
+			return "volume_off";
+		else if (volume < 25)
+			return "volume_mute";
+		else if (volume < 65)
+			return "volume_down";
+		else
+			return "volume_up";
+	}
+}
+
 @Component({
 	selector: "app-player",
 	templateUrl: "./player.component.html",
@@ -356,18 +375,6 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 			document.exitFullscreen();
 		else
 			document.body.requestFullscreen();
-	}
-
-	getVolumeBtn(): string
-	{
-		if (this.volume == 0 || this.muted)
-			return "volume_off";
-		else if (this.volume < 25)
-			return "volume_mute";
-		else if (this.volume < 65)
-			return "volume_down";
-		else
-			return "volume_up";
 	}
 
 	selectSubtitle(subtitle: Track, changeUrl: boolean = true)

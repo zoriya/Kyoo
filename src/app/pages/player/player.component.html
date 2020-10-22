@@ -7,7 +7,7 @@
 		       poster="backdrop/{{this.item.showSlug}}"
 		       autoplay muted
 		       (click)="this.videoClicked()"
-		       (play)="this.playing = true"
+		       (play)="this.playing = true; this.loading = false"
 		       (pause)="this.playing = false"
 		       (ended)="this.next()"
 		       [volume]="this.volume / 100"
@@ -122,7 +122,7 @@
 						<div id="volume" [ngClass]="{'d-none': this.isMobile}">
 							<button mat-icon-button matTooltipPosition="above" matTooltip="Volume"
 							        (click)="this.muted = !this.muted">
-								<mat-icon>{{this.getVolumeBtn()}}</mat-icon>
+								<mat-icon>{{this.volume | volumeToButton: this.muted}}</mat-icon>
 							</button>
 
 							<mat-slider [value]="this.volume" (input)="this.volume = $event.value"></mat-slider>
