@@ -37,25 +37,25 @@
 			Video Container:
 			<span>
 				{{this.item.container}}
-				<i class="material-icons">{{getSupportedFeature("container")}}</i>
+				<i class="material-icons">{{this.supportList | supportedButton: "container"}}</i>
 			</span>
 			<br />
 			Video Codec:
 			<span>
 				{{this.item.video.codec}}
-				<i class="material-icons">{{getSupportedFeature("video")}}</i>
+				<i class="material-icons">{{this.supportList | supportedButton: "video"}}</i>
 			</span>
 			<br />
 			Audio Codec:
 			<span>
-				{{this.item.audios[0].codec}}
-				<i class="material-icons">{{getSupportedFeature("audio")}}</i>
+				{{this.item.audios[this.selectedAudio].codec}}
+				<i class="material-icons">{{this.supportList | supportedButton: "audio":this.selectedAudio}}</i>
 			</span>
 			<br />
 			Subtitle Codec:
 			<span>
-				{{this.selectedSubtitle ? this.selectedSubtitle.codec : "none"}}
-				<i class="material-icons">{{getSupportedFeature("subtitle")}}</i>
+				{{this.selectedSubtitle != -1 ? this.item.subtitles[this.selectedSubtitle].codec : "none"}}
+				<i class="material-icons">{{this.supportList | supportedButton: "subtitle"}}</i>
 			</span>
 			<br />
 		</mat-card-content>
@@ -130,7 +130,8 @@
 						<p>{{player.currentTime | formatTime: player.duration}} / {{player.duration | formatTime}}</p>
 					</div>
 					<div class="right">
-						<button id="volume" *ngIf="this.item.audios.length > 1" mat-icon-button matTooltipPosition="above" matTooltip="Select audio track">
+						<button *ngIf="this.item.audios.length > 1" mat-icon-button
+						        matTooltipPosition="above" matTooltip="Select audio track">
 							<mat-icon>music_note</mat-icon>
 						</button>
 						<button *ngIf="this.item.subtitles.length > 0" mat-icon-button [matMenuTriggerFor]="subtitles"
@@ -158,12 +159,13 @@
 
 			<mat-menu #subtitles="matMenu" (closed)="this.isMenuOpen = false">
 				<ng-template matMenuContent>
-					<button [ngClass]="{'selected': this.selectedSubtitle == null}" mat-menu-item (click)="selectSubtitle(null)">
+					<button [ngClass]="{'selected': this.selectedSubtitle === -1}" mat-menu-item
+					        (click)="selectSubtitle(null)">
 						<span>None</span>
 					</button>
 
-					<div *ngFor="let subtitle of this.item.subtitles">
-						<button [ngClass]="{'selected': this.selectedSubtitle == subtitle}"
+					<div *ngFor="let subtitle of this.item.subtitles; index as i">
+						<button [ngClass]="{'selected': this.selectedSubtitle === i}"
 						        mat-menu-item *ngIf="subtitle.codec === 'ass' || subtitle.codec === 'subrip';
 						                             else elseBlock"
 						        (click)="selectSubtitle(subtitle)">

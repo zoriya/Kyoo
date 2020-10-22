@@ -22,7 +22,7 @@ import { PeopleListComponent } from './components/people-list/people-list.compon
 import {
 	BufferToWidthPipe,
 	FormatTimePipe,
-	PlayerComponent,
+	PlayerComponent, SupportedButtonPipe,
 	VolumeToButtonPipe
 } from "./pages/player/player.component";
 import { SearchComponent } from './pages/search/search.component';
@@ -67,7 +67,8 @@ import { MatBadgeModule } from "@angular/material/badge";
 		ShowGridComponent,
 		FormatTimePipe,
 		BufferToWidthPipe,
-		VolumeToButtonPipe
+		VolumeToButtonPipe,
+		SupportedButtonPipe
 	],
 	imports: [
 		BrowserModule,

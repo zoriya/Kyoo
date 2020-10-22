@@ -16,11 +16,10 @@ import { ActivatedRoute, Event, NavigationCancel, NavigationEnd, NavigationStart
 import { OidcSecurityService } from "angular-auth-oidc-client";
 import * as Hls from "hls.js";
 import {
-	getPlaybackMethod,
 	getWhatIsSupported,
 	method,
 	SupportList
-} from "../../../videoSupport/playbackMethodDetector";
+} from "./playbackMethodDetector";
 import { AppComponent } from "../../app.component";
 import { Track, WatchItem } from "../../models/watch-item";
 
@@ -76,6 +75,30 @@ export class VolumeToButtonPipe implements PipeTransform
 	}
 }
 
+@Pipe({
+	name: "supportedButton",
+	pure: true
+})
+export class SupportedButtonPipe implements PipeTransform
+{
+	transform(supports: SupportList, selector: string, audioIndex: number = 0): string
+	{
+		if (!supports)
+			return "help";
+		switch (selector)
+		{
+			case "container":
+				return supports.container ? "check_circle" : "cancel";
+			case "video":
+				return supports.videoCodec ? "check_circle" : "cancel";
+			case "audio":
+				return supports.audioCodec[audioIndex] ? "check_circle" : "cancel";
+			default:
+				return "help";
+		}
+	}
+}
+
 @Component({
 	selector: "app-player",
 	templateUrl: "./player.component.html",
@@ -85,7 +108,8 @@ export class VolumeToButtonPipe implements PipeTransform
 export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 {
 	item: WatchItem;
-	selectedSubtitle: Track;
+	selectedAudio: number = 0;
+	selectedSubtitle: number = -1;
 	playMethod: method = method.direct;
 	supportList: SupportList;
 	playing: boolean = true;
@@ -182,11 +206,11 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 			switch (true)
 			{
 				case event instanceof NavigationStart:
-					this.loading = false;
+					this.loading = true;
 					break;
 				case event instanceof NavigationEnd:
 				case event instanceof NavigationCancel:
-					this.loading = true;
+					this.loading = false;
 					break;
 				default:
 					break;
@@ -207,11 +231,25 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 
 	ngAfterViewInit()
 	{
+		if (this.oidcSecurity === undefined)
+			this.oidcSecurity = this.injector.get(OidcSecurityService);
+		this.hlsPlayer.config.xhrSetup = xhr =>
+		{
+			const token = this.oidcSecurity.getToken();
+			if (token)
+				xhr.setRequestHeader("Authorization", "Bearer " + token);
+		};
+
+		this.showControls = true;
+
 		setTimeout(() => this.route.data.subscribe(() =>
 		{
+			// TODO remove the query param for the method (should be a session setting).
 			let queryMethod: string = this.route.snapshot.queryParams["method"];
-			this.selectPlayMethod(queryMethod ? method[queryMethod] : getPlaybackMethod(this.player, this.item));
+			this.supportList = getWhatIsSupported(this.player, this.item);
+			this.selectPlayMethod(queryMethod ? method[queryMethod] : this.supportList.getPlaybackMethod());
 
+			// TODO remove this, it should be a user's setting.
 			const subSlug: string = this.route.snapshot.queryParams["sub"];
 			if (subSlug != null)
 			{
@@ -220,10 +258,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 				const sub: Track = this.item.subtitles.find(x => x.language == languageCode && x.isForced == forced);
 				this.selectSubtitle(sub, false);
 			}
-
-			this.supportList = getWhatIsSupported(this.player, this.item);
 		}));
-		this.showControls = true;
 	}
 
 	get isFullScreen(): boolean
@@ -304,16 +339,6 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 	selectPlayMethod(playMethod: method)
 	{
 		this.playMethod = playMethod;
-
-		if (this.oidcSecurity === undefined)
-			this.oidcSecurity = this.injector.get(OidcSecurityService);
-		this.hlsPlayer.config.xhrSetup = xhr =>
-		{
-			const token = this.oidcSecurity.getToken();
-			if (token)
-				xhr.setRequestHeader("Authorization", "Bearer " + token);
-		};
-
 		if (this.playMethod == method.direct)
 			this.player.src = `/video/${this.item.slug}`;
 		else
@@ -377,8 +402,16 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 			document.body.requestFullscreen();
 	}
 
-	selectSubtitle(subtitle: Track, changeUrl: boolean = true)
+	selectSubtitle(subtitle: Track | number, changeUrl: boolean = true)
 	{
+		if (typeof(subtitle) === "number")
+		{
+			this.selectedSubtitle = subtitle;
+			subtitle = this.item.subtitles[subtitle];
+		}
+		else
+			this.selectedSubtitle = this.item.subtitles.indexOf(subtitle);
+
 		if (changeUrl)
 		{
 			let subSlug: string;
@@ -393,11 +426,10 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 				relativeTo: this.route,
 				queryParams: {sub: subSlug},
 				replaceUrl: true,
-				queryParamsHandling: "merge"
+				queryParamsHandling: "merge",
 			});
 		}
 
-		this.selectedSubtitle = subtitle;
 
 		if (subtitle == null)
 		{
@@ -442,33 +474,11 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 		}
 	}
 
-	getSupportedFeature(feature: string) : string
-	{
-		if (!this.supportList)
-			return "help";
-		switch (feature)
-		{
-			case "container":
-				return this.supportList.container ? "check_circle" : "cancel";
-			case "video":
-				return this.supportList.videoCodec ? "check_circle" : "cancel";
-			case "audio":
-				return this.supportList.audioCodec ? "check_circle" : "cancel";
-			default:
-				return "help";
-		}
-	}
-
 	removeHtmlTrack()
 	{
 		let elements = this.player.getElementsByTagName("track");
 		if (elements.length > 0)
 			elements.item(0).remove();
-	}
-
-	getThumb(url: string)
-	{
-		return this.sanitizer.bypassSecurityTrustStyle("url(" + url + ")");
 	}
 
 	@HostListener("document:keyup", ["$event"])
@@ -477,6 +487,8 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 		switch (event.key)
 		{
 			case " ":
+			case "k":
+			case "K":
 				this.togglePlayback();
 				break;
 
@@ -499,18 +511,17 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 				});
 				break;
 
+			case "v":
 			case "V":
-				const subtitleIndex: number = this.item.subtitles.indexOf(this.selectedSubtitle);
-				const nextSub: Track = subtitleIndex + 1 <= this.item.subtitles.length
-					? this.item.subtitles[subtitleIndex + 1]
-					: this.item.subtitles[0];
-				this.selectSubtitle(nextSub);
+				this.selectSubtitle((this.selectedSubtitle + 2) % (this.item.subtitles.length + 1) - 1);
 				break;
 
+			case "f":
 			case "F":
 				this.fullscreen();
 				break;
 
+			case "m":
 			case "M":
 				this.muted = !this.muted;
 				this.snackBar.open(this.player.muted ? "Sound muted." : "Sound unmuted", null, {
@@ -521,10 +532,12 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 				});
 				break;
 
+			case "n":
 			case "N":
 				this.next();
 				break;
 
+			case "p":
 			case "P":
 				this.previous();
 				break;
