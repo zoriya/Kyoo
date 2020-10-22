@@ -85,6 +85,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 
 	controlHider: NodeJS.Timeout = null;
 	areControlHovered: boolean = false;
+	isMenuOpen: boolean = false;
 	private _showControls: boolean = true;
 	get showControls(): boolean { return this._showControls; }
 	set showControls(value: boolean)
@@ -96,7 +97,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 		{
 			this.controlHider = setTimeout(() =>
 			{
-				this.showControls = this.player.paused || this.areControlHovered;
+				this.showControls = this.player.paused || this.areControlHovered || this.isMenuOpen;
 			}, 2500);
 		}
 		else

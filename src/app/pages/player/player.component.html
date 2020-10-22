@@ -1,6 +1,6 @@
 <div id="root"
      (mouseenter)="!isMobile ? this.showControls = true : null"
-     (mouseleave)="!this.player.paused && !isMobile ? this.showControls = false : null"
+     (mouseleave)="!this.player.paused && !isMobile ? this.showControls = this.isMenuOpen : null"
      [style.cursor]="this.showControls ? '' : 'none'">
 	<div class="player data-vjs-player">
 		<video id="player" #player
@@ -134,13 +134,16 @@
 							<mat-icon>music_note</mat-icon>
 						</button>
 						<button *ngIf="this.item.subtitles.length > 0" mat-icon-button [matMenuTriggerFor]="subtitles"
+						        (menuOpened)="this.isMenuOpen = true"
 						        matTooltipPosition="above" matTooltip="Select subtitle track">
 							<mat-icon>closed_caption</mat-icon>
 						</button>
 						<button mat-icon-button matTooltipPosition="above" matTooltip="Cast">
 							<mat-icon>cast</mat-icon>
 						</button>
-						<button mat-icon-button matTooltipPosition="above" [matMenuTriggerFor]="settings" matTooltip="Settings">
+						<button mat-icon-button matTooltipPosition="above" matTooltip="Settings"
+						        (menuOpened)="this.isMenuOpen = true"
+						        [matMenuTriggerFor]="settings">
 							<mat-icon>settings</mat-icon>
 						</button>
 						<button mat-icon-button matTooltipPosition="above"
@@ -153,7 +156,7 @@
 				</div>
 			</div>
 
-			<mat-menu #subtitles="matMenu">
+			<mat-menu #subtitles="matMenu" (closed)="this.isMenuOpen = false">
 				<ng-template matMenuContent>
 					<button [ngClass]="{'selected': this.selectedSubtitle == null}" mat-menu-item (click)="selectSubtitle(null)">
 						<span>None</span>
@@ -176,7 +179,7 @@
 				</ng-template>
 			</mat-menu>
 
-			<mat-menu #settings="matMenu">
+			<mat-menu #settings="matMenu" (closed)="this.isMenuOpen = false">
 				<ng-template matMenuContent>
 					<button mat-menu-item (click)="this.displayStats = !this.displayStats">
 						<span>Stats</span>
