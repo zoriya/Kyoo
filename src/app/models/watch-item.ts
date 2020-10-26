@@ -12,7 +12,7 @@ export interface WatchItem
 	releaseDate;
 	isMovie: boolean;
 
-	previousEpisode: string;
+	previousEpisode: Episode;
 	nextEpisode: Episode;
 
 	container: string;

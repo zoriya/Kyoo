@@ -373,7 +373,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 	{
 		if (this.item.previousEpisode == null)
 			return;
-		this.router.navigate(["/watch", this.item.previousEpisode], {
+		this.router.navigate(["/watch", this.item.previousEpisode.slug], {
 			queryParamsHandling: "merge"
 		});
 	}
