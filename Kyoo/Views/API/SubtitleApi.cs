@@ -1,68 +1,46 @@
-﻿using Kyoo.Models;
+﻿using System;
+using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
-using Kyoo.Models.Watch;
 using Microsoft.AspNetCore.Authorization;
 
 namespace Kyoo.Api
 {
-	[Route("[controller]")]
+	[Route("subtitle")]
 	[ApiController]
-	public class SubtitleController : ControllerBase
+	public class SubtitleApi : ControllerBase
 	{
 		private readonly ILibraryManager _libraryManager;
-		//private readonly ITranscoder _transcoder;
 
-		public SubtitleController(ILibraryManager libraryManager/*, ITranscoder transcoder*/)
+		public SubtitleApi(ILibraryManager libraryManager)
 		{
 			_libraryManager = libraryManager;
-		//	_transcoder = transcoder;
 		}
 		
-		//TODO Create a real route for movie's subtitles.
-
-		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}.{identifier}.{extension?}")]
+		
+		[HttpGet("{slug}.{extension?}")]
 		[Authorize(Policy="Play")]
-		public async Task<IActionResult> GetSubtitle(string showSlug,
-			int seasonNumber, 
-			int episodeNumber, 
-			string identifier,
-			string extension)
+		public async Task<IActionResult> GetSubtitle(string slug, string extension)
 		{
-			string languageTag = identifier.Length >= 3 ? identifier.Substring(0, 3) : null;
-			bool forced = identifier.Length > 4 && identifier.Substring(4) == "forced";
-			Track subtitle = null;
-			
-			if (languageTag != null)
-				subtitle = (await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber))?.Tracks
-					.FirstOrDefault(x => x.Type == StreamType.Subtitle && x.Language == languageTag && x.IsForced == forced);
-				
-			if (subtitle == null)
+			Track subtitle;
+			try
 			{
-				string idString = identifier.IndexOf('-') != -1 
-					? identifier.Substring(0, identifier.IndexOf('-')) 
-					: identifier;
-				int.TryParse(idString, out int id);
-				subtitle = await _libraryManager.GetTrack(id);
+				subtitle = await _libraryManager.GetTrack(slug);
 			}
-			
+			catch (ArgumentException ex)
+			{
+				return BadRequest(new {error = ex.Message});
+			}
+
 			if (subtitle == null)
 				return NotFound();
 			
 			if (subtitle.Codec == "subrip" && extension == "vtt")
 				return new ConvertSubripToVtt(subtitle.Path);
-
-			string mime;
-			if (subtitle.Codec == "ass")
-				mime = "text/x-ssa";
-			else
-				mime = "application/x-subrip";
-
-			// TODO Should use appropriate mime type here
+			string mime = subtitle.Codec == "ass" ? "text/x-ssa" : "application/x-subrip";
 			return PhysicalFile(subtitle.Path, mime);
 		}
 
@@ -129,21 +107,19 @@ namespace Kyoo.Api
 				await writer.WriteLineAsync("");
 				await writer.WriteLineAsync("");
 
-				using (StreamReader reader = new StreamReader(_path))
+				using StreamReader reader = new StreamReader(_path);
+				while ((line = await reader.ReadLineAsync()) != null)
 				{
-					while ((line = await reader.ReadLineAsync()) != null)
+					if (line == "")
 					{
-						if (line == "")
-						{
-							lines.Add("");
-							IEnumerable<string> processedBlock = ConvertBlock(lines);
-							foreach (string t in processedBlock)
-								await writer.WriteLineAsync(t);
-							lines.Clear();
-						}
-						else
-							lines.Add(line);
+						lines.Add("");
+						IEnumerable<string> processedBlock = ConvertBlock(lines);
+						foreach (string t in processedBlock)
+							await writer.WriteLineAsync(t);
+						lines.Clear();
 					}
+					else
+						lines.Add(line);
 				}
 			}
 

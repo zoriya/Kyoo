@@ -79,7 +79,7 @@ namespace Kyoo.Controllers
 
 		public Task<string> Transcode(Episode episode)
 		{
-			return null; // Not implemented yet.
+			return Task.FromResult<string>(null); // Not implemented yet.
 		}
 	}
 }
