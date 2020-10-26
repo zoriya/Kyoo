@@ -22,8 +22,8 @@ import {
 } from "./playbackMethodDetector";
 import { AppComponent } from "../../app.component";
 import { Track, WatchItem } from "../../models/watch-item";
+import SubtitlesOctopus from "libass-wasm/dist/js/subtitles-octopus.js"
 
-declare var SubtitleManager: any;
 
 @Pipe({
 	name: "formatTime",
@@ -151,6 +151,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 	displayStats: boolean = false;
 
 
+	private subtitlesManager: SubtitlesOctopus;
 	private hlsPlayer: Hls = new Hls();
 	private oidcSecurity: OidcSecurityService;
 	constructor(private route: ActivatedRoute,
@@ -220,6 +221,8 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 
 	ngOnDestroy()
 	{
+		if (this.subtitlesManager)
+			this.subtitlesManager.dispose();
 		if (this.isFullScreen)
 			document.exitFullscreen();
 
@@ -439,7 +442,8 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 				duration: 750,
 				panelClass: "info-panel"
 			});
-			SubtitleManager.remove(this.player);
+			if (this.subtitlesManager)
+				this.subtitlesManager.freeTrack();
 			this.removeHtmlTrack();
 		}
 		else
@@ -453,10 +457,21 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 			this.removeHtmlTrack();
 
 			if (subtitle.codec == "ass")
-				SubtitleManager.add(this.player, `subtitle/${subtitle.slug}`, true);
+			{
+				if (!this.subtitlesManager)
+				{
+					this.subtitlesManager = new SubtitlesOctopus({
+						video: this.player,
+						subUrl: `subtitle/${subtitle.slug}`
+					});
+				}
+				else
+					this.subtitlesManager.setTrackByUrl(`subtitle/${subtitle.slug}`);
+			}
 			else if (subtitle.codec == "subrip")
 			{
-				SubtitleManager.remove(this.player);
+				if (this.subtitlesManager)
+					this.subtitlesManager.freeTrack();
 
 				let track = document.createElement("track");
 				track.kind = "subtitles";

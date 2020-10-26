@@ -30,7 +30,7 @@ h6
 
 
 //Material Angular Configuration
-@import '~@angular/material/theming';
+@import "~@angular/material/theming";
 @include mat-core();
 
 $primary: (default: #0a1128);
@@ -51,21 +51,23 @@ $theme: mat-dark-theme($primary, $accent);
 }
 
 //Material Icons
+//noinspection CssUnknownTarget
 @font-face {
-	font-family: 'Material Icons';
+	font-family: "Material Icons";
 	font-style: normal;
 	font-weight: 400;
 	src: url(/iconfont/MaterialIcons-Regular.eot); /* For IE6-8 */
-	src: local('Material Icons'),
-		local('MaterialIcons-Regular'),
-		url(/iconfont/MaterialIcons-Regular.woff2) format('woff2'),
-		url(/iconfont/MaterialIcons-Regular.woff) format('woff'),
-		url(/iconfont/MaterialIcons-Regular.ttf) format('truetype');
+	src: local("Material Icons"),
+	     local("MaterialIcons-Regular"),
+	     url(/iconfont/MaterialIcons-Regular.woff2) format("woff2"),
+	     url(/iconfont/MaterialIcons-Regular.woff) format("woff"),
+	     url(/iconfont/MaterialIcons-Regular.ttf) format("truetype");
 }
 
+//noinspection CssNoGenericFontName
 .material-icons
 {
-	font-family: 'Material Icons';
+	font-family: "Material Icons";
 	font-weight: normal;
 	font-style: normal;
 	font-size: 24px; /* Preferred icon size */
@@ -83,7 +85,7 @@ $theme: mat-dark-theme($primary, $accent);
 	/* Support for Firefox. */
 	-moz-osx-font-smoothing: grayscale;
 	/* Support for IE. */
-	font-feature-settings: 'liga';
+	font-feature-settings: "liga";
 }
 
 mat-icon
