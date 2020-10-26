@@ -19,6 +19,7 @@ namespace Kyoo.Api
 			_peoplePath = config.GetValue<string>("peoplePath");
 		}
 
+		
 		[HttpGet("poster/{showSlug}")]
 		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetShowThumb(string showSlug)
