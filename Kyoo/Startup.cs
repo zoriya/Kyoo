@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -168,7 +169,9 @@ namespace Kyoo
 				app.UseHsts();
 			}
 
-			app.UseStaticFiles();
+			FileExtensionContentTypeProvider contentTypeProvider = new FileExtensionContentTypeProvider();
+			contentTypeProvider.Mappings[".data"] = "application/octet-stream";
+			app.UseStaticFiles(new StaticFileOptions {ContentTypeProvider = contentTypeProvider});
 			if (!env.IsDevelopment())
 				app.UseSpaStaticFiles();
 
