@@ -93,7 +93,9 @@ namespace Kyoo.Models
 
 		public static string GetSlug(string showSlug, int seasonNumber, int episodeNumber)
 		{
-			return showSlug + "-s" + seasonNumber + "e" + episodeNumber;
+			if (seasonNumber == -1)
+				return showSlug;
+			return $"{showSlug}-s{seasonNumber}e{episodeNumber}";
 		}
 
 		public void OnMerge(object merged)

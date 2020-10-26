@@ -32,7 +32,6 @@ namespace Kyoo
 			_loggerFactory = loggerFactory;
 		}
 
-
 		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
@@ -132,7 +131,7 @@ namespace Kyoo
 			{
 				AllowedOrigins = { new Uri(publicUrl).GetLeftPart(UriPartial.Authority) }
 			});
-
+			
 
 			services.AddScoped<ILibraryRepository, LibraryRepository>();
 			services.AddScoped<ILibraryItemRepository, LibraryItemRepository>();

@@ -39,18 +39,21 @@ namespace Kyoo.Controllers
 		public override Task<Track> Get(string slug)
 		{
 			Match match = Regex.Match(slug,
-				@"(?<show>.*)-s(?<season>\d*)-e(?<episode>\d*).(?<language>.{0,3})(?<forced>-forced)?(\..*)?");
+				@"(?<show>.*)-s(?<season>\d+)e(?<episode>\d+)\.(?<language>.{0,3})(?<forced>-forced)?(\..*)?");
 
 			if (!match.Success)
 			{
 				if (int.TryParse(slug, out int id))
 					return Get(id);
-				throw new ArgumentException("Invalid track slug. Format: {episodeSlug}.{language}[-forced][.{extension}]");
+				match = Regex.Match(slug, @"(?<show>.*)\.(?<language>.{0,3})(?<forced>-forced)?(\..*)?");
+				if (!match.Success)
+					throw new ArgumentException("Invalid track slug. " +
+					                            "Format: {episodeSlug}.{language}[-forced][.{extension}]");
 			}
 
 			string showSlug = match.Groups["show"].Value;
-			int seasonNumber = int.Parse(match.Groups["season"].Value);
-			int episodeNumber = int.Parse(match.Groups["episode"].Value);
+			int seasonNumber = match.Groups["season"].Success ? int.Parse(match.Groups["season"].Value) : -1;
+			int episodeNumber = match.Groups["episode"].Success ? int.Parse(match.Groups["episode"].Value) : -1;
 			string language = match.Groups["language"].Value;
 			bool forced = match.Groups["forced"].Success;
 			return _database.Tracks.FirstOrDefaultAsync(x => x.Episode.Show.Slug == showSlug
@@ -59,6 +62,7 @@ namespace Kyoo.Controllers
 			                                                 && x.Language == language
 			                                                 && x.IsForced == forced);
 		}
+
 		public Task<ICollection<Track>> Search(string query)
 		{
 			throw new InvalidOperationException("Tracks do not support the search method.");

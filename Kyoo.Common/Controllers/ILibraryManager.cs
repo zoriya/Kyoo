@@ -32,6 +32,7 @@ namespace Kyoo.Controllers
 		Task<Episode> GetEpisode(int id);
 		Task<Episode> GetEpisode(int showID, int seasonNumber, int episodeNumber);
 		Task<Genre> GetGenre(int id);
+		Task<Track> GetTrack(int id);
 		Task<Studio> GetStudio(int id);
 		Task<People> GetPeople(int id);
 		
@@ -42,7 +43,7 @@ namespace Kyoo.Controllers
 		Task<Season> GetSeason(string showSlug, int seasonNumber);
 		Task<Episode> GetEpisode(string showSlug, int seasonNumber, int episodeNumber);
 		Task<Episode> GetMovieEpisode(string movieSlug);
-		Task<Track> GetTrack(int id);
+		Task<Track> GetTrack(string slug);
 		Task<Genre> GetGenre(string slug);
 		Task<Studio> GetStudio(string slug);
 		Task<People> GetPeople(string slug);
