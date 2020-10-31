@@ -422,14 +422,18 @@ namespace Kyoo.Api
 			string path = (await _libraryManager.GetShow(slug))?.Path;
 			if (path == null)
 				return NotFound();
+			path = Path.Combine(path, "Subtitles", "fonts");
+			if (!Directory.Exists(path))
+				return new Dictionary<string, string>();
 			return Directory.GetFiles(path)
-				.ToDictionary(Path.GetFileNameWithoutExtension, x => $"{BaseURL}/shows/{slug}/fonts/{x}");
+				.ToDictionary(Path.GetFileNameWithoutExtension,
+					x => $"{BaseURL}/api/shows/{slug}/fonts/{Path.GetFileName(x)}");
 		}
 		
 		[HttpGet("{showSlug}/font/{slug}")]
 		[HttpGet("{showSlug}/fonts/{slug}")]
 		[Authorize(Policy = "Read")]
-		public async Task<ActionResult<Dictionary<string, string>>> GetFont(string showSlug, string slug)
+		public async Task<ActionResult> GetFont(string showSlug, string slug)
 		{
 			string path = (await _libraryManager.GetShow(showSlug))?.Path;
 			if (path == null)

@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Kyoo.Models.Exceptions;
+using Kyoo.Models.Watch;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
@@ -306,7 +307,9 @@ namespace Kyoo.Controllers
 
 		private async Task<IEnumerable<Track>> GetTracks(Episode episode)
 		{
-			episode.Tracks = await _transcoder.ExtractInfos(episode.Path);
+			episode.Tracks = (await _transcoder.ExtractInfos(episode.Path))
+				.Where(x => x.Type != StreamType.Font)
+				.ToArray();
 			return episode.Tracks;
 		}
 
