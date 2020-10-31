@@ -12,11 +12,11 @@ namespace Kyoo.Models
 {
 	public class Chapter
 	{
-		public long StartTime;
-		public long EndTime;
+		public float StartTime;
+		public float EndTime;
 		public string Name;
 
-		public Chapter(long startTime, long endTime, string name)
+		public Chapter(float startTime, float endTime, string name)
 		{
 			StartTime = startTime;
 			EndTime = endTime;
@@ -145,7 +145,7 @@ namespace Kyoo.Models
 					.Select(x =>
 					{
 						string[] values = x.Split(' ');
-						return new Chapter(long.Parse(values[0]), long.Parse(values[1]), values[2]);
+						return new Chapter(float.Parse(values[0]), float.Parse(values[1]), string.Join(' ', values.Skip(2)));
 					})
 					.ToArray();
 			}
