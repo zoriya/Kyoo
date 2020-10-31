@@ -8,7 +8,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Kyoo.Models.Exceptions;
-using Kyoo.Models.Watch;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
@@ -307,52 +306,8 @@ namespace Kyoo.Controllers
 
 		private async Task<IEnumerable<Track>> GetTracks(Episode episode)
 		{
-			IEnumerable<Track> tracks = await _transcoder.GetTrackInfo(episode.Path);
-			List<Track> epTracks = tracks.Where(x => x.Type != StreamType.Subtitle)
-				.Concat(GetExtractedSubtitles(episode))
-				.ToList();
-			if (epTracks.Count(x => !x.IsExternal) < tracks.Count())
-				epTracks.AddRange(await _transcoder.ExtractSubtitles(episode.Path));
-			episode.Tracks = epTracks;
-			return epTracks;
-		}
-
-		private static IEnumerable<Track> GetExtractedSubtitles(Episode episode)
-		{
-			List<Track> tracks = new List<Track>();
-			
-			if (episode.Path == null)
-				return tracks;
-			string path = Path.Combine(Path.GetDirectoryName(episode.Path)!, "Subtitles");
-			
-			if (!Directory.Exists(path)) 
-				return tracks;
-			foreach (string sub in Directory.EnumerateFiles(path, "", SearchOption.AllDirectories))
-			{
-				string episodeLink = Path.GetFileNameWithoutExtension(episode.Path);
-				string subName = Path.GetFileName(sub);
-				
-				if (episodeLink == null 
-				    || subName?.Contains(episodeLink) == false 
-				    || subName.Length < episodeLink.Length + 5)
-					continue;
-				string language = subName.Substring(episodeLink.Length + 1, 3);
-				bool isDefault = sub.Contains("default");
-				bool isForced = sub.Contains("forced");
-				Track track = new Track(StreamType.Subtitle, null, language, isDefault, isForced, null, false, sub)
-				{
-					EpisodeID = episode.ID,
-					Codec = Path.GetExtension(sub) switch
-					{
-						".ass" => "ass",
-						".srt" => "subrip",
-						_ => null
-					}
-				};
-
-				tracks.Add(track);
-			}
-			return tracks;
+			episode.Tracks = await _transcoder.ExtractInfos(episode.Path);
+			return episode.Tracks;
 		}
 
 		private static readonly string[] VideoExtensions =

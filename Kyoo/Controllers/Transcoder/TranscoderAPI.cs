@@ -20,24 +20,19 @@ namespace Kyoo.Controllers.TranscoderLink
 		public static extern int transcode(string path, string out_path, out float playableDuration);
 
 		[DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-		private static extern IntPtr get_track_info(string path, out int array_length, out int track_count);
+		private static extern IntPtr extract_infos(string path, string outpath, out int length, out int track_count);
 		
 		[DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-		private static extern IntPtr extract_subtitles(string path, string out_path, out int array_length, out int track_count);
-
-		// [DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-		// private static extern void free_streams(IntPtr stream_ptr);   
+		private static extern void free(IntPtr stream_ptr);
 		
-		[DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-		private static extern void free(IntPtr ptr);
-
-
-		public static void GetTrackInfo(string path, out Track[] tracks)
+		
+		public static Track[] ExtractInfos(string path, string outPath)
 		{
 			int size = Marshal.SizeOf<Stream>();
-			IntPtr ptr = get_track_info(path, out int arrayLength, out int trackCount);
+			IntPtr ptr = extract_infos(path, outPath, out int arrayLength, out int trackCount);
 			IntPtr streamsPtr = ptr;
-
+			Track[] tracks;
+			
 			if (trackCount > 0 && ptr != IntPtr.Zero)
 			{
 				tracks = new Track[trackCount];
@@ -46,7 +41,7 @@ namespace Kyoo.Controllers.TranscoderLink
 				for (int i = 0; i < arrayLength; i++)
 				{
 					Stream stream = Marshal.PtrToStructure<Stream>(streamsPtr);
-					if (stream!.Type != StreamType.Unknow)
+					if (stream!.Type != StreamType.Unknow && stream.Type != StreamType.Font)
 					{
 						tracks[j] = new Track(stream);
 						j++;
@@ -57,35 +52,9 @@ namespace Kyoo.Controllers.TranscoderLink
 			else
 				tracks = new Track[0];
 
-			free(ptr);
-		}
-
-		public static void ExtractSubtitles(string path, string outPath, out Track[] tracks)
-		{
-			int size = Marshal.SizeOf<Stream>();
-			IntPtr ptr = extract_subtitles(path, outPath, out int arrayLength, out int trackCount);
-			IntPtr streamsPtr = ptr;
-
-			if (trackCount > 0 && ptr != IntPtr.Zero)
-			{
-				tracks = new Track[trackCount];
-
-				int j = 0;
-				for (int i = 0; i < arrayLength; i++)
-				{
-					Stream stream = Marshal.PtrToStructure<Stream>(streamsPtr);
-					if (stream!.Type != StreamType.Unknow)
-					{
-						tracks[j] = new Track(stream);
-						j++;
-					}
-					streamsPtr += size;
-				}
-			}
-			else
-				tracks = new Track[0];
-
-			free(ptr);
+			if (ptr != IntPtr.Zero)
+				free(ptr); // free_streams is not necesarry since the Marshal free the unmanaged pointers.
+			return tracks;
 		}
 	}
 }

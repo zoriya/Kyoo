@@ -2,12 +2,14 @@
 using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.CommonApi;
 using Kyoo.Controllers;
 using Kyoo.Models.Exceptions;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 
 namespace Kyoo.Api
@@ -18,6 +20,7 @@ namespace Kyoo.Api
 	public class ShowApi : CrudApi<Show>
 	{
 		private readonly ILibraryManager _libraryManager;
+		private FileExtensionContentTypeProvider _provider;
 
 		public ShowApi(ILibraryManager libraryManager, IConfiguration configuration)
 			: base(libraryManager.ShowRepository, configuration)
@@ -409,6 +412,36 @@ namespace Kyoo.Api
 			{
 				return BadRequest(new {Error = ex.Message});
 			}
+		}
+
+		[HttpGet("{slug}/font")]
+		[HttpGet("{slug}/fonts")]
+		[Authorize(Policy = "Read")]
+		public async Task<ActionResult<Dictionary<string, string>>> GetFonts(string slug)
+		{
+			string path = (await _libraryManager.GetShow(slug))?.Path;
+			if (path == null)
+				return NotFound();
+			return Directory.GetFiles(path)
+				.ToDictionary(Path.GetFileNameWithoutExtension, x => $"{BaseURL}/shows/{slug}/fonts/{x}");
+		}
+		
+		[HttpGet("{showSlug}/font/{slug}")]
+		[HttpGet("{showSlug}/fonts/{slug}")]
+		[Authorize(Policy = "Read")]
+		public async Task<ActionResult<Dictionary<string, string>>> GetFont(string showSlug, string slug)
+		{
+			string path = (await _libraryManager.GetShow(showSlug))?.Path;
+			if (path == null)
+				return NotFound();
+			string fontPath = Path.Combine(path, "Subtitles", "fonts", slug);
+			if (!System.IO.File.Exists(fontPath))
+				return NotFound();
+			
+			if (_provider == null)
+				_provider = new FileExtensionContentTypeProvider();
+			_provider.TryGetContentType(path, out string contentType);
+			return PhysicalFile(fontPath, contentType ?? "application/x-font-ttf");
 		}
 	}
 }

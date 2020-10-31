@@ -1,12 +1,29 @@
 ﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models.Watch;
+using PathIO = System.IO.Path;
 
 namespace Kyoo.Models
 {
+	public class Chapter
+	{
+		public long StartTime;
+		public long EndTime;
+		public string Name;
+
+		public Chapter(long startTime, long endTime, string name)
+		{
+			StartTime = startTime;
+			EndTime = endTime;
+			Name = name;
+		}
+	}
+	
 	public class WatchItem
 	{
 		[JsonIgnore] public readonly int EpisodeID = -1;
@@ -27,10 +44,11 @@ namespace Kyoo.Models
 		public Track Video;
 		public IEnumerable<Track> Audios;
 		public IEnumerable<Track> Subtitles;
+		public IEnumerable<Chapter> Chapters;
 
 		public WatchItem() { }
 
-		public WatchItem(int episodeID, 
+		private WatchItem(int episodeID, 
 			string showTitle,
 			string showSlug,
 			int seasonNumber,
@@ -52,7 +70,7 @@ namespace Kyoo.Models
 			Slug = Episode.GetSlug(ShowSlug, seasonNumber, episodeNumber);
 		}
 
-		public WatchItem(int episodeID,
+		private WatchItem(int episodeID,
 			string showTitle,
 			string showSlug, 
 			int seasonNumber, 
@@ -92,7 +110,7 @@ namespace Kyoo.Models
 				else
 					next = await library.GetEpisode(ep.ShowID, ep.SeasonNumber, ep.EpisodeNumber + 1);
 			}
-			
+
 			return new WatchItem(ep.ID,
 				show.Title,
 				show.Slug,
@@ -107,8 +125,35 @@ namespace Kyoo.Models
 			{
 				IsMovie = show.IsMovie,
 				PreviousEpisode = previous,
-				NextEpisode = next
+				NextEpisode = next,
+				Chapters = await GetChapters(ep.Path)
 			};
+		}
+
+		private static async Task<IEnumerable<Chapter>> GetChapters(string episodePath)
+		{
+			string path = PathIO.Combine(
+				PathIO.GetDirectoryName(episodePath)!, 
+				"Chapters",
+				PathIO.GetFileNameWithoutExtension(episodePath) + ".txt"
+			);
+			if (!File.Exists(path))
+				return new Chapter[0];
+			try
+			{
+				return (await File.ReadAllLinesAsync(path))
+					.Select(x =>
+					{
+						string[] values = x.Split(' ');
+						return new Chapter(long.Parse(values[0]), long.Parse(values[1]), values[2]);
+					})
+					.ToArray();
+			}
+			catch
+			{
+				await Console.Error.WriteLineAsync($"Invalid chapter file at {path}");
+				return new Chapter[0];
+			}
 		}
 	}
 }

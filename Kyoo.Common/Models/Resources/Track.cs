@@ -13,7 +13,8 @@ namespace Kyoo.Models
 			Unknow = 0,
 			Video = 1,
 			Audio = 2,
-			Subtitle = 3
+			Subtitle = 3,
+			Font = 4
 		}
 
 		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
