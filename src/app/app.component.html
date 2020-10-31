@@ -1,4 +1,4 @@
-<header id="nav" style="height: 68px;">
+<header id="nav">
 	<div class="fixed-top">
 		<nav id="toolbar" class="navbar navbar-dark bg-secondary">
 			<a class="navbar-brand nav-item ml-3" routerLink="/">
@@ -7,7 +7,7 @@
 
 			<ul class="navbar-nav flex-row">
 				<li class="nav-item">
-					<a class="nav-link" routerLink="/browse" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">All</a>
+					<a class="nav-link" routerLink="/browse" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">All</a>
 				</li>
 				<li class="nav-item" *ngFor="let library of this.libraries">
 					<a class="nav-link" routerLink="/browse/{{library.slug}}" routerLinkActive="active">{{library.name}}</a>
@@ -47,6 +47,6 @@
 	</div>
 </header>
 
-<main>
+<main id="main">
 	<router-outlet></router-outlet>
 </main>

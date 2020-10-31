@@ -1,53 +1,84 @@
-import {Component, ElementRef, Inject, ViewChild} from '@angular/core';
-import {MAT_DIALOG_DATA, MatDialogRef} from "@angular/material/dialog";
-import {HttpClient} from "@angular/common/http";
-import {Show} from "../../models/resources/show";
-import {Genre} from "../../models/resources/genre";
-import {MatChipInputEvent} from "@angular/material/chips";
-import {MatAutocompleteSelectedEvent} from "@angular/material/autocomplete";
-import {Observable, of} from "rxjs";
-import {tap} from "rxjs/operators";
-import {Studio} from "../../models/resources/studio";
-import {Provider} from "../../models/provider";
-import {MatSnackBar} from "@angular/material/snack-bar";
-import {ShowGridComponent} from "../../components/show-grid/show-grid.component";
+import { Component, Inject, OnInit, ViewChild } from "@angular/core";
+import { FormControl } from "@angular/forms";
+import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
+import { HttpClient } from "@angular/common/http";
+import { Page } from "../../models/page";
+import { Show } from "../../models/resources/show";
+import { Genre } from "../../models/resources/genre";
+import { MatChipInputEvent } from "@angular/material/chips";
+import { MatAutocompleteSelectedEvent } from "@angular/material/autocomplete";
+import { Observable, of} from "rxjs";
+import { catchError, filter, map, mergeAll, tap } from "rxjs/operators";
+import { Studio } from "../../models/resources/studio";
+import { Provider } from "../../models/provider";
+import { MatSnackBar } from "@angular/material/snack-bar";
+import { ShowGridComponent } from "../../components/show-grid/show-grid.component";
+import { GenreService, StudioService } from "../../services/api.service";
 
 @Component({
 	selector: 'app-metadata-edit',
 	templateUrl: './metadata-edit.component.html',
 	styleUrls: ['./metadata-edit.component.scss']
 })
-export class MetadataEditComponent
+export class MetadataEditComponent implements OnInit
 {
-	@ViewChild("genreInput") private genreInput: ElementRef<HTMLInputElement>;
-	public allGenres: Genre[];
-	public allStudios: Studio[];
+	studioForm: FormControl = new FormControl();
+	filteredStudios: Observable<Studio[]>;
+
+	genreForm: FormControl = new FormControl();
+	filteredGenres: Observable<Genre[]>;
 	
 	@ViewChild("identifyGrid") private identifyGrid: ShowGridComponent;
 	private identifying: Observable<Show[]>;
 	private identifiedShows: [string, Show[]];
-	public providers: Provider[];
+	public providers: Provider[] = [];
 
 	public metadataChanged: boolean = false;
 	
-	constructor(public dialogRef: MatDialogRef<MetadataEditComponent>, @Inject(MAT_DIALOG_DATA) public show: Show, private http: HttpClient, private snackBar: MatSnackBar) 
+	constructor(public dialogRef: MatDialogRef<MetadataEditComponent>,
+	            @Inject(MAT_DIALOG_DATA) public show: Show,
+	            private http: HttpClient,
+	            private studioApi: StudioService,
+	            private genreApi: GenreService,
+	            private snackBar: MatSnackBar)
 	{
-		this.http.get<Genre[]>("/api/genres").subscribe(result => 
+		this.http.get<Page<Provider>>("/api/providers").subscribe(result =>
 		{
-			this.allGenres = result;	
-		});
-		this.http.get<Studio[]>("/api/studios").subscribe(result =>
-		{
-			this.allStudios = result;
-		});
-		this.http.get<Provider[]>("/api/providers").subscribe(result =>
-		{
-			this.providers = result;
+			this.providers = result.items;
 		});
 
 		this.reIdentify(this.show.title);
 	}
-	
+
+	ngOnInit()
+	{
+		this.filteredGenres = this.genreForm.valueChanges
+			.pipe(
+				filter(x => x),
+				map(x => typeof x === "string" ? x : x.name),
+				map(x => this.genreApi.search(x)),
+				mergeAll(),
+				catchError(x =>
+				{
+					console.log(x);
+					return [];
+				})
+			);
+
+		this.filteredStudios = this.studioForm.valueChanges
+			.pipe(
+				filter(x => x),
+				map(x => typeof x === "string" ? x : x.name),
+				map(x => this.studioApi.search(x)),
+				mergeAll(),
+				catchError(x =>
+				{
+					console.log(x);
+					return [];
+				})
+			);
+	}
+
 	apply(): void
 	{
 		if (this.metadataChanged) 
@@ -59,7 +90,7 @@ export class MetadataEditComponent
 				},
 				() => 
 				{
-					this.snackBar.open("An unknown error occured.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
+					this.snackBar.open("An unknown error occurred.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
 				}
 			);
 			this.dialogRef.close(this.show);
@@ -106,10 +137,9 @@ export class MetadataEditComponent
 		this.show.genres.splice(i, 1);
 	}
 
-	autocompleteGenre(event: MatAutocompleteSelectedEvent): void 
+	autocompleteGenre(event: MatAutocompleteSelectedEvent): void
 	{
 		this.show.genres.push(event.option.value);
-		this.genreInput.nativeElement.value = '';
 	}
 
 	identityShow(name: string): Observable<Show[]>

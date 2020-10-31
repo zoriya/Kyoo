@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from "@angular/core";
+import { AfterViewInit, Component, HostListener, OnInit } from "@angular/core";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { DomSanitizer, Title } from "@angular/platform-browser";
 import {ActivatedRoute, Router} from '@angular/router';
@@ -17,7 +17,7 @@ import {People} from "../../models/resources/people";
 	templateUrl: './show-details.component.html',
 	styleUrls: ['./show-details.component.scss']
 })
-export class ShowDetailsComponent implements OnInit
+export class ShowDetailsComponent implements AfterViewInit
 {
 	show: Show;
 	seasons: Season[];
@@ -25,6 +25,7 @@ export class ShowDetailsComponent implements OnInit
 	episodes: Page<Episode>[] = [];
 	people: Page<People>;
 
+	private scrollZone: HTMLElement;
 	private toolbar: HTMLElement;
 	private backdrop: HTMLElement;
 
@@ -65,23 +66,30 @@ export class ShowDetailsComponent implements OnInit
 			this.getEpisodes(this.season);});
 	}
 
-	ngOnInit()
+	ngAfterViewInit()
 	{
+		this.scrollZone = document.getElementById("main");
 		this.toolbar = document.getElementById("toolbar");
 		this.backdrop = document.getElementById("backdrop");
 		this.toolbar.setAttribute("style", `background-color: rgba(0, 0, 0, 0) !important`);
+		this.scrollZone.style.marginTop = "0";
+		this.scrollZone.style.maxHeight = "100vh";
+		this.scrollZone.addEventListener("scroll", () => this.scroll());
 	}
 
 	ngOnDestroy()
 	{
 		this.title.setTitle("Kyoo");
 		this.toolbar.setAttribute("style", `background-color: #000000 !important`);
+		this.scrollZone.style.marginTop = null;
+		this.scrollZone.style.maxHeight = null;
+		this.scrollZone.removeEventListener("scroll", () => this.scroll());
 	}
 
-	@HostListener("window:scroll")
 	scroll()
 	{
-		let opacity: number = 2 * window.scrollY / this.backdrop.clientHeight;
+		console.log("scroll");
+		let opacity: number = 2 * this.scrollZone.scrollTop / this.backdrop.clientHeight;
 		this.toolbar.setAttribute("style", `background-color: rgba(0, 0, 0, ${opacity}) !important`);
 	};
 

@@ -53,10 +53,14 @@
                             {{genre.name}}
                             <mat-icon matChipRemove>cancel</mat-icon>
                         </mat-chip>
-                        <input #genreInput placeholder="New genre..." [matChipInputFor]="genreList" (matChipInputTokenEnd)="addGenre($event)"
+                        <input #genreInput placeholder="New genre..."
+                               [formControl]="genreForm"
+                               [matChipInputFor]="genreList"
+                               (matChipInputTokenEnd)="addGenre($event); $event.input.value = null;"
                                [matAutocomplete]="genreAuto" />
-                        <mat-autocomplete #genreAuto="matAutocomplete" (optionSelected)="autocompleteGenre($event)">
-                            <mat-option *ngFor="let genre of this.allGenres" [value]="genre">
+                        <mat-autocomplete #genreAuto="matAutocomplete"
+                                          (optionSelected)="autocompleteGenre($event); genreInput.value = null;">
+	                        <mat-option *ngFor="let genre of this.filteredGenres | async" [value]="genre">
                                 {{genre.name}}
                             </mat-option>
                         </mat-autocomplete>
@@ -73,8 +77,8 @@
                     <input matInput [value]="this.show.studio?.name"
                            (input)="this.show.studio = {id: 0, slug: null, name: $event.target.value};"
                            [matAutocomplete]="studioAuto" name="studio">
-                    <mat-autocomplete #studioAuto="matAutocomplete"  (optionSelected)="this.show.studio = $event.option.value">
-                        <mat-option *ngFor="let studio of this.allStudios" [value]="studio">
+                    <mat-autocomplete #studioAuto="matAutocomplete" (optionSelected)="this.show.studio = $event.option.value">
+                        <mat-option *ngFor="let studio of this.filteredStudios | async" [value]="studio">
                             {{studio.name}}
                         </mat-option>
                     </mat-autocomplete>

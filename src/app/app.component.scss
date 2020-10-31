@@ -1,6 +1,12 @@
 @import "~bootstrap/scss/functions";
 @import "~bootstrap/scss/variables";
 @import "~bootstrap/scss/mixins/breakpoints";
+@import "variables";
+
+#toolbar
+{
+	height: $nav-bar-height;
+}
 
 .navbar
 {
@@ -111,29 +117,27 @@ input::-webkit-search-cancel-button
 
 main
 {
-	max-height: calc(100vh - 68px) !important;
+	margin-top: $nav-bar-height;
+	padding-top: 4px;
+	max-height: calc(100vh - #{$nav-bar-height});
+	display: block;
+	overflow-y: auto;
+	scrollbar-color: #999 transparent;
+	position: relative;
 
-	&:last-child
+	&::-webkit-scrollbar
 	{
-		display: block;
-		overflow-y: auto;
+		width: 8px;
+		background: transparent;
+	}
 
-		scrollbar-color: #999 transparent;
+	&::-webkit-scrollbar-thumb
+	{
+		background-color: #999;
 
-		&::-webkit-scrollbar
+		&:host-context(.hoverEnabled) &:hover
 		{
-			width: 8px;
-			background: transparent;
-		}
-
-		&::-webkit-scrollbar-thumb
-		{
-			background-color: #999;
-
-			&:host-context(.hoverEnabled) &:hover
-			{
-				background-color: rgb(134, 127, 127);
-			}
+			background-color: rgb(134, 127, 127);
 		}
 	}
 }

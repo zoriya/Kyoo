@@ -2,6 +2,7 @@ import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs"
 import {Page} from "../models/page";
+import { Genre } from "../models/resources/genre";
 import {IResource} from "../models/resources/resource";
 import {Library} from "../models/resources/library";
 import {LibraryItem} from "../models/resources/library-item";
@@ -141,6 +142,23 @@ export class PeopleService extends CrudApi<People>
 	{
 		return this.client.get<Page<People>>(`/api/shows/${show}/people${this.ArgsAsQuery(args)}`)
 			.pipe(map(x => Object.assign(new Page<People>(), x)));
+	}
+}
+
+@Injectable({
+	providedIn: 'root'
+})
+export class GenreService extends CrudApi<Genre>
+{
+	constructor(client: HttpClient)
+	{
+		super(client, "genres");
+	}
+
+	getFromShow(show: string | number, args?: ApiArgs): Observable<Page<Genre>>
+	{
+		return this.client.get<Page<Genre>>(`/api/shows/${show}/genres${this.ArgsAsQuery(args)}`)
+			.pipe(map(x => Object.assign(new Page<Genre>(), x)));
 	}
 }
 
