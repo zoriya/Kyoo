@@ -64,11 +64,19 @@ a
 .poster
 {
 	width: 33%;
-	background-color: #333333;
 
 	@include media-breakpoint-up(md)
 	{
 		width: 25%;
+	}
+
+	> div
+	{
+		width: 100%;
+		height: 0;
+		padding-top: 147.0588%;
+		background-size: cover;
+		background-color: #333333;
 	}
 }
 

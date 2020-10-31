@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from "@angular/core";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { Title } from '@angular/platform-browser';
+import { DomSanitizer, Title } from "@angular/platform-browser";
 import {ActivatedRoute, Router} from '@angular/router';
 import { Episode } from "../../models/resources/episode";
 import { Show } from "../../models/resources/show";
@@ -30,6 +30,7 @@ export class ShowDetailsComponent implements OnInit
 
 	constructor(private route: ActivatedRoute,
 	            private snackBar: MatSnackBar,
+	            private sanitizer: DomSanitizer,
 	            private title: Title,
 	            private router: Router,
 	            private dialog: MatDialog,
@@ -68,22 +69,26 @@ export class ShowDetailsComponent implements OnInit
 	{
 		this.toolbar = document.getElementById("toolbar");
 		this.backdrop = document.getElementById("backdrop");
-		window.addEventListener("scroll", this.scroll, true);
 		this.toolbar.setAttribute("style", `background-color: rgba(0, 0, 0, 0) !important`);
 	}
 
 	ngOnDestroy()
 	{
-		window.removeEventListener("scroll", this.scroll, true);
 		this.title.setTitle("Kyoo");
 		this.toolbar.setAttribute("style", `background-color: #000000 !important`);
 	}
 
-	scroll = () =>
+	@HostListener("window:scroll")
+	scroll()
 	{
 		let opacity: number = 2 * window.scrollY / this.backdrop.clientHeight;
 		this.toolbar.setAttribute("style", `background-color: rgba(0, 0, 0, ${opacity}) !important`);
 	};
+
+	getThumb(slug: string)
+	{
+		return this.sanitizer.bypassSecurityTrustStyle("url(/poster/" + slug + ")");
+	}
 
 	playClicked()
 	{
