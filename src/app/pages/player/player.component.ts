@@ -15,6 +15,7 @@ import { DomSanitizer, Title } from "@angular/platform-browser";
 import { ActivatedRoute, Event, NavigationCancel, NavigationEnd, NavigationStart, Router } from "@angular/router";
 import { OidcSecurityService } from "angular-auth-oidc-client";
 import * as Hls from "hls.js";
+import { ShowService } from "../../services/api.service";
 import {
 	getWhatIsSupported,
 	method,
@@ -160,7 +161,8 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 	            private title: Title,
 	            private router: Router,
 	            private location: Location,
-	            private injector: Injector)
+	            private injector: Injector,
+	            private shows: ShowService)
 	{ }
 
 	ngOnInit()
@@ -405,7 +407,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 			document.body.requestFullscreen();
 	}
 
-	selectSubtitle(subtitle: Track | number, changeUrl: boolean = true)
+	async selectSubtitle(subtitle: Track | number, changeUrl: boolean = true)
 	{
 		if (typeof(subtitle) === "number")
 		{
@@ -460,9 +462,11 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 			{
 				if (!this.subtitlesManager)
 				{
+					let fonts: {[key: string]: string} = await this.shows.getFonts(this.item.showSlug).toPromise();
 					this.subtitlesManager = new SubtitlesOctopus({
 						video: this.player,
-						subUrl: `subtitle/${subtitle.slug}`
+						subUrl: `subtitle/${subtitle.slug}`,
+						fonts: Object.values(fonts)
 					});
 				}
 				else

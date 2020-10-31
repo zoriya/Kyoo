@@ -159,6 +159,11 @@ export class ShowService extends CrudApi<Show>
 		return this.client.get<Page<Show>>(`/api/collections/${collection}/shows${this.ArgsAsQuery(args)}`)
 			.pipe(map(x => Object.assign(new Page<Show>(), x)));
 	}
+
+	getFonts(id: string | number): Observable<{[font: string]: string}>
+	{
+		return this.client.get<any>(`/api/shows/${id}/fonts`);
+	}
 }
 
 @Injectable({
