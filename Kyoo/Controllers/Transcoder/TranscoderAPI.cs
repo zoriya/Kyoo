@@ -41,7 +41,7 @@ namespace Kyoo.Controllers.TranscoderLink
 				for (int i = 0; i < arrayLength; i++)
 				{
 					Stream stream = Marshal.PtrToStructure<Stream>(streamsPtr);
-					if (stream!.Type != StreamType.Unknow && stream.Type != StreamType.Font)
+					if (stream!.Type != StreamType.Unknow)
 					{
 						tracks[j] = new Track(stream);
 						j++;
