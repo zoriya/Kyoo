@@ -25,27 +25,15 @@ namespace Kyoo.Controllers
 				throw new BadTranscoderException();
 		}
 
-		public Task<Track[]> GetTrackInfo(string path)
-		{
-			return Task.Factory.StartNew(() =>
-			{
-				TranscoderAPI.GetTrackInfo(path, out Track[] tracks);
-				return tracks;
-			}, TaskCreationOptions.LongRunning);
-		}
-
-		public Task<Track[]> ExtractSubtitles(string path)
+		public Task<Track[]> ExtractInfos(string path)
 		{
 			string dir = Path.GetDirectoryName(path);
 			if (dir == null)
 				throw new ArgumentException("Invalid path.");
 			
-			string output = Path.Combine(dir, "Subtitles");
-			Directory.CreateDirectory(output);
-			return Task.Factory.StartNew(() => 
-			{ 
-				TranscoderAPI.ExtractSubtitles(path, output, out Track[] tracks);
-				return tracks;
+			return Task.Factory.StartNew(() =>
+			{
+				return TranscoderAPI.ExtractInfos(path, dir);
 			}, TaskCreationOptions.LongRunning);
 		}
 
