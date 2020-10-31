@@ -20,13 +20,13 @@
 
 .link
 {
-  outline: none;
-  color: inherit;
-  
-  &:hover
-  {
-	text-decoration: none !important;
-  }
+	outline: none;
+	color: inherit;
+	
+	&:hover
+	{
+		text-decoration: none !important;
+	}
 }
 
 .nav-link
@@ -107,4 +107,33 @@ input::-webkit-search-cancel-button
 .dropButton
 {
 	outline: none;
+}
+
+main
+{
+	max-height: calc(100vh - 68px) !important;
+
+	&:last-child
+	{
+		display: block;
+		overflow-y: auto;
+
+		scrollbar-color: #999 transparent;
+
+		&::-webkit-scrollbar
+		{
+			width: 8px;
+			background: transparent;
+		}
+
+		&::-webkit-scrollbar-thumb
+		{
+			background-color: #999;
+
+			&:host-context(.hoverEnabled) &:hover
+			{
+				background-color: rgb(134, 127, 127);
+			}
+		}
+	}
 }
