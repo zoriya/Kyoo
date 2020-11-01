@@ -16,6 +16,7 @@
 		<Authors>Anonymus-Raccoon</Authors>
 		<RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
 		<StartupObject>Kyoo.Program</StartupObject>
+		<LangVersion>default</LangVersion>
 	</PropertyGroup>
 
 	<ItemGroup>

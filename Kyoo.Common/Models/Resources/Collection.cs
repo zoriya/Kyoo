@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
 {

@@ -112,9 +112,13 @@ namespace Kyoo
 				object defaultValue = property.PropertyType.IsValueType
 					? Activator.CreateInstance(property.PropertyType) 
 					: null;
-				
+
 				if (value?.Equals(defaultValue) == false)
+				{
+					if (value is IEnumerable enumerable && !(value is string))
+						value = RunGenericMethod(typeof(Enumerable), "ToList", GetEnumerableType(enumerable), value);
 					property.SetValue(first, value);
+				}
 			}
 
 			if (first is IOnMerge merge)

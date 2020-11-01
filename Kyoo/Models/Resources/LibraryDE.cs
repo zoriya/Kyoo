@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Kyoo.Models.Attributes;
-using Newtonsoft.Json;
 
 namespace Kyoo.Models
 {

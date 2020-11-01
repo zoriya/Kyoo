@@ -40,7 +40,8 @@ namespace Kyoo
 				configuration.RootPath = "wwwroot";
 			});
 
-			services.AddControllers().AddNewtonsoftJson();
+			services.AddControllers()
+				.AddNewtonsoftJson(x => x.SerializerSettings.ContractResolver = new JsonPropertySelector());
 			services.AddHttpClient();
 
 			services.AddDbContext<DatabaseContext>(options =>
