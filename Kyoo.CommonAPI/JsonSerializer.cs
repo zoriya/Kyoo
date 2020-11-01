@@ -3,11 +3,11 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Reflection;
 using Kyoo.Models;
+using Kyoo.Models.Attributes;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -24,7 +24,8 @@ namespace Kyoo.Controllers
 			_forceSerialize = new Dictionary<Type, HashSet<string>>();
 		}
 		
-		public JsonPropertySelector(Dictionary<Type, HashSet<string>> ignored, Dictionary<Type, HashSet<string>> forceSerialize)
+		public JsonPropertySelector(Dictionary<Type, HashSet<string>> ignored, 
+			Dictionary<Type, HashSet<string>> forceSerialize = null)
 		{
 			_ignored = ignored ?? new Dictionary<Type, HashSet<string>>();
 			_forceSerialize = forceSerialize ?? new Dictionary<Type, HashSet<string>>();
@@ -58,15 +59,20 @@ namespace Kyoo.Controllers
 		{
 			JsonProperty property = base.CreateProperty(member, memberSerialization);
 
-			if (IsIgnored(property.DeclaringType, property.PropertyName))
+			if (IsSerializationForced(property.DeclaringType, property.PropertyName))
+			{
+				property.ShouldSerialize = i => true;
+				property.Ignored = false;
+			}
+			else if (IsIgnored(property.DeclaringType, property.PropertyName))
 			{
 				property.ShouldSerialize = i => false;
 				property.Ignored = true;
 			}
-			else if (IsSerializationForced(property.DeclaringType, property.PropertyName))
+			else
 			{
-				property.ShouldSerialize = i => true;
-				property.Ignored = false;
+				property.ShouldSerialize = i => member.GetCustomAttribute<JsonReadOnly>(true) == null;
+				property.ShouldDeserialize = i => member.GetCustomAttribute<JsonIgnore>(true) == null;
 			}
 			return property;
 		}
@@ -89,7 +95,7 @@ namespace Kyoo.Controllers
 						})
 					},
 				context.HttpContext.RequestServices.GetRequiredService<ArrayPool<char>>(), 
-					context.HttpContext.RequestServices.GetRequiredService<IOptions<MvcOptions>>().Value));
+					new MvcOptions()));
 			}
 		}
 	}

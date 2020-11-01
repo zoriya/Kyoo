@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Kyoo.Models.Attributes;
 
@@ -29,9 +28,9 @@ namespace Kyoo.Models
 		
 		
 		[JsonIgnore] public int? StudioID { get; set; }
-		[JsonIgnore] public virtual Studio Studio { get; set; }
-		[JsonIgnore] public virtual IEnumerable<Genre> Genres { get; set; }
-		[JsonIgnore] public virtual IEnumerable<PeopleRole> People { get; set; }
+		[JsonReadOnly] public virtual Studio Studio { get; set; }
+		[JsonReadOnly] public virtual IEnumerable<Genre> Genres { get; set; }
+		[JsonReadOnly] public virtual IEnumerable<PeopleRole> People { get; set; }
 		[JsonIgnore] public virtual IEnumerable<Season> Seasons { get; set; }
 		[JsonIgnore] public virtual IEnumerable<Episode> Episodes { get; set; }
 		[JsonIgnore] public virtual IEnumerable<Library> Libraries { get; set; }

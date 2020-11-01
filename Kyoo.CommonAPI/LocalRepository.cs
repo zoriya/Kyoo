@@ -10,6 +10,7 @@ using Kyoo.CommonApi;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Kyoo.Controllers
 {
@@ -142,18 +143,30 @@ namespace Kyoo.Controllers
 		{
 			if (edited == null)
 				throw new ArgumentNullException(nameof(edited));
-			
-			T old = await Get(edited.Slug);
 
-			if (old == null)
-				throw new ItemNotFound($"No resource found with the slug {edited.Slug}.");
-			
-			if (resetOld)
-				Utility.Nullify(old);
-			Utility.Merge(old, edited);
-			await Validate(old);
-			await Database.SaveChangesAsync();
-			return old;
+			Database.ChangeTracker.LazyLoadingEnabled = false;
+			try
+			{
+				T old = await Get(edited.ID);
+
+				if (old == null)
+					throw new ItemNotFound($"No resource found with the ID {edited.ID}.");
+
+				if (resetOld)
+					Utility.Nullify(old);
+				Utility.Complete(old, edited);
+				await Validate(old);
+				// TODO should fix this, new links & deleted links should be kept.
+				// TODO The changetracker has trash values now & values can't be listed before the validation (exception is thrown)
+				foreach (EntityEntry x in Database.ChangeTracker.Entries().Where(x => x.Entity != old))
+					x.State = EntityState.Detached;
+				await Database.SaveChangesAsync();
+				return old;
+			}
+			finally
+			{
+				Database.ChangeTracker.LazyLoadingEnabled = true;
+			}
 		}
 		
 		protected virtual Task Validate(T resource)

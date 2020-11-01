@@ -1,8 +1,8 @@
 ﻿using Kyoo.Models.Watch;
-using Newtonsoft.Json;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
+using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
 {
