@@ -224,24 +224,28 @@ namespace Kyoo.Controllers
 			bool isMovie, 
 			Library library)
 		{
-			Show show = await libraryManager.GetShow(x => x.Path == showPath);
-			if (show != null)
-				return show;
-			show = await _metadataProvider.SearchShow(showTitle, isMovie, library);
+			Show old = await libraryManager.GetShow(x => x.Path == showPath);
+			if (old != null)
+				return old;
+			Show show = await _metadataProvider.SearchShow(showTitle, isMovie, library);
 			show.Path = showPath;
 			show.People = await _metadataProvider.GetPeople(show, library);
 
 			try
 			{
 				await libraryManager.RegisterShow(show);
-				await _thumbnailsManager.Validate(show.People);
-				await _thumbnailsManager.Validate(show);
-				return show;
 			}
 			catch (DuplicatedItemException)
 			{
-				return await libraryManager.GetShow(show.Slug);
+				old = await libraryManager.GetShow(show.Slug);
+				if (old.Path == showPath)
+					return old;
+				show.Slug += $"-{show.StartYear}";
+				await libraryManager.RegisterShow(show);
 			}
+			await _thumbnailsManager.Validate(show.People);
+			await _thumbnailsManager.Validate(show);
+			return show;
 		}
 
 		private async Task<Season> GetSeason(ILibraryManager libraryManager, 
