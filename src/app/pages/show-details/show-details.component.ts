@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, HostListener, OnInit } from "@angular/core";
+import { AfterViewInit, Component } from "@angular/core";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { DomSanitizer, Title } from "@angular/platform-browser";
 import {ActivatedRoute, Router} from '@angular/router';
@@ -88,7 +88,6 @@ export class ShowDetailsComponent implements AfterViewInit
 
 	scroll()
 	{
-		console.log("scroll");
 		let opacity: number = 2 * this.scrollZone.scrollTop / this.backdrop.clientHeight;
 		this.toolbar.setAttribute("style", `background-color: rgba(0, 0, 0, ${opacity}) !important`);
 	};

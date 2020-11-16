@@ -89,7 +89,8 @@
 	</div>
 </mat-menu>
 
-<div class="container-fluid justify-content-center" infinite-scroll (scrolled)="this.page?.loadNext(this.client)">
+<div class="container-fluid justify-content-center"
+     infinite-scroll (scrolled)="this.page?.loadNext(this.client)" infiniteScrollContainer="#main" fromRoot="true">
 	<a class="show" *ngFor="let item of this.page?.items" [href]="getLink(item)" [routerLink]="getLink(item)">
 		<div matRipple [style.background-image]="getThumb(item.slug)"></div>
 		<p class="title">{{item.title ? item.title : item.name}}</p>

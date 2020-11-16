@@ -20,7 +20,7 @@
                             {{alias}}
                             <mat-icon matChipRemove>cancel</mat-icon>
                         </mat-chip>
-                        <input #aliasInput placeholder="New alias..." [matChipInputFor]="aliasList" (matChipInputTokenEnd)="addAlias($event)" />
+                        <input placeholder="New alias..." [matChipInputFor]="aliasList" (matChipInputTokenEnd)="addAlias($event)" />
                     </mat-chip-list>
                 </mat-form-field>
 
@@ -75,6 +75,7 @@
                 <mat-form-field class="w-100">
                     <mat-label>Studio</mat-label>
                     <input matInput [value]="this.show.studio?.name"
+                           [formControl]="studioForm"
                            (input)="this.show.studio = {id: 0, slug: null, name: $event.target.value};"
                            [matAutocomplete]="studioAuto" name="studio">
                     <mat-autocomplete #studioAuto="matAutocomplete" (optionSelected)="this.show.studio = $event.option.value">
@@ -105,7 +106,11 @@
 <div mat-dialog-actions align="end">
 	<button mat-button mat-dialog-close>Cancel</button>
 	<button mat-button (click)="apply()">
-        <mat-icon *ngIf="this.metadataChanged" style="color: red;" class="mr-2" matTooltip="You changed an external id, the whole show's metadata will be refreshed. Individual changes made won't last." matTooltipPosition="above">warning</mat-icon>
+        <mat-icon *ngIf="this.metadataChanged"
+                  style="color: red;"
+                  class="mr-2"
+                  matTooltip="You changed an external id, the whole show's metadata will be refreshed. Individual changes made won't last."
+                  matTooltipPosition="above">warning</mat-icon>
         Apply
     </button>
 </div>

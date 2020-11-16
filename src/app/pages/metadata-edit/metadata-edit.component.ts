@@ -13,7 +13,7 @@ import { Studio } from "../../models/resources/studio";
 import { Provider } from "../../models/provider";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { ShowGridComponent } from "../../components/show-grid/show-grid.component";
-import { GenreService, StudioService } from "../../services/api.service";
+import { GenreService, ShowService, StudioService } from "../../services/api.service";
 
 @Component({
 	selector: 'app-metadata-edit',
@@ -38,6 +38,7 @@ export class MetadataEditComponent implements OnInit
 	constructor(public dialogRef: MatDialogRef<MetadataEditComponent>,
 	            @Inject(MAT_DIALOG_DATA) public show: Show,
 	            private http: HttpClient,
+	            private showsApi: ShowService,
 	            private studioApi: StudioService,
 	            private genreApi: GenreService,
 	            private snackBar: MatSnackBar)
@@ -97,7 +98,7 @@ export class MetadataEditComponent implements OnInit
 		}
 		else
 		{
-			this.http.post("/api/show/edit/" + this.show.slug, this.show).subscribe(() =>
+			this.showsApi.edit(this.show).subscribe(() =>
 			{
 				this.dialogRef.close(this.show);
 			});
