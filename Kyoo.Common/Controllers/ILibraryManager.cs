@@ -43,7 +43,7 @@ namespace Kyoo.Controllers
 		Task<Season> GetSeason(string showSlug, int seasonNumber);
 		Task<Episode> GetEpisode(string showSlug, int seasonNumber, int episodeNumber);
 		Task<Episode> GetMovieEpisode(string movieSlug);
-		Task<Track> GetTrack(string slug);
+		Task<Track> GetTrack(string slug, StreamType type = StreamType.Unknow);
 		Task<Genre> GetGenre(string slug);
 		Task<Studio> GetStudio(string slug);
 		Task<People> GetPeople(string slug);
