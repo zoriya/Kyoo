@@ -36,7 +36,7 @@ namespace Kyoo.Controllers
 			await _database.DisposeAsync();
 		}
 
-		public override Task<Track> Get(string slug)
+		public override Task<Track> Get(string slug, StreamType type = StreamType.Unknow)
 		{
 			Match match = Regex.Match(slug,
 				@"(?<show>.*)-s(?<season>\d+)e(?<episode>\d+)\.(?<language>.{0,3})(?<forced>-forced)?(\..*)?");
@@ -56,11 +56,21 @@ namespace Kyoo.Controllers
 			int episodeNumber = match.Groups["episode"].Success ? int.Parse(match.Groups["episode"].Value) : -1;
 			string language = match.Groups["language"].Value;
 			bool forced = match.Groups["forced"].Success;
+
+			if (type == StreamType.Unknow)
+			{
+				return _database.Tracks.FirstOrDefaultAsync(x => x.Episode.Show.Slug == showSlug
+			        	                                         && x.Episode.SeasonNumber == seasonNumber
+			                	                                 && x.Episode.EpisodeNumber == episodeNumber
+			                        	                         && x.Language == language
+			                                	                 && x.IsForced == forced);
+		 	}
 			return _database.Tracks.FirstOrDefaultAsync(x => x.Episode.Show.Slug == showSlug
-			                                                 && x.Episode.SeasonNumber == seasonNumber
-			                                                 && x.Episode.EpisodeNumber == episodeNumber
-			                                                 && x.Language == language
-			                                                 && x.IsForced == forced);
+									 && x.Episode.SeasonNumber == seasonNumber
+									 && x.Episode.EpisodeNumber == episodeNumber
+									 && x.Type == type
+									 && x.Language == language
+									 && x.IsForced == forced);
 		}
 
 		public Task<ICollection<Track>> Search(string query)
