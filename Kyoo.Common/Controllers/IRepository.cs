@@ -145,7 +145,11 @@ namespace Kyoo.Controllers
 		Task Delete(string showSlug, int seasonNumber, int episodeNumber);
 	}
 
-	public interface ITrackRepository : IRepository<Track> { }
+	public interface ITrackRepository : IRepository<Track>
+	{
+		Task<Track> Get(string slug, StreamType type = StreamType.Unknow);
+	}
+	
 	public interface ILibraryRepository : IRepository<Library> { }
 
 	public interface ILibraryItemRepository : IRepository<LibraryItem>
