@@ -128,6 +128,8 @@ namespace Kyoo.Api
 
 		private static IEnumerable<string> ConvertBlock(IList<string> lines)
 		{
+			if (lines.Length < 3)
+				return lines;		
 			lines[1] = lines[1].Replace(',', '.');
 			if (lines[2].Length > 5)
 			{
