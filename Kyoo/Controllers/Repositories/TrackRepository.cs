@@ -36,7 +36,7 @@ namespace Kyoo.Controllers
 			await _database.DisposeAsync();
 		}
 
-		public override Task<Track> Get(string slug, StreamType type = StreamType.Unknow)
+		public Task<Track> Get(string slug, StreamType type = StreamType.Unknow)
 		{
 			Match match = Regex.Match(slug,
 				@"(?<show>.*)-s(?<season>\d+)e(?<episode>\d+)\.(?<language>.{0,3})(?<forced>-forced)?(\..*)?");
