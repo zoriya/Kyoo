@@ -6,7 +6,7 @@ namespace Kyoo.Models
 {
 	public class LibraryDE : Library
 	{
-		[JsonIgnore] [NotMergable] public virtual ICollection<ProviderLink> ProviderLinks { get; set; }
+		[EditableRelation] [JsonIgnore] [NotMergable] public virtual ICollection<ProviderLink> ProviderLinks { get; set; }
 		[ExpressionRewrite(nameof(ProviderLinks), nameof(ProviderLink.Provider))]
 		public override IEnumerable<ProviderID> Providers
 		{

@@ -102,9 +102,8 @@ namespace Kyoo
 			
 			Type type = typeof(T);
 			IEnumerable<PropertyInfo> properties = type.GetProperties()
-				.Where(x => x.CanRead 
-				            && x.CanWrite 
-				            && Attribute.GetCustomAttribute(x, typeof(NotMergableAttribute)) == null);
+				.Where(x => x.CanRead && x.CanWrite 
+				                      && Attribute.GetCustomAttribute(x, typeof(NotMergableAttribute)) == null);
 			
 			foreach (PropertyInfo property in properties)
 			{
@@ -114,11 +113,7 @@ namespace Kyoo
 					: null;
 
 				if (value?.Equals(defaultValue) == false)
-				{
-					if (value is IEnumerable enumerable && !(value is string))
-						value = RunGenericMethod(typeof(Enumerable), "ToList", GetEnumerableType(enumerable), value);
 					property.SetValue(first, value);
-				}
 			}
 
 			if (first is IOnMerge merge)

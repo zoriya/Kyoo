@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Kyoo.CommonApi;
 using Kyoo.Models;
+using Kyoo.Models.Attributes;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -118,24 +119,31 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 
-		public virtual async Task<T> CreateIfNotExists(T obj)
+		public virtual async Task<T> CreateIfNotExists(T obj, bool silentFail = false)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-
-			T old = await Get(obj.Slug);
-			if (old != null)
-				return old;
 			try
 			{
+				if (obj == null)
+					throw new ArgumentNullException(nameof(obj));
+
+				T old = await Get(obj.Slug);
+				if (old != null)
+					return old;
+				
 				return await Create(obj);
 			}
 			catch (DuplicatedItemException)
 			{
-				old = await Get(obj.Slug);
+				T old = await Get(obj!.Slug);
 				if (old == null)
 					throw new SystemException("Unknown database state.");
 				return old;
+			}
+			catch
+			{
+				if (silentFail)
+					return default;
+				throw;
 			}
 		}
 		
@@ -152,14 +160,17 @@ namespace Kyoo.Controllers
 				if (old == null)
 					throw new ItemNotFound($"No resource found with the ID {edited.ID}.");
 
+				IEnumerable<NavigationEntry> relations = Database.Entry(old).Collections
+					.Concat(Database.Entry(old).Navigations);
+				foreach (NavigationEntry navigation in relations)
+					if (navigation.Metadata.PropertyInfo.GetCustomAttribute<EditableRelation>() != null)
+						await navigation.LoadAsync();
+				
 				if (resetOld)
 					Utility.Nullify(old);
 				Utility.Complete(old, edited);
+				// TODO Validation set values & setting values trigger a change round in the OEM. A change round should only be triggered if the item is actually different.
 				await Validate(old);
-				// TODO should fix this, new links & deleted links should be kept.
-				// TODO The changetracker has trash values now & values can't be listed before the validation (exception is thrown)
-				foreach (EntityEntry x in Database.ChangeTracker.Entries().Where(x => x.Entity != old))
-					x.State = EntityState.Detached;
 				await Database.SaveChangesAsync();
 				return old;
 			}
@@ -168,7 +179,7 @@ namespace Kyoo.Controllers
 				Database.ChangeTracker.LazyLoadingEnabled = true;
 			}
 		}
-		
+
 		protected virtual Task Validate(T resource)
 		{
 			if (string.IsNullOrEmpty(resource.Slug))
@@ -298,13 +309,13 @@ namespace Kyoo.Controllers
 				.Then(x => item.ID = x.ID);
 		}
 
-		Task<T> IRepository<T>.CreateIfNotExists(T item)
+		Task<T> IRepository<T>.CreateIfNotExists(T item, bool silentFail)
 		{
 			TInternal obj = item as TInternal ?? new TInternal();
 			if (!(item is TInternal))
 				Utility.Assign(obj, item);
 			
-			return CreateIfNotExists(obj).Cast<T>()
+			return CreateIfNotExists(obj, silentFail).Cast<T>()
 				.Then(x => item.ID = x.ID);
 		}
 

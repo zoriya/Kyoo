@@ -23,7 +23,7 @@ namespace Kyoo.Models
 		public int Runtime { get; set; } //This runtime variable should be in minutes
 
 		[JsonIgnore] public string Poster { get; set; }
-		public virtual IEnumerable<MetadataID> ExternalIDs { get; set; }
+		[EditableRelation] public virtual IEnumerable<MetadataID> ExternalIDs { get; set; }
 
 		[JsonIgnore] public virtual IEnumerable<Track> Tracks { get; set; }
 

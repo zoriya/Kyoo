@@ -6,7 +6,7 @@ namespace Kyoo.Models
 {
 	public class ShowDE : Show
 	{
-		[JsonReadOnly] [NotMergable] public virtual ICollection<GenreLink> GenreLinks { get; set; }
+		[EditableRelation] [JsonReadOnly] [NotMergable] public virtual ICollection<GenreLink> GenreLinks { get; set; }
 		[ExpressionRewrite(nameof(GenreLinks), nameof(GenreLink.Genre))]
 		public override IEnumerable<Genre> Genres
 		{

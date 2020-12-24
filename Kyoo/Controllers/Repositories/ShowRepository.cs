@@ -75,7 +75,8 @@ namespace Kyoo.Controllers
 			query = $"%{query}%";
 			return await _database.Shows
 				.Where(x => EF.Functions.ILike(x.Title, query) 
-				            /*|| x.Aliases.Any(y => EF.Functions.ILike(y, query))*/) // NOT TRANSLATABLE.
+				            || EF.Functions.ILike(x.Slug, query) 
+							/*|| x.Aliases.Any(y => EF.Functions.ILike(y, query))*/) // NOT TRANSLATABLE.
 				.Take(20)
 				.ToListAsync<Show>();
 		}
