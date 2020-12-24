@@ -28,9 +28,9 @@ namespace Kyoo.Models
 		
 		
 		[JsonIgnore] public int? StudioID { get; set; }
-		[JsonReadOnly] public virtual Studio Studio { get; set; }
-		[JsonReadOnly] public virtual IEnumerable<Genre> Genres { get; set; }
-		[JsonReadOnly] public virtual IEnumerable<PeopleRole> People { get; set; }
+		[EditableRelation] [JsonReadOnly] public virtual Studio Studio { get; set; }
+		[EditableRelation] [JsonReadOnly] public virtual IEnumerable<Genre> Genres { get; set; }
+		[EditableRelation] [JsonReadOnly] public virtual IEnumerable<PeopleRole> People { get; set; }
 		[JsonIgnore] public virtual IEnumerable<Season> Seasons { get; set; }
 		[JsonIgnore] public virtual IEnumerable<Episode> Episodes { get; set; }
 		[JsonIgnore] public virtual IEnumerable<Library> Libraries { get; set; }

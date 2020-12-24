@@ -9,9 +9,9 @@ namespace Kyoo.Models
 		public string Slug { get; set; }
 		public string Name { get; set; }
 		public string Poster { get; set; }
-		public virtual IEnumerable<MetadataID> ExternalIDs { get; set; }
+		[EditableRelation] public virtual IEnumerable<MetadataID> ExternalIDs { get; set; }
 		
-		[JsonReadOnly] public virtual IEnumerable<PeopleRole> Roles { get; set; }
+		[EditableRelation] [JsonReadOnly] public virtual IEnumerable<PeopleRole> Roles { get; set; }
 		
 		public People() {}
 

@@ -110,7 +110,7 @@ namespace Kyoo.Controllers
 			return EpisodeRepository.Get(showID, seasonNumber, episodeNumber);
 		}
 
-		public Task<Track> GetTrack(string slug, StreamType type = StreamType.Unknow)
+		public Task<Track> GetTrack(string slug, StreamType type = StreamType.Unknown)
 		{
 			return TrackRepository.Get(slug, type);
 		}

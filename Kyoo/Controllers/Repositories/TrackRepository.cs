@@ -36,7 +36,7 @@ namespace Kyoo.Controllers
 			await _database.DisposeAsync();
 		}
 
-		public Task<Track> Get(string slug, StreamType type = StreamType.Unknow)
+		public Task<Track> Get(string slug, StreamType type = StreamType.Unknown)
 		{
 			Match match = Regex.Match(slug,
 				@"(?<show>.*)-s(?<season>\d+)e(?<episode>\d+)\.(?<language>.{0,3})(?<forced>-forced)?(\..*)?");
@@ -57,7 +57,7 @@ namespace Kyoo.Controllers
 			string language = match.Groups["language"].Value;
 			bool forced = match.Groups["forced"].Success;
 
-			if (type == StreamType.Unknow)
+			if (type == StreamType.Unknown)
 			{
 				return _database.Tracks.FirstOrDefaultAsync(x => x.Episode.Show.Slug == showSlug
 			        	                                         && x.Episode.SeasonNumber == seasonNumber

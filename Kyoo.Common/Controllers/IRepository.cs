@@ -95,20 +95,7 @@ namespace Kyoo.Controllers
 		
 		
 		Task<T> Create([NotNull] T obj);
-		Task<T> CreateIfNotExists([NotNull] T obj);
-		async Task<T> CreateIfNotExists([NotNull] T obj, bool silentFail)
-		{
-			try
-			{
-				return await CreateIfNotExists(obj);
-			}
-			catch
-			{
-				if (!silentFail)
-					throw;
-				return null;
-			}
-		}
+		Task<T> CreateIfNotExists([NotNull] T obj, bool silentFail = false);
 		Task<T> Edit([NotNull] T edited, bool resetOld);
 		
 		Task Delete(int id);
@@ -147,7 +134,7 @@ namespace Kyoo.Controllers
 
 	public interface ITrackRepository : IRepository<Track>
 	{
-		Task<Track> Get(string slug, StreamType type = StreamType.Unknow);
+		Task<Track> Get(string slug, StreamType type = StreamType.Unknown);
 	}
 	
 	public interface ILibraryRepository : IRepository<Library> { }

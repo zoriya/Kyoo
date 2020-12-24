@@ -13,7 +13,19 @@ using Newtonsoft.Json.Serialization;
 
 namespace Kyoo.Controllers
 {
-	public class JsonPropertySelector : CamelCasePropertyNamesContractResolver
+	public class JsonPropertyIgnorer : CamelCasePropertyNamesContractResolver
+	{
+		protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
+		{
+			JsonProperty property = base.CreateProperty(member, memberSerialization);
+			
+			property.ShouldSerialize = i => member.GetCustomAttribute<JsonReadOnly>(true) == null;
+			property.ShouldDeserialize = i => member.GetCustomAttribute<JsonIgnore>(true) == null;
+			return property;
+		}
+	}
+	
+	public class JsonPropertySelector : JsonPropertyIgnorer
 	{
 		private readonly Dictionary<Type, HashSet<string>> _ignored;
 		private readonly Dictionary<Type, HashSet<string>> _forceSerialize;
@@ -60,20 +72,9 @@ namespace Kyoo.Controllers
 			JsonProperty property = base.CreateProperty(member, memberSerialization);
 
 			if (IsSerializationForced(property.DeclaringType, property.PropertyName))
-			{
 				property.ShouldSerialize = i => true;
-				property.Ignored = false;
-			}
 			else if (IsIgnored(property.DeclaringType, property.PropertyName))
-			{
 				property.ShouldSerialize = i => false;
-				property.Ignored = true;
-			}
-			else
-			{
-				property.ShouldSerialize = i => member.GetCustomAttribute<JsonReadOnly>(true) == null;
-				property.ShouldDeserialize = i => member.GetCustomAttribute<JsonIgnore>(true) == null;
-			}
 			return property;
 		}
 	}

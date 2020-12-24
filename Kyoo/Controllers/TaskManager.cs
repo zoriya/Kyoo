@@ -55,7 +55,7 @@ namespace Kyoo.Controllers
 				}
 				else
 				{
-					await Task.Delay(10, cancellationToken);
+					await Task.Delay(1000, cancellationToken);
 					QueueScheduledTasks();
 				}
 			}
@@ -63,8 +63,8 @@ namespace Kyoo.Controllers
 
 		private void QueueScheduledTasks()
 		{
-			List<string> tasksToQueue = _tasks.Where(x => x.scheduledDate <= DateTime.Now)
-				.Select(x => x.task.Slug).ToList();
+			IEnumerable<string> tasksToQueue = _tasks.Where(x => x.scheduledDate <= DateTime.Now)
+				.Select(x => x.task.Slug);
 			foreach (string task in tasksToQueue)
 				StartTask(task);
 		}

@@ -10,7 +10,7 @@ namespace Kyoo.Models
 		public string Name { get; set; }
 		public IEnumerable<string> Paths { get; set; }
 
-		public virtual IEnumerable<ProviderID> Providers { get; set; }
+		[EditableRelation] public virtual IEnumerable<ProviderID> Providers { get; set; }
 
 		[JsonIgnore] public virtual IEnumerable<Show> Shows { get; set; }
 		[JsonIgnore] public virtual IEnumerable<Collection> Collections { get; set; }
