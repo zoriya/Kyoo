@@ -8,7 +8,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Kyoo.Models.Exceptions;
-using Kyoo.Models.Watch;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
@@ -121,18 +120,16 @@ namespace Kyoo.Controllers
 					.Where(x => IsVideo(x) && episodes.All(y => y.Path != x))
 					.GroupBy(Path.GetDirectoryName)
 					.ToList();
-				
-				IEnumerable<Task> tasks = shows
-					.Select(x => x.First())
-					.Select(x => RegisterFile(x, x.Substring(path.Length), library, cancellationToken));
-				foreach (Task[] showTasks in tasks.BatchBy(_parallelTasks))
-					await Task.WhenAll(showTasks);
 
-				tasks = shows
-					.SelectMany(x => x.Skip(1))
-					.Select(x => RegisterFile(x, x.Substring(path.Length), library, cancellationToken));
-				foreach (Task[] episodeTasks in tasks.BatchBy(_parallelTasks * 2))
-					await Task.WhenAll(episodeTasks);
+				IEnumerable<string> tasks = shows.Select(x => x.First());
+				foreach (string[] showTasks in tasks.BatchBy(_parallelTasks))
+					await Task.WhenAll(showTasks
+						.Select(x => RegisterFile(x, x.Substring(path.Length), library, cancellationToken)));
+
+				tasks = shows.SelectMany(x => x.Skip(1));
+				foreach (string[] episodeTasks in tasks.BatchBy(_parallelTasks * 2))
+					await Task.WhenAll(episodeTasks
+						.Select(x => RegisterFile(x, x.Substring(path.Length), library, cancellationToken)));
 			}
 		}
 
@@ -233,7 +230,7 @@ namespace Kyoo.Controllers
 
 			try
 			{
-				await libraryManager.RegisterShow(show);
+				show = await libraryManager.RegisterShow(show);
 			}
 			catch (DuplicatedItemException)
 			{

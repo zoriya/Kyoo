@@ -159,17 +159,15 @@ namespace Kyoo.Controllers
 
 				if (old == null)
 					throw new ItemNotFound($"No resource found with the ID {edited.ID}.");
-
-				IEnumerable<NavigationEntry> relations = Database.Entry(old).Collections
-					.Concat(Database.Entry(old).Navigations);
-				foreach (NavigationEntry navigation in relations)
-					if (navigation.Metadata.PropertyInfo.GetCustomAttribute<EditableRelation>() != null)
-						await navigation.LoadAsync();
 				
+				foreach (NavigationEntry navigation in Database.Entry(old).Navigations)
+					if (navigation.Metadata.PropertyInfo.GetCustomAttribute<EditableRelation>() != null
+					    && navigation.Metadata.GetGetter().GetClrValue(edited) != default)
+						await navigation.LoadAsync();
+
 				if (resetOld)
 					Utility.Nullify(old);
 				Utility.Complete(old, edited);
-				// TODO Validation set values & setting values trigger a change round in the OEM. A change round should only be triggered if the item is actually different.
 				await Validate(old);
 				await Database.SaveChangesAsync();
 				return old;
