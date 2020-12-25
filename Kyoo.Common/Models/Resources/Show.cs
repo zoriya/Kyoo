@@ -24,7 +24,7 @@ namespace Kyoo.Models
 
 		public bool IsMovie { get; set; }
 
-		public virtual IEnumerable<MetadataID> ExternalIDs { get; set; }
+		[EditableRelation] public virtual IEnumerable<MetadataID> ExternalIDs { get; set; }
 		
 		
 		[JsonIgnore] public int? StudioID { get; set; }
