@@ -27,12 +27,7 @@ namespace Kyoo.Tasks
 			DatabaseContext databaseContext = serviceScope.ServiceProvider.GetService<DatabaseContext>();
 			IdentityDatabase identityDatabase = serviceScope.ServiceProvider.GetService<IdentityDatabase>();
 			ConfigurationDbContext identityContext = serviceScope.ServiceProvider.GetService<ConfigurationDbContext>();
-
-			if (!databaseContext.Database.CanConnect()
-			    || !identityDatabase.Database.CanConnect()
-			    || !identityContext.Database.CanConnect())
-				throw new SystemException("Coudln't connect to the database.");
-
+			
 			databaseContext.Database.Migrate();
 			identityDatabase.Database.Migrate();
 			identityContext.Database.Migrate();
