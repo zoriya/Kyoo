@@ -68,7 +68,7 @@ export class AppComponent
 		if (query != "")
 		{
 			event.target.classList.add("searching");
-			this.router.navigate(["/search/" + query], { replaceUrl: this.router.url.startsWith("/search/") });
+			this.router.navigate(["/search", query], { replaceUrl: this.router.url.startsWith("/search") });
 		}
 		else
 		{
