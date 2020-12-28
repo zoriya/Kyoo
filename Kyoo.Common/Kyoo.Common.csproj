@@ -7,15 +7,19 @@
 		<Authors>Anonymus Raccoon</Authors>
 		<Description>Base package to create plugins for Kyoo.</Description>
 		<PackageProjectUrl>https://github.com/AnonymusRaccoon/Kyoo</PackageProjectUrl>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
 		<RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
 		<Company>SDG</Company>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 		<PackageVersion>1.0.22</PackageVersion>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <PackageReference Include="JetBrains.Annotations" Version="2020.1.0" />
+		<PackageReference Include="JetBrains.Annotations" Version="2020.1.0" />
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
 	</ItemGroup>
 
 </Project>
