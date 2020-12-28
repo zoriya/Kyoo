@@ -32,3 +32,10 @@ To develop for Kyoo, you will need the .NET 3.1 SDK, node & npm for the webapp a
 To run the development server, simply open the .sln file with your favorite C# IDE (like Jetbrain's Rider or Visual Studio) and press run or you can use the CLI and use the ```dotnet run -p Kyoo``` command.
 
 To pack the application, run the ```dotnet publish -c Release -o <build_path> Kyoo``` command. This will build the server, the webapp and the transcoder and output files in the <build_path> directory.
+
+## Plugins
+
+You can create plugins for Kyoo. To do that, create a C# Library project targetting the .Net Core 3.1 and install the [Kyoo.Common](https://www.nuget.org/packages/Kyoo.Common) package and implement the IPlugin interface.
+
+You can create Tasks which can be started manually or automatically at startup or every X hours. You can also create metadata providers that will be used to get informations about shows, seasons, episodes & people.
+You can find an exemple of metadata provider [here](https://github.com/AnonymusRaccoon/Kyoo.TheMovieDB).
