@@ -7,6 +7,14 @@ Kyoo has been created from scratch, it is not a fork. Everything is and always w
 
 Feel free to open issues or pull requests, all contribution are welcomed.
 
+## Installation
+
+If you are using a linux distribution with acess to the AUR, simply install the kyoo-bin package. **COMMING SOON**
+
+If you are running another linux distribution or macos, you will need to build the package from source. To do that, look [here](#development--build).
+
+If you are on windows, you can't install Kyoo for now. (Everything should work fine except for the transcoder. I haven't made the pipeline for MSVC).
+
 ## Repositories
 
 This is the main repository for Kyoo. Here, you will find all the server's code, the build process & the login page.
