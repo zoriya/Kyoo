@@ -16,6 +16,7 @@ import { ActivatedRoute, Event, NavigationCancel, NavigationEnd, NavigationStart
 import { OidcSecurityService } from "angular-auth-oidc-client";
 import * as Hls from "hls.js";
 import { ShowService } from "../../services/api.service";
+import { StartupService } from "../../services/startup.service";
 import {
 	getWhatIsSupported,
 	method,
@@ -162,7 +163,8 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 	            private router: Router,
 	            private location: Location,
 	            private injector: Injector,
-	            private shows: ShowService)
+	            private shows: ShowService,
+	            private startup: StartupService)
 	{ }
 
 	ngOnInit()
@@ -359,8 +361,14 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 
 	back()
 	{
-		// TODO add the show page in the backstack if the user used a direct link to go to the watch page.
-		this.location.back();
+		if (this.startup.loadedFromWatch)
+		{
+			this.router.navigate(["show", this.startup.show], {replaceUrl: true})
+			this.startup.loadedFromWatch = false;
+			this.startup.show = null;
+		}
+		else
+			this.location.back();
 	}
 
 	next()

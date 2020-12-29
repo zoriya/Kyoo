@@ -5,14 +5,17 @@ import { Injectable } from "@angular/core";
 })
 export class StartupService
 {
+	loadedFromWatch: boolean = false;
+	show: string = null;
+
 	constructor() {}
 
 	load(): Promise<any>
 	{
 		if (window.location.pathname.startsWith("/watch/"))
 		{
-			const show = window.location.pathname.match(/^\/watch\/(?<show>.*)(-s\d+e\d+)+?$/).groups["show"];
-			history.pushState({}, null, `/show/${show}`)
+			this.loadedFromWatch = true;
+			this.show = window.location.pathname.match(/^\/watch\/(?<show>.*)(-s\d+e\d+)+?$/).groups["show"];
 		}
 		return Promise.resolve(null);
 	}
