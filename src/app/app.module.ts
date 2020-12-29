@@ -1,5 +1,5 @@
 import { HttpClientModule } from '@angular/common/http';
-import { NgModule } from '@angular/core';
+import { APP_INITIALIZER, NgModule } from "@angular/core";
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatRippleModule } from '@angular/material/core';
@@ -46,6 +46,7 @@ import { MatExpansionModule } from "@angular/material/expansion";
 import { InfiniteScrollModule } from "ngx-infinite-scroll";
 import { ShowGridComponent } from "./components/show-grid/show-grid.component";
 import { MatBadgeModule } from "@angular/material/badge";
+import { StartupService } from "./services/startup.service";
 
 
 @NgModule({
@@ -101,6 +102,15 @@ import { MatBadgeModule } from "@angular/material/badge";
 		MatBadgeModule,
 		HammerModule
 	],
-	bootstrap: [AppComponent]
+	bootstrap: [AppComponent],
+	providers: [
+		StartupService,
+		{
+			provide: APP_INITIALIZER,
+			useFactory: (startup: StartupService) => () => startup.load(),
+			deps: [StartupService],
+			multi: true
+		}
+	]
 })
 export class AppModule { }

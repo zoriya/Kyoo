@@ -359,7 +359,8 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 
 	back()
 	{
-		this.router.navigate(["/show", this.item.showSlug]);
+		// TODO add the show page in the backstack if the user used a direct link to go to the watch page.
+		this.location.back();
 	}
 
 	next()
@@ -367,7 +368,8 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 		if (this.item.nextEpisode == null)
 			return;
 		this.router.navigate(["/watch", this.item.nextEpisode.slug], {
-			queryParamsHandling: "merge"
+			queryParamsHandling: "merge",
+			replaceUrl: true
 		});
 	}
 
@@ -376,7 +378,8 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 		if (this.item.previousEpisode == null)
 			return;
 		this.router.navigate(["/watch", this.item.previousEpisode.slug], {
-			queryParamsHandling: "merge"
+			queryParamsHandling: "merge",
+			replaceUrl: true
 		});
 	}
 

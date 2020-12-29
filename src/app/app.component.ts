@@ -1,5 +1,12 @@
 import {Component} from '@angular/core';
-import {Event, Router, NavigationStart, NavigationEnd, NavigationCancel, NavigationError} from '@angular/router';
+import {
+	Event,
+	Router,
+	NavigationStart,
+	NavigationEnd,
+	NavigationCancel,
+	NavigationError
+} from "@angular/router";
 import {Location} from "@angular/common";
 import {MatDialog} from "@angular/material/dialog";
 import {AccountComponent} from "./auth/account/account.component";
@@ -68,7 +75,9 @@ export class AppComponent
 		if (query != "")
 		{
 			event.target.classList.add("searching");
-			this.router.navigate(["/search", query], { replaceUrl: this.router.url.startsWith("/search") });
+			this.router.navigate(["/search", query], {
+				replaceUrl: true
+			});
 		}
 		else
 		{
