@@ -254,6 +254,9 @@ namespace Kyoo
 				i = 0;
 				yield return ret;
 			}
+
+			Array.Resize(ref ret, i);
+			yield return ret;
 		}
 		
 		public static string ToQueryString(this Dictionary<string, string> query)
