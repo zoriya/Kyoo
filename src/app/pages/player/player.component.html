@@ -7,6 +7,7 @@
 		       poster="backdrop/{{this.item.showSlug}}"
 		       autoplay muted
 		       (click)="this.videoClicked()"
+		       (dblclick)="this.fullscreen()"
 		       (play)="this.playing = true; this.loading = false"
 		       (pause)="this.playing = false"
 		       (ended)="this.next()"
