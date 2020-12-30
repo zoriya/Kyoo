@@ -1,24 +1,23 @@
 <header id="nav">
 	<div class="fixed-top">
-		<nav id="toolbar" class="navbar navbar-dark bg-secondary">
+		<nav id="toolbar" class="navbar navbar-dark bg-secondary flex-nowrap">
+			<button mat-icon-button class="icon p-0 d-sm-none" type="button" data-toggle="collapse" data-target=".mobile-nav">
+				<mat-icon>menu</mat-icon>
+			</button>
 			<a class="navbar-brand nav-item ml-3" routerLink="/">
 				Kyoo
 			</a>
 
-			<ul class="navbar-nav flex-row">
-				<li class="nav-item">
-					<a class="nav-link" routerLink="/browse" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">All</a>
-				</li>
-				<li class="nav-item" *ngFor="let library of this.libraries">
-					<a class="nav-link" routerLink="/browse/{{library.slug}}" routerLinkActive="active">{{library.name}}</a>
-				</li>
+			<ul class="navbar-nav flex-row d-none d-sm-flex">
+				<ng-container *ngTemplateOutlet="links"></ng-container>
 			</ul>
 
-			<ul class="navbar-nav flex-row ml-auto">
+			<ul class="navbar-nav flex-row flex-nowrap ml-auto">
 				<li class="nav-item icon searchbar">
-					<input placeholder="Search" id="search" type="search" (input)="onUpdateValue($event)"/>
 					<mat-icon matTooltipPosition="below" matTooltip="Search" (click)="openSearch()">search</mat-icon>
+					<input placeholder="Search" id="search" type="search" (input)="onUpdateValue($event)"/>
 				</li>
+
 				<li class="nav-item" *ngIf="!this.isAuthenticated else accountDrop">
 					<a class="icon" (click)="this.authManager.login()" matTooltipPosition="below" matTooltip="Login">
 						<mat-icon>account_circle</mat-icon>
@@ -43,6 +42,13 @@
 				</ng-template>
 			</ul>
 		</nav>
+
+		<div class="d-sm-none navbar-dark bg-secondary">
+			<ul class="mobile-nav collapse navbar-nav">
+				<ng-container *ngTemplateOutlet="links"></ng-container>
+			</ul>
+		</div>
+
 		<mat-progress-bar *ngIf="this.isLoading" color="accent" mode="indeterminate"> </mat-progress-bar>
 	</div>
 </header>
@@ -50,3 +56,12 @@
 <main id="main">
 	<router-outlet></router-outlet>
 </main>
+
+<ng-template #links>
+	<li class="nav-item">
+		<a class="nav-link" routerLink="/browse" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">All</a>
+	</li>
+	<li class="nav-item" *ngFor="let library of this.libraries">
+		<a class="nav-link" routerLink="/browse/{{library.slug}}" routerLinkActive="active">{{library.name}}</a>
+	</li>
+</ng-template>

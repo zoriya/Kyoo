@@ -17,6 +17,11 @@
 {
 	outline: none;
 
+	@include media-breakpoint-down(sm)
+	{
+		text-align: center;
+	}
+
 	> a
 	{
 		outline: none;
@@ -51,14 +56,24 @@
 	}
 }
 
-.navbar-brand:hover
+.navbar-brand
 {
-	color: var(--accentColor);
+	&:hover
+	{
+		color: var(--accentColor);
+	}
+
+	@media (max-width: 350px)
+	{
+		display: none;
+	}
 }
 
 .searchbar
 {
 	border-radius: 30px;
+	display: flex !important;
+	flex-flow: row-reverse nowrap;
 
 	> input
 	{
@@ -69,13 +84,14 @@
 		border-bottom: 1px solid #cfcfcf;
 		width: 0;
 		padding: 0;
+		max-width: 20rem;
 		transition: width 0.4s ease-in-out;
 
 		&:focus, &.searching
 		{
-			width: 12rem;
+			width: 100%;
 
-			@include media-breakpoint-up(sm)
+			@include media-breakpoint-up(md)
 			{
 				width: 20rem;
 			}
@@ -93,12 +109,14 @@ input::-webkit-search-cancel-button
 	padding: 8px;
 	display: inline-block;
 	opacity: 0.7;
+	outline: none;
 
 	&:host-context(.hoverEnabled) &:hover
 	{
 		cursor: pointer;
 		opacity: 1;
 	}
+
 }
 
 .profilePicture

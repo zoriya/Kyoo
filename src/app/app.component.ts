@@ -76,7 +76,7 @@ export class AppComponent
 		{
 			event.target.classList.add("searching");
 			this.router.navigate(["/search", query], {
-				replaceUrl: true
+				replaceUrl: this.router.url.startsWith("/search")
 			});
 		}
 		else
