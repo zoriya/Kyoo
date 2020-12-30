@@ -7,7 +7,6 @@ export interface Episode extends IResource
 	episodeNumber: number;
 	title: string;
 	thumb: string;
-	slug: string;
 	overview: string;
 	releaseDate;
 	runtime: number;

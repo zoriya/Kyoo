@@ -106,7 +106,7 @@ button
 				margin-bottom: 0;
 			}
 
-			&:host-context(.hoverEnabled) &:hover
+			&:host-context(.hoverEnabled) &:hover, &:focus
 			{
 				cursor: pointer;
 			}

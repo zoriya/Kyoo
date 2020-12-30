@@ -1,5 +1,5 @@
 import { Component, ElementRef, ViewChild } from "@angular/core";
-import {MatButton} from "@angular/material/button";
+import { MatButton } from "@angular/material/button";
 
 // noinspection AngularMissingOrInvalidDeclarationInModule
 @Component({

@@ -54,6 +54,9 @@
 	width: 55%;
 	outline: none;
 	position: relative;
+	cursor: pointer;
+	color: inherit;
+	text-decoration: inherit;
 
 	@include media-breakpoint-up(sm)
 	{
@@ -88,13 +91,10 @@
 		z-index: 255
 	}
 	
-	> a {
-		cursor: pointer;
-		color: inherit;
-		text-decoration: inherit;
-		outline: none;
-
-		.img {
+	> div
+	{
+		.img
+		{
 			width: 100%;
 			height: 0;
 			padding-top: 56.25%;
@@ -102,7 +102,8 @@
 			background-size: contain;
 			position: relative;
 
-			> .playBtn {
+			> .playBtn
+			{
 				position: absolute;
 				top: 0;
 				bottom: 0;
@@ -116,7 +117,8 @@
 			}
 		}
 
-		.title {
+		.title
+		{
 			padding-top: .2rem;
 			font-weight: 600;
 			margin-bottom: 0;
@@ -126,7 +128,8 @@
 			overflow: hidden;
 		}
 
-		.overview {
+		.overview
+		{
 			font-weight: 300;
 			display: -webkit-box;
 			-webkit-line-clamp: 4;
@@ -134,7 +137,8 @@
 			overflow: hidden;
 		}
 
-		.subtitle {
+		.subtitle
+		{
 			font-weight: 300;
 			display: -webkit-box;
 			-webkit-line-clamp: 1;
@@ -143,14 +147,14 @@
 		}
 	}
 
-	&:host-context(.hoverEnabled) &:hover
+	&:host-context(.hoverEnabled) &:hover, &:focus
 	{
 		.moreBtn
 		{
 			display: block;
 		}
 		
-		> a 
+		> div
 		{
 			.img 
 			{
@@ -168,6 +172,11 @@
 			}
 		}
 	}
+}
+
+.moreBtn:focus
+{
+	display: block !important;
 }
 
 .playIcon

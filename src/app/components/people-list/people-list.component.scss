@@ -86,11 +86,11 @@
 		}
 	}
 
-	&:host-context(.hoverEnabled) &:hover
+	&:host-context(.hoverEnabled) &:hover, &:focus
 	{
 		cursor: pointer;
 
-		> img
+		> div
 		{
 			outline: solid var(--accentColor);
 		}
