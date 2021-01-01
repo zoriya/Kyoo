@@ -47,6 +47,7 @@ import { InfiniteScrollModule } from "ngx-infinite-scroll";
 import { ShowGridComponent } from "./components/show-grid/show-grid.component";
 import { MatBadgeModule } from "@angular/material/badge";
 import { StartupService } from "./services/startup.service";
+import { LongPressDirective } from './misc/long-press.directive';
 
 
 @NgModule({
@@ -69,7 +70,8 @@ import { StartupService } from "./services/startup.service";
 		FormatTimePipe,
 		BufferToWidthPipe,
 		VolumeToButtonPipe,
-		SupportedButtonPipe
+		SupportedButtonPipe,
+		LongPressDirective
 	],
 	imports: [
 		BrowserModule,
