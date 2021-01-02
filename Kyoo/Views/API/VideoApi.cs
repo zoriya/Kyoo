@@ -42,7 +42,7 @@ namespace Kyoo.Api
 		
 
 		[HttpGet("{showSlug}-s{seasonNumber}e{episodeNumber}")]
-		[HttpGet("direct/{showSlug}-s{seasonNumber}e{episodeNumber}")]
+		[HttpGet("direct/{showSlug}-s{seasonNumber}e{episodeNumber}.{extension?}")]
 		[Authorize(Policy="Play")]
 		public async Task<IActionResult> DirectEpisode(string showSlug, int seasonNumber, int episodeNumber)
 		{
@@ -56,7 +56,7 @@ namespace Kyoo.Api
 		}
 		
 		[HttpGet("{movieSlug}")]
-		[HttpGet("direct/{movieSlug}")]
+		[HttpGet("direct/{movieSlug}.{extension?}")]
 		[Authorize(Policy="Play")]
 		public async Task<IActionResult> DirectMovie(string movieSlug)
 		{
@@ -68,7 +68,7 @@ namespace Kyoo.Api
 		}
 		
 
-		[HttpGet("transmux/{showSlug}-s{seasonNumber}e{episodeNumber}")]
+		[HttpGet("transmux/{showSlug}-s{seasonNumber}e{episodeNumber}.{extension?}")]
 		[Authorize(Policy="Play")]
 		public async Task<IActionResult> TransmuxEpisode(string showSlug, int seasonNumber, int episodeNumber)
 		{
@@ -81,10 +81,10 @@ namespace Kyoo.Api
 			string path = await _transcoder.Transmux(episode);
 			if (path == null)
 				return StatusCode(500);
-			return PhysicalFile(path, "application/x-mpegURL ", true);
+			return PhysicalFile(path, "application/x-mpegurl", true);
 		}
 		
-		[HttpGet("transmux/{movieSlug}")]
+		[HttpGet("transmux/{movieSlug}.{extension?}")]
 		[Authorize(Policy="Play")]
 		public async Task<IActionResult> TransmuxMovie(string movieSlug)
 		{
@@ -95,10 +95,10 @@ namespace Kyoo.Api
 			string path = await _transcoder.Transmux(episode);
 			if (path == null)
 				return StatusCode(500);
-			return PhysicalFile(path, "application/x-mpegURL ", true);
+			return PhysicalFile(path, "application/x-mpegurl", true);
 		}
 
-		[HttpGet("transcode/{showSlug}-s{seasonNumber}e{episodeNumber}")]
+		[HttpGet("transcode/{showSlug}-s{seasonNumber}e{episodeNumber}.{extension?}")]
 		[Authorize(Policy="Play")]
 		public async Task<IActionResult> TranscodeEpisode(string showSlug, int seasonNumber, int episodeNumber)
 		{
@@ -111,10 +111,10 @@ namespace Kyoo.Api
 			string path = await _transcoder.Transcode(episode);
 			if (path == null)
 				return StatusCode(500);
-			return PhysicalFile(path, "application/x-mpegURL ", true);
+			return PhysicalFile(path, "application/x-mpegurl", true);
 		}
 		
-		[HttpGet("transcode/{movieSlug}")]
+		[HttpGet("transcode/{movieSlug}.{extension?}")]
 		[Authorize(Policy="Play")]
 		public async Task<IActionResult> TranscodeMovie(string movieSlug)
 		{
@@ -125,7 +125,7 @@ namespace Kyoo.Api
 			string path = await _transcoder.Transcode(episode);
 			if (path == null)
 				return StatusCode(500);
-			return PhysicalFile(path, "application/x-mpegURL ", true);
+			return PhysicalFile(path, "application/x-mpegurl", true);
 		}
 		
 		
