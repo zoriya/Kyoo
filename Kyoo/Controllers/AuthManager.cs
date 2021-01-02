@@ -34,6 +34,8 @@ namespace Kyoo.Controllers
 			if (certificate.NotAfter.AddDays(7) <= DateTime.UtcNow)
 			{
 				Console.WriteLine("Signin certificate will expire soon, renewing it.");
+				if (File.Exists(OldCertificateFile))
+					File.Delete(OldCertificateFile);
 				File.Move(CertificateFile, OldCertificateFile);
 				builder.AddValidationKey(GenerateCertificate(CertificateFile, configuration.GetValue<string>("certificatePassword")));
 			}
