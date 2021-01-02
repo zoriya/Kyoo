@@ -42,7 +42,7 @@ namespace Kyoo.Api
 		
 
 		[HttpGet("{showSlug}-s{seasonNumber}e{episodeNumber}")]
-		[HttpGet("direct/{showSlug}-s{seasonNumber}e{episodeNumber}.{extension?}")]
+		[HttpGet("direct/{showSlug}-s{seasonNumber}e{episodeNumber}")]
 		[Authorize(Policy="Play")]
 		public async Task<IActionResult> DirectEpisode(string showSlug, int seasonNumber, int episodeNumber)
 		{
@@ -56,7 +56,7 @@ namespace Kyoo.Api
 		}
 		
 		[HttpGet("{movieSlug}")]
-		[HttpGet("direct/{movieSlug}.{extension?}")]
+		[HttpGet("direct/{movieSlug}")]
 		[Authorize(Policy="Play")]
 		public async Task<IActionResult> DirectMovie(string movieSlug)
 		{
@@ -68,7 +68,7 @@ namespace Kyoo.Api
 		}
 		
 
-		[HttpGet("transmux/{showSlug}-s{seasonNumber}e{episodeNumber}.{extension?}")]
+		[HttpGet("transmux/{showSlug}-s{seasonNumber}e{episodeNumber}")]
 		[Authorize(Policy="Play")]
 		public async Task<IActionResult> TransmuxEpisode(string showSlug, int seasonNumber, int episodeNumber)
 		{
@@ -84,7 +84,7 @@ namespace Kyoo.Api
 			return PhysicalFile(path, "application/x-mpegurl", true);
 		}
 		
-		[HttpGet("transmux/{movieSlug}.{extension?}")]
+		[HttpGet("transmux/{movieSlug}")]
 		[Authorize(Policy="Play")]
 		public async Task<IActionResult> TransmuxMovie(string movieSlug)
 		{
@@ -98,7 +98,7 @@ namespace Kyoo.Api
 			return PhysicalFile(path, "application/x-mpegurl", true);
 		}
 
-		[HttpGet("transcode/{showSlug}-s{seasonNumber}e{episodeNumber}.{extension?}")]
+		[HttpGet("transcode/{showSlug}-s{seasonNumber}e{episodeNumber}")]
 		[Authorize(Policy="Play")]
 		public async Task<IActionResult> TranscodeEpisode(string showSlug, int seasonNumber, int episodeNumber)
 		{
@@ -114,7 +114,7 @@ namespace Kyoo.Api
 			return PhysicalFile(path, "application/x-mpegurl", true);
 		}
 		
-		[HttpGet("transcode/{movieSlug}.{extension?}")]
+		[HttpGet("transcode/{movieSlug}")]
 		[Authorize(Policy="Play")]
 		public async Task<IActionResult> TranscodeMovie(string movieSlug)
 		{
