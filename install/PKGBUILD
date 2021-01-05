@@ -1,0 +1,45 @@
+# Maintainer: Zoe Roux <zoe.roux@sdg.moe>
+pkgname=kyoo
+pkgver=1.0.0
+pkgrel=1
+epoch=
+pkgdesc="A media browser."
+arch=("i686" "x86_64" "armv6h")
+url="https://github.com/AnonymusRaccoon/Kyoo"
+license=("GPLv3")
+groups=()
+depends=("dotnet-runtime>=3" "aspnet-runtime>=3")
+makedepends=("dotnet-sdk>=3" "cmake" "gcc" "make" "npm")
+source=("kyoo-$pkgver.tar.gz::https://github.com/AnonymusRaccoon/Kyoo/archive/master.tar.gz"
+	"trancoder-$pkgver.tar.gz::https://github.com/AnonymusRaccoon/Kyoo.Transcoder/archive/master.tar.gz"
+	"webapp-$pkgver.tar.gz::https://github.com/AnonymusRaccoon/Kyoo.WebApp/archive/master.tar.gz"
+	"kyoo.service"
+	"kyoo.sysusers")
+sha256sums=("SKIP" "SKIP" "SKIP" "SKIP" "SKIP")
+
+
+prepare() {
+	# cd "Kyoo-$pkgver"
+	# ln -s transcoder "../Kyoo.Transcoder-$pkgver"
+	# ln -s Kyoo/Views/WebApp "../Kyoo.WebApp-$pkgver"
+	cd "Kyoo-master"
+	ln -s transcoder "../Kyoo.Transcoder-master"
+	ln -s Kyoo/Views/WebApp "../Kyoo.WebApp-master"
+
+}
+
+build() {
+	# cd "Kyoo-$pkgver"
+	cd "Kyoo-master"
+	export DOTNET_CLI_TELEMETRY_OPTOUT=1
+	dotnet build -c Release Kyoo
+}
+
+package() {
+	# cd "Kyoo-$pkgver"
+	cd "Kyoo-master"
+	mkdir -p "$pkgdir/usr/lib/kyoo"
+	dotnet publish -c Release -o "$pkgdir/usr/lib/kyoo"  Kyoo
+	install -Dm 644 kyoo.service -t "$pkgdir/usr/lib/systemd/system/"
+	install -Dm 644 kyoo.sysusers "$pkgdir/usr/lib/sysusers.d/kyoo.conf"
+}
