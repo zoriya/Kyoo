@@ -17,6 +17,7 @@ sha256sums=("SKIP" "SKIP" "SKIP")
 
 
 prepare() {
+	# cd "Kyoo-$pkgver"
 	cd "Kyoo"
 	git submodule update --init --recursive
 }
@@ -25,14 +26,12 @@ build() {
 	# cd "Kyoo-$pkgver"
 	cd "Kyoo"
 	export DOTNET_CLI_TELEMETRY_OPTOUT=1
-	dotnet build -c Release Kyoo
+	dotnet publish -c Release -o "$srcdir/output"  Kyoo
 }
 
 package() {
-	# cd "Kyoo-$pkgver"
-	cd "Kyoo"
-	mkdir -p "$pkgdir/usr/lib/kyoo"
-	dotnet publish -c Release -o "$pkgdir/usr/lib/kyoo"  Kyoo
+	mkdir -p "$pkgdir/usr/lib"
+	cp -r --no-preserve ownership  "$srcdir/output" "$pkgdir/usr/lib/kyoo"
 	install -Dm 644 kyoo.service -t "$pkgdir/usr/lib/systemd/system/"
 	install -Dm 644 kyoo.sysusers "$pkgdir/usr/lib/sysusers.d/kyoo.conf"
 }
