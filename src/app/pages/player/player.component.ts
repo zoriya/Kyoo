@@ -346,11 +346,12 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 	selectPlayMethod(playMethod: method)
 	{
 		this.playMethod = playMethod;
-		if (this.playMethod == method.direct)
-			this.player.src = `/video/${this.item.slug}`;
+		const url: string = `/video/${this.playMethod.toLowerCase()}/${this.item.slug}/`;
+		if (this.playMethod == method.direct || this.player.canPlayType("application/vnd.apple.mpegurl"))
+			this.player.src = url;
 		else
 		{
-			this.hlsPlayer.loadSource(`/video/${this.playMethod.toLowerCase()}/${this.item.slug}/`);
+			this.hlsPlayer.loadSource(url);
 			this.hlsPlayer.attachMedia(this.player);
 			this.hlsPlayer.on(Hls.Events.MANIFEST_LOADED, () =>
 			{
