@@ -17,7 +17,7 @@ namespace Kyoo.Api
 			_libraryManager = libraryManager;
 		}
 
-		[HttpGet("{showSlug}-s{seasonNumber}e{episodeNumber}")]
+		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}")]
 		[Authorize(Policy="Read")]
 		public async Task<ActionResult<WatchItem>> GetWatchItem(string showSlug, int seasonNumber, int episodeNumber)
 		{
