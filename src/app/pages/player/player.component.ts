@@ -325,7 +325,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 
 	playbackError(): void
 	{
-		if (this.playMethod == method.transcode)
+		if (this.playMethod === method.transcode)
 		{
 			this.snackBar.open("This episode can't be played.", null, {
 				horizontalPosition: "left",
@@ -335,7 +335,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 		}
 		else
 		{
-			if (this.playMethod == method.direct)
+			if (this.playMethod === method.direct)
 				this.playMethod = method.transmux;
 			else
 				this.playMethod = method.transcode;
@@ -346,8 +346,13 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 	selectPlayMethod(playMethod: method)
 	{
 		this.playMethod = playMethod;
-		const url: string = `/video/${this.playMethod.toLowerCase()}/${this.item.slug}/`;
-		if (this.playMethod == method.direct || this.player.canPlayType("application/vnd.apple.mpegurl"))
+		const url: string = [
+			"/video",
+			this.playMethod.toLowerCase(),
+			this.item.slug,
+			this.playMethod != method.direct ? 'master.m3u8' : null
+		].filter(x => x !== null).join("/");
+		if (this.playMethod === method.direct || this.player.canPlayType("application/vnd.apple.mpegurl"))
 			this.player.src = url;
 		else
 		{

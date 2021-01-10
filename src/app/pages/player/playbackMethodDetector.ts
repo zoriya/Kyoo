@@ -3,7 +3,7 @@ import { Track, WatchItem } from "../../models/watch-item";
 
 export enum method
 {
-	direct = "Direct Play",
+	direct = "Direct",
 	transmux = "Transmux",
 	transcode = "Transcode"
 }
