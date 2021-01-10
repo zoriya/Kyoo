@@ -37,7 +37,9 @@
 			<img src="logo/{{this.show.slug}}" #logo alt="" (error)="logo.style.display = 'none'" />
 
 			<div>
-				<p>Studio: <b><a routerLink="/studio/{{this.show.studio?.slug}}">{{this.show.studio?.name}}</a></b></p>
+				<p>Studio: <b><a draggable="false"
+				                 href="/studio/{{this.show.studio?.slug}}"
+				                 routerLink="/studio/{{this.show.studio?.slug}}">{{this.show.studio?.name}}</a></b></p>
 			</div>
 		</div>
 	</div>
@@ -51,7 +53,14 @@
 		<div class="col">
 			<p class="mr-1 d-inline-block">Studio: <b><a routerLink="/studio/{{this.show.studio?.slug}}">{{this.show.studio?.name}}</a></b></p>
 			 <div class="d-sm-none">
-                 <p>Genres: <span *ngFor="let genre of this.show.genres; let isLast = last"><b><a routerLink="/genre/{{genre.slug}}">{{genre.name}}</a></b>{{isLast ? "" : ", "}}</span></p>
+                 <p>Genres:
+	                 <span *ngFor="let genre of this.show.genres; let isLast = last">
+		                 <b><a draggable="false"
+		                       href="/genre/{{genre.slug}}"
+		                       routerLink="/genre/{{genre.slug}}">{{genre.name}}</a></b>
+		                 {{isLast ? "" : ", "}}
+	                 </span>
+                 </p>
 			</div>
 		</div>
 	</div>
@@ -61,7 +70,7 @@
 			<p class="text-justify overview">{{this.show.overview}}</p>
             <ul>
                 <li class="provider" *ngFor="let id of this.show.externalIDs">
-                    <a [href]="id.link"><img [src]="id.provider.logo" [alt]="id.provider.name"/></a>
+                    <a draggable="false" [href]="id.link"><img [src]="id.provider.logo" [alt]="id.provider.name"/></a>
                 </li>
             </ul>
 		</div>
@@ -69,7 +78,11 @@
 		<div class="col-3 d-none d-sm-block">
 			<h3 style="opacity: .8;">Genres</h3>
 			<ul>
-				<li *ngFor="let genre of this.show.genres"><b><a class="genre" routerLink="/genre/{{genre.slug}}">{{genre.name}}</a></b></li>
+				<li *ngFor="let genre of this.show.genres">
+					<b><a draggable="false" class="genre"
+					      href="/genre/{{genre.slug}}"
+					      routerLink="/genre/{{genre.slug}}">{{genre.name}}</a></b>
+				</li>
 			</ul>
 		</div>
 	</div>

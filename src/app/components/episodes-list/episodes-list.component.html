@@ -3,7 +3,7 @@
 	     (scroll)="onScroll()" infinite-scroll (scrolled)="this.episodes?.loadNext(this.client)"
 	     [horizontal]="true" [scrollWindow]="false"
 	     appLongPress (longPressed)="this.openMenu()">
-		<a *ngFor="let episode of this.episodes?.items"
+		<a *ngFor="let episode of this.episodes?.items" draggable="false"
 		    routerLink="/watch/{{episode.slug}}" href="/watch/{{episode.slug}}"
 		    class="episode" #itemsDom>
 			<button mat-icon-button class="moreBtn" tabindex="-1"

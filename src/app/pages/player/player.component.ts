@@ -520,6 +520,9 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 	@HostListener("document:keyup", ["$event"])
 	keypress(event: KeyboardEvent): void
 	{
+		if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey)
+			return;
+
 		switch (event.key)
 		{
 			case " ":

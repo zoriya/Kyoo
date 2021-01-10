@@ -1,6 +1,7 @@
 <div class="scroll-row mb-5">
 	<div class="container" #scrollView (scroll)="onScroll()" infinite-scroll (scrolled)="this.items?.loadNext(this.client)" [horizontal]="true" [scrollWindow]="false">
-		<a class="item" *ngFor="let item of this.items?.items" [routerLink]="getLink(item)" [href]="getLink(item)" #itemsDom>
+		<a class="item" *ngFor="let item of this.items?.items" draggable="false"
+		   [routerLink]="getLink(item)" [href]="getLink(item)" #itemsDom>
 			<div matRipple [style.background-image]="getThumb(item.slug)"> </div>
 			<p class="title">{{item.title ? item.title : item.name}}</p>
 			<p class="date">{{getDate(item)}}</p>
