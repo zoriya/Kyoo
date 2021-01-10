@@ -1,6 +1,7 @@
-import { Component, Input, ViewChild } from "@angular/core";
+import { Component, Input, QueryList, ViewChild, ViewChildren } from "@angular/core";
 import { MatMenuTrigger } from "@angular/material/menu";
 import { DomSanitizer } from "@angular/platform-browser";
+import { first } from "rxjs/operators";
 import { Episode } from "../../models/resources/episode";
 import { HorizontalScroller } from "../../misc/horizontal-scroller";
 import { Page } from "../../models/page";
@@ -15,7 +16,8 @@ export class EpisodesListComponent extends HorizontalScroller
 {
 	@Input() displayShowTitle: boolean = false;
 	@Input() episodes: Page<Episode>;
-	@ViewChild(MatMenuTrigger) menu: MatMenuTrigger;
+	@ViewChildren(MatMenuTrigger) menus: QueryList<MatMenuTrigger>;
+	openedIndex: number = undefined;
 
 	constructor(private sanitizer: DomSanitizer, public client: HttpClient)
 	{
@@ -27,8 +29,10 @@ export class EpisodesListComponent extends HorizontalScroller
 		return this.sanitizer.bypassSecurityTrustStyle("url(" + url + ")");
 	}
 
-	openMenu(): void
+	openMenu(index: number): void
 	{
-		this.menu.openMenu();
+		const menu = this.menus.find((x, i) => i === index);
+		menu.focus();
+		menu.openMenu();
 	}
 }

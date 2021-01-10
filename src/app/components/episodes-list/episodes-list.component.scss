@@ -148,7 +148,7 @@
 		}
 	}
 
-	&:host-context(.hoverEnabled) &:hover, &:focus
+	&:host-context(.hoverEnabled) &:hover, &:host-context(.hoverEnabled) &:focus
 	{
 		.moreBtn
 		{
@@ -174,11 +174,6 @@
 			}
 		}
 	}
-}
-
-.moreBtn:focus
-{
-	display: block !important;
 }
 
 .playIcon

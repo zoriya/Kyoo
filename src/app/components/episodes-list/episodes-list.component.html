@@ -2,13 +2,15 @@
 	<div class="episodes" #scrollView
 	     (scroll)="onScroll()" infinite-scroll (scrolled)="this.episodes?.loadNext(this.client)"
 	     [horizontal]="true" [scrollWindow]="false">
-		<a *ngFor="let episode of this.episodes?.items" draggable="false"
+		<a *ngFor="let episode of this.episodes?.items; index as i;" draggable="false"
 		    routerLink="/watch/{{episode.slug}}" href="/watch/{{episode.slug}}"
-		    appLongPress (longPressed)="this.openMenu()"
+		    appLongPress (longPressed)="this.openMenu(i)"
 		    class="episode" #itemsDom>
 			<button mat-icon-button class="moreBtn" tabindex="-1"
+			        [style.display]="this.openedIndex === i ? 'block' : undefined"
 			        [matMenuTriggerFor]="more" [matMenuTriggerData]="{episode: episode}"
-			        (click)="$event.stopImmediatePropagation(); $event.preventDefault()">
+			        (menuOpened)="this.openedIndex = i" (menuClosed)="this.openedIndex = undefined"
+			        (click)="$event.stopImmediatePropagation(); $event.preventDefault();">
 				<mat-icon>more_vert</mat-icon>
 			</button>
 			<div>
