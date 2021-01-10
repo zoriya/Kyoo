@@ -2,6 +2,7 @@
 using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.CommonApi;
@@ -162,6 +163,21 @@ namespace Kyoo.Api
 			{
 				return BadRequest(new {Error = ex.Message});
 			}
+		}
+		
+		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}/thumb")]
+		[Authorize(Policy="Read")]
+		public async Task<IActionResult> GetThumb(string showSlug, int seasonNumber, int episodeNumber)
+		{
+			string path = (await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber))?.Path;
+			if (path == null)
+				return NotFound();
+
+			string thumb = Path.ChangeExtension(path, "jpg");
+
+			if (System.IO.File.Exists(thumb))
+				return new PhysicalFileResult(Path.GetFullPath(thumb), "image/jpg");
+			return NotFound();
 		}
 	}
 }

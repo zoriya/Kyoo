@@ -447,5 +447,50 @@ namespace Kyoo.Api
 			_provider.TryGetContentType(path, out string contentType);
 			return PhysicalFile(fontPath, contentType ?? "application/x-font-ttf");
 		}
+
+		[HttpGet("{slug}/poster")]
+		[Authorize(Policy = "Read")]
+		public async Task<ActionResult> GetPoster(string slug)
+		{
+			string path = (await _libraryManager.GetShow(slug))?.Path;
+			if (path == null)
+				return NotFound();
+
+			string poster = Path.Combine(path, "poster.jpg");
+
+			if (System.IO.File.Exists(poster))
+				return new PhysicalFileResult(Path.GetFullPath(poster), "image/jpg");
+			return NotFound();
+		}
+		
+		[HttpGet("{slug}/logo")]
+		[Authorize(Policy="Read")]
+		public async Task<IActionResult> GetLogo(string slug)
+		{
+			string path = (await _libraryManager.GetShow(slug))?.Path;
+			if (path == null)
+				return NotFound();
+
+			string logo = Path.Combine(path, "logo.png");
+
+			if (System.IO.File.Exists(logo))
+				return new PhysicalFileResult(Path.GetFullPath(logo), "image/png");
+			return NotFound();
+		}
+		
+		[HttpGet("{slug}/backdrop")]
+		[Authorize(Policy="Read")]
+		public async Task<IActionResult> GetBackdrop(string slug)
+		{
+			string path = (await _libraryManager.GetShow(slug))?.Path;
+			if (path == null)
+				return NotFound();
+
+			string thumb = Path.Combine(path, "backdrop.jpg");
+
+			if (System.IO.File.Exists(thumb))
+				return new PhysicalFileResult(Path.GetFullPath(thumb), "image/jpg");
+			return NotFound();
+		}
 	}
 }
