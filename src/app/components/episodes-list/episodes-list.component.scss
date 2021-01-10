@@ -49,7 +49,7 @@
 {
 	visibility: visible;
 	display: inline-block;
-	padding: .25rem;
+	margin: .25rem .25rem 1.25rem;
 	flex-shrink: 0;
 	width: 55%;
 	outline: none;
@@ -135,6 +135,7 @@
 			-webkit-line-clamp: 4;
 			-webkit-box-orient: vertical;
 			overflow: hidden;
+			margin-bottom: 0;
 		}
 
 		.subtitle

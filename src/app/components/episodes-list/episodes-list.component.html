@@ -1,10 +1,10 @@
 <div class="root">
 	<div class="episodes" #scrollView
 	     (scroll)="onScroll()" infinite-scroll (scrolled)="this.episodes?.loadNext(this.client)"
-	     [horizontal]="true" [scrollWindow]="false"
-	     appLongPress (longPressed)="this.openMenu()">
+	     [horizontal]="true" [scrollWindow]="false">
 		<a *ngFor="let episode of this.episodes?.items" draggable="false"
 		    routerLink="/watch/{{episode.slug}}" href="/watch/{{episode.slug}}"
+		    appLongPress (longPressed)="this.openMenu()"
 		    class="episode" #itemsDom>
 			<button mat-icon-button class="moreBtn" tabindex="-1"
 			        [matMenuTriggerFor]="more" [matMenuTriggerData]="{episode: episode}"
