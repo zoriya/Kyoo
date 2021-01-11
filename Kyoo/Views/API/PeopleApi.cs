@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.IO;
 using System.Threading.Tasks;
 using Kyoo.CommonApi;
 using Kyoo.Controllers;
@@ -17,11 +17,13 @@ namespace Kyoo.Api
 	public class PeopleApi : CrudApi<People>
 	{
 		private readonly ILibraryManager _libraryManager;
+		private readonly string _peoplePath;
 
 		public PeopleApi(ILibraryManager libraryManager, IConfiguration configuration) 
 			: base(libraryManager.PeopleRepository, configuration)
 		{
 			_libraryManager = libraryManager;
+			_peoplePath = configuration.GetValue<string>("peoplePath");
 		}
 
 		[HttpGet("{id:int}/role")]
@@ -88,6 +90,17 @@ namespace Kyoo.Api
 			{
 				return BadRequest(new {Error = ex.Message});
 			}
+		}
+		
+		[HttpGet("{slug}/poster")]
+		[Authorize(Policy="Read")]
+		public IActionResult GetPeopleIcon(string slug)
+		{
+			string thumbPath = Path.Combine(_peoplePath, slug + ".jpg");
+			if (!System.IO.File.Exists(thumbPath))
+				return NotFound();
+
+			return new PhysicalFileResult(Path.GetFullPath(thumbPath), "image/jpg");
 		}
 	}
 }

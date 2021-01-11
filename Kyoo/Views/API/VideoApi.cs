@@ -41,8 +41,8 @@ namespace Kyoo.Api
 		}
 		
 
-		[HttpGet("{showSlug}-s{seasonNumber}e{episodeNumber}")]
-		[HttpGet("direct/{showSlug}-s{seasonNumber}e{episodeNumber}")]
+		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}")]
+		[HttpGet("direct/{showSlug}-s{seasonNumber:int}e{episodeNumber:int}")]
 		[Authorize(Policy="Play")]
 		public async Task<IActionResult> DirectEpisode(string showSlug, int seasonNumber, int episodeNumber)
 		{
@@ -68,7 +68,7 @@ namespace Kyoo.Api
 		}
 		
 
-		[HttpGet("transmux/{showSlug}-s{seasonNumber}e{episodeNumber}")]
+		[HttpGet("transmux/{showSlug}-s{seasonNumber:int}e{episodeNumber:int}/master.m3u8")]
 		[Authorize(Policy="Play")]
 		public async Task<IActionResult> TransmuxEpisode(string showSlug, int seasonNumber, int episodeNumber)
 		{
@@ -84,7 +84,7 @@ namespace Kyoo.Api
 			return PhysicalFile(path, "application/x-mpegurl", true);
 		}
 		
-		[HttpGet("transmux/{movieSlug}")]
+		[HttpGet("transmux/{movieSlug}/master.m3u8")]
 		[Authorize(Policy="Play")]
 		public async Task<IActionResult> TransmuxMovie(string movieSlug)
 		{
@@ -98,7 +98,7 @@ namespace Kyoo.Api
 			return PhysicalFile(path, "application/x-mpegurl", true);
 		}
 
-		[HttpGet("transcode/{showSlug}-s{seasonNumber}e{episodeNumber}")]
+		[HttpGet("transcode/{showSlug}-s{seasonNumber:int}e{episodeNumber:int}/master.m3u8")]
 		[Authorize(Policy="Play")]
 		public async Task<IActionResult> TranscodeEpisode(string showSlug, int seasonNumber, int episodeNumber)
 		{
@@ -114,7 +114,7 @@ namespace Kyoo.Api
 			return PhysicalFile(path, "application/x-mpegurl", true);
 		}
 		
-		[HttpGet("transcode/{movieSlug}")]
+		[HttpGet("transcode/{movieSlug}/master.m3u8")]
 		[Authorize(Policy="Play")]
 		public async Task<IActionResult> TranscodeMovie(string movieSlug)
 		{
@@ -129,7 +129,7 @@ namespace Kyoo.Api
 		}
 		
 		
-		[HttpGet("transmux/{episodeLink}/segment/{chunk}")]
+		[HttpGet("transmux/{episodeLink}/segments/{chunk}")]
 		[Authorize(Policy="Play")]
 		public IActionResult GetTransmuxedChunk(string episodeLink, string chunk)
 		{
@@ -138,7 +138,7 @@ namespace Kyoo.Api
 			return PhysicalFile(path, "video/MP2T");
 		}
 		
-		[HttpGet("transcode/{episodeLink}/segment/{chunk}")]
+		[HttpGet("transcode/{episodeLink}/segments/{chunk}")]
 		[Authorize(Policy="Play")]
 		public IActionResult GetTranscodedChunk(string episodeLink, string chunk)
 		{
