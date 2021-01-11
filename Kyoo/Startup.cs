@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Reflection;
 using IdentityServer4.Services;
 using Kyoo.Api;
@@ -37,7 +38,7 @@ namespace Kyoo
 		{
 			services.AddSpaStaticFiles(configuration =>
 			{
-				configuration.RootPath = "wwwroot";
+				configuration.RootPath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "wwwroot");
 			});
 
 			services.AddControllers()
@@ -192,7 +193,7 @@ namespace Kyoo
 
 			app.UseSpa(spa =>
 			{
-				spa.Options.SourcePath = "Views/WebClient";
+				spa.Options.SourcePath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "Views/WebClient");
 
 				if (env.IsDevelopment())
 				{

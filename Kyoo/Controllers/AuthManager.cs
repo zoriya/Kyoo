@@ -87,14 +87,12 @@ namespace Kyoo.Controllers
  
 			Pkcs12Store store = new Pkcs12StoreBuilder().Build();
 			store.SetKeyEntry("Kyoo_key", new AsymmetricKeyEntry(subjectKeyPair.Private), new [] {new X509CertificateEntry(bouncyCert)});
- 
-			using (MemoryStream pfxStream = new MemoryStream())
-			{
-				store.Save(pfxStream, password.ToCharArray(), random);
-				certificate = new X509Certificate2(pfxStream.ToArray(), password, X509KeyStorageFlags.Exportable);
-				using FileStream fileStream = File.OpenWrite(file);
-				pfxStream.WriteTo(fileStream);
-			}
+
+			using MemoryStream pfxStream = new MemoryStream();
+			store.Save(pfxStream, password.ToCharArray(), random);
+			certificate = new X509Certificate2(pfxStream.ToArray(), password, X509KeyStorageFlags.Exportable);
+			using FileStream fileStream = File.OpenWrite(file);
+			pfxStream.WriteTo(fileStream);
 			return certificate;
 		}
 	}
