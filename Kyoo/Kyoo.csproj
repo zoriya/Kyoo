@@ -50,7 +50,7 @@
 	
 	<ItemGroup>
 		<Content Remove="$(SpaRoot)**" />
-		<None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
+		<None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules/**" />
 		<StaticFiles Include="$(SpaRoot)static/**" />
 		<LoginFiles Include="$(LoginRoot)**" />
 		<StaticFiles Include="Views/Login/material-icons.css" />
