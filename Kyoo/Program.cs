@@ -2,6 +2,7 @@ using System;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.VisualBasic.FileIO;
 
 namespace Kyoo
 {
@@ -9,7 +10,9 @@ namespace Kyoo
 	{
 		public static async Task Main(string[] args)
 		{
-			Console.WriteLine($"Running as: {Environment.UserName}");
+			if (args.Length > 0)
+				FileSystem.CurrentDirectory = args[0];
+			Console.WriteLine($"Running as {Environment.UserName} in {FileSystem.CurrentDirectory}.");
 			await CreateWebHostBuilder(args).Build().RunAsync();
 		}
 
