@@ -4,8 +4,7 @@ After=network.target
 
 [Service]
 User=kyoo
-WorkingDirectory=/usr/lib/kyoo
-ExecStart=/usr/bin/dotnet kyoo.dll
+ExecStart=/usr/lib/kyoo/Kyoo /var/lib/kyoo
 Restart=on-abort
 TimeoutSec=20
 
