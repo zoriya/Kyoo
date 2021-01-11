@@ -37,3 +37,7 @@ package() {
 	install -Dm 644 kyoo.service -t "$pkgdir/usr/lib/systemd/system/"
 	install -Dm 644 kyoo.sysusers "$pkgdir/usr/lib/sysusers.d/kyoo.conf"
 }
+
+post_install() {
+	sudo -u postgres createuser -d kyoo
+}
