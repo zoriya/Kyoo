@@ -1,0 +1,39 @@
+# Maintainer: Zoe Roux <zoe.roux@sdg.moe>
+pkgname=kyoo
+pkgver=1.0.0
+pkgrel=1
+epoch=
+pkgdesc="A media browser."
+arch=("i686" "x86_64" "armv6h")
+url="https://github.com/AnonymusRaccoon/Kyoo"
+license=("GPLv3")
+groups=()
+depends=("dotnet-runtime>=3" "aspnet-runtime>=3")
+makedepends=("dotnet-sdk>=3" "cmake" "gcc" "make" "npm" "git")
+source=("git+https://github.com/AnonymusRaccoon/Kyoo" #tag=v${pkgver}
+	"kyoo.service"
+	"kyoo.sysusers")
+sha256sums=("SKIP" "SKIP" "SKIP")
+
+
+prepare() {
+	# cd "Kyoo-$pkgver"
+	cd "Kyoo"
+	git submodule update --init --recursive
+}
+
+build() {
+	# cd "Kyoo-$pkgver"
+	cd "Kyoo"
+	export DOTNET_CLI_TELEMETRY_OPTOUT=1
+	dotnet publish -c Release -o "$srcdir/output"  Kyoo
+}
+
+package() {
+	mkdir -p "$pkgdir/usr/lib"
+	mkdir -p "$pkgdir/var/lib/kyoo"
+	cp -r --no-preserve ownership  "$srcdir/output" "$pkgdir/usr/lib/kyoo"
+	mv "$pkgdir/usr/lib/kyoo/appsettings.json" "$pkgdir/var/lib/kyoo/"
+	install -Dm 644 kyoo.service -t "$pkgdir/usr/lib/systemd/system/"
+	install -Dm 644 kyoo.sysusers "$pkgdir/usr/lib/sysusers.d/kyoo.conf"
+}

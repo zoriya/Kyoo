@@ -45,15 +45,15 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="3.1.3" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.3" />
 		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
-		<ProjectReference Include="..\Kyoo.CommonAPI\Kyoo.CommonAPI.csproj" />
+		<ProjectReference Include="../Kyoo.CommonAPI/Kyoo.CommonAPI.csproj" />
 	</ItemGroup>
 	
 	<ItemGroup>
 		<Content Remove="$(SpaRoot)**" />
-		<None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules\**" />
+		<None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules/**" />
 		<StaticFiles Include="$(SpaRoot)static/**" />
 		<LoginFiles Include="$(LoginRoot)**" />
-		<StaticFiles Include="Views\Login\material-icons.css" />
+		<StaticFiles Include="Views/Login/material-icons.css" />
 	</ItemGroup>
 	
 	<Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
@@ -104,6 +104,6 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-	  <Folder Include="Models\DatabaseMigrations\Internal" />
+		<Folder Include="Models/DatabaseMigrations/Internal" />
 	</ItemGroup>
 </Project>

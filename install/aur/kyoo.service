@@ -1,0 +1,12 @@
+[Unit]
+Description=Kyoo Media Server
+After=network.target
+
+[Service]
+User=kyoo
+ExecStart=/usr/lib/kyoo/Kyoo /var/lib/kyoo
+Restart=on-abort
+TimeoutSec=20
+
+[Install]
+WantedBy=multi-user.target
