@@ -4,7 +4,6 @@ import TouchStartEvent = JQuery.TouchStartEvent;
 
 function cancelClick(event): void
 {
-	console.log("Cancel click")
 	event.preventDefault();
 	event.stopPropagation();
 	this.removeEventListener("click", cancelClick, true);
@@ -38,25 +37,16 @@ export class LongPressDirective
 				return;
 			this.longPressed.emit();
 			this._timer = null;
-			// We must use the nativeElement ref and can't use a HostListener
-			// since Angular does not support capture phase listener.
-			// TODO this is used for firefox since firefox still trigger a click event
-			// FIXME find the best way to make it work for all, use a cancelclick like
-			//  so or find a way to prevent the event from ever happenning.
 			this.ref.nativeElement.addEventListener("click", cancelClick, true);
 		}, 500);
 	}
 
 	@HostListener("touchend", ["$event"])
-	@HostListener("mouseup", ["$event"])
+	@HostListener("window:mouseup", ["$event"])
 	end(): void
 	{
-		console.log("test");
-		// TODO this timeout is for chrome, chrome do not output a click event so the cancelClick should be removed.
-		// FIXME Chrome does not trigger a touchend event ether. So this is never called.
 		setTimeout(() =>
 		{
-			console.log("Timeout");
 			this.ref.nativeElement.removeEventListener("click", cancelClick, true);
 		}, 50);
 		this.cancel();
