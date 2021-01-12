@@ -13,8 +13,9 @@ makedepends=("dotnet-sdk>=3" "cmake" "gcc" "make" "npm" "git")
 install="kyoo.install"
 source=("git+https://github.com/AnonymusRaccoon/Kyoo" #tag=v${pkgver}
 	"kyoo.service"
-	"kyoo.sysusers")
-sha256sums=("SKIP" "SKIP" "SKIP")
+	"kyoo.sysusers"
+	"kyoo.tmpfiles")
+sha256sums=("SKIP" "SKIP" "SKIP" "SKIP")
 
 
 prepare() {
