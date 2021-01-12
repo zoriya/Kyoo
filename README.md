@@ -9,7 +9,7 @@ Feel free to open issues or pull requests, all contribution are welcomed.
 
 ## Installation
 
-If you are using a linux distribution with acess to the AUR, simply install the kyoo-bin package. **COMMING SOON**
+If you are using a linux distribution with acess to the AUR, simply install the kyoo-bin package. **COMMING SOON** The package is not published on the AUR yet but you can built it easily with makepkg. To do so, clone the repo & run `makepkg -i` inside the `install/aur` directory.
 
 If you are running another linux distribution or macos, you will need to build the package from source. To do that, look [here](#development--build).
 
