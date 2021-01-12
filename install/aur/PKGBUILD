@@ -37,4 +37,5 @@ package() {
 	mv "$pkgdir/usr/lib/kyoo/appsettings.json" "$pkgdir/var/lib/kyoo/"
 	install -Dm 644 kyoo.service -t "$pkgdir/usr/lib/systemd/system/"
 	install -Dm 644 kyoo.sysusers "$pkgdir/usr/lib/sysusers.d/kyoo.conf"
+	install -Dm 644 kyoo.tmpfiles "$pkgdir/usr/lib/tmpfiles.d/kyoo.conf"
 }
