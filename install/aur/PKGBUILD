@@ -10,6 +10,7 @@ license=("GPLv3")
 groups=()
 depends=("dotnet-runtime>=3" "aspnet-runtime>=3")
 makedepends=("dotnet-sdk>=3" "cmake" "gcc" "make" "npm" "git")
+install="kyoo.install"
 source=("git+https://github.com/AnonymusRaccoon/Kyoo" #tag=v${pkgver}
 	"kyoo.service"
 	"kyoo.sysusers")
@@ -36,8 +37,4 @@ package() {
 	mv "$pkgdir/usr/lib/kyoo/appsettings.json" "$pkgdir/var/lib/kyoo/"
 	install -Dm 644 kyoo.service -t "$pkgdir/usr/lib/systemd/system/"
 	install -Dm 644 kyoo.sysusers "$pkgdir/usr/lib/sysusers.d/kyoo.conf"
-}
-
-post_install() {
-	sudo -u postgres createuser -d kyoo
 }
