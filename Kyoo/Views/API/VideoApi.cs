@@ -5,13 +5,14 @@ using Microsoft.Extensions.Configuration;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.StaticFiles;
 
 namespace Kyoo.Api
 {
 	[Route("video")]
 	[ApiController]
-	public class VideoApi : ControllerBase
+	public class VideoApi : Controller
 	{
 		private readonly ILibraryManager _libraryManager;
 		private readonly ITranscoder _transcoder;
@@ -25,6 +26,14 @@ namespace Kyoo.Api
 			_transcoder = transcoder;
 			_transmuxPath = config.GetValue<string>("transmuxTempPath");
 			_transcodePath = config.GetValue<string>("transcodeTempPath");
+		}
+
+		public override void OnActionExecuted(ActionExecutedContext ctx)
+		{
+			base.OnActionExecuted(ctx);
+			ctx.HttpContext.Response.Headers.Add("Cache-Control", "no-cache, no-store, must-revalidate");
+			ctx.HttpContext.Response.Headers.Add("Pragma", "no-cache");
+			ctx.HttpContext.Response.Headers.Add("Expires", "0");
 		}
 
 		private string _GetContentType(string path)
