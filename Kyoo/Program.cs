@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
@@ -13,6 +14,8 @@ namespace Kyoo
 			if (args.Length > 0)
 				FileSystem.CurrentDirectory = args[0];
 			Console.WriteLine($"Running as {Environment.UserName} in {FileSystem.CurrentDirectory}.");
+			if (!File.Exists("./appsettings.json"))
+				File.Copy(Path.Join(AppDomain.CurrentDomain.BaseDirectory, "appsettings.json"), "appsettings.json");
 			await CreateWebHostBuilder(args).Build().RunAsync();
 		}
 

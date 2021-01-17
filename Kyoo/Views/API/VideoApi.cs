@@ -31,6 +31,7 @@ namespace Kyoo.Api
 		public override void OnActionExecuted(ActionExecutedContext ctx)
 		{
 			base.OnActionExecuted(ctx);
+			// Disabling the cache prevent an issue on firefox that skip the last 30 seconds of HLS files.
 			ctx.HttpContext.Response.Headers.Add("Cache-Control", "no-cache, no-store, must-revalidate");
 			ctx.HttpContext.Response.Headers.Add("Pragma", "no-cache");
 			ctx.HttpContext.Response.Headers.Add("Expires", "0");
