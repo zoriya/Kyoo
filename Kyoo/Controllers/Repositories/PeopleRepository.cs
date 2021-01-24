@@ -75,7 +75,8 @@ namespace Kyoo.Controllers
 			
 			if (resource.ExternalIDs != null)
 				foreach (MetadataID link in resource.ExternalIDs)
-					link.Provider = await _providers.CreateIfNotExists(link.Provider, true);
+					if (ShouldValidate(link))
+						link.Provider = await _providers.CreateIfNotExists(link.Provider, true);
 		}
 		
 		public override async Task Delete(People obj)

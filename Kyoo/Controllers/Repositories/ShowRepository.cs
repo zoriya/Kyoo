@@ -111,20 +111,23 @@ namespace Kyoo.Controllers
 		{
 			await base.Validate(resource);
 			
-			if (resource.Studio != null)
+			if (ShouldValidate(resource.Studio))
 				resource.Studio = await _studios.CreateIfNotExists(resource.Studio, true);
 			
 			if (resource.GenreLinks != null)
 				foreach (GenreLink link in resource.GenreLinks)
-					link.Genre = await _genres.CreateIfNotExists(link.Genre, true);
+					if (ShouldValidate(link))
+						link.Genre = await _genres.CreateIfNotExists(link.Genre, true);
 
 			if (resource.People != null)
 				foreach (PeopleRole link in resource.People)
-					link.People = await _people.CreateIfNotExists(link.People, true);
+					if (ShouldValidate(link))
+						link.People = await _people.CreateIfNotExists(link.People, true);
 
 			if (resource.ExternalIDs != null)
 				foreach (MetadataID link in resource.ExternalIDs)
-					link.Provider = await _providers.CreateIfNotExists(link.Provider, true);
+					if (ShouldValidate(link))
+						link.Provider = await _providers.CreateIfNotExists(link.Provider, true);
 		}
 		
 		public async Task AddShowLink(int showID, int? libraryID, int? collectionID)

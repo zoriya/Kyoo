@@ -12,6 +12,7 @@ using Kyoo.Models.Attributes;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Kyoo.Controllers
 {
@@ -159,12 +160,37 @@ namespace Kyoo.Controllers
 
 				if (old == null)
 					throw new ItemNotFound($"No resource found with the ID {edited.ID}.");
-				
-				foreach (NavigationEntry navigation in Database.Entry(old).Navigations)
-					if (navigation.Metadata.PropertyInfo.GetCustomAttribute<EditableRelation>() != null
-					    && navigation.Metadata.GetGetter().GetClrValue(edited) != default)
-						await navigation.LoadAsync();
 
+				foreach (NavigationEntry navigation in Database.Entry(old).Navigations)
+				{
+					if (navigation.Metadata.PropertyInfo.GetCustomAttribute<EditableRelation>() != null)
+					{
+						if (resetOld)
+						{
+							await navigation.LoadAsync();
+							continue;
+						}
+						IClrPropertyGetter getter = navigation.Metadata.GetGetter();
+
+						if (getter.HasDefaultValue(edited))
+							continue;
+						await navigation.LoadAsync();
+						if (getter.GetClrValue(edited) != getter.GetClrValue(old))
+						{
+							navigation.Metadata.PropertyInfo.SetValue(edited, default);
+							Console.WriteLine($"Loaded: {navigation.Metadata.Name}");
+						}
+						else
+							Console.WriteLine($"Using: {navigation.Metadata.Name}");
+					}
+					else
+					{
+						navigation.Metadata.PropertyInfo.SetValue(edited, default);
+						Console.WriteLine($"Skipping: {navigation.Metadata.Name}");
+					}
+				}
+
+				Console.WriteLine("Loading done.");
 				if (resetOld)
 					Utility.Nullify(old);
 				Utility.Complete(old, edited);
@@ -176,6 +202,11 @@ namespace Kyoo.Controllers
 			{
 				Database.ChangeTracker.LazyLoadingEnabled = true;
 			}
+		}
+
+		protected bool ShouldValidate<T2>(T2 value)
+		{
+			return value != null && Database.Entry(value).State == EntityState.Detached;
 		}
 
 		protected virtual Task Validate(T resource)
@@ -203,7 +234,7 @@ namespace Kyoo.Controllers
 				            && !typeof(string).IsAssignableFrom(x.PropertyType)))
 			{
 				object value = property.GetValue(resource);
-				if (value is ICollection || value == null)
+				if (value == null || value is ICollection || Utility.IsOfType(value, typeof(ICollection<>)))
 					continue;
 				value = Utility.RunGenericMethod(typeof(Enumerable), "ToList", Utility.GetEnumerableType((IEnumerable)value), value);
 				property.SetValue(resource, value);
@@ -299,6 +330,8 @@ namespace Kyoo.Controllers
 
 		Task<T> IRepository<T>.Create(T item)
 		{
+			if (item == null)
+				throw new ArgumentNullException(nameof(item));
 			TInternal obj = item as TInternal ?? new TInternal();
 			if (!(item is TInternal))
 				Utility.Assign(obj, item);
@@ -309,6 +342,8 @@ namespace Kyoo.Controllers
 
 		Task<T> IRepository<T>.CreateIfNotExists(T item, bool silentFail)
 		{
+			if (item == null)
+				throw new ArgumentNullException(nameof(item));
 			TInternal obj = item as TInternal ?? new TInternal();
 			if (!(item is TInternal))
 				Utility.Assign(obj, item);
@@ -319,6 +354,8 @@ namespace Kyoo.Controllers
 
 		public Task<T> Edit(T edited, bool resetOld)
 		{
+			if (edited == null)
+				throw new ArgumentNullException(nameof(edited));
 			if (edited is TInternal intern)
 				return Edit(intern, resetOld).Cast<T>();
 			TInternal obj = new TInternal();
@@ -330,6 +367,8 @@ namespace Kyoo.Controllers
 
 		Task IRepository<T>.Delete(T obj)
 		{
+			if (obj == null)
+				throw new ArgumentNullException(nameof(obj));
 			if (obj is TInternal intern)
 				return Delete(intern);
 			TInternal item = new TInternal();

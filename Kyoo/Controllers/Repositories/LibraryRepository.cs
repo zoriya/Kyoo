@@ -76,7 +76,8 @@ namespace Kyoo.Controllers
 			
 			if (resource.ProviderLinks != null)
 				foreach (ProviderLink link in resource.ProviderLinks)
-					link.Provider = await _providers.CreateIfNotExists(link.Provider, true);
+					if (ShouldValidate(link))
+						link.Provider = await _providers.CreateIfNotExists(link.Provider, true);
 		}
 
 		public override async Task Delete(LibraryDE obj)
