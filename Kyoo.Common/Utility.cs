@@ -177,6 +177,11 @@ namespace Kyoo
 			return obj;
 		}
 
+		public static bool IsOfType([NotNull] object obj, [NotNull] Type type)
+		{
+			throw new NotImplementedException();
+		}
+		
 		public static object RunGenericMethod(
 			[NotNull] Type owner, 
 			[NotNull] string methodName,
