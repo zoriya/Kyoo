@@ -1,8 +1,8 @@
 [submodule "transcoder"]
 	path = transcoder
-	url = https://github.com/AnonymusRaccoon/Kyoo.Transcoder
+	url = ../Kyoo.Transcoder.git
 	branch = master
 [submodule "WebApp"]
 	path = Kyoo/Views/WebClient
-	url = https://github.com/AnonymusRaccoon/Kyoo.WebApp
+	url = ../Kyoo.WebApp.git
 	branch = master
