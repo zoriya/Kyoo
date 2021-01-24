@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>netcoreapp3.1</TargetFramework>
+		<TargetFramework>net5.0</TargetFramework>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Title>Kyoo.Common</Title>
-		<Authors>Anonymus Raccoon</Authors>
+		<Authors>Zoe Roux</Authors>
 		<Description>Base package to create plugins for Kyoo.</Description>
 		<PackageProjectUrl>https://github.com/AnonymusRaccoon/Kyoo</PackageProjectUrl>
 		<PublishRepositoryUrl>true</PublishRepositoryUrl>
@@ -15,11 +15,12 @@
 		<PackageVersion>1.0.22</PackageVersion>
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<LangVersion>default</LangVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="JetBrains.Annotations" Version="2020.1.0" />
-		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.0-beta-20204-02" PrivateAssets="All" />
 	</ItemGroup>
 
 </Project>
