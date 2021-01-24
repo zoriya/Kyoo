@@ -177,9 +177,25 @@ namespace Kyoo
 			return obj;
 		}
 
-		public static bool IsOfGenericType([NotNull] object obj, [NotNull] Type type)
+		public static IEnumerable<Type> GetInheritanceTree([NotNull] this Type type)
 		{
-			throw new NotImplementedException();
+			if (type == null)
+				throw new ArgumentNullException(nameof(type));
+			for (; type != null; type = type.BaseType)
+				yield return type;
+		}
+
+		public static bool IsOfGenericType([NotNull] object obj, [NotNull] Type genericType)
+		{
+			if (obj == null)
+				throw new ArgumentNullException(nameof(obj));
+			if (genericType == null)
+				throw new ArgumentNullException(nameof(genericType));
+
+			IEnumerable<Type> types = genericType.IsInterface
+				? obj.GetType().GetInterfaces()
+				: obj.GetType().GetInheritanceTree();
+			return types.Any(type => type.IsGenericType && type.GetGenericTypeDefinition() == genericType);
 		}
 		
 		public static object RunGenericMethod(
