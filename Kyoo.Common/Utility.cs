@@ -177,7 +177,7 @@ namespace Kyoo
 			return obj;
 		}
 
-		public static bool IsOfType([NotNull] object obj, [NotNull] Type type)
+		public static bool IsOfGenericType([NotNull] object obj, [NotNull] Type type)
 		{
 			throw new NotImplementedException();
 		}

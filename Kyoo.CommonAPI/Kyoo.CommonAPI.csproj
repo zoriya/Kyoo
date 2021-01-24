@@ -1,12 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
-		<TargetFramework>netcoreapp3.1</TargetFramework>
+		<TargetFramework>net5.0</TargetFramework>
 		<AssemblyName>Kyoo.CommonApi</AssemblyName>
 		<RootNamespace>Kyoo.CommonApi</RootNamespace>
 		<PackageId>Kyoo.CommonApi</PackageId>
-		<Authors>AnonymusRaccoon</Authors>
+		<Authors>Zoe Roux</Authors>
+		<RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
 		<OutputType>Library</OutputType>
+		<LangVersion>default</LangVersion>
 	</PropertyGroup>
 
 	<ItemGroup>

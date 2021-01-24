@@ -234,7 +234,7 @@ namespace Kyoo.Controllers
 				            && !typeof(string).IsAssignableFrom(x.PropertyType)))
 			{
 				object value = property.GetValue(resource);
-				if (value == null || value is ICollection || Utility.IsOfType(value, typeof(ICollection<>)))
+				if (value == null || value is ICollection || Utility.IsOfGenericType(value, typeof(ICollection<>)))
 					continue;
 				value = Utility.RunGenericMethod(typeof(Enumerable), "ToList", Utility.GetEnumerableType((IEnumerable)value), value);
 				property.SetValue(resource, value);
