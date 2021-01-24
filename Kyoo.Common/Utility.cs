@@ -191,6 +191,8 @@ namespace Kyoo
 				throw new ArgumentNullException(nameof(obj));
 			if (genericType == null)
 				throw new ArgumentNullException(nameof(genericType));
+			if (!genericType.IsGenericType)
+				throw new ArgumentException($"{nameof(genericType)} is not a generic type.");
 
 			IEnumerable<Type> types = genericType.IsInterface
 				? obj.GetType().GetInterfaces()

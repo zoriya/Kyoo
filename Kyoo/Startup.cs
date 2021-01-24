@@ -112,7 +112,7 @@ namespace Kyoo
 
 			services.AddAuthorization(options =>
 			{
-				AuthorizationPolicyBuilder scheme = new AuthorizationPolicyBuilder(IdentityConstants.ApplicationScheme, JwtBearerDefaults.AuthenticationScheme);
+				AuthorizationPolicyBuilder scheme = new(IdentityConstants.ApplicationScheme, JwtBearerDefaults.AuthenticationScheme);
 				options.DefaultPolicy = scheme.RequireAuthenticatedUser().Build();
 
 				string[] permissions = {"Read", "Write", "Play", "Admin"};
