@@ -231,10 +231,9 @@ namespace Kyoo.Controllers
 			
 			foreach (PropertyInfo property in typeof(T).GetProperties()
 				.Where(x => typeof(IEnumerable).IsAssignableFrom(x.PropertyType) 
-				            && !typeof(string).IsAssignableFrom(x.PropertyType)))
+				            && !typeof(string).IsAssignableFrom(x.PropertyType) 
+				            && x.GetCustomAttribute<EditableRelation>() != null))
 			{
-				// TODO For DE classes (like ShowDE), the basic ienumerable should not be verified (for exemple, GenreLinks should be checked & not Genres). 
-				Console.WriteLine($"Validating {property.Name}");
 				object value = property.GetValue(resource);
 				if (value == null || value is ICollection || Utility.IsOfGenericType(value, typeof(ICollection<>)))
 					continue;
