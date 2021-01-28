@@ -175,7 +175,7 @@ namespace Kyoo.Controllers
 						if (getter.HasDefaultValue(edited))
 							continue;
 						await navigation.LoadAsync();
-						if (getter.GetClrValue(edited) != getter.GetClrValue(old))
+						if (Utility.ResourceEquals(getter.GetClrValue(edited), getter.GetClrValue(old)))
 						{
 							navigation.Metadata.PropertyInfo.SetValue(edited, default);
 							Console.WriteLine($"Loaded: {navigation.Metadata.Name}");
@@ -237,7 +237,7 @@ namespace Kyoo.Controllers
 				object value = property.GetValue(resource);
 				if (value == null || value is ICollection || Utility.IsOfGenericType(value, typeof(ICollection<>)))
 					continue;
-				value = Utility.RunGenericMethod(typeof(Enumerable), "ToList", Utility.GetEnumerableType((IEnumerable)value), value);
+				value = Utility.RunGenericMethod<object>(typeof(Enumerable), "ToList", Utility.GetEnumerableType((IEnumerable)value), value);
 				property.SetValue(resource, value);
 			}
 			return Task.CompletedTask;

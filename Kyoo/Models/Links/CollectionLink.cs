@@ -1,21 +1,20 @@
 namespace Kyoo.Models
 {
-	public class CollectionLink
+	public class CollectionLink : IResourceLink<Collection, Show>
 	{
-		public int ID { get; set; }
-		public int? CollectionID { get; set; }
-		public virtual Collection Collection { get; set; }
-		public int ShowID { get; set; }
-		public virtual Show Show { get; set; }
+		public int ParentID { get; set; }
+		public virtual Collection Parent { get; set; }
+		public int ChildID { get; set; }
+		public virtual Show Child { get; set; }
 
 		public CollectionLink() { }
 
-		public CollectionLink(Collection collection, Show show)
+		public CollectionLink(Collection parent, Show child)
 		{
-			Collection = collection;
-			CollectionID = collection.ID;
-			Show = show;
-			ShowID = show.ID;
+			Parent = parent;
+			ParentID = parent.ID;
+			Child = child;
+			ChildID = child.ID;
 		}
 	}
 }

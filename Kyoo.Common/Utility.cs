@@ -147,7 +147,7 @@ namespace Kyoo
 				else if (typeof(IEnumerable).IsAssignableFrom(property.PropertyType)
 				         && property.PropertyType != typeof(string))
 				{
-					property.SetValue(first, RunGenericMethod(
+					property.SetValue(first, RunGenericMethod<object>(
 						typeof(Utility), 
 						"MergeLists",
 						GetEnumerableType(property.PropertyType), 
@@ -189,18 +189,25 @@ namespace Kyoo
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
+			return IsOfGenericType(obj.GetType(), genericType);
+		}
+		
+		public static bool IsOfGenericType([NotNull] Type type, [NotNull] Type genericType)
+		{
+			if (type == null)
+				throw new ArgumentNullException(nameof(type));
 			if (genericType == null)
 				throw new ArgumentNullException(nameof(genericType));
 			if (!genericType.IsGenericType)
 				throw new ArgumentException($"{nameof(genericType)} is not a generic type.");
 
 			IEnumerable<Type> types = genericType.IsInterface
-				? obj.GetType().GetInterfaces()
-				: obj.GetType().GetInheritanceTree();
-			return types.Any(type => type.IsGenericType && type.GetGenericTypeDefinition() == genericType);
+				? type.GetInterfaces()
+				: type.GetInheritanceTree();
+			return types.Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == genericType);
 		}
 		
-		public static object RunGenericMethod(
+		public static T RunGenericMethod<T>(
 			[NotNull] Type owner, 
 			[NotNull] string methodName,
 			[NotNull] Type type,
@@ -212,13 +219,14 @@ namespace Kyoo
 				throw new ArgumentNullException(nameof(methodName));
 			if (type == null)
 				throw new ArgumentNullException(nameof(type));
-			MethodInfo method = owner.GetMethod(methodName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+			MethodInfo method = owner.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
+				.SingleOrDefault(x => x.Name == methodName && x.GetParameters().Length == args.Length);
 			if (method == null)
-				throw new NullReferenceException($"A method named {methodName} could not be found on {owner.FullName}");
-			return method.MakeGenericMethod(type).Invoke(null, args?.ToArray());
+				throw new NullReferenceException($"A method named {methodName} with {args.Length} arguments could not be found on {owner.FullName}");
+			return (T)method.MakeGenericMethod(type).Invoke(null, args?.ToArray());
 		}
 		
-		public static object RunGenericMethod(
+		public static T RunGenericMethod<T>(
 			[NotNull] object instance, 
 			[NotNull] string methodName,
 			[NotNull] Type type,
@@ -233,9 +241,10 @@ namespace Kyoo
 			MethodInfo method = instance.GetType().GetMethod(methodName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
 			if (method == null)
 				throw new NullReferenceException($"A method named {methodName} could not be found on {instance.GetType().FullName}");
-			return method.MakeGenericMethod(type).Invoke(instance, args?.ToArray());
+			return (T)method.MakeGenericMethod(type).Invoke(instance, args?.ToArray());
 		}
 
+		[NotNull]
 		public static Type GetEnumerableType([NoEnumeration] [NotNull] IEnumerable list)
 		{
 			if (list == null)
@@ -332,6 +341,59 @@ namespace Kyoo
 					throw new TaskCanceledException();
 				return (T)((dynamic)x).Result;
 			}, TaskContinuationOptions.ExecuteSynchronously);
+		}
+
+		public static bool ResourceEquals([CanBeNull] object first, [CanBeNull] object second)
+		{
+			if (ReferenceEquals(first, second))
+				return true;
+			if (first is IResource f && second is IResource s)
+				return ResourceEquals(f, s);
+			IEnumerable eno = first as IEnumerable;
+			IEnumerable ens = second as IEnumerable;
+			if (eno == null || ens == null)
+				throw new ArgumentException("Arguments are not resources or lists of resources.");
+			Type type = GetEnumerableType(eno);
+			if (typeof(IResource).IsAssignableFrom(type))
+				return ResourceEquals(eno.Cast<IResource>(), ens.Cast<IResource>());
+			// if (IsOfGenericType(type, typeof(IResourceLink<,>)))
+				// return ResourceEquals(eno.Cast<IResourceLink<,>>())
+			return RunGenericMethod<bool>(typeof(Enumerable), "SequenceEqual", type, first, second);
+		}
+		
+		public static bool ResourceEquals<T>([CanBeNull] T first, [CanBeNull] T second)
+			where T : IResource
+		{
+			if (ReferenceEquals(first, second))
+				return true;
+			if (first == null || second == null)
+				return false;
+			return first.ID == second.ID || first.Slug == second.Slug;
+		}
+		
+		public static bool ResourceEquals<T>([CanBeNull] IEnumerable<T> first, [CanBeNull] IEnumerable<T> second) 
+			where T : IResource
+		{
+			if (ReferenceEquals(first, second))
+				return true;
+			if (first == null || second == null)
+				return false;
+			return first.SequenceEqual(second, new ResourceComparer<T>());
+		}
+
+		public static bool LinkEquals<T>([CanBeNull] T first, int? firstID, [CanBeNull] T second, int? secondID)
+			where T : IResource
+		{
+			if (ResourceEquals(first, second))
+				return true;
+			if (first == null && second != null
+				&& firstID == second.ID)
+				return true;
+			if (first != null && second == null 
+				&& first.ID == secondID)
+				return true;
+			return firstID == secondID;
+
 		}
 
 		public static Expression<T> Convert<T>([CanBeNull] this Expression expr)

@@ -1,18 +1,18 @@
 namespace Kyoo.Models
 {
-	public class GenreLink
+	public class GenreLink : IResourceLink<Show, Genre>
 	{
-		public int ShowID { get; set; }
-		public virtual Show Show { get; set; }
-		public int GenreID { get; set; }
-		public virtual Genre Genre { get; set; }
+		public int ParentID { get; set; }
+		public virtual Show Parent { get; set; }
+		public int ChildID { get; set; }
+		public virtual Genre Child { get; set; }
 
 		public GenreLink() {}
 		
-		public GenreLink(Show show, Genre genre)
+		public GenreLink(Show parent, Genre child)
 		{
-			Show = show;
-			Genre = genre;
+			Parent = parent;
+			Child = child;
 		}
 	}
 }

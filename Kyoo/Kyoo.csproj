@@ -104,6 +104,7 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-		<Folder Include="Models/DatabaseMigrations/Internal" />
+		<Folder Include="Models\DatabaseMigrations" />
+		<Folder Include="Models\DatabaseMigrations\Internal" />
 	</ItemGroup>
 </Project>

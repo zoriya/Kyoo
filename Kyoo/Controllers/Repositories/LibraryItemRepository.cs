@@ -71,7 +71,7 @@ namespace Kyoo.Controllers
 
 		private IQueryable<LibraryItem> ItemsQuery 
 			=> _database.Shows
-				.Where(x => !_database.CollectionLinks.Any(y => y.ShowID == x.ID))
+				.Where(x => !_database.CollectionLinks.Any(y => y.ChildID == x.ID))
 				.Select(LibraryItem.FromShow)
 				.Concat(_database.Collections
 					.Select(LibraryItem.FromCollection));
@@ -118,7 +118,7 @@ namespace Kyoo.Controllers
 				.Where(selector)
 				.Select(x => x.Show)
 				.Where(x => x != null)
-				.Where(x => !_database.CollectionLinks.Any(y => y.ShowID == x.ID))
+				.Where(x => !_database.CollectionLinks.Any(y => y.ChildID == x.ID))
 				.Select(LibraryItem.FromShow)
 				.Concat(_database.LibraryLinks
 					.Where(selector)
