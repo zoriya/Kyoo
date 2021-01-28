@@ -356,8 +356,10 @@ namespace Kyoo
 			Type type = GetEnumerableType(eno);
 			if (typeof(IResource).IsAssignableFrom(type))
 				return ResourceEquals(eno.Cast<IResource>(), ens.Cast<IResource>());
+			// TODO find a way to run the equality checker with the right check.
+			// TODO maybe create a GetTypeOfGenericType
 			// if (IsOfGenericType(type, typeof(IResourceLink<,>)))
-				// return ResourceEquals(eno.Cast<IResourceLink<,>>())
+			// 	return ResourceEquals(eno.Cast<IResourceLink<,>>())
 			return RunGenericMethod<bool>(typeof(Enumerable), "SequenceEqual", type, first, second);
 		}
 		
@@ -393,7 +395,18 @@ namespace Kyoo
 				&& first.ID == secondID)
 				return true;
 			return firstID == secondID;
-
+		}
+		
+		public static bool LinkEquals<T, T1, T2>([CanBeNull] IEnumerable<T> first, [CanBeNull] IEnumerable<T> second) 
+			where T : IResourceLink<T1, T2>
+			where T1 : IResource
+			where T2 : IResource
+		{
+			if (ReferenceEquals(first, second))
+				return true;
+			if (first == null || second == null)
+				return false;
+			return first.SequenceEqual(second, new LinkComparer<T, T1, T2>());
 		}
 
 		public static Expression<T> Convert<T>([CanBeNull] this Expression expr)
