@@ -8,10 +8,10 @@ namespace Kyoo.Models
 	{
 		[JsonIgnore] [NotMergable] public virtual ICollection<GenreLink> Links { get; set; }
 
-		[ExpressionRewrite(nameof(Links), nameof(GenreLink.Genre))]
+		[ExpressionRewrite(nameof(Links), nameof(GenreLink.Child))]
 		[JsonIgnore] [NotMergable] public override IEnumerable<Show> Shows
 		{
-			get => Links?.Select(x => x.Show);
+			get => Links?.Select(x => x.Parent);
 			set => Links = value?.Select(x => new GenreLink(x, this)).ToList();
 		}
 

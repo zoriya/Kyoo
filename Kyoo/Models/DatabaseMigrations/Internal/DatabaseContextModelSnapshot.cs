@@ -18,7 +18,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
             modelBuilder
                 .HasAnnotation("Npgsql:Enum:item_type", "show,movie,collection")
                 .HasAnnotation("Npgsql:Enum:status", "finished,airing,planned,unknown")
-                .HasAnnotation("Npgsql:Enum:stream_type", "unknow,video,audio,subtitle")
+                .HasAnnotation("Npgsql:Enum:stream_type", "unknown,video,audio,subtitle,font")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn)
                 .HasAnnotation("ProductVersion", "3.1.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
@@ -55,23 +55,15 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
             modelBuilder.Entity("Kyoo.Models.CollectionLink", b =>
                 {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<int?>("CollectionID")
+                    b.Property<int>("ParentID")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ShowID")
+                    b.Property<int>("ChildID")
                         .HasColumnType("integer");
 
-                    b.HasKey("ID");
+                    b.HasKey("ParentID", "ChildID");
 
-                    b.HasIndex("ShowID");
-
-                    b.HasIndex("CollectionID", "ShowID")
-                        .IsUnique();
+                    b.HasIndex("ChildID");
 
                     b.ToTable("CollectionLinks");
                 });
@@ -152,15 +144,15 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
             modelBuilder.Entity("Kyoo.Models.GenreLink", b =>
                 {
-                    b.Property<int>("ShowID")
+                    b.Property<int>("ParentID")
                         .HasColumnType("integer");
 
-                    b.Property<int>("GenreID")
+                    b.Property<int>("ChildID")
                         .HasColumnType("integer");
 
-                    b.HasKey("ShowID", "GenreID");
+                    b.HasKey("ParentID", "ChildID");
 
-                    b.HasIndex("GenreID");
+                    b.HasIndex("ChildID");
 
                     b.ToTable("GenreLinks");
                 });
@@ -346,22 +338,15 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
             modelBuilder.Entity("Kyoo.Models.ProviderLink", b =>
                 {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<int?>("LibraryID")
+                    b.Property<int>("ParentID")
                         .HasColumnType("integer");
 
-                    b.Property<int>("ProviderID")
+                    b.Property<int>("ChildID")
                         .HasColumnType("integer");
 
-                    b.HasKey("ID");
+                    b.HasKey("ParentID", "ChildID");
 
-                    b.HasIndex("LibraryID");
-
-                    b.HasIndex("ProviderID");
+                    b.HasIndex("ChildID");
 
                     b.ToTable("ProviderLinks");
                 });
@@ -526,14 +511,15 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
             modelBuilder.Entity("Kyoo.Models.CollectionLink", b =>
                 {
-                    b.HasOne("Kyoo.Models.CollectionDE", "Collection")
-                        .WithMany("Links")
-                        .HasForeignKey("CollectionID")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Kyoo.Models.ShowDE", "Show")
+                    b.HasOne("Kyoo.Models.ShowDE", "Child")
                         .WithMany("CollectionLinks")
-                        .HasForeignKey("ShowID")
+                        .HasForeignKey("ChildID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kyoo.Models.CollectionDE", "Parent")
+                        .WithMany("Links")
+                        .HasForeignKey("ParentID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -553,15 +539,15 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
             modelBuilder.Entity("Kyoo.Models.GenreLink", b =>
                 {
-                    b.HasOne("Kyoo.Models.GenreDE", "Genre")
+                    b.HasOne("Kyoo.Models.GenreDE", "Child")
                         .WithMany("Links")
-                        .HasForeignKey("GenreID")
+                        .HasForeignKey("ChildID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Kyoo.Models.ShowDE", "Show")
+                    b.HasOne("Kyoo.Models.ShowDE", "Parent")
                         .WithMany("GenreLinks")
-                        .HasForeignKey("ShowID")
+                        .HasForeignKey("ParentID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -631,14 +617,15 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
             modelBuilder.Entity("Kyoo.Models.ProviderLink", b =>
                 {
-                    b.HasOne("Kyoo.Models.LibraryDE", "Library")
-                        .WithMany("ProviderLinks")
-                        .HasForeignKey("LibraryID")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Kyoo.Models.ProviderID", "Provider")
+                    b.HasOne("Kyoo.Models.ProviderID", "Child")
                         .WithMany()
-                        .HasForeignKey("ProviderID")
+                        .HasForeignKey("ChildID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kyoo.Models.LibraryDE", "Parent")
+                        .WithMany("ProviderLinks")
+                        .HasForeignKey("ParentID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

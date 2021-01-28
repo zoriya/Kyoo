@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
-using Kyoo.Models.Watch;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Npgsql;
@@ -78,8 +77,16 @@ namespace Kyoo
 				.Property(t => t.IsForced)
 				.ValueGeneratedNever();
 
+
 			modelBuilder.Entity<GenreLink>()
-				.HasKey(x => new {x.ShowID, x.GenreID});
+				.HasKey(x => new {ShowID = x.ParentID, GenreID = x.ChildID});
+
+			modelBuilder.Entity<CollectionLink>()
+				.HasKey(x => new {CollectionID = x.ParentID, ShowID = x.ChildID});
+			
+			modelBuilder.Entity<ProviderLink>()
+				.HasKey(x => new {LibraryID = x.ParentID, ProviderID = x.ChildID});
+
 
 			modelBuilder.Entity<LibraryDE>()
 				.Ignore(x => x.Shows)
@@ -119,25 +126,25 @@ namespace Kyoo
 				.OnDelete(DeleteBehavior.Cascade);
 			
 			modelBuilder.Entity<CollectionLink>()
-				.HasOne(x => x.Collection as CollectionDE)
+				.HasOne(x => x.Parent as CollectionDE)
 				.WithMany(x => x.Links)
 				.OnDelete(DeleteBehavior.Cascade);
 			modelBuilder.Entity<CollectionLink>()
-				.HasOne(x => x.Show as ShowDE)
+				.HasOne(x => x.Child as ShowDE)
 				.WithMany(x => x.CollectionLinks)
 				.OnDelete(DeleteBehavior.Cascade);
 			
 			modelBuilder.Entity<GenreLink>()
-				.HasOne(x => x.Genre as GenreDE)
+				.HasOne(x => x.Child as GenreDE)
 				.WithMany(x => x.Links)
 				.OnDelete(DeleteBehavior.Cascade);
 			modelBuilder.Entity<GenreLink>()
-				.HasOne(x => x.Show as ShowDE)
+				.HasOne(x => x.Parent as ShowDE)
 				.WithMany(x => x.GenreLinks)
 				.OnDelete(DeleteBehavior.Cascade);
 
 			modelBuilder.Entity<ProviderLink>()
-				.HasOne(x => x.Library as LibraryDE)
+				.HasOne(x => x.Parent as LibraryDE)
 				.WithMany(x => x.ProviderLinks)
 				.OnDelete(DeleteBehavior.Cascade);
 
@@ -210,9 +217,6 @@ namespace Kyoo
 				.IsUnique();
 			modelBuilder.Entity<LibraryLink>()
 				.HasIndex(x => new {x.LibraryID, x.CollectionID})
-				.IsUnique();
-			modelBuilder.Entity<CollectionLink>()
-				.HasIndex(x => new {x.CollectionID, x.ShowID})
 				.IsUnique();
 		}
 

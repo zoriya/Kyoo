@@ -90,8 +90,8 @@ namespace Kyoo.Controllers
 			{
 				foreach (GenreLink entry in obj.GenreLinks)
 				{
-					if (!(entry.Genre is GenreDE))
-						entry.Genre = new GenreDE(entry.Genre);
+					if (!(entry.Child is GenreDE))
+						entry.Child = new GenreDE(entry.Child);
 					_database.Entry(entry).State = EntityState.Added;
 				}
 			}
@@ -117,7 +117,7 @@ namespace Kyoo.Controllers
 			if (resource.GenreLinks != null)
 				foreach (GenreLink link in resource.GenreLinks)
 					if (ShouldValidate(link))
-						link.Genre = await _genres.CreateIfNotExists(link.Genre, true);
+						link.Child = await _genres.CreateIfNotExists(link.Child, true);
 
 			if (resource.People != null)
 				foreach (PeopleRole link in resource.People)
@@ -134,7 +134,7 @@ namespace Kyoo.Controllers
 		{
 			if (collectionID != null)
 			{
-				await _database.CollectionLinks.AddAsync(new CollectionLink {CollectionID = collectionID, ShowID = showID});
+				await _database.CollectionLinks.AddAsync(new CollectionLink {ParentID = collectionID.Value, ChildID = showID});
 				await _database.SaveIfNoDuplicates();
 			}
 			if (libraryID != null)

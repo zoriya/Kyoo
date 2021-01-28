@@ -2,20 +2,19 @@ using Newtonsoft.Json;
 
 namespace Kyoo.Models
 {
-	public class ProviderLink
+	public class ProviderLink : IResourceLink<Library, ProviderID>
 	{
-		[JsonIgnore] public int ID { get; set; }
-		[JsonIgnore] public int ProviderID { get; set; }
-		[JsonIgnore] public virtual ProviderID Provider { get; set; }
-		[JsonIgnore] public int? LibraryID { get; set; }
-		[JsonIgnore] public virtual Library Library { get; set; }
+		[JsonIgnore] public int ParentID { get; set; }
+		[JsonIgnore] public virtual Library Parent { get; set; }
+		[JsonIgnore] public int ChildID { get; set; }
+		[JsonIgnore] public virtual ProviderID Child { get; set; }
 
 		public ProviderLink() { }
 
-		public ProviderLink(ProviderID provider, Library library)
+		public ProviderLink(ProviderID child, Library parent)
 		{
-			Provider = provider;
-			Library = library;
+			Child = child;
+			Parent = parent;
 		}
 	}
 }

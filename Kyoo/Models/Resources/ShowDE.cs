@@ -7,10 +7,10 @@ namespace Kyoo.Models
 	public class ShowDE : Show
 	{
 		[EditableRelation] [JsonReadOnly] [NotMergable] public virtual ICollection<GenreLink> GenreLinks { get; set; }
-		[ExpressionRewrite(nameof(GenreLinks), nameof(GenreLink.Genre))]
+		[ExpressionRewrite(nameof(GenreLinks), nameof(GenreLink.Child))]
 		public override IEnumerable<Genre> Genres
 		{
-			get => GenreLinks?.Select(x => x.Genre);
+			get => GenreLinks?.Select(x => x.Child);
 			set => GenreLinks = value?.Select(x => new GenreLink(this, x)).ToList();
 		}
 		
@@ -23,10 +23,10 @@ namespace Kyoo.Models
 		}
 		
 		[JsonReadOnly] [NotMergable] public virtual ICollection<CollectionLink> CollectionLinks { get; set; }
-		[ExpressionRewrite(nameof(CollectionLinks), nameof(CollectionLink.Collection))]
+		[ExpressionRewrite(nameof(CollectionLinks), nameof(CollectionLink.Parent))]
 		public override IEnumerable<Collection> Collections
 		{
-			get => CollectionLinks?.Select(x => x.Collection);
+			get => CollectionLinks?.Select(x => x.Parent);
 			set => CollectionLinks = value?.Select(x => new CollectionLink(x, this)).ToList();
 		}
 
