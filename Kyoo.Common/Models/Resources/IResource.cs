@@ -29,8 +29,6 @@ namespace Kyoo.Models
 				return false;
 			if (ReferenceEquals(y, null))
 				return false;
-			if (x.GetType() != y.GetType())
-				return false;
 			return x.ID == y.ID || x.Slug == y.Slug;
 		}
 
@@ -52,8 +50,6 @@ namespace Kyoo.Models
 			if (ReferenceEquals(x, null))
 				return false;
 			if (ReferenceEquals(y, null))
-				return false;
-			if (x.GetType() != y.GetType())
 				return false;
 			return Utility.LinkEquals(x.Parent, x.ParentID, y.Parent, y.ParentID)
 			       && Utility.LinkEquals(x.Child, x.ChildID, y.Child, y.ChildID);
