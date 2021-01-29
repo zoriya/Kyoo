@@ -9,7 +9,7 @@ namespace Kyoo.Models
 		public int ID { get; set; }
 		public string Slug { get; set; }
 		public string Title { get; set; }
-		public IEnumerable<string> Aliases { get; set; }
+		[EditableRelation] public IEnumerable<string> Aliases { get; set; }
 		[JsonIgnore] public string Path { get; set; }
 		public string Overview { get; set; }
 		public Status? Status { get; set; }

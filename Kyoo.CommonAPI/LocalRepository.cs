@@ -175,22 +175,15 @@ namespace Kyoo.Controllers
 						if (getter.HasDefaultValue(edited))
 							continue;
 						await navigation.LoadAsync();
+						// TODO this may be usless for lists since the API does not return IDs but the
+						// TODO LinkEquality does not check slugs (their are lazy loaded and only the ID is available)
 						if (Utility.ResourceEquals(getter.GetClrValue(edited), getter.GetClrValue(old)))
-						{
 							navigation.Metadata.PropertyInfo.SetValue(edited, default);
-							Console.WriteLine($"Loaded: {navigation.Metadata.Name}");
-						}
-						else
-							Console.WriteLine($"Using: {navigation.Metadata.Name}");
 					}
 					else
-					{
 						navigation.Metadata.PropertyInfo.SetValue(edited, default);
-						Console.WriteLine($"Skipping: {navigation.Metadata.Name}");
-					}
 				}
 
-				Console.WriteLine("Loading done.");
 				if (resetOld)
 					Utility.Nullify(old);
 				Utility.Complete(old, edited);
