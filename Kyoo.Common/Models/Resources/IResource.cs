@@ -40,7 +40,7 @@ namespace Kyoo.Models
 		}
 	}
 	
-	public class LinkComparer<T, T1, T2> : IEqualityComparer<T>>
+	public class LinkComparer<T, T1, T2> : IEqualityComparer<T>
 		where T : IResourceLink<T1, T2>
 		where T1 : IResource
 		where T2 : IResource

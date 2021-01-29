@@ -206,6 +206,21 @@ namespace Kyoo
 				: type.GetInheritanceTree();
 			return types.Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == genericType);
 		}
+
+		public static Type GetGenericDefinition([NotNull] Type type, [NotNull] Type genericType)
+		{
+			if (type == null)
+				throw new ArgumentNullException(nameof(type));
+			if (genericType == null)
+				throw new ArgumentNullException(nameof(genericType));
+			if (!genericType.IsGenericType)
+				throw new ArgumentException($"{nameof(genericType)} is not a generic type.");
+
+			IEnumerable<Type> types = genericType.IsInterface
+				? type.GetInterfaces()
+				: type.GetInheritanceTree();
+			return types.FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == genericType);
+		}
 		
 		public static T RunGenericMethod<T>(
 			[NotNull] Type owner, 
@@ -213,17 +228,28 @@ namespace Kyoo
 			[NotNull] Type type,
 			params object[] args)
 		{
+			return RunGenericMethod<T>(owner, methodName, new[] {type}, args);
+		}
+		
+		public static T RunGenericMethod<T>(
+			[NotNull] Type owner, 
+			[NotNull] string methodName,
+			[NotNull] Type[] types,
+			params object[] args)
+		{
 			if (owner == null)
 				throw new ArgumentNullException(nameof(owner));
 			if (methodName == null)
 				throw new ArgumentNullException(nameof(methodName));
-			if (type == null)
-				throw new ArgumentNullException(nameof(type));
+			if (types == null)
+				throw new ArgumentNullException(nameof(types));
+			if (types.Length < 1)
+				throw new ArgumentException($"The {nameof(types)} array is empty. At least one type is needed.");
 			MethodInfo method = owner.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
 				.SingleOrDefault(x => x.Name == methodName && x.GetParameters().Length == args.Length);
 			if (method == null)
 				throw new NullReferenceException($"A method named {methodName} with {args.Length} arguments could not be found on {owner.FullName}");
-			return (T)method.MakeGenericMethod(type).Invoke(null, args?.ToArray());
+			return (T)method.MakeGenericMethod(types).Invoke(null, args?.ToArray());
 		}
 		
 		public static T RunGenericMethod<T>(
@@ -342,7 +368,7 @@ namespace Kyoo
 				return (T)((dynamic)x).Result;
 			}, TaskContinuationOptions.ExecuteSynchronously);
 		}
-
+		
 		public static bool ResourceEquals([CanBeNull] object first, [CanBeNull] object second)
 		{
 			if (ReferenceEquals(first, second))
@@ -356,11 +382,11 @@ namespace Kyoo
 			Type type = GetEnumerableType(eno);
 			if (typeof(IResource).IsAssignableFrom(type))
 				return ResourceEquals(eno.Cast<IResource>(), ens.Cast<IResource>());
-			// TODO find a way to run the equality checker with the right check.
-			// TODO maybe create a GetTypeOfGenericType
-			// if (IsOfGenericType(type, typeof(IResourceLink<,>)))
-			// 	return ResourceEquals(eno.Cast<IResourceLink<,>>())
-			return RunGenericMethod<bool>(typeof(Enumerable), "SequenceEqual", type, first, second);
+			Type genericDefinition = GetGenericDefinition(type, typeof(IResourceLink<,>));
+			if (genericDefinition == null)
+				return RunGenericMethod<bool>(typeof(Enumerable), "SequenceEqual", type, first, second);
+			Type[] types = genericDefinition.GetGenericArguments().Prepend(type).ToArray();
+			return RunGenericMethod<bool>(typeof(Utility), "LinkEquals", types, eno, ens);
 		}
 		
 		public static bool ResourceEquals<T>([CanBeNull] T first, [CanBeNull] T second)
