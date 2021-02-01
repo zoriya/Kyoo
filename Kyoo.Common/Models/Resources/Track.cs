@@ -82,6 +82,8 @@ namespace Kyoo.Models
 				string name = info?.EnglishName ?? language;
 				if (IsForced)
 					name += " Forced";
+				if (IsExternal)
+					name += " (External)";
 				if (Title != null && Title.Length > 1)
 					name += " - " + Title;
 				return name;
