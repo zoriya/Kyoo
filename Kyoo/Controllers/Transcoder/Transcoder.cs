@@ -31,10 +31,7 @@ namespace Kyoo.Controllers
 			if (dir == null)
 				throw new ArgumentException("Invalid path.");
 			
-			return Task.Factory.StartNew(() =>
-			{
-				return TranscoderAPI.ExtractInfos(path, dir);
-			}, TaskCreationOptions.LongRunning);
+			return Task.Factory.StartNew(() => TranscoderAPI.ExtractInfos(path, dir), TaskCreationOptions.LongRunning);
 		}
 
 		public async Task<string> Transmux(Episode episode)

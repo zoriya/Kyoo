@@ -81,7 +81,11 @@ namespace Kyoo.Controllers
 		public override async Task<Track> Create(Track obj)
 		{
 			if (obj.EpisodeID <= 0)
-				throw new InvalidOperationException($"Can't store a track not related to any episode (episodeID: {obj.EpisodeID}).");
+			{
+				obj.EpisodeID = obj.Episode?.ID ?? -1;
+				if (obj.EpisodeID <= 0)
+					throw new InvalidOperationException($"Can't store a track not related to any episode (episodeID: {obj.EpisodeID}).");
+			}
 
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;

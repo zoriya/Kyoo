@@ -116,9 +116,9 @@ namespace Kyoo.CommonApi
 				valueConst = Expression.Constant(value);
 			}
 
-			if (notEqual)
-				return Expression.NotEqual(field, valueConst);
-			return Expression.Equal(field, valueConst);
+			return notEqual 
+				? Expression.NotEqual(field, valueConst) 
+				: Expression.Equal(field, valueConst);
 		}
 		
 		private static Expression ContainsResourceExpression(MemberExpression xProperty, string value)

@@ -33,7 +33,7 @@ namespace Kyoo.Controllers
 		{
 			using IServiceScope serviceScope = _serviceProvider.CreateScope();
 			await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
-			return (await libraryManager.GetLibraries()).Select(x => x.Slug);
+			return (await libraryManager!.GetLibraries()).Select(x => x.Slug);
 		}
 
 		public int? Progress()
@@ -58,31 +58,33 @@ namespace Kyoo.Controllers
 			using IServiceScope serviceScope = _serviceProvider.CreateScope();
 			await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
 			
-			foreach (Show show in await libraryManager.GetShows())
+			foreach (Show show in await libraryManager!.GetShows())
 				if (!Directory.Exists(show.Path))
 					await libraryManager.DeleteShow(show);
 			
 			ICollection<Episode> episodes = await libraryManager.GetEpisodes();
+			foreach (Episode episode in episodes)
+				if (!File.Exists(episode.Path))
+					await libraryManager.DeleteEpisode(episode);
+			
+			ICollection<Track> tracks = await libraryManager.GetTracks();
+			foreach (Track track in tracks)
+				if (!File.Exists(track.Path))
+					await libraryManager.DeleteTrack(track);
+
 			ICollection<Library> libraries = argument == null 
 				? await libraryManager.GetLibraries()
 				: new [] { await libraryManager.GetLibrary(argument)};
-
-			foreach (Episode episode in episodes)
-			{
-				if (!File.Exists(episode.Path))
-					await libraryManager.DeleteEpisode(episode);
-			}
-
 			// TODO replace this grotesque way to load the providers.
 			foreach (Library library in libraries)
 				library.Providers = library.Providers;
 			
 			foreach (Library library in libraries)
-				await Scan(library, episodes, cancellationToken);
+				await Scan(library, episodes, tracks, cancellationToken);
 			Console.WriteLine("Scan finished!");
 		}
 
-		private async Task Scan(Library library, IEnumerable<Episode> episodes, CancellationToken cancellationToken)
+		private async Task Scan(Library library, IEnumerable<Episode> episodes, IEnumerable<Track> tracks, CancellationToken cancellationToken)
 		{
 			Console.WriteLine($"Scanning library {library.Name} at {string.Join(", ", library.Paths)}.");
 			foreach (string path in library.Paths)
@@ -130,7 +132,52 @@ namespace Kyoo.Controllers
 				foreach (string[] episodeTasks in tasks.BatchBy(_parallelTasks * 2))
 					await Task.WhenAll(episodeTasks
 						.Select(x => RegisterFile(x, x.Substring(path.Length), library, cancellationToken)));
+				
+				await Task.WhenAll(files.Where(x => IsSubtitle(x) && tracks.All(y => y.Path != x))
+					.Select(x => RegisterExternalSubtitle(x, cancellationToken)));
 			}
+		}
+
+		private async Task RegisterExternalSubtitle(string path, CancellationToken token)
+		{
+			if (token.IsCancellationRequested || path.Split(Path.DirectorySeparatorChar).Contains("Subtitles")) 
+				return;
+			using IServiceScope serviceScope = _serviceProvider.CreateScope();
+			await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
+			
+			string patern = _config.GetValue<string>("subtitleRegex");
+			Regex regex = new(patern, RegexOptions.IgnoreCase);
+			Match match = regex.Match(path);
+			
+			if (!match.Success)
+			{
+				await Console.Error.WriteLineAsync($"The subtitle at {path} does not match the subtitle's regex.");
+				return;
+			}
+
+			string episodePath = match.Groups["Episode"].Value;
+			Episode episode = await libraryManager!.GetEpisode(x => x.Path.StartsWith(episodePath));
+
+			if (episode == null)
+			{
+				await Console.Error.WriteLineAsync($"No episode found for subtitle at: ${path}.");
+				return;
+			}
+
+			Track track = new(StreamType.Subtitle,
+				null,
+				match.Groups["Language"].Value,
+				match.Groups["Default"].Value.Length > 0,
+				match.Groups["Forced"].Value.Length > 0,
+				SubtitleExtensions[Path.GetExtension(path)],
+				true,
+				path)
+			{
+				Episode = episode
+			};
+			
+			await libraryManager.RegisterTrack(track);
+			Console.WriteLine($"Registering subtitle at: {path}.");
 		}
 
 		private async Task RegisterFile(string path, string relativePath, Library library, CancellationToken token)
@@ -144,7 +191,7 @@ namespace Kyoo.Controllers
 				await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
 
 				string patern = _config.GetValue<string>("regex");
-				Regex regex = new Regex(patern, RegexOptions.IgnoreCase);
+				Regex regex = new(patern, RegexOptions.IgnoreCase);
 				Match match = regex.Match(relativePath);
 
 				if (!match.Success)
@@ -154,7 +201,7 @@ namespace Kyoo.Controllers
 				}
 				
 				string showPath = Path.GetDirectoryName(path);
-				string collectionName = match.Groups["Collection"]?.Value;
+				string collectionName = match.Groups["Collection"].Value;
 				string showName = match.Groups["Show"].Value;
 				int seasonNumber = int.TryParse(match.Groups["Season"].Value, out int tmp) ? tmp : -1;
 				int episodeNumber = int.TryParse(match.Groups["Episode"].Value, out tmp) ? tmp : -1;
@@ -164,7 +211,7 @@ namespace Kyoo.Controllers
 				bool isMovie = seasonNumber == -1 && episodeNumber == -1 && absoluteNumber == -1;
 				Show show = await GetShow(libraryManager, showName, showPath, isMovie, library);
 				if (isMovie)
-					await libraryManager.RegisterEpisode(await GetMovie(show, path));
+					await libraryManager!.RegisterEpisode(await GetMovie(show, path));
 				else
 				{
 					Season season = await GetSeason(libraryManager, show, seasonNumber, library);
@@ -175,7 +222,7 @@ namespace Kyoo.Controllers
 						absoluteNumber,
 						path,
 						library);
-					await libraryManager.RegisterEpisode(episode);
+					await libraryManager!.RegisterEpisode(episode);
 				}
 
 				await libraryManager.AddShowLink(show, library, collection);
@@ -295,7 +342,7 @@ namespace Kyoo.Controllers
 
 		private async Task<Episode> GetMovie(Show show, string episodePath)
 		{
-			Episode episode = new Episode
+			Episode episode = new()
 			{
 				Title = show.Title,
 				Path = episodePath,
@@ -345,6 +392,17 @@ namespace Kyoo.Controllers
 		private static bool IsVideo(string filePath)
 		{
 			return VideoExtensions.Contains(Path.GetExtension(filePath));
+		}
+
+		private static readonly Dictionary<string, string> SubtitleExtensions = new()
+		{
+			{".ass", "ass"},
+			{".str", "subrip"}
+		};
+
+		private static bool IsSubtitle(string filePath)
+		{
+			return SubtitleExtensions.ContainsKey(Path.GetExtension(filePath));
 		}
 	}
 }

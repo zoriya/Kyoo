@@ -50,7 +50,7 @@ namespace Kyoo.Controllers.TranscoderLink
 				}
 			}
 			else
-				tracks = new Track[0];
+				tracks = Array.Empty<Track>();
 
 			if (ptr != IntPtr.Zero)
 				free(ptr); // free_streams is not necesarry since the Marshal free the unmanaged pointers.
