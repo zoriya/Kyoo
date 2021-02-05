@@ -12,17 +12,11 @@
         },
         "array-type": false,
         "arrow-return-shorthand": true,
-        "curly": true,
         "deprecation": {
             "severity": "warning"
         },
         "eofline": true,
         "import-spacing": true,
-        "indent": {
-            "options": [
-                "tabs"
-            ]
-        },
         "max-classes-per-file": false,
         "max-line-length": [
             true,
