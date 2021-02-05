@@ -21,12 +21,12 @@ namespace Kyoo.Controllers
 		{
 			try
 			{
-				using WebClient client = new WebClient();
+				using WebClient client = new();
 				await client.DownloadFileTaskAsync(new Uri(url), localPath);
 			}
 			catch (WebException exception)
 			{
-				await Console.Error.WriteLineAsync($"\t{what} could not be downloaded.\n\tError: {exception.Message}.");
+				await Console.Error.WriteLineAsync($"{what} could not be downloaded.\n\tError: {exception.Message}.");
 			}
 		}
 

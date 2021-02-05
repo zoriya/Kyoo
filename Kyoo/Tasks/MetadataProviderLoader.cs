@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Tasks
 {
-	public class MetadataLoader : ITask
+	public class MetadataProviderLoader : ITask
 	{
 		public string Slug => "reload-metdata";
 		public string Name => "Reload Metadata Providers";
