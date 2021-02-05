@@ -10,8 +10,9 @@ namespace Kyoo.Tasks
 			new CreateDatabase(),
 			new PluginLoader(),
 			new Crawler(),
-			new MetadataLoader(),
-			new ReScan()
+			new MetadataProviderLoader(),
+			new ReScan(),
+			new ExtractMetadata()
 		};
 	}
 }

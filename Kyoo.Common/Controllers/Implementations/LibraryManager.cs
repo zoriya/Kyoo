@@ -144,12 +144,22 @@ namespace Kyoo.Controllers
 		{
 			return ShowRepository.Get(slug);
 		}
+		
+		public Task<Season> GetSeason(string slug)
+		{
+			return SeasonRepository.Get(slug);
+		}
 
 		public Task<Season> GetSeason(string showSlug, int seasonNumber)
 		{
 			return SeasonRepository.Get(showSlug, seasonNumber);
 		}
 
+		public Task<Episode> GetEpisode(string slug)
+		{
+			return EpisodeRepository.Get(slug);
+		}
+		
 		public Task<Episode> GetEpisode(string showSlug, int seasonNumber, int episodeNumber)
 		{
 			return EpisodeRepository.Get(showSlug, seasonNumber, episodeNumber);
