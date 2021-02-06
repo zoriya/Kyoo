@@ -170,7 +170,7 @@ namespace Kyoo
 				app.UseHsts();
 			}
 
-			FileExtensionContentTypeProvider contentTypeProvider = new FileExtensionContentTypeProvider();
+			FileExtensionContentTypeProvider contentTypeProvider = new();
 			contentTypeProvider.Mappings[".data"] = "application/octet-stream";
 			app.UseStaticFiles(new StaticFileOptions {ContentTypeProvider = contentTypeProvider});
 			if (!env.IsDevelopment())
