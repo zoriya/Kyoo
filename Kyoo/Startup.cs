@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -172,7 +173,11 @@ namespace Kyoo
 
 			FileExtensionContentTypeProvider contentTypeProvider = new();
 			contentTypeProvider.Mappings[".data"] = "application/octet-stream";
-			app.UseStaticFiles(new StaticFileOptions {ContentTypeProvider = contentTypeProvider});
+			app.UseStaticFiles(new StaticFileOptions
+			{
+				ContentTypeProvider = contentTypeProvider,
+				FileProvider = new PhysicalFileProvider(Path.Join(AppDomain.CurrentDomain.BaseDirectory, "wwwroot"))
+			});
 			if (!env.IsDevelopment())
 				app.UseSpaStaticFiles();
 
