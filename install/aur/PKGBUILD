@@ -21,6 +21,8 @@ sha256sums=("SKIP" "SKIP" "SKIP" "SKIP")
 prepare() {
 	# cd "Kyoo-$pkgver"
 	cd "Kyoo"
+	# This is necessary since submodules paths are relative and PKGBUILD remote are the local directory.
+	git remote set-url origin https://github.com/AnonymusRaccoon/Kyoo
 	git submodule update --init --recursive
 }
 
