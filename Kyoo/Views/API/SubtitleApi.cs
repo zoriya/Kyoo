@@ -43,44 +43,6 @@ namespace Kyoo.Api
 			string mime = subtitle.Codec == "ass" ? "text/x-ssa" : "application/x-subrip";
 			return PhysicalFile(subtitle.Path, mime);
 		}
-
-		// [HttpGet("extract/{showSlug}-s{seasonNumber}e{episodeNumber}")]
-		// [Authorize(Policy="Admin")]
-		// public async Task<string> ExtractSubtitle(string showSlug, long seasonNumber, long episodeNumber)
-		// {
-		// 	Episode episode = _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
-		// 	episode.Tracks = null;
-		//
-		// 	Track[] tracks = await _transcoder.ExtractSubtitles(episode.Path);
-		// 	foreach (Track track in tracks)
-		// 	{
-		// 		track.EpisodeID = episode.ID;
-		// 		_libraryManager.Register(track);
-		// 	}
-		// 	await _libraryManager.SaveChanges();
-		// 	return "Done. " + tracks.Length + " track(s) extracted.";
-		// }
-		//
-		// [HttpGet("extract/{showSlug}")]
-		// [Authorize(Policy="Admin")]
-		// public async Task<string> ExtractSubtitle(string showSlug)
-		// {
-		// 	IEnumerable<Episode> episodes = _libraryManager.GetShow(showSlug).Episodes;
-		// 	foreach (Episode episode in episodes)
-		// 	{
-		// 		episode.Tracks = null;
-		//
-		// 		Track[] tracks = await _transcoder.ExtractSubtitles(episode.Path);
-		// 		foreach (Track track in tracks)
-		// 		{
-		// 			track.EpisodeID = episode.ID;
-		// 			_libraryManager.Register(track);
-		// 		}
-		// 		await _libraryManager.SaveChanges();
-		// 	}
-		//
-		// 	return "Done.";
-		// }
 	}
 
 
