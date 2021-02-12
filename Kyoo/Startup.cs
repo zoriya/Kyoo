@@ -34,7 +34,6 @@ namespace Kyoo
 			_loggerFactory = loggerFactory;
 		}
 
-		// This method gets called by the runtime. Use this method to add services to the container.
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddSpaStaticFiles(configuration =>
@@ -102,7 +101,7 @@ namespace Kyoo
 					o.DefaultScheme = IdentityConstants.ApplicationScheme;
 					o.DefaultSignInScheme = IdentityConstants.ExternalScheme;
 				})
-				.AddIdentityCookies(o => { });
+				.AddIdentityCookies(_ => { });
 			services.AddAuthentication()
 				.AddJwtBearer(options =>
 				{
@@ -158,8 +157,7 @@ namespace Kyoo
 			services.AddHostedService(provider => (TaskManager)provider.GetService<ITaskManager>());
 		}
 
-		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+		public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
 			if (env.IsDevelopment())
 			{
