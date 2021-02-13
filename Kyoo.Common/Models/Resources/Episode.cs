@@ -4,6 +4,7 @@ using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
 {
+	[ComposedSlug]
 	public class Episode : IResource, IOnMerge
 	{
 		public int ID { get; set; }
@@ -28,7 +29,7 @@ namespace Kyoo.Models
 		[JsonIgnore] public virtual IEnumerable<Track> Tracks { get; set; }
 
 		public string ShowTitle => Show.Title;
-		public string Slug => GetSlug(Show.Slug, SeasonNumber, EpisodeNumber);
+		public string Slug => Show != null ? GetSlug(Show.Slug, SeasonNumber, EpisodeNumber) : ID.ToString();
 		public string Thumb
 		{
 			get

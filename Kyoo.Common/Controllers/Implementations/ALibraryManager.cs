@@ -6,7 +6,7 @@ using Kyoo.Models;
 
 namespace Kyoo.Controllers
 {
-	public class LibraryManager : ILibraryManager
+	public abstract class ALibraryManager : ILibraryManager
 	{
 		public ILibraryRepository LibraryRepository { get; }
 		public ILibraryItemRepository LibraryItemRepository { get; }
@@ -20,7 +20,7 @@ namespace Kyoo.Controllers
 		public IPeopleRepository PeopleRepository { get; }
 		public IProviderRepository ProviderRepository { get; }
 		
-		public LibraryManager(ILibraryRepository libraryRepository, 
+		public ALibraryManager(ILibraryRepository libraryRepository, 
 			ILibraryItemRepository libraryItemRepository,
 			ICollectionRepository collectionRepository, 
 			IShowRepository showRepository, 
@@ -234,6 +234,10 @@ namespace Kyoo.Controllers
 		{
 			return PeopleRepository.Get(where);
 		}
+
+		public abstract Task Load<T, T2>(T obj, Expression<Func<T, T2>> member)
+			where T : class, IResource
+			where T2 : class;
 
 		public Task<ICollection<Library>> GetLibraries(Expression<Func<Library, bool>> where = null, 
 			Sort<Library> sort = default,

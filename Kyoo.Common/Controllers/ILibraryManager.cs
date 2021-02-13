@@ -60,6 +60,10 @@ namespace Kyoo.Controllers
 		Task<Genre> GetGenre(Expression<Func<Genre, bool>> where);
 		Task<Studio> GetStudio(Expression<Func<Studio, bool>> where);
 		Task<People> GetPerson(Expression<Func<People, bool>> where);
+
+		Task Load<T, T2>([NotNull] T obj, Expression<Func<T, T2>> member)
+			where T : class, IResource
+			where T2 : class;
 		
 		// Library Items relations
 		Task<ICollection<LibraryItem>> GetItemsFromLibrary(int id,

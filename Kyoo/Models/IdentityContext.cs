@@ -1,9 +1,10 @@
 using System.Collections.Generic;
+using System.Linq;
 using IdentityServer4.Models;
 
 namespace Kyoo
 {
-	public class IdentityContext
+	public static class IdentityContext
 	{
 		public static IEnumerable<IdentityResource> GetIdentityResources()
 		{
@@ -19,7 +20,7 @@ namespace Kyoo
 		{
 			return new List<Client>
 			{
-				new Client
+				new()
 				{
 					ClientId = "kyoo.webapp",
 					
@@ -38,6 +39,38 @@ namespace Kyoo
 				}
 			};
 		}
+
+		public static IEnumerable<ApiScope> GetScopes()
+		{
+			return new[]
+			{
+				new ApiScope
+				{
+					Name = "kyoo.read",
+					DisplayName = "Read only access to the API.",
+				},
+				new ApiScope
+				{
+					Name = "kyoo.write",
+					DisplayName = "Read and write access to the public API"
+				},
+				new ApiScope
+				{
+					Name = "kyoo.play",
+					DisplayName = "Allow playback of movies and episodes."
+				},
+				new ApiScope
+				{
+					Name = "kyoo.download",
+					DisplayName = "Allow downloading of episodes and movies from kyoo."
+				},
+				new ApiScope
+				{
+					Name = "kyoo.admin",
+					DisplayName = "Full access to the admin's API and the public API."
+				}
+			};
+		}
 		
 		public static IEnumerable<ApiResource> GetApis()
 		{
@@ -46,34 +79,7 @@ namespace Kyoo
 				new ApiResource
 				{
 					Name = "Kyoo",
-					Scopes =
-					{
-						new Scope
-						{
-							Name = "kyoo.read",
-							DisplayName = "Read only access to the API.",
-						},
-						new Scope
-						{
-							Name = "kyoo.write",
-							DisplayName = "Read and write access to the public API"
-						},
-						new Scope
-						{
-							Name = "kyoo.play",
-							DisplayName = "Allow playback of movies and episodes."
-						},
-						new Scope
-						{
-							Name = "kyoo.download",
-							DisplayName = "Allow downloading of episodes and movies from kyoo."
-						},
-						new Scope
-						{
-							Name = "kyoo.admin",
-							DisplayName = "Full access to the admin's API and the public API."
-						}
-					}
+					Scopes = GetScopes().Select(x => x.Name).ToArray()
 				}
 			};
 		}
