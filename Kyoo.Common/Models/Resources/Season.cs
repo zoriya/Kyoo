@@ -3,6 +3,7 @@ using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
 {
+	[ComposedSlug]
 	public class Season : IResource
 	{
 		[JsonIgnore] public int ID  { get; set; }
@@ -10,7 +11,7 @@ namespace Kyoo.Models
 
 		public int SeasonNumber { get; set; } = -1;
 
-		public string Slug => $"{Show.Slug}-s{SeasonNumber}";
+		public string Slug => Show != null ? $"{Show.Slug}-s{SeasonNumber}" : ID.ToString();
 		public string Title { get; set; }
 		public string Overview { get; set; }
 		public int? Year { get; set; }

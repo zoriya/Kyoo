@@ -153,6 +153,7 @@ namespace Kyoo.Controllers
 			if (edited == null)
 				throw new ArgumentNullException(nameof(edited));
 
+			bool lazyLoading = Database.ChangeTracker.LazyLoadingEnabled;
 			Database.ChangeTracker.LazyLoadingEnabled = false;
 			try
 			{
@@ -193,7 +194,7 @@ namespace Kyoo.Controllers
 			}
 			finally
 			{
-				Database.ChangeTracker.LazyLoadingEnabled = true;
+				Database.ChangeTracker.LazyLoadingEnabled = lazyLoading;
 			}
 		}
 
@@ -206,7 +207,7 @@ namespace Kyoo.Controllers
 		{
 			if (string.IsNullOrEmpty(resource.Slug))
 				throw new ArgumentException("Resource can't have null as a slug.");
-			if (int.TryParse(resource.Slug, out int _))
+			if (int.TryParse(resource.Slug, out int _) && typeof(T).GetCustomAttribute<ComposedSlug>() == null)
 			{
 				try
 				{
@@ -352,7 +353,7 @@ namespace Kyoo.Controllers
 				throw new ArgumentNullException(nameof(edited));
 			if (edited is TInternal intern)
 				return Edit(intern, resetOld).Cast<T>();
-			TInternal obj = new TInternal();
+			TInternal obj = new();
 			Utility.Assign(obj, edited);
 			return base.Edit(obj, resetOld).Cast<T>();
 		}
@@ -365,7 +366,7 @@ namespace Kyoo.Controllers
 				throw new ArgumentNullException(nameof(obj));
 			if (obj is TInternal intern)
 				return Delete(intern);
-			TInternal item = new TInternal();
+			TInternal item = new();
 			Utility.Assign(item, obj);
 			return Delete(item);
 		}

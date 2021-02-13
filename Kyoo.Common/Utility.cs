@@ -17,6 +17,13 @@ namespace Kyoo
 {
 	public static class Utility
 	{
+		public static bool IsPropertyExpression<T, T2>(Expression<Func<T, T2>> ex)
+		{
+			return ex == null ||
+			       ex.Body is MemberExpression ||
+			       ex.Body.NodeType == ExpressionType.Convert && ((UnaryExpression)ex.Body).Operand is MemberExpression;
+		}
+		
 		public static string ToSlug(string str)
 		{
 			if (str == null)

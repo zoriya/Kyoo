@@ -98,10 +98,9 @@ namespace Kyoo.Tasks
 				await _thumbnails!.Validate(episode, true);
 			if (subs)
 			{
-				// TODO this doesn't work. 
-				IEnumerable<Track> tracks = (await _transcoder!.ExtractInfos(episode.Path))
+				// TODO handle external subtites.
+				episode.Tracks =  (await _transcoder!.ExtractInfos(episode.Path))
 					.Where(x => x.Type != StreamType.Font);
-				episode.Tracks = tracks;
 				await _library.EditEpisode(episode, false);
 			}
 		}

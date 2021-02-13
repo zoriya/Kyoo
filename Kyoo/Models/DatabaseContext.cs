@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -10,6 +11,8 @@ using Npgsql;
 
 namespace Kyoo
 {
+	//TODO disable lazy loading a provide a LoadAsync method in the library manager.
+	
 	public class DatabaseContext : DbContext
 	{
 		public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) { }
@@ -41,10 +44,10 @@ namespace Kyoo
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<StreamType>();
 		}
 		
-		private readonly ValueComparer<IEnumerable<string>> _stringArrayComparer = 
-			new ValueComparer<IEnumerable<string>>(
-				(l1, l2) => l1.SequenceEqual(l2),
-				arr => arr.Aggregate(0, (i, s) => s.GetHashCode()));
+		private readonly ValueComparer<IEnumerable<string>> _stringArrayComparer = new(
+			(l1, l2) => l1.SequenceEqual(l2),
+			arr => arr.Aggregate(0, (i, s) => s.GetHashCode())
+		);
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
@@ -266,7 +269,7 @@ namespace Kyoo
 		}
 
 		public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, 
-			CancellationToken cancellationToken = new CancellationToken())
+			CancellationToken cancellationToken = new())
 		{
 			try
 			{
@@ -281,7 +284,7 @@ namespace Kyoo
 			}
 		}
 
-		public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
+		public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new())
 		{
 			try
 			{
@@ -297,7 +300,7 @@ namespace Kyoo
 		}
 		
 		public async Task<int> SaveChangesAsync(string duplicateMessage,
-			CancellationToken cancellationToken = new CancellationToken())
+			CancellationToken cancellationToken = new())
 		{
 			try
 			{
@@ -312,7 +315,7 @@ namespace Kyoo
 			}
 		}
 
-		public async Task<int> SaveIfNoDuplicates(CancellationToken cancellationToken = new CancellationToken())
+		public async Task<int> SaveIfNoDuplicates(CancellationToken cancellationToken = new())
 		{
 			try
 			{
@@ -324,13 +327,12 @@ namespace Kyoo
 			}
 		}
 
-		public static bool IsDuplicateException(DbUpdateException ex)
+		private static bool IsDuplicateException(Exception ex)
 		{
-			return ex.InnerException is PostgresException inner
-			       && inner.SqlState == PostgresErrorCodes.UniqueViolation;
+			return ex.InnerException is PostgresException {SqlState: PostgresErrorCodes.UniqueViolation};
 		}
 
-		public void DiscardChanges()
+		private void DiscardChanges()
 		{
 			foreach (EntityEntry entry in ChangeTracker.Entries().Where(x => x.State != EntityState.Unchanged
 			                                                                 && x.State != EntityState.Detached))

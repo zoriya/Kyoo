@@ -33,12 +33,8 @@ namespace Kyoo.Controllers
 			Key = ExpressionRewrite.Rewrite<Func<T, object>>(key);
 			Descendant = descendant;
 			
-			if (Key == null || 
-			    Key.Body is MemberExpression || 
-			    Key.Body.NodeType == ExpressionType.Convert && ((UnaryExpression)Key.Body).Operand is MemberExpression)
-				return;
-				
-			throw new ArgumentException("The given sort key is not valid.");
+			if (!Utility.IsPropertyExpression(Key))
+				throw new ArgumentException("The given sort key is not valid.");
 		}
 
 		public Sort(string sortBy)

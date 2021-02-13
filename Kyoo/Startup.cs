@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using IdentityServer4.Extensions;
 using IdentityServer4.Services;
 using Kyoo.Api;
 using Kyoo.Controllers;
@@ -47,8 +48,7 @@ namespace Kyoo
 
 			services.AddDbContext<DatabaseContext>(options =>
 			{
-				options.UseLazyLoadingProxies()
-					.UseNpgsql(_configuration.GetConnectionString("Database"));
+				options.UseNpgsql(_configuration.GetConnectionString("Database"));
 					// .EnableSensitiveDataLogging()
 					// .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()));
 			}, ServiceLifetime.Transient);
@@ -72,7 +72,6 @@ namespace Kyoo
 			services.AddIdentityServer(options =>
 				{
 					options.IssuerUri = publicUrl;
-					options.PublicOrigin = publicUrl;
 					options.UserInteraction.LoginUrl = publicUrl + "login";
 					options.UserInteraction.ErrorUrl = publicUrl + "error";
 					options.UserInteraction.LogoutUrl = publicUrl + "logout";
@@ -92,6 +91,7 @@ namespace Kyoo
 					options.EnableTokenCleanup = true;
 				})
 				.AddInMemoryIdentityResources(IdentityContext.GetIdentityResources())
+				.AddInMemoryApiScopes(IdentityContext.GetScopes())
 				.AddInMemoryApiResources(IdentityContext.GetApis())
 				.AddProfileService<AccountController>()
 				.AddSigninKeys(_configuration);
@@ -157,7 +157,7 @@ namespace Kyoo
 			services.AddHostedService(provider => (TaskManager)provider.GetService<ITaskManager>());
 		}
 
-		public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
 			if (env.IsDevelopment())
 			{
@@ -186,6 +186,11 @@ namespace Kyoo
 				MinimumSameSitePolicy = SameSiteMode.Strict
 			});
 			app.UseAuthentication();
+			app.Use((ctx, next) =>
+			{
+				ctx.SetIdentityServerOrigin(_configuration.GetValue<string>("public_url"));
+				return next();
+			});
 			app.UseIdentityServer();
 			app.UseAuthorization();
 
