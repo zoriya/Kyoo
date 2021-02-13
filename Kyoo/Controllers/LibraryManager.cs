@@ -2,15 +2,14 @@ using System;
 using System.Collections;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Kyoo.Models;
 
 namespace Kyoo.Controllers
 {
-	public class LibaryManager : ALibraryManager
+	public class LibraryManager : ALibraryManager
 	{
 		private readonly DatabaseContext _database;
 		
-		public LibaryManager(ILibraryRepository libraryRepository,
+		public LibraryManager(ILibraryRepository libraryRepository,
 			ILibraryItemRepository libraryItemRepository,
 			ICollectionRepository collectionRepository,
 			IShowRepository showRepository,
