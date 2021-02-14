@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Kyoo.Controllers
 {
@@ -42,9 +44,14 @@ namespace Kyoo.Controllers
 				throw new ArgumentNullException(nameof(obj));
 			if (!Utility.IsPropertyExpression(member) || member == null)
 				throw new ArgumentException($"{nameof(member)} is not a property.");
-			if (typeof(IEnumerable).IsAssignableFrom(typeof(T2)))
-				return _database.Entry(obj).Collection(member).LoadAsync();
-			return _database.Entry(obj).Reference(member).LoadAsync();
+			
+			EntityEntry<T> entry = _database.Entry(obj);
+			
+			if (!typeof(IEnumerable).IsAssignableFrom(typeof(T2)))
+				return entry.Reference(member).LoadAsync();
+
+			Type collectionType = Utility.GetGenericDefinition(typeof(T2), typeof(IEnumerable<>));
+			return Utility.RunGenericMethod<CollectionEntry>(entry, "Collection", collectionType, member).LoadAsync();
 		}
 	}
 }
