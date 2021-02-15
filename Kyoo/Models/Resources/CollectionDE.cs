@@ -8,18 +8,18 @@ namespace Kyoo.Models
 	{
 		[JsonIgnore] [NotMergable] public virtual ICollection<CollectionLink> Links { get; set; }
 		[ExpressionRewrite(nameof(Links), nameof(CollectionLink.Child))]
-		public override IEnumerable<Show> Shows
+		public override ICollection<Show> Shows
 		{
-			get => Links?.Select(x => x.Child);
+			get => Links?.Select(x => x.Child).ToList();
 			set => Links = value?.Select(x => new CollectionLink(this, x)).ToList();
 		}
 		
 		[JsonIgnore] [NotMergable] public virtual ICollection<LibraryLink> LibraryLinks { get; set; }
 		
 		[ExpressionRewrite(nameof(LibraryLinks), nameof(GenreLink.Child))]
-		public override IEnumerable<Library> Libraries
+		public override ICollection<Library> Libraries
 		{
-			get => LibraryLinks?.Select(x => x.Library);
+			get => LibraryLinks?.Select(x => x.Library).ToList();
 			set => LibraryLinks = value?.Select(x => new LibraryLink(x, this)).ToList();
 		}
 		

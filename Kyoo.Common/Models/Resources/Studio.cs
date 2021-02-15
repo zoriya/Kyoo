@@ -9,7 +9,7 @@ namespace Kyoo.Models
 		public string Slug { get; set; }
 		public string Name { get; set; }
 		
-		[JsonIgnore] public virtual IEnumerable<Show> Shows { get; set; }
+		[JsonIgnore] public virtual ICollection<Show> Shows { get; set; }
 
 		public Studio() { }
 

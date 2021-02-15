@@ -29,7 +29,7 @@ namespace Kyoo
 				_ => null
 			};
 
-			if (debug == null)
+			if (debug == null && !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ENVIRONEMENT")))
 				Console.WriteLine($"Invalid ENVIRONEMENT variable. Supported values are \"debug\" and \"prod\". Ignoring...");
 
 			Console.WriteLine($"Running as {Environment.UserName}.");

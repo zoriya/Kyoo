@@ -240,10 +240,9 @@ namespace Kyoo.Controllers
 		Task<Genre> EditGenre(Genre genre, bool resetOld);
 		Task<Studio> EditStudio(Studio studio, bool resetOld);
 		Task<People> EditPeople(People people, bool resetOld);
-
 		
 		// Delete values
-		Task DelteLibrary(Library library);
+		Task DeleteLibrary(Library library);
 		Task DeleteCollection(Collection collection);
 		Task DeleteShow(Show show);
 		Task DeleteSeason(Season season);
@@ -254,7 +253,7 @@ namespace Kyoo.Controllers
 		Task DeletePeople(People people);
 		
 		//Delete by slug
-		Task DelteLibrary(string slug);
+		Task DeleteLibrary(string slug);
 		Task DeleteCollection(string slug);
 		Task DeleteShow(string slug);
 		Task DeleteSeason(string slug);
@@ -265,7 +264,7 @@ namespace Kyoo.Controllers
 		Task DeletePeople(string slug);
 		
 		//Delete by id
-		Task DelteLibrary(int id);
+		Task DeleteLibrary(int id);
 		Task DeleteCollection(int id);
 		Task DeleteShow(int id);
 		Task DeleteSeason(int id);

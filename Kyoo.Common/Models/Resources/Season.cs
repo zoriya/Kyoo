@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
@@ -17,10 +18,10 @@ namespace Kyoo.Models
 		public int? Year { get; set; }
 
 		[JsonIgnore] public string Poster { get; set; }
-		[EditableRelation] public virtual IEnumerable<MetadataID> ExternalIDs { get; set; }
+		[EditableRelation] public virtual ICollection<MetadataID> ExternalIDs { get; set; }
 
 		[JsonIgnore] public virtual Show Show { get; set; }
-		[JsonIgnore] public virtual IEnumerable<Episode> Episodes { get; set; }
+		[JsonIgnore] public virtual ICollection<Episode> Episodes { get; set; }
 
 		public Season() { }
 
@@ -38,7 +39,7 @@ namespace Kyoo.Models
 			Overview = overview;
 			Year = year;
 			Poster = poster;
-			ExternalIDs = externalIDs;
+			ExternalIDs = externalIDs?.ToArray();
 		}
 	}
 }

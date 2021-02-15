@@ -9,7 +9,7 @@ namespace Kyoo.Models
 		public int ID { get; set; }
 		public string Slug { get; set; }
 		public string Title { get; set; }
-		[EditableRelation] public IEnumerable<string> Aliases { get; set; }
+		[EditableRelation] public ICollection<string> Aliases { get; set; }
 		[JsonIgnore] public string Path { get; set; }
 		public string Overview { get; set; }
 		public Status? Status { get; set; }
@@ -24,17 +24,17 @@ namespace Kyoo.Models
 
 		public bool IsMovie { get; set; }
 
-		[EditableRelation] public virtual IEnumerable<MetadataID> ExternalIDs { get; set; }
+		[EditableRelation] public virtual ICollection<MetadataID> ExternalIDs { get; set; }
 		
 		
 		[JsonIgnore] public int? StudioID { get; set; }
 		[EditableRelation] [JsonReadOnly] public virtual Studio Studio { get; set; }
-		[EditableRelation] [JsonReadOnly] public virtual IEnumerable<Genre> Genres { get; set; }
-		[EditableRelation] [JsonReadOnly] public virtual IEnumerable<PeopleRole> People { get; set; }
-		[JsonIgnore] public virtual IEnumerable<Season> Seasons { get; set; }
-		[JsonIgnore] public virtual IEnumerable<Episode> Episodes { get; set; }
-		[JsonIgnore] public virtual IEnumerable<Library> Libraries { get; set; }
-		[JsonIgnore] public virtual IEnumerable<Collection> Collections { get; set; }
+		[EditableRelation] [JsonReadOnly] public virtual ICollection<Genre> Genres { get; set; }
+		[EditableRelation] [JsonReadOnly] public virtual ICollection<PeopleRole> People { get; set; }
+		[JsonIgnore] public virtual ICollection<Season> Seasons { get; set; }
+		[JsonIgnore] public virtual ICollection<Episode> Episodes { get; set; }
+		[JsonIgnore] public virtual ICollection<Library> Libraries { get; set; }
+		[JsonIgnore] public virtual ICollection<Collection> Collections { get; set; }
 
 		public Show() { }
 
@@ -51,15 +51,15 @@ namespace Kyoo.Models
 		{
 			Slug = slug;
 			Title = title;
-			Aliases = aliases;
+			Aliases = aliases?.ToArray();
 			Path = path;
 			Overview = overview;
 			TrailerUrl = trailerUrl;
-			Genres = genres;
+			Genres = genres?.ToArray();
 			Status = status;
 			StartYear = startYear;
 			EndYear = endYear;
-			ExternalIDs = externalIDs;
+			ExternalIDs = externalIDs?.ToArray();
 		}
 
 		public Show(string slug,
@@ -78,7 +78,7 @@ namespace Kyoo.Models
 		{
 			Slug = slug;
 			Title = title;
-			Aliases = aliases;
+			Aliases = aliases?.ToArray();
 			Path = path;
 			Overview = overview;
 			TrailerUrl = trailerUrl;
@@ -88,7 +88,7 @@ namespace Kyoo.Models
 			Poster = poster;
 			Logo = logo;
 			Backdrop = backdrop;
-			ExternalIDs = externalIDs;
+			ExternalIDs = externalIDs?.ToArray();
 		}
 
 		public string GetID(string provider)
