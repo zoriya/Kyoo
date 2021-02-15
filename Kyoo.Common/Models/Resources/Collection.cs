@@ -10,8 +10,8 @@ namespace Kyoo.Models
 		public string Name { get; set; }
 		public string Poster { get; set; }
 		public string Overview { get; set; }
-		[JsonIgnore] public virtual IEnumerable<Show> Shows { get; set; }
-		[JsonIgnore] public virtual IEnumerable<Library> Libraries { get; set; }
+		[JsonIgnore] public virtual ICollection<Show> Shows { get; set; }
+		[JsonIgnore] public virtual ICollection<Library> Libraries { get; set; }
 
 		public Collection() { }
 

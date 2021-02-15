@@ -6,7 +6,7 @@ using Kyoo.Models;
 
 namespace Kyoo.Controllers
 {
-	public abstract class ALibraryManager : ILibraryManager
+	public class LibraryManager : ILibraryManager
 	{
 		public ILibraryRepository LibraryRepository { get; }
 		public ILibraryItemRepository LibraryItemRepository { get; }
@@ -19,8 +19,8 @@ namespace Kyoo.Controllers
 		public IStudioRepository StudioRepository { get; }
 		public IPeopleRepository PeopleRepository { get; }
 		public IProviderRepository ProviderRepository { get; }
-		
-		public ALibraryManager(ILibraryRepository libraryRepository, 
+
+		protected LibraryManager(ILibraryRepository libraryRepository, 
 			ILibraryItemRepository libraryItemRepository,
 			ICollectionRepository collectionRepository, 
 			IShowRepository showRepository, 
@@ -235,9 +235,12 @@ namespace Kyoo.Controllers
 			return PeopleRepository.Get(where);
 		}
 
-		public abstract Task Load<T, T2>(T obj, Expression<Func<T, T2>> member)
+		public virtual Task Load<T, T2>(T obj, Expression<Func<T, T2>> member)
 			where T : class, IResource
-			where T2 : class;
+			where T2 : class
+		{
+			return Task.CompletedTask;
+		}
 
 		public Task<ICollection<Library>> GetLibraries(Expression<Func<Library, bool>> where = null, 
 			Sort<Library> sort = default,
@@ -544,7 +547,7 @@ namespace Kyoo.Controllers
 			return PeopleRepository.Edit(people, resetOld);
 		}
 
-		public Task DelteLibrary(Library library)
+		public Task DeleteLibrary(Library library)
 		{
 			return LibraryRepository.Delete(library);
 		}
@@ -589,7 +592,7 @@ namespace Kyoo.Controllers
 			return PeopleRepository.Delete(people);
 		}
 		
-		public Task DelteLibrary(string library)
+		public Task DeleteLibrary(string library)
 		{
 			return LibraryRepository.Delete(library);
 		}
@@ -634,7 +637,7 @@ namespace Kyoo.Controllers
 			return PeopleRepository.Delete(people);
 		}
 		
-		public Task DelteLibrary(int library)
+		public Task DeleteLibrary(int library)
 		{
 			return LibraryRepository.Delete(library);
 		}

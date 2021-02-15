@@ -99,8 +99,8 @@ namespace Kyoo.Tasks
 			if (subs)
 			{
 				// TODO handle external subtites.
-				episode.Tracks =  (await _transcoder!.ExtractInfos(episode.Path))
-					.Where(x => x.Type != StreamType.Font);
+				episode.Tracks = (await _transcoder!.ExtractInfos(episode.Path))
+					.Where(x => x.Type != StreamType.Font).ToArray();
 				await _library.EditEpisode(episode, false);
 			}
 		}

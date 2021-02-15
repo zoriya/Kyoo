@@ -3,15 +3,16 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Kyoo.Controllers
 {
-	public class LibraryManager : ALibraryManager
+	public class TLibraryManager : LibraryManager
 	{
-		private readonly DatabaseContext _database;
+		private readonly DbContext _database;
 		
-		public LibraryManager(ILibraryRepository libraryRepository,
+		public TLibraryManager(ILibraryRepository libraryRepository,
 			ILibraryItemRepository libraryItemRepository,
 			ICollectionRepository collectionRepository,
 			IShowRepository showRepository,
@@ -22,7 +23,7 @@ namespace Kyoo.Controllers
 			IStudioRepository studioRepository,
 			IProviderRepository providerRepository,
 			IPeopleRepository peopleRepository,
-			DatabaseContext database)
+			DbContext database)
 			: base(libraryRepository,
 				libraryItemRepository,
 				collectionRepository,

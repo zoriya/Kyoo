@@ -147,7 +147,7 @@ namespace Kyoo
 			services.AddScoped<IGenreRepository, GenreRepository>();
 			services.AddScoped<IProviderRepository, ProviderRepository>();
 			
-			services.AddScoped<ILibraryManager, LibraryManager>();
+			// services.AddScoped<ILibraryManager, LibraryManager>();
 			services.AddSingleton<ITranscoder, Transcoder>();
 			services.AddSingleton<IThumbnailsManager, ThumbnailsManager>();
 			services.AddSingleton<IProviderManager, ProviderManager>();

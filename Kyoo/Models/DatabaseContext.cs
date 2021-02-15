@@ -44,7 +44,7 @@ namespace Kyoo
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<StreamType>();
 		}
 		
-		private readonly ValueComparer<IEnumerable<string>> _stringArrayComparer = new(
+		private readonly ValueComparer<ICollection<string>> _stringArrayComparer = new(
 			(l1, l2) => l1.SequenceEqual(l2),
 			arr => arr.Aggregate(0, (i, s) => s.GetHashCode())
 		);

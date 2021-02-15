@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
@@ -9,9 +10,9 @@ namespace Kyoo.Models
 		public string Slug { get; set; }
 		public string Name { get; set; }
 		public string Poster { get; set; }
-		[EditableRelation] public virtual IEnumerable<MetadataID> ExternalIDs { get; set; }
+		[EditableRelation] public virtual ICollection<MetadataID> ExternalIDs { get; set; }
 		
-		[EditableRelation] [JsonReadOnly] public virtual IEnumerable<PeopleRole> Roles { get; set; }
+		[EditableRelation] [JsonReadOnly] public virtual ICollection<PeopleRole> Roles { get; set; }
 		
 		public People() {}
 
@@ -20,7 +21,7 @@ namespace Kyoo.Models
 			Slug = slug;
 			Name = name;
 			Poster = poster;
-			ExternalIDs = externalIDs;
+			ExternalIDs = externalIDs?.ToArray();
 		}
 	}
 }

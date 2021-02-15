@@ -40,7 +40,7 @@ namespace Kyoo.Controllers
 		}
 
 		private async Task<List<T>> GetMetadata<T>(
-			Func<IMetadataProvider, Task<IEnumerable<T>>> providerCall,
+			Func<IMetadataProvider, Task<ICollection<T>>> providerCall,
 			Library library,
 			string what)
 		{
@@ -146,7 +146,7 @@ namespace Kyoo.Controllers
 			return episode;
 		}
 
-		public async Task<IEnumerable<PeopleRole>> GetPeople(Show show, Library library)
+		public async Task<ICollection<PeopleRole>> GetPeople(Show show, Library library)
 		{
 			List<PeopleRole> people = await GetMetadata(
 				provider => provider.GetPeople(show),

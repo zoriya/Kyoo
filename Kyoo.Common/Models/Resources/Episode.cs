@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
@@ -24,9 +25,9 @@ namespace Kyoo.Models
 		public int Runtime { get; set; } //This runtime variable should be in minutes
 
 		[JsonIgnore] public string Poster { get; set; }
-		[EditableRelation] public virtual IEnumerable<MetadataID> ExternalIDs { get; set; }
+		[EditableRelation] public virtual ICollection<MetadataID> ExternalIDs { get; set; }
 
-		[JsonIgnore] public virtual IEnumerable<Track> Tracks { get; set; }
+		[JsonIgnore] public virtual ICollection<Track> Tracks { get; set; }
 
 		public string ShowTitle => Show.Title;
 		public string Slug => Show != null ? GetSlug(Show.Slug, SeasonNumber, EpisodeNumber) : ID.ToString();
@@ -61,7 +62,7 @@ namespace Kyoo.Models
 			ReleaseDate = releaseDate;
 			Runtime = runtime;
 			Poster = poster;
-			ExternalIDs = externalIDs;
+			ExternalIDs = externalIDs?.ToArray();
 		}
 
 		public Episode(int showID, 
@@ -76,19 +77,11 @@ namespace Kyoo.Models
 			int runtime, 
 			string poster,
 			IEnumerable<MetadataID> externalIDs)
+			: this(seasonNumber, episodeNumber, absoluteNumber, title, overview, releaseDate, runtime, poster, externalIDs)
 		{
 			ShowID = showID;
 			SeasonID = seasonID;
-			SeasonNumber = seasonNumber;
-			EpisodeNumber = episodeNumber;
-			AbsoluteNumber = absoluteNumber;
 			Path = path;
-			Title = title;
-			Overview = overview;
-			ReleaseDate = releaseDate;
-			Runtime = runtime;
-			Poster = poster;
-			ExternalIDs = externalIDs;
 		}
 
 		public static string GetSlug(string showSlug, int seasonNumber, int episodeNumber)

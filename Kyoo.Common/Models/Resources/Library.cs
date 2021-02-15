@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
@@ -8,12 +9,12 @@ namespace Kyoo.Models
 		[JsonIgnore] public int ID { get; set; }
 		public string Slug { get; set; }
 		public string Name { get; set; }
-		public IEnumerable<string> Paths { get; set; }
+		public ICollection<string> Paths { get; set; }
 
-		[EditableRelation] public virtual IEnumerable<ProviderID> Providers { get; set; }
+		[EditableRelation] public virtual ICollection<ProviderID> Providers { get; set; }
 
-		[JsonIgnore] public virtual IEnumerable<Show> Shows { get; set; }
-		[JsonIgnore] public virtual IEnumerable<Collection> Collections { get; set; }
+		[JsonIgnore] public virtual ICollection<Show> Shows { get; set; }
+		[JsonIgnore] public virtual ICollection<Collection> Collections { get; set; }
 
 		public Library()  { }
 		
@@ -21,8 +22,8 @@ namespace Kyoo.Models
 		{
 			Slug = slug;
 			Name = name;
-			Paths = paths;
-			Providers = providers;
+			Paths = paths?.ToArray();
+			Providers = providers?.ToArray();
 		}
 	}
 }

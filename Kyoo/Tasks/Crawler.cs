@@ -75,9 +75,8 @@ namespace Kyoo.Controllers
 			ICollection<Library> libraries = argument == null 
 				? await libraryManager.GetLibraries()
 				: new [] { await libraryManager.GetLibrary(argument)};
-			// TODO replace this grotesque way to load the providers.
 			foreach (Library library in libraries)
-				library.Providers = library.Providers;
+				await libraryManager.Load(library, x => x.Providers);
 			
 			foreach (Library library in libraries)
 				await Scan(library, episodes, tracks, cancellationToken);
@@ -353,7 +352,7 @@ namespace Kyoo.Controllers
 			return episode;
 		}
 
-		private async Task<IEnumerable<Track>> GetTracks(Episode episode)
+		private async Task<ICollection<Track>> GetTracks(Episode episode)
 		{
 			episode.Tracks = (await _transcoder.ExtractInfos(episode.Path))
 				.Where(x => x.Type != StreamType.Font)

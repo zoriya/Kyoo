@@ -8,25 +8,25 @@ namespace Kyoo.Models
 	{
 		[EditableRelation] [JsonReadOnly] [NotMergable] public virtual ICollection<GenreLink> GenreLinks { get; set; }
 		[ExpressionRewrite(nameof(GenreLinks), nameof(GenreLink.Child))]
-		public override IEnumerable<Genre> Genres
+		public override ICollection<Genre> Genres
 		{
-			get => GenreLinks?.Select(x => x.Child);
+			get => GenreLinks?.Select(x => x.Child).ToList();
 			set => GenreLinks = value?.Select(x => new GenreLink(this, x)).ToList();
 		}
 		
 		[JsonReadOnly] [NotMergable] public virtual ICollection<LibraryLink> LibraryLinks { get; set; }
 		[ExpressionRewrite(nameof(LibraryLinks), nameof(LibraryLink.Library))]
-		public override IEnumerable<Library> Libraries
+		public override ICollection<Library> Libraries
 		{
-			get => LibraryLinks?.Select(x => x.Library);
+			get => LibraryLinks?.Select(x => x.Library).ToList();
 			set => LibraryLinks = value?.Select(x => new LibraryLink(x, this)).ToList();
 		}
 		
 		[JsonReadOnly] [NotMergable] public virtual ICollection<CollectionLink> CollectionLinks { get; set; }
 		[ExpressionRewrite(nameof(CollectionLinks), nameof(CollectionLink.Parent))]
-		public override IEnumerable<Collection> Collections
+		public override ICollection<Collection> Collections
 		{
-			get => CollectionLinks?.Select(x => x.Parent);
+			get => CollectionLinks?.Select(x => x.Parent).ToList();
 			set => CollectionLinks = value?.Select(x => new CollectionLink(x, this)).ToList();
 		}
 

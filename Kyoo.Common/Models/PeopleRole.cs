@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using Kyoo.Models.Attributes;
 
@@ -33,7 +34,7 @@ namespace Kyoo.Models
 		}
 		
 		[ExpressionRewrite(nameof(People) + "."+ nameof(Models.People.ExternalIDs))]
-		public IEnumerable<MetadataID> ExternalIDs
+		public ICollection<MetadataID> ExternalIDs
 		{
 			get => People.ExternalIDs;
 			set => People.ExternalIDs = value;
@@ -75,7 +76,7 @@ namespace Kyoo.Models
 
 		public string Slug { get; set; }
 		public string Title { get; set; }
-		public IEnumerable<string> Aliases { get; set; }
+		public ICollection<string> Aliases { get; set; }
 		[JsonIgnore] public string Path { get; set; }
 		public string Overview { get; set; }
 		public Status? Status { get; set; }
@@ -96,7 +97,7 @@ namespace Kyoo.Models
 			Type = x.Type;
 			Slug = x.Show.Slug;
 			Title = x.Show.Title;
-			Aliases = x.Show.Aliases;
+			Aliases = x.Show.Aliases?.ToArray();
 			Path = x.Show.Path;
 			Overview = x.Show.Overview;
 			Status = x.Show.Status;
@@ -116,7 +117,7 @@ namespace Kyoo.Models
 			Type = x.Type,
 			Slug = x.Show.Slug,
 			Title = x.Show.Title,
-			Aliases = x.Show.Aliases,
+			Aliases = x.Show.Aliases != null ? x.Show.Aliases.ToArray() : null,
 			Path = x.Show.Path,
 			Overview = x.Show.Overview,
 			Status = x.Show.Status,
