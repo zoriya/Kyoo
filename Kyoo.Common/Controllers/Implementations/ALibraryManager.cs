@@ -6,7 +6,7 @@ using Kyoo.Models;
 
 namespace Kyoo.Controllers
 {
-	public class LibraryManager : ILibraryManager
+	public class ALibraryManager : ILibraryManager
 	{
 		public ILibraryRepository LibraryRepository { get; }
 		public ILibraryItemRepository LibraryItemRepository { get; }
@@ -20,7 +20,7 @@ namespace Kyoo.Controllers
 		public IPeopleRepository PeopleRepository { get; }
 		public IProviderRepository ProviderRepository { get; }
 
-		protected LibraryManager(ILibraryRepository libraryRepository, 
+		protected ALibraryManager(ILibraryRepository libraryRepository, 
 			ILibraryItemRepository libraryItemRepository,
 			ICollectionRepository collectionRepository, 
 			IShowRepository showRepository, 
