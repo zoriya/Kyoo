@@ -11,6 +11,7 @@ using Microsoft.Extensions.Options;
 
 namespace Kyoo
 {
+	// The configuration's database is named ConfigurationDbContext.
 	public class IdentityDatabase : IdentityDbContext<User>, IPersistedGrantDbContext
 	{
 		private readonly IOptions<OperationalStoreOptions> _operationalStoreOptions;

@@ -9,7 +9,7 @@ namespace Kyoo.Models
 		[JsonIgnore] public int ID { get; set; }
 		public string Slug { get; set; }
 		public string Name { get; set; }
-		public ICollection<string> Paths { get; set; }
+		public string[] Paths { get; set; }
 
 		[EditableRelation] public virtual ICollection<ProviderID> Providers { get; set; }
 

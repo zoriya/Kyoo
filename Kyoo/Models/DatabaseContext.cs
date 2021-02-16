@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,11 +42,6 @@ namespace Kyoo
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<ItemType>();
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<StreamType>();
 		}
-		
-		private readonly ValueComparer<ICollection<string>> _stringArrayComparer = new(
-			(l1, l2) => l1.SequenceEqual(l2),
-			arr => arr.Aggregate(0, (i, s) => s.GetHashCode())
-		);
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
@@ -61,16 +55,14 @@ namespace Kyoo
 			modelBuilder.Ignore<Collection>();
 			modelBuilder.Ignore<Show>();
 			modelBuilder.Ignore<Genre>();
-				
+
 			modelBuilder.Entity<LibraryDE>()
 				.Property(x => x.Paths)
-				.HasColumnType("text[]")
-				.Metadata.SetValueComparer(_stringArrayComparer);
+				.HasColumnType("text[]");
 
 			modelBuilder.Entity<ShowDE>()
 				.Property(x => x.Aliases)
-				.HasColumnType("text[]")
-				.Metadata.SetValueComparer(_stringArrayComparer);
+				.HasColumnType("text[]");
 
 			modelBuilder.Entity<Track>()
 				.Property(t => t.IsDefault)
