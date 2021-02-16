@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Kyoo.Controllers
 {
-	public class TLibraryManager : LibraryManager
+	public class LibraryManager : ALibraryManager
 	{
 		private readonly DbContext _database;
 		
-		public TLibraryManager(ILibraryRepository libraryRepository,
+		public LibraryManager(ILibraryRepository libraryRepository,
 			ILibraryItemRepository libraryItemRepository,
 			ICollectionRepository collectionRepository,
 			IShowRepository showRepository,
