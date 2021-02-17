@@ -238,6 +238,8 @@ namespace Kyoo
 				action();
 				yield break;
 			}
+
+			yield return enumerator.Current;
 			while (enumerator.MoveNext())
 				yield return enumerator.Current;
 		}
@@ -254,7 +256,6 @@ namespace Kyoo
 				.Where(x =>
 				{
 					int i = 0;
-					// TODO this thing does not work.
 					return x.GetGenericArguments().All(y => y.IsAssignableFrom(generics[i++]));
 				})
 				.IfEmpty(() => throw new NullReferenceException($"No method {name} match the generics specified."))
