@@ -51,6 +51,8 @@ namespace Kyoo.Controllers
 			if (!typeof(IEnumerable).IsAssignableFrom(typeof(T2)))
 				return entry.Reference(member).LoadAsync();
 
+			// TODO This is totally the wrong thing. We should run entry.Collection<T>(collectionMember).LoadAsync()
+			// TODO where collectionMember would be member with T2 replaced by it's inner type (IEnumerable<T3>)
 			Type collectionType = Utility.GetGenericDefinition(typeof(T2), typeof(IEnumerable<>));
 			return Utility.RunGenericMethod<CollectionEntry>(entry, "Collection", collectionType, member).LoadAsync();
 		}
