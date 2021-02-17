@@ -228,6 +228,49 @@ namespace Kyoo
 				: type.GetInheritanceTree();
 			return types.FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == genericType);
 		}
+
+		public static IEnumerable<T> IfEmpty<T>(this IEnumerable<T> self, Action action)
+		{
+			using IEnumerator<T> enumerator = self.GetEnumerator();
+
+			if (!enumerator.MoveNext())
+			{
+				action();
+				yield break;
+			}
+			while (enumerator.MoveNext())
+				yield return enumerator.Current;
+		}
+
+		private static MethodInfo GetMethod(Type type, BindingFlags flag, string name, Type[] generics, object[] args)
+		{
+			MethodInfo[] methods = type.GetMethods(flag | BindingFlags.Public | BindingFlags.NonPublic)
+				.Where(x => x.Name == name)
+				.Where(x => x.GetGenericArguments().Length == generics.Length)
+				.Where(x => x.GetParameters().Length == args.Length)
+				.IfEmpty(() => throw new NullReferenceException($"A method named {name} with " +
+				                                                $"{args.Length} arguments and {generics.Length} generic " +
+				                                                $"types could not be found on {type.Name}."))
+				.Where(x =>
+				{
+					int i = 0;
+					// TODO this thing does not work.
+					return x.GetGenericArguments().All(y => y.IsAssignableFrom(generics[i++]));
+				})
+				.IfEmpty(() => throw new NullReferenceException($"No method {name} match the generics specified."))
+				.Where(x =>
+				{
+					int i = 0;
+					return x.GetParameters().All(y => y.ParameterType == args[i++].GetType());
+				})
+				.IfEmpty(() => throw new NullReferenceException($"No method {name} match the parameters's types."))
+				.Take(2)
+				.ToArray();
+
+			if (methods.Length == 1)
+				return methods[0];
+			throw new NullReferenceException($"Multiple methods named {name} match the generics and parameters constraints.");
+		}
 		
 		public static T RunGenericMethod<T>(
 			[NotNull] Type owner, 
@@ -252,29 +295,33 @@ namespace Kyoo
 				throw new ArgumentNullException(nameof(types));
 			if (types.Length < 1)
 				throw new ArgumentException($"The {nameof(types)} array is empty. At least one type is needed.");
-			MethodInfo method = owner.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
-				.SingleOrDefault(x => x.Name == methodName && x.GetParameters().Length == args.Length);
-			if (method == null)
-				throw new NullReferenceException($"A method named {methodName} with {args.Length} arguments could not be found on {owner.FullName}");
+			MethodInfo method = GetMethod(owner, BindingFlags.Static, methodName, types, args);
 			return (T)method.MakeGenericMethod(types).Invoke(null, args?.ToArray());
 		}
-		
+
+		public static T RunGenericMethod<T>(
+			[NotNull] object instance,
+			[NotNull] string methodName,
+			[NotNull] Type type,
+			params object[] args)
+		{
+			return RunGenericMethod<T>(instance, methodName, new[] {type}, args);
+		}
+
 		public static T RunGenericMethod<T>(
 			[NotNull] object instance, 
 			[NotNull] string methodName,
-			[NotNull] Type type,
+			[NotNull] Type[] types,
 			params object[] args)
 		{
 			if (instance == null)
 				throw new ArgumentNullException(nameof(instance));
 			if (methodName == null)
 				throw new ArgumentNullException(nameof(methodName));
-			if (type == null)
-				throw new ArgumentNullException(nameof(type));
-			MethodInfo method = instance.GetType().GetMethod(methodName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-			if (method == null)
-				throw new NullReferenceException($"A method named {methodName} could not be found on {instance.GetType().FullName}");
-			return (T)method.MakeGenericMethod(type).Invoke(instance, args?.ToArray());
+			if (types == null || types.Length == 0)
+				throw new ArgumentNullException(nameof(types));
+			MethodInfo method = GetMethod(instance.GetType(), BindingFlags.Instance, methodName, types, args);
+			return (T)method.MakeGenericMethod(types).Invoke(instance, args?.ToArray());
 		}
 
 		[NotNull]
