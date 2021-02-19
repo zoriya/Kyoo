@@ -239,9 +239,17 @@ namespace Kyoo.Controllers
 			where T : class, IResource
 			where T2 : class
 		{
-			return Task.CompletedTask;
+			// TODO figure out why setting this method as abstract prevent the app from loading this assembly.
+			throw new NotImplementedException();
 		}
 
+		public virtual Task Load<T, T2>(T obj, Expression<Func<T, IEnumerable<T2>>> member)
+			where T : class, IResource
+			where T2 : class
+		{
+			throw new NotImplementedException();
+		}
+		
 		public Task<ICollection<Library>> GetLibraries(Expression<Func<Library, bool>> where = null, 
 			Sort<Library> sort = default,
 			Pagination page = default)

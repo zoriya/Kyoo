@@ -65,6 +65,10 @@ namespace Kyoo.Controllers
 			where T : class, IResource
 			where T2 : class;
 		
+		Task Load<T, T2>([NotNull] T obj, Expression<Func<T, IEnumerable<T2>>> member)
+			where T : class, IResource
+			where T2 : class;
+		
 		// Library Items relations
 		Task<ICollection<LibraryItem>> GetItemsFromLibrary(int id,
 			Expression<Func<LibraryItem, bool>> where = null,
