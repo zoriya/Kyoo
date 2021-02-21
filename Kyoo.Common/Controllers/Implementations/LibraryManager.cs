@@ -21,7 +21,7 @@ namespace Kyoo.Controllers
 		public IPeopleRepository PeopleRepository { get; }
 		public IProviderRepository ProviderRepository { get; }
 
-		protected LibraryManager(ILibraryRepository libraryRepository, 
+		public LibraryManager(ILibraryRepository libraryRepository, 
 			ILibraryItemRepository libraryItemRepository,
 			ICollectionRepository collectionRepository, 
 			IShowRepository showRepository, 
@@ -238,9 +238,9 @@ namespace Kyoo.Controllers
 
 		public Task Load<T, T2>(T obj, Expression<Func<T, T2>> member)
 			where T : class, IResource
-			where T2 : class, IResource
+			where T2 : class, IResource, new()
 		{
-			return (obj, (T2)default) switch
+			return (obj, new T2()) switch
 			{
 				(Show s, Studio) => StudioRepository.Get(x => x.Shows.Any(Utility.ResourceEqualsFunc<Show>(obj)))
 					.Then(x => s.Studio = x),
@@ -260,9 +260,9 @@ namespace Kyoo.Controllers
 
 		public Task Load<T, T2>(T obj, Expression<Func<T, ICollection<T2>>> member)
 			where T : class, IResource
-			where T2 : class
+			where T2 : class, new()
 		{
-			return (obj, (T2)default) switch
+			return (obj, new T2()) switch
 			{
 				(Library l, ProviderID) => ProviderRepository.GetAll(Utility.ResourceEquals<ProviderID>(obj))
 					.Then(x => l.Providers = x), 
