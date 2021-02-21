@@ -276,12 +276,12 @@ namespace Kyoo.Controllers
 				(Collection c, Library) => LibraryRepository.GetAll(Utility.ResourceEquals<Library>(obj))
 					.Then(x => c.Libraries = x), 
 				
-				(Show s, MetadataID) => ProviderRepository.Get(Utility.ResourceEquals<MetadataID>(obj))
+				(Show s, MetadataID) => ProviderRepository.GetMetadataID(x => x.ShowID == obj.ID)
 					.Then(x => s.ExternalIDs = x),
 				(Show s, Genre) => GenreRepository.GetAll(Utility.ResourceEquals<Genre>(obj))
 					.Then(x => s.Genres = x),
-				(Show s, PeopleRole) => PeopleRepository.GetFromShow(Utility.ResourceEquals<PeopleRole>(obj))
-					.Then(x => s.People = x),
+				(Show s, PeopleRole) => (PeopleRepository.GetFromShow((dynamic)(obj.ID > 0 ? obj.ID : obj.Slug))
+					as Task<ICollection<PeopleRole>>).Then(x => s.People = x),
 				(Show s, Season) => SeasonRepository.GetAll(Utility.ResourceEquals<Season>(obj))
 					.Then(x => s.Seasons = x),
 				(Show s, Episode) => EpisodeRepository.GetAll(Utility.ResourceEquals<Episode>(obj))
@@ -291,12 +291,12 @@ namespace Kyoo.Controllers
 				(Show s, Collection) => CollectionRepository.GetAll(Utility.ResourceEquals<Collection>(obj))
 					.Then(x => s.Collections = x),
 				
-				(Season s, MetadataID) => ProviderRepository.GetAll(Utility.ResourceEquals<MetadataID>(obj))
+				(Season s, MetadataID) => ProviderRepository.GetMetadataID(x => x.SeasonID == obj.ID)
 					.Then(x => s.ExternalIDs = x),
 				(Season s, Episode) => EpisodeRepository.GetAll(Utility.ResourceEquals<Episode>(obj))
 					.Then(x => s.Episodes = x),
 				
-				(Episode e, MetadataID) => ProviderRepository.GetAll(Utility.ResourceEquals<MetadataID>(obj))
+				(Episode e, MetadataID) => ProviderRepository.GetMetadataID(x => x.EpisodeID == obj.ID)
 					.Then(x => e.ExternalIDs = x),
 				(Episode e, Track) => TrackRepository.GetAll(Utility.ResourceEquals<Track>(obj))
 					.Then(x => e.Tracks = x),
@@ -307,10 +307,10 @@ namespace Kyoo.Controllers
 				(Studio s, Show) => ShowRepository.GetAll(Utility.ResourceEquals<Show>(obj))
 					.Then(x => s.Shows = x),
 				
-				(People p, MetadataID) => ProviderRepository.GetAll(Utility.ResourceEquals<MetadataID>(obj))
+				(People p, MetadataID) => ProviderRepository.GetMetadataID(x => x.PeopleID == obj.ID)
 					.Then(x => p.ExternalIDs = x),
-				(People p, PeopleRole) => PeopleRepository.GetFromPeople(Utility.ResourceEquals<PeopleRole>(obj))
-					.Then(x => p.Roles = x),
+				(People p, PeopleRole) => (PeopleRepository.GetFromPeople((dynamic)(obj.ID > 0 ? obj.ID : obj.Slug))
+					as Task<ICollection<PeopleRole>>).Then(x => p.Roles = x),
 
 				_ => throw new ArgumentException($"Couldn't find a way to load {member} of {typeof(T).Name}.")
 			};
