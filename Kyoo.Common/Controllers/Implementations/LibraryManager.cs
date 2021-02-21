@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
@@ -235,62 +236,83 @@ namespace Kyoo.Controllers
 			return PeopleRepository.Get(where);
 		}
 
-		public async Task Load<T, T2>(T obj, Expression<Func<T, T2>> member)
+		public Task Load<T, T2>(T obj, Expression<Func<T, T2>> member)
 			where T : class, IResource
 			where T2 : class, IResource
 		{
-			dynamic identifier = obj.ID > 0 ? obj.ID : obj.Slug;
-			switch (obj, (T2)default)
+			return (obj, (T2)default) switch
 			{
-				case (Show s, Studio): s.Studio = await StudioRepository.GetFromShow(identifier); break;
-				
-				case (Season s, Show): s.Show = await ShowRepository.GetFromSeason(identifier); break;
-				
-				case (Episode e, Show): e.Show = await ShowRepository.GetFromEpisode(identifier); break;
-				case (Episode e, Season): e.Season = await SeasonRepository.GetFromEpisode(identifier); break;
-				
-				case (Track t, Episode): t.Episode = await EpisodeRepository.GetFromTrack(identifier); break;
-				
-				default: throw new ArgumentException($"Couldn't find a way to load {member} of {typeof(T).Name}.");
-			}
+				(Show s, Studio) => StudioRepository.Get(x => x.Shows.Any(Utility.ResourceEqualsFunc<Show>(obj)))
+					.Then(x => s.Studio = x),
+
+				(Season s, Show) => ShowRepository.Get(Utility.ResourceEquals<Show>(obj)).Then(x => s.Show = x),
+
+				(Episode e, Show) => ShowRepository.Get(Utility.ResourceEquals<Show>(obj)).Then(x => e.Show = x),
+				(Episode e, Season) => SeasonRepository.Get(Utility.ResourceEquals<Season>(obj))
+					.Then(x => e.Season = x),
+
+				(Track t, Episode) => EpisodeRepository.Get(Utility.ResourceEquals<Episode>(obj))
+					.Then(x => t.Episode = x),
+
+				_ => throw new ArgumentException($"Couldn't find a way to load {member} of {typeof(T).Name}.")
+			};
 		}
 
-		public async Task Load<T, T2>(T obj, Expression<Func<T, ICollection<T2>>> member)
+		public Task Load<T, T2>(T obj, Expression<Func<T, ICollection<T2>>> member)
 			where T : class, IResource
 			where T2 : class
 		{
-			dynamic identifier = obj.ID > 0 ? obj.ID : obj.Slug;
-			switch (obj, (T2)default)
+			return (obj, (T2)default) switch
 			{
-				case (Library l, ProviderID): l.Providers = await ProviderRepository.GetFromLibrary(identifier); break; 
-				case (Library l, Show): l.Shows = await ShowRepository.GetFromLibrary(identifier); break; 
-				case (Library l, Collection): l.Collections = await CollectionRepository.GetFromLibrary(identifier); break; 
+				(Library l, ProviderID) => ProviderRepository.GetAll(Utility.ResourceEquals<ProviderID>(obj))
+					.Then(x => l.Providers = x), 
+				(Library l, Show) => ShowRepository.GetAll(Utility.ResourceEquals<Show>(obj))
+					.Then(x => l.Shows = x), 
+				(Library l, Collection) => CollectionRepository.GetAll(Utility.ResourceEquals<Collection>(obj))
+					.Then(x => l.Collections = x), 
 				
-				case (Collection c, Show): c.Shows = await ShowRepository.GetFromCollection(identifier); break; 
-				case (Collection c, Library): c.Libraries = await LibraryRepository.GetFromCollection(identifier); break; 
+				(Collection c, Show) => ShowRepository.GetAll(Utility.ResourceEquals<Show>(obj))
+					.Then(x => c.Shows = x), 
+				(Collection c, Library) => LibraryRepository.GetAll(Utility.ResourceEquals<Library>(obj))
+					.Then(x => c.Libraries = x), 
 				
-				case (Show s, MetadataID): s.ExternalIDs = await ProviderRepository.GetFromShow(identifier); break;
-				case (Show s, Genre): s.Genres = await GenreRepository.GetFromShow(identifier); break;
-				case (Show s, PeopleRole): s.People = await PeopleRepository.GetFromShow(identifier); break;
-				case (Show s, Season): s.Seasons = await SeasonRepository.GetFromShow(identifier); break;
-				case (Show s, Episode): s.Episodes = await EpisodeRepository.GetFromShow(identifier); break;
-				case (Show s, Library): s.Libraries = await LibraryRepository.GetFromShow(identifier); break;
-				case (Show s, Collection): s.Collections = await CollectionRepository.GetFromShow(identifier); break;
+				(Show s, MetadataID) => ProviderRepository.Get(Utility.ResourceEquals<MetadataID>(obj))
+					.Then(x => s.ExternalIDs = x),
+				(Show s, Genre) => GenreRepository.GetAll(Utility.ResourceEquals<Genre>(obj))
+					.Then(x => s.Genres = x),
+				(Show s, PeopleRole) => PeopleRepository.GetFromShow(Utility.ResourceEquals<PeopleRole>(obj))
+					.Then(x => s.People = x),
+				(Show s, Season) => SeasonRepository.GetAll(Utility.ResourceEquals<Season>(obj))
+					.Then(x => s.Seasons = x),
+				(Show s, Episode) => EpisodeRepository.GetAll(Utility.ResourceEquals<Episode>(obj))
+					.Then(x => s.Episodes = x),
+				(Show s, Library) => LibraryRepository.GetAll(Utility.ResourceEquals<Library>(obj))
+					.Then(x => s.Libraries = x),
+				(Show s, Collection) => CollectionRepository.GetAll(Utility.ResourceEquals<Collection>(obj))
+					.Then(x => s.Collections = x),
 				
-				case (Season s, MetadataID): s.ExternalIDs = await ProviderRepository.GetFromSeason(identifier); break;
-				case (Season s, Episode): s.Episodes = await EpisodeRepository.GetFromSeason(identifier); break;
+				(Season s, MetadataID) => ProviderRepository.GetAll(Utility.ResourceEquals<MetadataID>(obj))
+					.Then(x => s.ExternalIDs = x),
+				(Season s, Episode) => EpisodeRepository.GetAll(Utility.ResourceEquals<Episode>(obj))
+					.Then(x => s.Episodes = x),
 				
-				case (Episode e, MetadataID): e.ExternalIDs = await ProviderRepository.GetFromEpisode(identifier); break;
-				case (Episode e, Track): e.Tracks = await TrackRepository.GetFromEpisode(identifier); break;
+				(Episode e, MetadataID) => ProviderRepository.GetAll(Utility.ResourceEquals<MetadataID>(obj))
+					.Then(x => e.ExternalIDs = x),
+				(Episode e, Track) => TrackRepository.GetAll(Utility.ResourceEquals<Track>(obj))
+					.Then(x => e.Tracks = x),
 				
-				case (Genre g, Show): g.Shows = await ShowRepository.GetFromGenre(identifier); break;
+				(Genre g, Show) => ShowRepository.GetAll(Utility.ResourceEquals<Show>(obj))
+					.Then(x => g.Shows = x),
 				
-				case (Studio s, Show): s.Shows = await ShowRepository.GetFromStudio(identifier); break;
+				(Studio s, Show) => ShowRepository.GetAll(Utility.ResourceEquals<Show>(obj))
+					.Then(x => s.Shows = x),
 				
-				case (People p, MetadataID): p.ExternalIDs = await ProviderRepository.GetFromPeople(identifier); break;
-				case (People p, PeopleRole): p.Roles = await ShowRepository.GetFromPeople(identifier); break;
+				(People p, MetadataID) => ProviderRepository.GetAll(Utility.ResourceEquals<MetadataID>(obj))
+					.Then(x => p.ExternalIDs = x),
+				(People p, PeopleRole) => PeopleRepository.GetFromPeople(Utility.ResourceEquals<PeopleRole>(obj))
+					.Then(x => p.Roles = x),
 
-				default: throw new ArgumentException($"Couldn't find a way to load {member} of {typeof(T).Name}.");
+				_ => throw new ArgumentException($"Couldn't find a way to load {member} of {typeof(T).Name}.")
 			};
 		}
 		

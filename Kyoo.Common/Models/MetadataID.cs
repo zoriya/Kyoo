@@ -1,4 +1,3 @@
-using System;
 using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
