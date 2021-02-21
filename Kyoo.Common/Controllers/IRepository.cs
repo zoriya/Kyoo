@@ -209,24 +209,13 @@ namespace Kyoo.Controllers
 
 	public interface IProviderRepository : IRepository<ProviderID>
 	{
-		Task<ICollection<MetadataID>> GetFromShow(int showID,
-			Expression<Func<MetadataID, bool>> where = null, 
+		Task<ICollection<MetadataID>> GetMetadataID(Expression<Func<MetadataID, bool>> where = null, 
 			Sort<MetadataID> sort = default,
 			Pagination limit = default);
-		Task<ICollection<MetadataID>> GetFromShow(int showID,
-			[Optional] Expression<Func<MetadataID, bool>> where, 
-			Expression<Func<MetadataID, object>> sort = default,
+
+		Task<ICollection<MetadataID>> GetMetadataID([Optional] Expression<Func<MetadataID, bool>> where,
+			Expression<Func<MetadataID, object>> sort,
 			Pagination limit = default
-		) => GetFromShow(showID, where, new Sort<MetadataID>(sort), limit);
-		
-		Task<ICollection<MetadataID>> GetFromShow(string showSlug,
-			Expression<Func<MetadataID, bool>> where = null, 
-			Sort<MetadataID> sort = default,
-			Pagination limit = default);
-		Task<ICollection<MetadataID>> GetFromShow(string showSlug,
-			[Optional] Expression<Func<MetadataID, bool>> where, 
-			Expression<Func<MetadataID, object>> sort = default,
-			Pagination limit = default
-		) => GetFromShow(showSlug, where, new Sort<MetadataID>(sort), limit);
+		) => GetMetadataID(where, new Sort<MetadataID>(sort), limit);
 	}
 }

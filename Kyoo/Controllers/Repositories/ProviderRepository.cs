@@ -45,5 +45,17 @@ namespace Kyoo.Controllers
 			// TODO handle ExternalID deletion when they refer to this providerID.
 			await _database.SaveChangesAsync();
 		}
+
+		public Task<ICollection<MetadataID>> GetMetadataID(Expression<Func<MetadataID, bool>> where = null,
+			Sort<MetadataID> sort = default, 
+			Pagination limit = default)
+		{
+			return ApplyFilters(_database.MetadataIds,
+				x => _database.MetadataIds.FirstOrDefaultAsync(y => y.ID == x),
+				x => x.ID,
+				where,
+				sort,
+				limit);
+		}
 	}
 }
