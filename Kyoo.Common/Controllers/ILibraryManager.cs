@@ -63,11 +63,11 @@ namespace Kyoo.Controllers
 
 		Task Load<T, T2>([NotNull] T obj, [CanBeNull] Expression<Func<T, T2>> member)
 			where T : class, IResource
-			where T2 : class, IResource;
+			where T2 : class, IResource, new();
 		
 		Task Load<T, T2>([NotNull] T obj, [CanBeNull] Expression<Func<T, ICollection<T2>>> member)
 			where T : class, IResource
-			where T2 : class;
+			where T2 : class, new();
 		
 		// Library Items relations
 		Task<ICollection<LibraryItem>> GetItemsFromLibrary(int id,
