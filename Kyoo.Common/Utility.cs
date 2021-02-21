@@ -17,7 +17,7 @@ namespace Kyoo
 {
 	public static class Utility
 	{
-		public static bool IsPropertyExpression<T, T2>(Expression<Func<T, T2>> ex)
+		public static bool IsPropertyExpression(LambdaExpression ex)
 		{
 			return ex == null ||
 			       ex.Body is MemberExpression ||
@@ -488,6 +488,18 @@ namespace Kyoo
 			if (first == null || second == null)
 				return false;
 			return first.SequenceEqual(second, new LinkComparer<T, T1, T2>());
+		}
+
+		public static string GetMemberName([NotNull] Expression expression)
+		{
+			var t = ExpressionRewrite.Rewrite(expression);
+			return ExpressionRewrite.Rewrite(expression) switch
+			{
+				MemberExpression member => member.Member.Name,
+				LambdaExpression lambda when IsPropertyExpression(lambda) => GetMemberName(lambda.Body),
+				null => throw new ArgumentNullException(nameof(expression)),
+				_ => throw new ArgumentException($"Can't get member.")
+			};
 		}
 
 		public static Expression<T> Convert<T>([CanBeNull] this Expression expr)
