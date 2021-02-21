@@ -423,6 +423,22 @@ namespace Kyoo
 				return (T)((dynamic)x).Result;
 			}, TaskContinuationOptions.ExecuteSynchronously);
 		}
+
+		public static Expression<Func<T, bool>> ResourceEquals<T>(IResource obj)
+			where T : IResource
+		{
+			if (obj.ID > 0)
+				return x => x.ID == obj.ID || x.Slug == obj.Slug;
+			return x => x.Slug == obj.Slug;
+		}
+		
+		public static Func<T, bool> ResourceEqualsFunc<T>(IResource obj)
+			where T : IResource
+		{
+			if (obj.ID > 0)
+				return x => x.ID == obj.ID || x.Slug == obj.Slug;
+			return x => x.Slug == obj.Slug;
+		}
 		
 		public static bool ResourceEquals([CanBeNull] object first, [CanBeNull] object second)
 		{
@@ -489,19 +505,8 @@ namespace Kyoo
 				return false;
 			return first.SequenceEqual(second, new LinkComparer<T, T1, T2>());
 		}
-
-		public static string GetMemberName([NotNull] Expression expression)
-		{
-			var t = ExpressionRewrite.Rewrite(expression);
-			return ExpressionRewrite.Rewrite(expression) switch
-			{
-				MemberExpression member => member.Member.Name,
-				LambdaExpression lambda when IsPropertyExpression(lambda) => GetMemberName(lambda.Body),
-				null => throw new ArgumentNullException(nameof(expression)),
-				_ => throw new ArgumentException($"Can't get member.")
-			};
-		}
-
+		
+		
 		public static Expression<T> Convert<T>([CanBeNull] this Expression expr)
 			where T : Delegate
 		{
