@@ -6,7 +6,7 @@ using Kyoo.Models;
 
 namespace Kyoo.Controllers
 {
-	public class ALibraryManager : ILibraryManager
+	public class LibraryManager : ILibraryManager
 	{
 		public ILibraryRepository LibraryRepository { get; }
 		public ILibraryItemRepository LibraryItemRepository { get; }
@@ -20,7 +20,7 @@ namespace Kyoo.Controllers
 		public IPeopleRepository PeopleRepository { get; }
 		public IProviderRepository ProviderRepository { get; }
 
-		protected ALibraryManager(ILibraryRepository libraryRepository, 
+		protected LibraryManager(ILibraryRepository libraryRepository, 
 			ILibraryItemRepository libraryItemRepository,
 			ICollectionRepository collectionRepository, 
 			IShowRepository showRepository, 
@@ -235,19 +235,63 @@ namespace Kyoo.Controllers
 			return PeopleRepository.Get(where);
 		}
 
-		public virtual Task Load<T, T2>(T obj, Expression<Func<T, T2>> member)
+		public async Task Load<T, T2>(T obj, Expression<Func<T, T2>> member)
 			where T : class, IResource
-			where T2 : class
+			where T2 : class, IResource
 		{
-			// TODO figure out why setting this method as abstract prevent the app from loading this assembly.
-			throw new NotImplementedException();
+			dynamic identifier = obj.ID > 0 ? obj.ID : obj.Slug;
+			switch (obj, (T2)default)
+			{
+				case (Show s, Studio): s.Studio = await StudioRepository.GetFromShow(identifier); break;
+				
+				case (Season s, Show): s.Show = await ShowRepository.GetFromSeason(identifier); break;
+				
+				case (Episode e, Show): e.Show = await ShowRepository.GetFromEpisode(identifier); break;
+				case (Episode e, Season): e.Season = await SeasonRepository.GetFromEpisode(identifier); break;
+				
+				case (Track t, Episode): t.Episode = await EpisodeRepository.GetFromTrack(identifier); break;
+				
+				default: throw new ArgumentException($"Couldn't find a way to load {member} of {typeof(T).Name}.");
+			}
 		}
 
-		public virtual Task Load<T, T2>(T obj, Expression<Func<T, IEnumerable<T2>>> member)
+		public async Task Load<T, T2>(T obj, Expression<Func<T, ICollection<T2>>> member)
 			where T : class, IResource
 			where T2 : class
 		{
-			throw new NotImplementedException();
+			dynamic identifier = obj.ID > 0 ? obj.ID : obj.Slug;
+			switch (obj, (T2)default)
+			{
+				case (Library l, ProviderID): l.Providers = await ProviderRepository.GetFromLibrary(identifier); break; 
+				case (Library l, Show): l.Shows = await ShowRepository.GetFromLibrary(identifier); break; 
+				case (Library l, Collection): l.Collections = await CollectionRepository.GetFromLibrary(identifier); break; 
+				
+				case (Collection c, Show): c.Shows = await ShowRepository.GetFromCollection(identifier); break; 
+				case (Collection c, Library): c.Libraries = await LibraryRepository.GetFromCollection(identifier); break; 
+				
+				case (Show s, MetadataID): s.ExternalIDs = await ProviderRepository.GetFromShow(identifier); break;
+				case (Show s, Genre): s.Genres = await GenreRepository.GetFromShow(identifier); break;
+				case (Show s, PeopleRole): s.People = await PeopleRepository.GetFromShow(identifier); break;
+				case (Show s, Season): s.Seasons = await SeasonRepository.GetFromShow(identifier); break;
+				case (Show s, Episode): s.Episodes = await EpisodeRepository.GetFromShow(identifier); break;
+				case (Show s, Library): s.Libraries = await LibraryRepository.GetFromShow(identifier); break;
+				case (Show s, Collection): s.Collections = await CollectionRepository.GetFromShow(identifier); break;
+				
+				case (Season s, MetadataID): s.ExternalIDs = await ProviderRepository.GetFromSeason(identifier); break;
+				case (Season s, Episode): s.Episodes = await EpisodeRepository.GetFromSeason(identifier); break;
+				
+				case (Episode e, MetadataID): e.ExternalIDs = await ProviderRepository.GetFromEpisode(identifier); break;
+				case (Episode e, Track): e.Tracks = await TrackRepository.GetFromEpisode(identifier); break;
+				
+				case (Genre g, Show): g.Shows = await ShowRepository.GetFromGenre(identifier); break;
+				
+				case (Studio s, Show): s.Shows = await ShowRepository.GetFromStudio(identifier); break;
+				
+				case (People p, MetadataID): p.ExternalIDs = await ProviderRepository.GetFromPeople(identifier); break;
+				case (People p, PeopleRole): p.Roles = await ShowRepository.GetFromPeople(identifier); break;
+
+				default: throw new ArgumentException($"Couldn't find a way to load {member} of {typeof(T).Name}.");
+			};
 		}
 		
 		public Task<ICollection<Library>> GetLibraries(Expression<Func<Library, bool>> where = null, 

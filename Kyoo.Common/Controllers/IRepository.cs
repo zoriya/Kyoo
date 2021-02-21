@@ -20,7 +20,7 @@ namespace Kyoo.Controllers
 			AfterID = afterID;
 		}
 		
-		public static implicit operator Pagination(int limit) => new Pagination(limit);
+		public static implicit operator Pagination(int limit) => new(limit);
 	}
 
 	public struct Sort<T>
@@ -67,7 +67,7 @@ namespace Kyoo.Controllers
 
 		public Sort<TValue> To<TValue>()
 		{
-			return new Sort<TValue>(Key.Convert<Func<TValue, object>>(), Descendant);
+			return new(Key.Convert<Func<TValue, object>>(), Descendant);
 		}
 	}
 	
@@ -206,6 +206,27 @@ namespace Kyoo.Controllers
 			Pagination limit = default
 		) => GetFromPeople(showSlug, where, new Sort<ShowRole>(sort), limit);
 	}
-	
-	public interface IProviderRepository : IRepository<ProviderID> {}
+
+	public interface IProviderRepository : IRepository<ProviderID>
+	{
+		Task<ICollection<MetadataID>> GetFromShow(int showID,
+			Expression<Func<MetadataID, bool>> where = null, 
+			Sort<MetadataID> sort = default,
+			Pagination limit = default);
+		Task<ICollection<MetadataID>> GetFromShow(int showID,
+			[Optional] Expression<Func<MetadataID, bool>> where, 
+			Expression<Func<MetadataID, object>> sort = default,
+			Pagination limit = default
+		) => GetFromShow(showID, where, new Sort<MetadataID>(sort), limit);
+		
+		Task<ICollection<MetadataID>> GetFromShow(string showSlug,
+			Expression<Func<MetadataID, bool>> where = null, 
+			Sort<MetadataID> sort = default,
+			Pagination limit = default);
+		Task<ICollection<MetadataID>> GetFromShow(string showSlug,
+			[Optional] Expression<Func<MetadataID, bool>> where, 
+			Expression<Func<MetadataID, object>> sort = default,
+			Pagination limit = default
+		) => GetFromShow(showSlug, where, new Sort<MetadataID>(sort), limit);
+	}
 }

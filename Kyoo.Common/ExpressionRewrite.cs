@@ -43,26 +43,21 @@ namespace Kyoo
 			(string inner, _, ParameterExpression p) = _innerRewrites.FirstOrDefault(x => x.param == node.Expression);
 			if (inner != null)
 			{
-				Expression param = p;
-				foreach (string accessor in inner.Split('.'))
-					param = Expression.Property(param, accessor);
+				Expression param = inner.Split('.').Aggregate<string, Expression>(p, Expression.Property);
 				node = Expression.Property(param, node.Member.Name);
 			}
 			
 			// Can't use node.Member directly because we want to support attribute override
-			MemberInfo member = node.Expression.Type.GetProperty(node.Member.Name) ?? node.Member;
+			MemberInfo member = node.Expression!.Type.GetProperty(node.Member.Name) ?? node.Member;
 			ExpressionRewriteAttribute attr = member!.GetCustomAttribute<ExpressionRewriteAttribute>();
 			if (attr == null)
 				return base.VisitMember(node);
 
-			Expression property = node.Expression;
-			foreach (string child in attr.Link.Split('.'))
-				property = Expression.Property(property, child);
-			
+			Expression property = attr.Link.Split('.').Aggregate(node.Expression, Expression.Property);
 			if (property is MemberExpression expr)
 				Visit(expr.Expression);
 			_inner = attr.Inner;
-			return property;
+			return property!;
 		}
 
 		protected override Expression VisitLambda<T>(Expression<T> node)
