@@ -24,6 +24,16 @@ namespace Kyoo
 			       ex.Body.NodeType == ExpressionType.Convert && ((UnaryExpression)ex.Body).Operand is MemberExpression;
 		}
 		
+		public static string GetPropertyName(LambdaExpression ex)
+		{
+			if (!IsPropertyExpression(ex))
+				throw new ArgumentException($"{ex} is not a property expression.");
+			MemberExpression member = ex.Body.NodeType == ExpressionType.Convert
+				? ((UnaryExpression)ex.Body).Operand as MemberExpression
+				: ex.Body as MemberExpression;
+			return member!.Member.Name;
+		}
+		
 		public static string ToSlug(string str)
 		{
 			if (str == null)
@@ -32,7 +42,7 @@ namespace Kyoo
 			str = str.ToLowerInvariant();
 			
 			string normalizedString = str.Normalize(NormalizationForm.FormD);
-			StringBuilder stringBuilder = new StringBuilder();
+			StringBuilder stringBuilder = new();
 			foreach (char c in normalizedString)
 			{
 				UnicodeCategory unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
@@ -238,10 +248,12 @@ namespace Kyoo
 				action();
 				yield break;
 			}
-
-			yield return enumerator.Current;
-			while (enumerator.MoveNext())
+			
+			do
+			{
 				yield return enumerator.Current;
+			}
+			while (enumerator.MoveNext());
 		}
 
 		private static MethodInfo GetMethod(Type type, BindingFlags flag, string name, Type[] generics, object[] args)

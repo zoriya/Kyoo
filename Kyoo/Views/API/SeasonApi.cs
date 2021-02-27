@@ -33,10 +33,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 30)
 		{
-			where.Remove("sortBy");
-			where.Remove("limit");
-			where.Remove("afterID");
-
 			try
 			{
 				ICollection<Episode> resources = await _libraryManager.GetEpisodes(
@@ -64,10 +60,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 30)
 		{
-			where.Remove("sortBy");
-			where.Remove("limit");
-			where.Remove("afterID");
-
 			try
 			{
 				ICollection<Episode> resources = await _libraryManager.GetEpisodes(
@@ -96,10 +88,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 30)
 		{
-			where.Remove("sortBy");
-			where.Remove("limit");
-			where.Remove("afterID");
-
 			try
 			{
 				ICollection<Episode> resources = await _libraryManager.GetEpisodes(
