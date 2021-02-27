@@ -6,10 +6,10 @@ namespace Kyoo.Models
 {
 	public class GenreDE : Genre
 	{
-		[JsonIgnore] [NotMergable] public virtual ICollection<GenreLink> Links { get; set; }
+		[SerializeIgnore] [NotMergable] public virtual ICollection<GenreLink> Links { get; set; }
 
 		[ExpressionRewrite(nameof(Links), nameof(GenreLink.Child))]
-		[JsonIgnore] [NotMergable] public override ICollection<Show> Shows
+		[SerializeIgnore] [NotMergable] public override ICollection<Show> Shows
 		{
 			get => Links?.Select(x => x.Parent).ToList();
 			set => Links = value?.Select(x => new GenreLink(x, this)).ToList();

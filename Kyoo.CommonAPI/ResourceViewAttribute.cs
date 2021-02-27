@@ -1,9 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models;
+using Kyoo.Models.Attributes;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,8 +24,30 @@ namespace Kyoo.CommonApi
 					where.Remove(key);
 			}
 
-			context.HttpContext.Items["fields"] = context.HttpContext.Request.Query["fields"].ToArray();
-			// TODO Check if fields are loadable properties of the return type. If not, shorfail the request.
+			string[] fields = context.HttpContext.Request.Query["fields"].ToArray();
+			
+			context.HttpContext.Items["fields"] = fields;
+			if (context.ActionDescriptor is ControllerActionDescriptor descriptor)
+			{
+				Type type = descriptor.MethodInfo.ReturnType;
+				type = Utility.GetGenericDefinition(type, typeof(Task<>))?.GetGenericArguments()[0] ?? type;
+				type = Utility.GetGenericDefinition(type, typeof(ActionResult<>))?.GetGenericArguments()[0] ?? type;
+				type = Utility.GetGenericDefinition(type, typeof(Page<>))?.GetGenericArguments()[0] ?? type;
+				
+				PropertyInfo[] properties = type.GetProperties()
+					.Where(x => x.GetCustomAttribute<LoadableRelationAttribute>() != null)
+					.ToArray();
+				foreach (string field in fields)
+				{
+					if (properties.Any(y => string.Equals(y.Name,field, StringComparison.InvariantCultureIgnoreCase)))
+						continue;
+					context.Result = new BadRequestObjectResult(new
+					{
+						Error = $"{field} does not exist on {type.Name}."
+					});
+					return;
+				}
+			}
 			base.OnActionExecuting(context);
 		}
 
@@ -44,7 +70,7 @@ namespace Kyoo.CommonApi
 			
 			if (pageType != null)
 			{
-				foreach (IResource resource in ((Page<IResource>)result.Value).Items)
+				foreach (IResource resource in ((dynamic)result.Value).Items)
 				{
 					foreach (string field in fields!)
 						await library!.Load(resource, field);
@@ -53,7 +79,7 @@ namespace Kyoo.CommonApi
 			else if (result.DeclaredType.IsAssignableTo(typeof(IResource)))
 			{
 				foreach (string field in fields!)
-					await library!.Load(result.Value as IResource, field);
+					await library!.Load((IResource)result.Value, field);
 			}
 		}
 	}

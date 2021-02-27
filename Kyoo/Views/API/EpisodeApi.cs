@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.CommonApi;
 using Kyoo.Controllers;
-using Kyoo.Models.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 
@@ -77,8 +76,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 30)
 		{
-			
-
 			try
 			{
 				ICollection<Track> resources = await _libraryManager.GetTracks(
@@ -107,8 +104,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 30)
 		{
-			
-
 			try
 			{
 				ICollection<Track> resources = await _libraryManager.GetTracks(
@@ -139,8 +134,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 30)
 		{
-			
-
 			try
 			{
 				ICollection<Track> resources = await _libraryManager.GetTracks(ApiHelper.ParseWhere<Track>(where, x => x.Episode.Show.Slug == showSlug 
@@ -157,6 +150,21 @@ namespace Kyoo.Api
 			{
 				return BadRequest(new {Error = ex.Message});
 			}
+		}
+		
+		[HttpGet("{id:int}/thumb")]
+		[Authorize(Policy="Read")]
+		public async Task<IActionResult> GetThumb(int id)
+		{
+			string path = (await _libraryManager.GetEpisode(id))?.Path;
+			if (path == null)
+				return NotFound();
+
+			string thumb = Path.ChangeExtension(path, "jpg");
+
+			if (System.IO.File.Exists(thumb))
+				return new PhysicalFileResult(Path.GetFullPath(thumb), "image/jpg");
+			return NotFound();
 		}
 		
 		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}/thumb")]

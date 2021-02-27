@@ -25,8 +25,8 @@ namespace Kyoo.Models
 			public string Codec { get; set; }
 			[MarshalAs(UnmanagedType.I1)] public bool isDefault;
 			[MarshalAs(UnmanagedType.I1)] public bool isForced;
-			[JsonIgnore] public string Path { get; set; }
-			[JsonIgnore] public StreamType Type { get; set; }
+			[SerializeIgnore] public string Path { get; set; }
+			[SerializeIgnore] public StreamType Type { get; set; }
 			
 			public Stream() {}
 			
@@ -56,8 +56,8 @@ namespace Kyoo.Models
 
 	public class Track : Stream, IResource
 	{
-		[JsonIgnore] public int ID { get; set; }
-		[JsonIgnore] public int EpisodeID { get; set; }
+		public int ID { get; set; }
+		public int EpisodeID { get; set; }
 		public bool IsDefault
 		{
 			get => isDefault;
@@ -113,8 +113,8 @@ namespace Kyoo.Models
 			}
 		}
 
-		[JsonIgnore] public bool IsExternal { get; set; }
-		[JsonIgnore] public virtual Episode Episode { get; set; }
+		public bool IsExternal { get; set; }
+		[LoadableRelation] public virtual Episode Episode { get; set; }
 		
 		public Track() { }
 

@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models.Attributes;
-using Kyoo.Models.Watch;
 using PathIO = System.IO.Path;
 
 namespace Kyoo.Models
@@ -26,7 +25,7 @@ namespace Kyoo.Models
 	
 	public class WatchItem
 	{
-		[JsonIgnore] public readonly int EpisodeID = -1;
+		public readonly int EpisodeID = -1;
 
 		public string ShowTitle;
 		public string ShowSlug;
@@ -35,7 +34,7 @@ namespace Kyoo.Models
 		public string Title;
 		public string Slug;
 		public DateTime? ReleaseDate;
-		[JsonIgnore] public string Path;
+		[SerializeIgnore] public string Path;
 		public Episode PreviousEpisode;
 		public Episode NextEpisode;
 		public bool IsMovie;

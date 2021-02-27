@@ -6,7 +6,7 @@ namespace Kyoo.Models
 {
 	public class ShowDE : Show
 	{
-		[EditableRelation] [JsonReadOnly] [NotMergable] public virtual ICollection<GenreLink> GenreLinks { get; set; }
+		[EditableRelation] [SerializeIgnore] [NotMergable] public virtual ICollection<GenreLink> GenreLinks { get; set; }
 		[ExpressionRewrite(nameof(GenreLinks), nameof(GenreLink.Child))]
 		public override ICollection<Genre> Genres
 		{
@@ -14,7 +14,7 @@ namespace Kyoo.Models
 			set => GenreLinks = value?.Select(x => new GenreLink(this, x)).ToList();
 		}
 		
-		[JsonReadOnly] [NotMergable] public virtual ICollection<LibraryLink> LibraryLinks { get; set; }
+		[SerializeIgnore] [NotMergable] public virtual ICollection<LibraryLink> LibraryLinks { get; set; }
 		[ExpressionRewrite(nameof(LibraryLinks), nameof(LibraryLink.Library))]
 		public override ICollection<Library> Libraries
 		{
@@ -22,7 +22,7 @@ namespace Kyoo.Models
 			set => LibraryLinks = value?.Select(x => new LibraryLink(x, this)).ToList();
 		}
 		
-		[JsonReadOnly] [NotMergable] public virtual ICollection<CollectionLink> CollectionLinks { get; set; }
+		[SerializeIgnore] [NotMergable] public virtual ICollection<CollectionLink> CollectionLinks { get; set; }
 		[ExpressionRewrite(nameof(CollectionLinks), nameof(CollectionLink.Parent))]
 		public override ICollection<Collection> Collections
 		{

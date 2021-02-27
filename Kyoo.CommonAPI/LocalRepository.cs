@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -164,7 +163,7 @@ namespace Kyoo.Controllers
 
 				foreach (NavigationEntry navigation in Database.Entry(old).Navigations)
 				{
-					if (navigation.Metadata.PropertyInfo.GetCustomAttribute<EditableRelation>() != null)
+					if (navigation.Metadata.PropertyInfo.GetCustomAttribute<EditableRelationAttribute>() != null)
 					{
 						if (resetOld)
 						{
@@ -207,7 +206,7 @@ namespace Kyoo.Controllers
 		{
 			if (string.IsNullOrEmpty(resource.Slug))
 				throw new ArgumentException("Resource can't have null as a slug.");
-			if (int.TryParse(resource.Slug, out int _) && typeof(T).GetCustomAttribute<ComposedSlug>() == null)
+			if (int.TryParse(resource.Slug, out int _) && typeof(T).GetCustomAttribute<ComposedSlugAttribute>() == null)
 			{
 				try
 				{
@@ -221,18 +220,6 @@ namespace Kyoo.Controllers
 				{
 					throw new ArgumentException("Resources slug can't be number only.");
 				}
-			}
-			
-			foreach (PropertyInfo property in typeof(T).GetProperties()
-				.Where(x => typeof(IEnumerable).IsAssignableFrom(x.PropertyType) 
-				            && !typeof(string).IsAssignableFrom(x.PropertyType) 
-				            && x.GetCustomAttribute<EditableRelation>() != null))
-			{
-				object value = property.GetValue(resource);
-				if (value == null || value is ICollection || Utility.IsOfGenericType(value, typeof(ICollection<>)))
-					continue;
-				value = Utility.RunGenericMethod<object>(typeof(Enumerable), "ToList", Utility.GetEnumerableType((IEnumerable)value), value);
-				property.SetValue(resource, value);
 			}
 			return Task.CompletedTask;
 		}
