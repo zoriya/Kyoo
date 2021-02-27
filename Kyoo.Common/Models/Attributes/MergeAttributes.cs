@@ -8,7 +8,4 @@ namespace Kyoo.Models.Attributes
 	{
 		void OnMerge(object merged);
 	}
-	
-	public class JsonReadOnly : Attribute { }
-	public class JsonIgnore : JsonReadOnly { }
 }

@@ -69,10 +69,10 @@ namespace Kyoo.Controllers
 			where T : class, IResource
 			where T2 : class, new();
 
-		Task<T> Load<T>(T obj, string memberName)
+		Task<T> Load<T>([NotNull] T obj, string memberName)
 			where T : class, IResource;
 
-		Task Load(IResource obj, string memberName);
+		Task Load([NotNull] IResource obj, string memberName);
 
 		// Library Items relations
 		Task<ICollection<LibraryItem>> GetItemsFromLibrary(int id,

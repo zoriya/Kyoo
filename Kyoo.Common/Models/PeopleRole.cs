@@ -8,9 +8,9 @@ namespace Kyoo.Models
 {
 	public class PeopleRole : IResource
 	{
-		[JsonIgnore] public int ID { get; set; }
-		[JsonIgnore] public int PeopleID { get; set; }
-		[JsonIgnore] public virtual People People { get; set; }
+		[SerializeIgnore] public int ID { get; set; }
+		[SerializeIgnore] public int PeopleID { get; set; }
+		[SerializeIgnore] public virtual People People { get; set; }
 		
 		[ExpressionRewrite(nameof(People) + "." + nameof(Models.People.Slug))]
 		public string Slug
@@ -40,8 +40,8 @@ namespace Kyoo.Models
 			set => People.ExternalIDs = value;
 		}
 
-		[JsonIgnore] public int ShowID { get; set; }
-		[JsonIgnore] public virtual Show Show { get; set; }
+		[SerializeIgnore] public int ShowID { get; set; }
+		[SerializeIgnore] public virtual Show Show { get; set; }
 		public string Role { get; set; }
 		public string Type { get; set; }
 
@@ -77,7 +77,7 @@ namespace Kyoo.Models
 		public string Slug { get; set; }
 		public string Title { get; set; }
 		public ICollection<string> Aliases { get; set; }
-		[JsonIgnore] public string Path { get; set; }
+		[SerializeIgnore] public string Path { get; set; }
 		public string Overview { get; set; }
 		public Status? Status { get; set; }
 		public string TrailerUrl { get; set; }

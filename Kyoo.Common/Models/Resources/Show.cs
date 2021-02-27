@@ -10,7 +10,7 @@ namespace Kyoo.Models
 		public string Slug { get; set; }
 		public string Title { get; set; }
 		[EditableRelation] public string[] Aliases { get; set; }
-		[JsonIgnore] public string Path { get; set; }
+		[SerializeIgnore] public string Path { get; set; }
 		public string Overview { get; set; }
 		public Status? Status { get; set; }
 		public string TrailerUrl { get; set; }
@@ -24,17 +24,17 @@ namespace Kyoo.Models
 
 		public bool IsMovie { get; set; }
 
-		[EditableRelation] public virtual ICollection<MetadataID> ExternalIDs { get; set; }
+		[EditableRelation] [LoadableRelation] public virtual ICollection<MetadataID> ExternalIDs { get; set; }
 		
 		
-		[JsonIgnore] public int? StudioID { get; set; }
-		[EditableRelation] [JsonReadOnly] public virtual Studio Studio { get; set; }
-		[EditableRelation] [JsonReadOnly] public virtual ICollection<Genre> Genres { get; set; }
-		[EditableRelation] [JsonReadOnly] public virtual ICollection<PeopleRole> People { get; set; }
-		[JsonIgnore] public virtual ICollection<Season> Seasons { get; set; }
-		[JsonIgnore] public virtual ICollection<Episode> Episodes { get; set; }
-		[JsonIgnore] public virtual ICollection<Library> Libraries { get; set; }
-		[JsonIgnore] public virtual ICollection<Collection> Collections { get; set; }
+		public int? StudioID { get; set; }
+		[LoadableRelation] [EditableRelation] public virtual Studio Studio { get; set; }
+		[LoadableRelation] [EditableRelation] public virtual ICollection<Genre> Genres { get; set; }
+		[LoadableRelation] [EditableRelation] public virtual ICollection<PeopleRole> People { get; set; }
+		[LoadableRelation] public virtual ICollection<Season> Seasons { get; set; }
+		[LoadableRelation] public virtual ICollection<Episode> Episodes { get; set; }
+		[LoadableRelation] public virtual ICollection<Library> Libraries { get; set; }
+		[LoadableRelation] public virtual ICollection<Collection> Collections { get; set; }
 
 		public Show() { }
 

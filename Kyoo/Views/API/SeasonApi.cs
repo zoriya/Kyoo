@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Kyoo.CommonApi;
 using Kyoo.Controllers;
@@ -124,6 +125,37 @@ namespace Kyoo.Api
 		public async Task<ActionResult<Show>> GetShow(int showID, int _)
 		{
 			return await _libraryManager.GetShow(showID);
+		}
+		
+		[HttpGet("{id:int}/thumb")]
+		[Authorize(Policy="Read")]
+		public async Task<IActionResult> GetThumb(int id)
+		{
+			// TODO remove the next lambda and use a Season.Path (should exit for seasons in a different folder)
+			string path = (await _libraryManager.GetShow(x => x.Seasons.Any(y => y.ID == id)))?.Path;
+			int seasonNumber = (await _libraryManager.GetSeason(id)).SeasonNumber;
+			if (path == null)
+				return NotFound();
+
+			string thumb = Path.Combine(path, $"season-{seasonNumber}.jpg");
+			if (System.IO.File.Exists(thumb))
+				return new PhysicalFileResult(Path.GetFullPath(thumb), "image/jpg");
+			return NotFound();
+		}
+		
+		[HttpGet("{showSlug}-s{seasonNumber:int}/thumb")]
+		[Authorize(Policy="Read")]
+		public async Task<IActionResult> GetThumb(string showSlug, int seasonNumber)
+		{
+			// TODO use a season.Path
+			string path = (await _libraryManager.GetShow(showSlug))?.Path;
+			if (path == null)
+				return NotFound();
+
+			string thumb = Path.Combine(path, $"season-{seasonNumber}.jpg");
+			if (System.IO.File.Exists(thumb))
+				return new PhysicalFileResult(Path.GetFullPath(thumb), "image/jpg");
+			return NotFound();
 		}
 	}
 }

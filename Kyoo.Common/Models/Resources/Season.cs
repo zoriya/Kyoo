@@ -7,8 +7,8 @@ namespace Kyoo.Models
 	[ComposedSlug]
 	public class Season : IResource
 	{
-		[JsonIgnore] public int ID  { get; set; }
-		[JsonIgnore] public int ShowID { get; set; }
+		public int ID  { get; set; }
+		public int ShowID { get; set; }
 
 		public int SeasonNumber { get; set; } = -1;
 
@@ -17,11 +17,12 @@ namespace Kyoo.Models
 		public string Overview { get; set; }
 		public int? Year { get; set; }
 
-		[JsonIgnore] public string Poster { get; set; }
-		[EditableRelation] public virtual ICollection<MetadataID> ExternalIDs { get; set; }
+		[SerializeIgnore] public string Poster { get; set; }
+		public string Thumb => $"/api/seasons/{Slug}/thumb";
+		[EditableRelation] [LoadableRelation] public virtual ICollection<MetadataID> ExternalIDs { get; set; }
 
-		[JsonIgnore] public virtual Show Show { get; set; }
-		[JsonIgnore] public virtual ICollection<Episode> Episodes { get; set; }
+		[LoadableRelation] public virtual Show Show { get; set; }
+		[LoadableRelation] public virtual ICollection<Episode> Episodes { get; set; }
 
 		public Season() { }
 

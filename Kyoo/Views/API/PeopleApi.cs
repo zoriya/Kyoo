@@ -29,7 +29,6 @@ namespace Kyoo.Api
 		[HttpGet("{id:int}/role")]
 		[HttpGet("{id:int}/roles")]
 		[Authorize(Policy = "Read")]
-		[JsonDetailed]
 		public async Task<ActionResult<Page<ShowRole>>> GetRoles(int id,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -58,7 +57,6 @@ namespace Kyoo.Api
 		[HttpGet("{slug}/role")]
 		[HttpGet("{slug}/roles")]
 		[Authorize(Policy = "Read")]
-		[JsonDetailed]
 		public async Task<ActionResult<Page<ShowRole>>> GetRoles(string slug,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -84,12 +82,20 @@ namespace Kyoo.Api
 			}
 		}
 		
+		[HttpGet("{id:int}/poster")]
+		[Authorize(Policy="Read")]
+		public async Task<IActionResult> GetPeopleIcon(int id)
+		{
+			string slug = (await _libraryManager.GetPeople(id)).Slug;
+			return GetPeopleIcon(slug);
+		}
+		
 		[HttpGet("{slug}/poster")]
 		[Authorize(Policy="Read")]
 		public IActionResult GetPeopleIcon(string slug)
 		{
-			string thumbPath = Path.Combine(_peoplePath, slug + ".jpg");
-			if (!System.IO.File.Exists(thumbPath))
+			string thumbPath = Path.GetFullPath(Path.Combine(_peoplePath, slug + ".jpg"));
+			if (!thumbPath.StartsWith(_peoplePath) || !System.IO.File.Exists(thumbPath))
 				return NotFound();
 
 			return new PhysicalFileResult(Path.GetFullPath(thumbPath), "image/jpg");

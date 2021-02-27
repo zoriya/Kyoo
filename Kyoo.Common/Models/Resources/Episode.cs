@@ -9,37 +9,29 @@ namespace Kyoo.Models
 	public class Episode : IResource, IOnMerge
 	{
 		public int ID { get; set; }
+		public string Slug => Show != null ? GetSlug(Show.Slug, SeasonNumber, EpisodeNumber) : ID.ToString();
 		public int ShowID { get; set; }
-		[JsonIgnore] public virtual Show Show { get; set; }
+		[LoadableRelation] public virtual Show Show { get; set; }
 		public int? SeasonID { get; set; }
-		[JsonIgnore] public virtual Season Season { get; set; }
+		[LoadableRelation] public virtual Season Season { get; set; }
 
 		public int SeasonNumber { get; set; } = -1;
 		public int EpisodeNumber { get; set; } = -1;
 		public int AbsoluteNumber { get; set; } = -1;
-		[JsonIgnore] public string Path { get; set; }
+		[SerializeIgnore] public string Path { get; set; }
+		public string Thumb => $"/api/episodes/{Slug}/thumb";
 		public string Title { get; set; }
 		public string Overview { get; set; }
 		public DateTime? ReleaseDate { get; set; }
 
 		public int Runtime { get; set; } //This runtime variable should be in minutes
 
-		[JsonIgnore] public string Poster { get; set; }
-		[EditableRelation] public virtual ICollection<MetadataID> ExternalIDs { get; set; }
+		[SerializeIgnore] public string Poster { get; set; }
+		[LoadableRelation] public virtual ICollection<MetadataID> ExternalIDs { get; set; }
 
-		[JsonIgnore] public virtual ICollection<Track> Tracks { get; set; }
+		[LoadableRelation] public virtual ICollection<Track> Tracks { get; set; }
 
-		public string ShowTitle => Show.Title;
-		public string Slug => Show != null ? GetSlug(Show.Slug, SeasonNumber, EpisodeNumber) : ID.ToString();
-		public string Thumb
-		{
-			get
-			{
-				if (Show != null)
-					return "thumb/" + Slug;
-				return Poster;
-			}
-		}
+		public string ShowTitle => Show?.Title;
 
 
 		public Episode() { }

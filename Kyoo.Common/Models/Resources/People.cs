@@ -10,9 +10,9 @@ namespace Kyoo.Models
 		public string Slug { get; set; }
 		public string Name { get; set; }
 		public string Poster { get; set; }
-		[EditableRelation] public virtual ICollection<MetadataID> ExternalIDs { get; set; }
+		[EditableRelation] [LoadableRelation] public virtual ICollection<MetadataID> ExternalIDs { get; set; }
 		
-		[EditableRelation] [JsonReadOnly] public virtual ICollection<PeopleRole> Roles { get; set; }
+		[EditableRelation] [LoadableRelation] public virtual ICollection<PeopleRole> Roles { get; set; }
 		
 		public People() {}
 

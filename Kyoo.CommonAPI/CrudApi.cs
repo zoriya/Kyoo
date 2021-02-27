@@ -27,7 +27,6 @@ namespace Kyoo.CommonApi
 
 		[HttpGet("{id:int}")]
 		[Authorize(Policy = "Read")]
-		[JsonDetailed]
 		public virtual async Task<ActionResult<T>> Get(int id)
 		{
 			T resource = await _repository.Get(id);
@@ -39,7 +38,6 @@ namespace Kyoo.CommonApi
 
 		[HttpGet("{slug}")]
 		[Authorize(Policy = "Read")]
-		[JsonDetailed]
 		public virtual async Task<ActionResult<T>> Get(string slug)
 		{
 			T resource = await _repository.Get(slug);

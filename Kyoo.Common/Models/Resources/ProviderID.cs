@@ -4,7 +4,7 @@ namespace Kyoo.Models
 {
 	public class ProviderID : IResource
 	{
-		[JsonIgnore] public int ID { get; set; }
+		public int ID { get; set; }
 		public string Slug { get; set; }
 		public string Name { get; set; }
 		public string Logo { get; set; }
