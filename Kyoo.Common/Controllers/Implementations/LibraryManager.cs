@@ -266,61 +266,58 @@ namespace Kyoo.Controllers
 			return (obj, member) switch
 			{
 				(Library l, nameof(Library.Providers)) => ProviderRepository
-					.GetAll(x => x.Libraries.Any(y => y.ID == obj.ID || y.Slug == obj.Slug))
+					.GetAll(x => x.Libraries.Any(y => y.ID == obj.ID))
 					.Then(x => l.Providers = x), 
 				(Library l, nameof(Library.Shows)) => ShowRepository
-					.GetAll(x => x.Libraries.Any(y => y.ID == obj.ID || y.Slug == obj.Slug))
+					.GetAll(x => x.Libraries.Any(y => y.ID == obj.ID))
 					.Then(x => l.Shows = x), 
 				(Library l, nameof(Library.Collections)) => CollectionRepository
-					.GetAll(x => x.Libraries.Any(y => y.ID == obj.ID || y.Slug == obj.Slug))
+					.GetAll(x => x.Libraries.Any(y => y.ID == obj.ID))
 					.Then(x => l.Collections = x), 
 				
 				(Collection c, nameof(Library.Shows)) => ShowRepository
-					.GetAll(x => x.Collections.Any(y => y.ID == obj.ID || y.Slug == obj.Slug))
+					.GetAll(x => x.Collections.Any(y => y.ID == obj.ID))
 					.Then(x => c.Shows = x), 
 				(Collection c, nameof(Collection.Libraries)) => LibraryRepository
-					.GetAll(x => x.Collections.Any(y => y.ID == obj.ID || y.Slug == obj.Slug))
+					.GetAll(x => x.Collections.Any(y => y.ID == obj.ID))
 					.Then(x => c.Libraries = x), 
 				
 				(Show s, nameof(Show.ExternalIDs)) => ProviderRepository
 					.GetMetadataID(x => x.ShowID == obj.ID)
 					.Then(x => s.ExternalIDs = x),
 				(Show s, nameof(Show.Genres)) => GenreRepository
-					.GetAll(x => x.Shows.Any(y => y.ID == obj.ID || y.Slug == obj.Slug))
+					.GetAll(x => x.Shows.Any(y => y.ID == obj.ID))
 					.Then(x => s.Genres = x),
-				(Show s, nameof(Show.People)) => (
-					PeopleRepository.GetFromShow((dynamic)(obj.ID > 0 ? obj.ID : obj.Slug))
-					as Task<ICollection<PeopleRole>>)
+				(Show s, nameof(Show.People)) => PeopleRepository
+					.GetFromShow(obj.ID)
 					.Then(x => s.People = x),
 				(Show s, nameof(Show.Seasons)) => SeasonRepository
-					.GetAll(x => x.Show.ID == obj.ID || x.Show.Slug == obj.Slug)
+					.GetAll(x => x.Show.ID == obj.ID)
 					.Then(x => s.Seasons = x),
 				(Show s, nameof(Show.Episodes)) => EpisodeRepository
-					.GetAll(x => x.Show.ID == obj.ID || x.Show.Slug == obj.Slug)
+					.GetAll(x => x.Show.ID == obj.ID)
 					.Then(x => s.Episodes = x),
 				(Show s, nameof(Show.Libraries)) => LibraryRepository
-					.GetAll(x => x.Shows.Any(y => y.ID == obj.ID || y.Slug == obj.Slug))
+					.GetAll(x => x.Shows.Any(y => y.ID == obj.ID))
 					.Then(x => s.Libraries = x),
 				(Show s, nameof(Show.Collections)) => CollectionRepository
-					.GetAll(x => x.Shows.Any(y => y.ID == obj.ID || y.Slug == obj.Slug))
+					.GetAll(x => x.Shows.Any(y => y.ID == obj.ID))
 					.Then(x => s.Collections = x),
 				// TODO Studio loading does not work.
 				(Show s, nameof(Show.Studio)) => StudioRepository
-					.Get(x => x.Shows.Any(y => y.ID == obj.ID || y.Slug == obj.Slug))
+					.Get(x => x.Shows.Any(y => y.ID == obj.ID))
 					.Then(x => s.Studio = x),
 				
 				(Season s, nameof(Season.ExternalIDs)) => ProviderRepository
 					.GetMetadataID(x => x.SeasonID == obj.ID)
 					.Then(x => s.ExternalIDs = x),
 				(Season s, nameof(Season.Episodes)) => EpisodeRepository
-					.GetAll(x => x.Season.ID == obj.ID || x.Season.Slug == obj.Slug)
+					.GetAll(x => x.Season.ID == obj.ID)
 					.Then(x => s.Episodes = x),
 				(Season s, nameof(Season.Show)) => ShowRepository
-					.Get(x => x.Seasons
-						.Any(y => y.ID == obj.ID || y.ShowID == s.ShowID && y.SeasonNumber == s.SeasonNumber))
+					.Get(x => x.Seasons.Any(y => y.ID == obj.ID))
 					.Then(x => s.Show = x),
 				
-				// TODO maybe add slug support for episodes
 				(Episode e, nameof(Episode.ExternalIDs)) => ProviderRepository
 					.GetMetadataID(x => x.EpisodeID == obj.ID)
 					.Then(x => e.ExternalIDs = x),
@@ -339,19 +336,19 @@ namespace Kyoo.Controllers
 					.Then(x => t.Episode = x),
 				
 				(Genre g, nameof(Genre.Shows)) => ShowRepository
-					.GetAll(x => x.Genres.Any(y => y.ID == obj.ID || y.Slug == obj.Slug))
+					.GetAll(x => x.Genres.Any(y => y.ID == obj.ID))
 					.Then(x => g.Shows = x),
 				
 				(Studio s, nameof(Studio.Shows)) => ShowRepository
-					.GetAll(x => x.Studio.ID == obj.ID || x.Studio.Slug == obj.Slug)
+					.GetAll(x => x.Studio.ID == obj.ID)
 					.Then(x => s.Shows = x),
 				
 				(People p, nameof(People.ExternalIDs)) => ProviderRepository
 					.GetMetadataID(x => x.PeopleID == obj.ID)
 					.Then(x => p.ExternalIDs = x),
-				(People p, nameof(People.Roles)) => (
-					PeopleRepository.GetFromPeople((dynamic)(obj.ID > 0 ? obj.ID : obj.Slug))
-					as Task<ICollection<PeopleRole>>).Then(x => p.Roles = x),
+				(People p, nameof(People.Roles)) => PeopleRepository
+					.GetFromPeople(obj.ID)
+					.Then(x => p.Roles = x),
 
 				_ => throw new ArgumentException($"Couldn't find a way to load {member} of {obj.Slug}.")
 			};
@@ -459,17 +456,17 @@ namespace Kyoo.Controllers
 			return PeopleRepository.GetFromShow(showSlug, where, sort, limit);
 		}
 		
-		public Task<ICollection<ShowRole>> GetRolesFromPeople(int id, 
-			Expression<Func<ShowRole, bool>> where = null, 
-			Sort<ShowRole> sort = default, 
+		public Task<ICollection<PeopleRole>> GetRolesFromPeople(int id, 
+			Expression<Func<PeopleRole, bool>> where = null, 
+			Sort<PeopleRole> sort = default, 
 			Pagination limit = default)
 		{
 			return PeopleRepository.GetFromPeople(id, where, sort, limit);
 		}
 
-		public Task<ICollection<ShowRole>> GetRolesFromPeople(string slug, 
-			Expression<Func<ShowRole, bool>> where = null, 
-			Sort<ShowRole> sort = default, 
+		public Task<ICollection<PeopleRole>> GetRolesFromPeople(string slug, 
+			Expression<Func<PeopleRole, bool>> where = null, 
+			Sort<PeopleRole> sort = default, 
 			Pagination limit = default)
 		{
 			return PeopleRepository.GetFromPeople(slug, where, sort, limit);

@@ -98,10 +98,7 @@ namespace Kyoo
 				.Ignore(x => x.Collections);
 
 			modelBuilder.Entity<PeopleRole>()
-				.Ignore(x => x.Slug)
-				.Ignore(x => x.Name)
-				.Ignore(x => x.Poster)
-				.Ignore(x => x.ExternalIDs);
+				.Ignore(x => x.Slug);
 
 			modelBuilder.Entity<GenreDE>()
 				.Ignore(x => x.Shows);

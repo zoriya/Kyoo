@@ -117,25 +117,25 @@ namespace Kyoo.Controllers
 		) => GetPeopleFromShow(showSlug, where, new Sort<PeopleRole>(sort), limit);
 		
 		// Show Role relations
-		Task<ICollection<ShowRole>> GetRolesFromPeople(int showID,
-			Expression<Func<ShowRole, bool>> where = null, 
-			Sort<ShowRole> sort = default,
+		Task<ICollection<PeopleRole>> GetRolesFromPeople(int showID,
+			Expression<Func<PeopleRole, bool>> where = null, 
+			Sort<PeopleRole> sort = default,
 			Pagination limit = default);
-		Task<ICollection<ShowRole>> GetRolesFromPeople(int showID,
-			[Optional] Expression<Func<ShowRole, bool>> where,
-			Expression<Func<ShowRole, object>> sort,
+		Task<ICollection<PeopleRole>> GetRolesFromPeople(int showID,
+			[Optional] Expression<Func<PeopleRole, bool>> where,
+			Expression<Func<PeopleRole, object>> sort,
 			Pagination limit = default
-		) => GetRolesFromPeople(showID, where, new Sort<ShowRole>(sort), limit);
+		) => GetRolesFromPeople(showID, where, new Sort<PeopleRole>(sort), limit);
 		
-		Task<ICollection<ShowRole>> GetRolesFromPeople(string showSlug,
-			Expression<Func<ShowRole, bool>> where = null, 
-			Sort<ShowRole> sort = default,
+		Task<ICollection<PeopleRole>> GetRolesFromPeople(string showSlug,
+			Expression<Func<PeopleRole, bool>> where = null, 
+			Sort<PeopleRole> sort = default,
 			Pagination limit = default);
-		Task<ICollection<ShowRole>> GetRolesFromPeople(string showSlug,
-			[Optional] Expression<Func<ShowRole, bool>> where,
-			Expression<Func<ShowRole, object>> sort,
+		Task<ICollection<PeopleRole>> GetRolesFromPeople(string showSlug,
+			[Optional] Expression<Func<PeopleRole, bool>> where,
+			Expression<Func<PeopleRole, object>> sort,
 			Pagination limit = default
-		) => GetRolesFromPeople(showSlug, where, new Sort<ShowRole>(sort), limit);
+		) => GetRolesFromPeople(showSlug, where, new Sort<PeopleRole>(sort), limit);
 
 		// Helpers
 		Task AddShowLink(int showID, int? libraryID, int? collectionID);
