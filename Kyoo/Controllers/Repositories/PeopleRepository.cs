@@ -126,37 +126,39 @@ namespace Kyoo.Controllers
 			return people;
 		}
 		
-		public async Task<ICollection<ShowRole>> GetFromPeople(int peopleID,
-			Expression<Func<ShowRole, bool>> where = null,
-			Sort<ShowRole> sort = default, 
+		public async Task<ICollection<PeopleRole>> GetFromPeople(int peopleID,
+			Expression<Func<PeopleRole, bool>> where = null,
+			Sort<PeopleRole> sort = default, 
 			Pagination limit = default)
 		{
-			ICollection<ShowRole> roles = await ApplyFilters(_database.PeopleRoles.Where(x => x.PeopleID == peopleID)
-					.Select(ShowRole.FromPeopleRole),
-				async id => new ShowRole(await _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id)),
-				x => x.Title,
+			ICollection<PeopleRole> roles = await ApplyFilters(_database.PeopleRoles.Where(x => x.PeopleID == peopleID),
+				id => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id),
+				x => x.Show.Title,
 				where,
 				sort,
 				limit);
 			if (!roles.Any() && await Get(peopleID) == null)
 				throw new ItemNotFound();
+			foreach (PeopleRole role in roles)
+				role.ForPeople = true;
 			return roles;
 		}
 		
-		public async Task<ICollection<ShowRole>> GetFromPeople(string slug,
-			Expression<Func<ShowRole, bool>> where = null,
-			Sort<ShowRole> sort = default, 
+		public async Task<ICollection<PeopleRole>> GetFromPeople(string slug,
+			Expression<Func<PeopleRole, bool>> where = null,
+			Sort<PeopleRole> sort = default, 
 			Pagination limit = default)
 		{
-			ICollection<ShowRole> roles = await ApplyFilters(_database.PeopleRoles.Where(x => x.People.Slug == slug)
-					.Select(ShowRole.FromPeopleRole),
-				async id => new ShowRole(await _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id)),
-				x => x.Title,
+			ICollection<PeopleRole> roles = await ApplyFilters(_database.PeopleRoles.Where(x => x.People.Slug == slug),
+				id => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id),
+				x => x.Show.Title,
 				where,
 				sort,
 				limit);
 			if (!roles.Any() && await Get(slug) == null)
 				throw new ItemNotFound();
+			foreach (PeopleRole role in roles)
+				role.ForPeople = true;
 			return roles;
 		}
 	}

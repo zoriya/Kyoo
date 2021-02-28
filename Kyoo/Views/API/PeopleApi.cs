@@ -29,7 +29,7 @@ namespace Kyoo.Api
 		[HttpGet("{id:int}/role")]
 		[HttpGet("{id:int}/roles")]
 		[Authorize(Policy = "Read")]
-		public async Task<ActionResult<Page<ShowRole>>> GetRoles(int id,
+		public async Task<ActionResult<Page<PeopleRole>>> GetRoles(int id,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
 			[FromQuery] Dictionary<string, string> where,
@@ -37,9 +37,9 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<ShowRole> resources = await _libraryManager.GetRolesFromPeople(id,
-					ApiHelper.ParseWhere<ShowRole>(where),
-					new Sort<ShowRole>(sortBy),
+				ICollection<PeopleRole> resources = await _libraryManager.GetRolesFromPeople(id,
+					ApiHelper.ParseWhere<PeopleRole>(where),
+					new Sort<PeopleRole>(sortBy),
 					new Pagination(limit, afterID));
 
 				return Page(resources, limit);
@@ -57,7 +57,7 @@ namespace Kyoo.Api
 		[HttpGet("{slug}/role")]
 		[HttpGet("{slug}/roles")]
 		[Authorize(Policy = "Read")]
-		public async Task<ActionResult<Page<ShowRole>>> GetRoles(string slug,
+		public async Task<ActionResult<Page<PeopleRole>>> GetRoles(string slug,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
 			[FromQuery] Dictionary<string, string> where,
@@ -65,9 +65,9 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<ShowRole> resources = await _libraryManager.GetRolesFromPeople(slug,
-					ApiHelper.ParseWhere<ShowRole>(where),
-					new Sort<ShowRole>(sortBy),
+				ICollection<PeopleRole> resources = await _libraryManager.GetRolesFromPeople(slug,
+					ApiHelper.ParseWhere<PeopleRole>(where),
+					new Sort<PeopleRole>(sortBy),
 					new Pagination(limit, afterID));
 
 				return Page(resources, limit);
