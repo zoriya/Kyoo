@@ -11,7 +11,7 @@ namespace Kyoo.Tasks
 			new PluginLoader(),
 			new Crawler(),
 			new MetadataProviderLoader(),
-			new ReScan(),
+			// new ReScan(),
 			new ExtractMetadata()
 		};
 	}

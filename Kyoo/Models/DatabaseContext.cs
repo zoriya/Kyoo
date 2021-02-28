@@ -16,13 +16,13 @@ namespace Kyoo
 	{
 		public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) { }
 
-		public DbSet<LibraryDE> Libraries { get; set; }
-		public DbSet<CollectionDE> Collections { get; set; }
-		public DbSet<ShowDE> Shows { get; set; }
+		public DbSet<Library> Libraries { get; set; }
+		public DbSet<Collection> Collections { get; set; }
+		public DbSet<Show> Shows { get; set; }
 		public DbSet<Season> Seasons { get; set; }
 		public DbSet<Episode> Episodes { get; set; }
 		public DbSet<Track> Tracks { get; set; }
-		public DbSet<GenreDE> Genres { get; set; }
+		public DbSet<Genre> Genres { get; set; }
 		public DbSet<People> People { get; set; }
 		public DbSet<Studio> Studios { get; set; }
 		public DbSet<ProviderID> Providers { get; set; }
@@ -30,11 +30,6 @@ namespace Kyoo
 		
 		public DbSet<PeopleRole> PeopleRoles { get; set; }
 		
-		
-		public DbSet<LibraryLink> LibraryLinks { get; set; }
-		public DbSet<CollectionLink> CollectionLinks { get; set; }
-		public DbSet<GenreLink> GenreLinks { get; set; }
-		public DbSet<ProviderLink> ProviderLinks { get; set; }
 
 		public DatabaseContext()
 		{
@@ -56,11 +51,11 @@ namespace Kyoo
 			modelBuilder.Ignore<Show>();
 			modelBuilder.Ignore<Genre>();
 
-			modelBuilder.Entity<LibraryDE>()
+			modelBuilder.Entity<Library>()
 				.Property(x => x.Paths)
 				.HasColumnType("text[]");
 
-			modelBuilder.Entity<ShowDE>()
+			modelBuilder.Entity<Show>()
 				.Property(x => x.Aliases)
 				.HasColumnType("text[]");
 
@@ -72,88 +67,8 @@ namespace Kyoo
 				.Property(t => t.IsForced)
 				.ValueGeneratedNever();
 
-
-			modelBuilder.Entity<GenreLink>()
-				.HasKey(x => new {ShowID = x.ParentID, GenreID = x.ChildID});
-
-			modelBuilder.Entity<CollectionLink>()
-				.HasKey(x => new {CollectionID = x.ParentID, ShowID = x.ChildID});
-			
-			modelBuilder.Entity<ProviderLink>()
-				.HasKey(x => new {LibraryID = x.ParentID, ProviderID = x.ChildID});
-
-
-			modelBuilder.Entity<LibraryDE>()
-				.Ignore(x => x.Shows)
-				.Ignore(x => x.Collections)
-				.Ignore(x => x.Providers);
-			
-			modelBuilder.Entity<CollectionDE>()
-				.Ignore(x => x.Shows)
-				.Ignore(x => x.Libraries);
-			
-			modelBuilder.Entity<ShowDE>()
-				.Ignore(x => x.Genres)
-				.Ignore(x => x.Libraries)
-				.Ignore(x => x.Collections);
-
-			modelBuilder.Entity<PeopleRole>()
-				.Ignore(x => x.Slug);
-
-			modelBuilder.Entity<GenreDE>()
-				.Ignore(x => x.Shows);
-			
-
-			modelBuilder.Entity<LibraryLink>()
-				.HasOne(x => x.Library as LibraryDE)
-				.WithMany(x => x.Links)
-				.OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<LibraryLink>()
-				.HasOne(x => x.Show as ShowDE)
-				.WithMany(x => x.LibraryLinks)
-				.OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<LibraryLink>()
-				.HasOne(x => x.Collection as CollectionDE)
-				.WithMany(x => x.LibraryLinks)
-				.OnDelete(DeleteBehavior.Cascade);
-			
-			modelBuilder.Entity<CollectionLink>()
-				.HasOne(x => x.Parent as CollectionDE)
-				.WithMany(x => x.Links)
-				.OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<CollectionLink>()
-				.HasOne(x => x.Child as ShowDE)
-				.WithMany(x => x.CollectionLinks)
-				.OnDelete(DeleteBehavior.Cascade);
-			
-			modelBuilder.Entity<GenreLink>()
-				.HasOne(x => x.Child as GenreDE)
-				.WithMany(x => x.Links)
-				.OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<GenreLink>()
-				.HasOne(x => x.Parent as ShowDE)
-				.WithMany(x => x.GenreLinks)
-				.OnDelete(DeleteBehavior.Cascade);
-
-			modelBuilder.Entity<ProviderLink>()
-				.HasOne(x => x.Parent as LibraryDE)
-				.WithMany(x => x.ProviderLinks)
-				.OnDelete(DeleteBehavior.Cascade);
-
-			modelBuilder.Entity<Season>()
-				.HasOne(x => x.Show as ShowDE)
-				.WithMany(x => x.Seasons);
-			modelBuilder.Entity<Episode>()
-				.HasOne(x => x.Show as ShowDE)
-				.WithMany(x => x.Episodes);
-			modelBuilder.Entity<PeopleRole>()
-				.HasOne(x => x.Show as ShowDE)
-				.WithMany(x => x.People);
-			
-			
-
 			modelBuilder.Entity<MetadataID>()
-				.HasOne(x => x.Show as ShowDE)
+				.HasOne(x => x.Show)
 				.WithMany(x => x.ExternalIDs)
 				.OnDelete(DeleteBehavior.Cascade);
 			modelBuilder.Entity<MetadataID>()
@@ -169,27 +84,27 @@ namespace Kyoo
 				.WithMany(x => x.ExternalIDs)
 				.OnDelete(DeleteBehavior.Cascade);
 
-			modelBuilder.Entity<CollectionDE>().Property(x => x.Slug).IsRequired();
-			modelBuilder.Entity<GenreDE>().Property(x => x.Slug).IsRequired();
-			modelBuilder.Entity<LibraryDE>().Property(x => x.Slug).IsRequired();
+			modelBuilder.Entity<Collection>().Property(x => x.Slug).IsRequired();
+			modelBuilder.Entity<Genre>().Property(x => x.Slug).IsRequired();
+			modelBuilder.Entity<Library>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<People>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<ProviderID>().Property(x => x.Slug).IsRequired();
-			modelBuilder.Entity<ShowDE>().Property(x => x.Slug).IsRequired();
+			modelBuilder.Entity<Show>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<Studio>().Property(x => x.Slug).IsRequired();
 
-			modelBuilder.Entity<CollectionDE>()
+			modelBuilder.Entity<Collection>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
-			modelBuilder.Entity<GenreDE>()
+			modelBuilder.Entity<Genre>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
-			modelBuilder.Entity<LibraryDE>()
+			modelBuilder.Entity<Library>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
 			modelBuilder.Entity<People>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
-			modelBuilder.Entity<ShowDE>()
+			modelBuilder.Entity<Show>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
 			modelBuilder.Entity<Studio>()
