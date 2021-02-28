@@ -49,7 +49,7 @@ namespace Kyoo.Controllers
 				await _shows.Value.DisposeAsync();
 		}
 
-		public async Task<ICollection<People>> Search(string query)
+		public override async Task<ICollection<People>> Search(string query)
 		{
 			return await _database.People
 				.Where(people => EF.Functions.ILike(people.Name, $"%{query}%"))

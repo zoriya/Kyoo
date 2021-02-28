@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers
 {
-	public class GenreRepository : LocalRepository<Genre, GenreDE>, IGenreRepository
+	public class GenreRepository : LocalRepository<Genre>, IGenreRepository
 	{
 		private bool _disposed;
 		private readonly DatabaseContext _database;
-		protected override Expression<Func<GenreDE, object>> DefaultSort => x => x.Slug;
+		protected override Expression<Func<Genre, object>> DefaultSort => x => x.Slug;
 		
 		
 		public GenreRepository(DatabaseContext database) : base(database)
@@ -41,10 +41,10 @@ namespace Kyoo.Controllers
 			return await _database.Genres
 				.Where(genre => EF.Functions.ILike(genre.Name, $"%{query}%"))
 				.Take(20)
-				.ToListAsync<Genre>();
+				.ToListAsync();
 		}
 
-		public override async Task<GenreDE> Create(GenreDE obj)
+		public override async Task<Genre> Create(Genre obj)
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
@@ -52,15 +52,12 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 
-		public override async Task Delete(GenreDE obj)
+		public override async Task Delete(Genre obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
 			_database.Entry(obj).State = EntityState.Deleted;
-			if (obj.Links != null)
-				foreach (GenreLink link in obj.Links)
-					_database.Entry(link).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
 		}
 	}

@@ -119,12 +119,6 @@ namespace Kyoo
 			modelBuilder.Entity<Episode>()
 				.HasIndex(x => new {x.ShowID, x.SeasonNumber, x.EpisodeNumber, x.AbsoluteNumber})
 				.IsUnique();
-			modelBuilder.Entity<LibraryLink>()
-				.HasIndex(x => new {x.LibraryID, x.ShowID})
-				.IsUnique();
-			modelBuilder.Entity<LibraryLink>()
-				.HasIndex(x => new {x.LibraryID, x.CollectionID})
-				.IsUnique();
 		}
 
 		public override int SaveChanges()

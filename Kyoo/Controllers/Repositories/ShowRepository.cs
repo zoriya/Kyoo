@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
-	public class ShowRepository : LocalRepository<Show, ShowDE>, IShowRepository
+	public class ShowRepository : LocalRepository<Show>, IShowRepository
 	{
 		private bool _disposed;
 		private readonly DatabaseContext _database;
@@ -19,7 +19,7 @@ namespace Kyoo.Controllers
 		private readonly IProviderRepository _providers;
 		private readonly Lazy<ISeasonRepository> _seasons;
 		private readonly Lazy<IEpisodeRepository> _episodes;
-		protected override Expression<Func<ShowDE, object>> DefaultSort => x => x.Title;
+		protected override Expression<Func<Show, object>> DefaultSort => x => x.Title;
 
 		public ShowRepository(DatabaseContext database,
 			IStudioRepository studios,
@@ -81,20 +81,10 @@ namespace Kyoo.Controllers
 				.ToListAsync<Show>();
 		}
 
-		public override async Task<ShowDE> Create(ShowDE obj)
+		public override async Task<Show> Create(Show obj)
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
-			
-			if (obj.GenreLinks != null)
-			{
-				foreach (GenreLink entry in obj.GenreLinks)
-				{
-					if (!(entry.Child is GenreDE))
-						entry.Child = new GenreDE(entry.Child);
-					_database.Entry(entry).State = EntityState.Added;
-				}
-			}
 
 			if (obj.People != null)
 				foreach (PeopleRole entry in obj.People)
@@ -107,17 +97,16 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 		
-		protected override async Task Validate(ShowDE resource)
+		protected override async Task Validate(Show resource)
 		{
 			await base.Validate(resource);
 			
 			if (ShouldValidate(resource.Studio))
 				resource.Studio = await _studios.CreateIfNotExists(resource.Studio, true);
 			
-			if (resource.GenreLinks != null)
-				foreach (GenreLink link in resource.GenreLinks)
-					if (ShouldValidate(link))
-						link.Child = await _genres.CreateIfNotExists(link.Child, true);
+			resource.Genres = await resource.Genres
+				.SelectAsync(x => _genres.CreateIfNotExists(x, true))
+				.ToListAsync();
 
 			if (resource.People != null)
 				foreach (PeopleRole link in resource.People)
@@ -134,32 +123,30 @@ namespace Kyoo.Controllers
 		{
 			if (collectionID != null)
 			{
-				// await _database.CollectionLinks.AddAsync(new CollectionLink {ParentID = collectionID.Value, ChildID = showID});
+				
+				await _database.CollectionLinks.AddAsync(new CollectionLink {ParentID = collectionID.Value, ChildID = showID});
 				await _database.SaveIfNoDuplicates();
 			}
 			if (libraryID != null)
 			{
-				// await _database.LibraryLinks.AddAsync(new LibraryLink {LibraryID = libraryID.Value, ShowID = showID});
+				await _database.LibraryLinks.AddAsync(new LibraryLink {LibraryID = libraryID.Value, ShowID = showID});
 				await _database.SaveIfNoDuplicates();
 			}
 
 			if (libraryID != null && collectionID != null)
 			{
-				// await _database.LibraryLinks.AddAsync(new LibraryLink {LibraryID = libraryID.Value, CollectionID = collectionID.Value});
+				await _database.LibraryLinks.AddAsync(new LibraryLink {LibraryID = libraryID.Value, CollectionID = collectionID.Value});
 				await _database.SaveIfNoDuplicates();
 			}
 		}
 		
-		public override async Task Delete(ShowDE obj)
+		public override async Task Delete(Show obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 			
 			_database.Entry(obj).State = EntityState.Deleted;
 			
-			if (obj.GenreLinks != null)
-				foreach (GenreLink entry in obj.GenreLinks)
-					_database.Entry(entry).State = EntityState.Deleted;
 			
 			if (obj.People != null)
 				foreach (PeopleRole entry in obj.People)
@@ -167,14 +154,6 @@ namespace Kyoo.Controllers
 			
 			if (obj.ExternalIDs != null)
 				foreach (MetadataID entry in obj.ExternalIDs)
-					_database.Entry(entry).State = EntityState.Deleted;
-			
-			if (obj.CollectionLinks != null)
-				foreach (CollectionLink entry in obj.CollectionLinks)
-					_database.Entry(entry).State = EntityState.Deleted;
-			
-			if (obj.LibraryLinks != null)
-				foreach (LibraryLink entry in obj.LibraryLinks)
 					_database.Entry(entry).State = EntityState.Deleted;
 
 			await _database.SaveChangesAsync();
