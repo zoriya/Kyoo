@@ -11,14 +11,12 @@ namespace Kyoo.Controllers
 		{
 			JsonProperty property = base.CreateProperty(member, memberSerialization);
 			
-			// TODO this get called only once and get cached.
-
-			// if (member?.GetCustomAttributes<LoadableRelationAttribute>() != null)
-			// 	property.NullValueHandling = NullValueHandling.Ignore;
-			// if (member?.GetCustomAttributes<SerializeIgnoreAttribute>() != null)
-			// 	property.ShouldSerialize = _ => false;
-			// if (member?.GetCustomAttributes<DeserializeIgnoreAttribute>() != null)
-			// 	property.ShouldDeserialize = _ => false;
+			if (member?.GetCustomAttribute<LoadableRelationAttribute>() != null)
+				property.NullValueHandling = NullValueHandling.Ignore;
+			if (member?.GetCustomAttribute<SerializeIgnoreAttribute>() != null)
+				property.ShouldSerialize = _ => false;
+			if (member?.GetCustomAttribute<DeserializeIgnoreAttribute>() != null)
+				property.ShouldDeserialize = _ => false;
 			return property;
 		}
 	}
