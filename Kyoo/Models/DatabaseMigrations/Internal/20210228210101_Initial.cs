@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace Kyoo.Kyoo.Models.DatabaseMigrations.Internal
+namespace Kyoo.Models.DatabaseMigrations.Internal
 {
     public partial class Initial : Migration
     {

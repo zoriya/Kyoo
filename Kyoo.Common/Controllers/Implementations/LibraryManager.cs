@@ -260,47 +260,49 @@ namespace Kyoo.Controllers
 			await Load(obj as IResource, member);
 			return obj;
 		}
-		
+
 		public Task Load(IResource obj, string member)
 		{
 			return (obj, member) switch
 			{
 				(Library l, nameof(Library.Providers)) => ProviderRepository
-					.GetAll(Utility.ResourceEquals<ProviderID>(obj))
+					.GetAll(x => x.Libraries.Any(y => y.ID == obj.ID || y.Slug == obj.Slug))
 					.Then(x => l.Providers = x), 
-				(Library l, nameof(Library.Shows)) => ShowRepository.GetAll(Utility.ResourceEquals<Show>(obj))
+				(Library l, nameof(Library.Shows)) => ShowRepository
+					.GetAll(x => x.Libraries.Any(y => y.ID == obj.ID || y.Slug == obj.Slug))
 					.Then(x => l.Shows = x), 
 				(Library l, nameof(Library.Collections)) => CollectionRepository
-					.GetAll(Utility.ResourceEquals<Collection>(obj))
+					.GetAll(x => x.Libraries.Any(y => y.ID == obj.ID || y.Slug == obj.Slug))
 					.Then(x => l.Collections = x), 
 				
 				(Collection c, nameof(Library.Shows)) => ShowRepository
-					.GetAll(Utility.ResourceEquals<Show>(obj))
+					.GetAll(x => x.Collections.Any(y => y.ID == obj.ID || y.Slug == obj.Slug))
 					.Then(x => c.Shows = x), 
 				(Collection c, nameof(Collection.Libraries)) => LibraryRepository
-					.GetAll(Utility.ResourceEquals<Library>(obj))
+					.GetAll(x => x.Collections.Any(y => y.ID == obj.ID || y.Slug == obj.Slug))
 					.Then(x => c.Libraries = x), 
 				
 				(Show s, nameof(Show.ExternalIDs)) => ProviderRepository
 					.GetMetadataID(x => x.ShowID == obj.ID)
 					.Then(x => s.ExternalIDs = x),
 				(Show s, nameof(Show.Genres)) => GenreRepository
-					.GetAll(Utility.ResourceEquals<Genre>(obj))
+					.GetAll(x => x.Shows.Any(y => y.ID == obj.ID || y.Slug == obj.Slug))
 					.Then(x => s.Genres = x),
 				(Show s, nameof(Show.People)) => (
 					PeopleRepository.GetFromShow((dynamic)(obj.ID > 0 ? obj.ID : obj.Slug))
-					as Task<ICollection<PeopleRole>>).Then(x => s.People = x),
+					as Task<ICollection<PeopleRole>>)
+					.Then(x => s.People = x),
 				(Show s, nameof(Show.Seasons)) => SeasonRepository
-					.GetAll(Utility.ResourceEquals<Season>(obj))
+					.GetAll(x => x.Show.ID == obj.ID || x.Show.Slug == obj.Slug)
 					.Then(x => s.Seasons = x),
 				(Show s, nameof(Show.Episodes)) => EpisodeRepository
-					.GetAll(Utility.ResourceEquals<Episode>(obj))
+					.GetAll(x => x.Show.ID == obj.ID || x.Show.Slug == obj.Slug)
 					.Then(x => s.Episodes = x),
 				(Show s, nameof(Show.Libraries)) => LibraryRepository
-					.GetAll(Utility.ResourceEquals<Library>(obj))
+					.GetAll(x => x.Shows.Any(y => y.ID == obj.ID || y.Slug == obj.Slug))
 					.Then(x => s.Libraries = x),
 				(Show s, nameof(Show.Collections)) => CollectionRepository
-					.GetAll(Utility.ResourceEquals<Collection>(obj))
+					.GetAll(x => x.Shows.Any(y => y.ID == obj.ID || y.Slug == obj.Slug))
 					.Then(x => s.Collections = x),
 				// TODO Studio loading does not work.
 				(Show s, nameof(Show.Studio)) => StudioRepository
@@ -311,33 +313,37 @@ namespace Kyoo.Controllers
 					.GetMetadataID(x => x.SeasonID == obj.ID)
 					.Then(x => s.ExternalIDs = x),
 				(Season s, nameof(Season.Episodes)) => EpisodeRepository
-					.GetAll(Utility.ResourceEquals<Episode>(obj))
+					.GetAll(x => x.Season.ID == obj.ID || x.Season.Slug == obj.Slug)
 					.Then(x => s.Episodes = x),
 				(Season s, nameof(Season.Show)) => ShowRepository
-					.Get(Utility.ResourceEquals<Show>(obj)).Then(x => s.Show = x),
+					.Get(x => x.Seasons
+						.Any(y => y.ID == obj.ID || y.ShowID == s.ShowID && y.SeasonNumber == s.SeasonNumber))
+					.Then(x => s.Show = x),
 				
+				// TODO maybe add slug support for episodes
 				(Episode e, nameof(Episode.ExternalIDs)) => ProviderRepository
 					.GetMetadataID(x => x.EpisodeID == obj.ID)
 					.Then(x => e.ExternalIDs = x),
 				(Episode e, nameof(Episode.Tracks)) => TrackRepository
-					.GetAll(Utility.ResourceEquals<Track>(obj))
+					.GetAll(x => x.Episode.ID == obj.ID)
 					.Then(x => e.Tracks = x),
 				(Episode e, nameof(Episode.Show)) => ShowRepository
-					.Get(Utility.ResourceEquals<Show>(obj)).Then(x => e.Show = x),
+					.Get(x => x.Episodes.Any(y => y.ID == obj.ID))
+					.Then(x => e.Show = x),
 				(Episode e, nameof(Episode.Season)) => SeasonRepository
-					.Get(Utility.ResourceEquals<Season>(obj))
+					.Get(x => x.Episodes.Any(y => y.ID == e.ID))
 					.Then(x => e.Season = x),
 				
 				(Track t, nameof(Track.Episode)) => EpisodeRepository
-					.Get(Utility.ResourceEquals<Episode>(obj))
+					.Get(x => x.Tracks.Any(y => y.ID == obj.ID))
 					.Then(x => t.Episode = x),
 				
 				(Genre g, nameof(Genre.Shows)) => ShowRepository
-					.GetAll(Utility.ResourceEquals<Show>(obj))
+					.GetAll(x => x.Genres.Any(y => y.ID == obj.ID || y.Slug == obj.Slug))
 					.Then(x => g.Shows = x),
 				
 				(Studio s, nameof(Studio.Shows)) => ShowRepository
-					.GetAll(Utility.ResourceEquals<Show>(obj))
+					.GetAll(x => x.Studio.ID == obj.ID || x.Studio.Slug == obj.Slug)
 					.Then(x => s.Shows = x),
 				
 				(People p, nameof(People.ExternalIDs)) => ProviderRepository

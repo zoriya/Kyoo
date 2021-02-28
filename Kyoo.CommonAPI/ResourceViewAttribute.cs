@@ -24,9 +24,9 @@ namespace Kyoo.CommonApi
 					where.Remove(key);
 			}
 
-			string[] fields = string.Join(',', context.HttpContext.Request.Query["fields"]).Split(',');
-			
-			context.HttpContext.Items["fields"] = fields;
+			string[] fields = context.HttpContext.Request.Query["fields"]
+				.SelectMany(x => x.Split(','))
+				.ToArray();
 			if (context.ActionDescriptor is ControllerActionDescriptor descriptor)
 			{
 				Type type = descriptor.MethodInfo.ReturnType;
@@ -37,17 +37,24 @@ namespace Kyoo.CommonApi
 				PropertyInfo[] properties = type.GetProperties()
 					.Where(x => x.GetCustomAttribute<LoadableRelationAttribute>() != null)
 					.ToArray();
-				foreach (string field in fields)
-				{
-					if (properties.Any(y => string.Equals(y.Name,field, StringComparison.InvariantCultureIgnoreCase)))
-						continue;
-					context.Result = new BadRequestObjectResult(new
+				fields = fields.Select(x =>
 					{
-						Error = $"{field} does not exist on {type.Name}."
-					});
+						string property = properties
+							.FirstOrDefault(y => string.Equals(x, y.Name, StringComparison.InvariantCultureIgnoreCase))
+							?.Name;
+						if (property != null)
+							return property;
+						context.Result = new BadRequestObjectResult(new
+						{
+							Error = $"{x} does not exist on {type.Name}."
+						});
+						return null;
+					})
+					.ToArray();
+				if (context.Result != null)
 					return;
-				}
 			}
+			context.HttpContext.Items["fields"] = fields;
 			base.OnActionExecuting(context);
 		}
 
