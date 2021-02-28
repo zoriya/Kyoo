@@ -71,7 +71,7 @@ namespace Kyoo.Controllers
 
 		private IQueryable<LibraryItem> ItemsQuery 
 			=> _database.Shows
-				.Where(x => !_database.CollectionLinks.Any(y => y.ChildID == x.ID))
+				// .Where(x => !_database.CollectionLinks.Any(y => y.ChildID == x.ID))
 				.Select(LibraryItem.FromShow)
 				.Concat(_database.Collections
 					.Select(LibraryItem.FromCollection));
@@ -114,17 +114,18 @@ namespace Kyoo.Controllers
 		public override Task Delete(LibraryItem obj) => throw new InvalidOperationException();
 
 		private IQueryable<LibraryItem> LibraryRelatedQuery(Expression<Func<LibraryLink, bool>> selector)
-			=> _database.LibraryLinks
-				.Where(selector)
-				.Select(x => x.Show)
-				.Where(x => x != null)
-				.Where(x => !_database.CollectionLinks.Any(y => y.ChildID == x.ID))
-				.Select(LibraryItem.FromShow)
-				.Concat(_database.LibraryLinks
-					.Where(selector)
-					.Select(x => x.Collection)
-					.Where(x => x != null)
-					.Select(LibraryItem.FromCollection));
+			=> throw new NotImplementedException();
+			// => _database.LibraryLinks
+			// 	.Where(selector)
+			// 	.Select(x => x.Show)
+			// 	.Where(x => x != null)
+			// 	.Where(x => !_database.CollectionLinks.Any(y => y.ChildID == x.ID))
+			// 	.Select(LibraryItem.FromShow)
+			// 	.Concat(_database.LibraryLinks
+			// 		.Where(selector)
+			// 		.Select(x => x.Collection)
+			// 		.Where(x => x != null)
+			// 		.Select(LibraryItem.FromCollection));
 
 		public async Task<ICollection<LibraryItem>> GetFromLibrary(int id, 
 			Expression<Func<LibraryItem, bool>> where = null, 
