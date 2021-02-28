@@ -8,11 +8,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers
 {
-	public class CollectionRepository : LocalRepository<Collection, CollectionDE>, ICollectionRepository
+	public class CollectionRepository : LocalRepository<Collection>, ICollectionRepository
 	{
 		private bool _disposed;
 		private readonly DatabaseContext _database;
-		protected override Expression<Func<CollectionDE, object>> DefaultSort => x => x.Name;
+		protected override Expression<Func<Collection, object>> DefaultSort => x => x.Name;
 
 		public CollectionRepository(DatabaseContext database) : base(database)
 		{
@@ -40,10 +40,10 @@ namespace Kyoo.Controllers
 			return await _database.Collections
 				.Where(x => EF.Functions.ILike(x.Name, $"%{query}%"))
 				.Take(20)
-				.ToListAsync<Collection>();
+				.ToListAsync();
 		}
 
-		public override async Task<CollectionDE> Create(CollectionDE obj)
+		public override async Task<Collection> Create(Collection obj)
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
@@ -51,18 +51,12 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 
-		public override async Task Delete(CollectionDE obj)
+		public override async Task Delete(Collection obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
 			_database.Entry(obj).State = EntityState.Deleted;
-			if (obj.Links != null)
-				foreach (CollectionLink link in obj.Links)
-					_database.Entry(link).State = EntityState.Deleted;
-			if (obj.LibraryLinks != null)
-				foreach (LibraryLink link in obj.LibraryLinks)
-					_database.Entry(link).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
 		}
 	}

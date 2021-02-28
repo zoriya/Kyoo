@@ -74,7 +74,7 @@ namespace Kyoo.Controllers
 			                                                        && x.SeasonNumber == seasonNumber);
 		}
 
-		public async Task<ICollection<Season>> Search(string query)
+		public override async Task<ICollection<Season>> Search(string query)
 		{
 			return await _database.Seasons
 				.Where(x => EF.Functions.ILike(x.Title, $"%{query}%"))

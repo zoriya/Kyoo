@@ -86,7 +86,7 @@ namespace Kyoo.Controllers
 			                                                   && x.AbsoluteNumber == absoluteNumber);
 		}
 
-		public async Task<ICollection<Episode>> Search(string query)
+		public override async Task<ICollection<Episode>> Search(string query)
 		{
 			return await _database.Episodes
 				.Where(x => EF.Functions.ILike(x.Title, $"%{query}%"))

@@ -239,6 +239,23 @@ namespace Kyoo
 			return types.FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == genericType);
 		}
 
+		public static async IAsyncEnumerable<T2> SelectAsync<T, T2>(this IEnumerable<T> self, Func<T, Task<T2>> mapper)
+		{
+			using IEnumerator<T> enumerator = self.GetEnumerator();
+
+			while (enumerator.MoveNext())
+				yield return await mapper(enumerator.Current);
+		}
+
+		public static async Task<List<T>> ToListAsync<T>(this IAsyncEnumerable<T> self)
+		{
+			List<T> ret = new();
+			
+			await foreach(T i in self)
+				ret.Add(i);
+			return ret;
+		}
+
 		public static IEnumerable<T> IfEmpty<T>(this IEnumerable<T> self, Action action)
 		{
 			using IEnumerator<T> enumerator = self.GetEnumerator();

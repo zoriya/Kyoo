@@ -19,7 +19,7 @@ namespace Kyoo.Controllers
 			_database = database;
 		}
 		
-		public async Task<ICollection<Studio>> Search(string query)
+		public override async Task<ICollection<Studio>> Search(string query)
 		{
 			return await _database.Studios
 				.Where(x => EF.Functions.ILike(x.Name, $"%{query}%"))

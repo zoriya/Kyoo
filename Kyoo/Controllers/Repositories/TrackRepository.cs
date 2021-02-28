@@ -73,7 +73,7 @@ namespace Kyoo.Controllers
 									 && x.IsForced == forced);
 		}
 
-		public Task<ICollection<Track>> Search(string query)
+		public override Task<ICollection<Track>> Search(string query)
 		{
 			throw new InvalidOperationException("Tracks do not support the search method.");
 		}
