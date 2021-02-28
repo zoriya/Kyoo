@@ -11,7 +11,7 @@ namespace Kyoo.Models
 		public string Name { get; set; }
 		public string[] Paths { get; set; }
 
-		[EditableRelation] public virtual ICollection<ProviderID> Providers { get; set; }
+		[EditableRelation] [LoadableRelation] public virtual ICollection<ProviderID> Providers { get; set; }
 
 		[LoadableRelation] public virtual ICollection<Show> Shows { get; set; }
 		[LoadableRelation] public virtual ICollection<Collection> Collections { get; set; }

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
@@ -8,6 +9,8 @@ namespace Kyoo.Models
 		public string Slug { get; set; }
 		public string Name { get; set; }
 		public string Logo { get; set; }
+		
+		[LoadableRelation] public ICollection<Library> Libraries { get; set; }
 
 		public ProviderID() { }
 
