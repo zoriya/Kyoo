@@ -302,8 +302,9 @@ namespace Kyoo.Controllers
 				(Show s, nameof(Show.Collections)) => CollectionRepository
 					.GetAll(Utility.ResourceEquals<Collection>(obj))
 					.Then(x => s.Collections = x),
+				// TODO Studio loading does not work.
 				(Show s, nameof(Show.Studio)) => StudioRepository
-					.Get(x => x.Shows.Any(Utility.ResourceEqualsFunc<Show>(obj)))
+					.Get(x => x.Shows.Any(y => y.ID == obj.ID || y.Slug == obj.Slug))
 					.Then(x => s.Studio = x),
 				
 				(Season s, nameof(Season.ExternalIDs)) => ProviderRepository

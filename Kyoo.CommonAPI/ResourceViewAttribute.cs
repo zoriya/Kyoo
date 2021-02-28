@@ -24,7 +24,7 @@ namespace Kyoo.CommonApi
 					where.Remove(key);
 			}
 
-			string[] fields = context.HttpContext.Request.Query["fields"].ToArray();
+			string[] fields = string.Join(',', context.HttpContext.Request.Query["fields"]).Split(',');
 			
 			context.HttpContext.Items["fields"] = fields;
 			if (context.ActionDescriptor is ControllerActionDescriptor descriptor)
@@ -68,6 +68,7 @@ namespace Kyoo.CommonApi
 			Type pageType = Utility.GetGenericDefinition(result.DeclaredType, typeof(Page<>));
 
 			
+			// TODO loading is case sensitive. Maybe convert them in the first check.
 			if (pageType != null)
 			{
 				foreach (IResource resource in ((dynamic)result.Value).Items)
