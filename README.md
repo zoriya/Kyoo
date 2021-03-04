@@ -27,7 +27,7 @@ Both of theses repository are needed to fully build Kyoo, when you clone this re
 
 ## Development & Build
 
-To develop for Kyoo, you will need the .NET 3.1 SDK, node & npm for the webapp and cmake & gcc for the transcoder.
+To develop for Kyoo, you will need the .NET 5.0 SDK, node & npm for the webapp and cmake & gcc for the transcoder.
 
 To run the development server, simply open the .sln file with your favorite C# IDE (like Jetbrain's Rider or Visual Studio) and press run or you can use the CLI and use the ```dotnet run -p Kyoo``` command.
 
