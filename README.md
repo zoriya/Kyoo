@@ -28,6 +28,7 @@ Both of theses repository are needed to fully build Kyoo, when you clone this re
 ## Development & Build
 
 To develop for Kyoo, you will need the .NET 5.0 SDK, node & npm for the webapp and cmake & gcc for the transcoder.
+You will also need a running postgresql instance with a user named `kyoo` (you can create a user with this command: ```sudo -u postgres createuser -d kyoo```)
 
 To run the development server, simply open the .sln file with your favorite C# IDE (like Jetbrain's Rider or Visual Studio) and press run or you can use the CLI and use the ```dotnet run -p Kyoo``` command.
 
@@ -35,7 +36,7 @@ To pack the application, run the ```dotnet publish -c Release -o <build_path> Ky
 
 ## Plugins
 
-You can create plugins for Kyoo. To do that, create a C# Library project targetting the .Net Core 3.1 and install the [Kyoo.Common](https://www.nuget.org/packages/Kyoo.Common) package and implement the IPlugin interface.
+You can create plugins for Kyoo. To do that, create a C# Library project targetting the .Net Core 5 and install the [Kyoo.Common](https://www.nuget.org/packages/Kyoo.Common) package and implement the IPlugin interface.
 
 You can create Tasks which can be started manually or automatically at startup or every X hours. You can also create metadata providers that will be used to get informations about shows, seasons, episodes & people.
 You can find an exemple of metadata provider [here](https://github.com/AnonymusRaccoon/Kyoo.TheMovieDB).
