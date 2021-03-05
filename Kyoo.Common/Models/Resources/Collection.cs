@@ -13,6 +13,11 @@ namespace Kyoo.Models
 		[LoadableRelation] public virtual ICollection<Show> Shows { get; set; }
 		[LoadableRelation] public virtual ICollection<Library> Libraries { get; set; }
 
+#if ENABLE_INTERNAL_LINKS
+		[SerializeIgnore] public virtual ICollection<Link<Collection, Show>> ShowLinks { get; set; }
+		[SerializeIgnore] public virtual ICollection<Link<Library, Collection>> LibraryLinks { get; set; }
+#endif
+		
 		public Collection() { }
 
 		public Collection(string slug, string name, string overview, string poster)

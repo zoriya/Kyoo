@@ -18,7 +18,7 @@ namespace Kyoo.Controllers
 		private async Task<T> GetMetadata<T>(Func<IMetadataProvider, Task<T>> providerCall, Library library, string what)
 			where T : new()
 		{
-			T ret = new T();
+			T ret = new();
 
 			IEnumerable<IMetadataProvider> providers = library?.Providers
                    .Select(x => _providers.FirstOrDefault(y => y.Provider.Slug == x.Slug))

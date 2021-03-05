@@ -10,8 +10,6 @@ using Npgsql;
 
 namespace Kyoo
 {
-	//TODO disable lazy loading a provide a LoadAsync method in the library manager.
-	
 	public class DatabaseContext : DbContext
 	{
 		public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) { }
@@ -28,6 +26,7 @@ namespace Kyoo
 		public DbSet<ProviderID> Providers { get; set; }
 		public DbSet<MetadataID> MetadataIds { get; set; }
 		
+		// TODO Many to many with UsingEntity for this.
 		public DbSet<PeopleRole> PeopleRoles { get; set; }
 		
 
@@ -46,11 +45,6 @@ namespace Kyoo
 			modelBuilder.HasPostgresEnum<ItemType>();
 			modelBuilder.HasPostgresEnum<StreamType>();
 
-			modelBuilder.Ignore<Library>();
-			modelBuilder.Ignore<Collection>();
-			modelBuilder.Ignore<Show>();
-			modelBuilder.Ignore<Genre>();
-
 			modelBuilder.Entity<Library>()
 				.Property(x => x.Paths)
 				.HasColumnType("text[]");
@@ -66,6 +60,67 @@ namespace Kyoo
 			modelBuilder.Entity<Track>()
 				.Property(t => t.IsForced)
 				.ValueGeneratedNever();
+
+			modelBuilder.Entity<ProviderID>()
+				.HasMany(x => x.Libraries)
+				.WithMany(x => x.Providers)
+				.UsingEntity<Link<Library, ProviderID>>(
+					y => y
+						.HasOne(x => x.First)
+						.WithMany(x => x.ProviderLinks),
+					y => y
+						.HasOne(x => x.Second)
+						.WithMany(x => x.LibraryLinks),
+					y => y.HasKey(x => Link<Library, ProviderID>.PrimaryKey));
+			
+			modelBuilder.Entity<Collection>()
+				.HasMany(x => x.Libraries)
+				.WithMany(x => x.Collections)
+				.UsingEntity<Link<Library, Collection>>(
+					y => y
+						.HasOne(x => x.First)
+						.WithMany(x => x.CollectionLinks),
+					y => y
+						.HasOne(x => x.Second)
+						.WithMany(x => x.LibraryLinks),
+					y => y.HasKey(x => Link<Library, Collection>.PrimaryKey));
+			
+			modelBuilder.Entity<Show>()
+				.HasMany(x => x.Libraries)
+				.WithMany(x => x.Shows)
+				.UsingEntity<Link<Library, Show>>(
+					y => y
+						.HasOne(x => x.First)
+						.WithMany(x => x.ShowLinks),
+					y => y
+						.HasOne(x => x.Second)
+						.WithMany(x => x.LibraryLinks),
+					y => y.HasKey(x => Link<Library, Show>.PrimaryKey));
+			
+			modelBuilder.Entity<Show>()
+				.HasMany(x => x.Collections)
+				.WithMany(x => x.Shows)
+				.UsingEntity<Link<Collection, Show>>(
+					y => y
+						.HasOne(x => x.First)
+						.WithMany(x => x.ShowLinks),
+					y => y
+						.HasOne(x => x.Second)
+						.WithMany(x => x.CollectionLinks),
+					y => y.HasKey(x => Link<Collection, Show>.PrimaryKey));
+			
+			modelBuilder.Entity<Genre>()
+				.HasMany(x => x.Shows)
+				.WithMany(x => x.Genres)
+				.UsingEntity<Link<Show, Genre>>(
+					y => y
+						.HasOne(x => x.First)
+						.WithMany(x => x.GenreLinks),
+					y => y
+						.HasOne(x => x.Second)
+						.WithMany(x => x.ShowLinks),
+					y => y.HasKey(x => Link<Show, Genre>.PrimaryKey));
+			
 
 			modelBuilder.Entity<MetadataID>()
 				.HasOne(x => x.Show)
@@ -119,6 +174,16 @@ namespace Kyoo
 			modelBuilder.Entity<Episode>()
 				.HasIndex(x => new {x.ShowID, x.SeasonNumber, x.EpisodeNumber, x.AbsoluteNumber})
 				.IsUnique();
+		}
+
+		public T GetTemporaryObject<T>(T model)
+			where T : class, IResource
+		{
+			T tmp = Set<T>().Local.FirstOrDefault(x => x.ID == model.ID);
+			if (tmp != null)
+				return tmp;
+			Entry(model).State = EntityState.Unchanged;
+			return model;
 		}
 
 		public override int SaveChanges()

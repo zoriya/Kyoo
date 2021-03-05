@@ -16,6 +16,12 @@ namespace Kyoo.Models
 		[LoadableRelation] public virtual ICollection<Show> Shows { get; set; }
 		[LoadableRelation] public virtual ICollection<Collection> Collections { get; set; }
 
+#if ENABLE_INTERNAL_LINKS
+		[SerializeIgnore] public virtual ICollection<Link<Library, ProviderID>> ProviderLinks { get; set; }
+		[SerializeIgnore] public virtual ICollection<Link<Library, Show>> ShowLinks { get; set; }
+		[SerializeIgnore] public virtual ICollection<Link<Library, Collection>> CollectionLinks { get; set; }
+#endif
+
 		public Library()  { }
 		
 		public Library(string slug, string name, IEnumerable<string> paths, IEnumerable<ProviderID> providers)
