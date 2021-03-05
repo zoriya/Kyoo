@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
@@ -54,7 +55,10 @@ namespace Kyoo.Controllers
 		public override async Task<Library> Create(Library obj)
 		{
 			await base.Create(obj);
-			_database.Entry(obj).State = EntityState.Added;
+			// _database.Entry(obj).State = EntityState.Added;
+			// _database.Entry(obj).Collection(x => x.Providers).IsModified = true;
+			// _database.Add(obj);
+			// var a = EF.Property<ICollection<Link<LibraryDE, ProviderID>>>(obj, nameof(LibraryDE.LibraryLinks));
 			await _database.SaveChangesAsync($"Trying to insert a duplicated library (slug {obj.Slug} already exists).");
 			return obj;
 		}
@@ -70,9 +74,12 @@ namespace Kyoo.Controllers
 			
 			await base.Validate(resource);
 
-			resource.Providers = await resource.Providers
-				.SelectAsync(x => _providers.CreateIfNotExists(x, true))
-				.ToListAsync();
+			if (resource.Providers != null)
+			{
+				resource.Providers = await resource.Providers
+					.SelectAsync(x => _providers.CreateIfNotExists(x, true))
+					.ToListAsync();
+			}
 		}
 
 		public override async Task Delete(Library obj)

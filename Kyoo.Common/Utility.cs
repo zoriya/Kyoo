@@ -239,16 +239,25 @@ namespace Kyoo
 			return types.FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == genericType);
 		}
 
-		public static async IAsyncEnumerable<T2> SelectAsync<T, T2>(this IEnumerable<T> self, Func<T, Task<T2>> mapper)
+		public static async IAsyncEnumerable<T2> SelectAsync<T, T2>([NotNull] this IEnumerable<T> self, 
+			[NotNull] Func<T, Task<T2>> mapper)
 		{
+			if (self == null)
+				throw new ArgumentNullException(nameof(self));
+			if (mapper == null)
+				throw new ArgumentNullException(nameof(mapper));
+			
 			using IEnumerator<T> enumerator = self.GetEnumerator();
 
 			while (enumerator.MoveNext())
 				yield return await mapper(enumerator.Current);
 		}
 
-		public static async Task<List<T>> ToListAsync<T>(this IAsyncEnumerable<T> self)
+		public static async Task<List<T>> ToListAsync<T>([NotNull] this IAsyncEnumerable<T> self)
 		{
+			if (self == null)
+				throw new ArgumentNullException(nameof(self));
+			
 			List<T> ret = new();
 			
 			await foreach(T i in self)
@@ -482,11 +491,14 @@ namespace Kyoo
 			Type type = GetEnumerableType(eno);
 			if (typeof(IResource).IsAssignableFrom(type))
 				return ResourceEquals(eno.Cast<IResource>(), ens.Cast<IResource>());
-			Type genericDefinition = GetGenericDefinition(type, typeof(IResourceLink<,>));
-			if (genericDefinition == null)
-				return RunGenericMethod<bool>(typeof(Enumerable), "SequenceEqual", type, first, second);
-			Type[] types = genericDefinition.GetGenericArguments().Prepend(type).ToArray();
-			return RunGenericMethod<bool>(typeof(Utility), "LinkEquals", types, eno, ens);
+			return RunGenericMethod<bool>(typeof(Enumerable), "SequenceEqual", type, first, second);
+		}
+
+		public static void Test()
+		{
+			#if INTERNAL_LINKS
+			Console.WriteLine("Lib test");
+#endif
 		}
 		
 		public static bool ResourceEquals<T>([CanBeNull] T first, [CanBeNull] T second)
@@ -522,20 +534,7 @@ namespace Kyoo
 				return true;
 			return firstID == secondID;
 		}
-		
-		public static bool LinkEquals<T, T1, T2>([CanBeNull] IEnumerable<T> first, [CanBeNull] IEnumerable<T> second) 
-			where T : IResourceLink<T1, T2>
-			where T1 : IResource
-			where T2 : IResource
-		{
-			if (ReferenceEquals(first, second))
-				return true;
-			if (first == null || second == null)
-				return false;
-			return first.SequenceEqual(second, new LinkComparer<T, T1, T2>());
-		}
-		
-		
+
 		public static Expression<T> Convert<T>([CanBeNull] this Expression expr)
 			where T : Delegate
 		{

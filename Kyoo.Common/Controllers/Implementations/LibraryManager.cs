@@ -349,6 +349,10 @@ namespace Kyoo.Controllers
 				(People p, nameof(People.Roles)) => PeopleRepository
 					.GetFromPeople(obj.ID)
 					.Then(x => p.Roles = x),
+				
+				(ProviderID p, nameof(ProviderID.Libraries)) => LibraryRepository
+					.GetAll(x => x.Providers.Any(y => y.ID == obj.ID))
+					.Then(x => p.Libraries = x),
 
 				_ => throw new ArgumentException($"Couldn't find a way to load {member} of {obj.Slug}.")
 			};

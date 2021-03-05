@@ -104,10 +104,13 @@ namespace Kyoo.Controllers
 			
 			if (ShouldValidate(resource.Studio))
 				resource.Studio = await _studios.CreateIfNotExists(resource.Studio, true);
-			
-			resource.Genres = await resource.Genres
-				.SelectAsync(x => _genres.CreateIfNotExists(x, true))
-				.ToListAsync();
+
+			if (resource.Genres != null)
+			{
+				resource.Genres = await resource.Genres
+					.SelectAsync(x => _genres.CreateIfNotExists(x, true))
+					.ToListAsync();
+			}
 
 			if (resource.People != null)
 				foreach (PeopleRole link in resource.People)
@@ -125,25 +128,29 @@ namespace Kyoo.Controllers
 			Show show = await Get(showID);
 			if (collectionID != null)
 			{
+				Collection collection = _database.GetTemporaryObject(new Collection {ID = collectionID.Value});
+				
 				show.Collections ??= new List<Collection>();
-				show.Collections.Add(new Collection {ID = collectionID.Value});
-				await _database.SaveChangesAsync();
+				show.Collections.Add(collection);
+				await _database.SaveIfNoDuplicates();
+
+				if (libraryID != null)
+				{
+					Library library = await _database.Libraries.FirstOrDefaultAsync(x => x.ID == libraryID.Value);
+					if (library == null)
+						throw new ItemNotFound($"No library found with the ID {libraryID.Value}");
+					library.Collections ??= new List<Collection>();
+					library.Collections.Add(collection);
+					await _database.SaveIfNoDuplicates();
+				}
 			}
 			if (libraryID != null)
 			{
+				Library library = _database.GetTemporaryObject(new Library {ID = libraryID.Value});
+				
 				show.Libraries ??= new List<Library>();
-				show.Libraries.Add(new Library {ID = libraryID.Value});
-				await _database.SaveChangesAsync();
-			}
-
-			if (libraryID != null && collectionID != null)
-			{
-				Library library = await _database.Libraries.FirstOrDefaultAsync(x => x.ID == libraryID.Value);
-				if (library == null)
-					throw new ItemNotFound($"No library found with the ID {libraryID.Value}");
-				library.Collections ??= new List<Collection>();
-				library.Collections.Add(new Collection {ID = collectionID.Value});
-				await _database.SaveChangesAsync();
+				show.Libraries.Add(library);
+				await _database.SaveIfNoDuplicates();
 			}
 		}
 		

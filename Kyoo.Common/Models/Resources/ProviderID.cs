@@ -10,8 +10,12 @@ namespace Kyoo.Models
 		public string Name { get; set; }
 		public string Logo { get; set; }
 		
-		[LoadableRelation] public ICollection<Library> Libraries { get; set; }
-
+		[LoadableRelation] public virtual ICollection<Library> Libraries { get; set; }
+		
+#if ENABLE_INTERNAL_LINKS
+		[SerializeIgnore] public virtual ICollection<Link<Library, ProviderID>> LibraryLinks { get; set; }
+#endif
+		
 		public ProviderID() { }
 
 		public ProviderID(string name, string logo)

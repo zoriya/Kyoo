@@ -10,7 +10,12 @@ namespace Kyoo.Models
 		public string Name { get; set; }
 		
 		[LoadableRelation] public virtual ICollection<Show> Shows { get; set; }
-
+		
+#if ENABLE_INTERNAL_LINKS
+		[SerializeIgnore] public virtual ICollection<Link<Show, Genre>> ShowLinks { get; set; }
+#endif
+		
+		
 		public Genre() {}
 		
 		public Genre(string name)

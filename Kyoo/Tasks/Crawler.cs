@@ -122,6 +122,7 @@ namespace Kyoo.Controllers
 					.GroupBy(Path.GetDirectoryName)
 					.ToList();
 
+				// TODO If the library's path end with a /, the regex is broken.
 				IEnumerable<string> tasks = shows.Select(x => x.First());
 				foreach (string[] showTasks in tasks.BatchBy(_parallelTasks))
 					await Task.WhenAll(showTasks
