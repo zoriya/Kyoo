@@ -1,16 +1,17 @@
-import {Directive, ElementRef, HostListener, Input} from '@angular/core';
+import { Directive, ElementRef, HostListener, Input } from "@angular/core";
 
+/* tslint:disable:directive-selector */
 @Directive({
-	selector: 'img[fallback]'
+	selector: "img[fallback]"
 })
-export class FallbackDirective 
+export class FallbackDirective
 {
 	@Input() fallback: string;
-	
+
 	constructor(private img: ElementRef) { }
-	
+
 	@HostListener("error")
-	onError()
+	onError(): void
 	{
 		const html: HTMLImageElement = this.img.nativeElement;
 		html.src = this.fallback;
