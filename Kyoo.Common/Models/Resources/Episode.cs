@@ -10,10 +10,10 @@ namespace Kyoo.Models
 	{
 		public int ID { get; set; }
 		public string Slug => Show != null ? GetSlug(Show.Slug, SeasonNumber, EpisodeNumber) : ID.ToString();
-		public int ShowID { get; set; }
-		[LoadableRelation] public virtual Show Show { get; set; }
-		public int? SeasonID { get; set; }
-		[LoadableRelation] public virtual Season Season { get; set; }
+		[SerializeIgnore] public int ShowID { get; set; }
+		[LoadableRelation(nameof(ShowID))] public virtual Show Show { get; set; }
+		[SerializeIgnore] public int? SeasonID { get; set; }
+		[LoadableRelation(nameof(SeasonID))] public virtual Season Season { get; set; }
 
 		public int SeasonNumber { get; set; } = -1;
 		public int EpisodeNumber { get; set; } = -1;

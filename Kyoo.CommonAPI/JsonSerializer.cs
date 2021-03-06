@@ -10,9 +10,21 @@ namespace Kyoo.Controllers
 		protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
 		{
 			JsonProperty property = base.CreateProperty(member, memberSerialization);
-			
-			if (member?.GetCustomAttribute<LoadableRelationAttribute>() != null)
-				property.NullValueHandling = NullValueHandling.Ignore;
+
+			LoadableRelationAttribute relation = member?.GetCustomAttribute<LoadableRelationAttribute>();
+			if (relation != null)
+			{
+				if (relation.RelationID == null)
+					property.ShouldSerialize = x => member.GetValue(x) != null;
+				else
+					property.ShouldSerialize = x =>
+					{
+						if (member.GetValue(x) != null)
+							return true;
+						return x.GetType().GetProperty(relation.RelationID)?.GetValue(x) != null;
+					};
+			}
+
 			if (member?.GetCustomAttribute<SerializeIgnoreAttribute>() != null)
 				property.ShouldSerialize = _ => false;
 			if (member?.GetCustomAttribute<DeserializeIgnoreAttribute>() != null)

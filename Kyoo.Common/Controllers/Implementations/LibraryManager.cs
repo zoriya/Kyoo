@@ -306,10 +306,13 @@ namespace Kyoo.Controllers
 				(Show s, nameof(Show.Collections)) => CollectionRepository
 					.GetAll(x => x.Shows.Any(y => y.ID == obj.ID))
 					.Then(x => s.Collections = x),
-				// TODO Studio loading does not work.
 				(Show s, nameof(Show.Studio)) => StudioRepository
 					.Get(x => x.Shows.Any(y => y.ID == obj.ID))
-					.Then(x => s.Studio = x),
+					.Then(x =>
+					{
+						s.Studio = x;
+						s.StudioID = x?.ID ?? 0;
+					}),
 				
 				(Season s, nameof(Season.ExternalIDs)) => ProviderRepository
 					.GetMetadataID(x => x.SeasonID == obj.ID)
@@ -319,7 +322,11 @@ namespace Kyoo.Controllers
 					.Then(x => s.Episodes = x),
 				(Season s, nameof(Season.Show)) => ShowRepository
 					.Get(x => x.Seasons.Any(y => y.ID == obj.ID))
-					.Then(x => s.Show = x),
+					.Then(x =>
+					{
+						s.Show = x;
+						s.ShowID = x?.ID ?? 0;
+					}),
 				
 				(Episode e, nameof(Episode.ExternalIDs)) => ProviderRepository
 					.GetMetadataID(x => x.EpisodeID == obj.ID)
@@ -329,14 +336,26 @@ namespace Kyoo.Controllers
 					.Then(x => e.Tracks = x),
 				(Episode e, nameof(Episode.Show)) => ShowRepository
 					.Get(x => x.Episodes.Any(y => y.ID == obj.ID))
-					.Then(x => e.Show = x),
+					.Then(x =>
+					{
+						e.Show = x;
+						e.ShowID = x?.ID ?? 0;
+					}),
 				(Episode e, nameof(Episode.Season)) => SeasonRepository
 					.Get(x => x.Episodes.Any(y => y.ID == e.ID))
-					.Then(x => e.Season = x),
+					.Then(x =>
+					{
+						e.Season = x;
+						e.SeasonID = x?.ID ?? 0;
+					}),
 				
 				(Track t, nameof(Track.Episode)) => EpisodeRepository
 					.Get(x => x.Tracks.Any(y => y.ID == obj.ID))
-					.Then(x => t.Episode = x),
+					.Then(x =>
+					{
+						t.Episode = x;
+						t.EpisodeID = x?.ID ?? 0;
+					}),
 				
 				(Genre g, nameof(Genre.Shows)) => ShowRepository
 					.GetAll(x => x.Genres.Any(y => y.ID == obj.ID))
