@@ -1,9 +1,9 @@
-import {Season} from "./season";
-import {Genre} from "./genre";
-import {People} from "./people";
-import {Studio} from "./studio";
-import {ExternalID} from "../external-id";
-import {IResource} from "./resource";
+import { Season } from "./season";
+import { Genre } from "./genre";
+import { People } from "./people";
+import { Studio } from "./studio";
+import { ExternalID } from "../external-id";
+import { IResource } from "./resource";
 
 export interface Show extends IResource
 {
@@ -18,7 +18,7 @@ export interface Show extends IResource
 	trailerUrl: string;
 	isMovie: boolean;
 	startYear: number;
-	endYear : number;
+	endYear: number;
 	poster: string;
 	logo: string;
 	backdrop: string;
@@ -38,7 +38,7 @@ export interface ShowRole extends IResource
 	trailerUrl: string;
 	isMovie: boolean;
 	startYear: number;
-	endYear : number;
+	endYear: number;
 	poster: string;
 	logo: string;
 	backdrop: string;

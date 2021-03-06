@@ -9,7 +9,7 @@ export interface WatchItem
 	title: string;
 	slug: string;
 	duration: number;
-	releaseDate;
+	releaseDate: string;
 	isMovie: boolean;
 
 	previousEpisode: Episode;

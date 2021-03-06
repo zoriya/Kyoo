@@ -15,7 +15,7 @@ export class StartupService
 		if (window.location.pathname.startsWith("/watch/"))
 		{
 			this.loadedFromWatch = true;
-			this.show = window.location.pathname.match(/^\/watch\/(?<show>.*)(-s\d+e\d+)+?$/).groups["show"];
+			this.show = window.location.pathname.match(/^\/watch\/(?<show>.*)(-s\d+e\d+)+?$/).groups.show;
 		}
 		return Promise.resolve(null);
 	}

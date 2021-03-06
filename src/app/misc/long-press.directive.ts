@@ -1,8 +1,10 @@
 import { Directive, Output, EventEmitter, HostListener, HostBinding, ElementRef } from "@angular/core";
 import MouseDownEvent = JQuery.MouseDownEvent;
 import TouchStartEvent = JQuery.TouchStartEvent;
+import ContextMenuEvent = JQuery.ContextMenuEvent;
+import ClickEvent = JQuery.ClickEvent;
 
-function cancelClick(event): void
+function cancelClick(event: ClickEvent): void
 {
 	event.preventDefault();
 	event.stopPropagation();
@@ -19,7 +21,10 @@ export class LongPressDirective
 
 	constructor(private ref: ElementRef) {}
 
-	@HostBinding('class.longpress')
+	@HostBinding("style.-webkit-touch-callout")
+	defaultLongTouchEvent: string = "none";
+
+	@HostBinding("class.longpress")
 	get longPress(): boolean
 	{
 		return this._timer !== null;
@@ -29,10 +34,10 @@ export class LongPressDirective
 	@HostListener("mousedown", ["$event"])
 	start(event: MouseDownEvent | TouchStartEvent): void
 	{
-		const startBox = event.target.getBoundingClientRect();
+		const startBox: DOMRect = event.target.getBoundingClientRect();
 		this._timer = setTimeout(() =>
 		{
-			const endBox = event.target.getBoundingClientRect();
+			const endBox: DOMRect = event.target.getBoundingClientRect();
 			if (startBox.top !== endBox.top || startBox.left !== endBox.left)
 				return;
 			this.longPressed.emit();
@@ -63,11 +68,8 @@ export class LongPressDirective
 	}
 
 	@HostListener("contextmenu", ["$event"])
-	context(event): void
+	context(event: ContextMenuEvent): void
 	{
 		event.preventDefault();
 	}
-
-	@HostBinding("style.-webkit-touch-callout")
-	defaultLongTouchEvent: string = "none";
 }

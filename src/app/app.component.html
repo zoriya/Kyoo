@@ -15,7 +15,7 @@
 			<ul class="navbar-nav flex-row flex-nowrap ml-auto">
 				<li class="nav-item icon searchbar">
 					<mat-icon matTooltipPosition="below" matTooltip="Search" (click)="openSearch()">search</mat-icon>
-					<input placeholder="Search" id="search" type="search" (input)="onUpdateValue($event)"/>
+					<input placeholder="Search" id="search" type="search" (input)="onUpdateValue($any($event))"/>
 				</li>
 
 				<li class="nav-item" *ngIf="!this.isAuthenticated else accountDrop">

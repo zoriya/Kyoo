@@ -25,7 +25,7 @@ import { AuthGuard } from "./misc/authenticated-guard.service";
 import { AuthorizerInterceptor } from "./misc/authorizer-interceptor.service";
 import { UnauthorizedComponent } from "./unauthorized/unauthorized.component";
 
-export function loadConfig(oidcConfigService: OidcConfigService)
+export function loadConfig(oidcConfigService: OidcConfigService): () => Promise<any>
 {
 	return () => oidcConfigService.withConfig({
 		stsServer: window.location.origin,
@@ -91,7 +91,7 @@ export function loadConfig(oidcConfigService: OidcConfigService)
 		}
 	]
 })
-export class AuthModule 
+export class AuthModule
 {
 	constructor(http: HttpClient)
 	{

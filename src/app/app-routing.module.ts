@@ -1,10 +1,10 @@
-import { NgModule } from '@angular/core';
+import { NgModule } from "@angular/core";
 import { RouteReuseStrategy, RouterModule, Routes } from "@angular/router";
-import { ItemsGridComponent } from './components/items-grid/items-grid.component';
+import { ItemsGridComponent } from "./components/items-grid/items-grid.component";
 import { CustomRouteReuseStrategy } from "./misc/custom-route-reuse-strategy";
-import { NotFoundComponent } from './pages/not-found/not-found.component';
-import { PageResolver } from './services/page-resolver.service';
-import { ShowDetailsComponent } from './pages/show-details/show-details.component';
+import { NotFoundComponent } from "./pages/not-found/not-found.component";
+import { PageResolver } from "./services/page-resolver.service";
+import { ShowDetailsComponent } from "./pages/show-details/show-details.component";
 import { AuthGuard } from "./auth/misc/authenticated-guard.service";
 import { LibraryItem } from "./models/resources/library-item";
 import {
@@ -92,7 +92,7 @@ const routes: Routes = [
 
 	// TODO implement an home page.
 
-	{path: "", pathMatch: 'full', redirectTo: "/browse"},
+	{path: "", pathMatch: "full", redirectTo: "/browse"},
 	{path: "**", component: NotFoundComponent}
 ];
 

@@ -1,6 +1,6 @@
 import { Episode } from "./episode";
-import {ExternalID} from "../external-id";
-import {IResource} from "./resource";
+import { ExternalID } from "../external-id";
+import { IResource } from "./resource";
 
 export interface Season extends IResource
 {
@@ -8,5 +8,5 @@ export interface Season extends IResource
 	title: string;
 	overview: string;
 	episodes: Episode[];
-	externalIDs: ExternalID[]
+	externalIDs: ExternalID[];
 }

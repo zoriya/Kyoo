@@ -1,17 +1,17 @@
-import {Component, Input} from "@angular/core";
-import {Collection} from "../../models/resources/collection";
-import {DomSanitizer} from "@angular/platform-browser";
-import {HorizontalScroller} from "../../misc/horizontal-scroller";
-import {Page} from "../../models/page";
-import {HttpClient} from "@angular/common/http";
-import {Show, ShowRole} from "../../models/resources/show";
-import {LibraryItem} from "../../models/resources/library-item";
-import {ItemsUtils} from "../../misc/items-utils";
+import { Component, Input } from "@angular/core";
+import { Collection } from "../../models/resources/collection";
+import { DomSanitizer, SafeUrl } from "@angular/platform-browser";
+import { HorizontalScroller } from "../../misc/horizontal-scroller";
+import { Page } from "../../models/page";
+import { HttpClient } from "@angular/common/http";
+import { Show, ShowRole } from "../../models/resources/show";
+import { LibraryItem } from "../../models/resources/library-item";
+import { ItemsUtils } from "../../misc/items-utils";
 
 @Component({
-	selector: 'app-items-list',
-	templateUrl: './items-list.component.html',
-	styleUrls: ['./items-list.component.scss']
+	selector: "app-items-list",
+	templateUrl: "./items-list.component.html",
+	styleUrls: ["./items-list.component.scss"]
 })
 export class ItemsListComponent extends HorizontalScroller
 {
@@ -22,17 +22,17 @@ export class ItemsListComponent extends HorizontalScroller
 		super();
 	}
 
-	getThumb(slug: string)
+	getThumb(slug: string): SafeUrl
 	{
 		return this.sanitizer.bypassSecurityTrustStyle("url(/poster/" + slug + ")");
 	}
 
-	getDate(item: LibraryItem | Show | ShowRole | Collection)
+	getDate(item: LibraryItem | Show | ShowRole | Collection): string
 	{
 		return ItemsUtils.getDate(item);
 	}
 
-	getLink(item: LibraryItem | Show | ShowRole | Collection)
+	getLink(item: LibraryItem | Show | ShowRole | Collection): string
 	{
 		return ItemsUtils.getLink(item);
 	}

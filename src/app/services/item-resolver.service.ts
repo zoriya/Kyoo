@@ -10,7 +10,7 @@ export class ItemResolver
 {
 	public static resolvers: any[] = [];
 
-	static forResource<T>(resource: string)
+	static forResource<T>(resource: string): any
 	{
 		@Injectable()
 		class Resolver implements Resolve<T>

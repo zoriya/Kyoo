@@ -1,4 +1,4 @@
-import {IResource} from "./resource";
+import { IResource } from "./resource";
 
 export enum ItemType
 {
@@ -9,12 +9,12 @@ export enum ItemType
 
 export interface LibraryItem extends IResource
 {
-	title: string
-	overview: string
-	status: string
-	trailerUrl: string
-	startYear: number
-	endYear: number
-	poster: string
-	type: ItemType
+	title: string;
+	overview: string;
+	status: string;
+	trailerUrl: string;
+	startYear: number;
+	endYear: number;
+	poster: string;
+	type: ItemType;
 }

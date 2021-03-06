@@ -42,14 +42,12 @@
             "trace"
         ],
         "no-empty": false,
-        "no-inferrable-types": [
-            true,
-            "ignore-params"
-        ],
+        "no-inferrable-types": false,
         "no-non-null-assertion": true,
         "no-redundant-jsdoc": true,
+		"jsdoc-format": false,
         "no-switch-case-fall-through": true,
-        "no-var-requires": false,
+        "no-var-requires": true,
         "object-literal-key-quotes": [
             true,
             "as-needed"
@@ -74,7 +72,10 @@
         },
         "typedef": [
             true,
-            "call-signature"
+            "call-signature",
+			"parameter",
+			"property-declaration",
+			"variable-declaration"
         ],
         "typedef-whitespace": {
             "options": [
@@ -98,7 +99,8 @@
             "options": [
                 "ban-keywords",
                 "check-format",
-                "allow-pascal-case"
+				"allow-leading-underscore",
+				"require-const-for-all-caps"
             ]
         },
         "whitespace": {

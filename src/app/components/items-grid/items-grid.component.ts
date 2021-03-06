@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { ActivatedRoute, ActivatedRouteSnapshot, Params, Router } from "@angular/router";
-import { DomSanitizer } from '@angular/platform-browser';
+import { DomSanitizer, SafeStyle } from "@angular/platform-browser";
 import { Genre } from "../../models/resources/genre";
 import { LibraryItem } from "../../models/resources/library-item";
 import { Page } from "../../models/page";
@@ -14,36 +14,16 @@ import { Studio } from "../../models/resources/studio";
 import { ItemsUtils } from "../../misc/items-utils";
 import { PeopleService, StudioService } from "../../services/api.service";
 import { PreLoaderService } from "../../services/pre-loader.service";
-import { Observable } from "rxjs"
+import { Observable } from "rxjs";
 import { catchError, filter, map, mergeAll } from "rxjs/operators";
 
 @Component({
-	selector: 'app-items-grid',
-	templateUrl: './items-grid.component.html',
-	styleUrls: ['./items-grid.component.scss']
+	selector: "app-items-grid",
+	templateUrl: "./items-grid.component.html",
+	styleUrls: ["./items-grid.component.scss"]
 })
 export class ItemsGridComponent implements OnInit
 {
-	@Input() page: Page<LibraryItem | Show | ShowRole | Collection>;
-	@Input() sortEnabled: boolean = true;
-
-	complexFiltersEnabled: boolean;
-
-	sortType: string = "title";
-	sortKeys: string[] = ["title", "start year", "end year"]
-	sortUp: boolean = true;
-
-	public static readonly showOnlyFilters: string[] = ["genres", "studio", "people"]
-	public static readonly filters: string[] = [].concat(...ItemsGridComponent.showOnlyFilters)
-	filters: {genres: Genre[], studio: Studio, people: People[]} = {genres: [], studio: null, people: []};
-
-	genres: Genre[] = [];
-
-	studioForm: FormControl = new FormControl();
-	filteredStudios: Observable<Studio[]>;
-
-	peopleForm: FormControl = new FormControl();
-	filteredPeople: Observable<People[]>;
 
 	constructor(private route: ActivatedRoute,
 	            private sanitizer: DomSanitizer,
@@ -70,57 +50,103 @@ export class ItemsGridComponent implements OnInit
 		});
 	}
 
-	updateGenresFilterFromQuery(query: Params)
+	public static readonly showOnlyFilters: string[] = ["genres", "studio", "people"];
+	public static readonly filters: string[] = [].concat(...ItemsGridComponent.showOnlyFilters);
+	@Input() page: Page<LibraryItem | Show | ShowRole | Collection>;
+	@Input() sortEnabled: boolean = true;
+
+	complexFiltersEnabled: boolean;
+
+	sortType: string = "title";
+	sortKeys: string[] = ["title", "start year", "end year"];
+	sortUp: boolean = true;
+	filters: {genres: Genre[], studio: Studio, people: People[]} = {genres: [], studio: null, people: []};
+
+	genres: Genre[] = [];
+
+	studioForm: FormControl = new FormControl();
+	filteredStudios: Observable<Studio[]>;
+
+	peopleForm: FormControl = new FormControl();
+	filteredPeople: Observable<People[]>;
+
+	/*
+	 * /browse           -> /api/items | /api/shows
+	 * /browse/:library  -> /api/library/:slug/items | /api/library/:slug/shows
+	 * /genre/:slug      -> /api/shows
+	 * /studio/:slug     -> /api/shows
+	 *
+	 * /collection/:slug -> /api/collection/:slug/shows   |> /api/collections/:slug/shows
+	 * /people/:slug     -> /api/people/:slug/roles       |> /api/people/:slug/roles
+	 */
+
+	static routeMapper(route: ActivatedRouteSnapshot, endpoint: string, query: [string, string][]): string
+	{
+		const queryParams: [string, string][] = Object.entries(route.queryParams)
+			.filter(x => ItemsGridComponent.filters.includes(x[0]) || x[0] === "sortBy");
+		if (query)
+			queryParams.push(...query);
+
+		if (queryParams.some(x => ItemsGridComponent.showOnlyFilters.includes(x[0])))
+			endpoint = endpoint.replace(/items?$/, "show");
+
+		const params: string = queryParams.length > 0
+			? "?" + queryParams.map(x => `${x[0]}=${x[1]}`).join("&")
+			: "";
+		return `api/${endpoint}${params}`;
+	}
+
+	updateGenresFilterFromQuery(query: Params): void
 	{
 		let selectedGenres: string[] = [];
 		if (query.genres?.startsWith("ctn:"))
-			selectedGenres = query.genres.substr(4).split(',');
+			selectedGenres = query.genres.substr(4).split(",");
 		else if (query.genres != null)
-			selectedGenres = query.genres.split(',');
+			selectedGenres = query.genres.split(",");
 		if (this.router.url.startsWith("/genre"))
 			selectedGenres.push(this.route.snapshot.params.slug);
 
 		this.filters.genres = this.genres.filter(x => selectedGenres.includes(x.slug));
 	}
 
-	updateStudioFilterFromQuery(query: Params)
+	updateStudioFilterFromQuery(query: Params): void
 	{
 		const slug: string = this.router.url.startsWith("/studio") ? this.route.snapshot.params.slug : query.studio;
 
-		if (slug && this.filters.studio?.slug != slug)
+		if (slug && this.filters.studio?.slug !== slug)
 		{
-			this.filters.studio = {id: 0, slug: slug, name: slug};
+			this.filters.studio = {id: 0, slug, name: slug};
 			this.studioApi.get(slug).subscribe(x => this.filters.studio = x);
 		}
 		else if (!slug)
 			this.filters.studio = null;
 	}
 
-	updatePeopleFilterFromQuery(query: Params)
+	updatePeopleFilterFromQuery(query: Params): void
 	{
 		let slugs: string[] = [];
 		if (query.people != null)
 		{
 			if (query.people.startsWith("ctn:"))
-				slugs = query.people.substr(4).split(',');
+				slugs = query.people.substr(4).split(",");
 			else
-				slugs = query.people.split(',');
+				slugs = query.people.split(",");
 		}
 		else if (this.route.snapshot.params.slug && this.router.url.startsWith("/people"))
 			slugs = [this.route.snapshot.params.slug];
 
 		this.filters.people = slugs.map(x => ({slug: x, name: x} as People));
-		for (let slug of slugs)
+		for (const slug of slugs)
 		{
 			this.peopleApi.get(slug).subscribe(x =>
 			{
-				let i: number = this.filters.people.findIndex(x => x.slug == slug);
-				this.filters.people[i] = x
+				const i: number = this.filters.people.findIndex(y => y.slug === slug);
+				this.filters.people[i] = x;
 			});
 		}
 	}
 
-	ngOnInit()
+	ngOnInit(): void
 	{
 		this.filteredStudios = this.studioForm.valueChanges
 			.pipe(
@@ -149,38 +175,12 @@ export class ItemsGridComponent implements OnInit
 			);
 	}
 
-	shouldDisplayNoneStudio()
+	shouldDisplayNoneStudio(): boolean
 	{
-		return this.studioForm.value == '' || typeof this.studioForm.value != "string";
+		return this.studioForm.value === "" || typeof this.studioForm.value !== "string";
 	}
 
-	/*
-	 * /browse           -> /api/items | /api/shows
-	 * /browse/:library  -> /api/library/:slug/items | /api/library/:slug/shows
-	 * /genre/:slug      -> /api/shows
-	 * /studio/:slug     -> /api/shows
-	 *
-	 * /collection/:slug -> /api/collection/:slug/shows   |> /api/collections/:slug/shows
-	 * /people/:slug     -> /api/people/:slug/roles       |> /api/people/:slug/roles
-	 */
-
-	static routeMapper(route: ActivatedRouteSnapshot, endpoint: string, query: [string, string][]): string
-	{
-		let queryParams: [string, string][] = Object.entries(route.queryParams)
-			.filter(x => ItemsGridComponent.filters.includes(x[0]) || x[0] == "sortBy");
-		if (query)
-			queryParams.push(...query)
-
-		if (queryParams.some(x => ItemsGridComponent.showOnlyFilters.includes(x[0])))
-			endpoint = endpoint.replace(/items?$/, "show");
-
-		let params: string = queryParams.length > 0
-			? '?' + queryParams.map(x => `${x[0]}=${x[1]}`).join('&')
-			: "";
-		return `api/${endpoint}${params}`
-	}
-
-	getFilterCount()
+	getFilterCount(): number
 	{
 		let count: number = this.filters.genres.length + this.filters.people.length;
 		if (this.filters.studio != null)
@@ -188,39 +188,39 @@ export class ItemsGridComponent implements OnInit
 		return count;
 	}
 
-	addFilter(category: string, filter: IResource, isArray: boolean = true, toggle: boolean = false)
+	addFilter(category: string, resource: IResource, isArray: boolean = true, toggle: boolean = false): void
 	{
 		if (isArray)
 		{
-			if (this.filters[category].includes(filter) || this.filters[category].some(x => x.slug == filter.slug))
-				this.filters[category].splice(this.filters[category].indexOf(filter), 1);
+			if (this.filters[category].includes(resource) || this.filters[category].some(x => x.slug === resource.slug))
+				this.filters[category].splice(this.filters[category].indexOf(resource), 1);
 			else
-				this.filters[category].push(filter);
+				this.filters[category].push(resource);
 		}
 		else
 		{
-			if (filter && (this.filters[category] == filter || this.filters[category]?.slug == filter.slug))
+			if (resource && (this.filters[category] === resource || this.filters[category]?.slug === resource.slug))
 			{
 				if (!toggle)
 					return;
 				this.filters[category] = null;
 			}
 			else
-				this.filters[category] = filter;
+				this.filters[category] = resource;
 		}
 
 		let param: string = null;
 		if (isArray && this.filters[category].length > 0)
-			param = `${this.filters[category].map(x => x.slug).join(',')}`;
+			param = `${this.filters[category].map(x => x.slug).join(",")}`;
 		else if (!isArray && this.filters[category] != null)
-			param = filter.slug;
+			param = resource.slug;
 
 		if (/\/browse($|\?)/.test(this.router.url)
 			|| this.router.url.startsWith("/genre")
 			|| this.router.url.startsWith("/studio")
 			|| this.router.url.startsWith("/people"))
 		{
-			if (this.filters.genres.length == 1 && this.getFilterCount() == 1)
+			if (this.filters.genres.length === 1 && this.getFilterCount() === 1)
 			{
 				this.router.navigate(["genre", this.filters.genres[0].slug], {
 					replaceUrl: true,
@@ -228,7 +228,7 @@ export class ItemsGridComponent implements OnInit
 				});
 				return;
 			}
-			if (this.filters.studio != null && this.getFilterCount() == 1)
+			if (this.filters.studio != null && this.getFilterCount() === 1)
 			{
 				this.router.navigate(["studio", this.filters.studio.slug], {
 					replaceUrl: true,
@@ -236,7 +236,7 @@ export class ItemsGridComponent implements OnInit
 				});
 				return;
 			}
-			if (this.filters.people.length == 1 && this.getFilterCount() == 1)
+			if (this.filters.people.length === 1 && this.getFilterCount() === 1)
 			{
 				this.router.navigate(["people", this.filters.people[0].slug], {
 					replaceUrl: true,
@@ -244,14 +244,14 @@ export class ItemsGridComponent implements OnInit
 				});
 				return;
 			}
- 			if (this.getFilterCount() == 0 || this.router.url != "/browse")
+ 		if (this.getFilterCount() === 0 || this.router.url !== "/browse")
 			{
-				let params = {[category]: param}
-				if (this.router.url.startsWith("/studio") && category != "studio")
+				const params: {[key: string]: string} = {[category]: param};
+				if (this.router.url.startsWith("/studio") && category !== "studio")
 					params.studio = this.route.snapshot.params.slug;
-				if (this.router.url.startsWith("/genre") && category != "genres")
+				if (this.router.url.startsWith("/genre") && category !== "genres")
 					params.genres = `${this.route.snapshot.params.slug}`;
-				if (this.router.url.startsWith("/people") && category != "people")
+				if (this.router.url.startsWith("/people") && category !== "people")
 					params.people = `${this.route.snapshot.params.slug}`;
 
 				this.router.navigate(["/browse"], {
@@ -270,32 +270,32 @@ export class ItemsGridComponent implements OnInit
 		});
 	}
 
-	nameGetter(obj: Studio)
+	nameGetter(obj: Studio): string
 	{
 		return obj?.name ?? "None";
 	}
 
-	getThumb(slug: string)
+	getThumb(slug: string): SafeStyle
 	{
 		return this.sanitizer.bypassSecurityTrustStyle("url(/poster/" + slug + ")");
 	}
 
-	getDate(item: LibraryItem | Show | ShowRole | Collection)
+	getDate(item: LibraryItem | Show | ShowRole | Collection): string
 	{
 		return ItemsUtils.getDate(item);
 	}
 
-	getLink(item: LibraryItem | Show | ShowRole | Collection)
+	getLink(item: LibraryItem | Show | ShowRole | Collection): string
 	{
 		return ItemsUtils.getLink(item);
 	}
 
-	sort(type: string, order: boolean)
+	sort(type: string, order: boolean): void
 	{
 		this.sortType = type;
 		this.sortUp = order;
 
-		let param: string = `${this.sortType.replace(/\s/g, "")}:${this.sortUp ? "asc" : "desc"}`;
+		const param: string = `${this.sortType.replace(/\s/g, "")}:${this.sortUp ? "asc" : "desc"}`;
 		this.router.navigate([], {
 			relativeTo: this.route,
 			queryParams: { sortBy: param },

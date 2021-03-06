@@ -1,16 +1,16 @@
-import {Injectable} from "@angular/core";
-import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs"
-import {Page} from "../models/page";
+import { Injectable } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+import { Observable } from "rxjs";
+import { Page } from "../models/page";
 import { Genre } from "../models/resources/genre";
-import {IResource} from "../models/resources/resource";
-import {Library} from "../models/resources/library";
-import {LibraryItem} from "../models/resources/library-item";
-import {map} from "rxjs/operators";
-import {Season} from "../models/resources/season";
-import {Episode} from "../models/resources/episode";
-import {People} from "../models/resources/people";
-import {Show} from "../models/resources/show";
+import { IResource } from "../models/resources/resource";
+import { Library } from "../models/resources/library";
+import { LibraryItem } from "../models/resources/library-item";
+import { map } from "rxjs/operators";
+import { Season } from "../models/resources/season";
+import { Episode } from "../models/resources/episode";
+import { People } from "../models/resources/people";
+import { Show } from "../models/resources/show";
 import { Studio } from "../models/resources/studio";
 
 export interface ApiArgs
@@ -34,7 +34,7 @@ class CrudApi<T extends IResource>
 	{
 		if (args == null)
 			return "";
-		let params: string = Object.keys(args).map(x => `${x}=${args[x]}`).join("&");
+		const params: string = Object.keys(args).map(x => `${x}=${args[x]}`).join("&");
 
 		return params ? `?${params}` : "";
 	}
@@ -67,7 +67,7 @@ class CrudApi<T extends IResource>
 }
 
 @Injectable({
-	providedIn: 'root'
+	providedIn: "root"
 })
 export class LibraryService extends CrudApi<Library>
 {
@@ -78,7 +78,7 @@ export class LibraryService extends CrudApi<Library>
 }
 
 @Injectable({
-	providedIn: 'root'
+	providedIn: "root"
 })
 export class LibraryItemService extends CrudApi<LibraryItem>
 {
@@ -89,7 +89,7 @@ export class LibraryItemService extends CrudApi<LibraryItem>
 }
 
 @Injectable({
-	providedIn: 'root'
+	providedIn: "root"
 })
 export class SeasonService extends CrudApi<Season>
 {
@@ -106,7 +106,7 @@ export class SeasonService extends CrudApi<Season>
 }
 
 @Injectable({
-	providedIn: 'root'
+	providedIn: "root"
 })
 export class EpisodeService extends CrudApi<Episode>
 {
@@ -129,7 +129,7 @@ export class EpisodeService extends CrudApi<Episode>
 }
 
 @Injectable({
-	providedIn: 'root'
+	providedIn: "root"
 })
 export class PeopleService extends CrudApi<People>
 {
@@ -146,7 +146,7 @@ export class PeopleService extends CrudApi<People>
 }
 
 @Injectable({
-	providedIn: 'root'
+	providedIn: "root"
 })
 export class GenreService extends CrudApi<Genre>
 {
@@ -163,7 +163,7 @@ export class GenreService extends CrudApi<Genre>
 }
 
 @Injectable({
-	providedIn: 'root'
+	providedIn: "root"
 })
 export class ShowService extends CrudApi<Show>
 {
@@ -172,7 +172,7 @@ export class ShowService extends CrudApi<Show>
 		super(client, "shows");
 	}
 
-	getForCollection(collection: string | number, args?: ApiArgs) : Observable<Page<Show>>
+	getForCollection(collection: string | number, args?: ApiArgs): Observable<Page<Show>>
 	{
 		return this.client.get<Page<Show>>(`/api/collections/${collection}/shows${this.ArgsAsQuery(args)}`)
 			.pipe(map(x => Object.assign(new Page<Show>(), x)));
@@ -185,7 +185,7 @@ export class ShowService extends CrudApi<Show>
 }
 
 @Injectable({
-	providedIn: 'root'
+	providedIn: "root"
 })
 export class StudioService extends CrudApi<Studio>
 {
@@ -194,7 +194,7 @@ export class StudioService extends CrudApi<Studio>
 		super(client, "studios");
 	}
 
-	getForShow(show: string | number) : Observable<Studio>
+	getForShow(show: string | number): Observable<Studio>
 	{
 		return this.client.get<Studio>(`/api/show/${show}/studio}`);
 	}

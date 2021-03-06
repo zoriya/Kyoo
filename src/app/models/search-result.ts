@@ -3,7 +3,7 @@ import { Episode } from "./resources/episode";
 import { People } from "./resources/people";
 import { Studio } from "./resources/studio";
 import { Genre } from "./resources/genre";
-import {Collection} from "./resources/collection";
+import { Collection } from "./resources/collection";
 
 export interface SearchResult
 {

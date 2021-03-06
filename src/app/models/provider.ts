@@ -1,4 +1,4 @@
-export interface Provider 
+export interface Provider
 {
 	name: string;
 	logo: string;

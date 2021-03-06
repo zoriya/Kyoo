@@ -7,18 +7,19 @@ import { Show } from "../../models/resources/show";
 import { Genre } from "../../models/resources/genre";
 import { MatChipInputEvent } from "@angular/material/chips";
 import { MatAutocompleteSelectedEvent } from "@angular/material/autocomplete";
-import { Observable, of} from "rxjs";
+import { Observable, of } from "rxjs";
 import { catchError, filter, map, mergeAll, tap } from "rxjs/operators";
 import { Studio } from "../../models/resources/studio";
 import { Provider } from "../../models/provider";
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { ShowGridComponent } from "../../components/show-grid/show-grid.component";
 import { GenreService, ShowService, StudioService } from "../../services/api.service";
+import { ExternalID } from "../../models/external-id";
 
 @Component({
-	selector: 'app-metadata-edit',
-	templateUrl: './metadata-edit.component.html',
-	styleUrls: ['./metadata-edit.component.scss']
+	selector: "app-metadata-edit",
+	templateUrl: "./metadata-edit.component.html",
+	styleUrls: ["./metadata-edit.component.scss"]
 })
 export class MetadataEditComponent implements OnInit
 {
@@ -27,14 +28,14 @@ export class MetadataEditComponent implements OnInit
 
 	genreForm: FormControl = new FormControl();
 	filteredGenres: Observable<Genre[]>;
-	
+
 	@ViewChild("identifyGrid") private identifyGrid: ShowGridComponent;
-	private identifying: Observable<Show[]>;
-	private identifiedShows: [string, Show[]];
+	private _identifying: Observable<Show[]>;
+	private _identifiedShows: [string, Show[]];
 	public providers: Provider[] = [];
 
 	public metadataChanged: boolean = false;
-	
+
 	constructor(public dialogRef: MatDialogRef<MetadataEditComponent>,
 	            @Inject(MAT_DIALOG_DATA) public show: Show,
 	            private http: HttpClient,
@@ -51,7 +52,7 @@ export class MetadataEditComponent implements OnInit
 		this.reIdentify(this.show.title);
 	}
 
-	ngOnInit()
+	ngOnInit(): void
 	{
 		this.filteredGenres = this.genreForm.valueChanges
 			.pipe(
@@ -82,16 +83,17 @@ export class MetadataEditComponent implements OnInit
 
 	apply(): void
 	{
-		if (this.metadataChanged) 
+		if (this.metadataChanged)
 		{
 			this.http.post("/api/show/re-identify/" + this.show.slug, this.show.externalIDs).subscribe(
-				(show: Show) => 
+				() => {},
+				() =>
 				{
-					return;
-				},
-				() => 
-				{
-					this.snackBar.open("An unknown error occurred.", null, { horizontalPosition: "left", panelClass: ['snackError'], duration: 2500 });
+					this.snackBar.open("An unknown error occurred.", null, {
+						horizontalPosition: "left",
+						panelClass: ["snackError"],
+						duration: 2500
+					});
 				}
 			);
 			this.dialogRef.close(this.show);
@@ -104,37 +106,37 @@ export class MetadataEditComponent implements OnInit
 			});
 		}
 	}
-	
-	addAlias(event: MatChipInputEvent)
+
+	addAlias(event: MatChipInputEvent): void
 	{
-		const input = event.input;
-		const value = event.value;
+		const input: HTMLInputElement = event.input;
+		const value: string = event.value;
 
 		this.show.aliases.push(value);
 		if (input)
 			input.value = "";
 	}
-	
-	removeAlias(alias: string)
+
+	removeAlias(alias: string): void
 	{
-		const i = this.show.aliases.indexOf(alias);
+		const i: number = this.show.aliases.indexOf(alias);
 		this.show.aliases.splice(i, 1);
 	}
 
-	addGenre(event: MatChipInputEvent)
+	addGenre(event: MatChipInputEvent): void
 	{
-		const input = event.input;
-		const value = event.value;
-		let genre: Genre = {id: 0, slug: null, name: value};
-		
+		const input: HTMLInputElement = event.input;
+		const value: string = event.value;
+		const genre: Genre = {id: 0, slug: null, name: value};
+
 		this.show.genres.push(genre);
 		if (input)
 			input.value = "";
 	}
-	
+
 	removeGenre(genre: Genre): void
 	{
-		const i = this.show.genres.indexOf(genre);
+		const i: number = this.show.genres.indexOf(genre);
 		this.show.genres.splice(i, 1);
 	}
 
@@ -145,41 +147,42 @@ export class MetadataEditComponent implements OnInit
 
 	identityShow(name: string): Observable<Show[]>
 	{
-		if (this.identifiedShows && this.identifiedShows[0] === name)
-			return of(this.identifiedShows[1]);
-		this.identifying = this.http.get<Show[]>("/api/show/identify/" + name + "?isMovie=" + this.show.isMovie).pipe(
-			tap(result => this.identifiedShows = [name, result])
+		if (this._identifiedShows && this._identifiedShows[0] === name)
+			return of(this._identifiedShows[1]);
+		this._identifying = this.http.get<Show[]>("/api/show/identify/" + name + "?isMovie=" + this.show.isMovie).pipe(
+			tap(result => this._identifiedShows = [name, result])
 		);
-		return this.identifying;
+		return this._identifying;
 	}
-	
-	reIdentify(search: string)
+
+	reIdentify(search: string): void
 	{
+		// TODO implement this
 		// this.identityShow(search).subscribe(x => this.identifyGrid.shows = x);
 	}
 
-	getMetadataID(provider: Provider)
+	getMetadataID(provider: Provider): ExternalID
 	{
-		return this.show.externalIDs.find(x => x.provider.name == provider.name);
+		return this.show.externalIDs.find(x => x.provider.name === provider.name);
 	}
-	
-	setMetadataID(provider: Provider, id: string, link: string = undefined)
+
+	setMetadataID(provider: Provider, id: string, link: string = null): void
 	{
-		let i = this.show.externalIDs.findIndex(x => x.provider.name == provider.name);
-		
+		const i: number = this.show.externalIDs.findIndex(x => x.provider.name === provider.name);
+
 		this.metadataChanged = true;
-		if (i != -1)
+		if (i !== -1)
 		{
 			this.show.externalIDs[i].dataID = id;
 			this.show.externalIDs[i].link = link;
 		}
 		else
-			this.show.externalIDs.push({provider: provider, dataID: id, link: link});
+			this.show.externalIDs.push({provider, dataID: id, link});
 	}
 
-	identifyID(show: Show)
+	identifyID(show: Show): void
 	{
-		for (let id of show.externalIDs)
+		for (const id of show.externalIDs)
 			this.setMetadataID(id.provider, id.dataID, id.link);
 	}
 }

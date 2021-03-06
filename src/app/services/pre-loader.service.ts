@@ -15,7 +15,7 @@ export class PreLoaderService
 
 	load<T>(route: string): Observable<T[]>
 	{
-		let loaded = this.cache.find(x => x[0] === route);
+		const loaded: [string, any[]] = this.cache.find(x => x[0] === route);
 		if (loaded != null)
 			return of(loaded[1]);
 		return this.http.get<Page<T>>(route).pipe(map(newData =>

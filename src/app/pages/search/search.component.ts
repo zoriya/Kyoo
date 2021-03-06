@@ -1,21 +1,21 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit } from "@angular/core";
 import { ActivatedRoute } from "@angular/router";
 import { SearchResult } from "../../models/search-result";
 import { Title } from "@angular/platform-browser";
-import {Page} from "../../models/page";
+import { Page } from "../../models/page";
 
 @Component({
-	selector: 'app-search',
-	templateUrl: './search.component.html',
-	styleUrls: ['./search.component.scss']
+	selector: "app-search",
+	templateUrl: "./search.component.html",
+	styleUrls: ["./search.component.scss"]
 })
-export class SearchComponent implements OnInit, OnDestroy
+export class SearchComponent implements OnInit, OnDestroy, AfterViewInit
 {
 	items: SearchResult;
 
 	constructor(private route: ActivatedRoute, private title: Title) { }
 
-	ngOnInit()
+	ngOnInit(): void
 	{
 		this.route.data.subscribe((data) =>
 		{
@@ -24,16 +24,16 @@ export class SearchComponent implements OnInit, OnDestroy
 		});
 	}
 
-	ngAfterViewInit()
+	ngAfterViewInit(): void
 	{
-		let searchBar: HTMLInputElement = <HTMLInputElement>document.getElementById("search");
+		const searchBar: HTMLInputElement = document.getElementById("search") as HTMLInputElement;
 		searchBar.classList.add("searching");
 		searchBar.value = this.items.query;
 	}
 
-	ngOnDestroy()
+	ngOnDestroy(): void
 	{
-		let searchBar: HTMLInputElement = <HTMLInputElement>document.getElementById("search");
+		const searchBar: HTMLInputElement = document.getElementById("search") as HTMLInputElement;
 		searchBar.classList.remove("searching");
 		searchBar.value = "";
 	}

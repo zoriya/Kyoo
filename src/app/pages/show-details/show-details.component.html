@@ -1,5 +1,5 @@
 <div class="backdrop">
-	<img id="backdrop" src="backdrop/{{this.show.slug}}" />
+	<img id="backdrop" src="backdrop/{{this.show.slug}}" alt="backdrop" />
 </div>
 
 <div class="header container pt-sm-5">
@@ -43,7 +43,7 @@
 			</div>
 		</div>
 	</div>
-    
+
     <mat-menu #showMenu="matMenu">
         <button mat-menu-item (click)="editMetadata()">Edit metadata</button>
         <button mat-menu-item (click)="redownloadImages()">Re-download images</button>
@@ -101,7 +101,7 @@
 	</div>
 	<app-episodes-list [episodes]="episodes[season]"></app-episodes-list>
 </div>
-	
+
 <div class="container-fluid mt-5">
 	<h3>Staff</h3>
 </div>

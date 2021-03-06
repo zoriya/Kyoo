@@ -1,4 +1,4 @@
-import {HttpClient} from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 
 export class Page<T>
 {
@@ -9,12 +9,12 @@ export class Page<T>
 	items: T[];
 	private _isLoading: boolean = false;
 
-	constructor(init?:Partial<Page<T>>)
+	constructor(init?: Partial<Page<T>>)
 	{
 		Object.assign(this, init);
 	}
 
-	loadNext(client: HttpClient)
+	loadNext(client: HttpClient): void
 	{
 		if (this.next == null || this._isLoading)
 			return;
@@ -30,8 +30,8 @@ export class Page<T>
 		});
 	}
 
-	changeType(type: string)
+	changeType(type: string): string
 	{
-		return this.first.replace(/\/\w*($|\?)/, `/${type}$1`)
+		return this.first.replace(/\/\w*($|\?)/, `/${type}$1`);
 	}
 }

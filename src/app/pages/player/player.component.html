@@ -75,7 +75,7 @@
 
 		<div class="controller container-fluid" id="controller">
 			<div class="img d-none d-sm-block">
-				<img src="poster/{{this.item.showSlug}}" />
+				<img src="poster/{{this.item.showSlug}}" alt="poster" />
 			</div>
 			<div class="content">
 				<h3 *ngIf="!this.item.isMovie">S{{this.item.seasonNumber}}:E{{this.item.episodeNumber}} - {{this.item.title}}</h3>
@@ -112,7 +112,7 @@
 
 							<div id="next">
 								<div id="main">
-									<img src="{{this.item.nextEpisode.thumb}}" />
+									<img src="{{this.item.nextEpisode.thumb}}" alt="next episode thumbnail" />
 								</div>
 								<div id="overview">
 									<h6>S{{this.item.nextEpisode.seasonNumber}}:E{{this.item.nextEpisode.episodeNumber}} - {{this.item.nextEpisode.title}}</h6>

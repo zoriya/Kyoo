@@ -7,7 +7,7 @@ export class ItemsUtils
 {
 	static getLink(item: LibraryItem | Show | ShowRole | Collection): string
 	{
-		if ("type" in item && item.type == ItemType.Collection)
+		if ("type" in item && item.type === ItemType.Collection)
 			return "/collection/" + item.slug;
 		else
 			return "/show/" + item.slug;
@@ -21,13 +21,13 @@ export class ItemsUtils
 				return `as ${item.role} (${item.type})`;
 			return `as ${item.role}`;
 		}
-		if ("type" in item && item.type && typeof item.type == "string")
+		if ("type" in item && item.type && typeof item.type === "string")
 			return item.type;
 
 		if (!("startYear" in item))
 			return "";
-		if (item.endYear && item.startYear != item.endYear)
-			return `${item.startYear} - ${item.endYear}`
+		if (item.endYear && item.startYear !== item.endYear)
+			return `${item.startYear} - ${item.endYear}`;
 		return item.startYear?.toString();
 	}
 }

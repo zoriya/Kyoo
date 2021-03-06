@@ -1,17 +1,17 @@
-import {Component} from '@angular/core';
-import {Collection} from "../../models/resources/collection";
-import {ActivatedRoute} from "@angular/router";
-import {DomSanitizer} from "@angular/platform-browser";
-import {Show, ShowRole} from "../../models/resources/show";
-import {Page} from "../../models/page";
-import {People} from "../../models/resources/people";
-import {LibraryItem} from "../../models/resources/library-item";
-import {ItemsUtils} from "../../misc/items-utils";
+import { Component } from "@angular/core";
+import { Collection } from "../../models/resources/collection";
+import { ActivatedRoute } from "@angular/router";
+import { DomSanitizer, SafeStyle } from "@angular/platform-browser";
+import { Show, ShowRole } from "../../models/resources/show";
+import { Page } from "../../models/page";
+import { People } from "../../models/resources/people";
+import { LibraryItem } from "../../models/resources/library-item";
+import { ItemsUtils } from "../../misc/items-utils";
 
 @Component({
-	selector: 'app-collection',
-	templateUrl: './collection.component.html',
-	styleUrls: ['./collection.component.scss']
+	selector: "app-collection",
+	templateUrl: "./collection.component.html",
+	styleUrls: ["./collection.component.scss"]
 })
 export class CollectionComponent
 {
@@ -27,12 +27,12 @@ export class CollectionComponent
 		});
 	}
 
-	getThumb()
+	getThumb(): SafeStyle
 	{
 		return this.sanitizer.bypassSecurityTrustStyle("url(" + this.collection.poster + ")");
 	}
 
-	getDate(item: LibraryItem | Show | ShowRole | Collection | People)
+	getDate(item: LibraryItem | Show | ShowRole | Collection | People): string
 	{
 		return ItemsUtils.getDate(item);
 	}

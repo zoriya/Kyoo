@@ -1,12 +1,12 @@
 import { Show } from "./show";
-import {IResource} from "./resource";
+import { IResource } from "./resource";
 
 export interface Collection extends IResource
 {
 	name: string;
 	poster: string;
 	overview: string;
-	startYear: number,
-	endYear: number,
+	startYear: number;
+	endYear: number;
 	shows: Show[];
 }

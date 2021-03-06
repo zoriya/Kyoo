@@ -24,7 +24,9 @@ import {
 } from "./playbackMethodDetector";
 import { AppComponent } from "../../app.component";
 import { Track, WatchItem } from "../../models/watch-item";
-import SubtitlesOctopus from "libass-wasm/dist/js/subtitles-octopus.js"
+import SubtitlesOctopus from "libass-wasm/dist/js/subtitles-octopus.js";
+import MouseMoveEvent = JQuery.MouseMoveEvent;
+import TouchMoveEvent = JQuery.TouchMoveEvent;
 
 
 @Pipe({
@@ -52,7 +54,7 @@ export class BufferToWidthPipe implements PipeTransform
 {
 	transform(buffered: TimeRanges, duration: number): string
 	{
-		if (buffered.length == 0)
+		if (buffered.length === 0)
 			return "0";
 		return `${buffered.end(buffered.length - 1) / duration * 100}%`;
 	}
@@ -66,7 +68,7 @@ export class VolumeToButtonPipe implements PipeTransform
 {
 	transform(volume: number, muted: boolean): string
 	{
-		if (volume == 0 || muted)
+		if (volume === 0 || muted)
 			return "volume_off";
 		else if (volume < 25)
 			return "volume_mute";
@@ -167,7 +169,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 	            private startup: StartupService)
 	{ }
 
-	ngOnInit()
+	ngOnInit(): void
 	{
 		document.getElementById("nav").classList.add("d-none");
 		if (AppComponent.isMobile)
@@ -223,7 +225,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 		});
 	}
 
-	ngOnDestroy()
+	ngOnDestroy(): void
 	{
 		if (this.subtitlesManager)
 			this.subtitlesManager.dispose();
@@ -236,13 +238,13 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 		$(document).off();
 	}
 
-	ngAfterViewInit()
+	ngAfterViewInit(): void
 	{
 		if (this.oidcSecurity === undefined)
 			this.oidcSecurity = this.injector.get(OidcSecurityService);
 		this.hlsPlayer.config.xhrSetup = xhr =>
 		{
-			const token = this.oidcSecurity.getToken();
+			const token: string = this.oidcSecurity.getToken();
 			if (token)
 				xhr.setRequestHeader("Authorization", "Bearer " + token);
 		};
@@ -252,17 +254,17 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 		setTimeout(() => this.route.data.subscribe(() =>
 		{
 			// TODO remove the query param for the method (should be a session setting).
-			let queryMethod: string = this.route.snapshot.queryParams["method"];
+			const queryMethod: string = this.route.snapshot.queryParams.method;
 			this.supportList = getWhatIsSupported(this.player, this.item);
 			this.selectPlayMethod(queryMethod ? method[queryMethod] : this.supportList.getPlaybackMethod());
 
 			// TODO remove this, it should be a user's setting.
-			const subSlug: string = this.route.snapshot.queryParams["sub"];
+			const subSlug: string = this.route.snapshot.queryParams.sub;
 			if (subSlug != null)
 			{
 				const languageCode: string = subSlug.substring(0, 3);
-				const forced: boolean = subSlug.length > 3 && subSlug.substring(4) == "for";
-				const sub: Track = this.item.subtitles.find(x => x.language == languageCode && x.isForced == forced);
+				const forced: boolean = subSlug.length > 3 && subSlug.substring(4) === "for";
+				const sub: Track = this.item.subtitles.find(x => x.language === languageCode && x.isForced === forced);
 				this.selectSubtitle(sub, false);
 			}
 		}));
@@ -278,7 +280,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 		return AppComponent.isMobile;
 	}
 
-	getTimeFromSeekbar(pageX: number)
+	getTimeFromSeekbar(pageX: number): number
 	{
 		const value: number = (pageX - this.progressBar.offsetLeft) / this.progressBar.clientWidth;
 		const percent: number = Math.max(0, Math.min(value, 1));
@@ -308,14 +310,14 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 	}
 
 	@HostListener("document:touchmove", ["$event"])
-	touchSeek(event)
+	touchSeek(event: TouchMoveEvent): void
 	{
 		if (this.seeking)
 			this.player.currentTime = this.getTimeFromSeekbar(event.changedTouches[0].pageX);
 	}
 
 	@HostListener("document:mousemove", ["$event"])
-	mouseMove(event)
+	mouseMove(event: MouseMoveEvent): void
 	{
 		if (this.seeking)
 			this.player.currentTime = this.getTimeFromSeekbar(event.pageX);
@@ -343,14 +345,14 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 		}
 	}
 
-	selectPlayMethod(playMethod: method)
+	selectPlayMethod(playMethod: method): void
 	{
 		this.playMethod = playMethod;
 		const url: string = [
 			"/video",
 			this.playMethod.toLowerCase(),
 			this.item.slug,
-			this.playMethod != method.direct ? 'master.m3u8' : null
+			this.playMethod !== method.direct ? "master.m3u8" : null
 		].filter(x => x !== null).join("/");
 		if (this.playMethod === method.direct || this.player.canPlayType("application/vnd.apple.mpegurl"))
 			this.player.src = url;
@@ -365,11 +367,11 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 		}
 	}
 
-	back()
+	back(): void
 	{
 		if (this.startup.loadedFromWatch)
 		{
-			this.router.navigate(["show", this.startup.show], {replaceUrl: true})
+			this.router.navigate(["show", this.startup.show], {replaceUrl: true});
 			this.startup.loadedFromWatch = false;
 			this.startup.show = null;
 		}
@@ -377,7 +379,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 			this.location.back();
 	}
 
-	next()
+	next(): void
 	{
 		if (this.item.nextEpisode == null)
 			return;
@@ -387,7 +389,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 		});
 	}
 
-	previous()
+	previous(): void
 	{
 		if (this.item.previousEpisode == null)
 			return;
@@ -397,7 +399,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 		});
 	}
 
-	videoClicked()
+	videoClicked(): void
 	{
 		if (AppComponent.isMobile)
 			this.showControls = !this.showControls;
@@ -408,7 +410,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 		}
 	}
 
-	togglePlayback()
+	togglePlayback(): void
 	{
 		if (this.player.paused)
 			this.player.play();
@@ -416,7 +418,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 			this.player.pause();
 	}
 
-	fullscreen()
+	fullscreen(): void
 	{
 		if (this.isFullScreen)
 			document.exitFullscreen();
@@ -424,7 +426,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 			document.body.requestFullscreen();
 	}
 
-	async selectSubtitle(subtitle: Track | number, changeUrl: boolean = true)
+	async selectSubtitle(subtitle: Track | number, changeUrl: boolean = true): Promise<void>
 	{
 		if (typeof(subtitle) === "number")
 		{
@@ -444,7 +446,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 					subSlug += "-for";
 			}
 
-			this.router.navigate([], {
+			await this.router.navigate([], {
 				relativeTo: this.route,
 				queryParams: {sub: subSlug},
 				replaceUrl: true,
@@ -475,11 +477,11 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 			});
 			this.removeHtmlTrack();
 
-			if (subtitle.codec == "ass")
+			if (subtitle.codec === "ass")
 			{
 				if (!this.subtitlesManager)
 				{
-					let fonts: {[key: string]: string} = await this.shows.getFonts(this.item.showSlug).toPromise();
+					const fonts: { [key: string]: string } = await this.shows.getFonts(this.item.showSlug).toPromise();
 					this.subtitlesManager = new SubtitlesOctopus({
 						video: this.player,
 						subUrl: `subtitle/${subtitle.slug}`,
@@ -489,12 +491,12 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 				else
 					this.subtitlesManager.setTrackByUrl(`subtitle/${subtitle.slug}`);
 			}
-			else if (subtitle.codec == "subrip")
+			else if (subtitle.codec === "subrip")
 			{
 				if (this.subtitlesManager)
 					this.subtitlesManager.freeTrack();
 
-				let track = document.createElement("track");
+				const track: HTMLTrackElement = document.createElement("track");
 				track.kind = "subtitles";
 				track.label = subtitle.displayName;
 				track.srclang = subtitle.language;
@@ -510,9 +512,9 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 		}
 	}
 
-	removeHtmlTrack()
+	removeHtmlTrack(): void
 	{
-		let elements = this.player.getElementsByTagName("track");
+		const elements: HTMLCollectionOf<HTMLTrackElement> = this.player.getElementsByTagName("track");
 		if (elements.length > 0)
 			elements.item(0).remove();
 	}

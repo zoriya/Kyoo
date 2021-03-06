@@ -1,4 +1,4 @@
-import {IResource} from "./resource";
+import { IResource } from "./resource";
 
 export interface Library extends IResource
 {

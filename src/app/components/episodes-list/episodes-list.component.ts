@@ -30,7 +30,7 @@ export class EpisodesListComponent extends HorizontalScroller
 
 	openMenu(index: number): void
 	{
-		const menu = this.menus.find((x, i) => i === index);
+		const menu: MatMenuTrigger = this.menus.find((x, i) => i === index);
 		menu.focus();
 		menu.openMenu();
 	}

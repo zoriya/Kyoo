@@ -4,30 +4,30 @@ export class CustomRouteReuseStrategy extends RouteReuseStrategy
 {
 	shouldReuseRoute(future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot): boolean
 	{
-		if (curr.routeConfig?.path == "browse"
-			|| curr.routeConfig?.path == "genre/:slug"
-			|| curr.routeConfig?.path == "studio/:slug")
+		if (curr.routeConfig?.path === "browse"
+			|| curr.routeConfig?.path === "genre/:slug"
+			|| curr.routeConfig?.path === "studio/:slug")
 		{
-			return future.routeConfig.path == "browse"
-				|| future.routeConfig.path == "genre/:slug"
-				|| future.routeConfig.path == "studio/:slug";
+			return future.routeConfig.path === "browse"
+				|| future.routeConfig.path === "genre/:slug"
+				|| future.routeConfig.path === "studio/:slug";
 		}
 		return future.routeConfig === curr.routeConfig;
 	}
 
-	shouldAttach(route: ActivatedRouteSnapshot): boolean
+	shouldAttach(): boolean
 	{
 		return false;
 	}
 
-	shouldDetach(route: ActivatedRouteSnapshot): boolean
+	shouldDetach(): boolean
 	{
 		return false;
 	}
 
-	store(route: ActivatedRouteSnapshot, handle: DetachedRouteHandle | null): void  {}
+	store(): void  {}
 
-	retrieve(route: ActivatedRouteSnapshot): DetachedRouteHandle | null
+	retrieve(): DetachedRouteHandle | null
 	{
 		return null;
 	}

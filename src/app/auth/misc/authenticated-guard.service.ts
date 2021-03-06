@@ -1,31 +1,23 @@
-import {Injectable} from '@angular/core';
-import {
-	CanActivate,
-	CanLoad,
-	Route,
-	UrlSegment,
-	ActivatedRouteSnapshot,
-	RouterStateSnapshot,
-	Router
-} from '@angular/router';
-import {Observable} from 'rxjs';
-import {AuthService} from "../auth.service";
+import { Injectable } from "@angular/core";
+import { CanActivate, CanLoad, Router } from "@angular/router";
+import { Observable } from "rxjs";
+import { AuthService } from "../auth.service";
 
 @Injectable({providedIn: "root"})
-export class AuthGuard 
+export class AuthGuard
 {
 	public static guards: any[] = [];
 	public static defaultPermissions: string[];
 	public static permissionsObservable: Observable<string[]>;
 
-	static forPermissions(...permissions: string[])
+	static forPermissions(...permissions: string[]): any
 	{
 		@Injectable()
 		class AuthenticatedGuard implements CanActivate, CanLoad
 		{
 			constructor(private router: Router, private authManager: AuthService)  {}
-	
-			async canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot): Promise<boolean>
+
+			async canActivate(): Promise<boolean>
 			{
 				if (!await this.checkPermissions())
 				{
@@ -34,8 +26,8 @@ export class AuthGuard
 				}
 				return true;
 			}
-	
-			async canLoad(route: Route, segments: UrlSegment[]): Promise<boolean>
+
+			async canLoad(): Promise<boolean>
 			{
 				if (!await this.checkPermissions())
 				{
@@ -44,24 +36,24 @@ export class AuthGuard
 				}
 				return true;
 			}
-	
+
 			async checkPermissions(): Promise<boolean>
 			{
 				if (this.authManager.isAuthenticated)
 				{
 					const perms: string[] = this.authManager.account.permissions;
-					for (let perm of permissions) {
+					for (const perm of permissions) {
 						if (!perms.includes(perm))
 							return false;
 					}
 					return true;
 				}
-				else 
+				else
 				{
-					if (AuthGuard.defaultPermissions == undefined)
-						await AuthGuard.permissionsObservable.toPromise()
+					if (!AuthGuard.defaultPermissions)
+						await AuthGuard.permissionsObservable.toPromise();
 
-					for (let perm of permissions)
+					for (const perm of permissions)
 						if (!AuthGuard.defaultPermissions.includes(perm))
 							return false;
 					return true;
