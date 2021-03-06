@@ -123,12 +123,18 @@ export class ShowDetailsComponent implements AfterViewInit, OnDestroy
 
 	openTrailer(): void
 	{
-		this.dialog.open(TrailerDialogComponent, {width: "80%", height: "45vw", data: this.show.trailerUrl, panelClass: "panel"});
+		this.dialog.open(TrailerDialogComponent, {
+			width: "80%",
+			height: "45vw",
+			data: this.show.trailerUrl,
+			panelClass: "panel"
+		});
 	}
 
 	editMetadata(): void
 	{
-		this.dialog.open(MetadataEditComponent, {width: "80%", data: this.show}).afterClosed().subscribe((result: Show) =>
+		this.dialog.open(MetadataEditComponent, {width: "80%", data: this.show})
+			.afterClosed().subscribe((result: Show) =>
 		{
 			if (result) {
 				this.show = result;
@@ -138,7 +144,8 @@ export class ShowDetailsComponent implements AfterViewInit, OnDestroy
 
 	redownloadImages(): void
 	{
-		this.http.put(`api/task/extract/show/${this.show.slug}/thumbnails`, undefined).subscribe(() => { }, error =>
+		this.http.put(`api/task/extract/show/${this.show.slug}/thumbnails`, undefined)
+			.subscribe(() => { }, error =>
 		{
 			console.log(error.status + " - " + error.message);
 			this.snackBar.open("An unknown error occurred while re-downloading images.", null, {
@@ -151,7 +158,8 @@ export class ShowDetailsComponent implements AfterViewInit, OnDestroy
 
 	extractSubs(): void
 	{
-		this.http.put(`api/task/extract/show/${this.show.slug}/subs`, undefined).subscribe(() => { }, error =>
+		this.http.put(`api/task/extract/show/${this.show.slug}/subs`, undefined)
+			.subscribe(() => { }, error =>
 		{
 			console.log(error.status + " - " + error.message);
 			this.snackBar.open("An unknown error occurred while re-downloading images.", null, {
