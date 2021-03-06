@@ -31,6 +31,7 @@ namespace Kyoo.Controllers
 		public virtual void Dispose()
 		{
 			Database.Dispose();
+			GC.SuppressFinalize(this);
 		}
 
 		public virtual ValueTask DisposeAsync()

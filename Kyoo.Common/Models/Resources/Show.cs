@@ -27,7 +27,7 @@ namespace Kyoo.Models
 		[EditableRelation] [LoadableRelation] public virtual ICollection<MetadataID> ExternalIDs { get; set; }
 		
 		
-		public int? StudioID { get; set; }
+		[SerializeIgnore] public int? StudioID { get; set; }
 		[LoadableRelation] [EditableRelation] public virtual Studio Studio { get; set; }
 		[LoadableRelation] [EditableRelation] public virtual ICollection<Genre> Genres { get; set; }
 		[LoadableRelation] [EditableRelation] public virtual ICollection<PeopleRole> People { get; set; }

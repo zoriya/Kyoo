@@ -75,6 +75,10 @@ namespace Kyoo.Controllers
 			ICollection<Library> libraries = argument == null 
 				? await libraryManager.GetLibraries()
 				: new [] { await libraryManager.GetLibrary(argument)};
+			
+			if (argument != null && libraries.First() == null)
+				throw new ArgumentException($"No library found with the name {argument}");
+			
 			foreach (Library library in libraries)
 				await libraryManager.Load(library, x => x.Providers);
 			

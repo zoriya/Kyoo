@@ -26,6 +26,7 @@ namespace Kyoo.Controllers
 				return;
 			_disposed = true;
 			_database.Dispose();
+			GC.SuppressFinalize(this);
 		}
 
 		public override async ValueTask DisposeAsync()

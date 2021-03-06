@@ -282,6 +282,14 @@ namespace Kyoo
 			while (enumerator.MoveNext());
 		}
 
+		public static void ForEach<T>([CanBeNull] this IEnumerable<T> self, Action<T> action)
+		{
+			if (self == null)
+				return;
+			foreach (T i in self)
+				action(i);
+		}
+
 		private static MethodInfo GetMethod(Type type, BindingFlags flag, string name, Type[] generics, object[] args)
 		{
 			MethodInfo[] methods = type.GetMethods(flag | BindingFlags.Public | BindingFlags.NonPublic)
@@ -494,13 +502,6 @@ namespace Kyoo
 			return RunGenericMethod<bool>(typeof(Enumerable), "SequenceEqual", type, first, second);
 		}
 
-		public static void Test()
-		{
-			#if INTERNAL_LINKS
-			Console.WriteLine("Lib test");
-#endif
-		}
-		
 		public static bool ResourceEquals<T>([CanBeNull] T first, [CanBeNull] T second)
 			where T : IResource
 		{
