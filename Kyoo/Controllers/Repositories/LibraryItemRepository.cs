@@ -42,6 +42,7 @@ namespace Kyoo.Controllers
 				_shows.Value.Dispose();
 			if (_collections.IsValueCreated)
 				_collections.Value.Dispose();
+			GC.SuppressFinalize(this);
 		}
 
 		public override async ValueTask DisposeAsync()

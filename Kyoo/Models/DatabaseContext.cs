@@ -71,7 +71,7 @@ namespace Kyoo
 					y => y
 						.HasOne(x => x.Second)
 						.WithMany(x => x.LibraryLinks),
-					y => y.HasKey(x => Link<Library, ProviderID>.PrimaryKey));
+					y => y.HasKey(Link<Library, ProviderID>.PrimaryKey));
 			
 			modelBuilder.Entity<Collection>()
 				.HasMany(x => x.Libraries)
@@ -83,7 +83,7 @@ namespace Kyoo
 					y => y
 						.HasOne(x => x.Second)
 						.WithMany(x => x.LibraryLinks),
-					y => y.HasKey(x => Link<Library, Collection>.PrimaryKey));
+					y => y.HasKey(Link<Library, Collection>.PrimaryKey));
 			
 			modelBuilder.Entity<Show>()
 				.HasMany(x => x.Libraries)
@@ -95,7 +95,7 @@ namespace Kyoo
 					y => y
 						.HasOne(x => x.Second)
 						.WithMany(x => x.LibraryLinks),
-					y => y.HasKey(x => Link<Library, Show>.PrimaryKey));
+					y => y.HasKey(Link<Library, Show>.PrimaryKey));
 			
 			modelBuilder.Entity<Show>()
 				.HasMany(x => x.Collections)
@@ -107,7 +107,7 @@ namespace Kyoo
 					y => y
 						.HasOne(x => x.Second)
 						.WithMany(x => x.CollectionLinks),
-					y => y.HasKey(x => Link<Collection, Show>.PrimaryKey));
+					y => y.HasKey(Link<Collection, Show>.PrimaryKey));
 			
 			modelBuilder.Entity<Genre>()
 				.HasMany(x => x.Shows)
@@ -119,7 +119,7 @@ namespace Kyoo
 					y => y
 						.HasOne(x => x.Second)
 						.WithMany(x => x.ShowLinks),
-					y => y.HasKey(x => Link<Show, Genre>.PrimaryKey));
+					y => y.HasKey(Link<Show, Genre>.PrimaryKey));
 			
 
 			modelBuilder.Entity<MetadataID>()

@@ -4,10 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
-using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
@@ -33,6 +30,7 @@ namespace Kyoo.Controllers
 			_disposed = true;
 			_database.Dispose();
 			_providers.Dispose();
+			GC.SuppressFinalize(this);
 		}
 
 		public override async ValueTask DisposeAsync()
@@ -55,10 +53,9 @@ namespace Kyoo.Controllers
 		public override async Task<Library> Create(Library obj)
 		{
 			await base.Create(obj);
-			// _database.Entry(obj).State = EntityState.Added;
-			// _database.Entry(obj).Collection(x => x.Providers).IsModified = true;
-			// _database.Add(obj);
-			// var a = EF.Property<ICollection<Link<LibraryDE, ProviderID>>>(obj, nameof(LibraryDE.LibraryLinks));
+			_database.Entry(obj).State = EntityState.Added;
+			obj.ProviderLinks = obj.Providers?.Select(x => Link.Create(obj, x)).ToArray();
+			obj.ProviderLinks.ForEach(x => _database.Entry(x).State = EntityState.Added);
 			await _database.SaveChangesAsync($"Trying to insert a duplicated library (slug {obj.Slug} already exists).");
 			return obj;
 		}

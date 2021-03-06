@@ -32,6 +32,7 @@ namespace Kyoo.Controllers
 			_disposed = true;
 			_database.Dispose();
 			_providers.Dispose();
+			GC.SuppressFinalize(this);
 		}
 
 		public override async ValueTask DisposeAsync()
@@ -98,14 +99,8 @@ namespace Kyoo.Controllers
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
-			if (obj.ExternalIDs != null)
-				foreach (MetadataID entry in obj.ExternalIDs)
-					_database.Entry(entry).State = EntityState.Added;
-			
-			if (obj.Tracks != null)
-				foreach (Track entry in obj.Tracks)
-					_database.Entry(entry).State = EntityState.Added;
-			
+			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Added);
+			obj.Tracks.ForEach(x => _database.Entry(x).State = EntityState.Added);
 			await _database.SaveChangesAsync($"Trying to insert a duplicated episode (slug {obj.Slug} already exists).");
 			return obj;
 		}

@@ -263,6 +263,9 @@ namespace Kyoo.Controllers
 
 		public Task Load(IResource obj, string member)
 		{
+			if (obj == null)
+				throw new ArgumentNullException(nameof(obj));
+			
 			return (obj, member) switch
 			{
 				(Library l, nameof(Library.Providers)) => ProviderRepository
