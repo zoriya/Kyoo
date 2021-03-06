@@ -28,7 +28,7 @@ namespace Kyoo.Models
 		
 		
 		[SerializeIgnore] public int? StudioID { get; set; }
-		[LoadableRelation] [EditableRelation] public virtual Studio Studio { get; set; }
+		[LoadableRelation(nameof(StudioID))] [EditableRelation] public virtual Studio Studio { get; set; }
 		[LoadableRelation] [EditableRelation] public virtual ICollection<Genre> Genres { get; set; }
 		[LoadableRelation] [EditableRelation] public virtual ICollection<PeopleRole> People { get; set; }
 		[LoadableRelation] public virtual ICollection<Season> Seasons { get; set; }

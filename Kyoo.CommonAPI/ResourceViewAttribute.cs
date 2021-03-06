@@ -75,7 +75,6 @@ namespace Kyoo.CommonApi
 			Type pageType = Utility.GetGenericDefinition(result.DeclaredType, typeof(Page<>));
 
 			
-			// TODO loading is case sensitive. Maybe convert them in the first check.
 			if (pageType != null)
 			{
 				foreach (IResource resource in ((dynamic)result.Value).Items)

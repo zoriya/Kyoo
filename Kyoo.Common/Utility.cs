@@ -33,6 +33,20 @@ namespace Kyoo
 				: ex.Body as MemberExpression;
 			return member!.Member.Name;
 		}
+
+		public static object GetValue([NotNull] this MemberInfo member, [NotNull] object obj)
+		{
+			if (member == null)
+				throw new ArgumentNullException(nameof(member));
+			if (obj == null)
+				throw new ArgumentNullException(nameof(obj));
+			return member switch
+			{
+				PropertyInfo property => property.GetValue(obj),
+				FieldInfo field => field.GetValue(obj),
+				_ => throw new ArgumentException($"Can't get value of a non property/field (member: {member}).")
+			};
+		}
 		
 		public static string ToSlug(string str)
 		{

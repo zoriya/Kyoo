@@ -8,7 +8,7 @@ namespace Kyoo.Models
 	public class Season : IResource
 	{
 		public int ID  { get; set; }
-		public int ShowID { get; set; }
+		[SerializeIgnore] public int ShowID { get; set; }
 
 		public int SeasonNumber { get; set; } = -1;
 
@@ -21,7 +21,7 @@ namespace Kyoo.Models
 		public string Thumb => $"/api/seasons/{Slug}/thumb";
 		[EditableRelation] [LoadableRelation] public virtual ICollection<MetadataID> ExternalIDs { get; set; }
 
-		[LoadableRelation] public virtual Show Show { get; set; }
+		[LoadableRelation(nameof(ShowID))] public virtual Show Show { get; set; }
 		[LoadableRelation] public virtual ICollection<Episode> Episodes { get; set; }
 
 		public Season() { }

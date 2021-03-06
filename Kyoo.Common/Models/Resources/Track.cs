@@ -57,7 +57,7 @@ namespace Kyoo.Models
 	public class Track : Stream, IResource
 	{
 		public int ID { get; set; }
-		public int EpisodeID { get; set; }
+		[SerializeIgnore] public int EpisodeID { get; set; }
 		public bool IsDefault
 		{
 			get => isDefault;
@@ -114,11 +114,18 @@ namespace Kyoo.Models
 		}
 
 		public bool IsExternal { get; set; }
-		[LoadableRelation] public virtual Episode Episode { get; set; }
+		[LoadableRelation(nameof(EpisodeID))] public virtual Episode Episode { get; set; }
 		
 		public Track() { }
 
-		public Track(StreamType type, string title, string language, bool isDefault, bool isForced, string codec, bool isExternal, string path)
+		public Track(StreamType type, 
+			string title, 
+			string language, 
+			bool isDefault,
+			bool isForced,
+			string codec, 
+			bool isExternal, 
+			string path)
 			: base(title, language, codec, isDefault, isForced, path, type)
 		{
 			IsExternal = isExternal;
