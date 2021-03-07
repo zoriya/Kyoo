@@ -261,6 +261,14 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 
+		private async Task SetRelation<T1, T2>(T1 obj, Task<ICollection<T2>> loader, Action<T1, ICollection<T2>> setter, Action<T2, T1> inverse)
+		{
+			ICollection<T2> loaded = await loader;
+			setter(obj, loaded);
+			foreach (T2 item in loaded)
+				inverse(item, obj);
+		}
+
 		public Task Load(IResource obj, string member)
 		{
 			if (obj == null)
@@ -270,42 +278,57 @@ namespace Kyoo.Controllers
 			{
 				(Library l, nameof(Library.Providers)) => ProviderRepository
 					.GetAll(x => x.Libraries.Any(y => y.ID == obj.ID))
-					.Then(x => l.Providers = x), 
+					.Then(x => l.Providers = x),
+				
 				(Library l, nameof(Library.Shows)) => ShowRepository
 					.GetAll(x => x.Libraries.Any(y => y.ID == obj.ID))
 					.Then(x => l.Shows = x), 
+				
 				(Library l, nameof(Library.Collections)) => CollectionRepository
 					.GetAll(x => x.Libraries.Any(y => y.ID == obj.ID))
 					.Then(x => l.Collections = x), 
 				
+				
 				(Collection c, nameof(Library.Shows)) => ShowRepository
 					.GetAll(x => x.Collections.Any(y => y.ID == obj.ID))
 					.Then(x => c.Shows = x), 
+				
 				(Collection c, nameof(Collection.Libraries)) => LibraryRepository
 					.GetAll(x => x.Collections.Any(y => y.ID == obj.ID))
 					.Then(x => c.Libraries = x), 
 				
-				(Show s, nameof(Show.ExternalIDs)) => ProviderRepository
-					.GetMetadataID(x => x.ShowID == obj.ID)
-					.Then(x => s.ExternalIDs = x),
+				
+				(Show s, nameof(Show.ExternalIDs)) => SetRelation(s, 
+					ProviderRepository.GetMetadataID(x => x.ShowID == obj.ID),
+					(x, y) => x.ExternalIDs = y, 
+					(x, y) => x.Show = y),
+				
 				(Show s, nameof(Show.Genres)) => GenreRepository
 					.GetAll(x => x.Shows.Any(y => y.ID == obj.ID))
 					.Then(x => s.Genres = x),
+				
 				(Show s, nameof(Show.People)) => PeopleRepository
 					.GetFromShow(obj.ID)
 					.Then(x => s.People = x),
-				(Show s, nameof(Show.Seasons)) => SeasonRepository
-					.GetAll(x => x.Show.ID == obj.ID)
-					.Then(x => s.Seasons = x),
-				(Show s, nameof(Show.Episodes)) => EpisodeRepository
-					.GetAll(x => x.Show.ID == obj.ID)
-					.Then(x => s.Episodes = x),
+				
+				(Show s, nameof(Show.Seasons)) => SetRelation(s, 
+					SeasonRepository.GetAll(x => x.Show.ID == obj.ID),
+					(x, y) => x.Seasons = y,
+					(x, y) => { x.Show = y; x.ShowID = y.ID; }),
+				
+				(Show s, nameof(Show.Episodes)) => SetRelation(s, 
+					EpisodeRepository.GetAll(x => x.Show.ID == obj.ID),
+					(x, y) => x.Episodes = y,
+					(x, y) => { x.Show = y; x.ShowID = y.ID; }),
+				
 				(Show s, nameof(Show.Libraries)) => LibraryRepository
 					.GetAll(x => x.Shows.Any(y => y.ID == obj.ID))
 					.Then(x => s.Libraries = x),
+				
 				(Show s, nameof(Show.Collections)) => CollectionRepository
 					.GetAll(x => x.Shows.Any(y => y.ID == obj.ID))
 					.Then(x => s.Collections = x),
+				
 				(Show s, nameof(Show.Studio)) => StudioRepository
 					.Get(x => x.Shows.Any(y => y.ID == obj.ID))
 					.Then(x =>
@@ -314,12 +337,17 @@ namespace Kyoo.Controllers
 						s.StudioID = x?.ID ?? 0;
 					}),
 				
-				(Season s, nameof(Season.ExternalIDs)) => ProviderRepository
-					.GetMetadataID(x => x.SeasonID == obj.ID)
-					.Then(x => s.ExternalIDs = x),
-				(Season s, nameof(Season.Episodes)) => EpisodeRepository
-					.GetAll(x => x.Season.ID == obj.ID)
-					.Then(x => s.Episodes = x),
+				
+				(Season s, nameof(Season.ExternalIDs)) => SetRelation(s, 
+					ProviderRepository.GetMetadataID(x => x.SeasonID == obj.ID),
+					(x, y) => x.ExternalIDs = y,
+					(x, y) => { x.Season = y; x.SeasonID = y.ID; }),
+				
+				(Season s, nameof(Season.Episodes)) => SetRelation(s, 
+					EpisodeRepository.GetAll(x => x.Season.ID == obj.ID),
+					(x, y) => x.Episodes = y,
+					(x, y) => { x.Season = y; x.SeasonID = y.ID; }),
+				
 				(Season s, nameof(Season.Show)) => ShowRepository
 					.Get(x => x.Seasons.Any(y => y.ID == obj.ID))
 					.Then(x =>
@@ -328,12 +356,17 @@ namespace Kyoo.Controllers
 						s.ShowID = x?.ID ?? 0;
 					}),
 				
-				(Episode e, nameof(Episode.ExternalIDs)) => ProviderRepository
-					.GetMetadataID(x => x.EpisodeID == obj.ID)
-					.Then(x => e.ExternalIDs = x),
-				(Episode e, nameof(Episode.Tracks)) => TrackRepository
-					.GetAll(x => x.Episode.ID == obj.ID)
-					.Then(x => e.Tracks = x),
+				
+				(Episode e, nameof(Episode.ExternalIDs)) => SetRelation(e, 
+					ProviderRepository.GetMetadataID(x => x.EpisodeID == obj.ID), 
+					(x, y) => x.ExternalIDs = y,
+					(x, y) => { x.Episode = y; x.EpisodeID = y.ID; }),
+				
+				(Episode e, nameof(Episode.Tracks)) => SetRelation(e, 
+					TrackRepository.GetAll(x => x.Episode.ID == obj.ID),
+					(x, y) => x.Tracks = y,
+					(x, y) => { x.Episode = y; x.EpisodeID = y.ID; }),
+				
 				(Episode e, nameof(Episode.Show)) => ShowRepository
 					.Get(x => x.Episodes.Any(y => y.ID == obj.ID))
 					.Then(x =>
@@ -341,6 +374,7 @@ namespace Kyoo.Controllers
 						e.Show = x;
 						e.ShowID = x?.ID ?? 0;
 					}),
+				
 				(Episode e, nameof(Episode.Season)) => SeasonRepository
 					.Get(x => x.Episodes.Any(y => y.ID == e.ID))
 					.Then(x =>
@@ -348,6 +382,7 @@ namespace Kyoo.Controllers
 						e.Season = x;
 						e.SeasonID = x?.ID ?? 0;
 					}),
+				
 				
 				(Track t, nameof(Track.Episode)) => EpisodeRepository
 					.Get(x => x.Tracks.Any(y => y.ID == obj.ID))
@@ -357,24 +392,31 @@ namespace Kyoo.Controllers
 						t.EpisodeID = x?.ID ?? 0;
 					}),
 				
+				
 				(Genre g, nameof(Genre.Shows)) => ShowRepository
 					.GetAll(x => x.Genres.Any(y => y.ID == obj.ID))
 					.Then(x => g.Shows = x),
+				
 				
 				(Studio s, nameof(Studio.Shows)) => ShowRepository
 					.GetAll(x => x.Studio.ID == obj.ID)
 					.Then(x => s.Shows = x),
 				
-				(People p, nameof(People.ExternalIDs)) => ProviderRepository
-					.GetMetadataID(x => x.PeopleID == obj.ID)
-					.Then(x => p.ExternalIDs = x),
+				
+				(People p, nameof(People.ExternalIDs)) => SetRelation(p, 
+					ProviderRepository.GetMetadataID(x => x.PeopleID == obj.ID),
+					(x, y) => x.ExternalIDs = y,
+					(x, y) => { x.People = y; x.PeopleID = y.ID; }),
+				
 				(People p, nameof(People.Roles)) => PeopleRepository
 					.GetFromPeople(obj.ID)
 					.Then(x => p.Roles = x),
 				
+				
 				(ProviderID p, nameof(ProviderID.Libraries)) => LibraryRepository
 					.GetAll(x => x.Providers.Any(y => y.ID == obj.ID))
 					.Then(x => p.Libraries = x),
+				
 
 				_ => throw new ArgumentException($"Couldn't find a way to load {member} of {obj.Slug}.")
 			};

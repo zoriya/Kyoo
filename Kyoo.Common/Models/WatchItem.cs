@@ -89,7 +89,7 @@ namespace Kyoo.Models
 
 		public static async Task<WatchItem> FromEpisode(Episode ep, ILibraryManager library)
 		{
-			Show show = await library.GetShow(ep.ShowID); // TODO load only the title, the slug & the IsMovie with the library manager.
+			Show show = await library.GetShow(ep.ShowID);
 			Episode previous = null;
 			Episode next = null;
 
@@ -110,6 +110,7 @@ namespace Kyoo.Models
 					next = await library.GetEpisode(ep.ShowID, ep.SeasonNumber, ep.EpisodeNumber + 1);
 			}
 
+			await library.Load(ep, x => x.Tracks);
 			return new WatchItem(ep.ID,
 				show.Title,
 				show.Slug,
@@ -118,9 +119,9 @@ namespace Kyoo.Models
 				ep.Title,
 				ep.ReleaseDate,
 				ep.Path,
-				await library.GetTrack(x => x.EpisodeID == ep.ID && x.Type == StreamType.Video),
-				await library.GetTracks(x => x.EpisodeID == ep.ID && x.Type == StreamType.Audio),
-				await library.GetTracks(x => x.EpisodeID == ep.ID && x.Type == StreamType.Subtitle))
+				ep.Tracks.FirstOrDefault(x => x.Type == StreamType.Video),
+				ep.Tracks.Where(x => x.Type == StreamType.Audio),
+				ep.Tracks.Where(x => x.Type == StreamType.Subtitle))
 			{
 				IsMovie = show.IsMovie,
 				PreviousEpisode = previous,
@@ -137,7 +138,7 @@ namespace Kyoo.Models
 				PathIO.GetFileNameWithoutExtension(episodePath) + ".txt"
 			);
 			if (!File.Exists(path))
-				return new Chapter[0];
+				return Array.Empty<Chapter>();
 			try
 			{
 				return (await File.ReadAllLinesAsync(path))
@@ -151,7 +152,7 @@ namespace Kyoo.Models
 			catch
 			{
 				await Console.Error.WriteLineAsync($"Invalid chapter file at {path}");
-				return new Chapter[0];
+				return Array.Empty<Chapter>();
 			}
 		}
 	}
