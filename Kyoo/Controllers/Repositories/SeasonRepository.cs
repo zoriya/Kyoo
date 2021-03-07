@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
-using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,17 +15,20 @@ namespace Kyoo.Controllers
 		private bool _disposed;
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
+		private readonly IShowRepository _shows;
 		private readonly Lazy<IEpisodeRepository> _episodes;
 		protected override Expression<Func<Season, object>> DefaultSort => x => x.SeasonNumber;
 
 
 		public SeasonRepository(DatabaseContext database, 
 			IProviderRepository providers,
+			IShowRepository shows,
 			IServiceProvider services)
 			: base(database)
 		{
 			_database = database;
 			_providers = providers;
+			_shows = shows;
 			_episodes = new Lazy<IEpisodeRepository>(services.GetRequiredService<IEpisodeRepository>);
 		}
 
@@ -38,6 +40,7 @@ namespace Kyoo.Controllers
 			_disposed = true;
 			_database.Dispose();
 			_providers.Dispose();
+			_shows.Dispose();
 			if (_episodes.IsValueCreated)
 				_episodes.Value.Dispose();
 			GC.SuppressFinalize(this);
@@ -50,8 +53,25 @@ namespace Kyoo.Controllers
 			_disposed = true;
 			await _database.DisposeAsync();
 			await _providers.DisposeAsync();
+			await _shows.DisposeAsync();
 			if (_episodes.IsValueCreated)
 				await _episodes.Value.DisposeAsync();
+		}
+
+		public override async Task<Season> Get(int id)
+		{
+			Season ret = await base.Get(id);
+			if (ret != null)
+				ret.ShowSlug = await _shows.GetSlug(ret.ShowID);
+			return ret;
+		}
+
+		public override async Task<Season> Get(Expression<Func<Season, bool>> predicate)
+		{
+			Season ret = await base.Get(predicate);
+			if (ret != null)
+				ret.ShowSlug = await _shows.GetSlug(ret.ShowID);
+			return ret;
 		}
 
 		public override Task<Season> Get(string slug)
@@ -63,24 +83,43 @@ namespace Kyoo.Controllers
 			return Get(match.Groups["show"].Value, int.Parse(match.Groups["season"].Value));
 		}
 		
-		public Task<Season> Get(int showID, int seasonNumber)
+		public async Task<Season> Get(int showID, int seasonNumber)
 		{
-			return _database.Seasons.FirstOrDefaultAsync(x => x.ShowID == showID 
-			                                                  && x.SeasonNumber == seasonNumber);
+			Season ret = await _database.Seasons.FirstOrDefaultAsync(x => x.ShowID == showID 
+			                                                              && x.SeasonNumber == seasonNumber);
+			if (ret != null)
+				ret.ShowSlug = await _shows.GetSlug(showID);
+			return ret;
 		}
 		
-		public Task<Season> Get(string showSlug, int seasonNumber)
+		public async Task<Season> Get(string showSlug, int seasonNumber)
 		{
-			return _database.Seasons.FirstOrDefaultAsync(x => x.Show.Slug == showSlug 
+			Season ret = await _database.Seasons.FirstOrDefaultAsync(x => x.Show.Slug == showSlug 
 			                                                        && x.SeasonNumber == seasonNumber);
+			if (ret != null)
+				ret.ShowSlug = showSlug;
+			return ret;
 		}
 
 		public override async Task<ICollection<Season>> Search(string query)
 		{
-			return await _database.Seasons
+			List<Season> seasons = await _database.Seasons
 				.Where(x => EF.Functions.ILike(x.Title, $"%{query}%"))
 				.Take(20)
 				.ToListAsync();
+			foreach (Season season in seasons)
+				season.ShowSlug = await _shows.GetSlug(season.ShowID);
+			return seasons;
+		}
+		
+		public override async Task<ICollection<Season>> GetAll(Expression<Func<Season, bool>> where = null,
+			Sort<Season> sort = default, 
+			Pagination limit = default)
+		{
+			ICollection<Season> seasons = await base.GetAll(where, sort, limit);
+			foreach (Season season in seasons)
+				season.ShowSlug = await _shows.GetSlug(season.ShowID);
+			return seasons;
 		}
 		
 		public override async Task<Season> Create(Season obj)

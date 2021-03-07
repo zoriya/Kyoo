@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
-using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers
@@ -15,13 +14,16 @@ namespace Kyoo.Controllers
 		private bool _disposed;
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
+		private readonly IShowRepository _shows;
 		protected override Expression<Func<Episode, object>> DefaultSort => x => x.EpisodeNumber;
 
 
-		public EpisodeRepository(DatabaseContext database, IProviderRepository providers) : base(database)
+		public EpisodeRepository(DatabaseContext database, IProviderRepository providers, IShowRepository shows) 
+			: base(database)
 		{
 			_database = database;
 			_providers = providers;
+			_shows = shows;
 		}
 
 
@@ -32,6 +34,7 @@ namespace Kyoo.Controllers
 			_disposed = true;
 			_database.Dispose();
 			_providers.Dispose();
+			_shows.Dispose();
 			GC.SuppressFinalize(this);
 		}
 
@@ -42,6 +45,15 @@ namespace Kyoo.Controllers
 			_disposed = true;
 			await _database.DisposeAsync();
 			await _providers.DisposeAsync();
+			await _shows.DisposeAsync();
+		}
+
+		public override async Task<Episode> Get(int id)
+		{
+			Episode ret = await base.Get(id);
+			if (ret != null)
+				ret.ShowSlug = await _shows.GetSlug(ret.ShowID);
+			return ret;
 		}
 
 		public override Task<Episode> Get(string slug)
@@ -54,45 +66,81 @@ namespace Kyoo.Controllers
 				int.Parse(match.Groups["season"].Value), 
 				int.Parse(match.Groups["episode"].Value));
 		}
-		
-		public Task<Episode> Get(string showSlug, int seasonNumber, int episodeNumber)
+
+		public override async Task<Episode> Get(Expression<Func<Episode, bool>> predicate)
 		{
-			return _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == showSlug 
-			                                                         && x.SeasonNumber == seasonNumber
-			                                                         && x.EpisodeNumber == episodeNumber);
+			Episode ret = await base.Get(predicate);
+			if (ret != null)
+				ret.ShowSlug = await _shows.GetSlug(ret.ShowID);
+			return ret;
 		}
 
-		public Task<Episode> Get(int showID, int seasonNumber, int episodeNumber)
+		public async Task<Episode> Get(string showSlug, int seasonNumber, int episodeNumber)
 		{
-			return _database.Episodes.FirstOrDefaultAsync(x => x.ShowID == showID 
-			                                                   && x.SeasonNumber == seasonNumber
-			                                                   && x.EpisodeNumber == episodeNumber);
+			Episode ret = await _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == showSlug 
+			                                                                && x.SeasonNumber == seasonNumber 
+			                                                                && x.EpisodeNumber == episodeNumber);
+			if (ret != null)
+				ret.ShowSlug = showSlug;
+			return ret;
 		}
 
-		public Task<Episode> Get(int seasonID, int episodeNumber)
+		public async Task<Episode> Get(int showID, int seasonNumber, int episodeNumber)
 		{
-			return _database.Episodes.FirstOrDefaultAsync(x => x.SeasonID == seasonID
-			                                                   && x.EpisodeNumber == episodeNumber);
+			Episode ret = await _database.Episodes.FirstOrDefaultAsync(x => x.ShowID == showID 
+			                                                                && x.SeasonNumber == seasonNumber 
+			                                                                && x.EpisodeNumber == episodeNumber);
+			if (ret != null)
+				ret.ShowSlug = await _shows.GetSlug(showID);
+			return ret;
 		}
 
-		public Task<Episode> GetAbsolute(int showID, int absoluteNumber)
+		public async Task<Episode> Get(int seasonID, int episodeNumber)
 		{
-			return _database.Episodes.FirstOrDefaultAsync(x => x.ShowID == showID
-			                                                   && x.AbsoluteNumber == absoluteNumber);
+			Episode ret = await _database.Episodes.FirstOrDefaultAsync(x => x.SeasonID == seasonID 
+			                                                                && x.EpisodeNumber == episodeNumber);
+			if (ret != null)
+				ret.ShowSlug = await _shows.GetSlug(ret.ShowID);
+			return ret;
 		}
 
-		public Task<Episode> GetAbsolute(string showSlug, int absoluteNumber)
+		public async Task<Episode> GetAbsolute(int showID, int absoluteNumber)
 		{
-			return _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == showSlug
-			                                                   && x.AbsoluteNumber == absoluteNumber);
+			Episode ret = await _database.Episodes.FirstOrDefaultAsync(x => x.ShowID == showID 
+			                                                                && x.AbsoluteNumber == absoluteNumber);
+			if (ret != null)
+				ret.ShowSlug = await _shows.GetSlug(showID);
+			return ret;
+		}
+
+		public async Task<Episode> GetAbsolute(string showSlug, int absoluteNumber)
+		{
+			Episode ret = await _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == showSlug 
+			                                                                && x.AbsoluteNumber == absoluteNumber);
+			if (ret != null)
+				ret.ShowSlug = showSlug;
+			return ret;
 		}
 
 		public override async Task<ICollection<Episode>> Search(string query)
 		{
-			return await _database.Episodes
+			List<Episode> episodes = await _database.Episodes
 				.Where(x => EF.Functions.ILike(x.Title, $"%{query}%"))
 				.Take(20)
 				.ToListAsync();
+			foreach (Episode episode in episodes)
+				episode.ShowSlug = await _shows.GetSlug(episode.ShowID);
+			return episodes;
+		}
+		
+		public override async Task<ICollection<Episode>> GetAll(Expression<Func<Episode, bool>> where = null, 
+			Sort<Episode> sort = default, 
+			Pagination limit = default)
+		{
+			ICollection<Episode> episodes = await base.GetAll(where, sort, limit);
+			foreach (Episode episode in episodes)
+				episode.ShowSlug = await _shows.GetSlug(episode.ShowID);
+			return episodes;
 		}
 
 		public override async Task<Episode> Create(Episode obj)

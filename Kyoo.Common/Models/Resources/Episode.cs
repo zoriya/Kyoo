@@ -5,11 +5,11 @@ using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
 {
-	[ComposedSlug]
 	public class Episode : IResource, IOnMerge
 	{
 		public int ID { get; set; }
-		public string Slug => Show != null ? GetSlug(Show.Slug, SeasonNumber, EpisodeNumber) : ID.ToString();
+		public string Slug => GetSlug(ShowSlug, SeasonNumber, EpisodeNumber);
+		[SerializeIgnore] public string ShowSlug { private get; set; }
 		[SerializeIgnore] public int ShowID { get; set; }
 		[LoadableRelation(nameof(ShowID))] public virtual Show Show { get; set; }
 		[SerializeIgnore] public int? SeasonID { get; set; }
@@ -30,9 +30,7 @@ namespace Kyoo.Models
 		[LoadableRelation] public virtual ICollection<MetadataID> ExternalIDs { get; set; }
 
 		[LoadableRelation] public virtual ICollection<Track> Tracks { get; set; }
-
-		public string ShowTitle => Show?.Title;
-
+		
 
 		public Episode() { }
 
@@ -78,6 +76,8 @@ namespace Kyoo.Models
 
 		public static string GetSlug(string showSlug, int seasonNumber, int episodeNumber)
 		{
+			if (showSlug == null)
+				throw new ArgumentException("Show's slug is null. Can't find episode's slug.");
 			if (seasonNumber == -1)
 				return showSlug;
 			return $"{showSlug}-s{seasonNumber}e{episodeNumber}";

@@ -151,6 +151,13 @@ namespace Kyoo.Controllers
 			}
 		}
 		
+		public Task<string> GetSlug(int showID)
+		{
+			return _database.Shows.Where(x => x.ID == showID)
+				.Select(x => x.Slug)
+				.FirstOrDefaultAsync();
+		}
+		
 		public override async Task Delete(Show obj)
 		{
 			if (obj == null)

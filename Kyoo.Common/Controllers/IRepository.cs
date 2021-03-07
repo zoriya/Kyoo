@@ -109,6 +109,8 @@ namespace Kyoo.Controllers
 	public interface IShowRepository : IRepository<Show>
 	{
 		Task AddShowLink(int showID, int? libraryID, int? collectionID);
+
+		Task<string> GetSlug(int showID);
 	}
 
 	public interface ISeasonRepository : IRepository<Season>

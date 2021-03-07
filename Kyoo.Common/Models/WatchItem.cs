@@ -25,7 +25,7 @@ namespace Kyoo.Models
 	
 	public class WatchItem
 	{
-		public readonly int EpisodeID = -1;
+		public readonly int EpisodeID;
 
 		public string ShowTitle;
 		public string ShowSlug;
@@ -41,9 +41,9 @@ namespace Kyoo.Models
 
 		public string Container;
 		public Track Video;
-		public IEnumerable<Track> Audios;
-		public IEnumerable<Track> Subtitles;
-		public IEnumerable<Chapter> Chapters;
+		public ICollection<Track> Audios;
+		public ICollection<Track> Subtitles;
+		public ICollection<Chapter> Chapters;
 
 		public WatchItem() { }
 
@@ -78,8 +78,8 @@ namespace Kyoo.Models
 			DateTime? releaseDate, 
 			string path, 
 			Track video,
-			IEnumerable<Track> audios,
-			IEnumerable<Track> subtitles)
+			ICollection<Track> audios,
+			ICollection<Track> subtitles)
 			: this(episodeID, showTitle, showSlug, seasonNumber, episodeNumber, title, releaseDate, path)
 		{
 			Video = video;
@@ -120,8 +120,8 @@ namespace Kyoo.Models
 				ep.ReleaseDate,
 				ep.Path,
 				ep.Tracks.FirstOrDefault(x => x.Type == StreamType.Video),
-				ep.Tracks.Where(x => x.Type == StreamType.Audio),
-				ep.Tracks.Where(x => x.Type == StreamType.Subtitle))
+				ep.Tracks.Where(x => x.Type == StreamType.Audio).ToArray(),
+				ep.Tracks.Where(x => x.Type == StreamType.Subtitle).ToArray())
 			{
 				IsMovie = show.IsMovie,
 				PreviousEpisode = previous,
@@ -130,7 +130,7 @@ namespace Kyoo.Models
 			};
 		}
 
-		private static async Task<IEnumerable<Chapter>> GetChapters(string episodePath)
+		private static async Task<ICollection<Chapter>> GetChapters(string episodePath)
 		{
 			string path = PathIO.Combine(
 				PathIO.GetDirectoryName(episodePath)!, 

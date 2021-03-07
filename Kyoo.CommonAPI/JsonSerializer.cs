@@ -1,5 +1,7 @@
 using System;
+using System.Collections;
 using System.Reflection;
+using Kyoo.Models;
 using Kyoo.Models.Attributes;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -40,8 +42,13 @@ namespace Kyoo.Controllers
 		protected override JsonContract CreateContract(Type objectType)
 		{
 			JsonContract contract = base.CreateContract(objectType);
-			contract.OnSerializingCallbacks.Add((_, _) => _depth++);
-			contract.OnSerializedCallbacks.Add((_, _) => _depth--);
+			if (Utility.GetGenericDefinition(objectType, typeof(Page<>)) == null
+				&& !objectType.IsAssignableTo(typeof(IEnumerable)))
+			{
+				contract.OnSerializingCallbacks.Add((_, _) => _depth++);
+				contract.OnSerializedCallbacks.Add((_, _) => _depth--);
+			}
+
 			return contract;
 		}
 	}
