@@ -4,15 +4,16 @@ using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
 {
-	[ComposedSlug]
 	public class Season : IResource
 	{
 		public int ID  { get; set; }
+		public string Slug => $"{ShowSlug}-s{SeasonNumber}";
 		[SerializeIgnore] public int ShowID { get; set; }
+		[SerializeIgnore] public string ShowSlug { private get; set; }
+		[LoadableRelation(nameof(ShowID))] public virtual Show Show { get; set; }
 
 		public int SeasonNumber { get; set; } = -1;
 
-		public string Slug => Show != null ? $"{Show.Slug}-s{SeasonNumber}" : ID.ToString();
 		public string Title { get; set; }
 		public string Overview { get; set; }
 		public int? Year { get; set; }
@@ -21,7 +22,6 @@ namespace Kyoo.Models
 		public string Thumb => $"/api/seasons/{Slug}/thumb";
 		[EditableRelation] [LoadableRelation] public virtual ICollection<MetadataID> ExternalIDs { get; set; }
 
-		[LoadableRelation(nameof(ShowID))] public virtual Show Show { get; set; }
 		[LoadableRelation] public virtual ICollection<Episode> Episodes { get; set; }
 
 		public Season() { }

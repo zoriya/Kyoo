@@ -209,7 +209,7 @@ namespace Kyoo.Controllers
 		{
 			if (string.IsNullOrEmpty(resource.Slug))
 				throw new ArgumentException("Resource can't have null as a slug.");
-			if (int.TryParse(resource.Slug, out int _) && typeof(T).GetCustomAttribute<ComposedSlugAttribute>() == null)
+			if (int.TryParse(resource.Slug, out int _))
 			{
 				try
 				{

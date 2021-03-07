@@ -82,7 +82,7 @@ namespace Kyoo.Controllers
 		{
 			if (obj.EpisodeID <= 0)
 			{
-				obj.EpisodeID = obj.Episode?.ID ?? -1;
+				obj.EpisodeID = obj.Episode?.ID ?? 0;
 				if (obj.EpisodeID <= 0)
 					throw new InvalidOperationException($"Can't store a track not related to any episode (episodeID: {obj.EpisodeID}).");
 			}
