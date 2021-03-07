@@ -46,7 +46,7 @@ namespace Kyoo.Controllers
 
 		public override Task<Episode> Get(string slug)
 		{
-			Match match = Regex.Match(slug, @"(?<show>.*)-s(?<season>\d*)-e(?<episode>\d*)");
+			Match match = Regex.Match(slug, @"(?<show>.*)-s(?<season>\d*)e(?<episode>\d*)");
 			
 			if (!match.Success)
 				return _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == slug);
