@@ -43,7 +43,11 @@ namespace Kyoo
 			});
 
 			services.AddControllers()
-				.AddNewtonsoftJson(x => x.SerializerSettings.ContractResolver = new JsonPropertyIgnorer());
+				.AddNewtonsoftJson(x =>
+				{
+					x.SerializerSettings.ContractResolver = new JsonPropertyIgnorer();
+					x.SerializerSettings.Converters.Add(new PeopleRoleConverter());
+				});
 			services.AddHttpClient();
 
 			services.AddDbContext<DatabaseContext>(options =>
