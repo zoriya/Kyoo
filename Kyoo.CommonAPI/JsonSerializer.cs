@@ -4,6 +4,7 @@ using System.Reflection;
 using Kyoo.Models;
 using Kyoo.Models.Attributes;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 
 namespace Kyoo.Controllers
@@ -50,6 +51,26 @@ namespace Kyoo.Controllers
 			}
 
 			return contract;
+		}
+	}
+
+	public class PeopleRoleConverter : JsonConverter<PeopleRole>
+	{
+		public override void WriteJson(JsonWriter writer, PeopleRole value, JsonSerializer serializer)
+		{
+			// TODO this seems to not use the property.ShouldSerialize and cause an recursive inclusion error.
+			JToken t = JToken.FromObject(value, serializer);
+			JObject obj = t as JObject;
+			writer.WriteValue(obj);
+		}
+
+		public override PeopleRole ReadJson(JsonReader reader, 
+			Type objectType,
+			PeopleRole existingValue,
+			bool hasExistingValue,
+			JsonSerializer serializer)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

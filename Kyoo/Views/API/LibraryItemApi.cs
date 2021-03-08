@@ -15,6 +15,7 @@ namespace Kyoo.Api
 	[Route("api/item")]
 	[Route("api/items")]
 	[ApiController]
+	[ResourceView]
 	public class LibraryItemApi : ControllerBase
 	{
 		private readonly ILibraryItemRepository _libraryItems;
