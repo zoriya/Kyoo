@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using Kyoo.Models;
 using Kyoo.Models.Attributes;
@@ -58,10 +59,22 @@ namespace Kyoo.Controllers
 	{
 		public override void WriteJson(JsonWriter writer, PeopleRole value, JsonSerializer serializer)
 		{
-			// TODO this seems to not use the property.ShouldSerialize and cause an recursive inclusion error.
-			JToken t = JToken.FromObject(value, serializer);
-			JObject obj = t as JObject;
-			writer.WriteValue(obj);
+			ICollection<PeopleRole> oldPeople = value.Show?.People;
+			ICollection<PeopleRole> oldRoles = value.People?.Roles;
+			if (value.Show != null)
+				value.Show.People = null;
+			if (value.People != null)
+				value.People.Roles = null;
+			
+			JObject obj = JObject.FromObject(value.ForPeople ? value.People : value.Show, serializer);
+			obj.Add("role", value.Role);
+			obj.Add("type", value.Type);
+			obj.WriteTo(writer);
+
+			if (value.Show != null)
+				value.Show.People = oldPeople;
+			if (value.People != null)
+				value.People.Roles = oldRoles;
 		}
 
 		public override PeopleRole ReadJson(JsonReader reader, 

@@ -23,6 +23,7 @@ namespace Kyoo.Controllers
 		{
 			return await _database.Studios
 				.Where(x => EF.Functions.ILike(x.Name, $"%{query}%"))
+				.OrderBy(DefaultSort)
 				.Take(20)
 				.ToListAsync();
 		}

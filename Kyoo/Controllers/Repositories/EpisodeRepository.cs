@@ -125,7 +125,8 @@ namespace Kyoo.Controllers
 		public override async Task<ICollection<Episode>> Search(string query)
 		{
 			List<Episode> episodes = await _database.Episodes
-				.Where(x => EF.Functions.ILike(x.Title, $"%{query}%"))
+				.Where(x => EF.Functions.ILike(x.Title, $"%{query}%") && x.EpisodeNumber != -1)
+				.OrderBy(DefaultSort)
 				.Take(20)
 				.ToListAsync();
 			foreach (Episode episode in episodes)
