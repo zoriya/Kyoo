@@ -54,6 +54,7 @@ namespace Kyoo.Controllers
 		{
 			return await _database.People
 				.Where(people => EF.Functions.ILike(people.Name, $"%{query}%"))
+				.OrderBy(DefaultSort)
 				.Take(20)
 				.ToListAsync();
 		}
@@ -97,7 +98,9 @@ namespace Kyoo.Controllers
 			Sort<PeopleRole> sort = default, 
 			Pagination limit = default)
 		{
-			ICollection<PeopleRole> people = await ApplyFilters(_database.PeopleRoles.Where(x => x.ShowID == showID),
+			ICollection<PeopleRole> people = await ApplyFilters(_database.PeopleRoles
+					.Where(x => x.ShowID == showID)
+					.Include(x => x.People),
 				id => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id),
 				x => x.People.Name,
 				where,
@@ -105,6 +108,8 @@ namespace Kyoo.Controllers
 				limit);
 			if (!people.Any() && await _shows.Value.Get(showID) == null)
 				throw new ItemNotFound();
+			foreach (PeopleRole role in people)
+				role.ForPeople = true;
 			return people;
 		}
 
@@ -113,7 +118,10 @@ namespace Kyoo.Controllers
 			Sort<PeopleRole> sort = default, 
 			Pagination limit = default)
 		{
-			ICollection<PeopleRole> people = await ApplyFilters(_database.PeopleRoles.Where(x => x.Show.Slug == showSlug),
+			ICollection<PeopleRole> people = await ApplyFilters(_database.PeopleRoles
+					.Where(x => x.Show.Slug == showSlug)
+					.Include(x => x.People)
+					.Include(x => x.Show),
 				id => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id),
 				x => x.People.Name,
 				where,
@@ -121,6 +129,8 @@ namespace Kyoo.Controllers
 				limit);
 			if (!people.Any() && await _shows.Value.Get(showSlug) == null)
 				throw new ItemNotFound();
+			foreach (PeopleRole role in people)
+				role.ForPeople = true;
 			return people;
 		}
 		
@@ -129,7 +139,9 @@ namespace Kyoo.Controllers
 			Sort<PeopleRole> sort = default, 
 			Pagination limit = default)
 		{
-			ICollection<PeopleRole> roles = await ApplyFilters(_database.PeopleRoles.Where(x => x.PeopleID == peopleID),
+			ICollection<PeopleRole> roles = await ApplyFilters(_database.PeopleRoles
+					.Where(x => x.PeopleID == peopleID)
+					.Include(x => x.Show),
 				id => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id),
 				x => x.Show.Title,
 				where,
@@ -137,8 +149,6 @@ namespace Kyoo.Controllers
 				limit);
 			if (!roles.Any() && await Get(peopleID) == null)
 				throw new ItemNotFound();
-			foreach (PeopleRole role in roles)
-				role.ForPeople = true;
 			return roles;
 		}
 		
@@ -147,7 +157,9 @@ namespace Kyoo.Controllers
 			Sort<PeopleRole> sort = default, 
 			Pagination limit = default)
 		{
-			ICollection<PeopleRole> roles = await ApplyFilters(_database.PeopleRoles.Where(x => x.People.Slug == slug),
+			ICollection<PeopleRole> roles = await ApplyFilters(_database.PeopleRoles
+					.Where(x => x.People.Slug == slug)
+					.Include(x => x.Show),
 				id => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id),
 				x => x.Show.Title,
 				where,
@@ -155,8 +167,6 @@ namespace Kyoo.Controllers
 				limit);
 			if (!roles.Any() && await Get(slug) == null)
 				throw new ItemNotFound();
-			foreach (PeopleRole role in roles)
-				role.ForPeople = true;
 			return roles;
 		}
 	}

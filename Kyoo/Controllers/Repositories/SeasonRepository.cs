@@ -105,6 +105,7 @@ namespace Kyoo.Controllers
 		{
 			List<Season> seasons = await _database.Seasons
 				.Where(x => EF.Functions.ILike(x.Title, $"%{query}%"))
+				.OrderBy(DefaultSort)
 				.Take(20)
 				.ToListAsync();
 			foreach (Season season in seasons)

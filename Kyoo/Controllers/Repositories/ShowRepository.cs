@@ -79,6 +79,7 @@ namespace Kyoo.Controllers
 				.Where(x => EF.Functions.ILike(x.Title, query) 
 				            || EF.Functions.ILike(x.Slug, query) 
 							/*|| x.Aliases.Any(y => EF.Functions.ILike(y, query))*/) // NOT TRANSLATABLE.
+				.OrderBy(DefaultSort)
 				.Take(20)
 				.ToListAsync();
 		}

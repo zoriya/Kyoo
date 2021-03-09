@@ -96,6 +96,7 @@ namespace Kyoo.Controllers
 		{
 			return await ItemsQuery
 				.Where(x => EF.Functions.ILike(x.Title, $"%{query}%"))
+				.OrderBy(DefaultSort)
 				.Take(20)
 				.ToListAsync();
 		}

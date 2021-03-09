@@ -41,6 +41,7 @@ namespace Kyoo.Controllers
 		{
 			return await _database.Genres
 				.Where(genre => EF.Functions.ILike(genre.Name, $"%{query}%"))
+				.OrderBy(DefaultSort)
 				.Take(20)
 				.ToListAsync();
 		}
