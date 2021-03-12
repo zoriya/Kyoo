@@ -8,7 +8,7 @@ namespace Kyoo.Models
 		public int ID { get; set; }
 		public string Slug { get; set; }
 		public string Name { get; set; }
-		public string Poster { get; set; }
+		[SerializeAs("{HOST}/api/library/{Slug}/poster")] public string Poster { get; set; }
 		public string Overview { get; set; }
 		[LoadableRelation] public virtual ICollection<Show> Shows { get; set; }
 		[LoadableRelation] public virtual ICollection<Library> Libraries { get; set; }

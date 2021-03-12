@@ -351,7 +351,8 @@ namespace Kyoo.Controllers
 				Title = show.Title,
 				Path = episodePath,
 				Show = show,
-				ShowID = show.ID
+				ShowID = show.ID,
+				ShowSlug = show.Slug
 			};
 			episode.Tracks = await GetTracks(episode);
 			return episode;

@@ -19,14 +19,14 @@ namespace Kyoo.Models
 		public int EpisodeNumber { get; set; } = -1;
 		public int AbsoluteNumber { get; set; } = -1;
 		[SerializeIgnore] public string Path { get; set; }
-		public string Thumb => $"/api/episodes/{Slug}/thumb";
+
+		[SerializeAs("{HOST}/api/episodes/{Slug}/thumb")] public string Thumb { get; set; }
 		public string Title { get; set; }
 		public string Overview { get; set; }
 		public DateTime? ReleaseDate { get; set; }
 
 		public int Runtime { get; set; } //This runtime variable should be in minutes
 
-		[SerializeIgnore] public string Poster { get; set; }
 		[LoadableRelation] public virtual ICollection<MetadataID> ExternalIDs { get; set; }
 
 		[LoadableRelation] public virtual ICollection<Track> Tracks { get; set; }
@@ -41,7 +41,7 @@ namespace Kyoo.Models
 			string overview,
 			DateTime? releaseDate,
 			int runtime,
-			string poster,
+			string thumb,
 			IEnumerable<MetadataID> externalIDs)
 		{
 			SeasonNumber = seasonNumber;
@@ -51,7 +51,7 @@ namespace Kyoo.Models
 			Overview = overview;
 			ReleaseDate = releaseDate;
 			Runtime = runtime;
-			Poster = poster;
+			Thumb = thumb;
 			ExternalIDs = externalIDs?.ToArray();
 		}
 

@@ -318,11 +318,11 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     EpisodeNumber = table.Column<int>(type: "integer", nullable: false),
                     AbsoluteNumber = table.Column<int>(type: "integer", nullable: false),
                     Path = table.Column<string>(type: "text", nullable: true),
+                    Thumb = table.Column<string>(type: "text", nullable: true),
                     Title = table.Column<string>(type: "text", nullable: true),
                     Overview = table.Column<string>(type: "text", nullable: true),
                     ReleaseDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    Runtime = table.Column<int>(type: "integer", nullable: false),
-                    Poster = table.Column<string>(type: "text", nullable: true)
+                    Runtime = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {

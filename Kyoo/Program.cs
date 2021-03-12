@@ -11,6 +11,7 @@ namespace Kyoo
 	{
 		public static async Task Main(string[] args)
 		{
+			
 			if (args.Length > 0)
 				FileSystem.CurrentDirectory = args[0];
 			if (!File.Exists("./appsettings.json"))

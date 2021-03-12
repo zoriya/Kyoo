@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Kyoo.CommonApi
 {
@@ -24,9 +25,15 @@ namespace Kyoo.CommonApi
 					where.Remove(key);
 			}
 
-			string[] fields = context.HttpContext.Request.Query["fields"]
+			List<string> fields = context.HttpContext.Request.Query["fields"]
 				.SelectMany(x => x.Split(','))
-				.ToArray();
+				.ToList();
+			if (fields.Contains("internal"))
+			{
+				fields.Remove("internal");
+				context.HttpContext.Items["internal"] = true;
+				// TODO disable SerializeAs attributes when this is true.
+			}
 			if (context.ActionDescriptor is ControllerActionDescriptor descriptor)
 			{
 				Type type = descriptor.MethodInfo.ReturnType;
@@ -50,7 +57,7 @@ namespace Kyoo.CommonApi
 						});
 						return null;
 					})
-					.ToArray();
+					.ToList();
 				if (context.Result != null)
 					return;
 			}
@@ -71,7 +78,7 @@ namespace Kyoo.CommonApi
 				return;
 
 			await using ILibraryManager library = context.HttpContext.RequestServices.GetService<ILibraryManager>();
-			string[] fields = (string[])context.HttpContext.Items["fields"];
+			ICollection<string> fields = (ICollection<string>)context.HttpContext.Items["fields"];
 			Type pageType = Utility.GetGenericDefinition(result.DeclaredType, typeof(Page<>));
 
 			
