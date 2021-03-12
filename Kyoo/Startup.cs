@@ -37,6 +37,8 @@ namespace Kyoo
 
 		public void ConfigureServices(IServiceCollection services)
 		{
+			string publicUrl = _configuration.GetValue<string>("public_url");
+
 			services.AddSpaStaticFiles(configuration =>
 			{
 				configuration.RootPath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "wwwroot");
@@ -45,7 +47,7 @@ namespace Kyoo
 			services.AddControllers()
 				.AddNewtonsoftJson(x =>
 				{
-					x.SerializerSettings.ContractResolver = new JsonPropertyIgnorer();
+					x.SerializerSettings.ContractResolver = new JsonPropertyIgnorer(publicUrl);
 					x.SerializerSettings.Converters.Add(new PeopleRoleConverter());
 				});
 			services.AddHttpClient();
@@ -63,7 +65,6 @@ namespace Kyoo
 			});
 
 			string assemblyName = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
-			string publicUrl = _configuration.GetValue<string>("public_url");
 
 			services.AddIdentityCore<User>(o =>
 				{

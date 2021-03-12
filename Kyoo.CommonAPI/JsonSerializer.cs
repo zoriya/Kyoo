@@ -1,7 +1,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Kyoo.Models;
 using Kyoo.Models.Attributes;
 using Newtonsoft.Json;
@@ -13,7 +15,13 @@ namespace Kyoo.Controllers
 	public class JsonPropertyIgnorer : CamelCasePropertyNamesContractResolver
 	{
 		private int _depth = -1;
-		
+		private string _host;
+
+		public JsonPropertyIgnorer(string host)
+		{
+			_host = host;
+		}
+
 		protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
 		{
 			JsonProperty property = base.CreateProperty(member, memberSerialization);
@@ -38,6 +46,10 @@ namespace Kyoo.Controllers
 				property.ShouldSerialize = _ => false;
 			if (member?.GetCustomAttribute<DeserializeIgnoreAttribute>() != null)
 				property.ShouldDeserialize = _ => false;
+
+			SerializeAsAttribute serializeAs = member?.GetCustomAttribute<SerializeAsAttribute>();
+			if (serializeAs != null)
+				property.ValueProvider = new SerializeAsProvider(serializeAs.Format, _host);
 			return property;
 		}
 
@@ -82,6 +94,42 @@ namespace Kyoo.Controllers
 			PeopleRole existingValue,
 			bool hasExistingValue,
 			JsonSerializer serializer)
+		{
+			throw new NotImplementedException();
+		}
+	}
+
+	public class SerializeAsProvider : IValueProvider
+	{
+		private string _format;
+		private string _host;
+
+		public SerializeAsProvider(string format, string host)
+		{
+			_format = format;
+			_host = host.TrimEnd('/');
+		}
+		
+		public object GetValue(object target)
+		{
+			return Regex.Replace(_format, @"(?<!{){(\w+)}", x =>
+			{
+				string value = x.Groups[1].Value;
+
+				if (value == "HOST")
+					return _host;
+				
+				PropertyInfo properties = target.GetType().GetProperties()
+					.FirstOrDefault(y => y.Name == value);
+				if (properties == null)
+					return null;
+				if (properties.GetValue(target) is string ret)
+					return ret;
+				throw new ArgumentException($"Invalid serializer replacement {value}");
+			});
+		}
+		
+		public void SetValue(object target, object value)
 		{
 			throw new NotImplementedException();
 		}

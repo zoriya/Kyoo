@@ -18,9 +18,9 @@ namespace Kyoo.Models
 		public int? StartYear { get; set; }
 		public int? EndYear { get; set; }
 
-		public string Poster { get; set; }
-		public string Logo { get; set; }
-		public string Backdrop { get; set; }
+		[SerializeAs("{HOST}/api/shows/{Slug}/poster")] public string Poster { get; set; }
+		[SerializeAs("{HOST}/api/shows/{Slug}/logo")] public string Logo { get; set; }
+		[SerializeAs("{HOST}/api/shows/{Slug}/backdrop")] public string Backdrop { get; set; }
 
 		public bool IsMovie { get; set; }
 

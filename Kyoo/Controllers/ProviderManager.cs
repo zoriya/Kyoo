@@ -44,7 +44,7 @@ namespace Kyoo.Controllers
 			Library library,
 			string what)
 		{
-			List<T> ret = new List<T>();
+			List<T> ret = new();
 			
 			IEnumerable<IMetadataProvider> providers = library?.Providers
 					.Select(x => _providers.FirstOrDefault(y => y.Provider.Slug == x.Slug))
@@ -121,6 +121,7 @@ namespace Kyoo.Controllers
 				$"the season {seasonNumber} of {show.Title}");
 			season.Show = show;
 			season.ShowID = show.ID;
+			season.ShowSlug = show.Slug;
 			season.SeasonNumber = season.SeasonNumber == -1 ? seasonNumber : season.SeasonNumber;
 			season.Title ??= $"Season {season.SeasonNumber}";
 			return season;
@@ -139,6 +140,7 @@ namespace Kyoo.Controllers
 				"an episode");
 			episode.Show = show;
 			episode.ShowID = show.ID;
+			episode.ShowSlug = show.Slug;
 			episode.Path = episodePath;
 			episode.SeasonNumber = episode.SeasonNumber != -1 ? episode.SeasonNumber : seasonNumber;
 			episode.EpisodeNumber = episode.EpisodeNumber != -1 ? episode.EpisodeNumber : episodeNumber;

@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Kyoo.Models.DatabaseMigrations.Internal
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20210306181259_Initial")]
+    [Migration("20210312234147_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -71,9 +71,6 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     b.Property<string>("Path")
                         .HasColumnType("text");
 
-                    b.Property<string>("Poster")
-                        .HasColumnType("text");
-
                     b.Property<DateTime?>("ReleaseDate")
                         .HasColumnType("timestamp without time zone");
 
@@ -88,6 +85,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
                     b.Property<int>("ShowID")
                         .HasColumnType("integer");
+
+                    b.Property<string>("Thumb")
+                        .HasColumnType("text");
 
                     b.Property<string>("Title")
                         .HasColumnType("text");

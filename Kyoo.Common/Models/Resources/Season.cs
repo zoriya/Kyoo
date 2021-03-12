@@ -18,8 +18,7 @@ namespace Kyoo.Models
 		public string Overview { get; set; }
 		public int? Year { get; set; }
 
-		[SerializeIgnore] public string Poster { get; set; }
-		public string Thumb => $"/api/seasons/{Slug}/thumb";
+		[SerializeAs("{HOST}/api/seasons/{Slug}/thumb")] public string Poster { get; set; }
 		[EditableRelation] [LoadableRelation] public virtual ICollection<MetadataID> ExternalIDs { get; set; }
 
 		[LoadableRelation] public virtual ICollection<Episode> Episodes { get; set; }

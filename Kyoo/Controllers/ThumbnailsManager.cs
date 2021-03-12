@@ -96,11 +96,11 @@ namespace Kyoo.Controllers
 			if (episode?.Path == null)
 				return default;
 
-			if (episode.Poster != null)
+			if (episode.Thumb != null)
 			{
 				string localPath = Path.ChangeExtension(episode.Path, "jpg");
 				if (alwaysDownload || !File.Exists(localPath))
-					await DownloadImage(episode.Poster, localPath, $"The thumbnail of {episode.Show.Title}");
+					await DownloadImage(episode.Thumb, localPath, $"The thumbnail of {episode.Show.Title}");
 			}
 			return episode;
 		}

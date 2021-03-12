@@ -69,9 +69,6 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     b.Property<string>("Path")
                         .HasColumnType("text");
 
-                    b.Property<string>("Poster")
-                        .HasColumnType("text");
-
                     b.Property<DateTime?>("ReleaseDate")
                         .HasColumnType("timestamp without time zone");
 
@@ -86,6 +83,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
                     b.Property<int>("ShowID")
                         .HasColumnType("integer");
+
+                    b.Property<string>("Thumb")
+                        .HasColumnType("text");
 
                     b.Property<string>("Title")
                         .HasColumnType("text");
