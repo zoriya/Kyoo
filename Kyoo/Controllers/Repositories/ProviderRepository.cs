@@ -51,7 +51,7 @@ namespace Kyoo.Controllers
 			Sort<MetadataID> sort = default, 
 			Pagination limit = default)
 		{
-			return ApplyFilters(_database.MetadataIds,
+			return ApplyFilters(_database.MetadataIds.Include(y => y.Provider),
 				x => _database.MetadataIds.FirstOrDefaultAsync(y => y.ID == x),
 				x => x.ID,
 				where,

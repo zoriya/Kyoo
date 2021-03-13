@@ -261,7 +261,10 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 
-		private async Task SetRelation<T1, T2>(T1 obj, Task<ICollection<T2>> loader, Action<T1, ICollection<T2>> setter, Action<T2, T1> inverse)
+		private async Task SetRelation<T1, T2>(T1 obj, 
+			Task<ICollection<T2>> loader, 
+			Action<T1, ICollection<T2>> setter, 
+			Action<T2, T1> inverse)
 		{
 			ICollection<T2> loaded = await loader;
 			setter(obj, loaded);
@@ -300,8 +303,8 @@ namespace Kyoo.Controllers
 				
 				(Show s, nameof(Show.ExternalIDs)) => SetRelation(s, 
 					ProviderRepository.GetMetadataID(x => x.ShowID == obj.ID),
-					(x, y) => x.ExternalIDs = y, 
-					(x, y) => x.Show = y),
+					(x, y) => x.ExternalIDs = y,
+					(x, y) => { x.Show = y; x.ShowID = y.ID; }),
 				
 				(Show s, nameof(Show.Genres)) => GenreRepository
 					.GetAll(x => x.Shows.Any(y => y.ID == obj.ID))
