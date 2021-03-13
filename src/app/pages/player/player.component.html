@@ -4,7 +4,7 @@
      [style.cursor]="this.showControls ? '' : 'none'">
 	<div class="player data-vjs-player">
 		<video id="player" #player
-		       poster="backdrop/{{this.item.showSlug}}"
+			   [poster]="this.item.backdrop"
 		       autoplay muted
 		       (click)="this.videoClicked()"
 		       (dblclick)="this.fullscreen()"
@@ -75,7 +75,7 @@
 
 		<div class="controller container-fluid" id="controller">
 			<div class="img d-none d-sm-block">
-				<img src="poster/{{this.item.showSlug}}" alt="poster" />
+				<img [src]="this.item.poster" alt="poster" />
 			</div>
 			<div class="content">
 				<h3 *ngIf="!this.item.isMovie">S{{this.item.seasonNumber}}:E{{this.item.episodeNumber}} - {{this.item.title}}</h3>

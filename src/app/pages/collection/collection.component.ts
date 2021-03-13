@@ -29,7 +29,7 @@ export class CollectionComponent
 
 	getThumb(): SafeStyle
 	{
-		return this.sanitizer.bypassSecurityTrustStyle("url(" + this.collection.poster + ")");
+		return this.sanitizer.bypassSecurityTrustStyle(`url(${this.collection.poster})`);
 	}
 
 	getDate(item: LibraryItem | Show | ShowRole | Collection | People): string

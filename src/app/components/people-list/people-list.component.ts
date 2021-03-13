@@ -19,8 +19,8 @@ export class PeopleListComponent extends HorizontalScroller
 		super();
 	}
 
-	getPeopleIcon(slug: string): SafeStyle
+	getPeopleIcon(item: People): SafeStyle
 	{
-		return this.sanitizer.bypassSecurityTrustStyle("url(/peopleimg/" + slug + ")");
+		return this.sanitizer.bypassSecurityTrustStyle(`url(${item.poster})`);
 	}
 }

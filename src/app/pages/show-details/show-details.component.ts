@@ -53,20 +53,18 @@ export class ShowDetailsComponent implements AfterViewInit, OnDestroy
 
 			this.peopleService.getFromShow(this.show.slug).subscribe(x => this.people = x);
 
-			if (this.show.isMovie) {
+			if (this.show.isMovie)
 				return;
-			}
 
-			this.seasonService.getForShow(this.show.slug, {limit: 0}).subscribe(x =>
+			this.seasons = this.show.seasons;
+			if (!this.seasons.find(y => y.seasonNumber === this.season))
 			{
-				this.seasons = x.items;
-				if (x.items.find(y => y.seasonNumber === this.season) == null)
-				{
-					this.season = 1;
-					this.getEpisodes(1);
-				}
-			});
-			this.getEpisodes(this.season); });
+				this.season = 1;
+				this.getEpisodes(1);
+			}
+			else
+				this.getEpisodes(this.season);
+		});
 	}
 
 	ngAfterViewInit(): void
@@ -95,9 +93,9 @@ export class ShowDetailsComponent implements AfterViewInit, OnDestroy
 		this.toolbar.setAttribute("style", `background-color: rgba(0, 0, 0, ${opacity}) !important`);
 	}
 
-	getThumb(slug: string): SafeStyle
+	getThumb(item: Show): SafeStyle
 	{
-		return this.sanitizer.bypassSecurityTrustStyle("url(/poster/" + slug + ")");
+		return this.sanitizer.bypassSecurityTrustStyle(`url(${item.poster})`);
 	}
 
 	playClicked(): void
@@ -118,6 +116,12 @@ export class ShowDetailsComponent implements AfterViewInit, OnDestroy
 		this.episodeService.getFromSeasonNumber(this.show.slug, this.season).subscribe(x =>
 		{
 			this.episodes[season] = x;
+		});
+		this.router.navigate([], {
+			relativeTo: this.route,
+			queryParams: {season},
+			replaceUrl: true,
+			queryParamsHandling: "merge",
 		});
 	}
 

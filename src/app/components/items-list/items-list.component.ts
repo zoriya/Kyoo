@@ -22,9 +22,9 @@ export class ItemsListComponent extends HorizontalScroller
 		super();
 	}
 
-	getThumb(slug: string): SafeUrl
+	getPoster(item: LibraryItem | Show | ShowRole | Collection): SafeUrl
 	{
-		return this.sanitizer.bypassSecurityTrustStyle("url(/poster/" + slug + ")");
+		return this.sanitizer.bypassSecurityTrustStyle(`url(${item.poster})`);
 	}
 
 	getDate(item: LibraryItem | Show | ShowRole | Collection): string

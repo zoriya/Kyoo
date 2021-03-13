@@ -26,7 +26,7 @@
 	</ng-container>
 
 	<br/>
-	
+
 	<ng-container>
 		<mat-form-field class="w-100 px-3" (click)="$event.stopPropagation();">
 			<mat-label>Studio</mat-label>
@@ -93,7 +93,7 @@
      infinite-scroll (scrolled)="this.page?.loadNext(this.client)" infiniteScrollContainer="#main" fromRoot="true">
 	<a class="show" *ngFor="let item of this.page?.items" draggable="false"
 	   [href]="getLink(item)" [routerLink]="getLink(item)">
-		<div matRipple [style.background-image]="getThumb(item.slug)"></div>
+		<div matRipple [style.background-image]="getPoster(item)"></div>
 		<p class="title">{{item.title ? item.title : item.name}}</p>
 		<p class="date">{{getDate(item)}}</p>
 	</a>

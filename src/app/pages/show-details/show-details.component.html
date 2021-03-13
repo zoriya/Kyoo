@@ -1,11 +1,11 @@
 <div class="backdrop">
-	<img id="backdrop" src="backdrop/{{this.show.slug}}" alt="backdrop" />
+	<img id="backdrop" [src]="this.show.backdrop" alt="backdrop" />
 </div>
 
 <div class="header container pt-sm-5">
 	<div class="row">
 		<div class="poster d-none d-sm-block">
-			<div [style.background-image]="getThumb(this.show.slug)"></div>
+			<div [style.background-image]="getThumb(this.show)"></div>
 		</div>
 		<div class="main col">
 			<div class="info">
@@ -34,7 +34,7 @@
 			</div>
 		</div>
 		<div class="col-3 secondary d-none d-md-block">
-			<img src="logo/{{this.show.slug}}" #logo alt="" (error)="logo.style.display = 'none'" />
+			<img [src]="this.show.logo" #logo alt="" (error)="logo.style.display = 'none'" />
 
 			<div>
 				<p>Studio: <b><a draggable="false"

@@ -73,7 +73,7 @@ const routes: Routes = [
 	},
 
 	{path: "show/:slug", component: ShowDetailsComponent,
-		resolve: {show: ItemResolver.forResource<Show>("shows/:slug?fields=studio,genres")},
+		resolve: {show: ItemResolver.forResource<Show>("shows/:slug?fields=studio,genres,seasons,externalIDs")},
 		canLoad: [AuthGuard.forPermissions("read")],
 		canActivate: [AuthGuard.forPermissions("read")]
 	},

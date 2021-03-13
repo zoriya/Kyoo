@@ -275,9 +275,9 @@ export class ItemsGridComponent implements OnInit
 		return obj?.name ?? "None";
 	}
 
-	getThumb(slug: string): SafeStyle
+	getPoster(obj: LibraryItem | Show | ShowRole | Collection): SafeStyle
 	{
-		return this.sanitizer.bypassSecurityTrustStyle("url(/poster/" + slug + ")");
+		return this.sanitizer.bypassSecurityTrustStyle(`url(${obj.poster})`);
 	}
 
 	getDate(item: LibraryItem | Show | ShowRole | Collection): string
