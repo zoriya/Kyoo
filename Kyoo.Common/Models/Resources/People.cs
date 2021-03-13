@@ -9,7 +9,7 @@ namespace Kyoo.Models
 		public int ID { get; set; }
 		public string Slug { get; set; }
 		public string Name { get; set; }
-		public string Poster { get; set; }
+		[SerializeAs("{HOST}/api/people/{Slug}/poster")] public string Poster { get; set; }
 		[EditableRelation] [LoadableRelation] public virtual ICollection<MetadataID> ExternalIDs { get; set; }
 		
 		[EditableRelation] [LoadableRelation] public virtual ICollection<PeopleRole> Roles { get; set; }

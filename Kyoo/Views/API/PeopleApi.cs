@@ -23,7 +23,7 @@ namespace Kyoo.Api
 			: base(libraryManager.PeopleRepository, configuration)
 		{
 			_libraryManager = libraryManager;
-			_peoplePath = configuration.GetValue<string>("peoplePath");
+			_peoplePath = Path.GetFullPath(configuration.GetValue<string>("peoplePath"));
 		}
 
 		[HttpGet("{id:int}/role")]

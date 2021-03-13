@@ -119,7 +119,8 @@ namespace Kyoo.Controllers
 				if (value == "HOST")
 					return _host;
 				
-				PropertyInfo properties = target.GetType().GetProperties()
+				PropertyInfo properties = target.GetType()
+					.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
 					.FirstOrDefault(y => y.Name == value);
 				if (properties == null)
 					return null;
