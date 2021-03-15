@@ -4,7 +4,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using Kyoo.CommonApi;
 using Kyoo.Models;
 using Kyoo.Models.Attributes;
@@ -119,7 +118,7 @@ namespace Kyoo.Controllers
 			return query.CountAsync();
 		}
 
-		public virtual async Task<T> Create([NotNull] T obj)
+		public virtual async Task<T> Create(T obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -169,6 +168,26 @@ namespace Kyoo.Controllers
 				if (old == null)
 					throw new ItemNotFound($"No resource found with the ID {edited.ID}.");
 
+				// foreach (PropertyInfo navigation in typeof(T).GetProperties()
+				// 	.Where(x => x.GetCustomAttribute<LoadableRelationAttribute>() != null))
+				// {
+				// 	if (navigation.GetCustomAttribute<EditableRelationAttribute>() == null)
+				// 	{
+				// 		navigation.SetValue(edited, default);
+				// 		continue;
+				// 	}
+				//
+				// 	if (resetOld || navigation.GetValue(edited) != default)
+				// 	{
+				// 		// TODO only works for X To One and not X to Many
+				// 		await _library.Value.Load(old, navigation.Name);
+				// 		object value = navigation.GetValue(old);
+				// 		if (value is IEnumerable list) // TODO handle externalIds & PeopleRoles
+				// 			list.ForEach(x => _library.Value.Delete(x));
+				// 		else if (value is IResource resource)
+				// 			_library.Value.Delete(resource);
+				// 	}
+				// }
 				foreach (NavigationEntry navigation in Database.Entry(old).Navigations)
 				{
 					if (navigation.Metadata.PropertyInfo.GetCustomAttribute<EditableRelationAttribute>() != null)

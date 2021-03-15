@@ -304,6 +304,14 @@ namespace Kyoo
 				action(i);
 		}
 		
+		public static void ForEach([CanBeNull] this IEnumerable self, Action<object> action)
+		{
+			if (self == null)
+				return;
+			foreach (object i in self)
+				action(i);
+		}
+		
 		public static async Task ForEachAsync<T>([CanBeNull] this IEnumerable<T> self, Func<T, Task> action)
 		{
 			if (self == null)
@@ -318,6 +326,14 @@ namespace Kyoo
 				return;
 			await foreach (T i in self)
 				action(i);
+		}
+		
+		public static async Task ForEachAsync([CanBeNull] this IEnumerable self, Func<object, Task> action)
+		{
+			if (self == null)
+				return;
+			foreach (object i in self)
+				await action(i);
 		}
 
 		private static MethodInfo GetMethod(Type type, BindingFlags flag, string name, Type[] generics, object[] args)

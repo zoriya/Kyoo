@@ -166,13 +166,12 @@ namespace Kyoo.Controllers
 
 			await base.Validate(resource);
 
-			if (resource.Tracks != null)
-			{
-				// TODO remove old values
-				resource.Tracks = await resource.Tracks
-					.SelectAsync(x => _tracks.CreateIfNotExists(x, true))
-					.ToListAsync();
-			}
+			// if (resource.Tracks != null)
+			// {
+			// 	resource.Tracks = await resource.Tracks
+			// 		.SelectAsync(x => _tracks.CreateIfNotExists(x, true))
+			// 		.ToListAsync();
+			// }
 
 			if (resource.ExternalIDs != null)
 			{
@@ -194,7 +193,7 @@ namespace Kyoo.Controllers
 				throw new ArgumentNullException(nameof(obj));
 			
 			_database.Entry(obj).State = EntityState.Deleted;
-			await obj.Tracks.ForEachAsync(x => _tracks.CreateIfNotExists(x, true));
+			// await obj.Tracks.ForEachAsync(x => _tracks.CreateIfNotExists(x, true));
 			if (obj.ExternalIDs != null)
 				foreach (MetadataID entry in obj.ExternalIDs)
 					_database.Entry(entry).State = EntityState.Deleted;
