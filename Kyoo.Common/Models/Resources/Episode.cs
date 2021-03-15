@@ -27,9 +27,9 @@ namespace Kyoo.Models
 
 		public int Runtime { get; set; } //This runtime variable should be in minutes
 
-		[LoadableRelation] public virtual ICollection<MetadataID> ExternalIDs { get; set; }
+		[EditableRelation] [LoadableRelation] public virtual ICollection<MetadataID> ExternalIDs { get; set; }
 
-		[LoadableRelation] public virtual ICollection<Track> Tracks { get; set; }
+		[EditableRelation] [LoadableRelation] public virtual ICollection<Track> Tracks { get; set; }
 		
 
 		public Episode() { }

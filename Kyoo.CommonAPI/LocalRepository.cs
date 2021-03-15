@@ -43,6 +43,11 @@ namespace Kyoo.Controllers
 		{
 			return Database.Set<T>().FirstOrDefaultAsync(x => x.ID == id);
 		}
+		
+		public virtual Task<T> GetWithTracking(int id)
+		{
+			return Database.Set<T>().AsTracking().FirstOrDefaultAsync(x => x.ID == id);
+		}
 
 		public virtual Task<T> Get(string slug)
 		{
@@ -159,7 +164,7 @@ namespace Kyoo.Controllers
 			Database.ChangeTracker.LazyLoadingEnabled = false;
 			try
 			{
-				T old = await Get(edited.ID);
+				T old = await GetWithTracking(edited.ID);
 
 				if (old == null)
 					throw new ItemNotFound($"No resource found with the ID {edited.ID}.");
@@ -180,8 +185,8 @@ namespace Kyoo.Controllers
 						await navigation.LoadAsync();
 						// TODO this may be usless for lists since the API does not return IDs but the
 						// TODO LinkEquality does not check slugs (their are lazy loaded and only the ID is available)
-						if (Utility.ResourceEquals(getter.GetClrValue(edited), getter.GetClrValue(old)))
-							navigation.Metadata.PropertyInfo.SetValue(edited, default);
+						// if (Utility.ResourceEquals(getter.GetClrValue(edited), getter.GetClrValue(old)))
+						// 	navigation.Metadata.PropertyInfo.SetValue(edited, default);
 					}
 					else
 						navigation.Metadata.PropertyInfo.SetValue(edited, default);
