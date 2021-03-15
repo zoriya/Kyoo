@@ -110,7 +110,7 @@ namespace Kyoo.Controllers
 			_tasks.AddRange(CoreTaskHolder.Tasks.Select(x => (x, DateTime.Now + GetTaskDelay(x.Slug))));
 			
 			IEnumerable<ITask> prerunTasks = _tasks.Select(x => x.task)
-				.Where(x => x.RunOnStartup && x.Priority == Int32.MaxValue);
+				.Where(x => x.RunOnStartup && x.Priority == int.MaxValue);
 			
 			foreach (ITask task in prerunTasks)
 				task.Run(_serviceProvider, _taskToken.Token);

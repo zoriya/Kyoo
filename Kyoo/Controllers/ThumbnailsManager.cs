@@ -1,10 +1,10 @@
 ﻿using Kyoo.Models;
 using Microsoft.Extensions.Configuration;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 
 namespace Kyoo.Controllers
 {
@@ -26,7 +26,7 @@ namespace Kyoo.Controllers
 			}
 			catch (WebException exception)
 			{
-				await Console.Error.WriteLineAsync($"{what} could not be downloaded.\n\tError: {exception.Message}.");
+				await Console.Error.WriteLineAsync($"{what} could not be downloaded. Error: {exception.Message}.");
 			}
 		}
 
@@ -53,26 +53,23 @@ namespace Kyoo.Controllers
 				if (alwaysDownload || !File.Exists(backdropPath))
 					await DownloadImage(show.Backdrop, backdropPath, $"The backdrop of {show.Title}");
 			}
+			
+			foreach (PeopleRole role in show.People)
+				await Validate(role.People, alwaysDownload);
 
 			return show;
 		}
 
-		public async Task<IEnumerable<PeopleRole>> Validate(IEnumerable<PeopleRole> people, bool alwaysDownload)
+		public async Task<People> Validate([NotNull] People people, bool alwaysDownload)
 		{
 			if (people == null)
-				return null;
-			
+				throw new ArgumentNullException(nameof(people));
 			string root = _config.GetValue<string>("peoplePath");
-			Directory.CreateDirectory(root);
+			string localPath = Path.Combine(root, people.Slug + ".jpg");
 			
-			foreach (PeopleRole peop in people)
-			{
-				string localPath = Path.Combine(root, peop.People.Slug + ".jpg");
-				if (peop.People.Poster == null)
-					continue;
-				if (alwaysDownload || !File.Exists(localPath))
-					await DownloadImage(peop.People.Poster, localPath, $"The profile picture of {peop.People.Name}");
-			}
+			Directory.CreateDirectory(root);
+			if (alwaysDownload || !File.Exists(localPath))
+				await DownloadImage(people.Poster, localPath, $"The profile picture of {people.Name}");
 			
 			return people;
 		}
@@ -100,9 +97,25 @@ namespace Kyoo.Controllers
 			{
 				string localPath = Path.ChangeExtension(episode.Path, "jpg");
 				if (alwaysDownload || !File.Exists(localPath))
-					await DownloadImage(episode.Thumb, localPath, $"The thumbnail of {episode.Show.Title}");
+					await DownloadImage(episode.Thumb, localPath, $"The thumbnail of {episode.Slug}");
 			}
 			return episode;
 		}
+
+		public async Task<ProviderID> Validate(ProviderID provider, bool alwaysDownload)
+		{
+			if (provider.Logo == null)
+				return provider;
+
+			string root = _config.GetValue<string>("peoplePath");
+			string localPath = Path.Combine(root, provider.Slug + ".jpg");
+			
+			Directory.CreateDirectory(root);
+			if (alwaysDownload || !File.Exists(localPath))
+				await DownloadImage(provider.Logo, localPath, $"The thumbnail of {provider.Slug}");
+			return provider;
+		}
+		
+		//TODO add get thumbs here
 	}
 }
