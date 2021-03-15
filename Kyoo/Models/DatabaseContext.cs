@@ -12,7 +12,10 @@ namespace Kyoo
 {
 	public class DatabaseContext : DbContext
 	{
-		public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) { }
+		public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
+		{
+			ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+		}
 
 		public DbSet<Library> Libraries { get; set; }
 		public DbSet<Collection> Collections { get; set; }
@@ -35,6 +38,8 @@ namespace Kyoo
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<Status>();
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<ItemType>();
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<StreamType>();
+
+			ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 		}
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)

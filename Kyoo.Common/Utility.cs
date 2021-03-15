@@ -143,7 +143,7 @@ namespace Kyoo
 					? Activator.CreateInstance(property.PropertyType) 
 					: null;
 
-				if (value?.Equals(defaultValue) == false)
+				if (value?.Equals(defaultValue) == false && value != property.GetValue(first))
 					property.SetValue(first, value);
 			}
 
@@ -301,6 +301,22 @@ namespace Kyoo
 			if (self == null)
 				return;
 			foreach (T i in self)
+				action(i);
+		}
+		
+		public static async Task ForEachAsync<T>([CanBeNull] this IEnumerable<T> self, Func<T, Task> action)
+		{
+			if (self == null)
+				return;
+			foreach (T i in self)
+				await action(i);
+		}
+		
+		public static async Task ForEachAsync<T>([CanBeNull] this IAsyncEnumerable<T> self, Action<T> action)
+		{
+			if (self == null)
+				return;
+			await foreach (T i in self)
 				action(i);
 		}
 

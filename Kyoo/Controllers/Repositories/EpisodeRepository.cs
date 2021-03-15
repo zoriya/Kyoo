@@ -15,15 +15,20 @@ namespace Kyoo.Controllers
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
 		private readonly IShowRepository _shows;
+		private readonly ITrackRepository _tracks;
 		protected override Expression<Func<Episode, object>> DefaultSort => x => x.EpisodeNumber;
 
 
-		public EpisodeRepository(DatabaseContext database, IProviderRepository providers, IShowRepository shows) 
+		public EpisodeRepository(DatabaseContext database, 
+			IProviderRepository providers,
+			IShowRepository shows,
+			ITrackRepository tracks) 
 			: base(database)
 		{
 			_database = database;
 			_providers = providers;
 			_shows = shows;
+			_tracks = tracks;
 		}
 
 
@@ -161,6 +166,14 @@ namespace Kyoo.Controllers
 
 			await base.Validate(resource);
 
+			if (resource.Tracks != null)
+			{
+				// TODO remove old values
+				resource.Tracks = await resource.Tracks
+					.SelectAsync(x => _tracks.CreateIfNotExists(x, true))
+					.ToListAsync();
+			}
+
 			if (resource.ExternalIDs != null)
 			{
 				foreach (MetadataID link in resource.ExternalIDs)
@@ -181,10 +194,10 @@ namespace Kyoo.Controllers
 				throw new ArgumentNullException(nameof(obj));
 			
 			_database.Entry(obj).State = EntityState.Deleted;
+			await obj.Tracks.ForEachAsync(x => _tracks.CreateIfNotExists(x, true));
 			if (obj.ExternalIDs != null)
 				foreach (MetadataID entry in obj.ExternalIDs)
 					_database.Entry(entry).State = EntityState.Deleted;
-			// Since Tracks & Episodes are on the same database and handled by dotnet-ef, we can't use the repository to delete them. 
 			await _database.SaveChangesAsync();
 		}
 	}

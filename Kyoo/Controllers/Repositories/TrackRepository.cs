@@ -36,7 +36,12 @@ namespace Kyoo.Controllers
 			await _database.DisposeAsync();
 		}
 
-		public Task<Track> Get(string slug, StreamType type = StreamType.Unknown)
+		public override Task<Track> Get(string slug)
+		{
+			return Get(slug, StreamType.Unknown);
+		}
+		
+		public Task<Track> Get(string slug, StreamType type)
 		{
 			Match match = Regex.Match(slug,
 				@"(?<show>.*)-s(?<season>\d+)e(?<episode>\d+)\.(?<language>.{0,3})(?<forced>-forced)?(\..*)?");
@@ -92,6 +97,8 @@ namespace Kyoo.Controllers
 			await _database.SaveChangesAsync($"Trying to insert a duplicated track (slug {obj.Slug} already exists).");
 			return obj;
 		}
+		
+		
 		
 		protected override Task Validate(Track resource)
 		{
