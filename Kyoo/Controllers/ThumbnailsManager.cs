@@ -107,12 +107,12 @@ namespace Kyoo.Controllers
 			if (provider.Logo == null)
 				return provider;
 
-			string root = _config.GetValue<string>("peoplePath");
+			string root = _config.GetValue<string>("providerPath");
 			string localPath = Path.Combine(root, provider.Slug + ".jpg");
 			
 			Directory.CreateDirectory(root);
 			if (alwaysDownload || !File.Exists(localPath))
-				await DownloadImage(provider.Logo, localPath, $"The thumbnail of {provider.Slug}");
+				await DownloadImage(provider.Logo, localPath, $"The logo of {provider.Slug}");
 			return provider;
 		}
 		
