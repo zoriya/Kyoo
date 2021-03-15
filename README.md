@@ -7,6 +7,22 @@ Kyoo has been created from scratch, it is not a fork. Everything is and always w
 
 Feel free to open issues or pull requests, all contribution are welcomed.
 
+## Screens
+![Show](../screens/show.png?raw=true)
+- - -
+![Show Dropdown](../screens/show_dropdown.png?raw=true)
+- - -
+![Browse](../screens/browse.png?raw=true)
+- - -
+![Filters](../screens/filters.png?raw=true)
+- - -
+![People](../screens/people.png?raw=true)
+- - -
+![Player](../screens/player.png?raw=true)
+- - -
+![Search](../screens/search.png?raw=true)
+
+
 ## Installation
 
 If you are using a linux distribution with acess to the AUR, simply install the kyoo-bin package. **COMMING SOON**. The package is not published on the AUR yet but you can built it easily with makepkg. To do so, clone the repo & run `makepkg -i` inside the `install/aur` directory.
