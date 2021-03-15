@@ -21,13 +21,15 @@ namespace Kyoo.Tasks
 		{
 			using IServiceScope serviceScope = serviceProvider.CreateScope();
 			IProviderRepository providers = serviceScope.ServiceProvider.GetService<IProviderRepository>();
+			IThumbnailsManager thumbnails = serviceScope.ServiceProvider.GetService<IThumbnailsManager>();
 			IPluginManager pluginManager = serviceScope.ServiceProvider.GetService<IPluginManager>();
 			
-			foreach (IMetadataProvider provider in pluginManager.GetPlugins<IMetadataProvider>())
+			foreach (IMetadataProvider provider in pluginManager!.GetPlugins<IMetadataProvider>())
 			{
 				if (string.IsNullOrEmpty(provider.Provider.Slug))
 					throw new ArgumentException($"Empty provider slug (name: {provider.Provider.Name}).");
-				await providers.CreateIfNotExists(provider.Provider);
+				await providers!.CreateIfNotExists(provider.Provider);
+				await thumbnails!.Validate(provider.Provider);
 			}
 		}
 

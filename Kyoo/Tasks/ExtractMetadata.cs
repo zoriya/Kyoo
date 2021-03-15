@@ -72,6 +72,7 @@ namespace Kyoo.Tasks
 		{
 			if (thumbs)
 				await _thumbnails!.Validate(show, true);
+			await _library.Load(show, x => x.Seasons);
 			foreach (Season season in show.Seasons)
 			{
 				if (token.IsCancellationRequested)
@@ -84,6 +85,7 @@ namespace Kyoo.Tasks
 		{
 			if (thumbs)
 				await _thumbnails!.Validate(season, true);
+			await _library.Load(season, x => x.Episodes);
 			foreach (Episode episode in season.Episodes)
 			{
 				if (token.IsCancellationRequested)

@@ -291,7 +291,6 @@ namespace Kyoo.Controllers
 				show.Slug += $"-{show.StartYear}";
 				await libraryManager.RegisterShow(show);
 			}
-			await _thumbnailsManager.Validate(show.People);
 			await _thumbnailsManager.Validate(show);
 			return show;
 		}
