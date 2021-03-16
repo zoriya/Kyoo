@@ -145,6 +145,10 @@ namespace Kyoo
 				.HasOne(x => x.People)
 				.WithMany(x => x.ExternalIDs)
 				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<MetadataID>()
+				.HasOne(x => x.Provider)
+				.WithMany(x => x.MetadataLinks)
+				.OnDelete(DeleteBehavior.Cascade);
 
 			modelBuilder.Entity<Collection>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<Genre>().Property(x => x.Slug).IsRequired();

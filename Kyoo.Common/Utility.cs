@@ -124,7 +124,7 @@ namespace Kyoo
 			return first;
 		}
 		
-		public static T Complete<T>(T first, T second, Func<PropertyInfo, bool> ignore = null)
+		public static T Complete<T>(T first, T second, Func<PropertyInfo, bool> where = null)
 		{
 			if (first == null)
 				throw new ArgumentNullException(nameof(first));
@@ -136,8 +136,8 @@ namespace Kyoo
 				.Where(x => x.CanRead && x.CanWrite 
 				                      && Attribute.GetCustomAttribute(x, typeof(NotMergableAttribute)) == null);
 
-			if (ignore != null)
-				properties = properties.Where(ignore);
+			if (where != null)
+				properties = properties.Where(where);
 			
 			foreach (PropertyInfo property in properties)
 			{
