@@ -172,17 +172,13 @@ namespace Kyoo.Controllers
 			if (changed.Tracks != null || resetOld)
 			{
 				ICollection<Track> oldTracks = await _tracks.GetAll(x => x.EpisodeID == resource.ID);
-				resource.Tracks = await changed.Tracks.SelectAsync(async track =>
-					{
-						Track oldValue = oldTracks?.FirstOrDefault(x => Utility.ResourceEquals(track, x));
-						if (oldValue == null)
-							return await _tracks.CreateIfNotExists(track, true);
-						oldTracks.Remove(oldValue);
-						return oldValue;
-					})
-					.ToListAsync();
-				foreach (Track x in oldTracks)
-					await _tracks.Delete(x);
+				await _tracks.DeleteRange(oldTracks);
+				resource.Tracks = await changed.Tracks.SelectAsync(x =>
+				{
+					x.Episode = resource;
+					x.EpisodeID = resource.ID;
+					return _tracks.Create(x);
+				}).ToListAsync();
 			}
 
 			if (changed.ExternalIDs != null || resetOld)

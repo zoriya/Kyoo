@@ -94,6 +94,7 @@ namespace Kyoo.Models
 		{
 			get
 			{
+				// TODO other type of tracks should still have slugs. The slug should never be an ID. Maybe a und-number format.
 				if (Type != StreamType.Subtitle)
 					return null;
 
