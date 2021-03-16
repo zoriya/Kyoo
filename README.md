@@ -7,6 +7,22 @@ Kyoo has been created from scratch, it is not a fork. Everything is and always w
 
 Feel free to open issues or pull requests, all contribution are welcomed.
 
+## Screens
+![Show](../screens/show.png?raw=true)
+- - -
+![Show Dropdown](../screens/show_dropdown.png?raw=true)
+- - -
+![Browse](../screens/browse.png?raw=true)
+- - -
+![Filters](../screens/filters.png?raw=true)
+- - -
+![People](../screens/people.png?raw=true)
+- - -
+![Player](../screens/player.png?raw=true)
+- - -
+![Search](../screens/search.png?raw=true)
+
+
 ## Installation
 
 If you are using a linux distribution with acess to the AUR, simply install the kyoo-bin package. **COMMING SOON**. The package is not published on the AUR yet but you can built it easily with makepkg. To do so, clone the repo & run `makepkg -i` inside the `install/aur` directory.
@@ -27,7 +43,8 @@ Both of theses repository are needed to fully build Kyoo, when you clone this re
 
 ## Development & Build
 
-To develop for Kyoo, you will need the .NET 3.1 SDK, node & npm for the webapp and cmake & gcc for the transcoder.
+To develop for Kyoo, you will need the .NET 5.0 SDK, node & npm for the webapp and cmake & gcc for the transcoder.
+You will also need a running postgresql instance with a user named `kyoo` (you can create a user with this command: ```sudo -u postgres createuser -d kyoo```)
 
 To run the development server, simply open the .sln file with your favorite C# IDE (like Jetbrain's Rider or Visual Studio) and press run or you can use the CLI and use the ```dotnet run -p Kyoo``` command.
 
@@ -35,7 +52,7 @@ To pack the application, run the ```dotnet publish -c Release -o <build_path> Ky
 
 ## Plugins
 
-You can create plugins for Kyoo. To do that, create a C# Library project targetting the .Net Core 3.1 and install the [Kyoo.Common](https://www.nuget.org/packages/Kyoo.Common) package and implement the IPlugin interface.
+You can create plugins for Kyoo. To do that, create a C# Library project targetting the .Net Core 5 and install the [Kyoo.Common](https://www.nuget.org/packages/Kyoo.Common) package and implement the IPlugin interface.
 
 You can create Tasks which can be started manually or automatically at startup or every X hours. You can also create metadata providers that will be used to get informations about shows, seasons, episodes & people.
 You can find an exemple of metadata provider [here](https://github.com/AnonymusRaccoon/Kyoo.TheMovieDB).

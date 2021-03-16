@@ -227,9 +227,7 @@ namespace Kyoo
 				spa.Options.SourcePath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "Views/WebClient");
 
 				if (env.IsDevelopment())
-				{
 					spa.UseAngularCliServer("start");
-				}
 			});
 		}
 	}
