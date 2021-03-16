@@ -138,15 +138,16 @@ namespace Kyoo.Controllers
 				throw new InvalidOperationException($"Can't store a season not related to any show (showID: {resource.ShowID}).");
 
 			await base.Validate(resource);
-			
-			if (resource.ExternalIDs != null)
-			{
-				foreach (MetadataID link in resource.ExternalIDs)
-					if (ShouldValidate(link))
-						link.Provider = await _providers.CreateIfNotExists(link.Provider, true);
-			}
+			await resource.ExternalIDs.ForEachAsync(async id => 
+				id.Provider = await _providers.CreateIfNotExists(id.Provider, true));
 		}
-		
+
+		protected override Task EditRelations(Season resource, Season changed)
+		{
+			resource.ExternalIDs = changed.ExternalIDs;
+			return base.EditRelations(resource, changed);
+		}
+
 		public async Task Delete(string showSlug, int seasonNumber)
 		{
 			Season obj = await Get(showSlug, seasonNumber);
@@ -159,11 +160,7 @@ namespace Kyoo.Controllers
 				throw new ArgumentNullException(nameof(obj));
 			
 			_database.Entry(obj).State = EntityState.Deleted;
-			
-			if (obj.ExternalIDs != null)
-				foreach (MetadataID entry in obj.ExternalIDs)
-					_database.Entry(entry).State = EntityState.Deleted;
-			
+			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Deleted);
 			await _database.SaveChangesAsync();
 
 			if (obj.Episodes != null)

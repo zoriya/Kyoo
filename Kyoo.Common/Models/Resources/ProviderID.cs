@@ -14,6 +14,7 @@ namespace Kyoo.Models
 		
 #if ENABLE_INTERNAL_LINKS
 		[SerializeIgnore] public virtual ICollection<Link<Library, ProviderID>> LibraryLinks { get; set; }
+		[SerializeIgnore] public virtual ICollection<MetadataID> MetadataLinks { get; set; }
 #endif
 		
 		public ProviderID() { }

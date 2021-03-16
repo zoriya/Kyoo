@@ -170,7 +170,7 @@ namespace Kyoo.Controllers
 				await EditRelations(old, edited);
 				if (resetOld)
 					Utility.Nullify(old);
-				Utility.Complete(old, edited, x => x.GetCustomAttribute<EditableRelationAttribute>() != null);
+				Utility.Complete(old, edited, x => x.GetCustomAttribute<LoadableRelationAttribute>() == null);
 				await Validate(old);
 				await Database.SaveChangesAsync();
 				return old;
