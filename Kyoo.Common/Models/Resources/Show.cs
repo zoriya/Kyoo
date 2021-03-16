@@ -37,7 +37,8 @@ namespace Kyoo.Models
 		[LoadableRelation] public virtual ICollection<Collection> Collections { get; set; }
 		
 #if ENABLE_INTERNAL_LINKS
-		[SerializeIgnore] public virtual ICollection<Link<Library, Show>> LibraryLinks { get; set; }
+		[LinkRelation(nameof(Libraries))] [SerializeIgnore] 
+		public virtual ICollection<Link<Library, Show>> LibraryLinks { get; set; }
 		[SerializeIgnore] public virtual ICollection<Link<Collection, Show>> CollectionLinks { get; set; }
 		[SerializeIgnore] public virtual ICollection<Link<Show, Genre>> GenreLinks { get; set; }
 #endif
