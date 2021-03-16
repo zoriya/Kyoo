@@ -71,25 +71,27 @@ namespace Kyoo.Controllers
 		protected override async Task Validate(People resource)
 		{
 			await base.Validate(resource);
-			
-			if (resource.ExternalIDs != null)
-				foreach (MetadataID link in resource.ExternalIDs)
-					if (ShouldValidate(link))
-						link.Provider = await _providers.CreateIfNotExists(link.Provider, true);
+			await resource.ExternalIDs.ForEachAsync(async id => 
+				id.Provider = await _providers.CreateIfNotExists(id.Provider, true));
+			await resource.Roles.ForEachAsync(async role =>
+				role.Show = await _shows.Value.CreateIfNotExists(role.Show, true));
 		}
-		
+
+		protected override async Task EditRelations(People resource, People changed)
+		{
+			await base.EditRelations(resource, changed);
+			resource.Roles = changed.Roles;
+			resource.ExternalIDs = changed.ExternalIDs;
+		}
+
 		public override async Task Delete(People obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 			
 			_database.Entry(obj).State = EntityState.Deleted;
-			if (obj.ExternalIDs != null)
-				foreach (MetadataID entry in obj.ExternalIDs)
-					_database.Entry(entry).State = EntityState.Deleted;
-			if (obj.Roles != null)
-				foreach (PeopleRole link in obj.Roles)
-					_database.Entry(link).State = EntityState.Deleted;
+			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Deleted);
+			obj.Roles.ForEach(x => _database.Entry(x).State = EntityState.Deleted);
 			await _database.SaveChangesAsync();
 		}
 

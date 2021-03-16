@@ -110,7 +110,7 @@ namespace Kyoo.Controllers
 			throw new InvalidOperationException();
 		}
 		public override Task<LibraryItem> Edit(LibraryItem obj, bool reset) => throw new InvalidOperationException();
-		protected override Task EditRelations(LibraryItem _, LibraryItem _2) => throw new InvalidOperationException();
+		protected override Task EditRelations(LibraryItem _, LibraryItem changed) => throw new InvalidOperationException();
 		public override Task Delete(int id) => throw new InvalidOperationException();
 		public override Task Delete(string slug) => throw new InvalidOperationException();
 		public override Task Delete(LibraryItem obj) => throw new InvalidOperationException();

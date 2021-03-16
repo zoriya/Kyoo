@@ -181,7 +181,7 @@ namespace Kyoo.Controllers
 			}
 		}
 		
-		protected virtual Task EditRelations(T resource, T newValues)
+		protected virtual Task EditRelations(T resource, T changed)
 		{
 			return Validate(resource);
 		}
