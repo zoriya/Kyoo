@@ -138,15 +138,20 @@ namespace Kyoo.Controllers
 				throw new InvalidOperationException($"Can't store a season not related to any show (showID: {resource.ShowID}).");
 
 			await base.Validate(resource);
-			await resource.ExternalIDs.ForEachAsync(async id => 
-				id.Provider = await _providers.CreateIfNotExists(id.Provider, true));
+			await resource.ExternalIDs.ForEachAsync(async id =>
+			{
+				id.ProviderID = (await _providers.CreateIfNotExists(id.Provider, true)).ID;
+				id.Provider = null;
+			});
 		}
 
 		protected override async Task EditRelations(Season resource, Season changed, bool resetOld)
 		{
 			if (changed.ExternalIDs != null || resetOld)
+			{
 				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
-			resource.ExternalIDs = changed.ExternalIDs;
+				resource.ExternalIDs = changed.ExternalIDs;
+			}
 			await base.EditRelations(resource, changed, resetOld);
 		}
 

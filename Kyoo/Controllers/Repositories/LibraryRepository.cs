@@ -79,9 +79,11 @@ namespace Kyoo.Controllers
 				throw new ArgumentException("The library should have a least one path.");
 
 			if (changed.Providers != null || resetOld)
+			{
+				await Validate(changed);
 				await Database.Entry(resource).Collection(x => x.Providers).LoadAsync();
-			resource.Providers = changed.Providers;
-			await base.EditRelations(resource, changed, resetOld);
+				resource.Providers = changed.Providers;
+			}
 		}
 
 		public override async Task Delete(Library obj)
