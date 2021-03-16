@@ -142,10 +142,12 @@ namespace Kyoo.Controllers
 				id.Provider = await _providers.CreateIfNotExists(id.Provider, true));
 		}
 
-		protected override Task EditRelations(Season resource, Season changed)
+		protected override async Task EditRelations(Season resource, Season changed, bool resetOld)
 		{
+			if (changed.ExternalIDs != null || resetOld)
+				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
 			resource.ExternalIDs = changed.ExternalIDs;
-			return base.EditRelations(resource, changed);
+			await base.EditRelations(resource, changed, resetOld);
 		}
 
 		public async Task Delete(string showSlug, int seasonNumber)

@@ -162,14 +162,12 @@ namespace Kyoo.Controllers
 			try
 			{
 				T old = await GetWithTracking(edited.ID);
-
 				if (old == null)
 					throw new ItemNotFound($"No resource found with the ID {edited.ID}.");
-
-			
-				await EditRelations(old, edited);
+				
 				if (resetOld)
 					Utility.Nullify(old);
+				await EditRelations(old, edited, resetOld);
 				Utility.Complete(old, edited, x => x.GetCustomAttribute<LoadableRelationAttribute>() == null);
 				await Validate(old);
 				await Database.SaveChangesAsync();
@@ -181,7 +179,7 @@ namespace Kyoo.Controllers
 			}
 		}
 		
-		protected virtual Task EditRelations(T resource, T changed)
+		protected virtual Task EditRelations(T resource, T changed, bool resetOld)
 		{
 			return Validate(resource);
 		}

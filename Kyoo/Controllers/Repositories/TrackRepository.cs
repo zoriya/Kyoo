@@ -97,14 +97,7 @@ namespace Kyoo.Controllers
 			await _database.SaveChangesAsync($"Trying to insert a duplicated track (slug {obj.Slug} already exists).");
 			return obj;
 		}
-		
-		
-		
-		protected override Task Validate(Track resource)
-		{
-			return Task.CompletedTask;
-		}
-		
+
 		public override async Task Delete(Track obj)
 		{
 			if (obj == null)

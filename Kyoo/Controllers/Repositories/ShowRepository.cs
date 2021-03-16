@@ -99,28 +99,35 @@ namespace Kyoo.Controllers
 		protected override async Task Validate(Show resource)
 		{
 			await base.Validate(resource);
-			
-			if (ShouldValidate(resource.Studio))
-				resource.Studio = await _studios.CreateIfNotExists(resource.Studio, true);
-
-			if (resource.Genres != null)
-			{
-				resource.Genres = await resource.Genres
-					.SelectAsync(x => _genres.CreateIfNotExists(x, true))
-					.ToListAsync();
-			}
-
-			if (resource.People != null)
-				foreach (PeopleRole link in resource.People)
-					if (ShouldValidate(link))
-						link.People = await _people.CreateIfNotExists(link.People, true);
-
-			if (resource.ExternalIDs != null)
-				foreach (MetadataID link in resource.ExternalIDs)
-					if (ShouldValidate(link))
-						link.Provider = await _providers.CreateIfNotExists(link.Provider, true);
+			resource.Studio = await _studios.CreateIfNotExists(resource.Studio, true);
+			resource.Genres = await resource.Genres
+				.SelectAsync(x => _genres.CreateIfNotExists(x, true))
+				.ToListAsync();
+			await resource.ExternalIDs.ForEachAsync(async id => 
+				id.Provider = await _providers.CreateIfNotExists(id.Provider, true));
+			await resource.People.ForEachAsync(async role =>
+				role.People = await _people.CreateIfNotExists(role.People, true));
 		}
-		
+
+		protected override async Task EditRelations(Show resource, Show changed, bool resetOld)
+		{
+			if (changed.Aliases != null || resetOld)
+				resource.Aliases = changed.Aliases;
+			
+			if (changed.Genres != null || resetOld)
+				await Database.Entry(resource).Collection(x => x.Genres).LoadAsync();
+			resource.Genres = changed.Genres;
+			
+			if (changed.People != null || resetOld)
+				await Database.Entry(resource).Collection(x => x.People).LoadAsync();
+			resource.People = changed.People;
+			
+			if (changed.ExternalIDs != null || resetOld)
+				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
+			resource.ExternalIDs = changed.ExternalIDs;
+			await base.EditRelations(resource, changed, resetOld);
+		}
+
 		public async Task AddShowLink(int showID, int? libraryID, int? collectionID)
 		{
 			Show show = await Get(showID);

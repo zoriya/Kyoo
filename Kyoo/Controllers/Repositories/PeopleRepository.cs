@@ -77,11 +77,15 @@ namespace Kyoo.Controllers
 				role.Show = await _shows.Value.CreateIfNotExists(role.Show, true));
 		}
 
-		protected override async Task EditRelations(People resource, People changed)
+		protected override async Task EditRelations(People resource, People changed, bool resetOld)
 		{
-			await base.EditRelations(resource, changed);
+			if (changed.Roles != null || resetOld)
+				await Database.Entry(resource).Collection(x => x.Roles).LoadAsync();
 			resource.Roles = changed.Roles;
+			if (changed.ExternalIDs != null || resetOld)
+				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
 			resource.ExternalIDs = changed.ExternalIDs;
+			await base.EditRelations(resource, changed, resetOld);
 		}
 
 		public override async Task Delete(People obj)

@@ -69,7 +69,7 @@ namespace Kyoo.Controllers
 				.ToListAsync();
 		}
 
-		protected override Task EditRelations(Library resource, Library changed)
+		protected override async Task EditRelations(Library resource, Library changed, bool resetOld)
 		{
 			if (string.IsNullOrEmpty(resource.Slug))
 				throw new ArgumentException("The library's slug must be set and not empty");
@@ -77,8 +77,11 @@ namespace Kyoo.Controllers
 				throw new ArgumentException("The library's name must be set and not empty");
 			if (resource.Paths == null || !resource.Paths.Any())
 				throw new ArgumentException("The library should have a least one path.");
-			
-			return base.EditRelations(resource, changed);
+
+			if (changed.Providers != null || resetOld)
+				await Database.Entry(resource).Collection(x => x.Providers).LoadAsync();
+			resource.Providers = changed.Providers;
+			await base.EditRelations(resource, changed, resetOld);
 		}
 
 		public override async Task Delete(Library obj)
