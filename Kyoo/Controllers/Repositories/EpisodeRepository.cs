@@ -168,9 +168,7 @@ namespace Kyoo.Controllers
 		{
 			if (resource.ShowID <= 0)
 				throw new InvalidOperationException($"Can't store an episode not related to any show (showID: {resource.ShowID}).");
-
-			await base.EditRelations(resource, changed, resetOld);
-
+			
 			if (changed.Tracks != null || resetOld)
 			{
 				ICollection<Track> oldTracks = await _tracks.GetAll(x => x.EpisodeID == resource.ID);
@@ -190,7 +188,11 @@ namespace Kyoo.Controllers
 			if (changed.ExternalIDs != null || resetOld)
 			{
 				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
-				resource.ExternalIDs = changed.ExternalIDs;
+				resource.ExternalIDs = changed.ExternalIDs?.Select(x => 
+				{ 
+					x.Provider = null;
+					return x;
+				}).ToList();
 			}
 		}
 

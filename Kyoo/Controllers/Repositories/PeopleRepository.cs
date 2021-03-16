@@ -71,20 +71,33 @@ namespace Kyoo.Controllers
 		protected override async Task Validate(People resource)
 		{
 			await base.Validate(resource);
-			await resource.ExternalIDs.ForEachAsync(async id => 
-				id.Provider = await _providers.CreateIfNotExists(id.Provider, true));
+			await resource.ExternalIDs.ForEachAsync(async id =>
+			{
+				id.ProviderID = (await _providers.CreateIfNotExists(id.Provider, true)).ID;
+				id.Provider = null;
+
+			});
 			await resource.Roles.ForEachAsync(async role =>
-				role.Show = await _shows.Value.CreateIfNotExists(role.Show, true));
+			{
+				role.ShowID = (await _shows.Value.CreateIfNotExists(role.Show, true)).ID;
+				role.Show = null;
+			});
 		}
 
 		protected override async Task EditRelations(People resource, People changed, bool resetOld)
 		{
 			if (changed.Roles != null || resetOld)
+			{
 				await Database.Entry(resource).Collection(x => x.Roles).LoadAsync();
-			resource.Roles = changed.Roles;
+				resource.Roles = changed.Roles;
+			}
+
 			if (changed.ExternalIDs != null || resetOld)
+			{
 				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
-			resource.ExternalIDs = changed.ExternalIDs;
+				resource.ExternalIDs = changed.ExternalIDs;
+				
+			}
 			await base.EditRelations(resource, changed, resetOld);
 		}
 
