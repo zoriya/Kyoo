@@ -153,33 +153,45 @@ namespace Kyoo.Controllers
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
-			obj.Tracks = await obj.Tracks.SelectAsync(x => _tracks.CreateIfNotExists(x, true)).ToListAsync();
 			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Added);
 			await _database.SaveChangesAsync($"Trying to insert a duplicated episode (slug {obj.Slug} already exists).");
+			obj.Tracks = await obj.Tracks.SelectAsync(x =>
+			{
+				x.Episode = obj;
+				x.EpisodeID = obj.ID;
+				return _tracks.CreateIfNotExists(x, true);
+			}).ToListAsync();
 			return obj;
 		}
 
-		protected override async Task EditRelations(Episode resource, Episode changed)
+		protected override async Task EditRelations(Episode resource, Episode changed, bool resetOld)
 		{
 			if (resource.ShowID <= 0)
 				throw new InvalidOperationException($"Can't store an episode not related to any show (showID: {resource.ShowID}).");
 
-			await base.EditRelations(resource, changed);
-			
-			ICollection<Track> oldTracks = resource.Tracks;
-			resource.Tracks = await changed.Tracks.SelectAsync(async track =>
-				{
-					Track oldValue = oldTracks?.FirstOrDefault(x => Utility.ResourceEquals(track, x));
-					if (oldValue == null)
-						return await _tracks.CreateIfNotExists(track, true);
-					oldTracks.Remove(oldValue);
-					return oldValue;
-				})
-				.ToListAsync();
-			foreach (Track x in oldTracks)
-				await _tracks.Delete(x);
-			
-			resource.ExternalIDs = changed.ExternalIDs;
+			await base.EditRelations(resource, changed, resetOld);
+
+			if (changed.Tracks != null || resetOld)
+			{
+				ICollection<Track> oldTracks = await _tracks.GetAll(x => x.EpisodeID == resource.ID);
+				resource.Tracks = await changed.Tracks.SelectAsync(async track =>
+					{
+						Track oldValue = oldTracks?.FirstOrDefault(x => Utility.ResourceEquals(track, x));
+						if (oldValue == null)
+							return await _tracks.CreateIfNotExists(track, true);
+						oldTracks.Remove(oldValue);
+						return oldValue;
+					})
+					.ToListAsync();
+				foreach (Track x in oldTracks)
+					await _tracks.Delete(x);
+			}
+
+			if (changed.ExternalIDs != null || resetOld)
+			{
+				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
+				resource.ExternalIDs = changed.ExternalIDs;
+			}
 		}
 
 		protected override async Task Validate(Episode resource)
