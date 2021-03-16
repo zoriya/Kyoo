@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -10,8 +9,6 @@ using Kyoo.Models;
 using Kyoo.Models.Attributes;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Kyoo.Controllers
 {
@@ -155,7 +152,6 @@ namespace Kyoo.Controllers
 			}
 		}
 
-		
 		public virtual async Task<T> Edit(T edited, bool resetOld)
 		{
 			if (edited == null)
@@ -170,83 +166,11 @@ namespace Kyoo.Controllers
 				if (old == null)
 					throw new ItemNotFound($"No resource found with the ID {edited.ID}.");
 
-				List<PropertyInfo> navigations = typeof(T).GetProperties()
-					.Where(x => x.GetCustomAttribute<EditableRelationAttribute>() != null)
-					.ToList();
-				List<string> links = typeof(T).GetProperties()
-					.Select(x => x.GetCustomAttribute<LinkRelationAttribute>()?.Relation)
-					.Where(x => x != null)
-					.ToList();
-				
-				// This handle every links so every Many to Many
-				// TODO should handle non links value (One to Many)
-				foreach (string relationName in links)
-				{
-					PropertyInfo relation = navigations.Find(x => x.Name == relationName);
-					navigations.Remove(relation);
-
-					if (relation!.GetValue(edited) == null && !resetOld)
-						continue;
-
-					await _library.Load(old, relation.Name);
-					IEnumerable<IResource> oValues = (relation.GetValue(old) as IEnumerable)!.Cast<IResource>();
-					List<IResource> nValues = (relation.GetValue(edited) as IEnumerable)?.Cast<IResource>().ToList();
-					
-					foreach (IResource x in oValues)
-					{
-						int nIndex = nValues?.FindIndex(y => Utility.ResourceEquals(x, y)) ?? -1;
-						if (nIndex == -1 || resetOld)
-							await _linkManager.Delete(old, x);
-						else
-							nValues!.RemoveAt(nIndex);
-					}
-					
-					await nValues.ForEachAsync(x => _linkManager.Add(old, x));
-				}
-
-				// This handle every X to One
-				foreach (PropertyInfo relation in navigations)
-				{
-					IResource oValues = relation.GetValue(old) as IResource;
-					IResource nValues = relation.GetValue(edited) as IResource;
-
-					if (nValues == null && !resetOld)
-						continue;
-
-					if (false) // TODO change if false with if relation is casquade delete
-						await _library.Delete(oValue);
-					relation.SetValue(old, nValues);
-					// TODO call create if not exist
-					// TODO change relationID to the new value ID.
-				}
-				
-				
-				// This handle every One to Many or Many to One
-				foreach (PropertyInfo navigation in  navigations)
-				{
-					if (resetOld || navigation.GetValue(edited) != default)
-					{
-						// TODO only works for X To One and not X to Many
-						await _library.Value.Load(old, navigation.Name);
-						object value = navigation.GetValue(old);
-						if (value is IEnumerable list) // TODO handle externalIds & PeopleRoles (implement Link<> for those)
-							list.ForEach(x => _library.Value.Delete(x));
-						else if (value is IResource resource)
-							_library.Value.Delete(resource);
-					}
-					
-					
-					if (navigation.GetCustomAttribute<EditableRelationAttribute>() == null)
-					{
-						navigation.SetValue(edited, default);
-						continue;
-					}
-				}
-
+			
+				await EditRelations(old, edited);
 				if (resetOld)
 					Utility.Nullify(old);
-				Utility.Complete(old, edited);
-				await Validate(old);
+				Utility.Complete(old, edited, x => x.GetCustomAttribute<EditableRelationAttribute>() != null);
 				await Database.SaveChangesAsync();
 				return old;
 			}
@@ -255,13 +179,13 @@ namespace Kyoo.Controllers
 				Database.ChangeTracker.LazyLoadingEnabled = lazyLoading;
 			}
 		}
-
-		protected bool ShouldValidate<T2>(T2 value)
+		
+		protected virtual Task EditRelations(T resource, T newValues)
 		{
-			return value != null && Database.Entry(value).State == EntityState.Detached;
+			return Validate(resource);
 		}
-
-		protected virtual Task Validate(T resource)
+		
+		private Task Validate(T resource)
 		{
 			if (string.IsNullOrEmpty(resource.Slug))
 				throw new ArgumentException("Resource can't have null as a slug.");
@@ -282,7 +206,7 @@ namespace Kyoo.Controllers
 			}
 			return Task.CompletedTask;
 		}
-		
+
 		public virtual async Task Delete(int id)
 		{
 			T resource = await Get(id);

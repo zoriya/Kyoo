@@ -17,15 +17,4 @@ namespace Kyoo.Models.Attributes
 			RelationID = relationID;
 		}
 	}
-
-	[AttributeUsage(AttributeTargets.Property)]
-	public class LinkRelationAttribute : Attribute
-	{
-		public string Relation { get; }
-
-		public LinkRelationAttribute(string relation)
-		{
-			Relation = relation;
-		}
-	}
 }
