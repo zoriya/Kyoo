@@ -124,7 +124,7 @@ namespace Kyoo
 			return first;
 		}
 		
-		public static T Complete<T>(T first, T second)
+		public static T Complete<T>(T first, T second, Func<PropertyInfo, bool> ignore = null)
 		{
 			if (first == null)
 				throw new ArgumentNullException(nameof(first));
@@ -135,6 +135,9 @@ namespace Kyoo
 			IEnumerable<PropertyInfo> properties = type.GetProperties()
 				.Where(x => x.CanRead && x.CanWrite 
 				                      && Attribute.GetCustomAttribute(x, typeof(NotMergableAttribute)) == null);
+
+			if (ignore != null)
+				properties = properties.Where(ignore);
 			
 			foreach (PropertyInfo property in properties)
 			{
@@ -253,11 +256,11 @@ namespace Kyoo
 			return types.FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == genericType);
 		}
 
-		public static async IAsyncEnumerable<T2> SelectAsync<T, T2>([NotNull] this IEnumerable<T> self, 
+		public static async IAsyncEnumerable<T2> SelectAsync<T, T2>([CanBeNull] this IEnumerable<T> self, 
 			[NotNull] Func<T, Task<T2>> mapper)
 		{
 			if (self == null)
-				throw new ArgumentNullException(nameof(self));
+				yield break;
 			if (mapper == null)
 				throw new ArgumentNullException(nameof(mapper));
 			

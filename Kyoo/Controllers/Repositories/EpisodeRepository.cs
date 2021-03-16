@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -153,25 +154,31 @@ namespace Kyoo.Controllers
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
+			obj.Tracks = await obj.Tracks.SelectAsync(x => _tracks.CreateIfNotExists(x, true)).ToListAsync();
 			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Added);
-			obj.Tracks.ForEach(x => _database.Entry(x).State = EntityState.Added);
 			await _database.SaveChangesAsync($"Trying to insert a duplicated episode (slug {obj.Slug} already exists).");
 			return obj;
 		}
 
-		protected override async Task Validate(Episode resource)
+		protected override async Task EditRelations(Episode resource, Episode changed)
 		{
 			if (resource.ShowID <= 0)
 				throw new InvalidOperationException($"Can't store an episode not related to any show (showID: {resource.ShowID}).");
 
-			await base.Validate(resource);
-
-			// if (resource.Tracks != null)
-			// {
-			// 	resource.Tracks = await resource.Tracks
-			// 		.SelectAsync(x => _tracks.CreateIfNotExists(x, true))
-			// 		.ToListAsync();
-			// }
+			await base.EditRelations(resource, changed);
+			
+			ICollection<Track> oldTracks = resource.Tracks;
+			resource.Tracks = await changed.Tracks.SelectAsync(async track =>
+				{
+					Track oldValue = oldTracks?.FirstOrDefault(x => Utility.ResourceEquals(track, x));
+					if (oldValue == null)
+						return await _tracks.CreateIfNotExists(track, true);
+					oldTracks.Remove(oldValue);
+					return oldValue;
+				})
+				.ToListAsync();
+			foreach (Track x in oldTracks)
+				await _tracks.Delete(x);
 
 			if (resource.ExternalIDs != null)
 			{
