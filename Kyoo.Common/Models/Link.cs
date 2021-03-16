@@ -28,6 +28,13 @@ namespace Kyoo.Models
 			return new(first, second);
 		}
 		
+		public static Link<T, T2> UCreate<T, T2>(T first, T2 second)
+			where T : class, IResource
+			where T2 : class, IResource
+		{
+			return new(first, second, true);
+		}
+		
 		public static Expression<Func<Link, object>> PrimaryKey
 		{
 			get
@@ -47,13 +54,15 @@ namespace Kyoo.Models
 		
 		public Link() {}
 		
-		public Link(T1 first, T2 second)
+		public Link(T1 first, T2 second, bool privateItems = false)
 			: base(first, second)
 		{
+			if (privateItems)
+				return;
 			First = first;
 			Second = second;
 		}
-		
+
 		public new static Expression<Func<Link<T1, T2>, object>> PrimaryKey
 		{
 			get
