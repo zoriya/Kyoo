@@ -132,7 +132,7 @@ namespace Kyoo.Controllers
 		
 		public void SetValue(object target, object value)
 		{
-			throw new NotImplementedException();
+			// Values are ignored and should not be editable, except if the internal value is set.
 		}
 	}
 }

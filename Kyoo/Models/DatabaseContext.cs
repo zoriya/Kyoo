@@ -15,6 +15,7 @@ namespace Kyoo
 		public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
 		{
 			ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+			ChangeTracker.LazyLoadingEnabled = false;
 		}
 
 		public DbSet<Library> Libraries { get; set; }
@@ -40,6 +41,7 @@ namespace Kyoo
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<StreamType>();
 
 			ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+			ChangeTracker.LazyLoadingEnabled = false;
 		}
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)

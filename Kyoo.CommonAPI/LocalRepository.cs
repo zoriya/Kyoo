@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -153,6 +154,7 @@ namespace Kyoo.Controllers
 				throw;
 			}
 		}
+
 		
 		public virtual async Task<T> Edit(T edited, bool resetOld)
 		{
@@ -168,47 +170,77 @@ namespace Kyoo.Controllers
 				if (old == null)
 					throw new ItemNotFound($"No resource found with the ID {edited.ID}.");
 
-				// foreach (PropertyInfo navigation in typeof(T).GetProperties()
-				// 	.Where(x => x.GetCustomAttribute<LoadableRelationAttribute>() != null))
-				// {
-				// 	if (navigation.GetCustomAttribute<EditableRelationAttribute>() == null)
-				// 	{
-				// 		navigation.SetValue(edited, default);
-				// 		continue;
-				// 	}
-				//
-				// 	if (resetOld || navigation.GetValue(edited) != default)
-				// 	{
-				// 		// TODO only works for X To One and not X to Many
-				// 		await _library.Value.Load(old, navigation.Name);
-				// 		object value = navigation.GetValue(old);
-				// 		if (value is IEnumerable list) // TODO handle externalIds & PeopleRoles
-				// 			list.ForEach(x => _library.Value.Delete(x));
-				// 		else if (value is IResource resource)
-				// 			_library.Value.Delete(resource);
-				// 	}
-				// }
-				foreach (NavigationEntry navigation in Database.Entry(old).Navigations)
+				List<PropertyInfo> navigations = typeof(T).GetProperties()
+					.Where(x => x.GetCustomAttribute<EditableRelationAttribute>() != null)
+					.ToList();
+				List<string> links = typeof(T).GetProperties()
+					.Select(x => x.GetCustomAttribute<LinkRelationAttribute>()?.Relation)
+					.Where(x => x != null)
+					.ToList();
+				
+				// This handle every links so every Many to Many
+				// TODO should handle non links value (One to Many)
+				foreach (string relationName in links)
 				{
-					if (navigation.Metadata.PropertyInfo.GetCustomAttribute<EditableRelationAttribute>() != null)
-					{
-						if (resetOld)
-						{
-							await navigation.LoadAsync();
-							continue;
-						}
-						IClrPropertyGetter getter = navigation.Metadata.GetGetter();
+					PropertyInfo relation = navigations.Find(x => x.Name == relationName);
+					navigations.Remove(relation);
 
-						if (getter.HasDefaultValue(edited))
-							continue;
-						await navigation.LoadAsync();
-						// TODO this may be usless for lists since the API does not return IDs but the
-						// TODO LinkEquality does not check slugs (their are lazy loaded and only the ID is available)
-						// if (Utility.ResourceEquals(getter.GetClrValue(edited), getter.GetClrValue(old)))
-						// 	navigation.Metadata.PropertyInfo.SetValue(edited, default);
+					if (relation!.GetValue(edited) == null && !resetOld)
+						continue;
+
+					await _library.Load(old, relation.Name);
+					IEnumerable<IResource> oValues = (relation.GetValue(old) as IEnumerable)!.Cast<IResource>();
+					List<IResource> nValues = (relation.GetValue(edited) as IEnumerable)?.Cast<IResource>().ToList();
+					
+					foreach (IResource x in oValues)
+					{
+						int nIndex = nValues?.FindIndex(y => Utility.ResourceEquals(x, y)) ?? -1;
+						if (nIndex == -1 || resetOld)
+							await _linkManager.Delete(old, x);
+						else
+							nValues!.RemoveAt(nIndex);
 					}
-					else
-						navigation.Metadata.PropertyInfo.SetValue(edited, default);
+					
+					await nValues.ForEachAsync(x => _linkManager.Add(old, x));
+				}
+
+				// This handle every X to One
+				foreach (PropertyInfo relation in navigations)
+				{
+					IResource oValues = relation.GetValue(old) as IResource;
+					IResource nValues = relation.GetValue(edited) as IResource;
+
+					if (nValues == null && !resetOld)
+						continue;
+
+					if (false) // TODO change if false with if relation is casquade delete
+						await _library.Delete(oValue);
+					relation.SetValue(old, nValues);
+					// TODO call create if not exist
+					// TODO change relationID to the new value ID.
+				}
+				
+				
+				// This handle every One to Many or Many to One
+				foreach (PropertyInfo navigation in  navigations)
+				{
+					if (resetOld || navigation.GetValue(edited) != default)
+					{
+						// TODO only works for X To One and not X to Many
+						await _library.Value.Load(old, navigation.Name);
+						object value = navigation.GetValue(old);
+						if (value is IEnumerable list) // TODO handle externalIds & PeopleRoles (implement Link<> for those)
+							list.ForEach(x => _library.Value.Delete(x));
+						else if (value is IResource resource)
+							_library.Value.Delete(resource);
+					}
+					
+					
+					if (navigation.GetCustomAttribute<EditableRelationAttribute>() == null)
+					{
+						navigation.SetValue(edited, default);
+						continue;
+					}
 				}
 
 				if (resetOld)
