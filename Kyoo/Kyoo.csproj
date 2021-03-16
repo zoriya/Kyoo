@@ -12,6 +12,7 @@
 
 		<!-- Set this to true if you enable server-side prerendering -->
 		<BuildServerSideRenderer>false</BuildServerSideRenderer>
+
 		<Company>SDG</Company>
 		<Authors>Zoe Roux</Authors>
 		<RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
@@ -27,10 +28,10 @@
 		<PackageReference Include="IdentityServer4.EntityFramework" Version="4.1.1" />
 		<PackageReference Include="IdentityServer4.EntityFramework.Storage" Version="4.1.1" />
 		<PackageReference Include="IdentityServer4.Storage" Version="4.1.1" />
+		<PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.3" />
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.2" />
 		<PackageReference Include="Portable.BouncyCastle" Version="1.8.9" />
-		<PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
 		<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
 		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="5.0.3" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.3" />
@@ -88,6 +89,10 @@
 		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
 	</Target>
 
+	<Target Name="Symlink views to output - Linux" AfterTargets="Build" Condition="$(Configuration) == 'Debug' And $(OS) == 'Unix'">
+		<Exec WorkingDirectory="$(OutputPath)" Command="ln -fs ../../../Views"/>
+	</Target>
+
 	<Target Name="Compile the transcoder" BeforeTargets="BeforeBuild">
 		<Exec WorkingDirectory="$(TranscoderRoot)" Command="mkdir --parent build; cd build; cmake ..; make -j" />
 		<Copy SourceFiles="$(TranscoderRoot)/build/libtranscoder.so" DestinationFolder="." />
@@ -102,10 +107,5 @@
 		<None Include="libtranscoder.so" Condition="$(OS) == 'Unix'">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-	</ItemGroup>
-	<ItemGroup>
-		<Folder Include="Models\DatabaseMigrations" />
-		<Folder Include="Models\DatabaseMigrations\IdentityDatbase" />
-		<Folder Include="Models\DatabaseMigrations\Internal" />
 	</ItemGroup>
 </Project>

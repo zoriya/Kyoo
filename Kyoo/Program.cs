@@ -11,14 +11,13 @@ namespace Kyoo
 	{
 		public static async Task Main(string[] args)
 		{
-			
 			if (args.Length > 0)
 				FileSystem.CurrentDirectory = args[0];
 			if (!File.Exists("./appsettings.json"))
 				File.Copy(Path.Join(AppDomain.CurrentDomain.BaseDirectory, "appsettings.json"), "appsettings.json");
 
 
-			bool? debug = Environment.GetEnvironmentVariable("ENVIRONEMENT")?.ToLowerInvariant() switch
+			bool? debug = Environment.GetEnvironmentVariable("ENVIRONMENT")?.ToLowerInvariant() switch
 			{
 				"d" => true,
 				"dev" => true,
@@ -30,8 +29,11 @@ namespace Kyoo
 				_ => null
 			};
 
-			if (debug == null && !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("ENVIRONEMENT")))
-				Console.WriteLine($"Invalid ENVIRONEMENT variable. Supported values are \"debug\" and \"prod\". Ignoring...");
+			if (debug == null && Environment.GetEnvironmentVariable("ENVIRONMENT") != null)
+				Console.WriteLine($"Invalid ENVIRONMENT variable. Supported values are \"debug\" and \"prod\". Ignoring...");
+			#if DEBUG
+				debug ??= true;
+			#endif
 
 			Console.WriteLine($"Running as {Environment.UserName}.");
 			IWebHostBuilder host = CreateWebHostBuilder(args);
