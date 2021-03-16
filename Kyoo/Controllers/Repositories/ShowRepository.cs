@@ -100,32 +100,45 @@ namespace Kyoo.Controllers
 		{
 			await base.Validate(resource);
 			resource.Studio = await _studios.CreateIfNotExists(resource.Studio, true);
-			resource.Genres = await resource.Genres
-				.SelectAsync(x => _genres.CreateIfNotExists(x, true))
+			resource.GenreLinks = await resource.Genres
+				.SelectAsync(async x => Link.UCreate(resource, await _genres.CreateIfNotExists(x, true)))
 				.ToListAsync();
-			await resource.ExternalIDs.ForEachAsync(async id => 
-				id.Provider = await _providers.CreateIfNotExists(id.Provider, true));
+			await resource.ExternalIDs.ForEachAsync(async id =>
+			{
+				id.ProviderID = (await _providers.CreateIfNotExists(id.Provider, true)).ID;
+				id.Provider = null;
+			});
 			await resource.People.ForEachAsync(async role =>
-				role.People = await _people.CreateIfNotExists(role.People, true));
+			{
+				role.PeopleID = (await _people.CreateIfNotExists(role.People, true)).ID;
+				role.People = null;
+			});
 		}
 
 		protected override async Task EditRelations(Show resource, Show changed, bool resetOld)
 		{
+			await Validate(changed);
+			
 			if (changed.Aliases != null || resetOld)
 				resource.Aliases = changed.Aliases;
-			
+
 			if (changed.Genres != null || resetOld)
-				await Database.Entry(resource).Collection(x => x.Genres).LoadAsync();
-			resource.Genres = changed.Genres;
-			
+			{
+				await Database.Entry(resource).Collection(x => x.GenreLinks).LoadAsync();
+				resource.GenreLinks = changed.GenreLinks;
+			}
+
 			if (changed.People != null || resetOld)
+			{
 				await Database.Entry(resource).Collection(x => x.People).LoadAsync();
-			resource.People = changed.People;
-			
+				resource.People = changed.People;
+			}
+
 			if (changed.ExternalIDs != null || resetOld)
+			{
 				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
-			resource.ExternalIDs = changed.ExternalIDs;
-			await base.EditRelations(resource, changed, resetOld);
+				resource.ExternalIDs = changed.ExternalIDs;
+			}
 		}
 
 		public async Task AddShowLink(int showID, int? libraryID, int? collectionID)
