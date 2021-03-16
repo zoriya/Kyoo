@@ -171,6 +171,7 @@ namespace Kyoo.Controllers
 				if (resetOld)
 					Utility.Nullify(old);
 				Utility.Complete(old, edited, x => x.GetCustomAttribute<EditableRelationAttribute>() != null);
+				await Validate(old);
 				await Database.SaveChangesAsync();
 				return old;
 			}
@@ -185,7 +186,7 @@ namespace Kyoo.Controllers
 			return Validate(resource);
 		}
 		
-		private Task Validate(T resource)
+		protected virtual Task Validate(T resource)
 		{
 			if (string.IsNullOrEmpty(resource.Slug))
 				throw new ArgumentException("Resource can't have null as a slug.");

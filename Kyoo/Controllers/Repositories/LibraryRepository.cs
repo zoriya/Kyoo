@@ -63,6 +63,14 @@ namespace Kyoo.Controllers
 
 		protected override async Task Validate(Library resource)
 		{
+			await base.Validate(resource);
+			resource.Providers = await resource.Providers
+				.SelectAsync(x => _providers.CreateIfNotExists(x, true))
+				.ToListAsync();
+		}
+
+		protected override Task EditRelations(Library resource, Library changed)
+		{
 			if (string.IsNullOrEmpty(resource.Slug))
 				throw new ArgumentException("The library's slug must be set and not empty");
 			if (string.IsNullOrEmpty(resource.Name))
@@ -70,14 +78,7 @@ namespace Kyoo.Controllers
 			if (resource.Paths == null || !resource.Paths.Any())
 				throw new ArgumentException("The library should have a least one path.");
 			
-			await base.Validate(resource);
-
-			if (resource.Providers != null)
-			{
-				resource.Providers = await resource.Providers
-					.SelectAsync(x => _providers.CreateIfNotExists(x, true))
-					.ToListAsync();
-			}
+			return base.EditRelations(resource, changed);
 		}
 
 		public override async Task Delete(Library obj)

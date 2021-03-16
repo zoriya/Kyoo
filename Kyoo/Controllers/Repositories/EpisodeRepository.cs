@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -179,13 +178,15 @@ namespace Kyoo.Controllers
 				.ToListAsync();
 			foreach (Track x in oldTracks)
 				await _tracks.Delete(x);
+			
+			resource.ExternalIDs = changed.ExternalIDs;
+		}
 
-			if (resource.ExternalIDs != null)
-			{
-				foreach (MetadataID link in resource.ExternalIDs)
-					if (ShouldValidate(link))
-						link.Provider = await _providers.CreateIfNotExists(link.Provider, true);
-			}
+		protected override async Task Validate(Episode resource)
+		{
+			await base.Validate(resource);
+			await resource.ExternalIDs.ForEachAsync(async id => 
+				id.Provider = await _providers.CreateIfNotExists(id.Provider, true));
 		}
 
 		public async Task Delete(string showSlug, int seasonNumber, int episodeNumber)
@@ -200,10 +201,8 @@ namespace Kyoo.Controllers
 				throw new ArgumentNullException(nameof(obj));
 			
 			_database.Entry(obj).State = EntityState.Deleted;
-			// await obj.Tracks.ForEachAsync(x => _tracks.CreateIfNotExists(x, true));
-			if (obj.ExternalIDs != null)
-				foreach (MetadataID entry in obj.ExternalIDs)
-					_database.Entry(entry).State = EntityState.Deleted;
+			await obj.Tracks.ForEachAsync(x => _tracks.Delete(x));
+			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Deleted);
 			await _database.SaveChangesAsync();
 		}
 	}
