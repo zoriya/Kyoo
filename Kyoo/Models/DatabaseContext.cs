@@ -185,6 +185,9 @@ namespace Kyoo
 			modelBuilder.Entity<Episode>()
 				.HasIndex(x => new {x.ShowID, x.SeasonNumber, x.EpisodeNumber, x.AbsoluteNumber})
 				.IsUnique();
+			modelBuilder.Entity<Track>()
+				.HasIndex(x => new {x.EpisodeID, x.Type, x.Language, x.TrackIndex, x.IsForced})
+				.IsUnique();
 		}
 
 		public T GetTemporaryObject<T>(T model)
@@ -298,6 +301,33 @@ namespace Kyoo
 			catch (DuplicatedItemException)
 			{
 				return -1;
+			}
+		}
+
+		public Task<T> SaveOrRetry<T>(T obj, Func<T, int, T> onFail, CancellationToken cancellationToken = new())
+		{
+			return SaveOrRetry(obj, onFail, 0, cancellationToken);
+		}
+		
+		public async Task<T> SaveOrRetry<T>(T obj, 
+			Func<T, int, T> onFail,
+			int recurse,
+			CancellationToken cancellationToken = new())
+		{
+			try
+			{
+				await base.SaveChangesAsync(true, cancellationToken);
+				return obj;
+			}
+			catch (DbUpdateException ex) when (IsDuplicateException(ex))
+			{
+				recurse++;
+				return await SaveOrRetry(onFail(obj, recurse), onFail, recurse, cancellationToken);
+			}
+			catch (DbUpdateException)
+			{
+				DiscardChanges();
+				throw;
 			}
 		}
 

@@ -543,9 +543,10 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tracks_EpisodeID",
+                name: "IX_Tracks_EpisodeID_Type_Language_TrackIndex_IsForced",
                 table: "Tracks",
-                column: "EpisodeID");
+                columns: new[] { "EpisodeID", "Type", "Language", "TrackIndex", "IsForced" },
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

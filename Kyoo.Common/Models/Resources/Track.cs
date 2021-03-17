@@ -103,19 +103,13 @@ namespace Kyoo.Models
 					StreamType.Font => "font.",
 					_ => ""
 				};
-				string slug = $"{Episode.Slug}.{type}{Language}{(TrackIndex != 0 ? TrackIndex : "")}";
-				if (IsForced)
-					slug += "-forced";
-				switch (Codec)
+				string index = TrackIndex != 0 ? $"-{TrackIndex}" : string.Empty;
+				string codec = Codec switch
 				{
-					case "ass":
-						slug += ".ass";
-						break;
-					case "subrip":
-						slug += ".srt";
-						break;
-				}
-				return slug;
+					"subrip" => ".srt",
+					{} x => $".{x}"
+				};
+				return $"{Episode.Slug}.{type}{Language}{index}{(IsForced ? "-forced" : "")}{codec}";
 			}
 		}
 
