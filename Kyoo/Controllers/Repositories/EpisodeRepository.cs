@@ -165,8 +165,7 @@ namespace Kyoo.Controllers
 			
 			if (changed.Tracks != null || resetOld)
 			{
-				ICollection<Track> oldTracks = await _tracks.GetAll(x => x.EpisodeID == resource.ID);
-				await _tracks.DeleteRange(oldTracks);
+				await _tracks.DeleteRange(x => x.EpisodeID == resource.ID);
 				resource.Tracks = changed.Tracks;
 				await ValidateTracks(resource);
 			}
@@ -197,11 +196,13 @@ namespace Kyoo.Controllers
 		protected override async Task Validate(Episode resource)
 		{
 			await base.Validate(resource);
-			resource.ExternalIDs = resource.ExternalIDs?.Select(x => 
+			resource.ExternalIDs = await resource.ExternalIDs.SelectAsync(async x => 
 			{ 
-				x.Provider = null;
+				x.Provider = await _providers.CreateIfNotExists(x.Provider, true);
+				x.ProviderID = x.Provider.ID;
+				_database.Entry(x.Provider).State = EntityState.Detached;
 				return x;
-			}).ToList();
+			}).ToListAsync();
 		}
 
 		public async Task Delete(string showSlug, int seasonNumber, int episodeNumber)

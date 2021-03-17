@@ -88,7 +88,6 @@ namespace Kyoo.Controllers
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
-			obj.GenreLinks = obj.Genres?.Select(x => Link.Create(obj, x)).ToArray();
 			obj.GenreLinks.ForEach(x => _database.Entry(x).State = EntityState.Added);
 			obj.People.ForEach(x => _database.Entry(x).State = EntityState.Added);
 			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Added);
@@ -101,18 +100,23 @@ namespace Kyoo.Controllers
 			await base.Validate(resource);
 			if (resource.Studio != null)
 				resource.Studio = await _studios.CreateIfNotExists(resource.Studio, true);
-			resource.GenreLinks = await resource.Genres
-				.SelectAsync(async x => Link.UCreate(resource, await _genres.CreateIfNotExists(x, true)))
+			resource.Genres = await resource.Genres
+				.SelectAsync(x => _genres.CreateIfNotExists(x, true))
 				.ToListAsync();
+			resource.GenreLinks = resource.Genres?
+				.Select(x => Link.UCreate(resource, x))
+				.ToList();
 			await resource.ExternalIDs.ForEachAsync(async id =>
 			{
-				id.ProviderID = (await _providers.CreateIfNotExists(id.Provider, true)).ID;
-				id.Provider = null;
+				id.Provider = await _providers.CreateIfNotExists(id.Provider, true);
+				id.ProviderID = id.Provider.ID;
+				_database.Entry(id.Provider).State = EntityState.Detached;
 			});
 			await resource.People.ForEachAsync(async role =>
 			{
-				role.PeopleID = (await _people.CreateIfNotExists(role.People, true)).ID;
-				role.People = null;
+				role.People = await _people.CreateIfNotExists(role.People, true);
+				role.PeopleID = role.People.ID;
+				_database.Entry(role.People).State = EntityState.Detached;
 			});
 		}
 
@@ -126,7 +130,7 @@ namespace Kyoo.Controllers
 			if (changed.Genres != null || resetOld)
 			{
 				await Database.Entry(resource).Collection(x => x.GenreLinks).LoadAsync();
-				resource.GenreLinks = changed.GenreLinks;
+				resource.GenreLinks = changed.Genres?.Select(x => Link.UCreate(resource, x)).ToList();
 			}
 
 			if (changed.People != null || resetOld)

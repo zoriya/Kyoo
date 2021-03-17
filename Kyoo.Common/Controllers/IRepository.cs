@@ -98,6 +98,7 @@ namespace Kyoo.Controllers
 		Task DeleteRange(IEnumerable<int> ids);
 		Task DeleteRange(params string[] slugs) => DeleteRange(slugs.AsEnumerable());
 		Task DeleteRange(IEnumerable<string> slugs);
+		Task DeleteRange([NotNull] Expression<Func<T, bool>> where);
 	}
 
 	public interface IShowRepository : IRepository<Show>
