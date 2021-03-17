@@ -26,12 +26,7 @@ namespace Kyoo.CommonApi
 			Expression<Func<T, bool>> defaultWhere = null)
 		{
 			if (where == null || where.Count == 0)
-			{
-				if (defaultWhere == null)
-					return null;
-				Expression body = ExpressionRewrite.Rewrite(defaultWhere.Body);
-				return Expression.Lambda<Func<T, bool>>(body, defaultWhere.Parameters.First());
-			}
+				return defaultWhere;
 
 			ParameterExpression param = defaultWhere?.Parameters.First() ?? Expression.Parameter(typeof(T));
 			Expression expression = defaultWhere?.Body;
@@ -97,8 +92,7 @@ namespace Kyoo.CommonApi
 					expression = condition;
 			}
 
-			expression = ExpressionRewrite.Rewrite(expression);
-			return Expression.Lambda<Func<T, bool>>(expression, param);
+			return Expression.Lambda<Func<T, bool>>(expression!, param);
 		}
 
 		private static Expression ResourceEqual(Expression parameter, string value, bool notEqual = false)

@@ -489,6 +489,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     b.Property<string>("Title")
                         .HasColumnType("text");
 
+                    b.Property<int>("TrackIndex")
+                        .HasColumnType("integer");
+
                     b.Property<int>("Type")
                         .HasColumnType("integer");
 

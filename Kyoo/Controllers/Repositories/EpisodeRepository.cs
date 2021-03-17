@@ -155,13 +155,7 @@ namespace Kyoo.Controllers
 			_database.Entry(obj).State = EntityState.Added;
 			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Added);
 			await _database.SaveChangesAsync($"Trying to insert a duplicated episode (slug {obj.Slug} already exists).");
-			obj.Tracks = await obj.Tracks.SelectAsync(x =>
-			{
-				x.Episode = obj;
-				x.EpisodeID = obj.ID;
-				return _tracks.CreateIfNotExists(x, true);
-			}).ToListAsync();
-			return obj;
+			return await ValidateTracks(obj);
 		}
 
 		protected override async Task EditRelations(Episode resource, Episode changed, bool resetOld)
@@ -173,30 +167,41 @@ namespace Kyoo.Controllers
 			{
 				ICollection<Track> oldTracks = await _tracks.GetAll(x => x.EpisodeID == resource.ID);
 				await _tracks.DeleteRange(oldTracks);
-				resource.Tracks = await changed.Tracks.SelectAsync(x =>
-				{
-					x.Episode = resource;
-					x.EpisodeID = resource.ID;
-					return _tracks.Create(x);
-				}).ToListAsync();
+				resource.Tracks = changed.Tracks;
+				await ValidateTracks(resource);
 			}
 
 			if (changed.ExternalIDs != null || resetOld)
 			{
 				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
-				resource.ExternalIDs = changed.ExternalIDs?.Select(x => 
-				{ 
-					x.Provider = null;
-					return x;
-				}).ToList();
+				resource.ExternalIDs = changed.ExternalIDs;
 			}
+
+			await Validate(resource);
 		}
 
+		private async Task<Episode> ValidateTracks(Episode resource)
+		{
+			resource.Tracks = await resource.Tracks.MapAsync((x, i) =>
+			{
+				x.Episode = resource;
+				x.TrackIndex = resource.Tracks.Take(i).Count(y => x.Language == y.Language 
+				                                                  && x.IsForced == y.IsForced 
+				                                                  && x.Codec == y.Codec 
+				                                                  && x.Type == y.Type);
+				return _tracks.CreateIfNotExists(x, true);
+			}).ToListAsync();
+			return resource;
+		}
+		
 		protected override async Task Validate(Episode resource)
 		{
 			await base.Validate(resource);
-			await resource.ExternalIDs.ForEachAsync(async id => 
-				id.Provider = await _providers.CreateIfNotExists(id.Provider, true));
+			resource.ExternalIDs = resource.ExternalIDs?.Select(x => 
+			{ 
+				x.Provider = null;
+				return x;
+			}).ToList();
 		}
 
 		public async Task Delete(string showSlug, int seasonNumber, int episodeNumber)

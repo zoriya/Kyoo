@@ -30,7 +30,7 @@ namespace Kyoo.Controllers
 		
 		public Sort(Expression<Func<T, object>> key, bool descendant = false)
 		{
-			Key = ExpressionRewrite.Rewrite<Func<T, object>>(key);
+			Key = key;
 			Descendant = descendant;
 			
 			if (!Utility.IsPropertyExpression(Key))
@@ -54,8 +54,7 @@ namespace Kyoo.Controllers
 			Key = property.Type.IsValueType
 				? Expression.Lambda<Func<T, object>>(Expression.Convert(property, typeof(object)), param)
 				: Expression.Lambda<Func<T, object>>(property, param);
-			Key = ExpressionRewrite.Rewrite<Func<T, object>>(Key);
-					
+
 			Descendant = order switch
 			{
 				"desc" => true,
@@ -63,11 +62,6 @@ namespace Kyoo.Controllers
 				null => false,
 				_ => throw new ArgumentException($"The sort order, if set, should be :asc or :desc but it was :{order}.")
 			};
-		}
-
-		public Sort<TValue> To<TValue>()
-		{
-			return new(Key.Convert<Func<TValue, object>>(), Descendant);
 		}
 	}
 	

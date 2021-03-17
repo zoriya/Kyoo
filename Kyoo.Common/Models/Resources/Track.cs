@@ -58,6 +58,7 @@ namespace Kyoo.Models
 	{
 		public int ID { get; set; }
 		[SerializeIgnore] public int EpisodeID { get; set; }
+		public int TrackIndex { get; set; }
 		public bool IsDefault
 		{
 			get => isDefault;
@@ -94,13 +95,17 @@ namespace Kyoo.Models
 		{
 			get
 			{
-				// TODO other type of tracks should still have slugs. The slug should never be an ID. Maybe a und-number format.
-				if (Type != StreamType.Subtitle)
-					return null;
-
-				string slug = string.IsNullOrEmpty(Language) 
-					? ID.ToString()
-					: $"{Episode.Slug}.{Language}{(IsForced ? "-forced" : "")}";
+				string type = Type switch
+				{
+					StreamType.Subtitle => "",
+					StreamType.Video => "video.",
+					StreamType.Audio => "audio.",
+					StreamType.Font => "font.",
+					_ => ""
+				};
+				string slug = $"{Episode.Slug}.{type}{Language}{(TrackIndex != 0 ? TrackIndex : "")}";
+				if (IsForced)
+					slug += "-forced";
 				switch (Codec)
 				{
 					case "ass":
@@ -144,6 +149,7 @@ namespace Kyoo.Models
 			return mkvLanguage switch
 			{
 				"fre" => "fra",
+				null => "und",
 				_ => mkvLanguage
 			};
 		}

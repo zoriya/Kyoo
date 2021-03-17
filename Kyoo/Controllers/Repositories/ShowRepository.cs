@@ -99,7 +99,8 @@ namespace Kyoo.Controllers
 		protected override async Task Validate(Show resource)
 		{
 			await base.Validate(resource);
-			resource.Studio = await _studios.CreateIfNotExists(resource.Studio, true);
+			if (resource.Studio != null)
+				resource.Studio = await _studios.CreateIfNotExists(resource.Studio, true);
 			resource.GenreLinks = await resource.Genres
 				.SelectAsync(async x => Link.UCreate(resource, await _genres.CreateIfNotExists(x, true)))
 				.ToListAsync();

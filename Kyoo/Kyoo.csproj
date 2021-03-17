@@ -90,7 +90,7 @@
 	</Target>
 
 	<Target Name="Symlink views to output - Linux" AfterTargets="Build" Condition="$(Configuration) == 'Debug' And $(OS) == 'Unix'">
-		<Exec WorkingDirectory="$(OutputPath)" Command="ln -fs ../../../Views"/>
+		<Exec WorkingDirectory="$(OutputPath)" Command="ln -fs ../../../Views" />
 	</Target>
 
 	<Target Name="Compile the transcoder" BeforeTargets="BeforeBuild">
