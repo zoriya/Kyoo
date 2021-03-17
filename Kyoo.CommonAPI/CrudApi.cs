@@ -182,5 +182,20 @@ namespace Kyoo.CommonApi
 
 			return Ok();
 		}
+		
+		[Authorize(Policy = "Write")]
+		public virtual async Task<IActionResult> Delete(Dictionary<string, string> where)
+		{
+			try
+			{
+				await _repository.DeleteRange(ApiHelper.ParseWhere<T>(where));
+			}
+			catch (ItemNotFound)
+			{
+				return NotFound();
+			}
+
+			return Ok();
+		}
 	}
 }
