@@ -188,7 +188,7 @@ namespace Kyoo.Controllers
 				                                                  && x.IsForced == y.IsForced 
 				                                                  && x.Codec == y.Codec 
 				                                                  && x.Type == y.Type);
-				return _tracks.CreateIfNotExists(x, true);
+				return _tracks.Create(x);
 			}).ToListAsync();
 			return resource;
 		}

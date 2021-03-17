@@ -497,7 +497,8 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
                     b.HasKey("ID");
 
-                    b.HasIndex("EpisodeID");
+                    b.HasIndex("EpisodeID", "Type", "Language", "TrackIndex", "IsForced")
+                        .IsUnique();
 
                     b.ToTable("Tracks");
                 });

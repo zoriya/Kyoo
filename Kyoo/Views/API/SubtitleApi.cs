@@ -35,7 +35,7 @@ namespace Kyoo.Api
 				return BadRequest(new {error = ex.Message});
 			}
 
-			if (subtitle == null)
+			if (subtitle == null || subtitle.Type != StreamType.Subtitle)
 				return NotFound();
 			
 			if (subtitle.Codec == "subrip" && extension == "vtt")
