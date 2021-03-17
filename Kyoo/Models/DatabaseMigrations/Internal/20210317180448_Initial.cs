@@ -397,6 +397,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     ID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     EpisodeID = table.Column<int>(type: "integer", nullable: false),
+                    TrackIndex = table.Column<int>(type: "integer", nullable: false),
                     IsDefault = table.Column<bool>(type: "boolean", nullable: false),
                     IsForced = table.Column<bool>(type: "boolean", nullable: false),
                     IsExternal = table.Column<bool>(type: "boolean", nullable: false),
