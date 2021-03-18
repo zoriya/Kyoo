@@ -77,7 +77,7 @@ namespace Kyoo.Models
 				string language = GetLanguage(Language);
 
 				if (language == null)
-					return $"Unknown Language (id: {ID.ToString()})";
+					return $"Unknown (index: {TrackIndex})";
 				CultureInfo info = CultureInfo.GetCultures(CultureTypes.NeutralCultures)
 					.FirstOrDefault(x => x.ThreeLetterISOLanguageName == language);
 				string name = info?.EnglishName ?? language;
