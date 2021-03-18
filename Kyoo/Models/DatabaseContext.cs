@@ -30,8 +30,14 @@ namespace Kyoo
 		public DbSet<ProviderID> Providers { get; set; }
 		public DbSet<MetadataID> MetadataIds { get; set; }
 		
-		// TODO Many to many with UsingEntity for this.
 		public DbSet<PeopleRole> PeopleRoles { get; set; }
+
+		public DbSet<Link<T1, T2>> Links<T1, T2>()
+			where T1 : class, IResource
+			where T2 : class, IResource
+		{
+			return Set<Link<T1, T2>>();
+		}
 		
 
 		public DatabaseContext()
@@ -115,7 +121,7 @@ namespace Kyoo
 						.HasOne(x => x.Second)
 						.WithMany(x => x.CollectionLinks),
 					y => y.HasKey(Link<Collection, Show>.PrimaryKey));
-			
+
 			modelBuilder.Entity<Genre>()
 				.HasMany(x => x.Shows)
 				.WithMany(x => x.Genres)
