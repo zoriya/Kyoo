@@ -1,7 +1,7 @@
 <div *ngIf="items.collections.length > 0" class="container-fluid mt-3">
 	<h3>Collections</h3>
 </div>
-<app-items-list [items]="AsPage(items.collections)"></app-items-list>
+<app-items-list [items]="AsPage(items.collections)" type="collection"></app-items-list>
 <div *ngIf="items.shows.length > 0" class="container-fluid mt-3">
 	<h3>Shows</h3>
 </div>

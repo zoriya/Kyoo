@@ -16,6 +16,7 @@ import { ItemsUtils } from "../../misc/items-utils";
 export class ItemsListComponent extends HorizontalScroller
 {
 	@Input() items: Page<Collection | Show | LibraryItem | ShowRole>;
+	@Input() type: string;
 
 	constructor(private sanitizer: DomSanitizer, public client: HttpClient)
 	{
@@ -34,6 +35,8 @@ export class ItemsListComponent extends HorizontalScroller
 
 	getLink(item: LibraryItem | Show | ShowRole | Collection): string
 	{
+		if (this.type)
+			return `/${this.type}/${item.slug}`;
 		return ItemsUtils.getLink(item);
 	}
 }
