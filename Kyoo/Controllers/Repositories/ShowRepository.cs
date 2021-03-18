@@ -4,7 +4,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
-using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -148,31 +147,23 @@ namespace Kyoo.Controllers
 
 		public async Task AddShowLink(int showID, int? libraryID, int? collectionID)
 		{
-			Show show = await Get(showID);
 			if (collectionID != null)
 			{
-				Collection collection = _database.GetTemporaryObject(new Collection {ID = collectionID.Value});
-				
-				show.Collections ??= new List<Collection>();
-				show.Collections.Add(collection);
+				await _database.Links<Collection, Show>()
+					.AddAsync(new Link<Collection, Show>(collectionID.Value, showID));
 				await _database.SaveIfNoDuplicates();
 
 				if (libraryID != null)
 				{
-					Library library = await _database.Libraries.FirstOrDefaultAsync(x => x.ID == libraryID.Value);
-					if (library == null)
-						throw new ItemNotFound($"No library found with the ID {libraryID.Value}");
-					library.Collections ??= new List<Collection>();
-					library.Collections.Add(collection);
+					await _database.Links<Library, Collection>()
+						.AddAsync(new Link<Library, Collection>(libraryID.Value, collectionID.Value));
 					await _database.SaveIfNoDuplicates();
 				}
 			}
 			if (libraryID != null)
 			{
-				Library library = _database.GetTemporaryObject(new Library {ID = libraryID.Value});
-				
-				show.Libraries ??= new List<Library>();
-				show.Libraries.Add(library);
+				await _database.Links<Library, Show>()
+					.AddAsync(new Link<Library, Show>(libraryID.Value, showID));
 				await _database.SaveIfNoDuplicates();
 			}
 		}

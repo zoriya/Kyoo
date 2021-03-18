@@ -8,7 +8,13 @@ namespace Kyoo.Models
 		public int FirstID { get; set; }
 		public int SecondID { get; set; }
 		
-		public Link() {}		
+		public Link() {}
+
+		public Link(int firstID, int secondID)
+		{
+			FirstID = firstID;
+			SecondID = secondID;
+		}
 		
 		public Link(IResource first, IResource second)
 		{
@@ -39,7 +45,7 @@ namespace Kyoo.Models
 		{
 			get
 			{
-				return x => new {LibraryID = x.FirstID, ProviderID = x.SecondID};
+				return x => new {First = x.FirstID, Second = x.SecondID};
 			}	
 		}
 	}
@@ -63,11 +69,15 @@ namespace Kyoo.Models
 			Second = second;
 		}
 
+		public Link(int firstID, int secondID)
+			: base(firstID, secondID)
+		{ }
+
 		public new static Expression<Func<Link<T1, T2>, object>> PrimaryKey
 		{
 			get
 			{
-				return x => new {LibraryID = x.FirstID, ProviderID = x.SecondID};
+				return x => new {First = x.FirstID, Second = x.SecondID};
 			}	
 		}
 	}
