@@ -58,9 +58,9 @@ namespace Kyoo
 
 			services.AddDbContext<DatabaseContext>(options =>
 			{
-				options.UseNpgsql(_configuration.GetConnectionString("Database"))
-					.EnableSensitiveDataLogging()
-					.UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()));
+				options.UseNpgsql(_configuration.GetConnectionString("Database"));
+				// .EnableSensitiveDataLogging()
+				// .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()));
 			}, ServiceLifetime.Transient);
 			
 			services.AddDbContext<IdentityDatabase>(options =>
