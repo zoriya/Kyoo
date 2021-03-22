@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using Kyoo.CommonApi;
 using Kyoo.Controllers;
@@ -15,33 +13,35 @@ namespace Kyoo.Api
 	[ApiController]
 	public class ProviderAPI : CrudApi<ProviderID>
 	{
+		private readonly IThumbnailsManager _thumbnails;
 		private readonly ILibraryManager _libraryManager;
-		private readonly string _providerPath;
+		private readonly IFileManager _files;
 		
-		public ProviderAPI(ILibraryManager libraryManager, IConfiguration config)
+		public ProviderAPI(ILibraryManager libraryManager,
+			IConfiguration config,
+			IFileManager files,
+			IThumbnailsManager thumbnails)
 			: base(libraryManager.ProviderRepository, config)
 		{
 			_libraryManager = libraryManager;
-			_providerPath = Path.GetFullPath(config.GetValue<string>("providerPath"));
+			_files = files;
+			_thumbnails = thumbnails;
 		}
 		
 		[HttpGet("{id:int}/logo")]
 		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetLogo(int id)
 		{
-			string slug = (await _libraryManager.GetPeople(id)).Slug;
-			return GetLogo(slug);
+			ProviderID provider = await _libraryManager.GetProvider(id);
+			return _files.FileResult(await _thumbnails.GetProviderLogo(provider));
 		}
 		
 		[HttpGet("{slug}/logo")]
 		[Authorize(Policy="Read")]
-		public IActionResult GetLogo(string slug)
+		public async Task<IActionResult> GetLogo(string slug)
 		{
-			string thumbPath = Path.GetFullPath(Path.Combine(_providerPath, slug + ".jpg"));
-			if (!thumbPath.StartsWith(_providerPath) || !System.IO.File.Exists(thumbPath))
-				return NotFound();
-
-			return new PhysicalFileResult(Path.GetFullPath(thumbPath), "image/jpg");
+			ProviderID provider = await _libraryManager.GetProvider(slug);
+			return _files.FileResult(await _thumbnails.GetProviderLogo(provider));
 		}
 	}
 }

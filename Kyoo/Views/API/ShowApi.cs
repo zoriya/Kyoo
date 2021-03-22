@@ -9,7 +9,6 @@ using Kyoo.CommonApi;
 using Kyoo.Controllers;
 using Kyoo.Models.Exceptions;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 
 namespace Kyoo.Api
@@ -20,12 +19,18 @@ namespace Kyoo.Api
 	public class ShowApi : CrudApi<Show>
 	{
 		private readonly ILibraryManager _libraryManager;
-		private FileExtensionContentTypeProvider _provider;
+		private readonly IFileManager _files;
+		private readonly IThumbnailsManager _thumbs;
 
-		public ShowApi(ILibraryManager libraryManager, IConfiguration configuration)
+		public ShowApi(ILibraryManager libraryManager,
+			IFileManager files, 
+			IThumbnailsManager thumbs,
+			IConfiguration configuration)
 			: base(libraryManager.ShowRepository, configuration)
 		{
 			_libraryManager = libraryManager;
+			_files = files;
+			_thumbs = thumbs;
 		}
 
 		[HttpGet("{showID:int}/season")]
@@ -374,10 +379,8 @@ namespace Kyoo.Api
 			string path = (await _libraryManager.GetShow(slug))?.Path;
 			if (path == null)
 				return NotFound();
-			path = Path.Combine(path, "Subtitles", "fonts");
-			if (!Directory.Exists(path))
-				return new Dictionary<string, string>();
-			return Directory.GetFiles(path)
+			path = Path.Combine(_files.GetExtraDirectory(path), "Attachment");
+			return _files.ListFiles(path)
 				.ToDictionary(Path.GetFileNameWithoutExtension,
 					x => $"{BaseURL}/api/shows/{slug}/fonts/{Path.GetFileName(x)}");
 		}
@@ -385,64 +388,43 @@ namespace Kyoo.Api
 		[HttpGet("{showSlug}/font/{slug}")]
 		[HttpGet("{showSlug}/fonts/{slug}")]
 		[Authorize(Policy = "Read")]
-		public async Task<ActionResult> GetFont(string showSlug, string slug)
+		public async Task<IActionResult> GetFont(string showSlug, string slug)
 		{
 			string path = (await _libraryManager.GetShow(showSlug))?.Path;
 			if (path == null)
 				return NotFound();
-			string fontPath = Path.Combine(path, "Subtitles", "fonts", slug);
-			if (!System.IO.File.Exists(fontPath))
-				return NotFound();
-			
-			if (_provider == null)
-				_provider = new FileExtensionContentTypeProvider();
-			_provider.TryGetContentType(path, out string contentType);
-			return PhysicalFile(fontPath, contentType ?? "application/x-font-ttf");
+			path = Path.Combine(_files.GetExtraDirectory(path), "Attachment", slug);
+			return _files.FileResult(path);
 		}
 
 		[HttpGet("{slug}/poster")]
 		[Authorize(Policy = "Read")]
-		public async Task<ActionResult> GetPoster(string slug)
+		public async Task<IActionResult> GetPoster(string slug)
 		{
-			string path = (await _libraryManager.GetShow(slug))?.Path;
-			if (path == null)
+			Show show = await _libraryManager.GetShow(slug);
+			if (show == null)
 				return NotFound();
-
-			string poster = Path.Combine(path, "poster.jpg");
-
-			if (System.IO.File.Exists(poster))
-				return new PhysicalFileResult(Path.GetFullPath(poster), "image/jpg");
-			return NotFound();
+			return _files.FileResult(await _thumbs.GetShowPoster(show));
 		}
 		
 		[HttpGet("{slug}/logo")]
 		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetLogo(string slug)
 		{
-			string path = (await _libraryManager.GetShow(slug))?.Path;
-			if (path == null)
+			Show show = await _libraryManager.GetShow(slug);
+			if (show == null)
 				return NotFound();
-
-			string logo = Path.Combine(path, "logo.png");
-
-			if (System.IO.File.Exists(logo))
-				return new PhysicalFileResult(Path.GetFullPath(logo), "image/png");
-			return NotFound();
+			return _files.FileResult(await _thumbs.GetShowLogo(show));
 		}
 		
 		[HttpGet("{slug}/backdrop")]
 		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetBackdrop(string slug)
 		{
-			string path = (await _libraryManager.GetShow(slug))?.Path;
-			if (path == null)
+			Show show = await _libraryManager.GetShow(slug);
+			if (show == null)
 				return NotFound();
-
-			string thumb = Path.Combine(path, "backdrop.jpg");
-
-			if (System.IO.File.Exists(thumb))
-				return new PhysicalFileResult(Path.GetFullPath(thumb), "image/jpg");
-			return NotFound();
+			return _files.FileResult(await _thumbs.GetShowBackdrop(show));
 		}
 	}
 }

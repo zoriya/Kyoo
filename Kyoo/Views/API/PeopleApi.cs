@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using Kyoo.CommonApi;
 using Kyoo.Controllers;
@@ -17,13 +16,18 @@ namespace Kyoo.Api
 	public class PeopleApi : CrudApi<People>
 	{
 		private readonly ILibraryManager _libraryManager;
-		private readonly string _peoplePath;
+		private readonly IFileManager _files;
+		private readonly IThumbnailsManager _thumbs;
 
-		public PeopleApi(ILibraryManager libraryManager, IConfiguration configuration) 
+		public PeopleApi(ILibraryManager libraryManager,
+			IConfiguration configuration,
+			IFileManager files,
+			IThumbnailsManager thumbs) 
 			: base(libraryManager.PeopleRepository, configuration)
 		{
 			_libraryManager = libraryManager;
-			_peoplePath = Path.GetFullPath(configuration.GetValue<string>("peoplePath"));
+			_files = files;
+			_thumbs = thumbs;
 		}
 
 		[HttpGet("{id:int}/role")]
@@ -86,19 +90,16 @@ namespace Kyoo.Api
 		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetPeopleIcon(int id)
 		{
-			string slug = (await _libraryManager.GetPeople(id)).Slug;
-			return GetPeopleIcon(slug);
+			People people = await _libraryManager.GetPeople(id);
+			return _files.FileResult(await _thumbs.GetPeoplePoster(people));
 		}
 		
 		[HttpGet("{slug}/poster")]
 		[Authorize(Policy="Read")]
-		public IActionResult GetPeopleIcon(string slug)
+		public async Task<IActionResult> GetPeopleIcon(string slug)
 		{
-			string thumbPath = Path.GetFullPath(Path.Combine(_peoplePath, slug + ".jpg"));
-			if (!thumbPath.StartsWith(_peoplePath) || !System.IO.File.Exists(thumbPath))
-				return NotFound();
-
-			return new PhysicalFileResult(Path.GetFullPath(thumbPath), "image/jpg");
+			People people = await _libraryManager.GetPeople(slug);
+			return _files.FileResult(await _thumbs.GetPeoplePoster(people));
 		}
 	}
 }

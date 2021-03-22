@@ -70,12 +70,14 @@ namespace Kyoo.Controllers
 				return tracks;
 			}
 		}
-		
+
+		private readonly IFileManager _files;
 		private readonly string _transmuxPath;
 		private readonly string _transcodePath;
 
-		public Transcoder(IConfiguration config)
+		public Transcoder(IConfiguration config, IFileManager files)
 		{
+			_files = files;
 			_transmuxPath = Path.GetFullPath(config.GetValue<string>("transmuxTempPath"));
 			_transcodePath = Path.GetFullPath(config.GetValue<string>("transcodeTempPath"));
 
@@ -85,9 +87,10 @@ namespace Kyoo.Controllers
 
 		public Task<Track[]> ExtractInfos(string path, bool reextract)
 		{
-			string dir = Path.GetDirectoryName(path);
+			string dir = _files.GetExtraDirectory(path);
 			if (dir == null)
 				throw new ArgumentException("Invalid path.");
+			// TODO invalid path here.
 			dir = Path.Combine(dir, "Extra");
 			return Task.Factory.StartNew(
 				() => TranscoderAPI.ExtractInfos(path, dir, reextract),

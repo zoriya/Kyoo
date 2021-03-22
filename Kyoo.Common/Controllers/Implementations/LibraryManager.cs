@@ -131,6 +131,11 @@ namespace Kyoo.Controllers
 			return PeopleRepository.Get(id);
 		}
 
+		public Task<ProviderID> GetProvider(int id)
+		{
+			return ProviderRepository.Get(id);
+		}
+
 		public Task<Library> GetLibrary(string slug)
 		{
 			return LibraryRepository.Get(slug);
@@ -189,6 +194,11 @@ namespace Kyoo.Controllers
 		public Task<People> GetPeople(string slug)
 		{
 			return PeopleRepository.Get(slug);
+		}
+		
+		public Task<ProviderID> GetProvider(string slug)
+		{
+			return ProviderRepository.Get(slug);
 		}
 
 		public Task<Library> GetLibrary(Expression<Func<Library, bool>> where)
