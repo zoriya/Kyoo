@@ -12,7 +12,7 @@ namespace Kyoo.Models
 		Video = 1,
 		Audio = 2,
 		Subtitle = 3,
-		Font = 4
+		Attachment = 4
 	}
 
 	namespace Watch
@@ -100,7 +100,7 @@ namespace Kyoo.Models
 					StreamType.Subtitle => "",
 					StreamType.Video => "video.",
 					StreamType.Audio => "audio.",
-					StreamType.Font => "font.",
+					StreamType.Attachment => "font.",
 					_ => ""
 				};
 				string index = TrackIndex != 0 ? $"-{TrackIndex}" : string.Empty;
