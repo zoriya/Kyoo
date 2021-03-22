@@ -101,8 +101,8 @@ namespace Kyoo.Tasks
 			if (subs)
 			{
 				await _library.Load(episode, x => x.Tracks);
-				episode.Tracks = (await _transcoder!.ExtractInfos(episode.Path))
-					.Where(x => x.Type != StreamType.Font)
+				episode.Tracks = (await _transcoder!.ExtractInfos(episode.Path, true))
+					.Where(x => x.Type != StreamType.Attachment)
 					.Concat(episode.Tracks.Where(x => x.IsExternal))
 					.ToList();
 				await _library.EditEpisode(episode, false);

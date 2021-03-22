@@ -14,10 +14,12 @@ namespace Kyoo.Api
 	public class SubtitleApi : ControllerBase
 	{
 		private readonly ILibraryManager _libraryManager;
+		private readonly IFileManager _files;
 
-		public SubtitleApi(ILibraryManager libraryManager)
+		public SubtitleApi(ILibraryManager libraryManager, IFileManager files)
 		{
 			_libraryManager = libraryManager;
+			_files = files;
 		}
 		
 		
@@ -39,9 +41,8 @@ namespace Kyoo.Api
 				return NotFound();
 			
 			if (subtitle.Codec == "subrip" && extension == "vtt")
-				return new ConvertSubripToVtt(subtitle.Path);
-			string mime = subtitle.Codec == "ass" ? "text/x-ssa" : "application/x-subrip";
-			return PhysicalFile(subtitle.Path, mime);
+				return new ConvertSubripToVtt(subtitle.Path, _files);
+			return _files.FileResult(subtitle.Path);
 		}
 	}
 
@@ -49,27 +50,29 @@ namespace Kyoo.Api
 	public class ConvertSubripToVtt : IActionResult
 	{
 		private readonly string _path;
+		private readonly IFileManager _files;
 
-		public ConvertSubripToVtt(string subtitlePath)
+		public ConvertSubripToVtt(string subtitlePath, IFileManager files)
 		{
 			_path = subtitlePath;
+			_files = files;
 		}
 
 		public async Task ExecuteResultAsync(ActionContext context)
 		{
-			string line;
-			List<string> lines = new List<string>();
+			List<string> lines = new();
 
 			context.HttpContext.Response.StatusCode = 200;
 			context.HttpContext.Response.Headers.Add("Content-Type", "text/vtt");
 
-			await using (StreamWriter writer = new StreamWriter(context.HttpContext.Response.Body))
+			await using (StreamWriter writer = new(context.HttpContext.Response.Body))
 			{
 				await writer.WriteLineAsync("WEBVTT");
 				await writer.WriteLineAsync("");
 				await writer.WriteLineAsync("");
 
-				using StreamReader reader = new StreamReader(_path);
+				using StreamReader reader = _files.GetReader(_path);
+				string line;
 				while ((line = await reader.ReadLineAsync()) != null)
 				{
 					if (line == "")

@@ -158,6 +158,7 @@ namespace Kyoo
 			services.AddScoped<DbContext, DatabaseContext>();
 
 			services.AddScoped<ILibraryManager, LibraryManager>();
+			services.AddScoped<IFileManager, FileManager>();
 			services.AddSingleton<ITranscoder, Transcoder>();
 			services.AddSingleton<IThumbnailsManager, ThumbnailsManager>();
 			services.AddSingleton<IProviderManager, ProviderManager>();

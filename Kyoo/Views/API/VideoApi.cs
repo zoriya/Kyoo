@@ -1,12 +1,11 @@
-﻿using Kyoo.Controllers;
+﻿using System.IO;
+using Kyoo.Controllers;
 using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.StaticFiles;
 
 namespace Kyoo.Api
 {
@@ -16,14 +15,18 @@ namespace Kyoo.Api
 	{
 		private readonly ILibraryManager _libraryManager;
 		private readonly ITranscoder _transcoder;
+		private readonly IFileManager _files;
 		private readonly string _transmuxPath;
 		private readonly string _transcodePath;
-		private FileExtensionContentTypeProvider _provider;
 
-		public VideoApi(ILibraryManager libraryManager, ITranscoder transcoder, IConfiguration config)
+		public VideoApi(ILibraryManager libraryManager, 
+			ITranscoder transcoder, 
+			IConfiguration config,
+			IFileManager files)
 		{
 			_libraryManager = libraryManager;
 			_transcoder = transcoder;
+			_files = files;
 			_transmuxPath = config.GetValue<string>("transmuxTempPath");
 			_transcodePath = config.GetValue<string>("transcodeTempPath");
 		}
@@ -37,19 +40,6 @@ namespace Kyoo.Api
 			ctx.HttpContext.Response.Headers.Add("Expires", "0");
 		}
 
-		private string _GetContentType(string path)
-		{
-			if (_provider == null)
-			{
-				_provider = new FileExtensionContentTypeProvider();
-				_provider.Mappings[".mkv"] = "video/x-matroska";
-			}
-
-			if (_provider.TryGetContentType(path, out string contentType))
-				return contentType;
-			return "video/mp4";
-		}
-		
 
 		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}")]
 		[HttpGet("direct/{showSlug}-s{seasonNumber:int}e{episodeNumber:int}")]
@@ -60,9 +50,9 @@ namespace Kyoo.Api
 				return BadRequest(new {error = "Season number or episode number can not be negative."});
 
 			Episode episode = await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
-			if (episode != null && System.IO.File.Exists(episode.Path))
-				return PhysicalFile(episode.Path, _GetContentType(episode.Path), true);
-			return NotFound();
+			if (episode == null)
+				return NotFound();
+			return _files.FileResult(episode.Path, true);
 		}
 		
 		[HttpGet("{movieSlug}")]
@@ -72,9 +62,9 @@ namespace Kyoo.Api
 		{
 			Episode episode = await _libraryManager.GetMovieEpisode(movieSlug);
 
-			if (episode != null && System.IO.File.Exists(episode.Path))
-				return PhysicalFile(episode.Path, _GetContentType(episode.Path), true);
-			return NotFound();
+			if (episode == null)
+				return NotFound();
+			return _files.FileResult(episode.Path, true);
 		}
 		
 
@@ -86,12 +76,12 @@ namespace Kyoo.Api
 				return BadRequest(new {error = "Season number or episode number can not be negative."});
 			
 			Episode episode = await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
-			if (episode == null || !System.IO.File.Exists(episode.Path))
+			if (episode == null)
 				return NotFound();
 			string path = await _transcoder.Transmux(episode);
 			if (path == null)
 				return StatusCode(500);
-			return PhysicalFile(path, "application/x-mpegurl", true);
+			return _files.FileResult(path, true);
 		}
 		
 		[HttpGet("transmux/{movieSlug}/master.m3u8")]
@@ -100,12 +90,12 @@ namespace Kyoo.Api
 		{
 			Episode episode = await _libraryManager.GetMovieEpisode(movieSlug);
 
-			if (episode == null || !System.IO.File.Exists(episode.Path))
+			if (episode == null)
 				return NotFound();
 			string path = await _transcoder.Transmux(episode);
 			if (path == null)
 				return StatusCode(500);
-			return PhysicalFile(path, "application/x-mpegurl", true);
+			return _files.FileResult(path, true);
 		}
 
 		[HttpGet("transcode/{showSlug}-s{seasonNumber:int}e{episodeNumber:int}/master.m3u8")]
@@ -116,12 +106,12 @@ namespace Kyoo.Api
 				return BadRequest(new {error = "Season number or episode number can not be negative."});
 			
 			Episode episode = await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
-			if (episode == null || !System.IO.File.Exists(episode.Path))
+			if (episode == null)
 				return NotFound();
 			string path = await _transcoder.Transcode(episode);
 			if (path == null)
 				return StatusCode(500);
-			return PhysicalFile(path, "application/x-mpegurl", true);
+			return _files.FileResult(path, true);
 		}
 		
 		[HttpGet("transcode/{movieSlug}/master.m3u8")]
@@ -130,12 +120,12 @@ namespace Kyoo.Api
 		{
 			Episode episode = await _libraryManager.GetMovieEpisode(movieSlug);
 
-			if (episode == null || !System.IO.File.Exists(episode.Path))
+			if (episode == null)
 				return NotFound();
 			string path = await _transcoder.Transcode(episode);
 			if (path == null)
 				return StatusCode(500);
-			return PhysicalFile(path, "application/x-mpegurl", true);
+			return _files.FileResult(path, true);
 		}
 		
 		

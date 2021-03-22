@@ -359,8 +359,8 @@ namespace Kyoo.Controllers
 
 		private async Task<ICollection<Track>> GetTracks(Episode episode)
 		{
-			episode.Tracks = (await _transcoder.ExtractInfos(episode.Path))
-				.Where(x => x.Type != StreamType.Font)
+			episode.Tracks = (await _transcoder.ExtractInfos(episode.Path, false))
+				.Where(x => x.Type != StreamType.Attachment)
 				.ToArray();
 			return episode.Tracks;
 		}
