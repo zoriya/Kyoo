@@ -11,10 +11,16 @@ namespace Kyoo.Controllers
 	public class ThumbnailsManager : IThumbnailsManager
 	{
 		private readonly IConfiguration _config;
+		private readonly IFileManager _files;
+		private readonly string _peoplePath;
+		private readonly string _providerPath;
 
-		public ThumbnailsManager(IConfiguration configuration)
+		public ThumbnailsManager(IConfiguration configuration, IFileManager files)
 		{
 			_config = configuration;
+			_files = files;
+			_peoplePath = Path.GetFullPath(configuration.GetValue<string>("peoplePath"));
+			_providerPath = Path.GetFullPath(configuration.GetValue<string>("providerPath"));
 		}
 
 		private static async Task DownloadImage(string url, string localPath, string what)
@@ -34,22 +40,23 @@ namespace Kyoo.Controllers
 		{
 			if (show?.Path == null)
 				return default;
+			string basePath = _files.GetExtraDirectory(show.Path);
 
 			if (show.Poster != null)
 			{
-				string posterPath = Path.Combine(show.Path, "poster.jpg");
+				string posterPath = Path.Combine(basePath, "poster.jpg");
 				if (alwaysDownload || !File.Exists(posterPath))
 					await DownloadImage(show.Poster, posterPath, $"The poster of {show.Title}");
 			}
 			if (show.Logo != null)
 			{
-				string logoPath = Path.Combine(show.Path, "logo.png");
+				string logoPath = Path.Combine(basePath, "logo.png");
 				if (alwaysDownload || !File.Exists(logoPath))
 					await DownloadImage(show.Logo, logoPath, $"The logo of {show.Title}");
 			}
 			if (show.Backdrop != null)
 			{
-				string backdropPath = Path.Combine(show.Path, "backdrop.jpg");
+				string backdropPath = Path.Combine(basePath, "backdrop.jpg");
 				if (alwaysDownload || !File.Exists(backdropPath))
 					await DownloadImage(show.Backdrop, backdropPath, $"The backdrop of {show.Title}");
 			}
@@ -81,7 +88,8 @@ namespace Kyoo.Controllers
 
 			if (season.Poster != null)
 			{
-				string localPath = Path.Combine(season.Show.Path, $"season-{season.SeasonNumber}.jpg");
+				string basePath = _files.GetExtraDirectory(season.Show.Path);
+				string localPath = Path.Combine(basePath, $"season-{season.SeasonNumber}.jpg");
 				if (alwaysDownload || !File.Exists(localPath))
 					await DownloadImage(season.Poster, localPath, $"The poster of {season.Show.Title}'s season {season.SeasonNumber}");
 			}
@@ -95,7 +103,10 @@ namespace Kyoo.Controllers
 
 			if (episode.Thumb != null)
 			{
-				string localPath = Path.ChangeExtension(episode.Path, "jpg");
+				string localPath = Path.Combine(
+					_files.GetExtraDirectory(Path.GetDirectoryName(episode.Path)),
+					"Thumbnails",
+					$"{Path.GetFileNameWithoutExtension(episode.Path)}.jpg");
 				if (alwaysDownload || !File.Exists(localPath))
 					await DownloadImage(episode.Thumb, localPath, $"The thumbnail of {episode.Slug}");
 			}
@@ -115,7 +126,67 @@ namespace Kyoo.Controllers
 				await DownloadImage(provider.Logo, localPath, $"The logo of {provider.Slug}");
 			return provider;
 		}
+
+		public Task<string> GetShowBackdrop(Show show)
+		{
+			if (show?.Path == null)
+				throw new ArgumentNullException(nameof(show));
+			return Task.FromResult(Path.Combine(_files.GetExtraDirectory(show.Path), "backdrop.jpg"));
+		}
 		
-		//TODO add get thumbs here
+		public Task<string> GetShowLogo(Show show)
+		{
+			if (show?.Path == null)
+				throw new ArgumentNullException(nameof(show));
+			return Task.FromResult(Path.Combine(_files.GetExtraDirectory(show.Path), "logo.png"));
+		}
+		
+		public Task<string> GetShowPoster(Show show)
+		{
+			if (show?.Path == null)
+				throw new ArgumentNullException(nameof(show));
+			return Task.FromResult(Path.Combine(_files.GetExtraDirectory(show.Path), "poster.jpg"));
+		}
+
+		public Task<string> GetSeasonPoster(Season season)
+		{
+			if (season == null)
+				throw new ArgumentNullException(nameof(season));
+			// TODO Use a season.Path (for season's folder)
+			string path = season.Show.Poster;
+			if (path == null)
+				return Task.FromResult<string>(null);
+
+			string thumb = Path.Combine(_files.GetExtraDirectory(path), $"season-{season.SeasonNumber}.jpg");
+			return Task.FromResult(File.Exists(thumb) ? Path.GetFullPath(thumb) : null);
+		}
+
+		public Task<string> GetEpisodeThumb(Episode episode)
+		{
+			string path = episode.Path;
+			// TODO use show's path for get extra directory. If seasons folder are used, episodes may not be directly in the show folder.
+			return Task.FromResult(Path.Combine(
+				_files.GetExtraDirectory(Path.GetDirectoryName(path)),
+				"Thumbnails",
+				$"{Path.GetFileNameWithoutExtension(path)}.jpg"));
+		}
+
+		public Task<string> GetPeoplePoster(People people)
+		{
+			if (people == null)
+				throw new ArgumentNullException(nameof(people));
+			string thumbPath = Path.GetFullPath(Path.Combine(_peoplePath, $"{people.Slug}.jpg"));
+			if (!thumbPath.StartsWith(_peoplePath) || File.Exists(thumbPath))
+				return Task.FromResult<string>(null);
+			return Task.FromResult(thumbPath);
+		}
+
+		public Task<string> GetProviderLogo(ProviderID provider)
+		{
+			if (provider == null)
+				throw new ArgumentNullException(nameof(provider));
+			string thumbPath = Path.GetFullPath(Path.Combine(_providerPath, $"{provider.Slug}.jpg"));
+			return Task.FromResult(thumbPath.StartsWith(_providerPath) ? thumbPath : null);
+		}
 	}
 }

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading.Tasks;
 using Kyoo.CommonApi;
 using Kyoo.Controllers;
@@ -18,11 +17,18 @@ namespace Kyoo.Api
 	public class SeasonApi : CrudApi<Season>
 	{
 		private readonly ILibraryManager _libraryManager;
+		private readonly IThumbnailsManager _thumbs;
+		private readonly IFileManager _files;
 
-		public SeasonApi(ILibraryManager libraryManager, IConfiguration configuration)
+		public SeasonApi(ILibraryManager libraryManager,
+			IConfiguration configuration,
+			IThumbnailsManager thumbs,
+			IFileManager files)
 			: base(libraryManager.SeasonRepository, configuration)
 		{
 			_libraryManager = libraryManager;
+			_thumbs = thumbs;
+			_files = files;
 		}
 		
 		[HttpGet("{seasonID:int}/episode")]
@@ -131,31 +137,18 @@ namespace Kyoo.Api
 		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetThumb(int id)
 		{
-			// TODO remove the next lambda and use a Season.Path (should exit for seasons in a different folder)
-			string path = (await _libraryManager.GetShow(x => x.Seasons.Any(y => y.ID == id)))?.Path;
-			int seasonNumber = (await _libraryManager.GetSeason(id)).SeasonNumber;
-			if (path == null)
-				return NotFound();
-
-			string thumb = Path.Combine(path, $"season-{seasonNumber}.jpg");
-			if (System.IO.File.Exists(thumb))
-				return new PhysicalFileResult(Path.GetFullPath(thumb), "image/jpg");
-			return NotFound();
+			Season season = await _libraryManager.GetSeason(id);
+			await _libraryManager.Load(season, x => x.Show);
+			return _files.FileResult(await _thumbs.GetSeasonPoster(season));
 		}
 		
-		[HttpGet("{showSlug}-s{seasonNumber:int}/thumb")]
+		[HttpGet("{slug}/thumb")]
 		[Authorize(Policy="Read")]
-		public async Task<IActionResult> GetThumb(string showSlug, int seasonNumber)
+		public async Task<IActionResult> GetThumb(string slug)
 		{
-			// TODO use a season.Path
-			string path = (await _libraryManager.GetShow(showSlug))?.Path;
-			if (path == null)
-				return NotFound();
-
-			string thumb = Path.Combine(path, $"season-{seasonNumber}.jpg");
-			if (System.IO.File.Exists(thumb))
-				return new PhysicalFileResult(Path.GetFullPath(thumb), "image/jpg");
-			return NotFound();
+			Season season = await _libraryManager.GetSeason(slug);
+			await _libraryManager.Load(season, x => x.Show);
+			return _files.FileResult(await _thumbs.GetSeasonPoster(season));
 		}
 	}
 }

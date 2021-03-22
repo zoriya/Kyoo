@@ -1,11 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 
 namespace Kyoo.Controllers
 {
-	public class FileManager : ControllerBase, IFileManager
+	public class FileManager : IFileManager
 	{
 		private FileExtensionContentTypeProvider _provider;
 
@@ -19,16 +20,19 @@ namespace Kyoo.Controllers
 
 			if (_provider.TryGetContentType(path, out string contentType))
 				return contentType;
-			return "video/mp4";
+			throw new NotImplementedException($"Can't get the content type of the file at: {path}");
 		}
 		
 		public IActionResult FileResult(string path, bool range)
 		{
 			if (path == null)
-				throw new ArgumentNullException(nameof(path));
-			if (!System.IO.File.Exists(path))
-				return NotFound();
-			return PhysicalFile(path, _GetContentType(path), range);
+				return new NotFoundResult();
+			if (!File.Exists(path))
+				return new NotFoundResult();
+			return new PhysicalFileResult(Path.GetFullPath(path), _GetContentType(path))
+			{
+				EnableRangeProcessing = range
+			};
 		}
 
 		public StreamReader GetReader(string path)
@@ -36,6 +40,20 @@ namespace Kyoo.Controllers
 			if (path == null)
 				throw new ArgumentNullException(nameof(path));
 			return new StreamReader(path);
+		}
+
+		public string GetExtraDirectory(string showPath)
+		{
+			string path = Path.Combine(showPath, "Extra");
+			Directory.CreateDirectory(path);
+			return path;
+		}
+
+		public ICollection<string> ListFiles(string path)
+		{
+			if (path == null)
+				throw new ArgumentNullException(nameof(path));
+			return Directory.GetFiles(path);
 		}
 	}
 }

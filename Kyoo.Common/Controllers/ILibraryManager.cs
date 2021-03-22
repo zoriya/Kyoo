@@ -35,6 +35,7 @@ namespace Kyoo.Controllers
 		Task<Track> GetTrack(int id);
 		Task<Studio> GetStudio(int id);
 		Task<People> GetPeople(int id);
+		Task<ProviderID> GetProvider(int id);
 		
 		// Get by slug
 		Task<Library> GetLibrary(string slug);
@@ -49,6 +50,7 @@ namespace Kyoo.Controllers
 		Task<Genre> GetGenre(string slug);
 		Task<Studio> GetStudio(string slug);
 		Task<People> GetPeople(string slug);
+		Task<ProviderID> GetProvider(string slug);
 		
 		// Get by predicate
 		Task<Library> GetLibrary(Expression<Func<Library, bool>> where);
