@@ -38,25 +38,21 @@ namespace Kyoo.Controllers
 
 		public async Task<Show> Validate(Show show, bool alwaysDownload)
 		{
-			if (show?.Path == null)
-				return default;
-			string basePath = _files.GetExtraDirectory(show.Path);
-
 			if (show.Poster != null)
 			{
-				string posterPath = Path.Combine(basePath, "poster.jpg");
+				string posterPath = await GetShowPoster(show);
 				if (alwaysDownload || !File.Exists(posterPath))
 					await DownloadImage(show.Poster, posterPath, $"The poster of {show.Title}");
 			}
 			if (show.Logo != null)
 			{
-				string logoPath = Path.Combine(basePath, "logo.png");
+				string logoPath = await GetShowLogo(show);
 				if (alwaysDownload || !File.Exists(logoPath))
 					await DownloadImage(show.Logo, logoPath, $"The logo of {show.Title}");
 			}
 			if (show.Backdrop != null)
 			{
-				string backdropPath = Path.Combine(basePath, "backdrop.jpg");
+				string backdropPath = await GetShowBackdrop(show);
 				if (alwaysDownload || !File.Exists(backdropPath))
 					await DownloadImage(show.Backdrop, backdropPath, $"The backdrop of {show.Title}");
 			}
@@ -88,8 +84,7 @@ namespace Kyoo.Controllers
 
 			if (season.Poster != null)
 			{
-				string basePath = _files.GetExtraDirectory(season.Show.Path);
-				string localPath = Path.Combine(basePath, $"season-{season.SeasonNumber}.jpg");
+				string localPath = await GetSeasonPoster(season);
 				if (alwaysDownload || !File.Exists(localPath))
 					await DownloadImage(season.Poster, localPath, $"The poster of {season.Show.Title}'s season {season.SeasonNumber}");
 			}
@@ -103,10 +98,7 @@ namespace Kyoo.Controllers
 
 			if (episode.Thumb != null)
 			{
-				string localPath = Path.Combine(
-					_files.GetExtraDirectory(Path.GetDirectoryName(episode.Path)),
-					"Thumbnails",
-					$"{Path.GetFileNameWithoutExtension(episode.Path)}.jpg");
+				string localPath = await GetEpisodeThumb(episode);
 				if (alwaysDownload || !File.Exists(localPath))
 					await DownloadImage(episode.Thumb, localPath, $"The thumbnail of {episode.Slug}");
 			}
@@ -131,44 +123,36 @@ namespace Kyoo.Controllers
 		{
 			if (show?.Path == null)
 				throw new ArgumentNullException(nameof(show));
-			return Task.FromResult(Path.Combine(_files.GetExtraDirectory(show.Path), "backdrop.jpg"));
+			return Task.FromResult(Path.Combine(_files.GetExtraDirectory(show), "backdrop.jpg"));
 		}
 		
 		public Task<string> GetShowLogo(Show show)
 		{
 			if (show?.Path == null)
 				throw new ArgumentNullException(nameof(show));
-			return Task.FromResult(Path.Combine(_files.GetExtraDirectory(show.Path), "logo.png"));
+			return Task.FromResult(Path.Combine(_files.GetExtraDirectory(show), "logo.png"));
 		}
 		
 		public Task<string> GetShowPoster(Show show)
 		{
 			if (show?.Path == null)
 				throw new ArgumentNullException(nameof(show));
-			return Task.FromResult(Path.Combine(_files.GetExtraDirectory(show.Path), "poster.jpg"));
+			return Task.FromResult(Path.Combine(_files.GetExtraDirectory(show), "poster.jpg"));
 		}
 
 		public Task<string> GetSeasonPoster(Season season)
 		{
 			if (season == null)
 				throw new ArgumentNullException(nameof(season));
-			// TODO Use a season.Path (for season's folder)
-			string path = season.Show.Poster;
-			if (path == null)
-				return Task.FromResult<string>(null);
-
-			string thumb = Path.Combine(_files.GetExtraDirectory(path), $"season-{season.SeasonNumber}.jpg");
-			return Task.FromResult(File.Exists(thumb) ? Path.GetFullPath(thumb) : null);
+			return Task.FromResult(Path.Combine(_files.GetExtraDirectory(season), $"season-{season.SeasonNumber}.jpg"));
 		}
 
 		public Task<string> GetEpisodeThumb(Episode episode)
 		{
-			string path = episode.Path;
-			// TODO use show's path for get extra directory. If seasons folder are used, episodes may not be directly in the show folder.
 			return Task.FromResult(Path.Combine(
-				_files.GetExtraDirectory(Path.GetDirectoryName(path)),
+				_files.GetExtraDirectory(episode),
 				"Thumbnails",
-				$"{Path.GetFileNameWithoutExtension(path)}.jpg"));
+				$"{Path.GetFileNameWithoutExtension(episode.Path)}.jpg"));
 		}
 
 		public Task<string> GetPeoplePoster(People people)

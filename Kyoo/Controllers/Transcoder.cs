@@ -85,15 +85,13 @@ namespace Kyoo.Controllers
 				throw new BadTranscoderException();
 		}
 
-		public Task<Track[]> ExtractInfos(string path, bool reextract)
+		public Task<Track[]> ExtractInfos(Episode episode, bool reextract)
 		{
-			string dir = _files.GetExtraDirectory(path);
+			string dir = _files.GetExtraDirectory(episode);
 			if (dir == null)
 				throw new ArgumentException("Invalid path.");
-			// TODO invalid path here.
-			dir = Path.Combine(dir, "Extra");
 			return Task.Factory.StartNew(
-				() => TranscoderAPI.ExtractInfos(path, dir, reextract),
+				() => TranscoderAPI.ExtractInfos(episode.Path, dir, reextract),
 				TaskCreationOptions.LongRunning);
 		}
 
