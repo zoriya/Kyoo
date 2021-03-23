@@ -376,11 +376,11 @@ namespace Kyoo.Api
 		[Authorize(Policy = "Read")]
 		public async Task<ActionResult<Dictionary<string, string>>> GetFonts(string slug)
 		{
-			string path = (await _libraryManager.GetShow(slug))?.Path;
-			if (path == null)
+			Show show = await _libraryManager.GetShow(slug);
+			if (show == null)
 				return NotFound();
-			path = Path.Combine(_files.GetExtraDirectory(path), "Attachment");
-			return _files.ListFiles(path)
+			string path = Path.Combine(_files.GetExtraDirectory(show), "Attachments");
+			return (await _files.ListFiles(path))
 				.ToDictionary(Path.GetFileNameWithoutExtension,
 					x => $"{BaseURL}/api/shows/{slug}/fonts/{Path.GetFileName(x)}");
 		}
@@ -390,10 +390,10 @@ namespace Kyoo.Api
 		[Authorize(Policy = "Read")]
 		public async Task<IActionResult> GetFont(string showSlug, string slug)
 		{
-			string path = (await _libraryManager.GetShow(showSlug))?.Path;
-			if (path == null)
+			Show show = await _libraryManager.GetShow(showSlug);
+			if (show == null)
 				return NotFound();
-			path = Path.Combine(_files.GetExtraDirectory(path), "Attachment", slug);
+			string path = Path.Combine(_files.GetExtraDirectory(show), "Attachments", slug);
 			return _files.FileResult(path);
 		}
 

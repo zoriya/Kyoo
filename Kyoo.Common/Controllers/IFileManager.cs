@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kyoo.Controllers
@@ -11,11 +13,16 @@ namespace Kyoo.Controllers
 
 		public StreamReader GetReader([NotNull] string path);
 
-		public ICollection<string> ListFiles([NotNull] string path);
-		// TODO implement a List for directorys, a Exist to check existance and all.
+		public Task<ICollection<string>> ListFiles([NotNull] string path);
+
+		public Task<bool> Exists([NotNull] string path);
 		// TODO replace every use of System.IO with this to allow custom paths (like uptobox://path)
 		// TODO find a way to handle Transmux/Transcode with this system.
 
-		public string GetExtraDirectory(string showPath);
+		public string GetExtraDirectory(Show show);
+		
+		public string GetExtraDirectory(Season season);
+		
+		public string GetExtraDirectory(Episode episode);
 	}
 }
