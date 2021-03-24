@@ -7,11 +7,11 @@ namespace Kyoo.Controllers
 {
 	public interface IThumbnailsManager
 	{
-		Task<Show> Validate(Show show, bool alwaysDownload = false);
-		Task<Season> Validate(Season season, bool alwaysDownload = false);
-		Task<Episode> Validate(Episode episode, bool alwaysDownload = false);
-		Task<People> Validate(People actors, bool alwaysDownload = false);
-		Task<ProviderID> Validate(ProviderID actors, bool alwaysDownload = false);
+		Task Validate(Show show, bool alwaysDownload = false);
+		Task Validate(Season season, bool alwaysDownload = false);
+		Task Validate(Episode episode, bool alwaysDownload = false);
+		Task Validate(People actors, bool alwaysDownload = false);
+		Task Validate(ProviderID actors, bool alwaysDownload = false);
 
 		Task<string> GetShowPoster([NotNull] Show show);
 		Task<string> GetShowLogo([NotNull] Show show);

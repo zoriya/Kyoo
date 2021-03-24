@@ -38,7 +38,7 @@ namespace Kyoo.Controllers
 			}
 		}
 
-		public async Task<Show> Validate(Show show, bool alwaysDownload)
+		public async Task Validate(Show show, bool alwaysDownload)
 		{
 			if (show.Poster != null)
 			{
@@ -61,11 +61,9 @@ namespace Kyoo.Controllers
 			
 			foreach (PeopleRole role in show.People)
 				await Validate(role.People, alwaysDownload);
-
-			return show;
 		}
 
-		public async Task<People> Validate([NotNull] People people, bool alwaysDownload)
+		public async Task Validate([NotNull] People people, bool alwaysDownload)
 		{
 			if (people == null)
 				throw new ArgumentNullException(nameof(people));
@@ -75,42 +73,32 @@ namespace Kyoo.Controllers
 			Directory.CreateDirectory(root);
 			if (alwaysDownload || !File.Exists(localPath))
 				await DownloadImage(people.Poster, localPath, $"The profile picture of {people.Name}");
-			
-			return people;
 		}
 
-		public async Task<Season> Validate(Season season, bool alwaysDownload)
+		public async Task Validate(Season season, bool alwaysDownload)
 		{
-			if (season?.Show?.Path == null)
-				return default;
+			if (season?.Show?.Path == null || season.Poster == null)
+				return;
 
-			if (season.Poster != null)
-			{
-				string localPath = await GetSeasonPoster(season);
-				if (alwaysDownload || !File.Exists(localPath))
-					await DownloadImage(season.Poster, localPath, $"The poster of {season.Show.Title}'s season {season.SeasonNumber}");
-			}
-			return season;
+			string localPath = await GetSeasonPoster(season);
+			if (alwaysDownload || !File.Exists(localPath))
+				await DownloadImage(season.Poster, localPath, $"The poster of {season.Show.Title}'s season {season.SeasonNumber}");
 		}
 		
-		public async Task<Episode> Validate(Episode episode, bool alwaysDownload)
+		public async Task Validate(Episode episode, bool alwaysDownload)
 		{
-			if (episode?.Path == null)
-				return default;
+			if (episode?.Path == null || episode.Thumb == null)
+				return;
 
-			if (episode.Thumb != null)
-			{
-				string localPath = await GetEpisodeThumb(episode);
-				if (alwaysDownload || !File.Exists(localPath))
-					await DownloadImage(episode.Thumb, localPath, $"The thumbnail of {episode.Slug}");
-			}
-			return episode;
+			string localPath = await GetEpisodeThumb(episode);
+			if (alwaysDownload || !File.Exists(localPath))
+				await DownloadImage(episode.Thumb, localPath, $"The thumbnail of {episode.Slug}");
 		}
 
-		public async Task<ProviderID> Validate(ProviderID provider, bool alwaysDownload)
+		public async Task Validate(ProviderID provider, bool alwaysDownload)
 		{
 			if (provider.Logo == null)
-				return provider;
+				return;
 
 			string root = _config.GetValue<string>("providerPath");
 			string localPath = Path.Combine(root, provider.Slug + ".jpg");
@@ -118,7 +106,6 @@ namespace Kyoo.Controllers
 			Directory.CreateDirectory(root);
 			if (alwaysDownload || !File.Exists(localPath))
 				await DownloadImage(provider.Logo, localPath, $"The logo of {provider.Slug}");
-			return provider;
 		}
 
 		public Task<string> GetShowBackdrop(Show show)

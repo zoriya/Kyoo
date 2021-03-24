@@ -16,7 +16,6 @@ namespace Kyoo.Controllers
 		public Task<ICollection<string>> ListFiles([NotNull] string path);
 
 		public Task<bool> Exists([NotNull] string path);
-		// TODO replace every use of System.IO with this to allow custom paths (like uptobox://path)
 		// TODO find a way to handle Transmux/Transcode with this system.
 
 		public string GetExtraDirectory(Show show);
