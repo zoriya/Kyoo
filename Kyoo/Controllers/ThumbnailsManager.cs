@@ -21,6 +21,8 @@ namespace Kyoo.Controllers
 			_files = files;
 			_peoplePath = Path.GetFullPath(configuration.GetValue<string>("peoplePath"));
 			_providerPath = Path.GetFullPath(configuration.GetValue<string>("providerPath"));
+			Directory.CreateDirectory(_peoplePath);
+			Directory.CreateDirectory(_providerPath);
 		}
 
 		private static async Task DownloadImage(string url, string localPath, string what)
@@ -149,10 +151,9 @@ namespace Kyoo.Controllers
 
 		public Task<string> GetEpisodeThumb(Episode episode)
 		{
-			return Task.FromResult(Path.Combine(
-				_files.GetExtraDirectory(episode),
-				"Thumbnails",
-				$"{Path.GetFileNameWithoutExtension(episode.Path)}.jpg"));
+			string dir = Path.Combine(_files.GetExtraDirectory(episode), "Thumbnails");
+			Directory.CreateDirectory(dir);
+			return Task.FromResult(Path.Combine(dir, $"{Path.GetFileNameWithoutExtension(episode.Path)}.jpg"));
 		}
 
 		public Task<string> GetPeoplePoster(People people)
@@ -160,7 +161,7 @@ namespace Kyoo.Controllers
 			if (people == null)
 				throw new ArgumentNullException(nameof(people));
 			string thumbPath = Path.GetFullPath(Path.Combine(_peoplePath, $"{people.Slug}.jpg"));
-			if (!thumbPath.StartsWith(_peoplePath) || File.Exists(thumbPath))
+			if (!thumbPath.StartsWith(_peoplePath))
 				return Task.FromResult<string>(null);
 			return Task.FromResult(thumbPath);
 		}
@@ -170,6 +171,8 @@ namespace Kyoo.Controllers
 			if (provider == null)
 				throw new ArgumentNullException(nameof(provider));
 			string thumbPath = Path.GetFullPath(Path.Combine(_providerPath, $"{provider.Slug}.jpg"));
+			if (!thumbPath.StartsWith(_providerPath))
+				return Task.FromResult<string>(null);
 			return Task.FromResult(thumbPath.StartsWith(_providerPath) ? thumbPath : null);
 		}
 	}
