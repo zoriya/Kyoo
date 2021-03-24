@@ -10,14 +10,12 @@ namespace Kyoo.Controllers
 {
 	public class ThumbnailsManager : IThumbnailsManager
 	{
-		private readonly IConfiguration _config;
 		private readonly IFileManager _files;
 		private readonly string _peoplePath;
 		private readonly string _providerPath;
 
 		public ThumbnailsManager(IConfiguration configuration, IFileManager files)
 		{
-			_config = configuration;
 			_files = files;
 			_peoplePath = Path.GetFullPath(configuration.GetValue<string>("peoplePath"));
 			_providerPath = Path.GetFullPath(configuration.GetValue<string>("providerPath"));
@@ -67,10 +65,9 @@ namespace Kyoo.Controllers
 		{
 			if (people == null)
 				throw new ArgumentNullException(nameof(people));
-			string root = _config.GetValue<string>("peoplePath");
-			string localPath = Path.Combine(root, people.Slug + ".jpg");
-			
-			Directory.CreateDirectory(root);
+			if (people.Poster == null)
+				return;
+			string localPath = await GetPeoplePoster(people);
 			if (alwaysDownload || !File.Exists(localPath))
 				await DownloadImage(people.Poster, localPath, $"The profile picture of {people.Name}");
 		}
@@ -100,10 +97,7 @@ namespace Kyoo.Controllers
 			if (provider.Logo == null)
 				return;
 
-			string root = _config.GetValue<string>("providerPath");
-			string localPath = Path.Combine(root, provider.Slug + ".jpg");
-			
-			Directory.CreateDirectory(root);
+			string localPath = await GetProviderLogo(provider);
 			if (alwaysDownload || !File.Exists(localPath))
 				await DownloadImage(provider.Logo, localPath, $"The logo of {provider.Slug}");
 		}
@@ -157,9 +151,7 @@ namespace Kyoo.Controllers
 		{
 			if (provider == null)
 				throw new ArgumentNullException(nameof(provider));
-			string thumbPath = Path.GetFullPath(Path.Combine(_providerPath, $"{provider.Slug}.jpg"));
-			if (!thumbPath.StartsWith(_providerPath))
-				return Task.FromResult<string>(null);
+			string thumbPath = Path.GetFullPath(Path.Combine(_providerPath, $"{provider.Slug}.png"));
 			return Task.FromResult(thumbPath.StartsWith(_providerPath) ? thumbPath : null);
 		}
 	}

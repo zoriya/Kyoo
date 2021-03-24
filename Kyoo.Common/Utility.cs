@@ -91,18 +91,18 @@ namespace Kyoo
 			}
 		}
 
-		public static IEnumerable<T> MergeLists<T>(IEnumerable<T> first,
+		public static T[] MergeLists<T>(IEnumerable<T> first,
 			IEnumerable<T> second, 
 			Func<T, T, bool> isEqual = null)
 		{
 			if (first == null)
-				return second;
+				return second.ToArray();
 			if (second == null)
-				return first;
+				return first.ToArray();
 			if (isEqual == null)
-				return first.Concat(second).ToList();
+				return first.Concat(second).ToArray();
 			List<T> list = first.ToList();
-			return list.Concat(second.Where(x => !list.Any(y => isEqual(x, y))));
+			return list.Concat(second.Where(x => !list.Any(y => isEqual(x, y)))).ToArray();
 		}
 
 		public static T Assign<T>(T first, T second)
@@ -183,7 +183,7 @@ namespace Kyoo
 				{
 					property.SetValue(first, RunGenericMethod<object>(
 						typeof(Utility), 
-						"MergeLists",
+						nameof(MergeLists),
 						GetEnumerableType(property.PropertyType), 
 						oldValue, newValue, null));
 				}
@@ -384,18 +384,21 @@ namespace Kyoo
 				.IfEmpty(() => throw new NullReferenceException($"A method named {name} with " +
 				                                                $"{args.Length} arguments and {generics.Length} generic " +
 				                                                $"types could not be found on {type.Name}."))
-				.Where(x =>
-				{
-					int i = 0;
-					return x.GetGenericArguments().All(y => y.IsAssignableFrom(generics[i++]));
-				})
-				.IfEmpty(() => throw new NullReferenceException($"No method {name} match the generics specified."))
-				.Where(x =>
-				{
-					int i = 0;
-					return x.GetParameters().All(y => y.ParameterType == args[i++].GetType());
-				})
-				.IfEmpty(() => throw new NullReferenceException($"No method {name} match the parameters's types."))
+				// TODO this won't work but I don't know why.
+				// .Where(x =>
+				// {
+				// 	int i = 0;
+				// 	return x.GetGenericArguments().All(y => y.IsAssignableFrom(generics[i++]));
+				// })
+				// .IfEmpty(() => throw new NullReferenceException($"No method {name} match the generics specified."))
+				
+				// TODO this won't work for Type<T> because T is specified in arguments but not in the parameters type.
+				// .Where(x =>
+				// {
+				// 	int i = 0;
+				// 	return x.GetParameters().All(y => y.ParameterType.IsInstanceOfType(args[i++]));
+				// })
+				// .IfEmpty(() => throw new NullReferenceException($"No method {name} match the parameters's types."))
 				.Take(2)
 				.ToArray();
 
