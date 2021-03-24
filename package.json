@@ -32,7 +32,7 @@
         "detect-browser": "^5.2.0",
         "hls.js": "^0.14.17",
         "jquery": "^3.6.0",
-        "libass-wasm": "^4.0.0",
+        "libass-wasm": "https://codeload.github.com/jellyfin/JavascriptSubtitlesOctopus/tar.gz/4.0.0-jf-smarttv",
         "ngx-infinite-scroll": "^10.0.1",
         "popper.js": "^1.16.1",
         "rxjs": "^6.6.6",

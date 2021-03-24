@@ -485,7 +485,8 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 					this.subtitlesManager = new SubtitlesOctopus({
 						video: this.player,
 						subUrl: `subtitle/${subtitle.slug}`,
-						fonts: Object.values(fonts)
+						fonts: Object.values(fonts),
+						renderMode: "fast"
 					});
 				}
 				else
