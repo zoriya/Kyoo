@@ -12,7 +12,7 @@ namespace Kyoo.Models
 		Video = 1,
 		Audio = 2,
 		Subtitle = 3,
-		Font = 4
+		Attachment = 4
 	}
 
 	namespace Watch
@@ -25,8 +25,8 @@ namespace Kyoo.Models
 			public string Codec { get; set; }
 			[MarshalAs(UnmanagedType.I1)] public bool isDefault;
 			[MarshalAs(UnmanagedType.I1)] public bool isForced;
-			[JsonIgnore] public string Path { get; set; }
-			[JsonIgnore] public StreamType Type { get; set; }
+			[SerializeIgnore] public string Path { get; set; }
+			[SerializeIgnore] public StreamType Type { get; set; }
 			
 			public Stream() {}
 			
@@ -56,8 +56,9 @@ namespace Kyoo.Models
 
 	public class Track : Stream, IResource
 	{
-		[JsonIgnore] public int ID { get; set; }
-		[JsonIgnore] public int EpisodeID { get; set; }
+		public int ID { get; set; }
+		[SerializeIgnore] public int EpisodeID { get; set; }
+		public int TrackIndex { get; set; }
 		public bool IsDefault
 		{
 			get => isDefault;
@@ -76,7 +77,7 @@ namespace Kyoo.Models
 				string language = GetLanguage(Language);
 
 				if (language == null)
-					return $"Unknown Language (id: {ID.ToString()})";
+					return $"Unknown (index: {TrackIndex})";
 				CultureInfo info = CultureInfo.GetCultures(CultureTypes.NeutralCultures)
 					.FirstOrDefault(x => x.ThreeLetterISOLanguageName == language);
 				string name = info?.EnglishName ?? language;
@@ -94,31 +95,37 @@ namespace Kyoo.Models
 		{
 			get
 			{
-				if (Type != StreamType.Subtitle)
-					return null;
-
-				string slug = string.IsNullOrEmpty(Language) 
-					? ID.ToString()
-					: $"{Episode.Slug}.{Language}{(IsForced ? "-forced" : "")}";
-				switch (Codec)
+				string type = Type switch
 				{
-					case "ass":
-						slug += ".ass";
-						break;
-					case "subrip":
-						slug += ".srt";
-						break;
-				}
-				return slug;
+					StreamType.Subtitle => "",
+					StreamType.Video => "video.",
+					StreamType.Audio => "audio.",
+					StreamType.Attachment => "font.",
+					_ => ""
+				};
+				string index = TrackIndex != 0 ? $"-{TrackIndex}" : string.Empty;
+				string codec = Codec switch
+				{
+					"subrip" => ".srt",
+					{} x => $".{x}"
+				};
+				return $"{Episode.Slug}.{type}{Language}{index}{(IsForced ? "-forced" : "")}{codec}";
 			}
 		}
 
-		[JsonIgnore] public bool IsExternal { get; set; }
-		[JsonIgnore] public virtual Episode Episode { get; set; }
+		public bool IsExternal { get; set; }
+		[LoadableRelation(nameof(EpisodeID))] public virtual Episode Episode { get; set; }
 		
 		public Track() { }
 
-		public Track(StreamType type, string title, string language, bool isDefault, bool isForced, string codec, bool isExternal, string path)
+		public Track(StreamType type, 
+			string title, 
+			string language, 
+			bool isDefault,
+			bool isForced,
+			string codec, 
+			bool isExternal, 
+			string path)
 			: base(title, language, codec, isDefault, isForced, path, type)
 		{
 			IsExternal = isExternal;
@@ -136,6 +143,7 @@ namespace Kyoo.Models
 			return mkvLanguage switch
 			{
 				"fre" => "fra",
+				null => "und",
 				_ => mkvLanguage
 			};
 		}

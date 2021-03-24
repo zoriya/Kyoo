@@ -5,6 +5,6 @@ namespace Kyoo.Models
 	public interface IPlugin
 	{
 		public string Name { get; }
-		public IEnumerable<ITask> Tasks { get; }
+		public ICollection<ITask> Tasks { get; }
 	}
 }

@@ -36,6 +36,7 @@ namespace Kyoo.Controllers
 			_providers.Dispose();
 			if (_shows.IsValueCreated)
 				_shows.Value.Dispose();
+			GC.SuppressFinalize(this);
 		}
 
 		public override async ValueTask DisposeAsync()
@@ -49,10 +50,11 @@ namespace Kyoo.Controllers
 				await _shows.Value.DisposeAsync();
 		}
 
-		public async Task<ICollection<People>> Search(string query)
+		public override async Task<ICollection<People>> Search(string query)
 		{
 			return await _database.People
 				.Where(people => EF.Functions.ILike(people.Name, $"%{query}%"))
+				.OrderBy(DefaultSort)
 				.Take(20)
 				.ToListAsync();
 		}
@@ -61,10 +63,7 @@ namespace Kyoo.Controllers
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
-			if (obj.ExternalIDs != null)
-				foreach (MetadataID entry in obj.ExternalIDs)
-					_database.Entry(entry).State = EntityState.Added;
-			
+			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Added);
 			await _database.SaveChangesAsync($"Trying to insert a duplicated people (slug {obj.Slug} already exists).");
 			return obj;
 		}
@@ -72,25 +71,45 @@ namespace Kyoo.Controllers
 		protected override async Task Validate(People resource)
 		{
 			await base.Validate(resource);
-			
-			if (resource.ExternalIDs != null)
-				foreach (MetadataID link in resource.ExternalIDs)
-					if (ShouldValidate(link))
-						link.Provider = await _providers.CreateIfNotExists(link.Provider, true);
+			await resource.ExternalIDs.ForEachAsync(async id =>
+			{
+				id.Provider = await _providers.CreateIfNotExists(id.Provider, true);
+				id.ProviderID = id.Provider.ID;
+				_database.Entry(id.Provider).State = EntityState.Detached;
+			});
+			await resource.Roles.ForEachAsync(async role =>
+			{
+				role.Show = await _shows.Value.CreateIfNotExists(role.Show, true);
+				role.ShowID = role.Show.ID;
+				_database.Entry(role.Show).State = EntityState.Detached;
+			});
 		}
-		
+
+		protected override async Task EditRelations(People resource, People changed, bool resetOld)
+		{
+			if (changed.Roles != null || resetOld)
+			{
+				await Database.Entry(resource).Collection(x => x.Roles).LoadAsync();
+				resource.Roles = changed.Roles;
+			}
+
+			if (changed.ExternalIDs != null || resetOld)
+			{
+				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
+				resource.ExternalIDs = changed.ExternalIDs;
+				
+			}
+			await base.EditRelations(resource, changed, resetOld);
+		}
+
 		public override async Task Delete(People obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 			
 			_database.Entry(obj).State = EntityState.Deleted;
-			if (obj.ExternalIDs != null)
-				foreach (MetadataID entry in obj.ExternalIDs)
-					_database.Entry(entry).State = EntityState.Deleted;
-			if (obj.Roles != null)
-				foreach (PeopleRole link in obj.Roles)
-					_database.Entry(link).State = EntityState.Deleted;
+			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Deleted);
+			obj.Roles.ForEach(x => _database.Entry(x).State = EntityState.Deleted);
 			await _database.SaveChangesAsync();
 		}
 
@@ -99,7 +118,9 @@ namespace Kyoo.Controllers
 			Sort<PeopleRole> sort = default, 
 			Pagination limit = default)
 		{
-			ICollection<PeopleRole> people = await ApplyFilters(_database.PeopleRoles.Where(x => x.ShowID == showID),
+			ICollection<PeopleRole> people = await ApplyFilters(_database.PeopleRoles
+					.Where(x => x.ShowID == showID)
+					.Include(x => x.People),
 				id => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id),
 				x => x.People.Name,
 				where,
@@ -107,6 +128,8 @@ namespace Kyoo.Controllers
 				limit);
 			if (!people.Any() && await _shows.Value.Get(showID) == null)
 				throw new ItemNotFound();
+			foreach (PeopleRole role in people)
+				role.ForPeople = true;
 			return people;
 		}
 
@@ -115,7 +138,10 @@ namespace Kyoo.Controllers
 			Sort<PeopleRole> sort = default, 
 			Pagination limit = default)
 		{
-			ICollection<PeopleRole> people = await ApplyFilters(_database.PeopleRoles.Where(x => x.Show.Slug == showSlug),
+			ICollection<PeopleRole> people = await ApplyFilters(_database.PeopleRoles
+					.Where(x => x.Show.Slug == showSlug)
+					.Include(x => x.People)
+					.Include(x => x.Show),
 				id => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id),
 				x => x.People.Name,
 				where,
@@ -123,18 +149,21 @@ namespace Kyoo.Controllers
 				limit);
 			if (!people.Any() && await _shows.Value.Get(showSlug) == null)
 				throw new ItemNotFound();
+			foreach (PeopleRole role in people)
+				role.ForPeople = true;
 			return people;
 		}
 		
-		public async Task<ICollection<ShowRole>> GetFromPeople(int peopleID,
-			Expression<Func<ShowRole, bool>> where = null,
-			Sort<ShowRole> sort = default, 
+		public async Task<ICollection<PeopleRole>> GetFromPeople(int peopleID,
+			Expression<Func<PeopleRole, bool>> where = null,
+			Sort<PeopleRole> sort = default, 
 			Pagination limit = default)
 		{
-			ICollection<ShowRole> roles = await ApplyFilters(_database.PeopleRoles.Where(x => x.PeopleID == peopleID)
-					.Select(ShowRole.FromPeopleRole),
-				async id => new ShowRole(await _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id)),
-				x => x.Title,
+			ICollection<PeopleRole> roles = await ApplyFilters(_database.PeopleRoles
+					.Where(x => x.PeopleID == peopleID)
+					.Include(x => x.Show),
+				id => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id),
+				x => x.Show.Title,
 				where,
 				sort,
 				limit);
@@ -143,15 +172,16 @@ namespace Kyoo.Controllers
 			return roles;
 		}
 		
-		public async Task<ICollection<ShowRole>> GetFromPeople(string slug,
-			Expression<Func<ShowRole, bool>> where = null,
-			Sort<ShowRole> sort = default, 
+		public async Task<ICollection<PeopleRole>> GetFromPeople(string slug,
+			Expression<Func<PeopleRole, bool>> where = null,
+			Sort<PeopleRole> sort = default, 
 			Pagination limit = default)
 		{
-			ICollection<ShowRole> roles = await ApplyFilters(_database.PeopleRoles.Where(x => x.People.Slug == slug)
-					.Select(ShowRole.FromPeopleRole),
-				async id => new ShowRole(await _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id)),
-				x => x.Title,
+			ICollection<PeopleRole> roles = await ApplyFilters(_database.PeopleRoles
+					.Where(x => x.People.Slug == slug)
+					.Include(x => x.Show),
+				id => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id),
+				x => x.Show.Title,
 				where,
 				sort,
 				limit);

@@ -9,8 +9,8 @@ namespace Kyoo.Models
 		public int ID { get; set; }
 		public string Slug { get; set; }
 		public string Title { get; set; }
-		[EditableRelation] public IEnumerable<string> Aliases { get; set; }
-		[JsonIgnore] public string Path { get; set; }
+		[EditableRelation] public string[] Aliases { get; set; }
+		[SerializeIgnore] public string Path { get; set; }
 		public string Overview { get; set; }
 		public Status? Status { get; set; }
 		public string TrailerUrl { get; set; }
@@ -18,23 +18,30 @@ namespace Kyoo.Models
 		public int? StartYear { get; set; }
 		public int? EndYear { get; set; }
 
-		public string Poster { get; set; }
-		public string Logo { get; set; }
-		public string Backdrop { get; set; }
+		[SerializeAs("{HOST}/api/shows/{Slug}/poster")] public string Poster { get; set; }
+		[SerializeAs("{HOST}/api/shows/{Slug}/logo")] public string Logo { get; set; }
+		[SerializeAs("{HOST}/api/shows/{Slug}/backdrop")] public string Backdrop { get; set; }
 
 		public bool IsMovie { get; set; }
 
-		[EditableRelation] public virtual IEnumerable<MetadataID> ExternalIDs { get; set; }
+		[EditableRelation] [LoadableRelation] public virtual ICollection<MetadataID> ExternalIDs { get; set; }
 		
 		
-		[JsonIgnore] public int? StudioID { get; set; }
-		[EditableRelation] [JsonReadOnly] public virtual Studio Studio { get; set; }
-		[EditableRelation] [JsonReadOnly] public virtual IEnumerable<Genre> Genres { get; set; }
-		[EditableRelation] [JsonReadOnly] public virtual IEnumerable<PeopleRole> People { get; set; }
-		[JsonIgnore] public virtual IEnumerable<Season> Seasons { get; set; }
-		[JsonIgnore] public virtual IEnumerable<Episode> Episodes { get; set; }
-		[JsonIgnore] public virtual IEnumerable<Library> Libraries { get; set; }
-		[JsonIgnore] public virtual IEnumerable<Collection> Collections { get; set; }
+		[SerializeIgnore] public int? StudioID { get; set; }
+		[LoadableRelation(nameof(StudioID))] [EditableRelation] public virtual Studio Studio { get; set; }
+		[LoadableRelation] [EditableRelation] public virtual ICollection<Genre> Genres { get; set; }
+		[LoadableRelation] [EditableRelation] public virtual ICollection<PeopleRole> People { get; set; }
+		[LoadableRelation] public virtual ICollection<Season> Seasons { get; set; }
+		[LoadableRelation] public virtual ICollection<Episode> Episodes { get; set; }
+		[LoadableRelation] public virtual ICollection<Library> Libraries { get; set; }
+		[LoadableRelation] public virtual ICollection<Collection> Collections { get; set; }
+		
+#if ENABLE_INTERNAL_LINKS
+		[SerializeIgnore] public virtual ICollection<Link<Library, Show>> LibraryLinks { get; set; }
+		[SerializeIgnore] public virtual ICollection<Link<Collection, Show>> CollectionLinks { get; set; }
+		[SerializeIgnore] public virtual ICollection<Link<Show, Genre>> GenreLinks { get; set; }
+#endif
+
 
 		public Show() { }
 
@@ -51,15 +58,15 @@ namespace Kyoo.Models
 		{
 			Slug = slug;
 			Title = title;
-			Aliases = aliases;
+			Aliases = aliases?.ToArray();
 			Path = path;
 			Overview = overview;
 			TrailerUrl = trailerUrl;
-			Genres = genres;
+			Genres = genres?.ToArray();
 			Status = status;
 			StartYear = startYear;
 			EndYear = endYear;
-			ExternalIDs = externalIDs;
+			ExternalIDs = externalIDs?.ToArray();
 		}
 
 		public Show(string slug,
@@ -78,7 +85,7 @@ namespace Kyoo.Models
 		{
 			Slug = slug;
 			Title = title;
-			Aliases = aliases;
+			Aliases = aliases?.ToArray();
 			Path = path;
 			Overview = overview;
 			TrailerUrl = trailerUrl;
@@ -88,7 +95,7 @@ namespace Kyoo.Models
 			Poster = poster;
 			Logo = logo;
 			Backdrop = backdrop;
-			ExternalIDs = externalIDs;
+			ExternalIDs = externalIDs?.ToArray();
 		}
 
 		public string GetID(string provider)

@@ -4,18 +4,16 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
-using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
-	public class LibraryRepository : LocalRepository<Library, LibraryDE>, ILibraryRepository
+	public class LibraryRepository : LocalRepository<Library>, ILibraryRepository
 	{
 		private bool _disposed;
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
-		protected override Expression<Func<LibraryDE, object>> DefaultSort => x => x.ID;
+		protected override Expression<Func<Library, object>> DefaultSort => x => x.ID;
 
 
 		public LibraryRepository(DatabaseContext database, IProviderRepository providers)
@@ -32,6 +30,7 @@ namespace Kyoo.Controllers
 			_disposed = true;
 			_database.Dispose();
 			_providers.Dispose();
+			GC.SuppressFinalize(this);
 		}
 
 		public override async ValueTask DisposeAsync()
@@ -47,23 +46,30 @@ namespace Kyoo.Controllers
 		{
 			return await _database.Libraries
 				.Where(x => EF.Functions.ILike(x.Name, $"%{query}%"))
+				.OrderBy(DefaultSort)
 				.Take(20)
-				.ToListAsync<Library>();
+				.ToListAsync();
 		}
 
-		public override async Task<LibraryDE> Create(LibraryDE obj)
+		public override async Task<Library> Create(Library obj)
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
-			if (obj.ProviderLinks != null)
-				foreach (ProviderLink entry in obj.ProviderLinks)
-					_database.Entry(entry).State = EntityState.Added;
-			
+			obj.ProviderLinks = obj.Providers?.Select(x => Link.Create(obj, x)).ToArray();
+			obj.ProviderLinks.ForEach(x => _database.Entry(x).State = EntityState.Added);
 			await _database.SaveChangesAsync($"Trying to insert a duplicated library (slug {obj.Slug} already exists).");
 			return obj;
 		}
 
-		protected override async Task Validate(LibraryDE resource)
+		protected override async Task Validate(Library resource)
+		{
+			await base.Validate(resource);
+			resource.Providers = await resource.Providers
+				.SelectAsync(x => _providers.CreateIfNotExists(x, true))
+				.ToListAsync();
+		}
+
+		protected override async Task EditRelations(Library resource, Library changed, bool resetOld)
 		{
 			if (string.IsNullOrEmpty(resource.Slug))
 				throw new ArgumentException("The library's slug must be set and not empty");
@@ -71,27 +77,21 @@ namespace Kyoo.Controllers
 				throw new ArgumentException("The library's name must be set and not empty");
 			if (resource.Paths == null || !resource.Paths.Any())
 				throw new ArgumentException("The library should have a least one path.");
-			
-			await base.Validate(resource);
-			
-			if (resource.ProviderLinks != null)
-				foreach (ProviderLink link in resource.ProviderLinks)
-					if (ShouldValidate(link))
-						link.Child = await _providers.CreateIfNotExists(link.Child, true);
+
+			if (changed.Providers != null || resetOld)
+			{
+				await Validate(changed);
+				await Database.Entry(resource).Collection(x => x.Providers).LoadAsync();
+				resource.Providers = changed.Providers;
+			}
 		}
 
-		public override async Task Delete(LibraryDE obj)
+		public override async Task Delete(Library obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 			
 			_database.Entry(obj).State = EntityState.Deleted;
-			if (obj.ProviderLinks != null)
-				foreach (ProviderLink entry in obj.ProviderLinks)
-					_database.Entry(entry).State = EntityState.Deleted;
-			if (obj.Links != null)
-				foreach (LibraryLink entry in obj.Links)
-					_database.Entry(entry).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
 		}
 	}

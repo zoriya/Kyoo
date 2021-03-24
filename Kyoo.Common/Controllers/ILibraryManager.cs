@@ -35,6 +35,7 @@ namespace Kyoo.Controllers
 		Task<Track> GetTrack(int id);
 		Task<Studio> GetStudio(int id);
 		Task<People> GetPeople(int id);
+		Task<ProviderID> GetProvider(int id);
 		
 		// Get by slug
 		Task<Library> GetLibrary(string slug);
@@ -49,6 +50,7 @@ namespace Kyoo.Controllers
 		Task<Genre> GetGenre(string slug);
 		Task<Studio> GetStudio(string slug);
 		Task<People> GetPeople(string slug);
+		Task<ProviderID> GetProvider(string slug);
 		
 		// Get by predicate
 		Task<Library> GetLibrary(Expression<Func<Library, bool>> where);
@@ -60,7 +62,20 @@ namespace Kyoo.Controllers
 		Task<Genre> GetGenre(Expression<Func<Genre, bool>> where);
 		Task<Studio> GetStudio(Expression<Func<Studio, bool>> where);
 		Task<People> GetPerson(Expression<Func<People, bool>> where);
-		
+
+		Task<T> Load<T, T2>([NotNull] T obj, Expression<Func<T, T2>> member)
+			where T : class, IResource
+			where T2 : class, IResource, new();
+
+		Task<T> Load<T, T2>([NotNull] T obj, Expression<Func<T, ICollection<T2>>> member)
+			where T : class, IResource
+			where T2 : class, new();
+
+		Task<T> Load<T>([NotNull] T obj, string memberName)
+			where T : class, IResource;
+
+		Task Load([NotNull] IResource obj, string memberName);
+
 		// Library Items relations
 		Task<ICollection<LibraryItem>> GetItemsFromLibrary(int id,
 			Expression<Func<LibraryItem, bool>> where = null,
@@ -104,25 +119,25 @@ namespace Kyoo.Controllers
 		) => GetPeopleFromShow(showSlug, where, new Sort<PeopleRole>(sort), limit);
 		
 		// Show Role relations
-		Task<ICollection<ShowRole>> GetRolesFromPeople(int showID,
-			Expression<Func<ShowRole, bool>> where = null, 
-			Sort<ShowRole> sort = default,
+		Task<ICollection<PeopleRole>> GetRolesFromPeople(int showID,
+			Expression<Func<PeopleRole, bool>> where = null, 
+			Sort<PeopleRole> sort = default,
 			Pagination limit = default);
-		Task<ICollection<ShowRole>> GetRolesFromPeople(int showID,
-			[Optional] Expression<Func<ShowRole, bool>> where,
-			Expression<Func<ShowRole, object>> sort,
+		Task<ICollection<PeopleRole>> GetRolesFromPeople(int showID,
+			[Optional] Expression<Func<PeopleRole, bool>> where,
+			Expression<Func<PeopleRole, object>> sort,
 			Pagination limit = default
-		) => GetRolesFromPeople(showID, where, new Sort<ShowRole>(sort), limit);
+		) => GetRolesFromPeople(showID, where, new Sort<PeopleRole>(sort), limit);
 		
-		Task<ICollection<ShowRole>> GetRolesFromPeople(string showSlug,
-			Expression<Func<ShowRole, bool>> where = null, 
-			Sort<ShowRole> sort = default,
+		Task<ICollection<PeopleRole>> GetRolesFromPeople(string showSlug,
+			Expression<Func<PeopleRole, bool>> where = null, 
+			Sort<PeopleRole> sort = default,
 			Pagination limit = default);
-		Task<ICollection<ShowRole>> GetRolesFromPeople(string showSlug,
-			[Optional] Expression<Func<ShowRole, bool>> where,
-			Expression<Func<ShowRole, object>> sort,
+		Task<ICollection<PeopleRole>> GetRolesFromPeople(string showSlug,
+			[Optional] Expression<Func<PeopleRole, bool>> where,
+			Expression<Func<PeopleRole, object>> sort,
 			Pagination limit = default
-		) => GetRolesFromPeople(showSlug, where, new Sort<ShowRole>(sort), limit);
+		) => GetRolesFromPeople(showSlug, where, new Sort<PeopleRole>(sort), limit);
 
 		// Helpers
 		Task AddShowLink(int showID, int? libraryID, int? collectionID);
@@ -236,10 +251,9 @@ namespace Kyoo.Controllers
 		Task<Genre> EditGenre(Genre genre, bool resetOld);
 		Task<Studio> EditStudio(Studio studio, bool resetOld);
 		Task<People> EditPeople(People people, bool resetOld);
-
 		
 		// Delete values
-		Task DelteLibrary(Library library);
+		Task DeleteLibrary(Library library);
 		Task DeleteCollection(Collection collection);
 		Task DeleteShow(Show show);
 		Task DeleteSeason(Season season);
@@ -250,7 +264,7 @@ namespace Kyoo.Controllers
 		Task DeletePeople(People people);
 		
 		//Delete by slug
-		Task DelteLibrary(string slug);
+		Task DeleteLibrary(string slug);
 		Task DeleteCollection(string slug);
 		Task DeleteShow(string slug);
 		Task DeleteSeason(string slug);
@@ -261,7 +275,7 @@ namespace Kyoo.Controllers
 		Task DeletePeople(string slug);
 		
 		//Delete by id
-		Task DelteLibrary(int id);
+		Task DeleteLibrary(int id);
 		Task DeleteCollection(int id);
 		Task DeleteShow(int id);
 		Task DeleteSeason(int id);

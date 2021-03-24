@@ -72,6 +72,7 @@ namespace Kyoo.Tasks
 		{
 			if (thumbs)
 				await _thumbnails!.Validate(show, true);
+			await _library.Load(show, x => x.Seasons);
 			foreach (Season season in show.Seasons)
 			{
 				if (token.IsCancellationRequested)
@@ -84,6 +85,7 @@ namespace Kyoo.Tasks
 		{
 			if (thumbs)
 				await _thumbnails!.Validate(season, true);
+			await _library.Load(season, x => x.Episodes);
 			foreach (Episode episode in season.Episodes)
 			{
 				if (token.IsCancellationRequested)
@@ -98,10 +100,11 @@ namespace Kyoo.Tasks
 				await _thumbnails!.Validate(episode, true);
 			if (subs)
 			{
-				// TODO this doesn't work. 
-				IEnumerable<Track> tracks = (await _transcoder!.ExtractInfos(episode.Path))
-					.Where(x => x.Type != StreamType.Font);
-				episode.Tracks = tracks;
+				await _library.Load(episode, x => x.Tracks);
+				episode.Tracks = (await _transcoder!.ExtractInfos(episode, true))
+					.Where(x => x.Type != StreamType.Attachment)
+					.Concat(episode.Tracks.Where(x => x.IsExternal))
+					.ToList();
 				await _library.EditEpisode(episode, false);
 			}
 		}

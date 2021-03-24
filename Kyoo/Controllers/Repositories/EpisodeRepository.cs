@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
-using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers
@@ -15,13 +14,21 @@ namespace Kyoo.Controllers
 		private bool _disposed;
 		private readonly DatabaseContext _database;
 		private readonly IProviderRepository _providers;
+		private readonly IShowRepository _shows;
+		private readonly ITrackRepository _tracks;
 		protected override Expression<Func<Episode, object>> DefaultSort => x => x.EpisodeNumber;
 
 
-		public EpisodeRepository(DatabaseContext database, IProviderRepository providers) : base(database)
+		public EpisodeRepository(DatabaseContext database, 
+			IProviderRepository providers,
+			IShowRepository shows,
+			ITrackRepository tracks) 
+			: base(database)
 		{
 			_database = database;
 			_providers = providers;
+			_shows = shows;
+			_tracks = tracks;
 		}
 
 
@@ -32,6 +39,8 @@ namespace Kyoo.Controllers
 			_disposed = true;
 			_database.Dispose();
 			_providers.Dispose();
+			_shows.Dispose();
+			GC.SuppressFinalize(this);
 		}
 
 		public override async ValueTask DisposeAsync()
@@ -41,11 +50,20 @@ namespace Kyoo.Controllers
 			_disposed = true;
 			await _database.DisposeAsync();
 			await _providers.DisposeAsync();
+			await _shows.DisposeAsync();
+		}
+
+		public override async Task<Episode> Get(int id)
+		{
+			Episode ret = await base.Get(id);
+			if (ret != null)
+				ret.ShowSlug = await _shows.GetSlug(ret.ShowID);
+			return ret;
 		}
 
 		public override Task<Episode> Get(string slug)
 		{
-			Match match = Regex.Match(slug, @"(?<show>.*)-s(?<season>\d*)-e(?<episode>\d*)");
+			Match match = Regex.Match(slug, @"(?<show>.*)-s(?<season>\d*)e(?<episode>\d*)");
 			
 			if (!match.Success)
 				return _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == slug);
@@ -53,76 +71,138 @@ namespace Kyoo.Controllers
 				int.Parse(match.Groups["season"].Value), 
 				int.Parse(match.Groups["episode"].Value));
 		}
-		
-		public Task<Episode> Get(string showSlug, int seasonNumber, int episodeNumber)
+
+		public override async Task<Episode> Get(Expression<Func<Episode, bool>> predicate)
 		{
-			return _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == showSlug 
-			                                                         && x.SeasonNumber == seasonNumber
-			                                                         && x.EpisodeNumber == episodeNumber);
+			Episode ret = await base.Get(predicate);
+			if (ret != null)
+				ret.ShowSlug = await _shows.GetSlug(ret.ShowID);
+			return ret;
 		}
 
-		public Task<Episode> Get(int showID, int seasonNumber, int episodeNumber)
+		public async Task<Episode> Get(string showSlug, int seasonNumber, int episodeNumber)
 		{
-			return _database.Episodes.FirstOrDefaultAsync(x => x.ShowID == showID 
-			                                                   && x.SeasonNumber == seasonNumber
-			                                                   && x.EpisodeNumber == episodeNumber);
+			Episode ret = await _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == showSlug 
+			                                                                && x.SeasonNumber == seasonNumber 
+			                                                                && x.EpisodeNumber == episodeNumber);
+			if (ret != null)
+				ret.ShowSlug = showSlug;
+			return ret;
 		}
 
-		public Task<Episode> Get(int seasonID, int episodeNumber)
+		public async Task<Episode> Get(int showID, int seasonNumber, int episodeNumber)
 		{
-			return _database.Episodes.FirstOrDefaultAsync(x => x.SeasonID == seasonID
-			                                                   && x.EpisodeNumber == episodeNumber);
+			Episode ret = await _database.Episodes.FirstOrDefaultAsync(x => x.ShowID == showID 
+			                                                                && x.SeasonNumber == seasonNumber 
+			                                                                && x.EpisodeNumber == episodeNumber);
+			if (ret != null)
+				ret.ShowSlug = await _shows.GetSlug(showID);
+			return ret;
 		}
 
-		public Task<Episode> GetAbsolute(int showID, int absoluteNumber)
+		public async Task<Episode> Get(int seasonID, int episodeNumber)
 		{
-			return _database.Episodes.FirstOrDefaultAsync(x => x.ShowID == showID
-			                                                   && x.AbsoluteNumber == absoluteNumber);
+			Episode ret = await _database.Episodes.FirstOrDefaultAsync(x => x.SeasonID == seasonID 
+			                                                                && x.EpisodeNumber == episodeNumber);
+			if (ret != null)
+				ret.ShowSlug = await _shows.GetSlug(ret.ShowID);
+			return ret;
 		}
 
-		public Task<Episode> GetAbsolute(string showSlug, int absoluteNumber)
+		public async Task<Episode> GetAbsolute(int showID, int absoluteNumber)
 		{
-			return _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == showSlug
-			                                                   && x.AbsoluteNumber == absoluteNumber);
+			Episode ret = await _database.Episodes.FirstOrDefaultAsync(x => x.ShowID == showID 
+			                                                                && x.AbsoluteNumber == absoluteNumber);
+			if (ret != null)
+				ret.ShowSlug = await _shows.GetSlug(showID);
+			return ret;
 		}
 
-		public async Task<ICollection<Episode>> Search(string query)
+		public async Task<Episode> GetAbsolute(string showSlug, int absoluteNumber)
 		{
-			return await _database.Episodes
-				.Where(x => EF.Functions.ILike(x.Title, $"%{query}%"))
+			Episode ret = await _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == showSlug 
+			                                                                && x.AbsoluteNumber == absoluteNumber);
+			if (ret != null)
+				ret.ShowSlug = showSlug;
+			return ret;
+		}
+
+		public override async Task<ICollection<Episode>> Search(string query)
+		{
+			List<Episode> episodes = await _database.Episodes
+				.Where(x => EF.Functions.ILike(x.Title, $"%{query}%") && x.EpisodeNumber != -1)
+				.OrderBy(DefaultSort)
 				.Take(20)
 				.ToListAsync();
+			foreach (Episode episode in episodes)
+				episode.ShowSlug = await _shows.GetSlug(episode.ShowID);
+			return episodes;
+		}
+		
+		public override async Task<ICollection<Episode>> GetAll(Expression<Func<Episode, bool>> where = null, 
+			Sort<Episode> sort = default, 
+			Pagination limit = default)
+		{
+			ICollection<Episode> episodes = await base.GetAll(where, sort, limit);
+			foreach (Episode episode in episodes)
+				episode.ShowSlug = await _shows.GetSlug(episode.ShowID);
+			return episodes;
 		}
 
 		public override async Task<Episode> Create(Episode obj)
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
-			if (obj.ExternalIDs != null)
-				foreach (MetadataID entry in obj.ExternalIDs)
-					_database.Entry(entry).State = EntityState.Added;
-			
-			if (obj.Tracks != null)
-				foreach (Track entry in obj.Tracks)
-					_database.Entry(entry).State = EntityState.Added;
-			
+			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Added);
 			await _database.SaveChangesAsync($"Trying to insert a duplicated episode (slug {obj.Slug} already exists).");
-			return obj;
+			return await ValidateTracks(obj);
 		}
 
-		protected override async Task Validate(Episode resource)
+		protected override async Task EditRelations(Episode resource, Episode changed, bool resetOld)
 		{
 			if (resource.ShowID <= 0)
 				throw new InvalidOperationException($"Can't store an episode not related to any show (showID: {resource.ShowID}).");
-
-			await base.Validate(resource);
-
-			if (resource.ExternalIDs != null)
+			
+			if (changed.Tracks != null || resetOld)
 			{
-				foreach (MetadataID link in resource.ExternalIDs)
-					if (ShouldValidate(link))
-						link.Provider = await _providers.CreateIfNotExists(link.Provider, true);
+				await _tracks.DeleteRange(x => x.EpisodeID == resource.ID);
+				resource.Tracks = changed.Tracks;
+				await ValidateTracks(resource);
 			}
+
+			if (changed.ExternalIDs != null || resetOld)
+			{
+				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
+				resource.ExternalIDs = changed.ExternalIDs;
+			}
+
+			await Validate(resource);
+		}
+
+		private async Task<Episode> ValidateTracks(Episode resource)
+		{
+			resource.Tracks = await resource.Tracks.MapAsync((x, i) =>
+			{
+				x.Episode = resource;
+				x.TrackIndex = resource.Tracks.Take(i).Count(y => x.Language == y.Language 
+				                                                  && x.IsForced == y.IsForced 
+				                                                  && x.Codec == y.Codec 
+				                                                  && x.Type == y.Type);
+				return _tracks.Create(x);
+			}).ToListAsync();
+			return resource;
+		}
+		
+		protected override async Task Validate(Episode resource)
+		{
+			await base.Validate(resource);
+			resource.ExternalIDs = await resource.ExternalIDs.SelectAsync(async x => 
+			{ 
+				x.Provider = await _providers.CreateIfNotExists(x.Provider, true);
+				x.ProviderID = x.Provider.ID;
+				_database.Entry(x.Provider).State = EntityState.Detached;
+				return x;
+			}).ToListAsync();
 		}
 
 		public async Task Delete(string showSlug, int seasonNumber, int episodeNumber)
@@ -137,10 +217,8 @@ namespace Kyoo.Controllers
 				throw new ArgumentNullException(nameof(obj));
 			
 			_database.Entry(obj).State = EntityState.Deleted;
-			if (obj.ExternalIDs != null)
-				foreach (MetadataID entry in obj.ExternalIDs)
-					_database.Entry(entry).State = EntityState.Deleted;
-			// Since Tracks & Episodes are on the same database and handled by dotnet-ef, we can't use the repository to delete them. 
+			await obj.Tracks.ForEachAsync(x => _tracks.Delete(x));
+			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Deleted);
 			await _database.SaveChangesAsync();
 		}
 	}

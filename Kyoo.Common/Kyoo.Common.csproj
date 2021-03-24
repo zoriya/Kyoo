@@ -12,14 +12,17 @@
 		<Company>SDG</Company>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-		<PackageVersion>1.0.22</PackageVersion>
+		<PackageVersion>1.0.23</PackageVersion>
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<LangVersion>default</LangVersion>
+		
+		<DefineConstants>ENABLE_INTERNAL_LINKS</DefineConstants>
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="JetBrains.Annotations" Version="2020.1.0" />
+		<PackageReference Include="JetBrains.Annotations" Version="2020.3.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.0-beta-20204-02" PrivateAssets="All" />
 	</ItemGroup>
 

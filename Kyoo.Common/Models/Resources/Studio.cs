@@ -5,11 +5,11 @@ namespace Kyoo.Models
 {
 	public class Studio : IResource
 	{
-		[JsonIgnore] public int ID { get; set; }
+		public int ID { get; set; }
 		public string Slug { get; set; }
 		public string Name { get; set; }
 		
-		[JsonIgnore] public virtual IEnumerable<Show> Shows { get; set; }
+		[LoadableRelation] public virtual ICollection<Show> Shows { get; set; }
 
 		public Studio() { }
 

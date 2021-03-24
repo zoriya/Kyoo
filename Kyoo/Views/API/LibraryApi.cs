@@ -45,10 +45,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 50)
 		{
-			where.Remove("sortBy");
-			where.Remove("limit");
-			where.Remove("afterID");
-
 			try
 			{
 				ICollection<Show> resources = await _libraryManager.GetShows(
@@ -75,10 +71,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 20)
 		{
-			where.Remove("sortBy");
-			where.Remove("limit");
-			where.Remove("afterID");
-
 			try
 			{
 				ICollection<Show> resources = await _libraryManager.GetShows(
@@ -105,10 +97,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 50)
 		{
-			where.Remove("sortBy");
-			where.Remove("limit");
-			where.Remove("afterID");
-
 			try
 			{
 				ICollection<Collection> resources = await _libraryManager.GetCollections(
@@ -135,10 +123,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 20)
 		{
-			where.Remove("sortBy");
-			where.Remove("limit");
-			where.Remove("afterID");
-
 			try
 			{
 				ICollection<Collection> resources = await _libraryManager.GetCollections(
@@ -165,10 +149,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 50)
 		{
-			where.Remove("sortBy");
-			where.Remove("limit");
-			where.Remove("afterID");
-
 			try
 			{
 				ICollection<LibraryItem> resources = await _libraryManager.GetItemsFromLibrary(id,
@@ -195,10 +175,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 50)
 		{
-			where.Remove("sortBy");
-			where.Remove("limit");
-			where.Remove("afterID");
-
 			try
 			{
 				ICollection<LibraryItem> resources = await _libraryManager.GetItemsFromLibrary(slug,

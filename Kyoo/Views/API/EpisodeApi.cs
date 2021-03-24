@@ -2,12 +2,10 @@
 using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.CommonApi;
 using Kyoo.Controllers;
-using Kyoo.Models.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 
@@ -19,11 +17,18 @@ namespace Kyoo.Api
 	public class EpisodeApi : CrudApi<Episode>
 	{
 		private readonly ILibraryManager _libraryManager;
+		private readonly IThumbnailsManager _thumbnails;
+		private readonly IFileManager _files;
 
-		public EpisodeApi(ILibraryManager libraryManager, IConfiguration configuration) 
+		public EpisodeApi(ILibraryManager libraryManager,
+			IConfiguration configuration,
+			IFileManager files,
+			IThumbnailsManager thumbnails) 
 			: base(libraryManager.EpisodeRepository, configuration)
 		{
 			_libraryManager = libraryManager;
+			_files = files;
+			_thumbnails = thumbnails;
 		}
 
 		[HttpGet("{episodeID:int}/show")]
@@ -77,10 +82,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 30)
 		{
-			where.Remove("sortBy");
-			where.Remove("limit");
-			where.Remove("afterID");
-
 			try
 			{
 				ICollection<Track> resources = await _libraryManager.GetTracks(
@@ -109,10 +110,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 30)
 		{
-			where.Remove("sortBy");
-			where.Remove("limit");
-			where.Remove("afterID");
-
 			try
 			{
 				ICollection<Track> resources = await _libraryManager.GetTracks(
@@ -143,10 +140,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 30)
 		{
-			where.Remove("sortBy");
-			where.Remove("limit");
-			where.Remove("afterID");
-
 			try
 			{
 				ICollection<Track> resources = await _libraryManager.GetTracks(ApiHelper.ParseWhere<Track>(where, x => x.Episode.Show.Slug == showSlug 
@@ -165,19 +158,24 @@ namespace Kyoo.Api
 			}
 		}
 		
-		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}/thumb")]
+		[HttpGet("{id:int}/thumb")]
 		[Authorize(Policy="Read")]
-		public async Task<IActionResult> GetThumb(string showSlug, int seasonNumber, int episodeNumber)
+		public async Task<IActionResult> GetThumb(int id)
 		{
-			string path = (await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber))?.Path;
-			if (path == null)
+			Episode episode = await _libraryManager.GetEpisode(id);
+			if (episode == null)
 				return NotFound();
-
-			string thumb = Path.ChangeExtension(path, "jpg");
-
-			if (System.IO.File.Exists(thumb))
-				return new PhysicalFileResult(Path.GetFullPath(thumb), "image/jpg");
-			return NotFound();
+			return _files.FileResult(await _thumbnails.GetEpisodeThumb(episode));
+		}
+		
+		[HttpGet("{slug}/thumb")]
+		[Authorize(Policy="Read")]
+		public async Task<IActionResult> GetThumb(string slug)
+		{
+			Episode episode = await _libraryManager.GetEpisode(slug);
+			if (episode == null)
+				return NotFound();
+			return _files.FileResult(await _thumbnails.GetEpisodeThumb(episode));
 		}
 	}
 }

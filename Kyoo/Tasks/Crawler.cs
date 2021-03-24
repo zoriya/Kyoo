@@ -75,9 +75,12 @@ namespace Kyoo.Controllers
 			ICollection<Library> libraries = argument == null 
 				? await libraryManager.GetLibraries()
 				: new [] { await libraryManager.GetLibrary(argument)};
-			// TODO replace this grotesque way to load the providers.
+			
+			if (argument != null && libraries.First() == null)
+				throw new ArgumentException($"No library found with the name {argument}");
+			
 			foreach (Library library in libraries)
-				library.Providers = library.Providers;
+				await libraryManager.Load(library, x => x.Providers);
 			
 			foreach (Library library in libraries)
 				await Scan(library, episodes, tracks, cancellationToken);
@@ -123,6 +126,7 @@ namespace Kyoo.Controllers
 					.GroupBy(Path.GetDirectoryName)
 					.ToList();
 
+				// TODO If the library's path end with a /, the regex is broken.
 				IEnumerable<string> tasks = shows.Select(x => x.First());
 				foreach (string[] showTasks in tasks.BatchBy(_parallelTasks))
 					await Task.WhenAll(showTasks
@@ -287,7 +291,6 @@ namespace Kyoo.Controllers
 				show.Slug += $"-{show.StartYear}";
 				await libraryManager.RegisterShow(show);
 			}
-			await _thumbnailsManager.Validate(show.People);
 			await _thumbnailsManager.Validate(show);
 			return show;
 		}
@@ -347,16 +350,17 @@ namespace Kyoo.Controllers
 				Title = show.Title,
 				Path = episodePath,
 				Show = show,
-				ShowID = show.ID
+				ShowID = show.ID,
+				ShowSlug = show.Slug
 			};
 			episode.Tracks = await GetTracks(episode);
 			return episode;
 		}
 
-		private async Task<IEnumerable<Track>> GetTracks(Episode episode)
+		private async Task<ICollection<Track>> GetTracks(Episode episode)
 		{
-			episode.Tracks = (await _transcoder.ExtractInfos(episode.Path))
-				.Where(x => x.Type != StreamType.Font)
+			episode.Tracks = (await _transcoder.ExtractInfos(episode, false))
+				.Where(x => x.Type != StreamType.Attachment)
 				.ToArray();
 			return episode.Tracks;
 		}

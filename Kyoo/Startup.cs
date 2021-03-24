@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using IdentityServer4.Extensions;
 using IdentityServer4.Services;
 using Kyoo.Api;
 using Kyoo.Controllers;
@@ -36,21 +37,30 @@ namespace Kyoo
 
 		public void ConfigureServices(IServiceCollection services)
 		{
+			string publicUrl = _configuration.GetValue<string>("public_url");
+
 			services.AddSpaStaticFiles(configuration =>
 			{
 				configuration.RootPath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "wwwroot");
 			});
+			services.AddResponseCompression(x =>
+			{
+				x.EnableForHttps = true;
+			});
 
 			services.AddControllers()
-				.AddNewtonsoftJson(x => x.SerializerSettings.ContractResolver = new JsonPropertyIgnorer());
+				.AddNewtonsoftJson(x =>
+				{
+					x.SerializerSettings.ContractResolver = new JsonPropertyIgnorer(publicUrl);
+					x.SerializerSettings.Converters.Add(new PeopleRoleConverter());
+				});
 			services.AddHttpClient();
 
 			services.AddDbContext<DatabaseContext>(options =>
 			{
-				options.UseLazyLoadingProxies()
-					.UseNpgsql(_configuration.GetConnectionString("Database"));
-					// .EnableSensitiveDataLogging()
-					// .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()));
+				options.UseNpgsql(_configuration.GetConnectionString("Database"));
+				// .EnableSensitiveDataLogging()
+				// .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()));
 			}, ServiceLifetime.Transient);
 			
 			services.AddDbContext<IdentityDatabase>(options =>
@@ -59,7 +69,6 @@ namespace Kyoo
 			});
 
 			string assemblyName = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
-			string publicUrl = _configuration.GetValue<string>("public_url");
 
 			services.AddIdentityCore<User>(o =>
 				{
@@ -72,7 +81,6 @@ namespace Kyoo
 			services.AddIdentityServer(options =>
 				{
 					options.IssuerUri = publicUrl;
-					options.PublicOrigin = publicUrl;
 					options.UserInteraction.LoginUrl = publicUrl + "login";
 					options.UserInteraction.ErrorUrl = publicUrl + "error";
 					options.UserInteraction.LogoutUrl = publicUrl + "logout";
@@ -92,6 +100,7 @@ namespace Kyoo
 					options.EnableTokenCleanup = true;
 				})
 				.AddInMemoryIdentityResources(IdentityContext.GetIdentityResources())
+				.AddInMemoryApiScopes(IdentityContext.GetScopes())
 				.AddInMemoryApiResources(IdentityContext.GetApis())
 				.AddProfileService<AccountController>()
 				.AddSigninKeys(_configuration);
@@ -146,8 +155,10 @@ namespace Kyoo
 			services.AddScoped<IStudioRepository, StudioRepository>();
 			services.AddScoped<IGenreRepository, GenreRepository>();
 			services.AddScoped<IProviderRepository, ProviderRepository>();
-			
+			services.AddScoped<DbContext, DatabaseContext>();
+
 			services.AddScoped<ILibraryManager, LibraryManager>();
+			services.AddSingleton<IFileManager, FileManager>();
 			services.AddSingleton<ITranscoder, Transcoder>();
 			services.AddSingleton<IThumbnailsManager, ThumbnailsManager>();
 			services.AddSingleton<IProviderManager, ProviderManager>();
@@ -157,7 +168,7 @@ namespace Kyoo
 			services.AddHostedService(provider => (TaskManager)provider.GetService<ITaskManager>());
 		}
 
-		public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
 			if (env.IsDevelopment())
 			{
@@ -181,11 +192,29 @@ namespace Kyoo
 
 			app.UseRouting();
 
-			app.UseCookiePolicy(new CookiePolicyOptions 
+			app.Use((ctx, next) => 
+			{
+				ctx.Response.Headers.Remove("X-Powered-By");
+				ctx.Response.Headers.Remove("Server");
+				ctx.Response.Headers.Add("Feature-Policy", "autoplay 'self'; fullscreen");
+				ctx.Response.Headers.Add("Content-Security-Policy", "default-src 'self'; script-src 'self' blob: 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'");
+				ctx.Response.Headers.Add("X-Frame-Options", "SAMEORIGIN");
+				ctx.Response.Headers.Add("Referrer-Policy", "no-referrer");
+				ctx.Response.Headers.Add("Access-Control-Allow-Origin", "null");
+				ctx.Response.Headers.Add("X-Content-Type-Options", "nosniff");
+				return next();
+			});
+			app.UseResponseCompression();
+			app.UseCookiePolicy(new CookiePolicyOptions
 			{
 				MinimumSameSitePolicy = SameSiteMode.Strict
 			});
 			app.UseAuthentication();
+			app.Use((ctx, next) =>
+			{
+				ctx.SetIdentityServerOrigin(_configuration.GetValue<string>("public_url"));
+				return next();
+			});
 			app.UseIdentityServer();
 			app.UseAuthorization();
 

@@ -42,6 +42,7 @@ namespace Kyoo.Controllers
 				_shows.Value.Dispose();
 			if (_collections.IsValueCreated)
 				_collections.Value.Dispose();
+			GC.SuppressFinalize(this);
 		}
 
 		public override async ValueTask DisposeAsync()
@@ -71,7 +72,7 @@ namespace Kyoo.Controllers
 
 		private IQueryable<LibraryItem> ItemsQuery 
 			=> _database.Shows
-				.Where(x => !_database.CollectionLinks.Any(y => y.ChildID == x.ID))
+				.Where(x => !x.Collections.Any())
 				.Select(LibraryItem.FromShow)
 				.Concat(_database.Collections
 					.Select(LibraryItem.FromCollection));
@@ -91,10 +92,11 @@ namespace Kyoo.Controllers
 			return query.CountAsync();
 		}
 
-		public async Task<ICollection<LibraryItem>> Search(string query)
+		public override async Task<ICollection<LibraryItem>> Search(string query)
 		{
 			return await ItemsQuery
 				.Where(x => EF.Functions.ILike(x.Title, $"%{query}%"))
+				.OrderBy(DefaultSort)
 				.Take(20)
 				.ToListAsync();
 		}
@@ -108,22 +110,19 @@ namespace Kyoo.Controllers
 			throw new InvalidOperationException();
 		}
 		public override Task<LibraryItem> Edit(LibraryItem obj, bool reset) => throw new InvalidOperationException();
-		protected override Task Validate(LibraryItem resource) => throw new InvalidOperationException();
 		public override Task Delete(int id) => throw new InvalidOperationException();
 		public override Task Delete(string slug) => throw new InvalidOperationException();
 		public override Task Delete(LibraryItem obj) => throw new InvalidOperationException();
 
-		private IQueryable<LibraryItem> LibraryRelatedQuery(Expression<Func<LibraryLink, bool>> selector)
-			=> _database.LibraryLinks
+		private IQueryable<LibraryItem> LibraryRelatedQuery(Expression<Func<Library, bool>> selector)
+			=> _database.Libraries
 				.Where(selector)
-				.Select(x => x.Show)
-				.Where(x => x != null)
-				.Where(x => !_database.CollectionLinks.Any(y => y.ChildID == x.ID))
+				.SelectMany(x => x.Shows)
+				.Where(x => !x.Collections.Any())
 				.Select(LibraryItem.FromShow)
-				.Concat(_database.LibraryLinks
+				.Concat(_database.Libraries
 					.Where(selector)
-					.Select(x => x.Collection)
-					.Where(x => x != null)
+					.SelectMany(x => x.Collections)
 					.Select(LibraryItem.FromCollection));
 
 		public async Task<ICollection<LibraryItem>> GetFromLibrary(int id, 
@@ -131,7 +130,7 @@ namespace Kyoo.Controllers
 			Sort<LibraryItem> sort = default, 
 			Pagination limit = default)
 		{
-			ICollection<LibraryItem> items = await ApplyFilters(LibraryRelatedQuery(x => x.LibraryID == id),
+			ICollection<LibraryItem> items = await ApplyFilters(LibraryRelatedQuery(x => x.ID == id),
 				where,
 				sort,
 				limit);
@@ -145,7 +144,7 @@ namespace Kyoo.Controllers
 			Sort<LibraryItem> sort = default, 
 			Pagination limit = default)
 		{
-			ICollection<LibraryItem> items = await ApplyFilters(LibraryRelatedQuery(x => x.Library.Slug == slug),
+			ICollection<LibraryItem> items = await ApplyFilters(LibraryRelatedQuery(x => x.Slug == slug),
 				where,
 				sort,
 				limit);

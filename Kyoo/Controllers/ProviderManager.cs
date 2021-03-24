@@ -18,7 +18,7 @@ namespace Kyoo.Controllers
 		private async Task<T> GetMetadata<T>(Func<IMetadataProvider, Task<T>> providerCall, Library library, string what)
 			where T : new()
 		{
-			T ret = new T();
+			T ret = new();
 
 			IEnumerable<IMetadataProvider> providers = library?.Providers
                    .Select(x => _providers.FirstOrDefault(y => y.Provider.Slug == x.Slug))
@@ -40,11 +40,11 @@ namespace Kyoo.Controllers
 		}
 
 		private async Task<List<T>> GetMetadata<T>(
-			Func<IMetadataProvider, Task<IEnumerable<T>>> providerCall,
+			Func<IMetadataProvider, Task<ICollection<T>>> providerCall,
 			Library library,
 			string what)
 		{
-			List<T> ret = new List<T>();
+			List<T> ret = new();
 			
 			IEnumerable<IMetadataProvider> providers = library?.Providers
 					.Select(x => _providers.FirstOrDefault(y => y.Provider.Slug == x.Slug))
@@ -121,6 +121,7 @@ namespace Kyoo.Controllers
 				$"the season {seasonNumber} of {show.Title}");
 			season.Show = show;
 			season.ShowID = show.ID;
+			season.ShowSlug = show.Slug;
 			season.SeasonNumber = season.SeasonNumber == -1 ? seasonNumber : season.SeasonNumber;
 			season.Title ??= $"Season {season.SeasonNumber}";
 			return season;
@@ -139,6 +140,7 @@ namespace Kyoo.Controllers
 				"an episode");
 			episode.Show = show;
 			episode.ShowID = show.ID;
+			episode.ShowSlug = show.Slug;
 			episode.Path = episodePath;
 			episode.SeasonNumber = episode.SeasonNumber != -1 ? episode.SeasonNumber : seasonNumber;
 			episode.EpisodeNumber = episode.EpisodeNumber != -1 ? episode.EpisodeNumber : episodeNumber;
@@ -146,7 +148,7 @@ namespace Kyoo.Controllers
 			return episode;
 		}
 
-		public async Task<IEnumerable<PeopleRole>> GetPeople(Show show, Library library)
+		public async Task<ICollection<PeopleRole>> GetPeople(Show show, Library library)
 		{
 			List<PeopleRole> people = await GetMetadata(
 				provider => provider.GetPeople(show),

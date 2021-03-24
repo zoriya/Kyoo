@@ -1,103 +1,138 @@
 using System;
-using System.Buffers;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Kyoo.Models;
 using Kyoo.Models.Attributes;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 
 namespace Kyoo.Controllers
 {
 	public class JsonPropertyIgnorer : CamelCasePropertyNamesContractResolver
 	{
+		private int _depth = -1;
+		private string _host;
+
+		public JsonPropertyIgnorer(string host)
+		{
+			_host = host;
+		}
+
 		protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
 		{
 			JsonProperty property = base.CreateProperty(member, memberSerialization);
-			
-			property.ShouldSerialize = i => member.GetCustomAttribute<JsonReadOnly>(true) == null;
-			property.ShouldDeserialize = i => member.GetCustomAttribute<JsonIgnore>(true) == null;
+
+			LoadableRelationAttribute relation = member?.GetCustomAttribute<LoadableRelationAttribute>();
+			if (relation != null)
+			{
+				if (relation.RelationID == null)
+					property.ShouldSerialize = x => _depth == 0 && member.GetValue(x) != null;
+				else
+					property.ShouldSerialize = x =>
+					{
+						if (_depth != 0)
+							return false;
+						if (member.GetValue(x) != null)
+							return true;
+						return x.GetType().GetProperty(relation.RelationID)?.GetValue(x) != null;
+					};
+			}
+
+			if (member?.GetCustomAttribute<SerializeIgnoreAttribute>() != null)
+				property.ShouldSerialize = _ => false;
+			if (member?.GetCustomAttribute<DeserializeIgnoreAttribute>() != null)
+				property.ShouldDeserialize = _ => false;
+
+			SerializeAsAttribute serializeAs = member?.GetCustomAttribute<SerializeAsAttribute>();
+			if (serializeAs != null)
+				property.ValueProvider = new SerializeAsProvider(serializeAs.Format, _host);
 			return property;
 		}
-	}
-	
-	public class JsonPropertySelector : JsonPropertyIgnorer
-	{
-		private readonly Dictionary<Type, HashSet<string>> _ignored;
-		private readonly Dictionary<Type, HashSet<string>> _forceSerialize;
 
-		public JsonPropertySelector()
+		protected override JsonContract CreateContract(Type objectType)
 		{
-			_ignored = new Dictionary<Type, HashSet<string>>();	
-			_forceSerialize = new Dictionary<Type, HashSet<string>>();
+			JsonContract contract = base.CreateContract(objectType);
+			if (Utility.GetGenericDefinition(objectType, typeof(Page<>)) == null
+				&& !objectType.IsAssignableTo(typeof(IEnumerable)))
+			{
+				contract.OnSerializingCallbacks.Add((_, _) => _depth++);
+				contract.OnSerializedCallbacks.Add((_, _) => _depth--);
+			}
+
+			return contract;
+		}
+	}
+
+	public class PeopleRoleConverter : JsonConverter<PeopleRole>
+	{
+		public override void WriteJson(JsonWriter writer, PeopleRole value, JsonSerializer serializer)
+		{
+			ICollection<PeopleRole> oldPeople = value.Show?.People;
+			ICollection<PeopleRole> oldRoles = value.People?.Roles;
+			if (value.Show != null)
+				value.Show.People = null;
+			if (value.People != null)
+				value.People.Roles = null;
+			
+			JObject obj = JObject.FromObject(value.ForPeople ? value.People : value.Show, serializer);
+			obj.Add("role", value.Role);
+			obj.Add("type", value.Type);
+			obj.WriteTo(writer);
+
+			if (value.Show != null)
+				value.Show.People = oldPeople;
+			if (value.People != null)
+				value.People.Roles = oldRoles;
+		}
+
+		public override PeopleRole ReadJson(JsonReader reader, 
+			Type objectType,
+			PeopleRole existingValue,
+			bool hasExistingValue,
+			JsonSerializer serializer)
+		{
+			throw new NotImplementedException();
+		}
+	}
+
+	public class SerializeAsProvider : IValueProvider
+	{
+		private string _format;
+		private string _host;
+
+		public SerializeAsProvider(string format, string host)
+		{
+			_format = format;
+			_host = host.TrimEnd('/');
 		}
 		
-		public JsonPropertySelector(Dictionary<Type, HashSet<string>> ignored, 
-			Dictionary<Type, HashSet<string>> forceSerialize = null)
+		public object GetValue(object target)
 		{
-			_ignored = ignored ?? new Dictionary<Type, HashSet<string>>();
-			_forceSerialize = forceSerialize ?? new Dictionary<Type, HashSet<string>>();
-		}
-
-		private bool IsIgnored(Type type, string propertyName)
-		{
-			while (type != null)
+			return Regex.Replace(_format, @"(?<!{){(\w+)}", x =>
 			{
-				if (_ignored.ContainsKey(type) && _ignored[type].Contains(propertyName))
-					return true;
-				type = type.BaseType;
-			}
+				string value = x.Groups[1].Value;
 
-			return false;
+				if (value == "HOST")
+					return _host;
+				
+				PropertyInfo properties = target.GetType()
+					.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+					.FirstOrDefault(y => y.Name == value);
+				if (properties == null)
+					return null;
+				if (properties.GetValue(target) is string ret)
+					return ret;
+				throw new ArgumentException($"Invalid serializer replacement {value}");
+			});
 		}
-
-		private bool IsSerializationForced(Type type, string propertyName)
+		
+		public void SetValue(object target, object value)
 		{
-			while (type != null)
-			{
-				if (_forceSerialize.ContainsKey(type) && _forceSerialize[type].Contains(propertyName))
-					return true;
-				type = type.BaseType;
-			}
-
-			return false;
-		}
-
-		protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
-		{
-			JsonProperty property = base.CreateProperty(member, memberSerialization);
-
-			if (IsSerializationForced(property.DeclaringType, property.PropertyName))
-				property.ShouldSerialize = i => true;
-			else if (IsIgnored(property.DeclaringType, property.PropertyName))
-				property.ShouldSerialize = i => false;
-			return property;
-		}
-	}
-	
-	public class JsonDetailed : ActionFilterAttribute
-	{
-		public override void OnActionExecuted(ActionExecutedContext context)
-		{
-			if (context.Result is ObjectResult result)
-			{
-				result.Formatters.Add(new NewtonsoftJsonOutputFormatter(
-					new JsonSerializerSettings
-					{
-						ContractResolver = new JsonPropertySelector(null, new Dictionary<Type, HashSet<string>>
-						{
-							{typeof(Show), new HashSet<string> {"genres", "studio"}},
-							{typeof(Episode), new HashSet<string> {"tracks"}},
-							{typeof(PeopleRole), new HashSet<string> {"show"}}
-						})
-					},
-				context.HttpContext.RequestServices.GetRequiredService<ArrayPool<char>>(), 
-					new MvcOptions()));
-			}
+			// Values are ignored and should not be editable, except if the internal value is set.
 		}
 	}
 }

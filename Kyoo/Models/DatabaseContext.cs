@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,39 +12,43 @@ namespace Kyoo
 {
 	public class DatabaseContext : DbContext
 	{
-		public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options) { }
+		public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
+		{
+			ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+			ChangeTracker.LazyLoadingEnabled = false;
+		}
 
-		public DbSet<LibraryDE> Libraries { get; set; }
-		public DbSet<CollectionDE> Collections { get; set; }
-		public DbSet<ShowDE> Shows { get; set; }
+		public DbSet<Library> Libraries { get; set; }
+		public DbSet<Collection> Collections { get; set; }
+		public DbSet<Show> Shows { get; set; }
 		public DbSet<Season> Seasons { get; set; }
 		public DbSet<Episode> Episodes { get; set; }
 		public DbSet<Track> Tracks { get; set; }
-		public DbSet<GenreDE> Genres { get; set; }
+		public DbSet<Genre> Genres { get; set; }
 		public DbSet<People> People { get; set; }
 		public DbSet<Studio> Studios { get; set; }
 		public DbSet<ProviderID> Providers { get; set; }
 		public DbSet<MetadataID> MetadataIds { get; set; }
 		
 		public DbSet<PeopleRole> PeopleRoles { get; set; }
+
+		public DbSet<Link<T1, T2>> Links<T1, T2>()
+			where T1 : class, IResource
+			where T2 : class, IResource
+		{
+			return Set<Link<T1, T2>>();
+		}
 		
-		
-		public DbSet<LibraryLink> LibraryLinks { get; set; }
-		public DbSet<CollectionLink> CollectionLinks { get; set; }
-		public DbSet<GenreLink> GenreLinks { get; set; }
-		public DbSet<ProviderLink> ProviderLinks { get; set; }
 
 		public DatabaseContext()
 		{
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<Status>();
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<ItemType>();
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<StreamType>();
+
+			ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
+			ChangeTracker.LazyLoadingEnabled = false;
 		}
-		
-		private readonly ValueComparer<IEnumerable<string>> _stringArrayComparer = 
-			new ValueComparer<IEnumerable<string>>(
-				(l1, l2) => l1.SequenceEqual(l2),
-				arr => arr.Aggregate(0, (i, s) => s.GetHashCode()));
 
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
@@ -54,20 +58,13 @@ namespace Kyoo
 			modelBuilder.HasPostgresEnum<ItemType>();
 			modelBuilder.HasPostgresEnum<StreamType>();
 
-			modelBuilder.Ignore<Library>();
-			modelBuilder.Ignore<Collection>();
-			modelBuilder.Ignore<Show>();
-			modelBuilder.Ignore<Genre>();
-				
-			modelBuilder.Entity<LibraryDE>()
+			modelBuilder.Entity<Library>()
 				.Property(x => x.Paths)
-				.HasColumnType("text[]")
-				.Metadata.SetValueComparer(_stringArrayComparer);
+				.HasColumnType("text[]");
 
-			modelBuilder.Entity<ShowDE>()
+			modelBuilder.Entity<Show>()
 				.Property(x => x.Aliases)
-				.HasColumnType("text[]")
-				.Metadata.SetValueComparer(_stringArrayComparer);
+				.HasColumnType("text[]");
 
 			modelBuilder.Entity<Track>()
 				.Property(t => t.IsDefault)
@@ -77,91 +74,69 @@ namespace Kyoo
 				.Property(t => t.IsForced)
 				.ValueGeneratedNever();
 
-
-			modelBuilder.Entity<GenreLink>()
-				.HasKey(x => new {ShowID = x.ParentID, GenreID = x.ChildID});
-
-			modelBuilder.Entity<CollectionLink>()
-				.HasKey(x => new {CollectionID = x.ParentID, ShowID = x.ChildID});
+			modelBuilder.Entity<ProviderID>()
+				.HasMany(x => x.Libraries)
+				.WithMany(x => x.Providers)
+				.UsingEntity<Link<Library, ProviderID>>(
+					y => y
+						.HasOne(x => x.First)
+						.WithMany(x => x.ProviderLinks),
+					y => y
+						.HasOne(x => x.Second)
+						.WithMany(x => x.LibraryLinks),
+					y => y.HasKey(Link<Library, ProviderID>.PrimaryKey));
 			
-			modelBuilder.Entity<ProviderLink>()
-				.HasKey(x => new {LibraryID = x.ParentID, ProviderID = x.ChildID});
-
-
-			modelBuilder.Entity<LibraryDE>()
-				.Ignore(x => x.Shows)
-				.Ignore(x => x.Collections)
-				.Ignore(x => x.Providers);
+			modelBuilder.Entity<Collection>()
+				.HasMany(x => x.Libraries)
+				.WithMany(x => x.Collections)
+				.UsingEntity<Link<Library, Collection>>(
+					y => y
+						.HasOne(x => x.First)
+						.WithMany(x => x.CollectionLinks),
+					y => y
+						.HasOne(x => x.Second)
+						.WithMany(x => x.LibraryLinks),
+					y => y.HasKey(Link<Library, Collection>.PrimaryKey));
 			
-			modelBuilder.Entity<CollectionDE>()
-				.Ignore(x => x.Shows)
-				.Ignore(x => x.Libraries);
+			modelBuilder.Entity<Show>()
+				.HasMany(x => x.Libraries)
+				.WithMany(x => x.Shows)
+				.UsingEntity<Link<Library, Show>>(
+					y => y
+						.HasOne(x => x.First)
+						.WithMany(x => x.ShowLinks),
+					y => y
+						.HasOne(x => x.Second)
+						.WithMany(x => x.LibraryLinks),
+					y => y.HasKey(Link<Library, Show>.PrimaryKey));
 			
-			modelBuilder.Entity<ShowDE>()
-				.Ignore(x => x.Genres)
-				.Ignore(x => x.Libraries)
-				.Ignore(x => x.Collections);
+			modelBuilder.Entity<Show>()
+				.HasMany(x => x.Collections)
+				.WithMany(x => x.Shows)
+				.UsingEntity<Link<Collection, Show>>(
+					y => y
+						.HasOne(x => x.First)
+						.WithMany(x => x.ShowLinks),
+					y => y
+						.HasOne(x => x.Second)
+						.WithMany(x => x.CollectionLinks),
+					y => y.HasKey(Link<Collection, Show>.PrimaryKey));
 
-			modelBuilder.Entity<PeopleRole>()
-				.Ignore(x => x.Slug)
-				.Ignore(x => x.Name)
-				.Ignore(x => x.Poster)
-				.Ignore(x => x.ExternalIDs);
-
-			modelBuilder.Entity<GenreDE>()
-				.Ignore(x => x.Shows);
-			
-
-			modelBuilder.Entity<LibraryLink>()
-				.HasOne(x => x.Library as LibraryDE)
-				.WithMany(x => x.Links)
-				.OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<LibraryLink>()
-				.HasOne(x => x.Show as ShowDE)
-				.WithMany(x => x.LibraryLinks)
-				.OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<LibraryLink>()
-				.HasOne(x => x.Collection as CollectionDE)
-				.WithMany(x => x.LibraryLinks)
-				.OnDelete(DeleteBehavior.Cascade);
-			
-			modelBuilder.Entity<CollectionLink>()
-				.HasOne(x => x.Parent as CollectionDE)
-				.WithMany(x => x.Links)
-				.OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<CollectionLink>()
-				.HasOne(x => x.Child as ShowDE)
-				.WithMany(x => x.CollectionLinks)
-				.OnDelete(DeleteBehavior.Cascade);
-			
-			modelBuilder.Entity<GenreLink>()
-				.HasOne(x => x.Child as GenreDE)
-				.WithMany(x => x.Links)
-				.OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<GenreLink>()
-				.HasOne(x => x.Parent as ShowDE)
-				.WithMany(x => x.GenreLinks)
-				.OnDelete(DeleteBehavior.Cascade);
-
-			modelBuilder.Entity<ProviderLink>()
-				.HasOne(x => x.Parent as LibraryDE)
-				.WithMany(x => x.ProviderLinks)
-				.OnDelete(DeleteBehavior.Cascade);
-
-			modelBuilder.Entity<Season>()
-				.HasOne(x => x.Show as ShowDE)
-				.WithMany(x => x.Seasons);
-			modelBuilder.Entity<Episode>()
-				.HasOne(x => x.Show as ShowDE)
-				.WithMany(x => x.Episodes);
-			modelBuilder.Entity<PeopleRole>()
-				.HasOne(x => x.Show as ShowDE)
-				.WithMany(x => x.People);
-			
+			modelBuilder.Entity<Genre>()
+				.HasMany(x => x.Shows)
+				.WithMany(x => x.Genres)
+				.UsingEntity<Link<Show, Genre>>(
+					y => y
+						.HasOne(x => x.First)
+						.WithMany(x => x.GenreLinks),
+					y => y
+						.HasOne(x => x.Second)
+						.WithMany(x => x.ShowLinks),
+					y => y.HasKey(Link<Show, Genre>.PrimaryKey));
 			
 
 			modelBuilder.Entity<MetadataID>()
-				.HasOne(x => x.Show as ShowDE)
+				.HasOne(x => x.Show)
 				.WithMany(x => x.ExternalIDs)
 				.OnDelete(DeleteBehavior.Cascade);
 			modelBuilder.Entity<MetadataID>()
@@ -176,28 +151,32 @@ namespace Kyoo
 				.HasOne(x => x.People)
 				.WithMany(x => x.ExternalIDs)
 				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<MetadataID>()
+				.HasOne(x => x.Provider)
+				.WithMany(x => x.MetadataLinks)
+				.OnDelete(DeleteBehavior.Cascade);
 
-			modelBuilder.Entity<CollectionDE>().Property(x => x.Slug).IsRequired();
-			modelBuilder.Entity<GenreDE>().Property(x => x.Slug).IsRequired();
-			modelBuilder.Entity<LibraryDE>().Property(x => x.Slug).IsRequired();
+			modelBuilder.Entity<Collection>().Property(x => x.Slug).IsRequired();
+			modelBuilder.Entity<Genre>().Property(x => x.Slug).IsRequired();
+			modelBuilder.Entity<Library>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<People>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<ProviderID>().Property(x => x.Slug).IsRequired();
-			modelBuilder.Entity<ShowDE>().Property(x => x.Slug).IsRequired();
+			modelBuilder.Entity<Show>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<Studio>().Property(x => x.Slug).IsRequired();
 
-			modelBuilder.Entity<CollectionDE>()
+			modelBuilder.Entity<Collection>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
-			modelBuilder.Entity<GenreDE>()
+			modelBuilder.Entity<Genre>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
-			modelBuilder.Entity<LibraryDE>()
+			modelBuilder.Entity<Library>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
 			modelBuilder.Entity<People>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
-			modelBuilder.Entity<ShowDE>()
+			modelBuilder.Entity<Show>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
 			modelBuilder.Entity<Studio>()
@@ -212,12 +191,19 @@ namespace Kyoo
 			modelBuilder.Entity<Episode>()
 				.HasIndex(x => new {x.ShowID, x.SeasonNumber, x.EpisodeNumber, x.AbsoluteNumber})
 				.IsUnique();
-			modelBuilder.Entity<LibraryLink>()
-				.HasIndex(x => new {x.LibraryID, x.ShowID})
+			modelBuilder.Entity<Track>()
+				.HasIndex(x => new {x.EpisodeID, x.Type, x.Language, x.TrackIndex, x.IsForced})
 				.IsUnique();
-			modelBuilder.Entity<LibraryLink>()
-				.HasIndex(x => new {x.LibraryID, x.CollectionID})
-				.IsUnique();
+		}
+
+		public T GetTemporaryObject<T>(T model)
+			where T : class, IResource
+		{
+			T tmp = Set<T>().Local.FirstOrDefault(x => x.ID == model.ID);
+			if (tmp != null)
+				return tmp;
+			Entry(model).State = EntityState.Unchanged;
+			return model;
 		}
 
 		public override int SaveChanges()
@@ -266,7 +252,7 @@ namespace Kyoo
 		}
 
 		public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, 
-			CancellationToken cancellationToken = new CancellationToken())
+			CancellationToken cancellationToken = new())
 		{
 			try
 			{
@@ -281,7 +267,7 @@ namespace Kyoo
 			}
 		}
 
-		public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new CancellationToken())
+		public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new())
 		{
 			try
 			{
@@ -297,7 +283,7 @@ namespace Kyoo
 		}
 		
 		public async Task<int> SaveChangesAsync(string duplicateMessage,
-			CancellationToken cancellationToken = new CancellationToken())
+			CancellationToken cancellationToken = new())
 		{
 			try
 			{
@@ -312,7 +298,7 @@ namespace Kyoo
 			}
 		}
 
-		public async Task<int> SaveIfNoDuplicates(CancellationToken cancellationToken = new CancellationToken())
+		public async Task<int> SaveIfNoDuplicates(CancellationToken cancellationToken = new())
 		{
 			try
 			{
@@ -324,13 +310,39 @@ namespace Kyoo
 			}
 		}
 
-		public static bool IsDuplicateException(DbUpdateException ex)
+		public Task<T> SaveOrRetry<T>(T obj, Func<T, int, T> onFail, CancellationToken cancellationToken = new())
 		{
-			return ex.InnerException is PostgresException inner
-			       && inner.SqlState == PostgresErrorCodes.UniqueViolation;
+			return SaveOrRetry(obj, onFail, 0, cancellationToken);
+		}
+		
+		public async Task<T> SaveOrRetry<T>(T obj, 
+			Func<T, int, T> onFail,
+			int recurse,
+			CancellationToken cancellationToken = new())
+		{
+			try
+			{
+				await base.SaveChangesAsync(true, cancellationToken);
+				return obj;
+			}
+			catch (DbUpdateException ex) when (IsDuplicateException(ex))
+			{
+				recurse++;
+				return await SaveOrRetry(onFail(obj, recurse), onFail, recurse, cancellationToken);
+			}
+			catch (DbUpdateException)
+			{
+				DiscardChanges();
+				throw;
+			}
 		}
 
-		public void DiscardChanges()
+		private static bool IsDuplicateException(Exception ex)
+		{
+			return ex.InnerException is PostgresException {SqlState: PostgresErrorCodes.UniqueViolation};
+		}
+
+		private void DiscardChanges()
 		{
 			foreach (EntityEntry entry in ChangeTracker.Entries().Where(x => x.State != EntityState.Unchanged
 			                                                                 && x.State != EntityState.Detached))

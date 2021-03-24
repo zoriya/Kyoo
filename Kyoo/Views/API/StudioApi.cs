@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Kyoo.CommonApi;
 using Kyoo.Controllers;
 using Kyoo.Models;
-using Kyoo.Models.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -34,10 +33,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 20)
 		{
-			where.Remove("sortBy");
-			where.Remove("limit");
-			where.Remove("afterID");
-
 			try
 			{
 				ICollection<Show> resources = await _libraryManager.GetShows(
@@ -64,10 +59,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 20)
 		{
-			where.Remove("sortBy");
-			where.Remove("limit");
-			where.Remove("afterID");
-
 			try
 			{
 				ICollection<Show> resources = await _libraryManager.GetShows(

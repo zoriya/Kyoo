@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models.Attributes;
-using Kyoo.Models.Watch;
 using PathIO = System.IO.Path;
 
 namespace Kyoo.Models
@@ -26,31 +25,34 @@ namespace Kyoo.Models
 	
 	public class WatchItem
 	{
-		[JsonIgnore] public readonly int EpisodeID = -1;
+		public int EpisodeID { get; set; }
 
-		public string ShowTitle;
-		public string ShowSlug;
-		public int SeasonNumber;
-		public int EpisodeNumber;
-		public string Title;
-		public string Slug;
-		public DateTime? ReleaseDate;
-		[JsonIgnore] public string Path;
-		public Episode PreviousEpisode;
-		public Episode NextEpisode;
-		public bool IsMovie;
+		public string ShowTitle { get; set; }
+		public string ShowSlug { get; set; }
+		public int SeasonNumber { get; set; }
+		public int EpisodeNumber { get; set; }
+		public string Title { get; set; }
+		public string Slug { get; set; }
+		public DateTime? ReleaseDate { get; set; }
+		[SerializeIgnore] public string Path { get; set; }
+		public Episode PreviousEpisode { get; set; }
+		public Episode NextEpisode { get; set; }
+		public bool IsMovie { get; set; }
 
-		public string Container;
-		public Track Video;
-		public IEnumerable<Track> Audios;
-		public IEnumerable<Track> Subtitles;
-		public IEnumerable<Chapter> Chapters;
+		[SerializeAs("{HOST}/api/show/{ShowSlug}/poster")] public string Poster { get; set; }
+		[SerializeAs("{HOST}/api/show/{ShowSlug}/logo")] public string Logo { get; set; }
+		[SerializeAs("{HOST}/api/show/{ShowSlug}/backdrop")] public string Backdrop { get; set; }
+
+		public string Container { get; set; }
+		public Track Video { get; set; }
+		public ICollection<Track> Audios { get; set; }
+		public ICollection<Track> Subtitles { get; set; }
+		public ICollection<Chapter> Chapters { get; set; }
 
 		public WatchItem() { }
 
 		private WatchItem(int episodeID, 
-			string showTitle,
-			string showSlug,
+			Show show,
 			int seasonNumber,
 			int episodeNumber,
 			string title, 
@@ -58,30 +60,34 @@ namespace Kyoo.Models
 			string path)
 		{
 			EpisodeID = episodeID;
-			ShowTitle = showTitle;
-			ShowSlug = showSlug;
+			ShowTitle = show.Title;
+			ShowSlug = show.Slug;
 			SeasonNumber = seasonNumber;
 			EpisodeNumber = episodeNumber;
 			Title = title;
 			ReleaseDate = releaseDate;
 			Path = path;
+			IsMovie = show.IsMovie;
+
+			Poster = show.Poster;
+			Logo = show.Logo;
+			Backdrop = show.Backdrop;
 
 			Container = Path.Substring(Path.LastIndexOf('.') + 1);
 			Slug = Episode.GetSlug(ShowSlug, seasonNumber, episodeNumber);
 		}
 
 		private WatchItem(int episodeID,
-			string showTitle,
-			string showSlug, 
+			Show show,
 			int seasonNumber, 
 			int episodeNumber, 
 			string title, 
 			DateTime? releaseDate, 
 			string path, 
 			Track video,
-			IEnumerable<Track> audios,
-			IEnumerable<Track> subtitles)
-			: this(episodeID, showTitle, showSlug, seasonNumber, episodeNumber, title, releaseDate, path)
+			ICollection<Track> audios,
+			ICollection<Track> subtitles)
+			: this(episodeID, show, seasonNumber, episodeNumber, title, releaseDate, path)
 		{
 			Video = video;
 			Audios = audios;
@@ -90,11 +96,13 @@ namespace Kyoo.Models
 
 		public static async Task<WatchItem> FromEpisode(Episode ep, ILibraryManager library)
 		{
-			Show show = await library.GetShow(ep.ShowID); // TODO load only the title, the slug & the IsMovie with the library manager.
 			Episode previous = null;
 			Episode next = null;
 
-			if (!show.IsMovie)
+			await library.Load(ep, x => x.Show);
+			await library.Load(ep, x => x.Tracks);
+			
+			if (!ep.Show.IsMovie)
 			{
 				if (ep.EpisodeNumber > 1)
 					previous = await library.GetEpisode(ep.ShowID, ep.SeasonNumber, ep.EpisodeNumber - 1);
@@ -110,27 +118,25 @@ namespace Kyoo.Models
 				else
 					next = await library.GetEpisode(ep.ShowID, ep.SeasonNumber, ep.EpisodeNumber + 1);
 			}
-
+			
 			return new WatchItem(ep.ID,
-				show.Title,
-				show.Slug,
+				ep.Show,
 				ep.SeasonNumber,
 				ep.EpisodeNumber,
 				ep.Title,
 				ep.ReleaseDate,
 				ep.Path,
-				await library.GetTrack(x => x.EpisodeID == ep.ID && x.Type == StreamType.Video),
-				await library.GetTracks(x => x.EpisodeID == ep.ID && x.Type == StreamType.Audio),
-				await library.GetTracks(x => x.EpisodeID == ep.ID && x.Type == StreamType.Subtitle))
+				ep.Tracks.FirstOrDefault(x => x.Type == StreamType.Video),
+				ep.Tracks.Where(x => x.Type == StreamType.Audio).ToArray(),
+				ep.Tracks.Where(x => x.Type == StreamType.Subtitle).ToArray())
 			{
-				IsMovie = show.IsMovie,
 				PreviousEpisode = previous,
 				NextEpisode = next,
 				Chapters = await GetChapters(ep.Path)
 			};
 		}
 
-		private static async Task<IEnumerable<Chapter>> GetChapters(string episodePath)
+		private static async Task<ICollection<Chapter>> GetChapters(string episodePath)
 		{
 			string path = PathIO.Combine(
 				PathIO.GetDirectoryName(episodePath)!, 
@@ -138,7 +144,7 @@ namespace Kyoo.Models
 				PathIO.GetFileNameWithoutExtension(episodePath) + ".txt"
 			);
 			if (!File.Exists(path))
-				return new Chapter[0];
+				return Array.Empty<Chapter>();
 			try
 			{
 				return (await File.ReadAllLinesAsync(path))
@@ -152,7 +158,7 @@ namespace Kyoo.Models
 			catch
 			{
 				await Console.Error.WriteLineAsync($"Invalid chapter file at {path}");
-				return new Chapter[0];
+				return Array.Empty<Chapter>();
 			}
 		}
 	}

@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
+using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers
@@ -12,7 +13,7 @@ namespace Kyoo.Controllers
 	{
 		private bool _disposed;
 		private readonly DatabaseContext _database;
-		protected override Expression<Func<Track, object>> DefaultSort => x => x.ID;
+		protected override Expression<Func<Track, object>> DefaultSort => x => x.TrackIndex;
 
 
 		public TrackRepository(DatabaseContext database) : base(database)
@@ -36,10 +37,15 @@ namespace Kyoo.Controllers
 			await _database.DisposeAsync();
 		}
 
-		public Task<Track> Get(string slug, StreamType type = StreamType.Unknown)
+		public override Task<Track> Get(string slug)
+		{
+			return Get(slug, StreamType.Unknown);
+		}
+		
+		public Task<Track> Get(string slug, StreamType type)
 		{
 			Match match = Regex.Match(slug,
-				@"(?<show>.*)-s(?<season>\d+)e(?<episode>\d+)\.(?<language>.{0,3})(?<forced>-forced)?(\..*)?");
+				@"(?<show>.*)-s(?<season>\d+)e(?<episode>\d+)(\.(?<type>\w*))?\.(?<language>.{0,3})(?<forced>-forced)?(\..*)?");
 
 			if (!match.Success)
 			{
@@ -56,6 +62,8 @@ namespace Kyoo.Controllers
 			int episodeNumber = match.Groups["episode"].Success ? int.Parse(match.Groups["episode"].Value) : -1;
 			string language = match.Groups["language"].Value;
 			bool forced = match.Groups["forced"].Success;
+			if (match.Groups["type"].Success)
+				type = Enum.Parse<StreamType>(match.Groups["type"].Value, true);
 
 			if (type == StreamType.Unknown)
 			{
@@ -73,7 +81,7 @@ namespace Kyoo.Controllers
 									 && x.IsForced == forced);
 		}
 
-		public Task<ICollection<Track>> Search(string query)
+		public override Task<ICollection<Track>> Search(string query)
 		{
 			throw new InvalidOperationException("Tracks do not support the search method.");
 		}
@@ -82,22 +90,23 @@ namespace Kyoo.Controllers
 		{
 			if (obj.EpisodeID <= 0)
 			{
-				obj.EpisodeID = obj.Episode?.ID ?? -1;
+				obj.EpisodeID = obj.Episode?.ID ?? 0;
 				if (obj.EpisodeID <= 0)
 					throw new InvalidOperationException($"Can't store a track not related to any episode (episodeID: {obj.EpisodeID}).");
 			}
 
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
-			await _database.SaveChangesAsync($"Trying to insert a duplicated track (slug {obj.Slug} already exists).");
+			await _database.SaveOrRetry(obj, (x, i) =>
+			{
+				if (i > 10)
+					throw new DuplicatedItemException($"More than 10 same tracks exists {x.Slug}. Aborting...");
+				x.TrackIndex++;
+				return x;
+			});
 			return obj;
 		}
-		
-		protected override Task Validate(Track resource)
-		{
-			return Task.CompletedTask;
-		}
-		
+
 		public override async Task Delete(Track obj)
 		{
 			if (obj == null)

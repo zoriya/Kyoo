@@ -1,22 +1,18 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using Kyoo.CommonApi;
 using Kyoo.Models;
 using Kyoo.Models.Attributes;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace Kyoo.Controllers
 {
-	public abstract class LocalRepository<T>
+	public abstract class LocalRepository<T> : IRepository<T>
 		where T : class, IResource
 	{
 		protected readonly DbContext Database;
@@ -32,6 +28,7 @@ namespace Kyoo.Controllers
 		public virtual void Dispose()
 		{
 			Database.Dispose();
+			GC.SuppressFinalize(this);
 		}
 
 		public virtual ValueTask DisposeAsync()
@@ -43,6 +40,11 @@ namespace Kyoo.Controllers
 		{
 			return Database.Set<T>().FirstOrDefaultAsync(x => x.ID == id);
 		}
+		
+		public virtual Task<T> GetWithTracking(int id)
+		{
+			return Database.Set<T>().AsTracking().FirstOrDefaultAsync(x => x.ID == id);
+		}
 
 		public virtual Task<T> Get(string slug)
 		{
@@ -53,6 +55,8 @@ namespace Kyoo.Controllers
 		{
 			return Database.Set<T>().FirstOrDefaultAsync(predicate);
 		}
+		
+		public abstract Task<ICollection<T>> Search(string query);
 		
 		public virtual Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null,
 			Sort<T> sort = default,
@@ -112,7 +116,7 @@ namespace Kyoo.Controllers
 			return query.CountAsync();
 		}
 
-		public virtual async Task<T> Create([NotNull] T obj)
+		public virtual async Task<T> Create(T obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
@@ -147,61 +151,38 @@ namespace Kyoo.Controllers
 				throw;
 			}
 		}
-		
+
 		public virtual async Task<T> Edit(T edited, bool resetOld)
 		{
 			if (edited == null)
 				throw new ArgumentNullException(nameof(edited));
 
+			bool lazyLoading = Database.ChangeTracker.LazyLoadingEnabled;
 			Database.ChangeTracker.LazyLoadingEnabled = false;
 			try
 			{
-				T old = await Get(edited.ID);
-
+				T old = await GetWithTracking(edited.ID);
 				if (old == null)
 					throw new ItemNotFound($"No resource found with the ID {edited.ID}.");
-
-				foreach (NavigationEntry navigation in Database.Entry(old).Navigations)
-				{
-					if (navigation.Metadata.PropertyInfo.GetCustomAttribute<EditableRelation>() != null)
-					{
-						if (resetOld)
-						{
-							await navigation.LoadAsync();
-							continue;
-						}
-						IClrPropertyGetter getter = navigation.Metadata.GetGetter();
-
-						if (getter.HasDefaultValue(edited))
-							continue;
-						await navigation.LoadAsync();
-						// TODO this may be usless for lists since the API does not return IDs but the
-						// TODO LinkEquality does not check slugs (their are lazy loaded and only the ID is available)
-						if (Utility.ResourceEquals(getter.GetClrValue(edited), getter.GetClrValue(old)))
-							navigation.Metadata.PropertyInfo.SetValue(edited, default);
-					}
-					else
-						navigation.Metadata.PropertyInfo.SetValue(edited, default);
-				}
-
+				
 				if (resetOld)
 					Utility.Nullify(old);
-				Utility.Complete(old, edited);
-				await Validate(old);
+				Utility.Complete(old, edited, x => x.GetCustomAttribute<LoadableRelationAttribute>() == null);
+				await EditRelations(old, edited, resetOld);
 				await Database.SaveChangesAsync();
 				return old;
 			}
 			finally
 			{
-				Database.ChangeTracker.LazyLoadingEnabled = true;
+				Database.ChangeTracker.LazyLoadingEnabled = lazyLoading;
 			}
 		}
-
-		protected bool ShouldValidate<T2>(T2 value)
+		
+		protected virtual Task EditRelations(T resource, T changed, bool resetOld)
 		{
-			return value != null && Database.Entry(value).State == EntityState.Detached;
+			return Validate(resource);
 		}
-
+		
 		protected virtual Task Validate(T resource)
 		{
 			if (string.IsNullOrEmpty(resource.Slug))
@@ -221,21 +202,9 @@ namespace Kyoo.Controllers
 					throw new ArgumentException("Resources slug can't be number only.");
 				}
 			}
-			
-			foreach (PropertyInfo property in typeof(T).GetProperties()
-				.Where(x => typeof(IEnumerable).IsAssignableFrom(x.PropertyType) 
-				            && !typeof(string).IsAssignableFrom(x.PropertyType) 
-				            && x.GetCustomAttribute<EditableRelation>() != null))
-			{
-				object value = property.GetValue(resource);
-				if (value == null || value is ICollection || Utility.IsOfGenericType(value, typeof(ICollection<>)))
-					continue;
-				value = Utility.RunGenericMethod<object>(typeof(Enumerable), "ToList", Utility.GetEnumerableType((IEnumerable)value), value);
-				property.SetValue(resource, value);
-			}
 			return Task.CompletedTask;
 		}
-		
+
 		public virtual async Task Delete(int id)
 		{
 			T resource = await Get(id);
@@ -249,7 +218,7 @@ namespace Kyoo.Controllers
 		}
 
 		public abstract Task Delete(T obj);
-
+		
 		public virtual async Task DeleteRange(IEnumerable<T> objs)
 		{
 			foreach (T obj in objs)
@@ -267,113 +236,11 @@ namespace Kyoo.Controllers
 			foreach (string slug in slugs)
 				await Delete(slug);
 		}
-	}
-	
-	public abstract class LocalRepository<T, TInternal> : LocalRepository<TInternal>, IRepository<T>
-		where T : class, IResource
-		where TInternal : class, T, new()
-	{
-		protected LocalRepository(DbContext database) : base(database) { }
-
-		public new Task<T> Get(int id)
-		{
-			return base.Get(id).Cast<T>();
-		}
 		
-		public new Task<T> Get(string slug)
+		public async Task DeleteRange(Expression<Func<T, bool>> where)
 		{
-			return base.Get(slug).Cast<T>();
-		}
-
-		public Task<T> Get(Expression<Func<T, bool>> predicate)
-		{
-			return Get(predicate.Convert<Func<TInternal, bool>>()).Cast<T>();
-		}
-
-		public abstract Task<ICollection<T>> Search(string query);
-		
-		public virtual Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null,
-			Sort<T> sort = default,
-			Pagination limit = default)
-		{
-			return ApplyFilters(Database.Set<TInternal>(), where, sort, limit);
-		}
-		
-		protected virtual async Task<ICollection<T>> ApplyFilters(IQueryable<TInternal> query,
-			Expression<Func<T, bool>> where = null,
-			Sort<T> sort = default, 
-			Pagination limit = default)
-		{
-			ICollection<TInternal> items = await ApplyFilters(query, 
-				base.Get,
-				DefaultSort,
-				where.Convert<Func<TInternal, bool>>(), 
-				sort.To<TInternal>(), 
-				limit);
-
-			return items.ToList<T>();
-		}
-		
-		public virtual Task<int> GetCount(Expression<Func<T, bool>> where = null)
-		{
-			IQueryable<TInternal> query = Database.Set<TInternal>();
-			if (where != null)
-				query = query.Where(where.Convert<Func<TInternal, bool>>());
-			return query.CountAsync();
-		}
-
-		Task<T> IRepository<T>.Create(T item)
-		{
-			if (item == null)
-				throw new ArgumentNullException(nameof(item));
-			TInternal obj = item as TInternal ?? new TInternal();
-			if (!(item is TInternal))
-				Utility.Assign(obj, item);
-			
-			return Create(obj).Cast<T>()
-				.Then(x => item.ID = x.ID);
-		}
-
-		Task<T> IRepository<T>.CreateIfNotExists(T item, bool silentFail)
-		{
-			if (item == null)
-				throw new ArgumentNullException(nameof(item));
-			TInternal obj = item as TInternal ?? new TInternal();
-			if (!(item is TInternal))
-				Utility.Assign(obj, item);
-			
-			return CreateIfNotExists(obj, silentFail).Cast<T>()
-				.Then(x => item.ID = x.ID);
-		}
-
-		public Task<T> Edit(T edited, bool resetOld)
-		{
-			if (edited == null)
-				throw new ArgumentNullException(nameof(edited));
-			if (edited is TInternal intern)
-				return Edit(intern, resetOld).Cast<T>();
-			TInternal obj = new TInternal();
-			Utility.Assign(obj, edited);
-			return base.Edit(obj, resetOld).Cast<T>();
-		}
-
-		public abstract override Task Delete([NotNull] TInternal obj);
-
-		Task IRepository<T>.Delete(T obj)
-		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-			if (obj is TInternal intern)
-				return Delete(intern);
-			TInternal item = new TInternal();
-			Utility.Assign(item, obj);
-			return Delete(item);
-		}
-		
-		public virtual async Task DeleteRange(IEnumerable<T> objs)
-		{
-			foreach (T obj in objs)
-				await ((IRepository<T>)this).Delete(obj);
+			ICollection<T> resources = await GetAll(where);
+			await DeleteRange(resources);
 		}
 	}
 }

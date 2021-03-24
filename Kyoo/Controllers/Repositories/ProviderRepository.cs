@@ -19,10 +19,11 @@ namespace Kyoo.Controllers
 			_database = database;
 		}
 
-		public async Task<ICollection<ProviderID>> Search(string query)
+		public override async Task<ICollection<ProviderID>> Search(string query)
 		{
 			return await _database.Providers
 				.Where(x => EF.Functions.ILike(x.Name, $"%{query}%"))
+				.OrderBy(DefaultSort)
 				.Take(20)
 				.ToListAsync();
 		}
@@ -31,7 +32,6 @@ namespace Kyoo.Controllers
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
-
 			await _database.SaveChangesAsync($"Trying to insert a duplicated provider (slug {obj.Slug} already exists).");
 			return obj;
 		}
@@ -42,8 +42,20 @@ namespace Kyoo.Controllers
 				throw new ArgumentNullException(nameof(obj));
 			
 			_database.Entry(obj).State = EntityState.Deleted;
-			// TODO handle ExternalID deletion when they refer to this providerID.
+			obj.MetadataLinks.ForEach(x => _database.Entry(x).State = EntityState.Deleted);
 			await _database.SaveChangesAsync();
+		}
+
+		public Task<ICollection<MetadataID>> GetMetadataID(Expression<Func<MetadataID, bool>> where = null,
+			Sort<MetadataID> sort = default, 
+			Pagination limit = default)
+		{
+			return ApplyFilters(_database.MetadataIds.Include(y => y.Provider),
+				x => _database.MetadataIds.FirstOrDefaultAsync(y => y.ID == x),
+				x => x.ID,
+				where,
+				sort,
+				limit);
 		}
 	}
 }

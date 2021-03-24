@@ -15,9 +15,9 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn)
-                .HasAnnotation("ProductVersion", "3.1.3")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .HasAnnotation("Relational:MaxIdentifierLength", 63)
+                .HasAnnotation("ProductVersion", "5.0.3")
+                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ApiResource", b =>
                 {
@@ -26,16 +26,20 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
+                    b.Property<string>("AllowedAccessTokenSigningAlgorithms")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<DateTime>("Created")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
-                        .HasColumnType("character varying(1000)")
-                        .HasMaxLength(1000);
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<string>("DisplayName")
-                        .HasColumnType("character varying(200)")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<bool>("Enabled")
                         .HasColumnType("boolean");
@@ -45,10 +49,13 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("character varying(200)")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<bool>("NonEditable")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("ShowInDiscoveryDocument")
                         .HasColumnType("boolean");
 
                     b.Property<DateTime?>("Updated")
@@ -74,14 +81,14 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("character varying(200)")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ApiResourceId");
 
-                    b.ToTable("ApiClaims");
+                    b.ToTable("ApiResourceClaims");
                 });
 
             modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ApiResourceProperty", b =>
@@ -96,22 +103,22 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
 
                     b.Property<string>("Key")
                         .IsRequired()
-                        .HasColumnType("character varying(250)")
-                        .HasMaxLength(250);
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
 
                     b.Property<string>("Value")
                         .IsRequired()
-                        .HasColumnType("character varying(2000)")
-                        .HasMaxLength(2000);
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ApiResourceId");
 
-                    b.ToTable("ApiProperties");
+                    b.ToTable("ApiResourceProperties");
                 });
 
-            modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ApiScope", b =>
+            modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ApiResourceScope", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -121,21 +128,80 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
                     b.Property<int>("ApiResourceId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Scope")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApiResourceId");
+
+                    b.ToTable("ApiResourceScopes");
+                });
+
+            modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ApiResourceSecret", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<int>("ApiResourceId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("Created")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<string>("Description")
-                        .HasColumnType("character varying(1000)")
-                        .HasMaxLength(1000);
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<DateTime?>("Expiration")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApiResourceId");
+
+                    b.ToTable("ApiResourceSecrets");
+                });
+
+            modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ApiScope", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<string>("DisplayName")
-                        .HasColumnType("character varying(200)")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<bool>("Emphasize")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("Enabled")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("character varying(200)")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<bool>("Required")
                         .HasColumnType("boolean");
@@ -144,8 +210,6 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
                         .HasColumnType("boolean");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ApiResourceId");
 
                     b.HasIndex("Name")
                         .IsUnique();
@@ -160,56 +224,46 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<int>("ApiScopeId")
+                    b.Property<int>("ScopeId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("character varying(200)")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApiScopeId");
+                    b.HasIndex("ScopeId");
 
                     b.ToTable("ApiScopeClaims");
                 });
 
-            modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ApiSecret", b =>
+            modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ApiScopeProperty", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<int>("ApiResourceId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("Created")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("character varying(1000)")
-                        .HasMaxLength(1000);
-
-                    b.Property<DateTime?>("Expiration")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("Type")
+                    b.Property<string>("Key")
                         .IsRequired()
-                        .HasColumnType("character varying(250)")
-                        .HasMaxLength(250);
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
+
+                    b.Property<int>("ScopeId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Value")
                         .IsRequired()
-                        .HasColumnType("character varying(4000)")
-                        .HasMaxLength(4000);
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ApiResourceId");
+                    b.HasIndex("ScopeId");
 
-                    b.ToTable("ApiSecrets");
+                    b.ToTable("ApiScopeProperties");
                 });
 
             modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.Client", b =>
@@ -240,6 +294,10 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
                     b.Property<bool>("AllowRememberConsent")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("AllowedIdentityTokenSigningAlgorithms")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
                     b.Property<bool>("AlwaysIncludeUserClaimsInIdToken")
                         .HasColumnType("boolean");
 
@@ -253,25 +311,25 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
                         .HasColumnType("boolean");
 
                     b.Property<string>("BackChannelLogoutUri")
-                        .HasColumnType("character varying(2000)")
-                        .HasMaxLength(2000);
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<string>("ClientClaimsPrefix")
-                        .HasColumnType("character varying(200)")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("ClientId")
                         .IsRequired()
-                        .HasColumnType("character varying(200)")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("ClientName")
-                        .HasColumnType("character varying(200)")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("ClientUri")
-                        .HasColumnType("character varying(2000)")
-                        .HasMaxLength(2000);
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<int?>("ConsentLifetime")
                         .HasColumnType("integer");
@@ -280,8 +338,8 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
-                        .HasColumnType("character varying(1000)")
-                        .HasMaxLength(1000);
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<int>("DeviceCodeLifetime")
                         .HasColumnType("integer");
@@ -296,8 +354,8 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
                         .HasColumnType("boolean");
 
                     b.Property<string>("FrontChannelLogoutUri")
-                        .HasColumnType("character varying(2000)")
-                        .HasMaxLength(2000);
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<int>("IdentityTokenLifetime")
                         .HasColumnType("integer");
@@ -309,20 +367,20 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("LogoUri")
-                        .HasColumnType("character varying(2000)")
-                        .HasMaxLength(2000);
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<bool>("NonEditable")
                         .HasColumnType("boolean");
 
                     b.Property<string>("PairWiseSubjectSalt")
-                        .HasColumnType("character varying(200)")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<string>("ProtocolType")
                         .IsRequired()
-                        .HasColumnType("character varying(200)")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<int>("RefreshTokenExpiration")
                         .HasColumnType("integer");
@@ -339,6 +397,9 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
                     b.Property<bool>("RequirePkce")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("RequireRequestObject")
+                        .HasColumnType("boolean");
+
                     b.Property<int>("SlidingRefreshTokenLifetime")
                         .HasColumnType("integer");
 
@@ -349,8 +410,8 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("UserCodeType")
-                        .HasColumnType("character varying(100)")
-                        .HasMaxLength(100);
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.Property<int?>("UserSsoLifetime")
                         .HasColumnType("integer");
@@ -375,13 +436,13 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("character varying(250)")
-                        .HasMaxLength(250);
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
 
                     b.Property<string>("Value")
                         .IsRequired()
-                        .HasColumnType("character varying(250)")
-                        .HasMaxLength(250);
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
 
                     b.HasKey("Id");
 
@@ -402,8 +463,8 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
 
                     b.Property<string>("Origin")
                         .IsRequired()
-                        .HasColumnType("character varying(150)")
-                        .HasMaxLength(150);
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)");
 
                     b.HasKey("Id");
 
@@ -424,8 +485,8 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
 
                     b.Property<string>("GrantType")
                         .IsRequired()
-                        .HasColumnType("character varying(250)")
-                        .HasMaxLength(250);
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
 
                     b.HasKey("Id");
 
@@ -446,8 +507,8 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
 
                     b.Property<string>("Provider")
                         .IsRequired()
-                        .HasColumnType("character varying(200)")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.HasKey("Id");
 
@@ -468,8 +529,8 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
 
                     b.Property<string>("PostLogoutRedirectUri")
                         .IsRequired()
-                        .HasColumnType("character varying(2000)")
-                        .HasMaxLength(2000);
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
 
                     b.HasKey("Id");
 
@@ -490,13 +551,13 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
 
                     b.Property<string>("Key")
                         .IsRequired()
-                        .HasColumnType("character varying(250)")
-                        .HasMaxLength(250);
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
 
                     b.Property<string>("Value")
                         .IsRequired()
-                        .HasColumnType("character varying(2000)")
-                        .HasMaxLength(2000);
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
 
                     b.HasKey("Id");
 
@@ -517,8 +578,8 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
 
                     b.Property<string>("RedirectUri")
                         .IsRequired()
-                        .HasColumnType("character varying(2000)")
-                        .HasMaxLength(2000);
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
 
                     b.HasKey("Id");
 
@@ -539,8 +600,8 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
 
                     b.Property<string>("Scope")
                         .IsRequired()
-                        .HasColumnType("character varying(200)")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.HasKey("Id");
 
@@ -563,49 +624,27 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
-                        .HasColumnType("character varying(2000)")
-                        .HasMaxLength(2000);
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
 
                     b.Property<DateTime?>("Expiration")
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Type")
                         .IsRequired()
-                        .HasColumnType("character varying(250)")
-                        .HasMaxLength(250);
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
 
                     b.Property<string>("Value")
                         .IsRequired()
-                        .HasColumnType("character varying(4000)")
-                        .HasMaxLength(4000);
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ClientId");
 
                     b.ToTable("ClientSecrets");
-                });
-
-            modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.IdentityClaim", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<int>("IdentityResourceId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Type")
-                        .IsRequired()
-                        .HasColumnType("character varying(200)")
-                        .HasMaxLength(200);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IdentityResourceId");
-
-                    b.ToTable("IdentityClaims");
                 });
 
             modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.IdentityResource", b =>
@@ -619,12 +658,12 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
                         .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Description")
-                        .HasColumnType("character varying(1000)")
-                        .HasMaxLength(1000);
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
 
                     b.Property<string>("DisplayName")
-                        .HasColumnType("character varying(200)")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<bool>("Emphasize")
                         .HasColumnType("boolean");
@@ -634,8 +673,8 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("character varying(200)")
-                        .HasMaxLength(200);
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
 
                     b.Property<bool>("NonEditable")
                         .HasColumnType("boolean");
@@ -657,6 +696,28 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
                     b.ToTable("IdentityResources");
                 });
 
+            modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.IdentityResourceClaim", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<int>("IdentityResourceId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdentityResourceId");
+
+                    b.ToTable("IdentityResourceClaims");
+                });
+
             modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.IdentityResourceProperty", b =>
                 {
                     b.Property<int>("Id")
@@ -669,19 +730,19 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
 
                     b.Property<string>("Key")
                         .IsRequired()
-                        .HasColumnType("character varying(250)")
-                        .HasMaxLength(250);
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)");
 
                     b.Property<string>("Value")
                         .IsRequired()
-                        .HasColumnType("character varying(2000)")
-                        .HasMaxLength(2000);
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("IdentityResourceId");
 
-                    b.ToTable("IdentityProperties");
+                    b.ToTable("IdentityResourceProperties");
                 });
 
             modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ApiResourceClaim", b =>
@@ -691,6 +752,8 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
                         .HasForeignKey("ApiResourceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("ApiResource");
                 });
 
             modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ApiResourceProperty", b =>
@@ -700,33 +763,52 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
                         .HasForeignKey("ApiResourceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("ApiResource");
                 });
 
-            modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ApiScope", b =>
+            modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ApiResourceScope", b =>
                 {
                     b.HasOne("IdentityServer4.EntityFramework.Entities.ApiResource", "ApiResource")
                         .WithMany("Scopes")
                         .HasForeignKey("ApiResourceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("ApiResource");
                 });
 
-            modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ApiScopeClaim", b =>
-                {
-                    b.HasOne("IdentityServer4.EntityFramework.Entities.ApiScope", "ApiScope")
-                        .WithMany("UserClaims")
-                        .HasForeignKey("ApiScopeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ApiSecret", b =>
+            modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ApiResourceSecret", b =>
                 {
                     b.HasOne("IdentityServer4.EntityFramework.Entities.ApiResource", "ApiResource")
                         .WithMany("Secrets")
                         .HasForeignKey("ApiResourceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("ApiResource");
+                });
+
+            modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ApiScopeClaim", b =>
+                {
+                    b.HasOne("IdentityServer4.EntityFramework.Entities.ApiScope", "Scope")
+                        .WithMany("UserClaims")
+                        .HasForeignKey("ScopeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Scope");
+                });
+
+            modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ApiScopeProperty", b =>
+                {
+                    b.HasOne("IdentityServer4.EntityFramework.Entities.ApiScope", "Scope")
+                        .WithMany("Properties")
+                        .HasForeignKey("ScopeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Scope");
                 });
 
             modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ClientClaim", b =>
@@ -736,6 +818,8 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Client");
                 });
 
             modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ClientCorsOrigin", b =>
@@ -745,6 +829,8 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Client");
                 });
 
             modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ClientGrantType", b =>
@@ -754,6 +840,8 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Client");
                 });
 
             modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ClientIdPRestriction", b =>
@@ -763,6 +851,8 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Client");
                 });
 
             modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ClientPostLogoutRedirectUri", b =>
@@ -772,6 +862,8 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Client");
                 });
 
             modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ClientProperty", b =>
@@ -781,6 +873,8 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Client");
                 });
 
             modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ClientRedirectUri", b =>
@@ -790,6 +884,8 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Client");
                 });
 
             modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ClientScope", b =>
@@ -799,6 +895,8 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Client");
                 });
 
             modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ClientSecret", b =>
@@ -808,15 +906,19 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
                         .HasForeignKey("ClientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Client");
                 });
 
-            modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.IdentityClaim", b =>
+            modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.IdentityResourceClaim", b =>
                 {
                     b.HasOne("IdentityServer4.EntityFramework.Entities.IdentityResource", "IdentityResource")
                         .WithMany("UserClaims")
                         .HasForeignKey("IdentityResourceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("IdentityResource");
                 });
 
             modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.IdentityResourceProperty", b =>
@@ -826,6 +928,54 @@ namespace Kyoo.Models.DatabaseMigrations.IdentityConfiguration
                         .HasForeignKey("IdentityResourceId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("IdentityResource");
+                });
+
+            modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ApiResource", b =>
+                {
+                    b.Navigation("Properties");
+
+                    b.Navigation("Scopes");
+
+                    b.Navigation("Secrets");
+
+                    b.Navigation("UserClaims");
+                });
+
+            modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.ApiScope", b =>
+                {
+                    b.Navigation("Properties");
+
+                    b.Navigation("UserClaims");
+                });
+
+            modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.Client", b =>
+                {
+                    b.Navigation("AllowedCorsOrigins");
+
+                    b.Navigation("AllowedGrantTypes");
+
+                    b.Navigation("AllowedScopes");
+
+                    b.Navigation("Claims");
+
+                    b.Navigation("ClientSecrets");
+
+                    b.Navigation("IdentityProviderRestrictions");
+
+                    b.Navigation("PostLogoutRedirectUris");
+
+                    b.Navigation("Properties");
+
+                    b.Navigation("RedirectUris");
+                });
+
+            modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.IdentityResource", b =>
+                {
+                    b.Navigation("Properties");
+
+                    b.Navigation("UserClaims");
                 });
 #pragma warning restore 612, 618
         }

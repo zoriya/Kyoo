@@ -8,11 +8,16 @@ namespace Kyoo.Models
 		public int ID { get; set; }
 		public string Slug { get; set; }
 		public string Name { get; set; }
-		public string Poster { get; set; }
+		[SerializeAs("{HOST}/api/collection/{Slug}/poster")] public string Poster { get; set; }
 		public string Overview { get; set; }
-		[JsonIgnore] public virtual IEnumerable<Show> Shows { get; set; }
-		[JsonIgnore] public virtual IEnumerable<Library> Libraries { get; set; }
+		[LoadableRelation] public virtual ICollection<Show> Shows { get; set; }
+		[LoadableRelation] public virtual ICollection<Library> Libraries { get; set; }
 
+#if ENABLE_INTERNAL_LINKS
+		[SerializeIgnore] public virtual ICollection<Link<Collection, Show>> ShowLinks { get; set; }
+		[SerializeIgnore] public virtual ICollection<Link<Library, Collection>> LibraryLinks { get; set; }
+#endif
+		
 		public Collection() { }
 
 		public Collection(string slug, string name, string overview, string poster)

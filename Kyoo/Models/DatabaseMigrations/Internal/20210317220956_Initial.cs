@@ -17,12 +17,12 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "Collections",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
+                    ID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Slug = table.Column<string>(nullable: false),
-                    Name = table.Column<string>(nullable: true),
-                    Poster = table.Column<string>(nullable: true),
-                    Overview = table.Column<string>(nullable: true)
+                    Slug = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    Poster = table.Column<string>(type: "text", nullable: true),
+                    Overview = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -33,10 +33,10 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "Genres",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
+                    ID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Slug = table.Column<string>(nullable: false),
-                    Name = table.Column<string>(nullable: true)
+                    Slug = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -47,10 +47,10 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "Libraries",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
+                    ID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Slug = table.Column<string>(nullable: false),
-                    Name = table.Column<string>(nullable: true),
+                    Slug = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: true),
                     Paths = table.Column<string[]>(type: "text[]", nullable: true)
                 },
                 constraints: table =>
@@ -62,11 +62,11 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "People",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
+                    ID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Slug = table.Column<string>(nullable: false),
-                    Name = table.Column<string>(nullable: true),
-                    Poster = table.Column<string>(nullable: true)
+                    Slug = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    Poster = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -77,11 +77,11 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "Providers",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
+                    ID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Slug = table.Column<string>(nullable: false),
-                    Name = table.Column<string>(nullable: true),
-                    Logo = table.Column<string>(nullable: true)
+                    Slug = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    Logo = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -92,10 +92,10 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "Studios",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
+                    ID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Slug = table.Column<string>(nullable: false),
-                    Name = table.Column<string>(nullable: true)
+                    Slug = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -103,25 +103,49 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProviderLinks",
+                name: "Link<Library, Collection>",
                 columns: table => new
                 {
-                    ParentID = table.Column<int>(nullable: false),
-                    ChildID = table.Column<int>(nullable: false)
+                    FirstID = table.Column<int>(type: "integer", nullable: false),
+                    SecondID = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProviderLinks", x => new { x.ParentID, x.ChildID });
+                    table.PrimaryKey("PK_Link<Library, Collection>", x => new { x.FirstID, x.SecondID });
                     table.ForeignKey(
-                        name: "FK_ProviderLinks_Providers_ChildID",
-                        column: x => x.ChildID,
-                        principalTable: "Providers",
+                        name: "FK_Link<Library, Collection>_Collections_SecondID",
+                        column: x => x.SecondID,
+                        principalTable: "Collections",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ProviderLinks_Libraries_ParentID",
-                        column: x => x.ParentID,
+                        name: "FK_Link<Library, Collection>_Libraries_FirstID",
+                        column: x => x.FirstID,
                         principalTable: "Libraries",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Link<Library, ProviderID>",
+                columns: table => new
+                {
+                    FirstID = table.Column<int>(type: "integer", nullable: false),
+                    SecondID = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Link<Library, ProviderID>", x => new { x.FirstID, x.SecondID });
+                    table.ForeignKey(
+                        name: "FK_Link<Library, ProviderID>_Libraries_FirstID",
+                        column: x => x.FirstID,
+                        principalTable: "Libraries",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Link<Library, ProviderID>_Providers_SecondID",
+                        column: x => x.SecondID,
+                        principalTable: "Providers",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -130,22 +154,22 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "Shows",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
+                    ID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Slug = table.Column<string>(nullable: false),
-                    Title = table.Column<string>(nullable: true),
+                    Slug = table.Column<string>(type: "text", nullable: false),
+                    Title = table.Column<string>(type: "text", nullable: true),
                     Aliases = table.Column<string[]>(type: "text[]", nullable: true),
-                    Path = table.Column<string>(nullable: true),
-                    Overview = table.Column<string>(nullable: true),
-                    Status = table.Column<int>(nullable: true),
-                    TrailerUrl = table.Column<string>(nullable: true),
-                    StartYear = table.Column<int>(nullable: true),
-                    EndYear = table.Column<int>(nullable: true),
-                    Poster = table.Column<string>(nullable: true),
-                    Logo = table.Column<string>(nullable: true),
-                    Backdrop = table.Column<string>(nullable: true),
-                    IsMovie = table.Column<bool>(nullable: false),
-                    StudioID = table.Column<int>(nullable: true)
+                    Path = table.Column<string>(type: "text", nullable: true),
+                    Overview = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<int>(type: "integer", nullable: true),
+                    TrailerUrl = table.Column<string>(type: "text", nullable: true),
+                    StartYear = table.Column<int>(type: "integer", nullable: true),
+                    EndYear = table.Column<int>(type: "integer", nullable: true),
+                    Poster = table.Column<string>(type: "text", nullable: true),
+                    Logo = table.Column<string>(type: "text", nullable: true),
+                    Backdrop = table.Column<string>(type: "text", nullable: true),
+                    IsMovie = table.Column<bool>(type: "boolean", nullable: false),
+                    StudioID = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -159,81 +183,72 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 });
 
             migrationBuilder.CreateTable(
-                name: "CollectionLinks",
+                name: "Link<Collection, Show>",
                 columns: table => new
                 {
-                    ParentID = table.Column<int>(nullable: false),
-                    ChildID = table.Column<int>(nullable: false)
+                    FirstID = table.Column<int>(type: "integer", nullable: false),
+                    SecondID = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CollectionLinks", x => new { x.ParentID, x.ChildID });
+                    table.PrimaryKey("PK_Link<Collection, Show>", x => new { x.FirstID, x.SecondID });
                     table.ForeignKey(
-                        name: "FK_CollectionLinks_Shows_ChildID",
-                        column: x => x.ChildID,
-                        principalTable: "Shows",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_CollectionLinks_Collections_ParentID",
-                        column: x => x.ParentID,
+                        name: "FK_Link<Collection, Show>_Collections_FirstID",
+                        column: x => x.FirstID,
                         principalTable: "Collections",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "GenreLinks",
-                columns: table => new
-                {
-                    ParentID = table.Column<int>(nullable: false),
-                    ChildID = table.Column<int>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_GenreLinks", x => new { x.ParentID, x.ChildID });
                     table.ForeignKey(
-                        name: "FK_GenreLinks_Genres_ChildID",
-                        column: x => x.ChildID,
-                        principalTable: "Genres",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_GenreLinks_Shows_ParentID",
-                        column: x => x.ParentID,
+                        name: "FK_Link<Collection, Show>_Shows_SecondID",
+                        column: x => x.SecondID,
                         principalTable: "Shows",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "LibraryLinks",
+                name: "Link<Library, Show>",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    LibraryID = table.Column<int>(nullable: false),
-                    ShowID = table.Column<int>(nullable: true),
-                    CollectionID = table.Column<int>(nullable: true)
+                    FirstID = table.Column<int>(type: "integer", nullable: false),
+                    SecondID = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LibraryLinks", x => x.ID);
+                    table.PrimaryKey("PK_Link<Library, Show>", x => new { x.FirstID, x.SecondID });
                     table.ForeignKey(
-                        name: "FK_LibraryLinks_Collections_CollectionID",
-                        column: x => x.CollectionID,
-                        principalTable: "Collections",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_LibraryLinks_Libraries_LibraryID",
-                        column: x => x.LibraryID,
+                        name: "FK_Link<Library, Show>_Libraries_FirstID",
+                        column: x => x.FirstID,
                         principalTable: "Libraries",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_LibraryLinks_Shows_ShowID",
-                        column: x => x.ShowID,
+                        name: "FK_Link<Library, Show>_Shows_SecondID",
+                        column: x => x.SecondID,
+                        principalTable: "Shows",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Link<Show, Genre>",
+                columns: table => new
+                {
+                    FirstID = table.Column<int>(type: "integer", nullable: false),
+                    SecondID = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Link<Show, Genre>", x => new { x.FirstID, x.SecondID });
+                    table.ForeignKey(
+                        name: "FK_Link<Show, Genre>_Genres_SecondID",
+                        column: x => x.SecondID,
+                        principalTable: "Genres",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Link<Show, Genre>_Shows_FirstID",
+                        column: x => x.FirstID,
                         principalTable: "Shows",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
@@ -243,12 +258,12 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "PeopleRoles",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
+                    ID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    PeopleID = table.Column<int>(nullable: false),
-                    ShowID = table.Column<int>(nullable: false),
-                    Role = table.Column<string>(nullable: true),
-                    Type = table.Column<string>(nullable: true)
+                    PeopleID = table.Column<int>(type: "integer", nullable: false),
+                    ShowID = table.Column<int>(type: "integer", nullable: false),
+                    Role = table.Column<string>(type: "text", nullable: true),
+                    Type = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -271,14 +286,14 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "Seasons",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
+                    ID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ShowID = table.Column<int>(nullable: false),
-                    SeasonNumber = table.Column<int>(nullable: false),
-                    Title = table.Column<string>(nullable: true),
-                    Overview = table.Column<string>(nullable: true),
-                    Year = table.Column<int>(nullable: true),
-                    Poster = table.Column<string>(nullable: true)
+                    ShowID = table.Column<int>(type: "integer", nullable: false),
+                    SeasonNumber = table.Column<int>(type: "integer", nullable: false),
+                    Title = table.Column<string>(type: "text", nullable: true),
+                    Overview = table.Column<string>(type: "text", nullable: true),
+                    Year = table.Column<int>(type: "integer", nullable: true),
+                    Poster = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -295,19 +310,19 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "Episodes",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
+                    ID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ShowID = table.Column<int>(nullable: false),
-                    SeasonID = table.Column<int>(nullable: true),
-                    SeasonNumber = table.Column<int>(nullable: false),
-                    EpisodeNumber = table.Column<int>(nullable: false),
-                    AbsoluteNumber = table.Column<int>(nullable: false),
-                    Path = table.Column<string>(nullable: true),
-                    Title = table.Column<string>(nullable: true),
-                    Overview = table.Column<string>(nullable: true),
-                    ReleaseDate = table.Column<DateTime>(nullable: true),
-                    Runtime = table.Column<int>(nullable: false),
-                    Poster = table.Column<string>(nullable: true)
+                    ShowID = table.Column<int>(type: "integer", nullable: false),
+                    SeasonID = table.Column<int>(type: "integer", nullable: true),
+                    SeasonNumber = table.Column<int>(type: "integer", nullable: false),
+                    EpisodeNumber = table.Column<int>(type: "integer", nullable: false),
+                    AbsoluteNumber = table.Column<int>(type: "integer", nullable: false),
+                    Path = table.Column<string>(type: "text", nullable: true),
+                    Thumb = table.Column<string>(type: "text", nullable: true),
+                    Title = table.Column<string>(type: "text", nullable: true),
+                    Overview = table.Column<string>(type: "text", nullable: true),
+                    ReleaseDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    Runtime = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -330,15 +345,15 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "MetadataIds",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
+                    ID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    ProviderID = table.Column<int>(nullable: false),
-                    ShowID = table.Column<int>(nullable: true),
-                    EpisodeID = table.Column<int>(nullable: true),
-                    SeasonID = table.Column<int>(nullable: true),
-                    PeopleID = table.Column<int>(nullable: true),
-                    DataID = table.Column<string>(nullable: true),
-                    Link = table.Column<string>(nullable: true)
+                    ProviderID = table.Column<int>(type: "integer", nullable: false),
+                    ShowID = table.Column<int>(type: "integer", nullable: true),
+                    EpisodeID = table.Column<int>(type: "integer", nullable: true),
+                    SeasonID = table.Column<int>(type: "integer", nullable: true),
+                    PeopleID = table.Column<int>(type: "integer", nullable: true),
+                    DataID = table.Column<string>(type: "text", nullable: true),
+                    Link = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -379,17 +394,18 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "Tracks",
                 columns: table => new
                 {
-                    ID = table.Column<int>(nullable: false)
+                    ID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Title = table.Column<string>(nullable: true),
-                    Language = table.Column<string>(nullable: true),
-                    Codec = table.Column<string>(nullable: true),
-                    Path = table.Column<string>(nullable: true),
-                    Type = table.Column<int>(nullable: false),
-                    EpisodeID = table.Column<int>(nullable: false),
-                    IsDefault = table.Column<bool>(nullable: false),
-                    IsForced = table.Column<bool>(nullable: false),
-                    IsExternal = table.Column<bool>(nullable: false)
+                    EpisodeID = table.Column<int>(type: "integer", nullable: false),
+                    TrackIndex = table.Column<int>(type: "integer", nullable: false),
+                    IsDefault = table.Column<bool>(type: "boolean", nullable: false),
+                    IsForced = table.Column<bool>(type: "boolean", nullable: false),
+                    IsExternal = table.Column<bool>(type: "boolean", nullable: false),
+                    Title = table.Column<string>(type: "text", nullable: true),
+                    Language = table.Column<string>(type: "text", nullable: true),
+                    Codec = table.Column<string>(type: "text", nullable: true),
+                    Path = table.Column<string>(type: "text", nullable: true),
+                    Type = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -401,11 +417,6 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_CollectionLinks_ChildID",
-                table: "CollectionLinks",
-                column: "ChildID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Collections_Slug",
@@ -425,11 +436,6 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_GenreLinks_ChildID",
-                table: "GenreLinks",
-                column: "ChildID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Genres_Slug",
                 table: "Genres",
                 column: "Slug",
@@ -442,26 +448,29 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_LibraryLinks_CollectionID",
-                table: "LibraryLinks",
-                column: "CollectionID");
+                name: "IX_Link<Collection, Show>_SecondID",
+                table: "Link<Collection, Show>",
+                column: "SecondID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LibraryLinks_ShowID",
-                table: "LibraryLinks",
-                column: "ShowID");
+                name: "IX_Link<Library, Collection>_SecondID",
+                table: "Link<Library, Collection>",
+                column: "SecondID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LibraryLinks_LibraryID_CollectionID",
-                table: "LibraryLinks",
-                columns: new[] { "LibraryID", "CollectionID" },
-                unique: true);
+                name: "IX_Link<Library, ProviderID>_SecondID",
+                table: "Link<Library, ProviderID>",
+                column: "SecondID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LibraryLinks_LibraryID_ShowID",
-                table: "LibraryLinks",
-                columns: new[] { "LibraryID", "ShowID" },
-                unique: true);
+                name: "IX_Link<Library, Show>_SecondID",
+                table: "Link<Library, Show>",
+                column: "SecondID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Link<Show, Genre>_SecondID",
+                table: "Link<Show, Genre>",
+                column: "SecondID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MetadataIds_EpisodeID",
@@ -505,11 +514,6 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 column: "ShowID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProviderLinks_ChildID",
-                table: "ProviderLinks",
-                column: "ChildID");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Providers_Slug",
                 table: "Providers",
                 column: "Slug",
@@ -539,21 +543,28 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tracks_EpisodeID",
+                name: "IX_Tracks_EpisodeID_Type_Language_TrackIndex_IsForced",
                 table: "Tracks",
-                column: "EpisodeID");
+                columns: new[] { "EpisodeID", "Type", "Language", "TrackIndex", "IsForced" },
+                unique: true);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "CollectionLinks");
+                name: "Link<Collection, Show>");
 
             migrationBuilder.DropTable(
-                name: "GenreLinks");
+                name: "Link<Library, Collection>");
 
             migrationBuilder.DropTable(
-                name: "LibraryLinks");
+                name: "Link<Library, ProviderID>");
+
+            migrationBuilder.DropTable(
+                name: "Link<Library, Show>");
+
+            migrationBuilder.DropTable(
+                name: "Link<Show, Genre>");
 
             migrationBuilder.DropTable(
                 name: "MetadataIds");
@@ -562,25 +573,22 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "PeopleRoles");
 
             migrationBuilder.DropTable(
-                name: "ProviderLinks");
-
-            migrationBuilder.DropTable(
                 name: "Tracks");
-
-            migrationBuilder.DropTable(
-                name: "Genres");
 
             migrationBuilder.DropTable(
                 name: "Collections");
 
             migrationBuilder.DropTable(
-                name: "People");
+                name: "Libraries");
+
+            migrationBuilder.DropTable(
+                name: "Genres");
 
             migrationBuilder.DropTable(
                 name: "Providers");
 
             migrationBuilder.DropTable(
-                name: "Libraries");
+                name: "People");
 
             migrationBuilder.DropTable(
                 name: "Episodes");

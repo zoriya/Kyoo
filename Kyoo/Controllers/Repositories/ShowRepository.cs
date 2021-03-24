@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
-	public class ShowRepository : LocalRepository<Show, ShowDE>, IShowRepository
+	public class ShowRepository : LocalRepository<Show>, IShowRepository
 	{
 		private bool _disposed;
 		private readonly DatabaseContext _database;
@@ -19,7 +19,7 @@ namespace Kyoo.Controllers
 		private readonly IProviderRepository _providers;
 		private readonly Lazy<ISeasonRepository> _seasons;
 		private readonly Lazy<IEpisodeRepository> _episodes;
-		protected override Expression<Func<ShowDE, object>> DefaultSort => x => x.Title;
+		protected override Expression<Func<Show, object>> DefaultSort => x => x.Title;
 
 		public ShowRepository(DatabaseContext database,
 			IStudioRepository studios,
@@ -52,6 +52,7 @@ namespace Kyoo.Controllers
 				_seasons.Value.Dispose();
 			if (_episodes.IsValueCreated)
 				_episodes.Value.Dispose();
+			GC.SuppressFinalize(this);
 		}
 
 		public override async ValueTask DisposeAsync()
@@ -77,89 +78,110 @@ namespace Kyoo.Controllers
 				.Where(x => EF.Functions.ILike(x.Title, query) 
 				            || EF.Functions.ILike(x.Slug, query) 
 							/*|| x.Aliases.Any(y => EF.Functions.ILike(y, query))*/) // NOT TRANSLATABLE.
+				.OrderBy(DefaultSort)
 				.Take(20)
-				.ToListAsync<Show>();
+				.ToListAsync();
 		}
 
-		public override async Task<ShowDE> Create(ShowDE obj)
+		public override async Task<Show> Create(Show obj)
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
-			
-			if (obj.GenreLinks != null)
-			{
-				foreach (GenreLink entry in obj.GenreLinks)
-				{
-					if (!(entry.Child is GenreDE))
-						entry.Child = new GenreDE(entry.Child);
-					_database.Entry(entry).State = EntityState.Added;
-				}
-			}
-
-			if (obj.People != null)
-				foreach (PeopleRole entry in obj.People)
-					_database.Entry(entry).State = EntityState.Added;
-			if (obj.ExternalIDs != null)
-				foreach (MetadataID entry in obj.ExternalIDs)
-					_database.Entry(entry).State = EntityState.Added;
-			
+			obj.GenreLinks.ForEach(x => _database.Entry(x).State = EntityState.Added);
+			obj.People.ForEach(x => _database.Entry(x).State = EntityState.Added);
+			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Added);
 			await _database.SaveChangesAsync($"Trying to insert a duplicated show (slug {obj.Slug} already exists).");
 			return obj;
 		}
 		
-		protected override async Task Validate(ShowDE resource)
+		protected override async Task Validate(Show resource)
 		{
 			await base.Validate(resource);
-			
-			if (ShouldValidate(resource.Studio))
+			if (resource.Studio != null)
 				resource.Studio = await _studios.CreateIfNotExists(resource.Studio, true);
-			
-			if (resource.GenreLinks != null)
-				foreach (GenreLink link in resource.GenreLinks)
-					if (ShouldValidate(link))
-						link.Child = await _genres.CreateIfNotExists(link.Child, true);
-
-			if (resource.People != null)
-				foreach (PeopleRole link in resource.People)
-					if (ShouldValidate(link))
-						link.People = await _people.CreateIfNotExists(link.People, true);
-
-			if (resource.ExternalIDs != null)
-				foreach (MetadataID link in resource.ExternalIDs)
-					if (ShouldValidate(link))
-						link.Provider = await _providers.CreateIfNotExists(link.Provider, true);
+			resource.Genres = await resource.Genres
+				.SelectAsync(x => _genres.CreateIfNotExists(x, true))
+				.ToListAsync();
+			resource.GenreLinks = resource.Genres?
+				.Select(x => Link.UCreate(resource, x))
+				.ToList();
+			await resource.ExternalIDs.ForEachAsync(async id =>
+			{
+				id.Provider = await _providers.CreateIfNotExists(id.Provider, true);
+				id.ProviderID = id.Provider.ID;
+				_database.Entry(id.Provider).State = EntityState.Detached;
+			});
+			await resource.People.ForEachAsync(async role =>
+			{
+				role.People = await _people.CreateIfNotExists(role.People, true);
+				role.PeopleID = role.People.ID;
+				_database.Entry(role.People).State = EntityState.Detached;
+			});
 		}
-		
+
+		protected override async Task EditRelations(Show resource, Show changed, bool resetOld)
+		{
+			await Validate(changed);
+			
+			if (changed.Aliases != null || resetOld)
+				resource.Aliases = changed.Aliases;
+
+			if (changed.Genres != null || resetOld)
+			{
+				await Database.Entry(resource).Collection(x => x.GenreLinks).LoadAsync();
+				resource.GenreLinks = changed.Genres?.Select(x => Link.UCreate(resource, x)).ToList();
+			}
+
+			if (changed.People != null || resetOld)
+			{
+				await Database.Entry(resource).Collection(x => x.People).LoadAsync();
+				resource.People = changed.People;
+			}
+
+			if (changed.ExternalIDs != null || resetOld)
+			{
+				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
+				resource.ExternalIDs = changed.ExternalIDs;
+			}
+		}
+
 		public async Task AddShowLink(int showID, int? libraryID, int? collectionID)
 		{
 			if (collectionID != null)
 			{
-				await _database.CollectionLinks.AddAsync(new CollectionLink {ParentID = collectionID.Value, ChildID = showID});
+				await _database.Links<Collection, Show>()
+					.AddAsync(new Link<Collection, Show>(collectionID.Value, showID));
 				await _database.SaveIfNoDuplicates();
+
+				if (libraryID != null)
+				{
+					await _database.Links<Library, Collection>()
+						.AddAsync(new Link<Library, Collection>(libraryID.Value, collectionID.Value));
+					await _database.SaveIfNoDuplicates();
+				}
 			}
 			if (libraryID != null)
 			{
-				await _database.LibraryLinks.AddAsync(new LibraryLink {LibraryID = libraryID.Value, ShowID = showID});
-				await _database.SaveIfNoDuplicates();
-			}
-
-			if (libraryID != null && collectionID != null)
-			{
-				await _database.LibraryLinks.AddAsync(new LibraryLink {LibraryID = libraryID.Value, CollectionID = collectionID.Value});
+				await _database.Links<Library, Show>()
+					.AddAsync(new Link<Library, Show>(libraryID.Value, showID));
 				await _database.SaveIfNoDuplicates();
 			}
 		}
 		
-		public override async Task Delete(ShowDE obj)
+		public Task<string> GetSlug(int showID)
+		{
+			return _database.Shows.Where(x => x.ID == showID)
+				.Select(x => x.Slug)
+				.FirstOrDefaultAsync();
+		}
+		
+		public override async Task Delete(Show obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 			
 			_database.Entry(obj).State = EntityState.Deleted;
 			
-			if (obj.GenreLinks != null)
-				foreach (GenreLink entry in obj.GenreLinks)
-					_database.Entry(entry).State = EntityState.Deleted;
 			
 			if (obj.People != null)
 				foreach (PeopleRole entry in obj.People)
@@ -167,14 +189,6 @@ namespace Kyoo.Controllers
 			
 			if (obj.ExternalIDs != null)
 				foreach (MetadataID entry in obj.ExternalIDs)
-					_database.Entry(entry).State = EntityState.Deleted;
-			
-			if (obj.CollectionLinks != null)
-				foreach (CollectionLink entry in obj.CollectionLinks)
-					_database.Entry(entry).State = EntityState.Deleted;
-			
-			if (obj.LibraryLinks != null)
-				foreach (LibraryLink entry in obj.LibraryLinks)
 					_database.Entry(entry).State = EntityState.Deleted;
 
 			await _database.SaveChangesAsync();

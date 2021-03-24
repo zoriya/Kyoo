@@ -17,6 +17,37 @@ namespace Kyoo
 {
 	public static class Utility
 	{
+		public static bool IsPropertyExpression(LambdaExpression ex)
+		{
+			return ex == null ||
+			       ex.Body is MemberExpression ||
+			       ex.Body.NodeType == ExpressionType.Convert && ((UnaryExpression)ex.Body).Operand is MemberExpression;
+		}
+		
+		public static string GetPropertyName(LambdaExpression ex)
+		{
+			if (!IsPropertyExpression(ex))
+				throw new ArgumentException($"{ex} is not a property expression.");
+			MemberExpression member = ex.Body.NodeType == ExpressionType.Convert
+				? ((UnaryExpression)ex.Body).Operand as MemberExpression
+				: ex.Body as MemberExpression;
+			return member!.Member.Name;
+		}
+
+		public static object GetValue([NotNull] this MemberInfo member, [NotNull] object obj)
+		{
+			if (member == null)
+				throw new ArgumentNullException(nameof(member));
+			if (obj == null)
+				throw new ArgumentNullException(nameof(obj));
+			return member switch
+			{
+				PropertyInfo property => property.GetValue(obj),
+				FieldInfo field => field.GetValue(obj),
+				_ => throw new ArgumentException($"Can't get value of a non property/field (member: {member}).")
+			};
+		}
+		
 		public static string ToSlug(string str)
 		{
 			if (str == null)
@@ -25,7 +56,7 @@ namespace Kyoo
 			str = str.ToLowerInvariant();
 			
 			string normalizedString = str.Normalize(NormalizationForm.FormD);
-			StringBuilder stringBuilder = new StringBuilder();
+			StringBuilder stringBuilder = new();
 			foreach (char c in normalizedString)
 			{
 				UnicodeCategory unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
@@ -93,7 +124,7 @@ namespace Kyoo
 			return first;
 		}
 		
-		public static T Complete<T>(T first, T second)
+		public static T Complete<T>(T first, T second, Func<PropertyInfo, bool> where = null)
 		{
 			if (first == null)
 				throw new ArgumentNullException(nameof(first));
@@ -104,6 +135,9 @@ namespace Kyoo
 			IEnumerable<PropertyInfo> properties = type.GetProperties()
 				.Where(x => x.CanRead && x.CanWrite 
 				                      && Attribute.GetCustomAttribute(x, typeof(NotMergableAttribute)) == null);
+
+			if (where != null)
+				properties = properties.Where(where);
 			
 			foreach (PropertyInfo property in properties)
 			{
@@ -112,7 +146,7 @@ namespace Kyoo
 					? Activator.CreateInstance(property.PropertyType) 
 					: null;
 
-				if (value?.Equals(defaultValue) == false)
+				if (value?.Equals(defaultValue) == false && value != property.GetValue(first))
 					property.SetValue(first, value);
 			}
 
@@ -221,6 +255,154 @@ namespace Kyoo
 				: type.GetInheritanceTree();
 			return types.FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == genericType);
 		}
+
+		public static IEnumerable<T2> Map<T, T2>([CanBeNull] this IEnumerable<T> self, 
+			[NotNull] Func<T, int, T2> mapper)
+		{
+			if (self == null)
+				yield break;
+			if (mapper == null)
+				throw new ArgumentNullException(nameof(mapper));
+			
+			using IEnumerator<T> enumerator = self.GetEnumerator();
+			int index = 0;
+
+			while (enumerator.MoveNext())
+			{
+				yield return mapper(enumerator.Current, index);
+				index++;
+			}
+		}
+		
+		public static async IAsyncEnumerable<T2> MapAsync<T, T2>([CanBeNull] this IEnumerable<T> self, 
+			[NotNull] Func<T, int, Task<T2>> mapper)
+		{
+			if (self == null)
+				yield break;
+			if (mapper == null)
+				throw new ArgumentNullException(nameof(mapper));
+			
+			using IEnumerator<T> enumerator = self.GetEnumerator();
+			int index = 0;
+
+			while (enumerator.MoveNext())
+			{
+				yield return await mapper(enumerator.Current, index);
+				index++;
+			}
+		}
+		
+		public static async IAsyncEnumerable<T2> SelectAsync<T, T2>([CanBeNull] this IEnumerable<T> self, 
+			[NotNull] Func<T, Task<T2>> mapper)
+		{
+			if (self == null)
+				yield break;
+			if (mapper == null)
+				throw new ArgumentNullException(nameof(mapper));
+			
+			using IEnumerator<T> enumerator = self.GetEnumerator();
+
+			while (enumerator.MoveNext())
+				yield return await mapper(enumerator.Current);
+		}
+
+		public static async Task<List<T>> ToListAsync<T>([NotNull] this IAsyncEnumerable<T> self)
+		{
+			if (self == null)
+				throw new ArgumentNullException(nameof(self));
+			
+			List<T> ret = new();
+			
+			await foreach(T i in self)
+				ret.Add(i);
+			return ret;
+		}
+
+		public static IEnumerable<T> IfEmpty<T>(this IEnumerable<T> self, Action action)
+		{
+			using IEnumerator<T> enumerator = self.GetEnumerator();
+
+			if (!enumerator.MoveNext())
+			{
+				action();
+				yield break;
+			}
+			
+			do
+			{
+				yield return enumerator.Current;
+			}
+			while (enumerator.MoveNext());
+		}
+
+		public static void ForEach<T>([CanBeNull] this IEnumerable<T> self, Action<T> action)
+		{
+			if (self == null)
+				return;
+			foreach (T i in self)
+				action(i);
+		}
+		
+		public static void ForEach([CanBeNull] this IEnumerable self, Action<object> action)
+		{
+			if (self == null)
+				return;
+			foreach (object i in self)
+				action(i);
+		}
+		
+		public static async Task ForEachAsync<T>([CanBeNull] this IEnumerable<T> self, Func<T, Task> action)
+		{
+			if (self == null)
+				return;
+			foreach (T i in self)
+				await action(i);
+		}
+		
+		public static async Task ForEachAsync<T>([CanBeNull] this IAsyncEnumerable<T> self, Action<T> action)
+		{
+			if (self == null)
+				return;
+			await foreach (T i in self)
+				action(i);
+		}
+		
+		public static async Task ForEachAsync([CanBeNull] this IEnumerable self, Func<object, Task> action)
+		{
+			if (self == null)
+				return;
+			foreach (object i in self)
+				await action(i);
+		}
+
+		private static MethodInfo GetMethod(Type type, BindingFlags flag, string name, Type[] generics, object[] args)
+		{
+			MethodInfo[] methods = type.GetMethods(flag | BindingFlags.Public | BindingFlags.NonPublic)
+				.Where(x => x.Name == name)
+				.Where(x => x.GetGenericArguments().Length == generics.Length)
+				.Where(x => x.GetParameters().Length == args.Length)
+				.IfEmpty(() => throw new NullReferenceException($"A method named {name} with " +
+				                                                $"{args.Length} arguments and {generics.Length} generic " +
+				                                                $"types could not be found on {type.Name}."))
+				.Where(x =>
+				{
+					int i = 0;
+					return x.GetGenericArguments().All(y => y.IsAssignableFrom(generics[i++]));
+				})
+				.IfEmpty(() => throw new NullReferenceException($"No method {name} match the generics specified."))
+				.Where(x =>
+				{
+					int i = 0;
+					return x.GetParameters().All(y => y.ParameterType == args[i++].GetType());
+				})
+				.IfEmpty(() => throw new NullReferenceException($"No method {name} match the parameters's types."))
+				.Take(2)
+				.ToArray();
+
+			if (methods.Length == 1)
+				return methods[0];
+			throw new NullReferenceException($"Multiple methods named {name} match the generics and parameters constraints.");
+		}
 		
 		public static T RunGenericMethod<T>(
 			[NotNull] Type owner, 
@@ -245,29 +427,33 @@ namespace Kyoo
 				throw new ArgumentNullException(nameof(types));
 			if (types.Length < 1)
 				throw new ArgumentException($"The {nameof(types)} array is empty. At least one type is needed.");
-			MethodInfo method = owner.GetMethods(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic)
-				.SingleOrDefault(x => x.Name == methodName && x.GetParameters().Length == args.Length);
-			if (method == null)
-				throw new NullReferenceException($"A method named {methodName} with {args.Length} arguments could not be found on {owner.FullName}");
+			MethodInfo method = GetMethod(owner, BindingFlags.Static, methodName, types, args);
 			return (T)method.MakeGenericMethod(types).Invoke(null, args?.ToArray());
 		}
-		
+
+		public static T RunGenericMethod<T>(
+			[NotNull] object instance,
+			[NotNull] string methodName,
+			[NotNull] Type type,
+			params object[] args)
+		{
+			return RunGenericMethod<T>(instance, methodName, new[] {type}, args);
+		}
+
 		public static T RunGenericMethod<T>(
 			[NotNull] object instance, 
 			[NotNull] string methodName,
-			[NotNull] Type type,
+			[NotNull] Type[] types,
 			params object[] args)
 		{
 			if (instance == null)
 				throw new ArgumentNullException(nameof(instance));
 			if (methodName == null)
 				throw new ArgumentNullException(nameof(methodName));
-			if (type == null)
-				throw new ArgumentNullException(nameof(type));
-			MethodInfo method = instance.GetType().GetMethod(methodName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
-			if (method == null)
-				throw new NullReferenceException($"A method named {methodName} could not be found on {instance.GetType().FullName}");
-			return (T)method.MakeGenericMethod(type).Invoke(instance, args?.ToArray());
+			if (types == null || types.Length == 0)
+				throw new ArgumentNullException(nameof(types));
+			MethodInfo method = GetMethod(instance.GetType(), BindingFlags.Instance, methodName, types, args);
+			return (T)method.MakeGenericMethod(types).Invoke(instance, args?.ToArray());
 		}
 
 		[NotNull]
@@ -368,6 +554,22 @@ namespace Kyoo
 				return (T)((dynamic)x).Result;
 			}, TaskContinuationOptions.ExecuteSynchronously);
 		}
+
+		public static Expression<Func<T, bool>> ResourceEquals<T>(IResource obj)
+			where T : IResource
+		{
+			if (obj.ID > 0)
+				return x => x.ID == obj.ID || x.Slug == obj.Slug;
+			return x => x.Slug == obj.Slug;
+		}
+		
+		public static Func<T, bool> ResourceEqualsFunc<T>(IResource obj)
+			where T : IResource
+		{
+			if (obj.ID > 0)
+				return x => x.ID == obj.ID || x.Slug == obj.Slug;
+			return x => x.Slug == obj.Slug;
+		}
 		
 		public static bool ResourceEquals([CanBeNull] object first, [CanBeNull] object second)
 		{
@@ -382,13 +584,9 @@ namespace Kyoo
 			Type type = GetEnumerableType(eno);
 			if (typeof(IResource).IsAssignableFrom(type))
 				return ResourceEquals(eno.Cast<IResource>(), ens.Cast<IResource>());
-			Type genericDefinition = GetGenericDefinition(type, typeof(IResourceLink<,>));
-			if (genericDefinition == null)
-				return RunGenericMethod<bool>(typeof(Enumerable), "SequenceEqual", type, first, second);
-			Type[] types = genericDefinition.GetGenericArguments().Prepend(type).ToArray();
-			return RunGenericMethod<bool>(typeof(Utility), "LinkEquals", types, eno, ens);
+			return RunGenericMethod<bool>(typeof(Enumerable), "SequenceEqual", type, first, second);
 		}
-		
+
 		public static bool ResourceEquals<T>([CanBeNull] T first, [CanBeNull] T second)
 			where T : IResource
 		{
@@ -421,70 +619,6 @@ namespace Kyoo
 				&& first.ID == secondID)
 				return true;
 			return firstID == secondID;
-		}
-		
-		public static bool LinkEquals<T, T1, T2>([CanBeNull] IEnumerable<T> first, [CanBeNull] IEnumerable<T> second) 
-			where T : IResourceLink<T1, T2>
-			where T1 : IResource
-			where T2 : IResource
-		{
-			if (ReferenceEquals(first, second))
-				return true;
-			if (first == null || second == null)
-				return false;
-			return first.SequenceEqual(second, new LinkComparer<T, T1, T2>());
-		}
-
-		public static Expression<T> Convert<T>([CanBeNull] this Expression expr)
-			where T : Delegate
-		{
-			Expression<T> e = expr switch
-			{
-				null => null,
-				LambdaExpression lambda => new ExpressionConverter<T>(lambda).VisitAndConvert(),
-				_ => throw new ArgumentException("Can't convert a non lambda.")
-			};
-
-			return ExpressionRewrite.Rewrite<T>(e);
-		}
-
-		private class ExpressionConverter<TTo> : ExpressionVisitor
-			where TTo : Delegate
-		{
-			private readonly LambdaExpression _expression;
-			private readonly ParameterExpression[] _newParams;
-			
-			internal ExpressionConverter(LambdaExpression expression)
-			{
-				_expression = expression;
-
-				Type[] paramTypes = typeof(TTo).GetGenericArguments()[..^1];
-				if (paramTypes.Length != _expression.Parameters.Count)
-					throw new ArgumentException("Parameter count from internal and external lambda are not matched.");
-				
-				_newParams = new ParameterExpression[paramTypes.Length];
-				for (int i = 0; i < paramTypes.Length; i++)
-				{
-					if (_expression.Parameters[i].Type == paramTypes[i])
-						_newParams[i] = _expression.Parameters[i];
-					else
-						_newParams[i] = Expression.Parameter(paramTypes[i], _expression.Parameters[i].Name);
-				}
-			}
-
-			internal Expression<TTo> VisitAndConvert()
-			{
-				Type returnType = _expression.Type.GetGenericArguments().Last();
-				Expression body = _expression.ReturnType == returnType
-					? Visit(_expression.Body)
-					: Expression.Convert(Visit(_expression.Body)!, returnType);
-				return Expression.Lambda<TTo>(body!, _newParams);
-			}
-
-			protected override Expression VisitParameter(ParameterExpression node)
-			{
-				return _newParams.FirstOrDefault(x => x.Name == node.Name) ?? node;
-			}
 		}
 	}
 }

@@ -5,12 +5,17 @@ namespace Kyoo.Models
 {
 	public class Genre : IResource
 	{
-		[JsonIgnore] public int ID { get; set; }
+		public int ID { get; set; }
 		public string Slug { get; set; }
 		public string Name { get; set; }
 		
-		[JsonIgnore] public virtual IEnumerable<Show> Shows { get; set; }
-
+		[LoadableRelation] public virtual ICollection<Show> Shows { get; set; }
+		
+#if ENABLE_INTERNAL_LINKS
+		[SerializeIgnore] public virtual ICollection<Link<Show, Genre>> ShowLinks { get; set; }
+#endif
+		
+		
 		public Genre() {}
 		
 		public Genre(string name)

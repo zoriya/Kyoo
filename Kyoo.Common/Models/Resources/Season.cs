@@ -1,25 +1,27 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
 {
 	public class Season : IResource
 	{
-		[JsonIgnore] public int ID  { get; set; }
-		[JsonIgnore] public int ShowID { get; set; }
+		public int ID  { get; set; }
+		public string Slug => $"{ShowSlug}-s{SeasonNumber}";
+		[SerializeIgnore] public int ShowID { get; set; }
+		[SerializeIgnore] public string ShowSlug { private get; set; }
+		[LoadableRelation(nameof(ShowID))] public virtual Show Show { get; set; }
 
 		public int SeasonNumber { get; set; } = -1;
 
-		public string Slug => $"{Show.Slug}-s{SeasonNumber}";
 		public string Title { get; set; }
 		public string Overview { get; set; }
 		public int? Year { get; set; }
 
-		[JsonIgnore] public string Poster { get; set; }
-		[EditableRelation] public virtual IEnumerable<MetadataID> ExternalIDs { get; set; }
+		[SerializeAs("{HOST}/api/seasons/{Slug}/thumb")] public string Poster { get; set; }
+		[EditableRelation] [LoadableRelation] public virtual ICollection<MetadataID> ExternalIDs { get; set; }
 
-		[JsonIgnore] public virtual Show Show { get; set; }
-		[JsonIgnore] public virtual IEnumerable<Episode> Episodes { get; set; }
+		[LoadableRelation] public virtual ICollection<Episode> Episodes { get; set; }
 
 		public Season() { }
 
@@ -37,7 +39,7 @@ namespace Kyoo.Models
 			Overview = overview;
 			Year = year;
 			Poster = poster;
-			ExternalIDs = externalIDs;
+			ExternalIDs = externalIDs?.ToArray();
 		}
 	}
 }

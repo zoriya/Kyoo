@@ -11,8 +11,8 @@ namespace Kyoo.Controllers
 		Task<Collection> GetCollectionFromName(string name);
 
 		Task<Show> GetShowByID(Show show);
-		Task<IEnumerable<Show>> SearchShows(string showName, bool isMovie);
-		Task<IEnumerable<PeopleRole>> GetPeople(Show show);
+		Task<ICollection<Show>> SearchShows(string showName, bool isMovie);
+		Task<ICollection<PeopleRole>> GetPeople(Show show);
 
 		Task<Season> GetSeason(Show show, int seasonNumber);
 

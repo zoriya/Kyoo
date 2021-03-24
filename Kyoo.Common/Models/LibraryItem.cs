@@ -1,5 +1,6 @@
 using System;
 using System.Linq.Expressions;
+using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
 {
@@ -20,7 +21,8 @@ namespace Kyoo.Models
 		public string TrailerUrl { get; set; }
 		public int? StartYear { get; set; }
 		public int? EndYear { get; set; }
-		public string Poster { get; set; }
+		[SerializeAs("{HOST}/api/{_type}/{Slug}/poster")] public string Poster { get; set; }
+		private string _type => Type == ItemType.Collection ? "collection" : "show";
 		public ItemType Type { get; set; }
 		
 		public LibraryItem() {}

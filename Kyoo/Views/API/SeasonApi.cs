@@ -17,11 +17,18 @@ namespace Kyoo.Api
 	public class SeasonApi : CrudApi<Season>
 	{
 		private readonly ILibraryManager _libraryManager;
+		private readonly IThumbnailsManager _thumbs;
+		private readonly IFileManager _files;
 
-		public SeasonApi(ILibraryManager libraryManager, IConfiguration configuration)
+		public SeasonApi(ILibraryManager libraryManager,
+			IConfiguration configuration,
+			IThumbnailsManager thumbs,
+			IFileManager files)
 			: base(libraryManager.SeasonRepository, configuration)
 		{
 			_libraryManager = libraryManager;
+			_thumbs = thumbs;
+			_files = files;
 		}
 		
 		[HttpGet("{seasonID:int}/episode")]
@@ -33,10 +40,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 30)
 		{
-			where.Remove("sortBy");
-			where.Remove("limit");
-			where.Remove("afterID");
-
 			try
 			{
 				ICollection<Episode> resources = await _libraryManager.GetEpisodes(
@@ -64,10 +67,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 30)
 		{
-			where.Remove("sortBy");
-			where.Remove("limit");
-			where.Remove("afterID");
-
 			try
 			{
 				ICollection<Episode> resources = await _libraryManager.GetEpisodes(
@@ -96,10 +95,6 @@ namespace Kyoo.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 30)
 		{
-			where.Remove("sortBy");
-			where.Remove("limit");
-			where.Remove("afterID");
-
 			try
 			{
 				ICollection<Episode> resources = await _libraryManager.GetEpisodes(
@@ -136,6 +131,24 @@ namespace Kyoo.Api
 		public async Task<ActionResult<Show>> GetShow(int showID, int _)
 		{
 			return await _libraryManager.GetShow(showID);
+		}
+		
+		[HttpGet("{id:int}/thumb")]
+		[Authorize(Policy="Read")]
+		public async Task<IActionResult> GetThumb(int id)
+		{
+			Season season = await _libraryManager.GetSeason(id);
+			await _libraryManager.Load(season, x => x.Show);
+			return _files.FileResult(await _thumbs.GetSeasonPoster(season));
+		}
+		
+		[HttpGet("{slug}/thumb")]
+		[Authorize(Policy="Read")]
+		public async Task<IActionResult> GetThumb(string slug)
+		{
+			Season season = await _libraryManager.GetSeason(slug);
+			await _libraryManager.Load(season, x => x.Show);
+			return _files.FileResult(await _thumbs.GetSeasonPoster(season));
 		}
 	}
 }

@@ -12,6 +12,7 @@ using Microsoft.Extensions.Configuration;
 namespace Kyoo.CommonApi
 {
 	[ApiController]
+	[ResourceView]
 	public class CrudApi<T> : ControllerBase where T : class, IResource
 	{
 		private readonly IRepository<T> _repository;
@@ -22,10 +23,10 @@ namespace Kyoo.CommonApi
 			_repository = repository;
 			BaseURL = configuration.GetValue<string>("public_url").TrimEnd('/');
 		}
-		
+
+
 		[HttpGet("{id:int}")]
 		[Authorize(Policy = "Read")]
-		[JsonDetailed]
 		public virtual async Task<ActionResult<T>> Get(int id)
 		{
 			T resource = await _repository.Get(id);
@@ -37,7 +38,6 @@ namespace Kyoo.CommonApi
 
 		[HttpGet("{slug}")]
 		[Authorize(Policy = "Read")]
-		[JsonDetailed]
 		public virtual async Task<ActionResult<T>> Get(string slug)
 		{
 			T resource = await _repository.Get(slug);
@@ -68,10 +68,6 @@ namespace Kyoo.CommonApi
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 20)
 		{
-			where.Remove("sortBy");
-			where.Remove("limit");
-			where.Remove("afterID");
-
 			try
 			{
 				ICollection<T> resources = await _repository.GetAll(ApiHelper.ParseWhere<T>(where),
@@ -89,7 +85,7 @@ namespace Kyoo.CommonApi
 		protected Page<TResult> Page<TResult>(ICollection<TResult> resources, int limit)
 			where TResult : IResource
 		{
-			return new Page<TResult>(resources, 
+			return new(resources, 
 				BaseURL + Request.Path,
 				Request.Query.ToDictionary(x => x.Key, x => x.Value.ToString(), StringComparer.InvariantCultureIgnoreCase),
 				limit);
@@ -178,6 +174,21 @@ namespace Kyoo.CommonApi
 			try
 			{
 				await _repository.Delete(slug);
+			}
+			catch (ItemNotFound)
+			{
+				return NotFound();
+			}
+
+			return Ok();
+		}
+		
+		[Authorize(Policy = "Write")]
+		public virtual async Task<IActionResult> Delete(Dictionary<string, string> where)
+		{
+			try
+			{
+				await _repository.DeleteRange(ApiHelper.ParseWhere<T>(where));
 			}
 			catch (ItemNotFound)
 			{

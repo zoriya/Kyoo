@@ -20,7 +20,7 @@ namespace Kyoo.Controllers
 			AfterID = afterID;
 		}
 		
-		public static implicit operator Pagination(int limit) => new Pagination(limit);
+		public static implicit operator Pagination(int limit) => new(limit);
 	}
 
 	public struct Sort<T>
@@ -30,15 +30,11 @@ namespace Kyoo.Controllers
 		
 		public Sort(Expression<Func<T, object>> key, bool descendant = false)
 		{
-			Key = ExpressionRewrite.Rewrite<Func<T, object>>(key);
+			Key = key;
 			Descendant = descendant;
 			
-			if (Key == null || 
-			    Key.Body is MemberExpression || 
-			    Key.Body.NodeType == ExpressionType.Convert && ((UnaryExpression)Key.Body).Operand is MemberExpression)
-				return;
-				
-			throw new ArgumentException("The given sort key is not valid.");
+			if (!Utility.IsPropertyExpression(Key))
+				throw new ArgumentException("The given sort key is not valid.");
 		}
 
 		public Sort(string sortBy)
@@ -58,8 +54,7 @@ namespace Kyoo.Controllers
 			Key = property.Type.IsValueType
 				? Expression.Lambda<Func<T, object>>(Expression.Convert(property, typeof(object)), param)
 				: Expression.Lambda<Func<T, object>>(property, param);
-			Key = ExpressionRewrite.Rewrite<Func<T, object>>(Key);
-					
+
 			Descendant = order switch
 			{
 				"desc" => true,
@@ -67,11 +62,6 @@ namespace Kyoo.Controllers
 				null => false,
 				_ => throw new ArgumentException($"The sort order, if set, should be :asc or :desc but it was :{order}.")
 			};
-		}
-
-		public Sort<TValue> To<TValue>()
-		{
-			return new Sort<TValue>(Key.Convert<Func<TValue, object>>(), Descendant);
 		}
 	}
 	
@@ -108,11 +98,14 @@ namespace Kyoo.Controllers
 		Task DeleteRange(IEnumerable<int> ids);
 		Task DeleteRange(params string[] slugs) => DeleteRange(slugs.AsEnumerable());
 		Task DeleteRange(IEnumerable<string> slugs);
+		Task DeleteRange([NotNull] Expression<Func<T, bool>> where);
 	}
 
 	public interface IShowRepository : IRepository<Show>
 	{
 		Task AddShowLink(int showID, int? libraryID, int? collectionID);
+
+		Task<string> GetSlug(int showID);
 	}
 
 	public interface ISeasonRepository : IRepository<Season>
@@ -190,26 +183,36 @@ namespace Kyoo.Controllers
 			Pagination limit = default
 		) => GetFromShow(showSlug, where, new Sort<PeopleRole>(sort), limit);
 		
-		Task<ICollection<ShowRole>> GetFromPeople(int showID,
-			Expression<Func<ShowRole, bool>> where = null, 
-			Sort<ShowRole> sort = default,
+		Task<ICollection<PeopleRole>> GetFromPeople(int showID,
+			Expression<Func<PeopleRole, bool>> where = null, 
+			Sort<PeopleRole> sort = default,
 			Pagination limit = default);
-		Task<ICollection<ShowRole>> GetFromPeople(int showID,
-			[Optional] Expression<Func<ShowRole, bool>> where,
-			Expression<Func<ShowRole, object>> sort,
+		Task<ICollection<PeopleRole>> GetFromPeople(int showID,
+			[Optional] Expression<Func<PeopleRole, bool>> where,
+			Expression<Func<PeopleRole, object>> sort,
 			Pagination limit = default
-		) => GetFromPeople(showID, where, new Sort<ShowRole>(sort), limit);
+		) => GetFromPeople(showID, where, new Sort<PeopleRole>(sort), limit);
 		
-		Task<ICollection<ShowRole>> GetFromPeople(string showSlug,
-			Expression<Func<ShowRole, bool>> where = null, 
-			Sort<ShowRole> sort = default,
+		Task<ICollection<PeopleRole>> GetFromPeople(string showSlug,
+			Expression<Func<PeopleRole, bool>> where = null, 
+			Sort<PeopleRole> sort = default,
 			Pagination limit = default);
-		Task<ICollection<ShowRole>> GetFromPeople(string showSlug,
-			[Optional] Expression<Func<ShowRole, bool>> where,
-			Expression<Func<ShowRole, object>> sort,
+		Task<ICollection<PeopleRole>> GetFromPeople(string showSlug,
+			[Optional] Expression<Func<PeopleRole, bool>> where,
+			Expression<Func<PeopleRole, object>> sort,
 			Pagination limit = default
-		) => GetFromPeople(showSlug, where, new Sort<ShowRole>(sort), limit);
+		) => GetFromPeople(showSlug, where, new Sort<PeopleRole>(sort), limit);
 	}
-	
-	public interface IProviderRepository : IRepository<ProviderID> {}
+
+	public interface IProviderRepository : IRepository<ProviderID>
+	{
+		Task<ICollection<MetadataID>> GetMetadataID(Expression<Func<MetadataID, bool>> where = null, 
+			Sort<MetadataID> sort = default,
+			Pagination limit = default);
+
+		Task<ICollection<MetadataID>> GetMetadataID([Optional] Expression<Func<MetadataID, bool>> where,
+			Expression<Func<MetadataID, object>> sort,
+			Pagination limit = default
+		) => GetMetadataID(where, new Sort<MetadataID>(sort), limit);
+	}
 }
