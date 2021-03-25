@@ -142,16 +142,16 @@ namespace Kyoo.Controllers
 			if (people == null)
 				throw new ArgumentNullException(nameof(people));
 			string thumbPath = Path.GetFullPath(Path.Combine(_peoplePath, $"{people.Slug}.jpg"));
-			if (!thumbPath.StartsWith(_peoplePath))
-				return Task.FromResult<string>(null);
-			return Task.FromResult(thumbPath);
+			return Task.FromResult(thumbPath.StartsWith(_peoplePath) ? thumbPath : null);
 		}
 
 		public Task<string> GetProviderLogo(ProviderID provider)
 		{
 			if (provider == null)
 				throw new ArgumentNullException(nameof(provider));
-			string thumbPath = Path.GetFullPath(Path.Combine(_providerPath, $"{provider.Slug}.png"));
+			// TODO add a image's type on the provider to allow svg here.
+			// TODO fix trailer display.
+			string thumbPath = Path.GetFullPath(Path.Combine(_providerPath, $"{provider.Slug}.{provider.LogoExtension}"));
 			return Task.FromResult(thumbPath.StartsWith(_providerPath) ? thumbPath : null);
 		}
 	}

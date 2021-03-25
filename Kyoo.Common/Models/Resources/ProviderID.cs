@@ -9,7 +9,7 @@ namespace Kyoo.Models
 		public string Slug { get; set; }
 		public string Name { get; set; }
 		[SerializeAs("{HOST}/api/providers/{Slug}/logo")] public string Logo { get; set; }
-		
+		[SerializeIgnore] public string LogoExtension { get; set; }
 		[LoadableRelation] public virtual ICollection<Library> Libraries { get; set; }
 		
 #if ENABLE_INTERNAL_LINKS
