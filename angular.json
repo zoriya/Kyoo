@@ -54,7 +54,6 @@
                             "optimization": true,
                             "outputHashing": "all",
                             "sourceMap": false,
-                            "extractCss": true,
                             "namedChunks": false,
                             "aot": true,
                             "extractLicenses": true,
@@ -98,7 +97,7 @@
                         "tsConfig": "tsconfig.json",
                         "exclude": [
                             "**/node_modules/**",
-			    "dist"
+			                "dist"
                         ]
                     }
                 }
