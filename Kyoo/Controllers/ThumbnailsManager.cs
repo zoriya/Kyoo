@@ -149,7 +149,6 @@ namespace Kyoo.Controllers
 		{
 			if (provider == null)
 				throw new ArgumentNullException(nameof(provider));
-			// TODO fix trailer display.
 			string thumbPath = Path.GetFullPath(Path.Combine(_providerPath, $"{provider.Slug}.{provider.LogoExtension}"));
 			return Task.FromResult(thumbPath.StartsWith(_providerPath) ? thumbPath : null);
 		}

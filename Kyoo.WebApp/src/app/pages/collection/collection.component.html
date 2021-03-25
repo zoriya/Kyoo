@@ -1,0 +1,13 @@
+<div class="container-fluid">
+	<div class="row justify-content-center">
+		<div class="col-md-4 col-lg-3 col-xl-2 collection-info">
+			<div [style.background-image]="getThumb()"></div>
+		</div>
+		<div class="col-md-8 col-lg-9 col-xl-10">
+			<h3 class="text-center text-md-left p-2 p-md-3">{{collection.name}}</h3>
+			<h5 class="date">{{getDate(collection)}}</h5>
+			<hr />
+			<app-items-grid [page]="shows"></app-items-grid>
+		</div>
+	</div>
+</div>

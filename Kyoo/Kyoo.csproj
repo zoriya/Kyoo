@@ -5,9 +5,9 @@
 		<TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
 		<TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
 		<IsPackable>false</IsPackable>
-		<SpaRoot>Views/WebClient/</SpaRoot>
-		<LoginRoot>Views/Login/</LoginRoot>
-		<TranscoderRoot>../transcoder</TranscoderRoot>
+		<SpaRoot>../Kyoo.WebApp/</SpaRoot>
+		<LoginRoot>../Kyoo.WebLogin/</LoginRoot>
+		<TranscoderRoot>../transcoder/</TranscoderRoot>
 		<DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules/**</DefaultItemExcludes>
 
 		<!-- Set this to true if you enable server-side prerendering -->
@@ -54,7 +54,6 @@
 		<None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules/**" />
 		<StaticFiles Include="$(SpaRoot)static/**" />
 		<LoginFiles Include="$(LoginRoot)**" />
-		<StaticFiles Include="Views/Login/material-icons.css" />
 	</ItemGroup>
 	
 	<Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
@@ -85,16 +84,16 @@
 	
 	<Target Name="Prepare the web app" AfterTargets="Build" Condition="$(Configuration) == 'Debug'">
 		<Copy SourceFiles="@(StaticFiles)" DestinationFolder="$(OutputPath)/wwwroot/%(RecursiveDir)" />
-		<Copy SourceFiles="@(LoginFiles)" DestinationFolder="$(OutputPath)/login/%(RecursiveDir)" />
+		<Copy SourceFiles="@(LoginFiles)" DestinationFolder="$(OutputPath)/wwwroot/%(RecursiveDir)" />
 		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
 	</Target>
 
 	<Target Name="Symlink views to output - Linux" AfterTargets="Build" Condition="$(Configuration) == 'Debug' And $(OS) == 'Unix'">
-		<Exec WorkingDirectory="$(OutputPath)" Command="ln -fs ../../../Views" />
+		<Exec WorkingDirectory="$(OutputPath)" Command="ln -fs $(ProjectDir)/$(SpaRoot)" />
 	</Target>
 
 	<Target Name="Compile the transcoder" BeforeTargets="BeforeBuild">
-		<Exec WorkingDirectory="$(TranscoderRoot)" Command="mkdir --parent build; cd build; cmake ..; make -j" />
+		<Exec WorkingDirectory="$(TranscoderRoot)" Command="mkdir -p build; cd build; cmake ..; make -j" />
 		<Copy SourceFiles="$(TranscoderRoot)/build/libtranscoder.so" DestinationFolder="." />
 	</Target>
 	

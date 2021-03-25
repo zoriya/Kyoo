@@ -1,0 +1,38 @@
+* 
+{
+	box-sizing: border-box;
+	outline: none !important;
+}
+
+*:before, *:after 
+{
+	box-sizing: border-box;
+}
+
+.upload_picture
+{
+	position: absolute; 
+	bottom: 2%;
+	left: 0;
+	right: 0;
+	margin: auto;
+}
+
+.profilePicture
+{
+	padding-top: 100%;
+	height: 0;
+	position: relative;
+	
+	> img 
+	{
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 0;
+		right: 0;
+		width: 100%;
+		height: 100%;
+		border-radius: 50%;
+	}
+}

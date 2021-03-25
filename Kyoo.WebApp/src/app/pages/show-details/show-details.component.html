@@ -1,0 +1,108 @@
+<div class="backdrop">
+	<img id="backdrop" [src]="this.show.backdrop" alt="backdrop" />
+</div>
+
+<div class="header container pt-sm-5">
+	<div class="row">
+		<div class="poster d-none d-sm-block">
+			<div [style.background-image]="getThumb(this.show)"></div>
+		</div>
+		<div class="main col">
+			<div class="info">
+				<h1 class="title">{{this.show.title}}</h1>
+				<h2 class="date" *ngIf="show.endYear && show.startYear != show.endYear; else elseBlock">{{show.startYear}} - {{show.endYear}}</h2>
+				<ng-template #elseBlock><h2 class="date">{{show.startYear}}</h2></ng-template>
+			</div>
+			<div class="buttons">
+				<button mat-mini-fab matTooltipPosition="above" matTooltip="Play" class="mr-3" (click)="playClicked()">
+					<mat-icon>play_arrow</mat-icon>
+				</button>
+				<button *ngIf="this.show.trailerUrl" mat-icon-button matTooltipPosition="above" matTooltip="Trailer" (click)="openTrailer()">
+					<mat-icon>local_movies</mat-icon>
+				</button>
+				<a *ngIf="this.show.isMovie" [href]="'/video/' + this.show.slug" download>
+					<button mat-icon-button matTooltipPosition="above" matTooltip="Download">
+						<mat-icon>cloud_download</mat-icon>
+					</button>
+				</a>
+				<button mat-icon-button matTooltipPosition="above" matTooltip="Watched">
+					<mat-icon>done</mat-icon>
+				</button>
+				<button mat-icon-button matTooltipPosition="above" matTooltip="More" [matMenuTriggerFor]="showMenu">
+					<mat-icon>more_horiz</mat-icon>
+				</button>
+			</div>
+		</div>
+		<div class="col-3 secondary d-none d-md-block">
+			<img [src]="this.show.logo" #logo alt="" (error)="logo.style.display = 'none'" />
+
+			<div>
+				<p>Studio: <b><a draggable="false"
+				                 href="/studio/{{this.show.studio?.slug}}"
+				                 routerLink="/studio/{{this.show.studio?.slug}}">{{this.show.studio?.name}}</a></b></p>
+			</div>
+		</div>
+	</div>
+
+    <mat-menu #showMenu="matMenu">
+        <button mat-menu-item (click)="editMetadata()">Edit metadata</button>
+        <button mat-menu-item (click)="redownloadImages()">Re-download images</button>
+        <button mat-menu-item (click)="extractSubs()">Re-extract subtitles</button>
+    </mat-menu>
+
+	<div class="row pt-3 d-md-none">
+		<div class="col">
+			<p class="mr-1 d-inline-block">Studio: <b><a routerLink="/studio/{{this.show.studio?.slug}}">{{this.show.studio?.name}}</a></b></p>
+			 <div class="d-sm-none">
+                 <p>Genres:
+	                 <span *ngFor="let genre of this.show.genres; let isLast = last">
+		                 <b><a draggable="false"
+		                       href="/genre/{{genre.slug}}"
+		                       routerLink="/genre/{{genre.slug}}">{{genre.name}}</a></b>
+		                 {{isLast ? "" : ", "}}
+	                 </span>
+                 </p>
+			</div>
+		</div>
+	</div>
+
+	<div class="row pt-3">
+		<div class="col">
+			<p class="text-justify overview">{{this.show.overview}}</p>
+            <ul>
+                <li class="provider" *ngFor="let id of this.show.externalIDs">
+                    <a draggable="false" [href]="id.link"><img [src]="id.provider.logo" [alt]="id.provider.name"/></a>
+                </li>
+            </ul>
+		</div>
+		<hr class="d-none d-sm-block">
+		<div class="col-3 d-none d-sm-block">
+			<h3 style="opacity: .8;">Genres</h3>
+			<ul>
+				<li *ngFor="let genre of this.show.genres">
+					<b><a draggable="false" class="genre"
+					      href="/genre/{{genre.slug}}"
+					      routerLink="/genre/{{genre.slug}}">{{genre.name}}</a></b>
+				</li>
+			</ul>
+		</div>
+	</div>
+</div>
+
+
+<div *ngIf="!this.show.isMovie">
+	<div class="container-fluid mt-3">
+		<mat-form-field>
+			<mat-label>Season</mat-label>
+			<mat-select [(value)]="season" (selectionChange)="getEpisodes(season)">
+				<mat-option *ngFor="let season of this.seasons" [value]="season.seasonNumber">{{season.title}}</mat-option>
+			</mat-select>
+		</mat-form-field>
+	</div>
+	<app-episodes-list [episodes]="episodes[season]"></app-episodes-list>
+</div>
+
+<div class="container-fluid mt-5">
+	<h3>Staff</h3>
+</div>
+<app-people-list [people]="people"></app-people-list>
