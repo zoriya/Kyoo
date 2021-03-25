@@ -11,7 +11,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:Enum:item_type", "show,movie,collection")
                 .Annotation("Npgsql:Enum:status", "finished,airing,planned,unknown")
-                .Annotation("Npgsql:Enum:stream_type", "unknown,video,audio,subtitle,font");
+                .Annotation("Npgsql:Enum:stream_type", "unknown,video,audio,subtitle,attachment");
 
             migrationBuilder.CreateTable(
                 name: "Collections",
@@ -81,7 +81,8 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Slug = table.Column<string>(type: "text", nullable: false),
                     Name = table.Column<string>(type: "text", nullable: true),
-                    Logo = table.Column<string>(type: "text", nullable: true)
+                    Logo = table.Column<string>(type: "text", nullable: true),
+                    LogoExtension = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {

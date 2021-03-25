@@ -10,7 +10,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Kyoo.Models.DatabaseMigrations.Internal
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20210317220956_Initial")]
+    [Migration("20210325184215_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -19,7 +19,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
             modelBuilder
                 .HasPostgresEnum(null, "item_type", new[] { "show", "movie", "collection" })
                 .HasPostgresEnum(null, "status", new[] { "finished", "airing", "planned", "unknown" })
-                .HasPostgresEnum(null, "stream_type", new[] { "unknown", "video", "audio", "subtitle", "font" })
+                .HasPostgresEnum(null, "stream_type", new[] { "unknown", "video", "audio", "subtitle", "attachment" })
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
                 .HasAnnotation("ProductVersion", "5.0.3")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
@@ -328,6 +328,9 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
                     b.Property<string>("Logo")
+                        .HasColumnType("text");
+
+                    b.Property<string>("LogoExtension")
                         .HasColumnType("text");
 
                     b.Property<string>("Name")
