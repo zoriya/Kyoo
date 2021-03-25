@@ -50,10 +50,10 @@
 	</ItemGroup>
 	
 	<ItemGroup>
+		<None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules/**" Visible="false" />
+		<StaticFiles Include="$(SpaRoot)static/**" Visible="false" />
+		<LoginFiles Include="$(LoginRoot)**" Visible="false" />
 		<Content Remove="$(SpaRoot)**" />
-		<None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules/**" />
-		<StaticFiles Include="$(SpaRoot)static/**" />
-		<LoginFiles Include="$(LoginRoot)**" />
 	</ItemGroup>
 	
 	<Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
