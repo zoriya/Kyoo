@@ -47,6 +47,8 @@ namespace Kyoo.Controllers
 			if (member?.GetCustomAttribute<DeserializeIgnoreAttribute>() != null)
 				property.ShouldDeserialize = _ => false;
 
+			// TODO use http context to disable serialize as.
+			// TODO check https://stackoverflow.com/questions/53288633/net-core-api-custom-json-resolver-based-on-request-values
 			SerializeAsAttribute serializeAs = member?.GetCustomAttribute<SerializeAsAttribute>();
 			if (serializeAs != null)
 				property.ValueProvider = new SerializeAsProvider(serializeAs.Format, _host);
@@ -57,7 +59,8 @@ namespace Kyoo.Controllers
 		{
 			JsonContract contract = base.CreateContract(objectType);
 			if (Utility.GetGenericDefinition(objectType, typeof(Page<>)) == null
-				&& !objectType.IsAssignableTo(typeof(IEnumerable)))
+				&& !objectType.IsAssignableTo(typeof(IEnumerable))
+				&& objectType.Name != "AnnotatedProblemDetails")
 			{
 				contract.OnSerializingCallbacks.Add((_, _) => _depth++);
 				contract.OnSerializedCallbacks.Add((_, _) => _depth--);
