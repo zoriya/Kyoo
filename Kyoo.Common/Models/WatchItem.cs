@@ -31,6 +31,7 @@ namespace Kyoo.Models
 		public string ShowSlug { get; set; }
 		public int SeasonNumber { get; set; }
 		public int EpisodeNumber { get; set; }
+		public int AbsoluteNumber { get; set; }
 		public string Title { get; set; }
 		public string Slug { get; set; }
 		public DateTime? ReleaseDate { get; set; }
@@ -55,6 +56,7 @@ namespace Kyoo.Models
 			Show show,
 			int seasonNumber,
 			int episodeNumber,
+			int absoluteNumber,
 			string title, 
 			DateTime? releaseDate,
 			string path)
@@ -64,6 +66,7 @@ namespace Kyoo.Models
 			ShowSlug = show.Slug;
 			SeasonNumber = seasonNumber;
 			EpisodeNumber = episodeNumber;
+			AbsoluteNumber = absoluteNumber;
 			Title = title;
 			ReleaseDate = releaseDate;
 			Path = path;
@@ -74,20 +77,21 @@ namespace Kyoo.Models
 			Backdrop = show.Backdrop;
 
 			Container = Path.Substring(Path.LastIndexOf('.') + 1);
-			Slug = Episode.GetSlug(ShowSlug, seasonNumber, episodeNumber);
+			Slug = Episode.GetSlug(ShowSlug, seasonNumber, episodeNumber, absoluteNumber);
 		}
 
 		private WatchItem(int episodeID,
 			Show show,
 			int seasonNumber, 
-			int episodeNumber, 
+			int episodeNumber,
+			int absoluteNumber,
 			string title, 
 			DateTime? releaseDate, 
 			string path, 
 			Track video,
 			ICollection<Track> audios,
 			ICollection<Track> subtitles)
-			: this(episodeID, show, seasonNumber, episodeNumber, title, releaseDate, path)
+			: this(episodeID, show, seasonNumber, episodeNumber, absoluteNumber, title, releaseDate, path)
 		{
 			Video = video;
 			Audios = audios;
@@ -123,6 +127,7 @@ namespace Kyoo.Models
 				ep.Show,
 				ep.SeasonNumber,
 				ep.EpisodeNumber,
+				ep.AbsoluteNumber,
 				ep.Title,
 				ep.ReleaseDate,
 				ep.Path,

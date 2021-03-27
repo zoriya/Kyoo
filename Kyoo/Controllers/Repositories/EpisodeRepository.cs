@@ -61,15 +61,20 @@ namespace Kyoo.Controllers
 			return ret;
 		}
 
-		public override Task<Episode> Get(string slug)
+		public override async Task<Episode> Get(string slug)
 		{
 			Match match = Regex.Match(slug, @"(?<show>.*)-s(?<season>\d*)e(?<episode>\d*)");
-			
-			if (!match.Success)
-				return _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == slug);
-			return Get(match.Groups["show"].Value,
-				int.Parse(match.Groups["season"].Value), 
-				int.Parse(match.Groups["episode"].Value));
+
+			if (match.Success)
+			{
+				return await Get(match.Groups["show"].Value,
+					int.Parse(match.Groups["season"].Value),
+					int.Parse(match.Groups["episode"].Value));
+			}
+
+			Episode episode = await _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == slug);
+			episode.ShowSlug = slug;
+			return episode;
 		}
 
 		public override async Task<Episode> Get(Expression<Func<Episode, bool>> predicate)

@@ -8,7 +8,7 @@ namespace Kyoo.Models
 	public class Episode : IResource, IOnMerge
 	{
 		public int ID { get; set; }
-		public string Slug => GetSlug(ShowSlug, SeasonNumber, EpisodeNumber);
+		public string Slug => GetSlug(ShowSlug, SeasonNumber, EpisodeNumber, AbsoluteNumber);
 		[SerializeIgnore] public string ShowSlug { private get; set; }
 		[SerializeIgnore] public int ShowID { get; set; }
 		[LoadableRelation(nameof(ShowID))] public virtual Show Show { get; set; }
@@ -74,13 +74,16 @@ namespace Kyoo.Models
 			Path = path;
 		}
 
-		public static string GetSlug(string showSlug, int seasonNumber, int episodeNumber)
+		public static string GetSlug(string showSlug, int seasonNumber, int episodeNumber, int absoluteNumber)
 		{
 			if (showSlug == null)
 				throw new ArgumentException("Show's slug is null. Can't find episode's slug.");
-			if (seasonNumber == -1)
-				return showSlug;
-			return $"{showSlug}-s{seasonNumber}e{episodeNumber}";
+			return seasonNumber switch
+			{
+				-1 when absoluteNumber == -1 => showSlug,
+				-1 => $"{showSlug}-{absoluteNumber}",
+				_ => $"{showSlug}-s{seasonNumber}e{episodeNumber}"
+			};
 		}
 
 		public void OnMerge(object merged)
