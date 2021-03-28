@@ -41,8 +41,8 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.3" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="5.0.3" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.3">
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		  <PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
 		</PackageReference>
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="5.0.3" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="5.0.3" />
@@ -56,10 +56,10 @@
 		<Content Remove="$(SpaRoot)**" />
 	</ItemGroup>
 	
-	<Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
+	<Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish" Condition="'$(SkipWebApp)' != 'true'">
 		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
 		<Exec WorkingDirectory="$(SpaRoot)" Command="npm run build -- --prod" />
-		<Exec WorkingDirectory="$(SpaRoot)" Command="npm run build:ssr -- --prod" Condition=" '$(BuildServerSideRenderer)' == 'true' " />
+		<Exec WorkingDirectory="$(SpaRoot)" Command="npm run build:ssr -- --prod" Condition="'$(BuildServerSideRenderer)' == 'true'" />
 
 		<ItemGroup>
 			<DistFiles Include="$(SpaRoot)dist/**; $(SpaRoot)dist-server/**" />
@@ -69,6 +69,11 @@
 				<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 				<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 			</ResolvedFileToPublish>
+		</ItemGroup>
+	</Target>
+
+	<Target Name="Publish static and login" AfterTargets="ComputeFilesToPublish">
+		<ItemGroup>
 			<ResolvedFileToPublish Include="@(StaticFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
 				<RelativePath>wwwroot/%(StaticFiles.RecursiveDir)%(StaticFiles.Filename)%(StaticFiles.Extension)</RelativePath>
 				<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
@@ -81,7 +86,7 @@
 			</ResolvedFileToPublish>
 		</ItemGroup>
 	</Target>
-	
+
 	<Target Name="Prepare the web app" AfterTargets="Build" Condition="$(Configuration) == 'Debug'">
 		<Copy SourceFiles="@(StaticFiles)" DestinationFolder="$(OutputPath)/wwwroot/%(RecursiveDir)" />
 		<Copy SourceFiles="@(LoginFiles)" DestinationFolder="$(OutputPath)/wwwroot/%(RecursiveDir)" />
@@ -92,8 +97,8 @@
 		<Exec WorkingDirectory="$(OutputPath)" Command="ln -fs $(ProjectDir)/$(SpaRoot)" />
 	</Target>
 
-	<Target Name="Compile the transcoder" BeforeTargets="BeforeBuild">
-		<Exec WorkingDirectory="$(TranscoderRoot)" Command="mkdir -p build; cd build; cmake ..; make -j" />
+	<Target Name="Compile the transcoder" BeforeTargets="BeforeBuild" Condition="'$(SkipTranscoder)' != 'true'">
+		<Exec WorkingDirectory="$(TranscoderRoot)" Command='mkdir -p build %26%26 cd build %26%26 cmake .. %26%26 make -j' />
 		<Copy SourceFiles="$(TranscoderRoot)/build/libtranscoder.so" DestinationFolder="." />
 	</Target>
 	

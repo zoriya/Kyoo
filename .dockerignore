@@ -1,0 +1,9 @@
+transcoder/build
+Kyoo.WebApp/nodes_modules
+Kyoo.WebApp/dist
+Kyoo/bin
+Kyoo/obj
+Kyoo.Common/bin
+Kyoo.Common/obj
+Kyoo.CommonAPI/bin
+Kyoo.CommonAPI/obj
