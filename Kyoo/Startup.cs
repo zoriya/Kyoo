@@ -58,14 +58,14 @@ namespace Kyoo
 
 			services.AddDbContext<DatabaseContext>(options =>
 			{
-				options.UseNpgsql(_configuration.GetConnectionString("Database"));
+				options.UseNpgsql(_configuration.GetDatabaseConnection());
 				// .EnableSensitiveDataLogging()
 				// .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()));
 			}, ServiceLifetime.Transient);
 			
 			services.AddDbContext<IdentityDatabase>(options =>
 			{
-				options.UseNpgsql(_configuration.GetConnectionString("Database"));
+				options.UseNpgsql(_configuration.GetDatabaseConnection());
 			});
 
 			string assemblyName = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
@@ -89,13 +89,13 @@ namespace Kyoo
 				.AddConfigurationStore(options =>
 				{
 					options.ConfigureDbContext = builder =>
-						builder.UseNpgsql(_configuration.GetConnectionString("Database"),
+						builder.UseNpgsql(_configuration.GetDatabaseConnection(),
 							sql => sql.MigrationsAssembly(assemblyName));
 				})
 				.AddOperationalStore(options =>
 				{
 					options.ConfigureDbContext = builder =>
-						builder.UseNpgsql(_configuration.GetConnectionString("Database"),
+						builder.UseNpgsql(_configuration.GetDatabaseConnection(),
 							sql => sql.MigrationsAssembly(assemblyName));
 					options.EnableTokenCleanup = true;
 				})

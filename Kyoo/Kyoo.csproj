@@ -98,7 +98,7 @@
 	</Target>
 
 	<Target Name="Compile the transcoder" BeforeTargets="BeforeBuild" Condition="'$(SkipTranscoder)' != 'true'">
-		<Exec WorkingDirectory="$(TranscoderRoot)" Command='mkdir -p build %26%26 cd build %26%26 cmake .. %26%26 make -j' />
+		<Exec WorkingDirectory="$(TranscoderRoot)" Command="mkdir -p build %26%26 cd build %26%26 cmake .. %26%26 make -j" />
 		<Copy SourceFiles="$(TranscoderRoot)/build/libtranscoder.so" DestinationFolder="." />
 	</Target>
 	
