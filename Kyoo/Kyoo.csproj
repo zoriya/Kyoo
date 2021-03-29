@@ -106,12 +106,12 @@
 	</Target>
 	
 	<ItemGroup>
-		<None Include="transcoder.dll" Condition="$(OS) == 'Windows_NT'">
+		<None Include="transcoder.dll" Condition="$(OS) == 'Windows_NT' and '$(SkipTranscoder)' != 'true'">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-		<None Include="libtranscoder.so" Condition="$(OS) == 'Unix'">
+		<None Include="libtranscoder.so" Condition="$(OS) == 'Unix' and '$(SkipTranscoder)' != 'true'">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
