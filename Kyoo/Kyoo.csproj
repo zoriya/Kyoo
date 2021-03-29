@@ -87,10 +87,13 @@
 		</ItemGroup>
 	</Target>
 
-	<Target Name="Prepare the web app" AfterTargets="Build" Condition="$(Configuration) == 'Debug'">
+	<Target Name="Prepare the web app" AfterTargets="Build" Condition="$(Configuration) == 'Debug' and '$(SkipWebApp)' != 'true'">
+		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
+	</Target>
+	
+	<Target Name="Prepare static and login pages" AfterTargets="Build" Condition="$(Configuration) == 'Debug'">
 		<Copy SourceFiles="@(StaticFiles)" DestinationFolder="$(OutputPath)/wwwroot/%(RecursiveDir)" />
 		<Copy SourceFiles="@(LoginFiles)" DestinationFolder="$(OutputPath)/wwwroot/%(RecursiveDir)" />
-		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
 	</Target>
 
 	<Target Name="Symlink views to output - Linux" AfterTargets="Build" Condition="$(Configuration) == 'Debug' And $(OS) == 'Unix'">
