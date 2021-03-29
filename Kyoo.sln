@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Common", "Kyoo.Common\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.CommonAPI", "Kyoo.CommonAPI\Kyoo.CommonAPI.csproj", "{6F91B645-F785-46BB-9C4F-1EFC83E489B6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Tests", "Kyoo.Tests\Kyoo.Tests.csproj", "{D179D5FF-9F75-4B27-8E27-0DBDF1806611}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,5 +25,9 @@ Global
 		{6F91B645-F785-46BB-9C4F-1EFC83E489B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F91B645-F785-46BB-9C4F-1EFC83E489B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F91B645-F785-46BB-9C4F-1EFC83E489B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D179D5FF-9F75-4B27-8E27-0DBDF1806611}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D179D5FF-9F75-4B27-8E27-0DBDF1806611}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D179D5FF-9F75-4B27-8E27-0DBDF1806611}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D179D5FF-9F75-4B27-8E27-0DBDF1806611}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

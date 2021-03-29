@@ -941,6 +941,7 @@ EXCLUDE_PATTERNS      += */ffmpeg/*
 EXCLUDE_PATTERNS      += */bin/*
 EXCLUDE_PATTERNS      += */obj/*
 EXCLUDE_PATTERNS      += */dist/*
+EXCLUDE_PATTERNS      += */Kyoo.Tests/*
 
 # The EXCLUDE_SYMBOLS tag can be used to specify one or more symbol names
 # (namespaces, classes, functions, etc.) that should be excluded from the
