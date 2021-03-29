@@ -8,8 +8,8 @@ arch=("i686" "x86_64" "armv6h")
 url="https://github.com/AnonymusRaccoon/Kyoo"
 license=("GPLv3")
 groups=()
-depends=("dotnet-runtime-bin>=5" "aspnet-runtime-bin>=5" "postgresql")
-makedepends=("dotnet-sdk-bin>=5" "cmake" "gcc" "make" "npm" "git")
+depends=("dotnet-runtime>=5" "aspnet-runtime>=5" "postgresql")
+makedepends=("dotnet-sdk>=5" "cmake" "gcc" "make" "npm" "git")
 install="kyoo.install"
 source=("git+https://github.com/AnonymusRaccoon/Kyoo" #tag=v${pkgver}
 	"kyoo.service"

@@ -1,3 +1,4 @@
 post_install() {
+	sudo -u postgres dropuser kyoo --if-exist
 	sudo -u postgres createuser -d kyoo
 }

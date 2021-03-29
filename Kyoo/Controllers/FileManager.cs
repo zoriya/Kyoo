@@ -51,7 +51,9 @@ namespace Kyoo.Controllers
 		{
 			if (path == null)
 				throw new ArgumentNullException(nameof(path));
-			return Task.FromResult<ICollection<string>>(Directory.GetFiles(path));
+			return Task.FromResult<ICollection<string>>(Directory.Exists(path) 
+				? Directory.GetFiles(path) 
+				: Array.Empty<string>());
 		}
 
 		public Task<bool> Exists(string path)
