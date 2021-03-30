@@ -274,7 +274,10 @@ namespace Kyoo.Controllers
 		{
 			Show old = await libraryManager.GetShow(x => x.Path == showPath);
 			if (old != null)
+			{
+				await libraryManager.Load(old, x => x.ExternalIDs);
 				return old;
+			}
 			Show show = await _metadataProvider.SearchShow(showTitle, isMovie, library);
 			show.Path = showPath;
 			show.People = await _metadataProvider.GetPeople(show, library);
@@ -287,7 +290,10 @@ namespace Kyoo.Controllers
 			{
 				old = await libraryManager.GetShow(show.Slug);
 				if (old.Path == showPath)
+				{
+					await libraryManager.Load(old, x => x.ExternalIDs);
 					return old;
+				}
 				show.Slug += $"-{show.StartYear}";
 				await libraryManager.RegisterShow(show);
 			}

@@ -67,10 +67,7 @@ namespace Kyoo.Controllers
 		{
 			string pluginFolder = _config.GetValue<string>("plugins");
 			if (!Directory.Exists(pluginFolder))
-			{
-				Console.WriteLine("\nPlugin directory does not exist. No plugin loaded.\n");
-				return;
-			}
+				Directory.CreateDirectory(pluginFolder);
 
 			string[] pluginsPaths = Directory.GetFiles(pluginFolder);
 			_plugins = pluginsPaths.SelectMany(path =>
@@ -78,7 +75,7 @@ namespace Kyoo.Controllers
 				path = Path.GetFullPath(path);
 				try
 				{
-					PluginDependencyLoader loader = new PluginDependencyLoader(path);
+					PluginDependencyLoader loader = new(path);
 					Assembly ass = loader.LoadFromAssemblyPath(path);
 					return ass.GetTypes()
 						.Where(x => typeof(IPlugin).IsAssignableFrom(x))
