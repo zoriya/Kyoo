@@ -1,0 +1,30 @@
+name: Release the application
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          #- windows-latest
+          #- macOS-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Checkout submodules
+        run: git submodule update --init --recurse
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+      - name: Build the app
+        run: dotnet publish -c Release -o dist
+      - uses: actions/upload-artifact@v2
+        with:
+          name: artifact-${{matrix.os}}
+          path: dist/*
