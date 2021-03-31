@@ -1,0 +1,36 @@
+name: Release the application
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            runtime: linux-x64
+            artifact: linux
+         # - os: windows-latest
+         #   runtime: win-x64
+         #   artifact: windows
+          - os: macOS-latest
+            runtime: osx-x64
+            artifact: macos
+    steps:
+      - uses: actions/checkout@v1
+      - name: Checkout submodules
+        run: git submodule update --init --recursive
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+      - name: Build the app
+        run: dotnet publish -r ${{matrix.runtime}} -c Release -o dist Kyoo
+      - uses: actions/upload-artifact@v2
+        with:
+          name: kyoo_${{matrix.artifact}}.zip
+          path: dist/*
