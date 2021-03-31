@@ -17,9 +17,9 @@ jobs:
          # - os: windows-latest
          #   runtime: win-x64
          #   artifact: windows
-          - os: macOS-latest
-            runtime: osx-x64
-            artifact: macos
+         # - os: macOS-latest
+         #   runtime: osx-x64
+         #   artifact: macos
     steps:
       - uses: actions/checkout@v1
       - name: Checkout submodules
