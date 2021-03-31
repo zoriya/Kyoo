@@ -20,6 +20,7 @@ namespace Kyoo.Controllers
 				_provider.Mappings[".mkv"] = "video/x-matroska";
 				_provider.Mappings[".ass"] = "text/x-ssa";
 				_provider.Mappings[".srt"] = "application/x-subrip";
+				_provider.Mappings[".m3u8"] = "application/x-mpegurl";
 			}
 
 			if (_provider.TryGetContentType(path, out string contentType))

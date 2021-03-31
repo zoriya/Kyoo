@@ -197,7 +197,7 @@ namespace Kyoo
 				ctx.Response.Headers.Remove("X-Powered-By");
 				ctx.Response.Headers.Remove("Server");
 				ctx.Response.Headers.Add("Feature-Policy", "autoplay 'self'; fullscreen");
-				ctx.Response.Headers.Add("Content-Security-Policy", "default-src 'self'; script-src 'self' blob: 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; frame-src 'self' https://www.youtube.com");
+				ctx.Response.Headers.Add("Content-Security-Policy", "default-src 'self' blob:; script-src 'self' blob: 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; frame-src 'self' https://www.youtube.com");
 				ctx.Response.Headers.Add("X-Frame-Options", "SAMEORIGIN");
 				ctx.Response.Headers.Add("Referrer-Policy", "no-referrer");
 				ctx.Response.Headers.Add("Access-Control-Allow-Origin", "null");
