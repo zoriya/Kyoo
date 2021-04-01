@@ -84,25 +84,8 @@ jobs:
           path: |
             ./*.rpm
             !./*-debuginfo-*.rpm
-
-
   
 #  new-version:
 #    if: startsWith(github.ref, 'refs/tags/v')
-#    runs-on: ubuntu-latest
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-          path: dist/*
+#    runs-on: ubuntu-latest    
+
