@@ -55,8 +55,7 @@ jobs:
           cp -r --no-preserve ownership dist/* pkg/usr/lib/kyoo
           install -Dm 644 kyoo.service -t pkg/usr/lib/systemd/system/
           install -Dm 644 deployment/kyoo.sysusers pkg/usr/lib/sysusers.d/kyoo.conf
-	        install -Dm 644 deployment/kyoo.tmpfiles pkg/usr/lib/tmpfiles.d/kyoo.conf
-
+          install -Dm 644 deployment/kyoo.tmpfiles pkg/usr/lib/tmpfiles.d/kyoo.conf
       - uses: jiro4989/build-deb-action@v2
         with:
           package: kyoo
