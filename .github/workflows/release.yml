@@ -67,7 +67,7 @@ jobs:
       - uses: jiro4989/build-rpm-action@v2
         with:
           package: kyoo
-          package_root: .pkg
+          package_root: pkg
           maintainer: Zoe Roux
           version: ${{env.version}}
           arch: x86_64
