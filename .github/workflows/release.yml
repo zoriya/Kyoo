@@ -42,7 +42,7 @@ jobs:
     needs: build
     env:
       description: "A media browser"
-      version: beta #${{ github.ref }}
+      version: v0.0.1 #${{ github.ref }}
     steps:
       - uses: actions/checkout@v1
       - uses: actions/download-artifact@v2
