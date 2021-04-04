@@ -15,6 +15,10 @@ install="kyoo.install"
 source=()
 sha256sums=()
 
+build() {
+	cp -a "$srcdir/../output" "$srcdir"
+}
+
 package() {
-	cp -r --no-preserve ownership  "$srcdir/output/*" "$pkgdir"
+	cp -a "$srcdir/output/." "$pkgdir"
 }
