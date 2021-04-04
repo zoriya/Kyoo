@@ -81,12 +81,12 @@ jobs:
       - name: Prepare arch package
         run: |
           mkdir deployment/output
+          mv deployment/PKGBUILD.github deployment/PKGBUILD
           cp -a pkg/usr deployment/output/usr
       - uses: edlanglois/pkgbuild-action@v1
         id: makepkg
         with:
           pkgdir: deployment
-          makepkgArgs: -p PKGBUILD.github
       - uses: actions/upload-artifact@v2
         with:
           path: |
