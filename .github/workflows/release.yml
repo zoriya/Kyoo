@@ -52,10 +52,13 @@ jobs:
       - name: Create the package structure
         run: |
           mkdir -p pkg/usr/lib/
+          mkdir -p pkg/DEBIAN
           cp -r --no-preserve ownership dist pkg/usr/lib/kyoo
           install -Dm 644 deployment/kyoo.service -t pkg/usr/lib/systemd/system/
           install -Dm 644 deployment/kyoo.sysusers pkg/usr/lib/sysusers.d/kyoo.conf
           install -Dm 644 deployment/kyoo.tmpfiles pkg/usr/lib/tmpfiles.d/kyoo.conf
+          install -Dm 755 deployment/postinst -t pkg/DEBIAN/
+          install -Dm 755 deployment/postrm -t pkg/DEBIAN/
       - uses: jiro4989/build-rpm-action@v2
         with:
           package: kyoo
@@ -63,6 +66,7 @@ jobs:
           maintainer: Zoe Roux
           version: ${{env.version}}
           arch: x86_64
+#          requires: postgresql-server
           desc: ${{env.description}}
           summary: ${{env.description}}
       - uses: jiro4989/build-deb-action@v2
@@ -71,30 +75,29 @@ jobs:
           package_root: pkg
           maintainer: Zoe Roux
           version: ${{env.version}}
+          depends: postgresql
           arch: amd64
           desc: ${{env.description}}
       - name: Prepare arch package
-        run: cp -r pkg deployment/output
+        run: |
+          mkdir deployment/output
+          cp -a pkg/usr deployment/output/usr
       - uses: edlanglois/pkgbuild-action@v1
+        id: makepkg
         with:
           pkgdir: deployment
           makepkgArgs: -p PKGBUILD.github
       - uses: actions/upload-artifact@v2
         with:
-          name: kyoo-rpm
           path: |
             ./*.rpm
             !./*-debuginfo-*.rpm
       - uses: actions/upload-artifact@v2
         with:
-          name: kyoo-deb
-          path: |
-            ./*.deb
+          path: ./*.deb
       - uses: actions/upload-artifact@v2
         with:
-          name: kyoo-arch
-          path: |
-            ./*.pkg.tar.zst
+          path: ${{steps.makepkg.outputs.pkgfile0}}
   
 #  new-version:
 #    if: startsWith(github.ref, 'refs/tags/v')
