@@ -1,0 +1,21 @@
+# Maintainer: Zoe Roux <zoe.roux@sdg.moe>
+pkgname=kyoo-bin
+pkgver=1.0.0
+pkgrel=1
+epoch=
+pkgdesc="A media browser."
+arch=("i686" "x86_64" "armv6h")
+url="https://github.com/AnonymusRaccoon/Kyoo"
+license=("GPLv3")
+groups=()
+depends=("postgresql")
+makedepends=()
+install="kyoo.install"
+source=("pkg")
+sha256sums=("SKIP")
+
+build() { }
+
+package() {
+	cp -r --no-preserve ownership  "$srcdir" "$pkgdir"
+}
