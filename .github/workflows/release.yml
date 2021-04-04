@@ -56,14 +56,6 @@ jobs:
           install -Dm 644 deployment/kyoo.service -t pkg/usr/lib/systemd/system/
           install -Dm 644 deployment/kyoo.sysusers pkg/usr/lib/sysusers.d/kyoo.conf
           install -Dm 644 deployment/kyoo.tmpfiles pkg/usr/lib/tmpfiles.d/kyoo.conf
-      - uses: jiro4989/build-deb-action@v2
-        with:
-          package: kyoo
-          package_root: pkg
-          maintainer: Zoe Roux
-          version: ${{env.version}}
-          arch: amd64
-          desc: ${{env.description}}
       - uses: jiro4989/build-rpm-action@v2
         with:
           package: kyoo
@@ -73,17 +65,36 @@ jobs:
           arch: x86_64
           desc: ${{env.description}}
           summary: ${{env.description}}
+      - uses: jiro4989/build-deb-action@v2
+        with:
+          package: kyoo
+          package_root: pkg
+          maintainer: Zoe Roux
+          version: ${{env.version}}
+          arch: amd64
+          desc: ${{env.description}}
+      - name: Prepare arch package
+        run: cp -r pkg deployment/
+      - uses: edlanglois/pkgbuild-action@v1
+        with:
+          pkgdir: deployment
+          makepkgArgs: -p PKGBUILD.github
       - uses: actions/upload-artifact@v2
         with:
-          name: artifact-deb
+          name: kyoo-rpm
+          path: |
+            ./*.rpm
+            !./*-debuginfo-*.rpm
+      - uses: actions/upload-artifact@v2
+        with:
+          name: kyoo-deb
           path: |
             ./*.deb
       - uses: actions/upload-artifact@v2
         with:
-          name: artifact-rpm
+          name: kyoo-arch
           path: |
-            ./*.rpm
-            !./*-debuginfo-*.rpm
+            ./*.pkg.tar.zst
   
 #  new-version:
 #    if: startsWith(github.ref, 'refs/tags/v')
