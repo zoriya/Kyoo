@@ -11,11 +11,10 @@ groups=()
 depends=("postgresql")
 makedepends=()
 install="kyoo.install"
-source=("pkg")
-sha256sums=("SKIP")
-
-build() { }
+# The output folder is needed but we can't use directory in the source array.
+source=()
+sha256sums=()
 
 package() {
-	cp -r --no-preserve ownership  "$srcdir" "$pkgdir"
+	cp -r --no-preserve ownership  "$srcdir/output/*" "$pkgdir"
 }
