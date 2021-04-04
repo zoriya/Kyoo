@@ -74,7 +74,7 @@ jobs:
           arch: amd64
           desc: ${{env.description}}
       - name: Prepare arch package
-        run: cp -r pkg deployment/
+        run: cp -r pkg deployment/output
       - uses: edlanglois/pkgbuild-action@v1
         with:
           pkgdir: deployment
