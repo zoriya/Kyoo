@@ -14,6 +14,7 @@ install="kyoo.install"
 # The output folder is needed but we can't use directory in the source array.
 source=()
 sha256sums=()
+options=('staticlibs')
 
 build() {
 	cp -a "$srcdir/../output" "$srcdir"

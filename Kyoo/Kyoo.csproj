@@ -111,7 +111,12 @@
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-		<None Include="libtranscoder.so" Condition="$(OS) == 'Unix' and '$(SkipTranscoder)' != 'true'">
+		<None Include="libtranscoder.so" Condition="$([MSBuild]::IsOsPlatform('Linux')) and '$(SkipTranscoder)' != 'true'">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="libtranscoder.dylib" Condition="$([MSBuild]::IsOsPlatform('OSX')) and '$(SkipTranscoder)' != 'true'">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>

@@ -17,7 +17,7 @@ namespace Kyoo.Controllers
 	{
 		private static class TranscoderAPI
 		{
-			private const string TranscoderPath = "libtranscoder.so";
+			private const string TranscoderPath = "transcoder";
 
 			[DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
 			public static extern int init();
