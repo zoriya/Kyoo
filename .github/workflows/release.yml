@@ -32,12 +32,13 @@ jobs:
       - name: Build the app
         run: dotnet publish -r ${{matrix.runtime}} -c Release -o dist Kyoo
       - name: Compression output
+        shell: bash
         run: |
           assets=kyoo_${{matrix.artifact}}
           if [[ "${{runner.os}}" == "Windows" ]]; then
-            7z a "$assets.zip" dist
+            cd dist && 7z a "../$assets.zip"
           else
-            tar czf "$assets.tar.gz" dist
+            tar -C dist -czf "$assets.tar.gz" .
           fi
       - uses: actions/upload-artifact@v2
         with:
@@ -58,9 +59,9 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: kyoo_linux
-          path: dist.tar.gz
+          path: artifact
       - name: Unzip the published files.
-        run: mkdir dist && tar -C dist -xzf dist.tar.gz dist
+        run: mkdir dist && tar -C dist -xzf artifact/kyoo_linux.tar.gz
       - name: Create the package structure
         run: |
           mkdir -p pkg/usr/lib/
