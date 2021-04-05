@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Builf for ${{matrix.artifact}}
+    name: Build for ${{matrix.artifact}}
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
@@ -37,7 +37,7 @@ jobs:
           path: dist/*
           
   release:
-    name: Create debian & rpm releases
+    name: Create debian, rpm & arch releases
     runs-on: ubuntu-latest
     needs: build
     env:
@@ -87,6 +87,7 @@ jobs:
         id: makepkg
         with:
           pkgdir: deployment
+          namcapDisable: true
       - uses: actions/upload-artifact@v2
         with:
           path: |
