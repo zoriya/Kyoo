@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Builf for ${{matrix.artifact}}
+    name: Build for ${{matrix.artifact}}
     runs-on: ${{matrix.os}}
     strategy:
       matrix:
@@ -31,13 +31,24 @@ jobs:
           dotnet-version: 5.0.x
       - name: Build the app
         run: dotnet publish -r ${{matrix.runtime}} -c Release -o dist Kyoo
+      - name: Compression output
+        shell: bash
+        run: |
+          assets=kyoo_${{matrix.artifact}}
+          if [[ "${{runner.os}}" == "Windows" ]]; then
+            cd dist && 7z a "../$assets.zip"
+          else
+            tar -C dist -czf "$assets.tar.gz" .
+          fi
       - uses: actions/upload-artifact@v2
         with:
           name: kyoo_${{matrix.artifact}}
-          path: dist/*
+          path: |
+            *.zip
+            *.tar.gz
           
   release:
-    name: Create debian & rpm releases
+    name: Create debian, rpm & arch releases
     runs-on: ubuntu-latest
     needs: build
     env:
@@ -48,14 +59,19 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: kyoo_linux
-          path: dist
+          path: artifact
+      - name: Unzip the published files.
+        run: mkdir dist && tar -C dist -xzf artifact/kyoo_linux.tar.gz
       - name: Create the package structure
         run: |
           mkdir -p pkg/usr/lib/
+          mkdir -p pkg/DEBIAN
           cp -r --no-preserve ownership dist pkg/usr/lib/kyoo
           install -Dm 644 deployment/kyoo.service -t pkg/usr/lib/systemd/system/
           install -Dm 644 deployment/kyoo.sysusers pkg/usr/lib/sysusers.d/kyoo.conf
           install -Dm 644 deployment/kyoo.tmpfiles pkg/usr/lib/tmpfiles.d/kyoo.conf
+          install -Dm 755 deployment/postinst -t pkg/DEBIAN/
+          install -Dm 755 deployment/postrm -t pkg/DEBIAN/
       - uses: jiro4989/build-rpm-action@v2
         with:
           package: kyoo
@@ -63,6 +79,7 @@ jobs:
           maintainer: Zoe Roux
           version: ${{env.version}}
           arch: x86_64
+#          requires: postgresql-server
           desc: ${{env.description}}
           summary: ${{env.description}}
       - uses: jiro4989/build-deb-action@v2
@@ -71,30 +88,33 @@ jobs:
           package_root: pkg
           maintainer: Zoe Roux
           version: ${{env.version}}
+          depends: postgresql
           arch: amd64
           desc: ${{env.description}}
       - name: Prepare arch package
-        run: cp -r pkg deployment/output
+        run: |
+          mkdir deployment/output
+          mv deployment/PKGBUILD.github deployment/PKGBUILD
+          cp -a pkg/usr deployment/output/usr
       - uses: edlanglois/pkgbuild-action@v1
+        id: makepkg
         with:
           pkgdir: deployment
-          makepkgArgs: -p PKGBUILD.github
+          namcapDisable: true
       - uses: actions/upload-artifact@v2
         with:
-          name: kyoo-rpm
+          name: kyoo_rpm
           path: |
             ./*.rpm
             !./*-debuginfo-*.rpm
       - uses: actions/upload-artifact@v2
         with:
-          name: kyoo-deb
-          path: |
-            ./*.deb
+          name: kyoo_debian
+          path: ./*.deb
       - uses: actions/upload-artifact@v2
         with:
-          name: kyoo-arch
-          path: |
-            ./*.pkg.tar.zst
+          name: kyoo_arch
+          path: ${{steps.makepkg.outputs.pkgfile0}}
   
 #  new-version:
 #    if: startsWith(github.ref, 'refs/tags/v')
