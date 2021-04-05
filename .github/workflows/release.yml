@@ -31,10 +31,20 @@ jobs:
           dotnet-version: 5.0.x
       - name: Build the app
         run: dotnet publish -r ${{matrix.runtime}} -c Release -o dist Kyoo
+      - name: Compression output
+        run: |
+          assets=kyoo_${{matrix.artifact}}
+          if [[ "${{runner.os}}" == "Windows" ]]; then
+            7z a "$assets.zip" dist
+          else
+            tar czf "$assets.tar.gz" dist
+          fi
       - uses: actions/upload-artifact@v2
         with:
           name: kyoo_${{matrix.artifact}}
-          path: dist/*
+          path: |
+            *.zip
+            *.tar.gz
           
   release:
     name: Create debian, rpm & arch releases
@@ -48,7 +58,9 @@ jobs:
       - uses: actions/download-artifact@v2
         with:
           name: kyoo_linux
-          path: dist
+          path: dist.tar.gz
+      - name: Unzip the published files.
+        run: mkdir dist && tar -C dist -xzf dist.tar.gz dist
       - name: Create the package structure
         run: |
           mkdir -p pkg/usr/lib/
@@ -90,14 +102,17 @@ jobs:
           namcapDisable: true
       - uses: actions/upload-artifact@v2
         with:
+          name: kyoo_rpm
           path: |
             ./*.rpm
             !./*-debuginfo-*.rpm
       - uses: actions/upload-artifact@v2
         with:
+          name: kyoo_debian
           path: ./*.deb
       - uses: actions/upload-artifact@v2
         with:
+          name: kyoo_arch
           path: ${{steps.makepkg.outputs.pkgfile0}}
   
 #  new-version:
