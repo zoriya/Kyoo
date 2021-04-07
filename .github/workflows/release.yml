@@ -66,22 +66,22 @@ jobs:
         run: |
           mkdir -p pkg/usr/lib/
           mkdir -p pkg/DEBIAN
-          cp -r --no-preserve ownership dist pkg/usr/lib/kyoo
-          install -Dm 644 deployment/kyoo.service -t pkg/usr/lib/systemd/system/
-          install -Dm 644 deployment/kyoo.sysusers pkg/usr/lib/sysusers.d/kyoo.conf
-          install -Dm 644 deployment/kyoo.tmpfiles pkg/usr/lib/tmpfiles.d/kyoo.conf
-          install -Dm 755 deployment/postinst -t pkg/DEBIAN/
-          install -Dm 755 deployment/postrm -t pkg/DEBIAN/
-#      - uses: jiro4989/build-rpm-action@v2
-#        with:
-#          package: kyoo
-#          package_root: pkg
-#          maintainer: Zoe Roux
-#          version: ${{env.version}}
-#          arch: x86_64
-#          requires: postgresql-server
-#          desc: ${{env.description}}
-#          summary: ${{env.description}}
+          sudo cp -r --no-preserve ownership dist pkg/usr/lib/kyoo
+          sudo install -Dm 644 deployment/kyoo.service -t pkg/usr/lib/systemd/system/
+          sudo install -Dm 644 deployment/kyoo.sysusers pkg/usr/lib/sysusers.d/kyoo.conf
+          sudo install -Dm 644 deployment/kyoo.tmpfiles pkg/usr/lib/tmpfiles.d/kyoo.conf
+          sudo install -Dm 755 deployment/postinst -t pkg/DEBIAN/
+          sudo install -Dm 755 deployment/postrm -t pkg/DEBIAN/
+      - uses: jiro4989/build-rpm-action@v2
+        with:
+          package: kyoo
+          package_root: pkg
+          maintainer: Zoe Roux
+          version: ${{env.version}}
+          arch: x86_64
+          requires: postgresql-server
+          desc: ${{env.description}}
+          summary: ${{env.description}}
       - uses: jiro4989/build-deb-action@v2
         with:
           package: kyoo
