@@ -38,6 +38,7 @@ jobs:
           if [[ "${{runner.os}}" == "Windows" ]]; then
             cd dist && 7z a "../$assets.zip"
           else
+            sudo chown root:root -R dist
             tar -C dist -czf "$assets.tar.gz" .
           fi
       - uses: actions/upload-artifact@v2
@@ -64,8 +65,8 @@ jobs:
         run: mkdir dist && tar -C dist -xzf artifact/kyoo_linux.tar.gz
       - name: Create the package structure
         run: |
-          mkdir -p pkg/usr/lib/
-          mkdir -p pkg/DEBIAN
+          sudo mkdir -p pkg/usr/lib/
+          sudo mkdir -p pkg/DEBIAN
           sudo cp -r --no-preserve ownership dist pkg/usr/lib/kyoo
           sudo install -Dm 644 deployment/kyoo.service -t pkg/usr/lib/systemd/system/
           sudo install -Dm 644 deployment/kyoo.sysusers pkg/usr/lib/sysusers.d/kyoo.conf
