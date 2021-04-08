@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - os: ubuntu-latest
+          - os: ubuntu-16.04 # We are using an old version of ubuntu to have an old libc version (forward compatibility exist but not backward)
             runtime: linux-x64
             artifact: linux
          # - os: windows-latest
