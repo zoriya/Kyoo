@@ -72,7 +72,6 @@ jobs:
           sudo install -Dm 644 deployment/kyoo.sysusers pkg/usr/lib/sysusers.d/kyoo.conf
           sudo install -Dm 644 deployment/kyoo.tmpfiles pkg/usr/lib/tmpfiles.d/kyoo.conf
           sudo install -Dm 755 deployment/postinst -t pkg/DEBIAN/
-          sudo install -Dm 755 deployment/postrm -t pkg/DEBIAN/
       - uses: jiro4989/build-rpm-action@v2
         with:
           package: kyoo
