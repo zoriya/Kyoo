@@ -7,7 +7,7 @@
 		<IsPackable>false</IsPackable>
 		<SpaRoot>../Kyoo.WebApp/</SpaRoot>
 		<LoginRoot>../Kyoo.WebLogin/</LoginRoot>
-		<TranscoderRoot>../transcoder/</TranscoderRoot>
+		<TranscoderRoot>../Kyoo.Transcoder/</TranscoderRoot>
 		<DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules/**</DefaultItemExcludes>
 
 		<!-- Set this to true if you enable server-side prerendering -->

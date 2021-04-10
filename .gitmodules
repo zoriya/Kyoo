@@ -1,5 +1,5 @@
 [submodule "transcoder"]
-	path = transcoder
+	path = Kyoo.Transcoder
 	url = ../Kyoo.Transcoder.git
 	branch = master
 [submodule "WebApp"]
