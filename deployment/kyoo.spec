@@ -8,6 +8,15 @@ BuildArch:	x86_64
 Requires:	postgresql-server
 
 
+%install:
+cp -a * %{buildroot}
+
+%clean
+rm -rf %{buildroot}
+
+%files
+*
+
 %post:
 sudo -u postgres psql << "EOF"
 DO $$

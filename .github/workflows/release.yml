@@ -72,16 +72,6 @@ jobs:
           sudo install -Dm 644 deployment/kyoo.sysusers pkg/usr/lib/sysusers.d/kyoo.conf
           sudo install -Dm 644 deployment/kyoo.tmpfiles pkg/usr/lib/tmpfiles.d/kyoo.conf
           sudo install -Dm 755 deployment/postinst -t pkg/DEBIAN/
-      - uses: jiro4989/build-rpm-action@v2
-        with:
-          package: kyoo
-          package_root: pkg
-          maintainer: Zoe Roux
-          version: ${{env.version}}
-          arch: x86_64
-          requires: postgresql-server
-          desc: ${{env.description}}
-          summary: ${{env.description}}
       - uses: jiro4989/build-deb-action@v2
         with:
           package: kyoo
@@ -91,6 +81,10 @@ jobs:
           depends: postgresql
           arch: amd64
           desc: ${{env.description}}
+      - name: Build rpm package
+        run: |
+          rpmbuild -bb --buildroot . --build-in-place deployment/kyoo.specc
+          tree -a
       - name: Prepare arch package
         run: |
           mkdir deployment/output
