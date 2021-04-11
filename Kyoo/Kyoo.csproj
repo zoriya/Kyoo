@@ -22,8 +22,8 @@
 
 	<PropertyGroup>
 		<IsWindows Condition="'$(OS)' == 'Windows_NT'">true</IsWindows>
-		<IsOSX Condition="'$([MSBuild]::IsOsPlatform(OSX))' == 'true'">true</IsOSX>
-		<IsLinux Condition="'$([MSBuild]::IsOsPlatform(Linux))' == 'true'">true</IsLinux>
+		<IsOSX Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</IsOSX>
+		<IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</IsLinux>
 	</PropertyGroup>
 
 	<ItemGroup>
