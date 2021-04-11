@@ -20,6 +20,12 @@
 		<LangVersion>default</LangVersion>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<IsWindows Condition="'$(OS)' == 'Windows_NT'">true</IsWindows>
+		<IsOSX Condition="'$([MSBuild]::IsOsPlatform(OSX))' == 'true'">true</IsOSX>
+		<IsLinux Condition="'$([MSBuild]::IsOsPlatform(Linux))' == 'true'">true</IsLinux>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<ProjectReference Include="../Kyoo.Common/Kyoo.Common.csproj" />
 		<ProjectReference Include="../Kyoo.CommonAPI/Kyoo.CommonAPI.csproj" />
@@ -106,17 +112,17 @@
 	</Target>
 	
 	<ItemGroup>
-		<None Include="transcoder.dll" Condition="$(OS) == 'Windows_NT' and '$(SkipTranscoder)' != 'true'">
+		<None Include="transcoder.dll" Condition="'$(IsWindows)' == 'true' and '$(SkipTranscoder)' != 'true'">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-		<None Include="libtranscoder.so" Condition="$([MSBuild]::IsOsPlatform(Linux)) and '$(SkipTranscoder)' != 'true'">
+		<None Include="libtranscoder.so" Condition="'$(IsLinux)' == 'true' and '$(SkipTranscoder)' != 'true'">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
 	<ItemGroup>
-		<None Include="libtranscoder.dylib" Condition="$([MSBuild]::IsOsPlatform(OSX)) and '$(SkipTranscoder)' != 'true'">
+		<None Include="libtranscoder.dylib" Condition="'$(IsOSX)' == 'true' and '$(SkipTranscoder)' != 'true'">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
 	</ItemGroup>
