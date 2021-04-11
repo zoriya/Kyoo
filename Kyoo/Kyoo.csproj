@@ -26,6 +26,12 @@
 		<IsLinux Condition="$([MSBuild]::IsOSPlatform('Linux'))">true</IsLinux>
 	</PropertyGroup>
 
+	<PropertyGroup>
+		<TranscoderBinary Condition="'$(IsWindows)' == 'true'">transcoder.dll</TranscoderBinary>
+		<TranscoderBinary Condition="'$(IsOSX)' == 'true'">libtranscoder.dylib</TranscoderBinary>
+		<TranscoderBinary Condition="'$(IsLinux)' == 'true'">libtranscoder.so</TranscoderBinary>
+	</PropertyGroup>
+
 	<ItemGroup>
 		<ProjectReference Include="../Kyoo.Common/Kyoo.Common.csproj" />
 		<ProjectReference Include="../Kyoo.CommonAPI/Kyoo.CommonAPI.csproj" />
@@ -61,12 +67,6 @@
 		<LoginFiles Include="$(LoginRoot)**" Visible="false" />
 		<Content Remove="$(SpaRoot)**" />
 	</ItemGroup>
-
-	<Target Name="Log OS" BeforeTargets="BuildTranscoder">
-		<Message Text="IsWindows: $(IsWindows)" Importance="High" />
-		<Message Text="IsOSX: $(IsOSX)" Importance="High" />
-		<Message Text="IsLinux: $(IsLinux)" Importance="High" />
-	</Target>
 
 	<Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish" Condition="'$(SkipWebApp)' != 'true'">
 		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
@@ -114,18 +114,12 @@
 
 	<Target Name="BuildTranscoder" BeforeTargets="BeforeBuild" Condition="'$(SkipTranscoder)' != 'true'">
 		<Exec WorkingDirectory="$(TranscoderRoot)" Command="mkdir -p build %26%26 cd build %26%26 cmake .. %26%26 make -j" />
-		<Copy SourceFiles="$(TranscoderRoot)/build/libtranscoder.so" DestinationFolder="." />
+		<Copy SourceFiles="$(TranscoderRoot)/build/$(TranscoderBinary)" DestinationFolder="." />
 	</Target>
 	
 	<ItemGroup Condition="'$(SkipTranscoder)' != 'true'">
-		<None Include="transcoder.dll" Condition="'$(IsWindows)' == 'true'">
+		<None Include="$(TranscoderBinary)">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Include="libtranscoder.dylib" Condition="'$(IsOSX)' == 'true'">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-		<None Include="libtranscoder.so" Condition="'$(IsLinux)' == 'true'">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>                                 	
 		</None>
 	</ItemGroup>
 </Project>
