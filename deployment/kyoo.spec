@@ -8,7 +8,7 @@ BuildArch:	x86_64
 Requires:	postgresql-server
 
 
-%install:
+%install
 cp -a * %{buildroot}
 
 %clean
