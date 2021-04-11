@@ -21,9 +21,9 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<IsWindows Condition="'$(OS)' == 'Windows_NT'">true</IsWindows>
-		<IsOSX Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</IsOSX>
-		<IsLinux Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))' == 'true'">true</IsLinux>
+		<IsWindows Condition="$([MSBuild]::IsOSPlatform('Windows'))">true</IsWindows>
+		<IsOSX Condition="$([MSBuild]::IsOSPlatform('OSX'))">true</IsOSX>
+		<IsLinux Condition"$([MSBuild]::IsOSPlatform('Linux'))">true</IsLinux>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -61,7 +61,17 @@
 		<LoginFiles Include="$(LoginRoot)**" Visible="false" />
 		<Content Remove="$(SpaRoot)**" />
 	</ItemGroup>
-	
+
+	<Target Name="Log Windows" Condition="'$(IsWindows)' == 'true'">
+		<Message Text="Building for Windows" />
+	</Target>
+	<Target Name="Log OSX" Condition="'$(IsOSX)' == 'true'">
+		<Message Text="Building for OSX" />
+	</Target>
+	<Target Name="Log Linux" Condition="'$(IsLinux)' == 'true'">
+		<Message Text="Building for Linux" />
+	</Target>
+
 	<Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish" Condition="'$(SkipWebApp)' != 'true'">
 		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
 		<Exec WorkingDirectory="$(SpaRoot)" Command="npm run build -- --prod" />
