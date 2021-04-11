@@ -83,7 +83,7 @@ jobs:
           desc: ${{env.description}}
       - name: Build rpm package
         run: |
-          rpmbuild -bb --buildroot . --build-in-place deployment/kyoo.specc
+          rpmbuild -bb --buildroot . --build-in-place deployment/kyoo.spec
           tree -a
       - name: Prepare arch package
         run: |
