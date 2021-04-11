@@ -39,7 +39,7 @@ jobs:
             cd dist && 7z a "../$assets.zip"
           else
             rootgrp=$([ "${{runner.os}}" == "macOS" ] && echo wheel || echo root)
-            sudo chown root:$rootgrp -R dist
+            sudo chown -R root:$rootgrp dist
             tar -C dist -czf "$assets.tar.gz" .
           fi
       - uses: actions/upload-artifact@v2
