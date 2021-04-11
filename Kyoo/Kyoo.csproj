@@ -62,14 +62,10 @@
 		<Content Remove="$(SpaRoot)**" />
 	</ItemGroup>
 
-	<Target Name="Log Windows" Condition="'$(IsWindows)' == 'true'" BeforeTargets="BeforeResolveReferences">
-		<Message Text="Building for Windows" />
-	</Target>
-	<Target Name="Log OSX" Condition="'$(IsOSX)' == 'true'" BeforeTargets="BeforeResolveReferences">
-		<Message Text="Building for OSX" />
-	</Target>
-	<Target Name="Log Linux" Condition="'$(IsLinux)' == 'true'" BeforeTargets="BeforeResolveReferences">
-		<Message Text="Building for Linux" />
+	<Target Name="Log OS" BeforeTargets="BuildTranscoder">
+		<Message Text="IsWindows: $(IsWindows)" Importance="High" />
+		<Message Text="IsOSX: $(IsOSX)" Importance="High" />
+		<Message Text="IsLinux: $(IsLinux)" Importance="High" />
 	</Target>
 
 	<Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish" Condition="'$(SkipWebApp)' != 'true'">
@@ -116,7 +112,7 @@
 		<Exec WorkingDirectory="$(OutputPath)" Command="ln -fs $(ProjectDir)/$(SpaRoot)" />
 	</Target>
 
-	<Target Name="Compile the transcoder" BeforeTargets="BeforeBuild" Condition="'$(SkipTranscoder)' != 'true'">
+	<Target Name="BuildTranscoder" BeforeTargets="BeforeBuild" Condition="'$(SkipTranscoder)' != 'true'">
 		<Exec WorkingDirectory="$(TranscoderRoot)" Command="mkdir -p build %26%26 cd build %26%26 cmake .. %26%26 make -j" />
 		<Copy SourceFiles="$(TranscoderRoot)/build/libtranscoder.so" DestinationFolder="." />
 	</Target>
