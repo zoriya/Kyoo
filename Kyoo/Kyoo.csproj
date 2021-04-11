@@ -23,7 +23,7 @@
 	<PropertyGroup>
 		<IsWindows Condition="$([MSBuild]::IsOSPlatform('Windows'))">true</IsWindows>
 		<IsOSX Condition="$([MSBuild]::IsOSPlatform('OSX'))">true</IsOSX>
-		<IsLinux Condition"$([MSBuild]::IsOSPlatform('Linux'))">true</IsLinux>
+		<IsLinux Condition="$([MSBuild]::IsOSPlatform('Linux'))">true</IsLinux>
 	</PropertyGroup>
 
 	<ItemGroup>
