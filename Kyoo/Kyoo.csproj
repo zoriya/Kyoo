@@ -117,19 +117,15 @@
 		<Copy SourceFiles="$(TranscoderRoot)/build/libtranscoder.so" DestinationFolder="." />
 	</Target>
 	
-	<ItemGroup>
-		<None Include="transcoder.dll" Condition="'$(IsWindows)' == 'true' and '$(SkipTranscoder)' != 'true'">
+	<ItemGroup Condition="'$(SkipTranscoder)' != 'true'">
+		<None Include="transcoder.dll" Condition="'$(IsWindows)' == 'true'">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-	</ItemGroup>
-	<ItemGroup>
-		<None Include="libtranscoder.so" Condition="'$(IsLinux)' == 'true' and '$(SkipTranscoder)' != 'true'">
+		<None Include="libtranscoder.dylib" Condition="'$(IsOSX)' == 'true'">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
-	</ItemGroup>
-	<ItemGroup>
-		<None Include="libtranscoder.dylib" Condition="'$(IsOSX)' == 'true' and '$(SkipTranscoder)' != 'true'">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		<None Include="libtranscoder.so" Condition="'$(IsLinux)' == 'true'">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>                                 	
 		</None>
 	</ItemGroup>
 </Project>
