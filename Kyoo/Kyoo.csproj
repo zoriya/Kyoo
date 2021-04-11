@@ -62,13 +62,13 @@
 		<Content Remove="$(SpaRoot)**" />
 	</ItemGroup>
 
-	<Target Name="Log Windows" Condition="'$(IsWindows)' == 'true'">
+	<Target Name="Log Windows" Condition="'$(IsWindows)' == 'true'" BeforeTargets="BeforeResolveReferences">
 		<Message Text="Building for Windows" />
 	</Target>
-	<Target Name="Log OSX" Condition="'$(IsOSX)' == 'true'">
+	<Target Name="Log OSX" Condition="'$(IsOSX)' == 'true'" BeforeTargets="BeforeResolveReferences">
 		<Message Text="Building for OSX" />
 	</Target>
-	<Target Name="Log Linux" Condition="'$(IsLinux)' == 'true'">
+	<Target Name="Log Linux" Condition="'$(IsLinux)' == 'true'" BeforeTargets="BeforeResolveReferences">
 		<Message Text="Building for Linux" />
 	</Target>
 
