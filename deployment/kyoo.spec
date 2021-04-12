@@ -22,7 +22,7 @@ rm -rf %{buildroot}
 /usr/lib/sysusers.d/kyoo.conf
 /usr/lib/tmpfiles.d/kyoo.conf
 
-%post:
+%post
 sudo -u postgres psql << "EOF"
 DO $$
 BEGIN
