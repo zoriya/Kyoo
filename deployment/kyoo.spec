@@ -7,6 +7,8 @@ License:	GPL-3.0
 BuildArch:	x86_64
 Requires:	postgresql-server
 
+%description
+A media browser
 
 %install
 cp -a * %{buildroot}
