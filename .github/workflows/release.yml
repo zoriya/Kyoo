@@ -86,8 +86,7 @@ jobs:
         run: |
           mkdir out
           sudo rm -rf pkg/DEBIAN
-          rpmbuild -bb --buildroot $(pwd)/out --build-in-place deployment/kyoo.spec
-          tree -a
+          rpmbuild -bb --buildroot $(pwd)/out --build-in-place --define "_rpmdir $(pwd)" deployment/kyoo.spec
       - name: Prepare arch package
         run: |
           mkdir deployment/output
