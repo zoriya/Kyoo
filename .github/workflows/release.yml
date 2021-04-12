@@ -85,7 +85,7 @@ jobs:
       - name: Build rpm package
         run: |
           mkdir out
-          rpmbuild -bb --buildroot ./out --build-in-place deployment/kyoo.spec
+          rpmbuild -bb --buildroot $(pwd)/out --build-in-place deployment/kyoo.spec
           tree -a
       - name: Prepare arch package
         run: |
