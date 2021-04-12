@@ -17,7 +17,10 @@ cp -a pkg/. %{buildroot}
 rm -rf %{buildroot}
 
 %files
-*
+/usr/lib/kyoo
+/usr/lib/systemd/system/*
+/usr/lib/sysusers.d/kyoo.conf
+/usr/lib/tmpfiles.d/kyoo.conf
 
 %post:
 sudo -u postgres psql << "EOF"
