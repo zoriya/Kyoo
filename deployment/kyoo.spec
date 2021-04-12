@@ -11,7 +11,7 @@ Requires:	postgresql-server
 A media browser
 
 %install
-cp -a * %{buildroot}
+cp -a pkg/. %{buildroot}
 
 %clean
 rm -rf %{buildroot}
