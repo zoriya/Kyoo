@@ -100,7 +100,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: kyoo_rpm
-          path: ./rpm/**/*.rpm
+          path: ./rpm/x86_64/*.rpm
       - uses: actions/upload-artifact@v2
         with:
           name: kyoo_debian
