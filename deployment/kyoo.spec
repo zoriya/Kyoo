@@ -26,6 +26,8 @@ rm -rf %{buildroot}
 /usr/lib/tmpfiles.d/kyoo.conf
 
 %post
+sudo postgresql-setup --initdb 2> /dev/null || true
+sudo systemctl start postgresql
 sudo -u postgres psql << "EOF"
 DO $$
 BEGIN
