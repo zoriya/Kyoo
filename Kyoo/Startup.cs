@@ -23,6 +23,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Kyoo
 {
+	/// <summary>
+	/// The Startup class is used to configure the AspNet's webhost.
+	/// </summary>
 	public class Startup
 	{
 		private readonly IConfiguration _configuration;

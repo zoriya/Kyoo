@@ -15,8 +15,16 @@ using Kyoo.Models.Attributes;
 
 namespace Kyoo
 {
+	/// <summary>
+	/// A set of utility functions that can be used everywhere.
+	/// </summary>
 	public static class Utility
 	{
+		/// <summary>
+		/// Is the lambda expression a member (like x => x.Body).
+		/// </summary>
+		/// <param name="ex">The expression that should be checked</param>
+		/// <returns>True if the expression is a member, false otherwise</returns>
 		public static bool IsPropertyExpression(LambdaExpression ex)
 		{
 			return ex == null ||
@@ -24,6 +32,12 @@ namespace Kyoo
 			       ex.Body.NodeType == ExpressionType.Convert && ((UnaryExpression)ex.Body).Operand is MemberExpression;
 		}
 		
+		/// <summary>
+		/// Get the name of a property. Usfull for selectors as members ex: Load(x => x.Shows)
+		/// </summary>
+		/// <param name="ex">The expression</param>
+		/// <returns>The name of the expression</returns>
+		/// <exception cref="ArgumentException">If the expression is not a property, ArgumentException is thrown.</exception>
 		public static string GetPropertyName(LambdaExpression ex)
 		{
 			if (!IsPropertyExpression(ex))
@@ -34,6 +48,14 @@ namespace Kyoo
 			return member!.Member.Name;
 		}
 
+		/// <summary>
+		/// Get the value of a member (property or field)
+		/// </summary>
+		/// <param name="member">The member value</param>
+		/// <param name="obj">The owner of this member</param>
+		/// <returns>The value boxed as an object</returns>
+		/// <exception cref="ArgumentNullException">if <see cref="member"/> or <see cref="obj"/> is null.</exception>
+		/// <exception cref="ArgumentException">The member is not a field or a property.</exception>
 		public static object GetValue([NotNull] this MemberInfo member, [NotNull] object obj)
 		{
 			if (member == null)
@@ -48,6 +70,11 @@ namespace Kyoo
 			};
 		}
 		
+		/// <summary>
+		/// Slugify a string (Replace spaces by -, Uniformise accents é -> e)
+		/// </summary>
+		/// <param name="str">The string to slugify</param>
+		/// <returns>The slugified string</returns>
 		public static string ToSlug(string str)
 		{
 			if (str == null)
@@ -73,6 +100,12 @@ namespace Kyoo
 		}
 		
 		
+		/// <summary>
+		/// Set the image of a show using the <see cref="ImageType"/> type.
+		/// </summary>
+		/// <param name="show">The owner of the image</param>
+		/// <param name="imgUrl">The url of the image</param>
+		/// <param name="type">The type of the image</param>
 		public static void SetImage(Show show, string imgUrl, ImageType type)
 		{
 			switch(type)
@@ -91,6 +124,13 @@ namespace Kyoo
 			}
 		}
 
+		/// <summary>
+		/// Merge two lists, can keep duplicates or remove them.
+		/// </summary>
+		/// <param name="first">The first enumarble to merge</param>
+		/// <param name="second">The second enumerable to merge, if items from this list are equals to one from the first, they are not keeped</param>
+		/// <param name="isEqual">Equality function to compare items. If this is null, duplicated elements are kept</param>
+		/// <returns>The two list merged as an array</returns>
 		public static T[] MergeLists<T>(IEnumerable<T> first,
 			IEnumerable<T> second, 
 			Func<T, T, bool> isEqual = null)
@@ -105,13 +145,20 @@ namespace Kyoo
 			return list.Concat(second.Where(x => !list.Any(y => isEqual(x, y)))).ToArray();
 		}
 
+		/// <summary>
+		/// Set every fields of first to those of second. Ignore fields marked with the <see cref="NotMergableAttribute"/> attribute
+		/// At the end, the OnMerge method of first will be called if first is a <see cref="IOnMerge"/>
+		/// </summary>
+		/// <param name="first">The object to assign</param>
+		/// <param name="second">The object containg new values</param>
+		/// <typeparam name="T">Fields of T will be used</typeparam>
+		/// <returns><see cref="first"/></returns>
 		public static T Assign<T>(T first, T second)
 		{
 			Type type = typeof(T);
 			IEnumerable<PropertyInfo> properties = type.GetProperties()
-				.Where(x => x.CanRead 
-				            && x.CanWrite 
-				            && Attribute.GetCustomAttribute(x, typeof(NotMergableAttribute)) == null);
+				.Where(x => x.CanRead && x.CanWrite 
+				                      && Attribute.GetCustomAttribute(x, typeof(NotMergableAttribute)) == null);
 			
 			foreach (PropertyInfo property in properties)
 			{
@@ -124,7 +171,17 @@ namespace Kyoo
 			return first;
 		}
 		
-		public static T Complete<T>(T first, T second, Func<PropertyInfo, bool> where = null)
+		/// <summary>
+		/// Set every default values of first to the value of second. ex: {id: 0, slug: "test"}, {id: 4, slug: "foo"} -> {id: 4, slug: "test"}.
+		/// At the end, the OnMerge method of first will be called if first is a <see cref="IOnMerge"/>
+		/// </summary>
+		/// <param name="first">The object to complete</param>
+		/// <param name="second">Missing fields of first will be completed by fields of this item. If second is null, the function no-op.</param>
+		/// <param name="where">Filter fields that will be merged</param>
+		/// <typeparam name="T">Fields of T will be completed</typeparam>
+		/// <returns><see cref="first"/></returns>
+		/// <exception cref="ArgumentNullException">If first is null</exception>
+		public static T Complete<T>([NotNull] T first, [CanBeNull] T second, Func<PropertyInfo, bool> where = null)
 		{
 			if (first == null)
 				throw new ArgumentNullException(nameof(first));
@@ -155,6 +212,16 @@ namespace Kyoo
 			return first;
 		}
 
+		/// <summary>
+		/// An advanced <see cref="Complete{T}"/> function.
+		/// This will set missing values of <see cref="first"/> to the corresponding values of <see cref="second"/>.
+		/// Enumerables will be merged (concatened).
+		/// At the end, the OnMerge method of first will be called if first is a <see cref="IOnMerge"/>.
+		/// </summary>
+		/// <param name="first">The object to complete</param>
+		/// <param name="second">Missing fields of first will be completed by fields of this item. If second is null, the function no-op.</param>
+		/// <typeparam name="T">Fields of T will be merged</typeparam>
+		/// <returns><see cref="first"/></returns>
 		public static T Merge<T>(T first, T second)
 		{
 			if (first == null)
@@ -164,9 +231,8 @@ namespace Kyoo
 			
 			Type type = typeof(T);
 			IEnumerable<PropertyInfo> properties = type.GetProperties()
-				.Where(x => x.CanRead
-				            && x.CanWrite 
-				            && Attribute.GetCustomAttribute(x, typeof(NotMergableAttribute)) == null);
+				.Where(x => x.CanRead && x.CanWrite 
+				                      && Attribute.GetCustomAttribute(x, typeof(NotMergableAttribute)) == null);
 			
 			foreach (PropertyInfo property in properties)
 			{
@@ -194,6 +260,12 @@ namespace Kyoo
 			return first;
 		}
 
+		/// <summary>
+		/// Set every fields of <see cref="obj"/> to the default value.
+		/// </summary>
+		/// <param name="obj">The object to nullify</param>
+		/// <typeparam name="T">Fields of T will be nullified</typeparam>
+		/// <returns><see cref="obj"/></returns>
 		public static T Nullify<T>(T obj)
 		{
 			Type type = typeof(T);
@@ -211,6 +283,12 @@ namespace Kyoo
 			return obj;
 		}
 
+		/// <summary>
+		/// Return every <see cref="Type"/> in the inheritance tree of the parameter (interfaces are not returned)
+		/// </summary>
+		/// <param name="type">The starting type</param>
+		/// <returns>A list of types</returns>
+		/// <exception cref="ArgumentNullException"><see cref="type"/> can't be null</exception>
 		public static IEnumerable<Type> GetInheritanceTree([NotNull] this Type type)
 		{
 			if (type == null)
@@ -219,6 +297,13 @@ namespace Kyoo
 				yield return type;
 		}
 
+		/// <summary>
+		/// Check if <see cref="obj"/> inherit from a generic type <see cref="genericType"/>.
+		/// </summary>
+		/// <param name="obj">Does this object's type is a <see cref="genericType"/></param>
+		/// <param name="genericType">The generic type to check against (Only generic types are supported like typeof(IEnumerable&lt;&gt;).</param>
+		/// <returns>True if obj inherit from genericType. False otherwise</returns>
+		/// <exception cref="ArgumentNullException">obj and genericType can't be null</exception>
 		public static bool IsOfGenericType([NotNull] object obj, [NotNull] Type genericType)
 		{
 			if (obj == null)
@@ -226,6 +311,13 @@ namespace Kyoo
 			return IsOfGenericType(obj.GetType(), genericType);
 		}
 		
+		/// <summary>
+		/// Check if <see cref="type"/> inherit from a generic type <see cref="genericType"/>.
+		/// </summary>
+		/// <param name="type">The type to check</param>
+		/// <param name="genericType">The generic type to check against (Only generic types are supported like typeof(IEnumerable&lt;&gt;).</param>
+		/// <returns>True if obj inherit from genericType. False otherwise</returns>
+		/// <exception cref="ArgumentNullException">obj and genericType can't be null</exception>
 		public static bool IsOfGenericType([NotNull] Type type, [NotNull] Type genericType)
 		{
 			if (type == null)
@@ -241,6 +333,15 @@ namespace Kyoo
 			return types.Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == genericType);
 		}
 
+		/// <summary>
+		/// Get the generic definition of <see cref="genericType"/>.
+		/// For example, calling this function with List&lt;string&gt; and typeof(IEnumerable&lt;&gt;) will return IEnumerable&lt;string&gt;
+		/// </summary>
+		/// <param name="type">The type to check</param>
+		/// <param name="genericType">The generic type to check against (Only generic types are supported like typeof(IEnumerable&lt;&gt;).</param>
+		/// <returns>The generic definition of genericType that type inherit or null if type does not implement the genric type.</returns>
+		/// <exception cref="ArgumentNullException"><see cref="type"/> and <see cref="genericType"/> can't be null</exception>
+		/// <exception cref="ArgumentException"><see cref="genericType"/> must be a generic type</exception>
 		public static Type GetGenericDefinition([NotNull] Type type, [NotNull] Type genericType)
 		{
 			if (type == null)
@@ -256,6 +357,15 @@ namespace Kyoo
 			return types.FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == genericType);
 		}
 
+		/// <summary>
+		/// A Select where the index of the item can be used.
+		/// </summary>
+		/// <param name="self">The IEnumerable to map. If self is null, an empty list is returned</param>
+		/// <param name="mapper">The function that will map each items</param>
+		/// <typeparam name="T">The type of items in <see cref="self"/></typeparam>
+		/// <typeparam name="T2">The type of items in the returned list</typeparam>
+		/// <returns>The list mapped.</returns>
+		/// <exception cref="ArgumentNullException">mapper can't be null</exception>
 		public static IEnumerable<T2> Map<T, T2>([CanBeNull] this IEnumerable<T> self, 
 			[NotNull] Func<T, int, T2> mapper)
 		{
@@ -274,6 +384,16 @@ namespace Kyoo
 			}
 		}
 		
+		/// <summary>
+		/// A map where the mapping function is asynchronous.
+		/// Note: <see cref="SelectAsync{T,T2}"/> might interest you. 
+		/// </summary>
+		/// <param name="self">The IEnumerable to map. If self is null, an empty list is returned</param>
+		/// <param name="mapper">The asynchronous function that will map each items</param>
+		/// <typeparam name="T">The type of items in <see cref="self"/></typeparam>
+		/// <typeparam name="T2">The type of items in the returned list</typeparam>
+		/// <returns>The list mapped as an AsyncEnumerable</returns>
+		/// <exception cref="ArgumentNullException">mapper can't be null</exception>
 		public static async IAsyncEnumerable<T2> MapAsync<T, T2>([CanBeNull] this IEnumerable<T> self, 
 			[NotNull] Func<T, int, Task<T2>> mapper)
 		{
@@ -292,6 +412,15 @@ namespace Kyoo
 			}
 		}
 		
+		/// <summary>
+		/// An asynchronous version of Select.
+		/// </summary>
+		/// <param name="self">The IEnumerable to map</param>
+		/// <param name="mapper">The asynchronous function that will map each items</param>
+		/// <typeparam name="T">The type of items in <see cref="self"/></typeparam>
+		/// <typeparam name="T2">The type of items in the returned list</typeparam>
+		/// <returns>The list mapped as an AsyncEnumerable</returns>
+		/// <exception cref="ArgumentNullException">mapper can't be null</exception>
 		public static async IAsyncEnumerable<T2> SelectAsync<T, T2>([CanBeNull] this IEnumerable<T> self, 
 			[NotNull] Func<T, Task<T2>> mapper)
 		{
@@ -306,6 +435,13 @@ namespace Kyoo
 				yield return await mapper(enumerator.Current);
 		}
 
+		/// <summary>
+		/// Convert an AsyncEnumerable to a List by waiting for every item.
+		/// </summary>
+		/// <param name="self">The async list</param>
+		/// <typeparam name="T">The type of items in the async list and in the returned list.</typeparam>
+		/// <returns>A task that will return a simple list</returns>
+		/// <exception cref="ArgumentNullException">The list can't be null</exception>
 		public static async Task<List<T>> ToListAsync<T>([NotNull] this IAsyncEnumerable<T> self)
 		{
 			if (self == null)
@@ -318,6 +454,13 @@ namespace Kyoo
 			return ret;
 		}
 
+		/// <summary>
+		/// If the enumerable is empty, execute an action.
+		/// </summary>
+		/// <param name="self">The enumerable to check</param>
+		/// <param name="action">The action to execute is the list is empty</param>
+		/// <typeparam name="T">The type of items inside the list</typeparam>
+		/// <returns></returns>
 		public static IEnumerable<T> IfEmpty<T>(this IEnumerable<T> self, Action action)
 		{
 			using IEnumerator<T> enumerator = self.GetEnumerator();
@@ -335,6 +478,12 @@ namespace Kyoo
 			while (enumerator.MoveNext());
 		}
 
+		/// <summary>
+		/// A foreach used as a function with a little specificity: the list can be null.
+		/// </summary>
+		/// <param name="self">The list to enumerate. If this is null, the function result in a no-op</param>
+		/// <param name="action">The action to execute for each arguments</param>
+		/// <typeparam name="T">The type of items in the list</typeparam>
 		public static void ForEach<T>([CanBeNull] this IEnumerable<T> self, Action<T> action)
 		{
 			if (self == null)
@@ -343,6 +492,11 @@ namespace Kyoo
 				action(i);
 		}
 		
+		/// <summary>
+		/// A foreach used as a function with a little specificity: the list can be null.
+		/// </summary>
+		/// <param name="self">The list to enumerate. If this is null, the function result in a no-op</param>
+		/// <param name="action">The action to execute for each arguments</param>
 		public static void ForEach([CanBeNull] this IEnumerable self, Action<object> action)
 		{
 			if (self == null)

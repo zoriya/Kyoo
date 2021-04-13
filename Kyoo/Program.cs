@@ -7,8 +7,15 @@ using Microsoft.VisualBasic.FileIO;
 
 namespace Kyoo
 {
+	/// <summary>
+	/// Program entrypoint.
+	/// </summary>
 	public static class Program
 	{
+		/// <summary>
+		/// Main function of the program
+		/// </summary>
+		/// <param name="args">Command line arguments</param>
 		public static async Task Main(string[] args)
 		{
 			if (args.Length > 0)
@@ -42,6 +49,11 @@ namespace Kyoo
 			await host.Build().RunAsync();
 		}
 
+		/// <summary>
+		/// Createa a web host
+		/// </summary>
+		/// <param name="args">Command line parameters that can be handled by kestrel</param>
+		/// <returns>A new web host instance</returns>
 		private static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
 			WebHost.CreateDefaultBuilder(args)
 				.UseKestrel(config => { config.AddServerHeader = false; })
