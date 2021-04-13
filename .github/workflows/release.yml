@@ -86,7 +86,7 @@ jobs:
         run: |
           mkdir out
           sudo rm -rf pkg/DEBIAN
-          rpmbuild -bb --buildroot $(pwd)/out --build-in-place --define "_rpmdir $(pwd)" deployment/kyoo.spec
+          rpmbuild -bb --buildroot $(pwd)/out --build-in-place --define "_rpmdir $(pwd)/rpm" deployment/kyoo.spec
       - name: Prepare arch package
         run: |
           mkdir deployment/output
@@ -100,7 +100,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: kyoo_rpm
-          path: ./out/**/*.rpm
+          path: ./rpm/**/*.rpm
       - uses: actions/upload-artifact@v2
         with:
           name: kyoo_debian
