@@ -37,7 +37,7 @@ jobs:
           elif [[ "${{runner.os}}" == "macOS" ]]; then
             sudo brew install ffmpeg
           else
-            sudo apt install -y ffmpeg
+            sudo apt install -y ffmpeg-devel
           fi
       - name: Build the app
         run: dotnet publish -r ${{matrix.runtime}} -c Release -o dist Kyoo
@@ -89,7 +89,7 @@ jobs:
           package_root: pkg
           maintainer: Zoe Roux
           version: ${{env.version}}
-          depends: postgresql ffmpeg
+          depends: postgresql ffmpeg-devel
           arch: amd64
           desc: ${{env.description}}
       - name: Build rpm package
