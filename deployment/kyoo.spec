@@ -7,7 +7,7 @@ Summary:	A media browser
 URL:		https://github.com/AnonymusRaccoon/Kyoo
 License:	GPL-3.0
 BuildArch:	x86_64
-Requires:	postgresql-server
+Requires:	postgresql-server ffmpeg-devel
 AutoReqProv:	no
 
 %description
