@@ -29,6 +29,16 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 5.0.x
+      - name: Install ffmpeg
+        shell: bash
+        run: |
+          if [[ "${{runner.os}}" == "Windows" ]]; then
+            choco install ffmpeg
+          elif [[ "${{runner.os}}" == "macOS" ]]; then
+            sudo brew install ffmpeg
+          else
+            sudo apt install -y ffmpeg
+          fi
       - name: Build the app
         run: dotnet publish -r ${{matrix.runtime}} -c Release -o dist Kyoo
       - name: Compression output
