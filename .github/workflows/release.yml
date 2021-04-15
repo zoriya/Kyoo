@@ -41,6 +41,9 @@ jobs:
             # sudo apt-get update -y
             sudo apt-get install -y libavutil-dev libavcodec-dev libavformat-dev
           fi
+      - name: Clear nuget cache (hotfix for windows)
+        shell: bash
+        run: dotnet clean && dotnet nuget locals all --clear
       - name: Build the app
         run: dotnet publish -r ${{matrix.runtime}} -c Release -o dist Kyoo
       - name: Compression output
