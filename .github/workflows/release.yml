@@ -37,8 +37,10 @@ jobs:
           elif [[ "${{runner.os}}" == "macOS" ]]; then
             brew install ffmpeg
           else
-            sudo add-apt-repository ppa:jonathonf/ffmpeg-4
-            sudo apt-get upgrade
+            sudo apt-get remove ffmpeg -y
+            sudo apt-get autoremove -y
+            sudo add-apt-repository ppa:jonathonf/ffmpeg-4 -y
+            sudo apt-get upgrade -y
             sudo apt-get install -y ffmpeg
           fi
       - name: Build the app
