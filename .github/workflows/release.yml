@@ -37,12 +37,9 @@ jobs:
           elif [[ "${{runner.os}}" == "macOS" ]]; then
             brew install ffmpeg
           else
-            sudo apt-get remove ffmpeg -y
-            sudo apt-get autoremove -y
-            sudo apt-get upgrade -y && sudo apt-get update -y
-            sudo add-apt-repository ppa:jonathonf/ffmpeg-4 -y
+            sudo add-apt-repository -y "deb https://packages.ubuntu.com/ hirsute main"
             sudo apt-get update -y
-            sudo apt-get install -y ffmpeg
+            sudo apt-get install -y libavutil-dev libavcodec-dev libavformat-dev
           fi
       - name: Build the app
         run: dotnet publish -r ${{matrix.runtime}} -c Release -o dist Kyoo
@@ -92,7 +89,7 @@ jobs:
         with:
           package: kyoo
           package_root: pkg
-          maintainer: Zoe Roux
+          maintainer: Zoe Roux <zoe.roux@sdg.moe>
           version: ${{env.version}}
           depends: postgresql libavutil-dev libavcodec-dev libavformat-dev
           arch: amd64
