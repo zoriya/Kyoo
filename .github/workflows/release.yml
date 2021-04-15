@@ -39,8 +39,9 @@ jobs:
           else
             sudo apt-get remove ffmpeg -y
             sudo apt-get autoremove -y
+            sudo apt-get upgrade -y && sudo apt-get update -y
             sudo add-apt-repository ppa:jonathonf/ffmpeg-4 -y
-            sudo apt-get upgrade -y
+            sudo apt-get update -y
             sudo apt-get install -y ffmpeg
           fi
       - name: Build the app
