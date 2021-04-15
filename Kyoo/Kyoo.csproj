@@ -116,13 +116,14 @@
 		<Exec WorkingDirectory="$(TranscoderRoot)" Condition="'$(IsWindows)' != 'true'" 
 			  Command="mkdir -p build %26%26 cd build %26%26 cmake .. %26%26 make -j" />
 		<Exec WorkingDirectory="$(TranscoderRoot)" Condition="'$(IsWindows)' == 'true'"
-			  Command="(if not exist build mkdir build) %26%26 cd build %26%26 cmake .. %26%26 nmake" />
+			  Command="(if not exist build mkdir build) %26%26 cd build %26%26 cmake .. -G 'NMake Makefiles' %26%26 nmake" />
 		<Copy SourceFiles="$(TranscoderRoot)/build/$(TranscoderBinary)" DestinationFolder="." />
 	</Target>
 	
 	<ItemGroup Condition="'$(SkipTranscoder)' != 'true'">
 		<None Include="$(TranscoderBinary)">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Visible>false</Visible>
 		</None>
 	</ItemGroup>
 </Project>

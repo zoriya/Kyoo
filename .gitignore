@@ -6,6 +6,9 @@ Kyoo/Transcoder/Kyoo.Transcoder.lib
 Kyoo/Transcoder/Kyoo.Transcoder.pdb
 Kyoo/Transcoder/Kyoo.Transcoder.exp
 
+libtranscoder.so
+libtranscoder.dylib
+transcoder.dll
 
 docs/
 

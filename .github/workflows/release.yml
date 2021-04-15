@@ -15,9 +15,9 @@ jobs:
           - os: ubuntu-16.04 # We are using an old version of ubuntu to have an old libc version (forward compatibility exist but not backward)
             runtime: linux-x64
             artifact: linux
-         # - os: windows-latest
-         #   runtime: win-x64
-         #   artifact: windows
+          - os: windows-latest
+            runtime: win-x64
+            artifact: windows
           - os: macOS-latest
             runtime: osx-x64
             artifact: macos
@@ -37,6 +37,8 @@ jobs:
           elif [[ "${{runner.os}}" == "macOS" ]]; then
             brew install ffmpeg
           else
+            sudo add-apt-repository ppa:jonathonf/ffmpeg-4
+            sudo apt-get upgrade
             sudo apt-get install -y libavutil-dev libavcodec-dev libavformat-dev
           fi
       - name: Build the app
