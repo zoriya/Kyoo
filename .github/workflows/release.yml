@@ -35,6 +35,7 @@ jobs:
         run: |
           if [[ "${{runner.os}}" == "Windows" ]]; then
             choco install ffmpeg-shared
+            ls -Rl "C:\Program Files (x86)\FFmpeg\"
           elif [[ "${{runner.os}}" == "macOS" ]]; then
             brew install ffmpeg
           else
