@@ -10,6 +10,7 @@ jobs:
     name: Build for ${{matrix.artifact}}
     runs-on: ${{matrix.os}}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: ubuntu-latest #ubuntu-16.04 # We are using an old version of ubuntu to have an old libc version (forward compatibility exist but not backward)
