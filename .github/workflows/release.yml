@@ -43,8 +43,12 @@ jobs:
             sudo apt-get install -y libavutil-dev libavcodec-dev libavformat-dev
           fi
       - name: Enabling windows compilations tools
+        if: matrix.artifact == 'windows'
         uses: ilammy/msvc-dev-cmd@v1
       - name: Build the app
+        env: 
+          INCLUDE: ${{env.INCLUDE}}:"C:\Program Files (x86)\FFmpeg\include"
+          LIB: ${{env.LIB}}:"C:\Program Files (x86)\FFmpeg\lib"
         run: dotnet publish -r ${{matrix.runtime}} -c Release -o dist Kyoo
       - name: Compression output
         shell: bash
