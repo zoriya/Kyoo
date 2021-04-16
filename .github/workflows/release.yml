@@ -57,7 +57,7 @@ jobs:
           assets=kyoo_${{matrix.artifact}}
           if [[ "${{runner.os}}" == "Windows" ]]; then
             cd dist
-            cp "/C/Program Files/FFmpeg/lib/*" .
+            cp "/C/Program Files/FFmpeg/lib/." .
             7z a "../$assets.zip"
           else
             rootgrp=$([ "${{runner.os}}" == "macOS" ] && echo wheel || echo root)
