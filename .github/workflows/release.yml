@@ -37,6 +37,7 @@ jobs:
             choco install ffmpeg-shared
           elif [[ "${{runner.os}}" == "macOS" ]]; then
             brew install ffmpeg
+            find / -name '*avformat*'
           else
             # sudo add-apt-repository -y "deb http://azure.archive.ubuntu.com/ubuntu groovy main multiverse restricted universe"
             # sudo apt-get update -y
@@ -57,7 +58,7 @@ jobs:
           assets=kyoo_${{matrix.artifact}}
           if [[ "${{runner.os}}" == "Windows" ]]; then
             cd dist
-            cp "/C/Program Files/FFmpeg/lib/." .
+            cp -r "/C/Program Files/FFmpeg/lib/." .
             7z a "../$assets.zip"
           else
             rootgrp=$([ "${{runner.os}}" == "macOS" ] && echo wheel || echo root)
