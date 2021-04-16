@@ -34,7 +34,7 @@ jobs:
         shell: bash
         run: |
           if [[ "${{runner.os}}" == "Windows" ]]; then
-            choco install ffmpeg
+            choco install ffmpeg-shared
           elif [[ "${{runner.os}}" == "macOS" ]]; then
             brew install ffmpeg
           else
@@ -44,6 +44,7 @@ jobs:
           fi
       - name: Enabling windows compilations tools
         uses: ilammy/msvc-dev-cmd@v1
+        if: ${{"${{runner.os}}" == "Windows"}}
       - name: Build the app
         run: dotnet publish -r ${{matrix.runtime}} -c Release -o dist Kyoo
       - name: Compression output
