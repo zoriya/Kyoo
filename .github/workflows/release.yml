@@ -37,7 +37,6 @@ jobs:
             choco install ffmpeg-shared
           elif [[ "${{runner.os}}" == "macOS" ]]; then
             brew install ffmpeg
-            find / -name '*avformat*'
           else
             # sudo add-apt-repository -y "deb http://azure.archive.ubuntu.com/ubuntu groovy main multiverse restricted universe"
             # sudo apt-get update -y
@@ -51,6 +50,8 @@ jobs:
           INCLUDE: ${{env.INCLUDE}};C:\Program Files\FFmpeg\include
           LIB: ${{env.LIB}};C:\Program Files\FFmpeg\lib
           LIBPATH: ${{env.LIBPATH}};C:\Program Files\FFmpeg\lib
+          CFLAGS: -I/usr/local/include
+          LDFLAGS: -L/usr/local/lib
         run: dotnet publish -r ${{matrix.runtime}} -c Release -o dist Kyoo
       - name: Compression output
         shell: bash
