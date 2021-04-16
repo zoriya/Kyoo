@@ -42,6 +42,8 @@ jobs:
             # sudo apt-get update -y
             sudo apt-get install -y libavutil-dev libavcodec-dev libavformat-dev
           fi
+      - name: Enabling windows compilations tools
+        uses: ilammy/msvc-dev-cmd@v1
       - name: Build the app
         run: dotnet publish -r ${{matrix.runtime}} -c Release -o dist Kyoo
       - name: Compression output
