@@ -47,7 +47,9 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1
       - name: Build the app
         env: 
-          INCLUDE: ${{env.INCLUDE}}:"C:\Program Files (x86)\FFmpeg\include"
+          INCLUDE: ${{env.INCLUDE}};C:\Program Files (x86)\FFmpeg\include
+          LIB: ${{env.LIB}};C:\Program Files (x86)\FFmpeg\lib
+          LIBPATH: ${{env.LIBPATH}};C:\Program Files (x86)\FFmpeg\lib
         run: dotnet publish -r ${{matrix.runtime}} -c Release -o dist Kyoo
       - name: Compression output
         shell: bash
