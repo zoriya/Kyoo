@@ -103,7 +103,7 @@ jobs:
           package_root: pkg
           maintainer: Zoe Roux <zoe.roux@sdg.moe>
           version: ${{env.version}}
-          depends: postgresql libavutil-dev libavcodec-dev libavformat-dev
+          depends: "postgresql, libavutil-dev, libavcodec-dev, libavformat-dev"
           arch: amd64
           desc: ${{env.description}}
       - name: Build rpm package

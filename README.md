@@ -25,11 +25,18 @@ Feel free to open issues or pull requests, all contribution are welcomed.
 
 ## Installation
 
-If you are using a linux distribution with acess to the AUR, simply install the kyoo-bin package. **COMMING SOON**. The package is not published on the AUR yet but you can built it easily with makepkg. To do so, clone the repo & run `makepkg -i` inside the `install/aur` directory.
+On any system, you will need a running postgres server where Kyoo can connect. The connection's informations can be specified on the appsettings.json file, the default connection settings
+use the user `kyoo` with the password `kyooPassword` on the server at `127.0.0.1:5432` (the default postgres url).
 
-If you are running another linux distribution or macos, you will need to build the package from source. To do that, look [here](#development--build).
+You can find nightly prebuild zipped version here:
+ - [Windows](https://nightly.link/AnonymusRaccoon/Kyoo/workflows/release/master/kyoo_windows.zip)
+ - [MacOS](https://nightly.link/AnonymusRaccoon/Kyoo/workflows/release/master/kyoo_macos.zip)
+ - [Linux](https://nightly.link/AnonymusRaccoon/Kyoo/workflows/release/master/kyoo_linux.zip)
 
-If you are on windows, you can't install Kyoo for now. (Everything should work fine except for the transcoder. I haven't made the pipeline for MSVC).
+For arch based, debian based or rpm compatible distributions, a package is automatically created and can be downloaded:
+ - [Arch](https://nightly.link/AnonymusRaccoon/Kyoo/workflows/release/master/kyoo_arch.zip)
+ - [Debian](https://nightly.link/AnonymusRaccoon/Kyoo/workflows/release/master/kyoo_debian.zip)
+ - [RPM](https://nightly.link/AnonymusRaccoon/Kyoo/workflows/release/master/kyoo_rpm.zip)
 
 ## Repositories
 
@@ -43,12 +50,14 @@ Both of theses repository are needed to fully build Kyoo, when you clone this re
 
 ## Development & Build
 
-To develop for Kyoo, you will need the .NET 5.0 SDK, node & npm for the webapp and cmake & gcc for the transcoder.
-You will also need a running postgresql instance with a user named `kyoo` (you can create a user with this command: ```sudo -u postgres createuser -d kyoo```)
+To develop for Kyoo, you will need the .NET 5.0 SDK and node & npm for the webapp. If you want to build the transcoder, you will also need a cmake compatible environement.
 
 To run the development server, simply open the .sln file with your favorite C# IDE (like Jetbrain's Rider or Visual Studio) and press run or you can use the CLI and use the ```dotnet run -p Kyoo``` command.
-
 To pack the application, run the ```dotnet publish -c Release -o <build_path> Kyoo``` command. This will build the server, the webapp and the transcoder and output files in the <build_path> directory.
+
+If you want, you can build kyoo without it's transcoder by running ```dotnet build '-p:SkipTranscoder=true'```. You are now responsible of bringing a transcoder dynamic library at the build location. If you don't bring one, the transcoder won't be available.
+
+You can also disable the webapp build by running ```dotnet build '-p:SkipWebApp=true'```. Those two options can be combined by running ```dotnet build '-p:SkipTranscoder=true;SkipWebApp=true'```
 
 ## Plugins
 
