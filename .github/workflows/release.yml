@@ -44,7 +44,7 @@ jobs:
           fi
       - name: Enabling windows compilations tools
         uses: ilammy/msvc-dev-cmd@v1
-        if: ${{"${{runner.os}}" == "Windows"}}
+        if: ${{"${{matrix.os}}" == "Windows"}}
       - name: Build the app
         run: dotnet publish -r ${{matrix.runtime}} -c Release -o dist Kyoo
       - name: Compression output
