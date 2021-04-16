@@ -46,6 +46,6 @@ jobs:
               -d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
               -d:sonar.host.url="https://sonarcloud.io"
           
-          dotnet build --no-incremental
+          dotnet build --no-incremental '-p:SkipTranscoder=true;SkipWebApp=true'
           
           ./.sonar/scanner/dotnet-sonarscanner end -d:sonar.login="${{ secrets.SONAR_TOKEN }}"
