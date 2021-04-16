@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  build:
+  build-${{matrix.artifact}}:
     name: Build for ${{matrix.artifact}}
     runs-on: ${{matrix.os}}
     strategy:
@@ -68,7 +68,7 @@ jobs:
   release:
     name: Create debian, rpm & arch releases
     runs-on: ubuntu-latest
-    needs: build
+    needs: build-linux
     env:
       description: "A media browser"
       version: v0.0.1 #${{ github.ref }}
