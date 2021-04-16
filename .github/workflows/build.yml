@@ -1,4 +1,4 @@
-name: Release the application
+name: Build
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Build for ${{matrix.artifact}}
+    name: "${{matrix.artifact}}'s Build"
     runs-on: ${{matrix.os}}
     strategy:
       fail-fast: false
