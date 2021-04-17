@@ -1,0 +1,18 @@
+{
+	"categories": [
+		{
+			"title": "## Features",
+			"labels": ["feature"]
+		},
+		{
+			"title": "## Fixes",
+			"labels": ["fix"]
+		},
+		{
+			"title": "## Web App",
+			"labels": ["webapp"]
+		}
+	],
+	"template": "${{CHANGELOG}}\n\n<details>\n<summary>Others</summary>\n\n${{UNCATEGORIZED}}\n</details>",
+	"pr_template": "- ${{TITLE}} (PR: #${{NUMBER}})"
+}

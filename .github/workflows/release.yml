@@ -1,0 +1,46 @@
+name: Release
+
+on:
+  create:
+    tags:
+      - v*
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Wait for builds & tests to finish
+        uses: lewagon/wait-on-check-action@v0.2
+        with:
+          ref: ${{github.ref}}
+          repo-token: ${{secrets.GITHUB_TOKEN}}
+          running-workflow-name: release
+      - name: Generate changelog
+        uses: mikepenz/release-changelog-builder-action@v1
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - name: Download artifacts
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          commit: ${{github.ref}}
+          workflow: build.yml
+          path: ./artifacts
+          github_token: ${{secrets.GITHUB_TOKEN}}
+      - name: Public the common to nuget
+        id: publish_nuget
+        uses: rohith/publish-nuget@v2
+        with:
+          PROJECT_FILE_PATH: Kyoo.Common/Kyoo.Common.csproj
+          PACKAGE_NAME: Kyoo.Common
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          INCLUDE_SYMBOLS: true
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          draft: true
+          release_name: ${{github.ref}}
+          body: ${{steps.github_release.outputs.changelog}}
+          arficats: ./artifacts/**/*
+          token: ${{secrets.GITHUB_TOKEN}}
