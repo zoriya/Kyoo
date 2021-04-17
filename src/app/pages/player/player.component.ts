@@ -14,7 +14,7 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 import { DomSanitizer, Title } from "@angular/platform-browser";
 import { ActivatedRoute, Event, NavigationCancel, NavigationEnd, NavigationStart, Router } from "@angular/router";
 import { OidcSecurityService } from "angular-auth-oidc-client";
-import * as Hls from "hls.js";
+import Hls from "hls.js";
 import { ShowService } from "../../services/api.service";
 import { StartupService } from "../../services/startup.service";
 import {
