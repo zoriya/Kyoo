@@ -33,7 +33,7 @@ namespace Kyoo.Controllers
 		{
 			using IServiceScope serviceScope = _serviceProvider.CreateScope();
 			await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
-			return (await libraryManager!.GetLibraries()).Select(x => x.Slug);
+			return (await libraryManager!.GetAll<Library>()).Select(x => x.Slug);
 		}
 
 		public int? Progress()
@@ -58,23 +58,23 @@ namespace Kyoo.Controllers
 			using IServiceScope serviceScope = _serviceProvider.CreateScope();
 			await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
 			
-			foreach (Show show in await libraryManager!.GetShows())
+			foreach (Show show in await libraryManager!.GetAll<Show>())
 				if (!Directory.Exists(show.Path))
-					await libraryManager.DeleteShow(show);
+					await libraryManager.Delete(show);
 			
-			ICollection<Episode> episodes = await libraryManager.GetEpisodes();
+			ICollection<Episode> episodes = await libraryManager.GetAll<Episode>();
 			foreach (Episode episode in episodes)
 				if (!File.Exists(episode.Path))
-					await libraryManager.DeleteEpisode(episode);
+					await libraryManager.Delete(episode);
 			
-			ICollection<Track> tracks = await libraryManager.GetTracks();
+			ICollection<Track> tracks = await libraryManager.GetAll<Track>();
 			foreach (Track track in tracks)
 				if (!File.Exists(track.Path))
-					await libraryManager.DeleteTrack(track);
+					await libraryManager.Delete(track);
 
 			ICollection<Library> libraries = argument == null 
-				? await libraryManager.GetLibraries()
-				: new [] { await libraryManager.GetLibrary(argument)};
+				? await libraryManager.GetAll<Library>()
+				: new [] { await libraryManager.Get<Library>(argument)};
 			
 			if (argument != null && libraries.First() == null)
 				throw new ArgumentException($"No library found with the name {argument}");
@@ -160,7 +160,7 @@ namespace Kyoo.Controllers
 			}
 
 			string episodePath = match.Groups["Episode"].Value;
-			Episode episode = await libraryManager!.GetEpisode(x => x.Path.StartsWith(episodePath));
+			Episode episode = await libraryManager!.Get<Episode>(x => x.Path.StartsWith(episodePath));
 
 			if (episode == null)
 			{
@@ -180,7 +180,7 @@ namespace Kyoo.Controllers
 				Episode = episode
 			};
 			
-			await libraryManager.RegisterTrack(track);
+			await libraryManager.Create(track);
 			Console.WriteLine($"Registering subtitle at: {path}.");
 		}
 
@@ -215,7 +215,7 @@ namespace Kyoo.Controllers
 				bool isMovie = seasonNumber == -1 && episodeNumber == -1 && absoluteNumber == -1;
 				Show show = await GetShow(libraryManager, showName, showPath, isMovie, library);
 				if (isMovie)
-					await libraryManager!.RegisterEpisode(await GetMovie(show, path));
+					await libraryManager!.Create(await GetMovie(show, path));
 				else
 				{
 					Season season = await GetSeason(libraryManager, show, seasonNumber, library);
@@ -226,7 +226,7 @@ namespace Kyoo.Controllers
 						absoluteNumber,
 						path,
 						library);
-					await libraryManager!.RegisterEpisode(episode);
+					await libraryManager!.Create(episode);
 				}
 
 				await libraryManager.AddShowLink(show, library, collection);
@@ -250,19 +250,19 @@ namespace Kyoo.Controllers
 		{
 			if (string.IsNullOrEmpty(collectionName))
 				return null;
-			Collection collection = await libraryManager.GetCollection(Utility.ToSlug(collectionName));
+			Collection collection = await libraryManager.Get<Collection>(Utility.ToSlug(collectionName));
 			if (collection != null)
 				return collection;
 			collection = await _metadataProvider.GetCollectionFromName(collectionName, library);
 
 			try
 			{
-				await libraryManager.RegisterCollection(collection);
+				await libraryManager.Create(collection);
 				return collection;
 			}
 			catch (DuplicatedItemException)
 			{
-				return await libraryManager.GetCollection(collection.Slug);
+				return await libraryManager.Get<Collection>(collection.Slug);
 			}
 		}
 		
@@ -272,7 +272,7 @@ namespace Kyoo.Controllers
 			bool isMovie, 
 			Library library)
 		{
-			Show old = await libraryManager.GetShow(x => x.Path == showPath);
+			Show old = await libraryManager.Get<Show>(x => x.Path == showPath);
 			if (old != null)
 			{
 				await libraryManager.Load(old, x => x.ExternalIDs);
@@ -284,18 +284,18 @@ namespace Kyoo.Controllers
 
 			try
 			{
-				show = await libraryManager.RegisterShow(show);
+				show = await libraryManager.Create(show);
 			}
 			catch (DuplicatedItemException)
 			{
-				old = await libraryManager.GetShow(show.Slug);
+				old = await libraryManager.Get<Show>(show.Slug);
 				if (old.Path == showPath)
 				{
 					await libraryManager.Load(old, x => x.ExternalIDs);
 					return old;
 				}
 				show.Slug += $"-{show.StartYear}";
-				await libraryManager.RegisterShow(show);
+				await libraryManager.Create(show);
 			}
 			await _thumbnailsManager.Validate(show);
 			return show;
@@ -308,18 +308,18 @@ namespace Kyoo.Controllers
 		{
 			if (seasonNumber == -1)
 				return default;
-			Season season = await libraryManager.GetSeason(show.Slug, seasonNumber);
+			Season season = await libraryManager.Get(show.Slug, seasonNumber);
 			if (season == null)
 			{
 				season = await _metadataProvider.GetSeason(show, seasonNumber, library);
 				try
 				{
-					await libraryManager.RegisterSeason(season);
+					await libraryManager.Create(season);
 					await _thumbnailsManager.Validate(season);
 				}
 				catch (DuplicatedItemException)
 				{
-					season = await libraryManager.GetSeason(show.Slug, season.SeasonNumber);
+					season = await libraryManager.Get(show.Slug, season.SeasonNumber);
 				}
 			}
 			season.Show = show;

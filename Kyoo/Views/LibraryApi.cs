@@ -47,12 +47,12 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Show> resources = await _libraryManager.GetShows(
+				ICollection<Show> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Show>(where, x => x.Libraries.Any(y => y.ID == id)),
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetLibrary(id) == null)
+				if (!resources.Any() && await _libraryManager.Get<Library>(id) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -73,12 +73,12 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Show> resources = await _libraryManager.GetShows(
+				ICollection<Show> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Show>(where, x => x.Libraries.Any(y => y.Slug == slug)),
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetLibrary(slug) == null)
+				if (!resources.Any() && await _libraryManager.Get<Library>(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -99,12 +99,12 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Collection> resources = await _libraryManager.GetCollections(
+				ICollection<Collection> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Collection>(where, x => x.Libraries.Any(y => y.ID == id)),
 					new Sort<Collection>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetLibrary(id) == null)
+				if (!resources.Any() && await _libraryManager.Get<Library>(id) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -125,12 +125,12 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Collection> resources = await _libraryManager.GetCollections(
+				ICollection<Collection> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Collection>(where, x => x.Libraries.Any(y => y.Slug == slug)),
 					new Sort<Collection>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetLibrary(slug) == null)
+				if (!resources.Any() && await _libraryManager.Get<Library>(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -156,7 +156,7 @@ namespace Kyoo.Api
 					new Sort<LibraryItem>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetLibrary(id) == null)
+				if (!resources.Any() && await _libraryManager.Get<Library>(id) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -182,7 +182,7 @@ namespace Kyoo.Api
 					new Sort<LibraryItem>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetLibrary(slug) == null)
+				if (!resources.Any() && await _libraryManager.Get<Library>(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}

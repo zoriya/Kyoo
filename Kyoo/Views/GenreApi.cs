@@ -36,12 +36,12 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Show> resources = await _libraryManager.GetShows(
+				ICollection<Show> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Show>(where, x => x.Genres.Any(y => y.ID == id)),
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetGenre(id) == null)
+				if (!resources.Any() && await _libraryManager.Get<Genre>(id) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -62,12 +62,12 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Show> resources = await _libraryManager.GetShows(
+				ICollection<Show> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Show>(where, x => x.Genres.Any(y => y.Slug == slug)),
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetGenre(slug) == null)
+				if (!resources.Any() && await _libraryManager.Get<Genre>(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}

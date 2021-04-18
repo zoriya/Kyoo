@@ -17,21 +17,11 @@ namespace Kyoo.Api
 			_libraryManager = libraryManager;
 		}
 
-		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}")]
+		[HttpGet("{slug}")]
 		[Authorize(Policy="Read")]
-		public async Task<ActionResult<WatchItem>> GetWatchItem(string showSlug, int seasonNumber, int episodeNumber)
+		public async Task<ActionResult<WatchItem>> GetWatchItem(string slug)
 		{
-			Episode item = await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
-			if (item == null)
-				return NotFound();
-			return await WatchItem.FromEpisode(item, _libraryManager);
-		}
-		
-		[HttpGet("{movieSlug}")]
-		[Authorize(Policy="Read")]
-		public async Task<ActionResult<WatchItem>> GetWatchItem(string movieSlug)
-		{
-			Episode item = await _libraryManager.GetMovieEpisode(movieSlug);
+			Episode item = await _libraryManager.Get<Episode>(slug);
 			if (item == null)
 				return NotFound();
 			return await WatchItem.FromEpisode(item, _libraryManager);

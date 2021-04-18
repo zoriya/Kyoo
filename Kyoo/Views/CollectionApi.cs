@@ -35,12 +35,12 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Show> resources = await _libraryManager.GetShows(
+				ICollection<Show> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Show>(where, x => x.Collections.Any(y => y.ID == id)),
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetCollection(id) == null)
+				if (!resources.Any() && await _libraryManager.Get<Collection>(id) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -61,12 +61,12 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Show> resources = await _libraryManager.GetShows(
+				ICollection<Show> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Show>(where, x => x.Collections.Any(y => y.Slug == slug)),
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetCollection(slug) == null)
+				if (!resources.Any() && await _libraryManager.Get<Collection>(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -87,12 +87,12 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Library> resources = await _libraryManager.GetLibraries(
+				ICollection<Library> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Library>(where, x => x.Collections.Any(y => y.ID == id)),
 					new Sort<Library>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetCollection(id) == null)
+				if (!resources.Any() && await _libraryManager.Get<Collection>(id) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -113,12 +113,12 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Library> resources = await _libraryManager.GetLibraries(
+				ICollection<Library> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Library>(where, x => x.Collections.Any(y => y.Slug == slug)),
 					new Sort<Library>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetCollection(slug) == null)
+				if (!resources.Any() && await _libraryManager.Get<Collection>(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}

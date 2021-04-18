@@ -35,42 +35,42 @@ namespace Kyoo.Api
 		[Authorize(Policy = "Read")]
 		public async Task<ActionResult<Show>> GetShow(int episodeID)
 		{
-			return await _libraryManager.GetShow(x => x.Episodes.Any(y => y.ID  == episodeID));
+			return await _libraryManager.Get<Show>(x => x.Episodes.Any(y => y.ID  == episodeID));
 		}
 		
 		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}/show")]
 		[Authorize(Policy = "Read")]
-		public async Task<ActionResult<Show>> GetShow(string showSlug)
+		public async Task<ActionResult<Show>> GetShow(string showSlug, int seasonNumber, int episodeNumber)
 		{
-			return await _libraryManager.GetShow(showSlug);
+			return await _libraryManager.Get<Show>(showSlug);
 		}
 		
 		[HttpGet("{showID:int}-{seasonNumber:int}e{episodeNumber:int}/show")]
 		[Authorize(Policy = "Read")]
-		public async Task<ActionResult<Show>> GetShow(int showID, int _)
+		public async Task<ActionResult<Show>> GetShow(int showID, int seasonNumber, int episodeNumber)
 		{
-			return await _libraryManager.GetShow(showID);
+			return await _libraryManager.Get<Show>(showID);
 		}
 		
 		[HttpGet("{episodeID:int}/season")]
 		[Authorize(Policy = "Read")]
 		public async Task<ActionResult<Season>> GetSeason(int episodeID)
 		{
-			return await _libraryManager.GetSeason(x => x.Episodes.Any(y => y.ID == episodeID));
+			return await _libraryManager.Get<Season>(x => x.Episodes.Any(y => y.ID == episodeID));
 		}
 		
 		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}/season")]
 		[Authorize(Policy = "Read")]
-		public async Task<ActionResult<Season>> GetSeason(string showSlug, int seasonNuber)
+		public async Task<ActionResult<Season>> GetSeason(string showSlug, int seasonNumber, int episodeNumber)
 		{
-			return await _libraryManager.GetSeason(showSlug, seasonNuber);
+			return await _libraryManager.Get(showSlug, seasonNumber);
 		}
 		
 		[HttpGet("{showID:int}-{seasonNumber:int}e{episodeNumber:int}/season")]
 		[Authorize(Policy = "Read")]
-		public async Task<ActionResult<Season>> GetSeason(int showID, int seasonNumber)
+		public async Task<ActionResult<Season>> GetSeason(int showID, int seasonNumber, int episodeNumber)
 		{
-			return await _libraryManager.GetSeason(showID, seasonNumber);
+			return await _libraryManager.Get(showID, seasonNumber);
 		}
 		
 		[HttpGet("{episodeID:int}/track")]
@@ -84,12 +84,12 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Track> resources = await _libraryManager.GetTracks(
+				ICollection<Track> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Track>(where, x => x.Episode.ID == episodeID),
 					new Sort<Track>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetEpisode(episodeID) == null)
+				if (!resources.Any() && await _libraryManager.Get<Episode>(episodeID) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -112,14 +112,14 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Track> resources = await _libraryManager.GetTracks(
+				ICollection<Track> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Track>(where, x => x.Episode.ShowID == showID 
 					                                        && x.Episode.SeasonNumber == seasonNumber
 					                                        && x.Episode.EpisodeNumber == episodeNumber),
 					new Sort<Track>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetEpisode(showID, seasonNumber, episodeNumber) == null)
+				if (!resources.Any() && await _libraryManager.Get(showID, seasonNumber, episodeNumber) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -142,13 +142,14 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Track> resources = await _libraryManager.GetTracks(ApiHelper.ParseWhere<Track>(where, x => x.Episode.Show.Slug == showSlug 
+				ICollection<Track> resources = await _libraryManager.GetAll(
+					ApiHelper.ParseWhere<Track>(where, x => x.Episode.Show.Slug == showSlug 
 						&& x.Episode.SeasonNumber == seasonNumber
 						&& x.Episode.EpisodeNumber == episodeNumber),
 					new Sort<Track>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber) == null)
+				if (!resources.Any() && await _libraryManager.Get(showSlug, seasonNumber, episodeNumber) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -162,7 +163,7 @@ namespace Kyoo.Api
 		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetThumb(int id)
 		{
-			Episode episode = await _libraryManager.GetEpisode(id);
+			Episode episode = await _libraryManager.Get<Episode>(id);
 			if (episode == null)
 				return NotFound();
 			return _files.FileResult(await _thumbnails.GetEpisodeThumb(episode));
@@ -172,7 +173,7 @@ namespace Kyoo.Api
 		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetThumb(string slug)
 		{
-			Episode episode = await _libraryManager.GetEpisode(slug);
+			Episode episode = await _libraryManager.Get<Episode>(slug);
 			if (episode == null)
 				return NotFound();
 			return _files.FileResult(await _thumbnails.GetEpisodeThumb(episode));

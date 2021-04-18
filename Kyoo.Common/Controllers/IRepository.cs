@@ -23,10 +23,10 @@ namespace Kyoo.Controllers
 		public static implicit operator Pagination(int limit) => new(limit);
 	}
 
-	public struct Sort<T>
+	public readonly struct Sort<T>
 	{
-		public Expression<Func<T, object>> Key;
-		public bool Descendant;
+		public Expression<Func<T, object>> Key { get; }
+		public bool Descendant { get; }
 		
 		public Sort(Expression<Func<T, object>> key, bool descendant = false)
 		{
@@ -46,8 +46,8 @@ namespace Kyoo.Controllers
 				return;
 			}
 			
-			string key = sortBy.Contains(':') ? sortBy.Substring(0, sortBy.IndexOf(':')) : sortBy;
-			string order = sortBy.Contains(':') ? sortBy.Substring(sortBy.IndexOf(':') + 1) : null;
+			string key = sortBy.Contains(':') ? sortBy[..sortBy.IndexOf(':')] : sortBy;
+			string order = sortBy.Contains(':') ? sortBy[(sortBy.IndexOf(':') + 1)..] : null;
 
 			ParameterExpression param = Expression.Parameter(typeof(T), "x");
 			MemberExpression property = Expression.Property(param, key);
@@ -64,8 +64,13 @@ namespace Kyoo.Controllers
 			};
 		}
 	}
+
+	public interface IBaseRepository : IDisposable, IAsyncDisposable
+	{
+		Type RepositoryType { get; }
+	}
 	
-	public interface IRepository<T> : IDisposable, IAsyncDisposable where T : class, IResource
+	public interface IRepository<T> : IBaseRepository where T : class, IResource
 	{
 		Task<T> Get(int id);
 		Task<T> Get(string slug);
@@ -204,7 +209,7 @@ namespace Kyoo.Controllers
 		) => GetFromPeople(showSlug, where, new Sort<PeopleRole>(sort), limit);
 	}
 
-	public interface IProviderRepository : IRepository<ProviderID>
+	public interface IProviderRepository : IRepository<Provider>
 	{
 		Task<ICollection<MetadataID>> GetMetadataID(Expression<Func<MetadataID, bool>> where = null, 
 			Sort<MetadataID> sort = default,

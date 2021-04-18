@@ -42,12 +42,12 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Episode> resources = await _libraryManager.GetEpisodes(
+				ICollection<Episode> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Episode>(where, x => x.SeasonID == seasonID),
 					new Sort<Episode>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetSeason(seasonID) == null)
+				if (!resources.Any() && await _libraryManager.Get<Season>(seasonID) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -69,13 +69,13 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Episode> resources = await _libraryManager.GetEpisodes(
+				ICollection<Episode> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Episode>(where, x => x.Show.Slug == showSlug 
 					                                          && x.SeasonNumber == seasonNumber),
 					new Sort<Episode>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetSeason(showSlug, seasonNumber) == null)
+				if (!resources.Any() && await _libraryManager.Get(showSlug, seasonNumber) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -97,12 +97,12 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Episode> resources = await _libraryManager.GetEpisodes(
+				ICollection<Episode> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Episode>(where, x => x.ShowID == showID && x.SeasonNumber == seasonNumber),
 					new Sort<Episode>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetSeason(showID, seasonNumber) == null)
+				if (!resources.Any() && await _libraryManager.Get(showID, seasonNumber) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -116,28 +116,28 @@ namespace Kyoo.Api
 		[Authorize(Policy = "Read")]
 		public async Task<ActionResult<Show>> GetShow(int seasonID)
 		{
-			return await _libraryManager.GetShow(x => x.Seasons.Any(y => y.ID == seasonID));
+			return await _libraryManager.Get<Show>(x => x.Seasons.Any(y => y.ID == seasonID));
 		}
 		
 		[HttpGet("{showSlug}-s{seasonNumber:int}/show")]
 		[Authorize(Policy = "Read")]
-		public async Task<ActionResult<Show>> GetShow(string showSlug, int _)
+		public async Task<ActionResult<Show>> GetShow(string showSlug, int seasonNumber)
 		{
-			return await _libraryManager.GetShow(showSlug);
+			return await _libraryManager.Get<Show>(showSlug);
 		}
 		
 		[HttpGet("{showID:int}-s{seasonNumber:int}/show")]
 		[Authorize(Policy = "Read")]
-		public async Task<ActionResult<Show>> GetShow(int showID, int _)
+		public async Task<ActionResult<Show>> GetShow(int showID, int seasonNumber)
 		{
-			return await _libraryManager.GetShow(showID);
+			return await _libraryManager.Get<Show>(showID);
 		}
 		
 		[HttpGet("{id:int}/thumb")]
 		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetThumb(int id)
 		{
-			Season season = await _libraryManager.GetSeason(id);
+			Season season = await _libraryManager.Get<Season>(id);
 			await _libraryManager.Load(season, x => x.Show);
 			return _files.FileResult(await _thumbs.GetSeasonPoster(season));
 		}
@@ -146,7 +146,7 @@ namespace Kyoo.Api
 		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetThumb(string slug)
 		{
-			Season season = await _libraryManager.GetSeason(slug);
+			Season season = await _libraryManager.Get<Season>(slug);
 			await _libraryManager.Load(season, x => x.Show);
 			return _files.FileResult(await _thumbs.GetSeasonPoster(season));
 		}

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Kyoo.Api
 {
-	[Route("api/search")]
+	[Route("api/search/{query}")]
 	[ApiController]
 	public class SearchApi : ControllerBase
 	{
@@ -18,67 +18,67 @@ namespace Kyoo.Api
 			_libraryManager = libraryManager;
 		}
 
-		[HttpGet("{query}")]
+		[HttpGet]
 		[Authorize(Policy="Read")]
 		public async Task<ActionResult<SearchResult>> Search(string query)
 		{
 			return new SearchResult
 			{
 				Query = query,
-				Collections = await _libraryManager.SearchCollections(query),
-				Shows = await _libraryManager.SearchShows(query),
-				Episodes = await _libraryManager.SearchEpisodes(query),
-				People = await _libraryManager.SearchPeople(query),
-				Genres = await _libraryManager.SearchGenres(query),
-				Studios = await _libraryManager.SearchStudios(query)
+				Collections = await _libraryManager.Search<Collection>(query),
+				Shows = await _libraryManager.Search<Show>(query),
+				Episodes = await _libraryManager.Search<Episode>(query),
+				People = await _libraryManager.Search<People>(query),
+				Genres = await _libraryManager.Search<Genre>(query),
+				Studios = await _libraryManager.Search<Studio>(query)
 			};
 		}
 		
-		[HttpGet("{query}/collection")]
-		[HttpGet("{query}/collections")]
+		[HttpGet("collection")]
+		[HttpGet("collections")]
 		[Authorize(Policy="Read")]
 		public Task<ICollection<Collection>> SearchCollections(string query)
 		{
-			return _libraryManager.SearchCollections(query);
+			return _libraryManager.Search<Collection>(query);
 		}
 		
-		[HttpGet("{query}/show")]
-		[HttpGet("{query}/shows")]
+		[HttpGet("show")]
+		[HttpGet("shows")]
 		[Authorize(Policy="Read")]
 		public Task<ICollection<Show>> SearchShows(string query)
 		{
-			return _libraryManager.SearchShows(query);
+			return _libraryManager.Search<Show>(query);
 		}
 		
-		[HttpGet("{query}/episode")]
-		[HttpGet("{query}/episodes")]
+		[HttpGet("episode")]
+		[HttpGet("episodes")]
 		[Authorize(Policy="Read")]
 		public Task<ICollection<Episode>> SearchEpisodes(string query)
 		{
-			return _libraryManager.SearchEpisodes(query);
+			return _libraryManager.Search<Episode>(query);
 		}
 		
-		[HttpGet("{query}/people")]
+		[HttpGet("people")]
 		[Authorize(Policy="Read")]
 		public Task<ICollection<People>> SearchPeople(string query)
 		{
-			return _libraryManager.SearchPeople(query);
+			return _libraryManager.Search<People>(query);
 		}
 		
-		[HttpGet("{query}/genre")]
-		[HttpGet("{query}/genres")]
+		[HttpGet("genre")]
+		[HttpGet("genres")]
 		[Authorize(Policy="Read")]
 		public Task<ICollection<Genre>> SearchGenres(string query)
 		{
-			return _libraryManager.SearchGenres(query);
+			return _libraryManager.Search<Genre>(query);
 		}
 		
-		[HttpGet("{query}/studio")]
-		[HttpGet("{query}/studios")]
+		[HttpGet("studio")]
+		[HttpGet("studios")]
 		[Authorize(Policy="Read")]
 		public Task<ICollection<Studio>> SearchStudios(string query)
 		{
-			return _libraryManager.SearchStudios(query);
+			return _libraryManager.Search<Studio>(query);
 		}
 	}
 }

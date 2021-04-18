@@ -35,12 +35,12 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Show> resources = await _libraryManager.GetShows(
+				ICollection<Show> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Show>(where, x => x.StudioID == id),
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetStudio(id) == null)
+				if (!resources.Any() && await _libraryManager.Get<Studio>(id) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -61,12 +61,12 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Show> resources = await _libraryManager.GetShows(
+				ICollection<Show> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Show>(where, x => x.Studio.Slug == slug),
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 				
-				if (!resources.Any() && await _libraryManager.GetStudio(slug) == null)
+				if (!resources.Any() && await _libraryManager.Get<Studio>(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}

@@ -4,6 +4,7 @@ using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
+using Kyoo.Models.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Filters;
 
@@ -40,92 +41,59 @@ namespace Kyoo.Api
 			ctx.HttpContext.Response.Headers.Add("Expires", "0");
 		}
 
-
-		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}")]
-		[HttpGet("direct/{showSlug}-s{seasonNumber:int}e{episodeNumber:int}")]
-		[Authorize(Policy="Play")]
-		public async Task<IActionResult> DirectEpisode(string showSlug, int seasonNumber, int episodeNumber)
-		{
-			if (seasonNumber < 0 || episodeNumber < 0)
-				return BadRequest(new {error = "Season number or episode number can not be negative."});
-
-			Episode episode = await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
-			if (episode == null)
-				return NotFound();
-			return _files.FileResult(episode.Path, true);
-		}
 		
-		[HttpGet("{movieSlug}")]
-		[HttpGet("direct/{movieSlug}")]
+		[HttpGet("{slug}")]
+		[HttpGet("direct/{slug}")]
 		[Authorize(Policy="Play")]
-		public async Task<IActionResult> DirectMovie(string movieSlug)
+		public async Task<IActionResult> Direct(string slug)
 		{
-			Episode episode = await _libraryManager.GetMovieEpisode(movieSlug);
-
-			if (episode == null)
+			try
+			{
+				Episode episode = await _libraryManager.Get<Episode>(slug);
+				return _files.FileResult(episode.Path, true);
+			}
+			catch (ItemNotFound)
+			{
 				return NotFound();
-			return _files.FileResult(episode.Path, true);
-		}
-		
-
-		[HttpGet("transmux/{showSlug}-s{seasonNumber:int}e{episodeNumber:int}/master.m3u8")]
-		[Authorize(Policy="Play")]
-		public async Task<IActionResult> TransmuxEpisode(string showSlug, int seasonNumber, int episodeNumber)
-		{
-			if (seasonNumber < 0 || episodeNumber < 0)
-				return BadRequest(new {error = "Season number or episode number can not be negative."});
-			
-			Episode episode = await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
-			if (episode == null)
-				return NotFound();
-			string path = await _transcoder.Transmux(episode);
-			if (path == null)
-				return StatusCode(500);
-			return _files.FileResult(path, true);
-		}
-		
-		[HttpGet("transmux/{movieSlug}/master.m3u8")]
-		[Authorize(Policy="Play")]
-		public async Task<IActionResult> TransmuxMovie(string movieSlug)
-		{
-			Episode episode = await _libraryManager.GetMovieEpisode(movieSlug);
-
-			if (episode == null)
-				return NotFound();
-			string path = await _transcoder.Transmux(episode);
-			if (path == null)
-				return StatusCode(500);
-			return _files.FileResult(path, true);
+			}
 		}
 
-		[HttpGet("transcode/{showSlug}-s{seasonNumber:int}e{episodeNumber:int}/master.m3u8")]
+		[HttpGet("transmux/{slug}/master.m3u8")]
 		[Authorize(Policy="Play")]
-		public async Task<IActionResult> TranscodeEpisode(string showSlug, int seasonNumber, int episodeNumber)
+		public async Task<IActionResult> Transmux(string slug)
 		{
-			if (seasonNumber < 0 || episodeNumber < 0)
-				return BadRequest(new {error = "Season number or episode number can not be negative."});
-			
-			Episode episode = await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
-			if (episode == null)
-				return NotFound();
-			string path = await _transcoder.Transcode(episode);
-			if (path == null)
-				return StatusCode(500);
-			return _files.FileResult(path, true);
-		}
-		
-		[HttpGet("transcode/{movieSlug}/master.m3u8")]
-		[Authorize(Policy="Play")]
-		public async Task<IActionResult> TranscodeMovie(string movieSlug)
-		{
-			Episode episode = await _libraryManager.GetMovieEpisode(movieSlug);
+			try
+			{
+				Episode episode = await _libraryManager.Get<Episode>(slug);
+				string path = await _transcoder.Transmux(episode);
 
-			if (episode == null)
+				if (path == null)
+					return StatusCode(500);
+				return _files.FileResult(path, true);
+			}
+			catch (ItemNotFound)
+			{
 				return NotFound();
-			string path = await _transcoder.Transcode(episode);
-			if (path == null)
-				return StatusCode(500);
-			return _files.FileResult(path, true);
+			}
+		}
+
+		[HttpGet("transcode/{slug}/master.m3u8")]
+		[Authorize(Policy="Play")]
+		public async Task<IActionResult> Transcode(string slug)
+		{
+			try
+			{
+				Episode episode = await _libraryManager.Get<Episode>(slug);
+				string path = await _transcoder.Transcode(episode);
+
+				if (path == null)
+					return StatusCode(500);
+				return _files.FileResult(path, true);
+			}
+			catch (ItemNotFound)
+			{
+				return NotFound();
+			}
 		}
 		
 		

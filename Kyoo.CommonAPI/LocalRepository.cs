@@ -24,7 +24,9 @@ namespace Kyoo.Controllers
 		{
 			Database = database;
 		}
-		
+
+		public Type RepositoryType => typeof(T);
+
 		public virtual void Dispose()
 		{
 			Database.Dispose();

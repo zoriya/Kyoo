@@ -11,7 +11,7 @@ namespace Kyoo.Api
 	[Route("api/provider")]
 	[Route("api/providers")]
 	[ApiController]
-	public class ProviderAPI : CrudApi<ProviderID>
+	public class ProviderAPI : CrudApi<Provider>
 	{
 		private readonly IThumbnailsManager _thumbnails;
 		private readonly ILibraryManager _libraryManager;
@@ -32,7 +32,7 @@ namespace Kyoo.Api
 		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetLogo(int id)
 		{
-			ProviderID provider = await _libraryManager.GetProvider(id);
+			Provider provider = await _libraryManager.Get<Provider>(id);
 			return _files.FileResult(await _thumbnails.GetProviderLogo(provider));
 		}
 		
@@ -40,7 +40,7 @@ namespace Kyoo.Api
 		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetLogo(string slug)
 		{
-			ProviderID provider = await _libraryManager.GetProvider(slug);
+			Provider provider = await _libraryManager.Get<Provider>(slug);
 			return _files.FileResult(await _thumbnails.GetProviderLogo(provider));
 		}
 	}

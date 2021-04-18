@@ -44,12 +44,12 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Season> resources = await _libraryManager.GetSeasons(
+				ICollection<Season> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Season>(where, x => x.ShowID == showID),
 					new Sort<Season>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetShow(showID) == null)
+				if (!resources.Any() && await _libraryManager.Get<Show>(showID) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -70,12 +70,12 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Season> resources = await _libraryManager.GetSeasons(
+				ICollection<Season> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Season>(where, x => x.Show.Slug == slug),
 					new Sort<Season>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetShow(slug) == null)
+				if (!resources.Any() && await _libraryManager.Get<Show>(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -96,12 +96,12 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Episode> resources = await _libraryManager.GetEpisodes(
+				ICollection<Episode> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Episode>(where, x => x.ShowID == showID),
 					new Sort<Episode>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetShow(showID) == null)
+				if (!resources.Any() && await _libraryManager.Get<Show>(showID) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -122,12 +122,12 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Episode> resources = await _libraryManager.GetEpisodes(
+				ICollection<Episode> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Episode>(where, x => x.Show.Slug == slug),
 					new Sort<Episode>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetShow(slug) == null)
+				if (!resources.Any() && await _libraryManager.Get<Show>(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -152,7 +152,7 @@ namespace Kyoo.Api
 					new Sort<PeopleRole>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetShow(showID) == null)
+				if (!resources.Any() && await _libraryManager.Get<Show>(showID) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -177,7 +177,7 @@ namespace Kyoo.Api
 					new Sort<PeopleRole>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetShow(slug) == null)
+				if (!resources.Any() && await _libraryManager.Get<Show>(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -198,12 +198,12 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Genre> resources = await _libraryManager.GetGenres(
+				ICollection<Genre> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Genre>(where, x => x.Shows.Any(y => y.ID == showID)),
 					new Sort<Genre>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetShow(showID) == null)
+				if (!resources.Any() && await _libraryManager.Get<Show>(showID) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -224,12 +224,12 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Genre> resources = await _libraryManager.GetGenres(
+				ICollection<Genre> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Genre>(where, x => x.Shows.Any(y => y.Slug == slug)),
 					new Sort<Genre>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetShow(slug) == null)
+				if (!resources.Any() && await _libraryManager.Get<Show>(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -245,7 +245,7 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				return await _libraryManager.GetStudio(x => x.Shows.Any(y => y.ID == showID));
+				return await _libraryManager.Get<Studio>(x => x.Shows.Any(y => y.ID == showID));
 			}
 			catch (ItemNotFound)
 			{
@@ -259,7 +259,7 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				return await _libraryManager.GetStudio(x => x.Shows.Any(y => y.Slug == slug));
+				return await _libraryManager.Get<Studio>(x => x.Shows.Any(y => y.Slug == slug));
 			}
 			catch (ItemNotFound)
 			{
@@ -278,12 +278,12 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Library> resources = await _libraryManager.GetLibraries(
+				ICollection<Library> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Library>(where, x => x.Shows.Any(y => y.ID == showID)),
 					new Sort<Library>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetShow(showID) == null)
+				if (!resources.Any() && await _libraryManager.Get<Show>(showID) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -304,12 +304,12 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Library> resources = await _libraryManager.GetLibraries(
+				ICollection<Library> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Library>(where, x => x.Shows.Any(y => y.Slug == slug)),
 					new Sort<Library>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetShow(slug) == null)
+				if (!resources.Any() && await _libraryManager.Get<Show>(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -330,12 +330,12 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Collection> resources = await _libraryManager.GetCollections(
+				ICollection<Collection> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Collection>(where, x => x.Shows.Any(y => y.ID == showID)),
 					new Sort<Collection>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetShow(showID) == null)
+				if (!resources.Any() && await _libraryManager.Get<Show>(showID) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -356,12 +356,12 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				ICollection<Collection> resources = await _libraryManager.GetCollections(
+				ICollection<Collection> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Collection>(where, x => x.Shows.Any(y => y.Slug == slug)),
 					new Sort<Collection>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetShow(slug) == null)
+				if (!resources.Any() && await _libraryManager.Get<Show>(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -376,7 +376,7 @@ namespace Kyoo.Api
 		[Authorize(Policy = "Read")]
 		public async Task<ActionResult<Dictionary<string, string>>> GetFonts(string slug)
 		{
-			Show show = await _libraryManager.GetShow(slug);
+			Show show = await _libraryManager.Get<Show>(slug);
 			if (show == null)
 				return NotFound();
 			string path = Path.Combine(_files.GetExtraDirectory(show), "Attachments");
@@ -390,7 +390,7 @@ namespace Kyoo.Api
 		[Authorize(Policy = "Read")]
 		public async Task<IActionResult> GetFont(string showSlug, string slug)
 		{
-			Show show = await _libraryManager.GetShow(showSlug);
+			Show show = await _libraryManager.Get<Show>(showSlug);
 			if (show == null)
 				return NotFound();
 			string path = Path.Combine(_files.GetExtraDirectory(show), "Attachments", slug);
@@ -401,7 +401,7 @@ namespace Kyoo.Api
 		[Authorize(Policy = "Read")]
 		public async Task<IActionResult> GetPoster(string slug)
 		{
-			Show show = await _libraryManager.GetShow(slug);
+			Show show = await _libraryManager.Get<Show>(slug);
 			if (show == null)
 				return NotFound();
 			return _files.FileResult(await _thumbs.GetShowPoster(show));
@@ -411,7 +411,7 @@ namespace Kyoo.Api
 		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetLogo(string slug)
 		{
-			Show show = await _libraryManager.GetShow(slug);
+			Show show = await _libraryManager.Get<Show>(slug);
 			if (show == null)
 				return NotFound();
 			return _files.FileResult(await _thumbs.GetShowLogo(show));
@@ -421,7 +421,7 @@ namespace Kyoo.Api
 		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetBackdrop(string slug)
 		{
-			Show show = await _libraryManager.GetShow(slug);
+			Show show = await _libraryManager.Get<Show>(slug);
 			if (show == null)
 				return NotFound();
 			return _files.FileResult(await _thumbs.GetShowBackdrop(show));

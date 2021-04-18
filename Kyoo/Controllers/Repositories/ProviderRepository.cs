@@ -8,10 +8,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers
 {
-	public class ProviderRepository : LocalRepository<ProviderID>, IProviderRepository
+	public class ProviderRepository : LocalRepository<Provider>, IProviderRepository
 	{
 		private readonly DatabaseContext _database;
-		protected override Expression<Func<ProviderID, object>> DefaultSort => x => x.Slug;
+		protected override Expression<Func<Provider, object>> DefaultSort => x => x.Slug;
 
 
 		public ProviderRepository(DatabaseContext database) : base(database)
@@ -19,7 +19,7 @@ namespace Kyoo.Controllers
 			_database = database;
 		}
 
-		public override async Task<ICollection<ProviderID>> Search(string query)
+		public override async Task<ICollection<Provider>> Search(string query)
 		{
 			return await _database.Providers
 				.Where(x => EF.Functions.ILike(x.Name, $"%{query}%"))
@@ -28,7 +28,7 @@ namespace Kyoo.Controllers
 				.ToListAsync();
 		}
 
-		public override async Task<ProviderID> Create(ProviderID obj)
+		public override async Task<Provider> Create(Provider obj)
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
@@ -36,7 +36,7 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 
-		public override async Task Delete(ProviderID obj)
+		public override async Task Delete(Provider obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));

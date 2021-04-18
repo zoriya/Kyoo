@@ -27,7 +27,7 @@ namespace Kyoo
 		public DbSet<Genre> Genres { get; set; }
 		public DbSet<People> People { get; set; }
 		public DbSet<Studio> Studios { get; set; }
-		public DbSet<ProviderID> Providers { get; set; }
+		public DbSet<Provider> Providers { get; set; }
 		public DbSet<MetadataID> MetadataIds { get; set; }
 		
 		public DbSet<PeopleRole> PeopleRoles { get; set; }
@@ -74,17 +74,17 @@ namespace Kyoo
 				.Property(t => t.IsForced)
 				.ValueGeneratedNever();
 
-			modelBuilder.Entity<ProviderID>()
+			modelBuilder.Entity<Provider>()
 				.HasMany(x => x.Libraries)
 				.WithMany(x => x.Providers)
-				.UsingEntity<Link<Library, ProviderID>>(
+				.UsingEntity<Link<Library, Provider>>(
 					y => y
 						.HasOne(x => x.First)
 						.WithMany(x => x.ProviderLinks),
 					y => y
 						.HasOne(x => x.Second)
 						.WithMany(x => x.LibraryLinks),
-					y => y.HasKey(Link<Library, ProviderID>.PrimaryKey));
+					y => y.HasKey(Link<Library, Provider>.PrimaryKey));
 			
 			modelBuilder.Entity<Collection>()
 				.HasMany(x => x.Libraries)
@@ -160,7 +160,7 @@ namespace Kyoo
 			modelBuilder.Entity<Genre>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<Library>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<People>().Property(x => x.Slug).IsRequired();
-			modelBuilder.Entity<ProviderID>().Property(x => x.Slug).IsRequired();
+			modelBuilder.Entity<Provider>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<Show>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<Studio>().Property(x => x.Slug).IsRequired();
 
@@ -182,7 +182,7 @@ namespace Kyoo
 			modelBuilder.Entity<Studio>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
-			modelBuilder.Entity<ProviderID>()
+			modelBuilder.Entity<Provider>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
 			modelBuilder.Entity<Season>()
