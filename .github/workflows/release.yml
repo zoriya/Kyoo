@@ -10,6 +10,8 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
+      - name: Set commit environment
+        run: echo "COMMIT_SHA=$(git rev-list -n 1 ${{github.ref}}) >> $GITHUB_ENV
       - uses: actions/checkout@v2
       - name: Wait for builds & tests to finish
         uses: lewagon/wait-on-check-action@v0.2
@@ -24,7 +26,7 @@ jobs:
       - name: Download artifacts
         uses: dawidd6/action-download-artifact@v2
         with:
-          commit: ${{github.ref}}
+          commit: ${{env.COMMIT_SHA}}
           workflow: build.yml
           path: ./artifacts
           github_token: ${{secrets.GITHUB_TOKEN}}
