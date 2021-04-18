@@ -16,7 +16,9 @@ jobs:
         with:
           images: ghcr.io/${{github.repository_owner}}/Kyoo
           tags: |
-            type=ref
+            type=ref,event=tag
+            type=ref,event=branch
+            type=ref,event=pr
             type=sha,prefix=
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -33,5 +35,5 @@ jobs:
         uses: docker/build-push-action@v2
         with:
           context: .
-          push: ${{github.ref == 'refs/heads/master'}}
+          push: true
           tags: ${{steps.meta.outputs.tags}}
