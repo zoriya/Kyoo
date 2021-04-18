@@ -44,6 +44,8 @@ For arch based, debian based or rpm compatible distributions, a package is autom
  - [Debian](https://nightly.link/AnonymusRaccoon/Kyoo/workflows/release/master/kyoo_debian.zip)
  - [RPM](https://nightly.link/AnonymusRaccoon/Kyoo/workflows/release/master/kyoo_rpm.zip)
 
+A docker file is also available and an up-to-date docker image is available at: `ghcr.io/anonymusraccoon/kyoo:master`. An example docker-compose image is available at the root of the repository. You can customise it to feet your needs and use a prebuild image or you can build it from source. To do that, clone the repository with the `--recurse` flag and run `docker-compose up `.
+
 ## Repositories
 
 This is the main repository for Kyoo. Here, you will find all the server's code, the build process & the login page.
