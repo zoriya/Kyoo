@@ -11,7 +11,7 @@ jobs:
       - name: Checkout submodules
         run: git submodule update --init --recursive
       - name: Push to GitHub Packages
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v1
         with:
           username: ${{github.actor}}
           password: ${{secrets.GITHUB_TOKEN}}
