@@ -18,5 +18,3 @@ jobs:
           registry: docker.pkg.github.com
           repository: AnonymusRaccoon/Kyoo/kyoo
           tag_with_sha: true
-      - name: Docker build
-        run: docker build . -t kyoo:$(date +%s)
