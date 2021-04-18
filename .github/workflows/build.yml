@@ -1,14 +1,11 @@
 name: Build
-
-on:
-  push:
-    branches:
-      - master
+on: [push, pull_request]
 
 jobs:
   build:
     name: "${{matrix.artifact}}'s Build"
     runs-on: ${{matrix.os}}
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     strategy:
       fail-fast: false
       matrix:
@@ -77,6 +74,7 @@ jobs:
     name: Create debian, rpm & arch releases
     runs-on: ubuntu-latest
     needs: build
+    if: github.ref == 'refs/heads/master'
     env:
       description: "A media browser"
       version: v0.0.1 #${{ github.ref }}
