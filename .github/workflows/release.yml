@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set commit environment
-        run: echo "COMMIT_SHA=$(git rev-list -n 1 ${{github.ref}}) >> $GITHUB_ENV
+        run: echo "COMMIT_SHA=$(git rev-list -n 1 ${{github.ref}})" >> $GITHUB_ENV
       - uses: actions/checkout@v2
       - name: Wait for builds & tests to finish
         uses: lewagon/wait-on-check-action@v0.2
