@@ -9,25 +9,60 @@ using Kyoo.Models;
 
 namespace Kyoo.Controllers
 {
+	/// <summary>
+	/// Informations about the pagination. How many items should be displayed and where to start.
+	/// </summary>
 	public readonly struct Pagination
 	{
+		/// <summary>
+		/// The count of items to return.
+		/// </summary>
 		public int Count { get; }
+		/// <summary>
+		/// Where to start? Using the given sort
+		/// </summary>
 		public int AfterID { get; }
 
+		/// <summary>
+		/// Create a new <see cref="Pagination"/> instance.
+		/// </summary>
+		/// <param name="count">Set the <see cref="Count"/> value</param>
+		/// <param name="afterID">Set the <see cref="AfterID"/> value. If not specified, it will start from the start</param>
 		public Pagination(int count, int afterID = 0)
 		{
 			Count = count;
 			AfterID = afterID;
 		}
 		
+		/// <summary>
+		/// Implicitly create a new pagination from a limit number.
+		/// </summary>
+		/// <param name="limit">Set the <see cref="Count"/> value</param>
+		/// <returns>A new <see cref="Pagination"/> instance</returns>
 		public static implicit operator Pagination(int limit) => new(limit);
 	}
 
+	/// <summary>
+	/// Informations about how a query should be sorted. What factor should decide the sort and in which order.
+	/// </summary>
+	/// <typeparam name="T">For witch type this sort applies</typeparam>
 	public readonly struct Sort<T>
 	{
+		/// <summary>
+		/// The sort key. This member will be used to sort the results.
+		/// </summary>
 		public Expression<Func<T, object>> Key { get; }
+		/// <summary>
+		/// If this is set to true, items will be sorted in descend order else, they will be sorted in ascendent order.
+		/// </summary>
 		public bool Descendant { get; }
 		
+		/// <summary>
+		/// Create a new <see cref="Sort{T}"/> instance.
+		/// </summary>
+		/// <param name="key">The sort key given. It is assigned to <see cref="Key"/>.</param>
+		/// <param name="descendant">Should this be in descendant order? The default is false.</param>
+		/// <exception cref="ArgumentException">If the given key is not a member.</exception>
 		public Sort(Expression<Func<T, object>> key, bool descendant = false)
 		{
 			Key = key;
@@ -37,6 +72,11 @@ namespace Kyoo.Controllers
 				throw new ArgumentException("The given sort key is not valid.");
 		}
 
+		/// <summary>
+		/// Create a new <see cref="Sort{T}"/> instance from a key's name (case insensitive).
+		/// </summary>
+		/// <param name="sortBy">A key name with an optional order specifier. Format: "key:asc", "key:desc" or "key".</param>
+		/// <exception cref="ArgumentException">An invalid key or sort specifier as been given.</exception>
 		public Sort(string sortBy)
 		{
 			if (string.IsNullOrEmpty(sortBy))
@@ -65,8 +105,14 @@ namespace Kyoo.Controllers
 		}
 	}
 
+	/// <summary>
+	/// A base class for repositories. Every service implementing this will be handled by the <see cref="LibraryManager"/>.
+	/// </summary>
 	public interface IBaseRepository : IDisposable, IAsyncDisposable
 	{
+		/// <summary>
+		/// The type for witch this repository is responsible.
+		/// </summary>
 		Type RepositoryType { get; }
 	}
 	
