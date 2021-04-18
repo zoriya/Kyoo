@@ -15,7 +15,9 @@ jobs:
         uses: crazy-max/ghaction-docker-meta@v2
         with:
           images: ghcr.io/${{github.repository_owner}}/Kyoo
-          tags: type=sha,prefix=
+          tags: |
+            type=ref
+            type=sha,prefix=
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
       - name: Set up Docker Buildx
