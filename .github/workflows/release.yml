@@ -19,6 +19,7 @@ jobs:
           ref: ${{github.ref}}
           repo-token: ${{secrets.GITHUB_TOKEN}}
           running-workflow-name: release
+          allowed-conclusions: success,skipped,cancelled,neutral
       - name: Generate changelog
         uses: mikepenz/release-changelog-builder-action@v1
         env:
