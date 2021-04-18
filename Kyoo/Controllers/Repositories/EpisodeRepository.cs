@@ -73,7 +73,8 @@ namespace Kyoo.Controllers
 			}
 
 			Episode episode = await _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == slug);
-			episode.ShowSlug = slug;
+			if (episode != null)
+				episode.ShowSlug = slug;
 			return episode;
 		}
 
