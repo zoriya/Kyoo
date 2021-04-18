@@ -14,7 +14,7 @@ jobs:
       - name: Set commit environment
         run: echo "COMMIT_SHA=$(git rev-list -n 1 ${{github.ref}})" >> $GITHUB_ENV
       - name: Wait for builds & tests to finish
-        uses: lewagon/wait-on-check-action@v0.2
+        uses: lewagon/wait-on-check-action@master
         with:
           ref: ${{github.ref}}
           repo-token: ${{secrets.GITHUB_TOKEN}}
