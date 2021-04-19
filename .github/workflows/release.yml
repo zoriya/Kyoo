@@ -37,6 +37,7 @@ jobs:
         with:
           PROJECT_FILE_PATH: Kyoo.Common/Kyoo.Common.csproj
           PACKAGE_NAME: Kyoo.Common
+          VERSION_REGEX: ^\s*<PackageVersion>(.*)<\/PackageVersion>\s*$
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
           INCLUDE_SYMBOLS: true
       - name: Create Release
