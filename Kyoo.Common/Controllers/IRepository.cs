@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Kyoo.Models;
+using Kyoo.Models.Exceptions;
 
 namespace Kyoo.Controllers
 {
@@ -111,44 +112,150 @@ namespace Kyoo.Controllers
 	public interface IBaseRepository : IDisposable, IAsyncDisposable
 	{
 		/// <summary>
-		/// The type for witch this repository is responsible.
+		/// The type for witch this repository is responsible or null if non applicable.
 		/// </summary>
 		Type RepositoryType { get; }
 	}
 	
+	/// <summary>
+	/// A common repository for every resources.
+	/// It implement's <see cref="IBaseRepository"/> and <see cref="IDisposable"/>/<see cref="IAsyncDisposable"/>.
+	/// </summary>
+	/// <typeparam name="T">The resource's type that this repository manage.</typeparam>
 	public interface IRepository<T> : IBaseRepository where T : class, IResource
 	{
+		/// <summary>
+		/// Get a resource from it's ID.
+		/// </summary>
+		/// <param name="id">The id of the resource</param>
+		/// <exception cref="ItemNotFound">If the item could not be found.</exception>
+		/// <returns>The resource found</returns>
 		Task<T> Get(int id);
+		/// <summary>
+		/// Get a resource from it's slug.
+		/// </summary>
+		/// <param name="slug">The slug of the resource</param>
+		/// <exception cref="ItemNotFound">If the item could not be found.</exception>
+		/// <returns>The resource found</returns>
 		Task<T> Get(string slug);
+		/// <summary>
+		/// Get the first resource that match the predicate.
+		/// </summary>
+		/// <param name="where">A predicate to filter the resource.</param>
+		/// <exception cref="ItemNotFound">If the item could not be found.</exception>
+		/// <returns>The resource found</returns>
 		Task<T> Get(Expression<Func<T, bool>> where);
+		
+		/// <summary>
+		/// Search for resources.
+		/// </summary>
+		/// <param name="query">The query string.</param>
+		/// <returns>A list of resources found</returns>
 		Task<ICollection<T>> Search(string query);
 		
+		/// <summary>
+		/// Get every resources that match all filters
+		/// </summary>
+		/// <param name="where">A filter predicate</param>
+		/// <param name="sort">Sort informations about the query (sort by, sort order)</param>
+		/// <param name="limit">How pagination should be done (where to start and how many to return)</param>
+		/// <returns>A list of resources that match every filters</returns>
 		Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null, 
 			Sort<T> sort = default,
 			Pagination limit = default);
-
+		/// <summary>
+		/// Get every resources that match all filters
+		/// </summary>
+		/// <param name="where">A filter predicate</param>
+		/// <param name="sort">A sort by predicate. The order is ascending.</param>
+		/// <param name="limit">How pagination should be done (where to start and how many to return)</param>
+		/// <returns>A list of resources that match every filters</returns>
 		Task<ICollection<T>> GetAll([Optional] Expression<Func<T, bool>> where,
 			Expression<Func<T, object>> sort,
 			Pagination limit = default
 		) => GetAll(where, new Sort<T>(sort), limit);
 
+		/// <summary>
+		/// Get the number of resources that match the filter's predicate.
+		/// </summary>
+		/// <param name="where">A filter predicate</param>
+		/// <returns>How many resources matched that filter</returns>
 		Task<int> GetCount(Expression<Func<T, bool>> where = null);
 		
 		
+		/// <summary>
+		/// Create a new resource.
+		/// </summary>
+		/// <param name="obj">The item to register</param>
+		/// <returns>The resource registers and completed by database's informations (related items & so on)</returns>
 		Task<T> Create([NotNull] T obj);
+		
+		/// <summary>
+		/// Create a new resource if it does not exist already. If it does, the existing value is returned instead.
+		/// </summary>
+		/// <param name="obj">The object to create</param>
+		/// <param name="silentFail">Allow issues to occurs in this method. Every issue is catched and ignored.</param>
+		/// <returns>The newly created item or the existing value if it existed.</returns>
 		Task<T> CreateIfNotExists([NotNull] T obj, bool silentFail = false);
+		
+		/// <summary>
+		/// Edit a resource
+		/// </summary>
+		/// <param name="edited">The resourcce to edit, it's ID can't change.</param>
+		/// <param name="resetOld">Should old properties of the resource be discarded or should null values considered as not changed?</param>
+		/// <returns>The resource edited and completed by database's informations (related items & so on)</returns>
 		Task<T> Edit([NotNull] T edited, bool resetOld);
 		
+		/// <summary>
+		/// Delete a resource by it's ID
+		/// </summary>
+		/// <param name="id">The ID of the resource</param>
 		Task Delete(int id);
+		/// <summary>
+		/// Delete a resource by it's slug
+		/// </summary>
+		/// <param name="slug">The slug of the resource</param>
 		Task Delete(string slug);
+		/// <summary>
+		/// Delete a resource
+		/// </summary>
+		/// <param name="obj">The resource to delete</param>
 		Task Delete([NotNull] T obj);
 
+		/// <summary>
+		/// Delete a list of resources.
+		/// </summary>
+		/// <param name="objs">One or multiple resources to delete</param>
 		Task DeleteRange(params T[] objs) => DeleteRange(objs.AsEnumerable());
+		/// <summary>
+		/// Delete a list of resources.
+		/// </summary>
+		/// <param name="objs">An enumerable of resources to delete</param>
 		Task DeleteRange(IEnumerable<T> objs);
+		/// <summary>
+		/// Delete a list of resources.
+		/// </summary>
+		/// <param name="ids">One or multiple resources's id</param>
 		Task DeleteRange(params int[] ids) => DeleteRange(ids.AsEnumerable());
+		/// <summary>
+		/// Delete a list of resources.
+		/// </summary>
+		/// <param name="ids">An enumearble of resources's id</param>
 		Task DeleteRange(IEnumerable<int> ids);
+		/// <summary>
+		/// Delete a list of resources.
+		/// </summary>
+		/// <param name="slugs">One or multiple resources's slug</param>
 		Task DeleteRange(params string[] slugs) => DeleteRange(slugs.AsEnumerable());
+		/// <summary>
+		/// Delete a list of resources.
+		/// </summary>
+		/// <param name="slugs">An enumerable of resources's slug</param>
 		Task DeleteRange(IEnumerable<string> slugs);
+		/// <summary>
+		/// Delete a list of resources.
+		/// </summary>
+		/// <param name="where">A predicate to filter resources to delete. Every resource that match this will be deleted.</param>
 		Task DeleteRange([NotNull] Expression<Func<T, bool>> where);
 	}
 
