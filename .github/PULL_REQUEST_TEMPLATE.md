@@ -1,10 +1,3 @@
----
-name: Feature Proposal
-about: Propose code for a new feature of Kyoo
-title: "[FEATURE] "
-labels: enhancement
----
-
 ## Proposed changes
 
 Describe the big picture of your changes here to communicate to the maintainers why we should accept this pull request.
