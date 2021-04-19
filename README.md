@@ -2,6 +2,7 @@
 <p>
   <a href="https://github.com/AnonymusRaccoon/Kyoo/actions/workflows/build.yml"><img src="https://img.shields.io/github/workflow/status/AnonymusRaccoon/Kyoo/Build?style=flat-square" alt="Build status"></a>
   <a href="https://github.com/AnonymusRaccoon/Kyoo/actions/workflows/tests.yml"><img src="https://img.shields.io/github/workflow/status/AnonymusRaccoon/Kyoo/Testing?label=tests&style=flat-square" alt="Tests status"></a>
+  <a href="https://github.com/users/AnonymusRaccoon/packages/container/package/kyoo"><img src="https://img.shields.io/github/workflow/status/AnonymusRaccoon/Kyoo/Docker?label=docker&style=flat-square"/></a>
   <a href="https://sonarcloud.io/dashboard?id=AnonymusRaccoon_Kyoo"><img src="https://img.shields.io/sonar/violations/AnonymusRaccoon_Kyoo?format=long&server=https%3A%2F%2Fsonarcloud.io&style=flat-square" alt="Analysis report"></a>
   <a href="./LICENSE"><img src="https://img.shields.io/github/license/AnonymusRaccoon/Kyoo?style=flat-square" alt="License"></a>
 </p>
