@@ -46,5 +46,5 @@ jobs:
           draft: true
           release_name: ${{github.ref}}
           body: ${{steps.github_release.outputs.changelog}}
-          arficats: ./artifacts/**/*
+          artifacts: ./artifacts/**/*
           token: ${{secrets.GITHUB_TOKEN}}
