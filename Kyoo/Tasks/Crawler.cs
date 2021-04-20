@@ -144,44 +144,48 @@ namespace Kyoo.Controllers
 
 		private async Task RegisterExternalSubtitle(string path, CancellationToken token)
 		{
-			if (token.IsCancellationRequested || path.Split(Path.DirectorySeparatorChar).Contains("Subtitles")) 
-				return;
-			using IServiceScope serviceScope = _serviceProvider.CreateScope();
-			await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
-			
-			string patern = _config.GetValue<string>("subtitleRegex");
-			Regex regex = new(patern, RegexOptions.IgnoreCase);
-			Match match = regex.Match(path);
-			
-			if (!match.Success)
+			try
 			{
-				await Console.Error.WriteLineAsync($"The subtitle at {path} does not match the subtitle's regex.");
-				return;
+				if (token.IsCancellationRequested || path.Split(Path.DirectorySeparatorChar).Contains("Subtitles"))
+					return;
+				using IServiceScope serviceScope = _serviceProvider.CreateScope();
+				await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
+
+				string patern = _config.GetValue<string>("subtitleRegex");
+				Regex regex = new(patern, RegexOptions.IgnoreCase);
+				Match match = regex.Match(path);
+
+				if (!match.Success)
+				{
+					await Console.Error.WriteLineAsync($"The subtitle at {path} does not match the subtitle's regex.");
+					return;
+				}
+
+				string episodePath = match.Groups["Episode"].Value;
+				Episode episode = await libraryManager!.Get<Episode>(x => x.Path.StartsWith(episodePath));
+				Track track = new()
+				{
+					Type = StreamType.Subtitle,
+					Language = match.Groups["Language"].Value,
+					IsDefault = match.Groups["Default"].Value.Length > 0, 
+					IsForced = match.Groups["Forced"].Value.Length > 0,
+					Codec = SubtitleExtensions[Path.GetExtension(path)],
+					IsExternal = true,
+					Path = path,
+					Episode = episode
+				};
+
+				await libraryManager.Create(track);
+				Console.WriteLine($"Registering subtitle at: {path}.");
 			}
-
-			string episodePath = match.Groups["Episode"].Value;
-			Episode episode = await libraryManager!.Get<Episode>(x => x.Path.StartsWith(episodePath));
-
-			if (episode == null)
+			catch (ItemNotFound)
 			{
 				await Console.Error.WriteLineAsync($"No episode found for subtitle at: ${path}.");
-				return;
 			}
-
-			Track track = new(StreamType.Subtitle,
-				null,
-				match.Groups["Language"].Value,
-				match.Groups["Default"].Value.Length > 0,
-				match.Groups["Forced"].Value.Length > 0,
-				SubtitleExtensions[Path.GetExtension(path)],
-				true,
-				path)
+			catch (Exception ex)
 			{
-				Episode = episode
-			};
-			
-			await libraryManager.Create(track);
-			Console.WriteLine($"Registering subtitle at: {path}.");
+				await Console.Error.WriteLineAsync($"Unknown error while registering subtitle: {ex.Message}");
+			}
 		}
 
 		private async Task RegisterFile(string path, string relativePath, Library library, CancellationToken token)
@@ -308,22 +312,20 @@ namespace Kyoo.Controllers
 		{
 			if (seasonNumber == -1)
 				return default;
-			Season season = await libraryManager.Get(show.Slug, seasonNumber);
-			if (season == null)
+			try
 			{
-				season = await _metadataProvider.GetSeason(show, seasonNumber, library);
-				try
-				{
-					await libraryManager.Create(season);
-					await _thumbnailsManager.Validate(season);
-				}
-				catch (DuplicatedItemException)
-				{
-					season = await libraryManager.Get(show.Slug, season.SeasonNumber);
-				}
+				Season season = await libraryManager.Get(show.Slug, seasonNumber);
+				season.Show = show;
+				return season;
 			}
-			season.Show = show;
-			return season;
+			catch (ItemNotFound)
+			{
+				Season season = await _metadataProvider.GetSeason(show, seasonNumber, library);
+				await libraryManager.CreateIfNotExists(season);
+				await _thumbnailsManager.Validate(season);
+				season.Show = show;
+				return season;
+			}
 		}
 		
 		private async Task<Episode> GetEpisode(ILibraryManager libraryManager, 

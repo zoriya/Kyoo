@@ -30,7 +30,7 @@ namespace Kyoo.Api
 			Track subtitle;
 			try
 			{
-				subtitle = await _libraryManager.GetTrack(slug, StreamType.Subtitle);
+				subtitle = await _libraryManager.Get(slug, StreamType.Subtitle);
 			}
 			catch (ArgumentException ex)
 			{

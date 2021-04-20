@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models;
+using Kyoo.Models.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,10 +22,15 @@ namespace Kyoo.Api
 		[Authorize(Policy="Read")]
 		public async Task<ActionResult<WatchItem>> GetWatchItem(string slug)
 		{
-			Episode item = await _libraryManager.Get<Episode>(slug);
-			if (item == null)
+			try
+			{
+				Episode item = await _libraryManager.Get<Episode>(slug);
+				return await WatchItem.FromEpisode(item, _libraryManager);
+			}
+			catch (ItemNotFound)
+			{
 				return NotFound();
-			return await WatchItem.FromEpisode(item, _libraryManager);
+			}
 		}
 	}
 }

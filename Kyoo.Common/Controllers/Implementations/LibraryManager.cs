@@ -15,27 +15,6 @@ namespace Kyoo.Controllers
 		/// </summary>
 		private readonly IBaseRepository[] _repositories;
 		
-		
-		/// <summary>
-		/// Create a new <see cref="LibraryManager"/> instancce with every repository available.
-		/// </summary>
-		/// <param name="repositories">The list of repositories that this library manager should manage. If a repository for every base type is not available, this instance won't be stable.</param>
-		public LibraryManager(IEnumerable<IBaseRepository> repositories)
-		{
-			_repositories = repositories.ToArray();
-			LibraryRepository = GetRepository<Library>() as ILibraryRepository;
-			LibraryItemRepository = GetRepository<LibraryItem>() as ILibraryItemRepository;
-			CollectionRepository = GetRepository<Collection>() as ICollectionRepository;
-			ShowRepository = GetRepository<Show>() as IShowRepository;
-			SeasonRepository = GetRepository<Season>() as ISeasonRepository;
-			EpisodeRepository = GetRepository<Episode>() as IEpisodeRepository;
-			TrackRepository = GetRepository<Track>() as ITrackRepository;
-			PeopleRepository = GetRepository<People>() as IPeopleRepository;
-			StudioRepository = GetRepository<Studio>() as IStudioRepository;
-			GenreRepository = GetRepository<Genre>() as IGenreRepository;
-			ProviderRepository = GetRepository<Provider>() as IProviderRepository;
-		}
-
 		/// <summary>
 		/// The repository that handle libraries.
 		/// </summary>
@@ -90,7 +69,60 @@ namespace Kyoo.Controllers
 		/// The repository that handle providers.
 		/// </summary>
 		public IProviderRepository ProviderRepository { get; }
+		
+		
+		/// <summary>
+		/// Create a new <see cref="LibraryManager"/> instancce with every repository available.
+		/// </summary>
+		/// <param name="repositories">The list of repositories that this library manager should manage. If a repository for every base type is not available, this instance won't be stable.</param>
+		public LibraryManager(IEnumerable<IBaseRepository> repositories)
+		{
+			_repositories = repositories.ToArray();
+			LibraryRepository = GetRepository<Library>() as ILibraryRepository;
+			LibraryItemRepository = GetRepository<LibraryItem>() as ILibraryItemRepository;
+			CollectionRepository = GetRepository<Collection>() as ICollectionRepository;
+			ShowRepository = GetRepository<Show>() as IShowRepository;
+			SeasonRepository = GetRepository<Season>() as ISeasonRepository;
+			EpisodeRepository = GetRepository<Episode>() as IEpisodeRepository;
+			TrackRepository = GetRepository<Track>() as ITrackRepository;
+			PeopleRepository = GetRepository<People>() as IPeopleRepository;
+			StudioRepository = GetRepository<Studio>() as IStudioRepository;
+			GenreRepository = GetRepository<Genre>() as IGenreRepository;
+			ProviderRepository = GetRepository<Provider>() as IProviderRepository;
+		}
+		
+		/// <summary>
+		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+		/// </summary>
+		public void Dispose()
+		{
+			foreach (IBaseRepository repo in _repositories)
+				repo.Dispose();
+			GC.SuppressFinalize(this);
+		}
 
+		/// <summary>
+		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources asynchronously.
+		/// </summary>
+		/// <returns>A task that represents the asynchronous dispose operation.</returns>
+		public async ValueTask DisposeAsync()
+		{
+			await Task.WhenAll(_repositories.Select(x => x.DisposeAsync().AsTask()));
+		}
+
+		/// <summary>
+		/// Get the repository corresponding to the T item.
+		/// </summary>
+		/// <typeparam name="T">The type you want</typeparam>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <returns>The repository corresponding</returns>
+		public IRepository<T> GetRepository<T>()
+			where T : class, IResource
+		{
+			if (_repositories.FirstOrDefault(x => x.RepositoryType == typeof(T)) is IRepository<T> ret)
+				return ret;
+			throw new ItemNotFound();
+		}
 
 		/// <summary>
 		/// Get the resource by it's ID
@@ -188,44 +220,104 @@ namespace Kyoo.Controllers
 		/// <param name="type">The type (Video, Audio or Subtitle)</param>
 		/// <exception cref="ItemNotFound">If the item is not found</exception>
 		/// <returns>The tracl found</returns>
-		public Task<Track> GetTrack(string slug, StreamType type = StreamType.Unknown)
+		public Task<Track> Get(string slug, StreamType type = StreamType.Unknown)
 		{
 			return TrackRepository.Get(slug, type);
 		}
 
 		/// <summary>
-		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+		/// Get the resource by it's ID or null if it is not found.
 		/// </summary>
-		public void Dispose()
-		{
-			foreach (IBaseRepository repo in _repositories)
-				repo.Dispose();
-			GC.SuppressFinalize(this);
-		}
-
-		/// <summary>
-		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources asynchronously.
-		/// </summary>
-		/// <returns>A task that represents the asynchronous dispose operation.</returns>
-		public async ValueTask DisposeAsync()
-		{
-			await Task.WhenAll(_repositories.Select(x => x.DisposeAsync().AsTask()));
-		}
-
-		/// <summary>
-		/// Get the repository corresponding to the T item.
-		/// </summary>
-		/// <typeparam name="T">The type you want</typeparam>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
-		/// <returns>The repository corresponding</returns>
-		public IRepository<T> GetRepository<T>()
+		/// <param name="id">The id of the resource</param>
+		/// <typeparam name="T">The type of the resource</typeparam>
+		/// <returns>The resource found</returns>
+		public async Task<T> GetOrDefault<T>(int id) 
 			where T : class, IResource
 		{
-			if (_repositories.FirstOrDefault(x => x.RepositoryType == typeof(T)) is IRepository<T> ret)
-				return ret;
-			throw new ItemNotFound();
+			return await GetRepository<T>().GetOrDefault(id);
+		}
+		
+		/// <summary>
+		/// Get the resource by it's slug or null if it is not found.
+		/// </summary>
+		/// <param name="slug">The slug of the resource</param>
+		/// <typeparam name="T">The type of the resource</typeparam>
+		/// <returns>The resource found</returns>
+		public async Task<T> GetOrDefault<T>(string slug) 
+			where T : class, IResource
+		{
+			return await GetRepository<T>().GetOrDefault(slug);
+		}
+		
+		/// <summary>
+		/// Get the resource by a filter function or null if it is not found.
+		/// </summary>
+		/// <param name="where">The filter function.</param>
+		/// <typeparam name="T">The type of the resource</typeparam>
+		/// <returns>The first resource found that match the where function</returns>
+		public async Task<T> GetOrDefault<T>(Expression<Func<T, bool>> where)
+			where T : class, IResource
+		{
+			return await GetRepository<T>().GetOrDefault(where);
 		}
 
+		/// <summary>
+		/// Get a season from it's showID and it's seasonNumber or null if it is not found.
+		/// </summary>
+		/// <param name="showID">The id of the show</param>
+		/// <param name="seasonNumber">The season's number</param>
+		/// <returns>The season found</returns>
+		public async Task<Season> GetOrDefault(int showID, int seasonNumber)
+		{
+			return await SeasonRepository.GetOrDefault(showID, seasonNumber);
+		}
+		
+		/// <summary>
+		/// Get a season from it's show slug and it's seasonNumber or null if it is not found.
+		/// </summary>
+		/// <param name="showSlug">The slug of the show</param>
+		/// <param name="seasonNumber">The season's number</param>
+		/// <returns>The season found</returns>
+		public async Task<Season> GetOrDefault(string showSlug, int seasonNumber)
+		{
+			return await SeasonRepository.GetOrDefault(showSlug, seasonNumber);
+		}
+		
+		/// <summary>
+		/// Get a episode from it's showID, it's seasonNumber and it's episode number or null if it is not found.
+		/// </summary>
+		/// <param name="showID">The id of the show</param>
+		/// <param name="seasonNumber">The season's number</param>
+		/// <param name="episodeNumber">The episode's number</param>
+		/// <returns>The episode found</returns>
+		public async Task<Episode> GetOrDefault(int showID, int seasonNumber, int episodeNumber)
+		{
+			return await EpisodeRepository.GetOrDefault(showID, seasonNumber, episodeNumber);
+		}
+		
+		/// <summary>
+		/// Get a episode from it's show slug, it's seasonNumber and it's episode number or null if it is not found.
+		/// </summary>
+		/// <param name="showSlug">The slug of the show</param>
+		/// <param name="seasonNumber">The season's number</param>
+		/// <param name="episodeNumber">The episode's number</param>
+		/// <returns>The episode found</returns>
+		public async Task<Episode> GetOrDefault(string showSlug, int seasonNumber, int episodeNumber)
+		{
+			return await EpisodeRepository.GetOrDefault(showSlug, seasonNumber, episodeNumber);
+		}
+
+		/// <summary>
+		/// Get a track from it's slug and it's type or null if it is not found.
+		/// </summary>
+		/// <param name="slug">The slug of the track</param>
+		/// <param name="type">The type (Video, Audio or Subtitle)</param>
+		/// <returns>The tracl found</returns>
+		public async Task<Track> GetOrDefault(string slug, StreamType type = StreamType.Unknown)
+		{
+			return await TrackRepository.GetOrDefault(slug, type);
+		}
+		
 		/// <summary>
 		/// Load a related resource
 		/// </summary>
@@ -360,7 +452,7 @@ namespace Kyoo.Controllers
 					.Then(x => s.Collections = x),
 				
 				(Show s, nameof(Show.Studio)) => StudioRepository
-					.Get(x => x.Shows.Any(y => y.ID == obj.ID))
+					.GetOrDefault(x => x.Shows.Any(y => y.ID == obj.ID))
 					.Then(x =>
 					{
 						s.Studio = x;
@@ -379,7 +471,7 @@ namespace Kyoo.Controllers
 					(x, y) => { x.Season = y; x.SeasonID = y.ID; }),
 				
 				(Season s, nameof(Season.Show)) => ShowRepository
-					.Get(x => x.Seasons.Any(y => y.ID == obj.ID))
+					.GetOrDefault(x => x.Seasons.Any(y => y.ID == obj.ID))
 					.Then(x =>
 					{
 						s.Show = x;
@@ -398,7 +490,7 @@ namespace Kyoo.Controllers
 					(x, y) => { x.Episode = y; x.EpisodeID = y.ID; }),
 				
 				(Episode e, nameof(Episode.Show)) => ShowRepository
-					.Get(x => x.Episodes.Any(y => y.ID == obj.ID))
+					.GetOrDefault(x => x.Episodes.Any(y => y.ID == obj.ID))
 					.Then(x =>
 					{
 						e.Show = x;
@@ -406,7 +498,7 @@ namespace Kyoo.Controllers
 					}),
 				
 				(Episode e, nameof(Episode.Season)) => SeasonRepository
-					.Get(x => x.Episodes.Any(y => y.ID == e.ID))
+					.GetOrDefault(x => x.Episodes.Any(y => y.ID == e.ID))
 					.Then(x =>
 					{
 						e.Season = x;
@@ -415,7 +507,7 @@ namespace Kyoo.Controllers
 				
 				
 				(Track t, nameof(Track.Episode)) => EpisodeRepository
-					.Get(x => x.Tracks.Any(y => y.ID == obj.ID))
+					.GetOrDefault(x => x.Tracks.Any(y => y.ID == obj.ID))
 					.Then(x =>
 					{
 						t.Episode = x;
@@ -623,6 +715,18 @@ namespace Kyoo.Controllers
 		{
 			return GetRepository<T>().Create(item);
 		}
+		
+		/// <summary>
+		/// Create a new resource if it does not exist already. If it does, the existing value is returned instead.
+		/// </summary>
+		/// <param name="item">The object to create</param>
+		/// <typeparam name="T">The type of resource</typeparam>
+		/// <returns>The newly created item or the existing value if it existed.</returns>
+		public Task<T> CreateIfNotExists<T>(T item)
+			where T : class, IResource
+		{
+			return GetRepository<T>().CreateIfNotExists(item);
+		}
 
 		/// <summary>
 		/// Edit a resource
@@ -630,6 +734,7 @@ namespace Kyoo.Controllers
 		/// <param name="item">The resourcce to edit, it's ID can't change.</param>
 		/// <param name="resetOld">Should old properties of the resource be discarded or should null values considered as not changed?</param>
 		/// <typeparam name="T">The type of resources</typeparam>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
 		/// <returns>The resource edited and completed by database's informations (related items & so on)</returns>
 		public Task<T> Edit<T>(T item, bool resetOld)
 			where T : class, IResource
@@ -642,6 +747,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="item">The resource to delete</param>
 		/// <typeparam name="T">The type of resource to delete</typeparam>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
 		public Task Delete<T>(T item) 
 			where T : class, IResource
 		{
@@ -653,6 +759,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="id">The id of the resource to delete</param>
 		/// <typeparam name="T">The type of resource to delete</typeparam>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
 		public Task Delete<T>(int id) 
 			where T : class, IResource
 		{
@@ -664,6 +771,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="slug">The slug of the resource to delete</param>
 		/// <typeparam name="T">The type of resource to delete</typeparam>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
 		public Task Delete<T>(string slug) 
 			where T : class, IResource
 		{

@@ -143,13 +143,79 @@ namespace Kyoo.Controllers
 		Task<Episode> Get(string showSlug, int seasonNumber, int episodeNumber);
 
 		/// <summary>
-		/// Get a tracck from it's slug and it's type.
+		/// Get a track from it's slug and it's type.
 		/// </summary>
 		/// <param name="slug">The slug of the track</param>
 		/// <param name="type">The type (Video, Audio or Subtitle)</param>
 		/// <exception cref="ItemNotFound">If the item is not found</exception>
 		/// <returns>The tracl found</returns>
-		Task<Track> GetTrack(string slug, StreamType type = StreamType.Unknown);
+		Task<Track> Get(string slug, StreamType type = StreamType.Unknown);
+		
+		/// <summary>
+		/// Get the resource by it's ID or null if it is not found.
+		/// </summary>
+		/// <param name="id">The id of the resource</param>
+		/// <typeparam name="T">The type of the resource</typeparam>
+		/// <returns>The resource found</returns>
+		Task<T> GetOrDefault<T>(int id) where T : class, IResource;
+		
+		/// <summary>
+		/// Get the resource by it's slug or null if it is not found.
+		/// </summary>
+		/// <param name="slug">The slug of the resource</param>
+		/// <typeparam name="T">The type of the resource</typeparam>
+		/// <returns>The resource found</returns>
+		Task<T> GetOrDefault<T>(string slug) where T : class, IResource;
+		
+		/// <summary>
+		/// Get the resource by a filter function or null if it is not found.
+		/// </summary>
+		/// <param name="where">The filter function.</param>
+		/// <typeparam name="T">The type of the resource</typeparam>
+		/// <returns>The first resource found that match the where function</returns>
+		Task<T> GetOrDefault<T>(Expression<Func<T, bool>> where) where T : class, IResource;
+
+		/// <summary>
+		/// Get a season from it's showID and it's seasonNumber or null if it is not found.
+		/// </summary>
+		/// <param name="showID">The id of the show</param>
+		/// <param name="seasonNumber">The season's number</param>
+		/// <returns>The season found</returns>
+		Task<Season> GetOrDefault(int showID, int seasonNumber);
+		
+		/// <summary>
+		/// Get a season from it's show slug and it's seasonNumber or null if it is not found.
+		/// </summary>
+		/// <param name="showSlug">The slug of the show</param>
+		/// <param name="seasonNumber">The season's number</param>
+		/// <returns>The season found</returns>
+		Task<Season> GetOrDefault(string showSlug, int seasonNumber);
+		
+		/// <summary>
+		/// Get a episode from it's showID, it's seasonNumber and it's episode number or null if it is not found.
+		/// </summary>
+		/// <param name="showID">The id of the show</param>
+		/// <param name="seasonNumber">The season's number</param>
+		/// <param name="episodeNumber">The episode's number</param>
+		/// <returns>The episode found</returns>
+		Task<Episode> GetOrDefault(int showID, int seasonNumber, int episodeNumber);
+		
+		/// <summary>
+		/// Get a episode from it's show slug, it's seasonNumber and it's episode number or null if it is not found.
+		/// </summary>
+		/// <param name="showSlug">The slug of the show</param>
+		/// <param name="seasonNumber">The season's number</param>
+		/// <param name="episodeNumber">The episode's number</param>
+		/// <returns>The episode found</returns>
+		Task<Episode> GetOrDefault(string showSlug, int seasonNumber, int episodeNumber);
+
+		/// <summary>
+		/// Get a track from it's slug and it's type or null if it is not found.
+		/// </summary>
+		/// <param name="slug">The slug of the track</param>
+		/// <param name="type">The type (Video, Audio or Subtitle)</param>
+		/// <returns>The tracl found</returns>
+		Task<Track> GetOrDefault(string slug, StreamType type = StreamType.Unknown);
 		
 
 		/// <summary>
@@ -423,7 +489,15 @@ namespace Kyoo.Controllers
 		/// <param name="item">The item to register</param>
 		/// <typeparam name="T">The type of resource</typeparam>
 		/// <returns>The resource registers and completed by database's informations (related items & so on)</returns>
-		Task<T> Create<T>(T item) where T : class, IResource;
+		Task<T> Create<T>([NotNull] T item) where T : class, IResource;
+		
+		/// <summary>
+		/// Create a new resource if it does not exist already. If it does, the existing value is returned instead.
+		/// </summary>
+		/// <param name="item">The item to register</param>
+		/// <typeparam name="T">The type of resource</typeparam>
+		/// <returns>The newly created item or the existing value if it existed.</returns>
+		Task<T> CreateIfNotExists<T>([NotNull] T item) where T : class, IResource;
 		
 		/// <summary>
 		/// Edit a resource
@@ -431,6 +505,7 @@ namespace Kyoo.Controllers
 		/// <param name="item">The resourcce to edit, it's ID can't change.</param>
 		/// <param name="resetOld">Should old properties of the resource be discarded or should null values considered as not changed?</param>
 		/// <typeparam name="T">The type of resources</typeparam>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
 		/// <returns>The resource edited and completed by database's informations (related items & so on)</returns>
 		Task<T> Edit<T>(T item, bool resetOld) where T : class, IResource;
 
@@ -439,6 +514,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="item">The resource to delete</param>
 		/// <typeparam name="T">The type of resource to delete</typeparam>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
 		Task Delete<T>(T item) where T : class, IResource;
 		
 		/// <summary>
@@ -446,6 +522,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="id">The id of the resource to delete</param>
 		/// <typeparam name="T">The type of resource to delete</typeparam>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
 		Task Delete<T>(int id) where T : class, IResource;
 		
 		/// <summary>
@@ -453,6 +530,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="slug">The slug of the resource to delete</param>
 		/// <typeparam name="T">The type of resource to delete</typeparam>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
 		Task Delete<T>(string slug) where T : class, IResource;
 	}
 }

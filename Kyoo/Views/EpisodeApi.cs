@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.CommonApi;
 using Kyoo.Controllers;
+using Kyoo.Models.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 
@@ -163,20 +164,30 @@ namespace Kyoo.Api
 		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetThumb(int id)
 		{
-			Episode episode = await _libraryManager.Get<Episode>(id);
-			if (episode == null)
+			try
+			{
+				Episode episode = await _libraryManager.Get<Episode>(id);
+				return _files.FileResult(await _thumbnails.GetEpisodeThumb(episode));
+			}
+			catch (ItemNotFound)
+			{
 				return NotFound();
-			return _files.FileResult(await _thumbnails.GetEpisodeThumb(episode));
+			}
 		}
 		
 		[HttpGet("{slug}/thumb")]
 		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetThumb(string slug)
 		{
-			Episode episode = await _libraryManager.Get<Episode>(slug);
-			if (episode == null)
+			try
+			{
+				Episode episode = await _libraryManager.Get<Episode>(slug);
+				return _files.FileResult(await _thumbnails.GetEpisodeThumb(episode));
+			}
+			catch (ItemNotFound)
+			{
 				return NotFound();
-			return _files.FileResult(await _thumbnails.GetEpisodeThumb(episode));
+			}
 		}
 	}
 }

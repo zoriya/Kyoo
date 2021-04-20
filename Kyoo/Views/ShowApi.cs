@@ -376,13 +376,18 @@ namespace Kyoo.Api
 		[Authorize(Policy = "Read")]
 		public async Task<ActionResult<Dictionary<string, string>>> GetFonts(string slug)
 		{
-			Show show = await _libraryManager.Get<Show>(slug);
-			if (show == null)
+			try
+			{
+				Show show = await _libraryManager.Get<Show>(slug);
+				string path = Path.Combine(_files.GetExtraDirectory(show), "Attachments");
+				return (await _files.ListFiles(path))
+					.ToDictionary(Path.GetFileNameWithoutExtension,
+						x => $"{BaseURL}/api/shows/{slug}/fonts/{Path.GetFileName(x)}");
+			}
+			catch (ItemNotFound)
+			{
 				return NotFound();
-			string path = Path.Combine(_files.GetExtraDirectory(show), "Attachments");
-			return (await _files.ListFiles(path))
-				.ToDictionary(Path.GetFileNameWithoutExtension,
-					x => $"{BaseURL}/api/shows/{slug}/fonts/{Path.GetFileName(x)}");
+			}
 		}
 		
 		[HttpGet("{showSlug}/font/{slug}")]
@@ -390,41 +395,61 @@ namespace Kyoo.Api
 		[Authorize(Policy = "Read")]
 		public async Task<IActionResult> GetFont(string showSlug, string slug)
 		{
-			Show show = await _libraryManager.Get<Show>(showSlug);
-			if (show == null)
+			try
+			{
+				Show show = await _libraryManager.Get<Show>(showSlug);
+				string path = Path.Combine(_files.GetExtraDirectory(show), "Attachments", slug);
+				return _files.FileResult(path);
+			}
+			catch (ItemNotFound)
+			{
 				return NotFound();
-			string path = Path.Combine(_files.GetExtraDirectory(show), "Attachments", slug);
-			return _files.FileResult(path);
+			}
 		}
 
 		[HttpGet("{slug}/poster")]
 		[Authorize(Policy = "Read")]
 		public async Task<IActionResult> GetPoster(string slug)
 		{
-			Show show = await _libraryManager.Get<Show>(slug);
-			if (show == null)
+			try
+			{
+				Show show = await _libraryManager.Get<Show>(slug);
+				return _files.FileResult(await _thumbs.GetShowPoster(show));
+			}
+			catch (ItemNotFound)
+			{
 				return NotFound();
-			return _files.FileResult(await _thumbs.GetShowPoster(show));
+			}
 		}
 		
 		[HttpGet("{slug}/logo")]
 		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetLogo(string slug)
 		{
-			Show show = await _libraryManager.Get<Show>(slug);
-			if (show == null)
+			try
+			{
+				Show show = await _libraryManager.Get<Show>(slug);
+				return _files.FileResult(await _thumbs.GetShowLogo(show));
+			}
+			catch (ItemNotFound)
+			{
 				return NotFound();
-			return _files.FileResult(await _thumbs.GetShowLogo(show));
+			}
 		}
 		
 		[HttpGet("{slug}/backdrop")]
 		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetBackdrop(string slug)
 		{
-			Show show = await _libraryManager.Get<Show>(slug);
-			if (show == null)
+			try
+			{
+				Show show = await _libraryManager.Get<Show>(slug);
+				return _files.FileResult(await _thumbs.GetShowBackdrop(show));
+			}
+			catch (ItemNotFound)
+			{
 				return NotFound();
-			return _files.FileResult(await _thumbs.GetShowBackdrop(show));
+			}
 		}
 	}
 }

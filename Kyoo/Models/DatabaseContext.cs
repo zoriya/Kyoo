@@ -58,13 +58,13 @@ namespace Kyoo
 			modelBuilder.HasPostgresEnum<ItemType>();
 			modelBuilder.HasPostgresEnum<StreamType>();
 
-			modelBuilder.Entity<Library>()
-				.Property(x => x.Paths)
-				.HasColumnType("text[]");
-
-			modelBuilder.Entity<Show>()
-				.Property(x => x.Aliases)
-				.HasColumnType("text[]");
+			// modelBuilder.Entity<Library>()
+			// 	.Property(x => x.Paths)
+			// 	.HasColumnType("text[]");
+			//
+			// modelBuilder.Entity<Show>()
+			// 	.Property(x => x.Aliases)
+			// 	.HasColumnType("text[]");
 
 			modelBuilder.Entity<Track>()
 				.Property(t => t.IsDefault)

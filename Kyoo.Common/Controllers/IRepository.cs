@@ -147,6 +147,25 @@ namespace Kyoo.Controllers
 		Task<T> Get(Expression<Func<T, bool>> where);
 		
 		/// <summary>
+		/// Get a resource from it's ID or null if it is not found.
+		/// </summary>
+		/// <param name="id">The id of the resource</param>
+		/// <returns>The resource found</returns>
+		Task<T> GetOrDefault(int id);
+		/// <summary>
+		/// Get a resource from it's slug or null if it is not found.
+		/// </summary>
+		/// <param name="slug">The slug of the resource</param>
+		/// <returns>The resource found</returns>
+		Task<T> GetOrDefault(string slug);
+		/// <summary>
+		/// Get the first resource that match the predicate or null if it is not found.
+		/// </summary>
+		/// <param name="where">A predicate to filter the resource.</param>
+		/// <returns>The resource found</returns>
+		Task<T> GetOrDefault(Expression<Func<T, bool>> where);
+		
+		/// <summary>
 		/// Search for resources.
 		/// </summary>
 		/// <param name="query">The query string.</param>
@@ -203,6 +222,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="edited">The resourcce to edit, it's ID can't change.</param>
 		/// <param name="resetOld">Should old properties of the resource be discarded or should null values considered as not changed?</param>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
 		/// <returns>The resource edited and completed by database's informations (related items & so on)</returns>
 		Task<T> Edit([NotNull] T edited, bool resetOld);
 		
@@ -210,77 +230,193 @@ namespace Kyoo.Controllers
 		/// Delete a resource by it's ID
 		/// </summary>
 		/// <param name="id">The ID of the resource</param>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
 		Task Delete(int id);
 		/// <summary>
 		/// Delete a resource by it's slug
 		/// </summary>
 		/// <param name="slug">The slug of the resource</param>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
 		Task Delete(string slug);
 		/// <summary>
 		/// Delete a resource
 		/// </summary>
 		/// <param name="obj">The resource to delete</param>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
 		Task Delete([NotNull] T obj);
 
 		/// <summary>
 		/// Delete a list of resources.
 		/// </summary>
 		/// <param name="objs">One or multiple resources to delete</param>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
 		Task DeleteRange(params T[] objs) => DeleteRange(objs.AsEnumerable());
 		/// <summary>
 		/// Delete a list of resources.
 		/// </summary>
 		/// <param name="objs">An enumerable of resources to delete</param>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
 		Task DeleteRange(IEnumerable<T> objs);
 		/// <summary>
 		/// Delete a list of resources.
 		/// </summary>
 		/// <param name="ids">One or multiple resources's id</param>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
 		Task DeleteRange(params int[] ids) => DeleteRange(ids.AsEnumerable());
 		/// <summary>
 		/// Delete a list of resources.
 		/// </summary>
 		/// <param name="ids">An enumearble of resources's id</param>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
 		Task DeleteRange(IEnumerable<int> ids);
 		/// <summary>
 		/// Delete a list of resources.
 		/// </summary>
 		/// <param name="slugs">One or multiple resources's slug</param>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
 		Task DeleteRange(params string[] slugs) => DeleteRange(slugs.AsEnumerable());
 		/// <summary>
 		/// Delete a list of resources.
 		/// </summary>
 		/// <param name="slugs">An enumerable of resources's slug</param>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
 		Task DeleteRange(IEnumerable<string> slugs);
 		/// <summary>
 		/// Delete a list of resources.
 		/// </summary>
 		/// <param name="where">A predicate to filter resources to delete. Every resource that match this will be deleted.</param>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
 		Task DeleteRange([NotNull] Expression<Func<T, bool>> where);
 	}
 
+	/// <summary>
+	/// A repository to handle shows.
+	/// </summary>
 	public interface IShowRepository : IRepository<Show>
 	{
+		/// <summary>
+		/// Link a show to a collection and/or a library. The given show is now part of thoses containers.
+		/// If both a library and a collection are given, the collection is added to the library too.
+		/// </summary>
+		/// <param name="showID">The ID of the show</param>
+		/// <param name="libraryID">The ID of the library (optional)</param>
+		/// <param name="collectionID">The ID of the collection (optional)</param>
 		Task AddShowLink(int showID, int? libraryID, int? collectionID);
 
+		/// <summary>
+		/// Get a show's slug from it's ID.
+		/// </summary>
+		/// <param name="showID">The ID of the show</param>
+		/// <exception cref="ItemNotFound">If a show with the given ID is not found.</exception>
+		/// <returns>The show's slug</returns>
 		Task<string> GetSlug(int showID);
 	}
 
+	/// <summary>
+	/// A repository to handle seasons.
+	/// </summary>
 	public interface ISeasonRepository : IRepository<Season>
 	{
+		/// <summary>
+		/// Get a season from it's showID and it's seasonNumber
+		/// </summary>
+		/// <param name="showID">The id of the show</param>
+		/// <param name="seasonNumber">The season's number</param>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <returns>The season found</returns>
 		Task<Season> Get(int showID, int seasonNumber);
+		
+		/// <summary>
+		/// Get a season from it's show slug and it's seasonNumber
+		/// </summary>
+		/// <param name="showSlug">The slug of the show</param>
+		/// <param name="seasonNumber">The season's number</param>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <returns>The season found</returns>
 		Task<Season> Get(string showSlug, int seasonNumber);
-		Task Delete(string showSlug, int seasonNumber);
+		
+		/// <summary>
+        /// Get a season from it's showID and it's seasonNumber or null if it is not found.
+        /// </summary>
+        /// <param name="showID">The id of the show</param>
+        /// <param name="seasonNumber">The season's number</param>
+        /// <returns>The season found</returns>
+        Task<Season> GetOrDefault(int showID, int seasonNumber);
+        
+        /// <summary>
+        /// Get a season from it's show slug and it's seasonNumber or null if it is not found.
+        /// </summary>
+        /// <param name="showSlug">The slug of the show</param>
+        /// <param name="seasonNumber">The season's number</param>
+        /// <returns>The season found</returns>
+        Task<Season> GetOrDefault(string showSlug, int seasonNumber);
 	}
 	
+	/// <summary>
+	/// The repository to handle episodes
+	/// </summary>
 	public interface IEpisodeRepository : IRepository<Episode>
 	{
+		/// <summary>
+		/// Get a episode from it's showID, it's seasonNumber and it's episode number.
+		/// </summary>
+		/// <param name="showID">The id of the show</param>
+		/// <param name="seasonNumber">The season's number</param>
+		/// <param name="episodeNumber">The episode's number</param>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <returns>The episode found</returns>
 		Task<Episode> Get(int showID, int seasonNumber, int episodeNumber);
+		/// <summary>
+		/// Get a episode from it's show slug, it's seasonNumber and it's episode number.
+		/// </summary>
+		/// <param name="showSlug">The slug of the show</param>
+		/// <param name="seasonNumber">The season's number</param>
+		/// <param name="episodeNumber">The episode's number</param>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <returns>The episode found</returns>
 		Task<Episode> Get(string showSlug, int seasonNumber, int episodeNumber);
+		/// <summary>
+		/// Get a episode from it's season ID and it's episode number.
+		/// </summary>
+		/// <param name="seasonID">The ID of the season</param>
+		/// <param name="episodeNumber">The episode number</param>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <returns>The episode found</returns>
 		Task<Episode> Get(int seasonID, int episodeNumber);
+
+		/// <summary>
+		/// Get a episode from it's showID, it's seasonNumber and it's episode number or null if it is not found.
+		/// </summary>
+		/// <param name="showID">The id of the show</param>
+		/// <param name="seasonNumber">The season's number</param>
+		/// <param name="episodeNumber">The episode's number</param>
+		/// <returns>The episode found</returns>
+		Task<Episode> GetOrDefault(int showID, int seasonNumber, int episodeNumber);
+		/// <summary>
+		/// Get a episode from it's show slug, it's seasonNumber and it's episode number or null if it is not found.
+		/// </summary>
+		/// <param name="showSlug">The slug of the show</param>
+		/// <param name="seasonNumber">The season's number</param>
+		/// <param name="episodeNumber">The episode's number</param>
+		/// <returns>The episode found</returns>
+		Task<Episode> GetOrDefault(string showSlug, int seasonNumber, int episodeNumber);
+		
+		/// <summary>
+		/// Get a episode from it's showID and it's absolute number.
+		/// </summary>
+		/// <param name="showID">The id of the show</param>
+		/// <param name="absoluteNumber">The episode's absolute number (The episode number does not reset to 1 after the end of a season.</param>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <returns>The episode found</returns>
 		Task<Episode> GetAbsolute(int showID, int absoluteNumber);
+		/// <summary>
+		/// Get a episode from it's showID and it's absolute number.
+		/// </summary>
+		/// <param name="showSlug">The slug of the show</param>
+		/// <param name="absoluteNumber">The episode's absolute number (The episode number does not reset to 1 after the end of a season.</param>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <returns>The episode found</returns>
 		Task<Episode> GetAbsolute(string showSlug, int absoluteNumber);
-		Task Delete(string showSlug, int seasonNumber, int episodeNumber);
 	}
 
 	public interface ITrackRepository : IRepository<Track>
