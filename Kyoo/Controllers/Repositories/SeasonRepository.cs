@@ -20,9 +20,21 @@ namespace Kyoo.Controllers
 		/// Has this instance been disposed and should not handle requests?
 		/// </summary>
 		private bool _disposed;
+		/// <summary>
+		/// The database handle
+		/// </summary>
 		private readonly DatabaseContext _database;
+		/// <summary>
+		/// A provider repository to handle externalID creation and deletion
+		/// </summary>
 		private readonly IProviderRepository _providers;
+		/// <summary>
+		/// A show repository to get show's slug from their ID and keep the slug in each episode.
+		/// </summary>
 		private readonly IShowRepository _shows;
+		/// <summary>
+		/// A lazilly loaded episode repository to handle deletion of episodes with the season.
+		/// </summary>
 		private readonly Lazy<IEpisodeRepository> _episodes;
 		
 		/// <inheritdoc/>

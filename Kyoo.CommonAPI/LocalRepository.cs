@@ -97,19 +97,19 @@ namespace Kyoo.Controllers
 		}
 		
 		/// <inheritdoc />
-		public Task<T> GetOrDefault(int id)
+		public virtual Task<T> GetOrDefault(int id)
 		{
 			return Database.Set<T>().FirstOrDefaultAsync(x => x.ID == id);
 		}
 		
 		/// <inheritdoc />
-		public Task<T> GetOrDefault(string slug)
+		public virtual Task<T> GetOrDefault(string slug)
 		{
 			return Database.Set<T>().FirstOrDefaultAsync(x => x.Slug == slug);
 		}
 		
 		/// <inheritdoc />
-		public Task<T> GetOrDefault(Expression<Func<T, bool>> where)
+		public virtual Task<T> GetOrDefault(Expression<Func<T, bool>> where)
 		{
 			return Database.Set<T>().FirstOrDefaultAsync(where);
 		}

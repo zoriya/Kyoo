@@ -9,18 +9,56 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
+	/// <summary>
+	/// A local repository to handle shows
+	/// </summary>
 	public class ShowRepository : LocalRepository<Show>, IShowRepository
 	{
+		/// <summary>
+		/// Has this instance been disposed and should not handle requests?
+		/// </summary>
 		private bool _disposed;
+		/// <summary>
+		/// The databse handle
+		/// </summary>
 		private readonly DatabaseContext _database;
+		/// <summary>
+		/// A studio repository to handle creation/validation of related studios.
+		/// </summary>
 		private readonly IStudioRepository _studios;
+		/// <summary>
+		/// A people repository to handle creation/validation of related people.
+		/// </summary>
 		private readonly IPeopleRepository _people;
+		/// <summary>
+		/// A genres repository to handle creation/validation of related genres.
+		/// </summary>
 		private readonly IGenreRepository _genres;
+		/// <summary>
+		/// A provider repository to handle externalID creation and deletion
+		/// </summary>
 		private readonly IProviderRepository _providers;
+		/// <summary>
+		/// A lazy loaded season repository to handle cascade deletion (seasons deletion whith it's show) 
+		/// </summary>
 		private readonly Lazy<ISeasonRepository> _seasons;
+		/// <summary>
+		/// A lazy loaded episode repository to handle cascade deletion (episode deletion whith it's show) 
+		/// </summary>
 		private readonly Lazy<IEpisodeRepository> _episodes;
+
+		/// <inheritdoc />
 		protected override Expression<Func<Show, object>> DefaultSort => x => x.Title;
 
+		/// <summary>
+		/// Create a new <see cref="ShowRepository"/>.
+		/// </summary>
+		/// <param name="database">The database handle to use</param>
+		/// <param name="studios">A studio repository</param>
+		/// <param name="people">A people repository</param>
+		/// <param name="genres">A genres repository</param>
+		/// <param name="providers">A provider repository</param>
+		/// <param name="services">A service provider to lazilly request a season and an episode repository</param>
 		public ShowRepository(DatabaseContext database,
 			IStudioRepository studios,
 			IPeopleRepository people, 
@@ -38,6 +76,7 @@ namespace Kyoo.Controllers
 			_episodes = new Lazy<IEpisodeRepository>(services.GetRequiredService<IEpisodeRepository>);
 		}
 
+		/// <inheritdoc />
 		public override void Dispose()
 		{
 			if (_disposed)
@@ -55,6 +94,7 @@ namespace Kyoo.Controllers
 			GC.SuppressFinalize(this);
 		}
 
+		/// <inheritdoc />
 		public override async ValueTask DisposeAsync()
 		{
 			if (_disposed)
@@ -71,6 +111,7 @@ namespace Kyoo.Controllers
 				await _episodes.Value.DisposeAsync();
 		}
 
+		/// <inheritdoc />
 		public override async Task<ICollection<Show>> Search(string query)
 		{
 			query = $"%{query}%";
@@ -83,6 +124,7 @@ namespace Kyoo.Controllers
 				.ToListAsync();
 		}
 
+		/// <inheritdoc />
 		public override async Task<Show> Create(Show obj)
 		{
 			await base.Create(obj);
@@ -94,6 +136,7 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 		
+		/// <inheritdoc />
 		protected override async Task Validate(Show resource)
 		{
 			await base.Validate(resource);
@@ -119,6 +162,7 @@ namespace Kyoo.Controllers
 			});
 		}
 
+		/// <inheritdoc />
 		protected override async Task EditRelations(Show resource, Show changed, bool resetOld)
 		{
 			await Validate(changed);
@@ -145,6 +189,7 @@ namespace Kyoo.Controllers
 			}
 		}
 
+		/// <inheritdoc />
 		public async Task AddShowLink(int showID, int? libraryID, int? collectionID)
 		{
 			if (collectionID != null)
@@ -168,6 +213,7 @@ namespace Kyoo.Controllers
 			}
 		}
 		
+		/// <inheritdoc />
 		public Task<string> GetSlug(int showID)
 		{
 			return _database.Shows.Where(x => x.ID == showID)
@@ -175,6 +221,7 @@ namespace Kyoo.Controllers
 				.FirstOrDefaultAsync();
 		}
 		
+		/// <inheritdoc />
 		public override async Task Delete(Show obj)
 		{
 			if (obj == null)

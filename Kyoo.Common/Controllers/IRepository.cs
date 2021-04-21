@@ -375,14 +375,6 @@ namespace Kyoo.Controllers
 		/// <exception cref="ItemNotFound">If the item is not found</exception>
 		/// <returns>The episode found</returns>
 		Task<Episode> Get(string showSlug, int seasonNumber, int episodeNumber);
-		/// <summary>
-		/// Get a episode from it's season ID and it's episode number.
-		/// </summary>
-		/// <param name="seasonID">The ID of the season</param>
-		/// <param name="episodeNumber">The episode number</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
-		/// <returns>The episode found</returns>
-		Task<Episode> Get(int seasonID, int episodeNumber);
 
 		/// <summary>
 		/// Get a episode from it's showID, it's seasonNumber and it's episode number or null if it is not found.

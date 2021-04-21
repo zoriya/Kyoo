@@ -5,21 +5,49 @@ using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
+using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers
 {
+	/// <summary>
+	/// A local repository to handle episodes.
+	/// </summary>
 	public class EpisodeRepository : LocalRepository<Episode>, IEpisodeRepository
 	{
+		/// <summary>
+		/// Has this instance been disposed and should not handle requests?
+		/// </summary>
 		private bool _disposed;
+		/// <summary>
+		/// The databse handle
+		/// </summary>
 		private readonly DatabaseContext _database;
+		/// <summary>
+		/// A provider repository to handle externalID creation and deletion
+		/// </summary>
 		private readonly IProviderRepository _providers;
+		/// <summary>
+		/// A show repository to get show's slug from their ID and keep the slug in each episode.
+		/// </summary>
 		private readonly IShowRepository _shows;
+		/// <summary>
+		/// A track repository to handle creation and deletion of tracks related to the current episode.
+		/// </summary>
 		private readonly ITrackRepository _tracks;
+		
+		/// <inheritdoc />
 		protected override Expression<Func<Episode, object>> DefaultSort => x => x.EpisodeNumber;
 
 
-		public EpisodeRepository(DatabaseContext database, 
+		/// <summary>
+		/// Create a new <see cref="EpisodeRepository"/>.
+		/// </summary>
+		/// <param name="database">The database handle to use.</param>
+		/// <param name="providers">A provider repository</param>
+		/// <param name="shows">A show repository</param>
+		/// <param name="tracks">A track repository</param>
+		public EpisodeRepository(DatabaseContext database,
 			IProviderRepository providers,
 			IShowRepository shows,
 			ITrackRepository tracks) 
@@ -32,6 +60,7 @@ namespace Kyoo.Controllers
 		}
 
 
+		/// <inheritdoc />
 		public override void Dispose()
 		{
 			if (_disposed)
@@ -43,6 +72,7 @@ namespace Kyoo.Controllers
 			GC.SuppressFinalize(this);
 		}
 
+		/// <inheritdoc />
 		public override async ValueTask DisposeAsync()
 		{
 			if (_disposed)
@@ -53,7 +83,8 @@ namespace Kyoo.Controllers
 			await _shows.DisposeAsync();
 		}
 
-		public override async Task<Episode> Get(int id)
+		/// <inheritdoc />
+		public override async Task<Episode> GetOrDefault(int id)
 		{
 			Episode ret = await base.Get(id);
 			if (ret != null)
@@ -61,13 +92,14 @@ namespace Kyoo.Controllers
 			return ret;
 		}
 
-		public override async Task<Episode> Get(string slug)
+		/// <inheritdoc />
+		public override async Task<Episode> GetOrDefault(string slug)
 		{
 			Match match = Regex.Match(slug, @"(?<show>.*)-s(?<season>\d*)e(?<episode>\d*)");
 
 			if (match.Success)
 			{
-				return await Get(match.Groups["show"].Value,
+				return await GetOrDefault(match.Groups["show"].Value,
 					int.Parse(match.Groups["season"].Value),
 					int.Parse(match.Groups["episode"].Value));
 			}
@@ -78,7 +110,8 @@ namespace Kyoo.Controllers
 			return episode;
 		}
 
-		public override async Task<Episode> Get(Expression<Func<Episode, bool>> predicate)
+		/// <inheritdoc />
+		public override async Task<Episode> GetOrDefault(Expression<Func<Episode, bool>> predicate)
 		{
 			Episode ret = await base.Get(predicate);
 			if (ret != null)
@@ -86,7 +119,8 @@ namespace Kyoo.Controllers
 			return ret;
 		}
 
-		public async Task<Episode> Get(string showSlug, int seasonNumber, int episodeNumber)
+		/// <inheritdoc />
+		public async Task<Episode> GetOrDefault(string showSlug, int seasonNumber, int episodeNumber)
 		{
 			Episode ret = await _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == showSlug 
 			                                                                && x.SeasonNumber == seasonNumber 
@@ -96,7 +130,26 @@ namespace Kyoo.Controllers
 			return ret;
 		}
 
+		/// <inheritdoc />
 		public async Task<Episode> Get(int showID, int seasonNumber, int episodeNumber)
+		{
+			Episode ret = await GetOrDefault(showID, seasonNumber, episodeNumber);
+			if (ret == null)
+				throw new ItemNotFound($"No episode S{seasonNumber}E{episodeNumber} found on the show {showID}.");
+			return ret;
+		}
+
+		/// <inheritdoc />
+		public async Task<Episode> Get(string showSlug, int seasonNumber, int episodeNumber)
+		{
+			Episode ret = await GetOrDefault(showSlug, seasonNumber, episodeNumber);
+			if (ret == null)
+				throw new ItemNotFound($"No episode S{seasonNumber}E{episodeNumber} found on the show {showSlug}.");
+			return ret;
+		}
+
+		/// <inheritdoc />
+		public async Task<Episode> GetOrDefault(int showID, int seasonNumber, int episodeNumber)
 		{
 			Episode ret = await _database.Episodes.FirstOrDefaultAsync(x => x.ShowID == showID 
 			                                                                && x.SeasonNumber == seasonNumber 
@@ -106,15 +159,7 @@ namespace Kyoo.Controllers
 			return ret;
 		}
 
-		public async Task<Episode> Get(int seasonID, int episodeNumber)
-		{
-			Episode ret = await _database.Episodes.FirstOrDefaultAsync(x => x.SeasonID == seasonID 
-			                                                                && x.EpisodeNumber == episodeNumber);
-			if (ret != null)
-				ret.ShowSlug = await _shows.GetSlug(ret.ShowID);
-			return ret;
-		}
-
+		/// <inheritdoc />
 		public async Task<Episode> GetAbsolute(int showID, int absoluteNumber)
 		{
 			Episode ret = await _database.Episodes.FirstOrDefaultAsync(x => x.ShowID == showID 
@@ -124,6 +169,7 @@ namespace Kyoo.Controllers
 			return ret;
 		}
 
+		/// <inheritdoc />
 		public async Task<Episode> GetAbsolute(string showSlug, int absoluteNumber)
 		{
 			Episode ret = await _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == showSlug 
@@ -133,6 +179,7 @@ namespace Kyoo.Controllers
 			return ret;
 		}
 
+		/// <inheritdoc />
 		public override async Task<ICollection<Episode>> Search(string query)
 		{
 			List<Episode> episodes = await _database.Episodes
@@ -145,6 +192,7 @@ namespace Kyoo.Controllers
 			return episodes;
 		}
 		
+		/// <inheritdoc />
 		public override async Task<ICollection<Episode>> GetAll(Expression<Func<Episode, bool>> where = null, 
 			Sort<Episode> sort = default, 
 			Pagination limit = default)
@@ -155,6 +203,7 @@ namespace Kyoo.Controllers
 			return episodes;
 		}
 
+		/// <inheritdoc />
 		public override async Task<Episode> Create(Episode obj)
 		{
 			await base.Create(obj);
@@ -164,6 +213,7 @@ namespace Kyoo.Controllers
 			return await ValidateTracks(obj);
 		}
 
+		/// <inheritdoc />
 		protected override async Task EditRelations(Episode resource, Episode changed, bool resetOld)
 		{
 			if (resource.ShowID <= 0)
@@ -185,6 +235,11 @@ namespace Kyoo.Controllers
 			await Validate(resource);
 		}
 
+		/// <summary>
+		/// Set track's index and ensure that every tracks is well-formed.
+		/// </summary>
+		/// <param name="resource">The resource to fix.</param>
+		/// <returns>The <see cref="resource"/> parameter is returnned.</returns>
 		private async Task<Episode> ValidateTracks(Episode resource)
 		{
 			resource.Tracks = await resource.Tracks.MapAsync((x, i) =>
@@ -199,6 +254,7 @@ namespace Kyoo.Controllers
 			return resource;
 		}
 		
+		/// <inheritdoc />
 		protected override async Task Validate(Episode resource)
 		{
 			await base.Validate(resource);
@@ -211,6 +267,7 @@ namespace Kyoo.Controllers
 			}).ToListAsync();
 		}
 		
+		/// <inheritdoc />
 		public override async Task Delete(Episode obj)
 		{
 			if (obj == null)
