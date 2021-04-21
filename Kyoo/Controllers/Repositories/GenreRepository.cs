@@ -8,35 +8,31 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers
 {
+	/// <summary>
+	/// A local repository for genres.
+	/// </summary>
 	public class GenreRepository : LocalRepository<Genre>, IGenreRepository
 	{
-		private bool _disposed;
+		/// <summary>
+		/// The database handle
+		/// </summary>
 		private readonly DatabaseContext _database;
+		
+		/// <inheritdoc />
 		protected override Expression<Func<Genre, object>> DefaultSort => x => x.Slug;
 		
 		
-		public GenreRepository(DatabaseContext database) : base(database)
+		/// <summary>
+		/// Create a new <see cref="GenreRepository"/>.
+		/// </summary>
+		/// <param name="database">The database handle</param>
+		public GenreRepository(DatabaseContext database)
+			: base(database)
 		{
 			_database = database;
 		}
 
-		public override void Dispose()
-		{
-			if (_disposed)
-				return;
-			_disposed = true;
-			_database.Dispose();
-			GC.SuppressFinalize(this);
-		}
-
-		public override async ValueTask DisposeAsync()
-		{
-			if (_disposed)
-				return;
-			_disposed = true;
-			await _database.DisposeAsync();
-		}
-
+		/// <inheritdoc />
 		public override async Task<ICollection<Genre>> Search(string query)
 		{
 			return await _database.Genres
@@ -46,6 +42,7 @@ namespace Kyoo.Controllers
 				.ToListAsync();
 		}
 
+		/// <inheritdoc />
 		public override async Task<Genre> Create(Genre obj)
 		{
 			await base.Create(obj);
@@ -54,6 +51,7 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 
+		/// <inheritdoc />
 		public override async Task Delete(Genre obj)
 		{
 			if (obj == null)

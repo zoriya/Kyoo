@@ -8,17 +8,31 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers
 {
+	/// <summary>
+	/// A local repository to handle studios
+	/// </summary>
 	public class StudioRepository : LocalRepository<Studio>, IStudioRepository
 	{
+		/// <summary>
+		/// The database handle
+		/// </summary>
 		private readonly DatabaseContext _database;
+		
+		/// <inheritdoc />
 		protected override Expression<Func<Studio, object>> DefaultSort => x => x.Name;
 
 
-		public StudioRepository(DatabaseContext database) : base(database)
+		/// <summary>
+		/// Create a new <see cref="StudioRepository"/>.
+		/// </summary>
+		/// <param name="database">The database handle</param>
+		public StudioRepository(DatabaseContext database)
+			: base(database)
 		{
 			_database = database;
 		}
 		
+		/// <inheritdoc />
 		public override async Task<ICollection<Studio>> Search(string query)
 		{
 			return await _database.Studios
@@ -28,6 +42,7 @@ namespace Kyoo.Controllers
 				.ToListAsync();
 		}
 
+		/// <inheritdoc />
 		public override async Task<Studio> Create(Studio obj)
 		{
 			await base.Create(obj);
@@ -36,6 +51,7 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 
+		/// <inheritdoc />
 		public override async Task Delete(Studio obj)
 		{
 			if (obj == null)

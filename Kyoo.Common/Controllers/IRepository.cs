@@ -411,91 +411,240 @@ namespace Kyoo.Controllers
 		Task<Episode> GetAbsolute(string showSlug, int absoluteNumber);
 	}
 
+	/// <summary>
+	/// A repository to handle tracks
+	/// </summary>
 	public interface ITrackRepository : IRepository<Track>
 	{
+		/// <summary>
+		/// Get a track from it's slug and it's type.
+		/// </summary>
+		/// <param name="slug">The slug of the track</param>
+		/// <param name="type">The type (Video, Audio or Subtitle)</param>
+		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <returns>The tracl found</returns>
 		Task<Track> Get(string slug, StreamType type = StreamType.Unknown);
+		
+		/// <summary>
+		/// Get a track from it's slug and it's type or null if it is not found.
+		/// </summary>
+		/// <param name="slug">The slug of the track</param>
+		/// <param name="type">The type (Video, Audio or Subtitle)</param>
+		/// <returns>The tracl found</returns>
+		Task<Track> GetOrDefault(string slug, StreamType type = StreamType.Unknown);
 	}
 	
+	/// <summary>
+	/// A repository to handle libraries.
+	/// </summary>
 	public interface ILibraryRepository : IRepository<Library> { }
 
+	/// <summary>
+	/// A repository to handle library items (A wrapper arround shows and collections).
+	/// </summary>
 	public interface ILibraryItemRepository : IRepository<LibraryItem>
 	{
+		/// <summary>
+		/// Get items (A wrapper arround shows or collections) from a library.
+		/// </summary>
+		/// <param name="id">The ID of the library</param>
+		/// <param name="where">A filter function</param>
+		/// <param name="sort">Sort informations (sort order & sort by)</param>
+		/// <param name="limit">How many items to return and where to start</param>
+		/// <returns>A list of items that match every filters</returns>
 		public Task<ICollection<LibraryItem>> GetFromLibrary(int id,
 			Expression<Func<LibraryItem, bool>> where = null,
 			Sort<LibraryItem> sort = default,
 			Pagination limit = default);
-
+		/// <summary>
+		/// Get items (A wrapper arround shows or collections) from a library.
+		/// </summary>
+		/// <param name="id">The ID of the library</param>
+		/// <param name="where">A filter function</param>
+		/// <param name="sort">A sort by method</param>
+		/// <param name="limit">How many items to return and where to start</param>
+		/// <returns>A list of items that match every filters</returns>
 		public Task<ICollection<LibraryItem>> GetFromLibrary(int id,
 			[Optional] Expression<Func<LibraryItem, bool>> where,
 			Expression<Func<LibraryItem, object>> sort,
 			Pagination limit = default
 		) => GetFromLibrary(id, where, new Sort<LibraryItem>(sort), limit);
 		
-		public Task<ICollection<LibraryItem>> GetFromLibrary(string librarySlug,
+		/// <summary>
+		/// Get items (A wrapper arround shows or collections) from a library.
+		/// </summary>
+		/// <param name="slug">The slug of the library</param>
+		/// <param name="where">A filter function</param>
+		/// <param name="sort">Sort informations (sort order & sort by)</param>
+		/// <param name="limit">How many items to return and where to start</param>
+		/// <returns>A list of items that match every filters</returns>
+		public Task<ICollection<LibraryItem>> GetFromLibrary(string slug,
 			Expression<Func<LibraryItem, bool>> where = null,
 			Sort<LibraryItem> sort = default,
 			Pagination limit = default);
-
-		public Task<ICollection<LibraryItem>> GetFromLibrary(string librarySlug,
+		/// <summary>
+		/// Get items (A wrapper arround shows or collections) from a library.
+		/// </summary>
+		/// <param name="slug">The slug of the library</param>
+		/// <param name="where">A filter function</param>
+		/// <param name="sort">A sort by method</param>
+		/// <param name="limit">How many items to return and where to start</param>
+		/// <returns>A list of items that match every filters</returns>
+		public Task<ICollection<LibraryItem>> GetFromLibrary(string slug,
 			[Optional] Expression<Func<LibraryItem, bool>> where,
 			Expression<Func<LibraryItem, object>> sort,
 			Pagination limit = default
-		) => GetFromLibrary(librarySlug, where, new Sort<LibraryItem>(sort), limit);
+		) => GetFromLibrary(slug, where, new Sort<LibraryItem>(sort), limit);
 	}	
 		
+	/// <summary>
+	/// A repository for collections
+	/// </summary>
 	public interface ICollectionRepository : IRepository<Collection> { }
+	
+	/// <summary>
+	/// A repository for genres.
+	/// </summary>
 	public interface IGenreRepository : IRepository<Genre> { }
+	
+	/// <summary>
+	/// A repository for studios.
+	/// </summary>
 	public interface IStudioRepository : IRepository<Studio> { }
 
+	/// <summary>
+	/// A repository for people.
+	/// </summary>
 	public interface IPeopleRepository : IRepository<People>
 	{
+		/// <summary>
+		/// Get people's roles from a show.
+		/// </summary>
+		/// <param name="showID">The ID of the show</param>
+		/// <param name="where">A filter function</param>
+		/// <param name="sort">Sort informations (sort order & sort by)</param>
+		/// <param name="limit">How many items to return and where to start</param>
+		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetFromShow(int showID,
 			Expression<Func<PeopleRole, bool>> where = null, 
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default);
+		/// <summary>
+		/// Get people's roles from a show.
+		/// </summary>
+		/// <param name="showID">The ID of the show</param>
+		/// <param name="where">A filter function</param>
+		/// <param name="sort">A sort by method</param>
+		/// <param name="limit">How many items to return and where to start</param>
+		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetFromShow(int showID,
 			[Optional] Expression<Func<PeopleRole, bool>> where,
 			Expression<Func<PeopleRole, object>> sort,
 			Pagination limit = default
 		) => GetFromShow(showID, where, new Sort<PeopleRole>(sort), limit);
 		
+		/// <summary>
+		/// Get people's roles from a show.
+		/// </summary>
+		/// <param name="showSlug">The slug of the show</param>
+		/// <param name="where">A filter function</param>
+		/// <param name="sort">Sort informations (sort order & sort by)</param>
+		/// <param name="limit">How many items to return and where to start</param>
+		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetFromShow(string showSlug,
 			Expression<Func<PeopleRole, bool>> where = null, 
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default);
+		/// <summary>
+		/// Get people's roles from a show.
+		/// </summary>
+		/// <param name="showSlug">The slug of the show</param>
+		/// <param name="where">A filter function</param>
+		/// <param name="sort">A sort by method</param>
+		/// <param name="limit">How many items to return and where to start</param>
+		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetFromShow(string showSlug,
 			[Optional] Expression<Func<PeopleRole, bool>> where,
 			Expression<Func<PeopleRole, object>> sort,
 			Pagination limit = default
 		) => GetFromShow(showSlug, where, new Sort<PeopleRole>(sort), limit);
 		
-		Task<ICollection<PeopleRole>> GetFromPeople(int showID,
+		/// <summary>
+		/// Get people's roles from a person.
+		/// </summary>
+		/// <param name="id">The id of the person</param>
+		/// <param name="where">A filter function</param>
+		/// <param name="sort">Sort informations (sort order & sort by)</param>
+		/// <param name="limit">How many items to return and where to start</param>
+		/// <returns>A list of items that match every filters</returns>
+		Task<ICollection<PeopleRole>> GetFromPeople(int id,
 			Expression<Func<PeopleRole, bool>> where = null, 
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default);
-		Task<ICollection<PeopleRole>> GetFromPeople(int showID,
+		/// <summary>
+		/// Get people's roles from a person.
+		/// </summary>
+		/// <param name="id">The id of the person</param>
+		/// <param name="where">A filter function</param>
+		/// <param name="sort">A sort by method</param>
+		/// <param name="limit">How many items to return and where to start</param>
+		/// <returns>A list of items that match every filters</returns>
+		Task<ICollection<PeopleRole>> GetFromPeople(int id,
 			[Optional] Expression<Func<PeopleRole, bool>> where,
 			Expression<Func<PeopleRole, object>> sort,
 			Pagination limit = default
-		) => GetFromPeople(showID, where, new Sort<PeopleRole>(sort), limit);
+		) => GetFromPeople(id, where, new Sort<PeopleRole>(sort), limit);
 		
-		Task<ICollection<PeopleRole>> GetFromPeople(string showSlug,
+		/// <summary>
+		/// Get people's roles from a person.
+		/// </summary>
+		/// <param name="slug">The slug of the person</param>
+		/// <param name="where">A filter function</param>
+		/// <param name="sort">Sort informations (sort order & sort by)</param>
+		/// <param name="limit">How many items to return and where to start</param>
+		/// <returns>A list of items that match every filters</returns>
+		Task<ICollection<PeopleRole>> GetFromPeople(string slug,
 			Expression<Func<PeopleRole, bool>> where = null, 
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default);
-		Task<ICollection<PeopleRole>> GetFromPeople(string showSlug,
+		/// <summary>
+		/// Get people's roles from a person.
+		/// </summary>
+		/// <param name="slug">The slug of the person</param>
+		/// <param name="where">A filter function</param>
+		/// <param name="sort">A sort by method</param>
+		/// <param name="limit">How many items to return and where to start</param>
+		/// <returns>A list of items that match every filters</returns>
+		Task<ICollection<PeopleRole>> GetFromPeople(string slug,
 			[Optional] Expression<Func<PeopleRole, bool>> where,
 			Expression<Func<PeopleRole, object>> sort,
 			Pagination limit = default
-		) => GetFromPeople(showSlug, where, new Sort<PeopleRole>(sort), limit);
+		) => GetFromPeople(slug, where, new Sort<PeopleRole>(sort), limit);
 	}
 
+	/// <summary>
+	/// A repository to handle providers.
+	/// </summary>
 	public interface IProviderRepository : IRepository<Provider>
 	{
+		/// <summary>
+		/// Get a list of external ids that match all filters
+		/// </summary>
+		/// <param name="where">A predicate to add arbitrary filter</param>
+		/// <param name="sort">Sort information (sort order & sort by)</param>
+		/// <param name="limit">Paginations information (where to start and how many to get)</param>
+		/// <returns>A filtered list of external ids.</returns>
 		Task<ICollection<MetadataID>> GetMetadataID(Expression<Func<MetadataID, bool>> where = null, 
 			Sort<MetadataID> sort = default,
 			Pagination limit = default);
 
+		/// <summary>
+		/// Get a list of external ids that match all filters
+		/// </summary>
+		/// <param name="where">A predicate to add arbitrary filter</param>
+		/// <param name="sort">A sort by expression</param>
+		/// <param name="limit">Paginations information (where to start and how many to get)</param>
+		/// <returns>A filtered list of external ids.</returns>
 		Task<ICollection<MetadataID>> GetMetadataID([Optional] Expression<Func<MetadataID, bool>> where,
 			Expression<Func<MetadataID, object>> sort,
 			Pagination limit = default
