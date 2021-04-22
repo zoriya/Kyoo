@@ -92,15 +92,15 @@ namespace Kyoo.Controllers
 		}
 		
 		/// <inheritdoc />
-		public override async Task<LibraryItem> Get(int id)
+		public override async Task<LibraryItem> GetOrDefault(int id)
 		{
 			return id > 0 
-				? new LibraryItem(await _shows.Value.Get(id)) 
-				: new LibraryItem(await _collections.Value.Get(-id));
+				? new LibraryItem(await _shows.Value.GetOrDefault(id)) 
+				: new LibraryItem(await _collections.Value.GetOrDefault(-id));
 		}
 		
 		/// <inheritdoc />
-		public override Task<LibraryItem> Get(string slug)
+		public override Task<LibraryItem> GetOrDefault(string slug)
 		{
 			throw new InvalidOperationException("You can't get a library item by a slug.");
 		}
@@ -189,7 +189,7 @@ namespace Kyoo.Controllers
 				where,
 				sort,
 				limit);
-			if (!items.Any() && await _libraries.Value.Get(id) == null)
+			if (!items.Any() && await _libraries.Value.GetOrDefault(id) == null)
 				throw new ItemNotFound();
 			return items;
 		}
@@ -204,7 +204,7 @@ namespace Kyoo.Controllers
 				where,
 				sort,
 				limit);
-			if (!items.Any() && await _libraries.Value.Get(slug) == null)
+			if (!items.Any() && await _libraries.Value.GetOrDefault(slug) == null)
 				throw new ItemNotFound();
 			return items;
 		}

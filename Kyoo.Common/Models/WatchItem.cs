@@ -109,18 +109,18 @@ namespace Kyoo.Models
 			if (!ep.Show.IsMovie)
 			{
 				if (ep.EpisodeNumber > 1)
-					previous = await library.Get(ep.ShowID, ep.SeasonNumber, ep.EpisodeNumber - 1);
+					previous = await library.GetOrDefault(ep.ShowID, ep.SeasonNumber, ep.EpisodeNumber - 1);
 				else if (ep.SeasonNumber > 1)
 				{
 					int count = await library.GetCount<Episode>(x => x.ShowID == ep.ShowID 
 					                                                && x.SeasonNumber == ep.SeasonNumber - 1);
-					previous = await library.Get(ep.ShowID, ep.SeasonNumber - 1, count);
+					previous = await library.GetOrDefault(ep.ShowID, ep.SeasonNumber - 1, count);
 				}
 
 				if (ep.EpisodeNumber >= await library.GetCount<Episode>(x => x.SeasonID == ep.SeasonID))
-					next = await library.Get(ep.ShowID, ep.SeasonNumber + 1, 1);
+					next = await library.GetOrDefault(ep.ShowID, ep.SeasonNumber + 1, 1);
 				else
-					next = await library.Get(ep.ShowID, ep.SeasonNumber, ep.EpisodeNumber + 1);
+					next = await library.GetOrDefault(ep.ShowID, ep.SeasonNumber, ep.EpisodeNumber + 1);
 			}
 			
 			return new WatchItem(ep.ID,

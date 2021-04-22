@@ -86,7 +86,7 @@ namespace Kyoo.Controllers
 		/// <inheritdoc />
 		public override async Task<Episode> GetOrDefault(int id)
 		{
-			Episode ret = await base.Get(id);
+			Episode ret = await base.GetOrDefault(id);
 			if (ret != null)
 				ret.ShowSlug = await _shows.GetSlug(ret.ShowID);
 			return ret;
@@ -111,9 +111,9 @@ namespace Kyoo.Controllers
 		}
 
 		/// <inheritdoc />
-		public override async Task<Episode> GetOrDefault(Expression<Func<Episode, bool>> predicate)
+		public override async Task<Episode> GetOrDefault(Expression<Func<Episode, bool>> where)
 		{
-			Episode ret = await base.Get(predicate);
+			Episode ret = await base.GetOrDefault(where);
 			if (ret != null)
 				ret.ShowSlug = await _shows.GetSlug(ret.ShowID);
 			return ret;

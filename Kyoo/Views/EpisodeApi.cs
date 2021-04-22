@@ -64,14 +64,28 @@ namespace Kyoo.Api
 		[Authorize(Policy = "Read")]
 		public async Task<ActionResult<Season>> GetSeason(string showSlug, int seasonNumber, int episodeNumber)
 		{
-			return await _libraryManager.Get(showSlug, seasonNumber);
+			try
+			{
+				return await _libraryManager.Get(showSlug, seasonNumber);
+			}
+			catch (ItemNotFound)
+			{
+				return NotFound();
+			}
 		}
 		
 		[HttpGet("{showID:int}-{seasonNumber:int}e{episodeNumber:int}/season")]
 		[Authorize(Policy = "Read")]
 		public async Task<ActionResult<Season>> GetSeason(int showID, int seasonNumber, int episodeNumber)
 		{
-			return await _libraryManager.Get(showID, seasonNumber);
+			try
+			{
+				return await _libraryManager.Get(showID, seasonNumber);
+			}
+			catch (ItemNotFound)
+			{
+				return NotFound();
+			}
 		}
 		
 		[HttpGet("{episodeID:int}/track")]
@@ -120,7 +134,7 @@ namespace Kyoo.Api
 					new Sort<Track>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get(showID, seasonNumber, episodeNumber) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault(showID, seasonNumber, episodeNumber) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -130,10 +144,10 @@ namespace Kyoo.Api
 			}
 		}
 		
-		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}/track")]
-		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}/tracks")]
+		[HttpGet("{slug}-s{seasonNumber:int}e{episodeNumber:int}/track")]
+		[HttpGet("{slug}-s{seasonNumber:int}e{episodeNumber:int}/tracks")]
 		[Authorize(Policy = "Read")]
-		public async Task<ActionResult<Page<Track>>> GetEpisode(string showSlug,
+		public async Task<ActionResult<Page<Track>>> GetEpisode(string slug,
 			int seasonNumber,
 			int episodeNumber,
 			[FromQuery] string sortBy,
@@ -144,13 +158,13 @@ namespace Kyoo.Api
 			try
 			{
 				ICollection<Track> resources = await _libraryManager.GetAll(
-					ApiHelper.ParseWhere<Track>(where, x => x.Episode.Show.Slug == showSlug 
+					ApiHelper.ParseWhere<Track>(where, x => x.Episode.Show.Slug == slug 
 						&& x.Episode.SeasonNumber == seasonNumber
 						&& x.Episode.EpisodeNumber == episodeNumber),
 					new Sort<Track>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get(showSlug, seasonNumber, episodeNumber) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault(slug, seasonNumber, episodeNumber) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}

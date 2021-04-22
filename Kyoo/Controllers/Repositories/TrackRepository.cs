@@ -36,13 +36,13 @@ namespace Kyoo.Controllers
 		
 
 		/// <inheritdoc />
-		public override Task<Track> Get(string slug)
+		Task<Track> IRepository<Track>.Get(string slug)
 		{
-			return Get(slug, StreamType.Unknown);
+			return Get(slug);
 		}
 
 		/// <inheritdoc />
-		public async Task<Track> Get(string slug, StreamType type)
+		public async Task<Track> Get(string slug, StreamType type = StreamType.Unknown)
 		{
 			Track ret = await GetOrDefault(slug, type);
 			if (ret == null)
@@ -51,7 +51,7 @@ namespace Kyoo.Controllers
 		}
 		
 		/// <inheritdoc />
-		public Task<Track> GetOrDefault(string slug, StreamType type)
+		public Task<Track> GetOrDefault(string slug, StreamType type = StreamType.Unknown)
 		{
 			Match match = Regex.Match(slug,
 				@"(?<show>.*)-s(?<season>\d+)e(?<episode>\d+)(\.(?<type>\w*))?\.(?<language>.{0,3})(?<forced>-forced)?(\..*)?");

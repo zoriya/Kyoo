@@ -3,7 +3,11 @@ using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.VisualBasic.FileIO;
+using Microsoft.AspNetCore.Hosting.StaticWebAssets;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Kyoo
 {
@@ -18,12 +22,9 @@ namespace Kyoo
 		/// <param name="args">Command line arguments</param>
 		public static async Task Main(string[] args)
 		{
-			if (args.Length > 0)
-				FileSystem.CurrentDirectory = args[0];
-			if (!File.Exists("./appsettings.json"))
-				File.Copy(Path.Join(AppDomain.CurrentDomain.BaseDirectory, "appsettings.json"), "appsettings.json");
-
-
+			if (!File.Exists("./settings.json"))
+				File.Copy(Path.Join(AppDomain.CurrentDomain.BaseDirectory, "settings.json"), "settings.json");
+			
 			bool? debug = Environment.GetEnvironmentVariable("ENVIRONMENT")?.ToLowerInvariant() switch
 			{
 				"d" => true,
@@ -50,14 +51,49 @@ namespace Kyoo
 		}
 
 		/// <summary>
+		/// Register settings.json, environment variables and command lines arguments as configuration.
+		/// </summary>
+		/// <param name="builder">The configuration builder to use</param>
+		/// <param name="args">The command line arguments</param>
+		/// <returns>The modified configuration builder</returns>
+		private static IConfigurationBuilder SetupConfig(IConfigurationBuilder builder, string[] args)
+		{
+			return builder.AddJsonFile("./settings.json", false, true)
+				.AddEnvironmentVariables()
+				.AddCommandLine(args);
+		}
+		
+		/// <summary>
 		/// Createa a web host
 		/// </summary>
 		/// <param name="args">Command line parameters that can be handled by kestrel</param>
 		/// <returns>A new web host instance</returns>
-		private static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-			WebHost.CreateDefaultBuilder(args)
-				.UseKestrel(config => { config.AddServerHeader = false; })
-				.UseUrls("http://*:5000")
+		private static IWebHostBuilder CreateWebHostBuilder(string[] args)
+		{
+			WebHost.CreateDefaultBuilder(args);
+			
+			return new WebHostBuilder()
+				.UseContentRoot(AppDomain.CurrentDomain.BaseDirectory)
+				.UseConfiguration(SetupConfig(new ConfigurationBuilder(), args).Build())
+				.ConfigureAppConfiguration(x => SetupConfig(x, args))
+				.ConfigureLogging((context, builder) =>
+				{
+					builder.AddConfiguration(context.Configuration.GetSection("logging"))
+						.AddConsole()
+						.AddDebug()
+						.AddEventSourceLogger();
+				})
+				.UseDefaultServiceProvider((context, options) =>
+				{
+					options.ValidateScopes = context.HostingEnvironment.IsDevelopment();
+					if (context.HostingEnvironment.IsDevelopment())
+						StaticWebAssetsLoader.UseStaticWebAssets(context.HostingEnvironment, context.Configuration);
+				})
+				.ConfigureServices(x => x.AddRouting())
+				.UseKestrel(options => { options.AddServerHeader = false; })
+				.UseIIS()
+				.UseIISIntegration()
 				.UseStartup<Startup>();
+		}
 	}
 }

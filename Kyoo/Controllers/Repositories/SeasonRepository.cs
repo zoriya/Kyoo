@@ -98,9 +98,9 @@ namespace Kyoo.Controllers
 		}
 
 		/// <inheritdoc/>
-		public override async Task<Season> Get(Expression<Func<Season, bool>> predicate)
+		public override async Task<Season> Get(Expression<Func<Season, bool>> where)
 		{
-			Season ret = await base.Get(predicate);
+			Season ret = await base.Get(where);
 			ret.ShowSlug = await _shows.GetSlug(ret.ShowID);
 			return ret;
 		}
