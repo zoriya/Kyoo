@@ -42,19 +42,6 @@ namespace Kyoo.Controllers
 		/// <inheritdoc/>
 		public Type RepositoryType => typeof(T);
 
-		/// <inheritdoc/>
-		public virtual void Dispose()
-		{
-			Database.Dispose();
-			GC.SuppressFinalize(this);
-		}
-
-		/// <inheritdoc/>
-		public virtual ValueTask DisposeAsync()
-		{
-			return Database.DisposeAsync();
-		}
-		
 		/// <summary>
 		/// Get a resource from it's ID and make the <see cref="Database"/> instance track it.
 		/// </summary>
