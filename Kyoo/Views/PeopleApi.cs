@@ -90,7 +90,7 @@ namespace Kyoo.Api
 		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetPeopleIcon(int id)
 		{
-			People people = await _libraryManager.GetPeople(id);
+			People people = await _libraryManager.Get<People>(id);
 			return _files.FileResult(await _thumbs.GetPeoplePoster(people));
 		}
 		
@@ -98,7 +98,7 @@ namespace Kyoo.Api
 		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetPeopleIcon(string slug)
 		{
-			People people = await _libraryManager.GetPeople(slug);
+			People people = await _libraryManager.Get<People>(slug);
 			return _files.FileResult(await _thumbs.GetPeoplePoster(people));
 		}
 	}

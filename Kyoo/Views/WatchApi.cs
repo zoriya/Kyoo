@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models;
+using Kyoo.Models.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,24 +18,19 @@ namespace Kyoo.Api
 			_libraryManager = libraryManager;
 		}
 
-		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}")]
+		[HttpGet("{slug}")]
 		[Authorize(Policy="Read")]
-		public async Task<ActionResult<WatchItem>> GetWatchItem(string showSlug, int seasonNumber, int episodeNumber)
+		public async Task<ActionResult<WatchItem>> GetWatchItem(string slug)
 		{
-			Episode item = await _libraryManager.GetEpisode(showSlug, seasonNumber, episodeNumber);
-			if (item == null)
+			try
+			{
+				Episode item = await _libraryManager.Get<Episode>(slug);
+				return await WatchItem.FromEpisode(item, _libraryManager);
+			}
+			catch (ItemNotFound)
+			{
 				return NotFound();
-			return await WatchItem.FromEpisode(item, _libraryManager);
-		}
-		
-		[HttpGet("{movieSlug}")]
-		[Authorize(Policy="Read")]
-		public async Task<ActionResult<WatchItem>> GetWatchItem(string movieSlug)
-		{
-			Episode item = await _libraryManager.GetMovieEpisode(movieSlug);
-			if (item == null)
-				return NotFound();
-			return await WatchItem.FromEpisode(item, _libraryManager);
+			}
 		}
 	}
 }

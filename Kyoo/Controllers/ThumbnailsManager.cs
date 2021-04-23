@@ -92,7 +92,7 @@ namespace Kyoo.Controllers
 				await DownloadImage(episode.Thumb, localPath, $"The thumbnail of {episode.Slug}");
 		}
 
-		public async Task Validate(ProviderID provider, bool alwaysDownload)
+		public async Task Validate(Provider provider, bool alwaysDownload)
 		{
 			if (provider.Logo == null)
 				return;
@@ -145,7 +145,7 @@ namespace Kyoo.Controllers
 			return Task.FromResult(thumbPath.StartsWith(_peoplePath) ? thumbPath : null);
 		}
 
-		public Task<string> GetProviderLogo(ProviderID provider)
+		public Task<string> GetProviderLogo(Provider provider)
 		{
 			if (provider == null)
 				throw new ArgumentNullException(nameof(provider));

@@ -6,7 +6,7 @@ namespace Kyoo.Controllers
 {
 	public interface IMetadataProvider
 	{
-		ProviderID Provider { get; }
+		Provider Provider { get; }
 
 		Task<Collection> GetCollectionFromName(string name);
 

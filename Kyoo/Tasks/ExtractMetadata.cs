@@ -45,27 +45,25 @@ namespace Kyoo.Tasks
 				case "show":
 				case "shows":
 					Show show = await (int.TryParse(slug, out id)
-						? _library!.GetShow(id)
-						: _library!.GetShow(slug));
+						? _library!.Get<Show>(id)
+						: _library!.Get<Show>(slug));
 					await ExtractShow(show, thumbs, subs, token);
 					break;
 				case "season":
 				case "seasons":
 					Season season = await (int.TryParse(slug, out id) 
-						? _library!.GetSeason(id) 
-						: _library!.GetSeason(slug));
+						? _library!.Get<Season>(id) 
+						: _library!.Get<Season>(slug));
 					await ExtractSeason(season, thumbs, subs, token);
 					break;
 				case "episode":
 				case "episodes":
 					Episode episode = await (int.TryParse(slug, out id) 
-						? _library!.GetEpisode(id) 
-						: _library!.GetEpisode(slug));
+						? _library!.Get<Episode>(id) 
+						: _library!.Get<Episode>(slug));
 					await ExtractEpisode(episode, thumbs, subs);
 					break;
 			}
-
-			await _library!.DisposeAsync();
 		}
 
 		private async Task ExtractShow(Show show, bool thumbs, bool subs, CancellationToken token)
@@ -105,7 +103,7 @@ namespace Kyoo.Tasks
 					.Where(x => x.Type != StreamType.Attachment)
 					.Concat(episode.Tracks.Where(x => x.IsExternal))
 					.ToList();
-				await _library.EditEpisode(episode, false);
+				await _library.Edit(episode, false);
 			}
 		}
 		

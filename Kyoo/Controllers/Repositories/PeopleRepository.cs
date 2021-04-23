@@ -10,46 +10,45 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
+	/// <summary>
+	/// A local repository to handle people.
+	/// </summary>
 	public class PeopleRepository : LocalRepository<People>, IPeopleRepository
 	{
-		private bool _disposed;
+		/// <summary>
+		/// The database handle
+		/// </summary>
 		private readonly DatabaseContext _database;
+		/// <summary>
+		/// A provider repository to handle externalID creation and deletion
+		/// </summary>
 		private readonly IProviderRepository _providers;
+		/// <summary>
+		/// A lazy loaded show repository to validate requests from shows.
+		/// </summary>
 		private readonly Lazy<IShowRepository> _shows;
+		
+		/// <inheritdoc />
 		protected override Expression<Func<People, object>> DefaultSort => x => x.Name;
 
-		public PeopleRepository(DatabaseContext database, IProviderRepository providers, IServiceProvider services) 
+		/// <summary>
+		/// Create a new <see cref="PeopleRepository"/>
+		/// </summary>
+		/// <param name="database">The database handle</param>
+		/// <param name="providers">A provider repository</param>
+		/// <param name="services">A service provider to lazy load a show repository</param>
+		public PeopleRepository(DatabaseContext database,
+			IProviderRepository providers,
+			IServiceProvider services) 
 			: base(database)
 		{
 			_database = database;
 			_providers = providers;
 			_shows = new Lazy<IShowRepository>(services.GetRequiredService<IShowRepository>);
 		}
+		
 
-
-		public override void Dispose()
-		{
-			if (_disposed)
-				return;
-			_disposed = true;
-			_database.Dispose();
-			_providers.Dispose();
-			if (_shows.IsValueCreated)
-				_shows.Value.Dispose();
-			GC.SuppressFinalize(this);
-		}
-
-		public override async ValueTask DisposeAsync()
-		{
-			if (_disposed)
-				return;
-			_disposed = true;
-			await _database.DisposeAsync();
-			await _providers.DisposeAsync();
-			if (_shows.IsValueCreated)
-				await _shows.Value.DisposeAsync();
-		}
-
+		/// <inheritdoc />
 		public override async Task<ICollection<People>> Search(string query)
 		{
 			return await _database.People
@@ -59,6 +58,7 @@ namespace Kyoo.Controllers
 				.ToListAsync();
 		}
 
+		/// <inheritdoc />
 		public override async Task<People> Create(People obj)
 		{
 			await base.Create(obj);
@@ -68,6 +68,7 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 
+		/// <inheritdoc />
 		protected override async Task Validate(People resource)
 		{
 			await base.Validate(resource);
@@ -85,6 +86,7 @@ namespace Kyoo.Controllers
 			});
 		}
 
+		/// <inheritdoc />
 		protected override async Task EditRelations(People resource, People changed, bool resetOld)
 		{
 			if (changed.Roles != null || resetOld)
@@ -102,6 +104,7 @@ namespace Kyoo.Controllers
 			await base.EditRelations(resource, changed, resetOld);
 		}
 
+		/// <inheritdoc />
 		public override async Task Delete(People obj)
 		{
 			if (obj == null)
@@ -113,6 +116,7 @@ namespace Kyoo.Controllers
 			await _database.SaveChangesAsync();
 		}
 
+		/// <inheritdoc />
 		public async Task<ICollection<PeopleRole>> GetFromShow(int showID, 
 			Expression<Func<PeopleRole, bool>> where = null, 
 			Sort<PeopleRole> sort = default, 
@@ -133,6 +137,7 @@ namespace Kyoo.Controllers
 			return people;
 		}
 
+		/// <inheritdoc />
 		public async Task<ICollection<PeopleRole>> GetFromShow(string showSlug,
 			Expression<Func<PeopleRole, bool>> where = null,
 			Sort<PeopleRole> sort = default, 
@@ -154,24 +159,26 @@ namespace Kyoo.Controllers
 			return people;
 		}
 		
-		public async Task<ICollection<PeopleRole>> GetFromPeople(int peopleID,
+		/// <inheritdoc />
+		public async Task<ICollection<PeopleRole>> GetFromPeople(int id,
 			Expression<Func<PeopleRole, bool>> where = null,
 			Sort<PeopleRole> sort = default, 
 			Pagination limit = default)
 		{
 			ICollection<PeopleRole> roles = await ApplyFilters(_database.PeopleRoles
-					.Where(x => x.PeopleID == peopleID)
+					.Where(x => x.PeopleID == id)
 					.Include(x => x.Show),
-				id => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id),
+				y => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == y),
 				x => x.Show.Title,
 				where,
 				sort,
 				limit);
-			if (!roles.Any() && await Get(peopleID) == null)
+			if (!roles.Any() && await Get(id) == null)
 				throw new ItemNotFound();
 			return roles;
 		}
 		
+		/// <inheritdoc />
 		public async Task<ICollection<PeopleRole>> GetFromPeople(string slug,
 			Expression<Func<PeopleRole, bool>> where = null,
 			Sort<PeopleRole> sort = default, 

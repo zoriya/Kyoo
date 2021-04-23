@@ -30,14 +30,14 @@ namespace Kyoo.Api
 			Track subtitle;
 			try
 			{
-				subtitle = await _libraryManager.GetTrack(slug, StreamType.Subtitle);
+				subtitle = await _libraryManager.GetOrDefault(slug, StreamType.Subtitle);
 			}
 			catch (ArgumentException ex)
 			{
 				return BadRequest(new {error = ex.Message});
 			}
 
-			if (subtitle == null || subtitle.Type != StreamType.Subtitle)
+			if (subtitle is not {Type: StreamType.Subtitle})
 				return NotFound();
 			
 			if (subtitle.Codec == "subrip" && extension == "vtt")

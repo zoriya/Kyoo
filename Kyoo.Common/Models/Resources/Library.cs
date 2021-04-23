@@ -11,20 +11,20 @@ namespace Kyoo.Models
 		public string Name { get; set; }
 		public string[] Paths { get; set; }
 
-		[EditableRelation] [LoadableRelation] public virtual ICollection<ProviderID> Providers { get; set; }
+		[EditableRelation] [LoadableRelation] public virtual ICollection<Provider> Providers { get; set; }
 
 		[LoadableRelation] public virtual ICollection<Show> Shows { get; set; }
 		[LoadableRelation] public virtual ICollection<Collection> Collections { get; set; }
 
 #if ENABLE_INTERNAL_LINKS
-		[SerializeIgnore] public virtual ICollection<Link<Library, ProviderID>> ProviderLinks { get; set; }
+		[SerializeIgnore] public virtual ICollection<Link<Library, Provider>> ProviderLinks { get; set; }
 		[SerializeIgnore] public virtual ICollection<Link<Library, Show>> ShowLinks { get; set; }
 		[SerializeIgnore] public virtual ICollection<Link<Library, Collection>> CollectionLinks { get; set; }
 #endif
 
 		public Library()  { }
 		
-		public Library(string slug, string name, IEnumerable<string> paths, IEnumerable<ProviderID> providers)
+		public Library(string slug, string name, IEnumerable<string> paths, IEnumerable<Provider> providers)
 		{
 			Slug = slug;
 			Name = name;

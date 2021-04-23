@@ -177,7 +177,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     b.ToTable("Link<Library, Collection>");
                 });
 
-            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Library, Kyoo.Models.ProviderID>", b =>
+            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Library, Kyoo.Models.Provider>", b =>
                 {
                     b.Property<int>("FirstID")
                         .HasColumnType("integer");
@@ -189,7 +189,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
 
                     b.HasIndex("SecondID");
 
-                    b.ToTable("Link<Library, ProviderID>");
+                    b.ToTable("Link<Library, Provider>");
                 });
 
             modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Library, Kyoo.Models.Show>", b =>
@@ -318,7 +318,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     b.ToTable("PeopleRoles");
                 });
 
-            modelBuilder.Entity("Kyoo.Models.ProviderID", b =>
+            modelBuilder.Entity("Kyoo.Models.Provider", b =>
                 {
                     b.Property<int>("ID")
                         .ValueGeneratedOnAdd()
@@ -561,7 +561,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     b.Navigation("Second");
                 });
 
-            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Library, Kyoo.Models.ProviderID>", b =>
+            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Library, Kyoo.Models.Provider>", b =>
                 {
                     b.HasOne("Kyoo.Models.Library", "First")
                         .WithMany("ProviderLinks")
@@ -569,7 +569,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Kyoo.Models.ProviderID", "Second")
+                    b.HasOne("Kyoo.Models.Provider", "Second")
                         .WithMany("LibraryLinks")
                         .HasForeignKey("SecondID")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -630,7 +630,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                         .HasForeignKey("PeopleID")
                         .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Kyoo.Models.ProviderID", "Provider")
+                    b.HasOne("Kyoo.Models.Provider", "Provider")
                         .WithMany("MetadataLinks")
                         .HasForeignKey("ProviderID")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -742,7 +742,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                     b.Navigation("Roles");
                 });
 
-            modelBuilder.Entity("Kyoo.Models.ProviderID", b =>
+            modelBuilder.Entity("Kyoo.Models.Provider", b =>
                 {
                     b.Navigation("LibraryLinks");
 

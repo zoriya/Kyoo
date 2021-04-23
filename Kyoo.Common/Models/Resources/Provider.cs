@@ -3,7 +3,7 @@ using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
 {
-	public class ProviderID : IResource
+	public class Provider : IResource
 	{
 		public int ID { get; set; }
 		public string Slug { get; set; }
@@ -13,20 +13,20 @@ namespace Kyoo.Models
 		[LoadableRelation] public virtual ICollection<Library> Libraries { get; set; }
 		
 #if ENABLE_INTERNAL_LINKS
-		[SerializeIgnore] public virtual ICollection<Link<Library, ProviderID>> LibraryLinks { get; set; }
+		[SerializeIgnore] public virtual ICollection<Link<Library, Provider>> LibraryLinks { get; set; }
 		[SerializeIgnore] public virtual ICollection<MetadataID> MetadataLinks { get; set; }
 #endif
 		
-		public ProviderID() { }
+		public Provider() { }
 
-		public ProviderID(string name, string logo)
+		public Provider(string name, string logo)
 		{
 			Slug = Utility.ToSlug(name);
 			Name = name;
 			Logo = logo;
 		}
 		
-		public ProviderID(int id, string name, string logo)
+		public Provider(int id, string name, string logo)
 		{
 			ID = id;
 			Slug = Utility.ToSlug(name);

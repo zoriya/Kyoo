@@ -4,248 +4,174 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
+using Kyoo.Models.Exceptions;
 
 namespace Kyoo.Controllers
 {
 	public class LibraryManager : ILibraryManager
 	{
+		/// <summary>
+		/// The list of repositories
+		/// </summary>
+		private readonly IBaseRepository[] _repositories;
+		
+		/// <inheritdoc />
 		public ILibraryRepository LibraryRepository { get; }
+		/// <inheritdoc />
 		public ILibraryItemRepository LibraryItemRepository { get; }
+		/// <inheritdoc />
 		public ICollectionRepository CollectionRepository { get; }
+		/// <inheritdoc />
 		public IShowRepository ShowRepository { get; }
+		/// <inheritdoc />
 		public ISeasonRepository SeasonRepository { get; }
+		/// <inheritdoc />
 		public IEpisodeRepository EpisodeRepository { get; }
+		/// <inheritdoc />
 		public ITrackRepository TrackRepository { get; }
-		public IGenreRepository GenreRepository { get; }
-		public IStudioRepository StudioRepository { get; }
+		/// <inheritdoc />
 		public IPeopleRepository PeopleRepository { get; }
+		/// <inheritdoc />
+		public IStudioRepository StudioRepository { get; }
+		/// <inheritdoc />
+		public IGenreRepository GenreRepository { get; }
+		/// <inheritdoc />
 		public IProviderRepository ProviderRepository { get; }
-
-		public LibraryManager(ILibraryRepository libraryRepository, 
-			ILibraryItemRepository libraryItemRepository,
-			ICollectionRepository collectionRepository, 
-			IShowRepository showRepository, 
-			ISeasonRepository seasonRepository, 
-			IEpisodeRepository episodeRepository,
-			ITrackRepository trackRepository, 
-			IGenreRepository genreRepository, 
-			IStudioRepository studioRepository,
-			IProviderRepository providerRepository, 
-			IPeopleRepository peopleRepository)
-		{
-			LibraryRepository = libraryRepository;
-			LibraryItemRepository = libraryItemRepository;
-			CollectionRepository = collectionRepository;
-			ShowRepository = showRepository;
-			SeasonRepository = seasonRepository;
-			EpisodeRepository = episodeRepository;
-			TrackRepository = trackRepository;
-			GenreRepository = genreRepository;
-			StudioRepository = studioRepository;
-			ProviderRepository = providerRepository;
-			PeopleRepository = peopleRepository;
-		}
 		
-		public void Dispose()
-		{
-			LibraryRepository.Dispose();
-			CollectionRepository.Dispose();
-			ShowRepository.Dispose();
-			SeasonRepository.Dispose();
-			EpisodeRepository.Dispose();
-			TrackRepository.Dispose();
-			GenreRepository.Dispose();
-			StudioRepository.Dispose();
-			PeopleRepository.Dispose();
-			ProviderRepository.Dispose();
-		}
 		
-		public async ValueTask DisposeAsync()
+		/// <summary>
+		/// Create a new <see cref="LibraryManager"/> instancce with every repository available.
+		/// </summary>
+		/// <param name="repositories">The list of repositories that this library manager should manage.
+		/// If a repository for every base type is not available, this instance won't be stable.</param>
+		public LibraryManager(IEnumerable<IBaseRepository> repositories)
 		{
-			await Task.WhenAll(
-				LibraryRepository.DisposeAsync().AsTask(),
-				CollectionRepository.DisposeAsync().AsTask(),
-				ShowRepository.DisposeAsync().AsTask(),
-				SeasonRepository.DisposeAsync().AsTask(),
-				EpisodeRepository.DisposeAsync().AsTask(),
-				TrackRepository.DisposeAsync().AsTask(),
-				GenreRepository.DisposeAsync().AsTask(),
-				StudioRepository.DisposeAsync().AsTask(),
-				PeopleRepository.DisposeAsync().AsTask(),
-				ProviderRepository.DisposeAsync().AsTask()
-			);
+			_repositories = repositories.ToArray();
+			LibraryRepository = GetRepository<Library>() as ILibraryRepository;
+			LibraryItemRepository = GetRepository<LibraryItem>() as ILibraryItemRepository;
+			CollectionRepository = GetRepository<Collection>() as ICollectionRepository;
+			ShowRepository = GetRepository<Show>() as IShowRepository;
+			SeasonRepository = GetRepository<Season>() as ISeasonRepository;
+			EpisodeRepository = GetRepository<Episode>() as IEpisodeRepository;
+			TrackRepository = GetRepository<Track>() as ITrackRepository;
+			PeopleRepository = GetRepository<People>() as IPeopleRepository;
+			StudioRepository = GetRepository<Studio>() as IStudioRepository;
+			GenreRepository = GetRepository<Genre>() as IGenreRepository;
+			ProviderRepository = GetRepository<Provider>() as IProviderRepository;
 		}
 
-		public Task<Library> GetLibrary(int id)
+		/// <inheritdoc />
+		public IRepository<T> GetRepository<T>()
+			where T : class, IResource
 		{
-			return LibraryRepository.Get(id);
+			if (_repositories.FirstOrDefault(x => x.RepositoryType == typeof(T)) is IRepository<T> ret)
+				return ret;
+			throw new ItemNotFound();
 		}
 
-		public Task<Collection> GetCollection(int id)
+		/// <inheritdoc />
+		public Task<T> Get<T>(int id)
+			where T : class, IResource
 		{
-			return CollectionRepository.Get(id);
+			return GetRepository<T>().Get(id);
 		}
 
-		public Task<Show> GetShow(int id)
+		/// <inheritdoc />
+		public Task<T> Get<T>(string slug) 
+			where T : class, IResource
 		{
-			return ShowRepository.Get(id);
+			return GetRepository<T>().Get(slug);
 		}
 
-		public Task<Season> GetSeason(int id)
+		/// <inheritdoc />
+		public Task<T> Get<T>(Expression<Func<T, bool>> where)
+			where T : class, IResource
 		{
-			return SeasonRepository.Get(id);
+			return GetRepository<T>().Get(where);
 		}
-		
-		public Task<Season> GetSeason(int showID, int seasonNumber)
+
+		/// <inheritdoc />
+		public Task<Season> Get(int showID, int seasonNumber)
 		{
 			return SeasonRepository.Get(showID, seasonNumber);
 		}
-		
-		public Task<Episode> GetEpisode(int id)
-		{
-			return EpisodeRepository.Get(id);
-		}
 
-		public Task<Episode> GetEpisode(int showID, int seasonNumber, int episodeNumber)
-		{
-			return EpisodeRepository.Get(showID, seasonNumber, episodeNumber);
-		}
-
-		public Task<Track> GetTrack(string slug, StreamType type = StreamType.Unknown)
-		{
-			return TrackRepository.Get(slug, type);
-		}
-
-		public Task<Genre> GetGenre(int id)
-		{
-			return GenreRepository.Get(id);
-		}
-
-		public Task<Studio> GetStudio(int id)
-		{
-			return StudioRepository.Get(id);
-		}
-
-		public Task<People> GetPeople(int id)
-		{
-			return PeopleRepository.Get(id);
-		}
-
-		public Task<ProviderID> GetProvider(int id)
-		{
-			return ProviderRepository.Get(id);
-		}
-
-		public Task<Library> GetLibrary(string slug)
-		{
-			return LibraryRepository.Get(slug);
-		}
-
-		public Task<Collection> GetCollection(string slug)
-		{
-			return CollectionRepository.Get(slug);
-		}
-
-		public Task<Show> GetShow(string slug)
-		{
-			return ShowRepository.Get(slug);
-		}
-		
-		public Task<Season> GetSeason(string slug)
-		{
-			return SeasonRepository.Get(slug);
-		}
-
-		public Task<Season> GetSeason(string showSlug, int seasonNumber)
+		/// <inheritdoc />
+		public Task<Season> Get(string showSlug, int seasonNumber)
 		{
 			return SeasonRepository.Get(showSlug, seasonNumber);
 		}
 
-		public Task<Episode> GetEpisode(string slug)
+		/// <inheritdoc />
+		public Task<Episode> Get(int showID, int seasonNumber, int episodeNumber)
 		{
-			return EpisodeRepository.Get(slug);
+			return EpisodeRepository.Get(showID, seasonNumber, episodeNumber);
 		}
-		
-		public Task<Episode> GetEpisode(string showSlug, int seasonNumber, int episodeNumber)
+
+		/// <inheritdoc />
+		public Task<Episode> Get(string showSlug, int seasonNumber, int episodeNumber)
 		{
 			return EpisodeRepository.Get(showSlug, seasonNumber, episodeNumber);
 		}
 
-		public Task<Episode> GetMovieEpisode(string movieSlug)
+		/// <inheritdoc />
+		public Task<Track> Get(string slug, StreamType type = StreamType.Unknown)
 		{
-			return EpisodeRepository.Get(movieSlug);
+			return TrackRepository.Get(slug, type);
 		}
 
-		public Task<Track> GetTrack(int id)
+		/// <inheritdoc />
+		public async Task<T> GetOrDefault<T>(int id) 
+			where T : class, IResource
 		{
-			return TrackRepository.Get(id);
-		}
-
-		public Task<Genre> GetGenre(string slug)
-		{
-			return GenreRepository.Get(slug);
-		}
-
-		public Task<Studio> GetStudio(string slug)
-		{
-			return StudioRepository.Get(slug);
-		}
-
-		public Task<People> GetPeople(string slug)
-		{
-			return PeopleRepository.Get(slug);
+			return await GetRepository<T>().GetOrDefault(id);
 		}
 		
-		public Task<ProviderID> GetProvider(string slug)
+		/// <inheritdoc />
+		public async Task<T> GetOrDefault<T>(string slug) 
+			where T : class, IResource
 		{
-			return ProviderRepository.Get(slug);
+			return await GetRepository<T>().GetOrDefault(slug);
+		}
+		
+		/// <inheritdoc />
+		public async Task<T> GetOrDefault<T>(Expression<Func<T, bool>> where)
+			where T : class, IResource
+		{
+			return await GetRepository<T>().GetOrDefault(where);
 		}
 
-		public Task<Library> GetLibrary(Expression<Func<Library, bool>> where)
+		/// <inheritdoc />
+		public async Task<Season> GetOrDefault(int showID, int seasonNumber)
 		{
-			return LibraryRepository.Get(where);
+			return await SeasonRepository.GetOrDefault(showID, seasonNumber);
+		}
+		
+		/// <inheritdoc />
+		public async Task<Season> GetOrDefault(string showSlug, int seasonNumber)
+		{
+			return await SeasonRepository.GetOrDefault(showSlug, seasonNumber);
+		}
+		
+		/// <inheritdoc />
+		public async Task<Episode> GetOrDefault(int showID, int seasonNumber, int episodeNumber)
+		{
+			return await EpisodeRepository.GetOrDefault(showID, seasonNumber, episodeNumber);
+		}
+		
+		/// <inheritdoc />
+		public async Task<Episode> GetOrDefault(string showSlug, int seasonNumber, int episodeNumber)
+		{
+			return await EpisodeRepository.GetOrDefault(showSlug, seasonNumber, episodeNumber);
 		}
 
-		public Task<Collection> GetCollection(Expression<Func<Collection, bool>> where)
+		/// <inheritdoc />
+		public async Task<Track> GetOrDefault(string slug, StreamType type = StreamType.Unknown)
 		{
-			return CollectionRepository.Get(where);
+			return await TrackRepository.GetOrDefault(slug, type);
 		}
-
-		public Task<Show> GetShow(Expression<Func<Show, bool>> where)
-		{
-			return ShowRepository.Get(where);
-		}
-
-		public Task<Season> GetSeason(Expression<Func<Season, bool>> where)
-		{
-			return SeasonRepository.Get(where);
-		}
-
-		public Task<Episode> GetEpisode(Expression<Func<Episode, bool>> where)
-		{
-			return EpisodeRepository.Get(where);
-		}
-
-		public Task<Track> GetTrack(Expression<Func<Track, bool>> where)
-		{
-			return TrackRepository.Get(where);
-		}
-
-		public Task<Genre> GetGenre(Expression<Func<Genre, bool>> where)
-		{
-			return GenreRepository.Get(where);
-		}
-
-		public Task<Studio> GetStudio(Expression<Func<Studio, bool>> where)
-		{
-			return StudioRepository.Get(where);
-		}
-
-		public Task<People> GetPerson(Expression<Func<People, bool>> where)
-		{
-			return PeopleRepository.Get(where);
-		}
-
+		
+		/// <inheritdoc />
 		public Task<T> Load<T, T2>(T obj, Expression<Func<T, T2>> member)
 			where T : class, IResource
 			where T2 : class, IResource, new()
@@ -255,6 +181,7 @@ namespace Kyoo.Controllers
 			return Load(obj, Utility.GetPropertyName(member));
 		}
 
+		/// <inheritdoc />
 		public Task<T> Load<T, T2>(T obj, Expression<Func<T, ICollection<T2>>> member)
 			where T : class, IResource
 			where T2 : class, new()
@@ -264,14 +191,24 @@ namespace Kyoo.Controllers
 			return Load(obj, Utility.GetPropertyName(member));
 		}
 
-		public async Task<T> Load<T>(T obj, string member)
+		/// <inheritdoc />
+		public async Task<T> Load<T>(T obj, string memberName)
 			where T : class, IResource
 		{
-			await Load(obj as IResource, member);
+			await Load(obj as IResource, memberName);
 			return obj;
 		}
 
-		private async Task SetRelation<T1, T2>(T1 obj, 
+		/// <summary>
+		/// Set relations between to objects.
+		/// </summary>
+		/// <param name="obj">The owner object</param>
+		/// <param name="loader">A Task to load a collection of related objects</param>
+		/// <param name="setter">A setter function to store the collection of related objects</param>
+		/// <param name="inverse">A setter function to store the owner of a releated object loaded</param>
+		/// <typeparam name="T1">The type of the owner object</typeparam>
+		/// <typeparam name="T2">The type of the related object</typeparam>
+		private static async Task SetRelation<T1, T2>(T1 obj, 
 			Task<ICollection<T2>> loader, 
 			Action<T1, ICollection<T2>> setter, 
 			Action<T2, T1> inverse)
@@ -282,12 +219,13 @@ namespace Kyoo.Controllers
 				inverse(item, obj);
 		}
 
-		public Task Load(IResource obj, string member)
+		/// <inheritdoc />
+		public Task Load(IResource obj, string memberName)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 			
-			return (obj, member) switch
+			return (obj, member: memberName) switch
 			{
 				(Library l, nameof(Library.Providers)) => ProviderRepository
 					.GetAll(x => x.Libraries.Any(y => y.ID == obj.ID))
@@ -343,7 +281,7 @@ namespace Kyoo.Controllers
 					.Then(x => s.Collections = x),
 				
 				(Show s, nameof(Show.Studio)) => StudioRepository
-					.Get(x => x.Shows.Any(y => y.ID == obj.ID))
+					.GetOrDefault(x => x.Shows.Any(y => y.ID == obj.ID))
 					.Then(x =>
 					{
 						s.Studio = x;
@@ -362,7 +300,7 @@ namespace Kyoo.Controllers
 					(x, y) => { x.Season = y; x.SeasonID = y.ID; }),
 				
 				(Season s, nameof(Season.Show)) => ShowRepository
-					.Get(x => x.Seasons.Any(y => y.ID == obj.ID))
+					.GetOrDefault(x => x.Seasons.Any(y => y.ID == obj.ID))
 					.Then(x =>
 					{
 						s.Show = x;
@@ -381,7 +319,7 @@ namespace Kyoo.Controllers
 					(x, y) => { x.Episode = y; x.EpisodeID = y.ID; }),
 				
 				(Episode e, nameof(Episode.Show)) => ShowRepository
-					.Get(x => x.Episodes.Any(y => y.ID == obj.ID))
+					.GetOrDefault(x => x.Episodes.Any(y => y.ID == obj.ID))
 					.Then(x =>
 					{
 						e.Show = x;
@@ -389,7 +327,7 @@ namespace Kyoo.Controllers
 					}),
 				
 				(Episode e, nameof(Episode.Season)) => SeasonRepository
-					.Get(x => x.Episodes.Any(y => y.ID == e.ID))
+					.GetOrDefault(x => x.Episodes.Any(y => y.ID == e.ID))
 					.Then(x =>
 					{
 						e.Season = x;
@@ -398,7 +336,7 @@ namespace Kyoo.Controllers
 				
 				
 				(Track t, nameof(Track.Episode)) => EpisodeRepository
-					.Get(x => x.Tracks.Any(y => y.ID == obj.ID))
+					.GetOrDefault(x => x.Tracks.Any(y => y.ID == obj.ID))
 					.Then(x =>
 					{
 						t.Episode = x;
@@ -426,85 +364,16 @@ namespace Kyoo.Controllers
 					.Then(x => p.Roles = x),
 				
 				
-				(ProviderID p, nameof(ProviderID.Libraries)) => LibraryRepository
+				(Provider p, nameof(Provider.Libraries)) => LibraryRepository
 					.GetAll(x => x.Providers.Any(y => y.ID == obj.ID))
 					.Then(x => p.Libraries = x),
 				
 
-				_ => throw new ArgumentException($"Couldn't find a way to load {member} of {obj.Slug}.")
+				_ => throw new ArgumentException($"Couldn't find a way to load {memberName} of {obj.Slug}.")
 			};
 		}
-		
-		public Task<ICollection<Library>> GetLibraries(Expression<Func<Library, bool>> where = null, 
-			Sort<Library> sort = default,
-			Pagination page = default)
-		{
-			return LibraryRepository.GetAll(where, sort, page);
-		}
 
-		public Task<ICollection<Collection>> GetCollections(Expression<Func<Collection, bool>> where = null, 
-			Sort<Collection> sort = default,
-			Pagination page = default)
-		{
-			return CollectionRepository.GetAll(where, sort, page);
-		}
-
-		public Task<ICollection<Show>> GetShows(Expression<Func<Show, bool>> where = null, 
-			Sort<Show> sort = default,
-			Pagination limit = default)
-		{
-			return ShowRepository.GetAll(where, sort, limit);
-		}
-
-		public Task<ICollection<Season>> GetSeasons(Expression<Func<Season, bool>> where = null,
-			Sort<Season> sort = default,
-			Pagination limit = default)
-		{
-			return SeasonRepository.GetAll(where, sort, limit);
-		}
-
-		public Task<ICollection<Episode>> GetEpisodes(Expression<Func<Episode, bool>> where = null, 
-			Sort<Episode> sort = default,
-			Pagination limit = default)
-		{
-			return EpisodeRepository.GetAll(where, sort, limit);
-		}
-
-		public Task<ICollection<Track>> GetTracks(Expression<Func<Track, bool>> where = null, 
-			Sort<Track> sort = default,
-			Pagination page = default)
-		{
-			return TrackRepository.GetAll(where, sort, page);
-		}
-
-		public Task<ICollection<Studio>> GetStudios(Expression<Func<Studio, bool>> where = null, 
-			Sort<Studio> sort = default,
-			Pagination page = default)
-		{
-			return StudioRepository.GetAll(where, sort, page);
-		}
-
-		public Task<ICollection<People>> GetPeople(Expression<Func<People, bool>> where = null, 
-			Sort<People> sort = default,
-			Pagination page = default)
-		{
-			return PeopleRepository.GetAll(where, sort, page);
-		}
-
-		public Task<ICollection<Genre>> GetGenres(Expression<Func<Genre, bool>> where = null, 
-			Sort<Genre> sort = default,
-			Pagination page = default)
-		{
-			return GenreRepository.GetAll(where, sort, page);
-		}
-
-		public Task<ICollection<ProviderID>> GetProviders(Expression<Func<ProviderID, bool>> where = null, 
-			Sort<ProviderID> sort = default,
-			Pagination page = default)
-		{
-			return ProviderRepository.GetAll(where, sort, page); 
-		}
-
+		/// <inheritdoc />
 		public Task<ICollection<LibraryItem>> GetItemsFromLibrary(int id, 
 			Expression<Func<LibraryItem, bool>> where = null, 
 			Sort<LibraryItem> sort = default, 
@@ -513,366 +382,128 @@ namespace Kyoo.Controllers
 			return LibraryItemRepository.GetFromLibrary(id, where, sort, limit);
 		}
 
-		public Task<ICollection<LibraryItem>> GetItemsFromLibrary(string librarySlug,
-			Expression<Func<LibraryItem, bool>> where = null,
+		/// <inheritdoc />
+		public Task<ICollection<LibraryItem>> GetItemsFromLibrary(string slug, 
+			Expression<Func<LibraryItem, bool>> where = null, 
 			Sort<LibraryItem> sort = default, 
 			Pagination limit = default)
 		{
-			return LibraryItemRepository.GetFromLibrary(librarySlug, where, sort, limit);
+			return LibraryItemRepository.GetFromLibrary(slug, where, sort, limit);
 		}
-		
-		public Task<ICollection<PeopleRole>> GetPeopleFromShow(int showID,
+
+		/// <inheritdoc />
+		public Task<ICollection<PeopleRole>> GetPeopleFromShow(int showID, 
 			Expression<Func<PeopleRole, bool>> where = null,
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default)
 		{
 			return PeopleRepository.GetFromShow(showID, where, sort, limit);
 		}
-		
-		public Task<ICollection<PeopleRole>> GetPeopleFromShow(string showSlug,
+
+		/// <inheritdoc />
+		public Task<ICollection<PeopleRole>> GetPeopleFromShow(string showSlug, 
 			Expression<Func<PeopleRole, bool>> where = null,
-			Sort<PeopleRole> sort = default,
+			Sort<PeopleRole> sort = default, 
 			Pagination limit = default)
 		{
 			return PeopleRepository.GetFromShow(showSlug, where, sort, limit);
 		}
-		
+
+		/// <inheritdoc />
 		public Task<ICollection<PeopleRole>> GetRolesFromPeople(int id, 
-			Expression<Func<PeopleRole, bool>> where = null, 
-			Sort<PeopleRole> sort = default, 
+			Expression<Func<PeopleRole, bool>> where = null,
+			Sort<PeopleRole> sort = default,
 			Pagination limit = default)
 		{
 			return PeopleRepository.GetFromPeople(id, where, sort, limit);
 		}
 
-		public Task<ICollection<PeopleRole>> GetRolesFromPeople(string slug, 
-			Expression<Func<PeopleRole, bool>> where = null, 
-			Sort<PeopleRole> sort = default, 
+		/// <inheritdoc />
+		public Task<ICollection<PeopleRole>> GetRolesFromPeople(string slug,
+			Expression<Func<PeopleRole, bool>> where = null,
+			Sort<PeopleRole> sort = default,
 			Pagination limit = default)
 		{
 			return PeopleRepository.GetFromPeople(slug, where, sort, limit);
 		}
 
-		public Task<int> GetLibrariesCount(Expression<Func<Library, bool>> where = null)
-		{
-			return LibraryRepository.GetCount(where);
-		}
-
-		public Task<int> GetCollectionsCount(Expression<Func<Collection, bool>> where = null)
-		{
-			return CollectionRepository.GetCount(where);
-		}
-
-		public Task<int> GetShowsCount(Expression<Func<Show, bool>> where = null)
-		{
-			return ShowRepository.GetCount(where);
-		}
-
-		public Task<int> GetSeasonsCount(Expression<Func<Season, bool>> where = null)
-		{
-			return SeasonRepository.GetCount(where);
-		}
-
-		public Task<int> GetEpisodesCount(Expression<Func<Episode, bool>> where = null)
-		{
-			return EpisodeRepository.GetCount(where);
-		}
-
-		public Task<int> GetTracksCount(Expression<Func<Track, bool>> where = null)
-		{
-			return TrackRepository.GetCount(where);
-		}
-
-		public Task<int> GetGenresCount(Expression<Func<Genre, bool>> where = null)
-		{
-			return GenreRepository.GetCount(where);
-		}
-
-		public Task<int> GetStudiosCount(Expression<Func<Studio, bool>> where = null)
-		{
-			return StudioRepository.GetCount(where);
-		}
-
-		public Task<int> GetPeopleCount(Expression<Func<People, bool>> where = null)
-		{
-			return PeopleRepository.GetCount(where);
-		}
-
+		/// <inheritdoc />
 		public Task AddShowLink(int showID, int? libraryID, int? collectionID)
 		{
 			return ShowRepository.AddShowLink(showID, libraryID, collectionID);
 		}
 
+		/// <inheritdoc />
 		public Task AddShowLink(Show show, Library library, Collection collection)
 		{
 			if (show == null)
 				throw new ArgumentNullException(nameof(show));
-			return AddShowLink(show.ID, library?.ID, collection?.ID);
+			return ShowRepository.AddShowLink(show.ID, library?.ID, collection?.ID);
+		}
+
+		/// <inheritdoc />
+		public Task<ICollection<T>> GetAll<T>(Expression<Func<T, bool>> where = null,
+			Sort<T> sort = default,
+			Pagination limit = default) 
+			where T : class, IResource
+		{
+			return GetRepository<T>().GetAll(where, sort, limit);
+		}
+
+		/// <inheritdoc />
+		public Task<int> GetCount<T>(Expression<Func<T, bool>> where = null)
+			where T : class, IResource
+		{
+			return GetRepository<T>().GetCount(where);
+		}
+
+		/// <inheritdoc />
+		public Task<ICollection<T>> Search<T>(string query) 
+			where T : class, IResource
+		{
+			return GetRepository<T>().Search(query);
+		}
+
+		/// <inheritdoc />
+		public Task<T> Create<T>(T item) 
+			where T : class, IResource
+		{
+			return GetRepository<T>().Create(item);
 		}
 		
-		public Task<ICollection<Library>> SearchLibraries(string searchQuery)
+		/// <inheritdoc />
+		public Task<T> CreateIfNotExists<T>(T item)
+			where T : class, IResource
 		{
-			return LibraryRepository.Search(searchQuery);
+			return GetRepository<T>().CreateIfNotExists(item);
 		}
 
-		public Task<ICollection<Collection>> SearchCollections(string searchQuery)
+		/// <inheritdoc />
+		public Task<T> Edit<T>(T item, bool resetOld)
+			where T : class, IResource
 		{
-			return CollectionRepository.Search(searchQuery);
+			return GetRepository<T>().Edit(item, resetOld);
 		}
 
-		public Task<ICollection<Show>> SearchShows(string searchQuery)
+		/// <inheritdoc />
+		public Task Delete<T>(T item) 
+			where T : class, IResource
 		{
-			return ShowRepository.Search(searchQuery);
+			return GetRepository<T>().Delete(item);
 		}
 
-		public Task<ICollection<Season>> SearchSeasons(string searchQuery)
+		/// <inheritdoc />
+		public Task Delete<T>(int id) 
+			where T : class, IResource
 		{
-			return SeasonRepository.Search(searchQuery);
+			return GetRepository<T>().Delete(id);
 		}
 
-		public Task<ICollection<Episode>> SearchEpisodes(string searchQuery)
+		/// <inheritdoc />
+		public Task Delete<T>(string slug) 
+			where T : class, IResource
 		{
-			return EpisodeRepository.Search(searchQuery);
-		}
-
-		public Task<ICollection<Genre>> SearchGenres(string searchQuery)
-		{
-			return GenreRepository.Search(searchQuery);
-		}
-
-		public Task<ICollection<Studio>> SearchStudios(string searchQuery)
-		{
-			return StudioRepository.Search(searchQuery);
-		}
-
-		public Task<ICollection<People>> SearchPeople(string searchQuery)
-		{
-			return PeopleRepository.Search(searchQuery);
-		}
-		
-		public Task<Library> RegisterLibrary(Library library)
-		{
-			return LibraryRepository.Create(library);
-		}
-
-		public Task<Collection> RegisterCollection(Collection collection)
-		{
-			return CollectionRepository.Create(collection);
-		}
-
-		public Task<Show> RegisterShow(Show show)
-		{
-			return ShowRepository.Create(show);
-		}
-
-		public Task<Season> RegisterSeason(Season season)
-		{
-			return SeasonRepository.Create(season);
-		}
-
-		public Task<Episode> RegisterEpisode(Episode episode)
-		{
-			return EpisodeRepository.Create(episode);
-		}
-
-		public Task<Track> RegisterTrack(Track track)
-		{
-			return TrackRepository.Create(track);
-		}
-
-		public Task<Genre> RegisterGenre(Genre genre)
-		{
-			return GenreRepository.Create(genre);
-		}
-
-		public Task<Studio> RegisterStudio(Studio studio)
-		{
-			return StudioRepository.Create(studio);
-		}
-
-		public Task<People> RegisterPeople(People people)
-		{
-			return PeopleRepository.Create(people);
-		}
-
-		public Task<Library> EditLibrary(Library library, bool resetOld)
-		{
-			return LibraryRepository.Edit(library, resetOld);
-		}
-
-		public Task<Collection> EditCollection(Collection collection, bool resetOld)
-		{
-			return CollectionRepository.Edit(collection, resetOld);
-		}
-
-		public Task<Show> EditShow(Show show, bool resetOld)
-		{
-			return ShowRepository.Edit(show, resetOld);
-		}
-
-		public Task<Season> EditSeason(Season season, bool resetOld)
-		{
-			return SeasonRepository.Edit(season, resetOld);
-		}
-
-		public Task<Episode> EditEpisode(Episode episode, bool resetOld)
-		{
-			return EpisodeRepository.Edit(episode, resetOld);
-		}
-
-		public Task<Track> EditTrack(Track track, bool resetOld)
-		{
-			return TrackRepository.Edit(track, resetOld);
-		}
-
-		public Task<Genre> EditGenre(Genre genre, bool resetOld)
-		{
-			return GenreRepository.Edit(genre, resetOld);
-		}
-
-		public Task<Studio> EditStudio(Studio studio, bool resetOld)
-		{
-			return StudioRepository.Edit(studio, resetOld);
-		}
-
-		public Task<People> EditPeople(People people, bool resetOld)
-		{
-			return PeopleRepository.Edit(people, resetOld);
-		}
-
-		public Task DeleteLibrary(Library library)
-		{
-			return LibraryRepository.Delete(library);
-		}
-
-		public Task DeleteCollection(Collection collection)
-		{
-			return CollectionRepository.Delete(collection);
-		}
-
-		public Task DeleteShow(Show show)
-		{
-			return ShowRepository.Delete(show);
-		}
-
-		public Task DeleteSeason(Season season)
-		{
-			return SeasonRepository.Delete(season);
-		}
-
-		public Task DeleteEpisode(Episode episode)
-		{
-			return EpisodeRepository.Delete(episode);
-		}
-
-		public Task DeleteTrack(Track track)
-		{
-			return TrackRepository.Delete(track);
-		}
-
-		public Task DeleteGenre(Genre genre)
-		{
-			return GenreRepository.Delete(genre);
-		}
-
-		public Task DeleteStudio(Studio studio)
-		{
-			return StudioRepository.Delete(studio);
-		}
-
-		public Task DeletePeople(People people)
-		{
-			return PeopleRepository.Delete(people);
-		}
-		
-		public Task DeleteLibrary(string library)
-		{
-			return LibraryRepository.Delete(library);
-		}
-
-		public Task DeleteCollection(string collection)
-		{
-			return CollectionRepository.Delete(collection);
-		}
-
-		public Task DeleteShow(string show)
-		{
-			return ShowRepository.Delete(show);
-		}
-
-		public Task DeleteSeason(string season)
-		{
-			return SeasonRepository.Delete(season);
-		}
-
-		public Task DeleteEpisode(string episode)
-		{
-			return EpisodeRepository.Delete(episode);
-		}
-
-		public Task DeleteTrack(string track)
-		{
-			return TrackRepository.Delete(track);
-		}
-
-		public Task DeleteGenre(string genre)
-		{
-			return GenreRepository.Delete(genre);
-		}
-
-		public Task DeleteStudio(string studio)
-		{
-			return StudioRepository.Delete(studio);
-		}
-
-		public Task DeletePeople(string people)
-		{
-			return PeopleRepository.Delete(people);
-		}
-		
-		public Task DeleteLibrary(int library)
-		{
-			return LibraryRepository.Delete(library);
-		}
-
-		public Task DeleteCollection(int collection)
-		{
-			return CollectionRepository.Delete(collection);
-		}
-
-		public Task DeleteShow(int show)
-		{
-			return ShowRepository.Delete(show);
-		}
-
-		public Task DeleteSeason(int season)
-		{
-			return SeasonRepository.Delete(season);
-		}
-
-		public Task DeleteEpisode(int episode)
-		{
-			return EpisodeRepository.Delete(episode);
-		}
-
-		public Task DeleteTrack(int track)
-		{
-			return TrackRepository.Delete(track);
-		}
-
-		public Task DeleteGenre(int genre)
-		{
-			return GenreRepository.Delete(genre);
-		}
-
-		public Task DeleteStudio(int studio)
-		{
-			return StudioRepository.Delete(studio);
-		}
-
-		public Task DeletePeople(int people)
-		{
-			return PeopleRepository.Delete(people);
+			return GetRepository<T>().Delete(slug);
 		}
 	}
 }

@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace Kyoo.CommonApi
 {
@@ -77,7 +76,7 @@ namespace Kyoo.CommonApi
 			if (result.DeclaredType == null)
 				return;
 
-			await using ILibraryManager library = context.HttpContext.RequestServices.GetService<ILibraryManager>();
+			ILibraryManager library = context.HttpContext.RequestServices.GetService<ILibraryManager>();
 			ICollection<string> fields = (ICollection<string>)context.HttpContext.Items["fields"];
 			Type pageType = Utility.GetGenericDefinition(result.DeclaredType, typeof(Page<>));
 

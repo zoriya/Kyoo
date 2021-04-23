@@ -5,22 +5,47 @@ using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
+using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
+	/// <summary>
+	/// A local repository to handle seasons.
+	/// </summary>
 	public class SeasonRepository : LocalRepository<Season>, ISeasonRepository
 	{
-		private bool _disposed;
+		/// <summary>
+		/// The database handle
+		/// </summary>
 		private readonly DatabaseContext _database;
+		/// <summary>
+		/// A provider repository to handle externalID creation and deletion
+		/// </summary>
 		private readonly IProviderRepository _providers;
+		/// <summary>
+		/// A show repository to get show's slug from their ID and keep the slug in each episode.
+		/// </summary>
 		private readonly IShowRepository _shows;
+		/// <summary>
+		/// A lazilly loaded episode repository to handle deletion of episodes with the season.
+		/// </summary>
 		private readonly Lazy<IEpisodeRepository> _episodes;
+		
+		/// <inheritdoc/>
 		protected override Expression<Func<Season, object>> DefaultSort => x => x.SeasonNumber;
 
 
-		public SeasonRepository(DatabaseContext database, 
+		/// <summary>
+		/// Create a new <see cref="SeasonRepository"/> using the provided handle, a provider & a show repository and
+		/// a service provider to lazilly request an episode repository.
+		/// </summary>
+		/// <param name="database">The database handle that will be used</param>
+		/// <param name="providers">A provider repository</param>
+		/// <param name="shows">A show repository</param>
+		/// <param name="services">A service provider to lazilly request an episode repository.</param>
+		public SeasonRepository(DatabaseContext database,
 			IProviderRepository providers,
 			IShowRepository shows,
 			IServiceProvider services)
@@ -31,49 +56,25 @@ namespace Kyoo.Controllers
 			_shows = shows;
 			_episodes = new Lazy<IEpisodeRepository>(services.GetRequiredService<IEpisodeRepository>);
 		}
+		
 
-
-		public override void Dispose()
-		{
-			if (_disposed)
-				return;
-			_disposed = true;
-			_database.Dispose();
-			_providers.Dispose();
-			_shows.Dispose();
-			if (_episodes.IsValueCreated)
-				_episodes.Value.Dispose();
-			GC.SuppressFinalize(this);
-		}
-
-		public override async ValueTask DisposeAsync()
-		{
-			if (_disposed)
-				return;
-			_disposed = true;
-			await _database.DisposeAsync();
-			await _providers.DisposeAsync();
-			await _shows.DisposeAsync();
-			if (_episodes.IsValueCreated)
-				await _episodes.Value.DisposeAsync();
-		}
-
+		/// <inheritdoc/>
 		public override async Task<Season> Get(int id)
 		{
 			Season ret = await base.Get(id);
-			if (ret != null)
-				ret.ShowSlug = await _shows.GetSlug(ret.ShowID);
+			ret.ShowSlug = await _shows.GetSlug(ret.ShowID);
 			return ret;
 		}
 
-		public override async Task<Season> Get(Expression<Func<Season, bool>> predicate)
+		/// <inheritdoc/>
+		public override async Task<Season> Get(Expression<Func<Season, bool>> where)
 		{
-			Season ret = await base.Get(predicate);
-			if (ret != null)
-				ret.ShowSlug = await _shows.GetSlug(ret.ShowID);
+			Season ret = await base.Get(where);
+			ret.ShowSlug = await _shows.GetSlug(ret.ShowID);
 			return ret;
 		}
 
+		/// <inheritdoc/>
 		public override Task<Season> Get(string slug)
 		{
 			Match match = Regex.Match(slug, @"(?<show>.*)-s(?<season>\d*)");
@@ -83,24 +84,41 @@ namespace Kyoo.Controllers
 			return Get(match.Groups["show"].Value, int.Parse(match.Groups["season"].Value));
 		}
 		
+		/// <inheritdoc/>
 		public async Task<Season> Get(int showID, int seasonNumber)
 		{
-			Season ret = await _database.Seasons.FirstOrDefaultAsync(x => x.ShowID == showID 
-			                                                              && x.SeasonNumber == seasonNumber);
-			if (ret != null)
-				ret.ShowSlug = await _shows.GetSlug(showID);
+			Season ret = await GetOrDefault(showID, seasonNumber);
+			if (ret == null)
+				throw new ItemNotFound($"No season {seasonNumber} found for the show {showID}");
+			ret.ShowSlug = await _shows.GetSlug(showID);
 			return ret;
 		}
 		
+		/// <inheritdoc/>
 		public async Task<Season> Get(string showSlug, int seasonNumber)
 		{
-			Season ret = await _database.Seasons.FirstOrDefaultAsync(x => x.Show.Slug == showSlug 
-			                                                        && x.SeasonNumber == seasonNumber);
-			if (ret != null)
-				ret.ShowSlug = showSlug;
+			Season ret = await GetOrDefault(showSlug, seasonNumber);
+			if (ret == null)
+				throw new ItemNotFound($"No season {seasonNumber} found for the show {showSlug}");
+			ret.ShowSlug = showSlug;
 			return ret;
 		}
 
+		/// <inheritdoc/>
+		public Task<Season> GetOrDefault(int showID, int seasonNumber)
+		{
+			return _database.Seasons.FirstOrDefaultAsync(x => x.ShowID == showID 
+			                                                  && x.SeasonNumber == seasonNumber);
+		}
+
+		/// <inheritdoc/>
+		public Task<Season> GetOrDefault(string showSlug, int seasonNumber)
+		{
+			return _database.Seasons.FirstOrDefaultAsync(x => x.Show.Slug == showSlug 
+			                                                  && x.SeasonNumber == seasonNumber);
+		}
+
+		/// <inheritdoc/>
 		public override async Task<ICollection<Season>> Search(string query)
 		{
 			List<Season> seasons = await _database.Seasons
@@ -113,6 +131,7 @@ namespace Kyoo.Controllers
 			return seasons;
 		}
 		
+		/// <inheritdoc/>
 		public override async Task<ICollection<Season>> GetAll(Expression<Func<Season, bool>> where = null,
 			Sort<Season> sort = default, 
 			Pagination limit = default)
@@ -123,6 +142,7 @@ namespace Kyoo.Controllers
 			return seasons;
 		}
 		
+		/// <inheritdoc/>
 		public override async Task<Season> Create(Season obj)
 		{
 			await base.Create(obj);
@@ -132,6 +152,7 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 
+		/// <inheritdoc/>
 		protected override async Task Validate(Season resource)
 		{
 			if (resource.ShowID <= 0)
@@ -146,6 +167,7 @@ namespace Kyoo.Controllers
 			});
 		}
 
+		/// <inheritdoc/>
 		protected override async Task EditRelations(Season resource, Season changed, bool resetOld)
 		{
 			if (changed.ExternalIDs != null || resetOld)
@@ -155,13 +177,8 @@ namespace Kyoo.Controllers
 			}
 			await base.EditRelations(resource, changed, resetOld);
 		}
-
-		public async Task Delete(string showSlug, int seasonNumber)
-		{
-			Season obj = await Get(showSlug, seasonNumber);
-			await Delete(obj);
-		}
-
+		
+		/// <inheritdoc/>
 		public override async Task Delete(Season obj)
 		{
 			if (obj == null)

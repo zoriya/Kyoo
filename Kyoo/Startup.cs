@@ -147,6 +147,20 @@ namespace Kyoo
 			});
 			
 
+			// TODO Add custom method to the service container and expose those methods to the plugin
+			// TODO Add for example a AddRepository that will automatically register the complex interface, the IRepository<T> and the IBaseRepository
+			services.AddScoped<IBaseRepository, LibraryRepository>();
+			services.AddScoped<IBaseRepository, LibraryItemRepository>();
+			services.AddScoped<IBaseRepository, CollectionRepository>();
+			services.AddScoped<IBaseRepository, ShowRepository>();
+			services.AddScoped<IBaseRepository, SeasonRepository>();
+			services.AddScoped<IBaseRepository, EpisodeRepository>();
+			services.AddScoped<IBaseRepository, TrackRepository>();
+			services.AddScoped<IBaseRepository, PeopleRepository>();
+			services.AddScoped<IBaseRepository, StudioRepository>();
+			services.AddScoped<IBaseRepository, GenreRepository>();
+			services.AddScoped<IBaseRepository, ProviderRepository>();
+
 			services.AddScoped<ILibraryRepository, LibraryRepository>();
 			services.AddScoped<ILibraryItemRepository, LibraryItemRepository>();
 			services.AddScoped<ICollectionRepository, CollectionRepository>();

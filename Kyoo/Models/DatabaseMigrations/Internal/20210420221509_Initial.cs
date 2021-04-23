@@ -128,7 +128,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 });
 
             migrationBuilder.CreateTable(
-                name: "Link<Library, ProviderID>",
+                name: "Link<Library, Provider>",
                 columns: table => new
                 {
                     FirstID = table.Column<int>(type: "integer", nullable: false),
@@ -136,15 +136,15 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Link<Library, ProviderID>", x => new { x.FirstID, x.SecondID });
+                    table.PrimaryKey("PK_Link<Library, Provider>", x => new { x.FirstID, x.SecondID });
                     table.ForeignKey(
-                        name: "FK_Link<Library, ProviderID>_Libraries_FirstID",
+                        name: "FK_Link<Library, Provider>_Libraries_FirstID",
                         column: x => x.FirstID,
                         principalTable: "Libraries",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Link<Library, ProviderID>_Providers_SecondID",
+                        name: "FK_Link<Library, Provider>_Providers_SecondID",
                         column: x => x.SecondID,
                         principalTable: "Providers",
                         principalColumn: "ID",
@@ -459,8 +459,8 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 column: "SecondID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Link<Library, ProviderID>_SecondID",
-                table: "Link<Library, ProviderID>",
+                name: "IX_Link<Library, Provider>_SecondID",
+                table: "Link<Library, Provider>",
                 column: "SecondID");
 
             migrationBuilder.CreateIndex(
@@ -559,7 +559,7 @@ namespace Kyoo.Models.DatabaseMigrations.Internal
                 name: "Link<Library, Collection>");
 
             migrationBuilder.DropTable(
-                name: "Link<Library, ProviderID>");
+                name: "Link<Library, Provider>");
 
             migrationBuilder.DropTable(
                 name: "Link<Library, Show>");

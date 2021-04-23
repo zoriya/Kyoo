@@ -8,40 +8,38 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers
 {
+	/// <summary>
+	/// A local repository to handle libraries.
+	/// </summary>
 	public class LibraryRepository : LocalRepository<Library>, ILibraryRepository
 	{
-		private bool _disposed;
+		/// <summary>
+		/// The database handle
+		/// </summary>
 		private readonly DatabaseContext _database;
+		/// <summary>
+		/// A provider repository to handle externalID creation and deletion
+		/// </summary>
 		private readonly IProviderRepository _providers;
+		
+		/// <inheritdoc />
 		protected override Expression<Func<Library, object>> DefaultSort => x => x.ID;
 
 
+		/// <summary>
+		/// Create a new <see cref="LibraryRepository"/> instance.
+		/// </summary>
+		/// <param name="database">The database handle</param>
+		/// <param name="providers">The providere repository</param>
 		public LibraryRepository(DatabaseContext database, IProviderRepository providers)
 			: base(database)
 		{
 			_database = database;
 			_providers = providers;
 		}
+
 		
-		public override void Dispose()
-		{
-			if (_disposed)
-				return;
-			_disposed = true;
-			_database.Dispose();
-			_providers.Dispose();
-			GC.SuppressFinalize(this);
-		}
-
-		public override async ValueTask DisposeAsync()
-		{
-			if (_disposed)
-				return;
-			_disposed = true;
-			await _database.DisposeAsync();
-			await _providers.DisposeAsync();
-		}
-
+		/// <inheritdoc />
 		public override async Task<ICollection<Library>> Search(string query)
 		{
 			return await _database.Libraries
@@ -51,6 +49,7 @@ namespace Kyoo.Controllers
 				.ToListAsync();
 		}
 
+		/// <inheritdoc />
 		public override async Task<Library> Create(Library obj)
 		{
 			await base.Create(obj);
@@ -61,6 +60,7 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 
+		/// <inheritdoc />
 		protected override async Task Validate(Library resource)
 		{
 			await base.Validate(resource);
@@ -69,6 +69,7 @@ namespace Kyoo.Controllers
 				.ToListAsync();
 		}
 
+		/// <inheritdoc />
 		protected override async Task EditRelations(Library resource, Library changed, bool resetOld)
 		{
 			if (string.IsNullOrEmpty(resource.Slug))
@@ -86,6 +87,7 @@ namespace Kyoo.Controllers
 			}
 		}
 
+		/// <inheritdoc />
 		public override async Task Delete(Library obj)
 		{
 			if (obj == null)

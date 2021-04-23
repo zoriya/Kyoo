@@ -11,7 +11,7 @@ namespace Kyoo.Controllers
 		Task Validate(Season season, bool alwaysDownload = false);
 		Task Validate(Episode episode, bool alwaysDownload = false);
 		Task Validate(People actors, bool alwaysDownload = false);
-		Task Validate(ProviderID actors, bool alwaysDownload = false);
+		Task Validate(Provider actors, bool alwaysDownload = false);
 
 		Task<string> GetShowPoster([NotNull] Show show);
 		Task<string> GetShowLogo([NotNull] Show show);
@@ -19,6 +19,6 @@ namespace Kyoo.Controllers
 		Task<string> GetSeasonPoster([NotNull] Season season);
 		Task<string> GetEpisodeThumb([NotNull] Episode episode);
 		Task<string> GetPeoplePoster([NotNull] People people);
-		Task<string> GetProviderLogo([NotNull] ProviderID provider);
+		Task<string> GetProviderLogo([NotNull] Provider provider);
 	}
 }

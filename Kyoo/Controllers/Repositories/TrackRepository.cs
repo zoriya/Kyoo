@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -9,40 +10,48 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers
 {
+	/// <summary>
+	/// A local repository to handle tracks.
+	/// </summary>
 	public class TrackRepository : LocalRepository<Track>, ITrackRepository
 	{
-		private bool _disposed;
+		/// <summary>
+		/// The databse handle
+		/// </summary>
 		private readonly DatabaseContext _database;
+		
+		/// <inheritdoc />
 		protected override Expression<Func<Track, object>> DefaultSort => x => x.TrackIndex;
 
 
-		public TrackRepository(DatabaseContext database) : base(database)
+		/// <summary>
+		/// Create a new <see cref="TrackRepository"/>.
+		/// </summary>
+		/// <param name="database">The datatabse handle</param>
+		public TrackRepository(DatabaseContext database) 
+			: base(database)
 		{
 			_database = database;
 		}
+		
 
-		public override void Dispose()
+		/// <inheritdoc />
+		Task<Track> IRepository<Track>.Get(string slug)
 		{
-			if (_disposed)
-				return;
-			_disposed = true;
-			_database.Dispose();
+			return Get(slug);
 		}
 
-		public override async ValueTask DisposeAsync()
+		/// <inheritdoc />
+		public async Task<Track> Get(string slug, StreamType type = StreamType.Unknown)
 		{
-			if (_disposed)
-				return;
-			_disposed = true;
-			await _database.DisposeAsync();
-		}
-
-		public override Task<Track> Get(string slug)
-		{
-			return Get(slug, StreamType.Unknown);
+			Track ret = await GetOrDefault(slug, type);
+			if (ret == null)
+				throw new ItemNotFound($"No track found with the slug {slug} and the type {type}.");
+			return ret;
 		}
 		
-		public Task<Track> Get(string slug, StreamType type)
+		/// <inheritdoc />
+		public Task<Track> GetOrDefault(string slug, StreamType type = StreamType.Unknown)
 		{
 			Match match = Regex.Match(slug,
 				@"(?<show>.*)-s(?<season>\d+)e(?<episode>\d+)(\.(?<type>\w*))?\.(?<language>.{0,3})(?<forced>-forced)?(\..*)?");
@@ -65,27 +74,23 @@ namespace Kyoo.Controllers
 			if (match.Groups["type"].Success)
 				type = Enum.Parse<StreamType>(match.Groups["type"].Value, true);
 
-			if (type == StreamType.Unknown)
-			{
-				return _database.Tracks.FirstOrDefaultAsync(x => x.Episode.Show.Slug == showSlug
-			        	                                         && x.Episode.SeasonNumber == seasonNumber
-			                	                                 && x.Episode.EpisodeNumber == episodeNumber
-			                        	                         && x.Language == language
-			                                	                 && x.IsForced == forced);
-		 	}
-			return _database.Tracks.FirstOrDefaultAsync(x => x.Episode.Show.Slug == showSlug
-									 && x.Episode.SeasonNumber == seasonNumber
-									 && x.Episode.EpisodeNumber == episodeNumber
-									 && x.Type == type
-									 && x.Language == language
-									 && x.IsForced == forced);
+			IQueryable<Track> query = _database.Tracks.Where(x => x.Episode.Show.Slug == showSlug
+			                                                      && x.Episode.SeasonNumber == seasonNumber
+			                                                      && x.Episode.EpisodeNumber == episodeNumber
+			                                                      && x.Language == language
+			                                                      && x.IsForced == forced);
+			if (type != StreamType.Unknown)
+				return query.FirstOrDefaultAsync(x => x.Type == type);
+			return query.FirstOrDefaultAsync();
 		}
 
+		/// <inheritdoc />
 		public override Task<ICollection<Track>> Search(string query)
 		{
 			throw new InvalidOperationException("Tracks do not support the search method.");
 		}
 
+		/// <inheritdoc />
 		public override async Task<Track> Create(Track obj)
 		{
 			if (obj.EpisodeID <= 0)
@@ -107,6 +112,7 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 
+		/// <inheritdoc />
 		public override async Task Delete(Track obj)
 		{
 			if (obj == null)

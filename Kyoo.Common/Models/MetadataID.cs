@@ -6,7 +6,7 @@ namespace Kyoo.Models
 	{
 		[SerializeIgnore] public int ID { get; set; }
 		[SerializeIgnore] public int ProviderID { get; set; }
-		public virtual ProviderID Provider {get; set; }
+		public virtual Provider Provider {get; set; }
 		
 		[SerializeIgnore] public int? ShowID { get; set; } 
 		[SerializeIgnore] public virtual Show Show { get; set; }
@@ -25,7 +25,7 @@ namespace Kyoo.Models
 
 		public MetadataID() { }
 
-		public MetadataID(ProviderID provider, string dataID, string link)
+		public MetadataID(Provider provider, string dataID, string link)
 		{
 			Provider = provider;
 			DataID = dataID;

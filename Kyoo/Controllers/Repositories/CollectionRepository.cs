@@ -8,34 +8,30 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers
 {
+	/// <summary>
+	/// A local repository to handle collections
+	/// </summary>
 	public class CollectionRepository : LocalRepository<Collection>, ICollectionRepository
 	{
-		private bool _disposed;
+		/// <summary>
+		/// The database handle
+		/// </summary>
 		private readonly DatabaseContext _database;
+		
+		/// <inheritdoc />
 		protected override Expression<Func<Collection, object>> DefaultSort => x => x.Name;
 
-		public CollectionRepository(DatabaseContext database) : base(database)
+		/// <summary>
+		/// Create a new <see cref="CollectionRepository"/>.
+		/// </summary>
+		/// <param name="database">The database handle to use</param>
+		public CollectionRepository(DatabaseContext database)
+			: base(database)
 		{
 			_database = database;
 		}
 
-		public override void Dispose()
-		{
-			if (_disposed)
-				return;
-			_disposed = true;
-			_database.Dispose();
-			GC.SuppressFinalize(this);
-		}
-
-		public override async ValueTask DisposeAsync()
-		{
-			if (_disposed)
-				return;
-			_disposed = true;
-			await _database.DisposeAsync();
-		}
-		
+		/// <inheritdoc />
 		public override async Task<ICollection<Collection>> Search(string query)
 		{
 			return await _database.Collections
@@ -45,6 +41,7 @@ namespace Kyoo.Controllers
 				.ToListAsync();
 		}
 
+		/// <inheritdoc />
 		public override async Task<Collection> Create(Collection obj)
 		{
 			await base.Create(obj);
@@ -53,6 +50,7 @@ namespace Kyoo.Controllers
 			return obj;
 		}
 
+		/// <inheritdoc />
 		public override async Task Delete(Collection obj)
 		{
 			if (obj == null)

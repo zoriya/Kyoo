@@ -1,31 +1,25 @@
 {
-  "server.urls": "http://0.0.0.0:5000",
+  "server.urls": "http://*:5000",
   "public_url": "http://localhost:5000/",
-  "http_port": 5000,
-  "https_port": 44300,
 
-  "Database": {
-    "Server": "127.0.0.1",
-    "Port": "5432",
-    "Database": "kyooDB",
-    "User Id": "kyoo",
-    "Password": "kyooPassword",
-    "Pooling": "true",
-    "MaxPoolSize": "95",
-    "Timeout": "30"
+  "database": {
+    "server": "127.0.0.1",
+    "port": "5432",
+    "database": "kyooDB",
+    "user ID": "kyoo",
+    "password": "kyooPassword",
+    "pooling": "true",
+    "maxPoolSize": "95",
+    "timeout": "30"
   },
 
-  "Logging": {
-    "LogLevel": {
-      "Default": "Warning",
+  "logging": {
+    "logLevel": {
+      "default": "Warning",
       "Microsoft": "Warning",
-      "Microsoft.Hosting.Lifetime": "Information",
-      "Microsoft.EntityFrameworkCore.DbUpdateException": "None",
-      "Microsoft.EntityFrameworkCore.Update": "None",
-      "Microsoft.EntityFrameworkCore.Database.Command": "None"
+      "Microsoft.Hosting.Lifetime": "Information"
     }
   },
-  "AllowedHosts": "*",
   
   "parallelTasks": "1",
   

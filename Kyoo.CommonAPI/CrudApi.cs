@@ -29,22 +29,28 @@ namespace Kyoo.CommonApi
 		[Authorize(Policy = "Read")]
 		public virtual async Task<ActionResult<T>> Get(int id)
 		{
-			T resource = await _repository.Get(id);
-			if (resource == null)
+			try
+			{
+				return await _repository.Get(id);
+			}
+			catch (ItemNotFound)
+			{
 				return NotFound();
-
-			return resource;
+			}
 		}
 
 		[HttpGet("{slug}")]
 		[Authorize(Policy = "Read")]
 		public virtual async Task<ActionResult<T>> Get(string slug)
 		{
-			T resource = await _repository.Get(slug);
-			if (resource == null)
+			try
+			{
+				return await _repository.Get(slug);
+			}
+			catch (ItemNotFound)
+			{
 				return NotFound();
-			
-			return resource;
+			}
 		}
 
 		[HttpGet("count")]
@@ -114,15 +120,19 @@ namespace Kyoo.CommonApi
 		[Authorize(Policy = "Write")]
 		public virtual async Task<ActionResult<T>> Edit([FromQuery] bool resetOld, [FromBody] T resource)
 		{
-			if (resource.ID > 0)
+			try
+			{
+				if (resource.ID > 0)
+					return await _repository.Edit(resource, resetOld);
+
+				T old = await _repository.Get(resource.Slug);
+				resource.ID = old.ID;
 				return await _repository.Edit(resource, resetOld);
-			
-			T old = await _repository.Get(resource.Slug);
-			if (old == null)
+			}
+			catch (ItemNotFound)
+			{
 				return NotFound();
-			
-			resource.ID = old.ID;
-			return await _repository.Edit(resource, resetOld);
+			}
 		}
 
 		[HttpPut("{id:int}")]
@@ -144,11 +154,16 @@ namespace Kyoo.CommonApi
 		[Authorize(Policy = "Write")]
 		public virtual async Task<ActionResult<T>> Edit(string slug, [FromQuery] bool resetOld, [FromBody] T resource)
 		{
-			T old = await _repository.Get(slug);
-			if (old == null)
+			try
+			{
+				T old = await _repository.Get(slug);
+				resource.ID = old.ID;
+				return await _repository.Edit(resource, resetOld);
+			}
+			catch (ItemNotFound)
+			{
 				return NotFound();
-			resource.ID = old.ID;
-			return await _repository.Edit(resource, resetOld);
+			}
 		}
 
 		[HttpDelete("{id:int}")]
