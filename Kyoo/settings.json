@@ -21,6 +21,11 @@
     }
   },
   
+  "permissions": {
+    "default": "read,play,write,admin",
+    "newUser": "read,play,write,admin"
+  },
+  
   "parallelTasks": "1",
   
   "scheduledTasks": {
@@ -35,8 +40,6 @@
   "providerPath": "providers",
   "profilePicturePath": "users/",
   "plugins": "plugins/",
-  "defaultPermissions": "read,play,write,admin",
-  "newUserPermissions": "read,play,write,admin",
   "regex": "(?:\\/(?<Collection>.*?))?\\/(?<Show>.*?)(?: \\(\\d+\\))?\\/\\k<Show>(?: \\(\\d+\\))?(?:(?: S(?<Season>\\d+)E(?<Episode>\\d+))| (?<Absolute>\\d+))?.*$",
   "subtitleRegex": "^(?<Episode>.*)\\.(?<Language>\\w{1,3})\\.(?<Default>default\\.)?(?<Forced>forced\\.)?.*$"
 }

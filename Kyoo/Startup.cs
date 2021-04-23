@@ -199,6 +199,7 @@ namespace Kyoo
 
 			FileExtensionContentTypeProvider contentTypeProvider = new();
 			contentTypeProvider.Mappings[".data"] = "application/octet-stream";
+			app.UseDefaultFiles();
 			app.UseStaticFiles(new StaticFileOptions
 			{
 				ContentTypeProvider = contentTypeProvider,
