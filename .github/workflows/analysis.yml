@@ -34,11 +34,18 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: bash
         run: |
+          dotnet test \
+            '-p:CollectCoverage=true;CoverletOutputFormat=opencover' \
+            '-p:SkipTranscoder=true;SkipWebApp=true' || echo "Test failed. Skipping..."
+
+          dotnet build-server shutdown
+
           ./.sonar/scanner/dotnet-sonarscanner begin \
-              -k:"AnonymusRaccoon_Kyoo" \
-              -o:"anonymus-raccoon" \
-              -d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
-              -d:sonar.host.url="https://sonarcloud.io"
+            -k:"AnonymusRaccoon_Kyoo" \
+            -o:"anonymus-raccoon" \
+            -d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
+            -d:sonar.host.url="https://sonarcloud.io" \
+            -d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" 
           
           dotnet build --no-incremental '-p:SkipTranscoder=true;SkipWebApp=true'
           
