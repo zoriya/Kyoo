@@ -32,7 +32,7 @@ namespace Kyoo.Controllers
 		public async Task<IEnumerable<string>> GetPossibleParameters()
 		{
 			using IServiceScope serviceScope = _serviceProvider.CreateScope();
-			await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
+			ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
 			return (await libraryManager!.GetAll<Library>()).Select(x => x.Slug);
 		}
 
@@ -56,7 +56,7 @@ namespace Kyoo.Controllers
 				_parallelTasks = 30;
 
 			using IServiceScope serviceScope = _serviceProvider.CreateScope();
-			await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
+			ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
 			
 			foreach (Show show in await libraryManager!.GetAll<Show>())
 				if (!Directory.Exists(show.Path))
@@ -149,7 +149,7 @@ namespace Kyoo.Controllers
 				if (token.IsCancellationRequested || path.Split(Path.DirectorySeparatorChar).Contains("Subtitles"))
 					return;
 				using IServiceScope serviceScope = _serviceProvider.CreateScope();
-				await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
+				ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
 
 				string patern = _config.GetValue<string>("subtitleRegex");
 				Regex regex = new(patern, RegexOptions.IgnoreCase);
@@ -196,7 +196,7 @@ namespace Kyoo.Controllers
 			try
 			{
 				using IServiceScope serviceScope = _serviceProvider.CreateScope();
-				await using ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
+				ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
 
 				string patern = _config.GetValue<string>("regex");
 				Regex regex = new(patern, RegexOptions.IgnoreCase);

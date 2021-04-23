@@ -15,10 +15,6 @@ namespace Kyoo.Controllers
 	public class ShowRepository : LocalRepository<Show>, IShowRepository
 	{
 		/// <summary>
-		/// Has this instance been disposed and should not handle requests?
-		/// </summary>
-		private bool _disposed;
-		/// <summary>
 		/// The databse handle
 		/// </summary>
 		private readonly DatabaseContext _database;
@@ -75,41 +71,7 @@ namespace Kyoo.Controllers
 			_seasons = new Lazy<ISeasonRepository>(services.GetRequiredService<ISeasonRepository>);
 			_episodes = new Lazy<IEpisodeRepository>(services.GetRequiredService<IEpisodeRepository>);
 		}
-
-		/// <inheritdoc />
-		public override void Dispose()
-		{
-			if (_disposed)
-				return;
-			_disposed = true;
-			_database.Dispose();
-			_studios.Dispose();
-			_people.Dispose();
-			_genres.Dispose();
-			_providers.Dispose();
-			if (_seasons.IsValueCreated)
-				_seasons.Value.Dispose();
-			if (_episodes.IsValueCreated)
-				_episodes.Value.Dispose();
-			GC.SuppressFinalize(this);
-		}
-
-		/// <inheritdoc />
-		public override async ValueTask DisposeAsync()
-		{
-			if (_disposed)
-				return;
-			_disposed = true;
-			await _database.DisposeAsync();
-			await _studios.DisposeAsync();
-			await _people.DisposeAsync();
-			await _genres.DisposeAsync();
-			await _providers.DisposeAsync();
-			if (_seasons.IsValueCreated)
-				await _seasons.Value.DisposeAsync();
-			if (_episodes.IsValueCreated)
-				await _episodes.Value.DisposeAsync();
-		}
+		
 
 		/// <inheritdoc />
 		public override async Task<ICollection<Show>> Search(string query)

@@ -16,10 +16,6 @@ namespace Kyoo.Controllers
 	public class EpisodeRepository : LocalRepository<Episode>, IEpisodeRepository
 	{
 		/// <summary>
-		/// Has this instance been disposed and should not handle requests?
-		/// </summary>
-		private bool _disposed;
-		/// <summary>
 		/// The databse handle
 		/// </summary>
 		private readonly DatabaseContext _database;
@@ -58,30 +54,7 @@ namespace Kyoo.Controllers
 			_shows = shows;
 			_tracks = tracks;
 		}
-
-
-		/// <inheritdoc />
-		public override void Dispose()
-		{
-			if (_disposed)
-				return;
-			_disposed = true;
-			_database.Dispose();
-			_providers.Dispose();
-			_shows.Dispose();
-			GC.SuppressFinalize(this);
-		}
-
-		/// <inheritdoc />
-		public override async ValueTask DisposeAsync()
-		{
-			if (_disposed)
-				return;
-			_disposed = true;
-			await _database.DisposeAsync();
-			await _providers.DisposeAsync();
-			await _shows.DisposeAsync();
-		}
+		
 
 		/// <inheritdoc />
 		public override async Task<Episode> GetOrDefault(int id)

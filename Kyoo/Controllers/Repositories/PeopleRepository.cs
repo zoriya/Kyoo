@@ -16,10 +16,6 @@ namespace Kyoo.Controllers
 	public class PeopleRepository : LocalRepository<People>, IPeopleRepository
 	{
 		/// <summary>
-		/// Has this instance been disposed and should not handle requests?
-		/// </summary>
-		private bool _disposed;
-		/// <summary>
 		/// The database handle
 		/// </summary>
 		private readonly DatabaseContext _database;
@@ -50,32 +46,7 @@ namespace Kyoo.Controllers
 			_providers = providers;
 			_shows = new Lazy<IShowRepository>(services.GetRequiredService<IShowRepository>);
 		}
-
-
-		/// <inheritdoc />
-		public override void Dispose()
-		{
-			if (_disposed)
-				return;
-			_disposed = true;
-			_database.Dispose();
-			_providers.Dispose();
-			if (_shows.IsValueCreated)
-				_shows.Value.Dispose();
-			GC.SuppressFinalize(this);
-		}
-
-		/// <inheritdoc />
-		public override async ValueTask DisposeAsync()
-		{
-			if (_disposed)
-				return;
-			_disposed = true;
-			await _database.DisposeAsync();
-			await _providers.DisposeAsync();
-			if (_shows.IsValueCreated)
-				await _shows.Value.DisposeAsync();
-		}
+		
 
 		/// <inheritdoc />
 		public override async Task<ICollection<People>> Search(string query)

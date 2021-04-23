@@ -12,7 +12,7 @@ namespace Kyoo.Controllers
 	/// <summary>
 	/// An interface to interract with the database. Every repository is mapped through here. 
 	/// </summary>
-	public interface ILibraryManager : IDisposable, IAsyncDisposable
+	public interface ILibraryManager
 	{
 		/// <summary>
 		/// Get the repository corresponding to the T item.

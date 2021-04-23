@@ -59,20 +59,6 @@ namespace Kyoo.Controllers
 			GenreRepository = GetRepository<Genre>() as IGenreRepository;
 			ProviderRepository = GetRepository<Provider>() as IProviderRepository;
 		}
-		
-		/// <inheritdoc />
-		public void Dispose()
-		{
-			foreach (IBaseRepository repo in _repositories)
-				repo.Dispose();
-			GC.SuppressFinalize(this);
-		}
-
-		/// <inheritdoc />
-		public async ValueTask DisposeAsync()
-		{
-			await Task.WhenAll(_repositories.Select(x => x.DisposeAsync().AsTask()));
-		}
 
 		/// <inheritdoc />
 		public IRepository<T> GetRepository<T>()

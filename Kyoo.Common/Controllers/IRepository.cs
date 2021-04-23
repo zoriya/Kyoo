@@ -109,7 +109,7 @@ namespace Kyoo.Controllers
 	/// <summary>
 	/// A base class for repositories. Every service implementing this will be handled by the <see cref="LibraryManager"/>.
 	/// </summary>
-	public interface IBaseRepository : IDisposable, IAsyncDisposable
+	public interface IBaseRepository
 	{
 		/// <summary>
 		/// The type for witch this repository is responsible or null if non applicable.
@@ -119,7 +119,6 @@ namespace Kyoo.Controllers
 	
 	/// <summary>
 	/// A common repository for every resources.
-	/// It implement's <see cref="IBaseRepository"/> and <see cref="IDisposable"/>/<see cref="IAsyncDisposable"/>.
 	/// </summary>
 	/// <typeparam name="T">The resource's type that this repository manage.</typeparam>
 	public interface IRepository<T> : IBaseRepository where T : class, IResource

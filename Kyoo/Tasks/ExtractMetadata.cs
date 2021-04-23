@@ -64,8 +64,6 @@ namespace Kyoo.Tasks
 					await ExtractEpisode(episode, thumbs, subs);
 					break;
 			}
-
-			await _library!.DisposeAsync();
 		}
 
 		private async Task ExtractShow(Show show, bool thumbs, bool subs, CancellationToken token)

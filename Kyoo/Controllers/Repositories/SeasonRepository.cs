@@ -17,10 +17,6 @@ namespace Kyoo.Controllers
 	public class SeasonRepository : LocalRepository<Season>, ISeasonRepository
 	{
 		/// <summary>
-		/// Has this instance been disposed and should not handle requests?
-		/// </summary>
-		private bool _disposed;
-		/// <summary>
 		/// The database handle
 		/// </summary>
 		private readonly DatabaseContext _database;
@@ -60,34 +56,7 @@ namespace Kyoo.Controllers
 			_shows = shows;
 			_episodes = new Lazy<IEpisodeRepository>(services.GetRequiredService<IEpisodeRepository>);
 		}
-
-
-		/// <inheritdoc/>
-		public override void Dispose()
-		{
-			if (_disposed)
-				return;
-			_disposed = true;
-			_database.Dispose();
-			_providers.Dispose();
-			_shows.Dispose();
-			if (_episodes.IsValueCreated)
-				_episodes.Value.Dispose();
-			GC.SuppressFinalize(this);
-		}
-
-		/// <inheritdoc/>
-		public override async ValueTask DisposeAsync()
-		{
-			if (_disposed)
-				return;
-			_disposed = true;
-			await _database.DisposeAsync();
-			await _providers.DisposeAsync();
-			await _shows.DisposeAsync();
-			if (_episodes.IsValueCreated)
-				await _episodes.Value.DisposeAsync();
-		}
+		
 
 		/// <inheritdoc/>
 		public override async Task<Season> Get(int id)

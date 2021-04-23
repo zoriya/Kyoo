@@ -14,10 +14,6 @@ namespace Kyoo.Controllers
 	public class LibraryRepository : LocalRepository<Library>, ILibraryRepository
 	{
 		/// <summary>
-		/// Has this instance been disposed and should not handle requests?
-		/// </summary>
-		private bool _disposed;
-		/// <summary>
 		/// The database handle
 		/// </summary>
 		private readonly DatabaseContext _database;
@@ -41,28 +37,8 @@ namespace Kyoo.Controllers
 			_database = database;
 			_providers = providers;
 		}
+
 		
-		/// <inheritdoc />
-		public override void Dispose()
-		{
-			if (_disposed)
-				return;
-			_disposed = true;
-			_database.Dispose();
-			_providers.Dispose();
-			GC.SuppressFinalize(this);
-		}
-
-		/// <inheritdoc />
-		public override async ValueTask DisposeAsync()
-		{
-			if (_disposed)
-				return;
-			_disposed = true;
-			await _database.DisposeAsync();
-			await _providers.DisposeAsync();
-		}
-
 		/// <inheritdoc />
 		public override async Task<ICollection<Library>> Search(string query)
 		{

@@ -16,10 +16,6 @@ namespace Kyoo.Controllers
 	public class LibraryItemRepository : LocalRepository<LibraryItem>, ILibraryItemRepository
 	{
 		/// <summary>
-		/// Has this instance been disposed and should not handle requests?
-		/// </summary>
-		private bool _disposed;
-		/// <summary>
 		/// The database handle
 		/// </summary>
 		private readonly DatabaseContext _database;
@@ -61,35 +57,7 @@ namespace Kyoo.Controllers
 			_shows = new Lazy<IShowRepository>(services.GetRequiredService<IShowRepository>);
 			_collections = new Lazy<ICollectionRepository>(services.GetRequiredService<ICollectionRepository>);
 		}
-		
-		/// <inheritdoc />
-		public override void Dispose()
-		{
-			if (_disposed)
-				return;
-			_disposed = true;
-			_database.Dispose();
-			_providers.Dispose();
-			if (_shows.IsValueCreated)
-				_shows.Value.Dispose();
-			if (_collections.IsValueCreated)
-				_collections.Value.Dispose();
-			GC.SuppressFinalize(this);
-		}
 
-		/// <inheritdoc />
-		public override async ValueTask DisposeAsync()
-		{
-			if (_disposed)
-				return;
-			_disposed = true;
-			await _database.DisposeAsync();
-			await _providers.DisposeAsync();
-			if (_shows.IsValueCreated)
-				await _shows.Value.DisposeAsync();
-			if (_collections.IsValueCreated)
-				await _collections.Value.DisposeAsync();
-		}
 		
 		/// <inheritdoc />
 		public override async Task<LibraryItem> GetOrDefault(int id)
