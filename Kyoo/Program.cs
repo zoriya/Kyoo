@@ -1,13 +1,14 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Unity;
+using Unity.Microsoft.DependencyInjection;
 
 namespace Kyoo
 {
@@ -39,6 +40,7 @@ namespace Kyoo
 
 			if (debug == null && Environment.GetEnvironmentVariable("ENVIRONMENT") != null)
 				Console.WriteLine($"Invalid ENVIRONMENT variable. Supported values are \"debug\" and \"prod\". Ignoring...");
+
 			#if DEBUG
 				debug ??= true;
 			#endif
@@ -70,7 +72,8 @@ namespace Kyoo
 		/// <returns>A new web host instance</returns>
 		private static IWebHostBuilder CreateWebHostBuilder(string[] args)
 		{
-			WebHost.CreateDefaultBuilder(args);
+			UnityContainer container = new();
+			container.EnableDebugDiagnostic();
 			
 			return new WebHostBuilder()
 				.UseContentRoot(AppDomain.CurrentDomain.BaseDirectory)
@@ -89,6 +92,7 @@ namespace Kyoo
 					if (context.HostingEnvironment.IsDevelopment())
 						StaticWebAssetsLoader.UseStaticWebAssets(context.HostingEnvironment, context.Configuration);
 				})
+				.UseUnityServiceProvider(container)
 				.ConfigureServices(x => x.AddRouting())
 				.UseKestrel(options => { options.AddServerHeader = false; })
 				.UseIIS()

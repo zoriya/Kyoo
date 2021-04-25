@@ -20,6 +20,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Unity;
 
 namespace Kyoo
 {
@@ -185,7 +186,7 @@ namespace Kyoo
 			services.AddHostedService(provider => (TaskManager)provider.GetService<ITaskManager>());
 		}
 
-		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+		public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IUnityContainer container)
 		{
 			if (env.IsDevelopment())
 			{
@@ -247,6 +248,9 @@ namespace Kyoo
 				if (env.IsDevelopment())
 					spa.UseAngularCliServer("start");
 			});
+			
+			CoreModule.Configure(container);
+			container.Resolve<ITaskManager>().ReloadTasks();
 		}
 	}
 }

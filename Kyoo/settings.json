@@ -17,9 +17,11 @@
     "logLevel": {
       "default": "Warning",
       "Microsoft": "Warning",
-      "Microsoft.Hosting.Lifetime": "Information"
+      "Microsoft.Hosting.Lifetime": "Information",
+      "Kyoo": "Trace"
     }
   },
+  
   
   "parallelTasks": "1",
   

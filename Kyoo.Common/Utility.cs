@@ -529,9 +529,9 @@ namespace Kyoo
 				await action(i);
 		}
 
-		private static MethodInfo GetMethod(Type type, BindingFlags flag, string name, Type[] generics, object[] args)
+		public static MethodInfo GetMethod(Type type, BindingFlags flag, string name, Type[] generics, object[] args)
 		{
-			MethodInfo[] methods = type.GetMethods(flag | BindingFlags.Public | BindingFlags.NonPublic)
+			MethodInfo[] methods = type.GetMethods(flag | BindingFlags.Public)
 				.Where(x => x.Name == name)
 				.Where(x => x.GetGenericArguments().Length == generics.Length)
 				.Where(x => x.GetParameters().Length == args.Length)

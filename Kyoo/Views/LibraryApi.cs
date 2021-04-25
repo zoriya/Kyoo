@@ -32,7 +32,7 @@ namespace Kyoo.Api
 		{
 			ActionResult<Library> result = await base.Create(resource);
 			if (result.Value != null)
-				_taskManager.StartTask("scan", result.Value.Slug);
+				_taskManager.StartTask("scan", new Dictionary<string, object> {{"slug", result.Value.Slug}});
 			return result;
 		}
 		
