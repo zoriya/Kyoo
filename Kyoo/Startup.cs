@@ -21,6 +21,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Unity;
+using Unity.Lifetime;
 
 namespace Kyoo
 {
@@ -147,46 +148,11 @@ namespace Kyoo
 				AllowedOrigins = { new Uri(publicUrl).GetLeftPart(UriPartial.Authority) }
 			});
 			
-
-			// TODO Add custom method to the service container and expose those methods to the plugin
-			// TODO Add for example a AddRepository that will automatically register the complex interface, the IRepository<T> and the IBaseRepository
-			services.AddScoped<IBaseRepository, LibraryRepository>();
-			services.AddScoped<IBaseRepository, LibraryItemRepository>();
-			services.AddScoped<IBaseRepository, CollectionRepository>();
-			services.AddScoped<IBaseRepository, ShowRepository>();
-			services.AddScoped<IBaseRepository, SeasonRepository>();
-			services.AddScoped<IBaseRepository, EpisodeRepository>();
-			services.AddScoped<IBaseRepository, TrackRepository>();
-			services.AddScoped<IBaseRepository, PeopleRepository>();
-			services.AddScoped<IBaseRepository, StudioRepository>();
-			services.AddScoped<IBaseRepository, GenreRepository>();
-			services.AddScoped<IBaseRepository, ProviderRepository>();
-
-			services.AddScoped<ILibraryRepository, LibraryRepository>();
-			services.AddScoped<ILibraryItemRepository, LibraryItemRepository>();
-			services.AddScoped<ICollectionRepository, CollectionRepository>();
-			services.AddScoped<IShowRepository, ShowRepository>();
-			services.AddScoped<ISeasonRepository, SeasonRepository>();
-			services.AddScoped<IEpisodeRepository, EpisodeRepository>();
-			services.AddScoped<ITrackRepository, TrackRepository>();
-			services.AddScoped<IPeopleRepository, PeopleRepository>();
-			services.AddScoped<IStudioRepository, StudioRepository>();
-			services.AddScoped<IGenreRepository, GenreRepository>();
-			services.AddScoped<IProviderRepository, ProviderRepository>();
-			services.AddScoped<DbContext, DatabaseContext>();
-
-			services.AddScoped<ILibraryManager, LibraryManager>();
-			services.AddSingleton<IFileManager, FileManager>();
-			services.AddSingleton<ITranscoder, Transcoder>();
-			services.AddSingleton<IThumbnailsManager, ThumbnailsManager>();
-			services.AddSingleton<IProviderManager, ProviderManager>();
-			services.AddSingleton<IPluginManager, PluginManager>();
-			services.AddSingleton<ITaskManager, TaskManager>();
 			
-			services.AddHostedService(provider => (TaskManager)provider.GetService<ITaskManager>());
+			services.AddScoped<DbContext, DatabaseContext>();
 		}
-
-		public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IUnityContainer container)
+		
+		public void Configure(IUnityContainer container, IApplicationBuilder app, IWebHostEnvironment env)
 		{
 			if (env.IsDevelopment())
 			{
@@ -249,8 +215,10 @@ namespace Kyoo
 					spa.UseAngularCliServer("start");
 			});
 			
-			CoreModule.Configure(container);
-			container.Resolve<ITaskManager>().ReloadTasks();
+			new CoreModule().Configure(container, _configuration, app, env.IsDevelopment());
+			container.RegisterFactory<IHostedService>(c => c.Resolve<ITaskManager>(), new SingletonLifetimeManager());
+			// TODO the reload should re inject components from the constructor.
+			// TODO fin a way to inject tasks without a IUnityContainer.
 		}
 	}
 }

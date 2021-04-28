@@ -18,7 +18,7 @@ namespace Kyoo.Controllers
 		/// <param name="arguments">A list of arguments to pass to the task. An automatic conversion will be made if arguments to not fit.</param>
 		/// <exception cref="ArgumentException">If the number of arguments is invalid or if an argument can't be converted.</exception>
 		/// <exception cref="ItemNotFound">The task could not be found.</exception>
-		void StartTask(string taskSlug, Dictionary<string, object> arguments);
+		void StartTask(string taskSlug, Dictionary<string, object> arguments = null);
 		
 		/// <summary>
 		/// Get all currently running tasks

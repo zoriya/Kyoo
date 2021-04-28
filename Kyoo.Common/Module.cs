@@ -1,3 +1,4 @@
+using System;
 using Kyoo.Controllers;
 using Unity;
 
@@ -11,14 +12,14 @@ namespace Kyoo
 		/// <summary>
 		/// Register a new task to the container.
 		/// </summary>
-		/// <param name="services">The container</param>
+		/// <param name="container">The container</param>
 		/// <typeparam name="T">The type of the task</typeparam>
 		/// <returns>The initial container.</returns>
-		public static IUnityContainer AddTask<T>(this IUnityContainer services)
+		public static IUnityContainer RegisterTask<T>(this IUnityContainer container)
 			where T : class, ITask
 		{
-			services.RegisterSingleton<ITask, T>();
-			return services;
+			container.RegisterType<ITask, T>();
+			return container;
 		}
 	}
 }

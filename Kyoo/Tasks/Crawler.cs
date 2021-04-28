@@ -7,11 +7,12 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Kyoo.Controllers;
 using Kyoo.Models.Attributes;
 using Kyoo.Models.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Kyoo.Controllers
+namespace Kyoo.Tasks
 {
 	public class Crawler : ITask
 	{

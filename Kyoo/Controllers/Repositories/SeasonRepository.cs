@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
@@ -44,17 +43,17 @@ namespace Kyoo.Controllers
 		/// <param name="database">The database handle that will be used</param>
 		/// <param name="providers">A provider repository</param>
 		/// <param name="shows">A show repository</param>
-		/// <param name="services">A service provider to lazilly request an episode repository.</param>
+		/// <param name="episodes">A lazy loaded episode repository.</param>
 		public SeasonRepository(DatabaseContext database,
 			IProviderRepository providers,
 			IShowRepository shows,
-			IServiceProvider services)
+			Lazy<IEpisodeRepository> episodes)
 			: base(database)
 		{
 			_database = database;
 			_providers = providers;
 			_shows = shows;
-			_episodes = new Lazy<IEpisodeRepository>(services.GetRequiredService<IEpisodeRepository>);
+			_episodes = episodes;
 		}
 		
 

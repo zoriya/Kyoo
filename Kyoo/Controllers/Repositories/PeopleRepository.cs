@@ -36,15 +36,15 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="database">The database handle</param>
 		/// <param name="providers">A provider repository</param>
-		/// <param name="services">A service provider to lazy load a show repository</param>
+		/// <param name="shows">A lazy loaded show repository</param>
 		public PeopleRepository(DatabaseContext database,
 			IProviderRepository providers,
-			IServiceProvider services) 
+			Lazy<IShowRepository> shows) 
 			: base(database)
 		{
 			_database = database;
 			_providers = providers;
-			_shows = new Lazy<IShowRepository>(services.GetRequiredService<IShowRepository>);
+			_shows = shows;
 		}
 		
 

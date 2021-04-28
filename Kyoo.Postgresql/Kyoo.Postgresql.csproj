@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="../Kyoo/Kyoo.csproj" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.3" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="5.0.3" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.3">
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+			<PrivateAssets>all</PrivateAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="5.0.3" />
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.2" />
+	</ItemGroup>
+</Project>

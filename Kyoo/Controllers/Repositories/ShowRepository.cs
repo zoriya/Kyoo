@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
@@ -54,13 +53,15 @@ namespace Kyoo.Controllers
 		/// <param name="people">A people repository</param>
 		/// <param name="genres">A genres repository</param>
 		/// <param name="providers">A provider repository</param>
-		/// <param name="services">A service provider to lazilly request a season and an episode repository</param>
+		/// <param name="seasons">A lazy loaded season repository</param>
+		/// <param name="episodes">A lazy loaded episode repository</param>
 		public ShowRepository(DatabaseContext database,
 			IStudioRepository studios,
 			IPeopleRepository people, 
 			IGenreRepository genres, 
 			IProviderRepository providers,
-			IServiceProvider services)
+			Lazy<ISeasonRepository> seasons,
+			Lazy<IEpisodeRepository> episodes)
 			: base(database)
 		{
 			_database = database;
@@ -68,8 +69,8 @@ namespace Kyoo.Controllers
 			_people = people;
 			_genres = genres;
 			_providers = providers;
-			_seasons = new Lazy<ISeasonRepository>(services.GetRequiredService<ISeasonRepository>);
-			_episodes = new Lazy<IEpisodeRepository>(services.GetRequiredService<IEpisodeRepository>);
+			_seasons = seasons;
+			_episodes = episodes;
 		}
 		
 

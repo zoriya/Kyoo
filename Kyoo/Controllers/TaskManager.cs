@@ -62,10 +62,10 @@ namespace Kyoo.Controllers
 			IConfiguration configuration,
 			ILogger<TaskManager> logger)
 		{
-			_tasks = tasks.Select(x => (x, DateTime.Now + GetTaskDelay(x.Slug))).ToList();
 			_container = container;
 			_configuration = configuration.GetSection("scheduledTasks");
 			_logger = logger;
+			_tasks = tasks.Select(x => (x, DateTime.Now + GetTaskDelay(x.Slug))).ToList();
 		}
 		
 		
@@ -179,8 +179,10 @@ namespace Kyoo.Controllers
 		}
 
 		/// <inheritdoc />
-		public void StartTask(string taskSlug, Dictionary<string, object> arguments)
+		public void StartTask(string taskSlug, Dictionary<string, object> arguments = null)
 		{
+			arguments ??= new Dictionary<string, object>();
+			
 			int index = _tasks.FindIndex(x => x.task.Slug == taskSlug);
 			if (index == -1)
 				throw new ItemNotFound($"No task found with the slug {taskSlug}");
@@ -216,7 +218,7 @@ namespace Kyoo.Controllers
 		/// <inheritdoc />
 		public void ReloadTasks()
 		{
-			_tasks = _container.ResolveAll<ITask>().Select(x => (x, DateTime.Now + GetTaskDelay(x.Slug))).ToList();
+			_tasks = _container.Resolve<IEnumerable<ITask>>().Select(x => (x, DateTime.Now + GetTaskDelay(x.Slug))).ToList();
 			EnqueueStartupTasks();
 		}
 	}

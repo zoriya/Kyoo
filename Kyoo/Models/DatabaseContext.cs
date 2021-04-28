@@ -7,17 +7,17 @@ using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Npgsql;
 
 namespace Kyoo
 {
 	/// <summary>
 	/// The database handle used for all local repositories.
+	/// This is an abstract class. It is meant to be implemented by plugins. This allow the core to be database agnostic.
 	/// </summary>
 	/// <remarks>
 	/// It should not be used directly, to access the database use a <see cref="ILibraryManager"/> or repositories.
 	/// </remarks>
-	public class DatabaseContext : DbContext
+	public abstract class DatabaseContext : DbContext
 	{
 		/// <summary>
 		/// All libraries of Kyoo. See <see cref="Library"/>.
@@ -89,10 +89,6 @@ namespace Kyoo
 		/// </summary>
 		public DatabaseContext()
 		{
-			NpgsqlConnection.GlobalTypeMapper.MapEnum<Status>();
-			NpgsqlConnection.GlobalTypeMapper.MapEnum<ItemType>();
-			NpgsqlConnection.GlobalTypeMapper.MapEnum<StreamType>();
-
 			ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
 			ChangeTracker.LazyLoadingEnabled = false;
 		}
@@ -100,7 +96,7 @@ namespace Kyoo
 		/// <summary>
 		/// Create a new <see cref="DatabaseContext"/>.
 		/// </summary>
-		/// <param name="options">Connection options to use (witch databse provider to use, connection strings...)</param>
+		/// <param name="options">Connection options to use (witch database provider to use, connection strings...)</param>
 		public DatabaseContext(DbContextOptions<DatabaseContext> options)
 			: base(options)
 		{
@@ -115,10 +111,6 @@ namespace Kyoo
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
-
-			modelBuilder.HasPostgresEnum<Status>();
-			modelBuilder.HasPostgresEnum<ItemType>();
-			modelBuilder.HasPostgresEnum<StreamType>();
 
 			modelBuilder.Entity<Track>()
 				.Property(t => t.IsDefault)
@@ -467,13 +459,9 @@ namespace Kyoo
 		/// <summary>
 		/// Check if the exception is a duplicated exception.
 		/// </summary>
-		/// <remarks>WARNING: this only works for PostgreSQL</remarks>
 		/// <param name="ex">The exception to check</param>
 		/// <returns>True if the exception is a duplicate exception. False otherwise</returns>
-		private static bool IsDuplicateException(Exception ex)
-		{
-			return ex.InnerException is PostgresException {SqlState: PostgresErrorCodes.UniqueViolation};
-		}
+		protected abstract bool IsDuplicateException(Exception ex);
 
 		/// <summary>
 		/// Delete every changes that are on this context.
