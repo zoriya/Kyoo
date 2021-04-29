@@ -5,9 +5,9 @@
 		<TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
 		<TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
 		<IsPackable>false</IsPackable>
-		<SpaRoot>$(SolutionDir)/Kyoo.WebApp/</SpaRoot>
-		<LoginRoot>$(SolutionDir)/Kyoo.WebLogin/</LoginRoot>
-		<TranscoderRoot>$(SolutionDir)/Kyoo.Transcoder/</TranscoderRoot>
+		<SpaRoot>../Kyoo.WebApp/</SpaRoot>
+		<LoginRoot>../Kyoo.WebLogin/</LoginRoot>
+		<TranscoderRoot>../Kyoo.Transcoder/</TranscoderRoot>
 		<DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules/**</DefaultItemExcludes>
 
 		<!-- Set this to true if you enable server-side prerendering -->
@@ -33,8 +33,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Unity.Container" Version="5.11.11" />
-		<PackageReference Include="Unity.Microsoft.DependencyInjection" Version="5.11.5" />
 		<ProjectReference Include="../Kyoo.Common/Kyoo.Common.csproj" />
 		<ProjectReference Include="../Kyoo.CommonAPI/Kyoo.CommonAPI.csproj" />
 		<PackageReference Include="IdentityServer4" Version="4.1.1" />
@@ -60,6 +58,8 @@
 		</PackageReference>
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="5.0.3" />
 		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+		<PackageReference Include="Unity.Container" Version="5.11.11" />
+		<PackageReference Include="Unity.Microsoft.DependencyInjection" Version="5.11.5" />
 	</ItemGroup>
 	
 	<ItemGroup>
