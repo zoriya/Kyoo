@@ -1,12 +1,9 @@
 ﻿using System;
 using Kyoo.Controllers;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Unity;
-using Unity.Injection;
-using Unity.Lifetime;
-using Unity.Resolution;
 
 namespace Kyoo.Postgresql
 {
@@ -25,25 +22,42 @@ namespace Kyoo.Postgresql
 		public string Description => "A database context for postgresql.";
 
 		/// <inheritdoc />
-		public string[] Provides => new[]
+		public Type[] Provides => new[]
 		{
-			$"{nameof(DatabaseContext)}:{nameof(PostgresContext)}"
+			typeof(PostgresContext)
 		};
 
 		/// <inheritdoc />
-		public string[] Requires => Array.Empty<string>();
+		public Type[] Requires => Array.Empty<Type>();
 
-		/// <inheritdoc />
-		public void Configure(IUnityContainer container, IConfiguration config, IApplicationBuilder app, bool debugMode)
+
+		/// <summary>
+		/// The configuration to use. The database connection string is pulled from it.
+		/// </summary>
+		private readonly IConfiguration _configuration;
+
+		/// <summary>
+		/// The host environment to check if the app is in debug mode.
+		/// </summary>
+		private readonly IWebHostEnvironment _environment;
+
+		/// <summary>
+		/// Create a new postgres module instance and use the given configuration and environment.
+		/// </summary>
+		/// <param name="configuration">The configuration to use</param>
+		/// <param name="env">The environment that will be used (if the env is in development mode, more information will be displayed on errors.</param>
+		public PostgresModule(IConfiguration configuration, IWebHostEnvironment env)
 		{
-			// options.UseNpgsql(_configuration.GetDatabaseConnection());
-			// //          				// .EnableSensitiveDataLogging()
-			// //          				// .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()));
-			
-			container.RegisterFactory<DatabaseContext>(_ =>
-			{
-				return new PostgresContext(config.GetDatabaseConnection(), debugMode);
-			});
+			_configuration = configuration;
+			_environment = env;
+		}
+		
+		/// <inheritdoc />
+		public void Configure(IUnityContainer container)
+		{
+			container.RegisterFactory<DatabaseContext>(_ => new PostgresContext(
+				_configuration.GetDatabaseConnection("postgres"), 
+				_environment.IsDevelopment()));
 		}
 	}
 }

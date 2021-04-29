@@ -66,7 +66,7 @@ namespace Kyoo
 		}
 		
 		/// <summary>
-		/// Createa a web host
+		/// Create a a web host
 		/// </summary>
 		/// <param name="args">Command line parameters that can be handled by kestrel</param>
 		/// <returns>A new web host instance</returns>

@@ -3,14 +3,16 @@
   "public_url": "http://localhost:5000/",
 
   "database": {
-    "server": "127.0.0.1",
-    "port": "5432",
-    "database": "kyooDB",
-    "user ID": "kyoo",
-    "password": "kyooPassword",
-    "pooling": "true",
-    "maxPoolSize": "95",
-    "timeout": "30"
+    "postgres": {
+      "server": "127.0.0.1",
+      "port": "5432",
+      "database": "kyooDB",
+      "user ID": "kyoo",
+      "password": "kyooPassword",
+      "pooling": "true",
+      "maxPoolSize": "95",
+      "timeout": "30"
+    }
   },
 
   "logging": {

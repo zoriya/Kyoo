@@ -31,7 +31,7 @@ namespace Kyoo.Api
 			{
 				return await _libraryManager.Get<Episode>(x => x.Tracks.Any(y => y.ID == id));
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}
@@ -47,7 +47,7 @@ namespace Kyoo.Api
 				// TODO Implement something like this (a dotnet-ef's QueryCompilationContext): https://stackoverflow.com/questions/62687811/how-can-i-convert-a-custom-function-to-a-sql-expression-for-entity-framework-cor
 				return await _libraryManager.Get<Episode>(x => x.Tracks.Any(y => y.Slug == slug));
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}

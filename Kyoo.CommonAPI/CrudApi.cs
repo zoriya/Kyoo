@@ -33,7 +33,7 @@ namespace Kyoo.CommonApi
 			{
 				return await _repository.Get(id);
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}
@@ -47,7 +47,7 @@ namespace Kyoo.CommonApi
 			{
 				return await _repository.Get(slug);
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}
@@ -129,7 +129,7 @@ namespace Kyoo.CommonApi
 				resource.ID = old.ID;
 				return await _repository.Edit(resource, resetOld);
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}
@@ -144,7 +144,7 @@ namespace Kyoo.CommonApi
 			{
 				return await _repository.Edit(resource, resetOld);
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}
@@ -160,7 +160,7 @@ namespace Kyoo.CommonApi
 				resource.ID = old.ID;
 				return await _repository.Edit(resource, resetOld);
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}
@@ -174,7 +174,7 @@ namespace Kyoo.CommonApi
 			{
 				await _repository.Delete(id);
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}
@@ -190,7 +190,7 @@ namespace Kyoo.CommonApi
 			{
 				await _repository.Delete(slug);
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}
@@ -205,7 +205,7 @@ namespace Kyoo.CommonApi
 			{
 				await _repository.DeleteRange(ApiHelper.ParseWhere<T>(where));
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}

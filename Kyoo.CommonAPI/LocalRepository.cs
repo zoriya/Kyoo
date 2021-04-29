@@ -46,13 +46,13 @@ namespace Kyoo.Controllers
 		/// Get a resource from it's ID and make the <see cref="Database"/> instance track it.
 		/// </summary>
 		/// <param name="id">The ID of the resource</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The tracked resource with the given ID</returns>
 		protected virtual async Task<T> GetWithTracking(int id)
 		{
 			T ret = await Database.Set<T>().AsTracking().FirstOrDefaultAsync(x => x.ID == id);
 			if (ret == null)
-				throw new ItemNotFound($"No {typeof(T).Name} found with the id {id}");
+				throw new ItemNotFoundException($"No {typeof(T).Name} found with the id {id}");
 			return ret;
 		}
 		
@@ -61,7 +61,7 @@ namespace Kyoo.Controllers
 		{
 			T ret = await GetOrDefault(id);
 			if (ret == null)
-				throw new ItemNotFound($"No {typeof(T).Name} found with the id {id}");
+				throw new ItemNotFoundException($"No {typeof(T).Name} found with the id {id}");
 			return ret;
 		}
 
@@ -70,7 +70,7 @@ namespace Kyoo.Controllers
 		{
 			T ret = await GetOrDefault(slug);
 			if (ret == null)
-				throw new ItemNotFound($"No {typeof(T).Name} found with the slug {slug}");
+				throw new ItemNotFoundException($"No {typeof(T).Name} found with the slug {slug}");
 			return ret;
 		}
 
@@ -79,7 +79,7 @@ namespace Kyoo.Controllers
 		{
 			T ret = await GetOrDefault(where);
 			if (ret == null)
-				throw new ItemNotFound($"No {typeof(T).Name} found with the given predicate.");
+				throw new ItemNotFoundException($"No {typeof(T).Name} found with the given predicate.");
 			return ret;
 		}
 		

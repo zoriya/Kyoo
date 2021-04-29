@@ -27,7 +27,7 @@ namespace Kyoo.Api
 				Episode item = await _libraryManager.Get<Episode>(slug);
 				return await WatchItem.FromEpisode(item, _libraryManager);
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}

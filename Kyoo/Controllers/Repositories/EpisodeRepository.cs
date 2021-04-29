@@ -108,7 +108,7 @@ namespace Kyoo.Controllers
 		{
 			Episode ret = await GetOrDefault(showID, seasonNumber, episodeNumber);
 			if (ret == null)
-				throw new ItemNotFound($"No episode S{seasonNumber}E{episodeNumber} found on the show {showID}.");
+				throw new ItemNotFoundException($"No episode S{seasonNumber}E{episodeNumber} found on the show {showID}.");
 			return ret;
 		}
 
@@ -117,7 +117,7 @@ namespace Kyoo.Controllers
 		{
 			Episode ret = await GetOrDefault(showSlug, seasonNumber, episodeNumber);
 			if (ret == null)
-				throw new ItemNotFound($"No episode S{seasonNumber}E{episodeNumber} found on the show {showSlug}.");
+				throw new ItemNotFoundException($"No episode S{seasonNumber}E{episodeNumber} found on the show {showSlug}.");
 			return ret;
 		}
 

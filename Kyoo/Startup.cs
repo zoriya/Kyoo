@@ -61,16 +61,9 @@ namespace Kyoo
 				});
 			services.AddHttpClient();
 
-			services.AddDbContext<DatabaseContext>(options =>
-			{
-				options.UseNpgsql(_configuration.GetDatabaseConnection());
-				// .EnableSensitiveDataLogging()
-				// .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()));
-			}, ServiceLifetime.Transient);
-			
 			services.AddDbContext<IdentityDatabase>(options =>
 			{
-				options.UseNpgsql(_configuration.GetDatabaseConnection());
+				options.UseNpgsql(_configuration.GetDatabaseConnection("postgres"));
 			});
 
 			string assemblyName = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
@@ -94,13 +87,13 @@ namespace Kyoo
 				.AddConfigurationStore(options =>
 				{
 					options.ConfigureDbContext = builder =>
-						builder.UseNpgsql(_configuration.GetDatabaseConnection(),
+						builder.UseNpgsql(_configuration.GetDatabaseConnection("postgres"),
 							sql => sql.MigrationsAssembly(assemblyName));
 				})
 				.AddOperationalStore(options =>
 				{
 					options.ConfigureDbContext = builder =>
-						builder.UseNpgsql(_configuration.GetDatabaseConnection(),
+						builder.UseNpgsql(_configuration.GetDatabaseConnection("postgres"),
 							sql => sql.MigrationsAssembly(assemblyName));
 					options.EnableTokenCleanup = true;
 				})
@@ -147,9 +140,6 @@ namespace Kyoo
 			{
 				AllowedOrigins = { new Uri(publicUrl).GetLeftPart(UriPartial.Authority) }
 			});
-			
-			
-			services.AddScoped<DbContext, DatabaseContext>();
 		}
 		
 		public void Configure(IUnityContainer container, IApplicationBuilder app, IWebHostEnvironment env)
@@ -214,11 +204,14 @@ namespace Kyoo
 				if (env.IsDevelopment())
 					spa.UseAngularCliServer("start");
 			});
+
+			container.RegisterType<IPluginManager, PluginManager>(new SingletonLifetimeManager());
+			IPluginManager pluginManager = new PluginManager(container, _configuration, new Logger<PluginManager>(_loggerFactory));
+			pluginManager.ReloadPlugins();
 			
-			new CoreModule().Configure(container, _configuration, app, env.IsDevelopment());
-			container.RegisterFactory<IHostedService>(c => c.Resolve<ITaskManager>(), new SingletonLifetimeManager());
 			// TODO the reload should re inject components from the constructor.
 			// TODO fin a way to inject tasks without a IUnityContainer.
+			container.RegisterFactory<IHostedService>(c => c.Resolve<ITaskManager>(), new SingletonLifetimeManager());
 		}
 	}
 }

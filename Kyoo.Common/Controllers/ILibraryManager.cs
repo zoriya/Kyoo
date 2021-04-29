@@ -18,7 +18,7 @@ namespace Kyoo.Controllers
 		/// Get the repository corresponding to the T item.
 		/// </summary>
 		/// <typeparam name="T">The type you want</typeparam>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The repository corresponding</returns>
 		IRepository<T> GetRepository<T>() where T : class, IResource;
 
@@ -82,7 +82,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="id">The id of the resource</param>
 		/// <typeparam name="T">The type of the resource</typeparam>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The resource found</returns>
 		Task<T> Get<T>(int id) where T : class, IResource;
 		
@@ -91,7 +91,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="slug">The slug of the resource</param>
 		/// <typeparam name="T">The type of the resource</typeparam>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The resource found</returns>
 		Task<T> Get<T>(string slug) where T : class, IResource;
 		
@@ -100,7 +100,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="where">The filter function.</param>
 		/// <typeparam name="T">The type of the resource</typeparam>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The first resource found that match the where function</returns>
 		Task<T> Get<T>(Expression<Func<T, bool>> where) where T : class, IResource;
 
@@ -109,7 +109,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="showID">The id of the show</param>
 		/// <param name="seasonNumber">The season's number</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The season found</returns>
 		Task<Season> Get(int showID, int seasonNumber);
 		
@@ -118,7 +118,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="showSlug">The slug of the show</param>
 		/// <param name="seasonNumber">The season's number</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The season found</returns>
 		Task<Season> Get(string showSlug, int seasonNumber);
 		
@@ -128,7 +128,7 @@ namespace Kyoo.Controllers
 		/// <param name="showID">The id of the show</param>
 		/// <param name="seasonNumber">The season's number</param>
 		/// <param name="episodeNumber">The episode's number</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The episode found</returns>
 		Task<Episode> Get(int showID, int seasonNumber, int episodeNumber);
 		
@@ -138,7 +138,7 @@ namespace Kyoo.Controllers
 		/// <param name="showSlug">The slug of the show</param>
 		/// <param name="seasonNumber">The season's number</param>
 		/// <param name="episodeNumber">The episode's number</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The episode found</returns>
 		Task<Episode> Get(string showSlug, int seasonNumber, int episodeNumber);
 
@@ -147,7 +147,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="slug">The slug of the track</param>
 		/// <param name="type">The type (Video, Audio or Subtitle)</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The tracl found</returns>
 		Task<Track> Get(string slug, StreamType type = StreamType.Unknown);
 		
@@ -505,7 +505,7 @@ namespace Kyoo.Controllers
 		/// <param name="item">The resourcce to edit, it's ID can't change.</param>
 		/// <param name="resetOld">Should old properties of the resource be discarded or should null values considered as not changed?</param>
 		/// <typeparam name="T">The type of resources</typeparam>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The resource edited and completed by database's informations (related items & so on)</returns>
 		Task<T> Edit<T>(T item, bool resetOld) where T : class, IResource;
 
@@ -514,7 +514,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="item">The resource to delete</param>
 		/// <typeparam name="T">The type of resource to delete</typeparam>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task Delete<T>(T item) where T : class, IResource;
 		
 		/// <summary>
@@ -522,7 +522,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="id">The id of the resource to delete</param>
 		/// <typeparam name="T">The type of resource to delete</typeparam>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task Delete<T>(int id) where T : class, IResource;
 		
 		/// <summary>
@@ -530,7 +530,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="slug">The slug of the resource to delete</param>
 		/// <typeparam name="T">The type of resource to delete</typeparam>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task Delete<T>(string slug) where T : class, IResource;
 	}
 }

@@ -4,100 +4,152 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
-using Kyoo.Models;
+using Kyoo.Models.Exceptions;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Unity;
 
 namespace Kyoo.Controllers
 {
-	public class PluginDependencyLoader : AssemblyLoadContext
-	{
-		private readonly AssemblyDependencyResolver _resolver;
-		
-		public PluginDependencyLoader(string pluginPath)
-		{
-			_resolver = new AssemblyDependencyResolver(pluginPath);
-		}
-
-		protected override Assembly Load(AssemblyName assemblyName)
-		{
-			string assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
-			if (assemblyPath != null)
-				return LoadFromAssemblyPath(assemblyPath);
-			return base.Load(assemblyName);
-		}
-		
-		protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
-		{
-			string libraryPath = _resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
-			if (libraryPath != null)
-				return LoadUnmanagedDllFromPath(libraryPath);
-			return base.LoadUnmanagedDll(unmanagedDllName);
-		}
-	}
-	
+	/// <summary>
+	/// An implementation of <see cref="IPluginManager"/>.
+	/// This is used to load plugins and retrieve information from them.
+	/// </summary>
 	public class PluginManager : IPluginManager
 	{
-		private readonly IServiceProvider _provider;
+		/// <summary>
+		/// The unity container. It is given to the Configure method of plugins.
+		/// </summary>
+		private readonly IUnityContainer _container;
+		/// <summary>
+		/// The configuration to get the plugin's directory.
+		/// </summary>
 		private readonly IConfiguration _config;
-		private List<IPlugin> _plugins;
+		/// <summary>
+		/// The logger used by this class. 
+		/// </summary>
+		private readonly ILogger<PluginManager> _logger;
+		
+		/// <summary>
+		/// The list of plugins that are currently loaded.
+		/// </summary>
+		private readonly List<IPlugin> _plugins = new();
 
-		public PluginManager(IServiceProvider provider, IConfiguration config)
+		/// <summary>
+		/// Create a new <see cref="PluginManager"/> instance.
+		/// </summary>
+		/// <param name="container">A unity container to allow plugins to register new entries</param>
+		/// <param name="config">The configuration instance, to get the plugin's directory path.</param>
+		/// <param name="logger">The logger used by this class.</param>
+		public PluginManager(IUnityContainer container,
+			IConfiguration config,
+			ILogger<PluginManager> logger)
 		{
-			_provider = provider;
+			_container = container;
 			_config = config;
+			_logger = logger;
 		}
 
+
+		/// <inheritdoc />
 		public T GetPlugin<T>(string name)
 		{
 			return (T)_plugins?.FirstOrDefault(x => x.Name == name && x is T);
 		}
 
-		public IEnumerable<T> GetPlugins<T>()
+		/// <inheritdoc />
+		public ICollection<T> GetPlugins<T>()
 		{
-			return _plugins?.OfType<T>() ?? new List<T>();
+			return _plugins?.OfType<T>().ToArray();
 		}
 
-		public IEnumerable<IPlugin> GetAllPlugins()
+		/// <inheritdoc />
+		public ICollection<IPlugin> GetAllPlugins()
 		{
-			return _plugins ?? new  List<IPlugin>();
+			return _plugins;
 		}
 
+		/// <inheritdoc />
 		public void ReloadPlugins()
 		{
 			string pluginFolder = _config.GetValue<string>("plugins");
 			if (!Directory.Exists(pluginFolder))
 				Directory.CreateDirectory(pluginFolder);
 
-			string[] pluginsPaths = Directory.GetFiles(pluginFolder);
-			_plugins = pluginsPaths.SelectMany(path =>
+			_logger.LogTrace("Loading new plugins...");
+			string[] pluginsPaths = Directory.GetFiles(pluginFolder, "*.dll", SearchOption.AllDirectories);
+			ICollection<IPlugin> newPlugins = pluginsPaths.SelectMany(path =>
 			{
 				path = Path.GetFullPath(path);
 				try
 				{
 					PluginDependencyLoader loader = new(path);
-					Assembly ass = loader.LoadFromAssemblyPath(path);
-					return ass.GetTypes()
+					Assembly assembly = loader.LoadFromAssemblyPath(path);
+					return assembly.GetTypes()
 						.Where(x => typeof(IPlugin).IsAssignableFrom(x))
-						.Select(x => (IPlugin)ActivatorUtilities.CreateInstance(_provider, x));
+						.Where(x => _plugins.All(y => y.GetType() != x))
+						.Select(x => (IPlugin)_container.Resolve(x));
 				}
 				catch (Exception ex)
 				{
-					Console.Error.WriteLine($"\nError loading the plugin at {path}.\n{ex.GetType().Name}: {ex.Message}\n");
+					_logger.LogError(ex, "Could not load the plugin at {Path}", path);
 					return Array.Empty<IPlugin>();
 				}
-			}).ToList();
-			
-			if (!_plugins.Any())
+			}).ToArray();
+			_plugins.AddRange(newPlugins);
+
+			ICollection<Type> available = _plugins.SelectMany(x => x.Provides).ToArray();
+			foreach (IPlugin plugin in newPlugins)
 			{
-				Console.WriteLine("\nNo plugin enabled.\n");
-				return;
+				Type missing = plugin.Requires.FirstOrDefault(x => available.All(y => !y.IsAssignableTo(x)));
+				if (missing != null)
+					throw new MissingDependencyException(plugin.Name, missing.Name);
+				plugin.Configure(_container);
 			}
 
-			Console.WriteLine("\nPlugin enabled:");
-			foreach (IPlugin plugin in _plugins)
-				Console.WriteLine($"\t{plugin.Name}");
-			Console.WriteLine();
+			if (!_plugins.Any())
+				_logger.LogInformation("No plugin enabled");
+			else
+				_logger.LogInformation("Plugin enabled: {Plugins}", _plugins.Select(x => x.Name));
+		}
+
+
+		/// <summary>
+		/// A custom <see cref="AssemblyLoadContext"/> to load plugin's dependency if they are on the same folder.
+		/// </summary>
+		private class PluginDependencyLoader : AssemblyLoadContext
+		{
+			/// <summary>
+			/// The basic resolver that will be used to load dlls.
+			/// </summary>
+			private readonly AssemblyDependencyResolver _resolver;
+
+			/// <summary>
+			/// Create a new <see cref="PluginDependencyLoader"/> for the given path.
+			/// </summary>
+			/// <param name="pluginPath">The path of the plugin and it's dependencies</param>
+			public PluginDependencyLoader(string pluginPath)
+			{
+				_resolver = new AssemblyDependencyResolver(pluginPath);
+			}
+
+			/// <inheritdoc />
+			protected override Assembly Load(AssemblyName assemblyName)
+			{
+				string assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
+				if (assemblyPath != null)
+					return LoadFromAssemblyPath(assemblyPath);
+				return base.Load(assemblyName);
+			}
+
+			/// <inheritdoc />
+			protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
+			{
+				string libraryPath = _resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
+				if (libraryPath != null)
+					return LoadUnmanagedDllFromPath(libraryPath);
+				return base.LoadUnmanagedDll(unmanagedDllName);
+			}
 		}
 	}
 }

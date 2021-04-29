@@ -52,7 +52,7 @@ namespace Kyoo.Api
 				Episode episode = await _libraryManager.Get<Episode>(slug);
 				return _files.FileResult(episode.Path, true);
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}
@@ -71,7 +71,7 @@ namespace Kyoo.Api
 					return StatusCode(500);
 				return _files.FileResult(path, true);
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}
@@ -90,7 +90,7 @@ namespace Kyoo.Api
 					return StatusCode(500);
 				return _files.FileResult(path, true);
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}

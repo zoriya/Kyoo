@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 
 namespace Kyoo.Controllers
@@ -17,7 +16,7 @@ namespace Kyoo.Controllers
 		/// <param name="taskSlug">The slug of the task to run</param>
 		/// <param name="arguments">A list of arguments to pass to the task. An automatic conversion will be made if arguments to not fit.</param>
 		/// <exception cref="ArgumentException">If the number of arguments is invalid or if an argument can't be converted.</exception>
-		/// <exception cref="ItemNotFound">The task could not be found.</exception>
+		/// <exception cref="ItemNotFoundException">The task could not be found.</exception>
 		void StartTask(string taskSlug, Dictionary<string, object> arguments = null);
 		
 		/// <summary>
@@ -27,7 +26,7 @@ namespace Kyoo.Controllers
 		ICollection<ITask> GetRunningTasks();
 		
 		/// <summary>
-		/// Get all availables tasks
+		/// Get all available tasks
 		/// </summary>
 		/// <returns>A list of every tasks that this instance know.</returns>
 		ICollection<ITask> GetAllTasks();

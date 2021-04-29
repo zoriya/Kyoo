@@ -5,9 +5,9 @@
 		<TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
 		<TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
 		<IsPackable>false</IsPackable>
-		<SpaRoot>../Kyoo.WebApp/</SpaRoot>
-		<LoginRoot>../Kyoo.WebLogin/</LoginRoot>
-		<TranscoderRoot>../Kyoo.Transcoder/</TranscoderRoot>
+		<SpaRoot>$(SolutionDir)/Kyoo.WebApp/</SpaRoot>
+		<LoginRoot>$(SolutionDir)/Kyoo.WebLogin/</LoginRoot>
+		<TranscoderRoot>$(SolutionDir)/Kyoo.Transcoder/</TranscoderRoot>
 		<DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules/**</DefaultItemExcludes>
 
 		<!-- Set this to true if you enable server-side prerendering -->

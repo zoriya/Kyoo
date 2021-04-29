@@ -1,7 +1,6 @@
 using System;
 using Kyoo.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Npgsql;
 
 namespace Kyoo.Postgresql

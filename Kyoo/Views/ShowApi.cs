@@ -247,7 +247,7 @@ namespace Kyoo.Api
 			{
 				return await _libraryManager.Get<Studio>(x => x.Shows.Any(y => y.ID == showID));
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}
@@ -261,7 +261,7 @@ namespace Kyoo.Api
 			{
 				return await _libraryManager.Get<Studio>(x => x.Shows.Any(y => y.Slug == slug));
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}
@@ -384,7 +384,7 @@ namespace Kyoo.Api
 					.ToDictionary(Path.GetFileNameWithoutExtension,
 						x => $"{BaseURL}/api/shows/{slug}/fonts/{Path.GetFileName(x)}");
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}
@@ -401,7 +401,7 @@ namespace Kyoo.Api
 				string path = Path.Combine(_files.GetExtraDirectory(show), "Attachments", slug);
 				return _files.FileResult(path);
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}
@@ -416,7 +416,7 @@ namespace Kyoo.Api
 				Show show = await _libraryManager.Get<Show>(slug);
 				return _files.FileResult(await _thumbs.GetShowPoster(show));
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}
@@ -431,7 +431,7 @@ namespace Kyoo.Api
 				Show show = await _libraryManager.Get<Show>(slug);
 				return _files.FileResult(await _thumbs.GetShowLogo(show));
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}
@@ -446,7 +446,7 @@ namespace Kyoo.Api
 				Show show = await _libraryManager.Get<Show>(slug);
 				return _files.FileResult(await _thumbs.GetShowBackdrop(show));
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}

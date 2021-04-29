@@ -131,7 +131,7 @@ namespace Kyoo.Controllers
 				sort,
 				limit);
 			if (!people.Any() && await _shows.Value.Get(showID) == null)
-				throw new ItemNotFound();
+				throw new ItemNotFoundException();
 			foreach (PeopleRole role in people)
 				role.ForPeople = true;
 			return people;
@@ -153,7 +153,7 @@ namespace Kyoo.Controllers
 				sort,
 				limit);
 			if (!people.Any() && await _shows.Value.Get(showSlug) == null)
-				throw new ItemNotFound();
+				throw new ItemNotFoundException();
 			foreach (PeopleRole role in people)
 				role.ForPeople = true;
 			return people;
@@ -174,7 +174,7 @@ namespace Kyoo.Controllers
 				sort,
 				limit);
 			if (!roles.Any() && await Get(id) == null)
-				throw new ItemNotFound();
+				throw new ItemNotFoundException();
 			return roles;
 		}
 		
@@ -193,7 +193,7 @@ namespace Kyoo.Controllers
 				sort,
 				limit);
 			if (!roles.Any() && await Get(slug) == null)
-				throw new ItemNotFound();
+				throw new ItemNotFoundException();
 			return roles;
 		}
 	}

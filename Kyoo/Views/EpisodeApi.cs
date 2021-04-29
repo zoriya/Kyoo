@@ -68,7 +68,7 @@ namespace Kyoo.Api
 			{
 				return await _libraryManager.Get(showSlug, seasonNumber);
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}
@@ -82,7 +82,7 @@ namespace Kyoo.Api
 			{
 				return await _libraryManager.Get(showID, seasonNumber);
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}
@@ -183,7 +183,7 @@ namespace Kyoo.Api
 				Episode episode = await _libraryManager.Get<Episode>(id);
 				return _files.FileResult(await _thumbnails.GetEpisodeThumb(episode));
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}
@@ -198,7 +198,7 @@ namespace Kyoo.Api
 				Episode episode = await _libraryManager.Get<Episode>(slug);
 				return _files.FileResult(await _thumbnails.GetEpisodeThumb(episode));
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}

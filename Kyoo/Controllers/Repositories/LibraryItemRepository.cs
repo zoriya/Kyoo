@@ -154,7 +154,7 @@ namespace Kyoo.Controllers
 				sort,
 				limit);
 			if (!items.Any() && await _libraries.Value.GetOrDefault(id) == null)
-				throw new ItemNotFound();
+				throw new ItemNotFoundException();
 			return items;
 		}
 		
@@ -169,7 +169,7 @@ namespace Kyoo.Controllers
 				sort,
 				limit);
 			if (!items.Any() && await _libraries.Value.GetOrDefault(slug) == null)
-				throw new ItemNotFound();
+				throw new ItemNotFoundException();
 			return items;
 		}
 	}

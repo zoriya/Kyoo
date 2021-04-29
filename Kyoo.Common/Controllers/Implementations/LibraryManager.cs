@@ -66,7 +66,7 @@ namespace Kyoo.Controllers
 		{
 			if (_repositories.FirstOrDefault(x => x.RepositoryType == typeof(T)) is IRepository<T> ret)
 				return ret;
-			throw new ItemNotFound();
+			throw new ItemNotFoundException();
 		}
 
 		/// <inheritdoc />

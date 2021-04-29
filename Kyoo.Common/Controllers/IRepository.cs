@@ -127,21 +127,21 @@ namespace Kyoo.Controllers
 		/// Get a resource from it's ID.
 		/// </summary>
 		/// <param name="id">The id of the resource</param>
-		/// <exception cref="ItemNotFound">If the item could not be found.</exception>
+		/// <exception cref="ItemNotFoundException">If the item could not be found.</exception>
 		/// <returns>The resource found</returns>
 		Task<T> Get(int id);
 		/// <summary>
 		/// Get a resource from it's slug.
 		/// </summary>
 		/// <param name="slug">The slug of the resource</param>
-		/// <exception cref="ItemNotFound">If the item could not be found.</exception>
+		/// <exception cref="ItemNotFoundException">If the item could not be found.</exception>
 		/// <returns>The resource found</returns>
 		Task<T> Get(string slug);
 		/// <summary>
 		/// Get the first resource that match the predicate.
 		/// </summary>
 		/// <param name="where">A predicate to filter the resource.</param>
-		/// <exception cref="ItemNotFound">If the item could not be found.</exception>
+		/// <exception cref="ItemNotFoundException">If the item could not be found.</exception>
 		/// <returns>The resource found</returns>
 		Task<T> Get(Expression<Func<T, bool>> where);
 		
@@ -221,7 +221,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="edited">The resourcce to edit, it's ID can't change.</param>
 		/// <param name="resetOld">Should old properties of the resource be discarded or should null values considered as not changed?</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The resource edited and completed by database's informations (related items & so on)</returns>
 		Task<T> Edit([NotNull] T edited, bool resetOld);
 		
@@ -229,62 +229,62 @@ namespace Kyoo.Controllers
 		/// Delete a resource by it's ID
 		/// </summary>
 		/// <param name="id">The ID of the resource</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task Delete(int id);
 		/// <summary>
 		/// Delete a resource by it's slug
 		/// </summary>
 		/// <param name="slug">The slug of the resource</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task Delete(string slug);
 		/// <summary>
 		/// Delete a resource
 		/// </summary>
 		/// <param name="obj">The resource to delete</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task Delete([NotNull] T obj);
 
 		/// <summary>
 		/// Delete a list of resources.
 		/// </summary>
 		/// <param name="objs">One or multiple resources to delete</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task DeleteRange(params T[] objs) => DeleteRange(objs.AsEnumerable());
 		/// <summary>
 		/// Delete a list of resources.
 		/// </summary>
 		/// <param name="objs">An enumerable of resources to delete</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task DeleteRange(IEnumerable<T> objs);
 		/// <summary>
 		/// Delete a list of resources.
 		/// </summary>
 		/// <param name="ids">One or multiple resources's id</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task DeleteRange(params int[] ids) => DeleteRange(ids.AsEnumerable());
 		/// <summary>
 		/// Delete a list of resources.
 		/// </summary>
 		/// <param name="ids">An enumearble of resources's id</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task DeleteRange(IEnumerable<int> ids);
 		/// <summary>
 		/// Delete a list of resources.
 		/// </summary>
 		/// <param name="slugs">One or multiple resources's slug</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task DeleteRange(params string[] slugs) => DeleteRange(slugs.AsEnumerable());
 		/// <summary>
 		/// Delete a list of resources.
 		/// </summary>
 		/// <param name="slugs">An enumerable of resources's slug</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task DeleteRange(IEnumerable<string> slugs);
 		/// <summary>
 		/// Delete a list of resources.
 		/// </summary>
 		/// <param name="where">A predicate to filter resources to delete. Every resource that match this will be deleted.</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task DeleteRange([NotNull] Expression<Func<T, bool>> where);
 	}
 
@@ -306,7 +306,7 @@ namespace Kyoo.Controllers
 		/// Get a show's slug from it's ID.
 		/// </summary>
 		/// <param name="showID">The ID of the show</param>
-		/// <exception cref="ItemNotFound">If a show with the given ID is not found.</exception>
+		/// <exception cref="ItemNotFoundException">If a show with the given ID is not found.</exception>
 		/// <returns>The show's slug</returns>
 		Task<string> GetSlug(int showID);
 	}
@@ -321,7 +321,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="showID">The id of the show</param>
 		/// <param name="seasonNumber">The season's number</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The season found</returns>
 		Task<Season> Get(int showID, int seasonNumber);
 		
@@ -330,7 +330,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="showSlug">The slug of the show</param>
 		/// <param name="seasonNumber">The season's number</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The season found</returns>
 		Task<Season> Get(string showSlug, int seasonNumber);
 		
@@ -362,7 +362,7 @@ namespace Kyoo.Controllers
 		/// <param name="showID">The id of the show</param>
 		/// <param name="seasonNumber">The season's number</param>
 		/// <param name="episodeNumber">The episode's number</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The episode found</returns>
 		Task<Episode> Get(int showID, int seasonNumber, int episodeNumber);
 		/// <summary>
@@ -371,7 +371,7 @@ namespace Kyoo.Controllers
 		/// <param name="showSlug">The slug of the show</param>
 		/// <param name="seasonNumber">The season's number</param>
 		/// <param name="episodeNumber">The episode's number</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The episode found</returns>
 		Task<Episode> Get(string showSlug, int seasonNumber, int episodeNumber);
 
@@ -397,7 +397,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="showID">The id of the show</param>
 		/// <param name="absoluteNumber">The episode's absolute number (The episode number does not reset to 1 after the end of a season.</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The episode found</returns>
 		Task<Episode> GetAbsolute(int showID, int absoluteNumber);
 		/// <summary>
@@ -405,7 +405,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="showSlug">The slug of the show</param>
 		/// <param name="absoluteNumber">The episode's absolute number (The episode number does not reset to 1 after the end of a season.</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The episode found</returns>
 		Task<Episode> GetAbsolute(string showSlug, int absoluteNumber);
 	}
@@ -420,7 +420,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="slug">The slug of the track</param>
 		/// <param name="type">The type (Video, Audio or Subtitle)</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The tracl found</returns>
 		Task<Track> Get(string slug, StreamType type = StreamType.Unknown);
 		

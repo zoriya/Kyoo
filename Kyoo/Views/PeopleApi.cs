@@ -48,7 +48,7 @@ namespace Kyoo.Api
 
 				return Page(resources, limit);
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}
@@ -76,7 +76,7 @@ namespace Kyoo.Api
 
 				return Page(resources, limit);
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}

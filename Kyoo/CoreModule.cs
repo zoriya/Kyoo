@@ -1,7 +1,6 @@
+using System;
 using Kyoo.Controllers;
 using Kyoo.Tasks;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
 using Unity;
 using Unity.Lifetime;
 
@@ -22,42 +21,40 @@ namespace Kyoo
 		public string Description => "The core module containing default implementations.";
 
 		/// <inheritdoc />
-		public string[] Provides => new[]
+		public Type[] Provides => new[]
 		{
-			$"{nameof(IFileManager)}:file",
-			$"{nameof(ITranscoder)}:{nameof(Transcoder)}",
-			$"{nameof(IThumbnailsManager)}:{nameof(ThumbnailsManager)}",
-			$"{nameof(IProviderManager)}:{nameof(ProviderManager)}",
-			$"{nameof(IPluginManager)}:{nameof(PluginManager)}",
-			$"{nameof(ITaskManager)}:{nameof(TaskManager)}",
-			$"{nameof(ILibraryManager)}:{nameof(LibraryManager)}",
-			$"{nameof(ILibraryRepository)}:{nameof(LibraryRepository)}",
-			$"{nameof(ILibraryItemRepository)}:{nameof(LibraryItemRepository)}",
-			$"{nameof(ICollectionRepository)}:{nameof(CollectionRepository)}",
-			$"{nameof(IShowRepository)}:{nameof(ShowRepository)}",
-			$"{nameof(ISeasonRepository)}:{nameof(SeasonRepository)}",
-			$"{nameof(IEpisodeRepository)}:{nameof(EpisodeRepository)}",
-			$"{nameof(ITrackRepository)}:{nameof(TrackRepository)}",
-			$"{nameof(IPeopleRepository)}:{nameof(PeopleRepository)}",
-			$"{nameof(IStudioRepository)}:{nameof(StudioRepository)}",
-			$"{nameof(IGenreRepository)}:{nameof(GenreRepository)}",
-			$"{nameof(IProviderRepository)}:{nameof(ProviderRepository)}"
+			typeof(FileManager),
+			typeof(Transcoder),
+			typeof(ThumbnailsManager),
+			typeof(ProviderManager),
+			typeof(TaskManager),
+			typeof(LibraryManager),
+			typeof(LibraryRepository),
+			typeof(LibraryItemRepository),
+			typeof(CollectionRepository),
+			typeof(ShowRepository),
+			typeof(SeasonRepository),
+			typeof(EpisodeRepository),
+			typeof(TrackRepository),
+			typeof(PeopleRepository),
+			typeof(StudioRepository),
+			typeof(GenreRepository),
+			typeof(ProviderRepository),
 		};
 
 		/// <inheritdoc />
-		public string[] Requires => new[]
+		public Type[] Requires => new[]
 		{
-			"DatabaseContext:"
+			typeof(DatabaseContext)
 		};
 
         /// <inheritdoc />
-        public void Configure(IUnityContainer container, IConfiguration config, IApplicationBuilder app, bool debugMode)
+        public void Configure(IUnityContainer container)
 		{
 			container.RegisterType<IFileManager, FileManager>(new SingletonLifetimeManager());
 			container.RegisterType<ITranscoder, Transcoder>(new SingletonLifetimeManager());
 			container.RegisterType<IThumbnailsManager, ThumbnailsManager>(new SingletonLifetimeManager());
 			container.RegisterType<IProviderManager, ProviderManager>(new SingletonLifetimeManager());
-			container.RegisterType<IPluginManager, PluginManager>(new SingletonLifetimeManager());
 			container.RegisterType<ITaskManager, TaskManager>(new SingletonLifetimeManager());
 			
 			container.RegisterType<ILibraryManager, LibraryManager>(new HierarchicalLifetimeManager());

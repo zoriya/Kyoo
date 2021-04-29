@@ -46,7 +46,7 @@ namespace Kyoo.Controllers
 		{
 			Track ret = await GetOrDefault(slug, type);
 			if (ret == null)
-				throw new ItemNotFound($"No track found with the slug {slug} and the type {type}.");
+				throw new ItemNotFoundException($"No track found with the slug {slug} and the type {type}.");
 			return ret;
 		}
 		

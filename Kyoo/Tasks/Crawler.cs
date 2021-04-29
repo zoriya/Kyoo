@@ -177,7 +177,7 @@ namespace Kyoo.Tasks
 				await libraryManager.Create(track);
 				Console.WriteLine($"Registering subtitle at: {path}.");
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				await Console.Error.WriteLineAsync($"No episode found for subtitle at: ${path}.");
 			}
@@ -317,7 +317,7 @@ namespace Kyoo.Tasks
 				season.Show = show;
 				return season;
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				Season season = await MetadataProvider.GetSeason(show, seasonNumber, library);
 				await libraryManager.CreateIfNotExists(season);

@@ -185,7 +185,7 @@ namespace Kyoo.Controllers
 			
 			int index = _tasks.FindIndex(x => x.task.Slug == taskSlug);
 			if (index == -1)
-				throw new ItemNotFound($"No task found with the slug {taskSlug}");
+				throw new ItemNotFoundException($"No task found with the slug {taskSlug}");
 			_queuedTasks.Enqueue((_tasks[index].task, arguments));
 			_tasks[index] = (_tasks[index].task, DateTime.Now + GetTaskDelay(taskSlug));
 		}
