@@ -46,6 +46,12 @@ namespace Kyoo.Controllers
 		/// put typeof(ILibraryManager).
 		/// </remarks>
 		Type[] Requires { get; }
+		
+		/// <summary>
+		/// True if this plugin is needed to start Kyoo. If this is true and a dependency could not be met, app startup
+		/// will be canceled. If this is false, Kyoo's startup will continue without enabling this plugin.
+		/// </summary>
+		bool IsRequired { get; }
 
 		/// <summary>
 		/// A configure method that will be run on plugin's startup.

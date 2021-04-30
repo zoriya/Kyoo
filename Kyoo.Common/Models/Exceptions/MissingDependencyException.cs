@@ -14,7 +14,7 @@ namespace Kyoo.Models.Exceptions
 		/// <param name="plugin">The name of the plugin that can't be loaded.</param>
 		/// <param name="dependency">The name of the missing dependency.</param>
 		public MissingDependencyException(string plugin, string dependency)
-			: base($"No {dependency} are available in kyoo but the plugin {plugin} requires it.")
+			: base($"No {dependency} are available in Kyoo but the plugin {plugin} requires it.")
 		{}
 	}
 }

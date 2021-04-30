@@ -49,7 +49,14 @@ namespace Kyoo
 			IWebHostBuilder host = CreateWebHostBuilder(args);
 			if (debug != null)
 				host = host.UseEnvironment(debug == true ? "Development" : "Production");
-			await host.Build().RunAsync();
+			try
+			{
+				await host.Build().RunAsync();
+			}
+			catch (Exception ex)
+			{
+				new Logger<Startup>(new LoggerFactory()).LogCritical(ex, "Unhandled exception");
+			}
 		}
 
 		/// <summary>
@@ -74,7 +81,7 @@ namespace Kyoo
 		{
 			UnityContainer container = new();
 			container.EnableDebugDiagnostic();
-			
+
 			return new WebHostBuilder()
 				.UseContentRoot(AppDomain.CurrentDomain.BaseDirectory)
 				.UseConfiguration(SetupConfig(new ConfigurationBuilder(), args).Build())

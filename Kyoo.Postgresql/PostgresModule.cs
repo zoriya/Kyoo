@@ -29,6 +29,9 @@ namespace Kyoo.Postgresql
 
 		/// <inheritdoc />
 		public Type[] Requires => Array.Empty<Type>();
+		
+		/// <inheritdoc />
+		public bool IsRequired => true;
 
 
 		/// <summary>

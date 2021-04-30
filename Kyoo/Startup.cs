@@ -44,6 +44,8 @@ namespace Kyoo
 		{
 			string publicUrl = _configuration.GetValue<string>("public_url");
 
+			services.AddMvc().AddControllersAsServices();
+			
 			services.AddSpaStaticFiles(configuration =>
 			{
 				configuration.RootPath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "wwwroot");
@@ -141,6 +143,11 @@ namespace Kyoo
 				AllowedOrigins = { new Uri(publicUrl).GetLeftPart(UriPartial.Authority) }
 			});
 		}
+
+		public void ConfigureContainer(IUnityContainer container)
+		{
+			// TODO move this to the configure section and figure out a way to reload ControllerActivators with the updated unity container
+		}
 		
 		public void Configure(IUnityContainer container, IApplicationBuilder app, IWebHostEnvironment env)
 		{
@@ -204,7 +211,7 @@ namespace Kyoo
 				if (env.IsDevelopment())
 					spa.UseAngularCliServer("start");
 			});
-
+			
 			container.RegisterType<IPluginManager, PluginManager>(new SingletonLifetimeManager());
 			IPluginManager pluginManager = new PluginManager(container, _configuration, new Logger<PluginManager>(_loggerFactory));
 			pluginManager.ReloadPlugins();

@@ -88,14 +88,17 @@ namespace Kyoo.Controllers
 					return assembly.GetTypes()
 						.Where(x => typeof(IPlugin).IsAssignableFrom(x))
 						.Where(x => _plugins.All(y => y.GetType() != x))
-						.Select(x => (IPlugin)_container.Resolve(x));
+						.Select(x => (IPlugin)_container.Resolve(x))
+						.ToArray();
 				}
 				catch (Exception ex)
 				{
 					_logger.LogError(ex, "Could not load the plugin at {Path}", path);
 					return Array.Empty<IPlugin>();
 				}
-			}).ToArray();
+			}).ToList();
+			if (!_plugins.Any())
+				newPlugins.Add(new CoreModule());
 			_plugins.AddRange(newPlugins);
 
 			ICollection<Type> available = _plugins.SelectMany(x => x.Provides).ToArray();
@@ -103,8 +106,14 @@ namespace Kyoo.Controllers
 			{
 				Type missing = plugin.Requires.FirstOrDefault(x => available.All(y => !y.IsAssignableTo(x)));
 				if (missing != null)
-					throw new MissingDependencyException(plugin.Name, missing.Name);
-				plugin.Configure(_container);
+				{
+					Exception error = new MissingDependencyException(plugin.Name, missing.Name);
+					_logger.LogCritical(error, "A plugin's dependency could not be met");
+					if (plugin.IsRequired)
+						Environment.Exit(1);
+				}
+				else
+					plugin.Configure(_container);
 			}
 
 			if (!_plugins.Any())

@@ -48,6 +48,9 @@ namespace Kyoo
 			typeof(DatabaseContext)
 		};
 
+		/// <inheritdoc />
+		public bool IsRequired => true;
+		
         /// <inheritdoc />
         public void Configure(IUnityContainer container)
 		{
