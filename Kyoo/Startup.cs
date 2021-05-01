@@ -142,11 +142,18 @@ namespace Kyoo
 			{
 				AllowedOrigins = { new Uri(publicUrl).GetLeftPart(UriPartial.Authority) }
 			});
+
+			services.AddSingleton<ITaskManager, TaskManager>();
+			services.AddHostedService(x => x.GetService<ITaskManager>() as TaskManager);
 		}
 
-		public void ConfigureContainer(IUnityContainer container)
+		public void ConfigureContainer(UnityContainer container)
 		{
 			// TODO move this to the configure section and figure out a way to reload ControllerActivators with the updated unity container
+
+			// TODO the reload should re inject components from the constructor.
+			// TODO fin a way to inject tasks without a IUnityContainer.
+			// container.RegisterFactory<IHostedService>(c => c.Resolve<ITaskManager>(), new SingletonLifetimeManager());
 		}
 		
 		public void Configure(IUnityContainer container, IApplicationBuilder app, IWebHostEnvironment env)
@@ -213,12 +220,9 @@ namespace Kyoo
 			});
 			
 			container.RegisterType<IPluginManager, PluginManager>(new SingletonLifetimeManager());
-			IPluginManager pluginManager = new PluginManager(container, _configuration, new Logger<PluginManager>(_loggerFactory));
+			// container.Resolve<IConfiguration>();
+			IPluginManager pluginManager = container.Resolve<IPluginManager>();
 			pluginManager.ReloadPlugins();
-			
-			// TODO the reload should re inject components from the constructor.
-			// TODO fin a way to inject tasks without a IUnityContainer.
-			container.RegisterFactory<IHostedService>(c => c.Resolve<ITaskManager>(), new SingletonLifetimeManager());
 		}
 	}
 }

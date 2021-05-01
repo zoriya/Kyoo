@@ -66,6 +66,11 @@ namespace Kyoo.Controllers
 			_configuration = configuration.GetSection("scheduledTasks");
 			_logger = logger;
 			_tasks = tasks.Select(x => (x, DateTime.Now + GetTaskDelay(x.Slug))).ToList();
+			
+			if (_tasks.Any())
+				_logger.LogTrace("Task manager initiated with: {Tasks}", _tasks.Select(x => x.task.Name));
+			else
+				_logger.LogInformation("Task manager initiated without any tasks");
 		}
 		
 		

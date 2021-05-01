@@ -82,28 +82,17 @@ namespace Kyoo
 		{
 			return Set<Link<T1, T2>>();
 		}
-		
-		
-		/// <summary>
-		/// A basic constructor that set default values (query tracker behaviors, mapping enums...)
-		/// </summary>
-		public DatabaseContext()
-		{
-			ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
-			ChangeTracker.LazyLoadingEnabled = false;
-		}
 
 		/// <summary>
-		/// Create a new <see cref="DatabaseContext"/>.
+		/// Set basic configurations (like preventing query tracking)
 		/// </summary>
-		/// <param name="options">Connection options to use (witch database provider to use, connection strings...)</param>
-		public DatabaseContext(DbContextOptions<DatabaseContext> options)
-			: base(options)
+		/// <param name="optionsBuilder">An option builder to fill.</param>
+		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
-			ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
-			ChangeTracker.LazyLoadingEnabled = false;
+			base.OnConfiguring(optionsBuilder);
+			optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 		}
-		
+
 		/// <summary>
 		/// Set database parameters to support every types of Kyoo.
 		/// </summary>

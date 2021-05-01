@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Kyoo.UnityExtensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.Extensions.Configuration;
@@ -8,7 +9,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Unity;
-using Unity.Microsoft.DependencyInjection;
 
 namespace Kyoo
 {
@@ -46,16 +46,16 @@ namespace Kyoo
 			#endif
 
 			Console.WriteLine($"Running as {Environment.UserName}.");
-			IWebHostBuilder host = CreateWebHostBuilder(args);
+			IWebHostBuilder builder = CreateWebHostBuilder(args);
 			if (debug != null)
-				host = host.UseEnvironment(debug == true ? "Development" : "Production");
+				builder = builder.UseEnvironment(debug == true ? "Development" : "Production");
 			try
 			{
-				await host.Build().RunAsync();
+				await builder.Build().RunAsync();
 			}
 			catch (Exception ex)
 			{
-				new Logger<Startup>(new LoggerFactory()).LogCritical(ex, "Unhandled exception");
+				await Console.Error.WriteLineAsync($"Unhandled exception: {ex}");
 			}
 		}
 
@@ -71,7 +71,7 @@ namespace Kyoo
 				.AddEnvironmentVariables()
 				.AddCommandLine(args);
 		}
-		
+
 		/// <summary>
 		/// Create a a web host
 		/// </summary>
@@ -80,8 +80,8 @@ namespace Kyoo
 		private static IWebHostBuilder CreateWebHostBuilder(string[] args)
 		{
 			UnityContainer container = new();
-			container.EnableDebugDiagnostic();
-
+			// container.EnableDebugDiagnostic();
+			
 			return new WebHostBuilder()
 				.UseContentRoot(AppDomain.CurrentDomain.BaseDirectory)
 				.UseConfiguration(SetupConfig(new ConfigurationBuilder(), args).Build())
@@ -99,7 +99,7 @@ namespace Kyoo
 					if (context.HostingEnvironment.IsDevelopment())
 						StaticWebAssetsLoader.UseStaticWebAssets(context.HostingEnvironment, context.Configuration);
 				})
-				.UseUnityServiceProvider(container)
+				.UseUnityProvider(container)
 				.ConfigureServices(x => x.AddRouting())
 				.UseKestrel(options => { options.AddServerHeader = false; })
 				.UseIIS()

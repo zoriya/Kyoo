@@ -777,5 +777,19 @@ namespace Kyoo
 				return true;
 			return firstID == secondID;
 		}
+
+		/// <summary>
+		/// Get a friendly type name (supporting generics)
+		/// For example a list of string will be displayed as List&lt;string&gt; and not as List`1.
+		/// </summary>
+		/// <param name="type">The type to use</param>
+		/// <returns>The friendly name of the type</returns>
+		public static string FriendlyName(this Type type)
+		{
+			if (!type.IsGenericType)
+				return type.Name;
+			string generics = string.Join(", ", type.GetGenericArguments().Select(x => x.FriendlyName()));
+			return $"{type.Name[..type.Name.IndexOf('`')]}<{generics}>";
+		}
 	}
 }

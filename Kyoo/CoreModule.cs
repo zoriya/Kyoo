@@ -23,23 +23,23 @@ namespace Kyoo
 		/// <inheritdoc />
 		public Type[] Provides => new[]
 		{
-			typeof(FileManager),
-			typeof(Transcoder),
-			typeof(ThumbnailsManager),
-			typeof(ProviderManager),
-			typeof(TaskManager),
-			typeof(LibraryManager),
-			typeof(LibraryRepository),
-			typeof(LibraryItemRepository),
-			typeof(CollectionRepository),
-			typeof(ShowRepository),
-			typeof(SeasonRepository),
-			typeof(EpisodeRepository),
-			typeof(TrackRepository),
-			typeof(PeopleRepository),
-			typeof(StudioRepository),
-			typeof(GenreRepository),
-			typeof(ProviderRepository),
+			typeof(IFileManager),
+			typeof(ITranscoder),
+			typeof(IThumbnailsManager),
+			typeof(IProviderManager),
+			typeof(ITaskManager),
+			typeof(ILibraryManager),
+			typeof(ILibraryRepository),
+			typeof(ILibraryItemRepository),
+			typeof(ICollectionRepository),
+			typeof(IShowRepository),
+			typeof(ISeasonRepository),
+			typeof(IEpisodeRepository),
+			typeof(ITrackRepository),
+			typeof(IPeopleRepository),
+			typeof(IStudioRepository),
+			typeof(IGenreRepository),
+			typeof(IProviderRepository)
 		};
 
 		/// <inheritdoc />
@@ -62,17 +62,17 @@ namespace Kyoo
 			
 			container.RegisterType<ILibraryManager, LibraryManager>(new HierarchicalLifetimeManager());
 			
-			container.RegisterType<ILibraryRepository, LibraryRepository>(new HierarchicalLifetimeManager());
-			container.RegisterType<ILibraryItemRepository, LibraryItemRepository>(new HierarchicalLifetimeManager());
-			container.RegisterType<ICollectionRepository, CollectionRepository>(new HierarchicalLifetimeManager());
-			container.RegisterType<IShowRepository, ShowRepository>(new HierarchicalLifetimeManager());
-			container.RegisterType<ISeasonRepository, SeasonRepository>(new HierarchicalLifetimeManager());
-			container.RegisterType<IEpisodeRepository, EpisodeRepository>(new HierarchicalLifetimeManager());
-			container.RegisterType<ITrackRepository, TrackRepository>(new HierarchicalLifetimeManager());
-			container.RegisterType<IPeopleRepository, PeopleRepository>(new HierarchicalLifetimeManager());
-			container.RegisterType<IStudioRepository, StudioRepository>(new HierarchicalLifetimeManager());
-			container.RegisterType<IGenreRepository, GenreRepository>(new HierarchicalLifetimeManager());
-			container.RegisterType<IProviderRepository, ProviderRepository>(new HierarchicalLifetimeManager());
+			container.RegisterRepository<ILibraryRepository, LibraryRepository>();
+			container.RegisterRepository<ILibraryItemRepository, LibraryItemRepository>();
+			container.RegisterRepository<ICollectionRepository, CollectionRepository>();
+			container.RegisterRepository<IShowRepository, ShowRepository>();
+			container.RegisterRepository<ISeasonRepository, SeasonRepository>();
+			container.RegisterRepository<IEpisodeRepository, EpisodeRepository>();
+			container.RegisterRepository<ITrackRepository, TrackRepository>();
+			container.RegisterRepository<IPeopleRepository, PeopleRepository>();
+			container.RegisterRepository<IStudioRepository, StudioRepository>();
+			container.RegisterRepository<IGenreRepository, GenreRepository>();
+			container.RegisterRepository<IProviderRepository, ProviderRepository>();
 			
 			container.RegisterTask<Crawler>();
 		}

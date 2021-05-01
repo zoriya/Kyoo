@@ -51,6 +51,7 @@ namespace Kyoo.Postgresql
 			if (_debugMode)
 				optionsBuilder.EnableDetailedErrors()
 					.EnableSensitiveDataLogging();
+			base.OnConfiguring(optionsBuilder);
 		}
 
 		/// <summary>

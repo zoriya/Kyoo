@@ -32,8 +32,7 @@ namespace Kyoo.Controllers
 		/// A list of services that are provided by this service. This allow other plugins to declare dependencies.
 		/// </summary>
 		/// <remarks>
-		/// You should put directly the type that you will register in configure, Kyoo will detect by itself which
-		/// interfaces are implemented by your type.
+		/// You should put the type's interface that will be register in configure.
 		/// </remarks>
 		Type[] Provides { get; }
 		

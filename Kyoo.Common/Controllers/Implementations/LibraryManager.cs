@@ -40,7 +40,7 @@ namespace Kyoo.Controllers
 		
 		
 		/// <summary>
-		/// Create a new <see cref="LibraryManager"/> instancce with every repository available.
+		/// Create a new <see cref="LibraryManager"/> instance with every repository available.
 		/// </summary>
 		/// <param name="repositories">The list of repositories that this library manager should manage.
 		/// If a repository for every base type is not available, this instance won't be stable.</param>
@@ -66,7 +66,7 @@ namespace Kyoo.Controllers
 		{
 			if (_repositories.FirstOrDefault(x => x.RepositoryType == typeof(T)) is IRepository<T> ret)
 				return ret;
-			throw new ItemNotFoundException();
+			throw new ItemNotFoundException($"No repository found for the type {typeof(T).Name}.");
 		}
 
 		/// <inheritdoc />
