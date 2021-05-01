@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Kyoo.Controllers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -22,16 +23,16 @@ namespace Kyoo.Postgresql
 		public string Description => "A database context for postgresql.";
 
 		/// <inheritdoc />
-		public Type[] Provides => new[]
+		public ICollection<Type> Provides => new[]
 		{
 			typeof(PostgresContext)
 		};
 
 		/// <inheritdoc />
-		public Type[] Requires => Array.Empty<Type>();
-		
+		public ICollection<ConditionalProvide> ConditionalProvides => ArraySegment<ConditionalProvide>.Empty;
+
 		/// <inheritdoc />
-		public bool IsRequired => true;
+		public ICollection<Type> Requires => ArraySegment<Type>.Empty;
 
 
 		/// <summary>
@@ -56,7 +57,7 @@ namespace Kyoo.Postgresql
 		}
 		
 		/// <inheritdoc />
-		public void Configure(IUnityContainer container)
+		public void Configure(IUnityContainer container, ICollection<Type> availableTypes)
 		{
 			container.RegisterFactory<DatabaseContext>(_ => new PostgresContext(
 				_configuration.GetDatabaseConnection("postgres"), 

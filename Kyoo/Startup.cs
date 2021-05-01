@@ -147,14 +147,7 @@ namespace Kyoo
 			services.AddHostedService(x => x.GetService<ITaskManager>() as TaskManager);
 		}
 
-		public void ConfigureContainer(UnityContainer container)
-		{
-			// TODO move this to the configure section and figure out a way to reload ControllerActivators with the updated unity container
-
-			// TODO the reload should re inject components from the constructor.
-			// TODO fin a way to inject tasks without a IUnityContainer.
-			// container.RegisterFactory<IHostedService>(c => c.Resolve<ITaskManager>(), new SingletonLifetimeManager());
-		}
+		public void ConfigureContainer(UnityContainer container) { }
 		
 		public void Configure(IUnityContainer container, IApplicationBuilder app, IWebHostEnvironment env)
 		{

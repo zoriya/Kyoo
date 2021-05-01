@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Kyoo.Controllers;
 using Kyoo.Tasks;
 using Unity;
@@ -21,38 +22,37 @@ namespace Kyoo
 		public string Description => "The core module containing default implementations.";
 
 		/// <inheritdoc />
-		public Type[] Provides => new[]
+		public ICollection<Type> Provides => new[]
 		{
 			typeof(IFileManager),
 			typeof(ITranscoder),
 			typeof(IThumbnailsManager),
 			typeof(IProviderManager),
 			typeof(ITaskManager),
-			typeof(ILibraryManager),
-			typeof(ILibraryRepository),
-			typeof(ILibraryItemRepository),
-			typeof(ICollectionRepository),
-			typeof(IShowRepository),
-			typeof(ISeasonRepository),
-			typeof(IEpisodeRepository),
-			typeof(ITrackRepository),
-			typeof(IPeopleRepository),
-			typeof(IStudioRepository),
-			typeof(IGenreRepository),
-			typeof(IProviderRepository)
+			typeof(ILibraryManager)
 		};
 
 		/// <inheritdoc />
-		public Type[] Requires => new[]
+		public ICollection<ConditionalProvide> ConditionalProvides => new ConditionalProvide[]
 		{
-			typeof(DatabaseContext)
+			(typeof(ILibraryRepository), typeof(DatabaseContext)),
+			(typeof(ILibraryItemRepository), typeof(DatabaseContext)),
+			(typeof(ICollectionRepository), typeof(DatabaseContext)),
+			(typeof(IShowRepository), typeof(DatabaseContext)),
+			(typeof(ISeasonRepository), typeof(DatabaseContext)),
+			(typeof(IEpisodeRepository), typeof(DatabaseContext)),
+			(typeof(ITrackRepository), typeof(DatabaseContext)),
+			(typeof(IPeopleRepository), typeof(DatabaseContext)),
+			(typeof(IStudioRepository), typeof(DatabaseContext)),
+			(typeof(IGenreRepository), typeof(DatabaseContext)),
+			(typeof(IProviderRepository), typeof(DatabaseContext))
 		};
 
 		/// <inheritdoc />
-		public bool IsRequired => true;
-		
-        /// <inheritdoc />
-        public void Configure(IUnityContainer container)
+		public ICollection<Type> Requires => ArraySegment<Type>.Empty;
+
+		/// <inheritdoc />
+        public void Configure(IUnityContainer container, ICollection<Type> availableTypes)
 		{
 			container.RegisterType<IFileManager, FileManager>(new SingletonLifetimeManager());
 			container.RegisterType<ITranscoder, Transcoder>(new SingletonLifetimeManager());
@@ -61,19 +61,22 @@ namespace Kyoo
 			container.RegisterType<ITaskManager, TaskManager>(new SingletonLifetimeManager());
 			
 			container.RegisterType<ILibraryManager, LibraryManager>(new HierarchicalLifetimeManager());
-			
-			container.RegisterRepository<ILibraryRepository, LibraryRepository>();
-			container.RegisterRepository<ILibraryItemRepository, LibraryItemRepository>();
-			container.RegisterRepository<ICollectionRepository, CollectionRepository>();
-			container.RegisterRepository<IShowRepository, ShowRepository>();
-			container.RegisterRepository<ISeasonRepository, SeasonRepository>();
-			container.RegisterRepository<IEpisodeRepository, EpisodeRepository>();
-			container.RegisterRepository<ITrackRepository, TrackRepository>();
-			container.RegisterRepository<IPeopleRepository, PeopleRepository>();
-			container.RegisterRepository<IStudioRepository, StudioRepository>();
-			container.RegisterRepository<IGenreRepository, GenreRepository>();
-			container.RegisterRepository<IProviderRepository, ProviderRepository>();
-			
+
+			if (ProviderCondition.Has(typeof(DatabaseContext), availableTypes))
+			{
+				container.RegisterRepository<ILibraryRepository, LibraryRepository>();
+				container.RegisterRepository<ILibraryItemRepository, LibraryItemRepository>();
+				container.RegisterRepository<ICollectionRepository, CollectionRepository>();
+				container.RegisterRepository<IShowRepository, ShowRepository>();
+				container.RegisterRepository<ISeasonRepository, SeasonRepository>();
+				container.RegisterRepository<IEpisodeRepository, EpisodeRepository>();
+				container.RegisterRepository<ITrackRepository, TrackRepository>();
+				container.RegisterRepository<IPeopleRepository, PeopleRepository>();
+				container.RegisterRepository<IStudioRepository, StudioRepository>();
+				container.RegisterRepository<IGenreRepository, GenreRepository>();
+				container.RegisterRepository<IProviderRepository, ProviderRepository>();
+			}
+
 			container.RegisterTask<Crawler>();
 		}
 	}

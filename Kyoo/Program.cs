@@ -80,7 +80,7 @@ namespace Kyoo
 		private static IWebHostBuilder CreateWebHostBuilder(string[] args)
 		{
 			UnityContainer container = new();
-			// container.EnableDebugDiagnostic();
+			container.EnableDebugDiagnostic();
 			
 			return new WebHostBuilder()
 				.UseContentRoot(AppDomain.CurrentDomain.BaseDirectory)

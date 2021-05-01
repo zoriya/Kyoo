@@ -101,7 +101,7 @@ namespace Kyoo.Controllers
 				newPlugins.Add(new CoreModule());
 			_plugins.AddRange(newPlugins);
 
-			ICollection<Type> available = _plugins.SelectMany(x => x.Provides).ToArray();
+			ICollection<Type> available = GetProvidedTypes();
 			foreach (IPlugin plugin in newPlugins)
 			{
 				Type missing = plugin.Requires.FirstOrDefault(x => available.All(y => !y.IsAssignableTo(x)));
@@ -109,17 +109,55 @@ namespace Kyoo.Controllers
 				{
 					Exception error = new MissingDependencyException(plugin.Name, missing.Name);
 					_logger.LogCritical(error, "A plugin's dependency could not be met");
-					if (plugin.IsRequired)
-						Environment.Exit(1);
 				}
 				else
-					plugin.Configure(_container);
+					plugin.Configure(_container, available);
 			}
 
 			if (!_plugins.Any())
 				_logger.LogInformation("No plugin enabled");
 			else
 				_logger.LogInformation("Plugin enabled: {Plugins}", _plugins.Select(x => x.Name));
+		}
+
+		/// <summary>
+		/// Get the list of types provided by the currently loaded plugins.
+		/// </summary>
+		/// <returns>The list of types available.</returns>
+		private ICollection<Type> GetProvidedTypes()
+		{
+			List<Type> available = _plugins.SelectMany(x => x.Provides).ToList();
+			List<ConditionalProvide> conditionals =_plugins
+				.SelectMany(x => x.ConditionalProvides)
+				.Where(x => x.Condition.Condition())
+				.ToList();
+
+			bool IsAvailable(ConditionalProvide conditional, bool log = false)
+			{
+				if (!conditional.Condition.Condition())
+					return false;
+
+				ICollection<Type> needed = conditional.Condition.Needed
+					.Where(y => !available.Contains(y))
+					.ToList();
+				needed = needed.Where(x => !conditionals
+						.Where(y => y.Type == x)
+						.Any(y => IsAvailable(y)))
+					.ToList();
+				if (!needed.Any())
+					return true;
+				_logger.LogWarning("The type {Type} is not available, {Dependencies} could not be met",
+					conditional.Type.Name,
+					needed.Select(x => x.Name));
+				return false;
+			}
+
+			foreach (ConditionalProvide conditional in conditionals)
+			{
+				if (IsAvailable(conditional, true))
+					available.Add(conditional.Type);
+			}
+			return available;
 		}
 
 
