@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 using Unity;
 
 namespace Kyoo.Controllers
@@ -62,7 +63,25 @@ namespace Kyoo.Controllers
 		/// <param name="availableTypes">The list of types that are available for this instance. This can be used
 		/// for conditional type. See <see cref="ProviderCondition.Has(System.Type,System.Collections.Generic.ICollection{System.Type})"/>
 		/// or <see cref="ProviderCondition.Has(System.Collections.Generic.ICollection{System.Type},System.Collections.Generic.ICollection{System.Type})"/>></param>
-		void Configure(IUnityContainer container, ICollection<Type> availableTypes);
+		void Configure(IUnityContainer container, ICollection<Type> availableTypes) {}
+
+		/// <summary>
+		/// An optional configure method that will be run on plugin's startup.
+		/// This method may be used instead or with the
+		/// <see cref="Configure(Unity.IUnityContainer,System.Collections.Generic.ICollection{System.Type})"/> method
+		/// if you use a library that configure itself with a <see cref="IServiceCollection"/>.
+		/// Every service put in this container will be registered to the unity container after this method.
+		/// </summary>
+		/// <param name="services">An empty service container to register new services.</param>
+		/// <param name="availableTypes">The list of types that are available for this instance. This can be used
+		/// for conditional type. See <see cref="ProviderCondition.Has(System.Type,System.Collections.Generic.ICollection{System.Type})"/>
+		/// or <see cref="ProviderCondition.Has(System.Collections.Generic.ICollection{System.Type},System.Collections.Generic.ICollection{System.Type})"/>></param>
+		/// <returns>You should return the <see cref="services"/> parameter or another container if you want.
+		/// This container will be added to Kyoo's unity container.</returns>
+		IServiceCollection Configure(IServiceCollection services, ICollection<Type> availableTypes)
+		{
+			return services;
+		}
 		
 		/// <summary>
 		/// An optional configuration step to allow a plugin to change asp net configurations.

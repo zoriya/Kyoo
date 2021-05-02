@@ -1,25 +1,13 @@
 using System;
 using System.IO;
-using System.Reflection;
-using IdentityServer4.Extensions;
-using IdentityServer4.Services;
-using Kyoo.Api;
 using Kyoo.Controllers;
-using Kyoo.Models;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.AspNetCore.StaticFiles;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Unity;
 using Unity.Lifetime;
 
@@ -31,13 +19,11 @@ namespace Kyoo
 	public class Startup
 	{
 		private readonly IConfiguration _configuration;
-		private readonly ILoggerFactory _loggerFactory;
 
 
-		public Startup(IConfiguration configuration, ILoggerFactory loggerFactory)
+		public Startup(IConfiguration configuration)
 		{
 			_configuration = configuration;
-			_loggerFactory = loggerFactory;
 		}
 
 		public void ConfigureServices(IServiceCollection services)
@@ -62,86 +48,17 @@ namespace Kyoo
 					x.SerializerSettings.Converters.Add(new PeopleRoleConverter());
 				});
 			services.AddHttpClient();
-
-			services.AddDbContext<IdentityDatabase>(options =>
-			{
-				options.UseNpgsql(_configuration.GetDatabaseConnection("postgres"));
-			});
-
-			string assemblyName = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
-
-			services.AddIdentityCore<User>(o =>
-				{
-					o.Stores.MaxLengthForKeys = 128;
-				})
-				.AddSignInManager()
-				.AddDefaultTokenProviders()
-				.AddEntityFrameworkStores<IdentityDatabase>();
-
-			services.AddIdentityServer(options =>
-				{
-					options.IssuerUri = publicUrl;
-					options.UserInteraction.LoginUrl = publicUrl + "login";
-					options.UserInteraction.ErrorUrl = publicUrl + "error";
-					options.UserInteraction.LogoutUrl = publicUrl + "logout";
-				})
-				.AddAspNetIdentity<User>()
-				.AddConfigurationStore(options =>
-				{
-					options.ConfigureDbContext = builder =>
-						builder.UseNpgsql(_configuration.GetDatabaseConnection("postgres"),
-							sql => sql.MigrationsAssembly(assemblyName));
-				})
-				.AddOperationalStore(options =>
-				{
-					options.ConfigureDbContext = builder =>
-						builder.UseNpgsql(_configuration.GetDatabaseConnection("postgres"),
-							sql => sql.MigrationsAssembly(assemblyName));
-					options.EnableTokenCleanup = true;
-				})
-				.AddInMemoryIdentityResources(IdentityContext.GetIdentityResources())
-				.AddInMemoryApiScopes(IdentityContext.GetScopes())
-				.AddInMemoryApiResources(IdentityContext.GetApis())
-				.AddProfileService<AccountController>()
-				.AddSigninKeys(_configuration);
 			
-			services.AddAuthentication(o =>
-				{
-					o.DefaultScheme = IdentityConstants.ApplicationScheme;
-					o.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-				})
-				.AddIdentityCookies(_ => { });
-			services.AddAuthentication()
-				.AddJwtBearer(options =>
-				{
-					options.Authority = publicUrl;
-					options.Audience = "Kyoo";
-					options.RequireHttpsMetadata = false;
-				});
-
-			services.AddAuthorization(options =>
-			{
-				AuthorizationPolicyBuilder scheme = new(IdentityConstants.ApplicationScheme, JwtBearerDefaults.AuthenticationScheme);
-				options.DefaultPolicy = scheme.RequireAuthenticatedUser().Build();
-
-				string[] permissions = {"Read", "Write", "Play", "Admin"};
-				foreach (string permission in permissions)
-				{
-					options.AddPolicy(permission, policy =>
-					{
-						policy.AuthenticationSchemes.Add(IdentityConstants.ApplicationScheme);
-						policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
-						policy.AddRequirements(new AuthorizationValidator(permission));
-						// policy.RequireScope($"kyoo.{permission.ToLower()}");
-					});
-				}
-			});
-			services.AddSingleton<IAuthorizationHandler, AuthorizationValidatorHandler>();
-			
-			services.AddSingleton<ICorsPolicyService>(new DefaultCorsPolicyService(_loggerFactory.CreateLogger<DefaultCorsPolicyService>())
-			{
-				AllowedOrigins = { new Uri(publicUrl).GetLeftPart(UriPartial.Authority) }
-			});
+			// services.AddAuthorization(options =>
+			// {
+			// 	string[] permissions = {"Read", "Write", "Play", "Admin"};
+			// 	foreach (string permission in permissions)
+			// 		options.AddPolicy(permission, policy =>
+			// 		{
+			// 			policy.AddRequirements(new AuthorizationValidator(permission));
+			// 		});
+			// });
+			// services.AddAuthentication()
 
 			services.AddSingleton<ITaskManager, TaskManager>();
 			services.AddHostedService(x => x.GetService<ITaskManager>() as TaskManager);
@@ -152,9 +69,7 @@ namespace Kyoo
 		public void Configure(IUnityContainer container, IApplicationBuilder app, IWebHostEnvironment env)
 		{
 			if (env.IsDevelopment())
-			{
 				app.UseDeveloperExceptionPage();
-			}
 			else
 			{
 				app.UseExceptionHandler("/Error");
@@ -172,6 +87,7 @@ namespace Kyoo
 				app.UseSpaStaticFiles();
 
 			app.UseRouting();
+			// app.UseAuthorization();
 
 			app.Use((ctx, next) => 
 			{
@@ -186,36 +102,26 @@ namespace Kyoo
 				return next();
 			});
 			app.UseResponseCompression();
-			app.UseCookiePolicy(new CookiePolicyOptions
-			{
-				MinimumSameSitePolicy = SameSiteMode.Strict
-			});
-			app.UseAuthentication();
-			app.Use((ctx, next) =>
-			{
-				ctx.SetIdentityServerOrigin(_configuration.GetValue<string>("public_url"));
-				return next();
-			});
-			app.UseIdentityServer();
-			app.UseAuthorization();
 
-			app.UseEndpoints(endpoints =>
-			{
-				endpoints.MapControllerRoute("Kyoo", "api/{controller=Home}/{action=Index}/{id?}");
-			});
-
-			app.UseSpa(spa =>
-			{
-				spa.Options.SourcePath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "Kyoo.WebApp");
-
-				if (env.IsDevelopment())
-					spa.UseAngularCliServer("start");
-			});
-			
+			// app.UseSpa(spa =>
+			// {
+			// 	spa.Options.SourcePath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "Kyoo.WebApp");
+			//
+			// 	if (env.IsDevelopment())
+			// 		spa.UseAngularCliServer("start");
+			// });
+			//
 			container.RegisterType<IPluginManager, PluginManager>(new SingletonLifetimeManager());
 			// container.Resolve<IConfiguration>();
 			IPluginManager pluginManager = container.Resolve<IPluginManager>();
 			pluginManager.ReloadPlugins();
+			foreach (IPlugin plugin in pluginManager.GetAllPlugins())
+				plugin.ConfigureAspNet(app);
+			
+			app.UseEndpoints(endpoints =>
+			{
+				endpoints.MapControllerRoute("Kyoo", "api/{controller=Home}/{action=Index}/{id?}");
+			});
 		}
 	}
 }

@@ -36,7 +36,7 @@ namespace Kyoo.Controllers
 		public override async Task<ICollection<Studio>> Search(string query)
 		{
 			return await _database.Studios
-				.Where(x => EF.Functions.ILike(x.Name, $"%{query}%"))
+				.Where(_database.Like<Studio>(x => x.Name, $"%{query}%"))
 				.OrderBy(DefaultSort)
 				.Take(20)
 				.ToListAsync();

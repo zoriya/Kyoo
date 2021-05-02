@@ -5,7 +5,9 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 using Kyoo.Models.Exceptions;
+using Kyoo.UnityExtensions;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Unity;
 
@@ -111,7 +113,10 @@ namespace Kyoo.Controllers
 					_logger.LogCritical(error, "A plugin's dependency could not be met");
 				}
 				else
+				{
 					plugin.Configure(_container, available);
+					_container.AddServices(plugin.Configure(new ServiceCollection(), available));
+				}
 			}
 
 			if (!_plugins.Any())
@@ -146,12 +151,16 @@ namespace Kyoo.Controllers
 					.ToList();
 				if (!needed.Any())
 					return true;
-				_logger.LogWarning("The type {Type} is not available, {Dependencies} could not be met",
-					conditional.Type.Name,
-					needed.Select(x => x.Name));
+				if (log && available.All(x => x != conditional.Type))
+				{
+					_logger.LogWarning("The type {Type} is not available, {Dependencies} could not be met",
+						conditional.Type.Name,
+						needed.Select(x => x.Name));
+				}
 				return false;
 			}
 
+			// ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
 			foreach (ConditionalProvide conditional in conditionals)
 			{
 				if (IsAvailable(conditional, true))

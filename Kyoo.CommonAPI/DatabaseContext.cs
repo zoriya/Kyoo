@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
@@ -463,5 +464,15 @@ namespace Kyoo
 				entry.State = EntityState.Detached;
 			}
 		}
+
+
+		/// <summary>
+		/// Perform a case insensitive like operation.
+		/// </summary>
+		/// <param name="query">An accessor to get the item that will be checked.</param>
+		/// <param name="format">The second operator of the like format.</param>
+		/// <typeparam name="T">The type of the item to query</typeparam>
+		/// <returns>An expression representing the like query. It can directly be passed to a where call.</returns>
+		public abstract Expression<Func<T, bool>> Like<T>(Expression<Func<T, string>> query, string format);
 	}
 }

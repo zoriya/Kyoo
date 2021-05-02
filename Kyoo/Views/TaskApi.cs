@@ -2,15 +2,17 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Kyoo.Controllers;
+using Kyoo.Models.Attributes;
 using Kyoo.Models.Exceptions;
 using Microsoft.AspNetCore.Authorization;
+using static Kyoo.Models.Attributes.PermissionAttribute;
 
 namespace Kyoo.Api
 {
 	[Route("api/task")]
 	[Route("api/tasks")]
 	[ApiController]
-	[Authorize(Policy="Admin")]
+	// [Authorize(Policy="Admin")]
 	public class TaskApi : ControllerBase
 	{
 		private readonly ITaskManager _taskManager;
@@ -22,6 +24,7 @@ namespace Kyoo.Api
 
 
 		[HttpGet]
+		[Permission("task", Kind.Read)]
 		public ActionResult<ICollection<ITask>> GetTasks()
 		{
 			return Ok(_taskManager.GetAllTasks());

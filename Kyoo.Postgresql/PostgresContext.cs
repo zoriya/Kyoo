@@ -1,4 +1,6 @@
 using System;
+using System.Linq.Expressions;
+using System.Reflection;
 using Kyoo.Models;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
@@ -71,6 +73,15 @@ namespace Kyoo.Postgresql
 		protected override bool IsDuplicateException(Exception ex)
 		{
 			return ex.InnerException is PostgresException {SqlState: PostgresErrorCodes.UniqueViolation};
+		}
+
+		/// <inheritdoc />
+		public override Expression<Func<T, bool>> Like<T>(Expression<Func<T, string>> query, string format)
+		{
+			MethodInfo iLike = MethodOfUtils.MethodOf<string, string, bool>(EF.Functions.ILike);
+			MethodCallExpression call = Expression.Call(iLike, query.Body, Expression.Constant(format));
+
+			return Expression.Lambda<Func<T, bool>>(call, query.Parameters);
 		}
 	}
 }

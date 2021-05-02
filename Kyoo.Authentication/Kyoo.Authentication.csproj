@@ -2,11 +2,12 @@
 	
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
-		<OutputPath>../Kyoo/bin/$(Configuration)/$(TargetFramework)/plugins/postgresql</OutputPath>
+		<OutputPath>../Kyoo/bin/$(Configuration)/$(TargetFramework)/plugins/authentication</OutputPath>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<ProduceReferenceAssembly>false</ProduceReferenceAssembly>
 		<GenerateDependencyFile>false</GenerateDependencyFile>
 		<GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 
 		<Company>SDG</Company>
 		<Authors>Zoe Roux</Authors>
@@ -14,6 +15,16 @@
 		<LangVersion>default</LangVersion>
 	</PropertyGroup>
 
+	<ItemGroup>
+		<PackageReference Include="IdentityServer4" Version="4.1.1" />
+		<PackageReference Include="IdentityServer4.AspNetIdentity" Version="4.1.1" />
+		<PackageReference Include="IdentityServer4.EntityFramework" Version="4.1.1" />
+		<PackageReference Include="IdentityServer4.EntityFramework.Storage" Version="4.1.1" />
+		<PackageReference Include="IdentityServer4.Storage" Version="4.1.1" />
+		<PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
+		<PackageReference Include="Portable.BouncyCastle" Version="1.8.9" />
+	</ItemGroup>
+	
 	<ItemGroup>
 		<ProjectReference Include="../Kyoo.Common/Kyoo.Common.csproj">
 			<PrivateAssets>all</PrivateAssets>

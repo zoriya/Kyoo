@@ -25,7 +25,7 @@ namespace Kyoo.Postgresql
 		/// <inheritdoc />
 		public ICollection<Type> Provides => new[]
 		{
-			typeof(PostgresContext)
+			typeof(DatabaseContext)
 		};
 
 		/// <inheritdoc />

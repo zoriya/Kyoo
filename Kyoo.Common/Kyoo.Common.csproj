@@ -28,4 +28,10 @@
 		<PackageReference Include="Unity.Abstractions" Version="5.11.7" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Reference Include="Microsoft.Extensions.DependencyInjection.Abstractions, Version=5.0.0.0, Culture=neutral, PublicKeyToken=adb9793829ddae60">
+	    <HintPath>..\..\..\..\..\..\usr\share\dotnet\shared\Microsoft.AspNetCore.App\5.0.5\Microsoft.Extensions.DependencyInjection.Abstractions.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
+
 </Project>

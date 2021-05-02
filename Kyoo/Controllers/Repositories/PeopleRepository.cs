@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
@@ -52,7 +51,7 @@ namespace Kyoo.Controllers
 		public override async Task<ICollection<People>> Search(string query)
 		{
 			return await _database.People
-				.Where(people => EF.Functions.ILike(people.Name, $"%{query}%"))
+				.Where(_database.Like<People>(x => x.Name, $"%{query}%"))
 				.OrderBy(DefaultSort)
 				.Take(20)
 				.ToListAsync();

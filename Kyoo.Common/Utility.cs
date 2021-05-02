@@ -146,7 +146,7 @@ namespace Kyoo
 		}
 
 		/// <summary>
-		/// Set every fields of first to those of second. Ignore fields marked with the <see cref="NotMergableAttribute"/> attribute
+		/// Set every fields of first to those of second. Ignore fields marked with the <see cref="NotMergeableAttribute"/> attribute
 		/// At the end, the OnMerge method of first will be called if first is a <see cref="IOnMerge"/>
 		/// </summary>
 		/// <param name="first">The object to assign</param>
@@ -158,7 +158,7 @@ namespace Kyoo
 			Type type = typeof(T);
 			IEnumerable<PropertyInfo> properties = type.GetProperties()
 				.Where(x => x.CanRead && x.CanWrite 
-				                      && Attribute.GetCustomAttribute(x, typeof(NotMergableAttribute)) == null);
+				                      && Attribute.GetCustomAttribute(x, typeof(NotMergeableAttribute)) == null);
 			
 			foreach (PropertyInfo property in properties)
 			{
@@ -191,7 +191,7 @@ namespace Kyoo
 			Type type = typeof(T);
 			IEnumerable<PropertyInfo> properties = type.GetProperties()
 				.Where(x => x.CanRead && x.CanWrite 
-				                      && Attribute.GetCustomAttribute(x, typeof(NotMergableAttribute)) == null);
+				                      && Attribute.GetCustomAttribute(x, typeof(NotMergeableAttribute)) == null);
 
 			if (where != null)
 				properties = properties.Where(where);
@@ -232,7 +232,7 @@ namespace Kyoo
 			Type type = typeof(T);
 			IEnumerable<PropertyInfo> properties = type.GetProperties()
 				.Where(x => x.CanRead && x.CanWrite 
-				                      && Attribute.GetCustomAttribute(x, typeof(NotMergableAttribute)) == null);
+				                      && Attribute.GetCustomAttribute(x, typeof(NotMergeableAttribute)) == null);
 			
 			foreach (PropertyInfo property in properties)
 			{

@@ -17,10 +17,16 @@
 
   "logging": {
     "logLevel": {
-      "default": "Warning",
-      "Microsoft": "Warning",
-      "Microsoft.Hosting.Lifetime": "Information",
+      "default": "Trace",
       "Kyoo": "Trace"
+    }
+  },
+  
+  "authentication": {
+    "certificate": {
+      "file": "certificate.pfx",
+      "oldFile": "oldCertificate.pfx",
+      "password": "passphrase"
     }
   },
   
@@ -30,8 +36,6 @@
   "scheduledTasks": {
     "scan": "24:00:00"
   },
-  
-  "certificatePassword": "passphrase",
 
   "transmuxTempPath": "cached/kyoo/transmux",
   "transcodeTempPath": "cached/kyoo/transcode",

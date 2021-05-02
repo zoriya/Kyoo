@@ -35,18 +35,7 @@
 	<ItemGroup>
 		<ProjectReference Include="../Kyoo.Common/Kyoo.Common.csproj" />
 		<ProjectReference Include="../Kyoo.CommonAPI/Kyoo.CommonAPI.csproj" />
-		<PackageReference Include="IdentityServer4" Version="4.1.1" />
-		<PackageReference Include="IdentityServer4.AspNetIdentity" Version="4.1.1" />
-		<PackageReference Include="IdentityServer4.EntityFramework" Version="4.1.1" />
-		<PackageReference Include="IdentityServer4.EntityFramework.Storage" Version="4.1.1" />
-		<PackageReference Include="IdentityServer4.Storage" Version="4.1.1" />
-		<PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.3" />
-		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.2" />
-		<PackageReference Include="Portable.BouncyCastle" Version="1.8.9" />
 		<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
-		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="5.0.3" />
-		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.3" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.3" />
 		<PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="3.1.12" />
 		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.3" />

@@ -79,9 +79,7 @@ namespace Kyoo.Controllers
 		{
 			query = $"%{query}%";
 			return await _database.Shows
-				.Where(x => EF.Functions.ILike(x.Title, query) 
-				            || EF.Functions.ILike(x.Slug, query) 
-							/*|| x.Aliases.Any(y => EF.Functions.ILike(y, query))*/) // NOT TRANSLATABLE.
+				.Where(_database.Like<Show>(x => x.Title + " " + x.Slug, query))
 				.OrderBy(DefaultSort)
 				.Take(20)
 				.ToListAsync();
