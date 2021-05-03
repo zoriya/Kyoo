@@ -18,6 +18,8 @@
   "logging": {
     "logLevel": {
       "default": "Trace",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information",
       "Kyoo": "Trace"
     }
   },

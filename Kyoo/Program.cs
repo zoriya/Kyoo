@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Unity;
+using Unity.Microsoft.DependencyInjection;
 
 namespace Kyoo
 {
@@ -99,7 +100,8 @@ namespace Kyoo
 					if (context.HostingEnvironment.IsDevelopment())
 						StaticWebAssetsLoader.UseStaticWebAssets(context.HostingEnvironment, context.Configuration);
 				})
-				.UseUnityProvider(container)
+				// .UseUnityProvider(container)
+				.UseUnityServiceProvider(container)
 				.ConfigureServices(x => x.AddRouting())
 				.UseKestrel(options => { options.AddServerHeader = false; })
 				.UseIIS()

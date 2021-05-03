@@ -3,11 +3,13 @@ using System.IO;
 using Kyoo.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Unity;
 using Unity.Lifetime;
 
@@ -19,11 +21,13 @@ namespace Kyoo
 	public class Startup
 	{
 		private readonly IConfiguration _configuration;
+		private readonly ILoggerFactory _loggerFactory;
 
 
-		public Startup(IConfiguration configuration)
+		public Startup(IConfiguration configuration, ILoggerFactory loggerFactory, IServiceProvider provider)
 		{
 			_configuration = configuration;
+			_loggerFactory = loggerFactory;
 		}
 
 		public void ConfigureServices(IServiceCollection services)
@@ -60,11 +64,20 @@ namespace Kyoo
 			// });
 			// services.AddAuthentication()
 
+			
+			// container.Resolve<IConfiguration>();
+
 			services.AddSingleton<ITaskManager, TaskManager>();
 			services.AddHostedService(x => x.GetService<ITaskManager>() as TaskManager);
 		}
 
-		public void ConfigureContainer(UnityContainer container) { }
+		public void ConfigureContainer(IUnityContainer container)
+		{
+			container.RegisterType<IPluginManager, PluginManager>(new SingletonLifetimeManager());
+			container.RegisterInstance(_configuration);
+			PluginManager pluginManager = new(container, _configuration, _loggerFactory.CreateLogger<PluginManager>());
+			pluginManager.ReloadPlugins();
+		}
 		
 		public void Configure(IUnityContainer container, IApplicationBuilder app, IWebHostEnvironment env)
 		{
@@ -103,18 +116,15 @@ namespace Kyoo
 			});
 			app.UseResponseCompression();
 
-			// app.UseSpa(spa =>
-			// {
-			// 	spa.Options.SourcePath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "Kyoo.WebApp");
-			//
-			// 	if (env.IsDevelopment())
-			// 		spa.UseAngularCliServer("start");
-			// });
-			//
-			container.RegisterType<IPluginManager, PluginManager>(new SingletonLifetimeManager());
-			// container.Resolve<IConfiguration>();
+			app.UseSpa(spa =>
+			{
+				spa.Options.SourcePath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "Kyoo.WebApp");
+			
+				if (env.IsDevelopment())
+					spa.UseAngularCliServer("start");
+			});
+			
 			IPluginManager pluginManager = container.Resolve<IPluginManager>();
-			pluginManager.ReloadPlugins();
 			foreach (IPlugin plugin in pluginManager.GetAllPlugins())
 				plugin.ConfigureAspNet(app);
 			

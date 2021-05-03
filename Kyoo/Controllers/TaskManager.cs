@@ -24,7 +24,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		private readonly IUnityContainer _container;
 		/// <summary>
-		/// The configuration instance used to get schedule informations
+		/// The configuration instance used to get schedule information
 		/// </summary>
 		private readonly IConfiguration _configuration;
 		/// <summary>
@@ -37,7 +37,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		private List<(ITask task, DateTime scheduledDate)> _tasks;
 		/// <summary>
-		/// The queue of tasks that should be runned as soon as possible.
+		/// The queue of tasks that should be run as soon as possible.
 		/// </summary>
 		private readonly Queue<(ITask, Dictionary<string, object>)> _queuedTasks = new();
 		/// <summary>
@@ -108,27 +108,11 @@ namespace Kyoo.Controllers
 					_runningTask = task;
 					try
 					{
-						ICollection<TaskParameter> all = task.GetParameters();
-						TaskParameters args = new(arguments
-							.Select(x => (value: x, arg: all
-								.FirstOrDefault(y => string.Equals(y.Name, x.Key, StringComparison.OrdinalIgnoreCase))))
-							.Select(x =>
-							{
-								if (x.arg == null)
-									throw new ArgumentException($"Invalid argument name: {x.value.Key}");
-								return x.arg.CreateValue(x.value.Value);
-							}));
-						
-						
-						_logger.LogInformation("Task starting: {Task}", task.Name);
-						InjectServices(task);
-						await task.Run(args, _taskToken.Token);
-						_logger.LogInformation("Task finished: {Task}", task.Name);
+						await RunTask(task, arguments);
 					}
 					catch (Exception e)
 					{
-						_logger.LogError("An unhandled exception occured while running the task {Task}.\n" +
-						                 "Inner exception: {Exception}\n\n", task.Name, e.Message);
+						_logger.LogError(e, "An unhandled exception occured while running the task {Task}", task.Name);
 					}
 				}
 				else
@@ -140,13 +124,50 @@ namespace Kyoo.Controllers
 		}
 
 		/// <summary>
+		/// Parse parameters, inject a task and run it.
+		/// </summary>
+		/// <param name="task">The task to run</param>
+		/// <param name="arguments">The arguments to pass to the function</param>
+		/// <exception cref="ArgumentException">There was an invalid argument or a required argument was not found.</exception>
+		private async Task RunTask(ITask task, Dictionary<string, object> arguments)
+		{
+			_logger.LogInformation("Task starting: {Task}", task.Name);
+			
+			ICollection<TaskParameter> all = task.GetParameters();
+
+			ICollection<string> invalids = arguments.Keys
+				.Where(x => all.Any(y => x != y.Name))
+				.ToArray();
+			if (invalids.Any())
+			{
+				string invalidsStr = string.Join(", ", invalids);
+				throw new ArgumentException($"{invalidsStr} are invalid arguments for the task {task.Name}");
+			}
+			
+			TaskParameters args = new(all
+				.Select(x =>
+				{
+					object value = arguments
+						.FirstOrDefault(y => string.Equals(y.Key, x.Name, StringComparison.OrdinalIgnoreCase))
+						.Value;
+					if (value == null && x.IsRequired)
+						throw new ArgumentException($"The argument {x.Name} is required to run {task.Name}" +
+						                            " but it was not specified.");
+					return x.CreateValue(value ?? x.DefaultValue);
+				}));
+			
+			InjectServices(task);
+			await task.Run(args, _taskToken.Token);
+			_logger.LogInformation("Task finished: {Task}", task.Name);
+		}
+
+		/// <summary>
 		/// Inject services into the <see cref="InjectedAttribute"/> marked properties of the given object.
 		/// </summary>
 		/// <param name="obj">The object to inject</param>
-		/// <typeparam name="T">The type of the object.</typeparam>
-		private void InjectServices<T>(T obj)
+		private void InjectServices(ITask obj)
 		{
-			IEnumerable<PropertyInfo> properties = typeof(T).GetProperties()
+			IEnumerable<PropertyInfo> properties = obj.GetType().GetProperties()
 				.Where(x => x.GetCustomAttribute<InjectedAttribute>() != null)
 				.Where(x => x.CanWrite);
 
@@ -180,7 +201,7 @@ namespace Kyoo.Controllers
 				.Where(x => x.RunOnStartup && x.Priority != int.MaxValue)
 				.OrderByDescending(x => x.Priority);
 			foreach (ITask task in startupTasks)
-				_queuedTasks.Enqueue((task, null));
+				_queuedTasks.Enqueue((task, new Dictionary<string, object>()));
 		}
 
 		/// <inheritdoc />

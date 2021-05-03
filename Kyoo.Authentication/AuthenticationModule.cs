@@ -105,6 +105,7 @@ namespace Kyoo.Authentication
 				.AddInMemoryIdentityResources(IdentityContext.GetIdentityResources())
 				.AddInMemoryApiScopes(IdentityContext.GetScopes())
 				.AddInMemoryApiResources(IdentityContext.GetApis())
+				.AddInMemoryClients(IdentityContext.GetClients())
 				// .AddProfileService<AccountController>()
 				.AddSigninKeys(certificateOptions);
 

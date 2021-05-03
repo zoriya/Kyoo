@@ -145,6 +145,7 @@ namespace Kyoo.Controllers
 				ICollection<Type> needed = conditional.Condition.Needed
 					.Where(y => !available.Contains(y))
 					.ToList();
+				// TODO handle circular dependencies, actually it might stack overflow.
 				needed = needed.Where(x => !conditionals
 						.Where(y => y.Type == x)
 						.Any(y => IsAvailable(y)))

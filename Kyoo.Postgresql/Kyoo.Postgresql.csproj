@@ -7,6 +7,7 @@
 		<ProduceReferenceAssembly>false</ProduceReferenceAssembly>
 		<GenerateDependencyFile>false</GenerateDependencyFile>
 		<GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>
+		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 
 		<Company>SDG</Company>
 		<Authors>Zoe Roux</Authors>
