@@ -5,11 +5,10 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
 using Kyoo.Models.Exceptions;
-using Kyoo.UnityExtensions;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Unity;
 
 namespace Kyoo.Controllers
 {
@@ -20,9 +19,9 @@ namespace Kyoo.Controllers
 	public class PluginManager : IPluginManager
 	{
 		/// <summary>
-		/// The unity container. It is given to the Configure method of plugins.
+		/// The service provider. It allow plugin's activation.
 		/// </summary>
-		private readonly IUnityContainer _container;
+		private readonly IServiceProvider _provider;
 		/// <summary>
 		/// The configuration to get the plugin's directory.
 		/// </summary>
@@ -40,14 +39,14 @@ namespace Kyoo.Controllers
 		/// <summary>
 		/// Create a new <see cref="PluginManager"/> instance.
 		/// </summary>
-		/// <param name="container">A unity container to allow plugins to register new entries</param>
+		/// <param name="provider">A service container to allow initialization of plugins</param>
 		/// <param name="config">The configuration instance, to get the plugin's directory path.</param>
 		/// <param name="logger">The logger used by this class.</param>
-		public PluginManager(IUnityContainer container,
+		public PluginManager(IServiceProvider provider,
 			IConfiguration config,
 			ILogger<PluginManager> logger)
 		{
-			_container = container;
+			_provider = provider;
 			_config = config;
 			_logger = logger;
 		}
@@ -72,7 +71,7 @@ namespace Kyoo.Controllers
 		}
 
 		/// <inheritdoc />
-		public void ReloadPlugins()
+		public void LoadPlugins(ICollection<IPlugin> plugins)
 		{
 			string pluginFolder = _config.GetValue<string>("plugins");
 			if (!Directory.Exists(pluginFolder))
@@ -80,7 +79,7 @@ namespace Kyoo.Controllers
 
 			_logger.LogTrace("Loading new plugins...");
 			string[] pluginsPaths = Directory.GetFiles(pluginFolder, "*.dll", SearchOption.AllDirectories);
-			ICollection<IPlugin> newPlugins = pluginsPaths.SelectMany(path =>
+			plugins = pluginsPaths.SelectMany(path =>
 			{
 				path = Path.GetFullPath(path);
 				try
@@ -90,7 +89,7 @@ namespace Kyoo.Controllers
 					return assembly.GetTypes()
 						.Where(x => typeof(IPlugin).IsAssignableFrom(x))
 						.Where(x => _plugins.All(y => y.GetType() != x))
-						.Select(x => (IPlugin)_container.Resolve(x))
+						.Select(x => (IPlugin)ActivatorUtilities.CreateInstance(_provider, x))
 						.ToArray();
 				}
 				catch (Exception ex)
@@ -98,31 +97,39 @@ namespace Kyoo.Controllers
 					_logger.LogError(ex, "Could not load the plugin at {Path}", path);
 					return Array.Empty<IPlugin>();
 				}
-			}).ToList();
-			if (!_plugins.Any())
-				newPlugins.Add(new CoreModule());
-			_plugins.AddRange(newPlugins);
+			}).Concat(plugins).ToList();
 
 			ICollection<Type> available = GetProvidedTypes();
-			foreach (IPlugin plugin in newPlugins)
+			_plugins.AddRange(plugins.Where(plugin =>
 			{
 				Type missing = plugin.Requires.FirstOrDefault(x => available.All(y => !y.IsAssignableTo(x)));
-				if (missing != null)
-				{
-					Exception error = new MissingDependencyException(plugin.Name, missing.Name);
-					_logger.LogCritical(error, "A plugin's dependency could not be met");
-				}
-				else
-				{
-					plugin.Configure(_container, available);
-					_container.AddServices(plugin.Configure(new ServiceCollection(), available));
-				}
-			}
-
+				if (missing == null)
+					return true;
+				
+				Exception error = new MissingDependencyException(plugin.Name, missing.Name);
+				_logger.LogCritical(error, "A plugin's dependency could not be met");
+				return false;
+			}));
+			
 			if (!_plugins.Any())
 				_logger.LogInformation("No plugin enabled");
 			else
 				_logger.LogInformation("Plugin enabled: {Plugins}", _plugins.Select(x => x.Name));
+		}
+		
+		/// <inheritdoc />
+		public void ConfigureServices(IServiceCollection services)
+		{
+			ICollection<Type> available = GetProvidedTypes();
+			foreach (IPlugin plugin in _plugins)
+				plugin.Configure(services, available);
+		}
+
+		/// <inheritdoc />
+		public void ConfigureAspnet(IApplicationBuilder app)
+		{
+			foreach (IPlugin plugin in _plugins)
+				plugin.ConfigureAspNet(app);
 		}
 
 		/// <summary>

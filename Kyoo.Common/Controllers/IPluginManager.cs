@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using Kyoo.Models.Exceptions;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
@@ -29,11 +31,26 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <returns>All plugins currently loaded.</returns>
 		public ICollection<IPlugin> GetAllPlugins();
+
+		/// <summary>
+		/// Load plugins and their dependencies from the plugin directory.
+		/// </summary>
+		/// <param name="plugins">
+		/// An initial plugin list to use.
+		/// You should not try to put plugins from the plugins directory here as they will get automatically loaded.
+		/// </param>
+		public void LoadPlugins(ICollection<IPlugin> plugins);
+
+		/// <summary>
+		/// Configure services adding or removing services as the plugins wants.
+		/// </summary>
+		/// <param name="services">The service collection to populate</param>
+		public void ConfigureServices(IServiceCollection services);
 		
 		/// <summary>
-		/// Load new plugins from the plugin directory.
+		/// Configure an asp net application applying plugins policies.
 		/// </summary>
-		/// <exception cref="MissingDependencyException">If a plugin can't be loaded because a dependency can't be resolved.</exception>
-		public void ReloadPlugins();
+		/// <param name="app">The asp net application to configure</param>
+		public void ConfigureAspnet(IApplicationBuilder app);
 	}
 }

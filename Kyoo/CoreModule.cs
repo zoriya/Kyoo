@@ -2,8 +2,7 @@ using System;
 using System.Collections.Generic;
 using Kyoo.Controllers;
 using Kyoo.Tasks;
-using Unity;
-using Unity.Lifetime;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo
 {
@@ -52,32 +51,33 @@ namespace Kyoo
 		public ICollection<Type> Requires => ArraySegment<Type>.Empty;
 
 		/// <inheritdoc />
-        public void Configure(IUnityContainer container, ICollection<Type> availableTypes)
+        public void Configure(IServiceCollection services, ICollection<Type> availableTypes)
 		{
-			container.RegisterType<IFileManager, FileManager>(new SingletonLifetimeManager());
-			container.RegisterType<ITranscoder, Transcoder>(new SingletonLifetimeManager());
-			container.RegisterType<IThumbnailsManager, ThumbnailsManager>(new SingletonLifetimeManager());
-			container.RegisterType<IProviderManager, ProviderManager>(new SingletonLifetimeManager());
-			container.RegisterType<ITaskManager, TaskManager>(new SingletonLifetimeManager());
+			services.AddSingleton<IFileManager, FileManager>();
+			services.AddSingleton<ITranscoder, Transcoder>();
+			services.AddSingleton<IThumbnailsManager, ThumbnailsManager>();
+			services.AddSingleton<IProviderManager, ProviderManager>();
+			services.AddSingleton<ITaskManager, TaskManager>();
+			services.AddHostedService(x => x.GetService<ITaskManager>() as TaskManager);
 			
-			container.RegisterType<ILibraryManager, LibraryManager>(new HierarchicalLifetimeManager());
+			services.AddScoped<ILibraryManager, LibraryManager>();
 
 			if (ProviderCondition.Has(typeof(DatabaseContext), availableTypes))
 			{
-				container.RegisterRepository<ILibraryRepository, LibraryRepository>();
-				container.RegisterRepository<ILibraryItemRepository, LibraryItemRepository>();
-				container.RegisterRepository<ICollectionRepository, CollectionRepository>();
-				container.RegisterRepository<IShowRepository, ShowRepository>();
-				container.RegisterRepository<ISeasonRepository, SeasonRepository>();
-				container.RegisterRepository<IEpisodeRepository, EpisodeRepository>();
-				container.RegisterRepository<ITrackRepository, TrackRepository>();
-				container.RegisterRepository<IPeopleRepository, PeopleRepository>();
-				container.RegisterRepository<IStudioRepository, StudioRepository>();
-				container.RegisterRepository<IGenreRepository, GenreRepository>();
-				container.RegisterRepository<IProviderRepository, ProviderRepository>();
+				services.AddRepository<ILibraryRepository, LibraryRepository>();
+				services.AddRepository<ILibraryItemRepository, LibraryItemRepository>();
+				services.AddRepository<ICollectionRepository, CollectionRepository>();
+				services.AddRepository<IShowRepository, ShowRepository>();
+				services.AddRepository<ISeasonRepository, SeasonRepository>();
+				services.AddRepository<IEpisodeRepository, EpisodeRepository>();
+				services.AddRepository<ITrackRepository, TrackRepository>();
+				services.AddRepository<IPeopleRepository, PeopleRepository>();
+				services.AddRepository<IStudioRepository, StudioRepository>();
+				services.AddRepository<IGenreRepository, GenreRepository>();
+				services.AddRepository<IProviderRepository, ProviderRepository>();
 			}
 
-			container.RegisterTask<Crawler>();
+			services.AddTask<Crawler>();
 		}
 	}
 }

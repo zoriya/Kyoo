@@ -62,7 +62,7 @@ namespace Kyoo.Authentication
 		}
 
 		/// <inheritdoc />
-		public IServiceCollection Configure(IServiceCollection services, ICollection<Type> availableTypes)
+		public void Configure(IServiceCollection services, ICollection<Type> availableTypes)
 		{
 			string publicUrl = _configuration.GetValue<string>("public_url");
 
@@ -148,7 +148,6 @@ namespace Kyoo.Authentication
 				AllowedOrigins = {new Uri(publicUrl).GetLeftPart(UriPartial.Authority)}
 			}; 
 			services.AddSingleton<ICorsPolicyService>(cors);
-			return services;
 		}
 
 		/// <inheritdoc />

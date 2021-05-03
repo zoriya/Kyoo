@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using Kyoo.Controllers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Unity;
 
 namespace Kyoo.Postgresql
 {
@@ -57,9 +57,9 @@ namespace Kyoo.Postgresql
 		}
 		
 		/// <inheritdoc />
-		public void Configure(IUnityContainer container, ICollection<Type> availableTypes)
+		public void Configure(IServiceCollection services, ICollection<Type> availableTypes)
 		{
-			container.RegisterFactory<DatabaseContext>(_ => new PostgresContext(
+			services.AddScoped<DatabaseContext>(_ => new PostgresContext(
 				_configuration.GetDatabaseConnection("postgres"), 
 				_environment.IsDevelopment()));
 		}

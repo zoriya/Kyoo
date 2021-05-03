@@ -1,6 +1,6 @@
 using System;
 using Kyoo.Controllers;
-using Unity;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo
 {
@@ -12,55 +12,55 @@ namespace Kyoo
 		/// <summary>
 		/// Register a new task to the container.
 		/// </summary>
-		/// <param name="container">The container</param>
+		/// <param name="services">The container</param>
 		/// <typeparam name="T">The type of the task</typeparam>
 		/// <returns>The initial container.</returns>
-		public static IUnityContainer RegisterTask<T>(this IUnityContainer container)
+		public static IServiceCollection AddTask<T>(this IServiceCollection services)
 			where T : class, ITask
 		{
-			container.RegisterType<ITask, T>();
-			return container;
+			services.AddSingleton<ITask, T>();
+			return services;
 		}
 
 		/// <summary>
 		/// Register a new repository to the container.
 		/// </summary>
-		/// <param name="container">The container</param>
+		/// <param name="services">The container</param>
+		/// <param name="lifetime">The lifetime of the repository. The default is scoped.</param>
 		/// <typeparam name="T">The type of the repository.</typeparam>
 		/// <remarks>
-		/// If your repository implements a special interface, please use <see cref="RegisterRepository{T,T}"/>
+		/// If your repository implements a special interface, please use <see cref="AddRepository{T,T2}"/>
 		/// </remarks>
 		/// <returns>The initial container.</returns>
-		public static IUnityContainer RegisterRepository<T>(this IUnityContainer container)
+		public static IServiceCollection AddRepository<T>(this IServiceCollection services, 
+			ServiceLifetime lifetime = ServiceLifetime.Scoped)
 			where T : IBaseRepository
 		{
 			Type repository = Utility.GetGenericDefinition(typeof(T), typeof(IRepository<>));
 
 			if (repository != null)
-			{
-				container.RegisterType(repository, typeof(T));
-				container.RegisterType<IBaseRepository, T>(repository.FriendlyName());
-			}
-			else
-				container.RegisterType<IBaseRepository, T>(typeof(T).FriendlyName());
-			return container;
+				services.Add(ServiceDescriptor.Describe(repository, typeof(T), lifetime));
+			services.Add(ServiceDescriptor.Describe(typeof(IBaseRepository), typeof(T), lifetime));
+			return services;
 		}
 
 		/// <summary>
 		/// Register a new repository with a custom mapping to the container.
 		/// </summary>
-		/// <param name="container"></param>
+		/// <param name="services"></param>
+		/// <param name="lifetime">The lifetime of the repository. The default is scoped.</param>
 		/// <typeparam name="T">The custom mapping you have for your repository.</typeparam>
 		/// <typeparam name="T2">The type of the repository.</typeparam>
 		/// <remarks>
-		/// If your repository does not implements a special interface, please use <see cref="RegisterRepository{T}"/>
+		/// If your repository does not implements a special interface, please use <see cref="AddRepository{T}"/>
 		/// </remarks>
 		/// <returns>The initial container.</returns>
-		public static IUnityContainer RegisterRepository<T, T2>(this IUnityContainer container)
+		public static IServiceCollection AddRepository<T, T2>(this IServiceCollection services,
+			ServiceLifetime lifetime = ServiceLifetime.Scoped)
 			where T2 : IBaseRepository, T
 		{
-			container.RegisterType<T, T2>();
-			return container.RegisterRepository<T2>();
+			services.Add(ServiceDescriptor.Describe(typeof(T), typeof(T2), lifetime));
+			return services.AddRepository<T2>(lifetime);
 		}
 	}
 }

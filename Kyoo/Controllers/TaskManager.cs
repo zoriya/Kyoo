@@ -9,7 +9,6 @@ using Kyoo.Models.Exceptions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Unity;
 
 namespace Kyoo.Controllers
 {
@@ -22,7 +21,7 @@ namespace Kyoo.Controllers
 		/// <summary>
 		/// The service provider used to activate 
 		/// </summary>
-		private readonly IUnityContainer _container;
+		private readonly IServiceProvider _provider;
 		/// <summary>
 		/// The configuration instance used to get schedule information
 		/// </summary>
@@ -54,15 +53,15 @@ namespace Kyoo.Controllers
 		/// Create a new <see cref="TaskManager"/>.
 		/// </summary>
 		/// <param name="tasks">The list of tasks to manage</param>
-		/// <param name="container">The service provider to request services for tasks</param>
+		/// <param name="provider">The service provider to request services for tasks</param>
 		/// <param name="configuration">The configuration to load schedule information.</param>
 		/// <param name="logger">The logger.</param>
 		public TaskManager(IEnumerable<ITask> tasks,
-			IUnityContainer container, 
+			IServiceProvider provider, 
 			IConfiguration configuration,
 			ILogger<TaskManager> logger)
 		{
-			_container = container;
+			_provider = provider;
 			_configuration = configuration.GetSection("scheduledTasks");
 			_logger = logger;
 			_tasks = tasks.Select(x => (x, DateTime.Now + GetTaskDelay(x.Slug))).ToList();
@@ -173,7 +172,7 @@ namespace Kyoo.Controllers
 
 			foreach (PropertyInfo property in properties)
 			{
-				object value = _container.Resolve(property.PropertyType);
+				object value = _provider.GetService(property.PropertyType);
 				property.SetValue(obj, value);
 			}
 		}
@@ -244,7 +243,7 @@ namespace Kyoo.Controllers
 		/// <inheritdoc />
 		public void ReloadTasks()
 		{
-			_tasks = _container.Resolve<IEnumerable<ITask>>().Select(x => (x, DateTime.Now + GetTaskDelay(x.Slug))).ToList();
+			// _tasks = _provider.Resolve<IEnumerable<ITask>>().Select(x => (x, DateTime.Now + GetTaskDelay(x.Slug))).ToList();
 			EnqueueStartupTasks();
 		}
 	}

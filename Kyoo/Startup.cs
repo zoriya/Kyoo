@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Kyoo.Controllers;
+using Kyoo.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
@@ -10,8 +11,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Unity;
-using Unity.Lifetime;
 
 namespace Kyoo
 {
@@ -20,16 +19,38 @@ namespace Kyoo
 	/// </summary>
 	public class Startup
 	{
+		/// <summary>
+		/// The configuration context
+		/// </summary>
 		private readonly IConfiguration _configuration;
-		private readonly ILoggerFactory _loggerFactory;
+		/// <summary>
+		/// A plugin manager used to load plugins and allow them to configure services / asp net.
+		/// </summary>
+		private readonly IPluginManager _plugins;
 
 
-		public Startup(IConfiguration configuration, ILoggerFactory loggerFactory, IServiceProvider provider)
+		/// <summary>
+		/// Created from the DI container, those services are needed to load information and instantiate plugins.s
+		/// </summary>
+		/// <param name="hostProvider">
+		/// The ServiceProvider used to create this <see cref="Startup"/> instance.
+		/// The host provider that contains only well-known services that are Kyoo independent.
+		/// This is used to instantiate plugins that might need a logger, a configuration or an host environment.
+		/// </param>
+		/// <param name="configuration">The configuration context</param>
+		/// <param name="loggerFactory">A logger factory used to create a logger for the plugin manager.</param>
+		public Startup(IServiceProvider hostProvider, IConfiguration configuration, ILoggerFactory loggerFactory)
 		{
 			_configuration = configuration;
-			_loggerFactory = loggerFactory;
+			_plugins = new PluginManager(hostProvider, _configuration, loggerFactory.CreateLogger<PluginManager>());
+			
+			_plugins.LoadPlugins(new [] {new CoreModule()});
 		}
 
+		/// <summary>
+		/// Configure the WebApp services context.
+		/// </summary>
+		/// <param name="services">The service collection to fill.</param>
 		public void ConfigureServices(IServiceCollection services)
 		{
 			string publicUrl = _configuration.GetValue<string>("public_url");
@@ -63,23 +84,18 @@ namespace Kyoo
 			// 		});
 			// });
 			// services.AddAuthentication()
-
 			
-			// container.Resolve<IConfiguration>();
-
-			services.AddSingleton<ITaskManager, TaskManager>();
-			services.AddHostedService(x => x.GetService<ITaskManager>() as TaskManager);
-		}
-
-		public void ConfigureContainer(IUnityContainer container)
-		{
-			container.RegisterType<IPluginManager, PluginManager>(new SingletonLifetimeManager());
-			container.RegisterInstance(_configuration);
-			PluginManager pluginManager = new(container, _configuration, _loggerFactory.CreateLogger<PluginManager>());
-			pluginManager.ReloadPlugins();
+			services.AddSingleton(_plugins);
+			services.AddTransient(typeof(Lazy<>), typeof(LazyDi<>));
+			_plugins.ConfigureServices(services);
 		}
 		
-		public void Configure(IUnityContainer container, IApplicationBuilder app, IWebHostEnvironment env)
+		/// <summary>
+		/// Configure the asp net host.
+		/// </summary>
+		/// <param name="app">The asp net host to configure</param>
+		/// <param name="env">The host environment (is the app in development mode?)</param>
+		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
 			if (env.IsDevelopment())
 				app.UseDeveloperExceptionPage();
@@ -124,9 +140,7 @@ namespace Kyoo
 					spa.UseAngularCliServer("start");
 			});
 			
-			IPluginManager pluginManager = container.Resolve<IPluginManager>();
-			foreach (IPlugin plugin in pluginManager.GetAllPlugins())
-				plugin.ConfigureAspNet(app);
+			_plugins.ConfigureAspnet(app);
 			
 			app.UseEndpoints(endpoints =>
 			{

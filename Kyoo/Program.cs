@@ -1,16 +1,12 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Kyoo.UnityExtensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Unity;
-using Unity.Microsoft.DependencyInjection;
-
 namespace Kyoo
 {
 	/// <summary>
@@ -80,9 +76,6 @@ namespace Kyoo
 		/// <returns>A new web host instance</returns>
 		private static IWebHostBuilder CreateWebHostBuilder(string[] args)
 		{
-			UnityContainer container = new();
-			container.EnableDebugDiagnostic();
-			
 			return new WebHostBuilder()
 				.UseContentRoot(AppDomain.CurrentDomain.BaseDirectory)
 				.UseConfiguration(SetupConfig(new ConfigurationBuilder(), args).Build())
@@ -100,8 +93,6 @@ namespace Kyoo
 					if (context.HostingEnvironment.IsDevelopment())
 						StaticWebAssetsLoader.UseStaticWebAssets(context.HostingEnvironment, context.Configuration);
 				})
-				// .UseUnityProvider(container)
-				.UseUnityServiceProvider(container)
 				.ConfigureServices(x => x.AddRouting())
 				.UseKestrel(options => { options.AddServerHeader = false; })
 				.UseIIS()
