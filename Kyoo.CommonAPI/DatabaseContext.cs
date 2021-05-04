@@ -84,6 +84,20 @@ namespace Kyoo
 			return Set<Link<T1, T2>>();
 		}
 
+
+		/// <summary>
+		/// The default constructor
+		/// </summary>
+		protected DatabaseContext() { }
+
+		/// <summary>
+		/// Create a new <see cref="DatabaseContext"/> using specific options
+		/// </summary>
+		/// <param name="options">The options to use.</param>
+		protected DatabaseContext(DbContextOptions options)
+			: base(options)
+		{ }
+		
 		/// <summary>
 		/// Set basic configurations (like preventing query tracking)
 		/// </summary>

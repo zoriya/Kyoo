@@ -69,6 +69,31 @@ namespace Kyoo.Controllers
 			return _plugins;
 		}
 
+		/// <summary>
+		/// Load a single plugin and return all IPlugin implementations contained in the Assembly.
+		/// </summary>
+		/// <param name="path">The path of the dll</param>
+		/// <returns>The list of dlls in hte assembly</returns>
+		private IPlugin[] LoadPlugin(string path)
+		{
+			path = Path.GetFullPath(path);
+			try
+			{
+				PluginDependencyLoader loader = new(path);
+				Assembly assembly = loader.LoadFromAssemblyPath(path);
+				return assembly.GetTypes()
+					.Where(x => typeof(IPlugin).IsAssignableFrom(x))
+					.Where(x => _plugins.All(y => y.GetType() != x))
+					.Select(x => (IPlugin)ActivatorUtilities.CreateInstance(_provider, x))
+					.ToArray();
+			}
+			catch (Exception ex)
+			{
+				_logger.LogError(ex, "Could not load the plugin at {Path}", path);
+				return Array.Empty<IPlugin>();
+			}
+		}
+		
 		/// <inheritdoc />
 		public void LoadPlugins(ICollection<IPlugin> plugins)
 		{
@@ -78,27 +103,12 @@ namespace Kyoo.Controllers
 
 			_logger.LogTrace("Loading new plugins...");
 			string[] pluginsPaths = Directory.GetFiles(pluginFolder, "*.dll", SearchOption.AllDirectories);
-			plugins = pluginsPaths.SelectMany(path =>
-			{
-				path = Path.GetFullPath(path);
-				try
-				{
-					PluginDependencyLoader loader = new(path);
-					Assembly assembly = loader.LoadFromAssemblyPath(path);
-					return assembly.GetTypes()
-						.Where(x => typeof(IPlugin).IsAssignableFrom(x))
-						.Where(x => _plugins.All(y => y.GetType() != x))
-						.Select(x => (IPlugin)ActivatorUtilities.CreateInstance(_provider, x))
-						.ToArray();
-				}
-				catch (Exception ex)
-				{
-					_logger.LogError(ex, "Could not load the plugin at {Path}", path);
-					return Array.Empty<IPlugin>();
-				}
-			}).Concat(plugins).ToList();
+			plugins = plugins.Concat(pluginsPaths.SelectMany(LoadPlugin))
+				.GroupBy(x => x.Name)
+				.Select(x => x.First())
+				.ToList();
 
-			ICollection<Type> available = GetProvidedTypes();
+			ICollection<Type> available = GetProvidedTypes(plugins);
 			_plugins.AddRange(plugins.Where(plugin =>
 			{
 				Type missing = plugin.Requires.FirstOrDefault(x => available.All(y => !y.IsAssignableTo(x)));
@@ -119,7 +129,7 @@ namespace Kyoo.Controllers
 		/// <inheritdoc />
 		public void ConfigureServices(IServiceCollection services)
 		{
-			ICollection<Type> available = GetProvidedTypes();
+			ICollection<Type> available = GetProvidedTypes(_plugins);
 			foreach (IPlugin plugin in _plugins)
 				plugin.Configure(services, available);
 		}
@@ -134,11 +144,12 @@ namespace Kyoo.Controllers
 		/// <summary>
 		/// Get the list of types provided by the currently loaded plugins.
 		/// </summary>
+		/// <param name="plugins">The list of plugins that will be used as a plugin pool to get provided types.</param>
 		/// <returns>The list of types available.</returns>
-		private ICollection<Type> GetProvidedTypes()
+		private ICollection<Type> GetProvidedTypes(ICollection<IPlugin> plugins)
 		{
-			List<Type> available = _plugins.SelectMany(x => x.Provides).ToList();
-			List<ConditionalProvide> conditionals =_plugins
+			List<Type> available = plugins.SelectMany(x => x.Provides).ToList();
+			List<ConditionalProvide> conditionals = plugins
 				.SelectMany(x => x.ConditionalProvides)
 				.Where(x => x.Condition.Condition())
 				.ToList();
@@ -199,6 +210,14 @@ namespace Kyoo.Controllers
 			/// <inheritdoc />
 			protected override Assembly Load(AssemblyName assemblyName)
 			{
+				Assembly existing = AppDomain.CurrentDomain.GetAssemblies()
+					.FirstOrDefault(x =>
+					{
+						AssemblyName name = x.GetName();
+						return name.Name == assemblyName.Name && name.Version == assemblyName.Version;
+					});
+				if (existing != null)
+					return existing;
 				string assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
 				if (assemblyPath != null)
 					return LoadFromAssemblyPath(assemblyPath);

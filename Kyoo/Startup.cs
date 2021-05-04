@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Kyoo.Controllers;
 using Kyoo.Models;
+using Kyoo.Postgresql;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
@@ -39,12 +40,12 @@ namespace Kyoo
 		/// </param>
 		/// <param name="configuration">The configuration context</param>
 		/// <param name="loggerFactory">A logger factory used to create a logger for the plugin manager.</param>
-		public Startup(IServiceProvider hostProvider, IConfiguration configuration, ILoggerFactory loggerFactory)
+		public Startup(IServiceProvider hostProvider, IConfiguration configuration, ILoggerFactory loggerFactory, IWebHostEnvironment host)
 		{
 			_configuration = configuration;
 			_plugins = new PluginManager(hostProvider, _configuration, loggerFactory.CreateLogger<PluginManager>());
 			
-			_plugins.LoadPlugins(new [] {new CoreModule()});
+			_plugins.LoadPlugins(new IPlugin[] {new CoreModule(), new PostgresModule(configuration, host)});
 		}
 
 		/// <summary>
@@ -132,13 +133,13 @@ namespace Kyoo
 			});
 			app.UseResponseCompression();
 
-			app.UseSpa(spa =>
-			{
-				spa.Options.SourcePath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "Kyoo.WebApp");
-			
-				if (env.IsDevelopment())
-					spa.UseAngularCliServer("start");
-			});
+			// app.UseSpa(spa =>
+			// {
+			// 	spa.Options.SourcePath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "Kyoo.WebApp");
+			//
+			// 	if (env.IsDevelopment())
+			// 		spa.UseAngularCliServer("start");
+			// });
 			
 			_plugins.ConfigureAspnet(app);
 			

@@ -21,6 +21,11 @@ namespace Kyoo.Postgresql
 		/// Is this instance in debug mode?
 		/// </summary>
 		private readonly bool _debugMode;
+
+		/// <summary>
+		/// Should the configure step be skipped? This is used when the database is created via DbContextOptions.
+		/// </summary>
+		private readonly bool _skipConfigure;
 		
 		/// <summary>
 		/// A basic constructor that set default values (query tracker behaviors, mapping enums...)
@@ -30,6 +35,19 @@ namespace Kyoo.Postgresql
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<Status>();
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<ItemType>();
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<StreamType>();
+		}
+
+		/// <summary>
+		/// Create a new <see cref="PostgresContext"/> using specific options
+		/// </summary>
+		/// <param name="options">The options to use.</param>
+		public PostgresContext(DbContextOptions options)
+			: base(options)
+		{
+			NpgsqlConnection.GlobalTypeMapper.MapEnum<Status>();
+			NpgsqlConnection.GlobalTypeMapper.MapEnum<ItemType>();
+			NpgsqlConnection.GlobalTypeMapper.MapEnum<StreamType>();
+			_skipConfigure = true;
 		}
 
 		/// <summary>
@@ -49,10 +67,13 @@ namespace Kyoo.Postgresql
 		/// <param name="optionsBuilder">An option builder to fill.</param>
 		protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 		{
-			optionsBuilder.UseNpgsql(_connection);
-			if (_debugMode)
-				optionsBuilder.EnableDetailedErrors()
-					.EnableSensitiveDataLogging();
+			if (!_skipConfigure)
+			{
+				optionsBuilder.UseNpgsql(_connection);
+				if (_debugMode)
+					optionsBuilder.EnableDetailedErrors().EnableSensitiveDataLogging();
+			}
+
 			base.OnConfiguring(optionsBuilder);
 		}
 

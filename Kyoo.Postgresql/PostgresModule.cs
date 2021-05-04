@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Kyoo.Controllers;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -59,9 +60,16 @@ namespace Kyoo.Postgresql
 		/// <inheritdoc />
 		public void Configure(IServiceCollection services, ICollection<Type> availableTypes)
 		{
-			services.AddScoped<DatabaseContext>(_ => new PostgresContext(
-				_configuration.GetDatabaseConnection("postgres"), 
-				_environment.IsDevelopment()));
+			services.AddDbContext<DatabaseContext, PostgresContext>(x =>
+			{
+				x.UseNpgsql(_configuration.GetDatabaseConnection("postgres"));
+				if (_environment.IsDevelopment())
+					x.EnableDetailedErrors().EnableSensitiveDataLogging();
+			});
+			// services.AddScoped<DatabaseContext>(_ => new PostgresContext(
+			// 	_configuration.GetDatabaseConnection("postgres"), 
+			// 	_environment.IsDevelopment()));
+			// services.AddScoped<DbContext>(x => x.GetRequiredService<PostgresContext>());
 		}
 	}
 }
