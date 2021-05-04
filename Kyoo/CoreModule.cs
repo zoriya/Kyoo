@@ -48,7 +48,20 @@ namespace Kyoo
 		};
 
 		/// <inheritdoc />
-		public ICollection<Type> Requires => ArraySegment<Type>.Empty;
+		public ICollection<Type> Requires => new []
+		{
+			typeof(ILibraryRepository),
+			typeof(ILibraryItemRepository),
+			typeof(ICollectionRepository),
+			typeof(IShowRepository),
+			typeof(ISeasonRepository),
+			typeof(IEpisodeRepository),
+			typeof(ITrackRepository),
+			typeof(IPeopleRepository),
+			typeof(IStudioRepository),
+			typeof(IGenreRepository),
+			typeof(IProviderRepository)
+		};
 
 		/// <inheritdoc />
         public void Configure(IServiceCollection services, ICollection<Type> availableTypes)

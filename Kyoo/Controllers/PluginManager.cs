@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
-using Kyoo.Models.Exceptions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -106,8 +105,8 @@ namespace Kyoo.Controllers
 				if (missing == null)
 					return true;
 				
-				Exception error = new MissingDependencyException(plugin.Name, missing.Name);
-				_logger.LogCritical(error, "A plugin's dependency could not be met");
+				_logger.LogCritical("No {Dependency} available in Kyoo but the plugin {Plugin} requires it", 
+					missing.Name, plugin.Name);
 				return false;
 			}));
 			
