@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using SignInResult = Microsoft.AspNetCore.Identity.SignInResult;
 
@@ -47,29 +46,8 @@ namespace Kyoo.Api
 		[FromForm(Name = "picture")]
 		public IFormFile Picture { get; set; }
 	}
-	
-	[ApiController]
-	public class AccountUiController : Controller
-	{
-		[HttpGet("login")]
-		public IActionResult Index()
-		{
-			return new PhysicalFileResult(Path.GetFullPath("login/login.html"), "text/html");
-		}
-		
-		[HttpGet("login/{*file}")]
-		public IActionResult Index(string file)
-		{
-			string path = Path.Combine(Path.GetFullPath("login/"), file);
-			if (!System.IO.File.Exists(path))
-				return NotFound();
-			FileExtensionContentTypeProvider provider = new FileExtensionContentTypeProvider();
-			if (!provider.TryGetContentType(path, out string contentType))
-				contentType = "text/plain";			
-			return new PhysicalFileResult(path, contentType);
-		}
-	}
-	
+
+
 	[Route("api/[controller]")]
 	[ApiController]
 	public class AccountController : Controller, IProfileService
@@ -100,7 +78,7 @@ namespace Kyoo.Api
 				return BadRequest(new[] {new {code = "username", description = "Username must be at least 4 characters."}});
 			if (!new EmailAddressAttribute().IsValid(user.Email))
 				return BadRequest(new[] {new {code = "email", description = "Email must be valid."}});
-			User account = new User {UserName = user.Username, Email = user.Email};
+			User account = new() {UserName = user.Username, Email = user.Email};
 			IdentityResult result = await _userManager.CreateAsync(account, user.Password);
 			if (!result.Succeeded)
 				return BadRequest(result.Errors);
@@ -151,7 +129,7 @@ namespace Kyoo.Api
 			User user = await _userManager.GetUserAsync(context.Subject);
 			if (user != null)
 			{
-				List<Claim> claims = new List<Claim>
+				List<Claim> claims = new()
 				{
 					new Claim("email", user.Email),
 					new Claim("username", user.UserName),

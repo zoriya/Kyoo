@@ -79,8 +79,10 @@ namespace Kyoo.Authentication
 			// 	.AddDefaultTokenProviders()
 			// 	.AddEntityFrameworkStores<IdentityDatabase>();
 
+			services.Configure<PermissionOption>(_configuration.GetSection(PermissionOption.Path));
 			CertificateOption certificateOptions = new();
 			_configuration.GetSection(CertificateOption.Path).Bind(certificateOptions);
+
 			services.AddIdentityServer(options =>
 				{
 					options.IssuerUri = publicUrl;
@@ -136,7 +138,7 @@ namespace Kyoo.Authentication
 					{
 						policy.AuthenticationSchemes.Add(IdentityConstants.ApplicationScheme);
 						policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
-						policy.AddRequirements(new AuthorizationValidator(permission));
+						policy.AddRequirements(new AuthRequirement(permission));
 						policy.RequireScope($"kyoo.{permission.ToLower()}");
 					});
 				}
@@ -153,8 +155,6 @@ namespace Kyoo.Authentication
 		/// <inheritdoc />
 		public void ConfigureAspNet(IApplicationBuilder app)
 		{
-			app.UseAuthorization();
-
 			app.UseCookiePolicy(new CookiePolicyOptions
 			{
 				MinimumSameSitePolicy = SameSiteMode.Strict
@@ -166,6 +166,7 @@ namespace Kyoo.Authentication
 				return next();
 			});
 			app.UseIdentityServer();
+			app.UseAuthorization();
 		}
 	}
 }

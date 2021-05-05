@@ -40,7 +40,13 @@
 		<PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="3.1.14" />
 		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.5" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-		<ProjectReference Include="..\Kyoo.Postgresql\Kyoo.Postgresql.csproj" />
+		<ProjectReference Include="../Kyoo.Postgresql/Kyoo.Postgresql.csproj" />
+	</ItemGroup>
+	
+	<ItemGroup>
+		<ProjectReference Include="../Kyoo.Authentication/Kyoo.Authentication.csproj">
+			<ExcludeAssets>all</ExcludeAssets>
+		</ProjectReference>
 	</ItemGroup>
 	
 	<ItemGroup>
@@ -74,7 +80,7 @@
 				<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 			</ResolvedFileToPublish>
 			<ResolvedFileToPublish Include="@(LoginFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
-				<RelativePath>login/%(LoginFiles.RecursiveDir)%(LoginFiles.Filename)%(LoginFiles.Extension)</RelativePath>
+				<RelativePath>wwwroot/login/%(LoginFiles.RecursiveDir)%(LoginFiles.Filename)%(LoginFiles.Extension)</RelativePath>
 				<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 				<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 			</ResolvedFileToPublish>
@@ -87,7 +93,7 @@
 	
 	<Target Name="Prepare static and login pages" AfterTargets="Build" Condition="$(Configuration) == 'Debug'">
 		<Copy SourceFiles="@(StaticFiles)" DestinationFolder="$(OutputPath)/wwwroot/%(RecursiveDir)" />
-		<Copy SourceFiles="@(LoginFiles)" DestinationFolder="$(OutputPath)/wwwroot/%(RecursiveDir)" />
+		<Copy SourceFiles="@(LoginFiles)" DestinationFolder="$(OutputPath)/wwwroot/login/%(RecursiveDir)" />
 	</Target>
 
 	<Target Name="Symlink views to output - Linux" AfterTargets="Build" Condition="$(Configuration) == 'Debug' And $(OS) == 'Unix'">

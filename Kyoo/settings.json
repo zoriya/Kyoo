@@ -29,6 +29,10 @@
       "file": "certificate.pfx",
       "oldFile": "oldCertificate.pfx",
       "password": "passphrase"
+    },
+    "permissions": {
+      "default": ["read", "play", "write", "admin"],
+      "newUser": ["read", "play", "write", "admin"]
     }
   },
   
@@ -45,8 +49,6 @@
   "providerPath": "providers",
   "profilePicturePath": "users/",
   "plugins": "plugins/",
-  "defaultPermissions": "read,play,write,admin",
-  "newUserPermissions": "read,play,write,admin",
   "regex": "(?:\\/(?<Collection>.*?))?\\/(?<Show>.*?)(?: \\(\\d+\\))?\\/\\k<Show>(?: \\(\\d+\\))?(?:(?: S(?<Season>\\d+)E(?<Episode>\\d+))| (?<Absolute>\\d+))?.*$",
   "subtitleRegex": "^(?<Episode>.*)\\.(?<Language>\\w{1,3})\\.(?<Default>default\\.)?(?<Forced>forced\\.)?.*$"
 }

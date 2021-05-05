@@ -76,16 +76,6 @@ namespace Kyoo
 				});
 			services.AddHttpClient();
 			
-			// services.AddAuthorization(options =>
-			// {
-			// 	string[] permissions = {"Read", "Write", "Play", "Admin"};
-			// 	foreach (string permission in permissions)
-			// 		options.AddPolicy(permission, policy =>
-			// 		{
-			// 			policy.AddRequirements(new AuthorizationValidator(permission));
-			// 		});
-			// });
-			// services.AddAuthentication()
 			services.AddTransient(typeof(Lazy<>), typeof(LazyDi<>));
 			
 			services.AddSingleton(_plugins);
@@ -110,6 +100,7 @@ namespace Kyoo
 
 			FileExtensionContentTypeProvider contentTypeProvider = new();
 			contentTypeProvider.Mappings[".data"] = "application/octet-stream";
+			app.UseDefaultFiles();
 			app.UseStaticFiles(new StaticFileOptions
 			{
 				ContentTypeProvider = contentTypeProvider,
@@ -119,7 +110,6 @@ namespace Kyoo
 				app.UseSpaStaticFiles();
 
 			app.UseRouting();
-			// app.UseAuthorization();
 
 			app.Use((ctx, next) => 
 			{
@@ -135,13 +125,13 @@ namespace Kyoo
 			});
 			app.UseResponseCompression();
 
-			// app.UseSpa(spa =>
-			// {
-			// 	spa.Options.SourcePath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "Kyoo.WebApp");
-			//
-			// 	if (env.IsDevelopment())
-			// 		spa.UseAngularCliServer("start");
-			// });
+			app.UseSpa(spa =>
+			{
+				spa.Options.SourcePath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "Kyoo.WebApp");
+			
+				if (env.IsDevelopment())
+					spa.UseAngularCliServer("start");
+			});
 			
 			_plugins.ConfigureAspnet(app);
 			
