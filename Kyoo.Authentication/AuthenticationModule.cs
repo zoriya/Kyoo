@@ -64,7 +64,7 @@ namespace Kyoo.Authentication
 		/// <inheritdoc />
 		public void Configure(IServiceCollection services, ICollection<Type> availableTypes)
 		{
-			string publicUrl = _configuration.GetValue<string>("public_url");
+			string publicUrl = _configuration.GetValue<string>("public_url").TrimEnd('/');
 
 			// services.AddDbContext<IdentityDatabase>(options =>
 			// {
@@ -86,9 +86,9 @@ namespace Kyoo.Authentication
 			services.AddIdentityServer(options =>
 				{
 					options.IssuerUri = publicUrl;
-					options.UserInteraction.LoginUrl = publicUrl + "login";
-					options.UserInteraction.ErrorUrl = publicUrl + "error";
-					options.UserInteraction.LogoutUrl = publicUrl + "logout";
+					options.UserInteraction.LoginUrl = $"{publicUrl}/login";
+					options.UserInteraction.ErrorUrl = $"{publicUrl}/error";
+					options.UserInteraction.LogoutUrl = $"{publicUrl}/logout";
 				})
 				// .AddAspNetIdentity<User>()
 				// .AddConfigurationStore(options =>
@@ -105,11 +105,13 @@ namespace Kyoo.Authentication
 				// 	options.EnableTokenCleanup = true;
 				// })
 				.AddInMemoryIdentityResources(IdentityContext.GetIdentityResources())
-				.AddInMemoryApiScopes(IdentityContext.GetScopes())
 				.AddInMemoryApiResources(IdentityContext.GetApis())
 				.AddInMemoryClients(IdentityContext.GetClients())
-				// .AddProfileService<AccountController>()
-				.AddSigninKeys(certificateOptions);
+				.AddDeveloperSigningCredential();
+				// .AddProfileService<AccountApi>()
+				// .AddSigninKeys(certificateOptions);
+			// TODO implement means to add clients or api scopes for other plugins.
+			// TODO split scopes (kyoo.read should be task.read, video.read etc)
 
 			services.AddAuthentication(o =>
 				{

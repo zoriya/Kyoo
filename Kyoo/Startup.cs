@@ -124,6 +124,8 @@ namespace Kyoo
 				return next();
 			});
 			app.UseResponseCompression();
+			
+			_plugins.ConfigureAspnet(app);
 
 			app.UseSpa(spa =>
 			{
@@ -132,8 +134,6 @@ namespace Kyoo
 				if (env.IsDevelopment())
 					spa.UseAngularCliServer("start");
 			});
-			
-			_plugins.ConfigureAspnet(app);
 			
 			app.UseEndpoints(endpoints =>
 			{

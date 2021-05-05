@@ -64,6 +64,10 @@ namespace Kyoo
 		/// All metadataIDs (ExternalIDs) of Kyoo. See <see cref="MetadataID"/>.
 		/// </summary>
 		public DbSet<MetadataID> MetadataIds { get; set; }
+		/// <summary>
+		/// The list of registered users.
+		/// </summary>
+		// public DbSet<User> Users { get; set; }
 		
 		/// <summary>
 		/// All people's role. See <see cref="PeopleRole"/>.

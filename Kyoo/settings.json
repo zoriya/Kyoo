@@ -33,7 +33,8 @@
     "permissions": {
       "default": ["read", "play", "write", "admin"],
       "newUser": ["read", "play", "write", "admin"]
-    }
+    },
+    "profilePicturePath": "users/"
   },
   
   
@@ -47,7 +48,6 @@
   "transcodeTempPath": "cached/kyoo/transcode",
   "peoplePath": "people",
   "providerPath": "providers",
-  "profilePicturePath": "users/",
   "plugins": "plugins/",
   "regex": "(?:\\/(?<Collection>.*?))?\\/(?<Show>.*?)(?: \\(\\d+\\))?\\/\\k<Show>(?: \\(\\d+\\))?(?:(?: S(?<Season>\\d+)E(?<Episode>\\d+))| (?<Absolute>\\d+))?.*$",
   "subtitleRegex": "^(?<Episode>.*)\\.(?<Language>\\w{1,3})\\.(?<Default>default\\.)?(?<Forced>forced\\.)?.*$"
