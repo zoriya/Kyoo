@@ -16,17 +16,17 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.5">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.5.1" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <ProjectReference Include="../Kyoo.CommonAPI/Kyoo.CommonAPI.csproj">
-		  <PrivateAssets>all</PrivateAssets>
-		  <Private>false</Private>
 	  </ProjectReference>
 		<ProjectReference Include="../Kyoo.Common/Kyoo.Common.csproj">
-			<PrivateAssets>all</PrivateAssets>
-			<Private>false</Private>
 		</ProjectReference>
 	</ItemGroup>
 </Project>

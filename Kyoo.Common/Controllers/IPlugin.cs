@@ -72,6 +72,13 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="app">The Asp.Net application builder. On most case it is not needed but you can use it to add asp net functionalities.</param>
 		void ConfigureAspNet(IApplicationBuilder app) {}
+		
+		/// <summary>
+		/// An optional function to execute and initialize your plugin.
+		/// It can be used to initialize a database connection, fill initial data or anything.
+		/// </summary>
+		/// <param name="provider">A service provider to request services</param>
+		void Initialize(IServiceProvider provider) {}
 	}
 
 	/// <summary>

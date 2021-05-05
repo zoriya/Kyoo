@@ -151,7 +151,7 @@ namespace Kyoo.Controllers
 		public string HelpMessage { get; }
 		
 		/// <summary>
-		/// Should this task be automatically runned at app startup?
+		/// Should this task be automatically run at app startup?
 		/// </summary>
 		public bool RunOnStartup { get; }
 		
@@ -165,7 +165,7 @@ namespace Kyoo.Controllers
 		/// Start this task.
 		/// </summary>
 		/// <param name="arguments">The list of parameters.</param>
-		/// <param name="cancellationToken">A token to request the task's cancelation.
+		/// <param name="cancellationToken">A token to request the task's cancellation.
 		/// If this task is not cancelled quickly, it might be killed by the runner.</param>
 		/// <remarks>
 		/// Your task can have any service as a public field and use the <see cref="InjectedAttribute"/>,

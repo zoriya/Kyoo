@@ -30,10 +30,5 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <returns>A list of every tasks that this instance know.</returns>
 		ICollection<ITask> GetAllTasks();
-
-		/// <summary>
-		/// Reload tasks and run startup tasks.
-		/// </summary>
-		void ReloadTasks();
 	}
 }

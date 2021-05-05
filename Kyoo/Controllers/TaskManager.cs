@@ -4,9 +4,11 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Kyoo.Models.Attributes;
 using Kyoo.Models.Exceptions;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -34,7 +36,7 @@ namespace Kyoo.Controllers
 		/// <summary>
 		/// The list of tasks and their next scheduled run.
 		/// </summary>
-		private List<(ITask task, DateTime scheduledDate)> _tasks;
+		private readonly List<(ITask task, DateTime scheduledDate)> _tasks;
 		/// <summary>
 		/// The queue of tasks that should be run as soon as possible.
 		/// </summary>
@@ -47,8 +49,8 @@ namespace Kyoo.Controllers
 		/// The cancellation token used to cancel the running task when the runner should shutdown.
 		/// </summary>
 		private readonly CancellationTokenSource _taskToken = new();
-		
-		
+
+
 		/// <summary>
 		/// Create a new <see cref="TaskManager"/>.
 		/// </summary>
@@ -64,7 +66,7 @@ namespace Kyoo.Controllers
 			_provider = provider;
 			_configuration = configuration.GetSection("scheduledTasks");
 			_logger = logger;
-			_tasks = tasks.Select(x => (x, DateTime.Now + GetTaskDelay(x.Slug))).ToList();
+			_tasks = tasks.Select(x => (x, GetNextTaskDate(x.Slug))).ToList();
 			
 			if (_tasks.Any())
 				_logger.LogTrace("Task manager initiated with: {Tasks}", _tasks.Select(x => x.task.Name));
@@ -154,9 +156,11 @@ namespace Kyoo.Controllers
 						                            " but it was not specified.");
 					return x.CreateValue(value ?? x.DefaultValue);
 				}));
-			
-			InjectServices(task);
+
+			using IServiceScope scope = _provider.CreateScope();
+			InjectServices(task, x => scope.ServiceProvider.GetRequiredService(x));
 			await task.Run(args, _taskToken.Token);
+			InjectServices(task, _ => null);
 			_logger.LogInformation("Task finished: {Task}", task.Name);
 		}
 
@@ -164,17 +168,15 @@ namespace Kyoo.Controllers
 		/// Inject services into the <see cref="InjectedAttribute"/> marked properties of the given object.
 		/// </summary>
 		/// <param name="obj">The object to inject</param>
-		private void InjectServices(ITask obj)
+		/// <param name="retrieve">The function used to retrieve services. (The function is called immediately)</param>
+		private static void InjectServices(ITask obj, [InstantHandle] Func<Type, object> retrieve)
 		{
 			IEnumerable<PropertyInfo> properties = obj.GetType().GetProperties()
 				.Where(x => x.GetCustomAttribute<InjectedAttribute>() != null)
 				.Where(x => x.CanWrite);
 
 			foreach (PropertyInfo property in properties)
-			{
-				object value = _provider.GetService(property.PropertyType);
-				property.SetValue(obj, value);
-			}
+				property.SetValue(obj, retrieve(property.PropertyType));
 		}
 		
 		/// <summary>
@@ -197,7 +199,7 @@ namespace Kyoo.Controllers
 		private void EnqueueStartupTasks()
 		{
 			IEnumerable<ITask> startupTasks = _tasks.Select(x => x.task)
-				.Where(x => x.RunOnStartup && x.Priority != int.MaxValue)
+				.Where(x => x.RunOnStartup)
 				.OrderByDescending(x => x.Priority);
 			foreach (ITask task in startupTasks)
 				_queuedTasks.Enqueue((task, new Dictionary<string, object>()));
@@ -212,20 +214,20 @@ namespace Kyoo.Controllers
 			if (index == -1)
 				throw new ItemNotFoundException($"No task found with the slug {taskSlug}");
 			_queuedTasks.Enqueue((_tasks[index].task, arguments));
-			_tasks[index] = (_tasks[index].task, DateTime.Now + GetTaskDelay(taskSlug));
+			_tasks[index] = (_tasks[index].task, GetNextTaskDate(taskSlug));
 		}
 
 		/// <summary>
-		/// Get the delay of a task
+		/// Get the next date of the execution of the given task.
 		/// </summary>
 		/// <param name="taskSlug">The slug of the task</param>
-		/// <returns>The delay of the task.</returns>
-		private TimeSpan GetTaskDelay(string taskSlug)
+		/// <returns>The next date.</returns>
+		private DateTime GetNextTaskDate(string taskSlug)
 		{
 			TimeSpan delay = _configuration.GetValue<TimeSpan>(taskSlug);
 			if (delay == default)
-				delay = TimeSpan.MaxValue;
-			return delay;
+				return DateTime.MaxValue;
+			return DateTime.Now + delay;
 		}
 		
 		/// <inheritdoc />
@@ -238,13 +240,6 @@ namespace Kyoo.Controllers
 		public ICollection<ITask> GetAllTasks()
 		{
 			return _tasks.Select(x => x.task).ToArray();
-		}
-
-		/// <inheritdoc />
-		public void ReloadTasks()
-		{
-			// _tasks = _provider.Resolve<IEnumerable<ITask>>().Select(x => (x, DateTime.Now + GetTaskDelay(x.Slug))).ToList();
-			EnqueueStartupTasks();
 		}
 	}
 }

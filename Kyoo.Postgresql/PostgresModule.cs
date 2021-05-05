@@ -71,5 +71,12 @@ namespace Kyoo.Postgresql
 			// 	_environment.IsDevelopment()));
 			// services.AddScoped<DbContext>(x => x.GetRequiredService<PostgresContext>());
 		}
+
+		/// <inheritdoc />
+		public void Initialize(IServiceProvider provider)
+		{
+			DatabaseContext context = provider.GetRequiredService<DatabaseContext>();
+			context.Database.Migrate();
+		}
 	}
 }

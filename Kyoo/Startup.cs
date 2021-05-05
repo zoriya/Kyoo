@@ -3,6 +3,7 @@ using System.IO;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Kyoo.Postgresql;
+using Kyoo.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
@@ -85,9 +86,10 @@ namespace Kyoo
 			// 		});
 			// });
 			// services.AddAuthentication()
+			services.AddTransient(typeof(Lazy<>), typeof(LazyDi<>));
 			
 			services.AddSingleton(_plugins);
-			services.AddTransient(typeof(Lazy<>), typeof(LazyDi<>));
+			services.AddTask<PluginInitializer>();
 			_plugins.ConfigureServices(services);
 		}
 		

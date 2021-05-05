@@ -69,7 +69,10 @@ namespace Kyoo.Postgresql
 		{
 			if (!_skipConfigure)
 			{
-				optionsBuilder.UseNpgsql(_connection);
+				if (_connection != null)
+					optionsBuilder.UseNpgsql(_connection);
+				else
+					optionsBuilder.UseNpgsql();
 				if (_debugMode)
 					optionsBuilder.EnableDetailedErrors().EnableSensitiveDataLogging();
 			}
