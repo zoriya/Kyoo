@@ -215,7 +215,7 @@ namespace Kyoo
 		/// <summary>
 		/// An advanced <see cref="Complete{T}"/> function.
 		/// This will set missing values of <see cref="first"/> to the corresponding values of <see cref="second"/>.
-		/// Enumerables will be merged (concatened).
+		/// Enumerable will be merged (concatenated).
 		/// At the end, the OnMerge method of first will be called if first is a <see cref="IOnMerge"/>.
 		/// </summary>
 		/// <param name="first">The object to complete</param>

@@ -15,11 +15,11 @@ namespace Kyoo.Authentication.Models
 		/// <summary>
 		/// The default permissions that will be given to a non-connected user.
 		/// </summary>
-		public ICollection<string> Default { get; set; }
+		public string[] Default { get; set; }
 		
 		/// <summary>
 		/// Permissions applied to a new user.
 		/// </summary>
-		public ICollection<string> NewUser { get; set; }
+		public string[] NewUser { get; set; }
 	}
 }

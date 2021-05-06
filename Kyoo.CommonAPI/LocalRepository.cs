@@ -118,7 +118,7 @@ namespace Kyoo.Controllers
 		/// <param name="query">The base query to filter.</param>
 		/// <param name="where">An expression to filter based on arbitrary conditions</param>
 		/// <param name="sort">The sort settings (sort order & sort by)</param>
-		/// <param name="limit">Paginations information (where to start and how many to get)</param>
+		/// <param name="limit">Pagination information (where to start and how many to get)</param>
 		/// <returns>The filtered query</returns>
 		protected Task<ICollection<T>> ApplyFilters(IQueryable<T> query,
 			Expression<Func<T, bool>> where = null,
@@ -137,7 +137,7 @@ namespace Kyoo.Controllers
 		/// <param name="query">The base query to filter.</param>
 		/// <param name="where">An expression to filter based on arbitrary conditions</param>
 		/// <param name="sort">The sort settings (sort order & sort by)</param>
-		/// <param name="limit">Paginations information (where to start and how many to get)</param>
+		/// <param name="limit">Pagination information (where to start and how many to get)</param>
 		/// <returns>The filtered query</returns>
 		protected async Task<ICollection<TValue>> ApplyFilters<TValue>(IQueryable<TValue> query,
 			Func<int, Task<TValue>> get,
@@ -244,7 +244,7 @@ namespace Kyoo.Controllers
 		}
 		
 		/// <summary>
-		/// An overridable method to edit relatiosn of a resource.
+		/// An overridable method to edit relation of a resource.
 		/// </summary>
 		/// <param name="resource">The non edited resource</param>
 		/// <param name="changed">The new version of <see cref="resource"/>. This item will be saved on the databse and replace <see cref="resource"/></param>
