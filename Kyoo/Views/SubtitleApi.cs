@@ -71,7 +71,7 @@ namespace Kyoo.Api
 				await writer.WriteLineAsync("");
 				await writer.WriteLineAsync("");
 
-				using StreamReader reader = _files.GetReader(_path);
+				using StreamReader reader = new(_files.GetReader(_path));
 				string line;
 				while ((line = await reader.ReadLineAsync()) != null)
 				{

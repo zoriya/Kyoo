@@ -4,6 +4,7 @@ using IdentityServer4.Extensions;
 using IdentityServer4.Services;
 using Kyoo.Authentication.Models;
 using Kyoo.Controllers;
+using Kyoo.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
@@ -36,7 +37,10 @@ namespace Kyoo.Authentication
 		public ICollection<ConditionalProvide> ConditionalProvides => ArraySegment<ConditionalProvide>.Empty;
 		
 		/// <inheritdoc />
-		public ICollection<Type> Requires => ArraySegment<Type>.Empty;
+		public ICollection<Type> Requires => new []
+		{
+			typeof(IUserRepository)
+		};
 		
 		
 		/// <summary>

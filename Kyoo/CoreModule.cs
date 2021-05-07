@@ -44,7 +44,8 @@ namespace Kyoo
 			(typeof(IPeopleRepository), typeof(DatabaseContext)),
 			(typeof(IStudioRepository), typeof(DatabaseContext)),
 			(typeof(IGenreRepository), typeof(DatabaseContext)),
-			(typeof(IProviderRepository), typeof(DatabaseContext))
+			(typeof(IProviderRepository), typeof(DatabaseContext)),
+			(typeof(IUserRepository), typeof(DatabaseContext))
 		};
 
 		/// <inheritdoc />
@@ -88,6 +89,7 @@ namespace Kyoo
 				services.AddRepository<IStudioRepository, StudioRepository>();
 				services.AddRepository<IGenreRepository, GenreRepository>();
 				services.AddRepository<IProviderRepository, ProviderRepository>();
+				services.AddRepository<IUserRepository, UserRepository>();
 			}
 
 			services.AddTask<Crawler>();

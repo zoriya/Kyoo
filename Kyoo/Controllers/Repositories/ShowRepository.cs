@@ -14,7 +14,7 @@ namespace Kyoo.Controllers
 	public class ShowRepository : LocalRepository<Show>, IShowRepository
 	{
 		/// <summary>
-		/// The databse handle
+		/// The database handle
 		/// </summary>
 		private readonly DatabaseContext _database;
 		/// <summary>

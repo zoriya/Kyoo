@@ -89,6 +89,10 @@ namespace Kyoo.Postgresql
 			modelBuilder.HasPostgresEnum<Status>();
 			modelBuilder.HasPostgresEnum<ItemType>();
 			modelBuilder.HasPostgresEnum<StreamType>();
+
+			modelBuilder.Entity<User>()
+				.Property(x => x.ExtraData)
+				.HasColumnType("jsonb");
 			
 			base.OnModelCreating(modelBuilder);
 		}

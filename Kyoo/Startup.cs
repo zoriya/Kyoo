@@ -126,14 +126,14 @@ namespace Kyoo
 			app.UseResponseCompression();
 			
 			_plugins.ConfigureAspnet(app);
-
-			app.UseSpa(spa =>
-			{
-				spa.Options.SourcePath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "Kyoo.WebApp");
-			
-				if (env.IsDevelopment())
-					spa.UseAngularCliServer("start");
-			});
+			//
+			// app.UseSpa(spa =>
+			// {
+			// 	spa.Options.SourcePath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "Kyoo.WebApp");
+			//
+			// 	if (env.IsDevelopment())
+			// 		spa.UseAngularCliServer("start");
+			// });
 			
 			app.UseEndpoints(endpoints =>
 			{

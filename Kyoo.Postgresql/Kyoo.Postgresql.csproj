@@ -2,17 +2,20 @@
 
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
+
+		<Company>SDG</Company>
+		<Authors>Zoe Roux</Authors>
+		<RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
+		<LangVersion>default</LangVersion>
+	</PropertyGroup>
+	
+	<PropertyGroup>
 		<OutputPath>../Kyoo/bin/$(Configuration)/$(TargetFramework)/plugins/postgresql</OutputPath>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<ProduceReferenceAssembly>false</ProduceReferenceAssembly>
 		<GenerateDependencyFile>false</GenerateDependencyFile>
 		<GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>
 		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-
-		<Company>SDG</Company>
-		<Authors>Zoe Roux</Authors>
-		<RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
-		<LangVersion>default</LangVersion>
 	</PropertyGroup>
 
 	<ItemGroup>

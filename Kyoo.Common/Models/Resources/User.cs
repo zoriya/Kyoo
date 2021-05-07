@@ -53,11 +53,17 @@ namespace Kyoo.Models
 		/// Links between Users and Shows.
 		/// </summary>
 		public ICollection<Link<User, Show>> ShowLinks { get; set; }
-		
-		/// <summary>
-		/// Links between Users and WatchedEpisodes.
-		/// </summary>
-		public ICollection<Link<User, WatchedEpisode>> EpisodeLinks { get; set; }
 #endif
+	}
+	
+	/// <summary>
+	/// Metadata of episode currently watching by an user
+	/// </summary>
+	public class WatchedEpisode : Link<User, Episode>
+	{
+		/// <summary>
+		/// Where the player has stopped watching the episode (-1 if not started, else between 0 and 100).
+		/// </summary>
+		public int WatchedPercentage { get; set; }
 	}
 }

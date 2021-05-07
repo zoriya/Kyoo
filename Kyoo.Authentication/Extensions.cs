@@ -10,16 +10,29 @@ namespace Kyoo.Authentication
 	/// </summary>
 	public static class Extensions
 	{
-		public static ClaimsPrincipal ToPrincipal(this User user)
+		/// <summary>
+		/// Get claims of an user.
+		/// </summary>
+		/// <param name="user">The user concerned</param>
+		/// <returns>The list of claims the user has</returns>
+		public static ICollection<Claim> GetClaims(this User user)
 		{
-			List<Claim> claims = new()
+			return new[]
 			{
 				new Claim(JwtClaimTypes.Subject, user.ID.ToString()),
 				new Claim(JwtClaimTypes.Name, user.Username),
 				new Claim(JwtClaimTypes.Picture, $"api/account/picture/{user.Slug}")
 			};
-
-			ClaimsIdentity id = new (claims);
+		}
+		
+		/// <summary>
+		/// Convert a user to a ClaimsPrincipal.
+		/// </summary>
+		/// <param name="user">The user to convert</param>
+		/// <returns>A ClaimsPrincipal representing the user</returns>
+		public static ClaimsPrincipal ToPrincipal(this User user)
+		{
+			ClaimsIdentity id = new (user.GetClaims());
 			return new ClaimsPrincipal(id);
 		}
 	}

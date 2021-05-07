@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Security.Claims;
 using System.Threading.Tasks;
-using IdentityModel;
+using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
 using Kyoo.Authentication.Models.DTO;
@@ -12,24 +11,12 @@ using Kyoo.Controllers;
 using Kyoo.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using AuthenticationOptions = Kyoo.Authentication.Models.AuthenticationOptions;
 
 namespace Kyoo.Authentication.Views
 {
-	public class AccountData
-	{
-		[FromForm(Name = "email")]
-		public string Email { get; set; }
-		[FromForm(Name = "username")]
-		public string Username { get; set; }
-		[FromForm(Name = "picture")]
-		public IFormFile Picture { get; set; }
-	}
-
-
 	/// <summary>
 	/// The class responsible for login, logout, permissions and claims of a user.
 	/// </summary>
@@ -47,6 +34,11 @@ namespace Kyoo.Authentication.Views
 		/// </summary>
 		private readonly IIdentityServerInteractionService _interaction;
 		/// <summary>
+		/// A file manager to send profile pictures
+		/// </summary>
+		private readonly IFileManager _files;
+
+		/// <summary>
 		/// Options about authentication. Those options are monitored and reloads are supported.
 		/// </summary>
 		private readonly IOptionsMonitor<AuthenticationOptions> _options;
@@ -57,13 +49,16 @@ namespace Kyoo.Authentication.Views
 		/// </summary>
 		/// <param name="users">The user repository to create and manage users</param>
 		/// <param name="interaction">The identity server interaction service to login users.</param>
+		/// <param name="files">A file manager to send profile pictures</param>
 		/// <param name="options">Authentication options (this may be hot reloaded)</param>
 		public AccountApi(IUserRepository users,
 			IIdentityServerInteractionService interaction,
+			IFileManager files,
 			IOptionsMonitor<AuthenticationOptions> options)
 		{
 			_users = users;
 			_interaction = interaction;
+			_files = files;
 			_options = options;
 		}
 		
@@ -153,66 +148,51 @@ namespace Kyoo.Authentication.Views
 		// TODO check with the extension method
 		public async Task GetProfileDataAsync(ProfileDataRequestContext context)
 		{
-			User user = await _userManager.GetUserAsync(context.Subject);
-			if (user != null)
-			{
-				List<Claim> claims = new()
-				{
-					new Claim(JwtClaimTypes.Email, user.Email),
-					new Claim(JwtClaimTypes.Name, user.Username),
-					new Claim(JwtClaimTypes.Picture, $"api/account/picture/{user.Slug}")
-				};
-
-				Claim perms = (await _userManager.GetClaimsAsync(user)).FirstOrDefault(x => x.Type == "permissions");
-				if (perms != null)
-					claims.Add(perms);
-				
-				context.IssuedClaims.AddRange(claims);
-			}
+			User user = await _users.Get(int.Parse(context.Subject.GetSubjectId()));
+			if (user == null)
+				return;
+			context.IssuedClaims.AddRange(user.GetClaims());
 		}
 
 		public async Task IsActiveAsync(IsActiveContext context)
 		{
-			User user = await _userManager.GetUserAsync(context.Subject);
+			User user = await _users.Get(int.Parse(context.Subject.GetSubjectId()));
 			context.IsActive = user != null;
 		}
 		
-		[HttpGet("picture/{username}")]
-		public async Task<IActionResult> GetPicture(string username)
+		[HttpGet("picture/{slug}")]
+		public async Task<IActionResult> GetPicture(string slug)
 		{
-			User user = await _userManager.FindByNameAsync(username);
+			User user = await _users.GetOrDefault(slug);
 			if (user == null)
-				return BadRequest();
-			string path = Path.Combine(_picturePath, user.Id);
-			if (!System.IO.File.Exists(path))
 				return NotFound();
-			return new PhysicalFileResult(path, "image/png");
+			string path = Path.Combine(_options.CurrentValue.ProfilePicturePath, user.ID.ToString());
+			return _files.FileResult(path);
 		}
 		
-		[HttpPost("update")]
+		[HttpPut]
 		[Authorize]
-		public async Task<IActionResult> Update([FromForm] AccountData data)
+		public async Task<ActionResult<User>> Update([FromForm] AccountUpdateRequest data)
 		{
-			User user = await _userManager.GetUserAsync(HttpContext.User);
+			User user = await _users.Get(int.Parse(HttpContext.User.GetSubjectId()));
 			
 			if (!string.IsNullOrEmpty(data.Email))
-				user.Email =  data.Email;
+				user.Email = data.Email;
 			if (!string.IsNullOrEmpty(data.Username))
-				user.UserName = data.Username;
+				user.Username = data.Username;
 			if (data.Picture?.Length > 0)
 			{
-				string path = Path.Combine(_picturePath, user.Id);
-				await using FileStream file = System.IO.File.Create(path);
+				string path = Path.Combine(_options.CurrentValue.ProfilePicturePath, user.ID.ToString());
+				await using Stream file = _files.NewFile(path);
 				await data.Picture.CopyToAsync(file);
 			}
-			await _userManager.UpdateAsync(user);
-			return Ok();
+			return await _users.Edit(user, false);
 		}
 
-		[HttpGet("default-permissions")]
+		[HttpGet("permissions")]
 		public ActionResult<IEnumerable<string>> GetDefaultPermissions()
 		{
-			return _configuration.GetValue<string>("defaultPermissions").Split(",");
+			return _options.CurrentValue.Permissions.Default;
 		}
 	}
 }

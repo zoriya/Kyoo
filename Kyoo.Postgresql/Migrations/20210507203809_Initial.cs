@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Kyoo.Models;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -102,6 +103,24 @@ namespace Kyoo.Postgresql.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Studios", x => x.ID);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Slug = table.Column<string>(type: "text", nullable: false),
+                    Username = table.Column<string>(type: "text", nullable: true),
+                    Email = table.Column<string>(type: "text", nullable: true),
+                    Password = table.Column<string>(type: "text", nullable: true),
+                    Permissions = table.Column<string[]>(type: "text[]", nullable: true),
+                    ExtraData = table.Column<Dictionary<string, string>>(type: "jsonb", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.ID);
                 });
 
             migrationBuilder.CreateTable(
@@ -252,6 +271,30 @@ namespace Kyoo.Postgresql.Migrations
                         name: "FK_Link<Show, Genre>_Shows_FirstID",
                         column: x => x.FirstID,
                         principalTable: "Shows",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Link<User, Show>",
+                columns: table => new
+                {
+                    FirstID = table.Column<int>(type: "integer", nullable: false),
+                    SecondID = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Link<User, Show>", x => new { x.FirstID, x.SecondID });
+                    table.ForeignKey(
+                        name: "FK_Link<User, Show>_Shows_SecondID",
+                        column: x => x.SecondID,
+                        principalTable: "Shows",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Link<User, Show>_Users_FirstID",
+                        column: x => x.FirstID,
+                        principalTable: "Users",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -420,6 +463,31 @@ namespace Kyoo.Postgresql.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "WatchedEpisodes",
+                columns: table => new
+                {
+                    FirstID = table.Column<int>(type: "integer", nullable: false),
+                    SecondID = table.Column<int>(type: "integer", nullable: false),
+                    WatchedPercentage = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_WatchedEpisodes", x => new { x.FirstID, x.SecondID });
+                    table.ForeignKey(
+                        name: "FK_WatchedEpisodes_Episodes_SecondID",
+                        column: x => x.SecondID,
+                        principalTable: "Episodes",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_WatchedEpisodes_Users_FirstID",
+                        column: x => x.FirstID,
+                        principalTable: "Users",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Collections_Slug",
                 table: "Collections",
@@ -472,6 +540,11 @@ namespace Kyoo.Postgresql.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Link<Show, Genre>_SecondID",
                 table: "Link<Show, Genre>",
+                column: "SecondID");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Link<User, Show>_SecondID",
+                table: "Link<User, Show>",
                 column: "SecondID");
 
             migrationBuilder.CreateIndex(
@@ -549,6 +622,17 @@ namespace Kyoo.Postgresql.Migrations
                 table: "Tracks",
                 columns: new[] { "EpisodeID", "Type", "Language", "TrackIndex", "IsForced" },
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Slug",
+                table: "Users",
+                column: "Slug",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_WatchedEpisodes_SecondID",
+                table: "WatchedEpisodes",
+                column: "SecondID");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -569,6 +653,9 @@ namespace Kyoo.Postgresql.Migrations
                 name: "Link<Show, Genre>");
 
             migrationBuilder.DropTable(
+                name: "Link<User, Show>");
+
+            migrationBuilder.DropTable(
                 name: "MetadataIds");
 
             migrationBuilder.DropTable(
@@ -576,6 +663,9 @@ namespace Kyoo.Postgresql.Migrations
 
             migrationBuilder.DropTable(
                 name: "Tracks");
+
+            migrationBuilder.DropTable(
+                name: "WatchedEpisodes");
 
             migrationBuilder.DropTable(
                 name: "Collections");
@@ -594,6 +684,9 @@ namespace Kyoo.Postgresql.Migrations
 
             migrationBuilder.DropTable(
                 name: "Episodes");
+
+            migrationBuilder.DropTable(
+                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "Seasons");

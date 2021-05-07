@@ -73,6 +73,11 @@ namespace Kyoo
 		/// All people's role. See <see cref="PeopleRole"/>.
 		/// </summary>
 		public DbSet<PeopleRole> PeopleRoles { get; set; }
+		
+		/// <summary>
+		/// Episodes with a watch percentage. See <see cref="WatchedEpisode"/>
+		/// </summary>
+		public DbSet<WatchedEpisode> WatchedEpisodes { get; set; }
 
 		/// <summary>
 		/// Get a generic link between two resource types.
@@ -188,6 +193,17 @@ namespace Kyoo
 						.WithMany(x => x.ShowLinks),
 					y => y.HasKey(Link<Show, Genre>.PrimaryKey));
 			
+			modelBuilder.Entity<User>()
+				.HasMany(x => x.Watched)
+				.WithMany("users")
+				.UsingEntity<Link<User, Show>>(
+					y => y
+						.HasOne(x => x.Second)
+						.WithMany(),
+					y => y
+						.HasOne(x => x.First)
+						.WithMany(x => x.ShowLinks),
+					y => y.HasKey(Link<User, Show>.PrimaryKey));
 
 			modelBuilder.Entity<MetadataID>()
 				.HasOne(x => x.Show)
@@ -210,6 +226,9 @@ namespace Kyoo
 				.WithMany(x => x.MetadataLinks)
 				.OnDelete(DeleteBehavior.Cascade);
 
+			modelBuilder.Entity<WatchedEpisode>()
+				.HasKey(x => new {First = x.FirstID, Second = x.SecondID});
+
 			modelBuilder.Entity<Collection>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<Genre>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<Library>().Property(x => x.Slug).IsRequired();
@@ -217,6 +236,7 @@ namespace Kyoo
 			modelBuilder.Entity<Provider>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<Show>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<Studio>().Property(x => x.Slug).IsRequired();
+			modelBuilder.Entity<User>().Property(x => x.Slug).IsRequired();
 
 			modelBuilder.Entity<Collection>()
 				.HasIndex(x => x.Slug)
@@ -247,6 +267,9 @@ namespace Kyoo
 				.IsUnique();
 			modelBuilder.Entity<Track>()
 				.HasIndex(x => new {x.EpisodeID, x.Type, x.Language, x.TrackIndex, x.IsForced})
+				.IsUnique();
+			modelBuilder.Entity<User>()
+				.HasIndex(x => x.Slug)
 				.IsUnique();
 		}
 
