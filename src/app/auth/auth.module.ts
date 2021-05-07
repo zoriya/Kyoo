@@ -95,7 +95,7 @@ export class AuthModule
 {
 	constructor(http: HttpClient)
 	{
-		AuthGuard.permissionsObservable = http.get<string[]>("/api/account/default-permissions")
+		AuthGuard.permissionsObservable = http.get<string[]>("/api/account/permissions")
 			.pipe(tap(x => AuthGuard.defaultPermissions = x));
 	}
 }

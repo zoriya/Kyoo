@@ -50,8 +50,20 @@ export class AuthGuard
 				}
 				else
 				{
+					if (AuthGuard.defaultPermissions === undefined)
+					{
+						try
+						{
+							await AuthGuard.permissionsObservable.toPromise();
+						}
+						catch
+						{
+							AuthGuard.defaultPermissions = null;
+						}
+					}
+
 					if (!AuthGuard.defaultPermissions)
-						await AuthGuard.permissionsObservable.toPromise();
+						return true;
 
 					for (const perm of permissions)
 						if (!AuthGuard.defaultPermissions.includes(perm))
