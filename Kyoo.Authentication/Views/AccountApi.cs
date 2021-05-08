@@ -2,18 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
+using Kyoo.Authentication.Models;
 using Kyoo.Authentication.Models.DTO;
 using Kyoo.Controllers;
 using Kyoo.Models;
+using Kyoo.Models.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using AuthenticationOptions = Kyoo.Authentication.Models.AuthenticationOptions;
 
 namespace Kyoo.Authentication.Views
 {
@@ -32,7 +34,7 @@ namespace Kyoo.Authentication.Views
 		/// <summary>
 		/// The identity server interaction service to login users.
 		/// </summary>
-		private readonly IIdentityServerInteractionService _interaction;
+		// private readonly IIdentityServerInteractionService _interaction;
 		/// <summary>
 		/// A file manager to send profile pictures
 		/// </summary>
@@ -41,7 +43,7 @@ namespace Kyoo.Authentication.Views
 		/// <summary>
 		/// Options about authentication. Those options are monitored and reloads are supported.
 		/// </summary>
-		private readonly IOptionsMonitor<AuthenticationOptions> _options;
+		private readonly IOptions<AuthenticationOption> _options;
 
 
 		/// <summary>
@@ -52,12 +54,12 @@ namespace Kyoo.Authentication.Views
 		/// <param name="files">A file manager to send profile pictures</param>
 		/// <param name="options">Authentication options (this may be hot reloaded)</param>
 		public AccountApi(IUserRepository users,
-			IIdentityServerInteractionService interaction,
+			// IIdentityServerInteractionService interaction,
 			IFileManager files,
-			IOptionsMonitor<AuthenticationOptions> options)
+			IOptions<AuthenticationOption> options)
 		{
 			_users = users;
-			_interaction = interaction;
+			// _interaction = interaction;
 			_files = files;
 			_options = options;
 		}
@@ -69,15 +71,23 @@ namespace Kyoo.Authentication.Views
 		/// <param name="request">The DTO register request</param>
 		/// <returns>A OTAC to connect to this new account</returns>
 		[HttpPost("register")]
-		public async Task<ActionResult<string>> Register([FromBody] RegisterRequest request)
+		public async Task<IActionResult> Register([FromBody] RegisterRequest request)
 		{
 			User user = request.ToUser();
-			user.Permissions = _options.CurrentValue.Permissions.NewUser;
+			user.Permissions = _options.Value.Permissions.NewUser;
 			user.Password = PasswordUtils.HashPassword(user.Password);
 			user.ExtraData["otac"] = PasswordUtils.GenerateOTAC();
 			user.ExtraData["otac-expire"] = DateTime.Now.AddMinutes(1).ToString("s");
-			await _users.Create(user);
-			return user.ExtraData["otac"];
+			try
+			{
+				await _users.Create(user);
+			}
+			catch (DuplicatedItemException)
+			{
+				return Conflict(new {Errors = new {Duplicate = new[] {"A user with this name already exists"}}});
+			}
+
+			return Ok(new {Otac = user.ExtraData["otac"]});
 		}
 
 		/// <summary>
@@ -103,10 +113,10 @@ namespace Kyoo.Authentication.Views
 		[HttpPost("login")]
 		public async Task<IActionResult> Login([FromBody] LoginRequest login)
 		{
-			AuthorizationRequest context = await _interaction.GetAuthorizationContextAsync(login.ReturnURL);
+			// AuthorizationRequest context = await _interaction.GetAuthorizationContextAsync(login.ReturnURL);
 			User user = await _users.Get(x => x.Username == login.Username);
 
-			if (context == null || user == null)
+			if (user == null)
 				return Unauthorized();
 			if (!PasswordUtils.CheckPassword(login.Password, user.Password))
 				return Unauthorized();
@@ -122,7 +132,9 @@ namespace Kyoo.Authentication.Views
 		[HttpPost("otac-login")]
 		public async Task<IActionResult> OtacLogin([FromBody] OtacRequest otac)
 		{
-			User user = await _users.Get(x => x.ExtraData["OTAC"] == otac.Otac);
+			// TODO once hstore (Dictionary<string, string> accessor) are supported, use them.
+			//      We retrieve all users, this is inefficient.
+			User user = (await _users.GetAll()).FirstOrDefault(x => x.ExtraData.GetValueOrDefault("otac")  == otac.Otac);
 			if (user == null)
 				return Unauthorized();
 			if (DateTime.ParseExact(user.ExtraData["otac-expire"], "s", CultureInfo.InvariantCulture) <= DateTime.UtcNow)
@@ -166,7 +178,7 @@ namespace Kyoo.Authentication.Views
 			User user = await _users.GetOrDefault(slug);
 			if (user == null)
 				return NotFound();
-			string path = Path.Combine(_options.CurrentValue.ProfilePicturePath, user.ID.ToString());
+			string path = Path.Combine(_options.Value.ProfilePicturePath, user.ID.ToString());
 			return _files.FileResult(path);
 		}
 		
@@ -182,7 +194,7 @@ namespace Kyoo.Authentication.Views
 				user.Username = data.Username;
 			if (data.Picture?.Length > 0)
 			{
-				string path = Path.Combine(_options.CurrentValue.ProfilePicturePath, user.ID.ToString());
+				string path = Path.Combine(_options.Value.ProfilePicturePath, user.ID.ToString());
 				await using Stream file = _files.NewFile(path);
 				await data.Picture.CopyToAsync(file);
 			}
@@ -192,7 +204,7 @@ namespace Kyoo.Authentication.Views
 		[HttpGet("permissions")]
 		public ActionResult<IEnumerable<string>> GetDefaultPermissions()
 		{
-			return _options.CurrentValue.Permissions.Default;
+			return _options.Value.Permissions.Default;
 		}
 	}
 }

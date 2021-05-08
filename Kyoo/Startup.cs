@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Kyoo.Authentication;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Kyoo.Postgresql;
@@ -46,7 +47,7 @@ namespace Kyoo
 			_configuration = configuration;
 			_plugins = new PluginManager(hostProvider, _configuration, loggerFactory.CreateLogger<PluginManager>());
 			
-			_plugins.LoadPlugins(new IPlugin[] {new CoreModule(), new PostgresModule(configuration, host)});
+			_plugins.LoadPlugins(new IPlugin[] {new CoreModule(), new PostgresModule(configuration, host), new AuthenticationModule(configuration, loggerFactory)});
 		}
 
 		/// <summary>
@@ -126,18 +127,19 @@ namespace Kyoo
 			app.UseResponseCompression();
 			
 			_plugins.ConfigureAspnet(app);
-			//
-			// app.UseSpa(spa =>
-			// {
-			// 	spa.Options.SourcePath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "Kyoo.WebApp");
-			//
-			// 	if (env.IsDevelopment())
-			// 		spa.UseAngularCliServer("start");
-			// });
-			
+
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapControllerRoute("Kyoo", "api/{controller=Home}/{action=Index}/{id?}");
+			});
+			
+			
+			app.UseSpa(spa =>
+			{
+				spa.Options.SourcePath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "Kyoo.WebApp");
+			
+				if (env.IsDevelopment())
+					spa.UseAngularCliServer("start");
 			});
 		}
 	}

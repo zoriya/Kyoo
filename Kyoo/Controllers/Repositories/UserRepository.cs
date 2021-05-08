@@ -41,6 +41,15 @@ namespace Kyoo.Controllers
 				.Take(20)
 				.ToListAsync();
 		}
+		
+		/// <inheritdoc />
+		public override async Task<User> Create(User obj)
+		{
+			await base.Create(obj);
+			_database.Entry(obj).State = EntityState.Added;
+			await _database.SaveChangesAsync($"Trying to insert a duplicated user (slug {obj.Slug} already exists).");
+			return obj;
+		}
 
 		/// <inheritdoc />
 		public override async Task Delete(User obj)

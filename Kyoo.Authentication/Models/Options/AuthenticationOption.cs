@@ -3,7 +3,7 @@ namespace Kyoo.Authentication.Models
 	/// <summary>
 	/// The main authentication options.
 	/// </summary>
-	public class AuthenticationOptions
+	public class AuthenticationOption
 	{
 		/// <summary>
 		/// The path to get this option from the root configuration.

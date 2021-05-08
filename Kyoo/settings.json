@@ -20,8 +20,12 @@
       "default": "Trace",
       "Microsoft": "Warning",
       "Microsoft.Hosting.Lifetime": "Information",
+      "Microsoft.EntityFrameworkCore.DbUpdateException": "None",
+      "Microsoft.EntityFrameworkCore.Update": "None",
+      "Microsoft.EntityFrameworkCore.Database.Command": "None",
       "Kyoo": "Trace"
-    }
+    },
+    "dotnet-ef": "false"
   },
   
   "authentication": {

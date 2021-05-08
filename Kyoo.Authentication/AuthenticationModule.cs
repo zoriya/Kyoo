@@ -70,6 +70,8 @@ namespace Kyoo.Authentication
 		{
 			string publicUrl = _configuration.GetValue<string>("public_url").TrimEnd('/');
 
+			services.AddControllers();
+
 			// services.AddDbContext<IdentityDatabase>(options =>
 			// {
 			// 	options.UseNpgsql(_configuration.GetDatabaseConnection("postgres"));
@@ -84,6 +86,8 @@ namespace Kyoo.Authentication
 			// 	.AddEntityFrameworkStores<IdentityDatabase>();
 
 			services.Configure<PermissionOption>(_configuration.GetSection(PermissionOption.Path));
+			services.Configure<CertificateOption>(_configuration.GetSection(CertificateOption.Path));
+			services.Configure<AuthenticationOption>(_configuration.GetSection(AuthenticationOption.Path));
 			CertificateOption certificateOptions = new();
 			_configuration.GetSection(CertificateOption.Path).Bind(certificateOptions);
 
