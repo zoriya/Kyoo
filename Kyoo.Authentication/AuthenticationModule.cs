@@ -86,6 +86,12 @@ namespace Kyoo.Authentication
 				IdentityModelEventSource.ShowPII = true;
 
 			services.AddControllers();
+			
+			// TODO handle direct-videos with bearers (probably add a ?token query param and a app.Use to translate that for videos)
+			
+			// TODO Support sign-out, check if login work, check if tokens should be stored.
+			
+			// TODO remove unused/commented code, add documentation.
 
 			// services.AddIdentityCore<User>()
 			// 	.AddSignInManager()
@@ -157,8 +163,7 @@ namespace Kyoo.Authentication
 			
 			services.AddAuthorization(options =>
 			{
-				AuthorizationPolicyBuilder scheme = new(IdentityConstants.ApplicationScheme, 
-					JwtBearerDefaults.AuthenticationScheme);
+				AuthorizationPolicyBuilder scheme = new(JwtBearerDefaults.AuthenticationScheme);
 				options.DefaultPolicy = scheme.RequireAuthenticatedUser().Build();
 			
 				string[] permissions = {"Read", "Write", "Play", "Admin"};

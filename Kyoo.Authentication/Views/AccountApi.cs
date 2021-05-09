@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using IdentityServer4;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
@@ -35,15 +34,9 @@ namespace Kyoo.Authentication.Views
 		/// </summary>
 		private readonly IUserRepository _users;
 		/// <summary>
-		/// The identity server interaction service to login users.
-		/// </summary>
-		// private readonly IIdentityServerInteractionService _interaction;
-		/// <summary>
 		/// A file manager to send profile pictures
 		/// </summary>
 		private readonly IFileManager _files;
-		// private readonly SignInManager<User> _signInManager;
-
 		/// <summary>
 		/// Options about authentication. Those options are monitored and reloads are supported.
 		/// </summary>
@@ -54,20 +47,15 @@ namespace Kyoo.Authentication.Views
 		/// Create a new <see cref="AccountApi"/> handle to handle login/users requests.
 		/// </summary>
 		/// <param name="users">The user repository to create and manage users</param>
-		/// <param name="interaction">The identity server interaction service to login users.</param>
 		/// <param name="files">A file manager to send profile pictures</param>
 		/// <param name="options">Authentication options (this may be hot reloaded)</param>
 		public AccountApi(IUserRepository users,
-			// IIdentityServerInteractionService interaction,
 			IFileManager files,
 			IOptions<AuthenticationOption> options)
-			//, SignInManager<User> signInManager)
 		{
 			_users = users;
-			// _interaction = interaction;
 			_files = files;
 			_options = options;
-			// _signInManager = signInManager;
 		}
 		
 		
@@ -119,7 +107,6 @@ namespace Kyoo.Authentication.Views
 		[HttpPost("login")]
 		public async Task<IActionResult> Login([FromBody] LoginRequest login)
 		{
-			// AuthorizationRequest context = await _interaction.GetAuthorizationContextAsync(login.ReturnURL);
 			User user = await _users.GetOrDefault(x => x.Username == login.Username);
 
 			if (user == null)
@@ -127,7 +114,7 @@ namespace Kyoo.Authentication.Views
 			if (!PasswordUtils.CheckPassword(login.Password, user.Password))
 				return Unauthorized();
 
-			// await _signInManager.SignInAsync(user, login.StayLoggedIn);
+			await HttpContext.SignInAsync(user.ToIdentityUser(), StayLogged(login.StayLoggedIn));
 			return Ok(new { RedirectUrl = login.ReturnURL, IsOk = true });
 		}
 		
@@ -143,20 +130,16 @@ namespace Kyoo.Authentication.Views
 			User user = (await _users.GetAll()).FirstOrDefault(x => x.ExtraData.GetValueOrDefault("otac")  == otac.Otac);
 			if (user == null)
 				return Unauthorized();
-			if (DateTime.ParseExact(user.ExtraData["otac-expire"], "s", CultureInfo.InvariantCulture) <= DateTime.UtcNow)
+			if (DateTime.ParseExact(user.ExtraData["otac-expire"], "s", CultureInfo.InvariantCulture) <=
+			    DateTime.UtcNow)
+			{
 				return BadRequest(new
 				{
 					code = "ExpiredOTAC", description = "The OTAC has expired. Try to login with your password."
 				});
+			}
 			
-			
-			IdentityServerUser iduser = new(user.ID.ToString())
-			{
-				DisplayName = user.Username
-			};
-
-			await HttpContext.SignInAsync(iduser, StayLogged(otac.StayLoggedIn));
-			// await _signInManager.SignInAsync(user, otac.StayLoggedIn);
+			await HttpContext.SignInAsync(user.ToIdentityUser(), StayLogged(otac.StayLoggedIn));
 			return Ok();
 		}
 		
@@ -167,11 +150,11 @@ namespace Kyoo.Authentication.Views
 		[Authorize]
 		public async Task<IActionResult> Logout()
 		{
-			// await _signInManager.SignOutAsync();
+			await HttpContext.SignOutAsync();
 			return Ok();
 		}
 
-		// TODO check with the extension method
+		/// <inheritdoc />
 		public async Task GetProfileDataAsync(ProfileDataRequestContext context)
 		{
 			User user = await _users.GetOrDefault(int.Parse(context.Subject.GetSubjectId()));
@@ -181,12 +164,18 @@ namespace Kyoo.Authentication.Views
 			context.IssuedClaims.Add(new Claim("permissions", string.Join(',', user.Permissions)));
 		}
 
+		/// <inheritdoc />
 		public async Task IsActiveAsync(IsActiveContext context)
 		{
 			User user = await _users.GetOrDefault(int.Parse(context.Subject.GetSubjectId()));
 			context.IsActive = user != null;
 		}
 		
+		/// <summary>
+		/// Get the user's profile picture.
+		/// </summary>
+		/// <param name="slug">The user slug</param>
+		/// <returns>The profile picture of the user or 404 if not found</returns>
 		[HttpGet("picture/{slug}")]
 		public async Task<IActionResult> GetPicture(string slug)
 		{
@@ -197,6 +186,11 @@ namespace Kyoo.Authentication.Views
 			return _files.FileResult(path);
 		}
 		
+		/// <summary>
+		/// Update profile information (email, username, profile picture...)
+		/// </summary>
+		/// <param name="data">The new information</param>
+		/// <returns>The edited user</returns>
 		[HttpPut]
 		[Authorize]
 		public async Task<ActionResult<User>> Update([FromForm] AccountUpdateRequest data)
@@ -218,6 +212,10 @@ namespace Kyoo.Authentication.Views
 			return await _users.Edit(user, false);
 		}
 
+		/// <summary>
+		/// Get permissions for a non connected user.
+		/// </summary>
+		/// <returns>The list of permissions of a default user.</returns>
 		[HttpGet("permissions")]
 		public ActionResult<IEnumerable<string>> GetDefaultPermissions()
 		{

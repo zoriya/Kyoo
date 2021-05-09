@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 using IdentityModel;
+using IdentityServer4;
 using Kyoo.Models;
 
 namespace Kyoo.Authentication
@@ -24,16 +25,18 @@ namespace Kyoo.Authentication
 				new Claim(JwtClaimTypes.Picture, $"api/account/picture/{user.Slug}")
 			};
 		}
-		
+
 		/// <summary>
-		/// Convert a user to a ClaimsPrincipal.
+		/// Convert a user to an <see cref="IdentityServerUser"/>.
 		/// </summary>
 		/// <param name="user">The user to convert</param>
-		/// <returns>A ClaimsPrincipal representing the user</returns>
-		public static ClaimsPrincipal ToPrincipal(this User user)
+		/// <returns>The corresponding identity server user.</returns>
+		public static IdentityServerUser ToIdentityUser(this User user)
 		{
-			ClaimsIdentity id = new (user.GetClaims());
-			return new ClaimsPrincipal(id);
+			return new(user.ID.ToString())
+			{
+				DisplayName = user.Username
+			};
 		}
 	}
 }

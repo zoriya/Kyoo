@@ -19,7 +19,8 @@ namespace Kyoo.Controllers
 		/// or proxy them from a distant server
 		/// </summary>
 		/// <remarks>
-		///	If no file exists at the given path, you should return a NotFoundResult or handle it gracefully.
+		///	If no file exists at the given path or if the path is null, a NotFoundResult is returned
+		/// to handle it gracefully.
 		/// </remarks>
 		/// <param name="path">The path of the file.</param>
 		/// <param name="rangeSupport">
