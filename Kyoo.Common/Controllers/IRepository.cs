@@ -212,9 +212,8 @@ namespace Kyoo.Controllers
 		/// Create a new resource if it does not exist already. If it does, the existing value is returned instead.
 		/// </summary>
 		/// <param name="obj">The object to create</param>
-		/// <param name="silentFail">Allow issues to occurs in this method. Every issue is caught and ignored.</param>
 		/// <returns>The newly created item or the existing value if it existed.</returns>
-		Task<T> CreateIfNotExists([NotNull] T obj, bool silentFail = false);
+		Task<T> CreateIfNotExists([NotNull] T obj);
 		
 		/// <summary>
 		/// Edit a resource

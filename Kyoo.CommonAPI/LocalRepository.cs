@@ -125,7 +125,7 @@ namespace Kyoo.Controllers
 			Sort<T> sort = default, 
 			Pagination limit = default)
 		{
-			return ApplyFilters(query, Get, DefaultSort, where, sort, limit);
+			return ApplyFilters(query, GetOrDefault, DefaultSort, where, sort, limit);
 		}
 		
 		/// <summary>
@@ -193,14 +193,14 @@ namespace Kyoo.Controllers
 		}
 
 		/// <inheritdoc/>
-		public virtual async Task<T> CreateIfNotExists(T obj, bool silentFail = false)
+		public virtual async Task<T> CreateIfNotExists(T obj)
 		{
 			try
 			{
 				if (obj == null)
 					throw new ArgumentNullException(nameof(obj));
 
-				T old = await Get(obj.Slug);
+				T old = await GetOrDefault(obj.Slug);
 				if (old != null)
 					return old;
 				
@@ -208,13 +208,7 @@ namespace Kyoo.Controllers
 			}
 			catch (DuplicatedItemException)
 			{
-				return await Get(obj.Slug);
-			}
-			catch
-			{
-				if (silentFail)
-					return default;
-				throw;
+				return await GetOrDefault(obj.Slug);
 			}
 		}
 

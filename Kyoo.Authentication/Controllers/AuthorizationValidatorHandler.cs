@@ -41,7 +41,7 @@ namespace Kyoo.Authentication
 			else
 			{
 				ICollection<string> defaultPerms = _options.CurrentValue.Default;
-				if (defaultPerms.Contains(requirement.Permission.ToLower()))
+				if (defaultPerms?.Contains(requirement.Permission.ToLower()) == true)
 					context.Succeed(requirement);
 			}
 

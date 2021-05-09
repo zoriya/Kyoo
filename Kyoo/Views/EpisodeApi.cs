@@ -50,14 +50,20 @@ namespace Kyoo.Api
 		[Authorize(Policy = "Read")]
 		public async Task<ActionResult<Show>> GetShow(int showID, int seasonNumber, int episodeNumber)
 		{
-			return await _libraryManager.Get<Show>(showID);
+			Show ret = await _libraryManager.GetOrDefault<Show>(showID);
+			if (ret == null)
+				return NotFound();
+			return ret;
 		}
 		
 		[HttpGet("{episodeID:int}/season")]
 		[Authorize(Policy = "Read")]
 		public async Task<ActionResult<Season>> GetSeason(int episodeID)
 		{
-			return await _libraryManager.Get<Season>(x => x.Episodes.Any(y => y.ID == episodeID));
+			Season ret = await _libraryManager.GetOrDefault<Season>(x => x.Episodes.Any(y => y.ID == episodeID));
+			if (ret == null)
+				return NotFound();
+			return ret;
 		}
 		
 		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}/season")]
@@ -104,7 +110,7 @@ namespace Kyoo.Api
 					new Sort<Track>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Episode>(episodeID) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Episode>(episodeID) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -175,7 +181,6 @@ namespace Kyoo.Api
 		}
 		
 		[HttpGet("{id:int}/thumb")]
-		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetThumb(int id)
 		{
 			try
@@ -190,7 +195,6 @@ namespace Kyoo.Api
 		}
 		
 		[HttpGet("{slug}/thumb")]
-		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetThumb(string slug)
 		{
 			try

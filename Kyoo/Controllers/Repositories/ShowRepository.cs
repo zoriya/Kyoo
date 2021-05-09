@@ -102,22 +102,22 @@ namespace Kyoo.Controllers
 		{
 			await base.Validate(resource);
 			if (resource.Studio != null)
-				resource.Studio = await _studios.CreateIfNotExists(resource.Studio, true);
+				resource.Studio = await _studios.CreateIfNotExists(resource.Studio);
 			resource.Genres = await resource.Genres
-				.SelectAsync(x => _genres.CreateIfNotExists(x, true))
+				.SelectAsync(x => _genres.CreateIfNotExists(x))
 				.ToListAsync();
 			resource.GenreLinks = resource.Genres?
 				.Select(x => Link.UCreate(resource, x))
 				.ToList();
 			await resource.ExternalIDs.ForEachAsync(async id =>
 			{
-				id.Provider = await _providers.CreateIfNotExists(id.Provider, true);
+				id.Provider = await _providers.CreateIfNotExists(id.Provider);
 				id.ProviderID = id.Provider.ID;
 				_database.Entry(id.Provider).State = EntityState.Detached;
 			});
 			await resource.People.ForEachAsync(async role =>
 			{
-				role.People = await _people.CreateIfNotExists(role.People, true);
+				role.People = await _people.CreateIfNotExists(role.People);
 				role.PeopleID = role.People.ID;
 				_database.Entry(role.People).State = EntityState.Detached;
 			});

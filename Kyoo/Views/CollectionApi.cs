@@ -40,7 +40,7 @@ namespace Kyoo.Api
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Collection>(id) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Collection>(id) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -92,7 +92,7 @@ namespace Kyoo.Api
 					new Sort<Library>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Collection>(id) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Collection>(id) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}

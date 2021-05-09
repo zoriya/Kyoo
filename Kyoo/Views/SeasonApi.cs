@@ -47,7 +47,7 @@ namespace Kyoo.Api
 					new Sort<Episode>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Season>(seasonID) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Season>(seasonID) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -130,23 +130,28 @@ namespace Kyoo.Api
 		[Authorize(Policy = "Read")]
 		public async Task<ActionResult<Show>> GetShow(int showID, int seasonNumber)
 		{
-			return await _libraryManager.Get<Show>(showID);
+			Show ret = await _libraryManager.GetOrDefault<Show>(showID);
+			if (ret == null)
+				return NotFound();
+			return ret;
 		}
 		
 		[HttpGet("{id:int}/thumb")]
-		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetThumb(int id)
 		{
-			Season season = await _libraryManager.Get<Season>(id);
+			Season season = await _libraryManager.GetOrDefault<Season>(id);
+			if (season == null)
+				return NotFound();
 			await _libraryManager.Load(season, x => x.Show);
 			return _files.FileResult(await _thumbs.GetSeasonPoster(season));
 		}
 		
 		[HttpGet("{slug}/thumb")]
-		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetThumb(string slug)
 		{
-			Season season = await _libraryManager.Get<Season>(slug);
+			Season season = await _libraryManager.GetOrDefault<Season>(slug);
+			if (season == null)
+				return NotFound();
 			await _libraryManager.Load(season, x => x.Show);
 			return _files.FileResult(await _thumbs.GetSeasonPoster(season));
 		}

@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Kyoo.CommonApi;
 using Kyoo.Controllers;
 using Kyoo.Models;
-using Kyoo.Models.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -41,7 +40,7 @@ namespace Kyoo.Api
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Genre>(id) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Genre>(id) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}

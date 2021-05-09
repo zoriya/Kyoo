@@ -49,7 +49,7 @@ namespace Kyoo.Api
 					new Sort<Season>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Show>(showID) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Show>(showID) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -75,7 +75,7 @@ namespace Kyoo.Api
 					new Sort<Season>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Show>(slug) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Show>(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -101,7 +101,7 @@ namespace Kyoo.Api
 					new Sort<Episode>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Show>(showID) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Show>(showID) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -127,7 +127,7 @@ namespace Kyoo.Api
 					new Sort<Episode>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Show>(slug) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Show>(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -152,7 +152,7 @@ namespace Kyoo.Api
 					new Sort<PeopleRole>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Show>(showID) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Show>(showID) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -177,7 +177,7 @@ namespace Kyoo.Api
 					new Sort<PeopleRole>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Show>(slug) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Show>(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -203,7 +203,7 @@ namespace Kyoo.Api
 					new Sort<Genre>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Show>(showID) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Show>(showID) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -229,7 +229,7 @@ namespace Kyoo.Api
 					new Sort<Genre>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Show>(slug) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Show>(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -283,7 +283,7 @@ namespace Kyoo.Api
 					new Sort<Library>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Show>(showID) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Show>(showID) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -309,7 +309,7 @@ namespace Kyoo.Api
 					new Sort<Library>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Show>(slug) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Show>(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -335,7 +335,7 @@ namespace Kyoo.Api
 					new Sort<Collection>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Show>(showID) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Show>(showID) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -361,7 +361,7 @@ namespace Kyoo.Api
 					new Sort<Collection>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Show>(slug) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Show>(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -408,7 +408,6 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet("{slug}/poster")]
-		[Authorize(Policy = "Read")]
 		public async Task<IActionResult> GetPoster(string slug)
 		{
 			try
@@ -423,7 +422,6 @@ namespace Kyoo.Api
 		}
 		
 		[HttpGet("{slug}/logo")]
-		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetLogo(string slug)
 		{
 			try
@@ -438,7 +436,6 @@ namespace Kyoo.Api
 		}
 		
 		[HttpGet("{slug}/backdrop")]
-		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetBackdrop(string slug)
 		{
 			try

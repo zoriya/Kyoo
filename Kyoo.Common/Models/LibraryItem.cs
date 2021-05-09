@@ -1,5 +1,6 @@
 using System;
 using System.Linq.Expressions;
+using JetBrains.Annotations;
 using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
@@ -22,7 +23,7 @@ namespace Kyoo.Models
 		public int? StartYear { get; set; }
 		public int? EndYear { get; set; }
 		[SerializeAs("{HOST}/api/{_type}/{Slug}/poster")] public string Poster { get; set; }
-		private string _type => Type == ItemType.Collection ? "collection" : "show";
+		[UsedImplicitly] private string _type => Type == ItemType.Collection ? "collection" : "show";
 		public ItemType Type { get; set; }
 		
 		public LibraryItem() {}

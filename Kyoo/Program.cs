@@ -83,7 +83,10 @@ namespace Kyoo
 				.ConfigureLogging((context, builder) =>
 				{
 					builder.AddConfiguration(context.Configuration.GetSection("logging"))
-						.AddConsole()
+						.AddSimpleConsole(x  =>
+						{
+							x.TimestampFormat = "[hh:mm:ss] ";
+						})
 						.AddDebug()
 						.AddEventSourceLogger();
 				})

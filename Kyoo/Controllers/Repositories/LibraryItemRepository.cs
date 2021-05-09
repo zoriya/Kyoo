@@ -111,12 +111,7 @@ namespace Kyoo.Controllers
 		public override Task<LibraryItem> Create(LibraryItem obj) => throw new InvalidOperationException();
 
 		/// <inheritdoc />
-		public override Task<LibraryItem> CreateIfNotExists(LibraryItem obj, bool silentFail = false)
-		{
-			if (silentFail)
-				return Task.FromResult<LibraryItem>(default);
-			throw new InvalidOperationException();
-		}
+		public override Task<LibraryItem> CreateIfNotExists(LibraryItem obj) => throw new InvalidOperationException();
 		/// <inheritdoc />
 		public override Task<LibraryItem> Edit(LibraryItem obj, bool reset) => throw new InvalidOperationException();
 		/// <inheritdoc />

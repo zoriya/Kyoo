@@ -63,7 +63,7 @@ namespace Kyoo.Postgresql
 			services.AddDbContext<DatabaseContext, PostgresContext>(x =>
 			{
 				x.UseNpgsql(_configuration.GetDatabaseConnection("postgres"));
-				if (_configuration.GetValue<bool>("logging:dotnet-ef"))
+				if (_environment.IsDevelopment())
 					x.EnableDetailedErrors().EnableSensitiveDataLogging();
 			});
 			// services.AddScoped<DatabaseContext>(_ => new PostgresContext(

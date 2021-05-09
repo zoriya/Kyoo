@@ -23,7 +23,7 @@ namespace Kyoo.Authentication
 				new()
 				{
 					ClientId = "kyoo.webapp",
-					
+
 					AccessTokenType = AccessTokenType.Jwt,
 					AllowedGrantTypes = GrantTypes.Code,
 					RequirePkce = true,
@@ -33,7 +33,7 @@ namespace Kyoo.Authentication
 					AllowOfflineAccess = true,
 					RequireConsent = false,
 					
-					AllowedScopes = { "openid", "profile", "kyoo.read", "kyoo.write", "kyoo.play", "kyoo.download", "kyoo.admin" },
+					AllowedScopes = { "openid", "profile", "kyoo.read", "kyoo.write", "kyoo.play", "kyoo.admin" },
 					RedirectUris =  { "/", "/silent.html" },
 					PostLogoutRedirectUris = { "/logout" }
 				}
@@ -61,11 +61,6 @@ namespace Kyoo.Authentication
 				},
 				new ApiScope
 				{
-					Name = "kyoo.download",
-					DisplayName = "Allow downloading of episodes and movies from kyoo."
-				},
-				new ApiScope
-				{
 					Name = "kyoo.admin",
 					DisplayName = "Full access to the admin's API and the public API."
 				}
@@ -76,9 +71,8 @@ namespace Kyoo.Authentication
 		{
 			return new[]
 			{
-				new ApiResource
+				new ApiResource("kyoo", "Kyoo")
 				{
-					Name = "Kyoo",
 					Scopes = GetScopes().Select(x => x.Name).ToArray()
 				}
 			};

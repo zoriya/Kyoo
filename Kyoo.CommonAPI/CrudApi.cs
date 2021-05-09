@@ -29,28 +29,20 @@ namespace Kyoo.CommonApi
 		[Authorize(Policy = "Read")]
 		public virtual async Task<ActionResult<T>> Get(int id)
 		{
-			try
-			{
-				return await _repository.Get(id);
-			}
-			catch (ItemNotFoundException)
-			{
+			T ret = await _repository.GetOrDefault(id);
+			if (ret == null)
 				return NotFound();
-			}
+			return ret;
 		}
 
 		[HttpGet("{slug}")]
 		[Authorize(Policy = "Read")]
 		public virtual async Task<ActionResult<T>> Get(string slug)
 		{
-			try
-			{
-				return await _repository.Get(slug);
-			}
-			catch (ItemNotFoundException)
-			{
+			T ret = await _repository.Get(slug);
+			if (ret == null)
 				return NotFound();
-			}
+			return ret;
 		}
 
 		[HttpGet("count")]
@@ -111,7 +103,7 @@ namespace Kyoo.CommonApi
 			}
 			catch (DuplicatedItemException)
 			{
-				T existing = await _repository.Get(resource.Slug);
+				T existing = await _repository.GetOrDefault(resource.Slug);
 				return Conflict(existing);
 			}
 		}

@@ -20,12 +20,9 @@
       "default": "Trace",
       "Microsoft": "Warning",
       "Microsoft.Hosting.Lifetime": "Information",
-      "Microsoft.EntityFrameworkCore.DbUpdateException": "None",
-      "Microsoft.EntityFrameworkCore.Update": "None",
-      "Microsoft.EntityFrameworkCore.Database.Command": "None",
+      "Microsoft.EntityFrameworkCore": "None",
       "Kyoo": "Trace"
-    },
-    "dotnet-ef": "false"
+    }
   },
   
   "authentication": {
@@ -35,7 +32,7 @@
       "password": "passphrase"
     },
     "permissions": {
-      "default": ["read", "play", "write", "admin"],
+      "default": [],
       "newUser": ["read", "play", "write", "admin"]
     },
     "profilePicturePath": "users/"

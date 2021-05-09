@@ -73,13 +73,13 @@ namespace Kyoo.Controllers
 			await base.Validate(resource);
 			await resource.ExternalIDs.ForEachAsync(async id =>
 			{
-				id.Provider = await _providers.CreateIfNotExists(id.Provider, true);
+				id.Provider = await _providers.CreateIfNotExists(id.Provider);
 				id.ProviderID = id.Provider.ID;
 				_database.Entry(id.Provider).State = EntityState.Detached;
 			});
 			await resource.Roles.ForEachAsync(async role =>
 			{
-				role.Show = await _shows.Value.CreateIfNotExists(role.Show, true);
+				role.Show = await _shows.Value.CreateIfNotExists(role.Show);
 				role.ShowID = role.Show.ID;
 				_database.Entry(role.Show).State = EntityState.Detached;
 			});
@@ -129,7 +129,7 @@ namespace Kyoo.Controllers
 				where,
 				sort,
 				limit);
-			if (!people.Any() && await _shows.Value.Get(showID) == null)
+			if (!people.Any() && await _shows.Value.GetOrDefault(showID) == null)
 				throw new ItemNotFoundException();
 			foreach (PeopleRole role in people)
 				role.ForPeople = true;
@@ -151,7 +151,7 @@ namespace Kyoo.Controllers
 				where,
 				sort,
 				limit);
-			if (!people.Any() && await _shows.Value.Get(showSlug) == null)
+			if (!people.Any() && await _shows.Value.GetOrDefault(showSlug) == null)
 				throw new ItemNotFoundException();
 			foreach (PeopleRole role in people)
 				role.ForPeople = true;
@@ -172,7 +172,7 @@ namespace Kyoo.Controllers
 				where,
 				sort,
 				limit);
-			if (!roles.Any() && await Get(id) == null)
+			if (!roles.Any() && await GetOrDefault(id) == null)
 				throw new ItemNotFoundException();
 			return roles;
 		}
@@ -191,7 +191,7 @@ namespace Kyoo.Controllers
 				where,
 				sort,
 				limit);
-			if (!roles.Any() && await Get(slug) == null)
+			if (!roles.Any() && await GetOrDefault(slug) == null)
 				throw new ItemNotFoundException();
 			return roles;
 		}

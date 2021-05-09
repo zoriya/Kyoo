@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace Kyoo.Models
@@ -60,6 +61,7 @@ namespace Kyoo.Models
 		
 		public Link() {}
 		
+		[SuppressMessage("ReSharper", "VirtualMemberCallInConstructor")]
 		public Link(T1 first, T2 second, bool privateItems = false)
 			: base(first, second)
 		{

@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.Serialization;
 
 namespace Kyoo.Models.Exceptions
 {
@@ -21,6 +22,15 @@ namespace Kyoo.Models.Exceptions
 		/// <param name="message">The message to use</param>
 		public DuplicatedItemException(string message)
 			: base(message)
+		{ }
+		
+		/// <summary>
+		/// The serialization constructor 
+		/// </summary>
+		/// <param name="info">Serialization infos</param>
+		/// <param name="context">The serialization context</param>
+		protected DuplicatedItemException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
 		{ }
 	}
 }

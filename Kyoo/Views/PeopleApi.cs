@@ -87,18 +87,20 @@ namespace Kyoo.Api
 		}
 		
 		[HttpGet("{id:int}/poster")]
-		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetPeopleIcon(int id)
 		{
-			People people = await _libraryManager.Get<People>(id);
+			People people = await _libraryManager.GetOrDefault<People>(id);
+			if (people == null)
+				return NotFound();
 			return _files.FileResult(await _thumbs.GetPeoplePoster(people));
 		}
 		
 		[HttpGet("{slug}/poster")]
-		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetPeopleIcon(string slug)
 		{
-			People people = await _libraryManager.Get<People>(slug);
+			People people = await _libraryManager.GetOrDefault<People>(slug);
+			if (people == null)
+				return NotFound();
 			return _files.FileResult(await _thumbs.GetPeoplePoster(people));
 		}
 	}

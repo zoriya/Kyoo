@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Kyoo.Authentication.Models
 {
 	/// <summary>

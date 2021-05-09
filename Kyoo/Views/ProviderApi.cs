@@ -2,7 +2,6 @@ using System.Threading.Tasks;
 using Kyoo.CommonApi;
 using Kyoo.Controllers;
 using Kyoo.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
@@ -29,18 +28,20 @@ namespace Kyoo.Api
 		}
 		
 		[HttpGet("{id:int}/logo")]
-		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetLogo(int id)
 		{
-			Provider provider = await _libraryManager.Get<Provider>(id);
+			Provider provider = await _libraryManager.GetOrDefault<Provider>(id);
+			if (provider == null)
+				return NotFound();
 			return _files.FileResult(await _thumbnails.GetProviderLogo(provider));
 		}
 		
 		[HttpGet("{slug}/logo")]
-		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetLogo(string slug)
 		{
-			Provider provider = await _libraryManager.Get<Provider>(slug);
+			Provider provider = await _libraryManager.GetOrDefault<Provider>(slug);
+			if (provider == null)
+				return NotFound();
 			return _files.FileResult(await _thumbnails.GetProviderLogo(provider));
 		}
 	}

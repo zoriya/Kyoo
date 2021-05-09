@@ -42,62 +42,6 @@ namespace Kyoo.Models
 		[SerializeIgnore] public virtual ICollection<Link<Show, Genre>> GenreLinks { get; set; }
 #endif
 
-
-		public Show() { }
-
-		public Show(string slug, 
-			string title,
-			IEnumerable<string> aliases,
-			string path, string overview,
-			string trailerUrl,
-			IEnumerable<Genre> genres,
-			Status? status,
-			int? startYear,
-			int? endYear,
-			IEnumerable<MetadataID> externalIDs)
-		{
-			Slug = slug;
-			Title = title;
-			Aliases = aliases?.ToArray();
-			Path = path;
-			Overview = overview;
-			TrailerUrl = trailerUrl;
-			Genres = genres?.ToArray();
-			Status = status;
-			StartYear = startYear;
-			EndYear = endYear;
-			ExternalIDs = externalIDs?.ToArray();
-		}
-
-		public Show(string slug,
-			string title, 
-			IEnumerable<string> aliases, 
-			string path,
-			string overview, 
-			string trailerUrl,
-			Status? status, 
-			int? startYear,
-			int? endYear,
-			string poster,
-			string logo, 
-			string backdrop,
-			IEnumerable<MetadataID> externalIDs)
-		{
-			Slug = slug;
-			Title = title;
-			Aliases = aliases?.ToArray();
-			Path = path;
-			Overview = overview;
-			TrailerUrl = trailerUrl;
-			Status = status;
-			StartYear = startYear;
-			EndYear = endYear;
-			Poster = poster;
-			Logo = logo;
-			Backdrop = backdrop;
-			ExternalIDs = externalIDs?.ToArray();
-		}
-
 		public string GetID(string provider)
 		{
 			return ExternalIDs?.FirstOrDefault(x => x.Provider.Name == provider)?.DataID;

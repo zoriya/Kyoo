@@ -6,7 +6,6 @@ using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Kyoo.CommonApi;
-using Kyoo.Models.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 
@@ -27,7 +26,7 @@ namespace Kyoo.Api
 			_taskManager = taskManager;
 		}
 
-		[Authorize(Policy = "Admin")]
+		[Authorize(Policy = "Write")]
 		public override async Task<ActionResult<Library>> Create(Library resource)
 		{
 			ActionResult<Library> result = await base.Create(resource);
@@ -52,7 +51,7 @@ namespace Kyoo.Api
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Library>(id) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Library>(id) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -104,7 +103,7 @@ namespace Kyoo.Api
 					new Sort<Collection>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Library>(id) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Library>(id) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -156,7 +155,7 @@ namespace Kyoo.Api
 					new Sort<LibraryItem>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Library>(id) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Library>(id) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}

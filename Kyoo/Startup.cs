@@ -47,7 +47,8 @@ namespace Kyoo
 			_configuration = configuration;
 			_plugins = new PluginManager(hostProvider, _configuration, loggerFactory.CreateLogger<PluginManager>());
 			
-			_plugins.LoadPlugins(new IPlugin[] {new CoreModule(), new PostgresModule(configuration, host), new AuthenticationModule(configuration, loggerFactory)});
+			_plugins.LoadPlugins(new IPlugin[] {new CoreModule(), new PostgresModule(configuration, host), 
+				new AuthenticationModule(configuration, loggerFactory, host)});
 		}
 
 		/// <summary>

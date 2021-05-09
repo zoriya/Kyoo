@@ -73,7 +73,7 @@ namespace Kyoo.Tasks
 
 			ICollection<Library> libraries = argument == null 
 				? await libraryManager.GetAll<Library>()
-				: new [] { await libraryManager.Get<Library>(argument)};
+				: new [] { await libraryManager.GetOrDefault<Library>(argument)};
 			
 			if (argument != null && libraries.First() == null)
 				throw new ArgumentException($"No library found with the name {argument}");
@@ -253,7 +253,7 @@ namespace Kyoo.Tasks
 		{
 			if (string.IsNullOrEmpty(collectionName))
 				return null;
-			Collection collection = await libraryManager.Get<Collection>(Utility.ToSlug(collectionName));
+			Collection collection = await libraryManager.GetOrDefault<Collection>(Utility.ToSlug(collectionName));
 			if (collection != null)
 				return collection;
 			collection = await MetadataProvider.GetCollectionFromName(collectionName, library);
@@ -265,7 +265,7 @@ namespace Kyoo.Tasks
 			}
 			catch (DuplicatedItemException)
 			{
-				return await libraryManager.Get<Collection>(collection.Slug);
+				return await libraryManager.GetOrDefault<Collection>(collection.Slug);
 			}
 		}
 		
@@ -275,7 +275,7 @@ namespace Kyoo.Tasks
 			bool isMovie, 
 			Library library)
 		{
-			Show old = await libraryManager.Get<Show>(x => x.Path == showPath);
+			Show old = await libraryManager.GetOrDefault<Show>(x => x.Path == showPath);
 			if (old != null)
 			{
 				await libraryManager.Load(old, x => x.ExternalIDs);
@@ -291,7 +291,7 @@ namespace Kyoo.Tasks
 			}
 			catch (DuplicatedItemException)
 			{
-				old = await libraryManager.Get<Show>(show.Slug);
+				old = await libraryManager.GetOrDefault<Show>(show.Slug);
 				if (old.Path == showPath)
 				{
 					await libraryManager.Load(old, x => x.ExternalIDs);
@@ -320,8 +320,15 @@ namespace Kyoo.Tasks
 			catch (ItemNotFoundException)
 			{
 				Season season = await MetadataProvider.GetSeason(show, seasonNumber, library);
-				await libraryManager.CreateIfNotExists(season);
-				await ThumbnailsManager.Validate(season);
+				try
+				{
+					await libraryManager.Create(season);
+					await ThumbnailsManager.Validate(season);
+				}
+				catch (DuplicatedItemException)
+				{
+					season = await libraryManager.Get(show.Slug, seasonNumber);
+				}
 				season.Show = show;
 				return season;
 			}

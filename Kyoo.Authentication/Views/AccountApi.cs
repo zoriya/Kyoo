@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using IdentityServer4;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
@@ -14,6 +16,7 @@ using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -39,6 +42,7 @@ namespace Kyoo.Authentication.Views
 		/// A file manager to send profile pictures
 		/// </summary>
 		private readonly IFileManager _files;
+		// private readonly SignInManager<User> _signInManager;
 
 		/// <summary>
 		/// Options about authentication. Those options are monitored and reloads are supported.
@@ -57,11 +61,13 @@ namespace Kyoo.Authentication.Views
 			// IIdentityServerInteractionService interaction,
 			IFileManager files,
 			IOptions<AuthenticationOption> options)
+			//, SignInManager<User> signInManager)
 		{
 			_users = users;
 			// _interaction = interaction;
 			_files = files;
 			_options = options;
+			// _signInManager = signInManager;
 		}
 		
 		
@@ -114,14 +120,14 @@ namespace Kyoo.Authentication.Views
 		public async Task<IActionResult> Login([FromBody] LoginRequest login)
 		{
 			// AuthorizationRequest context = await _interaction.GetAuthorizationContextAsync(login.ReturnURL);
-			User user = await _users.Get(x => x.Username == login.Username);
+			User user = await _users.GetOrDefault(x => x.Username == login.Username);
 
 			if (user == null)
 				return Unauthorized();
 			if (!PasswordUtils.CheckPassword(login.Password, user.Password))
 				return Unauthorized();
 
-			await HttpContext.SignInAsync(user.ID.ToString(), user.ToPrincipal(), StayLogged(login.StayLoggedIn));
+			// await _signInManager.SignInAsync(user, login.StayLoggedIn);
 			return Ok(new { RedirectUrl = login.ReturnURL, IsOk = true });
 		}
 		
@@ -142,7 +148,15 @@ namespace Kyoo.Authentication.Views
 				{
 					code = "ExpiredOTAC", description = "The OTAC has expired. Try to login with your password."
 				});
-			await HttpContext.SignInAsync(user.ID.ToString(), user.ToPrincipal(), StayLogged(otac.StayLoggedIn));
+			
+			
+			IdentityServerUser iduser = new(user.ID.ToString())
+			{
+				DisplayName = user.Username
+			};
+
+			await HttpContext.SignInAsync(iduser, StayLogged(otac.StayLoggedIn));
+			// await _signInManager.SignInAsync(user, otac.StayLoggedIn);
 			return Ok();
 		}
 		
@@ -153,22 +167,23 @@ namespace Kyoo.Authentication.Views
 		[Authorize]
 		public async Task<IActionResult> Logout()
 		{
-			await HttpContext.SignOutAsync();
+			// await _signInManager.SignOutAsync();
 			return Ok();
 		}
 
 		// TODO check with the extension method
 		public async Task GetProfileDataAsync(ProfileDataRequestContext context)
 		{
-			User user = await _users.Get(int.Parse(context.Subject.GetSubjectId()));
+			User user = await _users.GetOrDefault(int.Parse(context.Subject.GetSubjectId()));
 			if (user == null)
 				return;
 			context.IssuedClaims.AddRange(user.GetClaims());
+			context.IssuedClaims.Add(new Claim("permissions", string.Join(',', user.Permissions)));
 		}
 
 		public async Task IsActiveAsync(IsActiveContext context)
 		{
-			User user = await _users.Get(int.Parse(context.Subject.GetSubjectId()));
+			User user = await _users.GetOrDefault(int.Parse(context.Subject.GetSubjectId()));
 			context.IsActive = user != null;
 		}
 		
@@ -186,8 +201,10 @@ namespace Kyoo.Authentication.Views
 		[Authorize]
 		public async Task<ActionResult<User>> Update([FromForm] AccountUpdateRequest data)
 		{
-			User user = await _users.Get(int.Parse(HttpContext.User.GetSubjectId()));
-			
+			User user = await _users.GetOrDefault(int.Parse(HttpContext.User.GetSubjectId()));
+
+			if (user == null)
+				return Unauthorized();
 			if (!string.IsNullOrEmpty(data.Email))
 				user.Email = data.Email;
 			if (!string.IsNullOrEmpty(data.Username))
@@ -204,7 +221,7 @@ namespace Kyoo.Authentication.Views
 		[HttpGet("permissions")]
 		public ActionResult<IEnumerable<string>> GetDefaultPermissions()
 		{
-			return _options.Value.Permissions.Default;
+			return _options.Value.Permissions.Default ?? Array.Empty<string>();
 		}
 	}
 }

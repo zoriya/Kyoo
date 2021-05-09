@@ -3,16 +3,19 @@ using System.Collections.Generic;
 using IdentityServer4.Extensions;
 using IdentityServer4.Services;
 using Kyoo.Authentication.Models;
+using Kyoo.Authentication.Views;
 using Kyoo.Controllers;
-using Kyoo.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Logging;
 
 namespace Kyoo.Authentication
 {
@@ -53,16 +56,25 @@ namespace Kyoo.Authentication
 		/// </summary>
 		private readonly ILoggerFactory _loggerFactory;
 
-		
+		/// <summary>
+		/// The environment information to check if the app runs in debug mode
+		/// </summary>
+		private readonly IWebHostEnvironment _environment;
+
+
 		/// <summary>
 		/// Create a new authentication module instance and use the given configuration and environment.
 		/// </summary>
 		/// <param name="configuration">The configuration to use</param>
 		/// <param name="loggerFactory">The logger factory to allow IdentityServer to log things</param>
-		public AuthenticationModule(IConfiguration configuration, ILoggerFactory loggerFactory)
+		/// <param name="environment">The environment information to check if the app runs in debug mode</param>
+		public AuthenticationModule(IConfiguration configuration,
+			ILoggerFactory loggerFactory, 
+			IWebHostEnvironment environment)
 		{
 			_configuration = configuration;
 			_loggerFactory = loggerFactory;
+			_environment = environment;
 		}
 
 		/// <inheritdoc />
@@ -70,7 +82,15 @@ namespace Kyoo.Authentication
 		{
 			string publicUrl = _configuration.GetValue<string>("public_url").TrimEnd('/');
 
+			if (_environment.IsDevelopment())
+				IdentityModelEventSource.ShowPII = true;
+
 			services.AddControllers();
+
+			// services.AddIdentityCore<User>()
+			// 	.AddSignInManager()
+			// 	.AddDefaultTokenProviders()
+			// 	.AddUserStore<UserStore>();
 
 			// services.AddDbContext<IdentityDatabase>(options =>
 			// {
@@ -113,25 +133,25 @@ namespace Kyoo.Authentication
 				// 	options.EnableTokenCleanup = true;
 				// })
 				.AddInMemoryIdentityResources(IdentityContext.GetIdentityResources())
+				.AddInMemoryApiScopes(IdentityContext.GetScopes())
 				.AddInMemoryApiResources(IdentityContext.GetApis())
 				.AddInMemoryClients(IdentityContext.GetClients())
-				.AddDeveloperSigningCredential();
-				// .AddProfileService<AccountApi>()
-				// .AddSigninKeys(certificateOptions);
+				.AddProfileService<AccountApi>()
+				.AddSigninKeys(certificateOptions);
 			// TODO implement means to add clients or api scopes for other plugins.
 			// TODO split scopes (kyoo.read should be task.read, video.read etc)
 
-			services.AddAuthentication(o =>
-				{
-					o.DefaultScheme = IdentityConstants.ApplicationScheme;
-					o.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-				})
-				.AddIdentityCookies(_ => { });
+			// services.AddAuthentication(o =>
+			// 	{
+			// 		o.DefaultScheme = IdentityConstants.ApplicationScheme;
+			// 		o.DefaultSignInScheme = IdentityConstants.ExternalScheme;
+			// 	})
+			// 	.AddIdentityCookies(_ => { });
 			services.AddAuthentication()
 				.AddJwtBearer(options =>
 				{
 					options.Authority = publicUrl;
-					options.Audience = "Kyoo";
+					options.Audience = "kyoo";
 					options.RequireHttpsMetadata = false;
 				});
 			
@@ -146,10 +166,10 @@ namespace Kyoo.Authentication
 				{
 					options.AddPolicy(permission, policy =>
 					{
-						policy.AuthenticationSchemes.Add(IdentityConstants.ApplicationScheme);
+						// policy.AuthenticationSchemes.Add(IdentityConstants.ApplicationScheme);
 						policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
 						policy.AddRequirements(new AuthRequirement(permission));
-						policy.RequireScope($"kyoo.{permission.ToLower()}");
+						// policy.RequireScope($"kyoo.{permission.ToLower()}");
 					});
 				}
 			});
