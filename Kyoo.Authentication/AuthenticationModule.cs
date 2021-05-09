@@ -10,7 +10,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -89,27 +88,9 @@ namespace Kyoo.Authentication
 			
 			// TODO handle direct-videos with bearers (probably add a ?token query param and a app.Use to translate that for videos)
 			
-			// TODO Support sign-out, check if login work, check if tokens should be stored.
+			// TODO Check if tokens should be stored.
 			
 			// TODO remove unused/commented code, add documentation.
-
-			// services.AddIdentityCore<User>()
-			// 	.AddSignInManager()
-			// 	.AddDefaultTokenProviders()
-			// 	.AddUserStore<UserStore>();
-
-			// services.AddDbContext<IdentityDatabase>(options =>
-			// {
-			// 	options.UseNpgsql(_configuration.GetDatabaseConnection("postgres"));
-			// });
-
-			// services.AddIdentityCore<User>(o =>
-			// 	{
-			// 		o.Stores.MaxLengthForKeys = 128;
-			// 	})
-			// 	.AddSignInManager()
-			// 	.AddDefaultTokenProviders()
-			// 	.AddEntityFrameworkStores<IdentityDatabase>();
 
 			services.Configure<PermissionOption>(_configuration.GetSection(PermissionOption.Path));
 			services.Configure<CertificateOption>(_configuration.GetSection(CertificateOption.Path));
@@ -124,35 +105,15 @@ namespace Kyoo.Authentication
 					options.UserInteraction.ErrorUrl = $"{publicUrl}/error";
 					options.UserInteraction.LogoutUrl = $"{publicUrl}/logout";
 				})
-				// .AddAspNetIdentity<User>()
-				// .AddConfigurationStore(options =>
-				// {
-				// 	options.ConfigureDbContext = builder =>
-				// 		builder.UseNpgsql(_configuration.GetDatabaseConnection("postgres"),
-				// 			sql => sql.MigrationsAssembly(assemblyName));
-				// })
-				// .AddOperationalStore(options =>
-				// {
-				// 	options.ConfigureDbContext = builder =>
-				// 		builder.UseNpgsql(_configuration.GetDatabaseConnection("postgres"),
-				// 			sql => sql.MigrationsAssembly(assemblyName));
-				// 	options.EnableTokenCleanup = true;
-				// })
 				.AddInMemoryIdentityResources(IdentityContext.GetIdentityResources())
 				.AddInMemoryApiScopes(IdentityContext.GetScopes())
 				.AddInMemoryApiResources(IdentityContext.GetApis())
 				.AddInMemoryClients(IdentityContext.GetClients())
+				.AddInMemoryClients(_configuration.GetSection("authentication:clients"))
 				.AddProfileService<AccountApi>()
 				.AddSigninKeys(certificateOptions);
-			// TODO implement means to add clients or api scopes for other plugins.
 			// TODO split scopes (kyoo.read should be task.read, video.read etc)
-
-			// services.AddAuthentication(o =>
-			// 	{
-			// 		o.DefaultScheme = IdentityConstants.ApplicationScheme;
-			// 		o.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-			// 	})
-			// 	.AddIdentityCookies(_ => { });
+			
 			services.AddAuthentication()
 				.AddJwtBearer(options =>
 				{
@@ -171,10 +132,10 @@ namespace Kyoo.Authentication
 				{
 					options.AddPolicy(permission, policy =>
 					{
-						// policy.AuthenticationSchemes.Add(IdentityConstants.ApplicationScheme);
 						policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
 						policy.AddRequirements(new AuthRequirement(permission));
-						// policy.RequireScope($"kyoo.{permission.ToLower()}");
+						// Scopes are disables to support default permissions.
+						// To enable them, use the following line: policy.RequireScope($"kyoo.{permission.ToLower()}");
 					});
 				}
 			});

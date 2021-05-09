@@ -35,7 +35,8 @@
       "default": [],
       "newUser": ["read", "play", "write", "admin"]
     },
-    "profilePicturePath": "users/"
+    "profilePicturePath": "users/",
+    "clients": []
   },
   
   

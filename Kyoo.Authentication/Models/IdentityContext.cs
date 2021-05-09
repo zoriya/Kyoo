@@ -4,8 +4,15 @@ using IdentityServer4.Models;
 
 namespace Kyoo.Authentication
 {
+	/// <summary>
+	/// The hard coded context of the identity server.
+	/// </summary>
 	public static class IdentityContext
 	{
+		/// <summary>
+		/// The list of identity resources supported (email, profile and openid)
+		/// </summary>
+		/// <returns>The list of identity resources supported</returns>
 		public static IEnumerable<IdentityResource> GetIdentityResources()
 		{
 			return new List<IdentityResource>
@@ -16,6 +23,13 @@ namespace Kyoo.Authentication
 			};
 		}
 
+		/// <summary>
+		/// The list of officially supported clients.
+		/// </summary>
+		/// <remarks>
+		/// You can add custom clients in the settings.json file.
+		/// </remarks>
+		/// <returns>The list of officially supported clients.</returns>
 		public static IEnumerable<Client> GetClients()
 		{
 			return new List<Client>
@@ -40,6 +54,10 @@ namespace Kyoo.Authentication
 			};
 		}
 
+		/// <summary>
+		/// The list of scopes supported by the API.
+		/// </summary>
+		/// <returns>The list of scopes</returns>
 		public static IEnumerable<ApiScope> GetScopes()
 		{
 			return new[]
@@ -67,6 +85,10 @@ namespace Kyoo.Authentication
 			};
 		}
 		
+		/// <summary>
+		/// The list of APIs (this is used to create Audiences)
+		/// </summary>
+		/// <returns>The list of apis</returns>
 		public static IEnumerable<ApiResource> GetApis()
 		{
 			return new[]
