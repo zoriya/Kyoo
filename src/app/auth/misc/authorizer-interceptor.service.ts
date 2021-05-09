@@ -18,9 +18,12 @@ export class AuthorizerInterceptor implements HttpInterceptor
 
 	intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>>
 	{
+		if (request.url.startsWith("http"))
+			return next.handle(request);
 		if (this.oidcSecurity === undefined)
 			this.oidcSecurity = this.injector.get(OidcSecurityService);
 		const token: string = this.oidcSecurity.getToken();
+		console.log(request.url, token);
 		if (token)
 			request = request.clone({setHeaders: {Authorization: "Bearer " + token}});
 		return next.handle(request);

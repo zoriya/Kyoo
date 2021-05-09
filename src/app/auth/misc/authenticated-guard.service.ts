@@ -7,7 +7,7 @@ import { AuthService } from "../auth.service";
 export class AuthGuard
 {
 	public static guards: any[] = [];
-	public static defaultPermissions: string[];
+	public static defaultPermissions: string[] = undefined;
 	public static permissionsObservable: Observable<string[]>;
 
 	static forPermissions(...permissions: string[]): any

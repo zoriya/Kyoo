@@ -18,11 +18,12 @@ export class AuthService
 		{
 			if (x == null)
 				return;
+			console.log(x);
 			this.account = {
 				email: x.email,
 				username: x.username,
 				picture: x.picture,
-				permissions: x.permissions.split(",")
+				permissions: x.permissions?.split(",") ?? []
 			};
 		});
 	}

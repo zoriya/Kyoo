@@ -34,7 +34,7 @@ export function loadConfig(oidcConfigService: OidcConfigService): () => Promise<
 		clientId: "kyoo.webapp",
 		responseType: "code",
 		triggerAuthorizationResultEvent: false,
-		scope: "openid profile offline_access",
+		scope: "openid profile offline_access kyoo.read kyoo.write kyoo.play kyoo.admin",
 		silentRenew: true,
 		silentRenewUrl: "/silent.html",
 		useRefreshToken: true,
