@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { OidcSecurityService } from "angular-auth-oidc-client";
 import { Account } from "../models/account";
+import {HttpClient} from "@angular/common/http";
 
 @Injectable({
 	providedIn: "root"
@@ -10,15 +11,17 @@ export class AuthService
 	isAuthenticated: boolean = false;
 	account: Account = null;
 
-	constructor(private oidcSecurityService: OidcSecurityService)
+	constructor(private oidcSecurityService: OidcSecurityService, private http: HttpClient)
 	{
 		this.oidcSecurityService.checkAuth()
 			.subscribe((auth: boolean) => this.isAuthenticated = auth);
 		this.oidcSecurityService.userData$.subscribe(x =>
 		{
 			if (x == null)
+			{
+				this.account = null;
 				return;
-			console.log(x);
+			}
 			this.account = {
 				email: x.email,
 				username: x.username,
@@ -35,10 +38,9 @@ export class AuthService
 
 	logout(): void
 	{
-		// this.http.get("api/account/logout").subscribe(() =>
-		// {
+		this.http.get("api/account/logout").subscribe(() =>
+		{
 			this.oidcSecurityService.logoff();
-			// document.cookie = "Authenticated=false; expires=" + new Date(2147483647 * 1000).toUTCString();
-		// });
+		});
 	}
 }
