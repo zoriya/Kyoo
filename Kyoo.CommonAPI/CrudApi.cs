@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
-using Microsoft.AspNetCore.Authorization;
+using Kyoo.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
@@ -26,7 +26,7 @@ namespace Kyoo.CommonApi
 
 
 		[HttpGet("{id:int}")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public virtual async Task<ActionResult<T>> Get(int id)
 		{
 			T ret = await _repository.GetOrDefault(id);
@@ -36,7 +36,7 @@ namespace Kyoo.CommonApi
 		}
 
 		[HttpGet("{slug}")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public virtual async Task<ActionResult<T>> Get(string slug)
 		{
 			T ret = await _repository.Get(slug);
@@ -46,7 +46,7 @@ namespace Kyoo.CommonApi
 		}
 
 		[HttpGet("count")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public virtual async Task<ActionResult<int>> GetCount([FromQuery] Dictionary<string, string> where)
 		{
 			try
@@ -60,7 +60,7 @@ namespace Kyoo.CommonApi
 		}
 		
 		[HttpGet]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public virtual async Task<ActionResult<Page<T>>> GetAll([FromQuery] string sortBy,
 			[FromQuery] int afterID,
 			[FromQuery] Dictionary<string, string> where,
@@ -90,7 +90,7 @@ namespace Kyoo.CommonApi
 		}
 
 		[HttpPost]
-		[Authorize(Policy = "Write")]
+		[PartialPermission(Kind.Create)]
 		public virtual async Task<ActionResult<T>> Create([FromBody] T resource)
 		{
 			try
@@ -109,7 +109,7 @@ namespace Kyoo.CommonApi
 		}
 		
 		[HttpPut]
-		[Authorize(Policy = "Write")]
+		[PartialPermission(Kind.Write)]
 		public virtual async Task<ActionResult<T>> Edit([FromQuery] bool resetOld, [FromBody] T resource)
 		{
 			try
@@ -128,7 +128,7 @@ namespace Kyoo.CommonApi
 		}
 
 		[HttpPut("{id:int}")]
-		[Authorize(Policy = "Write")]
+		[PartialPermission(Kind.Write)]
 		public virtual async Task<ActionResult<T>> Edit(int id, [FromQuery] bool resetOld, [FromBody] T resource)
 		{
 			resource.ID = id;
@@ -143,7 +143,7 @@ namespace Kyoo.CommonApi
 		}
 		
 		[HttpPut("{slug}")]
-		[Authorize(Policy = "Write")]
+		[PartialPermission(Kind.Write)]
 		public virtual async Task<ActionResult<T>> Edit(string slug, [FromQuery] bool resetOld, [FromBody] T resource)
 		{
 			try
@@ -159,7 +159,7 @@ namespace Kyoo.CommonApi
 		}
 
 		[HttpDelete("{id:int}")]
-		[Authorize(Policy = "Write")]
+		[PartialPermission(Kind.Delete)]
 		public virtual async Task<IActionResult> Delete(int id)
 		{
 			try
@@ -175,7 +175,7 @@ namespace Kyoo.CommonApi
 		}
 		
 		[HttpDelete("{slug}")]
-		[Authorize(Policy = "Write")]
+		[PartialPermission(Kind.Delete)]
 		public virtual async Task<IActionResult> Delete(string slug)
 		{
 			try
@@ -190,7 +190,7 @@ namespace Kyoo.CommonApi
 			return Ok();
 		}
 		
-		[Authorize(Policy = "Write")]
+		[PartialPermission(Kind.Delete)]
 		public virtual async Task<IActionResult> Delete(Dictionary<string, string> where)
 		{
 			try

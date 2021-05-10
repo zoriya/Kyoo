@@ -6,7 +6,7 @@ using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Kyoo.CommonApi;
-using Microsoft.AspNetCore.Authorization;
+using Kyoo.Models.Permissions;
 using Microsoft.Extensions.Configuration;
 
 namespace Kyoo.Api
@@ -14,6 +14,7 @@ namespace Kyoo.Api
 	[Route("api/library")]
 	[Route("api/libraries")]
 	[ApiController]
+	[PartialPermission(nameof(LibraryAPI))]
 	public class LibraryAPI : CrudApi<Library>
 	{
 		private readonly ILibraryManager _libraryManager;
@@ -26,7 +27,7 @@ namespace Kyoo.Api
 			_taskManager = taskManager;
 		}
 
-		[Authorize(Policy = "Write")]
+		[PartialPermission(Kind.Create)]
 		public override async Task<ActionResult<Library>> Create(Library resource)
 		{
 			ActionResult<Library> result = await base.Create(resource);
@@ -37,7 +38,7 @@ namespace Kyoo.Api
 		
 		[HttpGet("{id:int}/show")]
 		[HttpGet("{id:int}/shows")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<Show>>> GetShows(int id,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -63,7 +64,7 @@ namespace Kyoo.Api
 
 		[HttpGet("{slug}/show")]
 		[HttpGet("{slug}/shows")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<Show>>> GetShows(string slug,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -77,7 +78,7 @@ namespace Kyoo.Api
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Library>(slug) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Library>(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -89,7 +90,7 @@ namespace Kyoo.Api
 		
 		[HttpGet("{id:int}/collection")]
 		[HttpGet("{id:int}/collections")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<Collection>>> GetCollections(int id,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -115,7 +116,7 @@ namespace Kyoo.Api
 
 		[HttpGet("{slug}/collection")]
 		[HttpGet("{slug}/collections")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<Collection>>> GetCollections(string slug,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -129,7 +130,7 @@ namespace Kyoo.Api
 					new Sort<Collection>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Library>(slug) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Library>(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -141,7 +142,7 @@ namespace Kyoo.Api
 		
 		[HttpGet("{id:int}/item")]
 		[HttpGet("{id:int}/items")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<LibraryItem>>> GetItems(int id,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -167,7 +168,7 @@ namespace Kyoo.Api
 		
 		[HttpGet("{slug}/item")]
 		[HttpGet("{slug}/items")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<LibraryItem>>> GetItems(string slug,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -181,7 +182,7 @@ namespace Kyoo.Api
 					new Sort<LibraryItem>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Library>(slug) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Library>(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}

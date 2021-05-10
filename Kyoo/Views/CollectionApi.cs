@@ -6,7 +6,7 @@ using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Kyoo.CommonApi;
-using Microsoft.AspNetCore.Authorization;
+using Kyoo.Models.Permissions;
 using Microsoft.Extensions.Configuration;
 
 namespace Kyoo.Api
@@ -14,6 +14,7 @@ namespace Kyoo.Api
 	[Route("api/collection")]
 	[Route("api/collections")]
 	[ApiController]
+	[PartialPermission(nameof(CollectionApi))]
 	public class CollectionApi : CrudApi<Collection>
 	{
 		private readonly ILibraryManager _libraryManager;
@@ -26,7 +27,7 @@ namespace Kyoo.Api
 		
 		[HttpGet("{id:int}/show")]
 		[HttpGet("{id:int}/shows")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<Show>>> GetShows(int id,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -52,7 +53,7 @@ namespace Kyoo.Api
 		
 		[HttpGet("{slug}/show")]
 		[HttpGet("{slug}/shows")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<Show>>> GetShows(string slug,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -66,7 +67,7 @@ namespace Kyoo.Api
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Collection>(slug) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Collection>(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -78,7 +79,7 @@ namespace Kyoo.Api
 		
 		[HttpGet("{id:int}/library")]
 		[HttpGet("{id:int}/libraries")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<Library>>> GetLibraries(int id,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -104,7 +105,7 @@ namespace Kyoo.Api
 		
 		[HttpGet("{slug}/library")]
 		[HttpGet("{slug}/libraries")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<Library>>> GetLibraries(string slug,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -118,7 +119,7 @@ namespace Kyoo.Api
 					new Sort<Library>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Collection>(slug) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Collection>(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}

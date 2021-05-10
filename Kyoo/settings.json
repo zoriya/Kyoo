@@ -32,8 +32,8 @@
       "password": "passphrase"
     },
     "permissions": {
-      "default": [],
-      "newUser": ["read", "play", "write", "admin"]
+      "default": ["read", "play", "write", "admin"],
+      "newUser": ["read", "play", "write", "admin", "task.read"]
     },
     "profilePicturePath": "users/",
     "clients": []

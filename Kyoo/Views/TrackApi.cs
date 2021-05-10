@@ -4,7 +4,7 @@ using Kyoo.CommonApi;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
-using Microsoft.AspNetCore.Authorization;
+using Kyoo.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
@@ -13,6 +13,7 @@ namespace Kyoo.Api
 	[Route("api/track")]
 	[Route("api/tracks")]
 	[ApiController]
+	[PartialPermission(nameof(Track))]
 	public class TrackApi : CrudApi<Track>
 	{
 		private readonly ILibraryManager _libraryManager;
@@ -24,7 +25,7 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet("{id:int}/episode")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Episode>> GetEpisode(int id)
 		{
 			try
@@ -38,7 +39,7 @@ namespace Kyoo.Api
 		}
 		
 		[HttpGet("{slug}/episode")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Episode>> GetEpisode(string slug)
 		{
 			try

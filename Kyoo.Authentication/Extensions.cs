@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using IdentityModel;
 using IdentityServer4;
@@ -35,8 +36,19 @@ namespace Kyoo.Authentication
 		{
 			return new(user.ID.ToString())
 			{
-				DisplayName = user.Username
+				DisplayName = user.Username,
+				AdditionalClaims = new[] {new Claim("permissions", string.Join(',', user.Permissions))}
 			};
+		}
+
+		/// <summary>
+		/// Get the permissions of an user.
+		/// </summary>
+		/// <param name="user">The user</param>
+		/// <returns>The list of permissions</returns>
+		public static ICollection<string> GetPermissions(this ClaimsPrincipal user)
+		{
+			return user.Claims.FirstOrDefault(x => x.Type == "permissions")?.Value.Split(',');
 		}
 	}
 }

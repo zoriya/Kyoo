@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Kyoo.CommonApi;
 using Kyoo.Controllers;
 using Kyoo.Models;
-using Microsoft.AspNetCore.Authorization;
+using Kyoo.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
@@ -14,6 +14,7 @@ namespace Kyoo.Api
 	[Route("api/studio")]
 	[Route("api/studios")]
 	[ApiController]
+	[PartialPermission(nameof(ShowApi))]
 	public class StudioAPI : CrudApi<Studio>
 	{
 		private readonly ILibraryManager _libraryManager;
@@ -26,7 +27,7 @@ namespace Kyoo.Api
 		
 		[HttpGet("{id:int}/show")]
 		[HttpGet("{id:int}/shows")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<Show>>> GetShows(int id,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -52,7 +53,7 @@ namespace Kyoo.Api
 		
 		[HttpGet("{slug}/show")]
 		[HttpGet("{slug}/shows")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<Show>>> GetShows(string slug,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,

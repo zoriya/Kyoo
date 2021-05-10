@@ -6,7 +6,7 @@ using Kyoo.CommonApi;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
-using Microsoft.AspNetCore.Authorization;
+using Kyoo.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
@@ -29,7 +29,7 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet]
-		[Authorize(Policy = "Read")]
+		[Permission(nameof(LibraryItemApi), Kind.Read)]
 		public async Task<ActionResult<Page<LibraryItem>>> GetAll([FromQuery] string sortBy,
 			[FromQuery] int afterID,
 			[FromQuery] Dictionary<string, string> where,

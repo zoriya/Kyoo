@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Kyoo.CommonApi;
 using Kyoo.Controllers;
 using Kyoo.Models.Exceptions;
-using Microsoft.AspNetCore.Authorization;
+using Kyoo.Models.Permissions;
 using Microsoft.Extensions.Configuration;
 
 namespace Kyoo.Api
@@ -16,6 +16,7 @@ namespace Kyoo.Api
 	[Route("api/show")]
 	[Route("api/shows")]
 	[ApiController]
+	[PartialPermission(nameof(ShowApi))]
 	public class ShowApi : CrudApi<Show>
 	{
 		private readonly ILibraryManager _libraryManager;
@@ -35,7 +36,7 @@ namespace Kyoo.Api
 
 		[HttpGet("{showID:int}/season")]
 		[HttpGet("{showID:int}/seasons")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<Season>>> GetSeasons(int showID,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -61,7 +62,7 @@ namespace Kyoo.Api
 
 		[HttpGet("{slug}/season")]
 		[HttpGet("{slug}/seasons")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<Season>>> GetSeasons(string slug,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -87,7 +88,7 @@ namespace Kyoo.Api
 		
 		[HttpGet("{showID:int}/episode")]
 		[HttpGet("{showID:int}/episodes")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<Episode>>> GetEpisodes(int showID,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -113,7 +114,7 @@ namespace Kyoo.Api
 
 		[HttpGet("{slug}/episode")]
 		[HttpGet("{slug}/episodes")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<Episode>>> GetEpisodes(string slug,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -138,7 +139,7 @@ namespace Kyoo.Api
 		}
 		
 		[HttpGet("{showID:int}/people")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<PeopleRole>>> GetPeople(int showID,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -163,7 +164,7 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet("{slug}/people")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<PeopleRole>>> GetPeople(string slug,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -189,7 +190,7 @@ namespace Kyoo.Api
 		
 		[HttpGet("{showID:int}/genre")]
 		[HttpGet("{showID:int}/genres")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<Genre>>> GetGenres(int showID,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -215,7 +216,7 @@ namespace Kyoo.Api
 
 		[HttpGet("{slug}/genre")]
 		[HttpGet("{slug}/genres")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<Genre>>> GetGenre(string slug,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -240,7 +241,7 @@ namespace Kyoo.Api
 		}
 		
 		[HttpGet("{showID:int}/studio")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Studio>> GetStudio(int showID)
 		{
 			try
@@ -254,7 +255,7 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet("{slug}/studio")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Studio>> GetStudio(string slug)
 		{
 			try
@@ -269,7 +270,7 @@ namespace Kyoo.Api
 		
 		[HttpGet("{showID:int}/library")]
 		[HttpGet("{showID:int}/libraries")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<Library>>> GetLibraries(int showID,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -295,7 +296,7 @@ namespace Kyoo.Api
 
 		[HttpGet("{slug}/library")]
 		[HttpGet("{slug}/libraries")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<Library>>> GetLibraries(string slug,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -321,7 +322,7 @@ namespace Kyoo.Api
 		
 		[HttpGet("{showID:int}/collection")]
 		[HttpGet("{showID:int}/collections")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<Collection>>> GetCollections(int showID,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -347,7 +348,7 @@ namespace Kyoo.Api
 
 		[HttpGet("{slug}/collection")]
 		[HttpGet("{slug}/collections")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<Collection>>> GetCollections(string slug,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -373,7 +374,7 @@ namespace Kyoo.Api
 
 		[HttpGet("{slug}/font")]
 		[HttpGet("{slug}/fonts")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Dictionary<string, string>>> GetFonts(string slug)
 		{
 			try
@@ -392,7 +393,7 @@ namespace Kyoo.Api
 		
 		[HttpGet("{showSlug}/font/{slug}")]
 		[HttpGet("{showSlug}/fonts/{slug}")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<IActionResult> GetFont(string showSlug, string slug)
 		{
 			try

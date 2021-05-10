@@ -7,6 +7,7 @@ using Kyoo.Postgresql;
 using Kyoo.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
@@ -131,7 +132,7 @@ namespace Kyoo
 
 			app.UseEndpoints(endpoints =>
 			{
-				endpoints.MapControllerRoute("Kyoo", "api/{controller=Home}/{action=Index}/{id?}");
+				endpoints.MapControllers();
 			});
 			
 			

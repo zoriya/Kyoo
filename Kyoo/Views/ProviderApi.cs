@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Kyoo.CommonApi;
 using Kyoo.Controllers;
 using Kyoo.Models;
+using Kyoo.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
@@ -10,13 +11,14 @@ namespace Kyoo.Api
 	[Route("api/provider")]
 	[Route("api/providers")]
 	[ApiController]
-	public class ProviderAPI : CrudApi<Provider>
+	[PartialPermission(nameof(ProviderApi))]
+	public class ProviderApi : CrudApi<Provider>
 	{
 		private readonly IThumbnailsManager _thumbnails;
 		private readonly ILibraryManager _libraryManager;
 		private readonly IFileManager _files;
 		
-		public ProviderAPI(ILibraryManager libraryManager,
+		public ProviderApi(ILibraryManager libraryManager,
 			IConfiguration config,
 			IFileManager files,
 			IThumbnailsManager thumbnails)

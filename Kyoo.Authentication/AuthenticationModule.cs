@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using IdentityServer4.Extensions;
+using IdentityServer4.Models;
 using IdentityServer4.Services;
 using Kyoo.Authentication.Models;
 using Kyoo.Authentication.Views;
 using Kyoo.Controllers;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
+using Kyoo.Models.Permissions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -86,18 +87,20 @@ namespace Kyoo.Authentication
 
 			services.AddControllers();
 			
-			// TODO handle direct-videos with bearers (probably add a ?token query param and a app.Use to translate that for videos)
+			// TODO handle direct-videos with bearers (probably add a cookie and a app.Use to translate that for videos)
 			
 			// TODO Check if tokens should be stored.
 			
-			// TODO remove unused/commented code, add documentation.
-
 			services.Configure<PermissionOption>(_configuration.GetSection(PermissionOption.Path));
 			services.Configure<CertificateOption>(_configuration.GetSection(CertificateOption.Path));
 			services.Configure<AuthenticationOption>(_configuration.GetSection(AuthenticationOption.Path));
+			
+			
+			List<Client> clients = new();
+			_configuration.GetSection("authentication:clients").Bind(clients);
 			CertificateOption certificateOptions = new();
 			_configuration.GetSection(CertificateOption.Path).Bind(certificateOptions);
-
+			
 			services.AddIdentityServer(options =>
 				{
 					options.IssuerUri = publicUrl;
@@ -108,11 +111,9 @@ namespace Kyoo.Authentication
 				.AddInMemoryIdentityResources(IdentityContext.GetIdentityResources())
 				.AddInMemoryApiScopes(IdentityContext.GetScopes())
 				.AddInMemoryApiResources(IdentityContext.GetApis())
-				.AddInMemoryClients(IdentityContext.GetClients())
-				.AddInMemoryClients(_configuration.GetSection("authentication:clients"))
+				.AddInMemoryClients(IdentityContext.GetClients().Concat(clients))
 				.AddProfileService<AccountApi>()
 				.AddSigninKeys(certificateOptions);
-			// TODO split scopes (kyoo.read should be task.read, video.read etc)
 			
 			services.AddAuthentication()
 				.AddJwtBearer(options =>
@@ -121,25 +122,7 @@ namespace Kyoo.Authentication
 					options.Audience = "kyoo";
 					options.RequireHttpsMetadata = false;
 				});
-			
-			services.AddAuthorization(options =>
-			{
-				AuthorizationPolicyBuilder scheme = new(JwtBearerDefaults.AuthenticationScheme);
-				options.DefaultPolicy = scheme.RequireAuthenticatedUser().Build();
-			
-				string[] permissions = {"Read", "Write", "Play", "Admin"};
-				foreach (string permission in permissions)
-				{
-					options.AddPolicy(permission, policy =>
-					{
-						policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
-						policy.AddRequirements(new AuthRequirement(permission));
-						// Scopes are disables to support default permissions.
-						// To enable them, use the following line: policy.RequireScope($"kyoo.{permission.ToLower()}");
-					});
-				}
-			});
-			services.AddSingleton<IAuthorizationHandler, AuthorizationValidatorHandler>();
+			services.AddSingleton<IPermissionValidator, PermissionValidatorFactory>();
 
 			DefaultCorsPolicyService cors = new(_loggerFactory.CreateLogger<DefaultCorsPolicyService>())
 			{

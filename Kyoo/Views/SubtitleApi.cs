@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
-using Microsoft.AspNetCore.Authorization;
+using Kyoo.Models.Permissions;
 
 namespace Kyoo.Api
 {
@@ -23,8 +23,8 @@ namespace Kyoo.Api
 		}
 		
 		
-		[HttpGet("{slug}.{extension?}")]
-		[Authorize(Policy="Play")]
+		[HttpGet("{slug}.{extension}")]
+		[Permission(nameof(SubtitleApi), Kind.Read)]
 		public async Task<IActionResult> GetSubtitle(string slug, string extension)
 		{
 			Track subtitle;
