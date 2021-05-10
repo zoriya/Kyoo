@@ -45,7 +45,7 @@
 	
 	<ItemGroup>
 		<ProjectReference Include="../Kyoo.Authentication/Kyoo.Authentication.csproj">
-<!--			<ExcludeAssets>all</ExcludeAssets>-->
+			<ExcludeAssets>all</ExcludeAssets>
 		</ProjectReference>
 	</ItemGroup>
 	

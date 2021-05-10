@@ -32,8 +32,8 @@
       "password": "passphrase"
     },
     "permissions": {
-      "default": ["read", "play", "write", "admin"],
-      "newUser": ["read", "play", "write", "admin", "task.read"]
+      "default": ["overall.read", "overall.write", "overall.create", "overall.delete"],
+      "newUser": ["overall.read", "overall.write", "overall.create", "overall.delete"]
     },
     "profilePicturePath": "users/",
     "clients": []

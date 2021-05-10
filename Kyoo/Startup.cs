@@ -1,13 +1,11 @@
 using System;
 using System.IO;
-using Kyoo.Authentication;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Kyoo.Postgresql;
 using Kyoo.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
@@ -48,8 +46,7 @@ namespace Kyoo
 			_configuration = configuration;
 			_plugins = new PluginManager(hostProvider, _configuration, loggerFactory.CreateLogger<PluginManager>());
 			
-			_plugins.LoadPlugins(new IPlugin[] {new CoreModule(), new PostgresModule(configuration, host), 
-				new AuthenticationModule(configuration, loggerFactory, host)});
+			_plugins.LoadPlugins(new IPlugin[] {new CoreModule(), new PostgresModule(configuration, host)});
 		}
 
 		/// <summary>

@@ -24,7 +24,11 @@ namespace Kyoo.Models.Permissions
 		/// <summary>
 		/// The needed permission as string.
 		/// </summary>
-		private readonly string _permission;
+		public string Type { get; }
+		/// <summary>
+		/// The needed permission kind.
+		/// </summary>
+		public Kind Kind { get; }
 
 		/// <summary>
 		/// Ask a permission to run an action. 
@@ -38,7 +42,8 @@ namespace Kyoo.Models.Permissions
 		{
 			if (type.EndsWith("API", StringComparison.OrdinalIgnoreCase))
 				type = type[..^3];
-			_permission = $"{type.ToLower()}.{permission.ToString().ToLower()}";
+			Type = type.ToLower();
+			Kind = permission;
 		}
 		
 		/// <inheritdoc />
@@ -56,7 +61,7 @@ namespace Kyoo.Models.Permissions
 		/// <returns>The string representation.</returns>
 		public string AsPermissionString()
 		{
-			return _permission;
+			return Type;
 		}
 	}
 

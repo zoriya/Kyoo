@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Kyoo.Controllers;
+using Kyoo.Models.Permissions;
 using Kyoo.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -93,6 +95,9 @@ namespace Kyoo
 			}
 
 			services.AddTask<Crawler>();
+
+			if (services.All(x => x.ServiceType != typeof(IPermissionValidator)))
+				services.AddSingleton<IPermissionValidator, PassthroughPermissionValidator>();
 		}
 	}
 }
