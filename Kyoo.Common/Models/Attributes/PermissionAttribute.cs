@@ -7,12 +7,17 @@ namespace Kyoo.Models.Permissions
 	/// <summary>
 	/// The kind of permission needed.
 	/// </summary>
+	/// <remarks>
+	/// The admin kind is used for configuration or security sensitive permissions to allow one
+	/// to use an overall permission without compromising security.
+	/// </remarks>
 	public enum Kind
 	{
 		Read,
 		Write,
 		Create,
-		Delete
+		Delete,
+		Admin
 	}
 	
 	/// <summary>

@@ -1,5 +1,6 @@
 using System;
 using Kyoo.Controllers;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo
@@ -61,6 +62,13 @@ namespace Kyoo
 		{
 			services.Add(ServiceDescriptor.Describe(typeof(T), typeof(T2), lifetime));
 			return services.AddRepository<T2>(lifetime);
+		}
+
+		public static IServiceCollection AddConfiguration<T>(this IServiceCollection services, IConfiguration config, string path)
+		{
+			services.Configure<T>(config.GetSection(path));
+			services.AddSingleton<ConfigReference>(new ConfigReference(path, typeof(T)));
+			return services;
 		}
 	}
 }

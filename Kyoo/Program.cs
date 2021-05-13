@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
@@ -18,6 +19,7 @@ namespace Kyoo
 		/// Main function of the program
 		/// </summary>
 		/// <param name="args">Command line arguments</param>
+		[SuppressMessage("ReSharper", "ConditionIsAlwaysTrueOrFalse")]
 		public static async Task Main(string[] args)
 		{
 			if (!File.Exists("./settings.json"))
