@@ -39,12 +39,14 @@
 		<PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="3.1.14" />
 		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.5" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-		<ProjectReference Include="../Kyoo.Postgresql/Kyoo.Postgresql.csproj" />
 	</ItemGroup>
 	
 	<ItemGroup>
+		<ProjectReference Include="../Kyoo.Postgresql/Kyoo.Postgresql.csproj">
+<!--			<ExcludeAssets>all</ExcludeAssets>-->
+		</ProjectReference>
 		<ProjectReference Include="../Kyoo.Authentication/Kyoo.Authentication.csproj">
-			<ExcludeAssets>all</ExcludeAssets>
+<!--			<ExcludeAssets>all</ExcludeAssets>-->
 		</ProjectReference>
 	</ItemGroup>
 	
@@ -104,4 +106,25 @@
 			<Visible>false</Visible>
 		</None>
 	</ItemGroup>
+
+
+	<!--TODO remove this once plugins are reworked. This is useful because the authentication plugin is loaded manually and not by the plugin manager-->
+	<PropertyGroup>
+		<LoginRoot>../Kyoo.WebLogin/</LoginRoot>
+	</PropertyGroup>
+	<ItemGroup>
+		<LoginFiles Include="$(LoginRoot)**" Visible="false" />
+	</ItemGroup>
+	<Target Name="Publish login files" AfterTargets="ComputeFilesToPublish">
+		<ItemGroup>
+			<ResolvedFileToPublish Include="@(LoginFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
+				<RelativePath>login/%(LoginFiles.RecursiveDir)%(LoginFiles.Filename)%(LoginFiles.Extension)</RelativePath>
+				<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+				<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			</ResolvedFileToPublish>
+		</ItemGroup>
+	</Target>
+	<Target Name="Prepare static files" AfterTargets="Build" Condition="$(Configuration) == 'Debug'">
+		<Copy SourceFiles="@(LoginFiles)" DestinationFolder="$(OutputPath)/login/%(RecursiveDir)" />
+	</Target>
 </Project>

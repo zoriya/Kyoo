@@ -17,7 +17,7 @@
 
   "logging": {
     "logLevel": {
-      "default": "Trace",
+      "default": "Warning",
       "Microsoft": "Warning",
       "Microsoft.Hosting.Lifetime": "Information",
       "Microsoft.EntityFrameworkCore": "None",
