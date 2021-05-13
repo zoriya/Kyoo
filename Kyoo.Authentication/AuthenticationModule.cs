@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
@@ -13,9 +15,11 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Logging;
+using SameSiteMode = Microsoft.AspNetCore.Http.SameSiteMode;
 
 namespace Kyoo.Authentication
 {
@@ -80,7 +84,7 @@ namespace Kyoo.Authentication
 		/// <inheritdoc />
 		public void Configure(IServiceCollection services, ICollection<Type> availableTypes)
 		{
-			string publicUrl = _configuration.GetValue<string>("public_url").TrimEnd('/');
+			string publicUrl = _configuration.GetValue<string>("publicUrl").TrimEnd('/');
 
 			if (_environment.IsDevelopment())
 				IdentityModelEventSource.ShowPII = true;
@@ -141,11 +145,26 @@ namespace Kyoo.Authentication
 			app.UseAuthentication();
 			app.Use((ctx, next) =>
 			{
-				ctx.SetIdentityServerOrigin(_configuration.GetValue<string>("public_url"));
+				ctx.SetIdentityServerOrigin(_configuration.GetValue<string>("publicUrl").TrimEnd('/'));
 				return next();
 			});
 			app.UseIdentityServer();
 			app.UseAuthorization();
+
+			PhysicalFileProvider provider = new(Path.Combine(
+				Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
+				"login"));
+			app.UseDefaultFiles(new DefaultFilesOptions
+			{
+				RequestPath = new PathString("/login"),
+				FileProvider = provider,
+				RedirectToAppendTrailingSlash = true
+			});
+			app.UseStaticFiles(new StaticFileOptions
+			{
+				RequestPath = new PathString("/login"),
+				FileProvider = provider
+			});
 		}
 	}
 }

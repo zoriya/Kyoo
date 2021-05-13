@@ -25,7 +25,7 @@ namespace Kyoo.Api
 		public LibraryItemApi(ILibraryItemRepository libraryItems, IConfiguration configuration)
 		{
 			_libraryItems = libraryItems;
-			_baseURL = configuration.GetValue<string>("public_url").TrimEnd('/');
+			_baseURL = configuration.GetValue<string>("publicUrl").TrimEnd('/');
 		}
 
 		[HttpGet]

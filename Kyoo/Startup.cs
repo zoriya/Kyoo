@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Kyoo.Authentication;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Kyoo.Postgresql;
@@ -46,7 +47,11 @@ namespace Kyoo
 			_configuration = configuration;
 			_plugins = new PluginManager(hostProvider, _configuration, loggerFactory.CreateLogger<PluginManager>());
 			
-			_plugins.LoadPlugins(new IPlugin[] {new CoreModule(), new PostgresModule(configuration, host)});
+			// TODO remove postgres from here and load it like a normal plugin.
+			_plugins.LoadPlugins(new IPlugin[] {new CoreModule(), 
+				new PostgresModule(configuration, host),
+				new AuthenticationModule(configuration, loggerFactory, host)
+			});
 		}
 
 		/// <summary>
@@ -55,7 +60,7 @@ namespace Kyoo
 		/// <param name="services">The service collection to fill.</param>
 		public void ConfigureServices(IServiceCollection services)
 		{
-			string publicUrl = _configuration.GetValue<string>("public_url");
+			string publicUrl = _configuration.GetValue<string>("publicUrl");
 
 			services.AddMvc().AddControllersAsServices();
 			
@@ -100,7 +105,6 @@ namespace Kyoo
 
 			FileExtensionContentTypeProvider contentTypeProvider = new();
 			contentTypeProvider.Mappings[".data"] = "application/octet-stream";
-			app.UseDefaultFiles();
 			app.UseStaticFiles(new StaticFileOptions
 			{
 				ContentTypeProvider = contentTypeProvider,

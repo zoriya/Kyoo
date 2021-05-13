@@ -1,6 +1,6 @@
 {
   "server.urls": "http://*:5000",
-  "public_url": "http://localhost:5000/",
+  "publicUrl": "http://localhost:5000/",
 
   "database": {
     "postgres": {

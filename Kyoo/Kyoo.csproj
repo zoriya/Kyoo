@@ -6,7 +6,6 @@
 		<TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
 		<IsPackable>false</IsPackable>
 		<SpaRoot>../Kyoo.WebApp/</SpaRoot>
-		<LoginRoot>../Kyoo.WebLogin/</LoginRoot>
 		<TranscoderRoot>../Kyoo.Transcoder/</TranscoderRoot>
 		<DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules/**</DefaultItemExcludes>
 
@@ -52,7 +51,6 @@
 	<ItemGroup>
 		<None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules/**" Visible="false" />
 		<StaticFiles Include="$(SpaRoot)static/**" Visible="false" />
-		<LoginFiles Include="$(LoginRoot)**" Visible="false" />
 		<Content Remove="$(SpaRoot)**" />
 	</ItemGroup>
 
@@ -72,15 +70,10 @@
 		</ItemGroup>
 	</Target>
 
-	<Target Name="Publish static and login" AfterTargets="ComputeFilesToPublish">
+	<Target Name="Publish static files" AfterTargets="ComputeFilesToPublish">
 		<ItemGroup>
 			<ResolvedFileToPublish Include="@(StaticFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
 				<RelativePath>wwwroot/%(StaticFiles.RecursiveDir)%(StaticFiles.Filename)%(StaticFiles.Extension)</RelativePath>
-				<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-				<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-			</ResolvedFileToPublish>
-			<ResolvedFileToPublish Include="@(LoginFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
-				<RelativePath>wwwroot/login/%(LoginFiles.RecursiveDir)%(LoginFiles.Filename)%(LoginFiles.Extension)</RelativePath>
 				<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 				<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 			</ResolvedFileToPublish>
@@ -91,9 +84,8 @@
 		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
 	</Target>
 	
-	<Target Name="Prepare static and login pages" AfterTargets="Build" Condition="$(Configuration) == 'Debug'">
+	<Target Name="Prepare static files" AfterTargets="Build" Condition="$(Configuration) == 'Debug'">
 		<Copy SourceFiles="@(StaticFiles)" DestinationFolder="$(OutputPath)/wwwroot/%(RecursiveDir)" />
-		<Copy SourceFiles="@(LoginFiles)" DestinationFolder="$(OutputPath)/wwwroot/login/%(RecursiveDir)" />
 	</Target>
 
 	<Target Name="Symlink views to output - Linux" AfterTargets="Build" Condition="$(Configuration) == 'Debug' And $(OS) == 'Unix'">

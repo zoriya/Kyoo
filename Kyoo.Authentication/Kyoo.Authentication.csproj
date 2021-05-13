@@ -13,6 +13,7 @@
 		<Authors>Zoe Roux</Authors>
 		<RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
 		<LangVersion>default</LangVersion>
+		<LoginRoot>../Kyoo.WebLogin/</LoginRoot>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -21,12 +22,29 @@
 		<PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication" Version="2.2.0" />
 		<PackageReference Include="Portable.BouncyCastle" Version="1.8.10" />
-	</ItemGroup>
-	
-	<ItemGroup>
+
 		<ProjectReference Include="../Kyoo.Common/Kyoo.Common.csproj">
 			<PrivateAssets>all</PrivateAssets>
 			<Private>false</Private>
+			<ExcludeAssets>runtime</ExcludeAssets>
 		</ProjectReference>
 	</ItemGroup>
+	
+	<ItemGroup>
+		<LoginFiles Include="$(LoginRoot)**" Visible="false" />
+	</ItemGroup>
+	
+	<Target Name="Publish login files" AfterTargets="ComputeFilesToPublish">
+		<ItemGroup>
+			<ResolvedFileToPublish Include="@(LoginFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
+				<RelativePath>login/%(LoginFiles.RecursiveDir)%(LoginFiles.Filename)%(LoginFiles.Extension)</RelativePath>
+				<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+				<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			</ResolvedFileToPublish>
+		</ItemGroup>
+	</Target>
+
+	<Target Name="Prepare static files" AfterTargets="Build" Condition="$(Configuration) == 'Debug'">
+		<Copy SourceFiles="@(LoginFiles)" DestinationFolder="$(OutputPath)/login/%(RecursiveDir)" />
+	</Target>
 </Project>

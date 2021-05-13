@@ -218,6 +218,7 @@ namespace Kyoo.Controllers
 					});
 				if (existing != null)
 					return existing;
+				// TODO load the assembly from the common folder if the file exists (this would allow shared libraries)
 				string assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
 				if (assemblyPath != null)
 					return LoadFromAssemblyPath(assemblyPath);

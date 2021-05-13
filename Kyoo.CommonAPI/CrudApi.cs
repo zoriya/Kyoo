@@ -21,7 +21,7 @@ namespace Kyoo.CommonApi
 		public CrudApi(IRepository<T> repository, IConfiguration configuration)
 		{
 			_repository = repository;
-			BaseURL = configuration.GetValue<string>("public_url").TrimEnd('/');
+			BaseURL = configuration.GetValue<string>("publicUrl").TrimEnd('/');
 		}
 
 
