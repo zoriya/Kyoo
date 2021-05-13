@@ -46,13 +46,13 @@ namespace Kyoo.Controllers
 		/// Get a resource from it's ID and make the <see cref="Database"/> instance track it.
 		/// </summary>
 		/// <param name="id">The ID of the resource</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The tracked resource with the given ID</returns>
 		protected virtual async Task<T> GetWithTracking(int id)
 		{
 			T ret = await Database.Set<T>().AsTracking().FirstOrDefaultAsync(x => x.ID == id);
 			if (ret == null)
-				throw new ItemNotFound($"No {typeof(T).Name} found with the id {id}");
+				throw new ItemNotFoundException($"No {typeof(T).Name} found with the id {id}");
 			return ret;
 		}
 		
@@ -61,7 +61,7 @@ namespace Kyoo.Controllers
 		{
 			T ret = await GetOrDefault(id);
 			if (ret == null)
-				throw new ItemNotFound($"No {typeof(T).Name} found with the id {id}");
+				throw new ItemNotFoundException($"No {typeof(T).Name} found with the id {id}");
 			return ret;
 		}
 
@@ -70,7 +70,7 @@ namespace Kyoo.Controllers
 		{
 			T ret = await GetOrDefault(slug);
 			if (ret == null)
-				throw new ItemNotFound($"No {typeof(T).Name} found with the slug {slug}");
+				throw new ItemNotFoundException($"No {typeof(T).Name} found with the slug {slug}");
 			return ret;
 		}
 
@@ -79,7 +79,7 @@ namespace Kyoo.Controllers
 		{
 			T ret = await GetOrDefault(where);
 			if (ret == null)
-				throw new ItemNotFound($"No {typeof(T).Name} found with the given predicate.");
+				throw new ItemNotFoundException($"No {typeof(T).Name} found with the given predicate.");
 			return ret;
 		}
 		
@@ -118,14 +118,14 @@ namespace Kyoo.Controllers
 		/// <param name="query">The base query to filter.</param>
 		/// <param name="where">An expression to filter based on arbitrary conditions</param>
 		/// <param name="sort">The sort settings (sort order & sort by)</param>
-		/// <param name="limit">Paginations information (where to start and how many to get)</param>
+		/// <param name="limit">Pagination information (where to start and how many to get)</param>
 		/// <returns>The filtered query</returns>
 		protected Task<ICollection<T>> ApplyFilters(IQueryable<T> query,
 			Expression<Func<T, bool>> where = null,
 			Sort<T> sort = default, 
 			Pagination limit = default)
 		{
-			return ApplyFilters(query, Get, DefaultSort, where, sort, limit);
+			return ApplyFilters(query, GetOrDefault, DefaultSort, where, sort, limit);
 		}
 		
 		/// <summary>
@@ -137,7 +137,7 @@ namespace Kyoo.Controllers
 		/// <param name="query">The base query to filter.</param>
 		/// <param name="where">An expression to filter based on arbitrary conditions</param>
 		/// <param name="sort">The sort settings (sort order & sort by)</param>
-		/// <param name="limit">Paginations information (where to start and how many to get)</param>
+		/// <param name="limit">Pagination information (where to start and how many to get)</param>
 		/// <returns>The filtered query</returns>
 		protected async Task<ICollection<TValue>> ApplyFilters<TValue>(IQueryable<TValue> query,
 			Func<int, Task<TValue>> get,
@@ -193,14 +193,14 @@ namespace Kyoo.Controllers
 		}
 
 		/// <inheritdoc/>
-		public virtual async Task<T> CreateIfNotExists(T obj, bool silentFail = false)
+		public virtual async Task<T> CreateIfNotExists(T obj)
 		{
 			try
 			{
 				if (obj == null)
 					throw new ArgumentNullException(nameof(obj));
 
-				T old = await Get(obj.Slug);
+				T old = await GetOrDefault(obj.Slug);
 				if (old != null)
 					return old;
 				
@@ -208,13 +208,7 @@ namespace Kyoo.Controllers
 			}
 			catch (DuplicatedItemException)
 			{
-				return await Get(obj.Slug);
-			}
-			catch
-			{
-				if (silentFail)
-					return default;
-				throw;
+				return await GetOrDefault(obj.Slug);
 			}
 		}
 
@@ -244,7 +238,7 @@ namespace Kyoo.Controllers
 		}
 		
 		/// <summary>
-		/// An overridable method to edit relatiosn of a resource.
+		/// An overridable method to edit relation of a resource.
 		/// </summary>
 		/// <param name="resource">The non edited resource</param>
 		/// <param name="changed">The new version of <see cref="resource"/>. This item will be saved on the databse and replace <see cref="resource"/></param>

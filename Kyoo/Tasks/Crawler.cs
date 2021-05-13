@@ -7,10 +7,12 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Kyoo.Controllers;
+using Kyoo.Models.Attributes;
 using Kyoo.Models.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Kyoo.Controllers
+namespace Kyoo.Tasks
 {
 	public class Crawler : ITask
 	{
@@ -21,19 +23,20 @@ namespace Kyoo.Controllers
 		public bool RunOnStartup => true;
 		public int Priority => 0;
 		
-		private IServiceProvider _serviceProvider;
-		private IThumbnailsManager _thumbnailsManager;
-		private IProviderManager _metadataProvider;
-		private ITranscoder _transcoder;
-		private IConfiguration _config;
+		[Injected] public IServiceProvider ServiceProvider { private get; set; }
+		[Injected] public IThumbnailsManager ThumbnailsManager { private get; set; }
+		[Injected] public IProviderManager MetadataProvider { private get; set; }
+		[Injected] public ITranscoder Transcoder { private get; set; }
+		[Injected] public IConfiguration Config { private get; set; }
 
 		private int _parallelTasks;
 		
-		public async Task<IEnumerable<string>> GetPossibleParameters()
+		public TaskParameters GetParameters()
 		{
-			using IServiceScope serviceScope = _serviceProvider.CreateScope();
-			ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
-			return (await libraryManager!.GetAll<Library>()).Select(x => x.Slug);
+			return new()
+			{
+				TaskParameter.Create<string>("slug", "A library slug to restrict the scan to this library.")
+			};
 		}
 
 		public int? Progress()
@@ -42,20 +45,16 @@ namespace Kyoo.Controllers
 			return null;
 		}
 		
-		public async Task Run(IServiceProvider serviceProvider, 
-			CancellationToken cancellationToken, 
-			string argument = null)
+		public async Task Run(TaskParameters parameters,
+			CancellationToken cancellationToken)
 		{
-			_serviceProvider = serviceProvider;
-			_thumbnailsManager = serviceProvider.GetService<IThumbnailsManager>();
-			_metadataProvider = serviceProvider.GetService<IProviderManager>();
-			_transcoder = serviceProvider.GetService<ITranscoder>();
-			_config = serviceProvider.GetService<IConfiguration>();
-			_parallelTasks = _config.GetValue<int>("parallelTasks");
+			string argument = parameters["slug"].As<string>();
+			
+			_parallelTasks = Config.GetValue<int>("parallelTasks");
 			if (_parallelTasks <= 0)
 				_parallelTasks = 30;
 
-			using IServiceScope serviceScope = _serviceProvider.CreateScope();
+			using IServiceScope serviceScope = ServiceProvider.CreateScope();
 			ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
 			
 			foreach (Show show in await libraryManager!.GetAll<Show>())
@@ -74,7 +73,7 @@ namespace Kyoo.Controllers
 
 			ICollection<Library> libraries = argument == null 
 				? await libraryManager.GetAll<Library>()
-				: new [] { await libraryManager.Get<Library>(argument)};
+				: new [] { await libraryManager.GetOrDefault<Library>(argument)};
 			
 			if (argument != null && libraries.First() == null)
 				throw new ArgumentException($"No library found with the name {argument}");
@@ -148,10 +147,10 @@ namespace Kyoo.Controllers
 			{
 				if (token.IsCancellationRequested || path.Split(Path.DirectorySeparatorChar).Contains("Subtitles"))
 					return;
-				using IServiceScope serviceScope = _serviceProvider.CreateScope();
+				using IServiceScope serviceScope = ServiceProvider.CreateScope();
 				ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
 
-				string patern = _config.GetValue<string>("subtitleRegex");
+				string patern = Config.GetValue<string>("subtitleRegex");
 				Regex regex = new(patern, RegexOptions.IgnoreCase);
 				Match match = regex.Match(path);
 
@@ -178,7 +177,7 @@ namespace Kyoo.Controllers
 				await libraryManager.Create(track);
 				Console.WriteLine($"Registering subtitle at: {path}.");
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				await Console.Error.WriteLineAsync($"No episode found for subtitle at: ${path}.");
 			}
@@ -195,10 +194,10 @@ namespace Kyoo.Controllers
 
 			try
 			{
-				using IServiceScope serviceScope = _serviceProvider.CreateScope();
+				using IServiceScope serviceScope = ServiceProvider.CreateScope();
 				ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
 
-				string patern = _config.GetValue<string>("regex");
+				string patern = Config.GetValue<string>("regex");
 				Regex regex = new(patern, RegexOptions.IgnoreCase);
 				Match match = regex.Match(relativePath);
 
@@ -254,10 +253,10 @@ namespace Kyoo.Controllers
 		{
 			if (string.IsNullOrEmpty(collectionName))
 				return null;
-			Collection collection = await libraryManager.Get<Collection>(Utility.ToSlug(collectionName));
+			Collection collection = await libraryManager.GetOrDefault<Collection>(Utility.ToSlug(collectionName));
 			if (collection != null)
 				return collection;
-			collection = await _metadataProvider.GetCollectionFromName(collectionName, library);
+			collection = await MetadataProvider.GetCollectionFromName(collectionName, library);
 
 			try
 			{
@@ -266,7 +265,7 @@ namespace Kyoo.Controllers
 			}
 			catch (DuplicatedItemException)
 			{
-				return await libraryManager.Get<Collection>(collection.Slug);
+				return await libraryManager.GetOrDefault<Collection>(collection.Slug);
 			}
 		}
 		
@@ -276,15 +275,15 @@ namespace Kyoo.Controllers
 			bool isMovie, 
 			Library library)
 		{
-			Show old = await libraryManager.Get<Show>(x => x.Path == showPath);
+			Show old = await libraryManager.GetOrDefault<Show>(x => x.Path == showPath);
 			if (old != null)
 			{
 				await libraryManager.Load(old, x => x.ExternalIDs);
 				return old;
 			}
-			Show show = await _metadataProvider.SearchShow(showTitle, isMovie, library);
+			Show show = await MetadataProvider.SearchShow(showTitle, isMovie, library);
 			show.Path = showPath;
-			show.People = await _metadataProvider.GetPeople(show, library);
+			show.People = await MetadataProvider.GetPeople(show, library);
 
 			try
 			{
@@ -292,7 +291,7 @@ namespace Kyoo.Controllers
 			}
 			catch (DuplicatedItemException)
 			{
-				old = await libraryManager.Get<Show>(show.Slug);
+				old = await libraryManager.GetOrDefault<Show>(show.Slug);
 				if (old.Path == showPath)
 				{
 					await libraryManager.Load(old, x => x.ExternalIDs);
@@ -301,7 +300,7 @@ namespace Kyoo.Controllers
 				show.Slug += $"-{show.StartYear}";
 				await libraryManager.Create(show);
 			}
-			await _thumbnailsManager.Validate(show);
+			await ThumbnailsManager.Validate(show);
 			return show;
 		}
 
@@ -318,11 +317,18 @@ namespace Kyoo.Controllers
 				season.Show = show;
 				return season;
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
-				Season season = await _metadataProvider.GetSeason(show, seasonNumber, library);
-				await libraryManager.CreateIfNotExists(season);
-				await _thumbnailsManager.Validate(season);
+				Season season = await MetadataProvider.GetSeason(show, seasonNumber, library);
+				try
+				{
+					await libraryManager.Create(season);
+					await ThumbnailsManager.Validate(season);
+				}
+				catch (DuplicatedItemException)
+				{
+					season = await libraryManager.Get(show.Slug, seasonNumber);
+				}
 				season.Show = show;
 				return season;
 			}
@@ -336,7 +342,7 @@ namespace Kyoo.Controllers
 			string episodePath, 
 			Library library)
 		{
-			Episode episode = await _metadataProvider.GetEpisode(show,
+			Episode episode = await MetadataProvider.GetEpisode(show,
 				episodePath, 
 				season?.SeasonNumber ?? -1, 
 				episodeNumber,
@@ -346,7 +352,7 @@ namespace Kyoo.Controllers
 			season ??= await GetSeason(libraryManager, show, episode.SeasonNumber, library);
 			episode.Season = season;
 			episode.SeasonID = season?.ID;
-			await _thumbnailsManager.Validate(episode);
+			await ThumbnailsManager.Validate(episode);
 			await GetTracks(episode);
 			return episode;
 		}
@@ -367,7 +373,7 @@ namespace Kyoo.Controllers
 
 		private async Task<ICollection<Track>> GetTracks(Episode episode)
 		{
-			episode.Tracks = (await _transcoder.ExtractInfos(episode, false))
+			episode.Tracks = (await Transcoder.ExtractInfos(episode, false))
 				.Where(x => x.Type != StreamType.Attachment)
 				.ToArray();
 			return episode.Tracks;

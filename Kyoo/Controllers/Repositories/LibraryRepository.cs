@@ -43,7 +43,7 @@ namespace Kyoo.Controllers
 		public override async Task<ICollection<Library>> Search(string query)
 		{
 			return await _database.Libraries
-				.Where(x => EF.Functions.ILike(x.Name, $"%{query}%"))
+				.Where(_database.Like<Library>(x => x.Name, $"%{query}%"))
 				.OrderBy(DefaultSort)
 				.Take(20)
 				.ToListAsync();
@@ -53,9 +53,8 @@ namespace Kyoo.Controllers
 		public override async Task<Library> Create(Library obj)
 		{
 			await base.Create(obj);
+			obj.ProviderLinks = obj.Providers?.Select(x => Link.Create(obj, x)).ToList();
 			_database.Entry(obj).State = EntityState.Added;
-			obj.ProviderLinks = obj.Providers?.Select(x => Link.Create(obj, x)).ToArray();
-			obj.ProviderLinks.ForEach(x => _database.Entry(x).State = EntityState.Added);
 			await _database.SaveChangesAsync($"Trying to insert a duplicated library (slug {obj.Slug} already exists).");
 			return obj;
 		}
@@ -65,7 +64,7 @@ namespace Kyoo.Controllers
 		{
 			await base.Validate(resource);
 			resource.Providers = await resource.Providers
-				.SelectAsync(x => _providers.CreateIfNotExists(x, true))
+				.SelectAsync(x => _providers.CreateIfNotExists(x))
 				.ToListAsync();
 		}
 

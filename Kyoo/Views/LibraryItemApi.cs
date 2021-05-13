@@ -6,7 +6,7 @@ using Kyoo.CommonApi;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
-using Microsoft.AspNetCore.Authorization;
+using Kyoo.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
@@ -25,11 +25,11 @@ namespace Kyoo.Api
 		public LibraryItemApi(ILibraryItemRepository libraryItems, IConfiguration configuration)
 		{
 			_libraryItems = libraryItems;
-			_baseURL = configuration.GetValue<string>("public_url").TrimEnd('/');
+			_baseURL = configuration.GetValue<string>("publicUrl").TrimEnd('/');
 		}
 
 		[HttpGet]
-		[Authorize(Policy = "Read")]
+		[Permission(nameof(LibraryItemApi), Kind.Read)]
 		public async Task<ActionResult<Page<LibraryItem>>> GetAll([FromQuery] string sortBy,
 			[FromQuery] int afterID,
 			[FromQuery] Dictionary<string, string> where,
@@ -47,7 +47,7 @@ namespace Kyoo.Api
 					Request.Query.ToDictionary(x => x.Key, x => x.Value.ToString(), StringComparer.InvariantCultureIgnoreCase),
 					limit);
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}

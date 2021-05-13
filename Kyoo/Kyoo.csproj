@@ -6,7 +6,6 @@
 		<TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
 		<IsPackable>false</IsPackable>
 		<SpaRoot>../Kyoo.WebApp/</SpaRoot>
-		<LoginRoot>../Kyoo.WebLogin/</LoginRoot>
 		<TranscoderRoot>../Kyoo.Transcoder/</TranscoderRoot>
 		<DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules/**</DefaultItemExcludes>
 
@@ -35,36 +34,25 @@
 	<ItemGroup>
 		<ProjectReference Include="../Kyoo.Common/Kyoo.Common.csproj" />
 		<ProjectReference Include="../Kyoo.CommonAPI/Kyoo.CommonAPI.csproj" />
-		<PackageReference Include="IdentityServer4" Version="4.1.1" />
-		<PackageReference Include="IdentityServer4.AspNetIdentity" Version="4.1.1" />
-		<PackageReference Include="IdentityServer4.EntityFramework" Version="4.1.1" />
-		<PackageReference Include="IdentityServer4.EntityFramework.Storage" Version="4.1.1" />
-		<PackageReference Include="IdentityServer4.Storage" Version="4.1.1" />
-		<PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="5.0.3" />
-		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.2" />
-		<PackageReference Include="Portable.BouncyCastle" Version="1.8.9" />
 		<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
-		<PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="5.0.3" />
-		<PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="5.0.3" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.3" />
-		<PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="3.1.12" />
-		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.3" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.3" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" Version="5.0.3" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.3">
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-			<PrivateAssets>all</PrivateAssets>
-		</PackageReference>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" Version="5.0.3" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="5.0.3" />
-		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="3.1.14" />
+		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.5" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+	</ItemGroup>
+	
+	<ItemGroup>
+		<ProjectReference Include="../Kyoo.Postgresql/Kyoo.Postgresql.csproj">
+<!--			<ExcludeAssets>all</ExcludeAssets>-->
+		</ProjectReference>
+		<ProjectReference Include="../Kyoo.Authentication/Kyoo.Authentication.csproj">
+<!--			<ExcludeAssets>all</ExcludeAssets>-->
+		</ProjectReference>
 	</ItemGroup>
 	
 	<ItemGroup>
 		<None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules/**" Visible="false" />
 		<StaticFiles Include="$(SpaRoot)static/**" Visible="false" />
-		<LoginFiles Include="$(LoginRoot)**" Visible="false" />
 		<Content Remove="$(SpaRoot)**" />
 	</ItemGroup>
 
@@ -84,15 +72,10 @@
 		</ItemGroup>
 	</Target>
 
-	<Target Name="Publish static and login" AfterTargets="ComputeFilesToPublish">
+	<Target Name="Publish static files" AfterTargets="ComputeFilesToPublish">
 		<ItemGroup>
 			<ResolvedFileToPublish Include="@(StaticFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
 				<RelativePath>wwwroot/%(StaticFiles.RecursiveDir)%(StaticFiles.Filename)%(StaticFiles.Extension)</RelativePath>
-				<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-				<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-			</ResolvedFileToPublish>
-			<ResolvedFileToPublish Include="@(LoginFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
-				<RelativePath>login/%(LoginFiles.RecursiveDir)%(LoginFiles.Filename)%(LoginFiles.Extension)</RelativePath>
 				<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 				<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 			</ResolvedFileToPublish>
@@ -103,9 +86,8 @@
 		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
 	</Target>
 	
-	<Target Name="Prepare static and login pages" AfterTargets="Build" Condition="$(Configuration) == 'Debug'">
+	<Target Name="Prepare static files" AfterTargets="Build" Condition="$(Configuration) == 'Debug'">
 		<Copy SourceFiles="@(StaticFiles)" DestinationFolder="$(OutputPath)/wwwroot/%(RecursiveDir)" />
-		<Copy SourceFiles="@(LoginFiles)" DestinationFolder="$(OutputPath)/wwwroot/%(RecursiveDir)" />
 	</Target>
 
 	<Target Name="Symlink views to output - Linux" AfterTargets="Build" Condition="$(Configuration) == 'Debug' And $(OS) == 'Unix'">
@@ -124,4 +106,25 @@
 			<Visible>false</Visible>
 		</None>
 	</ItemGroup>
+
+
+	<!--TODO remove this once plugins are reworked. This is useful because the authentication plugin is loaded manually and not by the plugin manager-->
+	<PropertyGroup>
+		<LoginRoot>../Kyoo.WebLogin/</LoginRoot>
+	</PropertyGroup>
+	<ItemGroup>
+		<LoginFiles Include="$(LoginRoot)**" Visible="false" />
+	</ItemGroup>
+	<Target Name="Publish login files" AfterTargets="ComputeFilesToPublish">
+		<ItemGroup>
+			<ResolvedFileToPublish Include="@(LoginFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
+				<RelativePath>login/%(LoginFiles.RecursiveDir)%(LoginFiles.Filename)%(LoginFiles.Extension)</RelativePath>
+				<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+				<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+			</ResolvedFileToPublish>
+		</ItemGroup>
+	</Target>
+	<Target Name="Prepare static files" AfterTargets="Build" Condition="$(Configuration) == 'Debug'">
+		<Copy SourceFiles="@(LoginFiles)" DestinationFolder="$(OutputPath)/login/%(RecursiveDir)" />
+	</Target>
 </Project>

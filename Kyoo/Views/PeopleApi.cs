@@ -5,7 +5,7 @@ using Kyoo.CommonApi;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
-using Microsoft.AspNetCore.Authorization;
+using Kyoo.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
@@ -13,6 +13,7 @@ namespace Kyoo.Api
 {
 	[Route("api/people")]
 	[ApiController]
+	[PartialPermission(nameof(PeopleApi))]
 	public class PeopleApi : CrudApi<People>
 	{
 		private readonly ILibraryManager _libraryManager;
@@ -32,7 +33,7 @@ namespace Kyoo.Api
 
 		[HttpGet("{id:int}/role")]
 		[HttpGet("{id:int}/roles")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<PeopleRole>>> GetRoles(int id,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -48,7 +49,7 @@ namespace Kyoo.Api
 
 				return Page(resources, limit);
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}
@@ -60,7 +61,7 @@ namespace Kyoo.Api
 
 		[HttpGet("{slug}/role")]
 		[HttpGet("{slug}/roles")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<PeopleRole>>> GetRoles(string slug,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -76,7 +77,7 @@ namespace Kyoo.Api
 
 				return Page(resources, limit);
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}
@@ -87,18 +88,20 @@ namespace Kyoo.Api
 		}
 		
 		[HttpGet("{id:int}/poster")]
-		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetPeopleIcon(int id)
 		{
-			People people = await _libraryManager.Get<People>(id);
+			People people = await _libraryManager.GetOrDefault<People>(id);
+			if (people == null)
+				return NotFound();
 			return _files.FileResult(await _thumbs.GetPeoplePoster(people));
 		}
 		
 		[HttpGet("{slug}/poster")]
-		[Authorize(Policy="Read")]
 		public async Task<IActionResult> GetPeopleIcon(string slug)
 		{
-			People people = await _libraryManager.Get<People>(slug);
+			People people = await _libraryManager.GetOrDefault<People>(slug);
+			if (people == null)
+				return NotFound();
 			return _files.FileResult(await _thumbs.GetPeoplePoster(people));
 		}
 	}

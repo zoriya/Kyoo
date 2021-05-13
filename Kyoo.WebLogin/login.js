@@ -41,11 +41,11 @@ $("#login-btn").on("click", function (e)
 			success: function ()
 			{
 				let returnUrl = new URLSearchParams(window.location.search).get("ReturnUrl");
-				
+
 				if (returnUrl == null)
 					window.location.href = "/unauthorized";
 				else
-					window.location.href = returnUrl;	
+					window.location.href = returnUrl;
 			},
 			error: function(xhr)
 			{
@@ -56,7 +56,7 @@ $("#login-btn").on("click", function (e)
 		});
 });
 
-$("#register-btn").on("click", function (e) 
+$("#register-btn").on("click", function (e)
 {
 	e.preventDefault();
 
@@ -73,7 +73,7 @@ $("#register-btn").on("click", function (e)
 		error.text("Passwords don't match.");
 		return;
 	}
-	
+
 	$.ajax(
 	{
 		url: "/api/account/register",
@@ -81,19 +81,19 @@ $("#register-btn").on("click", function (e)
 		contentType: 'application/json;charset=UTF-8',
 		dataType: 'json',
 		data: JSON.stringify(user),
-		success: function(res) 
+		success: function(res)
 		{
 			useOtac(res.otac);
 		},
-		error: function(xhr) 
+		error: function(xhr)
 		{
 			let error = $("#register-error");
 			error.show();
-			error.text(JSON.parse(xhr.responseText)[0].description);
+			error.html(Object.values(JSON.parse(xhr.responseText).errors).map(x => x[0]).join("<br/>"));
 		}
 	});
 });
-	
+
 function useOtac(otac)
 {
 	$.ajax(
@@ -101,7 +101,7 @@ function useOtac(otac)
 		url: "/api/account/otac-login",
 		type: "POST",
 		contentType: 'application/json;charset=UTF-8',
-		data: JSON.stringify({otac: otac, tayLoggedIn: $("#stay-logged-in")[0].checked}),
+		data: JSON.stringify({otac: otac, stayLoggedIn: $("#stay-logged-in")[0].checked}),
 		success: function()
 		{
 			let returnUrl = new URLSearchParams(window.location.search).get("ReturnUrl");

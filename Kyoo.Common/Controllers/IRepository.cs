@@ -11,7 +11,7 @@ using Kyoo.Models.Exceptions;
 namespace Kyoo.Controllers
 {
 	/// <summary>
-	/// Informations about the pagination. How many items should be displayed and where to start.
+	/// Information about the pagination. How many items should be displayed and where to start.
 	/// </summary>
 	public readonly struct Pagination
 	{
@@ -44,7 +44,7 @@ namespace Kyoo.Controllers
 	}
 
 	/// <summary>
-	/// Informations about how a query should be sorted. What factor should decide the sort and in which order.
+	/// Information about how a query should be sorted. What factor should decide the sort and in which order.
 	/// </summary>
 	/// <typeparam name="T">For witch type this sort applies</typeparam>
 	public readonly struct Sort<T>
@@ -54,7 +54,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		public Expression<Func<T, object>> Key { get; }
 		/// <summary>
-		/// If this is set to true, items will be sorted in descend order else, they will be sorted in ascendent order.
+		/// If this is set to true, items will be sorted in descend order else, they will be sorted in ascendant order.
 		/// </summary>
 		public bool Descendant { get; }
 		
@@ -127,21 +127,21 @@ namespace Kyoo.Controllers
 		/// Get a resource from it's ID.
 		/// </summary>
 		/// <param name="id">The id of the resource</param>
-		/// <exception cref="ItemNotFound">If the item could not be found.</exception>
+		/// <exception cref="ItemNotFoundException">If the item could not be found.</exception>
 		/// <returns>The resource found</returns>
 		Task<T> Get(int id);
 		/// <summary>
 		/// Get a resource from it's slug.
 		/// </summary>
 		/// <param name="slug">The slug of the resource</param>
-		/// <exception cref="ItemNotFound">If the item could not be found.</exception>
+		/// <exception cref="ItemNotFoundException">If the item could not be found.</exception>
 		/// <returns>The resource found</returns>
 		Task<T> Get(string slug);
 		/// <summary>
 		/// Get the first resource that match the predicate.
 		/// </summary>
 		/// <param name="where">A predicate to filter the resource.</param>
-		/// <exception cref="ItemNotFound">If the item could not be found.</exception>
+		/// <exception cref="ItemNotFoundException">If the item could not be found.</exception>
 		/// <returns>The resource found</returns>
 		Task<T> Get(Expression<Func<T, bool>> where);
 		
@@ -175,7 +175,7 @@ namespace Kyoo.Controllers
 		/// Get every resources that match all filters
 		/// </summary>
 		/// <param name="where">A filter predicate</param>
-		/// <param name="sort">Sort informations about the query (sort by, sort order)</param>
+		/// <param name="sort">Sort information about the query (sort by, sort order)</param>
 		/// <param name="limit">How pagination should be done (where to start and how many to return)</param>
 		/// <returns>A list of resources that match every filters</returns>
 		Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null, 
@@ -205,86 +205,85 @@ namespace Kyoo.Controllers
 		/// Create a new resource.
 		/// </summary>
 		/// <param name="obj">The item to register</param>
-		/// <returns>The resource registers and completed by database's informations (related items & so on)</returns>
+		/// <returns>The resource registers and completed by database's information (related items & so on)</returns>
 		Task<T> Create([NotNull] T obj);
 		
 		/// <summary>
 		/// Create a new resource if it does not exist already. If it does, the existing value is returned instead.
 		/// </summary>
 		/// <param name="obj">The object to create</param>
-		/// <param name="silentFail">Allow issues to occurs in this method. Every issue is catched and ignored.</param>
 		/// <returns>The newly created item or the existing value if it existed.</returns>
-		Task<T> CreateIfNotExists([NotNull] T obj, bool silentFail = false);
+		Task<T> CreateIfNotExists([NotNull] T obj);
 		
 		/// <summary>
 		/// Edit a resource
 		/// </summary>
-		/// <param name="edited">The resourcce to edit, it's ID can't change.</param>
+		/// <param name="edited">The resource to edit, it's ID can't change.</param>
 		/// <param name="resetOld">Should old properties of the resource be discarded or should null values considered as not changed?</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
-		/// <returns>The resource edited and completed by database's informations (related items & so on)</returns>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
+		/// <returns>The resource edited and completed by database's information (related items & so on)</returns>
 		Task<T> Edit([NotNull] T edited, bool resetOld);
 		
 		/// <summary>
 		/// Delete a resource by it's ID
 		/// </summary>
 		/// <param name="id">The ID of the resource</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task Delete(int id);
 		/// <summary>
 		/// Delete a resource by it's slug
 		/// </summary>
 		/// <param name="slug">The slug of the resource</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task Delete(string slug);
 		/// <summary>
 		/// Delete a resource
 		/// </summary>
 		/// <param name="obj">The resource to delete</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task Delete([NotNull] T obj);
 
 		/// <summary>
 		/// Delete a list of resources.
 		/// </summary>
 		/// <param name="objs">One or multiple resources to delete</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task DeleteRange(params T[] objs) => DeleteRange(objs.AsEnumerable());
 		/// <summary>
 		/// Delete a list of resources.
 		/// </summary>
 		/// <param name="objs">An enumerable of resources to delete</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task DeleteRange(IEnumerable<T> objs);
 		/// <summary>
 		/// Delete a list of resources.
 		/// </summary>
-		/// <param name="ids">One or multiple resources's id</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <param name="ids">One or multiple resource's id</param>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task DeleteRange(params int[] ids) => DeleteRange(ids.AsEnumerable());
 		/// <summary>
 		/// Delete a list of resources.
 		/// </summary>
-		/// <param name="ids">An enumearble of resources's id</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <param name="ids">An enumerable of resource's id</param>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task DeleteRange(IEnumerable<int> ids);
 		/// <summary>
 		/// Delete a list of resources.
 		/// </summary>
-		/// <param name="slugs">One or multiple resources's slug</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <param name="slugs">One or multiple resource's slug</param>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task DeleteRange(params string[] slugs) => DeleteRange(slugs.AsEnumerable());
 		/// <summary>
 		/// Delete a list of resources.
 		/// </summary>
-		/// <param name="slugs">An enumerable of resources's slug</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <param name="slugs">An enumerable of resource's slug</param>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task DeleteRange(IEnumerable<string> slugs);
 		/// <summary>
 		/// Delete a list of resources.
 		/// </summary>
 		/// <param name="where">A predicate to filter resources to delete. Every resource that match this will be deleted.</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task DeleteRange([NotNull] Expression<Func<T, bool>> where);
 	}
 
@@ -294,7 +293,7 @@ namespace Kyoo.Controllers
 	public interface IShowRepository : IRepository<Show>
 	{
 		/// <summary>
-		/// Link a show to a collection and/or a library. The given show is now part of thoses containers.
+		/// Link a show to a collection and/or a library. The given show is now part of those containers.
 		/// If both a library and a collection are given, the collection is added to the library too.
 		/// </summary>
 		/// <param name="showID">The ID of the show</param>
@@ -306,7 +305,7 @@ namespace Kyoo.Controllers
 		/// Get a show's slug from it's ID.
 		/// </summary>
 		/// <param name="showID">The ID of the show</param>
-		/// <exception cref="ItemNotFound">If a show with the given ID is not found.</exception>
+		/// <exception cref="ItemNotFoundException">If a show with the given ID is not found.</exception>
 		/// <returns>The show's slug</returns>
 		Task<string> GetSlug(int showID);
 	}
@@ -321,7 +320,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="showID">The id of the show</param>
 		/// <param name="seasonNumber">The season's number</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The season found</returns>
 		Task<Season> Get(int showID, int seasonNumber);
 		
@@ -330,7 +329,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="showSlug">The slug of the show</param>
 		/// <param name="seasonNumber">The season's number</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The season found</returns>
 		Task<Season> Get(string showSlug, int seasonNumber);
 		
@@ -362,7 +361,7 @@ namespace Kyoo.Controllers
 		/// <param name="showID">The id of the show</param>
 		/// <param name="seasonNumber">The season's number</param>
 		/// <param name="episodeNumber">The episode's number</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The episode found</returns>
 		Task<Episode> Get(int showID, int seasonNumber, int episodeNumber);
 		/// <summary>
@@ -371,7 +370,7 @@ namespace Kyoo.Controllers
 		/// <param name="showSlug">The slug of the show</param>
 		/// <param name="seasonNumber">The season's number</param>
 		/// <param name="episodeNumber">The episode's number</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The episode found</returns>
 		Task<Episode> Get(string showSlug, int seasonNumber, int episodeNumber);
 
@@ -397,7 +396,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="showID">The id of the show</param>
 		/// <param name="absoluteNumber">The episode's absolute number (The episode number does not reset to 1 after the end of a season.</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The episode found</returns>
 		Task<Episode> GetAbsolute(int showID, int absoluteNumber);
 		/// <summary>
@@ -405,7 +404,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="showSlug">The slug of the show</param>
 		/// <param name="absoluteNumber">The episode's absolute number (The episode number does not reset to 1 after the end of a season.</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The episode found</returns>
 		Task<Episode> GetAbsolute(string showSlug, int absoluteNumber);
 	}
@@ -420,8 +419,8 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="slug">The slug of the track</param>
 		/// <param name="type">The type (Video, Audio or Subtitle)</param>
-		/// <exception cref="ItemNotFound">If the item is not found</exception>
-		/// <returns>The tracl found</returns>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
+		/// <returns>The track found</returns>
 		Task<Track> Get(string slug, StreamType type = StreamType.Unknown);
 		
 		/// <summary>
@@ -429,7 +428,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="slug">The slug of the track</param>
 		/// <param name="type">The type (Video, Audio or Subtitle)</param>
-		/// <returns>The tracl found</returns>
+		/// <returns>The track found</returns>
 		Task<Track> GetOrDefault(string slug, StreamType type = StreamType.Unknown);
 	}
 	
@@ -439,16 +438,16 @@ namespace Kyoo.Controllers
 	public interface ILibraryRepository : IRepository<Library> { }
 
 	/// <summary>
-	/// A repository to handle library items (A wrapper arround shows and collections).
+	/// A repository to handle library items (A wrapper around shows and collections).
 	/// </summary>
 	public interface ILibraryItemRepository : IRepository<LibraryItem>
 	{
 		/// <summary>
-		/// Get items (A wrapper arround shows or collections) from a library.
+		/// Get items (A wrapper around shows or collections) from a library.
 		/// </summary>
 		/// <param name="id">The ID of the library</param>
 		/// <param name="where">A filter function</param>
-		/// <param name="sort">Sort informations (sort order & sort by)</param>
+		/// <param name="sort">Sort information (sort order & sort by)</param>
 		/// <param name="limit">How many items to return and where to start</param>
 		/// <returns>A list of items that match every filters</returns>
 		public Task<ICollection<LibraryItem>> GetFromLibrary(int id,
@@ -456,7 +455,7 @@ namespace Kyoo.Controllers
 			Sort<LibraryItem> sort = default,
 			Pagination limit = default);
 		/// <summary>
-		/// Get items (A wrapper arround shows or collections) from a library.
+		/// Get items (A wrapper around shows or collections) from a library.
 		/// </summary>
 		/// <param name="id">The ID of the library</param>
 		/// <param name="where">A filter function</param>
@@ -470,11 +469,11 @@ namespace Kyoo.Controllers
 		) => GetFromLibrary(id, where, new Sort<LibraryItem>(sort), limit);
 		
 		/// <summary>
-		/// Get items (A wrapper arround shows or collections) from a library.
+		/// Get items (A wrapper around shows or collections) from a library.
 		/// </summary>
 		/// <param name="slug">The slug of the library</param>
 		/// <param name="where">A filter function</param>
-		/// <param name="sort">Sort informations (sort order & sort by)</param>
+		/// <param name="sort">Sort information (sort order & sort by)</param>
 		/// <param name="limit">How many items to return and where to start</param>
 		/// <returns>A list of items that match every filters</returns>
 		public Task<ICollection<LibraryItem>> GetFromLibrary(string slug,
@@ -482,7 +481,7 @@ namespace Kyoo.Controllers
 			Sort<LibraryItem> sort = default,
 			Pagination limit = default);
 		/// <summary>
-		/// Get items (A wrapper arround shows or collections) from a library.
+		/// Get items (A wrapper around shows or collections) from a library.
 		/// </summary>
 		/// <param name="slug">The slug of the library</param>
 		/// <param name="where">A filter function</param>
@@ -521,7 +520,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="showID">The ID of the show</param>
 		/// <param name="where">A filter function</param>
-		/// <param name="sort">Sort informations (sort order & sort by)</param>
+		/// <param name="sort">Sort information (sort order & sort by)</param>
 		/// <param name="limit">How many items to return and where to start</param>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetFromShow(int showID,
@@ -547,7 +546,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="showSlug">The slug of the show</param>
 		/// <param name="where">A filter function</param>
-		/// <param name="sort">Sort informations (sort order & sort by)</param>
+		/// <param name="sort">Sort information (sort order & sort by)</param>
 		/// <param name="limit">How many items to return and where to start</param>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetFromShow(string showSlug,
@@ -573,7 +572,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="id">The id of the person</param>
 		/// <param name="where">A filter function</param>
-		/// <param name="sort">Sort informations (sort order & sort by)</param>
+		/// <param name="sort">Sort information (sort order & sort by)</param>
 		/// <param name="limit">How many items to return and where to start</param>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetFromPeople(int id,
@@ -599,7 +598,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="slug">The slug of the person</param>
 		/// <param name="where">A filter function</param>
-		/// <param name="sort">Sort informations (sort order & sort by)</param>
+		/// <param name="sort">Sort information (sort order & sort by)</param>
 		/// <param name="limit">How many items to return and where to start</param>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetFromPeople(string slug,
@@ -631,7 +630,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="where">A predicate to add arbitrary filter</param>
 		/// <param name="sort">Sort information (sort order & sort by)</param>
-		/// <param name="limit">Paginations information (where to start and how many to get)</param>
+		/// <param name="limit">Pagination information (where to start and how many to get)</param>
 		/// <returns>A filtered list of external ids.</returns>
 		Task<ICollection<MetadataID>> GetMetadataID(Expression<Func<MetadataID, bool>> where = null, 
 			Sort<MetadataID> sort = default,
@@ -642,11 +641,16 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="where">A predicate to add arbitrary filter</param>
 		/// <param name="sort">A sort by expression</param>
-		/// <param name="limit">Paginations information (where to start and how many to get)</param>
+		/// <param name="limit">Pagination information (where to start and how many to get)</param>
 		/// <returns>A filtered list of external ids.</returns>
 		Task<ICollection<MetadataID>> GetMetadataID([Optional] Expression<Func<MetadataID, bool>> where,
 			Expression<Func<MetadataID, object>> sort,
 			Pagination limit = default
 		) => GetMetadataID(where, new Sort<MetadataID>(sort), limit);
 	}
+	
+	/// <summary>
+	/// A repository to handle users.
+	/// </summary>
+	public interface IUserRepository : IRepository<User> {}
 }

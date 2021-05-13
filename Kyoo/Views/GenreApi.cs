@@ -5,8 +5,7 @@ using System.Threading.Tasks;
 using Kyoo.CommonApi;
 using Kyoo.Controllers;
 using Kyoo.Models;
-using Kyoo.Models.Exceptions;
-using Microsoft.AspNetCore.Authorization;
+using Kyoo.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
@@ -15,6 +14,7 @@ namespace Kyoo.Api
 	[Route("api/genre")]
 	[Route("api/genres")]
 	[ApiController]
+	[PartialPermission(nameof(GenreApi))]
 	public class GenreApi : CrudApi<Genre>
 	{
 		private readonly ILibraryManager _libraryManager;
@@ -27,7 +27,7 @@ namespace Kyoo.Api
 		
 		[HttpGet("{id:int}/show")]
 		[HttpGet("{id:int}/shows")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<Show>>> GetShows(int id,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -41,7 +41,7 @@ namespace Kyoo.Api
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Genre>(id) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Genre>(id) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -53,7 +53,7 @@ namespace Kyoo.Api
 		
 		[HttpGet("{slug}/show")]
 		[HttpGet("{slug}/shows")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<Show>>> GetShows(string slug,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -67,7 +67,7 @@ namespace Kyoo.Api
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.Get<Genre>(slug) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault<Genre>(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}

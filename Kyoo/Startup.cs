@@ -1,20 +1,14 @@
 using System;
 using System.IO;
-using System.Reflection;
-using IdentityServer4.Extensions;
-using IdentityServer4.Services;
-using Kyoo.Api;
+using Kyoo.Authentication;
 using Kyoo.Controllers;
 using Kyoo.Models;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
+using Kyoo.Postgresql;
+using Kyoo.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.AspNetCore.StaticFiles;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
@@ -28,20 +22,48 @@ namespace Kyoo
 	/// </summary>
 	public class Startup
 	{
+		/// <summary>
+		/// The configuration context
+		/// </summary>
 		private readonly IConfiguration _configuration;
-		private readonly ILoggerFactory _loggerFactory;
+		/// <summary>
+		/// A plugin manager used to load plugins and allow them to configure services / asp net.
+		/// </summary>
+		private readonly IPluginManager _plugins;
 
 
-		public Startup(IConfiguration configuration, ILoggerFactory loggerFactory)
+		/// <summary>
+		/// Created from the DI container, those services are needed to load information and instantiate plugins.s
+		/// </summary>
+		/// <param name="hostProvider">
+		/// The ServiceProvider used to create this <see cref="Startup"/> instance.
+		/// The host provider that contains only well-known services that are Kyoo independent.
+		/// This is used to instantiate plugins that might need a logger, a configuration or an host environment.
+		/// </param>
+		/// <param name="configuration">The configuration context</param>
+		/// <param name="loggerFactory">A logger factory used to create a logger for the plugin manager.</param>
+		public Startup(IServiceProvider hostProvider, IConfiguration configuration, ILoggerFactory loggerFactory, IWebHostEnvironment host)
 		{
 			_configuration = configuration;
-			_loggerFactory = loggerFactory;
+			_plugins = new PluginManager(hostProvider, _configuration, loggerFactory.CreateLogger<PluginManager>());
+			
+			// TODO remove postgres from here and load it like a normal plugin.
+			_plugins.LoadPlugins(new IPlugin[] {new CoreModule(), 
+				new PostgresModule(configuration, host),
+				new AuthenticationModule(configuration, loggerFactory, host)
+			});
 		}
 
+		/// <summary>
+		/// Configure the WebApp services context.
+		/// </summary>
+		/// <param name="services">The service collection to fill.</param>
 		public void ConfigureServices(IServiceCollection services)
 		{
-			string publicUrl = _configuration.GetValue<string>("public_url");
+			string publicUrl = _configuration.GetValue<string>("publicUrl");
 
+			services.AddMvc().AddControllersAsServices();
+			
 			services.AddSpaStaticFiles(configuration =>
 			{
 				configuration.RootPath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "wwwroot");
@@ -58,139 +80,23 @@ namespace Kyoo
 					x.SerializerSettings.Converters.Add(new PeopleRoleConverter());
 				});
 			services.AddHttpClient();
-
-			services.AddDbContext<DatabaseContext>(options =>
-			{
-				options.UseNpgsql(_configuration.GetDatabaseConnection());
-				// .EnableSensitiveDataLogging()
-				// .UseLoggerFactory(LoggerFactory.Create(builder => builder.AddConsole()));
-			}, ServiceLifetime.Transient);
 			
-			services.AddDbContext<IdentityDatabase>(options =>
-			{
-				options.UseNpgsql(_configuration.GetDatabaseConnection());
-			});
-
-			string assemblyName = typeof(Startup).GetTypeInfo().Assembly.GetName().Name;
-
-			services.AddIdentityCore<User>(o =>
-				{
-					o.Stores.MaxLengthForKeys = 128;
-				})
-				.AddSignInManager()
-				.AddDefaultTokenProviders()
-				.AddEntityFrameworkStores<IdentityDatabase>();
-
-			services.AddIdentityServer(options =>
-				{
-					options.IssuerUri = publicUrl;
-					options.UserInteraction.LoginUrl = publicUrl + "login";
-					options.UserInteraction.ErrorUrl = publicUrl + "error";
-					options.UserInteraction.LogoutUrl = publicUrl + "logout";
-				})
-				.AddAspNetIdentity<User>()
-				.AddConfigurationStore(options =>
-				{
-					options.ConfigureDbContext = builder =>
-						builder.UseNpgsql(_configuration.GetDatabaseConnection(),
-							sql => sql.MigrationsAssembly(assemblyName));
-				})
-				.AddOperationalStore(options =>
-				{
-					options.ConfigureDbContext = builder =>
-						builder.UseNpgsql(_configuration.GetDatabaseConnection(),
-							sql => sql.MigrationsAssembly(assemblyName));
-					options.EnableTokenCleanup = true;
-				})
-				.AddInMemoryIdentityResources(IdentityContext.GetIdentityResources())
-				.AddInMemoryApiScopes(IdentityContext.GetScopes())
-				.AddInMemoryApiResources(IdentityContext.GetApis())
-				.AddProfileService<AccountController>()
-				.AddSigninKeys(_configuration);
+			services.AddTransient(typeof(Lazy<>), typeof(LazyDi<>));
 			
-			services.AddAuthentication(o =>
-				{
-					o.DefaultScheme = IdentityConstants.ApplicationScheme;
-					o.DefaultSignInScheme = IdentityConstants.ExternalScheme;
-				})
-				.AddIdentityCookies(_ => { });
-			services.AddAuthentication()
-				.AddJwtBearer(options =>
-				{
-					options.Authority = publicUrl;
-					options.Audience = "Kyoo";
-					options.RequireHttpsMetadata = false;
-				});
-
-			services.AddAuthorization(options =>
-			{
-				AuthorizationPolicyBuilder scheme = new(IdentityConstants.ApplicationScheme, JwtBearerDefaults.AuthenticationScheme);
-				options.DefaultPolicy = scheme.RequireAuthenticatedUser().Build();
-
-				string[] permissions = {"Read", "Write", "Play", "Admin"};
-				foreach (string permission in permissions)
-				{
-					options.AddPolicy(permission, policy =>
-					{
-						policy.AuthenticationSchemes.Add(IdentityConstants.ApplicationScheme);
-						policy.AuthenticationSchemes.Add(JwtBearerDefaults.AuthenticationScheme);
-						policy.AddRequirements(new AuthorizationValidator(permission));
-						// policy.RequireScope($"kyoo.{permission.ToLower()}");
-					});
-				}
-			});
-			services.AddSingleton<IAuthorizationHandler, AuthorizationValidatorHandler>();
-			
-			services.AddSingleton<ICorsPolicyService>(new DefaultCorsPolicyService(_loggerFactory.CreateLogger<DefaultCorsPolicyService>())
-			{
-				AllowedOrigins = { new Uri(publicUrl).GetLeftPart(UriPartial.Authority) }
-			});
-			
-
-			// TODO Add custom method to the service container and expose those methods to the plugin
-			// TODO Add for example a AddRepository that will automatically register the complex interface, the IRepository<T> and the IBaseRepository
-			services.AddScoped<IBaseRepository, LibraryRepository>();
-			services.AddScoped<IBaseRepository, LibraryItemRepository>();
-			services.AddScoped<IBaseRepository, CollectionRepository>();
-			services.AddScoped<IBaseRepository, ShowRepository>();
-			services.AddScoped<IBaseRepository, SeasonRepository>();
-			services.AddScoped<IBaseRepository, EpisodeRepository>();
-			services.AddScoped<IBaseRepository, TrackRepository>();
-			services.AddScoped<IBaseRepository, PeopleRepository>();
-			services.AddScoped<IBaseRepository, StudioRepository>();
-			services.AddScoped<IBaseRepository, GenreRepository>();
-			services.AddScoped<IBaseRepository, ProviderRepository>();
-
-			services.AddScoped<ILibraryRepository, LibraryRepository>();
-			services.AddScoped<ILibraryItemRepository, LibraryItemRepository>();
-			services.AddScoped<ICollectionRepository, CollectionRepository>();
-			services.AddScoped<IShowRepository, ShowRepository>();
-			services.AddScoped<ISeasonRepository, SeasonRepository>();
-			services.AddScoped<IEpisodeRepository, EpisodeRepository>();
-			services.AddScoped<ITrackRepository, TrackRepository>();
-			services.AddScoped<IPeopleRepository, PeopleRepository>();
-			services.AddScoped<IStudioRepository, StudioRepository>();
-			services.AddScoped<IGenreRepository, GenreRepository>();
-			services.AddScoped<IProviderRepository, ProviderRepository>();
-			services.AddScoped<DbContext, DatabaseContext>();
-
-			services.AddScoped<ILibraryManager, LibraryManager>();
-			services.AddSingleton<IFileManager, FileManager>();
-			services.AddSingleton<ITranscoder, Transcoder>();
-			services.AddSingleton<IThumbnailsManager, ThumbnailsManager>();
-			services.AddSingleton<IProviderManager, ProviderManager>();
-			services.AddSingleton<IPluginManager, PluginManager>();
-			services.AddSingleton<ITaskManager, TaskManager>();
-			
-			services.AddHostedService(provider => (TaskManager)provider.GetService<ITaskManager>());
+			services.AddSingleton(_plugins);
+			services.AddTask<PluginInitializer>();
+			_plugins.ConfigureServices(services);
 		}
-
+		
+		/// <summary>
+		/// Configure the asp net host.
+		/// </summary>
+		/// <param name="app">The asp net host to configure</param>
+		/// <param name="env">The host environment (is the app in development mode?)</param>
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
 			if (env.IsDevelopment())
-			{
 				app.UseDeveloperExceptionPage();
-			}
 			else
 			{
 				app.UseExceptionHandler("/Error");
@@ -222,28 +128,19 @@ namespace Kyoo
 				return next();
 			});
 			app.UseResponseCompression();
-			app.UseCookiePolicy(new CookiePolicyOptions
-			{
-				MinimumSameSitePolicy = SameSiteMode.Strict
-			});
-			app.UseAuthentication();
-			app.Use((ctx, next) =>
-			{
-				ctx.SetIdentityServerOrigin(_configuration.GetValue<string>("public_url"));
-				return next();
-			});
-			app.UseIdentityServer();
-			app.UseAuthorization();
+			
+			_plugins.ConfigureAspnet(app);
 
 			app.UseEndpoints(endpoints =>
 			{
-				endpoints.MapControllerRoute("Kyoo", "api/{controller=Home}/{action=Index}/{id?}");
+				endpoints.MapControllers();
 			});
-
+			
+			
 			app.UseSpa(spa =>
 			{
 				spa.Options.SourcePath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "Kyoo.WebApp");
-
+			
 				if (env.IsDevelopment())
 					spa.UseAngularCliServer("start");
 			});

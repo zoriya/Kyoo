@@ -146,7 +146,7 @@ namespace Kyoo
 		}
 
 		/// <summary>
-		/// Set every fields of first to those of second. Ignore fields marked with the <see cref="NotMergableAttribute"/> attribute
+		/// Set every fields of first to those of second. Ignore fields marked with the <see cref="NotMergeableAttribute"/> attribute
 		/// At the end, the OnMerge method of first will be called if first is a <see cref="IOnMerge"/>
 		/// </summary>
 		/// <param name="first">The object to assign</param>
@@ -158,7 +158,7 @@ namespace Kyoo
 			Type type = typeof(T);
 			IEnumerable<PropertyInfo> properties = type.GetProperties()
 				.Where(x => x.CanRead && x.CanWrite 
-				                      && Attribute.GetCustomAttribute(x, typeof(NotMergableAttribute)) == null);
+				                      && Attribute.GetCustomAttribute(x, typeof(NotMergeableAttribute)) == null);
 			
 			foreach (PropertyInfo property in properties)
 			{
@@ -191,7 +191,7 @@ namespace Kyoo
 			Type type = typeof(T);
 			IEnumerable<PropertyInfo> properties = type.GetProperties()
 				.Where(x => x.CanRead && x.CanWrite 
-				                      && Attribute.GetCustomAttribute(x, typeof(NotMergableAttribute)) == null);
+				                      && Attribute.GetCustomAttribute(x, typeof(NotMergeableAttribute)) == null);
 
 			if (where != null)
 				properties = properties.Where(where);
@@ -215,7 +215,7 @@ namespace Kyoo
 		/// <summary>
 		/// An advanced <see cref="Complete{T}"/> function.
 		/// This will set missing values of <see cref="first"/> to the corresponding values of <see cref="second"/>.
-		/// Enumerables will be merged (concatened).
+		/// Enumerable will be merged (concatenated).
 		/// At the end, the OnMerge method of first will be called if first is a <see cref="IOnMerge"/>.
 		/// </summary>
 		/// <param name="first">The object to complete</param>
@@ -232,7 +232,7 @@ namespace Kyoo
 			Type type = typeof(T);
 			IEnumerable<PropertyInfo> properties = type.GetProperties()
 				.Where(x => x.CanRead && x.CanWrite 
-				                      && Attribute.GetCustomAttribute(x, typeof(NotMergableAttribute)) == null);
+				                      && Attribute.GetCustomAttribute(x, typeof(NotMergeableAttribute)) == null);
 			
 			foreach (PropertyInfo property in properties)
 			{
@@ -529,9 +529,9 @@ namespace Kyoo
 				await action(i);
 		}
 
-		private static MethodInfo GetMethod(Type type, BindingFlags flag, string name, Type[] generics, object[] args)
+		public static MethodInfo GetMethod(Type type, BindingFlags flag, string name, Type[] generics, object[] args)
 		{
-			MethodInfo[] methods = type.GetMethods(flag | BindingFlags.Public | BindingFlags.NonPublic)
+			MethodInfo[] methods = type.GetMethods(flag | BindingFlags.Public)
 				.Where(x => x.Name == name)
 				.Where(x => x.GetGenericArguments().Length == generics.Length)
 				.Where(x => x.GetParameters().Length == args.Length)
@@ -712,70 +712,18 @@ namespace Kyoo
 			}, TaskContinuationOptions.ExecuteSynchronously);
 		}
 
-		public static Expression<Func<T, bool>> ResourceEquals<T>(IResource obj)
-			where T : IResource
+		/// <summary>
+		/// Get a friendly type name (supporting generics)
+		/// For example a list of string will be displayed as List&lt;string&gt; and not as List`1.
+		/// </summary>
+		/// <param name="type">The type to use</param>
+		/// <returns>The friendly name of the type</returns>
+		public static string FriendlyName(this Type type)
 		{
-			if (obj.ID > 0)
-				return x => x.ID == obj.ID || x.Slug == obj.Slug;
-			return x => x.Slug == obj.Slug;
-		}
-		
-		public static Func<T, bool> ResourceEqualsFunc<T>(IResource obj)
-			where T : IResource
-		{
-			if (obj.ID > 0)
-				return x => x.ID == obj.ID || x.Slug == obj.Slug;
-			return x => x.Slug == obj.Slug;
-		}
-		
-		public static bool ResourceEquals([CanBeNull] object first, [CanBeNull] object second)
-		{
-			if (ReferenceEquals(first, second))
-				return true;
-			if (first is IResource f && second is IResource s)
-				return ResourceEquals(f, s);
-			IEnumerable eno = first as IEnumerable;
-			IEnumerable ens = second as IEnumerable;
-			if (eno == null || ens == null)
-				throw new ArgumentException("Arguments are not resources or lists of resources.");
-			Type type = GetEnumerableType(eno);
-			if (typeof(IResource).IsAssignableFrom(type))
-				return ResourceEquals(eno.Cast<IResource>(), ens.Cast<IResource>());
-			return RunGenericMethod<bool>(typeof(Enumerable), "SequenceEqual", type, first, second);
-		}
-
-		public static bool ResourceEquals<T>([CanBeNull] T first, [CanBeNull] T second)
-			where T : IResource
-		{
-			if (ReferenceEquals(first, second))
-				return true;
-			if (first == null || second == null)
-				return false;
-			return first.ID == second.ID || first.Slug == second.Slug;
-		}
-		
-		public static bool ResourceEquals<T>([CanBeNull] IEnumerable<T> first, [CanBeNull] IEnumerable<T> second) 
-			where T : IResource
-		{
-			if (ReferenceEquals(first, second))
-				return true;
-			if (first == null || second == null)
-				return false;
-			return first.SequenceEqual(second, new ResourceComparer<T>());
-		}
-
-		public static bool LinkEquals<T>([CanBeNull] T first, int? firstID, [CanBeNull] T second, int? secondID)
-			where T : IResource
-		{
-			if (ResourceEquals(first, second))
-				return true;
-			if (first == null && second != null
-				&& firstID == second.ID)
-				return true;
-			if (first != null && second == null 
-				&& first.ID == secondID)
-				return true;
-			return firstID == secondID;
+			if (!type.IsGenericType)
+				return type.Name;
+			string generics = string.Join(", ", type.GetGenericArguments().Select(x => x.FriendlyName()));
+			return $"{type.Name[..type.Name.IndexOf('`')]}<{generics}>";
 		}
 	}
 }

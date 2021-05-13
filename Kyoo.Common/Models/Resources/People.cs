@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
@@ -13,15 +12,5 @@ namespace Kyoo.Models
 		[EditableRelation] [LoadableRelation] public virtual ICollection<MetadataID> ExternalIDs { get; set; }
 		
 		[EditableRelation] [LoadableRelation] public virtual ICollection<PeopleRole> Roles { get; set; }
-		
-		public People() {}
-
-		public People(string slug, string name, string poster, IEnumerable<MetadataID> externalIDs)
-		{
-			Slug = slug;
-			Name = name;
-			Poster = poster;
-			ExternalIDs = externalIDs?.ToArray();
-		}
 	}
 }

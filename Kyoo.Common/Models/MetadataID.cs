@@ -22,14 +22,5 @@ namespace Kyoo.Models
 		
 		public string DataID { get; set; }
 		public string Link { get; set; }
-
-		public MetadataID() { }
-
-		public MetadataID(Provider provider, string dataID, string link)
-		{
-			Provider = provider;
-			DataID = dataID;
-			Link = link;
-		}
 	}
 }

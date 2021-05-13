@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
@@ -21,15 +20,5 @@ namespace Kyoo.Models
 		[SerializeIgnore] public virtual ICollection<Link<Library, Show>> ShowLinks { get; set; }
 		[SerializeIgnore] public virtual ICollection<Link<Library, Collection>> CollectionLinks { get; set; }
 #endif
-
-		public Library()  { }
-		
-		public Library(string slug, string name, IEnumerable<string> paths, IEnumerable<Provider> providers)
-		{
-			Slug = slug;
-			Name = name;
-			Paths = paths?.ToArray();
-			Providers = providers?.ToArray();
-		}
 	}
 }

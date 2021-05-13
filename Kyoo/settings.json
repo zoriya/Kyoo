@@ -1,42 +1,56 @@
 {
   "server.urls": "http://*:5000",
-  "public_url": "http://localhost:5000/",
+  "publicUrl": "http://localhost:5000/",
 
   "database": {
-    "server": "127.0.0.1",
-    "port": "5432",
-    "database": "kyooDB",
-    "user ID": "kyoo",
-    "password": "kyooPassword",
-    "pooling": "true",
-    "maxPoolSize": "95",
-    "timeout": "30"
+    "postgres": {
+      "server": "127.0.0.1",
+      "port": "5432",
+      "database": "kyooDB",
+      "user ID": "kyoo",
+      "password": "kyooPassword",
+      "pooling": "true",
+      "maxPoolSize": "95",
+      "timeout": "30"
+    }
   },
 
   "logging": {
     "logLevel": {
       "default": "Warning",
       "Microsoft": "Warning",
-      "Microsoft.Hosting.Lifetime": "Information"
+      "Microsoft.Hosting.Lifetime": "Information",
+      "Microsoft.EntityFrameworkCore": "None",
+      "Kyoo": "Trace"
     }
   },
+  
+  "authentication": {
+    "certificate": {
+      "file": "certificate.pfx",
+      "oldFile": "oldCertificate.pfx",
+      "password": "passphrase"
+    },
+    "permissions": {
+      "default": ["overall.read", "overall.write", "overall.create", "overall.delete"],
+      "newUser": ["overall.read", "overall.write", "overall.create", "overall.delete"]
+    },
+    "profilePicturePath": "users/",
+    "clients": []
+  },
+  
   
   "parallelTasks": "1",
   
   "scheduledTasks": {
     "scan": "24:00:00"
   },
-  
-  "certificatePassword": "passphrase",
 
   "transmuxTempPath": "cached/kyoo/transmux",
   "transcodeTempPath": "cached/kyoo/transcode",
   "peoplePath": "people",
   "providerPath": "providers",
-  "profilePicturePath": "users/",
   "plugins": "plugins/",
-  "defaultPermissions": "read,play,write,admin",
-  "newUserPermissions": "read,play,write,admin",
   "regex": "(?:\\/(?<Collection>.*?))?\\/(?<Show>.*?)(?: \\(\\d+\\))?\\/\\k<Show>(?: \\(\\d+\\))?(?:(?: S(?<Season>\\d+)E(?<Episode>\\d+))| (?<Absolute>\\d+))?.*$",
   "subtitleRegex": "^(?<Episode>.*)\\.(?<Language>\\w{1,3})\\.(?<Default>default\\.)?(?<Forced>forced\\.)?.*$"
 }

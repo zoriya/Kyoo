@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models;
-using Microsoft.AspNetCore.Authorization;
+using Kyoo.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kyoo.Api
@@ -19,7 +19,12 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet]
-		[Authorize(Policy="Read")]
+		[Permission(nameof(Collection), Kind.Read)]
+		[Permission(nameof(Show), Kind.Read)]
+		[Permission(nameof(Episode), Kind.Read)]
+		[Permission(nameof(People), Kind.Read)]
+		[Permission(nameof(Genre), Kind.Read)]
+		[Permission(nameof(Studio), Kind.Read)]
 		public async Task<ActionResult<SearchResult>> Search(string query)
 		{
 			return new SearchResult
@@ -36,7 +41,7 @@ namespace Kyoo.Api
 		
 		[HttpGet("collection")]
 		[HttpGet("collections")]
-		[Authorize(Policy="Read")]
+		[Permission(nameof(Collection), Kind.Read)]
 		public Task<ICollection<Collection>> SearchCollections(string query)
 		{
 			return _libraryManager.Search<Collection>(query);
@@ -44,7 +49,7 @@ namespace Kyoo.Api
 		
 		[HttpGet("show")]
 		[HttpGet("shows")]
-		[Authorize(Policy="Read")]
+		[Permission(nameof(Show), Kind.Read)]
 		public Task<ICollection<Show>> SearchShows(string query)
 		{
 			return _libraryManager.Search<Show>(query);
@@ -52,14 +57,14 @@ namespace Kyoo.Api
 		
 		[HttpGet("episode")]
 		[HttpGet("episodes")]
-		[Authorize(Policy="Read")]
+		[Permission(nameof(Episode), Kind.Read)]
 		public Task<ICollection<Episode>> SearchEpisodes(string query)
 		{
 			return _libraryManager.Search<Episode>(query);
 		}
 		
 		[HttpGet("people")]
-		[Authorize(Policy="Read")]
+		[Permission(nameof(People), Kind.Read)]
 		public Task<ICollection<People>> SearchPeople(string query)
 		{
 			return _libraryManager.Search<People>(query);
@@ -67,7 +72,7 @@ namespace Kyoo.Api
 		
 		[HttpGet("genre")]
 		[HttpGet("genres")]
-		[Authorize(Policy="Read")]
+		[Permission(nameof(Genre), Kind.Read)]
 		public Task<ICollection<Genre>> SearchGenres(string query)
 		{
 			return _libraryManager.Search<Genre>(query);
@@ -75,7 +80,7 @@ namespace Kyoo.Api
 		
 		[HttpGet("studio")]
 		[HttpGet("studios")]
-		[Authorize(Policy="Read")]
+		[Permission(nameof(Studio), Kind.Read)]
 		public Task<ICollection<Studio>> SearchStudios(string query)
 		{
 			return _libraryManager.Search<Studio>(query);

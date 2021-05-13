@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
@@ -14,27 +13,5 @@ namespace Kyoo.Models
 		[SerializeIgnore] public virtual Show Show { get; set; }
 		public string Role { get; set; }
 		public string Type { get; set; }
-
-		public PeopleRole() {}
-		
-		public PeopleRole(People people, Show show, string role, string type)
-		{
-			People = people;
-			Show = show;
-			Role = role;
-			Type = type;
-		}
-
-		public PeopleRole(string slug, 
-			string name, 
-			string role, 
-			string type,
-			string poster,
-			IEnumerable<MetadataID> externalIDs)
-		{
-			People = new People(slug, name, poster, externalIDs);
-			Role = role;
-			Type = type;
-		}
 	}
 }

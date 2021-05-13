@@ -108,7 +108,7 @@ namespace Kyoo.Controllers
 		{
 			Episode ret = await GetOrDefault(showID, seasonNumber, episodeNumber);
 			if (ret == null)
-				throw new ItemNotFound($"No episode S{seasonNumber}E{episodeNumber} found on the show {showID}.");
+				throw new ItemNotFoundException($"No episode S{seasonNumber}E{episodeNumber} found on the show {showID}.");
 			return ret;
 		}
 
@@ -117,7 +117,7 @@ namespace Kyoo.Controllers
 		{
 			Episode ret = await GetOrDefault(showSlug, seasonNumber, episodeNumber);
 			if (ret == null)
-				throw new ItemNotFound($"No episode S{seasonNumber}E{episodeNumber} found on the show {showSlug}.");
+				throw new ItemNotFoundException($"No episode S{seasonNumber}E{episodeNumber} found on the show {showSlug}.");
 			return ret;
 		}
 
@@ -156,7 +156,8 @@ namespace Kyoo.Controllers
 		public override async Task<ICollection<Episode>> Search(string query)
 		{
 			List<Episode> episodes = await _database.Episodes
-				.Where(x => EF.Functions.ILike(x.Title, $"%{query}%") && x.EpisodeNumber != -1)
+				.Where(x => x.EpisodeNumber != -1)
+				.Where(_database.Like<Episode>(x => x.Title, $"%{query}%"))
 				.OrderBy(DefaultSort)
 				.Take(20)
 				.ToListAsync();
@@ -233,7 +234,7 @@ namespace Kyoo.Controllers
 			await base.Validate(resource);
 			resource.ExternalIDs = await resource.ExternalIDs.SelectAsync(async x => 
 			{ 
-				x.Provider = await _providers.CreateIfNotExists(x.Provider, true);
+				x.Provider = await _providers.CreateIfNotExists(x.Provider);
 				x.ProviderID = x.Provider.ID;
 				_database.Entry(x.Provider).State = EntityState.Detached;
 				return x;

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
@@ -19,10 +18,6 @@ namespace Kyoo.Controllers
 		/// The database handle
 		/// </summary>
 		private readonly DatabaseContext _database;
-		/// <summary>
-		/// A provider repository to handle externalID creation and deletion
-		/// </summary>
-		private readonly IProviderRepository _providers;
 		/// <summary>
 		/// A lazy loaded library repository to validate queries (check if a library does exist)
 		/// </summary>
@@ -44,18 +39,19 @@ namespace Kyoo.Controllers
 		/// Create a new <see cref="LibraryItemRepository"/>.
 		/// </summary>
 		/// <param name="database">The databse instance</param>
-		/// <param name="providers">A provider repository</param>
-		/// <param name="services">A service provider to lazilly request a library, show or collection repository.</param>
+		/// <param name="libraries">A lazy loaded library repository</param>
+		/// <param name="shows">A lazy loaded show repository</param>
+		/// <param name="collections">A lazy loaded collection repository</param>
 		public LibraryItemRepository(DatabaseContext database, 
-			IProviderRepository providers,
-			IServiceProvider services)
+			Lazy<ILibraryRepository> libraries,
+			Lazy<IShowRepository> shows,
+			Lazy<ICollectionRepository> collections)
 			: base(database)
 		{
 			_database = database;
-			_providers = providers;
-			_libraries = new Lazy<ILibraryRepository>(services.GetRequiredService<ILibraryRepository>);
-			_shows = new Lazy<IShowRepository>(services.GetRequiredService<IShowRepository>);
-			_collections = new Lazy<ICollectionRepository>(services.GetRequiredService<ICollectionRepository>);
+			_libraries = libraries;
+			_shows = shows;
+			_collections = collections;
 		}
 
 		
@@ -105,7 +101,7 @@ namespace Kyoo.Controllers
 		public override async Task<ICollection<LibraryItem>> Search(string query)
 		{
 			return await ItemsQuery
-				.Where(x => EF.Functions.ILike(x.Title, $"%{query}%"))
+				.Where(_database.Like<LibraryItem>(x => x.Title, $"%{query}%"))
 				.OrderBy(DefaultSort)
 				.Take(20)
 				.ToListAsync();
@@ -115,12 +111,7 @@ namespace Kyoo.Controllers
 		public override Task<LibraryItem> Create(LibraryItem obj) => throw new InvalidOperationException();
 
 		/// <inheritdoc />
-		public override Task<LibraryItem> CreateIfNotExists(LibraryItem obj, bool silentFail = false)
-		{
-			if (silentFail)
-				return Task.FromResult<LibraryItem>(default);
-			throw new InvalidOperationException();
-		}
+		public override Task<LibraryItem> CreateIfNotExists(LibraryItem obj) => throw new InvalidOperationException();
 		/// <inheritdoc />
 		public override Task<LibraryItem> Edit(LibraryItem obj, bool reset) => throw new InvalidOperationException();
 		/// <inheritdoc />
@@ -158,7 +149,7 @@ namespace Kyoo.Controllers
 				sort,
 				limit);
 			if (!items.Any() && await _libraries.Value.GetOrDefault(id) == null)
-				throw new ItemNotFound();
+				throw new ItemNotFoundException();
 			return items;
 		}
 		
@@ -173,7 +164,7 @@ namespace Kyoo.Controllers
 				sort,
 				limit);
 			if (!items.Any() && await _libraries.Value.GetOrDefault(slug) == null)
-				throw new ItemNotFound();
+				throw new ItemNotFoundException();
 			return items;
 		}
 	}

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
@@ -31,48 +30,6 @@ namespace Kyoo.Models
 
 		[EditableRelation] [LoadableRelation] public virtual ICollection<Track> Tracks { get; set; }
 		
-
-		public Episode() { }
-
-		public Episode(int seasonNumber, 
-			int episodeNumber,
-			int absoluteNumber,
-			string title,
-			string overview,
-			DateTime? releaseDate,
-			int runtime,
-			string thumb,
-			IEnumerable<MetadataID> externalIDs)
-		{
-			SeasonNumber = seasonNumber;
-			EpisodeNumber = episodeNumber;
-			AbsoluteNumber = absoluteNumber;
-			Title = title;
-			Overview = overview;
-			ReleaseDate = releaseDate;
-			Runtime = runtime;
-			Thumb = thumb;
-			ExternalIDs = externalIDs?.ToArray();
-		}
-
-		public Episode(int showID, 
-			int seasonID,
-			int seasonNumber, 
-			int episodeNumber, 
-			int absoluteNumber, 
-			string path,
-			string title, 
-			string overview, 
-			DateTime? releaseDate, 
-			int runtime, 
-			string poster,
-			IEnumerable<MetadataID> externalIDs)
-			: this(seasonNumber, episodeNumber, absoluteNumber, title, overview, releaseDate, runtime, poster, externalIDs)
-		{
-			ShowID = showID;
-			SeasonID = seasonID;
-			Path = path;
-		}
 
 		public static string GetSlug(string showSlug, int seasonNumber, int episodeNumber, int absoluteNumber)
 		{

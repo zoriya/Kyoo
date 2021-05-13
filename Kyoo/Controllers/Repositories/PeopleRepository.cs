@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
@@ -36,15 +35,15 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="database">The database handle</param>
 		/// <param name="providers">A provider repository</param>
-		/// <param name="services">A service provider to lazy load a show repository</param>
+		/// <param name="shows">A lazy loaded show repository</param>
 		public PeopleRepository(DatabaseContext database,
 			IProviderRepository providers,
-			IServiceProvider services) 
+			Lazy<IShowRepository> shows) 
 			: base(database)
 		{
 			_database = database;
 			_providers = providers;
-			_shows = new Lazy<IShowRepository>(services.GetRequiredService<IShowRepository>);
+			_shows = shows;
 		}
 		
 
@@ -52,7 +51,7 @@ namespace Kyoo.Controllers
 		public override async Task<ICollection<People>> Search(string query)
 		{
 			return await _database.People
-				.Where(people => EF.Functions.ILike(people.Name, $"%{query}%"))
+				.Where(_database.Like<People>(x => x.Name, $"%{query}%"))
 				.OrderBy(DefaultSort)
 				.Take(20)
 				.ToListAsync();
@@ -74,13 +73,13 @@ namespace Kyoo.Controllers
 			await base.Validate(resource);
 			await resource.ExternalIDs.ForEachAsync(async id =>
 			{
-				id.Provider = await _providers.CreateIfNotExists(id.Provider, true);
+				id.Provider = await _providers.CreateIfNotExists(id.Provider);
 				id.ProviderID = id.Provider.ID;
 				_database.Entry(id.Provider).State = EntityState.Detached;
 			});
 			await resource.Roles.ForEachAsync(async role =>
 			{
-				role.Show = await _shows.Value.CreateIfNotExists(role.Show, true);
+				role.Show = await _shows.Value.CreateIfNotExists(role.Show);
 				role.ShowID = role.Show.ID;
 				_database.Entry(role.Show).State = EntityState.Detached;
 			});
@@ -130,8 +129,8 @@ namespace Kyoo.Controllers
 				where,
 				sort,
 				limit);
-			if (!people.Any() && await _shows.Value.Get(showID) == null)
-				throw new ItemNotFound();
+			if (!people.Any() && await _shows.Value.GetOrDefault(showID) == null)
+				throw new ItemNotFoundException();
 			foreach (PeopleRole role in people)
 				role.ForPeople = true;
 			return people;
@@ -152,8 +151,8 @@ namespace Kyoo.Controllers
 				where,
 				sort,
 				limit);
-			if (!people.Any() && await _shows.Value.Get(showSlug) == null)
-				throw new ItemNotFound();
+			if (!people.Any() && await _shows.Value.GetOrDefault(showSlug) == null)
+				throw new ItemNotFoundException();
 			foreach (PeopleRole role in people)
 				role.ForPeople = true;
 			return people;
@@ -173,8 +172,8 @@ namespace Kyoo.Controllers
 				where,
 				sort,
 				limit);
-			if (!roles.Any() && await Get(id) == null)
-				throw new ItemNotFound();
+			if (!roles.Any() && await GetOrDefault(id) == null)
+				throw new ItemNotFoundException();
 			return roles;
 		}
 		
@@ -192,8 +191,8 @@ namespace Kyoo.Controllers
 				where,
 				sort,
 				limit);
-			if (!roles.Any() && await Get(slug) == null)
-				throw new ItemNotFound();
+			if (!roles.Any() && await GetOrDefault(slug) == null)
+				throw new ItemNotFoundException();
 			return roles;
 		}
 	}

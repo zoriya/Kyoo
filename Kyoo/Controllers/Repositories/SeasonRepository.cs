@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
@@ -44,17 +43,17 @@ namespace Kyoo.Controllers
 		/// <param name="database">The database handle that will be used</param>
 		/// <param name="providers">A provider repository</param>
 		/// <param name="shows">A show repository</param>
-		/// <param name="services">A service provider to lazilly request an episode repository.</param>
+		/// <param name="episodes">A lazy loaded episode repository.</param>
 		public SeasonRepository(DatabaseContext database,
 			IProviderRepository providers,
 			IShowRepository shows,
-			IServiceProvider services)
+			Lazy<IEpisodeRepository> episodes)
 			: base(database)
 		{
 			_database = database;
 			_providers = providers;
 			_shows = shows;
-			_episodes = new Lazy<IEpisodeRepository>(services.GetRequiredService<IEpisodeRepository>);
+			_episodes = episodes;
 		}
 		
 
@@ -89,7 +88,7 @@ namespace Kyoo.Controllers
 		{
 			Season ret = await GetOrDefault(showID, seasonNumber);
 			if (ret == null)
-				throw new ItemNotFound($"No season {seasonNumber} found for the show {showID}");
+				throw new ItemNotFoundException($"No season {seasonNumber} found for the show {showID}");
 			ret.ShowSlug = await _shows.GetSlug(showID);
 			return ret;
 		}
@@ -99,7 +98,7 @@ namespace Kyoo.Controllers
 		{
 			Season ret = await GetOrDefault(showSlug, seasonNumber);
 			if (ret == null)
-				throw new ItemNotFound($"No season {seasonNumber} found for the show {showSlug}");
+				throw new ItemNotFoundException($"No season {seasonNumber} found for the show {showSlug}");
 			ret.ShowSlug = showSlug;
 			return ret;
 		}
@@ -122,7 +121,7 @@ namespace Kyoo.Controllers
 		public override async Task<ICollection<Season>> Search(string query)
 		{
 			List<Season> seasons = await _database.Seasons
-				.Where(x => EF.Functions.ILike(x.Title, $"%{query}%"))
+				.Where(_database.Like<Season>(x => x.Title, $"%{query}%"))
 				.OrderBy(DefaultSort)
 				.Take(20)
 				.ToListAsync();
@@ -161,7 +160,7 @@ namespace Kyoo.Controllers
 			await base.Validate(resource);
 			await resource.ExternalIDs.ForEachAsync(async id =>
 			{
-				id.Provider = await _providers.CreateIfNotExists(id.Provider, true);
+				id.Provider = await _providers.CreateIfNotExists(id.Provider);
 				id.ProviderID = id.Provider.ID;
 				_database.Entry(id.Provider).State = EntityState.Detached;
 			});

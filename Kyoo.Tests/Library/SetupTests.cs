@@ -1,6 +1,3 @@
-using System.Linq;
-using Xunit;
-
 namespace Kyoo.Tests
 {
 	public class SetupTests

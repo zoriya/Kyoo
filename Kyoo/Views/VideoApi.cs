@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
 using Kyoo.Models.Exceptions;
-using Microsoft.AspNetCore.Authorization;
+using Kyoo.Models.Permissions;
 using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace Kyoo.Api
@@ -44,7 +44,7 @@ namespace Kyoo.Api
 		
 		[HttpGet("{slug}")]
 		[HttpGet("direct/{slug}")]
-		[Authorize(Policy="Play")]
+		// TODO enable the following line, this is disabled since the web app can't use bearers. [Permission("video", Kind.Read)]
 		public async Task<IActionResult> Direct(string slug)
 		{
 			try
@@ -52,14 +52,14 @@ namespace Kyoo.Api
 				Episode episode = await _libraryManager.Get<Episode>(slug);
 				return _files.FileResult(episode.Path, true);
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}
 		}
 
 		[HttpGet("transmux/{slug}/master.m3u8")]
-		[Authorize(Policy="Play")]
+		[Permission("video", Kind.Read)]
 		public async Task<IActionResult> Transmux(string slug)
 		{
 			try
@@ -71,14 +71,14 @@ namespace Kyoo.Api
 					return StatusCode(500);
 				return _files.FileResult(path, true);
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}
 		}
 
 		[HttpGet("transcode/{slug}/master.m3u8")]
-		[Authorize(Policy="Play")]
+		[Permission("video", Kind.Read)]
 		public async Task<IActionResult> Transcode(string slug)
 		{
 			try
@@ -90,7 +90,7 @@ namespace Kyoo.Api
 					return StatusCode(500);
 				return _files.FileResult(path, true);
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}
@@ -98,7 +98,7 @@ namespace Kyoo.Api
 		
 		
 		[HttpGet("transmux/{episodeLink}/segments/{chunk}")]
-		[Authorize(Policy="Play")]
+		[Permission("video", Kind.Read)]
 		public IActionResult GetTransmuxedChunk(string episodeLink, string chunk)
 		{
 			string path = Path.GetFullPath(Path.Combine(_transmuxPath, episodeLink));
@@ -107,7 +107,7 @@ namespace Kyoo.Api
 		}
 		
 		[HttpGet("transcode/{episodeLink}/segments/{chunk}")]
-		[Authorize(Policy="Play")]
+		[Permission("video", Kind.Read)]
 		public IActionResult GetTranscodedChunk(string episodeLink, string chunk)
 		{
 			string path = Path.GetFullPath(Path.Combine(_transcodePath, episodeLink));

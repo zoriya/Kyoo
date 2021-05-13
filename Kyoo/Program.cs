@@ -1,14 +1,12 @@
 using System;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-
 namespace Kyoo
 {
 	/// <summary>
@@ -39,15 +37,23 @@ namespace Kyoo
 
 			if (debug == null && Environment.GetEnvironmentVariable("ENVIRONMENT") != null)
 				Console.WriteLine($"Invalid ENVIRONMENT variable. Supported values are \"debug\" and \"prod\". Ignoring...");
+
 			#if DEBUG
 				debug ??= true;
 			#endif
 
 			Console.WriteLine($"Running as {Environment.UserName}.");
-			IWebHostBuilder host = CreateWebHostBuilder(args);
+			IWebHostBuilder builder = CreateWebHostBuilder(args);
 			if (debug != null)
-				host = host.UseEnvironment(debug == true ? "Development" : "Production");
-			await host.Build().RunAsync();
+				builder = builder.UseEnvironment(debug == true ? "Development" : "Production");
+			try
+			{
+				await builder.Build().RunAsync();
+			}
+			catch (Exception ex)
+			{
+				await Console.Error.WriteLineAsync($"Unhandled exception: {ex}");
+			}
 		}
 
 		/// <summary>
@@ -62,16 +68,14 @@ namespace Kyoo
 				.AddEnvironmentVariables()
 				.AddCommandLine(args);
 		}
-		
+
 		/// <summary>
-		/// Createa a web host
+		/// Create a a web host
 		/// </summary>
 		/// <param name="args">Command line parameters that can be handled by kestrel</param>
 		/// <returns>A new web host instance</returns>
 		private static IWebHostBuilder CreateWebHostBuilder(string[] args)
 		{
-			WebHost.CreateDefaultBuilder(args);
-			
 			return new WebHostBuilder()
 				.UseContentRoot(AppDomain.CurrentDomain.BaseDirectory)
 				.UseConfiguration(SetupConfig(new ConfigurationBuilder(), args).Build())
@@ -79,7 +83,10 @@ namespace Kyoo
 				.ConfigureLogging((context, builder) =>
 				{
 					builder.AddConfiguration(context.Configuration.GetSection("logging"))
-						.AddConsole()
+						.AddSimpleConsole(x  =>
+						{
+							x.TimestampFormat = "[hh:mm:ss] ";
+						})
 						.AddDebug()
 						.AddEventSourceLogger();
 				})

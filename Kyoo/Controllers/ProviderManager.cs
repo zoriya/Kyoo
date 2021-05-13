@@ -33,7 +33,7 @@ namespace Kyoo.Controllers
 				} catch (Exception ex) 
 				{
 					await Console.Error.WriteLineAsync(
-						$"The provider {provider.Provider.Name} coudln't work for {what}. Exception: {ex.Message}");
+						$"The provider {provider.Provider.Name} could not work for {what}. Exception: {ex.Message}");
 				}
 			}
 			return ret;

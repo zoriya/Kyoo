@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
@@ -15,7 +14,7 @@ namespace Kyoo.Controllers
 	public class ShowRepository : LocalRepository<Show>, IShowRepository
 	{
 		/// <summary>
-		/// The databse handle
+		/// The database handle
 		/// </summary>
 		private readonly DatabaseContext _database;
 		/// <summary>
@@ -54,13 +53,15 @@ namespace Kyoo.Controllers
 		/// <param name="people">A people repository</param>
 		/// <param name="genres">A genres repository</param>
 		/// <param name="providers">A provider repository</param>
-		/// <param name="services">A service provider to lazilly request a season and an episode repository</param>
+		/// <param name="seasons">A lazy loaded season repository</param>
+		/// <param name="episodes">A lazy loaded episode repository</param>
 		public ShowRepository(DatabaseContext database,
 			IStudioRepository studios,
 			IPeopleRepository people, 
 			IGenreRepository genres, 
 			IProviderRepository providers,
-			IServiceProvider services)
+			Lazy<ISeasonRepository> seasons,
+			Lazy<IEpisodeRepository> episodes)
 			: base(database)
 		{
 			_database = database;
@@ -68,8 +69,8 @@ namespace Kyoo.Controllers
 			_people = people;
 			_genres = genres;
 			_providers = providers;
-			_seasons = new Lazy<ISeasonRepository>(services.GetRequiredService<ISeasonRepository>);
-			_episodes = new Lazy<IEpisodeRepository>(services.GetRequiredService<IEpisodeRepository>);
+			_seasons = seasons;
+			_episodes = episodes;
 		}
 		
 
@@ -78,9 +79,7 @@ namespace Kyoo.Controllers
 		{
 			query = $"%{query}%";
 			return await _database.Shows
-				.Where(x => EF.Functions.ILike(x.Title, query) 
-				            || EF.Functions.ILike(x.Slug, query) 
-							/*|| x.Aliases.Any(y => EF.Functions.ILike(y, query))*/) // NOT TRANSLATABLE.
+				.Where(_database.Like<Show>(x => x.Title + " " + x.Slug, query))
 				.OrderBy(DefaultSort)
 				.Take(20)
 				.ToListAsync();
@@ -103,22 +102,22 @@ namespace Kyoo.Controllers
 		{
 			await base.Validate(resource);
 			if (resource.Studio != null)
-				resource.Studio = await _studios.CreateIfNotExists(resource.Studio, true);
+				resource.Studio = await _studios.CreateIfNotExists(resource.Studio);
 			resource.Genres = await resource.Genres
-				.SelectAsync(x => _genres.CreateIfNotExists(x, true))
+				.SelectAsync(x => _genres.CreateIfNotExists(x))
 				.ToListAsync();
 			resource.GenreLinks = resource.Genres?
 				.Select(x => Link.UCreate(resource, x))
 				.ToList();
 			await resource.ExternalIDs.ForEachAsync(async id =>
 			{
-				id.Provider = await _providers.CreateIfNotExists(id.Provider, true);
+				id.Provider = await _providers.CreateIfNotExists(id.Provider);
 				id.ProviderID = id.Provider.ID;
 				_database.Entry(id.Provider).State = EntityState.Detached;
 			});
 			await resource.People.ForEachAsync(async role =>
 			{
-				role.People = await _people.CreateIfNotExists(role.People, true);
+				role.People = await _people.CreateIfNotExists(role.People);
 				role.PeopleID = role.People.ID;
 				_database.Entry(role.People).State = EntityState.Detached;
 			});

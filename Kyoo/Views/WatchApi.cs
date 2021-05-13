@@ -2,7 +2,7 @@
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
-using Microsoft.AspNetCore.Authorization;
+using Kyoo.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kyoo.Api
@@ -19,7 +19,7 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet("{slug}")]
-		[Authorize(Policy="Read")]
+		[Permission("video", Kind.Read)]
 		public async Task<ActionResult<WatchItem>> GetWatchItem(string slug)
 		{
 			try
@@ -27,7 +27,7 @@ namespace Kyoo.Api
 				Episode item = await _libraryManager.Get<Episode>(slug);
 				return await WatchItem.FromEpisode(item, _libraryManager);
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}

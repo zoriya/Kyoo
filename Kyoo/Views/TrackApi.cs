@@ -4,7 +4,7 @@ using Kyoo.CommonApi;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
-using Microsoft.AspNetCore.Authorization;
+using Kyoo.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
@@ -13,6 +13,7 @@ namespace Kyoo.Api
 	[Route("api/track")]
 	[Route("api/tracks")]
 	[ApiController]
+	[PartialPermission(nameof(Track))]
 	public class TrackApi : CrudApi<Track>
 	{
 		private readonly ILibraryManager _libraryManager;
@@ -24,21 +25,21 @@ namespace Kyoo.Api
 		}
 
 		[HttpGet("{id:int}/episode")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Episode>> GetEpisode(int id)
 		{
 			try
 			{
 				return await _libraryManager.Get<Episode>(x => x.Tracks.Any(y => y.ID == id));
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}
 		}
 		
 		[HttpGet("{slug}/episode")]
-		[Authorize(Policy = "Read")]
+		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Episode>> GetEpisode(string slug)
 		{
 			try
@@ -47,7 +48,7 @@ namespace Kyoo.Api
 				// TODO Implement something like this (a dotnet-ef's QueryCompilationContext): https://stackoverflow.com/questions/62687811/how-can-i-convert-a-custom-function-to-a-sql-expression-for-entity-framework-cor
 				return await _libraryManager.Get<Episode>(x => x.Tracks.Any(y => y.Slug == slug));
 			}
-			catch (ItemNotFound)
+			catch (ItemNotFoundException)
 			{
 				return NotFound();
 			}

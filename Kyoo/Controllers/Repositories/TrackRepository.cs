@@ -46,7 +46,7 @@ namespace Kyoo.Controllers
 		{
 			Track ret = await GetOrDefault(slug, type);
 			if (ret == null)
-				throw new ItemNotFound($"No track found with the slug {slug} and the type {type}.");
+				throw new ItemNotFoundException($"No track found with the slug {slug} and the type {type}.");
 			return ret;
 		}
 		
@@ -59,7 +59,7 @@ namespace Kyoo.Controllers
 			if (!match.Success)
 			{
 				if (int.TryParse(slug, out int id))
-					return Get(id);
+					return GetOrDefault(id);
 				match = Regex.Match(slug, @"(?<show>.*)\.(?<language>.{0,3})(?<forced>-forced)?(\..*)?");
 				if (!match.Success)
 					throw new ArgumentException("Invalid track slug. " +
@@ -102,6 +102,7 @@ namespace Kyoo.Controllers
 
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
+			// ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
 			await _database.SaveOrRetry(obj, (x, i) =>
 			{
 				if (i > 10)
