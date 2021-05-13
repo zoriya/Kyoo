@@ -20,6 +20,7 @@ export class AuthService
 			if (x == null)
 			{
 				this.account = null;
+				this.isAuthenticated = false;
 				return;
 			}
 			this.account = {
