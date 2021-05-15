@@ -98,6 +98,7 @@ namespace Kyoo.Authentication
 			services.Configure<PermissionOption>(_configuration.GetSection(PermissionOption.Path));
 			services.Configure<CertificateOption>(_configuration.GetSection(CertificateOption.Path));
 			services.Configure<AuthenticationOption>(_configuration.GetSection(AuthenticationOption.Path));
+			services.AddConfiguration<AuthenticationOption>(AuthenticationOption.Path);
 			
 			
 			List<Client> clients = new();

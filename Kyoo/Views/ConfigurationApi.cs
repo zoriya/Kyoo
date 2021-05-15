@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Kyoo.Models;
 using Kyoo.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -15,15 +19,22 @@ namespace Kyoo.Api
 		/// <summary>
 		/// The configuration to retrieve and edit. 
 		/// </summary>
-		private readonly IConfiguration _config;
+		private readonly IConfiguration _configuration;
+
+		/// <summary>
+		/// The strongly typed list of options
+		/// </summary>
+		private readonly Dictionary<string, Type> _references;
 
 		/// <summary>
 		/// Create a new <see cref="ConfigurationApi"/> using the given configuration.
 		/// </summary>
-		/// <param name="config">The configuration to use.</param>
-		public ConfigurationApi(IConfiguration config)
+		/// <param name="configuration">The configuration to use.</param>
+		/// <param name="references">The strongly typed option list.</param>
+		public ConfigurationApi(IConfiguration configuration, IEnumerable<ConfigurationReference> references)
 		{
-			_config = config;
+			_configuration = configuration;
+			_references = references.ToDictionary(x => x.Path, x => x.Type, StringComparer.OrdinalIgnoreCase);
 		}
 
 		/// <summary>
@@ -35,7 +46,16 @@ namespace Kyoo.Api
 		[Permission(nameof(ConfigurationApi), Kind.Admin)]
 		public ActionResult<object> GetConfiguration(string slug)
 		{
-			return _config[slug];
+			slug = slug.Replace("__", ":");
+			// TODO handle lists and dictionaries.
+			if (!_references.TryGetValue(slug, out Type type))
+				return NotFound();
+			object ret = _configuration.GetValue(type, slug);
+			if (ret != null)
+				return ret;
+			object option = Activator.CreateInstance(type);
+			_configuration.Bind(slug, option);
+			return option;
 		}
 	}
 }

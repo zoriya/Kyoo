@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using Kyoo.Controllers;
+using Kyoo.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -64,10 +66,20 @@ namespace Kyoo
 			return services.AddRepository<T2>(lifetime);
 		}
 
-		public static IServiceCollection AddConfiguration<T>(this IServiceCollection services, IConfiguration config, string path)
+		/// <summary>
+		/// Add an editable configuration to the editable configuration list
+		/// </summary>
+		/// <param name="services">The service collection to edit</param>
+		/// <param name="path">The root path of the editable configuration. It should not be a nested type.</param>
+		/// <typeparam name="T">The type of the configuration</typeparam>
+		/// <returns>The given service collection is returned.</returns>
+		public static IServiceCollection AddConfiguration<T>(this IServiceCollection services, string path)
+			where T : class
 		{
-			services.Configure<T>(config.GetSection(path));
-			services.AddSingleton<ConfigReference>(new ConfigReference(path, typeof(T)));
+			if (services.Any(x => x.ServiceType == typeof(T)))
+				return services;
+			foreach (ConfigurationReference confRef in ConfigurationReference.CreateReference<T>(path))
+				services.AddSingleton(confRef);
 			return services;
 		}
 	}
