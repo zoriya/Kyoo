@@ -2,7 +2,6 @@ using System;
 using System.Linq;
 using Kyoo.Controllers;
 using Kyoo.Models;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo

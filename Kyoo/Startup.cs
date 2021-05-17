@@ -8,10 +8,8 @@ using Kyoo.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
-using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -22,10 +20,6 @@ namespace Kyoo
 	/// </summary>
 	public class Startup
 	{
-		/// <summary>
-		/// The configuration context
-		/// </summary>
-		private readonly IConfiguration _configuration;
 		/// <summary>
 		/// A plugin manager used to load plugins and allow them to configure services / asp net.
 		/// </summary>
@@ -44,11 +38,11 @@ namespace Kyoo
 		/// <param name="loggerFactory">A logger factory used to create a logger for the plugin manager.</param>
 		public Startup(IServiceProvider hostProvider, IConfiguration configuration, ILoggerFactory loggerFactory, IWebHostEnvironment host)
 		{
-			_configuration = configuration;
-			_plugins = new PluginManager(hostProvider, _configuration, loggerFactory.CreateLogger<PluginManager>());
+			_plugins = new PluginManager(hostProvider, configuration, loggerFactory.CreateLogger<PluginManager>());
 			
 			// TODO remove postgres from here and load it like a normal plugin.
-			_plugins.LoadPlugins(new IPlugin[] {new CoreModule(), 
+			_plugins.LoadPlugins(new IPlugin[] {
+				new CoreModule(configuration), 
 				new PostgresModule(configuration, host),
 				new AuthenticationModule(configuration, loggerFactory, host)
 			});
@@ -60,8 +54,6 @@ namespace Kyoo
 		/// <param name="services">The service collection to fill.</param>
 		public void ConfigureServices(IServiceCollection services)
 		{
-			string publicUrl = _configuration.GetValue<string>("publicUrl");
-
 			services.AddMvc().AddControllersAsServices();
 			
 			services.AddSpaStaticFiles(configuration =>
@@ -72,13 +64,7 @@ namespace Kyoo
 			{
 				x.EnableForHttps = true;
 			});
-
-			services.AddControllers()
-				.AddNewtonsoftJson(x =>
-				{
-					x.SerializerSettings.ContractResolver = new JsonPropertyIgnorer(publicUrl);
-					x.SerializerSettings.Converters.Add(new PeopleRoleConverter());
-				});
+			
 			services.AddHttpClient();
 			
 			services.AddTransient(typeof(Lazy<>), typeof(LazyDi<>));
@@ -99,22 +85,14 @@ namespace Kyoo
 				app.UseDeveloperExceptionPage();
 			else
 			{
-				app.UseExceptionHandler("/Error");
+				app.UseExceptionHandler("/error");
 				app.UseHsts();
 			}
-
-			FileExtensionContentTypeProvider contentTypeProvider = new();
-			contentTypeProvider.Mappings[".data"] = "application/octet-stream";
-			app.UseStaticFiles(new StaticFileOptions
-			{
-				ContentTypeProvider = contentTypeProvider,
-				FileProvider = new PhysicalFileProvider(Path.Join(AppDomain.CurrentDomain.BaseDirectory, "wwwroot"))
-			});
+			
 			if (!env.IsDevelopment())
 				app.UseSpaStaticFiles();
 
 			app.UseRouting();
-
 			app.Use((ctx, next) => 
 			{
 				ctx.Response.Headers.Remove("X-Powered-By");
@@ -131,12 +109,6 @@ namespace Kyoo
 			
 			_plugins.ConfigureAspnet(app);
 
-			app.UseEndpoints(endpoints =>
-			{
-				endpoints.MapControllers();
-			});
-			
-			
 			app.UseSpa(spa =>
 			{
 				spa.Options.SourcePath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "Kyoo.WebApp");

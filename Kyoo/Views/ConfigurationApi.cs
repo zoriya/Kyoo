@@ -40,8 +40,10 @@ namespace Kyoo.Api
 		/// <summary>
 		/// Get a permission from it's slug.
 		/// </summary>
-		/// <param name="slug">The permission to retrieve. You can use __ to get a child value.</param>
+		/// <param name="slug">The permission to retrieve. You can use ':' or "__" to get a child value.</param>
 		/// <returns>The associate value or list of values.</returns>
+		/// <response code="200">Return the configuration value or the list of configurations</response>
+		/// <response code="404">No configuration exists for the given slug</response>
 		[HttpGet("{slug}")]
 		[Permission(nameof(ConfigurationApi), Kind.Admin)]
 		public ActionResult<object> GetConfiguration(string slug)
@@ -56,6 +58,29 @@ namespace Kyoo.Api
 			object option = Activator.CreateInstance(type);
 			_configuration.Bind(slug, option);
 			return option;
+		}
+
+		/// <summary>
+		/// Edit a permission from it's slug.
+		/// </summary>
+		/// <param name="slug">The permission to edit. You can use ':' or "__" to get a child value.</param>
+		/// <param name="newValue">The new value of the configuration</param>
+		/// <returns>The edited value.</returns>
+		/// <response code="200">Return the edited value</response>
+		/// <response code="404">No configuration exists for the given slug</response>
+		[HttpPut("{slug}")]
+		[Permission(nameof(ConfigurationApi), Kind.Admin)]
+		public ActionResult<object> EditConfiguration(string slug, [FromBody] object newValue)
+		{
+			slug = slug.Replace("__", ":");
+			if (!_references.TryGetValue(slug, out Type type))
+				return NotFound();
+			// object ret = _configuration.(type, slug);
+			// if (ret != null)
+			// 	return ret;
+			// object option = Activator.CreateInstance(type);
+			// _configuration.Bind(slug, option);
+			return newValue;
 		}
 	}
 }
