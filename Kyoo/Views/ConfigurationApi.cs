@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models;
+using Kyoo.Models.Exceptions;
 using Kyoo.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -18,7 +19,7 @@ namespace Kyoo.Api
 	[ApiController]
 	public class ConfigurationApi : Controller
 	{
-		private readonly ConfigurationManager _manager;
+		private readonly IConfigurationManager _manager;
 
 		/// <summary>
 		/// The configuration to retrieve and edit. 
@@ -35,7 +36,7 @@ namespace Kyoo.Api
 		/// </summary>
 		/// <param name="configuration">The configuration to use.</param>
 		/// <param name="references">The strongly typed option list.</param>
-		public ConfigurationApi(ConfigurationManager manager, IConfiguration configuration, IEnumerable<ConfigurationReference> references)
+		public ConfigurationApi(IConfigurationManager manager, IConfiguration configuration, IEnumerable<ConfigurationReference> references)
 		{
 			_manager = manager;
 			_configuration = configuration;
@@ -77,12 +78,15 @@ namespace Kyoo.Api
 		[Permission(nameof(ConfigurationApi), Kind.Admin)]
 		public async Task<ActionResult<object>> EditConfiguration(string slug, [FromBody] object newValue)
 		{
-			slug = slug.Replace("__", ":");
-			if (!_references.TryGetValue(slug, out Type type))
+			try
+			{
+				await _manager.EditValue(slug, newValue);
+				return newValue;
+			}
+			catch (ItemNotFoundException)
+			{
 				return NotFound();
-			await _manager.EditValue(slug, newValue, type);
-			// await _configuration.SetValue(slug, newValue, type);
-			return newValue;
+			}
 		}
 	}
 }

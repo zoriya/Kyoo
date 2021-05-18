@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Api;
 using Kyoo.Models;
+using Kyoo.Models.Exceptions;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
 
@@ -34,17 +35,18 @@ namespace Kyoo.Controllers
 			_references = references.ToDictionary(x => x.Path, x => x.Type, StringComparer.OrdinalIgnoreCase);
 		}
 
-
 		/// <inheritdoc />
-		public Task EditValue<T>(string path, T value)
+		public async Task EditValue(string path, object value)
 		{
-			return EditValue(path, value, typeof(T));
-		}
-
-		/// <inheritdoc />
-		public async Task EditValue(string path, object value, Type type)
-		{
-			JObject obj = JObject.FromObject(ToObject(_configuration));
+			path = path.Replace("__", ":");
+			if (!_references.TryGetValue(path, out Type type))
+				throw new ItemNotFoundException($"No configuration exists for the name: {path}");
+			
+			ExpandoObject config = ToObject(_configuration);
+			IDictionary<string, object> configDic = config;
+			// TODO validate the type
+			configDic[path] = value;
+			JObject obj = JObject.FromObject(config);
 			// TODO allow path to change
 			await using StreamWriter writer = new("settings.json");
 			await writer.WriteAsync(obj.ToString());
@@ -56,7 +58,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="config">The configuration to transform</param>
 		/// <returns>A strongly typed representation of the configuration.</returns>
-		private object ToObject(IConfiguration config)
+		private ExpandoObject ToObject(IConfiguration config)
 		{
 			ExpandoObject obj = new();
 
