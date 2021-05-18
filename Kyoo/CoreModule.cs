@@ -99,6 +99,7 @@ namespace Kyoo
 					x.SerializerSettings.Converters.Add(new PeopleRoleConverter());
 				});
 			
+			services.AddSingleton<IConfigurationManager, ConfigurationManager>();
 			services.AddSingleton<IFileManager, FileManager>();
 			services.AddSingleton<ITranscoder, Transcoder>();
 			services.AddSingleton<IThumbnailsManager, ThumbnailsManager>();

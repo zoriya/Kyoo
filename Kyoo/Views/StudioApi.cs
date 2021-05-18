@@ -15,11 +15,11 @@ namespace Kyoo.Api
 	[Route("api/studios")]
 	[ApiController]
 	[PartialPermission(nameof(ShowApi))]
-	public class StudioAPI : CrudApi<Studio>
+	public class StudioApi : CrudApi<Studio>
 	{
 		private readonly ILibraryManager _libraryManager;
 
-		public StudioAPI(ILibraryManager libraryManager, IConfiguration config)
+		public StudioApi(ILibraryManager libraryManager, IConfiguration config)
 			: base(libraryManager.StudioRepository, config)
 		{
 			_libraryManager = libraryManager;

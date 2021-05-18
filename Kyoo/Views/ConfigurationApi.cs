@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using Kyoo.Controllers;
 using Kyoo.Models;
 using Kyoo.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +18,8 @@ namespace Kyoo.Api
 	[ApiController]
 	public class ConfigurationApi : Controller
 	{
+		private readonly ConfigurationManager _manager;
+
 		/// <summary>
 		/// The configuration to retrieve and edit. 
 		/// </summary>
@@ -31,8 +35,9 @@ namespace Kyoo.Api
 		/// </summary>
 		/// <param name="configuration">The configuration to use.</param>
 		/// <param name="references">The strongly typed option list.</param>
-		public ConfigurationApi(IConfiguration configuration, IEnumerable<ConfigurationReference> references)
+		public ConfigurationApi(ConfigurationManager manager, IConfiguration configuration, IEnumerable<ConfigurationReference> references)
 		{
+			_manager = manager;
 			_configuration = configuration;
 			_references = references.ToDictionary(x => x.Path, x => x.Type, StringComparer.OrdinalIgnoreCase);
 		}
@@ -70,16 +75,13 @@ namespace Kyoo.Api
 		/// <response code="404">No configuration exists for the given slug</response>
 		[HttpPut("{slug}")]
 		[Permission(nameof(ConfigurationApi), Kind.Admin)]
-		public ActionResult<object> EditConfiguration(string slug, [FromBody] object newValue)
+		public async Task<ActionResult<object>> EditConfiguration(string slug, [FromBody] object newValue)
 		{
 			slug = slug.Replace("__", ":");
 			if (!_references.TryGetValue(slug, out Type type))
 				return NotFound();
-			// object ret = _configuration.(type, slug);
-			// if (ret != null)
-			// 	return ret;
-			// object option = Activator.CreateInstance(type);
-			// _configuration.Bind(slug, option);
+			await _manager.EditValue(slug, newValue, type);
+			// await _configuration.SetValue(slug, newValue, type);
 			return newValue;
 		}
 	}
