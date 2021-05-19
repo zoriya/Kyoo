@@ -16,6 +16,11 @@ namespace Kyoo
 	public static class Program
 	{
 		/// <summary>
+		/// The path of the json configuration of the application.
+		/// </summary>
+		public const string JsonConfigPath = "./settings.json";
+		
+		/// <summary>
 		/// Main function of the program
 		/// </summary>
 		/// <param name="args">Command line arguments</param>
@@ -66,7 +71,7 @@ namespace Kyoo
 		/// <returns>The modified configuration builder</returns>
 		private static IConfigurationBuilder SetupConfig(IConfigurationBuilder builder, string[] args)
 		{
-			return builder.AddJsonFile("./settings.json", false, true)
+			return builder.AddJsonFile(JsonConfigPath, false, true)
 				.AddEnvironmentVariables()
 				.AddCommandLine(args);
 		}

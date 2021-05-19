@@ -41,14 +41,15 @@ namespace Kyoo.Controllers
 			path = path.Replace("__", ":");
 			if (!_references.TryGetValue(path, out Type type))
 				throw new ItemNotFoundException($"No configuration exists for the name: {path}");
+			value = JObject.FromObject(value).ToObject(type);
+			if (value == null)
+				throw new ArgumentException("Invalid value format.");
 			
 			ExpandoObject config = ToObject(_configuration);
 			IDictionary<string, object> configDic = config;
-			// TODO validate the type
 			configDic[path] = value;
 			JObject obj = JObject.FromObject(config);
-			// TODO allow path to change
-			await using StreamWriter writer = new("settings.json");
+			await using StreamWriter writer = new(Program.JsonConfigPath);
 			await writer.WriteAsync(obj.ToString());
 		}
 		

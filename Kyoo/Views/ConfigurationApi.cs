@@ -87,6 +87,10 @@ namespace Kyoo.Api
 			{
 				return NotFound();
 			}
+			catch (ArgumentException)
+			{
+				return BadRequest();
+			}
 		}
 	}
 }
