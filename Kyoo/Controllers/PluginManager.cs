@@ -4,10 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
+using Kyoo.Models.Options;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Kyoo.Controllers
 {
@@ -24,7 +25,7 @@ namespace Kyoo.Controllers
 		/// <summary>
 		/// The configuration to get the plugin's directory.
 		/// </summary>
-		private readonly IConfiguration _config;
+		private readonly IOptionsMonitor<BasicOptions> _options;
 		/// <summary>
 		/// The logger used by this class. 
 		/// </summary>
@@ -39,14 +40,14 @@ namespace Kyoo.Controllers
 		/// Create a new <see cref="PluginManager"/> instance.
 		/// </summary>
 		/// <param name="provider">A service container to allow initialization of plugins</param>
-		/// <param name="config">The configuration instance, to get the plugin's directory path.</param>
+		/// <param name="options">The configuration instance, to get the plugin's directory path.</param>
 		/// <param name="logger">The logger used by this class.</param>
 		public PluginManager(IServiceProvider provider,
-			IConfiguration config,
+			IOptionsMonitor<BasicOptions> options,
 			ILogger<PluginManager> logger)
 		{
 			_provider = provider;
-			_config = config;
+			_options = options;
 			_logger = logger;
 		}
 
@@ -97,7 +98,7 @@ namespace Kyoo.Controllers
 		/// <inheritdoc />
 		public void LoadPlugins(ICollection<IPlugin> plugins)
 		{
-			string pluginFolder = _config.GetValue<string>("plugins");
+			string pluginFolder = _options.CurrentValue.PluginPath;
 			if (!Directory.Exists(pluginFolder))
 				Directory.CreateDirectory(pluginFolder);
 

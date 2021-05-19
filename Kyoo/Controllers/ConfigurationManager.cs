@@ -36,6 +36,34 @@ namespace Kyoo.Controllers
 		}
 
 		/// <inheritdoc />
+		public object GetValue(string path)
+		{
+			path = path.Replace("__", ":");
+			// TODO handle lists and dictionaries.
+			if (!_references.TryGetValue(path, out Type type))
+				throw new ItemNotFoundException($"No configuration exists for the name: {path}");
+			object ret = _configuration.GetValue(type, path);
+			if (ret != null)
+				return ret;
+			object option = Activator.CreateInstance(type);
+			_configuration.Bind(path, option);
+			return option;
+		}
+
+		/// <inheritdoc />
+		public T GetValue<T>(string path)
+		{
+			path = path.Replace("__", ":");
+			// TODO handle lists and dictionaries.
+			if (!_references.TryGetValue(path, out Type type))
+				throw new ItemNotFoundException($"No configuration exists for the name: {path}");	
+			if (typeof(T).IsAssignableFrom(type))
+				throw new InvalidCastException($"The type {typeof(T).Name} is not valid for " +
+				                               $"a resource of type {type.Name}.");
+			return (T)GetValue(path);
+		}
+		
+		/// <inheritdoc />
 		public async Task EditValue(string path, object value)
 		{
 			path = path.Replace("__", ":");

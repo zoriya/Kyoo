@@ -3,6 +3,7 @@ using System.IO;
 using Kyoo.Authentication;
 using Kyoo.Controllers;
 using Kyoo.Models;
+using Kyoo.Models.Options;
 using Kyoo.Postgresql;
 using Kyoo.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -12,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Kyoo
 {
@@ -38,7 +40,8 @@ namespace Kyoo
 		/// <param name="loggerFactory">A logger factory used to create a logger for the plugin manager.</param>
 		public Startup(IServiceProvider hostProvider, IConfiguration configuration, ILoggerFactory loggerFactory, IWebHostEnvironment host)
 		{
-			_plugins = new PluginManager(hostProvider, configuration, loggerFactory.CreateLogger<PluginManager>());
+			IOptionsMonitor<BasicOptions> options = hostProvider.GetService<IOptionsMonitor<BasicOptions>>();
+			_plugins = new PluginManager(hostProvider, options, loggerFactory.CreateLogger<PluginManager>());
 			
 			// TODO remove postgres from here and load it like a normal plugin.
 			_plugins.LoadPlugins(new IPlugin[] {

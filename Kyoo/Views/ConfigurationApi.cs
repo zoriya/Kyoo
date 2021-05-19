@@ -1,13 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
-using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Kyoo.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 
 namespace Kyoo.Api
 {
@@ -19,28 +15,18 @@ namespace Kyoo.Api
 	[ApiController]
 	public class ConfigurationApi : Controller
 	{
+		/// <summary>
+		/// The configuration manager used to retrieve and edit configuration values (while being type safe).
+		/// </summary>
 		private readonly IConfigurationManager _manager;
-
-		/// <summary>
-		/// The configuration to retrieve and edit. 
-		/// </summary>
-		private readonly IConfiguration _configuration;
-
-		/// <summary>
-		/// The strongly typed list of options
-		/// </summary>
-		private readonly Dictionary<string, Type> _references;
 
 		/// <summary>
 		/// Create a new <see cref="ConfigurationApi"/> using the given configuration.
 		/// </summary>
-		/// <param name="configuration">The configuration to use.</param>
-		/// <param name="references">The strongly typed option list.</param>
-		public ConfigurationApi(IConfigurationManager manager, IConfiguration configuration, IEnumerable<ConfigurationReference> references)
+		/// <param name="manager">The configuration manager used to retrieve and edit configuration values</param>
+		public ConfigurationApi(IConfigurationManager manager)
 		{
 			_manager = manager;
-			_configuration = configuration;
-			_references = references.ToDictionary(x => x.Path, x => x.Type, StringComparer.OrdinalIgnoreCase);
 		}
 
 		/// <summary>
@@ -54,16 +40,14 @@ namespace Kyoo.Api
 		[Permission(nameof(ConfigurationApi), Kind.Admin)]
 		public ActionResult<object> GetConfiguration(string slug)
 		{
-			slug = slug.Replace("__", ":");
-			// TODO handle lists and dictionaries.
-			if (!_references.TryGetValue(slug, out Type type))
+			try
+			{
+				return _manager.GetValue(slug);
+			}
+			catch (ItemNotFoundException)
+			{
 				return NotFound();
-			object ret = _configuration.GetValue(type, slug);
-			if (ret != null)
-				return ret;
-			object option = Activator.CreateInstance(type);
-			_configuration.Bind(slug, option);
-			return option;
+			}
 		}
 
 		/// <summary>

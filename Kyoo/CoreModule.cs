@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Kyoo.Controllers;
+using Kyoo.Models.Options;
 using Kyoo.Models.Permissions;
 using Kyoo.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -90,8 +91,15 @@ namespace Kyoo
 		/// <inheritdoc />
         public void Configure(IServiceCollection services, ICollection<Type> availableTypes)
 		{
-			string publicUrl = _configuration.GetValue<string>("publicUrl");
+			string publicUrl = _configuration.GetPublicUrl();
 
+			services.Configure<BasicOptions>(_configuration.GetSection(BasicOptions.Path));
+			services.AddConfiguration<BasicOptions>(BasicOptions.Path);
+			services.Configure<TaskOptions>(_configuration.GetSection(TaskOptions.Path));
+			services.AddConfiguration<TaskOptions>(TaskOptions.Path);
+			services.Configure<MediaOptions>(_configuration.GetSection(MediaOptions.Path));
+			services.AddConfiguration<MediaOptions>(MediaOptions.Path);
+			
 			services.AddControllers()
 				.AddNewtonsoftJson(x =>
 				{

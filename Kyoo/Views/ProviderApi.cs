@@ -2,9 +2,10 @@ using System.Threading.Tasks;
 using Kyoo.CommonApi;
 using Kyoo.Controllers;
 using Kyoo.Models;
+using Kyoo.Models.Options;
 using Kyoo.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Kyoo.Api
 {
@@ -19,10 +20,10 @@ namespace Kyoo.Api
 		private readonly IFileManager _files;
 		
 		public ProviderApi(ILibraryManager libraryManager,
-			IConfiguration config,
+			IOptions<BasicOptions> options,
 			IFileManager files,
 			IThumbnailsManager thumbnails)
-			: base(libraryManager.ProviderRepository, config)
+			: base(libraryManager.ProviderRepository, options.Value.PublicUrl)
 		{
 			_libraryManager = libraryManager;
 			_files = files;

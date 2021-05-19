@@ -83,14 +83,16 @@ namespace Kyoo
 		/// <returns>A new web host instance</returns>
 		private static IWebHostBuilder CreateWebHostBuilder(string[] args)
 		{
+			IConfiguration configuration = SetupConfig(new ConfigurationBuilder(), args).Build();
+
 			return new WebHostBuilder()
 				.UseContentRoot(AppDomain.CurrentDomain.BaseDirectory)
-				.UseConfiguration(SetupConfig(new ConfigurationBuilder(), args).Build())
+				.UseConfiguration(configuration)
 				.ConfigureAppConfiguration(x => SetupConfig(x, args))
 				.ConfigureLogging((context, builder) =>
 				{
 					builder.AddConfiguration(context.Configuration.GetSection("logging"))
-						.AddSimpleConsole(x  =>
+						.AddSimpleConsole(x =>
 						{
 							x.TimestampFormat = "[hh:mm:ss] ";
 						})
@@ -107,6 +109,7 @@ namespace Kyoo
 				.UseKestrel(options => { options.AddServerHeader = false; })
 				.UseIIS()
 				.UseIISIntegration()
+				.UseUrls(configuration.GetValue<string>("basics:urls"))
 				.UseStartup<Startup>();
 		}
 	}

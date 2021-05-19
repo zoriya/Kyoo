@@ -6,8 +6,9 @@ using Kyoo.Controllers;
 using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using Kyoo.Models.Options;
 using Kyoo.Models.Permissions;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Kyoo.Api
 {
@@ -22,10 +23,10 @@ namespace Kyoo.Api
 		private readonly IFileManager _files;
 
 		public SeasonApi(ILibraryManager libraryManager,
-			IConfiguration configuration,
+			IOptions<BasicOptions> options,
 			IThumbnailsManager thumbs,
 			IFileManager files)
-			: base(libraryManager.SeasonRepository, configuration)
+			: base(libraryManager.SeasonRepository, options.Value.PublicUrl)
 		{
 			_libraryManager = libraryManager;
 			_thumbs = thumbs;

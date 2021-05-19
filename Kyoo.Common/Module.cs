@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Kyoo.Controllers;
 using Kyoo.Models;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo
@@ -80,6 +81,16 @@ namespace Kyoo
 			foreach (ConfigurationReference confRef in ConfigurationReference.CreateReference<T>(path))
 				services.AddSingleton(confRef);
 			return services;
+		}
+
+		/// <summary>
+		/// Get the public URL of kyoo using the given configuration instance.
+		/// </summary>
+		/// <param name="configuration">The configuration instance</param>
+		/// <returns>The public URl of kyoo (without a slash at the end)</returns>
+		public static string GetPublicUrl(this IConfiguration configuration)
+		{
+			return configuration["basics:publicUrl"]?.TrimEnd('/') ?? "http://localhost:5000";
 		}
 	}
 }

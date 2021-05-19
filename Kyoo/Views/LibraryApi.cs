@@ -6,8 +6,9 @@ using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Kyoo.CommonApi;
+using Kyoo.Models.Options;
 using Kyoo.Models.Permissions;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Kyoo.Api
 {
@@ -20,8 +21,8 @@ namespace Kyoo.Api
 		private readonly ILibraryManager _libraryManager;
 		private readonly ITaskManager _taskManager;
 
-		public LibraryApi(ILibraryManager libraryManager, ITaskManager taskManager, IConfiguration configuration)
-			: base(libraryManager.LibraryRepository, configuration)
+		public LibraryApi(ILibraryManager libraryManager, ITaskManager taskManager, IOptions<BasicOptions> options)
+			: base(libraryManager.LibraryRepository, options.Value.PublicUrl)
 		{
 			_libraryManager = libraryManager;
 			_taskManager = taskManager;

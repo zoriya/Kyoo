@@ -7,7 +7,6 @@ using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 using Kyoo.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 
 namespace Kyoo.CommonApi
 {
@@ -18,10 +17,10 @@ namespace Kyoo.CommonApi
 		private readonly IRepository<T> _repository;
 		protected readonly string BaseURL;
 
-		public CrudApi(IRepository<T> repository, IConfiguration configuration)
+		public CrudApi(IRepository<T> repository, string baseURL)
 		{
 			_repository = repository;
-			BaseURL = configuration.GetValue<string>("publicUrl").TrimEnd('/');
+			BaseURL = baseURL;
 		}
 
 

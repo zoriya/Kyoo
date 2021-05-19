@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Kyoo.Models.Attributes;
 using Kyoo.Models.Exceptions;
-using Microsoft.Extensions.Configuration;
+using Kyoo.Models.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace Kyoo.Controllers
 {
@@ -27,7 +28,7 @@ namespace Kyoo.Controllers
 		/// <summary>
 		/// The configuration instance used to get schedule information
 		/// </summary>
-		private readonly IConfiguration _configuration;
+		private readonly IOptionsMonitor<TaskOptions> _options;
 		/// <summary>
 		/// The logger instance.
 		/// </summary>
@@ -56,15 +57,15 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="tasks">The list of tasks to manage</param>
 		/// <param name="provider">The service provider to request services for tasks</param>
-		/// <param name="configuration">The configuration to load schedule information.</param>
+		/// <param name="options">The configuration to load schedule information.</param>
 		/// <param name="logger">The logger.</param>
 		public TaskManager(IEnumerable<ITask> tasks,
 			IServiceProvider provider, 
-			IConfiguration configuration,
+			IOptionsMonitor<TaskOptions> options,
 			ILogger<TaskManager> logger)
 		{
 			_provider = provider;
-			_configuration = configuration.GetSection("scheduledTasks");
+			_options = options;
 			_logger = logger;
 			_tasks = tasks.Select(x => (x, GetNextTaskDate(x.Slug))).ToList();
 			
@@ -224,10 +225,9 @@ namespace Kyoo.Controllers
 		/// <returns>The next date.</returns>
 		private DateTime GetNextTaskDate(string taskSlug)
 		{
-			TimeSpan delay = _configuration.GetValue<TimeSpan>(taskSlug);
-			if (delay == default)
-				return DateTime.MaxValue;
-			return DateTime.Now + delay;
+			if (_options.CurrentValue.Scheduled.TryGetValue(taskSlug, out TimeSpan delay))
+				return DateTime.Now + delay;
+			return DateTime.MaxValue;
 		}
 		
 		/// <inheritdoc />

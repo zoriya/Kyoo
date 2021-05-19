@@ -84,7 +84,7 @@ namespace Kyoo.Authentication
 		/// <inheritdoc />
 		public void Configure(IServiceCollection services, ICollection<Type> availableTypes)
 		{
-			string publicUrl = _configuration.GetValue<string>("publicUrl").TrimEnd('/');
+			string publicUrl = _configuration.GetPublicUrl();
 
 			if (_environment.IsDevelopment())
 				IdentityModelEventSource.ShowPII = true;
@@ -146,7 +146,7 @@ namespace Kyoo.Authentication
 			app.UseAuthentication();
 			app.Use((ctx, next) =>
 			{
-				ctx.SetIdentityServerOrigin(_configuration.GetValue<string>("publicUrl").TrimEnd('/'));
+				ctx.SetIdentityServerOrigin(_configuration.GetPublicUrl());
 				return next();
 			});
 			app.UseIdentityServer();

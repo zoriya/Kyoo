@@ -2,11 +2,12 @@
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using System.Threading.Tasks;
 using Kyoo.Models.Exceptions;
+using Kyoo.Models.Options;
 using Kyoo.Models.Permissions;
 using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Options;
 
 namespace Kyoo.Api
 {
@@ -16,20 +17,18 @@ namespace Kyoo.Api
 	{
 		private readonly ILibraryManager _libraryManager;
 		private readonly ITranscoder _transcoder;
+		private readonly IOptions<BasicOptions> _options;
 		private readonly IFileManager _files;
-		private readonly string _transmuxPath;
-		private readonly string _transcodePath;
 
 		public VideoApi(ILibraryManager libraryManager, 
 			ITranscoder transcoder, 
-			IConfiguration config,
+			IOptions<BasicOptions> options,
 			IFileManager files)
 		{
 			_libraryManager = libraryManager;
 			_transcoder = transcoder;
+			_options = options;
 			_files = files;
-			_transmuxPath = config.GetValue<string>("transmuxTempPath");
-			_transcodePath = config.GetValue<string>("transcodeTempPath");
 		}
 
 		public override void OnActionExecuted(ActionExecutedContext ctx)
@@ -101,7 +100,7 @@ namespace Kyoo.Api
 		[Permission("video", Kind.Read)]
 		public IActionResult GetTransmuxedChunk(string episodeLink, string chunk)
 		{
-			string path = Path.GetFullPath(Path.Combine(_transmuxPath, episodeLink));
+			string path = Path.GetFullPath(Path.Combine(_options.Value.TransmuxPath, episodeLink));
 			path = Path.Combine(path, "segments", chunk);
 			return PhysicalFile(path, "video/MP2T");
 		}
@@ -110,7 +109,7 @@ namespace Kyoo.Api
 		[Permission("video", Kind.Read)]
 		public IActionResult GetTranscodedChunk(string episodeLink, string chunk)
 		{
-			string path = Path.GetFullPath(Path.Combine(_transcodePath, episodeLink));
+			string path = Path.GetFullPath(Path.Combine(_options.Value.TranscodePath, episodeLink));
 			path = Path.Combine(path, "segments", chunk);
 			return PhysicalFile(path, "video/MP2T");
 		}
