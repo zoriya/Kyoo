@@ -36,7 +36,7 @@ namespace Kyoo.Authentication
 		/// <inheritdoc />
 		public IFilterMetadata Create(PermissionAttribute attribute)
 		{
-			return new PermissionValidator(attribute.Type, attribute.Kind, _options);
+			return new PermissionValidator(attribute.Type, attribute.Kind, attribute.Group, _options);
 		}
 		
 		/// <inheritdoc />
@@ -58,6 +58,11 @@ namespace Kyoo.Authentication
 			/// The kind of permission needed
 			/// </summary>
 			private readonly Kind? _kind;
+
+			/// <summary>
+			/// The group of he permission
+			/// </summary>
+			private readonly Group _group = Group.Overall;
 			/// <summary>
 			/// The permissions options to retrieve default permissions.
 			/// </summary>
@@ -68,11 +73,13 @@ namespace Kyoo.Authentication
 			/// </summary>
 			/// <param name="permission">The permission to validate</param>
 			/// <param name="kind">The kind of permission needed</param>
+			/// <param name="group">The group of the permission</param>
 			/// <param name="options">The option containing default values.</param>
-			public PermissionValidator(string permission, Kind kind, IOptionsMonitor<PermissionOption> options)
+			public PermissionValidator(string permission, Kind kind, Group group, IOptionsMonitor<PermissionOption> options)
 			{
 				_permission = permission;
 				_kind = kind;
+				_group = group;
 				_options = options;
 			}
 
@@ -125,7 +132,7 @@ namespace Kyoo.Authentication
 				}
 
 				string permStr = $"{permission.ToLower()}.{kind.ToString()!.ToLower()}";
-				string overallStr = $"overall.{kind.ToString()!.ToLower()}";
+				string overallStr = $"{_group.ToString()}.{kind.ToString()!.ToLower()}";
 				AuthenticateResult res = await context.HttpContext.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme);
 				if (res.Succeeded)
 				{

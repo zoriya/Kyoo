@@ -7,16 +7,20 @@ namespace Kyoo.Models.Permissions
 	/// <summary>
 	/// The kind of permission needed.
 	/// </summary>
-	/// <remarks>
-	/// The admin kind is used for configuration or security sensitive permissions to allow one
-	/// to use an overall permission without compromising security.
-	/// </remarks>
 	public enum Kind
 	{
 		Read,
 		Write,
 		Create,
-		Delete,
+		Delete
+	}
+
+	/// <summary>
+	/// The group of the permission.
+	/// </summary>
+	public enum Group
+	{
+		Overall,
 		Admin
 	}
 	
@@ -34,6 +38,10 @@ namespace Kyoo.Models.Permissions
 		/// The needed permission kind.
 		/// </summary>
 		public Kind Kind { get; }
+		/// <summary>
+		/// The group of this permission
+		/// </summary>
+		public Group Group { get; }
 
 		/// <summary>
 		/// Ask a permission to run an action. 
@@ -43,12 +51,17 @@ namespace Kyoo.Models.Permissions
 		/// (if the type ends with api, it will be removed. This allow you to use nameof(YourApi)).
 		/// </param>
 		/// <param name="permission">The kind of permission needed</param>
-		public PermissionAttribute(string type, Kind permission)
+		/// <param name="group">
+		/// The group of this permission (allow grouped permission like overall.read
+		/// for all read permissions of this group)
+		/// </param>
+		public PermissionAttribute(string type, Kind permission, Group group = Group.Overall)
 		{
 			if (type.EndsWith("API", StringComparison.OrdinalIgnoreCase))
 				type = type[..^3];
 			Type = type.ToLower();
 			Kind = permission;
+			Group = group;
 		}
 		
 		/// <inheritdoc />

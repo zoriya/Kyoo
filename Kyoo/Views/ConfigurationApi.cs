@@ -37,7 +37,7 @@ namespace Kyoo.Api
 		/// <response code="200">Return the configuration value or the list of configurations</response>
 		/// <response code="404">No configuration exists for the given slug</response>
 		[HttpGet("{slug}")]
-		[Permission(nameof(ConfigurationApi), Kind.Admin)]
+		[Permission(nameof(ConfigurationApi), Kind.Read, Group.Admin)]
 		public ActionResult<object> GetConfiguration(string slug)
 		{
 			try
@@ -59,7 +59,7 @@ namespace Kyoo.Api
 		/// <response code="200">Return the edited value</response>
 		/// <response code="404">No configuration exists for the given slug</response>
 		[HttpPut("{slug}")]
-		[Permission(nameof(ConfigurationApi), Kind.Admin)]
+		[Permission(nameof(ConfigurationApi), Kind.Write, Group.Admin)]
 		public async Task<ActionResult<object>> EditConfiguration(string slug, [FromBody] object newValue)
 		{
 			try
