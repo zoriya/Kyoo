@@ -3,7 +3,8 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Kyoo.Models;
-using Microsoft.Extensions.Configuration;
+using Kyoo.Models.Options;
+using Microsoft.Extensions.Options;
 using Stream = Kyoo.Models.Watch.Stream;
 
 // We use threads so tasks are not always awaited.
@@ -66,20 +67,18 @@ namespace Kyoo.Controllers
 					tracks = Array.Empty<Track>();
 
 				if (ptr != IntPtr.Zero)
-					free(ptr); // free_streams is not necesarry since the Marshal free the unmanaged pointers.
+					free(ptr); // free_streams is not necessary since the Marshal free the unmanaged pointers.
 				return tracks;
 			}
 		}
 
 		private readonly IFileManager _files;
-		private readonly string _transmuxPath;
-		private readonly string _transcodePath;
+		private readonly IOptions<BasicOptions> _options;
 
-		public Transcoder(IConfiguration config, IFileManager files)
+		public Transcoder(IFileManager files, IOptions<BasicOptions> options)
 		{
 			_files = files;
-			_transmuxPath = Path.GetFullPath(config.GetValue<string>("transmuxTempPath"));
-			_transcodePath = Path.GetFullPath(config.GetValue<string>("transcodeTempPath"));
+			_options = options;
 
 			if (TranscoderAPI.init() != Marshal.SizeOf<Stream>())
 				throw new BadTranscoderException();
@@ -100,7 +99,7 @@ namespace Kyoo.Controllers
 			if (!File.Exists(episode.Path))
 				throw new ArgumentException("Path does not exists. Can't transcode.");
 			
-			string folder = Path.Combine(_transmuxPath, episode.Slug);
+			string folder = Path.Combine(_options.Value.TransmuxPath, episode.Slug);
 			string manifest = Path.Combine(folder, episode.Slug + ".m3u8");
 			float playableDuration = 0;
 			bool transmuxFailed = false;

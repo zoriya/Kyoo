@@ -1,26 +1,25 @@
 ﻿using Kyoo.Models;
-using Microsoft.Extensions.Configuration;
 using System;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Kyoo.Models.Options;
+using Microsoft.Extensions.Options;
 
 namespace Kyoo.Controllers
 {
 	public class ThumbnailsManager : IThumbnailsManager
 	{
 		private readonly IFileManager _files;
-		private readonly string _peoplePath;
-		private readonly string _providerPath;
+		private readonly IOptionsMonitor<BasicOptions> _options;
 
-		public ThumbnailsManager(IConfiguration configuration, IFileManager files)
+		public ThumbnailsManager(IFileManager files, IOptionsMonitor<BasicOptions> options)
 		{
 			_files = files;
-			_peoplePath = Path.GetFullPath(configuration.GetValue<string>("peoplePath"));
-			_providerPath = Path.GetFullPath(configuration.GetValue<string>("providerPath"));
-			Directory.CreateDirectory(_peoplePath);
-			Directory.CreateDirectory(_providerPath);
+			_options = options;
+			Directory.CreateDirectory(_options.CurrentValue.PeoplePath);
+			Directory.CreateDirectory(_options.CurrentValue.ProviderPath);
 		}
 
 		private static async Task DownloadImage(string url, string localPath, string what)
@@ -141,16 +140,18 @@ namespace Kyoo.Controllers
 		{
 			if (people == null)
 				throw new ArgumentNullException(nameof(people));
-			string thumbPath = Path.GetFullPath(Path.Combine(_peoplePath, $"{people.Slug}.jpg"));
-			return Task.FromResult(thumbPath.StartsWith(_peoplePath) ? thumbPath : null);
+			string peoplePath = _options.CurrentValue.PeoplePath;
+			string thumbPath = Path.GetFullPath(Path.Combine(peoplePath, $"{people.Slug}.jpg"));
+			return Task.FromResult(thumbPath.StartsWith(peoplePath) ? thumbPath : null);
 		}
 
 		public Task<string> GetProviderLogo(Provider provider)
 		{
 			if (provider == null)
 				throw new ArgumentNullException(nameof(provider));
-			string thumbPath = Path.GetFullPath(Path.Combine(_providerPath, $"{provider.Slug}.{provider.LogoExtension}"));
-			return Task.FromResult(thumbPath.StartsWith(_providerPath) ? thumbPath : null);
+			string providerPath = _options.CurrentValue.ProviderPath;
+			string thumbPath = Path.GetFullPath(Path.Combine(providerPath, $"{provider.Slug}.{provider.LogoExtension}"));
+			return Task.FromResult(thumbPath.StartsWith(providerPath) ? thumbPath : null);
 		}
 	}
 }

@@ -6,8 +6,9 @@ using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Kyoo.CommonApi;
+using Kyoo.Models.Options;
 using Kyoo.Models.Permissions;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Kyoo.Api
 {
@@ -19,8 +20,8 @@ namespace Kyoo.Api
 	{
 		private readonly ILibraryManager _libraryManager;
 		
-		public CollectionApi(ILibraryManager libraryManager, IConfiguration configuration) 
-			: base(libraryManager.CollectionRepository, configuration)
+		public CollectionApi(ILibraryManager libraryManager, IOptions<BasicOptions> options) 
+			: base(libraryManager.CollectionRepository, options.Value.PublicUrl)
 		{
 			_libraryManager = libraryManager;
 		}

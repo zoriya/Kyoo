@@ -5,9 +5,10 @@ using System.Threading.Tasks;
 using Kyoo.CommonApi;
 using Kyoo.Controllers;
 using Kyoo.Models;
+using Kyoo.Models.Options;
 using Kyoo.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Kyoo.Api
 {
@@ -15,12 +16,12 @@ namespace Kyoo.Api
 	[Route("api/studios")]
 	[ApiController]
 	[PartialPermission(nameof(ShowApi))]
-	public class StudioAPI : CrudApi<Studio>
+	public class StudioApi : CrudApi<Studio>
 	{
 		private readonly ILibraryManager _libraryManager;
 
-		public StudioAPI(ILibraryManager libraryManager, IConfiguration config)
-			: base(libraryManager.StudioRepository, config)
+		public StudioApi(ILibraryManager libraryManager, IOptions<BasicOptions> options)
+			: base(libraryManager.StudioRepository, options.Value.PublicUrl)
 		{
 			_libraryManager = libraryManager;
 		}

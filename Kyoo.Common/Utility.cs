@@ -10,7 +10,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
-using Kyoo.Models;
 using Kyoo.Models.Attributes;
 
 namespace Kyoo
@@ -33,7 +32,7 @@ namespace Kyoo
 		}
 		
 		/// <summary>
-		/// Get the name of a property. Usfull for selectors as members ex: Load(x => x.Shows)
+		/// Get the name of a property. Useful for selectors as members ex: Load(x => x.Shows)
 		/// </summary>
 		/// <param name="ex">The expression</param>
 		/// <returns>The name of the expression</returns>
@@ -71,10 +70,10 @@ namespace Kyoo
 		}
 		
 		/// <summary>
-		/// Slugify a string (Replace spaces by -, Uniformise accents é -> e)
+		/// Slugify a string (Replace spaces by -, Uniformize accents é -> e)
 		/// </summary>
 		/// <param name="str">The string to slugify</param>
-		/// <returns>The slugified string</returns>
+		/// <returns>The slug version of the given string</returns>
 		public static string ToSlug(string str)
 		{
 			if (str == null)
@@ -98,37 +97,12 @@ namespace Kyoo
 			str = Regex.Replace(str, @"([-_]){2,}", "$1", RegexOptions.Compiled);
 			return str;
 		}
-		
-		
-		/// <summary>
-		/// Set the image of a show using the <see cref="ImageType"/> type.
-		/// </summary>
-		/// <param name="show">The owner of the image</param>
-		/// <param name="imgUrl">The url of the image</param>
-		/// <param name="type">The type of the image</param>
-		public static void SetImage(Show show, string imgUrl, ImageType type)
-		{
-			switch(type)
-			{
-				case ImageType.Poster:
-					show.Poster = imgUrl;
-					break;
-				case ImageType.Logo:
-					show.Logo = imgUrl;
-					break;
-				case ImageType.Background:
-					show.Backdrop = imgUrl;
-					break;
-				default:
-					throw new ArgumentOutOfRangeException(nameof(type), type, null);
-			}
-		}
 
 		/// <summary>
 		/// Merge two lists, can keep duplicates or remove them.
 		/// </summary>
-		/// <param name="first">The first enumarble to merge</param>
-		/// <param name="second">The second enumerable to merge, if items from this list are equals to one from the first, they are not keeped</param>
+		/// <param name="first">The first enumerable to merge</param>
+		/// <param name="second">The second enumerable to merge, if items from this list are equals to one from the first, they are not kept</param>
 		/// <param name="isEqual">Equality function to compare items. If this is null, duplicated elements are kept</param>
 		/// <returns>The two list merged as an array</returns>
 		public static T[] MergeLists<T>(IEnumerable<T> first,
@@ -150,7 +124,7 @@ namespace Kyoo
 		/// At the end, the OnMerge method of first will be called if first is a <see cref="IOnMerge"/>
 		/// </summary>
 		/// <param name="first">The object to assign</param>
-		/// <param name="second">The object containg new values</param>
+		/// <param name="second">The object containing new values</param>
 		/// <typeparam name="T">Fields of T will be used</typeparam>
 		/// <returns><see cref="first"/></returns>
 		public static T Assign<T>(T first, T second)
@@ -339,7 +313,7 @@ namespace Kyoo
 		/// </summary>
 		/// <param name="type">The type to check</param>
 		/// <param name="genericType">The generic type to check against (Only generic types are supported like typeof(IEnumerable&lt;&gt;).</param>
-		/// <returns>The generic definition of genericType that type inherit or null if type does not implement the genric type.</returns>
+		/// <returns>The generic definition of genericType that type inherit or null if type does not implement the generic type.</returns>
 		/// <exception cref="ArgumentNullException"><see cref="type"/> and <see cref="genericType"/> can't be null</exception>
 		/// <exception cref="ArgumentException"><see cref="genericType"/> must be a generic type</exception>
 		public static Type GetGenericDefinition([NotNull] Type type, [NotNull] Type genericType)

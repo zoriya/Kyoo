@@ -8,8 +8,9 @@ using System.Threading.Tasks;
 using Kyoo.CommonApi;
 using Kyoo.Controllers;
 using Kyoo.Models.Exceptions;
+using Kyoo.Models.Options;
 using Kyoo.Models.Permissions;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Kyoo.Api
 {
@@ -26,8 +27,8 @@ namespace Kyoo.Api
 		public ShowApi(ILibraryManager libraryManager,
 			IFileManager files, 
 			IThumbnailsManager thumbs,
-			IConfiguration configuration)
-			: base(libraryManager.ShowRepository, configuration)
+			IOptions<BasicOptions> options)
+			: base(libraryManager.ShowRepository, options.Value.PublicUrl)
 		{
 			_libraryManager = libraryManager;
 			_files = files;

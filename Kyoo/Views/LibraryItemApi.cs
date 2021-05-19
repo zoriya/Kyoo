@@ -6,9 +6,10 @@ using Kyoo.CommonApi;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
+using Kyoo.Models.Options;
 using Kyoo.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Kyoo.Api
 {
@@ -22,10 +23,10 @@ namespace Kyoo.Api
 		private readonly string _baseURL;
 
 
-		public LibraryItemApi(ILibraryItemRepository libraryItems, IConfiguration configuration)
+		public LibraryItemApi(ILibraryItemRepository libraryItems, IOptions<BasicOptions> options)
 		{
 			_libraryItems = libraryItems;
-			_baseURL = configuration.GetValue<string>("publicUrl").TrimEnd('/');
+			_baseURL = options.Value.PublicUrl;
 		}
 
 		[HttpGet]

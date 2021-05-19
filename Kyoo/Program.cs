@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
@@ -15,9 +16,15 @@ namespace Kyoo
 	public static class Program
 	{
 		/// <summary>
+		/// The path of the json configuration of the application.
+		/// </summary>
+		public const string JsonConfigPath = "./settings.json";
+		
+		/// <summary>
 		/// Main function of the program
 		/// </summary>
 		/// <param name="args">Command line arguments</param>
+		[SuppressMessage("ReSharper", "ConditionIsAlwaysTrueOrFalse")]
 		public static async Task Main(string[] args)
 		{
 			if (!File.Exists("./settings.json"))
@@ -64,7 +71,7 @@ namespace Kyoo
 		/// <returns>The modified configuration builder</returns>
 		private static IConfigurationBuilder SetupConfig(IConfigurationBuilder builder, string[] args)
 		{
-			return builder.AddJsonFile("./settings.json", false, true)
+			return builder.AddJsonFile(JsonConfigPath, false, true)
 				.AddEnvironmentVariables()
 				.AddCommandLine(args);
 		}
@@ -76,14 +83,16 @@ namespace Kyoo
 		/// <returns>A new web host instance</returns>
 		private static IWebHostBuilder CreateWebHostBuilder(string[] args)
 		{
+			IConfiguration configuration = SetupConfig(new ConfigurationBuilder(), args).Build();
+
 			return new WebHostBuilder()
 				.UseContentRoot(AppDomain.CurrentDomain.BaseDirectory)
-				.UseConfiguration(SetupConfig(new ConfigurationBuilder(), args).Build())
+				.UseConfiguration(configuration)
 				.ConfigureAppConfiguration(x => SetupConfig(x, args))
 				.ConfigureLogging((context, builder) =>
 				{
 					builder.AddConfiguration(context.Configuration.GetSection("logging"))
-						.AddSimpleConsole(x  =>
+						.AddSimpleConsole(x =>
 						{
 							x.TimestampFormat = "[hh:mm:ss] ";
 						})
@@ -100,6 +109,7 @@ namespace Kyoo
 				.UseKestrel(options => { options.AddServerHeader = false; })
 				.UseIIS()
 				.UseIISIntegration()
+				.UseUrls(configuration.GetValue<string>("basics:url"))
 				.UseStartup<Startup>();
 		}
 	}

@@ -14,6 +14,15 @@ namespace Kyoo.Models.Permissions
 		Create,
 		Delete
 	}
+
+	/// <summary>
+	/// The group of the permission.
+	/// </summary>
+	public enum Group
+	{
+		Overall,
+		Admin
+	}
 	
 	/// <summary>
 	/// Specify permissions needed for the API.
@@ -29,6 +38,10 @@ namespace Kyoo.Models.Permissions
 		/// The needed permission kind.
 		/// </summary>
 		public Kind Kind { get; }
+		/// <summary>
+		/// The group of this permission
+		/// </summary>
+		public Group Group { get; }
 
 		/// <summary>
 		/// Ask a permission to run an action. 
@@ -38,12 +51,17 @@ namespace Kyoo.Models.Permissions
 		/// (if the type ends with api, it will be removed. This allow you to use nameof(YourApi)).
 		/// </param>
 		/// <param name="permission">The kind of permission needed</param>
-		public PermissionAttribute(string type, Kind permission)
+		/// <param name="group">
+		/// The group of this permission (allow grouped permission like overall.read
+		/// for all read permissions of this group)
+		/// </param>
+		public PermissionAttribute(string type, Kind permission, Group group = Group.Overall)
 		{
 			if (type.EndsWith("API", StringComparison.OrdinalIgnoreCase))
 				type = type[..^3];
 			Type = type.ToLower();
 			Kind = permission;
+			Group = group;
 		}
 		
 		/// <inheritdoc />

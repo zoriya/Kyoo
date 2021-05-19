@@ -4,9 +4,10 @@ using Kyoo.CommonApi;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
+using Kyoo.Models.Options;
 using Kyoo.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Kyoo.Api
 {
@@ -18,8 +19,8 @@ namespace Kyoo.Api
 	{
 		private readonly ILibraryManager _libraryManager;
 
-		public TrackApi(ILibraryManager libraryManager, IConfiguration configuration)
-			: base(libraryManager.TrackRepository, configuration)
+		public TrackApi(ILibraryManager libraryManager, IOptions<BasicOptions> options)
+			: base(libraryManager.TrackRepository, options.Value.PublicUrl)
 		{
 			_libraryManager = libraryManager;
 		}

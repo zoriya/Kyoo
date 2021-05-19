@@ -7,8 +7,9 @@ using System.Threading.Tasks;
 using Kyoo.CommonApi;
 using Kyoo.Controllers;
 using Kyoo.Models.Exceptions;
+using Kyoo.Models.Options;
 using Kyoo.Models.Permissions;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace Kyoo.Api
 {
@@ -23,10 +24,10 @@ namespace Kyoo.Api
 		private readonly IFileManager _files;
 
 		public EpisodeApi(ILibraryManager libraryManager,
-			IConfiguration configuration,
+			IOptions<BasicOptions> options,
 			IFileManager files,
 			IThumbnailsManager thumbnails) 
-			: base(libraryManager.EpisodeRepository, configuration)
+			: base(libraryManager.EpisodeRepository, options.Value.PublicUrl)
 		{
 			_libraryManager = libraryManager;
 			_files = files;

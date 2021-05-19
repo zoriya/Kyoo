@@ -66,10 +66,6 @@ namespace Kyoo.Postgresql
 				if (_environment.IsDevelopment())
 					x.EnableDetailedErrors().EnableSensitiveDataLogging();
 			});
-			// services.AddScoped<DatabaseContext>(_ => new PostgresContext(
-			// 	_configuration.GetDatabaseConnection("postgres"), 
-			// 	_environment.IsDevelopment()));
-			// services.AddScoped<DbContext>(x => x.GetRequiredService<PostgresContext>());
 		}
 
 		/// <inheritdoc />

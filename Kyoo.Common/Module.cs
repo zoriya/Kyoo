@@ -1,5 +1,8 @@
 using System;
+using System.Linq;
 using Kyoo.Controllers;
+using Kyoo.Models;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo
@@ -61,6 +64,47 @@ namespace Kyoo
 		{
 			services.Add(ServiceDescriptor.Describe(typeof(T), typeof(T2), lifetime));
 			return services.AddRepository<T2>(lifetime);
+		}
+
+		/// <summary>
+		/// Add an editable configuration to the editable configuration list
+		/// </summary>
+		/// <param name="services">The service collection to edit</param>
+		/// <param name="path">The root path of the editable configuration. It should not be a nested type.</param>
+		/// <typeparam name="T">The type of the configuration</typeparam>
+		/// <returns>The given service collection is returned.</returns>
+		public static IServiceCollection AddConfiguration<T>(this IServiceCollection services, string path)
+			where T : class
+		{
+			if (services.Any(x => x.ServiceType == typeof(T)))
+				return services;
+			foreach (ConfigurationReference confRef in ConfigurationReference.CreateReference<T>(path))
+				services.AddSingleton(confRef);
+			return services;
+		}
+		
+		/// <summary>
+		/// Add an editable configuration to the editable configuration list.
+		/// WARNING: this method allow you to add an unmanaged type. This type won't be editable. This can be used
+		/// for external libraries or variable arguments.
+		/// </summary>
+		/// <param name="services">The service collection to edit</param>
+		/// <param name="path">The root path of the editable configuration. It should not be a nested type.</param>
+		/// <returns>The given service collection is returned.</returns>
+		public static IServiceCollection AddUntypedConfiguration(this IServiceCollection services, string path)
+		{
+			services.AddSingleton(ConfigurationReference.CreateUntyped(path));
+			return services;
+		}
+
+		/// <summary>
+		/// Get the public URL of kyoo using the given configuration instance.
+		/// </summary>
+		/// <param name="configuration">The configuration instance</param>
+		/// <returns>The public URl of kyoo (without a slash at the end)</returns>
+		public static string GetPublicUrl(this IConfiguration configuration)
+		{
+			return configuration["basics:publicUrl"]?.TrimEnd('/') ?? "http://localhost:5000";
 		}
 	}
 }
