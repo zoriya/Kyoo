@@ -99,6 +99,8 @@ namespace Kyoo
 			services.AddConfiguration<TaskOptions>(TaskOptions.Path);
 			services.Configure<MediaOptions>(_configuration.GetSection(MediaOptions.Path));
 			services.AddConfiguration<MediaOptions>(MediaOptions.Path);
+			services.AddUntypedConfiguration("database");
+			services.AddUntypedConfiguration("logging");
 			
 			services.AddControllers()
 				.AddNewtonsoftJson(x =>

@@ -109,7 +109,7 @@ namespace Kyoo
 				.UseKestrel(options => { options.AddServerHeader = false; })
 				.UseIIS()
 				.UseIISIntegration()
-				.UseUrls(configuration.GetValue<string>("basics:urls"))
+				.UseUrls(configuration.GetValue<string>("basics:url"))
 				.UseStartup<Startup>();
 		}
 	}

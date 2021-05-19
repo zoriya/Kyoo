@@ -132,7 +132,7 @@ namespace Kyoo.Authentication
 				}
 
 				string permStr = $"{permission.ToLower()}.{kind.ToString()!.ToLower()}";
-				string overallStr = $"{_group.ToString()}.{kind.ToString()!.ToLower()}";
+				string overallStr = $"{_group.ToString().ToLower()}.{kind.ToString()!.ToLower()}";
 				AuthenticateResult res = await context.HttpContext.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme);
 				if (res.Succeeded)
 				{

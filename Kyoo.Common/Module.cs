@@ -82,6 +82,20 @@ namespace Kyoo
 				services.AddSingleton(confRef);
 			return services;
 		}
+		
+		/// <summary>
+		/// Add an editable configuration to the editable configuration list.
+		/// WARNING: this method allow you to add an unmanaged type. This type won't be editable. This can be used
+		/// for external libraries or variable arguments.
+		/// </summary>
+		/// <param name="services">The service collection to edit</param>
+		/// <param name="path">The root path of the editable configuration. It should not be a nested type.</param>
+		/// <returns>The given service collection is returned.</returns>
+		public static IServiceCollection AddUntypedConfiguration(this IServiceCollection services, string path)
+		{
+			services.AddSingleton(ConfigurationReference.CreateUntyped(path));
+			return services;
+		}
 
 		/// <summary>
 		/// Get the public URL of kyoo using the given configuration instance.

@@ -87,5 +87,11 @@ namespace Kyoo.Models
 		{
 			return CreateReference(path, typeof(T));
 		}
+
+
+		public static ConfigurationReference CreateUntyped(string path)
+		{
+			return new(path, null);
+		}
 	}
 }

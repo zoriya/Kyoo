@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
@@ -35,13 +36,30 @@ namespace Kyoo.Controllers
 			_references = references.ToDictionary(x => x.Path, x => x.Type, StringComparer.OrdinalIgnoreCase);
 		}
 
+		private Type GetType(string path)
+		{
+			path = path.Replace("__", ":");
+
+			// TODO handle lists and dictionaries.
+			if (_references.TryGetValue(path, out Type type))
+			{
+				if (type != null)
+					return type;
+				throw new ArgumentException($"The configuration at {path} is not editable or readable.");
+			}
+
+			string parent = path.Contains(':') ? path[..path.IndexOf(':')] : null;
+			if (parent != null && _references.TryGetValue(parent, out type) && type == null)
+				throw new ArgumentException($"The configuration at {path} is not editable or readable.");
+			throw new ItemNotFoundException($"No configuration exists for the name: {path}");
+		}
+		
 		/// <inheritdoc />
 		public object GetValue(string path)
 		{
 			path = path.Replace("__", ":");
 			// TODO handle lists and dictionaries.
-			if (!_references.TryGetValue(path, out Type type))
-				throw new ItemNotFoundException($"No configuration exists for the name: {path}");
+			Type type = GetType(path);
 			object ret = _configuration.GetValue(type, path);
 			if (ret != null)
 				return ret;
@@ -55,8 +73,7 @@ namespace Kyoo.Controllers
 		{
 			path = path.Replace("__", ":");
 			// TODO handle lists and dictionaries.
-			if (!_references.TryGetValue(path, out Type type))
-				throw new ItemNotFoundException($"No configuration exists for the name: {path}");	
+			Type type = GetType(path);
 			if (typeof(T).IsAssignableFrom(type))
 				throw new InvalidCastException($"The type {typeof(T).Name} is not valid for " +
 				                               $"a resource of type {type.Name}.");
@@ -67,8 +84,7 @@ namespace Kyoo.Controllers
 		public async Task EditValue(string path, object value)
 		{
 			path = path.Replace("__", ":");
-			if (!_references.TryGetValue(path, out Type type))
-				throw new ItemNotFoundException($"No configuration exists for the name: {path}");
+			Type type = GetType(path);
 			value = JObject.FromObject(value).ToObject(type);
 			if (value == null)
 				throw new ArgumentException("Invalid value format.");
@@ -87,17 +103,47 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="config">The configuration to transform</param>
 		/// <returns>A strongly typed representation of the configuration.</returns>
+		[SuppressMessage("ReSharper", "RedundantJumpStatement")]
 		private ExpandoObject ToObject(IConfiguration config)
 		{
 			ExpandoObject obj = new();
 
 			foreach (IConfigurationSection section in config.GetChildren())
 			{
-				if (!_references.TryGetValue(section.Path, out Type type))
+				try
+				{
+					Type type = GetType(section.Path);
+					obj.TryAdd(section.Key, section.Get(type));
+				}
+				catch (ArgumentException)
+				{
+					obj.TryAdd(section.Key, ToUntyped(section));
+				}
+				catch
+				{
 					continue;
-				obj.TryAdd(section.Key, section.Get(type));
+				}
 			}
 			
+			return obj;
+		}
+
+		/// <summary>
+		/// Transform the configuration section in nested expando objects.
+		/// </summary>
+		/// <param name="config">The section to convert</param>
+		/// <returns>The converted section</returns>
+		private static object ToUntyped(IConfigurationSection config)
+		{
+			ExpandoObject obj = new();
+
+			foreach (IConfigurationSection section in config.GetChildren())
+			{
+				obj.TryAdd(section.Key, ToUntyped(section));
+			}
+
+			if (!obj.Any())
+				return config.Value;
 			return obj;
 		}
 	}
