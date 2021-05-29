@@ -6,10 +6,11 @@
 		<Authors>Zoe Roux</Authors>
 		<RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
 		<LangVersion>default</LangVersion>
+		<RootNamespace>Kyoo.SQLite</RootNamespace>
 	</PropertyGroup>
-	
+
 	<PropertyGroup>
-		<OutputPath>../Kyoo/bin/$(Configuration)/$(TargetFramework)/plugins/postgresql</OutputPath>
+		<OutputPath>../Kyoo/bin/$(Configuration)/$(TargetFramework)/plugins/sqlite</OutputPath>
 		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
 		<ProduceReferenceAssembly>false</ProduceReferenceAssembly>
 		<GenerateDependencyFile>false</GenerateDependencyFile>
@@ -22,7 +23,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.5.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.6" />
 	</ItemGroup>
 
 	<ItemGroup>

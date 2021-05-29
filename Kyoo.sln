@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Postgresql", "Kyoo.Pos
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Authentication", "Kyoo.Authentication\Kyoo.Authentication.csproj", "{7A841335-6523-47DB-9717-80AA7BD943FD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.SqLite", "Kyoo.SqLite\Kyoo.SqLite.csproj", "{6515380E-1E57-42DA-B6E3-E1C8A848818A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,5 +43,9 @@ Global
 		{7A841335-6523-47DB-9717-80AA7BD943FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7A841335-6523-47DB-9717-80AA7BD943FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7A841335-6523-47DB-9717-80AA7BD943FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6515380E-1E57-42DA-B6E3-E1C8A848818A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6515380E-1E57-42DA-B6E3-E1C8A848818A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6515380E-1E57-42DA-B6E3-E1C8A848818A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6515380E-1E57-42DA-B6E3-E1C8A848818A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
