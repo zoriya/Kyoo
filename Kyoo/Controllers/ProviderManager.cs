@@ -29,7 +29,7 @@ namespace Kyoo.Controllers
 			{
 				try
 				{
-					ret = Utility.Merge(ret, await providerCall(provider));
+					ret = Merger.Merge(ret, await providerCall(provider));
 				} catch (Exception ex) 
 				{
 					await Console.Error.WriteLineAsync(

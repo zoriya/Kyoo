@@ -225,8 +225,8 @@ namespace Kyoo.Controllers
 				T old = await GetWithTracking(edited.ID);
 			
 				if (resetOld)
-					Utility.Nullify(old);
-				Utility.Complete(old, edited, x => x.GetCustomAttribute<LoadableRelationAttribute>() == null);
+					Merger.Nullify(old);
+				Merger.Complete(old, edited, x => x.GetCustomAttribute<LoadableRelationAttribute>() == null);
 				await EditRelations(old, edited, resetOld);
 				await Database.SaveChangesAsync();
 				return old;

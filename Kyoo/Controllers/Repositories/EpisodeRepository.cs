@@ -213,7 +213,7 @@ namespace Kyoo.Controllers
 		/// Set track's index and ensure that every tracks is well-formed.
 		/// </summary>
 		/// <param name="resource">The resource to fix.</param>
-		/// <returns>The <see cref="resource"/> parameter is returnned.</returns>
+		/// <returns>The <see cref="resource"/> parameter is returned.</returns>
 		private async Task<Episode> ValidateTracks(Episode resource)
 		{
 			resource.Tracks = await resource.Tracks.MapAsync((x, i) =>
