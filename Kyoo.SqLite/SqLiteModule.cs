@@ -56,8 +56,8 @@ namespace Kyoo.SqLite
 			_configuration = configuration;
 			_environment = env;
 		}
-		
-		
+
+
 		/// <inheritdoc />
 		public void Configure(IServiceCollection services, ICollection<Type> availableTypes)
 		{
@@ -67,6 +67,13 @@ namespace Kyoo.SqLite
 				if (_environment.IsDevelopment())
 					x.EnableDetailedErrors().EnableSensitiveDataLogging();
 			});
+		}
+
+		/// <inheritdoc />
+		public void Initialize(IServiceProvider provider)
+		{
+			DatabaseContext context = provider.GetRequiredService<DatabaseContext>();
+			context.Database.Migrate();
 		}
 	}
 }

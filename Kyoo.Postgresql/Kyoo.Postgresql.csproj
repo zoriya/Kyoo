@@ -8,14 +8,14 @@
 		<LangVersion>default</LangVersion>
 	</PropertyGroup>
 	
-	<PropertyGroup>
-		<OutputPath>../Kyoo/bin/$(Configuration)/$(TargetFramework)/plugins/postgresql</OutputPath>
-		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-		<GenerateDependencyFile>false</GenerateDependencyFile>
-		<GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>
-		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-	</PropertyGroup>
+<!--	<PropertyGroup>-->
+<!--		<OutputPath>../Kyoo/bin/$(Configuration)/$(TargetFramework)/plugins/postgresql</OutputPath>-->
+<!--		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>-->
+<!--		<ProduceReferenceAssembly>false</ProduceReferenceAssembly>-->
+<!--		<GenerateDependencyFile>false</GenerateDependencyFile>-->
+<!--		<GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>-->
+<!--		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>-->
+<!--	</PropertyGroup>-->
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.5">
