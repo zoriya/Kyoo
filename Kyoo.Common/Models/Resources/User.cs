@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Kyoo.Common.Models.Attributes;
 
 namespace Kyoo.Models
 {
@@ -52,7 +53,7 @@ namespace Kyoo.Models
 		/// <summary>
 		/// Links between Users and Shows.
 		/// </summary>
-		public ICollection<Link<User, Show>> ShowLinks { get; set; }
+		[Link] public ICollection<Link<User, Show>> ShowLinks { get; set; }
 #endif
 	}
 	

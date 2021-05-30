@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -269,43 +268,6 @@ namespace Kyoo
 			if (ex == null)
 				throw new ArgumentNullException(nameof(ex));
 			ExceptionDispatchInfo.Capture(ex).Throw();
-		}
-		
-		public static Task<T> Then<T>(this Task<T> task, Action<T> map)
-		{
-			return task.ContinueWith(x =>
-			{
-				if (x.IsFaulted)
-					x.Exception!.InnerException!.ReThrow();
-				if (x.IsCanceled)
-					throw new TaskCanceledException();
-				map(x.Result);
-				return x.Result;
-			}, TaskContinuationOptions.ExecuteSynchronously);
-		}
-
-		public static Task<TResult> Map<T, TResult>(this Task<T> task, Func<T, TResult> map)
-		{
-			return task.ContinueWith(x =>
-			{
-				if (x.IsFaulted)
-					x.Exception!.InnerException!.ReThrow();
-				if (x.IsCanceled)
-					throw new TaskCanceledException();
-				return map(x.Result);
-			}, TaskContinuationOptions.ExecuteSynchronously);
-		}
-
-		public static Task<T> Cast<T>(this Task task)
-		{
-			return task.ContinueWith(x =>
-			{
-				if (x.IsFaulted)
-					x.Exception!.InnerException!.ReThrow();
-				if (x.IsCanceled)
-					throw new TaskCanceledException();
-				return (T)((dynamic)x).Result;
-			}, TaskContinuationOptions.ExecuteSynchronously);
 		}
 
 		/// <summary>

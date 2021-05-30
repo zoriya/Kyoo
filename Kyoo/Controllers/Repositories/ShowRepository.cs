@@ -103,9 +103,9 @@ namespace Kyoo.Controllers
 			await base.Validate(resource);
 			if (resource.Studio != null)
 				resource.Studio = await _studios.CreateIfNotExists(resource.Studio);
-			resource.Genres = await resource.Genres
-				.SelectAsync(x => _genres.CreateIfNotExists(x))
-				.ToListAsync();
+			resource.Genres = await TaskUtils.DefaultIfNull(resource.Genres
+				?.SelectAsync(x => _genres.CreateIfNotExists(x))
+				.ToListAsync());
 			resource.GenreLinks = resource.Genres?
 				.Select(x => Link.UCreate(resource, x))
 				.ToList();
