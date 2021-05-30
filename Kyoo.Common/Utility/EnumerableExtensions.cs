@@ -18,13 +18,13 @@ namespace Kyoo
 		/// <param name="mapper">The function that will map each items</param>
 		/// <typeparam name="T">The type of items in <see cref="self"/></typeparam>
 		/// <typeparam name="T2">The type of items in the returned list</typeparam>
-		/// <returns>The list mapped or null if the input map was null.</returns>
-		/// <exception cref="ArgumentNullException">mapper can't be null</exception>
-		public static IEnumerable<T2> Map<T, T2>([CanBeNull] this IEnumerable<T> self, 
+		/// <returns>The list mapped.</returns>
+		/// <exception cref="ArgumentNullException">The list or the mapper can't be null</exception>
+		public static IEnumerable<T2> Map<T, T2>([NotNull] this IEnumerable<T> self, 
 			[NotNull] Func<T, int, T2> mapper)
 		{
 			if (self == null)
-				return null;
+				throw new ArgumentNullException(nameof(self));
 			if (mapper == null)
 				throw new ArgumentNullException(nameof(mapper));
 
@@ -46,28 +46,33 @@ namespace Kyoo
 		/// A map where the mapping function is asynchronous.
 		/// Note: <see cref="SelectAsync{T,T2}"/> might interest you. 
 		/// </summary>
-		/// <param name="self">The IEnumerable to map. If self is null, an empty list is returned</param>
+		/// <param name="self">The IEnumerable to map.</param>
 		/// <param name="mapper">The asynchronous function that will map each items</param>
 		/// <typeparam name="T">The type of items in <see cref="self"/></typeparam>
 		/// <typeparam name="T2">The type of items in the returned list</typeparam>
 		/// <returns>The list mapped as an AsyncEnumerable</returns>
-		/// <exception cref="ArgumentNullException">mapper can't be null</exception>
-		public static async IAsyncEnumerable<T2> MapAsync<T, T2>([CanBeNull] this IEnumerable<T> self, 
+		/// <exception cref="ArgumentNullException">The list or the mapper can't be null</exception>
+		public static IAsyncEnumerable<T2> MapAsync<T, T2>([NotNull] this IEnumerable<T> self, 
 			[NotNull] Func<T, int, Task<T2>> mapper)
 		{
 			if (self == null)
-				yield break;
+				throw new ArgumentNullException(nameof(self));
 			if (mapper == null)
 				throw new ArgumentNullException(nameof(mapper));
-			
-			using IEnumerator<T> enumerator = self.GetEnumerator();
-			int index = 0;
 
-			while (enumerator.MoveNext())
+			static async IAsyncEnumerable<T2> Generator(IEnumerable<T> self, Func<T, int, Task<T2>> mapper)
 			{
-				yield return await mapper(enumerator.Current, index);
-				index++;
+				using IEnumerator<T> enumerator = self.GetEnumerator();
+				int index = 0;
+
+				while (enumerator.MoveNext())
+				{
+					yield return await mapper(enumerator.Current, index);
+					index++;
+				}
 			}
+
+			return Generator(self, mapper);
 		}
 		
 		/// <summary>
@@ -78,19 +83,24 @@ namespace Kyoo
 		/// <typeparam name="T">The type of items in <see cref="self"/></typeparam>
 		/// <typeparam name="T2">The type of items in the returned list</typeparam>
 		/// <returns>The list mapped as an AsyncEnumerable</returns>
-		/// <exception cref="ArgumentNullException">mapper can't be null</exception>
-		public static async IAsyncEnumerable<T2> SelectAsync<T, T2>([CanBeNull] this IEnumerable<T> self, 
+		/// <exception cref="ArgumentNullException">The list or the mapper can't be null</exception>
+		public static IAsyncEnumerable<T2> SelectAsync<T, T2>([NotNull] this IEnumerable<T> self, 
 			[NotNull] Func<T, Task<T2>> mapper)
 		{
 			if (self == null)
-				yield break;
+				throw new ArgumentNullException(nameof(self));
 			if (mapper == null)
 				throw new ArgumentNullException(nameof(mapper));
-			
-			using IEnumerator<T> enumerator = self.GetEnumerator();
 
-			while (enumerator.MoveNext())
-				yield return await mapper(enumerator.Current);
+			static async IAsyncEnumerable<T2> Generator(IEnumerable<T> self, Func<T, Task<T2>> mapper)
+			{
+				using IEnumerator<T> enumerator = self.GetEnumerator();
+
+				while (enumerator.MoveNext())
+					yield return await mapper(enumerator.Current);
+			}
+
+			return Generator(self, mapper);
 		}
 
 		/// <summary>
@@ -100,16 +110,20 @@ namespace Kyoo
 		/// <typeparam name="T">The type of items in the async list and in the returned list.</typeparam>
 		/// <returns>A task that will return a simple list</returns>
 		/// <exception cref="ArgumentNullException">The list can't be null</exception>
-		public static async Task<List<T>> ToListAsync<T>([NotNull] this IAsyncEnumerable<T> self)
+		public static Task<List<T>> ToListAsync<T>([NotNull] this IAsyncEnumerable<T> self)
 		{
 			if (self == null)
 				throw new ArgumentNullException(nameof(self));
-			
-			List<T> ret = new();
-			
-			await foreach(T i in self)
-				ret.Add(i);
-			return ret;
+
+			static async Task<List<T>> ToList(IAsyncEnumerable<T> self)
+			{
+				List<T> ret = new();
+				await foreach (T i in self)
+					ret.Add(i);
+				return ret;
+			}
+
+			return ToList(self);
 		}
 
 		/// <summary>
@@ -118,22 +132,33 @@ namespace Kyoo
 		/// <param name="self">The enumerable to check</param>
 		/// <param name="action">The action to execute is the list is empty</param>
 		/// <typeparam name="T">The type of items inside the list</typeparam>
-		/// <returns></returns>
-		public static IEnumerable<T> IfEmpty<T>(this IEnumerable<T> self, Action action)
+		/// <exception cref="ArgumentNullException">The iterable and the action can't be null.</exception>
+		/// <returns>The iterator proxied, there is no dual iterations.</returns>
+		public static IEnumerable<T> IfEmpty<T>([NotNull] this IEnumerable<T> self, [NotNull] Action action)
 		{
-			using IEnumerator<T> enumerator = self.GetEnumerator();
+			if (self == null)
+				throw new ArgumentNullException(nameof(self));
+			if (action == null)
+				throw new ArgumentNullException(nameof(action));
 
-			if (!enumerator.MoveNext())
+			static IEnumerable<T> Generator(IEnumerable<T> self, Action action)
 			{
-				action();
-				yield break;
+				using IEnumerator<T> enumerator = self.GetEnumerator();
+
+				if (!enumerator.MoveNext())
+				{
+					action();
+					yield break;
+				}
+
+				do
+				{
+					yield return enumerator.Current;
+				} 
+				while (enumerator.MoveNext());
 			}
-			
-			do
-			{
-				yield return enumerator.Current;
-			}
-			while (enumerator.MoveNext());
+
+			return Generator(self, action);
 		}
 
 		/// <summary>
