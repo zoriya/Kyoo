@@ -1,11 +1,13 @@
-﻿using Kyoo.Models.Watch;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Linq;
-using System.Runtime.InteropServices;
 using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
 {
+	/// <summary>
+	/// The list of available stream types.
+	/// Attachments are only used temporarily by the transcoder but are not stored in a database.
+	/// </summary>
 	public enum StreamType
 	{
 		Unknown = 0,
@@ -15,82 +17,15 @@ namespace Kyoo.Models
 		Attachment = 4
 	}
 
-	namespace Watch
+	/// <summary>
+	/// A video, audio or subtitle track for an episode.
+	/// </summary>
+	public class Track : IResource
 	{
-		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-		public class Stream
-		{
-			public string Title { get; set; }
-			public string Language { get; set; }
-			public string Codec { get; set; }
-			[MarshalAs(UnmanagedType.I1)] public bool isDefault;
-			[MarshalAs(UnmanagedType.I1)] public bool isForced;
-			[SerializeIgnore] public string Path { get; set; }
-			[SerializeIgnore] public StreamType Type { get; set; }
-			
-			public Stream() {}
-			
-			public Stream(string title, string language, string codec, bool isDefault, bool isForced, string path, StreamType type)
-			{
-				Title = title;
-				Language = language;
-				Codec = codec;
-				this.isDefault = isDefault;
-				this.isForced = isForced;
-				Path = path;
-				Type = type;
-			}
-			
-			public Stream(Stream stream)
-			{
-				Title  = stream.Title;
-				Language  = stream.Language;
-				isDefault  = stream.isDefault;
-				isForced  = stream.isForced;
-				Codec  = stream.Codec;
-				Path = stream.Path;
-				Type  = stream.Type;
-			}
-		}
-	}
-
-	public class Track : Stream, IResource
-	{
+		/// <inheritdoc />
 		public int ID { get; set; }
-		[SerializeIgnore] public int EpisodeID { get; set; }
-		public int TrackIndex { get; set; }
-		public bool IsDefault
-		{
-			get => isDefault;
-			set => isDefault = value;
-		}
-		public bool IsForced
-		{
-			get => isForced;
-			set => isForced = value;
-		}
-
-		public string DisplayName
-		{
-			get
-			{
-				string language = GetLanguage(Language);
-
-				if (language == null)
-					return $"Unknown (index: {TrackIndex})";
-				CultureInfo info = CultureInfo.GetCultures(CultureTypes.NeutralCultures)
-					.FirstOrDefault(x => x.ThreeLetterISOLanguageName == language);
-				string name = info?.EnglishName ?? language;
-				if (IsForced)
-					name += " Forced";
-				if (IsExternal)
-					name += " (External)";
-				if (Title != null && Title.Length > 1)
-					name += " - " + Title;
-				return name;
-			}
-		}
-
+		
+		/// <inheritdoc />
 		public string Slug
 		{
 			get
@@ -112,34 +47,90 @@ namespace Kyoo.Models
 				return $"{Episode.Slug}.{type}{Language}{index}{(IsForced ? "-forced" : "")}{codec}";
 			}
 		}
-
-		public bool IsExternal { get; set; }
-		[LoadableRelation(nameof(EpisodeID))] public virtual Episode Episode { get; set; }
 		
-		public Track() { }
+		/// <summary>
+		/// The title of the stream.
+		/// </summary>
+		public string Title { get; set; }
+		
+		/// <summary>
+		/// The language of this stream (as a ISO-639-2 language code)
+		/// </summary>
+		public string Language { get; set; }
+		
+		/// <summary>
+		/// The codec of this stream.
+		/// </summary>
+		public string Codec { get; set; }
+		
+		
+		/// <summary>
+		/// Is this stream the default one of it's type?
+		/// </summary>
+		public bool IsDefault { get; set; }
+		
+		/// <summary>
+		/// Is this stream tagged as forced? 
+		/// </summary>
+		public bool IsForced { get; set; }
+		
+		/// <summary>
+		/// Is this track extern to the episode's file?
+		/// </summary>
+		public bool IsExternal { get; set; }
+		
+		/// <summary>
+		/// The path of this track.
+		/// </summary>
+		[SerializeIgnore] public string Path { get; set; }
+		
+		/// <summary>
+		/// The type of this stream.
+		/// </summary>
+		[SerializeIgnore] public StreamType Type { get; set; }
+		
+		/// <summary>
+		/// The ID of the episode that uses this track. This value is only set when the <see cref="Episode"/> has been loaded.
+		/// </summary>
+		[SerializeIgnore] public int EpisodeID { get; set; }
+		/// <summary>
+		/// The episode that uses this track.
+		/// </summary>
+		[LoadableRelation(nameof(EpisodeID))] public Episode Episode { get; set; }
 
-		public Track(StreamType type, 
-			string title, 
-			string language, 
-			bool isDefault,
-			bool isForced,
-			string codec, 
-			bool isExternal, 
-			string path)
-			: base(title, language, codec, isDefault, isForced, path, type)
-		{
-			IsExternal = isExternal;
-		}
+		/// <summary>
+		/// The index of this track on the episode.
+		/// </summary>
+		public int TrackIndex { get; set; }
 
-		public Track(Stream stream)
-			: base(stream)
+		/// <summary>
+		/// A user-friendly name for this track. It does not include the track type.
+		/// </summary>
+		public string DisplayName
 		{
-			IsExternal = false;
+			get
+			{
+				string language = GetLanguage(Language);
+
+				if (language == null)
+					return $"Unknown (index: {TrackIndex})";
+				CultureInfo info = CultureInfo.GetCultures(CultureTypes.NeutralCultures)
+					.FirstOrDefault(x => x.ThreeLetterISOLanguageName == language);
+				string name = info?.EnglishName ?? language;
+				if (IsForced)
+					name += " Forced";
+				if (IsExternal)
+					name += " (External)";
+				if (Title is {Length: > 1})
+					name += " - " + Title;
+				return name;
+			}
 		}
 
 		//Converting mkv track language to c# system language tag.
 		private static string GetLanguage(string mkvLanguage)
 		{
+			// TODO delete this and have a real way to get the language string from the ISO-639-2.
 			return mkvLanguage switch
 			{
 				"fre" => "fra",

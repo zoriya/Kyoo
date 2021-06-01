@@ -20,7 +20,8 @@ namespace Kyoo
 		/// <typeparam name="T2">The type of items in the returned list</typeparam>
 		/// <returns>The list mapped.</returns>
 		/// <exception cref="ArgumentNullException">The list or the mapper can't be null</exception>
-		public static IEnumerable<T2> Map<T, T2>([NotNull] this IEnumerable<T> self, 
+		[LinqTunnel]
+		public static IEnumerable<T2> Map<T, T2>([NotNull] this IEnumerable<T> self,
 			[NotNull] Func<T, int, T2> mapper)
 		{
 			if (self == null)
@@ -52,6 +53,7 @@ namespace Kyoo
 		/// <typeparam name="T2">The type of items in the returned list</typeparam>
 		/// <returns>The list mapped as an AsyncEnumerable</returns>
 		/// <exception cref="ArgumentNullException">The list or the mapper can't be null</exception>
+		[LinqTunnel]
 		public static IAsyncEnumerable<T2> MapAsync<T, T2>([NotNull] this IEnumerable<T> self, 
 			[NotNull] Func<T, int, Task<T2>> mapper)
 		{
@@ -84,6 +86,7 @@ namespace Kyoo
 		/// <typeparam name="T2">The type of items in the returned list</typeparam>
 		/// <returns>The list mapped as an AsyncEnumerable</returns>
 		/// <exception cref="ArgumentNullException">The list or the mapper can't be null</exception>
+		[LinqTunnel]
 		public static IAsyncEnumerable<T2> SelectAsync<T, T2>([NotNull] this IEnumerable<T> self, 
 			[NotNull] Func<T, Task<T2>> mapper)
 		{
@@ -110,6 +113,7 @@ namespace Kyoo
 		/// <typeparam name="T">The type of items in the async list and in the returned list.</typeparam>
 		/// <returns>A task that will return a simple list</returns>
 		/// <exception cref="ArgumentNullException">The list can't be null</exception>
+		[LinqTunnel]
 		public static Task<List<T>> ToListAsync<T>([NotNull] this IAsyncEnumerable<T> self)
 		{
 			if (self == null)
@@ -134,6 +138,7 @@ namespace Kyoo
 		/// <typeparam name="T">The type of items inside the list</typeparam>
 		/// <exception cref="ArgumentNullException">The iterable and the action can't be null.</exception>
 		/// <returns>The iterator proxied, there is no dual iterations.</returns>
+		[LinqTunnel]
 		public static IEnumerable<T> IfEmpty<T>([NotNull] this IEnumerable<T> self, [NotNull] Action action)
 		{
 			if (self == null)
@@ -236,6 +241,7 @@ namespace Kyoo
 		/// <param name="countPerList">The number of items in each chunk</param>
 		/// <typeparam name="T">The type of data in the initial list.</typeparam>
 		/// <returns>A list of chunks</returns>
+		[LinqTunnel]
 		public static IEnumerable<List<T>> BatchBy<T>(this List<T> list, int countPerList)
 		{
 			for (int i = 0; i < list.Count; i += countPerList)
@@ -249,6 +255,7 @@ namespace Kyoo
 		/// <param name="countPerList">The number of items in each chunk</param>
 		/// <typeparam name="T">The type of data in the initial list.</typeparam>
 		/// <returns>A list of chunks</returns>
+		[LinqTunnel]
 		public static IEnumerable<T[]> BatchBy<T>(this IEnumerable<T> list, int countPerList)
 		{
 			T[] ret = new T[countPerList];

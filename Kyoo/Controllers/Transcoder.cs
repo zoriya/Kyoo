@@ -57,7 +57,7 @@ namespace Kyoo.Controllers
 						Stream stream = Marshal.PtrToStructure<Stream>(streamsPtr);
 						if (stream!.Type != StreamType.Unknown)
 						{
-							tracks[j] = new Track(stream);
+							tracks[j] = stream.ToTrack();
 							j++;
 						}
 						streamsPtr += size;

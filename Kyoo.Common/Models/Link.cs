@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace Kyoo.Models
@@ -55,13 +54,12 @@ namespace Kyoo.Models
 		where T1 : class, IResource
 		where T2 : class, IResource
 	{
-		public virtual T1 First { get; set; }
-		public virtual T2 Second { get; set; }
+		public T1 First { get; set; }
+		public T2 Second { get; set; }
 		
 		
 		public Link() {}
 		
-		[SuppressMessage("ReSharper", "VirtualMemberCallInConstructor")]
 		public Link(T1 first, T2 second, bool privateItems = false)
 			: base(first, second)
 		{

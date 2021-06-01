@@ -5,6 +5,9 @@ using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
 {
+	/// <summary>
+	/// The type of item, ether a show, a movie or a collection.
+	/// </summary>
 	public enum ItemType
 	{
 		Show,
@@ -12,16 +15,50 @@ namespace Kyoo.Models
 		Collection
 	}
 	
+	/// <summary>
+	/// A type union between <see cref="Show"/> and <see cref="Collection"/>.
+	/// This is used to list content put inside a library.
+	/// </summary>
 	public class LibraryItem : IResource
 	{
+		/// <inheritdoc />
 		public int ID { get; set; }
+		
+		/// <inheritdoc />
 		public string Slug { get; set; }
+		
+		/// <summary>
+		/// The title of the show or collection.
+		/// </summary>
 		public string Title { get; set; }
+		
+		/// <summary>
+		/// The summary of the show or collection.
+		/// </summary>
 		public string Overview { get; set; }
+		
+		/// <summary>
+		/// Is this show airing, not aired yet or finished? This is only applicable for shows.
+		/// </summary>
 		public Status? Status { get; set; }
-		public string TrailerUrl { get; set; }
-		public int? StartYear { get; set; }
-		public int? EndYear { get; set; }
+		
+		/// <summary>
+		/// The date this show or collection started airing. It can be null if this is unknown. 
+		/// </summary>
+		public DateTime? StartAir { get; set; }
+		
+		/// <summary>
+		/// The date this show or collection finished airing.
+		/// It must be after the <see cref="StartAir"/> but can be the same (example: for movies).
+		/// It can also be null if this is unknown.
+		/// </summary>
+		public DateTime? EndAir { get; set; }
+		
+		/// <summary>
+		/// The path of this item's poster.
+		/// By default, the http path for this poster is returned from the public API.
+		/// This can be disabled using the internal query flag.
+		/// </summary>
 		[SerializeAs("{HOST}/api/{_type}/{Slug}/poster")] public string Poster { get; set; }
 		[UsedImplicitly] private string _type => Type == ItemType.Collection ? "collection" : "show";
 		public ItemType Type { get; set; }
@@ -35,9 +72,8 @@ namespace Kyoo.Models
 			Title = show.Title;
 			Overview = show.Overview;
 			Status = show.Status;
-			TrailerUrl = show.TrailerUrl;
-			StartYear = show.StartYear;
-			EndYear = show.EndYear;
+			StartAir = show.StartAir;
+			EndAir = show.EndAir;
 			Poster = show.Poster;
 			Type = show.IsMovie ? ItemType.Movie : ItemType.Show;
 		}
@@ -49,9 +85,8 @@ namespace Kyoo.Models
 			Title = collection.Name;
 			Overview = collection.Overview;
 			Status = Models.Status.Unknown;
-			TrailerUrl = null;
-			StartYear = null;
-			EndYear = null;
+			StartAir = null;
+			EndAir = null;
 			Poster = collection.Poster;
 			Type = ItemType.Collection;
 		}
@@ -63,9 +98,8 @@ namespace Kyoo.Models
 			Title = x.Title,
 			Overview = x.Overview,
 			Status = x.Status,
-			TrailerUrl = x.TrailerUrl,
-			StartYear = x.StartYear,
-			EndYear = x.EndYear,
+			StartAir = x.StartAir,
+			EndAir = x.EndAir,
 			Poster= x.Poster,
 			Type = x.IsMovie ? ItemType.Movie : ItemType.Show
 		};
@@ -77,10 +111,9 @@ namespace Kyoo.Models
 			Title = x.Name,
 			Overview = x.Overview,
 			Status = Models.Status.Unknown,
-			TrailerUrl = null,
-			StartYear = null,
-			EndYear = null,
-			Poster= x.Poster,
+			StartAir = null,
+			EndAir = null,
+			Poster = x.Poster,
 			Type = ItemType.Collection
 		};
 	}

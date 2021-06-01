@@ -292,13 +292,19 @@ namespace Kyoo.Tasks
 			catch (DuplicatedItemException)
 			{
 				old = await libraryManager.GetOrDefault<Show>(show.Slug);
-				if (old.Path == showPath)
+				if (old != null && old.Path == showPath)
 				{
 					await libraryManager.Load(old, x => x.ExternalIDs);
 					return old;
 				}
-				show.Slug += $"-{show.StartYear}";
-				await libraryManager.Create(show);
+
+				if (show.StartAir != null)
+				{
+					show.Slug += $"-{show.StartAir.Value.Year}";
+					await libraryManager.Create(show);
+				}
+				else
+					throw;
 			}
 			await ThumbnailsManager.Validate(show);
 			return show;
