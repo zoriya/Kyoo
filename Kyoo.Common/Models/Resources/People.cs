@@ -27,9 +27,9 @@ namespace Kyoo.Models
 		[SerializeAs("{HOST}/api/people/{Slug}/poster")] public string Poster { get; set; }
 		
 		/// <summary>
-        /// The link to metadata providers that this person has. See <see cref="MetadataID"/> for more information.
+        /// The link to metadata providers that this person has. See <see cref="MetadataID{T}"/> for more information.
         /// </summary>
-		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
+		[EditableRelation] [LoadableRelation] public ICollection<MetadataID<People>> ExternalIDs { get; set; }
 		
 		/// <summary>
 		/// The list of roles this person has played in. See <see cref="PeopleRole"/> for more information.

@@ -86,9 +86,9 @@ namespace Kyoo.Models
 		public DateTime? ReleaseDate { get; set; }
 
 		/// <summary>
-		/// The link to metadata providers that this episode has. See <see cref="MetadataID"/> for more information.
+		/// The link to metadata providers that this episode has. See <see cref="MetadataID{T}"/> for more information.
 		/// </summary>
-		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
+		[EditableRelation] [LoadableRelation] public ICollection<MetadataID<Episode>> ExternalIDs { get; set; }
 
 		/// <summary>
 		/// The list of tracks this episode has. This lists video, audio and subtitles available.

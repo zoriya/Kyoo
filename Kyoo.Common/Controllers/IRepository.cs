@@ -631,10 +631,12 @@ namespace Kyoo.Controllers
 		/// <param name="where">A predicate to add arbitrary filter</param>
 		/// <param name="sort">Sort information (sort order & sort by)</param>
 		/// <param name="limit">Pagination information (where to start and how many to get)</param>
+		/// <typeparam name="T">The type of metadata to retrieve</typeparam>
 		/// <returns>A filtered list of external ids.</returns>
-		Task<ICollection<MetadataID>> GetMetadataID(Expression<Func<MetadataID, bool>> where = null, 
-			Sort<MetadataID> sort = default,
-			Pagination limit = default);
+		Task<ICollection<MetadataID<T>>> GetMetadataID<T>(Expression<Func<MetadataID<T>, bool>> where = null, 
+			Sort<MetadataID<T>> sort = default,
+			Pagination limit = default)
+			where T : class, IResource;
 
 		/// <summary>
 		/// Get a list of external ids that match all filters
@@ -643,10 +645,11 @@ namespace Kyoo.Controllers
 		/// <param name="sort">A sort by expression</param>
 		/// <param name="limit">Pagination information (where to start and how many to get)</param>
 		/// <returns>A filtered list of external ids.</returns>
-		Task<ICollection<MetadataID>> GetMetadataID([Optional] Expression<Func<MetadataID, bool>> where,
-			Expression<Func<MetadataID, object>> sort,
+		Task<ICollection<MetadataID<T>>> GetMetadataID<T>([Optional] Expression<Func<MetadataID<T>, bool>> where,
+			Expression<Func<MetadataID<T>, object>> sort,
 			Pagination limit = default
-		) => GetMetadataID(where, new Sort<MetadataID>(sort), limit);
+		) where T : class, IResource
+			=> GetMetadataID(where, new Sort<MetadataID<T>>(sort), limit);
 	}
 	
 	/// <summary>

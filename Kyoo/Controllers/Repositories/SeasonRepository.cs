@@ -160,9 +160,9 @@ namespace Kyoo.Controllers
 			await base.Validate(resource);
 			await resource.ExternalIDs.ForEachAsync(async id =>
 			{
-				id.Provider = await _providers.CreateIfNotExists(id.Provider);
-				id.ProviderID = id.Provider.ID;
-				_database.Entry(id.Provider).State = EntityState.Detached;
+				id.Second = await _providers.CreateIfNotExists(id.Second);
+				id.SecondID = id.Second.ID;
+				_database.Entry(id.Second).State = EntityState.Detached;
 			});
 		}
 

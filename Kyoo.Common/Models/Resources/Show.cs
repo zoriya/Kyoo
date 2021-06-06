@@ -89,9 +89,9 @@ namespace Kyoo.Models
 		public bool IsMovie { get; set; }
 
 		/// <summary>
-		/// The link to metadata providers that this show has. See <see cref="MetadataID"/> for more information.
+		/// The link to metadata providers that this show has. See <see cref="MetadataID{T}"/> for more information.
 		/// </summary>
-		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
+		[EditableRelation] [LoadableRelation] public ICollection<MetadataID<Show>> ExternalIDs { get; set; }
 		
 		/// <summary>
 		/// The ID of the Studio that made this show. This value is only set when the <see cref="Studio"/> has been loaded.
@@ -155,18 +155,18 @@ namespace Kyoo.Models
 		/// </summary>
 		/// <remarks>This method will never return anything if the <see cref="ExternalIDs"/> are not loaded.</remarks>
 		/// <param name="provider">The slug of the provider</param>
-		/// <returns>The <see cref="MetadataID.DataID"/> field of the asked provider.</returns>
+		/// <returns>The <see cref="MetadataID{T}.DataID"/> field of the asked provider.</returns>
 		public string GetID(string provider)
 		{
-			return ExternalIDs?.FirstOrDefault(x => x.Provider.Slug == provider)?.DataID;
+			return ExternalIDs?.FirstOrDefault(x => x.Second.Slug == provider)?.DataID;
 		}
 
 		/// <inheritdoc />
 		public void OnMerge(object merged)
 		{
 			if (ExternalIDs != null)
-				foreach (MetadataID id in ExternalIDs)
-					id.Show = this;
+				foreach (MetadataID<Show> id in ExternalIDs)
+					id.First = this;
 			if (People != null)
 				foreach (PeopleRole link in People)
 					link.Show = this;

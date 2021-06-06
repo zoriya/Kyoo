@@ -234,9 +234,9 @@ namespace Kyoo.Controllers
 			await base.Validate(resource);
 			resource.ExternalIDs = await resource.ExternalIDs.SelectAsync(async x => 
 			{ 
-				x.Provider = await _providers.CreateIfNotExists(x.Provider);
-				x.ProviderID = x.Provider.ID;
-				_database.Entry(x.Provider).State = EntityState.Detached;
+				x.Second = await _providers.CreateIfNotExists(x.Second);
+				x.SecondID = x.Second.ID;
+				_database.Entry(x.Second).State = EntityState.Detached;
 				return x;
 			}).ToListAsync();
 		}

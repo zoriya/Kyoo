@@ -250,9 +250,9 @@ namespace Kyoo.Controllers
 				
 				
 				(Show s, nameof(Show.ExternalIDs)) => SetRelation(s, 
-					ProviderRepository.GetMetadataID(x => x.ShowID == obj.ID),
+					ProviderRepository.GetMetadataID<Show>(x => x.FirstID == obj.ID),
 					(x, y) => x.ExternalIDs = y,
-					(x, y) => { x.Show = y; x.ShowID = y.ID; }),
+					(x, y) => { x.First = y; x.FirstID = y.ID; }),
 				
 				(Show s, nameof(Show.Genres)) => GenreRepository
 					.GetAll(x => x.Shows.Any(y => y.ID == obj.ID))
@@ -290,9 +290,9 @@ namespace Kyoo.Controllers
 				
 				
 				(Season s, nameof(Season.ExternalIDs)) => SetRelation(s, 
-					ProviderRepository.GetMetadataID(x => x.SeasonID == obj.ID),
+					ProviderRepository.GetMetadataID<Season>(x => x.FirstID == obj.ID),
 					(x, y) => x.ExternalIDs = y,
-					(x, y) => { x.Season = y; x.SeasonID = y.ID; }),
+					(x, y) => { x.First = y; x.FirstID = y.ID; }),
 				
 				(Season s, nameof(Season.Episodes)) => SetRelation(s, 
 					EpisodeRepository.GetAll(x => x.Season.ID == obj.ID),
@@ -309,9 +309,9 @@ namespace Kyoo.Controllers
 				
 				
 				(Episode e, nameof(Episode.ExternalIDs)) => SetRelation(e, 
-					ProviderRepository.GetMetadataID(x => x.EpisodeID == obj.ID), 
+					ProviderRepository.GetMetadataID<Episode>(x => x.FirstID == obj.ID), 
 					(x, y) => x.ExternalIDs = y,
-					(x, y) => { x.Episode = y; x.EpisodeID = y.ID; }),
+					(x, y) => { x.First = y; x.FirstID = y.ID; }),
 				
 				(Episode e, nameof(Episode.Tracks)) => SetRelation(e, 
 					TrackRepository.GetAll(x => x.Episode.ID == obj.ID),
@@ -355,9 +355,9 @@ namespace Kyoo.Controllers
 				
 				
 				(People p, nameof(People.ExternalIDs)) => SetRelation(p, 
-					ProviderRepository.GetMetadataID(x => x.PeopleID == obj.ID),
+					ProviderRepository.GetMetadataID<People>(x => x.FirstID == obj.ID),
 					(x, y) => x.ExternalIDs = y,
-					(x, y) => { x.People = y; x.PeopleID = y.ID; }),
+					(x, y) => { x.First = y; x.FirstID = y.ID; }),
 				
 				(People p, nameof(People.Roles)) => PeopleRepository
 					.GetFromPeople(obj.ID)

@@ -7,7 +7,6 @@ using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using JetBrains.Annotations;
 
 namespace Kyoo

@@ -61,10 +61,6 @@ namespace Kyoo
 		/// </summary>
 		public DbSet<Provider> Providers { get; set; }
 		/// <summary>
-		/// All metadataIDs (ExternalIDs) of Kyoo. See <see cref="MetadataID"/>.
-		/// </summary>
-		public DbSet<MetadataID> MetadataIds { get; set; }
-		/// <summary>
 		/// The list of registered users.
 		/// </summary>
 		public DbSet<User> Users { get; set; }
@@ -79,6 +75,17 @@ namespace Kyoo
 		/// </summary>
 		public DbSet<WatchedEpisode> WatchedEpisodes { get; set; }
 
+		/// <summary>
+		/// Get all metadataIDs (ExternalIDs) of a given resource. See <see cref="MetadataID{T}"/>.
+		/// </summary>
+		/// <typeparam name="T">The metadata of this type will be returned.</typeparam>
+		/// <returns>A queryable of metadata ids for a type.</returns>
+		public DbSet<MetadataID<T>> MetadataIds<T>()
+			where T : class, IResource
+		{
+			return Set<MetadataID<T>>();
+		}
+		
 		/// <summary>
 		/// Get a generic link between two resource types.
 		/// </summary>
@@ -205,25 +212,33 @@ namespace Kyoo
 						.WithMany(x => x.ShowLinks),
 					y => y.HasKey(Link<User, Show>.PrimaryKey));
 
-			modelBuilder.Entity<MetadataID>()
-				.HasOne(x => x.Show)
+			modelBuilder.Entity<MetadataID<Show>>()
+				.HasOne(x => x.First)
 				.WithMany(x => x.ExternalIDs)
 				.OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<MetadataID>()
-				.HasOne(x => x.Season)
+			modelBuilder.Entity<MetadataID<Season>>()
+				.HasOne(x => x.First)
 				.WithMany(x => x.ExternalIDs)
 				.OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<MetadataID>()
-				.HasOne(x => x.Episode)
+			modelBuilder.Entity<MetadataID<Episode>>()
+				.HasOne(x => x.First)
 				.WithMany(x => x.ExternalIDs)
 				.OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<MetadataID>()
-				.HasOne(x => x.People)
+			modelBuilder.Entity<MetadataID<People>>()
+				.HasOne(x => x.First)
 				.WithMany(x => x.ExternalIDs)
 				.OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<MetadataID>()
-				.HasOne(x => x.Provider)
-				.WithMany(x => x.MetadataLinks)
+			
+			
+			modelBuilder.Entity<MetadataID<Show>>().HasOne(x => x.Second).WithMany()
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<MetadataID<Season>>().HasOne(x => x.Second).WithMany()
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<MetadataID<Episode>>().HasOne(x => x.Second).WithMany()
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<MetadataID<People>>().HasOne(x => x.Second).WithMany()
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<MetadataID<Show>>().HasOne(x => x.Second).WithMany()
 				.OnDelete(DeleteBehavior.Cascade);
 
 			modelBuilder.Entity<WatchedEpisode>()

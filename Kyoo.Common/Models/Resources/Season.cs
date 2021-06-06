@@ -63,9 +63,9 @@ namespace Kyoo.Models
 		[SerializeAs("{HOST}/api/seasons/{Slug}/thumb")] public string Poster { get; set; }
 		
 		/// <summary>
-		/// The link to metadata providers that this episode has. See <see cref="MetadataID"/> for more information.
+		/// The link to metadata providers that this episode has. See <see cref="MetadataID{T}"/> for more information.
 		/// </summary>
-		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
+		[EditableRelation] [LoadableRelation] public ICollection<MetadataID<Season>> ExternalIDs { get; set; }
 
 		/// <summary>
 		/// The list of episodes that this season contains.

@@ -44,11 +44,6 @@ namespace Kyoo.Models
 		/// The internal link between this provider and libraries in the <see cref="Libraries"/> list.
 		/// </summary>
 		[Link] public ICollection<Link<Library, Provider>> LibraryLinks { get; set; }
-		
-		/// <summary>
-		/// The internal link between this provider and related <see cref="MetadataID"/>.
-		/// </summary>
-		[Link] public ICollection<MetadataID> MetadataLinks { get; set; }
 #endif
 		
 		/// <summary>
