@@ -1,6 +1,5 @@
 using System;
 using System.Linq.Expressions;
-using JetBrains.Annotations;
 using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
@@ -59,12 +58,23 @@ namespace Kyoo.Models
 		/// By default, the http path for this poster is returned from the public API.
 		/// This can be disabled using the internal query flag.
 		/// </summary>
-		[SerializeAs("{HOST}/api/{_type}/{Slug}/poster")] public string Poster { get; set; }
-		[UsedImplicitly] private string _type => Type == ItemType.Collection ? "collection" : "show";
+		[SerializeAs("{HOST}/api/{Type}/{Slug}/poster")] public string Poster { get; set; }
+		
+		/// <summary>
+		/// The type of this item (ether a collection, a show or a movie).
+		/// </summary>
 		public ItemType Type { get; set; }
 		
+		
+		/// <summary>
+		/// Create a new, empty <see cref="LibraryItem"/>.
+		/// </summary>
 		public LibraryItem() {}
 
+		/// <summary>
+		/// Create a <see cref="LibraryItem"/> from a show.
+		/// </summary>
+		/// <param name="show">The show that this library item should represent.</param>
 		public LibraryItem(Show show)
 		{
 			ID = show.ID;
@@ -78,6 +88,10 @@ namespace Kyoo.Models
 			Type = show.IsMovie ? ItemType.Movie : ItemType.Show;
 		}
 		
+		/// <summary>
+		/// Create a <see cref="LibraryItem"/> from a collection
+		/// </summary>
+		/// <param name="collection">The collection that this library item should represent.</param>
 		public LibraryItem(Collection collection)
 		{
 			ID = -collection.ID;
@@ -91,6 +105,9 @@ namespace Kyoo.Models
 			Type = ItemType.Collection;
 		}
 
+		/// <summary>
+		/// An expression to create a <see cref="LibraryItem"/> representing a show.
+		/// </summary>
 		public static Expression<Func<Show, LibraryItem>> FromShow => x => new LibraryItem
 		{
 			ID = x.ID,
@@ -104,6 +121,9 @@ namespace Kyoo.Models
 			Type = x.IsMovie ? ItemType.Movie : ItemType.Show
 		};
 		
+		/// <summary>
+		/// An expression to create a <see cref="LibraryItem"/> representing a collection.
+		/// </summary>
 		public static Expression<Func<Collection, LibraryItem>> FromCollection => x => new LibraryItem
 		{
 			ID = -x.ID,
