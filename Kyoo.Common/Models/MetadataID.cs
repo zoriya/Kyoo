@@ -1,3 +1,6 @@
+using System;
+using System.Linq.Expressions;
+
 namespace Kyoo.Models
 {
 	/// <summary>
@@ -16,5 +19,16 @@ namespace Kyoo.Models
 		/// The URL of the resource on the external provider.
 		/// </summary>
 		public string Link { get; set; }
+		
+		/// <summary>
+		/// The expression to retrieve the unique ID of a MetadataID. This is an aggregate of the two resources IDs.
+		/// </summary>
+		public new static Expression<Func<MetadataID<T>, object>> PrimaryKey
+		{
+			get
+			{
+				return x => new {First = x.FirstID, Second = x.SecondID};
+			}	
+		}
 	}
 }

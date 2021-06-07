@@ -213,17 +213,25 @@ namespace Kyoo
 					y => y.HasKey(Link<User, Show>.PrimaryKey));
 
 			modelBuilder.Entity<MetadataID<Show>>()
+				.HasKey(MetadataID<Show>.PrimaryKey);
+			modelBuilder.Entity<MetadataID<Show>>()
 				.HasOne(x => x.First)
 				.WithMany(x => x.ExternalIDs)
 				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<MetadataID<Season>>()
+				.HasKey(MetadataID<Season>.PrimaryKey);
 			modelBuilder.Entity<MetadataID<Season>>()
 				.HasOne(x => x.First)
 				.WithMany(x => x.ExternalIDs)
 				.OnDelete(DeleteBehavior.Cascade);
 			modelBuilder.Entity<MetadataID<Episode>>()
+				.HasKey(MetadataID<Episode>.PrimaryKey);
+			modelBuilder.Entity<MetadataID<Episode>>()
 				.HasOne(x => x.First)
 				.WithMany(x => x.ExternalIDs)
 				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<MetadataID<People>>()
+				.HasKey(MetadataID<People>.PrimaryKey);
 			modelBuilder.Entity<MetadataID<People>>()
 				.HasOne(x => x.First)
 				.WithMany(x => x.ExternalIDs)

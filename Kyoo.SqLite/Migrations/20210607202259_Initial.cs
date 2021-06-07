@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Kyoo.SQLite.Migrations
+namespace Kyoo.SqLite.Migrations
 {
     public partial class Initial : Migration
     {
@@ -164,6 +164,32 @@ namespace Kyoo.SQLite.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "MetadataID<People>",
+                columns: table => new
+                {
+                    FirstID = table.Column<int>(type: "INTEGER", nullable: false),
+                    SecondID = table.Column<int>(type: "INTEGER", nullable: false),
+                    DataID = table.Column<string>(type: "TEXT", nullable: true),
+                    Link = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MetadataID<People>", x => new { x.FirstID, x.SecondID });
+                    table.ForeignKey(
+                        name: "FK_MetadataID<People>_People_FirstID",
+                        column: x => x.FirstID,
+                        principalTable: "People",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_MetadataID<People>_Providers_SecondID",
+                        column: x => x.SecondID,
+                        principalTable: "Providers",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Shows",
                 columns: table => new
                 {
@@ -176,8 +202,8 @@ namespace Kyoo.SQLite.Migrations
                     Overview = table.Column<string>(type: "TEXT", nullable: true),
                     Status = table.Column<int>(type: "INTEGER", nullable: true),
                     TrailerUrl = table.Column<string>(type: "TEXT", nullable: true),
-                    StartYear = table.Column<int>(type: "INTEGER", nullable: true),
-                    EndYear = table.Column<int>(type: "INTEGER", nullable: true),
+                    StartAir = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    EndAir = table.Column<DateTime>(type: "TEXT", nullable: true),
                     Poster = table.Column<string>(type: "TEXT", nullable: true),
                     Logo = table.Column<string>(type: "TEXT", nullable: true),
                     Backdrop = table.Column<string>(type: "TEXT", nullable: true),
@@ -292,15 +318,42 @@ namespace Kyoo.SQLite.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "MetadataID<Show>",
+                columns: table => new
+                {
+                    FirstID = table.Column<int>(type: "INTEGER", nullable: false),
+                    SecondID = table.Column<int>(type: "INTEGER", nullable: false),
+                    DataID = table.Column<string>(type: "TEXT", nullable: true),
+                    Link = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MetadataID<Show>", x => new { x.FirstID, x.SecondID });
+                    table.ForeignKey(
+                        name: "FK_MetadataID<Show>_Providers_SecondID",
+                        column: x => x.SecondID,
+                        principalTable: "Providers",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_MetadataID<Show>_Shows_FirstID",
+                        column: x => x.FirstID,
+                        principalTable: "Shows",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "PeopleRoles",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    ForPeople = table.Column<bool>(type: "INTEGER", nullable: false),
                     PeopleID = table.Column<int>(type: "INTEGER", nullable: false),
                     ShowID = table.Column<int>(type: "INTEGER", nullable: false),
-                    Role = table.Column<string>(type: "TEXT", nullable: true),
-                    Type = table.Column<string>(type: "TEXT", nullable: true)
+                    Type = table.Column<string>(type: "TEXT", nullable: true),
+                    Role = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -329,7 +382,8 @@ namespace Kyoo.SQLite.Migrations
                     SeasonNumber = table.Column<int>(type: "INTEGER", nullable: false),
                     Title = table.Column<string>(type: "TEXT", nullable: true),
                     Overview = table.Column<string>(type: "TEXT", nullable: true),
-                    Year = table.Column<int>(type: "INTEGER", nullable: true),
+                    StartDate = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    EndDate = table.Column<DateTime>(type: "TEXT", nullable: true),
                     Poster = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
@@ -358,8 +412,7 @@ namespace Kyoo.SQLite.Migrations
                     Thumb = table.Column<string>(type: "TEXT", nullable: true),
                     Title = table.Column<string>(type: "TEXT", nullable: true),
                     Overview = table.Column<string>(type: "TEXT", nullable: true),
-                    ReleaseDate = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    Runtime = table.Column<int>(type: "INTEGER", nullable: false)
+                    ReleaseDate = table.Column<DateTime>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -379,50 +432,53 @@ namespace Kyoo.SQLite.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "MetadataIds",
+                name: "MetadataID<Season>",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    ProviderID = table.Column<int>(type: "INTEGER", nullable: false),
-                    ShowID = table.Column<int>(type: "INTEGER", nullable: true),
-                    EpisodeID = table.Column<int>(type: "INTEGER", nullable: true),
-                    SeasonID = table.Column<int>(type: "INTEGER", nullable: true),
-                    PeopleID = table.Column<int>(type: "INTEGER", nullable: true),
+                    FirstID = table.Column<int>(type: "INTEGER", nullable: false),
+                    SecondID = table.Column<int>(type: "INTEGER", nullable: false),
                     DataID = table.Column<string>(type: "TEXT", nullable: true),
                     Link = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MetadataIds", x => x.ID);
+                    table.PrimaryKey("PK_MetadataID<Season>", x => new { x.FirstID, x.SecondID });
                     table.ForeignKey(
-                        name: "FK_MetadataIds_Episodes_EpisodeID",
-                        column: x => x.EpisodeID,
-                        principalTable: "Episodes",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_MetadataIds_People_PeopleID",
-                        column: x => x.PeopleID,
-                        principalTable: "People",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_MetadataIds_Providers_ProviderID",
-                        column: x => x.ProviderID,
+                        name: "FK_MetadataID<Season>_Providers_SecondID",
+                        column: x => x.SecondID,
                         principalTable: "Providers",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_MetadataIds_Seasons_SeasonID",
-                        column: x => x.SeasonID,
+                        name: "FK_MetadataID<Season>_Seasons_FirstID",
+                        column: x => x.FirstID,
                         principalTable: "Seasons",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MetadataID<Episode>",
+                columns: table => new
+                {
+                    FirstID = table.Column<int>(type: "INTEGER", nullable: false),
+                    SecondID = table.Column<int>(type: "INTEGER", nullable: false),
+                    DataID = table.Column<string>(type: "TEXT", nullable: true),
+                    Link = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MetadataID<Episode>", x => new { x.FirstID, x.SecondID });
                     table.ForeignKey(
-                        name: "FK_MetadataIds_Shows_ShowID",
-                        column: x => x.ShowID,
-                        principalTable: "Shows",
+                        name: "FK_MetadataID<Episode>_Episodes_FirstID",
+                        column: x => x.FirstID,
+                        principalTable: "Episodes",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_MetadataID<Episode>_Providers_SecondID",
+                        column: x => x.SecondID,
+                        principalTable: "Providers",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -433,16 +489,16 @@ namespace Kyoo.SQLite.Migrations
                 {
                     ID = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    EpisodeID = table.Column<int>(type: "INTEGER", nullable: false),
-                    TrackIndex = table.Column<int>(type: "INTEGER", nullable: false),
-                    IsDefault = table.Column<bool>(type: "INTEGER", nullable: false),
-                    IsForced = table.Column<bool>(type: "INTEGER", nullable: false),
-                    IsExternal = table.Column<bool>(type: "INTEGER", nullable: false),
                     Title = table.Column<string>(type: "TEXT", nullable: true),
                     Language = table.Column<string>(type: "TEXT", nullable: true),
                     Codec = table.Column<string>(type: "TEXT", nullable: true),
+                    IsDefault = table.Column<bool>(type: "INTEGER", nullable: false),
+                    IsForced = table.Column<bool>(type: "INTEGER", nullable: false),
+                    IsExternal = table.Column<bool>(type: "INTEGER", nullable: false),
                     Path = table.Column<string>(type: "TEXT", nullable: true),
-                    Type = table.Column<int>(type: "INTEGER", nullable: false)
+                    Type = table.Column<int>(type: "INTEGER", nullable: false),
+                    EpisodeID = table.Column<int>(type: "INTEGER", nullable: false),
+                    TrackIndex = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -540,29 +596,24 @@ namespace Kyoo.SQLite.Migrations
                 column: "SecondID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MetadataIds_EpisodeID",
-                table: "MetadataIds",
-                column: "EpisodeID");
+                name: "IX_MetadataID<Episode>_SecondID",
+                table: "MetadataID<Episode>",
+                column: "SecondID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MetadataIds_PeopleID",
-                table: "MetadataIds",
-                column: "PeopleID");
+                name: "IX_MetadataID<People>_SecondID",
+                table: "MetadataID<People>",
+                column: "SecondID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MetadataIds_ProviderID",
-                table: "MetadataIds",
-                column: "ProviderID");
+                name: "IX_MetadataID<Season>_SecondID",
+                table: "MetadataID<Season>",
+                column: "SecondID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MetadataIds_SeasonID",
-                table: "MetadataIds",
-                column: "SeasonID");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_MetadataIds_ShowID",
-                table: "MetadataIds",
-                column: "ShowID");
+                name: "IX_MetadataID<Show>_SecondID",
+                table: "MetadataID<Show>",
+                column: "SecondID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_People_Slug",
@@ -648,7 +699,16 @@ namespace Kyoo.SQLite.Migrations
                 name: "Link<User, Show>");
 
             migrationBuilder.DropTable(
-                name: "MetadataIds");
+                name: "MetadataID<Episode>");
+
+            migrationBuilder.DropTable(
+                name: "MetadataID<People>");
+
+            migrationBuilder.DropTable(
+                name: "MetadataID<Season>");
+
+            migrationBuilder.DropTable(
+                name: "MetadataID<Show>");
 
             migrationBuilder.DropTable(
                 name: "PeopleRoles");
