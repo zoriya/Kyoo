@@ -9,95 +9,137 @@ using PathIO = System.IO.Path;
 
 namespace Kyoo.Models
 {
-	public class Chapter
-	{
-		public float StartTime;
-		public float EndTime;
-		public string Name;
-
-		public Chapter(float startTime, float endTime, string name)
-		{
-			StartTime = startTime;
-			EndTime = endTime;
-			Name = name;
-		}
-	}
-	
+	/// <summary>
+	/// A watch item give information useful for playback.
+	/// Information about tracks and display information that could be used by the player.
+	/// This contains mostly data from an <see cref="Episode"/> with another form.
+	/// </summary>
 	public class WatchItem
 	{
+		/// <summary>
+		/// The ID of the episode associated with this item.
+		/// </summary>
 		public int EpisodeID { get; set; }
-
-		public string ShowTitle { get; set; }
-		public string ShowSlug { get; set; }
-		public int SeasonNumber { get; set; }
-		public int EpisodeNumber { get; set; }
-		public int AbsoluteNumber { get; set; }
-		public string Title { get; set; }
+		
+		/// <summary>
+		/// The slug of this episode.
+		/// </summary>
 		public string Slug { get; set; }
+
+		/// <summary>
+		/// The title of the show containing this episode.
+		/// </summary>
+		public string ShowTitle { get; set; }
+		
+		/// <summary>
+		/// The slug of the show containing this episode
+		/// </summary>
+		public string ShowSlug { get; set; }
+		
+		/// <summary>
+		/// The season in witch this episode is in. This defaults to -1 if not specified.
+		/// </summary>
+		public int SeasonNumber { get; set; }
+		
+		/// <summary>
+		/// The number of this episode is it's season. This defaults to -1 if not specified.
+		/// </summary>
+		public int EpisodeNumber { get; set; }
+		
+		/// <summary>
+		/// The absolute number of this episode. It's an episode number that is not reset to 1 after a new season.
+		/// This defaults to -1 if not specified.
+		/// </summary>
+		public int AbsoluteNumber { get; set; }
+		
+		/// <summary>
+		/// The title of this episode.
+		/// </summary>
+		public string Title { get; set; }
+		
+		/// <summary>
+		/// The release date of this episode. It can be null if unknown.
+		/// </summary>
 		public DateTime? ReleaseDate { get; set; }
+		
+		/// <summary>
+		/// The path of the video file for this episode. Any format supported by a <see cref="IFileManager"/> is allowed.
+		/// </summary>
 		[SerializeIgnore] public string Path { get; set; }
+		
+		/// <summary>
+		/// The episode that come before this one if you follow usual watch orders.
+		/// If this is the first episode or this is a movie, it will be null.
+		/// </summary>
 		public Episode PreviousEpisode { get; set; }
+		
+		/// <summary>
+		/// The episode that come after this one if you follow usual watch orders.
+		/// If this is the last aired episode or this is a movie, it will be null.
+		/// </summary>
 		public Episode NextEpisode { get; set; }
+		
+		/// <summary>
+		/// <c>true</c> if this is a movie, <c>false</c> otherwise.
+		/// </summary>
 		public bool IsMovie { get; set; }
 
+		/// <summary>
+		/// The path of this item's poster.
+		/// By default, the http path for the poster is returned from the public API.
+		/// This can be disabled using the internal query flag.
+		/// </summary>
 		[SerializeAs("{HOST}/api/show/{ShowSlug}/poster")] public string Poster { get; set; }
+		
+		/// <summary>
+		/// The path of this item's logo.
+		/// By default, the http path for the logo is returned from the public API.
+		/// This can be disabled using the internal query flag.
+		/// </summary>
 		[SerializeAs("{HOST}/api/show/{ShowSlug}/logo")] public string Logo { get; set; }
+		
+		/// <summary>
+		/// The path of this item's backdrop.
+		/// By default, the http path for the backdrop is returned from the public API.
+		/// This can be disabled using the internal query flag.
+		/// </summary>
 		[SerializeAs("{HOST}/api/show/{ShowSlug}/backdrop")] public string Backdrop { get; set; }
 
+		/// <summary>
+		/// The container of the video file of this episode.
+		/// Common containers are mp4, mkv, avi and so on.
+		/// </summary>
 		public string Container { get; set; }
+		
+		/// <summary>
+		/// The video track. See <see cref="Track"/> for more information.
+		/// </summary>
 		public Track Video { get; set; }
+		
+		/// <summary>
+		/// The list of audio tracks. See <see cref="Track"/> for more information.
+		/// </summary>
 		public ICollection<Track> Audios { get; set; }
+		
+		/// <summary>
+		/// The list of subtitles tracks. See <see cref="Track"/> for more information.
+		/// </summary>
 		public ICollection<Track> Subtitles { get; set; }
+		
+		/// <summary>
+		/// The list of chapters. See <see cref="Chapter"/> for more information.
+		/// </summary>
 		public ICollection<Chapter> Chapters { get; set; }
+		
 
-		public WatchItem() { }
-
-		private WatchItem(int episodeID, 
-			Show show,
-			int seasonNumber,
-			int episodeNumber,
-			int absoluteNumber,
-			string title, 
-			DateTime? releaseDate,
-			string path)
-		{
-			EpisodeID = episodeID;
-			ShowTitle = show.Title;
-			ShowSlug = show.Slug;
-			SeasonNumber = seasonNumber;
-			EpisodeNumber = episodeNumber;
-			AbsoluteNumber = absoluteNumber;
-			Title = title;
-			ReleaseDate = releaseDate;
-			Path = path;
-			IsMovie = show.IsMovie;
-
-			Poster = show.Poster;
-			Logo = show.Logo;
-			Backdrop = show.Backdrop;
-
-			Container = Path.Substring(Path.LastIndexOf('.') + 1);
-			Slug = Episode.GetSlug(ShowSlug, seasonNumber, episodeNumber, absoluteNumber);
-		}
-
-		private WatchItem(int episodeID,
-			Show show,
-			int seasonNumber, 
-			int episodeNumber,
-			int absoluteNumber,
-			string title, 
-			DateTime? releaseDate, 
-			string path, 
-			Track video,
-			ICollection<Track> audios,
-			ICollection<Track> subtitles)
-			: this(episodeID, show, seasonNumber, episodeNumber, absoluteNumber, title, releaseDate, path)
-		{
-			Video = video;
-			Audios = audios;
-			Subtitles = subtitles;
-		}
-
+		/// <summary>
+		/// Create a <see cref="WatchItem"/> from an <see cref="Episode"/>.
+		/// </summary>
+		/// <param name="ep">The episode to transform.</param>
+		/// <param name="library">
+		/// A library manager to retrieve the next and previous episode and load the show & tracks of the episode.
+		/// </param>
+		/// <returns>A new WatchItem representing the given episode.</returns>
 		public static async Task<WatchItem> FromEpisode(Episode ep, ILibraryManager library)
 		{
 			Episode previous = null;
@@ -123,24 +165,27 @@ namespace Kyoo.Models
 					next = await library.GetOrDefault(ep.ShowID, ep.SeasonNumber, ep.EpisodeNumber + 1);
 			}
 			
-			return new WatchItem(ep.ID,
-				ep.Show,
-				ep.SeasonNumber,
-				ep.EpisodeNumber,
-				ep.AbsoluteNumber,
-				ep.Title,
-				ep.ReleaseDate,
-				ep.Path,
-				ep.Tracks.FirstOrDefault(x => x.Type == StreamType.Video),
-				ep.Tracks.Where(x => x.Type == StreamType.Audio).ToArray(),
-				ep.Tracks.Where(x => x.Type == StreamType.Subtitle).ToArray())
+			return new WatchItem
 			{
+				EpisodeID = ep.ID,
+				ShowSlug = ep.Show.Slug,
+				SeasonNumber = ep.SeasonNumber,
+				EpisodeNumber = ep.EpisodeNumber,
+				AbsoluteNumber = ep.AbsoluteNumber,
+				Title = ep.Title,
+				ReleaseDate = ep.ReleaseDate,
+				Path = ep.Path,
+				Video = ep.Tracks.FirstOrDefault(x => x.Type == StreamType.Video),
+				Audios = ep.Tracks.Where(x => x.Type == StreamType.Audio).ToArray(),
+				Subtitles = ep.Tracks.Where(x => x.Type == StreamType.Subtitle).ToArray(), 
 				PreviousEpisode = previous,
 				NextEpisode = next,
 				Chapters = await GetChapters(ep.Path)
 			};
 		}
 
+		// TODO move this method in a controller to support abstraction.
+		// TODO use a IFileManager to retrieve and read files.
 		private static async Task<ICollection<Chapter>> GetChapters(string episodePath)
 		{
 			string path = PathIO.Combine(
