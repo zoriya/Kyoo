@@ -13,10 +13,11 @@ namespace Kyoo.Tests
 		protected readonly RepositoryActivator Repositories;
 		private readonly IRepository<T> _repository;
 
-		protected RepositoryTests(RepositoryActivator repositories)
+		protected RepositoryTests()
 		{
-			Repositories = repositories;
+			Repositories = new RepositoryActivator();
 			_repository = Repositories.LibraryManager.GetRepository<T>();
+			Repositories.Context.AddTest<T>();
 		}
 		
 		[Fact]
@@ -64,6 +65,13 @@ namespace Kyoo.Tests
 		public async Task DeleteBySlugTest()
 		{
 			await _repository.Delete(TestSample.Get<T>().Slug);
+			Assert.Equal(0, await _repository.GetCount());
+		}
+		
+		[Fact]
+		public async Task DeleteByValueTest()
+		{
+			await _repository.Delete(TestSample.Get<T>());
 			Assert.Equal(0, await _repository.GetCount());
 		}
 	}

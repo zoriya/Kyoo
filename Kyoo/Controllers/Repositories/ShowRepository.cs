@@ -131,6 +131,12 @@ namespace Kyoo.Controllers
 			if (changed.Aliases != null || resetOld)
 				resource.Aliases = changed.Aliases;
 
+			if (changed.Studio != null || resetOld)
+			{
+				await Database.Entry(resource).Reference(x => x.Studio).LoadAsync();
+				resource.Studio = changed.Studio;
+			}
+			
 			if (changed.Genres != null || resetOld)
 			{
 				await Database.Entry(resource).Collection(x => x.GenreLinks).LoadAsync();
@@ -189,18 +195,9 @@ namespace Kyoo.Controllers
 				throw new ArgumentNullException(nameof(obj));
 			
 			_database.Entry(obj).State = EntityState.Deleted;
-			
-			
-			if (obj.People != null)
-				foreach (PeopleRole entry in obj.People)
-					_database.Entry(entry).State = EntityState.Deleted;
-			
-			if (obj.ExternalIDs != null)
-				foreach (MetadataID<Show> entry in obj.ExternalIDs)
-					_database.Entry(entry).State = EntityState.Deleted;
-
 			await _database.SaveChangesAsync();
 			
+			// TODO handle that with events maybe. (for now, seasons & episodes might not be loaded)
 			if (obj.Seasons != null)
 				await _seasons.Value.DeleteRange(obj.Seasons);
 

@@ -34,6 +34,49 @@ namespace Kyoo.Tests
 					IsMovie = false,
 					Studio = null
 				}
+			},
+			{
+				typeof(Season),
+				new Season
+				{
+					ID = 1,
+					ShowSlug = "anohana",
+					ShowID = 1,
+					SeasonNumber = 1,
+					Title = "Season 1",
+					Overview = "The first season",
+					StartDate = new DateTime(2020, 06, 05),
+					EndDate =  new DateTime(2020, 07, 05),
+					Poster = "poster"
+				}
+			},
+			{
+				typeof(Episode),
+				new Episode
+				{
+					ID = 1,
+					ShowSlug = "anohana",
+					ShowID = 1,
+					SeasonID = 1,
+					SeasonNumber = 1,
+					EpisodeNumber = 1,
+					AbsoluteNumber = 1,
+					Path = "/home/kyoo/anohana-s1e1",
+					Thumb = "thumbnail",
+					Title = "Episode 1",
+					Overview = "Summary of the first episode",
+					ReleaseDate = new DateTime(2020, 06, 05)
+				}
+			},
+			{
+				typeof(People),
+				new People
+				{
+					ID = 1,
+					Slug = "the-actor",
+					Name = "The Actor",
+					Poster = "NicePoster"
+				}
 			}
 		};
 		

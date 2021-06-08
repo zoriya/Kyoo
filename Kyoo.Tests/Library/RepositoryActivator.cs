@@ -1,14 +1,13 @@
 using System;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
-using Kyoo.Models;
 
 namespace Kyoo.Tests
 {
 	public class RepositoryActivator : IDisposable, IAsyncDisposable
 	{
-		public TestContext Context { get; init; }
-		public ILibraryManager LibraryManager { get; init; }
+		public TestContext Context { get; }
+		public ILibraryManager LibraryManager { get; }
 
 
 		private readonly DatabaseContext _database; 
@@ -50,8 +49,6 @@ namespace Kyoo.Tests
 				studio,
 				genre
 			});
-			
-			Context.AddTest<Show>();
 		}
 
 		public void Dispose()

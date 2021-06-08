@@ -40,6 +40,17 @@ namespace Kyoo.Tests
 		/// <summary>
 		/// Fill the database with pre defined values using a clean context.
 		/// </summary>
+		public void AddTest<T>() 
+			where T : class
+		{
+			using DatabaseContext context = New();
+			context.Set<T>().Add(TestSample.Get<T>());
+			context.SaveChanges();
+		}
+		
+		/// <summary>
+		/// Fill the database with pre defined values using a clean context.
+		/// </summary>
 		public async Task AddTestAsync<T>() 
 			where T : class
 		{
@@ -49,14 +60,25 @@ namespace Kyoo.Tests
 		}
 		
 		/// <summary>
-		/// Fill the database with pre defined values using a clean context.
+		/// Add an arbitrary data to the test context.
 		/// </summary>
-		public void AddTest<T>() 
+		public void Add<T>(T obj) 
 			where T : class
 		{
 			using DatabaseContext context = New();
-			context.Set<T>().Add(TestSample.Get<T>());
+			context.Set<T>().Add(obj);
 			context.SaveChanges();
+		}
+		
+		/// <summary>
+		/// Add an arbitrary data to the test context.
+		/// </summary>
+		public async Task AddAsync<T>(T obj) 
+			where T : class
+		{
+			await using DatabaseContext context = New();
+			await context.Set<T>().AddAsync(obj);
+			await context.SaveChangesAsync();
 		}
 
 		/// <summary>
