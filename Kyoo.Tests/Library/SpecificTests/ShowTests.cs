@@ -178,5 +178,43 @@ namespace Kyoo.Tests.SpecificTests
 			Assert.Null(edited.Genres);
 			Assert.Null(edited.Studio);
 		}
+		
+		[Fact]
+		public async Task CreateWithRelationsTest()
+		{
+			Show expected = TestSample.Get<Show>();
+			expected.ID = 0;
+			expected.Slug = "created-relation-test";
+			expected.ExternalIDs = new[]
+			{
+				new MetadataID<Show>
+				{
+					First = expected,
+					Second = new Provider("provider", "provider.png"),
+					DataID = "ID"
+				}
+			};
+			expected.Genres = new[]
+			{
+				new Genre
+				{
+					Name = "Genre",
+					Slug = "genre"
+				}
+			};
+			expected.People = new[]
+			{
+				new PeopleRole
+				{
+					People = TestSample.Get<People>(),
+					Show = expected,
+					ForPeople = false,
+					Role = "actor"
+				}
+			};
+			expected.Studio = new Studio("studio");
+			Show created = await _repository.Create(expected);
+			KAssert.DeepEqual(expected, created);
+		}
 	}
 }

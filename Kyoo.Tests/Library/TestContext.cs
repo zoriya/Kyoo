@@ -93,6 +93,7 @@ namespace Kyoo.Tests
 		public void Dispose()
 		{
 			_connection.Close();
+			GC.SuppressFinalize(this);
 		}
 
 		public async ValueTask DisposeAsync()

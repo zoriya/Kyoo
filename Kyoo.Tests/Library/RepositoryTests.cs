@@ -74,5 +74,17 @@ namespace Kyoo.Tests
 			await _repository.Delete(TestSample.Get<T>());
 			Assert.Equal(0, await _repository.GetCount());
 		}
+		
+		[Fact]
+		public async Task CreateTest()
+		{
+			await Assert.ThrowsAsync<DuplicatedItemException>(() => _repository.Create(TestSample.Get<T>()));
+			await _repository.Delete(TestSample.Get<T>());
+
+			T expected = TestSample.Get<T>();
+			expected.ID = 0;
+			await _repository.Create(expected);
+			KAssert.DeepEqual(expected, await _repository.Get(expected.Slug));
+		}
 	}
 }

@@ -6,11 +6,11 @@ namespace Kyoo.Tests
 {
 	public static class TestSample
 	{
-		private static readonly Dictionary<Type, object> Samples = new()
+		private static readonly Dictionary<Type, Func<object>> Samples = new()
 		{
 			{
 				typeof(Show),
-				new Show
+				() => new Show
 				{
 					ID = 1,
 					Slug = "anohana",
@@ -37,7 +37,7 @@ namespace Kyoo.Tests
 			},
 			{
 				typeof(Season),
-				new Season
+				() => new Season
 				{
 					ID = 1,
 					ShowSlug = "anohana",
@@ -52,7 +52,7 @@ namespace Kyoo.Tests
 			},
 			{
 				typeof(Episode),
-				new Episode
+				() => new Episode
 				{
 					ID = 1,
 					ShowSlug = "anohana",
@@ -70,7 +70,7 @@ namespace Kyoo.Tests
 			},
 			{
 				typeof(People),
-				new People
+				() => new People
 				{
 					ID = 1,
 					Slug = "the-actor",
@@ -82,7 +82,7 @@ namespace Kyoo.Tests
 		
 		public static T Get<T>()
 		{
-			return (T)Samples[typeof(T)];
+			return (T)Samples[typeof(T)]();
 		}
 	}
 }

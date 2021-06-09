@@ -119,7 +119,8 @@ namespace Kyoo.SqLite
 		/// <inheritdoc />
 		protected override bool IsDuplicateException(Exception ex)
 		{
-			return ex.InnerException is SqliteException { SqliteExtendedErrorCode: 2067 /*SQLITE_CONSTRAINT_UNIQUE*/};
+			return ex.InnerException is SqliteException { SqliteExtendedErrorCode: 2067 /*SQLITE_CONSTRAINT_UNIQUE*/}
+			                         or SqliteException { SqliteExtendedErrorCode: 1555 /*SQLITE_CONSTRAINT_PRIMARYKEY*/};
 		}
 
 		/// <inheritdoc />
