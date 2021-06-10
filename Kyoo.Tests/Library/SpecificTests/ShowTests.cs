@@ -216,5 +216,22 @@ namespace Kyoo.Tests.SpecificTests
 			Show created = await _repository.Create(expected);
 			KAssert.DeepEqual(expected, created);
 		}
+
+		[Fact]
+		public async Task SlugDuplicationTest()
+		{
+			Show test = TestSample.Get<Show>();
+			test.ID = 0;
+			test.Slug = "300";
+			Show created = await _repository.Create(test);
+			Assert.Equal("300!", created.Slug);
+		}
+		
+		[Fact]
+		public async Task GetSlugTest()
+		{
+			Show reference = TestSample.Get<Show>();
+			Assert.Equal(reference.Slug, await _repository.GetSlug(reference.ID));
+		}
 	}
 }

@@ -27,11 +27,7 @@ namespace Kyoo.Controllers
 		/// A show repository to get show's slug from their ID and keep the slug in each episode.
 		/// </summary>
 		private readonly IShowRepository _shows;
-		/// <summary>
-		/// A lazilly loaded episode repository to handle deletion of episodes with the season.
-		/// </summary>
-		private readonly Lazy<IEpisodeRepository> _episodes;
-		
+
 		/// <inheritdoc/>
 		protected override Expression<Func<Season, object>> DefaultSort => x => x.SeasonNumber;
 
@@ -43,17 +39,14 @@ namespace Kyoo.Controllers
 		/// <param name="database">The database handle that will be used</param>
 		/// <param name="providers">A provider repository</param>
 		/// <param name="shows">A show repository</param>
-		/// <param name="episodes">A lazy loaded episode repository.</param>
 		public SeasonRepository(DatabaseContext database,
 			IProviderRepository providers,
-			IShowRepository shows,
-			Lazy<IEpisodeRepository> episodes)
+			IShowRepository shows)
 			: base(database)
 		{
 			_database = database;
 			_providers = providers;
 			_shows = shows;
-			_episodes = episodes;
 		}
 		
 
@@ -186,9 +179,9 @@ namespace Kyoo.Controllers
 			_database.Entry(obj).State = EntityState.Deleted;
 			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Deleted);
 			await _database.SaveChangesAsync();
-
-			if (obj.Episodes != null)
-				await _episodes.Value.DeleteRange(obj.Episodes);
+			//
+			// if (obj.Episodes != null)
+			// 	await _episodes.Value.DeleteRange(obj.Episodes);
 		}
 	}
 }

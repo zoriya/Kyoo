@@ -295,31 +295,10 @@ namespace Kyoo.Controllers
 		public abstract Task Delete(T obj);
 		
 		/// <inheritdoc/>
-		public virtual async Task DeleteRange(IEnumerable<T> objs)
+		public async Task DeleteAll(Expression<Func<T, bool>> where)
 		{
-			foreach (T obj in objs)
-				await Delete(obj);
-		}
-		
-		/// <inheritdoc/>
-		public virtual async Task DeleteRange(IEnumerable<int> ids)
-		{
-			foreach (int id in ids)
-				await Delete(id);
-		}
-		
-		/// <inheritdoc/>
-		public virtual async Task DeleteRange(IEnumerable<string> slugs)
-		{
-			foreach (string slug in slugs)
-				await Delete(slug);
-		}
-		
-		/// <inheritdoc/>
-		public async Task DeleteRange(Expression<Func<T, bool>> where)
-		{
-			ICollection<T> resources = await GetAll(where);
-			await DeleteRange(resources);
+			foreach (T resource in await GetAll(where))
+				await Delete(resource);
 		}
 	}
 }

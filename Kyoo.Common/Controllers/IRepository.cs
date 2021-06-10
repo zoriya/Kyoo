@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -242,49 +241,13 @@ namespace Kyoo.Controllers
 		/// <param name="obj">The resource to delete</param>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task Delete([NotNull] T obj);
-
+		
 		/// <summary>
-		/// Delete a list of resources.
-		/// </summary>
-		/// <param name="objs">One or multiple resources to delete</param>
-		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-		Task DeleteRange(params T[] objs) => DeleteRange(objs.AsEnumerable());
-		/// <summary>
-		/// Delete a list of resources.
-		/// </summary>
-		/// <param name="objs">An enumerable of resources to delete</param>
-		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-		Task DeleteRange(IEnumerable<T> objs);
-		/// <summary>
-		/// Delete a list of resources.
-		/// </summary>
-		/// <param name="ids">One or multiple resource's id</param>
-		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-		Task DeleteRange(params int[] ids) => DeleteRange(ids.AsEnumerable());
-		/// <summary>
-		/// Delete a list of resources.
-		/// </summary>
-		/// <param name="ids">An enumerable of resource's id</param>
-		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-		Task DeleteRange(IEnumerable<int> ids);
-		/// <summary>
-		/// Delete a list of resources.
-		/// </summary>
-		/// <param name="slugs">One or multiple resource's slug</param>
-		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-		Task DeleteRange(params string[] slugs) => DeleteRange(slugs.AsEnumerable());
-		/// <summary>
-		/// Delete a list of resources.
-		/// </summary>
-		/// <param name="slugs">An enumerable of resource's slug</param>
-		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-		Task DeleteRange(IEnumerable<string> slugs);
-		/// <summary>
-		/// Delete a list of resources.
+		/// Delete all resources that match the predicate.
 		/// </summary>
 		/// <param name="where">A predicate to filter resources to delete. Every resource that match this will be deleted.</param>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-		Task DeleteRange([NotNull] Expression<Func<T, bool>> where);
+		Task DeleteAll([NotNull] Expression<Func<T, bool>> where);
 	}
 
 	/// <summary>

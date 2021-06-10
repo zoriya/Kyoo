@@ -25,8 +25,7 @@ namespace Kyoo.Tests
 			PeopleRepository people = new(_database, provider, 
 				new Lazy<IShowRepository>(() => LibraryManager.ShowRepository));
 			ShowRepository show = new(_database, studio, people, genre, provider);
-			SeasonRepository season = new(_database, provider, show, 
-				new Lazy<IEpisodeRepository>(() => LibraryManager.EpisodeRepository));
+			SeasonRepository season = new(_database, provider, show);
 			LibraryItemRepository libraryItem = new(_database, 
 				new Lazy<ILibraryRepository>(() => LibraryManager.LibraryRepository),
 				new Lazy<IShowRepository>(() => LibraryManager.ShowRepository),
