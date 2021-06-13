@@ -1,5 +1,7 @@
-﻿using System.Globalization;
+﻿using System;
+using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
@@ -44,9 +46,35 @@ namespace Kyoo.Models
 					"subrip" => ".srt",
 					{} x => $".{x}"
 				};
-				return $"{Episode.Slug}.{type}{Language}{index}{(IsForced ? "-forced" : "")}{codec}";
+				return $"{EpisodeSlug}.{type}{Language}{index}{(IsForced ? "-forced" : "")}{codec}";
+			}
+			set
+			{
+				Match match = Regex.Match(value, @"(?<show>.*)-s(?<season>\d+)e(?<episode>\d+)" 
+				                                 + @"(\.(?<type>\w*))?\.(?<language>.{0,3})(?<forced>-forced)?(\..\w)?");
+
+				if (!match.Success)
+				{
+					match = Regex.Match(value, @"(?<show>.*)\.(?<language>.{0,3})(?<forced>-forced)?(\..\w)?");
+					if (!match.Success)
+						throw new ArgumentException("Invalid track slug. " +
+						                            "Format: {episodeSlug}.{language}[-forced][.{extension}]");
+				}
+
+				EpisodeSlug = Episode.GetSlug(match.Groups["show"].Value, 
+					match.Groups["season"].Success ? int.Parse(match.Groups["season"].Value) : -1,
+					match.Groups["episode"].Success ? int.Parse(match.Groups["episode"].Value) : -1);
+				Language = match.Groups["language"].Value;
+				IsForced = match.Groups["forced"].Success;
+				if (match.Groups["type"].Success)
+					Type = Enum.Parse<StreamType>(match.Groups["type"].Value, true);
 			}
 		}
+		
+		/// <summary>
+        /// The slug of the episode that contain this track. If this is not set, this track is ill-formed.
+        /// </summary>
+        [SerializeIgnore] public string EpisodeSlug { private get; set; }
 		
 		/// <summary>
 		/// The title of the stream.

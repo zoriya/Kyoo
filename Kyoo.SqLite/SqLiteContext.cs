@@ -82,10 +82,6 @@ namespace Kyoo.SqLite
 		/// <param name="modelBuilder">The database's model builder.</param>
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-			// modelBuilder.HasPostgresEnum<Status>();
-			// modelBuilder.HasPostgresEnum<ItemType>();
-			// modelBuilder.HasPostgresEnum<StreamType>();
-
 			ValueConverter<string[], string> arrayConvertor = new(
 				x => string.Join(";", x),
 				x => x.Split(';', StringSplitOptions.None));
@@ -112,7 +108,6 @@ namespace Kyoo.SqLite
 			modelBuilder.Entity<User>()
 				.Property(x => x.ExtraData)
 				.HasConversion(jsonConvertor);
-			
 			base.OnModelCreating(modelBuilder);
 		}
 
@@ -127,7 +122,7 @@ namespace Kyoo.SqLite
 		public override Expression<Func<T, bool>> Like<T>(Expression<Func<T, string>> query, string format)
 		{
 			MethodInfo iLike = MethodOfUtils.MethodOf<string, string, bool>(EF.Functions.Like);
-			MethodCallExpression call = Expression.Call(iLike, query.Body, Expression.Constant(format));
+			MethodCallExpression call = Expression.Call(iLike, Expression.Constant(EF.Functions), query.Body, Expression.Constant(format));
 
 			return Expression.Lambda<Func<T, bool>>(call, query.Parameters);
 		}

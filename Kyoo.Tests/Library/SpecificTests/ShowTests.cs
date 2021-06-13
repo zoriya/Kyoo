@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
@@ -232,6 +233,24 @@ namespace Kyoo.Tests.SpecificTests
 		{
 			Show reference = TestSample.Get<Show>();
 			Assert.Equal(reference.Slug, await _repository.GetSlug(reference.ID));
+		}
+		
+		[Theory]
+		[InlineData("test")]
+		[InlineData("super")]
+		[InlineData("title")]
+		[InlineData("TiTlE")]
+		[InlineData("SuPeR")]
+		public async Task SearchTest(string query)
+		{
+			Show value = new()
+			{
+				Slug = "super-test",
+				Title = "This is a test title²"
+			};
+			await _repository.Create(value);
+			ICollection<Show> ret = await _repository.Search(query);
+			KAssert.DeepEqual(value, ret.First());
 		}
 	}
 }

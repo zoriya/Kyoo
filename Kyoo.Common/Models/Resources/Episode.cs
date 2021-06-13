@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 using Kyoo.Controllers;
 using Kyoo.Models.Attributes;
@@ -14,9 +15,36 @@ namespace Kyoo.Models
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
-		
+
 		/// <inheritdoc />
-		public string Slug => GetSlug(ShowSlug, SeasonNumber, EpisodeNumber, AbsoluteNumber);
+		public string Slug
+		{
+			get => GetSlug(ShowSlug, SeasonNumber, EpisodeNumber, AbsoluteNumber);
+			set
+			{
+				Match match = Regex.Match(value, @"(?<show>.*)-s(?<season>\d*)e(?<episode>\d*)");
+
+				if (match.Success)
+				{
+					ShowSlug = match.Groups["show"].Value;
+					SeasonNumber = int.Parse(match.Groups["season"].Value);
+					EpisodeNumber = int.Parse(match.Groups["episode"].Value);
+				}
+				else
+				{
+					match = Regex.Match(value, @"(?<show>.*)-(?<absolute>\d*)");
+					if (match.Success)
+					{
+						ShowSlug = match.Groups["Show"].Value;
+						AbsoluteNumber = int.Parse(match.Groups["absolute"].Value);
+					}
+					else
+						ShowSlug = value;
+					SeasonNumber = -1;
+					EpisodeNumber = -1;
+				}
+			}
+		}
 		
 		/// <summary>
 		/// The slug of the Show that contain this episode. If this is not set, this episode is ill-formed.

@@ -260,7 +260,7 @@ namespace Kyoo
 			modelBuilder.Entity<Show>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<Studio>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<User>().Property(x => x.Slug).IsRequired();
-
+			
 			modelBuilder.Entity<Collection>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();

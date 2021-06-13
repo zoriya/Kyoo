@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using Kyoo.Controllers;
 using Kyoo.Models.Attributes;
 
@@ -12,9 +13,21 @@ namespace Kyoo.Models
 	{
 		/// <inheritdoc />
 		public int ID  { get; set; }
-		
+
 		/// <inheritdoc />
-		public string Slug => $"{ShowSlug}-s{SeasonNumber}";
+		public string Slug
+		{
+			get => $"{ShowSlug}-s{SeasonNumber}";
+			set
+			{
+				Match match = Regex.Match(value, @"(?<show>.*)-s(?<season>\d*)");
+			
+				if (!match.Success)
+					throw new ArgumentException("Invalid season slug. Format: {showSlug}-s{seasonNumber}");
+				ShowSlug = match.Groups["show"].Value;
+				SeasonNumber = int.Parse(match.Groups["season"].Value);
+			}
+		}
 		
 		/// <summary>
 		/// The slug of the Show that contain this episode. If this is not set, this season is ill-formed.

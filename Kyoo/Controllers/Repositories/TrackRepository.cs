@@ -16,7 +16,7 @@ namespace Kyoo.Controllers
 	public class TrackRepository : LocalRepository<Track>, ITrackRepository
 	{
 		/// <summary>
-		/// The databse handle
+		/// The database handle
 		/// </summary>
 		private readonly DatabaseContext _database;
 		
@@ -27,7 +27,7 @@ namespace Kyoo.Controllers
 		/// <summary>
 		/// Create a new <see cref="TrackRepository"/>.
 		/// </summary>
-		/// <param name="database">The datatabse handle</param>
+		/// <param name="database">The database handle</param>
 		public TrackRepository(DatabaseContext database) 
 			: base(database)
 		{
