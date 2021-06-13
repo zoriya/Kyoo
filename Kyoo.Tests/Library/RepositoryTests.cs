@@ -20,7 +20,9 @@ namespace Kyoo.Tests
 		{
 			Repositories = new RepositoryActivator();
 			_repository = Repositories.LibraryManager.GetRepository<T>();
-			Repositories.Context.AddTest<T>();
+			Repositories.Context.AddTest<Show>();
+			if (new T() is not Show)
+				Repositories.Context.AddTest<T>();
 		}
 		
 		[Fact]

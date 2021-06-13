@@ -45,7 +45,6 @@ namespace Kyoo.Tests
 					SeasonNumber = 1,
 					Title = "Season 1",
 					Overview = "The first season",
-					Show = Get<Show>(),
 					StartDate = new DateTime(2020, 06, 05),
 					EndDate =  new DateTime(2020, 07, 05),
 					Poster = "poster"
