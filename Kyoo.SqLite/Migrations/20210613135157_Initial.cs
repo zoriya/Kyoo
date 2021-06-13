@@ -378,6 +378,7 @@ namespace Kyoo.SqLite.Migrations
                 {
                     ID = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    Slug = table.Column<string>(type: "TEXT", nullable: true),
                     ShowID = table.Column<int>(type: "INTEGER", nullable: false),
                     SeasonNumber = table.Column<int>(type: "INTEGER", nullable: false),
                     Title = table.Column<string>(type: "TEXT", nullable: true),
@@ -403,6 +404,7 @@ namespace Kyoo.SqLite.Migrations
                 {
                     ID = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    Slug = table.Column<string>(type: "TEXT", nullable: true),
                     ShowID = table.Column<int>(type: "INTEGER", nullable: false),
                     SeasonID = table.Column<int>(type: "INTEGER", nullable: true),
                     SeasonNumber = table.Column<int>(type: "INTEGER", nullable: false),
@@ -489,6 +491,7 @@ namespace Kyoo.SqLite.Migrations
                 {
                     ID = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
+                    Slug = table.Column<string>(type: "TEXT", nullable: true),
                     Title = table.Column<string>(type: "TEXT", nullable: true),
                     Language = table.Column<string>(type: "TEXT", nullable: true),
                     Codec = table.Column<string>(type: "TEXT", nullable: true),

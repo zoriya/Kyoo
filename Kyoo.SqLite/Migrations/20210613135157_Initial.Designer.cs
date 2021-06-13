@@ -9,14 +9,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kyoo.SqLite.Migrations
 {
     [DbContext(typeof(SqLiteContext))]
-    [Migration("20210607202259_Initial")]
+    [Migration("20210613135157_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "5.0.6");
+                .HasAnnotation("ProductVersion", "5.0.7");
 
             modelBuilder.Entity("Kyoo.Models.Collection", b =>
                 {
@@ -74,6 +74,9 @@ namespace Kyoo.SqLite.Migrations
 
                     b.Property<int>("ShowID")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("Slug")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Thumb")
                         .HasColumnType("TEXT");
@@ -412,6 +415,9 @@ namespace Kyoo.SqLite.Migrations
                     b.Property<int>("ShowID")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Slug")
+                        .HasColumnType("TEXT");
+
                     b.Property<DateTime?>("StartDate")
                         .HasColumnType("TEXT");
 
@@ -531,6 +537,9 @@ namespace Kyoo.SqLite.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Path")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Slug")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Title")

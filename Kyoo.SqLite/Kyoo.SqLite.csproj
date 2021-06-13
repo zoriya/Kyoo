@@ -28,14 +28,14 @@
 
 	<ItemGroup>
 		<ProjectReference Include="../Kyoo.CommonAPI/Kyoo.CommonAPI.csproj">
-			<PrivateAssets>all</PrivateAssets>
-			<Private>false</Private>
-			<ExcludeAssets>runtime</ExcludeAssets>
+<!--			<PrivateAssets>all</PrivateAssets>-->
+<!--			<Private>false</Private>-->
+<!--			<ExcludeAssets>runtime</ExcludeAssets>-->
 		</ProjectReference>
 		<ProjectReference Include="../Kyoo.Common/Kyoo.Common.csproj">
-			<PrivateAssets>all</PrivateAssets>
-			<Private>false</Private>
-			<ExcludeAssets>runtime</ExcludeAssets>
+<!--			<PrivateAssets>all</PrivateAssets>-->
+<!--			<Private>false</Private>-->
+<!--			<ExcludeAssets>runtime</ExcludeAssets>-->
 		</ProjectReference>
 	</ItemGroup>
 </Project>

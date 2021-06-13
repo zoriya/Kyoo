@@ -3,14 +3,16 @@ using System;
 using Kyoo.SqLite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Kyoo.SqLite.Migrations
 {
     [DbContext(typeof(SqLiteContext))]
-    partial class SqLiteContextModelSnapshot : ModelSnapshot
+    [Migration("20210613135215_Triggers")]
+    partial class Triggers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
