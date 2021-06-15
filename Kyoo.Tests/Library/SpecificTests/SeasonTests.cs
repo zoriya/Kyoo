@@ -8,7 +8,7 @@ namespace Kyoo.Tests.SpecificTests
 	public class SqLiteSeasonTests : SeasonTests
 	{
 		public SqLiteSeasonTests()
-			: base(new RepositoryActivator(true))
+			: base(new RepositoryActivator())
 		{ }
 	}
 	

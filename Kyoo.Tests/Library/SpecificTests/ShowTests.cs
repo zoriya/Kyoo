@@ -12,7 +12,7 @@ namespace Kyoo.Tests.SpecificTests
 	public class SqLiteShowTests : ShowTests
 	{
 		public SqLiteShowTests()
-			: base(new RepositoryActivator(null))
+			: base(new RepositoryActivator())
 		{ }
 	}
 	
