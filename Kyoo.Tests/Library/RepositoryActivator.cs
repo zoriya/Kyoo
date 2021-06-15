@@ -10,11 +10,13 @@ namespace Kyoo.Tests
 		public ILibraryManager LibraryManager { get; }
 
 
-		private readonly DatabaseContext _database; 
+		private readonly DatabaseContext _database;
 			
-		public RepositoryActivator()
+		public RepositoryActivator(PostgresFixture postgres = null)
 		{
-			Context = new TestContext();
+			Context = postgres == null 
+				? new SqLiteTestContext() 
+				: new PostgresTestContext(postgres);
 			_database = Context.New();
 			
 			ProviderRepository provider = new(_database);

@@ -9,11 +9,27 @@ using Xunit;
 
 namespace Kyoo.Tests.SpecificTests
 {
-	public class ShowTests : RepositoryTests<Show>
+	public class SqLiteShowTests : ShowTests
+	{
+		public SqLiteShowTests()
+			: base(new RepositoryActivator(null))
+		{ }
+	}
+	
+	[Collection(nameof(Postgresql))]
+	public class PostgresShowTests : ShowTests
+	{
+		public PostgresShowTests(PostgresFixture postgres)
+			: base(new RepositoryActivator(postgres))
+		{ }
+	}
+	
+	public abstract class ShowTests : RepositoryTests<Show>
 	{
 		private readonly IShowRepository _repository;
 
-		public ShowTests()
+		protected ShowTests(RepositoryActivator repositories)
+			: base(repositories)
 		{
 			_repository = Repositories.LibraryManager.ShowRepository;
 		}

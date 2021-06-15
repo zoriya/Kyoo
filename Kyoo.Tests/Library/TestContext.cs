@@ -3,39 +3,90 @@ using System.Threading.Tasks;
 using Kyoo.SqLite;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Xunit;
 
 namespace Kyoo.Tests
 {
-	/// <summary>
-	/// Class responsible to fill and create in memory databases for unit tests.
-	/// </summary>
-	public class TestContext : IDisposable, IAsyncDisposable
+	public sealed class SqLiteTestContext : TestContext
 	{
-		/// <summary>
-		/// The context's options that specify to use an in memory Sqlite database.
-		/// </summary>
-		private readonly DbContextOptions<DatabaseContext> _context;
-
 		/// <summary>
 		/// The internal sqlite connection used by all context returned by this class.
 		/// </summary>
 		private readonly SqliteConnection _connection;
-		
-		/// <summary>
-		/// Create a new database and fill it with information.
-		/// </summary>
-		public TestContext()
+
+		public SqLiteTestContext()
 		{
 			_connection = new SqliteConnection("DataSource=:memory:");
 			_connection.Open();
-
-			_context = new DbContextOptionsBuilder<DatabaseContext>()
+			
+			Context = new DbContextOptionsBuilder<DatabaseContext>()
 				.UseSqlite(_connection)
 				.Options;
 			
 			using DatabaseContext context = New();
 			context.Database.Migrate();
 		}
+		
+		public override void Dispose()
+		{
+			_connection.Close();
+		}
+
+		public override async ValueTask DisposeAsync()
+		{
+			await _connection.CloseAsync();
+		}
+
+		public override DatabaseContext New()
+		{
+			return new SqLiteContext(Context);
+		}
+	}
+
+	[CollectionDefinition(nameof(Postgresql))]
+	public class PostgresCollection : ICollectionFixture<PostgresFixture>
+	{}
+
+	public class PostgresFixture
+	{
+		
+	}
+	
+	public sealed class PostgresTestContext : TestContext
+	{
+		private readonly PostgresFixture _template;
+		
+		public PostgresTestContext(PostgresFixture template)
+		{
+			_template = template;
+		}
+		
+		public override void Dispose()
+		{
+			throw new NotImplementedException();
+		}
+
+		public override ValueTask DisposeAsync()
+		{
+			throw new NotImplementedException();
+		}
+
+		public override DatabaseContext New()
+		{
+			throw new NotImplementedException();
+		}
+	}
+	
+	
+	/// <summary>
+	/// Class responsible to fill and create in memory databases for unit tests.
+	/// </summary>
+	public abstract class TestContext : IDisposable, IAsyncDisposable
+	{
+		/// <summary>
+		/// The context's options that specify to use an in memory Sqlite database.
+		/// </summary>
+		protected DbContextOptions<DatabaseContext> Context;
 
 		/// <summary>
 		/// Fill the database with pre defined values using a clean context.
@@ -85,20 +136,10 @@ namespace Kyoo.Tests
 		/// Get a new database context connected to a in memory Sqlite database.
 		/// </summary>
 		/// <returns>A valid DatabaseContext</returns>
-		public DatabaseContext New()
-		{
-			return new SqLiteContext(_context);
-		}
+		public abstract DatabaseContext New();
 
-		public void Dispose()
-		{
-			_connection.Close();
-			GC.SuppressFinalize(this);
-		}
+		public abstract void Dispose();
 
-		public async ValueTask DisposeAsync()
-		{
-			await _connection.CloseAsync();
-		}
+		public abstract ValueTask DisposeAsync();
 	}
 }

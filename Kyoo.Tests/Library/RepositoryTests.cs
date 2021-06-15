@@ -16,9 +16,9 @@ namespace Kyoo.Tests
 		protected readonly RepositoryActivator Repositories;
 		private readonly IRepository<T> _repository;
 
-		protected RepositoryTests()
+		protected RepositoryTests(RepositoryActivator repositories)
 		{
-			Repositories = new RepositoryActivator();
+			Repositories = repositories;
 			_repository = Repositories.LibraryManager.GetRepository<T>();
 			Repositories.Context.AddTest<Show>();
 			if (new T() is not Show)

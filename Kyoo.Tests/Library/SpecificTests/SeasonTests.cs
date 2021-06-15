@@ -5,11 +5,19 @@ using Xunit;
 
 namespace Kyoo.Tests.SpecificTests
 {
-	public class SeasonTests : RepositoryTests<Season>
+	public class SqLiteSeasonTests : SeasonTests
+	{
+		public SqLiteSeasonTests()
+			: base(new RepositoryActivator(true))
+		{ }
+	}
+	
+	public abstract class SeasonTests : RepositoryTests<Season>
 	{
 		private readonly ISeasonRepository _repository;
 
-		public SeasonTests()
+		protected SeasonTests(RepositoryActivator repositories)
+			: base(repositories)
 		{
 			_repository = Repositories.LibraryManager.SeasonRepository;
 		}
@@ -34,7 +42,7 @@ namespace Kyoo.Tests.SpecificTests
 		{
 			Season season = await _repository.Get(1);
 			Assert.Equal("anohana-s1", season.Slug);
-			season = await _repository.Edit(new Season
+			await _repository.Edit(new Season
 			{
 				ID = 1,
 				SeasonNumber = 2
