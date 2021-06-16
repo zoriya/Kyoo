@@ -84,5 +84,14 @@ namespace Kyoo.Tests
 		{
 			return (T)Samples[typeof(T)]();
 		}
+
+		public static void FillDatabase(DatabaseContext context)
+		{
+			context.Shows.Add(Get<Show>());
+			context.Seasons.Add(Get<Season>());
+			// context.Episodes.Add(Get<Episode>());
+			// context.People.Add(Get<People>());
+			context.SaveChanges();
+		}
 	}
 }

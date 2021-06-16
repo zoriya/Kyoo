@@ -1,8 +1,10 @@
 using System;
 using System.Threading.Tasks;
+using Kyoo.Postgresql;
 using Kyoo.SqLite;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using Xunit;
 
 namespace Kyoo.Tests
@@ -13,18 +15,24 @@ namespace Kyoo.Tests
 		/// The internal sqlite connection used by all context returned by this class.
 		/// </summary>
 		private readonly SqliteConnection _connection;
+		
+		/// <summary>
+		/// The context's options that specify to use an in memory Sqlite database.
+		/// </summary>
+		private readonly DbContextOptions<DatabaseContext> _context;
 
 		public SqLiteTestContext()
 		{
 			_connection = new SqliteConnection("DataSource=:memory:");
 			_connection.Open();
 			
-			Context = new DbContextOptionsBuilder<DatabaseContext>()
+			_context = new DbContextOptionsBuilder<DatabaseContext>()
 				.UseSqlite(_connection)
 				.Options;
 			
 			using DatabaseContext context = New();
-			context.Database.Migrate();
+			context.Database.EnsureCreated();
+			TestSample.FillDatabase(context);
 		}
 		
 		public override void Dispose()
@@ -39,7 +47,7 @@ namespace Kyoo.Tests
 
 		public override DatabaseContext New()
 		{
-			return new SqLiteContext(Context);
+			return new SqLiteContext(_context);
 		}
 	}
 
@@ -47,33 +55,83 @@ namespace Kyoo.Tests
 	public class PostgresCollection : ICollectionFixture<PostgresFixture>
 	{}
 
-	public class PostgresFixture
+	public sealed class PostgresFixture : IDisposable
 	{
+		private readonly PostgresContext _context;
 		
+		public string Template { get; }
+
+		public string Connection => PostgresTestContext.GetConnectionString(Template);
+		
+		public PostgresFixture()
+		{
+			string id = Guid.NewGuid().ToString().Replace('-', '_');
+			Template = $"kyoo_template_{id}";
+			
+			DbContextOptions<DatabaseContext> options = new DbContextOptionsBuilder<DatabaseContext>()
+				.UseNpgsql(Connection)
+				.Options;
+			
+			_context = new PostgresContext(options);
+			_context.Database.EnsureCreated();
+			TestSample.FillDatabase(_context);
+			_context.Database.CloseConnection();
+		}
+		
+		public void Dispose()
+		{
+			_context.Database.EnsureDeleted();
+			_context.Dispose();
+		}
 	}
 	
 	public sealed class PostgresTestContext : TestContext
 	{
-		private readonly PostgresFixture _template;
+		private readonly NpgsqlConnection _connection;
+		private readonly DbContextOptions<DatabaseContext> _context;
 		
 		public PostgresTestContext(PostgresFixture template)
 		{
-			_template = template;
+			string id = Guid.NewGuid().ToString().Replace('-', '_');
+			string database = $"kyoo_test_{id}";
+
+			using (NpgsqlConnection connection = new(template.Connection))
+			{
+				connection.Open();
+				using NpgsqlCommand cmd = new($"CREATE DATABASE {database} WITH TEMPLATE {template.Template}", connection);
+				cmd.ExecuteNonQuery();
+			}
+
+			_connection = new NpgsqlConnection(GetConnectionString(database));
+			_connection.Open();
+
+			_context = new DbContextOptionsBuilder<DatabaseContext>()
+				.UseNpgsql(_connection)
+				.Options;
+		}
+		
+		public static string GetConnectionString(string database)
+		{
+			return $"Server=127.0.0.1;Port=5432;Database={database};User ID=kyoo;Password=kyooPassword";
 		}
 		
 		public override void Dispose()
 		{
-			throw new NotImplementedException();
+			using DatabaseContext db = New();
+			db.Database.EnsureDeleted();
+			_connection.Close();
 		}
 
-		public override ValueTask DisposeAsync()
+		public override async ValueTask DisposeAsync()
 		{
-			throw new NotImplementedException();
+			await using DatabaseContext db = New();
+			await db.Database.EnsureDeletedAsync();
+			await _connection.CloseAsync();
 		}
 
 		public override DatabaseContext New()
 		{
-			throw new NotImplementedException();
+			return new PostgresContext(_context);
 		}
 	}
 	
@@ -83,33 +141,6 @@ namespace Kyoo.Tests
 	/// </summary>
 	public abstract class TestContext : IDisposable, IAsyncDisposable
 	{
-		/// <summary>
-		/// The context's options that specify to use an in memory Sqlite database.
-		/// </summary>
-		protected DbContextOptions<DatabaseContext> Context;
-
-		/// <summary>
-		/// Fill the database with pre defined values using a clean context.
-		/// </summary>
-		public void AddTest<T>() 
-			where T : class
-		{
-			using DatabaseContext context = New();
-			context.Set<T>().Add(TestSample.Get<T>());
-			context.SaveChanges();
-		}
-		
-		/// <summary>
-		/// Fill the database with pre defined values using a clean context.
-		/// </summary>
-		public async Task AddTestAsync<T>() 
-			where T : class
-		{
-			await using DatabaseContext context = New();
-			await context.Set<T>().AddAsync(TestSample.Get<T>());
-			await context.SaveChangesAsync();
-		}
-		
 		/// <summary>
 		/// Add an arbitrary data to the test context.
 		/// </summary>
