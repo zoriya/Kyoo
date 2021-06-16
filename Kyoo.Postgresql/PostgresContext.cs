@@ -26,16 +26,19 @@ namespace Kyoo.Postgresql
 		/// Should the configure step be skipped? This is used when the database is created via DbContextOptions.
 		/// </summary>
 		private readonly bool _skipConfigure;
-		
-		/// <summary>
-		/// A basic constructor that set default values (query tracker behaviors, mapping enums...)
-		/// </summary>
-		public PostgresContext()
+
+
+		static PostgresContext()
 		{
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<Status>();
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<ItemType>();
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<StreamType>();
 		}
+		
+		/// <summary>
+		/// A basic constructor that set default values (query tracker behaviors, mapping enums...)
+		/// </summary>
+		public PostgresContext() { }
 
 		/// <summary>
 		/// Create a new <see cref="PostgresContext"/> using specific options
@@ -44,9 +47,6 @@ namespace Kyoo.Postgresql
 		public PostgresContext(DbContextOptions options)
 			: base(options)
 		{
-			NpgsqlConnection.GlobalTypeMapper.MapEnum<Status>();
-			NpgsqlConnection.GlobalTypeMapper.MapEnum<ItemType>();
-			NpgsqlConnection.GlobalTypeMapper.MapEnum<StreamType>();
 			_skipConfigure = true;
 		}
 

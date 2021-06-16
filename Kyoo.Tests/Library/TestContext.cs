@@ -31,7 +31,7 @@ namespace Kyoo.Tests
 				.Options;
 			
 			using DatabaseContext context = New();
-			context.Database.EnsureCreated();
+			context.Database.Migrate();
 			TestSample.FillDatabase(context);
 		}
 		
@@ -57,7 +57,7 @@ namespace Kyoo.Tests
 
 	public sealed class PostgresFixture : IDisposable
 	{
-		private readonly PostgresContext _context;
+		private readonly DbContextOptions<DatabaseContext> _options;
 		
 		public string Template { get; }
 
@@ -68,20 +68,24 @@ namespace Kyoo.Tests
 			string id = Guid.NewGuid().ToString().Replace('-', '_');
 			Template = $"kyoo_template_{id}";
 			
-			DbContextOptions<DatabaseContext> options = new DbContextOptionsBuilder<DatabaseContext>()
+			_options = new DbContextOptionsBuilder<DatabaseContext>()
 				.UseNpgsql(Connection)
 				.Options;
 			
-			_context = new PostgresContext(options);
-			_context.Database.EnsureCreated();
-			TestSample.FillDatabase(_context);
-			_context.Database.CloseConnection();
+			using PostgresContext context = new(_options);
+			context.Database.Migrate();
+
+			using NpgsqlConnection conn = (NpgsqlConnection)context.Database.GetDbConnection();
+			conn.Open();
+			conn.ReloadTypes();
+
+			TestSample.FillDatabase(context);
 		}
 		
 		public void Dispose()
 		{
-			_context.Database.EnsureDeleted();
-			_context.Dispose();
+			using PostgresContext context = new(_options);
+			context.Database.EnsureDeleted();
 		}
 	}
 	

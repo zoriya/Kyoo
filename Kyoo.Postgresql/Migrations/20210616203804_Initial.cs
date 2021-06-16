@@ -386,6 +386,7 @@ namespace Kyoo.Postgresql.Migrations
                 {
                     ID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Slug = table.Column<string>(type: "text", nullable: true),
                     ShowID = table.Column<int>(type: "integer", nullable: false),
                     SeasonNumber = table.Column<int>(type: "integer", nullable: false),
                     Title = table.Column<string>(type: "text", nullable: true),
@@ -411,6 +412,7 @@ namespace Kyoo.Postgresql.Migrations
                 {
                     ID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Slug = table.Column<string>(type: "text", nullable: true),
                     ShowID = table.Column<int>(type: "integer", nullable: false),
                     SeasonID = table.Column<int>(type: "integer", nullable: true),
                     SeasonNumber = table.Column<int>(type: "integer", nullable: false),
@@ -497,6 +499,7 @@ namespace Kyoo.Postgresql.Migrations
                 {
                     ID = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Slug = table.Column<string>(type: "text", nullable: true),
                     Title = table.Column<string>(type: "text", nullable: true),
                     Language = table.Column<string>(type: "text", nullable: true),
                     Codec = table.Column<string>(type: "text", nullable: true),

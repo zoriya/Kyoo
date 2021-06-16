@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Kyoo.Postgresql.Migrations
 {
     [DbContext(typeof(PostgresContext))]
-    [Migration("20210607202403_Initial")]
+    [Migration("20210616203804_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,7 +23,7 @@ namespace Kyoo.Postgresql.Migrations
                 .HasPostgresEnum(null, "status", new[] { "finished", "airing", "planned", "unknown" })
                 .HasPostgresEnum(null, "stream_type", new[] { "unknown", "video", "audio", "subtitle", "attachment" })
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.6")
+                .HasAnnotation("ProductVersion", "5.0.7")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("Kyoo.Models.Collection", b =>
@@ -84,6 +84,9 @@ namespace Kyoo.Postgresql.Migrations
 
                     b.Property<int>("ShowID")
                         .HasColumnType("integer");
+
+                    b.Property<string>("Slug")
+                        .HasColumnType("text");
 
                     b.Property<string>("Thumb")
                         .HasColumnType("text");
@@ -428,6 +431,9 @@ namespace Kyoo.Postgresql.Migrations
                     b.Property<int>("ShowID")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Slug")
+                        .HasColumnType("text");
+
                     b.Property<DateTime?>("StartDate")
                         .HasColumnType("timestamp without time zone");
 
@@ -550,6 +556,9 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Path")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Slug")
                         .HasColumnType("text");
 
                     b.Property<string>("Title")
