@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Kyoo.Tests
 {
-	public abstract class RepositoryTests<T>
+	public abstract class RepositoryTests<T> : IDisposable, IAsyncDisposable
 		where T : class, IResource, new()
 	{
 		protected readonly RepositoryActivator Repositories;
@@ -21,7 +21,17 @@ namespace Kyoo.Tests
 			Repositories = repositories;
 			_repository = Repositories.LibraryManager.GetRepository<T>();
 		}
-		
+
+		public void Dispose()
+		{
+			Repositories.Dispose();
+		}
+
+		public ValueTask DisposeAsync()
+		{
+			return Repositories.DisposeAsync();
+		}
+
 		[Fact]
 		public async Task FillTest()
 		{
