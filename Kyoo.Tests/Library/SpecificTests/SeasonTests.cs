@@ -60,6 +60,16 @@ namespace Kyoo.Tests.SpecificTests
 			Assert.Equal("anohana-s2", season.Slug);
 		}
 		
-		//TODO test insert trigger
+		[Fact]
+		public async Task SeasonCreationSlugTest()
+		{
+			Season season = await _repository.Create(new Season
+			{
+				Show = TestSample.Get<Show>(),
+				SeasonNumber = 2
+			});
+			Assert.Equal($"{TestSample.Get<Show>().Slug}-s2_NICE", season.Slug + "_" + season.Poster);
+			Assert.Equal($"{TestSample.Get<Show>().Slug}-s2", season.Slug);
+		}
 	}
 }
