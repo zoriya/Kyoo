@@ -26,7 +26,7 @@ namespace Kyoo.Postgresql.Migrations
 			$$;");
 			
 			migrationBuilder.Sql(@"
-			CREATE TRIGGER ""SeasonSlug"" AFTER INSERT OR UPDATE OF ""SeasonNumber"", ""ShowID"" ON ""Seasons"" 
+			CREATE TRIGGER ""SeasonSlug"" BEFORE INSERT OR UPDATE OF ""SeasonNumber"", ""ShowID"" ON ""Seasons"" 
 			FOR EACH ROW EXECUTE PROCEDURE season_slug_update();");
 
 

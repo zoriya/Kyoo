@@ -56,7 +56,6 @@ namespace Kyoo.Tests.SpecificTests
 				SeasonNumber = 2
 			}, false);
 			season = await _repository.Get(1);
-			Assert.Equal("anohana-s2_NICE", season.Slug + "_" + season.Poster);
 			Assert.Equal("anohana-s2", season.Slug);
 		}
 		
@@ -65,7 +64,7 @@ namespace Kyoo.Tests.SpecificTests
 		{
 			Season season = await _repository.Create(new Season
 			{
-				Show = TestSample.Get<Show>(),
+				ShowID = TestSample.Get<Show>().ID,
 				SeasonNumber = 2
 			});
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s2_NICE", season.Slug + "_" + season.Poster);
