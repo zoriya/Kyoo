@@ -66,6 +66,8 @@ namespace Kyoo.Tests
 		
 		public PostgresFixture()
 		{
+			// TODO Assert.Skip when postgres is not available. (this needs xunit v3)
+			
 			string id = Guid.NewGuid().ToString().Replace('-', '_');
 			Template = $"kyoo_template_{id}";
 			

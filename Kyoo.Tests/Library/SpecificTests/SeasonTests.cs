@@ -56,7 +56,10 @@ namespace Kyoo.Tests.SpecificTests
 				SeasonNumber = 2
 			}, false);
 			season = await _repository.Get(1);
+			Assert.Equal("anohana-s2_NICE", season.Slug + "_" + season.Poster);
 			Assert.Equal("anohana-s2", season.Slug);
 		}
+		
+		//TODO test insert trigger
 	}
 }
