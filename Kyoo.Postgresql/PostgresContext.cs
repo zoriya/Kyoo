@@ -107,7 +107,7 @@ namespace Kyoo.Postgresql
 		public override Expression<Func<T, bool>> Like<T>(Expression<Func<T, string>> query, string format)
 		{
 			MethodInfo iLike = MethodOfUtils.MethodOf<string, string, bool>(EF.Functions.ILike);
-			MethodCallExpression call = Expression.Call(iLike, query.Body, Expression.Constant(format));
+			MethodCallExpression call = Expression.Call(iLike, Expression.Constant(EF.Functions), query.Body, Expression.Constant(format));
 
 			return Expression.Lambda<Func<T, bool>>(call, query.Parameters);
 		}
