@@ -268,5 +268,21 @@ namespace Kyoo.Tests.SpecificTests
 			ICollection<Show> ret = await _repository.Search(query);
 			KAssert.DeepEqual(value, ret.First());
 		}
+		
+		[Fact]
+		public async Task DeleteShowWithEpisodeAndSeason()
+		{
+			Show show = TestSample.Get<Show>();
+			await Repositories.LibraryManager.Load(show, x => x.Seasons);
+			await Repositories.LibraryManager.Load(show, x => x.Episodes);
+			Assert.Equal(1, await _repository.GetCount());
+			Assert.Equal(1, show.Seasons.Count);
+			Assert.Equal(1, show.Episodes.Count);
+			await _repository.Delete(show);
+			Assert.Equal(0, await Repositories.LibraryManager.ShowRepository.GetCount());
+			Assert.Equal(0, await Repositories.LibraryManager.SeasonRepository.GetCount());
+			Assert.Equal(0, await Repositories.LibraryManager.EpisodeRepository.GetCount());
+		}
+
 	}
 }

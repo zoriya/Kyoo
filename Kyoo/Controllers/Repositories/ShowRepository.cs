@@ -181,7 +181,7 @@ namespace Kyoo.Controllers
 		/// <inheritdoc />
 		public override async Task Delete(Show obj)
 		{
-			_database.Entry(obj).State = EntityState.Deleted;
+			_database.Remove(obj);
 			await _database.SaveChangesAsync();
 		}
 	}

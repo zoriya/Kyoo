@@ -1,22 +1,30 @@
 ﻿using System;
+using System.Collections.Generic;
+using Kyoo.Models;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace Kyoo.SqLite.Migrations
+namespace Kyoo.Postgresql.Migrations
 {
     public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterDatabase()
+                .Annotation("Npgsql:Enum:item_type", "show,movie,collection")
+                .Annotation("Npgsql:Enum:status", "finished,airing,planned,unknown")
+                .Annotation("Npgsql:Enum:stream_type", "unknown,video,audio,subtitle,attachment");
+
             migrationBuilder.CreateTable(
                 name: "Collections",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Slug = table.Column<string>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: true),
-                    Poster = table.Column<string>(type: "TEXT", nullable: true),
-                    Overview = table.Column<string>(type: "TEXT", nullable: true)
+                    ID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Slug = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    Poster = table.Column<string>(type: "text", nullable: true),
+                    Overview = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -27,10 +35,10 @@ namespace Kyoo.SqLite.Migrations
                 name: "Genres",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Slug = table.Column<string>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: true)
+                    ID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Slug = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -41,11 +49,11 @@ namespace Kyoo.SqLite.Migrations
                 name: "Libraries",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Slug = table.Column<string>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: true),
-                    Paths = table.Column<string>(type: "TEXT", nullable: true)
+                    ID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Slug = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    Paths = table.Column<string[]>(type: "text[]", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -56,11 +64,11 @@ namespace Kyoo.SqLite.Migrations
                 name: "People",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Slug = table.Column<string>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: true),
-                    Poster = table.Column<string>(type: "TEXT", nullable: true)
+                    ID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Slug = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    Poster = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -71,12 +79,12 @@ namespace Kyoo.SqLite.Migrations
                 name: "Providers",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Slug = table.Column<string>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: true),
-                    Logo = table.Column<string>(type: "TEXT", nullable: true),
-                    LogoExtension = table.Column<string>(type: "TEXT", nullable: true)
+                    ID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Slug = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: true),
+                    Logo = table.Column<string>(type: "text", nullable: true),
+                    LogoExtension = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -87,10 +95,10 @@ namespace Kyoo.SqLite.Migrations
                 name: "Studios",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Slug = table.Column<string>(type: "TEXT", nullable: false),
-                    Name = table.Column<string>(type: "TEXT", nullable: true)
+                    ID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Slug = table.Column<string>(type: "text", nullable: false),
+                    Name = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -101,14 +109,14 @@ namespace Kyoo.SqLite.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Slug = table.Column<string>(type: "TEXT", nullable: false),
-                    Username = table.Column<string>(type: "TEXT", nullable: true),
-                    Email = table.Column<string>(type: "TEXT", nullable: true),
-                    Password = table.Column<string>(type: "TEXT", nullable: true),
-                    Permissions = table.Column<string>(type: "TEXT", nullable: true),
-                    ExtraData = table.Column<string>(type: "TEXT", nullable: true)
+                    ID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Slug = table.Column<string>(type: "text", nullable: false),
+                    Username = table.Column<string>(type: "text", nullable: true),
+                    Email = table.Column<string>(type: "text", nullable: true),
+                    Password = table.Column<string>(type: "text", nullable: true),
+                    Permissions = table.Column<string[]>(type: "text[]", nullable: true),
+                    ExtraData = table.Column<Dictionary<string, string>>(type: "jsonb", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -119,8 +127,8 @@ namespace Kyoo.SqLite.Migrations
                 name: "Link<Library, Collection>",
                 columns: table => new
                 {
-                    FirstID = table.Column<int>(type: "INTEGER", nullable: false),
-                    SecondID = table.Column<int>(type: "INTEGER", nullable: false)
+                    FirstID = table.Column<int>(type: "integer", nullable: false),
+                    SecondID = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -143,8 +151,8 @@ namespace Kyoo.SqLite.Migrations
                 name: "Link<Library, Provider>",
                 columns: table => new
                 {
-                    FirstID = table.Column<int>(type: "INTEGER", nullable: false),
-                    SecondID = table.Column<int>(type: "INTEGER", nullable: false)
+                    FirstID = table.Column<int>(type: "integer", nullable: false),
+                    SecondID = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -167,10 +175,10 @@ namespace Kyoo.SqLite.Migrations
                 name: "MetadataID<People>",
                 columns: table => new
                 {
-                    FirstID = table.Column<int>(type: "INTEGER", nullable: false),
-                    SecondID = table.Column<int>(type: "INTEGER", nullable: false),
-                    DataID = table.Column<string>(type: "TEXT", nullable: true),
-                    Link = table.Column<string>(type: "TEXT", nullable: true)
+                    FirstID = table.Column<int>(type: "integer", nullable: false),
+                    SecondID = table.Column<int>(type: "integer", nullable: false),
+                    DataID = table.Column<string>(type: "text", nullable: true),
+                    Link = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -193,22 +201,22 @@ namespace Kyoo.SqLite.Migrations
                 name: "Shows",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Slug = table.Column<string>(type: "TEXT", nullable: false),
-                    Title = table.Column<string>(type: "TEXT", nullable: true),
-                    Aliases = table.Column<string>(type: "TEXT", nullable: true),
-                    Path = table.Column<string>(type: "TEXT", nullable: true),
-                    Overview = table.Column<string>(type: "TEXT", nullable: true),
-                    Status = table.Column<int>(type: "INTEGER", nullable: true),
-                    TrailerUrl = table.Column<string>(type: "TEXT", nullable: true),
-                    StartAir = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    EndAir = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    Poster = table.Column<string>(type: "TEXT", nullable: true),
-                    Logo = table.Column<string>(type: "TEXT", nullable: true),
-                    Backdrop = table.Column<string>(type: "TEXT", nullable: true),
-                    IsMovie = table.Column<bool>(type: "INTEGER", nullable: false),
-                    StudioID = table.Column<int>(type: "INTEGER", nullable: true)
+                    ID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Slug = table.Column<string>(type: "text", nullable: false),
+                    Title = table.Column<string>(type: "text", nullable: true),
+                    Aliases = table.Column<string[]>(type: "text[]", nullable: true),
+                    Path = table.Column<string>(type: "text", nullable: true),
+                    Overview = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<Status>(type: "status", nullable: true),
+                    TrailerUrl = table.Column<string>(type: "text", nullable: true),
+                    StartAir = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    EndAir = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    Poster = table.Column<string>(type: "text", nullable: true),
+                    Logo = table.Column<string>(type: "text", nullable: true),
+                    Backdrop = table.Column<string>(type: "text", nullable: true),
+                    IsMovie = table.Column<bool>(type: "boolean", nullable: false),
+                    StudioID = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -225,8 +233,8 @@ namespace Kyoo.SqLite.Migrations
                 name: "Link<Collection, Show>",
                 columns: table => new
                 {
-                    FirstID = table.Column<int>(type: "INTEGER", nullable: false),
-                    SecondID = table.Column<int>(type: "INTEGER", nullable: false)
+                    FirstID = table.Column<int>(type: "integer", nullable: false),
+                    SecondID = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -249,8 +257,8 @@ namespace Kyoo.SqLite.Migrations
                 name: "Link<Library, Show>",
                 columns: table => new
                 {
-                    FirstID = table.Column<int>(type: "INTEGER", nullable: false),
-                    SecondID = table.Column<int>(type: "INTEGER", nullable: false)
+                    FirstID = table.Column<int>(type: "integer", nullable: false),
+                    SecondID = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -273,8 +281,8 @@ namespace Kyoo.SqLite.Migrations
                 name: "Link<Show, Genre>",
                 columns: table => new
                 {
-                    FirstID = table.Column<int>(type: "INTEGER", nullable: false),
-                    SecondID = table.Column<int>(type: "INTEGER", nullable: false)
+                    FirstID = table.Column<int>(type: "integer", nullable: false),
+                    SecondID = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -297,8 +305,8 @@ namespace Kyoo.SqLite.Migrations
                 name: "Link<User, Show>",
                 columns: table => new
                 {
-                    FirstID = table.Column<int>(type: "INTEGER", nullable: false),
-                    SecondID = table.Column<int>(type: "INTEGER", nullable: false)
+                    FirstID = table.Column<int>(type: "integer", nullable: false),
+                    SecondID = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -321,10 +329,10 @@ namespace Kyoo.SqLite.Migrations
                 name: "MetadataID<Show>",
                 columns: table => new
                 {
-                    FirstID = table.Column<int>(type: "INTEGER", nullable: false),
-                    SecondID = table.Column<int>(type: "INTEGER", nullable: false),
-                    DataID = table.Column<string>(type: "TEXT", nullable: true),
-                    Link = table.Column<string>(type: "TEXT", nullable: true)
+                    FirstID = table.Column<int>(type: "integer", nullable: false),
+                    SecondID = table.Column<int>(type: "integer", nullable: false),
+                    DataID = table.Column<string>(type: "text", nullable: true),
+                    Link = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -347,13 +355,13 @@ namespace Kyoo.SqLite.Migrations
                 name: "PeopleRoles",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    ForPeople = table.Column<bool>(type: "INTEGER", nullable: false),
-                    PeopleID = table.Column<int>(type: "INTEGER", nullable: false),
-                    ShowID = table.Column<int>(type: "INTEGER", nullable: false),
-                    Type = table.Column<string>(type: "TEXT", nullable: true),
-                    Role = table.Column<string>(type: "TEXT", nullable: true)
+                    ID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ForPeople = table.Column<bool>(type: "boolean", nullable: false),
+                    PeopleID = table.Column<int>(type: "integer", nullable: false),
+                    ShowID = table.Column<int>(type: "integer", nullable: false),
+                    Type = table.Column<string>(type: "text", nullable: true),
+                    Role = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -376,16 +384,16 @@ namespace Kyoo.SqLite.Migrations
                 name: "Seasons",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Slug = table.Column<string>(type: "TEXT", nullable: true),
-                    ShowID = table.Column<int>(type: "INTEGER", nullable: false),
-                    SeasonNumber = table.Column<int>(type: "INTEGER", nullable: false),
-                    Title = table.Column<string>(type: "TEXT", nullable: true),
-                    Overview = table.Column<string>(type: "TEXT", nullable: true),
-                    StartDate = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    EndDate = table.Column<DateTime>(type: "TEXT", nullable: true),
-                    Poster = table.Column<string>(type: "TEXT", nullable: true)
+                    ID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Slug = table.Column<string>(type: "text", nullable: true),
+                    ShowID = table.Column<int>(type: "integer", nullable: false),
+                    SeasonNumber = table.Column<int>(type: "integer", nullable: false),
+                    Title = table.Column<string>(type: "text", nullable: true),
+                    Overview = table.Column<string>(type: "text", nullable: true),
+                    StartDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    EndDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
+                    Poster = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -402,19 +410,19 @@ namespace Kyoo.SqLite.Migrations
                 name: "Episodes",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Slug = table.Column<string>(type: "TEXT", nullable: true),
-                    ShowID = table.Column<int>(type: "INTEGER", nullable: false),
-                    SeasonID = table.Column<int>(type: "INTEGER", nullable: true),
-                    SeasonNumber = table.Column<int>(type: "INTEGER", nullable: false),
-                    EpisodeNumber = table.Column<int>(type: "INTEGER", nullable: false),
-                    AbsoluteNumber = table.Column<int>(type: "INTEGER", nullable: false),
-                    Path = table.Column<string>(type: "TEXT", nullable: true),
-                    Thumb = table.Column<string>(type: "TEXT", nullable: true),
-                    Title = table.Column<string>(type: "TEXT", nullable: true),
-                    Overview = table.Column<string>(type: "TEXT", nullable: true),
-                    ReleaseDate = table.Column<DateTime>(type: "TEXT", nullable: true)
+                    ID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Slug = table.Column<string>(type: "text", nullable: true),
+                    ShowID = table.Column<int>(type: "integer", nullable: false),
+                    SeasonID = table.Column<int>(type: "integer", nullable: true),
+                    SeasonNumber = table.Column<int>(type: "integer", nullable: false),
+                    EpisodeNumber = table.Column<int>(type: "integer", nullable: false),
+                    AbsoluteNumber = table.Column<int>(type: "integer", nullable: false),
+                    Path = table.Column<string>(type: "text", nullable: true),
+                    Thumb = table.Column<string>(type: "text", nullable: true),
+                    Title = table.Column<string>(type: "text", nullable: true),
+                    Overview = table.Column<string>(type: "text", nullable: true),
+                    ReleaseDate = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -424,7 +432,7 @@ namespace Kyoo.SqLite.Migrations
                         column: x => x.SeasonID,
                         principalTable: "Seasons",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Episodes_Shows_ShowID",
                         column: x => x.ShowID,
@@ -437,10 +445,10 @@ namespace Kyoo.SqLite.Migrations
                 name: "MetadataID<Season>",
                 columns: table => new
                 {
-                    FirstID = table.Column<int>(type: "INTEGER", nullable: false),
-                    SecondID = table.Column<int>(type: "INTEGER", nullable: false),
-                    DataID = table.Column<string>(type: "TEXT", nullable: true),
-                    Link = table.Column<string>(type: "TEXT", nullable: true)
+                    FirstID = table.Column<int>(type: "integer", nullable: false),
+                    SecondID = table.Column<int>(type: "integer", nullable: false),
+                    DataID = table.Column<string>(type: "text", nullable: true),
+                    Link = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -463,10 +471,10 @@ namespace Kyoo.SqLite.Migrations
                 name: "MetadataID<Episode>",
                 columns: table => new
                 {
-                    FirstID = table.Column<int>(type: "INTEGER", nullable: false),
-                    SecondID = table.Column<int>(type: "INTEGER", nullable: false),
-                    DataID = table.Column<string>(type: "TEXT", nullable: true),
-                    Link = table.Column<string>(type: "TEXT", nullable: true)
+                    FirstID = table.Column<int>(type: "integer", nullable: false),
+                    SecondID = table.Column<int>(type: "integer", nullable: false),
+                    DataID = table.Column<string>(type: "text", nullable: true),
+                    Link = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -489,19 +497,19 @@ namespace Kyoo.SqLite.Migrations
                 name: "Tracks",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    Slug = table.Column<string>(type: "TEXT", nullable: true),
-                    Title = table.Column<string>(type: "TEXT", nullable: true),
-                    Language = table.Column<string>(type: "TEXT", nullable: true),
-                    Codec = table.Column<string>(type: "TEXT", nullable: true),
-                    IsDefault = table.Column<bool>(type: "INTEGER", nullable: false),
-                    IsForced = table.Column<bool>(type: "INTEGER", nullable: false),
-                    IsExternal = table.Column<bool>(type: "INTEGER", nullable: false),
-                    Path = table.Column<string>(type: "TEXT", nullable: true),
-                    Type = table.Column<int>(type: "INTEGER", nullable: false),
-                    EpisodeID = table.Column<int>(type: "INTEGER", nullable: false),
-                    TrackIndex = table.Column<int>(type: "INTEGER", nullable: false)
+                    ID = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Slug = table.Column<string>(type: "text", nullable: true),
+                    Title = table.Column<string>(type: "text", nullable: true),
+                    Language = table.Column<string>(type: "text", nullable: true),
+                    Codec = table.Column<string>(type: "text", nullable: true),
+                    IsDefault = table.Column<bool>(type: "boolean", nullable: false),
+                    IsForced = table.Column<bool>(type: "boolean", nullable: false),
+                    IsExternal = table.Column<bool>(type: "boolean", nullable: false),
+                    Path = table.Column<string>(type: "text", nullable: true),
+                    Type = table.Column<StreamType>(type: "stream_type", nullable: false),
+                    EpisodeID = table.Column<int>(type: "integer", nullable: false),
+                    TrackIndex = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -518,9 +526,9 @@ namespace Kyoo.SqLite.Migrations
                 name: "WatchedEpisodes",
                 columns: table => new
                 {
-                    FirstID = table.Column<int>(type: "INTEGER", nullable: false),
-                    SecondID = table.Column<int>(type: "INTEGER", nullable: false),
-                    WatchedPercentage = table.Column<int>(type: "INTEGER", nullable: false)
+                    FirstID = table.Column<int>(type: "integer", nullable: false),
+                    SecondID = table.Column<int>(type: "integer", nullable: false),
+                    WatchedPercentage = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {

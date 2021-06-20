@@ -123,13 +123,9 @@ namespace Kyoo.Controllers
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
-			
-			_database.Entry(obj).State = EntityState.Deleted;
-			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Deleted);
+
+			_database.Remove(obj);
 			await _database.SaveChangesAsync();
-			//
-			// if (obj.Episodes != null)
-			// 	await _episodes.Value.DeleteRange(obj.Episodes);
 		}
 	}
 }

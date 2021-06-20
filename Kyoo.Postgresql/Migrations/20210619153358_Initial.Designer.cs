@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Kyoo.Postgresql.Migrations
 {
     [DbContext(typeof(PostgresContext))]
-    [Migration("20210616203804_Initial")]
+    [Migration("20210619153358_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -634,7 +634,8 @@ namespace Kyoo.Postgresql.Migrations
                 {
                     b.HasOne("Kyoo.Models.Season", "Season")
                         .WithMany("Episodes")
-                        .HasForeignKey("SeasonID");
+                        .HasForeignKey("SeasonID")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Kyoo.Models.Show", "Show")
                         .WithMany("Episodes")

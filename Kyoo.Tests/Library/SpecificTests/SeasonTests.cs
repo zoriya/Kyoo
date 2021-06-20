@@ -12,6 +12,14 @@ namespace Kyoo.Tests.SpecificTests
 		{ }
 	}
 	
+	[Collection(nameof(Postgresql))]
+	public class PostgresSeasonTests : SeasonTests
+	{
+		public PostgresSeasonTests(PostgresFixture postgres)
+			: base(new RepositoryActivator(postgres))
+		{ }
+	}
+	
 	public abstract class SeasonTests : RepositoryTests<Season>
 	{
 		private readonly ISeasonRepository _repository;

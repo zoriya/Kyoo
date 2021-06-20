@@ -612,7 +612,8 @@ namespace Kyoo.SqLite.Migrations
                 {
                     b.HasOne("Kyoo.Models.Season", "Season")
                         .WithMany("Episodes")
-                        .HasForeignKey("SeasonID");
+                        .HasForeignKey("SeasonID")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Kyoo.Models.Show", "Show")
                         .WithMany("Episodes")

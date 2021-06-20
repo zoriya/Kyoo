@@ -140,6 +140,23 @@ namespace Kyoo
 				.Property(t => t.IsForced)
 				.ValueGeneratedNever();
 
+			modelBuilder.Entity<Show>()
+				.HasMany(x => x.Seasons)
+				.WithOne(x => x.Show)
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<Show>()
+				.HasMany(x => x.Episodes)
+				.WithOne(x => x.Show)
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<Season>()
+				.HasMany(x => x.Episodes)
+				.WithOne(x => x.Season)
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<Episode>()
+				.HasMany(x => x.Tracks)
+				.WithOne(x => x.Episode)
+				.OnDelete(DeleteBehavior.Cascade);
+
 			modelBuilder.Entity<Provider>()
 				.HasMany(x => x.Libraries)
 				.WithMany(x => x.Providers)

@@ -4,6 +4,7 @@ using Kyoo.Postgresql;
 using Kyoo.SqLite;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Npgsql;
 using Xunit;
 
@@ -80,6 +81,7 @@ namespace Kyoo.Tests
 			conn.ReloadTypes();
 
 			TestSample.FillDatabase(context);
+			conn.Close();
 		}
 		
 		public void Dispose()
@@ -111,12 +113,15 @@ namespace Kyoo.Tests
 
 			_context = new DbContextOptionsBuilder<DatabaseContext>()
 				.UseNpgsql(_connection)
+				.UseLoggerFactory(LoggerFactory.Create(x => x.AddConsole()))
+				.EnableSensitiveDataLogging()
+				.EnableDetailedErrors()
 				.Options;
 		}
 		
 		public static string GetConnectionString(string database)
 		{
-			return $"Server=127.0.0.1;Port=5432;Database={database};User ID=kyoo;Password=kyooPassword";
+			return $"Server=127.0.0.1;Port=5432;Database={database};User ID=kyoo;Password=kyooPassword;Include Error Detail=true";
 		}
 		
 		public override void Dispose()

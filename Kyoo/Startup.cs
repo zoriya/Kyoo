@@ -4,6 +4,7 @@ using Kyoo.Authentication;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Kyoo.Models.Options;
+using Kyoo.Postgresql;
 using Kyoo.SqLite;
 using Kyoo.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -46,8 +47,8 @@ namespace Kyoo
 			// TODO remove postgres from here and load it like a normal plugin.
 			_plugins.LoadPlugins(new IPlugin[] {
 				new CoreModule(configuration), 
-				// new PostgresModule(configuration, host),
-				new SqLiteModule(configuration, host),
+				new PostgresModule(configuration, host),
+				// new SqLiteModule(configuration, host),
 				new AuthenticationModule(configuration, loggerFactory, host)
 			});
 		}

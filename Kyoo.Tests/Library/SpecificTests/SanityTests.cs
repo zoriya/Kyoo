@@ -23,27 +23,6 @@ namespace Kyoo.Tests.SpecificTests
 			Assert.False(ReferenceEquals(TestSample.Get<Show>(), TestSample.Get<Show>()));
 		}
 		
-		[Fact]
-		public async Task DeleteShowWithEpisodeAndSeason()
-		{
-			Show show = TestSample.Get<Show>();
-			show.Seasons = new[]
-			{
-				TestSample.Get<Season>()
-			};
-			show.Seasons.First().Episodes = new[]
-			{
-				TestSample.Get<Episode>()
-			};
-			await _repositories.Context.AddAsync(show);
-
-			Assert.Equal(1, await _repositories.LibraryManager.ShowRepository.GetCount());
-			await _repositories.LibraryManager.ShowRepository.Delete(show);
-			Assert.Equal(0, await _repositories.LibraryManager.ShowRepository.GetCount());
-			Assert.Equal(0, await _repositories.LibraryManager.SeasonRepository.GetCount());
-			Assert.Equal(0, await _repositories.LibraryManager.EpisodeRepository.GetCount());
-		}
-
 		public void Dispose()
 		{
 			_repositories.Dispose();

@@ -9,8 +9,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kyoo.SqLite.Migrations
 {
     [DbContext(typeof(SqLiteContext))]
-    [Migration("20210613135215_Triggers")]
-    partial class Triggers
+    [Migration("20210619154617_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -614,7 +614,8 @@ namespace Kyoo.SqLite.Migrations
                 {
                     b.HasOne("Kyoo.Models.Season", "Season")
                         .WithMany("Episodes")
-                        .HasForeignKey("SeasonID");
+                        .HasForeignKey("SeasonID")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Kyoo.Models.Show", "Show")
                         .WithMany("Episodes")

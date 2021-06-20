@@ -6,6 +6,15 @@ namespace Kyoo.Tests
 {
 	public static class TestSample
 	{
+		private static readonly Dictionary<Type, Func<object>> NewSamples = new()
+		{
+			{
+				typeof(Show),
+				() => new Show()
+			}
+		};
+		
+		
 		private static readonly Dictionary<Type, Func<object>> Samples = new()
 		{
 			{
@@ -26,8 +35,8 @@ namespace Kyoo.Tests
 					           "school students, they had long ceased to think of each other as friends.",
 					Status = Status.Finished,
 					TrailerUrl = null,
-					StartAir = new DateTime(2011),
-					EndAir = new DateTime(2011),
+					StartAir = new DateTime(2011, 1, 1),
+					EndAir = new DateTime(2011, 1, 1),
 					Poster = "poster",
 					Logo = "logo",
 					Backdrop = "backdrop",
@@ -84,13 +93,32 @@ namespace Kyoo.Tests
 		{
 			return (T)Samples[typeof(T)]();
 		}
+		
+		public static T GetNew<T>()
+		{
+			return (T)NewSamples[typeof(T)]();
+		}
 
 		public static void FillDatabase(DatabaseContext context)
 		{
-			context.Shows.Add(Get<Show>());
-			context.Seasons.Add(Get<Season>());
-			// context.Episodes.Add(Get<Episode>());
-			// context.People.Add(Get<People>());
+			Show show = Get<Show>();
+			show.ID = 0;
+			context.Shows.Add(show);
+
+			Season season = Get<Season>();
+			season.ID = 0;
+			season.ShowID = 0;
+			season.Show = show;
+			context.Seasons.Add(season);
+
+			Episode episode = Get<Episode>();
+			episode.ID = 0;
+			episode.ShowID = 0;
+			episode.Show = show;
+			episode.SeasonID = 0;
+			episode.Season = season;
+			context.Episodes.Add(episode);
+			
 			context.SaveChanges();
 		}
 	}
