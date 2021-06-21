@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Kyoo.Postgresql.Migrations
 {
     [DbContext(typeof(PostgresContext))]
-    [Migration("20210619153358_Initial")]
+    [Migration("20210621175845_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -86,6 +86,7 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Slug")
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("text");
 
                     b.Property<string>("Thumb")
@@ -97,6 +98,9 @@ namespace Kyoo.Postgresql.Migrations
                     b.HasKey("ID");
 
                     b.HasIndex("SeasonID");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
 
                     b.HasIndex("ShowID", "SeasonNumber", "EpisodeNumber", "AbsoluteNumber")
                         .IsUnique();
@@ -432,6 +436,7 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Slug")
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("StartDate")
@@ -441,6 +446,9 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
 
                     b.HasIndex("ShowID", "SeasonNumber")
                         .IsUnique();
@@ -559,6 +567,7 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Slug")
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("text");
 
                     b.Property<string>("Title")
@@ -571,6 +580,9 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("stream_type");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
 
                     b.HasIndex("EpisodeID", "Type", "Language", "TrackIndex", "IsForced")
                         .IsUnique();

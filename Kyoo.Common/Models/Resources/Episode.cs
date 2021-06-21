@@ -20,7 +20,7 @@ namespace Kyoo.Models
 		public string Slug
 		{
 			get => GetSlug(ShowSlug, SeasonNumber, EpisodeNumber, AbsoluteNumber);
-			set
+			[UsedImplicitly] private set
 			{
 				Match match = Regex.Match(value, @"(?<show>.*)-s(?<season>\d*)e(?<episode>\d*)");
 

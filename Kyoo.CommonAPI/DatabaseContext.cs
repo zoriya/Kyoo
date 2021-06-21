@@ -302,15 +302,34 @@ namespace Kyoo
 			modelBuilder.Entity<Season>()
 				.HasIndex(x => new {x.ShowID, x.SeasonNumber})
 				.IsUnique();
+			modelBuilder.Entity<Season>()
+				.HasIndex(x => x.Slug)
+				.IsUnique();
 			modelBuilder.Entity<Episode>()
 				.HasIndex(x => new {x.ShowID, x.SeasonNumber, x.EpisodeNumber, x.AbsoluteNumber})
+				.IsUnique();
+			modelBuilder.Entity<Episode>()
+				.HasIndex(x => x.Slug)
 				.IsUnique();
 			modelBuilder.Entity<Track>()
 				.HasIndex(x => new {x.EpisodeID, x.Type, x.Language, x.TrackIndex, x.IsForced})
 				.IsUnique();
+			modelBuilder.Entity<Track>()
+				.HasIndex(x => x.Slug)
+				.IsUnique();
 			modelBuilder.Entity<User>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
+
+			modelBuilder.Entity<Season>()
+				.Property(x => x.Slug)
+				.ValueGeneratedOnAddOrUpdate();
+			modelBuilder.Entity<Episode>()
+				.Property(x => x.Slug)
+				.ValueGeneratedOnAddOrUpdate();
+			modelBuilder.Entity<Track>()
+				.Property(x => x.Slug)
+				.ValueGeneratedOnAddOrUpdate();
 		}
 
 		/// <summary>

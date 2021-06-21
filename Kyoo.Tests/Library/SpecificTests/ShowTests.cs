@@ -6,6 +6,7 @@ using Kyoo.Controllers;
 using Kyoo.Models;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
+using Xunit.Extensions.Ordering;
 
 namespace Kyoo.Tests.SpecificTests
 {
@@ -16,8 +17,7 @@ namespace Kyoo.Tests.SpecificTests
 		{ }
 	}
 	
-	[Collection(nameof(Postgresql))]
-	public class PostgresShowTests : ShowTests
+	public class PostgresShowTests : ShowTests, IAssemblyFixture<PostgresFixture>
 	{
 		public PostgresShowTests(PostgresFixture postgres)
 			: base(new RepositoryActivator(postgres))
@@ -283,6 +283,5 @@ namespace Kyoo.Tests.SpecificTests
 			Assert.Equal(0, await Repositories.LibraryManager.SeasonRepository.GetCount());
 			Assert.Equal(0, await Repositories.LibraryManager.EpisodeRepository.GetCount());
 		}
-
 	}
 }

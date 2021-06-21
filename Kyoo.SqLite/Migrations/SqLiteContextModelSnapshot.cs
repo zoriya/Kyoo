@@ -74,6 +74,7 @@ namespace Kyoo.SqLite.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Slug")
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Thumb")
@@ -85,6 +86,9 @@ namespace Kyoo.SqLite.Migrations
                     b.HasKey("ID");
 
                     b.HasIndex("SeasonID");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
 
                     b.HasIndex("ShowID", "SeasonNumber", "EpisodeNumber", "AbsoluteNumber")
                         .IsUnique();
@@ -414,6 +418,7 @@ namespace Kyoo.SqLite.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Slug")
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("StartDate")
@@ -423,6 +428,9 @@ namespace Kyoo.SqLite.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
 
                     b.HasIndex("ShowID", "SeasonNumber")
                         .IsUnique();
@@ -538,6 +546,7 @@ namespace Kyoo.SqLite.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Slug")
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
@@ -550,6 +559,9 @@ namespace Kyoo.SqLite.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
 
                     b.HasIndex("EpisodeID", "Type", "Language", "TrackIndex", "IsForced")
                         .IsUnique();

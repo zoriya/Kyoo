@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Xunit;
+using Xunit.Extensions.Ordering;
 
 namespace Kyoo.Tests.SpecificTests
 {
@@ -11,9 +12,9 @@ namespace Kyoo.Tests.SpecificTests
 			: base(new RepositoryActivator())
 		{ }
 	}
-	
-	[Collection(nameof(Postgresql))]
-	public class PostgresSeasonTests : SeasonTests
+
+
+	public class PostgresSeasonTests : SeasonTests, IAssemblyFixture<PostgresFixture>
 	{
 		public PostgresSeasonTests(PostgresFixture postgres)
 			: base(new RepositoryActivator(postgres))
@@ -67,7 +68,6 @@ namespace Kyoo.Tests.SpecificTests
 				ShowID = TestSample.Get<Show>().ID,
 				SeasonNumber = 2
 			});
-			Assert.Equal($"{TestSample.Get<Show>().Slug}-s2_NICE", season.Slug + "_" + season.Poster);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s2", season.Slug);
 		}
 	}

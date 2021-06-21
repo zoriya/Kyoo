@@ -84,6 +84,7 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Slug")
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("text");
 
                     b.Property<string>("Thumb")
@@ -95,6 +96,9 @@ namespace Kyoo.Postgresql.Migrations
                     b.HasKey("ID");
 
                     b.HasIndex("SeasonID");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
 
                     b.HasIndex("ShowID", "SeasonNumber", "EpisodeNumber", "AbsoluteNumber")
                         .IsUnique();
@@ -430,6 +434,7 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Slug")
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("StartDate")
@@ -439,6 +444,9 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
 
                     b.HasIndex("ShowID", "SeasonNumber")
                         .IsUnique();
@@ -557,6 +565,7 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Slug")
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("text");
 
                     b.Property<string>("Title")
@@ -569,6 +578,9 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("stream_type");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
 
                     b.HasIndex("EpisodeID", "Type", "Language", "TrackIndex", "IsForced")
                         .IsUnique();

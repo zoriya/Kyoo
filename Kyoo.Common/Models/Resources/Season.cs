@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using JetBrains.Annotations;
 using Kyoo.Controllers;
 using Kyoo.Models.Attributes;
 
@@ -18,7 +19,7 @@ namespace Kyoo.Models
 		public string Slug
 		{
 			get => $"{ShowSlug}-s{SeasonNumber}";
-			set
+			[UsedImplicitly] private set
 			{
 				Match match = Regex.Match(value, @"(?<show>.*)-s(?<season>\d*)");
 			

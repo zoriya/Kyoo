@@ -8,6 +8,8 @@ using Microsoft.Extensions.Logging;
 using Npgsql;
 using Xunit;
 
+[assembly: TestFramework("Xunit.Extensions.Ordering.TestFramework", "Xunit.Extensions.Ordering")]
+
 namespace Kyoo.Tests
 {
 	public sealed class SqLiteTestContext : TestContext
@@ -29,6 +31,9 @@ namespace Kyoo.Tests
 			
 			_context = new DbContextOptionsBuilder<DatabaseContext>()
 				.UseSqlite(_connection)
+				.UseLoggerFactory(LoggerFactory.Create(x => x.AddConsole()))
+				.EnableSensitiveDataLogging()
+				.EnableDetailedErrors()
 				.Options;
 			
 			using DatabaseContext context = New();
@@ -51,10 +56,6 @@ namespace Kyoo.Tests
 			return new SqLiteContext(_context);
 		}
 	}
-
-	[CollectionDefinition(nameof(Postgresql))]
-	public class PostgresCollection : ICollectionFixture<PostgresFixture>
-	{}
 
 	public sealed class PostgresFixture : IDisposable
 	{

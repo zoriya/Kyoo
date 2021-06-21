@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
+using JetBrains.Annotations;
 using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
@@ -48,7 +49,7 @@ namespace Kyoo.Models
 				};
 				return $"{EpisodeSlug}.{type}{Language}{index}{(IsForced ? "-forced" : "")}{codec}";
 			}
-			set
+			[UsedImplicitly] private set
 			{
 				Match match = Regex.Match(value, @"(?<show>.*)-s(?<season>\d+)e(?<episode>\d+)" 
 				                                 + @"(\.(?<type>\w*))?\.(?<language>.{0,3})(?<forced>-forced)?(\..\w)?");

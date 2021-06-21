@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kyoo.SqLite.Migrations
 {
     [DbContext(typeof(SqLiteContext))]
-    [Migration("20210619154654_Triggers")]
+    [Migration("20210621175342_Triggers")]
     partial class Triggers
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -76,6 +76,7 @@ namespace Kyoo.SqLite.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Slug")
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Thumb")
@@ -87,6 +88,9 @@ namespace Kyoo.SqLite.Migrations
                     b.HasKey("ID");
 
                     b.HasIndex("SeasonID");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
 
                     b.HasIndex("ShowID", "SeasonNumber", "EpisodeNumber", "AbsoluteNumber")
                         .IsUnique();
@@ -416,6 +420,7 @@ namespace Kyoo.SqLite.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Slug")
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("StartDate")
@@ -425,6 +430,9 @@ namespace Kyoo.SqLite.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
 
                     b.HasIndex("ShowID", "SeasonNumber")
                         .IsUnique();
@@ -540,6 +548,7 @@ namespace Kyoo.SqLite.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Slug")
+                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Title")
@@ -552,6 +561,9 @@ namespace Kyoo.SqLite.Migrations
                         .HasColumnType("INTEGER");
 
                     b.HasKey("ID");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
 
                     b.HasIndex("EpisodeID", "Type", "Language", "TrackIndex", "IsForced")
                         .IsUnique();
