@@ -2,30 +2,34 @@ using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Xunit;
-using Xunit.Extensions.Ordering;
 
-namespace Kyoo.Tests.SpecificTests
+namespace Kyoo.Tests.Library
 {
-	public class SqLiteSeasonTests : SeasonTests
+	namespace SqLite
 	{
-		public SqLiteSeasonTests()
-			: base(new RepositoryActivator())
-		{ }
+		public class SeasonTests : ASeasonTests
+		{
+			public SeasonTests()
+				: base(new RepositoryActivator()) { }
+		}
 	}
 
 
-	public class PostgresSeasonTests : SeasonTests, IAssemblyFixture<PostgresFixture>
+	namespace PostgreSQL
 	{
-		public PostgresSeasonTests(PostgresFixture postgres)
-			: base(new RepositoryActivator(postgres))
-		{ }
+		[Collection(nameof(Postgresql))]
+		public class SeasonTests : ASeasonTests
+		{
+			public SeasonTests(PostgresFixture postgres)
+				: base(new RepositoryActivator(postgres)) { }
+		}
 	}
-	
-	public abstract class SeasonTests : RepositoryTests<Season>
+
+	public abstract class ASeasonTests : RepositoryTests<Season>
 	{
 		private readonly ISeasonRepository _repository;
 
-		protected SeasonTests(RepositoryActivator repositories)
+		protected ASeasonTests(RepositoryActivator repositories)
 			: base(repositories)
 		{
 			_repository = Repositories.LibraryManager.SeasonRepository;

@@ -1,11 +1,10 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Models;
 using Xunit;
 
-namespace Kyoo.Tests.SpecificTests
+namespace Kyoo.Tests.Library
 {
 	public class GlobalTests : IDisposable, IAsyncDisposable
 	{

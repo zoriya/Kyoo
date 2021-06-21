@@ -6,29 +6,33 @@ using Kyoo.Controllers;
 using Kyoo.Models;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
-using Xunit.Extensions.Ordering;
 
-namespace Kyoo.Tests.SpecificTests
+namespace Kyoo.Tests.Library
 {
-	public class SqLiteShowTests : ShowTests
+	namespace SqLite
 	{
-		public SqLiteShowTests()
-			: base(new RepositoryActivator())
-		{ }
+		public class ShowTests : AShowTests
+		{
+			public ShowTests()
+				: base(new RepositoryActivator()) { }
+		}
 	}
-	
-	public class PostgresShowTests : ShowTests, IAssemblyFixture<PostgresFixture>
+
+	namespace PostgreSQL
 	{
-		public PostgresShowTests(PostgresFixture postgres)
-			: base(new RepositoryActivator(postgres))
-		{ }
+		[Collection(nameof(Postgresql))]
+		public class ShowTests : AShowTests
+		{
+			public ShowTests(PostgresFixture postgres)
+				: base(new RepositoryActivator(postgres)) { }
+		}
 	}
-	
-	public abstract class ShowTests : RepositoryTests<Show>
+
+	public abstract class AShowTests : RepositoryTests<Show>
 	{
 		private readonly IShowRepository _repository;
 
-		protected ShowTests(RepositoryActivator repositories)
+		protected AShowTests(RepositoryActivator repositories)
 			: base(repositories)
 		{
 			_repository = Repositories.LibraryManager.ShowRepository;
