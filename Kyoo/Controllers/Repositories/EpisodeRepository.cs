@@ -145,7 +145,7 @@ namespace Kyoo.Controllers
 		/// <returns>The <see cref="resource"/> parameter is returned.</returns>
 		private async Task<Episode> ValidateTracks(Episode resource)
 		{
-			resource.Tracks = await resource.Tracks.MapAsync((x, i) =>
+			resource.Tracks = await TaskUtils.DefaultIfNull(resource.Tracks?.MapAsync((x, i) =>
 			{
 				x.Episode = resource;
 				x.TrackIndex = resource.Tracks.Take(i).Count(y => x.Language == y.Language 
@@ -153,7 +153,7 @@ namespace Kyoo.Controllers
 				                                                  && x.Codec == y.Codec 
 				                                                  && x.Type == y.Type);
 				return _tracks.Create(x);
-			}).ToListAsync();
+			}).ToListAsync());
 			return resource;
 		}
 		
@@ -161,13 +161,12 @@ namespace Kyoo.Controllers
 		protected override async Task Validate(Episode resource)
 		{
 			await base.Validate(resource);
-			resource.ExternalIDs = await resource.ExternalIDs.SelectAsync(async x => 
+			await resource.ExternalIDs.ForEachAsync(async x => 
 			{ 
 				x.Second = await _providers.CreateIfNotExists(x.Second);
 				x.SecondID = x.Second.ID;
 				_database.Entry(x.Second).State = EntityState.Detached;
-				return x;
-			}).ToListAsync();
+			});
 		}
 		
 		/// <inheritdoc />

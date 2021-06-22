@@ -79,7 +79,7 @@ namespace Kyoo
 			
 			Type type = typeof(T);
 			IEnumerable<PropertyInfo> properties = type.GetProperties()
-				.Where(x => x.CanRead && x.CanWrite 
+				.Where(x => x.CanRead && x.CanWrite
 				                      && Attribute.GetCustomAttribute(x, typeof(NotMergeableAttribute)) == null);
 
 			if (where != null)

@@ -330,6 +330,16 @@ namespace Kyoo
 			modelBuilder.Entity<Track>()
 				.Property(x => x.Slug)
 				.ValueGeneratedOnAddOrUpdate();
+
+			modelBuilder.Entity<Episode>()
+				.Property(x => x.EpisodeNumber)
+				.HasDefaultValue(-1);
+			modelBuilder.Entity<Episode>()
+				.Property(x => x.SeasonNumber)
+				.HasDefaultValue(-1);
+			modelBuilder.Entity<Episode>()
+				.Property(x => x.AbsoluteNumber)
+				.HasDefaultValue(-1);
 		}
 
 		/// <summary>

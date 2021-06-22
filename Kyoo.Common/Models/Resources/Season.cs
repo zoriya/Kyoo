@@ -16,12 +16,17 @@ namespace Kyoo.Models
 		public int ID  { get; set; }
 
 		/// <inheritdoc />
-		public string Slug
+		[Computed] public string Slug
 		{
-			get => $"{ShowSlug}-s{SeasonNumber}";
+			get
+			{
+				if (ShowSlug == null && Show == null)
+					return $"{ShowID}-s{SeasonNumber}";
+				return $"{ShowSlug ?? Show?.Slug}-s{SeasonNumber}";
+			}
 			[UsedImplicitly] private set
 			{
-				Match match = Regex.Match(value, @"(?<show>.*)-s(?<season>\d*)");
+				Match match = Regex.Match(value ?? "", @"(?<show>.+)-s(?<season>\d+)");
 			
 				if (!match.Success)
 					throw new ArgumentException("Invalid season slug. Format: {showSlug}-s{seasonNumber}");
@@ -29,7 +34,7 @@ namespace Kyoo.Models
 				SeasonNumber = int.Parse(match.Groups["season"].Value);
 			}
 		}
-		
+
 		/// <summary>
 		/// The slug of the Show that contain this episode. If this is not set, this season is ill-formed.
 		/// </summary>

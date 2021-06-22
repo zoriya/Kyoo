@@ -29,7 +29,7 @@ namespace Kyoo.Models
 		public int ID { get; set; }
 		
 		/// <inheritdoc />
-		public string Slug
+		[Computed] public string Slug
 		{
 			get
 			{

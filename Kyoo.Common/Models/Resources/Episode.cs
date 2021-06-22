@@ -17,12 +17,17 @@ namespace Kyoo.Models
 		public int ID { get; set; }
 
 		/// <inheritdoc />
-		public string Slug
+		[Computed] public string Slug
 		{
-			get => GetSlug(ShowSlug, SeasonNumber, EpisodeNumber, AbsoluteNumber);
+			get
+			{
+				if (ShowSlug == null && Show == null)
+					return GetSlug(ShowID.ToString(), SeasonNumber, EpisodeNumber, AbsoluteNumber);
+				return GetSlug(ShowSlug ?? Show.Slug, SeasonNumber, EpisodeNumber, AbsoluteNumber);
+			}
 			[UsedImplicitly] private set
 			{
-				Match match = Regex.Match(value, @"(?<show>.*)-s(?<season>\d*)e(?<episode>\d*)");
+				Match match = Regex.Match(value, @"(?<show>.+)-s(?<season>\d+)e(?<episode>\d+)");
 
 				if (match.Success)
 				{
@@ -45,7 +50,7 @@ namespace Kyoo.Models
 				}
 			}
 		}
-		
+
 		/// <summary>
 		/// The slug of the Show that contain this episode. If this is not set, this episode is ill-formed.
 		/// </summary>

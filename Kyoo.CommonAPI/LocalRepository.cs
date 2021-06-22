@@ -257,6 +257,8 @@ namespace Kyoo.Controllers
 		/// <exception cref="ArgumentException">You can throw this if the resource is illegal and should not be saved.</exception>
 		protected virtual Task Validate(T resource)
 		{
+			if (typeof(T).GetProperty(nameof(resource.Slug))!.GetCustomAttribute<ComputedAttribute>() != null)
+				return Task.CompletedTask;
 			if (string.IsNullOrEmpty(resource.Slug))
 				throw new ArgumentException("Resource can't have null as a slug.");
 			if (int.TryParse(resource.Slug, out int _))
