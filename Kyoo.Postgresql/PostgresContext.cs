@@ -77,6 +77,7 @@ namespace Kyoo.Postgresql
 					optionsBuilder.EnableDetailedErrors().EnableSensitiveDataLogging();
 			}
 
+			optionsBuilder.UseSnakeCaseNamingConvention();
 			base.OnConfiguring(optionsBuilder);
 		}
 
