@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using JetBrains.Annotations;
@@ -88,9 +89,8 @@ namespace Kyoo
 			foreach (PropertyInfo property in properties)
 			{
 				object value = property.GetValue(second);
-				object defaultValue = property.PropertyType.IsValueType
-					? Activator.CreateInstance(property.PropertyType) 
-					: null;
+				object defaultValue = property.GetCustomAttribute<DefaultValueAttribute>()?.Value
+					?? property.PropertyType.GetClrDefault();
 
 				if (value?.Equals(defaultValue) == false && value != property.GetValue(first))
 					property.SetValue(first, value);

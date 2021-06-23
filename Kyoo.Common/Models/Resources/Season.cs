@@ -24,7 +24,7 @@ namespace Kyoo.Models
 					return $"{ShowID}-s{SeasonNumber}";
 				return $"{ShowSlug ?? Show?.Slug}-s{SeasonNumber}";
 			}
-			[UsedImplicitly] private set
+			[UsedImplicitly] [NotNull] private set
 			{
 				Match match = Regex.Match(value ?? "", @"(?<show>.+)-s(?<season>\d+)");
 			

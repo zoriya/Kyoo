@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 using Kyoo.Controllers;
@@ -25,8 +26,11 @@ namespace Kyoo.Models
 					return GetSlug(ShowID.ToString(), SeasonNumber, EpisodeNumber, AbsoluteNumber);
 				return GetSlug(ShowSlug ?? Show.Slug, SeasonNumber, EpisodeNumber, AbsoluteNumber);
 			}
-			[UsedImplicitly] private set
+			[UsedImplicitly] [NotNull] private set
 			{
+				if (value == null)
+					throw new ArgumentNullException(nameof(value));
+				
 				Match match = Regex.Match(value, @"(?<show>.+)-s(?<season>\d+)e(?<episode>\d+)");
 
 				if (match.Success)
@@ -76,19 +80,21 @@ namespace Kyoo.Models
 		[LoadableRelation(nameof(SeasonID))] public Season Season { get; set; }
 
 		/// <summary>
-		/// The season in witch this episode is in. This defaults to -1 if not specified.
+		/// The season in witch this episode is in.
 		/// </summary>
+		[DefaultValue(-1)]
 		public int SeasonNumber { get; set; } = -1;
 		
 		/// <summary>
-		/// The number of this episode is it's season. This defaults to -1 if not specified.
+		/// The number of this episode is it's season.
 		/// </summary>
+		[DefaultValue(-1)]
 		public int EpisodeNumber { get; set; } = -1;
 		
 		/// <summary>
 		/// The absolute number of this episode. It's an episode number that is not reset to 1 after a new season.
-		/// This defaults to -1 if not specified.
 		/// </summary>
+		[DefaultValue(-1)]
 		public int AbsoluteNumber { get; set; } = -1;
 		
 		/// <summary>

@@ -97,6 +97,18 @@ namespace Kyoo
 		}
 
 		/// <summary>
+		/// Get the default value of a type.
+		/// </summary>
+		/// <param name="type">The type to get the default value</param>
+		/// <returns>The default value of the given type.</returns>
+		public static object GetClrDefault(this Type type)
+		{
+			return type.IsValueType
+				? Activator.CreateInstance(type) 
+				: null;
+		}
+
+		/// <summary>
 		/// Return every <see cref="Type"/> in the inheritance tree of the parameter (interfaces are not returned)
 		/// </summary>
 		/// <param name="type">The starting type</param>
