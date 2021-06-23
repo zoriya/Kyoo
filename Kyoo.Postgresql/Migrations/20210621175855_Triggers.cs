@@ -6,6 +6,7 @@ namespace Kyoo.Postgresql.Migrations
 	{
 		protected override void Up(MigrationBuilder migrationBuilder)
 		{
+			// language=PostgreSQL
 			migrationBuilder.Sql(@"
 			CREATE FUNCTION season_slug_update()
 			RETURNS TRIGGER
@@ -21,11 +22,13 @@ namespace Kyoo.Postgresql.Migrations
 			END
 			$$;");
 			
+			// language=PostgreSQL
 			migrationBuilder.Sql(@"
-			CREATE TRIGGER ""SeasonSlug"" BEFORE INSERT OR UPDATE OF ""SeasonNumber"", ""ShowID"" ON ""Seasons"" 
+			CREATE TRIGGER season_slug_trigger BEFORE INSERT OR UPDATE OF ""SeasonNumber"", ""ShowID"" ON ""Seasons"" 
 			FOR EACH ROW EXECUTE PROCEDURE season_slug_update();");
 
 
+			// language=PostgreSQL
 			migrationBuilder.Sql(@"
 			CREATE FUNCTION show_slug_update()
 			RETURNS TRIGGER
@@ -37,17 +40,22 @@ namespace Kyoo.Postgresql.Migrations
 			END
 			$$;");
 	        
+			// language=PostgreSQL
 			migrationBuilder.Sql(@"
-			CREATE TRIGGER ""ShowSlug"" AFTER UPDATE OF ""Slug"" ON ""Shows""
+			CREATE TRIGGER show_slug_trigger AFTER UPDATE OF ""Slug"" ON ""Shows""
 			FOR EACH ROW EXECUTE PROCEDURE show_slug_update();");
 		}
 
 		protected override void Down(MigrationBuilder migrationBuilder)
 		{
-			migrationBuilder.Sql(@"DROP FUNCTION ""season_slug_update"";");
-			migrationBuilder.Sql(@"DROP TRIGGER ""SeasonSlug"";");
-			migrationBuilder.Sql(@"DROP FUNCTION ""show_slug_update"";");
-			migrationBuilder.Sql(@"DROP TRIGGER ""ShowSlug"";");
+			// language=PostgreSQL
+			migrationBuilder.Sql(@"DROP FUNCTION season_slug_update;");
+			// language=PostgreSQL
+			migrationBuilder.Sql("DROP TRIGGER show_slug_trigger ON \"Shows\";");
+			// language=PostgreSQL
+			migrationBuilder.Sql(@"DROP FUNCTION show_slug_update;");
+			// language=PostgreSQL
+			migrationBuilder.Sql(@"DROP TRIGGER season_slug_trigger;");
 		}
 	}
 }
