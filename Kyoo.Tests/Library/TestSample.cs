@@ -88,7 +88,7 @@ namespace Kyoo.Tests
 				}
 			}
 		};
-		
+
 		public static T Get<T>()
 		{
 			return (T)Samples[typeof(T)]();
@@ -120,6 +120,25 @@ namespace Kyoo.Tests
 			context.Episodes.Add(episode);
 			
 			context.SaveChanges();
+		}
+
+		public static Episode GetAbsoluteEpisode()
+		{
+			return new()
+			{
+				ID = 2,
+				ShowSlug = "anohana",
+				ShowID = 1,
+				SeasonID = -1,
+				SeasonNumber = -1,
+				EpisodeNumber = -1,
+				AbsoluteNumber = 3,
+				Path = "/home/kyoo/anohana-3",
+				Thumb = "thumbnail",
+				Title = "Episode 3",
+				Overview = "Summary of the third absolute episode",
+				ReleaseDate = new DateTime(2020, 06, 05)
+			};
 		}
 	}
 }

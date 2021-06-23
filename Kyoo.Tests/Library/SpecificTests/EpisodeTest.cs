@@ -81,16 +81,87 @@ namespace Kyoo.Tests.Library
 		[Fact]
 		public async Task EpisodeCreationSlugTest()
 		{
-			Episode season = await _repository.Create(new Episode
+			Episode episode = await _repository.Create(new Episode
 			{
 				ShowID = TestSample.Get<Show>().ID,
 				SeasonNumber = 2,
 				EpisodeNumber = 4
 			});
-			Assert.Equal($"{TestSample.Get<Show>().Slug}-s2e4", season.Slug);
+			Assert.Equal($"{TestSample.Get<Show>().Slug}-s2e4", episode.Slug);
 		}
 		
 		
 		// TODO absolute numbering tests
+
+
+		[Fact]
+		public void AbsoluteSlugTest()
+		{
+			Assert.Equal($"{TestSample.Get<Show>().Slug}-{TestSample.GetAbsoluteEpisode().AbsoluteNumber}", 
+				TestSample.GetAbsoluteEpisode().Slug);
+		}
+		
+		[Fact]
+		public async Task EpisodeCreationAbsoluteSlugTest()
+		{
+			Episode episode = await _repository.Create(TestSample.GetAbsoluteEpisode());
+			Assert.Equal($"{TestSample.Get<Show>().Slug}-{TestSample.GetAbsoluteEpisode().AbsoluteNumber}", episode.Slug);
+		}
+		
+		[Fact]
+		public async Task SlugEditAbsoluteTest()
+		{
+			Episode episode = await _repository.Create(TestSample.GetAbsoluteEpisode());
+			Show show = new()
+			{
+				ID = episode.ShowID,
+				Slug = "new-slug"
+			};
+			await Repositories.LibraryManager.ShowRepository.Edit(show, false);
+			episode = await _repository.Get(2);
+			Assert.Equal($"new-slug-3", episode.Slug);
+		}
+		
+		
+		[Fact]
+		public async Task AbsoluteNumberEditTest()
+		{
+			await _repository.Create(TestSample.GetAbsoluteEpisode());
+			await _repository.Edit(new Episode
+			{
+				ID = 1,
+				AbsoluteNumber = 56
+			}, false);
+			Episode episode = await _repository.Get(2);
+			Assert.Equal($"{TestSample.Get<Show>().Slug}-56", episode.Slug);
+		}
+		
+		[Fact]
+		public async Task AbsoluteToNormalEditTest()
+		{
+			await _repository.Create(TestSample.GetAbsoluteEpisode());
+			await _repository.Edit(new Episode
+			{
+				ID = 1,
+				SeasonNumber = 1,
+				EpisodeNumber = 2
+			}, false);
+			Episode episode = await _repository.Get(1);
+			Assert.Equal($"{TestSample.Get<Show>().Slug}-s1e2", episode.Slug);
+		}
+		
+		[Fact]
+		public async Task NormalToAbsoluteEditTest()
+		{
+			await _repository.Create(TestSample.GetAbsoluteEpisode());
+			await _repository.Edit(new Episode
+			{
+				ID = 1,
+				SeasonNumber = -1,
+				AbsoluteNumber = 12
+			}, false);
+			Episode episode = await _repository.Get(1);
+			Assert.Equal($"{TestSample.Get<Show>().Slug}-12", episode.Slug);
+		}
 	}
 }
