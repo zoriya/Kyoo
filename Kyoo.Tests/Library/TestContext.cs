@@ -126,7 +126,11 @@ namespace Kyoo.Tests
 		
 		public static string GetConnectionString(string database)
 		{
-			return $"Server=127.0.0.1;Port=5432;Database={database};User ID=kyoo;Password=kyooPassword;Include Error Detail=true";
+			string server = Environment.GetEnvironmentVariable("SERVER") ?? "127.0.0.1";
+			string port = Environment.GetEnvironmentVariable("PORT") ?? "5432";
+			string username = Environment.GetEnvironmentVariable("USERNAME") ?? "kyoo";
+			string password = Environment.GetEnvironmentVariable("PASSWORD") ?? "kyooPassword";
+			return $"Server={server};Port={port};Database={database};User ID={username};Password={password};Include Error Detail=true";
 		}
 		
 		public override void Dispose()
