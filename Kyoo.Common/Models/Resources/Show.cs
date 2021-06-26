@@ -118,7 +118,8 @@ namespace Kyoo.Models
 		[LoadableRelation] public ICollection<Season> Seasons { get; set; }
 		
 		/// <summary>
-		/// The list of episodes in this show. If this is a movie, there will be a unique episode (with the seasonNumber and episodeNumber set to -1).
+		/// The list of episodes in this show.
+		/// If this is a movie, there will be a unique episode (with the seasonNumber and episodeNumber set to null).
 		/// Having an episode is necessary to store metadata and tracks.
 		/// </summary>
 		[LoadableRelation] public ICollection<Episode> Episodes { get; set; }

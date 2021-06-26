@@ -63,8 +63,8 @@ namespace Kyoo.Models
 				}
 
 				EpisodeSlug = Episode.GetSlug(match.Groups["show"].Value, 
-					match.Groups["season"].Success ? int.Parse(match.Groups["season"].Value) : -1,
-					match.Groups["episode"].Success ? int.Parse(match.Groups["episode"].Value) : -1);
+					match.Groups["season"].Success ? int.Parse(match.Groups["season"].Value) : null,
+					match.Groups["episode"].Success ? int.Parse(match.Groups["episode"].Value) : null);
 				Language = match.Groups["language"].Value;
 				IsForced = match.Groups["forced"].Success;
 				if (match.Groups["type"].Success)

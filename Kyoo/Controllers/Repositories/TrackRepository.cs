@@ -67,8 +67,8 @@ namespace Kyoo.Controllers
 			}
 
 			string showSlug = match.Groups["show"].Value;
-			int seasonNumber = match.Groups["season"].Success ? int.Parse(match.Groups["season"].Value) : -1;
-			int episodeNumber = match.Groups["episode"].Success ? int.Parse(match.Groups["episode"].Value) : -1;
+			int? seasonNumber = match.Groups["season"].Success ? int.Parse(match.Groups["season"].Value) : null;
+			int? episodeNumber = match.Groups["episode"].Success ? int.Parse(match.Groups["episode"].Value) : null;
 			string language = match.Groups["language"].Value;
 			bool forced = match.Groups["forced"].Success;
 			if (match.Groups["type"].Success)

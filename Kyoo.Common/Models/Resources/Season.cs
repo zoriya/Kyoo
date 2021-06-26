@@ -50,9 +50,9 @@ namespace Kyoo.Models
 		[LoadableRelation(nameof(ShowID))] public Show Show { get; set; }
 
 		/// <summary>
-		/// The number of this season. This can be set to 0 to indicate specials. This defaults to -1 for unset.
+		/// The number of this season. This can be set to 0 to indicate specials.
 		/// </summary>
-		public int SeasonNumber { get; set; } = -1;
+		public int SeasonNumber { get; set; }
 
 		/// <summary>
 		/// The title of this season.

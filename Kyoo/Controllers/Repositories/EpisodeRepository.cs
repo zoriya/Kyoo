@@ -99,7 +99,7 @@ namespace Kyoo.Controllers
 		public override async Task<ICollection<Episode>> Search(string query)
 		{
 			return await _database.Episodes
-				.Where(x => x.EpisodeNumber != -1)
+				.Where(x => x.EpisodeNumber != null)
 				.Where(_database.Like<Episode>(x => x.Title, $"%{query}%"))
 				.OrderBy(DefaultSort)
 				.Take(20)

@@ -16,6 +16,6 @@ namespace Kyoo.Controllers
 
 		Task<Season> GetSeason(Show show, int seasonNumber);
 
-		Task<Episode> GetEpisode(Show show, int seasonNumber, int episodeNumber, int absoluteNumber);
+		Task<Episode> GetEpisode(Show show, int? seasonNumber, int? episodeNumber, int? absoluteNumber);
 	}
 }

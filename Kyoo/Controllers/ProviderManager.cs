@@ -122,16 +122,15 @@ namespace Kyoo.Controllers
 			season.Show = show;
 			season.ShowID = show.ID;
 			season.ShowSlug = show.Slug;
-			season.SeasonNumber = season.SeasonNumber == -1 ? seasonNumber : season.SeasonNumber;
 			season.Title ??= $"Season {season.SeasonNumber}";
 			return season;
 		}
 
 		public async Task<Episode> GetEpisode(Show show, 
 			string episodePath,
-			int seasonNumber, 
-			int episodeNumber,
-			int absoluteNumber,
+			int? seasonNumber, 
+			int? episodeNumber,
+			int? absoluteNumber,
 			Library library)
 		{
 			Episode episode = await GetMetadata(
@@ -142,9 +141,9 @@ namespace Kyoo.Controllers
 			episode.ShowID = show.ID;
 			episode.ShowSlug = show.Slug;
 			episode.Path = episodePath;
-			episode.SeasonNumber = episode.SeasonNumber != -1 ? episode.SeasonNumber : seasonNumber;
-			episode.EpisodeNumber = episode.EpisodeNumber != -1 ? episode.EpisodeNumber : episodeNumber;
-			episode.AbsoluteNumber = episode.AbsoluteNumber != -1 ? episode.AbsoluteNumber : absoluteNumber;
+			episode.SeasonNumber ??= seasonNumber;
+			episode.EpisodeNumber ??= episodeNumber;
+			episode.AbsoluteNumber ??= absoluteNumber;
 			return episode;
 		}
 

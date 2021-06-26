@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 using Kyoo.Controllers;
@@ -10,9 +9,8 @@ namespace Kyoo.Models
 {
 	/// <summary>
 	/// A class to represent a single show's episode.
-	/// This is also used internally for movies (their number is juste set to -1).
 	/// </summary>
-	public class Episode : IResource, IOnMerge
+	public class Episode : IResource
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
@@ -31,6 +29,7 @@ namespace Kyoo.Models
 				if (value == null)
 					throw new ArgumentNullException(nameof(value));
 				
+				Console.WriteLine(value);
 				Match match = Regex.Match(value, @"(?<show>.+)-s(?<season>\d+)e(?<episode>\d+)");
 
 				if (match.Success)
@@ -44,13 +43,13 @@ namespace Kyoo.Models
 					match = Regex.Match(value, @"(?<show>.*)-(?<absolute>\d*)");
 					if (match.Success)
 					{
-						ShowSlug = match.Groups["Show"].Value;
+						ShowSlug = match.Groups["show"].Value;
 						AbsoluteNumber = int.Parse(match.Groups["absolute"].Value);
 					}
 					else
 						ShowSlug = value;
-					SeasonNumber = -1;
-					EpisodeNumber = -1;
+					SeasonNumber = null;
+					EpisodeNumber = null;
 				}
 			}
 		}
@@ -82,20 +81,17 @@ namespace Kyoo.Models
 		/// <summary>
 		/// The season in witch this episode is in.
 		/// </summary>
-		[DefaultValue(-1)]
-		public int SeasonNumber { get; set; } = -1;
+		public int? SeasonNumber { get; set; }
 		
 		/// <summary>
 		/// The number of this episode is it's season.
 		/// </summary>
-		[DefaultValue(-1)]
-		public int EpisodeNumber { get; set; } = -1;
+		public int? EpisodeNumber { get; set; }
 		
 		/// <summary>
 		/// The absolute number of this episode. It's an episode number that is not reset to 1 after a new season.
 		/// </summary>
-		[DefaultValue(-1)]
-		public int AbsoluteNumber { get; set; } = -1;
+		public int? AbsoluteNumber { get; set; }
 		
 		/// <summary>
 		/// The path of the video file for this episode. Any format supported by a <see cref="IFileManager"/> is allowed.
@@ -141,43 +137,31 @@ namespace Kyoo.Models
 		/// <param name="showSlug">The slug of the show. It can't be null.</param>
 		/// <param name="seasonNumber">
 		/// The season in which the episode is.
-		/// If this is a movie or if the episode should be referred by it's absolute number, set this to -1.
+		/// If this is a movie or if the episode should be referred by it's absolute number, set this to null.
 		/// </param>
 		/// <param name="episodeNumber">
 		/// The number of the episode in it's season.
-		/// If this is a movie or if the episode should be referred by it's absolute number, set this to -1.
+		/// If this is a movie or if the episode should be referred by it's absolute number, set this to null.
 		/// </param>
 		/// <param name="absoluteNumber">
 		/// The absolute number of this show.
-		/// If you don't know it or this is a movie, use -1
+		/// If you don't know it or this is a movie, use null
 		/// </param>
 		/// <returns>The slug corresponding to the given arguments</returns>
 		/// <exception cref="ArgumentNullException">The given show slug was null.</exception>
 		public static string GetSlug([NotNull] string showSlug, 
-			int seasonNumber = -1, 
-			int episodeNumber = -1,
-			int absoluteNumber = -1)
+			int? seasonNumber, 
+			int? episodeNumber,
+			int? absoluteNumber = null)
 		{
 			if (showSlug == null)
 				throw new ArgumentNullException(nameof(showSlug));
 			return seasonNumber switch
 			{
-				-1 when absoluteNumber == -1 => showSlug,
-				-1 => $"{showSlug}-{absoluteNumber}",
+				null when absoluteNumber == null => showSlug,
+				null => $"{showSlug}-{absoluteNumber}",
 				_ => $"{showSlug}-s{seasonNumber}e{episodeNumber}"
 			};
-		}
-
-		/// <inheritdoc />
-		public void OnMerge(object merged)
-		{
-			Episode other = (Episode)merged;
-			if (SeasonNumber == -1 && other.SeasonNumber != -1)
-				SeasonNumber = other.SeasonNumber;
-			if (EpisodeNumber == -1 && other.EpisodeNumber != -1)
-				EpisodeNumber = other.EpisodeNumber;
-			if (AbsoluteNumber == -1 && other.AbsoluteNumber != -1)
-				AbsoluteNumber = other.AbsoluteNumber;
 		}
 	}
 }

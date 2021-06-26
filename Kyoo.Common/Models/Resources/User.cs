@@ -63,7 +63,7 @@ namespace Kyoo.Models
 	public class WatchedEpisode : Link<User, Episode>
 	{
 		/// <summary>
-		/// Where the player has stopped watching the episode (-1 if not started, else between 0 and 100).
+		/// Where the player has stopped watching the episode (between 0 and 100).
 		/// </summary>
 		public int WatchedPercentage { get; set; }
 	}
