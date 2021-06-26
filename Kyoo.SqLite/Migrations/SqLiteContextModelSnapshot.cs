@@ -49,10 +49,10 @@ namespace Kyoo.SqLite.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("AbsoluteNumber")
+                    b.Property<int?>("AbsoluteNumber")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("EpisodeNumber")
+                    b.Property<int?>("EpisodeNumber")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Overview")
@@ -67,7 +67,7 @@ namespace Kyoo.SqLite.Migrations
                     b.Property<int?>("SeasonID")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("SeasonNumber")
+                    b.Property<int?>("SeasonNumber")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("ShowID")

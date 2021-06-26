@@ -40,7 +40,7 @@ namespace Kyoo.Models
 				}
 				else
 				{
-					match = Regex.Match(value, @"(?<show>.*)-(?<absolute>\d*)");
+					match = Regex.Match(value, @"(?<show>.+)-(?<absolute>\d+)");
 					if (match.Success)
 					{
 						ShowSlug = match.Groups["show"].Value;

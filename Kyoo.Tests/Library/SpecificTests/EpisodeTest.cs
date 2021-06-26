@@ -60,7 +60,7 @@ namespace Kyoo.Tests.Library
 				ID = 1,
 				SeasonNumber = 2
 			}, false);
-			Assert.Equal($"{TestSample.Get<Show>().Slug}-s2e2", episode.Slug);
+			Assert.Equal($"{TestSample.Get<Show>().Slug}-s2e1", episode.Slug);
 			episode = await _repository.Get(1);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s2e1", episode.Slug);
 		}

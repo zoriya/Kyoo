@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kyoo.SqLite.Migrations
 {
     [DbContext(typeof(SqLiteContext))]
-    [Migration("20210621175330_Initial")]
+    [Migration("20210626141337_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -51,10 +51,10 @@ namespace Kyoo.SqLite.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("AbsoluteNumber")
+                    b.Property<int?>("AbsoluteNumber")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("EpisodeNumber")
+                    b.Property<int?>("EpisodeNumber")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Overview")
@@ -69,7 +69,7 @@ namespace Kyoo.SqLite.Migrations
                     b.Property<int?>("SeasonID")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("SeasonNumber")
+                    b.Property<int?>("SeasonNumber")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("ShowID")
