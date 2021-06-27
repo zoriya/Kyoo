@@ -6,6 +6,7 @@ using Kyoo.Controllers;
 using Kyoo.Models;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Kyoo.Tests.Library
 {
@@ -13,8 +14,8 @@ namespace Kyoo.Tests.Library
 	{
 		public class ShowTests : AShowTests
 		{
-			public ShowTests()
-				: base(new RepositoryActivator()) { }
+			public ShowTests(ITestOutputHelper output)
+				: base(new RepositoryActivator(output)) { }
 		}
 	}
 
@@ -23,8 +24,8 @@ namespace Kyoo.Tests.Library
 		[Collection(nameof(Postgresql))]
 		public class ShowTests : AShowTests
 		{
-			public ShowTests(PostgresFixture postgres)
-				: base(new RepositoryActivator(postgres)) { }
+			public ShowTests(PostgresFixture postgres, ITestOutputHelper output)
+				: base(new RepositoryActivator(output, postgres)) { }
 		}
 	}
 

@@ -29,7 +29,6 @@ namespace Kyoo.Models
 				if (value == null)
 					throw new ArgumentNullException(nameof(value));
 				
-				Console.WriteLine(value);
 				Match match = Regex.Match(value, @"(?<show>.+)-s(?<season>\d+)e(?<episode>\d+)");
 
 				if (match.Success)

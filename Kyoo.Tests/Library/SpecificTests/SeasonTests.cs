@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Kyoo.Tests.Library
 {
@@ -9,8 +10,8 @@ namespace Kyoo.Tests.Library
 	{
 		public class SeasonTests : ASeasonTests
 		{
-			public SeasonTests()
-				: base(new RepositoryActivator()) { }
+			public SeasonTests(ITestOutputHelper output)
+				: base(new RepositoryActivator(output)) { }
 		}
 	}
 
@@ -20,8 +21,8 @@ namespace Kyoo.Tests.Library
 		[Collection(nameof(Postgresql))]
 		public class SeasonTests : ASeasonTests
 		{
-			public SeasonTests(PostgresFixture postgres)
-				: base(new RepositoryActivator(postgres)) { }
+			public SeasonTests(PostgresFixture postgres, ITestOutputHelper output)
+				: base(new RepositoryActivator(output, postgres)) { }
 		}
 	}
 

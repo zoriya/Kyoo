@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Kyoo.Tests.Library
 {
@@ -9,8 +10,8 @@ namespace Kyoo.Tests.Library
 	{
 		public class EpisodeTests : AEpisodeTests
 		{
-			public EpisodeTests()
-				: base(new RepositoryActivator()) { }
+			public EpisodeTests(ITestOutputHelper output)
+				: base(new RepositoryActivator(output)) { }
 		}
 	}
 
@@ -20,8 +21,8 @@ namespace Kyoo.Tests.Library
 		[Collection(nameof(Postgresql))]
 		public class EpisodeTests : AEpisodeTests
 		{
-			public EpisodeTests(PostgresFixture postgres)
-				: base(new RepositoryActivator(postgres)) { }
+			public EpisodeTests(PostgresFixture postgres, ITestOutputHelper output)
+				: base(new RepositoryActivator(output, postgres)) { }
 		}
 	}
 
@@ -165,5 +166,7 @@ namespace Kyoo.Tests.Library
 			episode = await _repository.Get(1);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-12", episode.Slug);
 		}
+		
+		// TODO add movies tests.
 	}
 }

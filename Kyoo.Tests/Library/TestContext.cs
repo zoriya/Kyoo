@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Kyoo.Tests
 {
@@ -22,14 +23,18 @@ namespace Kyoo.Tests
 		/// </summary>
 		private readonly DbContextOptions<DatabaseContext> _context;
 
-		public SqLiteTestContext()
+		public SqLiteTestContext(ITestOutputHelper output)
 		{
 			_connection = new SqliteConnection("DataSource=:memory:");
 			_connection.Open();
 			
 			_context = new DbContextOptionsBuilder<DatabaseContext>()
 				.UseSqlite(_connection)
-				.UseLoggerFactory(LoggerFactory.Create(x => x.AddConsole()))
+				.UseLoggerFactory(LoggerFactory.Create(x =>
+				{
+					x.ClearProviders();
+					x.AddXunit(output);
+				}))
 				.EnableSensitiveDataLogging()
 				.EnableDetailedErrors()
 				.Options;
@@ -101,7 +106,7 @@ namespace Kyoo.Tests
 		private readonly NpgsqlConnection _connection;
 		private readonly DbContextOptions<DatabaseContext> _context;
 		
-		public PostgresTestContext(PostgresFixture template)
+		public PostgresTestContext(PostgresFixture template, ITestOutputHelper output)
 		{
 			string id = Guid.NewGuid().ToString().Replace('-', '_');
 			string database = $"kyoo_test_{id}";
@@ -118,7 +123,11 @@ namespace Kyoo.Tests
 
 			_context = new DbContextOptionsBuilder<DatabaseContext>()
 				.UseNpgsql(_connection)
-				.UseLoggerFactory(LoggerFactory.Create(x => x.AddConsole()))
+				.UseLoggerFactory(LoggerFactory.Create(x =>
+				{
+					x.ClearProviders();
+					x.AddXunit(output);
+				}))
 				.EnableSensitiveDataLogging()
 				.EnableDetailedErrors()
 				.Options;
@@ -126,10 +135,10 @@ namespace Kyoo.Tests
 		
 		public static string GetConnectionString(string database)
 		{
-			string server = Environment.GetEnvironmentVariable("SERVER") ?? "127.0.0.1";
-			string port = Environment.GetEnvironmentVariable("PORT") ?? "5432";
-			string username = Environment.GetEnvironmentVariable("USERNAME") ?? "kyoo";
-			string password = Environment.GetEnvironmentVariable("PASSWORD") ?? "kyooPassword";
+			string server = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "127.0.0.1";
+			string port = Environment.GetEnvironmentVariable("POSTGRES_PORT") ?? "5432";
+			string username = Environment.GetEnvironmentVariable("POSTGRES_USERNAME") ?? "kyoo";
+			string password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "kyooPassword";
 			return $"Server={server};Port={port};Database={database};User ID={username};Password={password};Include Error Detail=true";
 		}
 		

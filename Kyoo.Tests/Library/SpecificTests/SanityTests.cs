@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Kyoo.Models;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Kyoo.Tests.Library
 {
@@ -10,9 +11,9 @@ namespace Kyoo.Tests.Library
 	{
 		private readonly RepositoryActivator _repositories;
 		
-		public GlobalTests()
+		public GlobalTests(ITestOutputHelper output)
 		{
-			 _repositories = new RepositoryActivator();
+			 _repositories = new RepositoryActivator(output);
 		}
 
 		[Fact]

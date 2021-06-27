@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
+using Xunit.Abstractions;
 
 namespace Kyoo.Tests
 {
@@ -12,11 +13,11 @@ namespace Kyoo.Tests
 
 		private readonly DatabaseContext _database;
 			
-		public RepositoryActivator(PostgresFixture postgres = null)
+		public RepositoryActivator(ITestOutputHelper output, PostgresFixture postgres = null)
 		{
 			Context = postgres == null 
-				? new SqLiteTestContext() 
-				: new PostgresTestContext(postgres);
+				? new SqLiteTestContext(output) 
+				: new PostgresTestContext(postgres, output);
 			_database = Context.New();
 			
 			ProviderRepository provider = new(_database);
