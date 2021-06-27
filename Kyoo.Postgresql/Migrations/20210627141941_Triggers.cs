@@ -37,10 +37,10 @@ namespace Kyoo.Postgresql.Migrations
 			BEGIN
 				NEW.slug := CONCAT(
 					(SELECT slug FROM shows WHERE id = NEW.show_id),
-					'-s',
-					NEW.season_number,
-					'e',
-					NEW.episode_number
+					CASE
+					    WHEN NEW.season_number IS NULL THEN CONCAT('-', NEW.absolute_number)
+					    ELSE CONCAT('-s', NEW.season_number, 'e', NEW.episode_number)
+				    END
 				);
 				RETURN NEW;
 			END
@@ -48,7 +48,8 @@ namespace Kyoo.Postgresql.Migrations
 			
 			// language=PostgreSQL
 			migrationBuilder.Sql(@"
-			CREATE TRIGGER episode_slug_trigger BEFORE INSERT OR UPDATE OF episode_number, season_number, show_id ON episodes
+			CREATE TRIGGER episode_slug_trigger 
+			BEFORE INSERT OR UPDATE OF absolute_number, episode_number, season_number, show_id ON episodes
 			FOR EACH ROW EXECUTE PROCEDURE episode_slug_update();");
 
 
@@ -60,7 +61,11 @@ namespace Kyoo.Postgresql.Migrations
 			AS $$
 			BEGIN
 				UPDATE seasons SET slug = CONCAT(NEW.slug, '-s', season_number) WHERE show_id = NEW.id;
-				UPDATE episodes SET slug = CONCAT(NEW.slug, '-s', season_number, 'e', episode_number) WHERE show_id = NEW.id;
+				UPDATE episodes SET slug = CASE
+				    WHEN season_number IS NULL THEN CONCAT(NEW.slug, '-', absolute_number) 
+				    ELSE CONCAT(NEW.slug, '-s', season_number, 'e', episode_number)
+				END
+				WHERE show_id = NEW.id;
 				RETURN NEW;
 			END
 			$$;");

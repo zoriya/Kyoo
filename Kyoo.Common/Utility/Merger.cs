@@ -163,13 +163,9 @@ namespace Kyoo
 			Type type = typeof(T);
 			foreach (PropertyInfo property in type.GetProperties())
 			{
-				if (!property.CanWrite)
+				if (!property.CanWrite || property.GetCustomAttribute<ComputedAttribute>() != null)
 					continue;
-				
-				object defaultValue = property.PropertyType.IsValueType 
-					? Activator.CreateInstance(property.PropertyType) 
-					: null;
-				property.SetValue(obj, defaultValue);
+				property.SetValue(obj, property.PropertyType.GetClrDefault());
 			}
 
 			return obj;

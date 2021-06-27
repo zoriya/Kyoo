@@ -132,14 +132,6 @@ namespace Kyoo
 		{
 			base.OnModelCreating(modelBuilder);
 
-			modelBuilder.Entity<Track>()
-				.Property(t => t.IsDefault)
-				.ValueGeneratedNever();
-			
-			modelBuilder.Entity<Track>()
-				.Property(t => t.IsForced)
-				.ValueGeneratedNever();
-
 			modelBuilder.Entity<Show>()
 				.HasMany(x => x.Seasons)
 				.WithOne(x => x.Show)

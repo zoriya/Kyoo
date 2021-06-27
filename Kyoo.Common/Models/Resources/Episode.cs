@@ -60,7 +60,7 @@ namespace Kyoo.Models
 		[SerializeIgnore] public string ShowSlug { private get; set; }
 		
 		/// <summary>
-		/// The ID of the Show containing this episode. This value is only set when the <see cref="Show"/> has been loaded.
+		/// The ID of the Show containing this episode.
 		/// </summary>
 		[SerializeIgnore] public int ShowID { get; set; }
 		/// <summary>
@@ -69,7 +69,7 @@ namespace Kyoo.Models
 		[LoadableRelation(nameof(ShowID))] public Show Show { get; set; }
 		
 		/// <summary>
-		/// The ID of the Season containing this episode. This value is only set when the <see cref="Season"/> has been loaded.
+		/// The ID of the Season containing this episode.
 		/// </summary>
 		[SerializeIgnore] public int? SeasonID { get; set; }
 		/// <summary>

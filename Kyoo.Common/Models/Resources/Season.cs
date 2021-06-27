@@ -41,7 +41,7 @@ namespace Kyoo.Models
 		[SerializeIgnore] public string ShowSlug { private get; set; }
 		
 		/// <summary>
-		/// The ID of the Show containing this season. This value is only set when the <see cref="Show"/> has been loaded.
+		/// The ID of the Show containing this season.
 		/// </summary>
 		[SerializeIgnore] public int ShowID { get; set; }
 		/// <summary>

@@ -119,7 +119,7 @@ namespace Kyoo.Models
 		[SerializeIgnore] public StreamType Type { get; set; }
 		
 		/// <summary>
-		/// The ID of the episode that uses this track. This value is only set when the <see cref="Episode"/> has been loaded.
+		/// The ID of the episode that uses this track.
 		/// </summary>
 		[SerializeIgnore] public int EpisodeID { get; set; }
 		/// <summary>

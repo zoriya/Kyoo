@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Kyoo.Postgresql.Migrations
 {
     [DbContext(typeof(PostgresContext))]
-    [Migration("20210623174932_Triggers")]
+    [Migration("20210627141941_Triggers")]
     partial class Triggers
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -69,11 +69,11 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnName("id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<int>("AbsoluteNumber")
+                    b.Property<int?>("AbsoluteNumber")
                         .HasColumnType("integer")
                         .HasColumnName("absolute_number");
 
-                    b.Property<int>("EpisodeNumber")
+                    b.Property<int?>("EpisodeNumber")
                         .HasColumnType("integer")
                         .HasColumnName("episode_number");
 
@@ -93,7 +93,7 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("season_id");
 
-                    b.Property<int>("SeasonNumber")
+                    b.Property<int?>("SeasonNumber")
                         .HasColumnType("integer")
                         .HasColumnName("season_number");
 

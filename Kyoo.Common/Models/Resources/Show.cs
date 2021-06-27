@@ -94,7 +94,7 @@ namespace Kyoo.Models
 		[EditableRelation] [LoadableRelation] public ICollection<MetadataID<Show>> ExternalIDs { get; set; }
 		
 		/// <summary>
-		/// The ID of the Studio that made this show. This value is only set when the <see cref="Studio"/> has been loaded.
+		/// The ID of the Studio that made this show.
 		/// </summary>
 		[SerializeIgnore] public int? StudioID { get; set; }
 		/// <summary>

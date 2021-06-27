@@ -114,6 +114,9 @@ namespace Kyoo.Controllers
 			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Added);
 			await _database.SaveChangesAsync($"Trying to insert a duplicated episode (slug {obj.Slug} already exists).");
 			return await ValidateTracks(obj);
+			// TODO check if this is needed
+			// obj.Slug = await _database.Entry(obj).Property(x => x.Slug).
+			// return obj;
 		}
 
 		/// <inheritdoc />
@@ -148,7 +151,8 @@ namespace Kyoo.Controllers
 			resource.Tracks = await TaskUtils.DefaultIfNull(resource.Tracks?.MapAsync((x, i) =>
 			{
 				x.Episode = resource;
-				x.TrackIndex = resource.Tracks.Take(i).Count(y => x.Language == y.Language 
+				// TODO use a trigger for the next line.
+				x.TrackIndex = resource.Tracks.Take(i).Count(y => x.Language == y.Language
 				                                                  && x.IsForced == y.IsForced 
 				                                                  && x.Codec == y.Codec 
 				                                                  && x.Type == y.Type);
