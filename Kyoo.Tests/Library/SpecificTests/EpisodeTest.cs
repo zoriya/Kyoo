@@ -157,12 +157,10 @@ namespace Kyoo.Tests.Library
 		[Fact]
 		public async Task NormalToAbsoluteEditTest()
 		{
-			Episode episode = await _repository.Edit(new Episode
-			{
-				ID = 1,
-				SeasonNumber = null,
-				AbsoluteNumber = 12
-			}, false);
+			Episode episode = await _repository.Get(1);
+			episode.SeasonNumber = null;
+			episode.AbsoluteNumber = 12;
+			episode = await _repository.Edit(episode, true);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-12", episode.Slug);
 			episode = await _repository.Get(1);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-12", episode.Slug);
