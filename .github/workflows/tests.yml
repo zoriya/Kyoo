@@ -29,7 +29,7 @@ jobs:
         POSTGRES_USERNAME: postgres
         POSTGRES_PASSWORD: postgres
     - name: Sanitize coverage output
-      run: sed -i "s/$(pwd)//" Kyoo.Tests/coverage.opencover.xml 
+      run: sed -i "s'$(pwd)'.'" Kyoo.Tests/coverage.opencover.xml 
     - name: Upload coverage report
       uses: actions/upload-artifact@v2
       with:
