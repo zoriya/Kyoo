@@ -61,6 +61,25 @@ namespace Kyoo.SqLite.Migrations
 			    	           END
 				WHERE ShowID = new.ID;
 			END;");
+			
+			
+			// language=SQLite
+			migrationBuilder.Sql(@"
+			CREATE VIEW LibraryItems AS
+				SELECT s.ID, s.Slug, s.Title, s.Overview, s.Status, s.StartAir, s.EndAir, s.Poster, CASE
+					WHEN s.IsMovie THEN 1
+					ELSE 0
+					END AS Type
+				FROM Shows AS s
+				WHERE NOT (EXISTS (
+					SELECT 1
+					FROM 'Link<Collection, Show>' AS l
+					INNER JOIN Collections AS c ON l.FirstID = c.ID
+					WHERE s.ID = l.SecondID))
+				UNION ALL
+				SELECT -c0.ID, c0.Slug, c0.Name AS Title, c0.Overview, 3 AS Status, 
+				       NULL AS StartAir, NULL AS EndAir, c0.Poster, 2 AS Type
+				FROM collections AS c0");
 		}
 
 		protected override void Down(MigrationBuilder migrationBuilder)

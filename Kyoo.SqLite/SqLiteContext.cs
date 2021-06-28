@@ -108,6 +108,10 @@ namespace Kyoo.SqLite
 			modelBuilder.Entity<User>()
 				.Property(x => x.ExtraData)
 				.HasConversion(jsonConvertor);
+			
+			modelBuilder.Entity<LibraryItem>()
+				.ToView("LibraryItems")
+				.HasKey(x => x.ID);
 			base.OnModelCreating(modelBuilder);
 		}
 

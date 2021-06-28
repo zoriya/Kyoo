@@ -74,6 +74,14 @@ namespace Kyoo
 		/// Episodes with a watch percentage. See <see cref="WatchedEpisode"/>
 		/// </summary>
 		public DbSet<WatchedEpisode> WatchedEpisodes { get; set; }
+		
+		/// <summary>
+		/// The list of library items (shows and collections that are part of a library - or the global one)
+		/// </summary>
+		/// <remarks>
+		/// This set is ready only, on most database this will be a view.
+		/// </remarks>
+		public DbSet<LibraryItem> LibraryItems { get; set; }
 
 		/// <summary>
 		/// Get all metadataIDs (ExternalIDs) of a given resource. See <see cref="MetadataID{T}"/>.
@@ -322,6 +330,8 @@ namespace Kyoo
 			modelBuilder.Entity<Track>()
 				.Property(x => x.Slug)
 				.ValueGeneratedOnAddOrUpdate();
+
+			// modelBuilder.Ignore<LibraryItem>();
 		}
 
 		/// <summary>

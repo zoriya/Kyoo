@@ -22,15 +22,7 @@ namespace Kyoo.Controllers
 		/// A lazy loaded library repository to validate queries (check if a library does exist)
 		/// </summary>
 		private readonly Lazy<ILibraryRepository> _libraries;
-		/// <summary>
-		/// A lazy loaded show repository to get a show from it's id.
-		/// </summary>
-		private readonly Lazy<IShowRepository> _shows;
-		/// <summary>
-		/// A lazy loaded collection repository to get a collection from it's id.
-		/// </summary>
-		private readonly Lazy<ICollectionRepository> _collections;
-		
+
 		/// <inheritdoc />
 		protected override Expression<Func<LibraryItem, object>> DefaultSort => x => x.Title;
 
@@ -38,60 +30,41 @@ namespace Kyoo.Controllers
 		/// <summary>
 		/// Create a new <see cref="LibraryItemRepository"/>.
 		/// </summary>
-		/// <param name="database">The databse instance</param>
+		/// <param name="database">The database instance</param>
 		/// <param name="libraries">A lazy loaded library repository</param>
-		/// <param name="shows">A lazy loaded show repository</param>
-		/// <param name="collections">A lazy loaded collection repository</param>
 		public LibraryItemRepository(DatabaseContext database, 
-			Lazy<ILibraryRepository> libraries,
-			Lazy<IShowRepository> shows,
-			Lazy<ICollectionRepository> collections)
+			Lazy<ILibraryRepository> libraries)
 			: base(database)
 		{
 			_database = database;
 			_libraries = libraries;
-			_shows = shows;
-			_collections = collections;
 		}
 
 		
 		/// <inheritdoc />
-		public override async Task<LibraryItem> GetOrDefault(int id)
+		public override Task<LibraryItem> GetOrDefault(int id)
 		{
-			return id > 0 
-				? new LibraryItem(await _shows.Value.GetOrDefault(id)) 
-				: new LibraryItem(await _collections.Value.GetOrDefault(-id));
+			return _database.LibraryItems.FirstOrDefaultAsync(x => x.ID == id);
 		}
 		
 		/// <inheritdoc />
 		public override Task<LibraryItem> GetOrDefault(string slug)
 		{
-			throw new InvalidOperationException("You can't get a library item by a slug.");
+			return _database.LibraryItems.SingleOrDefaultAsync(x => x.Slug == slug);
 		}
-
-		/// <summary>
-		/// Get a basic queryable with the right mapping from shows & collections.
-		/// Shows contained in a collection are excluded.
-		/// </summary>
-		private IQueryable<LibraryItem> ItemsQuery
-			=> _database.Shows
-				.Where(x => !x.Collections.Any())
-				.Select(LibraryItem.FromShow)
-				.Concat(_database.Collections
-					.Select(LibraryItem.FromCollection));
 
 		/// <inheritdoc />
 		public override Task<ICollection<LibraryItem>> GetAll(Expression<Func<LibraryItem, bool>> where = null,
 			Sort<LibraryItem> sort = default,
 			Pagination limit = default)
 		{
-			return ApplyFilters(ItemsQuery, where, sort, limit);
+			return ApplyFilters(_database.LibraryItems, where, sort, limit);
 		}
 
 		/// <inheritdoc />
 		public override Task<int> GetCount(Expression<Func<LibraryItem, bool>> where = null)
 		{
-			IQueryable<LibraryItem> query = ItemsQuery;
+			IQueryable<LibraryItem> query = _database.LibraryItems;
 			if (where != null)
 				query = query.Where(where);
 			return query.CountAsync();
@@ -100,7 +73,7 @@ namespace Kyoo.Controllers
 		/// <inheritdoc />
 		public override async Task<ICollection<LibraryItem>> Search(string query)
 		{
-			return await ItemsQuery
+			return await _database.LibraryItems
 				.Where(_database.Like<LibraryItem>(x => x.Title, $"%{query}%"))
 				.OrderBy(DefaultSort)
 				.Take(20)
@@ -109,7 +82,6 @@ namespace Kyoo.Controllers
 
 		/// <inheritdoc />
 		public override Task<LibraryItem> Create(LibraryItem obj) => throw new InvalidOperationException();
-
 		/// <inheritdoc />
 		public override Task<LibraryItem> CreateIfNotExists(LibraryItem obj) => throw new InvalidOperationException();
 		/// <inheritdoc />
