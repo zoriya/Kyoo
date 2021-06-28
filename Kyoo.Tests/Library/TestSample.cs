@@ -18,6 +18,17 @@ namespace Kyoo.Tests
 		private static readonly Dictionary<Type, Func<object>> Samples = new()
 		{
 			{
+				typeof(Collection),
+				() => new Collection
+				{
+					ID = 1,
+					Slug = "collection",
+					Name = "Collection",
+					Overview = "A nice collection for tests",
+					Poster = "Poster"
+				}
+			},
+			{
 				typeof(Show),
 				() => new Show
 				{
@@ -101,6 +112,10 @@ namespace Kyoo.Tests
 
 		public static void FillDatabase(DatabaseContext context)
 		{
+			Collection collection = Get<Collection>();
+			collection.ID = 0;
+			context.Collections.Add(collection);
+			
 			Show show = Get<Show>();
 			show.ID = 0;
 			context.Shows.Add(show);

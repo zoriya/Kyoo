@@ -41,7 +41,6 @@ jobs:
         with:
           commit: ${{env.COMMIT_SHA}}
           workflow: tests.yml
-          name: coverage.xml
           github_token: ${{secrets.GITHUB_TOKEN}}
       - name: Build and analyze
         env:
@@ -49,6 +48,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: bash
         run: |
+          find . -name 'coverage.opencover.xml'
           dotnet build-server shutdown
 
           ./.sonar/scanner/dotnet-sonarscanner begin \
