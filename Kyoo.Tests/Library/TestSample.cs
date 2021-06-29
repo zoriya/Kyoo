@@ -89,6 +89,24 @@ namespace Kyoo.Tests
 				}
 			},
 			{
+				typeof(Track),
+				() => new Track
+				{
+					ID = 1,
+					EpisodeID = 1,
+					Codec = "subrip",
+					Language = "eng",
+					Path = "/path",
+					Title = "Subtitle track",
+					Type = StreamType.Subtitle,
+					EpisodeSlug = Get<Episode>().Slug,
+					IsDefault = true,
+					IsExternal = false,
+					IsForced = false,
+					TrackIndex = 1
+				}
+			},
+			{
 				typeof(People),
 				() => new People
 				{
@@ -133,6 +151,12 @@ namespace Kyoo.Tests
 			episode.SeasonID = 0;
 			episode.Season = season;
 			context.Episodes.Add(episode);
+
+			Track track = Get<Track>();
+			track.ID = 0;
+			track.EpisodeID = 0;
+			track.Episode = episode;
+			context.Tracks.Add(track);
 			
 			context.SaveChanges();
 		}

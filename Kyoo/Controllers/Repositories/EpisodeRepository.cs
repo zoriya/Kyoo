@@ -127,7 +127,7 @@ namespace Kyoo.Controllers
 			
 			if (changed.Tracks != null || resetOld)
 			{
-				await _tracks.DeleteAll(x => x.EpisodeID == resource.ID);
+				await Database.Entry(resource).Collection(x => x.Tracks).LoadAsync();
 				resource.Tracks = changed.Tracks;
 				await ValidateTracks(resource);
 			}
