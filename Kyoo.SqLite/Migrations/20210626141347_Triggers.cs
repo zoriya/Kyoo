@@ -28,6 +28,7 @@ namespace Kyoo.SqLite.Migrations
 			    UPDATE Episodes 
 			    	SET Slug = (SELECT Slug from Shows WHERE ID = ShowID) || 
 			    	           CASE
+			    	               WHEN SeasonNumber IS NULL AND AbsoluteNumber IS NULL THEN ''
 			    	               WHEN SeasonNumber IS NULL THEN '-' || AbsoluteNumber
 			    	               ELSE '-s' || SeasonNumber || 'e' || EpisodeNumber
 			    	           END
@@ -41,6 +42,7 @@ namespace Kyoo.SqLite.Migrations
 			    UPDATE Episodes 
 			    	SET Slug = (SELECT Slug from Shows WHERE ID = ShowID) || 
 			    	           CASE
+			    	               WHEN SeasonNumber IS NULL AND AbsoluteNumber IS NULL THEN ''
 			    	               WHEN SeasonNumber IS NULL THEN '-' || AbsoluteNumber
 			    	               ELSE '-s' || SeasonNumber || 'e' || EpisodeNumber
 			    	           END
@@ -56,6 +58,7 @@ namespace Kyoo.SqLite.Migrations
 			    UPDATE Episodes 
 			    	SET Slug = new.Slug || 
 			    	           CASE
+			    	               WHEN SeasonNumber IS NULL AND AbsoluteNumber IS NULL THEN ''
 			    	               WHEN SeasonNumber IS NULL THEN '-' || AbsoluteNumber
 			    	               ELSE '-s' || SeasonNumber || 'e' || EpisodeNumber
 			    	           END

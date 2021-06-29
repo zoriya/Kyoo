@@ -167,6 +167,26 @@ namespace Kyoo.Tests.Library
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-12", episode.Slug);
 		}
 		
-		// TODO add movies tests.
+		[Fact]
+		public async Task MovieEpisodeTest()
+		{
+			Episode episode = await _repository.Create(TestSample.GetMovieEpisode());
+			Assert.Equal(TestSample.Get<Show>().Slug, episode.Slug);
+			episode = await _repository.Get(3);
+			Assert.Equal(TestSample.Get<Show>().Slug, episode.Slug);
+		}
+		
+		[Fact]
+		public async Task MovieEpisodeEditTest()
+		{
+			await _repository.Create(TestSample.GetMovieEpisode());
+			await Repositories.LibraryManager.Edit(new Show
+			{
+				ID = 1,
+				Slug = "john-wick"
+			}, false);
+			Episode episode = await _repository.Get(3);
+			Assert.Equal("john-wick", episode.Slug);
+		}
 	}
 }

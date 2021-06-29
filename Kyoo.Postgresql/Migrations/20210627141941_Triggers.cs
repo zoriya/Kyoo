@@ -38,6 +38,7 @@ namespace Kyoo.Postgresql.Migrations
 				NEW.slug := CONCAT(
 					(SELECT slug FROM shows WHERE id = NEW.show_id),
 					CASE
+					    WHEN NEW.season_number IS NULL AND NEW.episode_number IS NULL THEN NULL
 					    WHEN NEW.season_number IS NULL THEN CONCAT('-', NEW.absolute_number)
 					    ELSE CONCAT('-s', NEW.season_number, 'e', NEW.episode_number)
 				    END
@@ -62,6 +63,7 @@ namespace Kyoo.Postgresql.Migrations
 			BEGIN
 				UPDATE seasons SET slug = CONCAT(NEW.slug, '-s', season_number) WHERE show_id = NEW.id;
 				UPDATE episodes SET slug = CASE
+				    WHEN season_number IS NULL AND episode_number IS NULL THEN NEW.slug
 				    WHEN season_number IS NULL THEN CONCAT(NEW.slug, '-', absolute_number) 
 				    ELSE CONCAT(NEW.slug, '-s', season_number, 'e', episode_number)
 				END

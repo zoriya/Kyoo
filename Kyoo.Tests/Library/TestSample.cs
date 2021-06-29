@@ -154,5 +154,20 @@ namespace Kyoo.Tests
 				ReleaseDate = new DateTime(2020, 06, 05)
 			};
 		}
+
+		public static Episode GetMovieEpisode()
+		{
+			return new()
+			{
+				ID = 3,
+				ShowSlug = "anohana",
+				ShowID = 1,
+				Path = "/home/kyoo/john-wick",
+				Thumb = "thumb",
+				Title = "John wick",
+				Overview = "A movie episode test",
+				ReleaseDate = new DateTime(1595, 05, 12)
+			};
+		}
 	}
 }

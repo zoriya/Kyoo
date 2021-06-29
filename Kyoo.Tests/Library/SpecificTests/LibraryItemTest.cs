@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models;
@@ -29,9 +30,11 @@ namespace Kyoo.Tests.Library
 	public abstract class ALibraryItemTest
 	{
 		private readonly ILibraryItemRepository _repository;
+		private readonly RepositoryActivator _repositories;
 		
-		public ALibraryItemTest(RepositoryActivator repositories)
+		protected ALibraryItemTest(RepositoryActivator repositories)
 		{
+			_repositories = repositories;
 			_repository = repositories.LibraryManager.LibraryItemRepository;
 		}
 
@@ -55,6 +58,32 @@ namespace Kyoo.Tests.Library
 			LibraryItem expected = new(TestSample.Get<Show>());
 			LibraryItem actual = await _repository.Get(-1);
 			KAssert.DeepEqual(expected, actual);
+		}
+		
+		[Fact]
+		public async Task GetShowSlugTests()
+		{
+			LibraryItem expected = new(TestSample.Get<Show>());
+			LibraryItem actual = await _repository.Get(TestSample.Get<Show>().Slug);
+			KAssert.DeepEqual(expected, actual);
+		}
+		
+		[Fact]
+		public async Task GetCollectionSlugTests()
+		{
+			LibraryItem expected = new(TestSample.Get<Collection>());
+			LibraryItem actual = await _repository.Get(TestSample.Get<Collection>().Slug);
+			KAssert.DeepEqual(expected, actual);
+		}
+		
+		[Fact]
+		public async Task GetDuplicatedSlugTests()
+		{
+			await _repositories.LibraryManager.Create(new Collection()
+			{
+				Slug = TestSample.Get<Show>().Slug
+			});
+			await Assert.ThrowsAsync<InvalidOperationException>(() => _repository.Get(TestSample.Get<Show>().Slug));
 		}
 	}
 }
