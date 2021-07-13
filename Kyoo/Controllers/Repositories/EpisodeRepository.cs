@@ -127,7 +127,7 @@ namespace Kyoo.Controllers
 			
 			if (changed.Tracks != null || resetOld)
 			{
-				await Database.Entry(resource).Collection(x => x.Tracks).LoadAsync();
+				await _tracks.DeleteAll(x => x.EpisodeID == resource.ID);
 				resource.Tracks = changed.Tracks;
 				await ValidateTracks(resource);
 			}
@@ -148,14 +148,10 @@ namespace Kyoo.Controllers
 		/// <returns>The <see cref="resource"/> parameter is returned.</returns>
 		private async Task<Episode> ValidateTracks(Episode resource)
 		{
-			resource.Tracks = await TaskUtils.DefaultIfNull(resource.Tracks?.MapAsync((x, i) =>
+			resource.Tracks = await TaskUtils.DefaultIfNull(resource.Tracks?.SelectAsync(x =>
 			{
 				x.Episode = resource;
-				// TODO use a trigger for the next line.
-				x.TrackIndex = resource.Tracks.Take(i).Count(y => x.Language == y.Language
-				                                                  && x.IsForced == y.IsForced 
-				                                                  && x.Codec == y.Codec 
-				                                                  && x.Type == y.Type);
+				x.EpisodeSlug = resource.Slug;
 				return _tracks.Create(x);
 			}).ToListAsync());
 			return resource;

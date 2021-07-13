@@ -115,12 +115,6 @@ namespace Kyoo.Controllers
 		}
 
 		/// <inheritdoc />
-		public Task<Track> Get(string slug, StreamType type = StreamType.Unknown)
-		{
-			return TrackRepository.Get(slug, type);
-		}
-
-		/// <inheritdoc />
 		public async Task<T> GetOrDefault<T>(int id) 
 			where T : class, IResource
 		{
@@ -165,12 +159,6 @@ namespace Kyoo.Controllers
 			return await EpisodeRepository.GetOrDefault(showSlug, seasonNumber, episodeNumber);
 		}
 
-		/// <inheritdoc />
-		public async Task<Track> GetOrDefault(string slug, StreamType type = StreamType.Unknown)
-		{
-			return await TrackRepository.GetOrDefault(slug, type);
-		}
-		
 		/// <inheritdoc />
 		public Task<T> Load<T, T2>(T obj, Expression<Func<T, T2>> member)
 			where T : class, IResource

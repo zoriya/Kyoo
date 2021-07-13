@@ -35,7 +35,7 @@ jobs:
           check-name: tests
           repo-token: ${{secrets.GITHUB_TOKEN}}
           running-workflow-name: analysis
-          allowed-conclusions: success,skipped,cancelled,neutral,failed
+          allowed-conclusions: success,skipped,cancelled,neutral,failure
       - name: Download coverage report
         uses: dawidd6/action-download-artifact@v2
         with:

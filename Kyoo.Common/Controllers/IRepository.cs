@@ -375,25 +375,7 @@ namespace Kyoo.Controllers
 	/// <summary>
 	/// A repository to handle tracks
 	/// </summary>
-	public interface ITrackRepository : IRepository<Track>
-	{
-		/// <summary>
-		/// Get a track from it's slug and it's type.
-		/// </summary>
-		/// <param name="slug">The slug of the track</param>
-		/// <param name="type">The type (Video, Audio or Subtitle)</param>
-		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-		/// <returns>The track found</returns>
-		Task<Track> Get(string slug, StreamType type = StreamType.Unknown);
-		
-		/// <summary>
-		/// Get a track from it's slug and it's type or null if it is not found.
-		/// </summary>
-		/// <param name="slug">The slug of the track</param>
-		/// <param name="type">The type (Video, Audio or Subtitle)</param>
-		/// <returns>The track found</returns>
-		Task<Track> GetOrDefault(string slug, StreamType type = StreamType.Unknown);
-	}
+	public interface ITrackRepository : IRepository<Track> { }
 	
 	/// <summary>
 	/// A repository to handle libraries.

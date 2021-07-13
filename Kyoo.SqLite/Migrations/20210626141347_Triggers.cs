@@ -25,13 +25,13 @@ namespace Kyoo.SqLite.Migrations
 			migrationBuilder.Sql(@"
 			CREATE TRIGGER EpisodeSlugInsert AFTER INSERT ON Episodes FOR EACH ROW 
 			BEGIN 
-			    UPDATE Episodes 
-			    	SET Slug = (SELECT Slug from Shows WHERE ID = ShowID) || 
-			    	           CASE
-			    	               WHEN SeasonNumber IS NULL AND AbsoluteNumber IS NULL THEN ''
-			    	               WHEN SeasonNumber IS NULL THEN '-' || AbsoluteNumber
-			    	               ELSE '-s' || SeasonNumber || 'e' || EpisodeNumber
-			    	           END
+				UPDATE Episodes 
+					SET Slug = (SELECT Slug from Shows WHERE ID = ShowID) || 
+					           CASE
+						           WHEN SeasonNumber IS NULL AND AbsoluteNumber IS NULL THEN ''
+						           WHEN SeasonNumber IS NULL THEN '-' || AbsoluteNumber
+						           ELSE '-s' || SeasonNumber || 'e' || EpisodeNumber
+					           END
 				WHERE ID == new.ID;
 			END");
 			// language=SQLite
@@ -39,29 +39,114 @@ namespace Kyoo.SqLite.Migrations
 			CREATE TRIGGER EpisodeSlugUpdate AFTER UPDATE OF AbsoluteNumber, EpisodeNumber, SeasonNumber, ShowID 
 			    ON Episodes FOR EACH ROW 
 			BEGIN 
-			    UPDATE Episodes 
-			    	SET Slug = (SELECT Slug from Shows WHERE ID = ShowID) || 
-			    	           CASE
-			    	               WHEN SeasonNumber IS NULL AND AbsoluteNumber IS NULL THEN ''
-			    	               WHEN SeasonNumber IS NULL THEN '-' || AbsoluteNumber
-			    	               ELSE '-s' || SeasonNumber || 'e' || EpisodeNumber
-			    	           END
+				UPDATE Episodes 
+					SET Slug = (SELECT Slug from Shows WHERE ID = ShowID) || 
+					           CASE
+						           WHEN SeasonNumber IS NULL AND AbsoluteNumber IS NULL THEN ''
+						           WHEN SeasonNumber IS NULL THEN '-' || AbsoluteNumber
+						           ELSE '-s' || SeasonNumber || 'e' || EpisodeNumber
+					           END
 				WHERE ID == new.ID;
 			END");
-			
-			
+
+			// language=SQLite
+			migrationBuilder.Sql(@"
+			CREATE TRIGGER TrackSlugInsert 
+			AFTER INSERT ON Tracks
+			FOR EACH ROW
+			BEGIN
+				UPDATE Tracks SET TrackIndex = (
+						SELECT COUNT(*) FROM Tracks
+						WHERE EpisodeID = new.EpisodeID AND Type = new.Type
+						  AND Language = new.Language AND IsForced = new.IsForced
+					) WHERE ID = new.ID AND TrackIndex = 0;
+				UPDATE Tracks SET Slug = (SELECT Slug FROM Episodes WHERE ID = EpisodeID) ||
+						'.' || Language ||
+						CASE (TrackIndex)
+							WHEN 0 THEN ''
+							ELSE '-' || (TrackIndex)
+						END ||
+						CASE (IsForced)
+							WHEN false THEN ''
+							ELSE '-forced'
+						END ||
+						CASE (Type)
+							WHEN 1 THEN '.video'
+							WHEN 2 THEN '.audio'
+							WHEN 3 THEN '.subtitle'
+							ELSE '.' || Type
+						END
+					WHERE ID = new.ID;
+			END;");
+			// language=SQLite
+			migrationBuilder.Sql(@"
+			CREATE TRIGGER TrackSlugUpdate 
+			AFTER UPDATE OF EpisodeID, IsForced, Language, TrackIndex, Type ON Tracks
+			FOR EACH ROW
+			BEGIN
+				UPDATE Tracks SET TrackIndex = (
+						SELECT COUNT(*) FROM Tracks
+						WHERE EpisodeID = new.EpisodeID AND Type = new.Type
+						  AND Language = new.Language AND IsForced = new.IsForced
+					) WHERE ID = new.ID AND TrackIndex = 0;
+				UPDATE Tracks SET Slug = 
+					    (SELECT Slug FROM Episodes WHERE ID = EpisodeID) ||
+						'.' || Language ||
+						CASE (TrackIndex)
+							WHEN 0 THEN ''
+							ELSE '-' || (TrackIndex)
+						END ||
+						CASE (IsForced)
+							WHEN false THEN ''
+							ELSE '-forced'
+						END ||
+						CASE (Type)
+							WHEN 1 THEN '.video'
+							WHEN 2 THEN '.audio'
+							WHEN 3 THEN '.subtitle'
+							ELSE '.' || Type
+						END
+					WHERE ID = new.ID;
+			END;");
+			// language=SQLite
+			migrationBuilder.Sql(@"
+			CREATE TRIGGER EpisodeUpdateTracksSlug 
+			AFTER UPDATE OF Slug ON Episodes
+			FOR EACH ROW
+			BEGIN
+				UPDATE Tracks SET Slug =
+						NEW.Slug ||
+						'.' || Language ||
+						CASE (TrackIndex)
+							WHEN 0 THEN ''
+							ELSE '-' || TrackIndex
+						END ||
+						CASE (IsForced)
+							WHEN false THEN ''
+							ELSE '-forced'
+						END ||
+						CASE (Type)
+							WHEN 1 THEN '.video'
+							WHEN 2 THEN '.audio'
+							WHEN 3 THEN '.subtitle'
+							ELSE '.' || Type
+						END
+					WHERE EpisodeID = NEW.ID;
+			END;");
+
+
 			// language=SQLite
 			migrationBuilder.Sql(@"
 			CREATE TRIGGER ShowSlugUpdate AFTER UPDATE OF Slug ON Shows FOR EACH ROW
 			BEGIN
-			    UPDATE Seasons SET Slug = new.Slug || '-s' || SeasonNumber WHERE ShowID = new.ID;
-			    UPDATE Episodes 
-			    	SET Slug = new.Slug || 
-			    	           CASE
-			    	               WHEN SeasonNumber IS NULL AND AbsoluteNumber IS NULL THEN ''
-			    	               WHEN SeasonNumber IS NULL THEN '-' || AbsoluteNumber
-			    	               ELSE '-s' || SeasonNumber || 'e' || EpisodeNumber
-			    	           END
+				UPDATE Seasons SET Slug = new.Slug || '-s' || SeasonNumber WHERE ShowID = new.ID;
+				UPDATE Episodes 
+					SET Slug = new.Slug || 
+					           CASE
+					               WHEN SeasonNumber IS NULL AND AbsoluteNumber IS NULL THEN ''
+					               WHEN SeasonNumber IS NULL THEN '-' || AbsoluteNumber
+					               ELSE '-s' || SeasonNumber || 'e' || EpisodeNumber
+					           END
 				WHERE ShowID = new.ID;
 			END;");
 			

@@ -5,7 +5,6 @@ using Kyoo.Controllers;
 using Kyoo.Models;
 using Kyoo.Models.Options;
 using Kyoo.Postgresql;
-using Kyoo.SqLite;
 using Kyoo.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;

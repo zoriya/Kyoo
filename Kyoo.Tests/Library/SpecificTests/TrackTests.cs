@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Xunit;
@@ -33,6 +34,18 @@ namespace Kyoo.Tests.Library
 			: base(repositories)
 		{
 			_repository = repositories.LibraryManager.TrackRepository;
+		}
+		
+		[Fact]
+		public async Task SlugEditTest()
+		{
+			await Repositories.LibraryManager.ShowRepository.Edit(new Show
+			{
+				ID = 1,
+				Slug = "new-slug"
+			}, false);
+			Track track = await _repository.Get(1);
+			Assert.Equal("new-slug-s1e1.eng-1.subtitle", track.Slug);
 		}
 	}
 }

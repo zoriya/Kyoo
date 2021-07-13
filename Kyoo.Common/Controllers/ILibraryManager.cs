@@ -150,16 +150,6 @@ namespace Kyoo.Controllers
 		Task<Episode> Get(string showSlug, int seasonNumber, int episodeNumber);
 
 		/// <summary>
-		/// Get a track from it's slug and it's type.
-		/// </summary>
-		/// <param name="slug">The slug of the track</param>
-		/// <param name="type">The type (Video, Audio or Subtitle)</param>
-		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-		/// <returns>The track found</returns>
-		[ItemNotNull]
-		Task<Track> Get(string slug, StreamType type = StreamType.Unknown);
-		
-		/// <summary>
 		/// Get the resource by it's ID or null if it is not found.
 		/// </summary>
 		/// <param name="id">The id of the resource</param>
@@ -224,15 +214,6 @@ namespace Kyoo.Controllers
 		[ItemCanBeNull]
 		Task<Episode> GetOrDefault(string showSlug, int seasonNumber, int episodeNumber);
 
-		/// <summary>
-		/// Get a track from it's slug and it's type or null if it is not found.
-		/// </summary>
-		/// <param name="slug">The slug of the track</param>
-		/// <param name="type">The type (Video, Audio or Subtitle)</param>
-		/// <returns>The track found</returns>
-		[ItemCanBeNull]
-		Task<Track> GetOrDefault(string slug, StreamType type = StreamType.Unknown);
-		
 
 		/// <summary>
 		/// Load a related resource

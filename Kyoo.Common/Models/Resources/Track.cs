@@ -33,42 +33,27 @@ namespace Kyoo.Models
 		{
 			get
 			{
-				string type = Type switch
-				{
-					StreamType.Subtitle => "",
-					StreamType.Video => "video.",
-					StreamType.Audio => "audio.",
-					StreamType.Attachment => "font.",
-					_ => ""
-				};
+				string type = Type.ToString().ToLower();
 				string index = TrackIndex != 0 ? $"-{TrackIndex}" : string.Empty;
-				string codec = Codec switch
-				{
-					"subrip" => ".srt",
-					{} x => $".{x}"
-				};
-				return $"{EpisodeSlug}.{type}{Language}{index}{(IsForced ? "-forced" : "")}{codec}";
+				string episode = EpisodeSlug ?? Episode.Slug ?? EpisodeID.ToString();
+				return $"{episode}.{Language}{index}{(IsForced ? ".forced" : "")}.{type}";
 			}
 			[UsedImplicitly] private set
 			{
-				Match match = Regex.Match(value, @"(?<show>.*)-s(?<season>\d+)e(?<episode>\d+)" 
-				                                 + @"(\.(?<type>\w*))?\.(?<language>.{0,3})(?<forced>-forced)?(\..\w)?");
+				if (value == null)
+					throw new ArgumentNullException(nameof(value));
+				Match match = Regex.Match(value, 
+					@"(?<ep>[^\.]+)\.(?<lang>\w{0,3})(-(?<index>\d+))?(\.(?<forced>forced))?\.(?<type>\w+)(\.\w*)?");
 
 				if (!match.Success)
-				{
-					match = Regex.Match(value, @"(?<show>.*)\.(?<language>.{0,3})(?<forced>-forced)?(\..\w)?");
-					if (!match.Success)
-						throw new ArgumentException("Invalid track slug. " +
-						                            "Format: {episodeSlug}.{language}[-forced][.{extension}]");
-				}
+					throw new ArgumentException("Invalid track slug. " +
+					                            "Format: {episodeSlug}.{language}[-{index}][-forced].{type}[.{extension}]");
 
-				EpisodeSlug = Episode.GetSlug(match.Groups["show"].Value, 
-					match.Groups["season"].Success ? int.Parse(match.Groups["season"].Value) : null,
-					match.Groups["episode"].Success ? int.Parse(match.Groups["episode"].Value) : null);
-				Language = match.Groups["language"].Value;
+				EpisodeSlug = match.Groups["ep"].Value;
+				Language = match.Groups["lang"].Value;
+				TrackIndex = int.Parse(match.Groups["index"].Value);
 				IsForced = match.Groups["forced"].Success;
-				if (match.Groups["type"].Success)
-					Type = Enum.Parse<StreamType>(match.Groups["type"].Value, true);
+				Type = Enum.Parse<StreamType>(match.Groups["type"].Value, true);
 			}
 		}
 		
@@ -166,6 +151,33 @@ namespace Kyoo.Models
 				null => "und",
 				_ => mkvLanguage
 			};
+		}
+
+		/// <summary>
+		/// Utility method to edit a track slug (this only return a slug with the modification, nothing is stored)
+		/// </summary>
+		/// <param name="baseSlug">The slug to edit</param>
+		/// <param name="type">The new type of this </param>
+		/// <param name="language"></param>
+		/// <param name="index"></param>
+		/// <param name="forced"></param>
+		/// <returns></returns>
+		public static string EditSlug(string baseSlug,
+			StreamType type = StreamType.Unknown,
+			string language = null,
+			int? index = null,
+			bool? forced = null)
+		{
+			Track track = new() {Slug = baseSlug};
+			if (type != StreamType.Unknown)
+				track.Type = type;
+			if (language != null)
+				track.Language = language;
+			if (index != null)
+				track.TrackIndex = index.Value;
+			if (forced != null)
+				track.IsForced = forced.Value;
+			return track.Slug;
 		}
 	}
 }

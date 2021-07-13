@@ -330,8 +330,6 @@ namespace Kyoo
 			modelBuilder.Entity<Track>()
 				.Property(x => x.Slug)
 				.ValueGeneratedOnAddOrUpdate();
-
-			// modelBuilder.Ignore<LibraryItem>();
 		}
 
 		/// <summary>
@@ -499,52 +497,6 @@ namespace Kyoo
 			catch (DuplicatedItemException)
 			{
 				return -1;
-			}
-		}
-
-		/// <summary>
-		/// Save items or retry with a custom method if a duplicate is found.
-		/// </summary>
-		/// <param name="obj">The item to save (other changes of this context will also be saved)</param>
-		/// <param name="onFail">A function to run on fail, the <see cref="obj"/> param wil be mapped.
-		/// The second parameter is the current retry number.</param>
-		/// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete</param>
-		/// <typeparam name="T">The type of the item to save</typeparam>
-		/// <returns>The number of state entries written to the database.</returns>
-		public Task<T> SaveOrRetry<T>(T obj, Func<T, int, T> onFail, CancellationToken cancellationToken = new())
-		{
-			return SaveOrRetry(obj, onFail, 0, cancellationToken);
-		}
-		
-		/// <summary>
-		/// Save items or retry with a custom method if a duplicate is found.
-		/// </summary>
-		/// <param name="obj">The item to save (other changes of this context will also be saved)</param>
-		/// <param name="onFail">A function to run on fail, the <see cref="obj"/> param wil be mapped.
-		/// The second parameter is the current retry number.</param>
-		/// <param name="recurse">The current retry number.</param>
-		/// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete</param>
-		/// <typeparam name="T">The type of the item to save</typeparam>
-		/// <returns>The number of state entries written to the database.</returns>
-		private async Task<T> SaveOrRetry<T>(T obj,
-			Func<T, int, T> onFail,
-			int recurse,
-			CancellationToken cancellationToken = new())
-		{
-			try
-			{
-				await base.SaveChangesAsync(true, cancellationToken);
-				return obj;
-			}
-			catch (DbUpdateException ex) when (IsDuplicateException(ex))
-			{
-				recurse++;
-				return await SaveOrRetry(onFail(obj, recurse), onFail, recurse, cancellationToken);
-			}
-			catch (DbUpdateException)
-			{
-				DiscardChanges();
-				throw;
 			}
 		}
 
