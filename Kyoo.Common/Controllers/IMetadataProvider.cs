@@ -35,7 +35,7 @@ namespace Kyoo.Controllers
 		/// If this metadata provider does not support <typeparamref name="T"/>.
 		/// </exception>
 		/// <returns>A new <typeparamref name="T"/> containing metadata from your provider</returns>
-		[ItemNotNull]
+		[ItemCanBeNull]
 		Task<T> Get<T>([NotNull] T item)
 			where T : class, IResource;
 

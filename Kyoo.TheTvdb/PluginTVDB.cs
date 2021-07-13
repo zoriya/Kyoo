@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using Autofac;
 using Kyoo.Controllers;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.TheTvdb
 {
@@ -33,9 +33,9 @@ namespace Kyoo.TheTvdb
 		
 		
 		/// <inheritdoc />
-		public void Configure(IServiceCollection services, ICollection<Type> availableTypes)
+		public void Configure(ContainerBuilder builder)
 		{
-			// services.AddProvider<ProviderTvdb>();
+			builder.RegisterProvider<ProviderTvdb>();
 		}
 	}
 }
