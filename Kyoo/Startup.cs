@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Autofac;
 using Kyoo.Authentication;
 using Kyoo.Controllers;
 using Kyoo.Models;
@@ -71,11 +72,15 @@ namespace Kyoo
 			
 			services.AddHttpClient();
 			
-			services.AddTransient(typeof(Lazy<>), typeof(LazyDi<>));
-			
-			services.AddSingleton(_plugins);
-			services.AddTask<PluginInitializer>();
+			// services.AddTransient(typeof(Lazy<>), typeof(LazyDi<>));
 			_plugins.ConfigureServices(services);
+		}
+
+		public void ConfigureContainer(ContainerBuilder builder)
+		{
+			builder.RegisterInstance(_plugins).As<IPluginManager>().ExternallyOwned();
+			builder.RegisterTask<PluginInitializer>();
+			_plugins.ConfigureContainer(builder);
 		}
 		
 		/// <summary>

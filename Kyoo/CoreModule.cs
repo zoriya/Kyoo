@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using Autofac;
+using Autofac.Core;
+using Autofac.Core.Registration;
 using Kyoo.Controllers;
 using Kyoo.Models.Options;
 using Kyoo.Models.Permissions;
@@ -34,7 +36,7 @@ namespace Kyoo
 			typeof(IFileManager),
 			typeof(ITranscoder),
 			typeof(IThumbnailsManager),
-			typeof(IProviderManager),
+			typeof(IMetadataProvider),
 			typeof(ITaskManager),
 			typeof(ILibraryManager)
 		};
@@ -89,6 +91,39 @@ namespace Kyoo
 		}
 
 		/// <inheritdoc />
+		public void Configure(ContainerBuilder builder)
+		{
+			builder.RegisterType<ConfigurationManager>().As<IConfigurationManager>().SingleInstance();
+			builder.RegisterType<FileManager>().As<IFileManager>().SingleInstance();
+			builder.RegisterType<Transcoder>().As<ITranscoder>().SingleInstance();
+			builder.RegisterType<ThumbnailsManager>().As<IThumbnailsManager>().SingleInstance();
+			builder.RegisterType<TaskManager>().As<ITaskManager>().SingleInstance();
+			builder.RegisterType<LibraryManager>().As<ILibraryManager>().InstancePerLifetimeScope();
+			builder.RegisterComposite<ProviderComposite, IMetadataProvider>().InstancePerLifetimeScope();
+			
+			builder.RegisterTask<Crawler>();
+
+			static bool DatabaseIsPresent(IComponentRegistryBuilder x)
+				=> x.IsRegistered(new TypedService(typeof(DatabaseContext)));
+
+			builder.RegisterRepository<ILibraryRepository, LibraryRepository>().OnlyIf(DatabaseIsPresent);
+			builder.RegisterRepository<ILibraryItemRepository, LibraryItemRepository>().OnlyIf(DatabaseIsPresent);
+			builder.RegisterRepository<ICollectionRepository, CollectionRepository>().OnlyIf(DatabaseIsPresent);
+			builder.RegisterRepository<IShowRepository, ShowRepository>().OnlyIf(DatabaseIsPresent);
+			builder.RegisterRepository<ISeasonRepository, SeasonRepository>().OnlyIf(DatabaseIsPresent);
+			builder.RegisterRepository<IEpisodeRepository, EpisodeRepository>().OnlyIf(DatabaseIsPresent);
+			builder.RegisterRepository<ITrackRepository, TrackRepository>().OnlyIf(DatabaseIsPresent);
+			builder.RegisterRepository<IPeopleRepository, PeopleRepository>().OnlyIf(DatabaseIsPresent);
+			builder.RegisterRepository<IStudioRepository, StudioRepository>().OnlyIf(DatabaseIsPresent);
+			builder.RegisterRepository<IGenreRepository, GenreRepository>().OnlyIf(DatabaseIsPresent);
+			builder.RegisterRepository<IProviderRepository, ProviderRepository>().OnlyIf(DatabaseIsPresent);
+			builder.RegisterRepository<IUserRepository, UserRepository>().OnlyIf(DatabaseIsPresent);
+
+			builder.RegisterType<PassthroughPermissionValidator>().As<IPermissionValidator>()
+				.IfNotRegistered(typeof(IPermissionValidator));
+		}
+		
+		/// <inheritdoc />
         public void Configure(IServiceCollection services, ICollection<Type> availableTypes)
 		{
 			string publicUrl = _configuration.GetPublicUrl();
@@ -109,36 +144,7 @@ namespace Kyoo
 					x.SerializerSettings.Converters.Add(new PeopleRoleConverter());
 				});
 			
-			services.AddSingleton<IConfigurationManager, ConfigurationManager>();
-			services.AddSingleton<IFileManager, FileManager>();
-			services.AddSingleton<ITranscoder, Transcoder>();
-			services.AddSingleton<IThumbnailsManager, ThumbnailsManager>();
-			services.AddSingleton<IProviderManager, ProviderManager>();
-			services.AddSingleton<ITaskManager, TaskManager>();
 			services.AddHostedService(x => x.GetService<ITaskManager>() as TaskManager);
-			
-			services.AddScoped<ILibraryManager, LibraryManager>();
-
-			if (ProviderCondition.Has(typeof(DatabaseContext), availableTypes))
-			{
-				services.AddRepository<ILibraryRepository, LibraryRepository>();
-				services.AddRepository<ILibraryItemRepository, LibraryItemRepository>();
-				services.AddRepository<ICollectionRepository, CollectionRepository>();
-				services.AddRepository<IShowRepository, ShowRepository>();
-				services.AddRepository<ISeasonRepository, SeasonRepository>();
-				services.AddRepository<IEpisodeRepository, EpisodeRepository>();
-				services.AddRepository<ITrackRepository, TrackRepository>();
-				services.AddRepository<IPeopleRepository, PeopleRepository>();
-				services.AddRepository<IStudioRepository, StudioRepository>();
-				services.AddRepository<IGenreRepository, GenreRepository>();
-				services.AddRepository<IProviderRepository, ProviderRepository>();
-				services.AddRepository<IUserRepository, UserRepository>();
-			}
-
-			services.AddTask<Crawler>();
-
-			if (services.All(x => x.ServiceType != typeof(IPermissionValidator)))
-				services.AddSingleton<IPermissionValidator, PassthroughPermissionValidator>();
 		}
 
 		/// <inheritdoc />

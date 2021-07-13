@@ -25,7 +25,7 @@ namespace Kyoo.Tasks
 		
 		[Injected] public IServiceProvider ServiceProvider { private get; set; }
 		[Injected] public IThumbnailsManager ThumbnailsManager { private get; set; }
-		[Injected] public IProviderManager MetadataProvider { private get; set; }
+		[Injected] public IMetadataProvider MetadataProvider { private get; set; }
 		[Injected] public ITranscoder Transcoder { private get; set; }
 		[Injected] public IConfiguration Config { private get; set; }
 
@@ -258,7 +258,7 @@ namespace Kyoo.Tasks
 			Collection collection = await libraryManager.GetOrDefault<Collection>(Utility.ToSlug(collectionName));
 			if (collection != null)
 				return collection;
-			collection = await MetadataProvider.GetCollectionFromName(collectionName, library);
+			// collection = await MetadataProvider.GetCollectionFromName(collectionName, library);
 
 			try
 			{
@@ -283,9 +283,10 @@ namespace Kyoo.Tasks
 				await libraryManager.Load(old, x => x.ExternalIDs);
 				return old;
 			}
-			Show show = await MetadataProvider.SearchShow(showTitle, isMovie, library);
+
+			Show show = new();//await MetadataProvider.SearchShow(showTitle, isMovie, library);
 			show.Path = showPath;
-			show.People = await MetadataProvider.GetPeople(show, library);
+			// show.People = await MetadataProvider.GetPeople(show, library);
 
 			try
 			{
@@ -325,7 +326,7 @@ namespace Kyoo.Tasks
 			}
 			catch (ItemNotFoundException)
 			{
-				Season season = await MetadataProvider.GetSeason(show, seasonNumber, library);
+				Season season = new();//await MetadataProvider.GetSeason(show, seasonNumber, library);
 				try
 				{
 					await libraryManager.Create(season);
@@ -348,12 +349,12 @@ namespace Kyoo.Tasks
 			string episodePath, 
 			Library library)
 		{
-			Episode episode = await MetadataProvider.GetEpisode(show,
+			Episode episode = new();/*await MetadataProvider.GetEpisode(show,
 				episodePath, 
 				season?.SeasonNumber, 
 				episodeNumber,
 				absoluteNumber,
-				library);
+				library);*/
 
 			if (episode.SeasonNumber != null)
 			{

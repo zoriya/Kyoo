@@ -1,5 +1,6 @@
-using System;
 using System.Linq;
+using Autofac;
+using Autofac.Builder;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Microsoft.Extensions.Configuration;
@@ -15,55 +16,63 @@ namespace Kyoo
 		/// <summary>
 		/// Register a new task to the container.
 		/// </summary>
-		/// <param name="services">The container</param>
+		/// <param name="builder">The container</param>
 		/// <typeparam name="T">The type of the task</typeparam>
-		/// <returns>The initial container.</returns>
-		public static IServiceCollection AddTask<T>(this IServiceCollection services)
+		/// <returns>The registration builder of this new task. That can be used to edit the registration.</returns>
+		public static IRegistrationBuilder<T, ConcreteReflectionActivatorData, SingleRegistrationStyle>
+			RegisterTask<T>(this ContainerBuilder builder)
 			where T : class, ITask
 		{
-			services.AddSingleton<ITask, T>();
-			return services;
+			return builder.RegisterType<T>().As<ITask>().SingleInstance();
+		}
+
+		/// <summary>
+		/// Register a new metadata provider to the container.
+		/// </summary>
+		/// <param name="builder">The container</param>
+		/// <typeparam name="T">The type of the task</typeparam>
+		/// <returns>The registration builder of this new provider. That can be used to edit the registration.</returns>
+		public static IRegistrationBuilder<T, ConcreteReflectionActivatorData, SingleRegistrationStyle> 
+			RegisterProvider<T>(this ContainerBuilder builder)
+			where T : class, IMetadataProvider
+		{
+			return builder.RegisterType<T>().As<IMetadataProvider>().InstancePerLifetimeScope();
 		}
 
 		/// <summary>
 		/// Register a new repository to the container.
 		/// </summary>
-		/// <param name="services">The container</param>
-		/// <param name="lifetime">The lifetime of the repository. The default is scoped.</param>
+		/// <param name="builder">The container</param>
 		/// <typeparam name="T">The type of the repository.</typeparam>
 		/// <remarks>
-		/// If your repository implements a special interface, please use <see cref="AddRepository{T,T2}"/>
+		/// If your repository implements a special interface, please use <see cref="RegisterRepository{T,T2}"/>
 		/// </remarks>
 		/// <returns>The initial container.</returns>
-		public static IServiceCollection AddRepository<T>(this IServiceCollection services, 
-			ServiceLifetime lifetime = ServiceLifetime.Scoped)
+		public static IRegistrationBuilder<T, ConcreteReflectionActivatorData, SingleRegistrationStyle> 
+			RegisterRepository<T>(this ContainerBuilder builder)
 			where T : IBaseRepository
 		{
-			Type repository = Utility.GetGenericDefinition(typeof(T), typeof(IRepository<>));
-
-			if (repository != null)
-				services.Add(ServiceDescriptor.Describe(repository, typeof(T), lifetime));
-			services.Add(ServiceDescriptor.Describe(typeof(IBaseRepository), typeof(T), lifetime));
-			return services;
+			return builder.RegisterType<T>()
+				.As<IBaseRepository>()
+				.As(Utility.GetGenericDefinition(typeof(T), typeof(IRepository<>)))
+				.InstancePerLifetimeScope();
 		}
 
 		/// <summary>
 		/// Register a new repository with a custom mapping to the container.
 		/// </summary>
-		/// <param name="services"></param>
-		/// <param name="lifetime">The lifetime of the repository. The default is scoped.</param>
+		/// <param name="builder">The container</param>
 		/// <typeparam name="T">The custom mapping you have for your repository.</typeparam>
 		/// <typeparam name="T2">The type of the repository.</typeparam>
 		/// <remarks>
-		/// If your repository does not implements a special interface, please use <see cref="AddRepository{T}"/>
+		/// If your repository does not implements a special interface, please use <see cref="RegisterRepository{T}"/>
 		/// </remarks>
 		/// <returns>The initial container.</returns>
-		public static IServiceCollection AddRepository<T, T2>(this IServiceCollection services,
-			ServiceLifetime lifetime = ServiceLifetime.Scoped)
+		public static IRegistrationBuilder<T2, ConcreteReflectionActivatorData, SingleRegistrationStyle>
+			RegisterRepository<T, T2>(this ContainerBuilder builder)
 			where T2 : IBaseRepository, T
 		{
-			services.Add(ServiceDescriptor.Describe(typeof(T), typeof(T2), lifetime));
-			return services.AddRepository<T2>(lifetime);
+			return builder.RegisterRepository<T2>().As<T>();
 		}
 
 		/// <summary>

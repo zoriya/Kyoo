@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Authentication", "Kyoo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.SqLite", "Kyoo.SqLite\Kyoo.SqLite.csproj", "{6515380E-1E57-42DA-B6E3-E1C8A848818A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.TheTvdb", "Kyoo.TheTvdb\Kyoo.TheTvdb.csproj", "{D06BF829-23F5-40F3-A62D-627D9F4B4D6C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,5 +49,9 @@ Global
 		{6515380E-1E57-42DA-B6E3-E1C8A848818A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6515380E-1E57-42DA-B6E3-E1C8A848818A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6515380E-1E57-42DA-B6E3-E1C8A848818A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D06BF829-23F5-40F3-A62D-627D9F4B4D6C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D06BF829-23F5-40F3-A62D-627D9F4B4D6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D06BF829-23F5-40F3-A62D-627D9F4B4D6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D06BF829-23F5-40F3-A62D-627D9F4B4D6C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

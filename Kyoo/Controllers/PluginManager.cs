@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
+using Autofac;
 using Kyoo.Models.Options;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -125,6 +126,12 @@ namespace Kyoo.Controllers
 				_logger.LogInformation("No plugin enabled");
 			else
 				_logger.LogInformation("Plugin enabled: {Plugins}", _plugins.Select(x => x.Name));
+		}
+
+		public void ConfigureContainer(ContainerBuilder builder)
+		{
+			foreach (IPlugin plugin in _plugins)
+				plugin.Configure(builder);
 		}
 		
 		/// <inheritdoc />
