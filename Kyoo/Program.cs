@@ -2,11 +2,12 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
+using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 
 namespace Kyoo
@@ -31,7 +32,7 @@ namespace Kyoo
 			if (!File.Exists("./settings.json"))
 				File.Copy(Path.Join(AppDomain.CurrentDomain.BaseDirectory, "settings.json"), "settings.json");
 			
-			IHostBuilder builder = CreateWebHostBuilder(args);
+			IWebHostBuilder builder = CreateWebHostBuilder(args);
 			
 			bool? debug = Environment.GetEnvironmentVariable("ENVIRONMENT")?.ToLowerInvariant() switch
 			{
@@ -87,14 +88,18 @@ namespace Kyoo
 		/// </summary>
 		/// <param name="args">Command line parameters that can be handled by kestrel</param>
 		/// <returns>A new web host instance</returns>
-		private static IHostBuilder CreateWebHostBuilder(string[] args)
+		private static IWebHostBuilder CreateWebHostBuilder(string[] args)
 		{
 			IConfiguration configuration = SetupConfig(new ConfigurationBuilder(), args).Build();
 
-
-			return new HostBuilder()
-				.UseServiceProviderFactory(new AutofacServiceProviderFactory())
+			return new WebHostBuilder()
+				.ConfigureServices(x =>
+				{
+					AutofacServiceProviderFactory factory = new();
+					x.Replace(ServiceDescriptor.Singleton<IServiceProviderFactory<ContainerBuilder>>(factory));
+				})
 				.UseContentRoot(AppDomain.CurrentDomain.BaseDirectory)
+				.UseConfiguration(configuration)
 				.ConfigureAppConfiguration(x => SetupConfig(x, args))
 				.ConfigureLogging((context, builder) =>
 				{
@@ -106,20 +111,12 @@ namespace Kyoo
 						.AddDebug()
 						.AddEventSourceLogger();
 				})
-				// .UseDefaultServiceProvider((context, options) =>
-				// {
-				// 	options.ValidateScopes = context.HostingEnvironment.IsDevelopment();
-				// 	if (context.HostingEnvironment.IsDevelopment())
-				// 		StaticWebAssetsLoader.UseStaticWebAssets(context.HostingEnvironment, context.Configuration);
-				// })
 				.ConfigureServices(x => x.AddRouting())
-				.ConfigureWebHost(x => x
-					.UseKestrel(options => { options.AddServerHeader = false; })
-					.UseIIS()
-					.UseIISIntegration()
-					.UseUrls(configuration.GetValue<string>("basics:url"))
-					.UseStartup<Startup>()
-				);
+				.UseKestrel(options => { options.AddServerHeader = false; })
+				.UseIIS()
+				.UseIISIntegration()
+				.UseUrls(configuration.GetValue<string>("basics:url"))
+				.UseStartup<Startup>();
 		}
 	}
 }
