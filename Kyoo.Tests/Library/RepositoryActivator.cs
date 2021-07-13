@@ -33,6 +33,7 @@ namespace Kyoo.Tests
 				new Lazy<ILibraryRepository>(() => LibraryManager.LibraryRepository));
 			TrackRepository track = new(_database);
 			EpisodeRepository episode = new(_database, provider, track);
+			UserRepository user = new(_database);
 
 			LibraryManager = new LibraryManager(new IBaseRepository[] {
 				provider,
@@ -45,7 +46,8 @@ namespace Kyoo.Tests
 				track,
 				people,
 				studio,
-				genre
+				genre,
+				user
 			});
 		}
 

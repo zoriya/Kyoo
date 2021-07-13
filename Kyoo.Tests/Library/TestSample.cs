@@ -18,6 +18,16 @@ namespace Kyoo.Tests
 		private static readonly Dictionary<Type, Func<object>> Samples = new()
 		{
 			{
+				typeof(Models.Library),
+				() => new Models.Library
+				{
+					ID = 1,
+					Slug = "deck",
+					Name = "Deck",
+					Paths = new[] {"/path/to/deck"}
+				}
+			},
+			{
 				typeof(Collection),
 				() => new Collection
 				{
@@ -115,6 +125,47 @@ namespace Kyoo.Tests
 					Name = "The Actor",
 					Poster = "NicePoster"
 				}
+			},
+			{
+				typeof(Studio),
+				() => new Studio
+				{
+					ID = 1,
+					Slug = "hyper-studio",
+					Name = "Hyper studio"
+				}
+			},
+			{
+				typeof(Genre),
+				() => new Genre
+				{
+					ID = 1,
+					Slug = "action",
+					Name = "Action"
+				}
+			},
+			{
+				typeof(Provider),
+				() => new Provider
+				{
+					ID = 1,
+					Slug = "tvdb",
+					Name = "The TVDB",
+					Logo = "path/tvdb.svg",
+					LogoExtension = "svg"
+				}
+			},
+			{
+				typeof(User),
+				() => new User
+				{
+					ID = 1,
+					Slug = "user",
+					Username = "User",
+					Email = "user@im-a-user.com",
+					Password = "MD5-encoded",
+					Permissions = new [] {"overall.read"}
+				}
 			}
 		};
 
@@ -157,7 +208,35 @@ namespace Kyoo.Tests
 			track.EpisodeID = 0;
 			track.Episode = episode;
 			context.Tracks.Add(track);
+
+			Studio studio = Get<Studio>();
+			studio.ID = 0;
+			studio.Shows = new List<Show> {show};
+			context.Studios.Add(studio);
+
+			Genre genre = Get<Genre>();
+			genre.ID = 0;
+			genre.Shows = new List<Show> {show};
+			context.Genres.Add(genre);
+
+			People people = Get<People>();
+			people.ID = 0;
+			context.People.Add(people);
 			
+			Provider provider = Get<Provider>();
+			provider.ID = 0;
+			context.Providers.Add(provider);
+			
+			Models.Library library = Get<Models.Library>();
+			library.ID = 0;
+			library.Collections = new List<Collection> {collection};
+			library.Providers = new List<Provider> {provider};
+			context.Libraries.Add(library);
+
+			User user = Get<User>();
+			user.ID = 0;
+			context.Users.Add(user);
+
 			context.SaveChanges();
 		}
 

@@ -226,7 +226,7 @@ namespace Kyoo.Postgresql.Migrations
                         column: x => x.studio_id,
                         principalTable: "studios",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(

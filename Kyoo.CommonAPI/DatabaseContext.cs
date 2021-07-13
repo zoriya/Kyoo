@@ -157,6 +157,11 @@ namespace Kyoo
 				.WithOne(x => x.Episode)
 				.OnDelete(DeleteBehavior.Cascade);
 
+			modelBuilder.Entity<Show>()
+				.HasOne(x => x.Studio)
+				.WithMany(x => x.Shows)
+				.OnDelete(DeleteBehavior.SetNull);
+
 			modelBuilder.Entity<Provider>()
 				.HasMany(x => x.Libraries)
 				.WithMany(x => x.Providers)

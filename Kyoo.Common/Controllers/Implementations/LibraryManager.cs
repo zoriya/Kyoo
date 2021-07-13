@@ -37,6 +37,8 @@ namespace Kyoo.Controllers
 		public IGenreRepository GenreRepository { get; }
 		/// <inheritdoc />
 		public IProviderRepository ProviderRepository { get; }
+		/// <inheritdoc />
+		public IUserRepository UserRepository { get; }
 		
 		
 		/// <summary>
@@ -58,6 +60,7 @@ namespace Kyoo.Controllers
 			StudioRepository = GetRepository<Studio>() as IStudioRepository;
 			GenreRepository = GetRepository<Genre>() as IGenreRepository;
 			ProviderRepository = GetRepository<Provider>() as IProviderRepository;
+			UserRepository = GetRepository<User>() as IUserRepository;
 		}
 
 		/// <inheritdoc />

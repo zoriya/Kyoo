@@ -78,6 +78,11 @@ namespace Kyoo.Controllers
 		IProviderRepository ProviderRepository { get; }
 		
 		/// <summary>
+		/// The repository that handle users.
+		/// </summary>
+		IUserRepository UserRepository { get; }
+		
+		/// <summary>
 		/// Get the resource by it's ID
 		/// </summary>
 		/// <param name="id">The id of the resource</param>

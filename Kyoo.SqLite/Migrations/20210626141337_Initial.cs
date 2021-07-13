@@ -218,7 +218,7 @@ namespace Kyoo.SqLite.Migrations
                         column: x => x.StudioID,
                         principalTable: "Studios",
                         principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.SetNull);
                 });
 
             migrationBuilder.CreateTable(
