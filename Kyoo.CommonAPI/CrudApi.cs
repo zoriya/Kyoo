@@ -194,7 +194,7 @@ namespace Kyoo.CommonApi
 		{
 			try
 			{
-				await _repository.DeleteRange(ApiHelper.ParseWhere<T>(where));
+				await _repository.DeleteAll(ApiHelper.ParseWhere<T>(where));
 			}
 			catch (ItemNotFoundException)
 			{

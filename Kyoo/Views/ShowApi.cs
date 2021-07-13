@@ -16,6 +16,8 @@ namespace Kyoo.Api
 {
 	[Route("api/show")]
 	[Route("api/shows")]
+	[Route("api/movie")]
+	[Route("api/movies")]
 	[ApiController]
 	[PartialPermission(nameof(ShowApi))]
 	public class ShowApi : CrudApi<Show>

@@ -35,9 +35,9 @@
 		<ProjectReference Include="../Kyoo.Common/Kyoo.Common.csproj" />
 		<ProjectReference Include="../Kyoo.CommonAPI/Kyoo.CommonAPI.csproj" />
 		<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.5" />
-		<PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="3.1.14" />
-		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.8" />
+		<PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="3.1.17" />
+		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.8" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 	</ItemGroup>
 	
@@ -46,6 +46,9 @@
 <!--			<ExcludeAssets>all</ExcludeAssets>-->
 		</ProjectReference>
 		<ProjectReference Include="../Kyoo.Authentication/Kyoo.Authentication.csproj">
+<!--			<ExcludeAssets>all</ExcludeAssets>-->
+		</ProjectReference>
+		<ProjectReference Include="../Kyoo.SqLite/Kyoo.SqLite.csproj">
 <!--			<ExcludeAssets>all</ExcludeAssets>-->
 		</ProjectReference>
 	</ItemGroup>

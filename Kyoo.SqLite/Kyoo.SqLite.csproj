@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+
+		<Company>SDG</Company>
+		<Authors>Zoe Roux</Authors>
+		<RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
+		<LangVersion>default</LangVersion>
+		<RootNamespace>Kyoo.SqLite</RootNamespace>
+	</PropertyGroup>
+
+<!--	<PropertyGroup>-->
+<!--		<OutputPath>../Kyoo/bin/$(Configuration)/$(TargetFramework)/plugins/sqlite</OutputPath>-->
+<!--		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>-->
+<!--		<ProduceReferenceAssembly>false</ProduceReferenceAssembly>-->
+<!--		<GenerateDependencyFile>false</GenerateDependencyFile>-->
+<!--		<GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>-->
+<!--		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>-->
+<!--	</PropertyGroup>-->
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.8">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.8" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="../Kyoo.CommonAPI/Kyoo.CommonAPI.csproj">
+<!--			<PrivateAssets>all</PrivateAssets>-->
+<!--			<Private>false</Private>-->
+<!--			<ExcludeAssets>runtime</ExcludeAssets>-->
+		</ProjectReference>
+		<ProjectReference Include="../Kyoo.Common/Kyoo.Common.csproj">
+<!--			<PrivateAssets>all</PrivateAssets>-->
+<!--			<Private>false</Private>-->
+<!--			<ExcludeAssets>runtime</ExcludeAssets>-->
+		</ProjectReference>
+	</ItemGroup>
+</Project>

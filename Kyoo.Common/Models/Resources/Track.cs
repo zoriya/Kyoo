@@ -1,11 +1,16 @@
-﻿using Kyoo.Models.Watch;
+﻿using System;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
+using JetBrains.Annotations;
 using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
 {
+	/// <summary>
+	/// The list of available stream types.
+	/// Attachments are only used temporarily by the transcoder but are not stored in a database.
+	/// </summary>
 	public enum StreamType
 	{
 		Unknown = 0,
@@ -15,61 +20,106 @@ namespace Kyoo.Models
 		Attachment = 4
 	}
 
-	namespace Watch
+	/// <summary>
+	/// A video, audio or subtitle track for an episode.
+	/// </summary>
+	public class Track : IResource
 	{
-		[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-		public class Stream
-		{
-			public string Title { get; set; }
-			public string Language { get; set; }
-			public string Codec { get; set; }
-			[MarshalAs(UnmanagedType.I1)] public bool isDefault;
-			[MarshalAs(UnmanagedType.I1)] public bool isForced;
-			[SerializeIgnore] public string Path { get; set; }
-			[SerializeIgnore] public StreamType Type { get; set; }
-			
-			public Stream() {}
-			
-			public Stream(string title, string language, string codec, bool isDefault, bool isForced, string path, StreamType type)
-			{
-				Title = title;
-				Language = language;
-				Codec = codec;
-				this.isDefault = isDefault;
-				this.isForced = isForced;
-				Path = path;
-				Type = type;
-			}
-			
-			public Stream(Stream stream)
-			{
-				Title  = stream.Title;
-				Language  = stream.Language;
-				isDefault  = stream.isDefault;
-				isForced  = stream.isForced;
-				Codec  = stream.Codec;
-				Path = stream.Path;
-				Type  = stream.Type;
-			}
-		}
-	}
-
-	public class Track : Stream, IResource
-	{
+		/// <inheritdoc />
 		public int ID { get; set; }
-		[SerializeIgnore] public int EpisodeID { get; set; }
-		public int TrackIndex { get; set; }
-		public bool IsDefault
+		
+		/// <inheritdoc />
+		[Computed] public string Slug
 		{
-			get => isDefault;
-			set => isDefault = value;
-		}
-		public bool IsForced
-		{
-			get => isForced;
-			set => isForced = value;
-		}
+			get
+			{
+				string type = Type.ToString().ToLower();
+				string index = TrackIndex != 0 ? $"-{TrackIndex}" : string.Empty;
+				string episode = EpisodeSlug ?? Episode.Slug ?? EpisodeID.ToString();
+				return $"{episode}.{Language}{index}{(IsForced ? ".forced" : "")}.{type}";
+			}
+			[UsedImplicitly] private set
+			{
+				if (value == null)
+					throw new ArgumentNullException(nameof(value));
+				Match match = Regex.Match(value, 
+					@"(?<ep>[^\.]+)\.(?<lang>\w{0,3})(-(?<index>\d+))?(\.(?<forced>forced))?\.(?<type>\w+)(\.\w*)?");
 
+				if (!match.Success)
+					throw new ArgumentException("Invalid track slug. " +
+					                            "Format: {episodeSlug}.{language}[-{index}][-forced].{type}[.{extension}]");
+
+				EpisodeSlug = match.Groups["ep"].Value;
+				Language = match.Groups["lang"].Value;
+				TrackIndex = int.Parse(match.Groups["index"].Value);
+				IsForced = match.Groups["forced"].Success;
+				Type = Enum.Parse<StreamType>(match.Groups["type"].Value, true);
+			}
+		}
+		
+		/// <summary>
+        /// The slug of the episode that contain this track. If this is not set, this track is ill-formed.
+        /// </summary>
+        [SerializeIgnore] public string EpisodeSlug { private get; set; }
+		
+		/// <summary>
+		/// The title of the stream.
+		/// </summary>
+		public string Title { get; set; }
+		
+		/// <summary>
+		/// The language of this stream (as a ISO-639-2 language code)
+		/// </summary>
+		public string Language { get; set; }
+		
+		/// <summary>
+		/// The codec of this stream.
+		/// </summary>
+		public string Codec { get; set; }
+		
+		
+		/// <summary>
+		/// Is this stream the default one of it's type?
+		/// </summary>
+		public bool IsDefault { get; set; }
+		
+		/// <summary>
+		/// Is this stream tagged as forced? 
+		/// </summary>
+		public bool IsForced { get; set; }
+		
+		/// <summary>
+		/// Is this track extern to the episode's file?
+		/// </summary>
+		public bool IsExternal { get; set; }
+		
+		/// <summary>
+		/// The path of this track.
+		/// </summary>
+		[SerializeIgnore] public string Path { get; set; }
+		
+		/// <summary>
+		/// The type of this stream.
+		/// </summary>
+		[SerializeIgnore] public StreamType Type { get; set; }
+		
+		/// <summary>
+		/// The ID of the episode that uses this track.
+		/// </summary>
+		[SerializeIgnore] public int EpisodeID { get; set; }
+		/// <summary>
+		/// The episode that uses this track.
+		/// </summary>
+		[LoadableRelation(nameof(EpisodeID))] public Episode Episode { get; set; }
+
+		/// <summary>
+		/// The index of this track on the episode.
+		/// </summary>
+		public int TrackIndex { get; set; }
+
+		/// <summary>
+		/// A user-friendly name for this track. It does not include the track type.
+		/// </summary>
 		public string DisplayName
 		{
 			get
@@ -85,67 +135,49 @@ namespace Kyoo.Models
 					name += " Forced";
 				if (IsExternal)
 					name += " (External)";
-				if (Title != null && Title.Length > 1)
+				if (Title is {Length: > 1})
 					name += " - " + Title;
 				return name;
 			}
 		}
 
-		public string Slug
-		{
-			get
-			{
-				string type = Type switch
-				{
-					StreamType.Subtitle => "",
-					StreamType.Video => "video.",
-					StreamType.Audio => "audio.",
-					StreamType.Attachment => "font.",
-					_ => ""
-				};
-				string index = TrackIndex != 0 ? $"-{TrackIndex}" : string.Empty;
-				string codec = Codec switch
-				{
-					"subrip" => ".srt",
-					{} x => $".{x}"
-				};
-				return $"{Episode.Slug}.{type}{Language}{index}{(IsForced ? "-forced" : "")}{codec}";
-			}
-		}
-
-		public bool IsExternal { get; set; }
-		[LoadableRelation(nameof(EpisodeID))] public virtual Episode Episode { get; set; }
-		
-		public Track() { }
-
-		public Track(StreamType type, 
-			string title, 
-			string language, 
-			bool isDefault,
-			bool isForced,
-			string codec, 
-			bool isExternal, 
-			string path)
-			: base(title, language, codec, isDefault, isForced, path, type)
-		{
-			IsExternal = isExternal;
-		}
-
-		public Track(Stream stream)
-			: base(stream)
-		{
-			IsExternal = false;
-		}
-
 		//Converting mkv track language to c# system language tag.
 		private static string GetLanguage(string mkvLanguage)
 		{
+			// TODO delete this and have a real way to get the language string from the ISO-639-2.
 			return mkvLanguage switch
 			{
 				"fre" => "fra",
 				null => "und",
 				_ => mkvLanguage
 			};
+		}
+
+		/// <summary>
+		/// Utility method to edit a track slug (this only return a slug with the modification, nothing is stored)
+		/// </summary>
+		/// <param name="baseSlug">The slug to edit</param>
+		/// <param name="type">The new type of this </param>
+		/// <param name="language"></param>
+		/// <param name="index"></param>
+		/// <param name="forced"></param>
+		/// <returns></returns>
+		public static string EditSlug(string baseSlug,
+			StreamType type = StreamType.Unknown,
+			string language = null,
+			int? index = null,
+			bool? forced = null)
+		{
+			Track track = new() {Slug = baseSlug};
+			if (type != StreamType.Unknown)
+				track.Type = type;
+			if (language != null)
+				track.Language = language;
+			if (index != null)
+				track.TrackIndex = index.Value;
+			if (forced != null)
+				track.IsForced = forced.Value;
+			return track.Slug;
 		}
 	}
 }

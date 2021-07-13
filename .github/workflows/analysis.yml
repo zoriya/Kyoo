@@ -2,9 +2,10 @@ name: Analysis
 on: [push, pull_request]
 
 jobs:
-  build:
+  analysis:
     name: Static Analysis
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     steps:
       - uses: actions/checkout@v2
         with:
@@ -28,16 +29,27 @@ jobs:
         run: |
           mkdir -p ./.sonar/scanner
           dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
+      - name: Wait for tests to run
+        uses: lewagon/wait-on-check-action@master
+        with:
+          ref: ${{github.ref}}
+          check-name: tests
+          repo-token: ${{secrets.GITHUB_TOKEN}}
+          running-workflow-name: analysis
+          allowed-conclusions: success,skipped,cancelled,neutral,failure
+      - name: Download coverage report
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          commit: ${{env.COMMIT_SHA}}
+          workflow: tests.yml
+          github_token: ${{secrets.GITHUB_TOKEN}}
       - name: Build and analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: bash
         run: |
-          dotnet test \
-            '-p:CollectCoverage=true;CoverletOutputFormat=opencover' \
-            '-p:SkipTranscoder=true;SkipWebApp=true' || echo "Test failed. Skipping..."
-
+          find . -name 'coverage.opencover.xml'
           dotnet build-server shutdown
 
           ./.sonar/scanner/dotnet-sonarscanner begin \

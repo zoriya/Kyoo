@@ -1,5 +1,4 @@
-﻿using System;
-using Kyoo.Models;
+﻿using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.IO;
@@ -27,19 +26,9 @@ namespace Kyoo.Api
 		[Permission(nameof(SubtitleApi), Kind.Read)]
 		public async Task<IActionResult> GetSubtitle(string slug, string extension)
 		{
-			Track subtitle;
-			try
-			{
-				subtitle = await _libraryManager.GetOrDefault(slug, StreamType.Subtitle);
-			}
-			catch (ArgumentException ex)
-			{
-				return BadRequest(new {error = ex.Message});
-			}
-
-			if (subtitle is not {Type: StreamType.Subtitle})
+			Track subtitle = await _libraryManager.GetOrDefault<Track>(Track.EditSlug(slug, StreamType.Subtitle));
+			if (subtitle == null)
 				return NotFound();
-			
 			if (subtitle.Codec == "subrip" && extension == "vtt")
 				return new ConvertSubripToVtt(subtitle.Path, _files);
 			return _files.FileResult(subtitle.Path);

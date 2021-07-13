@@ -10,6 +10,10 @@
   },
   
   "database": {
+    "sqlite": {
+      "data Source": "kyoo.db",
+      "cache": "Shared"
+    },
     "postgres": {
       "server": "127.0.0.1",
       "port": "5432",

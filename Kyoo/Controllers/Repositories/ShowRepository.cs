@@ -33,14 +33,6 @@ namespace Kyoo.Controllers
 		/// A provider repository to handle externalID creation and deletion
 		/// </summary>
 		private readonly IProviderRepository _providers;
-		/// <summary>
-		/// A lazy loaded season repository to handle cascade deletion (seasons deletion whith it's show) 
-		/// </summary>
-		private readonly Lazy<ISeasonRepository> _seasons;
-		/// <summary>
-		/// A lazy loaded episode repository to handle cascade deletion (episode deletion whith it's show) 
-		/// </summary>
-		private readonly Lazy<IEpisodeRepository> _episodes;
 
 		/// <inheritdoc />
 		protected override Expression<Func<Show, object>> DefaultSort => x => x.Title;
@@ -53,15 +45,11 @@ namespace Kyoo.Controllers
 		/// <param name="people">A people repository</param>
 		/// <param name="genres">A genres repository</param>
 		/// <param name="providers">A provider repository</param>
-		/// <param name="seasons">A lazy loaded season repository</param>
-		/// <param name="episodes">A lazy loaded episode repository</param>
 		public ShowRepository(DatabaseContext database,
 			IStudioRepository studios,
 			IPeopleRepository people, 
 			IGenreRepository genres, 
-			IProviderRepository providers,
-			Lazy<ISeasonRepository> seasons,
-			Lazy<IEpisodeRepository> episodes)
+			IProviderRepository providers)
 			: base(database)
 		{
 			_database = database;
@@ -69,8 +57,6 @@ namespace Kyoo.Controllers
 			_people = people;
 			_genres = genres;
 			_providers = providers;
-			_seasons = seasons;
-			_episodes = episodes;
 		}
 		
 
@@ -103,17 +89,21 @@ namespace Kyoo.Controllers
 			await base.Validate(resource);
 			if (resource.Studio != null)
 				resource.Studio = await _studios.CreateIfNotExists(resource.Studio);
-			resource.Genres = await resource.Genres
-				.SelectAsync(x => _genres.CreateIfNotExists(x))
-				.ToListAsync();
+
 			resource.GenreLinks = resource.Genres?
-				.Select(x => Link.UCreate(resource, x))
+				.Select(x => Link.Create(resource, x))
 				.ToList();
+			await resource.GenreLinks.ForEachAsync(async id =>
+			{
+				id.Second = await _genres.CreateIfNotExists(id.Second);
+				id.SecondID = id.Second.ID;
+				_database.Entry(id.Second).State = EntityState.Detached;
+			});
 			await resource.ExternalIDs.ForEachAsync(async id =>
 			{
-				id.Provider = await _providers.CreateIfNotExists(id.Provider);
-				id.ProviderID = id.Provider.ID;
-				_database.Entry(id.Provider).State = EntityState.Detached;
+				id.Second = await _providers.CreateIfNotExists(id.Second);
+				id.SecondID = id.Second.ID;
+				_database.Entry(id.Second).State = EntityState.Detached;
 			});
 			await resource.People.ForEachAsync(async role =>
 			{
@@ -131,10 +121,16 @@ namespace Kyoo.Controllers
 			if (changed.Aliases != null || resetOld)
 				resource.Aliases = changed.Aliases;
 
+			if (changed.Studio != null || resetOld)
+			{
+				await Database.Entry(resource).Reference(x => x.Studio).LoadAsync();
+				resource.Studio = changed.Studio;
+			}
+			
 			if (changed.Genres != null || resetOld)
 			{
-				await Database.Entry(resource).Collection(x => x.GenreLinks).LoadAsync();
-				resource.GenreLinks = changed.Genres?.Select(x => Link.UCreate(resource, x)).ToList();
+				await Database.Entry(resource).Collection(x => x.Genres).LoadAsync();
+				resource.Genres = changed.Genres;
 			}
 
 			if (changed.People != null || resetOld)
@@ -185,27 +181,8 @@ namespace Kyoo.Controllers
 		/// <inheritdoc />
 		public override async Task Delete(Show obj)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-			
-			_database.Entry(obj).State = EntityState.Deleted;
-			
-			
-			if (obj.People != null)
-				foreach (PeopleRole entry in obj.People)
-					_database.Entry(entry).State = EntityState.Deleted;
-			
-			if (obj.ExternalIDs != null)
-				foreach (MetadataID entry in obj.ExternalIDs)
-					_database.Entry(entry).State = EntityState.Deleted;
-
+			_database.Remove(obj);
 			await _database.SaveChangesAsync();
-			
-			if (obj.Seasons != null)
-				await _seasons.Value.DeleteRange(obj.Seasons);
-
-			if (obj.Episodes != null) 
-				await _episodes.Value.DeleteRange(obj.Episodes);
 		}
 	}
 }

@@ -26,16 +26,19 @@ namespace Kyoo.Postgresql
 		/// Should the configure step be skipped? This is used when the database is created via DbContextOptions.
 		/// </summary>
 		private readonly bool _skipConfigure;
-		
-		/// <summary>
-		/// A basic constructor that set default values (query tracker behaviors, mapping enums...)
-		/// </summary>
-		public PostgresContext()
+
+
+		static PostgresContext()
 		{
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<Status>();
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<ItemType>();
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<StreamType>();
 		}
+		
+		/// <summary>
+		/// A basic constructor that set default values (query tracker behaviors, mapping enums...)
+		/// </summary>
+		public PostgresContext() { }
 
 		/// <summary>
 		/// Create a new <see cref="PostgresContext"/> using specific options
@@ -44,9 +47,6 @@ namespace Kyoo.Postgresql
 		public PostgresContext(DbContextOptions options)
 			: base(options)
 		{
-			NpgsqlConnection.GlobalTypeMapper.MapEnum<Status>();
-			NpgsqlConnection.GlobalTypeMapper.MapEnum<ItemType>();
-			NpgsqlConnection.GlobalTypeMapper.MapEnum<StreamType>();
 			_skipConfigure = true;
 		}
 
@@ -77,6 +77,7 @@ namespace Kyoo.Postgresql
 					optionsBuilder.EnableDetailedErrors().EnableSensitiveDataLogging();
 			}
 
+			optionsBuilder.UseSnakeCaseNamingConvention();
 			base.OnConfiguring(optionsBuilder);
 		}
 
@@ -89,6 +90,10 @@ namespace Kyoo.Postgresql
 			modelBuilder.HasPostgresEnum<Status>();
 			modelBuilder.HasPostgresEnum<ItemType>();
 			modelBuilder.HasPostgresEnum<StreamType>();
+
+			modelBuilder.Entity<LibraryItem>()
+				.ToView("library_items")
+				.HasKey(x => x.ID);
 
 			modelBuilder.Entity<User>()
 				.Property(x => x.ExtraData)
@@ -107,7 +112,7 @@ namespace Kyoo.Postgresql
 		public override Expression<Func<T, bool>> Like<T>(Expression<Func<T, string>> query, string format)
 		{
 			MethodInfo iLike = MethodOfUtils.MethodOf<string, string, bool>(EF.Functions.ILike);
-			MethodCallExpression call = Expression.Call(iLike, query.Body, Expression.Constant(format));
+			MethodCallExpression call = Expression.Call(iLike, Expression.Constant(EF.Functions), query.Body, Expression.Constant(format));
 
 			return Expression.Lambda<Func<T, bool>>(call, query.Parameters);
 		}

@@ -1,3 +1,5 @@
+using Kyoo.Controllers;
+
 namespace Kyoo.Models
 {
 	/// <summary>
@@ -8,6 +10,10 @@ namespace Kyoo.Models
 		/// <summary>
 		/// A unique ID for this type of resource. This can't be changed and duplicates are not allowed.
 		/// </summary>
+		/// <remarks>
+		/// You don't need to specify an ID manually when creating a new resource,
+		/// this field is automatically assigned by the <see cref="IRepository{T}"/>. 
+		/// </remarks>
 		public int ID { get; set; }
 		
 		/// <summary>

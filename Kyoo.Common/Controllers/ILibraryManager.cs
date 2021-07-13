@@ -78,6 +78,11 @@ namespace Kyoo.Controllers
 		IProviderRepository ProviderRepository { get; }
 		
 		/// <summary>
+		/// The repository that handle users.
+		/// </summary>
+		IUserRepository UserRepository { get; }
+		
+		/// <summary>
 		/// Get the resource by it's ID
 		/// </summary>
 		/// <param name="id">The id of the resource</param>
@@ -150,16 +155,6 @@ namespace Kyoo.Controllers
 		Task<Episode> Get(string showSlug, int seasonNumber, int episodeNumber);
 
 		/// <summary>
-		/// Get a track from it's slug and it's type.
-		/// </summary>
-		/// <param name="slug">The slug of the track</param>
-		/// <param name="type">The type (Video, Audio or Subtitle)</param>
-		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-		/// <returns>The track found</returns>
-		[ItemNotNull]
-		Task<Track> Get(string slug, StreamType type = StreamType.Unknown);
-		
-		/// <summary>
 		/// Get the resource by it's ID or null if it is not found.
 		/// </summary>
 		/// <param name="id">The id of the resource</param>
@@ -224,15 +219,6 @@ namespace Kyoo.Controllers
 		[ItemCanBeNull]
 		Task<Episode> GetOrDefault(string showSlug, int seasonNumber, int episodeNumber);
 
-		/// <summary>
-		/// Get a track from it's slug and it's type or null if it is not found.
-		/// </summary>
-		/// <param name="slug">The slug of the track</param>
-		/// <param name="type">The type (Video, Audio or Subtitle)</param>
-		/// <returns>The track found</returns>
-		[ItemCanBeNull]
-		Task<Track> GetOrDefault(string slug, StreamType type = StreamType.Unknown);
-		
 
 		/// <summary>
 		/// Load a related resource
@@ -242,6 +228,9 @@ namespace Kyoo.Controllers
 		/// <typeparam name="T">The type of the source object</typeparam>
 		/// <typeparam name="T2">The related resource's type</typeparam>
 		/// <returns>The param <see cref="obj"/></returns>
+		/// <seealso cref="Load{T,T2}(T,System.Linq.Expressions.Expression{System.Func{T,System.Collections.Generic.ICollection{T2}}})"/>
+		/// <seealso cref="Load{T}(T, System.String)"/>
+		/// <seealso cref="Load(IResource, string)"/>
 		Task<T> Load<T, T2>([NotNull] T obj, Expression<Func<T, T2>> member)
 			where T : class, IResource
 			where T2 : class, IResource, new();
@@ -254,6 +243,9 @@ namespace Kyoo.Controllers
 		/// <typeparam name="T">The type of the source object</typeparam>
 		/// <typeparam name="T2">The related resource's type</typeparam>
 		/// <returns>The param <see cref="obj"/></returns>
+		/// <seealso cref="Load{T,T2}(T,System.Linq.Expressions.Expression{System.Func{T,T2}})"/>
+		/// <seealso cref="Load{T}(T, System.String)"/>
+		/// <seealso cref="Load(IResource, string)"/>
 		Task<T> Load<T, T2>([NotNull] T obj, Expression<Func<T, ICollection<T2>>> member)
 			where T : class, IResource
 			where T2 : class, new();
@@ -265,6 +257,9 @@ namespace Kyoo.Controllers
 		/// <param name="memberName">The name of the resource to load (case sensitive)</param>
 		/// <typeparam name="T">The type of the source object</typeparam>
 		/// <returns>The param <see cref="obj"/></returns>
+		/// <seealso cref="Load{T,T2}(T,System.Linq.Expressions.Expression{System.Func{T,T2}})"/>
+		/// <seealso cref="Load{T,T2}(T,System.Linq.Expressions.Expression{System.Func{T,System.Collections.Generic.ICollection{T2}}})"/>
+		/// <seealso cref="Load(IResource, string)"/>
 		Task<T> Load<T>([NotNull] T obj, string memberName)
 			where T : class, IResource;
 
@@ -273,6 +268,9 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="obj">The source object.</param>
 		/// <param name="memberName">The name of the resource to load (case sensitive)</param>
+		/// <seealso cref="Load{T,T2}(T,System.Linq.Expressions.Expression{System.Func{T,T2}})"/>
+		/// <seealso cref="Load{T,T2}(T,System.Linq.Expressions.Expression{System.Func{T,System.Collections.Generic.ICollection{T2}}})"/>
+		/// <seealso cref="Load{T}(T, System.String)"/>
 		Task Load([NotNull] IResource obj, string memberName);
 		
 		/// <summary>

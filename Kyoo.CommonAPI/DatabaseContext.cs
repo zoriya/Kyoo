@@ -61,10 +61,6 @@ namespace Kyoo
 		/// </summary>
 		public DbSet<Provider> Providers { get; set; }
 		/// <summary>
-		/// All metadataIDs (ExternalIDs) of Kyoo. See <see cref="MetadataID"/>.
-		/// </summary>
-		public DbSet<MetadataID> MetadataIds { get; set; }
-		/// <summary>
 		/// The list of registered users.
 		/// </summary>
 		public DbSet<User> Users { get; set; }
@@ -78,7 +74,26 @@ namespace Kyoo
 		/// Episodes with a watch percentage. See <see cref="WatchedEpisode"/>
 		/// </summary>
 		public DbSet<WatchedEpisode> WatchedEpisodes { get; set; }
+		
+		/// <summary>
+		/// The list of library items (shows and collections that are part of a library - or the global one)
+		/// </summary>
+		/// <remarks>
+		/// This set is ready only, on most database this will be a view.
+		/// </remarks>
+		public DbSet<LibraryItem> LibraryItems { get; set; }
 
+		/// <summary>
+		/// Get all metadataIDs (ExternalIDs) of a given resource. See <see cref="MetadataID{T}"/>.
+		/// </summary>
+		/// <typeparam name="T">The metadata of this type will be returned.</typeparam>
+		/// <returns>A queryable of metadata ids for a type.</returns>
+		public DbSet<MetadataID<T>> MetadataIds<T>()
+			where T : class, IResource
+		{
+			return Set<MetadataID<T>>();
+		}
+		
 		/// <summary>
 		/// Get a generic link between two resource types.
 		/// </summary>
@@ -125,13 +140,27 @@ namespace Kyoo
 		{
 			base.OnModelCreating(modelBuilder);
 
-			modelBuilder.Entity<Track>()
-				.Property(t => t.IsDefault)
-				.ValueGeneratedNever();
-			
-			modelBuilder.Entity<Track>()
-				.Property(t => t.IsForced)
-				.ValueGeneratedNever();
+			modelBuilder.Entity<Show>()
+				.HasMany(x => x.Seasons)
+				.WithOne(x => x.Show)
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<Show>()
+				.HasMany(x => x.Episodes)
+				.WithOne(x => x.Show)
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<Season>()
+				.HasMany(x => x.Episodes)
+				.WithOne(x => x.Season)
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<Episode>()
+				.HasMany(x => x.Tracks)
+				.WithOne(x => x.Episode)
+				.OnDelete(DeleteBehavior.Cascade);
+
+			modelBuilder.Entity<Show>()
+				.HasOne(x => x.Studio)
+				.WithMany(x => x.Shows)
+				.OnDelete(DeleteBehavior.SetNull);
 
 			modelBuilder.Entity<Provider>()
 				.HasMany(x => x.Libraries)
@@ -205,25 +234,41 @@ namespace Kyoo
 						.WithMany(x => x.ShowLinks),
 					y => y.HasKey(Link<User, Show>.PrimaryKey));
 
-			modelBuilder.Entity<MetadataID>()
-				.HasOne(x => x.Show)
+			modelBuilder.Entity<MetadataID<Show>>()
+				.HasKey(MetadataID<Show>.PrimaryKey);
+			modelBuilder.Entity<MetadataID<Show>>()
+				.HasOne(x => x.First)
 				.WithMany(x => x.ExternalIDs)
 				.OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<MetadataID>()
-				.HasOne(x => x.Season)
+			modelBuilder.Entity<MetadataID<Season>>()
+				.HasKey(MetadataID<Season>.PrimaryKey);
+			modelBuilder.Entity<MetadataID<Season>>()
+				.HasOne(x => x.First)
 				.WithMany(x => x.ExternalIDs)
 				.OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<MetadataID>()
-				.HasOne(x => x.Episode)
+			modelBuilder.Entity<MetadataID<Episode>>()
+				.HasKey(MetadataID<Episode>.PrimaryKey);
+			modelBuilder.Entity<MetadataID<Episode>>()
+				.HasOne(x => x.First)
 				.WithMany(x => x.ExternalIDs)
 				.OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<MetadataID>()
-				.HasOne(x => x.People)
+			modelBuilder.Entity<MetadataID<People>>()
+				.HasKey(MetadataID<People>.PrimaryKey);
+			modelBuilder.Entity<MetadataID<People>>()
+				.HasOne(x => x.First)
 				.WithMany(x => x.ExternalIDs)
 				.OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<MetadataID>()
-				.HasOne(x => x.Provider)
-				.WithMany(x => x.MetadataLinks)
+			
+			
+			modelBuilder.Entity<MetadataID<Show>>().HasOne(x => x.Second).WithMany()
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<MetadataID<Season>>().HasOne(x => x.Second).WithMany()
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<MetadataID<Episode>>().HasOne(x => x.Second).WithMany()
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<MetadataID<People>>().HasOne(x => x.Second).WithMany()
+				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<MetadataID<Show>>().HasOne(x => x.Second).WithMany()
 				.OnDelete(DeleteBehavior.Cascade);
 
 			modelBuilder.Entity<WatchedEpisode>()
@@ -237,7 +282,7 @@ namespace Kyoo
 			modelBuilder.Entity<Show>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<Studio>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<User>().Property(x => x.Slug).IsRequired();
-
+			
 			modelBuilder.Entity<Collection>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
@@ -262,15 +307,34 @@ namespace Kyoo
 			modelBuilder.Entity<Season>()
 				.HasIndex(x => new {x.ShowID, x.SeasonNumber})
 				.IsUnique();
+			modelBuilder.Entity<Season>()
+				.HasIndex(x => x.Slug)
+				.IsUnique();
 			modelBuilder.Entity<Episode>()
 				.HasIndex(x => new {x.ShowID, x.SeasonNumber, x.EpisodeNumber, x.AbsoluteNumber})
+				.IsUnique();
+			modelBuilder.Entity<Episode>()
+				.HasIndex(x => x.Slug)
 				.IsUnique();
 			modelBuilder.Entity<Track>()
 				.HasIndex(x => new {x.EpisodeID, x.Type, x.Language, x.TrackIndex, x.IsForced})
 				.IsUnique();
+			modelBuilder.Entity<Track>()
+				.HasIndex(x => x.Slug)
+				.IsUnique();
 			modelBuilder.Entity<User>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
+
+			modelBuilder.Entity<Season>()
+				.Property(x => x.Slug)
+				.ValueGeneratedOnAddOrUpdate();
+			modelBuilder.Entity<Episode>()
+				.Property(x => x.Slug)
+				.ValueGeneratedOnAddOrUpdate();
+			modelBuilder.Entity<Track>()
+				.Property(x => x.Slug)
+				.ValueGeneratedOnAddOrUpdate();
 		}
 
 		/// <summary>
@@ -438,52 +502,6 @@ namespace Kyoo
 			catch (DuplicatedItemException)
 			{
 				return -1;
-			}
-		}
-
-		/// <summary>
-		/// Save items or retry with a custom method if a duplicate is found.
-		/// </summary>
-		/// <param name="obj">The item to save (other changes of this context will also be saved)</param>
-		/// <param name="onFail">A function to run on fail, the <see cref="obj"/> param wil be mapped.
-		/// The second parameter is the current retry number.</param>
-		/// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete</param>
-		/// <typeparam name="T">The type of the item to save</typeparam>
-		/// <returns>The number of state entries written to the database.</returns>
-		public Task<T> SaveOrRetry<T>(T obj, Func<T, int, T> onFail, CancellationToken cancellationToken = new())
-		{
-			return SaveOrRetry(obj, onFail, 0, cancellationToken);
-		}
-		
-		/// <summary>
-		/// Save items or retry with a custom method if a duplicate is found.
-		/// </summary>
-		/// <param name="obj">The item to save (other changes of this context will also be saved)</param>
-		/// <param name="onFail">A function to run on fail, the <see cref="obj"/> param wil be mapped.
-		/// The second parameter is the current retry number.</param>
-		/// <param name="recurse">The current retry number.</param>
-		/// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete</param>
-		/// <typeparam name="T">The type of the item to save</typeparam>
-		/// <returns>The number of state entries written to the database.</returns>
-		private async Task<T> SaveOrRetry<T>(T obj,
-			Func<T, int, T> onFail,
-			int recurse,
-			CancellationToken cancellationToken = new())
-		{
-			try
-			{
-				await base.SaveChangesAsync(true, cancellationToken);
-				return obj;
-			}
-			catch (DbUpdateException ex) when (IsDuplicateException(ex))
-			{
-				recurse++;
-				return await SaveOrRetry(onFail(obj, recurse), onFail, recurse, cancellationToken);
-			}
-			catch (DbUpdateException)
-			{
-				DiscardChanges();
-				throw;
 			}
 		}
 

@@ -47,6 +47,7 @@ namespace Kyoo
 			_plugins.LoadPlugins(new IPlugin[] {
 				new CoreModule(configuration), 
 				new PostgresModule(configuration, host),
+				// new SqLiteModule(configuration, host),
 				new AuthenticationModule(configuration, loggerFactory, host)
 			});
 		}

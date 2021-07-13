@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -242,49 +241,13 @@ namespace Kyoo.Controllers
 		/// <param name="obj">The resource to delete</param>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task Delete([NotNull] T obj);
-
+		
 		/// <summary>
-		/// Delete a list of resources.
-		/// </summary>
-		/// <param name="objs">One or multiple resources to delete</param>
-		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-		Task DeleteRange(params T[] objs) => DeleteRange(objs.AsEnumerable());
-		/// <summary>
-		/// Delete a list of resources.
-		/// </summary>
-		/// <param name="objs">An enumerable of resources to delete</param>
-		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-		Task DeleteRange(IEnumerable<T> objs);
-		/// <summary>
-		/// Delete a list of resources.
-		/// </summary>
-		/// <param name="ids">One or multiple resource's id</param>
-		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-		Task DeleteRange(params int[] ids) => DeleteRange(ids.AsEnumerable());
-		/// <summary>
-		/// Delete a list of resources.
-		/// </summary>
-		/// <param name="ids">An enumerable of resource's id</param>
-		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-		Task DeleteRange(IEnumerable<int> ids);
-		/// <summary>
-		/// Delete a list of resources.
-		/// </summary>
-		/// <param name="slugs">One or multiple resource's slug</param>
-		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-		Task DeleteRange(params string[] slugs) => DeleteRange(slugs.AsEnumerable());
-		/// <summary>
-		/// Delete a list of resources.
-		/// </summary>
-		/// <param name="slugs">An enumerable of resource's slug</param>
-		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-		Task DeleteRange(IEnumerable<string> slugs);
-		/// <summary>
-		/// Delete a list of resources.
+		/// Delete all resources that match the predicate.
 		/// </summary>
 		/// <param name="where">A predicate to filter resources to delete. Every resource that match this will be deleted.</param>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-		Task DeleteRange([NotNull] Expression<Func<T, bool>> where);
+		Task DeleteAll([NotNull] Expression<Func<T, bool>> where);
 	}
 
 	/// <summary>
@@ -412,25 +375,7 @@ namespace Kyoo.Controllers
 	/// <summary>
 	/// A repository to handle tracks
 	/// </summary>
-	public interface ITrackRepository : IRepository<Track>
-	{
-		/// <summary>
-		/// Get a track from it's slug and it's type.
-		/// </summary>
-		/// <param name="slug">The slug of the track</param>
-		/// <param name="type">The type (Video, Audio or Subtitle)</param>
-		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-		/// <returns>The track found</returns>
-		Task<Track> Get(string slug, StreamType type = StreamType.Unknown);
-		
-		/// <summary>
-		/// Get a track from it's slug and it's type or null if it is not found.
-		/// </summary>
-		/// <param name="slug">The slug of the track</param>
-		/// <param name="type">The type (Video, Audio or Subtitle)</param>
-		/// <returns>The track found</returns>
-		Task<Track> GetOrDefault(string slug, StreamType type = StreamType.Unknown);
-	}
+	public interface ITrackRepository : IRepository<Track> { }
 	
 	/// <summary>
 	/// A repository to handle libraries.
@@ -631,10 +576,12 @@ namespace Kyoo.Controllers
 		/// <param name="where">A predicate to add arbitrary filter</param>
 		/// <param name="sort">Sort information (sort order & sort by)</param>
 		/// <param name="limit">Pagination information (where to start and how many to get)</param>
+		/// <typeparam name="T">The type of metadata to retrieve</typeparam>
 		/// <returns>A filtered list of external ids.</returns>
-		Task<ICollection<MetadataID>> GetMetadataID(Expression<Func<MetadataID, bool>> where = null, 
-			Sort<MetadataID> sort = default,
-			Pagination limit = default);
+		Task<ICollection<MetadataID<T>>> GetMetadataID<T>(Expression<Func<MetadataID<T>, bool>> where = null, 
+			Sort<MetadataID<T>> sort = default,
+			Pagination limit = default)
+			where T : class, IResource;
 
 		/// <summary>
 		/// Get a list of external ids that match all filters
@@ -643,10 +590,11 @@ namespace Kyoo.Controllers
 		/// <param name="sort">A sort by expression</param>
 		/// <param name="limit">Pagination information (where to start and how many to get)</param>
 		/// <returns>A filtered list of external ids.</returns>
-		Task<ICollection<MetadataID>> GetMetadataID([Optional] Expression<Func<MetadataID, bool>> where,
-			Expression<Func<MetadataID, object>> sort,
+		Task<ICollection<MetadataID<T>>> GetMetadataID<T>([Optional] Expression<Func<MetadataID<T>, bool>> where,
+			Expression<Func<MetadataID<T>, object>> sort,
 			Pagination limit = default
-		) => GetMetadataID(where, new Sort<MetadataID>(sort), limit);
+		) where T : class, IResource
+			=> GetMetadataID(where, new Sort<MetadataID<T>>(sort), limit);
 	}
 	
 	/// <summary>

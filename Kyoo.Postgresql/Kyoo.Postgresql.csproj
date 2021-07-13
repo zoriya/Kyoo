@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
 
@@ -9,33 +8,34 @@
 		<LangVersion>default</LangVersion>
 	</PropertyGroup>
 	
-	<PropertyGroup>
-		<OutputPath>../Kyoo/bin/$(Configuration)/$(TargetFramework)/plugins/postgresql</OutputPath>
-		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<ProduceReferenceAssembly>false</ProduceReferenceAssembly>
-		<GenerateDependencyFile>false</GenerateDependencyFile>
-		<GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>
-		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-	</PropertyGroup>
+<!--	<PropertyGroup>-->
+<!--		<OutputPath>../Kyoo/bin/$(Configuration)/$(TargetFramework)/plugins/postgresql</OutputPath>-->
+<!--		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>-->
+<!--		<ProduceReferenceAssembly>false</ProduceReferenceAssembly>-->
+<!--		<GenerateDependencyFile>false</GenerateDependencyFile>-->
+<!--		<GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>-->
+<!--		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>-->
+<!--	</PropertyGroup>-->
 
 	<ItemGroup>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.5">
+		<PackageReference Include="EFCore.NamingConventions" Version="5.0.2" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.8">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.5.1" />
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.7" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="../Kyoo.CommonAPI/Kyoo.CommonAPI.csproj">
-			<PrivateAssets>all</PrivateAssets>
-			<Private>false</Private>
-			<ExcludeAssets>runtime</ExcludeAssets>
+<!--			<PrivateAssets>all</PrivateAssets>-->
+<!--			<Private>false</Private>-->
+<!--			<ExcludeAssets>runtime</ExcludeAssets>-->
 		</ProjectReference>
 		<ProjectReference Include="../Kyoo.Common/Kyoo.Common.csproj">
-			<PrivateAssets>all</PrivateAssets>
-			<Private>false</Private>
-			<ExcludeAssets>runtime</ExcludeAssets>
+<!--			<PrivateAssets>all</PrivateAssets>-->
+<!--			<Private>false</Private>-->
+<!--			<ExcludeAssets>runtime</ExcludeAssets>-->
 		</ProjectReference>
 	</ItemGroup>
 </Project>

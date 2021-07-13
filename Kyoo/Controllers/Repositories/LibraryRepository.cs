@@ -63,9 +63,12 @@ namespace Kyoo.Controllers
 		protected override async Task Validate(Library resource)
 		{
 			await base.Validate(resource);
-			resource.Providers = await resource.Providers
-				.SelectAsync(x => _providers.CreateIfNotExists(x))
-				.ToListAsync();
+			await resource.ProviderLinks.ForEachAsync(async id =>
+			{
+				id.Second = await _providers.CreateIfNotExists(id.Second);
+				id.SecondID = id.Second.ID;
+				_database.Entry(id.Second).State = EntityState.Detached;
+			});
 		}
 
 		/// <inheritdoc />

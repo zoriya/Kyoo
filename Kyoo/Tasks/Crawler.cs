@@ -210,18 +210,20 @@ namespace Kyoo.Tasks
 				string showPath = Path.GetDirectoryName(path);
 				string collectionName = match.Groups["Collection"].Value;
 				string showName = match.Groups["Show"].Value;
-				int seasonNumber = int.TryParse(match.Groups["Season"].Value, out int tmp) ? tmp : -1;
-				int episodeNumber = int.TryParse(match.Groups["Episode"].Value, out tmp) ? tmp : -1;
-				int absoluteNumber = int.TryParse(match.Groups["Absolute"].Value, out tmp) ? tmp : -1;
+				int? seasonNumber = int.TryParse(match.Groups["Season"].Value, out int tmp) ? tmp : null;
+				int? episodeNumber = int.TryParse(match.Groups["Episode"].Value, out tmp) ? tmp : null;
+				int? absoluteNumber = int.TryParse(match.Groups["Absolute"].Value, out tmp) ? tmp : null;
 
 				Collection collection = await GetCollection(libraryManager, collectionName, library);
-				bool isMovie = seasonNumber == -1 && episodeNumber == -1 && absoluteNumber == -1;
+				bool isMovie = seasonNumber == null && episodeNumber == null && absoluteNumber == null;
 				Show show = await GetShow(libraryManager, showName, showPath, isMovie, library);
 				if (isMovie)
 					await libraryManager!.Create(await GetMovie(show, path));
 				else
 				{
-					Season season = await GetSeason(libraryManager, show, seasonNumber, library);
+					Season season = seasonNumber != null 
+						? await GetSeason(libraryManager, show, seasonNumber.Value, library)
+						: null;
 					Episode episode = await GetEpisode(libraryManager,
 						show,
 						season,
@@ -292,13 +294,19 @@ namespace Kyoo.Tasks
 			catch (DuplicatedItemException)
 			{
 				old = await libraryManager.GetOrDefault<Show>(show.Slug);
-				if (old.Path == showPath)
+				if (old != null && old.Path == showPath)
 				{
 					await libraryManager.Load(old, x => x.ExternalIDs);
 					return old;
 				}
-				show.Slug += $"-{show.StartYear}";
-				await libraryManager.Create(show);
+
+				if (show.StartAir != null)
+				{
+					show.Slug += $"-{show.StartAir.Value.Year}";
+					await libraryManager.Create(show);
+				}
+				else
+					throw;
 			}
 			await ThumbnailsManager.Validate(show);
 			return show;
@@ -309,8 +317,6 @@ namespace Kyoo.Tasks
 			int seasonNumber, 
 			Library library)
 		{
-			if (seasonNumber == -1)
-				return default;
 			try
 			{
 				Season season = await libraryManager.Get(show.Slug, seasonNumber);
@@ -337,21 +343,24 @@ namespace Kyoo.Tasks
 		private async Task<Episode> GetEpisode(ILibraryManager libraryManager, 
 			Show show, 
 			Season season,
-			int episodeNumber,
-			int absoluteNumber, 
+			int? episodeNumber,
+			int? absoluteNumber, 
 			string episodePath, 
 			Library library)
 		{
 			Episode episode = await MetadataProvider.GetEpisode(show,
 				episodePath, 
-				season?.SeasonNumber ?? -1, 
+				season?.SeasonNumber, 
 				episodeNumber,
 				absoluteNumber,
 				library);
-			
-			season ??= await GetSeason(libraryManager, show, episode.SeasonNumber, library);
-			episode.Season = season;
-			episode.SeasonID = season?.ID;
+
+			if (episode.SeasonNumber != null)
+			{
+				season ??= await GetSeason(libraryManager, show, episode.SeasonNumber.Value, library);
+				episode.Season = season;
+				episode.SeasonID = season?.ID;
+			}
 			await ThumbnailsManager.Validate(episode);
 			await GetTracks(episode);
 			return episode;

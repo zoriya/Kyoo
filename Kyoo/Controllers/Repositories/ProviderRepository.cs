@@ -58,18 +58,18 @@ namespace Kyoo.Controllers
 				throw new ArgumentNullException(nameof(obj));
 			
 			_database.Entry(obj).State = EntityState.Deleted;
-			obj.MetadataLinks.ForEach(x => _database.Entry(x).State = EntityState.Deleted);
 			await _database.SaveChangesAsync();
 		}
 
 		/// <inheritdoc />
-		public Task<ICollection<MetadataID>> GetMetadataID(Expression<Func<MetadataID, bool>> where = null,
-			Sort<MetadataID> sort = default, 
+		public Task<ICollection<MetadataID<T>>> GetMetadataID<T>(Expression<Func<MetadataID<T>, bool>> where = null,
+			Sort<MetadataID<T>> sort = default, 
 			Pagination limit = default)
+			where T : class, IResource
 		{
-			return ApplyFilters(_database.MetadataIds.Include(y => y.Provider),
-				x => _database.MetadataIds.FirstOrDefaultAsync(y => y.ID == x),
-				x => x.ID,
+			return ApplyFilters(_database.MetadataIds<T>().Include(y => y.Second),
+				x => _database.MetadataIds<T>().FirstOrDefaultAsync(y => y.FirstID == x),
+				x => x.FirstID,
 				where,
 				sort,
 				limit);

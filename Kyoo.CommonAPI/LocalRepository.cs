@@ -225,8 +225,8 @@ namespace Kyoo.Controllers
 				T old = await GetWithTracking(edited.ID);
 			
 				if (resetOld)
-					Utility.Nullify(old);
-				Utility.Complete(old, edited, x => x.GetCustomAttribute<LoadableRelationAttribute>() == null);
+					old = Merger.Nullify(old);
+				Merger.Complete(old, edited, x => x.GetCustomAttribute<LoadableRelationAttribute>() == null);
 				await EditRelations(old, edited, resetOld);
 				await Database.SaveChangesAsync();
 				return old;
@@ -257,6 +257,8 @@ namespace Kyoo.Controllers
 		/// <exception cref="ArgumentException">You can throw this if the resource is illegal and should not be saved.</exception>
 		protected virtual Task Validate(T resource)
 		{
+			if (typeof(T).GetProperty(nameof(resource.Slug))!.GetCustomAttribute<ComputedAttribute>() != null)
+				return Task.CompletedTask;
 			if (string.IsNullOrEmpty(resource.Slug))
 				throw new ArgumentException("Resource can't have null as a slug.");
 			if (int.TryParse(resource.Slug, out int _))
@@ -295,31 +297,10 @@ namespace Kyoo.Controllers
 		public abstract Task Delete(T obj);
 		
 		/// <inheritdoc/>
-		public virtual async Task DeleteRange(IEnumerable<T> objs)
+		public async Task DeleteAll(Expression<Func<T, bool>> where)
 		{
-			foreach (T obj in objs)
-				await Delete(obj);
-		}
-		
-		/// <inheritdoc/>
-		public virtual async Task DeleteRange(IEnumerable<int> ids)
-		{
-			foreach (int id in ids)
-				await Delete(id);
-		}
-		
-		/// <inheritdoc/>
-		public virtual async Task DeleteRange(IEnumerable<string> slugs)
-		{
-			foreach (string slug in slugs)
-				await Delete(slug);
-		}
-		
-		/// <inheritdoc/>
-		public async Task DeleteRange(Expression<Func<T, bool>> where)
-		{
-			ICollection<T> resources = await GetAll(where);
-			await DeleteRange(resources);
+			foreach (T resource in await GetAll(where))
+				await Delete(resource);
 		}
 	}
 }
