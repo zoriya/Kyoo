@@ -5,6 +5,7 @@ on: [push, pull_request]
 jobs:
   tests:
     runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     container: mcr.microsoft.com/dotnet/sdk:5.0
     services:
       postgres:
