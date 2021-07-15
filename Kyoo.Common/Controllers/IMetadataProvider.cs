@@ -49,13 +49,28 @@ namespace Kyoo.Controllers
 	/// A special <see cref="IMetadataProvider"/> that merge results.
 	/// This interface exists to specify witch provider to use but it can be used like any other metadata provider.
 	/// </summary>
-	public interface IProviderComposite : IMetadataProvider
+	public abstract class AProviderComposite : IMetadataProvider
 	{
+		/// <inheritdoc />
+		[ItemNotNull]
+		public abstract Task<T> Get<T>(T item)
+			where T : class, IResource;
+
+		/// <inheritdoc />
+		public abstract Task<ICollection<T>> Search<T>(string query)
+			where T : class, IResource;
+
+		/// <summary>
+		/// Since this is a composite and not a real provider, no metadata is available.
+		/// It is not meant to be stored or selected. This class will handle merge based on what is required. 
+		/// </summary>
+		public Provider Provider => null;
+
 		/// <summary>
 		/// Select witch providers to use.
 		/// The <see cref="IMetadataProvider"/> associated with the given <see cref="Provider"/> will be used.
 		/// </summary>
 		/// <param name="providers">The list of providers to use</param>
-		void UseProviders(IEnumerable<Provider> providers);
+		public abstract void UseProviders(IEnumerable<Provider> providers);
 	}
 }

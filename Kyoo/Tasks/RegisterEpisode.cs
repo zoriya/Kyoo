@@ -3,6 +3,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models;
+using Kyoo.Models.Attributes;
+using Kyoo.Models.Exceptions;
+using Microsoft.Extensions.Logging;
 
 namespace Kyoo.Tasks
 {
@@ -32,13 +35,30 @@ namespace Kyoo.Tasks
 		/// <inheritdoc />
 		public bool IsHidden => false;
 		
+		/// <summary>
+		/// An identifier to extract metadata from paths.
+		/// </summary>
+		[Injected] public IIdentifier Identifier { private get; set; }
+		/// <summary>
+		/// The library manager used to register the episode
+		/// </summary>
+		[Injected] public ILibraryManager LibraryManager { private get; set; }
+		/// <summary>
+		/// A metadata provider to retrieve the metadata of the new episode (and related items if they do not exist).
+		/// </summary>
+		[Injected] public AProviderComposite MetadataProvider { private get; set; }
+		/// <summary>
+		/// The logger used to inform the current status to the console.
+		/// </summary>
+		[Injected] public ILogger<RegisterEpisode> Logger { private get; set; }
+		
 		/// <inheritdoc />
 		public TaskParameters GetParameters()
 		{
 			return new()
 			{
 				TaskParameter.CreateRequired<string>("path", "The path of the episode file"),
-				TaskParameter.CreateRequired<Library>("library", "The library in witch the episode is")
+				TaskParameter.Create<Library>("library", "The library in witch the episode is")
 			};
 		}
 		
@@ -48,11 +68,63 @@ namespace Kyoo.Tasks
 			string path = arguments["path"].As<string>();
 			Library library = arguments["library"].As<Library>();
 			
+			try
+			{
+				(Collection collection, Show show, Season season, Episode episode) = await Identifier.Identify(path);
+				if (library != null)
+					MetadataProvider.UseProviders(library.Providers);
+
+				collection = await _RegisterAndFillCollection(collection);
+				// show = await _RegisterAndFillShow(show);
+				// if (isMovie)
+				// 	await libraryManager!.Create(await GetMovie(show, path));
+				// else
+				// {
+				// 	Season season = seasonNumber != null 
+				// 		? await GetSeason(libraryManager, show, seasonNumber.Value, library)
+				// 		: null;
+				// 	Episode episode = await GetEpisode(libraryManager,
+				// 		show,
+				// 		season,
+				// 		episodeNumber,
+				// 		absoluteNumber,
+				// 		path,
+				// 		library);
+				// 	await libraryManager!.Create(episode);
+				// }
+				//
+				// await libraryManager.AddShowLink(show, library, collection);
+				// Console.WriteLine($"Episode at {path} registered.");
+			}
+			catch (DuplicatedItemException ex)
+			{
+				Logger.LogWarning(ex, "Duplicated found at {Path}", path);
+			}
+			catch (Exception ex)
+			{
+				Logger.LogCritical(ex, "Unknown exception thrown while registering episode at {Path}", path);
+			}
+		}
+		
+		private async Task<Collection> _RegisterAndFillCollection(Collection collection)
+		{
+			if (collection == null)
+				return null;
 			
+			collection.Slug ??= Utility.ToSlug(collection.Name);
+			if (string.IsNullOrEmpty(collection.Slug))
+				return null;
+			
+			Collection existing = await LibraryManager.GetOrDefault<Collection>(collection.Slug);
+			if (existing != null)
+				return existing;
+			collection = await MetadataProvider.Get(collection);
+			return await LibraryManager.CreateIfNotExists(collection);
 		}
 		
 		/*
-		 * private async Task RegisterExternalSubtitle(string path, CancellationToken token)
+		 *
+		private async Task RegisterExternalSubtitle(string path, CancellationToken token)
 		{
 			try
 			{
@@ -103,83 +175,7 @@ namespace Kyoo.Tasks
 			if (token.IsCancellationRequested)
 				return;
 
-			try
-			{
-				using IServiceScope serviceScope = ServiceProvider.CreateScope();
-				ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
-
-				string patern = Config.GetValue<string>("regex");
-				Regex regex = new(patern, RegexOptions.IgnoreCase);
-				Match match = regex.Match(relativePath);
-
-				if (!match.Success)
-				{
-					await Console.Error.WriteLineAsync($"The episode at {path} does not match the episode's regex.");
-					return;
-				}
-				
-				string showPath = Path.GetDirectoryName(path);
-				string collectionName = match.Groups["Collection"].Value;
-				string showName = match.Groups["Show"].Value;
-				int? seasonNumber = int.TryParse(match.Groups["Season"].Value, out int tmp) ? tmp : null;
-				int? episodeNumber = int.TryParse(match.Groups["Episode"].Value, out tmp) ? tmp : null;
-				int? absoluteNumber = int.TryParse(match.Groups["Absolute"].Value, out tmp) ? tmp : null;
-
-				Collection collection = await GetCollection(libraryManager, collectionName, library);
-				bool isMovie = seasonNumber == null && episodeNumber == null && absoluteNumber == null;
-				Show show = await GetShow(libraryManager, showName, showPath, isMovie, library);
-				if (isMovie)
-					await libraryManager!.Create(await GetMovie(show, path));
-				else
-				{
-					Season season = seasonNumber != null 
-						? await GetSeason(libraryManager, show, seasonNumber.Value, library)
-						: null;
-					Episode episode = await GetEpisode(libraryManager,
-						show,
-						season,
-						episodeNumber,
-						absoluteNumber,
-						path,
-						library);
-					await libraryManager!.Create(episode);
-				}
-
-				await libraryManager.AddShowLink(show, library, collection);
-				Console.WriteLine($"Episode at {path} registered.");
-			}
-			catch (DuplicatedItemException ex)
-			{
-				await Console.Error.WriteLineAsync($"{path}: {ex.Message}");
-			}
-			catch (Exception ex)
-			{
-				await Console.Error.WriteLineAsync($"Unknown exception thrown while registering episode at {path}." +
-				                                   $"\nException: {ex.Message}" +
-				                                   $"\n{ex.StackTrace}");
-			}
-		}
-
-		private async Task<Collection> GetCollection(ILibraryManager libraryManager, 
-			string collectionName, 
-			Library library)
-		{
-			if (string.IsNullOrEmpty(collectionName))
-				return null;
-			Collection collection = await libraryManager.GetOrDefault<Collection>(Utility.ToSlug(collectionName));
-			if (collection != null)
-				return collection;
-			// collection = await MetadataProvider.GetCollectionFromName(collectionName, library);
-
-			try
-			{
-				await libraryManager.Create(collection);
-				return collection;
-			}
-			catch (DuplicatedItemException)
-			{
-				return await libraryManager.GetOrDefault<Collection>(collection.Slug);
-			}
+			
 		}
 		
 		private async Task<Show> GetShow(ILibraryManager libraryManager, 

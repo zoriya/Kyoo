@@ -72,7 +72,7 @@ namespace Kyoo
 		/// </summary>
 		/// <param name="str">The string to slugify</param>
 		/// <returns>The slug version of the given string</returns>
-		public static string ToSlug(string str)
+		public static string ToSlug([CanBeNull] string str)
 		{
 			if (str == null)
 				return null;

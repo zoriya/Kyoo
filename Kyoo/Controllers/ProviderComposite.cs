@@ -10,7 +10,7 @@ namespace Kyoo.Controllers
 	/// <summary>
 	/// A metadata provider composite that merge results from all available providers.
 	/// </summary>
-	public class ProviderComposite : IProviderComposite
+	public class ProviderComposite : AProviderComposite
 	{
 		/// <summary>
 		/// The list of metadata providers
@@ -26,12 +26,6 @@ namespace Kyoo.Controllers
 		/// The logger used to print errors.
 		/// </summary>
 		private readonly ILogger<ProviderComposite> _logger;
-		
-		/// <summary>
-		/// Since this is a composite and not a real provider, no metadata is available.
-		/// It is not meant to be stored or selected. This class will handle merge based on what is required. 
-		/// </summary>
-		public Provider Provider => null;
 
 
 		/// <summary>
@@ -47,7 +41,7 @@ namespace Kyoo.Controllers
 		
 
 		/// <inheritdoc />
-		public void UseProviders(IEnumerable<Provider> providers)
+		public override void UseProviders(IEnumerable<Provider> providers)
 		{
 			_selectedProviders = providers.ToArray();
 		}
@@ -65,8 +59,7 @@ namespace Kyoo.Controllers
 		}
 
 		/// <inheritdoc />
-		public async Task<T> Get<T>(T item)
-			where T : class, IResource
+		public override async Task<T> Get<T>(T item)
 		{
 			T ret = item;
 
@@ -87,8 +80,7 @@ namespace Kyoo.Controllers
 		}
 
 		/// <inheritdoc />
-		public async Task<ICollection<T>> Search<T>(string query) 
-			where T : class, IResource
+		public override async Task<ICollection<T>> Search<T>(string query)
 		{
 			List<T> ret = new();
 			

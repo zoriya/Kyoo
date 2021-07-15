@@ -44,7 +44,7 @@
   },
   
   "media": {
-    "regex": "(?:\\/(?<Collection>.*?))?\\/(?<Show>.*?)(?: \\(\\d+\\))?\\/\\k<Show>(?: \\(\\d+\\))?(?:(?: S(?<Season>\\d+)E(?<Episode>\\d+))| (?<Absolute>\\d+))?.*$",
+    "regex": "(?:\\/(?<Collection>.*?))?\\/(?<Show>.*?)(?: \\(?<StartYear>\\d+\\))?\\/\\k<Show>(?: \\(\\d+\\))?(?:(?: S(?<Season>\\d+)E(?<Episode>\\d+))| (?<Absolute>\\d+))?.*$",
     "subtitleRegex": "^(?<Episode>.*)\\.(?<Language>\\w{1,3})\\.(?<Default>default\\.)?(?<Forced>forced\\.)?.*$"
   },
   

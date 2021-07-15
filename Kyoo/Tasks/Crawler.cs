@@ -95,6 +95,9 @@ namespace Kyoo.Tasks
 				});
 				await Scan(library, episodes, reporter, cancellationToken);
 				percent += 100f / libraries.Count;
+				
+				if (cancellationToken.IsCancellationRequested)
+					return;
 			}
 			
 			progress.Report(100);
@@ -108,11 +111,11 @@ namespace Kyoo.Tasks
 			Logger.LogInformation("Scanning library {Library} at {Paths}", library.Name, library.Paths);
 			foreach (string path in library.Paths)
 			{
+				ICollection<string> files = await FileManager.ListFiles(path, SearchOption.AllDirectories);
+				
 				if (cancellationToken.IsCancellationRequested)
 					return;
 
-				ICollection<string> files = await FileManager.ListFiles(path, SearchOption.AllDirectories);
-				
 				// We try to group episodes by shows to register one episode of each show first.
 				// This speeds up the scan process because further episodes of a show are registered when all metadata
 				// of the show has already been fetched. 
