@@ -1,86 +1,126 @@
 ﻿using System;
 using Kyoo.Models;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Kyoo.Controllers
 {
-	public class ProviderComposite : IMetadataProvider
+	/// <summary>
+	/// A metadata provider composite that merge results from all available providers.
+	/// </summary>
+	public class ProviderComposite : IProviderComposite
 	{
-		private readonly IEnumerable<IMetadataProvider> _providers;
+		/// <summary>
+		/// The list of metadata providers
+		/// </summary>
+		private readonly ICollection<IMetadataProvider> _providers;
 
+		/// <summary>
+		/// The list of selected providers. If no provider has been selected, this is null.
+		/// </summary>
+		private ICollection<Provider> _selectedProviders;
+
+		/// <summary>
+		/// The logger used to print errors.
+		/// </summary>
+		private readonly ILogger<ProviderComposite> _logger;
 		
-		public ProviderComposite(IEnumerable<IMetadataProvider> providers)
+		/// <summary>
+		/// Since this is a composite and not a real provider, no metadata is available.
+		/// It is not meant to be stored or selected. This class will handle merge based on what is required. 
+		/// </summary>
+		public Provider Provider => null;
+
+
+		/// <summary>
+		/// Create a new <see cref="ProviderComposite"/> with a list of available providers.
+		/// </summary>
+		/// <param name="providers">The list of providers to merge.</param>
+		/// <param name="logger">The logger used to print errors.</param>
+		public ProviderComposite(IEnumerable<IMetadataProvider> providers, ILogger<ProviderComposite> logger)
 		{
-			_providers = providers;
+			_providers = providers.ToArray();
+			_logger = logger;
+		}
+		
+
+		/// <inheritdoc />
+		public void UseProviders(IEnumerable<Provider> providers)
+		{
+			_selectedProviders = providers.ToArray();
 		}
 
-		public Provider Provider { get; }
-		public Task<T> Get<T>(T item) where T : class, IResource
+		/// <summary>
+		/// Return the list of providers that should be used for queries.
+		/// </summary>
+		/// <returns>The list of providers to use, respecting the <see cref="UseProviders"/>.</returns>
+		private IEnumerable<IMetadataProvider> _GetProviders()
 		{
-			throw new NotImplementedException();
+			return _selectedProviders?
+					.Select(x => _providers.FirstOrDefault(y => y.Provider.Slug == x.Slug))
+					.Where(x => x != null)
+				?? _providers;
 		}
 
-		public Task<ICollection<T>> Search<T>(string query) where T : class, IResource
+		/// <inheritdoc />
+		public async Task<T> Get<T>(T item)
+			where T : class, IResource
 		{
-			throw new NotImplementedException();
+			T ret = null;
+			
+			foreach (IMetadataProvider provider in _GetProviders())
+			{
+				try
+				{
+					ret = Merger.Merge(ret, await provider.Get(ret ?? item));
+				}
+				catch (NotSupportedException)
+				{
+					// Silenced
+				}
+				catch (Exception ex) 
+				{
+					_logger.LogError(ex, "The provider {Provider} could not get a {Type}", 
+						provider.Provider.Name, typeof(T).Name);
+				}
+			}
+
+			return Merger.Merge(ret, item);
+		}
+
+		/// <inheritdoc />
+		public async Task<ICollection<T>> Search<T>(string query) 
+			where T : class, IResource
+		{
+			List<T> ret = new();
+			
+			foreach (IMetadataProvider provider in _GetProviders())
+			{
+				try
+				{
+					ret.AddRange(await provider.Search<T>(query));
+				}
+				catch (NotSupportedException)
+				{
+					// Silenced
+				}
+				catch (Exception ex) 
+				{
+					_logger.LogError(ex, "The provider {Provider} could not search for {Type}", 
+						provider.Provider.Name, typeof(T).Name);
+				}
+			}
+
+			return ret;
 		}
 
 		public Task<ICollection<PeopleRole>> GetPeople(Show show)
 		{
 			throw new NotImplementedException();
 		}
-		
-		// private async Task<T> GetMetadata<T>(Func<IMetadataProvider, Task<T>> providerCall, Library library, string what)
-		// 	where T : new()
-		// {
-		// 	T ret = new();
-  //
-		// 	IEnumerable<IMetadataProvider> providers = library?.Providers
-  //                  .Select(x => _providers.FirstOrDefault(y => y.Provider.Slug == x.Slug))
-  //                  .Where(x => x != null)
-  //              ?? _providers;
-		// 	
-		// 	foreach (IMetadataProvider provider in providers)
-		// 	{
-		// 		try
-		// 		{
-		// 			ret = Merger.Merge(ret, await providerCall(provider));
-		// 		} catch (Exception ex) 
-		// 		{
-		// 			await Console.Error.WriteLineAsync(
-		// 				$"The provider {provider.Provider.Name} could not work for {what}. Exception: {ex.Message}");
-		// 		}
-		// 	}
-		// 	return ret;
-		// }
-  //
-		// private async Task<List<T>> GetMetadata<T>(
-		// 	Func<IMetadataProvider, Task<ICollection<T>>> providerCall,
-		// 	Library library,
-		// 	string what)
-		// {
-		// 	List<T> ret = new();
-		// 	
-		// 	IEnumerable<IMetadataProvider> providers = library?.Providers
-		// 			.Select(x => _providers.FirstOrDefault(y => y.Provider.Slug == x.Slug))
-		// 			.Where(x => x != null)
-		// 	    ?? _providers;
-		// 	
-		// 	foreach (IMetadataProvider provider in providers)
-		// 	{
-		// 		try
-		// 		{
-		// 			ret.AddRange(await providerCall(provider) ?? new List<T>());
-		// 		} catch (Exception ex) 
-		// 		{
-		// 			await Console.Error.WriteLineAsync(
-		// 				$"The provider {provider.Provider.Name} coudln't work for {what}. Exception: {ex.Message}");
-		// 		}
-		// 	}
-		// 	return ret;
-		// }
-		//
+
 		// public async Task<Collection> GetCollectionFromName(string name, Library library)
 		// {
 		// 	Collection collection = await GetMetadata(

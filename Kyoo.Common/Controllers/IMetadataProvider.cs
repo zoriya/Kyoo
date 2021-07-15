@@ -53,4 +53,18 @@ namespace Kyoo.Controllers
 		
 		Task<ICollection<PeopleRole>> GetPeople(Show show);
 	}
+
+	/// <summary>
+	/// A special <see cref="IMetadataProvider"/> that merge results.
+	/// This interface exists to specify witch provider to use but it can be used like any other metadata provider.
+	/// </summary>
+	public interface IProviderComposite : IMetadataProvider
+	{
+		/// <summary>
+		/// Select witch providers to use.
+		/// The <see cref="IMetadataProvider"/> associated with the given <see cref="Provider"/> will be used.
+		/// </summary>
+		/// <param name="providers">The list of providers to use</param>
+		void UseProviders(IEnumerable<Provider> providers);
+	}
 }
