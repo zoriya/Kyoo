@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
@@ -28,8 +29,11 @@ namespace Kyoo.Tasks
 
 		/// <inheritdoc />
 		public int Priority => int.MaxValue;
-		
-		
+
+		/// <inheritdoc />
+		public bool IsHidden => true;
+
+
 		/// <summary>
 		/// The plugin manager used to retrieve plugins to initialize them.
 		/// </summary>
@@ -40,21 +44,28 @@ namespace Kyoo.Tasks
 		[Injected] public IServiceProvider Provider { private get; set; }
 		
 		/// <inheritdoc />
-		public Task Run(TaskParameters arguments, CancellationToken cancellationToken)
+		public Task Run(TaskParameters arguments, IProgress<float> progress, CancellationToken cancellationToken)
 		{
-			foreach (IPlugin plugin in PluginManager.GetAllPlugins())
+			ICollection<IPlugin> plugins = PluginManager.GetAllPlugins();
+			int count = 0;
+			progress.Report(0);
+
+			foreach (IPlugin plugin in plugins)
+			{
 				plugin.Initialize(Provider);
+				
+				progress.Report(count / plugins.Count * 100);
+				count++;
+			}
+			
+			progress.Report(100);
 			return Task.CompletedTask;
 		}
 
+		/// <inheritdoc />
 		public TaskParameters GetParameters()
 		{
 			return new();
-		}
-
-		public int? Progress()
-		{
-			return null;
 		}
 	}
 }

@@ -34,7 +34,7 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				_taskManager.StartTask(taskSlug, args);
+				_taskManager.StartTask(taskSlug, new Progress<float>(), args);
 				return Ok();
 			}
 			catch (ItemNotFoundException)

@@ -1,6 +1,5 @@
 ﻿using System;
 using Kyoo.Models;
-using Microsoft.Extensions.Configuration;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,26 +10,56 @@ using Kyoo.Controllers;
 using Kyoo.Models.Attributes;
 using Kyoo.Models.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Kyoo.Tasks
 {
+	/// <summary>
+	/// A task to add new video files.
+	/// </summary>
 	public class Crawler : ITask
 	{
+		/// <inheritdoc />
 		public string Slug => "scan";
+		
+		/// <inheritdoc />
 		public string Name => "Scan libraries";
-		public string Description => "Scan your libraries, load data for new shows and remove shows that don't exist anymore.";
-		public string HelpMessage => "Reloading all libraries is a long process and may take up to 24 hours if it is the first scan in a while.";
+		
+		/// <inheritdoc />
+		public string Description => "Scan your libraries and load data for new shows.";
+		
+		/// <inheritdoc />
+		public string HelpMessage => "Reloading all libraries is a long process and may take up to" +
+			" 24 hours if it is the first scan in a while.";
+		
+		/// <inheritdoc />
 		public bool RunOnStartup => true;
+		
+		/// <inheritdoc />
 		public int Priority => 0;
-		
-		[Injected] public IServiceProvider ServiceProvider { private get; set; }
-		[Injected] public IThumbnailsManager ThumbnailsManager { private get; set; }
-		[Injected] public IMetadataProvider MetadataProvider { private get; set; }
-		[Injected] public ITranscoder Transcoder { private get; set; }
-		[Injected] public IConfiguration Config { private get; set; }
 
-		private int _parallelTasks;
+		/// <inheritdoc />
+		public bool IsHidden => false;
+
+		/// <summary>
+		/// The library manager used to get libraries and providers to use.
+		/// </summary>
+		[Injected] public ILibraryManager LibraryManager { private get; set; }
+		/// <summary>
+		/// The file manager used walk inside directories and check they existences. 
+		/// </summary>
+		[Injected] public IFileManager FileManager { private get; set; }
+		/// <summary>
+		/// A task manager used to create sub tasks for each episode to add to the database. 
+		/// </summary>
+		[Injected] public ITaskManager TaskManager { private get; set; }
+		/// <summary>
+		/// The logger used to inform the current status to the console.
+		/// </summary>
+		[Injected] public ILogger<Crawler> Logger { private get; set; }
 		
+		
+		/// <inheritdoc />
 		public TaskParameters GetParameters()
 		{
 			return new()
@@ -39,354 +68,83 @@ namespace Kyoo.Tasks
 			};
 		}
 
-		public int? Progress()
+		/// <inheritdoc />
+		public async Task Run(TaskParameters arguments, IProgress<float> progress, CancellationToken cancellationToken)
 		{
-			// TODO implement this later.
-			return null;
-		}
-		
-		public async Task Run(TaskParameters parameters,
-			CancellationToken cancellationToken)
-		{
-			string argument = parameters["slug"].As<string>();
-			
-			_parallelTasks = Config.GetValue<int>("parallelTasks");
-			if (_parallelTasks <= 0)
-				_parallelTasks = 30;
-
-			using IServiceScope serviceScope = ServiceProvider.CreateScope();
-			ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
-			
-			foreach (Show show in await libraryManager!.GetAll<Show>())
-				if (!Directory.Exists(show.Path))
-					await libraryManager.Delete(show);
-			
-			ICollection<Episode> episodes = await libraryManager.GetAll<Episode>();
-			foreach (Episode episode in episodes)
-				if (!File.Exists(episode.Path))
-					await libraryManager.Delete(episode);
-			
-			ICollection<Track> tracks = await libraryManager.GetAll<Track>();
-			foreach (Track track in tracks)
-				if (!File.Exists(track.Path))
-					await libraryManager.Delete(track);
-
+			string argument = arguments["slug"].As<string>();
 			ICollection<Library> libraries = argument == null 
-				? await libraryManager.GetAll<Library>()
-				: new [] { await libraryManager.GetOrDefault<Library>(argument)};
-			
+				? await LibraryManager.GetAll<Library>()
+				: new [] { await LibraryManager.GetOrDefault<Library>(argument)};
+
 			if (argument != null && libraries.First() == null)
 				throw new ArgumentException($"No library found with the name {argument}");
-			
+
 			foreach (Library library in libraries)
-				await libraryManager.Load(library, x => x.Providers);
+				await LibraryManager.Load(library, x => x.Providers);
+
+			progress.Report(0);
+			float percent = 0;
 			
+			ICollection<Episode> episodes = await LibraryManager.GetAll<Episode>();
 			foreach (Library library in libraries)
-				await Scan(library, episodes, tracks, cancellationToken);
-			Console.WriteLine("Scan finished!");
+			{
+				IProgress<float> reporter = new Progress<float>(x =>
+				{
+					// ReSharper disable once AccessToModifiedClosure
+					progress.Report(percent + x / libraries.Count);
+				});
+				await Scan(library, episodes, reporter, cancellationToken);
+				percent += 100f / libraries.Count;
+			}
+			
+			progress.Report(100);
 		}
 
-		private async Task Scan(Library library, IEnumerable<Episode> episodes, IEnumerable<Track> tracks, CancellationToken cancellationToken)
+		private async Task Scan(Library library, 
+			IEnumerable<Episode> episodes,
+			IProgress<float> progress,
+			CancellationToken cancellationToken)
 		{
-			Console.WriteLine($"Scanning library {library.Name} at {string.Join(", ", library.Paths)}.");
+			Logger.LogInformation("Scanning library {Library} at {Paths}", library.Name, library.Paths);
 			foreach (string path in library.Paths)
 			{
 				if (cancellationToken.IsCancellationRequested)
-					continue;
-				
-				string[] files;
-				try
-				{
-					files = Directory.GetFiles(path, "*", SearchOption.AllDirectories);
-				}
-				catch (DirectoryNotFoundException)
-				{
-					await Console.Error.WriteLineAsync($"The library's directory {path} could not be found (library slug: {library.Slug})");
-					continue;
-				}
-				catch (PathTooLongException)
-				{
-					await Console.Error.WriteLineAsync($"The library's directory {path} is too long for this system. (library slug: {library.Slug})");
-					continue;
-				}
-				catch (ArgumentException)
-				{
-					await Console.Error.WriteLineAsync($"The library's directory {path} is invalid. (library slug: {library.Slug})");
-					continue;
-				}
-				catch (UnauthorizedAccessException ex)
-				{
-					await Console.Error.WriteLineAsync($"{ex.Message} (library slug: {library.Slug})");
-					continue;
-				}
+					return;
 
-				List<IGrouping<string, string>> shows =  files
-					.Where(x => IsVideo(x) && episodes.All(y => y.Path != x))
+				ICollection<string> files = await FileManager.ListFiles(path, SearchOption.AllDirectories);
+				
+				// We try to group episodes by shows to register one episode of each show first.
+				// This speeds up the scan process because further episodes of a show are registered when all metadata
+				// of the show has already been fetched. 
+				List<IGrouping<string, string>> shows = files
+					.Where(IsVideo)
+					.Where(x => episodes.All(y => y.Path != x))
 					.GroupBy(Path.GetDirectoryName)
 					.ToList();
+				string[] paths = shows.Select(x => x.First())
+					.Concat(shows.SelectMany(x => x.Skip(1)))
+					.ToArray();
 
-				// TODO If the library's path end with a /, the regex is broken.
-				IEnumerable<string> tasks = shows.Select(x => x.First());
-				foreach (string[] showTasks in tasks.BatchBy(_parallelTasks))
-					await Task.WhenAll(showTasks
-						.Select(x => RegisterFile(x, x.Substring(path.Length), library, cancellationToken)));
-
-				tasks = shows.SelectMany(x => x.Skip(1));
-				foreach (string[] episodeTasks in tasks.BatchBy(_parallelTasks * 2))
-					await Task.WhenAll(episodeTasks
-						.Select(x => RegisterFile(x, x.Substring(path.Length), library, cancellationToken)));
+				float percent = 0;
+				IProgress<float> reporter = new Progress<float>(x =>
+				{
+					// ReSharper disable once AccessToModifiedClosure
+					progress.Report((percent + x / paths.Length) / library.Paths.Length);
+				});
 				
-				await Task.WhenAll(files.Where(x => IsSubtitle(x) && tracks.All(y => y.Path != x))
-					.Select(x => RegisterExternalSubtitle(x, cancellationToken)));
-			}
-		}
-
-		private async Task RegisterExternalSubtitle(string path, CancellationToken token)
-		{
-			try
-			{
-				if (token.IsCancellationRequested || path.Split(Path.DirectorySeparatorChar).Contains("Subtitles"))
-					return;
-				using IServiceScope serviceScope = ServiceProvider.CreateScope();
-				ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
-
-				string patern = Config.GetValue<string>("subtitleRegex");
-				Regex regex = new(patern, RegexOptions.IgnoreCase);
-				Match match = regex.Match(path);
-
-				if (!match.Success)
+				foreach (string episodePath in paths)
 				{
-					await Console.Error.WriteLineAsync($"The subtitle at {path} does not match the subtitle's regex.");
-					return;
+					TaskManager.StartTask<RegisterEpisode>(reporter, new Dictionary<string, object>
+					{
+						["path"] = episodePath[path.Length..],
+						["library"] = library
+					}, cancellationToken);
+					percent += 100f / paths.Length;
 				}
 
-				string episodePath = match.Groups["Episode"].Value;
-				Episode episode = await libraryManager!.Get<Episode>(x => x.Path.StartsWith(episodePath));
-				Track track = new()
-				{
-					Type = StreamType.Subtitle,
-					Language = match.Groups["Language"].Value,
-					IsDefault = match.Groups["Default"].Value.Length > 0, 
-					IsForced = match.Groups["Forced"].Value.Length > 0,
-					Codec = SubtitleExtensions[Path.GetExtension(path)],
-					IsExternal = true,
-					Path = path,
-					Episode = episode
-				};
-
-				await libraryManager.Create(track);
-				Console.WriteLine($"Registering subtitle at: {path}.");
+				// await Task.WhenAll(files.Where(x => IsSubtitle(x) && tracks.All(y => y.Path != x))
+					// .Select(x => RegisterExternalSubtitle(x, cancellationToken)));
 			}
-			catch (ItemNotFoundException)
-			{
-				await Console.Error.WriteLineAsync($"No episode found for subtitle at: ${path}.");
-			}
-			catch (Exception ex)
-			{
-				await Console.Error.WriteLineAsync($"Unknown error while registering subtitle: {ex.Message}");
-			}
-		}
-
-		private async Task RegisterFile(string path, string relativePath, Library library, CancellationToken token)
-		{
-			if (token.IsCancellationRequested)
-				return;
-
-			try
-			{
-				using IServiceScope serviceScope = ServiceProvider.CreateScope();
-				ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
-
-				string patern = Config.GetValue<string>("regex");
-				Regex regex = new(patern, RegexOptions.IgnoreCase);
-				Match match = regex.Match(relativePath);
-
-				if (!match.Success)
-				{
-					await Console.Error.WriteLineAsync($"The episode at {path} does not match the episode's regex.");
-					return;
-				}
-				
-				string showPath = Path.GetDirectoryName(path);
-				string collectionName = match.Groups["Collection"].Value;
-				string showName = match.Groups["Show"].Value;
-				int? seasonNumber = int.TryParse(match.Groups["Season"].Value, out int tmp) ? tmp : null;
-				int? episodeNumber = int.TryParse(match.Groups["Episode"].Value, out tmp) ? tmp : null;
-				int? absoluteNumber = int.TryParse(match.Groups["Absolute"].Value, out tmp) ? tmp : null;
-
-				Collection collection = await GetCollection(libraryManager, collectionName, library);
-				bool isMovie = seasonNumber == null && episodeNumber == null && absoluteNumber == null;
-				Show show = await GetShow(libraryManager, showName, showPath, isMovie, library);
-				if (isMovie)
-					await libraryManager!.Create(await GetMovie(show, path));
-				else
-				{
-					Season season = seasonNumber != null 
-						? await GetSeason(libraryManager, show, seasonNumber.Value, library)
-						: null;
-					Episode episode = await GetEpisode(libraryManager,
-						show,
-						season,
-						episodeNumber,
-						absoluteNumber,
-						path,
-						library);
-					await libraryManager!.Create(episode);
-				}
-
-				await libraryManager.AddShowLink(show, library, collection);
-				Console.WriteLine($"Episode at {path} registered.");
-			}
-			catch (DuplicatedItemException ex)
-			{
-				await Console.Error.WriteLineAsync($"{path}: {ex.Message}");
-			}
-			catch (Exception ex)
-			{
-				await Console.Error.WriteLineAsync($"Unknown exception thrown while registering episode at {path}." +
-				                                   $"\nException: {ex.Message}" +
-				                                   $"\n{ex.StackTrace}");
-			}
-		}
-
-		private async Task<Collection> GetCollection(ILibraryManager libraryManager, 
-			string collectionName, 
-			Library library)
-		{
-			if (string.IsNullOrEmpty(collectionName))
-				return null;
-			Collection collection = await libraryManager.GetOrDefault<Collection>(Utility.ToSlug(collectionName));
-			if (collection != null)
-				return collection;
-			// collection = await MetadataProvider.GetCollectionFromName(collectionName, library);
-
-			try
-			{
-				await libraryManager.Create(collection);
-				return collection;
-			}
-			catch (DuplicatedItemException)
-			{
-				return await libraryManager.GetOrDefault<Collection>(collection.Slug);
-			}
-		}
-		
-		private async Task<Show> GetShow(ILibraryManager libraryManager, 
-			string showTitle, 
-			string showPath,
-			bool isMovie, 
-			Library library)
-		{
-			Show old = await libraryManager.GetOrDefault<Show>(x => x.Path == showPath);
-			if (old != null)
-			{
-				await libraryManager.Load(old, x => x.ExternalIDs);
-				return old;
-			}
-
-			Show show = new();//await MetadataProvider.SearchShow(showTitle, isMovie, library);
-			show.Path = showPath;
-			// show.People = await MetadataProvider.GetPeople(show, library);
-
-			try
-			{
-				show = await libraryManager.Create(show);
-			}
-			catch (DuplicatedItemException)
-			{
-				old = await libraryManager.GetOrDefault<Show>(show.Slug);
-				if (old != null && old.Path == showPath)
-				{
-					await libraryManager.Load(old, x => x.ExternalIDs);
-					return old;
-				}
-
-				if (show.StartAir != null)
-				{
-					show.Slug += $"-{show.StartAir.Value.Year}";
-					await libraryManager.Create(show);
-				}
-				else
-					throw;
-			}
-			await ThumbnailsManager.Validate(show);
-			return show;
-		}
-
-		private async Task<Season> GetSeason(ILibraryManager libraryManager, 
-			Show show, 
-			int seasonNumber, 
-			Library library)
-		{
-			try
-			{
-				Season season = await libraryManager.Get(show.Slug, seasonNumber);
-				season.Show = show;
-				return season;
-			}
-			catch (ItemNotFoundException)
-			{
-				Season season = new();//await MetadataProvider.GetSeason(show, seasonNumber, library);
-				try
-				{
-					await libraryManager.Create(season);
-					await ThumbnailsManager.Validate(season);
-				}
-				catch (DuplicatedItemException)
-				{
-					season = await libraryManager.Get(show.Slug, seasonNumber);
-				}
-				season.Show = show;
-				return season;
-			}
-		}
-		
-		private async Task<Episode> GetEpisode(ILibraryManager libraryManager, 
-			Show show, 
-			Season season,
-			int? episodeNumber,
-			int? absoluteNumber, 
-			string episodePath, 
-			Library library)
-		{
-			Episode episode = new();/*await MetadataProvider.GetEpisode(show,
-				episodePath, 
-				season?.SeasonNumber, 
-				episodeNumber,
-				absoluteNumber,
-				library);*/
-
-			if (episode.SeasonNumber != null)
-			{
-				season ??= await GetSeason(libraryManager, show, episode.SeasonNumber.Value, library);
-				episode.Season = season;
-				episode.SeasonID = season?.ID;
-			}
-			await ThumbnailsManager.Validate(episode);
-			await GetTracks(episode);
-			return episode;
-		}
-
-		private async Task<Episode> GetMovie(Show show, string episodePath)
-		{
-			Episode episode = new()
-			{
-				Title = show.Title,
-				Path = episodePath,
-				Show = show,
-				ShowID = show.ID,
-				ShowSlug = show.Slug
-			};
-			episode.Tracks = await GetTracks(episode);
-			return episode;
-		}
-
-		private async Task<ICollection<Track>> GetTracks(Episode episode)
-		{
-			episode.Tracks = (await Transcoder.ExtractInfos(episode, false))
-				.Where(x => x.Type != StreamType.Attachment)
-				.ToArray();
-			return episode.Tracks;
 		}
 
 		private static readonly string[] VideoExtensions =

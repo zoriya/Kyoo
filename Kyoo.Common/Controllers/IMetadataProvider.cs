@@ -1,5 +1,4 @@
-﻿using System;
-using Kyoo.Models;
+﻿using Kyoo.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -31,10 +30,7 @@ namespace Kyoo.Controllers
 		/// Merging metadata is the job of Kyoo, a complex <typeparamref name="T"/> is given
 		/// to make a precise search and give you every available properties, not to discard properties.
 		/// </remarks>
-		/// <exception cref="NotSupportedException">
-		/// If this metadata provider does not support <typeparamref name="T"/>.
-		/// </exception>
-		/// <returns>A new <typeparamref name="T"/> containing metadata from your provider</returns>
+		/// <returns>A new <typeparamref name="T"/> containing metadata from your provider or null</returns>
 		[ItemCanBeNull]
 		Task<T> Get<T>([NotNull] T item)
 			where T : class, IResource;
@@ -43,15 +39,10 @@ namespace Kyoo.Controllers
 		/// Search for a specific type of items with a given query.
 		/// </summary>
 		/// <param name="query">The search query to use.</param>
-		/// <exception cref="NotSupportedException">
-		/// If this metadata provider does not support <typeparamref name="T"/>.
-		/// </exception>
 		/// <returns>The list of items that could be found on this specific provider.</returns>
 		[ItemNotNull]
 		Task<ICollection<T>> Search<T>(string query)
 			where T : class, IResource;
-		
-		Task<ICollection<PeopleRole>> GetPeople(Show show);
 	}
 
 	/// <summary>

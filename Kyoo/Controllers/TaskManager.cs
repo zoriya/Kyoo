@@ -41,7 +41,7 @@ namespace Kyoo.Controllers
 		/// <summary>
 		/// The queue of tasks that should be run as soon as possible.
 		/// </summary>
-		private readonly Queue<(ITask, Dictionary<string, object>)> _queuedTasks = new();
+		private readonly Queue<(ITask, IProgress<float>, Dictionary<string, object>)> _queuedTasks = new();
 		/// <summary>
 		/// The currently running task.
 		/// </summary>
@@ -106,11 +106,11 @@ namespace Kyoo.Controllers
 			{
 				if (_queuedTasks.Any())
 				{
-					(ITask task, Dictionary<string, object> arguments) = _queuedTasks.Dequeue();
+					(ITask task, IProgress<float> progress, Dictionary<string, object> args) = _queuedTasks.Dequeue();
 					_runningTask = task;
 					try
 					{
-						await RunTask(task, arguments);
+						await RunTask(task, progress, args);
 					}
 					catch (Exception e)
 					{
@@ -129,9 +129,15 @@ namespace Kyoo.Controllers
 		/// Parse parameters, inject a task and run it.
 		/// </summary>
 		/// <param name="task">The task to run</param>
+		/// <param name="progress">A progress reporter to know the percentage of completion of the task.</param>
 		/// <param name="arguments">The arguments to pass to the function</param>
-		/// <exception cref="ArgumentException">There was an invalid argument or a required argument was not found.</exception>
-		private async Task RunTask(ITask task, Dictionary<string, object> arguments)
+		/// <exception cref="ArgumentException">
+		/// If the number of arguments is invalid, if an argument can't be converted or if the task finds the argument
+		/// invalid.
+		/// </exception>
+		private async Task RunTask(ITask task, 
+			[NotNull] IProgress<float> progress,
+			Dictionary<string, object> arguments)
 		{
 			_logger.LogInformation("Task starting: {Task}", task.Name);
 			
@@ -160,7 +166,7 @@ namespace Kyoo.Controllers
 
 			using IServiceScope scope = _provider.CreateScope();
 			InjectServices(task, x => scope.ServiceProvider.GetRequiredService(x));
-			await task.Run(args, _taskToken.Token);
+			await task.Run(args, progress, _taskToken.Token);
 			InjectServices(task, _ => null);
 			_logger.LogInformation("Task finished: {Task}", task.Name);
 		}
@@ -190,7 +196,7 @@ namespace Kyoo.Controllers
 			foreach (string task in tasksToQueue)
 			{
 				_logger.LogDebug("Queuing task scheduled for running: {Task}", task);
-				StartTask(task, new Dictionary<string, object>());
+				StartTask(task, new Progress<float>(), new Dictionary<string, object>());
 			}
 		}
 
@@ -203,19 +209,31 @@ namespace Kyoo.Controllers
 				.Where(x => x.RunOnStartup)
 				.OrderByDescending(x => x.Priority);
 			foreach (ITask task in startupTasks)
-				_queuedTasks.Enqueue((task, new Dictionary<string, object>()));
+				_queuedTasks.Enqueue((task, new Progress<float>(), new Dictionary<string, object>()));
 		}
 
 		/// <inheritdoc />
-		public void StartTask(string taskSlug, Dictionary<string, object> arguments = null)
+		public void StartTask(string taskSlug, 
+			IProgress<float> progress,
+			Dictionary<string, object> arguments = null,
+			CancellationToken? cancellationToken = null)
 		{
 			arguments ??= new Dictionary<string, object>();
 			
 			int index = _tasks.FindIndex(x => x.task.Slug == taskSlug);
 			if (index == -1)
 				throw new ItemNotFoundException($"No task found with the slug {taskSlug}");
-			_queuedTasks.Enqueue((_tasks[index].task, arguments));
+			_queuedTasks.Enqueue((_tasks[index].task, progress, arguments));
 			_tasks[index] = (_tasks[index].task, GetNextTaskDate(taskSlug));
+		}
+
+		/// <inheritdoc />
+		public void StartTask<T>(IProgress<float> progress, 
+			Dictionary<string, object> arguments = null,
+			CancellationToken? cancellationToken = null)
+			where T : ITask, new()
+		{
+			StartTask(new T().Slug, progress, arguments, cancellationToken);
 		}
 
 		/// <summary>

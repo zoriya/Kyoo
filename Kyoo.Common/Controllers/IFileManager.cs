@@ -54,8 +54,10 @@ namespace Kyoo.Controllers
 		/// List files in a directory.
 		/// </summary>
 		/// <param name="path">The path of the directory</param>
+		/// <param name="options">Should the search be recursive or not.</param>
 		/// <returns>A list of files's path.</returns>
-		public Task<ICollection<string>> ListFiles([NotNull] string path);
+		public Task<ICollection<string>> ListFiles([NotNull] string path, 
+			SearchOption options = SearchOption.TopDirectoryOnly);
 
 		/// <summary>
 		/// Check if a file exists at the given path.

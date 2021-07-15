@@ -11,8 +11,10 @@ namespace Kyoo.Controllers
 	/// <summary>
 	/// A common interface used to discord plugins
 	/// </summary>
-	/// <remarks>You can inject services in the IPlugin constructor.
-	/// You should only inject well known services like an ILogger, IConfiguration or IWebHostEnvironment.</remarks>
+	/// <remarks>
+	/// You can inject services in the IPlugin constructor.
+	/// You should only inject well known services like an ILogger, IConfiguration or IWebHostEnvironment.
+	/// </remarks>
 	[UsedImplicitly(ImplicitUseTargetFlags.WithInheritors)]
 	public interface IPlugin
 	{
@@ -84,7 +86,10 @@ namespace Kyoo.Controllers
 		/// An optional configuration step to allow a plugin to change asp net configurations.
 		/// WARNING: This is only called on Kyoo's startup so you must restart the app to apply this changes.
 		/// </summary>
-		/// <param name="app">The Asp.Net application builder. On most case it is not needed but you can use it to add asp net functionalities.</param>
+		/// <param name="app">
+		/// The Asp.Net application builder. On most case it is not needed but you can use it to
+		/// add asp net functionalities.
+		/// </param>
 		void ConfigureAspNet(IApplicationBuilder app)
 		{
 			// Skipped

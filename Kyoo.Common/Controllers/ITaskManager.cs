@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 using Kyoo.Models.Exceptions;
 
 namespace Kyoo.Controllers
@@ -13,11 +15,56 @@ namespace Kyoo.Controllers
 		/// <summary>
 		/// Start a new task (or queue it).
 		/// </summary>
-		/// <param name="taskSlug">The slug of the task to run</param>
-		/// <param name="arguments">A list of arguments to pass to the task. An automatic conversion will be made if arguments to not fit.</param>
-		/// <exception cref="ArgumentException">If the number of arguments is invalid or if an argument can't be converted.</exception>
-		/// <exception cref="ItemNotFoundException">The task could not be found.</exception>
-		void StartTask(string taskSlug, Dictionary<string, object> arguments = null);
+		/// <param name="taskSlug">
+		/// The slug of the task to run.
+		/// </param>
+		/// <param name="progress">
+		/// A progress reporter to know the percentage of completion of the task.
+		/// </param>
+		/// <param name="arguments">
+		/// A list of arguments to pass to the task. An automatic conversion will be made if arguments to not fit.
+		/// </param>
+		/// <param name="cancellationToken">
+		/// A custom cancellation token for the task.
+		/// </param>
+		/// <exception cref="ArgumentException">
+		/// If the number of arguments is invalid, if an argument can't be converted or if the task finds the argument
+		/// invalid.
+		/// </exception>
+		/// <exception cref="ItemNotFoundException">
+		/// The task could not be found.
+		/// </exception>
+		void StartTask(string taskSlug, 
+			[NotNull] IProgress<float> progress,
+			Dictionary<string, object> arguments = null,
+			CancellationToken? cancellationToken = null);
+		
+		/// <summary>
+		/// Start a new task (or queue it).
+		/// </summary>
+		/// <param name="progress">
+		/// A progress reporter to know the percentage of completion of the task.
+		/// </param>
+		/// <param name="arguments">
+		/// A list of arguments to pass to the task. An automatic conversion will be made if arguments to not fit.
+		/// </param>
+		/// <typeparam name="T">
+		/// The type of the task to start.
+		/// </typeparam>
+		/// <param name="cancellationToken">
+		/// A custom cancellation token for the task.
+		/// </param>
+		/// <exception cref="ArgumentException">
+		/// If the number of arguments is invalid, if an argument can't be converted or if the task finds the argument
+		/// invalid.
+		/// </exception>
+		/// <exception cref="ItemNotFoundException">
+		/// The task could not be found.
+		/// </exception>
+		void StartTask<T>([NotNull] IProgress<float> progress, 
+			Dictionary<string, object> arguments = null,
+			CancellationToken? cancellationToken = null)
+			where T : ITask, new();
 		
 		/// <summary>
 		/// Get all currently running tasks

@@ -70,13 +70,14 @@ namespace Kyoo.Controllers
 		}
 		
 		/// <inheritdoc />
-		public Task<ICollection<string>> ListFiles(string path)
+		public Task<ICollection<string>> ListFiles(string path, SearchOption options = SearchOption.TopDirectoryOnly)
 		{
 			if (path == null)
 				throw new ArgumentNullException(nameof(path));
-			return Task.FromResult<ICollection<string>>(Directory.Exists(path) 
-				? Directory.GetFiles(path) 
-				: Array.Empty<string>());
+			string[] ret = Directory.Exists(path) 
+				? Directory.GetFiles(path, "*", options)
+				: Array.Empty<string>();
+			return Task.FromResult<ICollection<string>>(ret);
 		}
 
 		/// <inheritdoc />

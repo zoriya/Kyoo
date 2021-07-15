@@ -112,7 +112,7 @@ namespace Kyoo
 		/// <param name="second">Missing fields of first will be completed by fields of this item. If second is null, the function no-op.</param>
 		/// <typeparam name="T">Fields of T will be merged</typeparam>
 		/// <returns><see cref="first"/></returns>
-		[ContractAnnotation("=> null; first:notnull => notnull; second:notnull => notnull")]
+		[ContractAnnotation("first:notnull => notnull; second:notnull => notnull", true)]
 		public static T Merge<T>([CanBeNull] T first, [CanBeNull] T second)
 		{
 			if (first == null)

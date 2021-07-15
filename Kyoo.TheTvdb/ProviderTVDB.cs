@@ -56,7 +56,7 @@ namespace Kyoo.TheTvdb
 			{
 				Show show => await _GetShow(show) as T,
 				Episode episode => await _GetEpisode(episode) as T,
-				_ => throw new NotSupportedException()
+				_ => null
 			};
 		}
 		
@@ -66,7 +66,11 @@ namespace Kyoo.TheTvdb
 			if (!int.TryParse(show.GetID(Provider.Slug), out int id))
 				return (await _SearchShow(show.Title)).FirstOrDefault();
 			TvDbResponse<Series> series = await _client.Series.GetAsync(id);
-			return series.Data.ToShow(Provider);
+			Show ret = series.Data.ToShow(Provider);
+			
+			TvDbResponse<Actor[]> people = await _client.Series.GetActorsAsync(id);
+			ret.People = people.Data.Select(x => x.ToPeopleRole(Provider)).ToArray();
+			return ret;
 		}
 
 		[ItemCanBeNull]
@@ -88,7 +92,7 @@ namespace Kyoo.TheTvdb
 			await _Authenticate();
 			if (typeof(T) == typeof(Show))
 				return (await _SearchShow(query) as ICollection<T>)!;
-			throw new NotImplementedException();
+			return ArraySegment<T>.Empty;
 		}
 		
 		[ItemNotNull]
@@ -96,16 +100,6 @@ namespace Kyoo.TheTvdb
 		{
 			TvDbResponse<SeriesSearchResult[]> shows = await _client.Search.SearchSeriesByNameAsync(query);
 			return shows.Data.Select(x => x.ToShow(Provider)).ToArray();
-		}
-
-		/// <inheritdoc />
-		public async Task<ICollection<PeopleRole>> GetPeople(Show show)
-		{
-			if (!int.TryParse(show?.GetID(Provider.Name), out int id))
-				return null;
-			await _Authenticate();
-			TvDbResponse<Actor[]> people = await _client.Series.GetActorsAsync(id);
-			return people.Data.Select(x => x.ToPeopleRole(Provider)).ToArray();
 		}
 	}
 }
