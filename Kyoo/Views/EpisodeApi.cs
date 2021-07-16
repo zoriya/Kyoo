@@ -188,13 +188,14 @@ namespace Kyoo.Api
 			}
 		}
 		
-		[HttpGet("{id:int}/thumb")]
+		[HttpGet("{id:int}/thumbnail")]
+		[HttpGet("{id:int}/backdrop")]
 		public async Task<IActionResult> GetThumb(int id)
 		{
 			try
 			{
 				Episode episode = await _libraryManager.Get<Episode>(id);
-				return _files.FileResult(await _thumbnails.GetEpisodeThumb(episode));
+				return _files.FileResult(await _thumbnails.GetThumbnail(episode));
 			}
 			catch (ItemNotFoundException)
 			{
@@ -202,13 +203,14 @@ namespace Kyoo.Api
 			}
 		}
 		
-		[HttpGet("{slug}/thumb")]
+		[HttpGet("{slug}/thumbnail")]
+		[HttpGet("{slug}/backdrop")]
 		public async Task<IActionResult> GetThumb(string slug)
 		{
 			try
 			{
 				Episode episode = await _libraryManager.Get<Episode>(slug);
-				return _files.FileResult(await _thumbnails.GetEpisodeThumb(episode));
+				return _files.FileResult(await _thumbnails.GetThumbnail(episode));
 			}
 			catch (ItemNotFoundException)
 			{

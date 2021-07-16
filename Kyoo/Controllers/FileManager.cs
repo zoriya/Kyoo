@@ -68,6 +68,21 @@ namespace Kyoo.Controllers
 				throw new ArgumentNullException(nameof(path));
 			return File.Create(path);
 		}
+
+		/// <inheritdoc />
+		public Task<string> CreateDirectory(string path)
+		{
+			if (path == null)
+				throw new ArgumentNullException(nameof(path));
+			Directory.CreateDirectory(path);
+			return Task.FromResult(path);
+		}
+		
+		/// <inheritdoc />
+		public string Combine(params string[] paths)
+		{
+			return Path.Combine(paths);
+		}
 		
 		/// <inheritdoc />
 		public Task<ICollection<string>> ListFiles(string path, SearchOption options = SearchOption.TopDirectoryOnly)

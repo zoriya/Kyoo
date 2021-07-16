@@ -51,6 +51,20 @@ namespace Kyoo.Controllers
 		public Stream NewFile([NotNull] string path);
 
 		/// <summary>
+		/// Create a new directory at the given path
+		/// </summary>
+		/// <param name="path">The path of the directory</param>
+		/// <returns>The path of the newly created directory is returned.</returns>
+		public Task<string> CreateDirectory([NotNull] string path);
+
+		/// <summary>
+		/// Combine multiple paths.
+		/// </summary>
+		/// <param name="paths">The paths to combine</param>
+		/// <returns>The combined path.</returns>
+		public string Combine(params string[] paths);
+
+		/// <summary>
 		/// List files in a directory.
 		/// </summary>
 		/// <param name="path">The path of the directory</param>

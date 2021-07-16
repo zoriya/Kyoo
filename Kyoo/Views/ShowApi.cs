@@ -417,7 +417,7 @@ namespace Kyoo.Api
 			try
 			{
 				Show show = await _libraryManager.Get<Show>(slug);
-				return _files.FileResult(await _thumbs.GetShowPoster(show));
+				return _files.FileResult(await _thumbs.GetPoster(show));
 			}
 			catch (ItemNotFoundException)
 			{
@@ -431,7 +431,7 @@ namespace Kyoo.Api
 			try
 			{
 				Show show = await _libraryManager.Get<Show>(slug);
-				return _files.FileResult(await _thumbs.GetShowLogo(show));
+				return _files.FileResult(await _thumbs.GetLogo(show));
 			}
 			catch (ItemNotFoundException)
 			{
@@ -440,12 +440,13 @@ namespace Kyoo.Api
 		}
 		
 		[HttpGet("{slug}/backdrop")]
+		[HttpGet("{slug}/thumbnail")]
 		public async Task<IActionResult> GetBackdrop(string slug)
 		{
 			try
 			{
 				Show show = await _libraryManager.Get<Show>(slug);
-				return _files.FileResult(await _thumbs.GetShowBackdrop(show));
+				return _files.FileResult(await _thumbs.GetThumbnail(show));
 			}
 			catch (ItemNotFoundException)
 			{

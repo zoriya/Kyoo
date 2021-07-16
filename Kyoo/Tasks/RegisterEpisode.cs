@@ -48,6 +48,10 @@ namespace Kyoo.Tasks
 		/// </summary>
 		[Injected] public AProviderComposite MetadataProvider { private get; set; }
 		/// <summary>
+		/// The thumbnail manager used to download images.
+		/// </summary>
+		[Injected] public IThumbnailsManager ThumbnailsManager { private get; set; }
+		/// <summary>
 		/// The logger used to inform the current status to the console.
 		/// </summary>
 		[Injected] public ILogger<RegisterEpisode> Logger { private get; set; }
@@ -74,8 +78,10 @@ namespace Kyoo.Tasks
 				if (library != null)
 					MetadataProvider.UseProviders(library.Providers);
 
-				collection = await _RegisterAndFillCollection(collection);
-				// show = await _RegisterAndFillShow(show);
+				if (collection != null)
+					collection.Slug ??= Utility.ToSlug(collection.Name);
+				collection = await _RegisterAndFill(collection);
+				show = await _RegisterAndFill(show);
 				// if (isMovie)
 				// 	await libraryManager!.Create(await GetMovie(show, path));
 				// else
@@ -106,22 +112,62 @@ namespace Kyoo.Tasks
 			}
 		}
 		
-		private async Task<Collection> _RegisterAndFillCollection(Collection collection)
+		private async Task<T> _RegisterAndFill<T>(T item)
+			where T : class, IResource
 		{
-			if (collection == null)
+			if (item == null || string.IsNullOrEmpty(item.Slug))
 				return null;
-			
-			collection.Slug ??= Utility.ToSlug(collection.Name);
-			if (string.IsNullOrEmpty(collection.Slug))
-				return null;
-			
-			Collection existing = await LibraryManager.GetOrDefault<Collection>(collection.Slug);
+
+			T existing = await LibraryManager.GetOrDefault<T>(item.Slug);
 			if (existing != null)
 				return existing;
-			collection = await MetadataProvider.Get(collection);
-			return await LibraryManager.CreateIfNotExists(collection);
+			item = await MetadataProvider.Get(item);
+			await ThumbnailsManager.DownloadImages(item);
+			return await LibraryManager.CreateIfNotExists(item);
 		}
 		
+		// private async Task<Show> GetShow(ILibraryManager libraryManager, 
+		// 	string showTitle, 
+		// 	string showPath,
+		// 	bool isMovie, 
+		// 	Library library)
+		// {
+		// 	Show old = await libraryManager.GetOrDefault<Show>(x => x.Path == showPath);
+		// 	if (old != null)
+		// 	{
+		// 		await libraryManager.Load(old, x => x.ExternalIDs);
+		// 		return old;
+		// 	}
+		//
+		// 	Show show = await MetadataProvider.SearchShow(showTitle, isMovie, library);
+		// 	show.Path = showPath;
+		// 	show.People = await MetadataProvider.GetPeople(show, library);
+		//
+		// 	try
+		// 	{
+		// 		show = await libraryManager.Create(show);
+		// 	}
+		// 	catch (DuplicatedItemException)
+		// 	{
+		// 		old = await libraryManager.GetOrDefault<Show>(show.Slug);
+		// 		if (old != null && old.Path == showPath)
+		// 		{
+		// 			await libraryManager.Load(old, x => x.ExternalIDs);
+		// 			return old;
+		// 		}
+		//
+		// 		if (show.StartAir != null)
+		// 		{
+		// 			show.Slug += $"-{show.StartAir.Value.Year}";
+		// 			await libraryManager.Create(show);
+		// 		}
+		// 		else
+		// 			throw;
+		// 	}
+		// 	await ThumbnailsManager.Validate(show);
+		// 	return show;
+		// }
+		//
 		/*
 		 *
 		private async Task RegisterExternalSubtitle(string path, CancellationToken token)
@@ -168,56 +214,6 @@ namespace Kyoo.Tasks
 			{
 				await Console.Error.WriteLineAsync($"Unknown error while registering subtitle: {ex.Message}");
 			}
-		}
-
-		private async Task RegisterFile(string path, string relativePath, Library library, CancellationToken token)
-		{
-			if (token.IsCancellationRequested)
-				return;
-
-			
-		}
-		
-		private async Task<Show> GetShow(ILibraryManager libraryManager, 
-			string showTitle, 
-			string showPath,
-			bool isMovie, 
-			Library library)
-		{
-			Show old = await libraryManager.GetOrDefault<Show>(x => x.Path == showPath);
-			if (old != null)
-			{
-				await libraryManager.Load(old, x => x.ExternalIDs);
-				return old;
-			}
-
-			Show show = new();//await MetadataProvider.SearchShow(showTitle, isMovie, library);
-			show.Path = showPath;
-			// show.People = await MetadataProvider.GetPeople(show, library);
-
-			try
-			{
-				show = await libraryManager.Create(show);
-			}
-			catch (DuplicatedItemException)
-			{
-				old = await libraryManager.GetOrDefault<Show>(show.Slug);
-				if (old != null && old.Path == showPath)
-				{
-					await libraryManager.Load(old, x => x.ExternalIDs);
-					return old;
-				}
-
-				if (show.StartAir != null)
-				{
-					show.Slug += $"-{show.StartAir.Value.Year}";
-					await libraryManager.Create(show);
-				}
-				else
-					throw;
-			}
-			await ThumbnailsManager.Validate(show);
-			return show;
 		}
 
 		private async Task<Season> GetSeason(ILibraryManager libraryManager, 

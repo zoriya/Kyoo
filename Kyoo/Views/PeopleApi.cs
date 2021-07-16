@@ -94,7 +94,7 @@ namespace Kyoo.Api
 			People people = await _libraryManager.GetOrDefault<People>(id);
 			if (people == null)
 				return NotFound();
-			return _files.FileResult(await _thumbs.GetPeoplePoster(people));
+			return _files.FileResult(await _thumbs.GetPoster(people));
 		}
 		
 		[HttpGet("{slug}/poster")]
@@ -103,7 +103,7 @@ namespace Kyoo.Api
 			People people = await _libraryManager.GetOrDefault<People>(slug);
 			if (people == null)
 				return NotFound();
-			return _files.FileResult(await _thumbs.GetPeoplePoster(people));
+			return _files.FileResult(await _thumbs.GetPoster(people));
 		}
 	}
 }
