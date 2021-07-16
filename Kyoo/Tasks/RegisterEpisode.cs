@@ -6,7 +6,6 @@ using Kyoo.Controllers;
 using Kyoo.Models;
 using Kyoo.Models.Attributes;
 using Kyoo.Models.Exceptions;
-using Microsoft.Extensions.Logging;
 
 namespace Kyoo.Tasks
 {
@@ -56,11 +55,7 @@ namespace Kyoo.Tasks
 		/// The transcoder used to extract subtitles and metadata.
 		/// </summary>
 		[Injected] public ITranscoder Transcoder { private get; set; }
-		/// <summary>
-		/// The logger used to inform the current status to the console.
-		/// </summary>
-		[Injected] public ILogger<RegisterEpisode> Logger { private get; set; }
-		
+
 		/// <inheritdoc />
 		public TaskParameters GetParameters()
 		{
@@ -76,58 +71,67 @@ namespace Kyoo.Tasks
 		{
 			string path = arguments["path"].As<string>();
 			Library library = arguments["library"].As<Library>();
+			progress.Report(0);
 			
-			try
+			if (library.Providers == null)
+				await LibraryManager.Load(library, x => x.Providers);
+			MetadataProvider.UseProviders(library.Providers);
+			(Collection collection, Show show, Season season, Episode episode) = await Identifier.Identify(path);
+			progress.Report(15);
+			
+			collection = await _RegisterAndFill(collection);
+			progress.Report(20);
+			
+			Show registeredShow = await _RegisterAndFill(show);
+			if (registeredShow.Path != show.Path)
 			{
-				if (library != null)
+				if (show.StartAir.HasValue)
 				{
-					if (library.Providers == null)
-						await LibraryManager.Load(library, x => x.Providers);
-					MetadataProvider.UseProviders(library.Providers);
-				}
-
-				(Collection collection, Show show, Season season, Episode episode) = await Identifier.Identify(path);
-				
-				collection = await _RegisterAndFill(collection);
-				
-				Show registeredShow = await _RegisterAndFill(show);
-				if (registeredShow.Path != show.Path)
-				{
-					if (show.StartAir.HasValue)
-					{
-						show.Slug += $"-{show.StartAir.Value.Year}";
-						show = await LibraryManager.Create(show);
-					}
-					else
-					{
-						Logger.LogError("Duplicated show found ({Slug}) at {Path1} and {Path2}",
-							show.Slug, registeredShow.Path, show.Path);
-						return;
-					}
+					show.Slug += $"-{show.StartAir.Value.Year}";
+					show = await LibraryManager.Create(show);
 				}
 				else
-					show = registeredShow;
-
-				if (season != null)
-					season.Show = show;
-				season = await _RegisterAndFill(season);
-
-				episode = await MetadataProvider.Get(episode);
-				episode.Season = season;
-				episode.Tracks = (await Transcoder.ExtractInfos(episode, false))
-					.Where(x => x.Type != StreamType.Attachment)
-					.ToArray();
-				await ThumbnailsManager.DownloadImages(episode);
-
-				await LibraryManager.Create(episode);
-				await LibraryManager.AddShowLink(show, library, collection);
+				{
+					throw new DuplicatedItemException($"Duplicated show found ({show.Slug}) " +
+						$"at {registeredShow.Path} and {show.Path}");
+				}
 			}
-			catch (DuplicatedItemException ex)
-			{
-				Logger.LogWarning(ex, "Duplicated found at {Path}", path);
-			}
+			else
+				show = registeredShow;
+			// If they are not already loaded, load external ids to allow metadata providers to use them.
+			if (show.ExternalIDs == null)
+				await LibraryManager.Load(show, x => x.ExternalIDs);
+			progress.Report(50);
+
+			if (season != null)
+				season.Show = show;
+			season = await _RegisterAndFill(season);
+			progress.Report(60);
+
+			episode = await MetadataProvider.Get(episode);
+			progress.Report(70);
+			episode.Show = show;
+			episode.Season = season;
+			episode.Tracks = (await Transcoder.ExtractInfos(episode, false))
+				.Where(x => x.Type != StreamType.Attachment)
+				.ToArray();
+			await ThumbnailsManager.DownloadImages(episode);
+			progress.Report(90);
+
+			await LibraryManager.Create(episode);
+			progress.Report(95);
+			await LibraryManager.AddShowLink(show, library, collection);
+			progress.Report(100);
 		}
 		
+		/// <summary>
+		/// Retrieve the equivalent item if it already exists in the database,
+		/// if it does not, fill metadata using the metadata provider, download images and register the item to the
+		/// database.
+		/// </summary>
+		/// <param name="item">The item to retrieve or fill and register</param>
+		/// <typeparam name="T">The type of the item</typeparam>
+		/// <returns>The existing or filled item.</returns>
 		private async Task<T> _RegisterAndFill<T>(T item)
 			where T : class, IResource
 		{
@@ -141,54 +145,5 @@ namespace Kyoo.Tasks
 			await ThumbnailsManager.DownloadImages(item);
 			return await LibraryManager.CreateIfNotExists(item);
 		}
-
-		/*
-		 *
-		private async Task RegisterExternalSubtitle(string path, CancellationToken token)
-		{
-			try
-			{
-				if (token.IsCancellationRequested || path.Split(Path.DirectorySeparatorChar).Contains("Subtitles"))
-					return;
-				using IServiceScope serviceScope = ServiceProvider.CreateScope();
-				ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
-
-				string patern = Config.GetValue<string>("subtitleRegex");
-				Regex regex = new(patern, RegexOptions.IgnoreCase);
-				Match match = regex.Match(path);
-
-				if (!match.Success)
-				{
-					await Console.Error.WriteLineAsync($"The subtitle at {path} does not match the subtitle's regex.");
-					return;
-				}
-
-				string episodePath = match.Groups["Episode"].Value;
-				Episode episode = await libraryManager!.Get<Episode>(x => x.Path.StartsWith(episodePath));
-				Track track = new()
-				{
-					Type = StreamType.Subtitle,
-					Language = match.Groups["Language"].Value,
-					IsDefault = match.Groups["Default"].Value.Length > 0, 
-					IsForced = match.Groups["Forced"].Value.Length > 0,
-					Codec = SubtitleExtensions[Path.GetExtension(path)],
-					IsExternal = true,
-					Path = path,
-					Episode = episode
-				};
-
-				await libraryManager.Create(track);
-				Console.WriteLine($"Registering subtitle at: {path}.");
-			}
-			catch (ItemNotFoundException)
-			{
-				await Console.Error.WriteLineAsync($"No episode found for subtitle at: ${path}.");
-			}
-			catch (Exception ex)
-			{
-				await Console.Error.WriteLineAsync($"Unknown error while registering subtitle: {ex.Message}");
-			}
-		}
-	*/
 	}
 }

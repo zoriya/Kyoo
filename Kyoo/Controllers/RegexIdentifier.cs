@@ -3,8 +3,9 @@ using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
+using Kyoo.Models.Exceptions;
 using Kyoo.Models.Options;
-using Microsoft.Extensions.Logging;
+using Kyoo.Models.Watch;
 using Microsoft.Extensions.Options;
 
 namespace Kyoo.Controllers
@@ -18,23 +19,16 @@ namespace Kyoo.Controllers
 		/// The configuration of kyoo to retrieve the identifier regex.
 		/// </summary>
 		private readonly IOptions<MediaOptions> _configuration;
-		/// <summary>
-		/// A logger to print errors.
-		/// </summary>
-		private readonly ILogger<RegexIdentifier> _logger;
 
 		/// <summary>
 		/// Create a new <see cref="RegexIdentifier"/>.
 		/// </summary>
 		/// <param name="configuration">The regex patterns to use.</param>
-		/// <param name="logger">The logger to use.</param>
-		public RegexIdentifier(IOptions<MediaOptions> configuration, ILogger<RegexIdentifier> logger)
+		public RegexIdentifier(IOptions<MediaOptions> configuration)
 		{
 			_configuration = configuration;
-			_logger = logger;
 		}
-
-
+		
 		/// <inheritdoc />
 		public Task<(Collection, Show, Season, Episode)> Identify(string path)
 		{
@@ -42,10 +36,7 @@ namespace Kyoo.Controllers
 			Match match = regex.Match(path);
 
 			if (!match.Success)
-			{
-				_logger.LogError("The episode at {Path} does not match the episode's regex", path);
-				return Task.FromResult<(Collection, Show, Season, Episode)>(default);
-			}
+				throw new IdentificationFailed($"The episode at {path} does not match the episode's regex.");
 
 			(Collection collection, Show show, Season season, Episode episode) ret = new();
 			
@@ -80,6 +71,32 @@ namespace Kyoo.Controllers
 			}
 
 			return Task.FromResult(ret);
+		}
+
+		/// <inheritdoc />
+		public Task<Track> IdentifyTrack(string path)
+		{
+			Regex regex = new(_configuration.Value.SubtitleRegex, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			Match match = regex.Match(path);
+
+			if (!match.Success)
+				throw new IdentificationFailed($"The subtitle at {path} does not match the subtitle's regex.");
+
+			string episodePath = match.Groups["Episode"].Value;
+			return Task.FromResult(new Track
+			{
+				Type = StreamType.Subtitle,
+				Language = match.Groups["Language"].Value,
+				IsDefault = match.Groups["Default"].Value.Length > 0, 
+				IsForced = match.Groups["Forced"].Value.Length > 0,
+				Codec = FileExtensions.SubtitleExtensions[Path.GetExtension(path)],
+				IsExternal = true,
+				Path = path,
+				Episode = new Episode
+				{
+					Path = episodePath
+				}
+			});
 		}
 	}
 }
