@@ -3,7 +3,6 @@ using System.IO;
 using Autofac;
 using Kyoo.Authentication;
 using Kyoo.Controllers;
-using Kyoo.Models;
 using Kyoo.Models.Options;
 using Kyoo.Postgresql;
 using Kyoo.Tasks;

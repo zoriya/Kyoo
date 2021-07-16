@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
@@ -52,6 +53,10 @@ namespace Kyoo.Tasks
 		/// </summary>
 		[Injected] public IThumbnailsManager ThumbnailsManager { private get; set; }
 		/// <summary>
+		/// The transcoder used to extract subtitles and metadata.
+		/// </summary>
+		[Injected] public ITranscoder Transcoder { private get; set; }
+		/// <summary>
 		/// The logger used to inform the current status to the console.
 		/// </summary>
 		[Injected] public ILogger<RegisterEpisode> Logger { private get; set; }
@@ -62,7 +67,7 @@ namespace Kyoo.Tasks
 			return new()
 			{
 				TaskParameter.CreateRequired<string>("path", "The path of the episode file"),
-				TaskParameter.Create<Library>("library", "The library in witch the episode is")
+				TaskParameter.CreateRequired<Library>("library", "The library in witch the episode is")
 			};
 		}
 		
@@ -74,41 +79,52 @@ namespace Kyoo.Tasks
 			
 			try
 			{
-				(Collection collection, Show show, Season season, Episode episode) = await Identifier.Identify(path);
 				if (library != null)
+				{
+					if (library.Providers == null)
+						await LibraryManager.Load(library, x => x.Providers);
 					MetadataProvider.UseProviders(library.Providers);
+				}
 
-				if (collection != null)
-					collection.Slug ??= Utility.ToSlug(collection.Name);
+				(Collection collection, Show show, Season season, Episode episode) = await Identifier.Identify(path);
+				
 				collection = await _RegisterAndFill(collection);
-				show = await _RegisterAndFill(show);
-				// if (isMovie)
-				// 	await libraryManager!.Create(await GetMovie(show, path));
-				// else
-				// {
-				// 	Season season = seasonNumber != null 
-				// 		? await GetSeason(libraryManager, show, seasonNumber.Value, library)
-				// 		: null;
-				// 	Episode episode = await GetEpisode(libraryManager,
-				// 		show,
-				// 		season,
-				// 		episodeNumber,
-				// 		absoluteNumber,
-				// 		path,
-				// 		library);
-				// 	await libraryManager!.Create(episode);
-				// }
-				//
-				// await libraryManager.AddShowLink(show, library, collection);
-				// Console.WriteLine($"Episode at {path} registered.");
+				
+				Show registeredShow = await _RegisterAndFill(show);
+				if (registeredShow.Path != show.Path)
+				{
+					if (show.StartAir.HasValue)
+					{
+						show.Slug += $"-{show.StartAir.Value.Year}";
+						show = await LibraryManager.Create(show);
+					}
+					else
+					{
+						Logger.LogError("Duplicated show found ({Slug}) at {Path1} and {Path2}",
+							show.Slug, registeredShow.Path, show.Path);
+						return;
+					}
+				}
+				else
+					show = registeredShow;
+
+				if (season != null)
+					season.Show = show;
+				season = await _RegisterAndFill(season);
+
+				episode = await MetadataProvider.Get(episode);
+				episode.Season = season;
+				episode.Tracks = (await Transcoder.ExtractInfos(episode, false))
+					.Where(x => x.Type != StreamType.Attachment)
+					.ToArray();
+				await ThumbnailsManager.DownloadImages(episode);
+
+				await LibraryManager.Create(episode);
+				await LibraryManager.AddShowLink(show, library, collection);
 			}
 			catch (DuplicatedItemException ex)
 			{
 				Logger.LogWarning(ex, "Duplicated found at {Path}", path);
-			}
-			catch (Exception ex)
-			{
-				Logger.LogCritical(ex, "Unknown exception thrown while registering episode at {Path}", path);
 			}
 		}
 		
@@ -125,49 +141,7 @@ namespace Kyoo.Tasks
 			await ThumbnailsManager.DownloadImages(item);
 			return await LibraryManager.CreateIfNotExists(item);
 		}
-		
-		// private async Task<Show> GetShow(ILibraryManager libraryManager, 
-		// 	string showTitle, 
-		// 	string showPath,
-		// 	bool isMovie, 
-		// 	Library library)
-		// {
-		// 	Show old = await libraryManager.GetOrDefault<Show>(x => x.Path == showPath);
-		// 	if (old != null)
-		// 	{
-		// 		await libraryManager.Load(old, x => x.ExternalIDs);
-		// 		return old;
-		// 	}
-		//
-		// 	Show show = await MetadataProvider.SearchShow(showTitle, isMovie, library);
-		// 	show.Path = showPath;
-		// 	show.People = await MetadataProvider.GetPeople(show, library);
-		//
-		// 	try
-		// 	{
-		// 		show = await libraryManager.Create(show);
-		// 	}
-		// 	catch (DuplicatedItemException)
-		// 	{
-		// 		old = await libraryManager.GetOrDefault<Show>(show.Slug);
-		// 		if (old != null && old.Path == showPath)
-		// 		{
-		// 			await libraryManager.Load(old, x => x.ExternalIDs);
-		// 			return old;
-		// 		}
-		//
-		// 		if (show.StartAir != null)
-		// 		{
-		// 			show.Slug += $"-{show.StartAir.Value.Year}";
-		// 			await libraryManager.Create(show);
-		// 		}
-		// 		else
-		// 			throw;
-		// 	}
-		// 	await ThumbnailsManager.Validate(show);
-		// 	return show;
-		// }
-		//
+
 		/*
 		 *
 		private async Task RegisterExternalSubtitle(string path, CancellationToken token)
@@ -214,83 +188,6 @@ namespace Kyoo.Tasks
 			{
 				await Console.Error.WriteLineAsync($"Unknown error while registering subtitle: {ex.Message}");
 			}
-		}
-
-		private async Task<Season> GetSeason(ILibraryManager libraryManager, 
-			Show show, 
-			int seasonNumber, 
-			Library library)
-		{
-			try
-			{
-				Season season = await libraryManager.Get(show.Slug, seasonNumber);
-				season.Show = show;
-				return season;
-			}
-			catch (ItemNotFoundException)
-			{
-				Season season = new();//await MetadataProvider.GetSeason(show, seasonNumber, library);
-				try
-				{
-					await libraryManager.Create(season);
-					await ThumbnailsManager.Validate(season);
-				}
-				catch (DuplicatedItemException)
-				{
-					season = await libraryManager.Get(show.Slug, seasonNumber);
-				}
-				season.Show = show;
-				return season;
-			}
-		}
-		
-		private async Task<Episode> GetEpisode(ILibraryManager libraryManager, 
-			Show show, 
-			Season season,
-			int? episodeNumber,
-			int? absoluteNumber, 
-			string episodePath, 
-			Library library)
-		{
-			Episode episode = new();
-			//await MetadataProvider.GetEpisode(show,
-			//	episodePath, 
-			//	season?.SeasonNumber, 
-			//	episodeNumber,
-			//	absoluteNumber,
-			//	library);
-
-			if (episode.SeasonNumber != null)
-			{
-				season ??= await GetSeason(libraryManager, show, episode.SeasonNumber.Value, library);
-				episode.Season = season;
-				episode.SeasonID = season?.ID;
-			}
-			await ThumbnailsManager.Validate(episode);
-			await GetTracks(episode);
-			return episode;
-		}
-
-		private async Task<Episode> GetMovie(Show show, string episodePath)
-		{
-			Episode episode = new()
-			{
-				Title = show.Title,
-				Path = episodePath,
-				Show = show,
-				ShowID = show.ID,
-				ShowSlug = show.Slug
-			};
-			episode.Tracks = await GetTracks(episode);
-			return episode;
-		}
-
-		private async Task<ICollection<Track>> GetTracks(Episode episode)
-		{
-			episode.Tracks = (await Transcoder.ExtractInfos(episode, false))
-				.Where(x => x.Type != StreamType.Attachment)
-				.ToArray();
-			return episode.Tracks;
 		}
 	*/
 	}

@@ -38,8 +38,7 @@ namespace Kyoo.Controllers
 		/// <inheritdoc />
 		public Task<(Collection, Show, Season, Episode)> Identify(string path)
 		{
-			string pattern = _configuration.Value.Regex;
-			Regex regex = new(pattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+			Regex regex = new(_configuration.Value.Regex, RegexOptions.IgnoreCase | RegexOptions.Compiled);
 			Match match = regex.Match(path);
 
 			if (!match.Success)
@@ -51,9 +50,12 @@ namespace Kyoo.Controllers
 			(Collection collection, Show show, Season season, Episode episode) ret = new();
 			
 			ret.collection.Name = match.Groups["Collection"].Value;
+			ret.collection.Slug = Utility.ToSlug(ret.collection.Name);
 			
 			ret.show.Title = match.Groups["Show"].Value;
+			ret.show.Slug = Utility.ToSlug(ret.show.Title);
 			ret.show.Path = Path.GetDirectoryName(path);
+			ret.episode.Path = path;
 
 			if (match.Groups["StartYear"].Success && int.TryParse(match.Groups["StartYear"].Value, out int tmp))
 				ret.show.StartAir = new DateTime(tmp, 1, 1);
@@ -70,9 +72,13 @@ namespace Kyoo.Controllers
 			if (match.Groups["Absolute"].Success && int.TryParse(match.Groups["Absolute"].Value, out tmp))
 				ret.episode.AbsoluteNumber = tmp;
 
-			ret.show.IsMovie = ret.episode.SeasonNumber == null && ret.episode.EpisodeNumber == null 
-			                   && ret.episode.AbsoluteNumber == null;
-			
+			if (ret.episode.SeasonNumber == null && ret.episode.EpisodeNumber == null
+				&& ret.episode.AbsoluteNumber == null)
+			{
+				ret.show.IsMovie = true;
+				ret.episode.Title = ret.show.Title;
+			}
+
 			return Task.FromResult(ret);
 		}
 	}
