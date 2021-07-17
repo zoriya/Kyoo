@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Autofac;
 using Kyoo.Controllers;
+using TvDbSharper;
 
 namespace Kyoo.TheTvdb
 {
@@ -35,6 +36,7 @@ namespace Kyoo.TheTvdb
 		/// <inheritdoc />
 		public void Configure(ContainerBuilder builder)
 		{
+			builder.RegisterType<TvDbClient>().As<ITvDbClient>();
 			builder.RegisterProvider<ProviderTvdb>();
 		}
 	}

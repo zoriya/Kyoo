@@ -4,8 +4,14 @@ using System.Linq;
 
 namespace Kyoo.Models.Watch
 {
+	/// <summary>
+	/// A static class allowing one to identify files extensions.
+	/// </summary>
 	public static class FileExtensions
 	{
+		/// <summary>
+		/// The list of known video extensions
+		/// </summary>
 		public static readonly string[] VideoExtensions =
 		{
 			".webm",
@@ -34,17 +40,30 @@ namespace Kyoo.Models.Watch
 			".3g2"
 		};
 
+		/// <summary>
+		/// Check if a file represent a video file (only by checking the extension of the file)
+		/// </summary>
+		/// <param name="filePath">The path of the file to check</param>
+		/// <returns><c>true</c> if the file is a video file, <c>false</c> otherwise.</returns>
 		public static bool IsVideo(string filePath)
 		{
 			return VideoExtensions.Contains(Path.GetExtension(filePath));
 		}
 		
+		/// <summary>
+		/// The dictionary of known subtitles extensions and the name of the subtitle codec.
+		/// </summary>
 		public static readonly Dictionary<string, string> SubtitleExtensions = new()
 		{
 			{".ass", "ass"},
 			{".str", "subrip"}
 		};
 
+		/// <summary>
+		/// Check if a file represent a subtitle  file (only by checking the extension of the file)
+		/// </summary>
+		/// <param name="filePath">The path of the file to check</param>
+		/// <returns><c>true</c> if the file is a subtitle file, <c>false</c> otherwise.</returns>
 		public static bool IsSubtitle(string filePath)
 		{
 			return SubtitleExtensions.ContainsKey(Path.GetExtension(filePath));

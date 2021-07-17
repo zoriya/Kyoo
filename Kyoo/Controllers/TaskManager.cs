@@ -144,7 +144,7 @@ namespace Kyoo.Controllers
 			ICollection<TaskParameter> all = task.GetParameters();
 
 			ICollection<string> invalids = arguments.Keys
-				.Where(x => all.Any(y => x != y.Name))
+				.Where(x => all.All(y => x != y.Name))
 				.ToArray();
 			if (invalids.Any())
 			{

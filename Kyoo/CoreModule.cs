@@ -38,7 +38,9 @@ namespace Kyoo
 			typeof(IThumbnailsManager),
 			typeof(IMetadataProvider),
 			typeof(ITaskManager),
-			typeof(ILibraryManager)
+			typeof(ILibraryManager),
+			typeof(IIdentifier),
+			typeof(AProviderComposite)
 		};
 
 		/// <inheritdoc />
@@ -99,9 +101,14 @@ namespace Kyoo
 			builder.RegisterType<ThumbnailsManager>().As<IThumbnailsManager>().SingleInstance();
 			builder.RegisterType<TaskManager>().As<ITaskManager>().SingleInstance();
 			builder.RegisterType<LibraryManager>().As<ILibraryManager>().InstancePerLifetimeScope();
-			builder.RegisterComposite<ProviderComposite, IMetadataProvider>().InstancePerLifetimeScope();
-			
+			builder.RegisterType<RegexIdentifier>().As<IIdentifier>().SingleInstance();
+			builder.RegisterComposite<ProviderComposite, IMetadataProvider>();
+			builder.Register(x => (AProviderComposite)x.Resolve<IMetadataProvider>());
+
 			builder.RegisterTask<Crawler>();
+			builder.RegisterTask<Housekeeping>();
+			builder.RegisterTask<RegisterEpisode>();
+			builder.RegisterTask<RegisterSubtitle>();
 
 			static bool DatabaseIsPresent(IComponentRegistryBuilder x)
 				=> x.IsRegistered(new TypedService(typeof(DatabaseContext)));

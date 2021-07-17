@@ -20,6 +20,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
+		<PackageReference Include="Microsoft.Extensions.Options" Version="5.0.0" />
 		<PackageReference Include="TvDbSharper" Version="3.2.2" />
 	</ItemGroup>
 	

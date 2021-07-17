@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Kyoo.Authentication.Models;
 using Kyoo.Controllers;
 using Kyoo.Models;
+using Microsoft.Extensions.Options;
 using TvDbSharper;
 using TvDbSharper.Dto;
 
@@ -18,12 +20,12 @@ namespace Kyoo.TheTvdb
 		/// <summary>
 		/// The internal tvdb client used to make requests.
 		/// </summary>
-		private readonly TvDbClient _client = new();
+		private readonly ITvDbClient _client;
 
 		/// <summary>
 		/// The API key used to authenticate with the tvdb API.
 		/// </summary>
-		private readonly string _apiKey;
+		private readonly IOptions<TvdbOption> _apiKey;
 
 		/// <inheritdoc />
 		public Provider Provider => new()
@@ -35,15 +37,24 @@ namespace Kyoo.TheTvdb
 		};
 		
 		
-		public ProviderTvdb(string apiKey)
+		/// <summary>
+		/// Create a new <see cref="ProviderTvdb"/> using a tvdb client and an api key.
+		/// </summary>
+		/// <param name="client">The tvdb client to use</param>
+		/// <param name="apiKey">The api key</param>
+		public ProviderTvdb(ITvDbClient client, IOptions<TvdbOption> apiKey)
 		{
+			_client = client;
 			_apiKey = apiKey;
 		}
 
+		/// <summary>
+		/// Authenticate and refresh the token of the tvdb client.
+		/// </summary>
 		private Task _Authenticate()
 		{
 			if (_client.Authentication.Token == null)
-				return _client.Authentication.AuthenticateAsync(_apiKey);
+				return _client.Authentication.AuthenticateAsync(_apiKey.Value.ApiKey);
 			return _client.Authentication.RefreshTokenAsync();
 		}
 		
