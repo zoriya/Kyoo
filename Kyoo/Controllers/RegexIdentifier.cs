@@ -30,10 +30,10 @@ namespace Kyoo.Controllers
 		}
 		
 		/// <inheritdoc />
-		public Task<(Collection, Show, Season, Episode)> Identify(string path)
+		public Task<(Collection, Show, Season, Episode)> Identify(string path, string relativePath)
 		{
 			Regex regex = new(_configuration.Value.Regex, RegexOptions.IgnoreCase | RegexOptions.Compiled);
-			Match match = regex.Match(path);
+			Match match = regex.Match(relativePath);
 
 			if (!match.Success)
 				throw new IdentificationFailed($"The episode at {path} does not match the episode's regex.");
@@ -84,10 +84,10 @@ namespace Kyoo.Controllers
 		}
 
 		/// <inheritdoc />
-		public Task<Track> IdentifyTrack(string path)
+		public Task<Track> IdentifyTrack(string path, string relativePath)
 		{
 			Regex regex = new(_configuration.Value.SubtitleRegex, RegexOptions.IgnoreCase | RegexOptions.Compiled);
-			Match match = regex.Match(path);
+			Match match = regex.Match(relativePath);
 
 			if (!match.Success)
 				throw new IdentificationFailed($"The subtitle at {path} does not match the subtitle's regex.");

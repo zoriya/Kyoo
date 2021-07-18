@@ -35,8 +35,8 @@ namespace Kyoo.Models
 			{
 				string type = Type.ToString().ToLower();
 				string index = TrackIndex != 0 ? $"-{TrackIndex}" : string.Empty;
-				string episode = EpisodeSlug ?? Episode.Slug ?? EpisodeID.ToString();
-				return $"{episode}.{Language}{index}{(IsForced ? ".forced" : "")}.{type}";
+				string episode = EpisodeSlug ?? Episode?.Slug ?? EpisodeID.ToString();
+				return $"{episode}.{Language ?? "und"}{index}{(IsForced ? ".forced" : "")}.{type}";
 			}
 			[UsedImplicitly] private set
 			{
@@ -47,11 +47,13 @@ namespace Kyoo.Models
 
 				if (!match.Success)
 					throw new ArgumentException("Invalid track slug. " +
-					                            "Format: {episodeSlug}.{language}[-{index}][-forced].{type}[.{extension}]");
+					                            "Format: {episodeSlug}.{language}[-{index}][.forced].{type}[.{extension}]");
 
 				EpisodeSlug = match.Groups["ep"].Value;
 				Language = match.Groups["lang"].Value;
-				TrackIndex = int.Parse(match.Groups["index"].Value);
+				if (Language == "und")
+					Language = null;
+				TrackIndex = match.Groups["index"].Success ? int.Parse(match.Groups["index"].Value) : 0;
 				IsForced = match.Groups["forced"].Success;
 				Type = Enum.Parse<StreamType>(match.Groups["type"].Value, true);
 			}

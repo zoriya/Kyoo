@@ -62,6 +62,8 @@ namespace Kyoo.Tasks
 			return new()
 			{
 				TaskParameter.CreateRequired<string>("path", "The path of the episode file"),
+				TaskParameter.CreateRequired<string>("relativePath",
+					"The path of the episode file relative to the library root. It starts with a /."),
 				TaskParameter.CreateRequired<Library>("library", "The library in witch the episode is")
 			};
 		}
@@ -70,13 +72,15 @@ namespace Kyoo.Tasks
 		public async Task Run(TaskParameters arguments, IProgress<float> progress, CancellationToken cancellationToken)
 		{
 			string path = arguments["path"].As<string>();
+			string relativePath = arguments["relativePath"].As<string>();
 			Library library = arguments["library"].As<Library>();
 			progress.Report(0);
 			
 			if (library.Providers == null)
 				await LibraryManager.Load(library, x => x.Providers);
 			MetadataProvider.UseProviders(library.Providers);
-			(Collection collection, Show show, Season season, Episode episode) = await Identifier.Identify(path);
+			(Collection collection, Show show, Season season, Episode episode) = await Identifier.Identify(path, 
+				relativePath);
 			progress.Report(15);
 			
 			collection = await _RegisterAndFill(collection);
@@ -105,6 +109,7 @@ namespace Kyoo.Tasks
 
 			if (season != null)
 				season.Show = show;
+
 			season = await _RegisterAndFill(season);
 			progress.Report(60);
 

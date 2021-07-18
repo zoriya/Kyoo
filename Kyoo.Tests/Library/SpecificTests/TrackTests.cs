@@ -47,5 +47,20 @@ namespace Kyoo.Tests.Library
 			Track track = await _repository.Get(1);
 			Assert.Equal("new-slug-s1e1.eng-1.subtitle", track.Slug);
 		}
+		
+		[Fact]
+		public async Task UndefinedLanguageSlugTest()
+		{
+			await _repository.Create(new Track
+			{
+				ID = 5,
+				TrackIndex = 0,
+				Type = StreamType.Video,
+				Language = null,
+				EpisodeID = TestSample.Get<Episode>().ID
+			});
+			Track track = await _repository.Get(5);
+			Assert.Equal("anohana-s1e1.und.video", track.Slug);
+		}
 	}
 }

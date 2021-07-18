@@ -48,7 +48,9 @@ namespace Kyoo.Tasks
 		{
 			return new()
 			{
-				TaskParameter.CreateRequired<string>("path", "The path of the episode file"),
+				TaskParameter.CreateRequired<string>("path", "The path of the subtitle file"),
+				TaskParameter.CreateRequired<string>("relativePath",
+					"The path of the subtitle file relative to the library root. It starts with a /.")
 			};
 		}
 		
@@ -56,9 +58,10 @@ namespace Kyoo.Tasks
 		public async Task Run(TaskParameters arguments, IProgress<float> progress, CancellationToken cancellationToken)
 		{
 			string path = arguments["path"].As<string>();
+			string relativePath = arguments["relativePath"].As<string>();
 			
 			progress.Report(0);
-			Track track = await Identifier.IdentifyTrack(path);
+			Track track = await Identifier.IdentifyTrack(path, relativePath);
 			progress.Report(25);
 			
 			if (track.Episode == null)

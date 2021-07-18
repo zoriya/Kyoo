@@ -61,14 +61,14 @@ namespace Kyoo.SqLite.Migrations
 						  AND Language = new.Language AND IsForced = new.IsForced
 					) WHERE ID = new.ID AND TrackIndex = 0;
 				UPDATE Tracks SET Slug = (SELECT Slug FROM Episodes WHERE ID = EpisodeID) ||
-						'.' || Language ||
+						'.' || COALESCE(Language, 'und') ||
 						CASE (TrackIndex)
 							WHEN 0 THEN ''
 							ELSE '-' || (TrackIndex)
 						END ||
 						CASE (IsForced)
 							WHEN false THEN ''
-							ELSE '-forced'
+							ELSE '.forced'
 						END ||
 						CASE (Type)
 							WHEN 1 THEN '.video'
@@ -98,7 +98,7 @@ namespace Kyoo.SqLite.Migrations
 						END ||
 						CASE (IsForced)
 							WHEN false THEN ''
-							ELSE '-forced'
+							ELSE '.forced'
 						END ||
 						CASE (Type)
 							WHEN 1 THEN '.video'
@@ -123,7 +123,7 @@ namespace Kyoo.SqLite.Migrations
 						END ||
 						CASE (IsForced)
 							WHEN false THEN ''
-							ELSE '-forced'
+							ELSE '.forced'
 						END ||
 						CASE (Type)
 							WHEN 1 THEN '.video'

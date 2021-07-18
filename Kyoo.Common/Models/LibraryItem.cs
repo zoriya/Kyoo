@@ -58,7 +58,7 @@ namespace Kyoo.Models
 		/// By default, the http path for this poster is returned from the public API.
 		/// This can be disabled using the internal query flag.
 		/// </summary>
-		[SerializeAs("{HOST}/api/{Type}/{Slug}/poster")] public string Poster { get; set; }
+		[SerializeAs("{HOST}/api/{Type:l}/{Slug}/poster")] public string Poster { get; set; }
 		
 		/// <summary>
 		/// The type of this item (ether a collection, a show or a movie).

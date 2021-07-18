@@ -115,9 +115,10 @@ namespace Kyoo.Controllers
 		
 		public object GetValue(object target)
 		{
-			return Regex.Replace(_format, @"(?<!{){(\w+)}", x =>
+			return Regex.Replace(_format, @"(?<!{){(\w+)(:(\w+))?}", x =>
 			{
 				string value = x.Groups[1].Value;
+				string modifier = x.Groups[3].Value;
 
 				if (value == "HOST")
 					return _host;
@@ -127,9 +128,22 @@ namespace Kyoo.Controllers
 					.FirstOrDefault(y => y.Name == value);
 				if (properties == null)
 					return null;
-				if (properties.GetValue(target) is string ret)
-					return ret;
-				throw new ArgumentException($"Invalid serializer replacement {value}");
+				object objValue = properties.GetValue(target);
+				if (objValue is not string ret)
+					ret = objValue?.ToString();
+				if (ret == null)
+					throw new ArgumentException($"Invalid serializer replacement {value}");
+
+				foreach (char modification in modifier)
+				{
+					ret = modification switch
+					{
+						'l' => ret.ToLowerInvariant(),
+						'u' => ret.ToUpperInvariant(),
+						_ => throw new ArgumentException($"Invalid serializer modificator {modification}.")
+					};
+				}
+				return ret;
 			});
 		}
 		

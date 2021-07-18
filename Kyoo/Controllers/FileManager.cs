@@ -98,7 +98,7 @@ namespace Kyoo.Controllers
 		/// <inheritdoc />
 		public Task<bool> Exists(string path)
 		{
-			return Task.FromResult(File.Exists(path));
+			return Task.FromResult(File.Exists(path) || Directory.Exists(path));
 		}
 		
 		/// <inheritdoc />

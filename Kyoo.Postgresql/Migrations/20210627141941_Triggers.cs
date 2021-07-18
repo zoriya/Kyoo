@@ -91,7 +91,7 @@ namespace Kyoo.Postgresql.Migrations
 					END,
 					CASE (is_forced)
 						WHEN false THEN ''
-						ELSE '-forced'
+						ELSE '.forced'
 					END,
 					'.', type
 				) WHERE episode_id = NEW.id;
@@ -117,14 +117,14 @@ namespace Kyoo.Postgresql.Migrations
 				END IF;
 				NEW.slug := CONCAT(
 					(SELECT slug FROM episodes WHERE id = NEW.episode_id),
-					'.', NEW.language,
+					'.', COALESCE(NEW.language, 'und'),
 					CASE (NEW.track_index)
 						WHEN 0 THEN ''
 						ELSE CONCAT('-', NEW.track_index)
 					END,
 					CASE (NEW.is_forced)
 						WHEN false THEN ''
-						ELSE '-forced'
+						ELSE '.forced'
 					END,
 					'.', NEW.type
 				);

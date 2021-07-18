@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Kyoo.Models.Attributes;
+using Microsoft.Extensions.Logging;
 
 namespace Kyoo.Tasks
 {
@@ -39,6 +40,10 @@ namespace Kyoo.Tasks
 		/// The file manager used walk inside directories and check they existences. 
 		/// </summary>
 		[Injected] public IFileManager FileManager { private get; set; }
+		/// <summary>
+		/// The logger used to inform the user that episodes has been removed. 
+		/// </summary>
+		[Injected] public ILogger<Housekeeping> Logger { private get; set; }
 
 		
 		/// <inheritdoc />
@@ -55,6 +60,8 @@ namespace Kyoo.Tasks
 				
 				if (await FileManager.Exists(show.Path))
 					continue;
+				Logger.LogWarning("Show {Name}'s folder has been deleted (was {Path}), removing it from kyoo", 
+					show.Title, show.Path);
 				await LibraryManager.Delete(show);
 			}
 
@@ -65,6 +72,8 @@ namespace Kyoo.Tasks
 				
 				if (await FileManager.Exists(episode.Path))
 					continue;
+				Logger.LogWarning("Episode {Slug}'s file has been deleted (was {Path}), removing it from kyoo", 
+					episode.Slug, episode.Path);
 				await LibraryManager.Delete(episode);
 			}
 			
