@@ -38,30 +38,40 @@ namespace Kyoo.Controllers
 			if (!match.Success)
 				throw new IdentificationFailed($"The episode at {path} does not match the episode's regex.");
 
-			(Collection collection, Show show, Season season, Episode episode) ret = new();
-			
-			ret.collection.Name = match.Groups["Collection"].Value;
-			ret.collection.Slug = Utility.ToSlug(ret.collection.Name);
-			
-			ret.show.Title = match.Groups["Show"].Value;
-			ret.show.Slug = Utility.ToSlug(ret.show.Title);
-			ret.show.Path = Path.GetDirectoryName(path);
-			ret.episode.Path = path;
+			(Collection collection, Show show, Season season, Episode episode) ret = (
+				collection: new Collection
+				{
+					Slug = Utility.ToSlug(match.Groups["Collection"].Value),
+					Name = match.Groups["Collection"].Value
+				},
+				show: new Show
+				{
+					Slug = Utility.ToSlug(match.Groups["Show"].Value),
+					Title = match.Groups["Show"].Value,
+					Path = Path.GetDirectoryName(path),
+					StartAir = match.Groups["StartYear"].Success 
+						? new DateTime(int.Parse(match.Groups["StartYear"].Value), 1, 1) 
+						: null
+				},
+				season: null,
+				episode: new Episode
+				{
+					SeasonNumber = match.Groups["Season"].Success 
+						? int.Parse(match.Groups["Season"].Value) 
+						: null,
+					EpisodeNumber = match.Groups["Episode"].Success 
+						? int.Parse(match.Groups["Episode"].Value) 
+						: null,
+					AbsoluteNumber = match.Groups["Absolute"].Success 
+						? int.Parse(match.Groups["Absolute"].Value) 
+						: null,
+					Path = path
+				}
+			);
 
-			if (match.Groups["StartYear"].Success && int.TryParse(match.Groups["StartYear"].Value, out int tmp))
-				ret.show.StartAir = new DateTime(tmp, 1, 1);
-			
-			if (match.Groups["Season"].Success && int.TryParse(match.Groups["Season"].Value, out tmp))
-			{
-				ret.season.SeasonNumber = tmp;
-				ret.episode.SeasonNumber = tmp;
-			}
+			if (ret.episode.SeasonNumber.HasValue)
+				ret.season = new Season { SeasonNumber = ret.episode.SeasonNumber.Value };
 
-			if (match.Groups["Episode"].Success && int.TryParse(match.Groups["Episode"].Value, out tmp))
-				ret.episode.EpisodeNumber = tmp;
-			
-			if (match.Groups["Absolute"].Success && int.TryParse(match.Groups["Absolute"].Value, out tmp))
-				ret.episode.AbsoluteNumber = tmp;
 
 			if (ret.episode.SeasonNumber == null && ret.episode.EpisodeNumber == null
 				&& ret.episode.AbsoluteNumber == null)
