@@ -22,7 +22,7 @@ namespace Kyoo.Controllers
 		/// <summary>
 		/// The service provider. It allow plugin's activation.
 		/// </summary>
-		private readonly IServiceProvider _provider;
+		private IServiceProvider _provider;
 		/// <summary>
 		/// The configuration to get the plugin's directory.
 		/// </summary>
@@ -50,6 +50,13 @@ namespace Kyoo.Controllers
 			_provider = provider;
 			_options = options;
 			_logger = logger;
+		}
+
+		public void SetProvider(IServiceProvider provider)
+		{
+			// TODO temporary bullshit to inject services before the configure asp net.
+			// TODO should rework this when the host will be reworked, as well as the asp net configure.
+			_provider = provider;
 		}
 
 
@@ -128,6 +135,7 @@ namespace Kyoo.Controllers
 				_logger.LogInformation("Plugin enabled: {Plugins}", _plugins.Select(x => x.Name));
 		}
 
+		/// <inheritdoc />
 		public void ConfigureContainer(ContainerBuilder builder)
 		{
 			foreach (IPlugin plugin in _plugins)
@@ -146,7 +154,11 @@ namespace Kyoo.Controllers
 		public void ConfigureAspnet(IApplicationBuilder app)
 		{
 			foreach (IPlugin plugin in _plugins)
+			{
+				using IServiceScope scope = _provider.CreateScope();
+				Helper.InjectServices(plugin, x => scope.ServiceProvider.GetRequiredService(x));
 				plugin.ConfigureAspNet(app);
+			}
 		}
 
 		/// <summary>

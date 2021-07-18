@@ -71,7 +71,6 @@ namespace Kyoo
 			
 			services.AddHttpClient();
 			
-			// services.AddTransient(typeof(Lazy<>), typeof(LazyDi<>));
 			_plugins.ConfigureServices(services);
 		}
 
@@ -87,7 +86,7 @@ namespace Kyoo
 		/// </summary>
 		/// <param name="app">The asp net host to configure</param>
 		/// <param name="env">The host environment (is the app in development mode?)</param>
-		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+		public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider provider)
 		{
 			if (env.IsDevelopment())
 				app.UseDeveloperExceptionPage();
@@ -114,7 +113,9 @@ namespace Kyoo
 				return next();
 			});
 			app.UseResponseCompression();
-			
+
+			if (_plugins is PluginManager manager)
+				manager.SetProvider(provider);
 			_plugins.ConfigureAspnet(app);
 
 			app.UseSpa(spa =>

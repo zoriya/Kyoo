@@ -13,6 +13,21 @@ namespace Kyoo.Controllers
 	public interface IConfigurationManager
 	{
 		/// <summary>
+		/// Add an editable configuration to the editable configuration list
+		/// </summary>
+		/// <param name="path">The root path of the editable configuration. It should not be a nested type.</param>
+		/// <typeparam name="T">The type of the configuration</typeparam>
+		void AddTyped<T>(string path);
+		
+		/// <summary>
+		/// Add an editable configuration to the editable configuration list.
+		/// WARNING: this method allow you to add an unmanaged type. This type won't be editable. This can be used
+		/// for external libraries or variable arguments.
+		/// </summary>
+		/// <param name="path">The root path of the editable configuration. It should not be a nested type.</param>
+		void AddUntyped(string path);
+		
+		/// <summary>
 		/// Get the value of a setting using it's path.
 		/// </summary>
 		/// <param name="path">The path of the resource (can be separated by ':' or '__')</param>

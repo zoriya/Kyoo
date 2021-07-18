@@ -165,27 +165,12 @@ namespace Kyoo.Controllers
 				}));
 
 			using IServiceScope scope = _provider.CreateScope();
-			InjectServices(task, x => scope.ServiceProvider.GetRequiredService(x));
+			Helper.InjectServices(task, x => scope.ServiceProvider.GetRequiredService(x));
 			await task.Run(args, progress, _taskToken.Token);
-			InjectServices(task, _ => null);
+			Helper.InjectServices(task, _ => null);
 			_logger.LogInformation("Task finished: {Task}", task.Name);
 		}
 
-		/// <summary>
-		/// Inject services into the <see cref="InjectedAttribute"/> marked properties of the given object.
-		/// </summary>
-		/// <param name="obj">The object to inject</param>
-		/// <param name="retrieve">The function used to retrieve services. (The function is called immediately)</param>
-		private static void InjectServices(ITask obj, [InstantHandle] Func<Type, object> retrieve)
-		{
-			IEnumerable<PropertyInfo> properties = obj.GetType().GetProperties()
-				.Where(x => x.GetCustomAttribute<InjectedAttribute>() != null)
-				.Where(x => x.CanWrite);
-
-			foreach (PropertyInfo property in properties)
-				property.SetValue(obj, retrieve(property.PropertyType));
-		}
-		
 		/// <summary>
 		/// Start tasks that are scheduled for start.
 		/// </summary>
