@@ -45,8 +45,6 @@ namespace Kyoo.Api
 		{
 			try
 			{
-				// TODO This won't work with the local repository implementation.
-				// TODO Implement something like this (a dotnet-ef's QueryCompilationContext): https://stackoverflow.com/questions/62687811/how-can-i-convert-a-custom-function-to-a-sql-expression-for-entity-framework-cor
 				return await _libraryManager.Get<Episode>(x => x.Tracks.Any(y => y.Slug == slug));
 			}
 			catch (ItemNotFoundException)

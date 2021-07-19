@@ -9,8 +9,14 @@ namespace Kyoo.Tests
 		private static readonly Dictionary<Type, Func<object>> NewSamples = new()
 		{
 			{
-				typeof(Show),
-				() => new Show()
+				typeof(Library),
+				() => new Library
+				{
+					ID = 2,
+					Slug = "new-library",
+					Name = "New Library",
+					Paths = new [] {"/a/random/path"}
+				}
 			}
 		};
 		
@@ -18,8 +24,8 @@ namespace Kyoo.Tests
 		private static readonly Dictionary<Type, Func<object>> Samples = new()
 		{
 			{
-				typeof(Models.Library),
-				() => new Models.Library
+				typeof(Library),
+				() => new Library
 				{
 					ID = 1,
 					Slug = "deck",

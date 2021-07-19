@@ -150,6 +150,7 @@ namespace Kyoo.Tasks
 				
 				string[] subtitles = files
 					.Where(FileExtensions.IsSubtitle)
+					.Where(x => x.Contains("/Extra/"))
 					.Where(x => tracks.All(y => y.Path != x))
 					.ToArray();
 				percent = 0;

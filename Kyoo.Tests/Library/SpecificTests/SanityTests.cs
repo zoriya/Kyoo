@@ -5,7 +5,7 @@ using Kyoo.Models;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Kyoo.Tests.Library
+namespace Kyoo.Tests.Database
 {
 	public class GlobalTests : IDisposable, IAsyncDisposable
 	{

@@ -87,7 +87,7 @@ namespace Kyoo.Controllers
 		public Task<Track> IdentifyTrack(string path, string relativePath)
 		{
 			Regex regex = new(_configuration.Value.SubtitleRegex, RegexOptions.IgnoreCase | RegexOptions.Compiled);
-			Match match = regex.Match(relativePath);
+			Match match = regex.Match(path);
 
 			if (!match.Success)
 				throw new IdentificationFailed($"The subtitle at {path} does not match the subtitle's regex.");

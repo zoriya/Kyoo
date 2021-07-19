@@ -3,7 +3,7 @@ using Kyoo.Models;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Kyoo.Tests.Library
+namespace Kyoo.Tests.Database
 {
 	namespace SqLite
 	{

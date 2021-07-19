@@ -176,6 +176,7 @@ namespace Kyoo.Models
 			return new WatchItem
 			{
 				EpisodeID = ep.ID,
+				Slug = ep.Slug,
 				ShowSlug = ep.Show.Slug,
 				SeasonNumber = ep.SeasonNumber,
 				EpisodeNumber = ep.EpisodeNumber,
@@ -183,6 +184,7 @@ namespace Kyoo.Models
 				Title = ep.Title,
 				ReleaseDate = ep.ReleaseDate,
 				Path = ep.Path,
+				Container = PathIO.GetExtension(ep.Path)![1..],
 				Video = ep.Tracks.FirstOrDefault(x => x.Type == StreamType.Video),
 				Audios = ep.Tracks.Where(x => x.Type == StreamType.Audio).ToArray(),
 				Subtitles = ep.Tracks.Where(x => x.Type == StreamType.Subtitle).ToArray(), 

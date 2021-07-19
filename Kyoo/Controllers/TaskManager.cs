@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
-using Kyoo.Models.Attributes;
 using Kyoo.Models.Exceptions;
 using Kyoo.Models.Options;
 using Microsoft.Extensions.DependencyInjection;
@@ -111,6 +109,10 @@ namespace Kyoo.Controllers
 					try
 					{
 						await RunTask(task, progress, args);
+					}
+					catch (TaskFailedException ex)
+					{
+						_logger.LogWarning("The task \"{Task}\" failed: {Message}", task.Name, ex.Message);
 					}
 					catch (Exception e)
 					{

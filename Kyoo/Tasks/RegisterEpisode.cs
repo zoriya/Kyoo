@@ -79,54 +79,66 @@ namespace Kyoo.Tasks
 			if (library.Providers == null)
 				await LibraryManager.Load(library, x => x.Providers);
 			MetadataProvider.UseProviders(library.Providers);
-			(Collection collection, Show show, Season season, Episode episode) = await Identifier.Identify(path, 
-				relativePath);
-			progress.Report(15);
-			
-			collection = await _RegisterAndFill(collection);
-			progress.Report(20);
-			
-			Show registeredShow = await _RegisterAndFill(show);
-			if (registeredShow.Path != show.Path)
+			try
 			{
-				if (show.StartAir.HasValue)
+				(Collection collection, Show show, Season season, Episode episode) = await Identifier.Identify(path,
+					relativePath);
+				progress.Report(15);
+
+				collection = await _RegisterAndFill(collection);
+				progress.Report(20);
+
+				Show registeredShow = await _RegisterAndFill(show);
+				if (registeredShow.Path != show.Path)
 				{
-					show.Slug += $"-{show.StartAir.Value.Year}";
-					show = await LibraryManager.Create(show);
+					if (show.StartAir.HasValue)
+					{
+						show.Slug += $"-{show.StartAir.Value.Year}";
+						show = await LibraryManager.Create(show);
+					}
+					else
+					{
+						throw new TaskFailedException($"Duplicated show found ({show.Slug}) " +
+							$"at {registeredShow.Path} and {show.Path}");
+					}
 				}
 				else
-				{
-					throw new DuplicatedItemException($"Duplicated show found ({show.Slug}) " +
-						$"at {registeredShow.Path} and {show.Path}");
-				}
+					show = registeredShow;
+
+				// If they are not already loaded, load external ids to allow metadata providers to use them.
+				if (show.ExternalIDs == null)
+					await LibraryManager.Load(show, x => x.ExternalIDs);
+				progress.Report(50);
+
+				if (season != null)
+					season.Show = show;
+
+				season = await _RegisterAndFill(season);
+				progress.Report(60);
+
+				episode = await MetadataProvider.Get(episode);
+				progress.Report(70);
+				episode.Show = show;
+				episode.Season = season;
+				episode.Tracks = (await Transcoder.ExtractInfos(episode, false))
+					.Where(x => x.Type != StreamType.Attachment)
+					.ToArray();
+				await ThumbnailsManager.DownloadImages(episode);
+				progress.Report(90);
+
+				await LibraryManager.Create(episode);
+				progress.Report(95);
+				await LibraryManager.AddShowLink(show, library, collection);
+				progress.Report(100);
 			}
-			else
-				show = registeredShow;
-			// If they are not already loaded, load external ids to allow metadata providers to use them.
-			if (show.ExternalIDs == null)
-				await LibraryManager.Load(show, x => x.ExternalIDs);
-			progress.Report(50);
-
-			if (season != null)
-				season.Show = show;
-
-			season = await _RegisterAndFill(season);
-			progress.Report(60);
-
-			episode = await MetadataProvider.Get(episode);
-			progress.Report(70);
-			episode.Show = show;
-			episode.Season = season;
-			episode.Tracks = (await Transcoder.ExtractInfos(episode, false))
-				.Where(x => x.Type != StreamType.Attachment)
-				.ToArray();
-			await ThumbnailsManager.DownloadImages(episode);
-			progress.Report(90);
-
-			await LibraryManager.Create(episode);
-			progress.Report(95);
-			await LibraryManager.AddShowLink(show, library, collection);
-			progress.Report(100);
+			catch (IdentificationFailed ex)
+			{
+				throw new TaskFailedException(ex);
+			}
+			catch (DuplicatedItemException ex)
+			{
+				throw new TaskFailedException(ex);
+			}
 		}
 		
 		/// <summary>

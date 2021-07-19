@@ -59,30 +59,37 @@ namespace Kyoo.Tasks
 		{
 			string path = arguments["path"].As<string>();
 			string relativePath = arguments["relativePath"].As<string>();
-			
-			progress.Report(0);
-			Track track = await Identifier.IdentifyTrack(path, relativePath);
-			progress.Report(25);
-			
-			if (track.Episode == null)
-				throw new IdentificationFailed($"No episode identified for the track at {path}");
-			if (track.Episode.ID == 0)
+
+			try
 			{
-				if (track.Episode.Slug != null)
-					track.Episode = await LibraryManager.Get<Episode>(track.Episode.Slug);
-				else if (track.Episode.Path != null)
+				progress.Report(0);
+				Track track = await Identifier.IdentifyTrack(path, relativePath);
+				progress.Report(25);
+
+				if (track.Episode == null)
+					throw new TaskFailedException($"No episode identified for the track at {path}");
+				if (track.Episode.ID == 0)
 				{
-					track.Episode = await LibraryManager.GetOrDefault<Episode>(x => x.Path == track.Episode.Path);
-					if (track.Episode == null)
-						throw new ItemNotFoundException($"No episode found for subtitle at: ${path}.");
+					if (track.Episode.Slug != null)
+						track.Episode = await LibraryManager.Get<Episode>(track.Episode.Slug);
+					else if (track.Episode.Path != null)
+					{
+						track.Episode = await LibraryManager.GetOrDefault<Episode>(x => x.Path.StartsWith(track.Episode.Path));
+						if (track.Episode == null)
+							throw new TaskFailedException($"No episode found for the track at: {path}.");
+					}
+					else
+						throw new TaskFailedException($"No episode identified for the track at {path}");
 				}
-				else
-					throw new IdentificationFailed($"No episode identified for the track at {path}");
+
+				progress.Report(50);
+				await LibraryManager.Create(track);
+				progress.Report(100);
 			}
-			
-			progress.Report(50);
-			await LibraryManager.Create(track);
-			progress.Report(100);
+			catch (IdentificationFailed ex)
+			{
+				throw new TaskFailedException(ex);
+			}
 		}
 	}
 }

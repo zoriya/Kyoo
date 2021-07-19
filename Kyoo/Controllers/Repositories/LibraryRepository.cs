@@ -30,7 +30,7 @@ namespace Kyoo.Controllers
 		/// Create a new <see cref="LibraryRepository"/> instance.
 		/// </summary>
 		/// <param name="database">The database handle</param>
-		/// <param name="providers">The providere repository</param>
+		/// <param name="providers">The provider repository</param>
 		public LibraryRepository(DatabaseContext database, IProviderRepository providers)
 			: base(database)
 		{
@@ -53,8 +53,8 @@ namespace Kyoo.Controllers
 		public override async Task<Library> Create(Library obj)
 		{
 			await base.Create(obj);
-			obj.ProviderLinks = obj.Providers?.Select(x => Link.Create(obj, x)).ToList();
 			_database.Entry(obj).State = EntityState.Added;
+			obj.ProviderLinks.ForEach(x => _database.Entry(x).State = EntityState.Added);
 			await _database.SaveChangesAsync($"Trying to insert a duplicated library (slug {obj.Slug} already exists).");
 			return obj;
 		}
@@ -63,6 +63,9 @@ namespace Kyoo.Controllers
 		protected override async Task Validate(Library resource)
 		{
 			await base.Validate(resource);
+			resource.ProviderLinks = resource.Providers?
+				.Select(x => Link.Create(resource, x))
+				.ToList();
 			await resource.ProviderLinks.ForEachAsync(async id =>
 			{
 				id.Second = await _providers.CreateIfNotExists(id.Second);

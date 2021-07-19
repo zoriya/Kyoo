@@ -386,7 +386,7 @@ namespace Kyoo.Api
 				string path = Path.Combine(_files.GetExtraDirectory(show), "Attachments");
 				return (await _files.ListFiles(path))
 					.ToDictionary(Path.GetFileNameWithoutExtension,
-						x => $"{BaseURL}/api/shows/{slug}/fonts/{Path.GetFileName(x)}");
+						x => $"{BaseURL}api/shows/{slug}/fonts/{Path.GetFileName(x)}");
 			}
 			catch (ItemNotFoundException)
 			{

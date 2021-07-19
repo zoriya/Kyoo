@@ -20,9 +20,11 @@ namespace Kyoo.Models
 		{
 			get
 			{
-				if (ShowSlug == null && Show == null)
-					return GetSlug(ShowID.ToString(), SeasonNumber, EpisodeNumber, AbsoluteNumber);
-				return GetSlug(ShowSlug ?? Show.Slug, SeasonNumber, EpisodeNumber, AbsoluteNumber);
+				if (ShowSlug != null || Show != null)
+					return GetSlug(ShowSlug ?? Show.Slug, SeasonNumber, EpisodeNumber, AbsoluteNumber);
+				return ShowID != 0 
+					? GetSlug(ShowID.ToString(), SeasonNumber, EpisodeNumber, AbsoluteNumber) 
+					: null;
 			}
 			[UsedImplicitly] [NotNull] private set
 			{
