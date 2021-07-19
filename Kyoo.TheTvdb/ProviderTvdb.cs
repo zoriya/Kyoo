@@ -71,11 +71,21 @@ namespace Kyoo.TheTvdb
 			};
 		}
 		
+		/// <summary>
+		/// Retrieve metadata about a show.
+		/// </summary>
+		/// <param name="show">The base show to retrieve metadata for.</param>
+		/// <returns>A new show filled with metadata from the tvdb.</returns>
 		[ItemCanBeNull]
 		private async Task<Show> _GetShow([NotNull] Show show)
 		{
 			if (!int.TryParse(show.GetID(Provider.Slug), out int id))
-				return (await _SearchShow(show.Title)).FirstOrDefault();
+			{
+				Show found = (await _SearchShow(show.Title)).FirstOrDefault();
+				if (found == null)
+					return null;
+				return await Get(found);
+			}
 			TvDbResponse<Series> series = await _client.Series.GetAsync(id);
 			Show ret = series.Data.ToShow(Provider);
 			
@@ -84,6 +94,11 @@ namespace Kyoo.TheTvdb
 			return ret;
 		}
 
+		/// <summary>
+		/// Retrieve metadata about an episode.
+		/// </summary>
+		/// <param name="episode">The base episode to retrieve metadata for.</param>
+		/// <returns>A new episode filled with metadata from the tvdb.</returns>
 		[ItemCanBeNull]
 		private async Task<Episode> _GetEpisode([NotNull] Episode episode)
 		{
@@ -106,11 +121,23 @@ namespace Kyoo.TheTvdb
 			return ArraySegment<T>.Empty;
 		}
 		
+		/// <summary>
+		/// Search for shows in the tvdb.
+		/// </summary>
+		/// <param name="query">The query to ask the tvdb about.</param>
+		/// <returns>A list of shows that could be found on the tvdb.</returns>
 		[ItemNotNull]
 		private async Task<ICollection<Show>> _SearchShow(string query)
 		{
-			TvDbResponse<SeriesSearchResult[]> shows = await _client.Search.SearchSeriesByNameAsync(query);
-			return shows.Data.Select(x => x.ToShow(Provider)).ToArray();
+			try
+			{
+				TvDbResponse<SeriesSearchResult[]> shows = await _client.Search.SearchSeriesByNameAsync(query);
+				return shows.Data.Select(x => x.ToShow(Provider)).ToArray();
+			}
+			catch (TvDbServerException)
+			{
+				return ArraySegment<Show>.Empty;
+			}
 		}
 	}
 }

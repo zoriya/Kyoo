@@ -112,14 +112,15 @@ namespace Kyoo.Tasks
 
 				if (season != null)
 					season.Show = show;
-
 				season = await _RegisterAndFill(season);
+				if (season != null)
+					season.Title ??= $"Season {season.SeasonNumber}";
 				progress.Report(60);
 
-				episode = await MetadataProvider.Get(episode);
-				progress.Report(70);
 				episode.Show = show;
 				episode.Season = season;
+				episode = await MetadataProvider.Get(episode);
+				progress.Report(70);
 				episode.Tracks = (await Transcoder.ExtractInfos(episode, false))
 					.Where(x => x.Type != StreamType.Attachment)
 					.ToArray();

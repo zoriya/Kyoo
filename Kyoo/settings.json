@@ -60,5 +60,9 @@
     },
     "profilePicturePath": "users/",
     "clients": []
+  },
+  
+  "tvdb": {
+    "apiKey": "REDACTED"
   }
 }

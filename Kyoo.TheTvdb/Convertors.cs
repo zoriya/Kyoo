@@ -33,7 +33,8 @@ namespace Kyoo.TheTvdb
 		/// <returns>The parsed <see cref="DateTime"/> or null.</returns>
 		private static DateTime ParseDate(string date)
 		{
-			DateTime.TryParseExact(date, "yyyy-mm-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsed);
+			DateTime.TryParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture, 
+				DateTimeStyles.None, out DateTime parsed);
 			return parsed;
 		}
 		
@@ -122,7 +123,8 @@ namespace Kyoo.TheTvdb
 						}
 					}
 				},
-				Role = actor.Role
+				Role = actor.Role,
+				Type = "Actor"
 			};
 		}
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Kyoo.Common.Models.Attributes;
 using Kyoo.Controllers;
 using Kyoo.Models.Attributes;
@@ -157,6 +158,7 @@ namespace Kyoo.Models
 		/// <remarks>This method will never return anything if the <see cref="ExternalIDs"/> are not loaded.</remarks>
 		/// <param name="provider">The slug of the provider</param>
 		/// <returns>The <see cref="MetadataID{T}.DataID"/> field of the asked provider.</returns>
+		[CanBeNull]
 		public string GetID(string provider)
 		{
 			return ExternalIDs?.FirstOrDefault(x => x.Second.Slug == provider)?.DataID;
