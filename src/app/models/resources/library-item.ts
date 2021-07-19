@@ -13,8 +13,8 @@ export interface LibraryItem extends IResource
 	overview: string;
 	status: string;
 	trailerUrl: string;
-	startYear: number;
-	endYear: number;
+	startAir: Date;
+	endAir: Date;
 	poster: string;
 	type: ItemType;
 }

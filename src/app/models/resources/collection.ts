@@ -6,7 +6,7 @@ export interface Collection extends IResource
 	name: string;
 	poster: string;
 	overview: string;
-	startYear: number;
-	endYear: number;
+	startAir: Date;
+	endAir: Date;
 	shows: Show[];
 }

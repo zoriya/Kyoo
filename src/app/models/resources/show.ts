@@ -17,8 +17,8 @@ export interface Show extends IResource
 	seasons: Season[];
 	trailerUrl: string;
 	isMovie: boolean;
-	startYear: number;
-	endYear: number;
+	startAir: Date;
+	endAir: Date;
 	poster: string;
 	logo: string;
 	backdrop: string;
@@ -37,8 +37,8 @@ export interface ShowRole extends IResource
 	status: string;
 	trailerUrl: string;
 	isMovie: boolean;
-	startYear: number;
-	endYear: number;
+	startAir: Date;
+	endAir: Date;
 	poster: string;
 	logo: string;
 	backdrop: string;

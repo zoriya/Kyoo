@@ -24,10 +24,10 @@ export class ItemsUtils
 		if ("type" in item && item.type && typeof item.type === "string")
 			return item.type;
 
-		if (!("startYear" in item))
+		if (!("startAir" in item))
 			return "";
-		if (item.endYear && item.startYear !== item.endYear)
-			return `${item.startYear} - ${item.endYear}`;
-		return item.startYear?.toString();
+		if (item.endAir && item.startAir !== item.endAir)
+			return `${item.startAir.getFullYear()} - ${item.endAir.getFullYear()}`;
+		return item.startAir?.getFullYear().toString();
 	}
 }

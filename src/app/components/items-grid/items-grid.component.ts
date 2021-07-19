@@ -226,25 +226,22 @@ export class ItemsGridComponent implements OnInit
 					replaceUrl: true,
 					queryParams: {sortBy: this.route.snapshot.queryParams.sortBy}
 				});
-				return;
 			}
-			if (this.filters.studio != null && this.getFilterCount() === 1)
+			else if (this.filters.studio != null && this.getFilterCount() === 1)
 			{
 				this.router.navigate(["studio", this.filters.studio.slug], {
 					replaceUrl: true,
 					queryParams: {sortBy: this.route.snapshot.queryParams.sortBy}
 				});
-				return;
 			}
-			if (this.filters.people.length === 1 && this.getFilterCount() === 1)
+			else if (this.filters.people.length === 1 && this.getFilterCount() === 1)
 			{
 				this.router.navigate(["people", this.filters.people[0].slug], {
 					replaceUrl: true,
 					queryParams: {sortBy: this.route.snapshot.queryParams.sortBy}
 				});
-				return;
 			}
- 		if (this.getFilterCount() === 0 || this.router.url !== "/browse")
+ 			else if (this.getFilterCount() === 0 || this.router.url !== "/browse")
 			{
 				const params: {[key: string]: string} = {[category]: param};
 				if (this.router.url.startsWith("/studio") && category !== "studio")
@@ -259,15 +256,17 @@ export class ItemsGridComponent implements OnInit
 					replaceUrl: true,
 					queryParamsHandling: "merge"
 				});
-				return;
 			}
 		}
-		this.router.navigate([], {
-			relativeTo: this.route,
-			queryParams: {[category]: param},
-			replaceUrl: true,
-			queryParamsHandling: "merge"
-		});
+		else
+		{
+			this.router.navigate([], {
+				relativeTo: this.route,
+				queryParams: {[category]: param},
+				replaceUrl: true,
+				queryParamsHandling: "merge"
+			});
+		}
 	}
 
 	nameGetter(obj: Studio): string

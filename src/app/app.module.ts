@@ -1,4 +1,4 @@
-import { HttpClientModule } from "@angular/common/http";
+import { HTTP_INTERCEPTORS, HttpClientModule } from "@angular/common/http";
 import { APP_INITIALIZER, NgModule } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCardModule } from "@angular/material/card";
@@ -48,6 +48,7 @@ import { ShowGridComponent } from "./components/show-grid/show-grid.component";
 import { MatBadgeModule } from "@angular/material/badge";
 import { StartupService } from "./services/startup.service";
 import { LongPressDirective } from "./misc/long-press.directive";
+import { DatetimeInterceptorService } from "./services/datetime-interceptor.service";
 
 
 @NgModule({
@@ -114,6 +115,11 @@ import { LongPressDirective } from "./misc/long-press.directive";
 			provide: APP_INITIALIZER,
 			useFactory: (startup: StartupService) => () => startup.load(),
 			deps: [StartupService],
+			multi: true
+		},
+		{
+			provide: HTTP_INTERCEPTORS,
+			useClass: DatetimeInterceptorService,
 			multi: true
 		}
 	]
