@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using Kyoo.Controllers;
 
@@ -27,9 +28,26 @@ namespace Kyoo.Common.Models.Attributes
 		public bool StripScheme { get; set; }
 		
 
+		/// <summary>
+		/// Create a new <see cref="FileSystemMetadataAttribute"/> using the specified schemes.
+		/// </summary>
+		/// <param name="schemes">The schemes to use.</param>
 		public FileSystemMetadataAttribute(string[] schemes)
 		{
 			Scheme = schemes;
+		}
+		
+		/// <summary>
+		/// Create a new <see cref="FileSystemMetadataAttribute"/> using a dictionary of metadata.
+		/// </summary>
+		/// <param name="metadata">
+		/// The dictionary of metadata. This method expect the dictionary to contain a field
+		/// per property in this attribute, with the same types as the properties of this attribute.
+		/// </param>
+		public FileSystemMetadataAttribute(IDictionary<string, object> metadata)
+		{
+			Scheme = (string[])metadata[nameof(Scheme)];
+			StripScheme = (bool)metadata[nameof(StripScheme)];
 		}
 	}
 }
