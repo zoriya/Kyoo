@@ -46,7 +46,7 @@ namespace Kyoo.Tasks
 		/// <summary>
 		/// The file manager used walk inside directories and check they existences. 
 		/// </summary>
-		[Injected] public IFileManager FileManager { private get; set; }
+		[Injected] public IFileSystem FileSystem { private get; set; }
 		/// <summary>
 		/// A task manager used to create sub tasks for each episode to add to the database. 
 		/// </summary>
@@ -111,7 +111,7 @@ namespace Kyoo.Tasks
 			Logger.LogInformation("Scanning library {Library} at {Paths}", library.Name, library.Paths);
 			foreach (string path in library.Paths)
 			{
-				ICollection<string> files = await FileManager.ListFiles(path, SearchOption.AllDirectories);
+				ICollection<string> files = await FileSystem.ListFiles(path, SearchOption.AllDirectories);
 				
 				if (cancellationToken.IsCancellationRequested)
 					return;

@@ -21,11 +21,11 @@ namespace Kyoo.Api
 	{
 		private readonly ILibraryManager _libraryManager;
 		private readonly IThumbnailsManager _thumbnails;
-		private readonly IFileManager _files;
+		private readonly IFileSystem _files;
 
 		public EpisodeApi(ILibraryManager libraryManager,
 			IOptions<BasicOptions> options,
-			IFileManager files,
+			IFileSystem files,
 			IThumbnailsManager thumbnails) 
 			: base(libraryManager.EpisodeRepository, options.Value.PublicUrl)
 		{

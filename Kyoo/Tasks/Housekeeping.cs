@@ -39,7 +39,7 @@ namespace Kyoo.Tasks
 		/// <summary>
 		/// The file manager used walk inside directories and check they existences. 
 		/// </summary>
-		[Injected] public IFileManager FileManager { private get; set; }
+		[Injected] public IFileSystem FileSystem { private get; set; }
 		/// <summary>
 		/// The logger used to inform the user that episodes has been removed. 
 		/// </summary>
@@ -58,7 +58,7 @@ namespace Kyoo.Tasks
 				progress.Report(count / delCount * 100);
 				count++;
 				
-				if (await FileManager.Exists(show.Path))
+				if (await FileSystem.Exists(show.Path))
 					continue;
 				Logger.LogWarning("Show {Name}'s folder has been deleted (was {Path}), removing it from kyoo", 
 					show.Title, show.Path);
@@ -70,7 +70,7 @@ namespace Kyoo.Tasks
 				progress.Report(count / delCount * 100);
 				count++;
 				
-				if (await FileManager.Exists(episode.Path))
+				if (await FileSystem.Exists(episode.Path))
 					continue;
 				Logger.LogWarning("Episode {Slug}'s file has been deleted (was {Path}), removing it from kyoo", 
 					episode.Slug, episode.Path);

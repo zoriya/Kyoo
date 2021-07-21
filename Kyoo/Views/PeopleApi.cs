@@ -18,12 +18,12 @@ namespace Kyoo.Api
 	public class PeopleApi : CrudApi<People>
 	{
 		private readonly ILibraryManager _libraryManager;
-		private readonly IFileManager _files;
+		private readonly IFileSystem _files;
 		private readonly IThumbnailsManager _thumbs;
 
 		public PeopleApi(ILibraryManager libraryManager,
 			IOptions<BasicOptions> options,
-			IFileManager files,
+			IFileSystem files,
 			IThumbnailsManager thumbs) 
 			: base(libraryManager.PeopleRepository, options.Value.PublicUrl)
 		{

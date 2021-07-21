@@ -10,7 +10,7 @@ namespace Kyoo.Controllers
 	/// <summary>
 	/// A service to abstract the file system to allow custom file systems (like distant file systems or external providers)
 	/// </summary>
-	public interface IFileManager
+	public interface IFileSystem
 	{
 		// TODO find a way to handle Transmux/Transcode with this system.
 
@@ -41,14 +41,14 @@ namespace Kyoo.Controllers
 		/// <param name="path">The path of the file</param>
 		/// <exception cref="FileNotFoundException">If the file could not be found.</exception>
 		/// <returns>A reader to read the file.</returns>
-		public Stream GetReader([NotNull] string path);
+		public Task<Stream> GetReader([NotNull] string path);
 
 		/// <summary>
 		/// Create a new file at <paramref name="path"></paramref>.
 		/// </summary>
 		/// <param name="path">The path of the new file.</param>
 		/// <returns>A writer to write to the new file.</returns>
-		public Stream NewFile([NotNull] string path);
+		public Task<Stream> NewFile([NotNull] string path);
 
 		/// <summary>
 		/// Create a new directory at the given path
@@ -87,24 +87,6 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="show">The show to proceed</param>
 		/// <returns>The extra directory of the show</returns>
-		public string GetExtraDirectory(Show show);
-		
-		/// <summary>
-		/// Get the extra directory of a season.
-		/// This method is in this system to allow a filesystem to use a different metadata policy for one.
-		/// It can be useful if the filesystem is readonly.
-		/// </summary>
-		/// <param name="season">The season to proceed</param>
-		/// <returns>The extra directory of the season</returns>
-		public string GetExtraDirectory(Season season);
-		
-		/// <summary>
-		/// Get the extra directory of an episode.
-		/// This method is in this system to allow a filesystem to use a different metadata policy for one.
-		/// It can be useful if the filesystem is readonly.
-		/// </summary>
-		/// <param name="episode">The episode to proceed</param>
-		/// <returns>The extra directory of the episode</returns>
-		public string GetExtraDirectory(Episode episode);
+		public string GetExtraDirectory([NotNull] Show show);
 	}
 }

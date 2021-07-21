@@ -254,7 +254,7 @@ namespace Kyoo
 		/// <example>
 		/// To run <see cref="Merger.MergeLists{T}"/> for a List where you don't know the type at compile type,
 		/// you could do:
-		/// <code>
+		/// <code lang="C#">
 		/// Utility.RunGenericMethod&lt;object&gt;(
 		///     typeof(Utility),
 		///     nameof(MergeLists),

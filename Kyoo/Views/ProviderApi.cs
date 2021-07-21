@@ -17,11 +17,11 @@ namespace Kyoo.Api
 	{
 		private readonly IThumbnailsManager _thumbnails;
 		private readonly ILibraryManager _libraryManager;
-		private readonly IFileManager _files;
+		private readonly IFileSystem _files;
 		
 		public ProviderApi(ILibraryManager libraryManager,
 			IOptions<BasicOptions> options,
-			IFileManager files,
+			IFileSystem files,
 			IThumbnailsManager thumbnails)
 			: base(libraryManager.ProviderRepository, options.Value.PublicUrl)
 		{

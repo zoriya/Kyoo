@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using Autofac;
+using Autofac.Extras.AttributeMetadata;
 using Kyoo.Authentication;
 using Kyoo.Controllers;
 using Kyoo.Models.Options;
@@ -76,6 +77,7 @@ namespace Kyoo
 
 		public void ConfigureContainer(ContainerBuilder builder)
 		{
+			builder.RegisterModule<AttributedMetadataModule>();
 			builder.RegisterInstance(_plugins).As<IPluginManager>().ExternallyOwned();
 			builder.RegisterTask<PluginInitializer>();
 			_plugins.ConfigureContainer(builder);

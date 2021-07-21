@@ -18,12 +18,12 @@ namespace Kyoo.Api
 		private readonly ILibraryManager _libraryManager;
 		private readonly ITranscoder _transcoder;
 		private readonly IOptions<BasicOptions> _options;
-		private readonly IFileManager _files;
+		private readonly IFileSystem _files;
 
 		public VideoApi(ILibraryManager libraryManager, 
 			ITranscoder transcoder, 
 			IOptions<BasicOptions> options,
-			IFileManager files)
+			IFileSystem files)
 		{
 			_libraryManager = libraryManager;
 			_transcoder = transcoder;

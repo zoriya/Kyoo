@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Kyoo.Common.Models.Attributes;
 using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
@@ -9,9 +10,10 @@ using Microsoft.AspNetCore.StaticFiles;
 namespace Kyoo.Controllers
 {
 	/// <summary>
-	/// A <see cref="IFileManager"/> for the local filesystem (using System.IO).
+	/// A <see cref="IFileSystem"/> for the local filesystem (using System.IO).
 	/// </summary>
-	public class FileManager : IFileManager
+	[FileSystemMetadata(new [] {"", "file"}, StripScheme = true)]
+	public class LocalFileSystem : IFileSystem
 	{
 		/// <summary>
 		/// An extension provider to get content types from files extensions.
@@ -54,19 +56,19 @@ namespace Kyoo.Controllers
 		}
 
 		/// <inheritdoc />
-		public Stream GetReader(string path)
+		public Task<Stream> GetReader(string path)
 		{
 			if (path == null)
 				throw new ArgumentNullException(nameof(path));
-			return File.OpenRead(path);
+			return Task.FromResult<Stream>(File.OpenRead(path));
 		}
 
 		/// <inheritdoc />
-		public Stream NewFile(string path)
+		public Task<Stream> NewFile(string path)
 		{
 			if (path == null)
 				throw new ArgumentNullException(nameof(path));
-			return File.Create(path);
+			return Task.FromResult<Stream>(File.Create(path));
 		}
 
 		/// <inheritdoc />
@@ -105,25 +107,6 @@ namespace Kyoo.Controllers
 		public string GetExtraDirectory(Show show)
 		{
 			string path = Path.Combine(show.Path, "Extra");
-			Directory.CreateDirectory(path);
-			return path;
-		}
-		
-		/// <inheritdoc />
-		public string GetExtraDirectory(Season season)
-		{
-			if (season.Show == null)
-				throw new NotImplementedException("Can't get season's extra directory when season.Show == null.");
-			// TODO use a season.Path here.
-			string path = Path.Combine(season.Show.Path, "Extra");
-			Directory.CreateDirectory(path);
-			return path;
-		}
-		
-		/// <inheritdoc />
-		public string GetExtraDirectory(Episode episode)
-		{
-			string path = Path.Combine(Path.GetDirectoryName(episode.Path)!, "Extra");
 			Directory.CreateDirectory(path);
 			return path;
 		}

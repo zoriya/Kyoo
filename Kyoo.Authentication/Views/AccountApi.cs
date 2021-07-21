@@ -36,7 +36,7 @@ namespace Kyoo.Authentication.Views
 		/// <summary>
 		/// A file manager to send profile pictures
 		/// </summary>
-		private readonly IFileManager _files;
+		private readonly IFileSystem _files;
 		/// <summary>
 		/// Options about authentication. Those options are monitored and reloads are supported.
 		/// </summary>
@@ -50,7 +50,7 @@ namespace Kyoo.Authentication.Views
 		/// <param name="files">A file manager to send profile pictures</param>
 		/// <param name="options">Authentication options (this may be hot reloaded)</param>
 		public AccountApi(IUserRepository users,
-			IFileManager files,
+			IFileSystem files,
 			IOptions<AuthenticationOption> options)
 		{
 			_users = users;
@@ -205,8 +205,8 @@ namespace Kyoo.Authentication.Views
 				user.Username = data.Username;
 			if (data.Picture?.Length > 0)
 			{
-				string path = Path.Combine(_options.Value.ProfilePicturePath, user.ID.ToString());
-				await using Stream file = _files.NewFile(path);
+				string path = _files.Combine(_options.Value.ProfilePicturePath, user.ID.ToString());
+				await using Stream file = await _files.NewFile(path);
 				await data.Picture.CopyToAsync(file);
 			}
 			return await _users.Edit(user, false);

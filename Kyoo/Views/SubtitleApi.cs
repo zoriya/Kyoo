@@ -14,9 +14,9 @@ namespace Kyoo.Api
 	public class SubtitleApi : ControllerBase
 	{
 		private readonly ILibraryManager _libraryManager;
-		private readonly IFileManager _files;
+		private readonly IFileSystem _files;
 
-		public SubtitleApi(ILibraryManager libraryManager, IFileManager files)
+		public SubtitleApi(ILibraryManager libraryManager, IFileSystem files)
 		{
 			_libraryManager = libraryManager;
 			_files = files;
@@ -71,9 +71,9 @@ namespace Kyoo.Api
 	public class ConvertSubripToVtt : IActionResult
 	{
 		private readonly string _path;
-		private readonly IFileManager _files;
+		private readonly IFileSystem _files;
 
-		public ConvertSubripToVtt(string subtitlePath, IFileManager files)
+		public ConvertSubripToVtt(string subtitlePath, IFileSystem files)
 		{
 			_path = subtitlePath;
 			_files = files;
@@ -92,7 +92,7 @@ namespace Kyoo.Api
 				await writer.WriteLineAsync("");
 				await writer.WriteLineAsync("");
 
-				using StreamReader reader = new(_files.GetReader(_path));
+				using StreamReader reader = new(await _files.GetReader(_path));
 				string line;
 				while ((line = await reader.ReadLineAsync()) != null)
 				{

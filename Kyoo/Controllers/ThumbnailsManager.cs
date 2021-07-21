@@ -17,7 +17,7 @@ namespace Kyoo.Controllers
 		/// <summary>
 		/// The file manager used to download the image if the file is distant
 		/// </summary>
-		private readonly IFileManager _files;
+		private readonly IFileSystem _files;
 		/// <summary>
 		/// A logger to report errors.
 		/// </summary>
@@ -26,6 +26,10 @@ namespace Kyoo.Controllers
 		/// The options containing the base path of people images and provider logos.
 		/// </summary>
 		private readonly IOptionsMonitor<BasicOptions> _options;
+		/// <summary>
+		/// A library manager used to load episode and seasons shows if they are not loaded.
+		/// </summary>
+		private readonly Lazy<ILibraryManager> _library;
 
 		/// <summary>
 		/// Create a new <see cref="ThumbnailsManager"/>.
@@ -33,13 +37,16 @@ namespace Kyoo.Controllers
 		/// <param name="files">The file manager to use.</param>
 		/// <param name="logger">A logger to report errors</param>
 		/// <param name="options">The options to use.</param>
-		public ThumbnailsManager(IFileManager files, 
+		/// <param name="library">A library manager used to load shows if they are not loaded.</param>
+		public ThumbnailsManager(IFileSystem files, 
 			ILogger<ThumbnailsManager> logger,
-			IOptionsMonitor<BasicOptions> options)
+			IOptionsMonitor<BasicOptions> options, 
+			Lazy<ILibraryManager> library)
 		{
 			_files = files;
 			_logger = logger;
 			_options = options;
+			_library = library;
 
 			options.OnChange(x =>
 			{
@@ -66,7 +73,7 @@ namespace Kyoo.Controllers
 		}
 
 		/// <summary>
-		/// An helper function to download an image using a <see cref="FileManager"/>.
+		/// An helper function to download an image using a <see cref="LocalFileSystem"/>.
 		/// </summary>
 		/// <param name="url">The distant url of the image</param>
 		/// <param name="localPath">The local path of the image</param>
@@ -79,8 +86,8 @@ namespace Kyoo.Controllers
 
 			try
 			{
-				await using Stream reader = _files.GetReader(url);
-				await using Stream local = _files.NewFile(localPath);
+				await using Stream reader = await _files.GetReader(url);
+				await using Stream local = await _files.NewFile(localPath);
 				await reader.CopyToAsync(local);
 				return true;
 			}
@@ -185,7 +192,7 @@ namespace Kyoo.Controllers
 			if (episode.Thumb == null)
 				return false;
 
-			string localPath = await GetEpisodeThumb(episode);
+			string localPath = await _GetEpisodeThumb(episode);
 			if (alwaysDownload || !await _files.Exists(localPath))
 				return await _DownloadImage(episode.Thumb, localPath, $"The thumbnail of {episode.Slug}");
 			return false;
@@ -218,13 +225,25 @@ namespace Kyoo.Controllers
 		{
 			if (item == null)
 				throw new ArgumentNullException(nameof(item));
-			return Task.FromResult(item switch
+			return item switch
 			{
-				Show show => _files.Combine(_files.GetExtraDirectory(show), "poster.jpg"),
-				Season season => _files.Combine(_files.GetExtraDirectory(season), $"season-{season.SeasonNumber}.jpg"),
-				People people => _files.Combine(_options.CurrentValue.PeoplePath, $"{people.Slug}.jpg"),
+				Show show => Task.FromResult(_files.Combine(_files.GetExtraDirectory(show), "poster.jpg")),
+				Season season => _GetSeasonPoster(season),
+				People actor => Task.FromResult(_files.Combine(_options.CurrentValue.PeoplePath, $"{actor.Slug}.jpg")),
 				_ => throw new NotSupportedException($"The type {typeof(T).Name} does not have a poster.")
-			});
+			};
+		}
+
+		/// <summary>
+		/// Retrieve the path of a season's poster.
+		/// </summary>
+		/// <param name="season">The season to retrieve the poster from.</param>
+		/// <returns>The path of the season's poster.</returns>
+		private async Task<string> _GetSeasonPoster(Season season)
+		{
+			if (season.Show == null)
+				await _library.Value.Load(season, x => x.Show);
+			return _files.Combine(_files.GetExtraDirectory(season.Show), $"season-{season.SeasonNumber}.jpg");
 		}
 		
 		/// <inheritdoc />
@@ -236,14 +255,21 @@ namespace Kyoo.Controllers
 			return item switch
 			{
 				Show show => Task.FromResult(_files.Combine(_files.GetExtraDirectory(show), "backdrop.jpg")),
-				Episode episode => GetEpisodeThumb(episode),
+				Episode episode => _GetEpisodeThumb(episode),
 				_ => throw new NotSupportedException($"The type {typeof(T).Name} does not have a thumbnail.")
 			};
 		}
 		
-		private async Task<string> GetEpisodeThumb(Episode episode)
+		/// <summary>
+		/// Get the path for an episode's thumbnail.
+		/// </summary>
+		/// <param name="episode">The episode to retrieve the thumbnail from</param>
+		/// <returns>The path of the given episode's thumbnail.</returns>
+		private async Task<string> _GetEpisodeThumb(Episode episode)
 		{
-			string dir = _files.Combine(_files.GetExtraDirectory(episode), "Thumbnails");
+			if (episode.Show == null)
+				await _library.Value.Load(episode, x => x.Show);
+			string dir = _files.Combine(_files.GetExtraDirectory(episode.Show), "Thumbnails");
 			await _files.CreateDirectory(dir);
 			return _files.Combine(dir, $"{Path.GetFileNameWithoutExtension(episode.Path)}.jpg");
 		}

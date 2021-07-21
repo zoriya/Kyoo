@@ -62,7 +62,7 @@ namespace Kyoo.Models
 		public DateTime? ReleaseDate { get; set; }
 		
 		/// <summary>
-		/// The path of the video file for this episode. Any format supported by a <see cref="IFileManager"/> is allowed.
+		/// The path of the video file for this episode. Any format supported by a <see cref="IFileSystem"/> is allowed.
 		/// </summary>
 		[SerializeIgnore] public string Path { get; set; }
 		

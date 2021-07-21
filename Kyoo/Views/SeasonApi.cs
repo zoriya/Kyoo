@@ -20,12 +20,12 @@ namespace Kyoo.Api
 	{
 		private readonly ILibraryManager _libraryManager;
 		private readonly IThumbnailsManager _thumbs;
-		private readonly IFileManager _files;
+		private readonly IFileSystem _files;
 
 		public SeasonApi(ILibraryManager libraryManager,
 			IOptions<BasicOptions> options,
 			IThumbnailsManager thumbs,
-			IFileManager files)
+			IFileSystem files)
 			: base(libraryManager.SeasonRepository, options.Value.PublicUrl)
 		{
 			_libraryManager = libraryManager;

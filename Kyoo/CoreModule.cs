@@ -34,7 +34,7 @@ namespace Kyoo
 		/// <inheritdoc />
 		public ICollection<Type> Provides => new[]
 		{
-			typeof(IFileManager),
+			typeof(IFileSystem),
 			typeof(ITranscoder),
 			typeof(IThumbnailsManager),
 			typeof(IMetadataProvider),
@@ -101,13 +101,17 @@ namespace Kyoo
 		/// <inheritdoc />
 		public void Configure(ContainerBuilder builder)
 		{
+			builder.RegisterComposite<FileSystemComposite, IFileSystem>();
+			builder.RegisterType<LocalFileSystem>().As<IFileSystem>().SingleInstance();
+			builder.RegisterType<HttpFileSystem>().As<IFileSystem>().SingleInstance();
+			
 			builder.RegisterType<ConfigurationManager>().As<IConfigurationManager>().SingleInstance();
-			builder.RegisterType<FileManager>().As<IFileManager>().SingleInstance();
 			builder.RegisterType<Transcoder>().As<ITranscoder>().SingleInstance();
 			builder.RegisterType<ThumbnailsManager>().As<IThumbnailsManager>().SingleInstance();
 			builder.RegisterType<TaskManager>().As<ITaskManager>().SingleInstance();
 			builder.RegisterType<LibraryManager>().As<ILibraryManager>().InstancePerLifetimeScope();
 			builder.RegisterType<RegexIdentifier>().As<IIdentifier>().SingleInstance();
+			
 			builder.RegisterComposite<ProviderComposite, IMetadataProvider>();
 			builder.Register(x => (AProviderComposite)x.Resolve<IMetadataProvider>());
 

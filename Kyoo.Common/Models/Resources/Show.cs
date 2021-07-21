@@ -31,7 +31,7 @@ namespace Kyoo.Models
 		
 		/// <summary>
 		/// The path of the root directory of this show.
-		/// This can be any kind of path supported by <see cref="IFileManager"/>
+		/// This can be any kind of path supported by <see cref="IFileSystem"/>
 		/// </summary>
 		[SerializeIgnore] public string Path { get; set; }
 		
@@ -46,7 +46,7 @@ namespace Kyoo.Models
 		public Status? Status { get; set; }
 		
 		/// <summary>
-		/// An URL to a trailer. This could be any path supported by the <see cref="IFileManager"/>.
+		/// An URL to a trailer. This could be any path supported by the <see cref="IFileSystem"/>.
 		/// </summary>
 		/// TODO for now, this is set to a youtube url. It should be cached and converted to a local file.
 		public string TrailerUrl { get; set; }

@@ -23,11 +23,11 @@ namespace Kyoo.Api
 	public class ShowApi : CrudApi<Show>
 	{
 		private readonly ILibraryManager _libraryManager;
-		private readonly IFileManager _files;
+		private readonly IFileSystem _files;
 		private readonly IThumbnailsManager _thumbs;
 
 		public ShowApi(ILibraryManager libraryManager,
-			IFileManager files, 
+			IFileSystem files, 
 			IThumbnailsManager thumbs,
 			IOptions<BasicOptions> options)
 			: base(libraryManager.ShowRepository, options.Value.PublicUrl)
