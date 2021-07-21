@@ -128,6 +128,7 @@ namespace Kyoo.Controllers
 		/// <param name="id">The id of the resource</param>
 		/// <exception cref="ItemNotFoundException">If the item could not be found.</exception>
 		/// <returns>The resource found</returns>
+		[ItemNotNull]
 		Task<T> Get(int id);
 		/// <summary>
 		/// Get a resource from it's slug.
@@ -135,6 +136,7 @@ namespace Kyoo.Controllers
 		/// <param name="slug">The slug of the resource</param>
 		/// <exception cref="ItemNotFoundException">If the item could not be found.</exception>
 		/// <returns>The resource found</returns>
+		[ItemNotNull]
 		Task<T> Get(string slug);
 		/// <summary>
 		/// Get the first resource that match the predicate.
@@ -142,6 +144,7 @@ namespace Kyoo.Controllers
 		/// <param name="where">A predicate to filter the resource.</param>
 		/// <exception cref="ItemNotFoundException">If the item could not be found.</exception>
 		/// <returns>The resource found</returns>
+		[ItemNotNull]
 		Task<T> Get(Expression<Func<T, bool>> where);
 		
 		/// <summary>
@@ -149,18 +152,21 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="id">The id of the resource</param>
 		/// <returns>The resource found</returns>
+		[ItemCanBeNull]
 		Task<T> GetOrDefault(int id);
 		/// <summary>
 		/// Get a resource from it's slug or null if it is not found.
 		/// </summary>
 		/// <param name="slug">The slug of the resource</param>
 		/// <returns>The resource found</returns>
+		[ItemCanBeNull]
 		Task<T> GetOrDefault(string slug);
 		/// <summary>
 		/// Get the first resource that match the predicate or null if it is not found.
 		/// </summary>
 		/// <param name="where">A predicate to filter the resource.</param>
 		/// <returns>The resource found</returns>
+		[ItemCanBeNull]
 		Task<T> GetOrDefault(Expression<Func<T, bool>> where);
 		
 		/// <summary>
@@ -168,6 +174,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="query">The query string.</param>
 		/// <returns>A list of resources found</returns>
+		[ItemNotNull]
 		Task<ICollection<T>> Search(string query);
 		
 		/// <summary>
@@ -177,6 +184,7 @@ namespace Kyoo.Controllers
 		/// <param name="sort">Sort information about the query (sort by, sort order)</param>
 		/// <param name="limit">How pagination should be done (where to start and how many to return)</param>
 		/// <returns>A list of resources that match every filters</returns>
+		[ItemNotNull]
 		Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null, 
 			Sort<T> sort = default,
 			Pagination limit = default);
@@ -187,6 +195,7 @@ namespace Kyoo.Controllers
 		/// <param name="sort">A sort by predicate. The order is ascending.</param>
 		/// <param name="limit">How pagination should be done (where to start and how many to return)</param>
 		/// <returns>A list of resources that match every filters</returns>
+		[ItemNotNull]
 		Task<ICollection<T>> GetAll([Optional] Expression<Func<T, bool>> where,
 			Expression<Func<T, object>> sort,
 			Pagination limit = default
@@ -205,6 +214,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="obj">The item to register</param>
 		/// <returns>The resource registers and completed by database's information (related items & so on)</returns>
+		[ItemNotNull]
 		Task<T> Create([NotNull] T obj);
 		
 		/// <summary>
@@ -212,6 +222,7 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="obj">The object to create</param>
 		/// <returns>The newly created item or the existing value if it existed.</returns>
+		[ItemNotNull]
 		Task<T> CreateIfNotExists([NotNull] T obj);
 		
 		/// <summary>
@@ -221,6 +232,7 @@ namespace Kyoo.Controllers
 		/// <param name="resetOld">Should old properties of the resource be discarded or should null values considered as not changed?</param>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The resource edited and completed by database's information (related items & so on)</returns>
+		[ItemNotNull]
 		Task<T> Edit([NotNull] T edited, bool resetOld);
 		
 		/// <summary>

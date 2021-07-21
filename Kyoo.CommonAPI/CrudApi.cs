@@ -38,7 +38,7 @@ namespace Kyoo.CommonApi
 		[PartialPermission(Kind.Read)]
 		public virtual async Task<ActionResult<T>> Get(string slug)
 		{
-			T ret = await _repository.Get(slug);
+			T ret = await _repository.GetOrDefault(slug);
 			if (ret == null)
 				return NotFound();
 			return ret;
