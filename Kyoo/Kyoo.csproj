@@ -32,6 +32,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
 		<ProjectReference Include="../Kyoo.Common/Kyoo.Common.csproj" />
 		<ProjectReference Include="../Kyoo.CommonAPI/Kyoo.CommonAPI.csproj" />
 		<PackageReference Include="Autofac" Version="6.2.0" />

@@ -1,6 +1,6 @@
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
-using System.Linq;
 
 namespace Kyoo.Models.Watch
 {
@@ -12,7 +12,7 @@ namespace Kyoo.Models.Watch
 		/// <summary>
 		/// The list of known video extensions
 		/// </summary>
-		public static readonly string[] VideoExtensions =
+		public static readonly ImmutableArray<string> VideoExtensions = new()
 		{
 			".webm",
 			".mkv",
@@ -53,11 +53,11 @@ namespace Kyoo.Models.Watch
 		/// <summary>
 		/// The dictionary of known subtitles extensions and the name of the subtitle codec.
 		/// </summary>
-		public static readonly Dictionary<string, string> SubtitleExtensions = new()
+		public static readonly ImmutableDictionary<string, string> SubtitleExtensions =  new Dictionary<string, string> 
 		{
 			{".ass", "ass"},
 			{".str", "subrip"}
-		};
+		}.ToImmutableDictionary();
 
 		/// <summary>
 		/// Check if a file represent a subtitle  file (only by checking the extension of the file)
