@@ -76,7 +76,7 @@ namespace Kyoo.Controllers
 			if (path == null)
 				return new NotFoundResult();
 			return _GetFileSystemForPath(path, out string relativePath)
-				.FileResult(relativePath);
+				.FileResult(relativePath, rangeSupport, type);
 		}
 
 		/// <inheritdoc />
