@@ -18,7 +18,7 @@ namespace Kyoo.Controllers
 		/// <param name="relativePath">
 		/// The path of the episode file relative to the library root. It starts with a <c>/</c>.
 		/// </param>
-		/// <exception cref="IdentificationFailed">The identifier could not work for the given path.</exception>
+		/// <exception cref="IdentificationFailedException">The identifier could not work for the given path.</exception>
 		/// <returns>
 		/// A tuple of models representing parsed metadata.
 		/// If no metadata could be parsed for a type, null can be returned.
@@ -34,7 +34,7 @@ namespace Kyoo.Controllers
 		/// <param name="relativePath">
 		/// The path of the episode file relative to the library root. It starts with a <c>/</c>.
 		/// </param>
-		/// <exception cref="IdentificationFailed">The identifier could not work for the given path.</exception>
+		/// <exception cref="IdentificationFailedException">The identifier could not work for the given path.</exception>
 		/// <returns>
 		/// The metadata of the track identified.
 		/// </returns>

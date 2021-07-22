@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Kyoo.Common.Models.Attributes;
 using Kyoo.Controllers;
-using Kyoo.Models.Attributes;
 using Kyoo.Models.Exceptions;
 
 namespace Kyoo.Tasks
@@ -11,43 +11,45 @@ namespace Kyoo.Tasks
 	/// <summary>
 	/// A task that download metadata providers images.
 	/// </summary>
+	[TaskMetadata("reload-metadata", "Reload Metadata Providers", "Add every loaded metadata provider to the database.",
+		RunOnStartup = true, Priority = 1000, IsHidden = true)]
 	public class MetadataProviderLoader : ITask
 	{
-		/// <inheritdoc />
-		public string Slug => "reload-metdata";
-		
-		/// <inheritdoc />
-		public string Name => "Reload Metadata Providers";
-		
-		/// <inheritdoc />
-		public string Description => "Add every loaded metadata provider to the database.";
-		
-		/// <inheritdoc />
-		public string HelpMessage => null;
-		
-		/// <inheritdoc />
-		public bool RunOnStartup => true;
-		
-		/// <inheritdoc />
-		public int Priority => 1000;
-
-		/// <inheritdoc />
-		public bool IsHidden => true;
-		
 		/// <summary>
 		/// The provider repository used to create in-db providers from metadata providers. 
 		/// </summary>
-		[Injected] public IProviderRepository Providers { private get; set; }
+		private readonly IProviderRepository _providers;
 		/// <summary>
 		/// The thumbnail manager used to download providers logo.
 		/// </summary>
-		[Injected] public IThumbnailsManager Thumbnails { private get; set; }
+		private readonly IThumbnailsManager _thumbnails;
 		/// <summary>
 		/// The list of metadata providers to register.
 		/// </summary>
-		[Injected] public ICollection<IMetadataProvider> MetadataProviders { private get; set; }
-		
-		
+		private readonly ICollection<IMetadataProvider> _metadataProviders;
+
+		/// <summary>
+		///	Create a new <see cref="MetadataProviderLoader"/> task.
+		/// </summary>
+		/// <param name="providers">
+		///	The provider repository used to create in-db providers from metadata providers.
+		/// </param>
+		/// <param name="thumbnails">
+		///	The thumbnail manager used to download providers logo.
+		/// </param>
+		/// <param name="metadataProviders">
+		///	The list of metadata providers to register.
+		/// </param>
+		public MetadataProviderLoader(IProviderRepository providers, 
+			IThumbnailsManager thumbnails,
+			ICollection<IMetadataProvider> metadataProviders)
+		{
+			_providers = providers;
+			_thumbnails = thumbnails;
+			_metadataProviders = metadataProviders;
+		}
+
+
 		/// <inheritdoc />
 		public TaskParameters GetParameters()
 		{
@@ -60,13 +62,13 @@ namespace Kyoo.Tasks
 			float percent = 0;
 			progress.Report(0);
 			
-			foreach (IMetadataProvider provider in MetadataProviders)
+			foreach (IMetadataProvider provider in _metadataProviders)
 			{
 				if (string.IsNullOrEmpty(provider.Provider.Slug))
 					throw new TaskFailedException($"Empty provider slug (name: {provider.Provider.Name}).");
-				await Providers.CreateIfNotExists(provider.Provider);
-				await Thumbnails.DownloadImages(provider.Provider);
-				percent += 100f / MetadataProviders.Count;
+				await _providers.CreateIfNotExists(provider.Provider);
+				await _thumbnails.DownloadImages(provider.Provider);
+				percent += 100f / _metadataProviders.Count;
 				progress.Report(percent);
 			}
 			progress.Report(100);

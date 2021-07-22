@@ -36,7 +36,7 @@ namespace Kyoo.Controllers
 			Match match = regex.Match(relativePath);
 
 			if (!match.Success)
-				throw new IdentificationFailed($"The episode at {path} does not match the episode's regex.");
+				throw new IdentificationFailedException($"The episode at {path} does not match the episode's regex.");
 
 			(Collection collection, Show show, Season season, Episode episode) ret = (
 				collection: new Collection
@@ -90,7 +90,7 @@ namespace Kyoo.Controllers
 			Match match = regex.Match(path);
 
 			if (!match.Success)
-				throw new IdentificationFailed($"The subtitle at {path} does not match the subtitle's regex.");
+				throw new IdentificationFailedException($"The subtitle at {path} does not match the subtitle's regex.");
 
 			string episodePath = match.Groups["Episode"].Value;
 			return Task.FromResult(new Track

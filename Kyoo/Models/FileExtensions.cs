@@ -12,8 +12,7 @@ namespace Kyoo.Models.Watch
 		/// <summary>
 		/// The list of known video extensions
 		/// </summary>
-		public static readonly ImmutableArray<string> VideoExtensions = new()
-		{
+		public static readonly ImmutableArray<string> VideoExtensions = ImmutableArray.Create(
 			".webm",
 			".mkv",
 			".flv",
@@ -38,7 +37,7 @@ namespace Kyoo.Models.Watch
 			".m2v",
 			".3gp",
 			".3g2"
-		};
+		);
 
 		/// <summary>
 		/// Check if a file represent a video file (only by checking the extension of the file)

@@ -2,9 +2,9 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Kyoo.Common.Models.Attributes;
 using Kyoo.Controllers;
 using Kyoo.Models;
-using Kyoo.Models.Attributes;
 using Kyoo.Models.Exceptions;
 
 namespace Kyoo.Tasks
@@ -12,49 +12,60 @@ namespace Kyoo.Tasks
 	/// <summary>
 	/// A task to register a new episode
 	/// </summary>
+	[TaskMetadata("register", "Register episode", "Register a new episode")]
 	public class RegisterEpisode : ITask
 	{
-		/// <inheritdoc />
-		public string Slug => "register";
-
-		/// <inheritdoc />
-		public string Name => "Register episode";
-
-		/// <inheritdoc />
-		public string Description => "Register a new episode";
-
-		/// <inheritdoc />
-		public string HelpMessage => null;
-
-		/// <inheritdoc />
-		public bool RunOnStartup => false;
-
-		/// <inheritdoc />
-		public int Priority => 0;
-
-		/// <inheritdoc />
-		public bool IsHidden => false;
-		
 		/// <summary>
 		/// An identifier to extract metadata from paths.
 		/// </summary>
-		[Injected] public IIdentifier Identifier { private get; set; }
+		private readonly IIdentifier _identifier;
 		/// <summary>
-		/// The library manager used to register the episode
+		/// The library manager used to register the episode.
 		/// </summary>
-		[Injected] public ILibraryManager LibraryManager { private get; set; }
+		private readonly ILibraryManager _libraryManager;
 		/// <summary>
 		/// A metadata provider to retrieve the metadata of the new episode (and related items if they do not exist).
 		/// </summary>
-		[Injected] public AProviderComposite MetadataProvider { private get; set; }
+		private readonly AProviderComposite _metadataProvider;
 		/// <summary>
 		/// The thumbnail manager used to download images.
 		/// </summary>
-		[Injected] public IThumbnailsManager ThumbnailsManager { private get; set; }
+		private readonly IThumbnailsManager _thumbnailsManager;
 		/// <summary>
 		/// The transcoder used to extract subtitles and metadata.
 		/// </summary>
-		[Injected] public ITranscoder Transcoder { private get; set; }
+		private readonly ITranscoder _transcoder;
+
+		/// <summary>
+		/// Create a new <see cref="RegisterEpisode"/> task.
+		/// </summary>
+		/// <param name="identifier">
+		/// An identifier to extract metadata from paths.
+		/// </param>
+		/// <param name="libraryManager">
+		/// The library manager used to register the episode.
+		/// </param>
+		/// <param name="metadataProvider">
+		/// A metadata provider to retrieve the metadata of the new episode (and related items if they do not exist).
+		/// </param>
+		/// <param name="thumbnailsManager">
+		/// The thumbnail manager used to download images.
+		/// </param>
+		/// <param name="transcoder">
+		/// The transcoder used to extract subtitles and metadata.
+		/// </param>
+		public RegisterEpisode(IIdentifier identifier,
+			ILibraryManager libraryManager,
+			AProviderComposite metadataProvider,
+			IThumbnailsManager thumbnailsManager,
+			ITranscoder transcoder)
+		{
+			_identifier = identifier;
+			_libraryManager = libraryManager;
+			_metadataProvider = metadataProvider;
+			_thumbnailsManager = thumbnailsManager;
+			_transcoder = transcoder;
+		}
 
 		/// <inheritdoc />
 		public TaskParameters GetParameters()
@@ -77,11 +88,11 @@ namespace Kyoo.Tasks
 			progress.Report(0);
 			
 			if (library.Providers == null)
-				await LibraryManager.Load(library, x => x.Providers);
-			MetadataProvider.UseProviders(library.Providers);
+				await _libraryManager.Load(library, x => x.Providers);
+			_metadataProvider.UseProviders(library.Providers);
 			try
 			{
-				(Collection collection, Show show, Season season, Episode episode) = await Identifier.Identify(path,
+				(Collection collection, Show show, Season season, Episode episode) = await _identifier.Identify(path,
 					relativePath);
 				progress.Report(15);
 
@@ -94,7 +105,7 @@ namespace Kyoo.Tasks
 					if (show.StartAir.HasValue)
 					{
 						show.Slug += $"-{show.StartAir.Value.Year}";
-						show = await LibraryManager.Create(show);
+						show = await _libraryManager.Create(show);
 					}
 					else
 					{
@@ -107,7 +118,7 @@ namespace Kyoo.Tasks
 
 				// If they are not already loaded, load external ids to allow metadata providers to use them.
 				if (show.ExternalIDs == null)
-					await LibraryManager.Load(show, x => x.ExternalIDs);
+					await _libraryManager.Load(show, x => x.ExternalIDs);
 				progress.Report(50);
 
 				if (season != null)
@@ -119,20 +130,20 @@ namespace Kyoo.Tasks
 
 				episode.Show = show;
 				episode.Season = season;
-				episode = await MetadataProvider.Get(episode);
+				episode = await _metadataProvider.Get(episode);
 				progress.Report(70);
-				episode.Tracks = (await Transcoder.ExtractInfos(episode, false))
+				episode.Tracks = (await _transcoder.ExtractInfos(episode, false))
 					.Where(x => x.Type != StreamType.Attachment)
 					.ToArray();
-				await ThumbnailsManager.DownloadImages(episode);
+				await _thumbnailsManager.DownloadImages(episode);
 				progress.Report(90);
 
-				await LibraryManager.Create(episode);
+				await _libraryManager.Create(episode);
 				progress.Report(95);
-				await LibraryManager.AddShowLink(show, library, collection);
+				await _libraryManager.AddShowLink(show, library, collection);
 				progress.Report(100);
 			}
-			catch (IdentificationFailed ex)
+			catch (IdentificationFailedException ex)
 			{
 				throw new TaskFailedException(ex);
 			}
@@ -156,12 +167,12 @@ namespace Kyoo.Tasks
 			if (item == null || string.IsNullOrEmpty(item.Slug))
 				return null;
 
-			T existing = await LibraryManager.GetOrDefault<T>(item.Slug);
+			T existing = await _libraryManager.GetOrDefault<T>(item.Slug);
 			if (existing != null)
 				return existing;
-			item = await MetadataProvider.Get(item);
-			await ThumbnailsManager.DownloadImages(item);
-			return await LibraryManager.CreateIfNotExists(item);
+			item = await _metadataProvider.Get(item);
+			await _thumbnailsManager.DownloadImages(item);
+			return await _libraryManager.CreateIfNotExists(item);
 		}
 	}
 }

@@ -1,12 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Autofac.Features.Metadata;
+using Autofac.Features.OwnedInstances;
 using JetBrains.Annotations;
+using Kyoo.Common.Models.Attributes;
 using Kyoo.Models.Exceptions;
 using Kyoo.Models.Options;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -20,9 +23,52 @@ namespace Kyoo.Controllers
 	public class TaskManager : BackgroundService, ITaskManager
 	{
 		/// <summary>
-		/// The service provider used to activate 
+		/// The class representing task under this <see cref="TaskManager"/> jurisdiction.
 		/// </summary>
-		private readonly IServiceProvider _provider;
+		private class ManagedTask
+		{
+			/// <summary>
+			/// The metadata for this task (the slug, and other useful information).
+			/// </summary>
+			public TaskMetadataAttribute Metadata { get; set; }
+			
+			/// <summary>
+			/// The function used to create the task object.
+			/// </summary>
+			public Func<Owned<ITask>> Factory { get; init; }
+
+			/// <summary>
+			/// The next scheduled date for this task
+			/// </summary>
+			public DateTime ScheduledDate { get; set; }
+		}
+
+		/// <summary>
+		/// A class representing a task inside the <see cref="TaskManager._queuedTasks"/> list.
+		/// </summary>
+		private class QueuedTask
+		{
+			/// <summary>
+			/// The task currently queued.
+			/// </summary>
+			public ManagedTask Task { get; init; }
+			
+			/// <summary>
+			/// The progress reporter that this task should use. 
+			/// </summary>
+			public IProgress<float> ProgressReporter { get; init; }
+			
+			/// <summary>
+			/// The arguments to give to run the task with.
+			/// </summary>
+			public Dictionary<string, object> Arguments { get; init; }
+			
+			/// <summary>
+			/// A token informing the task that it should be cancelled or not.
+			/// </summary>
+			public CancellationToken? CancellationToken { get; init; }
+		}
+		
 		/// <summary>
 		/// The configuration instance used to get schedule information
 		/// </summary>
@@ -35,15 +81,15 @@ namespace Kyoo.Controllers
 		/// <summary>
 		/// The list of tasks and their next scheduled run.
 		/// </summary>
-		private readonly List<(ITask task, DateTime scheduledDate)> _tasks;
+		private readonly List<ManagedTask> _tasks;
 		/// <summary>
 		/// The queue of tasks that should be run as soon as possible.
 		/// </summary>
-		private readonly Queue<(ITask, IProgress<float>, Dictionary<string, object>)> _queuedTasks = new();
+		private readonly Queue<QueuedTask> _queuedTasks = new();
 		/// <summary>
 		/// The currently running task.
 		/// </summary>
-		private ITask _runningTask;
+		private (TaskMetadataAttribute, ITask)? _runningTask;
 		/// <summary>
 		/// The cancellation token used to cancel the running task when the runner should shutdown.
 		/// </summary>
@@ -53,22 +99,24 @@ namespace Kyoo.Controllers
 		/// <summary>
 		/// Create a new <see cref="TaskManager"/>.
 		/// </summary>
-		/// <param name="tasks">The list of tasks to manage</param>
-		/// <param name="provider">The service provider to request services for tasks</param>
+		/// <param name="tasks">The list of tasks to manage with their metadata</param>
 		/// <param name="options">The configuration to load schedule information.</param>
 		/// <param name="logger">The logger.</param>
-		public TaskManager(IEnumerable<ITask> tasks,
-			IServiceProvider provider, 
+		public TaskManager(IEnumerable<Meta<Func<Owned<ITask>>, TaskMetadataAttribute>> tasks,
 			IOptionsMonitor<TaskOptions> options,
 			ILogger<TaskManager> logger)
 		{
-			_provider = provider;
 			_options = options;
 			_logger = logger;
-			_tasks = tasks.Select(x => (x, GetNextTaskDate(x.Slug))).ToList();
+			_tasks = tasks.Select(x => new ManagedTask
+			{
+				Factory = x.Value,
+				Metadata = x.Metadata,
+				ScheduledDate = GetNextTaskDate(x.Metadata.Slug)
+			}).ToList();
 			
 			if (_tasks.Any())
-				_logger.LogTrace("Task manager initiated with: {Tasks}", _tasks.Select(x => x.task.Name));
+				_logger.LogTrace("Task manager initiated with: {Tasks}", _tasks.Select(x => x.Metadata.Name));
 			else
 				_logger.LogInformation("Task manager initiated without any tasks");
 		}
@@ -98,25 +146,26 @@ namespace Kyoo.Controllers
 		/// <param name="cancellationToken">A token to stop the runner</param>
 		protected override async Task ExecuteAsync(CancellationToken cancellationToken)
 		{
-			EnqueueStartupTasks();
+			_EnqueueStartupTasks();
 			
 			while (!cancellationToken.IsCancellationRequested)
 			{
 				if (_queuedTasks.Any())
 				{
-					(ITask task, IProgress<float> progress, Dictionary<string, object> args) = _queuedTasks.Dequeue();
-					_runningTask = task;
+					QueuedTask task = _queuedTasks.Dequeue();
 					try
 					{
-						await RunTask(task, progress, args);
+						await _RunTask(task.Task, task.ProgressReporter, task.Arguments, task.CancellationToken);
 					}
 					catch (TaskFailedException ex)
 					{
-						_logger.LogWarning("The task \"{Task}\" failed: {Message}", task.Name, ex.Message);
+						_logger.LogWarning("The task \"{Task}\" failed: {Message}", 
+							task.Task.Metadata.Name, ex.Message);
 					}
 					catch (Exception e)
 					{
-						_logger.LogError(e, "An unhandled exception occured while running the task {Task}", task.Name);
+						_logger.LogError(e, "An unhandled exception occured while running the task {Task}", 
+							task.Task.Metadata.Name);
 					}
 				}
 				else
@@ -133,44 +182,54 @@ namespace Kyoo.Controllers
 		/// <param name="task">The task to run</param>
 		/// <param name="progress">A progress reporter to know the percentage of completion of the task.</param>
 		/// <param name="arguments">The arguments to pass to the function</param>
+		/// <param name="cancellationToken">An optional cancellation token that will be passed to the task.</param>
 		/// <exception cref="ArgumentException">
 		/// If the number of arguments is invalid, if an argument can't be converted or if the task finds the argument
 		/// invalid.
 		/// </exception>
-		private async Task RunTask(ITask task, 
+		private async Task _RunTask(ManagedTask task, 
 			[NotNull] IProgress<float> progress,
-			Dictionary<string, object> arguments)
+			Dictionary<string, object> arguments,
+			CancellationToken? cancellationToken = null)
 		{
-			_logger.LogInformation("Task starting: {Task}", task.Name);
-			
-			ICollection<TaskParameter> all = task.GetParameters();
-
-			ICollection<string> invalids = arguments.Keys
-				.Where(x => all.All(y => x != y.Name))
-				.ToArray();
-			if (invalids.Any())
+			using (_logger.BeginScope("Task: {Task}", task.Metadata.Name)) 
 			{
-				string invalidsStr = string.Join(", ", invalids);
-				throw new ArgumentException($"{invalidsStr} are invalid arguments for the task {task.Name}");
-			}
-			
-			TaskParameters args = new(all
-				.Select(x =>
-				{
-					object value = arguments
-						.FirstOrDefault(y => string.Equals(y.Key, x.Name, StringComparison.OrdinalIgnoreCase))
-						.Value;
-					if (value == null && x.IsRequired)
-						throw new ArgumentException($"The argument {x.Name} is required to run {task.Name}" +
-						                            " but it was not specified.");
-					return x.CreateValue(value ?? x.DefaultValue);
-				}));
+				await using Owned<ITask> taskObj = task.Factory.Invoke();
+				ICollection<TaskParameter> all = taskObj.Value.GetParameters();
 
-			using IServiceScope scope = _provider.CreateScope();
-			Helper.InjectServices(task, x => scope.ServiceProvider.GetRequiredService(x));
-			await task.Run(args, progress, _taskToken.Token);
-			Helper.InjectServices(task, _ => null);
-			_logger.LogInformation("Task finished: {Task}", task.Name);
+				_runningTask = (task.Metadata, taskObj.Value);
+				ICollection<string> invalids = arguments.Keys
+					.Where(x => all.All(y => x != y.Name))
+					.ToArray();
+				if (invalids.Any())
+				{
+					throw new ArgumentException($"{string.Join(", ", invalids)} are " +
+						$"invalid arguments for the task {task.Metadata.Name}");
+				}
+
+				TaskParameters args = new(all
+					.Select(x =>
+					{
+						object value = arguments
+							.FirstOrDefault(y => string.Equals(y.Key, x.Name, StringComparison.OrdinalIgnoreCase))
+							.Value;
+						if (value == null && x.IsRequired)
+							throw new ArgumentException($"The argument {x.Name} is required to run " +
+								$"{task.Metadata.Name} but it was not specified.");
+						return x.CreateValue(value ?? x.DefaultValue);
+					}));
+
+				_logger.LogInformation("Task starting: {Task} ({Parameters})", 
+					task.Metadata.Name, args.ToDictionary(x => x.Name, x => x.As<object>()));
+				
+				CancellationToken token = cancellationToken != null
+					? CancellationTokenSource.CreateLinkedTokenSource(_taskToken.Token, cancellationToken.Value).Token
+					: _taskToken.Token;
+				await taskObj.Value.Run(args, progress, token);
+				
+				_logger.LogInformation("Task finished: {Task}", task.Metadata.Name);
+				_runningTask = null;
+			}
 		}
 
 		/// <summary>
@@ -178,8 +237,8 @@ namespace Kyoo.Controllers
 		/// </summary>
 		private void QueueScheduledTasks()
 		{
-			IEnumerable<string> tasksToQueue = _tasks.Where(x => x.scheduledDate <= DateTime.Now)
-				.Select(x => x.task.Slug);
+			IEnumerable<string> tasksToQueue = _tasks.Where(x => x.ScheduledDate <= DateTime.Now)
+				.Select(x => x.Metadata.Slug);
 			foreach (string task in tasksToQueue)
 			{
 				_logger.LogDebug("Queuing task scheduled for running: {Task}", task);
@@ -190,13 +249,14 @@ namespace Kyoo.Controllers
 		/// <summary>
 		/// Queue startup tasks with respect to the priority rules.
 		/// </summary>
-		private void EnqueueStartupTasks()
+		private void _EnqueueStartupTasks()
 		{
-			IEnumerable<ITask> startupTasks = _tasks.Select(x => x.task)
-				.Where(x => x.RunOnStartup)
-				.OrderByDescending(x => x.Priority);
-			foreach (ITask task in startupTasks)
-				_queuedTasks.Enqueue((task, new Progress<float>(), new Dictionary<string, object>()));
+			IEnumerable<string> startupTasks = _tasks
+				.Where(x => x.Metadata.RunOnStartup)
+				.OrderByDescending(x => x.Metadata.Priority)
+				.Select(x => x.Metadata.Slug);
+			foreach (string task in startupTasks)
+				StartTask(task, new Progress<float>(), new Dictionary<string, object>());
 		}
 
 		/// <inheritdoc />
@@ -207,20 +267,29 @@ namespace Kyoo.Controllers
 		{
 			arguments ??= new Dictionary<string, object>();
 			
-			int index = _tasks.FindIndex(x => x.task.Slug == taskSlug);
+			int index = _tasks.FindIndex(x => x.Metadata.Slug == taskSlug);
 			if (index == -1)
 				throw new ItemNotFoundException($"No task found with the slug {taskSlug}");
-			_queuedTasks.Enqueue((_tasks[index].task, progress, arguments));
-			_tasks[index] = (_tasks[index].task, GetNextTaskDate(taskSlug));
+			_queuedTasks.Enqueue(new QueuedTask
+			{
+				Task = _tasks[index],
+				ProgressReporter = progress,
+				Arguments = arguments,
+				CancellationToken = cancellationToken	
+			});
+			_tasks[index].ScheduledDate = GetNextTaskDate(taskSlug);
 		}
 
 		/// <inheritdoc />
 		public void StartTask<T>(IProgress<float> progress, 
 			Dictionary<string, object> arguments = null,
 			CancellationToken? cancellationToken = null)
-			where T : ITask, new()
+			where T : ITask
 		{
-			StartTask(new T().Slug, progress, arguments, cancellationToken);
+			TaskMetadataAttribute metadata = typeof(T).GetCustomAttribute<TaskMetadataAttribute>();
+			if (metadata == null)
+				throw new ArgumentException($"No metadata found on the given task (type: {typeof(T).Name}).");
+			StartTask(metadata.Slug, progress, arguments, cancellationToken);
 		}
 
 		/// <summary>
@@ -236,15 +305,17 @@ namespace Kyoo.Controllers
 		}
 		
 		/// <inheritdoc />
-		public ICollection<ITask> GetRunningTasks()
+		public ICollection<(TaskMetadataAttribute, ITask)> GetRunningTasks()
 		{
-			return new[] {_runningTask};
+			return _runningTask == null 
+				? ArraySegment<(TaskMetadataAttribute, ITask)>.Empty 
+				: new[] { _runningTask.Value };
 		}
 
 		/// <inheritdoc />
-		public ICollection<ITask> GetAllTasks()
+		public ICollection<TaskMetadataAttribute> GetAllTasks()
 		{
-			return _tasks.Select(x => x.task).ToArray();
+			return _tasks.Select(x => x.Metadata).ToArray();
 		}
 	}
 }

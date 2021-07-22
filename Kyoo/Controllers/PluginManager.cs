@@ -158,6 +158,7 @@ namespace Kyoo.Controllers
 				using IServiceScope scope = _provider.CreateScope();
 				Helper.InjectServices(plugin, x => scope.ServiceProvider.GetRequiredService(x));
 				plugin.ConfigureAspNet(app);
+				Helper.InjectServices(plugin, _ => null);
 			}
 		}
 

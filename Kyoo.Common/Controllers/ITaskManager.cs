@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
+using Kyoo.Common.Models.Attributes;
 using Kyoo.Models.Exceptions;
 
 namespace Kyoo.Controllers
@@ -38,7 +39,7 @@ namespace Kyoo.Controllers
 			[NotNull] IProgress<float> progress,
 			Dictionary<string, object> arguments = null,
 			CancellationToken? cancellationToken = null);
-		
+
 		/// <summary>
 		/// Start a new task (or queue it).
 		/// </summary>
@@ -61,21 +62,21 @@ namespace Kyoo.Controllers
 		/// <exception cref="ItemNotFoundException">
 		/// The task could not be found.
 		/// </exception>
-		void StartTask<T>([NotNull] IProgress<float> progress, 
+		void StartTask<T>([NotNull] IProgress<float> progress,
 			Dictionary<string, object> arguments = null,
 			CancellationToken? cancellationToken = null)
-			where T : ITask, new();
+			where T : ITask;
 		
 		/// <summary>
 		/// Get all currently running tasks
 		/// </summary>
 		/// <returns>A list of currently running tasks.</returns>
-		ICollection<ITask> GetRunningTasks();
+		ICollection<(TaskMetadataAttribute, ITask)> GetRunningTasks();
 		
 		/// <summary>
 		/// Get all available tasks
 		/// </summary>
 		/// <returns>A list of every tasks that this instance know.</returns>
-		ICollection<ITask> GetAllTasks();
+		ICollection<TaskMetadataAttribute> GetAllTasks();
 	}
 }

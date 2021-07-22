@@ -114,9 +114,6 @@ namespace Kyoo.Controllers
 			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Added);
 			await _database.SaveChangesAsync($"Trying to insert a duplicated episode (slug {obj.Slug} already exists).");
 			return await ValidateTracks(obj);
-			// TODO check if this is needed
-			// obj.Slug = await _database.Entry(obj).Property(x => x.Slug).
-			// return obj;
 		}
 
 		/// <inheritdoc />

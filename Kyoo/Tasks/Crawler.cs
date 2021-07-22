@@ -5,8 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Kyoo.Common.Models.Attributes;
 using Kyoo.Controllers;
-using Kyoo.Models.Attributes;
 using Kyoo.Models.Watch;
 using Microsoft.Extensions.Logging;
 
@@ -15,46 +15,43 @@ namespace Kyoo.Tasks
 	/// <summary>
 	/// A task to add new video files.
 	/// </summary>
+	[TaskMetadata("scan", "Scan libraries", "Scan your libraries and load data for new shows.", RunOnStartup = true)]
 	public class Crawler : ITask
 	{
-		/// <inheritdoc />
-		public string Slug => "scan";
-		
-		/// <inheritdoc />
-		public string Name => "Scan libraries";
-		
-		/// <inheritdoc />
-		public string Description => "Scan your libraries and load data for new shows.";
-		
-		/// <inheritdoc />
-		public string HelpMessage => "Reloading all libraries is a long process and may take up to" +
-			" 24 hours if it is the first scan in a while.";
-		
-		/// <inheritdoc />
-		public bool RunOnStartup => true;
-		
-		/// <inheritdoc />
-		public int Priority => 0;
-
-		/// <inheritdoc />
-		public bool IsHidden => false;
-
 		/// <summary>
 		/// The library manager used to get libraries and providers to use.
 		/// </summary>
-		[Injected] public ILibraryManager LibraryManager { private get; set; }
+		private readonly ILibraryManager _libraryManager;
 		/// <summary>
 		/// The file manager used walk inside directories and check they existences. 
 		/// </summary>
-		[Injected] public IFileSystem FileSystem { private get; set; }
+		private readonly IFileSystem _fileSystem;
 		/// <summary>
 		/// A task manager used to create sub tasks for each episode to add to the database. 
 		/// </summary>
-		[Injected] public ITaskManager TaskManager { private get; set; }
+		private readonly ITaskManager _taskManager;
 		/// <summary>
 		/// The logger used to inform the current status to the console.
 		/// </summary>
-		[Injected] public ILogger<Crawler> Logger { private get; set; }
+		private readonly ILogger<Crawler> _logger;
+
+		/// <summary>
+		/// Create a new <see cref="Crawler"/>.
+		/// </summary>
+		/// <param name="libraryManager">The library manager to retrieve existing episodes/library/tracks</param>
+		/// <param name="fileSystem">The file system to glob files</param>
+		/// <param name="taskManager">The task manager used to start <see cref="RegisterEpisode"/>.</param>
+		/// <param name="logger">The logger used print messages.</param>
+		public Crawler(ILibraryManager libraryManager,
+			IFileSystem fileSystem,
+			ITaskManager taskManager,
+			ILogger<Crawler> logger)
+		{
+			_libraryManager = libraryManager;
+			_fileSystem = fileSystem;
+			_taskManager = taskManager;
+			_logger = logger;
+		}
 		
 		
 		/// <inheritdoc />
@@ -71,20 +68,20 @@ namespace Kyoo.Tasks
 		{
 			string argument = arguments["slug"].As<string>();
 			ICollection<Library> libraries = argument == null 
-				? await LibraryManager.GetAll<Library>()
-				: new [] { await LibraryManager.GetOrDefault<Library>(argument)};
+				? await _libraryManager.GetAll<Library>()
+				: new [] { await _libraryManager.GetOrDefault<Library>(argument)};
 
 			if (argument != null && libraries.First() == null)
 				throw new ArgumentException($"No library found with the name {argument}");
 
 			foreach (Library library in libraries)
-				await LibraryManager.Load(library, x => x.Providers);
+				await _libraryManager.Load(library, x => x.Providers);
 
 			progress.Report(0);
 			float percent = 0;
 			
-			ICollection<Episode> episodes = await LibraryManager.GetAll<Episode>();
-			ICollection<Track> tracks = await LibraryManager.GetAll<Track>();
+			ICollection<Episode> episodes = await _libraryManager.GetAll<Episode>();
+			ICollection<Track> tracks = await _libraryManager.GetAll<Track>();
 			foreach (Library library in libraries)
 			{
 				IProgress<float> reporter = new Progress<float>(x =>
@@ -108,10 +105,10 @@ namespace Kyoo.Tasks
 			IProgress<float> progress,
 			CancellationToken cancellationToken)
 		{
-			Logger.LogInformation("Scanning library {Library} at {Paths}", library.Name, library.Paths);
+			_logger.LogInformation("Scanning library {Library} at {Paths}", library.Name, library.Paths);
 			foreach (string path in library.Paths)
 			{
-				ICollection<string> files = await FileSystem.ListFiles(path, SearchOption.AllDirectories);
+				ICollection<string> files = await _fileSystem.ListFiles(path, SearchOption.AllDirectories);
 				
 				if (cancellationToken.IsCancellationRequested)
 					return;
@@ -138,7 +135,7 @@ namespace Kyoo.Tasks
 				
 				foreach (string episodePath in paths)
 				{
-					TaskManager.StartTask<RegisterEpisode>(reporter, new Dictionary<string, object>
+					_taskManager.StartTask<RegisterEpisode>(reporter, new Dictionary<string, object>
 					{
 						["path"] = episodePath,
 						["relativePath"] = episodePath[path.Length..],
@@ -162,7 +159,7 @@ namespace Kyoo.Tasks
 				
 				foreach (string trackPath in subtitles)
 				{
-					TaskManager.StartTask<RegisterSubtitle>(reporter, new Dictionary<string, object>
+					_taskManager.StartTask<RegisterSubtitle>(reporter, new Dictionary<string, object>
 					{
 						["path"] = trackPath,
 						["relativePath"] = trackPath[path.Length..]

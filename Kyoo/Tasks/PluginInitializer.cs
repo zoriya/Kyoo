@@ -2,57 +2,55 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Kyoo.Common.Models.Attributes;
 using Kyoo.Controllers;
-using Kyoo.Models.Attributes;
 
 namespace Kyoo.Tasks
 {
 	/// <summary>
 	/// A task run on Kyoo's startup to initialize plugins
 	/// </summary>
+	[TaskMetadata("plugin-init", "Plugin Initializer", "A task to initialize plugins.", 
+		RunOnStartup = true, Priority = int.MaxValue, IsHidden = true)]
 	public class PluginInitializer : ITask
 	{
-		/// <inheritdoc />
-		public string Slug => "plugin-init";
-		
-		/// <inheritdoc />
-		public string Name => "PluginInitializer";
-
-		/// <inheritdoc />
-		public string Description => "A task to initialize plugins.";
-
-		/// <inheritdoc />
-		public string HelpMessage => null;
-
-		/// <inheritdoc />
-		public bool RunOnStartup => true;
-
-		/// <inheritdoc />
-		public int Priority => int.MaxValue;
-
-		/// <inheritdoc />
-		public bool IsHidden => true;
-
-
 		/// <summary>
 		/// The plugin manager used to retrieve plugins to initialize them.
 		/// </summary>
-		[Injected] public IPluginManager PluginManager { private get; set; }
+		private readonly IPluginManager _pluginManager;
 		/// <summary>
 		/// The service provider given to each <see cref="IPlugin.Initialize"/> method.
 		/// </summary>
-		[Injected] public IServiceProvider Provider { private get; set; }
+		private readonly IServiceProvider _provider;
+
+		/// <summary>
+		/// Create a new <see cref="PluginInitializer"/> task
+		/// </summary>
+		/// <param name="pluginManager">The plugin manager used to retrieve plugins to initialize them.</param>
+		/// <param name="provider">The service provider given to each <see cref="IPlugin.Initialize"/> method.</param>
+		public PluginInitializer(IPluginManager pluginManager, IServiceProvider provider)
+		{
+			_pluginManager = pluginManager;
+			_provider = provider;
+		}
+		
+
+		/// <inheritdoc />
+		public TaskParameters GetParameters()
+		{
+			return new();
+		}
 		
 		/// <inheritdoc />
 		public Task Run(TaskParameters arguments, IProgress<float> progress, CancellationToken cancellationToken)
 		{
-			ICollection<IPlugin> plugins = PluginManager.GetAllPlugins();
+			ICollection<IPlugin> plugins = _pluginManager.GetAllPlugins();
 			int count = 0;
 			progress.Report(0);
 
 			foreach (IPlugin plugin in plugins)
 			{
-				plugin.Initialize(Provider);
+				plugin.Initialize(_provider);
 				
 				progress.Report(count / plugins.Count * 100);
 				count++;
@@ -60,12 +58,6 @@ namespace Kyoo.Tasks
 			
 			progress.Report(100);
 			return Task.CompletedTask;
-		}
-
-		/// <inheritdoc />
-		public TaskParameters GetParameters()
-		{
-			return new();
 		}
 	}
 }

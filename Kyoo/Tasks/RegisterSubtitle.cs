@@ -1,9 +1,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Kyoo.Common.Models.Attributes;
 using Kyoo.Controllers;
 using Kyoo.Models;
-using Kyoo.Models.Attributes;
 using Kyoo.Models.Exceptions;
 
 namespace Kyoo.Tasks
@@ -11,37 +11,28 @@ namespace Kyoo.Tasks
 	/// <summary>
 	/// A task to register a new episode
 	/// </summary>
+	[TaskMetadata("register-sub", "Register subtitle", "Register a new subtitle")]
 	public class RegisterSubtitle : ITask
 	{
-		/// <inheritdoc />
-		public string Slug => "register-sub";
-
-		/// <inheritdoc />
-		public string Name => "Register subtitle";
-
-		/// <inheritdoc />
-		public string Description => "Register a new subtitle";
-
-		/// <inheritdoc />
-		public string HelpMessage => null;
-
-		/// <inheritdoc />
-		public bool RunOnStartup => false;
-
-		/// <inheritdoc />
-		public int Priority => 0;
-
-		/// <inheritdoc />
-		public bool IsHidden => false;
-		
 		/// <summary>
 		/// An identifier to extract metadata from paths.
 		/// </summary>
-		[Injected] public IIdentifier Identifier { private get; set; }
+		private readonly IIdentifier _identifier;
 		/// <summary>
-		/// The library manager used to register the episode
+		/// The library manager used to register the episode.
 		/// </summary>
-		[Injected] public ILibraryManager LibraryManager { private get; set; }
+		private readonly ILibraryManager _libraryManager;
+
+		/// <summary>
+		/// Create a new <see cref="RegisterSubtitle"/> task.
+		/// </summary>
+		/// <param name="identifier">An identifier to extract metadata from paths.</param>
+		/// <param name="libraryManager">The library manager used to register the episode.</param>
+		public RegisterSubtitle(IIdentifier identifier, ILibraryManager libraryManager)
+		{
+			_identifier = identifier;
+			_libraryManager = libraryManager;
+		}
 
 		/// <inheritdoc />
 		public TaskParameters GetParameters()
@@ -63,7 +54,7 @@ namespace Kyoo.Tasks
 			try
 			{
 				progress.Report(0);
-				Track track = await Identifier.IdentifyTrack(path, relativePath);
+				Track track = await _identifier.IdentifyTrack(path, relativePath);
 				progress.Report(25);
 
 				if (track.Episode == null)
@@ -71,10 +62,10 @@ namespace Kyoo.Tasks
 				if (track.Episode.ID == 0)
 				{
 					if (track.Episode.Slug != null)
-						track.Episode = await LibraryManager.Get<Episode>(track.Episode.Slug);
+						track.Episode = await _libraryManager.Get<Episode>(track.Episode.Slug);
 					else if (track.Episode.Path != null)
 					{
-						track.Episode = await LibraryManager.GetOrDefault<Episode>(x => x.Path.StartsWith(track.Episode.Path));
+						track.Episode = await _libraryManager.GetOrDefault<Episode>(x => x.Path.StartsWith(track.Episode.Path));
 						if (track.Episode == null)
 							throw new TaskFailedException($"No episode found for the track at: {path}.");
 					}
@@ -83,10 +74,10 @@ namespace Kyoo.Tasks
 				}
 
 				progress.Report(50);
-				await LibraryManager.Create(track);
+				await _libraryManager.Create(track);
 				progress.Report(100);
 			}
-			catch (IdentificationFailed ex)
+			catch (IdentificationFailedException ex)
 			{
 				throw new TaskFailedException(ex);
 			}

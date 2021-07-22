@@ -43,7 +43,7 @@ namespace Kyoo.Controllers
 		}
 		
 		/// <inheritdoc />
-		public IActionResult FileResult(string path, bool range = false, string type = null)
+		public IActionResult FileResult(string path, bool rangeSupport = false, string type = null)
 		{
 			if (path == null)
 				return new NotFoundResult();
@@ -51,7 +51,7 @@ namespace Kyoo.Controllers
 				return new NotFoundResult();
 			return new PhysicalFileResult(Path.GetFullPath(path), type ?? _GetContentType(path))
 			{
-				EnableRangeProcessing = range
+				EnableRangeProcessing = rangeSupport
 			};
 		}
 

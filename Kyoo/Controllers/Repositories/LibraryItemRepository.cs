@@ -81,17 +81,28 @@ namespace Kyoo.Controllers
 		}
 
 		/// <inheritdoc />
-		public override Task<LibraryItem> Create(LibraryItem obj) => throw new InvalidOperationException();
+		public override Task<LibraryItem> Create(LibraryItem obj) 
+			=> throw new InvalidOperationException();
+		
 		/// <inheritdoc />
-		public override Task<LibraryItem> CreateIfNotExists(LibraryItem obj) => throw new InvalidOperationException();
+		public override Task<LibraryItem> CreateIfNotExists(LibraryItem obj) 
+			=> throw new InvalidOperationException();
+		
 		/// <inheritdoc />
-		public override Task<LibraryItem> Edit(LibraryItem obj, bool reset) => throw new InvalidOperationException();
+		public override Task<LibraryItem> Edit(LibraryItem obj, bool resetOld) 
+			=> throw new InvalidOperationException();
+		
 		/// <inheritdoc />
-		public override Task Delete(int id) => throw new InvalidOperationException();
+		public override Task Delete(int id) 
+			=> throw new InvalidOperationException();
+		
 		/// <inheritdoc />
-		public override Task Delete(string slug) => throw new InvalidOperationException();
+		public override Task Delete(string slug) 
+			=> throw new InvalidOperationException();
+		
 		/// <inheritdoc />
-		public override Task Delete(LibraryItem obj) => throw new InvalidOperationException();
+		public override Task Delete(LibraryItem obj) 
+			=> throw new InvalidOperationException();
 
 		/// <summary>
 		/// Get a basic queryable for a library with the right mapping from shows & collections.
