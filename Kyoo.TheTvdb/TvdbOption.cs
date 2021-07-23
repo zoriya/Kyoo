@@ -1,4 +1,4 @@
-namespace Kyoo.Authentication.Models
+namespace Kyoo.TheTvdb.Models
 {
 	/// <summary>
 	/// The option containing the api key for the tvdb.

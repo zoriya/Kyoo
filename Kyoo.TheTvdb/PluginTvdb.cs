@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Autofac;
-using Kyoo.Authentication.Models;
 using Kyoo.Controllers;
 using Kyoo.Models.Attributes;
+using Kyoo.TheTvdb.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

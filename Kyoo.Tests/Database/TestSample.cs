@@ -233,7 +233,7 @@ namespace Kyoo.Tests
 			provider.ID = 0;
 			context.Providers.Add(provider);
 			
-			Models.Library library = Get<Models.Library>();
+			Library library = Get<Library>();
 			library.ID = 0;
 			library.Collections = new List<Collection> {collection};
 			library.Providers = new List<Provider> {provider};

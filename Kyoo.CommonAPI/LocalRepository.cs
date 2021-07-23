@@ -208,7 +208,7 @@ namespace Kyoo.Controllers
 			}
 			catch (DuplicatedItemException)
 			{
-				return await GetOrDefault(obj.Slug);
+				return await Get(obj.Slug);
 			}
 		}
 

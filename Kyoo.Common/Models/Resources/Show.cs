@@ -43,7 +43,7 @@ namespace Kyoo.Models
 		/// <summary>
 		/// Is this show airing, not aired yet or finished?
 		/// </summary>
-		public Status? Status { get; set; }
+		public Status Status { get; set; }
 		
 		/// <summary>
 		/// An URL to a trailer. This could be any path supported by the <see cref="IFileSystem"/>.

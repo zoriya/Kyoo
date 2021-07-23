@@ -5,7 +5,7 @@ using Kyoo.Models;
 using Kyoo.Models.Attributes;
 using Xunit;
 
-namespace Kyoo.Tests
+namespace Kyoo.Tests.Utility
 {
 	public class MergerTests
 	{

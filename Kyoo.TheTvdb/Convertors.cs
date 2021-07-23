@@ -16,13 +16,13 @@ namespace Kyoo.TheTvdb
 		/// </summary>
 		/// <param name="status">The string representing the status.</param>
 		/// <returns>A kyoo <see cref="Status"/> value or null.</returns>
-		private static Status? GetStatus(string status)
+		private static Status _GetStatus(string status)
 		{
 			return status switch
 			{
 				"Ended" => Status.Finished,
 				"Continuing" => Status.Airing,
-				_ => null
+				_ => Status.Unknown
 			};
 		}
 
@@ -31,11 +31,12 @@ namespace Kyoo.TheTvdb
 		/// </summary>
 		/// <param name="date">The date string to parse</param>
 		/// <returns>The parsed <see cref="DateTime"/> or null.</returns>
-		private static DateTime ParseDate(string date)
+		private static DateTime? _ParseDate(string date)
 		{
-			DateTime.TryParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture, 
-				DateTimeStyles.None, out DateTime parsed);
-			return parsed;
+			return DateTime.TryParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture,
+				DateTimeStyles.None, out DateTime parsed)
+				? parsed
+				: null;
 		}
 		
 		/// <summary>
@@ -52,8 +53,8 @@ namespace Kyoo.TheTvdb
 				Title = result.SeriesName,
 				Aliases = result.Aliases,
 				Overview = result.Overview,
-				Status = GetStatus(result.Status),
-				StartAir = ParseDate(result.FirstAired),
+				Status = _GetStatus(result.Status),
+				StartAir = _ParseDate(result.FirstAired),
 				Poster = result.Poster != null ? $"https://www.thetvdb.com{result.Poster}" : null,
 				ExternalIDs = new[]
 				{
@@ -81,8 +82,8 @@ namespace Kyoo.TheTvdb
 				Title = series.SeriesName,
 				Aliases = series.Aliases,
 				Overview = series.Overview,
-				Status = GetStatus(series.Status),
-				StartAir = ParseDate(series.FirstAired),
+				Status = _GetStatus(series.Status),
+				StartAir = _ParseDate(series.FirstAired),
 				Poster = series.Poster != null ? $"https://www.thetvdb.com/banners/{series.Poster}" : null,
 				Backdrop = series.FanArt != null ? $"https://www.thetvdb.com/banners/{series.FanArt}" : null,
 				Genres = series.Genre.Select(y => new Genre(y)).ToList(),
