@@ -10,8 +10,7 @@
 		<div class="main col">
 			<div class="info">
 				<h1 class="title">{{this.show.title}}</h1>
-				<h2 class="date" *ngIf="show.endYear && show.startYear != show.endYear; else elseBlock">{{show.startYear}} - {{show.endYear}}</h2>
-				<ng-template #elseBlock><h2 class="date">{{show.startYear}}</h2></ng-template>
+				<h2 class="date" *ngIf="getDate(show)">{{getDate(show)}}</h2>
 			</div>
 			<div class="buttons">
 				<button mat-mini-fab matTooltipPosition="above" matTooltip="Play" class="mr-3" (click)="playClicked()">

@@ -2,7 +2,7 @@ import { HTTP_INTERCEPTORS, HttpClientModule } from "@angular/common/http";
 import { APP_INITIALIZER, NgModule } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
 import { MatCardModule } from "@angular/material/card";
-import { MatRippleModule } from "@angular/material/core";
+import { MatNativeDateModule, MatRippleModule } from "@angular/material/core";
 import { MatIconModule } from "@angular/material/icon";
 import { MatMenuModule } from "@angular/material/menu";
 import { MatProgressBarModule } from "@angular/material/progress-bar";
@@ -49,6 +49,7 @@ import { MatBadgeModule } from "@angular/material/badge";
 import { StartupService } from "./services/startup.service";
 import { LongPressDirective } from "./misc/long-press.directive";
 import { DatetimeInterceptorService } from "./services/datetime-interceptor.service";
+import { MatDatepickerModule } from "@angular/material/datepicker";
 
 
 @NgModule({
@@ -103,7 +104,9 @@ import { DatetimeInterceptorService } from "./services/datetime-interceptor.serv
 		MatExpansionModule,
 		InfiniteScrollModule,
 		MatBadgeModule,
-		HammerModule
+		HammerModule,
+		MatDatepickerModule,
+		MatNativeDateModule
 	],
 	bootstrap: [AppComponent],
 	exports: [

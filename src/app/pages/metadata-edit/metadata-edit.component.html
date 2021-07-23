@@ -28,15 +28,17 @@
                     <mat-label>Overview</mat-label>
                     <textarea matInput [(ngModel)]="this.show.overview" name="overview"></textarea>
                 </mat-form-field>
-        
-                <mat-form-field class="w-25 pr-3">
-                    <mat-label>Start Year</mat-label>
-                    <input matInput [(ngModel)]="this.show.startYear" name="startYear" type="number" [max]="this.show.endYear"/>
-                </mat-form-field>
-                <mat-form-field class="w-25 pr-3">
-                    <mat-label>End Year</mat-label>
-                    <input matInput [(ngModel)]="this.show.endYear" name="endYear" type="number" [min]="this.show.startYear"/>
-                </mat-form-field>
+
+	            <mat-form-field class="w-25 pr-3">
+		            <mat-label>Air period</mat-label>
+		            <mat-date-range-input [rangePicker]="picker">
+			            <input matStartDate placeholder="Start date" name="startAir" [(ngModel)]="this.show.startAir">
+			            <input matEndDate placeholder="End date" name="endAir" [(ngModel)]="this.show.endAir">
+		            </mat-date-range-input>
+		            <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+		            <mat-date-range-picker #picker></mat-date-range-picker>
+	            </mat-form-field>
+
                 <mat-form-field class="w-50">
                     <mat-label>Status</mat-label>
                     <mat-select>
@@ -45,7 +47,7 @@
                         <mat-option value="Planned">Planned</mat-option>
                     </mat-select>
                 </mat-form-field>
-                
+
                 <mat-form-field class="w-100">
                     <mat-label>Genres</mat-label>
                     <mat-chip-list #genreList>
@@ -66,12 +68,12 @@
                         </mat-autocomplete>
                     </mat-chip-list>
                 </mat-form-field>
-        
+
                 <mat-form-field class="w-100">
                     <mat-label>Trailer</mat-label>
                     <input matInput [(ngModel)]="this.show.trailerUrl" name="trailer">
                 </mat-form-field>
-        
+
                 <mat-form-field class="w-100">
                     <mat-label>Studio</mat-label>
                     <input matInput [value]="this.show.studio?.name"

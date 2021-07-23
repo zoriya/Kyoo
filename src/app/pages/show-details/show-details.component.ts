@@ -3,7 +3,7 @@ import { MatSnackBar } from "@angular/material/snack-bar";
 import { DomSanitizer, SafeStyle, Title } from "@angular/platform-browser";
 import { ActivatedRoute, Router } from "@angular/router";
 import { Episode } from "../../models/resources/episode";
-import { Show } from "../../models/resources/show";
+import { Show, ShowRole } from "../../models/resources/show";
 import { MatDialog } from "@angular/material/dialog";
 import { TrailerDialogComponent } from "../trailer-dialog/trailer-dialog.component";
 import { MetadataEditComponent } from "../metadata-edit/metadata-edit.component";
@@ -12,6 +12,9 @@ import { EpisodeService, PeopleService, SeasonService } from "../../services/api
 import { Page } from "../../models/page";
 import { People } from "../../models/resources/people";
 import { HttpClient } from "@angular/common/http";
+import { LibraryItem } from "../../models/resources/library-item";
+import { Collection } from "../../models/resources/collection";
+import { ItemsUtils } from "../../misc/items-utils";
 
 @Component({
 	selector: "app-show-details",
@@ -172,5 +175,10 @@ export class ShowDetailsComponent implements AfterViewInit, OnDestroy
 				duration: 2500
 			});
 		});
+	}
+
+	getDate(item: LibraryItem | Show | ShowRole | Collection): string
+	{
+		return ItemsUtils.getDate(item);
 	}
 }
