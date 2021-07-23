@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -109,32 +110,32 @@ namespace Kyoo.Controllers
 		}
 
 		/// <inheritdoc />
-		public async Task<Track> IdentifyTrack(string path)
+		public Task<Track> IdentifyTrack(string path)
 		{
-			string relativePath = await _GetRelativePath(path);
 			Match match = _configuration.CurrentValue.SubtitleRegex
 				.Select(x => new Regex(x, RegexOptions.IgnoreCase | RegexOptions.Compiled))
-				.Select(x => x.Match(relativePath))
+				.Select(x => x.Match(path))
 				.FirstOrDefault(x => x.Success);
 
 			if (match == null)
 				throw new IdentificationFailedException($"The subtitle at {path} does not match the subtitle's regex.");
 
 			string episodePath = match.Groups["Episode"].Value;
-			return new Track
+			string extension = Path.GetExtension(path);
+			return Task.FromResult(new Track
 			{
 				Type = StreamType.Subtitle,
 				Language = match.Groups["Language"].Value,
-				IsDefault = match.Groups["Default"].Value.Length > 0,
-				IsForced = match.Groups["Forced"].Value.Length > 0,
-				Codec = FileExtensions.SubtitleExtensions[Path.GetExtension(path)],
+				IsDefault = match.Groups["Default"].Success,
+				IsForced = match.Groups["Forced"].Success,
+				Codec = FileExtensions.SubtitleExtensions.GetValueOrDefault(extension, extension[1..]),
 				IsExternal = true,
 				Path = path,
 				Episode = new Episode
 				{
 					Path = episodePath
 				}
-			};
+			});
 		}
 	}
 }
