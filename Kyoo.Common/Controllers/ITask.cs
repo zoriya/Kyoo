@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Kyoo.Models;
 using Kyoo.Models.Attributes;
 using Kyoo.Models.Exceptions;
 
@@ -116,6 +117,15 @@ namespace Kyoo.Controllers
 		{
 			if (typeof(T) == typeof(object))
 				return (T)Value;
+
+			if (Value is IResource resource)
+			{
+				if (typeof(T) == typeof(string))
+					return (T)(object)resource.Slug;
+				if (typeof(T) == typeof(int))
+					return (T)(object)resource.ID;
+			}
+
 			return (T)Convert.ChangeType(Value, typeof(T));
 		}
 	}

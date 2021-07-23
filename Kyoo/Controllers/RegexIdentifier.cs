@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Kyoo.Models;
@@ -18,24 +19,48 @@ namespace Kyoo.Controllers
 		/// <summary>
 		/// The configuration of kyoo to retrieve the identifier regex.
 		/// </summary>
-		private readonly IOptions<MediaOptions> _configuration;
+		private readonly IOptionsMonitor<MediaOptions> _configuration;
+		/// <summary>
+		/// The library manager used to retrieve libraries paths.
+		/// </summary>
+		private readonly ILibraryManager _libraryManager;
 
 		/// <summary>
 		/// Create a new <see cref="RegexIdentifier"/>.
 		/// </summary>
 		/// <param name="configuration">The regex patterns to use.</param>
-		public RegexIdentifier(IOptions<MediaOptions> configuration)
+		/// <param name="libraryManager">The library manager used to retrieve libraries paths.</param>
+		public RegexIdentifier(IOptionsMonitor<MediaOptions> configuration, ILibraryManager libraryManager)
 		{
 			_configuration = configuration;
+			_libraryManager = libraryManager;
+		}
+
+		/// <summary>
+		/// Retrieve the relative path of an episode or subtitle.
+		/// </summary>
+		/// <param name="path">The full path of the episode</param>
+		/// <returns>The path relative to the library root.</returns>
+		private async Task<string> _GetRelativePath(string path)
+		{
+			string libraryPath = (await _libraryManager.GetAll<Library>())
+				.SelectMany(x => x.Paths)
+				.Where(path.StartsWith)
+				.OrderByDescending(x => x.Length)
+				.FirstOrDefault();
+			return path[(libraryPath?.Length ?? 0)..];
 		}
 		
 		/// <inheritdoc />
-		public Task<(Collection, Show, Season, Episode)> Identify(string path, string relativePath)
+		public async Task<(Collection, Show, Season, Episode)> Identify(string path)
 		{
-			Regex regex = new(_configuration.Value.Regex, RegexOptions.IgnoreCase | RegexOptions.Compiled);
-			Match match = regex.Match(relativePath);
+			string relativePath = await _GetRelativePath(path);
+			Match match = _configuration.CurrentValue.Regex
+				.Select(x => new Regex(x, RegexOptions.IgnoreCase | RegexOptions.Compiled))
+				.Select(x => x.Match(relativePath))
+				.FirstOrDefault(x => x.Success);
 
-			if (!match.Success)
+			if (match == null)
 				throw new IdentificationFailedException($"The episode at {path} does not match the episode's regex.");
 
 			(Collection collection, Show show, Season season, Episode episode) ret = (
@@ -80,24 +105,27 @@ namespace Kyoo.Controllers
 				ret.episode.Title = ret.show.Title;
 			}
 
-			return Task.FromResult(ret);
+			return ret;
 		}
 
 		/// <inheritdoc />
-		public Task<Track> IdentifyTrack(string path, string relativePath)
+		public async Task<Track> IdentifyTrack(string path)
 		{
-			Regex regex = new(_configuration.Value.SubtitleRegex, RegexOptions.IgnoreCase | RegexOptions.Compiled);
-			Match match = regex.Match(path);
+			string relativePath = await _GetRelativePath(path);
+			Match match = _configuration.CurrentValue.SubtitleRegex
+				.Select(x => new Regex(x, RegexOptions.IgnoreCase | RegexOptions.Compiled))
+				.Select(x => x.Match(relativePath))
+				.FirstOrDefault(x => x.Success);
 
-			if (!match.Success)
+			if (match == null)
 				throw new IdentificationFailedException($"The subtitle at {path} does not match the subtitle's regex.");
 
 			string episodePath = match.Groups["Episode"].Value;
-			return Task.FromResult(new Track
+			return new Track
 			{
 				Type = StreamType.Subtitle,
 				Language = match.Groups["Language"].Value,
-				IsDefault = match.Groups["Default"].Value.Length > 0, 
+				IsDefault = match.Groups["Default"].Value.Length > 0,
 				IsForced = match.Groups["Forced"].Value.Length > 0,
 				Codec = FileExtensions.SubtitleExtensions[Path.GetExtension(path)],
 				IsExternal = true,
@@ -106,7 +134,7 @@ namespace Kyoo.Controllers
 				{
 					Path = episodePath
 				}
-			});
+			};
 		}
 	}
 }

@@ -13,11 +13,11 @@ namespace Kyoo.Models.Options
 		/// <summary>
 		/// A regex for episodes
 		/// </summary>
-		public string Regex { get; set; }
+		public string[] Regex { get; set; }
 		
 		/// <summary>
 		/// A regex for subtitles
 		/// </summary>
-		public string SubtitleRegex { get; set; }
+		public string[] SubtitleRegex { get; set; }
 	}
 }

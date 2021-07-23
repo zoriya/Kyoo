@@ -25,6 +25,7 @@ namespace Kyoo.Tests
 		public void Dispose()
 		{
 			Repositories.Dispose();
+			GC.SuppressFinalize(this);
 		}
 
 		public ValueTask DisposeAsync()
