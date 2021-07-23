@@ -18,10 +18,10 @@ namespace Kyoo.Postgresql.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasPostgresEnum(null, "item_type", new[] { "show", "movie", "collection" })
-                .HasPostgresEnum(null, "status", new[] { "finished", "airing", "planned", "unknown" })
+                .HasPostgresEnum(null, "status", new[] { "unknown", "finished", "airing", "planned" })
                 .HasPostgresEnum(null, "stream_type", new[] { "unknown", "video", "audio", "subtitle", "attachment" })
                 .HasAnnotation("Relational:MaxIdentifierLength", 63)
-                .HasAnnotation("ProductVersion", "5.0.7")
+                .HasAnnotation("ProductVersion", "5.0.8")
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
             modelBuilder.Entity("Kyoo.Models.Collection", b =>
@@ -185,6 +185,51 @@ namespace Kyoo.Postgresql.Migrations
                         .HasDatabaseName("ix_libraries_slug");
 
                     b.ToTable("libraries");
+                });
+
+            modelBuilder.Entity("Kyoo.Models.LibraryItem", b =>
+                {
+                    b.Property<int>("ID")
+                        .HasColumnType("integer")
+                        .HasColumnName("id")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<DateTime?>("EndAir")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("end_air");
+
+                    b.Property<string>("Overview")
+                        .HasColumnType("text")
+                        .HasColumnName("overview");
+
+                    b.Property<string>("Poster")
+                        .HasColumnType("text")
+                        .HasColumnName("poster");
+
+                    b.Property<string>("Slug")
+                        .HasColumnType("text")
+                        .HasColumnName("slug");
+
+                    b.Property<DateTime?>("StartAir")
+                        .HasColumnType("timestamp without time zone")
+                        .HasColumnName("start_air");
+
+                    b.Property<Status?>("Status")
+                        .HasColumnType("status")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("text")
+                        .HasColumnName("title");
+
+                    b.Property<ItemType>("Type")
+                        .HasColumnType("item_type")
+                        .HasColumnName("type");
+
+                    b.HasKey("ID")
+                        .HasName("pk_library_items");
+
+                    b.ToView("library_items");
                 });
 
             modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Collection, Kyoo.Models.Show>", b =>
@@ -619,7 +664,7 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("start_air");
 
-                    b.Property<Status?>("Status")
+                    b.Property<Status>("Status")
                         .HasColumnType("status")
                         .HasColumnName("status");
 
@@ -1076,7 +1121,8 @@ namespace Kyoo.Postgresql.Migrations
                     b.HasOne("Kyoo.Models.Studio", "Studio")
                         .WithMany("Shows")
                         .HasForeignKey("StudioID")
-                        .HasConstraintName("fk_shows_studios_studio_id");
+                        .HasConstraintName("fk_shows_studios_studio_id")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Studio");
                 });

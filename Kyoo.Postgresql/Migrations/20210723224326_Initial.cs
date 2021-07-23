@@ -12,7 +12,7 @@ namespace Kyoo.Postgresql.Migrations
         {
             migrationBuilder.AlterDatabase()
                 .Annotation("Npgsql:Enum:item_type", "show,movie,collection")
-                .Annotation("Npgsql:Enum:status", "finished,airing,planned,unknown")
+                .Annotation("Npgsql:Enum:status", "unknown,finished,airing,planned")
                 .Annotation("Npgsql:Enum:stream_type", "unknown,video,audio,subtitle,attachment");
 
             migrationBuilder.CreateTable(
@@ -208,7 +208,7 @@ namespace Kyoo.Postgresql.Migrations
                     aliases = table.Column<string[]>(type: "text[]", nullable: true),
                     path = table.Column<string>(type: "text", nullable: true),
                     overview = table.Column<string>(type: "text", nullable: true),
-                    status = table.Column<Status>(type: "status", nullable: true),
+                    status = table.Column<Status>(type: "status", nullable: false),
                     trailer_url = table.Column<string>(type: "text", nullable: true),
                     start_air = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     end_air = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),

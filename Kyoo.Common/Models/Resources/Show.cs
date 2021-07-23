@@ -185,5 +185,5 @@ namespace Kyoo.Models
 	/// <summary>
 	/// The enum containing show's status.
 	/// </summary>
-	public enum Status { Finished, Airing, Planned, Unknown }
+	public enum Status { Unknown, Finished, Airing, Planned }
 }

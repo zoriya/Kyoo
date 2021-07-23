@@ -200,7 +200,7 @@ namespace Kyoo.SqLite.Migrations
                     Aliases = table.Column<string>(type: "TEXT", nullable: true),
                     Path = table.Column<string>(type: "TEXT", nullable: true),
                     Overview = table.Column<string>(type: "TEXT", nullable: true),
-                    Status = table.Column<int>(type: "INTEGER", nullable: true),
+                    Status = table.Column<int>(type: "INTEGER", nullable: false),
                     TrailerUrl = table.Column<string>(type: "TEXT", nullable: true),
                     StartAir = table.Column<DateTime>(type: "TEXT", nullable: true),
                     EndAir = table.Column<DateTime>(type: "TEXT", nullable: true),

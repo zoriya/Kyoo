@@ -9,14 +9,14 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kyoo.SqLite.Migrations
 {
     [DbContext(typeof(SqLiteContext))]
-    [Migration("20210626141337_Initial")]
+    [Migration("20210723224542_Initial")]
     partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "5.0.7");
+                .HasAnnotation("ProductVersion", "5.0.8");
 
             modelBuilder.Entity("Kyoo.Models.Collection", b =>
                 {
@@ -141,6 +141,41 @@ namespace Kyoo.SqLite.Migrations
                         .IsUnique();
 
                     b.ToTable("Libraries");
+                });
+
+            modelBuilder.Entity("Kyoo.Models.LibraryItem", b =>
+                {
+                    b.Property<int>("ID")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime?>("EndAir")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Overview")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Poster")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Slug")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("StartAir")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int?>("Status")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("ID");
+
+                    b.ToView("LibraryItems");
                 });
 
             modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Collection, Kyoo.Models.Show>", b =>
@@ -477,7 +512,7 @@ namespace Kyoo.SqLite.Migrations
                     b.Property<DateTime?>("StartAir")
                         .HasColumnType("TEXT");
 
-                    b.Property<int?>("Status")
+                    b.Property<int>("Status")
                         .HasColumnType("INTEGER");
 
                     b.Property<int?>("StudioID")
@@ -864,7 +899,8 @@ namespace Kyoo.SqLite.Migrations
                 {
                     b.HasOne("Kyoo.Models.Studio", "Studio")
                         .WithMany("Shows")
-                        .HasForeignKey("StudioID");
+                        .HasForeignKey("StudioID")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Studio");
                 });
