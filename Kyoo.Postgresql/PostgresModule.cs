@@ -75,7 +75,7 @@ namespace Kyoo.Postgresql
 			DatabaseContext context = provider.GetRequiredService<DatabaseContext>();
 			context.Database.Migrate();
 
-			NpgsqlConnection conn = (NpgsqlConnection)context.Database.GetDbConnection();
+			using NpgsqlConnection conn = (NpgsqlConnection)context.Database.GetDbConnection();
 			conn.Open();
 			conn.ReloadTypes();
 		}

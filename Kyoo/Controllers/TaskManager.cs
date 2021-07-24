@@ -192,7 +192,7 @@ namespace Kyoo.Controllers
 			Dictionary<string, object> arguments,
 			CancellationToken? cancellationToken = null)
 		{
-			using (_logger.BeginScope("Task: {Task}", task.Metadata.Name)) 
+			using (_logger.BeginScope("Task: {Task}", task.Metadata.Name))
 			{
 				await using Owned<ITask> taskObj = task.Factory.Invoke();
 				ICollection<TaskParameter> all = taskObj.Value.GetParameters();

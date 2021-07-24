@@ -138,7 +138,6 @@ namespace Kyoo.Tasks
 					_taskManager.StartTask<RegisterEpisode>(reporter, new Dictionary<string, object>
 					{
 						["path"] = episodePath,
-						["relativePath"] = episodePath[path.Length..],
 						["library"] = library
 					}, cancellationToken);
 					percent += 100f / paths.Length;
@@ -161,8 +160,7 @@ namespace Kyoo.Tasks
 				{
 					_taskManager.StartTask<RegisterSubtitle>(reporter, new Dictionary<string, object>
 					{
-						["path"] = trackPath,
-						["relativePath"] = trackPath[path.Length..]
+						["path"] = trackPath
 					}, cancellationToken);
 					percent += 100f / subtitles.Length;
 				}

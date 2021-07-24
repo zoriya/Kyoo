@@ -178,6 +178,7 @@ namespace Kyoo.Models
 				EpisodeID = ep.ID,
 				Slug = ep.Slug,
 				ShowSlug = ep.Show.Slug,
+				ShowTitle = ep.Show.Title,
 				SeasonNumber = ep.SeasonNumber,
 				EpisodeNumber = ep.EpisodeNumber,
 				AbsoluteNumber = ep.AbsoluteNumber,

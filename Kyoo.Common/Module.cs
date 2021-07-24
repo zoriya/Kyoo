@@ -20,7 +20,7 @@ namespace Kyoo
 			RegisterTask<T>(this ContainerBuilder builder)
 			where T : class, ITask
 		{
-			return builder.RegisterType<T>().As<ITask>().SingleInstance();
+			return builder.RegisterType<T>().As<ITask>();
 		}
 
 		/// <summary>
