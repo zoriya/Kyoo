@@ -76,7 +76,7 @@ namespace Kyoo.Tests.Identifier
 		}
 		
 		[Fact]
-		public async Task TwoProviderGetTest()
+		public async Task FailingProviderGetTest()
 		{
 			Show show = new()
 			{
@@ -84,22 +84,31 @@ namespace Kyoo.Tests.Identifier
 				Genres = new[] { new Genre("genre") }
 			};
 			Mock<IMetadataProvider> mock = new();
+			mock.Setup(x => x.Provider).Returns(new Provider("mock", ""));
 			mock.Setup(x => x.Get(show)).ReturnsAsync(new Show
 			{
 				Title = "title",
 				Genres = new[] { new Genre("ToMerge")}
 			});
+			
 			Mock<IMetadataProvider> mockTwo = new();
+			mockTwo.Setup(x => x.Provider).Returns(new Provider("mockTwo", ""));
 			mockTwo.Setup(x => x.Get(show)).ReturnsAsync(new Show
 			{
 				Title = "title2",
 				Status = Status.Finished,
 				Genres = new[] { new Genre("ToMerge")}
 			});
+			
+			Mock<IMetadataProvider> mockFailing = new();
+			mockFailing.Setup(x => x.Provider).Returns(new Provider("mockFail", ""));
+			mockFailing.Setup(x => x.Get(show)).Throws<ArgumentException>();
+			
 			AProviderComposite provider = new ProviderComposite(new []
 				{
 					mock.Object,
-					mockTwo.Object
+					mockTwo.Object,
+					mockFailing.Object
 				},
 				_factory.CreateLogger<ProviderComposite>());
 			
