@@ -17,11 +17,11 @@ namespace Kyoo.Api
 	{
 		private readonly IThumbnailsManager _thumbnails;
 		private readonly ILibraryManager _libraryManager;
-		private readonly IFileManager _files;
+		private readonly IFileSystem _files;
 		
 		public ProviderApi(ILibraryManager libraryManager,
 			IOptions<BasicOptions> options,
-			IFileManager files,
+			IFileSystem files,
 			IThumbnailsManager thumbnails)
 			: base(libraryManager.ProviderRepository, options.Value.PublicUrl)
 		{
@@ -36,7 +36,7 @@ namespace Kyoo.Api
 			Provider provider = await _libraryManager.GetOrDefault<Provider>(id);
 			if (provider == null)
 				return NotFound();
-			return _files.FileResult(await _thumbnails.GetProviderLogo(provider));
+			return _files.FileResult(await _thumbnails.GetLogo(provider));
 		}
 		
 		[HttpGet("{slug}/logo")]
@@ -45,7 +45,7 @@ namespace Kyoo.Api
 			Provider provider = await _libraryManager.GetOrDefault<Provider>(slug);
 			if (provider == null)
 				return NotFound();
-			return _files.FileResult(await _thumbnails.GetProviderLogo(provider));
+			return _files.FileResult(await _thumbnails.GetLogo(provider));
 		}
 	}
 }

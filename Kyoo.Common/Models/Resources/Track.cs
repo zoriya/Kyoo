@@ -35,8 +35,8 @@ namespace Kyoo.Models
 			{
 				string type = Type.ToString().ToLower();
 				string index = TrackIndex != 0 ? $"-{TrackIndex}" : string.Empty;
-				string episode = EpisodeSlug ?? Episode.Slug ?? EpisodeID.ToString();
-				return $"{episode}.{Language}{index}{(IsForced ? ".forced" : "")}.{type}";
+				string episode = EpisodeSlug ?? Episode?.Slug ?? EpisodeID.ToString();
+				return $"{episode}.{Language ?? "und"}{index}{(IsForced ? ".forced" : "")}.{type}";
 			}
 			[UsedImplicitly] private set
 			{
@@ -47,11 +47,13 @@ namespace Kyoo.Models
 
 				if (!match.Success)
 					throw new ArgumentException("Invalid track slug. " +
-					                            "Format: {episodeSlug}.{language}[-{index}][-forced].{type}[.{extension}]");
+					                            "Format: {episodeSlug}.{language}[-{index}][.forced].{type}[.{extension}]");
 
 				EpisodeSlug = match.Groups["ep"].Value;
 				Language = match.Groups["lang"].Value;
-				TrackIndex = int.Parse(match.Groups["index"].Value);
+				if (Language == "und")
+					Language = null;
+				TrackIndex = match.Groups["index"].Success ? int.Parse(match.Groups["index"].Value) : 0;
 				IsForced = match.Groups["forced"].Success;
 				Type = Enum.Parse<StreamType>(match.Groups["type"].Value, true);
 			}
@@ -154,30 +156,17 @@ namespace Kyoo.Models
 		}
 
 		/// <summary>
-		/// Utility method to edit a track slug (this only return a slug with the modification, nothing is stored)
+		/// Utility method to create a track slug from a incomplete slug (only add the type of the track).
 		/// </summary>
 		/// <param name="baseSlug">The slug to edit</param>
 		/// <param name="type">The new type of this </param>
-		/// <param name="language"></param>
-		/// <param name="index"></param>
-		/// <param name="forced"></param>
 		/// <returns></returns>
-		public static string EditSlug(string baseSlug,
-			StreamType type = StreamType.Unknown,
-			string language = null,
-			int? index = null,
-			bool? forced = null)
+		public static string BuildSlug(string baseSlug,
+			StreamType type)
 		{
-			Track track = new() {Slug = baseSlug};
-			if (type != StreamType.Unknown)
-				track.Type = type;
-			if (language != null)
-				track.Language = language;
-			if (index != null)
-				track.TrackIndex = index.Value;
-			if (forced != null)
-				track.IsForced = forced.Value;
-			return track.Slug;
+			return baseSlug.EndsWith($".{type}", StringComparison.InvariantCultureIgnoreCase) 
+				? baseSlug 
+				: $"{baseSlug}.{type.ToString().ToLowerInvariant()}";
 		}
 	}
 }

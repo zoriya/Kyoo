@@ -62,7 +62,7 @@ namespace Kyoo.Models
 		public DateTime? ReleaseDate { get; set; }
 		
 		/// <summary>
-		/// The path of the video file for this episode. Any format supported by a <see cref="IFileManager"/> is allowed.
+		/// The path of the video file for this episode. Any format supported by a <see cref="IFileSystem"/> is allowed.
 		/// </summary>
 		[SerializeIgnore] public string Path { get; set; }
 		
@@ -176,13 +176,16 @@ namespace Kyoo.Models
 			return new WatchItem
 			{
 				EpisodeID = ep.ID,
+				Slug = ep.Slug,
 				ShowSlug = ep.Show.Slug,
+				ShowTitle = ep.Show.Title,
 				SeasonNumber = ep.SeasonNumber,
 				EpisodeNumber = ep.EpisodeNumber,
 				AbsoluteNumber = ep.AbsoluteNumber,
 				Title = ep.Title,
 				ReleaseDate = ep.ReleaseDate,
 				Path = ep.Path,
+				Container = PathIO.GetExtension(ep.Path)![1..],
 				Video = ep.Tracks.FirstOrDefault(x => x.Type == StreamType.Video),
 				Audios = ep.Tracks.Where(x => x.Type == StreamType.Audio).ToArray(),
 				Subtitles = ep.Tracks.Where(x => x.Type == StreamType.Subtitle).ToArray(), 

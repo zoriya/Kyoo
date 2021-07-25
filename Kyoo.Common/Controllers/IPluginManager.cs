@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Autofac;
 using Kyoo.Models.Exceptions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -42,7 +43,13 @@ namespace Kyoo.Controllers
 		public void LoadPlugins(ICollection<IPlugin> plugins);
 
 		/// <summary>
-		/// Configure services adding or removing services as the plugins wants.
+		/// Configure container adding or removing services as the plugins wants.
+		/// </summary>
+		/// <param name="builder">The container to populate</param>
+		void ConfigureContainer(ContainerBuilder builder);
+		
+		/// <summary>
+		/// Configure services via the microsoft way. This allow libraries to add their services.
 		/// </summary>
 		/// <param name="services">The service collection to populate</param>
 		public void ConfigureServices(IServiceCollection services);

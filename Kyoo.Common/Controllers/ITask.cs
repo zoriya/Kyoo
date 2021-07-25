@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
+using Kyoo.Models;
 using Kyoo.Models.Attributes;
+using Kyoo.Models.Exceptions;
 
 namespace Kyoo.Controllers
 {
 	/// <summary>
-	/// A single task parameter. This struct contains metadata to display and utility functions to get them in the taks.
+	/// A single task parameter. This struct contains metadata to display and utility functions to get them in the task.
 	/// </summary>
 	/// <remarks>This struct will be used to generate the swagger documentation of the task.</remarks>
 	public record TaskParameter
@@ -61,6 +64,24 @@ namespace Kyoo.Controllers
 		}
 		
 		/// <summary>
+		/// Create a new required task parameter.
+		/// </summary>
+		/// <param name="name">The name of the parameter</param>
+		/// <param name="description">The description of the parameter</param>
+		/// <typeparam name="T">The type of the parameter.</typeparam>
+		/// <returns>A new task parameter.</returns>
+		public static TaskParameter CreateRequired<T>(string name, string description)
+		{
+			return new()
+			{
+				Name = name,
+				Description = description,
+				Type = typeof(T),
+				IsRequired = true
+			};
+		}
+		
+		/// <summary>
 		/// Create a parameter's value to give to a task.
 		/// </summary>
 		/// <param name="name">The name of the parameter</param>
@@ -94,6 +115,17 @@ namespace Kyoo.Controllers
 		/// <returns>The value of this parameter.</returns>
 		public T As<T>()
 		{
+			if (typeof(T) == typeof(object))
+				return (T)Value;
+
+			if (Value is IResource resource)
+			{
+				if (typeof(T) == typeof(string))
+					return (T)(object)resource.Slug;
+				if (typeof(T) == typeof(int))
+					return (T)(object)resource.ID;
+			}
+
 			return (T)Convert.ChangeType(Value, typeof(T));
 		}
 	}
@@ -131,58 +163,38 @@ namespace Kyoo.Controllers
 	public interface ITask
 	{
 		/// <summary>
-		/// The slug of the task, used to start it.
+		/// The list of parameters
 		/// </summary>
-		public string Slug { get; }
-		
-		/// <summary>
-		/// The name of the task that will be displayed to the user.
-		/// </summary>
-		public string Name { get; }
-		
-		/// <summary>
-		/// A quick description of what this task will do.
-		/// </summary>
-		public string Description { get; }
-		
-		/// <summary>
-		/// An optional message to display to help the user.
-		/// </summary>
-		public string HelpMessage { get; }
-		
-		/// <summary>
-		/// Should this task be automatically run at app startup?
-		/// </summary>
-		public bool RunOnStartup { get; }
-		
-		/// <summary>
-		/// The priority of this task. Only used if <see cref="RunOnStartup"/> is true.
-		/// It allow one to specify witch task will be started first as tasked are run on a Priority's descending order.
-		/// </summary>
-		public int Priority { get; }
+		/// <returns>
+		/// All parameters that this task as. Every one of them will be given to the run function with a value.
+		/// </returns>
+		public TaskParameters GetParameters();
 		
 		/// <summary>
 		/// Start this task.
 		/// </summary>
-		/// <param name="arguments">The list of parameters.</param>
+		/// <param name="arguments">
+		/// The list of parameters.
+		/// </param>
+		/// <param name="progress">
+		/// The progress reporter. Used to inform the sender the percentage of completion of this task
+		/// .</param>
 		/// <param name="cancellationToken">A token to request the task's cancellation.
-		/// If this task is not cancelled quickly, it might be killed by the runner.</param>
+		/// If this task is not cancelled quickly, it might be killed by the runner.
+		/// </param>
 		/// <remarks>
 		/// Your task can have any service as a public field and use the <see cref="InjectedAttribute"/>,
 		/// they will be set to an available service from the service container before calling this method.
+		/// They also will be removed after this method return (or throw) to prevent dangling services.
 		/// </remarks>
-		public Task Run(TaskParameters arguments, CancellationToken cancellationToken);
-		
-		/// <summary>
-		/// The list of parameters
-		/// </summary>
-		/// <returns>All parameters that this task as. Every one of them will be given to the run function with a value.</returns>
-		public TaskParameters GetParameters();
-		
-		/// <summary>
-		/// If this task is running, return the percentage of completion of this task or null if no percentage can be given.
-		/// </summary>
-		/// <returns>The percentage of completion of the task.</returns>
-		public int? Progress();
+		/// <exception cref="TaskFailedException">
+		/// An exception meaning that the task has failed for handled reasons like invalid arguments,
+		/// invalid environment, missing plugins or failures not related to a default in the code.
+		/// This exception allow the task to display a failure message to the end user while others exceptions
+		/// will be displayed as unhandled exceptions and display a stack trace.
+		/// </exception>
+		public Task Run([NotNull] TaskParameters arguments,
+			[NotNull] IProgress<float> progress,
+			CancellationToken cancellationToken);
 	}
 }

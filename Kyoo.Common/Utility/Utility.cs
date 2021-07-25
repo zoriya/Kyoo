@@ -72,7 +72,7 @@ namespace Kyoo
 		/// </summary>
 		/// <param name="str">The string to slugify</param>
 		/// <returns>The slug version of the given string</returns>
-		public static string ToSlug(string str)
+		public static string ToSlug([CanBeNull] string str)
 		{
 			if (str == null)
 				return null;
@@ -182,15 +182,49 @@ namespace Kyoo
 			return types.FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == genericType);
 		}
 
-		public static MethodInfo GetMethod(Type type, BindingFlags flag, string name, Type[] generics, object[] args)
+		/// <summary>
+		/// Retrieve a method from an <see cref="Type"/> with the given name and respect the
+		/// amount of parameters and generic parameters. This works for polymorphic methods.
+		/// </summary>
+		/// <param name="type">
+		/// The type owning the method. For non static methods, this is the <c>this</c>.
+		/// </param>
+		/// <param name="flag">
+		/// The binding flags of the method. This allow you to specify public/private and so on.
+		/// </param>
+		/// <param name="name">
+		/// The name of the method.
+		/// </param>
+		/// <param name="generics">
+		/// The list of generic parameters.
+		/// </param>
+		/// <param name="args">
+		/// The list of parameters. 
+		/// </param>
+		/// <exception cref="ArgumentException">No method match the given constraints.</exception>
+		/// <returns>The method handle of the matching method.</returns>
+		[PublicAPI]
+		[NotNull]
+		public static MethodInfo GetMethod([NotNull] Type type, 
+			BindingFlags flag,
+			string name, 
+			[NotNull] Type[] generics,
+			[NotNull] object[] args)
 		{
+			if (type == null)
+				throw new ArgumentNullException(nameof(type));
+			if (generics == null)
+				throw new ArgumentNullException(nameof(generics));
+			if (args == null)
+				throw new ArgumentNullException(nameof(args));
+			
 			MethodInfo[] methods = type.GetMethods(flag | BindingFlags.Public)
 				.Where(x => x.Name == name)
 				.Where(x => x.GetGenericArguments().Length == generics.Length)
 				.Where(x => x.GetParameters().Length == args.Length)
-				.IfEmpty(() => throw new NullReferenceException($"A method named {name} with " +
-				                                                $"{args.Length} arguments and {generics.Length} generic " +
-				                                                $"types could not be found on {type.Name}."))
+				.IfEmpty(() => throw new ArgumentException($"A method named {name} with " +
+				                                           $"{args.Length} arguments and {generics.Length} generic " +
+				                                           $"types could not be found on {type.Name}."))
 				// TODO this won't work but I don't know why.
 				// .Where(x =>
 				// {
@@ -211,9 +245,34 @@ namespace Kyoo
 
 			if (methods.Length == 1)
 				return methods[0];
-			throw new NullReferenceException($"Multiple methods named {name} match the generics and parameters constraints.");
+			throw new ArgumentException($"Multiple methods named {name} match the generics and parameters constraints.");
 		}
 		
+		/// <summary>
+		/// Run a generic static method for a runtime <see cref="Type"/>.
+		/// </summary>
+		/// <example>
+		/// To run <see cref="Merger.MergeLists{T}"/> for a List where you don't know the type at compile type,
+		/// you could do:
+		/// <code lang="C#">
+		/// Utility.RunGenericMethod&lt;object&gt;(
+		///     typeof(Utility),
+		///     nameof(MergeLists),
+		///     enumerableType,
+		///     oldValue, newValue, equalityComparer)
+		/// </code>
+		/// </example>
+		/// <param name="owner">The type that owns the method. For non static methods, the type of <c>this</c>.</param>
+		/// <param name="methodName">The name of the method. You should use the <c>nameof</c> keyword.</param>
+		/// <param name="type">The generic type to run the method with.</param>
+		/// <param name="args">The list of arguments of the method</param>
+		/// <typeparam name="T">
+		/// The return type of the method. You can put <see cref="object"/> for an unknown one.
+		/// </typeparam>
+		/// <exception cref="ArgumentException">No method match the given constraints.</exception>
+		/// <returns>The return of the method you wanted to run.</returns>
+		/// <seealso cref="RunGenericMethod{T}(object,string,System.Type,object[])"/>
+		/// <seealso cref="RunGenericMethod{T}(System.Type,string,System.Type[],object[])"/>
 		public static T RunGenericMethod<T>(
 			[NotNull] Type owner, 
 			[NotNull] string methodName,
@@ -223,6 +282,34 @@ namespace Kyoo
 			return RunGenericMethod<T>(owner, methodName, new[] {type}, args);
 		}
 		
+		/// <summary>
+		/// Run a generic static method for a multiple runtime <see cref="Type"/>.
+		/// If your generic method only needs one type, see
+		/// <see cref="RunGenericMethod{T}(System.Type,string,System.Type,object[])"/>
+		/// </summary>
+		/// <example>
+		/// To run <see cref="Merger.MergeLists{T}"/> for a List where you don't know the type at compile type,
+		/// you could do:
+		/// <code>
+		/// Utility.RunGenericMethod&lt;object&gt;(
+		///     typeof(Utility),
+		///     nameof(MergeLists),
+		///     enumerableType,
+		///     oldValue, newValue, equalityComparer)
+		/// </code>
+		/// </example>
+		/// <param name="owner">The type that owns the method. For non static methods, the type of <c>this</c>.</param>
+		/// <param name="methodName">The name of the method. You should use the <c>nameof</c> keyword.</param>
+		/// <param name="types">The list of generic types to run the method with.</param>
+		/// <param name="args">The list of arguments of the method</param>
+		/// <typeparam name="T">
+		/// The return type of the method. You can put <see cref="object"/> for an unknown one.
+		/// </typeparam>
+		/// <exception cref="ArgumentException">No method match the given constraints.</exception>
+		/// <returns>The return of the method you wanted to run.</returns>
+		/// <seealso cref="RunGenericMethod{T}(object,string,System.Type[],object[])"/>
+		/// <seealso cref="RunGenericMethod{T}(System.Type,string,System.Type,object[])"/>
+		[PublicAPI]
 		public static T RunGenericMethod<T>(
 			[NotNull] Type owner, 
 			[NotNull] string methodName,
@@ -238,9 +325,34 @@ namespace Kyoo
 			if (types.Length < 1)
 				throw new ArgumentException($"The {nameof(types)} array is empty. At least one type is needed.");
 			MethodInfo method = GetMethod(owner, BindingFlags.Static, methodName, types, args);
-			return (T)method.MakeGenericMethod(types).Invoke(null, args?.ToArray());
+			return (T)method.MakeGenericMethod(types).Invoke(null, args.ToArray());
 		}
 
+		/// <summary>
+		/// Run a generic method for a runtime <see cref="Type"/>.
+		/// </summary>
+		/// <example>
+		/// To run <see cref="Merger.MergeLists{T}"/> for a List where you don't know the type at compile type,
+		/// you could do:
+		/// <code>
+		/// Utility.RunGenericMethod&lt;object&gt;(
+		///     typeof(Utility),
+		///     nameof(MergeLists),
+		///     enumerableType,
+		///     oldValue, newValue, equalityComparer)
+		/// </code>
+		/// </example>
+		/// <param name="instance">The <c>this</c> of the method to run.</param>
+		/// <param name="methodName">The name of the method. You should use the <c>nameof</c> keyword.</param>
+		/// <param name="type">The generic type to run the method with.</param>
+		/// <param name="args">The list of arguments of the method</param>
+		/// <typeparam name="T">
+		/// The return type of the method. You can put <see cref="object"/> for an unknown one.
+		/// </typeparam>
+		/// <exception cref="ArgumentException">No method match the given constraints.</exception>
+		/// <returns>The return of the method you wanted to run.</returns>
+		/// <seealso cref="RunGenericMethod{T}(object,string,System.Type,object[])"/>
+		/// <seealso cref="RunGenericMethod{T}(System.Type,string,System.Type[],object[])"/>
 		public static T RunGenericMethod<T>(
 			[NotNull] object instance,
 			[NotNull] string methodName,
@@ -250,6 +362,33 @@ namespace Kyoo
 			return RunGenericMethod<T>(instance, methodName, new[] {type}, args);
 		}
 
+		/// <summary>
+		/// Run a generic method for a multiple runtime <see cref="Type"/>.
+		/// If your generic method only needs one type, see
+		/// <see cref="RunGenericMethod{T}(object,string,System.Type,object[])"/>
+		/// </summary>
+		/// <example>
+		/// To run <see cref="Merger.MergeLists{T}"/> for a List where you don't know the type at compile type,
+		/// you could do:
+		/// <code>
+		/// Utility.RunGenericMethod&lt;object&gt;(
+		///     typeof(Utility),
+		///     nameof(MergeLists),
+		///     enumerableType,
+		///     oldValue, newValue, equalityComparer)
+		/// </code>
+		/// </example>
+		/// <param name="instance">The <c>this</c> of the method to run.</param>
+		/// <param name="methodName">The name of the method. You should use the <c>nameof</c> keyword.</param>
+		/// <param name="types">The list of generic types to run the method with.</param>
+		/// <param name="args">The list of arguments of the method</param>
+		/// <typeparam name="T">
+		/// The return type of the method. You can put <see cref="object"/> for an unknown one.
+		/// </typeparam>
+		/// <exception cref="ArgumentException">No method match the given constraints.</exception>
+		/// <returns>The return of the method you wanted to run.</returns>
+		/// <seealso cref="RunGenericMethod{T}(object,string,System.Type[],object[])"/>
+		/// <seealso cref="RunGenericMethod{T}(System.Type,string,System.Type,object[])"/>
 		public static T RunGenericMethod<T>(
 			[NotNull] object instance, 
 			[NotNull] string methodName,
@@ -263,7 +402,7 @@ namespace Kyoo
 			if (types == null || types.Length == 0)
 				throw new ArgumentNullException(nameof(types));
 			MethodInfo method = GetMethod(instance.GetType(), BindingFlags.Instance, methodName, types, args);
-			return (T)method.MakeGenericMethod(types).Invoke(instance, args?.ToArray());
+			return (T)method.MakeGenericMethod(types).Invoke(instance, args.ToArray());
 		}
 
 		public static string ToQueryString(this Dictionary<string, string> query)

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using JetBrains.Annotations;
 using Kyoo.Common.Models.Attributes;
 using Kyoo.Controllers;
 using Kyoo.Models.Attributes;
@@ -30,7 +31,7 @@ namespace Kyoo.Models
 		
 		/// <summary>
 		/// The path of the root directory of this show.
-		/// This can be any kind of path supported by <see cref="IFileManager"/>
+		/// This can be any kind of path supported by <see cref="IFileSystem"/>
 		/// </summary>
 		[SerializeIgnore] public string Path { get; set; }
 		
@@ -42,10 +43,10 @@ namespace Kyoo.Models
 		/// <summary>
 		/// Is this show airing, not aired yet or finished?
 		/// </summary>
-		public Status? Status { get; set; }
+		public Status Status { get; set; }
 		
 		/// <summary>
-		/// An URL to a trailer. This could be any path supported by the <see cref="IFileManager"/>.
+		/// An URL to a trailer. This could be any path supported by the <see cref="IFileSystem"/>.
 		/// </summary>
 		/// TODO for now, this is set to a youtube url. It should be cached and converted to a local file.
 		public string TrailerUrl { get; set; }
@@ -157,6 +158,7 @@ namespace Kyoo.Models
 		/// <remarks>This method will never return anything if the <see cref="ExternalIDs"/> are not loaded.</remarks>
 		/// <param name="provider">The slug of the provider</param>
 		/// <returns>The <see cref="MetadataID{T}.DataID"/> field of the asked provider.</returns>
+		[CanBeNull]
 		public string GetID(string provider)
 		{
 			return ExternalIDs?.FirstOrDefault(x => x.Second.Slug == provider)?.DataID;
@@ -183,5 +185,5 @@ namespace Kyoo.Models
 	/// <summary>
 	/// The enum containing show's status.
 	/// </summary>
-	public enum Status { Finished, Airing, Planned, Unknown }
+	public enum Status { Unknown, Finished, Airing, Planned }
 }

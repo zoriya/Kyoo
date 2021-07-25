@@ -1,5 +1,6 @@
 using System;
 using System.Linq.Expressions;
+using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
 {
@@ -107,12 +108,12 @@ namespace Kyoo.Models
 		/// <summary>
 		/// A reference of the first resource.
 		/// </summary>
-		public T1 First { get; set; }
+		[SerializeIgnore] public T1 First { get; set; }
 		
 		/// <summary>
 		/// A reference to the second resource.
 		/// </summary>
-		public T2 Second { get; set; }
+		[SerializeIgnore] public T2 Second { get; set; }
 		
 		
 		/// <summary>

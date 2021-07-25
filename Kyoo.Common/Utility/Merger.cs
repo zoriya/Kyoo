@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using JetBrains.Annotations;
+using Kyoo.Models;
 using Kyoo.Models.Attributes;
 
 namespace Kyoo
@@ -111,7 +112,8 @@ namespace Kyoo
 		/// <param name="second">Missing fields of first will be completed by fields of this item. If second is null, the function no-op.</param>
 		/// <typeparam name="T">Fields of T will be merged</typeparam>
 		/// <returns><see cref="first"/></returns>
-		public static T Merge<T>(T first, T second)
+		[ContractAnnotation("first:notnull => notnull; second:notnull => notnull", true)]
+		public static T Merge<T>([CanBeNull] T first, [CanBeNull] T second)
 		{
 			if (first == null)
 				return second;
@@ -127,9 +129,7 @@ namespace Kyoo
 			{
 				object oldValue = property.GetValue(first);
 				object newValue = property.GetValue(second);
-				object defaultValue = property.PropertyType.IsValueType
-					? Activator.CreateInstance(property.PropertyType) 
-					: null;
+				object defaultValue = property.PropertyType.GetClrDefault();
 				
 				if (oldValue?.Equals(defaultValue) != false)
 					property.SetValue(first, newValue);
@@ -139,11 +139,14 @@ namespace Kyoo
 					Type enumerableType = Utility.GetGenericDefinition(property.PropertyType, typeof(IEnumerable<>))
 						.GenericTypeArguments
 						.First();
+					Func<IResource, IResource, bool> equalityComparer = enumerableType.IsAssignableTo(typeof(IResource))
+						? (x, y) =>  x.Slug == y.Slug
+						: null;
 					property.SetValue(first, Utility.RunGenericMethod<object>(
-						typeof(Utility), 
+						typeof(Merger),
 						nameof(MergeLists),
-						enumerableType, 
-						oldValue, newValue, null));
+						enumerableType,
+						oldValue, newValue, equalityComparer));
 				}
 			}
 

@@ -19,6 +19,12 @@ namespace Kyoo.Models
 		/// The URL of the resource on the external provider.
 		/// </summary>
 		public string Link { get; set; }
+
+		/// <summary>
+		/// A shortcut to access the provider of this metadata.
+		/// Unlike the <see cref="Link{T, T2}.Second"/> property, this is serializable.
+		/// </summary>
+		public Provider Provider => Second;
 		
 		/// <summary>
 		/// The expression to retrieve the unique ID of a MetadataID. This is an aggregate of the two resources IDs.

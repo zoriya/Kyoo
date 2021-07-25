@@ -20,12 +20,12 @@ namespace Kyoo.Api
 	{
 		private readonly ILibraryManager _libraryManager;
 		private readonly IThumbnailsManager _thumbs;
-		private readonly IFileManager _files;
+		private readonly IFileSystem _files;
 
 		public SeasonApi(ILibraryManager libraryManager,
 			IOptions<BasicOptions> options,
 			IThumbnailsManager thumbs,
-			IFileManager files)
+			IFileSystem files)
 			: base(libraryManager.SeasonRepository, options.Value.PublicUrl)
 		{
 			_libraryManager = libraryManager;
@@ -144,24 +144,24 @@ namespace Kyoo.Api
 			return ret;
 		}
 		
-		[HttpGet("{id:int}/thumb")]
-		public async Task<IActionResult> GetThumb(int id)
+		[HttpGet("{id:int}/poster")]
+		public async Task<IActionResult> GetPoster(int id)
 		{
 			Season season = await _libraryManager.GetOrDefault<Season>(id);
 			if (season == null)
 				return NotFound();
 			await _libraryManager.Load(season, x => x.Show);
-			return _files.FileResult(await _thumbs.GetSeasonPoster(season));
+			return _files.FileResult(await _thumbs.GetPoster(season));
 		}
 		
-		[HttpGet("{slug}/thumb")]
-		public async Task<IActionResult> GetThumb(string slug)
+		[HttpGet("{slug}/poster")]
+		public async Task<IActionResult> GetPoster(string slug)
 		{
 			Season season = await _libraryManager.GetOrDefault<Season>(slug);
 			if (season == null)
 				return NotFound();
 			await _libraryManager.Load(season, x => x.Show);
-			return _files.FileResult(await _thumbs.GetSeasonPoster(season));
+			return _files.FileResult(await _thumbs.GetPoster(season));
 		}
 	}
 }

@@ -96,7 +96,12 @@ namespace Kyoo.Controllers
 		protected override async Task Validate(Season resource)
 		{
 			if (resource.ShowID <= 0)
-				throw new InvalidOperationException($"Can't store a season not related to any show (showID: {resource.ShowID}).");
+			{
+				if (resource.Show == null)
+					throw new InvalidOperationException(
+						$"Can't store a season not related to any show (showID: {resource.ShowID}).");
+				resource.ShowID = resource.Show.ID;
+			}
 
 			await base.Validate(resource);
 			await resource.ExternalIDs.ForEachAsync(async id =>

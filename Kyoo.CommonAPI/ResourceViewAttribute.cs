@@ -43,22 +43,31 @@ namespace Kyoo.CommonApi
 				PropertyInfo[] properties = type.GetProperties()
 					.Where(x => x.GetCustomAttribute<LoadableRelationAttribute>() != null)
 					.ToArray();
-				fields = fields.Select(x =>
-					{
-						string property = properties
-							.FirstOrDefault(y => string.Equals(x, y.Name, StringComparison.InvariantCultureIgnoreCase))
-							?.Name;
-						if (property != null)
-							return property;
-						context.Result = new BadRequestObjectResult(new
+				if (fields.Count == 1 && fields.Contains("all"))
+				{
+					fields = properties.Select(x => x.Name).ToList();
+				}
+				else
+				{
+					fields = fields
+						.Select(x =>
 						{
-							Error = $"{x} does not exist on {type.Name}."
-						});
-						return null;
-					})
-					.ToList();
-				if (context.Result != null)
-					return;
+							string property = properties
+								.FirstOrDefault(y
+									=> string.Equals(x, y.Name, StringComparison.InvariantCultureIgnoreCase))
+								?.Name;
+							if (property != null)
+								return property;
+							context.Result = new BadRequestObjectResult(new
+							{
+								Error = $"{x} does not exist on {type.Name}."
+							});
+							return null;
+						})
+						.ToList();
+					if (context.Result != null)
+						return;
+				}
 			}
 			context.HttpContext.Items["fields"] = fields;
 			base.OnActionExecuting(context);

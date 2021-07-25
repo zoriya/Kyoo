@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Npgsql;
 
 namespace Kyoo.Postgresql
 {
@@ -73,6 +74,10 @@ namespace Kyoo.Postgresql
 		{
 			DatabaseContext context = provider.GetRequiredService<DatabaseContext>();
 			context.Database.Migrate();
+
+			using NpgsqlConnection conn = (NpgsqlConnection)context.Database.GetDbConnection();
+			conn.Open();
+			conn.ReloadTypes();
 		}
 	}
 }

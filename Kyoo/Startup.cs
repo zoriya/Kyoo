@@ -1,8 +1,9 @@
 using System;
 using System.IO;
+using Autofac;
+using Autofac.Extras.AttributeMetadata;
 using Kyoo.Authentication;
 using Kyoo.Controllers;
-using Kyoo.Models;
 using Kyoo.Models.Options;
 using Kyoo.Postgresql;
 using Kyoo.Tasks;
@@ -71,11 +72,15 @@ namespace Kyoo
 			
 			services.AddHttpClient();
 			
-			services.AddTransient(typeof(Lazy<>), typeof(LazyDi<>));
-			
-			services.AddSingleton(_plugins);
-			services.AddTask<PluginInitializer>();
 			_plugins.ConfigureServices(services);
+		}
+
+		public void ConfigureContainer(ContainerBuilder builder)
+		{
+			builder.RegisterModule<AttributedMetadataModule>();
+			builder.RegisterInstance(_plugins).As<IPluginManager>().ExternallyOwned();
+			builder.RegisterTask<PluginInitializer>();
+			_plugins.ConfigureContainer(builder);
 		}
 		
 		/// <summary>
@@ -83,7 +88,7 @@ namespace Kyoo
 		/// </summary>
 		/// <param name="app">The asp net host to configure</param>
 		/// <param name="env">The host environment (is the app in development mode?)</param>
-		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+		public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider provider)
 		{
 			if (env.IsDevelopment())
 				app.UseDeveloperExceptionPage();
@@ -110,7 +115,9 @@ namespace Kyoo
 				return next();
 			});
 			app.UseResponseCompression();
-			
+
+			if (_plugins is PluginManager manager)
+				manager.SetProvider(provider);
 			_plugins.ConfigureAspnet(app);
 
 			app.UseSpa(spa =>

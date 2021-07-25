@@ -2,12 +2,14 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
+using Autofac;
+using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+
 namespace Kyoo
 {
 	/// <summary>
@@ -30,6 +32,8 @@ namespace Kyoo
 			if (!File.Exists("./settings.json"))
 				File.Copy(Path.Join(AppDomain.CurrentDomain.BaseDirectory, "settings.json"), "settings.json");
 			
+			IWebHostBuilder builder = CreateWebHostBuilder(args);
+			
 			bool? debug = Environment.GetEnvironmentVariable("ENVIRONMENT")?.ToLowerInvariant() switch
 			{
 				"d" => true,
@@ -43,18 +47,21 @@ namespace Kyoo
 			};
 
 			if (debug == null && Environment.GetEnvironmentVariable("ENVIRONMENT") != null)
-				Console.WriteLine($"Invalid ENVIRONMENT variable. Supported values are \"debug\" and \"prod\". Ignoring...");
+			{
+				Console.WriteLine(
+					$"Invalid ENVIRONMENT variable. Supported values are \"debug\" and \"prod\". Ignoring...");
+			}
 
 			#if DEBUG
 				debug ??= true;
 			#endif
 
-			Console.WriteLine($"Running as {Environment.UserName}.");
-			IWebHostBuilder builder = CreateWebHostBuilder(args);
 			if (debug != null)
 				builder = builder.UseEnvironment(debug == true ? "Development" : "Production");
+
 			try
 			{
+				Console.WriteLine($"Running as {Environment.UserName}.");
 				await builder.Build().RunAsync();
 			}
 			catch (Exception ex)
@@ -86,6 +93,11 @@ namespace Kyoo
 			IConfiguration configuration = SetupConfig(new ConfigurationBuilder(), args).Build();
 
 			return new WebHostBuilder()
+				.ConfigureServices(x =>
+				{
+					AutofacServiceProviderFactory factory = new();
+					x.Replace(ServiceDescriptor.Singleton<IServiceProviderFactory<ContainerBuilder>>(factory));
+				})
 				.UseContentRoot(AppDomain.CurrentDomain.BaseDirectory)
 				.UseConfiguration(configuration)
 				.ConfigureAppConfiguration(x => SetupConfig(x, args))
@@ -98,12 +110,6 @@ namespace Kyoo
 						})
 						.AddDebug()
 						.AddEventSourceLogger();
-				})
-				.UseDefaultServiceProvider((context, options) =>
-				{
-					options.ValidateScopes = context.HostingEnvironment.IsDevelopment();
-					if (context.HostingEnvironment.IsDevelopment())
-						StaticWebAssetsLoader.UseStaticWebAssets(context.HostingEnvironment, context.Configuration);
 				})
 				.ConfigureServices(x => x.AddRouting())
 				.UseKestrel(options => { options.AddServerHeader = false; })

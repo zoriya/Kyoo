@@ -44,8 +44,14 @@
   },
   
   "media": {
-    "regex": "(?:\\/(?<Collection>.*?))?\\/(?<Show>.*?)(?: \\(\\d+\\))?\\/\\k<Show>(?: \\(\\d+\\))?(?:(?: S(?<Season>\\d+)E(?<Episode>\\d+))| (?<Absolute>\\d+))?.*$",
-    "subtitleRegex": "^(?<Episode>.*)\\.(?<Language>\\w{1,3})\\.(?<Default>default\\.)?(?<Forced>forced\\.)?.*$"
+    "regex": [
+      "^\\/?(?<Collection>.+)?\\/(?<Show>.+?)(?: \\((?<StartYear>\\d+)\\))?\\/\\k<Show>(?: \\(\\d+\\))? S(?<Season>\\d+)E(?<Episode>\\d+)\\..*$",
+      "^\\/?(?<Collection>.+)?\\/(?<Show>.+?)(?: \\((?<StartYear>\\d+)\\))?\\/\\k<Show>(?: \\(\\d+\\))? (?<Absolute>\\d+)\\..*$",
+      "^\\/?(?<Collection>.+)?\\/(?<Show>.+?)(?: \\((?<StartYear>\\d+)\\))?\\/\\k<Show>(?: \\(\\d+\\))?\\..*$"
+    ],
+    "subtitleRegex": [
+      "^(?<Episode>.+)\\.(?<Language>\\w{1,3})\\.(?<Default>default\\.)?(?<Forced>forced\\.)?.*$"
+    ]
   },
   
   "authentication": {
@@ -60,5 +66,9 @@
     },
     "profilePicturePath": "users/",
     "clients": []
+  },
+  
+  "tvdb": {
+    "apiKey": "REDACTED"
   }
 }

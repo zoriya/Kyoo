@@ -72,24 +72,29 @@ namespace Kyoo.Controllers
 			}
 		}
 
-		private readonly IFileManager _files;
+		private readonly IFileSystem _files;
 		private readonly IOptions<BasicOptions> _options;
+		private readonly Lazy<ILibraryManager> _library;
 
-		public Transcoder(IFileManager files, IOptions<BasicOptions> options)
+		public Transcoder(IFileSystem files, IOptions<BasicOptions> options, Lazy<ILibraryManager> library)
 		{
 			_files = files;
 			_options = options;
+			_library = library;
 
 			if (TranscoderAPI.init() != Marshal.SizeOf<Stream>())
 				throw new BadTranscoderException();
 		}
 
-		public Task<Track[]> ExtractInfos(Episode episode, bool reextract)
+		public async Task<Track[]> ExtractInfos(Episode episode, bool reextract)
 		{
-			string dir = _files.GetExtraDirectory(episode);
+			if (episode.Show == null)
+				await _library.Value.Load(episode, x => x.Show);
+
+			string dir = _files.GetExtraDirectory(episode.Show);
 			if (dir == null)
 				throw new ArgumentException("Invalid path.");
-			return Task.Factory.StartNew(
+			return await Task.Factory.StartNew(
 				() => TranscoderAPI.ExtractInfos(episode.Path, dir, reextract),
 				TaskCreationOptions.LongRunning);
 		}

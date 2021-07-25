@@ -18,12 +18,12 @@ namespace Kyoo.Api
 	public class PeopleApi : CrudApi<People>
 	{
 		private readonly ILibraryManager _libraryManager;
-		private readonly IFileManager _files;
+		private readonly IFileSystem _files;
 		private readonly IThumbnailsManager _thumbs;
 
 		public PeopleApi(ILibraryManager libraryManager,
 			IOptions<BasicOptions> options,
-			IFileManager files,
+			IFileSystem files,
 			IThumbnailsManager thumbs) 
 			: base(libraryManager.PeopleRepository, options.Value.PublicUrl)
 		{
@@ -94,7 +94,7 @@ namespace Kyoo.Api
 			People people = await _libraryManager.GetOrDefault<People>(id);
 			if (people == null)
 				return NotFound();
-			return _files.FileResult(await _thumbs.GetPeoplePoster(people));
+			return _files.FileResult(await _thumbs.GetPoster(people));
 		}
 		
 		[HttpGet("{slug}/poster")]
@@ -103,7 +103,7 @@ namespace Kyoo.Api
 			People people = await _libraryManager.GetOrDefault<People>(slug);
 			if (people == null)
 				return NotFound();
-			return _files.FileResult(await _thumbs.GetPeoplePoster(people));
+			return _files.FileResult(await _thumbs.GetPoster(people));
 		}
 	}
 }

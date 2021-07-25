@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models.Permissions;
@@ -13,20 +14,51 @@ namespace Kyoo.Api
 	public class SubtitleApi : ControllerBase
 	{
 		private readonly ILibraryManager _libraryManager;
-		private readonly IFileManager _files;
+		private readonly IFileSystem _files;
 
-		public SubtitleApi(ILibraryManager libraryManager, IFileManager files)
+		public SubtitleApi(ILibraryManager libraryManager, IFileSystem files)
 		{
 			_libraryManager = libraryManager;
 			_files = files;
 		}
 		
-		
-		[HttpGet("{slug}.{extension}")]
+		[HttpGet("{id:int}")]
 		[Permission(nameof(SubtitleApi), Kind.Read)]
-		public async Task<IActionResult> GetSubtitle(string slug, string extension)
+		public async Task<IActionResult> GetSubtitle(int id)
 		{
-			Track subtitle = await _libraryManager.GetOrDefault<Track>(Track.EditSlug(slug, StreamType.Subtitle));
+			Track subtitle = await _libraryManager.GetOrDefault<Track>(id);
+			return subtitle != null
+				? _files.FileResult(subtitle.Path)
+				: NotFound();
+		}
+		
+		[HttpGet("{id:int}.{extension}")]
+		[Permission(nameof(SubtitleApi), Kind.Read)]
+		public async Task<IActionResult> GetSubtitle(int id, string extension)
+		{
+			Track subtitle = await _libraryManager.GetOrDefault<Track>(id);
+			if (subtitle == null)
+				return NotFound();
+			if (subtitle.Codec == "subrip" && extension == "vtt")
+				return new ConvertSubripToVtt(subtitle.Path, _files);
+			return _files.FileResult(subtitle.Path);
+		}
+		
+		
+		[HttpGet("{slug}")]
+		[Permission(nameof(SubtitleApi), Kind.Read)]
+		public async Task<IActionResult> GetSubtitle(string slug)
+		{
+			string extension = null;
+			
+			if (slug.Count(x => x == '.') == 2)
+			{
+				int idx = slug.LastIndexOf('.');
+				extension = slug[(idx + 1)..];
+				slug = slug[..idx];
+			}
+
+			Track subtitle = await _libraryManager.GetOrDefault<Track>(Track.BuildSlug(slug, StreamType.Subtitle));
 			if (subtitle == null)
 				return NotFound();
 			if (subtitle.Codec == "subrip" && extension == "vtt")
@@ -39,9 +71,9 @@ namespace Kyoo.Api
 	public class ConvertSubripToVtt : IActionResult
 	{
 		private readonly string _path;
-		private readonly IFileManager _files;
+		private readonly IFileSystem _files;
 
-		public ConvertSubripToVtt(string subtitlePath, IFileManager files)
+		public ConvertSubripToVtt(string subtitlePath, IFileSystem files)
 		{
 			_path = subtitlePath;
 			_files = files;
@@ -60,7 +92,7 @@ namespace Kyoo.Api
 				await writer.WriteLineAsync("");
 				await writer.WriteLineAsync("");
 
-				using StreamReader reader = new(_files.GetReader(_path));
+				using StreamReader reader = new(await _files.GetReader(_path));
 				string line;
 				while ((line = await reader.ReadLineAsync()) != null)
 				{

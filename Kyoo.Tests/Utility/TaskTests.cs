@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace Kyoo.Tests
+namespace Kyoo.Tests.Utility
 {
 	public class TaskTests
 	{

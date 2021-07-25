@@ -36,7 +36,29 @@ namespace Kyoo.Controllers
 			_references = references.ToDictionary(x => x.Path, x => x.Type, StringComparer.OrdinalIgnoreCase);
 		}
 
-		private Type GetType(string path)
+
+		/// <inheritdoc />
+		public void AddTyped<T>(string path)
+		{
+			foreach (ConfigurationReference confRef in ConfigurationReference.CreateReference<T>(path))
+				_references.Add(confRef.Path, confRef.Type);
+		}
+
+		/// <inheritdoc />
+		public void AddUntyped(string path)
+		{
+			ConfigurationReference config = ConfigurationReference.CreateUntyped(path);
+			_references.Add(config.Path, config.Type);
+		}
+
+		/// <summary>
+		/// Get the type of the resource at the given path
+		/// </summary>
+		/// <param name="path">The path of the resource</param>
+		/// <exception cref="ArgumentException">The path is not editable or readable</exception>
+		/// <exception cref="ItemNotFoundException">No configuration exists for the given path</exception>
+		/// <returns>The type of the resource at the given path</returns>
+		private Type _GetType(string path)
 		{
 			path = path.Replace("__", ":");
 
@@ -59,7 +81,7 @@ namespace Kyoo.Controllers
 		{
 			path = path.Replace("__", ":");
 			// TODO handle lists and dictionaries.
-			Type type = GetType(path);
+			Type type = _GetType(path);
 			object ret = _configuration.GetValue(type, path);
 			if (ret != null)
 				return ret;
@@ -73,7 +95,7 @@ namespace Kyoo.Controllers
 		{
 			path = path.Replace("__", ":");
 			// TODO handle lists and dictionaries.
-			Type type = GetType(path);
+			Type type = _GetType(path);
 			if (typeof(T).IsAssignableFrom(type))
 				throw new InvalidCastException($"The type {typeof(T).Name} is not valid for " +
 				                               $"a resource of type {type.Name}.");
@@ -84,12 +106,12 @@ namespace Kyoo.Controllers
 		public async Task EditValue(string path, object value)
 		{
 			path = path.Replace("__", ":");
-			Type type = GetType(path);
+			Type type = _GetType(path);
 			value = JObject.FromObject(value).ToObject(type);
 			if (value == null)
 				throw new ArgumentException("Invalid value format.");
 			
-			ExpandoObject config = ToObject(_configuration);
+			ExpandoObject config = _ToObject(_configuration);
 			IDictionary<string, object> configDic = config;
 			configDic[path] = value;
 			JObject obj = JObject.FromObject(config);
@@ -104,7 +126,7 @@ namespace Kyoo.Controllers
 		/// <param name="config">The configuration to transform</param>
 		/// <returns>A strongly typed representation of the configuration.</returns>
 		[SuppressMessage("ReSharper", "RedundantJumpStatement")]
-		private ExpandoObject ToObject(IConfiguration config)
+		private ExpandoObject _ToObject(IConfiguration config)
 		{
 			ExpandoObject obj = new();
 
@@ -112,12 +134,12 @@ namespace Kyoo.Controllers
 			{
 				try
 				{
-					Type type = GetType(section.Path);
+					Type type = _GetType(section.Path);
 					obj.TryAdd(section.Key, section.Get(type));
 				}
 				catch (ArgumentException)
 				{
-					obj.TryAdd(section.Key, ToUntyped(section));
+					obj.TryAdd(section.Key, _ToUntyped(section));
 				}
 				catch
 				{
@@ -133,13 +155,13 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="config">The section to convert</param>
 		/// <returns>The converted section</returns>
-		private static object ToUntyped(IConfigurationSection config)
+		private static object _ToUntyped(IConfigurationSection config)
 		{
 			ExpandoObject obj = new();
 
 			foreach (IConfigurationSection section in config.GetChildren())
 			{
-				obj.TryAdd(section.Key, ToUntyped(section));
+				obj.TryAdd(section.Key, _ToUntyped(section));
 			}
 
 			if (!obj.Any())

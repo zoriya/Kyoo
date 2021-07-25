@@ -20,9 +20,11 @@ namespace Kyoo.Models
 		{
 			get
 			{
-				if (ShowSlug == null && Show == null)
-					return GetSlug(ShowID.ToString(), SeasonNumber, EpisodeNumber, AbsoluteNumber);
-				return GetSlug(ShowSlug ?? Show.Slug, SeasonNumber, EpisodeNumber, AbsoluteNumber);
+				if (ShowSlug != null || Show != null)
+					return GetSlug(ShowSlug ?? Show.Slug, SeasonNumber, EpisodeNumber, AbsoluteNumber);
+				return ShowID != 0 
+					? GetSlug(ShowID.ToString(), SeasonNumber, EpisodeNumber, AbsoluteNumber) 
+					: null;
 			}
 			[UsedImplicitly] [NotNull] private set
 			{
@@ -93,7 +95,7 @@ namespace Kyoo.Models
 		public int? AbsoluteNumber { get; set; }
 		
 		/// <summary>
-		/// The path of the video file for this episode. Any format supported by a <see cref="IFileManager"/> is allowed.
+		/// The path of the video file for this episode. Any format supported by a <see cref="IFileSystem"/> is allowed.
 		/// </summary>
 		[SerializeIgnore] public string Path { get; set; }
 

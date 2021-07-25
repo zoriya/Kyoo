@@ -23,11 +23,11 @@ namespace Kyoo.Api
 	public class ShowApi : CrudApi<Show>
 	{
 		private readonly ILibraryManager _libraryManager;
-		private readonly IFileManager _files;
+		private readonly IFileSystem _files;
 		private readonly IThumbnailsManager _thumbs;
 
 		public ShowApi(ILibraryManager libraryManager,
-			IFileManager files, 
+			IFileSystem files, 
 			IThumbnailsManager thumbs,
 			IOptions<BasicOptions> options)
 			: base(libraryManager.ShowRepository, options.Value.PublicUrl)
@@ -386,7 +386,7 @@ namespace Kyoo.Api
 				string path = Path.Combine(_files.GetExtraDirectory(show), "Attachments");
 				return (await _files.ListFiles(path))
 					.ToDictionary(Path.GetFileNameWithoutExtension,
-						x => $"{BaseURL}/api/shows/{slug}/fonts/{Path.GetFileName(x)}");
+						x => $"{BaseURL}api/shows/{slug}/fonts/{Path.GetFileName(x)}");
 			}
 			catch (ItemNotFoundException)
 			{
@@ -417,7 +417,7 @@ namespace Kyoo.Api
 			try
 			{
 				Show show = await _libraryManager.Get<Show>(slug);
-				return _files.FileResult(await _thumbs.GetShowPoster(show));
+				return _files.FileResult(await _thumbs.GetPoster(show));
 			}
 			catch (ItemNotFoundException)
 			{
@@ -431,7 +431,7 @@ namespace Kyoo.Api
 			try
 			{
 				Show show = await _libraryManager.Get<Show>(slug);
-				return _files.FileResult(await _thumbs.GetShowLogo(show));
+				return _files.FileResult(await _thumbs.GetLogo(show));
 			}
 			catch (ItemNotFoundException)
 			{
@@ -440,12 +440,13 @@ namespace Kyoo.Api
 		}
 		
 		[HttpGet("{slug}/backdrop")]
+		[HttpGet("{slug}/thumbnail")]
 		public async Task<IActionResult> GetBackdrop(string slug)
 		{
 			try
 			{
 				Show show = await _libraryManager.Get<Show>(slug);
-				return _files.FileResult(await _thumbs.GetShowBackdrop(show));
+				return _files.FileResult(await _thumbs.GetThumbnail(show));
 			}
 			catch (ItemNotFoundException)
 			{
