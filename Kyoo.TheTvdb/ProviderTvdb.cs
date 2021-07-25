@@ -79,6 +79,9 @@ namespace Kyoo.TheTvdb
 		[ItemCanBeNull]
 		private async Task<Show> _GetShow([NotNull] Show show)
 		{
+			if (show.IsMovie)
+				return null;
+			
 			if (!int.TryParse(show.GetID(Provider.Slug), out int id))
 			{
 				Show found = (await _SearchShow(show.Title)).FirstOrDefault();
