@@ -130,7 +130,8 @@ namespace Kyoo.Tasks
 
 				episode.Show = show;
 				episode.Season = season;
-				episode = await _metadataProvider.Get(episode);
+				if (!show.IsMovie)
+					episode = await _metadataProvider.Get(episode);
 				progress.Report(70);
 				episode.Tracks = (await _transcoder.ExtractInfos(episode, false))
 					.Where(x => x.Type != StreamType.Attachment)
