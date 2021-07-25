@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.SqLite", "Kyoo.SqLite\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.TheTvdb", "Kyoo.TheTvdb\Kyoo.TheTvdb.csproj", "{D06BF829-23F5-40F3-A62D-627D9F4B4D6C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.TheMovieDb", "Kyoo.TheMovieDb\Kyoo.TheMovieDb.csproj", "{BAB270D4-E0EA-4329-BA65-512FDAB01001}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,5 +55,9 @@ Global
 		{D06BF829-23F5-40F3-A62D-627D9F4B4D6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D06BF829-23F5-40F3-A62D-627D9F4B4D6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D06BF829-23F5-40F3-A62D-627D9F4B4D6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BAB270D4-E0EA-4329-BA65-512FDAB01001}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAB270D4-E0EA-4329-BA65-512FDAB01001}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAB270D4-E0EA-4329-BA65-512FDAB01001}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAB270D4-E0EA-4329-BA65-512FDAB01001}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

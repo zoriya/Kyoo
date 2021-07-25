@@ -70,5 +70,8 @@
   
   "tvdb": {
     "apiKey": "REDACTED"
+  },
+  "the-moviedb": {
+    "apiKey": "REDACTED"
   }
 }
