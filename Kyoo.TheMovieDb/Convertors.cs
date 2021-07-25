@@ -103,6 +103,23 @@ namespace Kyoo.TheMovieDb
 				}
 			};
 		}
+
+		
+		/// <summary>
+		/// Convert a <see cref="SearchCollection"/> into a <see cref="Collection"/>.
+		/// </summary>
+		/// <param name="collection">The collection to convert.</param>
+		/// <param name="provider">The provider representing TheMovieDb.</param>
+		/// <returns>The converted collection as a <see cref="Collection"/>.</returns>
+		public static Collection ToCollection(this SearchCollection collection, Provider provider)
+		{
+			return new()
+			{
+				Slug = Utility.ToSlug(collection.Name),
+				Name = collection.Name,
+				Poster = $"https://image.tmdb.org/t/p/original{collection.PosterPath}"
+			};
+		}
 		
 		/// <summary>
 		/// Convert a <see cref="SearchMovie"/> into a <see cref="Show"/>.

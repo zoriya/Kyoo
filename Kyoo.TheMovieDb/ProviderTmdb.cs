@@ -81,9 +81,25 @@ namespace Kyoo.TheMovieDb
 		public async Task<ICollection<T>> Search<T>(string query) 
 			where T : class, IResource
 		{
+			if (typeof(T) == typeof(Collection))
+				return (await _SearchCollections(query) as ICollection<T>)!;
 			if (typeof(T) == typeof(Show))
 				return (await _SearchShows(query) as ICollection<T>)!;
 			return ArraySegment<T>.Empty;
+		}
+
+		/// <summary>
+		/// Search for a collection using it's name as a query.
+		/// </summary>
+		/// <param name="query">The query to search for</param>
+		/// <returns>A collection containing metadata from TheMovieDb</returns>
+		private async Task<ICollection<Collection>> _SearchCollections(string query)
+		{
+			TMDbClient client = new(_apiKey.Value.ApiKey);
+			return (await client.SearchCollectionAsync(query))
+				.Results
+				.Select(x => x.ToCollection(Provider))
+				.ToArray();
 		}
 
 		/// <summary>
