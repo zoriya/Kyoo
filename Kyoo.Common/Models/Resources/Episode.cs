@@ -10,7 +10,7 @@ namespace Kyoo.Models
 	/// <summary>
 	/// A class to represent a single show's episode.
 	/// </summary>
-	public class Episode : IResource
+	public class Episode : IResource, IMetadata
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
@@ -121,10 +121,8 @@ namespace Kyoo.Models
 		/// </summary>
 		public DateTime? ReleaseDate { get; set; }
 
-		/// <summary>
-		/// The link to metadata providers that this episode has. See <see cref="MetadataID{T}"/> for more information.
-		/// </summary>
-		[EditableRelation] [LoadableRelation] public ICollection<MetadataID<Episode>> ExternalIDs { get; set; }
+		/// <inheritdoc />
+		public ICollection<MetadataID> ExternalIDs { get; set; }
 
 		/// <summary>
 		/// The list of tracks this episode has. This lists video, audio and subtitles available.

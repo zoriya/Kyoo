@@ -22,9 +22,9 @@ namespace Kyoo.Tests
 			
 			ProviderRepository provider = new(_database);
 			LibraryRepository library = new(_database, provider);
-			CollectionRepository collection = new(_database);
+			CollectionRepository collection = new(_database, provider);
 			GenreRepository genre = new(_database);
-			StudioRepository studio = new(_database);
+			StudioRepository studio = new(_database, provider);
 			PeopleRepository people = new(_database, provider, 
 				new Lazy<IShowRepository>(() => LibraryManager.ShowRepository));
 			ShowRepository show = new(_database, studio, people, genre, provider);

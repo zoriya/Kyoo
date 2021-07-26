@@ -10,7 +10,7 @@ namespace Kyoo.Models
 	/// <summary>
 	/// A season of a <see cref="Show"/>. 
 	/// </summary>
-	public class Season : IResource
+	public class Season : IResource, IMetadata
 	{
 		/// <inheritdoc />
 		public int ID  { get; set; }
@@ -81,10 +81,8 @@ namespace Kyoo.Models
 		/// </summary>
 		[SerializeAs("{HOST}/api/seasons/{Slug}/thumb")] public string Poster { get; set; }
 		
-		/// <summary>
-		/// The link to metadata providers that this episode has. See <see cref="MetadataID{T}"/> for more information.
-		/// </summary>
-		[EditableRelation] [LoadableRelation] public ICollection<MetadataID<Season>> ExternalIDs { get; set; }
+		/// <inheritdoc />
+		public ICollection<MetadataID> ExternalIDs { get; set; }
 
 		/// <summary>
 		/// The list of episodes that this season contains.

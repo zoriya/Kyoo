@@ -8,7 +8,7 @@ namespace Kyoo.Models
 	/// A class representing collections of <see cref="Show"/>.
 	/// A collection can also be stored in a <see cref="Library"/>.
 	/// </summary>
-	public class Collection : IResource
+	public class Collection : IResource, IMetadata
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
@@ -42,6 +42,9 @@ namespace Kyoo.Models
 		/// The list of libraries that contains this collection.
 		/// </summary>
 		[LoadableRelation] public ICollection<Library> Libraries { get; set; }
+		
+		/// <inheritdoc />
+		public ICollection<MetadataID> ExternalIDs { get; set; }
 
 #if ENABLE_INTERNAL_LINKS
 		

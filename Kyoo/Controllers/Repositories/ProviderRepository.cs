@@ -9,21 +9,18 @@ using Microsoft.EntityFrameworkCore;
 namespace Kyoo.Controllers
 {
 	/// <summary>
-	/// A local repository to handle providers.
+	///     A local repository to handle providers.
 	/// </summary>
 	public class ProviderRepository : LocalRepository<Provider>, IProviderRepository
 	{
 		/// <summary>
-		/// The database handle
+		///     The database handle
 		/// </summary>
 		private readonly DatabaseContext _database;
-		
-		/// <inheritdoc />
-		protected override Expression<Func<Provider, object>> DefaultSort => x => x.Slug;
 
 
 		/// <summary>
-		/// Create a new <see cref="ProviderRepository"/>.
+		///     Create a new <see cref="ProviderRepository" />.
 		/// </summary>
 		/// <param name="database">The database handle</param>
 		public ProviderRepository(DatabaseContext database)
@@ -31,6 +28,9 @@ namespace Kyoo.Controllers
 		{
 			_database = database;
 		}
+
+		/// <inheritdoc />
+		protected override Expression<Func<Provider, object>> DefaultSort => x => x.Slug;
 
 		/// <inheritdoc />
 		public override async Task<ICollection<Provider>> Search(string query)
@@ -47,7 +47,8 @@ namespace Kyoo.Controllers
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
-			await _database.SaveChangesAsync($"Trying to insert a duplicated provider (slug {obj.Slug} already exists).");
+			await _database.SaveChangesAsync("Trying to insert a duplicated provider " +
+				$"(slug {obj.Slug} already exists).");
 			return obj;
 		}
 
@@ -56,20 +57,24 @@ namespace Kyoo.Controllers
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
-			
+
 			_database.Entry(obj).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
 		}
 
 		/// <inheritdoc />
-		public Task<ICollection<MetadataID<T>>> GetMetadataID<T>(Expression<Func<MetadataID<T>, bool>> where = null,
-			Sort<MetadataID<T>> sort = default, 
+		public Task<ICollection<MetadataID>> GetMetadataID<T>(Expression<Func<MetadataID, bool>> where = null,
+			Sort<MetadataID> sort = default,
 			Pagination limit = default)
-			where T : class, IResource
+			where T : class, IMetadata
 		{
-			return ApplyFilters(_database.MetadataIds<T>().Include(y => y.Second),
-				x => _database.MetadataIds<T>().FirstOrDefaultAsync(y => y.FirstID == x),
-				x => x.FirstID,
+			string discriminator = typeof(T).Name;
+			return ApplyFilters(_database.MetadataIDs
+					.Include(y => y.Provider)
+					.Where(x => x.ResourceType == discriminator),
+				x => _database.MetadataIDs.FirstOrDefaultAsync(y => y.ResourceID == x
+					&& y.ResourceType == discriminator),
+				x => x.ResourceID,
 				where,
 				sort,
 				limit);

@@ -149,10 +149,9 @@ namespace Kyoo.Tests.Database
 			Show value = await _repository.Get(TestSample.Get<Show>().Slug);
 			value.ExternalIDs = new[]
 			{
-				new MetadataID<Show>()
+				new MetadataID
 				{
-					First = value,
-					Second = new Provider("test", "test.png"),
+					Provider = new Provider("test", "test.png"),
 					DataID = "1234"
 				}
 			};
@@ -160,19 +159,19 @@ namespace Kyoo.Tests.Database
 			
 			Assert.Equal(value.Slug, edited.Slug);
 			Assert.Equal(
-				value.ExternalIDs.Select(x => new {x.DataID, x.Second.Slug}), 
-				edited.ExternalIDs.Select(x => new {x.DataID, x.Second.Slug}));
+				value.ExternalIDs.Select(x => new {x.DataID, x.Provider.Slug}), 
+				edited.ExternalIDs.Select(x => new {x.DataID, x.Provider.Slug}));
 		
 			await using DatabaseContext database = Repositories.Context.New();
 			Show show = await database.Shows
 				.Include(x => x.ExternalIDs)
-				.ThenInclude(x => x.Second)
+				.ThenInclude(x => x.Provider)
 				.FirstAsync();
 			
 			Assert.Equal(value.Slug, show.Slug);
 			Assert.Equal(
-				value.ExternalIDs.Select(x => new {x.DataID, x.Second.Slug}), 
-				show.ExternalIDs.Select(x => new {x.DataID, x.Second.Slug}));
+				value.ExternalIDs.Select(x => new {x.DataID, x.Provider.Slug}), 
+				show.ExternalIDs.Select(x => new {x.DataID, x.Provider.Slug}));
 		}
 		
 		[Fact]
@@ -209,10 +208,9 @@ namespace Kyoo.Tests.Database
 			expected.Slug = "created-relation-test";
 			expected.ExternalIDs = new[]
 			{
-				new MetadataID<Show>
+				new MetadataID
 				{
-					First = expected,
-					Second = new Provider("provider", "provider.png"),
+					Provider = new Provider("provider", "provider.png"),
 					DataID = "ID"
 				}
 			};

@@ -6,7 +6,7 @@ namespace Kyoo.Models
 	/// <summary>
 	/// An actor, voice actor, writer, animator, somebody who worked on a <see cref="Show"/>. 
 	/// </summary>
-	public class People : IResource
+	public class People : IResource, IMetadata
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
@@ -26,10 +26,8 @@ namespace Kyoo.Models
 		/// </summary>
 		[SerializeAs("{HOST}/api/people/{Slug}/poster")] public string Poster { get; set; }
 		
-		/// <summary>
-        /// The link to metadata providers that this person has. See <see cref="MetadataID{T}"/> for more information.
-        /// </summary>
-		[EditableRelation] [LoadableRelation] public ICollection<MetadataID<People>> ExternalIDs { get; set; }
+		/// <inheritdoc />
+		public ICollection<MetadataID> ExternalIDs { get; set; }
 		
 		/// <summary>
 		/// The list of roles this person has played in. See <see cref="PeopleRole"/> for more information.

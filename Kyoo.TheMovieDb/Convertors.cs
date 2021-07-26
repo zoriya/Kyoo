@@ -48,9 +48,9 @@ namespace Kyoo.TheMovieDb
 					.ToArray(),
 				ExternalIDs = new []
 				{
-					new MetadataID<Show>
+					new MetadataID
 					{
-						Second = provider,
+						Provider = provider,
 						Link = $"https://www.themoviedb.org/movie/{movie.Id}",
 						DataID = movie.Id.ToString()
 					}
@@ -94,9 +94,9 @@ namespace Kyoo.TheMovieDb
 					.ToArray(),
 				ExternalIDs = new []
 				{
-					new MetadataID<Show>
+					new MetadataID
 					{
-						Second = provider,
+						Provider = provider,
 						Link = $"https://www.themoviedb.org/movie/{tv.Id}",
 						DataID = tv.Id.ToString()
 					}
@@ -145,9 +145,9 @@ namespace Kyoo.TheMovieDb
 				IsMovie = true,
 				ExternalIDs = new []
 				{
-					new MetadataID<Show>
+					new MetadataID
 					{
-						Second = provider,
+						Provider = provider,
 						Link = $"https://www.themoviedb.org/movie/{movie.Id}",
 						DataID = movie.Id.ToString()
 					}
@@ -178,9 +178,9 @@ namespace Kyoo.TheMovieDb
 				IsMovie = true,
 				ExternalIDs = new []
 				{
-					new MetadataID<Show>
+					new MetadataID
 					{
-						Second = provider,
+						Provider = provider,
 						Link = $"https://www.themoviedb.org/movie/{tv.Id}",
 						DataID = tv.Id.ToString()
 					}
@@ -205,9 +205,9 @@ namespace Kyoo.TheMovieDb
 					Poster = cast.ProfilePath != null ? $"https://image.tmdb.org/t/p/original{cast.ProfilePath}" : null,
 					ExternalIDs = new[]
 					{
-						new MetadataID<People>
+						new MetadataID
 						{
-							Second = provider,
+							Provider = provider,
 							DataID = cast.Id.ToString(),
 							Link = $"https://www.themoviedb.org/person/{cast.Id}"
 						}
@@ -235,9 +235,9 @@ namespace Kyoo.TheMovieDb
 					Poster = cast.ProfilePath != null ? $"https://image.tmdb.org/t/p/original{cast.ProfilePath}" : null,
 					ExternalIDs = new[]
 					{
-						new MetadataID<People>
+						new MetadataID
 						{
-							Second = provider,
+							Provider = provider,
 							DataID = cast.Id.ToString(),
 							Link = $"https://www.themoviedb.org/person/{cast.Id}"
 						}
@@ -265,9 +265,9 @@ namespace Kyoo.TheMovieDb
 					Poster = crew.ProfilePath != null ? $"https://image.tmdb.org/t/p/original{crew.ProfilePath}" : null,
 					ExternalIDs = new[]
 					{
-						new MetadataID<People>
+						new MetadataID
 						{
-							Second = provider,
+							Provider = provider,
 							DataID = crew.Id.ToString(),
 							Link = $"https://www.themoviedb.org/person/{crew.Id}"
 						}

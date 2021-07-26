@@ -58,11 +58,11 @@ namespace Kyoo.TheTvdb
 				Poster = result.Poster != null ? $"https://www.thetvdb.com{result.Poster}" : null,
 				ExternalIDs = new[]
 				{
-					new MetadataID<Show>
+					new MetadataID
 					{
 						DataID = result.Id.ToString(),
 						Link = $"https://www.thetvdb.com/series/{result.Slug}",
-						Second = provider
+						Provider = provider
 					}
 				}
 			};
@@ -89,11 +89,11 @@ namespace Kyoo.TheTvdb
 				Genres = series.Genre.Select(y => new Genre(y)).ToList(),
 				ExternalIDs = new[]
 				{
-					new MetadataID<Show>
+					new MetadataID
 					{
 						DataID = series.Id.ToString(),
 						Link = $"https://www.thetvdb.com/series/{series.Slug}",
-						Second = provider
+						Provider = provider
 					}
 				}
 			};
@@ -116,11 +116,11 @@ namespace Kyoo.TheTvdb
 					Poster = actor.Image != null ? $"https://www.thetvdb.com/banners/{actor.Image}" : null,
 					ExternalIDs = new []
 					{
-						new MetadataID<People>()
+						new MetadataID
 						{
 							DataID = actor.Id.ToString(),
 							Link = $"https://www.thetvdb.com/people/{actor.Id}",
-							Second = provider
+							Provider = provider
 						}
 					}
 				},
@@ -147,11 +147,11 @@ namespace Kyoo.TheTvdb
 				Thumb = episode.Filename != null ? $"https://www.thetvdb.com/banners/{episode.Filename}" : null,
 				ExternalIDs = new[]
 				{
-					new MetadataID<Episode>
+					new MetadataID
 					{
 						DataID = episode.Id.ToString(),
 						Link = $"https://www.thetvdb.com/series/{episode.SeriesId}/episodes/{episode.Id}",
-						Second = provider
+						Provider = provider
 					}
 				}
 			};

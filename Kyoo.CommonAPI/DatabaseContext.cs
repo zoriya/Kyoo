@@ -61,6 +61,10 @@ namespace Kyoo
 		/// </summary>
 		public DbSet<Provider> Providers { get; set; }
 		/// <summary>
+		/// All metadata ids, not discriminated by type. See <see cref="MetadataID"/>.
+		/// </summary>
+		public DbSet<MetadataID> MetadataIDs { get; set; }
+		/// <summary>
 		/// The list of registered users.
 		/// </summary>
 		public DbSet<User> Users { get; set; }
@@ -83,17 +87,6 @@ namespace Kyoo
 		/// </remarks>
 		public DbSet<LibraryItem> LibraryItems { get; set; }
 
-		/// <summary>
-		/// Get all metadataIDs (ExternalIDs) of a given resource. See <see cref="MetadataID{T}"/>.
-		/// </summary>
-		/// <typeparam name="T">The metadata of this type will be returned.</typeparam>
-		/// <returns>A queryable of metadata ids for a type.</returns>
-		public DbSet<MetadataID<T>> MetadataIds<T>()
-			where T : class, IResource
-		{
-			return Set<MetadataID<T>>();
-		}
-		
 		/// <summary>
 		/// Get a generic link between two resource types.
 		/// </summary>
@@ -132,6 +125,22 @@ namespace Kyoo
 			optionsBuilder.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 		}
 
+		/// <summary>
+		/// Build the metadata model for the given type.
+		/// </summary>
+		/// <param name="modelBuilder">The database model builder</param>
+		/// <typeparam name="T">The type to add metadata to.</typeparam>
+		private void _HasMetadata<T>(ModelBuilder modelBuilder)
+			where T : class, IMetadata
+		{
+			modelBuilder.Entity<T>()
+				.HasMany(x => x.ExternalIDs)
+				.WithOne()
+				.HasForeignKey(x => x.ResourceID)
+				.OnDelete(DeleteBehavior.Cascade);
+		}
+		
+		
 		/// <summary>
 		/// Set database parameters to support every types of Kyoo.
 		/// </summary>
@@ -234,43 +243,21 @@ namespace Kyoo
 						.WithMany(x => x.ShowLinks),
 					y => y.HasKey(Link<User, Show>.PrimaryKey));
 
-			modelBuilder.Entity<MetadataID<Show>>()
-				.HasKey(MetadataID<Show>.PrimaryKey);
-			modelBuilder.Entity<MetadataID<Show>>()
-				.HasOne(x => x.First)
-				.WithMany(x => x.ExternalIDs)
-				.OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<MetadataID<Season>>()
-				.HasKey(MetadataID<Season>.PrimaryKey);
-			modelBuilder.Entity<MetadataID<Season>>()
-				.HasOne(x => x.First)
-				.WithMany(x => x.ExternalIDs)
-				.OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<MetadataID<Episode>>()
-				.HasKey(MetadataID<Episode>.PrimaryKey);
-			modelBuilder.Entity<MetadataID<Episode>>()
-				.HasOne(x => x.First)
-				.WithMany(x => x.ExternalIDs)
-				.OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<MetadataID<People>>()
-				.HasKey(MetadataID<People>.PrimaryKey);
-			modelBuilder.Entity<MetadataID<People>>()
-				.HasOne(x => x.First)
-				.WithMany(x => x.ExternalIDs)
-				.OnDelete(DeleteBehavior.Cascade);
-			
-			
-			modelBuilder.Entity<MetadataID<Show>>().HasOne(x => x.Second).WithMany()
-				.OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<MetadataID<Season>>().HasOne(x => x.Second).WithMany()
-				.OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<MetadataID<Episode>>().HasOne(x => x.Second).WithMany()
-				.OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<MetadataID<People>>().HasOne(x => x.Second).WithMany()
-				.OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<MetadataID<Show>>().HasOne(x => x.Second).WithMany()
-				.OnDelete(DeleteBehavior.Cascade);
+			modelBuilder.Entity<MetadataID>()
+				.HasKey(MetadataID.PrimaryKey);
+			modelBuilder.Entity<MetadataID>()
+				.Property(x => x.ResourceType)
+				.IsRequired();
+			modelBuilder.Entity<MetadataID>()
+				.HasDiscriminator(x => x.ResourceType);
 
+			_HasMetadata<Collection>(modelBuilder);
+			_HasMetadata<Show>(modelBuilder);
+			_HasMetadata<Season>(modelBuilder);
+			_HasMetadata<Episode>(modelBuilder);
+			_HasMetadata<People>(modelBuilder);
+			_HasMetadata<Studio>(modelBuilder);
+			
 			modelBuilder.Entity<WatchedEpisode>()
 				.HasKey(x => new {First = x.FirstID, Second = x.SecondID});
 

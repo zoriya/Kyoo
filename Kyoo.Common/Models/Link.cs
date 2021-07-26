@@ -92,7 +92,7 @@ namespace Kyoo.Models
 			get
 			{
 				return x => new {First = x.FirstID, Second = x.SecondID};
-			}	
+			}
 		}
 	}
 	
@@ -157,7 +157,7 @@ namespace Kyoo.Models
 			get
 			{
 				return x => new {First = x.FirstID, Second = x.SecondID};
-			}	
+			}
 		}
 	}
 }
