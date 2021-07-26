@@ -8,7 +8,7 @@ namespace Kyoo.Models
 	/// A class representing collections of <see cref="Show"/>.
 	/// A collection can also be stored in a <see cref="Library"/>.
 	/// </summary>
-	public class Collection : IResource, IMetadata
+	public class Collection : IResource, IMetadata, IThumbnails
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
@@ -20,14 +20,18 @@ namespace Kyoo.Models
 		/// The name of this collection.
 		/// </summary>
 		public string Name { get; set; }
+
+		/// <inheritdoc />
+		public Dictionary<int, string> Images { get; set; }
 		
 		/// <summary>
 		/// The path of this poster.
 		/// By default, the http path for this poster is returned from the public API.
 		/// This can be disabled using the internal query flag.
 		/// </summary>
-		[SerializeAs("{HOST}/api/collection/{Slug}/poster")] public string Poster { get; set; }
-		
+		[SerializeAs("{HOST}/api/collection/{Slug}/poster")]
+		public string Poster => Images[Thumbnails.Poster];
+
 		/// <summary>
 		/// The description of this collection.
 		/// </summary>
@@ -44,7 +48,7 @@ namespace Kyoo.Models
 		[LoadableRelation] public ICollection<Library> Libraries { get; set; }
 		
 		/// <inheritdoc />
-		public ICollection<MetadataID> ExternalIDs { get; set; }
+		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
 
 #if ENABLE_INTERNAL_LINKS
 		

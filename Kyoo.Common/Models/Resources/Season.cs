@@ -10,7 +10,7 @@ namespace Kyoo.Models
 	/// <summary>
 	/// A season of a <see cref="Show"/>. 
 	/// </summary>
-	public class Season : IResource, IMetadata
+	public class Season : IResource, IMetadata, IThumbnails
 	{
 		/// <inheritdoc />
 		public int ID  { get; set; }
@@ -74,15 +74,19 @@ namespace Kyoo.Models
 		/// </summary>
 		public DateTime? EndDate { get; set; }
 
+		/// <inheritdoc />
+		public Dictionary<int, string> Images { get; set; }
+
 		/// <summary>
 		/// The path of this poster.
 		/// By default, the http path for this poster is returned from the public API.
 		/// This can be disabled using the internal query flag.
 		/// </summary>
-		[SerializeAs("{HOST}/api/seasons/{Slug}/thumb")] public string Poster { get; set; }
+		[SerializeAs("{HOST}/api/seasons/{Slug}/thumb")]
+		public string Poster => Images[Thumbnails.Poster];
 		
 		/// <inheritdoc />
-		public ICollection<MetadataID> ExternalIDs { get; set; }
+		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
 
 		/// <summary>
 		/// The list of episodes that this season contains.

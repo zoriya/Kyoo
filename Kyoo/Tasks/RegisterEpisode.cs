@@ -163,7 +163,7 @@ namespace Kyoo.Tasks
 		/// <typeparam name="T">The type of the item</typeparam>
 		/// <returns>The existing or filled item.</returns>
 		private async Task<T> _RegisterAndFill<T>(T item)
-			where T : class, IResource
+			where T : class, IResource, IThumbnails
 		{
 			if (item == null || string.IsNullOrEmpty(item.Slug))
 				return null;

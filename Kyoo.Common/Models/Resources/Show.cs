@@ -11,7 +11,7 @@ namespace Kyoo.Models
 	/// <summary>
 	/// A series or a movie.
 	/// </summary>
-	public class Show : IResource, IMetadata, IOnMerge
+	public class Show : IResource, IMetadata, IOnMerge, IThumbnails
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
@@ -44,12 +44,12 @@ namespace Kyoo.Models
 		/// Is this show airing, not aired yet or finished?
 		/// </summary>
 		public Status Status { get; set; }
-		
+
 		/// <summary>
 		/// An URL to a trailer. This could be any path supported by the <see cref="IFileSystem"/>.
 		/// </summary>
 		/// TODO for now, this is set to a youtube url. It should be cached and converted to a local file.
-		public string TrailerUrl { get; set; }
+		public string TrailerUrl => Images[Thumbnails.Trailer];
 		
 		/// <summary>
 		/// The date this show started airing. It can be null if this is unknown. 
@@ -63,26 +63,32 @@ namespace Kyoo.Models
 		/// </summary>
 		public DateTime? EndAir { get; set; }
 
+		/// <inheritdoc />
+		public Dictionary<int, string> Images { get; set; }
+
 		/// <summary>
 		/// The path of this show's poster.
 		/// By default, the http path for this poster is returned from the public API.
 		/// This can be disabled using the internal query flag.
 		/// </summary>
-		[SerializeAs("{HOST}/api/shows/{Slug}/poster")] public string Poster { get; set; }
-		
+		[SerializeAs("{HOST}/api/shows/{Slug}/poster")]
+		public string Poster => Images[Thumbnails.Poster];
+
 		/// <summary>
 		/// The path of this show's logo.
 		/// By default, the http path for this logo is returned from the public API.
 		/// This can be disabled using the internal query flag.
 		/// </summary>
-		[SerializeAs("{HOST}/api/shows/{Slug}/logo")] public string Logo { get; set; }
-		
+		[SerializeAs("{HOST}/api/shows/{Slug}/logo")]
+		public string Logo => Images[Thumbnails.Logo];
+
 		/// <summary>
 		/// The path of this show's backdrop.
 		/// By default, the http path for this backdrop is returned from the public API.
 		/// This can be disabled using the internal query flag.
 		/// </summary>
-		[SerializeAs("{HOST}/api/shows/{Slug}/backdrop")] public string Backdrop { get; set; }
+		[SerializeAs("{HOST}/api/shows/{Slug}/backdrop")]
+		public string Backdrop => Images[Thumbnails.Thumbnail];
 
 		/// <summary>
 		/// True if this show represent a movie, false otherwise.
@@ -90,7 +96,7 @@ namespace Kyoo.Models
 		public bool IsMovie { get; set; }
 
 		/// <inheritdoc />
-		public ICollection<MetadataID> ExternalIDs { get; set; }
+		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
 
 		/// <summary>
 		/// The ID of the Studio that made this show.

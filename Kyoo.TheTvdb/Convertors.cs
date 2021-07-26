@@ -55,7 +55,12 @@ namespace Kyoo.TheTvdb
 				Overview = result.Overview,
 				Status = _GetStatus(result.Status),
 				StartAir = _ParseDate(result.FirstAired),
-				Poster = result.Poster != null ? $"https://www.thetvdb.com{result.Poster}" : null,
+				Images =
+				{
+					[Thumbnails.Poster] = result.Poster != null
+						? $"https://www.thetvdb.com{result.Poster}" 
+						: null,
+				},
 				ExternalIDs = new[]
 				{
 					new MetadataID
@@ -84,8 +89,15 @@ namespace Kyoo.TheTvdb
 				Overview = series.Overview,
 				Status = _GetStatus(series.Status),
 				StartAir = _ParseDate(series.FirstAired),
-				Poster = series.Poster != null ? $"https://www.thetvdb.com/banners/{series.Poster}" : null,
-				Backdrop = series.FanArt != null ? $"https://www.thetvdb.com/banners/{series.FanArt}" : null,
+				Images=
+				{
+					[Thumbnails.Poster] = series.Poster != null
+					 	? $"https://www.thetvdb.com/banners/{series.Poster}" 
+					 	: null,
+					[Thumbnails.Thumbnail] = series.FanArt != null
+					 	? $"https://www.thetvdb.com/banners/{series.FanArt}" 
+					 	: null
+				},
 				Genres = series.Genre.Select(y => new Genre(y)).ToList(),
 				ExternalIDs = new[]
 				{
@@ -113,7 +125,12 @@ namespace Kyoo.TheTvdb
 				{
 					Slug = Utility.ToSlug(actor.Name),
 					Name = actor.Name,
-					Poster = actor.Image != null ? $"https://www.thetvdb.com/banners/{actor.Image}" : null,
+					Images = 
+					{
+						[Thumbnails.Poster] = actor.Image != null 
+							? $"https://www.thetvdb.com/banners/{actor.Image}" 
+							: null
+					},
 					ExternalIDs = new []
 					{
 						new MetadataID
@@ -144,7 +161,12 @@ namespace Kyoo.TheTvdb
 				AbsoluteNumber = episode.AbsoluteNumber,
 				Title = episode.EpisodeName,
 				Overview = episode.Overview,
-				Thumb = episode.Filename != null ? $"https://www.thetvdb.com/banners/{episode.Filename}" : null,
+				Images =
+				{
+					[Thumbnails.Thumbnail] = episode.Filename != null 
+						? $"https://www.thetvdb.com/banners/{episode.Filename}" 
+						: null
+				},
 				ExternalIDs = new[]
 				{
 					new MetadataID

@@ -25,7 +25,7 @@ namespace Kyoo.Models
 		[LoadableRelation] public ICollection<Show> Shows { get; set; }
 
 		/// <inheritdoc />
-		public ICollection<MetadataID> ExternalIDs { get; set; }
+		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
 		
 		/// <summary>
 		/// Create a new, empty, <see cref="Studio"/>.

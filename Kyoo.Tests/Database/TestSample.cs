@@ -41,7 +41,10 @@ namespace Kyoo.Tests
 					Slug = "collection",
 					Name = "Collection",
 					Overview = "A nice collection for tests",
-					Poster = "Poster"
+					Images =
+					{
+						[Thumbnails.Poster] = "Poster"
+					}
 				}
 			},
 			{
@@ -61,12 +64,14 @@ namespace Kyoo.Tests
 					           "In time, however, these childhood friends drifted apart, and when they became high " +
 					           "school students, they had long ceased to think of each other as friends.",
 					Status = Status.Finished,
-					TrailerUrl = null,
 					StartAir = new DateTime(2011, 1, 1),
 					EndAir = new DateTime(2011, 1, 1),
-					Poster = "poster",
-					Logo = "logo",
-					Backdrop = "backdrop",
+					Images =
+					{
+						[Thumbnails.Poster] = "Poster",
+						[Thumbnails.Logo] = "Logo",
+						[Thumbnails.Thumbnail] = "Thumbnail"
+					},
 					IsMovie = false,
 					Studio = null
 				}
@@ -83,7 +88,12 @@ namespace Kyoo.Tests
 					Overview = "The first season",
 					StartDate = new DateTime(2020, 06, 05),
 					EndDate =  new DateTime(2020, 07, 05),
-					Poster = "poster"
+					Images =
+					{
+						[Thumbnails.Poster] = "Poster",
+						[Thumbnails.Logo] = "Logo",
+						[Thumbnails.Thumbnail] = "Thumbnail"
+					},
 				}
 			},
 			{
@@ -98,7 +108,12 @@ namespace Kyoo.Tests
 					EpisodeNumber = 1,
 					AbsoluteNumber = 1,
 					Path = "/home/kyoo/anohana-s1e1",
-					Thumb = "thumbnail",
+					Images =
+					{
+						[Thumbnails.Poster] = "Poster",
+						[Thumbnails.Logo] = "Logo",
+						[Thumbnails.Thumbnail] = "Thumbnail"
+					},
 					Title = "Episode 1",
 					Overview = "Summary of the first episode",
 					ReleaseDate = new DateTime(2020, 06, 05)
@@ -129,7 +144,12 @@ namespace Kyoo.Tests
 					ID = 1,
 					Slug = "the-actor",
 					Name = "The Actor",
-					Poster = "NicePoster"
+					Images =
+					{
+						[Thumbnails.Poster] = "Poster",
+						[Thumbnails.Logo] = "Logo",
+						[Thumbnails.Thumbnail] = "Thumbnail"
+					},
 				}
 			},
 			{
@@ -138,7 +158,7 @@ namespace Kyoo.Tests
 				{
 					ID = 1,
 					Slug = "hyper-studio",
-					Name = "Hyper studio"
+					Name = "Hyper studio",
 				}
 			},
 			{
@@ -157,7 +177,12 @@ namespace Kyoo.Tests
 					ID = 1,
 					Slug = "tvdb",
 					Name = "The TVDB",
-					Logo = "path/tvdb.svg",
+					Images =
+					{
+						[Thumbnails.Poster] = "Poster",
+						[Thumbnails.Logo] = "path/tvdb.svg",
+						[Thumbnails.Thumbnail] = "Thumbnail"
+					},
 					LogoExtension = "svg"
 				}
 			},
@@ -257,7 +282,12 @@ namespace Kyoo.Tests
 				EpisodeNumber = null,
 				AbsoluteNumber = 3,
 				Path = "/home/kyoo/anohana-3",
-				Thumb = "thumbnail",
+				Images =
+				{
+					[Thumbnails.Poster] = "Poster",
+					[Thumbnails.Logo] = "Logo",
+					[Thumbnails.Thumbnail] = "Thumbnail"
+				},
 				Title = "Episode 3",
 				Overview = "Summary of the third absolute episode",
 				ReleaseDate = new DateTime(2020, 06, 05)
@@ -272,7 +302,12 @@ namespace Kyoo.Tests
 				ShowSlug = "anohana",
 				ShowID = 1,
 				Path = "/home/kyoo/john-wick",
-				Thumb = "thumb",
+				Images =
+				{
+					[Thumbnails.Poster] = "Poster",
+					[Thumbnails.Logo] = "Logo",
+					[Thumbnails.Thumbnail] = "Thumbnail"
+				},
 				Title = "John wick",
 				Overview = "A movie episode test",
 				ReleaseDate = new DateTime(1595, 05, 12)

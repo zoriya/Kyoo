@@ -11,6 +11,7 @@ namespace Kyoo.Models
 		/// <summary>
 		/// The link to metadata providers that this show has. See <see cref="MetadataID"/> for more information.
 		/// </summary>
-		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
+		[EditableRelation] [LoadableRelation] 
+		public ICollection<MetadataID> ExternalIDs { get; set; }
 	}
 }

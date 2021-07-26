@@ -10,7 +10,7 @@ namespace Kyoo.Models
 	/// <summary>
 	/// A class to represent a single show's episode.
 	/// </summary>
-	public class Episode : IResource, IMetadata
+	public class Episode : IResource, IMetadata, IThumbnails
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
@@ -98,13 +98,17 @@ namespace Kyoo.Models
 		/// The path of the video file for this episode. Any format supported by a <see cref="IFileSystem"/> is allowed.
 		/// </summary>
 		[SerializeIgnore] public string Path { get; set; }
+		
+		/// <inheritdoc />
+		public Dictionary<int, string> Images { get; set; }
 
 		/// <summary>
 		/// The path of this episode's thumbnail.
 		/// By default, the http path for the thumbnail is returned from the public API.
 		/// This can be disabled using the internal query flag.
 		/// </summary>
-		[SerializeAs("{HOST}/api/episodes/{Slug}/thumb")] public string Thumb { get; set; }
+		[SerializeAs("{HOST}/api/episodes/{Slug}/thumb")]
+		public string Thumb => Images[Thumbnails.Thumbnail];
 		
 		/// <summary>
 		/// The title of this episode.
@@ -122,7 +126,7 @@ namespace Kyoo.Models
 		public DateTime? ReleaseDate { get; set; }
 
 		/// <inheritdoc />
-		public ICollection<MetadataID> ExternalIDs { get; set; }
+		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
 
 		/// <summary>
 		/// The list of tracks this episode has. This lists video, audio and subtitles available.

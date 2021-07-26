@@ -417,7 +417,7 @@ namespace Kyoo.Api
 			try
 			{
 				Show show = await _libraryManager.Get<Show>(slug);
-				return _files.FileResult(await _thumbs.GetPoster(show));
+				return _files.FileResult(await _thumbs.GetImagePath(show, Thumbnails.Poster));
 			}
 			catch (ItemNotFoundException)
 			{
@@ -431,7 +431,7 @@ namespace Kyoo.Api
 			try
 			{
 				Show show = await _libraryManager.Get<Show>(slug);
-				return _files.FileResult(await _thumbs.GetLogo(show));
+				return _files.FileResult(await _thumbs.GetImagePath(show, Thumbnails.Logo));
 			}
 			catch (ItemNotFoundException)
 			{
@@ -446,7 +446,7 @@ namespace Kyoo.Api
 			try
 			{
 				Show show = await _libraryManager.Get<Show>(slug);
-				return _files.FileResult(await _thumbs.GetThumbnail(show));
+				return _files.FileResult(await _thumbs.GetImagePath(show, Thumbnails.Thumbnail));
 			}
 			catch (ItemNotFoundException)
 			{

@@ -9,7 +9,7 @@ namespace Kyoo.Models
 	/// This class contains metadata about <see cref="IMetadataProvider"/>.
 	/// You can have providers even if you don't have the corresponding <see cref="IMetadataProvider"/>.
 	/// </summary>
-	public class Provider : IResource
+	public class Provider : IResource, IThumbnails
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
@@ -22,12 +22,16 @@ namespace Kyoo.Models
 		/// </summary>
 		public string Name { get; set; }
 		
+		/// <inheritdoc />
+		public Dictionary<int, string> Images { get; set; }
+
 		/// <summary>
 		/// The path of this provider's logo.
 		/// By default, the http path for this logo is returned from the public API.
 		/// This can be disabled using the internal query flag.
 		/// </summary>
-		[SerializeAs("{HOST}/api/providers/{Slug}/logo")] public string Logo { get; set; }
+		[SerializeAs("{HOST}/api/providers/{Slug}/logo")]
+		public string Logo => Images[Thumbnails.Logo];
 		
 		/// <summary>
 		/// The extension of the logo. This is used for http responses.
@@ -61,7 +65,7 @@ namespace Kyoo.Models
 		{
 			Slug = Utility.ToSlug(name);
 			Name = name;
-			Logo = logo;
+			Images[Thumbnails.Logo] = logo;
 		}
 	}
 }

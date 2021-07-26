@@ -26,17 +26,21 @@ namespace Kyoo.TheMovieDb
 				Title = movie.Title,
 				Aliases = movie.AlternativeTitles.Titles.Select(x => x.Title).ToArray(),
 				Overview = movie.Overview,
-				TrailerUrl = movie.Videos?.Results.Where(x => x.Type is "Trailer" or "Teaser" && x.Site == "YouTube")
-					.Select(x => "https://www.youtube.com/watch?v=" + x.Key).FirstOrDefault(),
 				Status = movie.Status == "Released" ? Status.Finished : Status.Planned,
 				StartAir = movie.ReleaseDate,
 				EndAir = movie.ReleaseDate,
-				Poster = movie.PosterPath != null
-					? $"https://image.tmdb.org/t/p/original{movie.PosterPath}"
-					: null,
-				Backdrop = movie.BackdropPath != null
-					? $"https://image.tmdb.org/t/p/original{movie.BackdropPath}"
-					: null,
+				Images =
+				{
+					[Thumbnails.Poster] = movie.PosterPath != null
+						? $"https://image.tmdb.org/t/p/original{movie.PosterPath}"
+						: null,
+					[Thumbnails.Thumbnail] = movie.BackdropPath != null
+						? $"https://image.tmdb.org/t/p/original{movie.BackdropPath}"
+						: null,
+					[Thumbnails.Trailer] = movie.Videos?.Results
+						.Where(x => x.Type is "Trailer" or "Teaser" && x.Site == "YouTube")
+						.Select(x => "https://www.youtube.com/watch?v=" + x.Key).FirstOrDefault(),
+				},
 				Genres = movie.Genres.Select(x => new Genre(x.Name)).ToArray(),
 				Studio = !string.IsNullOrEmpty(movie.ProductionCompanies.FirstOrDefault()?.Name)
 					? new Studio(movie.ProductionCompanies.First().Name)
@@ -72,17 +76,21 @@ namespace Kyoo.TheMovieDb
 				Title = tv.Name,
 				Aliases = tv.AlternativeTitles.Results.Select(x => x.Title).ToArray(),
 				Overview = tv.Overview,
-				TrailerUrl = tv.Videos?.Results.Where(x => x.Type is "Trailer" or "Teaser" && x.Site == "YouTube")
-					.Select(x => "https://www.youtube.com/watch?v=" + x.Key).FirstOrDefault(),
 				Status = tv.Status == "Ended" ? Status.Finished : Status.Planned,
 				StartAir = tv.FirstAirDate,
 				EndAir = tv.LastAirDate,
-				Poster = tv.PosterPath != null
-					? $"https://image.tmdb.org/t/p/original{tv.PosterPath}"
-					: null,
-				Backdrop = tv.BackdropPath != null
-					? $"https://image.tmdb.org/t/p/original{tv.BackdropPath}"
-					: null,
+				Images =
+				{
+					[Thumbnails.Poster] = tv.PosterPath != null
+						? $"https://image.tmdb.org/t/p/original{tv.PosterPath}"
+						: null,
+					[Thumbnails.Thumbnail] = tv.BackdropPath != null
+						? $"https://image.tmdb.org/t/p/original{tv.BackdropPath}"
+						: null,
+					[Thumbnails.Trailer] = tv.Videos?.Results
+						.Where(x => x.Type is "Trailer" or "Teaser" && x.Site == "YouTube")
+						.Select(x => "https://www.youtube.com/watch?v=" + x.Key).FirstOrDefault()
+				},
 				Genres = tv.Genres.Select(x => new Genre(x.Name)).ToArray(),
 				Studio = !string.IsNullOrEmpty(tv.ProductionCompanies.FirstOrDefault()?.Name)
 					? new Studio(tv.ProductionCompanies.First().Name)
@@ -117,7 +125,15 @@ namespace Kyoo.TheMovieDb
 			{
 				Slug = Utility.ToSlug(collection.Name),
 				Name = collection.Name,
-				Poster = $"https://image.tmdb.org/t/p/original{collection.PosterPath}"
+				Images =
+				{
+					[Thumbnails.Poster] = collection.PosterPath != null
+						? $"https://image.tmdb.org/t/p/original{collection.PosterPath}"
+						: null,
+					[Thumbnails.Thumbnail] = collection.BackdropPath != null
+						? $"https://image.tmdb.org/t/p/original{collection.BackdropPath}"
+						: null
+				} 
 			};
 		}
 		
@@ -136,12 +152,15 @@ namespace Kyoo.TheMovieDb
 				Overview = movie.Overview,
 				StartAir = movie.ReleaseDate,
 				EndAir = movie.ReleaseDate,
-				Poster = movie.PosterPath != null
-					? $"https://image.tmdb.org/t/p/original{movie.PosterPath}"
-					: null,
-				Backdrop = movie.BackdropPath != null
-					? $"https://image.tmdb.org/t/p/original{movie.BackdropPath}"
-					: null,
+				Images =
+				{
+					[Thumbnails.Poster] = movie.PosterPath != null
+						? $"https://image.tmdb.org/t/p/original{movie.PosterPath}"
+						: null,
+					[Thumbnails.Thumbnail] = movie.BackdropPath != null
+						? $"https://image.tmdb.org/t/p/original{movie.BackdropPath}"
+						: null,
+				},
 				IsMovie = true,
 				ExternalIDs = new []
 				{
@@ -169,12 +188,15 @@ namespace Kyoo.TheMovieDb
 				Title = tv.Name,
 				Overview = tv.Overview,
 				StartAir = tv.FirstAirDate,
-				Poster = tv.PosterPath != null
-					? $"https://image.tmdb.org/t/p/original{tv.PosterPath}"
-					: null,
-				Backdrop = tv.BackdropPath != null
-					? $"https://image.tmdb.org/t/p/original{tv.BackdropPath}"
-					: null,
+				Images = 
+				{
+					[Thumbnails.Poster] = tv.PosterPath != null
+						? $"https://image.tmdb.org/t/p/original{tv.PosterPath}"
+						: null,
+					[Thumbnails.Thumbnail] = tv.BackdropPath != null
+						? $"https://image.tmdb.org/t/p/original{tv.BackdropPath}"
+						: null,
+				},
 				IsMovie = true,
 				ExternalIDs = new []
 				{
@@ -202,7 +224,12 @@ namespace Kyoo.TheMovieDb
 				{
 					Slug = Utility.ToSlug(cast.Name),
 					Name = cast.Name,
-					Poster = cast.ProfilePath != null ? $"https://image.tmdb.org/t/p/original{cast.ProfilePath}" : null,
+					Images =
+					{
+						[Thumbnails.Poster] = cast.ProfilePath != null 
+							? $"https://image.tmdb.org/t/p/original{cast.ProfilePath}" 
+							: null
+					},
 					ExternalIDs = new[]
 					{
 						new MetadataID
@@ -232,7 +259,12 @@ namespace Kyoo.TheMovieDb
 				{
 					Slug = Utility.ToSlug(cast.Name),
 					Name = cast.Name,
-					Poster = cast.ProfilePath != null ? $"https://image.tmdb.org/t/p/original{cast.ProfilePath}" : null,
+					Images =
+					{
+						[Thumbnails.Poster] = cast.ProfilePath != null 
+							? $"https://image.tmdb.org/t/p/original{cast.ProfilePath}" 
+							: null
+					},
 					ExternalIDs = new[]
 					{
 						new MetadataID
@@ -262,7 +294,12 @@ namespace Kyoo.TheMovieDb
 				{
 					Slug = Utility.ToSlug(crew.Name),
 					Name = crew.Name,
-					Poster = crew.ProfilePath != null ? $"https://image.tmdb.org/t/p/original{crew.ProfilePath}" : null,
+					Images =
+					{
+						[Thumbnails.Poster] = crew.ProfilePath != null 
+							? $"https://image.tmdb.org/t/p/original{crew.ProfilePath}" 
+							: null
+					},
 					ExternalIDs = new[]
 					{
 						new MetadataID
