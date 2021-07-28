@@ -1,6 +1,7 @@
 ﻿using Kyoo.Models;
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Models.Options;
 using Microsoft.Extensions.Logging;
@@ -87,10 +88,13 @@ namespace Kyoo.Controllers
 			if (item == null)
 				throw new ArgumentNullException(nameof(item));
 
+			if (item.Images == null)
+				return false;
+
 			string name = item is IResource res ? res.Slug : "???";
 			bool ret = false;
 
-			foreach ((int id, string image) in item.Images)
+			foreach ((int id, string image) in item.Images.Where(x => x.Value != null))
 			{
 				string localPath = await GetImagePath(item, id);
 				if (alwaysDownload || !await _files.Exists(localPath))

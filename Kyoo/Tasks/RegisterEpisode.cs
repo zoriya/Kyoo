@@ -116,9 +116,6 @@ namespace Kyoo.Tasks
 				else
 					show = registeredShow;
 
-				// If they are not already loaded, load external ids to allow metadata providers to use them.
-				if (show.ExternalIDs == null)
-					await _libraryManager.Load(show, x => x.ExternalIDs);
 				progress.Report(50);
 
 				if (season != null)
@@ -163,14 +160,18 @@ namespace Kyoo.Tasks
 		/// <typeparam name="T">The type of the item</typeparam>
 		/// <returns>The existing or filled item.</returns>
 		private async Task<T> _RegisterAndFill<T>(T item)
-			where T : class, IResource, IThumbnails
+			where T : class, IResource, IThumbnails, IMetadata
 		{
 			if (item == null || string.IsNullOrEmpty(item.Slug))
 				return null;
 
 			T existing = await _libraryManager.GetOrDefault<T>(item.Slug);
 			if (existing != null)
+			{
+				await _libraryManager.Load(existing, x => x.ExternalIDs);
 				return existing;
+			}
+
 			item = await _metadataProvider.Get(item);
 			await _thumbnailsManager.DownloadImages(item);
 			return await _libraryManager.CreateIfNotExists(item);

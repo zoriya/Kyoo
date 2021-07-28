@@ -30,7 +30,7 @@ namespace Kyoo.Models
 		/// This can be disabled using the internal query flag.
 		/// </summary>
 		[SerializeAs("{HOST}/api/collection/{Slug}/poster")]
-		public string Poster => Images[Thumbnails.Poster];
+		public string Poster => Images?.GetValueOrDefault(Thumbnails.Poster);
 
 		/// <summary>
 		/// The description of this collection.

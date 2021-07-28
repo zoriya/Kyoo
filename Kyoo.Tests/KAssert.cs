@@ -1,3 +1,5 @@
+using System.Collections;
+using System.Linq;
 using System.Reflection;
 using JetBrains.Annotations;
 using Xunit;
@@ -19,8 +21,11 @@ namespace Kyoo.Tests
 		[AssertionMethod]
 		public static void DeepEqual<T>(T expected, T value)
 		{
-			foreach (PropertyInfo property in typeof(T).GetProperties(BindingFlags.Instance))
+			PropertyInfo[] properties = typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public);
+			foreach (PropertyInfo property in properties)
 				Assert.Equal(property.GetValue(expected), property.GetValue(value));
+			if (!properties.Any())
+				Assert.Equal(expected, value);
 		}
 
 		/// <summary>

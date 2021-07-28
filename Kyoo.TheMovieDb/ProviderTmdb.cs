@@ -122,12 +122,16 @@ namespace Kyoo.TheMovieDb
 		/// <returns>A season containing metadata from TheMovieDb</returns>
 		private async Task<Season> _GetSeason(Season season)
 		{
-			if (season.Show == null || !season.Show.TryGetID(Provider.Slug, out int id))
+			if (season.Show == null)
 			{
 				_logger.LogWarning("Metadata for a season was requested but it's show is not loaded. " +
 					"This is unsupported");
 				return null;
 			}
+
+			if (!season.Show.TryGetID(Provider.Slug, out int id))
+				return null;
+			
 			TMDbClient client = new(_apiKey.Value.ApiKey);
 			return (await client.GetTvSeasonAsync(id, season.SeasonNumber))
 				.ToSeason(id, Provider);
@@ -141,13 +145,14 @@ namespace Kyoo.TheMovieDb
 		/// <returns>An episode containing metadata from TheMovieDb</returns>
 		private async Task<Episode> _GetEpisode(Episode episode)
 		{
-			if (episode.Show == null || !episode.Show.TryGetID(Provider.Slug, out int id))
+			if (episode.Show == null)
 			{
-				_logger.LogWarning("Metadata for a season was requested but it's show is not loaded. " +
+				_logger.LogWarning("Metadata for an episode was requested but it's show is not loaded. " +
 					"This is unsupported");
 				return null;
 			}
-			if (episode.SeasonNumber == null || episode.EpisodeNumber == null)
+			if (!episode.Show.TryGetID(Provider.Slug, out int id) 
+				|| episode.SeasonNumber == null || episode.EpisodeNumber == null)
 				return null;
 			
 			TMDbClient client = new(_apiKey.Value.ApiKey);

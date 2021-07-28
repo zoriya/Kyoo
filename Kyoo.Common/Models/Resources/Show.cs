@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using JetBrains.Annotations;
 using Kyoo.Common.Models.Attributes;
 using Kyoo.Controllers;
 using Kyoo.Models.Attributes;
@@ -49,7 +47,7 @@ namespace Kyoo.Models
 		/// An URL to a trailer. This could be any path supported by the <see cref="IFileSystem"/>.
 		/// </summary>
 		/// TODO for now, this is set to a youtube url. It should be cached and converted to a local file.
-		public string TrailerUrl => Images[Thumbnails.Trailer];
+		public string TrailerUrl => Images?.GetValueOrDefault(Thumbnails.Trailer);
 		
 		/// <summary>
 		/// The date this show started airing. It can be null if this is unknown. 
@@ -72,7 +70,7 @@ namespace Kyoo.Models
 		/// This can be disabled using the internal query flag.
 		/// </summary>
 		[SerializeAs("{HOST}/api/shows/{Slug}/poster")]
-		public string Poster => Images[Thumbnails.Poster];
+		public string Poster => Images?.GetValueOrDefault(Thumbnails.Poster);
 
 		/// <summary>
 		/// The path of this show's logo.
@@ -80,7 +78,7 @@ namespace Kyoo.Models
 		/// This can be disabled using the internal query flag.
 		/// </summary>
 		[SerializeAs("{HOST}/api/shows/{Slug}/logo")]
-		public string Logo => Images[Thumbnails.Logo];
+		public string Logo => Images?.GetValueOrDefault(Thumbnails.Logo);
 
 		/// <summary>
 		/// The path of this show's backdrop.
@@ -88,7 +86,7 @@ namespace Kyoo.Models
 		/// This can be disabled using the internal query flag.
 		/// </summary>
 		[SerializeAs("{HOST}/api/shows/{Slug}/backdrop")]
-		public string Backdrop => Images[Thumbnails.Thumbnail];
+		public string Backdrop => Images?.GetValueOrDefault(Thumbnails.Thumbnail);
 
 		/// <summary>
 		/// True if this show represent a movie, false otherwise.

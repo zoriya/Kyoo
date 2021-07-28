@@ -83,7 +83,7 @@ namespace Kyoo.Models
 		/// This can be disabled using the internal query flag.
 		/// </summary>
 		[SerializeAs("{HOST}/api/seasons/{Slug}/thumb")]
-		public string Poster => Images[Thumbnails.Poster];
+		public string Poster => Images?.GetValueOrDefault(Thumbnails.Poster);
 		
 		/// <inheritdoc />
 		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }

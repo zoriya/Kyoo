@@ -31,7 +31,7 @@ namespace Kyoo.Models
 		/// This can be disabled using the internal query flag.
 		/// </summary>
 		[SerializeAs("{HOST}/api/providers/{Slug}/logo")]
-		public string Logo => Images[Thumbnails.Logo];
+		public string Logo => Images?.GetValueOrDefault(Thumbnails.Logo);
 		
 		/// <summary>
 		/// The extension of the logo. This is used for http responses.

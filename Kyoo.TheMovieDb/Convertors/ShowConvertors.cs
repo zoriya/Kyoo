@@ -44,7 +44,6 @@ namespace Kyoo.TheMovieDb
 				Studio = !string.IsNullOrEmpty(tv.ProductionCompanies.FirstOrDefault()?.Name)
 					? new Studio(tv.ProductionCompanies.First().Name)
 					: null,
-				IsMovie = true,
 				People = tv.Credits.Cast
 					.Select(x => x.ToPeople(provider))
 					.Concat(tv.Credits.Crew.Select(x => x.ToPeople(provider)))
@@ -84,7 +83,6 @@ namespace Kyoo.TheMovieDb
 						? $"https://image.tmdb.org/t/p/original{tv.BackdropPath}"
 						: null,
 				},
-				IsMovie = true,
 				ExternalIDs = new []
 				{
 					new MetadataID

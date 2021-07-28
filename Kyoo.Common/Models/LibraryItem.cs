@@ -63,7 +63,7 @@ namespace Kyoo.Models
 		/// This can be disabled using the internal query flag.
 		/// </summary>
 		[SerializeAs("{HOST}/api/{Type:l}/{Slug}/poster")]
-		public string Poster => Images[Thumbnails.Poster];
+		public string Poster => Images?.GetValueOrDefault(Thumbnails.Poster);
 		
 		/// <summary>
 		/// The type of this item (ether a collection, a show or a movie).

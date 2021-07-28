@@ -108,7 +108,7 @@ namespace Kyoo.Models
 		/// This can be disabled using the internal query flag.
 		/// </summary>
 		[SerializeAs("{HOST}/api/episodes/{Slug}/thumb")]
-		public string Thumb => Images[Thumbnails.Thumbnail];
+		public string Thumb => Images?.GetValueOrDefault(Thumbnails.Thumbnail);
 		
 		/// <summary>
 		/// The title of this episode.

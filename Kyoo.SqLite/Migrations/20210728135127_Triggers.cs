@@ -165,7 +165,7 @@ namespace Kyoo.SqLite.Migrations
 					INNER JOIN Collections AS c ON l.FirstID = c.ID
 					WHERE s.ID = l.SecondID))
 				UNION ALL
-				SELECT -c0.ID, c0.Slug, c0.Name AS Title, c0.Overview, 3 AS Status, 
+				SELECT -c0.ID, c0.Slug, c0.Name AS Title, c0.Overview, 0 AS Status, 
 				       NULL AS StartAir, NULL AS EndAir, c0.Images, 2 AS Type
 				FROM collections AS c0");
 		}

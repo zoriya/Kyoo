@@ -235,6 +235,39 @@ namespace Kyoo.Tests.Database
 			expected.Studio = new Studio("studio");
 			Show created = await _repository.Create(expected);
 			KAssert.DeepEqual(expected, created);
+			await using DatabaseContext context = Repositories.Context.New();
+			Show retrieved = await context.Shows
+				.Include(x => x.ExternalIDs)
+				.Include(x => x.Genres)
+				.Include(x => x.People)
+				.Include(x => x.Studio)
+				.FirstAsync(x => x.ID == created.ID);
+			KAssert.DeepEqual(expected, retrieved);
+		}
+		
+		[Fact]
+		public async Task CreateWithExternalID()
+		{
+			Show expected = TestSample.Get<Show>();
+			expected.ID = 0;
+			expected.Slug = "created-relation-test";
+			expected.ExternalIDs = new[]
+			{
+				new MetadataID
+				{
+					Provider = TestSample.Get<Provider>(),
+					DataID = "ID"
+				}
+			};
+			Show created = await _repository.Create(expected);
+			KAssert.DeepEqual(expected, created);
+			await using DatabaseContext context = Repositories.Context.New();
+			Show retrieved = await context.Shows
+				.Include(x => x.ExternalIDs)
+				.FirstAsync(x => x.ID == created.ID);
+			KAssert.DeepEqual(expected, retrieved);
+			Assert.Equal(1, retrieved.ExternalIDs.Count);
+			Assert.Equal("ID", retrieved.ExternalIDs.First().DataID);
 		}
 
 		[Fact]

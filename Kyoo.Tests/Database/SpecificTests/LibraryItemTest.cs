@@ -55,7 +55,7 @@ namespace Kyoo.Tests.Database
 		[Fact]
 		public async Task GetCollectionTests()
 		{
-			LibraryItem expected = new(TestSample.Get<Show>());
+			LibraryItem expected = new(TestSample.Get<Collection>());
 			LibraryItem actual = await _repository.Get(-1);
 			KAssert.DeepEqual(expected, actual);
 		}
