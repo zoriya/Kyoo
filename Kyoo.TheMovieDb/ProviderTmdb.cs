@@ -161,8 +161,8 @@ namespace Kyoo.TheMovieDb
 				return (await _SearchCollections(query) as ICollection<T>)!;
 			if (typeof(T) == typeof(Show))
 				return (await _SearchShows(query) as ICollection<T>)!;
-			// if (typeof(T) == typeof(People))
-			// 	return (await _SearchPeople(query) as ICollection<T>)!;
+			if (typeof(T) == typeof(People))
+				return (await _SearchPeople(query) as ICollection<T>)!;
 			// if (typeof(T) == typeof(Studio))
 			// 	return (await _SearchStudios(query) as ICollection<T>)!;
 			return ArraySegment<T>.Empty;
@@ -202,6 +202,20 @@ namespace Kyoo.TheMovieDb
 					};
 				})
 				.Where(x => x != null)
+				.ToArray();
+		}
+		
+		/// <summary>
+		/// Search for people using there name as a query.
+		/// </summary>
+		/// <param name="query">The query to search for</param>
+		/// <returns>A list of people containing metadata from TheMovieDb</returns>
+		private async Task<ICollection<People>> _SearchPeople(string query)
+		{
+			TMDbClient client = new(_apiKey.Value.ApiKey);
+			return (await client.SearchPersonAsync(query))
+				.Results
+				.Select(x => x.ToPeople(Provider))
 				.ToArray();
 		}
 	}
