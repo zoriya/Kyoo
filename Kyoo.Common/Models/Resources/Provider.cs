@@ -65,7 +65,10 @@ namespace Kyoo.Models
 		{
 			Slug = Utility.ToSlug(name);
 			Name = name;
-			Images[Thumbnails.Logo] = logo;
+			Images = new Dictionary<int, string>
+			{
+				[Thumbnails.Logo] = logo
+			};
 		}
 	}
 }

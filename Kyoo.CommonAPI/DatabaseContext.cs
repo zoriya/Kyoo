@@ -60,10 +60,7 @@ namespace Kyoo
 		/// All providers of Kyoo. See <see cref="Provider"/>.
 		/// </summary>
 		public DbSet<Provider> Providers { get; set; }
-		/// <summary>
-		/// All metadata ids, not discriminated by type. See <see cref="MetadataID"/>.
-		/// </summary>
-		public DbSet<MetadataID> MetadataIDs { get; set; }
+
 		/// <summary>
 		/// The list of registered users.
 		/// </summary>
@@ -86,6 +83,25 @@ namespace Kyoo
 		/// This set is ready only, on most database this will be a view.
 		/// </remarks>
 		public DbSet<LibraryItem> LibraryItems { get; set; }
+
+		/// <summary>
+		/// Get the name of the metadata table of the given type.
+		/// </summary>
+		/// <typeparam name="T">The type related to the metadata</typeparam>
+		/// <returns>The name of the table containing the metadata.</returns>
+		protected abstract string MetadataName<T>()
+			where T : IMetadata;
+
+		/// <summary>
+		/// Get all metadataIDs (ExternalIDs) of a given resource. See <see cref="MetadataID"/>.
+		/// </summary>
+		/// <typeparam name="T">The metadata of this type will be returned.</typeparam>
+		/// <returns>A queryable of metadata ids for a type.</returns>
+		public DbSet<MetadataID> MetadataIds<T>()
+			where T : class, IMetadata
+		{
+			return Set<MetadataID>(MetadataName<T>());
+		}
 
 		/// <summary>
 		/// Get a generic link between two resource types.
@@ -133,9 +149,12 @@ namespace Kyoo
 		private void _HasMetadata<T>(ModelBuilder modelBuilder)
 			where T : class, IMetadata
 		{
-			modelBuilder.Entity<T>()
-				.HasMany(x => x.ExternalIDs)
-				.WithOne()
+			modelBuilder.SharedTypeEntity<MetadataID>(MetadataName<T>())
+				.HasKey(MetadataID.PrimaryKey);
+			
+			modelBuilder.SharedTypeEntity<MetadataID>(MetadataName<T>())
+				.HasOne<T>()
+				.WithMany(x => x.ExternalIDs)
 				.HasForeignKey(x => x.ResourceID)
 				.OnDelete(DeleteBehavior.Cascade);
 		}
@@ -148,6 +167,9 @@ namespace Kyoo
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			base.OnModelCreating(modelBuilder);
+
+			modelBuilder.Entity<PeopleRole>()
+				.Ignore(x => x.ForPeople);
 
 			modelBuilder.Entity<Show>()
 				.HasMany(x => x.Seasons)
@@ -243,14 +265,6 @@ namespace Kyoo
 						.WithMany(x => x.ShowLinks),
 					y => y.HasKey(Link<User, Show>.PrimaryKey));
 
-			modelBuilder.Entity<MetadataID>()
-				.HasKey(MetadataID.PrimaryKey);
-			modelBuilder.Entity<MetadataID>()
-				.Property(x => x.ResourceType)
-				.IsRequired();
-			modelBuilder.Entity<MetadataID>()
-				.HasDiscriminator(x => x.ResourceType);
-
 			_HasMetadata<Collection>(modelBuilder);
 			_HasMetadata<Show>(modelBuilder);
 			_HasMetadata<Season>(modelBuilder);
@@ -259,7 +273,7 @@ namespace Kyoo
 			_HasMetadata<Studio>(modelBuilder);
 			
 			modelBuilder.Entity<WatchedEpisode>()
-				.HasKey(x => new {First = x.FirstID, Second = x.SecondID});
+				.HasKey(x => new { First = x.FirstID, Second = x.SecondID });
 
 			modelBuilder.Entity<Collection>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<Genre>().Property(x => x.Slug).IsRequired();

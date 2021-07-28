@@ -102,17 +102,49 @@ namespace Kyoo.SqLite
 				.Property(x => x.Type)
 				.HasConversion<int>();
 
-			ValueConverter<Dictionary<string, string>, string> jsonConvertor = new(
+			ValueConverter<Dictionary<string, string>, string> extraDataConvertor = new(
 				x => JsonConvert.SerializeObject(x),
 				x => JsonConvert.DeserializeObject<Dictionary<string, string>>(x));
 			modelBuilder.Entity<User>()
 				.Property(x => x.ExtraData)
+				.HasConversion(extraDataConvertor);
+			
+			ValueConverter<Dictionary<int, string>, string> jsonConvertor = new(
+				x => JsonConvert.SerializeObject(x),
+				x => JsonConvert.DeserializeObject<Dictionary<int, string>>(x));
+			modelBuilder.Entity<LibraryItem>()
+				.Property(x => x.Images)
 				.HasConversion(jsonConvertor);
+			modelBuilder.Entity<Collection>()
+				.Property(x => x.Images)
+				.HasConversion(jsonConvertor);
+			modelBuilder.Entity<Show>()
+				.Property(x => x.Images)
+				.HasConversion(jsonConvertor);
+			modelBuilder.Entity<Season>()
+				.Property(x => x.Images)
+				.HasConversion(jsonConvertor);
+			modelBuilder.Entity<Episode>()
+				.Property(x => x.Images)
+				.HasConversion(jsonConvertor);
+			modelBuilder.Entity<People>()
+				.Property(x => x.Images)
+				.HasConversion(jsonConvertor);
+			modelBuilder.Entity<Provider>()
+				.Property(x => x.Images)
+				.HasConversion(jsonConvertor);
+			
 			
 			modelBuilder.Entity<LibraryItem>()
 				.ToView("LibraryItems")
 				.HasKey(x => x.ID);
 			base.OnModelCreating(modelBuilder);
+		}
+
+		/// <inheritdoc />
+		protected override string MetadataName<T>()
+		{
+			return typeof(T).Name + nameof(MetadataID);
 		}
 
 		/// <inheritdoc />

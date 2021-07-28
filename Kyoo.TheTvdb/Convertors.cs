@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Kyoo.Models;
@@ -55,7 +56,7 @@ namespace Kyoo.TheTvdb
 				Overview = result.Overview,
 				Status = _GetStatus(result.Status),
 				StartAir = _ParseDate(result.FirstAired),
-				Images =
+				Images = new Dictionary<int, string>
 				{
 					[Thumbnails.Poster] = result.Poster != null
 						? $"https://www.thetvdb.com{result.Poster}" 
@@ -89,7 +90,7 @@ namespace Kyoo.TheTvdb
 				Overview = series.Overview,
 				Status = _GetStatus(series.Status),
 				StartAir = _ParseDate(series.FirstAired),
-				Images=
+				Images = new Dictionary<int, string>
 				{
 					[Thumbnails.Poster] = series.Poster != null
 					 	? $"https://www.thetvdb.com/banners/{series.Poster}" 
@@ -125,7 +126,7 @@ namespace Kyoo.TheTvdb
 				{
 					Slug = Utility.ToSlug(actor.Name),
 					Name = actor.Name,
-					Images = 
+					Images = new Dictionary<int, string> 
 					{
 						[Thumbnails.Poster] = actor.Image != null 
 							? $"https://www.thetvdb.com/banners/{actor.Image}" 
@@ -161,7 +162,7 @@ namespace Kyoo.TheTvdb
 				AbsoluteNumber = episode.AbsoluteNumber,
 				Title = episode.EpisodeName,
 				Overview = episode.Overview,
-				Images =
+				Images = new Dictionary<int, string>
 				{
 					[Thumbnails.Thumbnail] = episode.Filename != null 
 						? $"https://www.thetvdb.com/banners/{episode.Filename}" 

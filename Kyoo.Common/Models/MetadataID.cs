@@ -13,27 +13,22 @@ namespace Kyoo.Models
 		/// The ID of the resource which possess the metadata.
 		/// </summary>
 		[SerializeIgnore] public int ResourceID { get; set; }
-		
-		/// <summary>
-		/// The name of the resource type. This is only used internally to discriminate types.  
-		/// </summary>
-		[SerializeIgnore] public string ResourceType { get; set; }
-		
+
 		/// <summary>
 		/// The ID of the provider.
 		/// </summary>
 		[SerializeIgnore] public int ProviderID { get; set; }
-		
+
 		/// <summary>
 		/// The provider that can do something with this ID.
 		/// </summary>
 		public Provider Provider { get; set; }
-		
+
 		/// <summary>
 		/// The ID of the resource on the external provider.
 		/// </summary>
 		public string DataID { get; set; }
-		
+
 		/// <summary>
 		/// The URL of the resource on the external provider.
 		/// </summary>
@@ -44,10 +39,7 @@ namespace Kyoo.Models
 		/// </summary>
 		public static Expression<Func<MetadataID, object>> PrimaryKey
 		{
-			get
-			{
-				return x => new {First = x.ResourceID, Second = x.ProviderID, Type = x.ResourceType};
-			}	
+			get { return x => new { First = x.ResourceID, Second = x.ProviderID }; }
 		}
 	}
 }

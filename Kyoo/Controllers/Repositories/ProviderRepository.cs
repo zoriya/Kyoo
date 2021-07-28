@@ -69,11 +69,9 @@ namespace Kyoo.Controllers
 			where T : class, IMetadata
 		{
 			string discriminator = typeof(T).Name;
-			return ApplyFilters(_database.MetadataIDs
-					.Include(y => y.Provider)
-					.Where(x => x.ResourceType == discriminator),
-				x => _database.MetadataIDs.FirstOrDefaultAsync(y => y.ResourceID == x
-					&& y.ResourceType == discriminator),
+			return ApplyFilters(_database.MetadataIds<T>()
+					.Include(y => y.Provider),
+				x => _database.MetadataIds<T>().FirstOrDefaultAsync(y => y.ResourceID == x),
 				x => x.ResourceID,
 				where,
 				sort,

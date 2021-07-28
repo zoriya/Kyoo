@@ -23,7 +23,7 @@ namespace Kyoo.Postgresql.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     slug = table.Column<string>(type: "text", nullable: false),
                     name = table.Column<string>(type: "text", nullable: true),
-                    poster = table.Column<string>(type: "text", nullable: true),
+                    images = table.Column<Dictionary<int, string>>(type: "jsonb", nullable: true),
                     overview = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
@@ -68,7 +68,7 @@ namespace Kyoo.Postgresql.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     slug = table.Column<string>(type: "text", nullable: false),
                     name = table.Column<string>(type: "text", nullable: true),
-                    poster = table.Column<string>(type: "text", nullable: true)
+                    images = table.Column<Dictionary<int, string>>(type: "jsonb", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -83,7 +83,7 @@ namespace Kyoo.Postgresql.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     slug = table.Column<string>(type: "text", nullable: false),
                     name = table.Column<string>(type: "text", nullable: true),
-                    logo = table.Column<string>(type: "text", nullable: true),
+                    images = table.Column<Dictionary<int, string>>(type: "jsonb", nullable: true),
                     logo_extension = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
@@ -148,6 +148,32 @@ namespace Kyoo.Postgresql.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "collection_metadata_id",
+                columns: table => new
+                {
+                    resource_id = table.Column<int>(type: "integer", nullable: false),
+                    provider_id = table.Column<int>(type: "integer", nullable: false),
+                    data_id = table.Column<string>(type: "text", nullable: true),
+                    link = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_collection_metadata_id", x => new { x.resource_id, x.provider_id });
+                    table.ForeignKey(
+                        name: "fk_collection_metadata_id_collections_collection_id",
+                        column: x => x.resource_id,
+                        principalTable: "collections",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_collection_metadata_id_providers_provider_id",
+                        column: x => x.provider_id,
+                        principalTable: "providers",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "link_library_provider",
                 columns: table => new
                 {
@@ -172,26 +198,26 @@ namespace Kyoo.Postgresql.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "metadata_id_people",
+                name: "people_metadata_id",
                 columns: table => new
                 {
-                    first_id = table.Column<int>(type: "integer", nullable: false),
-                    second_id = table.Column<int>(type: "integer", nullable: false),
+                    resource_id = table.Column<int>(type: "integer", nullable: false),
+                    provider_id = table.Column<int>(type: "integer", nullable: false),
                     data_id = table.Column<string>(type: "text", nullable: true),
                     link = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_metadata_id_people", x => new { x.first_id, x.second_id });
+                    table.PrimaryKey("pk_people_metadata_id", x => new { x.resource_id, x.provider_id });
                     table.ForeignKey(
-                        name: "fk_metadata_id_people_people_first_id",
-                        column: x => x.first_id,
+                        name: "fk_people_metadata_id_people_people_id",
+                        column: x => x.resource_id,
                         principalTable: "people",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_metadata_id_people_providers_second_id",
-                        column: x => x.second_id,
+                        name: "fk_people_metadata_id_providers_provider_id",
+                        column: x => x.provider_id,
                         principalTable: "providers",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -209,12 +235,9 @@ namespace Kyoo.Postgresql.Migrations
                     path = table.Column<string>(type: "text", nullable: true),
                     overview = table.Column<string>(type: "text", nullable: true),
                     status = table.Column<Status>(type: "status", nullable: false),
-                    trailer_url = table.Column<string>(type: "text", nullable: true),
                     start_air = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     end_air = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    poster = table.Column<string>(type: "text", nullable: true),
-                    logo = table.Column<string>(type: "text", nullable: true),
-                    backdrop = table.Column<string>(type: "text", nullable: true),
+                    images = table.Column<Dictionary<int, string>>(type: "jsonb", nullable: true),
                     is_movie = table.Column<bool>(type: "boolean", nullable: false),
                     studio_id = table.Column<int>(type: "integer", nullable: true)
                 },
@@ -227,6 +250,32 @@ namespace Kyoo.Postgresql.Migrations
                         principalTable: "studios",
                         principalColumn: "id",
                         onDelete: ReferentialAction.SetNull);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "studio_metadata_id",
+                columns: table => new
+                {
+                    resource_id = table.Column<int>(type: "integer", nullable: false),
+                    provider_id = table.Column<int>(type: "integer", nullable: false),
+                    data_id = table.Column<string>(type: "text", nullable: true),
+                    link = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_studio_metadata_id", x => new { x.resource_id, x.provider_id });
+                    table.ForeignKey(
+                        name: "fk_studio_metadata_id_providers_provider_id",
+                        column: x => x.provider_id,
+                        principalTable: "providers",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_studio_metadata_id_studios_studio_id",
+                        column: x => x.resource_id,
+                        principalTable: "studios",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -326,38 +375,11 @@ namespace Kyoo.Postgresql.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "metadata_id_show",
-                columns: table => new
-                {
-                    first_id = table.Column<int>(type: "integer", nullable: false),
-                    second_id = table.Column<int>(type: "integer", nullable: false),
-                    data_id = table.Column<string>(type: "text", nullable: true),
-                    link = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("pk_metadata_id_show", x => new { x.first_id, x.second_id });
-                    table.ForeignKey(
-                        name: "fk_metadata_id_show_providers_second_id",
-                        column: x => x.second_id,
-                        principalTable: "providers",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "fk_metadata_id_show_shows_first_id",
-                        column: x => x.first_id,
-                        principalTable: "shows",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "people_roles",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    for_people = table.Column<bool>(type: "boolean", nullable: false),
                     people_id = table.Column<int>(type: "integer", nullable: false),
                     show_id = table.Column<int>(type: "integer", nullable: false),
                     type = table.Column<string>(type: "text", nullable: true),
@@ -393,7 +415,7 @@ namespace Kyoo.Postgresql.Migrations
                     overview = table.Column<string>(type: "text", nullable: true),
                     start_date = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
                     end_date = table.Column<DateTime>(type: "timestamp without time zone", nullable: true),
-                    poster = table.Column<string>(type: "text", nullable: true)
+                    images = table.Column<Dictionary<int, string>>(type: "jsonb", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -401,6 +423,32 @@ namespace Kyoo.Postgresql.Migrations
                     table.ForeignKey(
                         name: "fk_seasons_shows_show_id",
                         column: x => x.show_id,
+                        principalTable: "shows",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "show_metadata_id",
+                columns: table => new
+                {
+                    resource_id = table.Column<int>(type: "integer", nullable: false),
+                    provider_id = table.Column<int>(type: "integer", nullable: false),
+                    data_id = table.Column<string>(type: "text", nullable: true),
+                    link = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("pk_show_metadata_id", x => new { x.resource_id, x.provider_id });
+                    table.ForeignKey(
+                        name: "fk_show_metadata_id_providers_provider_id",
+                        column: x => x.provider_id,
+                        principalTable: "providers",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "fk_show_metadata_id_shows_show_id",
+                        column: x => x.resource_id,
                         principalTable: "shows",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -419,7 +467,7 @@ namespace Kyoo.Postgresql.Migrations
                     episode_number = table.Column<int>(type: "integer", nullable: true),
                     absolute_number = table.Column<int>(type: "integer", nullable: true),
                     path = table.Column<string>(type: "text", nullable: true),
-                    thumb = table.Column<string>(type: "text", nullable: true),
+                    images = table.Column<Dictionary<int, string>>(type: "jsonb", nullable: true),
                     title = table.Column<string>(type: "text", nullable: true),
                     overview = table.Column<string>(type: "text", nullable: true),
                     release_date = table.Column<DateTime>(type: "timestamp without time zone", nullable: true)
@@ -442,52 +490,52 @@ namespace Kyoo.Postgresql.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "metadata_id_season",
+                name: "season_metadata_id",
                 columns: table => new
                 {
-                    first_id = table.Column<int>(type: "integer", nullable: false),
-                    second_id = table.Column<int>(type: "integer", nullable: false),
+                    resource_id = table.Column<int>(type: "integer", nullable: false),
+                    provider_id = table.Column<int>(type: "integer", nullable: false),
                     data_id = table.Column<string>(type: "text", nullable: true),
                     link = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_metadata_id_season", x => new { x.first_id, x.second_id });
+                    table.PrimaryKey("pk_season_metadata_id", x => new { x.resource_id, x.provider_id });
                     table.ForeignKey(
-                        name: "fk_metadata_id_season_providers_second_id",
-                        column: x => x.second_id,
+                        name: "fk_season_metadata_id_providers_provider_id",
+                        column: x => x.provider_id,
                         principalTable: "providers",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_metadata_id_season_seasons_first_id",
-                        column: x => x.first_id,
+                        name: "fk_season_metadata_id_seasons_season_id",
+                        column: x => x.resource_id,
                         principalTable: "seasons",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "metadata_id_episode",
+                name: "episode_metadata_id",
                 columns: table => new
                 {
-                    first_id = table.Column<int>(type: "integer", nullable: false),
-                    second_id = table.Column<int>(type: "integer", nullable: false),
+                    resource_id = table.Column<int>(type: "integer", nullable: false),
+                    provider_id = table.Column<int>(type: "integer", nullable: false),
                     data_id = table.Column<string>(type: "text", nullable: true),
                     link = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_metadata_id_episode", x => new { x.first_id, x.second_id });
+                    table.PrimaryKey("pk_episode_metadata_id", x => new { x.resource_id, x.provider_id });
                     table.ForeignKey(
-                        name: "fk_metadata_id_episode_episodes_first_id",
-                        column: x => x.first_id,
+                        name: "fk_episode_metadata_id_episodes_episode_id",
+                        column: x => x.resource_id,
                         principalTable: "episodes",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_metadata_id_episode_providers_second_id",
-                        column: x => x.second_id,
+                        name: "fk_episode_metadata_id_providers_provider_id",
+                        column: x => x.provider_id,
                         principalTable: "providers",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -548,10 +596,20 @@ namespace Kyoo.Postgresql.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "ix_collection_metadata_id_provider_id",
+                table: "collection_metadata_id",
+                column: "provider_id");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_collections_slug",
                 table: "collections",
                 column: "slug",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_episode_metadata_id_provider_id",
+                table: "episode_metadata_id",
+                column: "provider_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_episodes_season_id",
@@ -613,30 +671,15 @@ namespace Kyoo.Postgresql.Migrations
                 column: "second_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_metadata_id_episode_second_id",
-                table: "metadata_id_episode",
-                column: "second_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_metadata_id_people_second_id",
-                table: "metadata_id_people",
-                column: "second_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_metadata_id_season_second_id",
-                table: "metadata_id_season",
-                column: "second_id");
-
-            migrationBuilder.CreateIndex(
-                name: "ix_metadata_id_show_second_id",
-                table: "metadata_id_show",
-                column: "second_id");
-
-            migrationBuilder.CreateIndex(
                 name: "ix_people_slug",
                 table: "people",
                 column: "slug",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "ix_people_metadata_id_provider_id",
+                table: "people_metadata_id",
+                column: "provider_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_people_roles_people_id",
@@ -655,6 +698,11 @@ namespace Kyoo.Postgresql.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "ix_season_metadata_id_provider_id",
+                table: "season_metadata_id",
+                column: "provider_id");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_seasons_show_id_season_number",
                 table: "seasons",
                 columns: new[] { "show_id", "season_number" },
@@ -667,6 +715,11 @@ namespace Kyoo.Postgresql.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "ix_show_metadata_id_provider_id",
+                table: "show_metadata_id",
+                column: "provider_id");
+
+            migrationBuilder.CreateIndex(
                 name: "ix_shows_slug",
                 table: "shows",
                 column: "slug",
@@ -676,6 +729,11 @@ namespace Kyoo.Postgresql.Migrations
                 name: "ix_shows_studio_id",
                 table: "shows",
                 column: "studio_id");
+
+            migrationBuilder.CreateIndex(
+                name: "ix_studio_metadata_id_provider_id",
+                table: "studio_metadata_id",
+                column: "provider_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_studios_slug",
@@ -710,6 +768,12 @@ namespace Kyoo.Postgresql.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "collection_metadata_id");
+
+            migrationBuilder.DropTable(
+                name: "episode_metadata_id");
+
+            migrationBuilder.DropTable(
                 name: "link_collection_show");
 
             migrationBuilder.DropTable(
@@ -728,19 +792,19 @@ namespace Kyoo.Postgresql.Migrations
                 name: "link_user_show");
 
             migrationBuilder.DropTable(
-                name: "metadata_id_episode");
-
-            migrationBuilder.DropTable(
-                name: "metadata_id_people");
-
-            migrationBuilder.DropTable(
-                name: "metadata_id_season");
-
-            migrationBuilder.DropTable(
-                name: "metadata_id_show");
+                name: "people_metadata_id");
 
             migrationBuilder.DropTable(
                 name: "people_roles");
+
+            migrationBuilder.DropTable(
+                name: "season_metadata_id");
+
+            migrationBuilder.DropTable(
+                name: "show_metadata_id");
+
+            migrationBuilder.DropTable(
+                name: "studio_metadata_id");
 
             migrationBuilder.DropTable(
                 name: "tracks");
@@ -758,10 +822,10 @@ namespace Kyoo.Postgresql.Migrations
                 name: "genres");
 
             migrationBuilder.DropTable(
-                name: "providers");
+                name: "people");
 
             migrationBuilder.DropTable(
-                name: "people");
+                name: "providers");
 
             migrationBuilder.DropTable(
                 name: "episodes");

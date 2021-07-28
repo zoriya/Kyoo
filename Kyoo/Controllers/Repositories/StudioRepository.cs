@@ -66,7 +66,6 @@ namespace Kyoo.Controllers
 			{ 
 				x.Provider = await _providers.CreateIfNotExists(x.Provider);
 				x.ProviderID = x.Provider.ID;
-				x.ResourceType = nameof(Studio);
 				_database.Entry(x.Provider).State = EntityState.Detached;
 			});
 		}

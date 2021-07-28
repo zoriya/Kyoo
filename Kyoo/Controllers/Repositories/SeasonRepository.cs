@@ -87,7 +87,6 @@ namespace Kyoo.Controllers
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
-			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Added);
 			await _database.SaveChangesAsync($"Trying to insert a duplicated season (slug {obj.Slug} already exists).");
 			return obj;
 		}
@@ -108,7 +107,6 @@ namespace Kyoo.Controllers
 			{
 				id.Provider = await _providers.CreateIfNotExists(id.Provider);
 				id.ProviderID = id.Provider.ID;
-				id.ResourceType = nameof(Season);
 				_database.Entry(id.Provider).State = EntityState.Detached;
 			});
 		}

@@ -1,6 +1,8 @@
 using System;
+using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
+using EFCore.NamingConventions.Internal;
 using Kyoo.Models;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
@@ -99,7 +101,36 @@ namespace Kyoo.Postgresql
 				.Property(x => x.ExtraData)
 				.HasColumnType("jsonb");
 			
+			modelBuilder.Entity<LibraryItem>()
+				.Property(x => x.Images)
+				.HasColumnType("jsonb");
+			modelBuilder.Entity<Collection>()
+				.Property(x => x.Images)
+				.HasColumnType("jsonb");
+			modelBuilder.Entity<Show>()
+				.Property(x => x.Images)
+				.HasColumnType("jsonb");
+			modelBuilder.Entity<Season>()
+				.Property(x => x.Images)
+				.HasColumnType("jsonb");
+			modelBuilder.Entity<Episode>()
+				.Property(x => x.Images)
+				.HasColumnType("jsonb");
+			modelBuilder.Entity<People>()
+				.Property(x => x.Images)
+				.HasColumnType("jsonb");
+			modelBuilder.Entity<Provider>()
+				.Property(x => x.Images)
+				.HasColumnType("jsonb");
+			
 			base.OnModelCreating(modelBuilder);
+		}
+
+		/// <inheritdoc />
+		protected override string MetadataName<T>()
+		{
+			SnakeCaseNameRewriter rewriter = new(CultureInfo.InvariantCulture);
+			return rewriter.RewriteName(typeof(T).Name + nameof(MetadataID));
 		}
 
 		/// <inheritdoc />

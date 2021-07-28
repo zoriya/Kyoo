@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using Kyoo.Models.Attributes;
 
@@ -18,7 +19,7 @@ namespace Kyoo.Models
 	/// A type union between <see cref="Show"/> and <see cref="Collection"/>.
 	/// This is used to list content put inside a library.
 	/// </summary>
-	public class LibraryItem : IResource
+	public class LibraryItem : IResource, IThumbnails
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
@@ -52,13 +53,17 @@ namespace Kyoo.Models
 		/// It can also be null if this is unknown.
 		/// </summary>
 		public DateTime? EndAir { get; set; }
-		
+
+		/// <inheritdoc />
+		public Dictionary<int, string> Images { get; set; }
+
 		/// <summary>
 		/// The path of this item's poster.
 		/// By default, the http path for this poster is returned from the public API.
 		/// This can be disabled using the internal query flag.
 		/// </summary>
-		[SerializeAs("{HOST}/api/{Type:l}/{Slug}/poster")] public string Poster { get; set; }
+		[SerializeAs("{HOST}/api/{Type:l}/{Slug}/poster")]
+		public string Poster => Images[Thumbnails.Poster];
 		
 		/// <summary>
 		/// The type of this item (ether a collection, a show or a movie).
@@ -84,7 +89,7 @@ namespace Kyoo.Models
 			Status = show.Status;
 			StartAir = show.StartAir;
 			EndAir = show.EndAir;
-			Poster = show.Poster;
+			Images = show.Images;
 			Type = show.IsMovie ? ItemType.Movie : ItemType.Show;
 		}
 		
@@ -101,7 +106,7 @@ namespace Kyoo.Models
 			Status = Models.Status.Unknown;
 			StartAir = null;
 			EndAir = null;
-			Poster = collection.Poster;
+			Images = collection.Images;
 			Type = ItemType.Collection;
 		}
 
@@ -117,7 +122,7 @@ namespace Kyoo.Models
 			Status = x.Status,
 			StartAir = x.StartAir,
 			EndAir = x.EndAir,
-			Poster= x.Poster,
+			Images = x.Images,
 			Type = x.IsMovie ? ItemType.Movie : ItemType.Show
 		};
 		
@@ -133,7 +138,7 @@ namespace Kyoo.Models
 			Status = Models.Status.Unknown,
 			StartAir = null,
 			EndAir = null,
-			Poster = x.Poster,
+			Images = x.Images,
 			Type = ItemType.Collection
 		};
 	}

@@ -41,7 +41,7 @@ namespace Kyoo.Tests
 					Slug = "collection",
 					Name = "Collection",
 					Overview = "A nice collection for tests",
-					Images =
+					Images = new Dictionary<int, string>
 					{
 						[Thumbnails.Poster] = "Poster"
 					}
@@ -66,7 +66,7 @@ namespace Kyoo.Tests
 					Status = Status.Finished,
 					StartAir = new DateTime(2011, 1, 1),
 					EndAir = new DateTime(2011, 1, 1),
-					Images =
+					Images = new Dictionary<int, string>
 					{
 						[Thumbnails.Poster] = "Poster",
 						[Thumbnails.Logo] = "Logo",
@@ -88,7 +88,7 @@ namespace Kyoo.Tests
 					Overview = "The first season",
 					StartDate = new DateTime(2020, 06, 05),
 					EndDate =  new DateTime(2020, 07, 05),
-					Images =
+					Images = new Dictionary<int, string>
 					{
 						[Thumbnails.Poster] = "Poster",
 						[Thumbnails.Logo] = "Logo",
@@ -108,7 +108,7 @@ namespace Kyoo.Tests
 					EpisodeNumber = 1,
 					AbsoluteNumber = 1,
 					Path = "/home/kyoo/anohana-s1e1",
-					Images =
+					Images = new Dictionary<int, string>
 					{
 						[Thumbnails.Poster] = "Poster",
 						[Thumbnails.Logo] = "Logo",
@@ -144,7 +144,7 @@ namespace Kyoo.Tests
 					ID = 1,
 					Slug = "the-actor",
 					Name = "The Actor",
-					Images =
+					Images = new Dictionary<int, string>
 					{
 						[Thumbnails.Poster] = "Poster",
 						[Thumbnails.Logo] = "Logo",
@@ -177,7 +177,7 @@ namespace Kyoo.Tests
 					ID = 1,
 					Slug = "tvdb",
 					Name = "The TVDB",
-					Images =
+					Images = new Dictionary<int, string>
 					{
 						[Thumbnails.Poster] = "Poster",
 						[Thumbnails.Logo] = "path/tvdb.svg",
@@ -282,7 +282,7 @@ namespace Kyoo.Tests
 				EpisodeNumber = null,
 				AbsoluteNumber = 3,
 				Path = "/home/kyoo/anohana-3",
-				Images =
+				Images = new Dictionary<int, string>
 				{
 					[Thumbnails.Poster] = "Poster",
 					[Thumbnails.Logo] = "Logo",
@@ -302,7 +302,7 @@ namespace Kyoo.Tests
 				ShowSlug = "anohana",
 				ShowID = 1,
 				Path = "/home/kyoo/john-wick",
-				Images =
+				Images = new Dictionary<int, string>
 				{
 					[Thumbnails.Poster] = "Poster",
 					[Thumbnails.Logo] = "Logo",

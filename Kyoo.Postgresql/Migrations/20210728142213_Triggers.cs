@@ -141,7 +141,7 @@ namespace Kyoo.Postgresql.Migrations
 			// language=PostgreSQL
 			migrationBuilder.Sql(@"
 			CREATE VIEW library_items AS
-				SELECT s.id, s.slug, s.title, s.overview, s.status, s.start_air, s.end_air, s.poster, CASE
+				SELECT s.id, s.slug, s.title, s.overview, s.status, s.start_air, s.end_air, s.images, CASE
 					WHEN s.is_movie THEN 'movie'::item_type
 					ELSE 'show'::item_type
 					END AS type
@@ -153,7 +153,7 @@ namespace Kyoo.Postgresql.Migrations
 					WHERE s.id = l.second_id))
 				UNION ALL
 				SELECT -c0.id, c0.slug, c0.name AS title, c0.overview, 'unknown'::status AS status, 
-				       NULL AS start_air, NULL AS end_air, c0.poster, 'collection'::item_type AS type
+				       NULL AS start_air, NULL AS end_air, c0.images, 'collection'::item_type AS type
 				FROM collections AS c0");
 		}
 

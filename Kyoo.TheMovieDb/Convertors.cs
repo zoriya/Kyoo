@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Kyoo.Models;
 using TMDbLib.Objects.General;
@@ -29,7 +30,7 @@ namespace Kyoo.TheMovieDb
 				Status = movie.Status == "Released" ? Status.Finished : Status.Planned,
 				StartAir = movie.ReleaseDate,
 				EndAir = movie.ReleaseDate,
-				Images =
+				Images = new Dictionary<int, string>
 				{
 					[Thumbnails.Poster] = movie.PosterPath != null
 						? $"https://image.tmdb.org/t/p/original{movie.PosterPath}"
@@ -79,7 +80,7 @@ namespace Kyoo.TheMovieDb
 				Status = tv.Status == "Ended" ? Status.Finished : Status.Planned,
 				StartAir = tv.FirstAirDate,
 				EndAir = tv.LastAirDate,
-				Images =
+				Images = new Dictionary<int, string>
 				{
 					[Thumbnails.Poster] = tv.PosterPath != null
 						? $"https://image.tmdb.org/t/p/original{tv.PosterPath}"
@@ -125,7 +126,7 @@ namespace Kyoo.TheMovieDb
 			{
 				Slug = Utility.ToSlug(collection.Name),
 				Name = collection.Name,
-				Images =
+				Images = new Dictionary<int, string>
 				{
 					[Thumbnails.Poster] = collection.PosterPath != null
 						? $"https://image.tmdb.org/t/p/original{collection.PosterPath}"
@@ -152,7 +153,7 @@ namespace Kyoo.TheMovieDb
 				Overview = movie.Overview,
 				StartAir = movie.ReleaseDate,
 				EndAir = movie.ReleaseDate,
-				Images =
+				Images = new Dictionary<int, string>
 				{
 					[Thumbnails.Poster] = movie.PosterPath != null
 						? $"https://image.tmdb.org/t/p/original{movie.PosterPath}"
@@ -188,7 +189,7 @@ namespace Kyoo.TheMovieDb
 				Title = tv.Name,
 				Overview = tv.Overview,
 				StartAir = tv.FirstAirDate,
-				Images = 
+				Images = new Dictionary<int, string> 
 				{
 					[Thumbnails.Poster] = tv.PosterPath != null
 						? $"https://image.tmdb.org/t/p/original{tv.PosterPath}"
@@ -224,7 +225,7 @@ namespace Kyoo.TheMovieDb
 				{
 					Slug = Utility.ToSlug(cast.Name),
 					Name = cast.Name,
-					Images =
+					Images = new Dictionary<int, string>
 					{
 						[Thumbnails.Poster] = cast.ProfilePath != null 
 							? $"https://image.tmdb.org/t/p/original{cast.ProfilePath}" 
@@ -259,7 +260,7 @@ namespace Kyoo.TheMovieDb
 				{
 					Slug = Utility.ToSlug(cast.Name),
 					Name = cast.Name,
-					Images =
+					Images = new Dictionary<int, string>
 					{
 						[Thumbnails.Poster] = cast.ProfilePath != null 
 							? $"https://image.tmdb.org/t/p/original{cast.ProfilePath}" 
@@ -294,7 +295,7 @@ namespace Kyoo.TheMovieDb
 				{
 					Slug = Utility.ToSlug(crew.Name),
 					Name = crew.Name,
-					Images =
+					Images = new Dictionary<int, string>
 					{
 						[Thumbnails.Poster] = crew.ProfilePath != null 
 							? $"https://image.tmdb.org/t/p/original{crew.ProfilePath}" 

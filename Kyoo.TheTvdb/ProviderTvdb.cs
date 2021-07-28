@@ -33,7 +33,7 @@ namespace Kyoo.TheTvdb
 			Slug = "the-tvdb",
 			Name = "TheTVDB",
 			LogoExtension = "png",
-			Images =
+			Images = new Dictionary<int, string>
 			{
 				[Thumbnails.Logo] = "https://www.thetvdb.com/images/logo.png"	
 			}

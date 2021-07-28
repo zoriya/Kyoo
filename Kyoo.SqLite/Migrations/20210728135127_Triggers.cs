@@ -154,7 +154,7 @@ namespace Kyoo.SqLite.Migrations
 			// language=SQLite
 			migrationBuilder.Sql(@"
 			CREATE VIEW LibraryItems AS
-				SELECT s.ID, s.Slug, s.Title, s.Overview, s.Status, s.StartAir, s.EndAir, s.Poster, CASE
+				SELECT s.ID, s.Slug, s.Title, s.Overview, s.Status, s.StartAir, s.EndAir, s.Images, CASE
 					WHEN s.IsMovie THEN 1
 					ELSE 0
 					END AS Type
@@ -166,7 +166,7 @@ namespace Kyoo.SqLite.Migrations
 					WHERE s.ID = l.SecondID))
 				UNION ALL
 				SELECT -c0.ID, c0.Slug, c0.Name AS Title, c0.Overview, 3 AS Status, 
-				       NULL AS StartAir, NULL AS EndAir, c0.Poster, 2 AS Type
+				       NULL AS StartAir, NULL AS EndAir, c0.Images, 2 AS Type
 				FROM collections AS c0");
 		}
 
