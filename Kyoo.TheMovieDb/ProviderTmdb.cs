@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Kyoo.TheMovieDb.Models;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using TMDbLib.Client;
 using TMDbLib.Objects.Movies;
@@ -22,7 +23,11 @@ namespace Kyoo.TheMovieDb
 		/// The API key used to authenticate with TheMovieDb API.
 		/// </summary>
 		private readonly IOptions<TheMovieDbOptions> _apiKey;
-		
+		/// <summary>
+		/// The logger to use in ase of issue.
+		/// </summary>
+		private readonly ILogger<TheMovieDbProvider> _logger;
+
 		/// <inheritdoc />
 		public Provider Provider => new()
 		{
@@ -35,14 +40,16 @@ namespace Kyoo.TheMovieDb
 					"blue_short-8e7b30f73a4020692ccca9c88bafe5dcb6f8a62a4c6bc55cd9ba82bb2cd95f6c.svg"
 			}
 		};
-		
+
 		/// <summary>
 		/// Create a new <see cref="TheMovieDbProvider"/> using the given api key.
 		/// </summary>
 		/// <param name="apiKey">The api key</param>
-		public TheMovieDbProvider(IOptions<TheMovieDbOptions> apiKey)
+		/// <param name="logger">The logger to use in case of issue.</param>
+		public TheMovieDbProvider(IOptions<TheMovieDbOptions> apiKey, ILogger<TheMovieDbProvider> logger)
 		{
 			_apiKey = apiKey;
+			_logger = logger;
 		}
 		
 
@@ -54,6 +61,8 @@ namespace Kyoo.TheMovieDb
 			{
 				Collection collection => _GetCollection(collection) as Task<T>,
 				Show show => _GetShow(show) as Task<T>,
+				Season season => _GetSeason(season) as Task<T>,
+				Episode episode => _GetEpisode(episode) as Task<T>,
 				_ => null
 			};
 		}
@@ -104,6 +113,45 @@ namespace Kyoo.TheMovieDb
 				?.ToShow(Provider);
 		}
 		
+		/// <summary>
+		/// Get a season using it's show and it's season number.
+		/// </summary>
+		/// <param name="season">The season to retrieve metadata for.</param>
+		/// <returns>A season containing metadata from TheMovieDb</returns>
+		private async Task<Season> _GetSeason(Season season)
+		{
+			if (season.Show == null || !season.Show.TryGetID(Provider.Slug, out int id))
+			{
+				_logger.LogWarning("Metadata for a season was requested but it's show is not loaded. " +
+					"This is unsupported");
+				return null;
+			}
+			TMDbClient client = new(_apiKey.Value.ApiKey);
+			return (await client.GetTvSeasonAsync(id, season.SeasonNumber))
+				.ToSeason(id, Provider);
+		}
+
+		/// <summary>
+		/// Get an episode using it's show, it's season number and it's episode number.
+		/// Absolute numbering is not supported. 
+		/// </summary>
+		/// <param name="episode">The episode to retrieve metadata for.</param>
+		/// <returns>An episode containing metadata from TheMovieDb</returns>
+		private async Task<Episode> _GetEpisode(Episode episode)
+		{
+			if (episode.Show == null || !episode.Show.TryGetID(Provider.Slug, out int id))
+			{
+				_logger.LogWarning("Metadata for a season was requested but it's show is not loaded. " +
+					"This is unsupported");
+				return null;
+			}
+			if (episode.SeasonNumber == null || episode.EpisodeNumber == null)
+				return null;
+			
+			TMDbClient client = new(_apiKey.Value.ApiKey);
+			return (await client.GetTvEpisodeAsync(id, episode.SeasonNumber.Value, episode.EpisodeNumber.Value))
+				.ToEpisode(id, Provider);
+		}
 		
 		/// <inheritdoc />
 		public async Task<ICollection<T>> Search<T>(string query) 
@@ -113,6 +161,10 @@ namespace Kyoo.TheMovieDb
 				return (await _SearchCollections(query) as ICollection<T>)!;
 			if (typeof(T) == typeof(Show))
 				return (await _SearchShows(query) as ICollection<T>)!;
+			// if (typeof(T) == typeof(People))
+			// 	return (await _SearchPeople(query) as ICollection<T>)!;
+			// if (typeof(T) == typeof(Studio))
+			// 	return (await _SearchStudios(query) as ICollection<T>)!;
 			return ArraySegment<T>.Empty;
 		}
 
@@ -120,7 +172,7 @@ namespace Kyoo.TheMovieDb
 		/// Search for a collection using it's name as a query.
 		/// </summary>
 		/// <param name="query">The query to search for</param>
-		/// <returns>A collection containing metadata from TheMovieDb</returns>
+		/// <returns>A list of collections containing metadata from TheMovieDb</returns>
 		private async Task<ICollection<Collection>> _SearchCollections(string query)
 		{
 			TMDbClient client = new(_apiKey.Value.ApiKey);
@@ -134,7 +186,7 @@ namespace Kyoo.TheMovieDb
 		/// Search for a show using it's name as a query.
 		/// </summary>
 		/// <param name="query">The query to search for</param>
-		/// <returns>A show containing metadata from TheMovieDb</returns>
+		/// <returns>A list of shows containing metadata from TheMovieDb</returns>
 		private async Task<ICollection<Show>> _SearchShows(string query)
 		{
 			TMDbClient client = new(_apiKey.Value.ApiKey);
@@ -152,47 +204,5 @@ namespace Kyoo.TheMovieDb
 				.Where(x => x != null)
 				.ToArray();
 		}
-
-		// public async Task<Season> GetSeason(Show show, int seasonNumber)
-		// {
-		// 	string id = show?.GetID(Provider.Name);
-		// 	if (id == null)
-		// 		return await Task.FromResult<Season>(null);
-		// 	TMDbClient client = new TMDbClient(APIKey);
-		// 	TvSeason season = await client.GetTvSeasonAsync(int.Parse(id), seasonNumber);
-		// 	if (season == null)
-		// 		return null;
-		// 	return new Season(show.ID,
-		// 		seasonNumber,
-		// 		season.Name,
-		// 		season.Overview,
-		// 		season.AirDate?.Year,
-		// 		season.PosterPath != null ? "https://image.tmdb.org/t/p/original" + season.PosterPath : null,
-		// 		new[] {new MetadataID(Provider, $"{season.Id}", $"https://www.themoviedb.org/tv/{id}/season/{season.SeasonNumber}")});
-		// }
-		//
-		// public async Task<Episode> GetEpisode(Show show, int seasonNumber, int episodeNumber, int absoluteNumber)
-		// {
-		// 	if (seasonNumber == -1 || episodeNumber == -1)
-		// 		return await Task.FromResult<Episode>(null);
-		// 	
-		// 	string id = show?.GetID(Provider.Name);
-		// 	if (id == null)
-		// 		return await Task.FromResult<Episode>(null);
-		// 	TMDbClient client = new(APIKey);
-		// 	TvEpisode episode = await client.GetTvEpisodeAsync(int.Parse(id), seasonNumber, episodeNumber);
-		// 	if (episode == null)
-		// 		return null;
-		// 	return new Episode(seasonNumber, episodeNumber, absoluteNumber,
-		// 		episode.Name,
-		// 		episode.Overview,
-		// 		episode.AirDate,
-		// 		0,
-		// 		episode.StillPath != null ? "https://image.tmdb.org/t/p/original" + episode.StillPath : null,
-		// 		new []
-		// 		{
-		// 			new MetadataID(Provider, $"{episode.Id}", $"https://www.themoviedb.org/tv/{id}/season/{episode.SeasonNumber}/episode/{episode.EpisodeNumber}")
-		// 		});
-		// }
 	}
 }
