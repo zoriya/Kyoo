@@ -52,11 +52,30 @@ namespace Kyoo.TheMovieDb
 		{
 			return item switch
 			{
+				Collection collection => _GetCollection(collection) as Task<T>,
 				Show show => _GetShow(show) as Task<T>,
 				_ => null
 			};
 		}
-		
+
+		/// <summary>
+		/// Get a collection using it's id, if the id is not present in the collection, fallback to a name search.
+		/// </summary>
+		/// <param name="collection">The show to collection for</param>
+		/// <returns>A collection containing metadata from TheMovieDb</returns>
+		private async Task<Collection> _GetCollection(Collection collection)
+		{
+			if (!collection.TryGetID(Provider.Slug, out int id))
+			{
+				Collection found = (await _SearchCollections(collection.Name ?? collection.Slug)).FirstOrDefault();
+				if (found?.TryGetID(Provider.Slug, out id) != true)
+					return found;
+			}
+
+			TMDbClient client = new(_apiKey.Value.ApiKey);
+			return (await client.GetCollectionAsync(id)).ToCollection(Provider);
+		}
+
 		/// <summary>
 		/// Get a show using it's id, if the id is not present in the show, fallback to a title search.
 		/// </summary>
@@ -64,8 +83,13 @@ namespace Kyoo.TheMovieDb
 		/// <returns>A show containing metadata from TheMovieDb</returns>
 		private async Task<Show> _GetShow(Show show)
 		{
-			if (!int.TryParse(show.GetID(Provider.Name), out int id))
-				return (await _SearchShows(show.Title ?? show.Slug)).FirstOrDefault();
+			if (!show.TryGetID(Provider.Slug, out int id))
+			{
+				Show found = (await _SearchShows(show.Title ?? show.Slug)).FirstOrDefault();
+				if (found?.TryGetID(Provider.Slug, out id) != true)
+					return found;
+			}
+			
 			TMDbClient client = new(_apiKey.Value.ApiKey);
 			
 			if (show.IsMovie)

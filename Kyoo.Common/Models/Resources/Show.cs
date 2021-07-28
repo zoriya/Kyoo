@@ -156,18 +156,6 @@ namespace Kyoo.Models
 		[Link] public ICollection<Link<Show, Genre>> GenreLinks { get; set; }
 #endif
 
-		/// <summary>
-		/// Retrieve the internal provider's ID of a show using it's provider slug. 
-		/// </summary>
-		/// <remarks>This method will never return anything if the <see cref="ExternalIDs"/> are not loaded.</remarks>
-		/// <param name="provider">The slug of the provider</param>
-		/// <returns>The <see cref="MetadataID.DataID"/> field of the asked provider.</returns>
-		[CanBeNull]
-		public string GetID(string provider)
-		{
-			return ExternalIDs?.FirstOrDefault(x => x.Provider.Slug == provider)?.DataID;
-		}
-
 		/// <inheritdoc />
 		public void OnMerge(object merged)
 		{
