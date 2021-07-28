@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Kyoo.Models;
 using TMDbLib.Objects.General;
+using TMDbLib.Objects.People;
 using TMDbLib.Objects.Search;
 using TvCast = TMDbLib.Objects.TvShows.Cast;
 using MovieCast = TMDbLib.Objects.Movies.Cast;
@@ -114,6 +115,36 @@ namespace Kyoo.TheMovieDb
 				},
 				Type = crew.Department,
 				Role = crew.Job
+			};
+		}
+		
+		/// <summary>
+		/// Convert a <see cref="Person"/> to a <see cref="People"/>.
+		/// </summary>
+		/// <param name="person">An internal TheMovieDB person.</param>
+		/// <param name="provider">The provider that represent TheMovieDB inside Kyoo.</param>
+		/// <returns>A <see cref="People"/> representing the person.</returns>
+		public static People ToPeople(this Person person, Provider provider)
+		{
+			return new()
+			{
+				Slug = Utility.ToSlug(person.Name),
+				Name = person.Name,
+				Images = new Dictionary<int, string>
+				{
+					[Thumbnails.Poster] = person.ProfilePath != null 
+						? $"https://image.tmdb.org/t/p/original{person.ProfilePath}" 
+						: null
+				},
+				ExternalIDs = new[]
+				{
+					new MetadataID
+					{
+						Provider = provider,
+						DataID = person.Id.ToString(),
+						Link = $"https://www.themoviedb.org/person/{person.Id}"
+					}
+				}
 			};
 		}
 		

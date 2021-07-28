@@ -85,7 +85,7 @@ namespace Kyoo.Models
 		public int? SeasonNumber { get; set; }
 		
 		/// <summary>
-		/// The number of this episode is it's season.
+		/// The number of this episode in it's season.
 		/// </summary>
 		public int? EpisodeNumber { get; set; }
 		
