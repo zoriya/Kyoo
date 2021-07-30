@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Kyoo.Common.Models.Attributes;
 using Kyoo.Controllers;
 using Kyoo.Models.Attributes;
 
@@ -47,6 +46,7 @@ namespace Kyoo.Models
 		/// An URL to a trailer. This could be any path supported by the <see cref="IFileSystem"/>.
 		/// </summary>
 		/// TODO for now, this is set to a youtube url. It should be cached and converted to a local file.
+		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
 		public string TrailerUrl => Images?.GetValueOrDefault(Thumbnails.Trailer);
 		
 		/// <summary>
@@ -70,6 +70,7 @@ namespace Kyoo.Models
 		/// This can be disabled using the internal query flag.
 		/// </summary>
 		[SerializeAs("{HOST}/api/shows/{Slug}/poster")]
+		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
 		public string Poster => Images?.GetValueOrDefault(Thumbnails.Poster);
 
 		/// <summary>
@@ -78,6 +79,7 @@ namespace Kyoo.Models
 		/// This can be disabled using the internal query flag.
 		/// </summary>
 		[SerializeAs("{HOST}/api/shows/{Slug}/logo")]
+		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
 		public string Logo => Images?.GetValueOrDefault(Thumbnails.Logo);
 
 		/// <summary>
@@ -86,6 +88,7 @@ namespace Kyoo.Models
 		/// This can be disabled using the internal query flag.
 		/// </summary>
 		[SerializeAs("{HOST}/api/shows/{Slug}/backdrop")]
+		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
 		public string Backdrop => Images?.GetValueOrDefault(Thumbnails.Thumbnail);
 
 		/// <summary>
@@ -101,7 +104,8 @@ namespace Kyoo.Models
 		/// </summary>
 		[SerializeIgnore] public int? StudioID { get; set; }
 		/// <summary>
-		/// The Studio that made this show. This must be explicitly loaded via a call to <see cref="ILibraryManager.Load"/>.
+		/// The Studio that made this show.
+		/// This must be explicitly loaded via a call to <see cref="ILibraryManager.Load"/>.
 		/// </summary>
 		[LoadableRelation(nameof(StudioID))] [EditableRelation] public Studio Studio { get; set; }
 		
@@ -137,23 +141,6 @@ namespace Kyoo.Models
 		/// </summary>
 		[LoadableRelation] public ICollection<Collection> Collections { get; set; }
 		
-#if ENABLE_INTERNAL_LINKS
-		/// <summary>
-		/// The internal link between this show and libraries in the <see cref="Libraries"/> list.
-		/// </summary>
-		[Link] public ICollection<Link<Library, Show>> LibraryLinks { get; set; }
-		
-		/// <summary>
-		/// The internal link between this show and collections in the <see cref="Collections"/> list.
-		/// </summary>
-		[Link] public ICollection<Link<Collection, Show>> CollectionLinks { get; set; }
-		
-		/// <summary>
-		/// The internal link between this show and genres in the <see cref="Genres"/> list.
-		/// </summary>
-		[Link] public ICollection<Link<Show, Genre>> GenreLinks { get; set; }
-#endif
-
 		/// <inheritdoc />
 		public void OnMerge(object merged)
 		{

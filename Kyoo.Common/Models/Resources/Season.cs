@@ -45,7 +45,8 @@ namespace Kyoo.Models
 		/// </summary>
 		[SerializeIgnore] public int ShowID { get; set; }
 		/// <summary>
-		/// The show that contains this season. This must be explicitly loaded via a call to <see cref="ILibraryManager.Load"/>.
+		/// The show that contains this season.
+		/// This must be explicitly loaded via a call to <see cref="ILibraryManager.Load"/>.
 		/// </summary>
 		[LoadableRelation(nameof(ShowID))] public Show Show { get; set; }
 
@@ -83,6 +84,7 @@ namespace Kyoo.Models
 		/// This can be disabled using the internal query flag.
 		/// </summary>
 		[SerializeAs("{HOST}/api/seasons/{Slug}/thumb")]
+		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
 		public string Poster => Images?.GetValueOrDefault(Thumbnails.Poster);
 		
 		/// <inheritdoc />

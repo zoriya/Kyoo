@@ -17,8 +17,8 @@ namespace Kyoo.Models
 		public string Slug => ForPeople ? Show.Slug : People.Slug;
 		
 		/// <summary>
-		/// Should this role be used as a Show substitute (the value is <c>false</c>) or
-		/// as a People substitute (the value is <c>true</c>).
+		/// Should this role be used as a Show substitute (the value is <c>true</c>) or
+		/// as a People substitute (the value is <c>false</c>).
 		/// </summary>
 		public bool ForPeople { get; set; }
 

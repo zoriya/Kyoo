@@ -16,8 +16,6 @@
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<LangVersion>default</LangVersion>
-		
-<!--		<DefineConstants>ENABLE_INTERNAL_LINKS</DefineConstants>-->
 	</PropertyGroup>
 
 	<ItemGroup>

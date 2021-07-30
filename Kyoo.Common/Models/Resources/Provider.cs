@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-using Kyoo.Common.Models.Attributes;
 using Kyoo.Controllers;
 using Kyoo.Models.Attributes;
 
@@ -31,20 +31,14 @@ namespace Kyoo.Models
 		/// This can be disabled using the internal query flag.
 		/// </summary>
 		[SerializeAs("{HOST}/api/providers/{Slug}/logo")]
+		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
 		public string Logo => Images?.GetValueOrDefault(Thumbnails.Logo);
 
 		/// <summary>
 		/// The list of libraries that uses this provider.
 		/// </summary>
 		[LoadableRelation] public ICollection<Library> Libraries { get; set; }
-		
-#if ENABLE_INTERNAL_LINKS
-		/// <summary>
-		/// The internal link between this provider and libraries in the <see cref="Libraries"/> list.
-		/// </summary>
-		[Link] public ICollection<Link<Library, Provider>> LibraryLinks { get; set; }
-#endif
-		
+
 		/// <summary>
 		/// Create a new, default, <see cref="Provider"/>
 		/// </summary>

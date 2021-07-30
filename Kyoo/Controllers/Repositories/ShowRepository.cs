@@ -89,7 +89,10 @@ namespace Kyoo.Controllers
 		{
 			await base.Validate(resource);
 			if (resource.Studio != null)
+			{
 				resource.Studio = await _studios.CreateIfNotExists(resource.Studio);
+				resource.StudioID = resource.Studio.ID;
+			}
 
 			if (resource.Genres != null)
 			{

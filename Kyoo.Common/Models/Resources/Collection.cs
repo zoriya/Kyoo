@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using Kyoo.Common.Models.Attributes;
+﻿using System;
+using System.Collections.Generic;
 using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
@@ -30,6 +30,7 @@ namespace Kyoo.Models
 		/// This can be disabled using the internal query flag.
 		/// </summary>
 		[SerializeAs("{HOST}/api/collection/{Slug}/poster")]
+		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
 		public string Poster => Images?.GetValueOrDefault(Thumbnails.Poster);
 
 		/// <summary>
@@ -49,18 +50,5 @@ namespace Kyoo.Models
 		
 		/// <inheritdoc />
 		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
-
-#if ENABLE_INTERNAL_LINKS
-		
-		/// <summary>
-		/// The internal link between this collection and shows in the <see cref="Shows"/> list.
-		/// </summary>
-		[Link] public ICollection<Link<Collection, Show>> ShowLinks { get; set; }
-		
-		/// <summary>
-		/// The internal link between this collection and libraries in the <see cref="Libraries"/> list.
-		/// </summary>
-		[Link] public ICollection<Link<Library, Collection>> LibraryLinks { get; set; }
-#endif
 	}
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentAssertions;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Microsoft.EntityFrameworkCore;
@@ -243,9 +244,25 @@ namespace Kyoo.Tests.Database
 				.ThenInclude(x => x.Provider)
 				.Include(x => x.Genres)
 				.Include(x => x.People)
+				.ThenInclude(x => x.People)
 				.Include(x => x.Studio)
 				.FirstAsync(x => x.ID == created.ID);
-			KAssert.DeepEqual(expected, retrieved);
+			retrieved.People.ForEach(x => 
+			{
+				x.Show = null;
+				x.People.Roles = null;
+			});
+			retrieved.Studio.Shows = null;
+			retrieved.Genres.ForEach(x => x.Shows = null);
+			
+			expected.Genres.ForEach(x => x.Shows = null);
+			expected.People.ForEach(x =>
+			{
+				x.Show = null;
+				x.People.Roles = null;
+			});
+
+			retrieved.Should().BeEquivalentTo(expected);
 		}
 		
 		[Fact]

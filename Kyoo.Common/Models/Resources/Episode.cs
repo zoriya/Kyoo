@@ -74,9 +74,13 @@ namespace Kyoo.Models
 		/// </summary>
 		[SerializeIgnore] public int? SeasonID { get; set; }
 		/// <summary>
-		/// The season that contains this episode. This must be explicitly loaded via a call to <see cref="ILibraryManager.Load"/>.
-		/// This can be null if the season is unknown and the episode is only identified by it's <see cref="AbsoluteNumber"/>.
+		/// The season that contains this episode.
+		/// This must be explicitly loaded via a call to <see cref="ILibraryManager.Load"/>.
 		/// </summary>
+		/// <remarks>
+		/// This can be null if the season is unknown and the episode is only identified
+		/// by it's <see cref="AbsoluteNumber"/>.
+		/// </remarks>
 		[LoadableRelation(nameof(SeasonID))] public Season Season { get; set; }
 
 		/// <summary>
@@ -108,6 +112,7 @@ namespace Kyoo.Models
 		/// This can be disabled using the internal query flag.
 		/// </summary>
 		[SerializeAs("{HOST}/api/episodes/{Slug}/thumb")]
+		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
 		public string Thumb => Images?.GetValueOrDefault(Thumbnails.Thumbnail);
 		
 		/// <summary>

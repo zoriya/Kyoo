@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Kyoo.Common.Models.Attributes;
 
 namespace Kyoo.Models
 {
@@ -51,13 +50,6 @@ namespace Kyoo.Models
 		/// The list of episodes the user is watching (stopped in progress or the next episode of the show)
 		/// </summary>
 		public ICollection<WatchedEpisode> CurrentlyWatching { get; set; }
-
-#if ENABLE_INTERNAL_LINKS
-		/// <summary>
-		/// Links between Users and Shows.
-		/// </summary>
-		[Link] public ICollection<Link<User, Show>> ShowLinks { get; set; }
-#endif
 	}
 	
 	/// <summary>

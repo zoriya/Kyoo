@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Kyoo.Common.Models.Attributes;
 using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
@@ -39,22 +38,5 @@ namespace Kyoo.Models
 		/// The list of collections in this library.
 		/// </summary>
 		[LoadableRelation] public ICollection<Collection> Collections { get; set; }
-
-#if ENABLE_INTERNAL_LINKS
-		/// <summary>
-		/// The internal link between this library and provider in the <see cref="Providers"/> list.
-		/// </summary>
-		[Link] public ICollection<Link<Library, Provider>> ProviderLinks { get; set; }
-		
-		/// <summary>
-		/// The internal link between this library and shows in the <see cref="Shows"/> list.
-		/// </summary>
-		[Link] public ICollection<Link<Library, Show>> ShowLinks { get; set; }
-		
-		/// <summary>
-		/// The internal link between this library and collection in the <see cref="Collections"/> list.
-		/// </summary>
-		[Link] public ICollection<Link<Library, Collection>> CollectionLinks { get; set; }
-#endif
 	}
 }

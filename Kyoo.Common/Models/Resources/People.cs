@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Kyoo.Models.Attributes;
 
 namespace Kyoo.Models
@@ -28,6 +29,7 @@ namespace Kyoo.Models
 		/// This can be disabled using the internal query flag.
 		/// </summary>
 		[SerializeAs("{HOST}/api/people/{Slug}/poster")]
+		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
 		public string Poster => Images?.GetValueOrDefault(Thumbnails.Poster);
 		
 		/// <inheritdoc />
