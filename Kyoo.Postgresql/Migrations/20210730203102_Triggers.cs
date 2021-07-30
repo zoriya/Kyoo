@@ -149,8 +149,8 @@ namespace Kyoo.Postgresql.Migrations
 				WHERE NOT (EXISTS (
 					SELECT 1
 					FROM link_collection_show AS l
-					INNER JOIN collections AS c ON l.first_id = c.id
-					WHERE s.id = l.second_id))
+					INNER JOIN collections AS c ON l.collections_id = c.id
+					WHERE s.id = l.shows_id))
 				UNION ALL
 				SELECT -c0.id, c0.slug, c0.name AS title, c0.overview, 'unknown'::status AS status, 
 				       NULL AS start_air, NULL AS end_air, c0.images, 'collection'::item_type AS type

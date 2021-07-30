@@ -62,6 +62,7 @@ namespace Kyoo.Controllers
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
+			obj.ExternalIDs.ForEach(x => _database.MetadataIds<People>().Attach(x));
 			await _database.SaveChangesAsync($"Trying to insert a duplicated people (slug {obj.Slug} already exists).");
 			return obj;
 		}

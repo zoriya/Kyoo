@@ -75,8 +75,7 @@ namespace Kyoo.SqLite.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Slug = table.Column<string>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: true),
-                    Images = table.Column<string>(type: "TEXT", nullable: true),
-                    LogoExtension = table.Column<string>(type: "TEXT", nullable: true)
+                    Images = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -108,7 +107,8 @@ namespace Kyoo.SqLite.Migrations
                     Email = table.Column<string>(type: "TEXT", nullable: true),
                     Password = table.Column<string>(type: "TEXT", nullable: true),
                     Permissions = table.Column<string>(type: "TEXT", nullable: true),
-                    ExtraData = table.Column<string>(type: "TEXT", nullable: true)
+                    ExtraData = table.Column<string>(type: "TEXT", nullable: true),
+                    Images = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -116,24 +116,24 @@ namespace Kyoo.SqLite.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Link<Library, Collection>",
+                name: "LinkLibraryCollection",
                 columns: table => new
                 {
-                    FirstID = table.Column<int>(type: "INTEGER", nullable: false),
-                    SecondID = table.Column<int>(type: "INTEGER", nullable: false)
+                    CollectionsID = table.Column<int>(type: "INTEGER", nullable: false),
+                    LibrariesID = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Link<Library, Collection>", x => new { x.FirstID, x.SecondID });
+                    table.PrimaryKey("PK_LinkLibraryCollection", x => new { x.CollectionsID, x.LibrariesID });
                     table.ForeignKey(
-                        name: "FK_Link<Library, Collection>_Collections_SecondID",
-                        column: x => x.SecondID,
+                        name: "FK_LinkLibraryCollection_Collections_CollectionsID",
+                        column: x => x.CollectionsID,
                         principalTable: "Collections",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Link<Library, Collection>_Libraries_FirstID",
-                        column: x => x.FirstID,
+                        name: "FK_LinkLibraryCollection_Libraries_LibrariesID",
+                        column: x => x.LibrariesID,
                         principalTable: "Libraries",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
@@ -166,24 +166,24 @@ namespace Kyoo.SqLite.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Link<Library, Provider>",
+                name: "LinkLibraryProvider",
                 columns: table => new
                 {
-                    FirstID = table.Column<int>(type: "INTEGER", nullable: false),
-                    SecondID = table.Column<int>(type: "INTEGER", nullable: false)
+                    LibrariesID = table.Column<int>(type: "INTEGER", nullable: false),
+                    ProvidersID = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Link<Library, Provider>", x => new { x.FirstID, x.SecondID });
+                    table.PrimaryKey("PK_LinkLibraryProvider", x => new { x.LibrariesID, x.ProvidersID });
                     table.ForeignKey(
-                        name: "FK_Link<Library, Provider>_Libraries_FirstID",
-                        column: x => x.FirstID,
+                        name: "FK_LinkLibraryProvider_Libraries_LibrariesID",
+                        column: x => x.LibrariesID,
                         principalTable: "Libraries",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Link<Library, Provider>_Providers_SecondID",
-                        column: x => x.SecondID,
+                        name: "FK_LinkLibraryProvider_Providers_ProvidersID",
+                        column: x => x.ProvidersID,
                         principalTable: "Providers",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
@@ -271,96 +271,96 @@ namespace Kyoo.SqLite.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Link<Collection, Show>",
+                name: "LinkCollectionShow",
                 columns: table => new
                 {
-                    FirstID = table.Column<int>(type: "INTEGER", nullable: false),
-                    SecondID = table.Column<int>(type: "INTEGER", nullable: false)
+                    CollectionsID = table.Column<int>(type: "INTEGER", nullable: false),
+                    ShowsID = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Link<Collection, Show>", x => new { x.FirstID, x.SecondID });
+                    table.PrimaryKey("PK_LinkCollectionShow", x => new { x.CollectionsID, x.ShowsID });
                     table.ForeignKey(
-                        name: "FK_Link<Collection, Show>_Collections_FirstID",
-                        column: x => x.FirstID,
+                        name: "FK_LinkCollectionShow_Collections_CollectionsID",
+                        column: x => x.CollectionsID,
                         principalTable: "Collections",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Link<Collection, Show>_Shows_SecondID",
-                        column: x => x.SecondID,
+                        name: "FK_LinkCollectionShow_Shows_ShowsID",
+                        column: x => x.ShowsID,
                         principalTable: "Shows",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Link<Library, Show>",
+                name: "LinkLibraryShow",
                 columns: table => new
                 {
-                    FirstID = table.Column<int>(type: "INTEGER", nullable: false),
-                    SecondID = table.Column<int>(type: "INTEGER", nullable: false)
+                    LibrariesID = table.Column<int>(type: "INTEGER", nullable: false),
+                    ShowsID = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Link<Library, Show>", x => new { x.FirstID, x.SecondID });
+                    table.PrimaryKey("PK_LinkLibraryShow", x => new { x.LibrariesID, x.ShowsID });
                     table.ForeignKey(
-                        name: "FK_Link<Library, Show>_Libraries_FirstID",
-                        column: x => x.FirstID,
+                        name: "FK_LinkLibraryShow_Libraries_LibrariesID",
+                        column: x => x.LibrariesID,
                         principalTable: "Libraries",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Link<Library, Show>_Shows_SecondID",
-                        column: x => x.SecondID,
+                        name: "FK_LinkLibraryShow_Shows_ShowsID",
+                        column: x => x.ShowsID,
                         principalTable: "Shows",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Link<Show, Genre>",
+                name: "LinkShowGenre",
                 columns: table => new
                 {
-                    FirstID = table.Column<int>(type: "INTEGER", nullable: false),
-                    SecondID = table.Column<int>(type: "INTEGER", nullable: false)
+                    GenresID = table.Column<int>(type: "INTEGER", nullable: false),
+                    ShowsID = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Link<Show, Genre>", x => new { x.FirstID, x.SecondID });
+                    table.PrimaryKey("PK_LinkShowGenre", x => new { x.GenresID, x.ShowsID });
                     table.ForeignKey(
-                        name: "FK_Link<Show, Genre>_Genres_SecondID",
-                        column: x => x.SecondID,
+                        name: "FK_LinkShowGenre_Genres_GenresID",
+                        column: x => x.GenresID,
                         principalTable: "Genres",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Link<Show, Genre>_Shows_FirstID",
-                        column: x => x.FirstID,
+                        name: "FK_LinkShowGenre_Shows_ShowsID",
+                        column: x => x.ShowsID,
                         principalTable: "Shows",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Link<User, Show>",
+                name: "LinkUserShow",
                 columns: table => new
                 {
-                    FirstID = table.Column<int>(type: "INTEGER", nullable: false),
-                    SecondID = table.Column<int>(type: "INTEGER", nullable: false)
+                    UsersID = table.Column<int>(type: "INTEGER", nullable: false),
+                    WatchedID = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Link<User, Show>", x => new { x.FirstID, x.SecondID });
+                    table.PrimaryKey("PK_LinkUserShow", x => new { x.UsersID, x.WatchedID });
                     table.ForeignKey(
-                        name: "FK_Link<User, Show>_Shows_SecondID",
-                        column: x => x.SecondID,
+                        name: "FK_LinkUserShow_Shows_WatchedID",
+                        column: x => x.WatchedID,
                         principalTable: "Shows",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Link<User, Show>_Users_FirstID",
-                        column: x => x.FirstID,
+                        name: "FK_LinkUserShow_Users_UsersID",
+                        column: x => x.UsersID,
                         principalTable: "Users",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
@@ -566,22 +566,22 @@ namespace Kyoo.SqLite.Migrations
                 name: "WatchedEpisodes",
                 columns: table => new
                 {
-                    FirstID = table.Column<int>(type: "INTEGER", nullable: false),
-                    SecondID = table.Column<int>(type: "INTEGER", nullable: false),
+                    UserID = table.Column<int>(type: "INTEGER", nullable: false),
+                    EpisodeID = table.Column<int>(type: "INTEGER", nullable: false),
                     WatchedPercentage = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_WatchedEpisodes", x => new { x.FirstID, x.SecondID });
+                    table.PrimaryKey("PK_WatchedEpisodes", x => new { x.UserID, x.EpisodeID });
                     table.ForeignKey(
-                        name: "FK_WatchedEpisodes_Episodes_SecondID",
-                        column: x => x.SecondID,
+                        name: "FK_WatchedEpisodes_Episodes_EpisodeID",
+                        column: x => x.EpisodeID,
                         principalTable: "Episodes",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_WatchedEpisodes_Users_FirstID",
-                        column: x => x.FirstID,
+                        name: "FK_WatchedEpisodes_Users_UserID",
+                        column: x => x.UserID,
                         principalTable: "Users",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
@@ -633,34 +633,34 @@ namespace Kyoo.SqLite.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Link<Collection, Show>_SecondID",
-                table: "Link<Collection, Show>",
-                column: "SecondID");
+                name: "IX_LinkCollectionShow_ShowsID",
+                table: "LinkCollectionShow",
+                column: "ShowsID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Link<Library, Collection>_SecondID",
-                table: "Link<Library, Collection>",
-                column: "SecondID");
+                name: "IX_LinkLibraryCollection_LibrariesID",
+                table: "LinkLibraryCollection",
+                column: "LibrariesID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Link<Library, Provider>_SecondID",
-                table: "Link<Library, Provider>",
-                column: "SecondID");
+                name: "IX_LinkLibraryProvider_ProvidersID",
+                table: "LinkLibraryProvider",
+                column: "ProvidersID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Link<Library, Show>_SecondID",
-                table: "Link<Library, Show>",
-                column: "SecondID");
+                name: "IX_LinkLibraryShow_ShowsID",
+                table: "LinkLibraryShow",
+                column: "ShowsID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Link<Show, Genre>_SecondID",
-                table: "Link<Show, Genre>",
-                column: "SecondID");
+                name: "IX_LinkShowGenre_ShowsID",
+                table: "LinkShowGenre",
+                column: "ShowsID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Link<User, Show>_SecondID",
-                table: "Link<User, Show>",
-                column: "SecondID");
+                name: "IX_LinkUserShow_WatchedID",
+                table: "LinkUserShow",
+                column: "WatchedID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_People_Slug",
@@ -752,9 +752,9 @@ namespace Kyoo.SqLite.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_WatchedEpisodes_SecondID",
+                name: "IX_WatchedEpisodes_EpisodeID",
                 table: "WatchedEpisodes",
-                column: "SecondID");
+                column: "EpisodeID");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -766,22 +766,22 @@ namespace Kyoo.SqLite.Migrations
                 name: "EpisodeMetadataID");
 
             migrationBuilder.DropTable(
-                name: "Link<Collection, Show>");
+                name: "LinkCollectionShow");
 
             migrationBuilder.DropTable(
-                name: "Link<Library, Collection>");
+                name: "LinkLibraryCollection");
 
             migrationBuilder.DropTable(
-                name: "Link<Library, Provider>");
+                name: "LinkLibraryProvider");
 
             migrationBuilder.DropTable(
-                name: "Link<Library, Show>");
+                name: "LinkLibraryShow");
 
             migrationBuilder.DropTable(
-                name: "Link<Show, Genre>");
+                name: "LinkShowGenre");
 
             migrationBuilder.DropTable(
-                name: "Link<User, Show>");
+                name: "LinkUserShow");
 
             migrationBuilder.DropTable(
                 name: "PeopleMetadataID");

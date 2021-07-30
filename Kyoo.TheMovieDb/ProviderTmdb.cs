@@ -33,7 +33,6 @@ namespace Kyoo.TheMovieDb
 		{
 			Slug = "the-moviedb",
 			Name = "TheMovieDB",
-			LogoExtension = "svg",
 			Images = new Dictionary<int, string>
 			{
 				[Thumbnails.Logo] = "https://www.themoviedb.org/assets/2/v4/logos/v2/" +

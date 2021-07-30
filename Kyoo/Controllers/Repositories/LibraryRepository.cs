@@ -54,7 +54,8 @@ namespace Kyoo.Controllers
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
-			obj.ProviderLinks.ForEach(x => _database.Entry(x).State = EntityState.Added);
+			if (obj.Providers != null)
+				_database.AttachRange(obj.Providers);
 			await _database.SaveChangesAsync($"Trying to insert a duplicated library (slug {obj.Slug} already exists).");
 			return obj;
 		}
@@ -63,15 +64,12 @@ namespace Kyoo.Controllers
 		protected override async Task Validate(Library resource)
 		{
 			await base.Validate(resource);
-			resource.ProviderLinks = resource.Providers?
-				.Select(x => Link.Create(resource, x))
-				.ToList();
-			await resource.ProviderLinks.ForEachAsync(async id =>
+			if (resource.Providers != null)
 			{
-				id.Second = await _providers.CreateIfNotExists(id.Second);
-				id.SecondID = id.Second.ID;
-				_database.Entry(id.Second).State = EntityState.Detached;
-			});
+				resource.Providers = await resource.Providers
+					.SelectAsync(x => _providers.CreateIfNotExists(x))
+					.ToListAsync();
+			}
 		}
 
 		/// <inheritdoc />

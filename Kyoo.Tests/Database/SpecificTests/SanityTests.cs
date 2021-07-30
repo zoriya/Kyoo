@@ -16,13 +16,6 @@ namespace Kyoo.Tests.Database
 			 _repositories = new RepositoryActivator(output);
 		}
 
-		[Fact]
-		[SuppressMessage("ReSharper", "EqualExpressionComparison")]
-		public void SampleTest()
-		{
-			Assert.False(ReferenceEquals(TestSample.Get<Show>(), TestSample.Get<Show>()));
-		}
-		
 		public void Dispose()
 		{
 			_repositories.Dispose();
@@ -32,6 +25,13 @@ namespace Kyoo.Tests.Database
 		public ValueTask DisposeAsync()
 		{
 			return _repositories.DisposeAsync();
+		}
+		
+		[Fact]
+		[SuppressMessage("ReSharper", "EqualExpressionComparison")]
+		public void SampleTest()
+		{
+			Assert.False(ReferenceEquals(TestSample.Get<Show>(), TestSample.Get<Show>()));
 		}
 	}
 }

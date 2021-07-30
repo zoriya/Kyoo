@@ -133,6 +133,9 @@ namespace Kyoo.SqLite
 			modelBuilder.Entity<Provider>()
 				.Property(x => x.Images)
 				.HasConversion(jsonConvertor);
+			modelBuilder.Entity<User>()
+				.Property(x => x.Images)
+				.HasConversion(jsonConvertor);
 			
 			
 			modelBuilder.Entity<LibraryItem>()
@@ -145,6 +148,12 @@ namespace Kyoo.SqLite
 		protected override string MetadataName<T>()
 		{
 			return typeof(T).Name + nameof(MetadataID);
+		}
+		
+		/// <inheritdoc />
+		protected override string LinkName<T, T2>()
+		{
+			return "Link" + typeof(T).Name + typeof(T2).Name;
 		}
 
 		/// <inheritdoc />

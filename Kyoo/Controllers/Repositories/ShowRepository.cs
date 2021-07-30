@@ -76,8 +76,10 @@ namespace Kyoo.Controllers
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
-			obj.GenreLinks.ForEach(x => _database.Entry(x).State = EntityState.Added);
+			if (obj.Genres != null)
+				_database.AttachRange(obj.Genres);
 			obj.People.ForEach(x => _database.Entry(x).State = EntityState.Added);
+			obj.ExternalIDs.ForEach(x => _database.MetadataIds<Show>().Attach(x));
 			await _database.SaveChangesAsync($"Trying to insert a duplicated show (slug {obj.Slug} already exists).");
 			return obj;
 		}
@@ -89,15 +91,13 @@ namespace Kyoo.Controllers
 			if (resource.Studio != null)
 				resource.Studio = await _studios.CreateIfNotExists(resource.Studio);
 
-			resource.GenreLinks = resource.Genres?
-				.Select(x => Link.Create(resource, x))
-				.ToList();
-			await resource.GenreLinks.ForEachAsync(async id =>
+			if (resource.Genres != null)
 			{
-				id.Second = await _genres.CreateIfNotExists(id.Second);
-				id.SecondID = id.Second.ID;
-				_database.Entry(id.Second).State = EntityState.Detached;
-			});
+				resource.Genres = await resource.Genres
+					.SelectAsync(x => _genres.CreateIfNotExists(x))
+					.ToListAsync();
+			}
+
 			await resource.ExternalIDs.ForEachAsync(async id =>
 			{
 				id.Provider = await _providers.CreateIfNotExists(id.Provider);

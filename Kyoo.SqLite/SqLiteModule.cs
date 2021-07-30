@@ -66,7 +66,7 @@ namespace Kyoo.SqLite
 				x.UseSqlite(_configuration.GetDatabaseConnection("sqlite"));
 				if (_environment.IsDevelopment())
 					x.EnableDetailedErrors().EnableSensitiveDataLogging();
-			});
+			}, ServiceLifetime.Transient);
 		}
 
 		/// <inheritdoc />

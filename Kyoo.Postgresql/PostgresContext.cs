@@ -122,6 +122,9 @@ namespace Kyoo.Postgresql
 			modelBuilder.Entity<Provider>()
 				.Property(x => x.Images)
 				.HasColumnType("jsonb");
+			modelBuilder.Entity<User>()
+				.Property(x => x.Images)
+				.HasColumnType("jsonb");
 			
 			base.OnModelCreating(modelBuilder);
 		}
@@ -131,6 +134,13 @@ namespace Kyoo.Postgresql
 		{
 			SnakeCaseNameRewriter rewriter = new(CultureInfo.InvariantCulture);
 			return rewriter.RewriteName(typeof(T).Name + nameof(MetadataID));
+		}
+		
+		/// <inheritdoc />
+		protected override string LinkName<T, T2>()
+		{
+			SnakeCaseNameRewriter rewriter = new(CultureInfo.InvariantCulture);
+			return rewriter.RewriteName("Link" + typeof(T).Name + typeof(T2).Name);
 		}
 
 		/// <inheritdoc />

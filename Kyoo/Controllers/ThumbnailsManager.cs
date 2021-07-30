@@ -110,6 +110,7 @@ namespace Kyoo.Controllers
 		{
 			if (item == null)
 				throw new ArgumentNullException(nameof(item));
+			// TODO handle extensions
 			string imageName = imageID switch
 			{
 				Thumbnails.Poster => "poster.jpg",
@@ -142,9 +143,7 @@ namespace Kyoo.Controllers
 					return _files.Combine(_options.CurrentValue.PeoplePath, $"{actor.Slug}-{imageName}");
 				
 				case Provider provider:
-					return _files.Combine(
-						_options.CurrentValue.ProviderPath,
-						$"{provider.Slug}-{imageName[..^4]}{provider.LogoExtension}");
+					return _files.Combine(_options.CurrentValue.ProviderPath, $"{provider.Slug}-{imageName}");
 				
 				default:
 					throw new NotSupportedException($"The type {typeof(T).Name} is not supported.");

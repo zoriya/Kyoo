@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Kyoo.SqLite.Migrations
 {
     [DbContext(typeof(SqLiteContext))]
-    [Migration("20210728135127_Triggers")]
+    [Migration("20210730203746_Triggers")]
     partial class Triggers
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -17,6 +17,21 @@ namespace Kyoo.SqLite.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "5.0.8");
+
+            modelBuilder.Entity("CollectionLibrary", b =>
+                {
+                    b.Property<int>("CollectionsID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("LibrariesID")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("CollectionsID", "LibrariesID");
+
+                    b.HasIndex("LibrariesID");
+
+                    b.ToTable("LinkLibraryCollection");
+                });
 
             modelBuilder.Entity("CollectionMetadataID", b =>
                 {
@@ -39,6 +54,21 @@ namespace Kyoo.SqLite.Migrations
                     b.ToTable("CollectionMetadataID");
                 });
 
+            modelBuilder.Entity("CollectionShow", b =>
+                {
+                    b.Property<int>("CollectionsID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ShowsID")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("CollectionsID", "ShowsID");
+
+                    b.HasIndex("ShowsID");
+
+                    b.ToTable("LinkCollectionShow");
+                });
+
             modelBuilder.Entity("EpisodeMetadataID", b =>
                 {
                     b.Property<int>("ResourceID")
@@ -58,6 +88,21 @@ namespace Kyoo.SqLite.Migrations
                     b.HasIndex("ProviderID");
 
                     b.ToTable("EpisodeMetadataID");
+                });
+
+            modelBuilder.Entity("GenreShow", b =>
+                {
+                    b.Property<int>("GenresID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ShowsID")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("GenresID", "ShowsID");
+
+                    b.HasIndex("ShowsID");
+
+                    b.ToTable("LinkShowGenre");
                 });
 
             modelBuilder.Entity("Kyoo.Models.Collection", b =>
@@ -220,96 +265,6 @@ namespace Kyoo.SqLite.Migrations
                     b.ToView("LibraryItems");
                 });
 
-            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Collection, Kyoo.Models.Show>", b =>
-                {
-                    b.Property<int>("FirstID")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("SecondID")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("FirstID", "SecondID");
-
-                    b.HasIndex("SecondID");
-
-                    b.ToTable("Link<Collection, Show>");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Library, Kyoo.Models.Collection>", b =>
-                {
-                    b.Property<int>("FirstID")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("SecondID")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("FirstID", "SecondID");
-
-                    b.HasIndex("SecondID");
-
-                    b.ToTable("Link<Library, Collection>");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Library, Kyoo.Models.Provider>", b =>
-                {
-                    b.Property<int>("FirstID")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("SecondID")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("FirstID", "SecondID");
-
-                    b.HasIndex("SecondID");
-
-                    b.ToTable("Link<Library, Provider>");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Library, Kyoo.Models.Show>", b =>
-                {
-                    b.Property<int>("FirstID")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("SecondID")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("FirstID", "SecondID");
-
-                    b.HasIndex("SecondID");
-
-                    b.ToTable("Link<Library, Show>");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Show, Kyoo.Models.Genre>", b =>
-                {
-                    b.Property<int>("FirstID")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("SecondID")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("FirstID", "SecondID");
-
-                    b.HasIndex("SecondID");
-
-                    b.ToTable("Link<Show, Genre>");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.User, Kyoo.Models.Show>", b =>
-                {
-                    b.Property<int>("FirstID")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("SecondID")
-                        .HasColumnType("INTEGER");
-
-                    b.HasKey("FirstID", "SecondID");
-
-                    b.HasIndex("SecondID");
-
-                    b.ToTable("Link<User, Show>");
-                });
-
             modelBuilder.Entity("Kyoo.Models.People", b =>
                 {
                     b.Property<int>("ID")
@@ -368,9 +323,6 @@ namespace Kyoo.SqLite.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Images")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("LogoExtension")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -564,6 +516,9 @@ namespace Kyoo.SqLite.Migrations
                     b.Property<string>("ExtraData")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Images")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Password")
                         .HasColumnType("TEXT");
 
@@ -587,20 +542,50 @@ namespace Kyoo.SqLite.Migrations
 
             modelBuilder.Entity("Kyoo.Models.WatchedEpisode", b =>
                 {
-                    b.Property<int>("FirstID")
+                    b.Property<int>("UserID")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("SecondID")
+                    b.Property<int>("EpisodeID")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("WatchedPercentage")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("FirstID", "SecondID");
+                    b.HasKey("UserID", "EpisodeID");
 
-                    b.HasIndex("SecondID");
+                    b.HasIndex("EpisodeID");
 
                     b.ToTable("WatchedEpisodes");
+                });
+
+            modelBuilder.Entity("LibraryProvider", b =>
+                {
+                    b.Property<int>("LibrariesID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ProvidersID")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("LibrariesID", "ProvidersID");
+
+                    b.HasIndex("ProvidersID");
+
+                    b.ToTable("LinkLibraryProvider");
+                });
+
+            modelBuilder.Entity("LibraryShow", b =>
+                {
+                    b.Property<int>("LibrariesID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ShowsID")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("LibrariesID", "ShowsID");
+
+                    b.HasIndex("ShowsID");
+
+                    b.ToTable("LinkLibraryShow");
                 });
 
             modelBuilder.Entity("PeopleMetadataID", b =>
@@ -666,6 +651,21 @@ namespace Kyoo.SqLite.Migrations
                     b.ToTable("ShowMetadataID");
                 });
 
+            modelBuilder.Entity("ShowUser", b =>
+                {
+                    b.Property<int>("UsersID")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("WatchedID")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("UsersID", "WatchedID");
+
+                    b.HasIndex("WatchedID");
+
+                    b.ToTable("LinkUserShow");
+                });
+
             modelBuilder.Entity("StudioMetadataID", b =>
                 {
                     b.Property<int>("ResourceID")
@@ -687,6 +687,21 @@ namespace Kyoo.SqLite.Migrations
                     b.ToTable("StudioMetadataID");
                 });
 
+            modelBuilder.Entity("CollectionLibrary", b =>
+                {
+                    b.HasOne("Kyoo.Models.Collection", null)
+                        .WithMany()
+                        .HasForeignKey("CollectionsID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kyoo.Models.Library", null)
+                        .WithMany()
+                        .HasForeignKey("LibrariesID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("CollectionMetadataID", b =>
                 {
                     b.HasOne("Kyoo.Models.Provider", "Provider")
@@ -702,6 +717,21 @@ namespace Kyoo.SqLite.Migrations
                         .IsRequired();
 
                     b.Navigation("Provider");
+                });
+
+            modelBuilder.Entity("CollectionShow", b =>
+                {
+                    b.HasOne("Kyoo.Models.Collection", null)
+                        .WithMany()
+                        .HasForeignKey("CollectionsID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kyoo.Models.Show", null)
+                        .WithMany()
+                        .HasForeignKey("ShowsID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("EpisodeMetadataID", b =>
@@ -721,6 +751,21 @@ namespace Kyoo.SqLite.Migrations
                     b.Navigation("Provider");
                 });
 
+            modelBuilder.Entity("GenreShow", b =>
+                {
+                    b.HasOne("Kyoo.Models.Genre", null)
+                        .WithMany()
+                        .HasForeignKey("GenresID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kyoo.Models.Show", null)
+                        .WithMany()
+                        .HasForeignKey("ShowsID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Kyoo.Models.Episode", b =>
                 {
                     b.HasOne("Kyoo.Models.Season", "Season")
@@ -737,120 +782,6 @@ namespace Kyoo.SqLite.Migrations
                     b.Navigation("Season");
 
                     b.Navigation("Show");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Collection, Kyoo.Models.Show>", b =>
-                {
-                    b.HasOne("Kyoo.Models.Collection", "First")
-                        .WithMany("ShowLinks")
-                        .HasForeignKey("FirstID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Kyoo.Models.Show", "Second")
-                        .WithMany("CollectionLinks")
-                        .HasForeignKey("SecondID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("First");
-
-                    b.Navigation("Second");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Library, Kyoo.Models.Collection>", b =>
-                {
-                    b.HasOne("Kyoo.Models.Library", "First")
-                        .WithMany("CollectionLinks")
-                        .HasForeignKey("FirstID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Kyoo.Models.Collection", "Second")
-                        .WithMany("LibraryLinks")
-                        .HasForeignKey("SecondID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("First");
-
-                    b.Navigation("Second");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Library, Kyoo.Models.Provider>", b =>
-                {
-                    b.HasOne("Kyoo.Models.Library", "First")
-                        .WithMany("ProviderLinks")
-                        .HasForeignKey("FirstID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Kyoo.Models.Provider", "Second")
-                        .WithMany("LibraryLinks")
-                        .HasForeignKey("SecondID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("First");
-
-                    b.Navigation("Second");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Library, Kyoo.Models.Show>", b =>
-                {
-                    b.HasOne("Kyoo.Models.Library", "First")
-                        .WithMany("ShowLinks")
-                        .HasForeignKey("FirstID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Kyoo.Models.Show", "Second")
-                        .WithMany("LibraryLinks")
-                        .HasForeignKey("SecondID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("First");
-
-                    b.Navigation("Second");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Show, Kyoo.Models.Genre>", b =>
-                {
-                    b.HasOne("Kyoo.Models.Show", "First")
-                        .WithMany("GenreLinks")
-                        .HasForeignKey("FirstID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Kyoo.Models.Genre", "Second")
-                        .WithMany("ShowLinks")
-                        .HasForeignKey("SecondID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("First");
-
-                    b.Navigation("Second");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.User, Kyoo.Models.Show>", b =>
-                {
-                    b.HasOne("Kyoo.Models.User", "First")
-                        .WithMany("ShowLinks")
-                        .HasForeignKey("FirstID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Kyoo.Models.Show", "Second")
-                        .WithMany()
-                        .HasForeignKey("SecondID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("First");
-
-                    b.Navigation("Second");
                 });
 
             modelBuilder.Entity("Kyoo.Models.PeopleRole", b =>
@@ -906,21 +837,49 @@ namespace Kyoo.SqLite.Migrations
 
             modelBuilder.Entity("Kyoo.Models.WatchedEpisode", b =>
                 {
-                    b.HasOne("Kyoo.Models.User", "First")
-                        .WithMany("CurrentlyWatching")
-                        .HasForeignKey("FirstID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Kyoo.Models.Episode", "Second")
+                    b.HasOne("Kyoo.Models.Episode", "Episode")
                         .WithMany()
-                        .HasForeignKey("SecondID")
+                        .HasForeignKey("EpisodeID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("First");
+                    b.HasOne("Kyoo.Models.User", null)
+                        .WithMany("CurrentlyWatching")
+                        .HasForeignKey("UserID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("Second");
+                    b.Navigation("Episode");
+                });
+
+            modelBuilder.Entity("LibraryProvider", b =>
+                {
+                    b.HasOne("Kyoo.Models.Library", null)
+                        .WithMany()
+                        .HasForeignKey("LibrariesID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kyoo.Models.Provider", null)
+                        .WithMany()
+                        .HasForeignKey("ProvidersID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("LibraryShow", b =>
+                {
+                    b.HasOne("Kyoo.Models.Library", null)
+                        .WithMany()
+                        .HasForeignKey("LibrariesID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kyoo.Models.Show", null)
+                        .WithMany()
+                        .HasForeignKey("ShowsID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("PeopleMetadataID", b =>
@@ -974,6 +933,21 @@ namespace Kyoo.SqLite.Migrations
                     b.Navigation("Provider");
                 });
 
+            modelBuilder.Entity("ShowUser", b =>
+                {
+                    b.HasOne("Kyoo.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UsersID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kyoo.Models.Show", null)
+                        .WithMany()
+                        .HasForeignKey("WatchedID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("StudioMetadataID", b =>
                 {
                     b.HasOne("Kyoo.Models.Provider", "Provider")
@@ -994,10 +968,6 @@ namespace Kyoo.SqLite.Migrations
             modelBuilder.Entity("Kyoo.Models.Collection", b =>
                 {
                     b.Navigation("ExternalIDs");
-
-                    b.Navigation("LibraryLinks");
-
-                    b.Navigation("ShowLinks");
                 });
 
             modelBuilder.Entity("Kyoo.Models.Episode", b =>
@@ -1007,30 +977,11 @@ namespace Kyoo.SqLite.Migrations
                     b.Navigation("Tracks");
                 });
 
-            modelBuilder.Entity("Kyoo.Models.Genre", b =>
-                {
-                    b.Navigation("ShowLinks");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.Library", b =>
-                {
-                    b.Navigation("CollectionLinks");
-
-                    b.Navigation("ProviderLinks");
-
-                    b.Navigation("ShowLinks");
-                });
-
             modelBuilder.Entity("Kyoo.Models.People", b =>
                 {
                     b.Navigation("ExternalIDs");
 
                     b.Navigation("Roles");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.Provider", b =>
-                {
-                    b.Navigation("LibraryLinks");
                 });
 
             modelBuilder.Entity("Kyoo.Models.Season", b =>
@@ -1042,15 +993,9 @@ namespace Kyoo.SqLite.Migrations
 
             modelBuilder.Entity("Kyoo.Models.Show", b =>
                 {
-                    b.Navigation("CollectionLinks");
-
                     b.Navigation("Episodes");
 
                     b.Navigation("ExternalIDs");
-
-                    b.Navigation("GenreLinks");
-
-                    b.Navigation("LibraryLinks");
 
                     b.Navigation("People");
 
@@ -1067,8 +1012,6 @@ namespace Kyoo.SqLite.Migrations
             modelBuilder.Entity("Kyoo.Models.User", b =>
                 {
                     b.Navigation("CurrentlyWatching");
-
-                    b.Navigation("ShowLinks");
                 });
 #pragma warning restore 612, 618
         }

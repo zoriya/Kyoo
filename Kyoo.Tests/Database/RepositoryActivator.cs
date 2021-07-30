@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Xunit.Abstractions;
@@ -11,29 +12,28 @@ namespace Kyoo.Tests
 		public ILibraryManager LibraryManager { get; }
 
 
-		private readonly DatabaseContext _database;
+		private readonly List<DatabaseContext> _databases = new();
 			
 		public RepositoryActivator(ITestOutputHelper output, PostgresFixture postgres = null)
 		{
 			Context = postgres == null 
 				? new SqLiteTestContext(output) 
 				: new PostgresTestContext(postgres, output);
-			_database = Context.New();
-			
-			ProviderRepository provider = new(_database);
-			LibraryRepository library = new(_database, provider);
-			CollectionRepository collection = new(_database, provider);
-			GenreRepository genre = new(_database);
-			StudioRepository studio = new(_database, provider);
-			PeopleRepository people = new(_database, provider, 
+
+			ProviderRepository provider = new(_NewContext());
+			LibraryRepository library = new(_NewContext(), provider);
+			CollectionRepository collection = new(_NewContext(), provider);
+			GenreRepository genre = new(_NewContext());
+			StudioRepository studio = new(_NewContext(), provider);
+			PeopleRepository people = new(_NewContext(), provider, 
 				new Lazy<IShowRepository>(() => LibraryManager.ShowRepository));
-			ShowRepository show = new(_database, studio, people, genre, provider);
-			SeasonRepository season = new(_database, provider);
-			LibraryItemRepository libraryItem = new(_database, 
+			ShowRepository show = new(_NewContext(), studio, people, genre, provider);
+			SeasonRepository season = new(_NewContext(), provider);
+			LibraryItemRepository libraryItem = new(_NewContext(), 
 				new Lazy<ILibraryRepository>(() => LibraryManager.LibraryRepository));
-			TrackRepository track = new(_database);
-			EpisodeRepository episode = new(_database, provider, track);
-			UserRepository user = new(_database);
+			TrackRepository track = new(_NewContext());
+			EpisodeRepository episode = new(_NewContext(), provider, track);
+			UserRepository user = new(_NewContext());
 
 			LibraryManager = new LibraryManager(new IBaseRepository[] {
 				provider,
@@ -51,16 +51,25 @@ namespace Kyoo.Tests
 			});
 		}
 
+		private DatabaseContext _NewContext()
+		{
+			DatabaseContext context = Context.New();
+			_databases.Add(context);
+			return context;
+		}
+
 		public void Dispose()
 		{
-			_database.Dispose();
+			foreach (DatabaseContext context in _databases)
+				context.Dispose();
 			Context.Dispose();
 			GC.SuppressFinalize(this);
 		}
 
 		public async ValueTask DisposeAsync()
 		{
-			await _database.DisposeAsync();
+			foreach (DatabaseContext context in _databases)
+				await context.DisposeAsync();
 			await Context.DisposeAsync();
 		}
 	}

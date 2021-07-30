@@ -17,6 +17,27 @@ namespace Kyoo.Tests
 					Name = "New Library",
 					Paths = new [] {"/a/random/path"}
 				}
+			},
+			{
+				typeof(Show),
+				() => new Show
+				{
+					ID = 2,
+					Slug = "new-show",
+					Title = "New Show",
+					Overview = "overview",
+					Status = Status.Planned,
+					StartAir = new DateTime(2011, 1, 1),
+					EndAir = new DateTime(2011, 1, 1),
+					Images = new Dictionary<int, string>
+					{
+						[Thumbnails.Poster] = "Poster",
+						[Thumbnails.Logo] = "Logo",
+						[Thumbnails.Thumbnail] = "Thumbnail"
+					},
+					IsMovie = false,
+					Studio = null
+				}
 			}
 		};
 		
@@ -64,6 +85,7 @@ namespace Kyoo.Tests
 					           "In time, however, these childhood friends drifted apart, and when they became high " +
 					           "school students, they had long ceased to think of each other as friends.",
 					Status = Status.Finished,
+					StudioID = 1,
 					StartAir = new DateTime(2011, 1, 1),
 					EndAir = new DateTime(2011, 1, 1),
 					Images = new Dictionary<int, string>
@@ -182,8 +204,7 @@ namespace Kyoo.Tests
 						[Thumbnails.Poster] = "Poster",
 						[Thumbnails.Logo] = "path/tvdb.svg",
 						[Thumbnails.Thumbnail] = "Thumbnail"
-					},
-					LogoExtension = "svg"
+					}
 				}
 			},
 			{
@@ -218,6 +239,7 @@ namespace Kyoo.Tests
 			
 			Show show = Get<Show>();
 			show.ID = 0;
+			show.StudioID = 0;
 			context.Shows.Add(show);
 
 			Season season = Get<Season>();

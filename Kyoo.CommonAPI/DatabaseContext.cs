@@ -85,14 +85,6 @@ namespace Kyoo
 		public DbSet<LibraryItem> LibraryItems { get; set; }
 
 		/// <summary>
-		/// Get the name of the metadata table of the given type.
-		/// </summary>
-		/// <typeparam name="T">The type related to the metadata</typeparam>
-		/// <returns>The name of the table containing the metadata.</returns>
-		protected abstract string MetadataName<T>()
-			where T : IMetadata;
-
-		/// <summary>
 		/// Get all metadataIDs (ExternalIDs) of a given resource. See <see cref="MetadataID"/>.
 		/// </summary>
 		/// <typeparam name="T">The metadata of this type will be returned.</typeparam>
@@ -131,6 +123,24 @@ namespace Kyoo
 			: base(options)
 		{ }
 		
+		/// <summary>
+		/// Get the name of the metadata table of the given type.
+		/// </summary>
+		/// <typeparam name="T">The type related to the metadata</typeparam>
+		/// <returns>The name of the table containing the metadata.</returns>
+		protected abstract string MetadataName<T>()
+			where T : IMetadata;
+
+		/// <summary>
+		/// Get the name of the link table of the two given types.
+		/// </summary>
+		/// <typeparam name="T">The owner type of the relation</typeparam>
+		/// <typeparam name="T2">The child type of the relation</typeparam>
+		/// <returns>The name of the table containing the links.</returns>
+		protected abstract string LinkName<T, T2>()
+			where T : IResource
+			where T2 : IResource;
+
 		/// <summary>
 		/// Set basic configurations (like preventing query tracking)
 		/// </summary>
@@ -196,74 +206,27 @@ namespace Kyoo
 			modelBuilder.Entity<Provider>()
 				.HasMany(x => x.Libraries)
 				.WithMany(x => x.Providers)
-				.UsingEntity<Link<Library, Provider>>(
-					y => y
-						.HasOne(x => x.First)
-						.WithMany(x => x.ProviderLinks),
-					y => y
-						.HasOne(x => x.Second)
-						.WithMany(x => x.LibraryLinks),
-					y => y.HasKey(Link<Library, Provider>.PrimaryKey));
-			
+				.UsingEntity(x => x.ToTable(LinkName<Library, Provider>()));
 			modelBuilder.Entity<Collection>()
 				.HasMany(x => x.Libraries)
 				.WithMany(x => x.Collections)
-				.UsingEntity<Link<Library, Collection>>(
-					y => y
-						.HasOne(x => x.First)
-						.WithMany(x => x.CollectionLinks),
-					y => y
-						.HasOne(x => x.Second)
-						.WithMany(x => x.LibraryLinks),
-					y => y.HasKey(Link<Library, Collection>.PrimaryKey));
-			
+				.UsingEntity(x => x.ToTable(LinkName<Library, Collection>()));
 			modelBuilder.Entity<Show>()
 				.HasMany(x => x.Libraries)
 				.WithMany(x => x.Shows)
-				.UsingEntity<Link<Library, Show>>(
-					y => y
-						.HasOne(x => x.First)
-						.WithMany(x => x.ShowLinks),
-					y => y
-						.HasOne(x => x.Second)
-						.WithMany(x => x.LibraryLinks),
-					y => y.HasKey(Link<Library, Show>.PrimaryKey));
-			
+				.UsingEntity(x => x.ToTable(LinkName<Library, Show>()));
 			modelBuilder.Entity<Show>()
 				.HasMany(x => x.Collections)
 				.WithMany(x => x.Shows)
-				.UsingEntity<Link<Collection, Show>>(
-					y => y
-						.HasOne(x => x.First)
-						.WithMany(x => x.ShowLinks),
-					y => y
-						.HasOne(x => x.Second)
-						.WithMany(x => x.CollectionLinks),
-					y => y.HasKey(Link<Collection, Show>.PrimaryKey));
-
+				.UsingEntity(x => x.ToTable(LinkName<Collection, Show>()));
 			modelBuilder.Entity<Genre>()
 				.HasMany(x => x.Shows)
 				.WithMany(x => x.Genres)
-				.UsingEntity<Link<Show, Genre>>(
-					y => y
-						.HasOne(x => x.First)
-						.WithMany(x => x.GenreLinks),
-					y => y
-						.HasOne(x => x.Second)
-						.WithMany(x => x.ShowLinks),
-					y => y.HasKey(Link<Show, Genre>.PrimaryKey));
-			
+				.UsingEntity(x => x.ToTable(LinkName<Show, Genre>()));
 			modelBuilder.Entity<User>()
 				.HasMany(x => x.Watched)
-				.WithMany("users")
-				.UsingEntity<Link<User, Show>>(
-					y => y
-						.HasOne(x => x.Second)
-						.WithMany(),
-					y => y
-						.HasOne(x => x.First)
-						.WithMany(x => x.ShowLinks),
-					y => y.HasKey(Link<User, Show>.PrimaryKey));
+				.WithMany("Users")
+				.UsingEntity(x => x.ToTable(LinkName<User, Show>()));
 
 			_HasMetadata<Collection>(modelBuilder);
 			_HasMetadata<Show>(modelBuilder);
@@ -273,7 +236,7 @@ namespace Kyoo
 			_HasMetadata<Studio>(modelBuilder);
 			
 			modelBuilder.Entity<WatchedEpisode>()
-				.HasKey(x => new { First = x.FirstID, Second = x.SecondID });
+				.HasKey(x => new { User = x.UserID, Episode = x.EpisodeID });
 
 			modelBuilder.Entity<Collection>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<Genre>().Property(x => x.Slug).IsRequired();

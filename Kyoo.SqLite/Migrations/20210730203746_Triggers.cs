@@ -161,9 +161,9 @@ namespace Kyoo.SqLite.Migrations
 				FROM Shows AS s
 				WHERE NOT (EXISTS (
 					SELECT 1
-					FROM 'Link<Collection, Show>' AS l
-					INNER JOIN Collections AS c ON l.FirstID = c.ID
-					WHERE s.ID = l.SecondID))
+					FROM LinkCollectionShow AS l
+					INNER JOIN Collections AS c ON l.CollectionsID = c.ID
+					WHERE s.ID = l.ShowsID))
 				UNION ALL
 				SELECT -c0.ID, c0.Slug, c0.Name AS Title, c0.Overview, 0 AS Status, 
 				       NULL AS StartAir, NULL AS EndAir, c0.Images, 2 AS Type

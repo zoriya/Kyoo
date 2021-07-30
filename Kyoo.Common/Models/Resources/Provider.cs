@@ -32,12 +32,7 @@ namespace Kyoo.Models
 		/// </summary>
 		[SerializeAs("{HOST}/api/providers/{Slug}/logo")]
 		public string Logo => Images?.GetValueOrDefault(Thumbnails.Logo);
-		
-		/// <summary>
-		/// The extension of the logo. This is used for http responses.
-		/// </summary>
-		[SerializeIgnore] public string LogoExtension { get; set; }
-		
+
 		/// <summary>
 		/// The list of libraries that uses this provider.
 		/// </summary>
