@@ -54,6 +54,24 @@ namespace Kyoo.Tests
 				}
 			},
 			{
+				typeof(Season),
+				() => new Season
+				{
+					ID = 2,
+					ShowID = 1,
+					ShowSlug = Get<Show>().Slug,
+					Title = "New season",
+					Overview = "New overview",
+					EndDate = new DateTime(2000, 10, 10),
+					SeasonNumber = 2,
+					StartDate = new DateTime(2010, 10, 10),
+					Images = new Dictionary<int, string>
+					{
+						[Images.Logo] = "logo"
+					}
+				}
+			},
+			{
 				typeof(Provider),
 				() => new Provider
 				{
