@@ -79,9 +79,10 @@ namespace Kyoo.Tests.Database
 		[Fact]
 		public async Task GetDuplicatedSlugTests()
 		{
-			await _repositories.LibraryManager.Create(new Collection()
+			await _repositories.LibraryManager.Create(new Collection
 			{
-				Slug = TestSample.Get<Show>().Slug
+				Slug = TestSample.Get<Show>().Slug,
+				Name = "name"
 			});
 			await Assert.ThrowsAsync<InvalidOperationException>(() => _repository.Get(TestSample.Get<Show>().Slug));
 		}

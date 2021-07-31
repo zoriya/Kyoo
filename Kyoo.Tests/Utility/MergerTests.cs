@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Kyoo.Models;
@@ -135,6 +136,68 @@ namespace Kyoo.Tests.Utility
 			Assert.Equal(3, ret.Numbers[3]);
 		}
 		
+		private class MergeDictionaryTest
+		{
+			public int ID { get; set; }
+
+			public Dictionary<int, string> Dictionary { get; set; }
+		}
+		
+		[Fact]
+		public void GlobalMergeDictionariesTest()
+		{
+			MergeDictionaryTest test = new()
+			{
+				ID = 5,
+				Dictionary = new Dictionary<int, string>
+				{
+					[2] = "two"
+				}
+			};
+			MergeDictionaryTest test2 = new()
+			{
+				Dictionary = new Dictionary<int, string>
+				{
+					[3] = "third"
+				}
+			};
+			MergeDictionaryTest ret = Merger.Merge(test, test2);
+			Assert.True(ReferenceEquals(test, ret));
+			Assert.Equal(5, ret.ID);
+
+			Assert.Equal(2, ret.Dictionary.Count);
+			Assert.Equal("two", ret.Dictionary[2]);
+			Assert.Equal("third", ret.Dictionary[3]);
+		}
+		
+		[Fact]
+		public void GlobalMergeDictionariesDuplicatesTest()
+		{
+			MergeDictionaryTest test = new()
+			{
+				ID = 5,
+				Dictionary = new Dictionary<int, string>
+				{
+					[2] = "two"
+				}
+			};
+			MergeDictionaryTest test2 = new()
+			{
+				Dictionary = new Dictionary<int, string>
+				{
+					[2] = "nope",
+					[3] = "third"
+				}
+			};
+			MergeDictionaryTest ret = Merger.Merge(test, test2);
+			Assert.True(ReferenceEquals(test, ret));
+			Assert.Equal(5, ret.ID);
+
+			Assert.Equal(2, ret.Dictionary.Count);
+			Assert.Equal("two", ret.Dictionary[2]);
+			Assert.Equal("third", ret.Dictionary[3]);
+		}
+		
 		[Fact]
 		public void GlobalMergeListDuplicatesResourcesTest()
 		{
@@ -207,6 +270,100 @@ namespace Kyoo.Tests.Utility
 			Assert.Equal(2, ret.Length);
 			Assert.Equal(1, ret[0]);
 			Assert.Equal(2, ret[1]);
+		}
+		
+		[Fact]
+		public void MergeDictionariesTest()
+		{
+			Dictionary<int, string> first = new()
+			{
+				[1] = "test",
+				[5] = "value"
+			};
+			Dictionary<int, string> second = new()
+			{
+				[3] = "third",
+			};
+			IDictionary<int, string> ret = Merger.MergeDictionaries(first, second);
+			
+			Assert.Equal(3, ret.Count);
+			Assert.Equal("test", ret[1]);
+			Assert.Equal("value", ret[5]);
+			Assert.Equal("third", ret[3]);
+		}
+		
+		[Fact]
+		public void MergeDictionariesDuplicateTest()
+		{
+			Dictionary<int, string> first = new()
+			{
+				[1] = "test",
+				[5] = "value"
+			};
+			Dictionary<int, string> second = new()
+			{
+				[3] = "third",
+				[5] = "new-value",
+			};
+			IDictionary<int, string> ret = Merger.MergeDictionaries(first, second);
+			
+			Assert.Equal(3, ret.Count);
+			Assert.Equal("test", ret[1]);
+			Assert.Equal("value", ret[5]);
+			Assert.Equal("third", ret[3]);
+		}
+		
+		[Fact]
+		public void CompleteTest()
+		{
+			Genre genre = new()
+			{
+				ID = 5,
+				Name = "merged"
+			};
+			Genre genre2 = new()
+			{
+				Name = "test"
+			};
+			Genre ret = Merger.Complete(genre, genre2);
+			Assert.True(ReferenceEquals(genre, ret));
+			Assert.Equal(5, ret.ID);
+			Assert.Equal("test", genre.Name);
+			Assert.Null(genre.Slug);
+		}
+		
+		[Fact]
+		public void CompleteDictionaryTest()
+		{
+			Collection collection = new()
+			{
+				ID = 5,
+				Name = "merged",
+				Images = new Dictionary<int, string>
+				{
+					[Images.Logo] = "logo",
+					[Images.Poster] = "poster"
+				}
+				
+			};
+			Collection collection2 = new()
+			{
+				Name = "test",
+				Images = new Dictionary<int, string>
+				{
+					[Images.Poster] = "new-poster",
+					[Images.Thumbnail] = "thumbnails"
+				}
+			};
+			Collection ret = Merger.Complete(collection, collection2);
+			Assert.True(ReferenceEquals(collection, ret));
+			Assert.Equal(5, ret.ID);
+			Assert.Equal("test", ret.Name);
+			Assert.Null(ret.Slug);
+			Assert.Equal(3, ret.Images.Count);
+			Assert.Equal("new-poster", ret.Images[Images.Poster]);
+			Assert.Equal("thumbnails", ret.Images[Images.Thumbnail]);
+			Assert.Equal("logo", ret.Images[Images.Logo]);
 		}
 	}
 }

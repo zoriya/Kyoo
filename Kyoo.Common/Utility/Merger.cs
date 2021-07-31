@@ -22,18 +22,44 @@ namespace Kyoo
 		/// <param name="second">The second enumerable to merge, if items from this list are equals to one from the first, they are not kept</param>
 		/// <param name="isEqual">Equality function to compare items. If this is null, duplicated elements are kept</param>
 		/// <returns>The two list merged as an array</returns>
-		public static T[] MergeLists<T>(IEnumerable<T> first,
-			IEnumerable<T> second, 
-			Func<T, T, bool> isEqual = null)
+		[ContractAnnotation("first:notnull => notnull; second:notnull => notnull", true)]
+		public static T[] MergeLists<T>([CanBeNull] IEnumerable<T> first,
+			[CanBeNull] IEnumerable<T> second, 
+			[CanBeNull] Func<T, T, bool> isEqual = null)
 		{
 			if (first == null)
-				return second.ToArray();
+				return second?.ToArray();
 			if (second == null)
 				return first.ToArray();
 			if (isEqual == null)
 				return first.Concat(second).ToArray();
 			List<T> list = first.ToList();
 			return list.Concat(second.Where(x => !list.Any(y => isEqual(x, y)))).ToArray();
+		}
+
+		/// <summary>
+		/// Merge two dictionary, if the same key is found on both dictionary, the values of the first one is kept.
+		/// </summary>
+		/// <param name="first">The first dictionary to merge</param>
+		/// <param name="second">The second dictionary to merge</param>
+		/// <typeparam name="T">The type of the keys in dictionaries</typeparam>
+		/// <typeparam name="T2">The type of values in the dictionaries</typeparam>
+		/// <returns>A dictionary containing the result of the merge.</returns>
+		[ContractAnnotation("first:notnull => notnull; second:notnull => notnull", true)]
+		public static IDictionary<T, T2> MergeDictionaries<T, T2>([CanBeNull] IDictionary<T, T2> first,
+			[CanBeNull] IDictionary<T, T2> second)
+		{
+			if (first == null)
+				return second;
+			if (second == null)
+				return first;
+			Dictionary<T, T2> merged = new();
+			merged.EnsureCapacity(first.Count + second.Count);
+			foreach ((T key, T2 value) in first)
+				merged.Add(key, value);
+			foreach ((T key, T2 value) in second)
+				merged.TryAdd(key, value);
+			return merged;
 		}
 
 		/// <summary>
@@ -63,16 +89,32 @@ namespace Kyoo
 		}
 		
 		/// <summary>
-		/// Set every default values of first to the value of second. ex: {id: 0, slug: "test"}, {id: 4, slug: "foo"} -> {id: 4, slug: "test"}.
+		/// Set every non-default values of seconds to the corresponding property of second.
+		/// Dictionaries are handled like anonymous objects with a property per key/pair value
+		/// (see <see cref="MergeDictionaries{T,T2}"/> for more details).
 		/// At the end, the OnMerge method of first will be called if first is a <see cref="IOnMerge"/>
 		/// </summary>
-		/// <param name="first">The object to complete</param>
-		/// <param name="second">Missing fields of first will be completed by fields of this item. If second is null, the function no-op.</param>
-		/// <param name="where">Filter fields that will be merged</param>
+		/// <remarks>
+		/// This does the opposite of <see cref="Merge{T}"/>.
+		/// </remarks>
+		/// <example>
+		/// {id: 0, slug: "test"}, {id: 4, slug: "foo"} -> {id: 4, slug: "foo"}
+		/// </example>
+		/// <param name="first">
+		/// The object to complete
+		/// </param>
+		/// <param name="second">
+		/// Missing fields of first will be completed by fields of this item. If second is null, the function no-op.
+		/// </param>
+		/// <param name="where">
+		/// Filter fields that will be merged
+		/// </param>
 		/// <typeparam name="T">Fields of T will be completed</typeparam>
 		/// <returns><see cref="first"/></returns>
 		/// <exception cref="ArgumentNullException">If first is null</exception>
-		public static T Complete<T>([NotNull] T first, [CanBeNull] T second, Func<PropertyInfo, bool> where = null)
+		public static T Complete<T>([NotNull] T first, 
+			[CanBeNull] T second, 
+			[InstantHandle] Func<PropertyInfo, bool> where = null)
 		{
 			if (first == null)
 				throw new ArgumentNullException(nameof(first));
@@ -93,7 +135,19 @@ namespace Kyoo
 				object defaultValue = property.GetCustomAttribute<DefaultValueAttribute>()?.Value
 					?? property.PropertyType.GetClrDefault();
 
-				if (value?.Equals(defaultValue) == false && value != property.GetValue(first))
+				if (value?.Equals(defaultValue) != false || value == property.GetValue(first))
+					continue;
+				if (Utility.IsOfGenericType(property.PropertyType, typeof(IDictionary<,>)))
+				{
+					Type[] dictionaryTypes = Utility.GetGenericDefinition(property.PropertyType, typeof(IDictionary<,>))
+						.GenericTypeArguments;
+					property.SetValue(first, Utility.RunGenericMethod<object>(
+						typeof(Merger),
+						nameof(MergeDictionaries),
+						dictionaryTypes,
+						value, property.GetValue(first)));
+				}
+				else
 					property.SetValue(first, value);
 			}
 
@@ -103,17 +157,28 @@ namespace Kyoo
 		}
 
 		/// <summary>
-		/// An advanced <see cref="Complete{T}"/> function.
 		/// This will set missing values of <see cref="first"/> to the corresponding values of <see cref="second"/>.
-		/// Enumerable will be merged (concatenated).
+		/// Enumerable will be merged (concatenated) and Dictionaries too.
 		/// At the end, the OnMerge method of first will be called if first is a <see cref="IOnMerge"/>.
 		/// </summary>
-		/// <param name="first">The object to complete</param>
-		/// <param name="second">Missing fields of first will be completed by fields of this item. If second is null, the function no-op.</param>
+		/// <example>
+		/// {id: 0, slug: "test"}, {id: 4, slug: "foo"} -> {id: 4, slug: "test"}
+		/// </example>
+		/// <param name="first">
+		/// The object to complete
+		/// </param>
+		/// <param name="second">
+		/// Missing fields of first will be completed by fields of this item. If second is null, the function no-op.
+		/// </param>
+		/// <param name="where">
+		/// Filter fields that will be merged
+		/// </param>
 		/// <typeparam name="T">Fields of T will be merged</typeparam>
 		/// <returns><see cref="first"/></returns>
 		[ContractAnnotation("first:notnull => notnull; second:notnull => notnull", true)]
-		public static T Merge<T>([CanBeNull] T first, [CanBeNull] T second)
+		public static T Merge<T>([CanBeNull] T first, 
+			[CanBeNull] T second,
+			[InstantHandle] Func<PropertyInfo, bool> where = null)
 		{
 			if (first == null)
 				return second;
@@ -125,6 +190,9 @@ namespace Kyoo
 				.Where(x => x.CanRead && x.CanWrite 
 				                      && Attribute.GetCustomAttribute(x, typeof(NotMergeableAttribute)) == null);
 			
+			if (where != null)
+				properties = properties.Where(where);
+			
 			foreach (PropertyInfo property in properties)
 			{
 				object oldValue = property.GetValue(first);
@@ -133,6 +201,16 @@ namespace Kyoo
 				
 				if (oldValue?.Equals(defaultValue) != false)
 					property.SetValue(first, newValue);
+				else if (Utility.IsOfGenericType(property.PropertyType, typeof(IDictionary<,>)))
+				{
+					Type[] dictionaryTypes = Utility.GetGenericDefinition(property.PropertyType, typeof(IDictionary<,>))
+						.GenericTypeArguments;
+					property.SetValue(first, Utility.RunGenericMethod<object>(
+						typeof(Merger),
+						nameof(MergeDictionaries),
+						dictionaryTypes,
+						oldValue, newValue));
+				}
 				else if (typeof(IEnumerable).IsAssignableFrom(property.PropertyType)
 				         && property.PropertyType != typeof(string))
 				{

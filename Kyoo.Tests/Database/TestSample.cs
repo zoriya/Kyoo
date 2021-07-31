@@ -19,6 +19,20 @@ namespace Kyoo.Tests
 				}
 			},
 			{
+				typeof(Collection),
+				() => new Collection
+				{
+					ID = 2,
+					Slug = "new-collection",
+					Name = "New Collection",
+					Overview = "A collection created by new sample",
+					Images = new Dictionary<int, string>
+					{
+						[Images.Thumbnail] = "thumbnail"
+					}
+				}
+			},
+			{
 				typeof(Show),
 				() => new Show
 				{

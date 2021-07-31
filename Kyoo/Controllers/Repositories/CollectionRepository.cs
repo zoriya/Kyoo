@@ -42,7 +42,7 @@ namespace Kyoo.Controllers
 		public override async Task<ICollection<Collection>> Search(string query)
 		{
 			return await _database.Collections
-				.Where(_database.Like<Collection>(x => x.Name, $"%{query}%"))
+				.Where(_database.Like<Collection>(x => x.Name + " " + x.Slug, $"%{query}%"))
 				.OrderBy(DefaultSort)
 				.Take(20)
 				.ToListAsync();
@@ -53,7 +53,6 @@ namespace Kyoo.Controllers
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
-			obj.ExternalIDs.ForEach(x => _database.MetadataIds<Collection>().Attach(x));
 			await _database.SaveChangesAsync($"Trying to insert a duplicated collection (slug {obj.Slug} already exists).");
 			return obj;
 		}
@@ -62,24 +61,34 @@ namespace Kyoo.Controllers
 		protected override async Task Validate(Collection resource)
 		{
 			await base.Validate(resource);
-			await resource.ExternalIDs.ForEachAsync(async x => 
-			{ 
-				x.Provider = await _providers.CreateIfNotExists(x.Provider);
-				x.ProviderID = x.Provider.ID;
-				_database.Entry(x.Provider).State = EntityState.Detached;
-			});
+			
+			if (string.IsNullOrEmpty(resource.Slug))
+				throw new ArgumentException("The collection's slug must be set and not empty");
+			if (string.IsNullOrEmpty(resource.Name))
+				throw new ArgumentException("The collection's name must be set and not empty");
+
+			if (resource.ExternalIDs != null)
+			{
+				foreach (MetadataID id in resource.ExternalIDs)
+				{ 
+					id.Provider = await _providers.CreateIfNotExists(id.Provider);
+					id.ProviderID = id.Provider.ID;
+					_database.Entry(id.Provider).State = EntityState.Detached;
+				}
+				_database.MetadataIds<Collection>().AttachRange(resource.ExternalIDs);
+			}
 		}
 		
 		/// <inheritdoc />
 		protected override async Task EditRelations(Collection resource, Collection changed, bool resetOld)
 		{
+			await Validate(resource);
+			
 			if (changed.ExternalIDs != null || resetOld)
 			{
 				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
 				resource.ExternalIDs = changed.ExternalIDs;
 			}
-
-			await base.EditRelations(resource, changed, resetOld);
 		}
 
 		/// <inheritdoc />

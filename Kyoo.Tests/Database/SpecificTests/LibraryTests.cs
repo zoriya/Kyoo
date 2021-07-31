@@ -61,7 +61,7 @@ namespace Kyoo.Tests.Database
 			Library library = TestSample.GetNew<Library>();
 			library.Slug = "2";
 			Library ret = await _repository.Create(library);
-			Assert.Equal("2!", library.Slug);
+			Assert.Equal("2!", ret.Slug);
 		}
 		
 		[Fact]
