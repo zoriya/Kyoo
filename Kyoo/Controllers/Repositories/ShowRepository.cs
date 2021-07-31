@@ -76,10 +76,6 @@ namespace Kyoo.Controllers
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
-			if (obj.Genres != null)
-				_database.AttachRange(obj.Genres);
-			obj.People.ForEach(x => _database.Entry(x).State = EntityState.Added);
-			obj.ExternalIDs.ForEach(x => _database.MetadataIds<Show>().Attach(x));
 			await _database.SaveChangesAsync($"Trying to insert a duplicated show (slug {obj.Slug} already exists).");
 			return obj;
 		}
@@ -99,20 +95,30 @@ namespace Kyoo.Controllers
 				resource.Genres = await resource.Genres
 					.SelectAsync(x => _genres.CreateIfNotExists(x))
 					.ToListAsync();
+				_database.AttachRange(resource.Genres);
 			}
 
-			await resource.ExternalIDs.ForEachAsync(async id =>
+			if (resource.ExternalIDs != null)
 			{
-				id.Provider = await _providers.CreateIfNotExists(id.Provider);
-				id.ProviderID = id.Provider.ID;
-				_database.Entry(id.Provider).State = EntityState.Detached;
-			});
-			await resource.People.ForEachAsync(async role =>
+				foreach (MetadataID id in resource.ExternalIDs)
+				{
+					id.Provider = await _providers.CreateIfNotExists(id.Provider);
+					id.ProviderID = id.Provider.ID;
+					_database.Entry(id.Provider).State = EntityState.Detached;
+				}
+				_database.MetadataIds<Show>().AttachRange(resource.ExternalIDs);
+			}
+
+			if (resource.People != null)
 			{
-				role.People = await _people.CreateIfNotExists(role.People);
-				role.PeopleID = role.People.ID;
-				_database.Entry(role.People).State = EntityState.Detached;
-			});
+				foreach (PeopleRole role in resource.People)
+				{
+					role.People = await _people.CreateIfNotExists(role.People);
+					role.PeopleID = role.People.ID;
+					_database.Entry(role.People).State = EntityState.Detached;
+					_database.Entry(role).State = EntityState.Added;
+				}
+			}
 		}
 
 		/// <inheritdoc />
