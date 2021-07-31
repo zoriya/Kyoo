@@ -31,7 +31,7 @@ namespace Kyoo.Models
 		/// </summary>
 		[SerializeAs("{HOST}/api/collection/{Slug}/poster")]
 		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
-		public string Poster => Images?.GetValueOrDefault(Thumbnails.Poster);
+		public string Poster => Images?.GetValueOrDefault(Models.Images.Poster);
 
 		/// <summary>
 		/// The description of this collection.

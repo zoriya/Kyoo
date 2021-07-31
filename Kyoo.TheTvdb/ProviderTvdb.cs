@@ -34,7 +34,7 @@ namespace Kyoo.TheTvdb
 			Name = "TheTVDB",
 			Images = new Dictionary<int, string>
 			{
-				[Thumbnails.Logo] = "https://www.thetvdb.com/images/logo.png"	
+				[Images.Logo] = "https://www.thetvdb.com/images/logo.png"	
 			}
 		};
 		

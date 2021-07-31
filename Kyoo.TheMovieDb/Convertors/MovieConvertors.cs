@@ -30,13 +30,13 @@ namespace Kyoo.TheMovieDb
 				EndAir = movie.ReleaseDate,
 				Images = new Dictionary<int, string>
 				{
-					[Thumbnails.Poster] = movie.PosterPath != null
+					[Images.Poster] = movie.PosterPath != null
 						? $"https://image.tmdb.org/t/p/original{movie.PosterPath}"
 						: null,
-					[Thumbnails.Thumbnail] = movie.BackdropPath != null
+					[Images.Thumbnail] = movie.BackdropPath != null
 						? $"https://image.tmdb.org/t/p/original{movie.BackdropPath}"
 						: null,
-					[Thumbnails.Trailer] = movie.Videos?.Results
+					[Images.Trailer] = movie.Videos?.Results
 						.Where(x => x.Type is "Trailer" or "Teaser" && x.Site == "YouTube")
 						.Select(x => "https://www.youtube.com/watch?v=" + x.Key).FirstOrDefault(),
 				},
@@ -78,10 +78,10 @@ namespace Kyoo.TheMovieDb
 				EndAir = movie.ReleaseDate,
 				Images = new Dictionary<int, string>
 				{
-					[Thumbnails.Poster] = movie.PosterPath != null
+					[Images.Poster] = movie.PosterPath != null
 						? $"https://image.tmdb.org/t/p/original{movie.PosterPath}"
 						: null,
-					[Thumbnails.Thumbnail] = movie.BackdropPath != null
+					[Images.Thumbnail] = movie.BackdropPath != null
 						? $"https://image.tmdb.org/t/p/original{movie.BackdropPath}"
 						: null,
 				},

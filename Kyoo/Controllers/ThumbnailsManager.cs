@@ -113,9 +113,9 @@ namespace Kyoo.Controllers
 			// TODO handle extensions
 			string imageName = imageID switch
 			{
-				Thumbnails.Poster => "poster.jpg",
-				Thumbnails.Logo => "logo.jpg",
-				Thumbnails.Thumbnail => "thumbnail.jpg",
+				Images.Poster => "poster.jpg",
+				Images.Logo => "logo.jpg",
+				Images.Thumbnail => "thumbnail.jpg",
 				_ => $"{imageID}.jpg"
 			};
 			

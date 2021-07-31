@@ -85,7 +85,7 @@ namespace Kyoo.Models
 		/// </summary>
 		[SerializeAs("{HOST}/api/seasons/{Slug}/thumb")]
 		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
-		public string Poster => Images?.GetValueOrDefault(Thumbnails.Poster);
+		public string Poster => Images?.GetValueOrDefault(Models.Images.Poster);
 		
 		/// <inheritdoc />
 		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }

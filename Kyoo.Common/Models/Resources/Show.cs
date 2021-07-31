@@ -47,7 +47,7 @@ namespace Kyoo.Models
 		/// </summary>
 		/// TODO for now, this is set to a youtube url. It should be cached and converted to a local file.
 		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
-		public string TrailerUrl => Images?.GetValueOrDefault(Thumbnails.Trailer);
+		public string TrailerUrl => Images?.GetValueOrDefault(Models.Images.Trailer);
 		
 		/// <summary>
 		/// The date this show started airing. It can be null if this is unknown. 
@@ -71,7 +71,7 @@ namespace Kyoo.Models
 		/// </summary>
 		[SerializeAs("{HOST}/api/shows/{Slug}/poster")]
 		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
-		public string Poster => Images?.GetValueOrDefault(Thumbnails.Poster);
+		public string Poster => Images?.GetValueOrDefault(Models.Images.Poster);
 
 		/// <summary>
 		/// The path of this show's logo.
@@ -80,7 +80,7 @@ namespace Kyoo.Models
 		/// </summary>
 		[SerializeAs("{HOST}/api/shows/{Slug}/logo")]
 		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
-		public string Logo => Images?.GetValueOrDefault(Thumbnails.Logo);
+		public string Logo => Images?.GetValueOrDefault(Models.Images.Logo);
 
 		/// <summary>
 		/// The path of this show's backdrop.
@@ -89,7 +89,7 @@ namespace Kyoo.Models
 		/// </summary>
 		[SerializeAs("{HOST}/api/shows/{Slug}/backdrop")]
 		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
-		public string Backdrop => Images?.GetValueOrDefault(Thumbnails.Thumbnail);
+		public string Backdrop => Images?.GetValueOrDefault(Models.Images.Thumbnail);
 
 		/// <summary>
 		/// True if this show represent a movie, false otherwise.

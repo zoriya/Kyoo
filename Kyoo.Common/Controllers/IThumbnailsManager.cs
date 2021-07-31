@@ -30,7 +30,7 @@ namespace Kyoo.Controllers
 		/// Retrieve the local path of the poster of the given item.
 		/// </summary>
 		/// <param name="item">The item to retrieve the poster from.</param>
-		/// <param name="imageID">The ID of the image. See <see cref="Thumbnails"/> for values.</param>
+		/// <param name="imageID">The ID of the image. See <see cref="Images"/> for values.</param>
 		/// <typeparam name="T">The type of the item</typeparam>
 		/// <exception cref="NotSupportedException">If the type does not have a poster</exception>
 		/// <returns>The path of the poster for the given resource (it might or might not exists).</returns>

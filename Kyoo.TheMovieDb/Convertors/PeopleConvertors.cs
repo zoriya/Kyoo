@@ -3,6 +3,7 @@ using Kyoo.Models;
 using TMDbLib.Objects.General;
 using TMDbLib.Objects.People;
 using TMDbLib.Objects.Search;
+using Images = Kyoo.Models.Images;
 using TvCast = TMDbLib.Objects.TvShows.Cast;
 using MovieCast = TMDbLib.Objects.Movies.Cast;
 
@@ -29,7 +30,7 @@ namespace Kyoo.TheMovieDb
 					Name = cast.Name,
 					Images = new Dictionary<int, string>
 					{
-						[Thumbnails.Poster] = cast.ProfilePath != null 
+						[Images.Poster] = cast.ProfilePath != null 
 							? $"https://image.tmdb.org/t/p/original{cast.ProfilePath}" 
 							: null
 					},
@@ -64,7 +65,7 @@ namespace Kyoo.TheMovieDb
 					Name = cast.Name,
 					Images = new Dictionary<int, string>
 					{
-						[Thumbnails.Poster] = cast.ProfilePath != null 
+						[Images.Poster] = cast.ProfilePath != null 
 							? $"https://image.tmdb.org/t/p/original{cast.ProfilePath}" 
 							: null
 					},
@@ -99,7 +100,7 @@ namespace Kyoo.TheMovieDb
 					Name = crew.Name,
 					Images = new Dictionary<int, string>
 					{
-						[Thumbnails.Poster] = crew.ProfilePath != null 
+						[Images.Poster] = crew.ProfilePath != null 
 							? $"https://image.tmdb.org/t/p/original{crew.ProfilePath}" 
 							: null
 					},
@@ -132,7 +133,7 @@ namespace Kyoo.TheMovieDb
 				Name = person.Name,
 				Images = new Dictionary<int, string>
 				{
-					[Thumbnails.Poster] = person.ProfilePath != null 
+					[Images.Poster] = person.ProfilePath != null 
 						? $"https://image.tmdb.org/t/p/original{person.ProfilePath}" 
 						: null
 				},
@@ -162,7 +163,7 @@ namespace Kyoo.TheMovieDb
 				Name = person.Name,
 				Images = new Dictionary<int, string>
 				{
-					[Thumbnails.Poster] = person.ProfilePath != null 
+					[Images.Poster] = person.ProfilePath != null 
 						? $"https://image.tmdb.org/t/p/original{person.ProfilePath}" 
 						: null
 				},

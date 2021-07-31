@@ -58,7 +58,7 @@ namespace Kyoo.TheTvdb
 				StartAir = _ParseDate(result.FirstAired),
 				Images = new Dictionary<int, string>
 				{
-					[Thumbnails.Poster] = result.Poster != null
+					[Images.Poster] = result.Poster != null
 						? $"https://www.thetvdb.com{result.Poster}" 
 						: null,
 				},
@@ -92,10 +92,10 @@ namespace Kyoo.TheTvdb
 				StartAir = _ParseDate(series.FirstAired),
 				Images = new Dictionary<int, string>
 				{
-					[Thumbnails.Poster] = series.Poster != null
+					[Images.Poster] = series.Poster != null
 					 	? $"https://www.thetvdb.com/banners/{series.Poster}" 
 					 	: null,
-					[Thumbnails.Thumbnail] = series.FanArt != null
+					[Images.Thumbnail] = series.FanArt != null
 					 	? $"https://www.thetvdb.com/banners/{series.FanArt}" 
 					 	: null
 				},
@@ -128,7 +128,7 @@ namespace Kyoo.TheTvdb
 					Name = actor.Name,
 					Images = new Dictionary<int, string> 
 					{
-						[Thumbnails.Poster] = actor.Image != null 
+						[Images.Poster] = actor.Image != null 
 							? $"https://www.thetvdb.com/banners/{actor.Image}" 
 							: null
 					},
@@ -164,7 +164,7 @@ namespace Kyoo.TheTvdb
 				Overview = episode.Overview,
 				Images = new Dictionary<int, string>
 				{
-					[Thumbnails.Thumbnail] = episode.Filename != null 
+					[Images.Thumbnail] = episode.Filename != null 
 						? $"https://www.thetvdb.com/banners/{episode.Filename}" 
 						: null
 				},

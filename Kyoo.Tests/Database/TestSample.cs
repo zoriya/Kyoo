@@ -31,12 +31,25 @@ namespace Kyoo.Tests
 					EndAir = new DateTime(2011, 1, 1),
 					Images = new Dictionary<int, string>
 					{
-						[Thumbnails.Poster] = "Poster",
-						[Thumbnails.Logo] = "Logo",
-						[Thumbnails.Thumbnail] = "Thumbnail"
+						[Images.Poster] = "Poster",
+						[Images.Logo] = "Logo",
+						[Images.Thumbnail] = "Thumbnail"
 					},
 					IsMovie = false,
 					Studio = null
+				}
+			},
+			{
+				typeof(Provider),
+				() => new Provider
+				{
+					ID = 2,
+					Slug = "new-provider",
+					Name = "Provider NewSample",
+					Images = new Dictionary<int, string>
+					{
+						[Images.Logo] = "logo"
+					}
 				}
 			}
 		};
@@ -64,7 +77,7 @@ namespace Kyoo.Tests
 					Overview = "A nice collection for tests",
 					Images = new Dictionary<int, string>
 					{
-						[Thumbnails.Poster] = "Poster"
+						[Images.Poster] = "Poster"
 					}
 				}
 			},
@@ -90,9 +103,9 @@ namespace Kyoo.Tests
 					EndAir = new DateTime(2011, 1, 1),
 					Images = new Dictionary<int, string>
 					{
-						[Thumbnails.Poster] = "Poster",
-						[Thumbnails.Logo] = "Logo",
-						[Thumbnails.Thumbnail] = "Thumbnail"
+						[Images.Poster] = "Poster",
+						[Images.Logo] = "Logo",
+						[Images.Thumbnail] = "Thumbnail"
 					},
 					IsMovie = false,
 					Studio = null
@@ -112,9 +125,9 @@ namespace Kyoo.Tests
 					EndDate =  new DateTime(2020, 07, 05),
 					Images = new Dictionary<int, string>
 					{
-						[Thumbnails.Poster] = "Poster",
-						[Thumbnails.Logo] = "Logo",
-						[Thumbnails.Thumbnail] = "Thumbnail"
+						[Images.Poster] = "Poster",
+						[Images.Logo] = "Logo",
+						[Images.Thumbnail] = "Thumbnail"
 					},
 				}
 			},
@@ -132,9 +145,9 @@ namespace Kyoo.Tests
 					Path = "/home/kyoo/anohana-s1e1",
 					Images = new Dictionary<int, string>
 					{
-						[Thumbnails.Poster] = "Poster",
-						[Thumbnails.Logo] = "Logo",
-						[Thumbnails.Thumbnail] = "Thumbnail"
+						[Images.Poster] = "Poster",
+						[Images.Logo] = "Logo",
+						[Images.Thumbnail] = "Thumbnail"
 					},
 					Title = "Episode 1",
 					Overview = "Summary of the first episode",
@@ -168,9 +181,9 @@ namespace Kyoo.Tests
 					Name = "The Actor",
 					Images = new Dictionary<int, string>
 					{
-						[Thumbnails.Poster] = "Poster",
-						[Thumbnails.Logo] = "Logo",
-						[Thumbnails.Thumbnail] = "Thumbnail"
+						[Images.Poster] = "Poster",
+						[Images.Logo] = "Logo",
+						[Images.Thumbnail] = "Thumbnail"
 					},
 				}
 			},
@@ -201,9 +214,9 @@ namespace Kyoo.Tests
 					Name = "The TVDB",
 					Images = new Dictionary<int, string>
 					{
-						[Thumbnails.Poster] = "Poster",
-						[Thumbnails.Logo] = "path/tvdb.svg",
-						[Thumbnails.Thumbnail] = "Thumbnail"
+						[Images.Poster] = "Poster",
+						[Images.Logo] = "path/tvdb.svg",
+						[Images.Thumbnail] = "Thumbnail"
 					}
 				}
 			},
@@ -306,9 +319,9 @@ namespace Kyoo.Tests
 				Path = "/home/kyoo/anohana-3",
 				Images = new Dictionary<int, string>
 				{
-					[Thumbnails.Poster] = "Poster",
-					[Thumbnails.Logo] = "Logo",
-					[Thumbnails.Thumbnail] = "Thumbnail"
+					[Images.Poster] = "Poster",
+					[Images.Logo] = "Logo",
+					[Images.Thumbnail] = "Thumbnail"
 				},
 				Title = "Episode 3",
 				Overview = "Summary of the third absolute episode",
@@ -326,9 +339,9 @@ namespace Kyoo.Tests
 				Path = "/home/kyoo/john-wick",
 				Images = new Dictionary<int, string>
 				{
-					[Thumbnails.Poster] = "Poster",
-					[Thumbnails.Logo] = "Logo",
-					[Thumbnails.Thumbnail] = "Thumbnail"
+					[Images.Poster] = "Poster",
+					[Images.Logo] = "Logo",
+					[Images.Thumbnail] = "Thumbnail"
 				},
 				Title = "John wick",
 				Overview = "A movie episode test",

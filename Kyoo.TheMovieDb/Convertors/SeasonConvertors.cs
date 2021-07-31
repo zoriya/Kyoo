@@ -26,7 +26,7 @@ namespace Kyoo.TheMovieDb
 				StartDate = season.AirDate,
 				Images = new Dictionary<int, string>
 				{
-					[Thumbnails.Poster] = season.PosterPath != null 
+					[Images.Poster] = season.PosterPath != null 
 						? $"https://image.tmdb.org/t/p/original{season.PosterPath}"
 						: null
 				},

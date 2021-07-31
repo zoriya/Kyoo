@@ -27,7 +27,7 @@ namespace Kyoo.TheMovieDb
 				ReleaseDate = episode.AirDate,
 				Images = new Dictionary<int, string>
 				{
-					[Thumbnails.Thumbnail] = episode.StillPath != null 
+					[Images.Thumbnail] = episode.StillPath != null 
 						? $"https://image.tmdb.org/t/p/original{episode.StillPath}" 
 						: null
 				},

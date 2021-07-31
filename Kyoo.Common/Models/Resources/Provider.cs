@@ -32,7 +32,7 @@ namespace Kyoo.Models
 		/// </summary>
 		[SerializeAs("{HOST}/api/providers/{Slug}/logo")]
 		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
-		public string Logo => Images?.GetValueOrDefault(Thumbnails.Logo);
+		public string Logo => Images?.GetValueOrDefault(Models.Images.Logo);
 
 		/// <summary>
 		/// The list of libraries that uses this provider.
@@ -56,7 +56,7 @@ namespace Kyoo.Models
 			Name = name;
 			Images = new Dictionary<int, string>
 			{
-				[Thumbnails.Logo] = logo
+				[Models.Images.Logo] = logo
 			};
 		}
 	}

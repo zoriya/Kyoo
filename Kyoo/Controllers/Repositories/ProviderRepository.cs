@@ -68,7 +68,6 @@ namespace Kyoo.Controllers
 			Pagination limit = default)
 			where T : class, IMetadata
 		{
-			string discriminator = typeof(T).Name;
 			return ApplyFilters(_database.MetadataIds<T>()
 					.Include(y => y.Provider),
 				x => _database.MetadataIds<T>().FirstOrDefaultAsync(y => y.ResourceID == x),

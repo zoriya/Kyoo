@@ -13,7 +13,7 @@ namespace Kyoo.Models
 		/// The string value should be a path supported by the <see cref="IFileSystem"/>.
 		/// </summary>
 		/// <remarks>
-		/// An arbitrary index should not be used, instead use indexes from <see cref="Thumbnails"/>
+		/// An arbitrary index should not be used, instead use indexes from <see cref="Models.Images"/>
 		/// </remarks>
 		public Dictionary<int, string> Images { get; set; }
 		
@@ -23,7 +23,7 @@ namespace Kyoo.Models
 	/// <summary>
 	/// A class containing constant values for images. To be used as index of a <see cref="IThumbnails.Images"/>.
 	/// </summary>
-	public static class Thumbnails
+	public static class Images
 	{
 		/// <summary>
 		/// A poster is a 9/16 format image with the cover of the resource.

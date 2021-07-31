@@ -113,7 +113,7 @@ namespace Kyoo.Models
 		/// </summary>
 		[SerializeAs("{HOST}/api/episodes/{Slug}/thumb")]
 		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
-		public string Thumb => Images?.GetValueOrDefault(Thumbnails.Thumbnail);
+		public string Thumb => Images?.GetValueOrDefault(Models.Images.Thumbnail);
 		
 		/// <summary>
 		/// The title of this episode.

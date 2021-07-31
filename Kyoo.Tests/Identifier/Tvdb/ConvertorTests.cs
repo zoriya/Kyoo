@@ -32,7 +32,7 @@ namespace Kyoo.Tests.Identifier.Tvdb
 			Assert.Equal("Aliases", show.Aliases[0]);
 			Assert.Equal("overview", show.Overview);
 			Assert.Equal(new DateTime(2021, 7, 23), show.StartAir);
-			Assert.Equal("https://www.thetvdb.com/poster", show.Poster);
+			Assert.Equal("https://www.thetvdb.com/poster", show.Images[Images.Poster]);
 			Assert.Single(show.ExternalIDs);
 			Assert.Equal("5", show.ExternalIDs.First().DataID);
 			Assert.Equal(provider, show.ExternalIDs.First().Provider);
@@ -63,7 +63,7 @@ namespace Kyoo.Tests.Identifier.Tvdb
 			Assert.Equal("Aliases", show.Aliases[0]);
 			Assert.Equal("overview", show.Overview);
 			Assert.Null(show.StartAir);
-			Assert.Equal("https://www.thetvdb.com/poster", show.Poster);
+			Assert.Equal("https://www.thetvdb.com/poster", show.Images[Images.Poster]);
 			Assert.Single(show.ExternalIDs);
 			Assert.Equal("5", show.ExternalIDs.First().DataID);
 			Assert.Equal(provider, show.ExternalIDs.First().Provider);
@@ -100,8 +100,8 @@ namespace Kyoo.Tests.Identifier.Tvdb
 			Assert.Equal("Aliases", show.Aliases[0]);
 			Assert.Equal("overview", show.Overview);
 			Assert.Equal(new DateTime(2021, 7, 23), show.StartAir);
-			Assert.Equal("https://www.thetvdb.com/banners/poster", show.Poster);
-			Assert.Equal("https://www.thetvdb.com/banners/fanart", show.Backdrop);
+			Assert.Equal("https://www.thetvdb.com/banners/poster", show.Images[Images.Poster]);
+			Assert.Equal("https://www.thetvdb.com/banners/fanart", show.Images[Images.Thumbnail]);
 			Assert.Single(show.ExternalIDs);
 			Assert.Equal("5", show.ExternalIDs.First().DataID);
 			Assert.Equal(provider, show.ExternalIDs.First().Provider);
@@ -130,7 +130,7 @@ namespace Kyoo.Tests.Identifier.Tvdb
 			Assert.Equal("name", people.Slug);
 			Assert.Equal("Name", people.People.Name);
 			Assert.Equal("role", people.Role);
-			Assert.Equal("https://www.thetvdb.com/banners/image", people.People.Poster);
+			Assert.Equal("https://www.thetvdb.com/banners/image", people.People.Images[Images.Poster]);
 		}
 		
 		[Fact]
@@ -154,7 +154,7 @@ namespace Kyoo.Tests.Identifier.Tvdb
 			Assert.Equal(3, episode.EpisodeNumber);
 			Assert.Equal(23, episode.AbsoluteNumber);
 			Assert.Equal("overview", episode.Overview);
-			Assert.Equal("https://www.thetvdb.com/banners/thumb", episode.Thumb);
+			Assert.Equal("https://www.thetvdb.com/banners/thumb", episode.Images[Images.Thumbnail]);
 		}
 	}
 }

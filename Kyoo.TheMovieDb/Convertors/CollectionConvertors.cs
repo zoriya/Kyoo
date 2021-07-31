@@ -24,10 +24,10 @@ namespace Kyoo.TheMovieDb
 				Overview = collection.Overview,
 				Images = new Dictionary<int, string>
 				{
-					[Thumbnails.Poster] = collection.PosterPath != null
+					[Images.Poster] = collection.PosterPath != null
 						? $"https://image.tmdb.org/t/p/original{collection.PosterPath}"
 						: null,
-					[Thumbnails.Thumbnail] = collection.BackdropPath != null
+					[Images.Thumbnail] = collection.BackdropPath != null
 						? $"https://image.tmdb.org/t/p/original{collection.BackdropPath}"
 						: null
 				},
@@ -57,10 +57,10 @@ namespace Kyoo.TheMovieDb
 				Name = collection.Name,
 				Images = new Dictionary<int, string>
 				{
-					[Thumbnails.Poster] = collection.PosterPath != null
+					[Images.Poster] = collection.PosterPath != null
 						? $"https://image.tmdb.org/t/p/original{collection.PosterPath}"
 						: null,
-					[Thumbnails.Thumbnail] = collection.BackdropPath != null
+					[Images.Thumbnail] = collection.BackdropPath != null
 						? $"https://image.tmdb.org/t/p/original{collection.BackdropPath}"
 						: null
 				},
