@@ -44,22 +44,89 @@ namespace Kyoo
 		/// <param name="second">The second dictionary to merge</param>
 		/// <typeparam name="T">The type of the keys in dictionaries</typeparam>
 		/// <typeparam name="T2">The type of values in the dictionaries</typeparam>
-		/// <returns>A dictionary containing the result of the merge.</returns>
+		/// <returns>The first dictionary with the missing elements of <paramref name="second"/>.</returns>
+		/// <seealso cref="MergeDictionaries{T,T2}(System.Collections.Generic.IDictionary{T,T2},System.Collections.Generic.IDictionary{T,T2},out bool)"/>
 		[ContractAnnotation("first:notnull => notnull; second:notnull => notnull", true)]
 		public static IDictionary<T, T2> MergeDictionaries<T, T2>([CanBeNull] IDictionary<T, T2> first,
 			[CanBeNull] IDictionary<T, T2> second)
 		{
+			return MergeDictionaries(first, second, out bool _);
+		}
+
+		/// <summary>
+		/// Merge two dictionary, if the same key is found on both dictionary, the values of the first one is kept.
+		/// </summary>
+		/// <param name="first">The first dictionary to merge</param>
+		/// <param name="second">The second dictionary to merge</param>
+		/// <param name="hasChanged">
+		/// <c>true</c> if a new items has been added to the dictionary, <c>false</c> otherwise.
+		/// </param>
+		/// <typeparam name="T">The type of the keys in dictionaries</typeparam>
+		/// <typeparam name="T2">The type of values in the dictionaries</typeparam>
+		/// <returns>The first dictionary with the missing elements of <paramref name="second"/>.</returns>
+		[ContractAnnotation("first:notnull => notnull; second:notnull => notnull", true)]
+		public static IDictionary<T, T2> MergeDictionaries<T, T2>([CanBeNull] IDictionary<T, T2> first,
+			[CanBeNull] IDictionary<T, T2> second,
+			out bool hasChanged)
+		{
 			if (first == null)
+			{
+				hasChanged = true;
 				return second;
+			}
+
+			hasChanged = false;
 			if (second == null)
 				return first;
-			Dictionary<T, T2> merged = new();
-			merged.EnsureCapacity(first.Count + second.Count);
-			foreach ((T key, T2 value) in first)
-				merged.Add(key, value);
 			foreach ((T key, T2 value) in second)
-				merged.TryAdd(key, value);
-			return merged;
+				hasChanged |= first.TryAdd(key, value);
+			return first;
+		}
+
+		/// <summary>
+		/// Merge two dictionary, if the same key is found on both dictionary, the values of the second one is kept.
+		/// </summary>
+		/// <remarks>
+		/// The only difference in this function compared to
+		/// <see cref="MergeDictionaries{T,T2}(System.Collections.Generic.IDictionary{T,T2},System.Collections.Generic.IDictionary{T,T2}, out bool)"/>
+		/// is the way <paramref name="hasChanged"/> is calculated and the order of the arguments.
+		/// <code>
+		/// MergeDictionaries(first, second);
+		/// </code>
+		/// will do the same thing as
+		/// <code>
+		/// CompleteDictionaries(second, first, out bool _);
+		/// </code>
+		/// </remarks>
+		/// <param name="first">The first dictionary to merge</param>
+		/// <param name="second">The second dictionary to merge</param>
+		/// <param name="hasChanged">
+		/// <c>true</c> if a new items has been added to the dictionary, <c>false</c> otherwise.
+		/// </param>
+		/// <typeparam name="T">The type of the keys in dictionaries</typeparam>
+		/// <typeparam name="T2">The type of values in the dictionaries</typeparam>
+		/// <returns>
+		/// A dictionary with the missing elements of <paramref name="second"/>
+		/// set to those of <paramref name="first"/>.
+		/// </returns>
+		[ContractAnnotation("first:notnull => notnull; second:notnull => notnull", true)]
+		public static IDictionary<T, T2> CompleteDictionaries<T, T2>([CanBeNull] IDictionary<T, T2> first,
+			[CanBeNull] IDictionary<T, T2> second,
+			out bool hasChanged)
+		{
+			if (first == null)
+			{
+				hasChanged = true;
+				return second;
+			}
+
+			hasChanged = false;
+			if (second == null)
+				return first;
+			hasChanged = second.Any(x => !x.Value.Equals(first[x.Key]));
+			foreach ((T key, T2 value) in first)
+				second.TryAdd(key, value);
+			return second;
 		}
 
 		/// <summary>
@@ -91,7 +158,9 @@ namespace Kyoo
 		/// <summary>
 		/// Set every non-default values of seconds to the corresponding property of second.
 		/// Dictionaries are handled like anonymous objects with a property per key/pair value
-		/// (see <see cref="MergeDictionaries{T,T2}"/> for more details).
+		/// (see
+		/// <see cref="MergeDictionaries{T,T2}(System.Collections.Generic.IDictionary{T,T2},System.Collections.Generic.IDictionary{T,T2})"/>
+		/// for more details).
 		/// At the end, the OnMerge method of first will be called if first is a <see cref="IOnMerge"/>
 		/// </summary>
 		/// <remarks>
@@ -135,17 +204,24 @@ namespace Kyoo
 				object defaultValue = property.GetCustomAttribute<DefaultValueAttribute>()?.Value
 					?? property.PropertyType.GetClrDefault();
 
-				if (value?.Equals(defaultValue) != false || value == property.GetValue(first))
+				if (value?.Equals(defaultValue) != false || value.Equals(property.GetValue(first)))
 					continue;
 				if (Utility.IsOfGenericType(property.PropertyType, typeof(IDictionary<,>)))
 				{
 					Type[] dictionaryTypes = Utility.GetGenericDefinition(property.PropertyType, typeof(IDictionary<,>))
 						.GenericTypeArguments;
-					property.SetValue(first, Utility.RunGenericMethod<object>(
+					object[] parameters = {
+						property.GetValue(first),
+						value,
+						false
+					};
+					object newDictionary = Utility.RunGenericMethod<object>(
 						typeof(Merger),
-						nameof(MergeDictionaries),
+						nameof(CompleteDictionaries),
 						dictionaryTypes,
-						value, property.GetValue(first)));
+						parameters);
+					if ((bool)parameters[2])
+						property.SetValue(first, newDictionary);
 				}
 				else
 					property.SetValue(first, value);
@@ -205,11 +281,18 @@ namespace Kyoo
 				{
 					Type[] dictionaryTypes = Utility.GetGenericDefinition(property.PropertyType, typeof(IDictionary<,>))
 						.GenericTypeArguments;
-					property.SetValue(first, Utility.RunGenericMethod<object>(
+					object[] parameters = {
+						oldValue,
+						newValue,
+						false
+					};
+					object newDictionary = Utility.RunGenericMethod<object>(
 						typeof(Merger),
 						nameof(MergeDictionaries),
 						dictionaryTypes,
-						oldValue, newValue));
+						parameters);
+					if ((bool)parameters[2])
+						property.SetValue(first, newDictionary);
 				}
 				else if (typeof(IEnumerable).IsAssignableFrom(property.PropertyType)
 				         && property.PropertyType != typeof(string))

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using JetBrains.Annotations;
 using Kyoo.Models;
 using Kyoo.Models.Attributes;
 using Xunit;
@@ -364,6 +365,95 @@ namespace Kyoo.Tests.Utility
 			Assert.Equal("new-poster", ret.Images[Images.Poster]);
 			Assert.Equal("thumbnails", ret.Images[Images.Thumbnail]);
 			Assert.Equal("logo", ret.Images[Images.Logo]);
+		}
+
+		[Fact]
+		public void CompleteDictionaryOutParam()
+		{
+			Dictionary<int, string> first = new()
+			{
+				[Images.Logo] = "logo",
+				[Images.Poster] = "poster"
+			};
+			Dictionary<int, string> second = new()
+			{
+				[Images.Poster] = "new-poster",
+				[Images.Thumbnail] = "thumbnails"
+			};
+			IDictionary<int, string> ret = Merger.CompleteDictionaries(first, second, out bool changed);
+			Assert.True(changed);
+			Assert.Equal(3, ret.Count);
+			Assert.Equal("new-poster", ret[Images.Poster]);
+			Assert.Equal("thumbnails", ret[Images.Thumbnail]);
+			Assert.Equal("logo", ret[Images.Logo]);
+		}
+		
+		[Fact]
+		public void CompleteDictionaryEqualTest()
+		{
+			Dictionary<int, string> first = new()
+			{
+				[Images.Poster] = "poster"
+			};
+			Dictionary<int, string> second = new()
+			{
+				[Images.Poster] = "new-poster",
+			};
+			IDictionary<int, string> ret = Merger.CompleteDictionaries(first, second, out bool changed);
+			Assert.True(changed);
+			Assert.Equal(1, ret.Count);
+			Assert.Equal("new-poster", ret[Images.Poster]);
+		}
+
+		private class TestMergeSetter
+		{
+			public Dictionary<int, int> Backing;
+			
+			[UsedImplicitly] public Dictionary<int, int> Dictionary
+			{
+				get => Backing;
+				set
+				{
+					Backing = value;
+					KAssert.Fail();
+				}
+			}
+		}
+
+		[Fact]
+		public void CompleteDictionaryNoChangeNoSetTest()
+		{
+			TestMergeSetter first = new()
+			{
+				Backing = new Dictionary<int, int>
+				{
+					[2] = 3
+				}
+			};
+			TestMergeSetter second = new()
+			{
+				Backing = new Dictionary<int, int>()
+			};
+			Merger.Complete(first, second);
+			// This should no call the setter of first so the test should pass.
+		}
+		
+		[Fact]
+		public void MergeDictionaryNoChangeNoSetTest()
+		{
+			TestMergeSetter first = new()
+			{
+				Backing = new Dictionary<int, int>
+				{
+					[2] = 3
+				}
+			};
+			TestMergeSetter second = new()
+			{
+				Backing = new Dictionary<int, int>()
+			};
+			Merger.Merge(first, second);
+			// This should no call the setter of first so the test should pass.
 		}
 	}
 }

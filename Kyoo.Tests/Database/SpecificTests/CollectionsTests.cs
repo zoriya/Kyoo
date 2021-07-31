@@ -99,7 +99,7 @@ namespace Kyoo.Tests.Database
 			value.Name = "New Title";
 			value.Images = new Dictionary<int, string>
 			{
-				[Images.Poster] = "poster"
+				[Images.Poster] = "new-poster"
 			};
 			await _repository.Edit(value, false);
 		

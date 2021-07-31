@@ -325,7 +325,7 @@ namespace Kyoo
 			if (types.Length < 1)
 				throw new ArgumentException($"The {nameof(types)} array is empty. At least one type is needed.");
 			MethodInfo method = GetMethod(owner, BindingFlags.Static, methodName, types, args);
-			return (T)method.MakeGenericMethod(types).Invoke(null, args.ToArray());
+			return (T)method.MakeGenericMethod(types).Invoke(null, args);
 		}
 
 		/// <summary>

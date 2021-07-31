@@ -73,7 +73,7 @@ namespace Kyoo.Controllers
 				{ 
 					id.Provider = await _providers.CreateIfNotExists(id.Provider);
 					id.ProviderID = id.Provider.ID;
-					_database.Entry(id.Provider).State = EntityState.Detached;
+					_database.Entry(id.Provider).State = EntityState.Unchanged;
 				}
 				_database.MetadataIds<Collection>().AttachRange(resource.ExternalIDs);
 			}
@@ -82,7 +82,7 @@ namespace Kyoo.Controllers
 		/// <inheritdoc />
 		protected override async Task EditRelations(Collection resource, Collection changed, bool resetOld)
 		{
-			await Validate(resource);
+			await Validate(changed);
 			
 			if (changed.ExternalIDs != null || resetOld)
 			{
