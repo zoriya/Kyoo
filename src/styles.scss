@@ -12,8 +12,8 @@ $theme-colors: (
 	"textPrimary": #ffffff
 );
 
-$body-bg: theme-color("primary");
-$body-color: theme-color("textPrimary");
+$body-bg: map-get($theme-colors, "primary");
+$body-color: map-get($theme-colors, "textPrimary");
 $font-family-base: "Roboto", Arial, sans-serif;
 
 p
@@ -95,8 +95,8 @@ mat-icon
 
 .snackError
 {
-	background-color: theme-color("accentColor");
-	color: theme-color("textPrimary");
+	background-color: map-get($theme-colors, "accentColor");
+	color: map-get($theme-colors, "textPrimary");
 }
 
 .scroll-row

@@ -15,7 +15,7 @@ export class AuthPipe implements PipeTransform
 	{
 		if (this.oidcSecurity === undefined)
 			this.oidcSecurity = this.injector.get(OidcSecurityService);
-		const token: string = this.oidcSecurity.getToken();
+		const token: string = this.oidcSecurity.getAccessToken();
 		if (!token)
 			return uri;
 		const headers: HttpHeaders = new HttpHeaders({Authorization: "Bearer " + token});

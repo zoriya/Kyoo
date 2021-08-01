@@ -244,7 +244,7 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 			this.oidcSecurity = this.injector.get(OidcSecurityService);
 		this.hlsPlayer.config.xhrSetup = xhr =>
 		{
-			const token: string = this.oidcSecurity.getToken();
+			const token: string = this.oidcSecurity.getAccessToken();
 			if (token)
 				xhr.setRequestHeader("Authorization", "Bearer " + token);
 		};

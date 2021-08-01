@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
-import { OidcSecurityService } from "angular-auth-oidc-client";
+import { LoginResponse, OidcSecurityService } from "angular-auth-oidc-client";
 import { Account } from "../models/account";
-import {HttpClient} from "@angular/common/http";
+import { HttpClient } from "@angular/common/http";
 
 @Injectable({
 	providedIn: "root"
@@ -14,20 +14,20 @@ export class AuthService
 	constructor(private oidcSecurityService: OidcSecurityService, private http: HttpClient)
 	{
 		this.oidcSecurityService.checkAuth()
-			.subscribe((auth: boolean) => this.isAuthenticated = auth);
+			.subscribe((auth: LoginResponse) => this.isAuthenticated = auth.isAuthenticated);
 		this.oidcSecurityService.userData$.subscribe(x =>
 		{
-			if (x == null)
+			if (x?.userData == null)
 			{
 				this.account = null;
 				this.isAuthenticated = false;
 				return;
 			}
 			this.account = {
-				email: x.email,
-				username: x.username,
-				picture: x.picture,
-				permissions: x.permissions?.split(",") ?? []
+				email: x.userData.email,
+				username: x.userData.username,
+				picture: x.userData.picture,
+				permissions: x.userData.permissions?.split(",") ?? []
 			};
 		});
 	}

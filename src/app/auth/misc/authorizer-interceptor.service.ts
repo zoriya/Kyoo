@@ -22,7 +22,7 @@ export class AuthorizerInterceptor implements HttpInterceptor
 			return next.handle(request);
 		if (this.oidcSecurity === undefined)
 			this.oidcSecurity = this.injector.get(OidcSecurityService);
-		const token: string = this.oidcSecurity.getToken();
+		const token: string = this.oidcSecurity.getAccessToken();
 		if (token)
 			request = request.clone({setHeaders: {Authorization: "Bearer " + token}});
 		return next.handle(request);
