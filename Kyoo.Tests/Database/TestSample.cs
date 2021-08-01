@@ -72,6 +72,27 @@ namespace Kyoo.Tests
 				}
 			},
 			{
+				typeof(Episode),
+				() => new Episode
+				{
+					ID = 2,
+					ShowID = 1,
+					ShowSlug = Get<Show>().Slug,
+					SeasonID = 1,
+					SeasonNumber = Get<Season>().SeasonNumber,
+					EpisodeNumber = 3,
+					AbsoluteNumber = 4,
+					Path = "/episode-path",
+					Title = "New Episode Title",
+					ReleaseDate = new DateTime(2000, 10, 10),
+					Overview = "new episode overview",
+					Images = new Dictionary<int, string>
+					{
+						[Images.Logo] = "new episode logo"
+					}
+				}
+			},
+			{
 				typeof(Provider),
 				() => new Provider
 				{

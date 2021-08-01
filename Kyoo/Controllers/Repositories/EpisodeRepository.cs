@@ -99,7 +99,7 @@ namespace Kyoo.Controllers
 		public override async Task<ICollection<Episode>> Search(string query)
 		{
 			return await _database.Episodes
-				.Where(x => x.EpisodeNumber != null)
+				.Where(x => x.EpisodeNumber != null || x.AbsoluteNumber != null)
 				.Where(_database.Like<Episode>(x => x.Title, $"%{query}%"))
 				.OrderBy(DefaultSort)
 				.Take(20)
@@ -111,7 +111,6 @@ namespace Kyoo.Controllers
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
-			obj.ExternalIDs.ForEach(x => _database.MetadataIds<Episode>().Attach(x));
 			await _database.SaveChangesAsync($"Trying to insert a duplicated episode (slug {obj.Slug} already exists).");
 			return await ValidateTracks(obj);
 		}
@@ -119,9 +118,6 @@ namespace Kyoo.Controllers
 		/// <inheritdoc />
 		protected override async Task EditRelations(Episode resource, Episode changed, bool resetOld)
 		{
-			if (resource.ShowID <= 0)
-				throw new InvalidOperationException($"Can't store an episode not related to any show (showID: {resource.ShowID}).");
-			
 			if (changed.Tracks != null || resetOld)
 			{
 				await _tracks.DeleteAll(x => x.EpisodeID == resource.ID);
@@ -158,12 +154,20 @@ namespace Kyoo.Controllers
 		protected override async Task Validate(Episode resource)
 		{
 			await base.Validate(resource);
-			await resource.ExternalIDs.ForEachAsync(async x => 
-			{ 
-				x.Provider = await _providers.CreateIfNotExists(x.Provider);
-				x.ProviderID = x.Provider.ID;
-				_database.Entry(x.Provider).State = EntityState.Detached;
-			});
+			if (resource.ShowID <= 0)
+				throw new ArgumentException($"Can't store an episode not related " +
+					$"to any show (showID: {resource.ShowID}).");
+
+			if (resource.ExternalIDs != null)
+			{
+				foreach (MetadataID id in resource.ExternalIDs)
+				{
+					id.Provider = await _providers.CreateIfNotExists(id.Provider);
+					id.ProviderID = id.Provider.ID;
+					_database.Entry(id.Provider).State = EntityState.Unchanged;
+				}
+				_database.MetadataIds<Episode>().AttachRange(resource.ExternalIDs);
+			}
 		}
 		
 		/// <inheritdoc />

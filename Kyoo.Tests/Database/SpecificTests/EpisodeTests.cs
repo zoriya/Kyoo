@@ -1,6 +1,9 @@
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Controllers;
 using Kyoo.Models;
+using Microsoft.EntityFrameworkCore;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -92,10 +95,6 @@ namespace Kyoo.Tests.Database
 			});
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s2e4", episode.Slug);
 		}
-		
-		
-		// TODO absolute numbering tests
-
 
 		[Fact]
 		public void AbsoluteSlugTest()
@@ -187,6 +186,138 @@ namespace Kyoo.Tests.Database
 			}, false);
 			Episode episode = await _repository.Get(3);
 			Assert.Equal("john-wick", episode.Slug);
+		}
+		
+		[Fact]
+		public async Task CreateWithExternalIdTest()
+		{
+			Episode value = TestSample.GetNew<Episode>();
+			value.ExternalIDs = new[]
+			{
+				new MetadataID
+				{
+					Provider = TestSample.Get<Provider>(),
+					Link = "link",
+					DataID = "id"
+				},
+				new MetadataID
+				{
+					Provider = TestSample.GetNew<Provider>(),
+					Link = "new-provider-link",
+					DataID = "new-id"
+				}
+			};
+			await _repository.Create(value);
+			
+			Episode retrieved = await _repository.Get(2);
+			await Repositories.LibraryManager.Load(retrieved, x => x.ExternalIDs);
+			Assert.Equal(2, retrieved.ExternalIDs.Count);
+			KAssert.DeepEqual(value.ExternalIDs.First(), retrieved.ExternalIDs.First());
+			KAssert.DeepEqual(value.ExternalIDs.Last(), retrieved.ExternalIDs.Last());
+		}
+		
+		[Fact]
+		public async Task EditTest()
+		{
+			Episode value = await _repository.Get(TestSample.Get<Episode>().Slug);
+			value.Title = "New Title";
+			value.Images = new Dictionary<int, string>
+			{
+				[Images.Poster] = "new-poster"
+			};
+			await _repository.Edit(value, false);
+		
+			await using DatabaseContext database = Repositories.Context.New();
+			Episode retrieved = await database.Episodes.FirstAsync();
+			
+			KAssert.DeepEqual(value, retrieved);
+		}
+		
+		[Fact]
+		public async Task EditMetadataTest()
+		{
+			Episode value = await _repository.Get(TestSample.Get<Episode>().Slug);
+			value.ExternalIDs = new[]
+			{
+				new MetadataID
+				{
+					Provider = TestSample.Get<Provider>(),
+					Link = "link",
+					DataID = "id"
+				},
+			};
+			await _repository.Edit(value, false);
+		
+			await using DatabaseContext database = Repositories.Context.New();
+			Episode retrieved = await database.Episodes
+				.Include(x => x.ExternalIDs)
+				.ThenInclude(x => x.Provider)
+				.FirstAsync();
+			
+			KAssert.DeepEqual(value, retrieved);
+		}
+
+		[Fact]
+		public async Task AddMetadataTest()
+		{
+			Episode value = await _repository.Get(TestSample.Get<Episode>().Slug);
+			value.ExternalIDs = new List<MetadataID>
+			{
+				new()
+				{
+					Provider = TestSample.Get<Provider>(),
+					Link = "link",
+					DataID = "id"
+				},
+			};
+			await _repository.Edit(value, false);
+
+			{
+				await using DatabaseContext database = Repositories.Context.New();
+				Episode retrieved = await database.Episodes
+					.Include(x => x.ExternalIDs)
+					.ThenInclude(x => x.Provider)
+					.FirstAsync();
+
+				KAssert.DeepEqual(value, retrieved);
+			}
+
+			value.ExternalIDs.Add(new MetadataID
+			{
+				Provider = TestSample.GetNew<Provider>(),
+				Link = "link",
+				DataID = "id"
+			});
+			await _repository.Edit(value, false);
+			
+			{
+				await using DatabaseContext database = Repositories.Context.New();
+				Episode retrieved = await database.Episodes
+					.Include(x => x.ExternalIDs)
+					.ThenInclude(x => x.Provider)
+					.FirstAsync();
+
+				KAssert.DeepEqual(value, retrieved);
+			}
+		}
+		
+		[Theory]
+		[InlineData("test")]
+		[InlineData("super")]
+		[InlineData("title")]
+		[InlineData("TiTlE")]
+		[InlineData("SuPeR")]
+		public async Task SearchTest(string query)
+		{
+			Episode value = new()
+			{
+				Title = "This is a test super title",
+				ShowID = 1,
+				AbsoluteNumber = 2
+			};
+			await _repository.Create(value);
+			ICollection<Episode> ret = await _repository.Search(query);
+			KAssert.DeepEqual(value, ret.First());
 		}
 	}
 }

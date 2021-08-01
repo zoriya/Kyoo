@@ -203,6 +203,7 @@ namespace Kyoo.Tests.Database
 			Season value = new()
 			{
 				Title = "This is a test super title",
+				ShowID = 1
 			};
 			await _repository.Create(value);
 			ICollection<Season> ret = await _repository.Search(query);
