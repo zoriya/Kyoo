@@ -62,7 +62,8 @@ namespace Kyoo.Tests.Database
 			episode = await _repository.Edit(new Episode
 			{
 				ID = 1,
-				SeasonNumber = 2
+				SeasonNumber = 2,
+				ShowID = 1
 			}, false);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s2e1", episode.Slug);
 			episode = await _repository.Get(1);
@@ -77,7 +78,8 @@ namespace Kyoo.Tests.Database
 			episode = await _repository.Edit(new Episode
 			{
 				ID = 1,
-				EpisodeNumber = 2
+				EpisodeNumber = 2,
+				ShowID = 1
 			}, false);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s1e2", episode.Slug);
 			episode = await _repository.Get(1);
@@ -132,7 +134,8 @@ namespace Kyoo.Tests.Database
 			Episode episode = await _repository.Edit(new Episode
 			{
 				ID = 2,
-				AbsoluteNumber = 56
+				AbsoluteNumber = 56,
+				ShowID = 1
 			}, false);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-56", episode.Slug);
 			episode = await _repository.Get(2);
@@ -147,7 +150,8 @@ namespace Kyoo.Tests.Database
 			{
 				ID = 2,
 				SeasonNumber = 1,
-				EpisodeNumber = 2
+				EpisodeNumber = 2,
+				ShowID = 1
 			}, false);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s1e2", episode.Slug);
 			episode = await _repository.Get(2);

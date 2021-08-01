@@ -118,6 +118,8 @@ namespace Kyoo.Controllers
 		/// <inheritdoc />
 		protected override async Task EditRelations(Episode resource, Episode changed, bool resetOld)
 		{
+			await Validate(changed);
+
 			if (changed.Tracks != null || resetOld)
 			{
 				await _tracks.DeleteAll(x => x.EpisodeID == resource.ID);
@@ -130,8 +132,6 @@ namespace Kyoo.Controllers
 				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
 				resource.ExternalIDs = changed.ExternalIDs;
 			}
-
-			await Validate(resource);
 		}
 
 		/// <summary>

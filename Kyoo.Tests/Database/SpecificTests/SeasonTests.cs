@@ -62,7 +62,8 @@ namespace Kyoo.Tests.Database
 			await _repository.Edit(new Season
 			{
 				ID = 1,
-				SeasonNumber = 2
+				SeasonNumber = 2,
+				ShowID = 1
 			}, false);
 			season = await _repository.Get(1);
 			Assert.Equal("anohana-s2", season.Slug);
