@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Kyoo.Controllers;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
@@ -504,6 +505,23 @@ namespace Kyoo
 		}
 
 		/// <summary>
+		/// Return the first resource with the given slug that is currently tracked by this context.
+		/// This allow one to limit redundant calls to <see cref="IRepository{T}.CreateIfNotExists"/> during the
+		/// same transaction and prevent fails from EF when two same entities are being tracked. 
+		/// </summary>
+		/// <param name="slug">The slug of the resource to check</param>
+		/// <typeparam name="T">The type of entity to check</typeparam>
+		/// <returns>The local entity representing the resource with the given slug if it exists or null.</returns>
+		[CanBeNull]
+		public T LocalEntity<T>(string slug)
+			where T : class, IResource
+		{
+			return ChangeTracker.Entries<T>()
+				.FirstOrDefault(x => x.Entity.Slug == slug)
+				?.Entity;
+		}
+
+		/// <summary>
 		/// Check if the exception is a duplicated exception.
 		/// </summary>
 		/// <param name="ex">The exception to check</param>
@@ -515,14 +533,12 @@ namespace Kyoo
 		/// </summary>
 		private void DiscardChanges()
 		{
-			foreach (EntityEntry entry in ChangeTracker.Entries().Where(x => x.State != EntityState.Unchanged
-			                                                                 && x.State != EntityState.Detached))
+			foreach (EntityEntry entry in ChangeTracker.Entries().Where(x => x.State != EntityState.Detached))
 			{
 				entry.State = EntityState.Detached;
 			}
 		}
-
-
+		
 		/// <summary>
 		/// Perform a case insensitive like operation.
 		/// </summary>

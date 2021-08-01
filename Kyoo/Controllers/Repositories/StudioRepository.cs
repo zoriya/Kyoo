@@ -54,7 +54,6 @@ namespace Kyoo.Controllers
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
-			obj.ExternalIDs.ForEach(x => _database.MetadataIds<Studio>().Attach(x));
 			await _database.SaveChangesAsync($"Trying to insert a duplicated studio (slug {obj.Slug} already exists).");
 			return obj;
 		}
@@ -63,12 +62,16 @@ namespace Kyoo.Controllers
 		protected override async Task Validate(Studio resource)
 		{
 			await base.Validate(resource);
-			await resource.ExternalIDs.ForEachAsync(async x => 
-			{ 
-				x.Provider = await _providers.CreateIfNotExists(x.Provider);
-				x.ProviderID = x.Provider.ID;
-				_database.Entry(x.Provider).State = EntityState.Detached;
-			});
+			if (resource.ExternalIDs != null)
+			{
+				foreach (MetadataID id in resource.ExternalIDs)
+				{
+					id.Provider = _database.LocalEntity<Provider>(id.Provider.Slug)
+						?? await _providers.CreateIfNotExists(id.Provider);
+					id.ProviderID = id.Provider.ID;
+				}
+				_database.MetadataIds<Studio>().AttachRange(resource.ExternalIDs);
+			}
 		}
 		
 		/// <inheritdoc />

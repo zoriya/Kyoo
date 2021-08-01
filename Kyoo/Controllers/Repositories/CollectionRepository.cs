@@ -71,9 +71,9 @@ namespace Kyoo.Controllers
 			{
 				foreach (MetadataID id in resource.ExternalIDs)
 				{ 
-					id.Provider = await _providers.CreateIfNotExists(id.Provider);
+					id.Provider = _database.LocalEntity<Provider>(id.Provider.Slug)
+						?? await _providers.CreateIfNotExists(id.Provider);
 					id.ProviderID = id.Provider.ID;
-					_database.Entry(id.Provider).State = EntityState.Unchanged;
 				}
 				_database.MetadataIds<Collection>().AttachRange(resource.ExternalIDs);
 			}

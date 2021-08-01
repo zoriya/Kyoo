@@ -104,6 +104,20 @@ namespace Kyoo.Tests
 						[Images.Logo] = "logo"
 					}
 				}
+			},
+			{
+				typeof(People),
+				() => new People
+				{
+					ID = 2,
+					Slug = "new-person-name",
+					Name = "New person name",
+					Images = new Dictionary<int, string>
+					{
+						[Images.Logo] = "Old Logo",
+						[Images.Poster] = "Old poster"
+					}
+				}
 			}
 		};
 		

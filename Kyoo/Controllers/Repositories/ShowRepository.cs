@@ -102,9 +102,9 @@ namespace Kyoo.Controllers
 			{
 				foreach (MetadataID id in resource.ExternalIDs)
 				{
-					id.Provider = await _providers.CreateIfNotExists(id.Provider);
+					id.Provider = _database.LocalEntity<Provider>(id.Provider.Slug)
+						?? await _providers.CreateIfNotExists(id.Provider);
 					id.ProviderID = id.Provider.ID;
-					_database.Entry(id.Provider).State = EntityState.Detached;
 				}
 				_database.MetadataIds<Show>().AttachRange(resource.ExternalIDs);
 			}
@@ -113,9 +113,9 @@ namespace Kyoo.Controllers
 			{
 				foreach (PeopleRole role in resource.People)
 				{
-					role.People = await _people.CreateIfNotExists(role.People);
+					role.People = _database.LocalEntity<People>(role.People.Slug)
+						?? await _people.CreateIfNotExists(role.People);
 					role.PeopleID = role.People.ID;
-					_database.Entry(role.People).State = EntityState.Detached;
 					_database.Entry(role).State = EntityState.Added;
 				}
 			}
