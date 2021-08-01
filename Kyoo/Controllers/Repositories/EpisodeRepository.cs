@@ -141,12 +141,16 @@ namespace Kyoo.Controllers
 		/// <returns>The <see cref="resource"/> parameter is returned.</returns>
 		private async Task<Episode> ValidateTracks(Episode resource)
 		{
-			resource.Tracks = await TaskUtils.DefaultIfNull(resource.Tracks?.SelectAsync(x =>
+			if (resource.Tracks == null)
+				return resource;
+			
+			resource.Tracks = await resource.Tracks.SelectAsync(x =>
 			{
 				x.Episode = resource;
 				x.EpisodeSlug = resource.Slug;
 				return _tracks.Create(x);
-			}).ToListAsync());
+			}).ToListAsync();
+			_database.Tracks.AttachRange(resource.Tracks);
 			return resource;
 		}
 		
@@ -155,8 +159,12 @@ namespace Kyoo.Controllers
 		{
 			await base.Validate(resource);
 			if (resource.ShowID <= 0)
-				throw new ArgumentException($"Can't store an episode not related " +
-					$"to any show (showID: {resource.ShowID}).");
+			{
+				if (resource.Show == null)
+					throw new ArgumentException($"Can't store an episode not related " +
+						$"to any show (showID: {resource.ShowID}).");
+				resource.ShowID = resource.Show.ID;
+			}
 
 			if (resource.ExternalIDs != null)
 			{

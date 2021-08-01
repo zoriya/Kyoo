@@ -142,6 +142,13 @@ namespace Kyoo.Postgresql
 			SnakeCaseNameRewriter rewriter = new(CultureInfo.InvariantCulture);
 			return rewriter.RewriteName("Link" + typeof(T).Name + typeof(T2).Name);
 		}
+		
+		/// <inheritdoc />
+		protected override string LinkNameFk<T>()
+		{
+			SnakeCaseNameRewriter rewriter = new(CultureInfo.InvariantCulture);
+			return rewriter.RewriteName(typeof(T).Name + "ID");
+		}
 
 		/// <inheritdoc />
 		protected override bool IsDuplicateException(Exception ex)

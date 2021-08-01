@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
@@ -96,17 +97,23 @@ namespace Kyoo
 		}
 
 		/// <summary>
-		/// Get a generic link between two resource types.
+		/// Add a many to many link between two resources.
 		/// </summary>
 		/// <remarks>Types are order dependant. You can't inverse the order. Please always put the owner first.</remarks>
+		/// <param name="first">The ID of the first resource.</param>
+		/// <param name="second">The ID of the second resource.</param>
 		/// <typeparam name="T1">The first resource type of the relation. It is the owner of the second</typeparam>
 		/// <typeparam name="T2">The second resource type of the relation. It is the contained resource.</typeparam>
-		/// <returns>All links between the two types.</returns>
-		public DbSet<Link<T1, T2>> Links<T1, T2>()
+		public async Task AddLinks<T1, T2>(int first, int second)
 			where T1 : class, IResource
 			where T2 : class, IResource
 		{
-			return Set<Link<T1, T2>>();
+			await Set<Dictionary<string, object>>(LinkName<T1, T2>())
+				.AddAsync(new Dictionary<string, object>
+				{
+					[LinkNameFk<T1>()] = first,
+					[LinkNameFk<T2>()] = second
+				});
 		}
 
 
@@ -142,6 +149,14 @@ namespace Kyoo
 			where T2 : IResource;
 
 		/// <summary>
+		/// Get the name of a link's foreign key.
+		/// </summary>
+		/// <typeparam name="T">The type that will be accessible via the navigation</typeparam>
+		/// <returns>The name of the foreign key for the given resource.</returns>
+		protected abstract string LinkNameFk<T>()
+			where T : IResource;
+
+		/// <summary>
 		/// Set basic configurations (like preventing query tracking)
 		/// </summary>
 		/// <param name="optionsBuilder">An option builder to fill.</param>
@@ -167,6 +182,39 @@ namespace Kyoo
 				.WithMany(x => x.ExternalIDs)
 				.HasForeignKey(x => x.ResourceID)
 				.OnDelete(DeleteBehavior.Cascade);
+		}
+
+		/// <summary>
+		/// Create a many to many relationship between the two entities.
+		/// The resulting relationship will have an available <see cref="AddLinks{T1,T2}"/> method.
+		/// </summary>
+		/// <param name="modelBuilder">The database model builder</param>
+		/// <param name="firstNavigation">The first navigation expression from T to T2</param>
+		/// <param name="secondNavigation">The second navigation expression from T2 to T</param>
+		/// <typeparam name="T">The owning type of the relationship</typeparam>
+		/// <typeparam name="T2">The owned type of the relationship</typeparam>
+		private void _HasManyToMany<T, T2>(ModelBuilder modelBuilder, 
+			Expression<Func<T, IEnumerable<T2>>> firstNavigation,
+			Expression<Func<T2, IEnumerable<T>>> secondNavigation)
+			where T : class, IResource
+			where T2 : class, IResource
+		{
+			modelBuilder.Entity<T2>()
+				.HasMany(secondNavigation)
+				.WithMany(firstNavigation)
+				.UsingEntity<Dictionary<string, object>>(
+					LinkName<T, T2>(),
+					x => x
+						.HasOne<T>()
+						.WithMany()
+						.HasForeignKey(LinkNameFk<T>())
+						.OnDelete(DeleteBehavior.Cascade), 
+					x => x
+						.HasOne<T2>()
+						.WithMany()
+						.HasForeignKey(LinkNameFk<T2>())
+						.OnDelete(DeleteBehavior.Cascade)
+				);
 		}
 		
 		
@@ -203,26 +251,12 @@ namespace Kyoo
 				.WithMany(x => x.Shows)
 				.OnDelete(DeleteBehavior.SetNull);
 
-			modelBuilder.Entity<Provider>()
-				.HasMany(x => x.Libraries)
-				.WithMany(x => x.Providers)
-				.UsingEntity(x => x.ToTable(LinkName<Library, Provider>()));
-			modelBuilder.Entity<Collection>()
-				.HasMany(x => x.Libraries)
-				.WithMany(x => x.Collections)
-				.UsingEntity(x => x.ToTable(LinkName<Library, Collection>()));
-			modelBuilder.Entity<Show>()
-				.HasMany(x => x.Libraries)
-				.WithMany(x => x.Shows)
-				.UsingEntity(x => x.ToTable(LinkName<Library, Show>()));
-			modelBuilder.Entity<Show>()
-				.HasMany(x => x.Collections)
-				.WithMany(x => x.Shows)
-				.UsingEntity(x => x.ToTable(LinkName<Collection, Show>()));
-			modelBuilder.Entity<Genre>()
-				.HasMany(x => x.Shows)
-				.WithMany(x => x.Genres)
-				.UsingEntity(x => x.ToTable(LinkName<Show, Genre>()));
+			_HasManyToMany<Library, Provider>(modelBuilder, x => x.Providers, x => x.Libraries);
+			_HasManyToMany<Library, Collection>(modelBuilder, x => x.Collections, x => x.Libraries);
+			_HasManyToMany<Library, Show>(modelBuilder, x => x.Shows, x => x.Libraries);
+			_HasManyToMany<Collection, Show>(modelBuilder, x => x.Shows, x => x.Collections);
+			_HasManyToMany<Show, Genre>(modelBuilder, x => x.Genres, x => x.Shows);
+			
 			modelBuilder.Entity<User>()
 				.HasMany(x => x.Watched)
 				.WithMany("Users")

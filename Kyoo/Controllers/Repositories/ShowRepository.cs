@@ -159,21 +159,18 @@ namespace Kyoo.Controllers
 		{
 			if (collectionID != null)
 			{
-				await _database.Links<Collection, Show>()
-					.AddAsync(new Link<Collection, Show>(collectionID.Value, showID));
+				await _database.AddLinks<Collection, Show>(collectionID.Value, showID);
 				await _database.SaveIfNoDuplicates();
 
 				if (libraryID != null)
 				{
-					await _database.Links<Library, Collection>()
-						.AddAsync(new Link<Library, Collection>(libraryID.Value, collectionID.Value));
+					await _database.AddLinks<Library, Collection>(libraryID.Value, collectionID.Value);
 					await _database.SaveIfNoDuplicates();
 				}
 			}
 			if (libraryID != null)
 			{
-				await _database.Links<Library, Show>()
-					.AddAsync(new Link<Library, Show>(libraryID.Value, showID));
+				await _database.AddLinks<Library, Show>(libraryID.Value, showID);
 				await _database.SaveIfNoDuplicates();
 			}
 		}

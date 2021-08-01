@@ -127,21 +127,21 @@ namespace Kyoo.Postgresql.Migrations
                 name: "link_library_collection",
                 columns: table => new
                 {
-                    collections_id = table.Column<int>(type: "integer", nullable: false),
-                    libraries_id = table.Column<int>(type: "integer", nullable: false)
+                    collection_id = table.Column<int>(type: "integer", nullable: false),
+                    library_id = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_link_library_collection", x => new { x.collections_id, x.libraries_id });
+                    table.PrimaryKey("pk_link_library_collection", x => new { x.collection_id, x.library_id });
                     table.ForeignKey(
-                        name: "fk_link_library_collection_collections_collections_id",
-                        column: x => x.collections_id,
+                        name: "fk_link_library_collection_collections_collection_id",
+                        column: x => x.collection_id,
                         principalTable: "collections",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_link_library_collection_libraries_libraries_id",
-                        column: x => x.libraries_id,
+                        name: "fk_link_library_collection_libraries_library_id",
+                        column: x => x.library_id,
                         principalTable: "libraries",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -177,21 +177,21 @@ namespace Kyoo.Postgresql.Migrations
                 name: "link_library_provider",
                 columns: table => new
                 {
-                    libraries_id = table.Column<int>(type: "integer", nullable: false),
-                    providers_id = table.Column<int>(type: "integer", nullable: false)
+                    library_id = table.Column<int>(type: "integer", nullable: false),
+                    provider_id = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_link_library_provider", x => new { x.libraries_id, x.providers_id });
+                    table.PrimaryKey("pk_link_library_provider", x => new { x.library_id, x.provider_id });
                     table.ForeignKey(
-                        name: "fk_link_library_provider_libraries_libraries_id",
-                        column: x => x.libraries_id,
+                        name: "fk_link_library_provider_libraries_library_id",
+                        column: x => x.library_id,
                         principalTable: "libraries",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_link_library_provider_providers_providers_id",
-                        column: x => x.providers_id,
+                        name: "fk_link_library_provider_providers_provider_id",
+                        column: x => x.provider_id,
                         principalTable: "providers",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -282,21 +282,21 @@ namespace Kyoo.Postgresql.Migrations
                 name: "link_collection_show",
                 columns: table => new
                 {
-                    collections_id = table.Column<int>(type: "integer", nullable: false),
-                    shows_id = table.Column<int>(type: "integer", nullable: false)
+                    collection_id = table.Column<int>(type: "integer", nullable: false),
+                    show_id = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_link_collection_show", x => new { x.collections_id, x.shows_id });
+                    table.PrimaryKey("pk_link_collection_show", x => new { x.collection_id, x.show_id });
                     table.ForeignKey(
-                        name: "fk_link_collection_show_collections_collections_id",
-                        column: x => x.collections_id,
+                        name: "fk_link_collection_show_collections_collection_id",
+                        column: x => x.collection_id,
                         principalTable: "collections",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_link_collection_show_shows_shows_id",
-                        column: x => x.shows_id,
+                        name: "fk_link_collection_show_shows_show_id",
+                        column: x => x.show_id,
                         principalTable: "shows",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -306,21 +306,21 @@ namespace Kyoo.Postgresql.Migrations
                 name: "link_library_show",
                 columns: table => new
                 {
-                    libraries_id = table.Column<int>(type: "integer", nullable: false),
-                    shows_id = table.Column<int>(type: "integer", nullable: false)
+                    library_id = table.Column<int>(type: "integer", nullable: false),
+                    show_id = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_link_library_show", x => new { x.libraries_id, x.shows_id });
+                    table.PrimaryKey("pk_link_library_show", x => new { x.library_id, x.show_id });
                     table.ForeignKey(
-                        name: "fk_link_library_show_libraries_libraries_id",
-                        column: x => x.libraries_id,
+                        name: "fk_link_library_show_libraries_library_id",
+                        column: x => x.library_id,
                         principalTable: "libraries",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_link_library_show_shows_shows_id",
-                        column: x => x.shows_id,
+                        name: "fk_link_library_show_shows_show_id",
+                        column: x => x.show_id,
                         principalTable: "shows",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -330,21 +330,21 @@ namespace Kyoo.Postgresql.Migrations
                 name: "link_show_genre",
                 columns: table => new
                 {
-                    genres_id = table.Column<int>(type: "integer", nullable: false),
-                    shows_id = table.Column<int>(type: "integer", nullable: false)
+                    genre_id = table.Column<int>(type: "integer", nullable: false),
+                    show_id = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("pk_link_show_genre", x => new { x.genres_id, x.shows_id });
+                    table.PrimaryKey("pk_link_show_genre", x => new { x.genre_id, x.show_id });
                     table.ForeignKey(
-                        name: "fk_link_show_genre_genres_genres_id",
-                        column: x => x.genres_id,
+                        name: "fk_link_show_genre_genres_genre_id",
+                        column: x => x.genre_id,
                         principalTable: "genres",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "fk_link_show_genre_shows_shows_id",
-                        column: x => x.shows_id,
+                        name: "fk_link_show_genre_shows_show_id",
+                        column: x => x.show_id,
                         principalTable: "shows",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -641,29 +641,29 @@ namespace Kyoo.Postgresql.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "ix_link_collection_show_shows_id",
+                name: "ix_link_collection_show_show_id",
                 table: "link_collection_show",
-                column: "shows_id");
+                column: "show_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_link_library_collection_libraries_id",
+                name: "ix_link_library_collection_library_id",
                 table: "link_library_collection",
-                column: "libraries_id");
+                column: "library_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_link_library_provider_providers_id",
+                name: "ix_link_library_provider_provider_id",
                 table: "link_library_provider",
-                column: "providers_id");
+                column: "provider_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_link_library_show_shows_id",
+                name: "ix_link_library_show_show_id",
                 table: "link_library_show",
-                column: "shows_id");
+                column: "show_id");
 
             migrationBuilder.CreateIndex(
-                name: "ix_link_show_genre_shows_id",
+                name: "ix_link_show_genre_show_id",
                 table: "link_show_genre",
-                column: "shows_id");
+                column: "show_id");
 
             migrationBuilder.CreateIndex(
                 name: "ix_link_user_show_watched_id",

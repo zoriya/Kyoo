@@ -360,5 +360,18 @@ namespace Kyoo.Tests.Database
 			Assert.Equal(0, await Repositories.LibraryManager.SeasonRepository.GetCount());
 			Assert.Equal(0, await Repositories.LibraryManager.EpisodeRepository.GetCount());
 		}
+
+		[Fact]
+		public async Task AddShowLinkTest()
+		{
+			await Repositories.LibraryManager.Create(TestSample.GetNew<Library>());
+			await _repository.AddShowLink(1, 2, null);
+			
+			await using DatabaseContext context = Repositories.Context.New();
+			Show show = context.Shows
+				.Include(x => x.Libraries)
+				.First(x => x.ID == 1);
+			Assert.Contains(2, show.Libraries.Select(x => x.ID));
+		}
 	}
 }

@@ -155,6 +155,12 @@ namespace Kyoo.SqLite
 		{
 			return "Link" + typeof(T).Name + typeof(T2).Name;
 		}
+		
+		/// <inheritdoc />
+		protected override string LinkNameFk<T>()
+		{
+			return typeof(T).Name + "ID";
+		}
 
 		/// <inheritdoc />
 		protected override bool IsDuplicateException(Exception ex)
