@@ -33,7 +33,7 @@ jobs:
         POSTGRES_PASSWORD: postgres
     - name: Sanitize coverage output
       if: ${{ always() }}
-      run: sed -i "s'$(pwd)'.'" Kyoo.Tests/coverage.opencover.xml 
+      run: sed -i "s'$(pwd)'.'" tests/Kyoo.Tests/coverage.opencover.xml 
     - name: Upload coverage report
       if: ${{ always() }}
       uses: actions/upload-artifact@v2
