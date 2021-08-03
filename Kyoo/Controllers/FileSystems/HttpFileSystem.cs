@@ -76,7 +76,7 @@ namespace Kyoo.Controllers
 		}
 
 		/// <inheritdoc />
-		public string GetExtraDirectory(Show show)
+		public Task<string> GetExtraDirectory<T>(T resource)
 		{
 			throw new NotSupportedException("Extras can not be stored inside an http filesystem.");
 		}
@@ -117,7 +117,12 @@ namespace Kyoo.Controllers
 		public Task ExecuteResultAsync(ActionContext context)
 		{
 			// TODO implement that, example: https://github.com/twitchax/AspNetCore.Proxy/blob/14dd0f212d7abb43ca1bf8c890d5efb95db66acb/src/Core/Extensions/Http.cs#L15
-			throw new NotImplementedException();
+			
+			// Silence unused warnings
+			if (_path != null || _rangeSupport || _type == null)
+				throw new NotImplementedException();
+			else
+				throw new NotImplementedException();
 		}
 	}
 }

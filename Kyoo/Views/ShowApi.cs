@@ -383,7 +383,7 @@ namespace Kyoo.Api
 			try
 			{
 				Show show = await _libraryManager.Get<Show>(slug);
-				string path = Path.Combine(_files.GetExtraDirectory(show), "Attachments");
+				string path = _files.Combine(await _files.GetExtraDirectory(show), "Attachments");
 				return (await _files.ListFiles(path))
 					.ToDictionary(Path.GetFileNameWithoutExtension,
 						x => $"{BaseURL}api/shows/{slug}/fonts/{Path.GetFileName(x)}");
@@ -402,7 +402,7 @@ namespace Kyoo.Api
 			try
 			{
 				Show show = await _libraryManager.Get<Show>(showSlug);
-				string path = Path.Combine(_files.GetExtraDirectory(show), "Attachments", slug);
+				string path = _files.Combine(await _files.GetExtraDirectory(show), "Attachments", slug);
 				return _files.FileResult(path);
 			}
 			catch (ItemNotFoundException)

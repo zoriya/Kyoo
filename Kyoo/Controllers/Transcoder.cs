@@ -88,10 +88,8 @@ namespace Kyoo.Controllers
 
 		public async Task<Track[]> ExtractInfos(Episode episode, bool reextract)
 		{
-			if (episode.Show == null)
-				await _library.Value.Load(episode, x => x.Show);
-
-			string dir = _files.GetExtraDirectory(episode.Show);
+			await _library.Value.Load(episode, x => x.Show);
+			string dir = await _files.GetExtraDirectory(episode.Show);
 			if (dir == null)
 				throw new ArgumentException("Invalid path.");
 			return await Task.Factory.StartNew(

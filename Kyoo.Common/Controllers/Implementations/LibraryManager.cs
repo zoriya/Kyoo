@@ -162,34 +162,6 @@ namespace Kyoo.Controllers
 			return await EpisodeRepository.GetOrDefault(showSlug, seasonNumber, episodeNumber);
 		}
 
-		/// <inheritdoc />
-		public Task<T> Load<T, T2>(T obj, Expression<Func<T, T2>> member)
-			where T : class, IResource
-			where T2 : class, IResource, new()
-		{
-			if (member == null)
-				throw new ArgumentNullException(nameof(member));
-			return Load(obj, Utility.GetPropertyName(member));
-		}
-
-		/// <inheritdoc />
-		public Task<T> Load<T, T2>(T obj, Expression<Func<T, ICollection<T2>>> member)
-			where T : class, IResource
-			where T2 : class, new()
-		{
-			if (member == null)
-				throw new ArgumentNullException(nameof(member));
-			return Load(obj, Utility.GetPropertyName(member));
-		}
-
-		/// <inheritdoc />
-		public async Task<T> Load<T>(T obj, string memberName)
-			where T : class, IResource
-		{
-			await Load(obj as IResource, memberName);
-			return obj;
-		}
-
 		/// <summary>
 		/// Set relations between to objects.
 		/// </summary>
@@ -211,11 +183,46 @@ namespace Kyoo.Controllers
 		}
 
 		/// <inheritdoc />
-		public Task Load(IResource obj, string memberName)
+		public Task<T> Load<T, T2>(T obj, Expression<Func<T, T2>> member, bool force = false)
+			where T : class, IResource
+			where T2 : class, IResource
+		{
+			if (member == null)
+				throw new ArgumentNullException(nameof(member));
+			return Load(obj, Utility.GetPropertyName(member), force);
+		}
+
+		/// <inheritdoc />
+		public Task<T> Load<T, T2>(T obj, Expression<Func<T, ICollection<T2>>> member, bool force = false)
+			where T : class, IResource
+			where T2 : class
+		{
+			if (member == null)
+				throw new ArgumentNullException(nameof(member));
+			return Load(obj, Utility.GetPropertyName(member), force);
+		}
+
+		/// <inheritdoc />
+		public async Task<T> Load<T>(T obj, string memberName, bool force = false)
+			where T : class, IResource
+		{
+			await Load(obj as IResource, memberName, force);
+			return obj;
+		}
+
+		/// <inheritdoc />
+		public Task Load(IResource obj, string memberName, bool force = false)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
-			
+
+			object existingValue = obj.GetType()
+				.GetProperties()
+				.FirstOrDefault(x => string.Equals(x.Name, memberName, StringComparison.InvariantCultureIgnoreCase))
+				?.GetValue(obj);
+			if (existingValue != null && !force)
+				return Task.CompletedTask;
+
 			return (obj, member: memberName) switch
 			{
 				(Library l, nameof(Library.Providers)) => ProviderRepository

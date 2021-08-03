@@ -225,42 +225,51 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="obj">The source object.</param>
 		/// <param name="member">A getter function for the member to load</param>
+		/// <param name="force">
+		/// <c>true</c> if you want to load the relation even if it is not null, <c>false</c> otherwise. 
+		/// </param>
 		/// <typeparam name="T">The type of the source object</typeparam>
 		/// <typeparam name="T2">The related resource's type</typeparam>
 		/// <returns>The param <see cref="obj"/></returns>
-		/// <seealso cref="Load{T,T2}(T,System.Linq.Expressions.Expression{System.Func{T,System.Collections.Generic.ICollection{T2}}})"/>
-		/// <seealso cref="Load{T}(T, System.String)"/>
-		/// <seealso cref="Load(IResource, string)"/>
-		Task<T> Load<T, T2>([NotNull] T obj, Expression<Func<T, T2>> member)
+		/// <seealso cref="Load{T,T2}(T, System.Linq.Expressions.Expression{System.Func{T,System.Collections.Generic.ICollection{T2}}}, bool)"/>
+		/// <seealso cref="Load{T}(T, System.String, bool)"/>
+		/// <seealso cref="Load(IResource, string, bool)"/>
+		Task<T> Load<T, T2>([NotNull] T obj, Expression<Func<T, T2>> member, bool force = false)
 			where T : class, IResource
-			where T2 : class, IResource, new();
+			where T2 : class, IResource;
 
 		/// <summary>
 		/// Load a collection of related resource
 		/// </summary>
 		/// <param name="obj">The source object.</param>
 		/// <param name="member">A getter function for the member to load</param>
+		/// <param name="force">
+		/// <c>true</c> if you want to load the relation even if it is not null, <c>false</c> otherwise. 
+		/// </param>
 		/// <typeparam name="T">The type of the source object</typeparam>
 		/// <typeparam name="T2">The related resource's type</typeparam>
 		/// <returns>The param <see cref="obj"/></returns>
-		/// <seealso cref="Load{T,T2}(T,System.Linq.Expressions.Expression{System.Func{T,T2}})"/>
-		/// <seealso cref="Load{T}(T, System.String)"/>
-		/// <seealso cref="Load(IResource, string)"/>
-		Task<T> Load<T, T2>([NotNull] T obj, Expression<Func<T, ICollection<T2>>> member)
+		/// <seealso cref="Load{T,T2}(T, System.Linq.Expressions.Expression{System.Func{T,T2}}, bool)"/>
+		/// <seealso cref="Load{T}(T, System.String, bool)"/>
+		/// <seealso cref="Load(IResource, string, bool)"/>
+		Task<T> Load<T, T2>([NotNull] T obj, Expression<Func<T, ICollection<T2>>> member, bool force = false)
 			where T : class, IResource
-			where T2 : class, new();
+			where T2 : class;
 
 		/// <summary>
 		/// Load a related resource by it's name
 		/// </summary>
 		/// <param name="obj">The source object.</param>
 		/// <param name="memberName">The name of the resource to load (case sensitive)</param>
+		/// <param name="force">
+		/// <c>true</c> if you want to load the relation even if it is not null, <c>false</c> otherwise. 
+		/// </param>
 		/// <typeparam name="T">The type of the source object</typeparam>
 		/// <returns>The param <see cref="obj"/></returns>
-		/// <seealso cref="Load{T,T2}(T,System.Linq.Expressions.Expression{System.Func{T,T2}})"/>
-		/// <seealso cref="Load{T,T2}(T,System.Linq.Expressions.Expression{System.Func{T,System.Collections.Generic.ICollection{T2}}})"/>
-		/// <seealso cref="Load(IResource, string)"/>
-		Task<T> Load<T>([NotNull] T obj, string memberName)
+		/// <seealso cref="Load{T,T2}(T, System.Linq.Expressions.Expression{System.Func{T,T2}}, bool)"/>
+		/// <seealso cref="Load{T,T2}(T, System.Linq.Expressions.Expression{System.Func{T,System.Collections.Generic.ICollection{T2}}}, bool)"/>
+		/// <seealso cref="Load(IResource, string, bool)"/>
+		Task<T> Load<T>([NotNull] T obj, string memberName, bool force = false)
 			where T : class, IResource;
 
 		/// <summary>
@@ -268,10 +277,13 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="obj">The source object.</param>
 		/// <param name="memberName">The name of the resource to load (case sensitive)</param>
-		/// <seealso cref="Load{T,T2}(T,System.Linq.Expressions.Expression{System.Func{T,T2}})"/>
-		/// <seealso cref="Load{T,T2}(T,System.Linq.Expressions.Expression{System.Func{T,System.Collections.Generic.ICollection{T2}}})"/>
-		/// <seealso cref="Load{T}(T, System.String)"/>
-		Task Load([NotNull] IResource obj, string memberName);
+		/// <param name="force">
+		/// <c>true</c> if you want to load the relation even if it is not null, <c>false</c> otherwise. 
+		/// </param>
+		/// <seealso cref="Load{T,T2}(T, System.Linq.Expressions.Expression{System.Func{T,T2}}, bool)"/>
+		/// <seealso cref="Load{T,T2}(T, System.Linq.Expressions.Expression{System.Func{T,System.Collections.Generic.ICollection{T2}}}, bool)"/>
+		/// <seealso cref="Load{T}(T, System.String, bool)"/>
+		Task Load([NotNull] IResource obj, string memberName, bool force = false);
 		
 		/// <summary>
 		/// Get items (A wrapper arround shows or collections) from a library.

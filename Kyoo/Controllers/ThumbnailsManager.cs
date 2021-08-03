@@ -3,9 +3,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Kyoo.Models.Options;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Kyoo.Controllers
 {
@@ -22,37 +20,17 @@ namespace Kyoo.Controllers
 		/// A logger to report errors.
 		/// </summary>
 		private readonly ILogger<ThumbnailsManager> _logger;
-		/// <summary>
-		/// The options containing the base path of people images and provider logos.
-		/// </summary>
-		private readonly IOptionsMonitor<BasicOptions> _options;
-		/// <summary>
-		/// A library manager used to load episode and seasons shows if they are not loaded.
-		/// </summary>
-		private readonly Lazy<ILibraryManager> _library;
 
 		/// <summary>
 		/// Create a new <see cref="ThumbnailsManager"/>.
 		/// </summary>
 		/// <param name="files">The file manager to use.</param>
 		/// <param name="logger">A logger to report errors</param>
-		/// <param name="options">The options to use.</param>
-		/// <param name="library">A library manager used to load shows if they are not loaded.</param>
 		public ThumbnailsManager(IFileSystem files, 
-			ILogger<ThumbnailsManager> logger,
-			IOptionsMonitor<BasicOptions> options, 
-			Lazy<ILibraryManager> library)
+			ILogger<ThumbnailsManager> logger)
 		{
 			_files = files;
 			_logger = logger;
-			_options = options;
-			_library = library;
-
-			options.OnChange(x =>
-			{
-				_files.CreateDirectory(x.PeoplePath);
-				_files.CreateDirectory(x.ProviderPath);
-			});
 		}
 
 		/// <summary>
@@ -119,35 +97,7 @@ namespace Kyoo.Controllers
 				_ => $"{imageID}.jpg"
 			};
 			
-			// TODO implement a generic way, probably need to rework IFileManager.GetExtraDirectory too.
-			switch (item)
-			{
-				case Show show:
-					return _files.Combine(_files.GetExtraDirectory(show), imageName);
-				
-				case Season season:
-					if (season.Show == null)
-						await _library.Value.Load(season, x => x.Show);
-					return _files.Combine(
-						_files.GetExtraDirectory(season.Show!),
-						$"season-{season.SeasonNumber}-{imageName}");
-				
-				case Episode episode:
-					if (episode.Show == null)
-						await _library.Value.Load(episode, x => x.Show);
-					string dir = _files.Combine(_files.GetExtraDirectory(episode.Show!), "Thumbnails");
-					await _files.CreateDirectory(dir);
-					return _files.Combine(dir, $"{Path.GetFileNameWithoutExtension(episode.Path)}-{imageName}");
-				
-				case People actor:
-					return _files.Combine(_options.CurrentValue.PeoplePath, $"{actor.Slug}-{imageName}");
-				
-				case Provider provider:
-					return _files.Combine(_options.CurrentValue.ProviderPath, $"{provider.Slug}-{imageName}");
-				
-				default:
-					throw new NotSupportedException($"The type {typeof(T).Name} is not supported.");
-			}
+			return _files.Combine(await _files.GetExtraDirectory(item), imageName);
 		}
 	}
 }

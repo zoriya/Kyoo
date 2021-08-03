@@ -3,10 +3,10 @@
     "url": "http://*:5000",
     "publicUrl": "http://localhost:5000/",
     "pluginsPath": "plugins/",
-    "peoplePath": "people/",
-    "providerPath": "providers/",
     "transmuxPath": "cached/transmux",
-    "transcodePath": "cached/transcode"
+    "transcodePath": "cached/transcode",
+    "metadataInShow": true,
+    "metadataPath": "metadata/"
   },
   
   "database": {

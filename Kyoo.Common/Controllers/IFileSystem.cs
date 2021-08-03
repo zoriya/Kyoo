@@ -81,12 +81,13 @@ namespace Kyoo.Controllers
 		public Task<bool> Exists([NotNull] string path);
 
 		/// <summary>
-		/// Get the extra directory of a show.
+		/// Get the extra directory of a resource <typeparamref name="T"/>.
 		/// This method is in this system to allow a filesystem to use a different metadata policy for one.
 		/// It can be useful if the filesystem is readonly.
 		/// </summary>
-		/// <param name="show">The show to proceed</param>
-		/// <returns>The extra directory of the show</returns>
-		public string GetExtraDirectory([NotNull] Show show);
+		/// <param name="resource">The resource to proceed</param>
+		/// <typeparam name="T">The type of the resource.</typeparam>
+		/// <returns>The extra directory of the resource.</returns>
+		public Task<string> GetExtraDirectory<T>([NotNull] T resource);
 	}
 }
