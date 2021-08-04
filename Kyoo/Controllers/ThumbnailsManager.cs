@@ -47,7 +47,9 @@ namespace Kyoo.Controllers
 
 			try
 			{
-				await using Stream reader = await _files.GetReader(url);
+				AsyncRef<string> mime = new();
+				await using Stream reader = await _files.GetReader(url, mime);
+				// TODO use this mime type to guess the file extension.
 				await using Stream local = await _files.NewFile(localPath);
 				await reader.CopyToAsync(local);
 				return true;
@@ -58,7 +60,7 @@ namespace Kyoo.Controllers
 				return false;
 			}
 		}
-		
+
 		/// <inheritdoc />
 		public async Task<bool> DownloadImages<T>(T item, bool alwaysDownload = false) 
 			where T : IThumbnails
@@ -74,28 +76,32 @@ namespace Kyoo.Controllers
 
 			foreach ((int id, string image) in item.Images.Where(x => x.Value != null))
 			{
-				string localPath = await GetImagePath(item, id);
+				string localPath = await _GetPrivateImagePath(item, id);
 				if (alwaysDownload || !await _files.Exists(localPath))
 					ret |= await _DownloadImage(image, localPath, $"The image n°{id} of {name}");
 			}
 			
 			return ret;
 		}
-		
-		/// <inheritdoc />
-		public async Task<string> GetImagePath<T>(T item, int imageID)
-			where T : IThumbnails
+
+		/// <summary>
+		/// Retrieve the local path of an image of the given item <b>without an extension</b>.
+		/// </summary>
+		/// <param name="item">The item to retrieve the poster from.</param>
+		/// <param name="imageID">The ID of the image. See <see cref="Images"/> for values.</param>
+		/// <typeparam name="T">The type of the item</typeparam>
+		/// <returns>The path of the image for the given resource, <b>even if it does not exists</b></returns>
+		private async Task<string> _GetPrivateImagePath<T>(T item, int imageID)
 		{
 			if (item == null)
 				throw new ArgumentNullException(nameof(item));
-			// TODO handle extensions
 			string imageName = imageID switch
 			{
-				Images.Poster => "poster.jpg",
-				Images.Logo => "logo.jpg",
-				Images.Thumbnail => "thumbnail.jpg",
-				Images.Trailer => "trailer.mp4",
-				_ => $"{imageID}.jpg"
+				Images.Poster => "poster",
+				Images.Logo => "logo",
+				Images.Thumbnail => "thumbnail",
+				Images.Trailer => "trailer",
+				_ => $"{imageID}"
 			};
 
 			imageName = item switch
@@ -107,6 +113,17 @@ namespace Kyoo.Controllers
 			};
 
 			return _files.Combine(await _files.GetExtraDirectory(item), imageName);
+		}
+		
+		/// <inheritdoc />
+		public async Task<string> GetImagePath<T>(T item, int imageID)
+			where T : IThumbnails
+		{
+			string basePath = await _GetPrivateImagePath(item, imageID);
+			string directory = Path.GetDirectoryName(basePath);
+			string baseFile = Path.GetFileName(basePath);
+			return (await _files.ListFiles(directory!))
+				.FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == baseFile);
 		}
 	}
 }

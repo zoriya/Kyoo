@@ -78,6 +78,16 @@ namespace Kyoo.Controllers
 				throw new ArgumentNullException(nameof(path));
 			return Task.FromResult<Stream>(File.OpenRead(path));
 		}
+		
+		/// <inheritdoc />
+		public Task<Stream> GetReader(string path, AsyncRef<string> mime)
+		{
+			if (path == null)
+				throw new ArgumentNullException(nameof(path));
+			_provider.TryGetContentType(path, out string mimeValue);
+			mime.Value = mimeValue;
+			return Task.FromResult<Stream>(File.OpenRead(path));
+		}
 
 		/// <inheritdoc />
 		public Task<Stream> NewFile(string path)

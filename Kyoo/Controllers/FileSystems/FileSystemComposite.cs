@@ -108,6 +108,15 @@ namespace Kyoo.Controllers
 		}
 
 		/// <inheritdoc />
+		public Task<Stream> GetReader(string path, AsyncRef<string> mime)
+		{
+			if (path == null)
+				throw new ArgumentNullException(nameof(path));
+			return _GetFileSystemForPath(path, out string relativePath)
+				.GetReader(relativePath, mime);
+		}
+
+		/// <inheritdoc />
 		public Task<Stream> NewFile(string path)
 		{
 			if (path == null)
@@ -181,10 +190,11 @@ namespace Kyoo.Controllers
 					Season season => await GetExtraDirectory(season.Show),
 					Episode episode => await GetExtraDirectory(episode.Show),
 					Track track => await GetExtraDirectory(track.Episode),
-					IResource res => Combine(_options.CurrentValue.MetadataPath, typeof(T).Name, res.Slug),
-					_ => Combine(_options.CurrentValue.MetadataPath, typeof(T).Name)
+					IResource res => Combine(_options.CurrentValue.MetadataPath, 
+						typeof(T).Name.ToLowerInvariant(), res.Slug),
+					_ => Combine(_options.CurrentValue.MetadataPath, typeof(T).Name.ToLowerInvariant())
 				};
-			return path;
+			return await CreateDirectory(path);
 		}
 	}
 }

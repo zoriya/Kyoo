@@ -4,7 +4,6 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Kyoo.Common.Models.Attributes;
-using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kyoo.Controllers
@@ -43,6 +42,16 @@ namespace Kyoo.Controllers
 		{
 			HttpClient client = _clientFactory.CreateClient();
 			return client.GetStreamAsync(path);
+		}
+		
+		/// <inheritdoc />
+		public async Task<Stream> GetReader(string path, AsyncRef<string> mime)
+		{
+			HttpClient client = _clientFactory.CreateClient();
+			HttpResponseMessage response = await client.GetAsync(path);
+			response.EnsureSuccessStatusCode();
+			mime.Value = response.Content.Headers.ContentType?.MediaType;
+			return await response.Content.ReadAsStreamAsync();
 		}
 
 		/// <inheritdoc />
