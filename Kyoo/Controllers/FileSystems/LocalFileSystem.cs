@@ -127,9 +127,9 @@ namespace Kyoo.Controllers
 			return Task.FromResult(resource switch
 			{
 				Show show => Combine(show.Path, "Extra"),
-				Season season => Combine(season.Show.Path, "Extra", "Season"),
-				Episode episode => Combine(episode.Show.Path, "Extra", "Episode"),
-				Track track => Combine(track.Episode.Show.Path, "Track"),
+				Season season => Combine(season.Show.Path, "Extra"),
+				Episode episode => Combine(episode.Show.Path, "Extra"),
+				Track track => Combine(track.Episode.Show.Path, "Extra"),
 				_ => null
 			});
 		}

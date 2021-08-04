@@ -175,12 +175,15 @@ namespace Kyoo.Controllers
 				Track track => _GetFileSystemForPath(track.Episode.Show.Path, out string _),
 				_ => _GetFileSystemForPath(_options.CurrentValue.MetadataPath, out string _)
 			};
-			string path = await fs.GetExtraDirectory(resource);
-			if (resource is IResource res)
-				path ??= Combine(_options.CurrentValue.MetadataPath, res.Slug, typeof(T).Name);
-			else
-				path ??= Combine(_options.CurrentValue.MetadataPath, typeof(T).Name);
-			await CreateDirectory(path);
+			string path = await fs.GetExtraDirectory(resource)
+				?? resource switch
+				{
+					Season season => await GetExtraDirectory(season.Show),
+					Episode episode => await GetExtraDirectory(episode.Show),
+					Track track => await GetExtraDirectory(track.Episode),
+					IResource res => Combine(_options.CurrentValue.MetadataPath, typeof(T).Name, res.Slug),
+					_ => Combine(_options.CurrentValue.MetadataPath, typeof(T).Name)
+				};
 			return path;
 		}
 	}

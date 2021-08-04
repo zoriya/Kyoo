@@ -94,9 +94,18 @@ namespace Kyoo.Controllers
 				Images.Poster => "poster.jpg",
 				Images.Logo => "logo.jpg",
 				Images.Thumbnail => "thumbnail.jpg",
+				Images.Trailer => "trailer.mp4",
 				_ => $"{imageID}.jpg"
 			};
-			
+
+			imageName = item switch
+			{
+				Season season => $"season-{season.SeasonNumber}-{imageName}",
+				Episode episode => _files.Combine("Thumbnails",
+					$"{Path.GetFileNameWithoutExtension(episode.Path)}-{imageName}"),
+				_ => imageName
+			};
+
 			return _files.Combine(await _files.GetExtraDirectory(item), imageName);
 		}
 	}
