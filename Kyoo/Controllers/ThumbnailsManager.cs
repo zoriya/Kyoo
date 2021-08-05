@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Logging;
 
 namespace Kyoo.Controllers
@@ -49,8 +50,10 @@ namespace Kyoo.Controllers
 			{
 				AsyncRef<string> mime = new();
 				await using Stream reader = await _files.GetReader(url, mime);
-				// TODO use this mime type to guess the file extension.
-				await using Stream local = await _files.NewFile(localPath);
+				string extension = new FileExtensionContentTypeProvider()
+					.Mappings.FirstOrDefault(x => x.Value == mime.Value)
+					.Key;
+				await using Stream local = await _files.NewFile(localPath + extension);
 				await reader.CopyToAsync(local);
 				return true;
 			}
@@ -95,6 +98,8 @@ namespace Kyoo.Controllers
 		{
 			if (item == null)
 				throw new ArgumentNullException(nameof(item));
+			
+			string directory = await _files.GetExtraDirectory(item);
 			string imageName = imageID switch
 			{
 				Images.Poster => "poster",
@@ -103,16 +108,19 @@ namespace Kyoo.Controllers
 				Images.Trailer => "trailer",
 				_ => $"{imageID}"
 			};
-
-			imageName = item switch
+			
+			switch (item)
 			{
-				Season season => $"season-{season.SeasonNumber}-{imageName}",
-				Episode episode => _files.Combine("Thumbnails",
-					$"{Path.GetFileNameWithoutExtension(episode.Path)}-{imageName}"),
-				_ => imageName
-			};
+				case Season season:
+					imageName = $"season-{season.SeasonNumber}-{imageName}";
+					break;
+				case Episode episode:
+					directory = await _files.CreateDirectory(_files.Combine(directory, "Thumbnails"));
+					imageName = $"{Path.GetFileNameWithoutExtension(episode.Path)}-{imageName}";
+					break;
+			}
 
-			return _files.Combine(await _files.GetExtraDirectory(item), imageName);
+			return _files.Combine(directory, imageName);
 		}
 		
 		/// <inheritdoc />
