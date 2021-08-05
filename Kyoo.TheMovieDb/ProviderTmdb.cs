@@ -95,7 +95,8 @@ namespace Kyoo.TheMovieDb
 		{
 			if (!show.TryGetID(Provider.Slug, out int id))
 			{
-				Show found = (await _SearchShows(show.Title ?? show.Slug)).FirstOrDefault();
+				Show found = (await _SearchShows(show.Title ?? show.Slug, show.StartAir?.Year))
+					.FirstOrDefault(x => x.IsMovie == show.IsMovie);
 				if (found?.TryGetID(Provider.Slug, out id) != true)
 					return found;
 			}
@@ -228,11 +229,12 @@ namespace Kyoo.TheMovieDb
 		/// Search for a show using it's name as a query.
 		/// </summary>
 		/// <param name="query">The query to search for</param>
+		/// <param name="year">The year in witch the show has aired.</param>
 		/// <returns>A list of shows containing metadata from TheMovieDb</returns>
-		private async Task<ICollection<Show>> _SearchShows(string query)
+		private async Task<ICollection<Show>> _SearchShows(string query, int? year = null)
 		{
 			TMDbClient client = new(_apiKey.Value.ApiKey);
-			return (await client.SearchMultiAsync(query))
+			return (await client.SearchMultiAsync(query, year: year ?? 0))
 				.Results
 				.Select(x =>
 				{
