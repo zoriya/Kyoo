@@ -174,6 +174,13 @@ namespace Kyoo.Tasks
 
 			item = await _metadataProvider.Get(item);
 			await _thumbnailsManager.DownloadImages(item);
+			
+			if (item is Show show && show.People != null)
+			{
+				foreach (PeopleRole role in show.People)
+					await _thumbnailsManager.DownloadImages(role.People);
+			}
+
 			return await _libraryManager.CreateIfNotExists(item);
 		}
 	}
