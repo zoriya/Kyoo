@@ -101,13 +101,13 @@ namespace Kyoo
 		/// <inheritdoc />
 		public void Configure(ContainerBuilder builder)
 		{
-			builder.RegisterComposite<FileSystemComposite, IFileSystem>();
+			builder.RegisterComposite<FileSystemComposite, IFileSystem>().InstancePerLifetimeScope();
 			builder.RegisterType<LocalFileSystem>().As<IFileSystem>().SingleInstance();
 			builder.RegisterType<HttpFileSystem>().As<IFileSystem>().SingleInstance();
 			
 			builder.RegisterType<ConfigurationManager>().As<IConfigurationManager>().SingleInstance();
 			builder.RegisterType<Transcoder>().As<ITranscoder>().SingleInstance();
-			builder.RegisterType<ThumbnailsManager>().As<IThumbnailsManager>().SingleInstance();
+			builder.RegisterType<ThumbnailsManager>().As<IThumbnailsManager>().InstancePerLifetimeScope();
 			builder.RegisterType<TaskManager>().As<ITaskManager>().SingleInstance();
 			builder.RegisterType<LibraryManager>().As<ILibraryManager>().InstancePerLifetimeScope();
 			builder.RegisterType<RegexIdentifier>().As<IIdentifier>().SingleInstance();

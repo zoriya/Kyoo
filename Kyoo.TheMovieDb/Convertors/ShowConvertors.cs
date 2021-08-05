@@ -53,7 +53,7 @@ namespace Kyoo.TheMovieDb
 					new MetadataID
 					{
 						Provider = provider,
-						Link = $"https://www.themoviedb.org/movie/{tv.Id}",
+						Link = $"https://www.themoviedb.org/tv/{tv.Id}",
 						DataID = tv.Id.ToString()
 					}
 				}
@@ -88,7 +88,7 @@ namespace Kyoo.TheMovieDb
 					new MetadataID
 					{
 						Provider = provider,
-						Link = $"https://www.themoviedb.org/movie/{tv.Id}",
+						Link = $"https://www.themoviedb.org/tv/{tv.Id}",
 						DataID = tv.Id.ToString()
 					}
 				}

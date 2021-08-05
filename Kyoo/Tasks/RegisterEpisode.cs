@@ -121,8 +121,6 @@ namespace Kyoo.Tasks
 				if (season != null)
 					season.Show = show;
 				season = await _RegisterAndFill(season);
-				if (season != null)
-					season.Title ??= $"Season {season.SeasonNumber}";
 				progress.Report(60);
 
 				episode.Show = show;
@@ -175,10 +173,15 @@ namespace Kyoo.Tasks
 			item = await _metadataProvider.Get(item);
 			await _thumbnailsManager.DownloadImages(item);
 			
-			if (item is Show show && show.People != null)
+			switch (item)
 			{
-				foreach (PeopleRole role in show.People)
-					await _thumbnailsManager.DownloadImages(role.People);
+				case Show show when show.People != null:
+					foreach (PeopleRole role in show.People)
+						await _thumbnailsManager.DownloadImages(role.People);
+					break;
+				case Season season:
+					season.Title ??= $"Season {season.SeasonNumber}";
+					break;
 			}
 
 			return await _libraryManager.CreateIfNotExists(item);
