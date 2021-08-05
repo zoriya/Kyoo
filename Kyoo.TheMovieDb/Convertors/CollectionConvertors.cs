@@ -17,7 +17,7 @@ namespace Kyoo.TheMovieDb
 		/// <returns>The converted collection as a <see cref="Collection"/>.</returns>
 		public static Collection ToCollection(this TMDbLib.Objects.Collections.Collection collection, Provider provider)
 		{
-			return new()
+			return new Collection
 			{
 				Slug = Utility.ToSlug(collection.Name),
 				Name = collection.Name,
@@ -51,7 +51,7 @@ namespace Kyoo.TheMovieDb
 		/// <returns>The converted collection as a <see cref="Collection"/>.</returns>
 		public static Collection ToCollection(this SearchCollection collection, Provider provider)
 		{
-			return new()
+			return new Collection
 			{
 				Slug = Utility.ToSlug(collection.Name),
 				Name = collection.Name,

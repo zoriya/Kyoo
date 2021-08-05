@@ -95,7 +95,7 @@ namespace Kyoo.TheTvdb
 			Show ret = series.Data.ToShow(Provider);
 			
 			TvDbResponse<Actor[]> people = await _client.Series.GetActorsAsync(id);
-			ret.People = people.Data.Select(x => x.ToPeopleRole(Provider)).ToArray();
+			ret.People = people.Data.Select(x => x.ToPeopleRole()).ToArray();
 			return ret;
 		}
 

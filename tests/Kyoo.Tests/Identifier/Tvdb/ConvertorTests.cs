@@ -124,8 +124,7 @@ namespace Kyoo.Tests.Identifier.Tvdb
 				Name = "Name",
 				Role = "role"
 			};
-			Provider provider = TestSample.Get<Provider>();
-			PeopleRole people = actor.ToPeopleRole(provider);
+			PeopleRole people = actor.ToPeopleRole();
 			
 			Assert.Equal("name", people.Slug);
 			Assert.Equal("Name", people.People.Name);

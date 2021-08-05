@@ -22,7 +22,7 @@ namespace Kyoo.TheMovieDb
 		/// <returns>A <see cref="PeopleRole"/> representing the movie cast.</returns>
 		public static PeopleRole ToPeople(this MovieCast cast, Provider provider)
 		{
-			return new()
+			return new PeopleRole
 			{
 				People = new People
 				{
@@ -57,7 +57,7 @@ namespace Kyoo.TheMovieDb
 		/// <returns>A <see cref="PeopleRole"/> representing the movie cast.</returns>
 		public static PeopleRole ToPeople(this TvCast cast, Provider provider)
 		{
-			return new()
+			return new PeopleRole
 			{
 				People = new People
 				{
@@ -92,7 +92,7 @@ namespace Kyoo.TheMovieDb
 		/// <returns>A <see cref="PeopleRole"/> representing the movie crew.</returns>
 		public static PeopleRole ToPeople(this Crew crew, Provider provider)
 		{
-			return new()
+			return new PeopleRole
 			{
 				People = new People
 				{
@@ -127,7 +127,7 @@ namespace Kyoo.TheMovieDb
 		/// <returns>A <see cref="People"/> representing the person.</returns>
 		public static People ToPeople(this Person person, Provider provider)
 		{
-			return new()
+			return new People
 			{
 				Slug = Utility.ToSlug(person.Name),
 				Name = person.Name,
@@ -157,7 +157,7 @@ namespace Kyoo.TheMovieDb
 		/// <returns>A <see cref="People"/> representing the person.</returns>
 		public static People ToPeople(this SearchPerson person, Provider provider)
 		{
-			return new()
+			return new People
 			{
 				Slug = Utility.ToSlug(person.Name),
 				Name = person.Name,

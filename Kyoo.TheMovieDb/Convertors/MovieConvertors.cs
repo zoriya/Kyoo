@@ -19,7 +19,7 @@ namespace Kyoo.TheMovieDb
 		/// <returns>The converted movie as a <see cref="Show"/>.</returns>
 		public static Show ToShow(this Movie movie, Provider provider)
 		{
-			return new()
+			return new Show
 			{
 				Slug = Utility.ToSlug(movie.Title),
 				Title = movie.Title,
@@ -69,7 +69,7 @@ namespace Kyoo.TheMovieDb
 		/// <returns>The converted movie as a <see cref="Show"/>.</returns>
 		public static Show ToShow(this SearchMovie movie, Provider provider)
 		{
-			return new()
+			return new Show
 			{
 				Slug = Utility.ToSlug(movie.Title),
 				Title = movie.Title,

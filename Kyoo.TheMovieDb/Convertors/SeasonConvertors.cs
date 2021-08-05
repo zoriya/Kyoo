@@ -18,7 +18,7 @@ namespace Kyoo.TheMovieDb
 		/// <returns>The converted season as a <see cref="Season"/>.</returns>
 		public static Season ToSeason(this TvSeason season, int showID, Provider provider)
 		{
-			return new()
+			return new Season
 			{
 				SeasonNumber = season.SeasonNumber,
 				Title = season.Name,

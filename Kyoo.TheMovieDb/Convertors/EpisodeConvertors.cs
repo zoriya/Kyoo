@@ -18,7 +18,7 @@ namespace Kyoo.TheMovieDb
 		/// <returns>The converted episode as a <see cref="Episode"/>.</returns>
 		public static Episode ToEpisode(this TvEpisode episode, int showID, Provider provider)
 		{
-			return new()
+			return new Episode
 			{
 				SeasonNumber = episode.SeasonNumber,
 				EpisodeNumber = episode.EpisodeNumber,

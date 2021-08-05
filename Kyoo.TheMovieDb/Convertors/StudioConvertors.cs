@@ -17,7 +17,7 @@ namespace Kyoo.TheMovieDb
 		/// <returns>The converted company as a <see cref="Studio"/>.</returns>
 		public static Studio ToStudio(this Company company, Provider provider)
 		{
-			return new()
+			return new Studio
 			{
 				Slug = Utility.ToSlug(company.Name),
 				Name = company.Name,
@@ -41,7 +41,7 @@ namespace Kyoo.TheMovieDb
 		/// <returns>The converted company as a <see cref="Studio"/>.</returns>
 		public static Studio ToStudio(this SearchCompany company, Provider provider)
 		{
-			return new()
+			return new Studio
 			{
 				Slug = Utility.ToSlug(company.Name),
 				Name = company.Name,

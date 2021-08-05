@@ -48,7 +48,7 @@ namespace Kyoo.TheTvdb
 		/// <returns>A show representing the given search result.</returns>
 		public static Show ToShow(this SeriesSearchResult result, Provider provider)
 		{
-			return new()
+			return new Show
 			{
 				Slug = result.Slug,
 				Title = result.SeriesName,
@@ -58,7 +58,7 @@ namespace Kyoo.TheTvdb
 				StartAir = _ParseDate(result.FirstAired),
 				Images = new Dictionary<int, string>
 				{
-					[Images.Poster] = result.Poster != null
+					[Images.Poster] = string.IsNullOrEmpty(result.Poster)
 						? $"https://www.thetvdb.com{result.Poster}" 
 						: null,
 				},
@@ -82,7 +82,7 @@ namespace Kyoo.TheTvdb
 		/// <returns>A show representing the given series.</returns>
 		public static Show ToShow(this Series series, Provider provider)
 		{
-			return new()
+			return new Show
 			{
 				Slug = series.Slug,
 				Title = series.SeriesName,
@@ -92,10 +92,10 @@ namespace Kyoo.TheTvdb
 				StartAir = _ParseDate(series.FirstAired),
 				Images = new Dictionary<int, string>
 				{
-					[Images.Poster] = series.Poster != null
+					[Images.Poster] = string.IsNullOrEmpty(series.Poster)
 					 	? $"https://www.thetvdb.com/banners/{series.Poster}" 
 					 	: null,
-					[Images.Thumbnail] = series.FanArt != null
+					[Images.Thumbnail] = string.IsNullOrEmpty(series.FanArt)
 					 	? $"https://www.thetvdb.com/banners/{series.FanArt}" 
 					 	: null
 				},
@@ -116,11 +116,10 @@ namespace Kyoo.TheTvdb
 		/// Convert a tvdb actor to a kyoo <see cref="PeopleRole"/>.
 		/// </summary>
 		/// <param name="actor">The actor to convert</param>
-		/// <param name="provider">The provider representing the tvdb inside kyoo</param>
 		/// <returns>A people role representing the given actor in the role they played.</returns>
-		public static PeopleRole ToPeopleRole(this Actor actor, Provider provider)
+		public static PeopleRole ToPeopleRole(this Actor actor)
 		{
-			return new()
+			return new PeopleRole
 			{
 				People = new People
 				{
@@ -128,18 +127,9 @@ namespace Kyoo.TheTvdb
 					Name = actor.Name,
 					Images = new Dictionary<int, string> 
 					{
-						[Images.Poster] = actor.Image != null 
+						[Images.Poster] = string.IsNullOrEmpty(actor.Image) 
 							? $"https://www.thetvdb.com/banners/{actor.Image}" 
 							: null
-					},
-					ExternalIDs = new []
-					{
-						new MetadataID
-						{
-							DataID = actor.Id.ToString(),
-							Link = $"https://www.thetvdb.com/people/{actor.Id}",
-							Provider = provider
-						}
 					}
 				},
 				Role = actor.Role,
@@ -155,7 +145,7 @@ namespace Kyoo.TheTvdb
 		/// <returns>A episode representing the given tvdb episode.</returns>
 		public static Episode ToEpisode(this EpisodeRecord episode, Provider provider)
 		{
-			return new()
+			return new Episode
 			{
 				SeasonNumber = episode.AiredSeason,
 				EpisodeNumber = episode.AiredEpisodeNumber,
@@ -164,7 +154,7 @@ namespace Kyoo.TheTvdb
 				Overview = episode.Overview,
 				Images = new Dictionary<int, string>
 				{
-					[Images.Thumbnail] = episode.Filename != null 
+					[Images.Thumbnail] = string.IsNullOrEmpty(episode.Filename) 
 						? $"https://www.thetvdb.com/banners/{episode.Filename}" 
 						: null
 				},
