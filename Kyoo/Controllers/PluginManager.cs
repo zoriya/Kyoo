@@ -136,6 +136,12 @@ namespace Kyoo.Controllers
 		}
 
 		/// <inheritdoc />
+		public void LoadPlugins(params Type[] plugins)
+		{
+			throw new NotImplementedException();
+		}
+
+		/// <inheritdoc />
 		public void ConfigureContainer(ContainerBuilder builder)
 		{
 			foreach (IPlugin plugin in _plugins)

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Autofac;
 using Kyoo.Models.Exceptions;
@@ -41,6 +42,15 @@ namespace Kyoo.Controllers
 		/// You should not try to put plugins from the plugins directory here as they will get automatically loaded.
 		/// </param>
 		public void LoadPlugins(ICollection<IPlugin> plugins);
+		
+		/// <summary>
+		/// Load plugins and their dependencies from the plugin directory.
+		/// </summary>
+		/// <param name="plugins">
+		/// An initial plugin list to use.
+		/// You should not try to put plugins from the plugins directory here as they will get automatically loaded.
+		/// </param>
+		public void LoadPlugins(params Type[] plugins);
 
 		/// <summary>
 		/// Configure container adding or removing services as the plugins wants.

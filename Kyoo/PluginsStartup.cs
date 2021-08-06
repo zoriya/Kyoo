@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Autofac;
 using Autofac.Extras.AttributeMetadata;
@@ -6,6 +7,7 @@ using Kyoo.Authentication;
 using Kyoo.Controllers;
 using Kyoo.Models.Options;
 using Kyoo.Postgresql;
+using Kyoo.SqLite;
 using Kyoo.Tasks;
 using Kyoo.TheMovieDb;
 using Kyoo.TheTvdb;
@@ -23,43 +25,28 @@ namespace Kyoo
 	/// <summary>
 	/// The Startup class is used to configure the AspNet's webhost.
 	/// </summary>
-	public class Startup
+	public class PluginsStartup
 	{
 		/// <summary>
 		/// A plugin manager used to load plugins and allow them to configure services / asp net.
 		/// </summary>
 		private readonly IPluginManager _plugins;
-
-
+		
 		/// <summary>
 		/// Created from the DI container, those services are needed to load information and instantiate plugins.s
 		/// </summary>
-		/// <param name="hostEnvironment">
-		/// The host environment that could be used by plugins to configure themself.
-		/// </param>
-		/// <param name="configuration">The configuration context</param>
-		/// <param name="loggerFactory">A logger factory used to create a logger for the plugin manager.</param>
-		public Startup(IWebHostEnvironment hostEnvironment, 
-			IConfiguration configuration, 
-			ILoggerFactory loggerFactory)
+		/// <param name="plugins">The plugin manager to use to load new plugins and configure the host.</param>
+		public PluginsStartup(IPluginManager plugins)
 		{
-			HostServiceProvider hostProvider = new(hostEnvironment, configuration, loggerFactory);
-			_plugins = new PluginManager(
-				hostProvider, 
-				Options.Create(configuration.GetSection(BasicOptions.Path).Get<BasicOptions>()),
-				loggerFactory.CreateLogger<PluginManager>()
+			_plugins = plugins;
+			_plugins.LoadPlugins(
+				typeof(CoreModule), 
+				typeof(AuthenticationModule),
+				typeof(PostgresModule),
+				typeof(SqLiteModule),
+				typeof(PluginTvdb),
+				typeof(PluginTmdb)
 			);
-			
-			// TODO maybe keep all core-plugins here to simplify the build process but use their typeof in the method
-			// (to allow simple constructor changes), leaving the instantiation responsibility to the plugin manager.
-			_plugins.LoadPlugins(new IPlugin[] {
-				new CoreModule(configuration), 
-				new PostgresModule(configuration, hostEnvironment),
-				// new SqLiteModule(configuration, host),
-				new AuthenticationModule(configuration, loggerFactory, hostEnvironment),
-				new PluginTvdb(configuration),
-				new PluginTmdb(configuration)
-			});
 		}
 
 		/// <summary>
@@ -140,6 +127,34 @@ namespace Kyoo
 				if (env.IsDevelopment())
 					spa.UseAngularCliServer("start");
 			});
+		}
+		
+		
+		/// <summary>
+		/// Create a new <see cref="PluginsStartup"/> from a webhost.
+		/// This is meant to be used from <see cref="WebHostBuilderExtensions.UseStartup"/>.
+		/// </summary>
+		/// <param name="host">The context of the web host.</param>
+		/// <param name="loggingConfiguration">
+		/// The method used to configure the logger factory used by the plugin manager and plugins during startup.
+		/// </param>
+		/// <returns>A new <see cref="PluginsStartup"/>.</returns>
+		public static PluginsStartup FromWebHost(WebHostBuilderContext host, 
+			Action<HostBuilderContext, ILoggingBuilder> loggingConfiguration)
+		{
+			HostBuilderContext genericHost = new(new Dictionary<object, object>())
+			{
+				Configuration = host.Configuration,
+				HostingEnvironment = host.HostingEnvironment
+			};
+			ILoggerFactory logger = LoggerFactory.Create(builder => loggingConfiguration(genericHost, builder));
+			HostServiceProvider hostProvider = new(host.HostingEnvironment, host.Configuration, logger);
+			PluginManager plugins = new(
+				hostProvider,
+				Options.Create(host.Configuration.GetSection(BasicOptions.Path).Get<BasicOptions>()),
+				logger.CreateLogger<PluginManager>()
+			);
+			return new PluginsStartup(plugins);
 		}
 		
 		/// <summary>

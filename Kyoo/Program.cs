@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
 using Autofac.Extensions.DependencyInjection;
+using Kyoo.Controllers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -124,26 +125,8 @@ namespace Kyoo
 					.UseIIS()
 					.UseIISIntegration()
 					.UseUrls(configuration.GetValue<string>("basics:url"))
-					.UseStartup(host => new Startup(
-						host.HostingEnvironment, 
-						host.Configuration, 
-						LoggerFactory.Create(builder => loggingConfiguration(host.ToGenericHost(), builder)))
-					)
+					.UseStartup(host => PluginsStartup.FromWebHost(host, loggingConfiguration))
 				);
-		}
-
-		/// <summary>
-		/// Convert an <see cref="WebHostBuilderContext"/> to a <see cref="HostBuilderContext"/>.
-		/// </summary>
-		/// <param name="host">The <see cref="WebHostBuilderContext"/> to convert.</param>
-		/// <returns>A <see cref="HostBuilderContext"/> containing the same properties.</returns>
-		private static HostBuilderContext ToGenericHost(this WebHostBuilderContext host)
-		{
-			return new HostBuilderContext(new Dictionary<object, object>())
-			{
-				Configuration = host.Configuration,
-				HostingEnvironment = host.HostingEnvironment
-			};
 		}
 	}
 }
