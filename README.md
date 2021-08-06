@@ -36,14 +36,14 @@ On any system, you will need a running postgres server where Kyoo can connect. T
 use the user `kyoo` with the password `kyooPassword` on the server at `127.0.0.1:5432` (the default postgres url).
 
 You can find nightly prebuild zipped version here:
- - [Windows](https://nightly.link/AnonymusRaccoon/Kyoo/workflows/release/master/kyoo_windows.zip)
- - [MacOS](https://nightly.link/AnonymusRaccoon/Kyoo/workflows/release/master/kyoo_macos.zip)
- - [Linux](https://nightly.link/AnonymusRaccoon/Kyoo/workflows/release/master/kyoo_linux.zip)
+ - [Windows](https://nightly.link/AnonymusRaccoon/Kyoo/workflows/build/master/kyoo_windows.zip)
+ - [MacOS](https://nightly.link/AnonymusRaccoon/Kyoo/workflows/build/master/kyoo_macos.zip)
+ - [Linux](https://nightly.link/AnonymusRaccoon/Kyoo/workflows/build/master/kyoo_linux.zip)
 
 For arch based, debian based or rpm compatible distributions, a package is automatically created and can be downloaded:
- - [Arch](https://nightly.link/AnonymusRaccoon/Kyoo/workflows/release/master/kyoo_arch.zip)
- - [Debian](https://nightly.link/AnonymusRaccoon/Kyoo/workflows/release/master/kyoo_debian.zip)
- - [RPM](https://nightly.link/AnonymusRaccoon/Kyoo/workflows/release/master/kyoo_rpm.zip)
+ - [Arch](https://nightly.link/AnonymusRaccoon/Kyoo/workflows/build/master/kyoo_arch.zip)
+ - [Debian](https://nightly.link/AnonymusRaccoon/Kyoo/workflows/build/master/kyoo_debian.zip)
+ - [RPM](https://nightly.link/AnonymusRaccoon/Kyoo/workflows/build/master/kyoo_rpm.zip)
 
 A docker file is also available and an up-to-date docker image is available at: `ghcr.io/anonymusraccoon/kyoo:master`. An example docker-compose image is available at the root of the repository. You can customise it to feet your needs and use a prebuild image or you can build it from source. To do that, clone the repository with the `--recurse` flag and run `docker-compose up `.
 
