@@ -2,25 +2,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kyoo.Controllers
 {
-	/// <summary>
-	/// A class wrapping a value that will be set after the completion of the task it is related to.
-	/// </summary>
-	/// <remarks>
-	/// This class replace the use of an out parameter on a task since tasks and out can't be combined.
-	/// </remarks>
-	/// <typeparam name="T">The type of the value</typeparam>
-	public class AsyncRef<T>
-	{
-		/// <summary>
-		/// The value that will be set before the completion of the task.
-		/// </summary>
-		public T Value { get; set; }
-	}
-	
 	/// <summary>
 	/// A service to abstract the file system to allow custom file systems (like distant file systems or external providers)
 	/// </summary>

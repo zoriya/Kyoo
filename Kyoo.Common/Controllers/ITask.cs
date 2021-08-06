@@ -55,7 +55,7 @@ namespace Kyoo.Controllers
 		/// <returns>A new task parameter.</returns>
 		public static TaskParameter Create<T>(string name, string description)
 		{
-			return new()
+			return new TaskParameter
 			{
 				Name = name,
 				Description = description,
@@ -72,7 +72,7 @@ namespace Kyoo.Controllers
 		/// <returns>A new task parameter.</returns>
 		public static TaskParameter CreateRequired<T>(string name, string description)
 		{
-			return new()
+			return new TaskParameter
 			{
 				Name = name,
 				Description = description,

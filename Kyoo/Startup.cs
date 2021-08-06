@@ -34,31 +34,36 @@ namespace Kyoo
 		/// <summary>
 		/// Created from the DI container, those services are needed to load information and instantiate plugins.s
 		/// </summary>
-		/// <param name="hostProvider">
-		/// The ServiceProvider used to create this <see cref="Startup"/> instance.
-		/// The host provider that contains only well-known services that are Kyoo independent.
-		/// This is used to instantiate plugins that might need a logger, a configuration or an host environment.
+		/// <param name="hostEnvironment">
+		/// The host environment that could be used by plugins to configure themself.
 		/// </param>
 		/// <param name="configuration">The configuration context</param>
 		/// <param name="loggerFactory">A logger factory used to create a logger for the plugin manager.</param>
-		public Startup(IServiceProvider hostProvider, IConfiguration configuration, ILoggerFactory loggerFactory, IWebHostEnvironment host)
+		public Startup(IWebHostEnvironment hostEnvironment, 
+			IConfiguration configuration, 
+			ILoggerFactory loggerFactory)
 		{
-			IOptionsMonitor<BasicOptions> options = hostProvider.GetService<IOptionsMonitor<BasicOptions>>();
-			_plugins = new PluginManager(hostProvider, options, loggerFactory.CreateLogger<PluginManager>());
+			HostServiceProvider hostProvider = new(hostEnvironment, configuration, loggerFactory);
+			_plugins = new PluginManager(
+				hostProvider, 
+				Options.Create(configuration.GetSection(BasicOptions.Path).Get<BasicOptions>()),
+				loggerFactory.CreateLogger<PluginManager>()
+			);
 			
-			// TODO remove postgres from here and load it like a normal plugin.
+			// TODO maybe keep all core-plugins here to simplify the build process but use their typeof in the method
+			// (to allow simple constructor changes), leaving the instantiation responsibility to the plugin manager.
 			_plugins.LoadPlugins(new IPlugin[] {
 				new CoreModule(configuration), 
-				new PostgresModule(configuration, host),
+				new PostgresModule(configuration, hostEnvironment),
 				// new SqLiteModule(configuration, host),
-				new AuthenticationModule(configuration, loggerFactory, host),
+				new AuthenticationModule(configuration, loggerFactory, hostEnvironment),
 				new PluginTvdb(configuration),
 				new PluginTmdb(configuration)
 			});
 		}
 
 		/// <summary>
-		/// Configure the WebApp services context.
+		/// Configure the services context via the <see cref="PluginManager"/>.
 		/// </summary>
 		/// <param name="services">The service collection to fill.</param>
 		public void ConfigureServices(IServiceCollection services)
@@ -79,6 +84,10 @@ namespace Kyoo
 			_plugins.ConfigureServices(services);
 		}
 
+		/// <summary>
+		/// Configure the autofac container via the <see cref="PluginManager"/>.
+		/// </summary>
+		/// <param name="builder">The builder to configure.</param>
 		public void ConfigureContainer(ContainerBuilder builder)
 		{
 			builder.RegisterModule<AttributedMetadataModule>();
@@ -131,6 +140,58 @@ namespace Kyoo
 				if (env.IsDevelopment())
 					spa.UseAngularCliServer("start");
 			});
+		}
+		
+		/// <summary>
+		/// A simple host service provider used to activate plugins instance.
+		/// The same services as a generic host are available and an <see cref="ILoggerFactory"/> has been added.
+		/// </summary>
+		private class HostServiceProvider : IServiceProvider
+		{
+			/// <summary>
+			/// The host environment that could be used by plugins to configure themself.
+			/// </summary>
+			private readonly IWebHostEnvironment _hostEnvironment;
+			
+			/// <summary>
+			/// The configuration context.
+			/// </summary>
+			private readonly IConfiguration _configuration;
+			
+			/// <summary>
+			/// A logger factory used to create a logger for the plugin manager.
+			/// </summary>
+			private readonly ILoggerFactory _loggerFactory;
+
+			
+			/// <summary>
+			/// Create a new <see cref="HostServiceProvider"/> that will return given services when asked.
+			/// </summary>
+			/// <param name="hostEnvironment">
+			/// The host environment that could be used by plugins to configure themself.
+			/// </param>
+			/// <param name="configuration">The configuration context</param>
+			/// <param name="loggerFactory">A logger factory used to create a logger for the plugin manager.</param>
+			public HostServiceProvider(IWebHostEnvironment hostEnvironment,
+				IConfiguration configuration,
+				ILoggerFactory loggerFactory)
+			{
+				_hostEnvironment = hostEnvironment;
+				_configuration = configuration;
+				_loggerFactory = loggerFactory;
+			}
+
+			/// <inheritdoc />
+			public object GetService(Type serviceType)
+			{
+				if (serviceType == typeof(IWebHostEnvironment) || serviceType == typeof(IHostEnvironment))
+					return _hostEnvironment;
+				if (serviceType == typeof(IConfiguration))
+					return _configuration;
+				if (serviceType == typeof(ILoggerFactory))
+					return _loggerFactory;
+				return null;
+			}
 		}
 	}
 }

@@ -26,7 +26,7 @@ namespace Kyoo.Controllers
 		/// <summary>
 		/// The configuration to get the plugin's directory.
 		/// </summary>
-		private readonly IOptionsMonitor<BasicOptions> _options;
+		private readonly IOptions<BasicOptions> _options;
 		/// <summary>
 		/// The logger used by this class. 
 		/// </summary>
@@ -44,7 +44,7 @@ namespace Kyoo.Controllers
 		/// <param name="options">The configuration instance, to get the plugin's directory path.</param>
 		/// <param name="logger">The logger used by this class.</param>
 		public PluginManager(IServiceProvider provider,
-			IOptionsMonitor<BasicOptions> options,
+			IOptions<BasicOptions> options,
 			ILogger<PluginManager> logger)
 		{
 			_provider = provider;
@@ -106,7 +106,7 @@ namespace Kyoo.Controllers
 		/// <inheritdoc />
 		public void LoadPlugins(ICollection<IPlugin> plugins)
 		{
-			string pluginFolder = _options.CurrentValue.PluginPath;
+			string pluginFolder = _options.Value.PluginPath;
 			if (!Directory.Exists(pluginFolder))
 				Directory.CreateDirectory(pluginFolder);
 

@@ -5,6 +5,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Kyoo.Common.Models.Attributes;
+using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kyoo.Controllers
