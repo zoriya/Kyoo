@@ -38,18 +38,24 @@ namespace Kyoo.Controllers
 		}
 
 		/// <inheritdoc />
+		protected override async Task Validate(Track resource)
+		{
+			await base.Validate(resource);
+			if (resource.EpisodeID <= 0)
+			{
+				resource.EpisodeID = resource.Episode?.ID ?? 0;
+				if (resource.EpisodeID <= 0)
+					throw new ArgumentException("Can't store a track not related to any episode " +
+						$"(episodeID: {resource.EpisodeID}).");
+			}
+		}
+
+		/// <inheritdoc />
 		public override async Task<Track> Create(Track obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
-			if (obj.EpisodeID <= 0)
-			{
-				obj.EpisodeID = obj.Episode?.ID ?? 0;
-				if (obj.EpisodeID <= 0)
-					throw new InvalidOperationException($"Can't store a track not related to any episode (episodeID: {obj.EpisodeID}).");
-			}
-			
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
 			await _database.SaveChangesAsync();

@@ -10,7 +10,7 @@ namespace Kyoo.Models
 	/// <summary>
 	/// A class to represent a single show's episode.
 	/// </summary>
-	public class Episode : IResource
+	public class Episode : IResource, IMetadata, IThumbnails
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
@@ -74,9 +74,13 @@ namespace Kyoo.Models
 		/// </summary>
 		[SerializeIgnore] public int? SeasonID { get; set; }
 		/// <summary>
-		/// The season that contains this episode. This must be explicitly loaded via a call to <see cref="ILibraryManager.Load"/>.
-		/// This can be null if the season is unknown and the episode is only identified by it's <see cref="AbsoluteNumber"/>.
+		/// The season that contains this episode.
+		/// This must be explicitly loaded via a call to <see cref="ILibraryManager.Load"/>.
 		/// </summary>
+		/// <remarks>
+		/// This can be null if the season is unknown and the episode is only identified
+		/// by it's <see cref="AbsoluteNumber"/>.
+		/// </remarks>
 		[LoadableRelation(nameof(SeasonID))] public Season Season { get; set; }
 
 		/// <summary>
@@ -85,7 +89,7 @@ namespace Kyoo.Models
 		public int? SeasonNumber { get; set; }
 		
 		/// <summary>
-		/// The number of this episode is it's season.
+		/// The number of this episode in it's season.
 		/// </summary>
 		public int? EpisodeNumber { get; set; }
 		
@@ -98,13 +102,18 @@ namespace Kyoo.Models
 		/// The path of the video file for this episode. Any format supported by a <see cref="IFileSystem"/> is allowed.
 		/// </summary>
 		[SerializeIgnore] public string Path { get; set; }
+		
+		/// <inheritdoc />
+		public Dictionary<int, string> Images { get; set; }
 
 		/// <summary>
 		/// The path of this episode's thumbnail.
 		/// By default, the http path for the thumbnail is returned from the public API.
 		/// This can be disabled using the internal query flag.
 		/// </summary>
-		[SerializeAs("{HOST}/api/episodes/{Slug}/thumb")] public string Thumb { get; set; }
+		[SerializeAs("{HOST}/api/episodes/{Slug}/thumbnail")]
+		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
+		public string Thumb => Images?.GetValueOrDefault(Models.Images.Thumbnail);
 		
 		/// <summary>
 		/// The title of this episode.
@@ -121,10 +130,8 @@ namespace Kyoo.Models
 		/// </summary>
 		public DateTime? ReleaseDate { get; set; }
 
-		/// <summary>
-		/// The link to metadata providers that this episode has. See <see cref="MetadataID{T}"/> for more information.
-		/// </summary>
-		[EditableRelation] [LoadableRelation] public ICollection<MetadataID<Episode>> ExternalIDs { get; set; }
+		/// <inheritdoc />
+		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
 
 		/// <summary>
 		/// The list of tracks this episode has. This lists video, audio and subtitles available.

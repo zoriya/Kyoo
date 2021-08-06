@@ -195,7 +195,7 @@ namespace Kyoo.Api
 			try
 			{
 				Episode episode = await _libraryManager.Get<Episode>(id);
-				return _files.FileResult(await _thumbnails.GetThumbnail(episode));
+				return _files.FileResult(await _thumbnails.GetImagePath(episode, Images.Thumbnail));
 			}
 			catch (ItemNotFoundException)
 			{
@@ -210,7 +210,7 @@ namespace Kyoo.Api
 			try
 			{
 				Episode episode = await _libraryManager.Get<Episode>(slug);
-				return _files.FileResult(await _thumbnails.GetThumbnail(episode));
+				return _files.FileResult(await _thumbnails.GetImagePath(episode, Images.Thumbnail));
 			}
 			catch (ItemNotFoundException)
 			{

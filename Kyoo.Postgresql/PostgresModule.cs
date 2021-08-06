@@ -66,7 +66,7 @@ namespace Kyoo.Postgresql
 				x.UseNpgsql(_configuration.GetDatabaseConnection("postgres"));
 				if (_environment.IsDevelopment())
 					x.EnableDetailedErrors().EnableSensitiveDataLogging();
-			});
+			}, ServiceLifetime.Transient);
 		}
 
 		/// <inheritdoc />

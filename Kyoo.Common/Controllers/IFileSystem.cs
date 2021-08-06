@@ -2,11 +2,25 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
-using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kyoo.Controllers
 {
+	/// <summary>
+	/// A class wrapping a value that will be set after the completion of the task it is related to.
+	/// </summary>
+	/// <remarks>
+	/// This class replace the use of an out parameter on a task since tasks and out can't be combined.
+	/// </remarks>
+	/// <typeparam name="T">The type of the value</typeparam>
+	public class AsyncRef<T>
+	{
+		/// <summary>
+		/// The value that will be set before the completion of the task.
+		/// </summary>
+		public T Value { get; set; }
+	}
+	
 	/// <summary>
 	/// A service to abstract the file system to allow custom file systems (like distant file systems or external providers)
 	/// </summary>
@@ -42,6 +56,16 @@ namespace Kyoo.Controllers
 		/// <exception cref="FileNotFoundException">If the file could not be found.</exception>
 		/// <returns>A reader to read the file.</returns>
 		public Task<Stream> GetReader([NotNull] string path);
+		
+		/// <summary>
+		/// Read a file present at <paramref name="path"/>. The reader can be used in an arbitrary context.
+		/// To return files from an http endpoint, use <see cref="FileResult"/>.
+		/// </summary>
+		/// <param name="path">The path of the file</param>
+		/// <param name="mime">The mime type of the opened file.</param>
+		/// <exception cref="FileNotFoundException">If the file could not be found.</exception>
+		/// <returns>A reader to read the file.</returns>
+		public Task<Stream> GetReader([NotNull] string path, AsyncRef<string> mime);
 
 		/// <summary>
 		/// Create a new file at <paramref name="path"></paramref>.
@@ -81,12 +105,13 @@ namespace Kyoo.Controllers
 		public Task<bool> Exists([NotNull] string path);
 
 		/// <summary>
-		/// Get the extra directory of a show.
+		/// Get the extra directory of a resource <typeparamref name="T"/>.
 		/// This method is in this system to allow a filesystem to use a different metadata policy for one.
 		/// It can be useful if the filesystem is readonly.
 		/// </summary>
-		/// <param name="show">The show to proceed</param>
-		/// <returns>The extra directory of the show</returns>
-		public string GetExtraDirectory([NotNull] Show show);
+		/// <param name="resource">The resource to proceed</param>
+		/// <typeparam name="T">The type of the resource.</typeparam>
+		/// <returns>The extra directory of the resource.</returns>
+		public Task<string> GetExtraDirectory<T>([NotNull] T resource);
 	}
 }

@@ -10,7 +10,7 @@ namespace Kyoo.Models
 	/// <summary>
 	/// A season of a <see cref="Show"/>. 
 	/// </summary>
-	public class Season : IResource
+	public class Season : IResource, IMetadata, IThumbnails
 	{
 		/// <inheritdoc />
 		public int ID  { get; set; }
@@ -45,7 +45,8 @@ namespace Kyoo.Models
 		/// </summary>
 		[SerializeIgnore] public int ShowID { get; set; }
 		/// <summary>
-		/// The show that contains this season. This must be explicitly loaded via a call to <see cref="ILibraryManager.Load"/>.
+		/// The show that contains this season.
+		/// This must be explicitly loaded via a call to <see cref="ILibraryManager.Load"/>.
 		/// </summary>
 		[LoadableRelation(nameof(ShowID))] public Show Show { get; set; }
 
@@ -74,17 +75,20 @@ namespace Kyoo.Models
 		/// </summary>
 		public DateTime? EndDate { get; set; }
 
+		/// <inheritdoc />
+		public Dictionary<int, string> Images { get; set; }
+
 		/// <summary>
 		/// The path of this poster.
 		/// By default, the http path for this poster is returned from the public API.
 		/// This can be disabled using the internal query flag.
 		/// </summary>
-		[SerializeAs("{HOST}/api/seasons/{Slug}/thumb")] public string Poster { get; set; }
+		[SerializeAs("{HOST}/api/seasons/{Slug}/thumb")]
+		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
+		public string Poster => Images?.GetValueOrDefault(Models.Images.Poster);
 		
-		/// <summary>
-		/// The link to metadata providers that this episode has. See <see cref="MetadataID{T}"/> for more information.
-		/// </summary>
-		[EditableRelation] [LoadableRelation] public ICollection<MetadataID<Season>> ExternalIDs { get; set; }
+		/// <inheritdoc />
+		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
 
 		/// <summary>
 		/// The list of episodes that this season contains.

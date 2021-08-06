@@ -36,7 +36,7 @@ namespace Kyoo.Api
 			Provider provider = await _libraryManager.GetOrDefault<Provider>(id);
 			if (provider == null)
 				return NotFound();
-			return _files.FileResult(await _thumbnails.GetLogo(provider));
+			return _files.FileResult(await _thumbnails.GetImagePath(provider, Images.Logo));
 		}
 		
 		[HttpGet("{slug}/logo")]
@@ -45,7 +45,7 @@ namespace Kyoo.Api
 			Provider provider = await _libraryManager.GetOrDefault<Provider>(slug);
 			if (provider == null)
 				return NotFound();
-			return _files.FileResult(await _thumbnails.GetLogo(provider));
+			return _files.FileResult(await _thumbnails.GetImagePath(provider, Images.Logo));
 		}
 	}
 }

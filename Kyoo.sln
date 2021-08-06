@@ -5,8 +5,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Common", "Kyoo.Common\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.CommonAPI", "Kyoo.CommonAPI\Kyoo.CommonAPI.csproj", "{6F91B645-F785-46BB-9C4F-1EFC83E489B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Tests", "Kyoo.Tests\Kyoo.Tests.csproj", "{D179D5FF-9F75-4B27-8E27-0DBDF1806611}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Postgresql", "Kyoo.Postgresql\Kyoo.Postgresql.csproj", "{3213C96D-0BF3-460B-A8B5-B9977229408A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Authentication", "Kyoo.Authentication\Kyoo.Authentication.csproj", "{7A841335-6523-47DB-9717-80AA7BD943FD}"
@@ -14,6 +12,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.SqLite", "Kyoo.SqLite\Kyoo.SqLite.csproj", "{6515380E-1E57-42DA-B6E3-E1C8A848818A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.TheTvdb", "Kyoo.TheTvdb\Kyoo.TheTvdb.csproj", "{D06BF829-23F5-40F3-A62D-627D9F4B4D6C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.TheMovieDb", "Kyoo.TheMovieDb\Kyoo.TheMovieDb.csproj", "{BAB270D4-E0EA-4329-BA65-512FDAB01001}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Tests", "tests\Kyoo.Tests\Kyoo.Tests.csproj", "{0C8AA7EA-E723-4532-852F-35AA4E8AFED5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,10 +35,6 @@ Global
 		{6F91B645-F785-46BB-9C4F-1EFC83E489B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6F91B645-F785-46BB-9C4F-1EFC83E489B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F91B645-F785-46BB-9C4F-1EFC83E489B6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D179D5FF-9F75-4B27-8E27-0DBDF1806611}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D179D5FF-9F75-4B27-8E27-0DBDF1806611}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D179D5FF-9F75-4B27-8E27-0DBDF1806611}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D179D5FF-9F75-4B27-8E27-0DBDF1806611}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3213C96D-0BF3-460B-A8B5-B9977229408A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3213C96D-0BF3-460B-A8B5-B9977229408A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3213C96D-0BF3-460B-A8B5-B9977229408A}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -53,5 +51,13 @@ Global
 		{D06BF829-23F5-40F3-A62D-627D9F4B4D6C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D06BF829-23F5-40F3-A62D-627D9F4B4D6C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D06BF829-23F5-40F3-A62D-627D9F4B4D6C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BAB270D4-E0EA-4329-BA65-512FDAB01001}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAB270D4-E0EA-4329-BA65-512FDAB01001}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAB270D4-E0EA-4329-BA65-512FDAB01001}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAB270D4-E0EA-4329-BA65-512FDAB01001}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C8AA7EA-E723-4532-852F-35AA4E8AFED5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C8AA7EA-E723-4532-852F-35AA4E8AFED5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C8AA7EA-E723-4532-852F-35AA4E8AFED5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C8AA7EA-E723-4532-852F-35AA4E8AFED5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -151,7 +151,7 @@ namespace Kyoo.Api
 			if (season == null)
 				return NotFound();
 			await _libraryManager.Load(season, x => x.Show);
-			return _files.FileResult(await _thumbs.GetPoster(season));
+			return _files.FileResult(await _thumbs.GetImagePath(season, Images.Poster));
 		}
 		
 		[HttpGet("{slug}/poster")]
@@ -161,7 +161,7 @@ namespace Kyoo.Api
 			if (season == null)
 				return NotFound();
 			await _libraryManager.Load(season, x => x.Show);
-			return _files.FileResult(await _thumbs.GetPoster(season));
+			return _files.FileResult(await _thumbs.GetImagePath(season, Images.Poster));
 		}
 	}
 }

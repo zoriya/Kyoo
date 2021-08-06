@@ -4,8 +4,10 @@ using System.IO;
 using System.Threading.Tasks;
 using Kyoo.Common.Models.Attributes;
 using Kyoo.Models;
+using Kyoo.Models.Options;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Extensions.Options;
 
 namespace Kyoo.Controllers
 {
@@ -19,6 +21,20 @@ namespace Kyoo.Controllers
 		/// An extension provider to get content types from files extensions.
 		/// </summary>
 		private FileExtensionContentTypeProvider _provider;
+
+		/// <summary>
+		/// Options to check if the metadata should be kept in the show directory or in a kyoo's directory.
+		/// </summary>
+		private readonly IOptionsMonitor<BasicOptions> _options;
+
+		/// <summary>
+		/// Create a new <see cref="LocalFileSystem"/> with the specified options.
+		/// </summary>
+		/// <param name="options">The options to use.</param>
+		public LocalFileSystem(IOptionsMonitor<BasicOptions> options)
+		{
+			_options = options;
+		}
 
 		/// <summary>
 		/// Get the content type of a file using it's extension.
@@ -60,6 +76,16 @@ namespace Kyoo.Controllers
 		{
 			if (path == null)
 				throw new ArgumentNullException(nameof(path));
+			return Task.FromResult<Stream>(File.OpenRead(path));
+		}
+		
+		/// <inheritdoc />
+		public Task<Stream> GetReader(string path, AsyncRef<string> mime)
+		{
+			if (path == null)
+				throw new ArgumentNullException(nameof(path));
+			_provider.TryGetContentType(path, out string mimeValue);
+			mime.Value = mimeValue;
 			return Task.FromResult<Stream>(File.OpenRead(path));
 		}
 
@@ -104,11 +130,18 @@ namespace Kyoo.Controllers
 		}
 		
 		/// <inheritdoc />
-		public string GetExtraDirectory(Show show)
+		public Task<string> GetExtraDirectory<T>(T resource)
 		{
-			string path = Path.Combine(show.Path, "Extra");
-			Directory.CreateDirectory(path);
-			return path;
+			if (!_options.CurrentValue.MetadataInShow)
+				return Task.FromResult<string>(null);
+			return Task.FromResult(resource switch
+			{
+				Show show => Combine(show.Path, "Extra"),
+				Season season => Combine(season.Show.Path, "Extra"),
+				Episode episode => Combine(episode.Show.Path, "Extra"),
+				Track track => Combine(track.Episode.Show.Path, "Extra"),
+				_ => null
+			});
 		}
 	}
 }

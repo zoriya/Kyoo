@@ -32,6 +32,10 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnName("id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
+                    b.Property<Dictionary<int, string>>("Images")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("images");
+
                     b.Property<string>("Name")
                         .HasColumnType("text")
                         .HasColumnName("name");
@@ -39,10 +43,6 @@ namespace Kyoo.Postgresql.Migrations
                     b.Property<string>("Overview")
                         .HasColumnType("text")
                         .HasColumnName("overview");
-
-                    b.Property<string>("Poster")
-                        .HasColumnType("text")
-                        .HasColumnName("poster");
 
                     b.Property<string>("Slug")
                         .IsRequired()
@@ -75,6 +75,10 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("episode_number");
 
+                    b.Property<Dictionary<int, string>>("Images")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("images");
+
                     b.Property<string>("Overview")
                         .HasColumnType("text")
                         .HasColumnName("overview");
@@ -103,10 +107,6 @@ namespace Kyoo.Postgresql.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("text")
                         .HasColumnName("slug");
-
-                    b.Property<string>("Thumb")
-                        .HasColumnType("text")
-                        .HasColumnName("thumb");
 
                     b.Property<string>("Title")
                         .HasColumnType("text")
@@ -198,13 +198,13 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("end_air");
 
+                    b.Property<Dictionary<int, string>>("Images")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("images");
+
                     b.Property<string>("Overview")
                         .HasColumnType("text")
                         .HasColumnName("overview");
-
-                    b.Property<string>("Poster")
-                        .HasColumnType("text")
-                        .HasColumnName("poster");
 
                     b.Property<string>("Slug")
                         .HasColumnType("text")
@@ -232,228 +232,6 @@ namespace Kyoo.Postgresql.Migrations
                     b.ToView("library_items");
                 });
 
-            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Collection, Kyoo.Models.Show>", b =>
-                {
-                    b.Property<int>("FirstID")
-                        .HasColumnType("integer")
-                        .HasColumnName("first_id");
-
-                    b.Property<int>("SecondID")
-                        .HasColumnType("integer")
-                        .HasColumnName("second_id");
-
-                    b.HasKey("FirstID", "SecondID")
-                        .HasName("pk_link_collection_show");
-
-                    b.HasIndex("SecondID")
-                        .HasDatabaseName("ix_link_collection_show_second_id");
-
-                    b.ToTable("link_collection_show");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Library, Kyoo.Models.Collection>", b =>
-                {
-                    b.Property<int>("FirstID")
-                        .HasColumnType("integer")
-                        .HasColumnName("first_id");
-
-                    b.Property<int>("SecondID")
-                        .HasColumnType("integer")
-                        .HasColumnName("second_id");
-
-                    b.HasKey("FirstID", "SecondID")
-                        .HasName("pk_link_library_collection");
-
-                    b.HasIndex("SecondID")
-                        .HasDatabaseName("ix_link_library_collection_second_id");
-
-                    b.ToTable("link_library_collection");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Library, Kyoo.Models.Provider>", b =>
-                {
-                    b.Property<int>("FirstID")
-                        .HasColumnType("integer")
-                        .HasColumnName("first_id");
-
-                    b.Property<int>("SecondID")
-                        .HasColumnType("integer")
-                        .HasColumnName("second_id");
-
-                    b.HasKey("FirstID", "SecondID")
-                        .HasName("pk_link_library_provider");
-
-                    b.HasIndex("SecondID")
-                        .HasDatabaseName("ix_link_library_provider_second_id");
-
-                    b.ToTable("link_library_provider");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Library, Kyoo.Models.Show>", b =>
-                {
-                    b.Property<int>("FirstID")
-                        .HasColumnType("integer")
-                        .HasColumnName("first_id");
-
-                    b.Property<int>("SecondID")
-                        .HasColumnType("integer")
-                        .HasColumnName("second_id");
-
-                    b.HasKey("FirstID", "SecondID")
-                        .HasName("pk_link_library_show");
-
-                    b.HasIndex("SecondID")
-                        .HasDatabaseName("ix_link_library_show_second_id");
-
-                    b.ToTable("link_library_show");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Show, Kyoo.Models.Genre>", b =>
-                {
-                    b.Property<int>("FirstID")
-                        .HasColumnType("integer")
-                        .HasColumnName("first_id");
-
-                    b.Property<int>("SecondID")
-                        .HasColumnType("integer")
-                        .HasColumnName("second_id");
-
-                    b.HasKey("FirstID", "SecondID")
-                        .HasName("pk_link_show_genre");
-
-                    b.HasIndex("SecondID")
-                        .HasDatabaseName("ix_link_show_genre_second_id");
-
-                    b.ToTable("link_show_genre");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.User, Kyoo.Models.Show>", b =>
-                {
-                    b.Property<int>("FirstID")
-                        .HasColumnType("integer")
-                        .HasColumnName("first_id");
-
-                    b.Property<int>("SecondID")
-                        .HasColumnType("integer")
-                        .HasColumnName("second_id");
-
-                    b.HasKey("FirstID", "SecondID")
-                        .HasName("pk_link_user_show");
-
-                    b.HasIndex("SecondID")
-                        .HasDatabaseName("ix_link_user_show_second_id");
-
-                    b.ToTable("link_user_show");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.MetadataID<Kyoo.Models.Episode>", b =>
-                {
-                    b.Property<int>("FirstID")
-                        .HasColumnType("integer")
-                        .HasColumnName("first_id");
-
-                    b.Property<int>("SecondID")
-                        .HasColumnType("integer")
-                        .HasColumnName("second_id");
-
-                    b.Property<string>("DataID")
-                        .HasColumnType("text")
-                        .HasColumnName("data_id");
-
-                    b.Property<string>("Link")
-                        .HasColumnType("text")
-                        .HasColumnName("link");
-
-                    b.HasKey("FirstID", "SecondID")
-                        .HasName("pk_metadata_id_episode");
-
-                    b.HasIndex("SecondID")
-                        .HasDatabaseName("ix_metadata_id_episode_second_id");
-
-                    b.ToTable("metadata_id_episode");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.MetadataID<Kyoo.Models.People>", b =>
-                {
-                    b.Property<int>("FirstID")
-                        .HasColumnType("integer")
-                        .HasColumnName("first_id");
-
-                    b.Property<int>("SecondID")
-                        .HasColumnType("integer")
-                        .HasColumnName("second_id");
-
-                    b.Property<string>("DataID")
-                        .HasColumnType("text")
-                        .HasColumnName("data_id");
-
-                    b.Property<string>("Link")
-                        .HasColumnType("text")
-                        .HasColumnName("link");
-
-                    b.HasKey("FirstID", "SecondID")
-                        .HasName("pk_metadata_id_people");
-
-                    b.HasIndex("SecondID")
-                        .HasDatabaseName("ix_metadata_id_people_second_id");
-
-                    b.ToTable("metadata_id_people");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.MetadataID<Kyoo.Models.Season>", b =>
-                {
-                    b.Property<int>("FirstID")
-                        .HasColumnType("integer")
-                        .HasColumnName("first_id");
-
-                    b.Property<int>("SecondID")
-                        .HasColumnType("integer")
-                        .HasColumnName("second_id");
-
-                    b.Property<string>("DataID")
-                        .HasColumnType("text")
-                        .HasColumnName("data_id");
-
-                    b.Property<string>("Link")
-                        .HasColumnType("text")
-                        .HasColumnName("link");
-
-                    b.HasKey("FirstID", "SecondID")
-                        .HasName("pk_metadata_id_season");
-
-                    b.HasIndex("SecondID")
-                        .HasDatabaseName("ix_metadata_id_season_second_id");
-
-                    b.ToTable("metadata_id_season");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.MetadataID<Kyoo.Models.Show>", b =>
-                {
-                    b.Property<int>("FirstID")
-                        .HasColumnType("integer")
-                        .HasColumnName("first_id");
-
-                    b.Property<int>("SecondID")
-                        .HasColumnType("integer")
-                        .HasColumnName("second_id");
-
-                    b.Property<string>("DataID")
-                        .HasColumnType("text")
-                        .HasColumnName("data_id");
-
-                    b.Property<string>("Link")
-                        .HasColumnType("text")
-                        .HasColumnName("link");
-
-                    b.HasKey("FirstID", "SecondID")
-                        .HasName("pk_metadata_id_show");
-
-                    b.HasIndex("SecondID")
-                        .HasDatabaseName("ix_metadata_id_show_second_id");
-
-                    b.ToTable("metadata_id_show");
-                });
-
             modelBuilder.Entity("Kyoo.Models.People", b =>
                 {
                     b.Property<int>("ID")
@@ -462,13 +240,13 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnName("id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
+                    b.Property<Dictionary<int, string>>("Images")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("images");
+
                     b.Property<string>("Name")
                         .HasColumnType("text")
                         .HasColumnName("name");
-
-                    b.Property<string>("Poster")
-                        .HasColumnType("text")
-                        .HasColumnName("poster");
 
                     b.Property<string>("Slug")
                         .IsRequired()
@@ -492,10 +270,6 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
-
-                    b.Property<bool>("ForPeople")
-                        .HasColumnType("boolean")
-                        .HasColumnName("for_people");
 
                     b.Property<int>("PeopleID")
                         .HasColumnType("integer")
@@ -533,13 +307,9 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnName("id")
                         .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
 
-                    b.Property<string>("Logo")
-                        .HasColumnType("text")
-                        .HasColumnName("logo");
-
-                    b.Property<string>("LogoExtension")
-                        .HasColumnType("text")
-                        .HasColumnName("logo_extension");
+                    b.Property<Dictionary<int, string>>("Images")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("images");
 
                     b.Property<string>("Name")
                         .HasColumnType("text")
@@ -572,13 +342,13 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("end_date");
 
+                    b.Property<Dictionary<int, string>>("Images")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("images");
+
                     b.Property<string>("Overview")
                         .HasColumnType("text")
                         .HasColumnName("overview");
-
-                    b.Property<string>("Poster")
-                        .HasColumnType("text")
-                        .HasColumnName("poster");
 
                     b.Property<int>("SeasonNumber")
                         .HasColumnType("integer")
@@ -627,21 +397,17 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("text[]")
                         .HasColumnName("aliases");
 
-                    b.Property<string>("Backdrop")
-                        .HasColumnType("text")
-                        .HasColumnName("backdrop");
-
                     b.Property<DateTime?>("EndAir")
                         .HasColumnType("timestamp without time zone")
                         .HasColumnName("end_air");
 
+                    b.Property<Dictionary<int, string>>("Images")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("images");
+
                     b.Property<bool>("IsMovie")
                         .HasColumnType("boolean")
                         .HasColumnName("is_movie");
-
-                    b.Property<string>("Logo")
-                        .HasColumnType("text")
-                        .HasColumnName("logo");
 
                     b.Property<string>("Overview")
                         .HasColumnType("text")
@@ -650,10 +416,6 @@ namespace Kyoo.Postgresql.Migrations
                     b.Property<string>("Path")
                         .HasColumnType("text")
                         .HasColumnName("path");
-
-                    b.Property<string>("Poster")
-                        .HasColumnType("text")
-                        .HasColumnName("poster");
 
                     b.Property<string>("Slug")
                         .IsRequired()
@@ -675,10 +437,6 @@ namespace Kyoo.Postgresql.Migrations
                     b.Property<string>("Title")
                         .HasColumnType("text")
                         .HasColumnName("title");
-
-                    b.Property<string>("TrailerUrl")
-                        .HasColumnType("text")
-                        .HasColumnName("trailer_url");
 
                     b.HasKey("ID")
                         .HasName("pk_shows");
@@ -803,6 +561,10 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("jsonb")
                         .HasColumnName("extra_data");
 
+                    b.Property<Dictionary<int, string>>("Images")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("images");
+
                     b.Property<string>("Password")
                         .HasColumnType("text")
                         .HasColumnName("password");
@@ -832,25 +594,301 @@ namespace Kyoo.Postgresql.Migrations
 
             modelBuilder.Entity("Kyoo.Models.WatchedEpisode", b =>
                 {
-                    b.Property<int>("FirstID")
+                    b.Property<int>("UserID")
                         .HasColumnType("integer")
-                        .HasColumnName("first_id");
+                        .HasColumnName("user_id");
 
-                    b.Property<int>("SecondID")
+                    b.Property<int>("EpisodeID")
                         .HasColumnType("integer")
-                        .HasColumnName("second_id");
+                        .HasColumnName("episode_id");
 
                     b.Property<int>("WatchedPercentage")
                         .HasColumnType("integer")
                         .HasColumnName("watched_percentage");
 
-                    b.HasKey("FirstID", "SecondID")
+                    b.HasKey("UserID", "EpisodeID")
                         .HasName("pk_watched_episodes");
 
-                    b.HasIndex("SecondID")
-                        .HasDatabaseName("ix_watched_episodes_second_id");
+                    b.HasIndex("EpisodeID")
+                        .HasDatabaseName("ix_watched_episodes_episode_id");
 
                     b.ToTable("watched_episodes");
+                });
+
+            modelBuilder.Entity("ShowUser", b =>
+                {
+                    b.Property<int>("UsersID")
+                        .HasColumnType("integer")
+                        .HasColumnName("users_id");
+
+                    b.Property<int>("WatchedID")
+                        .HasColumnType("integer")
+                        .HasColumnName("watched_id");
+
+                    b.HasKey("UsersID", "WatchedID")
+                        .HasName("pk_link_user_show");
+
+                    b.HasIndex("WatchedID")
+                        .HasDatabaseName("ix_link_user_show_watched_id");
+
+                    b.ToTable("link_user_show");
+                });
+
+            modelBuilder.Entity("collection_metadata_id", b =>
+                {
+                    b.Property<int>("ResourceID")
+                        .HasColumnType("integer")
+                        .HasColumnName("resource_id");
+
+                    b.Property<int>("ProviderID")
+                        .HasColumnType("integer")
+                        .HasColumnName("provider_id");
+
+                    b.Property<string>("DataID")
+                        .HasColumnType("text")
+                        .HasColumnName("data_id");
+
+                    b.Property<string>("Link")
+                        .HasColumnType("text")
+                        .HasColumnName("link");
+
+                    b.HasKey("ResourceID", "ProviderID")
+                        .HasName("pk_collection_metadata_id");
+
+                    b.HasIndex("ProviderID")
+                        .HasDatabaseName("ix_collection_metadata_id_provider_id");
+
+                    b.ToTable("collection_metadata_id");
+                });
+
+            modelBuilder.Entity("episode_metadata_id", b =>
+                {
+                    b.Property<int>("ResourceID")
+                        .HasColumnType("integer")
+                        .HasColumnName("resource_id");
+
+                    b.Property<int>("ProviderID")
+                        .HasColumnType("integer")
+                        .HasColumnName("provider_id");
+
+                    b.Property<string>("DataID")
+                        .HasColumnType("text")
+                        .HasColumnName("data_id");
+
+                    b.Property<string>("Link")
+                        .HasColumnType("text")
+                        .HasColumnName("link");
+
+                    b.HasKey("ResourceID", "ProviderID")
+                        .HasName("pk_episode_metadata_id");
+
+                    b.HasIndex("ProviderID")
+                        .HasDatabaseName("ix_episode_metadata_id_provider_id");
+
+                    b.ToTable("episode_metadata_id");
+                });
+
+            modelBuilder.Entity("link_collection_show", b =>
+                {
+                    b.Property<int>("collection_id")
+                        .HasColumnType("integer")
+                        .HasColumnName("collection_id");
+
+                    b.Property<int>("show_id")
+                        .HasColumnType("integer")
+                        .HasColumnName("show_id");
+
+                    b.HasKey("collection_id", "show_id")
+                        .HasName("pk_link_collection_show");
+
+                    b.HasIndex("show_id")
+                        .HasDatabaseName("ix_link_collection_show_show_id");
+
+                    b.ToTable("link_collection_show");
+                });
+
+            modelBuilder.Entity("link_library_collection", b =>
+                {
+                    b.Property<int>("collection_id")
+                        .HasColumnType("integer")
+                        .HasColumnName("collection_id");
+
+                    b.Property<int>("library_id")
+                        .HasColumnType("integer")
+                        .HasColumnName("library_id");
+
+                    b.HasKey("collection_id", "library_id")
+                        .HasName("pk_link_library_collection");
+
+                    b.HasIndex("library_id")
+                        .HasDatabaseName("ix_link_library_collection_library_id");
+
+                    b.ToTable("link_library_collection");
+                });
+
+            modelBuilder.Entity("link_library_provider", b =>
+                {
+                    b.Property<int>("library_id")
+                        .HasColumnType("integer")
+                        .HasColumnName("library_id");
+
+                    b.Property<int>("provider_id")
+                        .HasColumnType("integer")
+                        .HasColumnName("provider_id");
+
+                    b.HasKey("library_id", "provider_id")
+                        .HasName("pk_link_library_provider");
+
+                    b.HasIndex("provider_id")
+                        .HasDatabaseName("ix_link_library_provider_provider_id");
+
+                    b.ToTable("link_library_provider");
+                });
+
+            modelBuilder.Entity("link_library_show", b =>
+                {
+                    b.Property<int>("library_id")
+                        .HasColumnType("integer")
+                        .HasColumnName("library_id");
+
+                    b.Property<int>("show_id")
+                        .HasColumnType("integer")
+                        .HasColumnName("show_id");
+
+                    b.HasKey("library_id", "show_id")
+                        .HasName("pk_link_library_show");
+
+                    b.HasIndex("show_id")
+                        .HasDatabaseName("ix_link_library_show_show_id");
+
+                    b.ToTable("link_library_show");
+                });
+
+            modelBuilder.Entity("link_show_genre", b =>
+                {
+                    b.Property<int>("genre_id")
+                        .HasColumnType("integer")
+                        .HasColumnName("genre_id");
+
+                    b.Property<int>("show_id")
+                        .HasColumnType("integer")
+                        .HasColumnName("show_id");
+
+                    b.HasKey("genre_id", "show_id")
+                        .HasName("pk_link_show_genre");
+
+                    b.HasIndex("show_id")
+                        .HasDatabaseName("ix_link_show_genre_show_id");
+
+                    b.ToTable("link_show_genre");
+                });
+
+            modelBuilder.Entity("people_metadata_id", b =>
+                {
+                    b.Property<int>("ResourceID")
+                        .HasColumnType("integer")
+                        .HasColumnName("resource_id");
+
+                    b.Property<int>("ProviderID")
+                        .HasColumnType("integer")
+                        .HasColumnName("provider_id");
+
+                    b.Property<string>("DataID")
+                        .HasColumnType("text")
+                        .HasColumnName("data_id");
+
+                    b.Property<string>("Link")
+                        .HasColumnType("text")
+                        .HasColumnName("link");
+
+                    b.HasKey("ResourceID", "ProviderID")
+                        .HasName("pk_people_metadata_id");
+
+                    b.HasIndex("ProviderID")
+                        .HasDatabaseName("ix_people_metadata_id_provider_id");
+
+                    b.ToTable("people_metadata_id");
+                });
+
+            modelBuilder.Entity("season_metadata_id", b =>
+                {
+                    b.Property<int>("ResourceID")
+                        .HasColumnType("integer")
+                        .HasColumnName("resource_id");
+
+                    b.Property<int>("ProviderID")
+                        .HasColumnType("integer")
+                        .HasColumnName("provider_id");
+
+                    b.Property<string>("DataID")
+                        .HasColumnType("text")
+                        .HasColumnName("data_id");
+
+                    b.Property<string>("Link")
+                        .HasColumnType("text")
+                        .HasColumnName("link");
+
+                    b.HasKey("ResourceID", "ProviderID")
+                        .HasName("pk_season_metadata_id");
+
+                    b.HasIndex("ProviderID")
+                        .HasDatabaseName("ix_season_metadata_id_provider_id");
+
+                    b.ToTable("season_metadata_id");
+                });
+
+            modelBuilder.Entity("show_metadata_id", b =>
+                {
+                    b.Property<int>("ResourceID")
+                        .HasColumnType("integer")
+                        .HasColumnName("resource_id");
+
+                    b.Property<int>("ProviderID")
+                        .HasColumnType("integer")
+                        .HasColumnName("provider_id");
+
+                    b.Property<string>("DataID")
+                        .HasColumnType("text")
+                        .HasColumnName("data_id");
+
+                    b.Property<string>("Link")
+                        .HasColumnType("text")
+                        .HasColumnName("link");
+
+                    b.HasKey("ResourceID", "ProviderID")
+                        .HasName("pk_show_metadata_id");
+
+                    b.HasIndex("ProviderID")
+                        .HasDatabaseName("ix_show_metadata_id_provider_id");
+
+                    b.ToTable("show_metadata_id");
+                });
+
+            modelBuilder.Entity("studio_metadata_id", b =>
+                {
+                    b.Property<int>("ResourceID")
+                        .HasColumnType("integer")
+                        .HasColumnName("resource_id");
+
+                    b.Property<int>("ProviderID")
+                        .HasColumnType("integer")
+                        .HasColumnName("provider_id");
+
+                    b.Property<string>("DataID")
+                        .HasColumnType("text")
+                        .HasColumnName("data_id");
+
+                    b.Property<string>("Link")
+                        .HasColumnType("text")
+                        .HasColumnName("link");
+
+                    b.HasKey("ResourceID", "ProviderID")
+                        .HasName("pk_studio_metadata_id");
+
+                    b.HasIndex("ProviderID")
+                        .HasDatabaseName("ix_studio_metadata_id_provider_id");
+
+                    b.ToTable("studio_metadata_id");
                 });
 
             modelBuilder.Entity("Kyoo.Models.Episode", b =>
@@ -871,216 +909,6 @@ namespace Kyoo.Postgresql.Migrations
                     b.Navigation("Season");
 
                     b.Navigation("Show");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Collection, Kyoo.Models.Show>", b =>
-                {
-                    b.HasOne("Kyoo.Models.Collection", "First")
-                        .WithMany("ShowLinks")
-                        .HasForeignKey("FirstID")
-                        .HasConstraintName("fk_link_collection_show_collections_first_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Kyoo.Models.Show", "Second")
-                        .WithMany("CollectionLinks")
-                        .HasForeignKey("SecondID")
-                        .HasConstraintName("fk_link_collection_show_shows_second_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("First");
-
-                    b.Navigation("Second");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Library, Kyoo.Models.Collection>", b =>
-                {
-                    b.HasOne("Kyoo.Models.Library", "First")
-                        .WithMany("CollectionLinks")
-                        .HasForeignKey("FirstID")
-                        .HasConstraintName("fk_link_library_collection_libraries_first_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Kyoo.Models.Collection", "Second")
-                        .WithMany("LibraryLinks")
-                        .HasForeignKey("SecondID")
-                        .HasConstraintName("fk_link_library_collection_collections_second_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("First");
-
-                    b.Navigation("Second");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Library, Kyoo.Models.Provider>", b =>
-                {
-                    b.HasOne("Kyoo.Models.Library", "First")
-                        .WithMany("ProviderLinks")
-                        .HasForeignKey("FirstID")
-                        .HasConstraintName("fk_link_library_provider_libraries_first_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Kyoo.Models.Provider", "Second")
-                        .WithMany("LibraryLinks")
-                        .HasForeignKey("SecondID")
-                        .HasConstraintName("fk_link_library_provider_providers_second_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("First");
-
-                    b.Navigation("Second");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Library, Kyoo.Models.Show>", b =>
-                {
-                    b.HasOne("Kyoo.Models.Library", "First")
-                        .WithMany("ShowLinks")
-                        .HasForeignKey("FirstID")
-                        .HasConstraintName("fk_link_library_show_libraries_first_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Kyoo.Models.Show", "Second")
-                        .WithMany("LibraryLinks")
-                        .HasForeignKey("SecondID")
-                        .HasConstraintName("fk_link_library_show_shows_second_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("First");
-
-                    b.Navigation("Second");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.Show, Kyoo.Models.Genre>", b =>
-                {
-                    b.HasOne("Kyoo.Models.Show", "First")
-                        .WithMany("GenreLinks")
-                        .HasForeignKey("FirstID")
-                        .HasConstraintName("fk_link_show_genre_shows_first_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Kyoo.Models.Genre", "Second")
-                        .WithMany("ShowLinks")
-                        .HasForeignKey("SecondID")
-                        .HasConstraintName("fk_link_show_genre_genres_second_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("First");
-
-                    b.Navigation("Second");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.Link<Kyoo.Models.User, Kyoo.Models.Show>", b =>
-                {
-                    b.HasOne("Kyoo.Models.User", "First")
-                        .WithMany("ShowLinks")
-                        .HasForeignKey("FirstID")
-                        .HasConstraintName("fk_link_user_show_users_first_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Kyoo.Models.Show", "Second")
-                        .WithMany()
-                        .HasForeignKey("SecondID")
-                        .HasConstraintName("fk_link_user_show_shows_second_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("First");
-
-                    b.Navigation("Second");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.MetadataID<Kyoo.Models.Episode>", b =>
-                {
-                    b.HasOne("Kyoo.Models.Episode", "First")
-                        .WithMany("ExternalIDs")
-                        .HasForeignKey("FirstID")
-                        .HasConstraintName("fk_metadata_id_episode_episodes_first_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Kyoo.Models.Provider", "Second")
-                        .WithMany()
-                        .HasForeignKey("SecondID")
-                        .HasConstraintName("fk_metadata_id_episode_providers_second_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("First");
-
-                    b.Navigation("Second");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.MetadataID<Kyoo.Models.People>", b =>
-                {
-                    b.HasOne("Kyoo.Models.People", "First")
-                        .WithMany("ExternalIDs")
-                        .HasForeignKey("FirstID")
-                        .HasConstraintName("fk_metadata_id_people_people_first_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Kyoo.Models.Provider", "Second")
-                        .WithMany()
-                        .HasForeignKey("SecondID")
-                        .HasConstraintName("fk_metadata_id_people_providers_second_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("First");
-
-                    b.Navigation("Second");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.MetadataID<Kyoo.Models.Season>", b =>
-                {
-                    b.HasOne("Kyoo.Models.Season", "First")
-                        .WithMany("ExternalIDs")
-                        .HasForeignKey("FirstID")
-                        .HasConstraintName("fk_metadata_id_season_seasons_first_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Kyoo.Models.Provider", "Second")
-                        .WithMany()
-                        .HasForeignKey("SecondID")
-                        .HasConstraintName("fk_metadata_id_season_providers_second_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("First");
-
-                    b.Navigation("Second");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.MetadataID<Kyoo.Models.Show>", b =>
-                {
-                    b.HasOne("Kyoo.Models.Show", "First")
-                        .WithMany("ExternalIDs")
-                        .HasForeignKey("FirstID")
-                        .HasConstraintName("fk_metadata_id_show_shows_first_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Kyoo.Models.Provider", "Second")
-                        .WithMany()
-                        .HasForeignKey("SecondID")
-                        .HasConstraintName("fk_metadata_id_show_providers_second_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("First");
-
-                    b.Navigation("Second");
                 });
 
             modelBuilder.Entity("Kyoo.Models.PeopleRole", b =>
@@ -1141,30 +969,242 @@ namespace Kyoo.Postgresql.Migrations
 
             modelBuilder.Entity("Kyoo.Models.WatchedEpisode", b =>
                 {
-                    b.HasOne("Kyoo.Models.User", "First")
-                        .WithMany("CurrentlyWatching")
-                        .HasForeignKey("FirstID")
-                        .HasConstraintName("fk_watched_episodes_users_first_id")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Kyoo.Models.Episode", "Second")
+                    b.HasOne("Kyoo.Models.Episode", "Episode")
                         .WithMany()
-                        .HasForeignKey("SecondID")
-                        .HasConstraintName("fk_watched_episodes_episodes_second_id")
+                        .HasForeignKey("EpisodeID")
+                        .HasConstraintName("fk_watched_episodes_episodes_episode_id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("First");
+                    b.HasOne("Kyoo.Models.User", null)
+                        .WithMany("CurrentlyWatching")
+                        .HasForeignKey("UserID")
+                        .HasConstraintName("fk_watched_episodes_users_user_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Navigation("Second");
+                    b.Navigation("Episode");
+                });
+
+            modelBuilder.Entity("ShowUser", b =>
+                {
+                    b.HasOne("Kyoo.Models.User", null)
+                        .WithMany()
+                        .HasForeignKey("UsersID")
+                        .HasConstraintName("fk_link_user_show_users_users_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kyoo.Models.Show", null)
+                        .WithMany()
+                        .HasForeignKey("WatchedID")
+                        .HasConstraintName("fk_link_user_show_shows_watched_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("collection_metadata_id", b =>
+                {
+                    b.HasOne("Kyoo.Models.Provider", "Provider")
+                        .WithMany()
+                        .HasForeignKey("ProviderID")
+                        .HasConstraintName("fk_collection_metadata_id_providers_provider_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kyoo.Models.Collection", null)
+                        .WithMany("ExternalIDs")
+                        .HasForeignKey("ResourceID")
+                        .HasConstraintName("fk_collection_metadata_id_collections_collection_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Provider");
+                });
+
+            modelBuilder.Entity("episode_metadata_id", b =>
+                {
+                    b.HasOne("Kyoo.Models.Provider", "Provider")
+                        .WithMany()
+                        .HasForeignKey("ProviderID")
+                        .HasConstraintName("fk_episode_metadata_id_providers_provider_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kyoo.Models.Episode", null)
+                        .WithMany("ExternalIDs")
+                        .HasForeignKey("ResourceID")
+                        .HasConstraintName("fk_episode_metadata_id_episodes_episode_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Provider");
+                });
+
+            modelBuilder.Entity("link_collection_show", b =>
+                {
+                    b.HasOne("Kyoo.Models.Collection", null)
+                        .WithMany()
+                        .HasForeignKey("collection_id")
+                        .HasConstraintName("fk_link_collection_show_collections_collection_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kyoo.Models.Show", null)
+                        .WithMany()
+                        .HasForeignKey("show_id")
+                        .HasConstraintName("fk_link_collection_show_shows_show_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("link_library_collection", b =>
+                {
+                    b.HasOne("Kyoo.Models.Collection", null)
+                        .WithMany()
+                        .HasForeignKey("collection_id")
+                        .HasConstraintName("fk_link_library_collection_collections_collection_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kyoo.Models.Library", null)
+                        .WithMany()
+                        .HasForeignKey("library_id")
+                        .HasConstraintName("fk_link_library_collection_libraries_library_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("link_library_provider", b =>
+                {
+                    b.HasOne("Kyoo.Models.Library", null)
+                        .WithMany()
+                        .HasForeignKey("library_id")
+                        .HasConstraintName("fk_link_library_provider_libraries_library_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kyoo.Models.Provider", null)
+                        .WithMany()
+                        .HasForeignKey("provider_id")
+                        .HasConstraintName("fk_link_library_provider_providers_provider_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("link_library_show", b =>
+                {
+                    b.HasOne("Kyoo.Models.Library", null)
+                        .WithMany()
+                        .HasForeignKey("library_id")
+                        .HasConstraintName("fk_link_library_show_libraries_library_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kyoo.Models.Show", null)
+                        .WithMany()
+                        .HasForeignKey("show_id")
+                        .HasConstraintName("fk_link_library_show_shows_show_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("link_show_genre", b =>
+                {
+                    b.HasOne("Kyoo.Models.Genre", null)
+                        .WithMany()
+                        .HasForeignKey("genre_id")
+                        .HasConstraintName("fk_link_show_genre_genres_genre_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kyoo.Models.Show", null)
+                        .WithMany()
+                        .HasForeignKey("show_id")
+                        .HasConstraintName("fk_link_show_genre_shows_show_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("people_metadata_id", b =>
+                {
+                    b.HasOne("Kyoo.Models.Provider", "Provider")
+                        .WithMany()
+                        .HasForeignKey("ProviderID")
+                        .HasConstraintName("fk_people_metadata_id_providers_provider_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kyoo.Models.People", null)
+                        .WithMany("ExternalIDs")
+                        .HasForeignKey("ResourceID")
+                        .HasConstraintName("fk_people_metadata_id_people_people_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Provider");
+                });
+
+            modelBuilder.Entity("season_metadata_id", b =>
+                {
+                    b.HasOne("Kyoo.Models.Provider", "Provider")
+                        .WithMany()
+                        .HasForeignKey("ProviderID")
+                        .HasConstraintName("fk_season_metadata_id_providers_provider_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kyoo.Models.Season", null)
+                        .WithMany("ExternalIDs")
+                        .HasForeignKey("ResourceID")
+                        .HasConstraintName("fk_season_metadata_id_seasons_season_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Provider");
+                });
+
+            modelBuilder.Entity("show_metadata_id", b =>
+                {
+                    b.HasOne("Kyoo.Models.Provider", "Provider")
+                        .WithMany()
+                        .HasForeignKey("ProviderID")
+                        .HasConstraintName("fk_show_metadata_id_providers_provider_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kyoo.Models.Show", null)
+                        .WithMany("ExternalIDs")
+                        .HasForeignKey("ResourceID")
+                        .HasConstraintName("fk_show_metadata_id_shows_show_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Provider");
+                });
+
+            modelBuilder.Entity("studio_metadata_id", b =>
+                {
+                    b.HasOne("Kyoo.Models.Provider", "Provider")
+                        .WithMany()
+                        .HasForeignKey("ProviderID")
+                        .HasConstraintName("fk_studio_metadata_id_providers_provider_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Kyoo.Models.Studio", null)
+                        .WithMany("ExternalIDs")
+                        .HasForeignKey("ResourceID")
+                        .HasConstraintName("fk_studio_metadata_id_studios_studio_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Provider");
                 });
 
             modelBuilder.Entity("Kyoo.Models.Collection", b =>
                 {
-                    b.Navigation("LibraryLinks");
-
-                    b.Navigation("ShowLinks");
+                    b.Navigation("ExternalIDs");
                 });
 
             modelBuilder.Entity("Kyoo.Models.Episode", b =>
@@ -1174,30 +1214,11 @@ namespace Kyoo.Postgresql.Migrations
                     b.Navigation("Tracks");
                 });
 
-            modelBuilder.Entity("Kyoo.Models.Genre", b =>
-                {
-                    b.Navigation("ShowLinks");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.Library", b =>
-                {
-                    b.Navigation("CollectionLinks");
-
-                    b.Navigation("ProviderLinks");
-
-                    b.Navigation("ShowLinks");
-                });
-
             modelBuilder.Entity("Kyoo.Models.People", b =>
                 {
                     b.Navigation("ExternalIDs");
 
                     b.Navigation("Roles");
-                });
-
-            modelBuilder.Entity("Kyoo.Models.Provider", b =>
-                {
-                    b.Navigation("LibraryLinks");
                 });
 
             modelBuilder.Entity("Kyoo.Models.Season", b =>
@@ -1209,15 +1230,9 @@ namespace Kyoo.Postgresql.Migrations
 
             modelBuilder.Entity("Kyoo.Models.Show", b =>
                 {
-                    b.Navigation("CollectionLinks");
-
                     b.Navigation("Episodes");
 
                     b.Navigation("ExternalIDs");
-
-                    b.Navigation("GenreLinks");
-
-                    b.Navigation("LibraryLinks");
 
                     b.Navigation("People");
 
@@ -1226,14 +1241,14 @@ namespace Kyoo.Postgresql.Migrations
 
             modelBuilder.Entity("Kyoo.Models.Studio", b =>
                 {
+                    b.Navigation("ExternalIDs");
+
                     b.Navigation("Shows");
                 });
 
             modelBuilder.Entity("Kyoo.Models.User", b =>
                 {
                     b.Navigation("CurrentlyWatching");
-
-                    b.Navigation("ShowLinks");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,5 +1,4 @@
-﻿using System;
-using Kyoo.Models;
+﻿using Kyoo.Models;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 
@@ -23,37 +22,17 @@ namespace Kyoo.Controllers
 		/// <typeparam name="T">The type of the item</typeparam>
 		/// <returns><c>true</c> if an image has been downloaded, <c>false</c> otherwise.</returns>
 		Task<bool> DownloadImages<T>([NotNull] T item, bool alwaysDownload = false)
-			where T : IResource;
-		
+			where T : IThumbnails;
+
 
 		/// <summary>
-		/// Retrieve the local path of the poster of the given item.
+		/// Retrieve the local path of an image of the given item.
 		/// </summary>
 		/// <param name="item">The item to retrieve the poster from.</param>
+		/// <param name="imageID">The ID of the image. See <see cref="Images"/> for values.</param>
 		/// <typeparam name="T">The type of the item</typeparam>
-		/// <exception cref="NotSupportedException">If the type does not have a poster</exception>
-		/// <returns>The path of the poster for the given resource (it might or might not exists).</returns>
-		Task<string> GetPoster<T>([NotNull] T item)
-			where T : IResource;
-		
-		/// <summary>
-		/// Retrieve the local path of the logo of the given item.
-		/// </summary>
-		/// <param name="item">The item to retrieve the logo from.</param>
-		/// <typeparam name="T">The type of the item</typeparam>
-		/// <exception cref="NotSupportedException">If the type does not have a logo</exception>
-		/// <returns>The path of the logo for the given resource (it might or might not exists).</returns>
-		Task<string> GetLogo<T>([NotNull] T item)
-			where T : IResource;
-		
-		/// <summary>
-		/// Retrieve the local path of the thumbnail of the given item.
-		/// </summary>
-		/// <param name="item">The item to retrieve the thumbnail from.</param>
-		/// <typeparam name="T">The type of the item</typeparam>
-		/// <exception cref="NotSupportedException">If the type does not have a thumbnail</exception>
-		/// <returns>The path of the thumbnail for the given resource (it might or might not exists).</returns>
-		Task<string> GetThumbnail<T>([NotNull] T item)
-			where T : IResource;
+		/// <returns>The path of the image for the given resource or null if it does not exists.</returns>
+		Task<string> GetImagePath<T>([NotNull] T item, int imageID)
+			where T : IThumbnails;
 	}
 }

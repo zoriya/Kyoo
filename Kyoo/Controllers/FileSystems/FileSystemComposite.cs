@@ -8,7 +8,9 @@ using Autofac.Features.Metadata;
 using JetBrains.Annotations;
 using Kyoo.Common.Models.Attributes;
 using Kyoo.Models;
+using Kyoo.Models.Options;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Kyoo.Controllers
 {
@@ -24,13 +26,30 @@ namespace Kyoo.Controllers
 		private readonly ICollection<Meta<Func<IFileSystem>, FileSystemMetadataAttribute>> _fileSystems;
 
 		/// <summary>
+		/// The library manager used to load shows to retrieve their path
+		/// (only if the option is set to metadata in show)
+		/// </summary>
+		private readonly ILibraryManager _libraryManager;
+		
+		/// <summary>
+		/// Options to check if the metadata should be kept in the show directory or in a kyoo's directory.
+		/// </summary>
+		private readonly IOptionsMonitor<BasicOptions> _options;
+		
+		/// <summary>
 		/// Create a new <see cref="FileSystemComposite"/> from a list of <see cref="IFileSystem"/> mapped to their
 		/// metadata.
 		/// </summary>
 		/// <param name="fileSystems">The list of filesystem mapped to their metadata.</param>
-		public FileSystemComposite(ICollection<Meta<Func<IFileSystem>, FileSystemMetadataAttribute>> fileSystems)
+		/// <param name="libraryManager">The library manager used to load shows to retrieve their path.</param>
+		/// <param name="options">The options to use.</param>
+		public FileSystemComposite(ICollection<Meta<Func<IFileSystem>, FileSystemMetadataAttribute>> fileSystems,
+			ILibraryManager libraryManager, 
+			IOptionsMonitor<BasicOptions> options)
 		{
 			_fileSystems = fileSystems;
+			_libraryManager = libraryManager;
+			_options = options;
 		}
 
 		
@@ -89,6 +108,15 @@ namespace Kyoo.Controllers
 		}
 
 		/// <inheritdoc />
+		public Task<Stream> GetReader(string path, AsyncRef<string> mime)
+		{
+			if (path == null)
+				throw new ArgumentNullException(nameof(path));
+			return _GetFileSystemForPath(path, out string relativePath)
+				.GetReader(relativePath, mime);
+		}
+
+		/// <inheritdoc />
 		public Task<Stream> NewFile(string path)
 		{
 			if (path == null)
@@ -132,12 +160,41 @@ namespace Kyoo.Controllers
 		}
 		
 		/// <inheritdoc />
-		public string GetExtraDirectory(Show show)
+		public async Task<string> GetExtraDirectory<T>(T resource)
 		{
-			if (show == null)
-				throw new ArgumentNullException(nameof(show));
-			return _GetFileSystemForPath(show.Path, out string _)
-				.GetExtraDirectory(show);
+			switch (resource)
+			{
+				case Season season:
+					await _libraryManager.Load(season, x => x.Show);
+					break;
+				case Episode episode:
+					await _libraryManager.Load(episode, x => x.Show);
+					break;
+				case Track track:
+					await _libraryManager.Load(track, x => x.Episode);
+					await _libraryManager.Load(track.Episode, x => x.Show);
+					break;
+			}
+
+			IFileSystem fs = resource switch
+			{
+				Show show => _GetFileSystemForPath(show.Path, out string _),
+				Season season => _GetFileSystemForPath(season.Show.Path, out string _),
+				Episode episode => _GetFileSystemForPath(episode.Show.Path, out string _),
+				Track track => _GetFileSystemForPath(track.Episode.Show.Path, out string _),
+				_ => _GetFileSystemForPath(_options.CurrentValue.MetadataPath, out string _)
+			};
+			string path = await fs.GetExtraDirectory(resource)
+				?? resource switch
+				{
+					Season season => await GetExtraDirectory(season.Show),
+					Episode episode => await GetExtraDirectory(episode.Show),
+					Track track => await GetExtraDirectory(track.Episode),
+					IResource res => Combine(_options.CurrentValue.MetadataPath, 
+						typeof(T).Name.ToLowerInvariant(), res.Slug),
+					_ => Combine(_options.CurrentValue.MetadataPath, typeof(T).Name.ToLowerInvariant())
+				};
+			return await CreateDirectory(path);
 		}
 	}
 }

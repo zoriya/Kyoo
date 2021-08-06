@@ -62,7 +62,6 @@ namespace Kyoo.Controllers
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
-			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Added);
 			await _database.SaveChangesAsync($"Trying to insert a duplicated people (slug {obj.Slug} already exists).");
 			return obj;
 		}
@@ -71,23 +70,35 @@ namespace Kyoo.Controllers
 		protected override async Task Validate(People resource)
 		{
 			await base.Validate(resource);
-			await resource.ExternalIDs.ForEachAsync(async id =>
+
+			if (resource.ExternalIDs != null)
 			{
-				id.Second = await _providers.CreateIfNotExists(id.Second);
-				id.SecondID = id.Second.ID;
-				_database.Entry(id.Second).State = EntityState.Detached;
-			});
-			await resource.Roles.ForEachAsync(async role =>
+				foreach (MetadataID id in resource.ExternalIDs)
+				{
+					id.Provider = _database.LocalEntity<Provider>(id.Provider.Slug)
+						?? await _providers.CreateIfNotExists(id.Provider);
+					id.ProviderID = id.Provider.ID;
+				}
+				_database.MetadataIds<People>().AttachRange(resource.ExternalIDs);
+			}
+
+			if (resource.Roles != null)
 			{
-				role.Show = await _shows.Value.CreateIfNotExists(role.Show);
-				role.ShowID = role.Show.ID;
-				_database.Entry(role.Show).State = EntityState.Detached;
-			});
+				foreach (PeopleRole role in resource.Roles)
+				{
+					role.Show = _database.LocalEntity<Show>(role.Show.Slug) 
+						?? await _shows.Value.CreateIfNotExists(role.Show);
+					role.ShowID = role.Show.ID;
+					_database.Entry(role).State = EntityState.Added;
+				}
+			}
 		}
 
 		/// <inheritdoc />
 		protected override async Task EditRelations(People resource, People changed, bool resetOld)
 		{
+			await Validate(changed);
+			
 			if (changed.Roles != null || resetOld)
 			{
 				await Database.Entry(resource).Collection(x => x.Roles).LoadAsync();
@@ -98,9 +109,7 @@ namespace Kyoo.Controllers
 			{
 				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
 				resource.ExternalIDs = changed.ExternalIDs;
-				
 			}
-			await base.EditRelations(resource, changed, resetOld);
 		}
 
 		/// <inheritdoc />

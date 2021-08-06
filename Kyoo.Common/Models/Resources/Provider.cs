@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-using Kyoo.Common.Models.Attributes;
 using Kyoo.Controllers;
 using Kyoo.Models.Attributes;
 
@@ -9,7 +9,7 @@ namespace Kyoo.Models
 	/// This class contains metadata about <see cref="IMetadataProvider"/>.
 	/// You can have providers even if you don't have the corresponding <see cref="IMetadataProvider"/>.
 	/// </summary>
-	public class Provider : IResource
+	public class Provider : IResource, IThumbnails
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
@@ -22,30 +22,23 @@ namespace Kyoo.Models
 		/// </summary>
 		public string Name { get; set; }
 		
+		/// <inheritdoc />
+		public Dictionary<int, string> Images { get; set; }
+
 		/// <summary>
 		/// The path of this provider's logo.
 		/// By default, the http path for this logo is returned from the public API.
 		/// This can be disabled using the internal query flag.
 		/// </summary>
-		[SerializeAs("{HOST}/api/providers/{Slug}/logo")] public string Logo { get; set; }
-		
-		/// <summary>
-		/// The extension of the logo. This is used for http responses.
-		/// </summary>
-		[SerializeIgnore] public string LogoExtension { get; set; }
-		
+		[SerializeAs("{HOST}/api/providers/{Slug}/logo")]
+		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
+		public string Logo => Images?.GetValueOrDefault(Models.Images.Logo);
+
 		/// <summary>
 		/// The list of libraries that uses this provider.
 		/// </summary>
 		[LoadableRelation] public ICollection<Library> Libraries { get; set; }
-		
-#if ENABLE_INTERNAL_LINKS
-		/// <summary>
-		/// The internal link between this provider and libraries in the <see cref="Libraries"/> list.
-		/// </summary>
-		[Link] public ICollection<Link<Library, Provider>> LibraryLinks { get; set; }
-#endif
-		
+
 		/// <summary>
 		/// Create a new, default, <see cref="Provider"/>
 		/// </summary>
@@ -61,7 +54,10 @@ namespace Kyoo.Models
 		{
 			Slug = Utility.ToSlug(name);
 			Name = name;
-			Logo = logo;
+			Images = new Dictionary<int, string>
+			{
+				[Models.Images.Logo] = logo
+			};
 		}
 	}
 }

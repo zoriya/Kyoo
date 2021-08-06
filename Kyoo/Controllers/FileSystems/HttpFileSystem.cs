@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Kyoo.Common.Models.Attributes;
-using Kyoo.Models;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kyoo.Controllers
@@ -44,6 +44,16 @@ namespace Kyoo.Controllers
 			HttpClient client = _clientFactory.CreateClient();
 			return client.GetStreamAsync(path);
 		}
+		
+		/// <inheritdoc />
+		public async Task<Stream> GetReader(string path, AsyncRef<string> mime)
+		{
+			HttpClient client = _clientFactory.CreateClient();
+			HttpResponseMessage response = await client.GetAsync(path);
+			response.EnsureSuccessStatusCode();
+			mime.Value = response.Content.Headers.ContentType?.MediaType;
+			return await response.Content.ReadAsStreamAsync();
+		}
 
 		/// <inheritdoc />
 		public Task<Stream> NewFile(string path)
@@ -76,7 +86,7 @@ namespace Kyoo.Controllers
 		}
 
 		/// <inheritdoc />
-		public string GetExtraDirectory(Show show)
+		public Task<string> GetExtraDirectory<T>(T resource)
 		{
 			throw new NotSupportedException("Extras can not be stored inside an http filesystem.");
 		}
@@ -85,6 +95,8 @@ namespace Kyoo.Controllers
 	/// <summary>
 	/// An <see cref="IActionResult"/> to proxy an http request.
 	/// </summary>
+	// TODO remove this suppress message once the class has been implemented.
+	[SuppressMessage("ReSharper", "NotAccessedField.Local")]
 	public class HttpForwardResult : IActionResult
 	{
 		/// <summary>

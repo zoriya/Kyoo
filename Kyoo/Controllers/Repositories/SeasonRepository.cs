@@ -87,7 +87,6 @@ namespace Kyoo.Controllers
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
-			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Added);
 			await _database.SaveChangesAsync($"Trying to insert a duplicated season (slug {obj.Slug} already exists).");
 			return obj;
 		}
@@ -95,32 +94,37 @@ namespace Kyoo.Controllers
 		/// <inheritdoc/>
 		protected override async Task Validate(Season resource)
 		{
+			await base.Validate(resource);
 			if (resource.ShowID <= 0)
 			{
 				if (resource.Show == null)
-					throw new InvalidOperationException(
+					throw new ArgumentException(
 						$"Can't store a season not related to any show (showID: {resource.ShowID}).");
 				resource.ShowID = resource.Show.ID;
 			}
 
-			await base.Validate(resource);
-			await resource.ExternalIDs.ForEachAsync(async id =>
+			if (resource.ExternalIDs != null)
 			{
-				id.Second = await _providers.CreateIfNotExists(id.Second);
-				id.SecondID = id.Second.ID;
-				_database.Entry(id.Second).State = EntityState.Detached;
-			});
+				foreach (MetadataID id in resource.ExternalIDs)
+				{
+					id.Provider = _database.LocalEntity<Provider>(id.Provider.Slug)
+						?? await _providers.CreateIfNotExists(id.Provider);
+					id.ProviderID = id.Provider.ID;
+				}
+				_database.MetadataIds<Season>().AttachRange(resource.ExternalIDs);
+			}
 		}
 
 		/// <inheritdoc/>
 		protected override async Task EditRelations(Season resource, Season changed, bool resetOld)
 		{
+			await Validate(changed);
+			
 			if (changed.ExternalIDs != null || resetOld)
 			{
 				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
 				resource.ExternalIDs = changed.ExternalIDs;
 			}
-			await base.EditRelations(resource, changed, resetOld);
 		}
 		
 		/// <inheritdoc/>

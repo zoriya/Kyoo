@@ -234,16 +234,23 @@ namespace Kyoo.Controllers
 			finally
 			{
 				Database.ChangeTracker.LazyLoadingEnabled = lazyLoading;
+				Database.ChangeTracker.Clear();
 			}
 		}
 		
 		/// <summary>
 		/// An overridable method to edit relation of a resource.
 		/// </summary>
-		/// <param name="resource">The non edited resource</param>
-		/// <param name="changed">The new version of <see cref="resource"/>. This item will be saved on the databse and replace <see cref="resource"/></param>
-		/// <param name="resetOld">A boolean to indicate if all values of resource should be discarded or not.</param>
-		/// <returns></returns>
+		/// <param name="resource">
+		/// The non edited resource
+		/// </param>
+		/// <param name="changed">
+		/// The new version of <see cref="resource"/>.
+		/// This item will be saved on the database and replace <see cref="resource"/>
+		/// </param>
+		/// <param name="resetOld">
+		/// A boolean to indicate if all values of resource should be discarded or not.
+		/// </param>
 		protected virtual Task EditRelations(T resource, T changed, bool resetOld)
 		{
 			return Validate(resource);
@@ -254,7 +261,9 @@ namespace Kyoo.Controllers
 		/// It is also called on the default implementation of <see cref="EditRelations"/>
 		/// </summary>
 		/// <param name="resource">The resource that will be saved</param>
-		/// <exception cref="ArgumentException">You can throw this if the resource is illegal and should not be saved.</exception>
+		/// <exception cref="ArgumentException">
+		/// You can throw this if the resource is illegal and should not be saved.
+		/// </exception>
 		protected virtual Task Validate(T resource)
 		{
 			if (typeof(T).GetProperty(nameof(resource.Slug))!.GetCustomAttribute<ComputedAttribute>() != null)

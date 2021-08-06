@@ -6,7 +6,7 @@ namespace Kyoo.Models
 	/// <summary>
 	/// A studio that make shows.
 	/// </summary>
-	public class Studio : IResource
+	public class Studio : IResource, IMetadata
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
@@ -24,6 +24,9 @@ namespace Kyoo.Models
 		/// </summary>
 		[LoadableRelation] public ICollection<Show> Shows { get; set; }
 
+		/// <inheritdoc />
+		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
+		
 		/// <summary>
 		/// Create a new, empty, <see cref="Studio"/>.
 		/// </summary>

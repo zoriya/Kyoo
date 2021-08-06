@@ -32,8 +32,10 @@ namespace Kyoo.TheTvdb
 		{
 			Slug = "the-tvdb",
 			Name = "TheTVDB",
-			LogoExtension = "png",
-			Logo = "https://www.thetvdb.com/images/logo.png"
+			Images = new Dictionary<int, string>
+			{
+				[Images.Logo] = "https://www.thetvdb.com/images/logo.png"	
+			}
 		};
 		
 		
@@ -93,7 +95,7 @@ namespace Kyoo.TheTvdb
 			Show ret = series.Data.ToShow(Provider);
 			
 			TvDbResponse<Actor[]> people = await _client.Series.GetActorsAsync(id);
-			ret.People = people.Data.Select(x => x.ToPeopleRole(Provider)).ToArray();
+			ret.People = people.Data.Select(x => x.ToPeopleRole()).ToArray();
 			return ret;
 		}
 
