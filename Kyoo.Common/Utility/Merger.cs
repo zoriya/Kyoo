@@ -79,7 +79,16 @@ namespace Kyoo
 			if (second == null)
 				return first;
 			foreach ((T key, T2 value) in second)
-				hasChanged |= first.TryAdd(key, value);
+			{
+				bool success = first.TryAdd(key, value);
+				hasChanged |= success;
+				
+				if (success || first[key]?.Equals(default) == false || value?.Equals(default) != false)
+					continue;
+				first[key] = value;
+				hasChanged = true;
+			}
+
 			return first;
 		}
 
@@ -123,7 +132,7 @@ namespace Kyoo
 			hasChanged = false;
 			if (second == null)
 				return first;
-			hasChanged = second.Any(x => !x.Value.Equals(first[x.Key]));
+			hasChanged = second.Any(x => x.Value?.Equals(first[x.Key]) == false);
 			foreach ((T key, T2 value) in first)
 				second.TryAdd(key, value);
 			return second;

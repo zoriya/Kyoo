@@ -455,5 +455,85 @@ namespace Kyoo.Tests.Utility
 			Merger.Merge(first, second);
 			// This should no call the setter of first so the test should pass.
 		}
+		
+		[Fact]
+		public void MergeDictionaryNullValue()
+		{
+			Dictionary<int, string> first = new()
+			{
+				[Images.Logo] = "logo",
+				[Images.Poster] = null
+			};
+			Dictionary<int, string> second = new()
+			{
+				[Images.Poster] = "new-poster",
+				[Images.Thumbnail] = "thumbnails"
+			};
+			IDictionary<int, string> ret = Merger.MergeDictionaries(first, second, out bool changed);
+			Assert.True(changed);
+			Assert.Equal(3, ret.Count);
+			Assert.Equal("new-poster", ret[Images.Poster]);
+			Assert.Equal("thumbnails", ret[Images.Thumbnail]);
+			Assert.Equal("logo", ret[Images.Logo]);
+		}
+		
+		[Fact]
+		public void MergeDictionaryNullValueNoChange()
+		{
+			Dictionary<int, string> first = new()
+			{
+				[Images.Logo] = "logo",
+				[Images.Poster] = null
+			};
+			Dictionary<int, string> second = new()
+			{
+				[Images.Poster] = null,
+			};
+			IDictionary<int, string> ret = Merger.MergeDictionaries(first, second, out bool changed);
+			Assert.False(changed);
+			Assert.Equal(2, ret.Count);
+			Assert.Null(ret[Images.Poster]);
+			Assert.Equal("logo", ret[Images.Logo]);
+		}
+		
+		[Fact]
+		public void CompleteDictionaryNullValue()
+		{
+			Dictionary<int, string> first = new()
+			{
+				[Images.Logo] = "logo",
+				[Images.Poster] = null
+			};
+			Dictionary<int, string> second = new()
+			{
+				[Images.Poster] = "new-poster",
+				[Images.Thumbnail] = "thumbnails"
+			};
+			IDictionary<int, string> ret = Merger.CompleteDictionaries(first, second, out bool changed);
+			Assert.True(changed);
+			Assert.Equal(3, ret.Count);
+			Assert.Equal("new-poster", ret[Images.Poster]);
+			Assert.Equal("thumbnails", ret[Images.Thumbnail]);
+			Assert.Equal("logo", ret[Images.Logo]);
+		}
+		
+		[Fact]
+		public void CompleteDictionaryNullValueNoChange()
+		{
+			Dictionary<int, string> first = new()
+			{
+				[Images.Logo] = "logo",
+				[Images.Poster] = null
+			};
+			Dictionary<int, string> second = new()
+			{
+				[Images.Poster] = null,
+			};
+			IDictionary<int, string> ret = Merger.CompleteDictionaries(first, second, out bool changed);
+			Assert.False(changed);
+			Assert.Equal(2, ret.Count);
+			Assert.Null(ret[Images.Poster]);
+			Assert.Equal("logo", ret[Images.Logo]);
+		}
 	}
 }

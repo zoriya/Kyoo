@@ -157,7 +157,7 @@ namespace Kyoo.TheMovieDb
 			
 			TMDbClient client = new(_apiKey.Value.ApiKey);
 			return (await client.GetTvEpisodeAsync(id, episode.SeasonNumber.Value, episode.EpisodeNumber.Value))
-				.ToEpisode(id, Provider);
+				?.ToEpisode(id, Provider);
 		}
 		
 		/// <summary>
