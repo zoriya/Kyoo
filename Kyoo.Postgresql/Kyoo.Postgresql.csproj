@@ -7,15 +7,6 @@
 		<RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
 		<LangVersion>default</LangVersion>
 	</PropertyGroup>
-	
-<!--	<PropertyGroup>-->
-<!--		<OutputPath>../Kyoo/bin/$(Configuration)/$(TargetFramework)/plugins/postgresql</OutputPath>-->
-<!--		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>-->
-<!--		<ProduceReferenceAssembly>false</ProduceReferenceAssembly>-->
-<!--		<GenerateDependencyFile>false</GenerateDependencyFile>-->
-<!--		<GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>-->
-<!--		<CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>-->
-<!--	</PropertyGroup>-->
 
 	<ItemGroup>
 		<PackageReference Include="EFCore.NamingConventions" Version="5.0.2" />
@@ -28,14 +19,8 @@
 
 	<ItemGroup>
 		<ProjectReference Include="../Kyoo.CommonAPI/Kyoo.CommonAPI.csproj">
-<!--			<PrivateAssets>all</PrivateAssets>-->
-<!--			<Private>false</Private>-->
-<!--			<ExcludeAssets>runtime</ExcludeAssets>-->
 		</ProjectReference>
 		<ProjectReference Include="../Kyoo.Common/Kyoo.Common.csproj">
-<!--			<PrivateAssets>all</PrivateAssets>-->
-<!--			<Private>false</Private>-->
-<!--			<ExcludeAssets>runtime</ExcludeAssets>-->
 		</ProjectReference>
 	</ItemGroup>
 </Project>

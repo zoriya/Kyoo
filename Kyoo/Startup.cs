@@ -7,6 +7,8 @@ using Kyoo.Controllers;
 using Kyoo.Models.Options;
 using Kyoo.Postgresql;
 using Kyoo.Tasks;
+using Kyoo.TheMovieDb;
+using Kyoo.TheTvdb;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
@@ -49,7 +51,9 @@ namespace Kyoo
 				new CoreModule(configuration), 
 				new PostgresModule(configuration, host),
 				// new SqLiteModule(configuration, host),
-				new AuthenticationModule(configuration, loggerFactory, host)
+				new AuthenticationModule(configuration, loggerFactory, host),
+				new PluginTvdb(configuration),
+				new PluginTmdb(configuration)
 			});
 		}
 
