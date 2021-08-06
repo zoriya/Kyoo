@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -94,6 +95,8 @@ namespace Kyoo.Controllers
 	/// <summary>
 	/// An <see cref="IActionResult"/> to proxy an http request.
 	/// </summary>
+	// TODO remove this suppress message once the class has been implemented.
+	[SuppressMessage("ReSharper", "NotAccessedField.Local")]
 	public class HttpForwardResult : IActionResult
 	{
 		/// <summary>
@@ -126,12 +129,7 @@ namespace Kyoo.Controllers
 		public Task ExecuteResultAsync(ActionContext context)
 		{
 			// TODO implement that, example: https://github.com/twitchax/AspNetCore.Proxy/blob/14dd0f212d7abb43ca1bf8c890d5efb95db66acb/src/Core/Extensions/Http.cs#L15
-			
-			// Silence unused warnings
-			if (_path != null || _rangeSupport || _type == null)
-				throw new NotImplementedException();
-			else
-				throw new NotImplementedException();
+			throw new NotImplementedException();
 		}
 	}
 }

@@ -133,7 +133,7 @@ namespace Kyoo.Controllers
 		public Task<string> GetExtraDirectory<T>(T resource)
 		{
 			if (!_options.CurrentValue.MetadataInShow)
-				return null;
+				return Task.FromResult<string>(null);
 			return Task.FromResult(resource switch
 			{
 				Show show => Combine(show.Path, "Extra"),
