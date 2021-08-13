@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using Autofac;
 using Kyoo.Controllers;
 using Kyoo.Models.Attributes;
@@ -23,20 +21,8 @@ namespace Kyoo.TheMovieDb
 		
 		/// <inheritdoc />
 		public string Description => "A metadata provider for TheMovieDB.";
-		
-		/// <inheritdoc />
-		public ICollection<Type> Provides => new []
-		{
-			typeof(IMetadataProvider)
-		};
-		
-		/// <inheritdoc />
-		public ICollection<ConditionalProvide> ConditionalProvides => ArraySegment<ConditionalProvide>.Empty;
-		
-		/// <inheritdoc />
-		public ICollection<Type> Requires => ArraySegment<Type>.Empty;
-		
-		
+
+
 		/// <summary>
 		/// The configuration to use.
 		/// </summary>
@@ -65,7 +51,7 @@ namespace Kyoo.TheMovieDb
 		}
 		
 		/// <inheritdoc />
-		public void Configure(IServiceCollection services, ICollection<Type> availableTypes)
+		public void Configure(IServiceCollection services)
 		{
 			services.Configure<TheMovieDbOptions>(_configuration.GetSection(TheMovieDbOptions.Path));
 		}

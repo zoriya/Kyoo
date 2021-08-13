@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using Autofac;
 using Kyoo.Controllers;
 using Kyoo.Models.Attributes;
@@ -24,20 +22,7 @@ namespace Kyoo.TheTvdb
 		
 		/// <inheritdoc />
 		public string Description => "A metadata provider for The TVDB.";
-		
-		/// <inheritdoc />
-		public ICollection<Type> Provides => new []
-		{
-			typeof(IMetadataProvider)
-		};
-		
-		/// <inheritdoc />
-		public ICollection<ConditionalProvide> ConditionalProvides => ArraySegment<ConditionalProvide>.Empty;
-		
-		/// <inheritdoc />
-		public ICollection<Type> Requires => ArraySegment<Type>.Empty;
-		
-		
+
 		/// <summary>
 		/// The configuration to use.
 		/// </summary>
@@ -67,7 +52,7 @@ namespace Kyoo.TheTvdb
 		}
 		
 		/// <inheritdoc />
-		public void Configure(IServiceCollection services, ICollection<Type> availableTypes)
+		public void Configure(IServiceCollection services)
 		{
 			services.Configure<TvdbOption>(_configuration.GetSection(TvdbOption.Path));
 		}

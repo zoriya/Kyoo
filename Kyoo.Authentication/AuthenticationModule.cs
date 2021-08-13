@@ -37,20 +37,8 @@ namespace Kyoo.Authentication
 		
 		/// <inheritdoc />
 		public string Description => "Enable OpenID authentication for Kyoo.";
-		
-		/// <inheritdoc />
-		public ICollection<Type> Provides => ArraySegment<Type>.Empty;
-		
-		/// <inheritdoc />
-		public ICollection<ConditionalProvide> ConditionalProvides => ArraySegment<ConditionalProvide>.Empty;
-		
-		/// <inheritdoc />
-		public ICollection<Type> Requires => new []
-		{
-			typeof(IUserRepository)
-		};
-		
-		
+
+
 		/// <summary>
 		/// The configuration to use.
 		/// </summary>
@@ -88,7 +76,7 @@ namespace Kyoo.Authentication
 		}
 
 		/// <inheritdoc />
-		public void Configure(IServiceCollection services, ICollection<Type> availableTypes)
+		public void Configure(IServiceCollection services)
 		{
 			string publicUrl = _configuration.GetPublicUrl();
 

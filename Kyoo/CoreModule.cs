@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using Autofac;
 using Autofac.Core;
@@ -31,53 +30,7 @@ namespace Kyoo
 		/// <inheritdoc />
 		public string Description => "The core module containing default implementations.";
 
-		/// <inheritdoc />
-		public ICollection<Type> Provides => new[]
-		{
-			typeof(IFileSystem),
-			typeof(ITranscoder),
-			typeof(IThumbnailsManager),
-			typeof(IMetadataProvider),
-			typeof(ITaskManager),
-			typeof(ILibraryManager),
-			typeof(IIdentifier),
-			typeof(AProviderComposite)
-		};
 
-		/// <inheritdoc />
-		public ICollection<ConditionalProvide> ConditionalProvides => new ConditionalProvide[]
-		{
-			(typeof(ILibraryRepository), typeof(DatabaseContext)),
-			(typeof(ILibraryItemRepository), typeof(DatabaseContext)),
-			(typeof(ICollectionRepository), typeof(DatabaseContext)),
-			(typeof(IShowRepository), typeof(DatabaseContext)),
-			(typeof(ISeasonRepository), typeof(DatabaseContext)),
-			(typeof(IEpisodeRepository), typeof(DatabaseContext)),
-			(typeof(ITrackRepository), typeof(DatabaseContext)),
-			(typeof(IPeopleRepository), typeof(DatabaseContext)),
-			(typeof(IStudioRepository), typeof(DatabaseContext)),
-			(typeof(IGenreRepository), typeof(DatabaseContext)),
-			(typeof(IProviderRepository), typeof(DatabaseContext)),
-			(typeof(IUserRepository), typeof(DatabaseContext))
-		};
-
-		/// <inheritdoc />
-		public ICollection<Type> Requires => new []
-		{
-			typeof(ILibraryRepository),
-			typeof(ILibraryItemRepository),
-			typeof(ICollectionRepository),
-			typeof(IShowRepository),
-			typeof(ISeasonRepository),
-			typeof(IEpisodeRepository),
-			typeof(ITrackRepository),
-			typeof(IPeopleRepository),
-			typeof(IStudioRepository),
-			typeof(IGenreRepository),
-			typeof(IProviderRepository)
-		};
-
-		
 		/// <summary>
 		/// The configuration to use.
 		/// </summary>
@@ -142,7 +95,7 @@ namespace Kyoo
 		}
 		
 		/// <inheritdoc />
-        public void Configure(IServiceCollection services, ICollection<Type> availableTypes)
+        public void Configure(IServiceCollection services)
 		{
 			string publicUrl = _configuration.GetPublicUrl();
 

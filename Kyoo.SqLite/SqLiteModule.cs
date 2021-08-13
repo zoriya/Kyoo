@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using Kyoo.Controllers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -23,19 +22,7 @@ namespace Kyoo.SqLite
 		/// <inheritdoc />
 		public string Description => "A database context for sqlite.";
 
-		/// <inheritdoc />
-		public ICollection<Type> Provides => new[]
-		{
-			typeof(DatabaseContext)
-		};
-		
-		/// <inheritdoc />
-		public ICollection<ConditionalProvide> ConditionalProvides => ArraySegment<ConditionalProvide>.Empty;
-		
-		/// <inheritdoc />
-		public ICollection<Type> Requires => ArraySegment<Type>.Empty;
-		
-		
+
 		/// <summary>
 		/// The configuration to use. The database connection string is pulled from it.
 		/// </summary>
@@ -59,7 +46,7 @@ namespace Kyoo.SqLite
 
 
 		/// <inheritdoc />
-		public void Configure(IServiceCollection services, ICollection<Type> availableTypes)
+		public void Configure(IServiceCollection services)
 		{
 			services.AddDbContext<DatabaseContext, SqLiteContext>(x =>
 			{
