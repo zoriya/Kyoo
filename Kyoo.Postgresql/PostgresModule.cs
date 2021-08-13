@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Kyoo.Controllers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,9 @@ namespace Kyoo.Postgresql
 
 		/// <inheritdoc />
 		public string Description => "A database context for postgresql.";
+		
+		/// <inheritdoc />
+		public Dictionary<string, Type> Configuration => new();
 
 		/// <inheritdoc />
 		public bool Enabled => _configuration.GetSelectedDatabase() == "postgres";

@@ -6,7 +6,6 @@ using System.Reflection;
 using System.Runtime.Loader;
 using Autofac;
 using Kyoo.Models.Options;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -146,18 +145,6 @@ namespace Kyoo.Controllers
 		{
 			foreach (IPlugin plugin in _plugins)
 				plugin.Configure(services);
-		}
-
-		/// <inheritdoc />
-		public void ConfigureAspnet(IApplicationBuilder app)
-		{
-			foreach (IPlugin plugin in _plugins)
-			{
-				using IServiceScope scope = _provider.CreateScope();
-				Helper.InjectServices(plugin, x => scope.ServiceProvider.GetRequiredService(x));
-				plugin.ConfigureAspNet(app);
-				Helper.InjectServices(plugin, _ => null);
-			}
 		}
 
 		/// <summary>

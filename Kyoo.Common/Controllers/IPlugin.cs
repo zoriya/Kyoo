@@ -1,7 +1,7 @@
 using System;
+using System.Collections.Generic;
 using Autofac;
 using JetBrains.Annotations;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
@@ -41,8 +41,26 @@ namespace Kyoo.Controllers
 		/// By default, a plugin is always enabled. This method can be overriden to change this behavior.
 		/// </remarks>
 		virtual bool Enabled => true;
+		
+		/// <summary>
+		/// A list of types that will be available via the IOptions interfaces and will be listed inside
+		/// an IConfiguration. If a field should be loosely typed, <see cref="Dictionary{TKey,TValue}"/> or <c>null</c>
+		/// can be specified.
+		/// </summary>
+		/// <remarks>
+		/// All use of the configuration must be specified here and not registered elsewhere, if a type is registered
+		/// elsewhere the configuration won't be editable via the <see cref="IConfigurationManager"/> and all values
+		/// will be discarded on edit.
+		/// </remarks>
+		Dictionary<string, Type> Configuration { get; }
 
 		/// <summary>
+		/// An optional configuration step to allow a plugin to change asp net configurations.
+		/// </summary>
+		/// <seealso cref="SA"/>
+		virtual IEnumerable<IStartupAction> ConfigureSteps => ArraySegment<IStartupAction>.Empty;
+
+			/// <summary>
 		/// A configure method that will be run on plugin's startup.
 		/// </summary>
 		/// <param name="builder">The autofac service container to register services.</param>
@@ -58,20 +76,6 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="services">A service container to register new services.</param>
 		void Configure(IServiceCollection services)
-		{
-			// Skipped
-		}
-		
-
-		/// <summary>
-		/// An optional configuration step to allow a plugin to change asp net configurations.
-		/// WARNING: This is only called on Kyoo's startup so you must restart the app to apply this changes.
-		/// </summary>
-		/// <param name="app">
-		/// The Asp.Net application builder. On most case it is not needed but you can use it to
-		/// add asp net functionalities.
-		/// </param>
-		void ConfigureAspNet(IApplicationBuilder app)
 		{
 			// Skipped
 		}

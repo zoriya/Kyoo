@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Autofac;
 using Autofac.Extras.AttributeMetadata;
 using Kyoo.Authentication;
@@ -90,18 +91,9 @@ namespace Kyoo
 		/// <param name="env">The host environment (is the app in development mode?)</param>
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider provider)
 		{
-			if (env.IsDevelopment())
-				app.UseDeveloperExceptionPage();
-			else
-			{
-				app.UseExceptionHandler("/error");
-				app.UseHsts();
-			}
-			
 			if (!env.IsDevelopment())
 				app.UseSpaStaticFiles();
-
-			app.UseRouting();
+			
 			app.Use((ctx, next) => 
 			{
 				ctx.Response.Headers.Remove("X-Powered-By");
@@ -116,9 +108,11 @@ namespace Kyoo
 			});
 			app.UseResponseCompression();
 
-			if (_plugins is PluginManager manager)
-				manager.SetProvider(provider);
-			_plugins.ConfigureAspnet(app);
+			IEnumerable<IStartupAction> steps = _plugins.GetAllPlugins()
+				.SelectMany(x => x.ConfigureSteps)
+				.OrderByDescending(x => x.Priority);
+			foreach (IStartupAction step in steps)
+				step.Run(provider);
 
 			app.UseSpa(spa =>
 			{

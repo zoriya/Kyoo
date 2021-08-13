@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Kyoo.Models;
-using Kyoo.Models.Attributes;
 using Kyoo.Models.Exceptions;
 
 namespace Kyoo.Controllers
@@ -182,11 +181,6 @@ namespace Kyoo.Controllers
 		/// <param name="cancellationToken">A token to request the task's cancellation.
 		/// If this task is not cancelled quickly, it might be killed by the runner.
 		/// </param>
-		/// <remarks>
-		/// Your task can have any service as a public field and use the <see cref="InjectedAttribute"/>,
-		/// they will be set to an available service from the service container before calling this method.
-		/// They also will be removed after this method return (or throw) to prevent dangling services.
-		/// </remarks>
 		/// <exception cref="TaskFailedException">
 		/// An exception meaning that the task has failed for handled reasons like invalid arguments,
 		/// invalid environment, missing plugins or failures not related to a default in the code.

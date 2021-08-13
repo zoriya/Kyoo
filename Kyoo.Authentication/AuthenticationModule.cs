@@ -9,7 +9,6 @@ using IdentityServer4.Services;
 using Kyoo.Authentication.Models;
 using Kyoo.Authentication.Views;
 using Kyoo.Controllers;
-using Kyoo.Models.Attributes;
 using Kyoo.Models.Permissions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -38,6 +37,12 @@ namespace Kyoo.Authentication
 		/// <inheritdoc />
 		public string Description => "Enable OpenID authentication for Kyoo.";
 
+		/// <inheritdoc />
+		public Dictionary<string, Type> Configuration => new()
+		{
+			{ AuthenticationOption.Path, typeof(AuthenticationOption) }
+		};
+
 
 		/// <summary>
 		/// The configuration to use.
@@ -53,11 +58,6 @@ namespace Kyoo.Authentication
 		/// The environment information to check if the app runs in debug mode
 		/// </summary>
 		private readonly IWebHostEnvironment _environment;
-		
-		/// <summary>
-		/// The configuration manager used to register typed/untyped implementations.
-		/// </summary>
-		[Injected] public IConfigurationManager ConfigurationManager { private get; set; }
 
 
 		/// <summary>
@@ -88,10 +88,6 @@ namespace Kyoo.Authentication
 			// TODO handle direct-videos with bearers (probably add a cookie and a app.Use to translate that for videos)
 			
 			// TODO Check if tokens should be stored.
-			
-			services.Configure<PermissionOption>(_configuration.GetSection(PermissionOption.Path));
-			services.Configure<CertificateOption>(_configuration.GetSection(CertificateOption.Path));
-			services.Configure<AuthenticationOption>(_configuration.GetSection(AuthenticationOption.Path));
 
 			List<Client> clients = new();
 			_configuration.GetSection("authentication:clients").Bind(clients);
@@ -129,37 +125,43 @@ namespace Kyoo.Authentication
 		}
 
 		/// <inheritdoc />
-		public void ConfigureAspNet(IApplicationBuilder app)
+		public IEnumerable<IStartupAction> ConfigureSteps => new IStartupAction[]
 		{
-			ConfigurationManager.AddTyped<AuthenticationOption>(AuthenticationOption.Path);
-			
-			app.UseCookiePolicy(new CookiePolicyOptions
+			SA.New<IApplicationBuilder>(app =>
 			{
-				MinimumSameSitePolicy = SameSiteMode.Strict
-			});
-			app.UseAuthentication();
-			app.Use((ctx, next) =>
+				PhysicalFileProvider provider = new(Path.Combine(
+					Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
+					"login"));
+				app.UseDefaultFiles(new DefaultFilesOptions
+				{
+					RequestPath = new PathString("/login"),
+					FileProvider = provider,
+					RedirectToAppendTrailingSlash = true
+				});
+				app.UseStaticFiles(new StaticFileOptions
+				{
+					RequestPath = new PathString("/login"),
+					FileProvider = provider
+				});
+			}, SA.StaticFiles),
+			SA.New<IApplicationBuilder>(app =>
 			{
-				ctx.SetIdentityServerOrigin(_configuration.GetPublicUrl());
-				return next();
-			});
-			app.UseIdentityServer();
-			app.UseAuthorization();
-
-			PhysicalFileProvider provider = new(Path.Combine(
-				Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
-				"login"));
-			app.UseDefaultFiles(new DefaultFilesOptions
+				app.UseCookiePolicy(new CookiePolicyOptions
+				{
+					MinimumSameSitePolicy = SameSiteMode.Strict
+				});
+				app.UseAuthentication();
+			}, SA.Authentication),
+			SA.New<IApplicationBuilder>(app =>
 			{
-				RequestPath = new PathString("/login"),
-				FileProvider = provider,
-				RedirectToAppendTrailingSlash = true
-			});
-			app.UseStaticFiles(new StaticFileOptions
-			{
-				RequestPath = new PathString("/login"),
-				FileProvider = provider
-			});
-		}
+				app.Use((ctx, next) =>
+				{
+					ctx.SetIdentityServerOrigin(_configuration.GetPublicUrl());
+					return next();
+				});
+				app.UseIdentityServer();
+			}, SA.Endpoint),
+			SA.New<IApplicationBuilder>(app => app.UseAuthorization(), SA.Authorization)
+		};
 	}
 }

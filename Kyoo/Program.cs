@@ -28,8 +28,8 @@ namespace Kyoo
 		[SuppressMessage("ReSharper", "ConditionIsAlwaysTrueOrFalse")]
 		public static async Task Main(string[] args)
 		{
-			if (!File.Exists("./settings.json"))
-				File.Copy(Path.Join(AppDomain.CurrentDomain.BaseDirectory, "settings.json"), "settings.json");
+			if (!File.Exists(JsonConfigPath))
+				File.Copy(Path.Join(AppDomain.CurrentDomain.BaseDirectory, JsonConfigPath), JsonConfigPath);
 			
 			IHostBuilder builder = CreateWebHostBuilder(args);
 			
@@ -77,7 +77,8 @@ namespace Kyoo
 		/// <returns>The modified configuration builder</returns>
 		private static IConfigurationBuilder SetupConfig(IConfigurationBuilder builder, string[] args)
 		{
-			return builder.AddJsonFile(JsonConfigPath, false, true)
+			return builder.SetBasePath(Environment.CurrentDirectory)
+				.AddJsonFile(JsonConfigPath, false, true)
 				.AddEnvironmentVariables()
 				.AddCommandLine(args);
 		}

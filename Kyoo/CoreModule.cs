@@ -1,10 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Autofac;
 using Autofac.Core;
 using Autofac.Core.Registration;
 using Kyoo.Controllers;
-using Kyoo.Models.Attributes;
 using Kyoo.Models.Options;
 using Kyoo.Models.Permissions;
 using Kyoo.Tasks;
@@ -13,6 +13,7 @@ using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
 
 namespace Kyoo
 {
@@ -30,18 +31,23 @@ namespace Kyoo
 		/// <inheritdoc />
 		public string Description => "The core module containing default implementations.";
 
+		/// <inheritdoc />
+		public Dictionary<string, Type> Configuration => new()
+		{
+			{ BasicOptions.Path, typeof(BasicOptions) },
+			{ TaskOptions.Path, typeof(TaskOptions) },
+			{ MediaOptions.Path, typeof(MediaOptions) },
+			{ "database", null },
+			{ "logging", null }
+		};
+
 
 		/// <summary>
 		/// The configuration to use.
 		/// </summary>
 		private readonly IConfiguration _configuration;
-		
-		/// <summary>
-		/// The configuration manager used to register typed/untyped implementations.
-		/// </summary>
-		[Injected] public IConfigurationManager ConfigurationManager { private get; set; }
 
-		
+
 		/// <summary>
 		/// Create a new core module instance and use the given configuration.
 		/// </summary>
@@ -99,10 +105,6 @@ namespace Kyoo
 		{
 			string publicUrl = _configuration.GetPublicUrl();
 
-			services.Configure<BasicOptions>(_configuration.GetSection(BasicOptions.Path));
-			services.Configure<TaskOptions>(_configuration.GetSection(TaskOptions.Path));
-			services.Configure<MediaOptions>(_configuration.GetSection(MediaOptions.Path));
-
 			services.AddControllers()
 				.AddNewtonsoftJson(x =>
 				{
@@ -114,26 +116,30 @@ namespace Kyoo
 		}
 
 		/// <inheritdoc />
-		public void ConfigureAspNet(IApplicationBuilder app)
+		public IEnumerable<IStartupAction> ConfigureSteps => new IStartupAction[]
 		{
-			ConfigurationManager.AddTyped<BasicOptions>(BasicOptions.Path);
-			ConfigurationManager.AddTyped<TaskOptions>(TaskOptions.Path);
-			ConfigurationManager.AddTyped<MediaOptions>(MediaOptions.Path);
-			ConfigurationManager.AddUntyped("database");
-			ConfigurationManager.AddUntyped("logging");
-			
-			FileExtensionContentTypeProvider contentTypeProvider = new();
-			contentTypeProvider.Mappings[".data"] = "application/octet-stream";
-			app.UseStaticFiles(new StaticFileOptions
+			SA.New<IApplicationBuilder, IHostEnvironment>((app, env) =>
 			{
-				ContentTypeProvider = contentTypeProvider,
-				FileProvider = new PhysicalFileProvider(Path.Join(AppDomain.CurrentDomain.BaseDirectory, "wwwroot"))
-			});
-			
-			app.UseEndpoints(endpoints =>
+				if (env.IsDevelopment())
+					app.UseDeveloperExceptionPage();
+				else
+				{
+					app.UseExceptionHandler("/error");
+					app.UseHsts();
+				}
+			}, SA.Before),
+			SA.New<IApplicationBuilder>(app => app.UseRouting(), SA.Routing),
+			SA.New<IApplicationBuilder>(app =>
 			{
-				endpoints.MapControllers();
-			});
-		}
+				FileExtensionContentTypeProvider contentTypeProvider = new();
+				contentTypeProvider.Mappings[".data"] = "application/octet-stream";
+				app.UseStaticFiles(new StaticFileOptions
+				{
+					ContentTypeProvider = contentTypeProvider,
+					FileProvider = new PhysicalFileProvider(Path.Join(AppDomain.CurrentDomain.BaseDirectory, "wwwroot"))
+				});
+			}, SA.StaticFiles),
+			SA.New<IApplicationBuilder>(app => app.UseEndpoints(x => x.MapControllers()), SA.Endpoint)
+		};
 	}
 }
