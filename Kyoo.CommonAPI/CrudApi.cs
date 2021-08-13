@@ -15,9 +15,9 @@ namespace Kyoo.CommonApi
 	public class CrudApi<T> : ControllerBase where T : class, IResource
 	{
 		private readonly IRepository<T> _repository;
-		protected readonly string BaseURL;
+		protected readonly Uri BaseURL;
 
-		public CrudApi(IRepository<T> repository, string baseURL)
+		public CrudApi(IRepository<T> repository, Uri baseURL)
 		{
 			_repository = repository;
 			BaseURL = baseURL;
@@ -82,8 +82,8 @@ namespace Kyoo.CommonApi
 		protected Page<TResult> Page<TResult>(ICollection<TResult> resources, int limit)
 			where TResult : IResource
 		{
-			return new(resources, 
-				BaseURL + Request.Path,
+			return new Page<TResult>(resources, 
+				new Uri(BaseURL, Request.Path),
 				Request.Query.ToDictionary(x => x.Key, x => x.Value.ToString(), StringComparer.InvariantCultureIgnoreCase),
 				limit);
 		}
