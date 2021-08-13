@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,17 +13,17 @@ namespace Kyoo.Models
 		/// <summary>
 		/// The link of the current page.
 		/// </summary>
-		public string This { get; }
+		public Uri This { get; }
 		
 		/// <summary>
 		/// The link of the first page.
 		/// </summary>
-		public string First { get; }
+		public Uri First { get; }
 		
 		/// <summary>
 		/// The link of the next page.
 		/// </summary>
-		public string Next { get; }
+		public Uri Next { get; }
 
 		/// <summary>
 		/// The number of items in the current page.
@@ -42,7 +43,7 @@ namespace Kyoo.Models
 		/// <param name="this">The link of the current page.</param>
 		/// <param name="next">The link of the next page.</param>
 		/// <param name="first">The link of the first page.</param>
-		public Page(ICollection<T> items, string @this, string next, string first)
+		public Page(ICollection<T> items, Uri @this, Uri next, Uri first)
 		{
 			Items = items;
 			This = @this;
@@ -58,21 +59,21 @@ namespace Kyoo.Models
 		/// <param name="query">The list of query strings of the current page</param>
 		/// <param name="limit">The number of items requested for the current page.</param>
 		public Page(ICollection<T> items,
-			string url,
+			Uri url,
 			Dictionary<string, string> query,
 			int limit)
 		{
 			Items = items;
-			This = url + query.ToQueryString();
+			This = new Uri(url + query.ToQueryString());
 
 			if (items.Count == limit && limit > 0)
 			{
 				query["afterID"] = items.Last().ID.ToString();
-				Next = url + query.ToQueryString();
+				Next = new Uri(url + query.ToQueryString());
 			}
 			
 			query.Remove("afterID");
-			First = url + query.ToQueryString();
+			First = new Uri(url + query.ToQueryString());
 		}
 	}
 }

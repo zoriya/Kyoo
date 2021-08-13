@@ -1,3 +1,5 @@
+using System;
+
 namespace Kyoo.Models.Options
 {
 	/// <summary>
@@ -11,14 +13,14 @@ namespace Kyoo.Models.Options
 		public const string Path = "Basics";
 
 		/// <summary>
-		/// The internal url where the server will listen
+		/// The internal url where the server will listen. It supports globing.
 		/// </summary>
 		public string Url { get; set; } = "http://*:5000";
 
 		/// <summary>
 		/// The public url that will be used in items response and in authentication server host.
 		/// </summary>
-		public string PublicUrl { get; set; } = "http://localhost:5000/";
+		public Uri PublicUrl { get; set; } = new("http://localhost:5000");
 
 		/// <summary>
 		/// The path of the plugin directory.
