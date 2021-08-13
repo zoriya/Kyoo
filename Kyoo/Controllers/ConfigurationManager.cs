@@ -50,6 +50,21 @@ namespace Kyoo.Controllers
 			ConfigurationReference config = ConfigurationReference.CreateUntyped(path);
 			_references.Add(config.Path, config.Type);
 		}
+		
+		/// <inheritdoc />
+		public void Register(string path, Type type)
+		{
+			if (type == null)
+			{
+				ConfigurationReference config = ConfigurationReference.CreateUntyped(path);
+				_references.Add(config.Path, config.Type);
+			}
+			else
+			{
+				foreach (ConfigurationReference confRef in ConfigurationReference.CreateReference(path, type))
+					_references.Add(confRef.Path, confRef.Type);
+			}
+		}
 
 		/// <summary>
 		/// Get the type of the resource at the given path

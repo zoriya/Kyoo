@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Autofac;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
@@ -40,7 +41,9 @@ namespace Kyoo.Authentication
 		/// <inheritdoc />
 		public Dictionary<string, Type> Configuration => new()
 		{
-			{ AuthenticationOption.Path, typeof(AuthenticationOption) }
+			{ AuthenticationOption.Path, typeof(AuthenticationOption) },
+			{ PermissionOption.Path, typeof(PermissionOption) },
+			{ CertificateOption.Path, typeof(CertificateOption) }
 		};
 
 
@@ -73,6 +76,18 @@ namespace Kyoo.Authentication
 			_configuration = configuration;
 			_loggerFactory = loggerFactory;
 			_environment = environment;
+		}
+
+		/// <inheritdoc />
+		public void Configure(ContainerBuilder builder)
+		{
+			builder.RegisterType<PermissionValidatorFactory>().As<IPermissionValidator>().SingleInstance();
+
+			DefaultCorsPolicyService cors = new(_loggerFactory.CreateLogger<DefaultCorsPolicyService>())
+			{
+				AllowedOrigins = { new Uri(_configuration.GetPublicUrl()).GetLeftPart(UriPartial.Authority) }
+			};
+			builder.RegisterInstance(cors).As<ICorsPolicyService>().SingleInstance();
 		}
 
 		/// <inheritdoc />
@@ -115,13 +130,6 @@ namespace Kyoo.Authentication
 					options.Audience = "kyoo";
 					options.RequireHttpsMetadata = false;
 				});
-			services.AddSingleton<IPermissionValidator, PermissionValidatorFactory>();
-
-			DefaultCorsPolicyService cors = new(_loggerFactory.CreateLogger<DefaultCorsPolicyService>())
-			{
-				AllowedOrigins = {new Uri(publicUrl).GetLeftPart(UriPartial.Authority)}
-			}; 
-			services.AddSingleton<ICorsPolicyService>(cors);
 		}
 
 		/// <inheritdoc />

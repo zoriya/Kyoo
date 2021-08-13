@@ -44,8 +44,12 @@ namespace Kyoo.Controllers
 		
 		/// <summary>
 		/// A list of types that will be available via the IOptions interfaces and will be listed inside
-		/// an IConfiguration. If a field should be loosely typed, <see cref="Dictionary{TKey,TValue}"/> or <c>null</c>
+		/// an IConfiguration.
+		///
+		/// If a field should be loosely typed, <see cref="Dictionary{TKey,TValue}"/> or <c>null</c>
 		/// can be specified.
+		/// WARNING: null means an unmanaged type that won't be editable. This can be used
+		/// for external libraries or variable arguments.
 		/// </summary>
 		/// <remarks>
 		/// All use of the configuration must be specified here and not registered elsewhere, if a type is registered

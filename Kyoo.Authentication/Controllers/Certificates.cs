@@ -34,7 +34,7 @@ namespace Kyoo.Authentication
 			X509Certificate2 certificate = GetCertificate(options);
 			builder.AddSigningCredential(certificate);
 			
-			if (certificate.NotAfter.AddDays(7) <= DateTime.UtcNow)
+			if (certificate.NotAfter.AddDays(-7) <= DateTime.UtcNow)
 			{
 				Console.WriteLine("Signin certificate will expire soon, renewing it.");
 				if (File.Exists(options.OldFile))
@@ -67,7 +67,7 @@ namespace Kyoo.Authentication
 		/// <returns>The loaded certificate</returns>
 		private static X509Certificate2 GetExistingCredential(string file, string password)
 		{
-			return new(file, password,
+			return new X509Certificate2(file, password,
 				X509KeyStorageFlags.MachineKeySet |
 				X509KeyStorageFlags.PersistKeySet |
 				X509KeyStorageFlags.Exportable

@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Kyoo.Models;
 using Kyoo.Models.Exceptions;
 
@@ -26,6 +27,15 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="path">The root path of the editable configuration. It should not be a nested type.</param>
 		void AddUntyped(string path);
+
+		/// <summary>
+		/// An helper method of <see cref="AddTyped{T}"/> and <see cref="AddUntyped"/>.
+		/// This register a typed value if <paramref name="type"/> is not <c>null</c> and registers an untyped type
+		/// if <paramref name="type"/> is <c>null</c>.
+		/// </summary>
+		/// <param name="path">The root path of the editable configuration. It should not be a nested type.</param>
+		/// <param name="type">The type of the configuration or null.</param>
+		void Register(string path, [CanBeNull] Type type);
 		
 		/// <summary>
 		/// Get the value of a setting using it's path.

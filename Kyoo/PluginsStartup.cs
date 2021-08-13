@@ -32,14 +32,23 @@ namespace Kyoo
 		/// A plugin manager used to load plugins and allow them to configure services / asp net.
 		/// </summary>
 		private readonly IPluginManager _plugins;
-		
+
+		/// <summary>
+		/// The configuration used to register <see cref="IOptions{TOptions}"/> and so on for plugin's specified types.
+		/// </summary>
+		private readonly IConfiguration _configuration;
+
 		/// <summary>
 		/// Created from the DI container, those services are needed to load information and instantiate plugins.s
 		/// </summary>
 		/// <param name="plugins">The plugin manager to use to load new plugins and configure the host.</param>
-		public PluginsStartup(IPluginManager plugins)
+		/// <param name="configuration">
+		/// The configuration used to register <see cref="IOptions{TOptions}"/> and so on for plugin's specified types.
+		/// </param>
+		public PluginsStartup(IPluginManager plugins, IConfiguration configuration)
 		{
 			_plugins = plugins;
+			_configuration = configuration;
 			_plugins.LoadPlugins(
 				typeof(CoreModule), 
 				typeof(AuthenticationModule),
@@ -58,9 +67,9 @@ namespace Kyoo
 		{
 			services.AddMvc().AddControllersAsServices();
 			
-			services.AddSpaStaticFiles(configuration =>
+			services.AddSpaStaticFiles(x =>
 			{
-				configuration.RootPath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "wwwroot");
+				x.RootPath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "wwwroot");
 			});
 			services.AddResponseCompression(x =>
 			{
@@ -70,6 +79,18 @@ namespace Kyoo
 			services.AddHttpClient();
 			
 			_plugins.ConfigureServices(services);
+			IEnumerable<KeyValuePair<string, Type>> configTypes = _plugins.GetAllPlugins()
+				.SelectMany(x => x.Configuration)
+				.Where(x => x.Value != null);
+			foreach ((string path, Type type) in configTypes)
+			{
+				Utility.RunGenericMethod<object>(
+					typeof(OptionsConfigurationServiceCollectionExtensions),
+					nameof(OptionsConfigurationServiceCollectionExtensions.Configure),
+					type,
+					services, _configuration.GetSection(path)
+				);
+			}
 		}
 
 		/// <summary>
@@ -89,7 +110,7 @@ namespace Kyoo
 		/// </summary>
 		/// <param name="app">The asp net host to configure</param>
 		/// <param name="env">The host environment (is the app in development mode?)</param>
-		public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IServiceProvider provider)
+		public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IConfigurationManager config, ILifetimeScope container)
 		{
 			if (!env.IsDevelopment())
 				app.UseSpaStaticFiles();
@@ -111,8 +132,22 @@ namespace Kyoo
 			IEnumerable<IStartupAction> steps = _plugins.GetAllPlugins()
 				.SelectMany(x => x.ConfigureSteps)
 				.OrderByDescending(x => x.Priority);
+
+			using ILifetimeScope scope = container.BeginLifetimeScope(x => 
+				x.RegisterInstance(app).SingleInstance().ExternallyOwned());
+			IServiceProvider provider = scope.Resolve<IServiceProvider>();
 			foreach (IStartupAction step in steps)
 				step.Run(provider);
+
+			IEnumerable<KeyValuePair<string, Type>> pluginConfig = _plugins.GetAllPlugins()
+				.SelectMany(x => x.Configuration)
+				.GroupBy(x => x.Key.Split(':').First())
+				.Select(x => x
+					.OrderBy(y => y.Key.Length)
+					.First()
+				);
+			foreach ((string path, Type type) in pluginConfig)
+				config.Register(path, type);
 
 			app.UseSpa(spa =>
 			{
@@ -148,7 +183,7 @@ namespace Kyoo
 				Options.Create(host.Configuration.GetSection(BasicOptions.Path).Get<BasicOptions>()),
 				logger.CreateLogger<PluginManager>()
 			);
-			return new PluginsStartup(plugins);
+			return new PluginsStartup(plugins, host.Configuration);
 		}
 		
 		/// <summary>
