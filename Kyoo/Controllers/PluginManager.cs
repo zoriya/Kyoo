@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
-using Autofac;
 using Kyoo.Models.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -131,20 +130,6 @@ namespace Kyoo.Controllers
 				.Select(x => (IPlugin)ActivatorUtilities.CreateInstance(_provider, x))
 				.ToArray()
 			);
-		}
-
-		/// <inheritdoc />
-		public void ConfigureContainer(ContainerBuilder builder)
-		{
-			foreach (IPlugin plugin in _plugins)
-				plugin.Configure(builder);
-		}
-		
-		/// <inheritdoc />
-		public void ConfigureServices(IServiceCollection services)
-		{
-			foreach (IPlugin plugin in _plugins)
-				plugin.Configure(services);
 		}
 
 		/// <summary>

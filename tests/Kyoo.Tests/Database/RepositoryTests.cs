@@ -64,7 +64,7 @@ namespace Kyoo.Tests
 		[Fact]
 		public async Task GetByFakeSlugTest()
 		{
-            await Assert.ThrowsAsync<ItemNotFoundException>(() => _repository.Get("non-existent"));
+			await Assert.ThrowsAsync<ItemNotFoundException>(() => _repository.Get("non-existent"));
 		}
 
 		[Fact]

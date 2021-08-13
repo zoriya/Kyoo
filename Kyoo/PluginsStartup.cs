@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using Autofac;
-using Autofac.Extras.AttributeMetadata;
 using Kyoo.Authentication;
 using Kyoo.Controllers;
 using Kyoo.Models.Options;
@@ -14,7 +12,6 @@ using Kyoo.TheMovieDb;
 using Kyoo.TheTvdb;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -65,20 +62,9 @@ namespace Kyoo
 		/// <param name="services">The service collection to fill.</param>
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddMvc().AddControllersAsServices();
+			foreach (IPlugin plugin in _plugins.GetAllPlugins())
+				plugin.Configure(services);
 			
-			services.AddSpaStaticFiles(x =>
-			{
-				x.RootPath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "wwwroot");
-			});
-			services.AddResponseCompression(x =>
-			{
-				x.EnableForHttps = true;
-			});
-			
-			services.AddHttpClient();
-			
-			_plugins.ConfigureServices(services);
 			IEnumerable<KeyValuePair<string, Type>> configTypes = _plugins.GetAllPlugins()
 				.SelectMany(x => x.Configuration)
 				.Where(x => x.Value != null);
@@ -99,41 +85,26 @@ namespace Kyoo
 		/// <param name="builder">The builder to configure.</param>
 		public void ConfigureContainer(ContainerBuilder builder)
 		{
-			builder.RegisterModule<AttributedMetadataModule>();
 			builder.RegisterInstance(_plugins).As<IPluginManager>().ExternallyOwned();
 			builder.RegisterTask<PluginInitializer>();
-			_plugins.ConfigureContainer(builder);
+			
+			foreach (IPlugin plugin in _plugins.GetAllPlugins())
+				plugin.Configure(builder);
 		}
-		
+
 		/// <summary>
 		/// Configure the asp net host.
 		/// </summary>
 		/// <param name="app">The asp net host to configure</param>
-		/// <param name="env">The host environment (is the app in development mode?)</param>
-		public void Configure(IApplicationBuilder app, IWebHostEnvironment env, IConfigurationManager config, ILifetimeScope container)
+		/// <param name="container">An autofac container used to create a new scope to configure asp-net.</param>
+		/// <param name="config">The configuration manager used to register strongly typed config.</param>
+		public void Configure(IApplicationBuilder app, ILifetimeScope container, IConfigurationManager config)
 		{
-			if (!env.IsDevelopment())
-				app.UseSpaStaticFiles();
-			
-			app.Use((ctx, next) => 
-			{
-				ctx.Response.Headers.Remove("X-Powered-By");
-				ctx.Response.Headers.Remove("Server");
-				ctx.Response.Headers.Add("Feature-Policy", "autoplay 'self'; fullscreen");
-				ctx.Response.Headers.Add("Content-Security-Policy", "default-src 'self' blob:; script-src 'self' blob: 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; frame-src 'self' https://www.youtube.com");
-				ctx.Response.Headers.Add("X-Frame-Options", "SAMEORIGIN");
-				ctx.Response.Headers.Add("Referrer-Policy", "no-referrer");
-				ctx.Response.Headers.Add("Access-Control-Allow-Origin", "null");
-				ctx.Response.Headers.Add("X-Content-Type-Options", "nosniff");
-				return next();
-			});
-			app.UseResponseCompression();
-
 			IEnumerable<IStartupAction> steps = _plugins.GetAllPlugins()
 				.SelectMany(x => x.ConfigureSteps)
 				.OrderByDescending(x => x.Priority);
 
-			using ILifetimeScope scope = container.BeginLifetimeScope(x => 
+			using ILifetimeScope scope = container.BeginLifetimeScope(x =>
 				x.RegisterInstance(app).SingleInstance().ExternallyOwned());
 			IServiceProvider provider = scope.Resolve<IServiceProvider>();
 			foreach (IStartupAction step in steps)
@@ -148,14 +119,6 @@ namespace Kyoo
 				);
 			foreach ((string path, Type type) in pluginConfig)
 				config.Register(path, type);
-
-			app.UseSpa(spa =>
-			{
-				spa.Options.SourcePath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "Kyoo.WebApp");
-			
-				if (env.IsDevelopment())
-					spa.UseAngularCliServer("start");
-			});
 		}
 		
 		

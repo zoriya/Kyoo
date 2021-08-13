@@ -309,20 +309,20 @@ namespace Kyoo.Controllers
 		Task<Season> Get(string showSlug, int seasonNumber);
 		
 		/// <summary>
-        /// Get a season from it's showID and it's seasonNumber or null if it is not found.
-        /// </summary>
-        /// <param name="showID">The id of the show</param>
-        /// <param name="seasonNumber">The season's number</param>
-        /// <returns>The season found</returns>
-        Task<Season> GetOrDefault(int showID, int seasonNumber);
-        
-        /// <summary>
-        /// Get a season from it's show slug and it's seasonNumber or null if it is not found.
-        /// </summary>
-        /// <param name="showSlug">The slug of the show</param>
-        /// <param name="seasonNumber">The season's number</param>
-        /// <returns>The season found</returns>
-        Task<Season> GetOrDefault(string showSlug, int seasonNumber);
+		/// Get a season from it's showID and it's seasonNumber or null if it is not found.
+		/// </summary>
+		/// <param name="showID">The id of the show</param>
+		/// <param name="seasonNumber">The season's number</param>
+		/// <returns>The season found</returns>
+		Task<Season> GetOrDefault(int showID, int seasonNumber);
+		
+		/// <summary>
+		/// Get a season from it's show slug and it's seasonNumber or null if it is not found.
+		/// </summary>
+		/// <param name="showSlug">The slug of the show</param>
+		/// <param name="seasonNumber">The season's number</param>
+		/// <returns>The season found</returns>
+		Task<Season> GetOrDefault(string showSlug, int seasonNumber);
 	}
 	
 	/// <summary>

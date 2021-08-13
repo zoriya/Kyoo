@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using Autofac;
 using Autofac.Core;
 using Autofac.Core.Registration;
+using Autofac.Extras.AttributeMetadata;
 using Kyoo.Controllers;
 using Kyoo.Models.Options;
 using Kyoo.Models.Permissions;
@@ -12,8 +12,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
+using IMetadataProvider = Kyoo.Controllers.IMetadataProvider;
 
 namespace Kyoo
 {
@@ -60,6 +60,8 @@ namespace Kyoo
 		/// <inheritdoc />
 		public void Configure(ContainerBuilder builder)
 		{
+			builder.RegisterModule<AttributedMetadataModule>();
+			
 			builder.RegisterComposite<FileSystemComposite, IFileSystem>().InstancePerLifetimeScope();
 			builder.RegisterType<LocalFileSystem>().As<IFileSystem>().SingleInstance();
 			builder.RegisterType<HttpFileSystem>().As<IFileSystem>().SingleInstance();
@@ -98,19 +100,37 @@ namespace Kyoo
 
 			builder.RegisterType<PassthroughPermissionValidator>().As<IPermissionValidator>()
 				.IfNotRegistered(typeof(IPermissionValidator));
+			
+			builder.RegisterType<FileExtensionContentTypeProvider>().As<IContentTypeProvider>().SingleInstance()
+				.OnActivating(x =>
+				{
+					x.Instance.Mappings[".data"] = "application/octet-stream";
+					x.Instance.Mappings[".mkv"] = "video/x-matroska";
+					x.Instance.Mappings[".ass"] = "text/x-ssa";
+					x.Instance.Mappings[".srt"] = "application/x-subrip";
+					x.Instance.Mappings[".m3u8"] = "application/x-mpegurl";
+				});
 		}
 		
 		/// <inheritdoc />
-        public void Configure(IServiceCollection services)
+		public void Configure(IServiceCollection services)
 		{
 			string publicUrl = _configuration.GetPublicUrl();
 
+			services.AddMvc().AddControllersAsServices();
 			services.AddControllers()
 				.AddNewtonsoftJson(x =>
 				{
 					x.SerializerSettings.ContractResolver = new JsonPropertyIgnorer(publicUrl);
 					x.SerializerSettings.Converters.Add(new PeopleRoleConverter());
 				});
+			
+			services.AddResponseCompression(x =>
+			{
+				x.EnableForHttps = true;
+			});
+			
+			services.AddHttpClient();
 			
 			services.AddHostedService(x => x.GetService<ITaskManager>() as TaskManager);
 		}
@@ -128,17 +148,8 @@ namespace Kyoo
 					app.UseHsts();
 				}
 			}, SA.Before),
+			SA.New<IApplicationBuilder>(app => app.UseResponseCompression(), SA.Routing + 1),
 			SA.New<IApplicationBuilder>(app => app.UseRouting(), SA.Routing),
-			SA.New<IApplicationBuilder>(app =>
-			{
-				FileExtensionContentTypeProvider contentTypeProvider = new();
-				contentTypeProvider.Mappings[".data"] = "application/octet-stream";
-				app.UseStaticFiles(new StaticFileOptions
-				{
-					ContentTypeProvider = contentTypeProvider,
-					FileProvider = new PhysicalFileProvider(Path.Join(AppDomain.CurrentDomain.BaseDirectory, "wwwroot"))
-				});
-			}, SA.StaticFiles),
 			SA.New<IApplicationBuilder>(app => app.UseEndpoints(x => x.MapControllers()), SA.Endpoint)
 		};
 	}

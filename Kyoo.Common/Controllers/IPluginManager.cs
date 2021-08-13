@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
-using Autofac;
 using Kyoo.Models.Exceptions;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Controllers
 {
@@ -50,17 +48,5 @@ namespace Kyoo.Controllers
 		/// You should not try to put plugins from the plugins directory here as they will get automatically loaded.
 		/// </param>
 		public void LoadPlugins(params Type[] plugins);
-
-		/// <summary>
-		/// Configure container adding or removing services as the plugins wants.
-		/// </summary>
-		/// <param name="builder">The container to populate</param>
-		void ConfigureContainer(ContainerBuilder builder);
-		
-		/// <summary>
-		/// Configure services via the microsoft way. This allow libraries to add their services.
-		/// </summary>
-		/// <param name="services">The service collection to populate</param>
-		public void ConfigureServices(IServiceCollection services);
 	}
 }

@@ -60,9 +60,9 @@ namespace Kyoo.Models
 		}
 		
 		/// <summary>
-        /// The slug of the episode that contain this track. If this is not set, this track is ill-formed.
-        /// </summary>
-        [SerializeIgnore] public string EpisodeSlug { private get; set; }
+		/// The slug of the episode that contain this track. If this is not set, this track is ill-formed.
+		/// </summary>
+		[SerializeIgnore] public string EpisodeSlug { private get; set; }
 		
 		/// <summary>
 		/// The title of the stream.
