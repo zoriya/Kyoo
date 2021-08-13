@@ -15,7 +15,7 @@ namespace Kyoo.Models.Options
 		/// <summary>
 		/// The internal url where the server will listen. It supports globing.
 		/// </summary>
-		public string Url { get; set; } = new("http://*:5000");
+		public string Url { get; set; } = "http://*:5000";
 
 		/// <summary>
 		/// The public url that will be used in items response and in authentication server host.
