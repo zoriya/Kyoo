@@ -23,6 +23,9 @@ namespace Kyoo.Postgresql
 		/// <inheritdoc />
 		public string Description => "A database context for postgresql.";
 
+		/// <inheritdoc />
+		public bool Enabled => _configuration.GetSelectedDatabase() == "postgres";
+
 		/// <summary>
 		/// The configuration to use. The database connection string is pulled from it.
 		/// </summary>

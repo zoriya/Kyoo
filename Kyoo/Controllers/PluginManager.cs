@@ -116,6 +116,7 @@ namespace Kyoo.Controllers
 				.Concat(pluginsPaths.SelectMany(LoadPlugin))
 				.GroupBy(x => x.Name)
 				.Select(x => x.First())
+				.Where(x => x.Enabled)
 			);
 			
 			if (!_plugins.Any())

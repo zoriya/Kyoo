@@ -10,19 +10,22 @@
   },
   
   "database": {
-    "sqlite": {
-      "data Source": "kyoo.db",
-      "cache": "Shared"
-    },
-    "postgres": {
-      "server": "127.0.0.1",
-      "port": "5432",
-      "database": "kyooDB",
-      "user ID": "kyoo",
-      "password": "kyooPassword",
-      "pooling": "true",
-      "maxPoolSize": "95",
-      "timeout": "30"
+    "enabled": "sqlite",
+    "configurations": {
+      "sqlite": {
+        "data Source": "kyoo.db",
+        "cache": "Shared"
+      },
+      "postgres": {
+        "server": "127.0.0.1",
+        "port": "5432",
+        "database": "kyooDB",
+        "user ID": "kyoo",
+        "password": "kyooPassword",
+        "pooling": "true",
+        "maxPoolSize": "95",
+        "timeout": "30"
+      }
     }
   },
 

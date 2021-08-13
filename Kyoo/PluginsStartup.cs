@@ -43,7 +43,7 @@ namespace Kyoo
 				typeof(CoreModule), 
 				typeof(AuthenticationModule),
 				typeof(PostgresModule),
-				// typeof(SqLiteModule),
+				typeof(SqLiteModule),
 				typeof(PluginTvdb),
 				typeof(PluginTmdb)
 			);
