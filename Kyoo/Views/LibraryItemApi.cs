@@ -43,7 +43,7 @@ namespace Kyoo.Api
 					new Pagination(limit, afterID));
 
 				return new Page<LibraryItem>(resources, 
-					new Uri(_baseURL + Request.Path),
+					new Uri(_baseURL, Request.Path),
 					Request.Query.ToDictionary(x => x.Key, x => x.Value.ToString(), StringComparer.InvariantCultureIgnoreCase),
 					limit);
 			}

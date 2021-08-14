@@ -82,7 +82,7 @@ namespace Kyoo.Api
 		protected Page<TResult> Page<TResult>(ICollection<TResult> resources, int limit)
 			where TResult : IResource
 		{
-			return new Page<TResult>(resources, 
+			return new Page<TResult>(resources,
 				new Uri(BaseURL, Request.Path),
 				Request.Query.ToDictionary(x => x.Key, x => x.Value.ToString(), StringComparer.InvariantCultureIgnoreCase),
 				limit);
