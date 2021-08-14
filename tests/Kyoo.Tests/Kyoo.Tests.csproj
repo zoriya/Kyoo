@@ -33,7 +33,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="../../Kyoo.CommonAPI/Kyoo.CommonAPI.csproj" />
-		<ProjectReference Include="../../Kyoo.Common/Kyoo.Common.csproj" />
+		<ProjectReference Include="../../Kyoo.Abstractions/Kyoo.Abstractions.csproj" />
 		<ProjectReference Include="../../Kyoo/Kyoo.csproj" />
 		<ProjectReference Include="../../Kyoo.TheTvdb/Kyoo.TheTvdb.csproj" />
 	</ItemGroup>

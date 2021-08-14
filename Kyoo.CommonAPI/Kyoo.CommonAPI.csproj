@@ -19,7 +19,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="../Kyoo.Common/Kyoo.Common.csproj" />
+	  <ProjectReference Include="../Kyoo.Abstractions/Kyoo.Abstractions.csproj" />
 	</ItemGroup>
 
 </Project>

@@ -34,20 +34,20 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="../Kyoo.Common/Kyoo.Common.csproj" />
+		<ProjectReference Include="../Kyoo.Abstractions/Kyoo.Abstractions.csproj" />
 		<ProjectReference Include="../Kyoo.CommonAPI/Kyoo.CommonAPI.csproj" />
 		<ProjectReference Include="../Kyoo.TheMovieDb/Kyoo.TheMovieDb.csproj" />
 		<ProjectReference Include="../Kyoo.TheTvdb/Kyoo.TheTvdb.csproj" />
 		<ProjectReference Include="../Kyoo.Postgresql/Kyoo.Postgresql.csproj" />
 		<ProjectReference Include="../Kyoo.SqLite/Kyoo.SqLite.csproj" />
 		<ProjectReference Include="../Kyoo.Authentication/Kyoo.Authentication.csproj" />
-		<ProjectReference Include="../Kyoo.WebApp/Kyoo.WebApp.csproj" Condition="'$(SkipWebApp)' != 'true'"/>
+		<ProjectReference Include="../Kyoo.WebApp/Kyoo.WebApp.csproj" Condition="'$(SkipWebApp)' != 'true'" />
 	</ItemGroup>
 
 	<Target Name="BuildTranscoder" BeforeTargets="BeforeBuild" Condition="'$(SkipTranscoder)' != 'true'">
-		<Exec WorkingDirectory="$(TranscoderRoot)" Condition="'$(IsWindows)' != 'true'" 
+		<Exec WorkingDirectory="$(TranscoderRoot)" Condition="'$(IsWindows)' != 'true'"
 			  Command="mkdir -p build %26%26 cd build %26%26 cmake .. %26%26 make -j" />
-		<Exec WorkingDirectory="$(TranscoderRoot)" Condition="'$(IsWindows)' == 'true'" 
+		<Exec WorkingDirectory="$(TranscoderRoot)" Condition="'$(IsWindows)' == 'true'"
 			  Command="(if not exist build mkdir build) %26%26 cd build %26%26 cmake .. -G &quot;NMake Makefiles&quot; %26%26 nmake" />
 	</Target>
 	

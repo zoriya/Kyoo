@@ -47,7 +47,6 @@ namespace Kyoo
 		{
 			_plugins = plugins;
 			_configuration = configuration;
-			// TODO enable the web app only if it was build with it.
 			_plugins.LoadPlugins(
 				typeof(CoreModule),
 				typeof(WebAppModule),

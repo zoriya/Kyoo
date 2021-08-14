@@ -19,7 +19,7 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="5.0.0-preview.8.20414.8" />
 		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.8" />
-		<ProjectReference Include="../Kyoo.Common/Kyoo.Common.csproj" />
+		<ProjectReference Include="../Kyoo.Abstractions/Kyoo.Abstractions.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
