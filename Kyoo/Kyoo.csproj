@@ -49,12 +49,10 @@
 			  Command="mkdir -p build %26%26 cd build %26%26 cmake .. %26%26 make -j" />
 		<Exec WorkingDirectory="$(TranscoderRoot)" Condition="'$(IsWindows)' == 'true'" 
 			  Command="(if not exist build mkdir build) %26%26 cd build %26%26 cmake .. -G &quot;NMake Makefiles&quot; %26%26 nmake" />
-		<!--TODO maybe don't copy the transcoder binary to the project root but directly copy it to the output folder (maybe a none include outside of the project)-->
-		<Copy SourceFiles="$(TranscoderRoot)/build/$(TranscoderBinary)" DestinationFolder="." />
 	</Target>
 	
 	<ItemGroup Condition="'$(SkipTranscoder)' != 'true'">
-		<None Include="$(TranscoderBinary)">
+		<None Include="$(TranscoderRoot)/build/$(TranscoderBinary)">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Visible>false</Visible>
 		</None>
