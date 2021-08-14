@@ -3,7 +3,7 @@ using System.Linq;
 using System.Security.Claims;
 using IdentityModel;
 using IdentityServer4;
-using Kyoo.Models;
+using Kyoo.Abstractions.Models;
 
 namespace Kyoo.Authentication
 {

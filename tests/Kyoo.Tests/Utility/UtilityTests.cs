@@ -1,7 +1,7 @@
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
-using Kyoo.Models;
+using Kyoo.Abstractions.Models;
 using Xunit;
 
 using Utils = Kyoo.Utility;

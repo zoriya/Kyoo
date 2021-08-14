@@ -31,12 +31,12 @@ jobs:
           workflow: build.yml
           path: ./artifacts
           github_token: ${{secrets.GITHUB_TOKEN}}
-      - name: Public the common to nuget
+      - name: Public the abstractions to nuget
         id: publish_nuget
         uses: rohith/publish-nuget@v2
         with:
-          PROJECT_FILE_PATH: Kyoo.Common/Kyoo.Common.csproj
-          PACKAGE_NAME: Kyoo.Common
+          PROJECT_FILE_PATH: Kyoo.Abstractions/Kyoo.Abstractions.csproj
+          PACKAGE_NAME: Kyoo.Abstractions
           VERSION_REGEX: ^\s*<PackageVersion>(.*)<\/PackageVersion>\s*$
           NUGET_KEY: ${{secrets.NUGET_API_KEY}}
           INCLUDE_SYMBOLS: true

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using JetBrains.Annotations;
-using Kyoo.Models;
-using Kyoo.Models.Attributes;
+using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Attributes;
 using Xunit;
 
 namespace Kyoo.Tests.Utility

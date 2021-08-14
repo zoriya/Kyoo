@@ -2,15 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
-		<TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
-		<TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
-		<IsPackable>false</IsPackable>
-		<SpaRoot>../Kyoo.WebApp/</SpaRoot>
 		<TranscoderRoot>../Kyoo.Transcoder/</TranscoderRoot>
-		<DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules/**</DefaultItemExcludes>
-
-		<!-- Set this to true if you enable server-side prerendering -->
-		<BuildServerSideRenderer>false</BuildServerSideRenderer>
 
 		<Company>SDG</Company>
 		<Authors>Zoe Roux</Authors>
@@ -33,107 +25,34 @@
 
 	<ItemGroup>
 		<PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
-		<ProjectReference Include="../Kyoo.Common/Kyoo.Common.csproj" />
-		<ProjectReference Include="../Kyoo.CommonAPI/Kyoo.CommonAPI.csproj" />
 		<PackageReference Include="Autofac" Version="6.2.0" />
 		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.1.0" />
 		<PackageReference Include="Autofac.Extras.AttributeMetadata" Version="6.0.0" />
 		<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.8" />
-		<PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="5.0.0-preview.8.20414.8" />
-		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.8" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-		<ProjectReference Include="..\Kyoo.TheMovieDb\Kyoo.TheMovieDb.csproj" />
-		<ProjectReference Include="..\Kyoo.TheTvdb\Kyoo.TheTvdb.csproj" />
 	</ItemGroup>
-	
+
 	<ItemGroup>
-		<ProjectReference Include="../Kyoo.Postgresql/Kyoo.Postgresql.csproj">
-<!--			<ExcludeAssets>all</ExcludeAssets>-->
-		</ProjectReference>
-		<ProjectReference Include="../Kyoo.Authentication/Kyoo.Authentication.csproj">
-<!--			<ExcludeAssets>all</ExcludeAssets>-->
-		</ProjectReference>
-		<ProjectReference Include="../Kyoo.SqLite/Kyoo.SqLite.csproj">
-<!--			<ExcludeAssets>all</ExcludeAssets>-->
-		</ProjectReference>
+		<ProjectReference Include="../Kyoo.Abstractions/Kyoo.Abstractions.csproj" />
+		<ProjectReference Include="..\Kyoo.Database\Kyoo.Database.csproj" />
+		<ProjectReference Include="../Kyoo.TheMovieDb/Kyoo.TheMovieDb.csproj" />
+		<ProjectReference Include="../Kyoo.TheTvdb/Kyoo.TheTvdb.csproj" />
+		<ProjectReference Include="../Kyoo.Postgresql/Kyoo.Postgresql.csproj" />
+		<ProjectReference Include="../Kyoo.SqLite/Kyoo.SqLite.csproj" />
+		<ProjectReference Include="../Kyoo.Authentication/Kyoo.Authentication.csproj" />
+		<ProjectReference Include="../Kyoo.WebApp/Kyoo.WebApp.csproj" />
 	</ItemGroup>
-	
-	<ItemGroup>
-		<None Include="$(SpaRoot)**" Exclude="$(SpaRoot)node_modules/**" Visible="false" />
-		<StaticFiles Include="$(SpaRoot)static/**" Visible="false" />
-		<Content Remove="$(SpaRoot)**" />
-	</ItemGroup>
-
-	<Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish" Condition="'$(SkipWebApp)' != 'true'">
-		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
-		<Exec WorkingDirectory="$(SpaRoot)" Command="npm run build -- --prod" />
-		<Exec WorkingDirectory="$(SpaRoot)" Command="npm run build:ssr -- --prod" Condition="'$(BuildServerSideRenderer)' == 'true'" />
-
-		<ItemGroup>
-			<DistFiles Include="$(SpaRoot)dist/**; $(SpaRoot)dist-server/**" />
-			<DistFiles Include="$(SpaRoot)node_modules/**" Condition="'$(BuildServerSideRenderer)' == 'true'" />
-			<ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
-				<RelativePath>wwwroot/%(DistFiles.Filename)%(DistFiles.Extension)</RelativePath>
-				<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-				<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-			</ResolvedFileToPublish>
-		</ItemGroup>
-	</Target>
-
-	<Target Name="Publish static files" AfterTargets="ComputeFilesToPublish">
-		<ItemGroup>
-			<ResolvedFileToPublish Include="@(StaticFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
-				<RelativePath>wwwroot/%(StaticFiles.RecursiveDir)%(StaticFiles.Filename)%(StaticFiles.Extension)</RelativePath>
-				<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-				<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-			</ResolvedFileToPublish>
-		</ItemGroup>
-	</Target>
-
-	<Target Name="Prepare the web app" AfterTargets="Build" Condition="$(Configuration) == 'Debug' and '$(SkipWebApp)' != 'true'">
-		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
-	</Target>
-	
-	<Target Name="Prepare static files" AfterTargets="Build" Condition="$(Configuration) == 'Debug'">
-		<Copy SourceFiles="@(StaticFiles)" DestinationFolder="$(OutputPath)/wwwroot/%(RecursiveDir)" />
-	</Target>
-
-	<Target Name="Symlink views to output - Linux" AfterTargets="Build" Condition="$(Configuration) == 'Debug' And $(OS) == 'Unix'">
-		<Exec WorkingDirectory="$(OutputPath)" Command="ln -fs $(ProjectDir)/$(SpaRoot)" />
-	</Target>
 
 	<Target Name="BuildTranscoder" BeforeTargets="BeforeBuild" Condition="'$(SkipTranscoder)' != 'true'">
 		<Exec WorkingDirectory="$(TranscoderRoot)" Condition="'$(IsWindows)' != 'true'" Command="mkdir -p build %26%26 cd build %26%26 cmake .. %26%26 make -j" />
 		<Exec WorkingDirectory="$(TranscoderRoot)" Condition="'$(IsWindows)' == 'true'" Command="(if not exist build mkdir build) %26%26 cd build %26%26 cmake .. -G &quot;NMake Makefiles&quot; %26%26 nmake" />
-		<Copy SourceFiles="$(TranscoderRoot)/build/$(TranscoderBinary)" DestinationFolder="." />
 	</Target>
 	
 	<ItemGroup Condition="'$(SkipTranscoder)' != 'true'">
-		<None Include="$(TranscoderBinary)">
+		<None Include="$(TranscoderRoot)/build/$(TranscoderBinary)">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Visible>false</Visible>
 		</None>
 	</ItemGroup>
-
-
-	<!--TODO remove this once plugins are reworked. This is useful because the authentication plugin is loaded manually and not by the plugin manager-->
-	<PropertyGroup>
-		<LoginRoot>../Kyoo.WebLogin/</LoginRoot>
-	</PropertyGroup>
-	<ItemGroup>
-		<LoginFiles Include="$(LoginRoot)**" Visible="false" />
-	</ItemGroup>
-	<Target Name="Publish login files" AfterTargets="ComputeFilesToPublish">
-		<ItemGroup>
-			<ResolvedFileToPublish Include="@(LoginFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
-				<RelativePath>login/%(LoginFiles.RecursiveDir)%(LoginFiles.Filename)%(LoginFiles.Extension)</RelativePath>
-				<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-				<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-			</ResolvedFileToPublish>
-		</ItemGroup>
-	</Target>
-	<Target Name="Prepare static files" AfterTargets="Build" Condition="$(Configuration) == 'Debug'">
-		<Copy SourceFiles="@(LoginFiles)" DestinationFolder="$(OutputPath)/login/%(RecursiveDir)" />
-	</Target>
 </Project>

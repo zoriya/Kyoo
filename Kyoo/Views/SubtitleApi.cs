@@ -1,11 +1,11 @@
-﻿using Kyoo.Models;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Kyoo.Controllers;
-using Kyoo.Models.Permissions;
+using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Permissions;
 
 namespace Kyoo.Api
 {

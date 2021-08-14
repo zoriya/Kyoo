@@ -1,19 +1,23 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using Autofac;
 using Autofac.Core;
 using Autofac.Core.Registration;
+using Autofac.Extras.AttributeMetadata;
+using Kyoo.Abstractions;
+using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models.Permissions;
+using Kyoo.Api;
 using Kyoo.Controllers;
-using Kyoo.Models.Attributes;
+using Kyoo.Database;
 using Kyoo.Models.Options;
-using Kyoo.Models.Permissions;
 using Kyoo.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
+using IMetadataProvider = Kyoo.Abstractions.Controllers.IMetadataProvider;
 
 namespace Kyoo
 {
@@ -32,63 +36,22 @@ namespace Kyoo
 		public string Description => "The core module containing default implementations.";
 
 		/// <inheritdoc />
-		public ICollection<Type> Provides => new[]
+		public Dictionary<string, Type> Configuration => new()
 		{
-			typeof(IFileSystem),
-			typeof(ITranscoder),
-			typeof(IThumbnailsManager),
-			typeof(IMetadataProvider),
-			typeof(ITaskManager),
-			typeof(ILibraryManager),
-			typeof(IIdentifier),
-			typeof(AProviderComposite)
+			{ BasicOptions.Path, typeof(BasicOptions) },
+			{ TaskOptions.Path, typeof(TaskOptions) },
+			{ MediaOptions.Path, typeof(MediaOptions) },
+			{ "database", null },
+			{ "logging", null }
 		};
 
-		/// <inheritdoc />
-		public ICollection<ConditionalProvide> ConditionalProvides => new ConditionalProvide[]
-		{
-			(typeof(ILibraryRepository), typeof(DatabaseContext)),
-			(typeof(ILibraryItemRepository), typeof(DatabaseContext)),
-			(typeof(ICollectionRepository), typeof(DatabaseContext)),
-			(typeof(IShowRepository), typeof(DatabaseContext)),
-			(typeof(ISeasonRepository), typeof(DatabaseContext)),
-			(typeof(IEpisodeRepository), typeof(DatabaseContext)),
-			(typeof(ITrackRepository), typeof(DatabaseContext)),
-			(typeof(IPeopleRepository), typeof(DatabaseContext)),
-			(typeof(IStudioRepository), typeof(DatabaseContext)),
-			(typeof(IGenreRepository), typeof(DatabaseContext)),
-			(typeof(IProviderRepository), typeof(DatabaseContext)),
-			(typeof(IUserRepository), typeof(DatabaseContext))
-		};
 
-		/// <inheritdoc />
-		public ICollection<Type> Requires => new []
-		{
-			typeof(ILibraryRepository),
-			typeof(ILibraryItemRepository),
-			typeof(ICollectionRepository),
-			typeof(IShowRepository),
-			typeof(ISeasonRepository),
-			typeof(IEpisodeRepository),
-			typeof(ITrackRepository),
-			typeof(IPeopleRepository),
-			typeof(IStudioRepository),
-			typeof(IGenreRepository),
-			typeof(IProviderRepository)
-		};
-
-		
 		/// <summary>
 		/// The configuration to use.
 		/// </summary>
 		private readonly IConfiguration _configuration;
-		
-		/// <summary>
-		/// The configuration manager used to register typed/untyped implementations.
-		/// </summary>
-		[Injected] public IConfigurationManager ConfigurationManager { private get; set; }
 
-		
+
 		/// <summary>
 		/// Create a new core module instance and use the given configuration.
 		/// </summary>
@@ -101,6 +64,8 @@ namespace Kyoo
 		/// <inheritdoc />
 		public void Configure(ContainerBuilder builder)
 		{
+			builder.RegisterModule<AttributedMetadataModule>();
+			
 			builder.RegisterComposite<FileSystemComposite, IFileSystem>().InstancePerLifetimeScope();
 			builder.RegisterType<LocalFileSystem>().As<IFileSystem>().SingleInstance();
 			builder.RegisterType<HttpFileSystem>().As<IFileSystem>().SingleInstance();
@@ -139,17 +104,24 @@ namespace Kyoo
 
 			builder.RegisterType<PassthroughPermissionValidator>().As<IPermissionValidator>()
 				.IfNotRegistered(typeof(IPermissionValidator));
+			
+			builder.RegisterType<FileExtensionContentTypeProvider>().As<IContentTypeProvider>().SingleInstance()
+				.OnActivating(x =>
+				{
+					x.Instance.Mappings[".data"] = "application/octet-stream";
+					x.Instance.Mappings[".mkv"] = "video/x-matroska";
+					x.Instance.Mappings[".ass"] = "text/x-ssa";
+					x.Instance.Mappings[".srt"] = "application/x-subrip";
+					x.Instance.Mappings[".m3u8"] = "application/x-mpegurl";
+				});
 		}
 		
 		/// <inheritdoc />
-        public void Configure(IServiceCollection services, ICollection<Type> availableTypes)
+		public void Configure(IServiceCollection services)
 		{
 			string publicUrl = _configuration.GetPublicUrl();
 
-			services.Configure<BasicOptions>(_configuration.GetSection(BasicOptions.Path));
-			services.Configure<TaskOptions>(_configuration.GetSection(TaskOptions.Path));
-			services.Configure<MediaOptions>(_configuration.GetSection(MediaOptions.Path));
-
+			services.AddMvc().AddControllersAsServices();
 			services.AddControllers()
 				.AddNewtonsoftJson(x =>
 				{
@@ -157,30 +129,32 @@ namespace Kyoo
 					x.SerializerSettings.Converters.Add(new PeopleRoleConverter());
 				});
 			
+			services.AddResponseCompression(x =>
+			{
+				x.EnableForHttps = true;
+			});
+			
+			services.AddHttpClient();
+			
 			services.AddHostedService(x => x.GetService<ITaskManager>() as TaskManager);
 		}
 
 		/// <inheritdoc />
-		public void ConfigureAspNet(IApplicationBuilder app)
+		public IEnumerable<IStartupAction> ConfigureSteps => new IStartupAction[]
 		{
-			ConfigurationManager.AddTyped<BasicOptions>(BasicOptions.Path);
-			ConfigurationManager.AddTyped<TaskOptions>(TaskOptions.Path);
-			ConfigurationManager.AddTyped<MediaOptions>(MediaOptions.Path);
-			ConfigurationManager.AddUntyped("database");
-			ConfigurationManager.AddUntyped("logging");
-			
-			FileExtensionContentTypeProvider contentTypeProvider = new();
-			contentTypeProvider.Mappings[".data"] = "application/octet-stream";
-			app.UseStaticFiles(new StaticFileOptions
+			SA.New<IApplicationBuilder, IHostEnvironment>((app, env) =>
 			{
-				ContentTypeProvider = contentTypeProvider,
-				FileProvider = new PhysicalFileProvider(Path.Join(AppDomain.CurrentDomain.BaseDirectory, "wwwroot"))
-			});
-			
-			app.UseEndpoints(endpoints =>
-			{
-				endpoints.MapControllers();
-			});
-		}
+				if (env.IsDevelopment())
+					app.UseDeveloperExceptionPage();
+				else
+				{
+					app.UseExceptionHandler("/error");
+					app.UseHsts();
+				}
+			}, SA.Before),
+			SA.New<IApplicationBuilder>(app => app.UseResponseCompression(), SA.Routing + 1),
+			SA.New<IApplicationBuilder>(app => app.UseRouting(), SA.Routing),
+			SA.New<IApplicationBuilder>(app => app.UseEndpoints(x => x.MapControllers()), SA.Endpoint)
+		};
 	}
 }

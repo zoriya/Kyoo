@@ -18,9 +18,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="../Kyoo.CommonAPI/Kyoo.CommonAPI.csproj">
-		</ProjectReference>
-		<ProjectReference Include="../Kyoo.Common/Kyoo.Common.csproj">
-		</ProjectReference>
+		<ProjectReference Include="..\Kyoo.Database\Kyoo.Database.csproj" />
+		<ProjectReference Include="../Kyoo.Abstractions/Kyoo.Abstractions.csproj" />
 	</ItemGroup>
 </Project>

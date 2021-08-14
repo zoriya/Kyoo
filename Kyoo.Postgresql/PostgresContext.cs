@@ -3,7 +3,8 @@ using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
 using EFCore.NamingConventions.Internal;
-using Kyoo.Models;
+using Kyoo.Abstractions.Models;
+using Kyoo.Database;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
 

@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using Kyoo.Models;
+using Kyoo.Abstractions.Models;
 using Kyoo.TheTvdb;
 using TvDbSharper.Dto;
 using Xunit;

@@ -1,4 +1,4 @@
-using Kyoo.Models.Permissions;
+using Kyoo.Abstractions.Models.Permissions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
 

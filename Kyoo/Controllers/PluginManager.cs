@@ -4,9 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
-using Autofac;
+using Kyoo.Abstractions.Controllers;
 using Kyoo.Models.Options;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -26,7 +25,7 @@ namespace Kyoo.Controllers
 		/// <summary>
 		/// The configuration to get the plugin's directory.
 		/// </summary>
-		private readonly IOptionsMonitor<BasicOptions> _options;
+		private readonly IOptions<BasicOptions> _options;
 		/// <summary>
 		/// The logger used by this class. 
 		/// </summary>
@@ -44,7 +43,7 @@ namespace Kyoo.Controllers
 		/// <param name="options">The configuration instance, to get the plugin's directory path.</param>
 		/// <param name="logger">The logger used by this class.</param>
 		public PluginManager(IServiceProvider provider,
-			IOptionsMonitor<BasicOptions> options,
+			IOptions<BasicOptions> options,
 			ILogger<PluginManager> logger)
 		{
 			_provider = provider;
@@ -106,28 +105,21 @@ namespace Kyoo.Controllers
 		/// <inheritdoc />
 		public void LoadPlugins(ICollection<IPlugin> plugins)
 		{
-			string pluginFolder = _options.CurrentValue.PluginPath;
+			string pluginFolder = _options.Value.PluginPath;
 			if (!Directory.Exists(pluginFolder))
 				Directory.CreateDirectory(pluginFolder);
 
 			_logger.LogTrace("Loading new plugins...");
 			string[] pluginsPaths = Directory.GetFiles(pluginFolder, "*.dll", SearchOption.AllDirectories);
-			plugins = plugins.Concat(pluginsPaths.SelectMany(LoadPlugin))
+			IPlugin[] newPlugins = plugins
+				.Concat(pluginsPaths.SelectMany(LoadPlugin))
 				.GroupBy(x => x.Name)
 				.Select(x => x.First())
-				.ToList();
-
-			ICollection<Type> available = GetProvidedTypes(plugins);
-			_plugins.AddRange(plugins.Where(plugin =>
-			{
-				Type missing = plugin.Requires.FirstOrDefault(x => available.All(y => !y.IsAssignableTo(x)));
-				if (missing == null)
-					return true;
-				
-				_logger.LogCritical("No {Dependency} available in Kyoo but the plugin {Plugin} requires it", 
-					missing.Name, plugin.Name);
-				return false;
-			}));
+				.ToArray();
+			_plugins.AddRange(newPlugins.Where(x => x.Enabled));
+			
+			foreach (IPlugin plugin in newPlugins.Where(x => !x.Enabled))
+				plugin.Disabled();
 			
 			if (!_plugins.Any())
 				_logger.LogInformation("No plugin enabled");
@@ -136,78 +128,13 @@ namespace Kyoo.Controllers
 		}
 
 		/// <inheritdoc />
-		public void ConfigureContainer(ContainerBuilder builder)
+		public void LoadPlugins(params Type[] plugins)
 		{
-			foreach (IPlugin plugin in _plugins)
-				plugin.Configure(builder);
+			LoadPlugins(plugins
+				.Select(x => (IPlugin)ActivatorUtilities.CreateInstance(_provider, x))
+				.ToArray()
+			);
 		}
-		
-		/// <inheritdoc />
-		public void ConfigureServices(IServiceCollection services)
-		{
-			ICollection<Type> available = GetProvidedTypes(_plugins);
-			foreach (IPlugin plugin in _plugins)
-				plugin.Configure(services, available);
-		}
-
-		/// <inheritdoc />
-		public void ConfigureAspnet(IApplicationBuilder app)
-		{
-			foreach (IPlugin plugin in _plugins)
-			{
-				using IServiceScope scope = _provider.CreateScope();
-				Helper.InjectServices(plugin, x => scope.ServiceProvider.GetRequiredService(x));
-				plugin.ConfigureAspNet(app);
-				Helper.InjectServices(plugin, _ => null);
-			}
-		}
-
-		/// <summary>
-		/// Get the list of types provided by the currently loaded plugins.
-		/// </summary>
-		/// <param name="plugins">The list of plugins that will be used as a plugin pool to get provided types.</param>
-		/// <returns>The list of types available.</returns>
-		private ICollection<Type> GetProvidedTypes(ICollection<IPlugin> plugins)
-		{
-			List<Type> available = plugins.SelectMany(x => x.Provides).ToList();
-			List<ConditionalProvide> conditionals = plugins
-				.SelectMany(x => x.ConditionalProvides)
-				.Where(x => x.Condition.Condition())
-				.ToList();
-
-			bool IsAvailable(ConditionalProvide conditional, bool log = false)
-			{
-				if (!conditional.Condition.Condition())
-					return false;
-
-				ICollection<Type> needed = conditional.Condition.Needed
-					.Where(y => !available.Contains(y))
-					.ToList();
-				// TODO handle circular dependencies, actually it might stack overflow.
-				needed = needed.Where(x => !conditionals
-						.Where(y => y.Type == x)
-						.Any(y => IsAvailable(y)))
-					.ToList();
-				if (!needed.Any())
-					return true;
-				if (log && available.All(x => x != conditional.Type))
-				{
-					_logger.LogWarning("The type {Type} is not available, {Dependencies} could not be met",
-						conditional.Type.Name,
-						needed.Select(x => x.Name));
-				}
-				return false;
-			}
-
-			// ReSharper disable once ForeachCanBeConvertedToQueryUsingAnotherGetEnumerator
-			foreach (ConditionalProvide conditional in conditionals)
-			{
-				if (IsAvailable(conditional, true))
-					available.Add(conditional.Type);
-			}
-			return available;
-		}
-
 
 		/// <summary>
 		/// A custom <see cref="AssemblyLoadContext"/> to load plugin's dependency if they are on the same folder.

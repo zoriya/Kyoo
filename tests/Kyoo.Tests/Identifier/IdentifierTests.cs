@@ -1,7 +1,8 @@
 using System.Threading.Tasks;
+using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Controllers;
-using Kyoo.Models;
-using Kyoo.Models.Exceptions;
 using Kyoo.Models.Options;
 using Microsoft.Extensions.Options;
 using Moq;

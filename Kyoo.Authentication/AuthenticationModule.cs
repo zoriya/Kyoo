@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Autofac;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
+using Kyoo.Abstractions;
+using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Authentication.Models;
 using Kyoo.Authentication.Views;
-using Kyoo.Controllers;
-using Kyoo.Models.Attributes;
-using Kyoo.Models.Permissions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -37,58 +38,61 @@ namespace Kyoo.Authentication
 		
 		/// <inheritdoc />
 		public string Description => "Enable OpenID authentication for Kyoo.";
-		
+
 		/// <inheritdoc />
-		public ICollection<Type> Provides => ArraySegment<Type>.Empty;
-		
-		/// <inheritdoc />
-		public ICollection<ConditionalProvide> ConditionalProvides => ArraySegment<ConditionalProvide>.Empty;
-		
-		/// <inheritdoc />
-		public ICollection<Type> Requires => new []
+		public Dictionary<string, Type> Configuration => new()
 		{
-			typeof(IUserRepository)
+			{ AuthenticationOption.Path, typeof(AuthenticationOption) },
+			{ PermissionOption.Path, typeof(PermissionOption) },
+			{ CertificateOption.Path, typeof(CertificateOption) }
 		};
-		
-		
+
+
 		/// <summary>
 		/// The configuration to use.
 		/// </summary>
 		private readonly IConfiguration _configuration;
 
 		/// <summary>
-		/// A logger factory to allow IdentityServer to log things.
+		/// The logger used to allow IdentityServer to log things.
 		/// </summary>
-		private readonly ILoggerFactory _loggerFactory;
+		private readonly ILogger<DefaultCorsPolicyService> _logger;
 
 		/// <summary>
 		/// The environment information to check if the app runs in debug mode
 		/// </summary>
 		private readonly IWebHostEnvironment _environment;
-		
-		/// <summary>
-		/// The configuration manager used to register typed/untyped implementations.
-		/// </summary>
-		[Injected] public IConfigurationManager ConfigurationManager { private get; set; }
 
 
 		/// <summary>
 		/// Create a new authentication module instance and use the given configuration and environment.
 		/// </summary>
 		/// <param name="configuration">The configuration to use</param>
-		/// <param name="loggerFactory">The logger factory to allow IdentityServer to log things</param>
+		/// <param name="logger">The logger used to allow IdentityServer to log things</param>
 		/// <param name="environment">The environment information to check if the app runs in debug mode</param>
 		public AuthenticationModule(IConfiguration configuration,
-			ILoggerFactory loggerFactory, 
+			ILogger<DefaultCorsPolicyService> logger, 
 			IWebHostEnvironment environment)
 		{
 			_configuration = configuration;
-			_loggerFactory = loggerFactory;
+			_logger = logger;
 			_environment = environment;
 		}
 
 		/// <inheritdoc />
-		public void Configure(IServiceCollection services, ICollection<Type> availableTypes)
+		public void Configure(ContainerBuilder builder)
+		{
+			builder.RegisterType<PermissionValidatorFactory>().As<IPermissionValidator>().SingleInstance();
+
+			DefaultCorsPolicyService cors = new(_logger)
+			{
+				AllowedOrigins = { new Uri(_configuration.GetPublicUrl()).GetLeftPart(UriPartial.Authority) }
+			};
+			builder.RegisterInstance(cors).As<ICorsPolicyService>().SingleInstance();
+		}
+
+		/// <inheritdoc />
+		public void Configure(IServiceCollection services)
 		{
 			string publicUrl = _configuration.GetPublicUrl();
 
@@ -100,10 +104,6 @@ namespace Kyoo.Authentication
 			// TODO handle direct-videos with bearers (probably add a cookie and a app.Use to translate that for videos)
 			
 			// TODO Check if tokens should be stored.
-			
-			services.Configure<PermissionOption>(_configuration.GetSection(PermissionOption.Path));
-			services.Configure<CertificateOption>(_configuration.GetSection(CertificateOption.Path));
-			services.Configure<AuthenticationOption>(_configuration.GetSection(AuthenticationOption.Path));
 
 			List<Client> clients = new();
 			_configuration.GetSection("authentication:clients").Bind(clients);
@@ -131,47 +131,46 @@ namespace Kyoo.Authentication
 					options.Audience = "kyoo";
 					options.RequireHttpsMetadata = false;
 				});
-			services.AddSingleton<IPermissionValidator, PermissionValidatorFactory>();
-
-			DefaultCorsPolicyService cors = new(_loggerFactory.CreateLogger<DefaultCorsPolicyService>())
-			{
-				AllowedOrigins = {new Uri(publicUrl).GetLeftPart(UriPartial.Authority)}
-			}; 
-			services.AddSingleton<ICorsPolicyService>(cors);
 		}
 
 		/// <inheritdoc />
-		public void ConfigureAspNet(IApplicationBuilder app)
+		public IEnumerable<IStartupAction> ConfigureSteps => new IStartupAction[]
 		{
-			ConfigurationManager.AddTyped<AuthenticationOption>(AuthenticationOption.Path);
-			
-			app.UseCookiePolicy(new CookiePolicyOptions
+			SA.New<IApplicationBuilder>(app =>
 			{
-				MinimumSameSitePolicy = SameSiteMode.Strict
-			});
-			app.UseAuthentication();
-			app.Use((ctx, next) =>
+				PhysicalFileProvider provider = new(Path.Combine(
+					Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
+					"login"));
+				app.UseDefaultFiles(new DefaultFilesOptions
+				{
+					RequestPath = new PathString("/login"),
+					FileProvider = provider,
+					RedirectToAppendTrailingSlash = true
+				});
+				app.UseStaticFiles(new StaticFileOptions
+				{
+					RequestPath = new PathString("/login"),
+					FileProvider = provider
+				});
+			}, SA.StaticFiles),
+			SA.New<IApplicationBuilder>(app =>
 			{
-				ctx.SetIdentityServerOrigin(_configuration.GetPublicUrl());
-				return next();
-			});
-			app.UseIdentityServer();
-			app.UseAuthorization();
-
-			PhysicalFileProvider provider = new(Path.Combine(
-				Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
-				"login"));
-			app.UseDefaultFiles(new DefaultFilesOptions
+				app.UseCookiePolicy(new CookiePolicyOptions
+				{
+					MinimumSameSitePolicy = SameSiteMode.Strict
+				});
+				app.UseAuthentication();
+			}, SA.Authentication),
+			SA.New<IApplicationBuilder>(app =>
 			{
-				RequestPath = new PathString("/login"),
-				FileProvider = provider,
-				RedirectToAppendTrailingSlash = true
-			});
-			app.UseStaticFiles(new StaticFileOptions
-			{
-				RequestPath = new PathString("/login"),
-				FileProvider = provider
-			});
-		}
+				app.Use((ctx, next) =>
+				{
+					ctx.SetIdentityServerOrigin(_configuration.GetPublicUrl());
+					return next();
+				});
+				app.UseIdentityServer();
+			}, SA.Endpoint),
+			SA.New<IApplicationBuilder>(app => app.UseAuthorization(), SA.Authorization)
+		};
 	}
 }

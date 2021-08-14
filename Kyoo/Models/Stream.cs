@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
-using Kyoo.Models.Attributes;
+using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Attributes;
 
 namespace Kyoo.Models.Watch
 {

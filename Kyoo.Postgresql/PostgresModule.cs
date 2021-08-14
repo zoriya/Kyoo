@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Kyoo.Controllers;
+using Kyoo.Abstractions.Controllers;
+using Kyoo.Database;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -23,19 +24,12 @@ namespace Kyoo.Postgresql
 
 		/// <inheritdoc />
 		public string Description => "A database context for postgresql.";
+		
+		/// <inheritdoc />
+		public Dictionary<string, Type> Configuration => new();
 
 		/// <inheritdoc />
-		public ICollection<Type> Provides => new[]
-		{
-			typeof(DatabaseContext)
-		};
-
-		/// <inheritdoc />
-		public ICollection<ConditionalProvide> ConditionalProvides => ArraySegment<ConditionalProvide>.Empty;
-
-		/// <inheritdoc />
-		public ICollection<Type> Requires => ArraySegment<Type>.Empty;
-
+		public bool Enabled => _configuration.GetSelectedDatabase() == "postgres";
 
 		/// <summary>
 		/// The configuration to use. The database connection string is pulled from it.
@@ -59,7 +53,7 @@ namespace Kyoo.Postgresql
 		}
 		
 		/// <inheritdoc />
-		public void Configure(IServiceCollection services, ICollection<Type> availableTypes)
+		public void Configure(IServiceCollection services)
 		{
 			services.AddDbContext<DatabaseContext, PostgresContext>(x =>
 			{

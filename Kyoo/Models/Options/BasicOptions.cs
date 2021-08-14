@@ -1,3 +1,4 @@
+using Kyoo.Abstractions.Models;
 using System;
 
 namespace Kyoo.Models.Options

@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
 using Autofac;
-using Kyoo.Controllers;
-using Kyoo.Models.Attributes;
+using Kyoo.Abstractions;
+using Kyoo.Abstractions.Controllers;
 using Kyoo.TheTvdb.Models;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using TvDbSharper;
 
 namespace Kyoo.TheTvdb
@@ -24,58 +21,18 @@ namespace Kyoo.TheTvdb
 		
 		/// <inheritdoc />
 		public string Description => "A metadata provider for The TVDB.";
-		
+
 		/// <inheritdoc />
-		public ICollection<Type> Provides => new []
+		public Dictionary<string, Type> Configuration => new()
 		{
-			typeof(IMetadataProvider)
+			{ TvdbOption.Path, typeof(TvdbOption) }
 		};
-		
-		/// <inheritdoc />
-		public ICollection<ConditionalProvide> ConditionalProvides => ArraySegment<ConditionalProvide>.Empty;
-		
-		/// <inheritdoc />
-		public ICollection<Type> Requires => ArraySegment<Type>.Empty;
-		
-		
-		/// <summary>
-		/// The configuration to use.
-		/// </summary>
-		private readonly IConfiguration _configuration;
-		
-		/// <summary>
-		/// The configuration manager used to register typed/untyped implementations.
-		/// </summary>
-		[Injected] public IConfigurationManager ConfigurationManager { private get; set; }
-		
-		
-		/// <summary>
-		/// Create a new tvdb module instance and use the given configuration.
-		/// </summary>
-		/// <param name="configuration">The configuration to use</param>
-		public PluginTvdb(IConfiguration configuration)
-		{
-			_configuration = configuration;
-		}
-		
-		
+
 		/// <inheritdoc />
 		public void Configure(ContainerBuilder builder)
 		{
 			builder.RegisterType<TvDbClient>().As<ITvDbClient>();
 			builder.RegisterProvider<ProviderTvdb>();
-		}
-		
-		/// <inheritdoc />
-		public void Configure(IServiceCollection services, ICollection<Type> availableTypes)
-		{
-			services.Configure<TvdbOption>(_configuration.GetSection(TvdbOption.Path));
-		}
-
-		/// <inheritdoc />
-		public void ConfigureAspNet(IApplicationBuilder app)
-		{
-			ConfigurationManager.AddTyped<TvdbOption>(TvdbOption.Path);
 		}
 	}
 }

@@ -2,8 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Kyoo.Common.Models.Attributes;
-using Kyoo.Models;
+using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Models.Options;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
@@ -20,7 +21,7 @@ namespace Kyoo.Controllers
 		/// <summary>
 		/// An extension provider to get content types from files extensions.
 		/// </summary>
-		private FileExtensionContentTypeProvider _provider;
+		private readonly IContentTypeProvider _provider;
 
 		/// <summary>
 		/// Options to check if the metadata should be kept in the show directory or in a kyoo's directory.
@@ -31,9 +32,11 @@ namespace Kyoo.Controllers
 		/// Create a new <see cref="LocalFileSystem"/> with the specified options.
 		/// </summary>
 		/// <param name="options">The options to use.</param>
-		public LocalFileSystem(IOptionsMonitor<BasicOptions> options)
+		/// <param name="provider">An extension provider to get content types from files extensions.</param>
+		public LocalFileSystem(IOptionsMonitor<BasicOptions> options, IContentTypeProvider provider)
 		{
 			_options = options;
+			_provider = provider;
 		}
 
 		/// <summary>
@@ -44,15 +47,6 @@ namespace Kyoo.Controllers
 		/// <returns>The content type of the file</returns>
 		private string _GetContentType(string path)
 		{
-			if (_provider == null)
-			{
-				_provider = new FileExtensionContentTypeProvider();
-				_provider.Mappings[".mkv"] = "video/x-matroska";
-				_provider.Mappings[".ass"] = "text/x-ssa";
-				_provider.Mappings[".srt"] = "application/x-subrip";
-				_provider.Mappings[".m3u8"] = "application/x-mpegurl";
-			}
-
 			if (_provider.TryGetContentType(path, out string contentType))
 				return contentType;
 			throw new NotImplementedException($"Can't get the content type of the file at: {path}");

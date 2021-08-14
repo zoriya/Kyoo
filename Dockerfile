@@ -7,6 +7,7 @@ RUN cmake . && make -j
 FROM node:alpine as webapp
 WORKDIR /webapp
 COPY Kyoo.WebApp .
+WORKDIR /webapp/Front
 RUN npm install
 RUN npm run build -- --prod
 
@@ -19,6 +20,6 @@ RUN apt-get update && apt-get install -y libavutil-dev libavcodec-dev libavforma
 EXPOSE 5000
 COPY --from=builder /opt/kyoo /usr/lib/kyoo
 COPY --from=transcoder /transcoder/libtranscoder.so /usr/lib/kyoo
-COPY --from=webapp /webapp/dist/* /usr/lib/kyoo/wwwroot/
+COPY --from=webapp /webapp/Front/dist/* /usr/lib/kyoo/wwwroot/
 CMD ["/usr/lib/kyoo/Kyoo", "/var/lib/kyoo"]
 

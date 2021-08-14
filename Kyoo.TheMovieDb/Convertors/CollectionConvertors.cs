@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Kyoo.Models;
+using Kyoo.Abstractions.Models;
 using TMDbLib.Objects.Search;
 
 namespace Kyoo.TheMovieDb

@@ -5,9 +5,10 @@ using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Api;
-using Kyoo.Models;
-using Kyoo.Models.Exceptions;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
 
@@ -49,6 +50,21 @@ namespace Kyoo.Controllers
 		{
 			ConfigurationReference config = ConfigurationReference.CreateUntyped(path);
 			_references.Add(config.Path, config.Type);
+		}
+		
+		/// <inheritdoc />
+		public void Register(string path, Type type)
+		{
+			if (type == null)
+			{
+				ConfigurationReference config = ConfigurationReference.CreateUntyped(path);
+				_references.Add(config.Path, config.Type);
+			}
+			else
+			{
+				foreach (ConfigurationReference confRef in ConfigurationReference.CreateReference(path, type))
+					_references.Add(confRef.Path, confRef.Type);
+			}
 		}
 
 		/// <summary>
