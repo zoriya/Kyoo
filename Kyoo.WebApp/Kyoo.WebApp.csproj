@@ -55,7 +55,7 @@
 		<Exec WorkingDirectory="$(SpaRoot)" Command="npm run build:ssr -- --prod" Condition="'$(BuildServerSideRenderer)' == 'true'" />
 	</Target>
 
-	<Target Name="SymlinkViews" AfterTargets="Build" Condition="$(Configuration) == 'Debug'">
+	<Target Name="SymlinkViews" AfterTargets="Build" Condition="$(SkipWebApp)' != 'true' And $(Configuration) == 'Debug'">
 		<Exec WorkingDirectory="$(ProjectDir)../Kyoo" Command="ln -fs '$(ProjectDir)' $(OutDir)" Condition="$(OS) == 'Unix'" />
 		<Exec WorkingDirectory="$(ProjectDir)../Kyoo" Command="mklink /D '$(OutDir)$(ProjectName)' '$(ProjectDir)'" Condition="$(OS) != 'Unix'" />
 	</Target>
