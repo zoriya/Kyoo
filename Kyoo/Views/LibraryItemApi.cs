@@ -19,7 +19,7 @@ namespace Kyoo.Api
 	public class LibraryItemApi : ControllerBase
 	{
 		private readonly ILibraryItemRepository _libraryItems;
-		private readonly string _baseURL;
+		private readonly Uri _baseURL;
 
 
 		public LibraryItemApi(ILibraryItemRepository libraryItems, IOptions<BasicOptions> options)
@@ -43,7 +43,7 @@ namespace Kyoo.Api
 					new Pagination(limit, afterID));
 
 				return new Page<LibraryItem>(resources, 
-					_baseURL + Request.Path,
+					new Uri(_baseURL + Request.Path),
 					Request.Query.ToDictionary(x => x.Key, x => x.Value.ToString(), StringComparer.InvariantCultureIgnoreCase),
 					limit);
 			}
