@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Threading.Tasks;
 using Autofac.Extensions.DependencyInjection;
@@ -20,54 +19,38 @@ namespace Kyoo
 		/// The path of the json configuration of the application.
 		/// </summary>
 		public const string JsonConfigPath = "./settings.json";
+
+		/// <summary>
+		/// The string representation of the environment used in <see cref="IWebHostEnvironment"/>.
+		/// </summary>
+#if DEBUG
+		private const string Environment = "Development";
+#else
+		private const string Environment = "Production";
+#endif
 		
 		/// <summary>
 		/// Main function of the program
 		/// </summary>
 		/// <param name="args">Command line arguments</param>
-		[SuppressMessage("ReSharper", "ConditionIsAlwaysTrueOrFalse")]
 		public static async Task Main(string[] args)
 		{
 			if (!File.Exists(JsonConfigPath))
 				File.Copy(Path.Join(AppDomain.CurrentDomain.BaseDirectory, JsonConfigPath), JsonConfigPath);
 			
-			IHostBuilder builder = CreateWebHostBuilder(args);
+			IHost host = CreateWebHostBuilder(args)
+				.UseEnvironment(Environment)
+				.Build();
 			
-			// TODO remove ENVIRONEMENT handling and force it to the build env
-			
-			bool? debug = Environment.GetEnvironmentVariable("ENVIRONMENT")?.ToLowerInvariant() switch
-			{
-				"d" => true,
-				"dev" => true,
-				"debug" => true,
-				"development" => true,
-				"p" => false,
-				"prod" => false,
-				"production" => false,
-				_ => null
-			};
-
-			if (debug == null && Environment.GetEnvironmentVariable("ENVIRONMENT") != null)
-			{
-				Console.WriteLine(
-					$"Invalid ENVIRONMENT variable. Supported values are \"debug\" and \"prod\". Ignoring...");
-			}
-
-			#if DEBUG
-				debug ??= true;
-			#endif
-
-			if (debug != null)
-				builder = builder.UseEnvironment(debug == true ? "Development" : "Production");
-
 			try
 			{
-				Console.WriteLine($"Running as {Environment.UserName}.");
-				await builder.Build().RunAsync();
+				host.Services.GetRequiredService<ILogger<Application>>()
+					.LogInformation("Running as {Name}", System.Environment.UserName);
+				await host.RunAsync();
 			}
 			catch (Exception ex)
 			{
-				await Console.Error.WriteLineAsync($"Unhandled exception: {ex}");
+				host.Services.GetRequiredService<ILogger<Application>>().LogCritical(ex, "Unhandled exception");
 			}
 		}
 
@@ -79,7 +62,7 @@ namespace Kyoo
 		/// <returns>The modified configuration builder</returns>
 		private static IConfigurationBuilder SetupConfig(IConfigurationBuilder builder, string[] args)
 		{
-			return builder.SetBasePath(Environment.CurrentDirectory)
+			return builder.SetBasePath(System.Environment.CurrentDirectory)
 				.AddJsonFile(JsonConfigPath, false, true)
 				.AddEnvironmentVariables()
 				.AddCommandLine(args);
@@ -129,5 +112,10 @@ namespace Kyoo
 					.UseStartup(host => PluginsStartup.FromWebHost(host, loggingConfiguration))
 				);
 		}
+
+		/// <summary>
+		/// An useless class only used to have a logger in the main.
+		/// </summary>
+		private class Application {}
 	}
 }

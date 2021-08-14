@@ -110,12 +110,15 @@ namespace Kyoo.Controllers
 
 			_logger.LogTrace("Loading new plugins...");
 			string[] pluginsPaths = Directory.GetFiles(pluginFolder, "*.dll", SearchOption.AllDirectories);
-			_plugins.AddRange(plugins
+			IPlugin[] newPlugins = plugins
 				.Concat(pluginsPaths.SelectMany(LoadPlugin))
 				.GroupBy(x => x.Name)
 				.Select(x => x.First())
-				.Where(x => x.Enabled)
-			);
+				.ToArray();
+			_plugins.AddRange(newPlugins.Where(x => x.Enabled));
+			
+			foreach (IPlugin plugin in newPlugins.Where(x => !x.Enabled))
+				plugin.Disabled();
 			
 			if (!_plugins.Any())
 				_logger.LogInformation("No plugin enabled");

@@ -49,7 +49,7 @@ namespace Kyoo
 			_configuration = configuration;
 			// TODO enable the web app only if it was build with it.
 			_plugins.LoadPlugins(
-				typeof(CoreModule), 
+				typeof(CoreModule),
 				typeof(WebAppModule),
 				typeof(AuthenticationModule),
 				typeof(PostgresModule),
@@ -198,8 +198,16 @@ namespace Kyoo
 					return _hostEnvironment;
 				if (serviceType == typeof(IConfiguration))
 					return _configuration;
-				if (serviceType == typeof(ILoggerFactory))
-					return _loggerFactory;
+				if (serviceType.GetGenericTypeDefinition() == typeof(ILogger<>))
+				{
+					return Utility.RunGenericMethod<object>(
+						typeof(LoggerFactoryExtensions),
+						nameof(LoggerFactoryExtensions.CreateLogger),
+						serviceType.GetGenericArguments().First(),
+						_loggerFactory
+					);
+				}
+
 				return null;
 			}
 		}

@@ -155,7 +155,8 @@ namespace Kyoo
 			IEnumerable<Type> types = genericType.IsInterface
 				? type.GetInterfaces()
 				: type.GetInheritanceTree();
-			return types.Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == genericType);
+			return types.Prepend(type)
+				.Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == genericType);
 		}
 
 		/// <summary>
@@ -179,7 +180,8 @@ namespace Kyoo
 			IEnumerable<Type> types = genericType.IsInterface
 				? type.GetInterfaces()
 				: type.GetInheritanceTree();
-			return types.FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == genericType);
+			return types.Prepend(type)
+				.FirstOrDefault(x => x.IsGenericType && x.GetGenericTypeDefinition() == genericType);
 		}
 
 		/// <summary>

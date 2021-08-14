@@ -53,9 +53,9 @@ namespace Kyoo.Authentication
 		private readonly IConfiguration _configuration;
 
 		/// <summary>
-		/// A logger factory to allow IdentityServer to log things.
+		/// The logger used to allow IdentityServer to log things.
 		/// </summary>
-		private readonly ILoggerFactory _loggerFactory;
+		private readonly ILogger<DefaultCorsPolicyService> _logger;
 
 		/// <summary>
 		/// The environment information to check if the app runs in debug mode
@@ -67,14 +67,14 @@ namespace Kyoo.Authentication
 		/// Create a new authentication module instance and use the given configuration and environment.
 		/// </summary>
 		/// <param name="configuration">The configuration to use</param>
-		/// <param name="loggerFactory">The logger factory to allow IdentityServer to log things</param>
+		/// <param name="logger">The logger used to allow IdentityServer to log things</param>
 		/// <param name="environment">The environment information to check if the app runs in debug mode</param>
 		public AuthenticationModule(IConfiguration configuration,
-			ILoggerFactory loggerFactory, 
+			ILogger<DefaultCorsPolicyService> logger, 
 			IWebHostEnvironment environment)
 		{
 			_configuration = configuration;
-			_loggerFactory = loggerFactory;
+			_logger = logger;
 			_environment = environment;
 		}
 
@@ -83,7 +83,7 @@ namespace Kyoo.Authentication
 		{
 			builder.RegisterType<PermissionValidatorFactory>().As<IPermissionValidator>().SingleInstance();
 
-			DefaultCorsPolicyService cors = new(_loggerFactory.CreateLogger<DefaultCorsPolicyService>())
+			DefaultCorsPolicyService cors = new(_logger)
 			{
 				AllowedOrigins = { new Uri(_configuration.GetPublicUrl()).GetLeftPart(UriPartial.Authority) }
 			};
