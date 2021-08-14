@@ -1,6 +1,6 @@
 using System;
 
-namespace Kyoo.Models.Attributes
+namespace Kyoo.Abstractions.Models.Attributes
 {
 	/// <summary>
 	/// Remove an property from the serialization pipeline. It will simply be skipped. 

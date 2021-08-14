@@ -1,8 +1,9 @@
 ﻿using System;
-using Kyoo.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Kyoo.Controllers

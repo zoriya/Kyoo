@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Kyoo.Abstractions.Controllers;
 using Kyoo.Controllers;
 using Xunit.Abstractions;
 

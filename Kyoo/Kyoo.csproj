@@ -45,10 +45,8 @@
 	</ItemGroup>
 
 	<Target Name="BuildTranscoder" BeforeTargets="BeforeBuild" Condition="'$(SkipTranscoder)' != 'true'">
-		<Exec WorkingDirectory="$(TranscoderRoot)" Condition="'$(IsWindows)' != 'true'"
-			  Command="mkdir -p build %26%26 cd build %26%26 cmake .. %26%26 make -j" />
-		<Exec WorkingDirectory="$(TranscoderRoot)" Condition="'$(IsWindows)' == 'true'"
-			  Command="(if not exist build mkdir build) %26%26 cd build %26%26 cmake .. -G &quot;NMake Makefiles&quot; %26%26 nmake" />
+		<Exec WorkingDirectory="$(TranscoderRoot)" Condition="'$(IsWindows)' != 'true'" Command="mkdir -p build %26%26 cd build %26%26 cmake .. %26%26 make -j" />
+		<Exec WorkingDirectory="$(TranscoderRoot)" Condition="'$(IsWindows)' == 'true'" Command="(if not exist build mkdir build) %26%26 cd build %26%26 cmake .. -G &quot;NMake Makefiles&quot; %26%26 nmake" />
 	</Target>
 	
 	<ItemGroup Condition="'$(SkipTranscoder)' != 'true'">

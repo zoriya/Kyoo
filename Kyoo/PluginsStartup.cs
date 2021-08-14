@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Autofac;
+using Kyoo.Abstractions;
+using Kyoo.Abstractions.Controllers;
 using Kyoo.Authentication;
 using Kyoo.Controllers;
 using Kyoo.Models.Options;

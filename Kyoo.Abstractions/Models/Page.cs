@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Kyoo.Models
+namespace Kyoo.Abstractions.Models
 {
 	/// <summary>
 	/// A page of resource that contains information about the pagination of resources.

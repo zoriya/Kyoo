@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Exceptions;
+using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.CommonApi;
-using Kyoo.Controllers;
-using Kyoo.Models;
-using Kyoo.Models.Exceptions;
 using Kyoo.Models.Options;
-using Kyoo.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 

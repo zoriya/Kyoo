@@ -5,9 +5,10 @@ using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Api;
-using Kyoo.Models;
-using Kyoo.Models.Exceptions;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json.Linq;
 

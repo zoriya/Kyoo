@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Kyoo.Models
+namespace Kyoo.Abstractions.Models
 {
 	/// <summary>
 	/// Results of a search request.

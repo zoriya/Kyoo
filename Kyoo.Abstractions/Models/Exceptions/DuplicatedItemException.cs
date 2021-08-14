@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.Serialization;
 
-namespace Kyoo.Models.Exceptions
+namespace Kyoo.Abstractions.Models.Exceptions
 {
 	/// <summary>
 	/// An exception raised when an item already exists in the database.

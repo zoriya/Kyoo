@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Title>Kyoo.Abstraction</Title>
+		<Title>Kyoo.Abstractions</Title>
 		<Authors>Zoe Roux</Authors>
 		<Description>Base package to create plugins for Kyoo.</Description>
 		<PackageProjectUrl>https://github.com/AnonymusRaccoon/Kyoo</PackageProjectUrl>
@@ -16,7 +16,7 @@
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 		<LangVersion>default</LangVersion>
-		<RootNamespace>Kyoo.Abstraction</RootNamespace>
+		<RootNamespace>Kyoo.Abstractions</RootNamespace>
 	</PropertyGroup>
 
 	<ItemGroup>

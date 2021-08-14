@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using Kyoo.Controllers;
+using Kyoo.Abstractions.Controllers;
 
-namespace Kyoo.Models
+namespace Kyoo.Abstractions.Models
 {
 	/// <summary>
 	/// An interface representing items that contains images (like posters, thumbnails, logo, banners...)

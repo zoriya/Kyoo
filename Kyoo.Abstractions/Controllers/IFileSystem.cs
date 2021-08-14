@@ -2,10 +2,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
-using Kyoo.Models;
+using Kyoo.Abstractions.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Kyoo.Controllers
+namespace Kyoo.Abstractions.Controllers
 {
 	/// <summary>
 	/// A service to abstract the file system to allow custom file systems (like distant file systems or external providers)

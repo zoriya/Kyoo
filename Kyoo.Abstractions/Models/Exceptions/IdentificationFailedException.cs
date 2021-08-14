@@ -1,8 +1,8 @@
 using System;
 using System.Runtime.Serialization;
-using Kyoo.Controllers;
+using Kyoo.Abstractions.Controllers;
 
-namespace Kyoo.Models.Exceptions
+namespace Kyoo.Abstractions.Models.Exceptions
 {
 	/// <summary>
 	/// An exception raised when an <see cref="IIdentifier"/> failed.

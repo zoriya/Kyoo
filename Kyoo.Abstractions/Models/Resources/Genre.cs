@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using Kyoo.Models.Attributes;
+using Kyoo.Abstractions.Models.Attributes;
 
-namespace Kyoo.Models
+namespace Kyoo.Abstractions.Models
 {
 	/// <summary>
 	/// A genre that allow one to specify categories for shows.

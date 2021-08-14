@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Kyoo.Controllers;
-using Kyoo.Models;
-using Kyoo.Models.Exceptions;
-using Kyoo.Models.Permissions;
+using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Exceptions;
+using Kyoo.Abstractions.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kyoo.CommonApi

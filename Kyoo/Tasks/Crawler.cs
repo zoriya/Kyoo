@@ -1,12 +1,12 @@
 ﻿using System;
-using Kyoo.Models;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Kyoo.Common.Models.Attributes;
-using Kyoo.Controllers;
+using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Models.Watch;
 using Microsoft.Extensions.Logging;
 

@@ -1,9 +1,9 @@
 using Autofac;
 using Autofac.Builder;
-using Kyoo.Controllers;
+using Kyoo.Abstractions.Controllers;
 using Microsoft.Extensions.Configuration;
 
-namespace Kyoo
+namespace Kyoo.Abstractions
 {
 	/// <summary>
 	/// A static class with helper functions to setup external modules

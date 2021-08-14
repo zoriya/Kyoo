@@ -1,8 +1,8 @@
 using System.Threading.Tasks;
-using Kyoo.Models;
-using Kyoo.Models.Exceptions;
+using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Exceptions;
 
-namespace Kyoo.Controllers
+namespace Kyoo.Abstractions.Controllers
 {
 	/// <summary>
 	/// An interface to identify episodes, shows and metadata based on the episode file.

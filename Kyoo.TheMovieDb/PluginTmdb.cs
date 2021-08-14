@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
 using Autofac;
-using Kyoo.Controllers;
+using Kyoo.Abstractions;
+using Kyoo.Abstractions.Controllers;
 using Kyoo.TheMovieDb.Models;
 
 namespace Kyoo.TheMovieDb

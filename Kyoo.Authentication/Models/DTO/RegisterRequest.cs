@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Kyoo.Models;
+using Kyoo.Abstractions.Models;
 
 namespace Kyoo.Authentication.Models.DTO
 {
@@ -34,7 +34,7 @@ namespace Kyoo.Authentication.Models.DTO
 		/// <returns></returns>
 		public User ToUser()
 		{
-			return new()
+			return new User
 			{
 				Slug = Utility.ToSlug(Username),
 				Username = Username,

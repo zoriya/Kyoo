@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using JetBrains.Annotations;
-using Kyoo.Models.Attributes;
+using Kyoo.Abstractions.Models.Attributes;
 
-namespace Kyoo.Models
+namespace Kyoo.Abstractions.Models
 {
 	/// <summary>
 	/// An interface applied to resources containing external metadata.

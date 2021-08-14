@@ -1,7 +1,7 @@
 using System;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Kyoo.Controllers
+namespace Kyoo.Abstractions.Controllers
 {
 	/// <summary>
 	/// A list of constant priorities used for <see cref="IStartupAction"/>'s <see cref="IStartupAction.Priority"/>.

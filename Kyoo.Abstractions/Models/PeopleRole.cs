@@ -1,4 +1,4 @@
-namespace Kyoo.Models
+namespace Kyoo.Abstractions.Models
 {
 	/// <summary>
 	/// A role a person played for a show. It can be an actor, musician, voice actor, director, writer...

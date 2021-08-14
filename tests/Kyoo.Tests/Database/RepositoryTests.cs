@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Kyoo.Controllers;
-using Kyoo.Models;
-using Kyoo.Models.Exceptions;
+using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Exceptions;
 using Xunit;
 
 namespace Kyoo.Tests

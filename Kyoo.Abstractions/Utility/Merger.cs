@@ -5,8 +5,8 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using JetBrains.Annotations;
-using Kyoo.Models;
-using Kyoo.Models.Attributes;
+using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Attributes;
 
 namespace Kyoo
 {

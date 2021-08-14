@@ -1,8 +1,8 @@
 using System;
 using System.Linq.Expressions;
-using Kyoo.Models.Attributes;
+using Kyoo.Abstractions.Models.Attributes;
 
-namespace Kyoo.Models
+namespace Kyoo.Abstractions.Models
 {
 	/// <summary>
 	/// ID and link of an item on an external provider.

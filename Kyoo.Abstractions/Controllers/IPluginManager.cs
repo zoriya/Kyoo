@@ -1,8 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Kyoo.Models.Exceptions;
+using Kyoo.Abstractions.Models.Exceptions;
 
-namespace Kyoo.Controllers
+namespace Kyoo.Abstractions.Controllers
 {
 	/// <summary>
 	/// A manager to load plugins and retrieve information from them.

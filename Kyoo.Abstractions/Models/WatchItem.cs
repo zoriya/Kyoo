@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using Kyoo.Controllers;
-using Kyoo.Models.Attributes;
+using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models.Attributes;
 using PathIO = System.IO.Path;
 
-namespace Kyoo.Models
+namespace Kyoo.Abstractions.Models
 {
 	/// <summary>
 	/// A watch item give information useful for playback.

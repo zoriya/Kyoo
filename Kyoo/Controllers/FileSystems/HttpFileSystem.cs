@@ -4,8 +4,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Kyoo.Common.Models.Attributes;
-using Kyoo.Models;
+using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Attributes;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kyoo.Controllers

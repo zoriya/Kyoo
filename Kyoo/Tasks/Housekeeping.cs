@@ -1,9 +1,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Kyoo.Common.Models.Attributes;
-using Kyoo.Controllers;
-using Kyoo.Models;
+using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Attributes;
 using Microsoft.Extensions.Logging;
 
 namespace Kyoo.Tasks

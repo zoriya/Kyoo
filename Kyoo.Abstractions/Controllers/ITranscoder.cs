@@ -1,7 +1,7 @@
-using Kyoo.Models;
+using Kyoo.Abstractions.Models;
 using System.Threading.Tasks;
 
-namespace Kyoo.Controllers
+namespace Kyoo.Abstractions.Controllers
 {
 	public interface ITranscoder
 	{

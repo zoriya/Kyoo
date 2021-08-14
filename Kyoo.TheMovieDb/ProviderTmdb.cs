@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Kyoo.Controllers;
-using Kyoo.Models;
+using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models;
 using Kyoo.TheMovieDb.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

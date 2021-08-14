@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using Kyoo.Models.Attributes;
+using Kyoo.Abstractions.Models.Attributes;
 
-namespace Kyoo.Models
+namespace Kyoo.Abstractions.Models
 {
 	/// <summary>
 	/// The type of item, ether a show, a movie or a collection.

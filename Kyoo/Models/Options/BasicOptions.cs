@@ -1,3 +1,5 @@
+using Kyoo.Abstractions.Models;
+
 namespace Kyoo.Models.Options
 {
 	/// <summary>

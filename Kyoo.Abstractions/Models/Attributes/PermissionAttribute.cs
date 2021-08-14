@@ -2,7 +2,7 @@ using System;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Kyoo.Models.Permissions
+namespace Kyoo.Abstractions.Models.Permissions
 {
 	/// <summary>
 	/// The kind of permission needed.

@@ -1,6 +1,6 @@
 using System;
 
-namespace Kyoo.Models.Attributes
+namespace Kyoo.Abstractions.Models.Attributes
 {
 	/// <summary>
 	/// Specify that a property can't be merged.

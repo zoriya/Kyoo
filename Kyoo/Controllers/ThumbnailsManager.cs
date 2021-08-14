@@ -1,8 +1,9 @@
-﻿using Kyoo.Models;
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Logging;
 

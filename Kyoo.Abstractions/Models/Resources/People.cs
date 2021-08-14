@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using Kyoo.Models.Attributes;
+using Kyoo.Abstractions.Models.Attributes;
 
-namespace Kyoo.Models
+namespace Kyoo.Abstractions.Models
 {
 	/// <summary>
 	/// An actor, voice actor, writer, animator, somebody who worked on a <see cref="Show"/>. 

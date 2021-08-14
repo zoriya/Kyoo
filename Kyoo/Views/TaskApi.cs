@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models.Exceptions;
+using Kyoo.Abstractions.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
-using Kyoo.Controllers;
-using Kyoo.Models.Exceptions;
-using Kyoo.Models.Permissions;
 
 namespace Kyoo.Api
 {

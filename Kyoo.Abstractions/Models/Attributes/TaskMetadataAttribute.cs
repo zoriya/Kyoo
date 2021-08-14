@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
-using Kyoo.Controllers;
+using Kyoo.Abstractions.Controllers;
 
-namespace Kyoo.Common.Models.Attributes
+namespace Kyoo.Abstractions.Models.Attributes
 {
 	/// <summary>
 	/// An attribute to inform how a <see cref="IFileSystem"/> works.

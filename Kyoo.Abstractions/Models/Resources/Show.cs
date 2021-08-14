@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using Kyoo.Controllers;
-using Kyoo.Models.Attributes;
+using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models.Attributes;
 
-namespace Kyoo.Models
+namespace Kyoo.Abstractions.Models
 {
 	/// <summary>
 	/// A series or a movie.

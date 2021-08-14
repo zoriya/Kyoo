@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Kyoo.Models;
+using Kyoo.Abstractions.Models;
 
 namespace Kyoo.CommonApi
 {

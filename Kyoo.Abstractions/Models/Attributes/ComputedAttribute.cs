@@ -1,6 +1,6 @@
 using System;
 
-namespace Kyoo.Models.Attributes
+namespace Kyoo.Abstractions.Models.Attributes
 {
 	/// <summary>
 	/// An attribute to inform that the property is computed automatically and can't be assigned manually.

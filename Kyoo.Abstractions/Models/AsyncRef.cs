@@ -1,4 +1,4 @@
-namespace Kyoo.Models
+namespace Kyoo.Abstractions.Models
 {
 	/// <summary>
 	/// A class wrapping a value that will be set after the completion of the task it is related to.

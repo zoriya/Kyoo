@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
-using Kyoo.Common.Models.Attributes;
-using Kyoo.Models.Exceptions;
+using Kyoo.Abstractions.Models.Attributes;
+using Kyoo.Abstractions.Models.Exceptions;
 
-namespace Kyoo.Controllers
+namespace Kyoo.Abstractions.Controllers
 {
 	/// <summary>
 	/// A service to handle long running tasks.

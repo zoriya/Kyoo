@@ -1,9 +1,9 @@
-﻿using Kyoo.Models;
+﻿using Kyoo.Abstractions.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 
-namespace Kyoo.Controllers
+namespace Kyoo.Abstractions.Controllers
 {
 	/// <summary>
 	/// An interface to automatically retrieve metadata from external providers.

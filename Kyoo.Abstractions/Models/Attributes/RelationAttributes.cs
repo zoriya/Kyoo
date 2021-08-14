@@ -1,7 +1,7 @@
 using System;
-using Kyoo.Controllers;
+using Kyoo.Abstractions.Controllers;
 
-namespace Kyoo.Models.Attributes
+namespace Kyoo.Abstractions.Models.Attributes
 {
 	/// <summary>
 	/// The targeted relation can be edited via calls to the repository's <see cref="IRepository{T}.Edit"/> method.

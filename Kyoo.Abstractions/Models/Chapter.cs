@@ -1,4 +1,4 @@
-namespace Kyoo.Models
+namespace Kyoo.Abstractions.Models
 {
 	/// <summary>
 	/// A chapter to split an episode in multiple parts.

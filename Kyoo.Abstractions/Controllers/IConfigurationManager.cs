@@ -1,10 +1,10 @@
 using System;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
-using Kyoo.Models;
-using Kyoo.Models.Exceptions;
+using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Exceptions;
 
-namespace Kyoo.Controllers
+namespace Kyoo.Abstractions.Controllers
 {
 	/// <summary>
 	/// A class to ease configuration management. This work WITH Microsoft's package, you can still use IOptions patterns

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Kyoo.Models;
+using Kyoo.Abstractions.Models;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 

@@ -4,10 +4,10 @@ using System.Linq.Expressions;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
-using Kyoo.Models;
-using Kyoo.Models.Exceptions;
+using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Exceptions;
 
-namespace Kyoo.Controllers
+namespace Kyoo.Abstractions.Controllers
 {
 	/// <summary>
 	/// Information about the pagination. How many items should be displayed and where to start.
@@ -106,7 +106,7 @@ namespace Kyoo.Controllers
 	}
 
 	/// <summary>
-	/// A base class for repositories. Every service implementing this will be handled by the <see cref="LibraryManager"/>.
+	/// A base class for repositories. Every service implementing this will be handled by the <see cref="ILibraryManager"/>.
 	/// </summary>
 	public interface IBaseRepository
 	{

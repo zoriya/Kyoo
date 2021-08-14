@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
-using Kyoo.Controllers;
-using Kyoo.Models;
+using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models;
 using Xunit;
 using Xunit.Abstractions;
 

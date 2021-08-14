@@ -1,8 +1,8 @@
-﻿using Kyoo.Models;
+﻿using Kyoo.Abstractions.Models;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 
-namespace Kyoo.Controllers
+namespace Kyoo.Abstractions.Controllers
 {
 	/// <summary>
 	/// Download images and retrieve the path of those images for a resource.

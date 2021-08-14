@@ -4,16 +4,18 @@ using Autofac;
 using Autofac.Core;
 using Autofac.Core.Registration;
 using Autofac.Extras.AttributeMetadata;
+using Kyoo.Abstractions;
+using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Controllers;
 using Kyoo.Models.Options;
-using Kyoo.Models.Permissions;
 using Kyoo.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using IMetadataProvider = Kyoo.Controllers.IMetadataProvider;
+using IMetadataProvider = Kyoo.Abstractions.Controllers.IMetadataProvider;
 
 namespace Kyoo
 {

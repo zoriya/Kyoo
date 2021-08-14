@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Kyoo.Controllers;
+using Kyoo.Abstractions.Controllers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

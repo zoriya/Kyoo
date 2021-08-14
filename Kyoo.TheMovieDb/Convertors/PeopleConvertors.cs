@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using Kyoo.Models;
+using Kyoo.Abstractions.Models;
 using TMDbLib.Objects.General;
 using TMDbLib.Objects.People;
 using TMDbLib.Objects.Search;
-using Images = Kyoo.Models.Images;
+using Images = Kyoo.Abstractions.Models.Images;
 using TvCast = TMDbLib.Objects.TvShows.Cast;
 using MovieCast = TMDbLib.Objects.Movies.Cast;
 
@@ -15,11 +15,11 @@ namespace Kyoo.TheMovieDb
 	public static partial class Convertors
 	{
 		/// <summary>
-		/// Convert a <see cref="MovieCast"/> to a <see cref="PeopleRole"/>.
+		/// Convert a <see cref="MovieCast"/> to a <see cref="Abstractions.Models.PeopleRole"/>.
 		/// </summary>
 		/// <param name="cast">An internal TheMovieDB cast.</param>
 		/// <param name="provider">The provider that represent TheMovieDB inside Kyoo.</param>
-		/// <returns>A <see cref="PeopleRole"/> representing the movie cast.</returns>
+		/// <returns>A <see cref="Abstractions.Models.PeopleRole"/> representing the movie cast.</returns>
 		public static PeopleRole ToPeople(this MovieCast cast, Provider provider)
 		{
 			return new PeopleRole

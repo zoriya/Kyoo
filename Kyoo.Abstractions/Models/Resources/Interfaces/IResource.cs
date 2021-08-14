@@ -1,6 +1,6 @@
-using Kyoo.Controllers;
+using Kyoo.Abstractions.Controllers;
 
-namespace Kyoo.Models
+namespace Kyoo.Abstractions.Models
 {
 	/// <summary>
 	/// An interface to represent a resource that can be retrieved from the database.

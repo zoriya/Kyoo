@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Kyoo.Common.Models.Attributes;
-using Kyoo.Controllers;
-using Kyoo.Models.Exceptions;
+using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models.Attributes;
+using Kyoo.Abstractions.Models.Exceptions;
 
 namespace Kyoo.Tasks
 {
