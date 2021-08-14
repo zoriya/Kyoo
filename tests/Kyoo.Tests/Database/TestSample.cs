@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Kyoo.Abstractions.Models;
+using Kyoo.Database;
 
 namespace Kyoo.Tests
 {

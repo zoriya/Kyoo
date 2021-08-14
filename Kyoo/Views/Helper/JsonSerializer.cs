@@ -10,7 +10,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 
-namespace Kyoo.Controllers
+namespace Kyoo.Api
 {
 	public class JsonPropertyIgnorer : CamelCasePropertyNamesContractResolver
 	{
@@ -26,7 +26,7 @@ namespace Kyoo.Controllers
 		{
 			JsonProperty property = base.CreateProperty(member, memberSerialization);
 
-			LoadableRelationAttribute relation = member?.GetCustomAttribute<LoadableRelationAttribute>();
+			LoadableRelationAttribute relation = member.GetCustomAttribute<LoadableRelationAttribute>();
 			if (relation != null)
 			{
 				if (relation.RelationID == null)
@@ -42,14 +42,14 @@ namespace Kyoo.Controllers
 					};
 			}
 
-			if (member?.GetCustomAttribute<SerializeIgnoreAttribute>() != null)
+			if (member.GetCustomAttribute<SerializeIgnoreAttribute>() != null)
 				property.ShouldSerialize = _ => false;
-			if (member?.GetCustomAttribute<DeserializeIgnoreAttribute>() != null)
+			if (member.GetCustomAttribute<DeserializeIgnoreAttribute>() != null)
 				property.ShouldDeserialize = _ => false;
 
 			// TODO use http context to disable serialize as.
 			// TODO check https://stackoverflow.com/questions/53288633/net-core-api-custom-json-resolver-based-on-request-values
-			SerializeAsAttribute serializeAs = member?.GetCustomAttribute<SerializeAsAttribute>();
+			SerializeAsAttribute serializeAs = member.GetCustomAttribute<SerializeAsAttribute>();
 			if (serializeAs != null)
 				property.ValueProvider = new SerializeAsProvider(serializeAs.Format, _host);
 			return property;
@@ -81,7 +81,7 @@ namespace Kyoo.Controllers
 			if (value.People != null)
 				value.People.Roles = null;
 			
-			JObject obj = JObject.FromObject(value.ForPeople ? value.People : value.Show, serializer);
+			JObject obj = JObject.FromObject((value.ForPeople ? value.People : value.Show)!, serializer);
 			obj.Add("role", value.Role);
 			obj.Add("type", value.Type);
 			obj.WriteTo(writer);

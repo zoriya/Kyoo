@@ -8,7 +8,6 @@ using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Permissions;
-using Kyoo.CommonApi;
 using Kyoo.Models.Options;
 using Microsoft.Extensions.Options;
 

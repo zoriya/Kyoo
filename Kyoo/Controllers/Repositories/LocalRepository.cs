@@ -8,7 +8,7 @@ using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Exceptions;
-using Kyoo.CommonApi;
+using Kyoo.Api;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Controllers

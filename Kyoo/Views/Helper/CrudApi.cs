@@ -8,7 +8,7 @@ using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Kyoo.CommonApi
+namespace Kyoo.Api
 {
 	[ApiController]
 	[ResourceView]

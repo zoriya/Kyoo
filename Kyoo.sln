@@ -3,7 +3,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kyoo", "Kyoo\Kyoo.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Abstractions", "Kyoo.Abstractions\Kyoo.Abstractions.csproj", "{BAB2CAE1-AC28-4509-AA3E-8DC75BD59220}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.CommonAPI", "Kyoo.CommonAPI\Kyoo.CommonAPI.csproj", "{6F91B645-F785-46BB-9C4F-1EFC83E489B6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Database", "Kyoo.Database\Kyoo.Database.csproj", "{6F91B645-F785-46BB-9C4F-1EFC83E489B6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Postgresql", "Kyoo.Postgresql\Kyoo.Postgresql.csproj", "{3213C96D-0BF3-460B-A8B5-B9977229408A}"
 EndProject

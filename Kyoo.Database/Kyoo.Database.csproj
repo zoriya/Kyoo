@@ -2,9 +2,8 @@
 
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
-		<AssemblyName>Kyoo.CommonApi</AssemblyName>
-		<RootNamespace>Kyoo.CommonApi</RootNamespace>
-		<PackageId>Kyoo.CommonApi</PackageId>
+		<AssemblyName>Kyoo.Database</AssemblyName>
+		<RootNamespace>Kyoo.Database</RootNamespace>
 		<Authors>Zoe Roux</Authors>
 		<RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
 		<OutputType>Library</OutputType>

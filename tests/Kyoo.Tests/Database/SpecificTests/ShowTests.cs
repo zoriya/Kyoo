@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Database;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 using Xunit.Abstractions;

@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Kyoo.Database;
 using Kyoo.Postgresql;
 using Kyoo.SqLite;
 using Microsoft.Data.Sqlite;

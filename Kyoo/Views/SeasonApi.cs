@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Kyoo.CommonApi;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using Kyoo.Abstractions.Controllers;

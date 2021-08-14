@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Kyoo.Abstractions.Models;
 
-namespace Kyoo.CommonApi
+namespace Kyoo.Api
 {
 	public static class ApiHelper
 	{

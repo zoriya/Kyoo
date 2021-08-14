@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Kyoo.CommonApi
+namespace Kyoo.Api
 {
 	public class ResourceViewAttribute : ActionFilterAttribute
 	{
