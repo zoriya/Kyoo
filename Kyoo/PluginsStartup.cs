@@ -10,6 +10,7 @@ using Kyoo.SqLite;
 using Kyoo.Tasks;
 using Kyoo.TheMovieDb;
 using Kyoo.TheTvdb;
+using Kyoo.WebApp;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -46,8 +47,10 @@ namespace Kyoo
 		{
 			_plugins = plugins;
 			_configuration = configuration;
+			// TODO enable the web app only if it was build with it.
 			_plugins.LoadPlugins(
 				typeof(CoreModule), 
+				typeof(WebAppModule),
 				typeof(AuthenticationModule),
 				typeof(PostgresModule),
 				typeof(SqLiteModule),

@@ -21,20 +21,10 @@
 	</ItemGroup>
 	
 	<ItemGroup>
-		<LoginFiles Include="$(LoginRoot)**" Visible="false" />
+		<None Remove="$(LoginRoot)**;" />
+		<Content Include="$(LoginRoot)**">
+			<Link>login/%(RecursiveDir)%(Filename)%(Extension)</Link>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
 	</ItemGroup>
-	
-	<Target Name="Publish login files" AfterTargets="ComputeFilesToPublish">
-		<ItemGroup>
-			<ResolvedFileToPublish Include="@(LoginFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
-				<RelativePath>login/%(LoginFiles.RecursiveDir)%(LoginFiles.Filename)%(LoginFiles.Extension)</RelativePath>
-				<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-				<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-			</ResolvedFileToPublish>
-		</ItemGroup>
-	</Target>
-
-	<Target Name="Prepare static files" AfterTargets="Build" Condition="$(Configuration) == 'Debug'">
-		<Copy SourceFiles="@(LoginFiles)" DestinationFolder="$(OutputPath)/login/%(RecursiveDir)" />
-	</Target>
 </Project>

@@ -33,6 +33,8 @@ namespace Kyoo
 			
 			IHostBuilder builder = CreateWebHostBuilder(args);
 			
+			// TODO remove ENVIRONEMENT handling and force it to the build env
+			
 			bool? debug = Environment.GetEnvironmentVariable("ENVIRONMENT")?.ToLowerInvariant() switch
 			{
 				"d" => true,
