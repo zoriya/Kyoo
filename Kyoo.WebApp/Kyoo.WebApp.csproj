@@ -25,20 +25,35 @@
 	<ItemGroup>
 		<Content Remove="$(SpaRoot)**" />
 		<Compile Remove="$(SpaRoot)**" />
-		
-		<Content Include="$(SpaRoot)static/**" Visible="false">
-			<Link>wwwroot/%(RecursiveDir)%(Filename)%(Extension)</Link>
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-		
 		<None Remove="$(SpaRoot)dist/**; $(SpaRoot)dist-server/**" />
-		<Content Include="$(SpaRoot)dist/**; $(SpaRoot)dist-server/**" Visible="false" Condition="'$(Configuration)' != 'Debug'">
+
+		<Content Include="$(SpaRoot)static/**" Visible="false">
 			<Link>wwwroot/%(RecursiveDir)%(Filename)%(Extension)</Link>
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		</Content>
 	</ItemGroup>
 
-	<Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" 
+	<Target Name="PublishRunWebpack" BeforeTargets="BeforeBuild;PrepareForPublish;GetCopyToOutputDirectoryItems" 
+			Condition="'$(SkipWebApp)' != 'true' And '$(Configuration)' != 'Debug'">
+		<Message Importance="high" Text="Restoring dependencies using 'npm'. This may take several minutes..." />
+		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
+		<Exec WorkingDirectory="$(SpaRoot)" Command="npm run build -- --prod" />
+		<Exec WorkingDirectory="$(SpaRoot)" Command="npm run build:ssr -- --prod" Condition="'$(BuildServerSideRenderer)' == 'true'" />
+	</Target>
+
+	<Target Name="CopyFrontEndFiles" 
+			AfterTargets="PublishRunWebpack" BeforeTargets="BeforeBuild;PrepareForPublish;GetCopyToOutputDirectoryItems"
+			Condition="'$(Configuration)' != 'Debug'">
+		<ItemGroup>
+			<NewContent Include="$(SpaRoot)dist/**; $(SpaRoot)dist-server/**" Visible="false" />
+			<Content Include="@(NewContent)">
+				<Link>wwwroot/%(NewContent.RecursiveDir)%(NewContent.Filename)%(NewContent.Extension)</Link>
+				<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			</Content>
+		</ItemGroup>
+	</Target>
+
+	<Target Name="DebugEnsureNodeEnv" BeforeTargets="Build"
 			Condition="'$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') And '$(SkipWebApp)' != 'true'">
 		<Exec Command="node --version" ContinueOnError="true">
 			<Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
@@ -46,13 +61,6 @@
 		<Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />
 		<Message Importance="high" Text="Restoring dependencies using 'npm'. This may take several minutes..." />
 		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
-	</Target>
-
-	<Target Name="PublishRunWebpack" BeforeTargets="Build" Condition="'$(SkipWebApp)' != 'true' And '$(Configuration)' != 'Debug'">
-		<Message Importance="high" Text="Restoring dependencies using 'npm'. This may take several minutes..." />
-		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
-		<Exec WorkingDirectory="$(SpaRoot)" Command="npm run build -- --prod" />
-		<Exec WorkingDirectory="$(SpaRoot)" Command="npm run build:ssr -- --prod" Condition="'$(BuildServerSideRenderer)' == 'true'" />
 	</Target>
 
 	<Target Name="SymlinkViews" AfterTargets="Build" Condition="'$(SkipWebApp)' != 'true' And $(Configuration) == 'Debug'">
