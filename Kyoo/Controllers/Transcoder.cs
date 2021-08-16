@@ -22,29 +22,40 @@ namespace Kyoo.Controllers
 			private const string TranscoderPath = "transcoder";
 
 			[DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-			public static extern int init();
+			private static extern int init();
 
-			[DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-			public static extern int transmux(string path, string outpath, out float playableDuration);
-		
-			[DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-			public static extern int transcode(string path, string outpath, out float playableDuration);
+			public static int Init() => init();
 
-			[DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
+			[DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl, 
+				CharSet = CharSet.Ansi, BestFitMapping = false, ThrowOnUnmappableChar = true)]
+			private static extern int transmux(string path, string outpath, out float playableDuration);
+
+			public static int Transmux(string path, string outPath, out float playableDuration)
+			{
+				path = path.Replace('\\', '/');
+				outPath = outPath.Replace('\\', '/');
+				return transmux(path, outPath, out playableDuration);
+			}
+
+			[DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl, 
+				CharSet = CharSet.Ansi, BestFitMapping = false, ThrowOnUnmappableChar = true)]
 			private static extern IntPtr extract_infos(string path, 
 				string outpath,
-				out int length,
-				out int trackCount,
+				out uint length,
+				out uint trackCount,
 				bool reextracct);
-		
+
 			[DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
-			private static extern void free(IntPtr ptr);
-		
-		
+			private static extern void free_streams(IntPtr streams, uint count);
+
+
 			public static Track[] ExtractInfos(string path, string outPath, bool reextract)
 			{
+				path = path.Replace('\\', '/');
+				outPath = outPath.Replace('\\', '/');
+				
 				int size = Marshal.SizeOf<Stream>();
-				IntPtr ptr = extract_infos(path, outPath, out int arrayLength, out int trackCount, reextract);
+				IntPtr ptr = extract_infos(path, outPath, out uint arrayLength, out uint trackCount, reextract);
 				IntPtr streamsPtr = ptr;
 				Track[] tracks;
 			
@@ -68,7 +79,7 @@ namespace Kyoo.Controllers
 					tracks = Array.Empty<Track>();
 
 				if (ptr != IntPtr.Zero)
-					free(ptr); // free_streams is not necessary since the Marshal free the unmanaged pointers.
+					free_streams(ptr, trackCount);
 				return tracks;
 			}
 		}
@@ -83,7 +94,7 @@ namespace Kyoo.Controllers
 			_options = options;
 			_library = library;
 
-			if (TranscoderAPI.init() != Marshal.SizeOf<Stream>())
+			if (TranscoderAPI.Init() != Marshal.SizeOf<Stream>())
 				throw new BadTranscoderException();
 		}
 
@@ -122,8 +133,7 @@ namespace Kyoo.Controllers
 			
 			Task.Factory.StartNew(() =>
 			{
-				string cleanManifest = manifest.Replace('\\', '/');
-				transmuxFailed = TranscoderAPI.transmux(episode.Path, cleanManifest, out playableDuration) != 0;
+				transmuxFailed = TranscoderAPI.Transmux(episode.Path, manifest, out playableDuration) != 0;
 			}, TaskCreationOptions.LongRunning);
 			while (playableDuration < 10 || !File.Exists(manifest) && !transmuxFailed)
 				await Task.Delay(10);
