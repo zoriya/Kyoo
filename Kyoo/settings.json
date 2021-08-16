@@ -45,12 +45,12 @@
       "scan": "24:00:00"
     }
   },
-  
+
   "media": {
     "regex": [
-      "^\\/?(?<Collection>.+)?\\/(?<Show>.+?)(?: \\((?<StartYear>\\d+)\\))?\\/\\k<Show>(?: \\(\\d+\\))? S(?<Season>\\d+)E(?<Episode>\\d+)\\..*$",
-      "^\\/?(?<Collection>.+)?\\/(?<Show>.+?)(?: \\((?<StartYear>\\d+)\\))?\\/\\k<Show>(?: \\(\\d+\\))? (?<Absolute>\\d+)\\..*$",
-      "^\\/?(?<Collection>.+)?\\/(?<Show>.+?)(?: \\((?<StartYear>\\d+)\\))?\\/\\k<Show>(?: \\(\\d+\\))?\\..*$"
+      "^[\\/\\\\]*(?<Collection>.+)?[\\/\\\\]+(?<Show>.+?)(?: \\((?<StartYear>\\d+)\\))?[\\/\\\\]+\\k<Show>(?: \\(\\d+\\))? S(?<Season>\\d+)E(?<Episode>\\d+)\\..*$",
+      "^[\\/\\\\]*(?<Collection>.+)?[\\/\\\\]+(?<Show>.+?)(?: \\((?<StartYear>\\d+)\\))?[\\/\\\\]+\\k<Show>(?: \\(\\d+\\))? (?<Absolute>\\d+)\\..*$",
+      "^[\\/\\\\]*(?<Collection>.+)?[\\/\\\\]+(?<Show>.+?)(?: \\((?<StartYear>\\d+)\\))?[\\/\\\\]+\\k<Show>(?: \\(\\d+\\))?\\..*$"
     ],
     "subtitleRegex": [
       "^(?<Episode>.+)\\.(?<Language>\\w{1,3})\\.(?<Default>default\\.)?(?<Forced>forced\\.)?.*$"

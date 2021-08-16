@@ -65,6 +65,6 @@
 
 	<Target Name="SymlinkViews" AfterTargets="Build" Condition="'$(SkipWebApp)' != 'true' And $(Configuration) == 'Debug'">
 		<Exec WorkingDirectory="$(ProjectDir)../Kyoo" Command="ln -fs '$(ProjectDir)' $(OutDir)" Condition="$(OS) == 'Unix'" />
-		<Exec WorkingDirectory="$(ProjectDir)../Kyoo" Command="mklink /D '$(OutDir)$(ProjectName)' '$(ProjectDir)'" Condition="$(OS) != 'Unix'" />
+		<Exec WorkingDirectory="$(ProjectDir)../Kyoo" Command="if not exist  %22$(OutDir)$(ProjectName)%22 mklink /D %22$(OutDir)$(ProjectName)%22 %22$(ProjectDir)%22" Condition="$(OS) != 'Unix'" />
 	</Target>
 </Project>
