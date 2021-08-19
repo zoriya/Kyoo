@@ -29,19 +29,19 @@ export function loadConfig(oidcConfigService: OidcConfigService): () => Promise<
 {
 	return () => oidcConfigService.withConfig({
 		stsServer: window.location.origin,
-		redirectUrl: "/",
-		postLogoutRedirectUri: "/logout",
+		redirectUrl: `${window.location.origin}/`,
+		postLogoutRedirectUri: `${window.location.origin}/logout`,
 		clientId: "kyoo.webapp",
 		responseType: "code",
 		triggerAuthorizationResultEvent: false,
 		scope: "openid profile offline_access kyoo.read kyoo.write kyoo.play kyoo.admin",
 		silentRenew: true,
-		silentRenewUrl: "/silent.html",
+		silentRenewUrl: `${window.location.origin}/silent.html`,
 		useRefreshToken: true,
 		startCheckSession: true,
 
-		forbiddenRoute: "/forbidden",
-		unauthorizedRoute: "/unauthorized",
+		forbiddenRoute: `${window.location.origin}/forbidden`,
+		unauthorizedRoute: `${window.location.origin}/unauthorized`,
 		logLevel: LogLevel.Warn
 	});
 }
