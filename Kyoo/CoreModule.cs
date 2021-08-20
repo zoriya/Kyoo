@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Serilog;
 using IMetadataProvider = Kyoo.Abstractions.Controllers.IMetadataProvider;
 
 namespace Kyoo
@@ -151,6 +152,7 @@ namespace Kyoo
 					app.UseHsts();
 				}
 			}, SA.Before),
+			SA.New<IApplicationBuilder>(app => app.UseSerilogRequestLogging(), SA.Before),
 			SA.New<IApplicationBuilder>(app => app.UseResponseCompression(), SA.Routing + 1),
 			SA.New<IApplicationBuilder>(app => app.UseRouting(), SA.Routing),
 			SA.New<IApplicationBuilder>(app => app.UseEndpoints(x => x.MapControllers()), SA.Endpoint)

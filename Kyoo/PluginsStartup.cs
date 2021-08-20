@@ -131,19 +131,13 @@ namespace Kyoo
 		/// This is meant to be used from <see cref="WebHostBuilderExtensions.UseStartup"/>.
 		/// </summary>
 		/// <param name="host">The context of the web host.</param>
-		/// <param name="loggingConfiguration">
-		/// The method used to configure the logger factory used by the plugin manager and plugins during startup.
+		/// <param name="logger">
+		/// The logger factory used to log while the application is setting itself up.
 		/// </param>
 		/// <returns>A new <see cref="PluginsStartup"/>.</returns>
 		public static PluginsStartup FromWebHost(WebHostBuilderContext host, 
-			Action<HostBuilderContext, ILoggingBuilder> loggingConfiguration)
+			ILoggerFactory logger)
 		{
-			HostBuilderContext genericHost = new(new Dictionary<object, object>())
-			{
-				Configuration = host.Configuration,
-				HostingEnvironment = host.HostingEnvironment
-			};
-			ILoggerFactory logger = LoggerFactory.Create(builder => loggingConfiguration(genericHost, builder));
 			HostServiceProvider hostProvider = new(host.HostingEnvironment, host.Configuration, logger);
 			PluginManager plugins = new(
 				hostProvider,

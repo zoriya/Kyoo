@@ -2,11 +2,15 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using Autofac.Extensions.DependencyInjection;
+using JetBrains.Annotations;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Templates;
+using Serilog.Templates.Themes;
 using SEnvironment = System.Environment;
 
 namespace Kyoo
@@ -30,6 +34,19 @@ namespace Kyoo
 		private const string Environment = "Production";
 #endif
 
+		/// <summary>
+		/// Initialize the bootstrap logger to use it anywhere. This is done here so it is called before any method,
+		/// even if the <see cref="Main"/> is not used and this binary is used as a dll.
+		/// </summary>
+		static Program()
+		{
+			LoggerConfiguration config = new();
+			_ConfigureLogging(null, config);
+			Log.Logger = config.CreateBootstrapLogger().ForContext<Application>();
+
+			AppDomain.CurrentDomain.ProcessExit += (_, _) => Log.CloseAndFlush();
+		}
+		
 		/// <summary>
 		/// Main function of the program
 		/// </summary>
@@ -67,6 +84,7 @@ namespace Kyoo
 		private static IConfigurationBuilder SetupConfig(IConfigurationBuilder builder, string[] args)
 		{
 			return builder.SetBasePath(System.Environment.CurrentDirectory)
+				.AddJsonFile(Path.Join(AppDomain.CurrentDomain.BaseDirectory, JsonConfigPath), false, true)
 				.AddJsonFile(JsonConfigPath, false, true)
 				.AddEnvironmentVariables()
 				.AddEnvironmentVariables("KYOO_")
@@ -78,44 +96,54 @@ namespace Kyoo
 		/// </summary>
 		/// <param name="context">The host context that contains the configuration</param>
 		/// <param name="builder">The logger builder to configure.</param>
-		public static void ConfigureLogging(HostBuilderContext context, ILoggingBuilder builder)
+		private static void _ConfigureLogging([CanBeNull] HostBuilderContext context, LoggerConfiguration builder)
 		{
-			builder.AddConfiguration(context.Configuration.GetSection("logging"))
-				.AddSimpleConsole(x =>
+			if (context != null)
+			{
+				try
 				{
-					x.TimestampFormat = "[hh:mm:ss] ";
-				})
-				.AddDebug()
-				.AddEventSourceLogger();
+					builder.ReadFrom.Configuration(context.Configuration, "logging");
+				}
+				catch (Exception ex)
+				{
+					Log.Fatal(ex, "Could not read serilog configuration");
+				}
+			}
+
+			const string template =
+				"[{@t:HH:mm:ss} {@l:u3} {Substring(SourceContext, LastIndexOf(SourceContext, '.') + 1), 15} ({@i:10})] " 
+				+ "{@m}{#if not EndsWith(@m, '\n')}\n{#end}{@x}";
+
+			builder
+				.WriteTo.Console(new ExpressionTemplate(template, theme: TemplateTheme.Code))
+				.WriteTo.Debug()
+				.WriteTo.RollingFile(new ExpressionTemplate(template), "logs/log-{Date}.log")
+				.Enrich.WithThreadId()
+				.Enrich.FromLogContext();
 		}
 
 		/// <summary>
 		/// Create a a web host
 		/// </summary>
 		/// <param name="args">Command line parameters that can be handled by kestrel</param>
-		/// <param name="loggingConfiguration">
-		/// An action to configure the logging. If it is null, <see cref="ConfigureLogging"/> will be used.
-		/// </param>
 		/// <returns>A new web host instance</returns>
-		public static IHostBuilder CreateWebHostBuilder(string[] args,
-			Action<HostBuilderContext, ILoggingBuilder> loggingConfiguration = null)
+		public static IHostBuilder CreateWebHostBuilder(string[] args)
 		{
 			IConfiguration configuration = SetupConfig(new ConfigurationBuilder(), args).Build();
-			loggingConfiguration ??= ConfigureLogging;
 
 			return new HostBuilder()
 				.UseServiceProviderFactory(new AutofacServiceProviderFactory())
 				.UseContentRoot(AppDomain.CurrentDomain.BaseDirectory)
 				.UseEnvironment(Environment)
 				.ConfigureAppConfiguration(x => SetupConfig(x, args))
-				.ConfigureLogging(loggingConfiguration)
+				.UseSerilog(_ConfigureLogging)
 				.ConfigureServices(x => x.AddRouting())
 				.ConfigureWebHost(x => x
 					.UseKestrel(options => { options.AddServerHeader = false; })
 					.UseIIS()
 					.UseIISIntegration()
 					.UseUrls(configuration.GetValue<string>("basics:url"))
-					.UseStartup(host => PluginsStartup.FromWebHost(host, loggingConfiguration))
+					.UseStartup(host => PluginsStartup.FromWebHost(host, new LoggerFactory().AddSerilog()))
 				);
 		}
 
@@ -140,14 +168,14 @@ namespace Kyoo
 			if (!Directory.Exists(path))
 				Directory.CreateDirectory(path);
 			SEnvironment.CurrentDirectory = path;
-			
+
 			if (!File.Exists(JsonConfigPath))
 				File.Copy(Path.Join(AppDomain.CurrentDomain.BaseDirectory, JsonConfigPath), JsonConfigPath);
 		}
-
-		/// <summary>
-		/// An useless class only used to have a logger in the main.
-		/// </summary>
-		private class Application {}
 	}
+	
+	/// <summary>
+	/// An useless class only used to have a logger in the main.
+	/// </summary>
+	internal class Application {}
 }

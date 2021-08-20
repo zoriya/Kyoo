@@ -78,6 +78,7 @@ namespace Kyoo.Host.Windows
 			{
 				_options = options;
 
+				AppDomain.CurrentDomain.ProcessExit += (_, _) => Dispose();
 				Application.ApplicationExit += (_, _) => Dispose();
 
 				_icon = new NotifyIcon();
@@ -111,8 +112,8 @@ namespace Kyoo.Host.Windows
 			/// <inheritdoc />
 			protected override void Dispose(bool disposing)
 			{
-				base.Dispose(disposing);
 				_icon.Visible = false;
+				base.Dispose(disposing);
 				_icon.Dispose();
 			}
 

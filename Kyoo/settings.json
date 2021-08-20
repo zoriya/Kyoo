@@ -30,12 +30,14 @@
   },
 
   "logging": {
-    "logLevel": {
-      "default": "Warning",
-      "Microsoft": "Warning",
-      "Microsoft.Hosting.Lifetime": "Information",
-      "Microsoft.EntityFrameworkCore": "None",
-      "Kyoo": "Trace"
+    "MinimumLevel": {
+      "Default": "Warning",
+      "Override": {
+        "Microsoft": "Warning",
+        "Microsoft.Hosting.Lifetime": "Information",
+        "Microsoft.EntityFrameworkCore": "Fatal",
+        "Kyoo": "Verbose"
+      }
     }
   },
 
