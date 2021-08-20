@@ -70,10 +70,11 @@ namespace Kyoo
 			builder.RegisterType<LocalFileSystem>().As<IFileSystem>().SingleInstance();
 			builder.RegisterType<HttpFileSystem>().As<IFileSystem>().SingleInstance();
 			
+			builder.RegisterType<TaskManager>().As<ITaskManager>().As<IHostedService>().SingleInstance();
+
 			builder.RegisterType<ConfigurationManager>().As<IConfigurationManager>().SingleInstance();
 			builder.RegisterType<Transcoder>().As<ITranscoder>().SingleInstance();
 			builder.RegisterType<ThumbnailsManager>().As<IThumbnailsManager>().InstancePerLifetimeScope();
-			builder.RegisterType<TaskManager>().As<ITaskManager>().SingleInstance();
 			builder.RegisterType<LibraryManager>().As<ILibraryManager>().InstancePerLifetimeScope();
 			builder.RegisterType<RegexIdentifier>().As<IIdentifier>().SingleInstance();
 			
@@ -135,8 +136,6 @@ namespace Kyoo
 			});
 			
 			services.AddHttpClient();
-			
-			services.AddHostedService(x => x.GetService<ITaskManager>() as TaskManager);
 		}
 
 		/// <inheritdoc />
