@@ -8,7 +8,7 @@ using Autofac;
 using Kyoo.Models.Options;
 using Microsoft.Extensions.Options;
 
-namespace Kyoo.Host.Windows
+namespace Kyoo.WindowsHost
 {
 	/// <summary>
 	/// A singleton that add an notification icon on the window's toolbar.

@@ -1,21 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project>
 	<PropertyGroup>
-		<OutputType>WinExe</OutputType>
-		<TargetFramework>net5.0-windows</TargetFramework>
-		<UseWindowsForms>true</UseWindowsForms>
-		<RootNamespace>Kyoo.Host.Windows</RootNamespace>
+		<IsWindows Condition="$([MSBuild]::IsOSPlatform('Windows'))">true</IsWindows>
 	</PropertyGroup>
-
+	
+	<Import Project="Kyoo.WindowsHost.target" Condition="$(IsWindows) == true" />
+	<Import Project="Kyoo.WindowsHost.linux.target" Condition="$(IsWindows) != true" />
+	
 	<ItemGroup>
-		<ProjectReference Include="../Kyoo/Kyoo.csproj" />
+		<None Remove="*.target" />
 	</ItemGroup>
-
-	<ItemGroup>
-	  <None Remove="kyoo.ico" />
-	  <Content Include="kyoo.ico">
-	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	</ItemGroup>
-
 </Project>

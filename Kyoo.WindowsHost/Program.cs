@@ -4,7 +4,7 @@ using Autofac;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Win32;
 
-namespace Kyoo.Host.Windows
+namespace Kyoo.WindowsHost
 {
 	public static class Program
 	{

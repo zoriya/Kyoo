@@ -1,0 +1,12 @@
+﻿<Project>
+	<!-- Project file used instead of the default csproj when the host system is not windows. This only skip the build. -->
+	
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<NoWarn>NU1503</NoWarn>
+	</PropertyGroup>
+
+	<Target Name="Build">
+		<Message Importance="high" Text="Detected current operating system is not windows, skipping WindowsHost build." />
+	</Target>
+</Project>

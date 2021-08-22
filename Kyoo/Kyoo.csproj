@@ -18,9 +18,13 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<TranscoderBinary Condition="'$(IsWindows)' == 'true'">transcoder.dll</TranscoderBinary>
-		<TranscoderBinary Condition="'$(IsOSX)' == 'true'">libtranscoder.dylib</TranscoderBinary>
-		<TranscoderBinary Condition="'$(IsLinux)' == 'true'">libtranscoder.so</TranscoderBinary>
+		<TranscoderBinary Condition="$(IsWindows) == true">transcoder.dll</TranscoderBinary>
+		<TranscoderBinary Condition="$(IsOSX) == true">libtranscoder.dylib</TranscoderBinary>
+		<TranscoderBinary Condition="$(IsLinux) == true">libtranscoder.so</TranscoderBinary>
+		
+		<TranscoderBuild Condition="$(IsWindows) == true">$(TranscoderRoot)buildWin</TranscoderBuild>
+		<TranscoderBuild Condition="$(IsOSX) == true">$(TranscoderRoot)buildOSX</TranscoderBuild>
+		<TranscoderBuild Condition="$(IsLinux) == true">$(TranscoderRoot)build</TranscoderBuild>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -48,13 +52,13 @@
 		<ProjectReference Include="../Kyoo.WebApp/Kyoo.WebApp.csproj" />
 	</ItemGroup>
 
-	<Target Name="BuildTranscoder" BeforeTargets="BeforeBuild" Condition="'$(SkipTranscoder)' != 'true' And !Exists('$(TranscoderRoot)/build/$(TranscoderBinary)')">
-		<Exec WorkingDirectory="$(TranscoderRoot)" Condition="'$(IsWindows)' != 'true'" Command="mkdir -p build %26%26 cd build %26%26 cmake .. %26%26 make -j" />
-		<Exec WorkingDirectory="$(TranscoderRoot)" Condition="'$(IsWindows)' == 'true'" Command="(if not exist build mkdir build) %26%26 cd build %26%26 cmake .. -G &quot;NMake Makefiles&quot; %26%26 nmake" />
+	<Target Name="BuildTranscoder" BeforeTargets="BeforeBuild" Condition="'$(SkipTranscoder)' != 'true' And !Exists('$(TranscoderBuild)/$(TranscoderBinary)')">
+		<Exec Command="mkdir -p $(TranscoderBuild) %26%26 cd $(TranscoderBuild) %26%26 cmake $(TranscoderRoot) %26%26 make -j" Condition="'$(IsWindows)' != 'true'" />
+		<Exec Command="(if not exist build mkdir $(TranscoderBuild)) %26%26 cd $(TranscoderBuild) %26%26 cmake $(TranscoderRoot) -G &quot;NMake Makefiles&quot; %26%26 nmake" Condition="'$(IsWindows)' == 'true'" />
 	</Target>
 	
 	<ItemGroup Condition="'$(SkipTranscoder)' != 'true'">
-		<None Include="$(TranscoderRoot)/build/$(TranscoderBinary)">
+		<None Include="$(TranscoderBuild)/$(TranscoderBinary)">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Visible>false</Visible>
 		</None>
