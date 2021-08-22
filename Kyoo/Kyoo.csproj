@@ -59,4 +59,8 @@
 			<Visible>false</Visible>
 		</None>
 	</ItemGroup>
+	
+	<ItemGroup>
+		<Content Include="../LICENSE" CopyToOutputDirectory="Always" Visible="false" />
+	</ItemGroup>
 </Project>

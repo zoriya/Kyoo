@@ -1,6 +1,8 @@
+using System;
 using System.Threading.Tasks;
 using Autofac;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Win32;
 
 namespace Kyoo.Host.Windows
 {
@@ -13,6 +15,10 @@ namespace Kyoo.Host.Windows
 		/// </summary>
 		public static async Task Main(string[] args)
 		{
+			object dataDir = Registry.GetValue(@"HKEY_LOCAL_MACHINE\Software\SDG\Kyoo\Settings", "DataDir", null)
+				?? Registry.GetValue(@"HKEY_CURRENT_USER\Software\SDG\Kyoo\Settings", "DataDir", null);
+			if (dataDir is string data)
+				Environment.SetEnvironmentVariable("KYOO_DATA_DIR", data);
 			Kyoo.Program.SetupDataDir(args);
 
 			IHost host = Kyoo.Program.CreateWebHostBuilder(args)

@@ -23,7 +23,7 @@ namespace Kyoo.Host.Windows
 		/// <summary>
 		/// The thread where the trait is running.
 		/// </summary>
-		private Thread? _thread;
+		private Thread _thread;
 		
 		
 		/// <summary>

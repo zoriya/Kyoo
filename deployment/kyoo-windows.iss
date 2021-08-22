@@ -9,12 +9,12 @@ AppUpdatesURL=https://github.com/AnonymusRaccoon/Kyoo
 DefaultDirName={commonpf}\Kyoo
 DisableProgramGroupPage=yes
 LicenseFile={#kyoo}\LICENSE
-OutputBaseFilename=kyoo-windows
 SetupIconFile={#kyoo}\wwwroot\favicon.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
 AppCopyright=GPL-3.0
+ArchitecturesInstallIn64BitMode=x64 arm64 ia64
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -26,14 +26,41 @@ Name: "none"; Description: "Do not start automatically"; GroupDescription: "Star
 
 [Files]
 Source: "{#kyoo}\Kyoo.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#kyoo}\Kyoo.WindowsHost.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#kyoo}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
+[Registry]
+Root: HKA; Subkey: "Software\SDG"; Flags: uninsdeletekeyifempty
+Root: HKA; Subkey: "Software\SDG\Kyoo"; Flags: uninsdeletekey
+Root: HKA; Subkey: "Software\SDG\Kyoo\Settings"; ValueType: string; ValueName: "DataDir"; ValueData: "{code:GetDataDir}"
+
 [UninstallDelete]
-Type: filesandordirs; Name: "{commonappdata}\Kyoo"
+Type: filesandordirs; Name: "{code:GetDataDir}"
 
 [Icons]
-Name: "{autoprograms}\Kyoo"; Filename: "{app}\Kyoo.exe"
-Name: "{autodesktop}\Kyoo"; Filename: "{app}\Kyoo.exe"; Tasks: desktopicon
+Name: "{autoprograms}\Kyoo"; Filename: "{app}\Kyoo.WindowsHost.exe"
+Name: "{autoprograms}\Kyoo (Console)"; Filename: "{app}\Kyoo.exe"
+Name: "{autodesktop}\Kyoo"; Filename: "{app}\Kyoo.WindowsHost.exe"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\Kyoo.exe"; Description: "{cm:LaunchProgram,Kyoo}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\Kyoo.WindowsHost.exe"; Description: "{cm:LaunchProgram,Kyoo}"; Flags: nowait postinstall skipifsilent
+
+[Code]
+var
+  DataDirPage: TInputDirWizardPage;
+
+procedure InitializeWizard;
+begin
+  DataDirPage := CreateInputDirPage(wpSelectDir,
+    'Choose Data Location', 'Choose the folder in which to install the Kyoo data',
+    'The installer will set the following folder for Kyoo. To install in a different folder, click Browse and select another folder.' + 
+    'Please make sure the folder exists and is accessible. Do not choose the server install folder. Click Next to continue.',
+    False, '');
+  DataDirPage.Add('');
+  DataDirPage.Values[0] := GetPreviousData('DataDir', 'C:\ProgramData\Kyoo');
+end;
+
+function GetDataDir(Param: String): String;
+begin
+  Result := DataDirPage.Values[0];
+end;

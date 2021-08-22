@@ -65,13 +65,13 @@ namespace Kyoo
 		{
 			try
 			{
-				host.Services.GetRequiredService<ILogger<Application>>()
-					.LogInformation("Running as {Name}", System.Environment.UserName);
+				Log.Information("Running as {Name}", System.Environment.UserName);
+				Log.Information("Data directory: {DataDirectory}", System.Environment.CurrentDirectory);
 				await host.RunAsync();
 			}
 			catch (Exception ex)
 			{
-				host.Services.GetRequiredService<ILogger<Application>>().LogCritical(ex, "Unhandled exception");
+				Log.Fatal(ex, "Unhandled exception");
 			}
 		}
 
