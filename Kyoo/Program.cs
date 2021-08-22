@@ -111,13 +111,18 @@ namespace Kyoo
 			}
 
 			const string template =
-				"[{@t:HH:mm:ss} {@l:u3} {Substring(SourceContext, LastIndexOf(SourceContext, '.') + 1), 15} ({@i:10})] " 
-				+ "{@m}{#if not EndsWith(@m, '\n')}\n{#end}{@x}";
+				"[{@t:HH:mm:ss} {@l:u3} {Substring(SourceContext, LastIndexOf(SourceContext, '.') + 1), 15} "
+				+ "({@i:0000000000})] {@m}{#if not EndsWith(@m, '\n')}\n{#end}{@x}";
 
 			builder
 				.WriteTo.Console(new ExpressionTemplate(template, theme: TemplateTheme.Code))
 				.WriteTo.Debug()
-				.WriteTo.RollingFile(new ExpressionTemplate(template), "logs/log-{Date}.log")
+				.WriteTo.File(
+					path: "logs/log-.log",
+					formatter: new ExpressionTemplate(template),
+					rollingInterval: RollingInterval.Day,
+					rollOnFileSizeLimit: true
+				)
 				.Enrich.WithThreadId()
 				.Enrich.FromLogContext();
 		}

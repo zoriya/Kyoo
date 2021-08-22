@@ -95,6 +95,9 @@ namespace Kyoo.Host.Windows
 				_icon.ContextMenuStrip = new ContextMenuStrip();
 				_icon.ContextMenuStrip.Items.AddRange(new ToolStripItem[]
 				{
+					new ToolStripMenuItem("Open browser", null, (_, _) => { _StartBrowser(); }),
+					new ToolStripMenuItem("Open logs", null, (_, _) => { Process.Start("explorer.exe", Environment.CurrentDirectory); }),
+					new ToolStripSeparator(),
 					new ToolStripMenuItem("Exit", null, (_, _) => { Environment.Exit(0); })
 				});
 			}
