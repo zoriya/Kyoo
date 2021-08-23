@@ -21,10 +21,6 @@
 		<TranscoderBinary Condition="$(IsWindows) == true">transcoder.dll</TranscoderBinary>
 		<TranscoderBinary Condition="$(IsOSX) == true">libtranscoder.dylib</TranscoderBinary>
 		<TranscoderBinary Condition="$(IsLinux) == true">libtranscoder.so</TranscoderBinary>
-		
-		<TranscoderBuild Condition="$(IsWindows) == true">$(TranscoderRoot)buildWin</TranscoderBuild>
-		<TranscoderBuild Condition="$(IsOSX) == true">$(TranscoderRoot)buildOSX</TranscoderBuild>
-		<TranscoderBuild Condition="$(IsLinux) == true">$(TranscoderRoot)build</TranscoderBuild>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -52,7 +48,7 @@
 		<ProjectReference Include="../Kyoo.WebApp/Kyoo.WebApp.csproj" />
 	</ItemGroup>
 
-	<Target Name="BuildTranscoder" BeforeTargets="BeforeBuild" Condition="'$(SkipTranscoder)' != 'true' And !Exists('$(TranscoderBuild)/$(TranscoderBinary)')">
+	<Target Name="BuildTranscoder" BeforeTargets="BeforeBuild" Condition="'$(SkipTranscoder)' != 'true' And !Exists('$(TranscoderRoot)/build/$(TranscoderBinary)')">
 		<Exec Command="mkdir -p build %26%26 cd build %26%26 cmake .. %26%26 make -j" WorkingDirectory="$(TranscoderRoot)" Condition="'$(IsWindows)' != 'true'" />
 		<Exec Command="(if not exist build mkdir build) %26%26 cd build %26%26 cmake .. -G &quot;NMake Makefiles&quot; %26%26 nmake" WorkingDirectory="$(TranscoderRoot)" Condition="'$(IsWindows)' == 'true'" />
 	</Target>

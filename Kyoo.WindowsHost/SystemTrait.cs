@@ -5,6 +5,7 @@ using System.IO;
 using System.Threading;
 using System.Windows.Forms;
 using Autofac;
+using Kyoo.Abstractions.Controllers;
 using Kyoo.Models.Options;
 using Microsoft.Extensions.Options;
 
@@ -15,6 +16,11 @@ namespace Kyoo.WindowsHost
 	/// </summary>
 	public sealed class SystemTrait : IStartable, IDisposable
 	{
+		/// <summary>
+		/// The application running Kyoo.
+		/// </summary>
+		private readonly IApplication _application;
+
 		/// <summary>
 		/// The options containing the <see cref="BasicOptions.PublicUrl"/>.
 		/// </summary>
@@ -29,16 +35,18 @@ namespace Kyoo.WindowsHost
 		/// <summary>
 		/// Create a new <see cref="SystemTrait"/>.
 		/// </summary>
+		/// <param name="application">The application running Kyoo.</param>
 		/// <param name="options">The options to use.</param>
-		public SystemTrait(IOptions<BasicOptions> options)
+		public SystemTrait(IApplication application, IOptions<BasicOptions> options)
 		{
+			_application = application;
 			_options = options;
 		}
 		
 		/// <inheritdoc />
 		public void Start()
 		{
-			_thread = new Thread(() => InternalSystemTrait.Run(_options))
+			_thread = new Thread(() => InternalSystemTrait.Run(_application, _options))
 			{
 				IsBackground = true
 			};
@@ -48,8 +56,7 @@ namespace Kyoo.WindowsHost
 		/// <inheritdoc />
 		public void Dispose()
 		{
-			// TODO not sure that the trait is ended and that it does shutdown but the only way to shutdown the
-			//      app anyway is via the Trait's Exit or a Signal so it's fine.
+			System.Windows.Forms.Application.Exit();
 			_thread?.Join();
 			_thread = null;
 		}
@@ -60,6 +67,11 @@ namespace Kyoo.WindowsHost
 		/// </summary>
 		private class InternalSystemTrait : ApplicationContext
 		{
+			/// <summary>
+			/// The application running Kyoo.
+			/// </summary>
+			private readonly IApplication _application;
+
 			/// <summary>
             /// The options containing the <see cref="BasicOptions.PublicUrl"/>.
             /// </summary>
@@ -73,13 +85,15 @@ namespace Kyoo.WindowsHost
 			/// <summary>
 			/// Create a new <see cref="InternalSystemTrait"/>. Used only by <see cref="Run"/>.
 			/// </summary>
+			/// <param name="application">The application running Kyoo.</param>
 			/// <param name="options">The option containing the public url.</param>
-			private InternalSystemTrait(IOptions<BasicOptions> options)
+			private InternalSystemTrait(IApplication application, IOptions<BasicOptions> options)
 			{
+				_application = application;
 				_options = options;
 
 				AppDomain.CurrentDomain.ProcessExit += (_, _) => Dispose();
-				Application.ApplicationExit += (_, _) => Dispose();
+				System.Windows.Forms.Application.ApplicationExit += (_, _) => Dispose();
 
 				_icon = new NotifyIcon();
 				_icon.Text = "Kyoo";
@@ -96,20 +110,21 @@ namespace Kyoo.WindowsHost
 				_icon.ContextMenuStrip.Items.AddRange(new ToolStripItem[]
 				{
 					new ToolStripMenuItem("Open browser", null, (_, _) => { _StartBrowser(); }),
-					new ToolStripMenuItem("Open logs", null, (_, _) => { Process.Start("explorer.exe", Environment.CurrentDirectory); }),
+					new ToolStripMenuItem("Open logs", null, (_, _) => { _OpenLogs(); }),
 					new ToolStripSeparator(),
-					new ToolStripMenuItem("Exit", null, (_, _) => { Environment.Exit(0); })
+					new ToolStripMenuItem("Exit", null, (_, _) => { _application.Shutdown(); })
 				});
 			}
 
 			/// <summary>
 			/// Run the trait in the current thread, this method does not return while the trait is running.
 			/// </summary>
+			/// <param name="application">The application running Kyoo.</param>
 			/// <param name="options">The options to pass to <see cref="InternalSystemTrait"/>.</param>
-			public static void Run(IOptions<BasicOptions> options)
+			public static void Run(IApplication application, IOptions<BasicOptions> options)
 			{
-				using InternalSystemTrait trait = new(options);
-				Application.Run(trait);
+				using InternalSystemTrait trait = new(application, options);
+				System.Windows.Forms.Application.Run(trait);
 			}
 
 			/// <inheritdoc />
@@ -133,6 +148,15 @@ namespace Kyoo.WindowsHost
 					}
 				};
 				browser.Start();
+			}
+
+			/// <summary>
+			/// Open the log directory in windows's explorer.
+			/// </summary>
+			private void _OpenLogs()
+			{
+				string logDir = Path.Combine(_application.GetDataDirectory(), "logs");
+				Process.Start("explorer.exe", logDir);
 			}
 		}
 	}

@@ -17,4 +17,5 @@
 	<Target Name="Clean" />
 	<Target Name="Pack" />
 	<Target Name="Restore" />
+	<Target Name="Publish" />
 </Project>

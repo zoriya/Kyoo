@@ -107,25 +107,22 @@ jobs:
       - name: Create the package structure
         run: |
           sudo mkdir -p pkg/usr/lib/
-          sudo mkdir -p pkg/DEBIAN
           sudo cp -r --no-preserve ownership dist pkg/usr/lib/kyoo
           sudo install -Dm 644 deployment/kyoo.service -t pkg/usr/lib/systemd/system/
           sudo install -Dm 644 deployment/kyoo.sysusers pkg/usr/lib/sysusers.d/kyoo.conf
           sudo install -Dm 644 deployment/kyoo.tmpfiles pkg/usr/lib/tmpfiles.d/kyoo.conf
-          sudo install -Dm 755 deployment/postinst -t pkg/DEBIAN/
       - uses: jiro4989/build-deb-action@v2
         with:
           package: kyoo
           package_root: pkg
           maintainer: Zoe Roux <zoe.roux@sdg.moe>
           version: ${{env.version}}
-          depends: "postgresql, libavutil-dev, libavcodec-dev, libavformat-dev"
+          depends: "libavutil-dev, libavcodec-dev, libavformat-dev"
           arch: amd64
           desc: ${{env.description}}
       - name: Build rpm package
         run: |
           mkdir out
-          sudo rm -rf pkg/DEBIAN
           rpmbuild -bb --buildroot $(pwd)/out --build-in-place --define "_rpmdir $(pwd)/rpm" deployment/kyoo.spec
       - name: Prepare arch package
         run: |
