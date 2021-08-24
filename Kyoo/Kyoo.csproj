@@ -10,6 +10,11 @@
 		<StartupObject>Kyoo.Program</StartupObject>
 		<LangVersion>default</LangVersion>
 	</PropertyGroup>
+		
+	<PropertyGroup Condition="$(CustomRuntime) == true">
+		<SelfContained>$(SelfContainedValue)</SelfContained>
+		<RuntimeIdentifier>$(RuntimeIdentifierValue)</RuntimeIdentifier>
+	</PropertyGroup>
 
 	<PropertyGroup>
 		<IsWindows Condition="$([MSBuild]::IsOSPlatform('Windows'))">true</IsWindows>

@@ -11,7 +11,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="../Kyoo/Kyoo.csproj" />
+		<ProjectReference Include="../Kyoo/Kyoo.csproj" Properties="CustomRuntime=true;SelfContainedValue=$(SelfContained);RuntimeIdentifierValue=$(RuntimeIdentifier)" />
 	</ItemGroup>
 
 	<ItemGroup>
