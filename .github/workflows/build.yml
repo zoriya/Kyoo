@@ -43,17 +43,17 @@ jobs:
       - name: Enabling windows compilations tools
         if: matrix.artifact == 'windows'
         uses: ilammy/msvc-dev-cmd@v1
-      - name: Build the app
+      - name: Select the project to build
         shell: bash
+        run: echo "PROJECT=$([ "${{runner.os}}" == "Windows" ] && echo Kyoo.WindowsHost || echo Kyoo)" >> $GITHUB_ENV
+      - name: Build the app
         env: 
           INCLUDE: ${{env.INCLUDE}};C:\Program Files\FFmpeg\include
           LIB: ${{env.LIB}};C:\Program Files\FFmpeg\lib
           LIBPATH: ${{env.LIBPATH}};C:\Program Files\FFmpeg\lib
           CFLAGS: -I/usr/local/include
           LDFLAGS: -L/usr/local/lib
-        run: |
-          project=$([ "${{runner.os}}" == "Windows" ] && echo Kyoo.WindowsHost || echo Kyoo)
-          dotnet publish -r ${{matrix.runtime}} -c Release -o dist $project
+        run: dotnet publish -r ${{matrix.runtime}} -c Release -o dist ${{env.PROJECT}}
       - name: Compression output
         shell: bash
         run: |
