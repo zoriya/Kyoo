@@ -73,9 +73,33 @@ jobs:
           path: |
             *.zip
             *.tar.gz
-          
+
+  windows_release:
+    name: Create windows release
+    runs-on: windows-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v1
+      - name: Download windows build
+        uses: actions/download-artifact@v2
+        with:
+          name: kyoo_windows
+          path: artifact
+      - name: Unzip windows files
+        run: mkdir dist_win && 7z x artifact/kyoo_windows.zip -odist_win
+      - name: Install Inno Setup
+        run: |
+          curl -L https://jrsoftware.org/download.php/is.exe > innosetup.exe
+          ./innosetup.exe /VERYSILENT /SUPPRESSMSGBOXES /Log=log.txt || (cat log.txt && exit 1)
+      - name: Create windows installer
+        run: iscc -Dkyoo=$(realpath dist_win) -O./ -Fkyoo-windows deployment/kyoo-windows.iss
+      - uses: actions/upload-artifact@v2
+        with:
+          name: kyoo_windows
+          path: ./*.exe
+
   release:
-    name: Create windows, debian, rpm & arch releases
+    name: Create debian, rpm & arch releases
     runs-on: ubuntu-latest
     needs: build
     env:
@@ -90,19 +114,6 @@ jobs:
           path: artifact
       - name: Unzip the published files.
         run: mkdir dist && tar -C dist -xzf artifact/kyoo_linux.tar.gz
-      - name: Download windows build
-        uses: actions/download-artifact@v2
-        with:
-          name: kyoo_windows
-          path: artifact
-      - name: Unzip windows files
-        run: mkdir dist_win && 7z x artifact/kyoo_windows.zip -odist_win
-      - name: Install Inno Setup
-        run: |
-          curl -L https://jrsoftware.org/download.php/is.exe > innosetup.exe
-          ./innosetup.exe /VERYSILENT /SUPPRESSMSGBOXES /Log=log.txt || (cat log.txt && exit 1)
-      - name: Create windows installer
-        run: iscc -Dkyoo=$(realpath dist_win) -O./ -Fkyoo-windows deployment/kyoo-windows.iss
       - name: Create the package structure
         run: |
           sudo mkdir -p pkg/usr/lib/
@@ -133,10 +144,6 @@ jobs:
         with:
           pkgdir: deployment
           namcapDisable: true
-      - uses: actions/upload-artifact@v2
-        with:
-          name: kyoo_windows
-          path: ./*.exe
       - uses: actions/upload-artifact@v2
         with:
           name: kyoo_rpm
