@@ -1,4 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project>
+	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+	
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
 		<TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
@@ -33,22 +35,19 @@
 		</Content>
 	</ItemGroup>
 
-	<Target Name="PublishRunWebpack" BeforeTargets="BeforeBuild;PrepareForPublish;GetCopyToOutputDirectoryItems" 
-			Condition="'$(SkipWebApp)' != 'true' And '$(Configuration)' != 'Debug'">
+	<Target Name="RunWebpack" Condition="'$(SkipWebApp)' != 'true'">
 		<Exec Command="node --version" ContinueOnError="true">
 			<Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
 		</Exec>
 		<Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />
 		
 		<Message Importance="high" Text="Restoring dependencies using 'npm'. This may take several minutes..." />
-		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
-		<Exec WorkingDirectory="$(SpaRoot)" Command="npm run build -- --prod" />
-		<Exec WorkingDirectory="$(SpaRoot)" Command="npm run build:ssr -- --prod" Condition="'$(BuildServerSideRenderer)' == 'true'" />
+		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" Condition="'$(Configuration)' != 'Debug' Or !Exists('$(SpaRoot)node_modules')" />
+		<Exec WorkingDirectory="$(SpaRoot)" Command="npm run build -- --prod" Condition="'$(Configuration)' != 'Debug'" />
+		<Exec WorkingDirectory="$(SpaRoot)" Command="npm run build:ssr -- --prod" Condition="'$(Configuration)' != 'Debug' And '$(BuildServerSideRenderer)' == 'true'" />
 	</Target>
 
-	<Target Name="CopyFrontEndFiles" 
-			AfterTargets="PublishRunWebpack" BeforeTargets="BeforeBuild;PrepareForPublish;GetCopyToOutputDirectoryItems"
-			Condition="'$(Configuration)' != 'Debug'">
+	<Target Name="CopyFrontEndFiles" AfterTargets="RunWebpack" BeforeTargets="GetCopyToOutputDirectoryItems" Condition="'$(Configuration)' != 'Debug'">
 		<ItemGroup>
 			<NewContent Include="$(SpaRoot)dist/**; $(SpaRoot)dist-server/**" Visible="false" />
 			<Content Include="@(NewContent)">
@@ -58,18 +57,17 @@
 		</ItemGroup>
 	</Target>
 
-	<Target Name="DebugEnsureNodeEnv" BeforeTargets="Build"
-			Condition="'$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') And '$(SkipWebApp)' != 'true'">
-		<Exec Command="node --version" ContinueOnError="true">
-			<Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
-		</Exec>
-		<Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />
-		<Message Importance="high" Text="Restoring dependencies using 'npm'. This may take several minutes..." />
-		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
-	</Target>
-
 	<Target Name="SymlinkViews" AfterTargets="Build" Condition="'$(SkipWebApp)' != 'true' And $(Configuration) == 'Debug'">
 		<Exec WorkingDirectory="$(ProjectDir)../Kyoo" Command="ln -fs '$(ProjectDir)' $(OutDir)" Condition="$(OS) == 'Unix'" />
 		<Exec WorkingDirectory="$(ProjectDir)../Kyoo" Command="if not exist  %22$(OutDir)$(ProjectName)%22 mklink /D %22$(OutDir)$(ProjectName)%22 %22$(ProjectDir)%22" Condition="$(OS) != 'Unix'" />
 	</Target>
+
+	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+
+	<PropertyGroup>
+		<BuildDependsOn>
+			RunWebpack;
+			$(BuildDependsOn)
+		</BuildDependsOn>
+	</PropertyGroup>
 </Project>
