@@ -96,7 +96,7 @@ jobs:
           name: kyoo_windows
           path: artifact
       - name: Unzip windows files
-        run: mkdir dist_win && 7z e artifact/kyoo_windows.zip -o dist_win
+        run: mkdir dist_win && 7z x artifact/kyoo_windows.zip -odist_win
       - name: Install Inno Setup
         run: |
           curl -L https://jrsoftware.org/download.php/is.exe > innosetup.exe
