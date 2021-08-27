@@ -26,7 +26,7 @@ export class ItemsUtils
 
 		if (!("startAir" in item))
 			return "";
-		if (item.endAir && item.startAir !== item.endAir)
+		if (item.endAir && item.startAir?.getFullYear() !== item.endAir.getFullYear())
 			return `${item.startAir.getFullYear()} - ${item.endAir.getFullYear()}`;
 		return item.startAir?.getFullYear().toString();
 	}
