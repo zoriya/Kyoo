@@ -23,7 +23,8 @@
 						"polyfills": "src/polyfills.ts",
 						"tsConfig": "tsconfig.json",
 						"aot": false,
-						"buildOptimizer": false,
+						"buildOptimizer": false, 
+						"preserveSymlinks": true,
 						"assets": [
 							"src/assets",
 							{
