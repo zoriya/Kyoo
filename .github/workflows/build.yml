@@ -91,7 +91,7 @@ jobs:
         shell: cmd
         run: |
           curl -L https://jrsoftware.org/download.php/is.exe > innosetup.exe
-          ./innosetup.exe /VERYSILENT /SUPPRESSMSGBOXES /Log=log.txt || (cat log.txt && exit 1)
+          innosetup.exe /VERYSILENT /SUPPRESSMSGBOXES /Log=log.txt || (cat log.txt && exit 1)
       - name: Create windows installer
         run: iscc -Dkyoo=$(realpath dist_win) -O./ -Fkyoo-windows deployment/kyoo-windows.iss
       - uses: actions/upload-artifact@v2
