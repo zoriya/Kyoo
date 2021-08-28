@@ -10,7 +10,6 @@ license=("GPLv3")
 groups=()
 depends=("dotnet-runtime>=5" "aspnet-runtime>=5" "ffmpeg")
 makedepends=("dotnet-sdk>=5" "cmake" "gcc" "make" "npm" "git")
-install="kyoo.install"
 source=("git+https://github.com/AnonymusRaccoon/Kyoo" #tag=v${pkgver}
 	"kyoo.service"
 	"kyoo.sysusers"
