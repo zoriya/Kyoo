@@ -35,7 +35,7 @@
 		</Content>
 	</ItemGroup>
 
-	<Target Name="RunWebpack" Condition="'$(SkipWebApp)' != 'true'">
+	<Target Name="RunWebpack" Condition="'$(SkipWebApp)' != 'true' And '$(CustomRuntime)' != 'true'">
 		<Exec Command="node --version" ContinueOnError="true">
 			<Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
 		</Exec>
