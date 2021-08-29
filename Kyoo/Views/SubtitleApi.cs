@@ -51,7 +51,7 @@ namespace Kyoo.Api
 		{
 			string extension = null;
 			
-			if (slug.Count(x => x == '.') == 2)
+			if (slug.Count(x => x == '.') == 3)
 			{
 				int idx = slug.LastIndexOf('.');
 				extension = slug[(idx + 1)..];
