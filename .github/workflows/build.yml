@@ -97,8 +97,8 @@ jobs:
         run: iscc -Dkyoo=$(realpath dist_win) -O./ -Fkyoo-windows deployment/kyoo-windows.iss
       - uses: actions/upload-artifact@v2
         with:
-          name: kyoo_windows
-          path: ./*.exe
+          name: kyoo_windows_installer
+          path: ./kyoo-windows.exe
 
   release:
     name: Create debian, rpm & arch releases

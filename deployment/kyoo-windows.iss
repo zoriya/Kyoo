@@ -41,6 +41,7 @@ Type: filesandordirs; Name: "{code:GetDataDir}"
 Name: "{autoprograms}\Kyoo"; Filename: "{app}\Kyoo.WindowsHost.exe"
 Name: "{autoprograms}\Kyoo (Console)"; Filename: "{app}\Kyoo.exe"
 Name: "{autodesktop}\Kyoo"; Filename: "{app}\Kyoo.WindowsHost.exe"; Tasks: desktopicon
+Name: "{autostartup}\Kyoo"; Filename: "{app}\Kyoo.WindowsHost.exe"; Tasks: startupShortcut
 
 [Run]
 Filename: "{app}\Kyoo.WindowsHost.exe"; Description: "{cm:LaunchProgram,Kyoo}"; Flags: nowait postinstall skipifsilent
