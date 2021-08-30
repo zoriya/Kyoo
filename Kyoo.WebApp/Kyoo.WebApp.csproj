@@ -36,7 +36,7 @@
 		</Content>
 	</ItemGroup>
 
-	<Target Name="NpmInstall" BeforeTargets="RunWebpack" Inputs="$(SpaRoot)/package.json" Outputs="$(NpmStamp)">
+	<Target Name="NpmInstall" BeforeTargets="RunWebpack" Inputs="$(SpaRoot)/package.json" Outputs="$(NpmStamp)" Condition="$(SkipWebApp) != true">
 		<Exec Command="node --version" ContinueOnError="true">
 			<Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
 		</Exec>
