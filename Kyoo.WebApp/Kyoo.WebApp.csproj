@@ -8,6 +8,7 @@
 		<IsPackable>false</IsPackable>
 		<DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules/**</DefaultItemExcludes>
 		<SpaRoot>Front/</SpaRoot>
+		<NpmStamp>$(SpaRoot)node_modules/.install-stamp</NpmStamp>
 
 		<!-- Set this to true if you enable server-side prerendering -->
 		<BuildServerSideRenderer>false</BuildServerSideRenderer>
@@ -35,16 +36,20 @@
 		</Content>
 	</ItemGroup>
 
-	<Target Name="RunWebpack" Condition="'$(SkipWebApp)' != 'true' And '$(CustomRuntime)' != 'true'">
+	<Target Name="NpmInstall" BeforeTargets="RunWebpack" Inputs="$(SpaRoot)/package.json" Outputs="$(NpmStamp)">
 		<Exec Command="node --version" ContinueOnError="true">
 			<Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
 		</Exec>
 		<Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />
 		
 		<Message Importance="high" Text="Restoring dependencies using 'npm'. This may take several minutes..." />
-		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" Condition="'$(Configuration)' != 'Debug' Or !Exists('$(SpaRoot)node_modules')" />
-		<Exec WorkingDirectory="$(SpaRoot)" Command="npm run build -- --prod" Condition="'$(Configuration)' != 'Debug'" />
-		<Exec WorkingDirectory="$(SpaRoot)" Command="npm run build:ssr -- --prod" Condition="'$(Configuration)' != 'Debug' And '$(BuildServerSideRenderer)' == 'true'" />
+		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
+		<Touch Files="$(NpmStamp)" AlwaysCreate="true" />
+	</Target>
+
+	<Target Name="RunWebpack" Condition="'$(SkipWebApp)' != 'true' And '$(Configuration)' == 'Debug'">
+		<Exec WorkingDirectory="$(SpaRoot)" Command="npm run build -- --prod" />
+		<Exec WorkingDirectory="$(SpaRoot)" Command="npm run build:ssr -- --prod" Condition="'$(BuildServerSideRenderer)' == 'true'" />
 	</Target>
 
 	<Target Name="CopyFrontEndFiles" AfterTargets="RunWebpack" BeforeTargets="GetCopyToOutputDirectoryItems" Condition="'$(Configuration)' != 'Debug'">
@@ -66,6 +71,7 @@
 
 	<PropertyGroup>
 		<BuildDependsOn>
+			NpmInstall;
 			RunWebpack;
 			$(BuildDependsOn)
 		</BuildDependsOn>

@@ -11,11 +11,6 @@
 		<LangVersion>default</LangVersion>
 	</PropertyGroup>
 		
-	<PropertyGroup Condition="$(CustomRuntime) == true">
-		<SelfContained>$(SelfContainedValue)</SelfContained>
-		<RuntimeIdentifier>$(RuntimeIdentifierValue)</RuntimeIdentifier>
-	</PropertyGroup>
-
 	<PropertyGroup>
 		<IsWindows Condition="$([MSBuild]::IsOSPlatform('Windows'))">true</IsWindows>
 		<IsOSX Condition="$([MSBuild]::IsOSPlatform('OSX'))">true</IsOSX>
@@ -50,7 +45,7 @@
 		<ProjectReference Include="../Kyoo.Postgresql/Kyoo.Postgresql.csproj" />
 		<ProjectReference Include="../Kyoo.SqLite/Kyoo.SqLite.csproj" />
 		<ProjectReference Include="../Kyoo.Authentication/Kyoo.Authentication.csproj" />
-		<ProjectReference Include="../Kyoo.WebApp/Kyoo.WebApp.csproj" Properties="CustomRuntime=$(CustomRuntime)" />
+		<ProjectReference Include="../Kyoo.WebApp/Kyoo.WebApp.csproj" />
 	</ItemGroup>
 
 	<Target Name="BuildTranscoder" BeforeTargets="BeforeBuild" Condition="'$(SkipTranscoder)' != 'true' And !Exists('$(TranscoderRoot)/build/$(TranscoderBinary)')">
