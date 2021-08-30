@@ -3,8 +3,8 @@
 		<IsWindows Condition="$([MSBuild]::IsOSPlatform('Windows'))">true</IsWindows>
 	</PropertyGroup>
 	
-	<Import Project="Kyoo.WindowsHost.target" Condition="$(IsWindows) == true" />
-	<Import Project="Kyoo.WindowsHost.linux.target" Condition="$(IsWindows) != true" />
+	<Import Project="Kyoo.Host.WindowsTrait.target" Condition="$(IsWindows) == true" />
+	<Import Project="Kyoo.Host.WindowsTrait.linux.target" Condition="$(IsWindows) != true" />
 	
 	<ItemGroup>
 		<None Remove="*.target" />

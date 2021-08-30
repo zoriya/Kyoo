@@ -22,6 +22,11 @@ namespace Kyoo.Controllers
 		private readonly IConfiguration _configuration;
 
 		/// <summary>
+		/// The application running Kyoo, it is used to retrieve the configuration file.
+		/// </summary>
+		private readonly IApplication _application;
+
+		/// <summary>
 		/// The strongly typed list of options
 		/// </summary>
 		private readonly Dictionary<string, Type> _references;
@@ -31,9 +36,11 @@ namespace Kyoo.Controllers
 		/// </summary>
 		/// <param name="configuration">The configuration to use.</param>
 		/// <param name="references">The strongly typed option list.</param>
-		public ConfigurationManager(IConfiguration configuration, IEnumerable<ConfigurationReference> references)
+		/// <param name="application">The application running Kyoo, it is used to retrieve the configuration file.</param>
+		public ConfigurationManager(IConfiguration configuration, IEnumerable<ConfigurationReference> references, IApplication application)
 		{
 			_configuration = configuration;
+			_application = application;
 			_references = references.ToDictionary(x => x.Path, x => x.Type, StringComparer.OrdinalIgnoreCase);
 		}
 
@@ -131,7 +138,7 @@ namespace Kyoo.Controllers
 			IDictionary<string, object> configDic = config;
 			configDic[path] = value;
 			JObject obj = JObject.FromObject(config);
-			await using StreamWriter writer = new(Program.JsonConfigPath);
+			await using StreamWriter writer = new(_application.GetConfigFile());
 			await writer.WriteAsync(obj.ToString());
 		}
 		

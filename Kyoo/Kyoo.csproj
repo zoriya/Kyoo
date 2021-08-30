@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
@@ -7,7 +7,6 @@
 		<Company>SDG</Company>
 		<Authors>Zoe Roux</Authors>
 		<RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
-		<StartupObject>Kyoo.Program</StartupObject>
 		<LangVersion>default</LangVersion>
 	</PropertyGroup>
 		
@@ -55,10 +54,7 @@
 		<Exec WorkingDirectory="$(TranscoderRoot)" Condition="'$(IsWindows)' == 'true'" Command="(if not exist build mkdir build) %26%26 cd build %26%26 cmake .. -G &quot;NMake Makefiles&quot; %26%26 nmake" ContinueOnError="true">
 			<Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
 		</Exec>
-		<Error Condition="'$(ErrorCode)' != '0'" Text="An environement capable of building the transcoder was not found. Appropriate tools are not installed, not available in the $PATH or not correctly configured. To fix this you can ether:
- - Fix your tools
- - Skip the transcoder via the '-p:SkipTranscoder=true'
- - Download an already built transcoder and put it in ./Kyoo.Transcoder/build" />
+		<Error Condition="'$(ErrorCode)' != '0'" Text="An environement capable of building the transcoder was not found. Appropriate tools are not installed, not available in the $PATH or not correctly configured. To fix this you can ether:&#xA; - Fix your tools&#xA; - Skip the transcoder via the '-p:SkipTranscoder=true'&#xA; - Download an already built transcoder and put it in ./Kyoo.Transcoder/build" />
 	</Target>
 	
 	<ItemGroup Condition="'$(SkipTranscoder)' != 'true'">
@@ -70,5 +66,6 @@
 	
 	<ItemGroup>
 		<Content Include="../LICENSE" CopyToOutputDirectory="Always" Visible="false" />
+		<Content Include="settings.json" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 </Project>

@@ -9,7 +9,7 @@ using Kyoo.Abstractions.Controllers;
 using Kyoo.Models.Options;
 using Microsoft.Extensions.Options;
 
-namespace Kyoo.WindowsHost
+namespace Kyoo.Host.WindowsTrait
 {
 	/// <summary>
 	/// A singleton that add an notification icon on the window's toolbar.

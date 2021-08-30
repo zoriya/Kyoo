@@ -19,7 +19,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Tests", "tests\Kyoo.Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.WebApp", "Kyoo.WebApp\Kyoo.WebApp.csproj", "{2374D500-1ADB-4752-85DB-8BB0DDF5A8E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.WindowsHost", "Kyoo.WindowsHost\Kyoo.WindowsHost.csproj", "{98851001-40DD-46A6-94B3-2F8D90722076}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Host.WindowsTrait", "Kyoo.Host.WindowsTrait\Kyoo.Host.WindowsTrait.csproj", "{98851001-40DD-46A6-94B3-2F8D90722076}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Host.Console", "Kyoo.Host.Console\Kyoo.Host.Console.csproj", "{D8658BEA-8949-45AC-BEBB-A4FFC4F800F5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -75,5 +77,9 @@ Global
 		{98851001-40DD-46A6-94B3-2F8D90722076}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{98851001-40DD-46A6-94B3-2F8D90722076}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{98851001-40DD-46A6-94B3-2F8D90722076}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8658BEA-8949-45AC-BEBB-A4FFC4F800F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8658BEA-8949-45AC-BEBB-A4FFC4F800F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8658BEA-8949-45AC-BEBB-A4FFC4F800F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8658BEA-8949-45AC-BEBB-A4FFC4F800F5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

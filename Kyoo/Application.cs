@@ -38,6 +38,22 @@ namespace Kyoo
 		private CancellationTokenSource _tokenSource;
 
 		/// <summary>
+		/// The environment in witch Kyoo will run (ether "Production" or "Development"). 
+		/// </summary>
+		private readonly string _environment;
+
+		
+		/// <summary>
+		/// Create a new <see cref="Application"/> that will use the specified environment.
+		/// </summary>
+		/// <param name="environment">The environment to run in.</param>
+		public Application(string environment)
+		{
+			_environment = environment;
+		}
+
+
+		/// <summary>
 		/// Start the application with the given console args.
 		/// This is generally called from the Main entrypoint of Kyoo.
 		/// </summary>
@@ -100,7 +116,14 @@ namespace Kyoo
 		{
 			return _dataDir;
 		}
-		
+
+
+		/// <inheritdoc />
+		public string GetConfigFile()
+		{
+			return "./settings.json";
+		}
+
 		/// <summary>
 		/// Parse the data directory from environment variables and command line arguments, create it if necessary.
 		/// Set the current directory to said data folder and place a default configuration file if it does not already
@@ -108,7 +131,7 @@ namespace Kyoo
 		/// </summary>
 		/// <param name="args">The command line arguments</param>
 		/// <returns>The current data directory.</returns>
-		private static string _SetupDataDir(string[] args)
+		private string _SetupDataDir(string[] args)
 		{
 			Dictionary<string, string> registry = new();
 
@@ -134,9 +157,9 @@ namespace Kyoo
 				Directory.CreateDirectory(path);
 			Environment.CurrentDirectory = path;
 
-			if (!File.Exists(Program.JsonConfigPath))
-				File.Copy(Path.Join(AppDomain.CurrentDomain.BaseDirectory, Program.JsonConfigPath),
-					Program.JsonConfigPath);
+			if (!File.Exists(GetConfigFile()))
+				File.Copy(Path.Join(AppDomain.CurrentDomain.BaseDirectory, GetConfigFile()),
+					GetConfigFile());
 			
 			return path;
 		}
@@ -159,7 +182,7 @@ namespace Kyoo
 				Log.Fatal(ex, "Unhandled exception");
 			}
 		}
-		
+
 		/// <summary>
 		/// Create a a web host
 		/// </summary>
@@ -172,7 +195,7 @@ namespace Kyoo
 			return new HostBuilder()
 				.UseServiceProviderFactory(new AutofacServiceProviderFactory())
 				.UseContentRoot(AppDomain.CurrentDomain.BaseDirectory)
-				.UseEnvironment(Program.Environment)
+				.UseEnvironment(_environment)
 				.ConfigureAppConfiguration(x => _SetupConfig(x, args))
 				.UseSerilog((host, builder) => _ConfigureLogging(builder, host.Configuration))
 				.ConfigureServices(x => x.AddRouting())
@@ -198,8 +221,8 @@ namespace Kyoo
 		private IConfigurationBuilder _SetupConfig(IConfigurationBuilder builder, string[] args)
 		{
 			return builder.SetBasePath(GetDataDirectory())
-				.AddJsonFile(Path.Join(AppDomain.CurrentDomain.BaseDirectory, Program.JsonConfigPath), false, true)
-				.AddJsonFile(Program.JsonConfigPath, false, true)
+				.AddJsonFile(Path.Join(AppDomain.CurrentDomain.BaseDirectory, GetConfigFile()), false, true)
+				.AddJsonFile(GetConfigFile(), false, true)
 				.AddEnvironmentVariables()
 				.AddEnvironmentVariables("KYOO_")
 				.AddCommandLine(args);
