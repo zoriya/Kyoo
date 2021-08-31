@@ -44,8 +44,8 @@ jobs:
       - name: Select the project to build
         shell: bash
         run: |
-          echo "PROJECT=$([ "${{runner.os}}" == "Windows" ]
-            && echo " -p:IncludeConsole=true Kyoo.Host.WindowsTrait"
+          echo "PROJECT=$([ "${{runner.os}}" == "Windows" ] \
+            && echo " -p:IncludeConsole=true Kyoo.Host.WindowsTrait" \
             || echo Kyoo.Host.Console)" >> $GITHUB_ENV
       - name: Build the app
         env: 
