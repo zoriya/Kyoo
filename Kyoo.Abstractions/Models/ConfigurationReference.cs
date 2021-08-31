@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using JetBrains.Annotations;
+using Kyoo.Utils;
 
 namespace Kyoo.Abstractions.Models
 {

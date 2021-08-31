@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Kyoo.Abstractions.Models;
+using Kyoo.Utils;
 
 namespace Kyoo.Authentication.Models.DTO
 {

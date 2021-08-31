@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest #ubuntu-16.04 # We are using an old version of ubuntu to have an old libc version (forward compatibility exist but not backward)
+          - os: ubuntu-latest
             runtime: linux-x64
             artifact: linux
           - os: windows-latest
@@ -35,7 +35,6 @@ jobs:
           elif [[ "${{runner.os}}" == "macOS" ]]; then
             brew install ffmpeg
           else
-            # sudo add-apt-repository -y "deb http://azure.archive.ubuntu.com/ubuntu groovy main multiverse restricted universe"
             sudo apt-get update 
             sudo apt-get install -y libavutil-dev libavcodec-dev libavformat-dev
           fi

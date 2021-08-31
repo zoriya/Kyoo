@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Autofac;
+using Kyoo.Core;
 
 namespace Kyoo.Host.WindowsTrait
 {

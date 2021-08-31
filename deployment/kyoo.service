@@ -6,7 +6,7 @@ After=network.target
 [Service]
 User=kyoo
 Environment=KYOO_DATADIR=/var/lib/kyoo
-ExecStart=/usr/lib/kyoo/Kyoo
+ExecStart=/usr/lib/kyoo/Kyoo.Host.Console
 Restart=on-abort
 TimeoutSec=20
 

@@ -9,8 +9,17 @@
 		<RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
 		<LangVersion>default</LangVersion>
 	</PropertyGroup>
+
+	<PropertyGroup Condition="$(IncludeConsole) == true">
+		<!-- 
+			IncludeConsole is a property used when deploying the windows host. Since the runtime identifier is removed, 
+			we specify it manually. This is kindy hacky but MsBuild does not really work well with multiples exe output
+			and we need multiples exe with the same shared framework (SelfContained).
+		 -->
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+	</PropertyGroup>
 	
 	<ItemGroup>
-		<ProjectReference Include="../Kyoo/Kyoo.csproj" />
+		<ProjectReference Include="../Kyoo.Core/Kyoo.Core.csproj" />
 	</ItemGroup>
 </Project>

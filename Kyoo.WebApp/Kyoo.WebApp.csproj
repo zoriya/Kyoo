@@ -47,7 +47,8 @@
 		<Touch Files="$(NpmStamp)" AlwaysCreate="true" />
 	</Target>
 
-	<Target Name="RunWebpack" Condition="'$(SkipWebApp)' != 'true' And '$(Configuration)' == 'Debug'">
+	<Target Name="RunWebpack" Condition="'$(SkipWebApp)' != 'true' And '$(Configuration)' == 'Release'">
+		<Message Importance="high" Text="Building the web app. This may take several minutes..." />
 		<Exec WorkingDirectory="$(SpaRoot)" Command="npm run build -- --prod" />
 		<Exec WorkingDirectory="$(SpaRoot)" Command="npm run build:ssr -- --prod" Condition="'$(BuildServerSideRenderer)' == 'true'" />
 	</Target>

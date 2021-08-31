@@ -1,4 +1,5 @@
 using System.Threading.Tasks;
+using Kyoo.Core;
 using Microsoft.AspNetCore.Hosting;
 
 namespace Kyoo.Host.Console

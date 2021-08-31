@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
-using Kyoo.Controllers;
+using Kyoo.Core.Controllers;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;

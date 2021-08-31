@@ -29,7 +29,7 @@ build() {
 	# cd "Kyoo-$pkgver"
 	cd "Kyoo"
 	export DOTNET_CLI_TELEMETRY_OPTOUT=1
-	dotnet publish -c Release -o "$srcdir/output" Kyoo
+	dotnet publish -c Release -o "$srcdir/output" Kyoo.Host.Console
 }
 
 package() {

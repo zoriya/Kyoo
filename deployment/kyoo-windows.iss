@@ -25,8 +25,8 @@ Name: "startupShortcut"; Description: "Create shortcut in Startup folder (Starts
 Name: "none"; Description: "Do not start automatically"; GroupDescription: "Start automatically"; Flags: exclusive unchecked
 
 [Files]
-Source: "{#kyoo}\Kyoo.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#kyoo}\Kyoo.WindowsHost.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#kyoo}\Kyoo.Host.Console.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#kyoo}\Kyoo.Host.WindowsTrait.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#kyoo}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Registry]
@@ -38,13 +38,13 @@ Root: HKA; Subkey: "Software\SDG\Kyoo\Settings"; ValueType: string; ValueName: "
 Type: filesandordirs; Name: "{code:GetDataDir}"
 
 [Icons]
-Name: "{autoprograms}\Kyoo"; Filename: "{app}\Kyoo.WindowsHost.exe"
-Name: "{autoprograms}\Kyoo (Console)"; Filename: "{app}\Kyoo.exe"
-Name: "{autodesktop}\Kyoo"; Filename: "{app}\Kyoo.WindowsHost.exe"; Tasks: desktopicon
-Name: "{autostartup}\Kyoo"; Filename: "{app}\Kyoo.WindowsHost.exe"; Tasks: startupShortcut
+Name: "{autoprograms}\Kyoo"; Filename: "{app}\Kyoo.Host.WindowsTrait.exe"
+Name: "{autoprograms}\Kyoo (Console)"; Filename: "{app}\Kyoo.Host.Console.exe"
+Name: "{autodesktop}\Kyoo"; Filename: "{app}\Kyoo.Host.WindowsTrait.exe"; Tasks: desktopicon
+Name: "{autostartup}\Kyoo"; Filename: "{app}\Kyoo.Host.WindowsTrait.exe"; Tasks: startupShortcut
 
 [Run]
-Filename: "{app}\Kyoo.WindowsHost.exe"; Description: "{cm:LaunchProgram,Kyoo}"; Flags: nowait postinstall skipifsilent
+Filename: "{app}\Kyoo.Host.WindowsTrait.exe"; Description: "{cm:LaunchProgram,Kyoo}"; Flags: nowait postinstall skipifsilent
 
 [Code]
 var

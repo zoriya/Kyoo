@@ -34,7 +34,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\..\Kyoo.Database\Kyoo.Database.csproj" />
 		<ProjectReference Include="../../Kyoo.Abstractions/Kyoo.Abstractions.csproj" />
-		<ProjectReference Include="../../Kyoo/Kyoo.csproj" />
+		<ProjectReference Include="..\..\Kyoo.Core\Kyoo.Core.csproj" />
 		<ProjectReference Include="../../Kyoo.TheTvdb/Kyoo.TheTvdb.csproj" />
 	</ItemGroup>
 

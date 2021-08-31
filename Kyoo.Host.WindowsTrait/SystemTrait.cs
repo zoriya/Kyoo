@@ -6,7 +6,7 @@ using System.Threading;
 using System.Windows.Forms;
 using Autofac;
 using Kyoo.Abstractions.Controllers;
-using Kyoo.Models.Options;
+using Kyoo.Core.Models.Options;
 using Microsoft.Extensions.Options;
 
 namespace Kyoo.Host.WindowsTrait

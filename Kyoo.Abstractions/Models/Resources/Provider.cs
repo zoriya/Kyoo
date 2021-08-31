@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
+using Kyoo.Utils;
 
 namespace Kyoo.Abstractions.Models
 {

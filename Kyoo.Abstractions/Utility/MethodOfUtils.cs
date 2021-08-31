@@ -1,7 +1,7 @@
 using System;
 using System.Reflection;
 
-namespace Kyoo
+namespace Kyoo.Utils
 {
 	/// <summary>
 	/// Static class containing MethodOf calls.

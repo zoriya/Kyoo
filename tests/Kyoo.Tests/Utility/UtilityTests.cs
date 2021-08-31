@@ -2,9 +2,10 @@ using System;
 using System.Linq.Expressions;
 using System.Reflection;
 using Kyoo.Abstractions.Models;
+using Kyoo.Utils;
 using Xunit;
 
-using Utils = Kyoo.Utility;
+using KUtility = Kyoo.Utils.Utility;
 
 namespace Kyoo.Tests.Utility
 {
@@ -16,12 +17,12 @@ namespace Kyoo.Tests.Utility
 			Expression<Func<Show, int>> member = x => x.ID;
 			Expression<Func<Show, object>> memberCast = x => x.ID;
 
-			Assert.False(Utils.IsPropertyExpression(null));
-			Assert.True(Utils.IsPropertyExpression(member));
-			Assert.True(Utils.IsPropertyExpression(memberCast));
+			Assert.False(KUtility.IsPropertyExpression(null));
+			Assert.True(KUtility.IsPropertyExpression(member));
+			Assert.True(KUtility.IsPropertyExpression(memberCast));
 
 			Expression<Func<Show, object>> call = x => x.GetID("test");
-			Assert.False(Utils.IsPropertyExpression(call));
+			Assert.False(KUtility.IsPropertyExpression(call));
 		}
 		
 		[Fact]
@@ -30,15 +31,15 @@ namespace Kyoo.Tests.Utility
 			Expression<Func<Show, int>> member = x => x.ID;
 			Expression<Func<Show, object>> memberCast = x => x.ID;
 
-			Assert.Equal("ID", Utils.GetPropertyName(member));
-			Assert.Equal("ID", Utils.GetPropertyName(memberCast));
-			Assert.Throws<ArgumentException>(() => Utils.GetPropertyName(null));
+			Assert.Equal("ID", KUtility.GetPropertyName(member));
+			Assert.Equal("ID", KUtility.GetPropertyName(memberCast));
+			Assert.Throws<ArgumentException>(() => KUtility.GetPropertyName(null));
 		}
 		
 		[Fact]
 		public void GetMethodTest()
 		{
-			MethodInfo method = Utils.GetMethod(typeof(UtilityTests),
+			MethodInfo method = KUtility.GetMethod(typeof(UtilityTests),
 				BindingFlags.Instance | BindingFlags.Public, 
 				nameof(GetMethodTest),
 				Array.Empty<Type>(),
@@ -49,17 +50,17 @@ namespace Kyoo.Tests.Utility
 		[Fact]
 		public void GetMethodInvalidGenericsTest()
 		{
-			Assert.Throws<ArgumentException>(() => Utils.GetMethod(typeof(UtilityTests),
+			Assert.Throws<ArgumentException>(() => KUtility.GetMethod(typeof(UtilityTests),
 				BindingFlags.Instance | BindingFlags.Public, 
 				nameof(GetMethodTest),
-				new [] { typeof(Utils) },
+				new [] { typeof(KUtility) },
 				Array.Empty<object>()));
 		}
 		
 		[Fact]
 		public void GetMethodInvalidParamsTest()
 		{
-			Assert.Throws<ArgumentException>(() => Utils.GetMethod(typeof(UtilityTests),
+			Assert.Throws<ArgumentException>(() => KUtility.GetMethod(typeof(UtilityTests),
 				BindingFlags.Instance | BindingFlags.Public, 
 				nameof(GetMethodTest),
 				Array.Empty<Type>(),
@@ -69,7 +70,7 @@ namespace Kyoo.Tests.Utility
 		[Fact]
 		public void GetMethodTest2()
 		{
-			MethodInfo method = Utils.GetMethod(typeof(Merger),
+			MethodInfo method = KUtility.GetMethod(typeof(Merger),
 				BindingFlags.Static | BindingFlags.Public, 
 				nameof(Merger.MergeLists),
 				new [] { typeof(string) },

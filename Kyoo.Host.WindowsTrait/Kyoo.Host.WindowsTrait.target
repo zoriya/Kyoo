@@ -11,7 +11,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="../Kyoo/Kyoo.csproj" />
+		<ProjectReference Include="../Kyoo.Core/Kyoo.Core.csproj" />
+		<ProjectReference Include="../Kyoo.Host.Console/Kyoo.Host.Console.csproj" Condition="$(IncludeConsole) == true" />
 	</ItemGroup>
 
 	<ItemGroup>
