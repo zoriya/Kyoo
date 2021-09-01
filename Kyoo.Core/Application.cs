@@ -42,6 +42,11 @@ namespace Kyoo.Core
 		/// </summary>
 		private readonly string _environment;
 
+		/// <summary>
+		/// The logger used for startup and error messages.
+		/// </summary>
+		private ILogger _logger;
+
 		
 		/// <summary>
 		/// Create a new <see cref="Application"/> that will use the specified environment.
@@ -76,9 +81,9 @@ namespace Kyoo.Core
 			_dataDir = _SetupDataDir(args);
 			
 			LoggerConfiguration config = new();
-			_ConfigureLogging(config, null);
-			Log.Logger = config.CreateBootstrapLogger()
-				.ForContext<Application>();
+			_ConfigureLogging(config, null, null);
+			Log.Logger = config.CreateBootstrapLogger();
+			_logger = Log.Logger.ForContext<Application>();
 
 			AppDomain.CurrentDomain.ProcessExit += (_, _) => Log.CloseAndFlush();
 			AppDomain.CurrentDomain.UnhandledException += (_, ex) 
@@ -89,7 +94,6 @@ namespace Kyoo.Core
 				IHost host = _CreateWebHostBuilder(args)
 					.ConfigureContainer(configure)
 					.Build();
-				Log.Logger = host.Services.GetRequiredService<ILogger>().ForContext<Application>();
 				
 				_tokenSource = new CancellationTokenSource();
 				await _StartWithHost(host, _tokenSource.Token);
@@ -173,13 +177,13 @@ namespace Kyoo.Core
 		{
 			try
 			{
-				Log.Information("Running as {Name}", Environment.UserName);
-				Log.Information("Data directory: {DataDirectory}", GetDataDirectory());
+				_logger.Information("Running as {Name}", Environment.UserName);
+				_logger.Information("Data directory: {DataDirectory}", GetDataDirectory());
 				await host.RunAsync(cancellationToken);
 			}
 			catch (Exception ex)
 			{
-				Log.Fatal(ex, "Unhandled exception");
+				_logger.Fatal(ex, "Unhandled exception");
 			}
 		}
 
@@ -197,7 +201,7 @@ namespace Kyoo.Core
 				.UseContentRoot(AppDomain.CurrentDomain.BaseDirectory)
 				.UseEnvironment(_environment)
 				.ConfigureAppConfiguration(x => _SetupConfig(x, args))
-				.UseSerilog((host, builder) => _ConfigureLogging(builder, host.Configuration))
+				.UseSerilog((host, services, builder) => _ConfigureLogging(builder, host.Configuration, services))
 				.ConfigureServices(x => x.AddRouting())
 				.ConfigureContainer<ContainerBuilder>(x =>
 				{
@@ -227,13 +231,16 @@ namespace Kyoo.Core
 				.AddEnvironmentVariables("KYOO_")
 				.AddCommandLine(args);
 		}
-		
+
 		/// <summary>
 		/// Configure the logging.
 		/// </summary>
 		/// <param name="builder">The logger builder to configure.</param>
 		/// <param name="configuration">The configuration to read settings from.</param>
-		private void _ConfigureLogging(LoggerConfiguration builder, [CanBeNull] IConfiguration configuration)
+		/// <param name="services">The services to read configuration from.</param>
+		private void _ConfigureLogging(LoggerConfiguration builder,
+			[CanBeNull] IConfiguration configuration,
+			[CanBeNull] IServiceProvider services)
 		{
 			if (configuration != null)
 			{
@@ -243,9 +250,12 @@ namespace Kyoo.Core
 				}
 				catch (Exception ex)
 				{
-					Log.Fatal(ex, "Could not read serilog configuration");
+					_logger.Fatal(ex, "Could not read serilog configuration");
 				}
 			}
+
+			if (services != null)
+				builder.ReadFrom.Services(services);
 
 			const string template =
 				"[{@t:HH:mm:ss} {@l:u3} {Substring(SourceContext, LastIndexOf(SourceContext, '.') + 1), 15} "

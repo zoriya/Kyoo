@@ -51,14 +51,6 @@ namespace Kyoo.Core.Controllers
 			_logger = logger;
 		}
 
-		public void SetProvider(IServiceProvider provider)
-		{
-			// TODO temporary bullshit to inject services before the configure asp net.
-			// TODO should rework this when the host will be reworked, as well as the asp net configure.
-			_provider = provider;
-		}
-
-
 		/// <inheritdoc />
 		public T GetPlugin<T>(string name)
 		{
@@ -111,16 +103,13 @@ namespace Kyoo.Core.Controllers
 
 			_logger.LogTrace("Loading new plugins...");
 			string[] pluginsPaths = Directory.GetFiles(pluginFolder, "*.dll", SearchOption.AllDirectories);
-			IPlugin[] newPlugins = plugins
+			_plugins.AddRange(plugins
 				.Concat(pluginsPaths.SelectMany(LoadPlugin))
+				.Where(x => x.Enabled)
 				.GroupBy(x => x.Name)
 				.Select(x => x.First())
-				.ToArray();
-			_plugins.AddRange(newPlugins.Where(x => x.Enabled));
-			
-			foreach (IPlugin plugin in newPlugins.Where(x => !x.Enabled))
-				plugin.Disabled();
-			
+			);
+
 			if (!_plugins.Any())
 				_logger.LogInformation("No plugin enabled");
 			else
