@@ -18,4 +18,9 @@
 	<Target Name="Pack" />
 	<Target Name="Restore" />
 	<Target Name="Publish" />
+	
+	<ItemGroup>
+		<None Include="@(Compile)" />
+		<Compile Remove="*" />
+	</ItemGroup>
 </Project>

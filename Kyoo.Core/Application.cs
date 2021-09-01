@@ -263,7 +263,6 @@ namespace Kyoo.Core
 
 			builder
 				.WriteTo.Console(new ExpressionTemplate(template, theme: TemplateTheme.Code))
-				.WriteTo.Debug()
 				.WriteTo.File(
 					path: Path.Combine(GetDataDirectory(), "logs", "log-.log"),
 					formatter: new ExpressionTemplate(template),
