@@ -1,5 +1,5 @@
 ﻿Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kyoo", "Kyoo\Kyoo.csproj", "{0F8275B6-C7DD-42DF-A168-755C81B1C329}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kyoo.Core", "Kyoo.Core\Kyoo.Core.csproj", "{0F8275B6-C7DD-42DF-A168-755C81B1C329}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Abstractions", "Kyoo.Abstractions\Kyoo.Abstractions.csproj", "{BAB2CAE1-AC28-4509-AA3E-8DC75BD59220}"
 EndProject
@@ -18,6 +18,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Tests", "tests\Kyoo.Tests\Kyoo.Tests.csproj", "{0C8AA7EA-E723-4532-852F-35AA4E8AFED5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.WebApp", "Kyoo.WebApp\Kyoo.WebApp.csproj", "{2374D500-1ADB-4752-85DB-8BB0DDF5A8E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Host.WindowsTrait", "Kyoo.Host.WindowsTrait\Kyoo.Host.WindowsTrait.csproj", "{98851001-40DD-46A6-94B3-2F8D90722076}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Host.Console", "Kyoo.Host.Console\Kyoo.Host.Console.csproj", "{D8658BEA-8949-45AC-BEBB-A4FFC4F800F5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -65,5 +69,17 @@ Global
 		{2374D500-1ADB-4752-85DB-8BB0DDF5A8E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2374D500-1ADB-4752-85DB-8BB0DDF5A8E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2374D500-1ADB-4752-85DB-8BB0DDF5A8E8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4FF1ECD9-6EEF-4440-B037-A661D78FB04D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4FF1ECD9-6EEF-4440-B037-A661D78FB04D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4FF1ECD9-6EEF-4440-B037-A661D78FB04D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4FF1ECD9-6EEF-4440-B037-A661D78FB04D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98851001-40DD-46A6-94B3-2F8D90722076}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98851001-40DD-46A6-94B3-2F8D90722076}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98851001-40DD-46A6-94B3-2F8D90722076}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98851001-40DD-46A6-94B3-2F8D90722076}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8658BEA-8949-45AC-BEBB-A4FFC4F800F5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8658BEA-8949-45AC-BEBB-A4FFC4F800F5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8658BEA-8949-45AC-BEBB-A4FFC4F800F5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8658BEA-8949-45AC-BEBB-A4FFC4F800F5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

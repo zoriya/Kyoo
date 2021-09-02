@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 
-namespace Kyoo
+namespace Kyoo.Utils
 {
 	/// <summary>
 	/// A class containing helper method for tasks.

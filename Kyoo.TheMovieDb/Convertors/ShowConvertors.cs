@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Kyoo.Abstractions.Models;
+using Kyoo.Utils;
 using TMDbLib.Objects.Search;
 using TMDbLib.Objects.TvShows;
 

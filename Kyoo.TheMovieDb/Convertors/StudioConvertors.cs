@@ -1,4 +1,5 @@
 using Kyoo.Abstractions.Models;
+using Kyoo.Utils;
 using TMDbLib.Objects.Companies;
 using TMDbLib.Objects.Search;
 

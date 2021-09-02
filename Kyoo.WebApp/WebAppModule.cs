@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using Kyoo.Abstractions.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -33,28 +34,17 @@ namespace Kyoo.WebApp
 		/// <inheritdoc />
 		public bool Enabled => Directory.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "wwwroot"));
 
-
-		/// <summary>
-		/// A logger only used to inform the user if the webapp could not be enabled.
-		/// </summary>
-		private readonly ILogger<WebAppModule> _logger;
-		
 		/// <summary>
 		/// Create a new <see cref="WebAppModule"/>.
 		/// </summary>
 		/// <param name="logger">A logger only used to inform the user if the webapp could not be enabled.</param>
 		public WebAppModule(ILogger<WebAppModule> logger)
 		{
-			_logger = logger;
+			if (!Enabled)
+				logger.LogError("The web app files could not be found, it will be disabled. " + 
+					"If you cloned the project, you probably forgot to use the --recurse flag");
 		}
-		
-		/// <inheritdoc />
-		public void Disabled()
-		{
-			_logger.LogError("The web app files could not be found, it will be disabled. " +
-				"If you cloned the project, you probably forgot to use the --recurse flag");
-		}
-		
+
 		/// <inheritdoc />
 		public void Configure(IServiceCollection services)
 		{
@@ -99,12 +89,27 @@ namespace Kyoo.WebApp
 			{
 				app.UseSpa(spa =>
 				{
-					spa.Options.SourcePath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "Kyoo.WebApp", "Front");
+					spa.Options.SourcePath = _GetSpaSourcePath();
 			
 					if (env.IsDevelopment())
 						spa.UseAngularCliServer("start");
 				});
 			}, SA.Endpoint - 500)
 		};
+
+		/// <summary>
+		/// Get the root directory of the web app
+		/// </summary>
+		/// <returns>The path of the source code of the web app or null if the directory has been deleted.</returns>
+		private static string _GetSpaSourcePath()
+		{
+			string GetSelfPath([CallerFilePath] string path = null)
+			{
+				return path;
+			}
+
+			string path = Path.Join(Path.GetDirectoryName(GetSelfPath()), "Front");
+			return Directory.Exists(path) ? path : null;
+		}
 	}
 }

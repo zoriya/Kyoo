@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Kyoo.Abstractions.Models.Attributes;
+using Kyoo.Utils;
 
 namespace Kyoo.Abstractions.Models
 {

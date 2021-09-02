@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Kyoo.Abstractions.Models;
+using Kyoo.Utils;
 using TMDbLib.Objects.General;
 using TMDbLib.Objects.People;
 using TMDbLib.Objects.Search;

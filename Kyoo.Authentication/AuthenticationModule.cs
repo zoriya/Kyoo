@@ -110,6 +110,14 @@ namespace Kyoo.Authentication
 			CertificateOption certificateOptions = new();
 			_configuration.GetSection(CertificateOption.Path).Bind(certificateOptions);
 			
+			clients.AddRange(IdentityContext.GetClients());
+			foreach (Client client in clients)
+			{
+				client.RedirectUris = client.RedirectUris
+					.Select(x => x.StartsWith("/") ? publicUrl + x : x)
+					.ToArray();
+			}
+
 			services.AddIdentityServer(options =>
 				{
 					options.IssuerUri = publicUrl;
@@ -120,7 +128,7 @@ namespace Kyoo.Authentication
 				.AddInMemoryIdentityResources(IdentityContext.GetIdentityResources())
 				.AddInMemoryApiScopes(IdentityContext.GetScopes())
 				.AddInMemoryApiResources(IdentityContext.GetApis())
-				.AddInMemoryClients(IdentityContext.GetClients().Concat(clients))
+				.AddInMemoryClients(clients)
 				.AddProfileService<AccountApi>()
 				.AddSigninKeys(certificateOptions);
 			

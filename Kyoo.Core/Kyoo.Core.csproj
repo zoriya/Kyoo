@@ -1,0 +1,71 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<TranscoderRoot>../Kyoo.Transcoder/</TranscoderRoot>
+
+		<Company>SDG</Company>
+		<Authors>Zoe Roux</Authors>
+		<RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
+		<LangVersion>default</LangVersion>
+	</PropertyGroup>
+		
+	<PropertyGroup>
+		<IsWindows Condition="$([MSBuild]::IsOSPlatform('Windows'))">true</IsWindows>
+		<IsOSX Condition="$([MSBuild]::IsOSPlatform('OSX'))">true</IsOSX>
+		<IsLinux Condition="$([MSBuild]::IsOSPlatform('Linux'))">true</IsLinux>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<TranscoderBinary Condition="$(IsWindows) == true">transcoder.dll</TranscoderBinary>
+		<TranscoderBinary Condition="$(IsOSX) == true">libtranscoder.dylib</TranscoderBinary>
+		<TranscoderBinary Condition="$(IsLinux) == true">libtranscoder.so</TranscoderBinary>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Serilog" Version="2.10.0" />
+		<PackageReference Include="Serilog.AspNetCore" Version="4.1.0" />
+		<PackageReference Include="Serilog.Enrichers.Thread" Version="3.1.0" />
+		<PackageReference Include="Serilog.Expressions" Version="3.2.0" />
+		<PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
+		<PackageReference Include="Autofac" Version="6.2.0" />
+		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.1.0" />
+		<PackageReference Include="Autofac.Extras.AttributeMetadata" Version="6.0.0" />
+		<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="5.0.8" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="../Kyoo.Abstractions/Kyoo.Abstractions.csproj" />
+		<ProjectReference Include="../Kyoo.Database/Kyoo.Database.csproj" />
+		<ProjectReference Include="../Kyoo.TheMovieDb/Kyoo.TheMovieDb.csproj" />
+		<ProjectReference Include="../Kyoo.TheTvdb/Kyoo.TheTvdb.csproj" />
+		<ProjectReference Include="../Kyoo.Postgresql/Kyoo.Postgresql.csproj" />
+		<ProjectReference Include="../Kyoo.SqLite/Kyoo.SqLite.csproj" />
+		<ProjectReference Include="../Kyoo.Authentication/Kyoo.Authentication.csproj" />
+		<ProjectReference Include="../Kyoo.WebApp/Kyoo.WebApp.csproj" />
+	</ItemGroup>
+
+	<Target Name="BuildTranscoder" BeforeTargets="BeforeBuild" Condition="'$(SkipTranscoder)' != 'true' And !Exists('$(TranscoderRoot)/build/$(TranscoderBinary)')">
+		<Exec WorkingDirectory="$(TranscoderRoot)" Condition="'$(IsWindows)' != 'true'" Command="mkdir -p build %26%26 cd build %26%26 cmake .. %26%26 make -j" ContinueOnError="true">
+			<Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
+		</Exec>
+		<Exec WorkingDirectory="$(TranscoderRoot)" Condition="'$(IsWindows)' == 'true'" Command="(if not exist build mkdir build) %26%26 cd build %26%26 cmake .. -G &quot;NMake Makefiles&quot; %26%26 nmake" ContinueOnError="true">
+			<Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
+		</Exec>
+		<Error Condition="'$(ErrorCode)' != '0'" Text="An environement capable of building the transcoder was not found. Appropriate tools are not installed, not available in the $PATH or not correctly configured. To fix this you can ether:&#xA; - Fix your tools&#xA; - Skip the transcoder via the '-p:SkipTranscoder=true'&#xA; - Download an already built transcoder and put it in ./Kyoo.Transcoder/build" />
+	</Target>
+	
+	<ItemGroup Condition="'$(SkipTranscoder)' != 'true'">
+		<None Include="$(TranscoderRoot)/build/$(TranscoderBinary)">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+			<Visible>false</Visible>
+		</None>
+	</ItemGroup>
+	
+	<ItemGroup>
+		<Content Include="../LICENSE" CopyToOutputDirectory="Always" Visible="false" />
+		<Content Include="settings.json" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+</Project>

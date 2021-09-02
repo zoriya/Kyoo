@@ -93,14 +93,5 @@ namespace Kyoo.Abstractions.Controllers
 		{
 			// Skipped
 		}
-
-		/// <summary>
-		/// An optional callback function called when the startups ends and this plugin has been flagged has disabled.
-		/// It allow a plugin to log an error or warning message to inform why it has been disabled.
-		/// </summary>
-		void Disabled()
-		{
-			// Skipped
-		}
 	}
 }

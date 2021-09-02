@@ -8,9 +8,8 @@ arch=("i686" "x86_64" "armv6h")
 url="https://github.com/AnonymusRaccoon/Kyoo"
 license=("GPLv3")
 groups=()
-depends=("postgresql" "ffmpeg")
+depends=("ffmpeg")
 makedepends=()
-install="kyoo.install"
 # The output folder is needed but we can't use directory in the source array.
 source=()
 sha256sums=()

@@ -5,6 +5,7 @@ using System.Linq;
 using JetBrains.Annotations;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
+using Kyoo.Utils;
 using Xunit;
 
 namespace Kyoo.Tests.Utility

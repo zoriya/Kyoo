@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Kyoo.Abstractions.Models;
+using Kyoo.Utils;
 using TvDbSharper.Dto;
 
 namespace Kyoo.TheTvdb

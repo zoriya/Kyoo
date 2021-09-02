@@ -9,7 +9,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 
-namespace Kyoo
+namespace Kyoo.Utils
 {
 	/// <summary>
 	/// A set of utility functions that can be used everywhere.

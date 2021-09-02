@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Exceptions;
+using Kyoo.Utils;
 
 namespace Kyoo.Abstractions.Controllers
 {

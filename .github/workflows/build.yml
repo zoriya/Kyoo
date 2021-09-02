@@ -1,5 +1,5 @@
 name: Build
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 
 jobs:
   build:
@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest #ubuntu-16.04 # We are using an old version of ubuntu to have an old libc version (forward compatibility exist but not backward)
+          - os: ubuntu-latest
             runtime: linux-x64
             artifact: linux
           - os: windows-latest
@@ -35,13 +35,18 @@ jobs:
           elif [[ "${{runner.os}}" == "macOS" ]]; then
             brew install ffmpeg
           else
-            # sudo add-apt-repository -y "deb http://azure.archive.ubuntu.com/ubuntu groovy main multiverse restricted universe"
-            sudo apt-get update
+            sudo apt-get update 
             sudo apt-get install -y libavutil-dev libavcodec-dev libavformat-dev
           fi
       - name: Enabling windows compilations tools
         if: matrix.artifact == 'windows'
         uses: ilammy/msvc-dev-cmd@v1
+      - name: Select the project to build
+        shell: bash
+        run: |
+          echo "PROJECT=$([ "${{runner.os}}" == "Windows" ] \
+            && echo " -p:IncludeConsole=true Kyoo.Host.WindowsTrait" \
+            || echo Kyoo.Host.Console)" >> $GITHUB_ENV
       - name: Build the app
         env: 
           INCLUDE: ${{env.INCLUDE}};C:\Program Files\FFmpeg\include
@@ -49,7 +54,7 @@ jobs:
           LIBPATH: ${{env.LIBPATH}};C:\Program Files\FFmpeg\lib
           CFLAGS: -I/usr/local/include
           LDFLAGS: -L/usr/local/lib
-        run: dotnet publish -r ${{matrix.runtime}} -c Release -o dist Kyoo
+        run: dotnet publish -r ${{matrix.runtime}} -c Release -o dist ${{env.PROJECT}}
       - name: Compression output
         shell: bash
         run: |
@@ -69,7 +74,34 @@ jobs:
           path: |
             *.zip
             *.tar.gz
-          
+
+  windows_release:
+    name: Create windows release
+    runs-on: windows-latest
+    needs: build
+    if: github.ref == 'refs/heads/master'
+    steps:
+      - uses: actions/checkout@v1
+      - name: Download windows build
+        uses: actions/download-artifact@v2
+        with:
+          name: kyoo_windows
+          path: artifact
+      - name: Unzip windows files
+        run: mkdir dist_win && 7z x artifact/kyoo_windows.zip -odist_win
+      - name: Install Inno Setup
+        shell: cmd
+        run: |
+          curl -L https://jrsoftware.org/download.php/is.exe > innosetup.exe
+          innosetup.exe /VERYSILENT /SUPPRESSMSGBOXES /Log=log.txt || (cat log.txt && exit 1)
+      - name: Create windows installer
+        shell: bash
+        run: iscc -Dkyoo=$(realpath dist_win) -O./ -Fkyoo-windows deployment/kyoo-windows.iss
+      - uses: actions/upload-artifact@v2
+        with:
+          name: kyoo_windows_installer
+          path: ./kyoo-windows.exe
+
   release:
     name: Create debian, rpm & arch releases
     runs-on: ubuntu-latest
@@ -80,7 +112,8 @@ jobs:
       version: v0.0.1 #${{ github.ref }}
     steps:
       - uses: actions/checkout@v1
-      - uses: actions/download-artifact@v2
+      - name: Download linux build
+        uses: actions/download-artifact@v2
         with:
           name: kyoo_linux
           path: artifact
@@ -89,19 +122,18 @@ jobs:
       - name: Create the package structure
         run: |
           sudo mkdir -p pkg/usr/lib/
-          sudo mkdir -p pkg/DEBIAN
           sudo cp -r --no-preserve ownership dist pkg/usr/lib/kyoo
           sudo install -Dm 644 deployment/kyoo.service -t pkg/usr/lib/systemd/system/
           sudo install -Dm 644 deployment/kyoo.sysusers pkg/usr/lib/sysusers.d/kyoo.conf
           sudo install -Dm 644 deployment/kyoo.tmpfiles pkg/usr/lib/tmpfiles.d/kyoo.conf
-          sudo install -Dm 755 deployment/postinst -t pkg/DEBIAN/
-      - uses: jiro4989/build-deb-action@v2
+      - name: Build debian package 
+        uses: jiro4989/build-deb-action@v2
         with:
           package: kyoo
           package_root: pkg
           maintainer: Zoe Roux <zoe.roux@sdg.moe>
           version: ${{env.version}}
-          depends: "postgresql, libavutil-dev, libavcodec-dev, libavformat-dev"
+          depends: "libavutil-dev, libavcodec-dev, libavformat-dev"
           arch: amd64
           desc: ${{env.description}}
       - name: Build rpm package

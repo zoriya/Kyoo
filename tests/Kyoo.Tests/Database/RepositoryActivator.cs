@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
-using Kyoo.Controllers;
+using Kyoo.Core.Controllers;
 using Kyoo.Database;
 using Xunit.Abstractions;
 

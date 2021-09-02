@@ -8,7 +8,7 @@ using JetBrains.Annotations;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
 
-namespace Kyoo
+namespace Kyoo.Utils
 {
 	/// <summary>
 	/// A class containing helper methods to merge objects.

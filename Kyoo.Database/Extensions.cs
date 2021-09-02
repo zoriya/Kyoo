@@ -1,7 +1,7 @@
 using System.Data.Common;
 using Microsoft.Extensions.Configuration;
 
-namespace Kyoo
+namespace Kyoo.Database
 {
 	/// <summary>
 	/// A class that regroup extensions used by some asp-net related parts of the app.

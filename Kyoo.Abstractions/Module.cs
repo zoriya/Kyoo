@@ -1,6 +1,7 @@
 using Autofac;
 using Autofac.Builder;
 using Kyoo.Abstractions.Controllers;
+using Kyoo.Utils;
 using Microsoft.Extensions.Configuration;
 
 namespace Kyoo.Abstractions

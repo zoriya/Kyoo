@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 
-namespace Kyoo
+namespace Kyoo.Utils
 {
 	/// <summary>
 	/// A set of extensions class for enumerable.
