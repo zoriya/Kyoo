@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting.Systemd;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32;
 using Serilog;
@@ -200,6 +201,7 @@ namespace Kyoo.Core
 				.UseServiceProviderFactory(new AutofacServiceProviderFactory())
 				.UseContentRoot(AppDomain.CurrentDomain.BaseDirectory)
 				.UseEnvironment(_environment)
+				.UseSystemd()
 				.ConfigureAppConfiguration(x => _SetupConfig(x, args))
 				.UseSerilog((host, services, builder) => _ConfigureLogging(builder, host.Configuration, services))
 				.ConfigureServices(x => x.AddRouting())
@@ -259,7 +261,19 @@ namespace Kyoo.Core
 
 			const string template =
 				"[{@t:HH:mm:ss} {@l:u3} {Substring(SourceContext, LastIndexOf(SourceContext, '.') + 1), 15} "
-				+ "({@i:0000000000})] {@m}{#if not EndsWith(@m, '\n')}\n{#end}{@x}";
+				+ "({@i:D10})] {@m}{#if not EndsWith(@m, '\n')}\n{#end}{@x}";
+
+			if (SystemdHelpers.IsSystemdService())
+			{
+				const string syslogTemplate = "[{SourceContext,-35}] {Message:lj}{NewLine}{Exception}";
+
+				builder
+					.WriteTo.Console(new ExpressionTemplate(template, theme: TemplateTheme.Code))
+					.WriteTo.LocalSyslog("Kyoo", outputTemplate: syslogTemplate)
+					.Enrich.WithThreadId()
+					.Enrich.FromLogContext();
+				return;
+			}
 
 			builder
 				.WriteTo.Console(new ExpressionTemplate(template, theme: TemplateTheme.Code))
