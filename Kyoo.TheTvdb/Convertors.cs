@@ -14,7 +14,7 @@ namespace Kyoo.TheTvdb
 	public static class Convertors
 	{
 		/// <summary>
-		/// Convert the string representation of the status in the tvdb API to a Kyoo's <see cref="Status"/> enum. 
+		/// Convert the string representation of the status in the tvdb API to a Kyoo's <see cref="Status"/> enum.
 		/// </summary>
 		/// <param name="status">The string representing the status.</param>
 		/// <returns>A kyoo <see cref="Status"/> value or null.</returns>
@@ -40,9 +40,9 @@ namespace Kyoo.TheTvdb
 				? parsed
 				: null;
 		}
-		
+
 		/// <summary>
-		/// Convert a series search to a show. 
+		/// Convert a series search to a show.
 		/// </summary>
 		/// <param name="result">The search result</param>
 		/// <param name="provider">The provider representing the tvdb inside kyoo</param>
@@ -60,7 +60,7 @@ namespace Kyoo.TheTvdb
 				Images = new Dictionary<int, string>
 				{
 					[Images.Poster] = !string.IsNullOrEmpty(result.Poster)
-						? $"https://www.thetvdb.com{result.Poster}" 
+						? $"https://www.thetvdb.com{result.Poster}"
 						: null,
 				},
 				ExternalIDs = new[]
@@ -74,7 +74,7 @@ namespace Kyoo.TheTvdb
 				}
 			};
 		}
-	
+
 		/// <summary>
 		/// Convert a tvdb series to a kyoo show.
 		/// </summary>
@@ -94,10 +94,10 @@ namespace Kyoo.TheTvdb
 				Images = new Dictionary<int, string>
 				{
 					[Images.Poster] = !string.IsNullOrEmpty(series.Poster)
-					 	? $"https://www.thetvdb.com/banners/{series.Poster}" 
+					 	? $"https://www.thetvdb.com/banners/{series.Poster}"
 					 	: null,
 					[Images.Thumbnail] = !string.IsNullOrEmpty(series.FanArt)
-					 	? $"https://www.thetvdb.com/banners/{series.FanArt}" 
+					 	? $"https://www.thetvdb.com/banners/{series.FanArt}"
 					 	: null
 				},
 				Genres = series.Genre.Select(y => new Genre(y)).ToList(),
@@ -112,7 +112,7 @@ namespace Kyoo.TheTvdb
 				}
 			};
 		}
-	
+
 		/// <summary>
 		/// Convert a tvdb actor to a kyoo <see cref="PeopleRole"/>.
 		/// </summary>
@@ -126,10 +126,10 @@ namespace Kyoo.TheTvdb
 				{
 					Slug = Utility.ToSlug(actor.Name),
 					Name = actor.Name,
-					Images = new Dictionary<int, string> 
+					Images = new Dictionary<int, string>
 					{
-						[Images.Poster] = !string.IsNullOrEmpty(actor.Image) 
-							? $"https://www.thetvdb.com/banners/{actor.Image}" 
+						[Images.Poster] = !string.IsNullOrEmpty(actor.Image)
+							? $"https://www.thetvdb.com/banners/{actor.Image}"
 							: null
 					}
 				},
@@ -155,8 +155,8 @@ namespace Kyoo.TheTvdb
 				Overview = episode.Overview,
 				Images = new Dictionary<int, string>
 				{
-					[Images.Thumbnail] = !string.IsNullOrEmpty(episode.Filename) 
-						? $"https://www.thetvdb.com/banners/{episode.Filename}" 
+					[Images.Thumbnail] = !string.IsNullOrEmpty(episode.Filename)
+						? $"https://www.thetvdb.com/banners/{episode.Filename}"
 						: null
 				},
 				ExternalIDs = new[]

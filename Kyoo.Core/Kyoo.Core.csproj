@@ -9,12 +9,6 @@
 		<RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
 		<LangVersion>default</LangVersion>
 	</PropertyGroup>
-		
-	<PropertyGroup>
-		<IsWindows Condition="$([MSBuild]::IsOSPlatform('Windows'))">true</IsWindows>
-		<IsOSX Condition="$([MSBuild]::IsOSPlatform('OSX'))">true</IsOSX>
-		<IsLinux Condition="$([MSBuild]::IsOSPlatform('Linux'))">true</IsLinux>
-	</PropertyGroup>
 
 	<PropertyGroup>
 		<TranscoderBinary Condition="$(IsWindows) == true">transcoder.dll</TranscoderBinary>
@@ -58,14 +52,14 @@
 		</Exec>
 		<Error Condition="'$(ErrorCode)' != '0'" Text="An environement capable of building the transcoder was not found. Appropriate tools are not installed, not available in the $PATH or not correctly configured. To fix this you can ether:&#xA; - Fix your tools&#xA; - Skip the transcoder via the '-p:SkipTranscoder=true'&#xA; - Download an already built transcoder and put it in ./Kyoo.Transcoder/build" />
 	</Target>
-	
+
 	<ItemGroup Condition="'$(SkipTranscoder)' != 'true'">
 		<None Include="$(TranscoderRoot)/build/$(TranscoderBinary)">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 			<Visible>false</Visible>
 		</None>
 	</ItemGroup>
-	
+
 	<ItemGroup>
 		<Content Include="../LICENSE" CopyToOutputDirectory="Always" Visible="false" />
 		<Content Include="settings.json" CopyToOutputDirectory="PreserveNewest" />

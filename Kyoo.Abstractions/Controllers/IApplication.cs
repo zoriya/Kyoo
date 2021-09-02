@@ -16,9 +16,9 @@
 		void Restart();
 
 		/// <summary>
-		/// Get the data directory
+		/// Get the data directory.
 		/// </summary>
-		/// <returns>Retrieve the data directory where runtime data should be stored</returns>
+		/// <returns>Retrieve the data directory where runtime data should be stored.</returns>
 		string GetDataDirectory();
 
 		/// <summary>

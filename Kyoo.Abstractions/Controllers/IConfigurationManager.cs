@@ -14,12 +14,12 @@ namespace Kyoo.Abstractions.Controllers
 	public interface IConfigurationManager
 	{
 		/// <summary>
-		/// Add an editable configuration to the editable configuration list
+		/// Add an editable configuration to the editable configuration list.
 		/// </summary>
 		/// <param name="path">The root path of the editable configuration. It should not be a nested type.</param>
-		/// <typeparam name="T">The type of the configuration</typeparam>
+		/// <typeparam name="T">The type of the configuration.</typeparam>
 		void AddTyped<T>(string path);
-		
+
 		/// <summary>
 		/// Add an editable configuration to the editable configuration list.
 		/// WARNING: this method allow you to add an unmanaged type. This type won't be editable. This can be used
@@ -36,32 +36,33 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="path">The root path of the editable configuration. It should not be a nested type.</param>
 		/// <param name="type">The type of the configuration or null.</param>
 		void Register(string path, [CanBeNull] Type type);
-		
+
 		/// <summary>
 		/// Get the value of a setting using it's path.
 		/// </summary>
-		/// <param name="path">The path of the resource (can be separated by ':' or '__')</param>
+		/// <param name="path">The path of the resource (can be separated by ':' or '__').</param>
 		/// <exception cref="ItemNotFoundException">No setting found at the given path.</exception>
-		/// <returns>The value of the settings (if it's a strongly typed one, the given type is instantiated</returns>
+		/// <returns>The value of the settings (if it's a strongly typed one, the given type is instantiated.</returns>
 		object GetValue(string path);
-		
+
 		/// <summary>
 		/// Get the value of a setting using it's path.
 		/// If your don't need a strongly typed value, see <see cref="GetValue"/>.
 		/// </summary>
-		/// <param name="path">The path of the resource (can be separated by ':' or '__')</param>
+		/// <param name="path">The path of the resource (can be separated by ':' or '__').</param>
 		/// <typeparam name="T">A type to strongly type your option.</typeparam>
-		/// <exception cref="InvalidCastException">If your type is not the same as the registered type</exception>
+		/// <exception cref="InvalidCastException">If your type is not the same as the registered type.</exception>
 		/// <exception cref="ItemNotFoundException">No setting found at the given path.</exception>
-		/// <returns>The value of the settings (if it's a strongly typed one, the given type is instantiated</returns>
+		/// <returns>The value of the settings (if it's a strongly typed one, the given type is instantiated.</returns>
 		T GetValue<T>(string path);
-		
+
 		/// <summary>
 		/// Edit the value of a setting using it's path. Save it to the json file.
 		/// </summary>
-		/// <param name="path">The path of the resource (can be separated by ':' or '__')</param>
-		/// <param name="value">The new value of the resource</param>
+		/// <param name="path">The path of the resource (can be separated by ':' or '__').</param>
+		/// <param name="value">The new value of the resource.</param>
 		/// <exception cref="ItemNotFoundException">No setting found at the given path.</exception>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task EditValue(string path, object value);
 	}
 }

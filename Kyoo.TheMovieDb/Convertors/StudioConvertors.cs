@@ -22,7 +22,7 @@ namespace Kyoo.TheMovieDb
 			{
 				Slug = Utility.ToSlug(company.Name),
 				Name = company.Name,
-				ExternalIDs = new []
+				ExternalIDs = new[]
 				{
 					new MetadataID
 					{

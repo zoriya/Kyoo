@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Core.Models.Options;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
 namespace Kyoo.Core.Api
@@ -33,11 +33,11 @@ namespace Kyoo.Core.Api
 			ActionResult<Library> result = await base.Create(resource);
 			if (result.Value != null)
 				_taskManager.StartTask("scan",
-					new Progress<float>(), 
+					new Progress<float>(),
 					new Dictionary<string, object> {{"slug", result.Value.Slug}});
 			return result;
 		}
-		
+
 		[HttpGet("{id:int}/show")]
 		[HttpGet("{id:int}/shows")]
 		[PartialPermission(Kind.Read)]
@@ -89,7 +89,7 @@ namespace Kyoo.Core.Api
 				return BadRequest(new {Error = ex.Message});
 			}
 		}
-		
+
 		[HttpGet("{id:int}/collection")]
 		[HttpGet("{id:int}/collections")]
 		[PartialPermission(Kind.Read)]
@@ -141,7 +141,7 @@ namespace Kyoo.Core.Api
 				return BadRequest(new {Error = ex.Message});
 			}
 		}
-		
+
 		[HttpGet("{id:int}/item")]
 		[HttpGet("{id:int}/items")]
 		[PartialPermission(Kind.Read)]
@@ -167,7 +167,7 @@ namespace Kyoo.Core.Api
 				return BadRequest(new {Error = ex.Message});
 			}
 		}
-		
+
 		[HttpGet("{slug}/item")]
 		[HttpGet("{slug}/items")]
 		[PartialPermission(Kind.Read)]

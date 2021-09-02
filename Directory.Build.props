@@ -1,0 +1,17 @@
+<Project>
+	<PropertyGroup>
+		<IsWindows Condition="$([MSBuild]::IsOSPlatform('Windows'))">true</IsWindows>
+		<IsOSX Condition="$([MSBuild]::IsOSPlatform('OSX'))">true</IsOSX>
+		<IsLinux Condition="$([MSBuild]::IsOSPlatform('Linux'))">true</IsLinux>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.354" />
+		<None Include="$(MSBuildThisFileDirectory)stylecop.json" Link="stylecop.json" Visible="false" />
+		<None Include="$(MSBuildThisFileDirectory).editorconfig" Link="stylecop.json" Visible="false" />
+	</ItemGroup>
+
+	<PropertyGroup>
+		<CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)Kyoo.ruleset</CodeAnalysisRuleSet>
+	</PropertyGroup>
+</Project>

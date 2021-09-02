@@ -15,18 +15,18 @@ namespace Kyoo.Abstractions.Models.Exceptions
 		/// </summary>
 		public IdentificationFailedException()
 			: base("An identification failed.")
-		{}
-		
+		{ }
+
 		/// <summary>
 		/// Create a new <see cref="IdentificationFailedException"/> with a custom message.
 		/// </summary>
 		/// <param name="message">The message to use.</param>
 		public IdentificationFailedException(string message)
 			: base(message)
-		{}
-		
+		{ }
+
 		/// <summary>
-		/// The serialization constructor 
+		/// The serialization constructor
 		/// </summary>
 		/// <param name="info">Serialization infos</param>
 		/// <param name="context">The serialization context</param>

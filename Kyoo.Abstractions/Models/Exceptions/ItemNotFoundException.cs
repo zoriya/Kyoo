@@ -12,7 +12,7 @@ namespace Kyoo.Abstractions.Models.Exceptions
 		/// <summary>
 		/// Create a default <see cref="ItemNotFoundException"/> with no message.
 		/// </summary>
-		public ItemNotFoundException() {}
+		public ItemNotFoundException() { }
 
 		/// <summary>
 		/// Create a new <see cref="ItemNotFoundException"/> with a message
@@ -21,9 +21,9 @@ namespace Kyoo.Abstractions.Models.Exceptions
 		public ItemNotFoundException(string message)
 			: base(message)
 		{ }
-		
+
 		/// <summary>
-		/// The serialization constructor 
+		/// The serialization constructor
 		/// </summary>
 		/// <param name="info">Serialization infos</param>
 		/// <param name="context">The serialization context</param>

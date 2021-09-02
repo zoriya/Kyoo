@@ -49,7 +49,7 @@ namespace Kyoo.TheMovieDb
 					.Select(x => x.ToPeople(provider))
 					.Concat(tv.Credits.Crew.Select(x => x.ToPeople(provider)))
 					.ToArray(),
-				ExternalIDs = new []
+				ExternalIDs = new[]
 				{
 					new MetadataID
 					{
@@ -60,7 +60,7 @@ namespace Kyoo.TheMovieDb
 				}
 			};
 		}
-		
+
 		/// <summary>
 		/// Convert a <see cref="SearchTv"/> to a <see cref="Show"/>.
 		/// </summary>
@@ -75,7 +75,7 @@ namespace Kyoo.TheMovieDb
 				Title = tv.Name,
 				Overview = tv.Overview,
 				StartAir = tv.FirstAirDate,
-				Images = new Dictionary<int, string> 
+				Images = new Dictionary<int, string>
 				{
 					[Images.Poster] = tv.PosterPath != null
 						? $"https://image.tmdb.org/t/p/original{tv.PosterPath}"
@@ -84,7 +84,7 @@ namespace Kyoo.TheMovieDb
 						? $"https://image.tmdb.org/t/p/original{tv.BackdropPath}"
 						: null,
 				},
-				ExternalIDs = new []
+				ExternalIDs = new[]
 				{
 					new MetadataID
 					{

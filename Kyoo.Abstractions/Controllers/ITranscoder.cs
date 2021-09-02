@@ -1,5 +1,5 @@
-using Kyoo.Abstractions.Models;
 using System.Threading.Tasks;
+using Kyoo.Abstractions.Models;
 
 namespace Kyoo.Abstractions.Controllers
 {

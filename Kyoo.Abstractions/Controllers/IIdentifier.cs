@@ -21,7 +21,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// If no metadata could be parsed for a type, null can be returned.
 		/// </returns>
 		Task<(Collection, Show, Season, Episode)> Identify(string path);
-		
+
 		/// <summary>
 		/// Identify an external subtitle or track file from it's path and return the parsed metadata.
 		/// </summary>

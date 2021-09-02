@@ -11,7 +11,7 @@ namespace Kyoo.TheMovieDb.Models
 		public const string Path = "the-moviedb";
 
 		/// <summary>
-		/// The api key of TheMovieDb. 
+		/// The api key of TheMovieDb.
 		/// </summary>
 		public string ApiKey { get; set; }
 	}

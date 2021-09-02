@@ -1,0 +1,26 @@
+<RuleSet Name="Kyoo" ToolsVersion="10.0">
+	<Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.CSharp.MaintainabilityRules">
+		<Rule Id="SA1413" Action="None" />        <!-- UseTrailingCommasInMultiLineInitializers -->
+		<Rule Id="SA1414" Action="None" />        <!-- UseTrailingCommasInMultiLineInitializers -->
+	</Rules>
+	<Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.CSharp.NamingRules">
+		<Rule Id="SA1309" Action="None" />        <!-- FieldNamesMustNotBeginWithUnderscore -->
+		<Rule Id="SX1309" Action="Warning" />     <!-- FieldNamesMustBeginWithUnderscore -->
+	</Rules>
+	<Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.CSharp.ReadabilityRules">
+		<Rule Id="SA1101" Action="None" />        <!-- PrefixLocalCallsWithThis -->
+		<Rule Id="SX1101" Action="Warning" />     <!-- DoNotPrefixLocalMembersWithThis -->
+	</Rules>
+	<Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.CSharp.SpacingRules">
+		<Rule Id="SA1502" Action="None"/>        <!-- DocumentationLinesMustBeginWithSingleSpace -->
+	</Rules>
+	<Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.CSharp.DocumentationRules">
+		<Rule Id="SA1642" Action="None" />        <!-- ConstructorSummaryDocumentationMustBeginWithStandardText -->
+		<Rule Id="SA1643" Action="None" />        <!-- DestructorSummaryDocumentationMustBeginWithStandardText -->
+		<Rule Id="SA1623" Action="None" />        <!-- PropertySummaryDocumentationMustMatchAccessors -->
+
+
+
+		<Rule Id="SA1633" Action="None" />        <!-- FileMustHaveHeader TODO remove this, this is only temporary -->
+	</Rules>
+</RuleSet>

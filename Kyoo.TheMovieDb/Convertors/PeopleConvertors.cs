@@ -5,8 +5,8 @@ using TMDbLib.Objects.General;
 using TMDbLib.Objects.People;
 using TMDbLib.Objects.Search;
 using Images = Kyoo.Abstractions.Models.Images;
-using TvCast = TMDbLib.Objects.TvShows.Cast;
 using MovieCast = TMDbLib.Objects.Movies.Cast;
+using TvCast = TMDbLib.Objects.TvShows.Cast;
 
 namespace Kyoo.TheMovieDb
 {
@@ -31,8 +31,8 @@ namespace Kyoo.TheMovieDb
 					Name = cast.Name,
 					Images = new Dictionary<int, string>
 					{
-						[Images.Poster] = cast.ProfilePath != null 
-							? $"https://image.tmdb.org/t/p/original{cast.ProfilePath}" 
+						[Images.Poster] = cast.ProfilePath != null
+							? $"https://image.tmdb.org/t/p/original{cast.ProfilePath}"
 							: null
 					},
 					ExternalIDs = new[]
@@ -49,7 +49,7 @@ namespace Kyoo.TheMovieDb
 				Role = cast.Character
 			};
 		}
-		
+
 		/// <summary>
 		/// Convert a <see cref="TvCast"/> to a <see cref="PeopleRole"/>.
 		/// </summary>
@@ -66,8 +66,8 @@ namespace Kyoo.TheMovieDb
 					Name = cast.Name,
 					Images = new Dictionary<int, string>
 					{
-						[Images.Poster] = cast.ProfilePath != null 
-							? $"https://image.tmdb.org/t/p/original{cast.ProfilePath}" 
+						[Images.Poster] = cast.ProfilePath != null
+							? $"https://image.tmdb.org/t/p/original{cast.ProfilePath}"
 							: null
 					},
 					ExternalIDs = new[]
@@ -84,7 +84,7 @@ namespace Kyoo.TheMovieDb
 				Role = cast.Character
 			};
 		}
-		
+
 		/// <summary>
 		/// Convert a <see cref="Crew"/> to a <see cref="PeopleRole"/>.
 		/// </summary>
@@ -101,8 +101,8 @@ namespace Kyoo.TheMovieDb
 					Name = crew.Name,
 					Images = new Dictionary<int, string>
 					{
-						[Images.Poster] = crew.ProfilePath != null 
-							? $"https://image.tmdb.org/t/p/original{crew.ProfilePath}" 
+						[Images.Poster] = crew.ProfilePath != null
+							? $"https://image.tmdb.org/t/p/original{crew.ProfilePath}"
 							: null
 					},
 					ExternalIDs = new[]
@@ -119,7 +119,7 @@ namespace Kyoo.TheMovieDb
 				Role = crew.Job
 			};
 		}
-		
+
 		/// <summary>
 		/// Convert a <see cref="Person"/> to a <see cref="People"/>.
 		/// </summary>
@@ -134,8 +134,8 @@ namespace Kyoo.TheMovieDb
 				Name = person.Name,
 				Images = new Dictionary<int, string>
 				{
-					[Images.Poster] = person.ProfilePath != null 
-						? $"https://image.tmdb.org/t/p/original{person.ProfilePath}" 
+					[Images.Poster] = person.ProfilePath != null
+						? $"https://image.tmdb.org/t/p/original{person.ProfilePath}"
 						: null
 				},
 				ExternalIDs = new[]
@@ -149,7 +149,7 @@ namespace Kyoo.TheMovieDb
 				}
 			};
 		}
-		
+
 		/// <summary>
 		/// Convert a <see cref="SearchPerson"/> to a <see cref="People"/>.
 		/// </summary>
@@ -164,8 +164,8 @@ namespace Kyoo.TheMovieDb
 				Name = person.Name,
 				Images = new Dictionary<int, string>
 				{
-					[Images.Poster] = person.ProfilePath != null 
-						? $"https://image.tmdb.org/t/p/original{person.ProfilePath}" 
+					[Images.Poster] = person.ProfilePath != null
+						? $"https://image.tmdb.org/t/p/original{person.ProfilePath}"
 						: null
 				},
 				ExternalIDs = new[]

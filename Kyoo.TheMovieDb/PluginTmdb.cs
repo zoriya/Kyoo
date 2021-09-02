@@ -14,24 +14,6 @@ namespace Kyoo.TheMovieDb
 	/// </summary>
 	public class PluginTmdb : IPlugin
 	{
-		/// <inheritdoc />
-		public string Slug => "the-moviedb";
-		
-		/// <inheritdoc />
-		public string Name => "TheMovieDb";
-		
-		/// <inheritdoc />
-		public string Description => "A metadata provider for TheMovieDB.";
-
-		/// <inheritdoc />
-		public bool Enabled => !string.IsNullOrEmpty(_configuration.GetValue<string>("the-moviedb:apikey"));
-
-		/// <inheritdoc />
-		public Dictionary<string, Type> Configuration => new()
-		{
-			{ TheMovieDbOptions.Path, typeof(TheMovieDbOptions) }
-		};
-
 		/// <summary>
 		/// The configuration used to check if the api key is present or not.
 		/// </summary>
@@ -46,9 +28,29 @@ namespace Kyoo.TheMovieDb
 		{
 			_configuration = configuration;
 			if (!Enabled)
+			{
 				logger.LogWarning("No API key configured for TheMovieDB provider. " +
 					"To enable TheMovieDB, specify one in the setting the-moviedb:APIKEY ");
+			}
 		}
+
+		/// <inheritdoc />
+		public string Slug => "the-moviedb";
+
+		/// <inheritdoc />
+		public string Name => "TheMovieDb";
+
+		/// <inheritdoc />
+		public string Description => "A metadata provider for TheMovieDB.";
+
+		/// <inheritdoc />
+		public bool Enabled => !string.IsNullOrEmpty(_configuration.GetValue<string>("the-moviedb:apikey"));
+
+		/// <inheritdoc />
+		public Dictionary<string, Type> Configuration => new()
+		{
+			{ TheMovieDbOptions.Path, typeof(TheMovieDbOptions) }
+		};
 
 		/// <inheritdoc />
 		public void Configure(ContainerBuilder builder)

@@ -8,7 +8,8 @@ using Microsoft.AspNetCore.Mvc;
 namespace Kyoo.Abstractions.Controllers
 {
 	/// <summary>
-	/// A service to abstract the file system to allow custom file systems (like distant file systems or external providers)
+	/// A service to abstract the file system to allow custom file systems
+	/// (like distant file systems or external providers).
 	/// </summary>
 	public interface IFileSystem
 	{
@@ -16,10 +17,10 @@ namespace Kyoo.Abstractions.Controllers
 
 		/// <summary>
 		/// Used for http queries returning a file. This should be used to return local files
-		/// or proxy them from a distant server
+		/// or proxy them from a distant server.
 		/// </summary>
 		/// <remarks>
-		///	If no file exists at the given path or if the path is null, a NotFoundResult is returned
+		/// If no file exists at the given path or if the path is null, a NotFoundResult is returned
 		/// to handle it gracefully.
 		/// </remarks>
 		/// <param name="path">The path of the file.</param>
@@ -42,7 +43,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <exception cref="FileNotFoundException">If the file could not be found.</exception>
 		/// <returns>A reader to read the file.</returns>
 		public Task<Stream> GetReader([NotNull] string path);
-		
+
 		/// <summary>
 		/// Read a file present at <paramref name="path"/>. The reader can be used in an arbitrary context.
 		/// To return files from an http endpoint, use <see cref="FileResult"/>.
@@ -80,7 +81,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="path">The path of the directory</param>
 		/// <param name="options">Should the search be recursive or not.</param>
 		/// <returns>A list of files's path.</returns>
-		public Task<ICollection<string>> ListFiles([NotNull] string path, 
+		public Task<ICollection<string>> ListFiles([NotNull] string path,
 			SearchOption options = SearchOption.TopDirectoryOnly);
 
 		/// <summary>
