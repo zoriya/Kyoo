@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Authentication.Models;
 using Microsoft.AspNetCore.Authentication;
@@ -17,7 +18,7 @@ namespace Kyoo.Authentication
 	/// A permission validator to validate permission with user Permission array
 	/// or the default array from the configurations if the user is not logged.
 	/// </summary>
-	public class PermissionValidatorFactory : IPermissionValidator
+	public class PermissionValidator : IPermissionValidator
 	{
 		/// <summary>
 		/// The permissions options to retrieve default permissions.
@@ -25,10 +26,10 @@ namespace Kyoo.Authentication
 		private readonly IOptionsMonitor<PermissionOption> _options;
 
 		/// <summary>
-		/// Create a new factory with the given options
+		/// Create a new factory with the given options.
 		/// </summary>
 		/// <param name="options">The option containing default values.</param>
-		public PermissionValidatorFactory(IOptionsMonitor<PermissionOption> options)
+		public PermissionValidator(IOptionsMonitor<PermissionOption> options)
 		{
 			_options = options;
 		}
@@ -36,46 +37,49 @@ namespace Kyoo.Authentication
 		/// <inheritdoc />
 		public IFilterMetadata Create(PermissionAttribute attribute)
 		{
-			return new PermissionValidator(attribute.Type, attribute.Kind, attribute.Group, _options);
+			return new PermissionValidatorFilter(attribute.Type, attribute.Kind, attribute.Group, _options);
 		}
 
 		/// <inheritdoc />
 		public IFilterMetadata Create(PartialPermissionAttribute attribute)
 		{
-			return new PermissionValidator((object)attribute.Type ?? attribute.Kind, _options);
+			return new PermissionValidatorFilter((object)attribute.Type ?? attribute.Kind, _options);
 		}
 
 		/// <summary>
-		/// The authorization filter used by <see cref="PermissionValidatorFactory"/>
+		/// The authorization filter used by <see cref="PermissionValidator"/>.
 		/// </summary>
-		private class PermissionValidator : IAsyncAuthorizationFilter
+		private class PermissionValidatorFilter : IAsyncAuthorizationFilter
 		{
 			/// <summary>
-			/// The permission to validate
+			/// The permission to validate.
 			/// </summary>
 			private readonly string _permission;
+
 			/// <summary>
-			/// The kind of permission needed
+			/// The kind of permission needed.
 			/// </summary>
 			private readonly Kind? _kind;
 
 			/// <summary>
-			/// The group of he permission
+			/// The group of he permission.
 			/// </summary>
 			private readonly Group _group = Group.Overall;
+
 			/// <summary>
 			/// The permissions options to retrieve default permissions.
 			/// </summary>
 			private readonly IOptionsMonitor<PermissionOption> _options;
 
 			/// <summary>
-			/// Create a new permission validator with the given options
+			/// Create a new permission validator with the given options.
 			/// </summary>
-			/// <param name="permission">The permission to validate</param>
-			/// <param name="kind">The kind of permission needed</param>
-			/// <param name="group">The group of the permission</param>
+			/// <param name="permission">The permission to validate.</param>
+			/// <param name="kind">The kind of permission needed.</param>
+			/// <param name="group">The group of the permission.</param>
 			/// <param name="options">The option containing default values.</param>
-			public PermissionValidator(string permission, Kind kind, Group group, IOptionsMonitor<PermissionOption> options)
+			public PermissionValidatorFilter(string permission, Kind kind, Group group,
+				IOptionsMonitor<PermissionOption> options)
 			{
 				_permission = permission;
 				_kind = kind;
@@ -84,11 +88,11 @@ namespace Kyoo.Authentication
 			}
 
 			/// <summary>
-			/// Create a new permission validator with the given options
+			/// Create a new permission validator with the given options.
 			/// </summary>
-			/// <param name="partialInfo">The partial permission to validate</param>
+			/// <param name="partialInfo">The partial permission to validate.</param>
 			/// <param name="options">The option containing default values.</param>
-			public PermissionValidator(object partialInfo, IOptionsMonitor<PermissionOption> options)
+			public PermissionValidatorFilter(object partialInfo, IOptionsMonitor<PermissionOption> options)
 			{
 				if (partialInfo is Kind kind)
 					_kind = kind;
@@ -98,7 +102,6 @@ namespace Kyoo.Authentication
 					throw new ArgumentException($"{nameof(partialInfo)} can only be a permission string or a kind.");
 				_options = options;
 			}
-
 
 			/// <inheritdoc />
 			public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
@@ -127,8 +130,10 @@ namespace Kyoo.Authentication
 							                            "are not supported.");
 					}
 					if (permission == null || kind == null)
+					{
 						throw new ArgumentException("The permission type or kind is still missing after two partial " +
 						                            "permission attributes, this is unsupported.");
+					}
 				}
 
 				string permStr = $"{permission.ToLower()}.{kind.ToString()!.ToLower()}";

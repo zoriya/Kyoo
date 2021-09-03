@@ -23,6 +23,7 @@ namespace Kyoo.TheMovieDb
 		/// The API key used to authenticate with TheMovieDb API.
 		/// </summary>
 		private readonly IOptions<TheMovieDbOptions> _apiKey;
+
 		/// <summary>
 		/// The logger to use in ase of issue.
 		/// </summary>
@@ -43,14 +44,13 @@ namespace Kyoo.TheMovieDb
 		/// <summary>
 		/// Create a new <see cref="TheMovieDbProvider"/> using the given api key.
 		/// </summary>
-		/// <param name="apiKey">The api key</param>
+		/// <param name="apiKey">The api key.</param>
 		/// <param name="logger">The logger to use in case of issue.</param>
 		public TheMovieDbProvider(IOptions<TheMovieDbOptions> apiKey, ILogger<TheMovieDbProvider> logger)
 		{
 			_apiKey = apiKey;
 			_logger = logger;
 		}
-
 
 		/// <inheritdoc />
 		public Task<T> Get<T>(T item)
@@ -71,8 +71,8 @@ namespace Kyoo.TheMovieDb
 		/// <summary>
 		/// Get a collection using it's id, if the id is not present in the collection, fallback to a name search.
 		/// </summary>
-		/// <param name="collection">The collection to search for</param>
-		/// <returns>A collection containing metadata from TheMovieDb</returns>
+		/// <param name="collection">The collection to search for.</param>
+		/// <returns>A collection containing metadata from TheMovieDb.</returns>
 		private async Task<Collection> _GetCollection(Collection collection)
 		{
 			if (!collection.TryGetID(Provider.Slug, out int id))
@@ -89,8 +89,8 @@ namespace Kyoo.TheMovieDb
 		/// <summary>
 		/// Get a show using it's id, if the id is not present in the show, fallback to a title search.
 		/// </summary>
-		/// <param name="show">The show to search for</param>
-		/// <returns>A show containing metadata from TheMovieDb</returns>
+		/// <param name="show">The show to search for.</param>
+		/// <returns>A show containing metadata from TheMovieDb.</returns>
 		private async Task<Show> _GetShow(Show show)
 		{
 			if (!show.TryGetID(Provider.Slug, out int id))
@@ -119,7 +119,7 @@ namespace Kyoo.TheMovieDb
 		/// Get a season using it's show and it's season number.
 		/// </summary>
 		/// <param name="season">The season to retrieve metadata for.</param>
-		/// <returns>A season containing metadata from TheMovieDb</returns>
+		/// <returns>A season containing metadata from TheMovieDb.</returns>
 		private async Task<Season> _GetSeason(Season season)
 		{
 			if (season.Show == null)
@@ -139,10 +139,10 @@ namespace Kyoo.TheMovieDb
 
 		/// <summary>
 		/// Get an episode using it's show, it's season number and it's episode number.
-		/// Absolute numbering is not supported. 
+		/// Absolute numbering is not supported.
 		/// </summary>
 		/// <param name="episode">The episode to retrieve metadata for.</param>
-		/// <returns>An episode containing metadata from TheMovieDb</returns>
+		/// <returns>An episode containing metadata from TheMovieDb.</returns>
 		private async Task<Episode> _GetEpisode(Episode episode)
 		{
 			if (episode.Show == null)
@@ -163,8 +163,8 @@ namespace Kyoo.TheMovieDb
 		/// <summary>
 		/// Get a person using it's id, if the id is not present in the person, fallback to a name search.
 		/// </summary>
-		/// <param name="person">The person to search for</param>
-		/// <returns>A person containing metadata from TheMovieDb</returns>
+		/// <param name="person">The person to search for.</param>
+		/// <returns>A person containing metadata from TheMovieDb.</returns>
 		private async Task<People> _GetPerson(People person)
 		{
 			if (!person.TryGetID(Provider.Slug, out int id))
@@ -181,8 +181,8 @@ namespace Kyoo.TheMovieDb
 		/// <summary>
 		/// Get a studio using it's id, if the id is not present in the studio, fallback to a name search.
 		/// </summary>
-		/// <param name="studio">The studio to search for</param>
-		/// <returns>A studio containing metadata from TheMovieDb</returns>
+		/// <param name="studio">The studio to search for.</param>
+		/// <returns>A studio containing metadata from TheMovieDb.</returns>
 		private async Task<Studio> _GetStudio(Studio studio)
 		{
 			if (!studio.TryGetID(Provider.Slug, out int id))

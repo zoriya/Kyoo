@@ -1,7 +1,7 @@
-﻿using Kyoo.Abstractions.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Kyoo.Abstractions.Models;
 
 namespace Kyoo.Abstractions.Controllers
 {
@@ -30,6 +30,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// Merging metadata is the job of Kyoo, a complex <typeparamref name="T"/> is given
 		/// to make a precise search and give you every available properties, not to discard properties.
 		/// </remarks>
+		/// <typeparam name="T">The type of resource to retrieve metadata for.</typeparam>
 		/// <returns>A new <typeparamref name="T"/> containing metadata from your provider or null</returns>
 		[ItemCanBeNull]
 		Task<T> Get<T>([NotNull] T item)
@@ -39,6 +40,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// Search for a specific type of items with a given query.
 		/// </summary>
 		/// <param name="query">The search query to use.</param>
+		/// <typeparam name="T">The type of resource to search metadata for.</typeparam>
 		/// <returns>The list of items that could be found on this specific provider.</returns>
 		[ItemNotNull]
 		Task<ICollection<T>> Search<T>(string query)
@@ -62,7 +64,7 @@ namespace Kyoo.Abstractions.Controllers
 
 		/// <summary>
 		/// Since this is a composite and not a real provider, no metadata is available.
-		/// It is not meant to be stored or selected. This class will handle merge based on what is required. 
+		/// It is not meant to be stored or selected. This class will handle merge based on what is required.
 		/// </summary>
 		public Provider Provider => null;
 

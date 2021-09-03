@@ -26,38 +26,47 @@ namespace Kyoo.Database
 		/// All libraries of Kyoo. See <see cref="Library"/>.
 		/// </summary>
 		public DbSet<Library> Libraries { get; set; }
+
 		/// <summary>
 		/// All collections of Kyoo. See <see cref="Collection"/>.
 		/// </summary>
 		public DbSet<Collection> Collections { get; set; }
+
 		/// <summary>
 		/// All shows of Kyoo. See <see cref="Show"/>.
 		/// </summary>
 		public DbSet<Show> Shows { get; set; }
+
 		/// <summary>
 		/// All seasons of Kyoo. See <see cref="Season"/>.
 		/// </summary>
 		public DbSet<Season> Seasons { get; set; }
+
 		/// <summary>
 		/// All episodes of Kyoo. See <see cref="Episode"/>.
 		/// </summary>
 		public DbSet<Episode> Episodes { get; set; }
+
 		/// <summary>
 		/// All tracks of Kyoo. See <see cref="Track"/>.
 		/// </summary>
 		public DbSet<Track> Tracks { get; set; }
+
 		/// <summary>
 		/// All genres of Kyoo. See <see cref="Genres"/>.
 		/// </summary>
 		public DbSet<Genre> Genres { get; set; }
+
 		/// <summary>
 		/// All people of Kyoo. See <see cref="People"/>.
 		/// </summary>
 		public DbSet<People> People { get; set; }
+
 		/// <summary>
 		/// All studios of Kyoo. See <see cref="Studio"/>.
 		/// </summary>
 		public DbSet<Studio> Studios { get; set; }
+
 		/// <summary>
 		/// All providers of Kyoo. See <see cref="Provider"/>.
 		/// </summary>
@@ -74,12 +83,12 @@ namespace Kyoo.Database
 		public DbSet<PeopleRole> PeopleRoles { get; set; }
 
 		/// <summary>
-		/// Episodes with a watch percentage. See <see cref="WatchedEpisode"/>
+		/// Episodes with a watch percentage. See <see cref="WatchedEpisode"/>.
 		/// </summary>
 		public DbSet<WatchedEpisode> WatchedEpisodes { get; set; }
 
 		/// <summary>
-		/// The list of library items (shows and collections that are part of a library - or the global one)
+		/// The list of library items (shows and collections that are part of a library - or the global one).
 		/// </summary>
 		/// <remarks>
 		/// This set is ready only, on most database this will be a view.
@@ -471,7 +480,7 @@ namespace Kyoo.Database
 		/// <exception cref="DuplicatedItemException">A duplicated item has been found.</exception>
 		/// <returns>The number of state entries written to the database.</returns>
 		public async Task<int> SaveChangesAsync(string duplicateMessage,
-			CancellationToken cancellationToken = new())
+			CancellationToken cancellationToken = default)
 		{
 			try
 			{
@@ -492,7 +501,7 @@ namespace Kyoo.Database
 		/// </summary>
 		/// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete</param>
 		/// <returns>The number of state entries written to the database or -1 if a duplicate exist.</returns>
-		public async Task<int> SaveIfNoDuplicates(CancellationToken cancellationToken = new())
+		public async Task<int> SaveIfNoDuplicates(CancellationToken cancellationToken = default)
 		{
 			try
 			{
@@ -507,7 +516,7 @@ namespace Kyoo.Database
 		/// <summary>
 		/// Return the first resource with the given slug that is currently tracked by this context.
 		/// This allow one to limit redundant calls to <see cref="IRepository{T}.CreateIfNotExists"/> during the
-		/// same transaction and prevent fails from EF when two same entities are being tracked. 
+		/// same transaction and prevent fails from EF when two same entities are being tracked.
 		/// </summary>
 		/// <param name="slug">The slug of the resource to check</param>
 		/// <typeparam name="T">The type of entity to check</typeparam>

@@ -3,6 +3,10 @@
 		<Rule Id="SA1413" Action="None" />        <!-- UseTrailingCommasInMultiLineInitializers -->
 		<Rule Id="SA1414" Action="None" />        <!-- UseTrailingCommasInMultiLineInitializers -->
 	</Rules>
+	<Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.CSharp.OrderingRules">
+		<Rule Id="SA1201" Action="None" />        <!-- ElementsMustAppearInTheCorrectOrder -->
+		<Rule Id="SA1202" Action="None" />        <!-- ElementsMustBeOrderedByAccess -->
+	</Rules>
 	<Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.CSharp.NamingRules">
 		<Rule Id="SA1309" Action="None" />        <!-- FieldNamesMustNotBeginWithUnderscore -->
 		<Rule Id="SX1309" Action="Warning" />     <!-- FieldNamesMustBeginWithUnderscore -->
@@ -11,13 +15,20 @@
 		<Rule Id="SA1101" Action="None" />        <!-- PrefixLocalCallsWithThis -->
 		<Rule Id="SX1101" Action="Warning" />     <!-- DoNotPrefixLocalMembersWithThis -->
 		<Rule Id="SA1134" Action="None" />        <!-- AttributesMustNotShareLine -->
+		<Rule Id="SA1117" Action="None" />        <!-- ParametersMustBeOnSameLineOrSeparateLines -->
+		<Rule Id="SA1116" Action="None" />        <!-- SplitParametersMustStartOnLineAfterDeclaration -->
+		<Rule Id="SA1111" Action="None" />        <!-- ClosingParenthesisMustBeOnLineOfLastParameter -->
+		<Rule Id="SA1009" Action="None" />        <!-- ClosingParenthesisMustBeSpacedCorrectly (bugged if the parenthesis is on a line by iteself) -->
 	</Rules>
 	<Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.CSharp.SpacingRules">
 		<Rule Id="SA1502" Action="None"/>         <!-- DocumentationLinesMustBeginWithSingleSpace -->
+		<Rule Id="SA1027" Action="None"/>         <!-- UseTabsCorrectly (smarts tabs are broken). TODO find a way to enable smart tabs -->
 	</Rules>
 	<Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.CSharp.LayoutRules">
 		<Rule Id="SA1503" Action="None"/>         <!-- BracesMustNotBeOmitted -->
 		<Rule Id="SA1520" Action="None"/>         <!-- UseBracesConsistently -->
+		<Rule Id="SA1515" Action="None"/>         <!-- SingleLineCommentMustBePrecededByBlankLine -->
+		<Rule Id="SA1513" Action="None"/>         <!-- ClosingBraceMustBeFollowedByBlankLine -->
 	</Rules>
 	<Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.CSharp.DocumentationRules">
 		<Rule Id="SA1642" Action="None" />        <!-- ConstructorSummaryDocumentationMustBeginWithStandardText -->
@@ -27,5 +38,6 @@
 
 
 		<Rule Id="SA1633" Action="None" />        <!-- FileMustHaveHeader TODO remove this, this is only temporary -->
+		<Rule Id="SA1629" Action="None" />        <!-- DocumentationTextMustEndWithAPeriod TODO remove this, this is only temporary -->
 	</Rules>
 </RuleSet>

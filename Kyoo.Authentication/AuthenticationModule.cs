@@ -85,7 +85,7 @@ namespace Kyoo.Authentication
 		/// <inheritdoc />
 		public void Configure(ContainerBuilder builder)
 		{
-			builder.RegisterType<PermissionValidatorFactory>().As<IPermissionValidator>().SingleInstance();
+			builder.RegisterType<PermissionValidator>().As<IPermissionValidator>().SingleInstance();
 
 			DefaultCorsPolicyService cors = new(_logger)
 			{

@@ -41,9 +41,9 @@ namespace Kyoo.Core.Api
 		}
 
 
+		// TODO enable the following line, this is disabled since the web app can't use bearers. [Permission("video", Kind.Read)]
 		[HttpGet("{slug}")]
 		[HttpGet("direct/{slug}")]
-		// TODO enable the following line, this is disabled since the web app can't use bearers. [Permission("video", Kind.Read)]
 		public async Task<IActionResult> Direct(string slug)
 		{
 			try

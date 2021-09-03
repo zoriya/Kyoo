@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Permissions;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.Extensions.Logging;
@@ -9,7 +11,8 @@ namespace Kyoo.Core.Controllers
 	/// </summary>
 	public class PassthroughPermissionValidator : IPermissionValidator
 	{
-		// ReSharper disable once SuggestBaseTypeForParameter
+		[SuppressMessage("ReSharper", "SuggestBaseTypeForParameterInConstructor",
+			Justification = "ILogger should include the typeparam for context.")]
 		public PassthroughPermissionValidator(ILogger<PassthroughPermissionValidator> logger)
 		{
 			logger.LogWarning("No permission validator has been enabled, all users will have all permissions");
@@ -28,7 +31,7 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <summary>
-		/// An useless filter that does nothing. 
+		/// An useless filter that does nothing.
 		/// </summary>
 		private class PassthroughValidator : IFilterMetadata { }
 	}

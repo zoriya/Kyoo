@@ -19,8 +19,9 @@ namespace Kyoo.Abstractions.Controllers
 		/// The count of items to return.
 		/// </summary>
 		public int Count { get; }
+
 		/// <summary>
-		/// Where to start? Using the given sort
+		/// Where to start? Using the given sort.
 		/// </summary>
 		public int AfterID { get; }
 
@@ -53,6 +54,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// The sort key. This member will be used to sort the results.
 		/// </summary>
 		public Expression<Func<T, object>> Key { get; }
+
 		/// <summary>
 		/// If this is set to true, items will be sorted in descend order else, they will be sorted in ascendant order.
 		/// </summary>
@@ -121,7 +123,8 @@ namespace Kyoo.Abstractions.Controllers
 	/// A common repository for every resources.
 	/// </summary>
 	/// <typeparam name="T">The resource's type that this repository manage.</typeparam>
-	public interface IRepository<T> : IBaseRepository where T : class, IResource
+	public interface IRepository<T> : IBaseRepository
+		where T : class, IResource
 	{
 		/// <summary>
 		/// Get a resource from it's ID.

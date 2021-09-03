@@ -35,7 +35,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <c>true</c> if the plugin should be enabled, <c>false</c> otherwise.
 		/// If a plugin is not enabled, no configure method will be called.
 		/// This allow one to enable a plugin if a specific configuration value is set or if the environment contains
-		/// the right settings. 
+		/// the right settings.
 		/// </summary>
 		/// <remarks>
 		/// By default, a plugin is always enabled. This method can be overriden to change this behavior.

@@ -50,7 +50,7 @@ namespace Kyoo.Abstractions.Models
 		public string TrailerUrl => Images?.GetValueOrDefault(Models.Images.Trailer);
 
 		/// <summary>
-		/// The date this show started airing. It can be null if this is unknown. 
+		/// The date this show started airing. It can be null if this is unknown.
 		/// </summary>
 		public DateTime? StartAir { get; set; }
 
@@ -103,6 +103,7 @@ namespace Kyoo.Abstractions.Models
 		/// The ID of the Studio that made this show.
 		/// </summary>
 		[SerializeIgnore] public int? StudioID { get; set; }
+
 		/// <summary>
 		/// The Studio that made this show.
 		/// This must be explicitly loaded via a call to <see cref="ILibraryManager.Load"/>.
@@ -145,19 +146,48 @@ namespace Kyoo.Abstractions.Models
 		public void OnMerge(object merged)
 		{
 			if (People != null)
+			{
 				foreach (PeopleRole link in People)
 					link.Show = this;
+			}
+
 			if (Seasons != null)
+			{
 				foreach (Season season in Seasons)
 					season.Show = this;
+			}
+
 			if (Episodes != null)
+			{
 				foreach (Episode episode in Episodes)
 					episode.Show = this;
+			}
 		}
 	}
 
 	/// <summary>
 	/// The enum containing show's status.
 	/// </summary>
-	public enum Status { Unknown, Finished, Airing, Planned }
+	public enum Status
+	{
+		/// <summary>
+		/// The status of the show is not known.
+		/// </summary>
+		Unknown,
+
+		/// <summary>
+		/// The show has finished airing.
+		/// </summary>
+		Finished,
+
+		/// <summary>
+		/// The show is still actively airing.
+		/// </summary>
+		Airing,
+
+		/// <summary>
+		/// This show has not aired yet but has been announced.
+		/// </summary>
+		Planned
+	}
 }
