@@ -21,8 +21,8 @@ namespace Kyoo.Core.Api
 			}
 			return operand(left, right);
 		}
-		
-		public static Expression<Func<T, bool>> ParseWhere<T>(Dictionary<string, string> where, 
+
+		public static Expression<Func<T, bool>> ParseWhere<T>(Dictionary<string, string> where,
 			Expression<Func<T, bool>> defaultWhere = null)
 		{
 			if (where == null || where.Count == 0)
@@ -35,7 +35,7 @@ namespace Kyoo.Core.Api
 			{
 				if (key == null || desired == null)
 					throw new ArgumentException("Invalid key/value pair. Can't be null.");
-				
+
 				string value = desired;
 				string operand = "eq";
 				if (desired.Contains(':'))
@@ -68,15 +68,15 @@ namespace Kyoo.Core.Api
 
 					valueExpr = Expression.Constant(val, property.PropertyType);
 				}
-				
+
 				Expression condition = operand switch
 				{
 					"eq" when isList => ContainsResourceExpression(propertyExpr, value),
 					"ctn" => ContainsResourceExpression(propertyExpr, value),
-					
+
 					"eq" when valueExpr == null => ResourceEqual(propertyExpr, value),
 					"not" when valueExpr == null => ResourceEqual(propertyExpr, value, true),
-					
+
 					"eq" => Expression.Equal(propertyExpr, valueExpr),
 					"not" => Expression.NotEqual(propertyExpr, valueExpr!),
 					"lt" => StringCompatibleExpression(Expression.LessThan, propertyExpr, valueExpr),
@@ -110,11 +110,11 @@ namespace Kyoo.Core.Api
 				valueConst = Expression.Constant(value);
 			}
 
-			return notEqual 
-				? Expression.NotEqual(field, valueConst) 
+			return notEqual
+				? Expression.NotEqual(field, valueConst)
 				: Expression.Equal(field, valueConst);
 		}
-		
+
 		private static Expression ContainsResourceExpression(MemberExpression xProperty, string value)
 		{
 			// x => x.PROPERTY.Any(y => y.Slug == value)

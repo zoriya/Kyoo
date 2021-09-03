@@ -24,7 +24,7 @@ namespace Kyoo.Postgresql
 
 		/// <inheritdoc />
 		public string Description => "A database context for postgresql.";
-		
+
 		/// <inheritdoc />
 		public Dictionary<string, Type> Configuration => new();
 
@@ -51,7 +51,7 @@ namespace Kyoo.Postgresql
 			_configuration = configuration;
 			_environment = env;
 		}
-		
+
 		/// <inheritdoc />
 		public void Configure(IServiceCollection services)
 		{

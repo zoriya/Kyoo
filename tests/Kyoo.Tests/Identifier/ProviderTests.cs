@@ -15,7 +15,7 @@ namespace Kyoo.Tests.Identifier
 	public class ProviderTests
 	{
 		private readonly ILoggerFactory _factory;
-		
+
 		public ProviderTests(ITestOutputHelper output)
 		{
 			_factory = LoggerFactory.Create(x =>
@@ -24,7 +24,7 @@ namespace Kyoo.Tests.Identifier
 				x.AddXunit(output);
 			});
 		}
-		
+
 		[Fact]
 		public async Task NoProviderGetTest()
 		{
@@ -38,7 +38,7 @@ namespace Kyoo.Tests.Identifier
 			Show ret = await provider.Get(show);
 			KAssert.DeepEqual(show, ret);
 		}
-		
+
 		[Fact]
 		public async Task NoProviderSearchTest()
 		{
@@ -47,7 +47,7 @@ namespace Kyoo.Tests.Identifier
 			ICollection<Show> ret = await provider.Search<Show>("show");
 			Assert.Empty(ret);
 		}
-		
+
 		[Fact]
 		public async Task OneProviderGetTest()
 		{
@@ -60,14 +60,14 @@ namespace Kyoo.Tests.Identifier
 			mock.Setup(x => x.Get(show)).ReturnsAsync(new Show
 			{
 				Title = "title",
-				Genres = new[] { new Genre("ToMerge")}
+				Genres = new[] { new Genre("ToMerge") }
 			});
-			AProviderComposite provider = new ProviderComposite(new []
+			AProviderComposite provider = new ProviderComposite(new[]
 				{
 					mock.Object
 				},
 				_factory.CreateLogger<ProviderComposite>());
-			
+
 			Show ret = await provider.Get(show);
 			Assert.Equal(4, ret.ID);
 			Assert.Equal("title", ret.Title);
@@ -75,7 +75,7 @@ namespace Kyoo.Tests.Identifier
 			Assert.Contains("genre", ret.Genres.Select(x => x.Slug));
 			Assert.Contains("tomerge", ret.Genres.Select(x => x.Slug));
 		}
-		
+
 		[Fact]
 		public async Task FailingProviderGetTest()
 		{
@@ -89,30 +89,30 @@ namespace Kyoo.Tests.Identifier
 			mock.Setup(x => x.Get(show)).ReturnsAsync(new Show
 			{
 				Title = "title",
-				Genres = new[] { new Genre("ToMerge")}
+				Genres = new[] { new Genre("ToMerge") }
 			});
-			
+
 			Mock<IMetadataProvider> mockTwo = new();
 			mockTwo.Setup(x => x.Provider).Returns(new Provider("mockTwo", ""));
 			mockTwo.Setup(x => x.Get(show)).ReturnsAsync(new Show
 			{
 				Title = "title2",
 				Status = Status.Finished,
-				Genres = new[] { new Genre("ToMerge")}
+				Genres = new[] { new Genre("ToMerge") }
 			});
-			
+
 			Mock<IMetadataProvider> mockFailing = new();
 			mockFailing.Setup(x => x.Provider).Returns(new Provider("mockFail", ""));
 			mockFailing.Setup(x => x.Get(show)).Throws<ArgumentException>();
-			
-			AProviderComposite provider = new ProviderComposite(new []
+
+			AProviderComposite provider = new ProviderComposite(new[]
 				{
 					mock.Object,
 					mockTwo.Object,
 					mockFailing.Object
 				},
 				_factory.CreateLogger<ProviderComposite>());
-			
+
 			Show ret = await provider.Get(show);
 			Assert.Equal(4, ret.ID);
 			Assert.Equal("title", ret.Title);

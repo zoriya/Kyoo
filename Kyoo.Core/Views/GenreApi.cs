@@ -24,7 +24,7 @@ namespace Kyoo.Core.Api
 		{
 			_libraryManager = libraryManager;
 		}
-		
+
 		[HttpGet("{id:int}/show")]
 		[HttpGet("{id:int}/shows")]
 		[PartialPermission(Kind.Read)]
@@ -47,10 +47,10 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
-		
+
 		[HttpGet("{slug}/show")]
 		[HttpGet("{slug}/shows")]
 		[PartialPermission(Kind.Read)]
@@ -73,7 +73,7 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
 	}

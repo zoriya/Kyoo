@@ -14,13 +14,13 @@ namespace Kyoo.Tests.Identifier
 	{
 		private readonly Mock<ILibraryManager> _manager;
 		private readonly IIdentifier _identifier;
-		
+
 		public Identifier()
 		{
 			Mock<IOptionsMonitor<MediaOptions>> options = new();
 			options.Setup(x => x.CurrentValue).Returns(new MediaOptions
 			{
-				Regex = new []
+				Regex = new[]
 				{
 					"^\\/?(?<Collection>.+)?\\/(?<Show>.+?)(?: \\((?<StartYear>\\d+)\\))?\\/\\k<Show>(?: \\(\\d+\\))? S(?<Season>\\d+)E(?<Episode>\\d+)\\..*$",
 					"^\\/?(?<Collection>.+)?\\/(?<Show>.+?)(?: \\((?<StartYear>\\d+)\\))?\\/\\k<Show>(?: \\(\\d+\\))? (?<Absolute>\\d+)\\..*$",
@@ -31,12 +31,12 @@ namespace Kyoo.Tests.Identifier
 					"^(?<Episode>.+)\\.(?<Language>\\w{1,3})\\.(?<Default>default\\.)?(?<Forced>forced\\.)?.*$"
 				}
 			});
-			
+
 			_manager = new Mock<ILibraryManager>();
 			_identifier = new RegexIdentifier(options.Object, _manager.Object);
 		}
-		
-		
+
+
 		[Fact]
 		public async Task EpisodeIdentification()
 		{
@@ -56,7 +56,7 @@ namespace Kyoo.Tests.Identifier
 			Assert.Equal(1, episode.EpisodeNumber);
 			Assert.Null(episode.AbsoluteNumber);
 		}
-		
+
 		[Fact]
 		public async Task EpisodeIdentificationWithoutLibraryTrailingSlash()
 		{
@@ -76,7 +76,7 @@ namespace Kyoo.Tests.Identifier
 			Assert.Equal(1, episode.EpisodeNumber);
 			Assert.Null(episode.AbsoluteNumber);
 		}
-		
+
 		[Fact]
 		public async Task EpisodeIdentificationMultiplePaths()
 		{
@@ -96,7 +96,7 @@ namespace Kyoo.Tests.Identifier
 			Assert.Equal(1, episode.EpisodeNumber);
 			Assert.Null(episode.AbsoluteNumber);
 		}
-		
+
 		[Fact]
 		public async Task AbsoluteEpisodeIdentification()
 		{
@@ -116,7 +116,7 @@ namespace Kyoo.Tests.Identifier
 			Assert.Null(episode.EpisodeNumber);
 			Assert.Equal(100, episode.AbsoluteNumber);
 		}
-		
+
 		[Fact]
 		public async Task MovieEpisodeIdentification()
 		{
@@ -137,7 +137,7 @@ namespace Kyoo.Tests.Identifier
 			Assert.Null(episode.EpisodeNumber);
 			Assert.Null(episode.AbsoluteNumber);
 		}
-		
+
 		[Fact]
 		public async Task InvalidEpisodeIdentification()
 		{
@@ -147,7 +147,7 @@ namespace Kyoo.Tests.Identifier
 			});
 			await Assert.ThrowsAsync<IdentificationFailedException>(() => _identifier.Identify("/invalid/path"));
 		}
-		
+
 		[Fact]
 		public async Task SubtitleIdentification()
 		{
@@ -163,7 +163,7 @@ namespace Kyoo.Tests.Identifier
 			Assert.False(track.IsForced);
 			Assert.StartsWith("/kyoo/Library/Collection/Show (2000)/Show", track.Episode.Path);
 		}
-		
+
 		[Fact]
 		public async Task SubtitleIdentificationUnknownCodec()
 		{
@@ -179,7 +179,7 @@ namespace Kyoo.Tests.Identifier
 			Assert.False(track.IsForced);
 			Assert.StartsWith("/kyoo/Library/Collection/Show (2000)/Show", track.Episode.Path);
 		}
-		
+
 		[Fact]
 		public async Task InvalidSubtitleIdentification()
 		{

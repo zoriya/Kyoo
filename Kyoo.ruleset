@@ -10,9 +10,14 @@
 	<Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.CSharp.ReadabilityRules">
 		<Rule Id="SA1101" Action="None" />        <!-- PrefixLocalCallsWithThis -->
 		<Rule Id="SX1101" Action="Warning" />     <!-- DoNotPrefixLocalMembersWithThis -->
+		<Rule Id="SA1134" Action="None" />        <!-- AttributesMustNotShareLine -->
 	</Rules>
 	<Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.CSharp.SpacingRules">
-		<Rule Id="SA1502" Action="None"/>        <!-- DocumentationLinesMustBeginWithSingleSpace -->
+		<Rule Id="SA1502" Action="None"/>         <!-- DocumentationLinesMustBeginWithSingleSpace -->
+	</Rules>
+	<Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.CSharp.LayoutRules">
+		<Rule Id="SA1503" Action="None"/>         <!-- BracesMustNotBeOmitted -->
+		<Rule Id="SA1520" Action="None"/>         <!-- UseBracesConsistently -->
 	</Rules>
 	<Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.CSharp.DocumentationRules">
 		<Rule Id="SA1642" Action="None" />        <!-- ConstructorSummaryDocumentationMustBeginWithStandardText -->

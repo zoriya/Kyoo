@@ -6,12 +6,15 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.354" />
+		<PackageReference Include="SerilogAnalyzer" Version="0.15.0" PrivateAssets="All" />
+		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.354" PrivateAssets="All" />
+
 		<None Include="$(MSBuildThisFileDirectory)stylecop.json" Link="stylecop.json" Visible="false" />
-		<None Include="$(MSBuildThisFileDirectory).editorconfig" Link="stylecop.json" Visible="false" />
+		<None Include="$(MSBuildThisFileDirectory).editorconfig" Link=".editorconfig" Visible="false" />
 	</ItemGroup>
 
 	<PropertyGroup>
 		<CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)Kyoo.ruleset</CodeAnalysisRuleSet>
+<!--		<AnalysisMode>AllEnabledByDefault</AnalysisMode>-->
 	</PropertyGroup>
 </Project>

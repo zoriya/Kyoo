@@ -15,7 +15,7 @@ namespace Kyoo.Abstractions.Models.Exceptions
 		public DuplicatedItemException()
 			: base("Already exists in the database.")
 		{ }
-		
+
 		/// <summary>
 		/// Create a new <see cref="DuplicatedItemException"/> with a custom message.
 		/// </summary>
@@ -23,7 +23,7 @@ namespace Kyoo.Abstractions.Models.Exceptions
 		public DuplicatedItemException(string message)
 			: base(message)
 		{ }
-		
+
 		/// <summary>
 		/// The serialization constructor 
 		/// </summary>

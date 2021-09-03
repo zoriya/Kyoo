@@ -39,7 +39,7 @@ namespace Kyoo.Tests.Database
 		{
 			_repository = Repositories.LibraryManager.CollectionRepository;
 		}
-		
+
 		[Fact]
 		public async Task CreateWithEmptySlugTest()
 		{
@@ -47,7 +47,7 @@ namespace Kyoo.Tests.Database
 			collection.Slug = "";
 			await Assert.ThrowsAsync<ArgumentException>(() => _repository.Create(collection));
 		}
-		
+
 		[Fact]
 		public async Task CreateWithNumberSlugTest()
 		{
@@ -56,7 +56,7 @@ namespace Kyoo.Tests.Database
 			Collection ret = await _repository.Create(collection);
 			Assert.Equal("2!", ret.Slug);
 		}
-		
+
 		[Fact]
 		public async Task CreateWithoutNameTest()
 		{
@@ -64,7 +64,7 @@ namespace Kyoo.Tests.Database
 			collection.Name = null;
 			await Assert.ThrowsAsync<ArgumentException>(() => _repository.Create(collection));
 		}
-		
+
 		[Fact]
 		public async Task CreateWithExternalIdTest()
 		{
@@ -85,14 +85,14 @@ namespace Kyoo.Tests.Database
 				}
 			};
 			await _repository.Create(collection);
-			
+
 			Collection retrieved = await _repository.Get(2);
 			await Repositories.LibraryManager.Load(retrieved, x => x.ExternalIDs);
 			Assert.Equal(2, retrieved.ExternalIDs.Count);
 			KAssert.DeepEqual(collection.ExternalIDs.First(), retrieved.ExternalIDs.First());
 			KAssert.DeepEqual(collection.ExternalIDs.Last(), retrieved.ExternalIDs.Last());
 		}
-		
+
 		[Fact]
 		public async Task EditTest()
 		{
@@ -103,13 +103,13 @@ namespace Kyoo.Tests.Database
 				[Images.Poster] = "new-poster"
 			};
 			await _repository.Edit(value, false);
-		
+
 			await using DatabaseContext database = Repositories.Context.New();
 			Collection retrieved = await database.Collections.FirstAsync();
-			
+
 			KAssert.DeepEqual(value, retrieved);
 		}
-		
+
 		[Fact]
 		public async Task EditMetadataTest()
 		{
@@ -124,13 +124,13 @@ namespace Kyoo.Tests.Database
 				},
 			};
 			await _repository.Edit(value, false);
-		
+
 			await using DatabaseContext database = Repositories.Context.New();
 			Collection retrieved = await database.Collections
 				.Include(x => x.ExternalIDs)
 				.ThenInclude(x => x.Provider)
 				.FirstAsync();
-			
+
 			KAssert.DeepEqual(value, retrieved);
 		}
 
@@ -166,7 +166,7 @@ namespace Kyoo.Tests.Database
 				DataID = "id"
 			});
 			await _repository.Edit(value, false);
-			
+
 			{
 				await using DatabaseContext database = Repositories.Context.New();
 				Collection retrieved = await database.Collections
@@ -177,7 +177,7 @@ namespace Kyoo.Tests.Database
 				KAssert.DeepEqual(value, retrieved);
 			}
 		}
-		
+
 		[Theory]
 		[InlineData("test")]
 		[InlineData("super")]

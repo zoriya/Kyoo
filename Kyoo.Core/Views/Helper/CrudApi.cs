@@ -54,10 +54,10 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
-		
+
 		[HttpGet]
 		[PartialPermission(Kind.Read)]
 		public virtual async Task<ActionResult<Page<T>>> GetAll([FromQuery] string sortBy,
@@ -75,7 +75,7 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
 
@@ -98,7 +98,7 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 			catch (DuplicatedItemException)
 			{
@@ -106,7 +106,7 @@ namespace Kyoo.Core.Api
 				return Conflict(existing);
 			}
 		}
-		
+
 		[HttpPut]
 		[PartialPermission(Kind.Write)]
 		public virtual async Task<ActionResult<T>> Edit([FromQuery] bool resetOld, [FromBody] T resource)
@@ -140,7 +140,7 @@ namespace Kyoo.Core.Api
 				return NotFound();
 			}
 		}
-		
+
 		[HttpPut("{slug}")]
 		[PartialPermission(Kind.Write)]
 		public virtual async Task<ActionResult<T>> Edit(string slug, [FromQuery] bool resetOld, [FromBody] T resource)
@@ -172,7 +172,7 @@ namespace Kyoo.Core.Api
 
 			return Ok();
 		}
-		
+
 		[HttpDelete("{slug}")]
 		[PartialPermission(Kind.Delete)]
 		public virtual async Task<IActionResult> Delete(string slug)
@@ -188,7 +188,7 @@ namespace Kyoo.Core.Api
 
 			return Ok();
 		}
-		
+
 		[PartialPermission(Kind.Delete)]
 		public virtual async Task<IActionResult> Delete(Dictionary<string, string> where)
 		{

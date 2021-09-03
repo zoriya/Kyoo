@@ -32,7 +32,7 @@ namespace Kyoo.Core.Models.Options
 		/// The temporary folder to cache transmuxed file.
 		/// </summary>
 		public string TransmuxPath { get; set; } = "cached/transmux";
-		
+
 		/// <summary>
 		/// The temporary folder to cache transcoded file.
 		/// </summary>

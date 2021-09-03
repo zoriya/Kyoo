@@ -10,15 +10,15 @@ namespace Kyoo.Abstractions.Models
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
-		
+
 		/// <inheritdoc />
 		public string Slug { get; set; }
-		
+
 		/// <summary>
 		/// The name of this library.
 		/// </summary>
 		public string Name { get; set; }
-		
+
 		/// <summary>
 		/// The list of paths that this library is responsible for. This is mainly used by the Scan task.
 		/// </summary>
@@ -33,7 +33,7 @@ namespace Kyoo.Abstractions.Models
 		/// The list of shows in this library.
 		/// </summary>
 		[LoadableRelation] public ICollection<Show> Shows { get; set; }
-		
+
 		/// <summary>
 		/// The list of collections in this library.
 		/// </summary>

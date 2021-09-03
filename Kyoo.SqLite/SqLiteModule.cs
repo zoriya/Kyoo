@@ -23,10 +23,10 @@ namespace Kyoo.SqLite
 
 		/// <inheritdoc />
 		public string Description => "A database context for sqlite.";
-		
+
 		/// <inheritdoc />
 		public Dictionary<string, Type> Configuration => new();
-		
+
 		/// <inheritdoc />
 		public bool Enabled => _configuration.GetSelectedDatabase() == "sqlite";
 

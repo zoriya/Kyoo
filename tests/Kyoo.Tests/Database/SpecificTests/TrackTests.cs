@@ -35,7 +35,7 @@ namespace Kyoo.Tests.Database
 		{
 			_repository = repositories.LibraryManager.TrackRepository;
 		}
-		
+
 		[Fact]
 		public async Task SlugEditTest()
 		{
@@ -47,7 +47,7 @@ namespace Kyoo.Tests.Database
 			Track track = await _repository.Get(1);
 			Assert.Equal("new-slug-s1e1.eng-1.subtitle", track.Slug);
 		}
-		
+
 		[Fact]
 		public async Task UndefinedLanguageSlugTest()
 		{

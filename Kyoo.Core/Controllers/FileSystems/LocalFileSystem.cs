@@ -15,7 +15,7 @@ namespace Kyoo.Core.Controllers
 	/// <summary>
 	/// A <see cref="IFileSystem"/> for the local filesystem (using System.IO).
 	/// </summary>
-	[FileSystemMetadata(new [] {"", "file"}, StripScheme = true)]
+	[FileSystemMetadata(new[] { "", "file" }, StripScheme = true)]
 	public class LocalFileSystem : IFileSystem
 	{
 		/// <summary>
@@ -51,7 +51,7 @@ namespace Kyoo.Core.Controllers
 				return contentType;
 			throw new NotImplementedException($"Can't get the content type of the file at: {path}");
 		}
-		
+
 		/// <inheritdoc />
 		public IActionResult FileResult(string path, bool rangeSupport = false, string type = null)
 		{
@@ -72,7 +72,7 @@ namespace Kyoo.Core.Controllers
 				throw new ArgumentNullException(nameof(path));
 			return Task.FromResult<Stream>(File.OpenRead(path));
 		}
-		
+
 		/// <inheritdoc />
 		public Task<Stream> GetReader(string path, AsyncRef<string> mime)
 		{
@@ -99,19 +99,19 @@ namespace Kyoo.Core.Controllers
 			Directory.CreateDirectory(path);
 			return Task.FromResult(path);
 		}
-		
+
 		/// <inheritdoc />
 		public string Combine(params string[] paths)
 		{
 			return Path.Combine(paths);
 		}
-		
+
 		/// <inheritdoc />
 		public Task<ICollection<string>> ListFiles(string path, SearchOption options = SearchOption.TopDirectoryOnly)
 		{
 			if (path == null)
 				throw new ArgumentNullException(nameof(path));
-			string[] ret = Directory.Exists(path) 
+			string[] ret = Directory.Exists(path)
 				? Directory.GetFiles(path, "*", options)
 				: Array.Empty<string>();
 			return Task.FromResult<ICollection<string>>(ret);
@@ -122,7 +122,7 @@ namespace Kyoo.Core.Controllers
 		{
 			return Task.FromResult(File.Exists(path) || Directory.Exists(path));
 		}
-		
+
 		/// <inheritdoc />
 		public Task<string> GetExtraDirectory<T>(T resource)
 		{

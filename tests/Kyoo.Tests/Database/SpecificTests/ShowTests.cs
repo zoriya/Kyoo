@@ -41,7 +41,7 @@ namespace Kyoo.Tests.Database
 		{
 			_repository = Repositories.LibraryManager.ShowRepository;
 		}
-		
+
 		[Fact]
 		public async Task EditTest()
 		{
@@ -50,32 +50,32 @@ namespace Kyoo.Tests.Database
 			value.Title = "New Title";
 			Show edited = await _repository.Edit(value, false);
 			KAssert.DeepEqual(value, edited);
-		
+
 			await using DatabaseContext database = Repositories.Context.New();
 			Show show = await database.Shows.FirstAsync();
-			
+
 			KAssert.DeepEqual(show, value);
 		}
-		
+
 		[Fact]
 		public async Task EditGenreTest()
 		{
 			Show value = await _repository.Get(TestSample.Get<Show>().Slug);
-			value.Genres = new[] {new Genre("test")};
+			value.Genres = new[] { new Genre("test") };
 			Show edited = await _repository.Edit(value, false);
-			
+
 			Assert.Equal(value.Slug, edited.Slug);
-			Assert.Equal(value.Genres.Select(x => new{x.Slug, x.Name}), edited.Genres.Select(x => new{x.Slug, x.Name}));
-		
+			Assert.Equal(value.Genres.Select(x => new { x.Slug, x.Name }), edited.Genres.Select(x => new { x.Slug, x.Name }));
+
 			await using DatabaseContext database = Repositories.Context.New();
 			Show show = await database.Shows
 				.Include(x => x.Genres)
 				.FirstAsync();
-			
+
 			Assert.Equal(value.Slug, show.Slug);
-			Assert.Equal(value.Genres.Select(x => new{x.Slug, x.Name}), show.Genres.Select(x => new{x.Slug, x.Name}));
+			Assert.Equal(value.Genres.Select(x => new { x.Slug, x.Name }), show.Genres.Select(x => new { x.Slug, x.Name }));
 		}
-		
+
 		[Fact]
 		public async Task AddGenreTest()
 		{
@@ -83,55 +83,55 @@ namespace Kyoo.Tests.Database
 			await Repositories.LibraryManager.Load(value, x => x.Genres);
 			value.Genres.Add(new Genre("test"));
 			Show edited = await _repository.Edit(value, false);
-			
+
 			Assert.Equal(value.Slug, edited.Slug);
-			Assert.Equal(value.Genres.Select(x => new{x.Slug, x.Name}), edited.Genres.Select(x => new{x.Slug, x.Name}));
-		
+			Assert.Equal(value.Genres.Select(x => new { x.Slug, x.Name }), edited.Genres.Select(x => new { x.Slug, x.Name }));
+
 			await using DatabaseContext database = Repositories.Context.New();
 			Show show = await database.Shows
 				.Include(x => x.Genres)
 				.FirstAsync();
-			
+
 			Assert.Equal(value.Slug, show.Slug);
-			Assert.Equal(value.Genres.Select(x => new{x.Slug, x.Name}), show.Genres.Select(x => new{x.Slug, x.Name}));
+			Assert.Equal(value.Genres.Select(x => new { x.Slug, x.Name }), show.Genres.Select(x => new { x.Slug, x.Name }));
 		}
-		
+
 		[Fact]
 		public async Task EditStudioTest()
 		{
 			Show value = await _repository.Get(TestSample.Get<Show>().Slug);
 			value.Studio = new Studio("studio");
 			Show edited = await _repository.Edit(value, false);
-			
+
 			Assert.Equal(value.Slug, edited.Slug);
 			Assert.Equal("studio", edited.Studio.Slug);
-		
+
 			await using DatabaseContext database = Repositories.Context.New();
 			Show show = await database.Shows
 				.Include(x => x.Studio)
 				.FirstAsync();
-			
+
 			Assert.Equal(value.Slug, show.Slug);
 			Assert.Equal("studio", show.Studio.Slug);
 		}
-		
+
 		[Fact]
 		public async Task EditAliasesTest()
 		{
 			Show value = await _repository.Get(TestSample.Get<Show>().Slug);
-			value.Aliases = new[] {"NiceNewAlias", "SecondAlias"};
+			value.Aliases = new[] { "NiceNewAlias", "SecondAlias" };
 			Show edited = await _repository.Edit(value, false);
-			
+
 			Assert.Equal(value.Slug, edited.Slug);
 			Assert.Equal(value.Aliases, edited.Aliases);
-		
+
 			await using DatabaseContext database = Repositories.Context.New();
 			Show show = await database.Shows.FirstAsync();
-			
+
 			Assert.Equal(value.Slug, show.Slug);
 			Assert.Equal(value.Aliases, show.Aliases);
 		}
-		
+
 		[Fact]
 		public async Task EditPeopleTest()
 		{
@@ -148,25 +148,25 @@ namespace Kyoo.Tests.Database
 				}
 			};
 			Show edited = await _repository.Edit(value, false);
-			
+
 			Assert.Equal(value.Slug, edited.Slug);
 			Assert.Equal(edited.People.First().ShowID, value.ID);
 			Assert.Equal(
-				value.People.Select(x => new{x.Role, x.Slug, x.People.Name}), 
-				edited.People.Select(x => new{x.Role, x.Slug, x.People.Name}));
-		
+				value.People.Select(x => new { x.Role, x.Slug, x.People.Name }),
+				edited.People.Select(x => new { x.Role, x.Slug, x.People.Name }));
+
 			await using DatabaseContext database = Repositories.Context.New();
 			Show show = await database.Shows
 				.Include(x => x.People)
 				.ThenInclude(x => x.People)
 				.FirstAsync();
-			
+
 			Assert.Equal(value.Slug, show.Slug);
 			Assert.Equal(
-				value.People.Select(x => new{x.Role, x.Slug, x.People.Name}), 
-				show.People.Select(x => new{x.Role, x.Slug, x.People.Name}));
+				value.People.Select(x => new { x.Role, x.Slug, x.People.Name }),
+				show.People.Select(x => new { x.Role, x.Slug, x.People.Name }));
 		}
-		
+
 		[Fact]
 		public async Task EditExternalIDsTest()
 		{
@@ -180,24 +180,24 @@ namespace Kyoo.Tests.Database
 				}
 			};
 			Show edited = await _repository.Edit(value, false);
-			
+
 			Assert.Equal(value.Slug, edited.Slug);
 			Assert.Equal(
-				value.ExternalIDs.Select(x => new {x.DataID, x.Provider.Slug}), 
-				edited.ExternalIDs.Select(x => new {x.DataID, x.Provider.Slug}));
-		
+				value.ExternalIDs.Select(x => new { x.DataID, x.Provider.Slug }),
+				edited.ExternalIDs.Select(x => new { x.DataID, x.Provider.Slug }));
+
 			await using DatabaseContext database = Repositories.Context.New();
 			Show show = await database.Shows
 				.Include(x => x.ExternalIDs)
 				.ThenInclude(x => x.Provider)
 				.FirstAsync();
-			
+
 			Assert.Equal(value.Slug, show.Slug);
 			Assert.Equal(
-				value.ExternalIDs.Select(x => new {x.DataID, x.Provider.Slug}), 
-				show.ExternalIDs.Select(x => new {x.DataID, x.Provider.Slug}));
+				value.ExternalIDs.Select(x => new { x.DataID, x.Provider.Slug }),
+				show.ExternalIDs.Select(x => new { x.DataID, x.Provider.Slug }));
 		}
-		
+
 		[Fact]
 		public async Task EditResetOldTest()
 		{
@@ -207,12 +207,12 @@ namespace Kyoo.Tests.Database
 				ID = value.ID,
 				Title = "Reset"
 			};
-			
+
 			await Assert.ThrowsAsync<ArgumentException>(() => _repository.Edit(newValue, true));
-			
+
 			newValue.Slug = "reset";
 			Show edited = await _repository.Edit(newValue, true);
-			
+
 			Assert.Equal(value.ID, edited.ID);
 			Assert.Null(edited.Overview);
 			Assert.Equal("reset", edited.Slug);
@@ -223,7 +223,7 @@ namespace Kyoo.Tests.Database
 			Assert.Null(edited.Genres);
 			Assert.Null(edited.Studio);
 		}
-		
+
 		[Fact]
 		public async Task CreateWithRelationsTest()
 		{
@@ -259,7 +259,7 @@ namespace Kyoo.Tests.Database
 			expected.Studio = new Studio("studio");
 			Show created = await _repository.Create(expected);
 			KAssert.DeepEqual(expected, created);
-			
+
 			await using DatabaseContext context = Repositories.Context.New();
 			Show retrieved = await context.Shows
 				.Include(x => x.ExternalIDs)
@@ -269,14 +269,14 @@ namespace Kyoo.Tests.Database
 				.ThenInclude(x => x.People)
 				.Include(x => x.Studio)
 				.FirstAsync(x => x.ID == created.ID);
-			retrieved.People.ForEach(x => 
+			retrieved.People.ForEach(x =>
 			{
 				x.Show = null;
 				x.People.Roles = null;
 			});
 			retrieved.Studio.Shows = null;
 			retrieved.Genres.ForEach(x => x.Shows = null);
-			
+
 			expected.Genres.ForEach(x => x.Shows = null);
 			expected.People.ForEach(x =>
 			{
@@ -286,7 +286,7 @@ namespace Kyoo.Tests.Database
 
 			retrieved.Should().BeEquivalentTo(expected);
 		}
-		
+
 		[Fact]
 		public async Task CreateWithExternalID()
 		{
@@ -322,14 +322,14 @@ namespace Kyoo.Tests.Database
 			Show created = await _repository.Create(test);
 			Assert.Equal("300!", created.Slug);
 		}
-		
+
 		[Fact]
 		public async Task GetSlugTest()
 		{
 			Show reference = TestSample.Get<Show>();
 			Assert.Equal(reference.Slug, await _repository.GetSlug(reference.ID));
 		}
-		
+
 		[Theory]
 		[InlineData("test")]
 		[InlineData("super")]
@@ -347,7 +347,7 @@ namespace Kyoo.Tests.Database
 			ICollection<Show> ret = await _repository.Search(query);
 			KAssert.DeepEqual(value, ret.First());
 		}
-		
+
 		[Fact]
 		public async Task DeleteShowWithEpisodeAndSeason()
 		{
@@ -368,7 +368,7 @@ namespace Kyoo.Tests.Database
 		{
 			await Repositories.LibraryManager.Create(TestSample.GetNew<Library>());
 			await _repository.AddShowLink(1, 2, null);
-			
+
 			await using DatabaseContext context = Repositories.Context.New();
 			Show show = context.Shows
 				.Include(x => x.Libraries)

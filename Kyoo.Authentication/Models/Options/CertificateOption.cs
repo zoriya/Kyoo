@@ -9,7 +9,7 @@ namespace Kyoo.Authentication.Models
 		/// The path to get this option from the root configuration.
 		/// </summary>
 		public const string Path = "authentication:certificate";
-		
+
 		/// <summary>
 		/// The path of the certificate file.
 		/// </summary>

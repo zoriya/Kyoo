@@ -29,7 +29,7 @@ namespace Kyoo.Tests
 		{
 			throw new XunitException();
 		}
-		
+
 		/// <summary>
 		/// Explicitly fail a test.
 		/// </summary>

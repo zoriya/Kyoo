@@ -17,7 +17,7 @@ namespace Kyoo.Core.Models.Watch
 			".mkv",
 			".flv",
 			".vob",
-			".ogg", 
+			".ogg",
 			".ogv",
 			".avi",
 			".mts",
@@ -25,7 +25,7 @@ namespace Kyoo.Core.Models.Watch
 			".ts",
 			".mov",
 			".qt",
-			".asf", 
+			".asf",
 			".mp4",
 			".m4p",
 			".m4v",
@@ -48,11 +48,11 @@ namespace Kyoo.Core.Models.Watch
 		{
 			return VideoExtensions.Contains(Path.GetExtension(filePath));
 		}
-		
+
 		/// <summary>
 		/// The dictionary of known subtitles extensions and the name of the subtitle codec.
 		/// </summary>
-		public static readonly ImmutableDictionary<string, string> SubtitleExtensions =  new Dictionary<string, string> 
+		public static readonly ImmutableDictionary<string, string> SubtitleExtensions = new Dictionary<string, string>
 		{
 			{".ass", "ass"},
 			{".str", "subrip"}

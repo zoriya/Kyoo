@@ -30,8 +30,8 @@ namespace Kyoo.Core.Controllers
 		/// The default sort order that will be used for this resource's type.
 		/// </summary>
 		protected abstract Expression<Func<T, object>> DefaultSort { get; }
-		
-		
+
+
 		/// <summary>
 		/// Create a new base <see cref="LocalRepository{T}"/> with the given database handle.
 		/// </summary>
@@ -57,7 +57,7 @@ namespace Kyoo.Core.Controllers
 				throw new ItemNotFoundException($"No {typeof(T).Name} found with the id {id}");
 			return ret;
 		}
-		
+
 		/// <inheritdoc/>
 		public virtual async Task<T> Get(int id)
 		{
@@ -84,19 +84,19 @@ namespace Kyoo.Core.Controllers
 				throw new ItemNotFoundException($"No {typeof(T).Name} found with the given predicate.");
 			return ret;
 		}
-		
+
 		/// <inheritdoc />
 		public virtual Task<T> GetOrDefault(int id)
 		{
 			return Database.Set<T>().FirstOrDefaultAsync(x => x.ID == id);
 		}
-		
+
 		/// <inheritdoc />
 		public virtual Task<T> GetOrDefault(string slug)
 		{
 			return Database.Set<T>().FirstOrDefaultAsync(x => x.Slug == slug);
 		}
-		
+
 		/// <inheritdoc />
 		public virtual Task<T> GetOrDefault(Expression<Func<T, bool>> where)
 		{
@@ -105,7 +105,7 @@ namespace Kyoo.Core.Controllers
 
 		/// <inheritdoc/>
 		public abstract Task<ICollection<T>> Search(string query);
-		
+
 		/// <inheritdoc/>
 		public virtual Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null,
 			Sort<T> sort = default,
@@ -113,7 +113,7 @@ namespace Kyoo.Core.Controllers
 		{
 			return ApplyFilters(Database.Set<T>(), where, sort, limit);
 		}
-		
+
 		/// <summary>
 		/// Apply filters to a query to ease sort, pagination & where queries for resources of this repository
 		/// </summary>
@@ -124,12 +124,12 @@ namespace Kyoo.Core.Controllers
 		/// <returns>The filtered query</returns>
 		protected Task<ICollection<T>> ApplyFilters(IQueryable<T> query,
 			Expression<Func<T, bool>> where = null,
-			Sort<T> sort = default, 
+			Sort<T> sort = default,
 			Pagination limit = default)
 		{
 			return ApplyFilters(query, GetOrDefault, DefaultSort, where, sort, limit);
 		}
-		
+
 		/// <summary>
 		/// Apply filters to a query to ease sort, pagination & where queries for any resources types.
 		/// For resources of type <see cref="T"/>, see <see cref="ApplyFilters"/>
@@ -145,17 +145,17 @@ namespace Kyoo.Core.Controllers
 			Func<int, Task<TValue>> get,
 			Expression<Func<TValue, object>> defaultSort,
 			Expression<Func<TValue, bool>> where = null,
-			Sort<TValue> sort = default, 
+			Sort<TValue> sort = default,
 			Pagination limit = default)
 		{
 			if (where != null)
 				query = query.Where(where);
-			
+
 			Expression<Func<TValue, object>> sortKey = sort.Key ?? defaultSort;
 			Expression sortExpression = sortKey.Body.NodeType == ExpressionType.Convert
 				? ((UnaryExpression)sortKey.Body).Operand
 				: sortKey.Body;
-			
+
 			if (typeof(Enum).IsAssignableFrom(sortExpression.Type))
 				throw new ArgumentException("Invalid sort key.");
 
@@ -205,7 +205,7 @@ namespace Kyoo.Core.Controllers
 				T old = await GetOrDefault(obj.Slug);
 				if (old != null)
 					return old;
-				
+
 				return await Create(obj);
 			}
 			catch (DuplicatedItemException)
@@ -225,7 +225,7 @@ namespace Kyoo.Core.Controllers
 			try
 			{
 				T old = await GetWithTracking(edited.ID);
-			
+
 				if (resetOld)
 					old = Merger.Nullify(old);
 				Merger.Complete(old, edited, x => x.GetCustomAttribute<LoadableRelationAttribute>() == null);
@@ -239,7 +239,7 @@ namespace Kyoo.Core.Controllers
 				Database.ChangeTracker.Clear();
 			}
 		}
-		
+
 		/// <summary>
 		/// An overridable method to edit relation of a resource.
 		/// </summary>
@@ -257,7 +257,7 @@ namespace Kyoo.Core.Controllers
 		{
 			return Validate(resource);
 		}
-		
+
 		/// <summary>
 		/// A method called just before saving a new resource to the database.
 		/// It is also called on the default implementation of <see cref="EditRelations"/>
@@ -278,7 +278,7 @@ namespace Kyoo.Core.Controllers
 				{
 					MethodInfo setter = typeof(T).GetProperty(nameof(resource.Slug))!.GetSetMethod();
 					if (setter != null)
-						setter.Invoke(resource, new object[] {resource.Slug + '!'});
+						setter.Invoke(resource, new object[] { resource.Slug + '!' });
 					else
 						throw new ArgumentException("Resources slug can't be number only.");
 				}
@@ -306,7 +306,7 @@ namespace Kyoo.Core.Controllers
 
 		/// <inheritdoc/>
 		public abstract Task Delete(T obj);
-		
+
 		/// <inheritdoc/>
 		public async Task DeleteAll(Expression<Func<T, bool>> where)
 		{

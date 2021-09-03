@@ -34,7 +34,7 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		/// <param name="database">The database instance</param>
 		/// <param name="libraries">A lazy loaded library repository</param>
-		public LibraryItemRepository(DatabaseContext database, 
+		public LibraryItemRepository(DatabaseContext database,
 			Lazy<ILibraryRepository> libraries)
 			: base(database)
 		{
@@ -42,13 +42,13 @@ namespace Kyoo.Core.Controllers
 			_libraries = libraries;
 		}
 
-		
+
 		/// <inheritdoc />
 		public override Task<LibraryItem> GetOrDefault(int id)
 		{
 			return _database.LibraryItems.FirstOrDefaultAsync(x => x.ID == id);
 		}
-		
+
 		/// <inheritdoc />
 		public override Task<LibraryItem> GetOrDefault(string slug)
 		{
@@ -83,27 +83,27 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public override Task<LibraryItem> Create(LibraryItem obj) 
+		public override Task<LibraryItem> Create(LibraryItem obj)
 			=> throw new InvalidOperationException();
-		
+
 		/// <inheritdoc />
-		public override Task<LibraryItem> CreateIfNotExists(LibraryItem obj) 
+		public override Task<LibraryItem> CreateIfNotExists(LibraryItem obj)
 			=> throw new InvalidOperationException();
-		
+
 		/// <inheritdoc />
-		public override Task<LibraryItem> Edit(LibraryItem obj, bool resetOld) 
+		public override Task<LibraryItem> Edit(LibraryItem obj, bool resetOld)
 			=> throw new InvalidOperationException();
-		
+
 		/// <inheritdoc />
-		public override Task Delete(int id) 
+		public override Task Delete(int id)
 			=> throw new InvalidOperationException();
-		
+
 		/// <inheritdoc />
-		public override Task Delete(string slug) 
+		public override Task Delete(string slug)
 			=> throw new InvalidOperationException();
-		
+
 		/// <inheritdoc />
-		public override Task Delete(LibraryItem obj) 
+		public override Task Delete(LibraryItem obj)
 			=> throw new InvalidOperationException();
 
 		/// <summary>
@@ -125,8 +125,8 @@ namespace Kyoo.Core.Controllers
 
 		/// <inheritdoc />
 		public async Task<ICollection<LibraryItem>> GetFromLibrary(int id,
-			Expression<Func<LibraryItem, bool>> where = null, 
-			Sort<LibraryItem> sort = default, 
+			Expression<Func<LibraryItem, bool>> where = null,
+			Sort<LibraryItem> sort = default,
 			Pagination limit = default)
 		{
 			ICollection<LibraryItem> items = await ApplyFilters(LibraryRelatedQuery(x => x.ID == id),
@@ -137,11 +137,11 @@ namespace Kyoo.Core.Controllers
 				throw new ItemNotFoundException();
 			return items;
 		}
-		
+
 		/// <inheritdoc />
 		public async Task<ICollection<LibraryItem>> GetFromLibrary(string slug,
-			Expression<Func<LibraryItem, bool>> where = null, 
-			Sort<LibraryItem> sort = default, 
+			Expression<Func<LibraryItem, bool>> where = null,
+			Sort<LibraryItem> sort = default,
 			Pagination limit = default)
 		{
 			ICollection<LibraryItem> items = await ApplyFilters(LibraryRelatedQuery(x => x.Slug == slug),

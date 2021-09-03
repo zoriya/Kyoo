@@ -15,11 +15,11 @@ namespace Kyoo.Tests
 
 
 		private readonly List<DatabaseContext> _databases = new();
-			
+
 		public RepositoryActivator(ITestOutputHelper output, PostgresFixture postgres = null)
 		{
-			Context = postgres == null 
-				? new SqLiteTestContext(output) 
+			Context = postgres == null
+				? new SqLiteTestContext(output)
 				: new PostgresTestContext(postgres, output);
 
 			ProviderRepository provider = new(_NewContext());
@@ -27,11 +27,11 @@ namespace Kyoo.Tests
 			CollectionRepository collection = new(_NewContext(), provider);
 			GenreRepository genre = new(_NewContext());
 			StudioRepository studio = new(_NewContext(), provider);
-			PeopleRepository people = new(_NewContext(), provider, 
+			PeopleRepository people = new(_NewContext(), provider,
 				new Lazy<IShowRepository>(() => LibraryManager.ShowRepository));
 			ShowRepository show = new(_NewContext(), studio, people, genre, provider);
 			SeasonRepository season = new(_NewContext(), provider);
-			LibraryItemRepository libraryItem = new(_NewContext(), 
+			LibraryItemRepository libraryItem = new(_NewContext(),
 				new Lazy<ILibraryRepository>(() => LibraryManager.LibraryRepository));
 			TrackRepository track = new(_NewContext());
 			EpisodeRepository episode = new(_NewContext(), provider, track);

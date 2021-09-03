@@ -19,11 +19,11 @@ namespace Kyoo.Abstractions.Models.Attributes
 		/// The name of the field containing the related resource's ID.
 		/// </summary>
 		public string RelationID { get; }
-		
+
 		/// <summary>
 		/// Create a new <see cref="LoadableRelationAttribute"/>.
 		/// </summary>
-		public LoadableRelationAttribute() {}
+		public LoadableRelationAttribute() { }
 
 		/// <summary>
 		/// Create a new <see cref="LoadableRelationAttribute"/> with a baking relationID field.

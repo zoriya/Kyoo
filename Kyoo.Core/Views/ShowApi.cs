@@ -26,7 +26,7 @@ namespace Kyoo.Core.Api
 		private readonly IThumbnailsManager _thumbs;
 
 		public ShowApi(ILibraryManager libraryManager,
-			IFileSystem files, 
+			IFileSystem files,
 			IThumbnailsManager thumbs,
 			IOptions<BasicOptions> options)
 			: base(libraryManager.ShowRepository, options.Value.PublicUrl)
@@ -58,7 +58,7 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
 
@@ -84,10 +84,10 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
-		
+
 		[HttpGet("{showID:int}/episode")]
 		[HttpGet("{showID:int}/episodes")]
 		[PartialPermission(Kind.Read)]
@@ -110,7 +110,7 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
 
@@ -136,10 +136,10 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
-		
+
 		[HttpGet("{showID:int}/people")]
 		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<PeopleRole>>> GetPeople(int showID,
@@ -161,7 +161,7 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
 
@@ -186,10 +186,10 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
-		
+
 		[HttpGet("{showID:int}/genre")]
 		[HttpGet("{showID:int}/genres")]
 		[PartialPermission(Kind.Read)]
@@ -212,7 +212,7 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
 
@@ -238,10 +238,10 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
-		
+
 		[HttpGet("{showID:int}/studio")]
 		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Studio>> GetStudio(int showID)
@@ -269,7 +269,7 @@ namespace Kyoo.Core.Api
 				return NotFound();
 			}
 		}
-		
+
 		[HttpGet("{showID:int}/library")]
 		[HttpGet("{showID:int}/libraries")]
 		[PartialPermission(Kind.Read)]
@@ -292,7 +292,7 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
 
@@ -318,10 +318,10 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
-		
+
 		[HttpGet("{showID:int}/collection")]
 		[HttpGet("{showID:int}/collections")]
 		[PartialPermission(Kind.Read)]
@@ -344,7 +344,7 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
 
@@ -370,7 +370,7 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
 
@@ -392,7 +392,7 @@ namespace Kyoo.Core.Api
 				return NotFound();
 			}
 		}
-		
+
 		[HttpGet("{showSlug}/font/{slug}")]
 		[HttpGet("{showSlug}/fonts/{slug}")]
 		[PartialPermission(Kind.Read)]
@@ -423,7 +423,7 @@ namespace Kyoo.Core.Api
 				return NotFound();
 			}
 		}
-		
+
 		[HttpGet("{slug}/logo")]
 		public async Task<IActionResult> GetLogo(string slug)
 		{
@@ -437,7 +437,7 @@ namespace Kyoo.Core.Api
 				return NotFound();
 			}
 		}
-		
+
 		[HttpGet("{slug}/backdrop")]
 		[HttpGet("{slug}/thumbnail")]
 		public async Task<IActionResult> GetBackdrop(string slug)

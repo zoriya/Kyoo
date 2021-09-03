@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
@@ -6,7 +6,6 @@
 		<RootNamespace>Kyoo.Database</RootNamespace>
 		<Authors>Zoe Roux</Authors>
 		<RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
-		<OutputType>Library</OutputType>
 		<LangVersion>default</LangVersion>
 	</PropertyGroup>
 

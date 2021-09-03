@@ -9,7 +9,7 @@ namespace Kyoo.Authentication.Models.DTO
 		/// The One Time Access Code
 		/// </summary>
 		public string Otac { get; set; }
-		
+
 		/// <summary>
 		/// Should the user stay logged
 		/// </summary>

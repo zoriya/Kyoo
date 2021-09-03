@@ -23,9 +23,9 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="action">The action to run</param>
 		/// <param name="priority">The priority of the new action</param>
 		/// <returns>A new <see cref="StartupAction"/></returns>
-		public static StartupAction New(Action action, int priority) 
+		public static StartupAction New(Action action, int priority)
 			=> new(action, priority);
-		
+
 		/// <summary>
 		/// Create a new <see cref="StartupAction"/>.
 		/// </summary>
@@ -33,9 +33,9 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="priority">The priority of the new action</param>
 		/// <typeparam name="T">A dependency that this action will use.</typeparam>
 		/// <returns>A new <see cref="StartupAction"/></returns>
-		public static StartupAction<T> New<T>(Action<T> action, int priority) 
+		public static StartupAction<T> New<T>(Action<T> action, int priority)
 			=> new(action, priority);
-		
+
 		/// <summary>
 		/// Create a new <see cref="StartupAction"/>.
 		/// </summary>
@@ -44,9 +44,9 @@ namespace Kyoo.Abstractions.Controllers
 		/// <typeparam name="T">A dependency that this action will use.</typeparam>
 		/// <typeparam name="T2">A second dependency that this action will use.</typeparam>
 		/// <returns>A new <see cref="StartupAction"/></returns>
-		public static StartupAction<T, T2> New<T, T2>(Action<T, T2> action, int priority) 
+		public static StartupAction<T, T2> New<T, T2>(Action<T, T2> action, int priority)
 			=> new(action, priority);
-		
+
 		/// <summary>
 		/// Create a new <see cref="StartupAction"/>.
 		/// </summary>
@@ -56,11 +56,11 @@ namespace Kyoo.Abstractions.Controllers
 		/// <typeparam name="T2">A second dependency that this action will use.</typeparam>
 		/// <typeparam name="T3">A third dependency that this action will use.</typeparam>
 		/// <returns>A new <see cref="StartupAction"/></returns>
-		public static StartupAction<T, T2, T3> New<T, T2, T3>(Action<T, T2, T3> action, int priority) 
+		public static StartupAction<T, T2, T3> New<T, T2, T3>(Action<T, T2, T3> action, int priority)
 			=> new(action, priority);
 	}
-	
-	
+
+
 	/// <summary>
 	/// An action executed on kyoo's startup to initialize the asp-net container.
 	/// </summary>
@@ -81,7 +81,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="provider">The service provider containing all services can be used.</param>
 		void Run(IServiceProvider provider);
 	}
-		
+
 	/// <summary>
 	/// A <see cref="IStartupAction"/> with no dependencies.
 	/// </summary>
@@ -94,7 +94,7 @@ namespace Kyoo.Abstractions.Controllers
 
 		/// <inheritdoc />
 		public int Priority { get; }
-		
+
 		/// <summary>
 		/// Create a new <see cref="StartupAction"/>.
 		/// </summary>
@@ -126,7 +126,7 @@ namespace Kyoo.Abstractions.Controllers
 
 		/// <inheritdoc />
 		public int Priority { get; }
-		
+
 		/// <summary>
 		/// Create a new <see cref="StartupAction{T}"/>.
 		/// </summary>
@@ -144,7 +144,7 @@ namespace Kyoo.Abstractions.Controllers
 			_action.Invoke(provider.GetRequiredService<T>());
 		}
 	}
-	
+
 	/// <summary>
 	/// A <see cref="IStartupAction"/> with two dependencies.
 	/// </summary>
@@ -180,7 +180,7 @@ namespace Kyoo.Abstractions.Controllers
 			);
 		}
 	}
-	
+
 	/// <summary>
 	/// A <see cref="IStartupAction"/> with three dependencies.
 	/// </summary>
@@ -196,7 +196,7 @@ namespace Kyoo.Abstractions.Controllers
 
 		/// <inheritdoc />
 		public int Priority { get; }
-		
+
 		/// <summary>
 		/// Create a new <see cref="StartupAction{T, T2, T3}"/>.
 		/// </summary>

@@ -28,7 +28,7 @@ namespace Kyoo.Utils
 			return ex.Body is MemberExpression ||
 			       ex.Body.NodeType == ExpressionType.Convert && ((UnaryExpression)ex.Body).Operand is MemberExpression;
 		}
-		
+
 		/// <summary>
 		/// Get the name of a property. Useful for selectors as members ex: Load(x => x.Shows)
 		/// </summary>
@@ -66,7 +66,7 @@ namespace Kyoo.Utils
 				_ => throw new ArgumentException($"Can't get value of a non property/field (member: {member}).")
 			};
 		}
-		
+
 		/// <summary>
 		/// Slugify a string (Replace spaces by -, Uniformize accents é -> e)
 		/// </summary>
@@ -78,7 +78,7 @@ namespace Kyoo.Utils
 				return null;
 
 			str = str.ToLowerInvariant();
-			
+
 			string normalizedString = str.Normalize(NormalizationForm.FormD);
 			StringBuilder stringBuilder = new();
 			foreach (char c in normalizedString)
@@ -104,7 +104,7 @@ namespace Kyoo.Utils
 		public static object GetClrDefault(this Type type)
 		{
 			return type.IsValueType
-				? Activator.CreateInstance(type) 
+				? Activator.CreateInstance(type)
 				: null;
 		}
 
@@ -135,7 +135,7 @@ namespace Kyoo.Utils
 				throw new ArgumentNullException(nameof(obj));
 			return IsOfGenericType(obj.GetType(), genericType);
 		}
-		
+
 		/// <summary>
 		/// Check if <see cref="type"/> inherit from a generic type <see cref="genericType"/>.
 		/// </summary>
@@ -201,15 +201,15 @@ namespace Kyoo.Utils
 		/// The list of generic parameters.
 		/// </param>
 		/// <param name="args">
-		/// The list of parameters. 
+		/// The list of parameters.
 		/// </param>
 		/// <exception cref="ArgumentException">No method match the given constraints.</exception>
 		/// <returns>The method handle of the matching method.</returns>
 		[PublicAPI]
 		[NotNull]
-		public static MethodInfo GetMethod([NotNull] Type type, 
+		public static MethodInfo GetMethod([NotNull] Type type,
 			BindingFlags flag,
-			string name, 
+			string name,
 			[NotNull] Type[] generics,
 			[NotNull] object[] args)
 		{
@@ -219,7 +219,7 @@ namespace Kyoo.Utils
 				throw new ArgumentNullException(nameof(generics));
 			if (args == null)
 				throw new ArgumentNullException(nameof(args));
-			
+
 			MethodInfo[] methods = type.GetMethods(flag | BindingFlags.Public)
 				.Where(x => x.Name == name)
 				.Where(x => x.GetGenericArguments().Length == generics.Length)
@@ -234,7 +234,7 @@ namespace Kyoo.Utils
 				// 	return x.GetGenericArguments().All(y => y.IsAssignableFrom(generics[i++]));
 				// })
 				// .IfEmpty(() => throw new NullReferenceException($"No method {name} match the generics specified."))
-				
+
 				// TODO this won't work for Type<T> because T is specified in arguments but not in the parameters type.
 				// .Where(x =>
 				// {
@@ -249,7 +249,7 @@ namespace Kyoo.Utils
 				return methods[0];
 			throw new ArgumentException($"Multiple methods named {name} match the generics and parameters constraints.");
 		}
-		
+
 		/// <summary>
 		/// Run a generic static method for a runtime <see cref="Type"/>.
 		/// </summary>
@@ -276,14 +276,14 @@ namespace Kyoo.Utils
 		/// <seealso cref="RunGenericMethod{T}(object,string,System.Type,object[])"/>
 		/// <seealso cref="RunGenericMethod{T}(System.Type,string,System.Type[],object[])"/>
 		public static T RunGenericMethod<T>(
-			[NotNull] Type owner, 
+			[NotNull] Type owner,
 			[NotNull] string methodName,
 			[NotNull] Type type,
 			params object[] args)
 		{
-			return RunGenericMethod<T>(owner, methodName, new[] {type}, args);
+			return RunGenericMethod<T>(owner, methodName, new[] { type }, args);
 		}
-		
+
 		/// <summary>
 		/// Run a generic static method for a multiple runtime <see cref="Type"/>.
 		/// If your generic method only needs one type, see
@@ -313,7 +313,7 @@ namespace Kyoo.Utils
 		/// <seealso cref="RunGenericMethod{T}(System.Type,string,System.Type,object[])"/>
 		[PublicAPI]
 		public static T RunGenericMethod<T>(
-			[NotNull] Type owner, 
+			[NotNull] Type owner,
 			[NotNull] string methodName,
 			[NotNull] Type[] types,
 			params object[] args)
@@ -361,7 +361,7 @@ namespace Kyoo.Utils
 			[NotNull] Type type,
 			params object[] args)
 		{
-			return RunGenericMethod<T>(instance, methodName, new[] {type}, args);
+			return RunGenericMethod<T>(instance, methodName, new[] { type }, args);
 		}
 
 		/// <summary>
@@ -392,7 +392,7 @@ namespace Kyoo.Utils
 		/// <seealso cref="RunGenericMethod{T}(object,string,System.Type[],object[])"/>
 		/// <seealso cref="RunGenericMethod{T}(System.Type,string,System.Type,object[])"/>
 		public static T RunGenericMethod<T>(
-			[NotNull] object instance, 
+			[NotNull] object instance,
 			[NotNull] string methodName,
 			[NotNull] Type[] types,
 			params object[] args)

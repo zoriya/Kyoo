@@ -40,7 +40,7 @@ namespace Kyoo.Core.Api
 				type = Utility.GetGenericDefinition(type, typeof(Task<>))?.GetGenericArguments()[0] ?? type;
 				type = Utility.GetGenericDefinition(type, typeof(ActionResult<>))?.GetGenericArguments()[0] ?? type;
 				type = Utility.GetGenericDefinition(type, typeof(Page<>))?.GetGenericArguments()[0] ?? type;
-				
+
 				PropertyInfo[] properties = type.GetProperties()
 					.Where(x => x.GetCustomAttribute<LoadableRelationAttribute>() != null)
 					.ToArray();
@@ -90,7 +90,7 @@ namespace Kyoo.Core.Api
 			ICollection<string> fields = (ICollection<string>)context.HttpContext.Items["fields"];
 			Type pageType = Utility.GetGenericDefinition(result.DeclaredType, typeof(Page<>));
 
-			
+
 			if (pageType != null)
 			{
 				foreach (IResource resource in ((dynamic)result.Value).Items)

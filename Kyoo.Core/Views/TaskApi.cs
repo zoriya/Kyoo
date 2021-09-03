@@ -26,7 +26,7 @@ namespace Kyoo.Core.Api
 		{
 			return Ok(_taskManager.GetAllTasks());
 		}
-		
+
 		[HttpGet("{taskSlug}")]
 		[HttpPut("{taskSlug}")]
 		[Permission(nameof(TaskApi), Kind.Create)]
@@ -43,7 +43,7 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
 	}

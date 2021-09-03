@@ -9,16 +9,16 @@ namespace Kyoo.Abstractions.Models
 		/// The start time of the chapter (in second from the start of the episode).
 		/// </summary>
 		public float StartTime { get; set; }
-		
+
 		/// <summary>
-		/// The end time of the chapter (in second from the start of the episode)&.
+		/// The end time of the chapter (in second from the start of the episode).
 		/// </summary>
 		public float EndTime { get; set; }
-		
+
 		/// <summary>
 		/// The name of this chapter. This should be a human-readable name that could be presented to the user.
 		/// There should be well-known chapters name for commonly used chapters.
-		/// For example, use "Opening" for the introduction-song and "Credits" for the end chapter with credits.  
+		/// For example, use "Opening" for the introduction-song and "Credits" for the end chapter with credits.
 		/// </summary>
 		public string Name { get; set; }
 

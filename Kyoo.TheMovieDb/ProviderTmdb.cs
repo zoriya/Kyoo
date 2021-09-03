@@ -50,10 +50,10 @@ namespace Kyoo.TheMovieDb
 			_apiKey = apiKey;
 			_logger = logger;
 		}
-		
+
 
 		/// <inheritdoc />
-		public Task<T> Get<T>(T item) 
+		public Task<T> Get<T>(T item)
 			where T : class, IResource
 		{
 			return item switch
@@ -100,21 +100,21 @@ namespace Kyoo.TheMovieDb
 				if (found?.TryGetID(Provider.Slug, out id) != true)
 					return found;
 			}
-			
+
 			TMDbClient client = new(_apiKey.Value.ApiKey);
-			
+
 			if (show.IsMovie)
 			{
 				return (await client
 					.GetMovieAsync(id, MovieMethods.AlternativeTitles | MovieMethods.Videos | MovieMethods.Credits))
 					?.ToShow(Provider);
 			}
-			
+
 			return (await client
 				.GetTvShowAsync(id, TvShowMethods.AlternativeTitles | TvShowMethods.Videos | TvShowMethods.Credits))
 				?.ToShow(Provider);
 		}
-		
+
 		/// <summary>
 		/// Get a season using it's show and it's season number.
 		/// </summary>
@@ -131,7 +131,7 @@ namespace Kyoo.TheMovieDb
 
 			if (!season.Show.TryGetID(Provider.Slug, out int id))
 				return null;
-			
+
 			TMDbClient client = new(_apiKey.Value.ApiKey);
 			return (await client.GetTvSeasonAsync(id, season.SeasonNumber))
 				.ToSeason(id, Provider);
@@ -151,15 +151,15 @@ namespace Kyoo.TheMovieDb
 					"This is unsupported");
 				return null;
 			}
-			if (!episode.Show.TryGetID(Provider.Slug, out int id) 
+			if (!episode.Show.TryGetID(Provider.Slug, out int id)
 				|| episode.SeasonNumber == null || episode.EpisodeNumber == null)
 				return null;
-			
+
 			TMDbClient client = new(_apiKey.Value.ApiKey);
 			return (await client.GetTvEpisodeAsync(id, episode.SeasonNumber.Value, episode.EpisodeNumber.Value))
 				?.ToEpisode(id, Provider);
 		}
-		
+
 		/// <summary>
 		/// Get a person using it's id, if the id is not present in the person, fallback to a name search.
 		/// </summary>
@@ -177,7 +177,7 @@ namespace Kyoo.TheMovieDb
 			TMDbClient client = new(_apiKey.Value.ApiKey);
 			return (await client.GetPersonAsync(id)).ToPeople(Provider);
 		}
-		
+
 		/// <summary>
 		/// Get a studio using it's id, if the id is not present in the studio, fallback to a name search.
 		/// </summary>
@@ -195,9 +195,9 @@ namespace Kyoo.TheMovieDb
 			TMDbClient client = new(_apiKey.Value.ApiKey);
 			return (await client.GetCompanyAsync(id)).ToStudio(Provider);
 		}
-		
+
 		/// <inheritdoc />
-		public async Task<ICollection<T>> Search<T>(string query) 
+		public async Task<ICollection<T>> Search<T>(string query)
 			where T : class, IResource
 		{
 			if (typeof(T) == typeof(Collection))
@@ -248,7 +248,7 @@ namespace Kyoo.TheMovieDb
 				.Where(x => x != null)
 				.ToArray();
 		}
-		
+
 		/// <summary>
 		/// Search for people using there name as a query.
 		/// </summary>
@@ -262,7 +262,7 @@ namespace Kyoo.TheMovieDb
 				.Select(x => x.ToPeople(Provider))
 				.ToArray();
 		}
-		
+
 		/// <summary>
 		/// Search for studios using there name as a query.
 		/// </summary>

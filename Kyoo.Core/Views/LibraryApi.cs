@@ -34,7 +34,7 @@ namespace Kyoo.Core.Api
 			if (result.Value != null)
 				_taskManager.StartTask("scan",
 					new Progress<float>(),
-					new Dictionary<string, object> {{"slug", result.Value.Slug}});
+					new Dictionary<string, object> { { "slug", result.Value.Slug } });
 			return result;
 		}
 
@@ -60,7 +60,7 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
 
@@ -86,7 +86,7 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
 
@@ -112,7 +112,7 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
 
@@ -138,7 +138,7 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
 
@@ -164,7 +164,7 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
 
@@ -190,7 +190,7 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
 	}

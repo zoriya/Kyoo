@@ -1,6 +1,6 @@
-﻿using Kyoo.Abstractions.Models;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
+using Kyoo.Abstractions.Models;
 
 namespace Kyoo.Abstractions.Controllers
 {

@@ -53,7 +53,7 @@ namespace Kyoo.Core.Controllers
 				.FirstOrDefault();
 			return path[(libraryPath?.Length ?? 0)..];
 		}
-		
+
 		/// <inheritdoc />
 		public async Task<(Collection, Show, Season, Episode)> Identify(string path)
 		{
@@ -77,21 +77,21 @@ namespace Kyoo.Core.Controllers
 					Slug = Utility.ToSlug(match.Groups["Show"].Value),
 					Title = match.Groups["Show"].Value,
 					Path = Path.GetDirectoryName(path),
-					StartAir = match.Groups["StartYear"].Success 
-						? new DateTime(int.Parse(match.Groups["StartYear"].Value), 1, 1) 
+					StartAir = match.Groups["StartYear"].Success
+						? new DateTime(int.Parse(match.Groups["StartYear"].Value), 1, 1)
 						: null
 				},
 				season: null,
 				episode: new Episode
 				{
-					SeasonNumber = match.Groups["Season"].Success 
-						? int.Parse(match.Groups["Season"].Value) 
+					SeasonNumber = match.Groups["Season"].Success
+						? int.Parse(match.Groups["Season"].Value)
 						: null,
-					EpisodeNumber = match.Groups["Episode"].Success 
-						? int.Parse(match.Groups["Episode"].Value) 
+					EpisodeNumber = match.Groups["Episode"].Success
+						? int.Parse(match.Groups["Episode"].Value)
 						: null,
-					AbsoluteNumber = match.Groups["Absolute"].Success 
-						? int.Parse(match.Groups["Absolute"].Value) 
+					AbsoluteNumber = match.Groups["Absolute"].Success
+						? int.Parse(match.Groups["Absolute"].Value)
 						: null,
 					Path = path
 				}

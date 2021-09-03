@@ -29,10 +29,10 @@ namespace Kyoo.Core
 	{
 		/// <inheritdoc />
 		public string Slug => "core";
-		
+
 		/// <inheritdoc />
 		public string Name => "Core";
-		
+
 		/// <inheritdoc />
 		public string Description => "The core module containing default implementations.";
 
@@ -66,11 +66,11 @@ namespace Kyoo.Core
 		public void Configure(ContainerBuilder builder)
 		{
 			builder.RegisterModule<AttributedMetadataModule>();
-			
+
 			builder.RegisterComposite<FileSystemComposite, IFileSystem>().InstancePerLifetimeScope();
 			builder.RegisterType<LocalFileSystem>().As<IFileSystem>().SingleInstance();
 			builder.RegisterType<HttpFileSystem>().As<IFileSystem>().SingleInstance();
-			
+
 			builder.RegisterType<TaskManager>().As<ITaskManager>().As<IHostedService>().SingleInstance();
 
 			builder.RegisterType<ConfigurationManager>().As<IConfigurationManager>().SingleInstance();
@@ -78,7 +78,7 @@ namespace Kyoo.Core
 			builder.RegisterType<ThumbnailsManager>().As<IThumbnailsManager>().InstancePerLifetimeScope();
 			builder.RegisterType<LibraryManager>().As<ILibraryManager>().InstancePerLifetimeScope();
 			builder.RegisterType<RegexIdentifier>().As<IIdentifier>().SingleInstance();
-			
+
 			builder.RegisterComposite<ProviderComposite, IMetadataProvider>();
 			builder.Register(x => (AProviderComposite)x.Resolve<IMetadataProvider>());
 
@@ -106,7 +106,7 @@ namespace Kyoo.Core
 
 			builder.RegisterType<PassthroughPermissionValidator>().As<IPermissionValidator>()
 				.IfNotRegistered(typeof(IPermissionValidator));
-			
+
 			builder.RegisterType<FileExtensionContentTypeProvider>().As<IContentTypeProvider>().SingleInstance()
 				.OnActivating(x =>
 				{
@@ -117,7 +117,7 @@ namespace Kyoo.Core
 					x.Instance.Mappings[".m3u8"] = "application/x-mpegurl";
 				});
 		}
-		
+
 		/// <inheritdoc />
 		public void Configure(IServiceCollection services)
 		{
@@ -130,12 +130,12 @@ namespace Kyoo.Core
 					x.SerializerSettings.ContractResolver = new JsonPropertyIgnorer(publicUrl);
 					x.SerializerSettings.Converters.Add(new PeopleRoleConverter());
 				});
-			
+
 			services.AddResponseCompression(x =>
 			{
 				x.EnableForHttps = true;
 			});
-			
+
 			services.AddHttpClient();
 		}
 

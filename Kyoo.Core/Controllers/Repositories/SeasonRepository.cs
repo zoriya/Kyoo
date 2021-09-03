@@ -50,7 +50,7 @@ namespace Kyoo.Core.Controllers
 				throw new ItemNotFoundException($"No season {seasonNumber} found for the show {showID}");
 			return ret;
 		}
-		
+
 		/// <inheritdoc/>
 		public async Task<Season> Get(string showSlug, int seasonNumber)
 		{
@@ -63,14 +63,14 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc/>
 		public Task<Season> GetOrDefault(int showID, int seasonNumber)
 		{
-			return _database.Seasons.FirstOrDefaultAsync(x => x.ShowID == showID 
+			return _database.Seasons.FirstOrDefaultAsync(x => x.ShowID == showID
 			                                                  && x.SeasonNumber == seasonNumber);
 		}
 
 		/// <inheritdoc/>
 		public Task<Season> GetOrDefault(string showSlug, int seasonNumber)
 		{
-			return _database.Seasons.FirstOrDefaultAsync(x => x.Show.Slug == showSlug 
+			return _database.Seasons.FirstOrDefaultAsync(x => x.Show.Slug == showSlug
 			                                                  && x.SeasonNumber == seasonNumber);
 		}
 
@@ -121,14 +121,14 @@ namespace Kyoo.Core.Controllers
 		protected override async Task EditRelations(Season resource, Season changed, bool resetOld)
 		{
 			await Validate(changed);
-			
+
 			if (changed.ExternalIDs != null || resetOld)
 			{
 				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
 				resource.ExternalIDs = changed.ExternalIDs;
 			}
 		}
-		
+
 		/// <inheritdoc/>
 		public override async Task Delete(Season obj)
 		{

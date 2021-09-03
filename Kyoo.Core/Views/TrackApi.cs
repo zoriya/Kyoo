@@ -37,7 +37,7 @@ namespace Kyoo.Core.Api
 				return NotFound();
 			}
 		}
-		
+
 		[HttpGet("{slug}/episode")]
 		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Episode>> GetEpisode(string slug)

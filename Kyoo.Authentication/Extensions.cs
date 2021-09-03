@@ -37,7 +37,7 @@ namespace Kyoo.Authentication
 			return new(user.ID.ToString())
 			{
 				DisplayName = user.Username,
-				AdditionalClaims = new[] {new Claim("permissions", string.Join(',', user.Permissions))}
+				AdditionalClaims = new[] { new Claim("permissions", string.Join(',', user.Permissions)) }
 			};
 		}
 

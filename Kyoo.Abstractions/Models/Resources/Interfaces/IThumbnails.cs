@@ -16,7 +16,7 @@ namespace Kyoo.Abstractions.Models
 		/// An arbitrary index should not be used, instead use indexes from <see cref="Models.Images"/>
 		/// </remarks>
 		public Dictionary<int, string> Images { get; set; }
-		
+
 		// TODO remove Posters properties add them via the json serializer for every IThumbnails
 	}
 

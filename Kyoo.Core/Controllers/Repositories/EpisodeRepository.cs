@@ -29,7 +29,7 @@ namespace Kyoo.Core.Controllers
 		/// A track repository to handle creation and deletion of tracks related to the current episode.
 		/// </summary>
 		private readonly ITrackRepository _tracks;
-		
+
 		/// <inheritdoc />
 		protected override Expression<Func<Episode, object>> DefaultSort => x => x.EpisodeNumber;
 
@@ -42,27 +42,27 @@ namespace Kyoo.Core.Controllers
 		/// <param name="tracks">A track repository</param>
 		public EpisodeRepository(DatabaseContext database,
 			IProviderRepository providers,
-			ITrackRepository tracks) 
+			ITrackRepository tracks)
 			: base(database)
 		{
 			_database = database;
 			_providers = providers;
 			_tracks = tracks;
 		}
-		
+
 		/// <inheritdoc />
 		public Task<Episode> GetOrDefault(int showID, int seasonNumber, int episodeNumber)
 		{
-			return _database.Episodes.FirstOrDefaultAsync(x => x.ShowID == showID 
-			                                                   && x.SeasonNumber == seasonNumber 
+			return _database.Episodes.FirstOrDefaultAsync(x => x.ShowID == showID
+			                                                   && x.SeasonNumber == seasonNumber
 			                                                   && x.EpisodeNumber == episodeNumber);
 		}
 
 		/// <inheritdoc />
 		public Task<Episode> GetOrDefault(string showSlug, int seasonNumber, int episodeNumber)
 		{
-			return _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == showSlug 
-			                                                   && x.SeasonNumber == seasonNumber 
+			return _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == showSlug
+			                                                   && x.SeasonNumber == seasonNumber
 			                                                   && x.EpisodeNumber == episodeNumber);
 		}
 
@@ -87,14 +87,14 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public Task<Episode> GetAbsolute(int showID, int absoluteNumber)
 		{
-			return _database.Episodes.FirstOrDefaultAsync(x => x.ShowID == showID 
+			return _database.Episodes.FirstOrDefaultAsync(x => x.ShowID == showID
 			                                                   && x.AbsoluteNumber == absoluteNumber);
 		}
 
 		/// <inheritdoc />
 		public Task<Episode> GetAbsolute(string showSlug, int absoluteNumber)
 		{
-			return _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == showSlug 
+			return _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == showSlug
 			                                                   && x.AbsoluteNumber == absoluteNumber);
 		}
 
@@ -108,7 +108,7 @@ namespace Kyoo.Core.Controllers
 				.Take(20)
 				.ToListAsync();
 		}
-		
+
 		/// <inheritdoc />
 		public override async Task<Episode> Create(Episode obj)
 		{
@@ -146,7 +146,7 @@ namespace Kyoo.Core.Controllers
 		{
 			if (resource.Tracks == null)
 				return resource;
-			
+
 			resource.Tracks = await resource.Tracks.SelectAsync(x =>
 			{
 				x.Episode = resource;
@@ -156,7 +156,7 @@ namespace Kyoo.Core.Controllers
 			_database.Tracks.AttachRange(resource.Tracks);
 			return resource;
 		}
-		
+
 		/// <inheritdoc />
 		protected override async Task Validate(Episode resource)
 		{
@@ -180,13 +180,13 @@ namespace Kyoo.Core.Controllers
 				_database.MetadataIds<Episode>().AttachRange(resource.ExternalIDs);
 			}
 		}
-		
+
 		/// <inheritdoc />
 		public override async Task Delete(Episode obj)
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
-			
+
 			_database.Entry(obj).State = EntityState.Deleted;
 			await obj.Tracks.ForEachAsync(x => _tracks.Delete(x));
 			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Deleted);

@@ -15,13 +15,13 @@ namespace Kyoo.Authentication.Models.DTO
 		/// </summary>
 		[EmailAddress(ErrorMessage = "The email must be a valid email address")]
 		public string Email { get; set; }
-		
+
 		/// <summary>
 		/// The user's username. 
 		/// </summary>
 		[MinLength(4, ErrorMessage = "The username must have at least {1} characters")]
 		public string Username { get; set; }
-		
+
 		/// <summary>
 		/// The user's password.
 		/// </summary>
@@ -44,5 +44,5 @@ namespace Kyoo.Authentication.Models.DTO
 				ExtraData = new Dictionary<string, string>()
 			};
 		}
-	}	
+	}
 }

@@ -17,7 +17,7 @@ namespace Kyoo.Core.Controllers
 	public class ConfigurationManager : IConfigurationManager
 	{
 		/// <summary>
-		/// The configuration to retrieve and edit. 
+		/// The configuration to retrieve and edit.
 		/// </summary>
 		private readonly IConfiguration _configuration;
 
@@ -58,7 +58,7 @@ namespace Kyoo.Core.Controllers
 			ConfigurationReference config = ConfigurationReference.CreateUntyped(path);
 			_references.Add(config.Path, config.Type);
 		}
-		
+
 		/// <inheritdoc />
 		public void Register(string path, Type type)
 		{
@@ -98,7 +98,7 @@ namespace Kyoo.Core.Controllers
 				throw new ArgumentException($"The configuration at {path} is not editable or readable.");
 			throw new ItemNotFoundException($"No configuration exists for the name: {path}");
 		}
-		
+
 		/// <inheritdoc />
 		public object GetValue(string path)
 		{
@@ -124,7 +124,7 @@ namespace Kyoo.Core.Controllers
 				                               $"a resource of type {type.Name}.");
 			return (T)GetValue(path);
 		}
-		
+
 		/// <inheritdoc />
 		public async Task EditValue(string path, object value)
 		{
@@ -133,7 +133,7 @@ namespace Kyoo.Core.Controllers
 			value = JObject.FromObject(value).ToObject(type);
 			if (value == null)
 				throw new ArgumentException("Invalid value format.");
-			
+
 			ExpandoObject config = _ToObject(_configuration);
 			IDictionary<string, object> configDic = config;
 			configDic[path] = value;
@@ -141,7 +141,7 @@ namespace Kyoo.Core.Controllers
 			await using StreamWriter writer = new(_application.GetConfigFile());
 			await writer.WriteAsync(obj.ToString());
 		}
-		
+
 		/// <summary>
 		/// Transform a configuration to a strongly typed object (the root configuration is an <see cref="ExpandoObject"/>
 		/// but child elements are using strong types.
@@ -169,7 +169,7 @@ namespace Kyoo.Core.Controllers
 					continue;
 				}
 			}
-			
+
 			return obj;
 		}
 

@@ -57,8 +57,8 @@ namespace Kyoo.Authentication.Views
 			_files = files;
 			_options = options;
 		}
-		
-		
+
+
 		/// <summary>
 		/// Register a new user and return a OTAC to connect to it. 
 		/// </summary>
@@ -78,10 +78,10 @@ namespace Kyoo.Authentication.Views
 			}
 			catch (DuplicatedItemException)
 			{
-				return Conflict(new {Errors = new {Duplicate = new[] {"A user with this name already exists"}}});
+				return Conflict(new { Errors = new { Duplicate = new[] { "A user with this name already exists" } } });
 			}
 
-			return Ok(new {Otac = user.ExtraData["otac"]});
+			return Ok(new { Otac = user.ExtraData["otac"] });
 		}
 
 		/// <summary>
@@ -99,7 +99,7 @@ namespace Kyoo.Authentication.Views
 				ExpiresUtc = DateTimeOffset.UtcNow.AddMonths(1)
 			};
 		}
-		
+
 		/// <summary>
 		/// Login the user.
 		/// </summary>
@@ -117,7 +117,7 @@ namespace Kyoo.Authentication.Views
 			await HttpContext.SignInAsync(user.ToIdentityUser(), StayLogged(login.StayLoggedIn));
 			return Ok(new { RedirectUrl = login.ReturnURL, IsOk = true });
 		}
-		
+
 		/// <summary>
 		/// Use a OTAC to login a user.
 		/// </summary>
@@ -127,22 +127,23 @@ namespace Kyoo.Authentication.Views
 		{
 			// TODO once hstore (Dictionary<string, string> accessor) are supported, use them.
 			//      We retrieve all users, this is inefficient.
-			User user = (await _users.GetAll()).FirstOrDefault(x => x.ExtraData.GetValueOrDefault("otac")  == otac.Otac);
+			User user = (await _users.GetAll()).FirstOrDefault(x => x.ExtraData.GetValueOrDefault("otac") == otac.Otac);
 			if (user == null)
 				return Unauthorized();
 			if (DateTime.ParseExact(user.ExtraData["otac-expire"], "s", CultureInfo.InvariantCulture) <=
-			    DateTime.UtcNow)
+				DateTime.UtcNow)
 			{
 				return BadRequest(new
 				{
-					code = "ExpiredOTAC", description = "The OTAC has expired. Try to login with your password."
+					code = "ExpiredOTAC",
+					description = "The OTAC has expired. Try to login with your password."
 				});
 			}
-			
+
 			await HttpContext.SignInAsync(user.ToIdentityUser(), StayLogged(otac.StayLoggedIn));
 			return Ok();
 		}
-		
+
 		/// <summary>
 		/// Sign out an user
 		/// </summary>
@@ -170,7 +171,7 @@ namespace Kyoo.Authentication.Views
 			User user = await _users.GetOrDefault(int.Parse(context.Subject.GetSubjectId()));
 			context.IsActive = user != null;
 		}
-		
+
 		/// <summary>
 		/// Get the user's profile picture.
 		/// </summary>
@@ -185,7 +186,7 @@ namespace Kyoo.Authentication.Views
 			string path = Path.Combine(_options.Value.ProfilePicturePath, user.ID.ToString());
 			return _files.FileResult(path);
 		}
-		
+
 		/// <summary>
 		/// Update profile information (email, username, profile picture...)
 		/// </summary>

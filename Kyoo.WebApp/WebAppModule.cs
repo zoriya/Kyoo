@@ -21,7 +21,7 @@ namespace Kyoo.WebApp
 	{
 		/// <inheritdoc />
 		public string Slug => "webapp";
-		
+
 		/// <inheritdoc />
 		public string Name => "WebApp";
 
@@ -41,8 +41,10 @@ namespace Kyoo.WebApp
 		public WebAppModule(ILogger<WebAppModule> logger)
 		{
 			if (!Enabled)
-				logger.LogError("The web app files could not be found, it will be disabled. " + 
+			{
+				logger.LogError("The web app files could not be found, it will be disabled. " +
 					"If you cloned the project, you probably forgot to use the --recurse flag");
+			}
 		}
 
 		/// <inheritdoc />
@@ -53,7 +55,7 @@ namespace Kyoo.WebApp
 				x.RootPath = Path.Join(AppDomain.CurrentDomain.BaseDirectory, "wwwroot");
 			});
 		}
-		
+
 		/// <inheritdoc />
 		public IEnumerable<IStartupAction> ConfigureSteps => new IStartupAction[]
 		{
@@ -72,7 +74,7 @@ namespace Kyoo.WebApp
 			}, SA.StaticFiles),
 			SA.New<IApplicationBuilder>(app =>
 			{
-				app.Use((ctx, next) => 
+				app.Use((ctx, next) =>
 				{
 					ctx.Response.Headers.Remove("X-Powered-By");
 					ctx.Response.Headers.Remove("Server");
@@ -90,7 +92,7 @@ namespace Kyoo.WebApp
 				app.UseSpa(spa =>
 				{
 					spa.Options.SourcePath = _GetSpaSourcePath();
-			
+
 					if (env.IsDevelopment())
 						spa.UseAngularCliServer("start");
 				});

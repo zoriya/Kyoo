@@ -6,13 +6,13 @@ namespace Kyoo.Abstractions.Models.Attributes
 	/// Remove an property from the serialization pipeline. It will simply be skipped. 
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-	public class SerializeIgnoreAttribute : Attribute {}
-	
+	public class SerializeIgnoreAttribute : Attribute { }
+
 	/// <summary>
 	/// Remove a property from the deserialization pipeline. The user can't input value for this property.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-	public class DeserializeIgnoreAttribute : Attribute {}
+	public class DeserializeIgnoreAttribute : Attribute { }
 
 	/// <summary>
 	/// Change the way the field is serialized. It allow one to use a string format like formatting instead of the default value.
@@ -25,7 +25,7 @@ namespace Kyoo.Abstractions.Models.Attributes
 		/// The format string to use.
 		/// </summary>
 		public string Format { get; }
-		
+
 		/// <summary>
 		/// Create a new <see cref="SerializeAsAttribute"/> with the selected format.
 		/// </summary>

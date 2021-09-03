@@ -25,7 +25,7 @@ namespace Kyoo.Tests.Identifier.Tvdb
 			};
 			Provider provider = TestSample.Get<Provider>();
 			Show show = result.ToShow(provider);
-			
+
 			Assert.Equal("slug", show.Slug);
 			Assert.Equal("name", show.Title);
 			Assert.Single(show.Aliases);
@@ -85,7 +85,7 @@ namespace Kyoo.Tests.Identifier.Tvdb
 				Poster = "poster",
 				FanArt = "fanart",
 				Id = 5,
-				Genre = new []
+				Genre = new[]
 				{
 					"Action",
 					"Test With Spéàacial characters"
@@ -93,7 +93,7 @@ namespace Kyoo.Tests.Identifier.Tvdb
 			};
 			Provider provider = TestSample.Get<Provider>();
 			Show show = result.ToShow(provider);
-			
+
 			Assert.Equal("slug", show.Slug);
 			Assert.Equal("name", show.Title);
 			Assert.Single(show.Aliases);
@@ -125,13 +125,13 @@ namespace Kyoo.Tests.Identifier.Tvdb
 				Role = "role"
 			};
 			PeopleRole people = actor.ToPeopleRole();
-			
+
 			Assert.Equal("name", people.Slug);
 			Assert.Equal("Name", people.People.Name);
 			Assert.Equal("role", people.Role);
 			Assert.Equal("https://www.thetvdb.com/banners/image", people.People.Images[Images.Poster]);
 		}
-		
+
 		[Fact]
 		public void EpisodeRecordToEpisode()
 		{
@@ -147,7 +147,7 @@ namespace Kyoo.Tests.Identifier.Tvdb
 			};
 			Provider provider = TestSample.Get<Provider>();
 			Episode episode = record.ToEpisode(provider);
-			
+
 			Assert.Equal("title", episode.Title);
 			Assert.Equal(2, episode.SeasonNumber);
 			Assert.Equal(3, episode.EpisodeNumber);

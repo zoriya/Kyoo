@@ -38,7 +38,7 @@ namespace Kyoo.Postgresql
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<ItemType>();
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<StreamType>();
 		}
-		
+
 		/// <summary>
 		/// A basic constructor that set default values (query tracker behaviors, mapping enums...)
 		/// </summary>
@@ -102,7 +102,7 @@ namespace Kyoo.Postgresql
 			modelBuilder.Entity<User>()
 				.Property(x => x.ExtraData)
 				.HasColumnType("jsonb");
-			
+
 			modelBuilder.Entity<LibraryItem>()
 				.Property(x => x.Images)
 				.HasColumnType("jsonb");
@@ -127,7 +127,7 @@ namespace Kyoo.Postgresql
 			modelBuilder.Entity<User>()
 				.Property(x => x.Images)
 				.HasColumnType("jsonb");
-			
+
 			base.OnModelCreating(modelBuilder);
 		}
 
@@ -137,14 +137,14 @@ namespace Kyoo.Postgresql
 			SnakeCaseNameRewriter rewriter = new(CultureInfo.InvariantCulture);
 			return rewriter.RewriteName(typeof(T).Name + nameof(MetadataID));
 		}
-		
+
 		/// <inheritdoc />
 		protected override string LinkName<T, T2>()
 		{
 			SnakeCaseNameRewriter rewriter = new(CultureInfo.InvariantCulture);
 			return rewriter.RewriteName("Link" + typeof(T).Name + typeof(T2).Name);
 		}
-		
+
 		/// <inheritdoc />
 		protected override string LinkNameFk<T>()
 		{
@@ -155,7 +155,7 @@ namespace Kyoo.Postgresql
 		/// <inheritdoc />
 		protected override bool IsDuplicateException(Exception ex)
 		{
-			return ex.InnerException is PostgresException {SqlState: PostgresErrorCodes.UniqueViolation};
+			return ex.InnerException is PostgresException { SqlState: PostgresErrorCodes.UniqueViolation };
 		}
 
 		/// <inheritdoc />

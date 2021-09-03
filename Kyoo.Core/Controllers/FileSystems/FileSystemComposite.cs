@@ -31,12 +31,12 @@ namespace Kyoo.Core.Controllers
 		/// (only if the option is set to metadata in show)
 		/// </summary>
 		private readonly ILibraryManager _libraryManager;
-		
+
 		/// <summary>
 		/// Options to check if the metadata should be kept in the show directory or in a kyoo's directory.
 		/// </summary>
 		private readonly IOptionsMonitor<BasicOptions> _options;
-		
+
 		/// <summary>
 		/// Create a new <see cref="FileSystemComposite"/> from a list of <see cref="IFileSystem"/> mapped to their
 		/// metadata.
@@ -45,7 +45,7 @@ namespace Kyoo.Core.Controllers
 		/// <param name="libraryManager">The library manager used to load shows to retrieve their path.</param>
 		/// <param name="options">The options to use.</param>
 		public FileSystemComposite(ICollection<Meta<Func<IFileSystem>, FileSystemMetadataAttribute>> fileSystems,
-			ILibraryManager libraryManager, 
+			ILibraryManager libraryManager,
 			IOptionsMonitor<BasicOptions> options)
 		{
 			_fileSystems = fileSystems;
@@ -53,7 +53,7 @@ namespace Kyoo.Core.Controllers
 			_options = options;
 		}
 
-		
+
 		/// <summary>
 		/// Retrieve the file system that should be used for a given path.
 		/// </summary>
@@ -159,7 +159,7 @@ namespace Kyoo.Core.Controllers
 			return _GetFileSystemForPath(path, out string relativePath)
 				.Exists(relativePath);
 		}
-		
+
 		/// <inheritdoc />
 		public async Task<string> GetExtraDirectory<T>(T resource)
 		{
@@ -191,7 +191,7 @@ namespace Kyoo.Core.Controllers
 					Season season => await GetExtraDirectory(season.Show),
 					Episode episode => await GetExtraDirectory(episode.Show),
 					Track track => await GetExtraDirectory(track.Episode),
-					IResource res => Combine(_options.CurrentValue.MetadataPath, 
+					IResource res => Combine(_options.CurrentValue.MetadataPath,
 						typeof(T).Name.ToLowerInvariant(), res.Slug),
 					_ => Combine(_options.CurrentValue.MetadataPath, typeof(T).Name.ToLowerInvariant())
 				};

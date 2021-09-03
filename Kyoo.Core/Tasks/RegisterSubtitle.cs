@@ -42,7 +42,7 @@ namespace Kyoo.Core.Tasks
 				TaskParameter.CreateRequired<string>("path", "The path of the subtitle file")
 			};
 		}
-		
+
 		/// <inheritdoc />
 		public async Task Run(TaskParameters arguments, IProgress<float> progress, CancellationToken cancellationToken)
 		{

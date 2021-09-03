@@ -81,7 +81,7 @@ namespace Kyoo.Core.Api
 				value.Show.People = null;
 			if (value.People != null)
 				value.People.Roles = null;
-			
+
 			JObject obj = JObject.FromObject((value.ForPeople ? value.People : value.Show)!, serializer);
 			obj.Add("role", value.Role);
 			obj.Add("type", value.Type);
@@ -93,7 +93,7 @@ namespace Kyoo.Core.Api
 				value.People.Roles = oldRoles;
 		}
 
-		public override PeopleRole ReadJson(JsonReader reader, 
+		public override PeopleRole ReadJson(JsonReader reader,
 			Type objectType,
 			PeopleRole existingValue,
 			bool hasExistingValue,
@@ -113,7 +113,7 @@ namespace Kyoo.Core.Api
 			_format = format;
 			_host = host.TrimEnd('/');
 		}
-		
+
 		public object GetValue(object target)
 		{
 			return Regex.Replace(_format, @"(?<!{){(\w+)(:(\w+))?}", x =>
@@ -123,7 +123,7 @@ namespace Kyoo.Core.Api
 
 				if (value == "HOST")
 					return _host;
-				
+
 				PropertyInfo properties = target.GetType()
 					.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
 					.FirstOrDefault(y => y.Name == value);
@@ -147,7 +147,7 @@ namespace Kyoo.Core.Api
 				return ret;
 			});
 		}
-		
+
 		public void SetValue(object target, object value)
 		{
 			// Values are ignored and should not be editable, except if the internal value is set.

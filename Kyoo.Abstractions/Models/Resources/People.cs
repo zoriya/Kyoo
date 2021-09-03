@@ -11,15 +11,15 @@ namespace Kyoo.Abstractions.Models
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
-		
+
 		/// <inheritdoc />
 		public string Slug { get; set; }
-		
+
 		/// <summary>
 		/// The name of this person.
 		/// </summary>
 		public string Name { get; set; }
-		
+
 		/// <inheritdoc />
 		public Dictionary<int, string> Images { get; set; }
 
@@ -31,10 +31,10 @@ namespace Kyoo.Abstractions.Models
 		[SerializeAs("{HOST}/api/people/{Slug}/poster")]
 		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
 		public string Poster => Images?.GetValueOrDefault(Models.Images.Poster);
-		
+
 		/// <inheritdoc />
 		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
-		
+
 		/// <summary>
 		/// The list of roles this person has played in. See <see cref="PeopleRole"/> for more information.
 		/// </summary>

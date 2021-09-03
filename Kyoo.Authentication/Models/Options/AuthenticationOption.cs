@@ -14,12 +14,12 @@ namespace Kyoo.Authentication.Models
 		/// The options for certificates
 		/// </summary>
 		public CertificateOption Certificate { get; set; }
-		
+
 		/// <summary>
 		/// Options for permissions
 		/// </summary>
 		public PermissionOption Permissions { get; set; }
-		
+
 		/// <summary>
 		/// Root path of user's profile pictures. 
 		/// </summary>

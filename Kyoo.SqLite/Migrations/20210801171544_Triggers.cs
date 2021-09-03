@@ -20,7 +20,7 @@ namespace Kyoo.SqLite.Migrations
 			    UPDATE Seasons SET Slug = (SELECT Slug from Shows WHERE ID = ShowID) || '-s' || SeasonNumber
 				WHERE ID == new.ID;
 			END");
-			
+
 			// language=SQLite
 			migrationBuilder.Sql(@"
 			CREATE TRIGGER EpisodeSlugInsert AFTER INSERT ON Episodes FOR EACH ROW 
@@ -149,8 +149,8 @@ namespace Kyoo.SqLite.Migrations
 					           END
 				WHERE ShowID = new.ID;
 			END;");
-			
-			
+
+
 			// language=SQLite
 			migrationBuilder.Sql(@"
 			CREATE VIEW LibraryItems AS

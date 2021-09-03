@@ -23,7 +23,7 @@ namespace Kyoo.Core.Api
 		public PeopleApi(ILibraryManager libraryManager,
 			IOptions<BasicOptions> options,
 			IFileSystem files,
-			IThumbnailsManager thumbs) 
+			IThumbnailsManager thumbs)
 			: base(libraryManager.PeopleRepository, options.Value.PublicUrl)
 		{
 			_libraryManager = libraryManager;
@@ -55,7 +55,7 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
 
@@ -83,10 +83,10 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
-		
+
 		[HttpGet("{id:int}/poster")]
 		public async Task<IActionResult> GetPeopleIcon(int id)
 		{
@@ -95,7 +95,7 @@ namespace Kyoo.Core.Api
 				return NotFound();
 			return _files.FileResult(await _thumbs.GetImagePath(people, Images.Poster));
 		}
-		
+
 		[HttpGet("{slug}/poster")]
 		public async Task<IActionResult> GetPeopleIcon(string slug)
 		{

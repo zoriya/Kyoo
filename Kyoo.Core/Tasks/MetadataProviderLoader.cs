@@ -40,7 +40,7 @@ namespace Kyoo.Core.Tasks
 		/// <param name="metadataProviders">
 		///	The list of metadata providers to register.
 		/// </param>
-		public MetadataProviderLoader(IProviderRepository providers, 
+		public MetadataProviderLoader(IProviderRepository providers,
 			IThumbnailsManager thumbnails,
 			ICollection<IMetadataProvider> metadataProviders)
 		{
@@ -61,7 +61,7 @@ namespace Kyoo.Core.Tasks
 		{
 			float percent = 0;
 			progress.Report(0);
-			
+
 			foreach (IMetadataProvider provider in _metadataProviders)
 			{
 				if (string.IsNullOrEmpty(provider.Provider.Slug))

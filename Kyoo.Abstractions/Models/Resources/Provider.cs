@@ -14,15 +14,15 @@ namespace Kyoo.Abstractions.Models
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
-		
+
 		/// <inheritdoc />
 		public string Slug { get; set; }
-		
+
 		/// <summary>
 		/// The name of this provider.
 		/// </summary>
 		public string Name { get; set; }
-		
+
 		/// <inheritdoc />
 		public Dictionary<int, string> Images { get; set; }
 

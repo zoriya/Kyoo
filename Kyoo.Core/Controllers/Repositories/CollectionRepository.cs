@@ -19,12 +19,12 @@ namespace Kyoo.Core.Controllers
 		/// The database handle
 		/// </summary>
 		private readonly DatabaseContext _database;
-		
+
 		/// <summary>
 		/// A provider repository to handle externalID creation and deletion
 		/// </summary>
 		private readonly IProviderRepository _providers;
-		
+
 		/// <inheritdoc />
 		protected override Expression<Func<Collection, object>> DefaultSort => x => x.Name;
 
@@ -58,12 +58,12 @@ namespace Kyoo.Core.Controllers
 			await _database.SaveChangesAsync($"Trying to insert a duplicated collection (slug {obj.Slug} already exists).");
 			return obj;
 		}
-		
+
 		/// <inheritdoc />
 		protected override async Task Validate(Collection resource)
 		{
 			await base.Validate(resource);
-			
+
 			if (string.IsNullOrEmpty(resource.Slug))
 				throw new ArgumentException("The collection's slug must be set and not empty");
 			if (string.IsNullOrEmpty(resource.Name))
@@ -72,7 +72,7 @@ namespace Kyoo.Core.Controllers
 			if (resource.ExternalIDs != null)
 			{
 				foreach (MetadataID id in resource.ExternalIDs)
-				{ 
+				{
 					id.Provider = _database.LocalEntity<Provider>(id.Provider.Slug)
 						?? await _providers.CreateIfNotExists(id.Provider);
 					id.ProviderID = id.Provider.ID;
@@ -80,12 +80,12 @@ namespace Kyoo.Core.Controllers
 				_database.MetadataIds<Collection>().AttachRange(resource.ExternalIDs);
 			}
 		}
-		
+
 		/// <inheritdoc />
 		protected override async Task EditRelations(Collection resource, Collection changed, bool resetOld)
 		{
 			await Validate(changed);
-			
+
 			if (changed.ExternalIDs != null || resetOld)
 			{
 				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();

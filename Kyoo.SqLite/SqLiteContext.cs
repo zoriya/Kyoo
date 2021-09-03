@@ -96,7 +96,7 @@ namespace Kyoo.SqLite
 			modelBuilder.Entity<User>()
 				.Property(x => x.Permissions)
 				.HasConversion(arrayConvertor);
-			
+
 			modelBuilder.Entity<Show>()
 				.Property(x => x.Status)
 				.HasConversion<int>();
@@ -110,7 +110,7 @@ namespace Kyoo.SqLite
 			modelBuilder.Entity<User>()
 				.Property(x => x.ExtraData)
 				.HasConversion(extraDataConvertor);
-			
+
 			ValueConverter<Dictionary<int, string>, string> jsonConvertor = new(
 				x => JsonConvert.SerializeObject(x),
 				x => JsonConvert.DeserializeObject<Dictionary<int, string>>(x));
@@ -138,8 +138,8 @@ namespace Kyoo.SqLite
 			modelBuilder.Entity<User>()
 				.Property(x => x.Images)
 				.HasConversion(jsonConvertor);
-			
-			
+
+
 			modelBuilder.Entity<LibraryItem>()
 				.ToView("LibraryItems")
 				.HasKey(x => x.ID);
@@ -151,13 +151,13 @@ namespace Kyoo.SqLite
 		{
 			return typeof(T).Name + nameof(MetadataID);
 		}
-		
+
 		/// <inheritdoc />
 		protected override string LinkName<T, T2>()
 		{
 			return "Link" + typeof(T).Name + typeof(T2).Name;
 		}
-		
+
 		/// <inheritdoc />
 		protected override string LinkNameFk<T>()
 		{

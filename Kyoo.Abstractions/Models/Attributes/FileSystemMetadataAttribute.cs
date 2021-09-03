@@ -20,13 +20,13 @@ namespace Kyoo.Abstractions.Models.Attributes
 		/// If multiples files with the same schemes exists, an exception will be thrown.
 		/// </remarks>
 		public string[] Scheme { get; }
-		
+
 		/// <summary>
 		/// <c>true</c> if the scheme should be removed from the path before calling
 		/// methods of this <see cref="IFileSystem"/>, <c>false</c> otherwise.
 		/// </summary>
 		public bool StripScheme { get; set; }
-		
+
 
 		/// <summary>
 		/// Create a new <see cref="FileSystemMetadataAttribute"/> using the specified schemes.
@@ -36,7 +36,7 @@ namespace Kyoo.Abstractions.Models.Attributes
 		{
 			Scheme = schemes;
 		}
-		
+
 		/// <summary>
 		/// Create a new <see cref="FileSystemMetadataAttribute"/> using a dictionary of metadata.
 		/// </summary>

@@ -32,7 +32,7 @@ namespace Kyoo.Core
 		/// Should the application restart after a shutdown?
 		/// </summary>
 		private bool _shouldRestart;
-		
+
 		/// <summary>
 		/// The cancellation token source used to allow the app to be shutdown or restarted.
 		/// </summary>
@@ -48,7 +48,7 @@ namespace Kyoo.Core
 		/// </summary>
 		private ILogger _logger;
 
-		
+
 		/// <summary>
 		/// Create a new <see cref="Application"/> that will use the specified environment.
 		/// </summary>
@@ -80,28 +80,28 @@ namespace Kyoo.Core
 		public async Task Start(string[] args, Action<ContainerBuilder> configure)
 		{
 			_dataDir = _SetupDataDir(args);
-			
+
 			LoggerConfiguration config = new();
 			_ConfigureLogging(config, null, null);
 			Log.Logger = config.CreateBootstrapLogger();
 			_logger = Log.Logger.ForContext<Application>();
 
 			AppDomain.CurrentDomain.ProcessExit += (_, _) => Log.CloseAndFlush();
-			AppDomain.CurrentDomain.UnhandledException += (_, ex) 
+			AppDomain.CurrentDomain.UnhandledException += (_, ex)
 				=> Log.Fatal(ex.ExceptionObject as Exception, "Unhandled exception");
-			
+
 			do
 			{
 				IHost host = _CreateWebHostBuilder(args)
 					.ConfigureContainer(configure)
 					.Build();
-				
+
 				_tokenSource = new CancellationTokenSource();
 				await _StartWithHost(host, _tokenSource.Token);
-			} 
+			}
 			while (_shouldRestart);
 		}
-		
+
 		/// <inheritdoc />
 		public void Shutdown()
 		{
@@ -155,7 +155,7 @@ namespace Kyoo.Core
 				.AddCommandLine(args)
 				.Build();
 
-			string path = parsed.GetValue<string>("datadir") 
+			string path = parsed.GetValue<string>("datadir")
 				?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Kyoo");
 
 			if (!Directory.Exists(path))
@@ -165,7 +165,7 @@ namespace Kyoo.Core
 			if (!File.Exists(GetConfigFile()))
 				File.Copy(Path.Join(AppDomain.CurrentDomain.BaseDirectory, GetConfigFile()),
 					GetConfigFile());
-			
+
 			return path;
 		}
 
@@ -217,7 +217,7 @@ namespace Kyoo.Core
 					.UseStartup(host => PluginsStartup.FromWebHost(host, new LoggerFactory().AddSerilog()))
 				);
 		}
-		
+
 		/// <summary>
 		/// Register settings.json, environment variables and command lines arguments as configuration.
 		/// </summary>

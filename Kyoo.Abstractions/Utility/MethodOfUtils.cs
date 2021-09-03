@@ -17,7 +17,7 @@ namespace Kyoo.Utils
 		{
 			return action.Method;
 		}
-		
+
 		/// <summary>
 		/// Get a MethodInfo from a direct method.
 		/// </summary>
@@ -27,7 +27,7 @@ namespace Kyoo.Utils
 		{
 			return action.Method;
 		}
-		
+
 		/// <summary>
 		/// Get a MethodInfo from a direct method.
 		/// </summary>
@@ -37,7 +37,7 @@ namespace Kyoo.Utils
 		{
 			return action.Method;
 		}
-		
+
 		/// <summary>
 		/// Get a MethodInfo from a direct method.
 		/// </summary>
@@ -47,7 +47,7 @@ namespace Kyoo.Utils
 		{
 			return action.Method;
 		}
-		
+
 		/// <summary>
 		/// Get a MethodInfo from a direct method.
 		/// </summary>
@@ -57,7 +57,7 @@ namespace Kyoo.Utils
 		{
 			return action.Method;
 		}
-		
+
 		/// <summary>
 		/// Get a MethodInfo from a direct method.
 		/// </summary>
@@ -67,7 +67,7 @@ namespace Kyoo.Utils
 		{
 			return action.Method;
 		}
-		
+
 		/// <summary>
 		/// Get a MethodInfo from a direct method.
 		/// </summary>
@@ -77,7 +77,7 @@ namespace Kyoo.Utils
 		{
 			return action.Method;
 		}
-		
+
 		/// <summary>
 		/// Get a MethodInfo from a direct method.
 		/// </summary>

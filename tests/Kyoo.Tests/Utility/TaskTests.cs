@@ -21,7 +21,7 @@ namespace Kyoo.Tests.Utility
 			await Assert.ThrowsAsync<ArgumentException>(() => Task.FromResult(1)
 				.Then(_ => throw new ArgumentException()));
 			Assert.Equal(1, await Task.FromResult(1)
-				.Then(_ => {}));
+				.Then(_ => { }));
 
 			static async Task<int> Faulted()
 			{
@@ -39,9 +39,9 @@ namespace Kyoo.Tests.Utility
 			CancellationTokenSource token = new();
 			token.Cancel();
 			await Assert.ThrowsAsync<TaskCanceledException>(() => Task.Run(Infinite, token.Token)
-				.Then(_ => {}));
+				.Then(_ => { }));
 		}
-		
+
 		[Fact]
 		public async Task MapTest()
 		{

@@ -24,7 +24,7 @@ namespace Kyoo.Utils
 		/// <returns>The two list merged as an array</returns>
 		[ContractAnnotation("first:notnull => notnull; second:notnull => notnull", true)]
 		public static T[] MergeLists<T>([CanBeNull] IEnumerable<T> first,
-			[CanBeNull] IEnumerable<T> second, 
+			[CanBeNull] IEnumerable<T> second,
 			[CanBeNull] Func<T, T, bool> isEqual = null)
 		{
 			if (first == null)
@@ -82,7 +82,7 @@ namespace Kyoo.Utils
 			{
 				bool success = first.TryAdd(key, value);
 				hasChanged |= success;
-				
+
 				if (success || first[key]?.Equals(default) == false || value?.Equals(default) != false)
 					continue;
 				first[key] = value;
@@ -150,9 +150,9 @@ namespace Kyoo.Utils
 		{
 			Type type = typeof(T);
 			IEnumerable<PropertyInfo> properties = type.GetProperties()
-				.Where(x => x.CanRead && x.CanWrite 
+				.Where(x => x.CanRead && x.CanWrite
 				                      && Attribute.GetCustomAttribute(x, typeof(NotMergeableAttribute)) == null);
-			
+
 			foreach (PropertyInfo property in properties)
 			{
 				object value = property.GetValue(second);
@@ -163,7 +163,7 @@ namespace Kyoo.Utils
 				merge.OnMerge(second);
 			return first;
 		}
-		
+
 		/// <summary>
 		/// Set every non-default values of seconds to the corresponding property of second.
 		/// Dictionaries are handled like anonymous objects with a property per key/pair value
@@ -190,15 +190,15 @@ namespace Kyoo.Utils
 		/// <typeparam name="T">Fields of T will be completed</typeparam>
 		/// <returns><see cref="first"/></returns>
 		/// <exception cref="ArgumentNullException">If first is null</exception>
-		public static T Complete<T>([NotNull] T first, 
-			[CanBeNull] T second, 
+		public static T Complete<T>([NotNull] T first,
+			[CanBeNull] T second,
 			[InstantHandle] Func<PropertyInfo, bool> where = null)
 		{
 			if (first == null)
 				throw new ArgumentNullException(nameof(first));
 			if (second == null)
 				return first;
-			
+
 			Type type = typeof(T);
 			IEnumerable<PropertyInfo> properties = type.GetProperties()
 				.Where(x => x.CanRead && x.CanWrite
@@ -206,7 +206,7 @@ namespace Kyoo.Utils
 
 			if (where != null)
 				properties = properties.Where(where);
-			
+
 			foreach (PropertyInfo property in properties)
 			{
 				object value = property.GetValue(second);
@@ -261,7 +261,7 @@ namespace Kyoo.Utils
 		/// <typeparam name="T">Fields of T will be merged</typeparam>
 		/// <returns><see cref="first"/></returns>
 		[ContractAnnotation("first:notnull => notnull; second:notnull => notnull", true)]
-		public static T Merge<T>([CanBeNull] T first, 
+		public static T Merge<T>([CanBeNull] T first,
 			[CanBeNull] T second,
 			[InstantHandle] Func<PropertyInfo, bool> where = null)
 		{
@@ -269,21 +269,21 @@ namespace Kyoo.Utils
 				return second;
 			if (second == null)
 				return first;
-			
+
 			Type type = typeof(T);
 			IEnumerable<PropertyInfo> properties = type.GetProperties()
-				.Where(x => x.CanRead && x.CanWrite 
+				.Where(x => x.CanRead && x.CanWrite
 				                      && Attribute.GetCustomAttribute(x, typeof(NotMergeableAttribute)) == null);
-			
+
 			if (where != null)
 				properties = properties.Where(where);
-			
+
 			foreach (PropertyInfo property in properties)
 			{
 				object oldValue = property.GetValue(first);
 				object newValue = property.GetValue(second);
 				object defaultValue = property.PropertyType.GetClrDefault();
-				
+
 				if (oldValue?.Equals(defaultValue) != false)
 					property.SetValue(first, newValue);
 				else if (Utility.IsOfGenericType(property.PropertyType, typeof(IDictionary<,>)))
@@ -310,7 +310,7 @@ namespace Kyoo.Utils
 						.GenericTypeArguments
 						.First();
 					Func<IResource, IResource, bool> equalityComparer = enumerableType.IsAssignableTo(typeof(IResource))
-						? (x, y) =>  x.Slug == y.Slug
+						? (x, y) => x.Slug == y.Slug
 						: null;
 					property.SetValue(first, Utility.RunGenericMethod<object>(
 						typeof(Merger),

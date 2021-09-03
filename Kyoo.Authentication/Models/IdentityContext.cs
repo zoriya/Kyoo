@@ -42,11 +42,11 @@ namespace Kyoo.Authentication
 					AllowedGrantTypes = GrantTypes.Code,
 					RequirePkce = true,
 					RequireClientSecret = false,
-					
+
 					AllowAccessTokensViaBrowser = true,
 					AllowOfflineAccess = true,
 					RequireConsent = false,
-					
+
 					AllowedScopes = { "openid", "profile", "kyoo.read", "kyoo.write", "kyoo.play", "kyoo.admin" },
 					RedirectUris =  { "/", "/silent.html" },
 					PostLogoutRedirectUris = { "/logout" }
@@ -84,7 +84,7 @@ namespace Kyoo.Authentication
 				}
 			};
 		}
-		
+
 		/// <summary>
 		/// The list of APIs (this is used to create Audiences)
 		/// </summary>

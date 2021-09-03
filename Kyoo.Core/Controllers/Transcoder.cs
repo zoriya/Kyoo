@@ -13,8 +13,8 @@ using Stream = Kyoo.Core.Models.Watch.Stream;
 
 namespace Kyoo.Core.Controllers
 {
-	public class BadTranscoderException : Exception {}
-	
+	public class BadTranscoderException : Exception { }
+
 	public class Transcoder : ITranscoder
 	{
 		private static class TranscoderAPI
@@ -26,7 +26,7 @@ namespace Kyoo.Core.Controllers
 
 			public static int Init() => init();
 
-			[DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl, 
+			[DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl,
 				CharSet = CharSet.Ansi, BestFitMapping = false, ThrowOnUnmappableChar = true)]
 			private static extern int transmux(string path, string outpath, out float playableDuration);
 
@@ -37,9 +37,9 @@ namespace Kyoo.Core.Controllers
 				return transmux(path, outPath, out playableDuration);
 			}
 
-			[DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl, 
+			[DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl,
 				CharSet = CharSet.Ansi, BestFitMapping = false, ThrowOnUnmappableChar = true)]
-			private static extern IntPtr extract_infos(string path, 
+			private static extern IntPtr extract_infos(string path,
 				string outpath,
 				out uint length,
 				out uint trackCount,
@@ -53,12 +53,12 @@ namespace Kyoo.Core.Controllers
 			{
 				path = path.Replace('\\', '/');
 				outPath = outPath.Replace('\\', '/');
-				
+
 				int size = Marshal.SizeOf<Models.Watch.Stream>();
 				IntPtr ptr = extract_infos(path, outPath, out uint arrayLength, out uint trackCount, reextract);
 				IntPtr streamsPtr = ptr;
 				Track[] tracks;
-			
+
 				if (trackCount > 0 && ptr != IntPtr.Zero)
 				{
 					tracks = new Track[trackCount];
@@ -113,7 +113,7 @@ namespace Kyoo.Core.Controllers
 		{
 			if (!File.Exists(episode.Path))
 				throw new ArgumentException("Path does not exists. Can't transcode.");
-			
+
 			string folder = Path.Combine(_options.Value.TransmuxPath, episode.Slug);
 			string manifest = Path.Combine(folder, episode.Slug + ".m3u8");
 			float playableDuration = 0;
@@ -130,7 +130,7 @@ namespace Kyoo.Core.Controllers
 				await Console.Error.WriteLineAsync($"Access to the path {manifest} is denied. Please change your transmux path in the config.");
 				return null;
 			}
-			
+
 			Task.Factory.StartNew(() =>
 			{
 				transmuxFailed = TranscoderAPI.Transmux(episode.Path, manifest, out playableDuration) != 0;

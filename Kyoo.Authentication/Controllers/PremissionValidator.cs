@@ -15,7 +15,7 @@ namespace Kyoo.Authentication
 {
 	/// <summary>
 	/// A permission validator to validate permission with user Permission array
-	/// or the default array from the configurations if the user is not logged. 
+	/// or the default array from the configurations if the user is not logged.
 	/// </summary>
 	public class PermissionValidatorFactory : IPermissionValidator
 	{
@@ -38,7 +38,7 @@ namespace Kyoo.Authentication
 		{
 			return new PermissionValidator(attribute.Type, attribute.Kind, attribute.Group, _options);
 		}
-		
+
 		/// <inheritdoc />
 		public IFilterMetadata Create(PartialPermissionAttribute attribute)
 		{

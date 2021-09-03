@@ -21,13 +21,13 @@ namespace Kyoo.Postgresql.Migrations
 				RETURN NEW;
 			END
 			$$;");
-			
+
 			// language=PostgreSQL
 			migrationBuilder.Sql(@"
 			CREATE TRIGGER season_slug_trigger BEFORE INSERT OR UPDATE OF season_number, show_id ON seasons 
 			FOR EACH ROW EXECUTE PROCEDURE season_slug_update();");
-			
-			
+
+
 			// language=PostgreSQL
 			migrationBuilder.Sql(@"
 			CREATE FUNCTION episode_slug_update()
@@ -46,7 +46,7 @@ namespace Kyoo.Postgresql.Migrations
 				RETURN NEW;
 			END
 			$$;");
-			
+
 			// language=PostgreSQL
 			migrationBuilder.Sql(@"
 			CREATE TRIGGER episode_slug_trigger 
@@ -74,7 +74,7 @@ namespace Kyoo.Postgresql.Migrations
 			migrationBuilder.Sql(@"
 			CREATE TRIGGER show_slug_trigger AFTER UPDATE OF slug ON shows
 			FOR EACH ROW EXECUTE PROCEDURE show_slug_update();");
-			
+
 			// language=PostgreSQL
 			migrationBuilder.Sql(@"
 			CREATE FUNCTION episode_update_tracks_slug()
@@ -102,7 +102,7 @@ namespace Kyoo.Postgresql.Migrations
 			migrationBuilder.Sql(@"
 			CREATE TRIGGER episode_track_slug_trigger AFTER UPDATE OF slug ON episodes
 			FOR EACH ROW EXECUTE PROCEDURE episode_update_tracks_slug();");
-			
+
 			// language=PostgreSQL
 			migrationBuilder.Sql(@"
 			CREATE FUNCTION track_slug_update()

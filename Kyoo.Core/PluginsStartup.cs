@@ -69,7 +69,7 @@ namespace Kyoo.Core
 		{
 			foreach (IPlugin plugin in _plugins.GetAllPlugins())
 				plugin.Configure(services);
-			
+
 			IEnumerable<KeyValuePair<string, Type>> configTypes = _plugins.GetAllPlugins()
 				.SelectMany(x => x.Configuration)
 				.Where(x => x.Value != null);
@@ -92,7 +92,7 @@ namespace Kyoo.Core
 		{
 			builder.RegisterInstance(_plugins).As<IPluginManager>().ExternallyOwned();
 			builder.RegisterTask<PluginInitializer>();
-			
+
 			foreach (IPlugin plugin in _plugins.GetAllPlugins())
 				plugin.Configure(builder);
 		}
@@ -125,8 +125,8 @@ namespace Kyoo.Core
 			foreach ((string path, Type type) in pluginConfig)
 				config.Register(path, type);
 		}
-		
-		
+
+
 		/// <summary>
 		/// Create a new <see cref="PluginsStartup"/> from a webhost.
 		/// This is meant to be used from <see cref="WebHostBuilderExtensions.UseStartup"/>.
@@ -136,7 +136,7 @@ namespace Kyoo.Core
 		/// The logger factory used to log while the application is setting itself up.
 		/// </param>
 		/// <returns>A new <see cref="PluginsStartup"/>.</returns>
-		public static PluginsStartup FromWebHost(WebHostBuilderContext host, 
+		public static PluginsStartup FromWebHost(WebHostBuilderContext host,
 			ILoggerFactory logger)
 		{
 			HostServiceProvider hostProvider = new(host.HostingEnvironment, host.Configuration, logger);
@@ -147,7 +147,7 @@ namespace Kyoo.Core
 			);
 			return new PluginsStartup(plugins, host.Configuration);
 		}
-		
+
 		/// <summary>
 		/// A simple host service provider used to activate plugins instance.
 		/// The same services as a generic host are available and an <see cref="ILoggerFactory"/> has been added.
@@ -158,18 +158,18 @@ namespace Kyoo.Core
 			/// The host environment that could be used by plugins to configure themself.
 			/// </summary>
 			private readonly IWebHostEnvironment _hostEnvironment;
-			
+
 			/// <summary>
 			/// The configuration context.
 			/// </summary>
 			private readonly IConfiguration _configuration;
-			
+
 			/// <summary>
 			/// A logger factory used to create a logger for the plugin manager.
 			/// </summary>
 			private readonly ILoggerFactory _loggerFactory;
 
-			
+
 			/// <summary>
 			/// Create a new <see cref="HostServiceProvider"/> that will return given services when asked.
 			/// </summary>

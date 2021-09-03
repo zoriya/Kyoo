@@ -21,7 +21,7 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		public Type Type { get; }
 
-		
+
 		/// <summary>
 		/// Create a new <see cref="ConfigurationReference"/> using a given path and type.
 		/// This method does not create sub configuration resources. Please see <see cref="CreateReference"/>
@@ -75,7 +75,7 @@ namespace Kyoo.Abstractions.Models
 
 			return ret;
 		}
-		
+
 		/// <summary>
 		/// Return the list of configuration reference a type has.
 		/// </summary>

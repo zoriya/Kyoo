@@ -34,7 +34,7 @@ namespace Kyoo.Abstractions.Controllers
 			Count = count;
 			AfterID = afterID;
 		}
-		
+
 		/// <summary>
 		/// Implicitly create a new pagination from a limit number.
 		/// </summary>
@@ -57,7 +57,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// If this is set to true, items will be sorted in descend order else, they will be sorted in ascendant order.
 		/// </summary>
 		public bool Descendant { get; }
-		
+
 		/// <summary>
 		/// Create a new <see cref="Sort{T}"/> instance.
 		/// </summary>
@@ -68,7 +68,7 @@ namespace Kyoo.Abstractions.Controllers
 		{
 			Key = key;
 			Descendant = descendant;
-			
+
 			if (!Utility.IsPropertyExpression(Key))
 				throw new ArgumentException("The given sort key is not valid.");
 		}
@@ -86,7 +86,7 @@ namespace Kyoo.Abstractions.Controllers
 				Descendant = false;
 				return;
 			}
-			
+
 			string key = sortBy.Contains(':') ? sortBy[..sortBy.IndexOf(':')] : sortBy;
 			string order = sortBy.Contains(':') ? sortBy[(sortBy.IndexOf(':') + 1)..] : null;
 
@@ -116,7 +116,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		Type RepositoryType { get; }
 	}
-	
+
 	/// <summary>
 	/// A common repository for every resources.
 	/// </summary>
@@ -147,7 +147,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <returns>The resource found</returns>
 		[ItemNotNull]
 		Task<T> Get(Expression<Func<T, bool>> where);
-		
+
 		/// <summary>
 		/// Get a resource from it's ID or null if it is not found.
 		/// </summary>
@@ -169,7 +169,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <returns>The resource found</returns>
 		[ItemCanBeNull]
 		Task<T> GetOrDefault(Expression<Func<T, bool>> where);
-		
+
 		/// <summary>
 		/// Search for resources.
 		/// </summary>
@@ -177,7 +177,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <returns>A list of resources found</returns>
 		[ItemNotNull]
 		Task<ICollection<T>> Search(string query);
-		
+
 		/// <summary>
 		/// Get every resources that match all filters
 		/// </summary>
@@ -186,7 +186,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="limit">How pagination should be done (where to start and how many to return)</param>
 		/// <returns>A list of resources that match every filters</returns>
 		[ItemNotNull]
-		Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null, 
+		Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null,
 			Sort<T> sort = default,
 			Pagination limit = default);
 		/// <summary>
@@ -208,8 +208,8 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="where">A filter predicate</param>
 		/// <returns>How many resources matched that filter</returns>
 		Task<int> GetCount(Expression<Func<T, bool>> where = null);
-		
-		
+
+
 		/// <summary>
 		/// Create a new resource.
 		/// </summary>
@@ -217,7 +217,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <returns>The resource registers and completed by database's information (related items & so on)</returns>
 		[ItemNotNull]
 		Task<T> Create([NotNull] T obj);
-		
+
 		/// <summary>
 		/// Create a new resource if it does not exist already. If it does, the existing value is returned instead.
 		/// </summary>
@@ -225,7 +225,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <returns>The newly created item or the existing value if it existed.</returns>
 		[ItemNotNull]
 		Task<T> CreateIfNotExists([NotNull] T obj);
-		
+
 		/// <summary>
 		/// Edit a resource
 		/// </summary>
@@ -235,7 +235,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <returns>The resource edited and completed by database's information (related items & so on)</returns>
 		[ItemNotNull]
 		Task<T> Edit([NotNull] T edited, bool resetOld);
-		
+
 		/// <summary>
 		/// Delete a resource by it's ID
 		/// </summary>
@@ -254,7 +254,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="obj">The resource to delete</param>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task Delete([NotNull] T obj);
-		
+
 		/// <summary>
 		/// Delete all resources that match the predicate.
 		/// </summary>
@@ -299,7 +299,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The season found</returns>
 		Task<Season> Get(int showID, int seasonNumber);
-		
+
 		/// <summary>
 		/// Get a season from it's show slug and it's seasonNumber
 		/// </summary>
@@ -308,7 +308,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The season found</returns>
 		Task<Season> Get(string showSlug, int seasonNumber);
-		
+
 		/// <summary>
 		/// Get a season from it's showID and it's seasonNumber or null if it is not found.
 		/// </summary>
@@ -316,7 +316,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="seasonNumber">The season's number</param>
 		/// <returns>The season found</returns>
 		Task<Season> GetOrDefault(int showID, int seasonNumber);
-		
+
 		/// <summary>
 		/// Get a season from it's show slug and it's seasonNumber or null if it is not found.
 		/// </summary>
@@ -325,7 +325,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <returns>The season found</returns>
 		Task<Season> GetOrDefault(string showSlug, int seasonNumber);
 	}
-	
+
 	/// <summary>
 	/// The repository to handle episodes
 	/// </summary>
@@ -366,7 +366,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="episodeNumber">The episode's number</param>
 		/// <returns>The episode found</returns>
 		Task<Episode> GetOrDefault(string showSlug, int seasonNumber, int episodeNumber);
-		
+
 		/// <summary>
 		/// Get a episode from it's showID and it's absolute number.
 		/// </summary>
@@ -389,7 +389,7 @@ namespace Kyoo.Abstractions.Controllers
 	/// A repository to handle tracks
 	/// </summary>
 	public interface ITrackRepository : IRepository<Track> { }
-	
+
 	/// <summary>
 	/// A repository to handle libraries.
 	/// </summary>
@@ -425,7 +425,7 @@ namespace Kyoo.Abstractions.Controllers
 			Expression<Func<LibraryItem, object>> sort,
 			Pagination limit = default
 		) => GetFromLibrary(id, where, new Sort<LibraryItem>(sort), limit);
-		
+
 		/// <summary>
 		/// Get items (A wrapper around shows or collections) from a library.
 		/// </summary>
@@ -451,18 +451,18 @@ namespace Kyoo.Abstractions.Controllers
 			Expression<Func<LibraryItem, object>> sort,
 			Pagination limit = default
 		) => GetFromLibrary(slug, where, new Sort<LibraryItem>(sort), limit);
-	}	
-		
+	}
+
 	/// <summary>
 	/// A repository for collections
 	/// </summary>
 	public interface ICollectionRepository : IRepository<Collection> { }
-	
+
 	/// <summary>
 	/// A repository for genres.
 	/// </summary>
 	public interface IGenreRepository : IRepository<Genre> { }
-	
+
 	/// <summary>
 	/// A repository for studios.
 	/// </summary>
@@ -482,7 +482,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="limit">How many items to return and where to start</param>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetFromShow(int showID,
-			Expression<Func<PeopleRole, bool>> where = null, 
+			Expression<Func<PeopleRole, bool>> where = null,
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default);
 		/// <summary>
@@ -498,7 +498,7 @@ namespace Kyoo.Abstractions.Controllers
 			Expression<Func<PeopleRole, object>> sort,
 			Pagination limit = default
 		) => GetFromShow(showID, where, new Sort<PeopleRole>(sort), limit);
-		
+
 		/// <summary>
 		/// Get people's roles from a show.
 		/// </summary>
@@ -508,7 +508,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="limit">How many items to return and where to start</param>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetFromShow(string showSlug,
-			Expression<Func<PeopleRole, bool>> where = null, 
+			Expression<Func<PeopleRole, bool>> where = null,
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default);
 		/// <summary>
@@ -524,7 +524,7 @@ namespace Kyoo.Abstractions.Controllers
 			Expression<Func<PeopleRole, object>> sort,
 			Pagination limit = default
 		) => GetFromShow(showSlug, where, new Sort<PeopleRole>(sort), limit);
-		
+
 		/// <summary>
 		/// Get people's roles from a person.
 		/// </summary>
@@ -534,7 +534,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="limit">How many items to return and where to start</param>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetFromPeople(int id,
-			Expression<Func<PeopleRole, bool>> where = null, 
+			Expression<Func<PeopleRole, bool>> where = null,
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default);
 		/// <summary>
@@ -550,7 +550,7 @@ namespace Kyoo.Abstractions.Controllers
 			Expression<Func<PeopleRole, object>> sort,
 			Pagination limit = default
 		) => GetFromPeople(id, where, new Sort<PeopleRole>(sort), limit);
-		
+
 		/// <summary>
 		/// Get people's roles from a person.
 		/// </summary>
@@ -560,7 +560,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="limit">How many items to return and where to start</param>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetFromPeople(string slug,
-			Expression<Func<PeopleRole, bool>> where = null, 
+			Expression<Func<PeopleRole, bool>> where = null,
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default);
 		/// <summary>
@@ -591,7 +591,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="limit">Pagination information (where to start and how many to get)</param>
 		/// <typeparam name="T">The type of metadata to retrieve</typeparam>
 		/// <returns>A filtered list of external ids.</returns>
-		Task<ICollection<MetadataID>> GetMetadataID<T>(Expression<Func<MetadataID, bool>> where = null, 
+		Task<ICollection<MetadataID>> GetMetadataID<T>(Expression<Func<MetadataID, bool>> where = null,
 			Sort<MetadataID> sort = default,
 			Pagination limit = default)
 			where T : class, IMetadata;
@@ -609,9 +609,9 @@ namespace Kyoo.Abstractions.Controllers
 		) where T : class, IMetadata
 			=> GetMetadataID<T>(where, new Sort<MetadataID>(sort), limit);
 	}
-	
+
 	/// <summary>
 	/// A repository to handle users.
 	/// </summary>
-	public interface IUserRepository : IRepository<User> {}
+	public interface IUserRepository : IRepository<User> { }
 }

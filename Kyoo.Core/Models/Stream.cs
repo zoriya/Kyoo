@@ -14,17 +14,17 @@ namespace Kyoo.Core.Models.Watch
 		/// The title of the stream.
 		/// </summary>
 		public string Title { get; set; }
-		
+
 		/// <summary>
 		/// The language of this stream (as a ISO-639-2 language code)
 		/// </summary>
 		public string Language { get; set; }
-		
+
 		/// <summary>
 		/// The codec of this stream.
 		/// </summary>
 		public string Codec { get; set; }
-		
+
 		/// <summary>
 		/// Is this stream the default one of it's type?
 		/// </summary>
@@ -34,12 +34,12 @@ namespace Kyoo.Core.Models.Watch
 		/// Is this stream tagged as forced? 
 		/// </summary>
 		[MarshalAs(UnmanagedType.I1)] public bool IsForced;
-		
+
 		/// <summary>
 		/// The path of this track.
 		/// </summary>
 		[SerializeIgnore] public string Path { get; set; }
-		
+
 		/// <summary>
 		/// The type of this stream.
 		/// </summary>

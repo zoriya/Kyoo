@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
@@ -13,7 +13,7 @@ namespace Kyoo.Abstractions.Models
 	public class Season : IResource, IMetadata, IThumbnails
 	{
 		/// <inheritdoc />
-		public int ID  { get; set; }
+		public int ID { get; set; }
 
 		/// <inheritdoc />
 		[Computed] public string Slug
@@ -27,7 +27,7 @@ namespace Kyoo.Abstractions.Models
 			[UsedImplicitly] [NotNull] private set
 			{
 				Match match = Regex.Match(value ?? "", @"(?<show>.+)-s(?<season>\d+)");
-			
+
 				if (!match.Success)
 					throw new ArgumentException("Invalid season slug. Format: {showSlug}-s{seasonNumber}");
 				ShowSlug = match.Groups["show"].Value;
@@ -39,7 +39,7 @@ namespace Kyoo.Abstractions.Models
 		/// The slug of the Show that contain this episode. If this is not set, this season is ill-formed.
 		/// </summary>
 		[SerializeIgnore] public string ShowSlug { private get; set; }
-		
+
 		/// <summary>
 		/// The ID of the Show containing this season.
 		/// </summary>
@@ -59,17 +59,17 @@ namespace Kyoo.Abstractions.Models
 		/// The title of this season.
 		/// </summary>
 		public string Title { get; set; }
-		
+
 		/// <summary>
 		/// A quick overview of this season.
 		/// </summary>
 		public string Overview { get; set; }
-		
+
 		/// <summary>
 		/// The starting air date of this season.
 		/// </summary>
 		public DateTime? StartDate { get; set; }
-		
+
 		/// <summary>
 		/// The ending date of this season.
 		/// </summary>
@@ -86,7 +86,7 @@ namespace Kyoo.Abstractions.Models
 		[SerializeAs("{HOST}/api/seasons/{Slug}/thumb")]
 		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
 		public string Poster => Images?.GetValueOrDefault(Models.Images.Poster);
-		
+
 		/// <inheritdoc />
 		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
 

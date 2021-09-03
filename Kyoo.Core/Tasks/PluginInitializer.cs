@@ -10,7 +10,7 @@ namespace Kyoo.Core.Tasks
 	/// <summary>
 	/// A task run on Kyoo's startup to initialize plugins
 	/// </summary>
-	[TaskMetadata("plugin-init", "Plugin Initializer", "A task to initialize plugins.", 
+	[TaskMetadata("plugin-init", "Plugin Initializer", "A task to initialize plugins.",
 		RunOnStartup = true, Priority = int.MaxValue, IsHidden = true)]
 	public class PluginInitializer : ITask
 	{
@@ -33,14 +33,14 @@ namespace Kyoo.Core.Tasks
 			_pluginManager = pluginManager;
 			_provider = provider;
 		}
-		
+
 
 		/// <inheritdoc />
 		public TaskParameters GetParameters()
 		{
 			return new();
 		}
-		
+
 		/// <inheritdoc />
 		public Task Run(TaskParameters arguments, IProgress<float> progress, CancellationToken cancellationToken)
 		{
@@ -51,11 +51,11 @@ namespace Kyoo.Core.Tasks
 			foreach (IPlugin plugin in plugins)
 			{
 				plugin.Initialize(_provider);
-				
+
 				progress.Report(count / plugins.Count * 100);
 				count++;
 			}
-			
+
 			progress.Report(100);
 			return Task.CompletedTask;
 		}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -32,10 +33,10 @@ namespace Kyoo.Authentication
 	{
 		/// <inheritdoc />
 		public string Slug => "auth";
-		
+
 		/// <inheritdoc />
 		public string Name => "Authentication";
-		
+
 		/// <inheritdoc />
 		public string Description => "Enable OpenID authentication for Kyoo.";
 
@@ -70,8 +71,10 @@ namespace Kyoo.Authentication
 		/// <param name="configuration">The configuration to use</param>
 		/// <param name="logger">The logger used to allow IdentityServer to log things</param>
 		/// <param name="environment">The environment information to check if the app runs in debug mode</param>
+		[SuppressMessage("ReSharper", "ContextualLoggerProblem",
+			Justification = "The logger is used for a dependency that is not created via the container.")]
 		public AuthenticationModule(IConfiguration configuration,
-			ILogger<DefaultCorsPolicyService> logger, 
+			ILogger<DefaultCorsPolicyService> logger,
 			IWebHostEnvironment environment)
 		{
 			_configuration = configuration;
@@ -100,16 +103,16 @@ namespace Kyoo.Authentication
 				IdentityModelEventSource.ShowPII = true;
 
 			services.AddControllers();
-			
+
 			// TODO handle direct-videos with bearers (probably add a cookie and a app.Use to translate that for videos)
-			
+
 			// TODO Check if tokens should be stored.
 
 			List<Client> clients = new();
 			_configuration.GetSection("authentication:clients").Bind(clients);
 			CertificateOption certificateOptions = new();
 			_configuration.GetSection(CertificateOption.Path).Bind(certificateOptions);
-			
+
 			clients.AddRange(IdentityContext.GetClients());
 			foreach (Client client in clients)
 			{
@@ -131,7 +134,7 @@ namespace Kyoo.Authentication
 				.AddInMemoryClients(clients)
 				.AddProfileService<AccountApi>()
 				.AddSigninKeys(certificateOptions);
-			
+
 			services.AddAuthentication()
 				.AddJwtBearer(options =>
 				{

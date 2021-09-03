@@ -13,7 +13,7 @@ namespace Kyoo.Core.Models.Options
 		/// The path of this options
 		/// </summary>
 		public const string Path = "Tasks";
-		
+
 		/// <summary>
 		/// The number of tasks that can be run concurrently.
 		/// </summary>

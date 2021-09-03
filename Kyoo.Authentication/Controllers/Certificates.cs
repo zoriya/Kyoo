@@ -28,12 +28,12 @@ namespace Kyoo.Authentication
 		/// <param name="builder">The identity server that will be modified.</param>
 		/// <param name="options">The certificate options</param>
 		/// <returns></returns>
-		public static IIdentityServerBuilder AddSigninKeys(this IIdentityServerBuilder builder, 
+		public static IIdentityServerBuilder AddSigninKeys(this IIdentityServerBuilder builder,
 			CertificateOption options)
 		{
 			X509Certificate2 certificate = GetCertificate(options);
 			builder.AddSigningCredential(certificate);
-			
+
 			if (certificate.NotAfter.AddDays(-7) <= DateTime.UtcNow)
 			{
 				Console.WriteLine("Signin certificate will expire soon, renewing it.");
@@ -54,8 +54,8 @@ namespace Kyoo.Authentication
 		/// <returns>A valid certificate</returns>
 		private static X509Certificate2 GetCertificate(CertificateOption options)
 		{
-			return File.Exists(options.File) 
-				? GetExistingCredential(options.File, options.Password) 
+			return File.Exists(options.File)
+				? GetExistingCredential(options.File, options.Password)
 				: GenerateCertificate(options.File, options.Password);
 		}
 
@@ -83,19 +83,19 @@ namespace Kyoo.Authentication
 		private static X509Certificate2 GenerateCertificate(string file, string password)
 		{
 			SecureRandom random = new();
-			
+
 			X509V3CertificateGenerator certificateGenerator = new();
-			certificateGenerator.SetSerialNumber(BigIntegers.CreateRandomInRange(BigInteger.One, 
+			certificateGenerator.SetSerialNumber(BigIntegers.CreateRandomInRange(BigInteger.One,
 				BigInteger.ValueOf(long.MaxValue), random));
 			certificateGenerator.SetIssuerDN(new X509Name($"C=NL, O=SDG, CN=Kyoo"));
 			certificateGenerator.SetSubjectDN(new X509Name($"C=NL, O=SDG, CN=Kyoo"));
 			certificateGenerator.SetNotBefore(DateTime.UtcNow.Date);
 			certificateGenerator.SetNotAfter(DateTime.UtcNow.Date.AddMonths(3));
- 
+
 			KeyGenerationParameters keyGenerationParameters = new(random, 2048);
 			RsaKeyPairGenerator keyPairGenerator = new();
 			keyPairGenerator.Init(keyGenerationParameters);
- 
+
 			AsymmetricCipherKeyPair subjectKeyPair = keyPairGenerator.GenerateKeyPair();
 			certificateGenerator.SetPublicKey(subjectKeyPair.Public);
 
@@ -104,7 +104,7 @@ namespace Kyoo.Authentication
 			X509Certificate bouncyCert = certificateGenerator.Generate(signatureFactory);
 
 			Pkcs12Store store = new Pkcs12StoreBuilder().Build();
-			store.SetKeyEntry("Kyoo_key", new AsymmetricKeyEntry(subjectKeyPair.Private), new []
+			store.SetKeyEntry("Kyoo_key", new AsymmetricKeyEntry(subjectKeyPair.Private), new[]
 			{
 				new X509CertificateEntry(bouncyCert)
 			});

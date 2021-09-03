@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -27,7 +27,7 @@ namespace Kyoo.Abstractions.Models
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
-		
+
 		/// <inheritdoc />
 		[Computed] public string Slug
 		{
@@ -42,12 +42,14 @@ namespace Kyoo.Abstractions.Models
 			{
 				if (value == null)
 					throw new ArgumentNullException(nameof(value));
-				Match match = Regex.Match(value, 
+				Match match = Regex.Match(value,
 					@"(?<ep>[^\.]+)\.(?<lang>\w{0,3})(-(?<index>\d+))?(\.(?<forced>forced))?\.(?<type>\w+)(\.\w*)?");
 
 				if (!match.Success)
+				{
 					throw new ArgumentException("Invalid track slug. " +
 					                            "Format: {episodeSlug}.{language}[-{index}][.forced].{type}[.{extension}]");
+				}
 
 				EpisodeSlug = match.Groups["ep"].Value;
 				Language = match.Groups["lang"].Value;
@@ -58,53 +60,53 @@ namespace Kyoo.Abstractions.Models
 				Type = Enum.Parse<StreamType>(match.Groups["type"].Value, true);
 			}
 		}
-		
+
 		/// <summary>
 		/// The slug of the episode that contain this track. If this is not set, this track is ill-formed.
 		/// </summary>
 		[SerializeIgnore] public string EpisodeSlug { private get; set; }
-		
+
 		/// <summary>
 		/// The title of the stream.
 		/// </summary>
 		public string Title { get; set; }
-		
+
 		/// <summary>
 		/// The language of this stream (as a ISO-639-2 language code)
 		/// </summary>
 		public string Language { get; set; }
-		
+
 		/// <summary>
 		/// The codec of this stream.
 		/// </summary>
 		public string Codec { get; set; }
-		
-		
+
+
 		/// <summary>
 		/// Is this stream the default one of it's type?
 		/// </summary>
 		public bool IsDefault { get; set; }
-		
+
 		/// <summary>
 		/// Is this stream tagged as forced? 
 		/// </summary>
 		public bool IsForced { get; set; }
-		
+
 		/// <summary>
 		/// Is this track extern to the episode's file?
 		/// </summary>
 		public bool IsExternal { get; set; }
-		
+
 		/// <summary>
 		/// The path of this track.
 		/// </summary>
 		[SerializeIgnore] public string Path { get; set; }
-		
+
 		/// <summary>
 		/// The type of this stream.
 		/// </summary>
 		[SerializeIgnore] public StreamType Type { get; set; }
-		
+
 		/// <summary>
 		/// The ID of the episode that uses this track.
 		/// </summary>
@@ -137,7 +139,7 @@ namespace Kyoo.Abstractions.Models
 					name += " Forced";
 				if (IsExternal)
 					name += " (External)";
-				if (Title is {Length: > 1})
+				if (Title is { Length: > 1 })
 					name += " - " + Title;
 				return name;
 			}
@@ -164,8 +166,8 @@ namespace Kyoo.Abstractions.Models
 		public static string BuildSlug(string baseSlug,
 			StreamType type)
 		{
-			return baseSlug.EndsWith($".{type}", StringComparison.InvariantCultureIgnoreCase) 
-				? baseSlug 
+			return baseSlug.EndsWith($".{type}", StringComparison.InvariantCultureIgnoreCase)
+				? baseSlug
 				: $"{baseSlug}.{type.ToString().ToLowerInvariant()}";
 		}
 	}

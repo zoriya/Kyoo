@@ -32,7 +32,7 @@ namespace Kyoo.TheMovieDb
 						? $"https://image.tmdb.org/t/p/original{collection.BackdropPath}"
 						: null
 				},
-				ExternalIDs = new []
+				ExternalIDs = new[]
 				{
 					new MetadataID
 					{
@@ -43,7 +43,7 @@ namespace Kyoo.TheMovieDb
 				}
 			};
 		}
-		
+
 		/// <summary>
 		/// Convert a <see cref="SearchCollection"/> into a <see cref="Collection"/>.
 		/// </summary>
@@ -65,7 +65,7 @@ namespace Kyoo.TheMovieDb
 						? $"https://image.tmdb.org/t/p/original{collection.BackdropPath}"
 						: null
 				},
-				ExternalIDs = new []
+				ExternalIDs = new[]
 				{
 					new MetadataID
 					{

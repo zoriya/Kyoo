@@ -67,17 +67,17 @@ namespace Kyoo.Database
 		/// The list of registered users.
 		/// </summary>
 		public DbSet<User> Users { get; set; }
-		
+
 		/// <summary>
 		/// All people's role. See <see cref="PeopleRole"/>.
 		/// </summary>
 		public DbSet<PeopleRole> PeopleRoles { get; set; }
-		
+
 		/// <summary>
 		/// Episodes with a watch percentage. See <see cref="WatchedEpisode"/>
 		/// </summary>
 		public DbSet<WatchedEpisode> WatchedEpisodes { get; set; }
-		
+
 		/// <summary>
 		/// The list of library items (shows and collections that are part of a library - or the global one)
 		/// </summary>
@@ -130,7 +130,7 @@ namespace Kyoo.Database
 		protected DatabaseContext(DbContextOptions options)
 			: base(options)
 		{ }
-		
+
 		/// <summary>
 		/// Get the name of the metadata table of the given type.
 		/// </summary>
@@ -177,7 +177,7 @@ namespace Kyoo.Database
 		{
 			modelBuilder.SharedTypeEntity<MetadataID>(MetadataName<T>())
 				.HasKey(MetadataID.PrimaryKey);
-			
+
 			modelBuilder.SharedTypeEntity<MetadataID>(MetadataName<T>())
 				.HasOne<T>()
 				.WithMany(x => x.ExternalIDs)
@@ -194,7 +194,7 @@ namespace Kyoo.Database
 		/// <param name="secondNavigation">The second navigation expression from T2 to T</param>
 		/// <typeparam name="T">The owning type of the relationship</typeparam>
 		/// <typeparam name="T2">The owned type of the relationship</typeparam>
-		private void _HasManyToMany<T, T2>(ModelBuilder modelBuilder, 
+		private void _HasManyToMany<T, T2>(ModelBuilder modelBuilder,
 			Expression<Func<T, IEnumerable<T2>>> firstNavigation,
 			Expression<Func<T2, IEnumerable<T>>> secondNavigation)
 			where T : class, IResource
@@ -209,7 +209,7 @@ namespace Kyoo.Database
 						.HasOne<T>()
 						.WithMany()
 						.HasForeignKey(LinkNameFk<T>())
-						.OnDelete(DeleteBehavior.Cascade), 
+						.OnDelete(DeleteBehavior.Cascade),
 					x => x
 						.HasOne<T2>()
 						.WithMany()
@@ -217,8 +217,8 @@ namespace Kyoo.Database
 						.OnDelete(DeleteBehavior.Cascade)
 				);
 		}
-		
-		
+
+
 		/// <summary>
 		/// Set database parameters to support every types of Kyoo.
 		/// </summary>
@@ -257,7 +257,7 @@ namespace Kyoo.Database
 			_HasManyToMany<Library, Show>(modelBuilder, x => x.Shows, x => x.Libraries);
 			_HasManyToMany<Collection, Show>(modelBuilder, x => x.Shows, x => x.Collections);
 			_HasManyToMany<Show, Genre>(modelBuilder, x => x.Genres, x => x.Shows);
-			
+
 			modelBuilder.Entity<User>()
 				.HasMany(x => x.Watched)
 				.WithMany("Users")
@@ -269,7 +269,7 @@ namespace Kyoo.Database
 			_HasMetadata<Episode>(modelBuilder);
 			_HasMetadata<People>(modelBuilder);
 			_HasMetadata<Studio>(modelBuilder);
-			
+
 			modelBuilder.Entity<WatchedEpisode>()
 				.HasKey(x => new { User = x.UserID, Episode = x.EpisodeID });
 
@@ -281,7 +281,7 @@ namespace Kyoo.Database
 			modelBuilder.Entity<Show>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<Studio>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<User>().Property(x => x.Slug).IsRequired();
-			
+
 			modelBuilder.Entity<Collection>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
@@ -304,19 +304,19 @@ namespace Kyoo.Database
 				.HasIndex(x => x.Slug)
 				.IsUnique();
 			modelBuilder.Entity<Season>()
-				.HasIndex(x => new {x.ShowID, x.SeasonNumber})
+				.HasIndex(x => new { x.ShowID, x.SeasonNumber })
 				.IsUnique();
 			modelBuilder.Entity<Season>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
 			modelBuilder.Entity<Episode>()
-				.HasIndex(x => new {x.ShowID, x.SeasonNumber, x.EpisodeNumber, x.AbsoluteNumber})
+				.HasIndex(x => new { x.ShowID, x.SeasonNumber, x.EpisodeNumber, x.AbsoluteNumber })
 				.IsUnique();
 			modelBuilder.Entity<Episode>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
 			modelBuilder.Entity<Track>()
-				.HasIndex(x => new {x.EpisodeID, x.Type, x.Language, x.TrackIndex, x.IsForced})
+				.HasIndex(x => new { x.EpisodeID, x.Type, x.Language, x.TrackIndex, x.IsForced })
 				.IsUnique();
 			modelBuilder.Entity<Track>()
 				.HasIndex(x => x.Slug)
@@ -394,7 +394,7 @@ namespace Kyoo.Database
 				throw;
 			}
 		}
-		
+
 		/// <summary>
 		/// Save changes that are applied to this context.
 		/// </summary>
@@ -425,7 +425,7 @@ namespace Kyoo.Database
 		/// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete</param>
 		/// <exception cref="DuplicatedItemException">A duplicated item has been found.</exception>
 		/// <returns>The number of state entries written to the database.</returns>
-		public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, 
+		public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
 			CancellationToken cancellationToken = new())
 		{
 			try
@@ -461,7 +461,7 @@ namespace Kyoo.Database
 				throw;
 			}
 		}
-		
+
 		/// <summary>
 		/// Save changes that are applied to this context.
 		/// </summary>
@@ -538,7 +538,7 @@ namespace Kyoo.Database
 				entry.State = EntityState.Detached;
 			}
 		}
-		
+
 		/// <summary>
 		/// Perform a case insensitive like operation.
 		/// </summary>

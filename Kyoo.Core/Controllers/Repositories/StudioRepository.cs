@@ -19,12 +19,12 @@ namespace Kyoo.Core.Controllers
 		/// The database handle
 		/// </summary>
 		private readonly DatabaseContext _database;
-		
+
 		/// <summary>
 		/// A provider repository to handle externalID creation and deletion
 		/// </summary>
 		private readonly IProviderRepository _providers;
-		
+
 		/// <inheritdoc />
 		protected override Expression<Func<Studio, object>> DefaultSort => x => x.Name;
 
@@ -40,7 +40,7 @@ namespace Kyoo.Core.Controllers
 			_database = database;
 			_providers = providers;
 		}
-		
+
 		/// <inheritdoc />
 		public override async Task<ICollection<Studio>> Search(string query)
 		{
@@ -59,7 +59,7 @@ namespace Kyoo.Core.Controllers
 			await _database.SaveChangesAsync($"Trying to insert a duplicated studio (slug {obj.Slug} already exists).");
 			return obj;
 		}
-		
+
 		/// <inheritdoc />
 		protected override async Task Validate(Studio resource)
 		{
@@ -75,7 +75,7 @@ namespace Kyoo.Core.Controllers
 				_database.MetadataIds<Studio>().AttachRange(resource.ExternalIDs);
 			}
 		}
-		
+
 		/// <inheritdoc />
 		protected override async Task EditRelations(Studio resource, Studio changed, bool resetOld)
 		{
@@ -93,7 +93,7 @@ namespace Kyoo.Core.Controllers
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
-			
+
 			_database.Entry(obj).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
 		}

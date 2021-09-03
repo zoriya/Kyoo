@@ -34,11 +34,11 @@ namespace Kyoo.TheTvdb
 			Name = "TheTVDB",
 			Images = new Dictionary<int, string>
 			{
-				[Images.Logo] = "https://www.thetvdb.com/images/logo.png"	
+				[Images.Logo] = "https://www.thetvdb.com/images/logo.png"
 			}
 		};
-		
-		
+
+
 		/// <summary>
 		/// Create a new <see cref="ProviderTvdb"/> using a tvdb client and an api key.
 		/// </summary>
@@ -59,9 +59,9 @@ namespace Kyoo.TheTvdb
 				return _client.Authentication.AuthenticateAsync(_apiKey.Value.ApiKey);
 			return _client.Authentication.RefreshTokenAsync();
 		}
-		
+
 		/// <inheritdoc />
-		public async Task<T> Get<T>(T item) 
+		public async Task<T> Get<T>(T item)
 			where T : class, IResource
 		{
 			await _Authenticate();
@@ -72,7 +72,7 @@ namespace Kyoo.TheTvdb
 				_ => null
 			};
 		}
-		
+
 		/// <summary>
 		/// Retrieve metadata about a show.
 		/// </summary>
@@ -83,7 +83,7 @@ namespace Kyoo.TheTvdb
 		{
 			if (show.IsMovie)
 				return null;
-			
+
 			if (!int.TryParse(show.GetID(Provider.Slug), out int id))
 			{
 				Show found = (await _SearchShow(show.Title)).FirstOrDefault();
@@ -93,7 +93,7 @@ namespace Kyoo.TheTvdb
 			}
 			TvDbResponse<Series> series = await _client.Series.GetAsync(id);
 			Show ret = series.Data.ToShow(Provider);
-			
+
 			TvDbResponse<Actor[]> people = await _client.Series.GetActorsAsync(id);
 			ret.People = people.Data.Select(x => x.ToPeopleRole()).ToArray();
 			return ret;
@@ -110,14 +110,14 @@ namespace Kyoo.TheTvdb
 			if (!int.TryParse(episode.Show?.GetID(Provider.Slug), out int id))
 				return null;
 			EpisodeQuery query = episode.AbsoluteNumber != null
-				? new EpisodeQuery {AbsoluteNumber = episode.AbsoluteNumber}
-				: new EpisodeQuery {AiredSeason = episode.SeasonNumber, AiredEpisode = episode.EpisodeNumber};
+				? new EpisodeQuery { AbsoluteNumber = episode.AbsoluteNumber }
+				: new EpisodeQuery { AiredSeason = episode.SeasonNumber, AiredEpisode = episode.EpisodeNumber };
 			TvDbResponse<EpisodeRecord[]> episodes = await _client.Series.GetEpisodesAsync(id, 0, query);
 			return episodes.Data.FirstOrDefault()?.ToEpisode(Provider);
 		}
 
 		/// <inheritdoc />
-		public async Task<ICollection<T>> Search<T>(string query) 
+		public async Task<ICollection<T>> Search<T>(string query)
 			where T : class, IResource
 		{
 			await _Authenticate();
@@ -125,7 +125,7 @@ namespace Kyoo.TheTvdb
 				return (await _SearchShow(query) as ICollection<T>)!;
 			return ArraySegment<T>.Empty;
 		}
-		
+
 		/// <summary>
 		/// Search for shows in the tvdb.
 		/// </summary>

@@ -38,7 +38,7 @@ namespace Kyoo.Tests.Database
 		{
 			_repository = Repositories.LibraryManager.PeopleRepository;
 		}
-		
+
 		[Fact]
 		public async Task CreateWithExternalIdTest()
 		{
@@ -59,14 +59,14 @@ namespace Kyoo.Tests.Database
 				}
 			};
 			await _repository.Create(value);
-			
+
 			People retrieved = await _repository.Get(2);
 			await Repositories.LibraryManager.Load(retrieved, x => x.ExternalIDs);
 			Assert.Equal(2, retrieved.ExternalIDs.Count);
 			KAssert.DeepEqual(value.ExternalIDs.First(), retrieved.ExternalIDs.First());
 			KAssert.DeepEqual(value.ExternalIDs.Last(), retrieved.ExternalIDs.Last());
 		}
-		
+
 		[Fact]
 		public async Task EditTest()
 		{
@@ -77,13 +77,13 @@ namespace Kyoo.Tests.Database
 				[Images.Poster] = "new-poster"
 			};
 			await _repository.Edit(value, false);
-		
+
 			await using DatabaseContext database = Repositories.Context.New();
 			People retrieved = await database.People.FirstAsync();
-			
+
 			KAssert.DeepEqual(value, retrieved);
 		}
-		
+
 		[Fact]
 		public async Task EditMetadataTest()
 		{
@@ -98,13 +98,13 @@ namespace Kyoo.Tests.Database
 				},
 			};
 			await _repository.Edit(value, false);
-		
+
 			await using DatabaseContext database = Repositories.Context.New();
 			People retrieved = await database.People
 				.Include(x => x.ExternalIDs)
 				.ThenInclude(x => x.Provider)
 				.FirstAsync();
-			
+
 			KAssert.DeepEqual(value, retrieved);
 		}
 
@@ -140,7 +140,7 @@ namespace Kyoo.Tests.Database
 				DataID = "id"
 			});
 			await _repository.Edit(value, false);
-			
+
 			{
 				await using DatabaseContext database = Repositories.Context.New();
 				People retrieved = await database.People
@@ -151,7 +151,7 @@ namespace Kyoo.Tests.Database
 				KAssert.DeepEqual(value, retrieved);
 			}
 		}
-		
+
 		[Theory]
 		[InlineData("Me")]
 		[InlineData("me")]

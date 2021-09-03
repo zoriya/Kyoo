@@ -20,17 +20,17 @@ namespace Kyoo.Abstractions.Controllers
 		/// A slug to identify this plugin in queries.
 		/// </summary>
 		string Slug { get; }
-		
+
 		/// <summary>
 		/// The name of the plugin
 		/// </summary>
 		string Name { get; }
-		
+
 		/// <summary>
 		/// The description of this plugin. This will be displayed on the "installed plugins" page.
 		/// </summary>
 		string Description { get; }
-		
+
 		/// <summary>
 		/// <c>true</c> if the plugin should be enabled, <c>false</c> otherwise.
 		/// If a plugin is not enabled, no configure method will be called.
@@ -41,7 +41,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// By default, a plugin is always enabled. This method can be overriden to change this behavior.
 		/// </remarks>
 		virtual bool Enabled => true;
-		
+
 		/// <summary>
 		/// A list of types that will be available via the IOptions interfaces and will be listed inside
 		/// an IConfiguration.
@@ -64,7 +64,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <seealso cref="SA"/>
 		virtual IEnumerable<IStartupAction> ConfigureSteps => ArraySegment<IStartupAction>.Empty;
 
-			/// <summary>
+		/// <summary>
 		/// A configure method that will be run on plugin's startup.
 		/// </summary>
 		/// <param name="builder">The autofac service container to register services.</param>
@@ -72,7 +72,7 @@ namespace Kyoo.Abstractions.Controllers
 		{
 			// Skipped
 		}
-		
+
 		/// <summary>
 		/// A configure method that will be run on plugin's startup.
 		/// This is available for libraries that build upon a <see cref="IServiceCollection"/>, for more precise

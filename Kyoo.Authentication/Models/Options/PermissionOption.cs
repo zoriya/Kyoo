@@ -14,7 +14,7 @@ namespace Kyoo.Authentication.Models
 		/// The default permissions that will be given to a non-connected user.
 		/// </summary>
 		public string[] Default { get; set; }
-		
+
 		/// <summary>
 		/// Permissions applied to a new user.
 		/// </summary>

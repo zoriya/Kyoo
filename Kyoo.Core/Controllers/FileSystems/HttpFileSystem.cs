@@ -14,7 +14,7 @@ namespace Kyoo.Core.Controllers
 	/// <summary>
 	/// A <see cref="IFileSystem"/> for http/https links.
 	/// </summary>
-	[FileSystemMetadata(new [] {"http", "https"})]
+	[FileSystemMetadata(new[] { "http", "https" })]
 	public class HttpFileSystem : IFileSystem
 	{
 		/// <summary>
@@ -30,8 +30,8 @@ namespace Kyoo.Core.Controllers
 		{
 			_clientFactory = factory;
 		}
-		
-		
+
+
 		/// <inheritdoc />
 		public IActionResult FileResult(string path, bool rangeSupport = false, string type = null)
 		{
@@ -46,7 +46,7 @@ namespace Kyoo.Core.Controllers
 			HttpClient client = _clientFactory.CreateClient();
 			return client.GetStreamAsync(path);
 		}
-		
+
 		/// <inheritdoc />
 		public async Task<Stream> GetReader(string path, AsyncRef<string> mime)
 		{

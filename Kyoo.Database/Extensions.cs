@@ -22,7 +22,7 @@ namespace Kyoo.Database
 				builder[child.Key] = child.Value;
 			return builder.ConnectionString;
 		}
-		
+
 		/// <summary>
 		/// Get the name of the selected database.
 		/// </summary>

@@ -35,7 +35,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <exception cref="ItemNotFoundException">
 		/// The task could not be found.
 		/// </exception>
-		void StartTask(string taskSlug, 
+		void StartTask(string taskSlug,
 			[NotNull] IProgress<float> progress,
 			Dictionary<string, object> arguments = null,
 			CancellationToken? cancellationToken = null);
@@ -66,13 +66,13 @@ namespace Kyoo.Abstractions.Controllers
 			Dictionary<string, object> arguments = null,
 			CancellationToken? cancellationToken = null)
 			where T : ITask;
-		
+
 		/// <summary>
 		/// Get all currently running tasks
 		/// </summary>
 		/// <returns>A list of currently running tasks.</returns>
 		ICollection<(TaskMetadataAttribute, ITask)> GetRunningTasks();
-		
+
 		/// <summary>
 		/// Get all available tasks
 		/// </summary>

@@ -38,7 +38,7 @@ namespace Kyoo.Core.Api
 				Studios = await _libraryManager.Search<Studio>(query)
 			};
 		}
-		
+
 		[HttpGet("collection")]
 		[HttpGet("collections")]
 		[Permission(nameof(Collection), Kind.Read)]
@@ -46,7 +46,7 @@ namespace Kyoo.Core.Api
 		{
 			return _libraryManager.Search<Collection>(query);
 		}
-		
+
 		[HttpGet("show")]
 		[HttpGet("shows")]
 		[Permission(nameof(Show), Kind.Read)]
@@ -54,7 +54,7 @@ namespace Kyoo.Core.Api
 		{
 			return _libraryManager.Search<Show>(query);
 		}
-		
+
 		[HttpGet("episode")]
 		[HttpGet("episodes")]
 		[Permission(nameof(Episode), Kind.Read)]
@@ -62,14 +62,14 @@ namespace Kyoo.Core.Api
 		{
 			return _libraryManager.Search<Episode>(query);
 		}
-		
+
 		[HttpGet("people")]
 		[Permission(nameof(People), Kind.Read)]
 		public Task<ICollection<People>> SearchPeople(string query)
 		{
 			return _libraryManager.Search<People>(query);
 		}
-		
+
 		[HttpGet("genre")]
 		[HttpGet("genres")]
 		[Permission(nameof(Genre), Kind.Read)]
@@ -77,7 +77,7 @@ namespace Kyoo.Core.Api
 		{
 			return _libraryManager.Search<Genre>(query);
 		}
-		
+
 		[HttpGet("studio")]
 		[HttpGet("studios")]
 		[Permission(nameof(Studio), Kind.Read)]

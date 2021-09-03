@@ -15,12 +15,12 @@ namespace Kyoo.Abstractions.Models
 		/// The link of the current page.
 		/// </summary>
 		public Uri This { get; }
-		
+
 		/// <summary>
 		/// The link of the first page.
 		/// </summary>
 		public Uri First { get; }
-		
+
 		/// <summary>
 		/// The link of the next page.
 		/// </summary>
@@ -30,13 +30,13 @@ namespace Kyoo.Abstractions.Models
 		/// The number of items in the current page.
 		/// </summary>
 		public int Count => Items.Count;
-		
+
 		/// <summary>
 		/// The list of items in the page.
 		/// </summary>
 		public ICollection<T> Items { get; }
-		
-		
+
+
 		/// <summary>
 		/// Create a new <see cref="Page{T}"/>.
 		/// </summary>
@@ -72,7 +72,7 @@ namespace Kyoo.Abstractions.Models
 				query["afterID"] = items.Last().ID.ToString();
 				Next = new Uri(url + query.ToQueryString());
 			}
-			
+
 			query.Remove("afterID");
 			First = new Uri(url + query.ToQueryString());
 		}

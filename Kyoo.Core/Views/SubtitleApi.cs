@@ -21,7 +21,7 @@ namespace Kyoo.Core.Api
 			_libraryManager = libraryManager;
 			_files = files;
 		}
-		
+
 		[HttpGet("{id:int}")]
 		[Permission(nameof(SubtitleApi), Kind.Read)]
 		public async Task<IActionResult> GetSubtitle(int id)
@@ -31,7 +31,7 @@ namespace Kyoo.Core.Api
 				? _files.FileResult(subtitle.Path)
 				: NotFound();
 		}
-		
+
 		[HttpGet("{id:int}.{extension}")]
 		[Permission(nameof(SubtitleApi), Kind.Read)]
 		public async Task<IActionResult> GetSubtitle(int id, string extension)
@@ -43,14 +43,14 @@ namespace Kyoo.Core.Api
 				return new ConvertSubripToVtt(subtitle.Path, _files);
 			return _files.FileResult(subtitle.Path);
 		}
-		
-		
+
+
 		[HttpGet("{slug}")]
 		[Permission(nameof(SubtitleApi), Kind.Read)]
 		public async Task<IActionResult> GetSubtitle(string slug)
 		{
 			string extension = null;
-			
+
 			if (slug.Count(x => x == '.') == 3)
 			{
 				int idx = slug.LastIndexOf('.');
@@ -115,7 +115,7 @@ namespace Kyoo.Core.Api
 		private static IEnumerable<string> ConvertBlock(IList<string> lines)
 		{
 			if (lines.Count < 3)
-				return lines;		
+				return lines;
 			lines[1] = lines[1].Replace(',', '.');
 			if (lines[2].Length > 5)
 			{

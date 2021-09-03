@@ -12,31 +12,31 @@ namespace Kyoo.Abstractions.Models
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
-		
+
 		/// <inheritdoc />
 		public string Slug { get; set; }
-		
+
 		/// <summary>
 		/// The title of this show.
 		/// </summary>
 		public string Title { get; set; }
-		
+
 		/// <summary>
 		/// The list of alternative titles of this show.
 		/// </summary>
 		[EditableRelation] public string[] Aliases { get; set; }
-		
+
 		/// <summary>
 		/// The path of the root directory of this show.
 		/// This can be any kind of path supported by <see cref="IFileSystem"/>
 		/// </summary>
 		[SerializeIgnore] public string Path { get; set; }
-		
+
 		/// <summary>
 		/// The summary of this show.
 		/// </summary>
 		public string Overview { get; set; }
-		
+
 		/// <summary>
 		/// Is this show airing, not aired yet or finished?
 		/// </summary>
@@ -48,12 +48,12 @@ namespace Kyoo.Abstractions.Models
 		/// TODO for now, this is set to a youtube url. It should be cached and converted to a local file.
 		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
 		public string TrailerUrl => Images?.GetValueOrDefault(Models.Images.Trailer);
-		
+
 		/// <summary>
 		/// The date this show started airing. It can be null if this is unknown. 
 		/// </summary>
 		public DateTime? StartAir { get; set; }
-		
+
 		/// <summary>
 		/// The date this show finished airing.
 		/// It must be after the <see cref="StartAir"/> but can be the same (example: for movies).
@@ -108,39 +108,39 @@ namespace Kyoo.Abstractions.Models
 		/// This must be explicitly loaded via a call to <see cref="ILibraryManager.Load"/>.
 		/// </summary>
 		[LoadableRelation(nameof(StudioID))] [EditableRelation] public Studio Studio { get; set; }
-		
+
 		/// <summary>
 		/// The list of genres (themes) this show has.
 		/// </summary>
 		[LoadableRelation] [EditableRelation] public ICollection<Genre> Genres { get; set; }
-		
+
 		/// <summary>
 		/// The list of people that made this show.
 		/// </summary>
 		[LoadableRelation] [EditableRelation] public ICollection<PeopleRole> People { get; set; }
-		
+
 		/// <summary>
 		/// The different seasons in this show. If this is a movie, this list is always null or empty.
 		/// </summary>
 		[LoadableRelation] public ICollection<Season> Seasons { get; set; }
-		
+
 		/// <summary>
 		/// The list of episodes in this show.
 		/// If this is a movie, there will be a unique episode (with the seasonNumber and episodeNumber set to null).
 		/// Having an episode is necessary to store metadata and tracks.
 		/// </summary>
 		[LoadableRelation] public ICollection<Episode> Episodes { get; set; }
-		
+
 		/// <summary>
 		/// The list of libraries that contains this show.
 		/// </summary>
 		[LoadableRelation] public ICollection<Library> Libraries { get; set; }
-		
+
 		/// <summary>
 		/// The list of collections that contains this show.
 		/// </summary>
 		[LoadableRelation] public ICollection<Collection> Collections { get; set; }
-		
+
 		/// <inheritdoc />
 		public void OnMerge(object merged)
 		{

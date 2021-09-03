@@ -40,7 +40,7 @@ namespace Kyoo.Core.Controllers
 			_providers = providers.ToArray();
 			_logger = logger;
 		}
-		
+
 
 		/// <inheritdoc />
 		public override void UseProviders(IEnumerable<Provider> providers)
@@ -71,9 +71,9 @@ namespace Kyoo.Core.Controllers
 				{
 					ret = Merger.Merge(ret, await provider.Get(ret));
 				}
-				catch (Exception ex) 
+				catch (Exception ex)
 				{
-					_logger.LogError(ex, "The provider {Provider} could not get a {Type}", 
+					_logger.LogError(ex, "The provider {Provider} could not get a {Type}",
 						provider.Provider.Name, typeof(T).Name);
 				}
 			}
@@ -85,16 +85,16 @@ namespace Kyoo.Core.Controllers
 		public override async Task<ICollection<T>> Search<T>(string query)
 		{
 			List<T> ret = new();
-			
+
 			foreach (IMetadataProvider provider in _GetProviders())
 			{
 				try
 				{
 					ret.AddRange(await provider.Search<T>(query));
 				}
-				catch (Exception ex) 
+				catch (Exception ex)
 				{
-					_logger.LogError(ex, "The provider {Provider} could not search for {Type}", 
+					_logger.LogError(ex, "The provider {Provider} could not search for {Type}",
 						provider.Provider.Name, typeof(T).Name);
 				}
 			}

@@ -22,17 +22,17 @@ namespace Kyoo.Core.Api
 		private readonly IFileSystem _files;
 		private readonly IThumbnailsManager _thumbs;
 
-		public CollectionApi(ILibraryManager libraryManager, 
-			IFileSystem files, 
+		public CollectionApi(ILibraryManager libraryManager,
+			IFileSystem files,
 			IThumbnailsManager thumbs,
-			IOptions<BasicOptions> options) 
+			IOptions<BasicOptions> options)
 			: base(libraryManager.CollectionRepository, options.Value.PublicUrl)
 		{
 			_libraryManager = libraryManager;
 			_files = files;
 			_thumbs = thumbs;
 		}
-		
+
 		[HttpGet("{id:int}/show")]
 		[HttpGet("{id:int}/shows")]
 		[PartialPermission(Kind.Read)]
@@ -55,10 +55,10 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
-		
+
 		[HttpGet("{slug}/show")]
 		[HttpGet("{slug}/shows")]
 		[PartialPermission(Kind.Read)]
@@ -81,10 +81,10 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
-		
+
 		[HttpGet("{id:int}/library")]
 		[HttpGet("{id:int}/libraries")]
 		[PartialPermission(Kind.Read)]
@@ -107,10 +107,10 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
-		
+
 		[HttpGet("{slug}/library")]
 		[HttpGet("{slug}/libraries")]
 		[PartialPermission(Kind.Read)]
@@ -133,10 +133,10 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
-		
+
 		[HttpGet("{slug}/poster")]
 		public async Task<IActionResult> GetPoster(string slug)
 		{
@@ -150,7 +150,7 @@ namespace Kyoo.Core.Api
 				return NotFound();
 			}
 		}
-		
+
 		[HttpGet("{slug}/logo")]
 		public async Task<IActionResult> GetLogo(string slug)
 		{
@@ -164,7 +164,7 @@ namespace Kyoo.Core.Api
 				return NotFound();
 			}
 		}
-		
+
 		[HttpGet("{slug}/backdrop")]
 		[HttpGet("{slug}/thumbnail")]
 		public async Task<IActionResult> GetBackdrop(string slug)

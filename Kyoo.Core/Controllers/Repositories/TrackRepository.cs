@@ -18,7 +18,7 @@ namespace Kyoo.Core.Controllers
 		/// The database handle
 		/// </summary>
 		private readonly DatabaseContext _database;
-		
+
 		/// <inheritdoc />
 		protected override Expression<Func<Track, object>> DefaultSort => x => x.TrackIndex;
 
@@ -27,7 +27,7 @@ namespace Kyoo.Core.Controllers
 		/// Create a new <see cref="TrackRepository"/>.
 		/// </summary>
 		/// <param name="database">The database handle</param>
-		public TrackRepository(DatabaseContext database) 
+		public TrackRepository(DatabaseContext database)
 			: base(database)
 		{
 			_database = database;
@@ -69,7 +69,7 @@ namespace Kyoo.Core.Controllers
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
-			
+
 			_database.Entry(obj).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
 		}

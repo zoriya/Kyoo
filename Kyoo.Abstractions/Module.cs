@@ -30,7 +30,7 @@ namespace Kyoo.Abstractions
 		/// <param name="builder">The container</param>
 		/// <typeparam name="T">The type of the task</typeparam>
 		/// <returns>The registration builder of this new provider. That can be used to edit the registration.</returns>
-		public static IRegistrationBuilder<T, ConcreteReflectionActivatorData, SingleRegistrationStyle> 
+		public static IRegistrationBuilder<T, ConcreteReflectionActivatorData, SingleRegistrationStyle>
 			RegisterProvider<T>(this ContainerBuilder builder)
 			where T : class, IMetadataProvider
 		{
@@ -46,7 +46,7 @@ namespace Kyoo.Abstractions
 		/// If your repository implements a special interface, please use <see cref="RegisterRepository{T,T2}"/>
 		/// </remarks>
 		/// <returns>The initial container.</returns>
-		public static IRegistrationBuilder<T, ConcreteReflectionActivatorData, SingleRegistrationStyle> 
+		public static IRegistrationBuilder<T, ConcreteReflectionActivatorData, SingleRegistrationStyle>
 			RegisterRepository<T>(this ContainerBuilder builder)
 			where T : IBaseRepository
 		{

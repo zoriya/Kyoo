@@ -17,7 +17,7 @@ namespace Kyoo.Core.Api
 		private readonly IThumbnailsManager _thumbnails;
 		private readonly ILibraryManager _libraryManager;
 		private readonly IFileSystem _files;
-		
+
 		public ProviderApi(ILibraryManager libraryManager,
 			IOptions<BasicOptions> options,
 			IFileSystem files,
@@ -28,7 +28,7 @@ namespace Kyoo.Core.Api
 			_files = files;
 			_thumbnails = thumbnails;
 		}
-		
+
 		[HttpGet("{id:int}/logo")]
 		public async Task<IActionResult> GetLogo(int id)
 		{
@@ -37,7 +37,7 @@ namespace Kyoo.Core.Api
 				return NotFound();
 			return _files.FileResult(await _thumbnails.GetImagePath(provider, Images.Logo));
 		}
-		
+
 		[HttpGet("{slug}/logo")]
 		public async Task<IActionResult> GetLogo(string slug)
 		{

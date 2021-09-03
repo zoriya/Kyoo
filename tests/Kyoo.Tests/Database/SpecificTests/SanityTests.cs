@@ -10,10 +10,10 @@ namespace Kyoo.Tests.Database
 	public class GlobalTests : IDisposable, IAsyncDisposable
 	{
 		private readonly RepositoryActivator _repositories;
-		
+
 		public GlobalTests(ITestOutputHelper output)
 		{
-			 _repositories = new RepositoryActivator(output);
+			_repositories = new RepositoryActivator(output);
 		}
 
 		public void Dispose()
@@ -26,7 +26,7 @@ namespace Kyoo.Tests.Database
 		{
 			return _repositories.DisposeAsync();
 		}
-		
+
 		[Fact]
 		[SuppressMessage("ReSharper", "EqualExpressionComparison")]
 		public void SampleTest()

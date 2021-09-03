@@ -20,8 +20,8 @@ namespace Kyoo.Core.Api
 		private readonly IOptions<BasicOptions> _options;
 		private readonly IFileSystem _files;
 
-		public VideoApi(ILibraryManager libraryManager, 
-			ITranscoder transcoder, 
+		public VideoApi(ILibraryManager libraryManager,
+			ITranscoder transcoder,
 			IOptions<BasicOptions> options,
 			IFileSystem files)
 		{
@@ -40,7 +40,7 @@ namespace Kyoo.Core.Api
 			ctx.HttpContext.Response.Headers.Add("Expires", "0");
 		}
 
-		
+
 		[HttpGet("{slug}")]
 		[HttpGet("direct/{slug}")]
 		// TODO enable the following line, this is disabled since the web app can't use bearers. [Permission("video", Kind.Read)]
@@ -94,8 +94,8 @@ namespace Kyoo.Core.Api
 				return NotFound();
 			}
 		}
-		
-		
+
+
 		[HttpGet("transmux/{episodeLink}/segments/{chunk}")]
 		[Permission("video", Kind.Read)]
 		public IActionResult GetTransmuxedChunk(string episodeLink, string chunk)
@@ -104,7 +104,7 @@ namespace Kyoo.Core.Api
 			path = Path.Combine(path, "segments", chunk);
 			return PhysicalFile(path, "video/MP2T");
 		}
-		
+
 		[HttpGet("transcode/{episodeLink}/segments/{chunk}")]
 		[Permission("video", Kind.Read)]
 		public IActionResult GetTranscodedChunk(string episodeLink, string chunk)

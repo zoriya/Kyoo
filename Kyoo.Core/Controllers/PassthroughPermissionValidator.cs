@@ -14,7 +14,7 @@ namespace Kyoo.Core.Controllers
 		{
 			logger.LogWarning("No permission validator has been enabled, all users will have all permissions");
 		}
-		
+
 		/// <inheritdoc />
 		public IFilterMetadata Create(PermissionAttribute attribute)
 		{

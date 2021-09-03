@@ -52,8 +52,8 @@ namespace Kyoo.Core.Tasks
 			_taskManager = taskManager;
 			_logger = logger;
 		}
-		
-		
+
+
 		/// <inheritdoc />
 		public TaskParameters GetParameters()
 		{
@@ -67,9 +67,9 @@ namespace Kyoo.Core.Tasks
 		public async Task Run(TaskParameters arguments, IProgress<float> progress, CancellationToken cancellationToken)
 		{
 			string argument = arguments["slug"].As<string>();
-			ICollection<Library> libraries = argument == null 
+			ICollection<Library> libraries = argument == null
 				? await _libraryManager.GetAll<Library>()
-				: new [] { await _libraryManager.GetOrDefault<Library>(argument)};
+				: new[] { await _libraryManager.GetOrDefault<Library>(argument) };
 
 			if (argument != null && libraries.First() == null)
 				throw new ArgumentException($"No library found with the name {argument}");
@@ -79,7 +79,7 @@ namespace Kyoo.Core.Tasks
 
 			progress.Report(0);
 			float percent = 0;
-			
+
 			ICollection<Episode> episodes = await _libraryManager.GetAll<Episode>();
 			ICollection<Track> tracks = await _libraryManager.GetAll<Track>();
 			foreach (Library library in libraries)
@@ -91,15 +91,15 @@ namespace Kyoo.Core.Tasks
 				});
 				await Scan(library, episodes, tracks, reporter, cancellationToken);
 				percent += 100f / libraries.Count;
-				
+
 				if (cancellationToken.IsCancellationRequested)
 					return;
 			}
-			
+
 			progress.Report(100);
 		}
 
-		private async Task Scan(Library library, 
+		private async Task Scan(Library library,
 			IEnumerable<Episode> episodes,
 			IEnumerable<Track> tracks,
 			IProgress<float> progress,
@@ -109,7 +109,7 @@ namespace Kyoo.Core.Tasks
 			foreach (string path in library.Paths)
 			{
 				ICollection<string> files = await _fileSystem.ListFiles(path, SearchOption.AllDirectories);
-				
+
 				if (cancellationToken.IsCancellationRequested)
 					return;
 
@@ -121,8 +121,8 @@ namespace Kyoo.Core.Tasks
 					.Where(x => episodes.All(y => y.Path != x))
 					.GroupBy(Path.GetDirectoryName)
 					.ToList();
-				
-				
+
+
 				string[] paths = shows.Select(x => x.First())
 					.Concat(shows.SelectMany(x => x.Skip(1)))
 					.ToArray();
@@ -132,7 +132,7 @@ namespace Kyoo.Core.Tasks
 					// ReSharper disable once AccessToModifiedClosure
 					progress.Report((percent + x / paths.Length - 10) / library.Paths.Length);
 				});
-				
+
 				foreach (string episodePath in paths)
 				{
 					_taskManager.StartTask<RegisterEpisode>(reporter, new Dictionary<string, object>
@@ -143,7 +143,7 @@ namespace Kyoo.Core.Tasks
 					percent += 100f / paths.Length;
 				}
 
-				
+
 				string[] subtitles = files
 					.Where(FileExtensions.IsSubtitle)
 					.Where(x => !x.Contains("Extra"))
@@ -155,7 +155,7 @@ namespace Kyoo.Core.Tasks
 					// ReSharper disable once AccessToModifiedClosure
 					progress.Report((90 + (percent + x / subtitles.Length)) / library.Paths.Length);
 				});
-				
+
 				foreach (string trackPath in subtitles)
 				{
 					_taskManager.StartTask<RegisterSubtitle>(reporter, new Dictionary<string, object>

@@ -12,10 +12,10 @@ namespace Kyoo.Abstractions.Models
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
-		
+
 		/// <inheritdoc />
 		public string Slug { get; set; }
-		
+
 		/// <summary>
 		/// The name of this collection.
 		/// </summary>
@@ -23,7 +23,7 @@ namespace Kyoo.Abstractions.Models
 
 		/// <inheritdoc />
 		public Dictionary<int, string> Images { get; set; }
-		
+
 		/// <summary>
 		/// The path of this poster.
 		/// By default, the http path for this poster is returned from the public API.
@@ -37,17 +37,17 @@ namespace Kyoo.Abstractions.Models
 		/// The description of this collection.
 		/// </summary>
 		public string Overview { get; set; }
-		
+
 		/// <summary>
 		/// The list of shows contained in this collection.
 		/// </summary>
 		[LoadableRelation] public ICollection<Show> Shows { get; set; }
-		
+
 		/// <summary>
 		/// The list of libraries that contains this collection.
 		/// </summary>
 		[LoadableRelation] public ICollection<Library> Libraries { get; set; }
-		
+
 		/// <inheritdoc />
 		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
 	}

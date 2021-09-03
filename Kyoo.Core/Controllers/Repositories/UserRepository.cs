@@ -19,11 +19,11 @@ namespace Kyoo.Core.Controllers
 		/// The database handle
 		/// </summary>
 		private readonly DatabaseContext _database;
-		
+
 		/// <inheritdoc />
 		protected override Expression<Func<User, object>> DefaultSort => x => x.Username;
-		
-		
+
+
 		/// <summary>
 		/// Create a new <see cref="UserRepository"/>
 		/// </summary>
@@ -33,7 +33,7 @@ namespace Kyoo.Core.Controllers
 		{
 			_database = database;
 		}
-		
+
 		/// <inheritdoc />
 		public override async Task<ICollection<User>> Search(string query)
 		{
@@ -43,7 +43,7 @@ namespace Kyoo.Core.Controllers
 				.Take(20)
 				.ToListAsync();
 		}
-		
+
 		/// <inheritdoc />
 		public override async Task<User> Create(User obj)
 		{
@@ -58,7 +58,7 @@ namespace Kyoo.Core.Controllers
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
-			
+
 			_database.Entry(obj).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
 		}

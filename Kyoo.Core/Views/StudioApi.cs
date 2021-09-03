@@ -24,7 +24,7 @@ namespace Kyoo.Core.Api
 		{
 			_libraryManager = libraryManager;
 		}
-		
+
 		[HttpGet("{id:int}/show")]
 		[HttpGet("{id:int}/shows")]
 		[PartialPermission(Kind.Read)]
@@ -47,10 +47,10 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
-		
+
 		[HttpGet("{slug}/show")]
 		[HttpGet("{slug}/shows")]
 		[PartialPermission(Kind.Read)]
@@ -66,14 +66,14 @@ namespace Kyoo.Core.Api
 					ApiHelper.ParseWhere<Show>(where, x => x.Studio.Slug == slug),
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
-				
+
 				if (!resources.Any() && await _libraryManager.GetOrDefault<Studio>(slug) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
 	}

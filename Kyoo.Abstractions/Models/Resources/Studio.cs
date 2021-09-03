@@ -11,15 +11,15 @@ namespace Kyoo.Abstractions.Models
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
-		
+
 		/// <inheritdoc />
 		public string Slug { get; set; }
-		
+
 		/// <summary>
 		/// The name of this studio.
 		/// </summary>
 		public string Name { get; set; }
-		
+
 		/// <summary>
 		/// The list of shows that are made by this studio.
 		/// </summary>
@@ -27,7 +27,7 @@ namespace Kyoo.Abstractions.Models
 
 		/// <inheritdoc />
 		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
-		
+
 		/// <summary>
 		/// Create a new, empty, <see cref="Studio"/>.
 		/// </summary>

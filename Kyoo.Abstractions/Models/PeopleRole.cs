@@ -12,10 +12,10 @@ namespace Kyoo.Abstractions.Models
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
-		
+
 		/// <inheritdoc />
 		public string Slug => ForPeople ? Show.Slug : People.Slug;
-		
+
 		/// <summary>
 		/// Should this role be used as a Show substitute (the value is <c>true</c>) or
 		/// as a People substitute (the value is <c>false</c>).
@@ -30,7 +30,7 @@ namespace Kyoo.Abstractions.Models
 		/// The people that played this role.
 		/// </summary>
 		public People People { get; set; }
-		
+
 		/// <summary>
 		/// The ID of the Show where the People playing in.
 		/// </summary>
@@ -39,13 +39,13 @@ namespace Kyoo.Abstractions.Models
 		/// The show where the People played in.
 		/// </summary>
 		public Show Show { get; set; }
-		
+
 		/// <summary>
 		/// The type of work the person has done for the show.
 		/// That can be something like "Actor", "Writer", "Music", "Voice Actor"... 
 		/// </summary>
 		public string Type { get; set; }
-		
+
 		/// <summary>
 		/// The role the People played.
 		/// This is mostly used to inform witch character was played for actor and voice actors. 

@@ -15,7 +15,7 @@ namespace Kyoo.Abstractions.Models
 		/// this field is automatically assigned by the <see cref="IRepository{T}"/>. 
 		/// </remarks>
 		public int ID { get; set; }
-		
+
 		/// <summary>
 		/// A human-readable identifier that can be used instead of an ID.
 		/// A slug must be unique for a type of resource but it can be changed.
@@ -24,6 +24,6 @@ namespace Kyoo.Abstractions.Models
 		/// There is no setter for a slug since it can be computed from other fields.
 		/// For example, a season slug is {ShowSlug}-s{SeasonNumber}.
 		/// </remarks>
-		public string Slug { get; } 
+		public string Slug { get; }
 	}
 }

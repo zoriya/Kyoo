@@ -15,24 +15,24 @@ namespace Kyoo.Abstractions.Models.Exceptions
 		/// </summary>
 		public TaskFailedException()
 			: base("A task failed.")
-		{}
-		
+		{ }
+
 		/// <summary>
 		/// Create a new <see cref="TaskFailedException"/> with a custom message.
 		/// </summary>
 		/// <param name="message">The message to use.</param>
 		public TaskFailedException(string message)
 			: base(message)
-		{}
-		
+		{ }
+
 		/// <summary>
 		/// Create a new <see cref="TaskFailedException"/> wrapping another exception.
 		/// </summary>
 		/// <param name="exception">The exception to wrap.</param>
 		public TaskFailedException(Exception exception)
 			: base(exception)
-		{}
-		
+		{ }
+
 		/// <summary>
 		/// The serialization constructor 
 		/// </summary>

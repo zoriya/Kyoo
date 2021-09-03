@@ -28,7 +28,7 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		/// <param name="files">The file manager to use.</param>
 		/// <param name="logger">A logger to report errors</param>
-		public ThumbnailsManager(IFileSystem files, 
+		public ThumbnailsManager(IFileSystem files,
 			ILogger<ThumbnailsManager> logger)
 		{
 			_files = files;
@@ -66,7 +66,7 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public async Task<bool> DownloadImages<T>(T item, bool alwaysDownload = false) 
+		public async Task<bool> DownloadImages<T>(T item, bool alwaysDownload = false)
 			where T : IThumbnails
 		{
 			if (item == null)
@@ -84,7 +84,7 @@ namespace Kyoo.Core.Controllers
 				if (alwaysDownload || !await _files.Exists(localPath))
 					ret |= await _DownloadImage(image, localPath, $"The image n°{id} of {name}");
 			}
-			
+
 			return ret;
 		}
 
@@ -99,7 +99,7 @@ namespace Kyoo.Core.Controllers
 		{
 			if (item == null)
 				throw new ArgumentNullException(nameof(item));
-			
+
 			string directory = await _files.GetExtraDirectory(item);
 			string imageName = imageID switch
 			{
@@ -109,7 +109,7 @@ namespace Kyoo.Core.Controllers
 				Images.Trailer => "trailer",
 				_ => $"{imageID}"
 			};
-			
+
 			switch (item)
 			{
 				case Season season:
@@ -123,7 +123,7 @@ namespace Kyoo.Core.Controllers
 
 			return _files.Combine(directory, imageName);
 		}
-		
+
 		/// <inheritdoc />
 		public async Task<string> GetImagePath<T>(T item, int imageID)
 			where T : IThumbnails

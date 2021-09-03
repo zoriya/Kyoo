@@ -16,7 +16,7 @@ namespace Kyoo.Core.Controllers
 		/// The list of repositories
 		/// </summary>
 		private readonly IBaseRepository[] _repositories;
-		
+
 		/// <inheritdoc />
 		public ILibraryRepository LibraryRepository { get; }
 		/// <inheritdoc />
@@ -41,8 +41,8 @@ namespace Kyoo.Core.Controllers
 		public IProviderRepository ProviderRepository { get; }
 		/// <inheritdoc />
 		public IUserRepository UserRepository { get; }
-		
-		
+
+
 		/// <summary>
 		/// Create a new <see cref="LibraryManager"/> instance with every repository available.
 		/// </summary>
@@ -82,7 +82,7 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public Task<T> Get<T>(string slug) 
+		public Task<T> Get<T>(string slug)
 			where T : class, IResource
 		{
 			return GetRepository<T>().Get(slug);
@@ -120,19 +120,19 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public async Task<T> GetOrDefault<T>(int id) 
+		public async Task<T> GetOrDefault<T>(int id)
 			where T : class, IResource
 		{
 			return await GetRepository<T>().GetOrDefault(id);
 		}
-		
+
 		/// <inheritdoc />
-		public async Task<T> GetOrDefault<T>(string slug) 
+		public async Task<T> GetOrDefault<T>(string slug)
 			where T : class, IResource
 		{
 			return await GetRepository<T>().GetOrDefault(slug);
 		}
-		
+
 		/// <inheritdoc />
 		public async Task<T> GetOrDefault<T>(Expression<Func<T, bool>> where)
 			where T : class, IResource
@@ -145,19 +145,19 @@ namespace Kyoo.Core.Controllers
 		{
 			return await SeasonRepository.GetOrDefault(showID, seasonNumber);
 		}
-		
+
 		/// <inheritdoc />
 		public async Task<Season> GetOrDefault(string showSlug, int seasonNumber)
 		{
 			return await SeasonRepository.GetOrDefault(showSlug, seasonNumber);
 		}
-		
+
 		/// <inheritdoc />
 		public async Task<Episode> GetOrDefault(int showID, int seasonNumber, int episodeNumber)
 		{
 			return await EpisodeRepository.GetOrDefault(showID, seasonNumber, episodeNumber);
 		}
-		
+
 		/// <inheritdoc />
 		public async Task<Episode> GetOrDefault(string showSlug, int seasonNumber, int episodeNumber)
 		{
@@ -173,9 +173,9 @@ namespace Kyoo.Core.Controllers
 		/// <param name="inverse">A setter function to store the owner of a releated object loaded</param>
 		/// <typeparam name="T1">The type of the owner object</typeparam>
 		/// <typeparam name="T2">The type of the related object</typeparam>
-		private static async Task SetRelation<T1, T2>(T1 obj, 
-			Task<ICollection<T2>> loader, 
-			Action<T1, ICollection<T2>> setter, 
+		private static async Task SetRelation<T1, T2>(T1 obj,
+			Task<ICollection<T2>> loader,
+			Action<T1, ICollection<T2>> setter,
 			Action<T2, T1> inverse)
 		{
 			ICollection<T2> loaded = await loader;
@@ -230,61 +230,61 @@ namespace Kyoo.Core.Controllers
 				(Library l, nameof(Library.Providers)) => ProviderRepository
 					.GetAll(x => x.Libraries.Any(y => y.ID == obj.ID))
 					.Then(x => l.Providers = x),
-				
+
 				(Library l, nameof(Library.Shows)) => ShowRepository
 					.GetAll(x => x.Libraries.Any(y => y.ID == obj.ID))
-					.Then(x => l.Shows = x), 
-				
+					.Then(x => l.Shows = x),
+
 				(Library l, nameof(Library.Collections)) => CollectionRepository
 					.GetAll(x => x.Libraries.Any(y => y.ID == obj.ID))
-					.Then(x => l.Collections = x), 
-				
-				
-				(Collection c, nameof(Collection.ExternalIDs)) => SetRelation(c, 
+					.Then(x => l.Collections = x),
+
+
+				(Collection c, nameof(Collection.ExternalIDs)) => SetRelation(c,
 					ProviderRepository.GetMetadataID<Collection>(x => x.ResourceID == obj.ID),
 					(x, y) => x.ExternalIDs = y,
 					(x, y) => { x.ResourceID = y.ID; }),
-				
+
 				(Collection c, nameof(Collection.Shows)) => ShowRepository
 					.GetAll(x => x.Collections.Any(y => y.ID == obj.ID))
-					.Then(x => c.Shows = x), 
-				
+					.Then(x => c.Shows = x),
+
 				(Collection c, nameof(Collection.Libraries)) => LibraryRepository
 					.GetAll(x => x.Collections.Any(y => y.ID == obj.ID))
-					.Then(x => c.Libraries = x), 
-				
-				
-				(Show s, nameof(Show.ExternalIDs)) => SetRelation(s, 
+					.Then(x => c.Libraries = x),
+
+
+				(Show s, nameof(Show.ExternalIDs)) => SetRelation(s,
 					ProviderRepository.GetMetadataID<Show>(x => x.ResourceID == obj.ID),
 					(x, y) => x.ExternalIDs = y,
 					(x, y) => { x.ResourceID = y.ID; }),
-				
+
 				(Show s, nameof(Show.Genres)) => GenreRepository
 					.GetAll(x => x.Shows.Any(y => y.ID == obj.ID))
 					.Then(x => s.Genres = x),
-				
+
 				(Show s, nameof(Show.People)) => PeopleRepository
 					.GetFromShow(obj.ID)
 					.Then(x => s.People = x),
-				
-				(Show s, nameof(Show.Seasons)) => SetRelation(s, 
+
+				(Show s, nameof(Show.Seasons)) => SetRelation(s,
 					SeasonRepository.GetAll(x => x.Show.ID == obj.ID),
 					(x, y) => x.Seasons = y,
 					(x, y) => { x.Show = y; x.ShowID = y.ID; }),
-				
-				(Show s, nameof(Show.Episodes)) => SetRelation(s, 
+
+				(Show s, nameof(Show.Episodes)) => SetRelation(s,
 					EpisodeRepository.GetAll(x => x.Show.ID == obj.ID),
 					(x, y) => x.Episodes = y,
 					(x, y) => { x.Show = y; x.ShowID = y.ID; }),
-				
+
 				(Show s, nameof(Show.Libraries)) => LibraryRepository
 					.GetAll(x => x.Shows.Any(y => y.ID == obj.ID))
 					.Then(x => s.Libraries = x),
-				
+
 				(Show s, nameof(Show.Collections)) => CollectionRepository
 					.GetAll(x => x.Shows.Any(y => y.ID == obj.ID))
 					.Then(x => s.Collections = x),
-				
+
 				(Show s, nameof(Show.Studio)) => StudioRepository
 					.GetOrDefault(x => x.Shows.Any(y => y.ID == obj.ID))
 					.Then(x =>
@@ -292,18 +292,18 @@ namespace Kyoo.Core.Controllers
 						s.Studio = x;
 						s.StudioID = x?.ID ?? 0;
 					}),
-				
-				
-				(Season s, nameof(Season.ExternalIDs)) => SetRelation(s, 
+
+
+				(Season s, nameof(Season.ExternalIDs)) => SetRelation(s,
 					ProviderRepository.GetMetadataID<Season>(x => x.ResourceID == obj.ID),
 					(x, y) => x.ExternalIDs = y,
 					(x, y) => { x.ResourceID = y.ID; }),
-				
-				(Season s, nameof(Season.Episodes)) => SetRelation(s, 
+
+				(Season s, nameof(Season.Episodes)) => SetRelation(s,
 					EpisodeRepository.GetAll(x => x.Season.ID == obj.ID),
 					(x, y) => x.Episodes = y,
 					(x, y) => { x.Season = y; x.SeasonID = y.ID; }),
-				
+
 				(Season s, nameof(Season.Show)) => ShowRepository
 					.GetOrDefault(x => x.Seasons.Any(y => y.ID == obj.ID))
 					.Then(x =>
@@ -311,18 +311,18 @@ namespace Kyoo.Core.Controllers
 						s.Show = x;
 						s.ShowID = x?.ID ?? 0;
 					}),
-				
-				
-				(Episode e, nameof(Episode.ExternalIDs)) => SetRelation(e, 
-					ProviderRepository.GetMetadataID<Episode>(x => x.ResourceID == obj.ID), 
+
+
+				(Episode e, nameof(Episode.ExternalIDs)) => SetRelation(e,
+					ProviderRepository.GetMetadataID<Episode>(x => x.ResourceID == obj.ID),
 					(x, y) => x.ExternalIDs = y,
 					(x, y) => { x.ResourceID = y.ID; }),
-				
-				(Episode e, nameof(Episode.Tracks)) => SetRelation(e, 
+
+				(Episode e, nameof(Episode.Tracks)) => SetRelation(e,
 					TrackRepository.GetAll(x => x.Episode.ID == obj.ID),
 					(x, y) => x.Tracks = y,
 					(x, y) => { x.Episode = y; x.EpisodeID = y.ID; }),
-				
+
 				(Episode e, nameof(Episode.Show)) => ShowRepository
 					.GetOrDefault(x => x.Episodes.Any(y => y.ID == obj.ID))
 					.Then(x =>
@@ -330,7 +330,7 @@ namespace Kyoo.Core.Controllers
 						e.Show = x;
 						e.ShowID = x?.ID ?? 0;
 					}),
-				
+
 				(Episode e, nameof(Episode.Season)) => SeasonRepository
 					.GetOrDefault(x => x.Episodes.Any(y => y.ID == e.ID))
 					.Then(x =>
@@ -338,8 +338,8 @@ namespace Kyoo.Core.Controllers
 						e.Season = x;
 						e.SeasonID = x?.ID ?? 0;
 					}),
-				
-				
+
+
 				(Track t, nameof(Track.Episode)) => EpisodeRepository
 					.GetOrDefault(x => x.Tracks.Any(y => y.ID == obj.ID))
 					.Then(x =>
@@ -347,62 +347,62 @@ namespace Kyoo.Core.Controllers
 						t.Episode = x;
 						t.EpisodeID = x?.ID ?? 0;
 					}),
-				
-				
+
+
 				(Genre g, nameof(Genre.Shows)) => ShowRepository
 					.GetAll(x => x.Genres.Any(y => y.ID == obj.ID))
 					.Then(x => g.Shows = x),
-				
-				
+
+
 				(Studio s, nameof(Studio.Shows)) => ShowRepository
 					.GetAll(x => x.Studio.ID == obj.ID)
 					.Then(x => s.Shows = x),
-				
-				(Studio s, nameof(Studio.ExternalIDs)) => SetRelation(s, 
+
+				(Studio s, nameof(Studio.ExternalIDs)) => SetRelation(s,
 					ProviderRepository.GetMetadataID<Studio>(x => x.ResourceID == obj.ID),
 					(x, y) => x.ExternalIDs = y,
 					(x, y) => { x.ResourceID = y.ID; }),
-				
-				
-				(People p, nameof(People.ExternalIDs)) => SetRelation(p, 
+
+
+				(People p, nameof(People.ExternalIDs)) => SetRelation(p,
 					ProviderRepository.GetMetadataID<People>(x => x.ResourceID == obj.ID),
 					(x, y) => x.ExternalIDs = y,
 					(x, y) => { x.ResourceID = y.ID; }),
-				
+
 				(People p, nameof(People.Roles)) => PeopleRepository
 					.GetFromPeople(obj.ID)
 					.Then(x => p.Roles = x),
-				
-				
+
+
 				(Provider p, nameof(Provider.Libraries)) => LibraryRepository
 					.GetAll(x => x.Providers.Any(y => y.ID == obj.ID))
 					.Then(x => p.Libraries = x),
-				
+
 
 				_ => throw new ArgumentException($"Couldn't find a way to load {memberName} of {obj.Slug}.")
 			};
 		}
 
 		/// <inheritdoc />
-		public Task<ICollection<LibraryItem>> GetItemsFromLibrary(int id, 
-			Expression<Func<LibraryItem, bool>> where = null, 
-			Sort<LibraryItem> sort = default, 
+		public Task<ICollection<LibraryItem>> GetItemsFromLibrary(int id,
+			Expression<Func<LibraryItem, bool>> where = null,
+			Sort<LibraryItem> sort = default,
 			Pagination limit = default)
 		{
 			return LibraryItemRepository.GetFromLibrary(id, where, sort, limit);
 		}
 
 		/// <inheritdoc />
-		public Task<ICollection<LibraryItem>> GetItemsFromLibrary(string slug, 
-			Expression<Func<LibraryItem, bool>> where = null, 
-			Sort<LibraryItem> sort = default, 
+		public Task<ICollection<LibraryItem>> GetItemsFromLibrary(string slug,
+			Expression<Func<LibraryItem, bool>> where = null,
+			Sort<LibraryItem> sort = default,
 			Pagination limit = default)
 		{
 			return LibraryItemRepository.GetFromLibrary(slug, where, sort, limit);
 		}
 
 		/// <inheritdoc />
-		public Task<ICollection<PeopleRole>> GetPeopleFromShow(int showID, 
+		public Task<ICollection<PeopleRole>> GetPeopleFromShow(int showID,
 			Expression<Func<PeopleRole, bool>> where = null,
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default)
@@ -411,16 +411,16 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public Task<ICollection<PeopleRole>> GetPeopleFromShow(string showSlug, 
+		public Task<ICollection<PeopleRole>> GetPeopleFromShow(string showSlug,
 			Expression<Func<PeopleRole, bool>> where = null,
-			Sort<PeopleRole> sort = default, 
+			Sort<PeopleRole> sort = default,
 			Pagination limit = default)
 		{
 			return PeopleRepository.GetFromShow(showSlug, where, sort, limit);
 		}
 
 		/// <inheritdoc />
-		public Task<ICollection<PeopleRole>> GetRolesFromPeople(int id, 
+		public Task<ICollection<PeopleRole>> GetRolesFromPeople(int id,
 			Expression<Func<PeopleRole, bool>> where = null,
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default)
@@ -454,7 +454,7 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public Task<ICollection<T>> GetAll<T>(Expression<Func<T, bool>> where = null,
 			Sort<T> sort = default,
-			Pagination limit = default) 
+			Pagination limit = default)
 			where T : class, IResource
 		{
 			return GetRepository<T>().GetAll(where, sort, limit);
@@ -468,19 +468,19 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public Task<ICollection<T>> Search<T>(string query) 
+		public Task<ICollection<T>> Search<T>(string query)
 			where T : class, IResource
 		{
 			return GetRepository<T>().Search(query);
 		}
 
 		/// <inheritdoc />
-		public Task<T> Create<T>(T item) 
+		public Task<T> Create<T>(T item)
 			where T : class, IResource
 		{
 			return GetRepository<T>().Create(item);
 		}
-		
+
 		/// <inheritdoc />
 		public Task<T> CreateIfNotExists<T>(T item)
 			where T : class, IResource
@@ -496,21 +496,21 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public Task Delete<T>(T item) 
+		public Task Delete<T>(T item)
 			where T : class, IResource
 		{
 			return GetRepository<T>().Delete(item);
 		}
 
 		/// <inheritdoc />
-		public Task Delete<T>(int id) 
+		public Task Delete<T>(int id)
 			where T : class, IResource
 		{
 			return GetRepository<T>().Delete(id);
 		}
 
 		/// <inheritdoc />
-		public Task Delete<T>(string slug) 
+		public Task Delete<T>(string slug)
 			where T : class, IResource
 		{
 			return GetRepository<T>().Delete(slug);

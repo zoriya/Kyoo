@@ -19,22 +19,22 @@ namespace Kyoo.Abstractions.Controllers
 		/// The name of this parameter.
 		/// </summary>
 		public string Name { get; init; }
-		
+
 		/// <summary>
 		/// The description of this parameter.
 		/// </summary>
 		public string Description { get; init; }
-		
+
 		/// <summary>
 		/// The type of this parameter.
 		/// </summary>
 		public Type Type { get; init; }
-		
+
 		/// <summary>
 		/// Is this parameter required or can it be ignored?
 		/// </summary>
 		public bool IsRequired { get; init; }
-		
+
 		/// <summary>
 		/// The default value of this object.
 		/// </summary>
@@ -44,7 +44,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// The value of the parameter.
 		/// </summary>
 		private object Value { get; init; }
-		
+
 		/// <summary>
 		/// Create a new task parameter.
 		/// </summary>
@@ -61,7 +61,7 @@ namespace Kyoo.Abstractions.Controllers
 				Type = typeof(T)
 			};
 		}
-		
+
 		/// <summary>
 		/// Create a new required task parameter.
 		/// </summary>
@@ -79,7 +79,7 @@ namespace Kyoo.Abstractions.Controllers
 				IsRequired = true
 			};
 		}
-		
+
 		/// <summary>
 		/// Create a parameter's value to give to a task.
 		/// </summary>
@@ -104,9 +104,9 @@ namespace Kyoo.Abstractions.Controllers
 		/// <returns>A new parameter's value for this current parameter</returns>
 		public TaskParameter CreateValue(object value)
 		{
-			return this with {Value = value};
+			return this with { Value = value };
 		}
-		
+
 		/// <summary>
 		/// Get the value of this parameter. If the value is of the wrong type, it will be converted.
 		/// </summary>
@@ -140,12 +140,12 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="name">The name of the task (case sensitive)</param>
 		public TaskParameter this[string name] => this.FirstOrDefault(x => x.Name == name);
 
-		
+
 		/// <summary>
 		/// Create a new, empty, <see cref="TaskParameters"/>
 		/// </summary>
-		public TaskParameters() {}
-		
+		public TaskParameters() { }
+
 		/// <summary>
 		/// Create a <see cref="TaskParameters"/> with an initial parameters content 
 		/// </summary>
@@ -155,7 +155,7 @@ namespace Kyoo.Abstractions.Controllers
 			AddRange(parameters);
 		}
 	}
-	
+
 	/// <summary>
 	/// A common interface that tasks should implement.
 	/// </summary>
@@ -168,7 +168,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// All parameters that this task as. Every one of them will be given to the run function with a value.
 		/// </returns>
 		public TaskParameters GetParameters();
-		
+
 		/// <summary>
 		/// Start this task.
 		/// </summary>

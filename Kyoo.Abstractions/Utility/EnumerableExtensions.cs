@@ -42,7 +42,7 @@ namespace Kyoo.Utils
 			}
 			return Generator(self, mapper);
 		}
-		
+
 		/// <summary>
 		/// A map where the mapping function is asynchronous.
 		/// Note: <see cref="SelectAsync{T,T2}"/> might interest you. 
@@ -54,7 +54,7 @@ namespace Kyoo.Utils
 		/// <returns>The list mapped as an AsyncEnumerable</returns>
 		/// <exception cref="ArgumentNullException">The list or the mapper can't be null</exception>
 		[LinqTunnel]
-		public static IAsyncEnumerable<T2> MapAsync<T, T2>([NotNull] this IEnumerable<T> self, 
+		public static IAsyncEnumerable<T2> MapAsync<T, T2>([NotNull] this IEnumerable<T> self,
 			[NotNull] Func<T, int, Task<T2>> mapper)
 		{
 			if (self == null)
@@ -76,7 +76,7 @@ namespace Kyoo.Utils
 
 			return Generator(self, mapper);
 		}
-		
+
 		/// <summary>
 		/// An asynchronous version of Select.
 		/// </summary>
@@ -87,7 +87,7 @@ namespace Kyoo.Utils
 		/// <returns>The list mapped as an AsyncEnumerable</returns>
 		/// <exception cref="ArgumentNullException">The list or the mapper can't be null</exception>
 		[LinqTunnel]
-		public static IAsyncEnumerable<T2> SelectAsync<T, T2>([NotNull] this IEnumerable<T> self, 
+		public static IAsyncEnumerable<T2> SelectAsync<T, T2>([NotNull] this IEnumerable<T> self,
 			[NotNull] Func<T, Task<T2>> mapper)
 		{
 			if (self == null)
@@ -159,7 +159,7 @@ namespace Kyoo.Utils
 				do
 				{
 					yield return enumerator.Current;
-				} 
+				}
 				while (enumerator.MoveNext());
 			}
 
@@ -179,7 +179,7 @@ namespace Kyoo.Utils
 			foreach (T i in self)
 				action(i);
 		}
-		
+
 		/// <summary>
 		/// A foreach used as a function with a little specificity: the list can be null.
 		/// </summary>
@@ -192,7 +192,7 @@ namespace Kyoo.Utils
 			foreach (object i in self)
 				action(i);
 		}
-		
+
 		/// <summary>
 		/// A foreach used as a function with a little specificity: the list can be null.
 		/// </summary>
@@ -205,7 +205,7 @@ namespace Kyoo.Utils
 			foreach (object i in self)
 				await action(i);
 		}
-		
+
 		/// <summary>
 		/// A foreach used as a function with a little specificity: the list can be null.
 		/// </summary>
@@ -219,7 +219,7 @@ namespace Kyoo.Utils
 			foreach (T i in self)
 				await action(i);
 		}
-		
+
 		/// <summary>
 		/// A foreach used as a function with a little specificity: the list can be null.
 		/// </summary>
@@ -233,7 +233,7 @@ namespace Kyoo.Utils
 			await foreach (T i in self)
 				action(i);
 		}
-		
+
 		/// <summary>
 		/// Split a list in a small chunk of data.
 		/// </summary>
@@ -247,7 +247,7 @@ namespace Kyoo.Utils
 			for (int i = 0; i < list.Count; i += countPerList)
 				yield return list.GetRange(i, Math.Min(list.Count - i, countPerList));
 		}
-		
+
 		/// <summary>
 		/// Split a list in a small chunk of data.
 		/// </summary>
@@ -260,7 +260,7 @@ namespace Kyoo.Utils
 		{
 			T[] ret = new T[countPerList];
 			int i = 0;
-			
+
 			using IEnumerator<T> enumerator = list.GetEnumerator();
 			while (enumerator.MoveNext())
 			{

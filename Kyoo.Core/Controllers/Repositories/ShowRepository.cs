@@ -50,8 +50,8 @@ namespace Kyoo.Core.Controllers
 		/// <param name="providers">A provider repository</param>
 		public ShowRepository(DatabaseContext database,
 			IStudioRepository studios,
-			IPeopleRepository people, 
-			IGenreRepository genres, 
+			IPeopleRepository people,
+			IGenreRepository genres,
 			IProviderRepository providers)
 			: base(database)
 		{
@@ -61,7 +61,7 @@ namespace Kyoo.Core.Controllers
 			_genres = genres;
 			_providers = providers;
 		}
-		
+
 
 		/// <inheritdoc />
 		public override async Task<ICollection<Show>> Search(string query)
@@ -82,7 +82,7 @@ namespace Kyoo.Core.Controllers
 			await _database.SaveChangesAsync($"Trying to insert a duplicated show (slug {obj.Slug} already exists).");
 			return obj;
 		}
-		
+
 		/// <inheritdoc />
 		protected override async Task Validate(Show resource)
 		{
@@ -128,7 +128,7 @@ namespace Kyoo.Core.Controllers
 		protected override async Task EditRelations(Show resource, Show changed, bool resetOld)
 		{
 			await Validate(changed);
-			
+
 			if (changed.Aliases != null || resetOld)
 				resource.Aliases = changed.Aliases;
 
@@ -137,7 +137,7 @@ namespace Kyoo.Core.Controllers
 				await Database.Entry(resource).Reference(x => x.Studio).LoadAsync();
 				resource.Studio = changed.Studio;
 			}
-			
+
 			if (changed.Genres != null || resetOld)
 			{
 				await Database.Entry(resource).Collection(x => x.Genres).LoadAsync();
@@ -177,7 +177,7 @@ namespace Kyoo.Core.Controllers
 				await _database.SaveIfNoDuplicates();
 			}
 		}
-		
+
 		/// <inheritdoc />
 		public Task<string> GetSlug(int showID)
 		{
@@ -185,7 +185,7 @@ namespace Kyoo.Core.Controllers
 				.Select(x => x.Slug)
 				.FirstOrDefaultAsync();
 		}
-		
+
 		/// <inheritdoc />
 		public override async Task Delete(Show obj)
 		{

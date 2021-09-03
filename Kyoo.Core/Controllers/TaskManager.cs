@@ -32,7 +32,7 @@ namespace Kyoo.Core.Controllers
 			/// The metadata for this task (the slug, and other useful information).
 			/// </summary>
 			public TaskMetadataAttribute Metadata { get; set; }
-			
+
 			/// <summary>
 			/// The function used to create the task object.
 			/// </summary>
@@ -53,23 +53,23 @@ namespace Kyoo.Core.Controllers
 			/// The task currently queued.
 			/// </summary>
 			public ManagedTask Task { get; init; }
-			
+
 			/// <summary>
 			/// The progress reporter that this task should use. 
 			/// </summary>
 			public IProgress<float> ProgressReporter { get; init; }
-			
+
 			/// <summary>
 			/// The arguments to give to run the task with.
 			/// </summary>
 			public Dictionary<string, object> Arguments { get; init; }
-			
+
 			/// <summary>
 			/// A token informing the task that it should be cancelled or not.
 			/// </summary>
 			public CancellationToken? CancellationToken { get; init; }
 		}
-		
+
 		/// <summary>
 		/// The configuration instance used to get schedule information
 		/// </summary>
@@ -115,14 +115,14 @@ namespace Kyoo.Core.Controllers
 				Metadata = x.Metadata,
 				ScheduledDate = GetNextTaskDate(x.Metadata.Slug)
 			}).ToList();
-			
+
 			if (_tasks.Any())
 				_logger.LogTrace("Task manager initiated with: {Tasks}", _tasks.Select(x => x.Metadata.Name));
 			else
 				_logger.LogInformation("Task manager initiated without any tasks");
 		}
-		
-		
+
+
 		/// <summary>
 		/// Triggered when the application host is ready to start the service.
 		/// </summary>
@@ -133,7 +133,7 @@ namespace Kyoo.Core.Controllers
 			Task.Run(() => base.StartAsync(cancellationToken), CancellationToken.None);
 			return Task.CompletedTask;
 		}
-		
+
 		/// <inheritdoc />
 		public override Task StopAsync(CancellationToken cancellationToken)
 		{
@@ -148,7 +148,7 @@ namespace Kyoo.Core.Controllers
 		protected override async Task ExecuteAsync(CancellationToken cancellationToken)
 		{
 			_EnqueueStartupTasks();
-			
+
 			while (!cancellationToken.IsCancellationRequested)
 			{
 				if (_queuedTasks.Any())
@@ -160,12 +160,12 @@ namespace Kyoo.Core.Controllers
 					}
 					catch (TaskFailedException ex)
 					{
-						_logger.LogWarning("The task \"{Task}\" failed: {Message}", 
+						_logger.LogWarning("The task \"{Task}\" failed: {Message}",
 							task.Task.Metadata.Name, ex.Message);
 					}
 					catch (Exception e)
 					{
-						_logger.LogError(e, "An unhandled exception occured while running the task {Task}", 
+						_logger.LogError(e, "An unhandled exception occured while running the task {Task}",
 							task.Task.Metadata.Name);
 					}
 				}
@@ -188,7 +188,7 @@ namespace Kyoo.Core.Controllers
 		/// If the number of arguments is invalid, if an argument can't be converted or if the task finds the argument
 		/// invalid.
 		/// </exception>
-		private async Task _RunTask(ManagedTask task, 
+		private async Task _RunTask(ManagedTask task,
 			[NotNull] IProgress<float> progress,
 			Dictionary<string, object> arguments,
 			CancellationToken? cancellationToken = null)
@@ -220,14 +220,14 @@ namespace Kyoo.Core.Controllers
 						return x.CreateValue(value ?? x.DefaultValue);
 					}));
 
-				_logger.LogInformation("Task starting: {Task} ({Parameters})", 
+				_logger.LogInformation("Task starting: {Task} ({Parameters})",
 					task.Metadata.Name, args.ToDictionary(x => x.Name, x => x.As<object>()));
-				
+
 				CancellationToken token = cancellationToken != null
 					? CancellationTokenSource.CreateLinkedTokenSource(_taskToken.Token, cancellationToken.Value).Token
 					: _taskToken.Token;
 				await taskObj.Value.Run(args, progress, token);
-				
+
 				_logger.LogInformation("Task finished: {Task}", task.Metadata.Name);
 				_runningTask = null;
 			}
@@ -261,13 +261,13 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public void StartTask(string taskSlug, 
+		public void StartTask(string taskSlug,
 			IProgress<float> progress,
 			Dictionary<string, object> arguments = null,
 			CancellationToken? cancellationToken = null)
 		{
 			arguments ??= new Dictionary<string, object>();
-			
+
 			int index = _tasks.FindIndex(x => x.Metadata.Slug == taskSlug);
 			if (index == -1)
 				throw new ItemNotFoundException($"No task found with the slug {taskSlug}");
@@ -276,13 +276,13 @@ namespace Kyoo.Core.Controllers
 				Task = _tasks[index],
 				ProgressReporter = progress,
 				Arguments = arguments,
-				CancellationToken = cancellationToken	
+				CancellationToken = cancellationToken
 			});
 			_tasks[index].ScheduledDate = GetNextTaskDate(taskSlug);
 		}
 
 		/// <inheritdoc />
-		public void StartTask<T>(IProgress<float> progress, 
+		public void StartTask<T>(IProgress<float> progress,
 			Dictionary<string, object> arguments = null,
 			CancellationToken? cancellationToken = null)
 			where T : ITask
@@ -304,12 +304,12 @@ namespace Kyoo.Core.Controllers
 				return DateTime.Now + delay;
 			return DateTime.MaxValue;
 		}
-		
+
 		/// <inheritdoc />
 		public ICollection<(TaskMetadataAttribute, ITask)> GetRunningTasks()
 		{
-			return _runningTask == null 
-				? ArraySegment<(TaskMetadataAttribute, ITask)>.Empty 
+			return _runningTask == null
+				? ArraySegment<(TaskMetadataAttribute, ITask)>.Empty
 				: new[] { _runningTask.Value };
 		}
 

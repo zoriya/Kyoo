@@ -31,7 +31,7 @@ namespace Kyoo.Core.Api
 			_thumbs = thumbs;
 			_files = files;
 		}
-		
+
 		[HttpGet("{seasonID:int}/episode")]
 		[HttpGet("{seasonID:int}/episodes")]
 		[PartialPermission(Kind.Read)]
@@ -54,10 +54,10 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
-		
+
 		[HttpGet("{showSlug}-s{seasonNumber:int}/episode")]
 		[HttpGet("{showSlug}-s{seasonNumber:int}/episodes")]
 		[PartialPermission(Kind.Read)]
@@ -71,7 +71,7 @@ namespace Kyoo.Core.Api
 			try
 			{
 				ICollection<Episode> resources = await _libraryManager.GetAll(
-					ApiHelper.ParseWhere<Episode>(where, x => x.Show.Slug == showSlug 
+					ApiHelper.ParseWhere<Episode>(where, x => x.Show.Slug == showSlug
 					                                          && x.SeasonNumber == seasonNumber),
 					new Sort<Episode>(sortBy),
 					new Pagination(limit, afterID));
@@ -82,10 +82,10 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
-		
+
 		[HttpGet("{showID:int}-s{seasonNumber:int}/episode")]
 		[HttpGet("{showID:int}-s{seasonNumber:int}/episodes")]
 		[PartialPermission(Kind.Read)]
@@ -109,10 +109,10 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
-		
+
 		[HttpGet("{seasonID:int}/show")]
 		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Show>> GetShow(int seasonID)
@@ -122,7 +122,7 @@ namespace Kyoo.Core.Api
 				return NotFound();
 			return ret;
 		}
-		
+
 		[HttpGet("{showSlug}-s{seasonNumber:int}/show")]
 		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Show>> GetShow(string showSlug, int seasonNumber)
@@ -132,7 +132,7 @@ namespace Kyoo.Core.Api
 				return NotFound();
 			return ret;
 		}
-		
+
 		[HttpGet("{showID:int}-s{seasonNumber:int}/show")]
 		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Show>> GetShow(int showID, int seasonNumber)
@@ -142,7 +142,7 @@ namespace Kyoo.Core.Api
 				return NotFound();
 			return ret;
 		}
-		
+
 		[HttpGet("{id:int}/poster")]
 		public async Task<IActionResult> GetPoster(int id)
 		{
@@ -152,7 +152,7 @@ namespace Kyoo.Core.Api
 			await _libraryManager.Load(season, x => x.Show);
 			return _files.FileResult(await _thumbs.GetImagePath(season, Images.Poster));
 		}
-		
+
 		[HttpGet("{slug}/poster")]
 		public async Task<IActionResult> GetPoster(string slug)
 		{

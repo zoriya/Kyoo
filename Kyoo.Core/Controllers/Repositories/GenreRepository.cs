@@ -19,11 +19,11 @@ namespace Kyoo.Core.Controllers
 		/// The database handle
 		/// </summary>
 		private readonly DatabaseContext _database;
-		
+
 		/// <inheritdoc />
 		protected override Expression<Func<Genre, object>> DefaultSort => x => x.Slug;
-		
-		
+
+
 		/// <summary>
 		/// Create a new <see cref="GenreRepository"/>.
 		/// </summary>

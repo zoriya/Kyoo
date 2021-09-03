@@ -50,7 +50,7 @@ namespace Kyoo.TheMovieDb
 					.Select(x => x.ToPeople(provider))
 					.Concat(movie.Credits.Crew.Select(x => x.ToPeople(provider)))
 					.ToArray(),
-				ExternalIDs = new []
+				ExternalIDs = new[]
 				{
 					new MetadataID
 					{
@@ -61,7 +61,7 @@ namespace Kyoo.TheMovieDb
 				}
 			};
 		}
-		
+
 		/// <summary>
 		/// Convert a <see cref="SearchMovie"/> into a <see cref="Show"/>.
 		/// </summary>
@@ -87,7 +87,7 @@ namespace Kyoo.TheMovieDb
 						: null,
 				},
 				IsMovie = true,
-				ExternalIDs = new []
+				ExternalIDs = new[]
 				{
 					new MetadataID
 					{

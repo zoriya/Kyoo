@@ -11,15 +11,15 @@ namespace Kyoo.Abstractions.Models
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
-		
+
 		/// <inheritdoc />
 		public string Slug { get; set; }
-		
+
 		/// <summary>
 		/// The name of this genre.
 		/// </summary>
 		public string Name { get; set; }
-		
+
 		/// <summary>
 		/// The list of shows that have this genre.
 		/// </summary>
@@ -28,8 +28,8 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// Create a new, empty <see cref="Genre"/>.
 		/// </summary>
-		public Genre() {}
-		
+		public Genre() { }
+
 		/// <summary>
 		/// Create a new <see cref="Genre"/> and specify it's <see cref="Name"/>.
 		/// The <see cref="Slug"/> is automatically calculated from it's name.  

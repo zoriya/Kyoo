@@ -26,12 +26,12 @@ namespace Kyoo.Tests.Database
 				: base(new RepositoryActivator(output, postgres)) { }
 		}
 	}
-	
+
 	public abstract class ALibraryItemTest
 	{
 		private readonly ILibraryItemRepository _repository;
 		private readonly RepositoryActivator _repositories;
-		
+
 		protected ALibraryItemTest(RepositoryActivator repositories)
 		{
 			_repositories = repositories;
@@ -43,7 +43,7 @@ namespace Kyoo.Tests.Database
 		{
 			Assert.Equal(2, await _repository.GetCount());
 		}
-		
+
 		[Fact]
 		public async Task GetShowTests()
 		{
@@ -51,7 +51,7 @@ namespace Kyoo.Tests.Database
 			LibraryItem actual = await _repository.Get(1);
 			KAssert.DeepEqual(expected, actual);
 		}
-		
+
 		[Fact]
 		public async Task GetCollectionTests()
 		{
@@ -59,7 +59,7 @@ namespace Kyoo.Tests.Database
 			LibraryItem actual = await _repository.Get(-1);
 			KAssert.DeepEqual(expected, actual);
 		}
-		
+
 		[Fact]
 		public async Task GetShowSlugTests()
 		{
@@ -67,7 +67,7 @@ namespace Kyoo.Tests.Database
 			LibraryItem actual = await _repository.Get(TestSample.Get<Show>().Slug);
 			KAssert.DeepEqual(expected, actual);
 		}
-		
+
 		[Fact]
 		public async Task GetCollectionSlugTests()
 		{
@@ -75,7 +75,7 @@ namespace Kyoo.Tests.Database
 			LibraryItem actual = await _repository.Get(TestSample.Get<Collection>().Slug);
 			KAssert.DeepEqual(expected, actual);
 		}
-		
+
 		[Fact]
 		public async Task GetDuplicatedSlugTests()
 		{

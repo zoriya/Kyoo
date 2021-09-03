@@ -13,13 +13,13 @@ namespace Kyoo.Authentication.Models.DTO
 		/// </summary>
 		[EmailAddress(ErrorMessage = "The email is invalid.")]
 		public string Email { get; set; }
-		
+
 		/// <summary>
 		/// The new username of the user.
 		/// </summary>
 		[MinLength(4, ErrorMessage = "The username must have at least 4 characters")]
 		public string Username { get; set; }
-		
+
 		/// <summary>
 		/// The picture icon.
 		/// </summary>

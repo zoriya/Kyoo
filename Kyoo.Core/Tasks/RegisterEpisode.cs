@@ -76,7 +76,7 @@ namespace Kyoo.Core.Tasks
 				TaskParameter.CreateRequired<Library>("library", "The library in witch the episode is")
 			};
 		}
-		
+
 		/// <inheritdoc />
 		public async Task Run(TaskParameters arguments, IProgress<float> progress, CancellationToken cancellationToken)
 		{
@@ -148,7 +148,7 @@ namespace Kyoo.Core.Tasks
 				throw new TaskFailedException(ex);
 			}
 		}
-		
+
 		/// <summary>
 		/// Retrieve the equivalent item if it already exists in the database,
 		/// if it does not, fill metadata using the metadata provider, download images and register the item to the
@@ -172,7 +172,7 @@ namespace Kyoo.Core.Tasks
 
 			item = await _metadataProvider.Get(item);
 			await _thumbnailsManager.DownloadImages(item);
-			
+
 			switch (item)
 			{
 				case Show show when show.People != null:

@@ -30,7 +30,7 @@ namespace Kyoo.Core.Controllers
 		/// The logger used by this class. 
 		/// </summary>
 		private readonly ILogger<PluginManager> _logger;
-		
+
 		/// <summary>
 		/// The list of plugins that are currently loaded.
 		/// </summary>
@@ -93,7 +93,7 @@ namespace Kyoo.Core.Controllers
 				return Array.Empty<IPlugin>();
 			}
 		}
-		
+
 		/// <inheritdoc />
 		public void LoadPlugins(ICollection<IPlugin> plugins)
 		{

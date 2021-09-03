@@ -42,7 +42,7 @@ namespace Kyoo.Core.Api
 					new Sort<LibraryItem>(sortBy),
 					new Pagination(limit, afterID));
 
-				return new Page<LibraryItem>(resources, 
+				return new Page<LibraryItem>(resources,
 					new Uri(_baseURL, Request.Path),
 					Request.Query.ToDictionary(x => x.Key, x => x.Value.ToString(), StringComparer.InvariantCultureIgnoreCase),
 					limit);
@@ -53,7 +53,7 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
 	}

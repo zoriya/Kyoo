@@ -23,7 +23,7 @@ namespace Kyoo.Abstractions.Models.Permissions
 		Overall,
 		Admin
 	}
-	
+
 	/// <summary>
 	/// Specify permissions needed for the API.
 	/// </summary>
@@ -63,7 +63,7 @@ namespace Kyoo.Abstractions.Models.Permissions
 			Kind = permission;
 			Group = group;
 		}
-		
+
 		/// <inheritdoc />
 		public IFilterMetadata CreateInstance(IServiceProvider serviceProvider)
 		{
@@ -97,7 +97,7 @@ namespace Kyoo.Abstractions.Models.Permissions
 		/// The needed permission kind.
 		/// </summary>
 		public Kind Kind { get; }
-		
+
 		/// <summary>
 		/// Ask a permission to run an action. 
 		/// </summary>
@@ -118,7 +118,7 @@ namespace Kyoo.Abstractions.Models.Permissions
 				type = type[..^3];
 			Type = type.ToLower();
 		}
-		
+
 		/// <summary>
 		/// Ask a permission to run an action. 
 		/// </summary>
@@ -134,7 +134,7 @@ namespace Kyoo.Abstractions.Models.Permissions
 		{
 			Kind = permission;
 		}
-		
+
 		/// <inheritdoc />
 		public IFilterMetadata CreateInstance(IServiceProvider serviceProvider)
 		{
@@ -158,7 +158,7 @@ namespace Kyoo.Abstractions.Models.Permissions
 		/// <param name="attribute">The permission attribute to validate</param>
 		/// <returns>An authorization filter used to validate the permission</returns>
 		IFilterMetadata Create(PermissionAttribute attribute);
-		
+
 		/// <summary>
 		/// Create an IAuthorizationFilter that will be used to validate permissions.
 		/// This can registered with any lifetime.

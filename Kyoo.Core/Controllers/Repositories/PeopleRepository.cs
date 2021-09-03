@@ -29,7 +29,7 @@ namespace Kyoo.Core.Controllers
 		/// A lazy loaded show repository to validate requests from shows.
 		/// </summary>
 		private readonly Lazy<IShowRepository> _shows;
-		
+
 		/// <inheritdoc />
 		protected override Expression<Func<People, object>> DefaultSort => x => x.Name;
 
@@ -41,14 +41,14 @@ namespace Kyoo.Core.Controllers
 		/// <param name="shows">A lazy loaded show repository</param>
 		public PeopleRepository(DatabaseContext database,
 			IProviderRepository providers,
-			Lazy<IShowRepository> shows) 
+			Lazy<IShowRepository> shows)
 			: base(database)
 		{
 			_database = database;
 			_providers = providers;
 			_shows = shows;
 		}
-		
+
 
 		/// <inheritdoc />
 		public override async Task<ICollection<People>> Search(string query)
@@ -89,7 +89,7 @@ namespace Kyoo.Core.Controllers
 			{
 				foreach (PeopleRole role in resource.Roles)
 				{
-					role.Show = _database.LocalEntity<Show>(role.Show.Slug) 
+					role.Show = _database.LocalEntity<Show>(role.Show.Slug)
 						?? await _shows.Value.CreateIfNotExists(role.Show);
 					role.ShowID = role.Show.ID;
 					_database.Entry(role).State = EntityState.Added;
@@ -101,7 +101,7 @@ namespace Kyoo.Core.Controllers
 		protected override async Task EditRelations(People resource, People changed, bool resetOld)
 		{
 			await Validate(changed);
-			
+
 			if (changed.Roles != null || resetOld)
 			{
 				await Database.Entry(resource).Collection(x => x.Roles).LoadAsync();
@@ -120,7 +120,7 @@ namespace Kyoo.Core.Controllers
 		{
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
-			
+
 			_database.Entry(obj).State = EntityState.Deleted;
 			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Deleted);
 			obj.Roles.ForEach(x => _database.Entry(x).State = EntityState.Deleted);
@@ -128,9 +128,9 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public async Task<ICollection<PeopleRole>> GetFromShow(int showID, 
-			Expression<Func<PeopleRole, bool>> where = null, 
-			Sort<PeopleRole> sort = default, 
+		public async Task<ICollection<PeopleRole>> GetFromShow(int showID,
+			Expression<Func<PeopleRole, bool>> where = null,
+			Sort<PeopleRole> sort = default,
 			Pagination limit = default)
 		{
 			ICollection<PeopleRole> people = await ApplyFilters(_database.PeopleRoles
@@ -151,7 +151,7 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public async Task<ICollection<PeopleRole>> GetFromShow(string showSlug,
 			Expression<Func<PeopleRole, bool>> where = null,
-			Sort<PeopleRole> sort = default, 
+			Sort<PeopleRole> sort = default,
 			Pagination limit = default)
 		{
 			ICollection<PeopleRole> people = await ApplyFilters(_database.PeopleRoles
@@ -169,11 +169,11 @@ namespace Kyoo.Core.Controllers
 				role.ForPeople = true;
 			return people;
 		}
-		
+
 		/// <inheritdoc />
 		public async Task<ICollection<PeopleRole>> GetFromPeople(int id,
 			Expression<Func<PeopleRole, bool>> where = null,
-			Sort<PeopleRole> sort = default, 
+			Sort<PeopleRole> sort = default,
 			Pagination limit = default)
 		{
 			ICollection<PeopleRole> roles = await ApplyFilters(_database.PeopleRoles
@@ -188,11 +188,11 @@ namespace Kyoo.Core.Controllers
 				throw new ItemNotFoundException();
 			return roles;
 		}
-		
+
 		/// <inheritdoc />
 		public async Task<ICollection<PeopleRole>> GetFromPeople(string slug,
 			Expression<Func<PeopleRole, bool>> where = null,
-			Sort<PeopleRole> sort = default, 
+			Sort<PeopleRole> sort = default,
 			Pagination limit = default)
 		{
 			ICollection<PeopleRole> roles = await ApplyFilters(_database.PeopleRoles

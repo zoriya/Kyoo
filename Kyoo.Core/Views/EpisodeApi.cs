@@ -25,7 +25,7 @@ namespace Kyoo.Core.Api
 		public EpisodeApi(ILibraryManager libraryManager,
 			IOptions<BasicOptions> options,
 			IFileSystem files,
-			IThumbnailsManager thumbnails) 
+			IThumbnailsManager thumbnails)
 			: base(libraryManager.EpisodeRepository, options.Value.PublicUrl)
 		{
 			_libraryManager = libraryManager;
@@ -37,12 +37,12 @@ namespace Kyoo.Core.Api
 		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Show>> GetShow(int episodeID)
 		{
-			Show ret =  await _libraryManager.GetOrDefault<Show>(x => x.Episodes.Any(y => y.ID  == episodeID));
+			Show ret = await _libraryManager.GetOrDefault<Show>(x => x.Episodes.Any(y => y.ID == episodeID));
 			if (ret == null)
 				return NotFound();
 			return ret;
 		}
-		
+
 		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}/show")]
 		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Show>> GetShow(string showSlug, int seasonNumber, int episodeNumber)
@@ -52,7 +52,7 @@ namespace Kyoo.Core.Api
 				return NotFound();
 			return ret;
 		}
-		
+
 		[HttpGet("{showID:int}-{seasonNumber:int}e{episodeNumber:int}/show")]
 		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Show>> GetShow(int showID, int seasonNumber, int episodeNumber)
@@ -62,7 +62,7 @@ namespace Kyoo.Core.Api
 				return NotFound();
 			return ret;
 		}
-		
+
 		[HttpGet("{episodeID:int}/season")]
 		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Season>> GetSeason(int episodeID)
@@ -72,7 +72,7 @@ namespace Kyoo.Core.Api
 				return NotFound();
 			return ret;
 		}
-		
+
 		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}/season")]
 		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Season>> GetSeason(string showSlug, int seasonNumber, int episodeNumber)
@@ -86,7 +86,7 @@ namespace Kyoo.Core.Api
 				return NotFound();
 			}
 		}
-		
+
 		[HttpGet("{showID:int}-{seasonNumber:int}e{episodeNumber:int}/season")]
 		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Season>> GetSeason(int showID, int seasonNumber, int episodeNumber)
@@ -100,7 +100,7 @@ namespace Kyoo.Core.Api
 				return NotFound();
 			}
 		}
-		
+
 		[HttpGet("{episodeID:int}/track")]
 		[HttpGet("{episodeID:int}/tracks")]
 		[PartialPermission(Kind.Read)]
@@ -123,10 +123,10 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
-		
+
 		[HttpGet("{showID:int}-s{seasonNumber:int}e{episodeNumber:int}/track")]
 		[HttpGet("{showID:int}-s{seasonNumber:int}e{episodeNumber:int}/tracks")]
 		[PartialPermission(Kind.Read)]
@@ -141,7 +141,7 @@ namespace Kyoo.Core.Api
 			try
 			{
 				ICollection<Track> resources = await _libraryManager.GetAll(
-					ApiHelper.ParseWhere<Track>(where, x => x.Episode.ShowID == showID 
+					ApiHelper.ParseWhere<Track>(where, x => x.Episode.ShowID == showID
 					                                        && x.Episode.SeasonNumber == seasonNumber
 					                                        && x.Episode.EpisodeNumber == episodeNumber),
 					new Sort<Track>(sortBy),
@@ -153,10 +153,10 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
-		
+
 		[HttpGet("{slug}-s{seasonNumber:int}e{episodeNumber:int}/track")]
 		[HttpGet("{slug}-s{seasonNumber:int}e{episodeNumber:int}/tracks")]
 		[PartialPermission(Kind.Read)]
@@ -171,7 +171,7 @@ namespace Kyoo.Core.Api
 			try
 			{
 				ICollection<Track> resources = await _libraryManager.GetAll(
-					ApiHelper.ParseWhere<Track>(where, x => x.Episode.Show.Slug == slug 
+					ApiHelper.ParseWhere<Track>(where, x => x.Episode.Show.Slug == slug
 						&& x.Episode.SeasonNumber == seasonNumber
 						&& x.Episode.EpisodeNumber == episodeNumber),
 					new Sort<Track>(sortBy),
@@ -183,10 +183,10 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new {Error = ex.Message});
+				return BadRequest(new { Error = ex.Message });
 			}
 		}
-		
+
 		[HttpGet("{id:int}/thumbnail")]
 		[HttpGet("{id:int}/backdrop")]
 		public async Task<IActionResult> GetThumb(int id)
@@ -201,7 +201,7 @@ namespace Kyoo.Core.Api
 				return NotFound();
 			}
 		}
-		
+
 		[HttpGet("{slug}/thumbnail")]
 		[HttpGet("{slug}/backdrop")]
 		public async Task<IActionResult> GetThumb(string slug)

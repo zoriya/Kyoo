@@ -57,10 +57,10 @@ namespace Kyoo.Core.Tasks
 			{
 				progress.Report(count / delCount * 100);
 				count++;
-				
+
 				if (await _fileSystem.Exists(show.Path))
 					continue;
-				_logger.LogWarning("Show {Name}'s folder has been deleted (was {Path}), removing it from kyoo", 
+				_logger.LogWarning("Show {Name}'s folder has been deleted (was {Path}), removing it from kyoo",
 					show.Title, show.Path);
 				await _libraryManager.Delete(show);
 			}
@@ -69,14 +69,14 @@ namespace Kyoo.Core.Tasks
 			{
 				progress.Report(count / delCount * 100);
 				count++;
-				
+
 				if (await _fileSystem.Exists(episode.Path))
 					continue;
-				_logger.LogWarning("Episode {Slug}'s file has been deleted (was {Path}), removing it from kyoo", 
+				_logger.LogWarning("Episode {Slug}'s file has been deleted (was {Path}), removing it from kyoo",
 					episode.Slug, episode.Path);
 				await _libraryManager.Delete(episode);
 			}
-			
+
 			progress.Report(100);
 		}
 	}
