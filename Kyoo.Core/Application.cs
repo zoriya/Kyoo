@@ -39,7 +39,7 @@ namespace Kyoo.Core
 		private CancellationTokenSource _tokenSource;
 
 		/// <summary>
-		/// The environment in witch Kyoo will run (ether "Production" or "Development"). 
+		/// The environment in witch Kyoo will run (ether "Production" or "Development").
 		/// </summary>
 		private readonly string _environment;
 
@@ -155,16 +155,19 @@ namespace Kyoo.Core
 				.AddCommandLine(args)
 				.Build();
 
-			string path = parsed.GetValue<string>("datadir")
-				?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Kyoo");
+			string path = parsed.GetValue<string>("datadir");
+			path ??= Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Kyoo");
+			path = Path.GetFullPath(path);
 
 			if (!Directory.Exists(path))
 				Directory.CreateDirectory(path);
 			Environment.CurrentDirectory = path;
 
 			if (!File.Exists(GetConfigFile()))
+			{
 				File.Copy(Path.Join(AppDomain.CurrentDomain.BaseDirectory, GetConfigFile()),
 					GetConfigFile());
+			}
 
 			return path;
 		}

@@ -13,10 +13,30 @@ namespace Kyoo.Abstractions.Models
 	/// </summary>
 	public enum StreamType
 	{
+		/// <summary>
+		/// The type of the stream is not known.
+		/// </summary>
 		Unknown = 0,
+
+		/// <summary>
+		/// The stream is a video.
+		/// </summary>
 		Video = 1,
+
+		/// <summary>
+		/// The stream is an audio.
+		/// </summary>
 		Audio = 2,
+
+		/// <summary>
+		/// The stream is a subtitle.
+		/// </summary>
 		Subtitle = 3,
+
+		/// <summary>
+		/// The stream is an attachement (a font, an image or something else).
+		/// Only fonts are handled by kyoo but they are not saved to the database.
+		/// </summary>
 		Attachment = 4
 	}
 
@@ -36,8 +56,9 @@ namespace Kyoo.Abstractions.Models
 				string type = Type.ToString().ToLower();
 				string index = TrackIndex != 0 ? $"-{TrackIndex}" : string.Empty;
 				string episode = EpisodeSlug ?? Episode?.Slug ?? EpisodeID.ToString();
-				return $"{episode}.{Language ?? "und"}{index}{(IsForced ? ".forced" : "")}.{type}";
+				return $"{episode}.{Language ?? "und"}{index}{(IsForced ? ".forced" : string.Empty)}.{type}";
 			}
+
 			[UsedImplicitly] private set
 			{
 				if (value == null)
@@ -81,14 +102,13 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		public string Codec { get; set; }
 
-
 		/// <summary>
 		/// Is this stream the default one of it's type?
 		/// </summary>
 		public bool IsDefault { get; set; }
 
 		/// <summary>
-		/// Is this stream tagged as forced? 
+		/// Is this stream tagged as forced?
 		/// </summary>
 		public bool IsForced { get; set; }
 
@@ -111,6 +131,7 @@ namespace Kyoo.Abstractions.Models
 		/// The ID of the episode that uses this track.
 		/// </summary>
 		[SerializeIgnore] public int EpisodeID { get; set; }
+
 		/// <summary>
 		/// The episode that uses this track.
 		/// </summary>
@@ -145,7 +166,7 @@ namespace Kyoo.Abstractions.Models
 			}
 		}
 
-		//Converting mkv track language to c# system language tag.
+		// Converting mkv track language to c# system language tag.
 		private static string GetLanguage(string mkvLanguage)
 		{
 			// TODO delete this and have a real way to get the language string from the ISO-639-2.
@@ -162,9 +183,8 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		/// <param name="baseSlug">The slug to edit</param>
 		/// <param name="type">The new type of this </param>
-		/// <returns></returns>
-		public static string BuildSlug(string baseSlug,
-			StreamType type)
+		/// <returns>The completed slug.</returns>
+		public static string BuildSlug(string baseSlug, StreamType type)
 		{
 			return baseSlug.EndsWith($".{type}", StringComparison.InvariantCultureIgnoreCase)
 				? baseSlug
