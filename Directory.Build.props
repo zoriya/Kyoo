@@ -1,4 +1,4 @@
-﻿<Project>
+<Project>
 	<PropertyGroup>
 		<IsWindows Condition="$([MSBuild]::IsOSPlatform('Windows'))">true</IsWindows>
 		<IsOSX Condition="$([MSBuild]::IsOSPlatform('OSX'))">true</IsOSX>

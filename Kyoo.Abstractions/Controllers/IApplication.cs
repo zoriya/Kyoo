@@ -1,4 +1,4 @@
-﻿namespace Kyoo.Abstractions.Controllers
+namespace Kyoo.Abstractions.Controllers
 {
 	/// <summary>
 	/// An interface that allow one to interact with the host and shutdown or restart the app.

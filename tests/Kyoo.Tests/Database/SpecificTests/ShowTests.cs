@@ -341,7 +341,7 @@ namespace Kyoo.Tests.Database
 			Show value = new()
 			{
 				Slug = "super-test",
-				Title = "This is a test title²"
+				Title = "This is a test title?"
 			};
 			await _repository.Create(value);
 			ICollection<Show> ret = await _repository.Search(query);

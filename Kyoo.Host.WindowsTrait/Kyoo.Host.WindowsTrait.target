@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 	<!-- Project file used instead of the default csproj when the host system is windows. 
 	     This is the real csproj used to compile the project.
 	 -->

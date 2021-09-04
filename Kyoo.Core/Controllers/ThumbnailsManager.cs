@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,6 +18,7 @@ namespace Kyoo.Core.Controllers
 		/// The file manager used to download the image if the file is distant
 		/// </summary>
 		private readonly IFileSystem _files;
+
 		/// <summary>
 		/// A logger to report errors.
 		/// </summary>
@@ -82,7 +83,7 @@ namespace Kyoo.Core.Controllers
 			{
 				string localPath = await _GetPrivateImagePath(item, id);
 				if (alwaysDownload || !await _files.Exists(localPath))
-					ret |= await _DownloadImage(image, localPath, $"The image n°{id} of {name}");
+					ret |= await _DownloadImage(image, localPath, $"The image n {id} of {name}");
 			}
 
 			return ret;

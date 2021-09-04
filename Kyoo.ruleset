@@ -1,4 +1,4 @@
-﻿<RuleSet Name="Kyoo" ToolsVersion="10.0">
+<RuleSet Name="Kyoo" ToolsVersion="10.0">
 	<Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.CSharp.MaintainabilityRules">
 		<Rule Id="SA1413" Action="None" />        <!-- UseTrailingCommasInMultiLineInitializers -->
 		<Rule Id="SA1414" Action="None" />        <!-- UseTrailingCommasInMultiLineInitializers -->

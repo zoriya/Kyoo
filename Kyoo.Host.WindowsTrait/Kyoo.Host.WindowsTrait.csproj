@@ -1,4 +1,4 @@
-﻿<Project>
+<Project>
 	<Import Project="Kyoo.Host.WindowsTrait.target" Condition="$(IsWindows) == true" />
 	<Import Project="Kyoo.Host.WindowsTrait.linux.target" Condition="$(IsWindows) != true" />
 

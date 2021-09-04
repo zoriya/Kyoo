@@ -68,7 +68,7 @@ namespace Kyoo.Utils
 		}
 
 		/// <summary>
-		/// Slugify a string (Replace spaces by -, Uniformize accents é -> e)
+		/// Slugify a string (Replace spaces by -, Uniformize accents)
 		/// </summary>
 		/// <param name="str">The string to slugify</param>
 		/// <returns>The slug version of the given string</returns>

@@ -88,7 +88,7 @@ namespace Kyoo.Tests.Identifier.Tvdb
 				Genre = new[]
 				{
 					"Action",
-					"Test With Spéàacial characters"
+					"Test With Sp??acial characters"
 				}
 			};
 			Provider provider = TestSample.Get<Provider>();
@@ -110,7 +110,7 @@ namespace Kyoo.Tests.Identifier.Tvdb
 			Assert.Equal(2, show.Genres.Count);
 			Assert.Equal("action", show.Genres.ToArray()[0].Slug);
 			Assert.Equal("Action", show.Genres.ToArray()[0].Name);
-			Assert.Equal("Test With Spéàacial characters", show.Genres.ToArray()[1].Name);
+			Assert.Equal("Test With Sp??acial characters", show.Genres.ToArray()[1].Name);
 			Assert.Equal("test-with-speaacial-characters", show.Genres.ToArray()[1].Slug);
 		}
 
