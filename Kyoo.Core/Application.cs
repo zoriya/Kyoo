@@ -21,8 +21,18 @@ using ILogger = Serilog.ILogger;
 
 namespace Kyoo.Core
 {
+	/// <summary>
+	/// The main implementation of <see cref="IApplication"/>.
+	/// Hosts of kyoo (main functions) generally only create a new <see cref="Application"/>
+	/// and return <see cref="Start(string[])"/>.
+	/// </summary>
 	public class Application : IApplication
 	{
+		/// <summary>
+		/// The environment in witch Kyoo will run (ether "Production" or "Development").
+		/// </summary>
+		private readonly string _environment;
+
 		/// <summary>
 		/// The path to the data directory.
 		/// </summary>
@@ -39,15 +49,9 @@ namespace Kyoo.Core
 		private CancellationTokenSource _tokenSource;
 
 		/// <summary>
-		/// The environment in witch Kyoo will run (ether "Production" or "Development").
-		/// </summary>
-		private readonly string _environment;
-
-		/// <summary>
 		/// The logger used for startup and error messages.
 		/// </summary>
 		private ILogger _logger;
-
 
 		/// <summary>
 		/// Create a new <see cref="Application"/> that will use the specified environment.
@@ -57,7 +61,6 @@ namespace Kyoo.Core
 		{
 			_environment = environment;
 		}
-
 
 		/// <summary>
 		/// Start the application with the given console args.
@@ -122,7 +125,6 @@ namespace Kyoo.Core
 			return _dataDir;
 		}
 
-
 		/// <inheritdoc />
 		public string GetConfigFile()
 		{
@@ -132,7 +134,7 @@ namespace Kyoo.Core
 		/// <summary>
 		/// Parse the data directory from environment variables and command line arguments, create it if necessary.
 		/// Set the current directory to said data folder and place a default configuration file if it does not already
-		/// exists. 
+		/// exists.
 		/// </summary>
 		/// <param name="args">The command line arguments</param>
 		/// <returns>The current data directory.</returns>

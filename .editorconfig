@@ -1,7 +1,7 @@
 root = true
 
 [*]
-charset = utf-8-bom
+charset = us-ascii
 end_of_line = lf
 trim_trailing_whitespace = true
 insert_final_newline = true
@@ -66,6 +66,15 @@ csharp_indent_switch_labels = true
 dotnet_style_readonly_field = true:suggestion
 csharp_preferred_modifier_order = public, private, protected, internal, new, abstract, virtual, sealed, override, static, readonly, extern, unsafe, volatile, async:suggestion
 dotnet_style_require_accessibility_modifiers = for_non_interface_members:suggestion
+# Naming style
+dotnet_naming_symbols.privates.applicable_kinds = property,method,event,delegate
+dotnet_naming_symbols.privates.applicable_accessibilities = private
+dotnet_naming_style.underscore_pascal.capitalization = pascal_case
+dotnet_naming_style.underscore_pascal.required_prefix = _
+dotnet_naming_rule.privates_with_underscore.symbols = privates
+dotnet_naming_rule.privates_with_underscore.style = underscore_pascal
+dotnet_naming_rule.privates_with_underscore.severity = warning
+dotnet_diagnostic.IDE1006.severity = warning
 # ReSharper properties
 resharper_align_multiline_binary_expressions_chain = false
 resharper_csharp_empty_block_style = together_same_line

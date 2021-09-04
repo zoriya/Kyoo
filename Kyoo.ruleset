@@ -1,4 +1,4 @@
-<RuleSet Name="Kyoo" ToolsVersion="10.0">
+﻿<RuleSet Name="Kyoo" ToolsVersion="10.0">
 	<Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.CSharp.MaintainabilityRules">
 		<Rule Id="SA1413" Action="None" />        <!-- UseTrailingCommasInMultiLineInitializers -->
 		<Rule Id="SA1414" Action="None" />        <!-- UseTrailingCommasInMultiLineInitializers -->
@@ -10,6 +10,7 @@
 	<Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.CSharp.NamingRules">
 		<Rule Id="SA1309" Action="None" />        <!-- FieldNamesMustNotBeginWithUnderscore -->
 		<Rule Id="SX1309" Action="Warning" />     <!-- FieldNamesMustBeginWithUnderscore -->
+		<Rule Id="SA1300" Action="None" />        <!-- ElementMustBeginWithUpperCaseLetter (this conflict with the _ prefix for privates, enforced by an IDE rule) -->
 	</Rules>
 	<Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.CSharp.ReadabilityRules">
 		<Rule Id="SA1101" Action="None" />        <!-- PrefixLocalCallsWithThis -->

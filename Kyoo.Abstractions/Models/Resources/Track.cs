@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -149,7 +149,7 @@ namespace Kyoo.Abstractions.Models
 		{
 			get
 			{
-				string language = GetLanguage(Language);
+				string language = _GetLanguage(Language);
 
 				if (language == null)
 					return $"Unknown (index: {TrackIndex})";
@@ -167,7 +167,7 @@ namespace Kyoo.Abstractions.Models
 		}
 
 		// Converting mkv track language to c# system language tag.
-		private static string GetLanguage(string mkvLanguage)
+		private static string _GetLanguage(string mkvLanguage)
 		{
 			// TODO delete this and have a real way to get the language string from the ISO-639-2.
 			return mkvLanguage switch

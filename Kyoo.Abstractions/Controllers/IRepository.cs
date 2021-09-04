@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Runtime.InteropServices;
@@ -134,6 +134,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <returns>The resource found</returns>
 		[ItemNotNull]
 		Task<T> Get(int id);
+
 		/// <summary>
 		/// Get a resource from it's slug.
 		/// </summary>

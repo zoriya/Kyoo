@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -229,10 +229,7 @@ namespace Kyoo.Tests.Utility
 		public void MergeListTest()
 		{
 			int[] first = { 1 };
-			int[] second = {
-				3,
-				3
-			};
+			int[] second = { 3, 3 };
 			int[] ret = Merger.MergeLists(first, second);
 
 			Assert.Equal(3, ret.Length);
@@ -263,10 +260,7 @@ namespace Kyoo.Tests.Utility
 		public void MergeListDuplicateCustomEqualityTest()
 		{
 			int[] first = { 1 };
-			int[] second = {
-				3,
-				2
-			};
+			int[] second = { 3, 2 };
 			int[] ret = Merger.MergeLists(first, second, (x, y) => x % 2 == y % 2);
 
 			Assert.Equal(2, ret.Length);

@@ -1,4 +1,4 @@
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Kyoo.Abstractions.Models;
 
@@ -23,7 +23,6 @@ namespace Kyoo.Abstractions.Controllers
 		/// <returns><c>true</c> if an image has been downloaded, <c>false</c> otherwise.</returns>
 		Task<bool> DownloadImages<T>([NotNull] T item, bool alwaysDownload = false)
 			where T : IThumbnails;
-
 
 		/// <summary>
 		/// Retrieve the local path of an image of the given item.

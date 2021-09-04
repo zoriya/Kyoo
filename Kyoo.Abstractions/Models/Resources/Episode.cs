@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
@@ -26,6 +26,7 @@ namespace Kyoo.Abstractions.Models
 					? GetSlug(ShowID.ToString(), SeasonNumber, EpisodeNumber, AbsoluteNumber)
 					: null;
 			}
+
 			[UsedImplicitly] [NotNull] private set
 			{
 				if (value == null)
@@ -64,6 +65,7 @@ namespace Kyoo.Abstractions.Models
 		/// The ID of the Show containing this episode.
 		/// </summary>
 		[SerializeIgnore] public int ShowID { get; set; }
+
 		/// <summary>
 		/// The show that contains this episode. This must be explicitly loaded via a call to <see cref="ILibraryManager.Load"/>.
 		/// </summary>
@@ -73,6 +75,7 @@ namespace Kyoo.Abstractions.Models
 		/// The ID of the Season containing this episode.
 		/// </summary>
 		[SerializeIgnore] public int? SeasonID { get; set; }
+
 		/// <summary>
 		/// The season that contains this episode.
 		/// This must be explicitly loaded via a call to <see cref="ILibraryManager.Load"/>.
@@ -137,7 +140,6 @@ namespace Kyoo.Abstractions.Models
 		/// The list of tracks this episode has. This lists video, audio and subtitles available.
 		/// </summary>
 		[EditableRelation] [LoadableRelation] public ICollection<Track> Tracks { get; set; }
-
 
 		/// <summary>
 		/// Get the slug of an episode.

@@ -1,4 +1,4 @@
-<Project>
+﻿<Project>
 	<PropertyGroup>
 		<IsWindows Condition="$([MSBuild]::IsOSPlatform('Windows'))">true</IsWindows>
 		<IsOSX Condition="$([MSBuild]::IsOSPlatform('OSX'))">true</IsOSX>
@@ -14,6 +14,7 @@
 	</ItemGroup>
 
 	<PropertyGroup>
+		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)Kyoo.ruleset</CodeAnalysisRuleSet>
 <!--		<AnalysisMode>AllEnabledByDefault</AnalysisMode>-->
 	</PropertyGroup>
