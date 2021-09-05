@@ -44,6 +44,7 @@ namespace Kyoo.Abstractions.Models
 		/// The ID of the Show containing this season.
 		/// </summary>
 		[SerializeIgnore] public int ShowID { get; set; }
+
 		/// <summary>
 		/// The show that contains this season.
 		/// This must be explicitly loaded via a call to <see cref="ILibraryManager.Load"/>.

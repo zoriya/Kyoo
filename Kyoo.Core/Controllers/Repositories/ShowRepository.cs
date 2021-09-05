@@ -20,18 +20,22 @@ namespace Kyoo.Core.Controllers
 		/// The database handle
 		/// </summary>
 		private readonly DatabaseContext _database;
+
 		/// <summary>
 		/// A studio repository to handle creation/validation of related studios.
 		/// </summary>
 		private readonly IStudioRepository _studios;
+
 		/// <summary>
 		/// A people repository to handle creation/validation of related people.
 		/// </summary>
 		private readonly IPeopleRepository _people;
+
 		/// <summary>
 		/// A genres repository to handle creation/validation of related genres.
 		/// </summary>
 		private readonly IGenreRepository _genres;
+
 		/// <summary>
 		/// A provider repository to handle externalID creation and deletion
 		/// </summary>

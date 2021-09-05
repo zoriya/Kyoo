@@ -18,6 +18,7 @@ namespace Kyoo.Core.Tasks
 		/// The plugin manager used to retrieve plugins to initialize them.
 		/// </summary>
 		private readonly IPluginManager _pluginManager;
+
 		/// <summary>
 		/// The service provider given to each <see cref="IPlugin.Initialize"/> method.
 		/// </summary>

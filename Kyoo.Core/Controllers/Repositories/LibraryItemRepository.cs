@@ -20,6 +20,7 @@ namespace Kyoo.Core.Controllers
 		/// The database handle
 		/// </summary>
 		private readonly DatabaseContext _database;
+
 		/// <summary>
 		/// A lazy loaded library repository to validate queries (check if a library does exist)
 		/// </summary>

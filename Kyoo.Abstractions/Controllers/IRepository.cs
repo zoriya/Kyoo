@@ -143,6 +143,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <returns>The resource found</returns>
 		[ItemNotNull]
 		Task<T> Get(string slug);
+
 		/// <summary>
 		/// Get the first resource that match the predicate.
 		/// </summary>
@@ -159,6 +160,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <returns>The resource found</returns>
 		[ItemCanBeNull]
 		Task<T> GetOrDefault(int id);
+
 		/// <summary>
 		/// Get a resource from it's slug or null if it is not found.
 		/// </summary>
@@ -166,6 +168,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <returns>The resource found</returns>
 		[ItemCanBeNull]
 		Task<T> GetOrDefault(string slug);
+
 		/// <summary>
 		/// Get the first resource that match the predicate or null if it is not found.
 		/// </summary>
@@ -193,6 +196,7 @@ namespace Kyoo.Abstractions.Controllers
 		Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null,
 			Sort<T> sort = default,
 			Pagination limit = default);
+
 		/// <summary>
 		/// Get every resources that match all filters
 		/// </summary>
@@ -246,12 +250,14 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="id">The ID of the resource</param>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task Delete(int id);
+
 		/// <summary>
 		/// Delete a resource by it's slug
 		/// </summary>
 		/// <param name="slug">The slug of the resource</param>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		Task Delete(string slug);
+
 		/// <summary>
 		/// Delete a resource
 		/// </summary>
@@ -344,6 +350,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The episode found</returns>
 		Task<Episode> Get(int showID, int seasonNumber, int episodeNumber);
+
 		/// <summary>
 		/// Get a episode from it's show slug, it's seasonNumber and it's episode number.
 		/// </summary>
@@ -362,6 +369,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="episodeNumber">The episode's number</param>
 		/// <returns>The episode found</returns>
 		Task<Episode> GetOrDefault(int showID, int seasonNumber, int episodeNumber);
+
 		/// <summary>
 		/// Get a episode from it's show slug, it's seasonNumber and it's episode number or null if it is not found.
 		/// </summary>
@@ -379,6 +387,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The episode found</returns>
 		Task<Episode> GetAbsolute(int showID, int absoluteNumber);
+
 		/// <summary>
 		/// Get a episode from it's showID and it's absolute number.
 		/// </summary>
@@ -416,6 +425,7 @@ namespace Kyoo.Abstractions.Controllers
 			Expression<Func<LibraryItem, bool>> where = null,
 			Sort<LibraryItem> sort = default,
 			Pagination limit = default);
+
 		/// <summary>
 		/// Get items (A wrapper around shows or collections) from a library.
 		/// </summary>
@@ -442,6 +452,7 @@ namespace Kyoo.Abstractions.Controllers
 			Expression<Func<LibraryItem, bool>> where = null,
 			Sort<LibraryItem> sort = default,
 			Pagination limit = default);
+
 		/// <summary>
 		/// Get items (A wrapper around shows or collections) from a library.
 		/// </summary>
@@ -489,6 +500,7 @@ namespace Kyoo.Abstractions.Controllers
 			Expression<Func<PeopleRole, bool>> where = null,
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default);
+
 		/// <summary>
 		/// Get people's roles from a show.
 		/// </summary>
@@ -515,6 +527,7 @@ namespace Kyoo.Abstractions.Controllers
 			Expression<Func<PeopleRole, bool>> where = null,
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default);
+
 		/// <summary>
 		/// Get people's roles from a show.
 		/// </summary>
@@ -541,6 +554,7 @@ namespace Kyoo.Abstractions.Controllers
 			Expression<Func<PeopleRole, bool>> where = null,
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default);
+
 		/// <summary>
 		/// Get people's roles from a person.
 		/// </summary>
@@ -567,6 +581,7 @@ namespace Kyoo.Abstractions.Controllers
 			Expression<Func<PeopleRole, bool>> where = null,
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default);
+
 		/// <summary>
 		/// Get people's roles from a person.
 		/// </summary>

@@ -21,10 +21,12 @@ namespace Kyoo.Core.Controllers
 		/// The database handle
 		/// </summary>
 		private readonly DatabaseContext _database;
+
 		/// <summary>
 		/// A provider repository to handle externalID creation and deletion
 		/// </summary>
 		private readonly IProviderRepository _providers;
+
 		/// <summary>
 		/// A lazy loaded show repository to validate requests from shows.
 		/// </summary>

@@ -18,6 +18,7 @@ namespace Kyoo.Core.Tasks
 		/// An identifier to extract metadata from paths.
 		/// </summary>
 		private readonly IIdentifier _identifier;
+
 		/// <summary>
 		/// The library manager used to register the episode.
 		/// </summary>

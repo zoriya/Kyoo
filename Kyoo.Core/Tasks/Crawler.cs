@@ -22,14 +22,17 @@ namespace Kyoo.Core.Tasks
 		/// The library manager used to get libraries and providers to use.
 		/// </summary>
 		private readonly ILibraryManager _libraryManager;
+
 		/// <summary>
 		/// The file manager used walk inside directories and check they existences. 
 		/// </summary>
 		private readonly IFileSystem _fileSystem;
+
 		/// <summary>
 		/// A task manager used to create sub tasks for each episode to add to the database. 
 		/// </summary>
 		private readonly ITaskManager _taskManager;
+
 		/// <summary>
 		/// The logger used to inform the current status to the console.
 		/// </summary>

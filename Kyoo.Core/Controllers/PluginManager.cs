@@ -22,10 +22,12 @@ namespace Kyoo.Core.Controllers
 		/// The service provider. It allow plugin's activation.
 		/// </summary>
 		private readonly IServiceProvider _provider;
+
 		/// <summary>
 		/// The configuration to get the plugin's directory.
 		/// </summary>
 		private readonly IOptions<BasicOptions> _options;
+
 		/// <summary>
 		/// The logger used by this class. 
 		/// </summary>

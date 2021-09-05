@@ -23,6 +23,7 @@ namespace Kyoo.Core.Controllers
 		/// The configuration of kyoo to retrieve the identifier regex.
 		/// </summary>
 		private readonly IOptionsMonitor<MediaOptions> _configuration;
+
 		/// <summary>
 		/// The library manager used to retrieve libraries paths.
 		/// </summary>

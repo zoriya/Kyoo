@@ -33,10 +33,12 @@ namespace Kyoo.Authentication.Views
 		/// The repository to handle users.
 		/// </summary>
 		private readonly IUserRepository _users;
+
 		/// <summary>
 		/// A file manager to send profile pictures
 		/// </summary>
 		private readonly IFileSystem _files;
+
 		/// <summary>
 		/// Options about authentication. Those options are monitored and reloads are supported.
 		/// </summary>

@@ -19,10 +19,12 @@ namespace Kyoo.Core.Tasks
 		/// The provider repository used to create in-db providers from metadata providers. 
 		/// </summary>
 		private readonly IProviderRepository _providers;
+
 		/// <summary>
 		/// The thumbnail manager used to download providers logo.
 		/// </summary>
 		private readonly IThumbnailsManager _thumbnails;
+
 		/// <summary>
 		/// The list of metadata providers to register.
 		/// </summary>

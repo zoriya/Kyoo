@@ -18,10 +18,12 @@ namespace Kyoo.Core.Tasks
 		/// The library manager used to get libraries or remove deleted episodes.
 		/// </summary>
 		private readonly ILibraryManager _libraryManager;
+
 		/// <summary>
 		/// The file manager used walk inside directories and check they existences. 
 		/// </summary>
 		private readonly IFileSystem _fileSystem;
+
 		/// <summary>
 		/// The logger used to inform the user that episodes has been removed. 
 		/// </summary>

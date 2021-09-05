@@ -74,6 +74,7 @@ namespace Kyoo.Core.Controllers
 		/// The configuration instance used to get schedule information
 		/// </summary>
 		private readonly IOptionsMonitor<TaskOptions> _options;
+
 		/// <summary>
 		/// The logger instance.
 		/// </summary>
@@ -83,14 +84,17 @@ namespace Kyoo.Core.Controllers
 		/// The list of tasks and their next scheduled run.
 		/// </summary>
 		private readonly List<ManagedTask> _tasks;
+
 		/// <summary>
 		/// The queue of tasks that should be run as soon as possible.
 		/// </summary>
 		private readonly Queue<QueuedTask> _queuedTasks = new();
+
 		/// <summary>
 		/// The currently running task.
 		/// </summary>
 		private (TaskMetadataAttribute, ITask)? _runningTask;
+
 		/// <summary>
 		/// The cancellation token used to cancel the running task when the runner should shutdown.
 		/// </summary>

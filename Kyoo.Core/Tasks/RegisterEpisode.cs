@@ -19,18 +19,22 @@ namespace Kyoo.Core.Tasks
 		/// An identifier to extract metadata from paths.
 		/// </summary>
 		private readonly IIdentifier _identifier;
+
 		/// <summary>
 		/// The library manager used to register the episode.
 		/// </summary>
 		private readonly ILibraryManager _libraryManager;
+
 		/// <summary>
 		/// A metadata provider to retrieve the metadata of the new episode (and related items if they do not exist).
 		/// </summary>
 		private readonly AProviderComposite _metadataProvider;
+
 		/// <summary>
 		/// The thumbnail manager used to download images.
 		/// </summary>
 		private readonly IThumbnailsManager _thumbnailsManager;
+
 		/// <summary>
 		/// The transcoder used to extract subtitles and metadata.
 		/// </summary>

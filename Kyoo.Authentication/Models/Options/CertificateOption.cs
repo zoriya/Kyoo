@@ -14,10 +14,12 @@ namespace Kyoo.Authentication.Models
 		/// The path of the certificate file.
 		/// </summary>
 		public string File { get; set; }
+
 		/// <summary>
 		/// The path of the old certificate file.
 		/// </summary>
 		public string OldFile { get; set; }
+
 		/// <summary>
 		/// The password of the certificates.
 		/// </summary>

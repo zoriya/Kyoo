@@ -26,6 +26,7 @@ namespace Kyoo.Abstractions.Models
 		/// The ID of the People playing the role.
 		/// </summary>
 		public int PeopleID { get; set; }
+
 		/// <summary>
 		/// The people that played this role.
 		/// </summary>
@@ -35,6 +36,7 @@ namespace Kyoo.Abstractions.Models
 		/// The ID of the Show where the People playing in.
 		/// </summary>
 		public int ShowID { get; set; }
+
 		/// <summary>
 		/// The show where the People played in.
 		/// </summary>

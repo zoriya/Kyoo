@@ -19,26 +19,37 @@ namespace Kyoo.Core.Controllers
 
 		/// <inheritdoc />
 		public ILibraryRepository LibraryRepository { get; }
+
 		/// <inheritdoc />
 		public ILibraryItemRepository LibraryItemRepository { get; }
+
 		/// <inheritdoc />
 		public ICollectionRepository CollectionRepository { get; }
+
 		/// <inheritdoc />
 		public IShowRepository ShowRepository { get; }
+
 		/// <inheritdoc />
 		public ISeasonRepository SeasonRepository { get; }
+
 		/// <inheritdoc />
 		public IEpisodeRepository EpisodeRepository { get; }
+
 		/// <inheritdoc />
 		public ITrackRepository TrackRepository { get; }
+
 		/// <inheritdoc />
 		public IPeopleRepository PeopleRepository { get; }
+
 		/// <inheritdoc />
 		public IStudioRepository StudioRepository { get; }
+
 		/// <inheritdoc />
 		public IGenreRepository GenreRepository { get; }
+
 		/// <inheritdoc />
 		public IProviderRepository ProviderRepository { get; }
+
 		/// <inheritdoc />
 		public IUserRepository UserRepository { get; }
 

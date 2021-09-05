@@ -105,10 +105,12 @@ namespace Kyoo.Core.Controllers
 		/// The path of the request to forward.
 		/// </summary>
 		private readonly Uri _path;
+
 		/// <summary>
 		/// Should the proxied result support ranges requests?
 		/// </summary>
 		private readonly bool _rangeSupport;
+
 		/// <summary>
 		/// If not null, override the content type of the resulting request.
 		/// </summary>
