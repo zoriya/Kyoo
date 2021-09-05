@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 using Autofac.Features.Metadata;
 using JetBrains.Annotations;
 using Kyoo.Abstractions.Controllers;
-using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Core.Models.Options;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -75,7 +75,7 @@ namespace Kyoo.Core.Controllers
 			{
 				usablePath = path;
 				Meta<Func<IFileSystem>, FileSystemMetadataAttribute> defaultFs = _fileSystems
-					.SingleOrDefault(x => x.Metadata.Scheme.Contains(""));
+					.SingleOrDefault(x => x.Metadata.Scheme.Contains(string.Empty));
 				if (defaultFs == null)
 					throw new ArgumentException($"No file system registered for the default scheme.");
 				return defaultFs.Value.Invoke();

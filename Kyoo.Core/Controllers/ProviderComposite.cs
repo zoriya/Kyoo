@@ -20,14 +20,14 @@ namespace Kyoo.Core.Controllers
 		private readonly ICollection<IMetadataProvider> _providers;
 
 		/// <summary>
-		/// The list of selected providers. If no provider has been selected, this is null.
-		/// </summary>
-		private ICollection<Provider> _selectedProviders;
-
-		/// <summary>
 		/// The logger used to print errors.
 		/// </summary>
 		private readonly ILogger<ProviderComposite> _logger;
+
+		/// <summary>
+		/// The list of selected providers. If no provider has been selected, this is null.
+		/// </summary>
+		private ICollection<Provider> _selectedProviders;
 
 		/// <summary>
 		/// Create a new <see cref="ProviderComposite"/> with a list of available providers.

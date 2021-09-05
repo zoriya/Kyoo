@@ -14,6 +14,7 @@
 	</ItemGroup>
 
 	<PropertyGroup>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)Kyoo.ruleset</CodeAnalysisRuleSet>
 <!--		<AnalysisMode>AllEnabledByDefault</AnalysisMode>-->

@@ -24,7 +24,7 @@ namespace Kyoo.Authentication
 		}
 
 		/// <summary>
-		/// The list of officially supported clients.
+		/// Get the list of officially supported clients.
 		/// </summary>
 		/// <remarks>
 		/// You can add custom clients in the settings.json file.
@@ -48,7 +48,7 @@ namespace Kyoo.Authentication
 					RequireConsent = false,
 
 					AllowedScopes = { "openid", "profile", "kyoo.read", "kyoo.write", "kyoo.play", "kyoo.admin" },
-					RedirectUris =  { "/", "/silent.html" },
+					RedirectUris = { "/", "/silent.html" },
 					PostLogoutRedirectUris = { "/logout" }
 				}
 			};

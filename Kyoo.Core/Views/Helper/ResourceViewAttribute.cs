@@ -77,11 +77,11 @@ namespace Kyoo.Core.Api
 		public override async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
 		{
 			if (context.Result is ObjectResult result)
-				await LoadResultRelations(context, result);
+				await _LoadResultRelations(context, result);
 			await base.OnResultExecutionAsync(context, next);
 		}
 
-		private static async Task LoadResultRelations(ActionContext context, ObjectResult result)
+		private static async Task _LoadResultRelations(ActionContext context, ObjectResult result)
 		{
 			if (result.DeclaredType == null)
 				return;

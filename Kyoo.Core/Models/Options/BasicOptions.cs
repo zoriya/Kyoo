@@ -1,5 +1,5 @@
-using Kyoo.Abstractions.Models;
 using System;
+using Kyoo.Abstractions.Models;
 
 namespace Kyoo.Core.Models.Options
 {

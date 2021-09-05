@@ -46,8 +46,10 @@ namespace Kyoo.Core.Controllers
 			{
 				resource.EpisodeID = resource.Episode?.ID ?? 0;
 				if (resource.EpisodeID <= 0)
+				{
 					throw new ArgumentException("Can't store a track not related to any episode " +
 						$"(episodeID: {resource.EpisodeID}).");
+				}
 			}
 		}
 

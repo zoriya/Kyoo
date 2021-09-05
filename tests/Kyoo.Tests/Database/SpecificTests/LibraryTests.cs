@@ -53,7 +53,7 @@ namespace Kyoo.Tests.Database
 		public async Task CreateWithEmptySlugTest()
 		{
 			Library library = TestSample.GetNew<Library>();
-			library.Slug = "";
+			library.Slug = string.Empty;
 			await Assert.ThrowsAsync<ArgumentException>(() => _repository.Create(library));
 		}
 

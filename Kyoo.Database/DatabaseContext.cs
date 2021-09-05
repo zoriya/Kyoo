@@ -114,6 +114,7 @@ namespace Kyoo.Database
 		/// <param name="second">The ID of the second resource.</param>
 		/// <typeparam name="T1">The first resource type of the relation. It is the owner of the second</typeparam>
 		/// <typeparam name="T2">The second resource type of the relation. It is the contained resource.</typeparam>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		public async Task AddLinks<T1, T2>(int first, int second)
 			where T1 : class, IResource
 			where T2 : class, IResource
@@ -433,7 +434,7 @@ namespace Kyoo.Database
 		/// <exception cref="DuplicatedItemException">A duplicated item has been found.</exception>
 		/// <returns>The number of state entries written to the database.</returns>
 		public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess,
-			CancellationToken cancellationToken = new())
+			CancellationToken cancellationToken = default)
 		{
 			try
 			{
@@ -454,7 +455,7 @@ namespace Kyoo.Database
 		/// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete</param>
 		/// <exception cref="DuplicatedItemException">A duplicated item has been found.</exception>
 		/// <returns>The number of state entries written to the database.</returns>
-		public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = new())
+		public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
 		{
 			try
 			{
@@ -538,7 +539,7 @@ namespace Kyoo.Database
 		/// <summary>
 		/// Delete every changes that are on this context.
 		/// </summary>
-		private void DiscardChanges()
+		public void DiscardChanges()
 		{
 			foreach (EntityEntry entry in ChangeTracker.Entries().Where(x => x.State != EntityState.Detached))
 			{

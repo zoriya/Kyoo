@@ -26,7 +26,7 @@ namespace Kyoo.Utils
 			if (ex == null)
 				return false;
 			return ex.Body is MemberExpression ||
-			       ex.Body.NodeType == ExpressionType.Convert && ((UnaryExpression)ex.Body).Operand is MemberExpression;
+			       (ex.Body.NodeType == ExpressionType.Convert && ((UnaryExpression)ex.Body).Operand is MemberExpression);
 		}
 
 		/// <summary>
@@ -51,7 +51,7 @@ namespace Kyoo.Utils
 		/// <param name="member">The member value</param>
 		/// <param name="obj">The owner of this member</param>
 		/// <returns>The value boxed as an object</returns>
-		/// <exception cref="ArgumentNullException">if <see cref="member"/> or <see cref="obj"/> is null.</exception>
+		/// <exception cref="ArgumentNullException">if <paramref name="member"/> or <paramref name="obj"/> is null.</exception>
 		/// <exception cref="ArgumentException">The member is not a field or a property.</exception>
 		public static object GetValue([NotNull] this MemberInfo member, [NotNull] object obj)
 		{
@@ -90,7 +90,7 @@ namespace Kyoo.Utils
 			str = stringBuilder.ToString().Normalize(NormalizationForm.FormC);
 
 			str = Regex.Replace(str, @"\s", "-", RegexOptions.Compiled);
-			str = Regex.Replace(str, @"[^\w\s\p{Pd}]", "", RegexOptions.Compiled);
+			str = Regex.Replace(str, @"[^\w\s\p{Pd}]", string.Empty, RegexOptions.Compiled);
 			str = str.Trim('-', '_');
 			str = Regex.Replace(str, @"([-_]){2,}", "$1", RegexOptions.Compiled);
 			return str;
@@ -113,7 +113,7 @@ namespace Kyoo.Utils
 		/// </summary>
 		/// <param name="type">The starting type</param>
 		/// <returns>A list of types</returns>
-		/// <exception cref="ArgumentNullException"><see cref="type"/> can't be null</exception>
+		/// <exception cref="ArgumentNullException"><paramref name="type"/> can't be null</exception>
 		public static IEnumerable<Type> GetInheritanceTree([NotNull] this Type type)
 		{
 			if (type == null)
@@ -123,9 +123,9 @@ namespace Kyoo.Utils
 		}
 
 		/// <summary>
-		/// Check if <see cref="obj"/> inherit from a generic type <see cref="genericType"/>.
+		/// Check if <paramref name="obj"/> inherit from a generic type <paramref name="genericType"/>.
 		/// </summary>
-		/// <param name="obj">Does this object's type is a <see cref="genericType"/></param>
+		/// <param name="obj">Does this object's type is a <paramref name="genericType"/></param>
 		/// <param name="genericType">The generic type to check against (Only generic types are supported like typeof(IEnumerable&lt;&gt;).</param>
 		/// <returns>True if obj inherit from genericType. False otherwise</returns>
 		/// <exception cref="ArgumentNullException">obj and genericType can't be null</exception>
@@ -137,7 +137,7 @@ namespace Kyoo.Utils
 		}
 
 		/// <summary>
-		/// Check if <see cref="type"/> inherit from a generic type <see cref="genericType"/>.
+		/// Check if <paramref name="type"/> inherit from a generic type <paramref name="genericType"/>.
 		/// </summary>
 		/// <param name="type">The type to check</param>
 		/// <param name="genericType">The generic type to check against (Only generic types are supported like typeof(IEnumerable&lt;&gt;).</param>
@@ -160,14 +160,14 @@ namespace Kyoo.Utils
 		}
 
 		/// <summary>
-		/// Get the generic definition of <see cref="genericType"/>.
+		/// Get the generic definition of <paramref name="genericType"/>.
 		/// For example, calling this function with List&lt;string&gt; and typeof(IEnumerable&lt;&gt;) will return IEnumerable&lt;string&gt;
 		/// </summary>
 		/// <param name="type">The type to check</param>
 		/// <param name="genericType">The generic type to check against (Only generic types are supported like typeof(IEnumerable&lt;&gt;).</param>
 		/// <returns>The generic definition of genericType that type inherit or null if type does not implement the generic type.</returns>
-		/// <exception cref="ArgumentNullException"><see cref="type"/> and <see cref="genericType"/> can't be null</exception>
-		/// <exception cref="ArgumentException"><see cref="genericType"/> must be a generic type</exception>
+		/// <exception cref="ArgumentNullException"><paramref name="type"/> and <paramref name="genericType"/> can't be null</exception>
+		/// <exception cref="ArgumentException"><paramref name="genericType"/> must be a generic type</exception>
 		public static Type GetGenericDefinition([NotNull] Type type, [NotNull] Type genericType)
 		{
 			if (type == null)

@@ -76,7 +76,7 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		/// <param name="path">The path of the dll</param>
 		/// <returns>The list of dlls in hte assembly</returns>
-		private IPlugin[] LoadPlugin(string path)
+		private IPlugin[] _LoadPlugin(string path)
 		{
 			path = Path.GetFullPath(path);
 			try
@@ -106,7 +106,7 @@ namespace Kyoo.Core.Controllers
 			_logger.LogTrace("Loading new plugins...");
 			string[] pluginsPaths = Directory.GetFiles(pluginFolder, "*.dll", SearchOption.AllDirectories);
 			_plugins.AddRange(plugins
-				.Concat(pluginsPaths.SelectMany(LoadPlugin))
+				.Concat(pluginsPaths.SelectMany(_LoadPlugin))
 				.Where(x => x.Enabled)
 				.GroupBy(x => x.Name)
 				.Select(x => x.First())

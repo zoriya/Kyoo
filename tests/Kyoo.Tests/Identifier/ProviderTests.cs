@@ -85,7 +85,7 @@ namespace Kyoo.Tests.Identifier
 				Genres = new[] { new Genre("genre") }
 			};
 			Mock<IMetadataProvider> mock = new();
-			mock.Setup(x => x.Provider).Returns(new Provider("mock", ""));
+			mock.Setup(x => x.Provider).Returns(new Provider("mock", string.Empty));
 			mock.Setup(x => x.Get(show)).ReturnsAsync(new Show
 			{
 				Title = "title",
@@ -93,7 +93,7 @@ namespace Kyoo.Tests.Identifier
 			});
 
 			Mock<IMetadataProvider> mockTwo = new();
-			mockTwo.Setup(x => x.Provider).Returns(new Provider("mockTwo", ""));
+			mockTwo.Setup(x => x.Provider).Returns(new Provider("mockTwo", string.Empty));
 			mockTwo.Setup(x => x.Get(show)).ReturnsAsync(new Show
 			{
 				Title = "title2",
@@ -102,7 +102,7 @@ namespace Kyoo.Tests.Identifier
 			});
 
 			Mock<IMetadataProvider> mockFailing = new();
-			mockFailing.Setup(x => x.Provider).Returns(new Provider("mockFail", ""));
+			mockFailing.Setup(x => x.Provider).Returns(new Provider("mockFail", string.Empty));
 			mockFailing.Setup(x => x.Get(show)).Throws<ArgumentException>();
 
 			AProviderComposite provider = new ProviderComposite(new[]

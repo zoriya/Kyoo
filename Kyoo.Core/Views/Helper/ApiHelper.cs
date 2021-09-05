@@ -71,11 +71,11 @@ namespace Kyoo.Core.Api
 
 				Expression condition = operand switch
 				{
-					"eq" when isList => ContainsResourceExpression(propertyExpr, value),
-					"ctn" => ContainsResourceExpression(propertyExpr, value),
+					"eq" when isList => _ContainsResourceExpression(propertyExpr, value),
+					"ctn" => _ContainsResourceExpression(propertyExpr, value),
 
-					"eq" when valueExpr == null => ResourceEqual(propertyExpr, value),
-					"not" when valueExpr == null => ResourceEqual(propertyExpr, value, true),
+					"eq" when valueExpr == null => _ResourceEqual(propertyExpr, value),
+					"not" when valueExpr == null => _ResourceEqual(propertyExpr, value, true),
 
 					"eq" => Expression.Equal(propertyExpr, valueExpr),
 					"not" => Expression.NotEqual(propertyExpr, valueExpr!),
@@ -95,7 +95,7 @@ namespace Kyoo.Core.Api
 			return Expression.Lambda<Func<T, bool>>(expression!, param);
 		}
 
-		private static Expression ResourceEqual(Expression parameter, string value, bool notEqual = false)
+		private static Expression _ResourceEqual(Expression parameter, string value, bool notEqual = false)
 		{
 			MemberExpression field;
 			ConstantExpression valueConst;
@@ -115,14 +115,14 @@ namespace Kyoo.Core.Api
 				: Expression.Equal(field, valueConst);
 		}
 
-		private static Expression ContainsResourceExpression(MemberExpression xProperty, string value)
+		private static Expression _ContainsResourceExpression(MemberExpression xProperty, string value)
 		{
 			// x => x.PROPERTY.Any(y => y.Slug == value)
 			Expression ret = null;
 			ParameterExpression y = Expression.Parameter(xProperty.Type.GenericTypeArguments.First(), "y");
 			foreach (string val in value.Split(','))
 			{
-				LambdaExpression lambda = Expression.Lambda(ResourceEqual(y, val), y);
+				LambdaExpression lambda = Expression.Lambda(_ResourceEqual(y, val), y);
 				Expression iteration = Expression.Call(typeof(Enumerable), "Any", xProperty.Type.GenericTypeArguments,
 					xProperty, lambda);
 

@@ -27,11 +27,11 @@ namespace Kyoo.Authentication
 		/// </summary>
 		/// <param name="builder">The identity server that will be modified.</param>
 		/// <param name="options">The certificate options</param>
-		/// <returns></returns>
+		/// <returns>The initial builder to allow chain-calls.</returns>
 		public static IIdentityServerBuilder AddSigninKeys(this IIdentityServerBuilder builder,
 			CertificateOption options)
 		{
-			X509Certificate2 certificate = GetCertificate(options);
+			X509Certificate2 certificate = _GetCertificate(options);
 			builder.AddSigningCredential(certificate);
 
 			if (certificate.NotAfter.AddDays(-7) <= DateTime.UtcNow)
@@ -40,10 +40,10 @@ namespace Kyoo.Authentication
 				if (File.Exists(options.OldFile))
 					File.Delete(options.OldFile);
 				File.Move(options.File, options.OldFile);
-				builder.AddValidationKey(GenerateCertificate(options.File, options.Password));
+				builder.AddValidationKey(_GenerateCertificate(options.File, options.Password));
 			}
 			else if (File.Exists(options.OldFile))
-				builder.AddValidationKey(GetExistingCredential(options.OldFile, options.Password));
+				builder.AddValidationKey(_GetExistingCredential(options.OldFile, options.Password));
 			return builder;
 		}
 
@@ -52,11 +52,11 @@ namespace Kyoo.Authentication
 		/// </summary>
 		/// <param name="options">The certificate options</param>
 		/// <returns>A valid certificate</returns>
-		private static X509Certificate2 GetCertificate(CertificateOption options)
+		private static X509Certificate2 _GetCertificate(CertificateOption options)
 		{
 			return File.Exists(options.File)
-				? GetExistingCredential(options.File, options.Password)
-				: GenerateCertificate(options.File, options.Password);
+				? _GetExistingCredential(options.File, options.Password)
+				: _GenerateCertificate(options.File, options.Password);
 		}
 
 		/// <summary>
@@ -65,13 +65,12 @@ namespace Kyoo.Authentication
 		/// <param name="file">The path of the certificate</param>
 		/// <param name="password">The password of the certificate</param>
 		/// <returns>The loaded certificate</returns>
-		private static X509Certificate2 GetExistingCredential(string file, string password)
+		private static X509Certificate2 _GetExistingCredential(string file, string password)
 		{
-			return new X509Certificate2(file, password,
-				X509KeyStorageFlags.MachineKeySet |
+			X509KeyStorageFlags storeFlags = X509KeyStorageFlags.MachineKeySet |
 				X509KeyStorageFlags.PersistKeySet |
-				X509KeyStorageFlags.Exportable
-			);
+				X509KeyStorageFlags.Exportable;
+			return new X509Certificate2(file, password, storeFlags);
 		}
 
 		/// <summary>
@@ -80,7 +79,7 @@ namespace Kyoo.Authentication
 		/// <param name="file">The path of the output file</param>
 		/// <param name="password">The password of the new certificate</param>
 		/// <returns>The generated certificate</returns>
-		private static X509Certificate2 GenerateCertificate(string file, string password)
+		private static X509Certificate2 _GenerateCertificate(string file, string password)
 		{
 			SecureRandom random = new();
 

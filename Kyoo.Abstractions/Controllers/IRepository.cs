@@ -221,7 +221,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// Create a new resource.
 		/// </summary>
 		/// <param name="obj">The item to register</param>
-		/// <returns>The resource registers and completed by database's information (related items & so on)</returns>
+		/// <returns>The resource registers and completed by database's information (related items and so on)</returns>
 		[ItemNotNull]
 		Task<T> Create([NotNull] T obj);
 
@@ -239,7 +239,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="edited">The resource to edit, it's ID can't change.</param>
 		/// <param name="resetOld">Should old properties of the resource be discarded or should null values considered as not changed?</param>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-		/// <returns>The resource edited and completed by database's information (related items & so on)</returns>
+		/// <returns>The resource edited and completed by database's information (related items and so on)</returns>
 		[ItemNotNull]
 		Task<T> Edit([NotNull] T edited, bool resetOld);
 
@@ -422,7 +422,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		/// <param name="id">The ID of the library</param>
 		/// <param name="where">A filter function</param>
-		/// <param name="sort">Sort information (sort order & sort by)</param>
+		/// <param name="sort">Sort information (sort order and sort by)</param>
 		/// <param name="limit">How many items to return and where to start</param>
 		/// <returns>A list of items that match every filters</returns>
 		public Task<ICollection<LibraryItem>> GetFromLibrary(int id,
@@ -449,7 +449,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		/// <param name="slug">The slug of the library</param>
 		/// <param name="where">A filter function</param>
-		/// <param name="sort">Sort information (sort order & sort by)</param>
+		/// <param name="sort">Sort information (sort order and sort by)</param>
 		/// <param name="limit">How many items to return and where to start</param>
 		/// <returns>A list of items that match every filters</returns>
 		public Task<ICollection<LibraryItem>> GetFromLibrary(string slug,
@@ -497,7 +497,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		/// <param name="showID">The ID of the show</param>
 		/// <param name="where">A filter function</param>
-		/// <param name="sort">Sort information (sort order & sort by)</param>
+		/// <param name="sort">Sort information (sort order and sort by)</param>
 		/// <param name="limit">How many items to return and where to start</param>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetFromShow(int showID,
@@ -524,7 +524,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		/// <param name="showSlug">The slug of the show</param>
 		/// <param name="where">A filter function</param>
-		/// <param name="sort">Sort information (sort order & sort by)</param>
+		/// <param name="sort">Sort information (sort order and sort by)</param>
 		/// <param name="limit">How many items to return and where to start</param>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetFromShow(string showSlug,
@@ -551,7 +551,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		/// <param name="id">The id of the person</param>
 		/// <param name="where">A filter function</param>
-		/// <param name="sort">Sort information (sort order & sort by)</param>
+		/// <param name="sort">Sort information (sort order and sort by)</param>
 		/// <param name="limit">How many items to return and where to start</param>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetFromPeople(int id,
@@ -578,7 +578,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		/// <param name="slug">The slug of the person</param>
 		/// <param name="where">A filter function</param>
-		/// <param name="sort">Sort information (sort order & sort by)</param>
+		/// <param name="sort">Sort information (sort order and sort by)</param>
 		/// <param name="limit">How many items to return and where to start</param>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetFromPeople(string slug,
@@ -610,7 +610,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// Get a list of external ids that match all filters
 		/// </summary>
 		/// <param name="where">A predicate to add arbitrary filter</param>
-		/// <param name="sort">Sort information (sort order & sort by)</param>
+		/// <param name="sort">Sort information (sort order and sort by)</param>
 		/// <param name="limit">Pagination information (where to start and how many to get)</param>
 		/// <typeparam name="T">The type of metadata to retrieve</typeparam>
 		/// <returns>A filtered list of external ids.</returns>

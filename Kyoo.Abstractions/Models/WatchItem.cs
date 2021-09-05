@@ -190,13 +190,13 @@ namespace Kyoo.Abstractions.Models
 				Subtitles = ep.Tracks.Where(x => x.Type == StreamType.Subtitle).ToArray(),
 				PreviousEpisode = previous,
 				NextEpisode = next,
-				Chapters = await GetChapters(ep.Path)
+				Chapters = await _GetChapters(ep.Path)
 			};
 		}
 
 		// TODO move this method in a controller to support abstraction.
 		// TODO use a IFileManager to retrieve and read files.
-		private static async Task<ICollection<Chapter>> GetChapters(string episodePath)
+		private static async Task<ICollection<Chapter>> _GetChapters(string episodePath)
 		{
 			string path = PathIO.Combine(
 				PathIO.GetDirectoryName(episodePath)!,

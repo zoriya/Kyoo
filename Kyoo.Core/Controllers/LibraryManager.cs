@@ -226,6 +226,8 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		[SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1507:CodeMustNotContainMultipleBlankLinesInARow",
 			Justification = "Separate the code by semantics and simplify the code read.")]
+		[SuppressMessage("StyleCop.CSharp.ReadabilityRules", "SA1107:Code should not contain multiple statements on one line",
+			Justification = "Assing IDs and Values in the same line.")]
 		public Task Load(IResource obj, string memberName, bool force = false)
 		{
 			if (obj == null)

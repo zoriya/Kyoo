@@ -44,6 +44,25 @@ namespace Kyoo.Core.Controllers
 			_references = references.ToDictionary(x => x.Path, x => x.Type, StringComparer.OrdinalIgnoreCase);
 		}
 
+		/// <summary>
+		/// Transform the configuration section in nested expando objects.
+		/// </summary>
+		/// <param name="config">The section to convert</param>
+		/// <returns>The converted section</returns>
+		private static object _ToUntyped(IConfigurationSection config)
+		{
+			ExpandoObject obj = new();
+
+			foreach (IConfigurationSection section in config.GetChildren())
+			{
+				obj.TryAdd(section.Key, _ToUntyped(section));
+			}
+
+			if (!obj.Any())
+				return config.Value;
+			return obj;
+		}
+
 		/// <inheritdoc />
 		public void AddTyped<T>(string path)
 		{
@@ -119,8 +138,10 @@ namespace Kyoo.Core.Controllers
 			// TODO handle lists and dictionaries.
 			Type type = _GetType(path);
 			if (typeof(T).IsAssignableFrom(type))
+			{
 				throw new InvalidCastException($"The type {typeof(T).Name} is not valid for " +
 				                               $"a resource of type {type.Name}.");
+			}
 			return (T)GetValue(path);
 		}
 
@@ -169,25 +190,6 @@ namespace Kyoo.Core.Controllers
 				}
 			}
 
-			return obj;
-		}
-
-		/// <summary>
-		/// Transform the configuration section in nested expando objects.
-		/// </summary>
-		/// <param name="config">The section to convert</param>
-		/// <returns>The converted section</returns>
-		private static object _ToUntyped(IConfigurationSection config)
-		{
-			ExpandoObject obj = new();
-
-			foreach (IConfigurationSection section in config.GetChildren())
-			{
-				obj.TryAdd(section.Key, _ToUntyped(section));
-			}
-
-			if (!obj.Any())
-				return config.Value;
 			return obj;
 		}
 	}

@@ -47,8 +47,10 @@ namespace Kyoo.TheTvdb
 		{
 			_configuration = configuration;
 			if (!Enabled)
+			{
 				logger.LogWarning("No API key configured for TVDB provider. " +
 					"To enable TVDB, specify one in the setting TVDB:APIKEY ");
+			}
 		}
 
 		/// <inheritdoc />

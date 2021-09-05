@@ -100,8 +100,10 @@ namespace Kyoo.Core.Controllers
 			if (resource.ShowID <= 0)
 			{
 				if (resource.Show == null)
-					throw new ArgumentException(
-						$"Can't store a season not related to any show (showID: {resource.ShowID}).");
+				{
+					throw new ArgumentException($"Can't store a season not related to any show " +
+						$"(showID: {resource.ShowID}).");
+				}
 				resource.ShowID = resource.Show.ID;
 			}
 

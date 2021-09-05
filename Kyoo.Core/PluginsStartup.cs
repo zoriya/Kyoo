@@ -62,6 +62,27 @@ namespace Kyoo.Core
 		}
 
 		/// <summary>
+		/// Create a new <see cref="PluginsStartup"/> from a webhost.
+		/// This is meant to be used from <see cref="WebHostBuilderExtensions.UseStartup"/>.
+		/// </summary>
+		/// <param name="host">The context of the web host.</param>
+		/// <param name="logger">
+		/// The logger factory used to log while the application is setting itself up.
+		/// </param>
+		/// <returns>A new <see cref="PluginsStartup"/>.</returns>
+		public static PluginsStartup FromWebHost(WebHostBuilderContext host,
+			ILoggerFactory logger)
+		{
+			HostServiceProvider hostProvider = new(host.HostingEnvironment, host.Configuration, logger);
+			PluginManager plugins = new(
+				hostProvider,
+				Options.Create(host.Configuration.GetSection(BasicOptions.Path).Get<BasicOptions>()),
+				logger.CreateLogger<PluginManager>()
+			);
+			return new PluginsStartup(plugins, host.Configuration);
+		}
+
+		/// <summary>
 		/// Configure the services context via the <see cref="PluginManager"/>.
 		/// </summary>
 		/// <param name="services">The service collection to fill.</param>
@@ -124,27 +145,6 @@ namespace Kyoo.Core
 				);
 			foreach ((string path, Type type) in pluginConfig)
 				config.Register(path, type);
-		}
-
-		/// <summary>
-		/// Create a new <see cref="PluginsStartup"/> from a webhost.
-		/// This is meant to be used from <see cref="WebHostBuilderExtensions.UseStartup"/>.
-		/// </summary>
-		/// <param name="host">The context of the web host.</param>
-		/// <param name="logger">
-		/// The logger factory used to log while the application is setting itself up.
-		/// </param>
-		/// <returns>A new <see cref="PluginsStartup"/>.</returns>
-		public static PluginsStartup FromWebHost(WebHostBuilderContext host,
-			ILoggerFactory logger)
-		{
-			HostServiceProvider hostProvider = new(host.HostingEnvironment, host.Configuration, logger);
-			PluginManager plugins = new(
-				hostProvider,
-				Options.Create(host.Configuration.GetSection(BasicOptions.Path).Get<BasicOptions>()),
-				logger.CreateLogger<PluginManager>()
-			);
-			return new PluginsStartup(plugins, host.Configuration);
 		}
 
 		/// <summary>

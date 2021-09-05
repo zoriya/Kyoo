@@ -54,8 +54,8 @@ namespace Kyoo.Core.Models.Watch
 		/// </summary>
 		public static readonly ImmutableDictionary<string, string> SubtitleExtensions = new Dictionary<string, string>
 		{
-			{".ass", "ass"},
-			{".str", "subrip"}
+			{ ".ass", "ass" },
+			{ ".str", "subrip" }
 		}.ToImmutableDictionary();
 
 		/// <summary>

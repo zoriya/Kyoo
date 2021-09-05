@@ -21,6 +21,7 @@ namespace Kyoo.Utils
 		/// <param name="first">The first enumerable to merge</param>
 		/// <param name="second">The second enumerable to merge, if items from this list are equals to one from the first, they are not kept</param>
 		/// <param name="isEqual">Equality function to compare items. If this is null, duplicated elements are kept</param>
+		/// <typeparam name="T">The type of items in the lists to merge.</typeparam>
 		/// <returns>The two list merged as an array</returns>
 		[ContractAnnotation("first:notnull => notnull; second:notnull => notnull", true)]
 		public static T[] MergeLists<T>([CanBeNull] IEnumerable<T> first,
@@ -219,7 +220,8 @@ namespace Kyoo.Utils
 				{
 					Type[] dictionaryTypes = Utility.GetGenericDefinition(property.PropertyType, typeof(IDictionary<,>))
 						.GenericTypeArguments;
-					object[] parameters = {
+					object[] parameters =
+					{
 						property.GetValue(first),
 						value,
 						false
@@ -290,7 +292,8 @@ namespace Kyoo.Utils
 				{
 					Type[] dictionaryTypes = Utility.GetGenericDefinition(property.PropertyType, typeof(IDictionary<,>))
 						.GenericTypeArguments;
-					object[] parameters = {
+					object[] parameters =
+					{
 						oldValue,
 						newValue,
 						false

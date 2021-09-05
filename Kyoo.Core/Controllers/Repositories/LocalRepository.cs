@@ -8,8 +8,8 @@ using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Exceptions;
-using Kyoo.Utils;
 using Kyoo.Core.Api;
+using Kyoo.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Core.Controllers
@@ -133,12 +133,13 @@ namespace Kyoo.Core.Controllers
 		/// Apply filters to a query to ease sort, pagination & where queries for any resources types.
 		/// For resources of type <see cref="T"/>, see <see cref="ApplyFilters"/>
 		/// </summary>
+		/// <param name="query">The base query to filter.</param>
 		/// <param name="get">A function to asynchronously get a resource from the database using it's ID.</param>
 		/// <param name="defaultSort">The default sort order of this resource's type.</param>
-		/// <param name="query">The base query to filter.</param>
 		/// <param name="where">An expression to filter based on arbitrary conditions</param>
 		/// <param name="sort">The sort settings (sort order & sort by)</param>
 		/// <param name="limit">Pagination information (where to start and how many to get)</param>
+		/// <typeparam name="TValue">The type of items to query.</typeparam>
 		/// <returns>The filtered query</returns>
 		protected async Task<ICollection<TValue>> ApplyFilters<TValue>(IQueryable<TValue> query,
 			Func<int, Task<TValue>> get,
@@ -252,6 +253,7 @@ namespace Kyoo.Core.Controllers
 		/// <param name="resetOld">
 		/// A boolean to indicate if all values of resource should be discarded or not.
 		/// </param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		protected virtual Task EditRelations(T resource, T changed, bool resetOld)
 		{
 			return Validate(resource);
@@ -265,6 +267,7 @@ namespace Kyoo.Core.Controllers
 		/// <exception cref="ArgumentException">
 		/// You can throw this if the resource is illegal and should not be saved.
 		/// </exception>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		protected virtual Task Validate(T resource)
 		{
 			if (typeof(T).GetProperty(nameof(resource.Slug))!.GetCustomAttribute<ComputedAttribute>() != null)

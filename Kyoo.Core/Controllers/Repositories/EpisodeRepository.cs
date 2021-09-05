@@ -116,7 +116,7 @@ namespace Kyoo.Core.Controllers
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
 			await _database.SaveChangesAsync($"Trying to insert a duplicated episode (slug {obj.Slug} already exists).");
-			return await ValidateTracks(obj);
+			return await _ValidateTracks(obj);
 		}
 
 		/// <inheritdoc />
@@ -128,7 +128,7 @@ namespace Kyoo.Core.Controllers
 			{
 				await _tracks.DeleteAll(x => x.EpisodeID == resource.ID);
 				resource.Tracks = changed.Tracks;
-				await ValidateTracks(resource);
+				await _ValidateTracks(resource);
 			}
 
 			if (changed.ExternalIDs != null || resetOld)
@@ -143,7 +143,7 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		/// <param name="resource">The resource to fix.</param>
 		/// <returns>The <see cref="resource"/> parameter is returned.</returns>
-		private async Task<Episode> ValidateTracks(Episode resource)
+		private async Task<Episode> _ValidateTracks(Episode resource)
 		{
 			if (resource.Tracks == null)
 				return resource;
@@ -165,8 +165,10 @@ namespace Kyoo.Core.Controllers
 			if (resource.ShowID <= 0)
 			{
 				if (resource.Show == null)
+				{
 					throw new ArgumentException($"Can't store an episode not related " +
 						$"to any show (showID: {resource.ShowID}).");
+				}
 				resource.ShowID = resource.Show.ID;
 			}
 

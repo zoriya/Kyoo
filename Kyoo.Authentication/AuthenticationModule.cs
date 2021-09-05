@@ -103,9 +103,7 @@ namespace Kyoo.Authentication
 			services.AddControllers();
 
 			// TODO handle direct-videos with bearers (probably add a cookie and a app.Use to translate that for videos)
-
 			// TODO Check if tokens should be stored.
-
 			List<Client> clients = new();
 			_configuration.GetSection("authentication:clients").Bind(clients);
 			CertificateOption certificateOptions = new();

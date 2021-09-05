@@ -91,48 +91,48 @@ namespace Kyoo.Core.Controllers
 		{
 			throw new NotSupportedException("Extras can not be stored inside an http filesystem.");
 		}
-	}
-
-	/// <summary>
-	/// An <see cref="IActionResult"/> to proxy an http request.
-	/// </summary>
-	// TODO remove this suppress message once the class has been implemented.
-	[SuppressMessage("ReSharper", "NotAccessedField.Local")]
-	public class HttpForwardResult : IActionResult
-	{
-		/// <summary>
-		/// The path of the request to forward.
-		/// </summary>
-		private readonly Uri _path;
 
 		/// <summary>
-		/// Should the proxied result support ranges requests?
+		/// An <see cref="IActionResult"/> to proxy an http request.
 		/// </summary>
-		private readonly bool _rangeSupport;
-
-		/// <summary>
-		/// If not null, override the content type of the resulting request.
-		/// </summary>
-		private readonly string _type;
-
-		/// <summary>
-		/// Create a new <see cref="HttpForwardResult"/>.
-		/// </summary>
-		/// <param name="path">The path of the request to forward.</param>
-		/// <param name="rangeSupport">Should the proxied result support ranges requests?</param>
-		/// <param name="type">If not null, override the content type of the resulting request.</param>
-		public HttpForwardResult(Uri path, bool rangeSupport, string type = null)
+		// TODO remove this suppress message once the class has been implemented.
+		[SuppressMessage("ReSharper", "NotAccessedField.Local", Justification = "Not Implemented Yet.")]
+		public class HttpForwardResult : IActionResult
 		{
-			_path = path;
-			_rangeSupport = rangeSupport;
-			_type = type;
-		}
+			/// <summary>
+			/// The path of the request to forward.
+			/// </summary>
+			private readonly Uri _path;
 
-		/// <inheritdoc />
-		public Task ExecuteResultAsync(ActionContext context)
-		{
-			// TODO implement that, example: https://github.com/twitchax/AspNetCore.Proxy/blob/14dd0f212d7abb43ca1bf8c890d5efb95db66acb/src/Core/Extensions/Http.cs#L15
-			throw new NotImplementedException();
+			/// <summary>
+			/// Should the proxied result support ranges requests?
+			/// </summary>
+			private readonly bool _rangeSupport;
+
+			/// <summary>
+			/// If not null, override the content type of the resulting request.
+			/// </summary>
+			private readonly string _type;
+
+			/// <summary>
+			/// Create a new <see cref="HttpForwardResult"/>.
+			/// </summary>
+			/// <param name="path">The path of the request to forward.</param>
+			/// <param name="rangeSupport">Should the proxied result support ranges requests?</param>
+			/// <param name="type">If not null, override the content type of the resulting request.</param>
+			public HttpForwardResult(Uri path, bool rangeSupport, string type = null)
+			{
+				_path = path;
+				_rangeSupport = rangeSupport;
+				_type = type;
+			}
+
+			/// <inheritdoc />
+			public Task ExecuteResultAsync(ActionContext context)
+			{
+				// TODO implement that, example: https://github.com/twitchax/AspNetCore.Proxy/blob/14dd0f212d7abb43ca1bf8c890d5efb95db66acb/src/Core/Extensions/Http.cs#L15
+				throw new NotImplementedException();
+			}
 		}
 	}
 }

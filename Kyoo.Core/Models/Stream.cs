@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
@@ -8,22 +9,22 @@ namespace Kyoo.Core.Models.Watch
 	/// The unmanaged stream that the transcoder will return.
 	/// </summary>
 	[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-	public class Stream
+	public struct Stream
 	{
 		/// <summary>
 		/// The title of the stream.
 		/// </summary>
-		public string Title { get; set; }
+		public string Title;
 
 		/// <summary>
 		/// The language of this stream (as a ISO-639-2 language code)
 		/// </summary>
-		public string Language { get; set; }
+		public string Language;
 
 		/// <summary>
 		/// The codec of this stream.
 		/// </summary>
-		public string Codec { get; set; }
+		public string Codec;
 
 		/// <summary>
 		/// Is this stream the default one of it's type?
@@ -38,12 +39,12 @@ namespace Kyoo.Core.Models.Watch
 		/// <summary>
 		/// The path of this track.
 		/// </summary>
-		[SerializeIgnore] public string Path { get; set; }
+		public string Path;
 
 		/// <summary>
 		/// The type of this stream.
 		/// </summary>
-		[SerializeIgnore] public StreamType Type { get; set; }
+		public StreamType Type;
 
 		/// <summary>
 		/// Create a track from this stream.

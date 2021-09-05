@@ -11,6 +11,7 @@
 		<Rule Id="SA1309" Action="None" />        <!-- FieldNamesMustNotBeginWithUnderscore -->
 		<Rule Id="SX1309" Action="Warning" />     <!-- FieldNamesMustBeginWithUnderscore -->
 		<Rule Id="SA1300" Action="None" />        <!-- ElementMustBeginWithUpperCaseLetter (this conflict with the _ prefix for privates, enforced by an IDE rule) -->
+		<Rule Id="SA1316" Action="None" />        <!-- TupleElementNamesShouldUseCorrectCasing (should be camels when deconstructing but pascal otherwise. -->
 	</Rules>
 	<Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.CSharp.ReadabilityRules">
 		<Rule Id="SA1101" Action="None" />        <!-- PrefixLocalCallsWithThis -->
@@ -40,5 +41,6 @@
 
 		<Rule Id="SA1633" Action="None" />        <!-- FileMustHaveHeader TODO remove this, this is only temporary -->
 		<Rule Id="SA1629" Action="None" />        <!-- DocumentationTextMustEndWithAPeriod TODO remove this, this is only temporary -->
+		<Rule Id="SA1600" Action="None" />        <!-- ElementsMustBeDocumented TODO remove this, this is only temporary -->
 	</Rules>
 </RuleSet>

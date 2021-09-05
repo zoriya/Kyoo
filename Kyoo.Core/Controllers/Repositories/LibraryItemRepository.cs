@@ -111,7 +111,7 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		/// <param name="selector">Only items that are part of a library that match this predicate will be returned.</param>
 		/// <returns>A queryable containing items that are part of a library matching the selector.</returns>
-		private IQueryable<LibraryItem> LibraryRelatedQuery(Expression<Func<Library, bool>> selector)
+		private IQueryable<LibraryItem> _LibraryRelatedQuery(Expression<Func<Library, bool>> selector)
 			=> _database.Libraries
 				.Where(selector)
 				.SelectMany(x => x.Shows)
@@ -128,7 +128,7 @@ namespace Kyoo.Core.Controllers
 			Sort<LibraryItem> sort = default,
 			Pagination limit = default)
 		{
-			ICollection<LibraryItem> items = await ApplyFilters(LibraryRelatedQuery(x => x.ID == id),
+			ICollection<LibraryItem> items = await ApplyFilters(_LibraryRelatedQuery(x => x.ID == id),
 				where,
 				sort,
 				limit);
@@ -143,7 +143,7 @@ namespace Kyoo.Core.Controllers
 			Sort<LibraryItem> sort = default,
 			Pagination limit = default)
 		{
-			ICollection<LibraryItem> items = await ApplyFilters(LibraryRelatedQuery(x => x.Slug == slug),
+			ICollection<LibraryItem> items = await ApplyFilters(_LibraryRelatedQuery(x => x.Slug == slug),
 				where,
 				sort,
 				limit);

@@ -89,7 +89,7 @@ namespace Kyoo.Authentication.Views
 		/// </summary>
 		/// <param name="stayLogged">Should the user stay logged</param>
 		/// <returns>Authentication properties based on a stay login</returns>
-		private static AuthenticationProperties StayLogged(bool stayLogged)
+		private static AuthenticationProperties _StayLogged(bool stayLogged)
 		{
 			if (!stayLogged)
 				return null;
@@ -114,7 +114,7 @@ namespace Kyoo.Authentication.Views
 			if (!PasswordUtils.CheckPassword(login.Password, user.Password))
 				return Unauthorized();
 
-			await HttpContext.SignInAsync(user.ToIdentityUser(), StayLogged(login.StayLoggedIn));
+			await HttpContext.SignInAsync(user.ToIdentityUser(), _StayLogged(login.StayLoggedIn));
 			return Ok(new { RedirectUrl = login.ReturnURL, IsOk = true });
 		}
 
@@ -140,7 +140,7 @@ namespace Kyoo.Authentication.Views
 				});
 			}
 
-			await HttpContext.SignInAsync(user.ToIdentityUser(), StayLogged(otac.StayLoggedIn));
+			await HttpContext.SignInAsync(user.ToIdentityUser(), _StayLogged(otac.StayLoggedIn));
 			return Ok();
 		}
 

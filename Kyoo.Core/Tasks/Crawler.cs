@@ -89,9 +89,9 @@ namespace Kyoo.Core.Tasks
 				IProgress<float> reporter = new Progress<float>(x =>
 				{
 					// ReSharper disable once AccessToModifiedClosure
-					progress.Report(percent + x / libraries.Count);
+					progress.Report(percent + (x / libraries.Count));
 				});
-				await Scan(library, episodes, tracks, reporter, cancellationToken);
+				await _Scan(library, episodes, tracks, reporter, cancellationToken);
 				percent += 100f / libraries.Count;
 
 				if (cancellationToken.IsCancellationRequested)
@@ -101,7 +101,7 @@ namespace Kyoo.Core.Tasks
 			progress.Report(100);
 		}
 
-		private async Task Scan(Library library,
+		private async Task _Scan(Library library,
 			IEnumerable<Episode> episodes,
 			IEnumerable<Track> tracks,
 			IProgress<float> progress,
@@ -131,7 +131,7 @@ namespace Kyoo.Core.Tasks
 				IProgress<float> reporter = new Progress<float>(x =>
 				{
 					// ReSharper disable once AccessToModifiedClosure
-					progress.Report((percent + x / paths.Length - 10) / library.Paths.Length);
+					progress.Report((percent + (x / paths.Length) - 10) / library.Paths.Length);
 				});
 
 				foreach (string episodePath in paths)
@@ -153,7 +153,7 @@ namespace Kyoo.Core.Tasks
 				reporter = new Progress<float>(x =>
 				{
 					// ReSharper disable once AccessToModifiedClosure
-					progress.Report((90 + (percent + x / subtitles.Length)) / library.Paths.Length);
+					progress.Report((90 + (percent + (x / subtitles.Length))) / library.Paths.Length);
 				});
 
 				foreach (string trackPath in subtitles)

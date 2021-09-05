@@ -134,7 +134,7 @@ namespace Kyoo.Core.Controllers
 			{
 				transmuxFailed = TranscoderAPI.Transmux(episode.Path, manifest, out playableDuration) != 0;
 			}, TaskCreationOptions.LongRunning);
-			while (playableDuration < 10 || !File.Exists(manifest) && !transmuxFailed)
+			while (playableDuration < 10 || (!File.Exists(manifest) && !transmuxFailed))
 				await Task.Delay(10);
 			return transmuxFailed ? null : manifest;
 		}

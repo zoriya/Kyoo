@@ -44,7 +44,7 @@ namespace Kyoo.Tests.Database
 		public async Task CreateWithEmptySlugTest()
 		{
 			Collection collection = TestSample.GetNew<Collection>();
-			collection.Slug = "";
+			collection.Slug = string.Empty;
 			await Assert.ThrowsAsync<ArgumentException>(() => _repository.Create(collection));
 		}
 

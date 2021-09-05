@@ -91,14 +91,14 @@ namespace Kyoo.Core.Controllers
 		private readonly Queue<QueuedTask> _queuedTasks = new();
 
 		/// <summary>
-		/// The currently running task.
-		/// </summary>
-		private (TaskMetadataAttribute, ITask)? _runningTask;
-
-		/// <summary>
 		/// The cancellation token used to cancel the running task when the runner should shutdown.
 		/// </summary>
 		private readonly CancellationTokenSource _taskToken = new();
+
+		/// <summary>
+		/// The currently running task.
+		/// </summary>
+		private (TaskMetadataAttribute, ITask)? _runningTask;
 
 		/// <summary>
 		/// Create a new <see cref="TaskManager"/>.
@@ -116,7 +116,7 @@ namespace Kyoo.Core.Controllers
 			{
 				Factory = x.Value,
 				Metadata = x.Metadata,
-				ScheduledDate = GetNextTaskDate(x.Metadata.Slug)
+				ScheduledDate = _GetNextTaskDate(x.Metadata.Slug)
 			}).ToList();
 
 			if (_tasks.Any())
@@ -130,6 +130,7 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		/// <remarks>Start the runner in another thread.</remarks>
 		/// <param name="cancellationToken">Indicates that the start process has been aborted.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		public override Task StartAsync(CancellationToken cancellationToken)
 		{
 			Task.Run(() => base.StartAsync(cancellationToken), CancellationToken.None);
@@ -147,6 +148,7 @@ namespace Kyoo.Core.Controllers
 		/// The runner that will host tasks and run queued tasks.
 		/// </summary>
 		/// <param name="cancellationToken">A token to stop the runner</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		protected override async Task ExecuteAsync(CancellationToken cancellationToken)
 		{
 			_EnqueueStartupTasks();
@@ -174,7 +176,7 @@ namespace Kyoo.Core.Controllers
 				else
 				{
 					await Task.Delay(1000, cancellationToken);
-					QueueScheduledTasks();
+					_QueueScheduledTasks();
 				}
 			}
 		}
@@ -217,8 +219,10 @@ namespace Kyoo.Core.Controllers
 							.FirstOrDefault(y => string.Equals(y.Key, x.Name, StringComparison.OrdinalIgnoreCase))
 							.Value;
 						if (value == null && x.IsRequired)
+						{
 							throw new ArgumentException($"The argument {x.Name} is required to run " +
 								$"{task.Metadata.Name} but it was not specified.");
+						}
 						return x.CreateValue(value ?? x.DefaultValue);
 					}));
 
@@ -238,7 +242,7 @@ namespace Kyoo.Core.Controllers
 		/// <summary>
 		/// Start tasks that are scheduled for start.
 		/// </summary>
-		private void QueueScheduledTasks()
+		private void _QueueScheduledTasks()
 		{
 			IEnumerable<string> tasksToQueue = _tasks.Where(x => x.ScheduledDate <= DateTime.Now)
 				.Select(x => x.Metadata.Slug);
@@ -280,7 +284,7 @@ namespace Kyoo.Core.Controllers
 				Arguments = arguments,
 				CancellationToken = cancellationToken
 			});
-			_tasks[index].ScheduledDate = GetNextTaskDate(taskSlug);
+			_tasks[index].ScheduledDate = _GetNextTaskDate(taskSlug);
 		}
 
 		/// <inheritdoc />
@@ -300,7 +304,7 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		/// <param name="taskSlug">The slug of the task</param>
 		/// <returns>The next date.</returns>
-		private DateTime GetNextTaskDate(string taskSlug)
+		private DateTime _GetNextTaskDate(string taskSlug)
 		{
 			if (_options.CurrentValue.Scheduled.TryGetValue(taskSlug, out TimeSpan delay))
 				return DateTime.Now + delay;

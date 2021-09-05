@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,6 +5,7 @@ using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Permissions;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Kyoo.Core.Api
 {
@@ -64,78 +64,78 @@ namespace Kyoo.Core.Api
 				return new ConvertSubripToVtt(subtitle.Path, _files);
 			return _files.FileResult(subtitle.Path);
 		}
-	}
 
-	public class ConvertSubripToVtt : IActionResult
-	{
-		private readonly string _path;
-		private readonly IFileSystem _files;
-
-		public ConvertSubripToVtt(string subtitlePath, IFileSystem files)
+		public class ConvertSubripToVtt : IActionResult
 		{
-			_path = subtitlePath;
-			_files = files;
-		}
+			private readonly string _path;
+			private readonly IFileSystem _files;
 
-		public async Task ExecuteResultAsync(ActionContext context)
-		{
-			List<string> lines = new();
-
-			context.HttpContext.Response.StatusCode = 200;
-			context.HttpContext.Response.Headers.Add("Content-Type", "text/vtt");
-
-			await using (StreamWriter writer = new(context.HttpContext.Response.Body))
+			public ConvertSubripToVtt(string subtitlePath, IFileSystem files)
 			{
-				await writer.WriteLineAsync("WEBVTT");
-				await writer.WriteLineAsync("");
-				await writer.WriteLineAsync("");
+				_path = subtitlePath;
+				_files = files;
+			}
 
-				using StreamReader reader = new(await _files.GetReader(_path));
-				string line;
-				while ((line = await reader.ReadLineAsync()) != null)
+			public async Task ExecuteResultAsync(ActionContext context)
+			{
+				List<string> lines = new();
+
+				context.HttpContext.Response.StatusCode = 200;
+				context.HttpContext.Response.Headers.Add("Content-Type", "text/vtt");
+
+				await using (StreamWriter writer = new(context.HttpContext.Response.Body))
 				{
-					if (line == "")
+					await writer.WriteLineAsync("WEBVTT");
+					await writer.WriteLineAsync(string.Empty);
+					await writer.WriteLineAsync(string.Empty);
+
+					using StreamReader reader = new(await _files.GetReader(_path));
+					string line;
+					while ((line = await reader.ReadLineAsync()) != null)
 					{
-						lines.Add("");
-						IEnumerable<string> processedBlock = ConvertBlock(lines);
-						foreach (string t in processedBlock)
-							await writer.WriteLineAsync(t);
-						lines.Clear();
+						if (line == string.Empty)
+						{
+							lines.Add(string.Empty);
+							IEnumerable<string> processedBlock = _ConvertBlock(lines);
+							foreach (string t in processedBlock)
+								await writer.WriteLineAsync(t);
+							lines.Clear();
+						}
+						else
+							lines.Add(line);
 					}
-					else
-						lines.Add(line);
 				}
+
+				await context.HttpContext.Response.Body.FlushAsync();
 			}
 
-			await context.HttpContext.Response.Body.FlushAsync();
-		}
-
-		private static IEnumerable<string> ConvertBlock(IList<string> lines)
-		{
-			if (lines.Count < 3)
-				return lines;
-			lines[1] = lines[1].Replace(',', '.');
-			if (lines[2].Length > 5)
+			private static IEnumerable<string> _ConvertBlock(IList<string> lines)
 			{
-				lines[1] += lines[2].Substring(0, 6) switch
+				if (lines.Count < 3)
+					return lines;
+				lines[1] = lines[1].Replace(',', '.');
+				if (lines[2].Length > 5)
 				{
-					"{\\an1}" => " line:93% position:15%",
-					"{\\an2}" => " line:93%",
-					"{\\an3}" => " line:93% position:85%",
-					"{\\an4}" => " line:50% position:15%",
-					"{\\an5}" => " line:50%",
-					"{\\an6}" => " line:50% position:85%",
-					"{\\an7}" => " line:7% position:15%",
-					"{\\an8}" => " line:7%",
-					"{\\an9}" => " line:7% position:85%",
-					_ => " line:93%"
-				};
+					lines[1] += lines[2].Substring(0, 6) switch
+					{
+						"{\\an1}" => " line:93% position:15%",
+						"{\\an2}" => " line:93%",
+						"{\\an3}" => " line:93% position:85%",
+						"{\\an4}" => " line:50% position:15%",
+						"{\\an5}" => " line:50%",
+						"{\\an6}" => " line:50% position:85%",
+						"{\\an7}" => " line:7% position:15%",
+						"{\\an8}" => " line:7%",
+						"{\\an9}" => " line:7% position:85%",
+						_ => " line:93%"
+					};
+				}
+
+				if (lines[2].StartsWith("{\\an"))
+					lines[2] = lines[2].Substring(6);
+
+				return lines;
 			}
-
-			if (lines[2].StartsWith("{\\an"))
-				lines[2] = lines[2].Substring(6);
-
-			return lines;
 		}
 	}
 }

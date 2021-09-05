@@ -12,7 +12,8 @@ namespace Kyoo.Core.Api
 {
 	[ApiController]
 	[ResourceView]
-	public class CrudApi<T> : ControllerBase where T : class, IResource
+	public class CrudApi<T> : ControllerBase
+		where T : class, IResource
 	{
 		private readonly IRepository<T> _repository;
 		protected readonly Uri BaseURL;
