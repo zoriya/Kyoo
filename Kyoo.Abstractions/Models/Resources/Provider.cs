@@ -47,7 +47,7 @@ namespace Kyoo.Abstractions.Models
 
 		/// <summary>
 		/// Create a new <see cref="Provider"/> and specify it's <see cref="Name"/>.
-		/// The <see cref="Slug"/> is automatically calculated from it's name.  
+		/// The <see cref="Slug"/> is automatically calculated from it's name.
 		/// </summary>
 		/// <param name="name">The name of this provider.</param>
 		/// <param name="logo">The logo of this provider.</param>

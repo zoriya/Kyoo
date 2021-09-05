@@ -17,7 +17,7 @@ namespace Kyoo.Authentication.Models.DTO
 		public string Email { get; set; }
 
 		/// <summary>
-		/// The user's username. 
+		/// The user's username.
 		/// </summary>
 		[MinLength(4, ErrorMessage = "The username must have at least {1} characters")]
 		public string Username { get; set; }

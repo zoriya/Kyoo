@@ -45,7 +45,7 @@ namespace Kyoo.Utils
 
 		/// <summary>
 		/// A map where the mapping function is asynchronous.
-		/// Note: <see cref="SelectAsync{T,T2}"/> might interest you. 
+		/// Note: <see cref="SelectAsync{T,T2}"/> might interest you.
 		/// </summary>
 		/// <param name="self">The IEnumerable to map.</param>
 		/// <param name="mapper">The asynchronous function that will map each items</param>

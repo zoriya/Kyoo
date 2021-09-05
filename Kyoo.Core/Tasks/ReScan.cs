@@ -17,8 +17,8 @@
 // 		public string HelpMessage => null;
 // 		public bool RunOnStartup => false;
 // 		public int Priority => 0;
-// 		
-// 		
+//
+//
 // 		private IServiceProvider _serviceProvider;
 // 		private IThumbnailsManager _thumbnailsManager;
 // 		private IProviderManager _providerManager;
@@ -31,7 +31,7 @@
 // 			_thumbnailsManager = serviceProvider.GetService<IThumbnailsManager>();
 // 			_providerManager = serviceProvider.GetService<IProviderManager>();
 // 			_database = serviceScope.ServiceProvider.GetService<DatabaseContext>();
-// 		
+//
 // 			if (arguments == null || !arguments.Contains('/'))
 // 				return;
 //
@@ -50,7 +50,7 @@
 // 		private async Task ReScanShow(string slug)
 // 		{
 // 			Show old;
-// 			
+//
 // 			using (IServiceScope serviceScope = _serviceProvider.CreateScope())
 // 			{
 // 				ILibraryManager libraryManager = serviceScope.ServiceProvider.GetService<ILibraryManager>();
@@ -71,7 +71,7 @@
 // 			if (orphans.Any())
 // 				await Task.WhenAll(orphans.Select(x => ReScanEpisode(old, x)));
 // 		}
-// 		
+//
 // 		private async Task ReScanSeason(string seasonSlug)
 // 		{
 // 			string[] infos = seasonSlug.Split('-');

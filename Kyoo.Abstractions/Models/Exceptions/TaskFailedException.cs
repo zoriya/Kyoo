@@ -34,7 +34,7 @@ namespace Kyoo.Abstractions.Models.Exceptions
 		{ }
 
 		/// <summary>
-		/// The serialization constructor 
+		/// The serialization constructor
 		/// </summary>
 		/// <param name="info">Serialization infos</param>
 		/// <param name="context">The serialization context</param>

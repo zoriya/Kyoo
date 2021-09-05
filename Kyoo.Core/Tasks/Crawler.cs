@@ -24,12 +24,12 @@ namespace Kyoo.Core.Tasks
 		private readonly ILibraryManager _libraryManager;
 
 		/// <summary>
-		/// The file manager used walk inside directories and check they existences. 
+		/// The file manager used walk inside directories and check they existences.
 		/// </summary>
 		private readonly IFileSystem _fileSystem;
 
 		/// <summary>
-		/// A task manager used to create sub tasks for each episode to add to the database. 
+		/// A task manager used to create sub tasks for each episode to add to the database.
 		/// </summary>
 		private readonly ITaskManager _taskManager;
 
@@ -117,7 +117,7 @@ namespace Kyoo.Core.Tasks
 
 				// We try to group episodes by shows to register one episode of each show first.
 				// This speeds up the scan process because further episodes of a show are registered when all metadata
-				// of the show has already been fetched. 
+				// of the show has already been fetched.
 				List<IGrouping<string, string>> shows = files
 					.Where(FileExtensions.IsVideo)
 					.Where(x => episodes.All(y => y.Path != x))

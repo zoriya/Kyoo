@@ -11,7 +11,7 @@ namespace Kyoo.TheTvdb.Models
 		public const string Path = "tvdb";
 
 		/// <summary>
-		/// The api key of the tvdb. 
+		/// The api key of the tvdb.
 		/// </summary>
 		public string ApiKey { get; set; }
 	}

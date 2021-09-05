@@ -60,7 +60,7 @@ namespace Kyoo.Authentication.Views
 		}
 
 		/// <summary>
-		/// Register a new user and return a OTAC to connect to it. 
+		/// Register a new user and return a OTAC to connect to it.
 		/// </summary>
 		/// <param name="request">The DTO register request</param>
 		/// <returns>A OTAC to connect to this new account</returns>

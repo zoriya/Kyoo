@@ -26,7 +26,7 @@ namespace Kyoo.Abstractions.Models
 	public static class MetadataExtension
 	{
 		/// <summary>
-		/// Retrieve the internal provider's ID of an item using it's provider slug. 
+		/// Retrieve the internal provider's ID of an item using it's provider slug.
 		/// </summary>
 		/// <remarks>
 		/// This method will never return anything if the <see cref="IMetadata.ExternalIDs"/> are not loaded.

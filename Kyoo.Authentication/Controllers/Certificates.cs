@@ -23,7 +23,7 @@ namespace Kyoo.Authentication
 	{
 		/// <summary>
 		/// Add the certificate file to the identity server. If the certificate will expire soon, automatically renew it.
-		/// If no certificate exists, one is generated. 
+		/// If no certificate exists, one is generated.
 		/// </summary>
 		/// <param name="builder">The identity server that will be modified.</param>
 		/// <param name="options">The certificate options</param>

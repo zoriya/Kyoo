@@ -16,7 +16,7 @@ namespace Kyoo.Core.Tasks
 	public class MetadataProviderLoader : ITask
 	{
 		/// <summary>
-		/// The provider repository used to create in-db providers from metadata providers. 
+		/// The provider repository used to create in-db providers from metadata providers.
 		/// </summary>
 		private readonly IProviderRepository _providers;
 

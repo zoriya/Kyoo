@@ -21,7 +21,7 @@ namespace Kyoo.Authentication.Models
 		public PermissionOption Permissions { get; set; }
 
 		/// <summary>
-		/// Root path of user's profile pictures. 
+		/// Root path of user's profile pictures.
 		/// </summary>
 		public string ProfilePicturePath { get; set; }
 	}

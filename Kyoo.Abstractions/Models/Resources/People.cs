@@ -5,7 +5,7 @@ using Kyoo.Abstractions.Models.Attributes;
 namespace Kyoo.Abstractions.Models
 {
 	/// <summary>
-	/// An actor, voice actor, writer, animator, somebody who worked on a <see cref="Show"/>. 
+	/// An actor, voice actor, writer, animator, somebody who worked on a <see cref="Show"/>.
 	/// </summary>
 	public class People : IResource, IMetadata, IThumbnails
 	{

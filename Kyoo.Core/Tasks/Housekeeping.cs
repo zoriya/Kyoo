@@ -20,12 +20,12 @@ namespace Kyoo.Core.Tasks
 		private readonly ILibraryManager _libraryManager;
 
 		/// <summary>
-		/// The file manager used walk inside directories and check they existences. 
+		/// The file manager used walk inside directories and check they existences.
 		/// </summary>
 		private readonly IFileSystem _fileSystem;
 
 		/// <summary>
-		/// The logger used to inform the user that episodes has been removed. 
+		/// The logger used to inform the user that episodes has been removed.
 		/// </summary>
 		private readonly ILogger<Housekeeping> _logger;
 

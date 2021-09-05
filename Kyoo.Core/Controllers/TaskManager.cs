@@ -55,7 +55,7 @@ namespace Kyoo.Core.Controllers
 			public ManagedTask Task { get; init; }
 
 			/// <summary>
-			/// The progress reporter that this task should use. 
+			/// The progress reporter that this task should use.
 			/// </summary>
 			public IProgress<float> ProgressReporter { get; init; }
 

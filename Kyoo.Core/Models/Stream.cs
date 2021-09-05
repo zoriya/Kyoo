@@ -31,7 +31,7 @@ namespace Kyoo.Core.Models.Watch
 		[MarshalAs(UnmanagedType.I1)] public bool IsDefault;
 
 		/// <summary>
-		/// Is this stream tagged as forced? 
+		/// Is this stream tagged as forced?
 		/// </summary>
 		[MarshalAs(UnmanagedType.I1)] public bool IsForced;
 

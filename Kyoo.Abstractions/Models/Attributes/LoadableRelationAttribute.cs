@@ -1,9 +1,8 @@
-﻿using System;
+using System;
 using Kyoo.Abstractions.Controllers;
 
 namespace Kyoo.Abstractions.Models.Attributes
 {
-
 	/// <summary>
 	/// The targeted relation can be loaded via a call to <see cref="ILibraryManager.Load"/>.
 	/// </summary>

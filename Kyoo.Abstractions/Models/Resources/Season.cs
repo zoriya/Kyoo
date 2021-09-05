@@ -8,7 +8,7 @@ using Kyoo.Abstractions.Models.Attributes;
 namespace Kyoo.Abstractions.Models
 {
 	/// <summary>
-	/// A season of a <see cref="Show"/>. 
+	/// A season of a <see cref="Show"/>.
 	/// </summary>
 	public class Season : IResource, IMetadata, IThumbnails
 	{
@@ -24,9 +24,10 @@ namespace Kyoo.Abstractions.Models
 					return $"{ShowID}-s{SeasonNumber}";
 				return $"{ShowSlug ?? Show?.Slug}-s{SeasonNumber}";
 			}
+
 			[UsedImplicitly] [NotNull] private set
 			{
-				Match match = Regex.Match(value ?? "", @"(?<show>.+)-s(?<season>\d+)");
+				Match match = Regex.Match(value ?? string.Empty, @"(?<show>.+)-s(?<season>\d+)");
 
 				if (!match.Success)
 					throw new ArgumentException("Invalid season slug. Format: {showSlug}-s{seasonNumber}");

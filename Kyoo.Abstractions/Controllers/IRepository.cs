@@ -625,6 +625,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="where">A predicate to add arbitrary filter</param>
 		/// <param name="sort">A sort by expression</param>
 		/// <param name="limit">Pagination information (where to start and how many to get)</param>
+		/// <typeparam name="T">The type of metadata to retrieve</typeparam>
 		/// <returns>A filtered list of external ids.</returns>
 		Task<ICollection<MetadataID>> GetMetadataID<T>([Optional] Expression<Func<MetadataID, bool>> where,
 			Expression<Func<MetadataID, object>> sort,

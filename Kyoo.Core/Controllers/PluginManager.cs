@@ -29,7 +29,7 @@ namespace Kyoo.Core.Controllers
 		private readonly IOptions<BasicOptions> _options;
 
 		/// <summary>
-		/// The logger used by this class. 
+		/// The logger used by this class.
 		/// </summary>
 		private readonly ILogger<PluginManager> _logger;
 

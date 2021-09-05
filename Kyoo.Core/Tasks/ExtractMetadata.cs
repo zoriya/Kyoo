@@ -22,7 +22,7 @@
 // 		private ILibraryManager _library;
 // 		private IThumbnailsManager _thumbnails;
 // 		private ITranscoder _transcoder;
-// 		
+//
 // 		public async Task Run(IServiceProvider serviceProvider, CancellationToken token, string arguments = null)
 // 		{
 // 			string[] args = arguments?.Split('/');
@@ -33,13 +33,13 @@
 // 			string slug = args[1];
 // 			bool thumbs = args.Length < 3 || string.Equals(args[2], "thumbnails", StringComparison.InvariantCultureIgnoreCase);
 // 			bool subs = args.Length < 3 || string.Equals(args[2], "subs", StringComparison.InvariantCultureIgnoreCase);
-// 			
+//
 // 			using IServiceScope serviceScope = serviceProvider.CreateScope();
 // 			_library = serviceScope.ServiceProvider.GetService<ILibraryManager>();
 // 			_thumbnails = serviceScope.ServiceProvider.GetService<IThumbnailsManager>();
 // 			_transcoder = serviceScope.ServiceProvider.GetService<ITranscoder>();
 // 			int id;
-// 			
+//
 // 			switch (args[0].ToLowerInvariant())
 // 			{
 // 				case "show":
@@ -51,15 +51,15 @@
 // 					break;
 // 				case "season":
 // 				case "seasons":
-// 					Season season = await (int.TryParse(slug, out id) 
-// 						? _library!.Get<Season>(id) 
+// 					Season season = await (int.TryParse(slug, out id)
+// 						? _library!.Get<Season>(id)
 // 						: _library!.Get<Season>(slug));
 // 					await ExtractSeason(season, thumbs, subs, token);
 // 					break;
 // 				case "episode":
 // 				case "episodes":
-// 					Episode episode = await (int.TryParse(slug, out id) 
-// 						? _library!.Get<Episode>(id) 
+// 					Episode episode = await (int.TryParse(slug, out id)
+// 						? _library!.Get<Episode>(id)
 // 						: _library!.Get<Episode>(slug));
 // 					await ExtractEpisode(episode, thumbs, subs);
 // 					break;
@@ -91,7 +91,7 @@
 // 				await ExtractEpisode(episode, thumbs, subs);
 // 			}
 // 		}
-// 		
+//
 // 		private async Task ExtractEpisode(Episode episode, bool thumbs, bool subs)
 // 		{
 // 			if (thumbs)
@@ -106,7 +106,7 @@
 // 				await _library.Edit(episode, false);
 // 			}
 // 		}
-// 		
+//
 // 		public Task<IEnumerable<string>> GetPossibleParameters()
 // 		{
 // 			return Task.FromResult<IEnumerable<string>>(null);
