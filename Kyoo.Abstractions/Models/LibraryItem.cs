@@ -10,8 +10,19 @@ namespace Kyoo.Abstractions.Models
 	/// </summary>
 	public enum ItemType
 	{
+		/// <summary>
+		/// The <see cref="LibraryItem"/> is a <see cref="Show"/>.
+		/// </summary>
 		Show,
+
+		/// <summary>
+		/// The <see cref="LibraryItem"/> is a Movie (a <see cref="Show"/> with <see cref="Show.IsMovie"/> equals to true).
+		/// </summary>
 		Movie,
+
+		/// <summary>
+		/// The <see cref="LibraryItem"/> is a <see cref="Collection"/>.
+		/// </summary>
 		Collection
 	}
 
@@ -43,7 +54,7 @@ namespace Kyoo.Abstractions.Models
 		public Status? Status { get; set; }
 
 		/// <summary>
-		/// The date this show or collection started airing. It can be null if this is unknown. 
+		/// The date this show or collection started airing. It can be null if this is unknown.
 		/// </summary>
 		public DateTime? StartAir { get; set; }
 

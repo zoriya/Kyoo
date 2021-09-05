@@ -6,7 +6,7 @@ namespace Kyoo.Abstractions.Models
 	/// <remarks>
 	/// This class is not serialized like other classes.
 	/// Based on the <see cref="ForPeople"/> field, it is serialized like
-	/// a show with two extra fields (<see cref="Role"/> and <see cref="Type"/>). 
+	/// a show with two extra fields (<see cref="Role"/> and <see cref="Type"/>).
 	/// </remarks>
 	public class PeopleRole : IResource
 	{
@@ -44,13 +44,13 @@ namespace Kyoo.Abstractions.Models
 
 		/// <summary>
 		/// The type of work the person has done for the show.
-		/// That can be something like "Actor", "Writer", "Music", "Voice Actor"... 
+		/// That can be something like "Actor", "Writer", "Music", "Voice Actor"...
 		/// </summary>
 		public string Type { get; set; }
 
 		/// <summary>
 		/// The role the People played.
-		/// This is mostly used to inform witch character was played for actor and voice actors. 
+		/// This is mostly used to inform witch character was played for actor and voice actors.
 		/// </summary>
 		public string Role { get; set; }
 	}

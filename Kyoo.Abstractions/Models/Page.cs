@@ -9,7 +9,8 @@ namespace Kyoo.Abstractions.Models
 	/// A page of resource that contains information about the pagination of resources.
 	/// </summary>
 	/// <typeparam name="T">The type of resource contained in this page.</typeparam>
-	public class Page<T> where T : IResource
+	public class Page<T>
+		where T : IResource
 	{
 		/// <summary>
 		/// The link of the current page.

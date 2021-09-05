@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Abstractions.Controllers
@@ -7,14 +8,44 @@ namespace Kyoo.Abstractions.Controllers
 	/// A list of constant priorities used for <see cref="IStartupAction"/>'s <see cref="IStartupAction.Priority"/>.
 	/// It also contains helper methods for creating new <see cref="StartupAction"/>.
 	/// </summary>
+	[SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1649:File name should match first type name",
+		Justification = "StartupAction is nested and the name SA is short to improve readability in plugin's startup.")]
 	public static class SA
 	{
+		/// <summary>
+		/// The highest predefined priority existing for <see cref="StartupAction"/>.
+		/// </summary>
 		public const int Before = 5000;
+
+		/// <summary>
+		/// Items defining routing (see IApplicationBuilder.UseRouting use this priority.
+		/// </summary>
 		public const int Routing = 4000;
+
+		/// <summary>
+		/// Actions defining new static files router use this priority.
+		/// </summary>
 		public const int StaticFiles = 3000;
+
+		/// <summary>
+		/// Actions calling IApplicationBuilder.UseAuthentication use this priority.
+		/// </summary>
 		public const int Authentication = 2000;
+
+		/// <summary>
+		/// Actions calling IApplicationBuilder.UseAuthorization use this priority.
+		/// </summary>
 		public const int Authorization = 1000;
+
+		/// <summary>
+		/// Action adding endpoint should use this priority (with a negative modificator if there is a catchall).
+		/// </summary>
 		public const int Endpoint = 0;
+
+		/// <summary>
+		/// The lowest predefined priority existing for <see cref="StartupAction"/>.
+		/// It should run after all other actions.
+		/// </summary>
 		public const int After = -1000;
 
 		/// <summary>
@@ -58,13 +89,150 @@ namespace Kyoo.Abstractions.Controllers
 		/// <returns>A new <see cref="StartupAction"/></returns>
 		public static StartupAction<T, T2, T3> New<T, T2, T3>(Action<T, T2, T3> action, int priority)
 			=> new(action, priority);
+
+		/// <summary>
+		/// A <see cref="IStartupAction"/> with no dependencies.
+		/// </summary>
+		public class StartupAction : IStartupAction
+		{
+			/// <summary>
+			/// The action to execute at startup.
+			/// </summary>
+			private readonly Action _action;
+
+			/// <inheritdoc />
+			public int Priority { get; }
+
+			/// <summary>
+			/// Create a new <see cref="StartupAction"/>.
+			/// </summary>
+			/// <param name="action">The action to execute on startup.</param>
+			/// <param name="priority">The priority of this action (see <see cref="Priority"/>).</param>
+			public StartupAction(Action action, int priority)
+			{
+				_action = action;
+				Priority = priority;
+			}
+
+			/// <inheritdoc />
+			public void Run(IServiceProvider provider)
+			{
+				_action.Invoke();
+			}
+		}
+
+		/// <summary>
+		/// A <see cref="IStartupAction"/> with one dependencies.
+		/// </summary>
+		/// <typeparam name="T">The dependency to use.</typeparam>
+		public class StartupAction<T> : IStartupAction
+		{
+			/// <summary>
+			/// The action to execute at startup.
+			/// </summary>
+			private readonly Action<T> _action;
+
+			/// <inheritdoc />
+			public int Priority { get; }
+
+			/// <summary>
+			/// Create a new <see cref="StartupAction{T}"/>.
+			/// </summary>
+			/// <param name="action">The action to execute on startup.</param>
+			/// <param name="priority">The priority of this action (see <see cref="Priority"/>).</param>
+			public StartupAction(Action<T> action, int priority)
+			{
+				_action = action;
+				Priority = priority;
+			}
+
+			/// <inheritdoc />
+			public void Run(IServiceProvider provider)
+			{
+				_action.Invoke(provider.GetRequiredService<T>());
+			}
+		}
+
+		/// <summary>
+		/// A <see cref="IStartupAction"/> with two dependencies.
+		/// </summary>
+		/// <typeparam name="T">The dependency to use.</typeparam>
+		/// <typeparam name="T2">The second dependency to use.</typeparam>
+		public class StartupAction<T, T2> : IStartupAction
+		{
+			/// <summary>
+			/// The action to execute at startup.
+			/// </summary>
+			private readonly Action<T, T2> _action;
+
+			/// <inheritdoc />
+			public int Priority { get; }
+
+			/// <summary>
+			/// Create a new <see cref="StartupAction{T, T2}"/>.
+			/// </summary>
+			/// <param name="action">The action to execute on startup.</param>
+			/// <param name="priority">The priority of this action (see <see cref="Priority"/>).</param>
+			public StartupAction(Action<T, T2> action, int priority)
+			{
+				_action = action;
+				Priority = priority;
+			}
+
+			/// <inheritdoc />
+			public void Run(IServiceProvider provider)
+			{
+				_action.Invoke(
+					provider.GetRequiredService<T>(),
+					provider.GetRequiredService<T2>()
+				);
+			}
+		}
+
+		/// <summary>
+		/// A <see cref="IStartupAction"/> with three dependencies.
+		/// </summary>
+		/// <typeparam name="T">The dependency to use.</typeparam>
+		/// <typeparam name="T2">The second dependency to use.</typeparam>
+		/// <typeparam name="T3">The third dependency to use.</typeparam>
+		public class StartupAction<T, T2, T3> : IStartupAction
+		{
+			/// <summary>
+			/// The action to execute at startup.
+			/// </summary>
+			private readonly Action<T, T2, T3> _action;
+
+			/// <inheritdoc />
+			public int Priority { get; }
+
+			/// <summary>
+			/// Create a new <see cref="StartupAction{T, T2, T3}"/>.
+			/// </summary>
+			/// <param name="action">The action to execute on startup.</param>
+			/// <param name="priority">The priority of this action (see <see cref="Priority"/>).</param>
+			public StartupAction(Action<T, T2, T3> action, int priority)
+			{
+				_action = action;
+				Priority = priority;
+			}
+
+			/// <inheritdoc />
+			public void Run(IServiceProvider provider)
+			{
+				_action.Invoke(
+					provider.GetRequiredService<T>(),
+					provider.GetRequiredService<T2>(),
+					provider.GetRequiredService<T3>()
+				);
+			}
+		}
 	}
 
 	/// <summary>
 	/// An action executed on kyoo's startup to initialize the asp-net container.
 	/// </summary>
 	/// <remarks>
-	/// This is the base interface, see <see cref="StartupAction"/> for a simpler use of this.
+	/// This is the base interface, see <see cref="SA.StartupAction"/> for a simpler use of this.
 	/// </remarks>
 	public interface IStartupAction
 	{
@@ -79,142 +247,5 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		/// <param name="provider">The service provider containing all services can be used.</param>
 		void Run(IServiceProvider provider);
-	}
-
-	/// <summary>
-	/// A <see cref="IStartupAction"/> with no dependencies.
-	/// </summary>
-	public class StartupAction : IStartupAction
-	{
-		/// <summary>
-		/// The action to execute at startup.
-		/// </summary>
-		private readonly Action _action;
-
-		/// <inheritdoc />
-		public int Priority { get; }
-
-		/// <summary>
-		/// Create a new <see cref="StartupAction"/>.
-		/// </summary>
-		/// <param name="action">The action to execute on startup.</param>
-		/// <param name="priority">The priority of this action (see <see cref="Priority"/>).</param>
-		public StartupAction(Action action, int priority)
-		{
-			_action = action;
-			Priority = priority;
-		}
-
-		/// <inheritdoc />
-		public void Run(IServiceProvider provider)
-		{
-			_action.Invoke();
-		}
-	}
-
-	/// <summary>
-	/// A <see cref="IStartupAction"/> with one dependencies.
-	/// </summary>
-	/// <typeparam name="T">The dependency to use.</typeparam>
-	public class StartupAction<T> : IStartupAction
-	{
-		/// <summary>
-		/// The action to execute at startup.
-		/// </summary>
-		private readonly Action<T> _action;
-
-		/// <inheritdoc />
-		public int Priority { get; }
-
-		/// <summary>
-		/// Create a new <see cref="StartupAction{T}"/>.
-		/// </summary>
-		/// <param name="action">The action to execute on startup.</param>
-		/// <param name="priority">The priority of this action (see <see cref="Priority"/>).</param>
-		public StartupAction(Action<T> action, int priority)
-		{
-			_action = action;
-			Priority = priority;
-		}
-
-		/// <inheritdoc />
-		public void Run(IServiceProvider provider)
-		{
-			_action.Invoke(provider.GetRequiredService<T>());
-		}
-	}
-
-	/// <summary>
-	/// A <see cref="IStartupAction"/> with two dependencies.
-	/// </summary>
-	/// <typeparam name="T">The dependency to use.</typeparam>
-	/// <typeparam name="T2">The second dependency to use.</typeparam>
-	public class StartupAction<T, T2> : IStartupAction
-	{
-		/// <summary>
-		/// The action to execute at startup.
-		/// </summary>
-		private readonly Action<T, T2> _action;
-
-		/// <inheritdoc />
-		public int Priority { get; }
-
-		/// <summary>
-		/// Create a new <see cref="StartupAction{T, T2}"/>.
-		/// </summary>
-		/// <param name="action">The action to execute on startup.</param>
-		/// <param name="priority">The priority of this action (see <see cref="Priority"/>).</param>
-		public StartupAction(Action<T, T2> action, int priority)
-		{
-			_action = action;
-			Priority = priority;
-		}
-
-		/// <inheritdoc />
-		public void Run(IServiceProvider provider)
-		{
-			_action.Invoke(
-				provider.GetRequiredService<T>(),
-				provider.GetRequiredService<T2>()
-			);
-		}
-	}
-
-	/// <summary>
-	/// A <see cref="IStartupAction"/> with three dependencies.
-	/// </summary>
-	/// <typeparam name="T">The dependency to use.</typeparam>
-	/// <typeparam name="T2">The second dependency to use.</typeparam>
-	/// <typeparam name="T3">The third dependency to use.</typeparam>
-	public class StartupAction<T, T2, T3> : IStartupAction
-	{
-		/// <summary>
-		/// The action to execute at startup.
-		/// </summary>
-		private readonly Action<T, T2, T3> _action;
-
-		/// <inheritdoc />
-		public int Priority { get; }
-
-		/// <summary>
-		/// Create a new <see cref="StartupAction{T, T2, T3}"/>.
-		/// </summary>
-		/// <param name="action">The action to execute on startup.</param>
-		/// <param name="priority">The priority of this action (see <see cref="Priority"/>).</param>
-		public StartupAction(Action<T, T2, T3> action, int priority)
-		{
-			_action = action;
-			Priority = priority;
-		}
-
-		/// <inheritdoc />
-		public void Run(IServiceProvider provider)
-		{
-			_action.Invoke(
-				provider.GetRequiredService<T>(),
-				provider.GetRequiredService<T2>(),
-				provider.GetRequiredService<T3>()
-			);
-		}
 	}
 }

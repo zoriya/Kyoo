@@ -10,6 +10,14 @@ namespace Kyoo.Abstractions.Models
 	public class MetadataID
 	{
 		/// <summary>
+		/// The expression to retrieve the unique ID of a MetadataID. This is an aggregate of the two resources IDs.
+		/// </summary>
+		public static Expression<Func<MetadataID, object>> PrimaryKey
+		{
+			get { return x => new { First = x.ResourceID, Second = x.ProviderID }; }
+		}
+
+		/// <summary>
 		/// The ID of the resource which possess the metadata.
 		/// </summary>
 		[SerializeIgnore] public int ResourceID { get; set; }
@@ -33,13 +41,5 @@ namespace Kyoo.Abstractions.Models
 		/// The URL of the resource on the external provider.
 		/// </summary>
 		public string Link { get; set; }
-
-		/// <summary>
-		/// The expression to retrieve the unique ID of a MetadataID. This is an aggregate of the two resources IDs.
-		/// </summary>
-		public static Expression<Func<MetadataID, object>> PrimaryKey
-		{
-			get { return x => new { First = x.ResourceID, Second = x.ProviderID }; }
-		}
 	}
 }
