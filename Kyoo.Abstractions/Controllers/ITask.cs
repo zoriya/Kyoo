@@ -10,6 +10,43 @@ using Kyoo.Abstractions.Models.Exceptions;
 namespace Kyoo.Abstractions.Controllers
 {
 	/// <summary>
+	/// A common interface that tasks should implement.
+	/// </summary>
+	public interface ITask
+	{
+		/// <summary>
+		/// The list of parameters
+		/// </summary>
+		/// <returns>
+		/// All parameters that this task as. Every one of them will be given to the run function with a value.
+		/// </returns>
+		public TaskParameters GetParameters();
+
+		/// <summary>
+		/// Start this task.
+		/// </summary>
+		/// <param name="arguments">
+		/// The list of parameters.
+		/// </param>
+		/// <param name="progress">
+		/// The progress reporter. Used to inform the sender the percentage of completion of this task
+		/// .</param>
+		/// <param name="cancellationToken">A token to request the task's cancellation.
+		/// If this task is not cancelled quickly, it might be killed by the runner.
+		/// </param>
+		/// <exception cref="TaskFailedException">
+		/// An exception meaning that the task has failed for handled reasons like invalid arguments,
+		/// invalid environment, missing plugins or failures not related to a default in the code.
+		/// This exception allow the task to display a failure message to the end user while others exceptions
+		/// will be displayed as unhandled exceptions and display a stack trace.
+		/// </exception>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+		public Task Run([NotNull] TaskParameters arguments,
+			[NotNull] IProgress<float> progress,
+			CancellationToken cancellationToken);
+	}
+
+	/// <summary>
 	/// A single task parameter. This struct contains metadata to display and utility functions to get them in the task.
 	/// </summary>
 	/// <remarks>This struct will be used to generate the swagger documentation of the task.</remarks>
@@ -43,7 +80,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <summary>
 		/// The value of the parameter.
 		/// </summary>
-		private object Value { get; init; }
+		private object _Value { get; init; }
 
 		/// <summary>
 		/// Create a new task parameter.
@@ -93,7 +130,7 @@ namespace Kyoo.Abstractions.Controllers
 			{
 				Name = name,
 				Type = typeof(T),
-				Value = value
+				_Value = value
 			};
 		}
 
@@ -104,7 +141,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <returns>A new parameter's value for this current parameter</returns>
 		public TaskParameter CreateValue(object value)
 		{
-			return this with { Value = value };
+			return this with { _Value = value };
 		}
 
 		/// <summary>
@@ -115,9 +152,9 @@ namespace Kyoo.Abstractions.Controllers
 		public T As<T>()
 		{
 			if (typeof(T) == typeof(object))
-				return (T)Value;
+				return (T)_Value;
 
-			if (Value is IResource resource)
+			if (_Value is IResource resource)
 			{
 				if (typeof(T) == typeof(string))
 					return (T)(object)resource.Slug;
@@ -125,7 +162,7 @@ namespace Kyoo.Abstractions.Controllers
 					return (T)(object)resource.ID;
 			}
 
-			return (T)Convert.ChangeType(Value, typeof(T));
+			return (T)Convert.ChangeType(_Value, typeof(T));
 		}
 	}
 
@@ -146,48 +183,12 @@ namespace Kyoo.Abstractions.Controllers
 		public TaskParameters() { }
 
 		/// <summary>
-		/// Create a <see cref="TaskParameters"/> with an initial parameters content 
+		/// Create a <see cref="TaskParameters"/> with an initial parameters content.
 		/// </summary>
 		/// <param name="parameters">The list of parameters</param>
 		public TaskParameters(IEnumerable<TaskParameter> parameters)
 		{
 			AddRange(parameters);
 		}
-	}
-
-	/// <summary>
-	/// A common interface that tasks should implement.
-	/// </summary>
-	public interface ITask
-	{
-		/// <summary>
-		/// The list of parameters
-		/// </summary>
-		/// <returns>
-		/// All parameters that this task as. Every one of them will be given to the run function with a value.
-		/// </returns>
-		public TaskParameters GetParameters();
-
-		/// <summary>
-		/// Start this task.
-		/// </summary>
-		/// <param name="arguments">
-		/// The list of parameters.
-		/// </param>
-		/// <param name="progress">
-		/// The progress reporter. Used to inform the sender the percentage of completion of this task
-		/// .</param>
-		/// <param name="cancellationToken">A token to request the task's cancellation.
-		/// If this task is not cancelled quickly, it might be killed by the runner.
-		/// </param>
-		/// <exception cref="TaskFailedException">
-		/// An exception meaning that the task has failed for handled reasons like invalid arguments,
-		/// invalid environment, missing plugins or failures not related to a default in the code.
-		/// This exception allow the task to display a failure message to the end user while others exceptions
-		/// will be displayed as unhandled exceptions and display a stack trace.
-		/// </exception>
-		public Task Run([NotNull] TaskParameters arguments,
-			[NotNull] IProgress<float> progress,
-			CancellationToken cancellationToken);
 	}
 }

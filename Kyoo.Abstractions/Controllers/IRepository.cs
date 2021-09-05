@@ -248,6 +248,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		/// <param name="id">The ID of the resource</param>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task Delete(int id);
 
 		/// <summary>
@@ -255,6 +256,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		/// <param name="slug">The slug of the resource</param>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task Delete(string slug);
 
 		/// <summary>
@@ -262,6 +264,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		/// <param name="obj">The resource to delete</param>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task Delete([NotNull] T obj);
 
 		/// <summary>
@@ -269,6 +272,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		/// <param name="where">A predicate to filter resources to delete. Every resource that match this will be deleted.</param>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task DeleteAll([NotNull] Expression<Func<T, bool>> where);
 	}
 
@@ -284,6 +288,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="showID">The ID of the show</param>
 		/// <param name="libraryID">The ID of the library (optional)</param>
 		/// <param name="collectionID">The ID of the collection (optional)</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task AddShowLink(int showID, int? libraryID, int? collectionID);
 
 		/// <summary>
@@ -624,7 +629,8 @@ namespace Kyoo.Abstractions.Controllers
 		Task<ICollection<MetadataID>> GetMetadataID<T>([Optional] Expression<Func<MetadataID, bool>> where,
 			Expression<Func<MetadataID, object>> sort,
 			Pagination limit = default
-		) where T : class, IMetadata
+		)
+		where T : class, IMetadata
 			=> GetMetadataID<T>(where, new Sort<MetadataID>(sort), limit);
 	}
 
