@@ -106,7 +106,7 @@ namespace Kyoo.Core.Controllers
 			=> throw new InvalidOperationException();
 
 		/// <summary>
-		/// Get a basic queryable for a library with the right mapping from shows & collections.
+		/// Get a basic queryable for a library with the right mapping from shows and collections.
 		/// Shows contained in a collection are excluded.
 		/// </summary>
 		/// <param name="selector">Only items that are part of a library that match this predicate will be returned.</param>

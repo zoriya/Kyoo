@@ -168,7 +168,7 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		/// <param name="config">The configuration to transform</param>
 		/// <returns>A strongly typed representation of the configuration.</returns>
-		[SuppressMessage("ReSharper", "RedundantJumpStatement")]
+		[SuppressMessage("ReSharper", "RedundantJumpStatement", Justification = "A catch block should not be empty.")]
 		private ExpandoObject _ToObject(IConfiguration config)
 		{
 			ExpandoObject obj = new();

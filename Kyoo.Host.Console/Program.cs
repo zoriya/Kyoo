@@ -22,6 +22,7 @@ namespace Kyoo.Host.Console
 		/// Main function of the program
 		/// </summary>
 		/// <param name="args">Command line arguments</param>
+		/// <returns>A <see cref="Task"/> representing the lifetime of the program.</returns>
 		public static Task Main(string[] args)
 		{
 			Application application = new(Environment);

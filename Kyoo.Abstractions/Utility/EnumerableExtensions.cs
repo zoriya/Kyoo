@@ -16,7 +16,7 @@ namespace Kyoo.Utils
 		/// </summary>
 		/// <param name="self">The IEnumerable to map. If self is null, an empty list is returned</param>
 		/// <param name="mapper">The function that will map each items</param>
-		/// <typeparam name="T">The type of items in <see cref="self"/></typeparam>
+		/// <typeparam name="T">The type of items in <paramref name="self"/></typeparam>
 		/// <typeparam name="T2">The type of items in the returned list</typeparam>
 		/// <returns>The list mapped.</returns>
 		/// <exception cref="ArgumentNullException">The list or the mapper can't be null</exception>
@@ -48,11 +48,11 @@ namespace Kyoo.Utils
 		/// Note: <see cref="SelectAsync{T,T2}"/> might interest you.
 		/// </summary>
 		/// <param name="self">The IEnumerable to map.</param>
-		/// <param name="mapper">The asynchronous function that will map each items</param>
-		/// <typeparam name="T">The type of items in <see cref="self"/></typeparam>
-		/// <typeparam name="T2">The type of items in the returned list</typeparam>
-		/// <returns>The list mapped as an AsyncEnumerable</returns>
-		/// <exception cref="ArgumentNullException">The list or the mapper can't be null</exception>
+		/// <param name="mapper">The asynchronous function that will map each items.</param>
+		/// <typeparam name="T">The type of items in <paramref name="self"/>.</typeparam>
+		/// <typeparam name="T2">The type of items in the returned list.</typeparam>
+		/// <returns>The list mapped as an AsyncEnumerable.</returns>
+		/// <exception cref="ArgumentNullException">The list or the mapper can't be null.</exception>
 		[LinqTunnel]
 		public static IAsyncEnumerable<T2> MapAsync<T, T2>([NotNull] this IEnumerable<T> self,
 			[NotNull] Func<T, int, Task<T2>> mapper)
@@ -82,7 +82,7 @@ namespace Kyoo.Utils
 		/// </summary>
 		/// <param name="self">The IEnumerable to map</param>
 		/// <param name="mapper">The asynchronous function that will map each items</param>
-		/// <typeparam name="T">The type of items in <see cref="self"/></typeparam>
+		/// <typeparam name="T">The type of items in <paramref name="self"/></typeparam>
 		/// <typeparam name="T2">The type of items in the returned list</typeparam>
 		/// <returns>The list mapped as an AsyncEnumerable</returns>
 		/// <exception cref="ArgumentNullException">The list or the mapper can't be null</exception>
@@ -198,6 +198,7 @@ namespace Kyoo.Utils
 		/// </summary>
 		/// <param name="self">The list to enumerate. If this is null, the function result in a no-op</param>
 		/// <param name="action">The action to execute for each arguments</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		public static async Task ForEachAsync([CanBeNull] this IEnumerable self, Func<object, Task> action)
 		{
 			if (self == null)
@@ -212,6 +213,7 @@ namespace Kyoo.Utils
 		/// <param name="self">The list to enumerate. If this is null, the function result in a no-op</param>
 		/// <param name="action">The asynchronous action to execute for each arguments</param>
 		/// <typeparam name="T">The type of items in the list.</typeparam>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		public static async Task ForEachAsync<T>([CanBeNull] this IEnumerable<T> self, Func<T, Task> action)
 		{
 			if (self == null)
@@ -226,6 +228,7 @@ namespace Kyoo.Utils
 		/// <param name="self">The async list to enumerate. If this is null, the function result in a no-op</param>
 		/// <param name="action">The action to execute for each arguments</param>
 		/// <typeparam name="T">The type of items in the list.</typeparam>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		public static async Task ForEachAsync<T>([CanBeNull] this IAsyncEnumerable<T> self, Action<T> action)
 		{
 			if (self == null)

@@ -135,7 +135,7 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		/// <param name="ep">The episode to transform.</param>
 		/// <param name="library">
-		/// A library manager to retrieve the next and previous episode and load the show & tracks of the episode.
+		/// A library manager to retrieve the next and previous episode and load the show and tracks of the episode.
 		/// </param>
 		/// <returns>A new WatchItem representing the given episode.</returns>
 		public static async Task<WatchItem> FromEpisode(Episode ep, ILibraryManager library)

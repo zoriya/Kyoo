@@ -348,7 +348,7 @@ namespace Kyoo.Database
 		/// Return a new or an in cache temporary object wih the same ID as the one given
 		/// </summary>
 		/// <param name="model">If a resource with the same ID is found in the database, it will be used.
-		/// <see cref="model"/> will be used otherwise</param>
+		/// <paramref name="model"/> will be used otherwise</param>
 		/// <typeparam name="T">The type of the resource</typeparam>
 		/// <returns>A resource that is now tracked by this context.</returns>
 		public T GetTemporaryObject<T>(T model)

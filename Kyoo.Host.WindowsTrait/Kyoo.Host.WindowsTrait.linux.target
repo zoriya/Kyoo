@@ -1,15 +1,15 @@
 <Project>
 	<!-- Project file used instead of the default csproj when the host system is not windows. This only skip the build. -->
-	
+
 	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
-	
+
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
 		<NoWarn>NU1503</NoWarn>
 	</PropertyGroup>
 
 	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
-	
+
 	<Target Name="Build">
 		<Message Importance="high" Text="Detected current operating system is not windows, skipping WindowsHost build." />
 	</Target>
@@ -18,9 +18,9 @@
 	<Target Name="Pack" />
 	<Target Name="Restore" />
 	<Target Name="Publish" />
-	
+
 	<ItemGroup>
-		<None Include="@(Compile)" />
+		<None Include="@(Compile)" Visible="true" />
 		<Compile Remove="*" />
 	</ItemGroup>
 </Project>

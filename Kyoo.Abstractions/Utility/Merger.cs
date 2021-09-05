@@ -146,7 +146,7 @@ namespace Kyoo.Utils
 		/// <param name="first">The object to assign</param>
 		/// <param name="second">The object containing new values</param>
 		/// <typeparam name="T">Fields of T will be used</typeparam>
-		/// <returns><see cref="first"/></returns>
+		/// <returns><paramref name="first"/></returns>
 		public static T Assign<T>(T first, T second)
 		{
 			Type type = typeof(T);
@@ -189,7 +189,7 @@ namespace Kyoo.Utils
 		/// Filter fields that will be merged
 		/// </param>
 		/// <typeparam name="T">Fields of T will be completed</typeparam>
-		/// <returns><see cref="first"/></returns>
+		/// <returns><paramref name="first"/></returns>
 		/// <exception cref="ArgumentNullException">If first is null</exception>
 		public static T Complete<T>([NotNull] T first,
 			[CanBeNull] T second,
@@ -244,7 +244,7 @@ namespace Kyoo.Utils
 		}
 
 		/// <summary>
-		/// This will set missing values of <see cref="first"/> to the corresponding values of <see cref="second"/>.
+		/// This will set missing values of <paramref name="first"/> to the corresponding values of <paramref name="second"/>.
 		/// Enumerable will be merged (concatenated) and Dictionaries too.
 		/// At the end, the OnMerge method of first will be called if first is a <see cref="IOnMerge"/>.
 		/// </summary>
@@ -261,7 +261,7 @@ namespace Kyoo.Utils
 		/// Filter fields that will be merged
 		/// </param>
 		/// <typeparam name="T">Fields of T will be merged</typeparam>
-		/// <returns><see cref="first"/></returns>
+		/// <returns><paramref name="first"/></returns>
 		[ContractAnnotation("first:notnull => notnull; second:notnull => notnull", true)]
 		public static T Merge<T>([CanBeNull] T first,
 			[CanBeNull] T second,
@@ -329,11 +329,11 @@ namespace Kyoo.Utils
 		}
 
 		/// <summary>
-		/// Set every fields of <see cref="obj"/> to the default value.
+		/// Set every fields of <paramref name="obj"/> to the default value.
 		/// </summary>
 		/// <param name="obj">The object to nullify</param>
 		/// <typeparam name="T">Fields of T will be nullified</typeparam>
-		/// <returns><see cref="obj"/></returns>
+		/// <returns><paramref name="obj"/></returns>
 		public static T Nullify<T>(T obj)
 		{
 			Type type = typeof(T);

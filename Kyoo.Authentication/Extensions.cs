@@ -30,11 +30,11 @@ namespace Kyoo.Authentication
 		/// <summary>
 		/// Convert a user to an <see cref="IdentityServerUser"/>.
 		/// </summary>
-		/// <param name="user">The user to convert</param>
+		/// <param name="user">The user to convert.</param>
 		/// <returns>The corresponding identity server user.</returns>
 		public static IdentityServerUser ToIdentityUser(this User user)
 		{
-			return new(user.ID.ToString())
+			return new IdentityServerUser(user.ID.ToString())
 			{
 				DisplayName = user.Username,
 				AdditionalClaims = new[] { new Claim("permissions", string.Join(',', user.Permissions)) }

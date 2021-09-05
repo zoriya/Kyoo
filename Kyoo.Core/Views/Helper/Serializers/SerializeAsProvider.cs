@@ -1,19 +1,11 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+using System;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using Kyoo.Abstractions.Models;
-using Kyoo.Abstractions.Models.Attributes;
-using Kyoo.Utils;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 
 namespace Kyoo.Core.Api
 {
-
 	public class SerializeAsProvider : IValueProvider
 	{
 		private string _format;

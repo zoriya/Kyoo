@@ -34,7 +34,7 @@ namespace Kyoo.Core.Controllers
 		/// <summary>
 		/// Create a new base <see cref="LocalRepository{T}"/> with the given database handle.
 		/// </summary>
-		/// <param name="database">A database connection to load resources of type <see cref="T"/></param>
+		/// <param name="database">A database connection to load resources of type <typeparamref name="T"/></param>
 		protected LocalRepository(DbContext database)
 		{
 			Database = database;
@@ -114,11 +114,11 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <summary>
-		/// Apply filters to a query to ease sort, pagination & where queries for resources of this repository
+		/// Apply filters to a query to ease sort, pagination and where queries for resources of this repository
 		/// </summary>
 		/// <param name="query">The base query to filter.</param>
 		/// <param name="where">An expression to filter based on arbitrary conditions</param>
-		/// <param name="sort">The sort settings (sort order & sort by)</param>
+		/// <param name="sort">The sort settings (sort order and sort by)</param>
 		/// <param name="limit">Pagination information (where to start and how many to get)</param>
 		/// <returns>The filtered query</returns>
 		protected Task<ICollection<T>> ApplyFilters(IQueryable<T> query,
@@ -130,14 +130,14 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <summary>
-		/// Apply filters to a query to ease sort, pagination & where queries for any resources types.
-		/// For resources of type <see cref="T"/>, see <see cref="ApplyFilters"/>
+		/// Apply filters to a query to ease sort, pagination and where queries for any resources types.
+		/// For resources of type <typeparamref name="T"/>, see <see cref="ApplyFilters"/>
 		/// </summary>
 		/// <param name="query">The base query to filter.</param>
 		/// <param name="get">A function to asynchronously get a resource from the database using it's ID.</param>
 		/// <param name="defaultSort">The default sort order of this resource's type.</param>
 		/// <param name="where">An expression to filter based on arbitrary conditions</param>
-		/// <param name="sort">The sort settings (sort order & sort by)</param>
+		/// <param name="sort">The sort settings (sort order and sort by)</param>
 		/// <param name="limit">Pagination information (where to start and how many to get)</param>
 		/// <typeparam name="TValue">The type of items to query.</typeparam>
 		/// <returns>The filtered query</returns>
@@ -247,8 +247,8 @@ namespace Kyoo.Core.Controllers
 		/// The non edited resource
 		/// </param>
 		/// <param name="changed">
-		/// The new version of <see cref="resource"/>.
-		/// This item will be saved on the database and replace <see cref="resource"/>
+		/// The new version of <paramref name="resource"/>.
+		/// This item will be saved on the database and replace <paramref name="resource"/>
 		/// </param>
 		/// <param name="resetOld">
 		/// A boolean to indicate if all values of resource should be discarded or not.

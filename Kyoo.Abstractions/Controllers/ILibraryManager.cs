@@ -29,7 +29,7 @@ namespace Kyoo.Abstractions.Controllers
 		ILibraryRepository LibraryRepository { get; }
 
 		/// <summary>
-		/// The repository that handle libraries items (a wrapper around shows & collections).
+		/// The repository that handle libraries items (a wrapper around shows and collections).
 		/// </summary>
 		ILibraryItemRepository LibraryItemRepository { get; }
 
@@ -236,7 +236,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// </param>
 		/// <typeparam name="T">The type of the source object</typeparam>
 		/// <typeparam name="T2">The related resource's type</typeparam>
-		/// <returns>The param <see cref="obj"/></returns>
+		/// <returns>The param <paramref name="obj"/></returns>
 		/// <seealso cref="Load{T,T2}(T, System.Linq.Expressions.Expression{System.Func{T,System.Collections.Generic.ICollection{T2}}}, bool)"/>
 		/// <seealso cref="Load{T}(T, string, bool)"/>
 		/// <seealso cref="Load(IResource, string, bool)"/>
@@ -254,7 +254,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// </param>
 		/// <typeparam name="T">The type of the source object</typeparam>
 		/// <typeparam name="T2">The related resource's type</typeparam>
-		/// <returns>The param <see cref="obj"/></returns>
+		/// <returns>The param <paramref name="obj"/></returns>
 		/// <seealso cref="Load{T,T2}(T, System.Linq.Expressions.Expression{System.Func{T,T2}}, bool)"/>
 		/// <seealso cref="Load{T}(T, string, bool)"/>
 		/// <seealso cref="Load(IResource, string, bool)"/>
@@ -271,7 +271,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <c>true</c> if you want to load the relation even if it is not null, <c>false</c> otherwise.
 		/// </param>
 		/// <typeparam name="T">The type of the source object</typeparam>
-		/// <returns>The param <see cref="obj"/></returns>
+		/// <returns>The param <paramref name="obj"/></returns>
 		/// <seealso cref="Load{T,T2}(T, System.Linq.Expressions.Expression{System.Func{T,T2}}, bool)"/>
 		/// <seealso cref="Load{T,T2}(T, System.Linq.Expressions.Expression{System.Func{T,System.Collections.Generic.ICollection{T2}}}, bool)"/>
 		/// <seealso cref="Load(IResource, string, bool)"/>
@@ -297,7 +297,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		/// <param name="id">The ID of the library</param>
 		/// <param name="where">A filter function</param>
-		/// <param name="sort">Sort information (sort order & sort by)</param>
+		/// <param name="sort">Sort information (sort order and sort by)</param>
 		/// <param name="limit">How many items to return and where to start</param>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<LibraryItem>> GetItemsFromLibrary(int id,
@@ -324,7 +324,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		/// <param name="slug">The slug of the library</param>
 		/// <param name="where">A filter function</param>
-		/// <param name="sort">Sort information (sort order & sort by)</param>
+		/// <param name="sort">Sort information (sort order and sort by)</param>
 		/// <param name="limit">How many items to return and where to start</param>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<LibraryItem>> GetItemsFromLibrary(string slug,
@@ -351,7 +351,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		/// <param name="showID">The ID of the show</param>
 		/// <param name="where">A filter function</param>
-		/// <param name="sort">Sort information (sort order & sort by)</param>
+		/// <param name="sort">Sort information (sort order and sort by)</param>
 		/// <param name="limit">How many items to return and where to start</param>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetPeopleFromShow(int showID,
@@ -378,7 +378,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		/// <param name="showSlug">The slug of the show</param>
 		/// <param name="where">A filter function</param>
-		/// <param name="sort">Sort information (sort order & sort by)</param>
+		/// <param name="sort">Sort information (sort order and sort by)</param>
 		/// <param name="limit">How many items to return and where to start</param>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetPeopleFromShow(string showSlug,
@@ -405,7 +405,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		/// <param name="id">The id of the person</param>
 		/// <param name="where">A filter function</param>
-		/// <param name="sort">Sort information (sort order & sort by)</param>
+		/// <param name="sort">Sort information (sort order and sort by)</param>
 		/// <param name="limit">How many items to return and where to start</param>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetRolesFromPeople(int id,
@@ -432,7 +432,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		/// <param name="slug">The slug of the person</param>
 		/// <param name="where">A filter function</param>
-		/// <param name="sort">Sort information (sort order & sort by)</param>
+		/// <param name="sort">Sort information (sort order and sort by)</param>
 		/// <param name="limit">How many items to return and where to start</param>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetRolesFromPeople(string slug,
@@ -476,7 +476,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// Get all resources with filters
 		/// </summary>
 		/// <param name="where">A filter function</param>
-		/// <param name="sort">Sort information (sort order & sort by)</param>
+		/// <param name="sort">Sort information (sort order and sort by)</param>
 		/// <param name="limit">How many items to return and where to start</param>
 		/// <typeparam name="T">The type of resources to load</typeparam>
 		/// <returns>A list of resources that match every filters</returns>
@@ -524,7 +524,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		/// <param name="item">The item to register</param>
 		/// <typeparam name="T">The type of resource</typeparam>
-		/// <returns>The resource registers and completed by database's information (related items & so on)</returns>
+		/// <returns>The resource registers and completed by database's information (related items and so on)</returns>
 		Task<T> Create<T>([NotNull] T item)
 			where T : class, IResource;
 
@@ -544,7 +544,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="resetOld">Should old properties of the resource be discarded or should null values considered as not changed?</param>
 		/// <typeparam name="T">The type of resources</typeparam>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-		/// <returns>The resource edited and completed by database's information (related items & so on)</returns>
+		/// <returns>The resource edited and completed by database's information (related items and so on)</returns>
 		Task<T> Edit<T>(T item, bool resetOld)
 			where T : class, IResource;
 

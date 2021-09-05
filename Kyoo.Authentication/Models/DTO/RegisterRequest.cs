@@ -31,7 +31,7 @@ namespace Kyoo.Authentication.Models.DTO
 		/// <summary>
 		/// Convert this register request to a new <see cref="User"/> class.
 		/// </summary>
-		/// <returns></returns>
+		/// <returns>A user representing this request.</returns>
 		public User ToUser()
 		{
 			return new User

@@ -74,7 +74,7 @@ namespace Kyoo.Authentication
 		}
 
 		/// <summary>
-		/// Generate a new certificate key and put it in the file at <see cref="file"/>.
+		/// Generate a new certificate key and put it in the file at <paramref name="file"/>.
 		/// </summary>
 		/// <param name="file">The path of the output file</param>
 		/// <param name="password">The password of the new certificate</param>

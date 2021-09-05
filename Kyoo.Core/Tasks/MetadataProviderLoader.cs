@@ -31,16 +31,16 @@ namespace Kyoo.Core.Tasks
 		private readonly ICollection<IMetadataProvider> _metadataProviders;
 
 		/// <summary>
-		///	Create a new <see cref="MetadataProviderLoader"/> task.
+		/// Create a new <see cref="MetadataProviderLoader"/> task.
 		/// </summary>
 		/// <param name="providers">
-		///	The provider repository used to create in-db providers from metadata providers.
+		/// The provider repository used to create in-db providers from metadata providers.
 		/// </param>
 		/// <param name="thumbnails">
-		///	The thumbnail manager used to download providers logo.
+		/// The thumbnail manager used to download providers logo.
 		/// </param>
 		/// <param name="metadataProviders">
-		///	The list of metadata providers to register.
+		/// The list of metadata providers to register.
 		/// </param>
 		public MetadataProviderLoader(IProviderRepository providers,
 			IThumbnailsManager thumbnails,

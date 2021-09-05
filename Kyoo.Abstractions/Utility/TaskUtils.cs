@@ -18,7 +18,6 @@ namespace Kyoo.Utils
 		/// </param>
 		/// <typeparam name="T">The type of the item in the task.</typeparam>
 		/// <returns>A continuation task wrapping the initial task and adding a continuation method.</returns>
-		/// <exception cref="TaskCanceledException"></exception>
 		/// <exception cref="TaskCanceledException">The source task has been canceled.</exception>
 		public static Task<T> Then<T>(this Task<T> task, Action<T> then)
 		{
