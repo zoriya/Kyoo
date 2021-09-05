@@ -14,12 +14,14 @@ namespace Kyoo.Host.WindowsTrait
 #else
 		private const string Environment = "Production";
 #endif
-		
+
 		/// <summary>
 		/// The main entry point for the application that overrides the default host.
 		/// It adds a system trait for windows and since the host is build as a windows executable instead of a console
 		/// app, the console is not showed.
 		/// </summary>
+		/// <param name="args">Command line arguments</param>
+		/// <returns>A <see cref="Task"/> representing the lifetime of the program.</returns>
 		public static Task Main(string[] args)
 		{
 			Application application = new(Environment);

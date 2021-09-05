@@ -16,7 +16,8 @@ namespace Kyoo.Core.Api
 		where T : class, IResource
 	{
 		private readonly IRepository<T> _repository;
-		protected readonly Uri BaseURL;
+
+		protected Uri BaseURL { get; }
 
 		public CrudApi(IRepository<T> repository, Uri baseURL)
 		{

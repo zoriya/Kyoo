@@ -55,7 +55,7 @@ namespace Kyoo.Host.WindowsTrait
 		/// <inheritdoc />
 		public void Dispose()
 		{
-			System.Windows.Forms.Application.Exit();
+			Application.Exit();
 			_thread?.Join();
 			_thread = null;
 		}
@@ -92,7 +92,7 @@ namespace Kyoo.Host.WindowsTrait
 				_options = options;
 
 				AppDomain.CurrentDomain.ProcessExit += (_, _) => Dispose();
-				System.Windows.Forms.Application.ApplicationExit += (_, _) => Dispose();
+				Application.ApplicationExit += (_, _) => Dispose();
 
 				_icon = new NotifyIcon
 				{
@@ -125,7 +125,7 @@ namespace Kyoo.Host.WindowsTrait
 			public static void Run(IApplication application, IOptions<BasicOptions> options)
 			{
 				using InternalSystemTrait trait = new(application, options);
-				System.Windows.Forms.Application.Run(trait);
+				Application.Run(trait);
 			}
 
 			/// <inheritdoc />

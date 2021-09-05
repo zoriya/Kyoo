@@ -41,6 +41,5 @@
 
 		<Rule Id="SA1633" Action="None" />        <!-- FileMustHaveHeader TODO remove this, this is only temporary -->
 		<Rule Id="SA1629" Action="None" />        <!-- DocumentationTextMustEndWithAPeriod TODO remove this, this is only temporary -->
-		<Rule Id="SA1600" Action="None" />        <!-- ElementsMustBeDocumented TODO remove this, this is only temporary -->
 	</Rules>
 </RuleSet>

@@ -1,8 +1,4 @@
 <Project ToolsVersion="Current">
-	<PropertyGroup>
-		<IsWindows Condition="$([MSBuild]::IsOSPlatform('Windows'))">true</IsWindows>
-	</PropertyGroup>
-
 	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
 	<PropertyGroup Condition="$(IsWindows) == true">

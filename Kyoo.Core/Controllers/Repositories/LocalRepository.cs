@@ -24,7 +24,7 @@ namespace Kyoo.Core.Controllers
 		/// <summary>
 		/// The Entity Framework's Database handle.
 		/// </summary>
-		protected readonly DbContext Database;
+		protected DbContext Database { get; }
 
 		/// <summary>
 		/// The default sort order that will be used for this resource's type.
