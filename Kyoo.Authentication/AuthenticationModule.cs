@@ -10,7 +10,6 @@ using IdentityServer4.Models;
 using IdentityServer4.Services;
 using Kyoo.Abstractions;
 using Kyoo.Abstractions.Controllers;
-using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Authentication.Models;
 using Kyoo.Authentication.Views;
 using Microsoft.AspNetCore.Builder;

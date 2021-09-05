@@ -16,7 +16,7 @@ namespace Kyoo.Abstractions.Models
 		Show,
 
 		/// <summary>
-		/// The <see cref="LibraryItem"/> is a Movie (a <see cref="Show"/> with <see cref="Show.IsMovie"/> equals to true).
+		/// The <see cref="LibraryItem"/> is a Movie (a <see cref="Show"/> with <see cref="Models.Show.IsMovie"/> equals to true).
 		/// </summary>
 		Movie,
 

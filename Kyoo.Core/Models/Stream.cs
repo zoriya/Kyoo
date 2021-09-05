@@ -1,7 +1,5 @@
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using Kyoo.Abstractions.Models;
-using Kyoo.Abstractions.Models.Attributes;
 
 namespace Kyoo.Core.Models.Watch
 {

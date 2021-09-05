@@ -6,15 +6,12 @@ using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Core.Models.Options;
 using Microsoft.Extensions.Options;
-using Stream = Kyoo.Core.Models.Watch.Stream;
 
 // We use threads so tasks are not always awaited.
 #pragma warning disable 4014
 
 namespace Kyoo.Core.Controllers
 {
-	public class BadTranscoderException : Exception { }
-
 	public class Transcoder : ITranscoder
 	{
 		private static class TranscoderAPI
@@ -82,6 +79,8 @@ namespace Kyoo.Core.Controllers
 				return tracks;
 			}
 		}
+
+		public class BadTranscoderException : Exception { }
 
 		private readonly IFileSystem _files;
 		private readonly IOptions<BasicOptions> _options;

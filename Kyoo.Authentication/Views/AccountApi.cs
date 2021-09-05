@@ -104,6 +104,7 @@ namespace Kyoo.Authentication.Views
 		/// Login the user.
 		/// </summary>
 		/// <param name="login">The DTO login request</param>
+		/// <returns>TODO</returns>
 		[HttpPost("login")]
 		public async Task<IActionResult> Login([FromBody] LoginRequest login)
 		{
@@ -122,6 +123,7 @@ namespace Kyoo.Authentication.Views
 		/// Use a OTAC to login a user.
 		/// </summary>
 		/// <param name="otac">The OTAC request</param>
+		/// <returns>TODO</returns>
 		[HttpPost("otac-login")]
 		public async Task<IActionResult> OtacLogin([FromBody] OtacRequest otac)
 		{
@@ -147,6 +149,7 @@ namespace Kyoo.Authentication.Views
 		/// <summary>
 		/// Sign out an user
 		/// </summary>
+		/// <returns>TODO</returns>
 		[HttpGet("logout")]
 		[Authorize]
 		public async Task<IActionResult> Logout()

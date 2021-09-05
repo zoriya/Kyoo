@@ -1,19 +1,7 @@
-using System;
+﻿using System;
 
 namespace Kyoo.Abstractions.Models.Attributes
 {
-	/// <summary>
-	/// Remove an property from the serialization pipeline. It will simply be skipped.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-	public class SerializeIgnoreAttribute : Attribute { }
-
-	/// <summary>
-	/// Remove a property from the deserialization pipeline. The user can't input value for this property.
-	/// </summary>
-	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-	public class DeserializeIgnoreAttribute : Attribute { }
-
 	/// <summary>
 	/// Change the way the field is serialized. It allow one to use a string format like formatting instead of the default value.
 	/// This can be disabled for a request by setting the "internal" query string parameter to true.

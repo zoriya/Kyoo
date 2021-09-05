@@ -6,7 +6,6 @@ using Autofac.Core.Registration;
 using Autofac.Extras.AttributeMetadata;
 using Kyoo.Abstractions;
 using Kyoo.Abstractions.Controllers;
-using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Core.Api;
 using Kyoo.Core.Controllers;
 using Kyoo.Core.Models.Options;

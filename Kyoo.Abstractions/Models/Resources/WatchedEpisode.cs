@@ -1,6 +1,4 @@
-using System.Collections.Generic;
-
-namespace Kyoo.Abstractions.Models
+﻿namespace Kyoo.Abstractions.Models
 {
 	/// <summary>
 	/// Metadata of episode currently watching by an user
