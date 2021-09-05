@@ -44,7 +44,6 @@ namespace Kyoo.Core.Api
 			return _files.FileResult(subtitle.Path);
 		}
 
-
 		[HttpGet("{slug}")]
 		[Permission(nameof(SubtitleApi), Kind.Read)]
 		public async Task<IActionResult> GetSubtitle(string slug)
@@ -66,7 +65,6 @@ namespace Kyoo.Core.Api
 			return _files.FileResult(subtitle.Path);
 		}
 	}
-
 
 	public class ConvertSubripToVtt : IActionResult
 	{

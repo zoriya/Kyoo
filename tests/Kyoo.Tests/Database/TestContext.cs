@@ -163,7 +163,6 @@ namespace Kyoo.Tests
 		}
 	}
 
-
 	/// <summary>
 	/// Class responsible to fill and create in memory databases for unit tests.
 	/// </summary>

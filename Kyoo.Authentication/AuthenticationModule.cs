@@ -48,7 +48,6 @@ namespace Kyoo.Authentication
 			{ CertificateOption.Path, typeof(CertificateOption) }
 		};
 
-
 		/// <summary>
 		/// The configuration to use.
 		/// </summary>
@@ -63,7 +62,6 @@ namespace Kyoo.Authentication
 		/// The environment information to check if the app runs in debug mode
 		/// </summary>
 		private readonly IWebHostEnvironment _environment;
-
 
 		/// <summary>
 		/// Create a new authentication module instance and use the given configuration and environment.

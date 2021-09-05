@@ -46,12 +46,10 @@ namespace Kyoo.Core
 			{ "logging", null }
 		};
 
-
 		/// <summary>
 		/// The configuration to use.
 		/// </summary>
 		private readonly IConfiguration _configuration;
-
 
 		/// <summary>
 		/// Create a new core module instance and use the given configuration.

@@ -44,7 +44,6 @@ namespace Kyoo.Authentication.Views
 		/// </summary>
 		private readonly IOptions<AuthenticationOption> _options;
 
-
 		/// <summary>
 		/// Create a new <see cref="AccountApi"/> handle to handle login/users requests.
 		/// </summary>
@@ -59,7 +58,6 @@ namespace Kyoo.Authentication.Views
 			_files = files;
 			_options = options;
 		}
-
 
 		/// <summary>
 		/// Register a new user and return a OTAC to connect to it. 

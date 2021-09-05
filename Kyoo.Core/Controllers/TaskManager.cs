@@ -100,7 +100,6 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		private readonly CancellationTokenSource _taskToken = new();
 
-
 		/// <summary>
 		/// Create a new <see cref="TaskManager"/>.
 		/// </summary>
@@ -125,7 +124,6 @@ namespace Kyoo.Core.Controllers
 			else
 				_logger.LogInformation("Task manager initiated without any tasks");
 		}
-
 
 		/// <summary>
 		/// Triggered when the application host is ready to start the service.

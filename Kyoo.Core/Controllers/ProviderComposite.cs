@@ -29,7 +29,6 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		private readonly ILogger<ProviderComposite> _logger;
 
-
 		/// <summary>
 		/// Create a new <see cref="ProviderComposite"/> with a list of available providers.
 		/// </summary>
@@ -40,7 +39,6 @@ namespace Kyoo.Core.Controllers
 			_providers = providers.ToArray();
 			_logger = logger;
 		}
-
 
 		/// <inheritdoc />
 		public override void UseProviders(IEnumerable<Provider> providers)

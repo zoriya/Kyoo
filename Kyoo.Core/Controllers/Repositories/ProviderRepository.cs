@@ -20,7 +20,6 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		private readonly DatabaseContext _database;
 
-
 		/// <summary>
 		///     Create a new <see cref="ProviderRepository" />.
 		/// </summary>

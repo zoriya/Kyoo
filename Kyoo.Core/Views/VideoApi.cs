@@ -40,7 +40,6 @@ namespace Kyoo.Core.Api
 			ctx.HttpContext.Response.Headers.Add("Expires", "0");
 		}
 
-
 		// TODO enable the following line, this is disabled since the web app can't use bearers. [Permission("video", Kind.Read)]
 		[HttpGet("{slug}")]
 		[HttpGet("direct/{slug}")]
@@ -94,7 +93,6 @@ namespace Kyoo.Core.Api
 				return NotFound();
 			}
 		}
-
 
 		[HttpGet("transmux/{episodeLink}/segments/{chunk}")]
 		[Permission("video", Kind.Read)]

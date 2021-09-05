@@ -134,7 +134,6 @@ namespace Kyoo.SqLite.Migrations
 					WHERE EpisodeID = NEW.ID;
 			END;");
 
-
 			// language=SQLite
 			migrationBuilder.Sql(@"
 			CREATE TRIGGER ShowSlugUpdate AFTER UPDATE OF Slug ON Shows FOR EACH ROW
@@ -149,7 +148,6 @@ namespace Kyoo.SqLite.Migrations
 					           END
 				WHERE ShowID = new.ID;
 			END;");
-
 
 			// language=SQLite
 			migrationBuilder.Sql(@"

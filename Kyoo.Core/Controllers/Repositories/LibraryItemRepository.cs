@@ -29,7 +29,6 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		protected override Expression<Func<LibraryItem, object>> DefaultSort => x => x.Title;
 
-
 		/// <summary>
 		/// Create a new <see cref="LibraryItemRepository"/>.
 		/// </summary>
@@ -42,7 +41,6 @@ namespace Kyoo.Core.Controllers
 			_database = database;
 			_libraries = libraries;
 		}
-
 
 		/// <inheritdoc />
 		public override Task<LibraryItem> GetOrDefault(int id)

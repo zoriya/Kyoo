@@ -31,7 +31,6 @@ namespace Kyoo.Postgresql
 		/// </summary>
 		private readonly bool _skipConfigure;
 
-
 		static PostgresContext()
 		{
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<Status>();

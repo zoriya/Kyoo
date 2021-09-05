@@ -31,7 +31,6 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		protected abstract Expression<Func<T, object>> DefaultSort { get; }
 
-
 		/// <summary>
 		/// Create a new base <see cref="LocalRepository{T}"/> with the given database handle.
 		/// </summary>

@@ -45,7 +45,6 @@ namespace Kyoo.Core.Models.Watch
 		/// </summary>
 		[SerializeIgnore] public StreamType Type { get; set; }
 
-
 		/// <summary>
 		/// Create a track from this stream.
 		/// </summary>

@@ -126,7 +126,6 @@ namespace Kyoo.Database
 				});
 		}
 
-
 		/// <summary>
 		/// The default constructor
 		/// </summary>
@@ -226,7 +225,6 @@ namespace Kyoo.Database
 						.OnDelete(DeleteBehavior.Cascade)
 				);
 		}
-
 
 		/// <summary>
 		/// Set database parameters to support every types of Kyoo.

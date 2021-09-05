@@ -101,7 +101,6 @@ namespace Kyoo.Core.Controllers
 			if (ret.episode.SeasonNumber.HasValue)
 				ret.season = new Season { SeasonNumber = ret.episode.SeasonNumber.Value };
 
-
 			if (ret.episode.SeasonNumber == null && ret.episode.EpisodeNumber == null
 				&& ret.episode.AbsoluteNumber == null)
 			{

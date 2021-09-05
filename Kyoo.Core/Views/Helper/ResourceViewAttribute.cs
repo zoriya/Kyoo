@@ -90,7 +90,6 @@ namespace Kyoo.Core.Api
 			ICollection<string> fields = (ICollection<string>)context.HttpContext.Items["fields"];
 			Type pageType = Utility.GetGenericDefinition(result.DeclaredType, typeof(Page<>));
 
-
 			if (pageType != null)
 			{
 				foreach (IResource resource in ((dynamic)result.Value).Items)

@@ -38,7 +38,6 @@ namespace Kyoo.TheTvdb
 			}
 		};
 
-
 		/// <summary>
 		/// Create a new <see cref="ProviderTvdb"/> using a tvdb client and an api key.
 		/// </summary>

@@ -29,7 +29,6 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc/>
 		protected override Expression<Func<Season, object>> DefaultSort => x => x.SeasonNumber;
 
-
 		/// <summary>
 		/// Create a new <see cref="SeasonRepository"/>.
 		/// </summary>

@@ -53,7 +53,6 @@ namespace Kyoo.Core.Controllers
 			_options = options;
 		}
 
-
 		/// <summary>
 		/// Retrieve the file system that should be used for a given path.
 		/// </summary>

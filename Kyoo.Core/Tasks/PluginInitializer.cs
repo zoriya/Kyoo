@@ -35,7 +35,6 @@ namespace Kyoo.Core.Tasks
 			_provider = provider;
 		}
 
-
 		/// <inheritdoc />
 		public TaskParameters GetParameters()
 		{

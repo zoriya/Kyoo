@@ -66,7 +66,6 @@ namespace Kyoo.Core.Controllers
 			_providers = providers;
 		}
 
-
 		/// <inheritdoc />
 		public override async Task<ICollection<Show>> Search(string query)
 		{

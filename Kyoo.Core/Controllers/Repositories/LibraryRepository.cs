@@ -29,7 +29,6 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		protected override Expression<Func<Library, object>> DefaultSort => x => x.ID;
 
-
 		/// <summary>
 		/// Create a new <see cref="LibraryRepository"/> instance.
 		/// </summary>
@@ -41,7 +40,6 @@ namespace Kyoo.Core.Controllers
 			_database = database;
 			_providers = providers;
 		}
-
 
 		/// <inheritdoc />
 		public override async Task<ICollection<Library>> Search(string query)

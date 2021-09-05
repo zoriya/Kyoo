@@ -217,7 +217,6 @@ namespace Kyoo.Abstractions.Controllers
 		/// <returns>How many resources matched that filter</returns>
 		Task<int> GetCount(Expression<Func<T, bool>> where = null);
 
-
 		/// <summary>
 		/// Create a new resource.
 		/// </summary>

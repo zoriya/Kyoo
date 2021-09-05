@@ -48,7 +48,6 @@ namespace Kyoo.Core.Controllers
 			[DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
 			private static extern void free_streams(IntPtr streams, uint count);
 
-
 			public static Track[] ExtractInfos(string path, string outPath, bool reextract)
 			{
 				path = path.Replace('\\', '/');

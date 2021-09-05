@@ -139,7 +139,6 @@ namespace Kyoo.SqLite
 				.Property(x => x.Images)
 				.HasConversion(jsonConvertor);
 
-
 			modelBuilder.Entity<LibraryItem>()
 				.ToView("LibraryItems")
 				.HasKey(x => x.ID);

@@ -60,7 +60,6 @@ namespace Kyoo.Abstractions.Controllers
 			=> new(action, priority);
 	}
 
-
 	/// <summary>
 	/// An action executed on kyoo's startup to initialize the asp-net container.
 	/// </summary>

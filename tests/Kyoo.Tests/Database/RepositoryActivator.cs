@@ -13,7 +13,6 @@ namespace Kyoo.Tests
 		public TestContext Context { get; }
 		public ILibraryManager LibraryManager { get; }
 
-
 		private readonly List<DatabaseContext> _databases = new();
 
 		public RepositoryActivator(ITestOutputHelper output, PostgresFixture postgres = null)

@@ -36,7 +36,6 @@ namespace Kyoo.Tests.Identifier
 			_identifier = new RegexIdentifier(options.Object, _manager.Object);
 		}
 
-
 		[Fact]
 		public async Task EpisodeIdentification()
 		{

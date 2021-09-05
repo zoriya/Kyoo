@@ -23,7 +23,6 @@ namespace Kyoo.Core.Api
 			BaseURL = baseURL;
 		}
 
-
 		[HttpGet("{id:int}")]
 		[PartialPermission(Kind.Read)]
 		public virtual async Task<ActionResult<T>> Get(int id)

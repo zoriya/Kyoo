@@ -43,7 +43,6 @@ namespace Kyoo.Abstractions.Models.Attributes
 		/// </summary>
 		public bool IsHidden { get; set; }
 
-
 		/// <summary>
 		/// Create a new <see cref="TaskMetadataAttribute"/> with the given slug, name and description.
 		/// </summary>

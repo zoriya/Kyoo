@@ -27,7 +27,6 @@ namespace Kyoo.Abstractions.Models.Attributes
 		/// </summary>
 		public bool StripScheme { get; set; }
 
-
 		/// <summary>
 		/// Create a new <see cref="FileSystemMetadataAttribute"/> using the specified schemes.
 		/// </summary>

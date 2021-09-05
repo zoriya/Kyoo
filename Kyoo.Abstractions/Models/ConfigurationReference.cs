@@ -21,7 +21,6 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		public Type Type { get; }
 
-
 		/// <summary>
 		/// Create a new <see cref="ConfigurationReference"/> using a given path and type.
 		/// This method does not create sub configuration resources. Please see <see cref="CreateReference"/>
@@ -52,7 +51,6 @@ namespace Kyoo.Abstractions.Models
 			{
 				new ConfigurationReference(path, type)
 			};
-
 
 			if (!type.IsClass || type.AssemblyQualifiedName?.StartsWith("System") == true)
 				return ret;
@@ -88,7 +86,6 @@ namespace Kyoo.Abstractions.Models
 		{
 			return CreateReference(path, typeof(T));
 		}
-
 
 		public static ConfigurationReference CreateUntyped(string path)
 		{

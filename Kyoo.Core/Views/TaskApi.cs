@@ -19,7 +19,6 @@ namespace Kyoo.Core.Api
 			_taskManager = taskManager;
 		}
 
-
 		[HttpGet]
 		[Permission(nameof(TaskApi), Kind.Read)]
 		public ActionResult<ICollection<ITask>> GetTasks()

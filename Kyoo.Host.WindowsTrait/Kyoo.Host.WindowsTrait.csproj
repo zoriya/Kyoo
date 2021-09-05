@@ -1,4 +1,8 @@
 <Project>
+	<PropertyGroup>
+		<ProjectGuid>{98851001-40DD-46A6-94B3-2F8D90722076}</ProjectGuid>
+	</PropertyGroup>
+
 	<Import Project="Kyoo.Host.WindowsTrait.target" Condition="$(IsWindows) == true" />
 	<Import Project="Kyoo.Host.WindowsTrait.linux.target" Condition="$(IsWindows) != true" />
 

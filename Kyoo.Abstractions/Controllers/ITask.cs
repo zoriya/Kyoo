@@ -140,7 +140,6 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="name">The name of the task (case sensitive)</param>
 		public TaskParameter this[string name] => this.FirstOrDefault(x => x.Name == name);
 
-
 		/// <summary>
 		/// Create a new, empty, <see cref="TaskParameters"/>
 		/// </summary>

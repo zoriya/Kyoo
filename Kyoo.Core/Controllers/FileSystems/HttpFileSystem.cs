@@ -31,7 +31,6 @@ namespace Kyoo.Core.Controllers
 			_clientFactory = factory;
 		}
 
-
 		/// <inheritdoc />
 		public IActionResult FileResult(string path, bool rangeSupport = false, string type = null)
 		{

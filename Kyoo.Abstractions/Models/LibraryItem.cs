@@ -70,7 +70,6 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		public ItemType Type { get; set; }
 
-
 		/// <summary>
 		/// Create a new, empty <see cref="LibraryItem"/>.
 		/// </summary>

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -52,7 +53,6 @@ namespace Kyoo.Core.Controllers
 
 		/// <inheritdoc />
 		public IUserRepository UserRepository { get; }
-
 
 		/// <summary>
 		/// Create a new <see cref="LibraryManager"/> instance with every repository available.
@@ -184,7 +184,7 @@ namespace Kyoo.Core.Controllers
 		/// <param name="inverse">A setter function to store the owner of a releated object loaded</param>
 		/// <typeparam name="T1">The type of the owner object</typeparam>
 		/// <typeparam name="T2">The type of the related object</typeparam>
-		private static async Task SetRelation<T1, T2>(T1 obj,
+		private static async Task _SetRelation<T1, T2>(T1 obj,
 			Task<ICollection<T2>> loader,
 			Action<T1, ICollection<T2>> setter,
 			Action<T2, T1> inverse)
@@ -224,6 +224,8 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
+		[SuppressMessage("StyleCop.CSharp.LayoutRules", "SA1507:CodeMustNotContainMultipleBlankLinesInARow",
+			Justification = "Separate the code by semantics and simplify the code read.")]
 		public Task Load(IResource obj, string memberName, bool force = false)
 		{
 			if (obj == null)
@@ -251,7 +253,7 @@ namespace Kyoo.Core.Controllers
 					.Then(x => l.Collections = x),
 
 
-				(Collection c, nameof(Collection.ExternalIDs)) => SetRelation(c,
+				(Collection c, nameof(Collection.ExternalIDs)) => _SetRelation(c,
 					ProviderRepository.GetMetadataID<Collection>(x => x.ResourceID == obj.ID),
 					(x, y) => x.ExternalIDs = y,
 					(x, y) => { x.ResourceID = y.ID; }),
@@ -265,7 +267,7 @@ namespace Kyoo.Core.Controllers
 					.Then(x => c.Libraries = x),
 
 
-				(Show s, nameof(Show.ExternalIDs)) => SetRelation(s,
+				(Show s, nameof(Show.ExternalIDs)) => _SetRelation(s,
 					ProviderRepository.GetMetadataID<Show>(x => x.ResourceID == obj.ID),
 					(x, y) => x.ExternalIDs = y,
 					(x, y) => { x.ResourceID = y.ID; }),
@@ -278,12 +280,12 @@ namespace Kyoo.Core.Controllers
 					.GetFromShow(obj.ID)
 					.Then(x => s.People = x),
 
-				(Show s, nameof(Show.Seasons)) => SetRelation(s,
+				(Show s, nameof(Show.Seasons)) => _SetRelation(s,
 					SeasonRepository.GetAll(x => x.Show.ID == obj.ID),
 					(x, y) => x.Seasons = y,
 					(x, y) => { x.Show = y; x.ShowID = y.ID; }),
 
-				(Show s, nameof(Show.Episodes)) => SetRelation(s,
+				(Show s, nameof(Show.Episodes)) => _SetRelation(s,
 					EpisodeRepository.GetAll(x => x.Show.ID == obj.ID),
 					(x, y) => x.Episodes = y,
 					(x, y) => { x.Show = y; x.ShowID = y.ID; }),
@@ -305,12 +307,12 @@ namespace Kyoo.Core.Controllers
 					}),
 
 
-				(Season s, nameof(Season.ExternalIDs)) => SetRelation(s,
+				(Season s, nameof(Season.ExternalIDs)) => _SetRelation(s,
 					ProviderRepository.GetMetadataID<Season>(x => x.ResourceID == obj.ID),
 					(x, y) => x.ExternalIDs = y,
 					(x, y) => { x.ResourceID = y.ID; }),
 
-				(Season s, nameof(Season.Episodes)) => SetRelation(s,
+				(Season s, nameof(Season.Episodes)) => _SetRelation(s,
 					EpisodeRepository.GetAll(x => x.Season.ID == obj.ID),
 					(x, y) => x.Episodes = y,
 					(x, y) => { x.Season = y; x.SeasonID = y.ID; }),
@@ -324,12 +326,12 @@ namespace Kyoo.Core.Controllers
 					}),
 
 
-				(Episode e, nameof(Episode.ExternalIDs)) => SetRelation(e,
+				(Episode e, nameof(Episode.ExternalIDs)) => _SetRelation(e,
 					ProviderRepository.GetMetadataID<Episode>(x => x.ResourceID == obj.ID),
 					(x, y) => x.ExternalIDs = y,
 					(x, y) => { x.ResourceID = y.ID; }),
 
-				(Episode e, nameof(Episode.Tracks)) => SetRelation(e,
+				(Episode e, nameof(Episode.Tracks)) => _SetRelation(e,
 					TrackRepository.GetAll(x => x.Episode.ID == obj.ID),
 					(x, y) => x.Tracks = y,
 					(x, y) => { x.Episode = y; x.EpisodeID = y.ID; }),
@@ -369,13 +371,13 @@ namespace Kyoo.Core.Controllers
 					.GetAll(x => x.Studio.ID == obj.ID)
 					.Then(x => s.Shows = x),
 
-				(Studio s, nameof(Studio.ExternalIDs)) => SetRelation(s,
+				(Studio s, nameof(Studio.ExternalIDs)) => _SetRelation(s,
 					ProviderRepository.GetMetadataID<Studio>(x => x.ResourceID == obj.ID),
 					(x, y) => x.ExternalIDs = y,
 					(x, y) => { x.ResourceID = y.ID; }),
 
 
-				(People p, nameof(People.ExternalIDs)) => SetRelation(p,
+				(People p, nameof(People.ExternalIDs)) => _SetRelation(p,
 					ProviderRepository.GetMetadataID<People>(x => x.ResourceID == obj.ID),
 					(x, y) => x.ExternalIDs = y,
 					(x, y) => { x.ResourceID = y.ID; }),

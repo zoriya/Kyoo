@@ -51,7 +51,6 @@ namespace Kyoo.Core.Tasks
 			_metadataProviders = metadataProviders;
 		}
 
-
 		/// <inheritdoc />
 		public TaskParameters GetParameters()
 		{

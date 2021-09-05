@@ -27,7 +27,6 @@ namespace Kyoo.Postgresql.Migrations
 			CREATE TRIGGER season_slug_trigger BEFORE INSERT OR UPDATE OF season_number, show_id ON seasons 
 			FOR EACH ROW EXECUTE PROCEDURE season_slug_update();");
 
-
 			// language=PostgreSQL
 			migrationBuilder.Sql(@"
 			CREATE FUNCTION episode_slug_update()
@@ -52,7 +51,6 @@ namespace Kyoo.Postgresql.Migrations
 			CREATE TRIGGER episode_slug_trigger 
 			BEFORE INSERT OR UPDATE OF absolute_number, episode_number, season_number, show_id ON episodes
 			FOR EACH ROW EXECUTE PROCEDURE episode_slug_update();");
-
 
 			// language=PostgreSQL
 			migrationBuilder.Sql(@"
@@ -136,7 +134,6 @@ namespace Kyoo.Postgresql.Migrations
 			CREATE TRIGGER track_slug_trigger 
 			BEFORE INSERT OR UPDATE OF episode_id, is_forced, language, track_index, type ON tracks
 			FOR EACH ROW EXECUTE PROCEDURE track_slug_update();");
-
 
 			// language=PostgreSQL
 			migrationBuilder.Sql(@"

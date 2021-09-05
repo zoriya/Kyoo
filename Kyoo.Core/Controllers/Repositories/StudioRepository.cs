@@ -28,7 +28,6 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		protected override Expression<Func<Studio, object>> DefaultSort => x => x.Name;
 
-
 		/// <summary>
 		/// Create a new <see cref="StudioRepository"/>.
 		/// </summary>

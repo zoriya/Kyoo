@@ -15,7 +15,6 @@ namespace Kyoo.Tests.Database
 		}
 	}
 
-
 	namespace PostgreSQL
 	{
 		[Collection(nameof(Postgresql))]

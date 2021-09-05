@@ -21,7 +21,6 @@ namespace Kyoo.Core.Api
 		private readonly ILibraryItemRepository _libraryItems;
 		private readonly Uri _baseURL;
 
-
 		public LibraryItemApi(ILibraryItemRepository libraryItems, IOptions<BasicOptions> options)
 		{
 			_libraryItems = libraryItems;

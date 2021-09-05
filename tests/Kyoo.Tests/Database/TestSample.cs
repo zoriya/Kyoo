@@ -122,7 +122,6 @@ namespace Kyoo.Tests
 			}
 		};
 
-
 		private static readonly Dictionary<Type, Func<object>> Samples = new()
 		{
 			{

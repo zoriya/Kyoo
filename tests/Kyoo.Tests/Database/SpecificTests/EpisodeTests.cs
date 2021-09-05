@@ -19,7 +19,6 @@ namespace Kyoo.Tests.Database
 		}
 	}
 
-
 	namespace PostgreSQL
 	{
 		[Collection(nameof(Postgresql))]
@@ -126,7 +125,6 @@ namespace Kyoo.Tests.Database
 			episode = await _repository.Get(2);
 			Assert.Equal($"new-slug-3", episode.Slug);
 		}
-
 
 		[Fact]
 		public async Task AbsoluteNumberEditTest()

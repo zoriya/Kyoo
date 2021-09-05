@@ -22,7 +22,6 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		protected override Expression<Func<Track, object>> DefaultSort => x => x.TrackIndex;
 
-
 		/// <summary>
 		/// Create a new <see cref="TrackRepository"/>.
 		/// </summary>

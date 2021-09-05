@@ -23,7 +23,6 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		protected override Expression<Func<Genre, object>> DefaultSort => x => x.Slug;
 
-
 		/// <summary>
 		/// Create a new <see cref="GenreRepository"/>.
 		/// </summary>

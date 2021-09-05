@@ -36,7 +36,6 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		public ICollection<T> Items { get; }
 
-
 		/// <summary>
 		/// Create a new <see cref="Page{T}"/>.
 		/// </summary>

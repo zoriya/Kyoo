@@ -126,7 +126,6 @@ namespace Kyoo.Core
 				config.Register(path, type);
 		}
 
-
 		/// <summary>
 		/// Create a new <see cref="PluginsStartup"/> from a webhost.
 		/// This is meant to be used from <see cref="WebHostBuilderExtensions.UseStartup"/>.
@@ -168,7 +167,6 @@ namespace Kyoo.Core
 			/// A logger factory used to create a logger for the plugin manager.
 			/// </summary>
 			private readonly ILoggerFactory _loggerFactory;
-
 
 			/// <summary>
 			/// Create a new <see cref="HostServiceProvider"/> that will return given services when asked.

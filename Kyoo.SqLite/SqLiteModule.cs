@@ -30,7 +30,6 @@ namespace Kyoo.SqLite
 		/// <inheritdoc />
 		public bool Enabled => _configuration.GetSelectedDatabase() == "sqlite";
 
-
 		/// <summary>
 		/// The configuration to use. The database connection string is pulled from it.
 		/// </summary>
@@ -51,7 +50,6 @@ namespace Kyoo.SqLite
 			_configuration = configuration;
 			_environment = env;
 		}
-
 
 		/// <inheritdoc />
 		public void Configure(IServiceCollection services)

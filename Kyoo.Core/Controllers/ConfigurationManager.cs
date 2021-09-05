@@ -44,7 +44,6 @@ namespace Kyoo.Core.Controllers
 			_references = references.ToDictionary(x => x.Path, x => x.Type, StringComparer.OrdinalIgnoreCase);
 		}
 
-
 		/// <inheritdoc />
 		public void AddTyped<T>(string path)
 		{

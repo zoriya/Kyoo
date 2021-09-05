@@ -23,7 +23,6 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		protected override Expression<Func<User, object>> DefaultSort => x => x.Username;
 
-
 		/// <summary>
 		/// Create a new <see cref="UserRepository"/>
 		/// </summary>

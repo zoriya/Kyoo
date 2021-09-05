@@ -28,7 +28,6 @@ namespace Kyoo.Authentication.Models.DTO
 		[MinLength(8, ErrorMessage = "The password must have at least {1} characters")]
 		public string Password { get; set; }
 
-
 		/// <summary>
 		/// Convert this register request to a new <see cref="User"/> class.
 		/// </summary>

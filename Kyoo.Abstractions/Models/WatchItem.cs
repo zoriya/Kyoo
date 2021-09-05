@@ -130,7 +130,6 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		public ICollection<Chapter> Chapters { get; set; }
 
-
 		/// <summary>
 		/// Create a <see cref="WatchItem"/> from an <see cref="Episode"/>.
 		/// </summary>

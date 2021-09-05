@@ -35,7 +35,6 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		protected override Expression<Func<Episode, object>> DefaultSort => x => x.EpisodeNumber;
 
-
 		/// <summary>
 		/// Create a new <see cref="EpisodeRepository"/>.
 		/// </summary>

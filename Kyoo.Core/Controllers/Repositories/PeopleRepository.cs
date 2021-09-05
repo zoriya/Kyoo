@@ -51,7 +51,6 @@ namespace Kyoo.Core.Controllers
 			_shows = shows;
 		}
 
-
 		/// <inheritdoc />
 		public override async Task<ICollection<People>> Search(string query)
 		{

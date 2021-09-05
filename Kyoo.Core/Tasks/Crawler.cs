@@ -56,7 +56,6 @@ namespace Kyoo.Core.Tasks
 			_logger = logger;
 		}
 
-
 		/// <inheritdoc />
 		public TaskParameters GetParameters()
 		{
@@ -125,7 +124,6 @@ namespace Kyoo.Core.Tasks
 					.GroupBy(Path.GetDirectoryName)
 					.ToList();
 
-
 				string[] paths = shows.Select(x => x.First())
 					.Concat(shows.SelectMany(x => x.Skip(1)))
 					.ToArray();
@@ -145,7 +143,6 @@ namespace Kyoo.Core.Tasks
 					}, cancellationToken);
 					percent += 100f / paths.Length;
 				}
-
 
 				string[] subtitles = files
 					.Where(FileExtensions.IsSubtitle)
