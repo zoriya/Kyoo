@@ -28,7 +28,7 @@ namespace Kyoo.Authentication
 		}
 
 		/// <summary>
-		/// Convert a user to an <see cref="IdentityServerUser"/>.
+		/// Convert a user to an IdentityServerUser.
 		/// </summary>
 		/// <param name="user">The user to convert.</param>
 		/// <returns>The corresponding identity server user.</returns>

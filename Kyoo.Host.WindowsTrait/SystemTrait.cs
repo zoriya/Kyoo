@@ -25,13 +25,12 @@ namespace Kyoo.Host.WindowsTrait
 		/// The options containing the <see cref="BasicOptions.PublicUrl"/>.
 		/// </summary>
 		private readonly IOptions<BasicOptions> _options;
-		
+
 		/// <summary>
 		/// The thread where the trait is running.
 		/// </summary>
 		private Thread _thread;
-		
-		
+
 		/// <summary>
 		/// Create a new <see cref="SystemTrait"/>.
 		/// </summary>
@@ -42,7 +41,7 @@ namespace Kyoo.Host.WindowsTrait
 			_application = application;
 			_options = options;
 		}
-		
+
 		/// <inheritdoc />
 		public void Start()
 		{
@@ -73,12 +72,12 @@ namespace Kyoo.Host.WindowsTrait
 			private readonly IApplication _application;
 
 			/// <summary>
-            /// The options containing the <see cref="BasicOptions.PublicUrl"/>.
-            /// </summary>
+			/// The options containing the <see cref="BasicOptions.PublicUrl"/>.
+			/// </summary>
 			private readonly IOptions<BasicOptions> _options;
-			
+
 			/// <summary>
-			/// The Icon that is displayed in the window's bar. 
+			/// The Icon that is displayed in the window's bar.
 			/// </summary>
 			private readonly NotifyIcon _icon;
 
@@ -95,10 +94,12 @@ namespace Kyoo.Host.WindowsTrait
 				AppDomain.CurrentDomain.ProcessExit += (_, _) => Dispose();
 				System.Windows.Forms.Application.ApplicationExit += (_, _) => Dispose();
 
-				_icon = new NotifyIcon();
-				_icon.Text = "Kyoo";
-				_icon.Icon = new Icon(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "kyoo.ico"));
-				_icon.Visible = true;
+				_icon = new NotifyIcon
+				{
+					Text = "Kyoo",
+					Icon = new Icon(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "kyoo.ico")),
+					Visible = true
+				};
 				_icon.MouseClick += (_, e) =>
 				{
 					if (e.Button != MouseButtons.Left)

@@ -1,12 +1,43 @@
-<Project>
+<Project ToolsVersion="Current">
 	<PropertyGroup>
-		<ProjectGuid>{98851001-40DD-46A6-94B3-2F8D90722076}</ProjectGuid>
+		<IsWindows Condition="$([MSBuild]::IsOSPlatform('Windows'))">true</IsWindows>
 	</PropertyGroup>
 
-	<Import Project="Kyoo.Host.WindowsTrait.target" Condition="$(IsWindows) == true" />
-	<Import Project="Kyoo.Host.WindowsTrait.linux.target" Condition="$(IsWindows) != true" />
+	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
-	<ItemGroup>
-		<None Remove="*.target" />
+	<PropertyGroup Condition="$(IsWindows) == true">
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net5.0-windows</TargetFramework>
+		<UseWindowsForms>true</UseWindowsForms>
+		<RootNamespace>Kyoo.WindowsHost</RootNamespace>
+	</PropertyGroup>
+	<ItemGroup Condition="$(IsWindows) == true">
+		<ProjectReference Include="../Kyoo.Core/Kyoo.Core.csproj" />
+		<ProjectReference Include="../Kyoo.Host.Console/Kyoo.Host.Console.csproj" Condition="$(IncludeConsole) == true" />
+
+		<None Remove="kyoo.ico" />
+		<Content Include="kyoo.ico">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<PropertyGroup Condition="$(IsWindows) != true">
+		<TargetFramework>net5.0</TargetFramework>
+		<NoWarn>NU1503</NoWarn>
+	</PropertyGroup>
+
+	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+
+	<Target Name="Build" Condition="$(IsWindows) != true">
+		<Message Importance="high" Text="Detected current operating system is not windows, skipping WindowsHost build." />
+	</Target>
+	<Target Name="Clean" Condition="$(IsWindows) != true" />
+	<Target Name="Pack" Condition="$(IsWindows) != true" />
+	<Target Name="Restore" Condition="$(IsWindows) != true" />
+	<Target Name="Publish" Condition="$(IsWindows) != true" />
+
+	<ItemGroup Condition="$(IsWindows) != true">
+		<None Include="@(Compile)" Visible="true" />
+		<Compile Remove="*" />
 	</ItemGroup>
 </Project>
