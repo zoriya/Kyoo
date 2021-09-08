@@ -61,7 +61,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Content Include="../LICENSE" CopyToOutputDirectory="Always" Visible="false" />
+		<Content Include="../../LICENSE" CopyToOutputDirectory="Always" Visible="false" />
 		<Content Include="settings.json" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 </Project>

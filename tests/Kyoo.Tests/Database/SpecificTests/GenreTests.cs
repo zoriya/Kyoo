@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System.Diagnostics.CodeAnalysis;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Xunit;
@@ -44,6 +45,7 @@ namespace Kyoo.Tests.Database
 
 	public abstract class AGenreTests : RepositoryTests<Genre>
 	{
+		[SuppressMessage("ReSharper", "NotAccessedField.Local")]
 		private readonly IGenreRepository _repository;
 
 		protected AGenreTests(RepositoryActivator repositories)

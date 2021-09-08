@@ -9,15 +9,15 @@
 		<PackageReference Include="SerilogAnalyzer" Version="0.15.0" PrivateAssets="All" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.354" PrivateAssets="All" />
 
-		<AdditionalFiles Include="$(MSBuildThisFileDirectory)stylecop.json" Link="stylecop.json" Visible="false" />
-		<None Include="$(MSBuildThisFileDirectory).editorconfig" Link=".editorconfig" Visible="false" />
+		<AdditionalFiles Include="$(MSBuildThisFileDirectory)../stylecop.json" Link="stylecop.json" Visible="false" />
+		<None Include="$(MSBuildThisFileDirectory)../.editorconfig" Link=".editorconfig" Visible="false" />
 	</ItemGroup>
 
 	<PropertyGroup>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>CS1591;SA1600;SA1601</NoWarn>
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-		<CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)Kyoo.ruleset</CodeAnalysisRuleSet>
+		<CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)../Kyoo.ruleset</CodeAnalysisRuleSet>
 <!--		<AnalysisMode>AllEnabledByDefault</AnalysisMode>-->
 	</PropertyGroup>
 </Project>
