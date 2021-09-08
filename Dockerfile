@@ -1,12 +1,12 @@
 FROM gcc:latest as transcoder
 RUN apt-get update && apt-get install -y cmake make libavutil-dev libavcodec-dev libavformat-dev
 WORKDIR /transcoder
-COPY Kyoo.Transcoder .
+COPY src/Kyoo.Transcoder .
 RUN cmake . && make -j
 
 FROM node:alpine as webapp
 WORKDIR /webapp
-COPY Kyoo.WebApp .
+COPY src/Kyoo.WebApp .
 WORKDIR /webapp/Front
 RUN npm install
 RUN npm run build -- --prod
