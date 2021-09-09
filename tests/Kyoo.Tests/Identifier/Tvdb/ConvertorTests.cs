@@ -129,7 +129,7 @@ namespace Kyoo.Tests.Identifier.Tvdb
 			Assert.Equal("action", show.Genres.ToArray()[0].Slug);
 			Assert.Equal("Action", show.Genres.ToArray()[0].Name);
 			Assert.Equal("Test With Sp??acial characters", show.Genres.ToArray()[1].Name);
-			Assert.Equal("test-with-speaacial-characters", show.Genres.ToArray()[1].Slug);
+			Assert.Equal("test-with-spacial-characters", show.Genres.ToArray()[1].Slug);
 		}
 
 		[Fact]
