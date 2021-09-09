@@ -23,17 +23,9 @@
 	</PropertyGroup>
 
 	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+	<Import Project="Kyoo.Host.WindowsTrait.Skipped.target" Condition="$(IsWindows) != true" />
 
-	<Target Name="Build" Condition="$(IsWindows) != true">
-		<Message Importance="high" Text="Detected current operating system is not windows, skipping WindowsHost build." />
-	</Target>
-	<Target Name="Clean" Condition="$(IsWindows) != true" />
-	<Target Name="Pack" Condition="$(IsWindows) != true" />
-	<Target Name="Restore" Condition="$(IsWindows) != true" />
-	<Target Name="Publish" Condition="$(IsWindows) != true" />
-
-	<ItemGroup Condition="$(IsWindows) != true">
-		<None Include="@(Compile)" Visible="true" />
-		<Compile Remove="*" />
+	<ItemGroup>
+		<None Remove="*.target" />
 	</ItemGroup>
 </Project>
