@@ -3,9 +3,15 @@
 		<IsWindows Condition="$([MSBuild]::IsOSPlatform('Windows'))">true</IsWindows>
 		<IsOSX Condition="$([MSBuild]::IsOSPlatform('OSX'))">true</IsOSX>
 		<IsLinux Condition="$([MSBuild]::IsOSPlatform('Linux'))">true</IsLinux>
+
+
+		<!-- TODO the next thing does not work on rider, enabling coding style check by default. -->
+		<!--<CheckCodingStyle Condition="$(BuildingInsideVisualStudio) == true">true</CheckCodingStyle>-->
+		<!--<CheckCodingStyle Condition="$(BuildingInsideReSharper) == true">true</CheckCodingStyle>-->
+		<CheckCodingStyle Condition="$(CheckCodingStyle) == ''">true</CheckCodingStyle>
 	</PropertyGroup>
 
-	<ItemGroup>
+	<ItemGroup Condition="$(CheckCodingStyle) == true">
 		<PackageReference Include="SerilogAnalyzer" Version="0.15.0" PrivateAssets="All" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.354" PrivateAssets="All" />
 
@@ -13,7 +19,7 @@
 		<None Include="$(MSBuildThisFileDirectory)../.editorconfig" Link=".editorconfig" Visible="false" />
 	</ItemGroup>
 
-	<PropertyGroup>
+	<PropertyGroup Condition="$(CheckCodingStyle) == true">
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<NoWarn>CS1591;SA1600;SA1601</NoWarn>
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>

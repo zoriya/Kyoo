@@ -45,8 +45,8 @@ jobs:
         shell: bash
         run: |
           echo "PROJECT=$([ "${{runner.os}}" == "Windows" ] \
-            && echo " -p:IncludeConsole=true src/Kyoo.Host.WindowsTrait" \
-            || echo src/Kyoo.Host.Console)" >> $GITHUB_ENV
+            && echo " -p:IncludeConsole=true -p:CheckCodingStyle=false src/Kyoo.Host.WindowsTrait" \
+            || echo " -p:CheckCodingStyle=false  src/Kyoo.Host.Console")" >> $GITHUB_ENV
       - name: Build the app
         env:
           INCLUDE: ${{env.INCLUDE}};C:\Program Files\FFmpeg\include
