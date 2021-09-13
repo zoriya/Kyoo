@@ -1,3 +1,21 @@
+// Kyoo - A portable and vast media library solution.
+// Copyright (c) Kyoo.
+//
+// See AUTHORS.md and LICENSE file in the project root for full license information.
+//
+// Kyoo is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// any later version.
+//
+// Kyoo is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,7 +36,6 @@ namespace Kyoo.Tests.Database
 				: base(new RepositoryActivator(output)) { }
 		}
 	}
-
 
 	namespace PostgreSQL
 	{
@@ -54,7 +71,7 @@ namespace Kyoo.Tests.Database
 			season = await _repository.Get(1);
 			Assert.Equal("new-slug-s1", season.Slug);
 		}
-		
+
 		[Fact]
 		public async Task SeasonNumberEditTest()
 		{
@@ -69,7 +86,7 @@ namespace Kyoo.Tests.Database
 			season = await _repository.Get(1);
 			Assert.Equal("anohana-s2", season.Slug);
 		}
-		
+
 		[Fact]
 		public async Task SeasonCreationSlugTest()
 		{
@@ -80,7 +97,7 @@ namespace Kyoo.Tests.Database
 			});
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s2", season.Slug);
 		}
-		
+
 		[Fact]
 		public async Task CreateWithExternalIdTest()
 		{
@@ -101,14 +118,14 @@ namespace Kyoo.Tests.Database
 				}
 			};
 			await _repository.Create(season);
-			
+
 			Season retrieved = await _repository.Get(2);
 			await Repositories.LibraryManager.Load(retrieved, x => x.ExternalIDs);
 			Assert.Equal(2, retrieved.ExternalIDs.Count);
 			KAssert.DeepEqual(season.ExternalIDs.First(), retrieved.ExternalIDs.First());
 			KAssert.DeepEqual(season.ExternalIDs.Last(), retrieved.ExternalIDs.Last());
 		}
-		
+
 		[Fact]
 		public async Task EditTest()
 		{
@@ -119,13 +136,13 @@ namespace Kyoo.Tests.Database
 				[Images.Poster] = "new-poster"
 			};
 			await _repository.Edit(value, false);
-		
+
 			await using DatabaseContext database = Repositories.Context.New();
 			Season retrieved = await database.Seasons.FirstAsync();
-			
+
 			KAssert.DeepEqual(value, retrieved);
 		}
-		
+
 		[Fact]
 		public async Task EditMetadataTest()
 		{
@@ -140,13 +157,13 @@ namespace Kyoo.Tests.Database
 				},
 			};
 			await _repository.Edit(value, false);
-		
+
 			await using DatabaseContext database = Repositories.Context.New();
 			Season retrieved = await database.Seasons
 				.Include(x => x.ExternalIDs)
 				.ThenInclude(x => x.Provider)
 				.FirstAsync();
-			
+
 			KAssert.DeepEqual(value, retrieved);
 		}
 
@@ -182,7 +199,7 @@ namespace Kyoo.Tests.Database
 				DataID = "id"
 			});
 			await _repository.Edit(value, false);
-			
+
 			{
 				await using DatabaseContext database = Repositories.Context.New();
 				Season retrieved = await database.Seasons
@@ -193,7 +210,7 @@ namespace Kyoo.Tests.Database
 				KAssert.DeepEqual(value, retrieved);
 			}
 		}
-		
+
 		[Theory]
 		[InlineData("test")]
 		[InlineData("super")]

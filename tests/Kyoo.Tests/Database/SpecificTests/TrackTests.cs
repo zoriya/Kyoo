@@ -1,3 +1,21 @@
+// Kyoo - A portable and vast media library solution.
+// Copyright (c) Kyoo.
+//
+// See AUTHORS.md and LICENSE file in the project root for full license information.
+//
+// Kyoo is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// any later version.
+//
+// Kyoo is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
+
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
@@ -14,7 +32,6 @@ namespace Kyoo.Tests.Database
 				: base(new RepositoryActivator(output)) { }
 		}
 	}
-
 
 	namespace PostgreSQL
 	{
@@ -35,7 +52,7 @@ namespace Kyoo.Tests.Database
 		{
 			_repository = repositories.LibraryManager.TrackRepository;
 		}
-		
+
 		[Fact]
 		public async Task SlugEditTest()
 		{
@@ -47,7 +64,7 @@ namespace Kyoo.Tests.Database
 			Track track = await _repository.Get(1);
 			Assert.Equal("new-slug-s1e1.eng-1.subtitle", track.Slug);
 		}
-		
+
 		[Fact]
 		public async Task UndefinedLanguageSlugTest()
 		{

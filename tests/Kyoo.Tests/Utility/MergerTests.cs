@@ -1,3 +1,21 @@
+// Kyoo - A portable and vast media library solution.
+// Copyright (c) Kyoo.
+//
+// See AUTHORS.md and LICENSE file in the project root for full license information.
+//
+// Kyoo is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// any later version.
+//
+// Kyoo is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -24,7 +42,7 @@ namespace Kyoo.Tests.Utility
 			Assert.Null(genre.Name);
 			Assert.Null(genre.Slug);
 		}
-		
+
 		[Fact]
 		public void MergeTest()
 		{
@@ -42,7 +60,7 @@ namespace Kyoo.Tests.Utility
 			Assert.Equal("test", genre.Name);
 			Assert.Null(genre.Slug);
 		}
-		
+
 		[Fact]
 		[SuppressMessage("ReSharper", "ExpressionIsAlwaysNull")]
 		public void MergeNullTests()
@@ -65,7 +83,7 @@ namespace Kyoo.Tests.Utility
 				throw exception;
 			}
 		}
-		
+
 		[Fact]
 		public void OnMergeTest()
 		{
@@ -81,25 +99,25 @@ namespace Kyoo.Tests.Utility
 				Assert.True(ReferenceEquals(test2, ex.Data[0]));
 			}
 		}
-		
+
 		private class Test
 		{
 			public int ID { get; set; }
 
 			public int[] Numbers { get; set; }
 		}
-		
+
 		[Fact]
 		public void GlobalMergeListTest()
 		{
 			Test test = new()
 			{
 				ID = 5,
-				Numbers = new [] { 1 }
+				Numbers = new[] { 1 }
 			};
 			Test test2 = new()
 			{
-				Numbers = new [] { 3 }
+				Numbers = new[] { 3 }
 			};
 			Test ret = Merger.Merge(test, test2);
 			Assert.True(ReferenceEquals(test, ret));
@@ -109,18 +127,18 @@ namespace Kyoo.Tests.Utility
 			Assert.Equal(1, ret.Numbers[0]);
 			Assert.Equal(3, ret.Numbers[1]);
 		}
-		
+
 		[Fact]
 		public void GlobalMergeListDuplicatesTest()
 		{
 			Test test = new()
 			{
 				ID = 5,
-				Numbers = new [] { 1 }
+				Numbers = new[] { 1 }
 			};
 			Test test2 = new()
 			{
-				Numbers = new []
+				Numbers = new[]
 				{
 					1,
 					3,
@@ -137,14 +155,14 @@ namespace Kyoo.Tests.Utility
 			Assert.Equal(3, ret.Numbers[2]);
 			Assert.Equal(3, ret.Numbers[3]);
 		}
-		
+
 		private class MergeDictionaryTest
 		{
 			public int ID { get; set; }
 
 			public Dictionary<int, string> Dictionary { get; set; }
 		}
-		
+
 		[Fact]
 		public void GlobalMergeDictionariesTest()
 		{
@@ -171,7 +189,7 @@ namespace Kyoo.Tests.Utility
 			Assert.Equal("two", ret.Dictionary[2]);
 			Assert.Equal("third", ret.Dictionary[3]);
 		}
-		
+
 		[Fact]
 		public void GlobalMergeDictionariesDuplicatesTest()
 		{
@@ -199,21 +217,21 @@ namespace Kyoo.Tests.Utility
 			Assert.Equal("two", ret.Dictionary[2]);
 			Assert.Equal("third", ret.Dictionary[3]);
 		}
-		
+
 		[Fact]
 		public void GlobalMergeListDuplicatesResourcesTest()
 		{
 			Show test = new()
 			{
 				ID = 5,
-				Genres = new [] { new Genre("test") }
+				Genres = new[] { new Genre("test") }
 			};
 			Show test2 = new()
 			{
-				Genres = new [] 
+				Genres = new[]
 				{
 					new Genre("test"),
-					new Genre("test2") 
+					new Genre("test2")
 				}
 			};
 			Show ret = Merger.Merge(test, test2);
@@ -229,18 +247,15 @@ namespace Kyoo.Tests.Utility
 		public void MergeListTest()
 		{
 			int[] first = { 1 };
-			int[] second = {
-				3,
-				3
-			};
+			int[] second = { 3, 3 };
 			int[] ret = Merger.MergeLists(first, second);
-			
+
 			Assert.Equal(3, ret.Length);
 			Assert.Equal(1, ret[0]);
 			Assert.Equal(3, ret[1]);
 			Assert.Equal(3, ret[2]);
 		}
-		
+
 		[Fact]
 		public void MergeListDuplicateTest()
 		{
@@ -251,29 +266,26 @@ namespace Kyoo.Tests.Utility
 				3
 			};
 			int[] ret = Merger.MergeLists(first, second);
-			
+
 			Assert.Equal(4, ret.Length);
 			Assert.Equal(1, ret[0]);
 			Assert.Equal(1, ret[1]);
 			Assert.Equal(3, ret[2]);
 			Assert.Equal(3, ret[3]);
 		}
-		
+
 		[Fact]
 		public void MergeListDuplicateCustomEqualityTest()
 		{
 			int[] first = { 1 };
-			int[] second = {
-				3,
-				2
-			};
+			int[] second = { 3, 2 };
 			int[] ret = Merger.MergeLists(first, second, (x, y) => x % 2 == y % 2);
-			
+
 			Assert.Equal(2, ret.Length);
 			Assert.Equal(1, ret[0]);
 			Assert.Equal(2, ret[1]);
 		}
-		
+
 		[Fact]
 		public void MergeDictionariesTest()
 		{
@@ -287,13 +299,13 @@ namespace Kyoo.Tests.Utility
 				[3] = "third",
 			};
 			IDictionary<int, string> ret = Merger.MergeDictionaries(first, second);
-			
+
 			Assert.Equal(3, ret.Count);
 			Assert.Equal("test", ret[1]);
 			Assert.Equal("value", ret[5]);
 			Assert.Equal("third", ret[3]);
 		}
-		
+
 		[Fact]
 		public void MergeDictionariesDuplicateTest()
 		{
@@ -308,13 +320,13 @@ namespace Kyoo.Tests.Utility
 				[5] = "new-value",
 			};
 			IDictionary<int, string> ret = Merger.MergeDictionaries(first, second);
-			
+
 			Assert.Equal(3, ret.Count);
 			Assert.Equal("test", ret[1]);
 			Assert.Equal("value", ret[5]);
 			Assert.Equal("third", ret[3]);
 		}
-		
+
 		[Fact]
 		public void CompleteTest()
 		{
@@ -333,7 +345,7 @@ namespace Kyoo.Tests.Utility
 			Assert.Equal("test", genre.Name);
 			Assert.Null(genre.Slug);
 		}
-		
+
 		[Fact]
 		public void CompleteDictionaryTest()
 		{
@@ -346,7 +358,7 @@ namespace Kyoo.Tests.Utility
 					[Images.Logo] = "logo",
 					[Images.Poster] = "poster"
 				}
-				
+
 			};
 			Collection collection2 = new()
 			{
@@ -388,7 +400,7 @@ namespace Kyoo.Tests.Utility
 			Assert.Equal("thumbnails", ret[Images.Thumbnail]);
 			Assert.Equal("logo", ret[Images.Logo]);
 		}
-		
+
 		[Fact]
 		public void CompleteDictionaryEqualTest()
 		{
@@ -409,8 +421,9 @@ namespace Kyoo.Tests.Utility
 		private class TestMergeSetter
 		{
 			public Dictionary<int, int> Backing;
-			
-			[UsedImplicitly] public Dictionary<int, int> Dictionary
+
+			[UsedImplicitly]
+			public Dictionary<int, int> Dictionary
 			{
 				get => Backing;
 				set
@@ -438,7 +451,7 @@ namespace Kyoo.Tests.Utility
 			Merger.Complete(first, second);
 			// This should no call the setter of first so the test should pass.
 		}
-		
+
 		[Fact]
 		public void MergeDictionaryNoChangeNoSetTest()
 		{
@@ -456,7 +469,7 @@ namespace Kyoo.Tests.Utility
 			Merger.Merge(first, second);
 			// This should no call the setter of first so the test should pass.
 		}
-		
+
 		[Fact]
 		public void MergeDictionaryNullValue()
 		{
@@ -477,7 +490,7 @@ namespace Kyoo.Tests.Utility
 			Assert.Equal("thumbnails", ret[Images.Thumbnail]);
 			Assert.Equal("logo", ret[Images.Logo]);
 		}
-		
+
 		[Fact]
 		public void MergeDictionaryNullValueNoChange()
 		{
@@ -496,7 +509,7 @@ namespace Kyoo.Tests.Utility
 			Assert.Null(ret[Images.Poster]);
 			Assert.Equal("logo", ret[Images.Logo]);
 		}
-		
+
 		[Fact]
 		public void CompleteDictionaryNullValue()
 		{
@@ -517,7 +530,7 @@ namespace Kyoo.Tests.Utility
 			Assert.Equal("thumbnails", ret[Images.Thumbnail]);
 			Assert.Equal("logo", ret[Images.Logo]);
 		}
-		
+
 		[Fact]
 		public void CompleteDictionaryNullValueNoChange()
 		{

@@ -1,0 +1,31 @@
+<Project ToolsVersion="Current">
+	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
+
+	<PropertyGroup Condition="$(IsWindows) == true">
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net5.0-windows</TargetFramework>
+		<UseWindowsForms>true</UseWindowsForms>
+		<RootNamespace>Kyoo.WindowsHost</RootNamespace>
+	</PropertyGroup>
+	<ItemGroup Condition="$(IsWindows) == true">
+		<ProjectReference Include="../Kyoo.Core/Kyoo.Core.csproj" />
+		<ProjectReference Include="../Kyoo.Host.Console/Kyoo.Host.Console.csproj" Condition="$(IncludeConsole) == true" />
+
+		<None Remove="kyoo.ico" />
+		<Content Include="kyoo.ico">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+
+	<PropertyGroup Condition="$(IsWindows) != true">
+		<TargetFramework>net5.0</TargetFramework>
+		<NoWarn>NU1503</NoWarn>
+	</PropertyGroup>
+
+	<Import Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
+	<Import Project="Kyoo.Host.WindowsTrait.Skipped.target" Condition="$(IsWindows) != true" />
+
+	<ItemGroup>
+		<None Remove="*.target" />
+	</ItemGroup>
+</Project>

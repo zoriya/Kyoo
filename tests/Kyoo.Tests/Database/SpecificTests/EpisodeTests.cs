@@ -1,3 +1,21 @@
+// Kyoo - A portable and vast media library solution.
+// Copyright (c) Kyoo.
+//
+// See AUTHORS.md and LICENSE file in the project root for full license information.
+//
+// Kyoo is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// any later version.
+//
+// Kyoo is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -19,7 +37,6 @@ namespace Kyoo.Tests.Database
 		}
 	}
 
-
 	namespace PostgreSQL
 	{
 		[Collection(nameof(Postgresql))]
@@ -39,7 +56,7 @@ namespace Kyoo.Tests.Database
 		{
 			_repository = repositories.LibraryManager.EpisodeRepository;
 		}
-		
+
 		[Fact]
 		public async Task SlugEditTest()
 		{
@@ -54,7 +71,7 @@ namespace Kyoo.Tests.Database
 			episode = await _repository.Get(1);
 			Assert.Equal("new-slug-s1e1", episode.Slug);
 		}
-		
+
 		[Fact]
 		public async Task SeasonNumberEditTest()
 		{
@@ -70,7 +87,7 @@ namespace Kyoo.Tests.Database
 			episode = await _repository.Get(1);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s2e1", episode.Slug);
 		}
-		
+
 		[Fact]
 		public async Task EpisodeNumberEditTest()
 		{
@@ -86,7 +103,7 @@ namespace Kyoo.Tests.Database
 			episode = await _repository.Get(1);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s1e2", episode.Slug);
 		}
-		
+
 		[Fact]
 		public async Task EpisodeCreationSlugTest()
 		{
@@ -102,17 +119,17 @@ namespace Kyoo.Tests.Database
 		[Fact]
 		public void AbsoluteSlugTest()
 		{
-			Assert.Equal($"{TestSample.Get<Show>().Slug}-{TestSample.GetAbsoluteEpisode().AbsoluteNumber}", 
+			Assert.Equal($"{TestSample.Get<Show>().Slug}-{TestSample.GetAbsoluteEpisode().AbsoluteNumber}",
 				TestSample.GetAbsoluteEpisode().Slug);
 		}
-		
+
 		[Fact]
 		public async Task EpisodeCreationAbsoluteSlugTest()
 		{
 			Episode episode = await _repository.Create(TestSample.GetAbsoluteEpisode());
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-{TestSample.GetAbsoluteEpisode().AbsoluteNumber}", episode.Slug);
 		}
-		
+
 		[Fact]
 		public async Task SlugEditAbsoluteTest()
 		{
@@ -126,8 +143,7 @@ namespace Kyoo.Tests.Database
 			episode = await _repository.Get(2);
 			Assert.Equal($"new-slug-3", episode.Slug);
 		}
-		
-		
+
 		[Fact]
 		public async Task AbsoluteNumberEditTest()
 		{
@@ -142,7 +158,7 @@ namespace Kyoo.Tests.Database
 			episode = await _repository.Get(2);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-56", episode.Slug);
 		}
-		
+
 		[Fact]
 		public async Task AbsoluteToNormalEditTest()
 		{
@@ -158,7 +174,7 @@ namespace Kyoo.Tests.Database
 			episode = await _repository.Get(2);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s1e2", episode.Slug);
 		}
-		
+
 		[Fact]
 		public async Task NormalToAbsoluteEditTest()
 		{
@@ -170,7 +186,7 @@ namespace Kyoo.Tests.Database
 			episode = await _repository.Get(1);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-12", episode.Slug);
 		}
-		
+
 		[Fact]
 		public async Task MovieEpisodeTest()
 		{
@@ -179,7 +195,7 @@ namespace Kyoo.Tests.Database
 			episode = await _repository.Get(3);
 			Assert.Equal(TestSample.Get<Show>().Slug, episode.Slug);
 		}
-		
+
 		[Fact]
 		public async Task MovieEpisodeEditTest()
 		{
@@ -192,7 +208,7 @@ namespace Kyoo.Tests.Database
 			Episode episode = await _repository.Get(3);
 			Assert.Equal("john-wick", episode.Slug);
 		}
-		
+
 		[Fact]
 		public async Task CreateWithExternalIdTest()
 		{
@@ -213,14 +229,14 @@ namespace Kyoo.Tests.Database
 				}
 			};
 			await _repository.Create(value);
-			
+
 			Episode retrieved = await _repository.Get(2);
 			await Repositories.LibraryManager.Load(retrieved, x => x.ExternalIDs);
 			Assert.Equal(2, retrieved.ExternalIDs.Count);
 			KAssert.DeepEqual(value.ExternalIDs.First(), retrieved.ExternalIDs.First());
 			KAssert.DeepEqual(value.ExternalIDs.Last(), retrieved.ExternalIDs.Last());
 		}
-		
+
 		[Fact]
 		public async Task EditTest()
 		{
@@ -231,13 +247,13 @@ namespace Kyoo.Tests.Database
 				[Images.Poster] = "new-poster"
 			};
 			await _repository.Edit(value, false);
-		
+
 			await using DatabaseContext database = Repositories.Context.New();
 			Episode retrieved = await database.Episodes.FirstAsync();
-			
+
 			KAssert.DeepEqual(value, retrieved);
 		}
-		
+
 		[Fact]
 		public async Task EditMetadataTest()
 		{
@@ -252,13 +268,13 @@ namespace Kyoo.Tests.Database
 				},
 			};
 			await _repository.Edit(value, false);
-		
+
 			await using DatabaseContext database = Repositories.Context.New();
 			Episode retrieved = await database.Episodes
 				.Include(x => x.ExternalIDs)
 				.ThenInclude(x => x.Provider)
 				.FirstAsync();
-			
+
 			KAssert.DeepEqual(value, retrieved);
 		}
 
@@ -294,7 +310,7 @@ namespace Kyoo.Tests.Database
 				DataID = "id"
 			});
 			await _repository.Edit(value, false);
-			
+
 			{
 				await using DatabaseContext database = Repositories.Context.New();
 				Episode retrieved = await database.Episodes
@@ -305,7 +321,7 @@ namespace Kyoo.Tests.Database
 				KAssert.DeepEqual(value, retrieved);
 			}
 		}
-		
+
 		[Theory]
 		[InlineData("test")]
 		[InlineData("super")]

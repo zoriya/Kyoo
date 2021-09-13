@@ -1,3 +1,21 @@
+// Kyoo - A portable and vast media library solution.
+// Copyright (c) Kyoo.
+//
+// See AUTHORS.md and LICENSE file in the project root for full license information.
+//
+// Kyoo is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// any later version.
+//
+// Kyoo is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
+
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
@@ -14,13 +32,13 @@ namespace Kyoo.Tests.Identifier
 	{
 		private readonly Mock<ILibraryManager> _manager;
 		private readonly IIdentifier _identifier;
-		
+
 		public Identifier()
 		{
 			Mock<IOptionsMonitor<MediaOptions>> options = new();
 			options.Setup(x => x.CurrentValue).Returns(new MediaOptions
 			{
-				Regex = new []
+				Regex = new[]
 				{
 					"^\\/?(?<Collection>.+)?\\/(?<Show>.+?)(?: \\((?<StartYear>\\d+)\\))?\\/\\k<Show>(?: \\(\\d+\\))? S(?<Season>\\d+)E(?<Episode>\\d+)\\..*$",
 					"^\\/?(?<Collection>.+)?\\/(?<Show>.+?)(?: \\((?<StartYear>\\d+)\\))?\\/\\k<Show>(?: \\(\\d+\\))? (?<Absolute>\\d+)\\..*$",
@@ -31,12 +49,11 @@ namespace Kyoo.Tests.Identifier
 					"^(?<Episode>.+)\\.(?<Language>\\w{1,3})\\.(?<Default>default\\.)?(?<Forced>forced\\.)?.*$"
 				}
 			});
-			
+
 			_manager = new Mock<ILibraryManager>();
 			_identifier = new RegexIdentifier(options.Object, _manager.Object);
 		}
-		
-		
+
 		[Fact]
 		public async Task EpisodeIdentification()
 		{
@@ -56,7 +73,7 @@ namespace Kyoo.Tests.Identifier
 			Assert.Equal(1, episode.EpisodeNumber);
 			Assert.Null(episode.AbsoluteNumber);
 		}
-		
+
 		[Fact]
 		public async Task EpisodeIdentificationWithoutLibraryTrailingSlash()
 		{
@@ -76,7 +93,7 @@ namespace Kyoo.Tests.Identifier
 			Assert.Equal(1, episode.EpisodeNumber);
 			Assert.Null(episode.AbsoluteNumber);
 		}
-		
+
 		[Fact]
 		public async Task EpisodeIdentificationMultiplePaths()
 		{
@@ -96,7 +113,7 @@ namespace Kyoo.Tests.Identifier
 			Assert.Equal(1, episode.EpisodeNumber);
 			Assert.Null(episode.AbsoluteNumber);
 		}
-		
+
 		[Fact]
 		public async Task AbsoluteEpisodeIdentification()
 		{
@@ -116,7 +133,7 @@ namespace Kyoo.Tests.Identifier
 			Assert.Null(episode.EpisodeNumber);
 			Assert.Equal(100, episode.AbsoluteNumber);
 		}
-		
+
 		[Fact]
 		public async Task MovieEpisodeIdentification()
 		{
@@ -137,7 +154,7 @@ namespace Kyoo.Tests.Identifier
 			Assert.Null(episode.EpisodeNumber);
 			Assert.Null(episode.AbsoluteNumber);
 		}
-		
+
 		[Fact]
 		public async Task InvalidEpisodeIdentification()
 		{
@@ -147,7 +164,7 @@ namespace Kyoo.Tests.Identifier
 			});
 			await Assert.ThrowsAsync<IdentificationFailedException>(() => _identifier.Identify("/invalid/path"));
 		}
-		
+
 		[Fact]
 		public async Task SubtitleIdentification()
 		{
@@ -163,7 +180,7 @@ namespace Kyoo.Tests.Identifier
 			Assert.False(track.IsForced);
 			Assert.StartsWith("/kyoo/Library/Collection/Show (2000)/Show", track.Episode.Path);
 		}
-		
+
 		[Fact]
 		public async Task SubtitleIdentificationUnknownCodec()
 		{
@@ -179,7 +196,7 @@ namespace Kyoo.Tests.Identifier
 			Assert.False(track.IsForced);
 			Assert.StartsWith("/kyoo/Library/Collection/Show (2000)/Show", track.Episode.Path);
 		}
-		
+
 		[Fact]
 		public async Task InvalidSubtitleIdentification()
 		{

@@ -1,27 +1,27 @@
-﻿Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kyoo.Core", "Kyoo.Core\Kyoo.Core.csproj", "{0F8275B6-C7DD-42DF-A168-755C81B1C329}"
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Kyoo.Core", "src\Kyoo.Core\Kyoo.Core.csproj", "{0F8275B6-C7DD-42DF-A168-755C81B1C329}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Abstractions", "Kyoo.Abstractions\Kyoo.Abstractions.csproj", "{BAB2CAE1-AC28-4509-AA3E-8DC75BD59220}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Abstractions", "src\Kyoo.Abstractions\Kyoo.Abstractions.csproj", "{BAB2CAE1-AC28-4509-AA3E-8DC75BD59220}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Database", "Kyoo.Database\Kyoo.Database.csproj", "{6F91B645-F785-46BB-9C4F-1EFC83E489B6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Database", "src\Kyoo.Database\Kyoo.Database.csproj", "{6F91B645-F785-46BB-9C4F-1EFC83E489B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Postgresql", "Kyoo.Postgresql\Kyoo.Postgresql.csproj", "{3213C96D-0BF3-460B-A8B5-B9977229408A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Postgresql", "src\Kyoo.Postgresql\Kyoo.Postgresql.csproj", "{3213C96D-0BF3-460B-A8B5-B9977229408A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Authentication", "Kyoo.Authentication\Kyoo.Authentication.csproj", "{7A841335-6523-47DB-9717-80AA7BD943FD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Authentication", "src\Kyoo.Authentication\Kyoo.Authentication.csproj", "{7A841335-6523-47DB-9717-80AA7BD943FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.SqLite", "Kyoo.SqLite\Kyoo.SqLite.csproj", "{6515380E-1E57-42DA-B6E3-E1C8A848818A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.SqLite", "src\Kyoo.SqLite\Kyoo.SqLite.csproj", "{6515380E-1E57-42DA-B6E3-E1C8A848818A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.TheTvdb", "Kyoo.TheTvdb\Kyoo.TheTvdb.csproj", "{D06BF829-23F5-40F3-A62D-627D9F4B4D6C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.TheTvdb", "src\Kyoo.TheTvdb\Kyoo.TheTvdb.csproj", "{D06BF829-23F5-40F3-A62D-627D9F4B4D6C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.TheMovieDb", "Kyoo.TheMovieDb\Kyoo.TheMovieDb.csproj", "{BAB270D4-E0EA-4329-BA65-512FDAB01001}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.TheMovieDb", "src\Kyoo.TheMovieDb\Kyoo.TheMovieDb.csproj", "{BAB270D4-E0EA-4329-BA65-512FDAB01001}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Tests", "tests\Kyoo.Tests\Kyoo.Tests.csproj", "{0C8AA7EA-E723-4532-852F-35AA4E8AFED5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.WebApp", "Kyoo.WebApp\Kyoo.WebApp.csproj", "{2374D500-1ADB-4752-85DB-8BB0DDF5A8E8}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.WebApp", "src\Kyoo.WebApp\Kyoo.WebApp.csproj", "{2374D500-1ADB-4752-85DB-8BB0DDF5A8E8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Host.WindowsTrait", "Kyoo.Host.WindowsTrait\Kyoo.Host.WindowsTrait.csproj", "{98851001-40DD-46A6-94B3-2F8D90722076}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Host.WindowsTrait", "src\Kyoo.Host.WindowsTrait\Kyoo.Host.WindowsTrait.csproj", "{98851001-40DD-46A6-94B3-2F8D90722076}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Host.Console", "Kyoo.Host.Console\Kyoo.Host.Console.csproj", "{D8658BEA-8949-45AC-BEBB-A4FFC4F800F5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Host.Console", "src\Kyoo.Host.Console\Kyoo.Host.Console.csproj", "{D8658BEA-8949-45AC-BEBB-A4FFC4F800F5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

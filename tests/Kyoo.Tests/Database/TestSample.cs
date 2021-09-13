@@ -1,3 +1,21 @@
+// Kyoo - A portable and vast media library solution.
+// Copyright (c) Kyoo.
+//
+// See AUTHORS.md and LICENSE file in the project root for full license information.
+//
+// Kyoo is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// any later version.
+//
+// Kyoo is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
+
 using System;
 using System.Collections.Generic;
 using Kyoo.Abstractions.Models;
@@ -16,7 +34,7 @@ namespace Kyoo.Tests
 					ID = 2,
 					Slug = "new-library",
 					Name = "New Library",
-					Paths = new [] {"/a/random/path"}
+					Paths = new[] { "/a/random/path" }
 				}
 			},
 			{
@@ -121,8 +139,7 @@ namespace Kyoo.Tests
 				}
 			}
 		};
-		
-		
+
 		private static readonly Dictionary<Type, Func<object>> Samples = new()
 		{
 			{
@@ -132,7 +149,7 @@ namespace Kyoo.Tests
 					ID = 1,
 					Slug = "deck",
 					Name = "Deck",
-					Paths = new[] {"/path/to/deck"}
+					Paths = new[] { "/path/to/deck" }
 				}
 			},
 			{
@@ -190,7 +207,7 @@ namespace Kyoo.Tests
 					Title = "Season 1",
 					Overview = "The first season",
 					StartDate = new DateTime(2020, 06, 05),
-					EndDate =  new DateTime(2020, 07, 05),
+					EndDate = new DateTime(2020, 07, 05),
 					Images = new Dictionary<int, string>
 					{
 						[Images.Poster] = "Poster",
@@ -297,7 +314,7 @@ namespace Kyoo.Tests
 					Username = "User",
 					Email = "user@im-a-user.com",
 					Password = "MD5-encoded",
-					Permissions = new [] {"overall.read"}
+					Permissions = new[] { "overall.read" }
 				}
 			}
 		};
@@ -306,7 +323,7 @@ namespace Kyoo.Tests
 		{
 			return (T)Samples[typeof(T)]();
 		}
-		
+
 		public static T GetNew<T>()
 		{
 			return (T)NewSamples[typeof(T)]();
@@ -317,7 +334,7 @@ namespace Kyoo.Tests
 			Collection collection = Get<Collection>();
 			collection.ID = 0;
 			context.Collections.Add(collection);
-			
+
 			Show show = Get<Show>();
 			show.ID = 0;
 			show.StudioID = 0;
@@ -345,26 +362,26 @@ namespace Kyoo.Tests
 
 			Studio studio = Get<Studio>();
 			studio.ID = 0;
-			studio.Shows = new List<Show> {show};
+			studio.Shows = new List<Show> { show };
 			context.Studios.Add(studio);
 
 			Genre genre = Get<Genre>();
 			genre.ID = 0;
-			genre.Shows = new List<Show> {show};
+			genre.Shows = new List<Show> { show };
 			context.Genres.Add(genre);
 
 			People people = Get<People>();
 			people.ID = 0;
 			context.People.Add(people);
-			
+
 			Provider provider = Get<Provider>();
 			provider.ID = 0;
 			context.Providers.Add(provider);
-			
+
 			Library library = Get<Library>();
 			library.ID = 0;
-			library.Collections = new List<Collection> {collection};
-			library.Providers = new List<Provider> {provider};
+			library.Collections = new List<Collection> { collection };
+			library.Providers = new List<Provider> { provider };
 			context.Libraries.Add(library);
 
 			User user = Get<User>();

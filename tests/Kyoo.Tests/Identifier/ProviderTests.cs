@@ -1,3 +1,21 @@
+// Kyoo - A portable and vast media library solution.
+// Copyright (c) Kyoo.
+//
+// See AUTHORS.md and LICENSE file in the project root for full license information.
+//
+// Kyoo is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// any later version.
+//
+// Kyoo is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +33,7 @@ namespace Kyoo.Tests.Identifier
 	public class ProviderTests
 	{
 		private readonly ILoggerFactory _factory;
-		
+
 		public ProviderTests(ITestOutputHelper output)
 		{
 			_factory = LoggerFactory.Create(x =>
@@ -24,7 +42,7 @@ namespace Kyoo.Tests.Identifier
 				x.AddXunit(output);
 			});
 		}
-		
+
 		[Fact]
 		public async Task NoProviderGetTest()
 		{
@@ -38,7 +56,7 @@ namespace Kyoo.Tests.Identifier
 			Show ret = await provider.Get(show);
 			KAssert.DeepEqual(show, ret);
 		}
-		
+
 		[Fact]
 		public async Task NoProviderSearchTest()
 		{
@@ -47,7 +65,7 @@ namespace Kyoo.Tests.Identifier
 			ICollection<Show> ret = await provider.Search<Show>("show");
 			Assert.Empty(ret);
 		}
-		
+
 		[Fact]
 		public async Task OneProviderGetTest()
 		{
@@ -60,14 +78,14 @@ namespace Kyoo.Tests.Identifier
 			mock.Setup(x => x.Get(show)).ReturnsAsync(new Show
 			{
 				Title = "title",
-				Genres = new[] { new Genre("ToMerge")}
+				Genres = new[] { new Genre("ToMerge") }
 			});
-			AProviderComposite provider = new ProviderComposite(new []
+			AProviderComposite provider = new ProviderComposite(new[]
 				{
 					mock.Object
 				},
 				_factory.CreateLogger<ProviderComposite>());
-			
+
 			Show ret = await provider.Get(show);
 			Assert.Equal(4, ret.ID);
 			Assert.Equal("title", ret.Title);
@@ -75,7 +93,7 @@ namespace Kyoo.Tests.Identifier
 			Assert.Contains("genre", ret.Genres.Select(x => x.Slug));
 			Assert.Contains("tomerge", ret.Genres.Select(x => x.Slug));
 		}
-		
+
 		[Fact]
 		public async Task FailingProviderGetTest()
 		{
@@ -85,34 +103,34 @@ namespace Kyoo.Tests.Identifier
 				Genres = new[] { new Genre("genre") }
 			};
 			Mock<IMetadataProvider> mock = new();
-			mock.Setup(x => x.Provider).Returns(new Provider("mock", ""));
+			mock.Setup(x => x.Provider).Returns(new Provider("mock", string.Empty));
 			mock.Setup(x => x.Get(show)).ReturnsAsync(new Show
 			{
 				Title = "title",
-				Genres = new[] { new Genre("ToMerge")}
+				Genres = new[] { new Genre("ToMerge") }
 			});
-			
+
 			Mock<IMetadataProvider> mockTwo = new();
-			mockTwo.Setup(x => x.Provider).Returns(new Provider("mockTwo", ""));
+			mockTwo.Setup(x => x.Provider).Returns(new Provider("mockTwo", string.Empty));
 			mockTwo.Setup(x => x.Get(show)).ReturnsAsync(new Show
 			{
 				Title = "title2",
 				Status = Status.Finished,
-				Genres = new[] { new Genre("ToMerge")}
+				Genres = new[] { new Genre("ToMerge") }
 			});
-			
+
 			Mock<IMetadataProvider> mockFailing = new();
-			mockFailing.Setup(x => x.Provider).Returns(new Provider("mockFail", ""));
+			mockFailing.Setup(x => x.Provider).Returns(new Provider("mockFail", string.Empty));
 			mockFailing.Setup(x => x.Get(show)).Throws<ArgumentException>();
-			
-			AProviderComposite provider = new ProviderComposite(new []
+
+			AProviderComposite provider = new ProviderComposite(new[]
 				{
 					mock.Object,
 					mockTwo.Object,
 					mockFailing.Object
 				},
 				_factory.CreateLogger<ProviderComposite>());
-			
+
 			Show ret = await provider.Get(show);
 			Assert.Equal(4, ret.ID);
 			Assert.Equal("title", ret.Title);

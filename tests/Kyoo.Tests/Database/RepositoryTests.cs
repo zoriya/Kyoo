@@ -1,3 +1,21 @@
+// Kyoo - A portable and vast media library solution.
+// Copyright (c) Kyoo.
+//
+// See AUTHORS.md and LICENSE file in the project root for full license information.
+//
+// Kyoo is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// any later version.
+//
+// Kyoo is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,20 +66,20 @@ namespace Kyoo.Tests
 			T value = await _repository.Get(TestSample.Get<T>().ID);
 			KAssert.DeepEqual(TestSample.Get<T>(), value);
 		}
-		
+
 		[Fact]
 		public async Task GetBySlugTest()
 		{
 			T value = await _repository.Get(TestSample.Get<T>().Slug);
 			KAssert.DeepEqual(TestSample.Get<T>(), value);
 		}
-		
+
 		[Fact]
 		public async Task GetByFakeIdTest()
 		{
 			await Assert.ThrowsAsync<ItemNotFoundException>(() => _repository.Get(2));
 		}
-		
+
 		[Fact]
 		public async Task GetByFakeSlugTest()
 		{
@@ -74,21 +92,21 @@ namespace Kyoo.Tests
 			await _repository.Delete(TestSample.Get<T>().ID);
 			Assert.Equal(0, await _repository.GetCount());
 		}
-		
+
 		[Fact]
 		public async Task DeleteBySlugTest()
 		{
 			await _repository.Delete(TestSample.Get<T>().Slug);
 			Assert.Equal(0, await _repository.GetCount());
 		}
-		
+
 		[Fact]
 		public async Task DeleteByValueTest()
 		{
 			await _repository.Delete(TestSample.Get<T>());
 			Assert.Equal(0, await _repository.GetCount());
 		}
-		
+
 		[Fact]
 		public async Task CreateTest()
 		{
@@ -100,19 +118,19 @@ namespace Kyoo.Tests
 			await _repository.Create(expected);
 			KAssert.DeepEqual(expected, await _repository.Get(expected.Slug));
 		}
-		
+
 		[Fact]
 		public async Task CreateNullTest()
 		{
 			await Assert.ThrowsAsync<ArgumentNullException>(() => _repository.Create(null!));
 		}
-		
+
 		[Fact]
 		public async Task CreateIfNotExistNullTest()
 		{
 			await Assert.ThrowsAsync<ArgumentNullException>(() => _repository.CreateIfNotExists(null!));
 		}
-		
+
 		[Fact]
 		public async Task CreateIfNotExistTest()
 		{
@@ -121,17 +139,17 @@ namespace Kyoo.Tests
 			await _repository.Delete(TestSample.Get<T>());
 			KAssert.DeepEqual(expected, await _repository.CreateIfNotExists(TestSample.Get<T>()));
 		}
-		
+
 		[Fact]
 		public async Task EditNullTest()
 		{
 			await Assert.ThrowsAsync<ArgumentNullException>(() => _repository.Edit(null!, false));
 		}
-		
+
 		[Fact]
 		public async Task EditNonExistingTest()
 		{
-			await Assert.ThrowsAsync<ItemNotFoundException>(() => _repository.Edit(new T {ID = 56}, false));
+			await Assert.ThrowsAsync<ItemNotFoundException>(() => _repository.Edit(new T { ID = 56 }, false));
 		}
 
 		[Fact]
@@ -145,19 +163,19 @@ namespace Kyoo.Tests
 		{
 			KAssert.DeepEqual(TestSample.Get<T>(), await _repository.Get(x => x.Slug == TestSample.Get<T>().Slug));
 		}
-		
+
 		[Fact]
 		public async Task GetExpressionNotFoundTest()
 		{
 			await Assert.ThrowsAsync<ItemNotFoundException>(() => _repository.Get(x => x.Slug == "non-existing"));
 		}
-		
+
 		[Fact]
 		public async Task GetExpressionNullTest()
 		{
 			await Assert.ThrowsAsync<ArgumentNullException>(() => _repository.Get((Expression<Func<T, bool>>)null!));
 		}
-		
+
 		[Fact]
 		public async Task GetOrDefaultTest()
 		{
@@ -172,7 +190,7 @@ namespace Kyoo.Tests
 			string slug = TestSample.Get<T>().Slug[2..4];
 			Assert.Equal(1, await _repository.GetCount(x => x.Slug.Contains(slug)));
 		}
-		
+
 		[Fact]
 		public async Task GetAllTest()
 		{
@@ -181,7 +199,7 @@ namespace Kyoo.Tests
 			Assert.Equal(1, ret.Count);
 			KAssert.DeepEqual(TestSample.Get<T>(), ret.First());
 		}
-		
+
 		[Fact]
 		public async Task DeleteAllTest()
 		{

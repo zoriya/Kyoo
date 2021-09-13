@@ -1,0 +1,20 @@
+{
+	"profiles": {
+		"Console Host": {
+			"commandName": "Project",
+			"launchBrowser": false,
+			"environmentVariables": {
+				"KYOO_DATADIR": "./bin/KyooData"
+			},
+			"applicationUrl": "http://localhost:5000"
+		},
+		"Console Host (Browser)": {
+			"commandName": "Project",
+			"launchBrowser": true,
+			"environmentVariables": {
+				"KYOO_DATADIR": "./bin/KyooData"
+			},
+			"applicationUrl": "http://localhost:5000"
+		}
+	}
+}

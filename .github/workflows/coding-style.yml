@@ -1,0 +1,15 @@
+name: CodingStyle
+on: [pull_request, workflow_dispatch]
+
+jobs:
+  build:
+    name: "Coding style check"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+      - name: Build the app
+        run: dotnet build -p:CheckCodingStyle=true -p:TreatWarningsAsErrors=true '-p:SkipTranscoder=true;SkipWebApp=true'

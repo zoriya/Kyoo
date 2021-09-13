@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<Title>Kyoo.Abstractions</Title>
+		<Authors>Zoe Roux</Authors>
+		<Description>Base package to create plugins for Kyoo.</Description>
+		<PackageProjectUrl>https://github.com/AnonymusRaccoon/Kyoo</PackageProjectUrl>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
+		<Company>SDG</Company>
+		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+		<PackageVersion>1.0.0</PackageVersion>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<LangVersion>default</LangVersion>
+		<RootNamespace>Kyoo.Abstractions</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Autofac" Version="6.2.0" />
+		<PackageReference Include="JetBrains.Annotations" Version="2021.2.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
+		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="5.0.0" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.0-beta-20204-02" PrivateAssets="All" />
+		<PackageReference Include="System.ComponentModel.Composition" Version="5.0.0" />
+	</ItemGroup>
+
+</Project>

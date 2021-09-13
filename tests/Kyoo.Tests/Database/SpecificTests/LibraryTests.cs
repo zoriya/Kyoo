@@ -1,3 +1,21 @@
+// Kyoo - A portable and vast media library solution.
+// Copyright (c) Kyoo.
+//
+// See AUTHORS.md and LICENSE file in the project root for full license information.
+//
+// Kyoo is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// any later version.
+//
+// Kyoo is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -48,15 +66,15 @@ namespace Kyoo.Tests.Database
 			library.Paths = null;
 			await Assert.ThrowsAsync<ArgumentException>(() => _repository.Create(library));
 		}
-		
+
 		[Fact]
 		public async Task CreateWithEmptySlugTest()
 		{
 			Library library = TestSample.GetNew<Library>();
-			library.Slug = "";
+			library.Slug = string.Empty;
 			await Assert.ThrowsAsync<ArgumentException>(() => _repository.Create(library));
 		}
-		
+
 		[Fact]
 		public async Task CreateWithNumberSlugTest()
 		{
@@ -65,7 +83,7 @@ namespace Kyoo.Tests.Database
 			Library ret = await _repository.Create(library);
 			Assert.Equal("2!", ret.Slug);
 		}
-		
+
 		[Fact]
 		public async Task CreateWithoutNameTest()
 		{
@@ -73,7 +91,7 @@ namespace Kyoo.Tests.Database
 			library.Name = null;
 			await Assert.ThrowsAsync<ArgumentException>(() => _repository.Create(library));
 		}
-		
+
 		[Fact]
 		public async Task CreateWithProvider()
 		{
@@ -90,16 +108,16 @@ namespace Kyoo.Tests.Database
 		public async Task EditTest()
 		{
 			Library value = await _repository.Get(TestSample.Get<Library>().Slug);
-			value.Paths = new [] {"/super", "/test"};
+			value.Paths = new[] { "/super", "/test" };
 			value.Name = "New Title";
 			Library edited = await _repository.Edit(value, false);
-		
+
 			await using DatabaseContext database = Repositories.Context.New();
 			Library show = await database.Libraries.FirstAsync();
-			
+
 			KAssert.DeepEqual(show, edited);
 		}
-		
+
 		[Fact]
 		public async Task EditProvidersTest()
 		{
@@ -109,17 +127,17 @@ namespace Kyoo.Tests.Database
 				TestSample.GetNew<Provider>()
 			};
 			Library edited = await _repository.Edit(value, false);
-		
+
 			await using DatabaseContext database = Repositories.Context.New();
 			Library show = await database.Libraries
 				.Include(x => x.Providers)
 				.FirstAsync();
-			
+
 			show.Providers.ForEach(x => x.Libraries = null);
 			edited.Providers.ForEach(x => x.Libraries = null);
 			KAssert.DeepEqual(show, edited);
 		}
-		
+
 		[Fact]
 		public async Task AddProvidersTest()
 		{
@@ -127,17 +145,17 @@ namespace Kyoo.Tests.Database
 			await Repositories.LibraryManager.Load(value, x => x.Providers);
 			value.Providers.Add(TestSample.GetNew<Provider>());
 			Library edited = await _repository.Edit(value, false);
-		
+
 			await using DatabaseContext database = Repositories.Context.New();
 			Library show = await database.Libraries
 				.Include(x => x.Providers)
 				.FirstAsync();
-			
+
 			show.Providers.ForEach(x => x.Libraries = null);
 			edited.Providers.ForEach(x => x.Libraries = null);
 			KAssert.DeepEqual(show, edited);
 		}
-		
+
 		[Theory]
 		[InlineData("test")]
 		[InlineData("super")]
@@ -150,7 +168,7 @@ namespace Kyoo.Tests.Database
 			{
 				Slug = "super-test",
 				Name = "This is a test title",
-				Paths = new [] {"path"}
+				Paths = new[] { "path" }
 			};
 			await _repository.Create(value);
 			ICollection<Library> ret = await _repository.Search(query);

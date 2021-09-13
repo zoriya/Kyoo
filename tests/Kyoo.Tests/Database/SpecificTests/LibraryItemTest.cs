@@ -1,3 +1,21 @@
+// Kyoo - A portable and vast media library solution.
+// Copyright (c) Kyoo.
+//
+// See AUTHORS.md and LICENSE file in the project root for full license information.
+//
+// Kyoo is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// any later version.
+//
+// Kyoo is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
+
 using System;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
@@ -16,7 +34,6 @@ namespace Kyoo.Tests.Database
 		}
 	}
 
-
 	namespace PostgreSQL
 	{
 		[Collection(nameof(Postgresql))]
@@ -26,12 +43,12 @@ namespace Kyoo.Tests.Database
 				: base(new RepositoryActivator(output, postgres)) { }
 		}
 	}
-	
+
 	public abstract class ALibraryItemTest
 	{
 		private readonly ILibraryItemRepository _repository;
 		private readonly RepositoryActivator _repositories;
-		
+
 		protected ALibraryItemTest(RepositoryActivator repositories)
 		{
 			_repositories = repositories;
@@ -43,7 +60,7 @@ namespace Kyoo.Tests.Database
 		{
 			Assert.Equal(2, await _repository.GetCount());
 		}
-		
+
 		[Fact]
 		public async Task GetShowTests()
 		{
@@ -51,7 +68,7 @@ namespace Kyoo.Tests.Database
 			LibraryItem actual = await _repository.Get(1);
 			KAssert.DeepEqual(expected, actual);
 		}
-		
+
 		[Fact]
 		public async Task GetCollectionTests()
 		{
@@ -59,7 +76,7 @@ namespace Kyoo.Tests.Database
 			LibraryItem actual = await _repository.Get(-1);
 			KAssert.DeepEqual(expected, actual);
 		}
-		
+
 		[Fact]
 		public async Task GetShowSlugTests()
 		{
@@ -67,7 +84,7 @@ namespace Kyoo.Tests.Database
 			LibraryItem actual = await _repository.Get(TestSample.Get<Show>().Slug);
 			KAssert.DeepEqual(expected, actual);
 		}
-		
+
 		[Fact]
 		public async Task GetCollectionSlugTests()
 		{
@@ -75,7 +92,7 @@ namespace Kyoo.Tests.Database
 			LibraryItem actual = await _repository.Get(TestSample.Get<Collection>().Slug);
 			KAssert.DeepEqual(expected, actual);
 		}
-		
+
 		[Fact]
 		public async Task GetDuplicatedSlugTests()
 		{

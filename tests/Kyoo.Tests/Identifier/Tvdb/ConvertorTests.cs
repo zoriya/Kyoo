@@ -1,3 +1,21 @@
+// Kyoo - A portable and vast media library solution.
+// Copyright (c) Kyoo.
+//
+// See AUTHORS.md and LICENSE file in the project root for full license information.
+//
+// Kyoo is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// any later version.
+//
+// Kyoo is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
+
 using System;
 using System.Linq;
 using Kyoo.Abstractions.Models;
@@ -25,7 +43,7 @@ namespace Kyoo.Tests.Identifier.Tvdb
 			};
 			Provider provider = TestSample.Get<Provider>();
 			Show show = result.ToShow(provider);
-			
+
 			Assert.Equal("slug", show.Slug);
 			Assert.Equal("name", show.Title);
 			Assert.Single(show.Aliases);
@@ -85,15 +103,15 @@ namespace Kyoo.Tests.Identifier.Tvdb
 				Poster = "poster",
 				FanArt = "fanart",
 				Id = 5,
-				Genre = new []
+				Genre = new[]
 				{
 					"Action",
-					"Test With Spéàacial characters"
+					"Test With Sp??acial characters"
 				}
 			};
 			Provider provider = TestSample.Get<Provider>();
 			Show show = result.ToShow(provider);
-			
+
 			Assert.Equal("slug", show.Slug);
 			Assert.Equal("name", show.Title);
 			Assert.Single(show.Aliases);
@@ -110,8 +128,8 @@ namespace Kyoo.Tests.Identifier.Tvdb
 			Assert.Equal(2, show.Genres.Count);
 			Assert.Equal("action", show.Genres.ToArray()[0].Slug);
 			Assert.Equal("Action", show.Genres.ToArray()[0].Name);
-			Assert.Equal("Test With Spéàacial characters", show.Genres.ToArray()[1].Name);
-			Assert.Equal("test-with-speaacial-characters", show.Genres.ToArray()[1].Slug);
+			Assert.Equal("Test With Sp??acial characters", show.Genres.ToArray()[1].Name);
+			Assert.Equal("test-with-spacial-characters", show.Genres.ToArray()[1].Slug);
 		}
 
 		[Fact]
@@ -125,13 +143,13 @@ namespace Kyoo.Tests.Identifier.Tvdb
 				Role = "role"
 			};
 			PeopleRole people = actor.ToPeopleRole();
-			
+
 			Assert.Equal("name", people.Slug);
 			Assert.Equal("Name", people.People.Name);
 			Assert.Equal("role", people.Role);
 			Assert.Equal("https://www.thetvdb.com/banners/image", people.People.Images[Images.Poster]);
 		}
-		
+
 		[Fact]
 		public void EpisodeRecordToEpisode()
 		{
@@ -147,7 +165,7 @@ namespace Kyoo.Tests.Identifier.Tvdb
 			};
 			Provider provider = TestSample.Get<Provider>();
 			Episode episode = record.ToEpisode(provider);
-			
+
 			Assert.Equal("title", episode.Title);
 			Assert.Equal(2, episode.SeasonNumber);
 			Assert.Equal(3, episode.EpisodeNumber);
