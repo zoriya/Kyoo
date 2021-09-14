@@ -1,13 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
-		<TranscoderRoot>../Kyoo.Transcoder/</TranscoderRoot>
-
-		<Company>SDG</Company>
-		<Authors>Zoe Roux</Authors>
-		<RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
 		<LangVersion>default</LangVersion>
+		<AssemblyName>Kyoo.Core</AssemblyName>
+		<RootNamespace>Kyoo.Core</RootNamespace>
+		<TranscoderRoot>../Kyoo.Transcoder/</TranscoderRoot>
 	</PropertyGroup>
 
 	<PropertyGroup>
