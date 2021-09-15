@@ -28,6 +28,7 @@ using Kyoo.Core.Models.Options;
 using Kyoo.Core.Tasks;
 using Kyoo.Postgresql;
 using Kyoo.SqLite;
+using Kyoo.Swagger;
 using Kyoo.TheMovieDb;
 using Kyoo.TheTvdb;
 using Kyoo.Utils;
@@ -75,7 +76,8 @@ namespace Kyoo.Core
 				typeof(PostgresModule),
 				typeof(SqLiteModule),
 				typeof(PluginTvdb),
-				typeof(PluginTmdb)
+				typeof(PluginTmdb),
+				typeof(SwaggerModule)
 			);
 		}
 

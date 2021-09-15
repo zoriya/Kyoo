@@ -27,6 +27,8 @@ using Microsoft.Extensions.Options;
 
 // We use threads so tasks are not always awaited.
 #pragma warning disable 4014
+// Private items that are external can't start with an _
+#pragma warning disable IDE1006
 
 namespace Kyoo.Core.Controllers
 {

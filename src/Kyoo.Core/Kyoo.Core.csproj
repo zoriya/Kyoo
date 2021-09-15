@@ -38,6 +38,7 @@
 		<ProjectReference Include="../Kyoo.SqLite/Kyoo.SqLite.csproj" />
 		<ProjectReference Include="../Kyoo.Authentication/Kyoo.Authentication.csproj" />
 		<ProjectReference Include="../Kyoo.WebApp/Kyoo.WebApp.csproj" />
+		<ProjectReference Include="../Kyoo.Swagger/Kyoo.Swagger.csproj" />
 	</ItemGroup>
 
 	<Target Name="BuildTranscoder" BeforeTargets="BeforeBuild" Condition="'$(SkipTranscoder)' != 'true' And !Exists('$(TranscoderRoot)/build/$(TranscoderBinary)')">

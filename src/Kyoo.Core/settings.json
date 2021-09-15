@@ -8,7 +8,7 @@
     "metadataInShow": true,
     "metadataPath": "metadata/"
   },
-  
+
   "database": {
     "enabled": "sqlite",
     "configurations": {
@@ -58,7 +58,7 @@
       "^(?<Episode>.+)\\.(?<Language>\\w{1,3})\\.(?<Default>default\\.)?(?<Forced>forced\\.)?.*$"
     ]
   },
-  
+
   "authentication": {
     "certificate": {
       "file": "certificate.pfx",
@@ -72,7 +72,7 @@
     "profilePicturePath": "users/",
     "clients": []
   },
-  
+
   "tvdb": {
     "apiKey": ""
   },

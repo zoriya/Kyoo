@@ -208,6 +208,7 @@ namespace Kyoo.Core.Api
 			return Ok();
 		}
 
+		[HttpDelete]
 		[PartialPermission(Kind.Delete)]
 		public virtual async Task<IActionResult> Delete(Dictionary<string, string> where)
 		{
