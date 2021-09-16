@@ -177,6 +177,7 @@ namespace Kyoo.Authentication.Views
 		}
 
 		/// <inheritdoc />
+		[ApiExplorerSettings(IgnoreApi = true)]
 		public async Task GetProfileDataAsync(ProfileDataRequestContext context)
 		{
 			User user = await _users.GetOrDefault(int.Parse(context.Subject.GetSubjectId()));
@@ -187,6 +188,7 @@ namespace Kyoo.Authentication.Views
 		}
 
 		/// <inheritdoc />
+		[ApiExplorerSettings(IgnoreApi = true)]
 		public async Task IsActiveAsync(IsActiveContext context)
 		{
 			User user = await _users.GetOrDefault(int.Parse(context.Subject.GetSubjectId()));

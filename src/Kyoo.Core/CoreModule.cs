@@ -138,7 +138,9 @@ namespace Kyoo.Core
 		{
 			string publicUrl = _configuration.GetPublicUrl();
 
-			services.AddMvc().AddControllersAsServices();
+			services.AddMvcCore()
+				.AddControllersAsServices()
+				.AddApiExplorer();
 			services.AddControllers()
 				.AddNewtonsoftJson(x =>
 				{

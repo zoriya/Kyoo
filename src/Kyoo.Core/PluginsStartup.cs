@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Autofac;
 using Kyoo.Abstractions;
 using Kyoo.Abstractions.Controllers;
@@ -108,6 +109,9 @@ namespace Kyoo.Core
 		/// <param name="services">The service collection to fill.</param>
 		public void ConfigureServices(IServiceCollection services)
 		{
+			foreach (Assembly assembly in _plugins.GetAllPlugins().Select(x => x.GetType().Assembly))
+				services.AddMvcCore().AddApplicationPart(assembly);
+
 			foreach (IPlugin plugin in _plugins.GetAllPlugins())
 				plugin.Configure(services);
 

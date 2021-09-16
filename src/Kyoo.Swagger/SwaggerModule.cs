@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.IO;
 using Kyoo.Abstractions.Controllers;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 
