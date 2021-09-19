@@ -16,24 +16,17 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using JetBrains.Annotations;
-using Microsoft.AspNetCore.Mvc;
-
-namespace Kyoo.Abstractions.Models.Attributes
+namespace Kyoo.Abstractions.Models.Utils
 {
 	/// <summary>
-	/// A custom <see cref="RouteAttribute"/> that indicate an alternatives, hidden route.
+	/// A class containing constant numbers.
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
-	public class AltRouteAttribute : RouteAttribute
+	public static class Constants
 	{
 		/// <summary>
-		/// Create a new <see cref="AltRouteAttribute"/>.
+		/// A property to use on a Microsoft.AspNet.MVC.Route.Order property to mark it as an alternative route
+		/// that won't be included on the swagger.
 		/// </summary>
-		/// <param name="template">The route template, see <see cref="RouteAttribute.Template"/>.</param>
-		public AltRouteAttribute([NotNull] [RouteTemplateAttribute] string template)
-			: base(template)
-		{ }
+		public const int AlternativeRoute = 1;
 	}
 }

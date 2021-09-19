@@ -19,12 +19,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using Kyoo.Abstractions.Controllers;
-using Kyoo.Abstractions.Models.Attributes;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
+using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Swagger
 {
@@ -71,12 +70,9 @@ namespace Kyoo.Swagger
 					options.IncludeXmlComments(documentation);
 
 				options.UseAllOfForInheritance();
-
-				options.DocInclusionPredicate((_, apiDescription) =>
-				{
-					return apiDescription.ActionDescriptor.EndpointMetadata
-						.All(x => x is not AltRouteAttribute && x is not AltHttpGetAttribute);
-				});
+				options.SwaggerGeneratorOptions.SortKeySelector = x => x.RelativePath;
+				options.DocInclusionPredicate((_, apiDescription)
+					=> apiDescription.ActionDescriptor.AttributeRouteInfo?.Order != AlternativeRoute);
 			});
 		}
 

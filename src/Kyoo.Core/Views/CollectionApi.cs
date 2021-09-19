@@ -22,17 +22,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
-using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Core.Models.Options;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Core.Api
 {
 	[Route("api/collections")]
-	[AltRoute("api/collection")]
+	[Route("api/collection", Order = AlternativeRoute)]
 	[ApiController]
 	[PartialPermission(nameof(CollectionApi))]
 	public class CollectionApi : CrudApi<Collection>
@@ -53,7 +53,7 @@ namespace Kyoo.Core.Api
 		}
 
 		[HttpGet("{id:int}/shows")]
-		[AltHttpGet("{id:int}/show")]
+		[HttpGet("{id:int}/show", Order = AlternativeRoute)]
 		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<Show>>> GetShows(int id,
 			[FromQuery] string sortBy,
@@ -79,7 +79,7 @@ namespace Kyoo.Core.Api
 		}
 
 		[HttpGet("{slug}/shows")]
-		[AltHttpGet("{slug}/show")]
+		[HttpGet("{slug}/show", Order = AlternativeRoute)]
 		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<Show>>> GetShows(string slug,
 			[FromQuery] string sortBy,
@@ -105,7 +105,7 @@ namespace Kyoo.Core.Api
 		}
 
 		[HttpGet("{id:int}/libraries")]
-		[AltHttpGet("{id:int}/library")]
+		[HttpGet("{id:int}/library", Order = AlternativeRoute)]
 		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<Library>>> GetLibraries(int id,
 			[FromQuery] string sortBy,
@@ -131,7 +131,7 @@ namespace Kyoo.Core.Api
 		}
 
 		[HttpGet("{slug}/libraries")]
-		[AltHttpGet("{slug}/library")]
+		[HttpGet("{slug}/library", Order = AlternativeRoute)]
 		[PartialPermission(Kind.Read)]
 		public async Task<ActionResult<Page<Library>>> GetLibraries(string slug,
 			[FromQuery] string sortBy,
