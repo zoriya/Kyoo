@@ -60,6 +60,7 @@
 
 	<ItemGroup>
 		<Content Include="../../LICENSE" CopyToOutputDirectory="Always" Visible="false" />
+		<Content Include="../../AUTHORS.md" CopyToOutputDirectory="Always" Visible="false" />
 		<Content Include="settings.json" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 </Project>

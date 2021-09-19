@@ -19,9 +19,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models.Attributes;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 
@@ -47,9 +48,9 @@ namespace Kyoo.Swagger
 		/// <inheritdoc />
 		public void Configure(IServiceCollection services)
 		{
-			services.AddSwaggerGen(x =>
+			services.AddSwaggerGen(options =>
 			{
-				x.SwaggerDoc("v1", new OpenApiInfo
+				options.SwaggerDoc("v1", new OpenApiInfo
 				{
 					Version = "v1",
 					Title = "Kyoo API",
@@ -67,7 +68,15 @@ namespace Kyoo.Swagger
 				});
 
 				foreach (string documentation in Directory.GetFiles(AppContext.BaseDirectory, "*.xml"))
-					x.IncludeXmlComments(documentation);
+					options.IncludeXmlComments(documentation);
+
+				options.UseAllOfForInheritance();
+
+				options.DocInclusionPredicate((_, apiDescription) =>
+				{
+					return apiDescription.ActionDescriptor.EndpointMetadata
+						.All(x => x is not AltRouteAttribute && x is not AltHttpGetAttribute);
+				});
 			});
 		}
 
@@ -78,6 +87,10 @@ namespace Kyoo.Swagger
 			SA.New<IApplicationBuilder>(app => app.UseSwaggerUI(x =>
 			{
 				x.SwaggerEndpoint("/swagger/v1/swagger.json", "Kyoo v1");
+			}), SA.Before),
+			SA.New<IApplicationBuilder>(app => app.UseReDoc(x =>
+			{
+				x.SpecUrl = "/swagger/v1/swagger.json";
 			}), SA.Before)
 		};
 	}

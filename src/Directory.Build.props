@@ -3,10 +3,18 @@
 		<Company>Kyoo</Company>
 		<Authors>Kyoo</Authors>
 		<Copyright>Copyright (c) Kyoo</Copyright>
+		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<RequireLicenseAcceptance>true</RequireLicenseAcceptance>
+
 		<RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<PackageProjectUrl>https://github.com/AnonymusRaccoon/Kyoo</PackageProjectUrl>
+
+		<PackageVersion>1.0.0</PackageVersion>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 	</PropertyGroup>
 
 	<PropertyGroup>
