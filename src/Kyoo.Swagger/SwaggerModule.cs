@@ -66,9 +66,7 @@ namespace Kyoo.Swagger
 					}
 				});
 
-				foreach (string documentation in Directory.GetFiles(AppContext.BaseDirectory, "*.xml"))
-					options.IncludeXmlComments(documentation);
-
+				options.LoadXmlDocumentation();
 				options.UseAllOfForInheritance();
 				options.SwaggerGeneratorOptions.SortKeySelector = x => x.RelativePath;
 				options.DocInclusionPredicate((_, apiDescription)

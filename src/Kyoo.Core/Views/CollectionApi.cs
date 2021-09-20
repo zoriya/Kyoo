@@ -31,14 +31,28 @@ using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Core.Api
 {
+	/// <summary>
+	/// Information about one or multiple <see cref="Collection"/>.
+	/// </summary>
 	[Route("api/collections")]
 	[Route("api/collection", Order = AlternativeRoute)]
 	[ApiController]
 	[PartialPermission(nameof(CollectionApi))]
 	public class CollectionApi : CrudApi<Collection>
 	{
+		/// <summary>
+		/// The library manager used to modify or retrieve information about the data store.
+		/// </summary>
 		private readonly ILibraryManager _libraryManager;
+
+		/// <summary>
+		/// The file manager used to send images.
+		/// </summary>
 		private readonly IFileSystem _files;
+
+		/// <summary>
+		/// The thumbnail manager used to retrieve images paths.
+		/// </summary>
 		private readonly IThumbnailsManager _thumbs;
 
 		public CollectionApi(ILibraryManager libraryManager,
@@ -52,6 +66,20 @@ namespace Kyoo.Core.Api
 			_thumbs = thumbs;
 		}
 
+		/// <summary>
+		/// Lists <see cref="Show"/> that are contained in the <see cref="Collection"/> with id <paramref name="id"/>.
+		/// </summary>
+		/// <param name="id">The ID of the <see cref="Collection"/>.</param>
+		/// <param name="sortBy">A key to sort shows by. See <see cref="Sort{T}"/> for more information.</param>
+		/// <param name="afterID">An optional show's ID to start the query from this specific item.</param>
+		/// <param name="where">
+		/// An optional list of filters. See <see cref="ApiHelper.ParseWhere{T}"/> for more details.
+		/// </param>
+		/// <param name="limit">The number of shows to return.</param>
+		/// <returns>A page of shows.</returns>
+		/// <response code="200">A page of shows.</response>
+		/// <response code="400"><paramref name="sortBy"/> or <paramref name="where"/> is invalid.</response>
+		/// <response code="404">No collection with the ID <paramref name="id"/> could be found.</response>
 		[HttpGet("{id:int}/shows")]
 		[HttpGet("{id:int}/show", Order = AlternativeRoute)]
 		[PartialPermission(Kind.Read)]

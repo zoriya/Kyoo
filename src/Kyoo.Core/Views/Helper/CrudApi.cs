@@ -28,21 +28,47 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Kyoo.Core.Api
 {
+	/// <summary>
+	/// A base class to handle CRUD operations on a specific resource type <typeparamref name="T"/>.
+	/// </summary>
+	/// <typeparam name="T">The type of resource to make CRUD apis for.</typeparam>
 	[ApiController]
 	[ResourceView]
 	public class CrudApi<T> : ControllerBase
 		where T : class, IResource
 	{
+		/// <summary>
+		/// The repository of the resource, used to retrieve, save and do operations on the baking store.
+		/// </summary>
 		private readonly IRepository<T> _repository;
 
+		/// <summary>
+		/// The base URL of Kyoo. This will be used to create links for images and <see cref="Abstractions.Models.Page{T}"/>.
+		/// </summary>
 		protected Uri BaseURL { get; }
 
+		/// <summary>
+		/// Create a new <see cref="CrudApi{T}"/> using the given repository and base url.
+		/// </summary>
+		/// <param name="repository">
+		/// The repository to use as a baking store for the type <typeparamref name="T"/>.
+		/// </param>
+		/// <param name="baseURL">
+		/// The base URL of Kyoo to use to create links.
+		/// </param>
 		public CrudApi(IRepository<T> repository, Uri baseURL)
 		{
 			_repository = repository;
 			BaseURL = baseURL;
 		}
 
+		/// <summary>
+		/// Get a <typeparamref name="T"/> by ID.
+		/// </summary>
+		/// <param name="id">The ID of the resource to retrieve.</param>
+		/// <returns>The retrieved <typeparamref name="T"/>.</returns>
+		/// <response code="200">The <typeparamref name="T"/> exist and is returned.</response>
+		/// <response code="404">A resource with the ID <paramref name="id"/> does not exist.</response>
 		[HttpGet("{id:int}")]
 		[PartialPermission(Kind.Read)]
 		public virtual async Task<ActionResult<T>> Get(int id)
