@@ -77,7 +77,6 @@ namespace Kyoo.Core.Api
 		/// </param>
 		/// <param name="limit">The number of shows to return.</param>
 		/// <returns>A page of shows.</returns>
-		/// <response code="200">A page of shows.</response>
 		/// <response code="400"><paramref name="sortBy"/> or <paramref name="where"/> is invalid.</response>
 		/// <response code="404">No collection with the ID <paramref name="id"/> could be found.</response>
 		[HttpGet("{id:int}/shows")]

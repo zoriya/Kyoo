@@ -18,11 +18,12 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using Kyoo.Abstractions.Controllers;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OpenApi.Models;
+using NSwag;
+using NSwag.Generation.AspNetCore;
 using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Swagger
@@ -47,44 +48,50 @@ namespace Kyoo.Swagger
 		/// <inheritdoc />
 		public void Configure(IServiceCollection services)
 		{
-			services.AddSwaggerGen(options =>
+			services.AddTransient<IApplicationModelProvider, GenericResponseProvider>();
+			services.AddOpenApiDocument(options =>
 			{
-				options.SwaggerDoc("v1", new OpenApiInfo
+				options.Title = "Kyoo API";
+				// TODO use a real multi-line description in markdown.
+				options.Description = "The Kyoo's public API";
+				options.Version = "1.0.0";
+				options.DocumentName = "v1";
+				options.UseControllerSummaryAsTagDescription = true;
+				options.GenerateExamples = true;
+				options.PostProcess = x =>
 				{
-					Version = "v1",
-					Title = "Kyoo API",
-					Description = "The Kyoo's public API",
-					Contact = new OpenApiContact
+					x.Info.Contact = new OpenApiContact
 					{
 						Name = "Kyoo's github",
-						Url = new Uri("https://github.com/AnonymusRaccoon/Kyoo/issues/new/choose")
-					},
-					License = new OpenApiLicense
+						Url = "https://github.com/AnonymusRaccoon/Kyoo"
+					};
+					x.Info.License = new OpenApiLicense
 					{
 						Name = "GPL-3.0-or-later",
-						Url = new Uri("https://github.com/AnonymusRaccoon/Kyoo/blob/master/LICENSE")
-					}
+						Url = "https://github.com/AnonymusRaccoon/Kyoo/blob/master/LICENSE"
+					};
+				};
+				options.AddOperationFilter(x =>
+				{
+					if (x is AspNetCoreOperationProcessorContext ctx)
+						return ctx.ApiDescription.ActionDescriptor.AttributeRouteInfo?.Order != AlternativeRoute;
+					return true;
 				});
-
-				options.LoadXmlDocumentation();
-				options.UseAllOfForInheritance();
-				options.SwaggerGeneratorOptions.SortKeySelector = x => x.RelativePath;
-				options.DocInclusionPredicate((_, apiDescription)
-					=> apiDescription.ActionDescriptor.AttributeRouteInfo?.Order != AlternativeRoute);
 			});
 		}
 
 		/// <inheritdoc />
 		public IEnumerable<IStartupAction> ConfigureSteps => new IStartupAction[]
 		{
-			SA.New<IApplicationBuilder>(app => app.UseSwagger(), SA.Before + 1),
-			SA.New<IApplicationBuilder>(app => app.UseSwaggerUI(x =>
+			SA.New<IApplicationBuilder>(app => app.UseOpenApi(), SA.Before + 1),
+			SA.New<IApplicationBuilder>(app => app.UseSwaggerUi3(x =>
 			{
-				x.SwaggerEndpoint("/swagger/v1/swagger.json", "Kyoo v1");
+				x.OperationsSorter = "alpha";
+				x.TagsSorter = "alpha";
 			}), SA.Before),
 			SA.New<IApplicationBuilder>(app => app.UseReDoc(x =>
 			{
-				x.SpecUrl = "/swagger/v1/swagger.json";
+				x.Path = "/redoc";
 			}), SA.Before)
 		};
 	}

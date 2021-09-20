@@ -18,18 +18,21 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Autofac;
 using Autofac.Core;
 using Autofac.Core.Registration;
 using Autofac.Extras.AttributeMetadata;
 using Kyoo.Abstractions;
 using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Core.Api;
 using Kyoo.Core.Controllers;
 using Kyoo.Core.Models.Options;
 using Kyoo.Core.Tasks;
 using Kyoo.Database;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -139,8 +142,21 @@ namespace Kyoo.Core
 			string publicUrl = _configuration.GetPublicUrl();
 
 			services.AddMvcCore()
+				.AddDataAnnotations()
 				.AddControllersAsServices()
-				.AddApiExplorer();
+				.AddApiExplorer()
+				.ConfigureApiBehaviorOptions(options =>
+				{
+					options.SuppressMapClientErrors = true;
+					options.InvalidModelStateResponseFactory = ctx =>
+					{
+						string[] errors = ctx.ModelState
+							.SelectMany(x => x.Value.Errors)
+							.Select(x => x.ErrorMessage)
+							.ToArray();
+						return new BadRequestObjectResult(new RequestError(errors));
+					};
+				});
 			services.AddControllers()
 				.AddNewtonsoftJson(x =>
 				{

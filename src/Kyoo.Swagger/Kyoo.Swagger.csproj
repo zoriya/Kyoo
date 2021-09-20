@@ -7,8 +7,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.2.1" />
-		<PackageReference Include="Swashbuckle.AspNetCore.ReDoc" Version="6.2.1" />
+		<PackageReference Include="NSwag.AspNetCore" Version="13.13.2" />
 		<ProjectReference Include="../Kyoo.Abstractions/Kyoo.Abstractions.csproj" />
 	</ItemGroup>
 </Project>
