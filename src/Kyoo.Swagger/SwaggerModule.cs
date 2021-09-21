@@ -19,9 +19,12 @@
 using System;
 using System.Collections.Generic;
 using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.Extensions.DependencyInjection;
+using NJsonSchema;
+using NJsonSchema.Generation.TypeMappers;
 using NSwag;
 using NSwag.Generation.AspNetCore;
 using static Kyoo.Abstractions.Models.Utils.Constants;
@@ -77,6 +80,11 @@ namespace Kyoo.Swagger
 						return ctx.ApiDescription.ActionDescriptor.AttributeRouteInfo?.Order != AlternativeRoute;
 					return true;
 				});
+				options.SchemaGenerator.Settings.TypeMappers
+					.Add(new PrimitiveTypeMapper(
+						typeof(Identifier),
+						x => x.Type = JsonObjectType.String | JsonObjectType.Integer)
+					);
 			});
 		}
 

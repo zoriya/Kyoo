@@ -85,42 +85,24 @@ namespace Kyoo.Core.Api
 		}
 
 		/// <summary>
-		/// Get by ID
+		/// Get item
 		/// </summary>
 		/// <remarks>
-		/// Get a specific resource via it's ID.
+		/// Get a specific resource via it's ID or it's slug.
 		/// </remarks>
-		/// <param name="id">The ID of the resource to retrieve.</param>
+		/// <param name="identifier">The ID or slug of the resource to retrieve.</param>
 		/// <returns>The retrieved resource.</returns>
-		/// <response code="404">A resource with the given ID does not exist.</response>
-		[HttpGet("{id:int}")]
+		/// <response code="404">A resource with the given ID or slug does not exist.</response>
+		[HttpGet("{identifier:id}")]
 		[PartialPermission(Kind.Read)]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<T>> Get(int id)
+		public async Task<ActionResult<T>> Get(Identifier identifier)
 		{
-			T ret = await _repository.GetOrDefault(id);
-			if (ret == null)
-				return NotFound();
-			return ret;
-		}
-
-		/// <summary>
-		/// Get by slug
-		/// </summary>
-		/// <remarks>
-		/// Get a specific resource via it's slug (a unique, human readable identifier).
-		/// </remarks>
-		/// <param name="slug">The slug of the resource to retrieve.</param>
-		/// <returns>The retrieved resource.</returns>
-		/// <response code="404">A resource with the given ID does not exist.</response>
-		[HttpGet("{slug}")]
-		[PartialPermission(Kind.Read)]
-		[ProducesResponseType(StatusCodes.Status200OK)]
-		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<T>> Get(string slug)
-		{
-			T ret = await _repository.GetOrDefault(slug);
+			T ret = await identifier.Match(
+				id => _repository.GetOrDefault(id),
+				slug => _repository.GetOrDefault(slug)
+			);
 			if (ret == null)
 				return NotFound();
 			return ret;
@@ -256,50 +238,26 @@ namespace Kyoo.Core.Api
 		}
 
 		/// <summary>
-		/// Delete by ID
+		/// Delete an item
 		/// </summary>
 		/// <remarks>
-		/// Delete one item via it's ID.
+		/// Delete one item via it's ID or it's slug.
 		/// </remarks>
-		/// <param name="id">The ID of the resource to delete.</param>
+		/// <param name="identifier">The ID or slug of the resource to delete.</param>
 		/// <returns>The item has successfully been deleted.</returns>
-		/// <response code="404">No item could be found with the given id.</response>
-		[HttpDelete("{id:int}")]
+		/// <response code="404">No item could be found with the given id or slug.</response>
+		[HttpDelete("{identifier:id}")]
 		[PartialPermission(Kind.Delete)]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<IActionResult> Delete(int id)
+		public async Task<IActionResult> Delete(Identifier identifier)
 		{
 			try
 			{
-				await _repository.Delete(id);
-			}
-			catch (ItemNotFoundException)
-			{
-				return NotFound();
-			}
-
-			return Ok();
-		}
-
-		/// <summary>
-		/// Delete by slug
-		/// </summary>
-		/// <remarks>
-		/// Delete one item via it's slug (an unique, human-readable identifier).
-		/// </remarks>
-		/// <param name="slug">The slug of the resource to delete.</param>
-		/// <returns>The item has successfully been deleted.</returns>
-		/// <response code="404">No item could be found with the given slug.</response>
-		[HttpDelete("{slug}")]
-		[PartialPermission(Kind.Delete)]
-		[ProducesResponseType(StatusCodes.Status200OK)]
-		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<IActionResult> Delete(string slug)
-		{
-			try
-			{
-				await _repository.Delete(slug);
+				await identifier.Match(
+					id => _repository.Delete(id),
+					slug => _repository.Delete(slug)
+				);
 			}
 			catch (ItemNotFoundException)
 			{

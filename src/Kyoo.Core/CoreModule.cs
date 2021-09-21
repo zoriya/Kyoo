@@ -33,6 +33,7 @@ using Kyoo.Core.Tasks;
 using Kyoo.Database;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -145,6 +146,11 @@ namespace Kyoo.Core
 				.AddDataAnnotations()
 				.AddControllersAsServices()
 				.AddApiExplorer()
+				.AddNewtonsoftJson(x =>
+				{
+					x.SerializerSettings.ContractResolver = new JsonPropertyIgnorer(publicUrl);
+					x.SerializerSettings.Converters.Add(new PeopleRoleConverter());
+				})
 				.ConfigureApiBehaviorOptions(options =>
 				{
 					options.SuppressMapClientErrors = true;
@@ -157,12 +163,11 @@ namespace Kyoo.Core
 						return new BadRequestObjectResult(new RequestError(errors));
 					};
 				});
-			services.AddControllers()
-				.AddNewtonsoftJson(x =>
-				{
-					x.SerializerSettings.ContractResolver = new JsonPropertyIgnorer(publicUrl);
-					x.SerializerSettings.Converters.Add(new PeopleRoleConverter());
-				});
+
+			services.Configure<RouteOptions>(x =>
+			{
+				x.ConstraintMap.Add("id", typeof(IdentifierRouteConstraint));
+			});
 
 			services.AddResponseCompression(x =>
 			{
