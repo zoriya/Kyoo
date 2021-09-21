@@ -24,7 +24,9 @@ using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Permissions;
+using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Core.Models.Options;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using static Kyoo.Abstractions.Models.Utils.Constants;
@@ -67,21 +69,25 @@ namespace Kyoo.Core.Api
 		}
 
 		/// <summary>
-		/// Lists <see cref="Show"/> that are contained in the <see cref="Collection"/> with id <paramref name="id"/>.
+		/// Get shows in collection (via id)
 		/// </summary>
+		/// <remarks>
+		/// Lists the shows that are contained in the collection with the given id.
+		/// </remarks>
 		/// <param name="id">The ID of the <see cref="Collection"/>.</param>
-		/// <param name="sortBy">A key to sort shows by. See <see cref="Sort{T}"/> for more information.</param>
+		/// <param name="sortBy">A key to sort shows by.</param>
 		/// <param name="afterID">An optional show's ID to start the query from this specific item.</param>
-		/// <param name="where">
-		/// An optional list of filters. See <see cref="ApiHelper.ParseWhere{T}"/> for more details.
-		/// </param>
+		/// <param name="where">An optional list of filters.</param>
 		/// <param name="limit">The number of shows to return.</param>
 		/// <returns>A page of shows.</returns>
-		/// <response code="400"><paramref name="sortBy"/> or <paramref name="where"/> is invalid.</response>
-		/// <response code="404">No collection with the ID <paramref name="id"/> could be found.</response>
+		/// <response code="400">The filters or the sort parameters are invalid.</response>
+		/// <response code="404">No collection with the given ID could be found.</response>
 		[HttpGet("{id:int}/shows")]
 		[HttpGet("{id:int}/show", Order = AlternativeRoute)]
 		[PartialPermission(Kind.Read)]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<Page<Show>>> GetShows(int id,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -101,13 +107,30 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new { Error = ex.Message });
+				return BadRequest(new RequestError(ex.Message));
 			}
 		}
 
+		/// <summary>
+		/// Get shows in collection (via slug)
+		/// </summary>
+		/// <remarks>
+		/// Lists the shows that are contained in the collection with the given slug.
+		/// </remarks>
+		/// <param name="slug">The slug of the <see cref="Collection"/>.</param>
+		/// <param name="sortBy">A key to sort shows by.</param>
+		/// <param name="afterID">An optional show's ID to start the query from this specific item.</param>
+		/// <param name="where">An optional list of filters.</param>
+		/// <param name="limit">The number of shows to return.</param>
+		/// <returns>A page of shows.</returns>
+		/// <response code="400">The filters or the sort parameters are invalid.</response>
+		/// <response code="404">No collection with the given slug could be found.</response>
 		[HttpGet("{slug}/shows")]
 		[HttpGet("{slug}/show", Order = AlternativeRoute)]
 		[PartialPermission(Kind.Read)]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<Page<Show>>> GetShows(string slug,
 			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
@@ -127,10 +150,24 @@ namespace Kyoo.Core.Api
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new { Error = ex.Message });
+				return BadRequest(new RequestError(ex.Message));
 			}
 		}
 
+		/// <summary>
+		/// Get libraries containing this collection
+		/// </summary>
+		/// <remarks>
+		/// Lists the libraries that contain the collection with the given id.
+		/// </remarks>
+		/// <param name="slug">The slug of the <see cref="Collection"/>.</param>
+		/// <param name="sortBy">A key to sort shows by.</param>
+		/// <param name="afterID">An optional show's ID to start the query from this specific item.</param>
+		/// <param name="where">An optional list of filters.</param>
+		/// <param name="limit">The number of shows to return.</param>
+		/// <returns>A page of shows.</returns>
+		/// <response code="400">The filters or the sort parameters are invalid.</response>
+		/// <response code="404">No collection with the given slug could be found.</response>
 		[HttpGet("{id:int}/libraries")]
 		[HttpGet("{id:int}/library", Order = AlternativeRoute)]
 		[PartialPermission(Kind.Read)]

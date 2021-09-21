@@ -30,6 +30,7 @@ namespace Kyoo.Abstractions.Models.Utils
 		/// <summary>
 		/// The list of errors that where made in the request.
 		/// </summary>
+		/// <example><c>["InvalidFilter: no field 'startYear' on a collection"]</c></example>
 		[NotNull] public string[] Errors { get; set; }
 
 		/// <summary>

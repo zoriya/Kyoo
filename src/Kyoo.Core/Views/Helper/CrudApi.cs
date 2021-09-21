@@ -45,7 +45,8 @@ namespace Kyoo.Core.Api
 		private readonly IRepository<T> _repository;
 
 		/// <summary>
-		/// The base URL of Kyoo. This will be used to create links for images and <see cref="Abstractions.Models.Page{T}"/>.
+		/// The base URL of Kyoo. This will be used to create links for images and
+		/// <see cref="Abstractions.Models.Page{T}"/>.
 		/// </summary>
 		protected Uri BaseURL { get; }
 
@@ -110,7 +111,7 @@ namespace Kyoo.Core.Api
 		/// <remarks>
 		/// Get a specific resource via it's slug (a unique, human readable identifier).
 		/// </remarks>
-		/// <param name="slug" example="1">The slug of the resource to retrieve.</param>
+		/// <param name="slug">The slug of the resource to retrieve.</param>
 		/// <returns>The retrieved resource.</returns>
 		/// <response code="404">A resource with the given ID does not exist.</response>
 		[HttpGet("{slug}")]
@@ -166,7 +167,8 @@ namespace Kyoo.Core.Api
 		[PartialPermission(Kind.Read)]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
-		public async Task<ActionResult<Page<T>>> GetAll([FromQuery] string sortBy,
+		public async Task<ActionResult<Page<T>>> GetAll(
+			[FromQuery] string sortBy,
 			[FromQuery] int afterID,
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] int limit = 20)
@@ -253,9 +255,20 @@ namespace Kyoo.Core.Api
 			}
 		}
 
+		/// <summary>
+		/// Delete by ID
+		/// </summary>
+		/// <remarks>
+		/// Delete one item via it's ID.
+		/// </remarks>
+		/// <param name="id">The ID of the resource to delete.</param>
+		/// <returns>The item has successfully been deleted.</returns>
+		/// <response code="404">No item could be found with the given id.</response>
 		[HttpDelete("{id:int}")]
 		[PartialPermission(Kind.Delete)]
-		public virtual async Task<IActionResult> Delete(int id)
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task<IActionResult> Delete(int id)
 		{
 			try
 			{
@@ -269,9 +282,20 @@ namespace Kyoo.Core.Api
 			return Ok();
 		}
 
+		/// <summary>
+		/// Delete by slug
+		/// </summary>
+		/// <remarks>
+		/// Delete one item via it's slug (an unique, human-readable identifier).
+		/// </remarks>
+		/// <param name="slug">The slug of the resource to delete.</param>
+		/// <returns>The item has successfully been deleted.</returns>
+		/// <response code="404">No item could be found with the given slug.</response>
 		[HttpDelete("{slug}")]
 		[PartialPermission(Kind.Delete)]
-		public virtual async Task<IActionResult> Delete(string slug)
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task<IActionResult> Delete(string slug)
 		{
 			try
 			{
@@ -285,17 +309,28 @@ namespace Kyoo.Core.Api
 			return Ok();
 		}
 
+		/// <summary>
+		/// Delete all where
+		/// </summary>
+		/// <remarks>
+		/// Delete all items matching the given filters. If no filter is specified, delete all items.
+		/// </remarks>
+		/// <param name="where">The list of filters.</param>
+		/// <returns>The item(s) has successfully been deleted.</returns>
+		/// <response code="400">One or multiple filters are invalid.</response>
 		[HttpDelete]
 		[PartialPermission(Kind.Delete)]
-		public virtual async Task<IActionResult> Delete(Dictionary<string, string> where)
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
+		public async Task<IActionResult> Delete([FromQuery] Dictionary<string, string> where)
 		{
 			try
 			{
 				await _repository.DeleteAll(ApiHelper.ParseWhere<T>(where));
 			}
-			catch (ItemNotFoundException)
+			catch (ArgumentException ex)
 			{
-				return NotFound();
+				return BadRequest(new RequestError(ex.Message));
 			}
 
 			return Ok();

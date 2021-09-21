@@ -179,7 +179,6 @@ namespace Kyoo.Abstractions.Controllers
 		/// Delete all resources that match the predicate.
 		/// </summary>
 		/// <param name="where">A predicate to filter resources to delete. Every resource that match this will be deleted.</param>
-		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task DeleteAll([NotNull] Expression<Func<T, bool>> where);
 	}
