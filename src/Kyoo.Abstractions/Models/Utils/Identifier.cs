@@ -19,6 +19,7 @@
 using System;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq.Expressions;
 using JetBrains.Annotations;
 
 namespace Kyoo.Abstractions.Models.Utils
@@ -84,6 +85,29 @@ namespace Kyoo.Abstractions.Models.Utils
 			return _id.HasValue
 				? idFunc(_id.Value)
 				: slugFunc(_slug);
+		}
+
+		/// <summary>
+		/// Return true if this <see cref="Identifier"/> match a resource.
+		/// </summary>
+		/// <param name="resource">The resource to match</param>
+		/// <returns>
+		/// <c>true</c> if the <paramref name="resource"/> match this identifier, <c>false</c> otherwise.
+		/// </returns>
+		public bool IsSame(IResource resource)
+		{
+			return Match(
+				id => resource.ID == id,
+				slug => resource.Slug == slug
+			);
+		}
+
+		public Expression<Func<T, bool>> IsSame<T>()
+			where T : IResource
+		{
+			return _id.HasValue
+				? x => x.ID == _id
+				: x => x.Slug == _slug;
 		}
 
 		public class IdentifierConvertor : TypeConverter

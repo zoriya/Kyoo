@@ -22,7 +22,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
-using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Core.Models.Options;
@@ -40,111 +39,56 @@ namespace Kyoo.Core.Api
 	[Route("api/collection", Order = AlternativeRoute)]
 	[ApiController]
 	[PartialPermission(nameof(CollectionApi))]
-	public class CollectionApi : CrudApi<Collection>
+	public class CollectionApi : CrudThumbsApi<Collection>
 	{
 		/// <summary>
 		/// The library manager used to modify or retrieve information about the data store.
 		/// </summary>
 		private readonly ILibraryManager _libraryManager;
 
-		/// <summary>
-		/// The file manager used to send images.
-		/// </summary>
-		private readonly IFileSystem _files;
-
-		/// <summary>
-		/// The thumbnail manager used to retrieve images paths.
-		/// </summary>
-		private readonly IThumbnailsManager _thumbs;
-
 		public CollectionApi(ILibraryManager libraryManager,
 			IFileSystem files,
 			IThumbnailsManager thumbs,
 			IOptions<BasicOptions> options)
-			: base(libraryManager.CollectionRepository, options.Value.PublicUrl)
+			: base(libraryManager.CollectionRepository, files, thumbs, options.Value.PublicUrl)
 		{
 			_libraryManager = libraryManager;
-			_files = files;
-			_thumbs = thumbs;
 		}
 
 		/// <summary>
-		/// Get shows in collection (via id)
+		/// Get shows in collection
 		/// </summary>
 		/// <remarks>
-		/// Lists the shows that are contained in the collection with the given id.
+		/// Lists the shows that are contained in the collection with the given id or slug.
 		/// </remarks>
-		/// <param name="id">The ID of the <see cref="Collection"/>.</param>
+		/// <param name="identifier">The ID or slug of the <see cref="Collection"/>.</param>
 		/// <param name="sortBy">A key to sort shows by.</param>
-		/// <param name="afterID">An optional show's ID to start the query from this specific item.</param>
 		/// <param name="where">An optional list of filters.</param>
 		/// <param name="limit">The number of shows to return.</param>
+		/// <param name="afterID">An optional show's ID to start the query from this specific item.</param>
 		/// <returns>A page of shows.</returns>
 		/// <response code="400">The filters or the sort parameters are invalid.</response>
 		/// <response code="404">No collection with the given ID could be found.</response>
-		[HttpGet("{id:int}/shows")]
-		[HttpGet("{id:int}/show", Order = AlternativeRoute)]
+		[HttpGet("{identifier:id}/shows")]
+		[HttpGet("{identifier:id}/show", Order = AlternativeRoute)]
 		[PartialPermission(Kind.Read)]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Page<Show>>> GetShows(int id,
+		public async Task<ActionResult<Page<Show>>> GetShows(Identifier identifier,
 			[FromQuery] string sortBy,
-			[FromQuery] int afterID,
 			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 30)
+			[FromQuery] int limit = 30,
+			[FromQuery] int? afterID = null)
 		{
 			try
 			{
 				ICollection<Show> resources = await _libraryManager.GetAll(
-					ApiHelper.ParseWhere<Show>(where, x => x.Collections.Any(y => y.ID == id)),
+					ApiHelper.ParseWhere<Show>(where, x => x.Collections.Any(identifier.IsSame)),
 					new Sort<Show>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetOrDefault<Collection>(id) == null)
-					return NotFound();
-				return Page(resources, limit);
-			}
-			catch (ArgumentException ex)
-			{
-				return BadRequest(new RequestError(ex.Message));
-			}
-		}
-
-		/// <summary>
-		/// Get shows in collection (via slug)
-		/// </summary>
-		/// <remarks>
-		/// Lists the shows that are contained in the collection with the given slug.
-		/// </remarks>
-		/// <param name="slug">The slug of the <see cref="Collection"/>.</param>
-		/// <param name="sortBy">A key to sort shows by.</param>
-		/// <param name="afterID">An optional show's ID to start the query from this specific item.</param>
-		/// <param name="where">An optional list of filters.</param>
-		/// <param name="limit">The number of shows to return.</param>
-		/// <returns>A page of shows.</returns>
-		/// <response code="400">The filters or the sort parameters are invalid.</response>
-		/// <response code="404">No collection with the given slug could be found.</response>
-		[HttpGet("{slug}/shows")]
-		[HttpGet("{slug}/show", Order = AlternativeRoute)]
-		[PartialPermission(Kind.Read)]
-		[ProducesResponseType(StatusCodes.Status200OK)]
-		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
-		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Page<Show>>> GetShows(string slug,
-			[FromQuery] string sortBy,
-			[FromQuery] int afterID,
-			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 30)
-		{
-			try
-			{
-				ICollection<Show> resources = await _libraryManager.GetAll(
-					ApiHelper.ParseWhere<Show>(where, x => x.Collections.Any(y => y.Slug == slug)),
-					new Sort<Show>(sortBy),
-					new Pagination(limit, afterID));
-
-				if (!resources.Any() && await _libraryManager.GetOrDefault<Collection>(slug) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Collection>()) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
@@ -158,108 +102,39 @@ namespace Kyoo.Core.Api
 		/// Get libraries containing this collection
 		/// </summary>
 		/// <remarks>
-		/// Lists the libraries that contain the collection with the given id.
+		/// Lists the libraries that contain the collection with the given id or slug.
 		/// </remarks>
-		/// <param name="slug">The slug of the <see cref="Collection"/>.</param>
-		/// <param name="sortBy">A key to sort shows by.</param>
-		/// <param name="afterID">An optional show's ID to start the query from this specific item.</param>
+		/// <param name="identifier">The ID or slug of the <see cref="Collection"/>.</param>
+		/// <param name="sortBy">A key to sort libraries by.</param>
 		/// <param name="where">An optional list of filters.</param>
-		/// <param name="limit">The number of shows to return.</param>
-		/// <returns>A page of shows.</returns>
+		/// <param name="limit">The number of libraries to return.</param>
+		/// <param name="afterID">An optional library's ID to start the query from this specific item.</param>
+		/// <returns>A page of libraries.</returns>
 		/// <response code="400">The filters or the sort parameters are invalid.</response>
-		/// <response code="404">No collection with the given slug could be found.</response>
-		[HttpGet("{id:int}/libraries")]
-		[HttpGet("{id:int}/library", Order = AlternativeRoute)]
+		/// <response code="404">No collection with the given ID or slug could be found.</response>
+		[HttpGet("{identifier:id}/libraries")]
+		[HttpGet("{identifier:id}/library", Order = AlternativeRoute)]
 		[PartialPermission(Kind.Read)]
-		public async Task<ActionResult<Page<Library>>> GetLibraries(int id,
+		public async Task<ActionResult<Page<Library>>> GetLibraries(Identifier identifier,
 			[FromQuery] string sortBy,
-			[FromQuery] int afterID,
 			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 30)
+			[FromQuery] int limit = 30,
+			[FromQuery] int? afterID = null)
 		{
 			try
 			{
 				ICollection<Library> resources = await _libraryManager.GetAll(
-					ApiHelper.ParseWhere<Library>(where, x => x.Collections.Any(y => y.ID == id)),
+					ApiHelper.ParseWhere<Library>(where, x => x.Collections.Any(identifier.IsSame)),
 					new Sort<Library>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetOrDefault<Collection>(id) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Collection>()) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new { Error = ex.Message });
-			}
-		}
-
-		[HttpGet("{slug}/libraries")]
-		[HttpGet("{slug}/library", Order = AlternativeRoute)]
-		[PartialPermission(Kind.Read)]
-		public async Task<ActionResult<Page<Library>>> GetLibraries(string slug,
-			[FromQuery] string sortBy,
-			[FromQuery] int afterID,
-			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 30)
-		{
-			try
-			{
-				ICollection<Library> resources = await _libraryManager.GetAll(
-					ApiHelper.ParseWhere<Library>(where, x => x.Collections.Any(y => y.Slug == slug)),
-					new Sort<Library>(sortBy),
-					new Pagination(limit, afterID));
-
-				if (!resources.Any() && await _libraryManager.GetOrDefault<Collection>(slug) == null)
-					return NotFound();
-				return Page(resources, limit);
-			}
-			catch (ArgumentException ex)
-			{
-				return BadRequest(new { Error = ex.Message });
-			}
-		}
-
-		[HttpGet("{slug}/poster")]
-		public async Task<IActionResult> GetPoster(string slug)
-		{
-			try
-			{
-				Collection collection = await _libraryManager.Get<Collection>(slug);
-				return _files.FileResult(await _thumbs.GetImagePath(collection, Images.Poster));
-			}
-			catch (ItemNotFoundException)
-			{
-				return NotFound();
-			}
-		}
-
-		[HttpGet("{slug}/logo")]
-		public async Task<IActionResult> GetLogo(string slug)
-		{
-			try
-			{
-				Collection collection = await _libraryManager.Get<Collection>(slug);
-				return _files.FileResult(await _thumbs.GetImagePath(collection, Images.Logo));
-			}
-			catch (ItemNotFoundException)
-			{
-				return NotFound();
-			}
-		}
-
-		[HttpGet("{slug}/backdrop")]
-		[HttpGet("{slug}/thumbnail")]
-		public async Task<IActionResult> GetBackdrop(string slug)
-		{
-			try
-			{
-				Collection collection = await _libraryManager.Get<Collection>(slug);
-				return _files.FileResult(await _thumbs.GetImagePath(collection, Images.Thumbnail));
-			}
-			catch (ItemNotFoundException)
-			{
-				return NotFound();
+				return BadRequest(new RequestError(ex.Message));
 			}
 		}
 	}

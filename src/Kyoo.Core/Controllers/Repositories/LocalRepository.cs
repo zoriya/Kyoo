@@ -179,9 +179,9 @@ namespace Kyoo.Core.Controllers
 
 			query = sort.Descendant ? query.OrderByDescending(sortKey) : query.OrderBy(sortKey);
 
-			if (limit.AfterID != 0)
+			if (limit.AfterID != null)
 			{
-				TValue after = await get(limit.AfterID);
+				TValue after = await get(limit.AfterID.Value);
 				Expression key = Expression.Constant(sortKey.Compile()(after), sortExpression.Type);
 				query = query.Where(Expression.Lambda<Func<TValue, bool>>(
 					ApiHelper.StringCompatibleExpression(Expression.GreaterThan, sortExpression, key),

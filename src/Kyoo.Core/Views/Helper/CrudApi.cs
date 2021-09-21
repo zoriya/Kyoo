@@ -42,7 +42,7 @@ namespace Kyoo.Core.Api
 		/// <summary>
 		/// The repository of the resource, used to retrieve, save and do operations on the baking store.
 		/// </summary>
-		private readonly IRepository<T> _repository;
+		protected IRepository<T> Repository { get; }
 
 		/// <summary>
 		/// The base URL of Kyoo. This will be used to create links for images and
@@ -61,7 +61,7 @@ namespace Kyoo.Core.Api
 		/// </param>
 		public CrudApi(IRepository<T> repository, Uri baseURL)
 		{
-			_repository = repository;
+			Repository = repository;
 			BaseURL = baseURL;
 		}
 
@@ -100,8 +100,8 @@ namespace Kyoo.Core.Api
 		public async Task<ActionResult<T>> Get(Identifier identifier)
 		{
 			T ret = await identifier.Match(
-				id => _repository.GetOrDefault(id),
-				slug => _repository.GetOrDefault(slug)
+				id => Repository.GetOrDefault(id),
+				slug => Repository.GetOrDefault(slug)
 			);
 			if (ret == null)
 				return NotFound();
@@ -125,7 +125,7 @@ namespace Kyoo.Core.Api
 		{
 			try
 			{
-				return await _repository.GetCount(ApiHelper.ParseWhere<T>(where));
+				return await Repository.GetCount(ApiHelper.ParseWhere<T>(where));
 			}
 			catch (ArgumentException ex)
 			{
@@ -140,9 +140,9 @@ namespace Kyoo.Core.Api
 		/// Get all resources that match the given filter.
 		/// </remarks>
 		/// <param name="sortBy">Sort information about the query (sort by, sort order).</param>
-		/// <param name="afterID">Where the pagination should start.</param>
 		/// <param name="where">Filter the returned items.</param>
 		/// <param name="limit">How many items per page should be returned.</param>
+		/// <param name="afterID">Where the pagination should start.</param>
 		/// <returns>A list of resources that match every filters.</returns>
 		/// <response code="400">Invalid filters or sort information.</response>
 		[HttpGet]
@@ -151,13 +151,13 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		public async Task<ActionResult<Page<T>>> GetAll(
 			[FromQuery] string sortBy,
-			[FromQuery] int afterID,
 			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 20)
+			[FromQuery] int limit = 20,
+			[FromQuery] int? afterID = null)
 		{
 			try
 			{
-				ICollection<T> resources = await _repository.GetAll(ApiHelper.ParseWhere<T>(where),
+				ICollection<T> resources = await Repository.GetAll(ApiHelper.ParseWhere<T>(where),
 					new Sort<T>(sortBy),
 					new Pagination(limit, afterID));
 
@@ -188,7 +188,7 @@ namespace Kyoo.Core.Api
 		{
 			try
 			{
-				return await _repository.Create(resource);
+				return await Repository.Create(resource);
 			}
 			catch (ArgumentException ex)
 			{
@@ -196,7 +196,7 @@ namespace Kyoo.Core.Api
 			}
 			catch (DuplicatedItemException)
 			{
-				T existing = await _repository.GetOrDefault(resource.Slug);
+				T existing = await Repository.GetOrDefault(resource.Slug);
 				return Conflict(existing);
 			}
 		}
@@ -225,11 +225,11 @@ namespace Kyoo.Core.Api
 			try
 			{
 				if (resource.ID > 0)
-					return await _repository.Edit(resource, resetOld);
+					return await Repository.Edit(resource, resetOld);
 
-				T old = await _repository.Get(resource.Slug);
+				T old = await Repository.Get(resource.Slug);
 				resource.ID = old.ID;
-				return await _repository.Edit(resource, resetOld);
+				return await Repository.Edit(resource, resetOld);
 			}
 			catch (ItemNotFoundException)
 			{
@@ -255,8 +255,8 @@ namespace Kyoo.Core.Api
 			try
 			{
 				await identifier.Match(
-					id => _repository.Delete(id),
-					slug => _repository.Delete(slug)
+					id => Repository.Delete(id),
+					slug => Repository.Delete(slug)
 				);
 			}
 			catch (ItemNotFoundException)
@@ -284,7 +284,7 @@ namespace Kyoo.Core.Api
 		{
 			try
 			{
-				await _repository.DeleteAll(ApiHelper.ParseWhere<T>(where));
+				await Repository.DeleteAll(ApiHelper.ParseWhere<T>(where));
 			}
 			catch (ArgumentException ex)
 			{

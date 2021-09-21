@@ -80,11 +80,11 @@ namespace Kyoo.Swagger
 						return ctx.ApiDescription.ActionDescriptor.AttributeRouteInfo?.Order != AlternativeRoute;
 					return true;
 				});
-				options.SchemaGenerator.Settings.TypeMappers
-					.Add(new PrimitiveTypeMapper(
-						typeof(Identifier),
-						x => x.Type = JsonObjectType.String | JsonObjectType.Integer)
-					);
+				options.SchemaGenerator.Settings.TypeMappers.Add(new PrimitiveTypeMapper(typeof(Identifier), x =>
+				{
+					x.IsNullableRaw = false;
+					x.Type = JsonObjectType.String | JsonObjectType.Integer;
+				}));
 			});
 		}
 
