@@ -70,7 +70,7 @@ namespace Kyoo.Core.Api
 		}
 
 		/// <summary>
-		/// Get Image
+		/// Get image
 		/// </summary>
 		/// <remarks>
 		/// Get an image for the specified item.
@@ -97,7 +97,7 @@ namespace Kyoo.Core.Api
 			);
 			if (resource == null)
 				return NotFound();
-			string path = await _thumbs.GetImagePath(resource, Images.Poster);
+			string path = await _thumbs.GetImagePath(resource, image);
 			return _files.FileResult(path);
 		}
 

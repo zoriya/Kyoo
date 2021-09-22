@@ -17,9 +17,12 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using JetBrains.Annotations;
 
 namespace Kyoo.Abstractions.Models.Utils
@@ -88,6 +91,26 @@ namespace Kyoo.Abstractions.Models.Utils
 		}
 
 		/// <summary>
+		/// Match a custom type to an identifier. This can be used for wrapped resources (see example for more details).
+		/// </summary>
+		/// <param name="idGetter">An expression to retrieve an ID from the type <typeparamref name="T"/>.</param>
+		/// <param name="slugGetter">An expression to retrieve a slug from the type <typeparamref name="T"/>.</param>
+		/// <typeparam name="T">The type to match against this identifier.</typeparam>
+		/// <returns>An expression to match the type <typeparamref name="T"/> to this identifier.</returns>
+		/// <example>
+		/// <code lang="csharp">
+		/// identifier.Matcher&lt;Season&gt;(x => x.ShowID, x => x.Show.Slug)
+		/// </code>
+		/// </example>
+		public Expression<Func<T, bool>> Matcher<T>(Expression<Func<T, int>> idGetter,
+			Expression<Func<T, string>> slugGetter)
+		{
+			ConstantExpression self = Expression.Constant(_id.HasValue ? _id.Value : _slug);
+			BinaryExpression equal = Expression.Equal(_id.HasValue ? idGetter.Body : slugGetter.Body, self);
+			return Expression.Lambda<Func<T, bool>>(equal);
+		}
+
+		/// <summary>
 		/// Return true if this <see cref="Identifier"/> match a resource.
 		/// </summary>
 		/// <param name="resource">The resource to match</param>
@@ -102,14 +125,51 @@ namespace Kyoo.Abstractions.Models.Utils
 			);
 		}
 
+		/// <summary>
+		/// Return an expression that return true if this <see cref="Identifier"/> match a given resource.
+		/// </summary>
+		/// <typeparam name="T">The type of resource to match against.</typeparam>
+		/// <returns>
+		/// <c>true</c> if the given resource match this identifier, <c>false</c> otherwise.
+		/// </returns>
 		public Expression<Func<T, bool>> IsSame<T>()
 			where T : IResource
 		{
 			return _id.HasValue
-				? x => x.ID == _id
+				? x => x.ID == _id.Value
 				: x => x.Slug == _slug;
 		}
 
+		/// <summary>
+		/// Return an expression that return true if this <see cref="Identifier"/> is containing in a collection.
+		/// </summary>
+		/// <param name="listGetter">An expression to retrieve the list to check.</param>
+		/// <typeparam name="T">The type that contain the list to check.</typeparam>
+		/// <typeparam name="T2">The type of resource to check this identifier against.</typeparam>
+		/// <returns>An expression to check if this <see cref="Identifier"/> is contained.</returns>
+		public Expression<Func<T, bool>> IsContainedIn<T, T2>(Expression<Func<T, IEnumerable<T2>>> listGetter)
+			where T2 : IResource
+		{
+			MethodInfo method = typeof(Enumerable)
+				.GetMethods()
+				.Where(x => x.Name == nameof(Enumerable.Any))
+				.FirstOrDefault(x => x.GetParameters().Length == 2)!
+				.MakeGenericMethod(typeof(T2));
+			MethodCallExpression call = Expression.Call(null, method!, listGetter.Body, IsSame<T2>());
+			return Expression.Lambda<Func<T, bool>>(call, listGetter.Parameters);
+		}
+
+		/// <inheritdoc />
+		public override string ToString()
+		{
+			return _id.HasValue
+				? _id.Value.ToString()
+				: _slug;
+		}
+
+		/// <summary>
+		/// A custom <see cref="TypeConverter"/> used to convert int or strings to an <see cref="Identifier"/>.
+		/// </summary>
 		public class IdentifierConvertor : TypeConverter
 		{
 			/// <inheritdoc />

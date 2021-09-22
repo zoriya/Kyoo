@@ -157,9 +157,11 @@ namespace Kyoo.Core.Api
 		{
 			try
 			{
-				ICollection<T> resources = await Repository.GetAll(ApiHelper.ParseWhere<T>(where),
+				ICollection<T> resources = await Repository.GetAll(
+					ApiHelper.ParseWhere<T>(where),
 					new Sort<T>(sortBy),
-					new Pagination(limit, afterID));
+					new Pagination(limit, afterID)
+				);
 
 				return Page(resources, limit);
 			}

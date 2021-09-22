@@ -23,7 +23,6 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
-using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Database;
 using Kyoo.Utils;
 using Microsoft.EntityFrameworkCore;
@@ -160,8 +159,6 @@ namespace Kyoo.Core.Controllers
 				where,
 				sort,
 				limit);
-			if (!people.Any() && await _shows.Value.GetOrDefault(showID) == null)
-				throw new ItemNotFoundException();
 			foreach (PeopleRole role in people)
 				role.ForPeople = true;
 			return people;
@@ -182,8 +179,6 @@ namespace Kyoo.Core.Controllers
 				where,
 				sort,
 				limit);
-			if (!people.Any() && await _shows.Value.GetOrDefault(showSlug) == null)
-				throw new ItemNotFoundException();
 			foreach (PeopleRole role in people)
 				role.ForPeople = true;
 			return people;
@@ -195,7 +190,7 @@ namespace Kyoo.Core.Controllers
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default)
 		{
-			ICollection<PeopleRole> roles = await ApplyFilters(_database.PeopleRoles
+			return await ApplyFilters(_database.PeopleRoles
 					.Where(x => x.PeopleID == id)
 					.Include(x => x.Show),
 				y => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == y),
@@ -203,9 +198,6 @@ namespace Kyoo.Core.Controllers
 				where,
 				sort,
 				limit);
-			if (!roles.Any() && await GetOrDefault(id) == null)
-				throw new ItemNotFoundException();
-			return roles;
 		}
 
 		/// <inheritdoc />
@@ -214,7 +206,7 @@ namespace Kyoo.Core.Controllers
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default)
 		{
-			ICollection<PeopleRole> roles = await ApplyFilters(_database.PeopleRoles
+			return await ApplyFilters(_database.PeopleRoles
 					.Where(x => x.People.Slug == slug)
 					.Include(x => x.Show),
 				id => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id),
@@ -222,9 +214,6 @@ namespace Kyoo.Core.Controllers
 				where,
 				sort,
 				limit);
-			if (!roles.Any() && await GetOrDefault(slug) == null)
-				throw new ItemNotFoundException();
-			return roles;
 		}
 	}
 }

@@ -29,7 +29,6 @@ using Kyoo.Core.Models.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using NSwag.Annotations;
 using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Core.Api
@@ -41,7 +40,7 @@ namespace Kyoo.Core.Api
 	[Route("api/collection", Order = AlternativeRoute)]
 	[ApiController]
 	[PartialPermission(nameof(CollectionApi))]
-	[ApiDefinition("Collection", Group = ResourceGroup)]
+	[ApiDefinition("Collections", Group = ResourceGroup)]
 	public class CollectionApi : CrudThumbsApi<Collection>
 	{
 		/// <summary>
@@ -100,7 +99,8 @@ namespace Kyoo.Core.Api
 				ICollection<Show> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Show>(where, x => x.Collections.Any(identifier.IsSame)),
 					new Sort<Show>(sortBy),
-					new Pagination(limit, afterID));
+					new Pagination(limit, afterID)
+				);
 
 				if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Collection>()) == null)
 					return NotFound();
@@ -143,7 +143,8 @@ namespace Kyoo.Core.Api
 				ICollection<Library> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere<Library>(where, x => x.Collections.Any(identifier.IsSame)),
 					new Sort<Library>(sortBy),
-					new Pagination(limit, afterID));
+					new Pagination(limit, afterID)
+				);
 
 				if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Collection>()) == null)
 					return NotFound();
