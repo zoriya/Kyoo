@@ -28,12 +28,37 @@ using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Core.Api
 {
+	/// <summary>
+	/// A base class to handle CRUD operations and services thumbnails for
+	/// a specific resource type <typeparamref name="T"/>.
+	/// </summary>
+	/// <typeparam name="T">The type of resource to make CRUD and thumbnails apis for.</typeparam>
+	[ApiController]
+	[ResourceView]
 	public class CrudThumbsApi<T> : CrudApi<T>
 		where T : class, IResource, IThumbnails
 	{
+		/// <summary>
+		/// The file manager used to send images.
+		/// </summary>
 		private readonly IFileSystem _files;
+
+		/// <summary>
+		/// The thumbnail manager used to retrieve images paths.
+		/// </summary>
 		private readonly IThumbnailsManager _thumbs;
 
+		/// <summary>
+		/// Create a new <see cref="CrudThumbsApi{T}"/> that handles crud requests and thumbnails.
+		/// </summary>
+		/// <param name="repository">
+		/// The repository to use as a baking store for the type <typeparamref name="T"/>.
+		/// </param>
+		/// <param name="files">The file manager used to send images.</param>
+		/// <param name="thumbs">The thumbnail manager used to retrieve images paths.</param>
+		/// <param name="baseURL">
+		/// The base URL of Kyoo to use to create links.
+		/// </param>
 		public CrudThumbsApi(IRepository<T> repository,
 			IFileSystem files,
 			IThumbnailsManager thumbs,
@@ -49,26 +74,17 @@ namespace Kyoo.Core.Api
 		/// </summary>
 		/// <remarks>
 		/// Get an image for the specified item.
-		/// List of commonly available images:
-		/// <list type="bullet">
-		///     <item>
-		///         <description>Poster: Image 0, also available at /poster</description>
-		///     </item>
-		///     <item>
-		///         <description>Thumbnail: Image 1, also available at /thumbnail</description>
-		///     </item>
-		///     <item>
-		///         <description>Logo: Image 3, also available at /logo</description>
-		///     </item>
-		/// </list>
+		/// List of commonly available images:<br/>
+		///  - Poster: Image 0, also available at /poster<br/>
+		///  - Thumbnail: Image 1, also available at /thumbnail<br/>
+		///  - Logo: Image 3, also available at /logo<br/>
+		/// <br/>
 		/// Other images can be arbitrarily added by plugins so any image number can be specified from this endpoint.
 		/// </remarks>
 		/// <param name="identifier">The ID or slug of the resource to get the image for.</param>
 		/// <param name="image">The number of the image to retrieve.</param>
 		/// <returns>The image asked.</returns>
-		/// <response code="404">
-		/// No item exist with the specific identifier or the image does not exists on kyoo.
-		/// </response>
+		/// <response code="404">No item exist with the specific identifier or the image does not exists on kyoo.</response>
 		[HttpGet("{identifier:id}/image-{image:int}")]
 		[PartialPermission(Kind.Read)]
 		[ProducesResponseType(StatusCodes.Status200OK)]

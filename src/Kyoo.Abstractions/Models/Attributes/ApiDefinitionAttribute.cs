@@ -16,24 +16,36 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using Kyoo.Abstractions.Models.Attributes;
+using System;
+using JetBrains.Annotations;
 
-namespace Kyoo.Abstractions.Models.Utils
+namespace Kyoo.Abstractions.Models.Attributes
 {
 	/// <summary>
-	/// A class containing constant numbers.
+	/// An attribute to specify on apis to specify it's documentation's name and category.
 	/// </summary>
-	public static class Constants
+	[AttributeUsage(AttributeTargets.Class)]
+	public class ApiDefinitionAttribute : Attribute
 	{
 		/// <summary>
-		/// A property to use on a Microsoft.AspNet.MVC.Route.Order property to mark it as an alternative route
-		/// that won't be included on the swagger.
+		/// The public name of this api.
 		/// </summary>
-		public const int AlternativeRoute = 1;
+		[NotNull] public string Name { get; }
 
 		/// <summary>
-		/// A group name for <see cref="ApiDefinitionAttribute"/>. It should be used for every <see cref="IResource"/>.
+		/// The name of the group in witch this API is.
 		/// </summary>
-		public const string ResourceGroup = "Resource";
+		public string Group { get; set; }
+
+		/// <summary>
+		/// Create a new <see cref="ApiDefinitionAttribute"/>.
+		/// </summary>
+		/// <param name="name">The name of the api that will be used on the documentation page.</param>
+		public ApiDefinitionAttribute([NotNull] string name)
+		{
+			if (name == null)
+				throw new ArgumentNullException(nameof(name));
+			Name = name;
+		}
 	}
 }

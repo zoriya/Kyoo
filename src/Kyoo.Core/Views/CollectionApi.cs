@@ -22,12 +22,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Core.Models.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using NSwag.Annotations;
 using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Core.Api
@@ -39,6 +41,7 @@ namespace Kyoo.Core.Api
 	[Route("api/collection", Order = AlternativeRoute)]
 	[ApiController]
 	[PartialPermission(nameof(CollectionApi))]
+	[ApiDefinition("Collection", Group = ResourceGroup)]
 	public class CollectionApi : CrudThumbsApi<Collection>
 	{
 		/// <summary>
@@ -46,6 +49,17 @@ namespace Kyoo.Core.Api
 		/// </summary>
 		private readonly ILibraryManager _libraryManager;
 
+		/// <summary>
+		/// Create a new <see cref="CollectionApi"/>.
+		/// </summary>
+		/// <param name="libraryManager">
+		/// The library manager used to modify or retrieve information about the data store.
+		/// </param>
+		/// <param name="files">The file manager used to send images.</param>
+		/// <param name="thumbs">The thumbnail manager used to retrieve images paths.</param>
+		/// <param name="options">
+		/// Options used to retrieve the base URL of Kyoo.
+		/// </param>
 		public CollectionApi(ILibraryManager libraryManager,
 			IFileSystem files,
 			IThumbnailsManager thumbs,
@@ -115,6 +129,9 @@ namespace Kyoo.Core.Api
 		[HttpGet("{identifier:id}/libraries")]
 		[HttpGet("{identifier:id}/library", Order = AlternativeRoute)]
 		[PartialPermission(Kind.Read)]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<Page<Library>>> GetLibraries(Identifier identifier,
 			[FromQuery] string sortBy,
 			[FromQuery] Dictionary<string, string> where,
