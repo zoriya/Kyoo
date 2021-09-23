@@ -48,7 +48,7 @@ namespace Kyoo.Core.Api
 	public class ShowApi : CrudThumbsApi<Show>
 	{
 		/// <summary>
-		/// The library manager used to modify or retrieve information about the data store.
+		/// The library manager used to modify or retrieve information in the data store.
 		/// </summary>
 		private readonly ILibraryManager _libraryManager;
 
@@ -279,7 +279,7 @@ namespace Kyoo.Core.Api
 		}
 
 		/// <summary>
-		/// Get libraries containing this show.
+		/// Get libraries containing this show
 		/// </summary>
 		/// <remarks>
 		/// List the libraries that contain this show. If this show is contained in a collection that is contained in
@@ -324,7 +324,7 @@ namespace Kyoo.Core.Api
 		}
 
 		/// <summary>
-		/// Get collections containing this show.
+		/// Get collections containing this show
 		/// </summary>
 		/// <remarks>
 		/// List the collections that contain this show.
@@ -337,8 +337,8 @@ namespace Kyoo.Core.Api
 		/// <returns>A page of collections.</returns>
 		/// <response code="400">The filters or the sort parameters are invalid.</response>
 		/// <response code="404">No show with the given ID or slug could be found.</response>
-		[HttpGet("{identifier:id}/collection")]
 		[HttpGet("{identifier:id}/collections")]
+		[HttpGet("{identifier:id}/collection", Order = AlternativeRoute)]
 		[PartialPermission(Kind.Read)]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]

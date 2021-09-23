@@ -111,6 +111,23 @@ namespace Kyoo.Abstractions.Models.Utils
 		}
 
 		/// <summary>
+		/// A matcher overload for nullable IDs. See
+		/// <see cref="Matcher{T}(System.Linq.Expressions.Expression{System.Func{T,int}},System.Linq.Expressions.Expression{System.Func{T,string}})"/>
+		/// for more details.
+		/// </summary>
+		/// <param name="idGetter">An expression to retrieve an ID from the type <typeparamref name="T"/>.</param>
+		/// <param name="slugGetter">An expression to retrieve a slug from the type <typeparamref name="T"/>.</param>
+		/// <typeparam name="T">The type to match against this identifier.</typeparam>
+		/// <returns>An expression to match the type <typeparamref name="T"/> to this identifier.</returns>
+		public Expression<Func<T, bool>> Matcher<T>(Expression<Func<T, int?>> idGetter,
+			Expression<Func<T, string>> slugGetter)
+		{
+			ConstantExpression self = Expression.Constant(_id.HasValue ? _id.Value : _slug);
+			BinaryExpression equal = Expression.Equal(_id.HasValue ? idGetter.Body : slugGetter.Body, self);
+			return Expression.Lambda<Func<T, bool>>(equal);
+		}
+
+		/// <summary>
 		/// Return true if this <see cref="Identifier"/> match a resource.
 		/// </summary>
 		/// <param name="resource">The resource to match</param>

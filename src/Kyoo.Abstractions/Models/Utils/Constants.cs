@@ -34,6 +34,6 @@ namespace Kyoo.Abstractions.Models.Utils
 		/// <summary>
 		/// A group name for <see cref="ApiDefinitionAttribute"/>. It should be used for every <see cref="IResource"/>.
 		/// </summary>
-		public const string ResourceGroup = "Resource";
+		public const string ResourceGroup = "Resources";
 	}
 }
