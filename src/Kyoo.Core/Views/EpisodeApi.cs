@@ -22,216 +22,145 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
-using Kyoo.Abstractions.Models.Exceptions;
+using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Permissions;
+using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Core.Models.Options;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Core.Api
 {
-	[Route("api/episode")]
+	/// <summary>
+	/// Information about one or multiple <see cref="Episode"/>.
+	/// </summary>
 	[Route("api/episodes")]
+	[Route("api/episode", Order = AlternativeRoute)]
 	[ApiController]
 	[PartialPermission(nameof(EpisodeApi))]
-	public class EpisodeApi : CrudApi<Episode>
+	[ApiDefinition("Episodes", Group = ResourcesGroup)]
+	public class EpisodeApi : CrudThumbsApi<Episode>
 	{
+		/// <summary>
+		/// The library manager used to modify or retrieve information in the data store.
+		/// </summary>
 		private readonly ILibraryManager _libraryManager;
-		private readonly IThumbnailsManager _thumbnails;
-		private readonly IFileSystem _files;
 
+		/// <summary>
+		/// Create a new <see cref="EpisodeApi"/>.
+		/// </summary>
+		/// <param name="libraryManager">
+		/// The library manager used to modify or retrieve information in the data store.
+		/// </param>
+		/// <param name="files">The file manager used to send images.</param>
+		/// <param name="thumbnails">The thumbnail manager used to retrieve images paths.</param>
+		/// <param name="options">
+		/// Options used to retrieve the base URL of Kyoo.
+		/// </param>
 		public EpisodeApi(ILibraryManager libraryManager,
-			IOptions<BasicOptions> options,
 			IFileSystem files,
-			IThumbnailsManager thumbnails)
-			: base(libraryManager.EpisodeRepository, options.Value.PublicUrl)
+			IThumbnailsManager thumbnails,
+			IOptions<BasicOptions> options)
+			: base(libraryManager.EpisodeRepository, files, thumbnails, options.Value.PublicUrl)
 		{
 			_libraryManager = libraryManager;
-			_files = files;
-			_thumbnails = thumbnails;
 		}
 
-		[HttpGet("{episodeID:int}/show")]
+		/// <summary>
+		/// Get episode's show
+		/// </summary>
+		/// <remarks>
+		/// Get the show that this episode is part of.
+		/// </remarks>
+		/// <param name="identifier">The ID or slug of the <see cref="Episode"/>.</param>
+		/// <returns>The show that contains this episode.</returns>
+		/// <response code="404">No episode with the given ID or slug could be found.</response>
+		[HttpGet("{identifier:id}/show")]
 		[PartialPermission(Kind.Read)]
-		public async Task<ActionResult<Show>> GetShow(int episodeID)
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task<ActionResult<Show>> GetShow(Identifier identifier)
 		{
-			Show ret = await _libraryManager.GetOrDefault<Show>(x => x.Episodes.Any(y => y.ID == episodeID));
+			Show ret = await _libraryManager.GetOrDefault(identifier.IsContainedIn<Show, Episode>(x => x.Episodes));
 			if (ret == null)
 				return NotFound();
 			return ret;
 		}
 
-		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}/show")]
+		/// <summary>
+		/// Get episode's season
+		/// </summary>
+		/// <remarks>
+		/// Get the season that this episode is part of.
+		/// </remarks>
+		/// <param name="identifier">The ID or slug of the <see cref="Episode"/>.</param>
+		/// <returns>The season that contains this episode.</returns>
+		/// <response code="204">The episode is not part of a season.</response>
+		/// <response code="404">No episode with the given ID or slug could be found.</response>
+		[HttpGet("{identifier:id}/season")]
 		[PartialPermission(Kind.Read)]
-		public async Task<ActionResult<Show>> GetShow(string showSlug, int seasonNumber, int episodeNumber)
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task<ActionResult<Season>> GetSeason(Identifier identifier)
 		{
-			Show ret = await _libraryManager.GetOrDefault<Show>(showSlug);
-			if (ret == null)
-				return NotFound();
-			return ret;
+			Season ret = await _libraryManager.GetOrDefault(identifier.IsContainedIn<Season, Episode>(x => x.Episodes));
+			if (ret != null)
+				return ret;
+			Episode episode = await identifier.Match(
+				id => _libraryManager.GetOrDefault<Episode>(id),
+				slug => _libraryManager.GetOrDefault<Episode>(slug)
+			);
+			return episode == null
+				? NotFound()
+				: NoContent();
 		}
 
-		[HttpGet("{showID:int}-{seasonNumber:int}e{episodeNumber:int}/show")]
+		/// <summary>
+		/// Get tracks
+		/// </summary>
+		/// <remarks>
+		/// List the tracks (video, audio and subtitles) available for this episode.
+		/// This endpoint provide the list of raw tracks, without transcode on it. To get a schema easier to watch
+		/// on a player, see the [/watch endpoint](#/watch).
+		/// </remarks>
+		/// <param name="identifier">The ID or slug of the <see cref="Episode"/>.</param>
+		/// <param name="sortBy">A key to sort tracks by.</param>
+		/// <param name="where">An optional list of filters.</param>
+		/// <param name="limit">The number of tracks to return.</param>
+		/// <param name="afterID">An optional track's ID to start the query from this specific item.</param>
+		/// <returns>A page of tracks.</returns>
+		/// <response code="400">The filters or the sort parameters are invalid.</response>
+		/// <response code="404">No track with the given ID or slug could be found.</response>
+		/// TODO fix the /watch endpoint link (when operations ID are specified).
+		[HttpGet("{identifier:id}/tracks")]
+		[HttpGet("{identifier:id}/track", Order = AlternativeRoute)]
 		[PartialPermission(Kind.Read)]
-		public async Task<ActionResult<Show>> GetShow(int showID, int seasonNumber, int episodeNumber)
-		{
-			Show ret = await _libraryManager.GetOrDefault<Show>(showID);
-			if (ret == null)
-				return NotFound();
-			return ret;
-		}
-
-		[HttpGet("{episodeID:int}/season")]
-		[PartialPermission(Kind.Read)]
-		public async Task<ActionResult<Season>> GetSeason(int episodeID)
-		{
-			Season ret = await _libraryManager.GetOrDefault<Season>(x => x.Episodes.Any(y => y.ID == episodeID));
-			if (ret == null)
-				return NotFound();
-			return ret;
-		}
-
-		[HttpGet("{showSlug}-s{seasonNumber:int}e{episodeNumber:int}/season")]
-		[PartialPermission(Kind.Read)]
-		public async Task<ActionResult<Season>> GetSeason(string showSlug, int seasonNumber, int episodeNumber)
-		{
-			try
-			{
-				return await _libraryManager.Get(showSlug, seasonNumber);
-			}
-			catch (ItemNotFoundException)
-			{
-				return NotFound();
-			}
-		}
-
-		[HttpGet("{showID:int}-{seasonNumber:int}e{episodeNumber:int}/season")]
-		[PartialPermission(Kind.Read)]
-		public async Task<ActionResult<Season>> GetSeason(int showID, int seasonNumber, int episodeNumber)
-		{
-			try
-			{
-				return await _libraryManager.Get(showID, seasonNumber);
-			}
-			catch (ItemNotFoundException)
-			{
-				return NotFound();
-			}
-		}
-
-		[HttpGet("{episodeID:int}/track")]
-		[HttpGet("{episodeID:int}/tracks")]
-		[PartialPermission(Kind.Read)]
-		public async Task<ActionResult<Page<Track>>> GetEpisode(int episodeID,
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task<ActionResult<Page<Track>>> GetEpisode(Identifier identifier,
 			[FromQuery] string sortBy,
-			[FromQuery] int afterID,
 			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 30)
+			[FromQuery] int limit = 30,
+			[FromQuery] int? afterID = null)
 		{
 			try
 			{
 				ICollection<Track> resources = await _libraryManager.GetAll(
-					ApiHelper.ParseWhere<Track>(where, x => x.Episode.ID == episodeID),
+					ApiHelper.ParseWhere(where, identifier.Matcher<Track>(x => x.EpisodeID, x => x.Episode.Slug)),
 					new Sort<Track>(sortBy),
 					new Pagination(limit, afterID));
 
-				if (!resources.Any() && await _libraryManager.GetOrDefault<Episode>(episodeID) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Episode>()) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new { Error = ex.Message });
-			}
-		}
-
-		[HttpGet("{showID:int}-s{seasonNumber:int}e{episodeNumber:int}/track")]
-		[HttpGet("{showID:int}-s{seasonNumber:int}e{episodeNumber:int}/tracks")]
-		[PartialPermission(Kind.Read)]
-		public async Task<ActionResult<Page<Track>>> GetEpisode(int showID,
-			int seasonNumber,
-			int episodeNumber,
-			[FromQuery] string sortBy,
-			[FromQuery] int afterID,
-			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 30)
-		{
-			try
-			{
-				ICollection<Track> resources = await _libraryManager.GetAll(
-					ApiHelper.ParseWhere<Track>(where, x => x.Episode.ShowID == showID
-					                                        && x.Episode.SeasonNumber == seasonNumber
-					                                        && x.Episode.EpisodeNumber == episodeNumber),
-					new Sort<Track>(sortBy),
-					new Pagination(limit, afterID));
-
-				if (!resources.Any() && await _libraryManager.GetOrDefault(showID, seasonNumber, episodeNumber) == null)
-					return NotFound();
-				return Page(resources, limit);
-			}
-			catch (ArgumentException ex)
-			{
-				return BadRequest(new { Error = ex.Message });
-			}
-		}
-
-		[HttpGet("{slug}-s{seasonNumber:int}e{episodeNumber:int}/track")]
-		[HttpGet("{slug}-s{seasonNumber:int}e{episodeNumber:int}/tracks")]
-		[PartialPermission(Kind.Read)]
-		public async Task<ActionResult<Page<Track>>> GetEpisode(string slug,
-			int seasonNumber,
-			int episodeNumber,
-			[FromQuery] string sortBy,
-			[FromQuery] int afterID,
-			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 30)
-		{
-			try
-			{
-				ICollection<Track> resources = await _libraryManager.GetAll(
-					ApiHelper.ParseWhere<Track>(where, x => x.Episode.Show.Slug == slug
-						&& x.Episode.SeasonNumber == seasonNumber
-						&& x.Episode.EpisodeNumber == episodeNumber),
-					new Sort<Track>(sortBy),
-					new Pagination(limit, afterID));
-
-				if (!resources.Any() && await _libraryManager.GetOrDefault(slug, seasonNumber, episodeNumber) == null)
-					return NotFound();
-				return Page(resources, limit);
-			}
-			catch (ArgumentException ex)
-			{
-				return BadRequest(new { Error = ex.Message });
-			}
-		}
-
-		[HttpGet("{id:int}/thumbnail")]
-		[HttpGet("{id:int}/backdrop")]
-		public async Task<IActionResult> GetThumb(int id)
-		{
-			try
-			{
-				Episode episode = await _libraryManager.Get<Episode>(id);
-				return _files.FileResult(await _thumbnails.GetImagePath(episode, Images.Thumbnail));
-			}
-			catch (ItemNotFoundException)
-			{
-				return NotFound();
-			}
-		}
-
-		[HttpGet("{slug}/thumbnail")]
-		[HttpGet("{slug}/backdrop")]
-		public async Task<IActionResult> GetThumb(string slug)
-		{
-			try
-			{
-				Episode episode = await _libraryManager.Get<Episode>(slug);
-				return _files.FileResult(await _thumbnails.GetImagePath(episode, Images.Thumbnail));
-			}
-			catch (ItemNotFoundException)
-			{
-				return NotFound();
+				return BadRequest(new RequestError(ex.Message));
 			}
 		}
 	}

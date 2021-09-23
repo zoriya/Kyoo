@@ -25,6 +25,7 @@ Here are a few things you can do that will increase the likelihood of your pull 
 
 ## Resources
 
+- [Why should you indent with tabs](https://www.reddit.com/r/javascript/comments/c8drjo/nobody_talks_about_the_real_reason_to_use_tabs/)
 - [How to Contribute to Open Source](https://opensource.guide/how-to-contribute/)
 - [Using Pull Requests](https://docs.github.com/en/github/collaborating-with-issues-and-pull-requests/about-pull-requests)
 - [GitHub Help](https://docs.github.com/en)
