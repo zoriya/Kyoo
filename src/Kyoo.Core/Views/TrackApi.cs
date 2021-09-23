@@ -16,58 +16,69 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
-using Kyoo.Abstractions.Models.Exceptions;
+using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Permissions;
+using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Core.Models.Options;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Core.Api
 {
-	[Route("api/track")]
+	/// <summary>
+	/// Information about one or multiple <see cref="Track"/>.
+	/// </summary>
 	[Route("api/tracks")]
+	[Route("api/track", Order = AlternativeRoute)]
 	[ApiController]
 	[PartialPermission(nameof(Track))]
+	[ApiDefinition("Tracks", Group = ResourcesGroup)]
 	public class TrackApi : CrudApi<Track>
 	{
+		/// <summary>
+		/// The library manager used to modify or retrieve information in the data store.
+		/// </summary>
 		private readonly ILibraryManager _libraryManager;
 
+		/// <summary>
+		/// Create a new <see cref="TrackApi"/>.
+		/// </summary>
+		/// <param name="libraryManager">
+		/// The library manager used to modify or retrieve information in the data store.
+		/// </param>
+		/// <param name="options">
+		/// Options used to retrieve the base URL of Kyoo.
+		/// </param>
 		public TrackApi(ILibraryManager libraryManager, IOptions<BasicOptions> options)
 			: base(libraryManager.TrackRepository, options.Value.PublicUrl)
 		{
 			_libraryManager = libraryManager;
 		}
 
-		[HttpGet("{id:int}/episode")]
+		/// <summary>
+		/// Get track's episode
+		/// </summary>
+		/// <remarks>
+		/// Get the episode that uses this track.
+		/// </remarks>
+		/// <param name="identifier">The ID or slug of the <see cref="Track"/>.</param>
+		/// <returns>The episode that uses this track.</returns>
+		/// <response code="404">No track with the given ID or slug could be found.</response>
+		[HttpGet("{identifier:id}/episode")]
 		[PartialPermission(Kind.Read)]
-		public async Task<ActionResult<Episode>> GetEpisode(int id)
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task<ActionResult<Episode>> GetEpisode(Identifier identifier)
 		{
-			try
-			{
-				return await _libraryManager.Get<Episode>(x => x.Tracks.Any(y => y.ID == id));
-			}
-			catch (ItemNotFoundException)
-			{
+			Episode ret = await _libraryManager.GetOrDefault(identifier.IsContainedIn<Episode, Track>(x => x.Tracks));
+			if (ret == null)
 				return NotFound();
-			}
-		}
-
-		[HttpGet("{slug}/episode")]
-		[PartialPermission(Kind.Read)]
-		public async Task<ActionResult<Episode>> GetEpisode(string slug)
-		{
-			try
-			{
-				return await _libraryManager.Get<Episode>(x => x.Tracks.Any(y => y.Slug == slug));
-			}
-			catch (ItemNotFoundException)
-			{
-				return NotFound();
-			}
+			return ret;
 		}
 	}
 }
