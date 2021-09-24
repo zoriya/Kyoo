@@ -19,198 +19,186 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Permissions;
+using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Core.Models.Options;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Core.Api
 {
-	[Route("api/library")]
+	/// <summary>
+	/// Information about one or multiple <see cref="Library"/>.
+	/// </summary>
 	[Route("api/libraries")]
+	[Route("api/library", Order = AlternativeRoute)]
 	[ApiController]
-	[PartialPermission(nameof(LibraryApi))]
+	[PartialPermission(nameof(LibraryApi), Group = Group.Admin)]
+	[ApiDefinition("Library", Group = ResourcesGroup)]
 	public class LibraryApi : CrudApi<Library>
 	{
+		/// <summary>
+		/// The library manager used to modify or retrieve information in the data store.
+		/// </summary>
 		private readonly ILibraryManager _libraryManager;
-		private readonly ITaskManager _taskManager;
 
-		public LibraryApi(ILibraryManager libraryManager, ITaskManager taskManager, IOptions<BasicOptions> options)
+		/// <summary>
+		/// Create a new <see cref="EpisodeApi"/>.
+		/// </summary>
+		/// <param name="libraryManager">
+		/// The library manager used to modify or retrieve information in the data store.
+		/// </param>
+		/// <param name="options">
+		/// Options used to retrieve the base URL of Kyoo.
+		/// </param>
+		public LibraryApi(ILibraryManager libraryManager, IOptions<BasicOptions> options)
 			: base(libraryManager.LibraryRepository, options.Value.PublicUrl)
 		{
 			_libraryManager = libraryManager;
-			_taskManager = taskManager;
 		}
 
-		[PartialPermission(Kind.Create)]
-		public override async Task<ActionResult<Library>> Create(Library resource)
-		{
-			ActionResult<Library> result = await base.Create(resource);
-			if (result.Value != null)
-			{
-				_taskManager.StartTask("scan",
-					new Progress<float>(),
-					new Dictionary<string, object> { { "slug", result.Value.Slug } });
-			}
-			return result;
-		}
-
-		[HttpGet("{id:int}/show")]
-		[HttpGet("{id:int}/shows")]
+		/// <summary>
+		/// Get shows
+		/// </summary>
+		/// <remarks>
+		/// List the shows that are part of this library.
+		/// </remarks>
+		/// <param name="identifier">The ID or slug of the <see cref="Library"/>.</param>
+		/// <param name="sortBy">A key to sort shows by.</param>
+		/// <param name="where">An optional list of filters.</param>
+		/// <param name="limit">The number of shows to return.</param>
+		/// <param name="afterID">An optional show's ID to start the query from this specific item.</param>
+		/// <returns>A page of shows.</returns>
+		/// <response code="400">The filters or the sort parameters are invalid.</response>
+		/// <response code="404">No library with the given ID or slug could be found.</response>
+		[HttpGet("{identifier:id}/shows")]
+		[HttpGet("{identifier:id}/show", Order = AlternativeRoute)]
 		[PartialPermission(Kind.Read)]
-		public async Task<ActionResult<Page<Show>>> GetShows(int id,
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task<ActionResult<Page<Show>>> GetShows(Identifier identifier,
 			[FromQuery] string sortBy,
-			[FromQuery] int afterID,
 			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 50)
+			[FromQuery] int limit = 50,
+			[FromQuery] int? afterID = null)
 		{
 			try
 			{
 				ICollection<Show> resources = await _libraryManager.GetAll(
-					ApiHelper.ParseWhere<Show>(where, x => x.Libraries.Any(y => y.ID == id)),
+					ApiHelper.ParseWhere(where, identifier.IsContainedIn<Show, Library>(x => x.Libraries)),
 					new Sort<Show>(sortBy),
-					new Pagination(limit, afterID));
+					new Pagination(limit, afterID)
+				);
 
-				if (!resources.Any() && await _libraryManager.GetOrDefault<Library>(id) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Library>()) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new { Error = ex.Message });
+				return BadRequest(new RequestError(ex.Message));
 			}
 		}
 
-		[HttpGet("{slug}/show")]
-		[HttpGet("{slug}/shows")]
+		/// <summary>
+		/// Get collections
+		/// </summary>
+		/// <remarks>
+		/// List the collections that are part of this library.
+		/// </remarks>
+		/// <param name="identifier">The ID or slug of the <see cref="Library"/>.</param>
+		/// <param name="sortBy">A key to sort collections by.</param>
+		/// <param name="where">An optional list of filters.</param>
+		/// <param name="limit">The number of collections to return.</param>
+		/// <param name="afterID">An optional collection's ID to start the query from this specific item.</param>
+		/// <returns>A page of collections.</returns>
+		/// <response code="400">The filters or the sort parameters are invalid.</response>
+		/// <response code="404">No library with the given ID or slug could be found.</response>
+		[HttpGet("{identifier:id}/collections")]
+		[HttpGet("{identifier:id}/collection", Order = AlternativeRoute)]
 		[PartialPermission(Kind.Read)]
-		public async Task<ActionResult<Page<Show>>> GetShows(string slug,
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task<ActionResult<Page<Collection>>> GetCollections(Identifier identifier,
 			[FromQuery] string sortBy,
-			[FromQuery] int afterID,
 			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 20)
-		{
-			try
-			{
-				ICollection<Show> resources = await _libraryManager.GetAll(
-					ApiHelper.ParseWhere<Show>(where, x => x.Libraries.Any(y => y.Slug == slug)),
-					new Sort<Show>(sortBy),
-					new Pagination(limit, afterID));
-
-				if (!resources.Any() && await _libraryManager.GetOrDefault<Library>(slug) == null)
-					return NotFound();
-				return Page(resources, limit);
-			}
-			catch (ArgumentException ex)
-			{
-				return BadRequest(new { Error = ex.Message });
-			}
-		}
-
-		[HttpGet("{id:int}/collection")]
-		[HttpGet("{id:int}/collections")]
-		[PartialPermission(Kind.Read)]
-		public async Task<ActionResult<Page<Collection>>> GetCollections(int id,
-			[FromQuery] string sortBy,
-			[FromQuery] int afterID,
-			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 50)
+			[FromQuery] int limit = 50,
+			[FromQuery] int? afterID = null)
 		{
 			try
 			{
 				ICollection<Collection> resources = await _libraryManager.GetAll(
-					ApiHelper.ParseWhere<Collection>(where, x => x.Libraries.Any(y => y.ID == id)),
+					ApiHelper.ParseWhere(where, identifier.IsContainedIn<Collection, Library>(x => x.Libraries)),
 					new Sort<Collection>(sortBy),
-					new Pagination(limit, afterID));
+					new Pagination(limit, afterID)
+				);
 
-				if (!resources.Any() && await _libraryManager.GetOrDefault<Library>(id) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Library>()) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new { Error = ex.Message });
+				return BadRequest(new RequestError(ex.Message));
 			}
 		}
 
-		[HttpGet("{slug}/collection")]
-		[HttpGet("{slug}/collections")]
+		/// <summary>
+		/// Get items
+		/// </summary>
+		/// <remarks>
+		/// List all items of this library.
+		/// An item can ether represent a collection or a show.
+		/// This endpoint allow one to retrieve all collections and shows that are not contained in a collection.
+		/// This is what is displayed on the /browse page of the webapp.
+		/// </remarks>
+		/// <param name="identifier">The ID or slug of the <see cref="Library"/>.</param>
+		/// <param name="sortBy">A key to sort items by.</param>
+		/// <param name="where">An optional list of filters.</param>
+		/// <param name="limit">The number of items to return.</param>
+		/// <param name="afterID">An optional item's ID to start the query from this specific item.</param>
+		/// <returns>A page of items.</returns>
+		/// <response code="400">The filters or the sort parameters are invalid.</response>
+		/// <response code="404">No library with the given ID or slug could be found.</response>
+		[HttpGet("{identifier:id}/items")]
+		[HttpGet("{identifier:id}/item", Order = AlternativeRoute)]
 		[PartialPermission(Kind.Read)]
-		public async Task<ActionResult<Page<Collection>>> GetCollections(string slug,
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task<ActionResult<Page<LibraryItem>>> GetItems(Identifier identifier,
 			[FromQuery] string sortBy,
-			[FromQuery] int afterID,
 			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 20)
+			[FromQuery] int limit = 50,
+			[FromQuery] int? afterID = null)
 		{
 			try
 			{
-				ICollection<Collection> resources = await _libraryManager.GetAll(
-					ApiHelper.ParseWhere<Collection>(where, x => x.Libraries.Any(y => y.Slug == slug)),
-					new Sort<Collection>(sortBy),
-					new Pagination(limit, afterID));
+				Expression<Func<LibraryItem, bool>> whereQuery = ApiHelper.ParseWhere<LibraryItem>(where);
+				Sort<LibraryItem> sort = new(sortBy);
+				Pagination pagination = new(limit, afterID);
 
-				if (!resources.Any() && await _libraryManager.GetOrDefault<Library>(slug) == null)
+				ICollection<LibraryItem> resources = await identifier.Match(
+					id => _libraryManager.GetItemsFromLibrary(id, whereQuery, sort, pagination),
+					slug => _libraryManager.GetItemsFromLibrary(slug, whereQuery, sort, pagination)
+				);
+
+				if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Library>()) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new { Error = ex.Message });
-			}
-		}
-
-		[HttpGet("{id:int}/item")]
-		[HttpGet("{id:int}/items")]
-		[PartialPermission(Kind.Read)]
-		public async Task<ActionResult<Page<LibraryItem>>> GetItems(int id,
-			[FromQuery] string sortBy,
-			[FromQuery] int afterID,
-			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 50)
-		{
-			try
-			{
-				ICollection<LibraryItem> resources = await _libraryManager.GetItemsFromLibrary(id,
-					ApiHelper.ParseWhere<LibraryItem>(where),
-					new Sort<LibraryItem>(sortBy),
-					new Pagination(limit, afterID));
-
-				if (!resources.Any() && await _libraryManager.GetOrDefault<Library>(id) == null)
-					return NotFound();
-				return Page(resources, limit);
-			}
-			catch (ArgumentException ex)
-			{
-				return BadRequest(new { Error = ex.Message });
-			}
-		}
-
-		[HttpGet("{slug}/item")]
-		[HttpGet("{slug}/items")]
-		[PartialPermission(Kind.Read)]
-		public async Task<ActionResult<Page<LibraryItem>>> GetItems(string slug,
-			[FromQuery] string sortBy,
-			[FromQuery] int afterID,
-			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 50)
-		{
-			try
-			{
-				ICollection<LibraryItem> resources = await _libraryManager.GetItemsFromLibrary(slug,
-					ApiHelper.ParseWhere<LibraryItem>(where),
-					new Sort<LibraryItem>(sortBy),
-					new Pagination(limit, afterID));
-
-				if (!resources.Any() && await _libraryManager.GetOrDefault<Library>(slug) == null)
-					return NotFound();
-				return Page(resources, limit);
-			}
-			catch (ArgumentException ex)
-			{
-				return BadRequest(new { Error = ex.Message });
+				return BadRequest(new RequestError(ex.Message));
 			}
 		}
 	}

@@ -40,6 +40,11 @@ namespace Kyoo.Abstractions.Models.Permissions
 		public Kind Kind { get; }
 
 		/// <summary>
+		/// The group of this permission.
+		/// </summary>
+		public Group Group { get; set; }
+
+		/// <summary>
 		/// Ask a permission to run an action.
 		/// </summary>
 		/// <remarks>

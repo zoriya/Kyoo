@@ -133,7 +133,7 @@ namespace Kyoo.Core.Api
 		/// <param name="afterID">An optional track's ID to start the query from this specific item.</param>
 		/// <returns>A page of tracks.</returns>
 		/// <response code="400">The filters or the sort parameters are invalid.</response>
-		/// <response code="404">No track with the given ID or slug could be found.</response>
+		/// <response code="404">No episode with the given ID or slug could be found.</response>
 		/// TODO fix the /watch endpoint link (when operations ID are specified).
 		[HttpGet("{identifier:id}/tracks")]
 		[HttpGet("{identifier:id}/track", Order = AlternativeRoute)]
