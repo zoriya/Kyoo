@@ -23,9 +23,7 @@ using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Permissions;
-using Kyoo.Core.Models.Options;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace Kyoo.Core.Api
 {
@@ -37,8 +35,8 @@ namespace Kyoo.Core.Api
 	{
 		private readonly ILibraryManager _libraryManager;
 
-		public StudioApi(ILibraryManager libraryManager, IOptions<BasicOptions> options)
-			: base(libraryManager.StudioRepository, options.Value.PublicUrl)
+		public StudioApi(ILibraryManager libraryManager)
+			: base(libraryManager.StudioRepository)
 		{
 			_libraryManager = libraryManager;
 		}

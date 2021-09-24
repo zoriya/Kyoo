@@ -23,9 +23,7 @@ using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Permissions;
-using Kyoo.Core.Models.Options;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace Kyoo.Core.Api
 {
@@ -39,10 +37,9 @@ namespace Kyoo.Core.Api
 		private readonly IThumbnailsManager _thumbs;
 
 		public PeopleApi(ILibraryManager libraryManager,
-			IOptions<BasicOptions> options,
 			IFileSystem files,
 			IThumbnailsManager thumbs)
-			: base(libraryManager.PeopleRepository, options.Value.PublicUrl)
+			: base(libraryManager.PeopleRepository)
 		{
 			_libraryManager = libraryManager;
 			_files = files;

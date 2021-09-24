@@ -23,6 +23,10 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using Kyoo.Abstractions.Models;
+using Kyoo.Core.Models.Options;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Kyoo.Core.Api
 {

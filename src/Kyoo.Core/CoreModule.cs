@@ -140,7 +140,7 @@ namespace Kyoo.Core
 		/// <inheritdoc />
 		public void Configure(IServiceCollection services)
 		{
-			string publicUrl = _configuration.GetPublicUrl();
+			Uri publicUrl = _configuration.GetPublicUrl();
 
 			services.AddMvcCore()
 				.AddDataAnnotations()

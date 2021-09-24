@@ -16,7 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
@@ -56,14 +55,10 @@ namespace Kyoo.Core.Api
 		/// </param>
 		/// <param name="files">The file manager used to send images.</param>
 		/// <param name="thumbs">The thumbnail manager used to retrieve images paths.</param>
-		/// <param name="baseURL">
-		/// The base URL of Kyoo to use to create links.
-		/// </param>
 		public CrudThumbsApi(IRepository<T> repository,
 			IFileSystem files,
-			IThumbnailsManager thumbs,
-			Uri baseURL)
-			: base(repository, baseURL)
+			IThumbnailsManager thumbs)
+			: base(repository)
 		{
 			_files = files;
 			_thumbs = thumbs;

@@ -18,59 +18,85 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
-using Kyoo.Abstractions.Models.Exceptions;
+using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Permissions;
-using Kyoo.Core.Models.Options;
+using Kyoo.Abstractions.Models.Utils;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
+using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Core.Api
 {
-	[Route("api/item")]
+	/// <summary>
+	/// Endpoint for items that are not part of a specific library.
+	/// An item can ether represent a collection or a show.
+	/// </summary>
 	[Route("api/items")]
+	[Route("api/item", Order = AlternativeRoute)]
 	[ApiController]
 	[ResourceView]
-	public class LibraryItemApi : ControllerBase
+	[ApiDefinition("Items", Group = ResourcesGroup)]
+	public class LibraryItemApi : BaseApi
 	{
+		/// <summary>
+		/// The library item repository used to modify or retrieve information in the data store.
+		/// </summary>
 		private readonly ILibraryItemRepository _libraryItems;
-		private readonly Uri _baseURL;
 
-		public LibraryItemApi(ILibraryItemRepository libraryItems, IOptions<BasicOptions> options)
+		/// <summary>
+		/// Create a new <see cref="LibraryItemApi"/>.
+		/// </summary>
+		/// <param name="libraryItems">
+		/// The library item repository used to modify or retrieve information in the data store.
+		/// </param>
+		public LibraryItemApi(ILibraryItemRepository libraryItems)
 		{
 			_libraryItems = libraryItems;
-			_baseURL = options.Value.PublicUrl;
 		}
 
+		/// <summary>
+		/// Get items
+		/// </summary>
+		/// <remarks>
+		/// List all items of kyoo.
+		/// An item can ether represent a collection or a show.
+		/// This endpoint allow one to retrieve all collections and shows that are not contained in a collection.
+		/// This is what is displayed on the /browse page of the webapp.
+		/// </remarks>
+		/// <param name="sortBy">A key to sort items by.</param>
+		/// <param name="where">An optional list of filters.</param>
+		/// <param name="limit">The number of items to return.</param>
+		/// <param name="afterID">An optional item's ID to start the query from this specific item.</param>
+		/// <returns>A page of items.</returns>
+		/// <response code="400">The filters or the sort parameters are invalid.</response>
+		/// <response code="404">No library with the given ID or slug could be found.</response>
 		[HttpGet]
 		[Permission(nameof(LibraryItemApi), Kind.Read)]
-		public async Task<ActionResult<Page<LibraryItem>>> GetAll([FromQuery] string sortBy,
-			[FromQuery] int afterID,
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task<ActionResult<Page<LibraryItem>>> GetAll(
+			[FromQuery] string sortBy,
 			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 50)
+			[FromQuery] int limit = 50,
+			[FromQuery] int? afterID = null)
 		{
 			try
 			{
 				ICollection<LibraryItem> resources = await _libraryItems.GetAll(
 					ApiHelper.ParseWhere<LibraryItem>(where),
 					new Sort<LibraryItem>(sortBy),
-					new Pagination(limit, afterID));
+					new Pagination(limit, afterID)
+				);
 
-				return new Page<LibraryItem>(resources,
-					new Uri(_baseURL, Request.Path),
-					Request.Query.ToDictionary(x => x.Key, x => x.Value.ToString(), StringComparer.InvariantCultureIgnoreCase),
-					limit);
-			}
-			catch (ItemNotFoundException)
-			{
-				return NotFound();
+				return Page(resources, limit);
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new { Error = ex.Message });
+				return BadRequest(new RequestError(ex.Message));
 			}
 		}
 	}

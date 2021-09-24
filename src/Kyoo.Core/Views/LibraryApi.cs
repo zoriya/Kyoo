@@ -26,10 +26,8 @@ using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
-using Kyoo.Core.Models.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Core.Api
@@ -40,6 +38,7 @@ namespace Kyoo.Core.Api
 	[Route("api/libraries")]
 	[Route("api/library", Order = AlternativeRoute)]
 	[ApiController]
+	[ResourceView]
 	[PartialPermission(nameof(LibraryApi), Group = Group.Admin)]
 	[ApiDefinition("Library", Group = ResourcesGroup)]
 	public class LibraryApi : CrudApi<Library>
@@ -55,11 +54,8 @@ namespace Kyoo.Core.Api
 		/// <param name="libraryManager">
 		/// The library manager used to modify or retrieve information in the data store.
 		/// </param>
-		/// <param name="options">
-		/// Options used to retrieve the base URL of Kyoo.
-		/// </param>
-		public LibraryApi(ILibraryManager libraryManager, IOptions<BasicOptions> options)
-			: base(libraryManager.LibraryRepository, options.Value.PublicUrl)
+		public LibraryApi(ILibraryManager libraryManager)
+			: base(libraryManager.LibraryRepository)
 		{
 			_libraryManager = libraryManager;
 		}
@@ -159,7 +155,7 @@ namespace Kyoo.Core.Api
 		/// List all items of this library.
 		/// An item can ether represent a collection or a show.
 		/// This endpoint allow one to retrieve all collections and shows that are not contained in a collection.
-		/// This is what is displayed on the /browse page of the webapp.
+		/// This is what is displayed on the /browse/library page of the webapp.
 		/// </remarks>
 		/// <param name="identifier">The ID or slug of the <see cref="Library"/>.</param>
 		/// <param name="sortBy">A key to sort items by.</param>

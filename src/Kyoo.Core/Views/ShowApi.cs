@@ -58,6 +58,12 @@ namespace Kyoo.Core.Api
 		private readonly IFileSystem _files;
 
 		/// <summary>
+		/// The base URL of Kyoo. This will be used to create links for images and
+		/// <see cref="Abstractions.Models.Page{T}"/>.
+		/// </summary>
+		private readonly Uri _baseURL;
+
+		/// <summary>
 		/// Create a new <see cref="ShowApi"/>.
 		/// </summary>
 		/// <param name="libraryManager">
@@ -72,10 +78,11 @@ namespace Kyoo.Core.Api
 			IFileSystem files,
 			IThumbnailsManager thumbs,
 			IOptions<BasicOptions> options)
-			: base(libraryManager.ShowRepository, files, thumbs, options.Value.PublicUrl)
+			: base(libraryManager.ShowRepository, files, thumbs)
 		{
 			_libraryManager = libraryManager;
 			_files = files;
+			_baseURL = options.Value.PublicUrl;
 		}
 
 		/// <summary>
@@ -392,7 +399,7 @@ namespace Kyoo.Core.Api
 			return (await _files.ListFiles(path))
 				.ToDictionary(
 					Path.GetFileNameWithoutExtension,
-					x => $"{BaseURL}api/shows/{identifier}/fonts/{Path.GetFileName(x)}"
+					x => $"{_baseURL}api/shows/{identifier}/fonts/{Path.GetFileName(x)}"
 				);
 		}
 

@@ -32,8 +32,13 @@ namespace Kyoo.Abstractions.Models.Utils
 		public const int AlternativeRoute = 1;
 
 		/// <summary>
-		/// A group name for <see cref="ApiDefinitionAttribute"/>. It should be used for every <see cref="IResource"/>.
+		/// A group name for <see cref="ApiDefinitionAttribute"/>. It should be used for main resources of kyoo.
 		/// </summary>
 		public const string ResourcesGroup = "Resources";
+
+		/// <summary>
+		/// A group name for <see cref="ApiDefinitionAttribute"/>. It should be used for endpoints useful for playback.
+		/// </summary>
+		public const string WatchGroup = "Watch";
 	}
 }

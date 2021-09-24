@@ -26,13 +26,13 @@ namespace Kyoo.Core.Api
 {
 	public class SerializeAsProvider : IValueProvider
 	{
-		private string _format;
-		private string _host;
+		private readonly string _format;
+		private readonly Uri _host;
 
-		public SerializeAsProvider(string format, string host)
+		public SerializeAsProvider(string format, Uri host)
 		{
 			_format = format;
-			_host = host.TrimEnd('/');
+			_host = host;
 		}
 
 		public object GetValue(object target)
@@ -43,7 +43,7 @@ namespace Kyoo.Core.Api
 				string modifier = x.Groups[3].Value;
 
 				if (value == "HOST")
-					return _host;
+					return _host.ToString().TrimEnd('/');
 
 				PropertyInfo properties = target.GetType()
 					.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)

@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
@@ -36,7 +35,7 @@ namespace Kyoo.Core.Api
 	/// <typeparam name="T">The type of resource to make CRUD apis for.</typeparam>
 	[ApiController]
 	[ResourceView]
-	public class CrudApi<T> : ControllerBase
+	public class CrudApi<T> : BaseApi
 		where T : class, IResource
 	{
 		/// <summary>
@@ -45,43 +44,14 @@ namespace Kyoo.Core.Api
 		protected IRepository<T> Repository { get; }
 
 		/// <summary>
-		/// The base URL of Kyoo. This will be used to create links for images and
-		/// <see cref="Abstractions.Models.Page{T}"/>.
-		/// </summary>
-		protected Uri BaseURL { get; }
-
-		/// <summary>
 		/// Create a new <see cref="CrudApi{T}"/> using the given repository and base url.
 		/// </summary>
 		/// <param name="repository">
 		/// The repository to use as a baking store for the type <typeparamref name="T"/>.
 		/// </param>
-		/// <param name="baseURL">
-		/// The base URL of Kyoo to use to create links.
-		/// </param>
-		public CrudApi(IRepository<T> repository, Uri baseURL)
+		public CrudApi(IRepository<T> repository)
 		{
 			Repository = repository;
-			BaseURL = baseURL;
-		}
-
-		/// <summary>
-		/// Construct and return a page from an api.
-		/// </summary>
-		/// <param name="resources">The list of resources that should be included in the current page.</param>
-		/// <param name="limit">
-		/// The max number of items that should be present per page. This should be the same as in the request,
-		/// it is used to calculate if this is the last page and so on.
-		/// </param>
-		/// <typeparam name="TResult">The type of items on the page.</typeparam>
-		/// <returns>A Page representing the response.</returns>
-		protected Page<TResult> Page<TResult>(ICollection<TResult> resources, int limit)
-			where TResult : IResource
-		{
-			return new Page<TResult>(resources,
-				new Uri(BaseURL, Request.Path),
-				Request.Query.ToDictionary(x => x.Key, x => x.Value.ToString(), StringComparer.InvariantCultureIgnoreCase),
-				limit);
 		}
 
 		/// <summary>

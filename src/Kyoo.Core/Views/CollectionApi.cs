@@ -25,10 +25,8 @@ using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
-using Kyoo.Core.Models.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Core.Api
@@ -56,14 +54,10 @@ namespace Kyoo.Core.Api
 		/// </param>
 		/// <param name="files">The file manager used to send images.</param>
 		/// <param name="thumbs">The thumbnail manager used to retrieve images paths.</param>
-		/// <param name="options">
-		/// Options used to retrieve the base URL of Kyoo.
-		/// </param>
 		public CollectionApi(ILibraryManager libraryManager,
 			IFileSystem files,
-			IThumbnailsManager thumbs,
-			IOptions<BasicOptions> options)
-			: base(libraryManager.CollectionRepository, files, thumbs, options.Value.PublicUrl)
+			IThumbnailsManager thumbs)
+			: base(libraryManager.CollectionRepository, files, thumbs)
 		{
 			_libraryManager = libraryManager;
 		}

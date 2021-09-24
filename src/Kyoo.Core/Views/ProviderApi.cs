@@ -20,9 +20,7 @@ using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Permissions;
-using Kyoo.Core.Models.Options;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace Kyoo.Core.Api
 {
@@ -37,10 +35,9 @@ namespace Kyoo.Core.Api
 		private readonly IFileSystem _files;
 
 		public ProviderApi(ILibraryManager libraryManager,
-			IOptions<BasicOptions> options,
 			IFileSystem files,
 			IThumbnailsManager thumbnails)
-			: base(libraryManager.ProviderRepository, options.Value.PublicUrl)
+			: base(libraryManager.ProviderRepository)
 		{
 			_libraryManager = libraryManager;
 			_files = files;

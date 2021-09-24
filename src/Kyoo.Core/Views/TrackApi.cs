@@ -22,22 +22,22 @@ using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
-using Kyoo.Core.Models.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Core.Api
 {
 	/// <summary>
 	/// Information about one or multiple <see cref="Track"/>.
+	/// A track contain metadata about a video, an audio or a subtitles.
 	/// </summary>
 	[Route("api/tracks")]
 	[Route("api/track", Order = AlternativeRoute)]
 	[ApiController]
+	[ResourceView]
 	[PartialPermission(nameof(Track))]
-	[ApiDefinition("Tracks", Group = ResourcesGroup)]
+	[ApiDefinition("Tracks", Group = WatchGroup)]
 	public class TrackApi : CrudApi<Track>
 	{
 		/// <summary>
@@ -51,11 +51,8 @@ namespace Kyoo.Core.Api
 		/// <param name="libraryManager">
 		/// The library manager used to modify or retrieve information in the data store.
 		/// </param>
-		/// <param name="options">
-		/// Options used to retrieve the base URL of Kyoo.
-		/// </param>
-		public TrackApi(ILibraryManager libraryManager, IOptions<BasicOptions> options)
-			: base(libraryManager.TrackRepository, options.Value.PublicUrl)
+		public TrackApi(ILibraryManager libraryManager)
+			: base(libraryManager.TrackRepository)
 		{
 			_libraryManager = libraryManager;
 		}

@@ -25,10 +25,8 @@ using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
-using Kyoo.Core.Models.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Core.Api
@@ -39,6 +37,7 @@ namespace Kyoo.Core.Api
 	[Route("api/episodes")]
 	[Route("api/episode", Order = AlternativeRoute)]
 	[ApiController]
+	[ResourceView]
 	[PartialPermission(nameof(EpisodeApi))]
 	[ApiDefinition("Episodes", Group = ResourcesGroup)]
 	public class EpisodeApi : CrudThumbsApi<Episode>
@@ -56,14 +55,10 @@ namespace Kyoo.Core.Api
 		/// </param>
 		/// <param name="files">The file manager used to send images.</param>
 		/// <param name="thumbnails">The thumbnail manager used to retrieve images paths.</param>
-		/// <param name="options">
-		/// Options used to retrieve the base URL of Kyoo.
-		/// </param>
 		public EpisodeApi(ILibraryManager libraryManager,
 			IFileSystem files,
-			IThumbnailsManager thumbnails,
-			IOptions<BasicOptions> options)
-			: base(libraryManager.EpisodeRepository, files, thumbnails, options.Value.PublicUrl)
+			IThumbnailsManager thumbnails)
+			: base(libraryManager.EpisodeRepository, files, thumbnails)
 		{
 			_libraryManager = libraryManager;
 		}
