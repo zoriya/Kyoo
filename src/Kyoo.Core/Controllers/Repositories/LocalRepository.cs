@@ -115,9 +115,12 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public virtual Task<T> GetOrDefault(Expression<Func<T, bool>> where)
+		public virtual Task<T> GetOrDefault(Expression<Func<T, bool>> where, Sort<T> sortBy = default)
 		{
-			return Database.Set<T>().FirstOrDefaultAsync(where);
+			IQueryable<T> query = Database.Set<T>();
+			Expression<Func<T, object>> sortKey = sortBy.Key ?? DefaultSort;
+			query = sortBy.Descendant ? query.OrderByDescending(sortKey) : query.OrderBy(sortKey);
+			return query.FirstOrDefaultAsync(where);
 		}
 
 		/// <inheritdoc/>

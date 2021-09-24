@@ -163,10 +163,10 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public async Task<T> GetOrDefault<T>(Expression<Func<T, bool>> where)
+		public async Task<T> GetOrDefault<T>(Expression<Func<T, bool>> where, Sort<T> sortBy)
 			where T : class, IResource
 		{
-			return await GetRepository<T>().GetOrDefault(where);
+			return await GetRepository<T>().GetOrDefault(where, sortBy);
 		}
 
 		/// <inheritdoc />

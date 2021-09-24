@@ -29,8 +29,8 @@ namespace Kyoo.Core.Api
 {
 	public class JsonPropertyIgnorer : CamelCasePropertyNamesContractResolver
 	{
-		private int _depth = -1;
 		private readonly Uri _host;
+		private int _depth = -1;
 
 		public JsonPropertyIgnorer(Uri host)
 		{

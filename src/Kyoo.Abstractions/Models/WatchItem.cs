@@ -158,36 +158,50 @@ namespace Kyoo.Abstractions.Models
 		/// <returns>A new WatchItem representing the given episode.</returns>
 		public static async Task<WatchItem> FromEpisode(Episode ep, ILibraryManager library)
 		{
-			Episode previous = null;
-			Episode next = null;
-
 			await library.Load(ep, x => x.Show);
 			await library.Load(ep, x => x.Tracks);
 
-			if (!ep.Show.IsMovie && ep.SeasonNumber != null && ep.EpisodeNumber != null)
+			Episode previous = null;
+			Episode next = null;
+			if (!ep.Show.IsMovie)
 			{
-				if (ep.EpisodeNumber > 1)
-					previous = await library.GetOrDefault(ep.ShowID, ep.SeasonNumber.Value, ep.EpisodeNumber.Value - 1);
-				else if (ep.SeasonNumber > 1)
+				if (ep.AbsoluteNumber != null)
 				{
-					previous = (await library.GetAll(x => x.ShowID == ep.ShowID
-					                                      && x.SeasonNumber == ep.SeasonNumber.Value - 1,
-						limit: 1,
-						sort: new Sort<Episode>(x => x.EpisodeNumber, true))
-					).FirstOrDefault();
+					previous = await library.GetOrDefault(
+						x => x.ShowID == ep.ShowID && x.AbsoluteNumber <= ep.AbsoluteNumber,
+						new Sort<Episode>(x => x.AbsoluteNumber, true)
+					);
+					next = await library.GetOrDefault(
+						x => x.ShowID == ep.ShowID && x.AbsoluteNumber >= ep.AbsoluteNumber,
+						new Sort<Episode>(x => x.AbsoluteNumber)
+					);
 				}
+				else if (ep.SeasonNumber != null && ep.EpisodeNumber != null)
+				{
+					previous = await library.GetOrDefault(
+						x => x.ShowID == ep.ShowID
+							&& x.SeasonNumber == ep.SeasonNumber
+							&& x.EpisodeNumber < ep.EpisodeNumber,
+						new Sort<Episode>(x => x.EpisodeNumber, true)
+					);
+					previous ??= await library.GetOrDefault(
+						x => x.ShowID == ep.ShowID
+							&& x.SeasonNumber == ep.SeasonNumber - 1,
+						new Sort<Episode>(x => x.EpisodeNumber, true)
+					);
 
-				if (ep.EpisodeNumber >= await library.GetCount<Episode>(x => x.SeasonID == ep.SeasonID))
-					next = await library.GetOrDefault(ep.ShowID, ep.SeasonNumber.Value + 1, 1);
-				else
-					next = await library.GetOrDefault(ep.ShowID, ep.SeasonNumber.Value, ep.EpisodeNumber.Value + 1);
-			}
-			else if (!ep.Show.IsMovie && ep.AbsoluteNumber != null)
-			{
-				previous = await library.GetOrDefault<Episode>(x => x.ShowID == ep.ShowID
-				                                                    && x.AbsoluteNumber == ep.EpisodeNumber + 1);
-				next = await library.GetOrDefault<Episode>(x => x.ShowID == ep.ShowID
-				                                                && x.AbsoluteNumber == ep.AbsoluteNumber + 1);
+					next = await library.GetOrDefault(
+						x => x.ShowID == ep.ShowID
+							&& x.SeasonNumber == ep.SeasonNumber
+							&& x.EpisodeNumber > ep.EpisodeNumber,
+						new Sort<Episode>(x => x.EpisodeNumber)
+					);
+					next ??= await library.GetOrDefault(
+						x => x.ShowID == ep.ShowID
+							&& x.SeasonNumber == ep.SeasonNumber + 1,
+						new Sort<Episode>(x => x.EpisodeNumber)
+					);
+				}
 			}
 
 			return new WatchItem

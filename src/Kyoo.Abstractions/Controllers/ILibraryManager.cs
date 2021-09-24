@@ -200,10 +200,11 @@ namespace Kyoo.Abstractions.Controllers
 		/// Get the resource by a filter function or null if it is not found.
 		/// </summary>
 		/// <param name="where">The filter function.</param>
+		/// <param name="sortBy">A custom sort method to handle cases where multiples items match the filters.</param>
 		/// <typeparam name="T">The type of the resource</typeparam>
 		/// <returns>The first resource found that match the where function</returns>
 		[ItemCanBeNull]
-		Task<T> GetOrDefault<T>(Expression<Func<T, bool>> where)
+		Task<T> GetOrDefault<T>(Expression<Func<T, bool>> where, Sort<T> sortBy = default)
 			where T : class, IResource;
 
 		/// <summary>
