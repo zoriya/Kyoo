@@ -34,11 +34,17 @@ namespace Kyoo.Abstractions.Models.Utils
 		/// <summary>
 		/// A group name for <see cref="ApiDefinitionAttribute"/>. It should be used for main resources of kyoo.
 		/// </summary>
-		public const string ResourcesGroup = "Resources";
+		public const string ResourcesGroup = "0:Resources";
+
+		/// <summary>
+		/// A group name for <see cref="ApiDefinitionAttribute"/>.
+		/// It should be used for sub resources of kyoo that help define the main resources.
+		/// </summary>
+		public const string MetadataGroup = "1:Metadata";
 
 		/// <summary>
 		/// A group name for <see cref="ApiDefinitionAttribute"/>. It should be used for endpoints useful for playback.
 		/// </summary>
-		public const string WatchGroup = "Watch";
+		public const string WatchGroup = "2:Watch";
 	}
 }

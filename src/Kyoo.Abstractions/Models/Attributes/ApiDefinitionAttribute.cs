@@ -33,7 +33,9 @@ namespace Kyoo.Abstractions.Models.Attributes
 		[NotNull] public string Name { get; }
 
 		/// <summary>
-		/// The name of the group in witch this API is.
+		/// The name of the group in witch this API is. You can also specify a custom sort order using the following
+		/// format: <code>order:name</code>. Everything before the first <c>:</c> will be removed but kept for
+		/// th alphabetical ordering.
 		/// </summary>
 		public string Group { get; set; }
 

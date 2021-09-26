@@ -18,15 +18,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using Kyoo.Abstractions.Controllers;
-using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.Extensions.DependencyInjection;
-using Namotion.Reflection;
 using NJsonSchema;
 using NJsonSchema.Generation.TypeMappers;
 using NSwag;
@@ -77,73 +73,13 @@ namespace Kyoo.Swagger
 						Name = "GPL-3.0-or-later",
 						Url = "https://github.com/AnonymusRaccoon/Kyoo/blob/master/LICENSE"
 					};
-
-					// We can't reorder items by assigning the sorted value to the Paths variable since it has no setter.
-					List<KeyValuePair<string, OpenApiPathItem>> sorted = postProcess.Paths
-						.OrderBy(x => x.Key)
-						.ToList();
-					postProcess.Paths.Clear();
-					foreach ((string key, OpenApiPathItem value) in sorted)
-						postProcess.Paths.Add(key, value);
-
-					List<dynamic> tagGroups = (List<dynamic>)postProcess.ExtensionData["x-tagGroups"];
-					List<string> tagsWithoutGroup = postProcess.Tags
-						.Select(x => x.Name)
-						.Where(x => tagGroups
-							.SelectMany<dynamic, string>(y => y.tags)
-							.All(y => y != x))
-						.ToList();
-					if (tagsWithoutGroup.Any())
-					{
-						tagGroups.Add(new
-						{
-							name = "Others",
-							tags = tagsWithoutGroup
-						});
-					}
 				};
+				options.UseApiTags();
+				options.SortApis();
 				options.AddOperationFilter(x =>
 				{
 					if (x is AspNetCoreOperationProcessorContext ctx)
 						return ctx.ApiDescription.ActionDescriptor.AttributeRouteInfo?.Order != AlternativeRoute;
-					return true;
-				});
-				options.AddOperationFilter(context =>
-				{
-					ApiDefinitionAttribute def = context.ControllerType.GetCustomAttribute<ApiDefinitionAttribute>();
-					string name = def?.Name ?? context.ControllerType.Name;
-
-					context.OperationDescription.Operation.Tags.Add(name);
-					if (context.Document.Tags.All(x => x.Name != name))
-					{
-						context.Document.Tags.Add(new OpenApiTag
-						{
-							Name = name,
-							Description = context.ControllerType.GetXmlDocsSummary()
-						});
-					}
-
-					if (def == null)
-						return true;
-
-					context.Document.ExtensionData ??= new Dictionary<string, object>();
-					context.Document.ExtensionData.TryAdd("x-tagGroups", new List<dynamic>());
-					List<dynamic> obj = (List<dynamic>)context.Document.ExtensionData["x-tagGroups"];
-					dynamic existing = obj.FirstOrDefault(x => x.name == def.Group);
-					if (existing != null)
-					{
-						if (!existing.tags.Contains(def.Name))
-							existing.tags.Add(def.Name);
-					}
-					else
-					{
-						obj.Add(new
-						{
-							name = def.Group,
-							tags = new List<string> { def.Name }
-						});
-					}
-
 					return true;
 				});
 				options.SchemaGenerator.Settings.TypeMappers.Add(new PrimitiveTypeMapper(typeof(Identifier), x =>
