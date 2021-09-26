@@ -22,74 +22,83 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Permissions;
+using Kyoo.Abstractions.Models.Utils;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Core.Api
 {
-	[Route("api/studio")]
+	/// <summary>
+	/// Information about one or multiple <see cref="Studio"/>.
+	/// </summary>
 	[Route("api/studios")]
+	[Route("api/studio", Order = AlternativeRoute)]
 	[ApiController]
 	[PartialPermission(nameof(ShowApi))]
+	[ApiDefinition("Studios", Group = MetadataGroup)]
 	public class StudioApi : CrudApi<Studio>
 	{
+		/// <summary>
+		/// The library manager used to modify or retrieve information in the data store.
+		/// </summary>
 		private readonly ILibraryManager _libraryManager;
 
+		/// <summary>
+		/// Create a new <see cref="StudioApi"/>.
+		/// </summary>
+		/// <param name="libraryManager">
+		/// The library manager used to modify or retrieve information in the data store.
+		/// </param>
 		public StudioApi(ILibraryManager libraryManager)
 			: base(libraryManager.StudioRepository)
 		{
 			_libraryManager = libraryManager;
 		}
 
-		[HttpGet("{id:int}/show")]
-		[HttpGet("{id:int}/shows")]
+		/// <summary>
+		/// Get shows
+		/// </summary>
+		/// <remarks>
+		/// List shows that were made by this specific studio.
+		/// </remarks>
+		/// <param name="identifier">The ID or slug of the <see cref="Studio"/>.</param>
+		/// <param name="sortBy">A key to sort shows by.</param>
+		/// <param name="where">An optional list of filters.</param>
+		/// <param name="limit">The number of shows to return.</param>
+		/// <param name="afterID">An optional show's ID to start the query from this specific item.</param>
+		/// <returns>A page of shows.</returns>
+		/// <response code="400">The filters or the sort parameters are invalid.</response>
+		/// <response code="404">No studio with the given ID or slug could be found.</response>
+		[HttpGet("{identifier:id}/shows")]
+		[HttpGet("{identifier:id}/show", Order = AlternativeRoute)]
 		[PartialPermission(Kind.Read)]
-		public async Task<ActionResult<Page<Show>>> GetShows(int id,
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task<ActionResult<Page<Show>>> GetShows(Identifier identifier,
 			[FromQuery] string sortBy,
-			[FromQuery] int afterID,
 			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 20)
+			[FromQuery] int limit = 20,
+			[FromQuery] int? afterID = null)
 		{
 			try
 			{
 				ICollection<Show> resources = await _libraryManager.GetAll(
-					ApiHelper.ParseWhere<Show>(where, x => x.StudioID == id),
+					ApiHelper.ParseWhere(where, identifier.Matcher<Show>(x => x.StudioID, x => x.Studio.Slug)),
 					new Sort<Show>(sortBy),
-					new Pagination(limit, afterID));
+					new Pagination(limit, afterID)
+				);
 
-				if (!resources.Any() && await _libraryManager.GetOrDefault<Studio>(id) == null)
+				if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Studio>()) == null)
 					return NotFound();
 				return Page(resources, limit);
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new { Error = ex.Message });
-			}
-		}
-
-		[HttpGet("{slug}/show")]
-		[HttpGet("{slug}/shows")]
-		[PartialPermission(Kind.Read)]
-		public async Task<ActionResult<Page<Show>>> GetShows(string slug,
-			[FromQuery] string sortBy,
-			[FromQuery] int afterID,
-			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 20)
-		{
-			try
-			{
-				ICollection<Show> resources = await _libraryManager.GetAll(
-					ApiHelper.ParseWhere<Show>(where, x => x.Studio.Slug == slug),
-					new Sort<Show>(sortBy),
-					new Pagination(limit, afterID));
-
-				if (!resources.Any() && await _libraryManager.GetOrDefault<Studio>(slug) == null)
-					return NotFound();
-				return Page(resources, limit);
-			}
-			catch (ArgumentException ex)
-			{
-				return BadRequest(new { Error = ex.Message });
+				return BadRequest(new RequestError(ex.Message));
 			}
 		}
 	}
