@@ -16,50 +16,40 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Permissions;
 using Microsoft.AspNetCore.Mvc;
+using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Core.Api
 {
-	[Route("api/provider")]
+	/// <summary>
+	/// Information about one or multiple <see cref="Provider"/>.
+	/// Providers are links to external websites or database.
+	/// They are mostly linked to plugins that provide metadata from those websites.
+	/// </summary>
 	[Route("api/providers")]
+	[Route("api/provider", Order = AlternativeRoute)]
 	[ApiController]
+	[ResourceView]
 	[PartialPermission(nameof(ProviderApi))]
-	public class ProviderApi : CrudApi<Provider>
+	[ApiDefinition("Providers", Group = MetadataGroup)]
+	public class ProviderApi : CrudThumbsApi<Provider>
 	{
-		private readonly IThumbnailsManager _thumbnails;
-		private readonly ILibraryManager _libraryManager;
-		private readonly IFileSystem _files;
-
+		/// <summary>
+		/// Create a new <see cref="ProviderApi"/>.
+		/// </summary>
+		/// <param name="libraryManager">
+		/// The library manager used to modify or retrieve information about the data store.
+		/// </param>
+		/// <param name="files">The file manager used to send images and fonts.</param>
+		/// <param name="thumbnails">The thumbnail manager used to retrieve images paths.</param>
 		public ProviderApi(ILibraryManager libraryManager,
 			IFileSystem files,
 			IThumbnailsManager thumbnails)
-			: base(libraryManager.ProviderRepository)
-		{
-			_libraryManager = libraryManager;
-			_files = files;
-			_thumbnails = thumbnails;
-		}
-
-		[HttpGet("{id:int}/logo")]
-		public async Task<IActionResult> GetLogo(int id)
-		{
-			Provider provider = await _libraryManager.GetOrDefault<Provider>(id);
-			if (provider == null)
-				return NotFound();
-			return _files.FileResult(await _thumbnails.GetImagePath(provider, Images.Logo));
-		}
-
-		[HttpGet("{slug}/logo")]
-		public async Task<IActionResult> GetLogo(string slug)
-		{
-			Provider provider = await _libraryManager.GetOrDefault<Provider>(slug);
-			if (provider == null)
-				return NotFound();
-			return _files.FileResult(await _thumbnails.GetImagePath(provider, Images.Logo));
-		}
+			: base(libraryManager.ProviderRepository, files, thumbnails)
+		{ }
 	}
 }
