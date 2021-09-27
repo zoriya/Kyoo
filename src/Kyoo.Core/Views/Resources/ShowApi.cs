@@ -25,6 +25,7 @@ using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
+using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Core.Models.Options;
@@ -174,7 +175,7 @@ namespace Kyoo.Core.Api
 		}
 
 		/// <summary>
-		/// Get people that made this show
+		/// Get staff
 		/// </summary>
 		/// <remarks>
 		/// List staff members that made this show.
@@ -187,8 +188,8 @@ namespace Kyoo.Core.Api
 		/// <returns>A page of people.</returns>
 		/// <response code="400">The filters or the sort parameters are invalid.</response>
 		/// <response code="404">No show with the given ID or slug could be found.</response>
-		[HttpGet("{identifier:id}/people")]
-		[HttpGet("{identifier:id}/staff", Order = AlternativeRoute)]
+		[HttpGet("{identifier:id}/staff")]
+		[HttpGet("{identifier:id}/people", Order = AlternativeRoute)]
 		[PartialPermission(Kind.Read)]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
@@ -209,10 +210,11 @@ namespace Kyoo.Core.Api
 					id => _libraryManager.GetPeopleFromShow(id, whereQuery, sort, pagination),
 					slug => _libraryManager.GetPeopleFromShow(slug, whereQuery, sort, pagination)
 				);
-
-				if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Show>()) == null)
-					return NotFound();
 				return Page(resources, limit);
+			}
+			catch (ItemNotFoundException)
+			{
+				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{

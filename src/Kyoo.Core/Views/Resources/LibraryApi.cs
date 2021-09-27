@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
+using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
 using Microsoft.AspNetCore.Http;
@@ -188,9 +189,11 @@ namespace Kyoo.Core.Api
 					slug => _libraryManager.GetItemsFromLibrary(slug, whereQuery, sort, pagination)
 				);
 
-				if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Library>()) == null)
-					return NotFound();
 				return Page(resources, limit);
+			}
+			catch (ItemNotFoundException)
+			{
+				return NotFound();
 			}
 			catch (ArgumentException ex)
 			{
