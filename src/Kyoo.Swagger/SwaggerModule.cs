@@ -52,41 +52,61 @@ namespace Kyoo.Swagger
 		public void Configure(IServiceCollection services)
 		{
 			services.AddTransient<IApplicationModelProvider, GenericResponseProvider>();
-			services.AddOpenApiDocument(options =>
+			services.AddOpenApiDocument(document =>
 			{
-				options.Title = "Kyoo API";
+				document.Title = "Kyoo API";
 				// TODO use a real multi-line description in markdown.
-				options.Description = "The Kyoo's public API";
-				options.Version = "1.0.0";
-				options.DocumentName = "v1";
-				options.UseControllerSummaryAsTagDescription = true;
-				options.GenerateExamples = true;
-				options.PostProcess = postProcess =>
+				document.Description = "The Kyoo's public API";
+				document.Version = "1.0.0";
+				document.DocumentName = "v1";
+				document.UseControllerSummaryAsTagDescription = true;
+				document.GenerateExamples = true;
+				document.PostProcess = options =>
 				{
-					postProcess.Info.Contact = new OpenApiContact
+					options.Info.Contact = new OpenApiContact
 					{
 						Name = "Kyoo's github",
 						Url = "https://github.com/AnonymusRaccoon/Kyoo"
 					};
-					postProcess.Info.License = new OpenApiLicense
+					options.Info.License = new OpenApiLicense
 					{
 						Name = "GPL-3.0-or-later",
 						Url = "https://github.com/AnonymusRaccoon/Kyoo/blob/master/LICENSE"
 					};
 				};
-				options.UseApiTags();
-				options.SortApis();
-				options.AddOperationFilter(x =>
+				document.UseApiTags();
+				document.SortApis();
+				document.AddOperationFilter(x =>
 				{
 					if (x is AspNetCoreOperationProcessorContext ctx)
 						return ctx.ApiDescription.ActionDescriptor.AttributeRouteInfo?.Order != AlternativeRoute;
 					return true;
 				});
-				options.SchemaGenerator.Settings.TypeMappers.Add(new PrimitiveTypeMapper(typeof(Identifier), x =>
+				document.SchemaGenerator.Settings.TypeMappers.Add(new PrimitiveTypeMapper(typeof(Identifier), x =>
 				{
 					x.IsNullableRaw = false;
 					x.Type = JsonObjectType.String | JsonObjectType.Integer;
 				}));
+
+				document.AddSecurity("Kyoo", new OpenApiSecurityScheme()
+				{
+					Type = OpenApiSecuritySchemeType.OpenIdConnect,
+					Description = "Kyoo's OpenID Authentication",
+					Flow = OpenApiOAuth2Flow.AccessCode,
+					Flows = new OpenApiOAuthFlows()
+					{
+						Implicit = new OpenApiOAuthFlow()
+						{
+							Scopes = new Dictionary<string, string>
+							{
+								{ "read", "Read access to protected resources" },
+								{ "write", "Write access to protected resources" }
+							},
+							AuthorizationUrl = "https://localhost:44333/core/connect/authorize",
+							TokenUrl = "https://localhost:44333/core/connect/token"
+						},
+					}
+				});
 			});
 		}
 
