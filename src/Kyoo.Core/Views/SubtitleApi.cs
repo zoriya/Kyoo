@@ -22,39 +22,79 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Permissions;
+using Kyoo.Abstractions.Models.Utils;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Core.Api
 {
-	[Route("subtitle")]
+	/// <summary>
+	/// An endpoint to retrieve subtitles for a specific episode.
+	/// </summary>
+	[Route("subtitles")]
+	[Route("subtitle", Order = AlternativeRoute)]
+	[PartialPermission(nameof(SubtitleApi))]
 	[ApiController]
+	[ApiDefinition("Subtitles", Group = WatchGroup)]
 	public class SubtitleApi : ControllerBase
 	{
+		/// <summary>
+		/// The library manager used to modify or retrieve information about the data store.
+		/// </summary>
 		private readonly ILibraryManager _libraryManager;
+
+		/// <summary>
+		/// The file manager used to send subtitles files.
+		/// </summary>
 		private readonly IFileSystem _files;
 
+		/// <summary>
+		/// Create a new <see cref="SubtitleApi"/>.
+		/// </summary>
+		/// <param name="libraryManager">The library manager used to interact with the data store.</param>
+		/// <param name="files">The file manager used to send subtitle files.</param>
 		public SubtitleApi(ILibraryManager libraryManager, IFileSystem files)
 		{
 			_libraryManager = libraryManager;
 			_files = files;
 		}
 
-		[HttpGet("{id:int}")]
-		[Permission(nameof(SubtitleApi), Kind.Read)]
-		public async Task<IActionResult> GetSubtitle(int id)
+		/// <summary>
+		/// Get subtitle
+		/// </summary>
+		/// <remarks>
+		/// Get the subtitle file with the given identifier.
+		/// The extension is optional and can be used to ask Kyoo to convert the subtitle file on the fly.
+		/// </remarks>
+		/// <param name="identifier">
+		/// The ID or slug of the subtitle (the same as the corresponding <see cref="Track"/>).
+		/// </param>
+		/// <param name="extension">An optional extension for the subtitle file.</param>
+		/// <returns>The subtitle file</returns>
+		/// <response code="404">No subtitle exist with the given ID or slug.</response>
+		[HttpGet("{identifier:id}", Order = AlternativeRoute)]
+		[HttpGet("{identifier:id}.{extension}")]
+		[PartialPermission(Kind.Read)]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task<IActionResult> GetSubtitle(Identifier identifier, string extension)
 		{
-			Track subtitle = await _libraryManager.GetOrDefault<Track>(id);
-			return subtitle != null
-				? _files.FileResult(subtitle.Path)
-				: NotFound();
-		}
+			Track subtitle = await identifier.Match(
+				id => _libraryManager.GetOrDefault<Track>(id),
+				slug =>
+				{
+					if (slug.Count(x => x == '.') == 3)
+					{
+						int idx = slug.LastIndexOf('.');
+						extension = slug[(idx + 1)..];
+						slug = slug[..idx];
+					}
+					return _libraryManager.GetOrDefault<Track>(Track.BuildSlug(slug, StreamType.Subtitle));
+				});
 
-		[HttpGet("{id:int}.{extension}")]
-		[Permission(nameof(SubtitleApi), Kind.Read)]
-		public async Task<IActionResult> GetSubtitle(int id, string extension)
-		{
-			Track subtitle = await _libraryManager.GetOrDefault<Track>(id);
 			if (subtitle == null)
 				return NotFound();
 			if (subtitle.Codec == "subrip" && extension == "vtt")
@@ -62,38 +102,37 @@ namespace Kyoo.Core.Api
 			return _files.FileResult(subtitle.Path);
 		}
 
-		[HttpGet("{slug}")]
-		[Permission(nameof(SubtitleApi), Kind.Read)]
-		public async Task<IActionResult> GetSubtitle(string slug)
+		/// <summary>
+		/// An action result that convert a subrip subtitle to vtt.
+		/// </summary>
+		private class ConvertSubripToVtt : IActionResult
 		{
-			string extension = null;
-
-			if (slug.Count(x => x == '.') == 3)
-			{
-				int idx = slug.LastIndexOf('.');
-				extension = slug[(idx + 1)..];
-				slug = slug[..idx];
-			}
-
-			Track subtitle = await _libraryManager.GetOrDefault<Track>(Track.BuildSlug(slug, StreamType.Subtitle));
-			if (subtitle == null)
-				return NotFound();
-			if (subtitle.Codec == "subrip" && extension == "vtt")
-				return new ConvertSubripToVtt(subtitle.Path, _files);
-			return _files.FileResult(subtitle.Path);
-		}
-
-		public class ConvertSubripToVtt : IActionResult
-		{
+			/// <summary>
+			/// The path of the file to convert. It can be any path supported by a <see cref="IFileSystem"/>.
+			/// </summary>
 			private readonly string _path;
+
+			/// <summary>
+			/// The file system used to manipulate the given file.
+			/// </summary>
 			private readonly IFileSystem _files;
 
+			/// <summary>
+			/// Create a new <see cref="ConvertSubripToVtt"/>.
+			/// </summary>
+			/// <param name="subtitlePath">
+			/// The path of the subtitle file. It can be any path supported by the given <paramref name="files"/>.
+			/// </param>
+			/// <param name="files">
+			/// The file system used to interact with the file at the given <paramref name="subtitlePath"/>.
+			/// </param>
 			public ConvertSubripToVtt(string subtitlePath, IFileSystem files)
 			{
 				_path = subtitlePath;
 				_files = files;
 			}
 
+			/// <inheritdoc />
 			public async Task ExecuteResultAsync(ActionContext context)
 			{
 				List<string> lines = new();
@@ -127,7 +166,12 @@ namespace Kyoo.Core.Api
 				await context.HttpContext.Response.Body.FlushAsync();
 			}
 
-			private static IEnumerable<string> _ConvertBlock(IList<string> lines)
+			/// <summary>
+			/// Convert a block from subrip to vtt.
+			/// </summary>
+			/// <param name="lines">All the lines in the block.</param>
+			/// <returns>The given block, converted to vtt.</returns>
+			private static IList<string> _ConvertBlock(IList<string> lines)
 			{
 				if (lines.Count < 3)
 					return lines;
@@ -150,8 +194,7 @@ namespace Kyoo.Core.Api
 				}
 
 				if (lines[2].StartsWith("{\\an"))
-					lines[2] = lines[2].Substring(6);
-
+					lines[2] = lines[2][6..];
 				return lines;
 			}
 		}
