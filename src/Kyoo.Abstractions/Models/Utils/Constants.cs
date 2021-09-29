@@ -46,5 +46,10 @@ namespace Kyoo.Abstractions.Models.Utils
 		/// A group name for <see cref="ApiDefinitionAttribute"/>. It should be used for endpoints useful for playback.
 		/// </summary>
 		public const string WatchGroup = "2:Watch";
+
+		/// <summary>
+		/// A group name for <see cref="ApiDefinitionAttribute"/>. It should be used for endpoints used by admins.
+		/// </summary>
+		public const string AdminGroup = "3:Admin";
 	}
 }
