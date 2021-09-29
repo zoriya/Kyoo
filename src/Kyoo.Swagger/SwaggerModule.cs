@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
@@ -27,6 +28,7 @@ using NJsonSchema;
 using NJsonSchema.Generation.TypeMappers;
 using NSwag;
 using NSwag.Generation.AspNetCore;
+using NSwag.Generation.Processors.Security;
 using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Swagger
@@ -104,9 +106,24 @@ namespace Kyoo.Swagger
 							},
 							AuthorizationUrl = "https://localhost:44333/core/connect/authorize",
 							TokenUrl = "https://localhost:44333/core/connect/token"
-						},
+						}
 					}
 				});
+				document.OperationProcessors.Add(new OperationPermissionProcessor());
+				document.DocumentProcessors.Add(new SecurityDefinitionAppender(Group.Overall.ToString(), new OpenApiSecurityScheme
+				{
+					Type = OpenApiSecuritySchemeType.ApiKey,
+					Name = "Authorization",
+					In = OpenApiSecurityApiKeyLocation.Header,
+					Description = "Type into the textbox: Bearer {your JWT token}. You can get a JWT token from /Authorization/Authenticate."
+				}));
+				document.DocumentProcessors.Add(new SecurityDefinitionAppender(Group.Admin.ToString(), new OpenApiSecurityScheme
+				{
+					Type = OpenApiSecuritySchemeType.ApiKey,
+					Name = "Authorization",
+					In = OpenApiSecurityApiKeyLocation.Header,
+					Description = "Type into the textbox: Bearer {your JWT token}. You can get a JWT token from /Authorization/Authenticate."
+				}));
 			});
 		}
 
