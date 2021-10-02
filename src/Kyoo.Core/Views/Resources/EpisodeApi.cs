@@ -38,7 +38,7 @@ namespace Kyoo.Core.Api
 	[Route("api/episode", Order = AlternativeRoute)]
 	[ApiController]
 	[ResourceView]
-	[PartialPermission(nameof(EpisodeApi))]
+	[PartialPermission(nameof(Episode))]
 	[ApiDefinition("Episodes", Group = ResourcesGroup)]
 	public class EpisodeApi : CrudThumbsApi<Episode>
 	{

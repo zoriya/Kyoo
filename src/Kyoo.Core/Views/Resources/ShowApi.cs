@@ -44,7 +44,7 @@ namespace Kyoo.Core.Api
 	[Route("api/movie", Order = AlternativeRoute)]
 	[Route("api/movies", Order = AlternativeRoute)]
 	[ApiController]
-	[PartialPermission(nameof(ShowApi))]
+	[PartialPermission(nameof(Show))]
 	[ApiDefinition("Shows", Group = ResourcesGroup)]
 	public class ShowApi : CrudThumbsApi<Show>
 	{

@@ -37,7 +37,7 @@ namespace Kyoo.Core.Api
 	[Route("api/studios")]
 	[Route("api/studio", Order = AlternativeRoute)]
 	[ApiController]
-	[PartialPermission(nameof(ShowApi))]
+	[PartialPermission(nameof(Show))]
 	[ApiDefinition("Studios", Group = MetadataGroup)]
 	public class StudioApi : CrudApi<Studio>
 	{

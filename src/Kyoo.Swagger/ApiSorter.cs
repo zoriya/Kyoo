@@ -18,6 +18,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Kyoo.Swagger.Models;
 using NSwag;
 using NSwag.Generation.AspNetCore;
 
@@ -49,13 +50,16 @@ namespace Kyoo.Swagger
 			{
 				if (!postProcess.ExtensionData.TryGetValue("x-tagGroups", out object list))
 					return;
-				List<dynamic> tagGroups = (List<dynamic>)list;
+				List<TagGroups> tagGroups = (List<TagGroups>)list;
 				postProcess.ExtensionData["x-tagGroups"] = tagGroups
-					.OrderBy(x => x.name)
-					.Select(x => new
+					.OrderBy(x => x.Name)
+					.Select(x =>
 					{
-						name = x.name.Substring(x.name.IndexOf(':') + 1),
-						x.tags
+						x.Name = x.Name[(x.Name.IndexOf(':') + 1)..];
+						x.Tags = x.Tags
+							.OrderBy(y => y)
+							.ToList();
+						return x;
 					})
 					.ToList();
 			};

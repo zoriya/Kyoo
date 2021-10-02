@@ -54,14 +54,9 @@ namespace Kyoo.Abstractions.Models.Permissions
 		/// If you don't put exactly two of those attributes, the permission attribute will be ill-formed and will
 		/// lead to unspecified behaviors.
 		/// </remarks>
-		/// <param name="type">
-		/// The type of the action
-		/// (if the type ends with api, it will be removed. This allow you to use nameof(YourApi)).
-		/// </param>
+		/// <param name="type">The type of the action</param>
 		public PartialPermissionAttribute(string type)
 		{
-			if (type.EndsWith("API", StringComparison.OrdinalIgnoreCase))
-				type = type[..^3];
 			Type = type.ToLower();
 		}
 

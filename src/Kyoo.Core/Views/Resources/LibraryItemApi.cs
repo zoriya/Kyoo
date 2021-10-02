@@ -38,6 +38,7 @@ namespace Kyoo.Core.Api
 	[Route("api/item", Order = AlternativeRoute)]
 	[ApiController]
 	[ResourceView]
+	[PartialPermission(nameof(LibraryItem))]
 	[ApiDefinition("Items", Group = ResourcesGroup)]
 	public class LibraryItemApi : BaseApi
 	{
@@ -74,7 +75,7 @@ namespace Kyoo.Core.Api
 		/// <response code="400">The filters or the sort parameters are invalid.</response>
 		/// <response code="404">No library with the given ID or slug could be found.</response>
 		[HttpGet]
-		[Permission(nameof(LibraryItemApi), Kind.Read)]
+		[PartialPermission(Kind.Read)]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]

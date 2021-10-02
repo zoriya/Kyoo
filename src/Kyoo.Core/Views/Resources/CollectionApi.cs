@@ -37,7 +37,7 @@ namespace Kyoo.Core.Api
 	[Route("api/collections")]
 	[Route("api/collection", Order = AlternativeRoute)]
 	[ApiController]
-	[PartialPermission(nameof(CollectionApi))]
+	[PartialPermission(nameof(Collection))]
 	[ApiDefinition("Collections", Group = ResourcesGroup)]
 	public class CollectionApi : CrudThumbsApi<Collection>
 	{

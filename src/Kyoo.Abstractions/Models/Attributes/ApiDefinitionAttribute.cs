@@ -23,8 +23,10 @@ namespace Kyoo.Abstractions.Models.Attributes
 {
 	/// <summary>
 	/// An attribute to specify on apis to specify it's documentation's name and category.
+	/// If this is applied on a method, the specified method will be exploded from the controller's page and be
+	/// included on the specified tag page.
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Class)]
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method)]
 	public class ApiDefinitionAttribute : Attribute
 	{
 		/// <summary>

@@ -34,7 +34,7 @@ namespace Kyoo.Core.Api
 	[Route("api/provider", Order = AlternativeRoute)]
 	[ApiController]
 	[ResourceView]
-	[PartialPermission(nameof(ProviderApi))]
+	[PartialPermission(nameof(Provider))]
 	[ApiDefinition("Providers", Group = MetadataGroup)]
 	public class ProviderApi : CrudThumbsApi<Provider>
 	{

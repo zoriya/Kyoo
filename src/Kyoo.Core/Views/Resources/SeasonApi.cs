@@ -37,7 +37,7 @@ namespace Kyoo.Core.Api
 	[Route("api/seasons")]
 	[Route("api/season", Order = AlternativeRoute)]
 	[ApiController]
-	[PartialPermission(nameof(SeasonApi))]
+	[PartialPermission(nameof(Season))]
 	[ApiDefinition("Seasons", Group = ResourcesGroup)]
 	public class SeasonApi : CrudThumbsApi<Season>
 	{

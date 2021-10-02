@@ -39,7 +39,7 @@ namespace Kyoo.Core.Api
 	[Route("api/people", Order = AlternativeRoute)]
 	[ApiController]
 	[ResourceView]
-	[PartialPermission(nameof(StaffApi))]
+	[PartialPermission(nameof(People))]
 	[ApiDefinition("Staff", Group = MetadataGroup)]
 	public class StaffApi : CrudThumbsApi<People>
 	{

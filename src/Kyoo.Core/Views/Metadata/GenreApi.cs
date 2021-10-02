@@ -37,7 +37,7 @@ namespace Kyoo.Core.Api
 	[Route("api/genres")]
 	[Route("api/genre", Order = AlternativeRoute)]
 	[ApiController]
-	[PartialPermission(nameof(GenreApi))]
+	[PartialPermission(nameof(Genre))]
 	[ApiDefinition("Genres", Group = MetadataGroup)]
 	public class GenreApi : CrudApi<Genre>
 	{

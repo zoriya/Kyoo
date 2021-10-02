@@ -36,7 +36,7 @@ namespace Kyoo.Core.Api
 	[Route("api/task", Order = AlternativeRoute)]
 	[ApiController]
 	[ResourceView]
-	[PartialPermission(nameof(TaskApi), Group = Group.Admin)]
+	[PartialPermission("Task", Group = Group.Admin)]
 	[ApiDefinition("Tasks", Group = AdminGroup)]
 	public class TaskApi : ControllerBase
 	{

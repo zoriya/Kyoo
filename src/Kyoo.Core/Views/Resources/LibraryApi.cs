@@ -40,7 +40,7 @@ namespace Kyoo.Core.Api
 	[Route("api/library", Order = AlternativeRoute)]
 	[ApiController]
 	[ResourceView]
-	[PartialPermission(nameof(LibraryApi), Group = Group.Admin)]
+	[PartialPermission(nameof(Library), Group = Group.Admin)]
 	[ApiDefinition("Library", Group = ResourcesGroup)]
 	public class LibraryApi : CrudApi<Library>
 	{
