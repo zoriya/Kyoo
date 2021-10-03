@@ -19,18 +19,23 @@
 using System;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Permissions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Core.Api
 {
 	/// <summary>
 	/// An API to retrieve or edit configuration settings
 	/// </summary>
-	[Route("api/config")]
 	[Route("api/configuration")]
+	[Route("api/config", Order = AlternativeRoute)]
 	[ApiController]
+	[PartialPermission("Configuration", Group = Group.Admin)]
+	[ApiDefinition("Configuration", Group = AdminGroup)]
 	public class ConfigurationApi : Controller
 	{
 		/// <summary>
@@ -48,14 +53,19 @@ namespace Kyoo.Core.Api
 		}
 
 		/// <summary>
-		/// Get a permission from it's slug.
+		/// Get config value
 		/// </summary>
+		/// <remarks>
+		/// Retrieve a configuration's value from it's slug.
+		/// </remarks>
 		/// <param name="slug">The permission to retrieve. You can use ':' or "__" to get a child value.</param>
 		/// <returns>The associate value or list of values.</returns>
 		/// <response code="200">Return the configuration value or the list of configurations</response>
 		/// <response code="404">No configuration exists for the given slug</response>
 		[HttpGet("{slug}")]
-		[Permission(nameof(ConfigurationApi), Kind.Read, Group.Admin)]
+		[PartialPermission(Kind.Read)]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public ActionResult<object> GetConfiguration(string slug)
 		{
 			try
@@ -69,15 +79,20 @@ namespace Kyoo.Core.Api
 		}
 
 		/// <summary>
-		/// Edit a permission from it's slug.
+		/// Edit config
 		/// </summary>
+		/// <remarks>
+		/// Edit a configuration's value from it's slug.
+		/// </remarks>
 		/// <param name="slug">The permission to edit. You can use ':' or "__" to get a child value.</param>
 		/// <param name="newValue">The new value of the configuration</param>
 		/// <returns>The edited value.</returns>
 		/// <response code="200">Return the edited value</response>
 		/// <response code="404">No configuration exists for the given slug</response>
 		[HttpPut("{slug}")]
-		[Permission(nameof(ConfigurationApi), Kind.Write, Group.Admin)]
+		[PartialPermission(Kind.Write)]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<object>> EditConfiguration(string slug, [FromBody] object newValue)
 		{
 			try
