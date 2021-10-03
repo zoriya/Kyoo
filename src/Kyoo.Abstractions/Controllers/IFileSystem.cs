@@ -31,8 +31,6 @@ namespace Kyoo.Abstractions.Controllers
 	/// </summary>
 	public interface IFileSystem
 	{
-		// TODO find a way to handle Transmux/Transcode with this system.
-
 		/// <summary>
 		/// Used for http queries returning a file. This should be used to return local files
 		/// or proxy them from a distant server.
@@ -51,7 +49,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// If the type is not specified, it will be deduced automatically (from the extension or by sniffing the file).
 		/// </param>
 		/// <returns>An <see cref="IActionResult"/> representing the file returned.</returns>
-		public IActionResult FileResult([CanBeNull] string path, bool rangeSupport = false, string type = null);
+		IActionResult FileResult([CanBeNull] string path, bool rangeSupport = false, string type = null);
 
 		/// <summary>
 		/// Read a file present at <paramref name="path"/>. The reader can be used in an arbitrary context.
@@ -60,7 +58,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="path">The path of the file</param>
 		/// <exception cref="FileNotFoundException">If the file could not be found.</exception>
 		/// <returns>A reader to read the file.</returns>
-		public Task<Stream> GetReader([NotNull] string path);
+		Task<Stream> GetReader([NotNull] string path);
 
 		/// <summary>
 		/// Read a file present at <paramref name="path"/>. The reader can be used in an arbitrary context.
@@ -70,28 +68,28 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="mime">The mime type of the opened file.</param>
 		/// <exception cref="FileNotFoundException">If the file could not be found.</exception>
 		/// <returns>A reader to read the file.</returns>
-		public Task<Stream> GetReader([NotNull] string path, AsyncRef<string> mime);
+		Task<Stream> GetReader([NotNull] string path, AsyncRef<string> mime);
 
 		/// <summary>
 		/// Create a new file at <paramref name="path"></paramref>.
 		/// </summary>
 		/// <param name="path">The path of the new file.</param>
 		/// <returns>A writer to write to the new file.</returns>
-		public Task<Stream> NewFile([NotNull] string path);
+		Task<Stream> NewFile([NotNull] string path);
 
 		/// <summary>
 		/// Create a new directory at the given path
 		/// </summary>
 		/// <param name="path">The path of the directory</param>
 		/// <returns>The path of the newly created directory is returned.</returns>
-		public Task<string> CreateDirectory([NotNull] string path);
+		Task<string> CreateDirectory([NotNull] string path);
 
 		/// <summary>
 		/// Combine multiple paths.
 		/// </summary>
 		/// <param name="paths">The paths to combine</param>
 		/// <returns>The combined path.</returns>
-		public string Combine(params string[] paths);
+		string Combine(params string[] paths);
 
 		/// <summary>
 		/// List files in a directory.
@@ -99,7 +97,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="path">The path of the directory</param>
 		/// <param name="options">Should the search be recursive or not.</param>
 		/// <returns>A list of files's path.</returns>
-		public Task<ICollection<string>> ListFiles([NotNull] string path,
+		Task<ICollection<string>> ListFiles([NotNull] string path,
 			SearchOption options = SearchOption.TopDirectoryOnly);
 
 		/// <summary>
@@ -107,7 +105,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		/// <param name="path">The path to check</param>
 		/// <returns>True if the path exists, false otherwise</returns>
-		public Task<bool> Exists([NotNull] string path);
+		Task<bool> Exists([NotNull] string path);
 
 		/// <summary>
 		/// Get the extra directory of a resource <typeparamref name="T"/>.
@@ -117,6 +115,25 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="resource">The resource to proceed</param>
 		/// <typeparam name="T">The type of the resource.</typeparam>
 		/// <returns>The extra directory of the resource.</returns>
-		public Task<string> GetExtraDirectory<T>([NotNull] T resource);
+		Task<string> GetExtraDirectory<T>([NotNull] T resource);
+
+		/// <summary>
+		/// Retrieve tracks for a specific episode.
+		/// Subtitles, chapters and fonts should also be extracted and cached when calling this method.
+		/// </summary>
+		/// <param name="episode">The episode to retrieve tracks for.</param>
+		/// <param name="reExtract">Should the cache be invalidated and subtitles and others be re-extracted?</param>
+		/// <returns>The list of tracks available for this episode.</returns>
+		Task<ICollection<Track>> ExtractInfos([NotNull] Episode episode, bool reExtract);
+
+		/// <summary>
+		/// Transmux the selected episode to hls.
+		/// </summary>
+		/// <param name="episode">The episode to transmux.</param>
+		/// <returns>The master file (m3u8) of the transmuxed hls file.</returns>
+		IActionResult Transmux([NotNull] Episode episode);
+
+		// Maybe add options for to select the codec.
+		// IActionResult Transcode(Episode episode);
 	}
 }

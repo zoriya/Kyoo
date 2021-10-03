@@ -28,7 +28,6 @@ using NJsonSchema;
 using NJsonSchema.Generation.TypeMappers;
 using NSwag;
 using NSwag.Generation.AspNetCore;
-using NSwag.Generation.Processors.Security;
 using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Swagger
@@ -90,40 +89,35 @@ namespace Kyoo.Swagger
 					x.Type = JsonObjectType.String | JsonObjectType.Integer;
 				}));
 
-				document.AddSecurity("Kyoo", new OpenApiSecurityScheme()
+				document.AddSecurity("Kyoo", new OpenApiSecurityScheme
 				{
 					Type = OpenApiSecuritySchemeType.OpenIdConnect,
-					Description = "Kyoo's OpenID Authentication",
-					Flow = OpenApiOAuth2Flow.AccessCode,
-					Flows = new OpenApiOAuthFlows()
-					{
-						Implicit = new OpenApiOAuthFlow()
-						{
-							Scopes = new Dictionary<string, string>
-							{
-								{ "read", "Read access to protected resources" },
-								{ "write", "Write access to protected resources" }
-							},
-							AuthorizationUrl = "https://localhost:44333/core/connect/authorize",
-							TokenUrl = "https://localhost:44333/core/connect/token"
-						}
-					}
+					OpenIdConnectUrl = "/.well-known/openid-configuration",
+					Description = "You can login via an OIDC client, clients must be first registered in kyoo. " +
+						"Documentation coming soon."
 				});
 				document.OperationProcessors.Add(new OperationPermissionProcessor());
-				document.DocumentProcessors.Add(new SecurityDefinitionAppender(Group.Overall.ToString(), new OpenApiSecurityScheme
+				// This does not respect the swagger's specification but it works for swaggerUi and ReDoc so honestly this will do.
+				document.AddSecurity(Group.Overall.ToString(), new OpenApiSecurityScheme
 				{
-					Type = OpenApiSecuritySchemeType.ApiKey,
-					Name = "Authorization",
-					In = OpenApiSecurityApiKeyLocation.Header,
-					Description = "Type into the textbox: Bearer {your JWT token}. You can get a JWT token from /Authorization/Authenticate."
-				}));
-				document.DocumentProcessors.Add(new SecurityDefinitionAppender(Group.Admin.ToString(), new OpenApiSecurityScheme
+					ExtensionData = new Dictionary<string, object>
+					{
+						["type"] = "OpenID Connect or Api Key"
+					},
+					Description = "Kyoo's permissions work by groups. Permissions are attributed to " +
+						"a specific group and if a user has a group permission, it will be the same as having every " +
+						"permission in the group. For example, having overall.read gives you collections.read, " +
+						"shows.read and so on."
+				});
+				document.AddSecurity(Group.Admin.ToString(), new OpenApiSecurityScheme
 				{
-					Type = OpenApiSecuritySchemeType.ApiKey,
-					Name = "Authorization",
-					In = OpenApiSecurityApiKeyLocation.Header,
-					Description = "Type into the textbox: Bearer {your JWT token}. You can get a JWT token from /Authorization/Authenticate."
-				}));
+					ExtensionData = new Dictionary<string, object>
+					{
+						["type"] = "OpenID Connect or Api Key"
+					},
+					Description = "The permission group used for administrative items like tasks, account management " +
+						"and library creation."
+				});
 			});
 		}
 

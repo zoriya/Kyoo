@@ -107,7 +107,8 @@ namespace Kyoo.Abstractions.Models.Utils
 		{
 			ConstantExpression self = Expression.Constant(_id.HasValue ? _id.Value : _slug);
 			BinaryExpression equal = Expression.Equal(_id.HasValue ? idGetter.Body : slugGetter.Body, self);
-			return Expression.Lambda<Func<T, bool>>(equal);
+			ICollection<ParameterExpression> parameters = _id.HasValue ? idGetter.Parameters : slugGetter.Parameters;
+			return Expression.Lambda<Func<T, bool>>(equal, parameters);
 		}
 
 		/// <summary>
@@ -124,7 +125,8 @@ namespace Kyoo.Abstractions.Models.Utils
 		{
 			ConstantExpression self = Expression.Constant(_id.HasValue ? _id.Value : _slug);
 			BinaryExpression equal = Expression.Equal(_id.HasValue ? idGetter.Body : slugGetter.Body, self);
-			return Expression.Lambda<Func<T, bool>>(equal);
+			ICollection<ParameterExpression> parameters = _id.HasValue ? idGetter.Parameters : slugGetter.Parameters;
+			return Expression.Lambda<Func<T, bool>>(equal, parameters);
 		}
 
 		/// <summary>

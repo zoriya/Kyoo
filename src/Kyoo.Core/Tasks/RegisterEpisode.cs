@@ -56,7 +56,7 @@ namespace Kyoo.Core.Tasks
 		/// <summary>
 		/// The transcoder used to extract subtitles and metadata.
 		/// </summary>
-		private readonly ITranscoder _transcoder;
+		private readonly IFileSystem _transcoder;
 
 		/// <summary>
 		/// Create a new <see cref="RegisterEpisode"/> task.
@@ -74,13 +74,13 @@ namespace Kyoo.Core.Tasks
 		/// The thumbnail manager used to download images.
 		/// </param>
 		/// <param name="transcoder">
-		/// The transcoder used to extract subtitles and metadata.
+		/// The file manager used to retrieve episodes metadata.
 		/// </param>
 		public RegisterEpisode(IIdentifier identifier,
 			ILibraryManager libraryManager,
 			AProviderComposite metadataProvider,
 			IThumbnailsManager thumbnailsManager,
-			ITranscoder transcoder)
+			IFileSystem transcoder)
 		{
 			_identifier = identifier;
 			_libraryManager = libraryManager;

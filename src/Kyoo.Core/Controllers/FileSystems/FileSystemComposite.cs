@@ -214,5 +214,19 @@ namespace Kyoo.Core.Controllers
 				};
 			return await CreateDirectory(path);
 		}
+
+		/// <inheritdoc />
+		public Task<ICollection<Track>> ExtractInfos(Episode episode, bool reExtract)
+		{
+			IFileSystem fs = _GetFileSystemForPath(episode.Path, out string _);
+			return fs.ExtractInfos(episode, reExtract);
+		}
+
+		/// <inheritdoc />
+		public IActionResult Transmux(Episode episode)
+		{
+			IFileSystem fs = _GetFileSystemForPath(episode.Path, out string _);
+			return fs.Transmux(episode);
+		}
 	}
 }
