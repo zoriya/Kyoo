@@ -28,6 +28,7 @@ using IdentityServer4.Models;
 using IdentityServer4.Services;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Authentication.Models;
@@ -43,10 +44,13 @@ namespace Kyoo.Authentication.Views
 {
 	/// <summary>
 	/// The endpoint responsible for login, logout, permissions and claims of a user.
+	/// Documentation of this endpoint is a work in progress.
 	/// </summary>
+	/// TODO document this well.
 	[Route("api/accounts")]
 	[Route("api/account", Order = AlternativeRoute)]
 	[ApiController]
+	[ApiDefinition("Account")]
 	public class AccountApi : Controller, IProfileService
 	{
 		/// <summary>
@@ -90,7 +94,7 @@ namespace Kyoo.Authentication.Views
 		[HttpPost("register")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(RequestError))]
-		public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+		public async Task<ActionResult<OtacResponse>> Register([FromBody] RegisterRequest request)
 		{
 			User user = request.ToUser();
 			user.Permissions = _options.Value.Permissions.NewUser;
@@ -106,7 +110,7 @@ namespace Kyoo.Authentication.Views
 				return Conflict(new RequestError("A user with this name already exists"));
 			}
 
-			return Ok(new { Otac = user.ExtraData["otac"] });
+			return Ok(new OtacResponse(user.ExtraData["otac"]));
 		}
 
 		/// <summary>
@@ -126,8 +130,11 @@ namespace Kyoo.Authentication.Views
 		}
 
 		/// <summary>
-		/// Login the user.
+		/// Login
 		/// </summary>
+		/// <remarks>
+		/// Login the current session.
+		/// </remarks>
 		/// <param name="login">The DTO login request</param>
 		/// <returns>TODO</returns>
 		[HttpPost("login")]

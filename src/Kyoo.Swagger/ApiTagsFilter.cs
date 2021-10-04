@@ -59,7 +59,7 @@ namespace Kyoo.Swagger
 				});
 			}
 
-			if (def == null)
+			if (def?.Group == null)
 				return true;
 
 			context.Document.ExtensionData ??= new Dictionary<string, object>();

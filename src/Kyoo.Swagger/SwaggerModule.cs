@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
@@ -58,7 +59,7 @@ namespace Kyoo.Swagger
 				document.Title = "Kyoo API";
 				// TODO use a real multi-line description in markdown.
 				document.Description = "The Kyoo's public API";
-				document.Version = "1.0.0";
+				document.Version = Assembly.GetExecutingAssembly().GetName().Version!.ToString(3);
 				document.DocumentName = "v1";
 				document.UseControllerSummaryAsTagDescription = true;
 				document.GenerateExamples = true;
@@ -73,6 +74,14 @@ namespace Kyoo.Swagger
 					{
 						Name = "GPL-3.0-or-later",
 						Url = "https://github.com/AnonymusRaccoon/Kyoo/blob/master/LICENSE"
+					};
+
+					options.Info.ExtensionData ??= new Dictionary<string, object>();
+					options.Info.ExtensionData["x-logo"] = new
+					{
+						url = "/banner.png",
+						backgroundColor = "#FFFFFF",
+						altText = "Kyoo's logo"
 					};
 				};
 				document.UseApiTags();
@@ -129,6 +138,10 @@ namespace Kyoo.Swagger
 			SA.New<IApplicationBuilder>(app => app.UseReDoc(x =>
 			{
 				x.Path = "/redoc";
+				x.AdditionalSettings["theme"] = new
+				{
+					colors = new { primary = new { main = "#e13e13" } }
+				};
 			}), SA.Before)
 		};
 	}

@@ -12,6 +12,7 @@
 		<IsPackable>false</IsPackable>
 		<DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules/**</DefaultItemExcludes>
 		<SpaRoot>Front/</SpaRoot>
+		<Icons>../../icons/</Icons>
 		<NpmStamp>$(SpaRoot)node_modules/.install-stamp</NpmStamp>
 
 		<!-- Set this to true if you enable server-side prerendering -->
@@ -28,6 +29,11 @@
 		<Content Remove="$(SpaRoot)**" />
 		<Compile Remove="$(SpaRoot)**" />
 		<None Remove="$(SpaRoot)dist/**; $(SpaRoot)dist-server/**" />
+
+		<Content Include="$(Icons)**" Visible="false">
+			<Link>wwwroot/%(RecursiveDir)%(Filename)%(Extension)</Link>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
 
 		<Content Include="$(SpaRoot)static/**" Visible="false">
 			<Link>wwwroot/%(RecursiveDir)%(Filename)%(Extension)</Link>
