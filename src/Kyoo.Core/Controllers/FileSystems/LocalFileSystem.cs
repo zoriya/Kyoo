@@ -165,11 +165,13 @@ namespace Kyoo.Core.Controllers
 			});
 		}
 
+		/// <inheritdoc />
 		public Task<ICollection<Track>> ExtractInfos(Episode episode, bool reExtract)
 		{
 			return _transcoder.ExtractInfos(episode, reExtract);
 		}
 
+		/// <inheritdoc />
 		public IActionResult Transmux(Episode episode)
 		{
 			return _transcoder.Transmux(episode);

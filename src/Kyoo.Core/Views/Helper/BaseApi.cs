@@ -27,7 +27,10 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Core.Api
 {
-	public class BaseApi : ControllerBase
+	/// <summary>
+	/// A common API containing custom methods to help inheritors.
+	/// </summary>
+	public abstract class BaseApi : ControllerBase
 	{
 		/// <summary>
 		/// Construct and return a page from an api.

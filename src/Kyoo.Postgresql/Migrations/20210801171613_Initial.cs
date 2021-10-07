@@ -24,8 +24,12 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace Kyoo.Postgresql.Migrations
 {
+	/// <summary>
+	/// The initial migration that build most of the database.
+	/// </summary>
 	public partial class Initial : Migration
 	{
+		/// <inheritdoc/>
 		protected override void Up(MigrationBuilder migrationBuilder)
 		{
 			migrationBuilder.AlterDatabase()
@@ -783,6 +787,7 @@ namespace Kyoo.Postgresql.Migrations
 				column: "episode_id");
 		}
 
+		/// <inheritdoc/>
 		protected override void Down(MigrationBuilder migrationBuilder)
 		{
 			migrationBuilder.DropTable(

@@ -45,7 +45,6 @@
 
 	<PropertyGroup Condition="$(CheckCodingStyle) == true">
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<NoWarn>CS1591;SA1600;SA1601</NoWarn>
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)../Kyoo.ruleset</CodeAnalysisRuleSet>
 <!--		<AnalysisMode>AllEnabledByDefault</AnalysisMode>-->

@@ -23,6 +23,9 @@ using IdentityModel;
 
 namespace Kyoo.Authentication
 {
+	/// <summary>
+	/// Some functions to handle password management.
+	/// </summary>
 	public static class PasswordUtils
 	{
 		/// <summary>

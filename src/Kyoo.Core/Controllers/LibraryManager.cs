@@ -29,6 +29,9 @@ using Kyoo.Utils;
 
 namespace Kyoo.Core.Controllers
 {
+	/// <summary>
+	/// An class to interact with the database. Every repository is mapped through here.
+	/// </summary>
 	public class LibraryManager : ILibraryManager
 	{
 		/// <summary>

@@ -20,8 +20,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Kyoo.Postgresql.Migrations
 {
+	/// <summary>
+	/// A migration that adds postgres triggers to update slugs.
+	/// </summary>
 	public partial class Triggers : Migration
 	{
+		/// <inheritdoc/>
 		protected override void Up(MigrationBuilder migrationBuilder)
 		{
 			// language=PostgreSQL
@@ -42,7 +46,7 @@ namespace Kyoo.Postgresql.Migrations
 
 			// language=PostgreSQL
 			migrationBuilder.Sql(@"
-			CREATE TRIGGER season_slug_trigger BEFORE INSERT OR UPDATE OF season_number, show_id ON seasons 
+			CREATE TRIGGER season_slug_trigger BEFORE INSERT OR UPDATE OF season_number, show_id ON seasons
 			FOR EACH ROW EXECUTE PROCEDURE season_slug_update();");
 
 			// language=PostgreSQL
@@ -66,7 +70,7 @@ namespace Kyoo.Postgresql.Migrations
 
 			// language=PostgreSQL
 			migrationBuilder.Sql(@"
-			CREATE TRIGGER episode_slug_trigger 
+			CREATE TRIGGER episode_slug_trigger
 			BEFORE INSERT OR UPDATE OF absolute_number, episode_number, season_number, show_id ON episodes
 			FOR EACH ROW EXECUTE PROCEDURE episode_slug_update();");
 
@@ -80,7 +84,7 @@ namespace Kyoo.Postgresql.Migrations
 				UPDATE seasons SET slug = CONCAT(NEW.slug, '-s', season_number) WHERE show_id = NEW.id;
 				UPDATE episodes SET slug = CASE
 					WHEN season_number IS NULL AND episode_number IS NULL THEN NEW.slug
-					WHEN season_number IS NULL THEN CONCAT(NEW.slug, '-', absolute_number) 
+					WHEN season_number IS NULL THEN CONCAT(NEW.slug, '-', absolute_number)
 					ELSE CONCAT(NEW.slug, '-s', season_number, 'e', episode_number)
 				END WHERE show_id = NEW.id;
 				RETURN NEW;
@@ -128,7 +132,7 @@ namespace Kyoo.Postgresql.Migrations
 			BEGIN
 				IF NEW.track_index = 0 THEN
 					NEW.track_index := (SELECT COUNT(*) FROM tracks
-						WHERE episode_id = NEW.episode_id AND type = NEW.type 
+						WHERE episode_id = NEW.episode_id AND type = NEW.type
 						  AND language = NEW.language AND is_forced = NEW.is_forced);
 				END IF;
 				NEW.slug := CONCAT(
@@ -149,7 +153,7 @@ namespace Kyoo.Postgresql.Migrations
 			$$;");
 			// language=PostgreSQL
 			migrationBuilder.Sql(@"
-			CREATE TRIGGER track_slug_trigger 
+			CREATE TRIGGER track_slug_trigger
 			BEFORE INSERT OR UPDATE OF episode_id, is_forced, language, track_index, type ON tracks
 			FOR EACH ROW EXECUTE PROCEDURE track_slug_update();");
 
@@ -167,11 +171,12 @@ namespace Kyoo.Postgresql.Migrations
 					INNER JOIN collections AS c ON l.collection_id = c.id
 					WHERE s.id = l.show_id))
 				UNION ALL
-				SELECT -c0.id, c0.slug, c0.name AS title, c0.overview, 'unknown'::status AS status, 
+				SELECT -c0.id, c0.slug, c0.name AS title, c0.overview, 'unknown'::status AS status,
 				       NULL AS start_air, NULL AS end_air, c0.images, 'collection'::item_type AS type
 				FROM collections AS c0");
 		}
 
+		/// <inheritdoc/>
 		protected override void Down(MigrationBuilder migrationBuilder)
 		{
 			// language=PostgreSQL

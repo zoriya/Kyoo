@@ -20,31 +20,35 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Kyoo.SqLite.Migrations
 {
+	/// <summary>
+	/// A migration that adds sqlite triggers to update slugs.
+	/// </summary>
 	public partial class Triggers : Migration
 	{
+		/// <inheritdoc/>
 		protected override void Up(MigrationBuilder migrationBuilder)
 		{
 			// language=SQLite
 			migrationBuilder.Sql(@"
-			CREATE TRIGGER SeasonSlugInsert AFTER INSERT ON Seasons FOR EACH ROW 
-			BEGIN 
+			CREATE TRIGGER SeasonSlugInsert AFTER INSERT ON Seasons FOR EACH ROW
+			BEGIN
 			    UPDATE Seasons SET Slug = (SELECT Slug from Shows WHERE ID = ShowID) || '-s' || SeasonNumber
 				WHERE ID == new.ID;
 			END");
 			// language=SQLite
 			migrationBuilder.Sql(@"
-			CREATE TRIGGER SeasonSlugUpdate AFTER UPDATE OF SeasonNumber, ShowID ON Seasons FOR EACH ROW 
-			BEGIN 
+			CREATE TRIGGER SeasonSlugUpdate AFTER UPDATE OF SeasonNumber, ShowID ON Seasons FOR EACH ROW
+			BEGIN
 			    UPDATE Seasons SET Slug = (SELECT Slug from Shows WHERE ID = ShowID) || '-s' || SeasonNumber
 				WHERE ID == new.ID;
 			END");
 
 			// language=SQLite
 			migrationBuilder.Sql(@"
-			CREATE TRIGGER EpisodeSlugInsert AFTER INSERT ON Episodes FOR EACH ROW 
-			BEGIN 
-				UPDATE Episodes 
-					SET Slug = (SELECT Slug from Shows WHERE ID = ShowID) || 
+			CREATE TRIGGER EpisodeSlugInsert AFTER INSERT ON Episodes FOR EACH ROW
+			BEGIN
+				UPDATE Episodes
+					SET Slug = (SELECT Slug from Shows WHERE ID = ShowID) ||
 					           CASE
 						           WHEN SeasonNumber IS NULL AND AbsoluteNumber IS NULL THEN ''
 						           WHEN SeasonNumber IS NULL THEN '-' || AbsoluteNumber
@@ -54,11 +58,11 @@ namespace Kyoo.SqLite.Migrations
 			END");
 			// language=SQLite
 			migrationBuilder.Sql(@"
-			CREATE TRIGGER EpisodeSlugUpdate AFTER UPDATE OF AbsoluteNumber, EpisodeNumber, SeasonNumber, ShowID 
-			    ON Episodes FOR EACH ROW 
-			BEGIN 
-				UPDATE Episodes 
-					SET Slug = (SELECT Slug from Shows WHERE ID = ShowID) || 
+			CREATE TRIGGER EpisodeSlugUpdate AFTER UPDATE OF AbsoluteNumber, EpisodeNumber, SeasonNumber, ShowID
+			    ON Episodes FOR EACH ROW
+			BEGIN
+				UPDATE Episodes
+					SET Slug = (SELECT Slug from Shows WHERE ID = ShowID) ||
 					           CASE
 						           WHEN SeasonNumber IS NULL AND AbsoluteNumber IS NULL THEN ''
 						           WHEN SeasonNumber IS NULL THEN '-' || AbsoluteNumber
@@ -69,7 +73,7 @@ namespace Kyoo.SqLite.Migrations
 
 			// language=SQLite
 			migrationBuilder.Sql(@"
-			CREATE TRIGGER TrackSlugInsert 
+			CREATE TRIGGER TrackSlugInsert
 			AFTER INSERT ON Tracks
 			FOR EACH ROW
 			BEGIN
@@ -98,7 +102,7 @@ namespace Kyoo.SqLite.Migrations
 			END;");
 			// language=SQLite
 			migrationBuilder.Sql(@"
-			CREATE TRIGGER TrackSlugUpdate 
+			CREATE TRIGGER TrackSlugUpdate
 			AFTER UPDATE OF EpisodeID, IsForced, Language, TrackIndex, Type ON Tracks
 			FOR EACH ROW
 			BEGIN
@@ -107,7 +111,7 @@ namespace Kyoo.SqLite.Migrations
 						WHERE EpisodeID = new.EpisodeID AND Type = new.Type
 						  AND Language = new.Language AND IsForced = new.IsForced
 					) WHERE ID = new.ID AND TrackIndex = 0;
-				UPDATE Tracks SET Slug = 
+				UPDATE Tracks SET Slug =
 					    (SELECT Slug FROM Episodes WHERE ID = EpisodeID) ||
 						'.' || Language ||
 						CASE (TrackIndex)
@@ -128,7 +132,7 @@ namespace Kyoo.SqLite.Migrations
 			END;");
 			// language=SQLite
 			migrationBuilder.Sql(@"
-			CREATE TRIGGER EpisodeUpdateTracksSlug 
+			CREATE TRIGGER EpisodeUpdateTracksSlug
 			AFTER UPDATE OF Slug ON Episodes
 			FOR EACH ROW
 			BEGIN
@@ -157,8 +161,8 @@ namespace Kyoo.SqLite.Migrations
 			CREATE TRIGGER ShowSlugUpdate AFTER UPDATE OF Slug ON Shows FOR EACH ROW
 			BEGIN
 				UPDATE Seasons SET Slug = new.Slug || '-s' || SeasonNumber WHERE ShowID = new.ID;
-				UPDATE Episodes 
-					SET Slug = new.Slug || 
+				UPDATE Episodes
+					SET Slug = new.Slug ||
 					           CASE
 					               WHEN SeasonNumber IS NULL AND AbsoluteNumber IS NULL THEN ''
 					               WHEN SeasonNumber IS NULL THEN '-' || AbsoluteNumber
@@ -181,11 +185,12 @@ namespace Kyoo.SqLite.Migrations
 					INNER JOIN Collections AS c ON l.CollectionID = c.ID
 					WHERE s.ID = l.ShowID))
 				UNION ALL
-				SELECT -c0.ID, c0.Slug, c0.Name AS Title, c0.Overview, 0 AS Status, 
+				SELECT -c0.ID, c0.Slug, c0.Name AS Title, c0.Overview, 0 AS Status,
 				       NULL AS StartAir, NULL AS EndAir, c0.Images, 2 AS Type
 				FROM collections AS c0");
 		}
 
+		/// <inheritdoc/>
 		protected override void Down(MigrationBuilder migrationBuilder)
 		{
 			// language=SQLite

@@ -425,6 +425,11 @@ namespace Kyoo.Utils
 			return (T)method.MakeGenericMethod(types).Invoke(instance, args.ToArray());
 		}
 
+		/// <summary>
+		/// Convert a dictionary to a query string.
+		/// </summary>
+		/// <param name="query">The list of query parameters.</param>
+		/// <returns>A valid query string with all items in the dictionary.</returns>
 		public static string ToQueryString(this Dictionary<string, string> query)
 		{
 			if (!query.Any())
@@ -432,6 +437,11 @@ namespace Kyoo.Utils
 			return "?" + string.Join('&', query.Select(x => $"{x.Key}={x.Value}"));
 		}
 
+		/// <summary>
+		/// Rethrow the exception without modifying the stack trace.
+		/// This is similar to the <c>rethrow;</c> code but is useful when the exception is not in a catch block.
+		/// </summary>
+		/// <param name="ex">The exception to rethrow.</param>
 		[System.Diagnostics.CodeAnalysis.DoesNotReturn]
 		public static void ReThrow([NotNull] this Exception ex)
 		{

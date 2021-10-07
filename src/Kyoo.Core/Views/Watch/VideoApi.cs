@@ -41,9 +41,21 @@ namespace Kyoo.Core.Api
 	[ApiDefinition("Videos", Group = WatchGroup)]
 	public class VideoApi : Controller
 	{
+		/// <summary>
+		/// The library manager used to modify or retrieve information in the data store.
+		/// </summary>
 		private readonly ILibraryManager _libraryManager;
+
+		/// <summary>
+		/// The file system used to send video files.
+		/// </summary>
 		private readonly IFileSystem _files;
 
+		/// <summary>
+		/// Create a new <see cref="VideoApi"/>.
+		/// </summary>
+		/// <param name="libraryManager">The library manager used to retrieve episodes.</param>
+		/// <param name="files">The file manager used to send video files.</param>
 		public VideoApi(ILibraryManager libraryManager,
 			IFileSystem files)
 		{

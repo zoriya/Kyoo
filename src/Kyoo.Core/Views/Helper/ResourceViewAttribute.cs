@@ -32,8 +32,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Core.Api
 {
+	/// <summary>
+	/// An attribute to put on most controllers. It handle fields loading (only retuning fields requested and if they
+	/// are requested, load them) and help for the <c>where</c> query parameter.
+	/// </summary>
 	public class ResourceViewAttribute : ActionFilterAttribute
 	{
+		/// <inheritdoc />
 		public override void OnActionExecuting(ActionExecutingContext context)
 		{
 			if (context.ActionArguments.TryGetValue("where", out object dic) && dic is Dictionary<string, string> where)
@@ -92,6 +97,7 @@ namespace Kyoo.Core.Api
 			base.OnActionExecuting(context);
 		}
 
+		/// <inheritdoc />
 		public override async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
 		{
 			if (context.Result is ObjectResult result)
