@@ -26,7 +26,6 @@ using Autofac.Extras.AttributeMetadata;
 using Kyoo.Abstractions;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Utils;
-using Kyoo.Core.Api;
 using Kyoo.Core.Controllers;
 using Kyoo.Core.Models.Options;
 using Kyoo.Core.Tasks;
@@ -35,11 +34,12 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.StaticFiles;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using Serilog;
 using IMetadataProvider = Kyoo.Abstractions.Controllers.IMetadataProvider;
+using JsonOptions = Kyoo.Core.Api.JsonOptions;
 
 namespace Kyoo.Core
 {
@@ -66,20 +66,6 @@ namespace Kyoo.Core
 			{ "database", null },
 			{ "logging", null }
 		};
-
-		/// <summary>
-		/// The configuration to use.
-		/// </summary>
-		private readonly IConfiguration _configuration;
-
-		/// <summary>
-		/// Create a new core module instance and use the given configuration.
-		/// </summary>
-		/// <param name="configuration">The configuration to use</param>
-		public CoreModule(IConfiguration configuration)
-		{
-			_configuration = configuration;
-		}
 
 		/// <inheritdoc />
 		public void Configure(ContainerBuilder builder)
@@ -140,17 +126,13 @@ namespace Kyoo.Core
 		/// <inheritdoc />
 		public void Configure(IServiceCollection services)
 		{
-			Uri publicUrl = _configuration.GetPublicUrl();
+			services.AddTransient<IConfigureOptions<MvcNewtonsoftJsonOptions>, JsonOptions>();
 
 			services.AddMvcCore()
+				.AddNewtonsoftJson()
 				.AddDataAnnotations()
 				.AddControllersAsServices()
 				.AddApiExplorer()
-				.AddNewtonsoftJson(x =>
-				{
-					x.SerializerSettings.ContractResolver = new JsonPropertyIgnorer(publicUrl);
-					x.SerializerSettings.Converters.Add(new PeopleRoleConverter());
-				})
 				.ConfigureApiBehaviorOptions(options =>
 				{
 					options.SuppressMapClientErrors = true;

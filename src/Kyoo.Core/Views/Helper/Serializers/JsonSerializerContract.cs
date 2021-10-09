@@ -16,27 +16,39 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
-using Kyoo.Utils;
+using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
 namespace Kyoo.Core.Api
 {
-	public class JsonPropertyIgnorer : CamelCasePropertyNamesContractResolver
+	/// <summary>
+	/// A custom json serializer that respects <see cref="SerializeIgnoreAttribute"/> and
+	/// <see cref="DeserializeIgnoreAttribute"/>. It also handle <see cref="LoadableRelationAttribute"/> via the
+	/// <c>fields</c> query parameter and <see cref="IThumbnails"/> items.
+	/// </summary>
+	public class JsonSerializerContract : CamelCasePropertyNamesContractResolver
 	{
-		private readonly Uri _host;
-		private int _depth = -1;
+		/// <summary>
+		/// The http context accessor used to retrieve the <c>fields</c> query parameter as well as the type of
+		/// resource currently serializing.
+		/// </summary>
+		private readonly IHttpContextAccessor _httpContextAccessor;
 
-		public JsonPropertyIgnorer(Uri host)
+		/// <summary>
+		/// Create a new <see cref="JsonSerializerContract"/>.
+		/// </summary>
+		/// <param name="httpContextAccessor">The http context accessor to use.</param>
+		public JsonSerializerContract(IHttpContextAccessor httpContextAccessor)
 		{
-			_host = host;
+			_httpContextAccessor = httpContextAccessor;
 		}
 
+		/// <inheritdoc />
 		protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
 		{
 			JsonProperty property = base.CreateProperty(member, memberSerialization);
@@ -44,19 +56,14 @@ namespace Kyoo.Core.Api
 			LoadableRelationAttribute relation = member.GetCustomAttribute<LoadableRelationAttribute>();
 			if (relation != null)
 			{
-				if (relation.RelationID == null)
-					property.ShouldSerialize = x => _depth == 0 && member.GetValue(x) != null;
-				else
+				property.ShouldSerialize = _ =>
 				{
-					property.ShouldSerialize = x =>
-					{
-						if (_depth != 0)
-							return false;
-						if (member.GetValue(x) != null)
-							return true;
-						return x.GetType().GetProperty(relation.RelationID)?.GetValue(x) != null;
-					};
-				}
+					string resType = (string)_httpContextAccessor.HttpContext!.Items["ResourceType"];
+					if (member.DeclaringType!.Name != resType)
+						return false;
+					ICollection<string> fields = (ICollection<string>)_httpContextAccessor.HttpContext!.Items["fields"];
+					return fields!.Contains(member.Name);
+				};
 			}
 
 			if (member.GetCustomAttribute<SerializeIgnoreAttribute>() != null)
@@ -66,24 +73,10 @@ namespace Kyoo.Core.Api
 
 			// TODO use http context to disable serialize as.
 			// TODO check https://stackoverflow.com/questions/53288633/net-core-api-custom-json-resolver-based-on-request-values
-			SerializeAsAttribute serializeAs = member.GetCustomAttribute<SerializeAsAttribute>();
-			if (serializeAs != null)
-				property.ValueProvider = new SerializeAsProvider(serializeAs.Format, _host);
+			// SerializeAsAttribute serializeAs = member.GetCustomAttribute<SerializeAsAttribute>();
+			// if (serializeAs != null)
+				// property.ValueProvider = new SerializeAsProvider(serializeAs.Format, _host);
 			return property;
-		}
-
-		protected override JsonContract CreateContract(Type objectType)
-		{
-			JsonContract contract = base.CreateContract(objectType);
-			if (Utility.GetGenericDefinition(objectType, typeof(Page<>)) == null
-				&& !objectType.IsAssignableTo(typeof(IEnumerable))
-				&& objectType.Name != "AnnotatedProblemDetails")
-			{
-				contract.OnSerializingCallbacks.Add((_, _) => _depth++);
-				contract.OnSerializedCallbacks.Add((_, _) => _depth--);
-			}
-
-			return contract;
 		}
 	}
 }
