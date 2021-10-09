@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq.Expressions;
 
 namespace Kyoo.Abstractions.Models
@@ -33,7 +34,8 @@ namespace Kyoo.Abstractions.Models
 		Show,
 
 		/// <summary>
-		/// The <see cref="LibraryItem"/> is a Movie (a <see cref="Show"/> with <see cref="Models.Show.IsMovie"/> equals to true).
+		/// The <see cref="LibraryItem"/> is a Movie (a <see cref="Show"/> with
+		/// <see cref="Models.Show.IsMovie"/> equals to true).
 		/// </summary>
 		Movie,
 
@@ -47,7 +49,7 @@ namespace Kyoo.Abstractions.Models
 	/// A type union between <see cref="Show"/> and <see cref="Collection"/>.
 	/// This is used to list content put inside a library.
 	/// </summary>
-	public class LibraryItem : IResource, IThumbnails
+	public class LibraryItem : CustomTypeDescriptor, IResource, IThumbnails
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
@@ -160,5 +162,11 @@ namespace Kyoo.Abstractions.Models
 			Images = x.Images,
 			Type = ItemType.Collection
 		};
+
+		/// <inheritdoc />
+		public override string GetClassName()
+		{
+			return Type.ToString();
+		}
 	}
 }

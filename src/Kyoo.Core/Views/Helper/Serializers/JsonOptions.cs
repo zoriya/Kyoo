@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using Kyoo.Core.Models.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -34,20 +35,29 @@ namespace Kyoo.Core.Api
 		private readonly IHttpContextAccessor _httpContextAccessor;
 
 		/// <summary>
+		/// The options containing the public URL of kyoo, given to <see cref="JsonSerializerContract"/>.
+		/// </summary>
+		private readonly IOptions<BasicOptions> _options;
+
+		/// <summary>
 		/// Create a new <see cref="JsonOptions"/>.
 		/// </summary>
 		/// <param name="httpContextAccessor">
 		/// The http context accessor given to the <see cref="JsonSerializerContract"/>.
 		/// </param>
-		public JsonOptions(IHttpContextAccessor httpContextAccessor)
+		/// <param name="options">
+		/// The options containing the public URL of kyoo, given to <see cref="JsonSerializerContract"/>.
+		/// </param>
+		public JsonOptions(IHttpContextAccessor httpContextAccessor, IOptions<BasicOptions> options)
 		{
 			_httpContextAccessor = httpContextAccessor;
+			_options = options;
 		}
 
 		/// <inheritdoc />
 		public void Configure(MvcNewtonsoftJsonOptions options)
 		{
-			options.SerializerSettings.ContractResolver = new JsonSerializerContract(_httpContextAccessor);
+			options.SerializerSettings.ContractResolver = new JsonSerializerContract(_httpContextAccessor, _options);
 			options.SerializerSettings.Converters.Add(new PeopleRoleConverter());
 		}
 	}
