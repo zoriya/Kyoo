@@ -36,7 +36,7 @@ namespace Kyoo.Core.Api
 		/// Make an expression (like
 		/// <see cref="Expression.LessThan(System.Linq.Expressions.Expression,System.Linq.Expressions.Expression)"/>
 		/// compatible with strings). If the expressions are not strings, the given <paramref name="operand"/> is
-		/// constructed but if the expressions are strings, this method make the <param name="operand"/> compatible with
+		/// constructed but if the expressions are strings, this method make the <paramref name="operand"/> compatible with
 		/// strings.
 		/// </summary>
 		/// <param name="operand">

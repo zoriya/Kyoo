@@ -128,15 +128,6 @@ namespace Kyoo.Abstractions.Models
 		public Dictionary<int, string> Images { get; set; }
 
 		/// <summary>
-		/// The path of this episode's thumbnail.
-		/// By default, the http path for the thumbnail is returned from the public API.
-		/// This can be disabled using the internal query flag.
-		/// </summary>
-		[SerializeAs("{HOST}/api/episodes/{Slug}/thumbnail")]
-		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
-		public string Thumb => Images?.GetValueOrDefault(Models.Images.Thumbnail);
-
-		/// <summary>
 		/// The title of this episode.
 		/// </summary>
 		public string Title { get; set; }

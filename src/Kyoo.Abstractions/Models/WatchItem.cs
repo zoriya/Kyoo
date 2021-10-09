@@ -102,27 +102,6 @@ namespace Kyoo.Abstractions.Models
 		public bool IsMovie { get; set; }
 
 		/// <summary>
-		/// The path of this item's poster.
-		/// By default, the http path for the poster is returned from the public API.
-		/// This can be disabled using the internal query flag.
-		/// </summary>
-		[SerializeAs("{HOST}/api/show/{ShowSlug}/poster")] public string Poster { get; set; }
-
-		/// <summary>
-		/// The path of this item's logo.
-		/// By default, the http path for the logo is returned from the public API.
-		/// This can be disabled using the internal query flag.
-		/// </summary>
-		[SerializeAs("{HOST}/api/show/{ShowSlug}/logo")] public string Logo { get; set; }
-
-		/// <summary>
-		/// The path of this item's backdrop.
-		/// By default, the http path for the backdrop is returned from the public API.
-		/// This can be disabled using the internal query flag.
-		/// </summary>
-		[SerializeAs("{HOST}/api/show/{ShowSlug}/backdrop")] public string Backdrop { get; set; }
-
-		/// <summary>
 		/// The container of the video file of this episode.
 		/// Common containers are mp4, mkv, avi and so on.
 		/// </summary>

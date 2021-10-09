@@ -15,6 +15,7 @@ namespace Kyoo.Postgresql.Migrations
     [Migration("20210801171641_Triggers")]
     partial class Triggers
     {
+	    /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618

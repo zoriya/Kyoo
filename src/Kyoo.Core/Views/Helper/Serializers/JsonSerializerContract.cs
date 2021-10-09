@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Kyoo.Abstractions.Models;
@@ -70,13 +71,74 @@ namespace Kyoo.Core.Api
 				property.ShouldSerialize = _ => false;
 			if (member.GetCustomAttribute<DeserializeIgnoreAttribute>() != null)
 				property.ShouldDeserialize = _ => false;
-
-			// TODO use http context to disable serialize as.
-			// TODO check https://stackoverflow.com/questions/53288633/net-core-api-custom-json-resolver-based-on-request-values
-			// SerializeAsAttribute serializeAs = member.GetCustomAttribute<SerializeAsAttribute>();
-			// if (serializeAs != null)
-				// property.ValueProvider = new SerializeAsProvider(serializeAs.Format, _host);
 			return property;
+		}
+
+		/// <inheritdoc />
+		protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
+		{
+			IList<JsonProperty> properties = base.CreateProperties(type, memberSerialization);
+			if (!type.IsAssignableTo(typeof(IThumbnails)))
+				return properties;
+			foreach ((int id, string image) in Images.ImageName)
+			{
+				properties.Add(new JsonProperty
+				{
+					DeclaringType = type,
+					PropertyName = image.ToLower(),
+					UnderlyingName = image,
+					PropertyType = typeof(string),
+					Readable = true,
+					Writable = false,
+					ItemIsReference = false,
+					TypeNameHandling = TypeNameHandling.None,
+					ShouldSerialize = x =>
+					{
+						IThumbnails thumb = (IThumbnails)x;
+						return thumb.Images?.ContainsKey(id) == true;
+					},
+					ValueProvider = new ThumbnailProvider(id)
+				});
+			}
+
+			return properties;
+		}
+
+		/// <summary>
+		/// A custom <see cref="IValueProvider"/> that uses the
+		/// <see cref="IThumbnails"/>.<see cref="IThumbnails.Images"/> as a value.
+		/// </summary>
+		private class ThumbnailProvider : IValueProvider
+		{
+			/// <summary>
+			/// The index/ID of the image to retrieve/set.
+			/// </summary>
+			private readonly int _imageIndex;
+
+			/// <summary>
+			/// Create a new <see cref="ThumbnailProvider"/>.
+			/// </summary>
+			/// <param name="imageIndex">The index/ID of the image to retrieve/set.</param>
+			public ThumbnailProvider(int imageIndex)
+			{
+				_imageIndex = imageIndex;
+			}
+
+			/// <inheritdoc />
+			public void SetValue(object target, object value)
+			{
+				if (target is not IThumbnails thumb)
+					throw new ArgumentException($"The given object is not an Thumbnail.");
+				thumb.Images[_imageIndex] = value as string;
+			}
+
+			/// <inheritdoc />
+			public object GetValue(object target)
+			{
+				if (target is IThumbnails thumb)
+					return thumb.Images?.GetValueOrDefault(_imageIndex);
+				return null;
+			}
 		}
 	}
 }

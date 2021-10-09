@@ -12,6 +12,7 @@ namespace Kyoo.SqLite.Migrations
     [Migration("20210801171544_Triggers")]
     partial class Triggers
     {
+	    /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618

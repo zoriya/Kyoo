@@ -19,7 +19,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using Kyoo.Abstractions.Models.Attributes;
 
 namespace Kyoo.Abstractions.Models
 {
@@ -85,14 +84,6 @@ namespace Kyoo.Abstractions.Models
 
 		/// <inheritdoc />
 		public Dictionary<int, string> Images { get; set; }
-
-		/// <summary>
-		/// The path of this item's poster.
-		/// By default, the http path for this poster is returned from the public API.
-		/// This can be disabled using the internal query flag.
-		/// </summary>
-		[SerializeAs("{HOST}/api/{Type:l}/{Slug}/poster")]
-		public string Poster => Images?.GetValueOrDefault(Models.Images.Poster);
 
 		/// <summary>
 		/// The type of this item (ether a collection, a show or a movie).
