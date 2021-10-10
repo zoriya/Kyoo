@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -32,7 +33,7 @@ namespace Kyoo.Abstractions.Models
 	/// Information about tracks and display information that could be used by the player.
 	/// This contains mostly data from an <see cref="Episode"/> with another form.
 	/// </summary>
-	public class WatchItem
+	public class WatchItem : CustomTypeDescriptor, IThumbnails
 	{
 		/// <summary>
 		/// The ID of the episode associated with this item.
@@ -101,6 +102,9 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		public bool IsMovie { get; set; }
 
+		/// <inheritdoc />
+		public Dictionary<int, string> Images { get; set; }
+
 		/// <summary>
 		/// The container of the video file of this episode.
 		/// Common containers are mp4, mkv, avi and so on.
@@ -147,11 +151,11 @@ namespace Kyoo.Abstractions.Models
 				if (ep.AbsoluteNumber != null)
 				{
 					previous = await library.GetOrDefault(
-						x => x.ShowID == ep.ShowID && x.AbsoluteNumber <= ep.AbsoluteNumber,
+						x => x.ShowID == ep.ShowID && x.AbsoluteNumber < ep.AbsoluteNumber,
 						new Sort<Episode>(x => x.AbsoluteNumber, true)
 					);
 					next = await library.GetOrDefault(
-						x => x.ShowID == ep.ShowID && x.AbsoluteNumber >= ep.AbsoluteNumber,
+						x => x.ShowID == ep.ShowID && x.AbsoluteNumber > ep.AbsoluteNumber,
 						new Sort<Episode>(x => x.AbsoluteNumber)
 					);
 				}
@@ -195,6 +199,7 @@ namespace Kyoo.Abstractions.Models
 				Title = ep.Title,
 				ReleaseDate = ep.ReleaseDate,
 				Path = ep.Path,
+				Images = ep.Show.Images,
 				Container = PathIO.GetExtension(ep.Path)![1..],
 				Video = ep.Tracks.FirstOrDefault(x => x.Type == StreamType.Video),
 				Audios = ep.Tracks.Where(x => x.Type == StreamType.Audio).ToArray(),
@@ -231,6 +236,18 @@ namespace Kyoo.Abstractions.Models
 				await Console.Error.WriteLineAsync($"Invalid chapter file at {path}");
 				return Array.Empty<Chapter>();
 			}
+		}
+
+		/// <inheritdoc />
+		public override string GetClassName()
+		{
+			return nameof(Show);
+		}
+
+		/// <inheritdoc />
+		public override string GetComponentName()
+		{
+			return ShowSlug;
 		}
 	}
 }

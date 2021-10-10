@@ -17,6 +17,7 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -75,11 +76,13 @@ namespace Kyoo.Core.Api
 		/// <param name="extension">An optional extension for the subtitle file.</param>
 		/// <returns>The subtitle file</returns>
 		/// <response code="404">No subtitle exist with the given ID or slug.</response>
-		[HttpGet("{identifier:id}", Order = AlternativeRoute)]
+		[HttpGet("{identifier:int}", Order = AlternativeRoute)]
 		[HttpGet("{identifier:id}.{extension}")]
 		[PartialPermission(Kind.Read)]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		[SuppressMessage("ReSharper", "RouteTemplates.ParameterTypeAndConstraintsMismatch",
+			Justification = "An indentifier can be constructed with an int.")]
 		public async Task<IActionResult> GetSubtitle(Identifier identifier, string extension)
 		{
 			Track subtitle = await identifier.Match(

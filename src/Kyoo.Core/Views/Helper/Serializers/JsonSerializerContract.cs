@@ -152,13 +152,15 @@ namespace Kyoo.Core.Api
 			/// <inheritdoc />
 			public object GetValue(object target)
 			{
-				if (target is not (IThumbnails thumb and IResource res)
+				string slug = (target as IResource)?.Slug ?? (target as ICustomTypeDescriptor)?.GetComponentName();
+				if (target is not IThumbnails thumb
+					|| slug == null
 					|| string.IsNullOrEmpty(thumb.Images?.GetValueOrDefault(_imageIndex)))
 					return null;
 				string type = target is ICustomTypeDescriptor descriptor
 					? descriptor.GetClassName()
 					: target.GetType().Name;
-				return new Uri(_host, $"/api/{type}/{res.Slug}/{Images.ImageName[_imageIndex]}".ToLower())
+				return new Uri(_host, $"/api/{type}/{slug}/{Images.ImageName[_imageIndex]}".ToLower())
 					.ToString();
 			}
 		}
