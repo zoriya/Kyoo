@@ -75,7 +75,7 @@
 
 		<div class="controller container-fluid" id="controller">
 			<div class="img d-none d-sm-block">
-				<img [src]="this.item.poster" alt="poster" />
+				<img [src]="this.item.poster | fallback" alt="poster" />
 			</div>
 			<div class="content">
 				<h3 *ngIf="!this.item.isMovie">S{{this.item.seasonNumber}}:E{{this.item.episodeNumber}} - {{this.item.title}}</h3>

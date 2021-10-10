@@ -34,7 +34,7 @@ import { MatTabsModule } from "@angular/material/tabs";
 import { PasswordValidator } from "./misc/password-validator";
 import { MatCheckboxModule } from "@angular/material/checkbox";
 import { MatDialogModule } from "@angular/material/dialog";
-import { FallbackDirective } from "./misc/fallback.directive";
+import { FallbackDirective, FallbackPipe } from "./misc/fallback.directive";
 import { AuthModule } from "./auth/auth.module";
 import { AuthRoutingModule } from "./auth/auth-routing.module";
 import { TrailerDialogComponent } from "./pages/trailer-dialog/trailer-dialog.component";
@@ -73,7 +73,8 @@ import { MatDatepickerModule } from "@angular/material/datepicker";
 		BufferToWidthPipe,
 		VolumeToButtonPipe,
 		SupportedButtonPipe,
-		LongPressDirective
+		LongPressDirective,
+		FallbackPipe
 	],
 	imports: [
 		BrowserModule,
@@ -110,7 +111,8 @@ import { MatDatepickerModule } from "@angular/material/datepicker";
 	],
 	bootstrap: [AppComponent],
 	exports: [
-		FallbackDirective
+		FallbackDirective,
+		FallbackPipe
 	],
 	providers: [
 		StartupService,

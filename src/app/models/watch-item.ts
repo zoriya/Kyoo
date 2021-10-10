@@ -11,7 +11,7 @@ export interface WatchItem
 	duration: number;
 	releaseDate: string;
 	isMovie: boolean;
-	
+
 	poster: string;
 	backdrop: string;
 

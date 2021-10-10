@@ -25,6 +25,8 @@ export class EpisodesListComponent extends HorizontalScroller
 
 	sanitize(url: string): SafeStyle
 	{
+		if (!url)
+			return undefined;
 		return this.sanitizer.bypassSecurityTrustStyle("url(" + url + ")");
 	}
 

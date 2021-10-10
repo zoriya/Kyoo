@@ -276,6 +276,8 @@ export class ItemsGridComponent implements OnInit
 
 	getPoster(obj: LibraryItem | Show | ShowRole | Collection): SafeStyle
 	{
+		if (!obj.poster)
+			return undefined;
 		return this.sanitizer.bypassSecurityTrustStyle(`url(${obj.poster})`);
 	}
 

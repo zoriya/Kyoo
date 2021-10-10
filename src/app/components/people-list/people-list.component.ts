@@ -21,6 +21,8 @@ export class PeopleListComponent extends HorizontalScroller
 
 	getPeopleIcon(item: People): SafeStyle
 	{
+		if (!item.poster)
+			return undefined;
 		return this.sanitizer.bypassSecurityTrustStyle(`url(${item.poster})`);
 	}
 }

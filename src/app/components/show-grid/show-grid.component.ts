@@ -18,6 +18,8 @@ export class ShowGridComponent
 
 	getThumb(show: Show): SafeStyle
 	{
+		if (!show.poster)
+			return undefined;
 		return this.sanitizer.bypassSecurityTrustStyle(`url(${show.poster})`);
 	}
 

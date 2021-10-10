@@ -25,6 +25,8 @@ export class ItemsListComponent extends HorizontalScroller
 
 	getPoster(item: LibraryItem | Show | ShowRole | Collection): SafeUrl
 	{
+		if (!item.poster)
+			return undefined;
 		return this.sanitizer.bypassSecurityTrustStyle(`url(${item.poster})`);
 	}
 

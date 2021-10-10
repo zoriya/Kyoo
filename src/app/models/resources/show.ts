@@ -15,13 +15,13 @@ export interface Show extends IResource
 	studio: Studio;
 	people: People[];
 	seasons: Season[];
-	trailerUrl: string;
+	trailer: string;
 	isMovie: boolean;
 	startAir: Date;
 	endAir: Date;
 	poster: string;
 	logo: string;
-	backdrop: string;
+	thumbnail: string;
 
 	externalIDs: ExternalID[];
 }

@@ -1,4 +1,4 @@
-import { Directive, ElementRef, HostListener, Input } from "@angular/core";
+import { Directive, ElementRef, HostListener, Input, Pipe, PipeTransform } from "@angular/core";
 
 /* tslint:disable:directive-selector */
 @Directive({
@@ -15,5 +15,17 @@ export class FallbackDirective
 	{
 		const html: HTMLImageElement = this.img.nativeElement;
 		html.src = this.fallback;
+	}
+}
+
+@Pipe({
+	name: "fallback",
+	pure: true
+})
+export class FallbackPipe implements PipeTransform
+{
+	transform(value: any, ...args: any[]): any
+	{
+		return value ?? args.find(x => x);
 	}
 }

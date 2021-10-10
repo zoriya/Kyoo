@@ -133,7 +133,7 @@ export class ShowDetailsComponent implements AfterViewInit, OnDestroy
 		this.dialog.open(TrailerDialogComponent, {
 			width: "80%",
 			height: "45vw",
-			data: this.show.trailerUrl,
+			data: this.show.trailer,
 			panelClass: "panel"
 		});
 	}

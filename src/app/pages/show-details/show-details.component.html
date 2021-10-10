@@ -1,5 +1,5 @@
 <div class="backdrop">
-	<img id="backdrop" [src]="this.show.backdrop" alt="backdrop" />
+	<img id="backdrop" [src]="this.show.thumbnail | fallback" alt="backdrop" />
 </div>
 
 <div class="header container pt-sm-5">
@@ -16,7 +16,7 @@
 				<button mat-mini-fab matTooltipPosition="above" matTooltip="Play" class="mr-3" (click)="playClicked()">
 					<mat-icon>play_arrow</mat-icon>
 				</button>
-				<button *ngIf="this.show.trailerUrl" mat-icon-button matTooltipPosition="above" matTooltip="Trailer" (click)="openTrailer()">
+				<button *ngIf="this.show.trailer" mat-icon-button matTooltipPosition="above" matTooltip="Trailer" (click)="openTrailer()">
 					<mat-icon>local_movies</mat-icon>
 				</button>
 				<a *ngIf="this.show.isMovie" [href]="'/video/' + this.show.slug" download>
