@@ -58,7 +58,7 @@ export class ItemsGridComponent implements OnInit
 	complexFiltersEnabled: boolean;
 
 	sortType: string = "title";
-	sortKeys: string[] = ["title", "start year", "end year"];
+	sortKeys: string[] = ["title", "start air", "end air"];
 	sortUp: boolean = true;
 	filters: {genres: Genre[], studio: Studio, people: People[]} = {genres: [], studio: null, people: []};
 
