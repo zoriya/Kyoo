@@ -29,6 +29,10 @@ namespace Kyoo.Core.Controllers
 	/// </summary>
 	public class PassthroughPermissionValidator : IPermissionValidator
 	{
+		/// <summary>
+		/// Create a new <see cref="PassthroughPermissionValidator"/>.
+		/// </summary>
+		/// <param name="logger">The logger used to warn that no real permission validator exists.</param>
 		[SuppressMessage("ReSharper", "SuggestBaseTypeForParameterInConstructor",
 			Justification = "ILogger should include the typeparam for context.")]
 		public PassthroughPermissionValidator(ILogger<PassthroughPermissionValidator> logger)

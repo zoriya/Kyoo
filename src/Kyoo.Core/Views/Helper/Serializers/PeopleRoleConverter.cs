@@ -24,8 +24,13 @@ using Newtonsoft.Json.Linq;
 
 namespace Kyoo.Core.Api
 {
+	/// <summary>
+	/// A custom role's convertor to inline the person or the show depending on the value of
+	/// <see cref="PeopleRole.ForPeople"/>.
+	/// </summary>
 	public class PeopleRoleConverter : JsonConverter<PeopleRole>
 	{
+		/// <inheritdoc />
 		public override void WriteJson(JsonWriter writer, PeopleRole value, JsonSerializer serializer)
 		{
 			ICollection<PeopleRole> oldPeople = value.Show?.People;
@@ -46,6 +51,7 @@ namespace Kyoo.Core.Api
 				value.People.Roles = oldRoles;
 		}
 
+		/// <inheritdoc />
 		public override PeopleRole ReadJson(JsonReader reader,
 			Type objectType,
 			PeopleRole existingValue,

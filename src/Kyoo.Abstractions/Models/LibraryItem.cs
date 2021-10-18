@@ -18,8 +18,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq.Expressions;
-using Kyoo.Abstractions.Models.Attributes;
 
 namespace Kyoo.Abstractions.Models
 {
@@ -34,7 +34,8 @@ namespace Kyoo.Abstractions.Models
 		Show,
 
 		/// <summary>
-		/// The <see cref="LibraryItem"/> is a Movie (a <see cref="Show"/> with <see cref="Models.Show.IsMovie"/> equals to true).
+		/// The <see cref="LibraryItem"/> is a Movie (a <see cref="Show"/> with
+		/// <see cref="Models.Show.IsMovie"/> equals to true).
 		/// </summary>
 		Movie,
 
@@ -48,7 +49,7 @@ namespace Kyoo.Abstractions.Models
 	/// A type union between <see cref="Show"/> and <see cref="Collection"/>.
 	/// This is used to list content put inside a library.
 	/// </summary>
-	public class LibraryItem : IResource, IThumbnails
+	public class LibraryItem : CustomTypeDescriptor, IResource, IThumbnails
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
@@ -85,14 +86,6 @@ namespace Kyoo.Abstractions.Models
 
 		/// <inheritdoc />
 		public Dictionary<int, string> Images { get; set; }
-
-		/// <summary>
-		/// The path of this item's poster.
-		/// By default, the http path for this poster is returned from the public API.
-		/// This can be disabled using the internal query flag.
-		/// </summary>
-		[SerializeAs("{HOST}/api/{Type:l}/{Slug}/poster")]
-		public string Poster => Images?.GetValueOrDefault(Models.Images.Poster);
 
 		/// <summary>
 		/// The type of this item (ether a collection, a show or a movie).
@@ -169,5 +162,11 @@ namespace Kyoo.Abstractions.Models
 			Images = x.Images,
 			Type = ItemType.Collection
 		};
+
+		/// <inheritdoc />
+		public override string GetClassName()
+		{
+			return Type.ToString();
+		}
 	}
 }

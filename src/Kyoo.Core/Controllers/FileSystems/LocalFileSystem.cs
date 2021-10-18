@@ -42,6 +42,11 @@ namespace Kyoo.Core.Controllers
 		private readonly IContentTypeProvider _provider;
 
 		/// <summary>
+		/// The transcoder of local files.
+		/// </summary>
+		private readonly ITranscoder _transcoder;
+
+		/// <summary>
 		/// Options to check if the metadata should be kept in the show directory or in a kyoo's directory.
 		/// </summary>
 		private readonly IOptionsMonitor<BasicOptions> _options;
@@ -51,10 +56,14 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		/// <param name="options">The options to use.</param>
 		/// <param name="provider">An extension provider to get content types from files extensions.</param>
-		public LocalFileSystem(IOptionsMonitor<BasicOptions> options, IContentTypeProvider provider)
+		/// <param name="transcoder">The transcoder of local files.</param>
+		public LocalFileSystem(IOptionsMonitor<BasicOptions> options,
+			IContentTypeProvider provider,
+			ITranscoder transcoder)
 		{
 			_options = options;
 			_provider = provider;
+			_transcoder = transcoder;
 		}
 
 		/// <summary>
@@ -154,6 +163,18 @@ namespace Kyoo.Core.Controllers
 				Track track => Combine(track.Episode.Show.Path, "Extra"),
 				_ => null
 			});
+		}
+
+		/// <inheritdoc />
+		public Task<ICollection<Track>> ExtractInfos(Episode episode, bool reExtract)
+		{
+			return _transcoder.ExtractInfos(episode, reExtract);
+		}
+
+		/// <inheritdoc />
+		public IActionResult Transmux(Episode episode)
+		{
+			return _transcoder.Transmux(episode);
 		}
 	}
 }

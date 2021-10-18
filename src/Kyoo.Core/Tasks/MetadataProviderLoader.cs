@@ -72,7 +72,7 @@ namespace Kyoo.Core.Tasks
 		/// <inheritdoc />
 		public TaskParameters GetParameters()
 		{
-			return new();
+			return new TaskParameters();
 		}
 
 		/// <inheritdoc />

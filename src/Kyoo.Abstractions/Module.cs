@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using Autofac;
 using Autofac.Builder;
 using Kyoo.Abstractions.Controllers;
@@ -96,9 +97,10 @@ namespace Kyoo.Abstractions
 		/// </summary>
 		/// <param name="configuration">The configuration instance</param>
 		/// <returns>The public URl of kyoo (without a slash at the end)</returns>
-		public static string GetPublicUrl(this IConfiguration configuration)
+		public static Uri GetPublicUrl(this IConfiguration configuration)
 		{
-			return configuration["basics:publicUrl"]?.TrimEnd('/') ?? "http://localhost:5000";
+			string uri = configuration["basics:publicUrl"]?.TrimEnd('/') ?? "http://localhost:5000";
+			return new Uri(uri);
 		}
 	}
 }

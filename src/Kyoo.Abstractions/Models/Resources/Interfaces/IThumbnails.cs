@@ -33,9 +33,8 @@ namespace Kyoo.Abstractions.Models
 		/// <remarks>
 		/// An arbitrary index should not be used, instead use indexes from <see cref="Models.Images"/>
 		/// </remarks>
+		/// <example>{"0": "example.com/dune/poster"}</example>
 		public Dictionary<int, string> Images { get; set; }
-
-		// TODO remove Posters properties add them via the json serializer for every IThumbnails
 	}
 
 	/// <summary>
@@ -63,5 +62,17 @@ namespace Kyoo.Abstractions.Models
 		/// A video of a few minutes that tease the content.
 		/// </summary>
 		public const int Trailer = 3;
+
+		/// <summary>
+		/// Retrieve the name of an image using it's ID. It is also used by the serializer to retrieve all named images.
+		/// If a plugin adds a new image type, it should add it's value and name here to allow the serializer to add it.
+		/// </summary>
+		public static Dictionary<int, string> ImageName { get; } = new()
+		{
+			[Poster] = nameof(Poster),
+			[Thumbnail] = nameof(Thumbnail),
+			[Logo] = nameof(Logo),
+			[Trailer] = nameof(Trailer)
+		};
 	}
 }

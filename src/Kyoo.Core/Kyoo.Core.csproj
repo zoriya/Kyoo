@@ -1,13 +1,10 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
-		<TranscoderRoot>../Kyoo.Transcoder/</TranscoderRoot>
-
-		<Company>SDG</Company>
-		<Authors>Zoe Roux</Authors>
-		<RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
 		<LangVersion>default</LangVersion>
+		<AssemblyName>Kyoo.Core</AssemblyName>
+		<RootNamespace>Kyoo.Core</RootNamespace>
+		<TranscoderRoot>../Kyoo.Transcoder/</TranscoderRoot>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -41,6 +38,7 @@
 		<ProjectReference Include="../Kyoo.SqLite/Kyoo.SqLite.csproj" />
 		<ProjectReference Include="../Kyoo.Authentication/Kyoo.Authentication.csproj" />
 		<ProjectReference Include="../Kyoo.WebApp/Kyoo.WebApp.csproj" />
+		<ProjectReference Include="../Kyoo.Swagger/Kyoo.Swagger.csproj" />
 	</ItemGroup>
 
 	<Target Name="BuildTranscoder" BeforeTargets="BeforeBuild" Condition="'$(SkipTranscoder)' != 'true' And !Exists('$(TranscoderRoot)/build/$(TranscoderBinary)')">
@@ -62,6 +60,7 @@
 
 	<ItemGroup>
 		<Content Include="../../LICENSE" CopyToOutputDirectory="Always" Visible="false" />
+		<Content Include="../../AUTHORS.md" CopyToOutputDirectory="Always" Visible="false" />
 		<Content Include="settings.json" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 </Project>

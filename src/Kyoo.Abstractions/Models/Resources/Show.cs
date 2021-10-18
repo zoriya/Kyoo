@@ -83,33 +83,6 @@ namespace Kyoo.Abstractions.Models
 		public Dictionary<int, string> Images { get; set; }
 
 		/// <summary>
-		/// The path of this show's poster.
-		/// By default, the http path for this poster is returned from the public API.
-		/// This can be disabled using the internal query flag.
-		/// </summary>
-		[SerializeAs("{HOST}/api/shows/{Slug}/poster")]
-		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
-		public string Poster => Images?.GetValueOrDefault(Models.Images.Poster);
-
-		/// <summary>
-		/// The path of this show's logo.
-		/// By default, the http path for this logo is returned from the public API.
-		/// This can be disabled using the internal query flag.
-		/// </summary>
-		[SerializeAs("{HOST}/api/shows/{Slug}/logo")]
-		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
-		public string Logo => Images?.GetValueOrDefault(Models.Images.Logo);
-
-		/// <summary>
-		/// The path of this show's backdrop.
-		/// By default, the http path for this backdrop is returned from the public API.
-		/// This can be disabled using the internal query flag.
-		/// </summary>
-		[SerializeAs("{HOST}/api/shows/{Slug}/backdrop")]
-		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
-		public string Backdrop => Images?.GetValueOrDefault(Models.Images.Thumbnail);
-
-		/// <summary>
 		/// True if this show represent a movie, false otherwise.
 		/// </summary>
 		public bool IsMovie { get; set; }

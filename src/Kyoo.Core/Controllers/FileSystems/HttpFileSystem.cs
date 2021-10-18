@@ -110,6 +110,18 @@ namespace Kyoo.Core.Controllers
 			throw new NotSupportedException("Extras can not be stored inside an http filesystem.");
 		}
 
+		/// <inheritdoc />
+		public Task<ICollection<Track>> ExtractInfos(Episode episode, bool reExtract)
+		{
+			throw new NotSupportedException("Extracting infos is not supported on an http filesystem.");
+		}
+
+		/// <inheritdoc />
+		public IActionResult Transmux(Episode episode)
+		{
+			throw new NotSupportedException("Transmuxing is not supported on an http filesystem.");
+		}
+
 		/// <summary>
 		/// An <see cref="IActionResult"/> to proxy an http request.
 		/// </summary>

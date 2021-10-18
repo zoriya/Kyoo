@@ -32,6 +32,11 @@ using Newtonsoft.Json.Linq;
 
 namespace Kyoo.Core.Controllers
 {
+	/// <summary>
+	/// A class to ease configuration management. This work WITH Microsoft's package, you can still use IOptions patterns
+	/// to access your options, this manager ease dynamic work and editing.
+	/// It works with <see cref="ConfigurationReference"/>.
+	/// </summary>
 	public class ConfigurationManager : IConfigurationManager
 	{
 		/// <summary>

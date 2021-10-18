@@ -115,9 +115,12 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public virtual Task<T> GetOrDefault(Expression<Func<T, bool>> where)
+		public virtual Task<T> GetOrDefault(Expression<Func<T, bool>> where, Sort<T> sortBy = default)
 		{
-			return Database.Set<T>().FirstOrDefaultAsync(where);
+			IQueryable<T> query = Database.Set<T>();
+			Expression<Func<T, object>> sortKey = sortBy.Key ?? DefaultSort;
+			query = sortBy.Descendant ? query.OrderByDescending(sortKey) : query.OrderBy(sortKey);
+			return query.FirstOrDefaultAsync(where);
 		}
 
 		/// <inheritdoc/>
@@ -179,9 +182,9 @@ namespace Kyoo.Core.Controllers
 
 			query = sort.Descendant ? query.OrderByDescending(sortKey) : query.OrderBy(sortKey);
 
-			if (limit.AfterID != 0)
+			if (limit.AfterID != null)
 			{
-				TValue after = await get(limit.AfterID);
+				TValue after = await get(limit.AfterID.Value);
 				Expression key = Expression.Constant(sortKey.Compile()(after), sortExpression.Type);
 				query = query.Where(Expression.Lambda<Func<TValue, bool>>(
 					ApiHelper.StringCompatibleExpression(Expression.GreaterThan, sortExpression, key),

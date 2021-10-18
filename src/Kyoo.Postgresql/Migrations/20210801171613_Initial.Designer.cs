@@ -15,7 +15,8 @@ namespace Kyoo.Postgresql.Migrations
     [Migration("20210801171613_Initial")]
     partial class Initial
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+	    /// <inheritdoc />
+	    protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

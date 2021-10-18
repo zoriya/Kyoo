@@ -16,7 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Collections.Generic;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
@@ -43,15 +42,6 @@ namespace Kyoo.Abstractions.Models
 
 		/// <inheritdoc />
 		public Dictionary<int, string> Images { get; set; }
-
-		/// <summary>
-		/// The path of this provider's logo.
-		/// By default, the http path for this logo is returned from the public API.
-		/// This can be disabled using the internal query flag.
-		/// </summary>
-		[SerializeAs("{HOST}/api/providers/{Slug}/logo")]
-		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
-		public string Logo => Images?.GetValueOrDefault(Models.Images.Logo);
 
 		/// <summary>
 		/// The list of libraries that uses this provider.

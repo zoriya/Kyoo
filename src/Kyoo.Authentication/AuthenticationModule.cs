@@ -104,7 +104,7 @@ namespace Kyoo.Authentication
 
 			DefaultCorsPolicyService cors = new(_logger)
 			{
-				AllowedOrigins = { new Uri(_configuration.GetPublicUrl()).GetLeftPart(UriPartial.Authority) }
+				AllowedOrigins = { _configuration.GetPublicUrl().GetLeftPart(UriPartial.Authority) }
 			};
 			builder.RegisterInstance(cors).As<ICorsPolicyService>().SingleInstance();
 		}
@@ -112,7 +112,7 @@ namespace Kyoo.Authentication
 		/// <inheritdoc />
 		public void Configure(IServiceCollection services)
 		{
-			string publicUrl = _configuration.GetPublicUrl();
+			Uri publicUrl = _configuration.GetPublicUrl();
 
 			if (_environment.IsDevelopment())
 				IdentityModelEventSource.ShowPII = true;
@@ -136,7 +136,7 @@ namespace Kyoo.Authentication
 
 			services.AddIdentityServer(options =>
 				{
-					options.IssuerUri = publicUrl;
+					options.IssuerUri = publicUrl.ToString();
 					options.UserInteraction.LoginUrl = $"{publicUrl}/login";
 					options.UserInteraction.ErrorUrl = $"{publicUrl}/error";
 					options.UserInteraction.LogoutUrl = $"{publicUrl}/logout";
@@ -151,7 +151,7 @@ namespace Kyoo.Authentication
 			services.AddAuthentication()
 				.AddJwtBearer(options =>
 				{
-					options.Authority = publicUrl;
+					options.Authority = publicUrl.ToString();
 					options.Audience = "kyoo";
 					options.RequireHttpsMetadata = false;
 				});
@@ -189,7 +189,7 @@ namespace Kyoo.Authentication
 			{
 				app.Use((ctx, next) =>
 				{
-					ctx.SetIdentityServerOrigin(_configuration.GetPublicUrl());
+					ctx.SetIdentityServerOrigin(_configuration.GetPublicUrl().ToString());
 					return next();
 				});
 				app.UseIdentityServer();

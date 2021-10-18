@@ -4,8 +4,10 @@
 	<PropertyGroup Condition="$(IsWindows) == true">
 		<OutputType>WinExe</OutputType>
 		<TargetFramework>net5.0-windows</TargetFramework>
+		<LangVersion>default</LangVersion>
 		<UseWindowsForms>true</UseWindowsForms>
-		<RootNamespace>Kyoo.WindowsHost</RootNamespace>
+		<AssemblyName>Kyoo.Host.WindowsTrait</AssemblyName>
+		<RootNamespace>Kyoo.Host.WindowsTrait</RootNamespace>
 	</PropertyGroup>
 	<ItemGroup Condition="$(IsWindows) == true">
 		<ProjectReference Include="../Kyoo.Core/Kyoo.Core.csproj" />

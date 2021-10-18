@@ -200,10 +200,11 @@ namespace Kyoo.Abstractions.Controllers
 		/// Get the resource by a filter function or null if it is not found.
 		/// </summary>
 		/// <param name="where">The filter function.</param>
+		/// <param name="sortBy">A custom sort method to handle cases where multiples items match the filters.</param>
 		/// <typeparam name="T">The type of the resource</typeparam>
 		/// <returns>The first resource found that match the where function</returns>
 		[ItemCanBeNull]
-		Task<T> GetOrDefault<T>(Expression<Func<T, bool>> where)
+		Task<T> GetOrDefault<T>(Expression<Func<T, bool>> where, Sort<T> sortBy = default)
 			where T : class, IResource;
 
 		/// <summary>
@@ -317,6 +318,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="where">A filter function</param>
 		/// <param name="sort">Sort information (sort order and sort by)</param>
 		/// <param name="limit">How many items to return and where to start</param>
+		/// <exception cref="ItemNotFoundException">No library exist with the given ID.</exception>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<LibraryItem>> GetItemsFromLibrary(int id,
 			Expression<Func<LibraryItem, bool>> where = null,
@@ -330,6 +332,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="where">A filter function</param>
 		/// <param name="sort">A sort by method</param>
 		/// <param name="limit">How many items to return and where to start</param>
+		/// <exception cref="ItemNotFoundException">No library exist with the given ID.</exception>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<LibraryItem>> GetItemsFromLibrary(int id,
 			[Optional] Expression<Func<LibraryItem, bool>> where,
@@ -344,6 +347,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="where">A filter function</param>
 		/// <param name="sort">Sort information (sort order and sort by)</param>
 		/// <param name="limit">How many items to return and where to start</param>
+		/// <exception cref="ItemNotFoundException">No library exist with the given slug.</exception>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<LibraryItem>> GetItemsFromLibrary(string slug,
 			Expression<Func<LibraryItem, bool>> where = null,
@@ -357,6 +361,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="where">A filter function</param>
 		/// <param name="sort">A sort by method</param>
 		/// <param name="limit">How many items to return and where to start</param>
+		/// <exception cref="ItemNotFoundException">No library exist with the given slug.</exception>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<LibraryItem>> GetItemsFromLibrary(string slug,
 			[Optional] Expression<Func<LibraryItem, bool>> where,
@@ -371,6 +376,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="where">A filter function</param>
 		/// <param name="sort">Sort information (sort order and sort by)</param>
 		/// <param name="limit">How many items to return and where to start</param>
+		/// <exception cref="ItemNotFoundException">No <see cref="Show"/> exist with the given ID.</exception>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetPeopleFromShow(int showID,
 			Expression<Func<PeopleRole, bool>> where = null,
@@ -384,6 +390,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="where">A filter function</param>
 		/// <param name="sort">A sort by method</param>
 		/// <param name="limit">How many items to return and where to start</param>
+		/// <exception cref="ItemNotFoundException">No <see cref="Show"/> exist with the given ID.</exception>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetPeopleFromShow(int showID,
 			[Optional] Expression<Func<PeopleRole, bool>> where,
@@ -398,6 +405,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="where">A filter function</param>
 		/// <param name="sort">Sort information (sort order and sort by)</param>
 		/// <param name="limit">How many items to return and where to start</param>
+		/// <exception cref="ItemNotFoundException">No <see cref="Show"/> exist with the given slug.</exception>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetPeopleFromShow(string showSlug,
 			Expression<Func<PeopleRole, bool>> where = null,
@@ -411,6 +419,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="where">A filter function</param>
 		/// <param name="sort">A sort by method</param>
 		/// <param name="limit">How many items to return and where to start</param>
+		/// <exception cref="ItemNotFoundException">No <see cref="Show"/> exist with the given slug.</exception>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetPeopleFromShow(string showSlug,
 			[Optional] Expression<Func<PeopleRole, bool>> where,
@@ -425,6 +434,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="where">A filter function</param>
 		/// <param name="sort">Sort information (sort order and sort by)</param>
 		/// <param name="limit">How many items to return and where to start</param>
+		/// <exception cref="ItemNotFoundException">No <see cref="People"/> exist with the given ID.</exception>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetRolesFromPeople(int id,
 			Expression<Func<PeopleRole, bool>> where = null,
@@ -438,6 +448,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="where">A filter function</param>
 		/// <param name="sort">A sort by method</param>
 		/// <param name="limit">How many items to return and where to start</param>
+		/// <exception cref="ItemNotFoundException">No <see cref="People"/> exist with the given ID.</exception>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetRolesFromPeople(int id,
 			[Optional] Expression<Func<PeopleRole, bool>> where,
@@ -452,6 +463,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="where">A filter function</param>
 		/// <param name="sort">Sort information (sort order and sort by)</param>
 		/// <param name="limit">How many items to return and where to start</param>
+		/// <exception cref="ItemNotFoundException">No <see cref="People"/> exist with the given slug.</exception>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetRolesFromPeople(string slug,
 			Expression<Func<PeopleRole, bool>> where = null,
@@ -465,6 +477,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="where">A filter function</param>
 		/// <param name="sort">A sort by method</param>
 		/// <param name="limit">How many items to return and where to start</param>
+		/// <exception cref="ItemNotFoundException">No <see cref="People"/> exist with the given slug.</exception>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetRolesFromPeople(string slug,
 			[Optional] Expression<Func<PeopleRole, bool>> where,
