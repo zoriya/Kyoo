@@ -17,6 +17,8 @@
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
 		<ApplicationIcon>$(MSBuildThisFileDirectory)../icons/icon-256x256.ico</ApplicationIcon>
+
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -44,7 +46,6 @@
 	</ItemGroup>
 
 	<PropertyGroup Condition="$(CheckCodingStyle) == true">
-		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)../Kyoo.ruleset</CodeAnalysisRuleSet>
 <!--		<AnalysisMode>AllEnabledByDefault</AnalysisMode>-->
