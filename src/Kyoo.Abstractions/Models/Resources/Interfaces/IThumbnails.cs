@@ -33,6 +33,7 @@ namespace Kyoo.Abstractions.Models
 		/// <remarks>
 		/// An arbitrary index should not be used, instead use indexes from <see cref="Models.Images"/>
 		/// </remarks>
+		/// <example>{"0": "example.com/dune/poster"}</example>
 		public Dictionary<int, string> Images { get; set; }
 	}
 

@@ -97,6 +97,7 @@ namespace Kyoo.Swagger
 					x.IsNullableRaw = false;
 					x.Type = JsonObjectType.String | JsonObjectType.Integer;
 				}));
+				document.SchemaProcessors.Add(new ThumbnailProcessor());
 
 				document.AddSecurity("Kyoo", new OpenApiSecurityScheme
 				{

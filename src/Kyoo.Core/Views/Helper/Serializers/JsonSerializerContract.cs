@@ -105,7 +105,7 @@ namespace Kyoo.Core.Api
 					ShouldSerialize = x =>
 					{
 						IThumbnails thumb = (IThumbnails)x;
-						return thumb.Images?.ContainsKey(id) == true;
+						return thumb?.Images?.ContainsKey(id) == true;
 					},
 					ValueProvider = new ThumbnailProvider(_options.Value.PublicUrl, id)
 				});
