@@ -9,7 +9,7 @@ AppUpdatesURL=https://github.com/AnonymusRaccoon/Kyoo
 DefaultDirName={commonpf}\Kyoo
 DisableProgramGroupPage=yes
 LicenseFile={#kyoo}\LICENSE
-SetupIconFile={#kyoo}\wwwroot\favicon.ico
+SetupIconFile={#kyoo}\wwwroot\icon-256x256.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -54,7 +54,7 @@ procedure InitializeWizard;
 begin
   DataDirPage := CreateInputDirPage(wpSelectDir,
     'Choose Data Location', 'Choose the folder in which to install the Kyoo data',
-    'The installer will set the following folder for Kyoo. To install in a different folder, click Browse and select another folder.' + 
+    'The installer will set the following folder for Kyoo. To install in a different folder, click Browse and select another folder.' +
     'Please make sure the folder exists and is accessible. Do not choose the server install folder. Click Next to continue.',
     False, '');
   DataDirPage.Add('');
