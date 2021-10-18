@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using Autofac;
 using Kyoo.Abstractions;
 using Kyoo.Abstractions.Controllers;
@@ -28,6 +29,7 @@ using Kyoo.Core.Models.Options;
 using Kyoo.Core.Tasks;
 using Kyoo.Postgresql;
 using Kyoo.SqLite;
+using Kyoo.Swagger;
 using Kyoo.TheMovieDb;
 using Kyoo.TheTvdb;
 using Kyoo.Utils;
@@ -75,7 +77,8 @@ namespace Kyoo.Core
 				typeof(PostgresModule),
 				typeof(SqLiteModule),
 				typeof(PluginTvdb),
-				typeof(PluginTmdb)
+				typeof(PluginTmdb),
+				typeof(SwaggerModule)
 			);
 		}
 
@@ -106,6 +109,9 @@ namespace Kyoo.Core
 		/// <param name="services">The service collection to fill.</param>
 		public void ConfigureServices(IServiceCollection services)
 		{
+			foreach (Assembly assembly in _plugins.GetAllPlugins().Select(x => x.GetType().Assembly))
+				services.AddMvcCore().AddApplicationPart(assembly);
+
 			foreach (IPlugin plugin in _plugins.GetAllPlugins())
 				plugin.Configure(services);
 

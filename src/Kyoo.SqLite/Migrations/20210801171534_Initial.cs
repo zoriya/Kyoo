@@ -21,8 +21,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Kyoo.SqLite.Migrations
 {
+	/// <summary>
+	/// The initial migration that build most of the database.
+	/// </summary>
 	public partial class Initial : Migration
 	{
+		/// <inheritdoc/>
 		protected override void Up(MigrationBuilder migrationBuilder)
 		{
 			migrationBuilder.CreateTable(
@@ -775,6 +779,7 @@ namespace Kyoo.SqLite.Migrations
 				column: "EpisodeID");
 		}
 
+		/// <inheritdoc/>
 		protected override void Down(MigrationBuilder migrationBuilder)
 		{
 			migrationBuilder.DropTable(

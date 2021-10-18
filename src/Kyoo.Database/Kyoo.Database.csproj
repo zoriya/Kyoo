@@ -1,12 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
+		<LangVersion>default</LangVersion>
 		<AssemblyName>Kyoo.Database</AssemblyName>
 		<RootNamespace>Kyoo.Database</RootNamespace>
-		<Authors>Zoe Roux</Authors>
-		<RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
-		<LangVersion>default</LangVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -19,5 +16,4 @@
 	<ItemGroup>
 	  <ProjectReference Include="../Kyoo.Abstractions/Kyoo.Abstractions.csproj" />
 	</ItemGroup>
-
 </Project>

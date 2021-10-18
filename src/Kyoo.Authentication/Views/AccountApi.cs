@@ -28,7 +28,9 @@ using IdentityServer4.Models;
 using IdentityServer4.Services;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Exceptions;
+using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Authentication.Models;
 using Kyoo.Authentication.Models.DTO;
 using Microsoft.AspNetCore.Authentication;
@@ -36,15 +38,19 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Authentication.Views
 {
 	/// <summary>
-	/// The class responsible for login, logout, permissions and claims of a user.
+	/// The endpoint responsible for login, logout, permissions and claims of a user.
+	/// Documentation of this endpoint is a work in progress.
 	/// </summary>
-	[Route("api/account")]
+	/// TODO document this well.
 	[Route("api/accounts")]
+	[Route("api/account", Order = AlternativeRoute)]
 	[ApiController]
+	[ApiDefinition("Account")]
 	public class AccountApi : Controller, IProfileService
 	{
 		/// <summary>
@@ -78,12 +84,17 @@ namespace Kyoo.Authentication.Views
 		}
 
 		/// <summary>
-		/// Register a new user and return a OTAC to connect to it.
+		/// Register
 		/// </summary>
+		/// <remarks>
+		/// Register a new user and return a OTAC to connect to it.
+		/// </remarks>
 		/// <param name="request">The DTO register request</param>
 		/// <returns>A OTAC to connect to this new account</returns>
 		[HttpPost("register")]
-		public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(RequestError))]
+		public async Task<ActionResult<OtacResponse>> Register([FromBody] RegisterRequest request)
 		{
 			User user = request.ToUser();
 			user.Permissions = _options.Value.Permissions.NewUser;
@@ -96,10 +107,10 @@ namespace Kyoo.Authentication.Views
 			}
 			catch (DuplicatedItemException)
 			{
-				return Conflict(new { Errors = new { Duplicate = new[] { "A user with this name already exists" } } });
+				return Conflict(new RequestError("A user with this name already exists"));
 			}
 
-			return Ok(new { Otac = user.ExtraData["otac"] });
+			return Ok(new OtacResponse(user.ExtraData["otac"]));
 		}
 
 		/// <summary>
@@ -119,8 +130,11 @@ namespace Kyoo.Authentication.Views
 		}
 
 		/// <summary>
-		/// Login the user.
+		/// Login
 		/// </summary>
+		/// <remarks>
+		/// Login the current session.
+		/// </remarks>
 		/// <param name="login">The DTO login request</param>
 		/// <returns>TODO</returns>
 		[HttpPost("login")]
@@ -177,6 +191,7 @@ namespace Kyoo.Authentication.Views
 		}
 
 		/// <inheritdoc />
+		[ApiExplorerSettings(IgnoreApi = true)]
 		public async Task GetProfileDataAsync(ProfileDataRequestContext context)
 		{
 			User user = await _users.GetOrDefault(int.Parse(context.Subject.GetSubjectId()));
@@ -187,6 +202,7 @@ namespace Kyoo.Authentication.Views
 		}
 
 		/// <inheritdoc />
+		[ApiExplorerSettings(IgnoreApi = true)]
 		public async Task IsActiveAsync(IsActiveContext context)
 		{
 			User user = await _users.GetOrDefault(int.Parse(context.Subject.GetSubjectId()));

@@ -61,7 +61,7 @@ namespace Kyoo.Authentication
 		/// <inheritdoc />
 		public IFilterMetadata Create(PartialPermissionAttribute attribute)
 		{
-			return new PermissionValidatorFilter((object)attribute.Type ?? attribute.Kind, _options);
+			return new PermissionValidatorFilter((object)attribute.Type ?? attribute.Kind, attribute.Group, _options);
 		}
 
 		/// <summary>
@@ -109,15 +109,24 @@ namespace Kyoo.Authentication
 			/// Create a new permission validator with the given options.
 			/// </summary>
 			/// <param name="partialInfo">The partial permission to validate.</param>
+			/// <param name="group">The group of the permission.</param>
 			/// <param name="options">The option containing default values.</param>
-			public PermissionValidatorFilter(object partialInfo, IOptionsMonitor<PermissionOption> options)
+			public PermissionValidatorFilter(object partialInfo, Group? group, IOptionsMonitor<PermissionOption> options)
 			{
-				if (partialInfo is Kind kind)
-					_kind = kind;
-				else if (partialInfo is string perm)
-					_permission = perm;
-				else
-					throw new ArgumentException($"{nameof(partialInfo)} can only be a permission string or a kind.");
+				switch (partialInfo)
+				{
+					case Kind kind:
+						_kind = kind;
+						break;
+					case string perm:
+						_permission = perm;
+						break;
+					default:
+						throw new ArgumentException($"{nameof(partialInfo)} can only be a permission string or a kind.");
+				}
+
+				if (group != null)
+					_group = group.Value;
 				_options = options;
 			}
 

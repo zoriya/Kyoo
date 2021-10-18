@@ -31,14 +31,14 @@ namespace Kyoo.Abstractions.Controllers
 		/// <summary>
 		/// Where to start? Using the given sort.
 		/// </summary>
-		public int AfterID { get; }
+		public int? AfterID { get; }
 
 		/// <summary>
 		/// Create a new <see cref="Pagination"/> instance.
 		/// </summary>
 		/// <param name="count">Set the <see cref="Count"/> value</param>
 		/// <param name="afterID">Set the <see cref="AfterID"/> value. If not specified, it will start from the start</param>
-		public Pagination(int count, int afterID = 0)
+		public Pagination(int count, int? afterID = null)
 		{
 			Count = count;
 			AfterID = afterID;

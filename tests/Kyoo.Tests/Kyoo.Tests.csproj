@@ -1,12 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
 		<LangVersion>default</LangVersion>
 		<IsPackable>false</IsPackable>
-
-		<Authors>Zoe Roux</Authors>
-		<Company>SDG</Company>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -37,5 +33,4 @@
 		<ProjectReference Include="../../src/Kyoo.Core/Kyoo.Core.csproj" />
 		<ProjectReference Include="../../src/Kyoo.TheTvdb/Kyoo.TheTvdb.csproj" />
 	</ItemGroup>
-
 </Project>

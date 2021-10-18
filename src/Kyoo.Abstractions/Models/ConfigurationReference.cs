@@ -105,9 +105,17 @@ namespace Kyoo.Abstractions.Models
 			return CreateReference(path, typeof(T));
 		}
 
+		/// <summary>
+		/// Return a <see cref="ConfigurationReference"/> meaning that the given path is of any type.
+		/// It means that the type can't be edited.
+		/// </summary>
+		/// <param name="path">
+		/// The path that will be untyped (separated by ':' or "__". If empty, it will start at root).
+		/// </param>
+		/// <returns>A configuration reference representing a path of any type.</returns>
 		public static ConfigurationReference CreateUntyped(string path)
 		{
-			return new(path, null);
+			return new ConfigurationReference(path, null);
 		}
 	}
 }

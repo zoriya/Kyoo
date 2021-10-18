@@ -22,24 +22,53 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using JetBrains.Annotations;
 using Kyoo.Abstractions.Models;
 
 namespace Kyoo.Core.Api
 {
+	/// <summary>
+	/// A static class containing methods to parse the <c>where</c> query string.
+	/// </summary>
 	public static class ApiHelper
 	{
-		public static Expression StringCompatibleExpression(Func<Expression, Expression, BinaryExpression> operand,
-			Expression left,
-			Expression right)
+		/// <summary>
+		/// Make an expression (like
+		/// <see cref="Expression.LessThan(System.Linq.Expressions.Expression,System.Linq.Expressions.Expression)"/>
+		/// compatible with strings). If the expressions are not strings, the given <paramref name="operand"/> is
+		/// constructed but if the expressions are strings, this method make the <paramref name="operand"/> compatible with
+		/// strings.
+		/// </summary>
+		/// <param name="operand">
+		/// The expression to make compatible. It should be something like
+		/// <see cref="Expression.LessThan(System.Linq.Expressions.Expression,System.Linq.Expressions.Expression)"/> or
+		/// <see cref="Expression.Equal(System.Linq.Expressions.Expression,System.Linq.Expressions.Expression)"/>.
+		/// </param>
+		/// <param name="left">The first parameter to compare.</param>
+		/// <param name="right">The second parameter to compare.</param>
+		/// <returns>A comparison expression compatible with strings</returns>
+		public static BinaryExpression StringCompatibleExpression(
+			[NotNull] Func<Expression, Expression, BinaryExpression> operand,
+			[NotNull] Expression left,
+			[NotNull] Expression right)
 		{
-			if (left is MemberExpression member && ((PropertyInfo)member.Member).PropertyType == typeof(string))
-			{
-				MethodCallExpression call = Expression.Call(typeof(string), "Compare", null, left, right);
-				return operand(call, Expression.Constant(0));
-			}
-			return operand(left, right);
+			if (left is not MemberExpression member || ((PropertyInfo)member.Member).PropertyType != typeof(string))
+				return operand(left, right);
+			MethodCallExpression call = Expression.Call(typeof(string), "Compare", null, left, right);
+			return operand(call, Expression.Constant(0));
 		}
 
+		/// <summary>
+		/// Parse a <c>where</c> query for the given <typeparamref name="T"/>. Items can be filtered by any property
+		/// of the given type.
+		/// </summary>
+		/// <param name="where">The list of filters.</param>
+		/// <param name="defaultWhere">
+		/// A custom expression to initially filter a collection. It will be combined with the parsed expression.
+		/// </param>
+		/// <typeparam name="T">The type to create filters for.</typeparam>
+		/// <exception cref="ArgumentException">A filter is invalid.</exception>
+		/// <returns>An expression representing the filters that can be used anywhere or compiled</returns>
 		public static Expression<Func<T, bool>> ParseWhere<T>(Dictionary<string, string> where,
 			Expression<Func<T, bool>> defaultWhere = null)
 		{
@@ -96,18 +125,17 @@ namespace Kyoo.Core.Api
 					"not" when valueExpr == null => _ResourceEqual(propertyExpr, value, true),
 
 					"eq" => Expression.Equal(propertyExpr, valueExpr),
-					"not" => Expression.NotEqual(propertyExpr, valueExpr!),
-					"lt" => StringCompatibleExpression(Expression.LessThan, propertyExpr, valueExpr),
-					"lte" => StringCompatibleExpression(Expression.LessThanOrEqual, propertyExpr, valueExpr),
-					"gt" => StringCompatibleExpression(Expression.GreaterThan, propertyExpr, valueExpr),
-					"gte" => StringCompatibleExpression(Expression.GreaterThanOrEqual, propertyExpr, valueExpr),
+					"not" => Expression.NotEqual(propertyExpr, valueExpr),
+					"lt" => StringCompatibleExpression(Expression.LessThan, propertyExpr, valueExpr!),
+					"lte" => StringCompatibleExpression(Expression.LessThanOrEqual, propertyExpr, valueExpr!),
+					"gt" => StringCompatibleExpression(Expression.GreaterThan, propertyExpr, valueExpr!),
+					"gte" => StringCompatibleExpression(Expression.GreaterThanOrEqual, propertyExpr, valueExpr!),
 					_ => throw new ArgumentException($"Invalid operand: {operand}")
 				};
 
-				if (expression != null)
-					expression = Expression.AndAlso(expression, condition);
-				else
-					expression = condition;
+				expression = expression != null
+					? Expression.AndAlso(expression, condition)
+					: condition;
 			}
 
 			return Expression.Lambda<Func<T, bool>>(expression!, param);

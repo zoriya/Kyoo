@@ -98,15 +98,6 @@ namespace Kyoo.Abstractions.Models
 		/// <inheritdoc />
 		public Dictionary<int, string> Images { get; set; }
 
-		/// <summary>
-		/// The path of this poster.
-		/// By default, the http path for this poster is returned from the public API.
-		/// This can be disabled using the internal query flag.
-		/// </summary>
-		[SerializeAs("{HOST}/api/seasons/{Slug}/thumb")]
-		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
-		public string Poster => Images?.GetValueOrDefault(Models.Images.Poster);
-
 		/// <inheritdoc />
 		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
 

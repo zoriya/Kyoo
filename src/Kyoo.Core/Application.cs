@@ -283,7 +283,7 @@ namespace Kyoo.Core
 				builder.ReadFrom.Services(services);
 
 			const string template =
-				"[{@t:HH:mm:ss} {@l:u3} {Substring(SourceContext, LastIndexOf(SourceContext, '.') + 1), 15} "
+				"[{@t:HH:mm:ss} {@l:u3} {Substring(SourceContext, LastIndexOf(SourceContext, '.') + 1), 25} "
 				+ "({@i:D10})] {@m}{#if not EndsWith(@m, '\n')}\n{#end}{@x}";
 
 			if (SystemdHelpers.IsSystemdService())

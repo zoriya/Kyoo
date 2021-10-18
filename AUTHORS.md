@@ -1,4 +1,4 @@
 # Authors
-Alphabetical order by first name.
+Ordered by the date of the first commit.
 
 * Zoe Roux ([@AnonymusRaccoon](http://github.com/AnonymusRaccoon))

@@ -16,7 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Collections.Generic;
 using Kyoo.Abstractions.Models.Attributes;
 
@@ -40,15 +39,6 @@ namespace Kyoo.Abstractions.Models
 
 		/// <inheritdoc />
 		public Dictionary<int, string> Images { get; set; }
-
-		/// <summary>
-		/// The path of this poster.
-		/// By default, the http path for this poster is returned from the public API.
-		/// This can be disabled using the internal query flag.
-		/// </summary>
-		[SerializeAs("{HOST}/api/people/{Slug}/poster")]
-		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
-		public string Poster => Images?.GetValueOrDefault(Models.Images.Poster);
 
 		/// <inheritdoc />
 		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }

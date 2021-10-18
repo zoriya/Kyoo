@@ -169,7 +169,6 @@ namespace Kyoo.Core.Controllers
 			resource.Tracks = await resource.Tracks.SelectAsync(x =>
 			{
 				x.Episode = resource;
-				x.EpisodeSlug = resource.Slug;
 				return _tracks.Create(x);
 			}).ToListAsync();
 			_database.Tracks.AttachRange(resource.Tracks);

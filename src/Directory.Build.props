@@ -1,5 +1,25 @@
 <Project>
 	<PropertyGroup>
+		<Company>Kyoo</Company>
+		<Authors>Kyoo</Authors>
+		<Copyright>Copyright (c) Kyoo</Copyright>
+		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
+		<RequireLicenseAcceptance>true</RequireLicenseAcceptance>
+
+		<RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<PackageProjectUrl>https://github.com/AnonymusRaccoon/Kyoo</PackageProjectUrl>
+
+		<PackageVersion>1.0.0</PackageVersion>
+		<IncludeSymbols>true</IncludeSymbols>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+		<ApplicationIcon>$(MSBuildThisFileDirectory)../icons/icon-256x256.ico</ApplicationIcon>
+	</PropertyGroup>
+
+	<PropertyGroup>
 		<IsWindows Condition="$([MSBuild]::IsOSPlatform('Windows'))">true</IsWindows>
 		<IsOSX Condition="$([MSBuild]::IsOSPlatform('OSX'))">true</IsOSX>
 		<IsLinux Condition="$([MSBuild]::IsOSPlatform('Linux'))">true</IsLinux>
@@ -11,6 +31,10 @@
 		<CheckCodingStyle Condition="$(CheckCodingStyle) == ''">true</CheckCodingStyle>
 	</PropertyGroup>
 
+	<ItemGroup>
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.0-beta-20204-02" PrivateAssets="All" />
+	</ItemGroup>
+
 	<ItemGroup Condition="$(CheckCodingStyle) == true">
 		<PackageReference Include="SerilogAnalyzer" Version="0.15.0" PrivateAssets="All" />
 		<PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.354" PrivateAssets="All" />
@@ -21,7 +45,6 @@
 
 	<PropertyGroup Condition="$(CheckCodingStyle) == true">
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<NoWarn>CS1591;SA1600;SA1601</NoWarn>
 		<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)../Kyoo.ruleset</CodeAnalysisRuleSet>
 <!--		<AnalysisMode>AllEnabledByDefault</AnalysisMode>-->

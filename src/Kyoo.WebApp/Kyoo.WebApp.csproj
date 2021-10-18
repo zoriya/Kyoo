@@ -1,22 +1,22 @@
 <Project>
 	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
-	
+
 	<PropertyGroup>
 		<TargetFramework>net5.0</TargetFramework>
+		<LangVersion>default</LangVersion>
+		<AssemblyName>Kyoo.WebApp</AssemblyName>
+		<RootNamespace>Kyoo.WebApp</RootNamespace>
+
 		<TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
 		<TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
 		<IsPackable>false</IsPackable>
 		<DefaultItemExcludes>$(DefaultItemExcludes);$(SpaRoot)node_modules/**</DefaultItemExcludes>
 		<SpaRoot>Front/</SpaRoot>
+		<Icons>../../icons/</Icons>
 		<NpmStamp>$(SpaRoot)node_modules/.install-stamp</NpmStamp>
 
 		<!-- Set this to true if you enable server-side prerendering -->
 		<BuildServerSideRenderer>false</BuildServerSideRenderer>
-
-		<Company>SDG</Company>
-		<Authors>Zoe Roux</Authors>
-		<RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
-		<LangVersion>default</LangVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -30,6 +30,11 @@
 		<Compile Remove="$(SpaRoot)**" />
 		<None Remove="$(SpaRoot)dist/**; $(SpaRoot)dist-server/**" />
 
+		<Content Include="$(Icons)**" Visible="false">
+			<Link>wwwroot/%(RecursiveDir)%(Filename)%(Extension)</Link>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		</Content>
+
 		<Content Include="$(SpaRoot)static/**" Visible="false">
 			<Link>wwwroot/%(RecursiveDir)%(Filename)%(Extension)</Link>
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -41,7 +46,7 @@
 			<Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
 		</Exec>
 		<Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />
-		
+
 		<Message Importance="high" Text="Restoring dependencies using 'npm'. This may take several minutes..." />
 		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
 		<Touch Files="$(NpmStamp)" AlwaysCreate="true" />

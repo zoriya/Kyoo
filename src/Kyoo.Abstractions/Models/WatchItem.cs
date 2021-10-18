@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -32,7 +33,7 @@ namespace Kyoo.Abstractions.Models
 	/// Information about tracks and display information that could be used by the player.
 	/// This contains mostly data from an <see cref="Episode"/> with another form.
 	/// </summary>
-	public class WatchItem
+	public class WatchItem : CustomTypeDescriptor, IThumbnails
 	{
 		/// <summary>
 		/// The ID of the episode associated with this item.
@@ -101,26 +102,8 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		public bool IsMovie { get; set; }
 
-		/// <summary>
-		/// The path of this item's poster.
-		/// By default, the http path for the poster is returned from the public API.
-		/// This can be disabled using the internal query flag.
-		/// </summary>
-		[SerializeAs("{HOST}/api/show/{ShowSlug}/poster")] public string Poster { get; set; }
-
-		/// <summary>
-		/// The path of this item's logo.
-		/// By default, the http path for the logo is returned from the public API.
-		/// This can be disabled using the internal query flag.
-		/// </summary>
-		[SerializeAs("{HOST}/api/show/{ShowSlug}/logo")] public string Logo { get; set; }
-
-		/// <summary>
-		/// The path of this item's backdrop.
-		/// By default, the http path for the backdrop is returned from the public API.
-		/// This can be disabled using the internal query flag.
-		/// </summary>
-		[SerializeAs("{HOST}/api/show/{ShowSlug}/backdrop")] public string Backdrop { get; set; }
+		/// <inheritdoc />
+		public Dictionary<int, string> Images { get; set; }
 
 		/// <summary>
 		/// The container of the video file of this episode.
@@ -158,36 +141,50 @@ namespace Kyoo.Abstractions.Models
 		/// <returns>A new WatchItem representing the given episode.</returns>
 		public static async Task<WatchItem> FromEpisode(Episode ep, ILibraryManager library)
 		{
-			Episode previous = null;
-			Episode next = null;
-
 			await library.Load(ep, x => x.Show);
 			await library.Load(ep, x => x.Tracks);
 
-			if (!ep.Show.IsMovie && ep.SeasonNumber != null && ep.EpisodeNumber != null)
+			Episode previous = null;
+			Episode next = null;
+			if (!ep.Show.IsMovie)
 			{
-				if (ep.EpisodeNumber > 1)
-					previous = await library.GetOrDefault(ep.ShowID, ep.SeasonNumber.Value, ep.EpisodeNumber.Value - 1);
-				else if (ep.SeasonNumber > 1)
+				if (ep.AbsoluteNumber != null)
 				{
-					previous = (await library.GetAll(x => x.ShowID == ep.ShowID
-					                                      && x.SeasonNumber == ep.SeasonNumber.Value - 1,
-						limit: 1,
-						sort: new Sort<Episode>(x => x.EpisodeNumber, true))
-					).FirstOrDefault();
+					previous = await library.GetOrDefault(
+						x => x.ShowID == ep.ShowID && x.AbsoluteNumber < ep.AbsoluteNumber,
+						new Sort<Episode>(x => x.AbsoluteNumber, true)
+					);
+					next = await library.GetOrDefault(
+						x => x.ShowID == ep.ShowID && x.AbsoluteNumber > ep.AbsoluteNumber,
+						new Sort<Episode>(x => x.AbsoluteNumber)
+					);
 				}
+				else if (ep.SeasonNumber != null && ep.EpisodeNumber != null)
+				{
+					previous = await library.GetOrDefault(
+						x => x.ShowID == ep.ShowID
+							&& x.SeasonNumber == ep.SeasonNumber
+							&& x.EpisodeNumber < ep.EpisodeNumber,
+						new Sort<Episode>(x => x.EpisodeNumber, true)
+					);
+					previous ??= await library.GetOrDefault(
+						x => x.ShowID == ep.ShowID
+							&& x.SeasonNumber == ep.SeasonNumber - 1,
+						new Sort<Episode>(x => x.EpisodeNumber, true)
+					);
 
-				if (ep.EpisodeNumber >= await library.GetCount<Episode>(x => x.SeasonID == ep.SeasonID))
-					next = await library.GetOrDefault(ep.ShowID, ep.SeasonNumber.Value + 1, 1);
-				else
-					next = await library.GetOrDefault(ep.ShowID, ep.SeasonNumber.Value, ep.EpisodeNumber.Value + 1);
-			}
-			else if (!ep.Show.IsMovie && ep.AbsoluteNumber != null)
-			{
-				previous = await library.GetOrDefault<Episode>(x => x.ShowID == ep.ShowID
-				                                                    && x.AbsoluteNumber == ep.EpisodeNumber + 1);
-				next = await library.GetOrDefault<Episode>(x => x.ShowID == ep.ShowID
-				                                                && x.AbsoluteNumber == ep.AbsoluteNumber + 1);
+					next = await library.GetOrDefault(
+						x => x.ShowID == ep.ShowID
+							&& x.SeasonNumber == ep.SeasonNumber
+							&& x.EpisodeNumber > ep.EpisodeNumber,
+						new Sort<Episode>(x => x.EpisodeNumber)
+					);
+					next ??= await library.GetOrDefault(
+						x => x.ShowID == ep.ShowID
+							&& x.SeasonNumber == ep.SeasonNumber + 1,
+						new Sort<Episode>(x => x.EpisodeNumber)
+					);
+				}
 			}
 
 			return new WatchItem
@@ -202,6 +199,7 @@ namespace Kyoo.Abstractions.Models
 				Title = ep.Title,
 				ReleaseDate = ep.ReleaseDate,
 				Path = ep.Path,
+				Images = ep.Show.Images,
 				Container = PathIO.GetExtension(ep.Path)![1..],
 				Video = ep.Tracks.FirstOrDefault(x => x.Type == StreamType.Video),
 				Audios = ep.Tracks.Where(x => x.Type == StreamType.Audio).ToArray(),
@@ -238,6 +236,18 @@ namespace Kyoo.Abstractions.Models
 				await Console.Error.WriteLineAsync($"Invalid chapter file at {path}");
 				return Array.Empty<Chapter>();
 			}
+		}
+
+		/// <inheritdoc />
+		public override string GetClassName()
+		{
+			return nameof(Show);
+		}
+
+		/// <inheritdoc />
+		public override string GetComponentName()
+		{
+			return ShowSlug;
 		}
 	}
 }

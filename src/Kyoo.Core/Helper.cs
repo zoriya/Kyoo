@@ -22,6 +22,9 @@ using Newtonsoft.Json;
 
 namespace Kyoo.Core
 {
+	/// <summary>
+	/// A class containing helper methods.
+	/// </summary>
 	public static class Helper
 	{
 		/// <summary>

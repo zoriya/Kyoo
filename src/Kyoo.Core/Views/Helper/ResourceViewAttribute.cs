@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
+using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Controllers;
@@ -32,8 +33,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Core.Api
 {
+	/// <summary>
+	/// An attribute to put on most controllers. It handle fields loading (only retuning fields requested and if they
+	/// are requested, load them) and help for the <c>where</c> query parameter.
+	/// </summary>
 	public class ResourceViewAttribute : ActionFilterAttribute
 	{
+		/// <inheritdoc />
 		public override void OnActionExecuting(ActionExecutingContext context)
 		{
 			if (context.ActionArguments.TryGetValue("where", out object dic) && dic is Dictionary<string, string> where)
@@ -59,13 +65,13 @@ namespace Kyoo.Core.Api
 				type = Utility.GetGenericDefinition(type, typeof(ActionResult<>))?.GetGenericArguments()[0] ?? type;
 				type = Utility.GetGenericDefinition(type, typeof(Page<>))?.GetGenericArguments()[0] ?? type;
 
+				context.HttpContext.Items["ResourceType"] = type.Name;
+
 				PropertyInfo[] properties = type.GetProperties()
 					.Where(x => x.GetCustomAttribute<LoadableRelationAttribute>() != null)
 					.ToArray();
 				if (fields.Count == 1 && fields.Contains("all"))
-				{
 					fields = properties.Select(x => x.Name).ToList();
-				}
 				else
 				{
 					fields = fields
@@ -77,10 +83,9 @@ namespace Kyoo.Core.Api
 								?.Name;
 							if (property != null)
 								return property;
-							context.Result = new BadRequestObjectResult(new
-							{
-								Error = $"{x} does not exist on {type.Name}."
-							});
+							context.Result = new BadRequestObjectResult(
+								new RequestError($"{x} does not exist on {type.Name}.")
+							);
 							return null;
 						})
 						.ToList();
@@ -92,6 +97,7 @@ namespace Kyoo.Core.Api
 			base.OnActionExecuting(context);
 		}
 
+		/// <inheritdoc />
 		public override async Task OnResultExecutionAsync(ResultExecutingContext context, ResultExecutionDelegate next)
 		{
 			if (context.Result is ObjectResult result)
@@ -104,7 +110,7 @@ namespace Kyoo.Core.Api
 			if (result.DeclaredType == null)
 				return;
 
-			ILibraryManager library = context.HttpContext.RequestServices.GetService<ILibraryManager>();
+			ILibraryManager library = context.HttpContext.RequestServices.GetRequiredService<ILibraryManager>();
 			ICollection<string> fields = (ICollection<string>)context.HttpContext.Items["fields"];
 			Type pageType = Utility.GetGenericDefinition(result.DeclaredType, typeof(Page<>));
 
@@ -113,13 +119,13 @@ namespace Kyoo.Core.Api
 				foreach (IResource resource in ((dynamic)result.Value).Items)
 				{
 					foreach (string field in fields!)
-						await library!.Load(resource, field);
+						await library.Load(resource, field);
 				}
 			}
 			else if (result.DeclaredType.IsAssignableTo(typeof(IResource)))
 			{
 				foreach (string field in fields!)
-					await library!.Load((IResource)result.Value, field);
+					await library.Load((IResource)result.Value, field);
 			}
 		}
 	}

@@ -52,7 +52,7 @@ namespace Kyoo.Abstractions.Models
 		Subtitle = 3,
 
 		/// <summary>
-		/// The stream is an attachement (a font, an image or something else).
+		/// The stream is an attachment (a font, an image or something else).
 		/// Only fonts are handled by kyoo but they are not saved to the database.
 		/// </summary>
 		Attachment = 4
@@ -73,7 +73,7 @@ namespace Kyoo.Abstractions.Models
 			{
 				string type = Type.ToString().ToLower();
 				string index = TrackIndex != 0 ? $"-{TrackIndex}" : string.Empty;
-				string episode = EpisodeSlug ?? Episode?.Slug ?? EpisodeID.ToString();
+				string episode = _episodeSlug ?? Episode?.Slug ?? EpisodeID.ToString();
 				return $"{episode}.{Language ?? "und"}{index}{(IsForced ? ".forced" : string.Empty)}.{type}";
 			}
 
@@ -90,7 +90,7 @@ namespace Kyoo.Abstractions.Models
 					                            "Format: {episodeSlug}.{language}[-{index}][.forced].{type}[.{extension}]");
 				}
 
-				EpisodeSlug = match.Groups["ep"].Value;
+				_episodeSlug = match.Groups["ep"].Value;
 				Language = match.Groups["lang"].Value;
 				if (Language == "und")
 					Language = null;
@@ -99,11 +99,6 @@ namespace Kyoo.Abstractions.Models
 				Type = Enum.Parse<StreamType>(match.Groups["type"].Value, true);
 			}
 		}
-
-		/// <summary>
-		/// The slug of the episode that contain this track. If this is not set, this track is ill-formed.
-		/// </summary>
-		[SerializeIgnore] public string EpisodeSlug { private get; set; }
 
 		/// <summary>
 		/// The title of the stream.
@@ -153,7 +148,16 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The episode that uses this track.
 		/// </summary>
-		[LoadableRelation(nameof(EpisodeID))] public Episode Episode { get; set; }
+		[LoadableRelation(nameof(EpisodeID))] public Episode Episode
+		{
+			get => _episode;
+			set
+			{
+				_episode = value;
+				if (_episode != null)
+					_episodeSlug = _episode.Slug;
+			}
+		}
 
 		/// <summary>
 		/// The index of this track on the episode.
@@ -183,6 +187,17 @@ namespace Kyoo.Abstractions.Models
 				return name;
 			}
 		}
+
+		/// <summary>
+		/// The slug of the episode that contain this track. If this is not set, this track is ill-formed.
+		/// </summary>
+		[SerializeIgnore] private string _episodeSlug;
+
+		/// <summary>
+		/// The episode that uses this track.
+		/// This is the baking field of <see cref="Episode"/>.
+		/// </summary>
+		[SerializeIgnore] private Episode _episode;
 
 		// Converting mkv track language to c# system language tag.
 		private static string _GetLanguage(string mkvLanguage)

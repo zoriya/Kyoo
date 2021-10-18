@@ -18,126 +18,190 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Permissions;
+using Kyoo.Abstractions.Models.Utils;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kyoo.Core.Api
 {
+	/// <summary>
+	/// A base class to handle CRUD operations on a specific resource type <typeparamref name="T"/>.
+	/// </summary>
+	/// <typeparam name="T">The type of resource to make CRUD apis for.</typeparam>
 	[ApiController]
 	[ResourceView]
-	public class CrudApi<T> : ControllerBase
+	public class CrudApi<T> : BaseApi
 		where T : class, IResource
 	{
-		private readonly IRepository<T> _repository;
+		/// <summary>
+		/// The repository of the resource, used to retrieve, save and do operations on the baking store.
+		/// </summary>
+		protected IRepository<T> Repository { get; }
 
-		protected Uri BaseURL { get; }
-
-		public CrudApi(IRepository<T> repository, Uri baseURL)
+		/// <summary>
+		/// Create a new <see cref="CrudApi{T}"/> using the given repository and base url.
+		/// </summary>
+		/// <param name="repository">
+		/// The repository to use as a baking store for the type <typeparamref name="T"/>.
+		/// </param>
+		public CrudApi(IRepository<T> repository)
 		{
-			_repository = repository;
-			BaseURL = baseURL;
+			Repository = repository;
 		}
 
-		[HttpGet("{id:int}")]
+		/// <summary>
+		/// Get item
+		/// </summary>
+		/// <remarks>
+		/// Get a specific resource via it's ID or it's slug.
+		/// </remarks>
+		/// <param name="identifier">The ID or slug of the resource to retrieve.</param>
+		/// <returns>The retrieved resource.</returns>
+		/// <response code="404">A resource with the given ID or slug does not exist.</response>
+		[HttpGet("{identifier:id}")]
 		[PartialPermission(Kind.Read)]
-		public virtual async Task<ActionResult<T>> Get(int id)
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task<ActionResult<T>> Get(Identifier identifier)
 		{
-			T ret = await _repository.GetOrDefault(id);
+			T ret = await identifier.Match(
+				id => Repository.GetOrDefault(id),
+				slug => Repository.GetOrDefault(slug)
+			);
 			if (ret == null)
 				return NotFound();
 			return ret;
 		}
 
-		[HttpGet("{slug}")]
-		[PartialPermission(Kind.Read)]
-		public virtual async Task<ActionResult<T>> Get(string slug)
-		{
-			T ret = await _repository.GetOrDefault(slug);
-			if (ret == null)
-				return NotFound();
-			return ret;
-		}
-
+		/// <summary>
+		/// Get count
+		/// </summary>
+		/// <remarks>
+		/// Get the number of resources that match the filters.
+		/// </remarks>
+		/// <param name="where">A list of filters to respect.</param>
+		/// <returns>How many resources matched that filter.</returns>
+		/// <response code="400">Invalid filters.</response>
 		[HttpGet("count")]
 		[PartialPermission(Kind.Read)]
-		public virtual async Task<ActionResult<int>> GetCount([FromQuery] Dictionary<string, string> where)
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
+		public async Task<ActionResult<int>> GetCount([FromQuery] Dictionary<string, string> where)
 		{
 			try
 			{
-				return await _repository.GetCount(ApiHelper.ParseWhere<T>(where));
+				return await Repository.GetCount(ApiHelper.ParseWhere<T>(where));
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new { Error = ex.Message });
+				return BadRequest(new RequestError(ex.Message));
 			}
 		}
 
+		/// <summary>
+		/// Get all
+		/// </summary>
+		/// <remarks>
+		/// Get all resources that match the given filter.
+		/// </remarks>
+		/// <param name="sortBy">Sort information about the query (sort by, sort order).</param>
+		/// <param name="where">Filter the returned items.</param>
+		/// <param name="limit">How many items per page should be returned.</param>
+		/// <param name="afterID">Where the pagination should start.</param>
+		/// <returns>A list of resources that match every filters.</returns>
+		/// <response code="400">Invalid filters or sort information.</response>
 		[HttpGet]
 		[PartialPermission(Kind.Read)]
-		public virtual async Task<ActionResult<Page<T>>> GetAll([FromQuery] string sortBy,
-			[FromQuery] int afterID,
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
+		public async Task<ActionResult<Page<T>>> GetAll(
+			[FromQuery] string sortBy,
 			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 20)
+			[FromQuery] int limit = 20,
+			[FromQuery] int? afterID = null)
 		{
 			try
 			{
-				ICollection<T> resources = await _repository.GetAll(ApiHelper.ParseWhere<T>(where),
+				ICollection<T> resources = await Repository.GetAll(
+					ApiHelper.ParseWhere<T>(where),
 					new Sort<T>(sortBy),
-					new Pagination(limit, afterID));
+					new Pagination(limit, afterID)
+				);
 
 				return Page(resources, limit);
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new { Error = ex.Message });
+				return BadRequest(new RequestError(ex.Message));
 			}
 		}
 
-		protected Page<TResult> Page<TResult>(ICollection<TResult> resources, int limit)
-			where TResult : IResource
-		{
-			return new Page<TResult>(resources,
-				new Uri(BaseURL, Request.Path),
-				Request.Query.ToDictionary(x => x.Key, x => x.Value.ToString(), StringComparer.InvariantCultureIgnoreCase),
-				limit);
-		}
-
+		/// <summary>
+		/// Create new
+		/// </summary>
+		/// <remarks>
+		/// Create a new item and store it. You may leave the ID unspecified, it will be filed by Kyoo.
+		/// </remarks>
+		/// <param name="resource">The resource to create.</param>
+		/// <returns>The created resource.</returns>
+		/// <response code="400">The resource in the request body is invalid.</response>
+		/// <response code="409">This item already exists (maybe a duplicated slug).</response>
 		[HttpPost]
 		[PartialPermission(Kind.Create)]
-		public virtual async Task<ActionResult<T>> Create([FromBody] T resource)
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
+		[ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(ActionResult<>))]
+		public async Task<ActionResult<T>> Create([FromBody] T resource)
 		{
 			try
 			{
-				return await _repository.Create(resource);
+				return await Repository.Create(resource);
 			}
 			catch (ArgumentException ex)
 			{
-				return BadRequest(new { Error = ex.Message });
+				return BadRequest(new RequestError(ex.Message));
 			}
 			catch (DuplicatedItemException)
 			{
-				T existing = await _repository.GetOrDefault(resource.Slug);
+				T existing = await Repository.GetOrDefault(resource.Slug);
 				return Conflict(existing);
 			}
 		}
 
+		/// <summary>
+		/// Edit
+		/// </summary>
+		/// <remarks>
+		/// Edit an item. If the ID is specified it will be used to identify the resource.
+		/// If not, the slug will be used to identify it.
+		/// </remarks>
+		/// <param name="resource">The resource to edit.</param>
+		/// <param name="resetOld">
+		/// Should old properties of the resource be discarded or should null values considered as not changed?
+		/// </param>
+		/// <returns>The created resource.</returns>
+		/// <response code="400">The resource in the request body is invalid.</response>
+		/// <response code="404">No item found with the specified ID (or slug).</response>
 		[HttpPut]
 		[PartialPermission(Kind.Write)]
-		public virtual async Task<ActionResult<T>> Edit([FromQuery] bool resetOld, [FromBody] T resource)
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task<ActionResult<T>> Edit([FromBody] T resource, [FromQuery] bool resetOld = true)
 		{
 			try
 			{
 				if (resource.ID > 0)
-					return await _repository.Edit(resource, resetOld);
+					return await Repository.Edit(resource, resetOld);
 
-				T old = await _repository.Get(resource.Slug);
+				T old = await Repository.Get(resource.Slug);
 				resource.ID = old.ID;
-				return await _repository.Edit(resource, resetOld);
+				return await Repository.Edit(resource, resetOld);
 			}
 			catch (ItemNotFoundException)
 			{
@@ -145,44 +209,27 @@ namespace Kyoo.Core.Api
 			}
 		}
 
-		[HttpPut("{id:int}")]
-		[PartialPermission(Kind.Write)]
-		public virtual async Task<ActionResult<T>> Edit(int id, [FromQuery] bool resetOld, [FromBody] T resource)
-		{
-			resource.ID = id;
-			try
-			{
-				return await _repository.Edit(resource, resetOld);
-			}
-			catch (ItemNotFoundException)
-			{
-				return NotFound();
-			}
-		}
-
-		[HttpPut("{slug}")]
-		[PartialPermission(Kind.Write)]
-		public virtual async Task<ActionResult<T>> Edit(string slug, [FromQuery] bool resetOld, [FromBody] T resource)
-		{
-			try
-			{
-				T old = await _repository.Get(slug);
-				resource.ID = old.ID;
-				return await _repository.Edit(resource, resetOld);
-			}
-			catch (ItemNotFoundException)
-			{
-				return NotFound();
-			}
-		}
-
-		[HttpDelete("{id:int}")]
+		/// <summary>
+		/// Delete an item
+		/// </summary>
+		/// <remarks>
+		/// Delete one item via it's ID or it's slug.
+		/// </remarks>
+		/// <param name="identifier">The ID or slug of the resource to delete.</param>
+		/// <returns>The item has successfully been deleted.</returns>
+		/// <response code="404">No item could be found with the given id or slug.</response>
+		[HttpDelete("{identifier:id}")]
 		[PartialPermission(Kind.Delete)]
-		public virtual async Task<IActionResult> Delete(int id)
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task<IActionResult> Delete(Identifier identifier)
 		{
 			try
 			{
-				await _repository.Delete(id);
+				await identifier.Match(
+					id => Repository.Delete(id),
+					slug => Repository.Delete(slug)
+				);
 			}
 			catch (ItemNotFoundException)
 			{
@@ -192,32 +239,28 @@ namespace Kyoo.Core.Api
 			return Ok();
 		}
 
-		[HttpDelete("{slug}")]
+		/// <summary>
+		/// Delete all where
+		/// </summary>
+		/// <remarks>
+		/// Delete all items matching the given filters. If no filter is specified, delete all items.
+		/// </remarks>
+		/// <param name="where">The list of filters.</param>
+		/// <returns>The item(s) has successfully been deleted.</returns>
+		/// <response code="400">One or multiple filters are invalid.</response>
+		[HttpDelete]
 		[PartialPermission(Kind.Delete)]
-		public virtual async Task<IActionResult> Delete(string slug)
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
+		public async Task<IActionResult> Delete([FromQuery] Dictionary<string, string> where)
 		{
 			try
 			{
-				await _repository.Delete(slug);
+				await Repository.DeleteAll(ApiHelper.ParseWhere<T>(where));
 			}
-			catch (ItemNotFoundException)
+			catch (ArgumentException ex)
 			{
-				return NotFound();
-			}
-
-			return Ok();
-		}
-
-		[PartialPermission(Kind.Delete)]
-		public virtual async Task<IActionResult> Delete(Dictionary<string, string> where)
-		{
-			try
-			{
-				await _repository.DeleteAll(ApiHelper.ParseWhere<T>(where));
-			}
-			catch (ItemNotFoundException)
-			{
-				return NotFound();
+				return BadRequest(new RequestError(ex.Message));
 			}
 
 			return Ok();

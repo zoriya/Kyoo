@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<LangVersion>default</LangVersion>
+		<AssemblyName>Kyoo.Swagger</AssemblyName>
+		<RootNamespace>Kyoo.Swagger</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="NSwag.AspNetCore" Version="13.13.2" />
+		<ProjectReference Include="../Kyoo.Abstractions/Kyoo.Abstractions.csproj" />
+	</ItemGroup>
+</Project>
