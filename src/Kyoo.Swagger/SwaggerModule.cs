@@ -19,11 +19,13 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Kyoo.Abstractions;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NJsonSchema;
 using NJsonSchema.Generation.TypeMappers;
@@ -50,6 +52,20 @@ namespace Kyoo.Swagger
 		/// <inheritdoc />
 		public Dictionary<string, Type> Configuration => new();
 
+		/// <summary>
+		/// The configuration instance used to retrieve the server's public url.
+		/// </summary>
+		private readonly IConfiguration _configuration;
+
+		/// <summary>
+		/// Create a new <see cref="SwaggerModule"/>.
+		/// </summary>
+		/// <param name="configuration">The configuration instance used to retrieve the server's public url.</param>
+		public SwaggerModule(IConfiguration configuration)
+		{
+			_configuration = configuration;
+		}
+
 		/// <inheritdoc />
 		public void Configure(IServiceCollection services)
 		{
@@ -75,6 +91,11 @@ namespace Kyoo.Swagger
 						Name = "GPL-3.0-or-later",
 						Url = "https://github.com/AnonymusRaccoon/Kyoo/blob/master/LICENSE"
 					};
+					options.Servers.Add(new OpenApiServer
+					{
+						Url = _configuration.GetPublicUrl().ToString(),
+						Description = "The currently running kyoo's instance."
+					});
 
 					options.Info.ExtensionData ??= new Dictionary<string, object>();
 					options.Info.ExtensionData["x-logo"] = new

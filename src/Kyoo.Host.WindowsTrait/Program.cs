@@ -22,6 +22,9 @@ using Kyoo.Core;
 
 namespace Kyoo.Host.WindowsTrait
 {
+	/// <summary>
+	/// Windows's program entrypoint.
+	/// </summary>
 	public static class Program
 	{
 		/// <summary>

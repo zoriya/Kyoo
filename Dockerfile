@@ -21,5 +21,5 @@ EXPOSE 5000
 COPY --from=builder /opt/kyoo /usr/lib/kyoo
 COPY --from=transcoder /transcoder/libtranscoder.so /usr/lib/kyoo
 COPY --from=webapp /webapp/Front/dist/* /usr/lib/kyoo/wwwroot/
-CMD ["/usr/lib/kyoo/Kyoo", "/var/lib/kyoo"]
+CMD ["/usr/lib/kyoo/Kyoo.Host.Console"]
 
