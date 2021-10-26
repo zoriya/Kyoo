@@ -39,4 +39,6 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: coverage.xml
-        path: "**/coverage.opencover.xml"
+        path: |
+          "**/coverage.opencover.xml"
+          "**/TestOutputResults.xml"

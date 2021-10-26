@@ -57,8 +57,9 @@ jobs:
             -o:"anonymus-raccoon" \
             -d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
             -d:sonar.host.url="https://sonarcloud.io" \
-            -d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" 
-          
+            -d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" \
+            -d:sonar.cs.vstest.reportsPaths="**/TestOutputResults.xml"
+
           dotnet build --no-incremental '-p:SkipTranscoder=true;SkipWebApp=true'
-          
+
           ./.sonar/scanner/dotnet-sonarscanner end -d:sonar.login="${{ secrets.SONAR_TOKEN }}"
