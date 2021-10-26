@@ -130,16 +130,16 @@ namespace Kyoo.Authentication
 			foreach (Client client in clients)
 			{
 				client.RedirectUris = client.RedirectUris
-					.Select(x => x.StartsWith("/") ? publicUrl + x : x)
+					.Select(x => x.StartsWith("/") ? publicUrl.ToString().TrimEnd('/') + x : x)
 					.ToArray();
 			}
 
 			services.AddIdentityServer(options =>
 				{
 					options.IssuerUri = publicUrl.ToString();
-					options.UserInteraction.LoginUrl = $"{publicUrl}/login";
-					options.UserInteraction.ErrorUrl = $"{publicUrl}/error";
-					options.UserInteraction.LogoutUrl = $"{publicUrl}/logout";
+					options.UserInteraction.LoginUrl = $"{publicUrl}login";
+					options.UserInteraction.ErrorUrl = $"{publicUrl}error";
+					options.UserInteraction.LogoutUrl = $"{publicUrl}logout";
 				})
 				.AddInMemoryIdentityResources(IdentityContext.GetIdentityResources())
 				.AddInMemoryApiScopes(IdentityContext.GetScopes())
