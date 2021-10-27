@@ -44,21 +44,25 @@ version: "3.8"
 
 services:
     kyoo:
-        build: "."
+        image: ghcr.io/anonymusraccoon/kyoo:readme
         restart: on-failure
         environment:
             - KYOO_DATADIR=/var/lib/kyoo
             - BASICS__PUBLICURL=https://demo.kyoo.sdg
             - KYOO_MetadataInShow=false
-            - DATABASE__SERVER=postgres
-            - DATABASE__POSTGRES__USER_ID=kyoo
-            - DATABASE__POSTGRES__PASSWORD=kyooPassword
+            - DATABASE__ENABLED=postgres
+            - DATABASE__CONFIGURATIONS__POSTGRES__SERVER=postgres
+            - DATABASE__CONFIGURATIONS__POSTGRES__USER ID=kyoo
+            - DATABASE__CONFIGURATIONS__POSTGRES__PASSWORD=kyooPassword
+            - TVDB__APIKEY=TheTvDbApiKey
+            - THE-MOVIEDB__APIKEY=TheMovieDbApiKey
         ports:
             - "80:5000"
         depends_on:
             - postgres
         volumes:
             - kyoo:/var/lib/kyoo
+            - video:/video
     postgres:
         image: "postgres"
         restart: on-failure
@@ -70,6 +74,7 @@ services:
 
 volumes:
     kyoo:
+    video:
     db:
 ```
 
