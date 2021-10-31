@@ -1,7 +1,7 @@
 .git
 **/build
 **/dist
-**/nodes_modules
+src/Kyoo.WebApp/Front/nodes_modules
 **/bin
 **/obj
 docs

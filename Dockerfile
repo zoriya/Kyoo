@@ -4,11 +4,12 @@ WORKDIR /transcoder
 COPY src/Kyoo.Transcoder .
 RUN cmake . && make -j
 
-FROM node:alpine as webapp
+FROM node:16-alpine as webapp
 WORKDIR /webapp
 COPY src/Kyoo.WebApp/Front .
-RUN npm install
-RUN npm run build -- --configuration production
+RUN npm install -g @angular/cli #???
+RUN yarn install --frozen-lockfile
+RUN yarn run build --configuration production
 
 FROM mcr.microsoft.com/dotnet/sdk:5.0 as builder
 COPY . .
