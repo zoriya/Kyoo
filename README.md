@@ -37,7 +37,7 @@ Feel free to open issues or pull requests, all contribution are welcomed.
 You can see a live demo with copyright-free movies here: [demo.kyoo.moe](https://demo.kyoo.moe).
 Thanks to the [blender studio](https://www.blender.org/about/studio/) for providing open-source movies available for all.
 
-The files available on the demo server can be downloaded [here](https://demo.kyoo.moe/files.zip). The demo server is simply created using the following docker compose:
+The demo server is simply created using the following docker compose:
 
 ```yml
 version: "3.8"
