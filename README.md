@@ -44,12 +44,12 @@ version: "3.8"
 
 services:
     kyoo:
-        image: ghcr.io/anonymusraccoon/kyoo:readme
+        image: ghcr.io/anonymusraccoon/kyoo:master
         restart: on-failure
         environment:
             - KYOO_DATADIR=/var/lib/kyoo
-            - BASICS__PUBLICURL=https://demo.kyoo.sdg
-            - KYOO_MetadataInShow=false
+            - BASICS__PUBLICURL=https://demo.kyoo.moe
+            - BASICS__MetadataInShow=false
             - DATABASE__ENABLED=postgres
             - DATABASE__CONFIGURATIONS__POSTGRES__SERVER=postgres
             - DATABASE__CONFIGURATIONS__POSTGRES__USER ID=kyoo

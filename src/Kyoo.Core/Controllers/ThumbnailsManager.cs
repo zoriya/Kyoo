@@ -20,6 +20,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Microsoft.AspNetCore.StaticFiles;
@@ -114,7 +115,7 @@ namespace Kyoo.Core.Controllers
 		/// <param name="imageID">The ID of the image. See <see cref="Images"/> for values.</param>
 		/// <typeparam name="T">The type of the item</typeparam>
 		/// <returns>The path of the image for the given resource, <b>even if it does not exists</b></returns>
-		private async Task<string> _GetPrivateImagePath<T>(T item, int imageID)
+		private async Task<string> _GetPrivateImagePath<T>([NotNull] T item, int imageID)
 		{
 			if (item == null)
 				throw new ArgumentNullException(nameof(item));

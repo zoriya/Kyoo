@@ -47,15 +47,15 @@
 		</Exec>
 		<Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />
 
-		<Message Importance="high" Text="Restoring dependencies using 'npm'. This may take several minutes..." />
-		<Exec WorkingDirectory="$(SpaRoot)" Command="npm install" />
+		<Message Importance="high" Text="Restoring dependencies using 'yarn'. This may take several minutes..." />
+		<Exec WorkingDirectory="$(SpaRoot)" Command="yarn install" />
 		<Touch Files="$(NpmStamp)" AlwaysCreate="true" />
 	</Target>
 
 	<Target Name="RunWebpack" Condition="'$(SkipWebApp)' != 'true' And '$(Configuration)' == 'Release'">
 		<Message Importance="high" Text="Building the web app. This may take several minutes..." />
-		<Exec WorkingDirectory="$(SpaRoot)" Command="npm run build -- --prod" />
-		<Exec WorkingDirectory="$(SpaRoot)" Command="npm run build:ssr -- --prod" Condition="'$(BuildServerSideRenderer)' == 'true'" />
+		<Exec WorkingDirectory="$(SpaRoot)" Command="yarn run build -- --prod" />
+		<Exec WorkingDirectory="$(SpaRoot)" Command="yarn run build:ssr -- --prod" Condition="'$(BuildServerSideRenderer)' == 'true'" />
 	</Target>
 
 	<Target Name="CopyFrontEndFiles" AfterTargets="RunWebpack" BeforeTargets="GetCopyToOutputDirectoryItems" Condition="'$(Configuration)' != 'Debug'">
