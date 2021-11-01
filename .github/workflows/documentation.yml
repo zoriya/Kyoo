@@ -18,6 +18,7 @@ jobs:
         run: |
           cd docs/_site
           sudo chown $(whoami):$(whoami) . -R
+          echo -n docs.kyoo.moe > CNAME
           git config --global user.email "${GITHUB_ACTOR}@github.com"
           git config --global user.name "${GITHUB_ACTOR}"
           git init
