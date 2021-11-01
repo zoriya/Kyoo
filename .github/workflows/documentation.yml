@@ -16,7 +16,7 @@ jobs:
           args: docs/docfx.json
       - name: Update the docs
         run: |
-          cd _site
+          cd docs/_site
           git config --global user.email "${GITHUB_ACTOR}@github.com";
           git config --global user.name "${GITHUB_ACTOR}";
           git init

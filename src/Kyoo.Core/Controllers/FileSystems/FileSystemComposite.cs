@@ -207,10 +207,10 @@ namespace Kyoo.Core.Controllers
 				{
 					IResource res => Combine(
 						_options.CurrentValue.MetadataPath,
-						typeof(T).Name.ToLowerInvariant(),
+						typeof(T).Name.ToLower(),
 						res.Slug
 					),
-					_ => Combine(_options.CurrentValue.MetadataPath, typeof(T).Name.ToLowerInvariant())
+					_ => Combine(_options.CurrentValue.MetadataPath, typeof(T).Name.ToLower())
 				};
 			return await CreateDirectory(path);
 		}
