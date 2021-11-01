@@ -26,7 +26,7 @@ jobs:
         dotnet build --no-restore '-p:SkipWebApp=true;SkipTranscoder=true' -p:CopyLocalLockFileAssemblies=true
         cp ./src/Kyoo.Abstractions/bin/Debug/net5.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll ./tests/Kyoo.Tests/bin/Debug/net5.0/
     - name: Test
-      run: dotnet test --no-build '-p:CollectCoverage=true;CoverletOutputFormat=opencover'
+      run: dotnet test --no-build '-p:CollectCoverage=true;CoverletOutputFormat=opencover' --logger "trx;LogFileName=TestOutputResults.xml"
       env:
         POSTGRES_HOST: postgres
         POSTGRES_USERNAME: postgres
@@ -34,6 +34,12 @@ jobs:
     - name: Sanitize coverage output
       if: ${{ always() }}
       run: sed -i "s'$(pwd)'.'" tests/Kyoo.Tests/coverage.opencover.xml
+    - name: Upload tests results
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: results.xml
+        path: "**/TestOutputResults.xml"
     - name: Upload coverage report
       if: ${{ always() }}
       uses: actions/upload-artifact@v2

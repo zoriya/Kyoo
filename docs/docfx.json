@@ -1,0 +1,65 @@
+{
+	"metadata": [
+		{
+			"src": [
+				{
+					"files": [ "**.csproj" ],
+					"exclude": [ "**/bin/**", "**/obj/**" ],
+					"src": "../src"
+				}
+			],
+			"dest": "obj/api",
+			"disableGitFeatures": false,
+			"disableDefaultFilter": false
+		}
+	],
+	"build": {
+		"content": [
+			{
+				"files": [
+					"**/*.md",
+					"**/toc.yml"
+				]
+			},
+			{
+				"files": "CONTRIBUTING.md",
+				"src": "../",
+				"dest": "contributing"
+			},
+			{
+				"files": [ "**/*.yml" ],
+				"src": "obj/api",
+				"dest": "api"
+			}
+		],
+		"resource": [
+			{
+				"files": ["icons/**"],
+				"src": "../"
+			}
+		],
+		"dest": "_site",
+		"globalMetadata": {
+			"_appTitle": "Documentation - Kyoo",
+			"_appLogoPath": "icons/icon-32x32.png",
+			"_appFaviconPath": "icons/icon-256x256.ico",
+			"_gitContribute": {
+				"repo": "https://github.com/AnonymusRaccoon/Kyoo",
+				"branch": "master",
+				"apiSpecFolder": "docs"
+			},
+			"_enableSearch": true
+		},
+		"globalMetadataFiles": [],
+		"fileMetadataFiles": [],
+		"template": [
+			"default"
+		],
+		"postProcessors": [],
+		"markdownEngineName": "markdig",
+		"noLangKeyword": false,
+		"keepFileLink": false,
+		"cleanupCacheHistory": false,
+		"disableGitFeatures": false
+	}
+}

@@ -99,8 +99,7 @@ namespace Kyoo.Abstractions
 		/// <returns>The public URl of kyoo (without a slash at the end)</returns>
 		public static Uri GetPublicUrl(this IConfiguration configuration)
 		{
-			string uri = configuration["basics:publicUrl"]?.TrimEnd('/') ?? "http://localhost:5000";
-			return new Uri(uri);
+			return new Uri(configuration["basics:publicUrl"] ?? "http://localhost:5000");
 		}
 	}
 }

@@ -205,11 +205,11 @@ namespace Kyoo.Core.Controllers
 			string path = await fs.GetExtraDirectory(resource)
 				?? resource switch
 				{
-					Season season => await GetExtraDirectory(season.Show),
-					Episode episode => await GetExtraDirectory(episode.Show),
-					Track track => await GetExtraDirectory(track.Episode),
-					IResource res => Combine(_options.CurrentValue.MetadataPath,
-						typeof(T).Name.ToLowerInvariant(), res.Slug),
+					IResource res => Combine(
+						_options.CurrentValue.MetadataPath,
+						typeof(T).Name.ToLowerInvariant(),
+						res.Slug
+					),
 					_ => Combine(_options.CurrentValue.MetadataPath, typeof(T).Name.ToLowerInvariant())
 				};
 			return await CreateDirectory(path);

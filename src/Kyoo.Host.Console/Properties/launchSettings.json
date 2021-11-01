@@ -1,6 +1,6 @@
 {
 	"profiles": {
-		"Console Host": {
+		"Console": {
 			"commandName": "Project",
 			"launchBrowser": false,
 			"environmentVariables": {
@@ -8,7 +8,7 @@
 			},
 			"applicationUrl": "http://localhost:5000"
 		},
-		"Console Host (Browser)": {
+		"Console-Browser": {
 			"commandName": "Project",
 			"launchBrowser": true,
 			"environmentVariables": {

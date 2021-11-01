@@ -8,16 +8,15 @@ on:
 jobs:
   Building:
     runs-on: [ubuntu-latest]
-
     steps:
       - uses: actions/checkout@v1
-      - name: Install Doxygen
-        run: sudo apt-get install -y doxygen graphviz
+      - uses: nikeee/docfx-action@v1.0.0
+        name: Build Documentation
+        with:
+          args: docs/docfx.json
       - name: Update the docs
         run: |
-          rm -rf docs/*
-          doxygen Doxyfile
-          cd docs
+          cd _site
           git config --global user.email "${GITHUB_ACTOR}@github.com";
           git config --global user.name "${GITHUB_ACTOR}";
           git init
