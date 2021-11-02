@@ -41,7 +41,7 @@
 		"dest": "_site",
 		"globalMetadata": {
 			"_appTitle": "Documentation - Kyoo",
-			"_appLogoPath": "icons/icon-32x32.png",
+			"_appLogoPath": "icons/icon.svg",
 			"_appFaviconPath": "icons/icon-256x256.ico",
 			"_gitContribute": {
 				"repo": "https://github.com/AnonymusRaccoon/Kyoo",
