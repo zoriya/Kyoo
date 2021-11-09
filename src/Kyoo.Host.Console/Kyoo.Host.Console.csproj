@@ -18,6 +18,6 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<ProjectReference Include="../Kyoo.Core/Kyoo.Core.csproj" />
+		<ProjectReference Include="../Kyoo.Host.Generic/Kyoo.Host.Generic.csproj" />
 	</ItemGroup>
 </Project>

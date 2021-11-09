@@ -22,7 +22,6 @@ using System.Linq;
 using Autofac;
 using Autofac.Core;
 using Autofac.Core.Registration;
-using Autofac.Extras.AttributeMetadata;
 using Kyoo.Abstractions;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Utils;
@@ -37,7 +36,6 @@ using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Serilog;
 using IMetadataProvider = Kyoo.Abstractions.Controllers.IMetadataProvider;
 using JsonOptions = Kyoo.Core.Api.JsonOptions;
 
@@ -60,7 +58,6 @@ namespace Kyoo.Core
 		/// <inheritdoc />
 		public Dictionary<string, Type> Configuration => new()
 		{
-			{ BasicOptions.Path, typeof(BasicOptions) },
 			{ TaskOptions.Path, typeof(TaskOptions) },
 			{ MediaOptions.Path, typeof(MediaOptions) },
 			{ "database", null },
@@ -70,13 +67,8 @@ namespace Kyoo.Core
 		/// <inheritdoc />
 		public void Configure(ContainerBuilder builder)
 		{
-			builder.RegisterModule<AttributedMetadataModule>();
-
-			builder.RegisterComposite<FileSystemComposite, IFileSystem>().InstancePerLifetimeScope();
 			builder.RegisterType<LocalFileSystem>().As<IFileSystem>().SingleInstance();
 			builder.RegisterType<HttpFileSystem>().As<IFileSystem>().SingleInstance();
-
-			builder.RegisterType<TaskManager>().As<ITaskManager>().As<IHostedService>().SingleInstance();
 
 			builder.RegisterType<ConfigurationManager>().As<IConfigurationManager>().SingleInstance();
 			builder.RegisterType<Transcoder>().As<ITranscoder>().SingleInstance();
@@ -172,7 +164,6 @@ namespace Kyoo.Core
 					app.UseHsts();
 				}
 			}, SA.Before),
-			SA.New<IApplicationBuilder>(app => app.UseSerilogRequestLogging(), SA.Before),
 			SA.New<IApplicationBuilder>(app => app.UseResponseCompression(), SA.Routing + 1),
 			SA.New<IApplicationBuilder>(app => app.UseRouting(), SA.Routing),
 			SA.New<IApplicationBuilder>(app => app.UseEndpoints(x => x.MapControllers()), SA.Endpoint)

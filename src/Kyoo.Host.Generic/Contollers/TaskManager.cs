@@ -33,7 +33,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Kyoo.Core.Controllers
+namespace Kyoo.Host.Generic.Controllers
 {
 	/// <summary>
 	/// A service to handle long running tasks and a background runner.

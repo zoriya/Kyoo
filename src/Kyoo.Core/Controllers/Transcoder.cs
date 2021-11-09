@@ -35,6 +35,7 @@ namespace Kyoo.Core.Controllers
 	/// </summary>
 	public class Transcoder : ITranscoder
 	{
+#pragma warning disable IDE1006
 		/// <summary>
 		/// The class that interact with the transcoder written in C.
 		/// </summary>
@@ -156,6 +157,7 @@ namespace Kyoo.Core.Controllers
 				return tracks;
 			}
 		}
+#pragma warning restore IDE1006
 
 		/// <summary>
 		/// The file system used to retrieve the extra directory of shows to know where to extract information.
