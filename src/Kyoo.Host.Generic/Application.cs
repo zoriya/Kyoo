@@ -37,7 +37,7 @@ using Serilog.Templates;
 using Serilog.Templates.Themes;
 using ILogger = Serilog.ILogger;
 
-namespace Kyoo.Core
+namespace Kyoo.Host.Generic
 {
 	/// <summary>
 	/// The main implementation of <see cref="IApplication"/>.

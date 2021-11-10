@@ -21,12 +21,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Autofac;
-using Kyoo.Abstractions;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Authentication;
-using Kyoo.Core.Controllers;
+using Kyoo.Core;
 using Kyoo.Core.Models.Options;
-using Kyoo.Core.Tasks;
+using Kyoo.Host.Generic.Controllers;
 using Kyoo.Postgresql;
 using Kyoo.SqLite;
 using Kyoo.Swagger;
@@ -42,7 +41,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Kyoo.Core
+namespace Kyoo.Host.Generic
 {
 	/// <summary>
 	/// The Startup class is used to configure the AspNet's webhost.
@@ -60,6 +59,11 @@ namespace Kyoo.Core
 		private readonly IConfiguration _configuration;
 
 		/// <summary>
+		/// The plugin that adds controllers and tasks specific to this host.
+		/// </summary>
+		private readonly IPlugin _hostModule;
+
+		/// <summary>
 		/// Created from the DI container, those services are needed to load information and instantiate plugins.s
 		/// </summary>
 		/// <param name="plugins">The plugin manager to use to load new plugins and configure the host.</param>
@@ -70,6 +74,7 @@ namespace Kyoo.Core
 		{
 			_plugins = plugins;
 			_configuration = configuration;
+			_hostModule = new HostModule(_plugins);
 			_plugins.LoadPlugins(
 				typeof(CoreModule),
 				typeof(WebAppModule),
@@ -112,10 +117,12 @@ namespace Kyoo.Core
 			foreach (Assembly assembly in _plugins.GetAllPlugins().Select(x => x.GetType().Assembly))
 				services.AddMvcCore().AddApplicationPart(assembly);
 
+			_hostModule.Configure(services);
 			foreach (IPlugin plugin in _plugins.GetAllPlugins())
 				plugin.Configure(services);
 
 			IEnumerable<KeyValuePair<string, Type>> configTypes = _plugins.GetAllPlugins()
+				.Append(_hostModule)
 				.SelectMany(x => x.Configuration)
 				.Where(x => x.Value != null);
 			foreach ((string path, Type type) in configTypes)
@@ -135,9 +142,7 @@ namespace Kyoo.Core
 		/// <param name="builder">The builder to configure.</param>
 		public void ConfigureContainer(ContainerBuilder builder)
 		{
-			builder.RegisterInstance(_plugins).As<IPluginManager>().ExternallyOwned();
-			builder.RegisterTask<PluginInitializer>();
-
+			_hostModule.Configure(builder);
 			foreach (IPlugin plugin in _plugins.GetAllPlugins())
 				plugin.Configure(builder);
 		}
@@ -151,6 +156,7 @@ namespace Kyoo.Core
 		public void Configure(IApplicationBuilder app, ILifetimeScope container, IConfigurationManager config)
 		{
 			IEnumerable<IStartupAction> steps = _plugins.GetAllPlugins()
+				.Append(_hostModule)
 				.SelectMany(x => x.ConfigureSteps)
 				.OrderByDescending(x => x.Priority);
 
@@ -161,6 +167,7 @@ namespace Kyoo.Core
 				step.Run(provider);
 
 			IEnumerable<KeyValuePair<string, Type>> pluginConfig = _plugins.GetAllPlugins()
+				.Append(_hostModule)
 				.SelectMany(x => x.Configuration)
 				.GroupBy(x => x.Key.Split(':').First())
 				.Select(x => x

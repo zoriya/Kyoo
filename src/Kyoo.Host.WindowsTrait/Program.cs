@@ -18,7 +18,7 @@
 
 using System.Threading.Tasks;
 using Autofac;
-using Kyoo.Core;
+using Kyoo.Host.Generic;
 
 namespace Kyoo.Host.WindowsTrait
 {
