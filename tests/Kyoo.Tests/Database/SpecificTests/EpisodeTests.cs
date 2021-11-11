@@ -338,6 +338,7 @@ namespace Kyoo.Tests.Database
 			};
 			await _repository.Create(value);
 			ICollection<Episode> ret = await _repository.Search(query);
+			value.Show = TestSample.Get<Show>();
 			KAssert.DeepEqual(value, ret.First());
 		}
 	}

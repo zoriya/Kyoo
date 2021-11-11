@@ -120,13 +120,16 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task<ICollection<Episode>> Search(string query)
 		{
-			return await _database.Episodes
+			List<Episode> ret = await _database.Episodes
 				.Include(x => x.Show)
 				.Where(x => x.EpisodeNumber != null || x.AbsoluteNumber != null)
 				.Where(_database.Like<Episode>(x => x.Title, $"%{query}%"))
 				.OrderBy(DefaultSort)
 				.Take(20)
 				.ToListAsync();
+			foreach (Episode ep in ret)
+				ep.Show.Episodes = null;
+			return ret;
 		}
 
 		/// <inheritdoc />
