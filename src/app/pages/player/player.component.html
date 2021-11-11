@@ -49,7 +49,11 @@
 			<br />
 			Audio Codec:
 			<span>
-				{{this.item.audios[this.selectedAudio].codec}}
+				{{
+					this.selectedAudio != -1 && this.selectedAudio < this.item.audios.length
+						? this.item.audios[this.selectedAudio].codec
+						: "none"
+				}}
 				<i class="material-icons">{{this.supportList | supportedButton: "audio":this.selectedAudio}}</i>
 			</span>
 			<br />

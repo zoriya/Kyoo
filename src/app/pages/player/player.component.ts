@@ -96,7 +96,9 @@ export class SupportedButtonPipe implements PipeTransform
 			case "video":
 				return supports.videoCodec ? "check_circle" : "cancel";
 			case "audio":
-				return supports.audioCodec[audioIndex] ? "check_circle" : "cancel";
+				return (audioIndex >= supports.audioCodec.length || supports.audioCodec[audioIndex])
+					? "check_circle"
+					: "cancel";
 			default:
 				return "help";
 		}
