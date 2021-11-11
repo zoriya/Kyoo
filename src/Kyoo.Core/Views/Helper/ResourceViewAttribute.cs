@@ -52,12 +52,7 @@ namespace Kyoo.Core.Api
 			List<string> fields = context.HttpContext.Request.Query["fields"]
 				.SelectMany(x => x.Split(','))
 				.ToList();
-			if (fields.Contains("internal"))
-			{
-				fields.Remove("internal");
-				context.HttpContext.Items["internal"] = true;
-				// TODO disable SerializeAs attributes when this is true.
-			}
+
 			if (context.ActionDescriptor is ControllerActionDescriptor descriptor)
 			{
 				Type type = descriptor.MethodInfo.ReturnType;

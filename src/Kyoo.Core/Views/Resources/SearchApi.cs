@@ -70,6 +70,8 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		public async Task<ActionResult<SearchResult>> Search(string query)
 		{
+			HttpContext.Items["ResourceType"] = nameof(Episode);
+			HttpContext.Items["fields"] = new[] { nameof(Episode.Show) };
 			return new SearchResult
 			{
 				Query = query,
