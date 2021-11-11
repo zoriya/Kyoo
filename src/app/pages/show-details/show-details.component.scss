@@ -13,6 +13,12 @@ a
 	margin-top: -68px;
 	position: relative;
 	z-index: -1;
+	min-height: 20vh;
+
+	@include media-breakpoint-up(md)
+	{
+		min-height: 60vh;
+	}
 
 	> img
 	{
@@ -166,14 +172,14 @@ hr
 	width: 3rem;
 	height: 3rem;
 	margin: .5rem;
-	
+
 	> a
 	{
 		width: 3rem;
 		height: 3rem;
 		position: relative;
 		display: inline-block;
-		
+
 		> img
 		{
 			position: absolute;
