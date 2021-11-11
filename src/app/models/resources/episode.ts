@@ -1,5 +1,6 @@
 import { ExternalID } from "../external-id";
 import { IResource } from "./resource";
+import { Show } from "./show";
 
 export interface Episode extends IResource
 {
@@ -10,6 +11,6 @@ export interface Episode extends IResource
 	overview: string;
 	releaseDate: string;
 	runtime: number;
-	showTitle: string;
+	show: Show;
 	externalIDs: ExternalID[];
 }
