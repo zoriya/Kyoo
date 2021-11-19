@@ -2,7 +2,3 @@
 	path = src/Kyoo.Transcoder
 	url = ../Kyoo.Transcoder.git
 	branch = master
-[submodule "WebApp"]
-	path = src/Kyoo.WebApp/Front
-	url = ../Kyoo.WebApp.git
-	branch = master

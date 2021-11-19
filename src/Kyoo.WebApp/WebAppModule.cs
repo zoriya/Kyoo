@@ -59,10 +59,7 @@ namespace Kyoo.WebApp
 		public WebAppModule(ILogger<WebAppModule> logger)
 		{
 			if (!Enabled)
-			{
-				logger.LogError("The web app files could not be found, it will be disabled. " +
-					"If you cloned the project, you probably forgot to use the --recurse flag");
-			}
+				logger.LogError("The web app files could not be found, it will be disabled");
 		}
 
 		/// <inheritdoc />
@@ -123,12 +120,15 @@ namespace Kyoo.WebApp
 		/// <returns>The path of the source code of the web app or null if the directory has been deleted.</returns>
 		private static string _GetSpaSourcePath()
 		{
-			string GetSelfPath([CallerFilePath] string path = null)
+			static string GetRepoRootPath([CallerFilePath] string path = null)
 			{
+				// path is {RepoRoot}/src/Kyoo.WebApp/WebAppModules.cs
+				for (int i = 0; i < 3; i++)
+					path = Path.GetDirectoryName(path);
 				return path;
 			}
 
-			string path = Path.Join(Path.GetDirectoryName(GetSelfPath()), "Front");
+			string path = Path.Join(GetRepoRootPath(), "front");
 			return Directory.Exists(path) ? path : null;
 		}
 	}
