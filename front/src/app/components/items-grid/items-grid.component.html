@@ -1,0 +1,100 @@
+<div class="container-fluid justify-content-center" *ngIf="this.sortEnabled">
+	<button mat-icon-button matTooltipPosition="below" matTooltip="Filter" [matMenuTriggerFor]="filterMenu">
+		<mat-icon [matBadge]="getFilterCount().toString()" [matBadgeHidden]="getFilterCount() == 0"
+		          matBadgeColor="warn" matBadgeSize="small">
+			filter_list
+		</mat-icon>
+	</button>
+	<button mat-button matTooltipPosition="below" matTooltip="Sort" [matMenuTriggerFor]="sortMenu">
+		<mat-icon>sort</mat-icon> Sort by {{this.sortType}}
+		<i *ngIf="this.sortUp" class="material-icons arrow">arrow_upward</i>
+		<i *ngIf="!this.sortUp" class="material-icons arrow">arrow_downward</i>
+	</button>
+</div>
+
+<mat-menu #filterMenu="matMenu" class="big-panel">
+	<ng-container *ngIf="this.genres.length > 0">
+		<h4><b>Genres</b></h4>
+		<mat-chip-list>
+			<!--suppress AngularInvalidExpressionResultType ('default' color is valid for mat-chip)-->
+			<mat-chip *ngFor="let genre of this.genres"
+			          [color]="this.filters.genres.includes(genre) ? 'accent' : 'default'" selected
+			          (click)="this.addFilter('genres', genre)">
+				{{genre.name}}
+			</mat-chip>
+		</mat-chip-list>
+	</ng-container>
+
+	<br/>
+
+	<ng-container>
+		<mat-form-field class="w-100 px-3" (click)="$event.stopPropagation();">
+			<mat-label>Studio</mat-label>
+			<input type="text" matInput [formControl]="studioForm"
+			       [matAutocomplete]="autoStudio"
+			       [value]="this.nameGetter(this.filters.studio)">
+			<mat-autocomplete autoActiveFirstOption #autoStudio="matAutocomplete"
+			                  (optionSelected)="this.addFilter('studio', $event.option.value, false)"
+			                  [displayWith]="this.nameGetter">
+				<mat-option *ngIf="this.shouldDisplayNoneStudio()" [value]="null">None</mat-option>
+				<mat-option *ngFor="let studio of this.filteredStudios | async" [value]="studio">
+					{{studio.name}}
+				</mat-option>
+			</mat-autocomplete>
+		</mat-form-field>
+	</ng-container>
+
+	<ng-container>
+		<mat-form-field class="w-100 px-3" (click)="$event.stopPropagation();">
+			<mat-label>People</mat-label>
+			<mat-chip-list #peopleList>
+				<mat-chip *ngFor="let people of this.filters.people"
+				          color="accent" selected
+				          removable="true"
+				          (removed)="this.addFilter('people', people)"
+				          (click)="this.addFilter('people', people)">
+					{{people.name || people.slug}}
+					<mat-icon matChipRemove>cancel</mat-icon>
+				</mat-chip>
+				<input #peopleInput
+				       [matAutocomplete]="autoPpl"
+				       [matChipInputFor]="peopleList"
+				       [formControl]="peopleForm"
+				       (matChipInputTokenEnd)="this.addFilter('people', {id: 0, slug: $event.value});
+				                               $event.input.value = null;"/>
+			</mat-chip-list>
+			<mat-autocomplete #autoPpl="matAutocomplete"
+			                  (optionSelected)="this.addFilter('people', $event.option.value);
+			                                    peopleInput.value = null;">
+				<mat-option *ngFor="let people of this.filteredPeople | async" [value]="people">
+					{{people.name}}
+				</mat-option>
+			</mat-autocomplete>
+		</mat-form-field>
+	</ng-container>
+</mat-menu>
+
+<mat-menu #sortMenu="matMenu">
+	<div *ngFor="let type of this.sortKeys">
+		<button *ngIf="type != this.sortType; else elseBlock;" mat-menu-item (click)="sort(type, true)">
+			Sort by {{type}}
+		</button>
+		<ng-template #elseBlock>
+			<button mat-menu-item (click)="sort(type, !this.sortUp)">
+				Sort by {{type}}
+				<i *ngIf="!this.sortUp" class="material-icons arrow">arrow_upward</i>
+				<i *ngIf="this.sortUp" class="material-icons arrow">arrow_downward</i>
+			</button>
+		</ng-template>
+	</div>
+</mat-menu>
+
+<div class="container-fluid justify-content-center"
+     infinite-scroll (scrolled)="this.page?.loadNext(this.client)" infiniteScrollContainer="#main" fromRoot="true">
+	<a class="show" *ngFor="let item of this.page?.items" draggable="false"
+	   [href]="getLink(item)" [routerLink]="getLink(item)">
+		<div matRipple [style.background-image]="getPoster(item)"></div>
+		<p class="title">{{item.title ? item.title : item.name}}</p>
+		<p class="date">{{getDate(item)}}</p>
+	</a>
+</div>
