@@ -3,7 +3,8 @@
 	"version": 1,
 	"cli": {
 		"packageManager": "yarn",
-		"analytics": false
+		"analytics": false,
+		"defaultCollection": "@angular-eslint/schematics"
 	},
 	"newProjectRoot": "projects",
 	"projects": {
@@ -44,7 +45,9 @@
 							"./node_modules/hls.js/dist/hls.js"
 						],
 						"stylePreprocessorOptions": {
-							"includePaths": ["src"]
+							"includePaths": [
+								"src"
+							]
 						}
 					},
 					"configurations": {
@@ -105,12 +108,11 @@
 					}
 				},
 				"lint": {
-					"builder": "@angular-devkit/build-angular:tslint",
+					"builder": "@angular-eslint/builder:lint",
 					"options": {
-						"tsConfig": "tsconfig.json",
-						"exclude": [
-							"**/node_modules/**",
-							"dist"
+						"lintFilePatterns": [
+							"projects/host/**/*.ts",
+							"projects/host/**/*.html"
 						]
 					}
 				}

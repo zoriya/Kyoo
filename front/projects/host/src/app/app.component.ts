@@ -29,16 +29,21 @@ export class AppComponent
 	isLoading: boolean = false;
 
 
-	constructor(private libraryService: LibraryService,
-	            private router: Router,
-	            private location: Location,
-	            public authManager: AuthService,
-	            public dialog: MatDialog)
+	constructor(
+		private libraryService: LibraryService,
+		private router: Router,
+		private location: Location,
+		public authManager: AuthService,
+		public dialog: MatDialog
+	)
 	{
-		libraryService.getAll().subscribe(result =>
-		{
-			this.libraries = result.items;
-		}, error => console.error(error));
+		libraryService.getAll().subscribe({
+			next: result =>
+			{
+				this.libraries = result.items;
+			},
+			error: error => console.error(error)
+		});
 
 		this.router.events.subscribe((event: Event) =>
 		{
@@ -85,8 +90,7 @@ export class AppComponent
 			this.router.navigate(["/search", query], {
 				replaceUrl: this.router.url.startsWith("/search")
 			});
-		}
-		else
+		} else
 		{
 			event.target.classList.remove("searching");
 			this.location.back();

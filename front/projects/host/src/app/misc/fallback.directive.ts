@@ -1,6 +1,6 @@
 import { Directive, ElementRef, HostListener, Input, Pipe, PipeTransform } from "@angular/core";
 
-/* tslint:disable:directive-selector */
+/* eslint-disable @angular-eslint/directive-selector */
 @Directive({
 	selector: "img[fallback]"
 })
