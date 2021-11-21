@@ -43,12 +43,7 @@
 							"./node_modules/jquery/dist/jquery.min.js",
 							"./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js",
 							"./node_modules/hls.js/dist/hls.js"
-						],
-						"stylePreprocessorOptions": {
-							"includePaths": [
-								"src"
-							]
-						}
+						]
 					},
 					"configurations": {
 						"production": {
@@ -59,7 +54,6 @@
 								}
 							],
 							"optimization": true,
-							"outputHashing": "all",
 							"sourceMap": false,
 							"namedChunks": false,
 							"aot": true,

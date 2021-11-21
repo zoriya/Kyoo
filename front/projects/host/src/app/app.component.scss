@@ -1,7 +1,8 @@
 @import "~bootstrap/scss/functions";
 @import "~bootstrap/scss/variables";
 @import "~bootstrap/scss/mixins/breakpoints";
-@import "variables";
+
+$nav-bar-height: 64px;
 
 #toolbar
 {

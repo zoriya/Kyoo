@@ -6,7 +6,7 @@ RUN cmake . && make -j
 
 FROM node:14-alpine as webapp
 WORKDIR /webapp
-COPY src/Kyoo.WebApp/Front .
+COPY front .
 RUN npm install -g @angular/cli
 RUN yarn install --frozen-lockfile
 RUN yarn run build --configuration production
