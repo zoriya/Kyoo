@@ -1,0 +1,9 @@
+# Editor configuration, see https://editorconfig.org
+root = false
+
+[*]
+charset = utf-8
+indent_style = tab
+insert_final_newline = true
+max_line_length = 120
+trim_trailing_whitespace = true

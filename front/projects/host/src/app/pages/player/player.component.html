@@ -1,0 +1,215 @@
+<div id="root"
+     (mouseenter)="!isMobile ? this.showControls = true : null"
+     (mouseleave)="!this.player.paused && !isMobile ? this.showControls = this.isMenuOpen : null"
+     [style.cursor]="this.showControls ? '' : 'none'">
+	<div class="player data-vjs-player">
+		<video id="player" #player
+			   [poster]="this.item.backdrop"
+		       autoplay muted
+		       (click)="this.videoClicked()"
+		       (dblclick)="this.fullscreen()"
+		       (play)="this.playing = true; this.loading = false"
+		       (pause)="this.playing = false"
+		       (ended)="this.next()"
+		       [volume]="this.volume / 100"
+		       [muted]="this.muted"
+		       (waiting)="this.loading = true"
+		       (canplay)="this.loading = false"
+		       (error)="this.playbackError()">
+		</video>
+	</div>
+
+	<div id="loadIndicator" [ngClass]="{'d-none': !this.loading}">
+		<div class="spinner-border align-self-center" role="status"></div>
+	</div>
+
+	<mat-card class="d-none w-25 m-5 stats" [ngClass]="{'d-block': this.displayStats}">
+		<mat-card-header>
+			<h4>Stats</h4>
+			<div style="flex: 1 1 auto"></div>
+			<button mat-icon-button aria-label="Close" (click)="this.displayStats = false">
+				<mat-icon>close</mat-icon>
+			</button>
+		</mat-card-header>
+		<mat-card-content>
+			Play method: <span>{{this.playMethod}}</span>
+			<br />
+			<br />
+			Video Container:
+			<span>
+				{{this.item.container}}
+				<i class="material-icons">{{this.supportList | supportedButton: "container"}}</i>
+			</span>
+			<br />
+			Video Codec:
+			<span>
+				{{this.item.video.codec}}
+				<i class="material-icons">{{this.supportList | supportedButton: "video"}}</i>
+			</span>
+			<br />
+			Audio Codec:
+			<span>
+				{{
+					this.selectedAudio !== -1 && this.selectedAudio < this.item.audios.length
+						? this.item.audios[this.selectedAudio].codec
+						: "none"
+				}}
+				<i class="material-icons">{{this.supportList | supportedButton: "audio":this.selectedAudio}}</i>
+			</span>
+			<br />
+			Subtitle Codec:
+			<span>
+				{{this.selectedSubtitle !== -1 ? this.item.subtitles[this.selectedSubtitle].codec : "none"}}
+				<i class="material-icons">{{this.supportList | supportedButton: "subtitle"}}</i>
+			</span>
+			<br />
+		</mat-card-content>
+	</mat-card>
+
+	<div id="hover"
+	     (mouseenter)="this.areControlHovered = true"
+	     (mouseleave)="this.areControlHovered = false"
+	     [ngClass]="{'idle': !this.showControls}">
+		<div class="back">
+			<a mat-icon-button matTooltipPosition="below" matTooltip="Back" (click)="back()">
+				<mat-icon>arrow_back</mat-icon>
+			</a>
+			<h5>{{this.item.showTitle}}</h5>
+		</div>
+
+		<div class="controller container-fluid" id="controller">
+			<div class="img d-none d-sm-block">
+				<img [src]="this.item.poster | fallback" alt="poster" />
+			</div>
+			<div class="content">
+				<h3 *ngIf="!this.item.isMovie">S{{this.item.seasonNumber}}:E{{this.item.episodeNumber}} - {{this.item.title}}</h3>
+				<h3 *ngIf="this.item.isMovie">{{this.item.title}}</h3>
+
+				<div id="progress-bar" #progressBar
+				     [ngClass]="{'seeking': this.seeking}"
+				     (click)="player.currentTime = this.getTimeFromSeekbar($event.pageX);"
+				     (mousedown)="this.startSeeking($event)"
+				     (touchstart)="this.startSeeking($event)">
+					<div class="seek-bar">
+						<div id="buffered" [style.width]="player.buffered | bufferToWidth: player.duration">
+						</div>
+						<div id="progress" [style.width]="(player.currentTime / player.duration * 100) + '%'"></div>
+					</div>
+					<div id="thumb" [style.transform]="'translateX(' + (player.currentTime / player.duration * 100) + '%)'">
+						<div></div>
+					</div>
+				</div>
+
+				<div class="buttons">
+					<div class="left">
+						<a *ngIf="this.item.previousEpisode" mat-icon-button matTooltipPosition="above" matTooltip="Previous"
+						   (click)="previous()">
+							<mat-icon>skip_previous</mat-icon>
+						</a>
+						<button mat-icon-button matTooltipPosition="above" id="play"
+						        [matTooltip]="this.playing ? 'Pause' : 'Play'"
+						        (click)="togglePlayback()">
+							<mat-icon>{{this.playing ? 'pause' : 'play_arrow'}}</mat-icon>
+						</button>
+						<a mat-icon-button id="nextBtn" *ngIf="this.item.nextEpisode" (click)="next()">
+							<mat-icon>skip_next</mat-icon>
+
+							<div id="next">
+								<div id="main">
+									<img src="{{this.item.nextEpisode.thumbnail}}" alt="next episode thumbnail" />
+								</div>
+								<div id="overview">
+									<h6>S{{this.item.nextEpisode.seasonNumber}}:E{{this.item.nextEpisode.episodeNumber}} - {{this.item.nextEpisode.title}}</h6>
+									<p>{{this.item.nextEpisode.overview}}</p>
+								</div>
+							</div>
+						</a>
+						<div id="volume" [ngClass]="{'d-none': this.isMobile}">
+							<button mat-icon-button matTooltipPosition="above" matTooltip="Volume"
+							        (click)="this.muted = !this.muted">
+								<mat-icon>{{this.volume | volumeToButton: this.muted}}</mat-icon>
+							</button>
+
+							<mat-slider [value]="this.volume" (input)="this.volume = $event.value"></mat-slider>
+						</div>
+						<p>{{player.currentTime | formatTime: player.duration}} / {{player.duration | formatTime}}</p>
+					</div>
+					<div class="right">
+						<button *ngIf="this.item.audios.length > 1" mat-icon-button
+						        matTooltipPosition="above" matTooltip="Select audio track">
+							<mat-icon>music_note</mat-icon>
+						</button>
+						<button *ngIf="this.item.subtitles.length > 0" mat-icon-button [matMenuTriggerFor]="subtitles"
+						        (menuOpened)="this.isMenuOpen = true"
+						        matTooltipPosition="above" matTooltip="Select subtitle track">
+							<mat-icon>closed_caption</mat-icon>
+						</button>
+						<button mat-icon-button matTooltipPosition="above" matTooltip="Cast">
+							<mat-icon>cast</mat-icon>
+						</button>
+						<button mat-icon-button matTooltipPosition="above" matTooltip="Settings"
+						        (menuOpened)="this.isMenuOpen = true"
+						        [matMenuTriggerFor]="settings">
+							<mat-icon>settings</mat-icon>
+						</button>
+						<button mat-icon-button matTooltipPosition="above"
+						        [ngClass]="{'d-none': this.isMobile}"
+						        [matTooltip]="this.isFullScreen ? 'Exit fullscreen' : 'Fullscreen'"
+						        (click)="fullscreen()">
+							<mat-icon>{{this.isFullScreen ? "fullscreen_exit" : "fullscreen"}}</mat-icon>
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<mat-menu #subtitles="matMenu" (closed)="this.isMenuOpen = false">
+				<ng-template matMenuContent>
+					<button [ngClass]="{'selected': this.selectedSubtitle === -1}" mat-menu-item
+					        (click)="selectSubtitle(null)">
+						<span>None</span>
+					</button>
+
+					<div *ngFor="let subtitle of this.item.subtitles; index as i">
+						<button [ngClass]="{'selected': this.selectedSubtitle === i}"
+						        mat-menu-item *ngIf="subtitle.codec === 'ass' || subtitle.codec === 'subrip';
+						                             else elseBlock"
+						        (click)="selectSubtitle(subtitle)">
+							<span>{{subtitle.displayName}}</span>
+						</button>
+
+						<ng-template #elseBlock>
+							<button mat-menu-item disabled>
+								<span>{{subtitle.displayName}} ({{subtitle.codec}})</span>
+							</button>
+						</ng-template>
+					</div>
+				</ng-template>
+			</mat-menu>
+
+			<mat-menu #settings="matMenu" (closed)="this.isMenuOpen = false">
+				<ng-template matMenuContent>
+					<button mat-menu-item (click)="this.displayStats = !this.displayStats">
+						<span>Stats</span>
+					</button>
+					<button mat-menu-item [matMenuTriggerFor]="method">
+						<span>Method</span>
+					</button>
+				</ng-template>
+			</mat-menu>
+
+			<mat-menu #method="matMenu">
+				<ng-template matMenuContent>
+					<button mat-menu-item (click)="selectPlayMethod(methodType.direct)">
+						<span>Direct Play</span>
+					</button>
+					<button mat-menu-item (click)="selectPlayMethod(methodType.transmux)">
+						<span>Transmux</span>
+					</button>
+					<button mat-menu-item (click)="selectPlayMethod(methodType.transcode)">
+						<span>Transcode</span>
+					</button>
+				</ng-template>
+			</mat-menu>
+		</div>
+	</div>
+</div>
