@@ -1,6 +1,6 @@
 <div class="container-fluid justify-content-center" *ngIf="this.sortEnabled">
 	<button mat-icon-button matTooltipPosition="below" matTooltip="Filter" [matMenuTriggerFor]="filterMenu">
-		<mat-icon [matBadge]="getFilterCount().toString()" [matBadgeHidden]="getFilterCount() == 0"
+		<mat-icon [matBadge]="getFilterCount().toString()" [matBadgeHidden]="getFilterCount() === 0"
 		          matBadgeColor="warn" matBadgeSize="small">
 			filter_list
 		</mat-icon>
@@ -76,7 +76,7 @@
 
 <mat-menu #sortMenu="matMenu">
 	<div *ngFor="let type of this.sortKeys">
-		<button *ngIf="type != this.sortType; else elseBlock;" mat-menu-item (click)="sort(type, true)">
+		<button *ngIf="type !== this.sortType; else elseBlock;" mat-menu-item (click)="sort(type, true)">
 			Sort by {{type}}
 		</button>
 		<ng-template #elseBlock>

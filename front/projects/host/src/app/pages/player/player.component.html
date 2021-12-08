@@ -50,7 +50,7 @@
 			Audio Codec:
 			<span>
 				{{
-					this.selectedAudio != -1 && this.selectedAudio < this.item.audios.length
+					this.selectedAudio !== -1 && this.selectedAudio < this.item.audios.length
 						? this.item.audios[this.selectedAudio].codec
 						: "none"
 				}}
@@ -59,7 +59,7 @@
 			<br />
 			Subtitle Codec:
 			<span>
-				{{this.selectedSubtitle != -1 ? this.item.subtitles[this.selectedSubtitle].codec : "none"}}
+				{{this.selectedSubtitle !== -1 ? this.item.subtitles[this.selectedSubtitle].codec : "none"}}
 				<i class="material-icons">{{this.supportList | supportedButton: "subtitle"}}</i>
 			</span>
 			<br />

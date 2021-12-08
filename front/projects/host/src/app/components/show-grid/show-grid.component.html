@@ -8,7 +8,7 @@
                 </div>
                 <div class="data">
                     <p class="title">{{show.title}}</p>
-                    <p class="date" *ngIf="show.endYear && show.startYear != show.endYear; else elseBlock">{{show.startYear}} - {{show.endYear}}</p>
+                    <p class="date" *ngIf="show.endYear && show.startYear !== show.endYear; else elseBlock">{{show.startYear}} - {{show.endYear}}</p>
                     <ng-template #elseBlock><p class="date">{{show.startYear}}</p></ng-template>
                     <p class="overview">{{show.overview}}</p>
                     <ul>

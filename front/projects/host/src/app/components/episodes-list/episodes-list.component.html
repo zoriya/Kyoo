@@ -20,12 +20,12 @@
 					</button>
 				</div>
 				<ng-container *ngIf="displayShowTitle; else noTitle;">
-					<h6 *ngIf="episode.seasonNumber != 0; else elseBlock;" class="title">{{episode.show.title}} - S{{episode.seasonNumber}}:E{{episode.episodeNumber}}</h6>
+					<h6 *ngIf="episode.seasonNumber !== 0; else elseBlock;" class="title">{{episode.show.title}} - S{{episode.seasonNumber}}:E{{episode.episodeNumber}}</h6>
 					<ng-template #elseBlock><h6 class="title">{{episode.show.title}}</h6></ng-template>
 					<p class="subtitle">{{episode.title}}</p>
 				</ng-container>
 				<ng-template #noTitle>
-					<h6 *ngIf="episode.seasonNumber != 0; else elseBlock;" class="title">S{{episode.seasonNumber}}:E{{episode.episodeNumber}} - {{episode.title}}</h6>
+					<h6 *ngIf="episode.seasonNumber !== 0; else elseBlock;" class="title">S{{episode.seasonNumber}}:E{{episode.episodeNumber}} - {{episode.title}}</h6>
 					<ng-template #elseBlock><h6 class="title">{{episode.title}}</h6></ng-template>
 					<p class="overview">{{episode.overview}}</p>
 				</ng-template>
