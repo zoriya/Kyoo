@@ -54,8 +54,8 @@
 
 	<Target Name="RunWebpack" Condition="'$(SkipWebApp)' != 'true' And '$(Configuration)' == 'Release'">
 		<Message Importance="high" Text="Building the web app. This may take several minutes..." />
-		<Exec WorkingDirectory="$(SpaRoot)" Command="yarn run build -- --configuration production" />
-		<Exec WorkingDirectory="$(SpaRoot)" Command="yarn run build:ssr -- --configuration production" Condition="'$(BuildServerSideRenderer)' == 'true'" />
+		<Exec WorkingDirectory="$(SpaRoot)" Command="yarn run build --configuration production" />
+		<Exec WorkingDirectory="$(SpaRoot)" Command="yarn run build:ssr --configuration production" Condition="'$(BuildServerSideRenderer)' == 'true'" />
 	</Target>
 
 	<Target Name="CopyFrontEndFiles" AfterTargets="RunWebpack" BeforeTargets="GetCopyToOutputDirectoryItems" Condition="'$(Configuration)' != 'Debug'">
