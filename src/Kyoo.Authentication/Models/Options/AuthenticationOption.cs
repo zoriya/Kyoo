@@ -29,9 +29,9 @@ namespace Kyoo.Authentication.Models
 		public const string Path = "authentication";
 
 		/// <summary>
-		/// The options for certificates
+		/// The secret used to encrypt the jwt.
 		/// </summary>
-		public CertificateOption Certificate { get; set; }
+		public string Secret { get; set; }
 
 		/// <summary>
 		/// Options for permissions
