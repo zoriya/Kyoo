@@ -9,7 +9,7 @@ Hi, and welcome to Kyoo, you are about to embark on this wonderful journey that 
 
 To setup Kyoo, you need to make sure you installed it, then we'll configure some settings, maybe rearrange your files. This shouldn't take long if you are used to manage JSON files, and regex.
 
-## Settings.json
+## settings.json
 
 If you installed Kyoo on Linux/macOS, their should be a ```/var/lib/Kyoo``` directory
 If you are on a Windows, it should be ```C:\ProgramData```
@@ -48,10 +48,16 @@ We are going to take a look at the fields you might want to change to tailor Kyo
   - ```enabled```: Which database to use. Either ```sqlite``` (by default) or ```postgres```. SQLite is easier to use & manage if you don't have an SQL server on your machine
 
 - ```tasks```
+  - ```parallels```: The number (as a string) of tasks that can be run at the same time. To avoid conflicts, we recommend leaving the value at ```1```
   - ```scheduled```: An object with keys being the name of an automation task, with a value being the interval between each task of the same type.
     - The available keys can be found at ```publicUrl/api/tasks``` (as 'slug')
     - The values must be formatted like ```HH:MM:SS``
     **For Example** in the default configuration, a file scan task will be executed every 24 hours
-  - ```parallels```: The number (as a string) of tasks that can be run at the same time. To avoid conflicts, we recommend leaving the value at ```1```
+
+- ```tvdb```
+  - ```apikey```: The API key that will be used to interact with the TVDB's API. See [there](https://thetvdb.com/api-information) to get one
+
+- ```the-moviedb```
+  - ```apikey```: The API key that will be used to interact with TMDB's API. See [there](https://developers.themoviedb.org/3/getting-started/introduction) to get one
 
 ## Using a Container
