@@ -44,4 +44,14 @@ We are going to take a look at the fields you might want to change to tailor Kyo
 
   **Warning** Therefore, if your shows are not in individual folders, it is recommended to set ```metadataInShow``` to ```false```. If you don't, all the shows will share the same metadata we are sure you don't want that ;)
 
+- ```database```
+  - ```enabled```: Which database to use. Either ```sqlite``` (by default) or ```postgres```. SQLite is easier to use & manage if you don't have an SQL server on your machine
+
+- ```tasks```
+  - ```scheduled```: An object with keys being the name of an automation task, with a value being the interval between each task of the same type.
+    - The available keys can be found at ```publicUrl/api/tasks``` (as 'slug')
+    - The values must be formatted like ```HH:MM:SS``
+    **For Example** in the default configuration, a file scan task will be executed every 24 hours
+  - ```parallels```: The number (as a string) of tasks that can be run at the same time. To avoid conflicts, we recommend leaving the value at ```1```
+
 ## Using a Container
