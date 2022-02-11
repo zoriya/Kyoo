@@ -74,3 +74,12 @@ We are going to take a look at the fields you might want to change to tailor Kyo
   - ```apikey```: The API key that will be used to interact with TMDB's API. See [there](https://developers.themoviedb.org/3/getting-started/introduction) to get one
 
 ## Using a Container
+
+If you use Kyoo from a container, we recommand using the docker-compose file from [here](https://github.com/AnonymusRaccoon/Kyoo) and doing the following actions before launching the container:
+
+- If you use Postgres, configure the fields ```DATABASE__CONFIGURATIONS_*```
+- If you use SQLite, set the ```DATABASE__ENABLED``` to ```sqlite```
+- Set the ```*APIKEY``` values
+- Map the folder ```/var/lib/kyoo``` to a directory on your host, so you can access files easily, and it'll be persistent
+- Map the folder ```/video``` to the media directory
+- If you use Postgres, map ```/var/lib/postgresql/data``` to the host's Postgres server data folder
