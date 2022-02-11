@@ -54,6 +54,19 @@ We are going to take a look at the fields you might want to change to tailor Kyo
     - The values must be formatted like ```HH:MM:SS``
     **For Example** in the default configuration, a file scan task will be executed every 24 hours
 
+- ```media```
+  - ```regex```: An array of String to match files using Regex (PHP). The Regex must have the following groups:
+    - ```Collection```: The name of the collection. For example, you can move all the movie from a same saga in one directory, the collection's name will be the directory's. If the movie is at the root of the library, no collection will be created.
+    - ```Show```: the name of the show/movie
+    - ```StartYear``` (optional): the start year for a TV Series, or Year for a movie, used to get the correct metadata in provider
+    - ```Season``` (for TV Series): An integer being the number of the season
+    - ```Episode``` (for TV Series): An integer being the number of the episode in the season
+    - ```Absolute``` (optional if the two groups above are in the regex): The absolute number of the episode (from episode 1x01, ignoring seasons)
+  - ```subtitleRegex```: Same as ```regex```, but to find Subtitles files.
+    - ```Language```: A String from 1 to 3 characters long defining the language of the subtitles
+    - ```Default```: If present, will set the subtitle as default track
+    - ```Forced```: If present, will set the subtitles as forced track
+
 - ```tvdb```
   - ```apikey```: The API key that will be used to interact with the TVDB's API. See [there](https://thetvdb.com/api-information) to get one
 
