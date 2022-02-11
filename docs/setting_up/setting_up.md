@@ -83,3 +83,34 @@ If you use Kyoo from a container, we recommand using the docker-compose file fro
 - Map the folder ```/var/lib/kyoo``` to a directory on your host, so you can access files easily, and it'll be persistent
 - Map the folder ```/video``` to the media directory
 - If you use Postgres, map ```/var/lib/postgresql/data``` to the host's Postgres server data folder
+
+## Configuring Libraries
+
+You are now ready to launch Kyoo for the first time!
+But before being able to see your favorite shows & movies, we need to configure the libraries: With Kyoo, you can separate your shows into libraries, for example to split TV Series from Movies,  Anime from Live-Action Series, Concerts from Documentaries.
+
+First, you must open the server. To do so, execute the Kyoo.Host.Console binary found in the install directory.
+If everything looks normal, no error message will appear, just log messages.
+
+Then, we are going to interact with Kyoo's API. To create a library, you must do the following request for each library you want to make:
+  
+- POST Request
+- At ```publicUrl/api/libraries``` (```publicUrl``` is in ```settings.json```)
+- Content-Type: ```application/json```
+- Body:
+
+    ```json
+    {
+        "name": "$KYOO_LIBRARY_NAME", // The name of the Library
+        "slug": "$KYOO_LIBRARY_SLUG", // The unique identifier of the Library, can be $KYOO_LIBRARY_NAME if it's unique 
+        "paths": ["$KYOO_LIBRARY_PATH"], // Path of directories to scan for shows in library
+        "providers": [
+            {"slug": "the-moviedb"}, // Remove if you don't want to use this provider
+            {"slug": "the-tvdb"} // Remove if you don't want to use this provider
+        ]
+    }
+    ```
+
+Now that you created your libraries, you can do a simple GET request to ```publicUrl/api/task/scan``` to scan for videos in all the libraries.
+
+Once the scan is over, ```Task finished: Scan Libraries``` will be displayed! You are now ready to use Kyoo!
