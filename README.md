@@ -18,6 +18,7 @@ Feel free to open issues or pull requests, all contribution are welcomed.
 ## Getting started
 
 - [Installation](https://docs.kyoo.moe/start/install.html)
+- [Setting Up](https://docs.kyoo.moe/start/setting_up.html)
 - [Api Documentation](https://demo.kyoo.moe/redoc)
 - [Documentation (work in progress)](https://docs.kyoo.moe)
 - [Contributing](./CONTRIBUTING.md)
