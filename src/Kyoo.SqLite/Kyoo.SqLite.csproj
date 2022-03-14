@@ -1,7 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net5.0</TargetFramework>
-		<LangVersion>default</LangVersion>
 		<AssemblyName>Kyoo.SqLite</AssemblyName>
 		<RootNamespace>Kyoo.SqLite</RootNamespace>
 	</PropertyGroup>

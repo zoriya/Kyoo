@@ -1,7 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net5.0</TargetFramework>
-		<LangVersion>default</LangVersion>
 		<AssemblyName>Kyoo.Swagger</AssemblyName>
 		<RootNamespace>Kyoo.Swagger</RootNamespace>
 	</PropertyGroup>

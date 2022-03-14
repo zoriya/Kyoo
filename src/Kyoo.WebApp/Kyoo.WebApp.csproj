@@ -2,8 +2,6 @@
 	<Import Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
 
 	<PropertyGroup>
-		<TargetFramework>net5.0</TargetFramework>
-		<LangVersion>default</LangVersion>
 		<AssemblyName>Kyoo.WebApp</AssemblyName>
 		<RootNamespace>Kyoo.WebApp</RootNamespace>
 
