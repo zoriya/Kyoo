@@ -223,19 +223,19 @@ namespace Kyoo.Core.Api
 		}
 
 		/// <summary>
-        /// Get genres of this show
-        /// </summary>
-        /// <remarks>
-        /// List the genres that represent this show.
-        /// </remarks>
-        /// <param name="identifier">The ID or slug of the <see cref="Show"/>.</param>
-        /// <param name="sortBy">A key to sort genres by.</param>
-        /// <param name="where">An optional list of filters.</param>
-        /// <param name="limit">The number of genres to return.</param>
-        /// <param name="afterID">An optional genre's ID to start the query from this specific item.</param>
-        /// <returns>A page of genres.</returns>
-        /// <response code="400">The filters or the sort parameters are invalid.</response>
-        /// <response code="404">No show with the given ID or slug could be found.</response>
+		/// Get genres of this show
+		/// </summary>
+		/// <remarks>
+		/// List the genres that represent this show.
+		/// </remarks>
+		/// <param name="identifier">The ID or slug of the <see cref="Show"/>.</param>
+		/// <param name="sortBy">A key to sort genres by.</param>
+		/// <param name="where">An optional list of filters.</param>
+		/// <param name="limit">The number of genres to return.</param>
+		/// <param name="afterID">An optional genre's ID to start the query from this specific item.</param>
+		/// <returns>A page of genres.</returns>
+		/// <response code="400">The filters or the sort parameters are invalid.</response>
+		/// <response code="404">No show with the given ID or slug could be found.</response>
 		[HttpGet("{identifier:id}/genres")]
 		[HttpGet("{identifier:id}/genre", Order = AlternativeRoute)]
 		[PartialPermission(Kind.Read)]
