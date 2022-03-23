@@ -43,8 +43,6 @@ jobs:
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          draft: true
-          release_name: ${{github.ref}}
           body: ${{steps.github_release.outputs.changelog}}
           artifacts: ./artifacts/**/*
           token: ${{secrets.GITHUB_TOKEN}}
