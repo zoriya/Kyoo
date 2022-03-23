@@ -45,7 +45,9 @@ namespace Kyoo.Authentication
 		public static string HashPassword(string password)
 		{
 			byte[] salt = new byte[16];
+#pragma warning disable SYSLIB0023
 			new RNGCryptoServiceProvider().GetBytes(salt);
+#pragma warning restore SYSLIB0023
 			Rfc2898DeriveBytes pbkdf2 = new(password, salt, 100000);
 			byte[] hash = pbkdf2.GetBytes(20);
 			byte[] hashBytes = new byte[36];

@@ -1,13 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	
 	<PropertyGroup>
-		<TargetFramework>net5.0</TargetFramework>
 		<LoginRoot>../Kyoo.WebLogin/</LoginRoot>
-		
-		<Company>SDG</Company>
-		<Authors>Zoe Roux</Authors>
-		<RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
-		<LangVersion>default</LangVersion>
 	</PropertyGroup>
 
 	<ItemGroup>

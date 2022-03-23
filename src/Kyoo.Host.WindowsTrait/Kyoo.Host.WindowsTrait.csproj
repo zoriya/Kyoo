@@ -3,7 +3,7 @@
 
 	<PropertyGroup Condition="$(IsWindows) == true">
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>net5.0-windows</TargetFramework>
+		<TargetFramework>net6.0-windows</TargetFramework>
 		<LangVersion>default</LangVersion>
 		<UseWindowsForms>true</UseWindowsForms>
 		<AssemblyName>Kyoo.Host.WindowsTrait</AssemblyName>
@@ -20,7 +20,7 @@
 	</ItemGroup>
 
 	<PropertyGroup Condition="$(IsWindows) != true">
-		<TargetFramework>net5.0</TargetFramework>
+		<TargetFramework>net6.0</TargetFramework>
 		<NoWarn>NU1503</NoWarn>
 	</PropertyGroup>
 

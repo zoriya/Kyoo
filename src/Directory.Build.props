@@ -1,5 +1,7 @@
 <Project>
 	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<LangVersion>default</LangVersion>
 		<Company>Kyoo</Company>
 		<Authors>Kyoo</Authors>
 		<Copyright>Copyright (c) Kyoo</Copyright>

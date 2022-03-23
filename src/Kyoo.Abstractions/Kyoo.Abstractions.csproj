@@ -1,7 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net5.0</TargetFramework>
-		<LangVersion>default</LangVersion>
 		<Title>Kyoo.Abstractions</Title>
 		<Description>Base package to create plugins for Kyoo.</Description>
 		<RootNamespace>Kyoo.Abstractions</RootNamespace>

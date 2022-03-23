@@ -351,3 +351,5 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 /Kyoo/TheTVDB-Credentials.json
+
+.vscode
