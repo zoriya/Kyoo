@@ -79,7 +79,7 @@ jobs:
     name: Create windows release
     runs-on: windows-latest
     needs: build
-    if: github.ref == 'refs/heads/master'
+    if: ${{ github.ref == 'refs/heads/master' || contains(github.ref, 'tags') }}
     steps:
       - uses: actions/checkout@v1
       - name: Download windows build
