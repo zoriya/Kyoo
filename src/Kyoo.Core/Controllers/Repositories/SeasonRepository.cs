@@ -82,14 +82,14 @@ namespace Kyoo.Core.Controllers
 		public Task<Season> GetOrDefault(int showID, int seasonNumber)
 		{
 			return _database.Seasons.FirstOrDefaultAsync(x => x.ShowID == showID
-			                                                  && x.SeasonNumber == seasonNumber);
+				&& x.SeasonNumber == seasonNumber);
 		}
 
 		/// <inheritdoc/>
 		public Task<Season> GetOrDefault(string showSlug, int seasonNumber)
 		{
 			return _database.Seasons.FirstOrDefaultAsync(x => x.Show.Slug == showSlug
-			                                                  && x.SeasonNumber == seasonNumber);
+				&& x.SeasonNumber == seasonNumber);
 		}
 
 		/// <inheritdoc/>

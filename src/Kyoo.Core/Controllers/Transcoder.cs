@@ -260,7 +260,7 @@ namespace Kyoo.Core.Controllers
 				_logger = logger;
 			}
 
-// We use threads so tasks are not always awaited.
+			// We use threads so tasks are not always awaited.
 #pragma warning disable 4014
 
 			/// <inheritdoc />

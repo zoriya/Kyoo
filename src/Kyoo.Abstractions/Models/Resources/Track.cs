@@ -67,7 +67,8 @@ namespace Kyoo.Abstractions.Models
 		public int ID { get; set; }
 
 		/// <inheritdoc />
-		[Computed] public string Slug
+		[Computed]
+		public string Slug
 		{
 			get
 			{
@@ -77,7 +78,8 @@ namespace Kyoo.Abstractions.Models
 				return $"{episode}.{Language ?? "und"}{index}{(IsForced ? ".forced" : string.Empty)}.{type}";
 			}
 
-			[UsedImplicitly] private set
+			[UsedImplicitly]
+			private set
 			{
 				if (value == null)
 					throw new ArgumentNullException(nameof(value));
@@ -86,8 +88,10 @@ namespace Kyoo.Abstractions.Models
 
 				if (!match.Success)
 				{
-					throw new ArgumentException("Invalid track slug. " +
-					                            "Format: {episodeSlug}.{language}[-{index}][.forced].{type}[.{extension}]");
+					throw new ArgumentException(
+						"Invalid track slug. " +
+						"Format: {episodeSlug}.{language}[-{index}][.forced].{type}[.{extension}]"
+					);
 				}
 
 				_episodeSlug = match.Groups["ep"].Value;
@@ -148,7 +152,8 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The episode that uses this track.
 		/// </summary>
-		[LoadableRelation(nameof(EpisodeID))] public Episode Episode
+		[LoadableRelation(nameof(EpisodeID))]
+		public Episode Episode
 		{
 			get => _episode;
 			set

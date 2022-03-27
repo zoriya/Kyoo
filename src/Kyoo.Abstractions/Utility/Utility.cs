@@ -43,8 +43,8 @@ namespace Kyoo.Utils
 		{
 			if (ex == null)
 				return false;
-			return ex.Body is MemberExpression ||
-			       (ex.Body.NodeType == ExpressionType.Convert && ((UnaryExpression)ex.Body).Operand is MemberExpression);
+			return ex.Body is MemberExpression
+				|| (ex.Body.NodeType == ExpressionType.Convert && ((UnaryExpression)ex.Body).Operand is MemberExpression);
 		}
 
 		/// <summary>
@@ -242,9 +242,12 @@ namespace Kyoo.Utils
 				.Where(x => x.Name == name)
 				.Where(x => x.GetGenericArguments().Length == generics.Length)
 				.Where(x => x.GetParameters().Length == args.Length)
-				.IfEmpty(() => throw new ArgumentException($"A method named {name} with " +
-				                                           $"{args.Length} arguments and {generics.Length} generic " +
-				                                           $"types could not be found on {type.Name}."))
+				.IfEmpty(() =>
+				{
+					throw new ArgumentException($"A method named {name} with " +
+						$"{args.Length} arguments and {generics.Length} generic " +
+						$"types could not be found on {type.Name}.");
+				})
 				// TODO this won't work but I don't know why.
 				// .Where(x =>
 				// {
