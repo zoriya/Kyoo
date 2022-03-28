@@ -60,7 +60,7 @@ namespace Kyoo.Core.Api
 
 		/// <summary>
 		/// The base URL of Kyoo. This will be used to create links for images and
-		/// <see cref="Abstractions.Models.Page{T}"/>.
+		/// <see cref="Page{T}"/>.
 		/// </summary>
 		private readonly Uri _baseURL;
 
@@ -399,6 +399,7 @@ namespace Kyoo.Core.Api
 				return NotFound();
 			string path = _files.Combine(await _files.GetExtraDirectory(show), "Attachments");
 			return (await _files.ListFiles(path))
+				.DistinctBy(Path.GetFileNameWithoutExtension)
 				.ToDictionary(
 					Path.GetFileNameWithoutExtension,
 					x => $"{_baseURL}api/shows/{identifier}/fonts/{Path.GetFileName(x)}"
