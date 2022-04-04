@@ -159,6 +159,7 @@ namespace Kyoo.Core.Controllers
 			{
 				Show show => Combine(show.Path, "Extra"),
 				Season season => Combine(season.Show.Path, "Extra"),
+				// TODO: extras should not be on the same directory for every episodes/seasons/tracks. If this is fixed, fonts handling will break.
 				Episode episode => Combine(episode.Show.Path, "Extra"),
 				Track track => Combine(track.Episode.Show.Path, "Extra"),
 				_ => null
