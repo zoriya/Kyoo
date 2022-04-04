@@ -1,0 +1,36 @@
+version: "3.8"
+
+services:
+  kyoo:
+    build: .
+    restart: on-failure
+    environment:
+      - KYOO_DATADIR=/var/lib/kyoo
+      - BASICS__PUBLICURL=http://localhost:5000
+      - BASICS__MetadataInShow=false
+      - DATABASE__ENABLED=postgres
+      - DATABASE__CONFIGURATIONS__POSTGRES__SERVER=postgres
+      - DATABASE__CONFIGURATIONS__POSTGRES__USER ID=kyoo
+      - DATABASE__CONFIGURATIONS__POSTGRES__PASSWORD=kyooPassword
+      - TVDB__APIKEY=${TVDB__APIKEY}
+      - THEMOVIEDB__APIKEY=${THEMOVIEDB__APIKEY}
+    ports:
+      - "5000:5000"
+    depends_on:
+      - postgres
+    volumes:
+      - kyoo:/var/lib/kyoo
+      - ./video:/video
+  postgres:
+    image: "postgres"
+    restart: on-failure
+    environment:
+      - POSTGRES_USER=kyoo
+      - POSTGRES_PASSWORD=kyooPassword
+    volumes:
+      - db:/var/lib/postgresql/data
+
+volumes:
+  kyoo:
+  db:
+

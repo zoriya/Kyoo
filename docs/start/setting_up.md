@@ -70,7 +70,7 @@ We are going to take a look at the fields you might want to change to tailor Kyo
 - ```tvdb```
   - ```apikey```: The API key that will be used to interact with the TVDB's API. See [there](https://thetvdb.com/api-information) to get one
 
-- ```the-moviedb```
+- ```themoviedb```
   - ```apikey```: The API key that will be used to interact with TMDB's API. See [there](https://developers.themoviedb.org/3/getting-started/introduction) to get one
 
 ## Using a Container

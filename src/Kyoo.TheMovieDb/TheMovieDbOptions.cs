@@ -26,7 +26,7 @@ namespace Kyoo.TheMovieDb.Models
 		/// <summary>
 		/// The path to get this option from the root configuration.
 		/// </summary>
-		public const string Path = "the-moviedb";
+		public const string Path = "themoviedb";
 
 		/// <summary>
 		/// The api key of TheMovieDb.

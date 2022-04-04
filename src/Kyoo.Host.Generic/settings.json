@@ -76,7 +76,7 @@
   "tvdb": {
     "apiKey": ""
   },
-  "the-moviedb": {
+  "themoviedb": {
     "apiKey": ""
   }
 }

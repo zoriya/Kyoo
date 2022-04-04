@@ -48,7 +48,7 @@ namespace Kyoo.TheMovieDb
 			if (!Enabled)
 			{
 				logger.LogWarning("No API key configured for TheMovieDB provider. " +
-					"To enable TheMovieDB, specify one in the setting the-moviedb:APIKEY ");
+					"To enable TheMovieDB, specify one in the setting themoviedb:APIKEY");
 			}
 		}
 
@@ -62,7 +62,7 @@ namespace Kyoo.TheMovieDb
 		public string Description => "A metadata provider for TheMovieDB.";
 
 		/// <inheritdoc />
-		public bool Enabled => !string.IsNullOrEmpty(_configuration.GetValue<string>("the-moviedb:apikey"));
+		public bool Enabled => !string.IsNullOrEmpty(_configuration.GetValue<string>("themoviedb:apikey"));
 
 		/// <inheritdoc />
 		public Dictionary<string, Type> Configuration => new()
