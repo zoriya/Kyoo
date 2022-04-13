@@ -50,12 +50,6 @@ namespace Kyoo.Abstractions.Models
 		/// The stream is a subtitle.
 		/// </summary>
 		Subtitle = 3,
-
-		/// <summary>
-		/// The stream is an attachment (a font, an image or something else).
-		/// Only fonts are handled by kyoo but they are not saved to the database.
-		/// </summary>
-		Attachment = 4
 	}
 
 	/// <summary>

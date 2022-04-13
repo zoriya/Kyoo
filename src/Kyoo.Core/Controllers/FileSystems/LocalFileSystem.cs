@@ -153,17 +153,12 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public Task<string> GetExtraDirectory<T>(T resource)
 		{
-			if (!_options.CurrentValue.MetadataInShow)
-				return Task.FromResult<string>(null);
-			return Task.FromResult(resource switch
+			string path = resource switch
 			{
-				Show show => Combine(show.Path, "Extra"),
-				Season season => Combine(season.Show.Path, "Extra"),
-				// TODO: extras should not be on the same directory for every episodes/seasons/tracks. If this is fixed, fonts handling will break.
-				Episode episode => Combine(episode.Show.Path, "Extra"),
-				Track track => Combine(track.Episode.Show.Path, "Extra"),
-				_ => null
-			});
+				IResource res => Combine(_options.CurrentValue.MetadataPath, typeof(T).Name.ToLower(), res.Slug),
+				_ => Combine(_options.CurrentValue.MetadataPath, typeof(T).Name.ToLower())
+			};
+			return CreateDirectory(path);
 		}
 
 		/// <inheritdoc />

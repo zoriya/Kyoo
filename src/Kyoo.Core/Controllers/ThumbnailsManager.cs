@@ -129,18 +129,6 @@ namespace Kyoo.Core.Controllers
 				Images.Trailer => "trailer",
 				_ => $"{imageID}"
 			};
-
-			switch (item)
-			{
-				case Season season:
-					imageName = $"season-{season.SeasonNumber}-{imageName}";
-					break;
-				case Episode episode:
-					directory = await _files.CreateDirectory(_files.Combine(directory, "Thumbnails"));
-					imageName = $"{Path.GetFileNameWithoutExtension(episode.Path)}-{imageName}";
-					break;
-			}
-
 			return _files.Combine(directory, imageName);
 		}
 

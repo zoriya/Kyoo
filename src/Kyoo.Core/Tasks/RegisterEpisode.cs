@@ -150,9 +150,7 @@ namespace Kyoo.Core.Tasks
 				if (!show.IsMovie)
 					episode = await _metadataProvider.Get(episode);
 				progress.Report(70);
-				episode.Tracks = (await _transcoder.ExtractInfos(episode, false))
-					.Where(x => x.Type != StreamType.Attachment)
-					.ToArray();
+				episode.Tracks = await _transcoder.ExtractInfos(episode, false);
 				await _thumbnailsManager.DownloadImages(episode);
 				progress.Report(90);
 
