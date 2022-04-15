@@ -17,7 +17,6 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using Kyoo.Abstractions.Models;
 
 namespace Kyoo.Core.Models.Options
 {
@@ -57,19 +56,7 @@ namespace Kyoo.Core.Models.Options
 		public string TranscodePath { get; set; } = "cached/transcode";
 
 		/// <summary>
-		/// <c>true</c> if the metadata of a show/season/episode should be stored in the same directory as video files,
-		/// <c>false</c> to save them in a kyoo specific directory.
-		/// </summary>
-		/// <remarks>
-		/// Some file systems might discard this option to store them somewhere else.
-		/// For example, readonly file systems will probably store them in a kyoo specific directory.
-		/// </remarks>
-		public bool MetadataInShow { get; set; } = true;
-
-		/// <summary>
-		/// The path for metadata if they are not stored near show (see <see cref="MetadataInShow"/>).
-		/// Some resources can't be stored near a show and they are stored in this directory
-		/// (like <see cref="Provider"/>).
+		/// The path where metadata is stored.
 		/// </summary>
 		public string MetadataPath { get; set; } = "metadata/";
 	}

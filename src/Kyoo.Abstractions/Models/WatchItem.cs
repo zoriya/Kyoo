@@ -200,7 +200,7 @@ namespace Kyoo.Abstractions.Models
 				ReleaseDate = ep.ReleaseDate,
 				Path = ep.Path,
 				Images = ep.Show.Images,
-				Container = PathIO.GetExtension(ep.Path)![1..],
+				Container = PathIO.GetExtension(ep.Path).Replace(".", string.Empty),
 				Video = ep.Tracks.FirstOrDefault(x => x.Type == StreamType.Video),
 				Audios = ep.Tracks.Where(x => x.Type == StreamType.Audio).ToArray(),
 				Subtitles = ep.Tracks.Where(x => x.Type == StreamType.Subtitle).ToArray(),

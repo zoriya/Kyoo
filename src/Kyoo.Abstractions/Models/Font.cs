@@ -61,7 +61,7 @@ namespace Kyoo.Abstractions.Models
 			Slug = Utility.ToSlug(PathIO.GetFileNameWithoutExtension(path));
 			Path = path;
 			File = PathIO.GetFileName(path);
-			Format = PathIO.GetExtension(path);
+			Format = PathIO.GetExtension(path).Replace(".", string.Empty);
 		}
 	}
 }

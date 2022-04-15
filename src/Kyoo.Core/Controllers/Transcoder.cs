@@ -221,10 +221,10 @@ namespace Kyoo.Core.Controllers
 		{
 			string path = _files.Combine(await _files.GetExtraDirectory(episode), "Attachments");
 			string font = (await _files.ListFiles(path))
-				.FirstOrDefault(x => Utility.ToSlug(Path.GetFileName(x)) == slug);
+				.FirstOrDefault(x => Utility.ToSlug(Path.GetFileNameWithoutExtension(x)) == slug);
 			if (font == null)
 				return null;
-			return new Font(path);
+			return new Font(font);
 		}
 
 		/// <inheritdoc />
