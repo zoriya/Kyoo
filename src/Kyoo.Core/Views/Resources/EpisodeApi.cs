@@ -207,8 +207,8 @@ namespace Kyoo.Core.Api
 		/// <param name="slug">The slug of the font to retrieve.</param>
 		/// <returns>A page of collections.</returns>
 		/// <response code="404">No show with the given ID/slug could be found or the font does not exist.</response>
-		[HttpGet("{identifier:id}/fonts/{font}")]
-		[HttpGet("{identifier:id}/font/{font}", Order = AlternativeRoute)]
+		[HttpGet("{identifier:id}/fonts/{slug}")]
+		[HttpGet("{identifier:id}/font/{slug}", Order = AlternativeRoute)]
 		[PartialPermission(Kind.Read)]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -220,6 +220,8 @@ namespace Kyoo.Core.Api
 			);
 			if (episode == null)
 				return NotFound();
+			if (slug.Contains('.'))
+				slug = slug[..slug.LastIndexOf('.')];
 			Font font = await _transcoder.GetFont(episode, slug);
 			if (font == null)
 				return NotFound();

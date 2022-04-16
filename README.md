@@ -50,7 +50,6 @@ services:
         environment:
             - KYOO_DATADIR=/var/lib/kyoo
             - BASICS__PUBLICURL=https://demo.kyoo.moe
-            - BASICS__MetadataInShow=false
             - DATABASE__ENABLED=postgres
             - DATABASE__CONFIGURATIONS__POSTGRES__SERVER=postgres
             - DATABASE__CONFIGURATIONS__POSTGRES__USER ID=kyoo

@@ -7,7 +7,6 @@ services:
     environment:
       - KYOO_DATADIR=/var/lib/kyoo
       - BASICS__PUBLICURL=http://localhost:5000
-      - BASICS__MetadataInShow=false
       - DATABASE__ENABLED=postgres
       - DATABASE__CONFIGURATIONS__POSTGRES__SERVER=postgres
       - DATABASE__CONFIGURATIONS__POSTGRES__USER ID=kyoo
