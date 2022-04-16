@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -28,10 +27,8 @@ using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
-using Kyoo.Core.Models.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Core.Api
@@ -54,17 +51,6 @@ namespace Kyoo.Core.Api
 		private readonly ILibraryManager _libraryManager;
 
 		/// <summary>
-		/// The file manager used to send images and fonts.
-		/// </summary>
-		private readonly IFileSystem _files;
-
-		/// <summary>
-		/// The base URL of Kyoo. This will be used to create links for images and
-		/// <see cref="Page{T}"/>.
-		/// </summary>
-		private readonly Uri _baseURL;
-
-		/// <summary>
 		/// Create a new <see cref="ShowApi"/>.
 		/// </summary>
 		/// <param name="libraryManager">
@@ -72,18 +58,12 @@ namespace Kyoo.Core.Api
 		/// </param>
 		/// <param name="files">The file manager used to send images and fonts.</param>
 		/// <param name="thumbs">The thumbnail manager used to retrieve images paths.</param>
-		/// <param name="options">
-		/// Options used to retrieve the base URL of Kyoo.
-		/// </param>
 		public ShowApi(ILibraryManager libraryManager,
 			IFileSystem files,
-			IThumbnailsManager thumbs,
-			IOptions<BasicOptions> options)
+			IThumbnailsManager thumbs)
 			: base(libraryManager.ShowRepository, files, thumbs)
 		{
 			_libraryManager = libraryManager;
-			_files = files;
-			_baseURL = options.Value.PublicUrl;
 		}
 
 		/// <summary>

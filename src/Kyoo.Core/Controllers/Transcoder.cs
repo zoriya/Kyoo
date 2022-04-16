@@ -24,6 +24,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Core.Models.Options;
 using Kyoo.Core.Models.Watch;
 using Kyoo.Utils;
@@ -178,6 +179,11 @@ namespace Kyoo.Core.Controllers
 		private readonly ILogger<Transcoder> _logger;
 
 		/// <summary>
+		/// <see langword="true"/> if the C library has been checked, <see langword="false"/> otherwise.
+		/// </summary>
+		private bool _initialized;
+
+		/// <summary>
 		/// Create a new <see cref="Transcoder"/>.
 		/// </summary>
 		/// <param name="files">
@@ -190,14 +196,29 @@ namespace Kyoo.Core.Controllers
 			_files = files;
 			_options = options;
 			_logger = logger;
+		}
 
-			if (TranscoderAPI.Init() != Marshal.SizeOf<FTrack>())
-				_logger.LogCritical("The transcoder library could not be initialized correctly");
+		/// <summary>
+		/// Check if the C library can be used or if there is an issue with it.
+		/// </summary>
+		/// <param name="fastStop">Should the healthcheck be abborted if the transcoder was already initialized?</param>
+		/// <exception cref="HealthException">If the transcoder is corrupted, this exception in thrown.</exception>
+		public void CheckHealth(bool fastStop = false)
+		{
+			if (fastStop && _initialized)
+				return;
+			if (TranscoderAPI.Init() == Marshal.SizeOf<FTrack>())
+				return;
+			_initialized = true;
+			_logger.LogCritical("The transcoder library could not be initialized correctly");
+			throw new HealthException("The transcoder library is corrupted or invalid.");
 		}
 
 		/// <inheritdoc />
 		public async Task<ICollection<Track>> ExtractInfos(Episode episode, bool reExtract)
 		{
+			CheckHealth(true);
+
 			string dir = await _files.GetExtraDirectory(episode);
 			if (dir == null)
 				throw new ArgumentException("Invalid path.");
@@ -230,6 +251,8 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public IActionResult Transmux(Episode episode)
 		{
+			CheckHealth(true);
+
 			string folder = Path.Combine(_options.Value.TransmuxPath, episode.Slug);
 			string manifest = Path.GetFullPath(Path.Combine(folder, episode.Slug + ".m3u8"));
 
