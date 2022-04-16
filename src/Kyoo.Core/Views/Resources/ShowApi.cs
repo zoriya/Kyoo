@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -28,10 +27,8 @@ using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
-using Kyoo.Core.Models.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Core.Api
@@ -54,17 +51,6 @@ namespace Kyoo.Core.Api
 		private readonly ILibraryManager _libraryManager;
 
 		/// <summary>
-		/// The file manager used to send images and fonts.
-		/// </summary>
-		private readonly IFileSystem _files;
-
-		/// <summary>
-		/// The base URL of Kyoo. This will be used to create links for images and
-		/// <see cref="Abstractions.Models.Page{T}"/>.
-		/// </summary>
-		private readonly Uri _baseURL;
-
-		/// <summary>
 		/// Create a new <see cref="ShowApi"/>.
 		/// </summary>
 		/// <param name="libraryManager">
@@ -72,18 +58,12 @@ namespace Kyoo.Core.Api
 		/// </param>
 		/// <param name="files">The file manager used to send images and fonts.</param>
 		/// <param name="thumbs">The thumbnail manager used to retrieve images paths.</param>
-		/// <param name="options">
-		/// Options used to retrieve the base URL of Kyoo.
-		/// </param>
 		public ShowApi(ILibraryManager libraryManager,
 			IFileSystem files,
-			IThumbnailsManager thumbs,
-			IOptions<BasicOptions> options)
+			IThumbnailsManager thumbs)
 			: base(libraryManager.ShowRepository, files, thumbs)
 		{
 			_libraryManager = libraryManager;
-			_files = files;
-			_baseURL = options.Value.PublicUrl;
 		}
 
 		/// <summary>
@@ -374,66 +354,6 @@ namespace Kyoo.Core.Api
 			{
 				return BadRequest(new RequestError(ex.Message));
 			}
-		}
-
-		/// <summary>
-		/// List fonts
-		/// </summary>
-		/// <remarks>
-		/// List available fonts for this show.
-		/// </remarks>
-		/// <param name="identifier">The ID or slug of the <see cref="Show"/>.</param>
-		/// <returns>An object containing the name of the font followed by the url to retrieve it.</returns>
-		[HttpGet("{identifier:id}/fonts")]
-		[HttpGet("{identifier:id}/font", Order = AlternativeRoute)]
-		[PartialPermission(Kind.Read)]
-		[ProducesResponseType(StatusCodes.Status200OK)]
-		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Dictionary<string, string>>> GetFonts(Identifier identifier)
-		{
-			Show show = await identifier.Match(
-				id => _libraryManager.GetOrDefault<Show>(id),
-				slug => _libraryManager.GetOrDefault<Show>(slug)
-			);
-			if (show == null)
-				return NotFound();
-			string path = _files.Combine(await _files.GetExtraDirectory(show), "Attachments");
-			return (await _files.ListFiles(path))
-				.ToDictionary(
-					Path.GetFileNameWithoutExtension,
-					x => $"{_baseURL}api/shows/{identifier}/fonts/{Path.GetFileName(x)}"
-				);
-		}
-
-		/// <summary>
-		/// Get font
-		/// </summary>
-		/// <remarks>
-		/// Get a font file that is used in subtitles of this show.
-		/// </remarks>
-		/// <param name="identifier">The ID or slug of the <see cref="Show"/>.</param>
-		/// <param name="font">The name of the font to retrieve (with it's file extension).</param>
-		/// <returns>A page of collections.</returns>
-		/// <response code="400">The font name is invalid.</response>
-		/// <response code="404">No show with the given ID/slug could be found or the font does not exist.</response>
-		[HttpGet("{identifier:id}/fonts/{font}")]
-		[HttpGet("{identifier:id}/font/{font}", Order = AlternativeRoute)]
-		[PartialPermission(Kind.Read)]
-		[ProducesResponseType(StatusCodes.Status200OK)]
-		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
-		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<IActionResult> GetFont(Identifier identifier, string font)
-		{
-			if (font.Contains('/') || font.Contains('\\'))
-				return BadRequest(new RequestError("Invalid font name."));
-			Show show = await identifier.Match(
-				id => _libraryManager.GetOrDefault<Show>(id),
-				slug => _libraryManager.GetOrDefault<Show>(slug)
-			);
-			if (show == null)
-				return NotFound();
-			string path = _files.Combine(await _files.GetExtraDirectory(show), "Attachments", font);
-			return _files.FileResult(path);
 		}
 	}
 }

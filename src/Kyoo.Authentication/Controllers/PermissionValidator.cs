@@ -154,12 +154,12 @@ namespace Kyoo.Authentication
 							return;
 						default:
 							throw new ArgumentException("Multiple non-matching partial permission attribute " +
-							                            "are not supported.");
+								"are not supported.");
 					}
 					if (permission == null || kind == null)
 					{
 						throw new ArgumentException("The permission type or kind is still missing after two partial " +
-						                            "permission attributes, this is unsupported.");
+							"permission attributes, this is unsupported.");
 					}
 				}
 

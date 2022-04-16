@@ -163,7 +163,7 @@ namespace Kyoo.Core.Controllers
 			if (typeof(T).IsAssignableFrom(type))
 			{
 				throw new InvalidCastException($"The type {typeof(T).Name} is not valid for " +
-				                               $"a resource of type {type.Name}.");
+					$"a resource of type {type.Name}.");
 			}
 			return (T)GetValue(path);
 		}

@@ -45,12 +45,6 @@ namespace Kyoo.Host.Generic.Controllers
 		private readonly ICollection<Meta<Func<IFileSystem>, FileSystemMetadataAttribute>> _fileSystems;
 
 		/// <summary>
-		/// The library manager used to load shows to retrieve their path
-		/// (only if the option is set to metadata in show)
-		/// </summary>
-		private readonly ILibraryManager _libraryManager;
-
-		/// <summary>
 		/// Options to check if the metadata should be kept in the show directory or in a kyoo's directory.
 		/// </summary>
 		private readonly IOptionsMonitor<BasicOptions> _options;
@@ -60,14 +54,11 @@ namespace Kyoo.Host.Generic.Controllers
 		/// metadata.
 		/// </summary>
 		/// <param name="fileSystems">The list of filesystem mapped to their metadata.</param>
-		/// <param name="libraryManager">The library manager used to load shows to retrieve their path.</param>
 		/// <param name="options">The options to use.</param>
 		public FileSystemComposite(ICollection<Meta<Func<IFileSystem>, FileSystemMetadataAttribute>> fileSystems,
-			ILibraryManager libraryManager,
 			IOptionsMonitor<BasicOptions> options)
 		{
 			_fileSystems = fileSystems;
-			_libraryManager = libraryManager;
 			_options = options;
 		}
 
@@ -178,41 +169,10 @@ namespace Kyoo.Host.Generic.Controllers
 		}
 
 		/// <inheritdoc />
-		public async Task<string> GetExtraDirectory<T>(T resource)
+		public Task<string> GetExtraDirectory<T>(T resource)
 		{
-			switch (resource)
-			{
-				case Season season:
-					await _libraryManager.Load(season, x => x.Show);
-					break;
-				case Episode episode:
-					await _libraryManager.Load(episode, x => x.Show);
-					break;
-				case Track track:
-					await _libraryManager.Load(track, x => x.Episode);
-					await _libraryManager.Load(track.Episode, x => x.Show);
-					break;
-			}
-
-			IFileSystem fs = resource switch
-			{
-				Show show => _GetFileSystemForPath(show.Path, out string _),
-				Season season => _GetFileSystemForPath(season.Show.Path, out string _),
-				Episode episode => _GetFileSystemForPath(episode.Show.Path, out string _),
-				Track track => _GetFileSystemForPath(track.Episode.Show.Path, out string _),
-				_ => _GetFileSystemForPath(_options.CurrentValue.MetadataPath, out string _)
-			};
-			string path = await fs.GetExtraDirectory(resource)
-				?? resource switch
-				{
-					IResource res => Combine(
-						_options.CurrentValue.MetadataPath,
-						typeof(T).Name.ToLower(),
-						res.Slug
-					),
-					_ => Combine(_options.CurrentValue.MetadataPath, typeof(T).Name.ToLower())
-				};
-			return await CreateDirectory(path);
+			IFileSystem fs = _GetFileSystemForPath(_options.CurrentValue.MetadataPath, out string path);
+			return fs.GetExtraDirectory(resource);
 		}
 
 		/// <inheritdoc />

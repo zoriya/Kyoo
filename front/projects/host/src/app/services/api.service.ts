@@ -9,6 +9,7 @@ import { LibraryItem } from "../models/resources/library-item";
 import { map } from "rxjs/operators";
 import { Season } from "../models/resources/season";
 import { Episode } from "../models/resources/episode";
+import { Font } from "../models/font";
 import { People } from "../models/resources/people";
 import { Show } from "../models/resources/show";
 import { Studio } from "../models/resources/studio";
@@ -126,6 +127,11 @@ export class EpisodeService extends CrudApi<Episode>
 		return this.client.get(`/api/seasons/${show}-s${seasonNumber}/episodes${this.ArgsAsQuery(args)}`)
 			.pipe(map(x => Object.assign(new Page<Episode>(), x)));
 	}
+
+	getFonts(id: string | number): Observable<Font[]>
+	{
+		return this.client.get<Font[]>(`/api/episodes/${id}/fonts`);
+	}
 }
 
 @Injectable({
@@ -176,11 +182,6 @@ export class ShowService extends CrudApi<Show>
 	{
 		return this.client.get<Page<Show>>(`/api/collections/${collection}/shows${this.ArgsAsQuery(args)}`)
 			.pipe(map(x => Object.assign(new Page<Show>(), x)));
-	}
-
-	getFonts(id: string | number): Observable<{[font: string]: string}>
-	{
-		return this.client.get<any>(`/api/shows/${id}/fonts`);
 	}
 }
 

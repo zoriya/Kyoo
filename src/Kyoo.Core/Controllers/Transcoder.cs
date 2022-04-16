@@ -19,11 +19,15 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Core.Models.Options;
+using Kyoo.Core.Models.Watch;
+using Kyoo.Utils;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -48,16 +52,16 @@ namespace Kyoo.Core.Controllers
 			private const string TranscoderPath = "transcoder";
 
 			/// <summary>
-			/// Initialize the C library, setup the logger and return the size of a <see cref="Models.Watch.Stream"/>.
+			/// Initialize the C library, setup the logger and return the size of a <see cref="FTrack"/>.
 			/// </summary>
-			/// <returns>The size of a <see cref="Models.Watch.Stream"/></returns>
+			/// <returns>The size of a <see cref="FTrack"/></returns>
 			[DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl)]
 			private static extern int init();
 
 			/// <summary>
-			/// Initialize the C library, setup the logger and return the size of a <see cref="Models.Watch.Stream"/>.
+			/// Initialize the C library, setup the logger and return the size of a <see cref="FTrack"/>.
 			/// </summary>
-			/// <returns>The size of a <see cref="Models.Watch.Stream"/></returns>
+			/// <returns>The size of a <see cref="FTrack"/></returns>
 			public static int Init() => init();
 
 			/// <summary>
@@ -99,7 +103,7 @@ namespace Kyoo.Core.Controllers
 			/// <param name="length">The size of the returned array.</param>
 			/// <param name="trackCount">The number of tracks in the returned array.</param>
 			/// <param name="reExtract">Should the cache be invalidated and information re-extracted or not?</param>
-			/// <returns>A pointer to an array of <see cref="Models.Watch.Stream"/></returns>
+			/// <returns>A pointer to an array of <see cref="FTrack"/></returns>
 			[DllImport(TranscoderPath, CallingConvention = CallingConvention.Cdecl,
 				CharSet = CharSet.Ansi, BestFitMapping = false, ThrowOnUnmappableChar = true)]
 			private static extern IntPtr extract_infos(string path,
@@ -109,7 +113,7 @@ namespace Kyoo.Core.Controllers
 				bool reExtract);
 
 			/// <summary>
-			/// An helper method to free an array of <see cref="Models.Watch.Stream"/>.
+			/// An helper method to free an array of <see cref="FTrack"/>.
 			/// </summary>
 			/// <param name="streams">A pointer to the first element of the array</param>
 			/// <param name="count">The number of items in the array.</param>
@@ -128,7 +132,7 @@ namespace Kyoo.Core.Controllers
 				path = path.Replace('\\', '/');
 				outPath = outPath.Replace('\\', '/');
 
-				int size = Marshal.SizeOf<Models.Watch.Stream>();
+				int size = Marshal.SizeOf<FTrack>();
 				IntPtr ptr = extract_infos(path, outPath, out uint arrayLength, out uint trackCount, reExtract);
 				IntPtr streamsPtr = ptr;
 				Track[] tracks;
@@ -140,8 +144,8 @@ namespace Kyoo.Core.Controllers
 					int j = 0;
 					for (int i = 0; i < arrayLength; i++)
 					{
-						Models.Watch.Stream stream = Marshal.PtrToStructure<Models.Watch.Stream>(streamsPtr);
-						if (stream!.Type != StreamType.Unknown)
+						FTrack stream = Marshal.PtrToStructure<FTrack>(streamsPtr);
+						if (stream!.Type != FTrackType.Unknown && stream.Type != FTrackType.Attachment)
 						{
 							tracks[j] = stream.ToTrack();
 							j++;
@@ -175,6 +179,11 @@ namespace Kyoo.Core.Controllers
 		private readonly ILogger<Transcoder> _logger;
 
 		/// <summary>
+		/// <see langword="true"/> if the C library has been checked, <see langword="false"/> otherwise.
+		/// </summary>
+		private bool _initialized;
+
+		/// <summary>
 		/// Create a new <see cref="Transcoder"/>.
 		/// </summary>
 		/// <param name="files">
@@ -187,14 +196,29 @@ namespace Kyoo.Core.Controllers
 			_files = files;
 			_options = options;
 			_logger = logger;
+		}
 
-			if (TranscoderAPI.Init() != Marshal.SizeOf<Models.Watch.Stream>())
-				_logger.LogCritical("The transcoder library could not be initialized correctly");
+		/// <summary>
+		/// Check if the C library can be used or if there is an issue with it.
+		/// </summary>
+		/// <param name="fastStop">Should the healthcheck be abborted if the transcoder was already initialized?</param>
+		/// <exception cref="HealthException">If the transcoder is corrupted, this exception in thrown.</exception>
+		public void CheckHealth(bool fastStop = false)
+		{
+			if (fastStop && _initialized)
+				return;
+			if (TranscoderAPI.Init() == Marshal.SizeOf<FTrack>())
+				return;
+			_initialized = true;
+			_logger.LogCritical("The transcoder library could not be initialized correctly");
+			throw new HealthException("The transcoder library is corrupted or invalid.");
 		}
 
 		/// <inheritdoc />
 		public async Task<ICollection<Track>> ExtractInfos(Episode episode, bool reExtract)
 		{
+			CheckHealth(true);
+
 			string dir = await _files.GetExtraDirectory(episode);
 			if (dir == null)
 				throw new ArgumentException("Invalid path.");
@@ -204,9 +228,31 @@ namespace Kyoo.Core.Controllers
 			);
 		}
 
+		/// <inheritdoc/>
+		public async Task<ICollection<Font>> ListFonts(Episode episode)
+		{
+			string path = _files.Combine(await _files.GetExtraDirectory(episode), "Attachments");
+			return (await _files.ListFiles(path))
+				.Select(x => new Font(x))
+				.ToArray();
+		}
+
+		/// <inheritdoc/>
+		public async Task<Font> GetFont(Episode episode, string slug)
+		{
+			string path = _files.Combine(await _files.GetExtraDirectory(episode), "Attachments");
+			string font = (await _files.ListFiles(path))
+				.FirstOrDefault(x => Utility.ToSlug(Path.GetFileNameWithoutExtension(x)) == slug);
+			if (font == null)
+				return null;
+			return new Font(font);
+		}
+
 		/// <inheritdoc />
 		public IActionResult Transmux(Episode episode)
 		{
+			CheckHealth(true);
+
 			string folder = Path.Combine(_options.Value.TransmuxPath, episode.Slug);
 			string manifest = Path.GetFullPath(Path.Combine(folder, episode.Slug + ".m3u8"));
 
@@ -260,7 +306,7 @@ namespace Kyoo.Core.Controllers
 				_logger = logger;
 			}
 
-// We use threads so tasks are not always awaited.
+			// We use threads so tasks are not always awaited.
 #pragma warning disable 4014
 
 			/// <inheritdoc />
@@ -292,28 +338,5 @@ namespace Kyoo.Core.Controllers
 
 #pragma warning restore 4014
 		}
-	}
-
-	/// <summary>
-	/// The transcoder used by the <see cref="LocalFileSystem"/>. This is on a different interface than the file system
-	/// to offset the work.
-	/// </summary>
-	public interface ITranscoder
-	{
-		/// <summary>
-		/// Retrieve tracks for a specific episode.
-		/// Subtitles, chapters and fonts should also be extracted and cached when calling this method.
-		/// </summary>
-		/// <param name="episode">The episode to retrieve tracks for.</param>
-		/// <param name="reExtract">Should the cache be invalidated and subtitles and others be re-extracted?</param>
-		/// <returns>The list of tracks available for this episode.</returns>
-		Task<ICollection<Track>> ExtractInfos(Episode episode, bool reExtract);
-
-		/// <summary>
-		/// Transmux the selected episode to hls.
-		/// </summary>
-		/// <param name="episode">The episode to transmux.</param>
-		/// <returns>The master file (m3u8) of the transmuxed hls file.</returns>
-		IActionResult Transmux(Episode episode);
 	}
 }

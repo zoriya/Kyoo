@@ -17,12 +17,31 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Runtime.Serialization;
 
-namespace Kyoo.Abstractions.Models.Attributes
+namespace Kyoo.Abstractions.Models.Exceptions
 {
 	/// <summary>
-	/// Remove an property from the serialization pipeline. It will simply be skipped.
+	/// An exception thrown when a part of the app has a fatal issue.
 	/// </summary>
-	[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
-	public class SerializeIgnoreAttribute : Attribute { }
+	[Serializable]
+	public class HealthException : Exception
+	{
+		/// <summary>
+		/// Create a new <see cref="HealthException"/> with a custom message.
+		/// </summary>
+		/// <param name="message">The message to use.</param>
+		public HealthException(string message)
+			: base(message)
+		{ }
+
+		/// <summary>
+		/// The serialization constructor
+		/// </summary>
+		/// <param name="info">Serialization infos</param>
+		/// <param name="context">The serialization context</param>
+		protected HealthException(SerializationInfo info, StreamingContext context)
+			: base(info, context)
+		{ }
+	}
 }

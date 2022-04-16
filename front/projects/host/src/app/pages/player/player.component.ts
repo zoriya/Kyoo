@@ -15,7 +15,7 @@ import { DomSanitizer, Title } from "@angular/platform-browser";
 import { ActivatedRoute, Event, NavigationCancel, NavigationEnd, NavigationStart, Router } from "@angular/router";
 import { OidcSecurityService } from "angular-auth-oidc-client";
 import Hls from "hls.js";
-import { ShowService } from "../../services/api.service";
+import { EpisodeService, ShowService } from "../../services/api.service";
 import { StartupService } from "../../services/startup.service";
 import {
 	getWhatIsSupported,
@@ -24,6 +24,7 @@ import {
 } from "./playbackMethodDetector";
 import { AppComponent } from "../../app.component";
 import { Track, WatchItem } from "../../models/watch-item";
+import { Font } from "../../models/font";
 import SubtitlesOctopus from "libass-wasm/dist/js/subtitles-octopus.js";
 import MouseMoveEvent = JQuery.MouseMoveEvent;
 import TouchMoveEvent = JQuery.TouchMoveEvent;
@@ -161,13 +162,12 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 	private hlsPlayer: Hls = new Hls();
 	private oidcSecurity: OidcSecurityService;
 	constructor(private route: ActivatedRoute,
-	            private sanitizer: DomSanitizer,
 	            private snackBar: MatSnackBar,
 	            private title: Title,
 	            private router: Router,
 	            private location: Location,
 	            private injector: Injector,
-	            private shows: ShowService,
+	            private episode: EpisodeService,
 	            private startup: StartupService)
 	{ }
 
@@ -481,18 +481,13 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 
 			if (subtitle.codec === "ass")
 			{
-				if (!this.subtitlesManager)
-				{
-					const fonts: { [key: string]: string } = await this.shows.getFonts(this.item.showSlug).toPromise();
-					this.subtitlesManager = new SubtitlesOctopus({
-						video: this.player,
-						subUrl: `subtitle/${subtitle.slug}`,
-						fonts: Object.values(fonts),
-						renderMode: "fast"
-					});
-				}
-				else
-					this.subtitlesManager.setTrackByUrl(`subtitle/${subtitle.slug}`);
+				const fonts: Font[] = await this.episode.getFonts(this.item.slug).toPromise();
+				this.subtitlesManager = new SubtitlesOctopus({
+					video: this.player,
+					subUrl: `subtitle/${subtitle.slug}`,
+					fonts: fonts.map(x => `/api/episode/${this.item.slug}/font/${x.slug}.${x.format}`),
+					renderMode: "fast"
+				});
 			}
 			else if (subtitle.codec === "subrip")
 			{

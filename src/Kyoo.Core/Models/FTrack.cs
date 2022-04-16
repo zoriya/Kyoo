@@ -22,10 +22,44 @@ using Kyoo.Abstractions.Models;
 namespace Kyoo.Core.Models.Watch
 {
 	/// <summary>
+	/// The list of available stream types.
+	/// Attachments are only used temporarily by the transcoder but are not stored in a database.
+	/// This is another <see cref="StreamType"/> enum used internally to communicate with ffmpeg.
+	/// </summary>
+	public enum FTrackType
+	{
+		/// <summary>
+		/// The type of the stream is not known.
+		/// </summary>
+		Unknown = StreamType.Unknown,
+
+		/// <summary>
+		/// The stream is a video.
+		/// </summary>
+		Video = StreamType.Video,
+
+		/// <summary>
+		/// The stream is an audio.
+		/// </summary>
+		Audio = StreamType.Audio,
+
+		/// <summary>
+		/// The stream is a subtitle.
+		/// </summary>
+		Subtitle = StreamType.Subtitle,
+
+		/// <summary>
+		/// The stream is an attachment (a font, an image or something else).
+		/// Only fonts are handled by kyoo but they are not saved to the database.
+		/// </summary>
+		Attachment
+	}
+
+	/// <summary>
 	/// The unmanaged stream that the transcoder will return.
 	/// </summary>
 	[StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-	public struct Stream
+	public struct FTrack
 	{
 		/// <summary>
 		/// The title of the stream.
@@ -60,7 +94,7 @@ namespace Kyoo.Core.Models.Watch
 		/// <summary>
 		/// The type of this stream.
 		/// </summary>
-		public StreamType Type;
+		public FTrackType Type;
 
 		/// <summary>
 		/// Create a track from this stream.
@@ -76,7 +110,7 @@ namespace Kyoo.Core.Models.Watch
 				IsDefault = IsDefault,
 				IsForced = IsForced,
 				Path = Path,
-				Type = Type,
+				Type = Type < FTrackType.Attachment ? (StreamType)Type : StreamType.Unknown,
 				IsExternal = false
 			};
 		}

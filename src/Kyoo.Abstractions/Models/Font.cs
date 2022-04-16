@@ -16,48 +16,52 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
+using Kyoo.Abstractions.Models.Attributes;
+using Kyoo.Utils;
+using PathIO = System.IO.Path;
 
-namespace Kyoo.Core.Models.Options
+namespace Kyoo.Abstractions.Models
 {
 	/// <summary>
-	/// The typed list of basic/global options for Kyoo
+	/// A font of an <see cref="Episode"/>.
 	/// </summary>
-	public class BasicOptions
+	public class Font
 	{
 		/// <summary>
-		/// The path of this list of options
+		/// A human-readable identifier, used in the URL.
 		/// </summary>
-		public const string Path = "Basics";
+		public string Slug { get; set; }
 
 		/// <summary>
-		/// The internal url where the server will listen. It supports globing.
+		/// The name of the font file (with the extension).
 		/// </summary>
-		public string Url { get; set; } = "http://*:5000";
+		public string File { get; set; }
 
 		/// <summary>
-		/// The public url that will be used in items response and in authentication server host.
+		/// The format of this font (the extension).
 		/// </summary>
-		public Uri PublicUrl { get; set; } = new("http://localhost:5000");
+		public string Format { get; set; }
 
 		/// <summary>
-		/// The path of the plugin directory.
+		/// The path of the font.
 		/// </summary>
-		public string PluginPath { get; set; } = "plugins/";
+		[SerializeIgnore] public string Path { get; set; }
 
 		/// <summary>
-		/// The temporary folder to cache transmuxed file.
+		/// Create a new empty <see cref="Font"/>.
 		/// </summary>
-		public string TransmuxPath { get; set; } = "cached/transmux";
+		public Font() { }
 
 		/// <summary>
-		/// The temporary folder to cache transcoded file.
+		/// Create a new <see cref="Font"/> from a path.
 		/// </summary>
-		public string TranscodePath { get; set; } = "cached/transcode";
-
-		/// <summary>
-		/// The path where metadata is stored.
-		/// </summary>
-		public string MetadataPath { get; set; } = "metadata/";
+		/// <param name="path">The path of the font.</param>
+		public Font(string path)
+		{
+			Slug = Utility.ToSlug(PathIO.GetFileNameWithoutExtension(path));
+			Path = path;
+			File = PathIO.GetFileName(path);
+			Format = PathIO.GetExtension(path).Replace(".", string.Empty);
+		}
 	}
 }

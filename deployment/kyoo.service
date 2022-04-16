@@ -1,6 +1,5 @@
 [Unit]
 Description=Kyoo Media Server
-Requires=postgresql.service
 After=network.target
 
 [Service]

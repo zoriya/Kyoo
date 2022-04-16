@@ -34,7 +34,8 @@ namespace Kyoo.Abstractions.Models
 		public int ID { get; set; }
 
 		/// <inheritdoc />
-		[Computed] public string Slug
+		[Computed]
+		public string Slug
 		{
 			get
 			{
@@ -43,7 +44,9 @@ namespace Kyoo.Abstractions.Models
 				return $"{ShowSlug ?? Show?.Slug}-s{SeasonNumber}";
 			}
 
-			[UsedImplicitly] [NotNull] private set
+			[UsedImplicitly]
+			[NotNull]
+			private set
 			{
 				Match match = Regex.Match(value ?? string.Empty, @"(?<show>.+)-s(?<season>\d+)");
 

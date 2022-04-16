@@ -20,7 +20,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 
-namespace Kyoo.Core.Models.Watch
+namespace Kyoo.Core.Models
 {
 	/// <summary>
 	/// A static class allowing one to identify files extensions.

@@ -48,19 +48,33 @@ namespace Kyoo.Core.Api
 		private readonly ILibraryManager _libraryManager;
 
 		/// <summary>
+		/// The transcoder used to retrive fonts.
+		/// </summary>
+		private readonly ITranscoder _transcoder;
+
+		/// <summary>
+		/// The file system used to send fonts.
+		/// </summary>
+		private readonly IFileSystem _files;
+
+		/// <summary>
 		/// Create a new <see cref="EpisodeApi"/>.
 		/// </summary>
 		/// <param name="libraryManager">
 		/// The library manager used to modify or retrieve information in the data store.
 		/// </param>
+		/// <param name="transcoder">The transcoder used to retrive fonts</param>
 		/// <param name="files">The file manager used to send images.</param>
 		/// <param name="thumbnails">The thumbnail manager used to retrieve images paths.</param>
 		public EpisodeApi(ILibraryManager libraryManager,
+			ITranscoder transcoder,
 			IFileSystem files,
 			IThumbnailsManager thumbnails)
 			: base(libraryManager.EpisodeRepository, files, thumbnails)
 		{
 			_libraryManager = libraryManager;
+			_transcoder = transcoder;
+			_files = files;
 		}
 
 		/// <summary>
@@ -157,6 +171,61 @@ namespace Kyoo.Core.Api
 			{
 				return BadRequest(new RequestError(ex.Message));
 			}
+		}
+
+		/// <summary>
+		/// List fonts
+		/// </summary>
+		/// <remarks>
+		/// List available fonts for this episode.
+		/// </remarks>
+		/// <param name="identifier">The ID or slug of the <see cref="Episode"/>.</param>
+		/// <returns>An object containing the name of the font followed by the url to retrieve it.</returns>
+		[HttpGet("{identifier:id}/fonts")]
+		[HttpGet("{identifier:id}/font", Order = AlternativeRoute)]
+		[PartialPermission(Kind.Read)]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task<ActionResult<ICollection<Font>>> GetFonts(Identifier identifier)
+		{
+			Episode episode = await identifier.Match(
+				id => _libraryManager.GetOrDefault<Episode>(id),
+				slug => _libraryManager.GetOrDefault<Episode>(slug)
+			);
+			if (episode == null)
+				return NotFound();
+			return Ok(await _transcoder.ListFonts(episode));
+		}
+
+		/// <summary>
+		/// Get font
+		/// </summary>
+		/// <remarks>
+		/// Get a font file that is used in subtitles of this episode.
+		/// </remarks>
+		/// <param name="identifier">The ID or slug of the <see cref="Episode"/>.</param>
+		/// <param name="slug">The slug of the font to retrieve.</param>
+		/// <returns>A page of collections.</returns>
+		/// <response code="404">No show with the given ID/slug could be found or the font does not exist.</response>
+		[HttpGet("{identifier:id}/fonts/{slug}")]
+		[HttpGet("{identifier:id}/font/{slug}", Order = AlternativeRoute)]
+		[PartialPermission(Kind.Read)]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task<IActionResult> GetFont(Identifier identifier, string slug)
+		{
+			Episode episode = await identifier.Match(
+				id => _libraryManager.GetOrDefault<Episode>(id),
+				slug => _libraryManager.GetOrDefault<Episode>(slug)
+			);
+			if (episode == null)
+				return NotFound();
+			if (slug.Contains('.'))
+				slug = slug[..slug.LastIndexOf('.')];
+			Font font = await _transcoder.GetFont(episode, slug);
+			if (font == null)
+				return NotFound();
+			return _files.FileResult(font.Path);
 		}
 	}
 }

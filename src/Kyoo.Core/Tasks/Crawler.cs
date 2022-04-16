@@ -25,7 +25,7 @@ using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
-using Kyoo.Core.Models.Watch;
+using Kyoo.Core.Models;
 using Microsoft.Extensions.Logging;
 
 namespace Kyoo.Core.Tasks

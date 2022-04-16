@@ -180,8 +180,8 @@ namespace Kyoo.Tests
 						"We Still Don't Know the Name of the Flower We Saw That Day."
 					},
 					Overview = "When Yadomi Jinta was a child, he was a central piece in a group of close friends. " +
-					           "In time, however, these childhood friends drifted apart, and when they became high " +
-					           "school students, they had long ceased to think of each other as friends.",
+						"In time, however, these childhood friends drifted apart, and when they became high " +
+						"school students, they had long ceased to think of each other as friends.",
 					Status = Status.Finished,
 					StudioID = 1,
 					StartAir = new DateTime(2011, 1, 1),
@@ -243,7 +243,7 @@ namespace Kyoo.Tests
 				typeof(Track),
 				() =>
 				{
-					Track ret =  new()
+					Track ret = new()
 					{
 						ID = 1,
 						EpisodeID = 1,

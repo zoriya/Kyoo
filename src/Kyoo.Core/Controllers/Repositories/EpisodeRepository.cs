@@ -73,16 +73,16 @@ namespace Kyoo.Core.Controllers
 		public Task<Episode> GetOrDefault(int showID, int seasonNumber, int episodeNumber)
 		{
 			return _database.Episodes.FirstOrDefaultAsync(x => x.ShowID == showID
-			                                                   && x.SeasonNumber == seasonNumber
-			                                                   && x.EpisodeNumber == episodeNumber);
+				&& x.SeasonNumber == seasonNumber
+				&& x.EpisodeNumber == episodeNumber);
 		}
 
 		/// <inheritdoc />
 		public Task<Episode> GetOrDefault(string showSlug, int seasonNumber, int episodeNumber)
 		{
 			return _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == showSlug
-			                                                   && x.SeasonNumber == seasonNumber
-			                                                   && x.EpisodeNumber == episodeNumber);
+				&& x.SeasonNumber == seasonNumber
+				&& x.EpisodeNumber == episodeNumber);
 		}
 
 		/// <inheritdoc />
@@ -107,14 +107,14 @@ namespace Kyoo.Core.Controllers
 		public Task<Episode> GetAbsolute(int showID, int absoluteNumber)
 		{
 			return _database.Episodes.FirstOrDefaultAsync(x => x.ShowID == showID
-			                                                   && x.AbsoluteNumber == absoluteNumber);
+				&& x.AbsoluteNumber == absoluteNumber);
 		}
 
 		/// <inheritdoc />
 		public Task<Episode> GetAbsolute(string showSlug, int absoluteNumber)
 		{
 			return _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == showSlug
-			                                                   && x.AbsoluteNumber == absoluteNumber);
+				&& x.AbsoluteNumber == absoluteNumber);
 		}
 
 		/// <inheritdoc />

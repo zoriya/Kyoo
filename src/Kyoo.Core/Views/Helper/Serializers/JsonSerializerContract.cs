@@ -1,4 +1,4 @@
-﻿// Kyoo - A portable and vast media library solution.
+// Kyoo - A portable and vast media library solution.
 // Copyright (c) Kyoo.
 //
 // See AUTHORS.md and LICENSE file in the project root for full license information.

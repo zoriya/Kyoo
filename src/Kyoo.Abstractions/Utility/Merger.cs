@@ -170,7 +170,7 @@ namespace Kyoo.Utils
 			Type type = typeof(T);
 			IEnumerable<PropertyInfo> properties = type.GetProperties()
 				.Where(x => x.CanRead && x.CanWrite
-				                      && Attribute.GetCustomAttribute(x, typeof(NotMergeableAttribute)) == null);
+					&& Attribute.GetCustomAttribute(x, typeof(NotMergeableAttribute)) == null);
 
 			foreach (PropertyInfo property in properties)
 			{
@@ -221,7 +221,7 @@ namespace Kyoo.Utils
 			Type type = typeof(T);
 			IEnumerable<PropertyInfo> properties = type.GetProperties()
 				.Where(x => x.CanRead && x.CanWrite
-				                      && Attribute.GetCustomAttribute(x, typeof(NotMergeableAttribute)) == null);
+					&& Attribute.GetCustomAttribute(x, typeof(NotMergeableAttribute)) == null);
 
 			if (where != null)
 				properties = properties.Where(where);
@@ -293,7 +293,7 @@ namespace Kyoo.Utils
 			Type type = typeof(T);
 			IEnumerable<PropertyInfo> properties = type.GetProperties()
 				.Where(x => x.CanRead && x.CanWrite
-				                      && Attribute.GetCustomAttribute(x, typeof(NotMergeableAttribute)) == null);
+					&& Attribute.GetCustomAttribute(x, typeof(NotMergeableAttribute)) == null);
 
 			if (where != null)
 				properties = properties.Where(where);
@@ -325,7 +325,7 @@ namespace Kyoo.Utils
 						property.SetValue(first, newDictionary);
 				}
 				else if (typeof(IEnumerable).IsAssignableFrom(property.PropertyType)
-				         && property.PropertyType != typeof(string))
+					&& property.PropertyType != typeof(string))
 				{
 					Type enumerableType = Utility.GetGenericDefinition(property.PropertyType, typeof(IEnumerable<>))
 						.GenericTypeArguments
