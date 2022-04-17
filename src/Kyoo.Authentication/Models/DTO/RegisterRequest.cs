@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Kyoo.Abstractions.Models;
 using Kyoo.Utils;
+using BCryptNet = BCrypt.Net.BCrypt;
 
 namespace Kyoo.Authentication.Models.DTO
 {
@@ -56,7 +57,7 @@ namespace Kyoo.Authentication.Models.DTO
 			{
 				Slug = Utility.ToSlug(Username),
 				Username = Username,
-				Password = Password,
+				Password = BCryptNet.HashPassword(Password),
 				Email = Email,
 				ExtraData = new Dictionary<string, string>()
 			};

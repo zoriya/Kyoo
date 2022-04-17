@@ -22,33 +22,34 @@ using JetBrains.Annotations;
 using Kyoo.Abstractions.Models;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Kyoo.Authentication;
-
-/// <summary>
-/// The service that controls jwt creation and validation.
-/// </summary>
-public interface ITokenController
+namespace Kyoo.Authentication
 {
 	/// <summary>
-	/// Create a new access token for the given user.
+	/// The service that controls jwt creation and validation.
 	/// </summary>
-	/// <param name="user">The user to create a token for.</param>
-	/// <param name="expireIn">When this token will expire.</param>
-	/// <returns>A new, valid access token.</returns>
-	string CreateAccessToken([NotNull] User user, out TimeSpan expireIn);
+	public interface ITokenController
+	{
+		/// <summary>
+		/// Create a new access token for the given user.
+		/// </summary>
+		/// <param name="user">The user to create a token for.</param>
+		/// <param name="expireIn">When this token will expire.</param>
+		/// <returns>A new, valid access token.</returns>
+		string CreateAccessToken([NotNull] User user, out TimeSpan expireIn);
 
-	/// <summary>
-	/// Create a new refresh token for the given user.
-	/// </summary>
-	/// <param name="user">The user to create a token for.</param>
-	/// <returns>A new, valid refresh token.</returns>
-	Task<string> CreateRefreshToken([NotNull] User user);
+		/// <summary>
+		/// Create a new refresh token for the given user.
+		/// </summary>
+		/// <param name="user">The user to create a token for.</param>
+		/// <returns>A new, valid refresh token.</returns>
+		Task<string> CreateRefreshToken([NotNull] User user);
 
-	/// <summary>
-	/// Check if the given refresh token is valid and if it is, retrieve the id of the user this token belongs to.
-	/// </summary>
-	/// <param name="refreshToken">The refresh token to validate.</param>
-	/// <exception cref="SecurityTokenException">The given refresh token is not valid.</exception>
-	/// <returns>The id of the token's user.</returns>
-	int GetRefreshTokenUserID(string refreshToken);
+		/// <summary>
+		/// Check if the given refresh token is valid and if it is, retrieve the id of the user this token belongs to.
+		/// </summary>
+		/// <param name="refreshToken">The refresh token to validate.</param>
+		/// <exception cref="SecurityTokenException">The given refresh token is not valid.</exception>
+		/// <returns>The id of the token's user.</returns>
+		int GetRefreshTokenUserID(string refreshToken);
+	}
 }

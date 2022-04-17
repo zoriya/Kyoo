@@ -47,7 +47,7 @@ namespace Kyoo.Authentication
 		public string Name => "Authentication";
 
 		/// <inheritdoc />
-		public string Description => "Enable an authentication/permission system for Kyoo (via Jwt or ApKeys).";
+		public string Description => "Enable an authentication/permission system for Kyoo (via Jwt or ApiKeys).";
 
 		/// <inheritdoc />
 		public Dictionary<string, Type> Configuration => new()
@@ -62,7 +62,7 @@ namespace Kyoo.Authentication
 		private readonly IConfiguration _configuration;
 
 		/// <summary>
-		/// Create a new authentication module instance and use the given configuration and environment.
+		/// Create a new authentication module instance and use the given configuration.
 		/// </summary>
 		/// <param name="configuration">The configuration to use</param>
 		public AuthenticationModule(IConfiguration configuration)

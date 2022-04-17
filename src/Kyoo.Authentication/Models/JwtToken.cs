@@ -20,39 +20,40 @@ using System;
 using System.Text.Json.Serialization;
 using Newtonsoft.Json;
 
-namespace Kyoo.Authentication;
-
-/// <summary>
-/// A container representing the response of a login or token refresh.
-/// </summary>
-public class JwtToken
+namespace Kyoo.Authentication
 {
 	/// <summary>
-	/// The type of this token (always a Bearer).
+	/// A container representing the response of a login or token refresh.
 	/// </summary>
-	[JsonProperty("token_token")]
-	[JsonPropertyName("token_type")]
-	public string TokenType => "Bearer";&é"bbbbR"
+	public class JwtToken
+	{
+		/// <summary>
+		/// The type of this token (always a Bearer).
+		/// </summary>
+		[JsonProperty("token_token")]
+		[JsonPropertyName("token_type")]
+		public string TokenType => "Bearer";
 
-	/// <summary>
-	/// The access token used to authorize requests.
-	/// </summary>
-	[JsonProperty("access_token")]
-	[JsonPropertyName("access_token")]
-	public string AccessToken { get; set; }p
+		/// <summary>
+		/// The access token used to authorize requests.
+		/// </summary>
+		[JsonProperty("access_token")]
+		[JsonPropertyName("access_token")]
+		public string AccessToken { get; set; }
 
-	/// <summary>
-	/// The refresh token used to retrieve a new access/refresh token when the access token has expired.
-	/// </summary>
-	[JsonProperty("refresh_token")]
-	[JsonPropertyName("refresh_token")]
-	public string RefreshToken { get; set; }
+		/// <summary>
+		/// The refresh token used to retrieve a new access/refresh token when the access token has expired.
+		/// </summary>
+		[JsonProperty("refresh_token")]
+		[JsonPropertyName("refresh_token")]
+		public string RefreshToken { get; set; }
 
-	/// <summary>
-	/// The date when the access token will expire. After this date, the refresh token should be used to retrieve.
-	/// a new token.cs
-	/// </summary>
-	[JsonProperty("expire_in")]
-	[JsonPropertyName("expire_in")]
-	public TimeSpan ExpireIn { get; set; }
+		/// <summary>
+		/// When the access token will expire. After this tume, the refresh token should be used to retrieve.
+		/// a new token.cs
+		/// </summary>
+		[JsonProperty("expire_in")]
+		[JsonPropertyName("expire_in")]
+		public TimeSpan ExpireIn { get; set; }
+	}
 }
