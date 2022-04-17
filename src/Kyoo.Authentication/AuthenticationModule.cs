@@ -27,13 +27,11 @@ using Kyoo.Abstractions.Controllers;
 using Kyoo.Authentication.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
-using SameSiteMode = Microsoft.AspNetCore.Http.SameSiteMode;
 
 namespace Kyoo.Authentication
 {
@@ -64,20 +62,12 @@ namespace Kyoo.Authentication
 		private readonly IConfiguration _configuration;
 
 		/// <summary>
-		/// The environment information to check if the app runs in debug mode
-		/// </summary>
-		private readonly IWebHostEnvironment _environment;
-
-		/// <summary>
 		/// Create a new authentication module instance and use the given configuration and environment.
 		/// </summary>
 		/// <param name="configuration">The configuration to use</param>
-		/// <param name="environment">The environment information to check if the app runs in debug mode</param>
-		public AuthenticationModule(IConfiguration configuration,
-			IWebHostEnvironment environment)
+		public AuthenticationModule(IConfiguration configuration)
 		{
 			_configuration = configuration;
-			_environment = environment;
 		}
 
 		/// <inheritdoc />
@@ -132,21 +122,8 @@ namespace Kyoo.Authentication
 			}, SA.StaticFiles),
 			SA.New<IApplicationBuilder>(app =>
 			{
-				app.UseCookiePolicy(new CookiePolicyOptions
-				{
-					MinimumSameSitePolicy = SameSiteMode.Strict
-				});
 				app.UseAuthentication();
 			}, SA.Authentication),
-			SA.New<IApplicationBuilder>(app =>
-			{
-				app.Use((ctx, next) =>
-				{
-					ctx.SetIdentityServerOrigin(_configuration.GetPublicUrl().ToString());
-					return next();
-				});
-				app.UseIdentityServer();
-			}, SA.Endpoint),
 			SA.New<IApplicationBuilder>(app => app.UseAuthorization(), SA.Authorization)
 		};
 	}

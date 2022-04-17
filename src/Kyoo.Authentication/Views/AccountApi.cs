@@ -18,246 +18,195 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using IdentityServer4.Extensions;
-using IdentityServer4.Models;
-using IdentityServer4.Services;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
-using Kyoo.Abstractions.Models.Attributes;
-using Kyoo.Abstractions.Models.Exceptions;
-using Kyoo.Abstractions.Models.Utils;
-using Kyoo.Authentication.Models;
+using Kyoo.Authentication;
 using Kyoo.Authentication.Models.DTO;
-using Microsoft.AspNetCore.Authentication;
+using Kyoo.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using static Kyoo.Abstractions.Models.Utils.Constants;
+using Microsoft.IdentityModel.Tokens;
+using BCryptNet = BCrypt.Net.BCrypt;
 
-namespace Kyoo.Authentication.Views
+namespace Amadeus.Server.Views.Auth;
+
+/// <summary>
+/// Sign in, Sign up or refresh tokens.
+/// </summary>
+[ApiController]
+[Route("auth")]
+public class AuthView : ControllerBase
 {
 	/// <summary>
-	/// The endpoint responsible for login, logout, permissions and claims of a user.
-	/// Documentation of this endpoint is a work in progress.
+	/// The repository used to check if the user exists.
 	/// </summary>
-	/// TODO document this well.
-	[Route("api/accounts")]
-	[Route("api/account", Order = AlternativeRoute)]
-	[ApiController]
-	[ApiDefinition("Account")]
-	public class AccountApi : Controller, IProfileService
+	private readonly IUserRepository _users;
+
+	/// <summary>
+	/// The token generator.
+	/// </summary>
+	private readonly ITokenController _token;
+
+	/// <summary>
+	/// Create a new <see cref="AuthView"/>.
+	/// </summary>
+	/// <param name="users">The repository used to check if the user exists.</param>
+	/// <param name="token">The token generator.</param>
+	public AuthView(IUserRepository users, ITokenController token)
 	{
-		/// <summary>
-		/// The repository to handle users.
-		/// </summary>
-		private readonly IUserRepository _users;
+		_users = users;
+		_token = token;
+	}
 
-		/// <summary>
-		/// A file manager to send profile pictures
-		/// </summary>
-		private readonly IFileSystem _files;
-
-		/// <summary>
-		/// Options about authentication. Those options are monitored and reloads are supported.
-		/// </summary>
-		private readonly IOptions<AuthenticationOption> _options;
-
-		/// <summary>
-		/// Create a new <see cref="AccountApi"/> handle to handle login/users requests.
-		/// </summary>
-		/// <param name="users">The user repository to create and manage users</param>
-		/// <param name="files">A file manager to send profile pictures</param>
-		/// <param name="options">Authentication options (this may be hot reloaded)</param>
-		public AccountApi(IUserRepository users,
-			IFileSystem files,
-			IOptions<AuthenticationOption> options)
+	/// <summary>
+	/// Login.
+	/// </summary>
+	/// <remarks>
+	/// Login as a user and retrieve an access and a refresh token.
+	/// </remarks>
+	/// <param name="request">The body of the request.</param>
+	/// <returns>A new access and a refresh token.</returns>
+	/// <response code="400">The user and password does not match.</response>
+	[HttpPost("login")]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	public async Task<ActionResult<JwtToken>> Login([FromBody] LoginRequest request)
+	{
+		User user = (await _users.GetAll()).FirstOrDefault(x => x.Username == request.Username);
+		if (user != null && BCryptNet.Verify(request.Password, user.Password))
 		{
-			_users = users;
-			_files = files;
-			_options = options;
-		}
-
-		/// <summary>
-		/// Register
-		/// </summary>
-		/// <remarks>
-		/// Register a new user and return a OTAC to connect to it.
-		/// </remarks>
-		/// <param name="request">The DTO register request</param>
-		/// <returns>A OTAC to connect to this new account</returns>
-		[HttpPost("register")]
-		[ProducesResponseType(StatusCodes.Status200OK)]
-		[ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(RequestError))]
-		public async Task<ActionResult<OtacResponse>> Register([FromBody] RegisterRequest request)
-		{
-			User user = request.ToUser();
-			user.Permissions = _options.Value.Permissions.NewUser;
-			user.Password = PasswordUtils.HashPassword(user.Password);
-			user.ExtraData["otac"] = PasswordUtils.GenerateOTAC();
-			user.ExtraData["otac-expire"] = DateTime.Now.AddMinutes(1).ToString("s");
-			try
+			return new JwtToken
 			{
-				await _users.Create(user);
-			}
-			catch (DuplicatedItemException)
-			{
-				return Conflict(new RequestError("A user with this name already exists"));
-			}
-
-			return Ok(new OtacResponse(user.ExtraData["otac"]));
-		}
-
-		/// <summary>
-		/// Return an authentication properties based on a stay login property
-		/// </summary>
-		/// <param name="stayLogged">Should the user stay logged</param>
-		/// <returns>Authentication properties based on a stay login</returns>
-		private static AuthenticationProperties _StayLogged(bool stayLogged)
-		{
-			if (!stayLogged)
-				return null;
-			return new AuthenticationProperties
-			{
-				IsPersistent = true,
-				ExpiresUtc = DateTimeOffset.UtcNow.AddMonths(1)
+				AccessToken = _token.CreateAccessToken(user, out TimeSpan expireDate),
+				RefreshToken = await _token.CreateRefreshToken(user),
+				ExpireIn = expireDate
 			};
 		}
+		return BadRequest(new { Message = "The user and password does not match." });
+	}
 
-		/// <summary>
-		/// Login
-		/// </summary>
-		/// <remarks>
-		/// Login the current session.
-		/// </remarks>
-		/// <param name="login">The DTO login request</param>
-		/// <returns>TODO</returns>
-		[HttpPost("login")]
-		public async Task<IActionResult> Login([FromBody] LoginRequest login)
+	/// <summary>
+	/// Register.
+	/// </summary>
+	/// <remarks>
+	/// Register a new user and get a new access/refresh token for this new user.
+	/// </remarks>
+	/// <param name="request">The body of the request.</param>
+	/// <returns>A new access and a refresh token.</returns>
+	/// <response code="400">The request is invalid.</response>
+	/// <response code="409">A user already exists with this username or email address.</response>
+	[HttpPost("register")]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	[ProducesResponseType(StatusCodes.Status409Conflict)]
+	public async Task<ActionResult<JwtToken>> Register([FromBody] RegisterRequest request)
+	{
+		User user = request.ToUser();
+		user.Password = BCryptNet.HashPassword(request.Password);
+		try
 		{
-			User user = await _users.GetOrDefault(x => x.Username == login.Username);
-
-			if (user == null)
-				return Unauthorized();
-			if (!PasswordUtils.CheckPassword(login.Password, user.Password))
-				return Unauthorized();
-
-			await HttpContext.SignInAsync(user.ToIdentityUser(), _StayLogged(login.StayLoggedIn));
-			return Ok(new { RedirectUrl = login.ReturnURL, IsOk = true });
+			await _users.Create(user);
+		}
+		catch (DuplicateField)
+		{
+			return Conflict(new { Message = "A user already exists with this username." });
 		}
 
-		/// <summary>
-		/// Use a OTAC to login a user.
-		/// </summary>
-		/// <param name="otac">The OTAC request</param>
-		/// <returns>TODO</returns>
-		[HttpPost("otac-login")]
-		public async Task<IActionResult> OtacLogin([FromBody] OtacRequest otac)
+
+		return new JwtToken
 		{
-			// TODO once hstore (Dictionary<string, string> accessor) are supported, use them.
-			//      We retrieve all users, this is inefficient.
-			User user = (await _users.GetAll()).FirstOrDefault(x => x.ExtraData.GetValueOrDefault("otac") == otac.Otac);
-			if (user == null)
-				return Unauthorized();
-			if (DateTime.ParseExact(user.ExtraData["otac-expire"], "s", CultureInfo.InvariantCulture) <=
-				DateTime.UtcNow)
+			AccessToken = _token.CreateAccessToken(user, out TimeSpan expireDate),
+			RefreshToken = await _token.CreateRefreshToken(user),
+			ExpireIn = expireDate
+		};
+	}
+
+	/// <summary>
+	/// Refresh a token.
+	/// </summary>
+	/// <remarks>
+	/// Refresh an access token using the given refresh token. A new access and refresh token are generated.
+	/// The old refresh token should not be used anymore.
+	/// </remarks>
+	/// <param name="token">A valid refresh token.</param>
+	/// <returns>A new access and refresh token.</returns>
+	/// <response code="400">The given refresh token is invalid.</response>
+	[HttpGet("refresh")]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[ProducesResponseType(StatusCodes.Status400BadRequest)]
+	public async Task<ActionResult<JwtToken>> Refresh([FromQuery] string token)
+	{
+		try
+		{
+			int userId = _token.GetRefreshTokenUserID(token);
+			User user = await _users.GetById(userId);
+			return new JwtToken
 			{
-				return BadRequest(new
-				{
-					code = "ExpiredOTAC",
-					description = "The OTAC has expired. Try to login with your password."
-				});
-			}
-
-			await HttpContext.SignInAsync(user.ToIdentityUser(), _StayLogged(otac.StayLoggedIn));
-			return Ok();
+				AccessToken = _token.CreateAccessToken(user, out TimeSpan expireDate),
+				RefreshToken = await _token.CreateRefreshToken(user),
+				ExpireIn = expireDate
+			};
 		}
-
-		/// <summary>
-		/// Sign out an user
-		/// </summary>
-		/// <returns>TODO</returns>
-		[HttpGet("logout")]
-		[Authorize]
-		public async Task<IActionResult> Logout()
+		catch (ElementNotFound)
 		{
-			await HttpContext.SignOutAsync();
-			return Ok();
+			return BadRequest(new { Message = "Invalid refresh token." });
 		}
-
-		/// <inheritdoc />
-		[ApiExplorerSettings(IgnoreApi = true)]
-		public async Task GetProfileDataAsync(ProfileDataRequestContext context)
+		catch (SecurityTokenException ex)
 		{
-			User user = await _users.GetOrDefault(int.Parse(context.Subject.GetSubjectId()));
-			if (user == null)
-				return;
-			context.IssuedClaims.AddRange(user.GetClaims());
-			context.IssuedClaims.Add(new Claim("permissions", string.Join(',', user.Permissions)));
+			return BadRequest(new { ex.Message });
 		}
+	}
 
-		/// <inheritdoc />
-		[ApiExplorerSettings(IgnoreApi = true)]
-		public async Task IsActiveAsync(IsActiveContext context)
+	[HttpGet("anilist")]
+	[ProducesResponseType(StatusCodes.Status302Found)]
+	public IActionResult AniListLogin([FromQuery] Uri redirectUrl, [FromServices] IOptions<AniListOptions> anilist)
+	{
+		Dictionary<string, string> query = new()
 		{
-			User user = await _users.GetOrDefault(int.Parse(context.Subject.GetSubjectId()));
-			context.IsActive = user != null;
-		}
+			["client_id"] = anilist.Value.ClientID,
+			["redirect_uri"] = redirectUrl.ToString(),
+			["response_type"] = "code"
+		};
+		return Redirect($"https://anilist.co/api/v2/oauth/authorize{query.ToQueryString()}");
+	}
 
-		/// <summary>
-		/// Get the user's profile picture.
-		/// </summary>
-		/// <param name="slug">The user slug</param>
-		/// <returns>The profile picture of the user or 404 if not found</returns>
-		[HttpGet("picture/{slug}")]
-		public async Task<IActionResult> GetPicture(string slug)
+	[HttpPost("link/anilist")]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	[Authorize]
+	public async Task<ActionResult<User>> AniListLink([FromQuery] string code, [FromServices] AniListService anilist)
+	{
+		// TODO prevent link if someone has already linked this account.
+		// TODO allow unlink.
+		if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userID))
+			return BadRequest("Invalid access token");
+		return await anilist.LinkAccount(userID, code);
+	}
+
+	[HttpPost("login/anilist")]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	public async Task<ActionResult<JwtToken>> AniListLogin([FromQuery] string code, [FromServices] AniListService anilist)
+	{
+		User user = await anilist.Login(code);
+		return new JwtToken
 		{
-			User user = await _users.GetOrDefault(slug);
-			if (user == null)
-				return NotFound();
-			string path = Path.Combine(_options.Value.ProfilePicturePath, user.ID.ToString());
-			return _files.FileResult(path);
-		}
+			AccessToken = _token.CreateAccessToken(user, out TimeSpan expireIn),
+			RefreshToken = await _token.CreateRefreshToken(user),
+			ExpireIn = expireIn
+		};
+	}
 
-		/// <summary>
-		/// Update profile information (email, username, profile picture...)
-		/// </summary>
-		/// <param name="data">The new information</param>
-		/// <returns>The edited user</returns>
-		[HttpPut]
-		[Authorize]
-		public async Task<ActionResult<User>> Update([FromForm] AccountUpdateRequest data)
-		{
-			User user = await _users.GetOrDefault(int.Parse(HttpContext.User.GetSubjectId()));
-
-			if (user == null)
-				return Unauthorized();
-			if (!string.IsNullOrEmpty(data.Email))
-				user.Email = data.Email;
-			if (!string.IsNullOrEmpty(data.Username))
-				user.Username = data.Username;
-			if (data.Picture?.Length > 0)
-			{
-				string path = _files.Combine(_options.Value.ProfilePicturePath, user.ID.ToString());
-				await using Stream file = await _files.NewFile(path);
-				await data.Picture.CopyToAsync(file);
-			}
-			return await _users.Edit(user, false);
-		}
-
-		/// <summary>
-		/// Get permissions for a non connected user.
-		/// </summary>
-		/// <returns>The list of permissions of a default user.</returns>
-		[HttpGet("permissions")]
-		public ActionResult<IEnumerable<string>> GetDefaultPermissions()
-		{
-			return _options.Value.Permissions.Default ?? Array.Empty<string>();
-		}
+	[HttpGet("me")]
+	[Authorize]
+	[ProducesResponseType(StatusCodes.Status200OK)]
+	public async Task<ActionResult<User>> GetMe()
+	{
+		if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userID))
+			return BadRequest("Invalid access token");
+		return await _users.GetById(userID);
 	}
 }
