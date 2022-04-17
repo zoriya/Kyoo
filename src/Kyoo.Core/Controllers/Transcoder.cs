@@ -142,16 +142,15 @@ namespace Kyoo.Core.Controllers
 					tracks = new Track[trackCount];
 
 					int j = 0;
-					for (int i = 0; i < arrayLength; i++)
+					for (int i = 0; i < arrayLength; i++, streamsPtr += size)
 					{
 						FTrack stream = Marshal.PtrToStructure<FTrack>(streamsPtr);
-						if (stream!.Type != FTrackType.Unknown && stream.Type != FTrackType.Attachment)
-						{
-							tracks[j] = stream.ToTrack();
-							j++;
-						}
-						streamsPtr += size;
+						if (stream!.Type == FTrackType.Unknown || stream.Type == FTrackType.Attachment)
+							continue;
+						tracks[j] = stream.ToTrack();
+						j++;
 					}
+					Array.Resize(ref tracks, j);
 				}
 				else
 					tracks = Array.Empty<Track>();
@@ -207,11 +206,12 @@ namespace Kyoo.Core.Controllers
 		{
 			if (fastStop && _initialized)
 				return;
-			if (TranscoderAPI.Init() == Marshal.SizeOf<FTrack>())
-				return;
+			if (TranscoderAPI.Init() != Marshal.SizeOf<FTrack>())
+			{
+				_logger.LogCritical("The transcoder library could not be initialized correctly");
+				throw new HealthException("The transcoder library is corrupted or invalid.");
+			}
 			_initialized = true;
-			_logger.LogCritical("The transcoder library could not be initialized correctly");
-			throw new HealthException("The transcoder library is corrupted or invalid.");
 		}
 
 		/// <inheritdoc />
