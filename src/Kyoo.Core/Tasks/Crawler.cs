@@ -138,6 +138,7 @@ namespace Kyoo.Core.Tasks
 				// of the show has already been fetched.
 				List<IGrouping<string, string>> shows = files
 					.Where(FileExtensions.IsVideo)
+					.Where(x => !Path.GetFileName(x).StartsWith('.')) // ignore hidden files.
 					.Where(x => episodes.All(y => y.Path != x))
 					.GroupBy(Path.GetDirectoryName)
 					.ToList();
