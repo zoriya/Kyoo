@@ -118,6 +118,7 @@ namespace Kyoo.Core
 		/// <inheritdoc />
 		public void Configure(IServiceCollection services)
 		{
+			services.AddHttpContextAccessor();
 			services.AddTransient<IConfigureOptions<MvcNewtonsoftJsonOptions>, JsonOptions>();
 
 			services.AddMvcCore()

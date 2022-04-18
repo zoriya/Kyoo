@@ -120,11 +120,8 @@ namespace Kyoo.Authentication
 					FileProvider = provider
 				});
 			}, SA.StaticFiles),
-			SA.New<IApplicationBuilder>(app =>
-			{
-				app.UseAuthentication();
-			}, SA.Authentication),
-			SA.New<IApplicationBuilder>(app => app.UseAuthorization(), SA.Authorization)
+			SA.New<IApplicationBuilder>(app => app.UseAuthentication(), SA.Authentication),
+			// SA.New<IApplicationBuilder>(app => app.UseAuthorization(), SA.Authorization)
 		};
 	}
 }

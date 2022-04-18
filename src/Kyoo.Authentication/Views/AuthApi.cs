@@ -161,14 +161,23 @@ namespace Kyoo.Authentication.Views
 			}
 		}
 
+		/// <summary>
+		/// Get authenticated user.
+		/// </summary>
+		/// <remarks>
+		/// Get information about the currently authenticated user. This can also be used to ensure that you are
+		/// logged in.
+		/// </remarks>
+		/// <returns>The currently authenticated user.</returns>
+		/// <response code="403">The given access token is invalid.</response>
 		[HttpGet("me")]
 		[Authorize]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		public async Task<ActionResult<User>> GetMe()
 		{
 			if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userID))
-				return BadRequest("Invalid access token");
-			return await _users.GetById(userID);
+				return Forbid();
+			return await _users.Get(userID);
 		}
 	}
 }
