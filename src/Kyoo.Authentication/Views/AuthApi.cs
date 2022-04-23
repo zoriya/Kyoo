@@ -17,7 +17,6 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
@@ -26,11 +25,9 @@ using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Authentication.Models.DTO;
-using Kyoo.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using static Kyoo.Abstractions.Models.Utils.Constants;
 using BCryptNet = BCrypt.Net.BCrypt;

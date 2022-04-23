@@ -65,6 +65,7 @@
       "newUser": ["overall.read", "overall.write", "overall.create", "overall.delete", "admin.read", "admin.write"]
     },
     "profilePicturePath": "users/",
+	"secret": "jwt-secret"
   },
 
   "tvdb": {

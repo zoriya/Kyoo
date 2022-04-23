@@ -13,7 +13,6 @@ import {
 import { MatSnackBar } from "@angular/material/snack-bar";
 import { DomSanitizer, Title } from "@angular/platform-browser";
 import { ActivatedRoute, Event, NavigationCancel, NavigationEnd, NavigationStart, Router } from "@angular/router";
-import { OidcSecurityService } from "angular-auth-oidc-client";
 import Hls from "hls.js";
 import { EpisodeService, ShowService } from "../../services/api.service";
 import { StartupService } from "../../services/startup.service";
@@ -160,7 +159,6 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 
 	private subtitlesManager: SubtitlesOctopus;
 	private hlsPlayer: Hls = new Hls();
-	private oidcSecurity: OidcSecurityService;
 	constructor(private route: ActivatedRoute,
 	            private snackBar: MatSnackBar,
 	            private title: Title,
@@ -242,11 +240,9 @@ export class PlayerComponent implements OnInit, OnDestroy, AfterViewInit
 
 	ngAfterViewInit(): void
 	{
-		if (this.oidcSecurity === undefined)
-			this.oidcSecurity = this.injector.get(OidcSecurityService);
 		this.hlsPlayer.config.xhrSetup = xhr =>
 		{
-			const token: string = this.oidcSecurity.getAccessToken();
+			const token: string = null;
 			if (token)
 				xhr.setRequestHeader("Authorization", "Bearer " + token);
 		};
