@@ -17,6 +17,7 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using Kyoo.Abstractions.Models.Attributes;
 
 namespace Kyoo.Abstractions.Models
 {
@@ -62,11 +63,13 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The list of shows the user has finished.
 		/// </summary>
+		[SerializeIgnore]
 		public ICollection<Show> Watched { get; set; }
 
 		/// <summary>
 		/// The list of episodes the user is watching (stopped in progress or the next episode of the show)
 		/// </summary>
+		[SerializeIgnore]
 		public ICollection<WatchedEpisode> CurrentlyWatching { get; set; }
 	}
 }

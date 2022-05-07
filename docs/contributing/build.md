@@ -10,7 +10,7 @@ title: Build
 To develop for Kyoo, you will need the **.NET 5.0 SDK**, **node** and **npm** for the webapp. If you want to build the transcoder, you will also need a cmake compatible environment.
 
 ## Building
-To run the development server, simply open the .sln file with your favorite C# IDE (like Jetbrain's Rider or Visual Studio) and press run or you can use the CLI and use the ```dotnet run dotnet run -p src/Kyoo.Host.Console --launch-profile "Console"``` command.
+To run the development server, simply open the .sln file with your favorite C# IDE (like Jetbrain's Rider or Visual Studio) and press run or you can use the CLI and use the ```dotnet run --project src/Kyoo.Host.Console --launch-profile "Console"``` command.
 To pack the application, run the ```dotnet publish -c Release -o <build_path> Kyoo.Host.Console``` command. This will build the server, the webapp and the transcoder and output files in the <build_path> directory.
 
 ## Skipping parts

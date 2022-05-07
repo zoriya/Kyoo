@@ -44,8 +44,21 @@ namespace Kyoo.Authentication.Models.DTO
 		/// <summary>
 		/// The user's password.
 		/// </summary>
-		[MinLength(8, ErrorMessage = "The password must have at least {1} characters")]
+		[MinLength(4, ErrorMessage = "The password must have at least {1} characters")]
 		public string Password { get; set; }
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="RegisterRequest"/> class.
+		/// </summary>
+		/// <param name="email">The user email address.</param>
+		/// <param name="username">The user's username.</param>
+		/// <param name="password">The user's password.</param>
+		public RegisterRequest(string email, string username, string password)
+		{
+			Email = email;
+			Username = username;
+			Password = password;
+		}
 
 		/// <summary>
 		/// Convert this register request to a new <see cref="User"/> class.

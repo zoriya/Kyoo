@@ -2,6 +2,7 @@
 
 	<PropertyGroup>
 		<LoginRoot>../Kyoo.WebLogin/</LoginRoot>
+		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<ItemGroup>

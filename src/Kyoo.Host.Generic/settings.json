@@ -61,8 +61,8 @@
 
   "authentication": {
     "permissions": {
-      "default": ["overall.read", "overall.write", "overall.create", "overall.delete", "admin.read", "admin.write"],
-      "newUser": ["overall.read", "overall.write", "overall.create", "overall.delete", "admin.read", "admin.write"]
+      "default": ["overall.read", "overall.write"],
+      "newUser": ["overall.read", "overall.write"]
     },
     "profilePicturePath": "users/",
 	"secret": "jwt-secret"

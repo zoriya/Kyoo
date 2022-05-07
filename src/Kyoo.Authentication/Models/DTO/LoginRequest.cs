@@ -34,13 +34,14 @@ namespace Kyoo.Authentication.Models.DTO
 		public string Password { get; set; }
 
 		/// <summary>
-		/// Should the user stay logged in? If true a cookie will be put.
+		/// Initializes a new instance of the <see cref="LoginRequest"/> class.
 		/// </summary>
-		public bool StayLoggedIn { get; set; }
-
-		/// <summary>
-		/// The return url of the login flow.
-		/// </summary>
-		public string ReturnURL { get; set; }
+		/// <param name="username">The user's username.</param>
+		/// <param name="password">The user's password.</param>
+		public LoginRequest(string username, string password)
+		{
+			Username = username;
+			Password = password;
+		}
 	}
 }

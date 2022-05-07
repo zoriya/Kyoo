@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -34,7 +35,8 @@ namespace Kyoo.Authentication
 		/// <returns>The list of permissions</returns>
 		public static ICollection<string> GetPermissions(this ClaimsPrincipal user)
 		{
-			return user.Claims.FirstOrDefault(x => x.Type == "permissions")?.Value.Split(',');
+			return user.Claims.FirstOrDefault(x => x.Type == "permissions")?.Value.Split(',')
+				?? Array.Empty<string>();
 		}
 	}
 }

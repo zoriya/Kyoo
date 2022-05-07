@@ -64,6 +64,16 @@ namespace Kyoo.Authentication.Views
 		}
 
 		/// <summary>
+		/// Create a new Forbidden result from an object.
+		/// </summary>
+		/// <param name="value">The json value to output on the response.</param>
+		/// <returns>A new forbidden result with the given json object.</returns>
+		public static ObjectResult Forbid(object value)
+		{
+			return new ObjectResult(value) { StatusCode = StatusCodes.Status403Forbidden };
+		}
+
+		/// <summary>
 		/// Login.
 		/// </summary>
 		/// <remarks>
@@ -71,7 +81,7 @@ namespace Kyoo.Authentication.Views
 		/// </remarks>
 		/// <param name="request">The body of the request.</param>
 		/// <returns>A new access and a refresh token.</returns>
-		/// <response code="400">The user and password does not match.</response>
+		/// <response code="403">The user and password does not match.</response>
 		[HttpPost("login")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
@@ -79,14 +89,13 @@ namespace Kyoo.Authentication.Views
 		{
 			User user = await _users.GetOrDefault(x => x.Username == request.Username);
 			if (user == null || !BCryptNet.Verify(request.Password, user.Password))
-				return BadRequest(new RequestError("The user and password does not match."));
+				return Forbid(new RequestError("The user and password does not match."));
 
-			return new JwtToken
-			{
-				AccessToken = _token.CreateAccessToken(user, out TimeSpan expireIn),
-				RefreshToken = await _token.CreateRefreshToken(user),
-				ExpireIn = expireIn
-			};
+			return new JwtToken(
+				_token.CreateAccessToken(user, out TimeSpan expireIn),
+				await _token.CreateRefreshToken(user),
+				expireIn
+			);
 		}
 
 		/// <summary>
@@ -115,12 +124,11 @@ namespace Kyoo.Authentication.Views
 				return Conflict(new RequestError("A user already exists with this username."));
 			}
 
-			return new JwtToken
-			{
-				AccessToken = _token.CreateAccessToken(user, out TimeSpan expireIn),
-				RefreshToken = await _token.CreateRefreshToken(user),
-				ExpireIn = expireIn
-			};
+			return new JwtToken(
+				_token.CreateAccessToken(user, out TimeSpan expireIn),
+				await _token.CreateRefreshToken(user),
+				expireIn
+			);
 		}
 
 		/// <summary>
@@ -141,12 +149,11 @@ namespace Kyoo.Authentication.Views
 			{
 				int userId = _token.GetRefreshTokenUserID(token);
 				User user = await _users.Get(userId);
-				return new JwtToken
-				{
-					AccessToken = _token.CreateAccessToken(user, out TimeSpan expireIn),
-					RefreshToken = await _token.CreateRefreshToken(user),
-					ExpireIn = expireIn
-				};
+				return new JwtToken(
+					_token.CreateAccessToken(user, out TimeSpan expireIn),
+					await _token.CreateRefreshToken(user),
+					expireIn
+				);
 			}
 			catch (ItemNotFoundException)
 			{
@@ -176,5 +183,7 @@ namespace Kyoo.Authentication.Views
 				return Forbid();
 			return await _users.Get(userID);
 		}
+
+		// TODO: Add a put to edit the current user.
 	}
 }

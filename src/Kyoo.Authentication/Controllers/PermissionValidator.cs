@@ -72,7 +72,7 @@ namespace Kyoo.Authentication
 			/// <summary>
 			/// The permission to validate.
 			/// </summary>
-			private readonly string _permission;
+			private readonly string? _permission;
 
 			/// <summary>
 			/// The kind of permission needed.
@@ -133,7 +133,7 @@ namespace Kyoo.Authentication
 			/// <inheritdoc />
 			public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
 			{
-				string permission = _permission;
+				string? permission = _permission;
 				Kind? kind = _kind;
 
 				if (permission == null || kind == null)

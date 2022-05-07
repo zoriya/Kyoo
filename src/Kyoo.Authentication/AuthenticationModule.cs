@@ -74,14 +74,16 @@ namespace Kyoo.Authentication
 		public void Configure(ContainerBuilder builder)
 		{
 			builder.RegisterType<PermissionValidator>().As<IPermissionValidator>().SingleInstance();
+			builder.RegisterType<TokenController>().As<ITokenController>().SingleInstance();
 		}
 
 		/// <inheritdoc />
 		public void Configure(IServiceCollection services)
 		{
 			Uri publicUrl = _configuration.GetPublicUrl();
-			AuthenticationOption jwt = new();
-			_configuration.GetSection(AuthenticationOption.Path).Bind(jwt);
+			AuthenticationOption jwt = ConfigurationBinder.Get<AuthenticationOption>(
+				_configuration.GetSection(AuthenticationOption.Path)
+			);
 
 			// TODO handle direct-videos with bearers (probably add a cookie and a app.Use to translate that for videos)
 			services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

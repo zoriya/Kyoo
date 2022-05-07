@@ -55,5 +55,18 @@ namespace Kyoo.Authentication
 		[JsonProperty("expire_in")]
 		[JsonPropertyName("expire_in")]
 		public TimeSpan ExpireIn { get; set; }
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="JwtToken"/> class.
+		/// </summary>
+		/// <param name="accessToken">The access token used to authorize requests.</param>
+		/// <param name="refreshToken">The refresh token to retrieve a new access token.</param>
+		/// <param name="expireIn">When the access token will expire.</param>
+		public JwtToken(string accessToken, string refreshToken, TimeSpan expireIn)
+		{
+			AccessToken = accessToken;
+			RefreshToken = refreshToken;
+			ExpireIn = expireIn;
+		}
 	}
 }
