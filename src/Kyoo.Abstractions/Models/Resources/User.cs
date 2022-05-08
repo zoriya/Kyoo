@@ -45,6 +45,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The user password (hashed, it can't be read like that). The hashing format is implementation defined.
 		/// </summary>
+		[SerializeIgnore]
 		public string Password { get; set; }
 
 		/// <summary>
@@ -55,6 +56,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// Arbitrary extra data that can be used by specific authentication implementations.
 		/// </summary>
+		[SerializeIgnore]
 		public Dictionary<string, string> ExtraData { get; set; }
 
 		/// <inheritdoc />

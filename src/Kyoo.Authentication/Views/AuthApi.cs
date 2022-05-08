@@ -175,15 +175,76 @@ namespace Kyoo.Authentication.Views
 		/// <returns>The currently authenticated user.</returns>
 		/// <response code="403">The given access token is invalid.</response>
 		[HttpGet("me")]
-		[Authorize]
 		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status403Forbidden)]
 		public async Task<ActionResult<User>> GetMe()
 		{
 			if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userID))
 				return Forbid();
-			return await _users.Get(userID);
+			try
+			{
+				return await _users.Get(userID);
+			}
+			catch (ItemNotFoundException)
+			{
+				return Forbid();
+			}
 		}
 
-		// TODO: Add a put to edit the current user.
+		/// <summary>
+		/// Edit self
+		/// </summary>
+		/// <remarks>
+		/// Edit information about the currently authenticated user.
+		/// </remarks>
+		/// <param name="user">The new data for the current user.</param>
+		/// <param name="resetOld">
+		/// Should old properties of the resource be discarded or should null values considered as not changed?
+		/// </param>
+		/// <returns>The currently authenticated user after modifications.</returns>
+		/// <response code="403">The given access token is invalid.</response>
+		[HttpPut("me")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status403Forbidden)]
+		public async Task<ActionResult<User>> EditMe(User user, [FromQuery] bool resetOld = true)
+		{
+			if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userID))
+				return Forbid();
+			try
+			{
+				user.ID = userID;
+				return await _users.Edit(user, resetOld);
+			}
+			catch (ItemNotFoundException)
+			{
+				return Forbid();
+			}
+		}
+
+		/// <summary>
+		/// Delete account
+		/// </summary>
+		/// <remarks>
+		/// Delete the current account.
+		/// </remarks>
+		/// <returns>The currently authenticated user after modifications.</returns>
+		/// <response code="403">The given access token is invalid.</response>
+		[HttpDelete("me")]
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
+		[ProducesResponseType(StatusCodes.Status403Forbidden)]
+		public async Task<ActionResult<User>> DeleteMe()
+		{
+			if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userID))
+				return Forbid();
+			try
+			{
+				await _users.Delete(userID);
+				return NoContent();
+			}
+			catch (ItemNotFoundException)
+			{
+				return Forbid();
+			}
+		}
 	}
 }

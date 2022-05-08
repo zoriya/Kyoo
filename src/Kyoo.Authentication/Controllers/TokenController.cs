@@ -62,9 +62,6 @@ namespace Kyoo.Authentication
 		/// <inheritdoc />
 		public string CreateAccessToken(User user, out TimeSpan expireIn)
 		{
-			if (user == null)
-				throw new ArgumentNullException(nameof(user));
-
 			expireIn = new TimeSpan(1, 0, 0);
 
 			SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_options.Value.Secret));
@@ -94,9 +91,6 @@ namespace Kyoo.Authentication
 		/// <inheritdoc />
 		public Task<string> CreateRefreshToken(User user)
 		{
-			if (user == null)
-				throw new ArgumentNullException(nameof(user));
-
 			SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_options.Value.Secret));
 			SigningCredentials credential = new(key, SecurityAlgorithms.HmacSha256Signature);
 			JwtSecurityToken token = new(

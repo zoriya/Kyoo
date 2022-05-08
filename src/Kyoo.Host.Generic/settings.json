@@ -65,7 +65,7 @@
       "newUser": ["overall.read", "overall.write"]
     },
     "profilePicturePath": "users/",
-	"secret": "jwt-secret"
+    "secret": "4c@mraGB!KRfF@kpS8740y9FcHemKxBsqqxLbdR?"
   },
 
   "tvdb": {

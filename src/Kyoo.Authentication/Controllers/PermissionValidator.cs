@@ -96,7 +96,10 @@ namespace Kyoo.Authentication
 			/// <param name="kind">The kind of permission needed.</param>
 			/// <param name="group">The group of the permission.</param>
 			/// <param name="options">The option containing default values.</param>
-			public PermissionValidatorFilter(string permission, Kind kind, Group group,
+			public PermissionValidatorFilter(
+				string permission,
+				Kind kind,
+				Group group,
 				IOptionsMonitor<PermissionOption> options)
 			{
 				_permission = permission;

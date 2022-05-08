@@ -31,7 +31,7 @@ namespace Kyoo.Authentication.Models
 		/// <summary>
 		/// The default jwt secret.
 		/// </summary>
-		public const string DefaultSecret = "jwt-secret";
+		public const string DefaultSecret = "4c@mraGB!KRfF@kpS8739y9FcHemKxBsqqxLbdR?";
 
 		/// <summary>
 		/// The secret used to encrypt the jwt.
