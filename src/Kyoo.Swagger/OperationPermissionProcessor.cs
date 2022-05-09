@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -36,12 +37,19 @@ namespace Kyoo.Swagger
 		public bool Process(OperationProcessorContext context)
 		{
 			context.OperationDescription.Operation.Security ??= new List<OpenApiSecurityRequirement>();
-			OpenApiSecurityRequirement perms = context.MethodInfo.GetCustomAttributes<PermissionAttribute>()
+			OpenApiSecurityRequirement perms = context.MethodInfo.GetCustomAttributes<UserOnlyAttribute>()
 				.Aggregate(new OpenApiSecurityRequirement(), (agg, cur) =>
+				{
+					agg[nameof(Kyoo)] = Array.Empty<string>();
+					return agg;
+				});
+
+			perms = context.MethodInfo.GetCustomAttributes<PermissionAttribute>()
+				.Aggregate(perms, (agg, cur) =>
 				{
 					ICollection<string> permissions = _GetPermissionsList(agg, cur.Group);
 					permissions.Add($"{cur.Type}.{cur.Kind.ToString().ToLower()}");
-					agg[cur.Group.ToString()] = permissions;
+					agg[nameof(Kyoo)] = permissions;
 					return agg;
 				});
 
@@ -61,7 +69,7 @@ namespace Kyoo.Swagger
 							: cur.Kind;
 						ICollection<string> permissions = _GetPermissionsList(agg, group);
 						permissions.Add($"{type}.{kind.ToString().ToLower()}");
-						agg[group.ToString()] = permissions;
+						agg[nameof(Kyoo)] = permissions;
 						return agg;
 					});
 			}
@@ -70,7 +78,7 @@ namespace Kyoo.Swagger
 			return true;
 		}
 
-		private ICollection<string> _GetPermissionsList(OpenApiSecurityRequirement security, Group group)
+		private static ICollection<string> _GetPermissionsList(OpenApiSecurityRequirement security, Group group)
 		{
 			return security.TryGetValue(group.ToString(), out IEnumerable<string> perms)
 				? perms.ToList()

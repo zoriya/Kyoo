@@ -49,7 +49,7 @@ namespace Kyoo.Authentication
 		public string RefreshToken { get; set; }
 
 		/// <summary>
-		/// When the access token will expire. After this tume, the refresh token should be used to retrieve.
+		/// When the access token will expire. After this time, the refresh token should be used to retrieve.
 		/// a new token.cs
 		/// </summary>
 		[JsonProperty("expire_in")]

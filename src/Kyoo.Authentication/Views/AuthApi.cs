@@ -23,9 +23,9 @@ using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Exceptions;
+using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Authentication.Models.DTO;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -84,7 +84,7 @@ namespace Kyoo.Authentication.Views
 		/// <response code="403">The user and password does not match.</response>
 		[HttpPost("login")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
-		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
+		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
 		public async Task<ActionResult<JwtToken>> Login([FromBody] LoginRequest request)
 		{
 			User user = await _users.GetOrDefault(x => x.Username == request.Username);
@@ -139,10 +139,11 @@ namespace Kyoo.Authentication.Views
 		/// </remarks>
 		/// <param name="token">A valid refresh token.</param>
 		/// <returns>A new access and refresh token.</returns>
-		/// <response code="400">The given refresh token is invalid.</response>
+		/// <response code="403">The given refresh token is invalid.</response>
 		[HttpGet("refresh")]
+		[UserOnly]
 		[ProducesResponseType(StatusCodes.Status200OK)]
-		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
+		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
 		public async Task<ActionResult<JwtToken>> Refresh([FromQuery] string token)
 		{
 			try
@@ -157,11 +158,11 @@ namespace Kyoo.Authentication.Views
 			}
 			catch (ItemNotFoundException)
 			{
-				return BadRequest(new RequestError("Invalid refresh token."));
+				return Forbid(new RequestError("Invalid refresh token."));
 			}
 			catch (SecurityTokenException ex)
 			{
-				return BadRequest(new RequestError(ex.Message));
+				return Forbid(new RequestError(ex.Message));
 			}
 		}
 
@@ -175,6 +176,7 @@ namespace Kyoo.Authentication.Views
 		/// <returns>The currently authenticated user.</returns>
 		/// <response code="403">The given access token is invalid.</response>
 		[HttpGet("me")]
+		[UserOnly]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status403Forbidden)]
 		public async Task<ActionResult<User>> GetMe()
@@ -204,6 +206,7 @@ namespace Kyoo.Authentication.Views
 		/// <returns>The currently authenticated user after modifications.</returns>
 		/// <response code="403">The given access token is invalid.</response>
 		[HttpPut("me")]
+		[UserOnly]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status403Forbidden)]
 		public async Task<ActionResult<User>> EditMe(User user, [FromQuery] bool resetOld = true)
@@ -230,6 +233,7 @@ namespace Kyoo.Authentication.Views
 		/// <returns>The currently authenticated user after modifications.</returns>
 		/// <response code="403">The given access token is invalid.</response>
 		[HttpDelete("me")]
+		[UserOnly]
 		[ProducesResponseType(StatusCodes.Status204NoContent)]
 		[ProducesResponseType(StatusCodes.Status403Forbidden)]
 		public async Task<ActionResult<User>> DeleteMe()

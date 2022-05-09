@@ -18,7 +18,6 @@
 
 using System;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using Kyoo.Abstractions.Models;
 using Microsoft.IdentityModel.Tokens;
 
@@ -35,14 +34,14 @@ namespace Kyoo.Authentication
 		/// <param name="user">The user to create a token for.</param>
 		/// <param name="expireIn">When this token will expire.</param>
 		/// <returns>A new, valid access token.</returns>
-		string CreateAccessToken([NotNull] User user, out TimeSpan expireIn);
+		string CreateAccessToken(User user, out TimeSpan expireIn);
 
 		/// <summary>
 		/// Create a new refresh token for the given user.
 		/// </summary>
 		/// <param name="user">The user to create a token for.</param>
 		/// <returns>A new, valid refresh token.</returns>
-		Task<string> CreateRefreshToken([NotNull] User user);
+		Task<string> CreateRefreshToken(User user);
 
 		/// <summary>
 		/// Check if the given refresh token is valid and if it is, retrieve the id of the user this token belongs to.

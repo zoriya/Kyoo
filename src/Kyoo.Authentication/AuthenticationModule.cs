@@ -18,8 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
 using System.Text;
 using Autofac;
 using Kyoo.Abstractions;
@@ -27,10 +25,8 @@ using Kyoo.Abstractions.Controllers;
 using Kyoo.Authentication.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Kyoo.Authentication
@@ -105,25 +101,7 @@ namespace Kyoo.Authentication
 		/// <inheritdoc />
 		public IEnumerable<IStartupAction> ConfigureSteps => new IStartupAction[]
 		{
-			SA.New<IApplicationBuilder>(app =>
-			{
-				PhysicalFileProvider provider = new(Path.Combine(
-					Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
-					"login"));
-				app.UseDefaultFiles(new DefaultFilesOptions
-				{
-					RequestPath = new PathString("/login"),
-					FileProvider = provider,
-					RedirectToAppendTrailingSlash = true
-				});
-				app.UseStaticFiles(new StaticFileOptions
-				{
-					RequestPath = new PathString("/login"),
-					FileProvider = provider
-				});
-			}, SA.StaticFiles),
 			SA.New<IApplicationBuilder>(app => app.UseAuthentication(), SA.Authentication),
-			// SA.New<IApplicationBuilder>(app => app.UseAuthorization(), SA.Authorization)
 		};
 	}
 }

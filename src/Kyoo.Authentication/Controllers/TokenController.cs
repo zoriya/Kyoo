@@ -105,7 +105,7 @@ namespace Kyoo.Authentication
 				},
 				expires: DateTime.UtcNow.AddYears(1)
 			);
-			// TODO refresh keys are unique (thanks to the guid) but we could store them in DB to invalidate them if requested by the user.
+			// TODO: refresh keys are unique (thanks to the guid) but we could store them in DB to invalidate them if requested by the user.
 			return Task.FromResult(new JwtSecurityTokenHandler().WriteToken(token));
 		}
 

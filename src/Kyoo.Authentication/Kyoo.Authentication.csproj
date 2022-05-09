@@ -13,11 +13,4 @@
 		<ProjectReference Include="../Kyoo.Abstractions/Kyoo.Abstractions.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<None Remove="$(LoginRoot)**;" />
-		<Content Include="$(LoginRoot)**" Visible="false">
-			<Link>login/%(RecursiveDir)%(Filename)%(Extension)</Link>
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Content>
-	</ItemGroup>
 </Project>
