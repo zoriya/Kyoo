@@ -200,23 +200,48 @@ namespace Kyoo.Authentication.Views
 		/// Edit information about the currently authenticated user.
 		/// </remarks>
 		/// <param name="user">The new data for the current user.</param>
-		/// <param name="resetOld">
-		/// Should old properties of the resource be discarded or should null values considered as not changed?
-		/// </param>
 		/// <returns>The currently authenticated user after modifications.</returns>
 		/// <response code="403">The given access token is invalid.</response>
 		[HttpPut("me")]
 		[UserOnly]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status403Forbidden)]
-		public async Task<ActionResult<User>> EditMe(User user, [FromQuery] bool resetOld = true)
+		public async Task<ActionResult<User>> EditMe(User user)
 		{
 			if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userID))
 				return Forbid();
 			try
 			{
 				user.ID = userID;
-				return await _users.Edit(user, resetOld);
+				return await _users.Edit(user, true);
+			}
+			catch (ItemNotFoundException)
+			{
+				return Forbid();
+			}
+		}
+
+		/// <summary>
+		/// Patch self
+		/// </summary>
+		/// <remarks>
+		/// Edit only provided informations about the currently authenticated user.
+		/// </remarks>
+		/// <param name="user">The new data for the current user.</param>
+		/// <returns>The currently authenticated user after modifications.</returns>
+		/// <response code="403">The given access token is invalid.</response>
+		[HttpPut("me")]
+		[UserOnly]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status403Forbidden)]
+		public async Task<ActionResult<User>> PatchMe(User user)
+		{
+			if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userID))
+				return Forbid();
+			try
+			{
+				user.ID = userID;
+				return await _users.Edit(user, false);
 			}
 			catch (ItemNotFoundException)
 			{
