@@ -16,7 +16,6 @@ import { MatSliderModule } from "@angular/material/slider";
 import { MatTabsModule } from "@angular/material/tabs";
 import { MatTooltipModule } from "@angular/material/tooltip";
 import { RouterModule } from "@angular/router";
-import { AuthModule as OidcModule, LogLevel } from "angular-auth-oidc-client";
 import { tap } from "rxjs/operators";
 import { AccountComponent } from "./account/account.component";
 import { LogoutComponent } from "./logout/logout.component";
@@ -48,25 +47,6 @@ import { UnauthorizedComponent } from "./unauthorized/unauthorized.component";
 		FormsModule,
 		MatTabsModule,
 		MatCheckboxModule,
-		OidcModule.forRoot({
-			config: {
-				authority: window.location.origin,
-				redirectUrl: `${window.location.origin}/`,
-				postLogoutRedirectUri: `${window.location.origin}/logout`,
-				clientId: "kyoo.webapp",
-				responseType: "code",
-				triggerAuthorizationResultEvent: false,
-				scope: "openid profile offline_access kyoo.read kyoo.write kyoo.play kyoo.admin",
-				silentRenew: true,
-				silentRenewUrl: `${window.location.origin}/silent.html`,
-				useRefreshToken: true,
-				startCheckSession: true,
-
-				forbiddenRoute: `${window.location.origin}/forbidden`,
-				unauthorizedRoute: `${window.location.origin}/unauthorized`,
-				logLevel: LogLevel.Warn
-			}
-		}),
 		RouterModule
 	],
 	entryComponents: [

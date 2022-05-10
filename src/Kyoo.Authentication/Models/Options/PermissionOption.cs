@@ -31,11 +31,11 @@ namespace Kyoo.Authentication.Models
 		/// <summary>
 		/// The default permissions that will be given to a non-connected user.
 		/// </summary>
-		public string[] Default { get; set; }
+		public string[] Default { get; set; } = new[] { "overall.read", "overall.write" };
 
 		/// <summary>
 		/// Permissions applied to a new user.
 		/// </summary>
-		public string[] NewUser { get; set; }
+		public string[] NewUser { get; set; } = new[] { "overall.read", "overall.write" };
 	}
 }

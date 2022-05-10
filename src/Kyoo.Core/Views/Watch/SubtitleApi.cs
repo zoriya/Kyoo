@@ -37,7 +37,7 @@ namespace Kyoo.Core.Api
 	/// </summary>
 	[Route("subtitles")]
 	[Route("subtitle", Order = AlternativeRoute)]
-	[PartialPermission(nameof(SubtitleApi))]
+	[PartialPermission("subtitle")]
 	[ApiController]
 	[ApiDefinition("Subtitles", Group = WatchGroup)]
 	public class SubtitleApi : ControllerBase

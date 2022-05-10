@@ -220,7 +220,7 @@ namespace Kyoo.Core.Api
 		/// <response code="404">No item could be found with the given id or slug.</response>
 		[HttpDelete("{identifier:id}")]
 		[PartialPermission(Kind.Delete)]
-		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<IActionResult> Delete(Identifier identifier)
 		{
@@ -236,7 +236,7 @@ namespace Kyoo.Core.Api
 				return NotFound();
 			}
 
-			return Ok();
+			return NoContent();
 		}
 
 		/// <summary>
@@ -250,7 +250,7 @@ namespace Kyoo.Core.Api
 		/// <response code="400">One or multiple filters are invalid.</response>
 		[HttpDelete]
 		[PartialPermission(Kind.Delete)]
-		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		public async Task<IActionResult> Delete([FromQuery] Dictionary<string, string> where)
 		{
@@ -263,7 +263,7 @@ namespace Kyoo.Core.Api
 				return BadRequest(new RequestError(ex.Message));
 			}
 
-			return Ok();
+			return NoContent();
 		}
 	}
 }

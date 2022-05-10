@@ -32,24 +32,29 @@ namespace Kyoo.Abstractions.Models.Utils
 		public const int AlternativeRoute = 1;
 
 		/// <summary>
+		/// A group name for <see cref="ApiDefinitionAttribute"/>. It should be used for endpoints used by users.
+		/// </summary>
+		public const string UsersGroup = "0:Users";
+
+		/// <summary>
 		/// A group name for <see cref="ApiDefinitionAttribute"/>. It should be used for main resources of kyoo.
 		/// </summary>
-		public const string ResourcesGroup = "0:Resources";
+		public const string ResourcesGroup = "1:Resources";
 
 		/// <summary>
 		/// A group name for <see cref="ApiDefinitionAttribute"/>.
 		/// It should be used for sub resources of kyoo that help define the main resources.
 		/// </summary>
-		public const string MetadataGroup = "1:Metadata";
+		public const string MetadataGroup = "2:Metadata";
 
 		/// <summary>
 		/// A group name for <see cref="ApiDefinitionAttribute"/>. It should be used for endpoints useful for playback.
 		/// </summary>
-		public const string WatchGroup = "2:Watch";
+		public const string WatchGroup = "3:Watch";
 
 		/// <summary>
 		/// A group name for <see cref="ApiDefinitionAttribute"/>. It should be used for endpoints used by admins.
 		/// </summary>
-		public const string AdminGroup = "3:Admin";
+		public const string AdminGroup = "4:Admin";
 	}
 }

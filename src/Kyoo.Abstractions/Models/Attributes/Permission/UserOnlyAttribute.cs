@@ -16,26 +16,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-namespace Kyoo.Authentication.Models.DTO
+using System;
+
+namespace Kyoo.Abstractions.Models.Permissions
 {
 	/// <summary>
-	/// A one time access token
+	/// The annotated route can only be accessed by a logged in user.
 	/// </summary>
-	public class OtacResponse
+	[AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
+	public class UserOnlyAttribute : Attribute
 	{
-		/// <summary>
-		/// The One Time Access Token that allow one to connect to an account without typing a password or without
-		/// any kind of verification. This is valid only one time and only for a short period of time.
-		/// </summary>
-		public string OTAC { get; set; }
-
-		/// <summary>
-		/// Create a new <see cref="OtacResponse"/>.
-		/// </summary>
-		/// <param name="otac">The one time access token.</param>
-		public OtacResponse(string otac)
-		{
-			OTAC = otac;
-		}
+		// TODO: Implement a Filter Attribute to make this work. For now, this attribute is only useful as documentation.
 	}
 }

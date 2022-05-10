@@ -60,17 +60,12 @@
   },
 
   "authentication": {
-    "certificate": {
-      "file": "certificate.pfx",
-      "oldFile": "oldCertificate.pfx",
-      "password": "passphrase"
-    },
     "permissions": {
-      "default": ["overall.read", "overall.write", "overall.create", "overall.delete", "admin.read", "admin.write"],
-      "newUser": ["overall.read", "overall.write", "overall.create", "overall.delete", "admin.read", "admin.write"]
+      "default": ["overall.read", "overall.write"],
+      "newUser": ["overall.read", "overall.write"]
     },
     "profilePicturePath": "users/",
-    "clients": []
+    "secret": "4c@mraGB!KRfF@kpS8740y9FcHemKxBsqqxLbdR?"
   },
 
   "tvdb": {

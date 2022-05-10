@@ -72,7 +72,7 @@ namespace Kyoo.Authentication
 			/// <summary>
 			/// The permission to validate.
 			/// </summary>
-			private readonly string _permission;
+			private readonly string? _permission;
 
 			/// <summary>
 			/// The kind of permission needed.
@@ -96,7 +96,10 @@ namespace Kyoo.Authentication
 			/// <param name="kind">The kind of permission needed.</param>
 			/// <param name="group">The group of the permission.</param>
 			/// <param name="options">The option containing default values.</param>
-			public PermissionValidatorFilter(string permission, Kind kind, Group group,
+			public PermissionValidatorFilter(
+				string permission,
+				Kind kind,
+				Group group,
 				IOptionsMonitor<PermissionOption> options)
 			{
 				_permission = permission;
@@ -133,7 +136,7 @@ namespace Kyoo.Authentication
 			/// <inheritdoc />
 			public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
 			{
-				string permission = _permission;
+				string? permission = _permission;
 				Kind? kind = _kind;
 
 				if (permission == null || kind == null)

@@ -120,35 +120,14 @@ namespace Kyoo.Swagger
 				}));
 				document.SchemaProcessors.Add(new ThumbnailProcessor());
 
-				document.AddSecurity("Kyoo", new OpenApiSecurityScheme
+				document.AddSecurity(nameof(Kyoo), new OpenApiSecurityScheme
 				{
-					Type = OpenApiSecuritySchemeType.OpenIdConnect,
-					OpenIdConnectUrl = "/.well-known/openid-configuration",
-					Description = "You can login via an OIDC client, clients must be first registered in kyoo. " +
-						"Documentation coming soon."
+					Type = OpenApiSecuritySchemeType.Http,
+					Scheme = "Bearer",
+					BearerFormat = "JWT",
+					Description = "The user's bearer"
 				});
 				document.OperationProcessors.Add(new OperationPermissionProcessor());
-				// This does not respect the swagger's specification but it works for swaggerUi and ReDoc so honestly this will do.
-				document.AddSecurity(Group.Overall.ToString(), new OpenApiSecurityScheme
-				{
-					ExtensionData = new Dictionary<string, object>
-					{
-						["type"] = "OpenID Connect or Api Key"
-					},
-					Description = "Kyoo's permissions work by groups. Permissions are attributed to " +
-						"a specific group and if a user has a group permission, it will be the same as having every " +
-						"permission in the group. For example, having overall.read gives you collections.read, " +
-						"shows.read and so on."
-				});
-				document.AddSecurity(Group.Admin.ToString(), new OpenApiSecurityScheme
-				{
-					ExtensionData = new Dictionary<string, object>
-					{
-						["type"] = "OpenID Connect or Api Key"
-					},
-					Description = "The permission group used for administrative items like tasks, account management " +
-						"and library creation."
-				});
 			});
 		}
 

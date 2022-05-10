@@ -356,3 +356,4 @@ healthchecksdb
 /Kyoo/TheTVDB-Credentials.json
 
 .vscode
+.netcoredbg_hist

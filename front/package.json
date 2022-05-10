@@ -26,7 +26,6 @@
 		"@angular/platform-browser": "^13.0.2",
 		"@angular/platform-browser-dynamic": "^13.0.2",
 		"@angular/router": "^13.0.2",
-		"angular-auth-oidc-client": "^13.0.0",
 		"bootstrap": "^4.6.0",
 		"detect-browser": "^5.2.1",
 		"hls.js": "^1.1.1",

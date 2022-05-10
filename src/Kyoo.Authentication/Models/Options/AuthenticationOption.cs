@@ -29,18 +29,23 @@ namespace Kyoo.Authentication.Models
 		public const string Path = "authentication";
 
 		/// <summary>
-		/// The options for certificates
+		/// The default jwt secret.
 		/// </summary>
-		public CertificateOption Certificate { get; set; }
+		public const string DefaultSecret = "4c@mraGB!KRfF@kpS8739y9FcHemKxBsqqxLbdR?";
+
+		/// <summary>
+		/// The secret used to encrypt the jwt.
+		/// </summary>
+		public string Secret { get; set; } = DefaultSecret;
 
 		/// <summary>
 		/// Options for permissions
 		/// </summary>
-		public PermissionOption Permissions { get; set; }
+		public PermissionOption Permissions { get; set; } = new();
 
 		/// <summary>
 		/// Root path of user's profile pictures.
 		/// </summary>
-		public string ProfilePicturePath { get; set; }
+		public string ProfilePicturePath { get; set; } = "users/";
 	}
 }
