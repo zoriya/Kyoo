@@ -181,10 +181,7 @@ namespace Kyoo.Core.Api
 		/// If not, the slug will be used to identify it.
 		/// </remarks>
 		/// <param name="resource">The resource to edit.</param>
-		/// <param name="resetOld">
-		/// Should old properties of the resource be discarded or should null values considered as not changed?
-		/// </param>
-		/// <returns>The created resource.</returns>
+		/// <returns>The edited resource.</returns>
 		/// <response code="400">The resource in the request body is invalid.</response>
 		/// <response code="404">No item found with the specified ID (or slug).</response>
 		[HttpPut]
@@ -192,16 +189,49 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<T>> Edit([FromBody] T resource, [FromQuery] bool resetOld = true)
+		public async Task<ActionResult<T>> Edit([FromBody] T resource)
 		{
 			try
 			{
 				if (resource.ID > 0)
-					return await Repository.Edit(resource, resetOld);
+					return await Repository.Edit(resource, true);
 
 				T old = await Repository.Get(resource.Slug);
 				resource.ID = old.ID;
-				return await Repository.Edit(resource, resetOld);
+				return await Repository.Edit(resource, true);
+			}
+			catch (ItemNotFoundException)
+			{
+				return NotFound();
+			}
+		}
+
+		/// <summary>
+		/// Patch
+		/// </summary>
+		/// <remarks>
+		/// Edit only specified properties of an item. If the ID is specified it will be used to identify the resource.
+		/// If not, the slug will be used to identify it.
+		/// </remarks>
+		/// <param name="resource">The resource to patch.</param>
+		/// <returns>The edited resource.</returns>
+		/// <response code="400">The resource in the request body is invalid.</response>
+		/// <response code="404">No item found with the specified ID (or slug).</response>
+		[HttpPatch]
+		[PartialPermission(Kind.Write)]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task<ActionResult<T>> Patch([FromBody] T resource)
+		{
+			try
+			{
+				if (resource.ID > 0)
+					return await Repository.Edit(resource, false);
+
+				T old = await Repository.Get(resource.Slug);
+				resource.ID = old.ID;
+				return await Repository.Edit(resource, false);
 			}
 			catch (ItemNotFoundException)
 			{
