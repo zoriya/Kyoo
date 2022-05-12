@@ -34,10 +34,21 @@ namespace Kyoo.Database
 		/// <returns>A parsed connection string</returns>
 		public static string GetDatabaseConnection(this IConfiguration config, string database)
 		{
+			static string ToDbProperty(string key)
+			{
+				return key switch
+				{
+					"USER" => "USER ID",
+					_ => key
+				};
+			}
+
 			DbConnectionStringBuilder builder = new();
 			IConfigurationSection section = config.GetSection("database:configurations").GetSection(database);
 			foreach (IConfigurationSection child in section.GetChildren())
-				builder[child.Key] = child.Value;
+			{
+				builder[ToDbProperty(child.Key)] = child.Value;
+			}
 			return builder.ConnectionString;
 		}
 
