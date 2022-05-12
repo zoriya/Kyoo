@@ -54,7 +54,7 @@ jobs:
           LIBPATH: ${{env.LIBPATH}};C:\Program Files\FFmpeg\lib
           CFLAGS: -I/usr/local/include
           LDFLAGS: -L/usr/local/lib
-        run: dotnet publish -r ${{matrix.runtime}} -c Release -o dist ${{env.PROJECT}}
+        run: dotnet publish -r ${{matrix.runtime}} --self-contained -c Release -o dist ${{env.PROJECT}}
       - name: Compression output
         shell: bash
         run: |
