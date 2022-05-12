@@ -12,6 +12,8 @@ RUN yarn install --frozen-lockfile
 RUN yarn run build --configuration production
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 as builder
+WORKDIR /kyoo
+COPY .git/ ./.git/
 COPY . .
 RUN dotnet publish -c Release -o /opt/kyoo '-p:SkipWebApp=true;SkipTranscoder=true;CheckCodingStyle=false' src/Kyoo.Host.Console
 

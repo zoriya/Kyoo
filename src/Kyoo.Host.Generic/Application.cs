@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
@@ -44,7 +45,7 @@ namespace Kyoo.Host.Generic
 	/// Hosts of kyoo (main functions) generally only create a new <see cref="Application"/>
 	/// and return <see cref="Start(string[])"/>.
 	/// </summary>
-	public class Application : IApplication
+	public class Application : IApplication, IDisposable
 	{
 		/// <summary>
 		/// The environment in witch Kyoo will run (ether "Production" or "Development").
@@ -202,6 +203,7 @@ namespace Kyoo.Host.Generic
 			try
 			{
 				_logger.Information("Running as {Name}", Environment.UserName);
+				_logger.Information("Version: {Version}", Assembly.GetExecutingAssembly().GetName().Version.ToString(3));
 				_logger.Information("Data directory: {DataDirectory}", GetDataDirectory());
 				await host.RunAsync(cancellationToken);
 			}
@@ -308,6 +310,13 @@ namespace Kyoo.Host.Generic
 				)
 				.Enrich.WithThreadId()
 				.Enrich.FromLogContext();
+		}
+
+		/// <inheritdoc/>
+		public void Dispose()
+		{
+			_tokenSource.Dispose();
+			GC.SuppressFinalize(this);
 		}
 	}
 }

@@ -1,7 +1,7 @@
 [Setup]
 AppId={{31A61284-7939-46BC-B584-D2279A6EEEE8}
 AppName=Kyoo
-AppVersion=1.0
+AppVersion={#version}
 AppPublisher=SDG
 AppPublisherURL=https://github.com/AnonymusRaccoon/Kyoo
 AppSupportURL=https://github.com/AnonymusRaccoon/Kyoo
