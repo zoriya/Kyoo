@@ -1,0 +1,33 @@
+name: RobotTests
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: recursive
+
+      - name: Build the app
+        run: docker-compose build
+
+      - name: Start the service
+        run: docker-compose up -d
+
+      - name: Perform healthchecks
+        run: |
+          docker-compose ps -a
+          wget --retry-connrefused http://localhost:5000 # /healthcheck
+
+      - name: Run robot tests
+        run: |
+          pip install -r tests/robot/requirements.txt
+          robot -d out tests/robot/
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: results
+          path: out
+
