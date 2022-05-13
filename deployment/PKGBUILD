@@ -1,41 +1,28 @@
 # Maintainer: Zoe Roux <zoe.roux@sdg.moe>
-pkgname=kyoo
+pkgname=kyoo-bin
 pkgver=1.0.0
 pkgrel=1
 epoch=
-pkgdesc="A media browser."
+pkgdesc="A portable and vast media library solution."
 arch=("i686" "x86_64" "armv6h")
 url="https://github.com/AnonymusRaccoon/Kyoo"
 license=("GPLv3")
 groups=()
-depends=("dotnet-runtime>=5" "aspnet-runtime>=5" "ffmpeg")
-makedepends=("dotnet-sdk>=5" "cmake" "gcc" "make" "npm" "git")
-source=("git+https://github.com/AnonymusRaccoon/Kyoo" #tag=v${pkgver}
-	"kyoo.service"
-	"kyoo.sysusers"
-	"kyoo.tmpfiles")
-sha256sums=("SKIP" "SKIP" "SKIP" "SKIP")
+depends=("ffmpeg")
+makedepends=()
+# The output folder is needed but we can't use directory in the source array.
+source=()
+sha256sums=()
+options=('staticlibs')
 
-
-prepare() {
-	# cd "Kyoo-$pkgver"
-	cd "Kyoo"
-	# This is necessary since submodules paths are relative and PKGBUILD remote are the local directory.
-	git remote set-url origin https://github.com/AnonymusRaccoon/Kyoo
-	git submodule update --init --recursive
+pkgver() {
+	echo $version # The version is available as an environment variable.
 }
 
 build() {
-	# cd "Kyoo-$pkgver"
-	cd "Kyoo"
-	export DOTNET_CLI_TELEMETRY_OPTOUT=1
-	dotnet publish -c Release -o "$srcdir/output" Kyoo.Host.Console
+	cp -a "$srcdir/../output" "$srcdir"
 }
 
 package() {
-	mkdir -p "$pkgdir/usr/lib"
-	cp -r --no-preserve ownership  "$srcdir/output" "$pkgdir/usr/lib/kyoo"
-	install -Dm 644 kyoo.service -t "$pkgdir/usr/lib/systemd/system/"
-	install -Dm 644 kyoo.sysusers "$pkgdir/usr/lib/sysusers.d/kyoo.conf"
-	install -Dm 644 kyoo.tmpfiles "$pkgdir/usr/lib/tmpfiles.d/kyoo.conf"
+	cp -a "$srcdir/output/." "$pkgdir"
 }

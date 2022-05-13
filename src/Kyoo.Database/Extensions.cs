@@ -36,7 +36,7 @@ namespace Kyoo.Database
 		{
 			static string ToDbProperty(string key)
 			{
-				return key switch
+				return key.ToUpperInvariant() switch
 				{
 					"USER" => "USER ID",
 					_ => key

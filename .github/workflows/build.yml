@@ -19,10 +19,13 @@ jobs:
           - os: macOS-latest
             runtime: osx-x64
             artifact: macos
+    outputs:
+      version: ${{ steps.gitversion.outputs.majorMinorPatch }}
     steps:
       - uses: actions/checkout@v1
         with:
           submodules: recursive
+          fetch-depth: 0
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
@@ -75,11 +78,23 @@ jobs:
             *.zip
             *.tar.gz
 
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v0.9.13
+        with:
+          versionSpec: '5.x'
+      - name: Determine Version
+        id: gitversion
+        uses: gittools/actions/gitversion/execute@v0.9.13
+        with:
+          useConfigFile: true
+
   windows_release:
     name: Create windows release
     runs-on: windows-latest
     needs: build
     if: ${{ github.ref == 'refs/heads/master' || contains(github.ref, 'tags') }}
+    env:
+      version: ${{ needs.build.outputs.version }}
     steps:
       - uses: actions/checkout@v1
       - name: Download windows build
@@ -96,7 +111,7 @@ jobs:
           innosetup.exe /VERYSILENT /SUPPRESSMSGBOXES /Log=log.txt || (cat log.txt && exit 1)
       - name: Create windows installer
         shell: bash
-        run: iscc -Dkyoo=$(realpath dist_win) -O./ -Fkyoo-windows deployment/kyoo-windows.iss
+        run: iscc -Dkyoo=$(realpath dist_win) -Dversion=${version} -O./ -Fkyoo-windows deployment/kyoo-windows.iss
       - uses: actions/upload-artifact@v2
         with:
           name: kyoo_windows_installer
@@ -108,8 +123,8 @@ jobs:
     needs: build
     if: ${{ github.ref == 'refs/heads/master' || contains(github.ref, 'tags') }}
     env:
-      description: "A media browser"
-      version: v0.0.1 #${{ github.ref }}
+      description: "A portable and vast media library solution."
+      version: ${{ needs.build.outputs.version }}
     steps:
       - uses: actions/checkout@v1
       - name: Download linux build
@@ -119,6 +134,7 @@ jobs:
           path: artifact
       - name: Unzip the published files.
         run: mkdir dist && tar -C dist -xzf artifact/kyoo_linux.tar.gz
+
       - name: Create the package structure
         run: |
           sudo mkdir -p pkg/usr/lib/
@@ -140,17 +156,19 @@ jobs:
         run: |
           mkdir out
           sudo rm -rf pkg/DEBIAN
-          rpmbuild -bb --buildroot $(pwd)/out --build-in-place --define "_rpmdir $(pwd)/rpm" deployment/kyoo.spec
+          rpmbuild -bb --buildroot $(pwd)/out --build-in-place --define "_rpmdir $(pwd)/rpm" --define "version_ ${version}" deployment/kyoo.spec
+
       - name: Prepare arch package
         run: |
           mkdir deployment/output
-          mv deployment/PKGBUILD.github deployment/PKGBUILD
+          sed -i s/\$version/${version}/ deployment/PKGBUILD #doing the substitution here since the pkgbuild is run in a docker without env
           cp -a pkg/usr deployment/output/usr
       - uses: edlanglois/pkgbuild-action@v1
         id: makepkg
         with:
           pkgdir: deployment
           namcapDisable: true
+
       - uses: actions/upload-artifact@v2
         with:
           name: kyoo_rpm
@@ -163,8 +181,4 @@ jobs:
         with:
           name: kyoo_arch
           path: ${{steps.makepkg.outputs.pkgfile0}}
-
-#  new-version:
-#    if: startsWith(github.ref, 'refs/tags/v')
-#    runs-on: ubuntu-latest
 

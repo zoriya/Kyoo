@@ -9,6 +9,7 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
+          fetch-depth: 0
 
       - name: Build the app
         run: docker-compose build
