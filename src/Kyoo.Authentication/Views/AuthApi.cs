@@ -230,7 +230,7 @@ namespace Kyoo.Authentication.Views
 		/// <param name="user">The new data for the current user.</param>
 		/// <returns>The currently authenticated user after modifications.</returns>
 		/// <response code="403">The given access token is invalid.</response>
-		[HttpPut("me")]
+		[HttpPatch("me")]
 		[UserOnly]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status403Forbidden)]

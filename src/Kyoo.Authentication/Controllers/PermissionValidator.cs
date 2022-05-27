@@ -22,6 +22,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Permissions;
+using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Authentication.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -173,15 +174,28 @@ namespace Kyoo.Authentication
 				{
 					ICollection<string> permissions = res.Principal.GetPermissions();
 					if (permissions.All(x => x != permStr && x != overallStr))
-						context.Result = new StatusCodeResult(StatusCodes.Status403Forbidden);
+					{
+						context.Result = _ErrorResult($"Missing permission: {permStr}", StatusCodes.Status403Forbidden);
+					}
 				}
 				else
 				{
 					ICollection<string> permissions = _options.CurrentValue.Default ?? Array.Empty<string>();
 					if (res.Failure != null || permissions.All(x => x != permStr && x != overallStr))
-						context.Result = new StatusCodeResult(StatusCodes.Status401Unauthorized);
+						context.Result = _ErrorResult($"Unlogged user does not have permission: {permStr}", StatusCodes.Status401Unauthorized);
 				}
 			}
+		}
+
+		/// <summary>
+		/// Create a new action result with the given error message and error code.
+		/// </summary>
+		/// <param name="error">The error message.</param>
+		/// <param name="code">The status code of the error.</param>
+		/// <returns>The resulting error action.</returns>
+		private static IActionResult _ErrorResult(string error, int code)
+		{
+			return new ObjectResult(new RequestError(error)) { StatusCode = code };
 		}
 	}
 }
