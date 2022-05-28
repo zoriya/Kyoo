@@ -71,13 +71,13 @@ namespace Kyoo.Authentication
 				: string.Empty;
 			List<Claim> claims = new()
 			{
-				new Claim(ClaimTypes.NameIdentifier, user.ID.ToString(CultureInfo.InvariantCulture)),
-				new Claim(ClaimTypes.Name, user.Username),
-				new Claim(ClaimTypes.Role, permissions),
-				new Claim("type", "access")
+				new Claim(Claims.Id, user.ID.ToString(CultureInfo.InvariantCulture)),
+				new Claim(Claims.Name, user.Username),
+				new Claim(Claims.Permissions, permissions),
+				new Claim(Claims.Type, "access")
 			};
 			if (user.Email != null)
-				claims.Add(new Claim(ClaimTypes.Email, user.Email));
+				claims.Add(new Claim(Claims.Email, user.Email));
 			JwtSecurityToken token = new(
 				signingCredentials: credential,
 				issuer: _configuration.GetPublicUrl().ToString(),
@@ -99,9 +99,9 @@ namespace Kyoo.Authentication
 				audience: _configuration.GetPublicUrl().ToString(),
 				claims: new[]
 				{
-					new Claim(ClaimTypes.NameIdentifier, user.ID.ToString(CultureInfo.InvariantCulture)),
-					new Claim("guid", Guid.NewGuid().ToString()),
-					new Claim("type", "refresh")
+					new Claim(Claims.Id, user.ID.ToString(CultureInfo.InvariantCulture)),
+					new Claim(Claims.Guid, Guid.NewGuid().ToString()),
+					new Claim(Claims.Type, "refresh")
 				},
 				expires: DateTime.UtcNow.AddYears(1)
 			);
@@ -133,9 +133,9 @@ namespace Kyoo.Authentication
 				throw new SecurityTokenException(ex.Message);
 			}
 
-			if (principal.Claims.First(x => x.Type == "type").Value != "refresh")
+			if (principal.Claims.First(x => x.Type == Claims.Type).Value != "refresh")
 				throw new SecurityTokenException("Invalid token type. The token should be a refresh token.");
-			Claim identifier = principal.Claims.First(x => x.Type == ClaimTypes.NameIdentifier);
+			Claim identifier = principal.Claims.First(x => x.Type == Claims.Id);
 			if (int.TryParse(identifier.Value, out int id))
 				return id;
 			throw new SecurityTokenException("Token not associated to any user.");

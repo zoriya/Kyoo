@@ -25,9 +25,11 @@ using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
+using Kyoo.Authentication.Models;
 using Kyoo.Authentication.Models.DTO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using static Kyoo.Abstractions.Models.Utils.Constants;
 using BCryptNet = BCrypt.Net.BCrypt;
@@ -53,14 +55,21 @@ namespace Kyoo.Authentication.Views
 		private readonly ITokenController _token;
 
 		/// <summary>
+		/// The permisson options.
+		/// </summary>
+		private readonly IOptionsMonitor<PermissionOption> _permissions;
+
+		/// <summary>
 		/// Create a new <see cref="AuthApi"/>.
 		/// </summary>
 		/// <param name="users">The repository used to check if the user exists.</param>
 		/// <param name="token">The token generator.</param>
-		public AuthApi(IUserRepository users, ITokenController token)
+		/// <param name="permissions">The permission opitons.</param>
+		public AuthApi(IUserRepository users, ITokenController token, IOptionsMonitor<PermissionOption> permissions)
 		{
 			_users = users;
 			_token = token;
+			_permissions = permissions;
 		}
 
 		/// <summary>
@@ -115,6 +124,10 @@ namespace Kyoo.Authentication.Views
 		public async Task<ActionResult<JwtToken>> Register([FromBody] RegisterRequest request)
 		{
 			User user = request.ToUser();
+			user.Permissions = _permissions.CurrentValue.NewUser;
+			// If no users exists, the new one will be an admin. Give it every permissions.
+			if (await _users.GetOrDefault(where: x => true) == null)
+				user.Permissions = PermissionOption.Admin;
 			try
 			{
 				await _users.Create(user);
@@ -174,22 +187,24 @@ namespace Kyoo.Authentication.Views
 		/// logged in.
 		/// </remarks>
 		/// <returns>The currently authenticated user.</returns>
+		/// <response code="401">The user is not authenticated.</response>
 		/// <response code="403">The given access token is invalid.</response>
 		[HttpGet("me")]
 		[UserOnly]
 		[ProducesResponseType(StatusCodes.Status200OK)]
-		[ProducesResponseType(StatusCodes.Status403Forbidden)]
+		[ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(RequestError))]
+		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
 		public async Task<ActionResult<User>> GetMe()
 		{
-			if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userID))
-				return Forbid();
+			if (!int.TryParse(User.FindFirstValue(Claims.Id), out int userID))
+				return Unauthorized(new RequestError("User not authenticated"));
 			try
 			{
 				return await _users.Get(userID);
 			}
 			catch (ItemNotFoundException)
 			{
-				return Forbid();
+				return Forbid(new RequestError("Invalid token"));
 			}
 		}
 
@@ -201,15 +216,17 @@ namespace Kyoo.Authentication.Views
 		/// </remarks>
 		/// <param name="user">The new data for the current user.</param>
 		/// <returns>The currently authenticated user after modifications.</returns>
+		/// <response code="401">The user is not authenticated.</response>
 		/// <response code="403">The given access token is invalid.</response>
 		[HttpPut("me")]
 		[UserOnly]
 		[ProducesResponseType(StatusCodes.Status200OK)]
-		[ProducesResponseType(StatusCodes.Status403Forbidden)]
+		[ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(RequestError))]
+		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
 		public async Task<ActionResult<User>> EditMe(User user)
 		{
-			if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userID))
-				return Forbid();
+			if (!int.TryParse(User.FindFirstValue(Claims.Id), out int userID))
+				return Unauthorized(new RequestError("User not authenticated"));
 			try
 			{
 				user.ID = userID;
@@ -217,7 +234,7 @@ namespace Kyoo.Authentication.Views
 			}
 			catch (ItemNotFoundException)
 			{
-				return Forbid();
+				return Forbid(new RequestError("Invalid token"));
 			}
 		}
 
@@ -229,15 +246,17 @@ namespace Kyoo.Authentication.Views
 		/// </remarks>
 		/// <param name="user">The new data for the current user.</param>
 		/// <returns>The currently authenticated user after modifications.</returns>
+		/// <response code="401">The user is not authenticated.</response>
 		/// <response code="403">The given access token is invalid.</response>
-		[HttpPut("me")]
+		[HttpPatch("me")]
 		[UserOnly]
 		[ProducesResponseType(StatusCodes.Status200OK)]
-		[ProducesResponseType(StatusCodes.Status403Forbidden)]
+		[ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(RequestError))]
+		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
 		public async Task<ActionResult<User>> PatchMe(User user)
 		{
-			if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userID))
-				return Forbid();
+			if (!int.TryParse(User.FindFirstValue(Claims.Id), out int userID))
+				return Unauthorized(new RequestError("User not authenticated"));
 			try
 			{
 				user.ID = userID;
@@ -245,7 +264,7 @@ namespace Kyoo.Authentication.Views
 			}
 			catch (ItemNotFoundException)
 			{
-				return Forbid();
+				return Forbid(new RequestError("Invalid token"));
 			}
 		}
 
@@ -256,15 +275,17 @@ namespace Kyoo.Authentication.Views
 		/// Delete the current account.
 		/// </remarks>
 		/// <returns>The currently authenticated user after modifications.</returns>
+		/// <response code="401">The user is not authenticated.</response>
 		/// <response code="403">The given access token is invalid.</response>
 		[HttpDelete("me")]
 		[UserOnly]
 		[ProducesResponseType(StatusCodes.Status204NoContent)]
-		[ProducesResponseType(StatusCodes.Status403Forbidden)]
+		[ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(RequestError))]
+		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
 		public async Task<ActionResult<User>> DeleteMe()
 		{
-			if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userID))
-				return Forbid();
+			if (!int.TryParse(User.FindFirstValue(Claims.Id), out int userID))
+				return Unauthorized(new RequestError("User not authenticated"));
 			try
 			{
 				await _users.Delete(userID);
@@ -272,7 +293,7 @@ namespace Kyoo.Authentication.Views
 			}
 			catch (ItemNotFoundException)
 			{
-				return Forbid();
+				return Forbid(new RequestError("Invalid token"));
 			}
 		}
 	}

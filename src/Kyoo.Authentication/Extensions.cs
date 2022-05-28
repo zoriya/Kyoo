@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
+using Kyoo.Authentication.Models;
 
 namespace Kyoo.Authentication
 {
@@ -35,7 +36,7 @@ namespace Kyoo.Authentication
 		/// <returns>The list of permissions</returns>
 		public static ICollection<string> GetPermissions(this ClaimsPrincipal user)
 		{
-			return user.Claims.FirstOrDefault(x => x.Type == "permissions")?.Value.Split(',')
+			return user.Claims.FirstOrDefault(x => x.Type == Claims.Permissions)?.Value.Split(',')
 				?? Array.Empty<string>();
 		}
 	}

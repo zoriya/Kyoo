@@ -35,7 +35,7 @@ Logout
 Me cant be accessed without an account
     Get    /auth/me
     Output
-    Integer    response status    403
+    Integer    response status    401
 
 Bad Account
     [Documentation]    Login fails if user does not exist
