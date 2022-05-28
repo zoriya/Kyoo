@@ -16,44 +16,41 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-using System.Linq;
-using Kyoo.Abstractions.Models.Permissions;
-
 namespace Kyoo.Authentication.Models
 {
 	/// <summary>
-	/// Permission options.
+	/// List of well known claims of kyoo
 	/// </summary>
-	public class PermissionOption
+	public static class Claims
 	{
 		/// <summary>
-		/// The path to get this option from the root configuration.
+		/// The id of the user
 		/// </summary>
-		public const string Path = "authentication:permissions";
+		public static string Id => "id";
 
 		/// <summary>
-		/// All permissions possibles, this is used to create an admin group.
+		/// The name of the user
 		/// </summary>
-		public static string[] Admin
-		{
-			get
-			{
-				return Enum.GetNames<Group>()
-					.SelectMany(group => Enum.GetNames<Kind>()
-						.Select(kind => $"{group}.{kind}".ToLowerInvariant())
-					).ToArray();
-			}
-		}
+		public static string Name => "name";
 
 		/// <summary>
-		/// The default permissions that will be given to a non-connected user.
+		/// The email of the user.
 		/// </summary>
-		public string[] Default { get; set; } = new[] { "overall.read" };
+		public static string Email => "email";
 
 		/// <summary>
-		/// Permissions applied to a new user.
+		/// The list of permissions that the user has.
 		/// </summary>
-		public string[] NewUser { get; set; } = new[] { "overall.read" };
+		public static string Permissions => "permissions";
+
+		/// <summary>
+		/// The type of the token (either "access" or "refresh").
+		/// </summary>
+		public static string Type => "type";
+
+		/// <summary>
+		/// A guid used to identify a specific refresh token. This is only useful for the server to revokate tokens.
+		/// </summary>
+		public static string Guid => "guid";
 	}
 }
