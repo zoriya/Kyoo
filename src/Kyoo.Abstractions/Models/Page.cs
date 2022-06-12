@@ -33,17 +33,17 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The link of the current page.
 		/// </summary>
-		public Uri This { get; }
+		public string This { get; }
 
 		/// <summary>
 		/// The link of the first page.
 		/// </summary>
-		public Uri First { get; }
+		public string First { get; }
 
 		/// <summary>
 		/// The link of the next page.
 		/// </summary>
-		public Uri Next { get; }
+		public string Next { get; }
 
 		/// <summary>
 		/// The number of items in the current page.
@@ -62,7 +62,7 @@ namespace Kyoo.Abstractions.Models
 		/// <param name="this">The link of the current page.</param>
 		/// <param name="next">The link of the next page.</param>
 		/// <param name="first">The link of the first page.</param>
-		public Page(ICollection<T> items, Uri @this, Uri next, Uri first)
+		public Page(ICollection<T> items, string @this, string next, string first)
 		{
 			Items = items;
 			This = @this;
@@ -78,21 +78,21 @@ namespace Kyoo.Abstractions.Models
 		/// <param name="query">The list of query strings of the current page</param>
 		/// <param name="limit">The number of items requested for the current page.</param>
 		public Page(ICollection<T> items,
-			Uri url,
+			string url,
 			Dictionary<string, string> query,
 			int limit)
 		{
 			Items = items;
-			This = new Uri(url + query.ToQueryString());
+			This = url + query.ToQueryString();
 
 			if (items.Count == limit && limit > 0)
 			{
 				query["afterID"] = items.Last().ID.ToString();
-				Next = new Uri(url + query.ToQueryString());
+				Next = url + query.ToQueryString();
 			}
 
 			query.Remove("afterID");
-			First = new Uri(url + query.ToQueryString());
+			First = url + query.ToQueryString();
 		}
 	}
 }

@@ -44,7 +44,7 @@ namespace Kyoo.Core.Api
 		{
 			return new Page<TResult>(
 				resources,
-				new Uri(Request.Path),
+				Request.Path,
 				Request.Query.ToDictionary(
 					x => x.Key,
 					x => x.Value.ToString(),

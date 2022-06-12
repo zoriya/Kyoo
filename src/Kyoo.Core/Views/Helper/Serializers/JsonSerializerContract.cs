@@ -144,8 +144,7 @@ namespace Kyoo.Core.Api
 				string type = target is ICustomTypeDescriptor descriptor
 					? descriptor.GetClassName()
 					: target.GetType().Name;
-				return new Uri($"/{type}/{slug}/{Images.ImageName[_imageIndex]}".ToLowerInvariant())
-					.ToString();
+				return $"/{type}/{slug}/{Images.ImageName[_imageIndex]}".ToLowerInvariant();
 			}
 		}
 	}
