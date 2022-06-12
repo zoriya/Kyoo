@@ -34,8 +34,8 @@ namespace Kyoo.Core.Api
 	/// <summary>
 	/// Information about one or multiple <see cref="Studio"/>.
 	/// </summary>
-	[Route("api/studios")]
-	[Route("api/studio", Order = AlternativeRoute)]
+	[Route("studios")]
+	[Route("studio", Order = AlternativeRoute)]
 	[ApiController]
 	[PartialPermission(nameof(Show))]
 	[ApiDefinition("Studios", Group = MetadataGroup)]

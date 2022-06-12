@@ -34,8 +34,8 @@ namespace Kyoo.Core.Api
 	/// <summary>
 	/// Information about one or multiple <see cref="Episode"/>.
 	/// </summary>
-	[Route("api/episodes")]
-	[Route("api/episode", Order = AlternativeRoute)]
+	[Route("episodes")]
+	[Route("episode", Order = AlternativeRoute)]
 	[ApiController]
 	[ResourceView]
 	[PartialPermission(nameof(Episode))]

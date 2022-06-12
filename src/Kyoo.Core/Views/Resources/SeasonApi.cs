@@ -34,8 +34,8 @@ namespace Kyoo.Core.Api
 	/// <summary>
 	/// Information about one or multiple <see cref="Season"/>.
 	/// </summary>
-	[Route("api/seasons")]
-	[Route("api/season", Order = AlternativeRoute)]
+	[Route("seasons")]
+	[Route("season", Order = AlternativeRoute)]
 	[ApiController]
 	[PartialPermission(nameof(Season))]
 	[ApiDefinition("Seasons", Group = ResourcesGroup)]

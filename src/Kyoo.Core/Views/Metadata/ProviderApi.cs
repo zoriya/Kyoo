@@ -30,8 +30,8 @@ namespace Kyoo.Core.Api
 	/// Providers are links to external websites or database.
 	/// They are mostly linked to plugins that provide metadata from those websites.
 	/// </summary>
-	[Route("api/providers")]
-	[Route("api/provider", Order = AlternativeRoute)]
+	[Route("providers")]
+	[Route("provider", Order = AlternativeRoute)]
 	[ApiController]
 	[ResourceView]
 	[PartialPermission(nameof(Provider))]

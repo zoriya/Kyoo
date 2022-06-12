@@ -35,8 +35,8 @@ namespace Kyoo.Core.Api
 	/// <summary>
 	/// Information about one or multiple staff member.
 	/// </summary>
-	[Route("api/staff")]
-	[Route("api/people", Order = AlternativeRoute)]
+	[Route("staff")]
+	[Route("people", Order = AlternativeRoute)]
 	[ApiController]
 	[ResourceView]
 	[PartialPermission(nameof(People))]

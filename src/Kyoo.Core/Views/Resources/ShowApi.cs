@@ -36,10 +36,10 @@ namespace Kyoo.Core.Api
 	/// <summary>
 	/// Information about one or multiple <see cref="Show"/>.
 	/// </summary>
-	[Route("api/shows")]
-	[Route("api/show", Order = AlternativeRoute)]
-	[Route("api/movie", Order = AlternativeRoute)]
-	[Route("api/movies", Order = AlternativeRoute)]
+	[Route("shows")]
+	[Route("show", Order = AlternativeRoute)]
+	[Route("movie", Order = AlternativeRoute)]
+	[Route("movies", Order = AlternativeRoute)]
 	[ApiController]
 	[PartialPermission(nameof(Show))]
 	[ApiDefinition("Shows", Group = ResourcesGroup)]

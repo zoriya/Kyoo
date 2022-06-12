@@ -40,7 +40,7 @@ namespace Kyoo.Authentication.Views
 	/// Sign in, Sign up or refresh tokens.
 	/// </summary>
 	[ApiController]
-	[Route("api/auth")]
+	[Route("auth")]
 	[ApiDefinition("Authentication", Group = UsersGroup)]
 	public class AuthApi : ControllerBase
 	{
