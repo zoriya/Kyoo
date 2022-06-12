@@ -32,8 +32,8 @@ namespace Kyoo.Core.Api
 	/// Information about one or multiple <see cref="Track"/>.
 	/// A track contain metadata about a video, an audio or a subtitles.
 	/// </summary>
-	[Route("api/tracks")]
-	[Route("api/track", Order = AlternativeRoute)]
+	[Route("tracks")]
+	[Route("track", Order = AlternativeRoute)]
 	[ApiController]
 	[ResourceView]
 	[PartialPermission(nameof(Track))]

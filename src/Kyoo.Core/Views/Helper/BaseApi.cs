@@ -19,11 +19,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Kyoo.Abstractions;
 using Kyoo.Abstractions.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Core.Api
 {

@@ -35,29 +35,20 @@ namespace Kyoo.Core.Api
 		private readonly IHttpContextAccessor _httpContextAccessor;
 
 		/// <summary>
-		/// The options containing the public URL of kyoo, given to <see cref="JsonSerializerContract"/>.
-		/// </summary>
-		private readonly IOptions<BasicOptions> _options;
-
-		/// <summary>
 		/// Create a new <see cref="JsonOptions"/>.
 		/// </summary>
 		/// <param name="httpContextAccessor">
 		/// The http context accessor given to the <see cref="JsonSerializerContract"/>.
 		/// </param>
-		/// <param name="options">
-		/// The options containing the public URL of kyoo, given to <see cref="JsonSerializerContract"/>.
-		/// </param>
-		public JsonOptions(IHttpContextAccessor httpContextAccessor, IOptions<BasicOptions> options)
+		public JsonOptions(IHttpContextAccessor httpContextAccessor)
 		{
 			_httpContextAccessor = httpContextAccessor;
-			_options = options;
 		}
 
 		/// <inheritdoc />
 		public void Configure(MvcNewtonsoftJsonOptions options)
 		{
-			options.SerializerSettings.ContractResolver = new JsonSerializerContract(_httpContextAccessor, _options);
+			options.SerializerSettings.ContractResolver = new JsonSerializerContract(_httpContextAccessor);
 			options.SerializerSettings.Converters.Add(new PeopleRoleConverter());
 		}
 	}

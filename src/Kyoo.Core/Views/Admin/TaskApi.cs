@@ -32,8 +32,8 @@ namespace Kyoo.Core.Api
 	/// <summary>
 	/// An endpoint to list and run tasks in the background.
 	/// </summary>
-	[Route("api/tasks")]
-	[Route("api/task", Order = AlternativeRoute)]
+	[Route("tasks")]
+	[Route("task", Order = AlternativeRoute)]
 	[ApiController]
 	[ResourceView]
 	[PartialPermission("Task", Group = Group.Admin)]

@@ -36,8 +36,8 @@ namespace Kyoo.Core.Api
 	/// <summary>
 	/// Information about one or multiple <see cref="Library"/>.
 	/// </summary>
-	[Route("api/libraries")]
-	[Route("api/library", Order = AlternativeRoute)]
+	[Route("libraries")]
+	[Route("library", Order = AlternativeRoute)]
 	[ApiController]
 	[ResourceView]
 	[PartialPermission(nameof(Library), Group = Group.Admin)]

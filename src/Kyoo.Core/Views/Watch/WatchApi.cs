@@ -34,8 +34,8 @@ namespace Kyoo.Core.Api
 	/// It contains streams (video, audio, subtitles) information, chapters, next and previous episodes and a bit of
 	/// information of the show.
 	/// </summary>
-	[Route("api/watch")]
-	[Route("api/watchitem", Order = AlternativeRoute)]
+	[Route("watch")]
+	[Route("watchitem", Order = AlternativeRoute)]
 	[ApiController]
 	[ApiDefinition("Watch Items", Group = WatchGroup)]
 	public class WatchApi : ControllerBase

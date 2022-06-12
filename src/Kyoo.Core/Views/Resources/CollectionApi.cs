@@ -34,8 +34,8 @@ namespace Kyoo.Core.Api
 	/// <summary>
 	/// Information about one or multiple <see cref="Collection"/>.
 	/// </summary>
-	[Route("api/collections")]
-	[Route("api/collection", Order = AlternativeRoute)]
+	[Route("collections")]
+	[Route("collection", Order = AlternativeRoute)]
 	[ApiController]
 	[PartialPermission(nameof(Collection))]
 	[ApiDefinition("Collections", Group = ResourcesGroup)]

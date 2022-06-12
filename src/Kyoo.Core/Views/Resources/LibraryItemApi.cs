@@ -34,8 +34,8 @@ namespace Kyoo.Core.Api
 	/// Endpoint for items that are not part of a specific library.
 	/// An item can ether represent a collection or a show.
 	/// </summary>
-	[Route("api/items")]
-	[Route("api/item", Order = AlternativeRoute)]
+	[Route("items")]
+	[Route("item", Order = AlternativeRoute)]
 	[ApiController]
 	[ResourceView]
 	[PartialPermission(nameof(LibraryItem))]

@@ -32,7 +32,7 @@ namespace Kyoo.Core.Api
 	/// An endpoint to search for every resources of kyoo. Searching for only a specific type of resource
 	/// is available on the said endpoint.
 	/// </summary>
-	[Route("api/search/{query}")]
+	[Route("search/{query}")]
 	[ApiController]
 	[ResourceView]
 	[ApiDefinition("Search", Group = ResourcesGroup)]

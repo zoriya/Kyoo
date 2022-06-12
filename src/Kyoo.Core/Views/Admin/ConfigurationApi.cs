@@ -31,8 +31,8 @@ namespace Kyoo.Core.Api
 	/// <summary>
 	/// An API to retrieve or edit configuration settings
 	/// </summary>
-	[Route("api/configuration")]
-	[Route("api/config", Order = AlternativeRoute)]
+	[Route("configuration")]
+	[Route("config", Order = AlternativeRoute)]
 	[ApiController]
 	[PartialPermission("Configuration", Group = Group.Admin)]
 	[ApiDefinition("Configuration", Group = AdminGroup)]

@@ -22,9 +22,7 @@ using System.ComponentModel;
 using System.Reflection;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
-using Kyoo.Core.Models.Options;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -44,19 +42,12 @@ namespace Kyoo.Core.Api
 		private readonly IHttpContextAccessor _httpContextAccessor;
 
 		/// <summary>
-		/// The options containing the public URL of kyoo.
-		/// </summary>
-		private readonly IOptions<BasicOptions> _options;
-
-		/// <summary>
 		/// Create a new <see cref="JsonSerializerContract"/>.
 		/// </summary>
 		/// <param name="httpContextAccessor">The http context accessor to use.</param>
-		/// <param name="options">The options containing the public URL of kyoo.</param>
-		public JsonSerializerContract(IHttpContextAccessor httpContextAccessor, IOptions<BasicOptions> options)
+		public JsonSerializerContract(IHttpContextAccessor httpContextAccessor)
 		{
 			_httpContextAccessor = httpContextAccessor;
-			_options = options;
 		}
 
 		/// <inheritdoc />
@@ -153,7 +144,7 @@ namespace Kyoo.Core.Api
 				string type = target is ICustomTypeDescriptor descriptor
 					? descriptor.GetClassName()
 					: target.GetType().Name;
-				return new Uri($"/api/{type}/{slug}/{Images.ImageName[_imageIndex]}".ToLowerInvariant())
+				return new Uri($"/{type}/{slug}/{Images.ImageName[_imageIndex]}".ToLowerInvariant())
 					.ToString();
 			}
 		}

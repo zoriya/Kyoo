@@ -34,8 +34,8 @@ namespace Kyoo.Core.Api
 	/// <summary>
 	/// Information about one or multiple <see cref="Genre"/>.
 	/// </summary>
-	[Route("api/genres")]
-	[Route("api/genre", Order = AlternativeRoute)]
+	[Route("genres")]
+	[Route("genre", Order = AlternativeRoute)]
 	[ApiController]
 	[PartialPermission(nameof(Genre))]
 	[ApiDefinition("Genres", Group = MetadataGroup)]
