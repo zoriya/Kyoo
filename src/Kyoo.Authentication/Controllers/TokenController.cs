@@ -24,10 +24,8 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
-using Kyoo.Abstractions;
 using Kyoo.Abstractions.Models;
 using Kyoo.Authentication.Models;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
@@ -44,19 +42,12 @@ namespace Kyoo.Authentication
 		private readonly IOptions<AuthenticationOption> _options;
 
 		/// <summary>
-		/// The configuration used to retrieve the public URL of kyoo.
-		/// </summary>
-		private readonly IConfiguration _configuration;
-
-		/// <summary>
 		/// Create a new <see cref="TokenController"/>.
 		/// </summary>
 		/// <param name="options">The options that this controller will use.</param>
-		/// <param name="configuration">The configuration used to retrieve the public URL of kyoo.</param>
-		public TokenController(IOptions<AuthenticationOption> options, IConfiguration configuration)
+		public TokenController(IOptions<AuthenticationOption> options)
 		{
 			_options = options;
-			_configuration = configuration;
 		}
 
 		/// <inheritdoc />
@@ -80,8 +71,6 @@ namespace Kyoo.Authentication
 				claims.Add(new Claim(Claims.Email, user.Email));
 			JwtSecurityToken token = new(
 				signingCredentials: credential,
-				issuer: _configuration.GetPublicUrl().ToString(),
-				audience: _configuration.GetPublicUrl().ToString(),
 				claims: claims,
 				expires: DateTime.UtcNow.Add(expireIn)
 			);
@@ -95,8 +84,6 @@ namespace Kyoo.Authentication
 			SigningCredentials credential = new(key, SecurityAlgorithms.HmacSha256Signature);
 			JwtSecurityToken token = new(
 				signingCredentials: credential,
-				issuer: _configuration.GetPublicUrl().ToString(),
-				audience: _configuration.GetPublicUrl().ToString(),
 				claims: new[]
 				{
 					new Claim(Claims.Id, user.ID.ToString(CultureInfo.InvariantCulture)),
@@ -119,12 +106,10 @@ namespace Kyoo.Authentication
 			{
 				principal = tokenHandler.ValidateToken(refreshToken, new TokenValidationParameters
 				{
-					ValidateIssuer = true,
-					ValidateAudience = true,
+					ValidateIssuer = false,
+					ValidateAudience = false,
 					ValidateIssuerSigningKey = true,
 					ValidateLifetime = true,
-					ValidIssuer = _configuration.GetPublicUrl().ToString(),
-					ValidAudience = _configuration.GetPublicUrl().ToString(),
 					IssuerSigningKey = key
 				}, out SecurityToken _);
 			}

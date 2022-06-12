@@ -91,15 +91,5 @@ namespace Kyoo.Abstractions
 		{
 			return builder.RegisterRepository<T2>().As<T>();
 		}
-
-		/// <summary>
-		/// Get the public URL of kyoo using the given configuration instance.
-		/// </summary>
-		/// <param name="configuration">The configuration instance</param>
-		/// <returns>The public URl of kyoo (without a slash at the end)</returns>
-		public static Uri GetPublicUrl(this IConfiguration configuration)
-		{
-			return new Uri(configuration["basics:publicUrl"] ?? "http://localhost:5000");
-		}
 	}
 }

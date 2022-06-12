@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using Autofac;
-using Kyoo.Abstractions;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Authentication.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -76,7 +75,6 @@ namespace Kyoo.Authentication
 		/// <inheritdoc />
 		public void Configure(IServiceCollection services)
 		{
-			Uri publicUrl = _configuration.GetPublicUrl();
 			AuthenticationOption jwt = ConfigurationBinder.Get<AuthenticationOption>(
 				_configuration.GetSection(AuthenticationOption.Path)
 			);
@@ -87,12 +85,10 @@ namespace Kyoo.Authentication
 				{
 					options.TokenValidationParameters = new TokenValidationParameters
 					{
-						ValidateIssuer = true,
-						ValidateAudience = true,
+						ValidateIssuer = false,
+						ValidateAudience = false,
 						ValidateLifetime = true,
 						ValidateIssuerSigningKey = true,
-						ValidIssuer = publicUrl.ToString(),
-						ValidAudience = publicUrl.ToString(),
 						IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Secret))
 					};
 				});

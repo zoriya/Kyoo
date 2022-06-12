@@ -40,7 +40,7 @@ namespace Kyoo.Host.WindowsTrait
 		private readonly IApplication _application;
 
 		/// <summary>
-		/// The options containing the <see cref="BasicOptions.PublicUrl"/>.
+		/// The options containing the <see cref="BasicOptions.Url"/>.
 		/// </summary>
 		private readonly IOptions<BasicOptions> _options;
 
@@ -90,7 +90,7 @@ namespace Kyoo.Host.WindowsTrait
 			private readonly IApplication _application;
 
 			/// <summary>
-			/// The options containing the <see cref="BasicOptions.PublicUrl"/>.
+			/// The options containing the <see cref="BasicOptions.Url"/>.
 			/// </summary>
 			private readonly IOptions<BasicOptions> _options;
 
@@ -161,7 +161,7 @@ namespace Kyoo.Host.WindowsTrait
 			{
 				Process browser = new()
 				{
-					StartInfo = new ProcessStartInfo(_options.Value.PublicUrl.ToString())
+					StartInfo = new ProcessStartInfo(_options.Value.Url.ToString().Replace("//*:", "//localhost:"))
 					{
 						UseShellExecute = true
 					}

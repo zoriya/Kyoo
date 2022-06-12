@@ -107,7 +107,7 @@ namespace Kyoo.Core.Api
 						IThumbnails thumb = (IThumbnails)x;
 						return thumb?.Images?.ContainsKey(id) == true;
 					},
-					ValueProvider = new ThumbnailProvider(_options.Value.PublicUrl, id)
+					ValueProvider = new ThumbnailProvider(id)
 				});
 			}
 
@@ -121,11 +121,6 @@ namespace Kyoo.Core.Api
 		private class ThumbnailProvider : IValueProvider
 		{
 			/// <summary>
-			/// The public address of kyoo.
-			/// </summary>
-			private readonly Uri _host;
-
-			/// <summary>
 			/// The index/ID of the image to retrieve/set.
 			/// </summary>
 			private readonly int _imageIndex;
@@ -133,11 +128,9 @@ namespace Kyoo.Core.Api
 			/// <summary>
 			/// Create a new <see cref="ThumbnailProvider"/>.
 			/// </summary>
-			/// <param name="host">The public address of kyoo.</param>
 			/// <param name="imageIndex">The index/ID of the image to retrieve/set.</param>
-			public ThumbnailProvider(Uri host, int imageIndex)
+			public ThumbnailProvider(int imageIndex)
 			{
-				_host = host;
 				_imageIndex = imageIndex;
 			}
 
@@ -160,7 +153,7 @@ namespace Kyoo.Core.Api
 				string type = target is ICustomTypeDescriptor descriptor
 					? descriptor.GetClassName()
 					: target.GetType().Name;
-				return new Uri(_host, $"/api/{type}/{slug}/{Images.ImageName[_imageIndex]}".ToLower())
+				return new Uri($"/api/{type}/{slug}/{Images.ImageName[_imageIndex]}".ToLowerInvariant())
 					.ToString();
 			}
 		}

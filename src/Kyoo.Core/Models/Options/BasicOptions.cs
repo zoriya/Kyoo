@@ -16,8 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
-
 namespace Kyoo.Core.Models.Options
 {
 	/// <summary>
@@ -34,11 +32,6 @@ namespace Kyoo.Core.Models.Options
 		/// The internal url where the server will listen. It supports globing.
 		/// </summary>
 		public string Url { get; set; } = "http://*:5000";
-
-		/// <summary>
-		/// The public url that will be used in items response and in authentication server host.
-		/// </summary>
-		public Uri PublicUrl { get; set; } = new("http://localhost:5000");
 
 		/// <summary>
 		/// The path of the plugin directory.

@@ -49,7 +49,6 @@ services:
         restart: on-failure
         environment:
             - KYOO_DATADIR=/var/lib/kyoo
-            - BASICS__PUBLICURL=https://demo.kyoo.moe
             - DATABASE__ENABLED=postgres
             - DATABASE__CONFIGURATIONS__POSTGRES__SERVER=postgres
             - DATABASE__CONFIGURATIONS__POSTGRES__USER ID=kyoo

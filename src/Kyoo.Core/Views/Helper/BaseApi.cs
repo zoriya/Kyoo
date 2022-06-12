@@ -45,12 +45,9 @@ namespace Kyoo.Core.Api
 		protected Page<TResult> Page<TResult>(ICollection<TResult> resources, int limit)
 			where TResult : IResource
 		{
-			Uri publicUrl = HttpContext.RequestServices
-				.GetRequiredService<IConfiguration>()
-				.GetPublicUrl();
 			return new Page<TResult>(
 				resources,
-				new Uri(publicUrl, Request.Path),
+				new Uri(Request.Path),
 				Request.Query.ToDictionary(
 					x => x.Key,
 					x => x.Value.ToString(),

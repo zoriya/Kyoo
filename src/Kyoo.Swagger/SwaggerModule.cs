@@ -91,11 +91,6 @@ namespace Kyoo.Swagger
 						Name = "GPL-3.0-or-later",
 						Url = "https://github.com/AnonymusRaccoon/Kyoo/blob/master/LICENSE"
 					};
-					options.Servers.Add(new OpenApiServer
-					{
-						Url = _configuration.GetPublicUrl().ToString(),
-						Description = "The currently running kyoo's instance."
-					});
 
 					options.Info.ExtensionData ??= new Dictionary<string, object>();
 					options.Info.ExtensionData["x-logo"] = new

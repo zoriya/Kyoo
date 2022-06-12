@@ -1,7 +1,6 @@
 {
   "basics": {
     "url": "http://*:5000",
-    "publicUrl": "http://localhost:5000/",
     "pluginsPath": "plugins/",
     "transmuxPath": "cached/transmux",
     "transcodePath": "cached/transcode",
