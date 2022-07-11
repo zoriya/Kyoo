@@ -18,10 +18,16 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { ThemeProvider } from "@mui/material";
 import type { AppProps } from "next/app";
+import { defaultTheme } from "~/utils/themes/default-theme";
 
-function MyApp({ Component, pageProps }: AppProps) {
-	return <Component {...pageProps} />;
-}
+const MyApp = ({ Component, pageProps }: AppProps) => {
+	return (
+		<ThemeProvider theme={defaultTheme}>
+			<Component {...pageProps} />
+		</ThemeProvider>
+	);
+};
 
 export default MyApp;
