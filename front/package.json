@@ -1,0 +1,40 @@
+{
+	"name": "kyoo",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"dev": "next dev",
+		"build": "next build",
+		"start": "next start",
+		"lint": "next lint",
+		"format": "prettier --check --ignore-path .gitignore .",
+		"format:fix": "prettier --write --ignore-path .gitignore ."
+	},
+	"prettier": {
+		"useTabs": true,
+		"printWidth": 100,
+		"trailingComma": "all",
+		"plugins": [
+			"prettier-plugin-jsdoc"
+		],
+		"jsdocSingleLineComment": false,
+		"tsdoc": true
+	},
+	"dependencies": {
+		"next": "12.2.2",
+		"react": "18.2.0",
+		"react-dom": "18.2.0"
+	},
+	"devDependencies": {
+		"@types/node": "18.0.3",
+		"@types/react": "18.0.15",
+		"@types/react-dom": "18.0.6",
+		"eslint": "8.19.0",
+		"eslint-config-next": "12.2.2",
+		"eslint-config-prettier": "^8.5.0",
+		"eslint-plugin-header": "^3.1.1",
+		"prettier": "^2.7.1",
+		"prettier-plugin-jsdoc": "^0.3.38",
+		"typescript": "4.7.4"
+	}
+}
