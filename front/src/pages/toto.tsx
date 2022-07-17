@@ -19,17 +19,18 @@
  */
 
 import { QueryPage, useFetch } from "~/utils/query";
+import useTranslation from "next-translate/useTranslation";
 
 const Toto: QueryPage = ({}) => {
 	const libraries = useFetch<any>("libraries");
+	const { t } = useTranslation("common");
 
 	if (libraries.error) return <p>oups</p>;
 	if (!libraries.data) return <p>loading</p>;
 
-	console.log(libraries.data.items);
 	return (
 		<>
-			<p>toto</p>
+			<p>{t("navbar.home")}</p>
 			{libraries.data.items.map((x: any) => (
 				<p key={x.id}>{x.name}</p>
 			))}

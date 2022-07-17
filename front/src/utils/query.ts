@@ -21,12 +21,10 @@
 import { ComponentType } from "react";
 import { dehydrate, QueryClient, QueryFunctionContext, useQuery } from "react-query";
 
-const isServer = () => typeof window === "undefined"
-
 const queryFn = async <T>(context: QueryFunctionContext): Promise<T> => {
 	try {
 		const resp = await fetch(
-			[isServer() ? process.env.KYOO_URL : "/api"]
+			[typeof window === "undefined" ? process.env.KYOO_URL : "/api"]
 				.concat(context.pageParam ? [context.pageParam] : (context.queryKey as string[]))
 				.join("/"),
 		);
@@ -62,7 +60,9 @@ export const useFetch = <Data>(...params: [string]) => {
 };
 
 export const fetchQuery = async (queries: [[string]]) => {
-	if (!isServer()) return {};
+	// we can't put this check in a function because we want build time optimizations
+	// see https://github.com/vercel/next.js/issues/5354 for details
+	if (typeof window !== "undefined") return {};
 
 	const client = createQueryClient();
 	await Promise.all(queries.map((x) => client.prefetchQuery(x)));
