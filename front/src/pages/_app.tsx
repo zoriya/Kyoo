@@ -19,15 +19,33 @@
  */
 
 import { ThemeProvider } from "@mui/material";
+import NextApp, { AppContext } from "next/app";
 import type { AppProps } from "next/app";
+import { Hydrate, QueryClientProvider } from "react-query";
+import { createQueryClient, fetchQuery } from "~/utils/query";
 import { defaultTheme } from "~/utils/themes/default-theme";
+import { useState } from "react";
 
-const MyApp = ({ Component, pageProps }: AppProps) => {
+const App = ({ Component, pageProps }: AppProps) => {
+	const [queryClient] = useState(() => createQueryClient());
 	return (
-		<ThemeProvider theme={defaultTheme}>
-			<Component {...pageProps} />
-		</ThemeProvider>
+		<QueryClientProvider client={queryClient}>
+			<Hydrate state={pageProps.queryState}>
+				<ThemeProvider theme={defaultTheme}>
+					<Component {...pageProps} />
+				</ThemeProvider>
+			</Hydrate>
+		</QueryClientProvider>
 	);
 };
 
-export default MyApp;
+App.getInitialProps = async (ctx: AppContext) => {
+	const appProps = await NextApp.getInitialProps(ctx);
+
+	const getUrl = (ctx.Component as any).getFetchUrls;
+	if (getUrl) appProps.pageProps.queryState = await fetchQuery(getUrl(ctx.router.query));
+
+	return appProps;
+};
+
+export default App;

@@ -20,7 +20,8 @@
 
 import type { NextPage } from "next";
 import { Stack, Button } from "@mui/material";
-import Link from "~/utils/link";
+import Link from "next/link";
+// import { Link } from "~/utils/link";
 
 const Home: NextPage = () => {
 	return (
