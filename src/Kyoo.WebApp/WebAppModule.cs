@@ -50,7 +50,7 @@ namespace Kyoo.WebApp
 		public Dictionary<string, Type> Configuration => new();
 
 		/// <inheritdoc />
-		public bool Enabled => Directory.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "wwwroot"));
+		public bool Enabled => false; // Directory.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "wwwroot"));
 
 		/// <summary>
 		/// Create a new <see cref="WebAppModule"/>.

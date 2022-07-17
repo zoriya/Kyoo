@@ -18,12 +18,25 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import type { NextPage } from "next";
+import { QueryPage, useFetch } from "~/utils/query";
 
-const Toto: NextPage = () => {
+const Toto: QueryPage = ({}) => {
+	const libraries = useFetch<any>("libraries");
+
+	if (libraries.error) return <p>oups</p>;
+	if (!libraries.data) return <p>loading</p>;
+
+	console.log(libraries.data.items);
 	return (
-		<p>toto</p>
+		<>
+			<p>toto</p>
+			{libraries.data.items.map((x: any) => (
+				<p key={x.id}>{x.name}</p>
+			))}
+		</>
 	);
 };
+
+Toto.getFetchUrls = () => [["libraries"]];
 
 export default Toto;
