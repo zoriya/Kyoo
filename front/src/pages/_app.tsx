@@ -18,13 +18,14 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { useState } from "react";
+import appWithI18n from "next-translate/appWithI18n";
 import { ThemeProvider } from "@mui/material";
 import NextApp, { AppContext } from "next/app";
 import type { AppProps } from "next/app";
 import { Hydrate, QueryClientProvider } from "react-query";
 import { createQueryClient, fetchQuery } from "~/utils/query";
 import { defaultTheme } from "~/utils/themes/default-theme";
-import { useState } from "react";
 
 const App = ({ Component, pageProps }: AppProps) => {
 	const [queryClient] = useState(() => createQueryClient());
@@ -48,4 +49,15 @@ App.getInitialProps = async (ctx: AppContext) => {
 	return appProps;
 };
 
-export default App;
+// The as any is needed since appWithI18n as wrong type hints
+export default appWithI18n(App as any, {
+	skipInitialProps: false,
+	locales: ["en", "fr"],
+	defaultLocale: "en",
+	loader: false,
+	pages: {
+		"*": ["common"],
+	},
+	loadLocaleFrom: (locale, namespace) =>
+		import(`../../locales/${locale}/${namespace}`).then((m) => m.default),
+});
