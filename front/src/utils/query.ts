@@ -19,7 +19,14 @@
  */
 
 import { ComponentType } from "react";
-import { dehydrate, QueryClient, QueryFunctionContext, useQuery } from "react-query";
+import {
+	dehydrate,
+	QueryClient,
+	QueryFunctionContext,
+	useInfiniteQuery,
+	useQuery,
+} from "react-query";
+import { imageList, KyooErrors, Page } from "~/models";
 
 const queryFn = async <T>(context: QueryFunctionContext): Promise<T> => {
 	try {
@@ -55,8 +62,30 @@ export type QueryPage<Props = {}> = ComponentType<Props> & {
 	getFetchUrls?: (route: { [key: string]: string }) => [[string]];
 };
 
+const imageSelector = <T>(obj: T): T => {
+	for (const img of imageList) {
+		// @ts-ignore
+		if (img in obj && !obj[img].startWith("/api")) {
+			// @ts-ignore
+			obj[img] = `/api/${obj[img]}`;
+		}
+	}
+	return obj;
+};
+
 export const useFetch = <Data>(...params: [string]) => {
-	return useQuery<Data, any>(params);
+	return useQuery<Data, KyooErrors>(params, {
+		select: imageSelector,
+	});
+};
+
+export const useInfiniteFetch = <Data>(...params: [string]) => {
+	return useInfiniteQuery<Page<Data>, KyooErrors>(params, {
+		select: (pages) => {
+			pages.pages.map((x) => x.items.map(imageSelector));
+			return pages;
+		},
+	});
 };
 
 export const fetchQuery = async (queries: [[string]]) => {

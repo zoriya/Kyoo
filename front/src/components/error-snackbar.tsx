@@ -18,26 +18,22 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { QueryPage, useFetch } from "~/utils/query";
-import useTranslation from "next-translate/useTranslation";
+import { Alert, Snackbar, SnackbarCloseReason } from "@mui/material";
+import { SyntheticEvent, useState } from "react";
+import { KyooErrors } from "~/models";
 
-const Toto: QueryPage = ({}) => {
-	const libraries = useFetch<any>("libraries");
-	const { t } = useTranslation("common");
+export const ErrorSnackbar = ({ error }: { error: KyooErrors }) => {
+	const [isOpen, setOpen] = useState(true);
+	const close = (_: Event | SyntheticEvent, reason?: SnackbarCloseReason) => {
+		if (reason !== "clickaway") setOpen(false);
+	};
 
-	if (libraries.error) return <p>oups</p>;
-	if (!libraries.data) return <p>loading</p>;
-
+	if (!isOpen) return null;
 	return (
-		<>
-			<p>{t("navbar.home")}</p>
-			{libraries.data.items.map((x: any) => (
-				<p key={x.id}>{x.name}</p>
-			))}
-		</>
+		<Snackbar open={isOpen} onClose={close} autoHideDuration={6000}>
+			<Alert severity="error" onClose={close} sx={{ width: "100%" }}>
+				{error.errors[0]}
+			</Alert>
+		</Snackbar>
 	);
 };
-
-Toto.getFetchUrls = () => [["libraries"]];
-
-export default Toto;
