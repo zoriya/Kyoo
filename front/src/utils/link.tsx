@@ -18,106 +18,30 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-// This file was shamelessly taken from:
-// https://github.com/mui/material-ui/tree/master/examples/nextjs
+import React, { forwardRef, Ref } from "react";
+import NLink, { LinkProps as NLinkProps} from "next/link";
+import { Button as MButton, ButtonProps, Link as MLink, LinkProps as MLinkProps} from "@mui/material";
 
-import * as React from "react";
-import clsx from "clsx";
-import { useRouter } from "next/router";
-import NextLink, { LinkProps as NextLinkProps } from "next/link";
-import MuiLink, { LinkProps as MuiLinkProps } from "@mui/material/Link";
-import { styled } from "@mui/material/styles";
+type ButtonRef = HTMLButtonElement;
+type ButtonLinkProps = Omit<ButtonProps, "href"> &
+	Pick<NLinkProps, "href" | "as" | "prefetch" | "locale">;
 
-// Add support for the sx prop for consistency with the other branches.
-const Anchor = styled("a")({});
-
-interface NextLinkComposedProps
-	extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "href">,
-		Omit<NextLinkProps, "href" | "as" | "onClick" | "onMouseEnter"> {
-	to: NextLinkProps["href"];
-	linkAs?: NextLinkProps["as"];
-}
-
-export const NextLinkComposed = React.forwardRef<HTMLAnchorElement, NextLinkComposedProps>(
-	function NextLinkComposed(props, ref) {
-		const { to, linkAs, replace, scroll, shallow, prefetch, locale, ...other } = props;
-
-		return (
-			<NextLink
-				href={to}
-				prefetch={prefetch}
-				as={linkAs}
-				replace={replace}
-				scroll={scroll}
-				shallow={shallow}
-				passHref
-				locale={locale}
-			>
-				<Anchor ref={ref} {...other} />
-			</NextLink>
-		);
-	},
+const NextButton = ({ href, as, prefetch, locale, ...props }: ButtonLinkProps, ref: Ref<ButtonRef>) => (
+	<NLink href={href} as={as} prefetch={prefetch} locale={locale} passHref>
+		<MButton ref={ref} {...props} />
+	</NLink>
 );
 
-export type LinkProps = {
-	activeClassName?: string;
-	as?: NextLinkProps["as"];
-	href: NextLinkProps["href"];
-	linkAs?: NextLinkProps["as"]; // Useful when the as prop is shallow by styled().
-	noLinkStyle?: boolean;
-} & Omit<NextLinkComposedProps, "to" | "linkAs" | "href"> &
-	Omit<MuiLinkProps, "href">;
+export const ButtonLink = forwardRef<ButtonRef, ButtonLinkProps>(NextButton);
 
-// A styled version of the Next.js Link component:
-// https://nextjs.org/docs/api-reference/next/link
-export const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(function Link(props, ref) {
-	const {
-		activeClassName = "active",
-		as,
-		className: classNameProps,
-		href,
-		linkAs: linkAsProp,
-		locale,
-		noLinkStyle,
-		prefetch,
-		replace,
-		role, // Link don't have roles.
-		scroll,
-		shallow,
-		...other
-	} = props;
+type LinkRef = HTMLAnchorElement;
+type LinkProps = Omit<MLinkProps, "href"> &
+	Pick<NLinkProps, "href" | "as" | "prefetch" | "locale">;
 
-	const router = useRouter();
-	const pathname = typeof href === "string" ? href : href.pathname;
-	const className = clsx(classNameProps, {
-		[activeClassName]: router.pathname === pathname && activeClassName,
-	});
+const NextLink = ({ href, as, prefetch, locale, ...props }: LinkProps, ref: Ref<LinkRef>) => (
+	<NLink href={href} as={as} prefetch={prefetch} locale={locale} passHref>
+		<MLink ref={ref} {...props} />
+	</NLink>
+);
 
-	const isExternal =
-		typeof href === "string" && (href.indexOf("http") === 0 || href.indexOf("mailto:") === 0);
-
-	if (isExternal) {
-		if (noLinkStyle) {
-			return <Anchor className={className} href={href} ref={ref} {...other} />;
-		}
-
-		return <MuiLink className={className} href={href} ref={ref} {...other} />;
-	}
-
-	const linkAs = linkAsProp || as;
-	const nextjsProps = { to: href, linkAs, replace, scroll, shallow, prefetch, locale };
-
-	if (noLinkStyle) {
-		return <NextLinkComposed className={className} ref={ref} {...nextjsProps} {...other} />;
-	}
-
-	return (
-		<MuiLink
-			component={NextLinkComposed}
-			className={className}
-			ref={ref}
-			{...nextjsProps}
-			{...other}
-		/>
-	);
-});
+export const Link = forwardRef<LinkRef, LinkProps>(NextLink);

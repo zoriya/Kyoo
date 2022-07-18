@@ -26,6 +26,8 @@ import type { AppProps } from "next/app";
 import { Hydrate, QueryClientProvider } from "react-query";
 import { createQueryClient, fetchQuery } from "~/utils/query";
 import { defaultTheme } from "~/utils/themes/default-theme";
+import { Navbar } from "~/components/navbar";
+import "../global.css"
 
 const App = ({ Component, pageProps }: AppProps) => {
 	const [queryClient] = useState(() => createQueryClient());
@@ -33,6 +35,9 @@ const App = ({ Component, pageProps }: AppProps) => {
 		<QueryClientProvider client={queryClient}>
 			<Hydrate state={pageProps.queryState}>
 				<ThemeProvider theme={defaultTheme}>
+					<Navbar />
+					{/* TODO: add a container to allow the component to be scrolled without the navbar */}
+					{/* TODO: add an option to disable the navbar in the component */}
 					<Component {...pageProps} />
 				</ThemeProvider>
 			</Hydrate>
@@ -44,7 +49,10 @@ App.getInitialProps = async (ctx: AppContext) => {
 	const appProps = await NextApp.getInitialProps(ctx);
 
 	const getUrl = (ctx.Component as any).getFetchUrls;
-	if (getUrl) appProps.pageProps.queryState = await fetchQuery(getUrl(ctx.router.query));
+	const urls: [[string]] = getUrl ? getUrl(ctx.router.query) : [];
+	// TODO: check if the navbar is needed for this
+	urls.push(["libraries"]);
+	appProps.pageProps.queryState = await fetchQuery(urls);
 
 	return appProps;
 };
