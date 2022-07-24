@@ -27,18 +27,31 @@ import { Hydrate, QueryClientProvider } from "react-query";
 import { createQueryClient, fetchQuery } from "~/utils/query";
 import { defaultTheme } from "~/utils/themes/default-theme";
 import { Navbar } from "~/components/navbar";
-import "../global.css"
+import "../global.css";
+import { Box } from "@mui/system";
+
+const AppWithNavbar = ({ children }: { children: JSX.Element }) => {
+	return (
+		<>
+			<Navbar/>
+			{/* TODO: add an option to disable the navbar in the component */}
+			<Box >
+				{children}
+			</Box>
+		</>
+	);
+};
 
 const App = ({ Component, pageProps }: AppProps) => {
 	const [queryClient] = useState(() => createQueryClient());
+	const { queryState, ...props } = pageProps;
 	return (
 		<QueryClientProvider client={queryClient}>
-			<Hydrate state={pageProps.queryState}>
+			<Hydrate state={queryState}>
 				<ThemeProvider theme={defaultTheme}>
-					<Navbar />
-					{/* TODO: add a container to allow the component to be scrolled without the navbar */}
-					{/* TODO: add an option to disable the navbar in the component */}
-					<Component {...pageProps} />
+					<AppWithNavbar>
+						<Component {...props} />
+					</AppWithNavbar>
 				</ThemeProvider>
 			</Hydrate>
 		</QueryClientProvider>
@@ -49,7 +62,7 @@ App.getInitialProps = async (ctx: AppContext) => {
 	const appProps = await NextApp.getInitialProps(ctx);
 
 	const getUrl = (ctx.Component as any).getFetchUrls;
-	const urls: [[string]] = getUrl ? getUrl(ctx.router.query) : [];
+	const urls: string[][] = getUrl ? getUrl(ctx.router.query) : [];
 	// TODO: check if the navbar is needed for this
 	urls.push(["libraries"]);
 	appProps.pageProps.queryState = await fetchQuery(urls);
