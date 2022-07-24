@@ -77,7 +77,7 @@ export const Navbar = () => {
 	const { data, error, isSuccess, isError } = useFetch<Page<Library>>("libraries");
 
 	return (
-		<AppBar position="static">
+		<AppBar position="sticky">
 			<Toolbar>
 				<IconButton
 					size="large"

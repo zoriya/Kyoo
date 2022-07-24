@@ -59,27 +59,31 @@ export const createQueryClient = () =>
 	});
 
 export type QueryPage<Props = {}> = ComponentType<Props> & {
-	getFetchUrls?: (route: { [key: string]: string }) => [[string]];
+	getFetchUrls?: (route: { [key: string]: string }) => string[][];
 };
 
 const imageSelector = <T>(obj: T): T => {
+	// TODO: remove this
+	// @ts-ignore
+	if ("title" in obj) obj.name = obj.title;
+
 	for (const img of imageList) {
 		// @ts-ignore
-		if (img in obj && !obj[img].startWith("/api")) {
+		if (img in obj && obj[img] && !obj[img].startsWith("/api")) {
 			// @ts-ignore
-			obj[img] = `/api/${obj[img]}`;
+			obj[img] = `/api${obj[img]}`;
 		}
 	}
 	return obj;
 };
 
-export const useFetch = <Data>(...params: [string]) => {
+export const useFetch = <Data>(...params: string[]) => {
 	return useQuery<Data, KyooErrors>(params, {
 		select: imageSelector,
 	});
 };
 
-export const useInfiniteFetch = <Data>(...params: [string]) => {
+export const useInfiniteFetch = <Data>(...params: string[]) => {
 	return useInfiniteQuery<Page<Data>, KyooErrors>(params, {
 		select: (pages) => {
 			pages.pages.map((x) => x.items.map(imageSelector));
@@ -88,10 +92,11 @@ export const useInfiniteFetch = <Data>(...params: [string]) => {
 	});
 };
 
-export const fetchQuery = async (queries: [[string]]) => {
+export const fetchQuery = async (queries: string[][]) => {
 	// we can't put this check in a function because we want build time optimizations
 	// see https://github.com/vercel/next.js/issues/5354 for details
 	if (typeof window !== "undefined") return {};
+	console.log(queries)
 
 	const client = createQueryClient();
 	await Promise.all(queries.map((x) => client.prefetchQuery(x)));
