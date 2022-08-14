@@ -26,11 +26,11 @@
 		"@mui/icons-material": "^5.8.4",
 		"@mui/material": "^5.8.7",
 		"next": "12.2.2",
-		"next-superjson-plugin": "^0.3.0",
 		"next-translate": "^1.5.0",
 		"react": "18.2.0",
 		"react-dom": "18.2.0",
 		"react-query": "^4.0.0-beta.23",
+		"superjson": "^1.9.1",
 		"zod": "^3.18.0"
 	},
 	"devDependencies": {

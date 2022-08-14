@@ -18,14 +18,26 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { createTheme } from "@mui/material";
+import { createTheme, responsiveFontSizes } from "@mui/material";
 
-export const defaultTheme = createTheme({
-	components: {
-		MuiSkeleton: {
-			defaultProps: {
-				animation: "wave",
+export const defaultTheme = responsiveFontSizes(
+	createTheme({
+		components: {
+			MuiSkeleton: {
+				defaultProps: {
+					animation: "wave",
+				},
+			},
+			Poster: {
+				defaultProps: {
+					radius: "1%",
+				},
+			},
+			MuiLink: {
+				defaultProps: {
+					underline: "hover",
+				},
 			},
 		},
-	},
-});
+	}),
+);

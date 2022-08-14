@@ -1,0 +1,9 @@
+{
+	"show": {
+		"play": "Play",
+		"trailer": "Play Trailer",
+		"studio": "Studio",
+		"genre": "Genres",
+		"genre-none": "No genres"
+	}
+}

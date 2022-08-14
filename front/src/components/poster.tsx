@@ -19,15 +19,11 @@
  */
 
 import { Box, Skeleton, styled } from "@mui/material";
-import {
-	SyntheticEvent,
-	useEffect,
-	useLayoutEffect,
-	useRef,
-	useState,
-} from "react";
+import { SyntheticEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material";
 import { withThemeProps } from "~/utils/with-theme";
+import type { Property } from "csstype";
+import { ResponsiveStyleValue } from "@mui/system";
 
 type ImageOptions = {
 	radius?: string;
@@ -35,13 +31,16 @@ type ImageOptions = {
 };
 
 type ImageProps = {
-	img?: string;
+	img?: string | null;
 	alt: string;
 } & ImageOptions;
 
 type ImagePropsWithLoading =
-	| (ImageProps & { loading?: false })
+	| (ImageProps & { loading?: boolean })
 	| (Partial<ImageProps> & { loading: true });
+
+type Width = ResponsiveStyleValue<Property.Width<(string & {}) | 0>>;
+type Height = ResponsiveStyleValue<Property.Height<(string & {}) | 0>>;
 
 const _Image = ({
 	img,
@@ -55,8 +54,8 @@ const _Image = ({
 	...others
 }: ImagePropsWithLoading &
 	(
-		| { aspectRatio?: string; width: string | number; height: string | number }
-		| { aspectRatio: string; width?: string | number; height?: string | number }
+		| { aspectRatio?: string; width: Width; height: Height }
+		| { aspectRatio: string; width?: Width; height?: Height }
 	)) => {
 	const [showLoading, setLoading] = useState<boolean>(loading);
 	const imgRef = useRef<HTMLImageElement>(null);
@@ -101,7 +100,9 @@ const _Image = ({
 export const Image = styled(_Image)({});
 
 // eslint-disable-next-line jsx-a11y/alt-text
-const _Poster = (props: ImagePropsWithLoading) => <_Image aspectRatio="2 / 3" {...props} />;
+const _Poster = (
+	props: ImagePropsWithLoading & { width?: Width; height?: Height },
+) => <_Image aspectRatio="2 / 3" {...props} />;
 
 declare module "@mui/material/styles" {
 	interface ComponentsPropsList {
