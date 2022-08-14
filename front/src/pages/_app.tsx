@@ -24,9 +24,9 @@ import { ThemeProvider } from "@mui/material";
 import NextApp, { AppContext } from "next/app";
 import type { AppProps } from "next/app";
 import { Hydrate, QueryClientProvider } from "react-query";
-import { createQueryClient, fetchQuery } from "~/utils/query";
+import { createQueryClient, fetchQuery, QueryIdentifier, QueryPage } from "~/utils/query";
 import { defaultTheme } from "~/utils/themes/default-theme";
-import { Navbar } from "~/components/navbar";
+import { Navbar, NavbarQuery } from "~/components/navbar";
 import "../global.css";
 import { Box } from "@mui/system";
 
@@ -35,9 +35,7 @@ const AppWithNavbar = ({ children }: { children: JSX.Element }) => {
 		<>
 			<Navbar/>
 			{/* TODO: add an option to disable the navbar in the component */}
-			<Box >
-				{children}
-			</Box>
+			<Box>{children}</Box>
 		</>
 	);
 };
@@ -45,6 +43,8 @@ const AppWithNavbar = ({ children }: { children: JSX.Element }) => {
 const App = ({ Component, pageProps }: AppProps) => {
 	const [queryClient] = useState(() => createQueryClient());
 	const { queryState, ...props } = pageProps;
+
+	// TODO: tranform date string to date instances in the queryState
 	return (
 		<QueryClientProvider client={queryClient}>
 			<Hydrate state={queryState}>
@@ -61,10 +61,10 @@ const App = ({ Component, pageProps }: AppProps) => {
 App.getInitialProps = async (ctx: AppContext) => {
 	const appProps = await NextApp.getInitialProps(ctx);
 
-	const getUrl = (ctx.Component as any).getFetchUrls;
-	const urls: string[][] = getUrl ? getUrl(ctx.router.query) : [];
+	const getUrl = (ctx.Component as QueryPage).getFetchUrls;
+	const urls: QueryIdentifier[] = getUrl ? getUrl(ctx.router.query as any) : [];
 	// TODO: check if the navbar is needed for this
-	urls.push(["libraries"]);
+	urls.push(NavbarQuery);
 	appProps.pageProps.queryState = await fetchQuery(urls);
 
 	return appProps;

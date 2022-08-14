@@ -18,19 +18,22 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Resource } from "../traits/resource";
+import { z } from "zod";
+import { ResourceP } from "../traits/resource";
 
 /**
  * The library that will contain Shows, Collections...
  */
-export interface Library extends Resource {
+export const LibraryP = ResourceP.extend({
 	/**
 	 * The name of this library.
 	 */
-	name: string;
+	name: z.string(),
 
 	/**
 	 * The list of paths that this library is responsible for. This is mainly used by the Scan task.
 	 */
-	paths: string[];
-}
+	paths: z.array(z.string()),
+});
+
+export type Library = z.infer<typeof LibraryP>;

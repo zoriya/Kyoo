@@ -29,13 +29,14 @@ import {
 	Tooltip,
 	Box,
 	Skeleton,
+	AppBarProps,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import logo from "../../public/icons/icon.svg";
 import useTranslation from "next-translate/useTranslation";
 import Image from "next/image";
 import { ButtonLink } from "~/utils/link";
-import { Library, Page } from "~/models";
+import { LibraryP, Paged } from "~/models";
 import { useFetch } from "~/utils/query";
 import { ErrorSnackbar } from "./error-snackbar";
 
@@ -63,6 +64,7 @@ export const KyooTitle = (props: { sx: SxProps<Theme> }) => {
 						mr: 2,
 						fontFamily: "monospace",
 						fontWeight: 700,
+						color: "white",
 					}}
 				>
 					Kyoo
@@ -72,9 +74,14 @@ export const KyooTitle = (props: { sx: SxProps<Theme> }) => {
 	);
 };
 
-export const Navbar = () => {
+export const NavbarQuery = {
+	parser: Paged(LibraryP),
+	path: ["libraries"],
+};
+
+export const Navbar = (barProps: AppBarProps) => {
 	const { t } = useTranslation("common");
-	const { data, error, isSuccess, isError } = useFetch<Page<Library>>("libraries");
+	const { data, error, isSuccess, isError } = useFetch(NavbarQuery);
 
 	return (
 		<AppBar position="sticky">
@@ -111,7 +118,7 @@ export const Navbar = () => {
 				</Box>
 				<Tooltip title={t("navbar.login")}>
 					<IconButton sx={{ p: 0 }} href="/auth/login">
-						<Avatar alt="Account" />
+						<Avatar alt={t("navbar.login")} />
 					</IconButton>
 				</Tooltip>
 			</Toolbar>

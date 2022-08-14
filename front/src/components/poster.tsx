@@ -18,9 +18,8 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Box, NoSsr, Skeleton, styled } from "@mui/material";
+import { Box, Skeleton, styled } from "@mui/material";
 import {
-	MutableRefObject,
 	SyntheticEvent,
 	useEffect,
 	useLayoutEffect,
