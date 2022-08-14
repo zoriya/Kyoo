@@ -22,6 +22,7 @@ import { z } from "zod";
 import { zdate } from "~/utils/zod";
 import { ImagesP, ResourceP } from "../traits";
 import { GenreP } from "./genre";
+import { StudioP } from "./studio";
 
 /**
  * The enum containing show's status.
@@ -58,7 +59,7 @@ export const ShowP = z.preprocess(
 		/**
 		 * The date this show started airing. It can be null if this is unknown.
 		 */
-		startAir: zdate().optional(),
+		startAir: zdate().nullable(),
 		/**
 		 * The date this show finished airing. It can also be null if this is unknown.
 		 */
@@ -67,6 +68,10 @@ export const ShowP = z.preprocess(
 		 * The list of genres (themes) this show has.
 		 */
 		genres: z.array(GenreP).optional(),
+		/**
+		 * The studio that made this show.
+		 */
+		studio: StudioP.optional(),
 	}),
 );
 

@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { forwardRef, Ref } from "react";
+import { forwardRef, Ref } from "react";
 import NLink, { LinkProps as NLinkProps} from "next/link";
 import { Button as MButton, ButtonProps, Link as MLink, LinkProps as MLinkProps} from "@mui/material";
 

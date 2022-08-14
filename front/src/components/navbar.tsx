@@ -64,7 +64,7 @@ export const KyooTitle = (props: { sx: SxProps<Theme> }) => {
 						mr: 2,
 						fontFamily: "monospace",
 						fontWeight: 700,
-						color: "white",
+						color: "white"
 					}}
 				>
 					Kyoo
@@ -84,7 +84,7 @@ export const Navbar = (barProps: AppBarProps) => {
 	const { data, error, isSuccess, isError } = useFetch(NavbarQuery);
 
 	return (
-		<AppBar position="sticky">
+		<AppBar position="sticky" {...barProps}>
 			<Toolbar>
 				<IconButton
 					size="large"
@@ -118,7 +118,7 @@ export const Navbar = (barProps: AppBarProps) => {
 				</Box>
 				<Tooltip title={t("navbar.login")}>
 					<IconButton sx={{ p: 0 }} href="/auth/login">
-						<Avatar alt={t("navbar.login")} />
+						<Avatar alt={t("navbar.login")}/>
 					</IconButton>
 				</Tooltip>
 			</Toolbar>

@@ -27,7 +27,7 @@ import {
 	useQuery,
 } from "react-query";
 import { z } from "zod";
-import { imageList, KyooErrors, Page } from "~/models";
+import { KyooErrors, Page } from "~/models";
 import { Paged } from "~/models/page";
 
 const queryFn = async <Data>(

@@ -28,33 +28,31 @@ export const ImagesP = z.object({
 	 * be null. If the kyoo's instance is not capable of handling this kind of image for the specific
 	 * resource, this field won't be present.
 	 */
-	poster: z.string().transform(imageFn).optional(),
+	poster: z.string().transform(imageFn).optional().nullable(),
 
 	/**
 	 * An url to the thumbnail of this resource. If this resource does not have an image, the link
 	 * will be null. If the kyoo's instance is not capable of handling this kind of image for the
 	 * specific resource, this field won't be present.
 	 */
-	thumbnail: z.string().transform(imageFn).optional(),
+	thumbnail: z.string().transform(imageFn).optional().nullable(),
 
 	/**
 	 * An url to the logo of this resource. If this resource does not have an image, the link will be
 	 * null. If the kyoo's instance is not capable of handling this kind of image for the specific
 	 * resource, this field won't be present.
 	 */
-	logo: z.string().transform(imageFn).optional(),
+	logo: z.string().transform(imageFn).optional().nullable(),
 
 	/**
 	 * An url to the thumbnail of this resource. If this resource does not have an image, the link
 	 * will be null. If the kyoo's instance is not capable of handling this kind of image for the
 	 * specific resource, this field won't be present.
 	 */
-	trailer: z.string().transform(imageFn).optional(),
+	trailer: z.string().transform(imageFn).optional().nullable(),
 });
 
 /**
  * Base traits for items that has image resources.
  */
 export type Images = z.infer<typeof ImagesP>;
-
-export const imageList = ["poster", "thumbnail", "logo", "trailer"];

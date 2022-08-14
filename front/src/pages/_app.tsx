@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { useState } from "react";
+import React, { useState } from "react";
 import appWithI18n from "next-translate/appWithI18n";
 import { ThemeProvider } from "@mui/material";
 import NextApp, { AppContext } from "next/app";
@@ -27,13 +27,18 @@ import { Hydrate, QueryClientProvider } from "react-query";
 import { createQueryClient, fetchQuery, QueryIdentifier, QueryPage } from "~/utils/query";
 import { defaultTheme } from "~/utils/themes/default-theme";
 import { Navbar, NavbarQuery } from "~/components/navbar";
-import "../global.css";
 import { Box } from "@mui/system";
+import superjson from "superjson";
+
+// Simply silence a SSR warning (see https://github.com/facebook/react/issues/14927 for more details)
+if (typeof window === "undefined") {
+	React.useLayoutEffect = React.useEffect;
+}
 
 const AppWithNavbar = ({ children }: { children: JSX.Element }) => {
 	return (
 		<>
-			<Navbar/>
+			{/* <Navbar /> */}
 			{/* TODO: add an option to disable the navbar in the component */}
 			<Box>{children}</Box>
 		</>
@@ -42,19 +47,27 @@ const AppWithNavbar = ({ children }: { children: JSX.Element }) => {
 
 const App = ({ Component, pageProps }: AppProps) => {
 	const [queryClient] = useState(() => createQueryClient());
-	const { queryState, ...props } = pageProps;
+	const { queryState, ...props } = superjson.deserialize<any>(pageProps ?? {});
 
 	// TODO: tranform date string to date instances in the queryState
 	return (
-		<QueryClientProvider client={queryClient}>
-			<Hydrate state={queryState}>
-				<ThemeProvider theme={defaultTheme}>
-					<AppWithNavbar>
-						<Component {...props} />
-					</AppWithNavbar>
-				</ThemeProvider>
-			</Hydrate>
-		</QueryClientProvider>
+		<>
+			<style jsx global>{`
+				body {
+					margin: 0px;
+					padding: 0px;
+				}
+			`}</style>
+			<QueryClientProvider client={queryClient}>
+				<Hydrate state={queryState}>
+					<ThemeProvider theme={defaultTheme}>
+						<AppWithNavbar>
+							<Component {...props} />
+						</AppWithNavbar>
+					</ThemeProvider>
+				</Hydrate>
+			</QueryClientProvider>
+		</>
 	);
 };
 
@@ -67,7 +80,7 @@ App.getInitialProps = async (ctx: AppContext) => {
 	urls.push(NavbarQuery);
 	appProps.pageProps.queryState = await fetchQuery(urls);
 
-	return appProps;
+	return { pageProps: superjson.serialize(appProps.pageProps) };
 };
 
 // The as any is needed since appWithI18n as wrong type hints
@@ -77,7 +90,7 @@ export default appWithI18n(App as any, {
 	defaultLocale: "en",
 	loader: false,
 	pages: {
-		"*": ["common"],
+		"*": ["common", "browse"],
 	},
 	loadLocaleFrom: (locale, namespace) =>
 		import(`../../locales/${locale}/${namespace}`).then((m) => m.default),
