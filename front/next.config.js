@@ -24,6 +24,16 @@
 const nextConfig = {
 	reactStrictMode: true,
 	swcMinify: true,
+	experimental: {
+		swcPlugins: [
+			[
+				"next-superjson-plugin",
+				{
+					excluded: [],
+				},
+			],
+		],
+	},
 	env: {
 		KYOO_URL: process.env.KYOO_URL ?? "http://localhost:5000",
 	},

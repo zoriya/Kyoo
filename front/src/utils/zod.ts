@@ -20,47 +20,14 @@
 
 import { z } from "zod";
 
-/**
- * A page of resource that contains information about the pagination of resources.
- */
-export interface Page<T> {
-	/**
-	 * The link of the current page.
-	 *
-	 * @format uri
-	 */
-	this: string;
+export const zdate = () => {
+	return z.preprocess((arg) => {
+		if (arg instanceof Date) return arg;
 
-	/**
-	 * The link of the first page.
-	 *
-	 * @format uri
-	 */
-	first: string;
+		if (typeof arg === "string" && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z/.test(arg)) {
+			return new Date(arg);
+		}
 
-	/**
-	 * The link of the next page.
-	 *
-	 * @format uri
-	 */
-	next?: string;
-
-	/**
-	 * The number of items in the current page.
-	 */
-	count: number;
-
-	/**
-	 * The list of items in the page.
-	 */
-	items: T[];
-}
-
-export const Paged = <Item>(item: z.ZodType<Item>): z.ZodSchema<Page<Item>> =>
-	z.object({
-		this: z.string(),
-		first: z.string(),
-		next: z.string().optional(),
-		count: z.number(),
-		items: z.array(item),
-	});
+		return undefined;
+	}, z.date());
+};

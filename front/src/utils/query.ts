@@ -26,22 +26,37 @@ import {
 	useInfiniteQuery,
 	useQuery,
 } from "react-query";
+import { z } from "zod";
 import { imageList, KyooErrors, Page } from "~/models";
+import { Paged } from "~/models/page";
 
-const queryFn = async <T>(context: QueryFunctionContext): Promise<T> => {
+const queryFn = async <Data>(
+	type: z.ZodType<Data>,
+	context: QueryFunctionContext,
+): Promise<Data> => {
 	try {
 		const resp = await fetch(
 			[typeof window === "undefined" ? process.env.KYOO_URL : "/api"]
-				.concat(context.pageParam ? [context.pageParam] : (context.queryKey as string[]))
-				.join("/"),
+				.concat(
+					context.pageParam ? [context.pageParam] : (context.queryKey.filter((x) => x) as string[]),
+				)
+				.join("/")
+				.replace("/?", "?"),
 		);
 		if (!resp.ok) {
 			throw await resp.json();
 		}
-		return await resp.json();
+
+		const data = await resp.json();
+		const parsed = await type.safeParseAsync(data);
+		if (!parsed.success) {
+			console.log("Parse error: ", parsed.error);
+			throw { errors: parsed.error.errors.map((x) => x.message) } as KyooErrors;
+		}
+		return parsed.data;
 	} catch (e) {
-		console.error(e);
-		throw { errors: ["Could not reach Kyoo's server."] }; // as KyooErrors;
+		console.error("Fetch error: ", e);
+		throw { errors: ["Could not reach Kyoo's server."] } as KyooErrors;
 	}
 };
 
@@ -53,52 +68,57 @@ export const createQueryClient = () =>
 				refetchOnWindowFocus: false,
 				refetchOnReconnect: false,
 				retry: false,
-				queryFn: queryFn,
 			},
 		},
 	});
 
+export type QueryIdentifier<T = unknown> = {
+	parser: z.ZodType<T>;
+	path: string[];
+	params?: { [query: string]: boolean | number | string | string[] };
+};
+
 export type QueryPage<Props = {}> = ComponentType<Props> & {
-	getFetchUrls?: (route: { [key: string]: string }) => string[][];
+	getFetchUrls?: (route: { [key: string]: string }) => QueryIdentifier[];
 };
 
-const imageSelector = <T>(obj: T): T => {
-	// TODO: remove this
-	// @ts-ignore
-	if ("title" in obj) obj.name = obj.title;
-
-	for (const img of imageList) {
-		// @ts-ignore
-		if (img in obj && obj[img] && !obj[img].startsWith("/api")) {
-			// @ts-ignore
-			obj[img] = `/api${obj[img]}`;
-		}
-	}
-	return obj;
+const toQuery = (params?: { [query: string]: boolean | number | string | string[] }) => {
+	if (!params) return undefined;
+	return (
+		"?" +
+		Object.entries(params)
+			.map(([k, v]) => `${k}=${Array.isArray(v) ? v.join(",") : v}`)
+			.join("&")
+	);
 };
 
-export const useFetch = <Data>(...params: string[]) => {
-	return useQuery<Data, KyooErrors>(params, {
-		select: imageSelector,
+export const useFetch = <Data>(query: QueryIdentifier<Data>) => {
+	return useQuery<Data, KyooErrors>({
+		queryKey: [...query.path, toQuery(query.params)],
+		queryFn: (ctx) => queryFn(query.parser, ctx),
 	});
 };
 
-export const useInfiniteFetch = <Data>(...params: string[]) => {
-	return useInfiniteQuery<Page<Data>, KyooErrors>(params, {
-		select: (pages) => {
-			pages.pages.map((x) => x.items.map(imageSelector));
-			return pages;
-		},
+export const useInfiniteFetch = <Data>(query: QueryIdentifier<Data>) => {
+	return useInfiniteQuery<Page<Data>, KyooErrors>({
+		queryKey: [...query.path, toQuery(query.params)],
+		queryFn: (ctx) => queryFn(Paged(query.parser), ctx),
 	});
 };
 
-export const fetchQuery = async (queries: string[][]) => {
+export const fetchQuery = async (queries: QueryIdentifier[]) => {
 	// we can't put this check in a function because we want build time optimizations
 	// see https://github.com/vercel/next.js/issues/5354 for details
 	if (typeof window !== "undefined") return {};
-	console.log(queries)
 
 	const client = createQueryClient();
-	await Promise.all(queries.map((x) => client.prefetchQuery(x)));
+	await Promise.all(
+		queries.map((query) =>
+			client.prefetchQuery({
+				queryKey: [...query.path, toQuery(query.params)],
+				queryFn: (ctx) => queryFn(query.parser, ctx),
+			}),
+		),
+	);
 	return dehydrate(client);
 };

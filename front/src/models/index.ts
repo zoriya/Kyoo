@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export type { Page } from "./page";
-export type { KyooErrors } from "./kyoo-errors";
+export * from "./page";
+export * from "./kyoo-errors";
 export * from "./traits";
 export * from "./resources";

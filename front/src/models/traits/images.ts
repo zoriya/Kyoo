@@ -18,38 +18,43 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * Base traits for items that has image resources.
- */
-export interface Images {
+import { z } from "zod";
+
+const imageFn = (url: string) => (url.startsWith("/api") ? url : `/api${url}`);
+
+export const ImagesP = z.object({
 	/**
 	 * An url to the poster of this resource. If this resource does not have an image, the link will
 	 * be null. If the kyoo's instance is not capable of handling this kind of image for the specific
 	 * resource, this field won't be present.
 	 */
-	poster?: string;
+	poster: z.string().transform(imageFn).optional(),
 
 	/**
 	 * An url to the thumbnail of this resource. If this resource does not have an image, the link
 	 * will be null. If the kyoo's instance is not capable of handling this kind of image for the
 	 * specific resource, this field won't be present.
 	 */
-	thumbnail?: string;
+	thumbnail: z.string().transform(imageFn).optional(),
 
 	/**
 	 * An url to the logo of this resource. If this resource does not have an image, the link will be
 	 * null. If the kyoo's instance is not capable of handling this kind of image for the specific
 	 * resource, this field won't be present.
 	 */
-	logo?: string;
+	logo: z.string().transform(imageFn).optional(),
 
 	/**
 	 * An url to the thumbnail of this resource. If this resource does not have an image, the link
 	 * will be null. If the kyoo's instance is not capable of handling this kind of image for the
 	 * specific resource, this field won't be present.
 	 */
+	trailer: z.string().transform(imageFn).optional(),
+});
 
-	trailer?: string;
-};
+/**
+ * Base traits for items that has image resources.
+ */
+export type Images = z.infer<typeof ImagesP>;
 
 export const imageList = ["poster", "thumbnail", "logo", "trailer"];

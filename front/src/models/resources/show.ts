@@ -18,42 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Resource, Images } from "../traits";
-
-/**
- * A series or a movie.
- */
-export interface Show extends Resource, Images {
-	/**
-	 * The title of this show.
-	 */
-	name: string;
-
-	/**
-	 * The list of alternative titles of this show.
-	 */
-	aliases: string[];
-
-	/**
-	 * The summary of this show.
-	 */
-	overview: string;
-
-	/**
-	 * Is this show airing, not aired yet or finished?
-	 */
-	status: Status;
-
-	/**
-	 * The date this show started airing. It can be null if this is unknown.
-	 */
-	startAir: Date | null;
-
-	/**
-	 * The date this show finished airing. It can also be null if this is unknown.
-	 */
-	endAir: Date | null;
-}
+import { z } from "zod";
+import { zdate } from "~/utils/zod";
+import { ImagesP, ResourceP } from "../traits";
+import { GenreP } from "./genre";
 
 /**
  * The enum containing show's status.
@@ -64,3 +32,45 @@ export enum Status {
 	Airing = 2,
 	Planned = 3,
 }
+
+export const ShowP = z.preprocess(
+	(x: any) => {
+		x.name = x.title;
+		return x;
+	},
+	ResourceP.merge(ImagesP).extend({
+		/**
+		 * The title of this show.
+		 */
+		name: z.string(),
+		/**
+		 * The list of alternative titles of this show.
+		 */
+		aliases: z.array(z.string()),
+		/**
+		 * The summary of this show.
+		 */
+		overview: z.string(),
+		/**
+		 * Is this show airing, not aired yet or finished?
+		 */
+		status: z.nativeEnum(Status),
+		/**
+		 * The date this show started airing. It can be null if this is unknown.
+		 */
+		startAir: zdate().optional(),
+		/**
+		 * The date this show finished airing. It can also be null if this is unknown.
+		 */
+		endAir: zdate().nullable(),
+		/**
+		 * The list of genres (themes) this show has.
+		 */
+		genres: z.array(GenreP).optional(),
+	}),
+);
+
+/**
+ * A tv serie or an anime.
+ */
+export type Show = z.infer<typeof ShowP>;

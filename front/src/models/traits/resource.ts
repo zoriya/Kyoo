@@ -18,18 +18,22 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-/**
- * The base trait used to represent identifiable resources.
- */
-export interface Resource {
+import { z } from "zod";
+
+export const ResourceP = z.object({
 	/**
 	 * A unique ID for this type of resource. This can't be changed and duplicates are not allowed.
 	 */
-	id: number;
+	id: z.number(),
 
 	/**
 	 * A human-readable identifier that can be used instead of an ID. A slug must be unique for a type
 	 * of resource but it can be changed.
 	 */
-	slug: string;
-}
+	slug: z.string(),
+});
+
+/**
+ * The base trait used to represent identifiable resources.
+ */
+export type Resource = z.infer<typeof ResourceP>;

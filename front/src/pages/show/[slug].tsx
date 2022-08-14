@@ -20,8 +20,8 @@
 
 import { Box, Typography } from "@mui/material";
 import { Image, Poster } from "~/components/poster";
-import { Show } from "~/models";
-import { QueryPage, useFetch } from "~/utils/query";
+import { Show, ShowP } from "~/models";
+import { QueryIdentifier, QueryPage, useFetch } from "~/utils/query";
 import { withRoute } from "~/utils/router";
 
 const ShowHeader = (data: Show) => {
@@ -36,8 +36,17 @@ const ShowHeader = (data: Show) => {
 	);
 };
 
+const query = (slug: string): QueryIdentifier<Show> => ({
+	parser: ShowP,
+	path: ["shows", slug],
+	params: {
+		fields: ["genres"],
+	},
+});
+
 const ShowDetails: QueryPage<{ slug: string }> = ({ slug }) => {
-	const { data } = useFetch<Show>("shows", slug);
+	const { data, error } = useFetch(query(slug));
+	console.log("error", data);
 
 	if (!data) return <p>oups</p>;
 
@@ -48,6 +57,6 @@ const ShowDetails: QueryPage<{ slug: string }> = ({ slug }) => {
 	);
 };
 
-ShowDetails.getFetchUrls = ({ slug }) => [["shows", slug]];
+ShowDetails.getFetchUrls = ({ slug }) => [query(slug)];
 
 export default withRoute(ShowDetails);
