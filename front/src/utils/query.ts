@@ -34,8 +34,9 @@ const queryFn = async <Data>(
 	type: z.ZodType<Data>,
 	context: QueryFunctionContext,
 ): Promise<Data> => {
+	let resp;
 	try {
-		const resp = await fetch(
+		resp = await fetch(
 			[typeof window === "undefined" ? process.env.KYOO_URL : "/api"]
 				.concat(
 					context.pageParam ? [context.pageParam] : (context.queryKey.filter((x) => x) as string[]),
@@ -43,21 +44,37 @@ const queryFn = async <Data>(
 				.join("/")
 				.replace("/?", "?"),
 		);
-		if (!resp.ok) {
-			throw await resp.json();
-		}
-
-		const data = await resp.json();
-		const parsed = await type.safeParseAsync(data);
-		if (!parsed.success) {
-			console.log("Parse error: ", parsed.error);
-			throw { errors: parsed.error.errors.map((x) => x.message) } as KyooErrors;
-		}
-		return parsed.data;
 	} catch (e) {
-		console.error("Fetch error: ", e);
+		console.log("Fetch error", e);
 		throw { errors: ["Could not reach Kyoo's server."] } as KyooErrors;
 	}
+	if (resp.status === 404) {
+		throw { errors: ["Resource not found."] } as KyooErrors;
+	}
+	if (!resp.ok) {
+		const error = await resp.text();
+		let data;
+		try {
+			data = JSON.parse(error);
+		} catch (e) {
+			data = { errors: [error] };
+		}
+		throw data;
+	}
+
+	let data;
+	try {
+		data = await resp.json();
+	} catch (e) {
+		console.error("Invald json from kyoo", e);
+		throw { errors: ["Invalid repsonse from kyoo"] };
+	}
+	const parsed = await type.safeParseAsync(data);
+	if (!parsed.success) {
+		console.log("Parse error: ", parsed.error);
+		throw { errors: parsed.error.errors.map((x) => x.message) } as KyooErrors;
+	}
+	return parsed.data;
 };
 
 export const createQueryClient = () =>

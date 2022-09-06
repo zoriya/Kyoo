@@ -38,7 +38,7 @@ import Image from "next/image";
 import { ButtonLink } from "~/utils/link";
 import { LibraryP, Paged } from "~/models";
 import { useFetch } from "~/utils/query";
-import { ErrorSnackbar } from "./error-snackbar";
+import { ErrorSnackbar } from "./errors";
 
 export const KyooTitle = (props: { sx: SxProps<Theme> }) => {
 	const { t } = useTranslation("common");

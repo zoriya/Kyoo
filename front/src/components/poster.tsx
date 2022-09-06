@@ -32,7 +32,7 @@ type ImageOptions = {
 
 type ImageProps = {
 	img?: string | null;
-	alt: string;
+	alt?: string;
 } & ImageOptions;
 
 type ImagePropsWithLoading =

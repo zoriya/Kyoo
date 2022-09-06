@@ -56,6 +56,21 @@ const App = ({ Component, pageProps }: AppProps) => {
 				body {
 					margin: 0px;
 					padding: 0px;
+					background-color: ${defaultTheme.palette.background.default};
+				}
+
+				*::-webkit-scrollbar {
+					height: 6px;
+					width: 6px;
+					background: transparent;
+				}
+
+				*::-webkit-scrollbar-thumb {
+					background-color: #999;
+					border-radius: 90px;
+				}
+				*:hover::-webkit-scrollbar-thumb {
+					background-color: rgb(134, 127, 127);
 				}
 			`}</style>
 			<QueryClientProvider client={queryClient}>
