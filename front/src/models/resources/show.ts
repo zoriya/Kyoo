@@ -22,6 +22,7 @@ import { z } from "zod";
 import { zdate } from "~/utils/zod";
 import { ImagesP, ResourceP } from "../traits";
 import { GenreP } from "./genre";
+import { SeasonP } from "./season";
 import { StudioP } from "./studio";
 
 /**
@@ -72,6 +73,10 @@ export const ShowP = z.preprocess(
 		 * The studio that made this show.
 		 */
 		studio: StudioP.optional(),
+		/**
+		 * The list of seasons of this show.
+		 */
+		seasons: z.array(SeasonP).optional(),
 	}),
 );
 

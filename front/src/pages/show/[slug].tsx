@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { LocalMovies, PlayArrow } from "@mui/icons-material";
+import { ArrowLeft, ArrowRight, LocalMovies, PlayArrow } from "@mui/icons-material";
 import {
 	alpha,
 	Box,
@@ -27,6 +27,8 @@ import {
 	IconButton,
 	Skeleton,
 	SxProps,
+	Tab,
+	Tabs,
 	Tooltip,
 	Typography,
 	useTheme,
@@ -35,7 +37,7 @@ import useTranslation from "next-translate/useTranslation";
 import Head from "next/head";
 import { Navbar } from "~/components/navbar";
 import { Image, Poster } from "~/components/poster";
-import { Page, Show, ShowP } from "~/models";
+import { Episode, EpisodeP, Page, Season, Show, ShowP } from "~/models";
 import { QueryIdentifier, QueryPage, useFetch, useInfiniteFetch } from "~/utils/query";
 import { getDisplayDate } from "~/models/utils";
 import { useScroll } from "~/utils/hooks/use-scroll";
@@ -47,6 +49,9 @@ import { Studio } from "~/models/resources/studio";
 import { Paged, Person, PersonP } from "~/models";
 import { PersonAvatar } from "~/components/person";
 import { useInView } from "react-intersection-observer";
+import { ErrorPage } from "~/components/errors";
+import { useState } from "react";
+import { EpisodeBox, EpisodeLine } from "~/components/episode";
 
 const StudioText = ({
 	studio,
@@ -84,7 +89,7 @@ const ShowHeader = ({ data }: { data?: Show }) => {
 			<Navbar
 				position="fixed"
 				elevation={0}
-				sx={{ backgroundColor: `rgba(0, 0, 0, ${0 /*0.4 + scroll / 1000*/})` }}
+				sx={{ backgroundColor: `rgba(0, 0, 0, ${0.4 /*+ scroll / 1000*/})` }}
 			/>
 			<Image
 				img={data?.thumbnail}
@@ -260,18 +265,32 @@ const ShowStaff = ({ slug }: { slug: string }) => {
 	const { ref } = useInView({
 		onChange: () => !isFetching && hasNextPage && fetchNextPage(),
 	});
+	const { t } = useTranslation("browse");
+
+	// TODO: Unsure that the fetchNextPage is only used when needed (currently called way too mutch)
+	// TODO: Handle errors
 
 	/* if (isError) return null; */
 
 	return (
 		<>
-			<Typography variant="h4" component="h2" sx={{ py: 3, pl: 4 }}>
-				Staff
-			</Typography>
-			<Box sx={{ display: "flex", flexDirection: "row", maxWidth: "100%", overflowY: "auto" }}>
-				{(data ? data.pages.flatMap((x) => x.items) : [...Array(6)]).map((x) => (
+			<Container sx={{ display: "flex", flexDirection: "row", justifyContent: "space-between", py: 3 }}>
+				<Typography variant="h4" component="h2">
+					{t("show.staff")}
+				</Typography>
+				<Box>
+					<IconButton>
+						<ArrowLeft />
+					</IconButton>
+					<IconButton>
+						<ArrowRight />
+					</IconButton>
+				</Box>
+			</Container>
+			<Box sx={{ display: "flex", flexDirection: "row", maxWidth: "100%", overflowY: "auto", py: 1,  }}>
+				{(data ? data.pages.flatMap((x) => x.items) : [...Array(6)]).map((x, i) => (
 					<PersonAvatar
-						key={x.id}
+						key={x ? x.id : i}
 						person={x}
 						sx={{ width: { xs: "7rem", lg: "10rem" }, flexShrink: 0, px: 2 }}
 					/>
@@ -282,18 +301,72 @@ const ShowStaff = ({ slug }: { slug: string }) => {
 	);
 };
 
+const episodesQuery = (slug: string, season: string | number): QueryIdentifier<Episode> => ({
+	parser: EpisodeP,
+	path: ["shows", slug, "episode"],
+	params: {
+		seasonNumber: season,
+	},
+	infinite: true,
+});
+
+const EpisodeGrid = ({ slug, season }: { slug: string; season: number }) => {
+	const { data, isError, error, isFetching, hasNextPage, fetchNextPage } = useInfiniteFetch(
+		episodesQuery(slug, season),
+	);
+	const { ref } = useInView({
+		onChange: () => !isFetching && hasNextPage && fetchNextPage(),
+	});
+
+	// TODO: Unsure that the fetchNextPage is only used when needed (currently called way too mutch)
+	// TODO: Handle errors
+
+	/* if (isError) return null; */
+
+	return (
+		<Box sx={{ display: "flex", flexDirection: "column", backgroundColor: "background.paper" }}>
+			{(data ? data.pages.flatMap((x) => x.items) : [...Array(12)]).map((x, i) => (
+				<EpisodeLine key={x ? x.id : i} episode={x} />
+			))}
+			{/* <div ref={ref} /> */}
+		</Box>
+	);
+};
+
+const SeasonTab = ({ slug, seasons, sx }: { slug: string; seasons?: Season[]; sx?: SxProps }) => {
+	const [season, setSeason] = useState(1);
+
+	// TODO: handle absolute number only shows (without seasons)
+	return (
+		<Container sx={sx}>
+			<Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+				<Tabs value={season} onChange={(_, i) => setSeason(i)} aria-label="List of seasons">
+					{seasons
+						? seasons.map((x) => <Tab key={x.seasonNumber} label={x.name} value={x.seasonNumber} />)
+						: [...Array(3)].map((_, i) => (
+								<Typography key={i} variant="button">
+									<Skeleton />
+								</Typography>
+						  ))}
+				</Tabs>
+				<EpisodeGrid slug={slug} season={season} />
+			</Box>
+		</Container>
+	);
+};
+
 const query = (slug: string): QueryIdentifier<Show> => ({
 	parser: ShowP,
 	path: ["shows", slug],
 	params: {
-		fields: ["genres", "studio"],
+		fields: ["genres", "studio", "seasons"],
 	},
 });
 
 const ShowDetails: QueryPage<{ slug: string }> = ({ slug }) => {
 	const { data, error } = useFetch(query(slug));
 
-	if (error) return <p>oups</p>;
+	if (error) return <ErrorPage {...error} />;
 
 	return (
 		<>
@@ -303,10 +376,15 @@ const ShowDetails: QueryPage<{ slug: string }> = ({ slug }) => {
 			</Head>
 			<ShowHeader data={data} />
 			<ShowStaff slug={slug} />
+			<SeasonTab slug={slug} seasons={data?.seasons} sx={{ pt: 3 }} />
 		</>
 	);
 };
 
-ShowDetails.getFetchUrls = ({ slug }) => [query(slug), staffQuery(slug)];
+ShowDetails.getFetchUrls = ({ slug, seasonNumber = 1 }) => [
+	query(slug),
+	staffQuery(slug),
+	episodesQuery(slug, seasonNumber),
+];
 
 export default withRoute(ShowDetails);

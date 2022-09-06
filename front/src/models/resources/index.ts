@@ -26,3 +26,5 @@ export * from "./collection";
 export * from "./genre";
 export * from "./person";
 export * from "./studio";
+export * from "./episode";
+export * from "./season";

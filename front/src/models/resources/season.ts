@@ -18,22 +18,44 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Alert, Snackbar, SnackbarCloseReason } from "@mui/material";
-import { SyntheticEvent, useState } from "react";
-import { KyooErrors } from "~/models";
+import { z } from "zod";
+import { zdate } from "~/utils/zod";
+import { ImagesP } from "../traits";
+import { ResourceP } from "../traits/resource";
 
-export const ErrorSnackbar = ({ error }: { error: KyooErrors }) => {
-	const [isOpen, setOpen] = useState(true);
-	const close = (_: Event | SyntheticEvent, reason?: SnackbarCloseReason) => {
-		if (reason !== "clickaway") setOpen(false);
-	};
+export const SeasonP = z.preprocess(
+	(x: any) => {
+		x.name = x.title;
+		return x;
+	},
+	ResourceP.merge(ImagesP).extend({
+		/**
+		 * The name of this season.
+		 */
+		name: z.string(),
+		/**
+		 * The number of this season. This can be set to 0 to indicate specials.
+		 */
+		seasonNumber: z.number(),
 
-	if (!isOpen) return null;
-	return (
-		<Snackbar open={isOpen} onClose={close} autoHideDuration={6000}>
-			<Alert severity="error" onClose={close} sx={{ width: "100%" }}>
-				{error.errors[0]}
-			</Alert>
-		</Snackbar>
-	);
-};
+		/**
+		 * A quick overview of this season.
+		 */
+		overview: z.string(),
+
+		/**
+		 * The starting air date of this season.
+		 */
+		startDate: zdate().nullable(),
+
+		/**
+		 * The ending date of this season.
+		 */
+		endDate: zdate().nullable(),
+	}),
+);
+
+/**
+ * A season of a Show.
+ */
+export type Season = z.infer<typeof SeasonP>;
