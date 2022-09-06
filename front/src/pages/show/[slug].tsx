@@ -35,8 +35,8 @@ import useTranslation from "next-translate/useTranslation";
 import Head from "next/head";
 import { Navbar } from "~/components/navbar";
 import { Image, Poster } from "~/components/poster";
-import { Show, ShowP } from "~/models";
-import { QueryIdentifier, QueryPage, useFetch } from "~/utils/query";
+import { Page, Show, ShowP } from "~/models";
+import { QueryIdentifier, QueryPage, useFetch, useInfiniteFetch } from "~/utils/query";
 import { getDisplayDate } from "~/models/utils";
 import { useScroll } from "~/utils/hooks/use-scroll";
 import { withRoute } from "~/utils/router";
@@ -44,6 +44,9 @@ import { Container } from "~/components/container";
 import { makeTitle } from "~/utils/utils";
 import { Link } from "~/utils/link";
 import { Studio } from "~/models/resources/studio";
+import { Paged, Person, PersonP } from "~/models";
+import { PersonAvatar } from "~/components/person";
+import { useInView } from "react-intersection-observer";
 
 const StudioText = ({
 	studio,
@@ -72,7 +75,6 @@ const StudioText = ({
 const ShowHeader = ({ data }: { data?: Show }) => {
 	/* const scroll = useScroll(); */
 	const { t } = useTranslation("browse");
-	console.log(data);
 	// TODO: tweek the navbar color with the theme.
 
 	return (
@@ -81,6 +83,7 @@ const ShowHeader = ({ data }: { data?: Show }) => {
 			{/* TODO: Put the navbar outside of the scrollbox */}
 			<Navbar
 				position="fixed"
+				elevation={0}
 				sx={{ backgroundColor: `rgba(0, 0, 0, ${0 /*0.4 + scroll / 1000*/})` }}
 			/>
 			<Image
@@ -244,6 +247,41 @@ const ShowHeader = ({ data }: { data?: Show }) => {
 	);
 };
 
+const staffQuery = (slug: string): QueryIdentifier<Person> => ({
+	parser: PersonP,
+	path: ["shows", slug, "people"],
+	infinite: true,
+});
+
+const ShowStaff = ({ slug }: { slug: string }) => {
+	const { data, isError, error, isFetching, hasNextPage, fetchNextPage } = useInfiniteFetch(
+		staffQuery(slug),
+	);
+	const { ref } = useInView({
+		onChange: () => !isFetching && hasNextPage && fetchNextPage(),
+	});
+
+	/* if (isError) return null; */
+
+	return (
+		<>
+			<Typography variant="h4" component="h2" sx={{ py: 3, pl: 4 }}>
+				Staff
+			</Typography>
+			<Box sx={{ display: "flex", flexDirection: "row", maxWidth: "100%", overflowY: "auto" }}>
+				{(data ? data.pages.flatMap((x) => x.items) : [...Array(6)]).map((x) => (
+					<PersonAvatar
+						key={x.id}
+						person={x}
+						sx={{ width: { xs: "7rem", lg: "10rem" }, flexShrink: 0, px: 2 }}
+					/>
+				))}
+				<div ref={ref} />
+			</Box>
+		</>
+	);
+};
+
 const query = (slug: string): QueryIdentifier<Show> => ({
 	parser: ShowP,
 	path: ["shows", slug],
@@ -264,10 +302,11 @@ const ShowDetails: QueryPage<{ slug: string }> = ({ slug }) => {
 				<meta name="description" content={data?.overview} />
 			</Head>
 			<ShowHeader data={data} />
+			<ShowStaff slug={slug} />
 		</>
 	);
 };
 
-ShowDetails.getFetchUrls = ({ slug }) => [query(slug)];
+ShowDetails.getFetchUrls = ({ slug }) => [query(slug), staffQuery(slug)];
 
 export default withRoute(ShowDetails);

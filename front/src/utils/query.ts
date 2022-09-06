@@ -76,33 +76,39 @@ export type QueryIdentifier<T = unknown> = {
 	parser: z.ZodType<T>;
 	path: string[];
 	params?: { [query: string]: boolean | number | string | string[] };
+	infinite?: boolean;
 };
 
 export type QueryPage<Props = {}> = ComponentType<Props> & {
 	getFetchUrls?: (route: { [key: string]: string }) => QueryIdentifier[];
 };
 
-const toQuery = (params?: { [query: string]: boolean | number | string | string[] }) => {
-	if (!params) return undefined;
-	return (
-		"?" +
-		Object.entries(params)
-			.map(([k, v]) => `${k}=${Array.isArray(v) ? v.join(",") : v}`)
-			.join("&")
-	);
+const toQueryKey = <Data>(query: QueryIdentifier<Data>) => {
+	if (query.params) {
+		return [
+			...query.path,
+			"?" +
+				Object.entries(query.params)
+					.map(([k, v]) => `${k}=${Array.isArray(v) ? v.join(",") : v}`)
+					.join("&"),
+		];
+	} else {
+		return query.path;
+	}
 };
 
 export const useFetch = <Data>(query: QueryIdentifier<Data>) => {
 	return useQuery<Data, KyooErrors>({
-		queryKey: [...query.path, toQuery(query.params)],
+		queryKey: toQueryKey(query),
 		queryFn: (ctx) => queryFn(query.parser, ctx),
 	});
 };
 
 export const useInfiniteFetch = <Data>(query: QueryIdentifier<Data>) => {
 	return useInfiniteQuery<Page<Data>, KyooErrors>({
-		queryKey: [...query.path, toQuery(query.params)],
+		queryKey: toQueryKey(query),
 		queryFn: (ctx) => queryFn(Paged(query.parser), ctx),
+		getNextPageParam: (page: Page<Data>) => page?.next || undefined,
 	});
 };
 
@@ -113,12 +119,19 @@ export const fetchQuery = async (queries: QueryIdentifier[]) => {
 
 	const client = createQueryClient();
 	await Promise.all(
-		queries.map((query) =>
-			client.prefetchQuery({
-				queryKey: [...query.path, toQuery(query.params)],
-				queryFn: (ctx) => queryFn(query.parser, ctx),
-			}),
-		),
+		queries.map((query) => {
+			if (query.infinite) {
+				return client.prefetchInfiniteQuery({
+					queryKey: toQueryKey(query),
+					queryFn: (ctx) => queryFn(Paged(query.parser), ctx),
+				});
+			} else {
+				return client.prefetchQuery({
+					queryKey: toQueryKey(query),
+					queryFn: (ctx) => queryFn(query.parser, ctx),
+				});
+			}
+		}),
 	);
 	return dehydrate(client);
 };
