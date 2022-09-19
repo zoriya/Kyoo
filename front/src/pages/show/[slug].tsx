@@ -51,6 +51,7 @@ import { PersonAvatar } from "~/components/person";
 import { ErrorComponent, ErrorPage } from "~/components/errors";
 import { useState } from "react";
 import { EpisodeBox, EpisodeLine } from "~/components/episode";
+import InfiniteScroll from "react-infinite-scroll-component";
 
 const StudioText = ({
 	studio,
@@ -260,12 +261,10 @@ const staffQuery = (slug: string): QueryIdentifier<Person> => ({
 });
 
 const ShowStaff = ({ slug }: { slug: string }) => {
-	const { data, isError, error, isFetching, hasNextPage, fetchNextPage } = useInfiniteFetch(
-		staffQuery(slug),
-	);
+	const { data, isError, error, hasNextPage, fetchNextPage } = useInfiniteFetch(staffQuery(slug));
 	const { t } = useTranslation("browse");
 
-	// TODO: Unsure that the fetchNextPage is only used when needed (currently called way too mutch)
+	// TODO: handle infinite scroll
 
 	if (isError) return <ErrorComponent {...error} />;
 
@@ -325,12 +324,10 @@ const episodesQuery = (slug: string, season: string | number): QueryIdentifier<E
 });
 
 const EpisodeGrid = ({ slug, season }: { slug: string; season: number }) => {
-	const { data, isError, error, isFetching, hasNextPage, fetchNextPage } = useInfiniteFetch(
+	const { data, isError, error, hasNextPage, fetchNextPage } = useInfiniteFetch(
 		episodesQuery(slug, season),
 	);
 	const { t } = useTranslation("browse");
-
-	// TODO: Unsure that the fetchNextPage is only used when needed (currently called way too mutch)
 
 	if (isError) return <ErrorComponent {...error} />;
 
@@ -343,12 +340,18 @@ const EpisodeGrid = ({ slug, season }: { slug: string; season: number }) => {
 	}
 
 	return (
-		<Box sx={{ display: "flex", flexDirection: "column", backgroundColor: "background.paper" }}>
+		<InfiniteScroll
+			dataLength={data?.pages.flatMap((x) => x.items).length ?? 0}
+			next={fetchNextPage}
+			hasMore={hasNextPage!}
+			loader={[...Array(12)].map((_, i) => (
+				<EpisodeLine key={i} />
+			))}
+		>
 			{(data ? data.pages.flatMap((x) => x.items) : [...Array(12)]).map((x, i) => (
 				<EpisodeLine key={x ? x.id : i} episode={x} />
 			))}
-			{/* <div ref={ref} /> */}
-		</Box>
+		</InfiniteScroll>
 	);
 };
 
