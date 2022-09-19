@@ -18,9 +18,8 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ArrowLeft, ArrowRight, LocalMovies, PlayArrow } from "@mui/icons-material";
+import { LocalMovies, PlayArrow } from "@mui/icons-material";
 import {
-	alpha,
 	Box,
 	Divider,
 	Fab,
@@ -31,13 +30,12 @@ import {
 	Tabs,
 	Tooltip,
 	Typography,
-	useTheme,
 } from "@mui/material";
 import useTranslation from "next-translate/useTranslation";
 import Head from "next/head";
 import { Navbar } from "~/components/navbar";
 import { Image, Poster } from "~/components/poster";
-import { Episode, EpisodeP, Page, Season, Show, ShowP } from "~/models";
+import { Episode, EpisodeP, Season, Show, ShowP } from "~/models";
 import { QueryIdentifier, QueryPage, useFetch, useInfiniteFetch } from "~/utils/query";
 import { getDisplayDate } from "~/models/utils";
 import { withRoute } from "~/utils/router";
@@ -45,13 +43,14 @@ import { Container } from "~/components/container";
 import { makeTitle } from "~/utils/utils";
 import { Link } from "~/utils/link";
 import { Studio } from "~/models/resources/studio";
-import { Paged, Person, PersonP } from "~/models";
+import { Person, PersonP } from "~/models";
 import { PersonAvatar } from "~/components/person";
 import { ErrorComponent, ErrorPage } from "~/components/errors";
 import { useState } from "react";
 import { EpisodeLine } from "~/components/episode";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useRouter } from "next/router";
+import { HorizontalList } from "~/components/horizontal-list";
 
 const StudioText = ({
 	studio,
@@ -261,7 +260,7 @@ const staffQuery = (slug: string): QueryIdentifier<Person> => ({
 });
 
 const ShowStaff = ({ slug }: { slug: string }) => {
-	const { data, isError, error, hasNextPage, fetchNextPage } = useInfiniteFetch(staffQuery(slug));
+	const { data, isError, error } = useInfiniteFetch(staffQuery(slug));
 	const { t } = useTranslation("browse");
 
 	// TODO: handle infinite scroll
@@ -269,48 +268,15 @@ const ShowStaff = ({ slug }: { slug: string }) => {
 	if (isError) return <ErrorComponent {...error} />;
 
 	return (
-		<>
-			<Container
-				sx={{ display: "flex", flexDirection: "row", justifyContent: "space-between", py: 3 }}
-			>
-				<Typography variant="h4" component="h2">
-					{t("show.staff")}
-				</Typography>
-				<Box>
-					<IconButton>
-						<ArrowLeft />
-					</IconButton>
-					<IconButton>
-						<ArrowRight />
-					</IconButton>
-				</Box>
-			</Container>
-			{data && data?.pages.at(0)?.count === 0 ? (
-				<Box sx={{ display: "flex", justifyContent: "center" }}>
-					<Typography sx={{ py: 3 }}>{t("show.staff-none")}</Typography>
-				</Box>
-			) : (
-				<Container
-					sx={{
-						display: "flex",
-						flexDirection: "row",
-						maxWidth: "100%",
-						overflowY: "auto",
-						pt: 1,
-						pb: 2,
-						overflowX: "visible",
-					}}
-				>
-					{(data ? data.pages.flatMap((x) => x.items) : [...Array(20)]).map((x, i) => (
-						<PersonAvatar
-							key={x ? x.id : i}
-							person={x}
-							sx={{ width: { xs: "7rem", lg: "10rem" }, flexShrink: 0, px: 2 }}
-						/>
-					))}
-				</Container>
-			)}
-		</>
+		<HorizontalList title={t("show.staff")} noContent={t("show.staff-none")}>
+			{(data ? data.pages.flatMap((x) => x.items) : [...Array(20)]).map((x, i) => (
+				<PersonAvatar
+					key={x ? x.id : i}
+					person={x}
+					sx={{ width: { xs: "7rem", lg: "10rem" }, flexShrink: 0, px: 2 }}
+				/>
+			))}
+		</HorizontalList>
 	);
 };
 
