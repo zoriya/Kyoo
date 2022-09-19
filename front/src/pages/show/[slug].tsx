@@ -40,9 +40,8 @@ import { Image, Poster } from "~/components/poster";
 import { Episode, EpisodeP, Page, Season, Show, ShowP } from "~/models";
 import { QueryIdentifier, QueryPage, useFetch, useInfiniteFetch } from "~/utils/query";
 import { getDisplayDate } from "~/models/utils";
-import { useScroll } from "~/utils/hooks/use-scroll";
 import { withRoute } from "~/utils/router";
-import { Container, containerPadding } from "~/components/container";
+import { Container } from "~/components/container";
 import { makeTitle } from "~/utils/utils";
 import { Link } from "~/utils/link";
 import { Studio } from "~/models/resources/studio";
@@ -50,8 +49,9 @@ import { Paged, Person, PersonP } from "~/models";
 import { PersonAvatar } from "~/components/person";
 import { ErrorComponent, ErrorPage } from "~/components/errors";
 import { useState } from "react";
-import { EpisodeBox, EpisodeLine } from "~/components/episode";
+import { EpisodeLine } from "~/components/episode";
 import InfiniteScroll from "react-infinite-scroll-component";
+import { useRouter } from "next/router";
 
 const StudioText = ({
 	studio,
@@ -356,7 +356,9 @@ const EpisodeGrid = ({ slug, season }: { slug: string; season: number }) => {
 };
 
 const SeasonTab = ({ slug, seasons, sx }: { slug: string; seasons?: Season[]; sx?: SxProps }) => {
-	const [season, setSeason] = useState(1);
+	const router = useRouter();
+	const seasonQuery = typeof router.query.season === "string" ? parseInt(router.query.season) : NaN;
+	const [season, setSeason] = useState(isNaN(seasonQuery) ? 1 : seasonQuery);
 
 	// TODO: handle absolute number only shows (without seasons)
 	return (
@@ -364,7 +366,16 @@ const SeasonTab = ({ slug, seasons, sx }: { slug: string; seasons?: Season[]; sx
 			<Box sx={{ borderBottom: 1, borderColor: "divider", width: "100%" }}>
 				<Tabs value={season} onChange={(_, i) => setSeason(i)} aria-label="List of seasons">
 					{seasons
-						? seasons.map((x) => <Tab key={x.seasonNumber} label={x.name} value={x.seasonNumber} />)
+						? seasons.map((x) => (
+								<Tab
+									key={x.seasonNumber}
+									label={x.name}
+									value={x.seasonNumber}
+									component={Link}
+									to={`/show/${slug}?season=${x.seasonNumber}`}
+									shallow
+								/>
+						  ))
 						: [...Array(3)].map((_, i) => (
 								<Tab key={i} label={<Skeleton width="5rem" />} value={i + 1} disabled />
 						  ))}
@@ -401,10 +412,10 @@ const ShowDetails: QueryPage<{ slug: string }> = ({ slug }) => {
 	);
 };
 
-ShowDetails.getFetchUrls = ({ slug, seasonNumber = 1 }) => [
+ShowDetails.getFetchUrls = ({ slug, season = 1 }) => [
 	query(slug),
 	staffQuery(slug),
-	episodesQuery(slug, seasonNumber),
+	episodesQuery(slug, season),
 ];
 
 export default withRoute(ShowDetails);

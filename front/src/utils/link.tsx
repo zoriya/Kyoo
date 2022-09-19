@@ -36,10 +36,11 @@ export const ButtonLink = forwardRef<ButtonRef, ButtonLinkProps>(NextButton);
 
 type LinkRef = HTMLAnchorElement;
 type LinkProps = Omit<MLinkProps, "href"> &
-	Pick<NLinkProps, "href" | "as" | "prefetch" | "locale">;
+	Pick<NLinkProps, "as" | "prefetch" | "locale" | "shallow"> &
+	({ to: NLinkProps["href"], href?: undefined } | { href: NLinkProps["href"], to?: undefined });
 
-const NextLink = ({ href, as, prefetch, locale, ...props }: LinkProps, ref: Ref<LinkRef>) => (
-	<NLink href={href} as={as} prefetch={prefetch} locale={locale} passHref>
+const NextLink = ({ href, to, as, prefetch, locale, shallow, ...props }: LinkProps, ref: Ref<LinkRef>) => (
+	<NLink href={href ?? to} as={as} prefetch={prefetch} locale={locale} shallow={shallow} passHref>
 		<MLink ref={ref} {...props} />
 	</NLink>
 );
