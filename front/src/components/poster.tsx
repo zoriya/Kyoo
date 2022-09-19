@@ -62,8 +62,9 @@ const _Image = ({
 
 	// This allow the loading bool to be false with SSR but still be on client-side
 	useLayoutEffect(() => {
-		if (!imgRef.current?.complete) setLoading(true);
-	}, []);
+		if (!imgRef.current?.complete && img) setLoading(true);
+		if (!img && !loading) setLoading(false);
+	}, [img, loading]);
 
 	return (
 		<Box
@@ -73,7 +74,7 @@ const _Image = ({
 				aspectRatio,
 				width,
 				height,
-				backgroundColor: "primary.dark",
+				backgroundColor: "grey.300",
 				"& > *": { width: "100%", height: "100%" },
 			}}
 			{...others}
@@ -100,9 +101,9 @@ const _Image = ({
 export const Image = styled(_Image)({});
 
 // eslint-disable-next-line jsx-a11y/alt-text
-const _Poster = (
-	props: ImagePropsWithLoading & { width?: Width; height?: Height },
-) => <_Image aspectRatio="2 / 3" {...props} />;
+const _Poster = (props: ImagePropsWithLoading & { width?: Width; height?: Height }) => (
+	<_Image aspectRatio="2 / 3" {...props} />
+);
 
 declare module "@mui/material/styles" {
 	interface ComponentsPropsList {

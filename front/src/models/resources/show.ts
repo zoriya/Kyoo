@@ -37,7 +37,9 @@ export enum Status {
 
 export const ShowP = z.preprocess(
 	(x: any) => {
+		// Waiting for the API to be updaded
 		x.name = x.title;
+		if (x.aliases === null) x.aliases = [];
 		return x;
 	},
 	ResourceP.merge(ImagesP).extend({
@@ -52,7 +54,7 @@ export const ShowP = z.preprocess(
 		/**
 		 * The summary of this show.
 		 */
-		overview: z.string(),
+		overview: z.string().nullable(),
 		/**
 		 * Is this show airing, not aired yet or finished?
 		 */
@@ -72,7 +74,7 @@ export const ShowP = z.preprocess(
 		/**
 		 * The studio that made this show.
 		 */
-		studio: StudioP.optional(),
+		studio: StudioP.optional().nullable(),
 		/**
 		 * The list of seasons of this show.
 		 */

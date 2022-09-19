@@ -26,7 +26,7 @@ export const PersonAvatar = ({ person, sx }: { person?: Person; sx?: SxProps }) 
 	if (!person) {
 		return (
 			<Box sx={sx}>
-				<Skeleton variant="circular" sx={{ width: "100%", aspectRatio: "1/1" }}/>
+				<Skeleton variant="circular" sx={{ width: "100%", aspectRatio: "1/1", height: "unset" }}/>
 				<Typography align="center"><Skeleton/></Typography>
 				<Typography variant="body2" align="center"><Skeleton/></Typography>
 			</Box>

@@ -19,12 +19,13 @@
  */
 
 import { Box, Divider, Skeleton, SxProps, Typography } from "@mui/material";
+import useTranslation from "next-translate/useTranslation";
 import { Episode } from "~/models";
 import { Link } from "~/utils/link";
 import { Image } from "./poster";
 
 const displayNumber = (episode: Episode) => {
-	if (episode.seasonNumber && episode.episodeNumber)
+	if (typeof episode.seasonNumber === "number" && typeof episode.episodeNumber === "number")
 		return `S${episode.seasonNumber}:E${episode.episodeNumber}`;
 	if (episode.absoluteNumber) return episode.absoluteNumber.toString();
 	return "???";
@@ -41,6 +42,8 @@ export const EpisodeBox = ({ episode, sx }: { episode?: Episode; sx: SxProps }) 
 };
 
 export const EpisodeLine = ({ episode, sx }: { episode?: Episode; sx?: SxProps }) => {
+	const { t } = useTranslation("browse"); 
+
 	return (
 		<>
 			<Link
@@ -59,10 +62,17 @@ export const EpisodeLine = ({ episode, sx }: { episode?: Episode; sx?: SxProps }
 					{episode ? displayNumber(episode) : <Skeleton />}
 				</Typography>
 				<Image img={episode?.thumbnail} width="18%" aspectRatio="16/9" sx={{ flexShrink: 0 }} />
-				<Box>
-					<Typography variant="h6">{episode?.name ?? <Skeleton />}</Typography>
-					<Typography variant="body2">{episode?.overview ?? <Skeleton />}</Typography>
-				</Box>
+				{episode ? (
+					<Box sx={{ flexGrow: 1 }}>
+						<Typography variant="h6">{episode.name ?? t("show.episodeNoMetadata")}</Typography>
+						{episode.overview && <Typography variant="body2">{episode.overview}</Typography>}
+					</Box>
+				) : (
+					<Box sx={{ flexGrow: 1 }}>
+						<Typography variant="h6">{<Skeleton />}</Typography>
+						<Typography variant="body2">{<Skeleton />}</Typography>
+					</Box>
+				)}
 			</Link>
 			<Divider />
 		</>
