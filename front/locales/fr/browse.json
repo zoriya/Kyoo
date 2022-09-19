@@ -5,6 +5,10 @@
 		"studio": "Studio",
 		"genre": "Genres",
 		"genre-none": "Aucun genres",
-		"staff": "Staff"
+		"staff": "Staff",
+		"staff-none": "Aucun membre du staff connu",
+		"noOverview": "Aucune description disponible",
+		"episode-none": "Il n'y a pas d'episodes dans cette saison",
+		"episodeNoMetadata": "Aucune metadonnée disponible"
 	}
 }

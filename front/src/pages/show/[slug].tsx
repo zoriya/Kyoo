@@ -42,14 +42,13 @@ import { QueryIdentifier, QueryPage, useFetch, useInfiniteFetch } from "~/utils/
 import { getDisplayDate } from "~/models/utils";
 import { useScroll } from "~/utils/hooks/use-scroll";
 import { withRoute } from "~/utils/router";
-import { Container } from "~/components/container";
+import { Container, containerPadding } from "~/components/container";
 import { makeTitle } from "~/utils/utils";
 import { Link } from "~/utils/link";
 import { Studio } from "~/models/resources/studio";
 import { Paged, Person, PersonP } from "~/models";
 import { PersonAvatar } from "~/components/person";
-import { useInView } from "react-intersection-observer";
-import { ErrorPage } from "~/components/errors";
+import { ErrorComponent, ErrorPage } from "~/components/errors";
 import { useState } from "react";
 import { EpisodeBox, EpisodeLine } from "~/components/episode";
 
@@ -58,7 +57,7 @@ const StudioText = ({
 	loading = false,
 	sx,
 }: {
-	studio?: Studio;
+	studio?: Studio | null;
 	loading?: boolean;
 	sx?: SxProps;
 }) => {
@@ -196,7 +195,7 @@ const ShowHeader = ({ data }: { data?: Show }) => {
 					{": "}
 					{!data ? (
 						<Skeleton width="10rem" sx={{ display: "inline-flex" }} />
-					) : data?.genres ? (
+					) : data?.genres && data.genres.length ? (
 						data.genres.map((genre, i) => [
 							i > 0 && ", ",
 							<Link key={genre.id} href={`/genres/${genre.slug}`}>
@@ -211,7 +210,9 @@ const ShowHeader = ({ data }: { data?: Show }) => {
 
 			<Container sx={{ pt: 2 }}>
 				<Typography align="justify" sx={{ flexBasis: 0, flexGrow: 1, pt: { sm: 2 } }}>
-					{data?.overview ?? [...Array(4)].map((_, i) => <Skeleton key={i} />)}
+					{data
+						? data.overview ?? t("show.noOverview")
+						: [...Array(4)].map((_, i) => <Skeleton key={i} />)}
 				</Typography>
 				<Divider
 					orientation="vertical"
@@ -229,7 +230,7 @@ const ShowHeader = ({ data }: { data?: Show }) => {
 					<Typography variant="h4" component="h2">
 						{t("show.genre")}
 					</Typography>
-					{!data || data.genres ? (
+					{!data || data.genres?.length ? (
 						<ul>
 							{(data ? data.genres! : [...Array(3)]).map((genre, i) => (
 								<li key={genre?.id ?? i}>
@@ -262,19 +263,17 @@ const ShowStaff = ({ slug }: { slug: string }) => {
 	const { data, isError, error, isFetching, hasNextPage, fetchNextPage } = useInfiniteFetch(
 		staffQuery(slug),
 	);
-	const { ref } = useInView({
-		onChange: () => !isFetching && hasNextPage && fetchNextPage(),
-	});
 	const { t } = useTranslation("browse");
 
 	// TODO: Unsure that the fetchNextPage is only used when needed (currently called way too mutch)
-	// TODO: Handle errors
 
-	/* if (isError) return null; */
+	if (isError) return <ErrorComponent {...error} />;
 
 	return (
 		<>
-			<Container sx={{ display: "flex", flexDirection: "row", justifyContent: "space-between", py: 3 }}>
+			<Container
+				sx={{ display: "flex", flexDirection: "row", justifyContent: "space-between", py: 3 }}
+			>
 				<Typography variant="h4" component="h2">
 					{t("show.staff")}
 				</Typography>
@@ -287,16 +286,31 @@ const ShowStaff = ({ slug }: { slug: string }) => {
 					</IconButton>
 				</Box>
 			</Container>
-			<Box sx={{ display: "flex", flexDirection: "row", maxWidth: "100%", overflowY: "auto", py: 1,  }}>
-				{(data ? data.pages.flatMap((x) => x.items) : [...Array(6)]).map((x, i) => (
-					<PersonAvatar
-						key={x ? x.id : i}
-						person={x}
-						sx={{ width: { xs: "7rem", lg: "10rem" }, flexShrink: 0, px: 2 }}
-					/>
-				))}
-				<div ref={ref} />
-			</Box>
+			{data && data?.pages.at(0)?.count === 0 ? (
+				<Box sx={{ display: "flex", justifyContent: "center" }}>
+					<Typography sx={{ py: 3 }}>{t("show.staff-none")}</Typography>
+				</Box>
+			) : (
+				<Container
+					sx={{
+						display: "flex",
+						flexDirection: "row",
+						maxWidth: "100%",
+						overflowY: "auto",
+						pt: 1,
+						pb: 2,
+						overflowX: "visible",
+					}}
+				>
+					{(data ? data.pages.flatMap((x) => x.items) : [...Array(20)]).map((x, i) => (
+						<PersonAvatar
+							key={x ? x.id : i}
+							person={x}
+							sx={{ width: { xs: "7rem", lg: "10rem" }, flexShrink: 0, px: 2 }}
+						/>
+					))}
+				</Container>
+			)}
 		</>
 	);
 };
@@ -314,14 +328,19 @@ const EpisodeGrid = ({ slug, season }: { slug: string; season: number }) => {
 	const { data, isError, error, isFetching, hasNextPage, fetchNextPage } = useInfiniteFetch(
 		episodesQuery(slug, season),
 	);
-	const { ref } = useInView({
-		onChange: () => !isFetching && hasNextPage && fetchNextPage(),
-	});
+	const { t } = useTranslation("browse");
 
 	// TODO: Unsure that the fetchNextPage is only used when needed (currently called way too mutch)
-	// TODO: Handle errors
 
-	/* if (isError) return null; */
+	if (isError) return <ErrorComponent {...error} />;
+
+	if (data && data.pages.at(0)?.count === 0) {
+		return (
+			<Box sx={{ display: "flex", justifyContent: "center" }}>
+				<Typography sx={{ py: 3 }}>{t("show.episode-none")}</Typography>
+			</Box>
+		);
+	}
 
 	return (
 		<Box sx={{ display: "flex", flexDirection: "column", backgroundColor: "background.paper" }}>
@@ -339,14 +358,12 @@ const SeasonTab = ({ slug, seasons, sx }: { slug: string; seasons?: Season[]; sx
 	// TODO: handle absolute number only shows (without seasons)
 	return (
 		<Container sx={sx}>
-			<Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+			<Box sx={{ borderBottom: 1, borderColor: "divider", width: "100%" }}>
 				<Tabs value={season} onChange={(_, i) => setSeason(i)} aria-label="List of seasons">
 					{seasons
 						? seasons.map((x) => <Tab key={x.seasonNumber} label={x.name} value={x.seasonNumber} />)
 						: [...Array(3)].map((_, i) => (
-								<Typography key={i} variant="button">
-									<Skeleton />
-								</Typography>
+								<Tab key={i} label={<Skeleton width="5rem" />} value={i + 1} disabled />
 						  ))}
 				</Tabs>
 				<EpisodeGrid slug={slug} season={season} />
@@ -372,7 +389,7 @@ const ShowDetails: QueryPage<{ slug: string }> = ({ slug }) => {
 		<>
 			<Head>
 				<title>{makeTitle(data?.name)}</title>
-				<meta name="description" content={data?.overview} />
+				<meta name="description" content={data?.overview!} />
 			</Head>
 			<ShowHeader data={data} />
 			<ShowStaff slug={slug} />

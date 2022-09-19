@@ -41,7 +41,7 @@ export const SeasonP = z.preprocess(
 		/**
 		 * A quick overview of this season.
 		 */
-		overview: z.string(),
+		overview: z.string().nullable(),
 
 		/**
 		 * The starting air date of this season.

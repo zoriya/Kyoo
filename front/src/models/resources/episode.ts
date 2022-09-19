@@ -47,17 +47,17 @@ export const EpisodeP = z.preprocess(
 		/**
 		 * The title of this episode.
 		 */
-		name: z.string(),
+		name: z.string().nullable(),
 
 		/**
 		 * The overview of this episode.
 		 */
-		overview: z.string(),
+		overview: z.string().nullable(),
 
 		/**
 		 * The release date of this episode. It can be null if unknown.
 		 */
-		releaseDate: zdate(),
+		releaseDate: zdate().nullable(),
 	}),
 );
 

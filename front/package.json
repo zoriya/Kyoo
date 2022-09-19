@@ -29,7 +29,7 @@
 		"next-translate": "^1.5.0",
 		"react": "18.2.0",
 		"react-dom": "18.2.0",
-		"react-intersection-observer": "^9.4.0",
+		"react-infinite-scroll-component": "^6.1.0",
 		"react-query": "^4.0.0-beta.23",
 		"superjson": "^1.9.1",
 		"zod": "^3.18.0"

@@ -18,20 +18,38 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Alert, Snackbar, SnackbarCloseReason, Typography } from "@mui/material";
+import { Alert, Box, Snackbar, SnackbarCloseReason, Typography, SxProps } from "@mui/material";
 import { SyntheticEvent, useState } from "react";
 import { KyooErrors } from "~/models";
 
-export const ErrorPage = ({ errors }: { errors: string[] }) => {
+export const ErrorComponent = ({ errors, sx }: { errors: string[], sx?: SxProps }) => {
 	return (
-		<>
-			<Typography variant="h1">Error</Typography>
+		<Box
+			sx={{
+				display: "flex",
+				flexDirection: "column",
+				alignItems: "center",
+				justifyContent: "center",
+				height: "100%",
+				backgroundColor: "error.light",
+				...sx
+			}}
+		>
+			<Typography variant="h1" component="h1" sx={{ fontWeight: 500 }}>Error</Typography>
 			{errors.map((x, i) => (
-				<Typography variant="h2" key={i}>
+				<Typography variant="h2" component="h2" key={i}>
 					{x}
 				</Typography>
 			))}
-		</>
+		</Box>
+	);
+};
+
+export const ErrorPage = ({ errors }: { errors: string[] }) => {
+	return (
+		<Box sx={{ height: "100vh" }}>
+			<ErrorComponent errors={errors} sx={{ backgroundColor: "unset" }} />
+		</Box>
 	);
 };
 
