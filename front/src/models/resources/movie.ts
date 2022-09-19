@@ -18,34 +18,62 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Resource, Images } from "../traits";
+import { z } from "zod";
+import { zdate } from "~/utils/zod";
+import { ImagesP, ResourceP } from "../traits";
+import { GenreP } from "./genre";
+import { StudioP } from "./studio";
 
 /**
- * A series or a movie.
+ * The enum containing movie's status.
  */
-export interface Movie extends Resource, Images {
-	/**
-	 * The title of this show.
-	 */
-	name: string;
-
-	/**
-	 * The list of alternative titles of this movie.
-	 */
-	aliases: string[];
-
-	/**
-	 * The summary of this show.
-	 */
-	overview: string;
-
-	/**
-	 * Is this movie aired or planned
-	 */
-	isPlanned: boolean;
-
-	/**
-	 * The date this mavie aired. It can also be null if this is unknown.
-	 */
-	airDate: Date | null;
+export enum MovieStatus {
+	Unknown = 0,
+	Finished = 1,
+	Planned = 3,
 }
+
+export const MovieP = z.preprocess(
+	(x: any) => {
+		// Waiting for the API to be updaded
+		x.name = x.title;
+		if (x.aliases === null) x.aliases = [];
+		x.airDate = x.startAir;
+		return x;
+	},
+	ResourceP.merge(ImagesP).extend({
+		/**
+		 * The title of this movie.
+		 */
+		name: z.string(),
+		/**
+		 * The list of alternative titles of this movie.
+		 */
+		aliases: z.array(z.string()),
+		/**
+		 * The summary of this movie.
+		 */
+		overview: z.string().nullable(),
+		/**
+		 * Is this movie not aired yet or finished?
+		 */
+		status: z.nativeEnum(MovieStatus),
+		/**
+		 * The date this movie aired. It can also be null if this is unknown.
+		 */
+		airDate: zdate().nullable(),
+		/**
+		 * The list of genres (themes) this movie has.
+		 */
+		genres: z.array(GenreP).optional(),
+		/**
+		 * The studio that made this movie.
+		 */
+		studio: StudioP.optional().nullable(),
+	}),
+);
+
+/**
+ * A Movie type
+ */
+export type Movie = z.infer<typeof MovieP>;

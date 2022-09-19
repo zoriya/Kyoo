@@ -18,9 +18,22 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export const getDisplayDate = (startAir: Date, endAir?: Date | null) => {
-	if (!endAir || startAir.getFullYear() === endAir.getFullYear()) {
-		return startAir.getFullYear();
+import { Movie, Show } from "./resources";
+
+export const getDisplayDate = (data: Show | Movie) => {
+	const {
+		startAir,
+		endAir,
+		airDate,
+	}: { startAir?: Date | null; endAir?: Date | null; airDate?: Date | null } = data;
+
+	if (startAir) {
+		if (!endAir || startAir.getFullYear() === endAir.getFullYear()) {
+			return startAir.getFullYear();
+		}
+		return startAir.getFullYear() + (endAir ? ` - ${endAir.getFullYear()}` : "");
 	}
-	return startAir.getFullYear() + (endAir ? ` - ${endAir.getFullYear()}` : "");
+	else if (airDate) {
+		return airDate.getFullYear();
+	}
 };
