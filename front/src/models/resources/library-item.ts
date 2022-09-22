@@ -18,17 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Collection } from "./collection";
-import { Movie } from "./movie";
-import { Show } from "./show";
-
-/**
- * An item that can be contained by a Library (so a Show, a Movie or a Collection).
- */
-export type LibraryItem =
-	| (Show & { type: ItemType.Show })
-	| (Movie & { type: ItemType.Movie })
-	| (Collection & { type: ItemType.Collection });
+import { z } from "zod";
+import { CollectionP } from "./collection";
+import { MovieP } from "./movie";
+import { ShowP } from "./show";
 
 /**
  * The type of item, ether a show, a movie or a collection.
@@ -38,3 +31,20 @@ export enum ItemType {
 	Movie = 1,
 	Collection = 2,
 }
+
+export const LibraryItemP = z.preprocess(
+	(x: any) => {
+		x.aliases ??= [];
+		return x;
+	},
+	z.union([
+		ShowP.and(z.object({ type: z.literal(ItemType.Show) })),
+		MovieP.and(z.object({ type: z.literal(ItemType.Movie) })),
+		CollectionP.and(z.object({ type: z.literal(ItemType.Collection) })),
+	]),
+);
+
+/**
+ * An item that can be contained by a Library (so a Show, a Movie or a Collection).
+ */
+export type LibraryItem = z.infer<typeof LibraryItemP>;

@@ -18,6 +18,6 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import BrowsePage from "./browse"
+import BrowsePage from "./index";
 
 export default BrowsePage;

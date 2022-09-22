@@ -18,19 +18,22 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Images, Resource } from "../traits";
+import { z } from "zod";
+import { ImagesP, ResourceP } from "../traits";
+
+
+export const CollectionP = ResourceP.merge(ImagesP).extend({
+	/**
+	 * The title of this collection.
+	 */
+	name: z.string(),
+	/**
+	 * The summary of this show.
+	 */
+	overview: z.string().nullable(),
+});
 
 /**
  * A class representing collections of show or movies.
  */
-export interface Collection extends Resource, Images {
-	/**
-	 * The name of this collection.
-	 */
-	name: string;
-
-	/**
-	 * The description of this collection.
-	 */
-	overview: string;
-}
+export type Collection = z.infer<typeof CollectionP>;
