@@ -249,7 +249,7 @@ export const ShowHeader = ({ data }: { data?: Show | Movie }) => {
 
 
 export const ShowStaff = ({ slug }: { slug: string }) => {
-	const { data, isError, error } = useInfiniteFetch(ShowStaff.query(slug));
+	const { items, isError, error } = useInfiniteFetch(ShowStaff.query(slug));
 	const { t } = useTranslation("browse");
 
 	// TODO: handle infinite scroll
@@ -258,7 +258,7 @@ export const ShowStaff = ({ slug }: { slug: string }) => {
 
 	return (
 		<HorizontalList title={t("show.staff")} noContent={t("show.staff-none")}>
-			{(data ? data.pages.flatMap((x) => x.items) : [...Array(20)]).map((x, i) => (
+			{(items ?? [...Array(20)]).map((x, i) => (
 				<PersonAvatar
 					key={x ? x.id : i}
 					person={x}
@@ -304,6 +304,7 @@ const MovieDetails: QueryPage<{ slug: string }> = ({ slug }) => {
 MovieDetails.getFetchUrls = ({ slug }) => [
 	query(slug),
 	ShowStaff.query(slug),
+	Navbar.query(),
 ];
 
 export default withRoute(MovieDetails);

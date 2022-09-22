@@ -29,11 +29,11 @@ export const getDisplayDate = (data: Show | Movie) => {
 
 	if (startAir) {
 		if (!endAir || startAir.getFullYear() === endAir.getFullYear()) {
-			return startAir.getFullYear();
+			return startAir.getFullYear().toString();
 		}
 		return startAir.getFullYear() + (endAir ? ` - ${endAir.getFullYear()}` : "");
 	}
 	else if (airDate) {
-		return airDate.getFullYear();
+		return airDate.getFullYear().toString();
 	}
 };

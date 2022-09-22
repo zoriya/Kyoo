@@ -36,11 +36,11 @@ import logo from "../../public/icons/icon.svg";
 import useTranslation from "next-translate/useTranslation";
 import Image from "next/image";
 import { ButtonLink } from "~/utils/link";
-import { LibraryP, Paged } from "~/models";
-import { useFetch } from "~/utils/query";
+import { Library, LibraryP, Page, Paged } from "~/models";
+import { QueryIdentifier, useFetch } from "~/utils/query";
 import { ErrorSnackbar } from "./errors";
 
-export const KyooTitle = (props: { sx: SxProps<Theme> }) => {
+const KyooTitle = (props: { sx: SxProps<Theme> }) => {
 	const { t } = useTranslation("common");
 
 	return (
@@ -74,14 +74,9 @@ export const KyooTitle = (props: { sx: SxProps<Theme> }) => {
 	);
 };
 
-export const NavbarQuery = {
-	parser: Paged(LibraryP),
-	path: ["libraries"],
-};
-
 export const Navbar = (barProps: AppBarProps) => {
 	const { t } = useTranslation("common");
-	const { data, error, isSuccess, isError } = useFetch(NavbarQuery);
+	const { data, error, isSuccess, isError } = useFetch(Navbar.query());
 
 	return (
 		<AppBar position="sticky" {...barProps}>
@@ -103,7 +98,7 @@ export const Navbar = (barProps: AppBarProps) => {
 					{isSuccess
 						? data.items.map((library) => (
 								<ButtonLink
-									href={`/library/${library.slug}`}
+									href={`/browse/${library.slug}`}
 									key={library.slug}
 									sx={{ color: "white" }}
 								>
@@ -126,3 +121,9 @@ export const Navbar = (barProps: AppBarProps) => {
 		</AppBar>
 	);
 };
+
+Navbar.query = (): QueryIdentifier<Page<Library>> => ({
+	parser: Paged(LibraryP),
+	path: ["libraries"],
+});
+

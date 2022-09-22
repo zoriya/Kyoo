@@ -18,6 +18,9 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import BrowsePage from "./browse"
+import { withThemeProps } from "./with-theme";
+import _InfiniteScroll from "react-infinite-scroll-component";
 
-export default BrowsePage;
+export const InfiniteScroll = withThemeProps(_InfiniteScroll, {
+	name: "InfiniteScroll",
+});

@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ComponentType } from "react";
+import { ComponentType, ReactElement, ReactNode } from "react";
 import {
 	dehydrate,
 	QueryClient,
@@ -57,9 +57,10 @@ const queryFn = async <Data>(
 		try {
 			data = JSON.parse(error);
 		} catch (e) {
-			data = { errors: [error] };
+			data = { errors: [error] } as KyooErrors;
 		}
-		throw data;
+		console.log("Invalid response:", data)
+		throw data as KyooErrors;
 	}
 
 	let data;
@@ -91,13 +92,14 @@ export const createQueryClient = () =>
 
 export type QueryIdentifier<T = unknown> = {
 	parser: z.ZodType<T>;
-	path: string[];
-	params?: { [query: string]: boolean | number | string | string[] };
+	path: (string | undefined)[];
+	params?: { [query: string]: boolean | number | string | string[] | undefined };
 	infinite?: boolean;
 };
 
 export type QueryPage<Props = {}> = ComponentType<Props> & {
 	getFetchUrls?: (route: { [key: string]: string }) => QueryIdentifier[];
+	getLayout?: (page: ReactElement) => ReactNode;
 };
 
 const toQueryKey = <Data>(query: QueryIdentifier<Data>) => {
@@ -106,6 +108,7 @@ const toQueryKey = <Data>(query: QueryIdentifier<Data>) => {
 			...query.path,
 			"?" +
 				Object.entries(query.params)
+					.filter(([k, v]) => v !== undefined)
 					.map(([k, v]) => `${k}=${Array.isArray(v) ? v.join(",") : v}`)
 					.join("&"),
 		];
@@ -122,11 +125,12 @@ export const useFetch = <Data>(query: QueryIdentifier<Data>) => {
 };
 
 export const useInfiniteFetch = <Data>(query: QueryIdentifier<Data>) => {
-	return useInfiniteQuery<Page<Data>, KyooErrors>({
+	const ret = useInfiniteQuery<Page<Data>, KyooErrors>({
 		queryKey: toQueryKey(query),
 		queryFn: (ctx) => queryFn(Paged(query.parser), ctx),
 		getNextPageParam: (page: Page<Data>) => page?.next || undefined,
 	});
+	return {...ret, items: ret.data?.pages.flatMap((x) => x.items)}
 };
 
 export const fetchQuery = async (queries: QueryIdentifier[]) => {

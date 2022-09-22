@@ -30,6 +30,15 @@ const nextConfig = {
 	rewrites: async () => [
 		{ source: "/api/:path*", destination: process.env.KYOO_URL ?? "http://localhost:5000/:path*" },
 	],
+	async redirects() {
+		return [
+			{
+				source: "/",
+				destination: "/browse",
+				permanent: true,
+			},
+		];
+	},
 };
 
 module.exports = nextConfig;

@@ -10,5 +10,17 @@
 		"noOverview": "Aucune description disponible",
 		"episode-none": "Il n'y a pas d'episodes dans cette saison",
 		"episodeNoMetadata": "Aucune metadonnée disponible"
+	},
+	"browse": {
+		"sortby": "Trier par {{key}}",
+		"sortkey": {
+			"name": "Nom",
+			"startAir": "Date de sortie",
+			"endAir": "Date de fin de sortie"
+		},
+		"sortord": {
+			"asc": "asc",
+			"desc": "decs"
+		}
 	}
 }

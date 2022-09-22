@@ -18,14 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-	Box,
-	Skeleton,
-	SxProps,
-	Tab,
-	Tabs,
-	Typography,
-} from "@mui/material";
+import { Box, Skeleton, SxProps, Tab, Tabs, Typography } from "@mui/material";
 import useTranslation from "next-translate/useTranslation";
 import Head from "next/head";
 import { Episode, EpisodeP, Season, Show, ShowP } from "~/models";
@@ -40,17 +33,17 @@ import { EpisodeLine } from "~/components/episode";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useRouter } from "next/router";
 import { ShowHeader, ShowStaff } from "../movie/[slug]";
-
+import { Navbar } from "~/components/navbar";
 
 const EpisodeGrid = ({ slug, season }: { slug: string; season: number }) => {
-	const { data, isError, error, hasNextPage, fetchNextPage } = useInfiniteFetch(
+	const { items, isError, error, hasNextPage, fetchNextPage } = useInfiniteFetch(
 		EpisodeGrid.query(slug, season),
 	);
 	const { t } = useTranslation("browse");
 
 	if (isError) return <ErrorComponent {...error} />;
 
-	if (data && data.pages.at(0)?.count === 0) {
+	if (items && items?.length === 0) {
 		return (
 			<Box sx={{ display: "flex", justifyContent: "center" }}>
 				<Typography sx={{ py: 3 }}>{t("show.episode-none")}</Typography>
@@ -60,14 +53,14 @@ const EpisodeGrid = ({ slug, season }: { slug: string; season: number }) => {
 
 	return (
 		<InfiniteScroll
-			dataLength={data?.pages.flatMap((x) => x.items).length ?? 0}
+			dataLength={items?.length ?? 0}
 			next={fetchNextPage}
 			hasMore={hasNextPage!}
 			loader={[...Array(12)].map((_, i) => (
 				<EpisodeLine key={i} />
 			))}
 		>
-			{(data ? data.pages.flatMap((x) => x.items) : [...Array(12)]).map((x, i) => (
+			{(items ?? [...Array(12)]).map((x, i) => (
 				<EpisodeLine key={x ? x.id : i} episode={x} />
 			))}
 		</InfiniteScroll>
@@ -82,7 +75,6 @@ EpisodeGrid.query = (slug: string, season: string | number): QueryIdentifier<Epi
 	},
 	infinite: true,
 });
-
 
 const SeasonTab = ({ slug, seasons, sx }: { slug: string; seasons?: Season[]; sx?: SxProps }) => {
 	const router = useRouter();
@@ -101,8 +93,9 @@ const SeasonTab = ({ slug, seasons, sx }: { slug: string; seasons?: Season[]; sx
 									label={x.name}
 									value={x.seasonNumber}
 									component={Link}
-									to={`/show/${slug}?season=${x.seasonNumber}`}
+									to={{ query: { ...router.query, season: x.seasonNumber } }}
 									shallow
+									replace
 								/>
 						  ))
 						: [...Array(3)].map((_, i) => (
@@ -145,6 +138,7 @@ ShowDetails.getFetchUrls = ({ slug, season = 1 }) => [
 	query(slug),
 	ShowStaff.query(slug),
 	EpisodeGrid.query(slug, season),
+	Navbar.query(),
 ];
 
 export default withRoute(ShowDetails);

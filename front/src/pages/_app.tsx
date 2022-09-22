@@ -26,30 +26,19 @@ import type { AppProps } from "next/app";
 import { Hydrate, QueryClientProvider } from "react-query";
 import { createQueryClient, fetchQuery, QueryIdentifier, QueryPage } from "~/utils/query";
 import { defaultTheme } from "~/utils/themes/default-theme";
-import { Navbar, NavbarQuery } from "~/components/navbar";
-import { Box } from "@mui/system";
 import superjson from "superjson";
+import Head from "next/head";
 
 // Simply silence a SSR warning (see https://github.com/facebook/react/issues/14927 for more details)
 if (typeof window === "undefined") {
 	React.useLayoutEffect = React.useEffect;
 }
 
-const AppWithNavbar = ({ children }: { children: JSX.Element }) => {
-	return (
-		<>
-			{/* <Navbar /> */}
-			{/* TODO: add an option to disable the navbar in the component */}
-			<Box>{children}</Box>
-		</>
-	);
-};
-
 const App = ({ Component, pageProps }: AppProps) => {
 	const [queryClient] = useState(() => createQueryClient());
 	const { queryState, ...props } = superjson.deserialize<any>(pageProps ?? {});
+	const getLayout = (Component as QueryPage).getLayout ?? ((page) => page);
 
-	// TODO: tranform date string to date instances in the queryState
 	return (
 		<>
 			<style jsx global>{`
@@ -73,12 +62,13 @@ const App = ({ Component, pageProps }: AppProps) => {
 					background-color: rgb(134, 127, 127);
 				}
 			`}</style>
+			<Head>
+				<title>Kyoo</title>
+			</Head>
 			<QueryClientProvider client={queryClient}>
 				<Hydrate state={queryState}>
 					<ThemeProvider theme={defaultTheme}>
-						<AppWithNavbar>
-							<Component {...props} />
-						</AppWithNavbar>
+						{getLayout(<Component {...props} />)}
 					</ThemeProvider>
 				</Hydrate>
 			</QueryClientProvider>
@@ -91,8 +81,6 @@ App.getInitialProps = async (ctx: AppContext) => {
 
 	const getUrl = (ctx.Component as QueryPage).getFetchUrls;
 	const urls: QueryIdentifier[] = getUrl ? getUrl(ctx.router.query as any) : [];
-	// TODO: check if the navbar is needed for this
-	urls.push(NavbarQuery);
 	appProps.pageProps.queryState = await fetchQuery(urls);
 
 	return { pageProps: superjson.serialize(appProps.pageProps) };
