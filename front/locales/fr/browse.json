@@ -8,11 +8,12 @@
 		"staff": "Staff",
 		"staff-none": "Aucun membre du staff connu",
 		"noOverview": "Aucune description disponible",
-		"episode-none": "Il n'y a pas d'episodes dans cette saison",
+		"episode-none": "Il n'y a pas d'épisodes dans cette saison",
 		"episodeNoMetadata": "Aucune metadonnée disponible"
 	},
 	"browse": {
 		"sortby": "Trier par {{key}}",
+		"sortby-tt": "Trier par",
 		"sortkey": {
 			"name": "Nom",
 			"startAir": "Date de sortie",
@@ -21,6 +22,12 @@
 		"sortord": {
 			"asc": "asc",
 			"desc": "decs"
-		}
+		},
+		"switchToGrid": "Passer en vue grille",
+		"switchToList": "Passer en vue liste"
+	},
+	"misc": {
+		"prev-page": "Page précédente",
+		"next-page": "Page suivante"
 	}
 }

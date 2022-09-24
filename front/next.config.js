@@ -34,6 +34,10 @@ const nextConfig = {
 			},
 		];
 	},
+	i18n: {
+		locales: ["en", "fr"],
+		defaultLocale: "en",
+	},
 };
 
 if (process.env.NODE_ENV !== "production") {

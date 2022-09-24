@@ -2,6 +2,7 @@
 	"extends": ["next/core-web-vitals", "prettier"],
 	"plugins": ["header"],
 	"rules": {
+		"@next/next/no-img-element": "off",
 		"header/header": [
 			"error",
 			"block",

@@ -135,7 +135,7 @@ export const ShowHeader = ({ data }: { data?: Show | Movie }) => {
 						{data?.name ?? <Skeleton width="15rem" />}
 					</Typography>
 					{(!data || getDisplayDate(data)) && (
-						<Typography variant="h5" sx={{ color: { md: "white" }, fontWeight: 300, mb: ".5rem" }}>
+						<Typography component="p" variant="h5" sx={{ color: { md: "white" }, fontWeight: 300, mb: ".5rem" }}>
 							{data != undefined ? (
 								getDisplayDate(data)
 							) : (
