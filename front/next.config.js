@@ -24,12 +24,7 @@
 const nextConfig = {
 	reactStrictMode: true,
 	swcMinify: true,
-	env: {
-		KYOO_URL: process.env.KYOO_URL ?? "http://localhost:5000",
-	},
-	rewrites: async () => [
-		{ source: "/api/:path*", destination: process.env.KYOO_URL ?? "http://localhost:5000/:path*" },
-	],
+	output: "standalone",
 	async redirects() {
 		return [
 			{
@@ -40,5 +35,11 @@ const nextConfig = {
 		];
 	},
 };
+
+if (process.env.NODE_ENV !== "production") {
+	nextConfig.rewrites = async () => [
+		{ source: "/api/:path*", destination: process.env.KYOO_URL ?? "http://localhost:5000/:path*" },
+	];
+}
 
 module.exports = nextConfig;
