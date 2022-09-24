@@ -18,14 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-	FilterList,
-	GridView,
-	North,
-	Sort,
-	South,
-	ViewList,
-} from "@mui/icons-material";
+import { FilterList, GridView, North, Sort, South, ViewList } from "@mui/icons-material";
 import {
 	Box,
 	Button,
@@ -36,6 +29,7 @@ import {
 	Menu,
 	Skeleton,
 	Divider,
+	Tooltip,
 	Typography,
 } from "@mui/material";
 import useTranslation from "next-translate/useTranslation";
@@ -253,6 +247,8 @@ const BrowseSettings = ({
 	const router = useRouter();
 	const { t } = useTranslation("browse");
 
+	const switchViewTitle = layout === Layout.Grid ? t("browse.switchToList") : t("browse.switchToGrid");
+
 	return (
 		<>
 			<Box sx={{ display: "flex", justifyContent: "space-around" }}>
@@ -260,20 +256,28 @@ const BrowseSettings = ({
 					<Button disabled>
 						<FilterList />
 					</Button>
-					<Button
-						id="sortby"
-						aria-controls={sortAnchor ? "sorby-menu" : undefined}
-						aria-haspopup="true"
-						aria-expanded={sortAnchor ? "true" : undefined}
-						onClick={(event: MouseEvent<HTMLElement>) => setSortAnchor(event.currentTarget)}
-					>
-						<Sort />
-						{t("browse.sortby", { key: t(`browse.sortkey.${sortKey}`) })}
-						{sortOrd === SortOrd.Asc ? <South fontSize="small" /> : <North fontSize="small" />}
-					</Button>
-					<Button onClick={() => setLayout(layout === Layout.List ? Layout.Grid : Layout.List)}>
-						{layout === Layout.List ? <GridView /> : <ViewList />}
-					</Button>
+					<Tooltip title={t("browse.sortby-tt")}>
+						<Button
+							id="sortby"
+							aria-label={t("browse.sortby-tt")}
+							aria-controls={sortAnchor ? "sorby-menu" : undefined}
+							aria-haspopup="true"
+							aria-expanded={sortAnchor ? "true" : undefined}
+							onClick={(event: MouseEvent<HTMLElement>) => setSortAnchor(event.currentTarget)}
+						>
+							<Sort />
+							{t("browse.sortby", { key: t(`browse.sortkey.${sortKey}`) })}
+							{sortOrd === SortOrd.Asc ? <South fontSize="small" /> : <North fontSize="small" />}
+						</Button>
+					</Tooltip>
+					<Tooltip title={switchViewTitle}>
+						<Button
+							onClick={() => setLayout(layout === Layout.List ? Layout.Grid : Layout.List)}
+							aria-label={switchViewTitle}
+						>
+							{layout === Layout.List ? <GridView /> : <ViewList />}
+						</Button>
+					</Tooltip>
 				</ButtonGroup>
 			</Box>
 			<Menu

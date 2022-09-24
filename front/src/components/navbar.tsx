@@ -32,7 +32,6 @@ import {
 	AppBarProps,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-/* import logo from "../public/icons/icon.svg"; */
 import useTranslation from "next-translate/useTranslation";
 import Image from "next/image";
 import { ButtonLink } from "~/utils/link";
@@ -55,7 +54,7 @@ const KyooTitle = (props: { sx: SxProps<Theme> }) => {
 				}}
 				href="/"
 			>
-				<Image src={"/icon.svg"} width={24} height={24} alt="" />
+				<img src={"/icon.svg"} width="24px" height="24px" alt="" />
 				<Typography
 					variant="h6"
 					noWrap

@@ -13,6 +13,7 @@
 	},
 	"browse": {
 		"sortby": "Sort by {{key}}",
+		"sortby-tt": "Sort by",
 		"sortkey": {
 			"name": "Name",
 			"startAir": "Start air",
@@ -21,6 +22,12 @@
 		"sortord": {
 			"asc": "asc",
 			"desc": "decs"
-		}
+		},
+		"switchToGrid": "Switch to grid view",
+		"switchToList": "Switch to list view"
+	},
+	"misc": {
+		"prev-page": "Previous page",
+		"next-page": "Next page"
 	}
 }
