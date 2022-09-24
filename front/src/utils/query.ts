@@ -34,10 +34,12 @@ const queryFn = async <Data>(
 	type: z.ZodType<Data>,
 	context: QueryFunctionContext,
 ): Promise<Data> => {
+	const kyoo_url = process.env.KYOO_URL ?? "http://localhost:5000";
+
 	let resp;
 	try {
 		resp = await fetch(
-			[typeof window === "undefined" ? process.env.KYOO_URL : "/api"]
+			[typeof window === "undefined" ? kyoo_url : "/api"]
 				.concat(
 					context.pageParam ? [context.pageParam] : (context.queryKey.filter((x) => x) as string[]),
 				)

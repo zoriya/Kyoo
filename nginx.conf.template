@@ -1,0 +1,12 @@
+server {
+	listen ${PORT};
+	root /usr/share/nginx/html;
+
+	location / {
+		proxy_pass ${FRONT_URL};
+	}
+
+	location /api/ {
+		proxy_pass ${BACK_URL}/;
+	}
+}

@@ -4,13 +4,6 @@ WORKDIR /transcoder
 COPY src/Kyoo.Transcoder .
 RUN cmake . && make -j
 
-FROM node:14-alpine as webapp
-WORKDIR /webapp
-COPY front .
-RUN npm install -g @angular/cli
-RUN yarn install --frozen-lockfile
-RUN yarn run build --configuration production
-
 FROM mcr.microsoft.com/dotnet/sdk:6.0 as builder
 WORKDIR /kyoo
 COPY .git/ ./.git/
@@ -22,6 +15,5 @@ RUN apt-get update && apt-get install -y libavutil-dev libavcodec-dev libavforma
 EXPOSE 5000
 COPY --from=builder /opt/kyoo /usr/lib/kyoo
 COPY --from=transcoder /transcoder/libtranscoder.so /usr/lib/kyoo
-COPY --from=webapp /webapp/dist/* /usr/lib/kyoo/wwwroot/
 CMD ["/usr/lib/kyoo/Kyoo.Host.Console"]
 

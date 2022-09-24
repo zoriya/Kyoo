@@ -1,3 +1,7 @@
+Dockerfile
+.dockerignore
+docker-compose.yml
+README.md
 **/build
 **/dist
 src/Kyoo.WebApp/Front/nodes_modules
@@ -5,3 +9,6 @@ src/Kyoo.WebApp/Front/nodes_modules
 **/obj
 docs
 tests
+front
+video
+nginx.conf.template
