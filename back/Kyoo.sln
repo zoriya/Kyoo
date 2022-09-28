@@ -17,10 +17,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.TheMovieDb", "src\Kyoo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Tests", "tests\Kyoo.Tests\Kyoo.Tests.csproj", "{0C8AA7EA-E723-4532-852F-35AA4E8AFED5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.WebApp", "src\Kyoo.WebApp\Kyoo.WebApp.csproj", "{2374D500-1ADB-4752-85DB-8BB0DDF5A8E8}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Host.WindowsTrait", "src\Kyoo.Host.WindowsTrait\Kyoo.Host.WindowsTrait.csproj", "{98851001-40DD-46A6-94B3-2F8D90722076}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Host.Console", "src\Kyoo.Host.Console\Kyoo.Host.Console.csproj", "{D8658BEA-8949-45AC-BEBB-A4FFC4F800F5}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Swagger", "src\Kyoo.Swagger\Kyoo.Swagger.csproj", "{7D1A7596-73F6-4D35-842E-A5AD9C620596}"

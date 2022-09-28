@@ -26,13 +26,10 @@
 		<ProjectReference Include="../Kyoo.Postgresql/Kyoo.Postgresql.csproj" />
 		<ProjectReference Include="../Kyoo.SqLite/Kyoo.SqLite.csproj" />
 		<ProjectReference Include="../Kyoo.Authentication/Kyoo.Authentication.csproj" />
-		<ProjectReference Include="../Kyoo.WebApp/Kyoo.WebApp.csproj" />
 		<ProjectReference Include="../Kyoo.Swagger/Kyoo.Swagger.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<Content Include="../../LICENSE" CopyToOutputDirectory="Always" Visible="false" />
-		<Content Include="../../AUTHORS.md" CopyToOutputDirectory="Always" Visible="false" />
 		<Content Include="settings.json" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 </Project>
