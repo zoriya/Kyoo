@@ -6,9 +6,8 @@ RUN cmake . && make -j
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 as builder
 WORKDIR /kyoo
-COPY .git/ ./.git/
 COPY . .
-RUN dotnet publish -c Release -o /opt/kyoo '-p:SkipWebApp=true;SkipTranscoder=true;CheckCodingStyle=false' src/Kyoo.Host.Console
+RUN dotnet publish -c Release -o /opt/kyoo '-p:SkipTranscoder=true;CheckCodingStyle=false' src/Kyoo.Host.Console
 
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
 RUN apt-get update && apt-get install -y libavutil-dev libavcodec-dev libavformat-dev

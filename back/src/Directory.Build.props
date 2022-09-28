@@ -18,7 +18,7 @@
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
-		<ApplicationIcon>$(MSBuildThisFileDirectory)../icons/icon-256x256.ico</ApplicationIcon>
+		<ApplicationIcon>$(MSBuildThisFileDirectory)../icon.ico</ApplicationIcon>
 
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 	</PropertyGroup>
@@ -31,12 +31,8 @@
 		<CheckCodingStyle Condition="$(CheckCodingStyle) == ''">true</CheckCodingStyle>
 	</PropertyGroup>
 
-	<ItemGroup>
+	<ItemGroup Condition="Exists('../../.git')">
 		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.0-beta-20204-02" PrivateAssets="All" />
-		<PackageReference Include="GitVersion.MsBuild" Version="5.10.1">
-			<PrivateAssets>all</PrivateAssets>
-			<IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-		</PackageReference>
 	</ItemGroup>
 
 	<ItemGroup Condition="$(CheckCodingStyle) == true">
