@@ -9,8 +9,10 @@ README.md
 src/Kyoo.WebApp/Front/nodes_modules
 **/bin
 **/obj
+out
 docs
 tests
+!tests/Kyoo.Tests/Kyoo.Tests.csproj
 front
 video
 nginx.conf.template

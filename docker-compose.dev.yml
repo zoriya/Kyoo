@@ -5,24 +5,33 @@ services:
     build: 
       context: ./back
       dockerfile: Dockerfile.dev
+    ports:
+      - "5000:5000"
     restart: on-failure
     environment:
       - KYOO_DATADIR=/var/lib/kyoo
       - DATABASE__ENABLED=postgres
       - DATABASE__CONFIGURATIONS__POSTGRES__SERVER=postgres
-      - DATABASE__CONFIGURATIONS__POSTGRES__USER=kyoo
-      - DATABASE__CONFIGURATIONS__POSTGRES__PASSWORD=kyooPassword
+      - DATABASE__CONFIGURATIONS__POSTGRES__USER=${POSTGRES_USER}
+      - DATABASE__CONFIGURATIONS__POSTGRES__PASSWORD=${POSTGRES_PASSWORD}
       - TVDB__APIKEY=${TVDB__APIKEY}
       - THEMOVIEDB__APIKEY=${THEMOVIEDB__APIKEY}
     depends_on:
       - postgres
     volumes:
+      - ./back:/app
+      - /app/out
       - kyoo:/var/lib/kyoo
       - ./video:/video
   front:
     build: 
       context: ./front
       dockerfile: Dockerfile.dev
+    volumes:
+      - ./front:/app
+      - /app/nodes_modules
+    ports:
+      - "3000:3000"
     restart: on-failure
     environment:
       - KYOO_URL=http://kyoo:5000
@@ -31,7 +40,7 @@ services:
     restart: on-failure
     environment:
       - PORT=8901
-      - FRONT_URL=http://front:8901
+      - FRONT_URL=http://front:3000
       - BACK_URL=http://kyoo:5000
     volumes:
       - ./nginx.conf.template:/etc/nginx/templates/kyoo.conf.template:ro
@@ -44,8 +53,8 @@ services:
     image: "postgres"
     restart: on-failure
     environment:
-      - POSTGRES_USER=kyoo
-      - POSTGRES_PASSWORD=kyooPassword
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
     volumes:
       - db:/var/lib/postgresql/data
 
