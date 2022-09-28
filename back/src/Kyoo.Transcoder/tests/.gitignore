@@ -1,0 +1,5 @@
+segments/
+out.m3u8
+*.o
+vgcore.*
+out
