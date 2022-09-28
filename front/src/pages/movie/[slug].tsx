@@ -135,7 +135,11 @@ export const ShowHeader = ({ data }: { data?: Show | Movie }) => {
 						{data?.name ?? <Skeleton width="15rem" />}
 					</Typography>
 					{(!data || getDisplayDate(data)) && (
-						<Typography component="p" variant="h5" sx={{ color: { md: "white" }, fontWeight: 300, mb: ".5rem" }}>
+						<Typography
+							component="p"
+							variant="h5"
+							sx={{ color: { md: "white" }, fontWeight: 300, mb: ".5rem" }}
+						>
 							{data != undefined ? (
 								getDisplayDate(data)
 							) : (
@@ -247,7 +251,6 @@ export const ShowHeader = ({ data }: { data?: Show | Movie }) => {
 	);
 };
 
-
 export const ShowStaff = ({ slug }: { slug: string }) => {
 	const { items, isError, error } = useInfiniteFetch(ShowStaff.query(slug));
 	const { t } = useTranslation("browse");
@@ -300,11 +303,6 @@ const MovieDetails: QueryPage<{ slug: string }> = ({ slug }) => {
 	);
 };
 
-
-MovieDetails.getFetchUrls = ({ slug }) => [
-	query(slug),
-	ShowStaff.query(slug),
-	Navbar.query(),
-];
+MovieDetails.getFetchUrls = ({ slug }) => [query(slug), ShowStaff.query(slug), Navbar.query()];
 
 export default withRoute(MovieDetails);

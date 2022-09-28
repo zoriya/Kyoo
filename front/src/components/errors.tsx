@@ -22,7 +22,7 @@ import { Alert, Box, Snackbar, SnackbarCloseReason, Typography, SxProps } from "
 import { SyntheticEvent, useState } from "react";
 import { KyooErrors } from "~/models";
 
-export const ErrorComponent = ({ errors, sx }: { errors: string[], sx?: SxProps }) => {
+export const ErrorComponent = ({ errors, sx }: { errors: string[]; sx?: SxProps }) => {
 	return (
 		<Box
 			sx={{
@@ -32,10 +32,12 @@ export const ErrorComponent = ({ errors, sx }: { errors: string[], sx?: SxProps 
 				justifyContent: "center",
 				height: "100%",
 				backgroundColor: "error.light",
-				...sx
+				...sx,
 			}}
 		>
-			<Typography variant="h1" component="h1" sx={{ fontWeight: 500 }}>Error</Typography>
+			<Typography variant="h1" component="h1" sx={{ fontWeight: 500 }}>
+				Error
+			</Typography>
 			{errors.map((x, i) => (
 				<Typography variant="h2" component="h2" key={i}>
 					{x}

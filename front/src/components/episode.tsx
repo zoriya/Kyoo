@@ -42,7 +42,7 @@ export const EpisodeBox = ({ episode, sx }: { episode?: Episode; sx: SxProps }) 
 };
 
 export const EpisodeLine = ({ episode, sx }: { episode?: Episode; sx?: SxProps }) => {
-	const { t } = useTranslation("browse"); 
+	const { t } = useTranslation("browse");
 
 	return (
 		<>
@@ -61,7 +61,13 @@ export const EpisodeLine = ({ episode, sx }: { episode?: Episode; sx?: SxProps }
 				<Typography variant="overline" align="center" sx={{ width: "4rem", flexShrink: 0 }}>
 					{episode ? displayNumber(episode) : <Skeleton />}
 				</Typography>
-				<Image img={episode?.thumbnail} alt="" width="18%" aspectRatio="16/9" sx={{ flexShrink: 0 }} />
+				<Image
+					img={episode?.thumbnail}
+					alt=""
+					width="18%"
+					aspectRatio="16/9"
+					sx={{ flexShrink: 0 }}
+				/>
 				{episode ? (
 					<Box sx={{ flexGrow: 1 }}>
 						<Typography variant="h6">{episode.name ?? t("show.episodeNoMetadata")}</Typography>

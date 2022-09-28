@@ -247,7 +247,9 @@ const BrowseSettings = ({
 	const router = useRouter();
 	const { t } = useTranslation("browse");
 
-	const switchViewTitle = layout === Layout.Grid ? t("browse.switchToList") : t("browse.switchToGrid");
+	const switchViewTitle = layout === Layout.Grid 
+		? t("browse.switchToList")
+		: t("browse.switchToGrid");
 
 	return (
 		<>
