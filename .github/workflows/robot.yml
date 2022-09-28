@@ -20,7 +20,7 @@ jobs:
       - name: Perform healthchecks
         run: |
           docker-compose ps -a
-          wget --retry-connrefused http://localhost:5000 # /healthcheck
+          wget --retry-connrefused http://localhost:8901 # /healthcheck
 
       - name: Run robot tests
         run: |

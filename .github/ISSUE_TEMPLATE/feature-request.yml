@@ -1,3 +1,7 @@
 name: Feature Request
 description: Suggest a new feature for Kyoo (don't forget to check projects first)
 labels: [enhancement]
+body:
+  - type: textarea
+    attributes:
+      label: Feature description
