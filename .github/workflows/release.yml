@@ -20,13 +20,6 @@ jobs:
           repo-token: ${{secrets.GITHUB_TOKEN}}
           running-workflow-name: release
           allowed-conclusions: success,skipped,cancelled,neutral
-      - name: Download artifacts
-        uses: dawidd6/action-download-artifact@v2
-        with:
-          commit: ${{env.COMMIT_SHA}}
-          workflow: build.yml
-          path: ./artifacts
-          github_token: ${{secrets.GITHUB_TOKEN}}
       # - name: Public the abstractions to nuget
       #   id: publish_nuget
       #   uses: rohith/publish-nuget@v2
@@ -40,5 +33,4 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           generateReleaseNotes: true
-          artifacts: ./artifacts/**/*
           token: ${{secrets.GITHUB_TOKEN}}

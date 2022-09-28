@@ -32,7 +32,6 @@ using Kyoo.Swagger;
 using Kyoo.TheMovieDb;
 using Kyoo.TheTvdb;
 using Kyoo.Utils;
-using Kyoo.WebApp;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -77,7 +76,6 @@ namespace Kyoo.Host.Generic
 			_hostModule = new HostModule(_plugins);
 			_plugins.LoadPlugins(
 				typeof(CoreModule),
-				typeof(WebAppModule),
 				typeof(AuthenticationModule),
 				typeof(PostgresModule),
 				typeof(SqLiteModule),
