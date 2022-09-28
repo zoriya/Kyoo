@@ -19,14 +19,22 @@
  */
 
 import { forwardRef, Ref } from "react";
-import NLink, { LinkProps as NLinkProps} from "next/link";
-import { Button as MButton, ButtonProps, Link as MLink, LinkProps as MLinkProps} from "@mui/material";
+import NLink, { LinkProps as NLinkProps } from "next/link";
+import {
+	Button as MButton,
+	ButtonProps,
+	Link as MLink,
+	LinkProps as MLinkProps,
+} from "@mui/material";
 
 type ButtonRef = HTMLButtonElement;
 type ButtonLinkProps = Omit<ButtonProps, "href"> &
 	Pick<NLinkProps, "href" | "as" | "prefetch" | "locale">;
 
-const NextButton = ({ href, as, prefetch, locale, ...props }: ButtonLinkProps, ref: Ref<ButtonRef>) => (
+const NextButton = (
+	{ href, as, prefetch, locale, ...props }: ButtonLinkProps,
+	ref: Ref<ButtonRef>,
+) => (
 	<NLink href={href} as={as} prefetch={prefetch} locale={locale} passHref>
 		<MButton ref={ref} {...props} />
 	</NLink>
@@ -37,10 +45,21 @@ export const ButtonLink = forwardRef<ButtonRef, ButtonLinkProps>(NextButton);
 type LinkRef = HTMLAnchorElement;
 type LinkProps = Omit<MLinkProps, "href"> &
 	Pick<NLinkProps, "as" | "prefetch" | "locale" | "shallow" | "replace"> &
-	({ to: NLinkProps["href"], href?: undefined } | { href: NLinkProps["href"], to?: undefined });
+	({ to: NLinkProps["href"]; href?: undefined } | { href: NLinkProps["href"]; to?: undefined });
 
-const NextLink = ({ href, to, as, prefetch, locale, shallow, replace, ...props }: LinkProps, ref: Ref<LinkRef>) => (
-	<NLink href={href ?? to} as={as} prefetch={prefetch} locale={locale} shallow={shallow} replace={replace} passHref>
+const NextLink = (
+	{ href, to, as, prefetch, locale, shallow, replace, ...props }: LinkProps,
+	ref: Ref<LinkRef>,
+) => (
+	<NLink
+		href={href ?? to}
+		as={as}
+		prefetch={prefetch}
+		locale={locale}
+		shallow={shallow}
+		replace={replace}
+		passHref
+	>
 		<MLink ref={ref} {...props} />
 	</NLink>
 );

@@ -24,7 +24,15 @@ import { ReactNode, useRef } from "react";
 import { Container } from "./container";
 import useTranslation from "next-translate/useTranslation";
 
-export const HorizontalList = ({ title, noContent, children }: { title: string, noContent: string, children: ReactNode[] }) => {
+export const HorizontalList = ({
+	title,
+	noContent,
+	children,
+}: {
+	title: string;
+	noContent: string;
+	children: ReactNode[];
+}) => {
 	const { t } = useTranslation("browse");
 	const ref = useRef<HTMLDivElement>(null);
 	const getScrollSize = () => {
@@ -41,18 +49,24 @@ export const HorizontalList = ({ title, noContent, children }: { title: string, 
 		<>
 			<Container
 				sx={{ display: "flex", flexDirection: "row", justifyContent: "space-between", py: 3 }}
-				>
+			>
 				<Typography variant="h4" component="h2">
 					{title}
 				</Typography>
 				<Box>
 					<Tooltip title={t("misc.prev-page")}>
-						<IconButton aria-label={t("misc.prev-page")} onClick={() => ref.current?.scrollBy({ left: -getScrollSize(), behavior: "smooth" })}>
+						<IconButton
+							aria-label={t("misc.prev-page")}
+							onClick={() => ref.current?.scrollBy({ left: -getScrollSize(), behavior: "smooth" })}
+						>
 							<ArrowLeft />
 						</IconButton>
 					</Tooltip>
 					<Tooltip title={t("misc.next-page")}>
-						<IconButton aria-label={t("misc.next-page")} onClick={() => ref.current?.scrollBy({ left: getScrollSize(), behavior: "smooth" })}>
+						<IconButton
+							aria-label={t("misc.next-page")}
+							onClick={() => ref.current?.scrollBy({ left: getScrollSize(), behavior: "smooth" })}
+						>
 							<ArrowRight />
 						</IconButton>
 					</Tooltip>
@@ -62,22 +76,22 @@ export const HorizontalList = ({ title, noContent, children }: { title: string, 
 				<Box sx={{ display: "flex", justifyContent: "center" }}>
 					<Typography sx={{ py: 3 }}>{noContent}</Typography>
 				</Box>
-				) : (
-					<Container
-						sx={{
-							display: "flex",
-							flexDirection: "row",
-							maxWidth: "100%",
-							overflowY: "auto",
-							pt: 1,
-							pb: 2,
-							overflowX: "visible",
-						}}
-						ref={ref}
-						>
-						{children}
-					</Container>
+			) : (
+				<Container
+					sx={{
+						display: "flex",
+						flexDirection: "row",
+						maxWidth: "100%",
+						overflowY: "auto",
+						pt: 1,
+						pb: 2,
+						overflowX: "visible",
+					}}
+					ref={ref}
+				>
+					{children}
+				</Container>
 			)}
 		</>
 	);
-}
+};

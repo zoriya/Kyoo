@@ -63,7 +63,7 @@ const KyooTitle = (props: { sx: SxProps<Theme> }) => {
 						mr: 2,
 						fontFamily: "monospace",
 						fontWeight: 700,
-						color: "white"
+						color: "white",
 					}}
 				>
 					Kyoo
@@ -112,7 +112,7 @@ export const Navbar = (barProps: AppBarProps) => {
 				</Box>
 				<Tooltip title={t("navbar.login")}>
 					<IconButton sx={{ p: 0 }} href="/auth/login">
-						<Avatar alt={t("navbar.login")}/>
+						<Avatar alt={t("navbar.login")} />
 					</IconButton>
 				</Tooltip>
 			</Toolbar>
@@ -125,4 +125,3 @@ Navbar.query = (): QueryIdentifier<Page<Library>> => ({
 	parser: Paged(LibraryP),
 	path: ["libraries"],
 });
-

@@ -67,9 +67,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 			</Head>
 			<QueryClientProvider client={queryClient}>
 				<Hydrate state={queryState}>
-					<ThemeProvider theme={defaultTheme}>
-						{getLayout(<Component {...props} />)}
-					</ThemeProvider>
+					<ThemeProvider theme={defaultTheme}>{getLayout(<Component {...props} />)}</ThemeProvider>
 				</Hydrate>
 			</QueryClientProvider>
 		</>

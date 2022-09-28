@@ -61,7 +61,7 @@ const queryFn = async <Data>(
 		} catch (e) {
 			data = { errors: [error] } as KyooErrors;
 		}
-		console.log("Invalid response:", data)
+		console.log("Invalid response:", data);
 		throw data as KyooErrors;
 	}
 
@@ -132,7 +132,7 @@ export const useInfiniteFetch = <Data>(query: QueryIdentifier<Data>) => {
 		queryFn: (ctx) => queryFn(Paged(query.parser), ctx),
 		getNextPageParam: (page: Page<Data>) => page?.next || undefined,
 	});
-	return {...ret, items: ret.data?.pages.flatMap((x) => x.items)}
+	return { ...ret, items: ret.data?.pages.flatMap((x) => x.items) };
 };
 
 export const fetchQuery = async (queries: QueryIdentifier[]) => {

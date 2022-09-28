@@ -38,8 +38,17 @@ export const LibraryItemP = z.preprocess(
 		return x;
 	},
 	z.union([
+		/*
+		 * Either a Show
+		 */
 		ShowP.and(z.object({ type: z.literal(ItemType.Show) })),
+		/*
+		 * Or a Movie
+		 */
 		MovieP.and(z.object({ type: z.literal(ItemType.Movie) })),
+		/*
+		 * Or a Collection
+		 */
 		CollectionP.and(z.object({ type: z.literal(ItemType.Collection) })),
 	]),
 );
