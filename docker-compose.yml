@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  kyoo:
+  back:
     build: ./back
     restart: on-failure
     environment:
@@ -10,6 +10,7 @@ services:
       - DATABASE__CONFIGURATIONS__POSTGRES__SERVER=postgres
       - DATABASE__CONFIGURATIONS__POSTGRES__USER=${POSTGRES_USER}
       - DATABASE__CONFIGURATIONS__POSTGRES__PASSWORD=${POSTGRES_PASSWORD}
+      - DATABASE__CONFIGURATIONS__POSTGRES__DATABASE=${POSTGRES_DB}
       - TVDB__APIKEY=${TVDB__APIKEY}
       - THEMOVIEDB__APIKEY=${THEMOVIEDB__APIKEY}
     depends_on:
@@ -21,27 +22,28 @@ services:
     build: ./front
     restart: on-failure
     environment:
-      - KYOO_URL=http://kyoo:5000
+      - KYOO_URL=http://back:5000
   ingress:
     image: nginx
     restart: on-failure
     environment:
       - PORT=8901
       - FRONT_URL=http://front:8901
-      - BACK_URL=http://kyoo:5000
+      - BACK_URL=http://back:5000
     volumes:
       - ./nginx.conf.template:/etc/nginx/templates/kyoo.conf.template:ro
     depends_on:
-      - kyoo
+      - back
       - front
     ports:
       - "8901:8901"
   postgres:
-    image: "postgres"
+    image: postgres
     restart: on-failure
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     volumes:
       - db:/var/lib/postgresql/data
 

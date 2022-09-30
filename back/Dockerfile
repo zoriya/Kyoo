@@ -6,8 +6,27 @@ RUN cmake . && make -j
 
 FROM mcr.microsoft.com/dotnet/sdk:6.0 as builder
 WORKDIR /kyoo
+
+COPY Kyoo.sln ./Kyoo.sln
+COPY nuget.config ./nuget.config
+COPY src/Directory.Build.props src/Directory.Build.props
+COPY src/Kyoo.Authentication/Kyoo.Authentication.csproj src/Kyoo.Authentication/Kyoo.Authentication.csproj
+COPY src/Kyoo.Database/Kyoo.Database.csproj src/Kyoo.Database/Kyoo.Database.csproj
+COPY src/Kyoo.Host.Generic/Kyoo.Host.Generic.csproj src/Kyoo.Host.Generic/Kyoo.Host.Generic.csproj
+COPY src/Kyoo.SqLite/Kyoo.SqLite.csproj src/Kyoo.SqLite/Kyoo.SqLite.csproj
+COPY src/Kyoo.TheMovieDb/Kyoo.TheMovieDb.csproj src/Kyoo.TheMovieDb/Kyoo.TheMovieDb.csproj
+COPY src/Kyoo.Abstractions/Kyoo.Abstractions.csproj src/Kyoo.Abstractions/Kyoo.Abstractions.csproj
+COPY src/Kyoo.Core/Kyoo.Core.csproj src/Kyoo.Core/Kyoo.Core.csproj
+COPY src/Kyoo.Host.Console/Kyoo.Host.Console.csproj src/Kyoo.Host.Console/Kyoo.Host.Console.csproj
+COPY src/Kyoo.Postgresql/Kyoo.Postgresql.csproj src/Kyoo.Postgresql/Kyoo.Postgresql.csproj
+COPY src/Kyoo.Swagger/Kyoo.Swagger.csproj src/Kyoo.Swagger/Kyoo.Swagger.csproj
+COPY src/Kyoo.TheTvdb/Kyoo.TheTvdb.csproj src/Kyoo.TheTvdb/Kyoo.TheTvdb.csproj
+COPY tests/Kyoo.Tests/Kyoo.Tests.csproj tests/Kyoo.Tests/Kyoo.Tests.csproj
+RUN dotnet restore
+
 COPY . .
-RUN dotnet publish -c Release -o /opt/kyoo '-p:SkipTranscoder=true;CheckCodingStyle=false' src/Kyoo.Host.Console
+ARG VERSION
+RUN dotnet publish --no-restore -c Release -o /opt/kyoo "-p:Version=${VERSION:-"0.0.0-dev"};SkipTranscoder=true" src/Kyoo.Host.Console
 
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
 RUN apt-get update && apt-get install -y libavutil-dev libavcodec-dev libavformat-dev

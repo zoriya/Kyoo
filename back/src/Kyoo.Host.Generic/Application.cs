@@ -159,18 +159,7 @@ namespace Kyoo.Host.Generic
 		/// <returns>The current data directory.</returns>
 		private string _SetupDataDir(string[] args)
 		{
-			Dictionary<string, string> registry = new();
-
-			if (OperatingSystem.IsWindows())
-			{
-				object dataDir = Registry.GetValue(@"HKEY_LOCAL_MACHINE\Software\SDG\Kyoo\Settings", "DataDir", null)
-					?? Registry.GetValue(@"HKEY_CURRENT_USER\Software\SDG\Kyoo\Settings", "DataDir", null);
-				if (dataDir is string data)
-					registry.Add("DataDir", data);
-			}
-
 			IConfiguration parsed = new ConfigurationBuilder()
-				.AddInMemoryCollection(registry)
 				.AddEnvironmentVariables()
 				.AddEnvironmentVariables("KYOO_")
 				.AddCommandLine(args)
@@ -186,8 +175,10 @@ namespace Kyoo.Host.Generic
 
 			if (!File.Exists(GetConfigFile()))
 			{
-				File.Copy(Path.Join(AppDomain.CurrentDomain.BaseDirectory, GetConfigFile()),
-					GetConfigFile());
+				File.Copy(
+					Path.Join(AppDomain.CurrentDomain.BaseDirectory, GetConfigFile()),
+					GetConfigFile()
+				);
 			}
 
 			return path;
