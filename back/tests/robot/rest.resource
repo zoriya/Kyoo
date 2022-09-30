@@ -1,4 +1,4 @@
 *** Settings ***
 Documentation       Common things to handle rest requests
 
-Library             REST    http://localhost:5000
+Library             REST    http://localhost:8901/api

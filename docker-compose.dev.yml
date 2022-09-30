@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-  kyoo:
+  back:
     build: 
       context: ./back
       dockerfile: Dockerfile.dev
@@ -34,18 +34,18 @@ services:
       - "3000:3000"
     restart: on-failure
     environment:
-      - KYOO_URL=http://kyoo:5000
+      - KYOO_URL=http://back:5000
   ingress:
     image: nginx
     restart: on-failure
     environment:
       - PORT=8901
       - FRONT_URL=http://front:3000
-      - BACK_URL=http://kyoo:5000
+      - BACK_URL=http://back:5000
     volumes:
       - ./nginx.conf.template:/etc/nginx/templates/kyoo.conf.template:ro
     depends_on:
-      - kyoo
+      - back
       - front
     ports:
       - "8901:8901"

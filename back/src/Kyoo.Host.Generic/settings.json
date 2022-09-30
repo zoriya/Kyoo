@@ -19,7 +19,7 @@
         "server": "127.0.0.1",
         "port": "5432",
         "database": "kyooDB",
-        "user ID": "kyoo",
+        "user": "kyoo",
         "password": "kyooPassword",
         "pooling": "true",
         "maxPoolSize": "95",

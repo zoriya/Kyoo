@@ -2,4 +2,6 @@ video
 .env
 .idea
 .vscode
-
+log.html
+output.xml
+report.html
