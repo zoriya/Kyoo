@@ -31,6 +31,5 @@ COPY --from=transcoder /transcoder/libtranscoder.so /usr/lib/
 
 EXPOSE 5000
 ENV DOTNET_USE_POLLING_FILE_WATCHER 1
-ENV LD_DEBUG libs
 CMD ["dotnet", "watch", "run", "--no-restore", "--project", "src/Kyoo.Host.Console"]
 
