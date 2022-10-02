@@ -18,12 +18,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
-using Kyoo.Abstractions;
 using Kyoo.Abstractions.Controllers;
-using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -130,10 +130,10 @@ namespace Kyoo.Swagger
 		public IEnumerable<IStartupAction> ConfigureSteps => new IStartupAction[]
 		{
 			SA.New<IApplicationBuilder>(app => app.UseOpenApi(), SA.Before + 1),
-			SA.New<IApplicationBuilder>(app => app.UseSwaggerUi3(), SA.Before),
 			SA.New<IApplicationBuilder>(app => app.UseReDoc(x =>
 			{
-				x.Path = "/redoc";
+				x.Path = "/doc";
+				x.TransformToExternalPath = (internalUiRoute, request) => "/api" + internalUiRoute;
 				x.AdditionalSettings["theme"] = new
 				{
 					colors = new { primary = new { main = "#e13e13" } }
