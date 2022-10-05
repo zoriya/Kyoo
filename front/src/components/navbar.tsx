@@ -33,7 +33,6 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import useTranslation from "next-translate/useTranslation";
-import Image from "next/image";
 import { ButtonLink } from "~/utils/link";
 import { Library, LibraryP, Page, Paged } from "~/models";
 import { QueryIdentifier, useFetch } from "~/utils/query";

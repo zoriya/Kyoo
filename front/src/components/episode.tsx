@@ -24,11 +24,14 @@ import { Episode } from "~/models";
 import { Link } from "~/utils/link";
 import { Image } from "./poster";
 
-const displayNumber = (episode: Episode) => {
+export const episodeDisplayNumber = (
+	episode: { seasonNumber?: number; episodeNumber?: number; absoluteNumber?: number },
+	def?: string,
+) => {
 	if (typeof episode.seasonNumber === "number" && typeof episode.episodeNumber === "number")
 		return `S${episode.seasonNumber}:E${episode.episodeNumber}`;
 	if (episode.absoluteNumber) return episode.absoluteNumber.toString();
-	return "???";
+	return def;
 };
 
 export const EpisodeBox = ({ episode, sx }: { episode?: Episode; sx: SxProps }) => {
@@ -59,7 +62,7 @@ export const EpisodeLine = ({ episode, sx }: { episode?: Episode; sx?: SxProps }
 				}}
 			>
 				<Typography variant="overline" align="center" sx={{ width: "4rem", flexShrink: 0 }}>
-					{episode ? displayNumber(episode) : <Skeleton />}
+					{episode ? episodeDisplayNumber(episode, "???") : <Skeleton />}
 				</Typography>
 				<Image
 					img={episode?.thumbnail}

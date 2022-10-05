@@ -38,7 +38,7 @@ export const ErrorComponent = ({ errors, sx }: { errors: string[]; sx?: SxProps 
 			<Typography variant="h1" component="h1" sx={{ fontWeight: 500 }}>
 				Error
 			</Typography>
-			{errors.map((x, i) => (
+			{errors?.map((x, i) => (
 				<Typography variant="h2" component="h2" key={i}>
 					{x}
 				</Typography>

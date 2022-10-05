@@ -206,7 +206,8 @@ namespace Kyoo.Abstractions.Models
 				Subtitles = ep.Tracks.Where(x => x.Type == StreamType.Subtitle).ToArray(),
 				PreviousEpisode = previous,
 				NextEpisode = next,
-				Chapters = await _GetChapters(ep.Path)
+				Chapters = await _GetChapters(ep.Path),
+				IsMovie = ep.Show.IsMovie
 			};
 		}
 

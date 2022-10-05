@@ -25,6 +25,7 @@ import { ResourceP } from "../traits/resource";
 
 export const EpisodeP = z.preprocess(
 	(x: any) => {
+		if (!x) return x;
 		x.name = x.title;
 		return x;
 	},

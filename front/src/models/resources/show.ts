@@ -37,6 +37,7 @@ export enum Status {
 
 export const ShowP = z.preprocess(
 	(x: any) => {
+		if (!x) return x;
 		// Waiting for the API to be updaded
 		x.name = x.title;
 		if (x.aliases === null) x.aliases = [];
