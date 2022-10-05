@@ -25,7 +25,11 @@ import { Link } from "~/utils/link";
 import { Image } from "./poster";
 
 export const episodeDisplayNumber = (
-	episode: { seasonNumber?: number; episodeNumber?: number; absoluteNumber?: number },
+	episode: {
+		seasonNumber?: number | null;
+		episodeNumber?: number | null;
+		absoluteNumber?: number | null;
+	},
 	def?: string,
 ) => {
 	if (typeof episode.seasonNumber === "number" && typeof episode.episodeNumber === "number")

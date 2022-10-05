@@ -60,6 +60,7 @@ export const TrackP = ResourceP.extend({
 	 */
 	displayName: z.string(),
 });
+export type Track = z.infer<typeof TrackP>;
 
 export const ChapterP = z.object({
 	/**

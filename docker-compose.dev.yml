@@ -20,7 +20,7 @@ services:
       - postgres
     volumes:
       - ./back:/app
-      - /app/out
+      - /app/out/
       - kyoo:/var/lib/kyoo
       - ./video:/video
   front:
@@ -29,7 +29,8 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./front:/app
-      - /app/nodes_modules
+      - /app/node_modules/
+      - /app/.next/
     ports:
       - "3000:3000"
     restart: on-failure
@@ -55,6 +56,7 @@ services:
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     volumes:
       - db:/var/lib/postgresql/data
 

@@ -18,6 +18,8 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+const CopyPlugin = require("copy-webpack-plugin");
+
 /**
  * @type {import("next").NextConfig}
  */
@@ -25,6 +27,21 @@ const nextConfig = {
 	reactStrictMode: true,
 	swcMinify: true,
 	output: "standalone",
+	webpack: (config) => {
+		config.plugins = [
+			...config.plugins,
+			new CopyPlugin({
+				patterns: [
+					{
+						context: "node_modules/@jellyfin/libass-wasm/dist/js/",
+						from: "*",
+						to: "static/chunks/",
+					},
+				],
+			}),
+		];
+		return config;
+	},
 	async redirects() {
 		return [
 			{
