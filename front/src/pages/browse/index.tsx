@@ -228,6 +228,78 @@ const Item = ({ item, layout }: { item?: LibraryItem; layout: Layout }) => {
 	}
 };
 
+const SortByMenu = ({
+	sortKey,
+	setSort,
+	sortOrd,
+	setSortOrd,
+	anchor,
+	onClose,
+}: {
+	sortKey: SortBy;
+	setSort: (sort: SortBy) => void;
+	sortOrd: SortOrd;
+	setSortOrd: (sort: SortOrd) => void;
+	anchor: HTMLElement;
+	onClose: () => void;
+}) => {
+	const router = useRouter();
+	const { t } = useTranslation("browse");
+
+	return (
+		<Menu
+			id="sortby-menu"
+			MenuListProps={{
+				"aria-labelledby": "sortby",
+			}}
+			anchorEl={anchor}
+			open={!!anchor}
+			onClose={onClose}
+		>
+			{Object.values(SortBy).map((x) => (
+				<MenuItem
+					key={x}
+					selected={sortKey === x}
+					onClick={() => setSort(x)}
+					component={Link}
+					to={{ query: { ...router.query, sortBy: `${sortKey}-${sortOrd}` } }}
+					shallow
+					replace
+				>
+					<ListItemText>{t(`browse.sortkey.${x}`)}</ListItemText>
+				</MenuItem>
+			))}
+			<Divider />
+			<MenuItem
+				selected={sortOrd === SortOrd.Asc}
+				onClick={() => setSortOrd(SortOrd.Asc)}
+				component={Link}
+				to={{ query: { ...router.query, sortBy: `${sortKey}-${sortOrd}` } }}
+				shallow
+				replace
+			>
+				<ListItemIcon>
+					<South fontSize="small" />
+				</ListItemIcon>
+				<ListItemText>{t("browse.sortord.asc")}</ListItemText>
+			</MenuItem>
+			<MenuItem
+				selected={sortOrd === SortOrd.Desc}
+				onClick={() => setSortOrd(SortOrd.Desc)}
+				component={Link}
+				to={{ query: { ...router.query, sortBy: `${sortKey}-${sortOrd}` } }}
+				shallow
+				replace
+			>
+				<ListItemIcon>
+					<North fontSize="small" />
+				</ListItemIcon>
+				<ListItemText>{t("browse.sortord.desc")}</ListItemText>
+			</MenuItem>
+		</Menu>
+	);
+};
+
 const BrowseSettings = ({
 	sortKey,
 	setSort,
@@ -244,7 +316,6 @@ const BrowseSettings = ({
 	setLayout: (layout: Layout) => void;
 }) => {
 	const [sortAnchor, setSortAnchor] = useState<HTMLElement | null>(null);
-	const router = useRouter();
 	const { t } = useTranslation("browse");
 
 	const switchViewTitle = layout === Layout.Grid 
@@ -265,7 +336,7 @@ const BrowseSettings = ({
 							aria-controls={sortAnchor ? "sorby-menu" : undefined}
 							aria-haspopup="true"
 							aria-expanded={sortAnchor ? "true" : undefined}
-							onClick={(event: MouseEvent<HTMLElement>) => setSortAnchor(event.currentTarget)}
+							onClick={(event) => setSortAnchor(event.currentTarget)}
 						>
 							<Sort />
 							{t("browse.sortby", { key: t(`browse.sortkey.${sortKey}`) })}
@@ -282,56 +353,16 @@ const BrowseSettings = ({
 					</Tooltip>
 				</ButtonGroup>
 			</Box>
-			<Menu
-				id="sortby-menu"
-				MenuListProps={{
-					"aria-labelledby": "sortby",
-				}}
-				anchorEl={sortAnchor}
-				open={!!sortAnchor}
-				onClose={() => setSortAnchor(null)}
-			>
-				{Object.values(SortBy).map((x) => (
-					<MenuItem
-						key={x}
-						selected={sortKey === x}
-						onClick={() => setSort(x)}
-						component={Link}
-						to={{ query: { ...router.query, sortBy: `${sortKey}-${sortOrd}` } }}
-						shallow
-						replace
-					>
-						<ListItemText>{t(`browse.sortkey.${x}`)}</ListItemText>
-					</MenuItem>
-				))}
-				<Divider />
-				<MenuItem
-					selected={sortOrd === SortOrd.Asc}
-					onClick={() => setSortOrd(SortOrd.Asc)}
-					component={Link}
-					to={{ query: { ...router.query, sortBy: `${sortKey}-${sortOrd}` } }}
-					shallow
-					replace
-				>
-					<ListItemIcon>
-						<South fontSize="small" />
-					</ListItemIcon>
-					<ListItemText>{t("browse.sortord.asc")}</ListItemText>
-				</MenuItem>
-				<MenuItem
-					selected={sortOrd === SortOrd.Desc}
-					onClick={() => setSortOrd(SortOrd.Desc)}
-					component={Link}
-					to={{ query: { ...router.query, sortBy: `${sortKey}-${sortOrd}` } }}
-					shallow
-					replace
-				>
-					<ListItemIcon>
-						<North fontSize="small" />
-					</ListItemIcon>
-					<ListItemText>{t("browse.sortord.desc")}</ListItemText>
-				</MenuItem>
-			</Menu>
+			{sortAnchor && (
+				<SortByMenu
+					sortKey={sortKey}
+					sortOrd={sortOrd}
+					setSort={setSort}
+					setSortOrd={setSortOrd}
+					anchor={sortAnchor}
+					onClose={() => setSortAnchor(null)}
+				/>
+			)}
 		</>
 	);
 };

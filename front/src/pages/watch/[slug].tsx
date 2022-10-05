@@ -20,10 +20,18 @@
 
 import { QueryIdentifier, QueryPage } from "~/utils/query";
 import { withRoute } from "~/utils/router";
-import { WatchItem, WatchItemP, Chapter } from "~/models/resources/watch-item";
+import { WatchItem, WatchItemP, Chapter, Track } from "~/models/resources/watch-item";
 import { useFetch } from "~/utils/query";
 import { ErrorPage } from "~/components/errors";
-import { useState, useRef, useEffect, HTMLProps, memo, useMemo, useCallback } from "react";
+import {
+	useState,
+	useRef,
+	useEffect,
+	memo,
+	useMemo,
+	useCallback,
+	RefObject,
+} from "react";
 import {
 	Box,
 	CircularProgress,
@@ -32,6 +40,10 @@ import {
 	Typography,
 	Skeleton,
 	Slider,
+	Menu,
+	MenuItem,
+	ListItemText,
+    BoxProps,
 } from "@mui/material";
 import useTranslation from "next-translate/useTranslation";
 import {
@@ -50,12 +62,84 @@ import {
 } from "@mui/icons-material";
 import { Poster } from "~/components/poster";
 import { episodeDisplayNumber } from "~/components/episode";
+import { Link } from "~/utils/link";
 import NextLink from "next/link";
+import { useRouter } from "next/router";
+// @ts-ignore
+import SubtitleOctopus from "@jellyfin/libass-wasm"
 
 const toTimerString = (timer: number, duration?: number) => {
 	if (!duration) duration = timer;
 	if (duration >= 3600) return new Date(timer * 1000).toISOString().substring(11, 19);
 	return new Date(timer * 1000).toISOString().substring(14, 19);
+};
+
+const SubtitleMenu = ({
+	subtitles,
+	setSubtitle,
+	selectedID,
+	anchor,
+	onClose,
+}: {
+	subtitles: Track[];
+	setSubtitle: (subtitle: Track | null) => void;
+	selectedID?: number;
+	anchor: HTMLElement;
+	onClose: () => void;
+}) => {
+	const router = useRouter();
+	const { t } = useTranslation("player");
+	const { subtitle, ...queryWithoutSubs } = router.query;
+
+	return (
+		<Menu
+			id="subtitle-menu"
+			MenuListProps={{
+				"aria-labelledby": "subtitle",
+			}}
+			anchorEl={anchor}
+			open={!!anchor}
+			onClose={onClose}
+			anchorOrigin={{
+				vertical: "top",
+				horizontal: "center",
+			}}
+			transformOrigin={{
+				vertical: "bottom",
+				horizontal: "center",
+			}}
+		>
+			<MenuItem
+				selected={!selectedID}
+				onClick={() => {
+					setSubtitle(null);
+					onClose();
+				}}
+				component={Link}
+				to={{ query: queryWithoutSubs }}
+				shallow
+				replace
+			>
+				<ListItemText>{t("subtitle-none")}</ListItemText>
+			</MenuItem>
+			{subtitles.map((sub) => (
+				<MenuItem
+					key={sub.id}
+					selected={selectedID == sub.id}
+					onClick={() => {
+						setSubtitle(sub);
+						onClose();
+					}}
+					component={Link}
+					to={{ query: { ...router.query, subtitle: sub.language ?? sub.id } }}
+					shallow
+					replace
+				>
+					<ListItemText>{sub.displayName}</ListItemText>
+				</MenuItem>
+			))}
+		</Menu>
+	);
 };
 
 const LoadingIndicator = () => {
@@ -304,24 +388,50 @@ const LeftButtons = memo(function LeftButtons({
 const RightButtons = memo(function RightButton({
 	isFullscreen,
 	toggleFullscreen,
+	subtitles,
+	selectedSubtitle,
+	selectSubtitle,
 }: {
 	isFullscreen: boolean;
 	toggleFullscreen: () => void;
+	subtitles?: Track[];
+	selectedSubtitle: Track | null;
+	selectSubtitle: (track: Track | null) => void;
 }) {
 	const { t } = useTranslation("player");
+	const [subtitleAnchor, setSubtitleAnchor] = useState<HTMLButtonElement | null>(null);
 
 	return (
-		<Box sx={{ "> *": { mx: "8px !important" } }}>
-			<Tooltip title={t("subtitles")}>
-				<IconButton aria-label={t("subtitles")} sx={{ color: "white" }}>
-					<ClosedCaption />
-				</IconButton>
-			</Tooltip>
+		<Box sx={{ "> *": { m: "8px !important" } }}>
+			{subtitles && (
+				<Tooltip title={t("subtitles")}>
+					<IconButton
+						id="sortby"
+						aria-label={t("subtitles")}
+						aria-controls={subtitleAnchor ? "subtitle-menu" : undefined}
+						aria-haspopup="true"
+						aria-expanded={subtitleAnchor ? "true" : undefined}
+						onClick={(event) => setSubtitleAnchor(event.currentTarget)}
+						sx={{ color: "white" }}
+					>
+						<ClosedCaption />
+					</IconButton>
+				</Tooltip>
+			)}
 			<Tooltip title={t("fullscreen")}>
 				<IconButton onClick={toggleFullscreen} aria-label={t("fullscreen")} sx={{ color: "white" }}>
 					{isFullscreen ? <FullscreenExit /> : <Fullscreen />}
 				</IconButton>
 			</Tooltip>
+			{subtitleAnchor && (
+				<SubtitleMenu
+					subtitles={subtitles!}
+					anchor={subtitleAnchor}
+					setSubtitle={selectSubtitle}
+					selectedID={selectedSubtitle?.id}
+					onClose={() => setSubtitleAnchor(null)}
+				/>
+			)}
 		</Box>
 	);
 });
@@ -356,6 +466,67 @@ const Back = memo(function Back({ name, href }: { name?: string; href: string })
 	);
 });
 
+const useSubtitleController = (player: RefObject<HTMLVideoElement>): [Track | null, (value: Track | null) => void] => {
+	const [selectedSubtitle, setSubtitle] = useState<Track | null>(null);
+	const [htmlTrack, setHtmlTrack] = useState<HTMLTrackElement | null>(null);
+	const [subocto, setSubOcto] = useState<SubtitleOctopus | null>(null);
+
+	return [
+		selectedSubtitle,
+		useCallback(
+			(value: Track | null) => {
+				const removeHtmlSubtitle = () => {
+					if (htmlTrack) htmlTrack.remove();
+					setHtmlTrack(null);
+				};
+				const removeOctoSub = () => {
+					if (subocto) {
+						subocto.freeTrack();
+						subocto.dispose();
+					}
+					setSubOcto(null);
+				};
+
+				if (!player.current) return;
+
+				setSubtitle(value);
+				if (!value) {
+					removeHtmlSubtitle();
+					removeOctoSub();
+				} else if (value.codec === "vtt" || value.codec === "srt") {
+					removeOctoSub();
+					const track: HTMLTrackElement = htmlTrack ?? document.createElement("track");
+					track.kind = "subtitles";
+					track.label = value.displayName;
+					if (value.language) track.srclang = value.language;
+					track.src = `subtitle/${value.slug}.vtt`;
+					track.className = "subtitle_container";
+					track.default = true;
+					track.onload = () => {
+						if (player.current) player.current.textTracks[0].mode = "showing";
+					};
+					player.current.appendChild(track);
+					setHtmlTrack(track);
+				} else if (value.codec === "ass") {
+					removeHtmlSubtitle();
+					removeOctoSub();
+					setSubOcto(
+						new SubtitleOctopus({
+							video: player.current,
+							subUrl: `/api/subtitle/${value.slug}`,
+							workerUrl: "/_next/static/chunks/subtitles-octopus-worker.js",
+							legacyWorkerUrl: "/_next/static/chunks/subtitles-octopus-worker-legacy.js",
+							/* fonts:  */
+							renderMode: "wasm-blend",
+						}),
+					);
+				}
+			},
+			[htmlTrack, subocto, player],
+		),
+	];
+};
+
 const useVideoController = () => {
 	const player = useRef<HTMLVideoElement>(null);
 	const [isPlaying, setPlay] = useState(true);
@@ -366,6 +537,7 @@ const useVideoController = () => {
 	const [volume, setVolume] = useState(100);
 	const [isMuted, setMute] = useState(false);
 	const [isFullscreen, setFullscreen] = useState(false);
+	const [selectedSubtitle, selectSubtitle] = useSubtitleController(player);
 
 	useEffect(() => {
 		if (!player?.current?.duration) return;
@@ -373,7 +545,7 @@ const useVideoController = () => {
 	}, [player]);
 
 	const togglePlay = useCallback(() => {
-		if (!player?.current) return;
+		if (!player.current) return;
 		if (!isPlaying) {
 			player.current.play();
 		} else {
@@ -390,7 +562,7 @@ const useVideoController = () => {
 		}
 	}, [isFullscreen]);
 
-	const videoProps: HTMLProps<HTMLVideoElement> = useMemo(
+	const videoProps: BoxProps<"video"> = useMemo(
 		() => ({
 			ref: player,
 			onClick: togglePlay,
@@ -418,7 +590,17 @@ const useVideoController = () => {
 		[player, togglePlay, toggleFullscreen],
 	);
 	return {
-		state: { isPlaying, isLoading, progress, duration, buffered, volume, isMuted, isFullscreen },
+		state: {
+			isPlaying,
+			isLoading,
+			progress,
+			duration,
+			buffered,
+			volume,
+			isMuted,
+			isFullscreen,
+			selectedSubtitle,
+		},
 		videoProps,
 		togglePlay,
 		toggleMute: useCallback(() => {
@@ -439,6 +621,7 @@ const useVideoController = () => {
 			},
 			[player],
 		),
+		selectSubtitle,
 	};
 };
 
@@ -447,19 +630,31 @@ const query = (slug: string): QueryIdentifier<WatchItem> => ({
 	parser: WatchItemP,
 });
 
-//
+// Callback used to hide the controls when the mouse goes iddle. This is stored globally to clear the old timeout
+// if the mouse moves again
 let mouseCallback: NodeJS.Timeout;
 
 const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 	const { data, error } = useFetch(query(slug));
 	const {
-		state: { isPlaying, isLoading, progress, duration, buffered, volume, isMuted, isFullscreen },
+		state: {
+			isPlaying,
+			isLoading,
+			progress,
+			duration,
+			buffered,
+			volume,
+			isMuted,
+			isFullscreen,
+			selectedSubtitle,
+		},
 		videoProps,
 		togglePlay,
 		toggleMute,
 		toggleFullscreen,
 		setProgress,
 		setVolume,
+		selectSubtitle,
 	} = useVideoController();
 	const [showHover, setHover] = useState(false);
 	const [mouseMoved, setMouseMoved] = useState(false);
@@ -494,7 +689,7 @@ const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 			<Box
 				component="video"
 				src={data?.link.direct}
-				{...(videoProps as any)}
+				{...videoProps}
 				sx={{
 					position: "absolute",
 					top: 0,
@@ -511,15 +706,19 @@ const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 			<Box
 				onMouseEnter={() => setHover(true)}
 				onMouseLeave={() => setHover(false)}
-				sx={ displayControls ? {
-					visibility: "visible",
-					opacity: 1,
-					transition: "opacity .2s ease-in",
-				} : {
-					visibility: "hidden",
-					opacity: 0,
-					transition: "opacity .4s ease-out, visibility 0s .4s",
-				}}
+				sx={
+					displayControls
+						? {
+								visibility: "visible",
+								opacity: 1,
+								transition: "opacity .2s ease-in",
+						  }
+						: {
+								visibility: "hidden",
+								opacity: 0,
+								transition: "opacity .4s ease-out, visibility 0s .4s",
+						  }
+				}
 			>
 				<Back
 					name={data?.name}
@@ -566,7 +765,13 @@ const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 									{toTimerString(progress, duration)} : {toTimerString(duration)}
 								</Typography>
 							</Box>
-							<RightButtons isFullscreen={isFullscreen} toggleFullscreen={toggleFullscreen} />
+							<RightButtons
+								isFullscreen={isFullscreen}
+								toggleFullscreen={toggleFullscreen}
+								subtitles={data?.subtitles}
+								selectedSubtitle={selectedSubtitle}
+								selectSubtitle={selectSubtitle}
+							/>
 						</Box>
 					</Box>
 				</Box>
