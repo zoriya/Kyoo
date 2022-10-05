@@ -91,7 +91,7 @@ export default appWithI18n(App as any, {
 	defaultLocale: "en",
 	loader: false,
 	pages: {
-		"*": ["common", "browse"],
+		"*": ["common", "browse", "player"],
 	},
 	loadLocaleFrom: (locale, namespace) =>
 		import(`../../locales/${locale}/${namespace}`).then((m) => m.default),
