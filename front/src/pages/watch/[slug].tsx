@@ -447,6 +447,9 @@ const query = (slug: string): QueryIdentifier<WatchItem> => ({
 	parser: WatchItemP,
 });
 
+//
+let mouseCallback: NodeJS.Timeout;
+
 const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 	const { data, error } = useFetch(query(slug));
 	const {
@@ -458,18 +461,36 @@ const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 		setProgress,
 		setVolume,
 	} = useVideoController();
-	const [showHover, setHover] = useState(true);
+	const [showHover, setHover] = useState(false);
+	const [mouseMoved, setMouseMoved] = useState(false);
+
+	useEffect(() => {
+		const handler = () => {
+			setMouseMoved(true);
+			if (mouseCallback) clearTimeout(mouseCallback);
+			mouseCallback = setTimeout(() => {
+				setMouseMoved(false);
+			}, 2500);
+		};
+
+		document.addEventListener("mousemove", handler);
+		return () => document.removeEventListener("mousemove", handler);
+	});
 
 	const name = data
 		? data.isMovie
 			? data.name
 			: `${episodeDisplayNumber(data, "")} ${data.name}`
 		: undefined;
+	const displayControls = showHover || !isPlaying || mouseMoved;
 
 	if (error) return <ErrorPage {...error} />;
 
 	return (
-		<>
+		<Box
+			onMouseLeave={() => setMouseMoved(false)}
+			sx={{ cursor: displayControls ? "unset" : "none" }}
+		>
 			<Box
 				component="video"
 				src={data?.link.direct}
@@ -487,60 +508,70 @@ const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 				}}
 			/>
 			{isLoading && <LoadingIndicator />}
-			{showHover && (
-				<>
-					<Back
-						name={data?.name}
-						href={data ? (data.isMovie ? `/movie/${data.slug}` : `/show/${data.showSlug}`) : "#"}
-					/>
-					<Box
-						sx={{
-							position: "absolute",
-							bottom: 0,
-							left: 0,
-							right: 0,
-							background: "rgba(0, 0, 0, 0.6)",
-							display: "flex",
-							padding: "1%",
-						}}
-					>
-						<VideoPoster poster={data?.poster} />
-						<Box sx={{ width: "100%", ml: 3, display: "flex", flexDirection: "column" }}>
-							<Typography variant="h4" component="h2" color="white" sx={{ pb: 1 }}>
-								{name ?? <Skeleton />}
-							</Typography>
+			<Box
+				onMouseEnter={() => setHover(true)}
+				onMouseLeave={() => setHover(false)}
+				sx={ displayControls ? {
+					visibility: "visible",
+					opacity: 1,
+					transition: "opacity .2s ease-in",
+				} : {
+					visibility: "hidden",
+					opacity: 0,
+					transition: "opacity .4s ease-out, visibility 0s .4s",
+				}}
+			>
+				<Back
+					name={data?.name}
+					href={data ? (data.isMovie ? `/movie/${data.slug}` : `/show/${data.showSlug}`) : "#"}
+				/>
+				<Box
+					sx={{
+						position: "absolute",
+						bottom: 0,
+						left: 0,
+						right: 0,
+						background: "rgba(0, 0, 0, 0.6)",
+						display: "flex",
+						padding: "1%",
+					}}
+				>
+					<VideoPoster poster={data?.poster} />
+					<Box sx={{ width: "100%", ml: 3, display: "flex", flexDirection: "column" }}>
+						<Typography variant="h4" component="h2" color="white" sx={{ pb: 1 }}>
+							{name ?? <Skeleton />}
+						</Typography>
 
-							<ProgressBar
-								progress={progress}
-								duration={duration}
-								buffered={buffered}
-								setProgress={setProgress}
-								chapters={data?.chapters}
-							/>
+						<ProgressBar
+							progress={progress}
+							duration={duration}
+							buffered={buffered}
+							setProgress={setProgress}
+							chapters={data?.chapters}
+						/>
 
-							<Box sx={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
-								<Box sx={{ display: "flex" }}>
-									<LeftButtons
-										previousSlug={data && !data.isMovie ? data.previousEpisode?.slug : undefined}
-										nextSlug={data && !data.isMovie ? data.nextEpisode?.slug : undefined}
-										isPlaying={isPlaying}
-										volume={volume}
-										isMuted={isMuted}
-										togglePlay={togglePlay}
-										toggleMute={toggleMute}
-										setVolume={setVolume}
-									/>
-									<Typography color="white" sx={{ alignSelf: "center" }}>
-										{toTimerString(progress, duration)} : {toTimerString(duration)}
-									</Typography>
-								</Box>
-								<RightButtons isFullscreen={isFullscreen} toggleFullscreen={toggleFullscreen} />
+						<Box sx={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
+							<Box sx={{ display: "flex" }}>
+								<LeftButtons
+									previousSlug={data && !data.isMovie ? data.previousEpisode?.slug : undefined}
+									nextSlug={data && !data.isMovie ? data.nextEpisode?.slug : undefined}
+									isPlaying={isPlaying}
+									volume={volume}
+									isMuted={isMuted}
+									togglePlay={togglePlay}
+									toggleMute={toggleMute}
+									setVolume={setVolume}
+								/>
+								<Typography color="white" sx={{ alignSelf: "center" }}>
+									{toTimerString(progress, duration)} : {toTimerString(duration)}
+								</Typography>
 							</Box>
+							<RightButtons isFullscreen={isFullscreen} toggleFullscreen={toggleFullscreen} />
 						</Box>
 					</Box>
-				</>
-			)}
-		</>
+				</Box>
+			</Box>
+		</Box>
 	);
 };
 
