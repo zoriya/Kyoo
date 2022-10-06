@@ -62,6 +62,22 @@ export const TrackP = ResourceP.extend({
 });
 export type Track = z.infer<typeof TrackP>;
 
+export const FontP = z.object({
+	/*
+	 * A human-readable identifier, used in the URL.
+	 */
+	slug: z.string(),
+	/*
+	 * The name of the font file (with the extension).
+	 */
+	file: z.string(),
+	/*
+	 * The format of this font (the extension).
+	 */
+	format: z.string(),
+});
+export type Font = z.infer<typeof FontP>;
+
 export const ChapterP = z.object({
 	/**
 	 * The start time of the chapter (in second from the start of the episode).
@@ -119,6 +135,10 @@ const WatchMovieP = z.preprocess(
 		 * The list of subtitles tracks. See Track for more information.
 		 */
 		subtitles: z.array(TrackP),
+		/**
+		 * The list of fonts that can be used to display subtitles.
+		 */
+		fonts: z.array(FontP),
 		/**
 		 * The list of chapters. See Chapter for more information.
 		 */

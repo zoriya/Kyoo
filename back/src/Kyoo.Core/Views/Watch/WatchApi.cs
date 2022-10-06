@@ -46,14 +46,28 @@ namespace Kyoo.Core.Api
 		private readonly ILibraryManager _libraryManager;
 
 		/// <summary>
+		/// A file system used to retrieve chapters informations.
+		/// </summary>
+		private readonly IFileSystem _files;
+
+		/// <summary>
+		/// The transcoder used to list fonts.
+		/// </summary>
+		private readonly ITranscoder _transcoder;
+
+		/// <summary>
 		/// Create a new <see cref="WatchApi"/>.
 		/// </summary>
 		/// <param name="libraryManager">
 		/// The library manager used to modify or retrieve information in the data store.
 		/// </param>
-		public WatchApi(ILibraryManager libraryManager)
+		/// <param name="fs">A file system used to retrieve chapters informations.</param>
+		/// <param name="transcoder">The transcoder used to list fonts.</param>
+		public WatchApi(ILibraryManager libraryManager, IFileSystem fs, ITranscoder transcoder)
 		{
 			_libraryManager = libraryManager;
+			_files = fs;
+			_transcoder = transcoder;
 		}
 
 		/// <summary>
@@ -77,7 +91,38 @@ namespace Kyoo.Core.Api
 			);
 			if (item == null)
 				return NotFound();
-			return await WatchItem.FromEpisode(item, _libraryManager);
+			return await WatchItem.FromEpisode(item, _libraryManager, _files, _transcoder);
+		}
+
+		/// <summary>
+		/// Get font
+		/// </summary>
+		/// <remarks>
+		/// Get a font file that is used in subtitles of this episode.
+		/// </remarks>
+		/// <param name="identifier">The ID or slug of the <see cref="Episode"/>.</param>
+		/// <param name="slug">The slug of the font to retrieve.</param>
+		/// <returns>A page of collections.</returns>
+		/// <response code="404">No show with the given ID/slug could be found or the font does not exist.</response>
+		[HttpGet("{identifier:id}/fonts/{slug}")]
+		[HttpGet("{identifier:id}/font/{slug}", Order = AlternativeRoute)]
+		[PartialPermission(Kind.Read)]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task<IActionResult> GetFont(Identifier identifier, string slug)
+		{
+			Episode episode = await identifier.Match(
+				id => _libraryManager.GetOrDefault<Episode>(id),
+				slug => _libraryManager.GetOrDefault<Episode>(slug)
+			);
+			if (episode == null)
+				return NotFound();
+			if (slug.Contains('.'))
+				slug = slug[..slug.LastIndexOf('.')];
+			Font font = await _transcoder.GetFont(episode, slug);
+			if (font == null)
+				return NotFound();
+			return _files.FileResult(font.Path);
 		}
 	}
 }

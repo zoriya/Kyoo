@@ -20,18 +20,10 @@
 
 import { QueryIdentifier, QueryPage } from "~/utils/query";
 import { withRoute } from "~/utils/router";
-import { WatchItem, WatchItemP, Chapter, Track } from "~/models/resources/watch-item";
+import { WatchItem, WatchItemP, Chapter, Track, Font } from "~/models/resources/watch-item";
 import { useFetch } from "~/utils/query";
 import { ErrorPage } from "~/components/errors";
-import {
-	useState,
-	useRef,
-	useEffect,
-	memo,
-	useMemo,
-	useCallback,
-	RefObject,
-} from "react";
+import { useState, useRef, useEffect, memo, useMemo, useCallback, RefObject } from "react";
 import {
 	Box,
 	CircularProgress,
@@ -43,7 +35,7 @@ import {
 	Menu,
 	MenuItem,
 	ListItemText,
-    BoxProps,
+	BoxProps,
 } from "@mui/material";
 import useTranslation from "next-translate/useTranslation";
 import {
@@ -66,7 +58,7 @@ import { Link } from "~/utils/link";
 import NextLink from "next/link";
 import { useRouter } from "next/router";
 // @ts-ignore
-import SubtitleOctopus from "@jellyfin/libass-wasm"
+import SubtitleOctopus from "@jellyfin/libass-wasm";
 
 const toTimerString = (timer: number, duration?: number) => {
 	if (!duration) duration = timer;
@@ -264,9 +256,9 @@ const ProgressBar = ({
 						key={x.startTime}
 						sx={{
 							position: "absolute",
-							width: "2px",
+							width: "4px",
 							top: 0,
-							botton: 0,
+							bottom: 0,
 							left: `${(x.startTime / duration) * 100}%`,
 							background: (theme) => theme.palette.primary.dark,
 						}}
@@ -311,12 +303,13 @@ const LeftButtons = memo(function LeftButtons({
 	setVolume: (value: number) => void;
 }) {
 	const { t } = useTranslation("player");
+	const router = useRouter();
 
 	return (
 		<Box sx={{ display: "flex", "> *": { mx: "8px !important" } }}>
 			{previousSlug && (
 				<Tooltip title={t("previous")}>
-					<NextLink href={`/watch/${previousSlug}`} passHref>
+					<NextLink href={{query: {  ...router.query, slug: previousSlug }}} passHref>
 						<IconButton aria-label={t("previous")} sx={{ color: "white" }}>
 							<SkipPrevious />
 						</IconButton>
@@ -334,7 +327,7 @@ const LeftButtons = memo(function LeftButtons({
 			</Tooltip>
 			{nextSlug && (
 				<Tooltip title={t("next")}>
-					<NextLink href={`/watch/${nextSlug}`} passHref>
+					<NextLink href={{query: {  ...router.query, slug: nextSlug }}} passHref>
 						<IconButton aria-label={t("next")} sx={{ color: "white" }}>
 							<SkipNext />
 						</IconButton>
@@ -466,65 +459,78 @@ const Back = memo(function Back({ name, href }: { name?: string; href: string })
 	);
 });
 
-const useSubtitleController = (player: RefObject<HTMLVideoElement>): [Track | null, (value: Track | null) => void] => {
+const useSubtitleController = (
+	player: RefObject<HTMLVideoElement>,
+	slug: string,
+	fonts?: Font[],
+	subtitles?: Track[],
+): [Track | null, (value: Track | null) => void] => {
 	const [selectedSubtitle, setSubtitle] = useState<Track | null>(null);
 	const [htmlTrack, setHtmlTrack] = useState<HTMLTrackElement | null>(null);
 	const [subocto, setSubOcto] = useState<SubtitleOctopus | null>(null);
+	const { query: { subtitle } } = useRouter();
 
-	return [
-		selectedSubtitle,
-		useCallback(
-			(value: Track | null) => {
-				const removeHtmlSubtitle = () => {
-					if (htmlTrack) htmlTrack.remove();
-					setHtmlTrack(null);
-				};
-				const removeOctoSub = () => {
-					if (subocto) {
-						subocto.freeTrack();
-						subocto.dispose();
-					}
-					setSubOcto(null);
-				};
-
-				if (!player.current) return;
-
-				setSubtitle(value);
-				if (!value) {
-					removeHtmlSubtitle();
-					removeOctoSub();
-				} else if (value.codec === "vtt" || value.codec === "srt") {
-					removeOctoSub();
-					const track: HTMLTrackElement = htmlTrack ?? document.createElement("track");
-					track.kind = "subtitles";
-					track.label = value.displayName;
-					if (value.language) track.srclang = value.language;
-					track.src = `subtitle/${value.slug}.vtt`;
-					track.className = "subtitle_container";
-					track.default = true;
-					track.onload = () => {
-						if (player.current) player.current.textTracks[0].mode = "showing";
-					};
-					player.current.appendChild(track);
-					setHtmlTrack(track);
-				} else if (value.codec === "ass") {
-					removeHtmlSubtitle();
-					removeOctoSub();
-					setSubOcto(
-						new SubtitleOctopus({
-							video: player.current,
-							subUrl: `/api/subtitle/${value.slug}`,
-							workerUrl: "/_next/static/chunks/subtitles-octopus-worker.js",
-							legacyWorkerUrl: "/_next/static/chunks/subtitles-octopus-worker-legacy.js",
-							/* fonts:  */
-							renderMode: "wasm-blend",
-						}),
-					);
+	const selectSubtitle = useCallback(
+		(value: Track | null) => {
+			const removeHtmlSubtitle = () => {
+				if (htmlTrack) htmlTrack.remove();
+				setHtmlTrack(null);
+			};
+			const removeOctoSub = () => {
+				if (subocto) {
+					subocto.freeTrack();
+					subocto.dispose();
 				}
-			},
-			[htmlTrack, subocto, player],
-		),
-	];
+				setSubOcto(null);
+			};
+
+			if (!player.current) return;
+
+			setSubtitle(value);
+			if (!value) {
+				removeHtmlSubtitle();
+				removeOctoSub();
+			} else if (value.codec === "vtt" || value.codec === "srt") {
+				removeOctoSub();
+				const track: HTMLTrackElement = htmlTrack ?? document.createElement("track");
+				track.kind = "subtitles";
+				track.label = value.displayName;
+				if (value.language) track.srclang = value.language;
+				track.src = `subtitle/${value.slug}.vtt`;
+				track.className = "subtitle_container";
+				track.default = true;
+				track.onload = () => {
+					if (player.current) player.current.textTracks[0].mode = "showing";
+				};
+				player.current.appendChild(track);
+				setHtmlTrack(track);
+			} else if (value.codec === "ass") {
+				removeHtmlSubtitle();
+				removeOctoSub();
+				setSubOcto(
+					new SubtitleOctopus({
+						video: player.current,
+						subUrl: `/api/subtitle/${value.slug}`,
+						workerUrl: "/_next/static/chunks/subtitles-octopus-worker.js",
+						legacyWorkerUrl: "/_next/static/chunks/subtitles-octopus-worker-legacy.js",
+						fonts: fonts?.map((x) => `/api/watch/${slug}/font/${x.slug}.${x.format}`),
+						renderMode: "wasm-blend",
+					}),
+				);
+			}
+		},
+		[htmlTrack, subocto, player, fonts, slug],
+	);
+
+	const newSub = subtitles?.find(x => x.language === subtitle);
+	useEffect(() => {
+		if (newSub === undefined) return;
+		console.log("old", selectedSubtitle)
+		console.log("new", newSub)
+		if (newSub?.id !== selectedSubtitle?.id) selectSubtitle(newSub);
+	}, [player.current?.src, newSub, selectedSubtitle, selectSubtitle]);
+
+	return [selectedSubtitle, selectSubtitle];
 };
 
 const useVideoController = () => {
@@ -537,7 +543,12 @@ const useVideoController = () => {
 	const [volume, setVolume] = useState(100);
 	const [isMuted, setMute] = useState(false);
 	const [isFullscreen, setFullscreen] = useState(false);
-	const [selectedSubtitle, selectSubtitle] = useSubtitleController(player);
+
+	useEffect(() => {
+		if (!player.current) return;
+		if (player.current.paused) player.current.play();
+		setPlay(!player.current.paused);
+	}, []);
 
 	useEffect(() => {
 		if (!player?.current?.duration) return;
@@ -590,6 +601,7 @@ const useVideoController = () => {
 		[player, togglePlay, toggleFullscreen],
 	);
 	return {
+		playerRef: player,
 		state: {
 			isPlaying,
 			isLoading,
@@ -599,7 +611,6 @@ const useVideoController = () => {
 			volume,
 			isMuted,
 			isFullscreen,
-			selectedSubtitle,
 		},
 		videoProps,
 		togglePlay,
@@ -621,7 +632,6 @@ const useVideoController = () => {
 			},
 			[player],
 		),
-		selectSubtitle,
 	};
 };
 
@@ -637,25 +647,21 @@ let mouseCallback: NodeJS.Timeout;
 const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 	const { data, error } = useFetch(query(slug));
 	const {
-		state: {
-			isPlaying,
-			isLoading,
-			progress,
-			duration,
-			buffered,
-			volume,
-			isMuted,
-			isFullscreen,
-			selectedSubtitle,
-		},
+		playerRef,
+		state: { isPlaying, isLoading, progress, duration, buffered, volume, isMuted, isFullscreen },
 		videoProps,
 		togglePlay,
 		toggleMute,
 		toggleFullscreen,
 		setProgress,
 		setVolume,
-		selectSubtitle,
 	} = useVideoController();
+	const [selectedSubtitle, selectSubtitle] = useSubtitleController(
+		playerRef,
+		slug,
+		data?.fonts,
+		data?.subtitles,
+	);
 	const [showHover, setHover] = useState(false);
 	const [mouseMoved, setMouseMoved] = useState(false);
 
