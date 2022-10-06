@@ -45,6 +45,7 @@ import { Person, PersonP } from "~/models";
 import { PersonAvatar } from "~/components/person";
 import { ErrorComponent, ErrorPage } from "~/components/errors";
 import { HorizontalList } from "~/components/horizontal-list";
+import NextLink from "next/link";
 
 const StudioText = ({
 	studio,
@@ -149,9 +150,11 @@ export const ShowHeader = ({ data }: { data?: Show | Movie }) => {
 					)}
 					<Box sx={{ "& > *": { m: ".3rem !important" } }}>
 						<Tooltip title={t("show.play")}>
-							<Fab color="primary" size="small" aria-label={t("show.play")}>
-								<PlayArrow />
-							</Fab>
+							<NextLink href={data ? `/watch/${data.slug}` : ""} passHref>
+								<Fab color="primary" size="small" aria-label={t("show.play")}>
+									<PlayArrow />
+								</Fab>
+							</NextLink>
 						</Tooltip>
 						<Tooltip title={t("show.trailer")} aria-label={t("show.trailer")}>
 							<IconButton>

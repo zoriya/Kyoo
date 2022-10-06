@@ -127,6 +127,11 @@ namespace Kyoo.Abstractions.Models
 		public ICollection<Track> Subtitles { get; set; }
 
 		/// <summary>
+		/// The list of fonts that can be used to draw the subtitles.
+		/// </summary>
+		public ICollection<Font> Fonts { get; set; }
+
+		/// <summary>
 		/// The list of chapters. See <see cref="Chapter"/> for more information.
 		/// </summary>
 		public ICollection<Chapter> Chapters { get; set; }
@@ -138,8 +143,10 @@ namespace Kyoo.Abstractions.Models
 		/// <param name="library">
 		/// A library manager to retrieve the next and previous episode and load the show and tracks of the episode.
 		/// </param>
+		/// <param name="fs">A file system used to retrieve chapters informations.</param>
+		/// <param name="transcoder">The transcoder used to list fonts.</param>
 		/// <returns>A new WatchItem representing the given episode.</returns>
-		public static async Task<WatchItem> FromEpisode(Episode ep, ILibraryManager library)
+		public static async Task<WatchItem> FromEpisode(Episode ep, ILibraryManager library, IFileSystem fs, ITranscoder transcoder)
 		{
 			await library.Load(ep, x => x.Show);
 			await library.Load(ep, x => x.Tracks);
@@ -204,37 +211,51 @@ namespace Kyoo.Abstractions.Models
 				Video = ep.Tracks.FirstOrDefault(x => x.Type == StreamType.Video),
 				Audios = ep.Tracks.Where(x => x.Type == StreamType.Audio).ToArray(),
 				Subtitles = ep.Tracks.Where(x => x.Type == StreamType.Subtitle).ToArray(),
+				Fonts = await transcoder.ListFonts(ep),
 				PreviousEpisode = previous,
 				NextEpisode = next,
-				Chapters = await _GetChapters(ep.Path),
+				Chapters = await _GetChapters(ep, fs),
 				IsMovie = ep.Show.IsMovie
 			};
 		}
 
 		// TODO move this method in a controller to support abstraction.
-		// TODO use a IFileManager to retrieve and read files.
-		private static async Task<ICollection<Chapter>> _GetChapters(string episodePath)
+		private static async Task<ICollection<Chapter>> _GetChapters(Episode episode, IFileSystem fs)
 		{
-			string path = PathIO.Combine(
-				PathIO.GetDirectoryName(episodePath)!,
+			string path = fs.Combine(
+				await fs.GetExtraDirectory(episode),
 				"Chapters",
-				PathIO.GetFileNameWithoutExtension(episodePath) + ".txt"
+				PathIO.GetFileNameWithoutExtension(episode.Path) + ".txt"
 			);
-			if (!File.Exists(path))
+			if (!await fs.Exists(path))
 				return Array.Empty<Chapter>();
 			try
 			{
-				return (await File.ReadAllLinesAsync(path))
+				using StreamReader sr = new(await fs.GetReader(path));
+				string chapters = await sr.ReadToEndAsync();
+				return chapters.Split('\n')
 					.Select(x =>
 					{
 						string[] values = x.Split(' ');
-						return new Chapter(float.Parse(values[0]), float.Parse(values[1]), string.Join(' ', values.Skip(2)));
+						if (
+							values.Length < 3
+							|| !float.TryParse(values[0], out float start)
+							|| !float.TryParse(values[1], out float end)
+						)
+							return null;
+						return new Chapter(
+							start,
+							end,
+							string.Join(' ', values.Skip(2))
+						);
 					})
+					.Where(x => x != null)
 					.ToArray();
 			}
-			catch
+			catch (Exception ex)
 			{
 				await Console.Error.WriteLineAsync($"Invalid chapter file at {path}");
+				Console.Error.WriteLine(ex.ToString());
 				return Array.Empty<Chapter>();
 			}
 		}
