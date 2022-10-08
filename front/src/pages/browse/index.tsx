@@ -318,9 +318,8 @@ const BrowseSettings = ({
 	const [sortAnchor, setSortAnchor] = useState<HTMLElement | null>(null);
 	const { t } = useTranslation("browse");
 
-	const switchViewTitle = layout === Layout.Grid 
-		? t("browse.switchToList")
-		: t("browse.switchToGrid");
+	const switchViewTitle =
+		layout === Layout.Grid ? t("browse.switchToList") : t("browse.switchToGrid");
 
 	return (
 		<>

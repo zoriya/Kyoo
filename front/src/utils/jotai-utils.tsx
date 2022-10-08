@@ -18,6 +18,18 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Player from "~/player/player";
+import { atom, PrimitiveAtom, WritableAtom } from "jotai";
 
-export default Player;
+type AtomWritter<T, Update> = Parameters<typeof atom<T, Update>>[1];
+export const bakedAtom = <T, Update = T>(
+	initialValue: T,
+	writter: (...args: [...Parameters<AtomWritter<T, Update>>, PrimitiveAtom<T>]) => void,
+): [PrimitiveAtom<T>, WritableAtom<T, Update>] => {
+	const baker = atom(initialValue);
+	const pub = atom<T, Update>(
+		(get) => get(baker),
+		(...args) => writter(...args, baker),
+	);
+
+	return [baker, pub];
+};
