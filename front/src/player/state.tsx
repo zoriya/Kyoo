@@ -163,19 +163,20 @@ export const [_subtitleAtom, subtitleAtom] = bakedAtom<Track | null, { track: Tr
 		if (!value) {
 			removeHtmlSubtitle();
 			removeOctoSub();
-		} else if (value.track.codec === "vtt" || value.track.codec === "srt") {
+		} else if (value.track.codec === "vtt" || value.track.codec === "subrip") {
 			removeOctoSub();
+			if (player.current.textTracks.length > 0) player.current.textTracks[0].mode = "hidden";
 			const track: HTMLTrackElement = get(htmlTrackAtom) ?? document.createElement("track");
 			track.kind = "subtitles";
 			track.label = value.track.displayName;
 			if (value.track.language) track.srclang = value.track.language;
-			track.src = value.track.link!;
+			track.src = value.track.link! + ".vtt";
 			track.className = "subtitle_container";
 			track.default = true;
 			track.onload = () => {
 				if (player.current) player.current.textTracks[0].mode = "showing";
 			};
-			player.current.appendChild(track);
+			if (!get(htmlTrackAtom)) player.current.appendChild(track);
 			set(htmlTrackAtom, track);
 		} else if (value.track.codec === "ass") {
 			removeHtmlSubtitle();
