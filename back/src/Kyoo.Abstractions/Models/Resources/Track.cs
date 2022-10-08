@@ -55,7 +55,7 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// A video, audio or subtitle track for an episode.
 	/// </summary>
-	public class Track : IResource
+	public class Track : IResource, ILink
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
@@ -66,9 +66,9 @@ namespace Kyoo.Abstractions.Models
 		{
 			get
 			{
-				string type = Type.ToString().ToLower();
+				string type = Type.ToString().ToLowerInvariant();
 				string index = TrackIndex != 0 ? $"-{TrackIndex}" : string.Empty;
-				string episode = _episodeSlug ?? Episode?.Slug ?? EpisodeID.ToString();
+				string episode = _episodeSlug ?? Episode?.Slug ?? EpisodeID.ToString(CultureInfo.InvariantCulture);
 				return $"{episode}.{Language ?? "und"}{index}{(IsForced ? ".forced" : string.Empty)}.{type}";
 			}
 
@@ -92,7 +92,7 @@ namespace Kyoo.Abstractions.Models
 				Language = match.Groups["lang"].Value;
 				if (Language == "und")
 					Language = null;
-				TrackIndex = match.Groups["index"].Success ? int.Parse(match.Groups["index"].Value) : 0;
+				TrackIndex = match.Groups["index"].Success ? int.Parse(match.Groups["index"].Value, CultureInfo.InvariantCulture) : 0;
 				IsForced = match.Groups["forced"].Success;
 				Type = Enum.Parse<StreamType>(match.Groups["type"].Value, true);
 			}
@@ -197,6 +197,9 @@ namespace Kyoo.Abstractions.Models
 		/// This is the baking field of <see cref="Episode"/>.
 		/// </summary>
 		[SerializeIgnore] private Episode _episode;
+
+		/// <inheritdoc/>
+		public object Link => Type == StreamType.Subtitle ? $"/subtitle/{Slug}" : null;
 
 		// Converting mkv track language to c# system language tag.
 		private static string _GetLanguage(string mkvLanguage)

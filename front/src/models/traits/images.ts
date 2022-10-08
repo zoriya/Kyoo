@@ -20,7 +20,7 @@
 
 import { z } from "zod";
 
-const imageFn = (url: string) => (url.startsWith("/api") ? url : `/api${url}`);
+export const imageFn = (url: string) => (url.startsWith("/api") ? url : `/api${url}`);
 
 export const ImagesP = z.object({
 	/**

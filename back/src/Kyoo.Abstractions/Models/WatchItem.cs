@@ -33,7 +33,7 @@ namespace Kyoo.Abstractions.Models
 	/// Information about tracks and display information that could be used by the player.
 	/// This contains mostly data from an <see cref="Episode"/> with another form.
 	/// </summary>
-	public class WatchItem : CustomTypeDescriptor, IThumbnails
+	public class WatchItem : CustomTypeDescriptor, IThumbnails, ILink
 	{
 		/// <summary>
 		/// The ID of the episode associated with this item.
@@ -135,6 +135,13 @@ namespace Kyoo.Abstractions.Models
 		/// The list of chapters. See <see cref="Chapter"/> for more information.
 		/// </summary>
 		public ICollection<Chapter> Chapters { get; set; }
+
+		/// <inheritdoc/>
+		public object Link => new
+		{
+			Direct = $"/video/direct/{Slug}",
+			Transmux = $"/video/transmux/{Slug}/master.m3u8",
+		};
 
 		/// <summary>
 		/// Create a <see cref="WatchItem"/> from an <see cref="Episode"/>.

@@ -25,7 +25,7 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// A font of an <see cref="Episode"/>.
 	/// </summary>
-	public class Font
+	public class Font : ILink
 	{
 		/// <summary>
 		/// A human-readable identifier, used in the URL.
@@ -47,6 +47,9 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		[SerializeIgnore] public string Path { get; set; }
 
+		/// <inheritdoc/>
+		public object Link { get; init; }
+
 		/// <summary>
 		/// Create a new empty <see cref="Font"/>.
 		/// </summary>
@@ -56,12 +59,14 @@ namespace Kyoo.Abstractions.Models
 		/// Create a new <see cref="Font"/> from a path.
 		/// </summary>
 		/// <param name="path">The path of the font.</param>
-		public Font(string path)
+		/// <param name="episodeSlug">The slug of the episode that contains this font.</param>
+		public Font(string path, string episodeSlug)
 		{
 			Slug = Utility.ToSlug(PathIO.GetFileNameWithoutExtension(path));
 			Path = path;
 			File = PathIO.GetFileName(path);
 			Format = PathIO.GetExtension(path).Replace(".", string.Empty);
+			Link = $"/watch/{episodeSlug}/font/{Slug}.{Format}";
 		}
 	}
 }

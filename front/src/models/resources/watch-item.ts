@@ -20,7 +20,7 @@
 
 import { z } from "zod";
 import { zdate } from "~/utils/zod";
-import { ResourceP, ImagesP } from "../traits";
+import { ResourceP, ImagesP, imageFn } from "../traits";
 import { EpisodeP } from "./episode";
 
 /**
@@ -59,6 +59,10 @@ export const TrackP = ResourceP.extend({
 	 * A user-friendly name for this track. It does not include the track type.
 	 */
 	displayName: z.string(),
+	/*
+	 * The url of this track (only if this is a subtitle)..
+	 */
+	link: z.string().transform(imageFn).nullable(),
 });
 export type Track = z.infer<typeof TrackP>;
 
@@ -78,7 +82,7 @@ export const FontP = z.object({
 	/*
 	 * The url of the font.
 	 */
-	link: z.string(),
+	link: z.string().transform(imageFn),
 });
 export type Font = z.infer<typeof FontP>;
 
@@ -105,13 +109,6 @@ const WatchMovieP = z.preprocess(
 		if (!x) return x;
 
 		x.name = x.title;
-		x.link = {
-			direct: `/api/video/${x.slug}`,
-		};
-		x.fonts = x.fonts?.map((y: Font) => {
-			y.link = `/api/watch/${x.slug}/font/${y.slug}.${y.format}`;
-			return y;
-		})
 		return x;
 	},
 	ImagesP.extend({
@@ -155,7 +152,8 @@ const WatchMovieP = z.preprocess(
 		 * The links to the videos of this watch item.
 		 */
 		link: z.object({
-			direct: z.string(),
+			direct: z.string().transform(imageFn),
+			transmux: z.string().transform(imageFn),
 		}),
 	}),
 );
