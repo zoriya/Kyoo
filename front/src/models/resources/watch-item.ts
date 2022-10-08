@@ -75,6 +75,10 @@ export const FontP = z.object({
 	 * The format of this font (the extension).
 	 */
 	format: z.string(),
+	/*
+	 * The url of the font.
+	 */
+	link: z.string(),
 });
 export type Font = z.infer<typeof FontP>;
 
@@ -104,6 +108,10 @@ const WatchMovieP = z.preprocess(
 		x.link = {
 			direct: `/api/video/${x.slug}`,
 		};
+		x.fonts = x.fonts?.map((y: Font) => {
+			y.link = `/api/watch/${x.slug}/font/${y.slug}.${y.format}`;
+			return y;
+		})
 		return x;
 	},
 	ImagesP.extend({
