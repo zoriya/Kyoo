@@ -233,7 +233,7 @@ namespace Kyoo.Core.Controllers
 		{
 			string path = _files.Combine(await _files.GetExtraDirectory(episode), "Attachments");
 			return (await _files.ListFiles(path))
-				.Select(x => new Font(x))
+				.Select(x => new Font(x, episode.Slug))
 				.ToArray();
 		}
 
@@ -245,7 +245,7 @@ namespace Kyoo.Core.Controllers
 				.FirstOrDefault(x => Utility.ToSlug(Path.GetFileNameWithoutExtension(x)) == slug);
 			if (font == null)
 				return null;
-			return new Font(font);
+			return new Font(font, episode.Slug);
 		}
 
 		/// <inheritdoc />

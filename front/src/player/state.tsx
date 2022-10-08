@@ -21,7 +21,7 @@
 import { BoxProps } from "@mui/material";
 import { atom, useSetAtom } from "jotai";
 import { useRouter } from "next/router";
-import { RefObject, useCallback, useEffect, useRef, useState } from "react";
+import { RefObject, useEffect, useRef } from "react";
 import { Font, Track } from "~/models/resources/watch-item";
 import { bakedAtom } from "~/utils/jotai-utils";
 // @ts-ignore
@@ -169,7 +169,7 @@ export const [_subtitleAtom, subtitleAtom] = bakedAtom<Track | null, { track: Tr
 			track.kind = "subtitles";
 			track.label = value.track.displayName;
 			if (value.track.language) track.srclang = value.track.language;
-			track.src = `subtitle/${value.track.slug}.vtt`;
+			track.src = value.track.link!;
 			track.className = "subtitle_container";
 			track.default = true;
 			track.onload = () => {
@@ -184,7 +184,7 @@ export const [_subtitleAtom, subtitleAtom] = bakedAtom<Track | null, { track: Tr
 				suboctoAtom,
 				new SubtitleOctopus({
 					video: player.current,
-					subUrl: `/api/subtitle/${value.track.slug}`,
+					subUrl: value.track.link!,
 					workerUrl: "/_next/static/chunks/subtitles-octopus-worker.js",
 					legacyWorkerUrl: "/_next/static/chunks/subtitles-octopus-worker-legacy.js",
 					fonts: value.fonts?.map((x) => x.link),
