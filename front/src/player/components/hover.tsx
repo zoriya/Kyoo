@@ -39,7 +39,12 @@ import { RightButtons } from "./right-buttons";
 import { ProgressBar } from "./progress-bar";
 import { useAtomValue } from "jotai";
 
-export const Hover = ({ data, ...props }: { data?: WatchItem } & BoxProps) => {
+export const Hover = ({
+	data,
+	onMenuOpen,
+	onMenuClose,
+	...props
+}: { data?: WatchItem; onMenuOpen: () => void; onMenuClose: () => void } & BoxProps) => {
 	const name = data
 		? data.isMovie
 			? data.name
@@ -64,7 +69,7 @@ export const Hover = ({ data, ...props }: { data?: WatchItem } & BoxProps) => {
 				}}
 			>
 				<VideoPoster poster={data?.poster} />
-				<Box sx={{ width: "100%", ml: 3, display: "flex", flexDirection: "column" }}>
+				<Box sx={{ width: "100%", ml: { xs: 0.5, sm: 3 }, display: "flex", flexDirection: "column" }}>
 					<Typography variant="h4" component="h2" color="white" sx={{ pb: 1 }}>
 						{name ?? <Skeleton />}
 					</Typography>
@@ -76,7 +81,7 @@ export const Hover = ({ data, ...props }: { data?: WatchItem } & BoxProps) => {
 							previousSlug={data && !data.isMovie ? data.previousEpisode?.slug : undefined}
 							nextSlug={data && !data.isMovie ? data.nextEpisode?.slug : undefined}
 						/>
-						<RightButtons subtitles={data?.subtitles} fonts={data?.fonts} />
+						<RightButtons subtitles={data?.subtitles} fonts={data?.fonts} onMenuOpen={onMenuOpen} onMenuClose={onMenuClose} />
 					</Box>
 				</Box>
 			</Box>

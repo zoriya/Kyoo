@@ -24,15 +24,38 @@ import useTranslation from "next-translate/useTranslation";
 import { useRouter } from "next/router";
 import { durationAtom, mutedAtom, playAtom, progressAtom, volumeAtom } from "../state";
 import NextLink from "next/link";
-import { Pause, PlayArrow, SkipNext, SkipPrevious, VolumeDown, VolumeMute, VolumeOff, VolumeUp } from "@mui/icons-material";
+import {
+	Pause,
+	PlayArrow,
+	SkipNext,
+	SkipPrevious,
+	VolumeDown,
+	VolumeMute,
+	VolumeOff,
+	VolumeUp,
+} from "@mui/icons-material";
 
-export const LeftButtons = ({ previousSlug, nextSlug }: { previousSlug?: string; nextSlug?: string }) => {
+export const LeftButtons = ({
+	previousSlug,
+	nextSlug,
+}: {
+	previousSlug?: string;
+	nextSlug?: string;
+}) => {
 	const { t } = useTranslation("player");
 	const router = useRouter();
 	const [isPlaying, setPlay] = useAtom(playAtom);
 
 	return (
-		<Box sx={{ display: "flex", "> *": { mx: "8px !important" } }}>
+		<Box
+			sx={{
+				display: "flex",
+				"> *": {
+					mx: { xs: "2px !important", sm: "8px !important" },
+					p: { xs: "4px !important", sm: "8px !important" },
+				},
+			}}
+		>
 			{previousSlug && (
 				<Tooltip title={t("previous")}>
 					<NextLink href={{ query: { ...router.query, slug: previousSlug } }} passHref>
@@ -74,10 +97,10 @@ const VolumeSlider = () => {
 	return (
 		<Box
 			sx={{
-				display: "flex",
+				display: { xs: "none", sm: "flex" },
 				m: "0 !important",
 				p: "8px",
-				"&:hover .slider": { width: "100px", px: "16px" },
+				"body.hoverEnabled &:hover .slider": { width: "100px", px: "16px" },
 			}}
 		>
 			<Tooltip title={t("mute")}>

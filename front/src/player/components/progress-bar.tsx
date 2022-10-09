@@ -31,9 +31,10 @@ export const ProgressBar = ({ chapters }: { chapters?: Chapter[] }) => {
 	const buffered = useAtomValue(bufferedAtom);
 	const duration = useAtomValue(durationAtom);
 
-	const updateProgress = (event: MouseEvent, skipSeek?: boolean) => {
+	const updateProgress = (event: MouseEvent | TouchEvent, skipSeek?: boolean) => {
 		if (!(isSeeking || skipSeek) || !ref?.current) return;
-		const value: number = (event.pageX - ref.current.offsetLeft) / ref.current.clientWidth;
+		const pageX: number = "pageX" in event ? event.pageX : event.changedTouches[0].pageX;
+		const value: number = (pageX - ref.current.offsetLeft) / ref.current.clientWidth;
 		setProgress(Math.max(0, Math.min(value, 1)) * duration);
 	};
 
@@ -41,16 +42,25 @@ export const ProgressBar = ({ chapters }: { chapters?: Chapter[] }) => {
 		const handler = () => setSeek(false);
 
 		document.addEventListener("mouseup", handler);
-		return () => document.removeEventListener("mouseup", handler);
+		document.addEventListener("touchend", handler);
+		return () => {
+			document.removeEventListener("mouseup", handler);
+			document.removeEventListener("touchend", handler);
+		};
 	});
 	useEffect(() => {
 		document.addEventListener("mousemove", updateProgress);
-		return () => document.removeEventListener("mousemove", updateProgress);
+		document.addEventListener("touchmove", updateProgress);
+		return () => {
+			document.removeEventListener("mousemove", updateProgress);
+			document.removeEventListener("touchmove", updateProgress);
+		};
 	});
 
 	return (
 		<Box
 			onMouseDown={(event) => {
+				// prevent drag and drop of the UI.
 				event.preventDefault();
 				setSeek(true);
 			}}
@@ -60,7 +70,8 @@ export const ProgressBar = ({ chapters }: { chapters?: Chapter[] }) => {
 				width: "100%",
 				py: 1,
 				cursor: "pointer",
-				"&:hover": {
+				WebkitTapHighlightColor: "transparent",
+				"body.hoverEnabled &:hover": {
 					".thumb": { opacity: 1 },
 					".bar": { transform: "unset" },
 				},
@@ -130,4 +141,3 @@ export const ProgressBar = ({ chapters }: { chapters?: Chapter[] }) => {
 		</Box>
 	);
 };
-

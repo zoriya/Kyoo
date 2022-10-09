@@ -30,7 +30,7 @@ const Document = () => {
 				<link rel="icon" type="image/png" sizes="128x128" href="/icon-128x128.png" />
 				<link rel="icon" type="image/png" sizes="256x256" href="/icon-256x256.png" />
 			</Head>
-			<body>
+			<body className="hoverEnabled">
 				<Main />
 				<NextScript />
 			</body>

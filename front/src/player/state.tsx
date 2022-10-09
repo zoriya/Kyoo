@@ -58,13 +58,17 @@ export const [_mutedAtom, mutedAtom] = bakedAtom(false, (get, set, value, baker)
 	set(baker, value);
 	if (player.current) player.current.muted = value;
 });
-export const [_, fullscreenAtom] = bakedAtom(false, (_, set, value, baker) => {
-	set(baker, value);
-	if (value) {
-		document.body.requestFullscreen();
-	} else {
-		document.exitFullscreen();
-	}
+export const [_, fullscreenAtom] = bakedAtom(false, async (_, set, value, baker) => {
+	try {
+		if (value) {
+			await document.body.requestFullscreen();
+			await screen.orientation.lock("landscape");
+		} else {
+			await document.exitFullscreen();
+			screen.orientation.unlock();
+		}
+		set(baker, value);
+	} catch {}
 });
 
 export const useVideoController = () => {
@@ -94,14 +98,6 @@ export const useVideoController = () => {
 
 	const videoProps: BoxProps<"video"> = {
 		ref: player,
-		onClick: () => {
-			if (!player.current) return;
-			if (player.current.paused) {
-				player.current.play();
-			} else {
-				player.current.pause();
-			}
-		},
 		onDoubleClick: () => {
 			if (document.fullscreenElement) {
 				setFullscreen(false);
@@ -132,69 +128,77 @@ export const useVideoController = () => {
 	return {
 		playerRef: player,
 		videoProps,
+		onVideoClick: () => {
+			if (!player.current) return;
+			if (player.current.paused) {
+				player.current.play();
+			} else {
+				player.current.pause();
+			}
+		},
 	};
 };
 
 const htmlTrackAtom = atom<HTMLTrackElement | null>(null);
 const suboctoAtom = atom<SubtitleOctopus | null>(null);
-export const [_subtitleAtom, subtitleAtom] = bakedAtom<Track | null, { track: Track, fonts: Font[] } | null>(
-	null,
-	(get, set, value, baked) => {
-		const removeHtmlSubtitle = () => {
-			const htmlTrack = get(htmlTrackAtom);
-			if (htmlTrack) htmlTrack.remove();
-			set(htmlTrackAtom, null);
-		};
-		const removeOctoSub = () => {
-			const subocto = get(suboctoAtom);
-			if (subocto) {
-				subocto.freeTrack();
-				subocto.dispose();
-			}
-			set(suboctoAtom, null);
-		};
-
-		const player = get(playerAtom);
-		if (!player?.current) return;
-
-		if (get(baked)?.id === value?.track.id) return;
-
-		set(baked, value?.track ?? null);
-		if (!value) {
-			removeHtmlSubtitle();
-			removeOctoSub();
-		} else if (value.track.codec === "vtt" || value.track.codec === "subrip") {
-			removeOctoSub();
-			if (player.current.textTracks.length > 0) player.current.textTracks[0].mode = "hidden";
-			const track: HTMLTrackElement = get(htmlTrackAtom) ?? document.createElement("track");
-			track.kind = "subtitles";
-			track.label = value.track.displayName;
-			if (value.track.language) track.srclang = value.track.language;
-			track.src = value.track.link! + ".vtt";
-			track.className = "subtitle_container";
-			track.default = true;
-			track.onload = () => {
-				if (player.current) player.current.textTracks[0].mode = "showing";
-			};
-			if (!get(htmlTrackAtom)) player.current.appendChild(track);
-			set(htmlTrackAtom, track);
-		} else if (value.track.codec === "ass") {
-			removeHtmlSubtitle();
-			removeOctoSub();
-			set(
-				suboctoAtom,
-				new SubtitleOctopus({
-					video: player.current,
-					subUrl: value.track.link!,
-					workerUrl: "/_next/static/chunks/subtitles-octopus-worker.js",
-					legacyWorkerUrl: "/_next/static/chunks/subtitles-octopus-worker-legacy.js",
-					fonts: value.fonts?.map((x) => x.link),
-					renderMode: "wasm-blend",
-				}),
-			);
+export const [_subtitleAtom, subtitleAtom] = bakedAtom<
+	Track | null,
+	{ track: Track; fonts: Font[] } | null
+>(null, (get, set, value, baked) => {
+	const removeHtmlSubtitle = () => {
+		const htmlTrack = get(htmlTrackAtom);
+		if (htmlTrack) htmlTrack.remove();
+		set(htmlTrackAtom, null);
+	};
+	const removeOctoSub = () => {
+		const subocto = get(suboctoAtom);
+		if (subocto) {
+			subocto.freeTrack();
+			subocto.dispose();
 		}
-	},
-);
+		set(suboctoAtom, null);
+	};
+
+	const player = get(playerAtom);
+	if (!player?.current) return;
+
+	if (get(baked)?.id === value?.track.id) return;
+
+	set(baked, value?.track ?? null);
+	if (!value) {
+		removeHtmlSubtitle();
+		removeOctoSub();
+	} else if (value.track.codec === "vtt" || value.track.codec === "subrip") {
+		removeOctoSub();
+		if (player.current.textTracks.length > 0) player.current.textTracks[0].mode = "hidden";
+		const track: HTMLTrackElement = get(htmlTrackAtom) ?? document.createElement("track");
+		track.kind = "subtitles";
+		track.label = value.track.displayName;
+		if (value.track.language) track.srclang = value.track.language;
+		track.src = value.track.link! + ".vtt";
+		track.className = "subtitle_container";
+		track.default = true;
+		track.onload = () => {
+			if (player.current) player.current.textTracks[0].mode = "showing";
+		};
+		if (!get(htmlTrackAtom)) player.current.appendChild(track);
+		set(htmlTrackAtom, track);
+	} else if (value.track.codec === "ass") {
+		removeHtmlSubtitle();
+		removeOctoSub();
+		set(
+			suboctoAtom,
+			new SubtitleOctopus({
+				video: player.current,
+				subUrl: value.track.link!,
+				workerUrl: "/_next/static/chunks/subtitles-octopus-worker.js",
+				legacyWorkerUrl: "/_next/static/chunks/subtitles-octopus-worker-legacy.js",
+				fonts: value.fonts?.map((x) => x.link),
+				renderMode: "wasm-blend",
+			}),
+		);
+	}
+});
 
 export const useSubtitleController = (
 	player: RefObject<HTMLVideoElement>,
@@ -209,6 +213,6 @@ export const useSubtitleController = (
 	const newSub = subtitles?.find((x) => x.language === subtitle);
 	useEffect(() => {
 		if (newSub === undefined) return;
-		selectSubtitle({track: newSub, fonts: fonts ?? []});
+		selectSubtitle({ track: newSub, fonts: fonts ?? [] });
 	}, [player.current?.src, newSub, fonts, selectSubtitle]);
 };
