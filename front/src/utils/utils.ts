@@ -18,6 +18,34 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { useEffect } from "react";
+
 export const makeTitle = (title?: string) => {
 	return title ? `${title} - Kyoo` : "Kyoo";
+};
+
+let preventHover: boolean = false;
+let hoverTimeout: NodeJS.Timeout;
+
+export const useMobileHover = () => {
+	useEffect(() => {
+		const enableHover = () => {
+			if (preventHover) return;
+			document.body.classList.add("hoverEnabled");
+		}
+
+		const disableHover = () => {
+			if (hoverTimeout) clearTimeout(hoverTimeout);
+			preventHover = true;
+			hoverTimeout = setTimeout(() => preventHover = false, 500);
+			document.body.classList.remove("hoverEnabled");
+		}
+
+		document.addEventListener("touchstart", disableHover, true);
+		document.addEventListener("mousemove", enableHover, true);
+		return () => {
+			document.removeEventListener("touchstart", disableHover);
+			document.removeEventListener("mousemove", enableHover);
+		};
+	}, []);
 };

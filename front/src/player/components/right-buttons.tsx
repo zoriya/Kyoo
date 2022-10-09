@@ -31,16 +31,28 @@ import { fullscreenAtom, subtitleAtom } from "../state";
 export const RightButtons = ({
 	subtitles,
 	fonts,
+	onMenuOpen,
+	onMenuClose,
 }: {
 	subtitles?: Track[];
 	fonts?: Font[];
+	onMenuOpen: () => void;
+	onMenuClose: () => void;
 }) => {
 	const { t } = useTranslation("player");
 	const [subtitleAnchor, setSubtitleAnchor] = useState<HTMLButtonElement | null>(null);
 	const [isFullscreen, setFullscreen] = useAtom(fullscreenAtom);
 
 	return (
-		<Box sx={{ "> *": { m: "8px !important" } }}>
+		<Box
+			sx={{
+				display: "flex",
+				"> *": {
+					m: { xs: "4px !important", sm: "8px !important" },
+					p: { xs: "4px !important", sm: "8px !important" },
+				},
+			}}
+		>
 			{subtitles && (
 				<Tooltip title={t("subtitles")}>
 					<IconButton
@@ -49,7 +61,10 @@ export const RightButtons = ({
 						aria-controls={subtitleAnchor ? "subtitle-menu" : undefined}
 						aria-haspopup="true"
 						aria-expanded={subtitleAnchor ? "true" : undefined}
-						onClick={(event) => setSubtitleAnchor(event.currentTarget)}
+						onClick={(event) => {
+							setSubtitleAnchor(event.currentTarget);
+							onMenuOpen();
+						}}
 						sx={{ color: "white" }}
 					>
 						<ClosedCaption />
@@ -70,7 +85,10 @@ export const RightButtons = ({
 					subtitles={subtitles!}
 					fonts={fonts!}
 					anchor={subtitleAnchor}
-					onClose={() => setSubtitleAnchor(null)}
+					onClose={() => {
+						setSubtitleAnchor(null);
+						onMenuClose();
+					}}
 				/>
 			)}
 		</Box>
@@ -84,7 +102,7 @@ const SubtitleMenu = ({
 	onClose,
 }: {
 	subtitles: Track[];
-	fonts: Font[],
+	fonts: Font[];
 	anchor: HTMLElement;
 	onClose: () => void;
 }) => {
@@ -129,7 +147,7 @@ const SubtitleMenu = ({
 					key={sub.id}
 					selected={selectedSubtitle?.id === sub.id}
 					onClick={() => {
-						setSubtitle({track: sub, fonts});
+						setSubtitle({ track: sub, fonts });
 						onClose();
 					}}
 					component={Link}
@@ -143,4 +161,3 @@ const SubtitleMenu = ({
 		</Menu>
 	);
 };
-

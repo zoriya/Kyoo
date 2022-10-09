@@ -28,6 +28,7 @@ import { createQueryClient, fetchQuery, QueryIdentifier, QueryPage } from "~/uti
 import { defaultTheme } from "~/utils/themes/default-theme";
 import superjson from "superjson";
 import Head from "next/head";
+import { useMobileHover } from "~/utils/utils";
 
 // Simply silence a SSR warning (see https://github.com/facebook/react/issues/14927 for more details)
 if (typeof window === "undefined") {
@@ -38,6 +39,8 @@ const App = ({ Component, pageProps }: AppProps) => {
 	const [queryClient] = useState(() => createQueryClient());
 	const { queryState, ...props } = superjson.deserialize<any>(pageProps ?? {});
 	const getLayout = (Component as QueryPage).getLayout ?? ((page) => page);
+	
+	useMobileHover();
 
 	return (
 		<>
