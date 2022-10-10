@@ -121,6 +121,10 @@ const WatchMovieP = z.preprocess(
 		 */
 		name: z.string(),
 		/**
+		 * The sumarry of this episode.
+		 */
+		overview: z.string().nullable(),
+		/**
 		 * The release date of this episode. It can be null if unknown.
 		 */
 		releaseDate: zdate().nullable(),
