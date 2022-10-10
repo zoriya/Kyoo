@@ -43,7 +43,8 @@ export const [_playAtom, playAtom] = bakedAtom(true, async (get, set, value) => 
 		try {
 			await player.current.play();
 		} catch (e) {
-			if (e instanceof DOMException && e.name === "NotSupportedError") set(playModeAtom, PlayMode.Transmux);
+			if (e instanceof DOMException && e.name === "NotSupportedError")
+				set(playModeAtom, PlayMode.Transmux);
 			else if (!(e instanceof DOMException && e.name === "NotAllowedError")) console.log(e);
 		}
 	} else {
@@ -63,7 +64,7 @@ export const [_volumeAtom, volumeAtom] = bakedAtom(100, (get, set, value, baker)
 	const player = get(playerAtom);
 	if (!player?.current) return;
 	set(baker, value);
-	if (player.current) player.current.volume = value / 100;
+	if (player.current) player.current.volume = Math.max(0, Math.min(value, 100)) / 100;
 });
 export const [_mutedAtom, mutedAtom] = bakedAtom(false, (get, set, value, baker) => {
 	const player = get(playerAtom);
@@ -75,12 +76,13 @@ export const [_, fullscreenAtom] = bakedAtom(false, async (_, set, value, baker)
 	try {
 		if (value) {
 			await document.body.requestFullscreen();
+			set(baker, true);
 			await screen.orientation.lock("landscape");
 		} else {
 			await document.exitFullscreen();
+			set(baker, false);
 			screen.orientation.unlock();
 		}
-		set(baker, value);
 	} catch {}
 });
 
@@ -140,11 +142,7 @@ export const useVideoController = (links?: { direct: string; transmux: string })
 	const videoProps: BoxProps<"video"> = {
 		ref: player,
 		onDoubleClick: () => {
-			if (document.fullscreenElement) {
-				setFullscreen(false);
-			} else {
-				setFullscreen(true);
-			}
+			setFullscreen(!document.fullscreenElement);
 		},
 		onPlay: () => setPlay(true),
 		onPause: () => setPlay(false),
