@@ -37,11 +37,12 @@ type Action =
 	| { type: "mute" }
 	| { type: "fullscreen" }
 	| { type: "seek"; value: number }
+	| { type: "seekTo"; value: number }
 	| { type: "seekPercent"; value: number }
 	| { type: "volume"; value: number }
 	| { type: "subtitle"; subtitles: Track[]; fonts: Font[] };
 
-const keyboardReducerAtom = atom<null, Action>(null, (get, set, action) => {
+export const reducerAtom = atom<null, Action>(null, (get, set, action) => {
 	switch (action.type) {
 		case "play":
 			set(playAtom, !get(playAtom));
@@ -54,6 +55,9 @@ const keyboardReducerAtom = atom<null, Action>(null, (get, set, action) => {
 			break;
 		case "seek":
 			set(progressAtom, get(progressAtom) + action.value);
+			break;
+		case "seekTo":
+			set(progressAtom, action.value);
 			break;
 		case "seekPercent":
 			set(progressAtom, (get(durationAtom) * action.value) / 100);
@@ -83,7 +87,7 @@ export const useVideoKeyboard = (
 	previousEpisode?: string,
 	nextEpisode?: string,
 ) => {
-	const reducer = useSetAtom(keyboardReducerAtom);
+	const reducer = useSetAtom(reducerAtom);
 	const router = useRouter();
 
 	useEffect(() => {
