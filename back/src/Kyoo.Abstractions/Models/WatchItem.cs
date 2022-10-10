@@ -76,6 +76,11 @@ namespace Kyoo.Abstractions.Models
 		public string Title { get; set; }
 
 		/// <summary>
+		/// The summary of this episode.
+		/// </summay>
+		public string Overview { get; set; }
+
+		/// <summary>
 		/// The release date of this episode. It can be null if unknown.
 		/// </summary>
 		public DateTime? ReleaseDate { get; set; }
@@ -211,6 +216,7 @@ namespace Kyoo.Abstractions.Models
 				EpisodeNumber = ep.EpisodeNumber,
 				AbsoluteNumber = ep.AbsoluteNumber,
 				Title = ep.Title,
+				Overview = ep.Overview,
 				ReleaseDate = ep.ReleaseDate,
 				Path = ep.Path,
 				Images = ep.Show.Images,

@@ -25,9 +25,13 @@ import { useFetch } from "~/utils/query";
 import { ErrorPage } from "~/components/errors";
 import { useState, useEffect, PointerEvent as ReactPointerEvent } from "react";
 import { Box } from "@mui/material";
-import { useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { Hover, LoadingIndicator } from "./components/hover";
 import { fullscreenAtom, playAtom, useSubtitleController, useVideoController } from "./state";
+import { useRouter } from "next/router";
+import Head from "next/head";
+import { makeTitle } from "~/utils/utils";
+import { episodeDisplayNumber } from "~/components/episode";
 
 // Callback used to hide the controls when the mouse goes iddle. This is stored globally to clear the old timeout
 // if the mouse moves again (if this is stored as a state, the whole page is redrawn on mouse move)
@@ -40,10 +44,11 @@ const query = (slug: string): QueryIdentifier<WatchItem> => ({
 
 const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 	const { data, error } = useFetch(query(slug));
-	const { playerRef, videoProps, onVideoClick } = useVideoController();
+	const { playerRef, videoProps, onVideoClick } = useVideoController(data?.link);
 	const setFullscreen = useSetAtom(fullscreenAtom);
+	const router = useRouter();
 
-	const isPlaying = useAtomValue(playAtom);
+	const [isPlaying, setPlay] = useAtom(playAtom);
 	const [showHover, setHover] = useState(false);
 	const [mouseMoved, setMouseMoved] = useState(false);
 	const [menuOpenned, setMenuOpen] = useState(false);
@@ -55,7 +60,7 @@ const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 		mouseCallback = setTimeout(() => {
 			setMouseMoved(false);
 		}, 2500);
-	}
+	};
 
 	useEffect(() => {
 		const handler = (e: PointerEvent) => {
@@ -66,6 +71,10 @@ const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 		document.addEventListener("pointermove", handler);
 		return () => document.removeEventListener("pointermove", handler);
 	});
+
+	useEffect(() => {
+		setPlay(true);
+	}, [slug, setPlay]);
 
 	useSubtitleController(playerRef, data?.subtitles, data?.fonts);
 
@@ -79,6 +88,24 @@ const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 
 	return (
 		<>
+			{data && (
+				<Head>
+					<title>
+						{makeTitle(
+							data.isMovie
+								? data.name
+								: data.showTitle +
+										" " +
+										episodeDisplayNumber({
+											seasonNumber: data.seasonNumber,
+											episodeNumber: data.episodeNumber,
+											absoluteNumber: data.absoluteNumber,
+										}),
+						)}
+					</title>
+					<meta name="description" content={data.overview ?? undefined} />
+				</Head>
+			)}
 			<style jsx global>{`
 				::cue {
 					background-color: transparent;
@@ -91,7 +118,6 @@ const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 			>
 				<Box
 					component="video"
-					src={data?.link.direct}
 					{...videoProps}
 					onPointerDown={(e: ReactPointerEvent<HTMLVideoElement>) => {
 						if (e.pointerType === "mouse") {
@@ -101,6 +127,14 @@ const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 						} else {
 							mouseHasMoved();
 						}
+					}}
+					onEnded={() => {
+						if (!data) return;
+						if (data.isMovie) router.push(`/movie/${data.slug}`);
+						else
+							router.push(
+								data.nextEpisode ? `/watch/${data.nextEpisode.slug}` : `/show/${data.showSlug}`,
+							);
 					}}
 					sx={{
 						position: "fixed",

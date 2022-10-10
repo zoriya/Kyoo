@@ -19,20 +19,33 @@
  */
 
 import { BoxProps } from "@mui/material";
-import { atom, useSetAtom } from "jotai";
+import { atom, useAtom, useSetAtom } from "jotai";
 import { useRouter } from "next/router";
 import { RefObject, useEffect, useRef } from "react";
 import { Font, Track } from "~/models/resources/watch-item";
 import { bakedAtom } from "~/utils/jotai-utils";
 // @ts-ignore
 import SubtitleOctopus from "@jellyfin/libass-wasm/dist/js/subtitles-octopus";
+import Hls from "hls.js";
+
+enum PlayMode {
+	Direct,
+	Transmux,
+}
+
+const playModeAtom = atom<PlayMode>(PlayMode.Direct);
 
 export const playerAtom = atom<RefObject<HTMLVideoElement> | null>(null);
-export const [_playAtom, playAtom] = bakedAtom(true, (get, _, value) => {
+export const [_playAtom, playAtom] = bakedAtom(true, async (get, set, value) => {
 	const player = get(playerAtom);
 	if (!player?.current) return;
 	if (value) {
-		player.current.play();
+		try {
+			await player.current.play();
+		} catch (e) {
+			if (e instanceof DOMException && e.name === "NotSupportedError") set(playModeAtom, PlayMode.Transmux);
+			else if (!(e instanceof DOMException && e.name === "NotAllowedError")) console.log(e);
+		}
 	} else {
 		player.current.pause();
 	}
@@ -71,10 +84,13 @@ export const [_, fullscreenAtom] = bakedAtom(false, async (_, set, value, baker)
 	} catch {}
 });
 
-export const useVideoController = () => {
+let hls: Hls | null = null;
+
+export const useVideoController = (links?: { direct: string; transmux: string }) => {
 	const player = useRef<HTMLVideoElement>(null);
 	const setPlayer = useSetAtom(playerAtom);
 	const setPlay = useSetAtom(_playAtom);
+	const setPPlay = useSetAtom(playAtom);
 	const setLoad = useSetAtom(loadAtom);
 	const setProgress = useSetAtom(_progressAtom);
 	const setBuffered = useSetAtom(bufferedAtom);
@@ -82,14 +98,39 @@ export const useVideoController = () => {
 	const setVolume = useSetAtom(_volumeAtom);
 	const setMuted = useSetAtom(_mutedAtom);
 	const setFullscreen = useSetAtom(fullscreenAtom);
+	const [playMode, setPlayMode] = useAtom(playModeAtom);
 
 	setPlayer(player);
 
 	useEffect(() => {
 		if (!player.current) return;
-		if (player.current.paused) player.current.play();
 		setPlay(!player.current.paused);
 	}, [setPlay]);
+
+	useEffect(() => {
+		setPlayMode(PlayMode.Direct);
+	}, [links, setPlayMode]);
+
+	useEffect(() => {
+		const src = playMode === PlayMode.Direct ? links?.direct : links?.transmux;
+
+		if (!player?.current || !src) return;
+		if (
+			playMode == PlayMode.Direct ||
+			player.current.canPlayType("application/vnd.apple.mpegurl")
+		) {
+			player.current.src = src;
+		} else {
+			if (hls === null) hls = new Hls();
+			hls.loadSource(src);
+			hls.attachMedia(player.current);
+			hls.on(Hls.Events.MANIFEST_LOADED, async () => {
+				try {
+					await player.current?.play();
+				} catch {}
+			});
+		}
+	}, [playMode, links, player]);
 
 	useEffect(() => {
 		if (!player?.current?.duration) return;
@@ -109,6 +150,10 @@ export const useVideoController = () => {
 		onPause: () => setPlay(false),
 		onWaiting: () => setLoad(true),
 		onCanPlay: () => setLoad(false),
+		onError: () => {
+			if (player?.current?.error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED)
+				setPlayMode(PlayMode.Transmux);
+		},
 		onTimeUpdate: () => setProgress(player?.current?.currentTime ?? 0),
 		onDurationChange: () => setDuration(player?.current?.duration ?? 0),
 		onProgress: () =>
@@ -130,11 +175,7 @@ export const useVideoController = () => {
 		videoProps,
 		onVideoClick: () => {
 			if (!player.current) return;
-			if (player.current.paused) {
-				player.current.play();
-			} else {
-				player.current.pause();
-			}
+			setPPlay(player.current.paused);
 		},
 	};
 };
