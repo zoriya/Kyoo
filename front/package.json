@@ -7,8 +7,8 @@
 		"build": "next build",
 		"start": "next start",
 		"lint": "next lint",
-		"format": "prettier --check --ignore-path .gitignore .",
-		"format:fix": "prettier --write --ignore-path .gitignore ."
+		"format": "prettier --check --ignore-path .gitignore '!src/utils/jotai-utils.tsx' .",
+		"format:fix": "prettier --write --ignore-path .gitignore '!src/utils/jotai-utils.tsx' ."
 	},
 	"prettier": {
 		"useTabs": true,

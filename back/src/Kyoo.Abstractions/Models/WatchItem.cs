@@ -77,7 +77,7 @@ namespace Kyoo.Abstractions.Models
 
 		/// <summary>
 		/// The summary of this episode.
-		/// </summay>
+		/// </summary>
 		public string Overview { get; set; }
 
 		/// <summary>
