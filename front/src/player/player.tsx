@@ -33,6 +33,7 @@ import Head from "next/head";
 import { makeTitle } from "~/utils/utils";
 import { episodeDisplayNumber } from "~/components/episode";
 import { useVideoKeyboard } from "./keyboard";
+import { MediaSessionManager } from "./media-session";
 
 // Callback used to hide the controls when the mouse goes iddle. This is stored globally to clear the old timeout
 // if the mouse moves again (if this is stored as a state, the whole page is redrawn on mouse move)
@@ -54,6 +55,13 @@ const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 	const [mouseMoved, setMouseMoved] = useState(false);
 	const [menuOpenned, setMenuOpen] = useState(false);
 	const displayControls = showHover || !isPlaying || mouseMoved || menuOpenned;
+
+	const previous =
+		data && !data.isMovie && data.previousEpisode
+			? `/watch/${data.previousEpisode.slug}`
+			: undefined;
+	const next =
+		data && !data.isMovie && data.nextEpisode ? `/watch/${data.nextEpisode.slug}` : undefined;
 
 	const mouseHasMoved = () => {
 		setMouseMoved(true);
@@ -84,16 +92,7 @@ const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 	}, [setFullscreen]);
 
 	useSubtitleController(playerRef, data?.subtitles, data?.fonts);
-	useVideoKeyboard(
-		data?.subtitles,
-		data?.fonts,
-		data && !data.isMovie && data.previousEpisode
-			? `/watch/${data.previousEpisode.slug}`
-			: undefined,
-		data && !data.isMovie && data.nextEpisode
-			? `/watch/${data.nextEpisode.slug}`
-			: undefined,
-	);
+	useVideoKeyboard(data?.subtitles, data?.fonts, previous, next);
 
 	if (error) return <ErrorPage {...error} />;
 
@@ -117,6 +116,7 @@ const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 					<meta name="description" content={data.overview ?? undefined} />
 				</Head>
 			)}
+			<MediaSessionManager title={data?.name} image={data?.thumbnail} next={next} previous={previous} />
 			<style jsx global>{`
 				::cue {
 					background-color: transparent;
