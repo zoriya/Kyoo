@@ -32,6 +32,7 @@ import { useRouter } from "next/router";
 import Head from "next/head";
 import { makeTitle } from "~/utils/utils";
 import { episodeDisplayNumber } from "~/components/episode";
+import { useVideoKeyboard } from "./keyboard";
 
 // Callback used to hide the controls when the mouse goes iddle. This is stored globally to clear the old timeout
 // if the mouse moves again (if this is stored as a state, the whole page is redrawn on mouse move)
@@ -76,13 +77,23 @@ const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 		setPlay(true);
 	}, [slug, setPlay]);
 
-	useSubtitleController(playerRef, data?.subtitles, data?.fonts);
-
 	useEffect(() => {
 		if (!/Mobi/i.test(window.navigator.userAgent)) return;
 		setFullscreen(true);
 		return () => setFullscreen(false);
 	}, [setFullscreen]);
+
+	useSubtitleController(playerRef, data?.subtitles, data?.fonts);
+	useVideoKeyboard(
+		data?.subtitles,
+		data?.fonts,
+		data && !data.isMovie && data.previousEpisode
+			? `/watch/${data.previousEpisode.slug}`
+			: undefined,
+		data && !data.isMovie && data.nextEpisode
+			? `/watch/${data.nextEpisode.slug}`
+			: undefined,
+	);
 
 	if (error) return <ErrorPage {...error} />;
 
