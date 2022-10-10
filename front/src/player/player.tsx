@@ -116,7 +116,12 @@ const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 					<meta name="description" content={data.overview ?? undefined} />
 				</Head>
 			)}
-			<MediaSessionManager title={data?.name} image={data?.thumbnail} next={next} previous={previous} />
+			<MediaSessionManager
+				title={data?.name}
+				image={data?.thumbnail}
+				next={next}
+				previous={previous}
+			/>
 			<style jsx global>{`
 				::cue {
 					background-color: transparent;

@@ -32,14 +32,14 @@ export const useMobileHover = () => {
 		const enableHover = () => {
 			if (preventHover) return;
 			document.body.classList.add("hoverEnabled");
-		}
+		};
 
 		const disableHover = () => {
 			if (hoverTimeout) clearTimeout(hoverTimeout);
 			preventHover = true;
-			hoverTimeout = setTimeout(() => preventHover = false, 500);
+			hoverTimeout = setTimeout(() => (preventHover = false), 500);
 			document.body.classList.remove("hoverEnabled");
-		}
+		};
 
 		document.addEventListener("touchstart", disableHover, true);
 		document.addEventListener("mousemove", enableHover, true);

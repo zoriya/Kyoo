@@ -69,7 +69,9 @@ export const Hover = ({
 				}}
 			>
 				<VideoPoster poster={data?.poster} />
-				<Box sx={{ width: "100%", ml: { xs: 0.5, sm: 3 }, display: "flex", flexDirection: "column" }}>
+				<Box
+					sx={{ width: "100%", ml: { xs: 0.5, sm: 3 }, display: "flex", flexDirection: "column" }}
+				>
 					<Typography variant="h4" component="h2" color="white" sx={{ pb: 1 }}>
 						{name ?? <Skeleton />}
 					</Typography>
@@ -81,7 +83,12 @@ export const Hover = ({
 							previousSlug={data && !data.isMovie ? data.previousEpisode?.slug : undefined}
 							nextSlug={data && !data.isMovie ? data.nextEpisode?.slug : undefined}
 						/>
-						<RightButtons subtitles={data?.subtitles} fonts={data?.fonts} onMenuOpen={onMenuOpen} onMenuClose={onMenuClose} />
+						<RightButtons
+							subtitles={data?.subtitles}
+							fonts={data?.fonts}
+							onMenuOpen={onMenuOpen}
+							onMenuClose={onMenuClose}
+						/>
 					</Box>
 				</Box>
 			</Box>

@@ -39,7 +39,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 	const [queryClient] = useState(() => createQueryClient());
 	const { queryState, ...props } = superjson.deserialize<any>(pageProps ?? {});
 	const getLayout = (Component as QueryPage).getLayout ?? ((page) => page);
-	
+
 	useMobileHover();
 
 	return (
