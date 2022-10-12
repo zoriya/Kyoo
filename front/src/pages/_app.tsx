@@ -29,6 +29,7 @@ import { defaultTheme } from "~/utils/themes/default-theme";
 import superjson from "superjson";
 import Head from "next/head";
 import { useMobileHover } from "~/utils/utils";
+import { CastProvider } from "~/player/cast/cast-provider";
 
 // Simply silence a SSR warning (see https://github.com/facebook/react/issues/14927 for more details)
 if (typeof window === "undefined") {
@@ -39,6 +40,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 	const [queryClient] = useState(() => createQueryClient());
 	const { queryState, ...props } = superjson.deserialize<any>(pageProps ?? {});
 	const getLayout = (Component as QueryPage).getLayout ?? ((page) => page);
+	const castEnabled = true;
 
 	useMobileHover();
 
@@ -70,7 +72,10 @@ const App = ({ Component, pageProps }: AppProps) => {
 			</Head>
 			<QueryClientProvider client={queryClient}>
 				<Hydrate state={queryState}>
-					<ThemeProvider theme={defaultTheme}>{getLayout(<Component {...props} />)}</ThemeProvider>
+					<ThemeProvider theme={defaultTheme}>
+						{getLayout(<Component {...props} />)}
+						{castEnabled && <CastProvider />}
+					</ThemeProvider>
 				</Hydrate>
 			</QueryClientProvider>
 		</>

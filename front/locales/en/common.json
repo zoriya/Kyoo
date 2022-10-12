@@ -2,5 +2,8 @@
 	"navbar": {
 		"home": "Home",
 		"login": "Login"
+	},
+	"cast": {
+		"start": "Cast to device"
 	}
 }

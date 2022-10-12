@@ -24,8 +24,8 @@ import { WatchItem, WatchItemP } from "~/models/resources/watch-item";
 import { useFetch } from "~/utils/query";
 import { ErrorPage } from "~/components/errors";
 import { useState, useEffect, PointerEvent as ReactPointerEvent } from "react";
-import { Box } from "@mui/material";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { Box, styled } from "@mui/material";
+import { useAtom, useSetAtom } from "jotai";
 import { Hover, LoadingIndicator } from "./components/hover";
 import { fullscreenAtom, playAtom, useSubtitleController, useVideoController } from "./state";
 import { useRouter } from "next/router";
@@ -34,6 +34,8 @@ import { makeTitle } from "~/utils/utils";
 import { episodeDisplayNumber } from "~/components/episode";
 import { useVideoKeyboard } from "./keyboard";
 import { MediaSessionManager } from "./media-session";
+
+const Video = styled("video")({});
 
 // Callback used to hide the controls when the mouse goes iddle. This is stored globally to clear the old timeout
 // if the mouse moves again (if this is stored as a state, the whole page is redrawn on mouse move)
@@ -132,8 +134,7 @@ const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 				onMouseLeave={() => setMouseMoved(false)}
 				sx={{ cursor: displayControls ? "unset" : "none" }}
 			>
-				<Box
-					component="video"
+				<Video
 					{...videoProps}
 					onPointerDown={(e: ReactPointerEvent<HTMLVideoElement>) => {
 						if (e.pointerType === "mouse") {

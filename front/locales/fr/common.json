@@ -2,5 +2,8 @@
 	"navbar": {
 		"home": "Accueil",
 		"login": "Connexion"
+	},
+	"cast": {
+		"start": "Caster sur un appareil"
 	}
 }

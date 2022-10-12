@@ -18,10 +18,9 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { BoxProps } from "@mui/material";
 import { atom, useAtom, useSetAtom } from "jotai";
 import { useRouter } from "next/router";
-import { RefObject, useEffect, useRef } from "react";
+import { ComponentProps, RefObject, useEffect, useRef } from "react";
 import { Font, Track } from "~/models/resources/watch-item";
 import { bakedAtom } from "~/utils/jotai-utils";
 // @ts-ignore
@@ -139,7 +138,7 @@ export const useVideoController = (links?: { direct: string; transmux: string })
 		setDuration(player.current.duration);
 	}, [player, setDuration]);
 
-	const videoProps: BoxProps<"video"> = {
+	const videoProps: ComponentProps<"video"> = {
 		ref: player,
 		onDoubleClick: () => {
 			setFullscreen(!document.fullscreenElement);

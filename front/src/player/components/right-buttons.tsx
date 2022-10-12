@@ -26,6 +26,7 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import { Font, Track } from "~/models/resources/watch-item";
 import { Link } from "~/utils/link";
+import { CastButton } from "../cast/cast-button";
 import { fullscreenAtom, subtitleAtom } from "../state";
 
 export const RightButtons = ({
@@ -40,6 +41,7 @@ export const RightButtons = ({
 	onMenuClose: () => void;
 }) => {
 	const { t } = useTranslation("player");
+	const { t: tc } = useTranslation("common");
 	const [subtitleAnchor, setSubtitleAnchor] = useState<HTMLButtonElement | null>(null);
 	const [isFullscreen, setFullscreen] = useAtom(fullscreenAtom);
 
@@ -71,6 +73,16 @@ export const RightButtons = ({
 					</IconButton>
 				</Tooltip>
 			)}
+			<Tooltip title={tc("cast.start")}>
+				<CastButton
+					sx={{
+						width: "24px",
+						height: "24px",
+						"--connected-color": "white",
+						"--disconnected-color": "white",
+					}}
+				/>
+			</Tooltip>
 			<Tooltip title={t("fullscreen")}>
 				<IconButton
 					onClick={() => setFullscreen(!isFullscreen)}
