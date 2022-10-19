@@ -22,6 +22,15 @@ import { atom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useMemo } from "react";
 import { bakedAtom } from "~/utils/jotai-utils";
 
+export type Media = {
+	name: string;
+	episodeName?: null;
+	episodeNumber?: number;
+	seasonNumber?: number;
+	absoluteNumber?: string;
+	thunbnail?: string;
+};
+
 const playerAtom = atom(() => {
 	const player = new cast.framework.RemotePlayer();
 	return {
@@ -31,18 +40,21 @@ const playerAtom = atom(() => {
 });
 
 export const [_playAtom, playAtom] = bakedAtom<boolean, never>(true, (get) => {
-	const {controller} = get(playerAtom);
+	const { controller } = get(playerAtom);
 	controller.playOrPause();
 });
 export const [_durationAtom, durationAtom] = bakedAtom(1, (get, _, value) => {
-	const {controller} = get(playerAtom);
-	controller.seek()
+	const { controller } = get(playerAtom);
+	controller.seek();
 });
+
+export const [_mediaAtom, mediaAtom] = bakedAtom<Media | null, string>(null, (get, _, value) => {});
 
 export const useCastController = () => {
 	const { player, controller } = useAtomValue(playerAtom);
 	const setPlay = useSetAtom(_playAtom);
 	const setDuration = useSetAtom(_durationAtom);
+	const setMedia = useSetAtom(_mediaAtom);
 
 	useEffect(() => {
 		const eventListeners: [
@@ -51,11 +63,15 @@ export const useCastController = () => {
 		][] = [
 			[cast.framework.RemotePlayerEventType.IS_PAUSED_CHANGED, (event) => setPlay(event.value)],
 			[cast.framework.RemotePlayerEventType.DURATION_CHANGED, (event) => setDuration(event.value)],
+			[
+				cast.framework.RemotePlayerEventType.MEDIA_INFO_CHANGED,
+				() => setMedia(player.mediaInfo?.metadata),
+			],
 		];
 
 		for (const [key, handler] of eventListeners) controller.addEventListener(key, handler);
 		return () => {
 			for (const [key, handler] of eventListeners) controller.removeEventListener(key, handler);
 		};
-	}, [player, controller, setPlay]);
+	}, [player, controller, setPlay, setDuration, setMedia]);
 };
