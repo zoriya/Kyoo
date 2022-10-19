@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Box, IconButton, Slider, Tooltip, Typography } from "@mui/material";
+import { Box, IconButton, Slider, SxProps, Tooltip, Typography } from "@mui/material";
 import { useAtom, useAtomValue } from "jotai";
 import useTranslation from "next-translate/useTranslation";
 import { useRouter } from "next/router";
@@ -83,13 +83,13 @@ export const LeftButtons = ({
 					</NextLink>
 				</Tooltip>
 			)}
-			<VolumeSlider />
+			<VolumeSlider color="white" />
 			<ProgressText />
 		</Box>
 	);
 };
 
-const VolumeSlider = () => {
+export const VolumeSlider = ({ color, className }: { color?: string, className?: string }) => {
 	const [volume, setVolume] = useAtom(volumeAtom);
 	const [isMuted, setMuted] = useAtom(mutedAtom);
 	const { t } = useTranslation("player");
@@ -102,12 +102,13 @@ const VolumeSlider = () => {
 				p: "8px",
 				"body.hoverEnabled &:hover .slider": { width: "100px", px: "16px" },
 			}}
+			className={className}
 		>
 			<Tooltip title={t("mute")}>
 				<IconButton
 					onClick={() => setMuted(!isMuted)}
 					aria-label={t("mute")}
-					sx={{ color: "white" }}
+					sx={{ color: color }}
 				>
 					{isMuted || volume == 0 ? (
 						<VolumeOff />
@@ -141,12 +142,12 @@ const VolumeSlider = () => {
 	);
 };
 
-const ProgressText = () => {
+export const ProgressText = ({ sx }: { sx?: SxProps }) => {
 	const progress = useAtomValue(progressAtom);
 	const duration = useAtomValue(durationAtom);
 
 	return (
-		<Typography color="white" sx={{ alignSelf: "center" }}>
+		<Typography sx={{ alignSelf: "center", ...sx }}>
 			{toTimerString(progress, duration)} : {toTimerString(duration)}
 		</Typography>
 	);

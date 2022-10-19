@@ -77,7 +77,7 @@ export const Navbar = (barProps: AppBarProps) => {
 	const { data, error, isSuccess, isError } = useFetch(Navbar.query());
 
 	return (
-		<AppBar position="sticky" {...barProps}>
+		<AppBar position="relative" {...barProps}>
 			<Toolbar>
 				<IconButton
 					size="large"

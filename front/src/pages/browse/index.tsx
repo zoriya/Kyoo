@@ -44,6 +44,8 @@ import { InfiniteScroll } from "~/utils/infinite-scroll";
 import { Link } from "~/utils/link";
 import { withRoute } from "~/utils/router";
 import { QueryIdentifier, QueryPage, useInfiniteFetch } from "~/utils/query";
+import { CastMiniPlayer } from "~/player/cast/mini-player";
+import { styled } from "@mui/system";
 
 enum SortBy {
 	Name = "name",
@@ -422,12 +424,17 @@ const BrowsePage: QueryPage<{ slug?: string }> = ({ slug }) => {
 	);
 };
 
+const Main = styled("main")({});
+
 BrowsePage.getLayout = (page) => {
 	return (
-		<>
+		<Box sx={{ display: "flex", flexDirection: "column", height: "100vh" }}>
 			<Navbar />
-			<main>{page}</main>
-		</>
+			<Main sx={{ flexGrow: 1, flexShrink: 1, overflow: "auto" }}>{page}</Main>
+			<footer>
+				<CastMiniPlayer />
+			</footer>
+		</Box>
 	);
 };
 

@@ -18,8 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Box, styled } from "@mui/material";
-import { BoxProps } from "@mui/system";
+import { styled } from "@mui/material";
 import { ComponentProps, forwardRef } from "react";
 
 

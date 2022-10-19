@@ -18,8 +18,8 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Box, Skeleton, styled } from "@mui/material";
-import { SyntheticEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { Box, Skeleton, SxProps } from "@mui/material";
+import { SyntheticEvent, useLayoutEffect, useRef, useState } from "react";
 import { ComponentsOverrides, ComponentsProps, ComponentsVariants } from "@mui/material";
 import { withThemeProps } from "~/utils/with-theme";
 import type { Property } from "csstype";
@@ -42,7 +42,7 @@ type ImagePropsWithLoading =
 type Width = ResponsiveStyleValue<Property.Width<(string & {}) | 0>>;
 type Height = ResponsiveStyleValue<Property.Height<(string & {}) | 0>>;
 
-const _Image = ({
+export const Image = ({
 	img,
 	alt,
 	radius,
@@ -51,9 +51,9 @@ const _Image = ({
 	aspectRatio = undefined,
 	width = undefined,
 	height = undefined,
+	sx,
 	...others
-}: ImagePropsWithLoading &
-	(
+}: ImagePropsWithLoading & { sx?: SxProps } & (
 		| { aspectRatio?: string; width: Width; height: Height }
 		| { aspectRatio: string; width?: Width; height?: Height }
 	)) => {
@@ -76,6 +76,7 @@ const _Image = ({
 				height,
 				backgroundColor: "grey.300",
 				"& > *": { width: "100%", height: "100%" },
+				...sx,
 			}}
 			{...others}
 		>
@@ -98,11 +99,9 @@ const _Image = ({
 	);
 };
 
-export const Image = styled(_Image)({});
-
-// eslint-disable-next-line jsx-a11y/alt-text
 const _Poster = (props: ImagePropsWithLoading & { width?: Width; height?: Height }) => (
-	<_Image aspectRatio="2 / 3" {...props} />
+	// eslint-disable-next-line jsx-a11y/alt-text
+	<Image aspectRatio="2 / 3" {...props} />
 );
 
 declare module "@mui/material/styles" {

@@ -18,13 +18,13 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Box } from "@mui/material";
+import { Box, SxProps } from "@mui/material";
 import { useAtom, useAtomValue } from "jotai";
 import { useEffect, useRef, useState } from "react";
 import { Chapter } from "~/models/resources/watch-item";
 import { bufferedAtom, durationAtom, progressAtom } from "../state";
 
-export const ProgressBar = ({ chapters }: { chapters?: Chapter[] }) => {
+export const ProgressBar = ({ chapters, sx }: { chapters?: Chapter[], sx?: SxProps }) => {
 	const ref = useRef<HTMLDivElement>(null);
 	const [isSeeking, setSeek] = useState(false);
 	const [progress, setProgress] = useAtom(progressAtom);
@@ -75,6 +75,7 @@ export const ProgressBar = ({ chapters }: { chapters?: Chapter[] }) => {
 					".thumb": { opacity: 1 },
 					".bar": { transform: "unset" },
 				},
+				...sx
 			}}
 		>
 			<Box

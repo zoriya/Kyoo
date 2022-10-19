@@ -20,7 +20,7 @@
 
 import React, { useState } from "react";
 import appWithI18n from "next-translate/appWithI18n";
-import { ThemeProvider } from "@mui/material";
+import { Box, ThemeProvider } from "@mui/material";
 import NextApp, { AppContext } from "next/app";
 import type { AppProps } from "next/app";
 import { Hydrate, QueryClientProvider } from "react-query";
@@ -73,8 +73,10 @@ const App = ({ Component, pageProps }: AppProps) => {
 			<QueryClientProvider client={queryClient}>
 				<Hydrate state={queryState}>
 					<ThemeProvider theme={defaultTheme}>
-						{getLayout(<Component {...props} />)}
-						{castEnabled && <CastProvider />}
+						<Box >
+							{getLayout(<Component {...props} />)}
+							{castEnabled && <CastProvider />}
+						</Box>
 					</ThemeProvider>
 				</Hydrate>
 			</QueryClientProvider>
