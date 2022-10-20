@@ -1,0 +1,7 @@
+{
+	"include": ["src/**/*", "./node_modules/@types/chromecast-caf-receiver/*" ],
+	"compilerOptions": {
+		"target": "es2021",
+		"strict": true
+	}
+}
