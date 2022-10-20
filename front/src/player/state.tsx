@@ -84,10 +84,13 @@ export const [_, fullscreenAtom] = bakedAtom(false, async (_, set, value, baker)
 		}
 	} catch {}
 });
+export const mediaAtom = atom<string | null>(null);
+// The tuple is only used to prevent jotai from thinking the function is a read func.
+export const stopAtom = atom<[() => void]>([() => {}]);
 
 let hls: Hls | null = null;
 
-export const useVideoController = (links?: { direct: string; transmux: string }) => {
+export const useVideoController = (slug: string, links?: { direct: string; transmux: string }) => {
 	const player = useRef<HTMLVideoElement>(null);
 	const setPlayer = useSetAtom(playerAtom);
 	const setPlay = useSetAtom(_playAtom);
@@ -99,6 +102,7 @@ export const useVideoController = (links?: { direct: string; transmux: string })
 	const setVolume = useSetAtom(_volumeAtom);
 	const setMuted = useSetAtom(_mutedAtom);
 	const setFullscreen = useSetAtom(fullscreenAtom);
+	const setMedia = useSetAtom(mediaAtom);
 	const [playMode, setPlayMode] = useAtom(playModeAtom);
 
 	setPlayer(player);
@@ -110,7 +114,8 @@ export const useVideoController = (links?: { direct: string; transmux: string })
 
 	useEffect(() => {
 		setPlayMode(PlayMode.Direct);
-	}, [links, setPlayMode]);
+		setMedia(slug);
+	}, [slug, links, setPlayMode, setMedia]);
 
 	useEffect(() => {
 		const src = playMode === PlayMode.Direct ? links?.direct : links?.transmux;

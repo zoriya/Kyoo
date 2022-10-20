@@ -27,7 +27,13 @@ import { useState, useEffect, PointerEvent as ReactPointerEvent } from "react";
 import { Box, styled } from "@mui/material";
 import { useAtom, useSetAtom } from "jotai";
 import { Hover, LoadingIndicator } from "./components/hover";
-import { fullscreenAtom, playAtom, useSubtitleController, useVideoController } from "./state";
+import {
+	fullscreenAtom,
+	playAtom,
+	stopAtom,
+	useSubtitleController,
+	useVideoController,
+} from "./state";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import { makeTitle } from "~/utils/utils";
@@ -43,13 +49,15 @@ let mouseCallback: NodeJS.Timeout;
 
 const query = (slug: string): QueryIdentifier<WatchItem> => ({
 	path: ["watch", slug],
+	// @ts-ignore
 	parser: WatchItemP,
 });
 
 const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 	const { data, error } = useFetch(query(slug));
-	const { playerRef, videoProps, onVideoClick } = useVideoController(data?.link);
+	const { playerRef, videoProps, onVideoClick } = useVideoController(slug, data?.link);
 	const setFullscreen = useSetAtom(fullscreenAtom);
+	const setStopCallback = useSetAtom(stopAtom);
 	const router = useRouter();
 
 	const [isPlaying, setPlay] = useAtom(playAtom);
@@ -95,6 +103,16 @@ const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 
 	useSubtitleController(playerRef, data?.subtitles, data?.fonts);
 	useVideoKeyboard(data?.subtitles, data?.fonts, previous, next);
+
+	useEffect(() => {
+		setStopCallback([ () => {
+			console.log("toto")
+			router.push(data ? (data.isMovie ? `/movie/${data.slug}` : `/show/${data.showSlug}`) : "/");
+		}]);
+		return () => {
+			setStopCallback([() => {}]);
+		};
+	}, [setStopCallback, data, router]);
 
 	if (error) return <ErrorPage {...error} />;
 

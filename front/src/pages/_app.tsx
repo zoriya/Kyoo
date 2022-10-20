@@ -38,9 +38,8 @@ if (typeof window === "undefined") {
 
 const App = ({ Component, pageProps }: AppProps) => {
 	const [queryClient] = useState(() => createQueryClient());
-	const { queryState, ...props } = superjson.deserialize<any>(pageProps ?? {});
+	const { queryState, ...props } = superjson.deserialize<any>(pageProps ?? { json: {} });
 	const getLayout = (Component as QueryPage).getLayout ?? ((page) => page);
-	const castEnabled = true;
 
 	useMobileHover();
 
@@ -75,7 +74,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 					<ThemeProvider theme={defaultTheme}>
 						<Box >
 							{getLayout(<Component {...props} />)}
-							{castEnabled && <CastProvider />}
+							<CastProvider />
 						</Box>
 					</ThemeProvider>
 				</Hydrate>

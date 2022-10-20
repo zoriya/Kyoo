@@ -18,10 +18,18 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import dynamic from "next/dynamic";
 import Script from "next/script";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+
+// @ts-ignore
+const CastController = dynamic(() => import("./state").then((x) => x.CastController), {
+	loading: () => null,
+});
 
 export const CastProvider = () => {
+	const [loaded, setLoaded] = useState(false);
+
 	useEffect(() => {
 		window.__onGCastApiAvailable = (isAvailable) => {
 			if (!isAvailable) return;
@@ -34,9 +42,13 @@ export const CastProvider = () => {
 	}, []);
 
 	return (
-		<Script
-			src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"
-			strategy="lazyOnload"
-		/>
+		<>
+			<Script
+				src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"
+				strategy="lazyOnload"
+				onReady={() => setLoaded(true)}
+			/>
+			{loaded && <CastController />}
+		</>
 	);
 };

@@ -84,7 +84,7 @@ export const LeftButtons = ({
 				</Tooltip>
 			)}
 			<VolumeSlider color="white" />
-			<ProgressText />
+			<ProgressText sx={{ color: "white" }} />
 		</Box>
 	);
 };

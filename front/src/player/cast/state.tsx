@@ -19,8 +19,9 @@
  */
 
 import { atom, useAtomValue, useSetAtom } from "jotai";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { bakedAtom } from "~/utils/jotai-utils";
+import { stopAtom } from "../state";
 
 export type Media = {
 	name: string;
@@ -44,19 +45,35 @@ export const [_playAtom, playAtom] = bakedAtom<boolean, never>(true, (get) => {
 	controller.playOrPause();
 });
 export const [_durationAtom, durationAtom] = bakedAtom(1, (get, _, value) => {
-	const { controller } = get(playerAtom);
+	const { player, controller } = get(playerAtom);
+	player.currentTime = value;
 	controller.seek();
 });
 
-export const [_mediaAtom, mediaAtom] = bakedAtom<Media | null, string>(null, (get, _, value) => {});
+export const [_mediaAtom, mediaAtom] = bakedAtom<Media | null, string>(
+	null,
+	async (_, _2, value) => {
+		const session = cast.framework.CastContext.getInstance().getCurrentSession();
+		if (!session) return;
+		const mediaInfo = new chrome.cast.media.MediaInfo(
+			value,
+			process.env.KYOO_URL ?? "http://localhost:5000",
+		);
+		session.loadMedia(new chrome.cast.media.LoadRequest(mediaInfo));
+	},
+);
 
 export const useCastController = () => {
 	const { player, controller } = useAtomValue(playerAtom);
 	const setPlay = useSetAtom(_playAtom);
 	const setDuration = useSetAtom(_durationAtom);
 	const setMedia = useSetAtom(_mediaAtom);
+	const stopPlayer = useAtomValue(stopAtom);
+	const media = useAtomValue(mediaAtom);
 
 	useEffect(() => {
+		const context = cast.framework.CastContext.getInstance();
+
 		const eventListeners: [
 			cast.framework.RemotePlayerEventType,
 			(event: cast.framework.RemotePlayerChangedEvent<any>) => void,
@@ -69,9 +86,23 @@ export const useCastController = () => {
 			],
 		];
 
+		const sessionStateHandler = (event: cast.framework.SessionStateEventData) => {
+			if (event.sessionState === cast.framework.SessionState.SESSION_STARTED) {
+				stopPlayer[0]();
+				setMedia(media);
+			}
+		};
+
+		context.addEventListener(cast.framework.CastContextEventType.SESSION_STATE_CHANGED, sessionStateHandler);
 		for (const [key, handler] of eventListeners) controller.addEventListener(key, handler);
 		return () => {
+			context.removeEventListener(cast.framework.CastContextEventType.SESSION_STATE_CHANGED, sessionStateHandler);
 			for (const [key, handler] of eventListeners) controller.removeEventListener(key, handler);
 		};
-	}, [player, controller, setPlay, setDuration, setMedia]);
+	}, [player, controller, setPlay, setDuration, setMedia, stopPlayer, media]);
+};
+
+export const CastController = (props: any) => {
+	useCastController();
+	return <div></div>;
 };

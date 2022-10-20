@@ -20,15 +20,20 @@
 
 import { Pause, PlayArrow, SkipNext, SkipPrevious } from "@mui/icons-material";
 import { Box, IconButton, Paper, Tooltip, Typography } from "@mui/material";
+import { useAtom } from "jotai";
 import useTranslation from "next-translate/useTranslation";
 import { useRouter } from "next/router";
 import { Image } from "~/components/poster";
 import { ProgressText, VolumeSlider } from "~/player/components/left-buttons";
 import { ProgressBar } from "../components/progress-bar";
+import { mediaAtom } from "./state";
 
 export const CastMiniPlayer = () => {
 	const { t } = useTranslation("player");
 	const router = useRouter();
+
+	const [media, setMedia] = useAtom(mediaAtom);
+	console.log(media)
 
 	const name = "Ansatsu Kyoushitsu";
 	const episodeName = "S1:E1 Assassination Time";
