@@ -20,17 +20,10 @@
 
 import { atom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect } from "react";
+import { WatchItem } from "~/models/resources/watch-item";
 import { bakedAtom } from "~/utils/jotai-utils";
 import { stopAtom, localMediaAtom } from "../state";
-
-export type Media = {
-	name: string;
-	episodeName?: null;
-	episodeNumber?: number;
-	seasonNumber?: number;
-	absoluteNumber?: string;
-	thunbnail?: string;
-};
+import { connectedAtom } from "./mini-player";
 
 const playerAtom = atom(() => {
 	const player = new cast.framework.RemotePlayer();
@@ -40,25 +33,25 @@ const playerAtom = atom(() => {
 	};
 });
 
-export const [_playAtom, playAtom] = bakedAtom<boolean, never>(true, (get) => {
+export const [_playAtom, playAtom] = bakedAtom<boolean, undefined>(true, (get) => {
 	const { controller } = get(playerAtom);
 	controller.playOrPause();
 });
-export const [_durationAtom, durationAtom] = bakedAtom(1, (get, _, value) => {
+export const durationAtom = atom(0);
+export const [_progressAtom, progressAtom] = bakedAtom(1, (get, _, value) => {
 	const { player, controller } = get(playerAtom);
 	player.currentTime = value;
 	controller.seek();
 });
 
-export const [_mediaAtom, mediaAtom] = bakedAtom<Media | null, string>(
+export const [_mediaAtom, mediaAtom] = bakedAtom<WatchItem | null, string>(
 	null,
 	async (_, _2, value) => {
 		const session = cast.framework.CastContext.getInstance().getCurrentSession();
 		if (!session) return;
-		const mediaInfo = new chrome.cast.media.MediaInfo(
-			value, "application/json"
-		);
-		if (!process.env.NEXT_PUBLIC_BACK_URL) console.error("PUBLIC_BACK_URL is not defined. Chromecast won't work.");
+		const mediaInfo = new chrome.cast.media.MediaInfo(value, "application/json");
+		if (!process.env.NEXT_PUBLIC_BACK_URL)
+			console.error("PUBLIC_BACK_URL is not defined. Chromecast won't work.");
 		mediaInfo.customData = { serverUrl: process.env.NEXT_PUBLIC_BACK_URL };
 		session.loadMedia(new chrome.cast.media.LoadRequest(mediaInfo));
 	},
@@ -67,8 +60,10 @@ export const [_mediaAtom, mediaAtom] = bakedAtom<Media | null, string>(
 export const useCastController = () => {
 	const { player, controller } = useAtomValue(playerAtom);
 	const setPlay = useSetAtom(_playAtom);
-	const setDuration = useSetAtom(_durationAtom);
+	const setProgress = useSetAtom(_progressAtom);
+	const setDuration = useSetAtom(durationAtom);
 	const setMedia = useSetAtom(_mediaAtom);
+	const setConnected = useSetAtom(connectedAtom);
 	const loadMedia = useSetAtom(mediaAtom);
 	const stopPlayer = useAtomValue(stopAtom);
 	const localMedia = useAtomValue(localMediaAtom);
@@ -76,15 +71,27 @@ export const useCastController = () => {
 	useEffect(() => {
 		const context = cast.framework.CastContext.getInstance();
 
+		const session = cast.framework.CastContext.getInstance().getCurrentSession();
+		if (session) {
+			setConnected(true);
+			setDuration(player.duration);
+			setMedia(player.mediaInfo?.metadata);
+			setPlay(!player.isPaused);
+		}
+
 		const eventListeners: [
 			cast.framework.RemotePlayerEventType,
 			(event: cast.framework.RemotePlayerChangedEvent<any>) => void,
 		][] = [
-			[cast.framework.RemotePlayerEventType.IS_PAUSED_CHANGED, (event) => setPlay(event.value)],
+			[cast.framework.RemotePlayerEventType.IS_PAUSED_CHANGED, (event) => setPlay(!event.value)],
+			[
+				cast.framework.RemotePlayerEventType.CURRENT_TIME_CHANGED,
+				(event) => setProgress(event.value),
+			],
 			[cast.framework.RemotePlayerEventType.DURATION_CHANGED, (event) => setDuration(event.value)],
 			[
 				cast.framework.RemotePlayerEventType.MEDIA_INFO_CHANGED,
-				() => setMedia(player.mediaInfo?.metadata),
+				() => setMedia(player.mediaInfo?.customData),
 			],
 		];
 
@@ -92,16 +99,38 @@ export const useCastController = () => {
 			if (event.sessionState === cast.framework.SessionState.SESSION_STARTED && localMedia) {
 				stopPlayer[0]();
 				loadMedia(localMedia);
+				setConnected(true);
+			} else if (event.sessionState === cast.framework.SessionState.SESSION_RESUMED) {
+				setConnected(true);
+			} else if (event.sessionState === cast.framework.SessionState.SESSION_ENDED) {
+				setConnected(false);
 			}
 		};
 
-		context.addEventListener(cast.framework.CastContextEventType.SESSION_STATE_CHANGED, sessionStateHandler);
+		context.addEventListener(
+			cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+			sessionStateHandler,
+		);
 		for (const [key, handler] of eventListeners) controller.addEventListener(key, handler);
 		return () => {
-			context.removeEventListener(cast.framework.CastContextEventType.SESSION_STATE_CHANGED, sessionStateHandler);
+			context.removeEventListener(
+				cast.framework.CastContextEventType.SESSION_STATE_CHANGED,
+				sessionStateHandler,
+			);
 			for (const [key, handler] of eventListeners) controller.removeEventListener(key, handler);
 		};
-	}, [player, controller, setPlay, setDuration, setMedia, stopPlayer, localMedia, loadMedia]);
+	}, [
+		player,
+		controller,
+		setPlay,
+		setDuration,
+		setMedia,
+		stopPlayer,
+		localMedia,
+		loadMedia,
+		setConnected,
+		setProgress,
+	]);
 };
 
 export const CastController = () => {

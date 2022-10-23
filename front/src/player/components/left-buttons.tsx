@@ -19,7 +19,7 @@
  */
 
 import { Box, IconButton, Slider, SxProps, Tooltip, Typography } from "@mui/material";
-import { useAtom, useAtomValue } from "jotai";
+import { Atom, useAtom, useAtomValue } from "jotai";
 import useTranslation from "next-translate/useTranslation";
 import { useRouter } from "next/router";
 import { durationAtom, mutedAtom, playAtom, progressAtom, volumeAtom } from "../state";
@@ -84,12 +84,12 @@ export const LeftButtons = ({
 				</Tooltip>
 			)}
 			<VolumeSlider color="white" />
-			<ProgressText sx={{ color: "white" }} />
+			<ProgressText sx={{ color: "white" }} progressAtom={progressAtom} durationAtom={durationAtom} />
 		</Box>
 	);
 };
 
-export const VolumeSlider = ({ color, className }: { color?: string, className?: string }) => {
+export const VolumeSlider = ({ color, className }: { color?: string; className?: string }) => {
 	const [volume, setVolume] = useAtom(volumeAtom);
 	const [isMuted, setMuted] = useAtom(mutedAtom);
 	const { t } = useTranslation("player");
@@ -105,11 +105,7 @@ export const VolumeSlider = ({ color, className }: { color?: string, className?:
 			className={className}
 		>
 			<Tooltip title={t("mute")}>
-				<IconButton
-					onClick={() => setMuted(!isMuted)}
-					aria-label={t("mute")}
-					sx={{ color: color }}
-				>
+				<IconButton onClick={() => setMuted(!isMuted)} aria-label={t("mute")} sx={{ color: color }}>
 					{isMuted || volume == 0 ? (
 						<VolumeOff />
 					) : volume < 25 ? (
@@ -142,7 +138,15 @@ export const VolumeSlider = ({ color, className }: { color?: string, className?:
 	);
 };
 
-export const ProgressText = ({ sx }: { sx?: SxProps }) => {
+export const ProgressText = ({
+	sx,
+	progressAtom,
+	durationAtom,
+}: {
+	sx?: SxProps;
+	progressAtom: Atom<number>;
+	durationAtom: Atom<number>;
+}) => {
 	const progress = useAtomValue(progressAtom);
 	const duration = useAtomValue(durationAtom);
 

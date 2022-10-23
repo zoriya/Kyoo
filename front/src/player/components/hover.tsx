@@ -32,7 +32,7 @@ import useTranslation from "next-translate/useTranslation";
 import NextLink from "next/link";
 import { Poster } from "~/components/poster";
 import { WatchItem } from "~/models/resources/watch-item";
-import { loadAtom } from "../state";
+import { durationAtom, loadAtom, progressAtom } from "../state";
 import { episodeDisplayNumber } from "~/components/episode";
 import { LeftButtons } from "./left-buttons";
 import { RightButtons } from "./right-buttons";
@@ -76,7 +76,7 @@ export const Hover = ({
 						{name ?? <Skeleton />}
 					</Typography>
 
-					<ProgressBar chapters={data?.chapters} />
+					<ProgressBar chapters={data?.chapters} progressAtom={progressAtom} durationAtom={durationAtom} />
 
 					<Box sx={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
 						<LeftButtons

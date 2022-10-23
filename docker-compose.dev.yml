@@ -37,6 +37,7 @@ services:
     environment:
       - KYOO_URL=http://back:5000
       - NEXT_PUBLIC_BACK_URL=${PUBLIC_BACK_URL}
+      - NEXT_PUBLIC_CAST_APPLICATION_ID=${CAST_APPLICATION_ID}
   ingress:
     image: nginx
     restart: on-failure

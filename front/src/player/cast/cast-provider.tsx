@@ -34,9 +34,10 @@ export const CastProvider = () => {
 		window.__onGCastApiAvailable = (isAvailable) => {
 			if (!isAvailable) return;
 			cast.framework.CastContext.getInstance().setOptions({
-				receiverApplicationId: process.env.CAST_APPLICATION_ID,
+				receiverApplicationId: process.env.NEXT_PUBLIC_CAST_APPLICATION_ID,
 				autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
 			});
+			setLoaded(true);
 		};
 	}, []);
 
@@ -45,7 +46,6 @@ export const CastProvider = () => {
 			<Script
 				src="https://www.gstatic.com/cv/js/sender/v1/cast_sender.js?loadCastFramework=1"
 				strategy="lazyOnload"
-				onReady={() => setLoaded(true)}
 			/>
 			{loaded && <CastController />}
 		</>

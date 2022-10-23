@@ -18,23 +18,44 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { getItem } from "./api";
+import { getItem, itemToMovie, itemToTvMetadata } from "./api";
+const Command = cast.framework.messages.Command;
 
 const context = cast.framework.CastReceiverContext.getInstance();
 const playerManager = context.getPlayerManager();
 
-playerManager.setMessageInterceptor(cast.framework.messages.MessageType.LOAD, async (loadRequestData) => {
-	if (loadRequestData.media.contentUrl && loadRequestData.media.metadata) return loadRequestData;
+playerManager.setSupportedMediaCommands(
+	Command.PAUSE |
+		Command.SEEK |
+		Command.QUEUE_NEXT |
+		Command.QUEUE_PREV |
+		Command.EDIT_TRACKS |
+		Command.STREAM_MUTE |
+		Command.STREAM_VOLUME |
+		Command.STREAM_TRANSFER,
+);
 
-	const item = await getItem(loadRequestData.media.contentId, loadRequestData.media.customData.serverUrl);
-	if (!item) {
-		return new cast.framework.messages.ErrorData(
-			cast.framework.messages.ErrorType.LOAD_FAILED,
+
+
+playerManager.setMessageInterceptor(
+	cast.framework.messages.MessageType.LOAD,
+	async (loadRequestData) => {
+		if (loadRequestData.media.contentUrl && loadRequestData.media.metadata) return loadRequestData;
+
+		const item = await getItem(
+			loadRequestData.media.contentId,
+			loadRequestData.media.customData.serverUrl,
 		);
-	}
-	loadRequestData.media.contentUrl = item.link.direct;
-	loadRequestData.media.metadata = item;
-	return loadRequestData;
-});
+		if (!item) {
+			return new cast.framework.messages.ErrorData(cast.framework.messages.ErrorType.LOAD_FAILED);
+		}
+		loadRequestData.media.contentUrl = item.link.direct;
+		loadRequestData.media.metadata = item.isMovie
+			? itemToMovie(item)
+			: itemToTvMetadata(item);
+		loadRequestData.media.customData = item;
+		return loadRequestData;
+	},
+);
 
 context.start();
