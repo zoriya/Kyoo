@@ -21,7 +21,7 @@
 import { atom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect } from "react";
 import { bakedAtom } from "~/utils/jotai-utils";
-import { stopAtom } from "../state";
+import { stopAtom, localMediaAtom } from "../state";
 
 export type Media = {
 	name: string;
@@ -56,9 +56,10 @@ export const [_mediaAtom, mediaAtom] = bakedAtom<Media | null, string>(
 		const session = cast.framework.CastContext.getInstance().getCurrentSession();
 		if (!session) return;
 		const mediaInfo = new chrome.cast.media.MediaInfo(
-			value,
-			process.env.KYOO_URL ?? "http://localhost:5000",
+			value, "application/json"
 		);
+		if (!process.env.NEXT_PUBLIC_BACK_URL) console.error("PUBLIC_BACK_URL is not defined. Chromecast won't work.");
+		mediaInfo.customData = { serverUrl: process.env.NEXT_PUBLIC_BACK_URL };
 		session.loadMedia(new chrome.cast.media.LoadRequest(mediaInfo));
 	},
 );
@@ -68,8 +69,9 @@ export const useCastController = () => {
 	const setPlay = useSetAtom(_playAtom);
 	const setDuration = useSetAtom(_durationAtom);
 	const setMedia = useSetAtom(_mediaAtom);
+	const loadMedia = useSetAtom(mediaAtom);
 	const stopPlayer = useAtomValue(stopAtom);
-	const media = useAtomValue(mediaAtom);
+	const localMedia = useAtomValue(localMediaAtom);
 
 	useEffect(() => {
 		const context = cast.framework.CastContext.getInstance();
@@ -87,9 +89,9 @@ export const useCastController = () => {
 		];
 
 		const sessionStateHandler = (event: cast.framework.SessionStateEventData) => {
-			if (event.sessionState === cast.framework.SessionState.SESSION_STARTED) {
+			if (event.sessionState === cast.framework.SessionState.SESSION_STARTED && localMedia) {
 				stopPlayer[0]();
-				setMedia(media);
+				loadMedia(localMedia);
 			}
 		};
 
@@ -99,10 +101,10 @@ export const useCastController = () => {
 			context.removeEventListener(cast.framework.CastContextEventType.SESSION_STATE_CHANGED, sessionStateHandler);
 			for (const [key, handler] of eventListeners) controller.removeEventListener(key, handler);
 		};
-	}, [player, controller, setPlay, setDuration, setMedia, stopPlayer, media]);
+	}, [player, controller, setPlay, setDuration, setMedia, stopPlayer, localMedia, loadMedia]);
 };
 
-export const CastController = (props: any) => {
+export const CastController = () => {
 	useCastController();
-	return <div></div>;
+	return null;
 };

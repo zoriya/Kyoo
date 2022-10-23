@@ -18,40 +18,23 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { getItem } from "./api";
+
 const context = cast.framework.CastReceiverContext.getInstance();
 const playerManager = context.getPlayerManager();
 
-playerManager.setMessageInterceptor(cast.framework.messages.MessageType.LOAD, (loadRequestData) => {
-	console.log(loadRequestData)
-	const error = new cast.framework.messages.ErrorData(
-		cast.framework.messages.ErrorType.LOAD_FAILED,
-	);
-	if (!loadRequestData.media) {
-		error.reason = cast.framework.messages.ErrorReason.INVALID_PARAMS;
-		return error;
-	}
+playerManager.setMessageInterceptor(cast.framework.messages.MessageType.LOAD, async (loadRequestData) => {
+	if (loadRequestData.media.contentUrl && loadRequestData.media.metadata) return loadRequestData;
 
-	if (!loadRequestData.media.entity) {
-		return loadRequestData;
+	const item = await getItem(loadRequestData.media.contentId, loadRequestData.media.customData.serverUrl);
+	if (!item) {
+		return new cast.framework.messages.ErrorData(
+			cast.framework.messages.ErrorType.LOAD_FAILED,
+		);
 	}
-
+	loadRequestData.media.contentUrl = item.link.direct;
+	loadRequestData.media.metadata = item;
 	return loadRequestData;
-	/* return thirdparty */
-	/* 	.fetchAssetAndAuth(loadRequestData.media.entity, loadRequestData.credentials) */
-	/* 	.then((asset) => { */
-	/* 		if (!asset) { */
-	/* 			throw cast.framework.messages.ErrorReason.INVALID_REQUEST; */
-	/* 		} */
-
-	/* 		loadRequestData.media.contentUrl = asset.url; */
-	/* 		loadRequestData.media.metadata = asset.metadata; */
-	/* 		loadRequestData.media.tracks = asset.tracks; */
-	/* 		return loadRequestData; */
-	/* 	}) */
-	/* 	.catch((reason) => { */
-	/* 		error.reason = reason; // cast.framework.messages.ErrorReason */
-	/* 		return error; */
-	/* 	}); */
 });
 
 context.start();

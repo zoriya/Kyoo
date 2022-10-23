@@ -121,7 +121,9 @@ namespace Kyoo.Core
 			services.AddHttpContextAccessor();
 			services.AddTransient<IConfigureOptions<MvcNewtonsoftJsonOptions>, JsonOptions>();
 
-			services.AddMvcCore()
+			services
+				.AddMvcCore()
+				.AddCors()
 				.AddNewtonsoftJson()
 				.AddDataAnnotations()
 				.AddControllersAsServices()
@@ -167,6 +169,12 @@ namespace Kyoo.Core
 			}, SA.Before),
 			SA.New<IApplicationBuilder>(app => app.UseResponseCompression(), SA.Routing + 1),
 			SA.New<IApplicationBuilder>(app => app.UseRouting(), SA.Routing),
+			SA.New<IApplicationBuilder>(app => app.UseCors(x => x
+					.SetIsOriginAllowed(_ => true)
+					.AllowAnyMethod()
+					.AllowAnyHeader()
+					.AllowCredentials()
+			), SA.Routing + 2),
 			SA.New<IApplicationBuilder>(app => app.UseEndpoints(x => x.MapControllers()), SA.Endpoint)
 		};
 	}

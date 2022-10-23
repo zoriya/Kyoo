@@ -30,6 +30,7 @@ services:
       - PORT=8901
       - FRONT_URL=http://front:8901
       - BACK_URL=http://back:5000
+      - CAST_APPLICATION_ID=${CAST_APPLICATION_ID}
     volumes:
       - ./nginx.conf.template:/etc/nginx/templates/kyoo.conf.template:ro
     depends_on:

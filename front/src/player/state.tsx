@@ -84,7 +84,7 @@ export const [_, fullscreenAtom] = bakedAtom(false, async (_, set, value, baker)
 		}
 	} catch {}
 });
-export const mediaAtom = atom<string | null>(null);
+export const localMediaAtom = atom<string | null>(null);
 // The tuple is only used to prevent jotai from thinking the function is a read func.
 export const stopAtom = atom<[() => void]>([() => {}]);
 
@@ -102,7 +102,7 @@ export const useVideoController = (slug: string, links?: { direct: string; trans
 	const setVolume = useSetAtom(_volumeAtom);
 	const setMuted = useSetAtom(_mutedAtom);
 	const setFullscreen = useSetAtom(fullscreenAtom);
-	const setMedia = useSetAtom(mediaAtom);
+	const setLocalMedia = useSetAtom(localMediaAtom);
 	const [playMode, setPlayMode] = useAtom(playModeAtom);
 
 	setPlayer(player);
@@ -114,8 +114,8 @@ export const useVideoController = (slug: string, links?: { direct: string; trans
 
 	useEffect(() => {
 		setPlayMode(PlayMode.Direct);
-		setMedia(slug);
-	}, [slug, links, setPlayMode, setMedia]);
+		setLocalMedia(slug);
+	}, [slug, links, setPlayMode, setLocalMedia]);
 
 	useEffect(() => {
 		const src = playMode === PlayMode.Direct ? links?.direct : links?.transmux;

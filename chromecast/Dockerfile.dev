@@ -1,0 +1,9 @@
+FROM node:16-alpine AS builder
+WORKDIR /app
+
+COPY package.json yarn.lock ./
+RUN yarn --frozen-lockfile
+
+EXPOSE 1234
+ENV PORT 1234
+CMD ["yarn", "dev"]

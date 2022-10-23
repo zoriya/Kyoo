@@ -36,6 +36,7 @@ services:
     restart: on-failure
     environment:
       - KYOO_URL=http://back:5000
+      - NEXT_PUBLIC_BACK_URL=${PUBLIC_BACK_URL}
   ingress:
     image: nginx
     restart: on-failure
@@ -59,6 +60,18 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
     volumes:
       - db:/var/lib/postgresql/data
+  chromecast:
+    build: 
+      context: ./chromecast
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./chromecast:/app
+      - /app/node_modules/
+      - /app/.parcel-cache/
+      - /app/dist/
+    ports:
+      - "1234:1234"
+    restart: on-failure
 
 volumes:
   kyoo:

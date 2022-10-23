@@ -34,8 +34,7 @@ export const CastProvider = () => {
 		window.__onGCastApiAvailable = (isAvailable) => {
 			if (!isAvailable) return;
 			cast.framework.CastContext.getInstance().setOptions({
-				receiverApplicationId:
-					process.env.CAST_APPLICATION_ID ?? chrome.cast.media.DEFAULT_MEDIA_RECEIVER_APP_ID,
+				receiverApplicationId: process.env.CAST_APPLICATION_ID,
 				autoJoinPolicy: chrome.cast.AutoJoinPolicy.ORIGIN_SCOPED,
 			});
 		};
