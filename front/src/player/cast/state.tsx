@@ -91,7 +91,7 @@ export const useCastController = () => {
 			[cast.framework.RemotePlayerEventType.DURATION_CHANGED, (event) => setDuration(event.value)],
 			[
 				cast.framework.RemotePlayerEventType.MEDIA_INFO_CHANGED,
-				() => setMedia(player.mediaInfo?.customData),
+				() => setMedia(player.mediaInfo?.customData ?? null),
 			],
 		];
 

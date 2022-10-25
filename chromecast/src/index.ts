@@ -18,7 +18,8 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { getItem, itemToMovie, itemToTvMetadata } from "./api";
+import { getItem, itemToMedia } from "./api";
+import { Queue } from "./queue";
 const Command = cast.framework.messages.Command;
 
 const context = cast.framework.CastReceiverContext.getInstance();
@@ -35,27 +36,22 @@ playerManager.setSupportedMediaCommands(
 		Command.STREAM_TRANSFER,
 );
 
-
-
 playerManager.setMessageInterceptor(
 	cast.framework.messages.MessageType.LOAD,
 	async (loadRequestData) => {
 		if (loadRequestData.media.contentUrl && loadRequestData.media.metadata) return loadRequestData;
 
+		const apiUrl = loadRequestData.media.customData.serverUrl;
 		const item = await getItem(
 			loadRequestData.media.contentId,
-			loadRequestData.media.customData.serverUrl,
+			apiUrl,
 		);
 		if (!item) {
 			return new cast.framework.messages.ErrorData(cast.framework.messages.ErrorType.LOAD_FAILED);
 		}
-		loadRequestData.media.contentUrl = item.link.direct;
-		loadRequestData.media.metadata = item.isMovie
-			? itemToMovie(item)
-			: itemToTvMetadata(item);
-		loadRequestData.media.customData = item;
+		loadRequestData.media = itemToMedia(item, apiUrl);
 		return loadRequestData;
 	},
 );
 
-context.start();
+context.start({ queue: new Queue() });

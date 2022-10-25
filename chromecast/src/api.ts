@@ -81,6 +81,14 @@ export type Item = {
 		direct: string;
 		transmux: string;
 	};
+	nextEpisode: {
+		id: number,
+		slug: string,
+	},
+	previousEpisode: {
+		id: number,
+		slug: string,
+	}
 };
 
 export const getItem = async (slug: string, apiUrl: string) => {
@@ -125,3 +133,13 @@ export const itemToMovie = (item: Item) => {
 	return metadata;
 }
 
+export const itemToMedia = (item: Item, apiUrl: string) => {
+	const media = new cast.framework.messages.MediaInformation();
+	media.contentUrl = item.link.direct;
+	media.metadata = item.isMovie
+		? itemToMovie(item)
+		: itemToTvMetadata(item);
+	media.customData = item;
+	media.customData.serverUrl = apiUrl;
+	return media;
+}
