@@ -18,59 +18,83 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { useState } from "react";
+import React, { ReactNode, useState } from "react";
 import appWithI18n from "next-translate/appWithI18n";
-import { ThemeProvider } from "@mui/material";
+import { ThemeProvider, useTheme } from "@emotion/react";
+import { createTheme, ThemeProvider as MTheme } from "@mui/material";
 import NextApp, { AppContext } from "next/app";
 import type { AppProps } from "next/app";
 import { Hydrate, QueryClientProvider } from "react-query";
 import { createQueryClient, fetchQuery, QueryIdentifier, QueryPage } from "~/utils/query";
-import { defaultTheme } from "~/utils/themes/default-theme";
 import superjson from "superjson";
 import Head from "next/head";
 import { useMobileHover } from "~/utils/utils";
+import { catppuccin } from "~/utils/themes/catppuccin";
+import { selectMode } from "~/utils/themes/theme";
 
 // Simply silence a SSR warning (see https://github.com/facebook/react/issues/14927 for more details)
 if (typeof window === "undefined") {
 	React.useLayoutEffect = React.useEffect;
 }
 
+const ThemeSelector = ({ children }: { children?: ReactNode | ReactNode[] }) => {
+	// TODO: Handle user selected mode (light, dark, auto)
+	// TODO: Hande theme change.
+	return (
+		<MTheme theme={createTheme()}>
+			<ThemeProvider theme={selectMode(catppuccin, "light")}>
+				{children}
+			</ThemeProvider>
+		</MTheme>
+	)
+}
+
+const GlobalCssTheme = () => {
+	const theme = useTheme();
+
+	return (
+		<style jsx global>{`
+			body {
+				margin: 0px;
+				padding: 0px;
+				background-color: ${theme.background};
+			}
+
+			*::-webkit-scrollbar {
+				height: 6px;
+				width: 6px;
+				background: transparent;
+			}
+
+			*::-webkit-scrollbar-thumb {
+				background-color: #999;
+				border-radius: 90px;
+			}
+			*:hover::-webkit-scrollbar-thumb {
+				background-color: rgb(134, 127, 127);
+			}
+		`}</style>
+	);
+};
+
 const App = ({ Component, pageProps }: AppProps) => {
 	const [queryClient] = useState(() => createQueryClient());
-	const { queryState, ...props } = superjson.deserialize<any>(pageProps ?? {});
+	const { queryState, ...props } = superjson.deserialize<any>(pageProps ?? { json: {} });
 	const getLayout = (Component as QueryPage).getLayout ?? ((page) => page);
 
 	useMobileHover();
 
 	return (
 		<>
-			<style jsx global>{`
-				body {
-					margin: 0px;
-					padding: 0px;
-					background-color: ${defaultTheme.palette.background.default};
-				}
-
-				*::-webkit-scrollbar {
-					height: 6px;
-					width: 6px;
-					background: transparent;
-				}
-
-				*::-webkit-scrollbar-thumb {
-					background-color: #999;
-					border-radius: 90px;
-				}
-				*:hover::-webkit-scrollbar-thumb {
-					background-color: rgb(134, 127, 127);
-				}
-			`}</style>
 			<Head>
 				<title>Kyoo</title>
 			</Head>
 			<QueryClientProvider client={queryClient}>
 				<Hydrate state={queryState}>
-					<ThemeProvider theme={defaultTheme}>{getLayout(<Component {...props} />)}</ThemeProvider>
+					<ThemeSelector>
+						<GlobalCssTheme />
+						{getLayout(<Component {...props} />)}
+					</ThemeSelector>
 				</Hydrate>
 			</QueryClientProvider>
 		</>

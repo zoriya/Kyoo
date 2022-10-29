@@ -18,36 +18,17 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Property } from "csstype";
+import { ThemeBuilder } from "./theme";
 
-// TODO: Add specifics colors
-export type Theme = {
-	fonts: {
-		heading: string,
-		paragraph: string,
-	},
-	light: {
-		appbar: Property.Color,
-		default: {
-			background: Property.Color,
-			accent: Property.Color,
-			divider: Property.Color,
-			heading: Property.Color,
-			paragraph: Property.Color,
-			subtext: Property.Color,
-		},
-		variant: Theme["light"]["default"],
-	},
-	dark: Theme["light"]
-}
-
-export const catppuccin: Theme = {
+export const catppuccin: ThemeBuilder = {
 	fonts: {
 		heading: "Pacifico",
 		paragraph: "Poppins",
 	},
 	light: {
 		appbar: "#e64553",
+		contrast: "#cdd6f4",
+		subcontrast: "#bac2de",
 		default: {
 			background: "#eff1f5",
 			accent: "#ea76cb",
@@ -63,10 +44,12 @@ export const catppuccin: Theme = {
 			heading: "#4c4f69",
 			paragraph: "#5c5f77",
 			subtext: "#6c6f85",
-		}
+		},
 	},
 	dark: {
 		appbar: "#94e2d5",
+		contrast: "#cdd6f4",
+		subcontrast: "#bac2de",
 		default: {
 			background: "#1e1e2e",
 			accent: "##f5c2e7",
@@ -83,5 +66,5 @@ export const catppuccin: Theme = {
 			paragraph: "#bac2de",
 			subtext: "#a6adc8",
 		},
-	}
-}
+	},
+};

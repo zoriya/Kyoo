@@ -38,18 +38,17 @@ import { Library, LibraryP, Page, Paged } from "~/models";
 import { QueryIdentifier, useFetch } from "~/utils/query";
 import { ErrorSnackbar } from "./errors";
 
-const KyooTitle = (props: { sx: SxProps<Theme> }) => {
+const KyooTitle = () => {
 	const { t } = useTranslation("common");
 
 	return (
 		<Tooltip title={t("navbar.home")}>
 			<ButtonLink
-				sx={{
+				css={{
 					alignItems: "center",
 					color: "inherit",
 					textDecoration: "inherit",
 					display: "flex",
-					...props.sx,
 				}}
 				href="/"
 			>
@@ -57,7 +56,7 @@ const KyooTitle = (props: { sx: SxProps<Theme> }) => {
 				<Typography
 					variant="h6"
 					noWrap
-					sx={{
+					css={{
 						ml: 1,
 						mr: 2,
 						fontFamily: "monospace",
@@ -90,7 +89,7 @@ export const Navbar = (barProps: AppBarProps) => {
 					<MenuIcon />
 				</IconButton>
 				<Box sx={{ flexGrow: 1, display: { sx: "flex", sm: "none" } }} />
-				<KyooTitle sx={{ mr: 1 }} />
+				<KyooTitle css={{ mr: 1 }} />
 				<Box sx={{ flexGrow: 1, display: { sx: "flex", sm: "none" } }} />
 				<Box sx={{ flexGrow: 1, display: { xs: "none", sm: "flex" } }}>
 					{isSuccess
@@ -110,7 +109,7 @@ export const Navbar = (barProps: AppBarProps) => {
 						  ))}
 				</Box>
 				<Tooltip title={t("navbar.login")}>
-					<IconButton sx={{ p: 0 }} href="/auth/login">
+					<IconButton css={{ p: 0 }} href="/auth/login">
 						<Avatar alt={t("navbar.login")} />
 					</IconButton>
 				</Tooltip>
