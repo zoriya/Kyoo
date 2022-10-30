@@ -29,8 +29,8 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./front:/app
-      - /app/node_modules/
-      - /app/.next/
+      - /app/.yarn
+      - /app/packages/web/.next/
     ports:
       - "3000:3000"
     restart: on-failure

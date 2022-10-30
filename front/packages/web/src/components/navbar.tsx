@@ -22,8 +22,6 @@ import {
 	AppBar,
 	Toolbar,
 	Typography,
-	SxProps,
-	Theme,
 	Avatar,
 	IconButton,
 	Tooltip,

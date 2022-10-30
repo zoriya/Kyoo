@@ -18,7 +18,11 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+const path = require("path")
 const CopyPlugin = require("copy-webpack-plugin");
+
+
+const suboctopus = path.dirname(require.resolve("@jellyfin/libass-wasm"));
 
 /**
  * @type {import("next").NextConfig}
@@ -33,7 +37,7 @@ const nextConfig = {
 			new CopyPlugin({
 				patterns: [
 					{
-						context: "node_modules/@jellyfin/libass-wasm/dist/js/",
+						context: suboctopus,
 						from: "*",
 						to: "static/chunks/",
 					},

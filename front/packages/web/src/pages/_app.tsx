@@ -24,7 +24,7 @@ import { ThemeProvider, useTheme } from "@emotion/react";
 import { createTheme, ThemeProvider as MTheme } from "@mui/material";
 import NextApp, { AppContext } from "next/app";
 import type { AppProps } from "next/app";
-import { Hydrate, QueryClientProvider } from "react-query";
+import { Hydrate, QueryClientProvider } from "@tanstack/react-query";
 import { createQueryClient, fetchQuery, QueryIdentifier, QueryPage } from "~/utils/query";
 import superjson from "superjson";
 import Head from "next/head";

@@ -25,7 +25,7 @@ import {
 	QueryFunctionContext,
 	useInfiniteQuery,
 	useQuery,
-} from "react-query";
+} from "@tanstack/react-query";
 import { z } from "zod";
 import { KyooErrors, Page } from "~/models";
 import { Paged } from "~/models/page";
@@ -93,7 +93,7 @@ export const createQueryClient = () =>
 	});
 
 export type QueryIdentifier<T = unknown> = {
-	parser: z.ZodType<T>;
+	parser: z.ZodType<T, z.ZodTypeDef, any>;
 	path: (string | undefined)[];
 	params?: { [query: string]: boolean | number | string | string[] | undefined };
 	infinite?: boolean;

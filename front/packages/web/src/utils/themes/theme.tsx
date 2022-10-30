@@ -29,7 +29,7 @@ type ThemeSettings = {
 	};
 };
 
-type Mode = Variant & {
+type Mode = {
 	appbar: Property.Color;
 	/*
 	 * The color used in texts or button that are hover black shades on images (ShowHeader, player...)
@@ -50,18 +50,20 @@ type Variant = {
 
 declare module "@emotion/react" {
 	// TODO: Add specifics colors
-	export interface Theme extends ThemeSettings, Mode {}
+	export interface Theme extends ThemeSettings, Mode, Variant {}
 }
 
 export type { Theme } from "@emotion/react";
 export type ThemeBuilder = ThemeSettings & {
-	light: Mode;
-	dark: Mode;
+	light: Mode & { default: Variant };
+	dark: Mode & { default: Variant };
 };
 
 export const selectMode = (theme: ThemeBuilder, mode: "light" | "dark"): Theme => {
-	const value = (mode === "light" ? theme.light : theme.dark);
-	return { fonts: theme.fonts, ...(value.default), variant: value.variant };
+	const { light, dark, ...options } = theme;
+	const value = mode === "light" ? light : dark;
+	const { default: def, ...modeOpt } = value;
+	return { ...options, ...modeOpt, ...def, variant: value.variant };
 };
 
 export const switchVariant = (theme: Theme) => {

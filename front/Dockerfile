@@ -1,20 +1,22 @@
 FROM node:16-alpine AS builder
 WORKDIR /app
+COPY .yarn ./.yarn
+COPY .yarnrc.yml ./
 COPY package.json yarn.lock ./
-RUN yarn --frozen-lockfile
+RUN yarn --immutabe
 
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED 1
 ENV NODE_ENV production
-RUN yarn build
+RUN yarn build:web
 
 
 FROM node:16-alpine
 WORKDIR /app
 
-COPY --from=builder /app/.next/standalone .
-COPY --from=builder /app/.next/static ./.next/static/
-COPY --from=builder /app/public ./public
+COPY --from=builder /app/packages/web/.next/standalone .
+COPY --from=builder /app/packages/web/.next/static ./.next/static/
+COPY --from=builder /app/packages/web/public ./public
 
 EXPOSE 8901
 ENV PORT 8901

@@ -25,6 +25,7 @@ export const withRoute = <Props,>(Component: ComponentType<Props>) => {
 	const WithUseRoute = (props: Props) => {
 		const router = useRouter();
 
+		// @ts-ignore
 		return <Component {...router.query} {...props} />;
 	};
 

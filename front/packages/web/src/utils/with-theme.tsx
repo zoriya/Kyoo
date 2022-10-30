@@ -20,9 +20,9 @@
 
 import { Theme, useThemeProps, styled } from "@mui/material";
 import { MUIStyledCommonProps, MuiStyledOptions } from "@mui/system";
-import { FilteringStyledOptions } from "@mui/styled-engine";
 import { WithConditionalCSSProp } from "@emotion/react/types/jsx-namespace";
 import clsx from "clsx";
+import { FilteringStyledOptions } from "@emotion/styled";
 
 export interface ClassNameProps {
 	className?: string;
@@ -33,6 +33,7 @@ export const withThemeProps = <P,>(
 	options?: FilteringStyledOptions<P> & MuiStyledOptions,
 ) => {
 	const name = options?.name || component.displayName;
+	// @ts-ignore
 	const Component = styled(component, options)<P>(() => ({}));
 
 	const WithTheme = (
@@ -49,6 +50,7 @@ export const withThemeProps = <P,>(
 		}
 		const props = useThemeProps({ props: inProps, name: name });
 		const className = clsx(props.className, `${name}-${options?.slot ?? "Root"}`);
+		// @ts-ignore
 		return <Component {...props} className={className} />;
 	};
 	WithTheme.displayName = `WithThemeProps(${name || "Component"})`;
