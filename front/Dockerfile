@@ -3,7 +3,8 @@ WORKDIR /app
 COPY .yarn ./.yarn
 COPY .yarnrc.yml ./
 COPY package.json yarn.lock ./
-RUN yarn --immutabe
+COPY packages/web/package.json packages/web/package.json
+RUN yarn --immutable
 
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED 1

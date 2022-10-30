@@ -55,8 +55,8 @@ const KyooTitle = () => {
 					variant="h6"
 					noWrap
 					css={{
-						ml: 1,
-						mr: 2,
+						ml: 8,
+						mr: 16,
 						fontFamily: "monospace",
 						fontWeight: 700,
 						color: "white",
