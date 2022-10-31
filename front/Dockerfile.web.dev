@@ -5,6 +5,7 @@ COPY .yarn ./.yarn
 COPY .yarnrc.yml ./
 COPY package.json yarn.lock ./
 COPY packages/web/package.json packages/web/package.json
+COPY packages/native/package.json packages/native/package.json
 RUN yarn --immutable
 
 ENV NEXT_TELEMETRY_DISABLED 1

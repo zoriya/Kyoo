@@ -1,0 +1,13 @@
+FROM node:16-alpine AS builder
+WORKDIR /app
+
+COPY .yarn ./.yarn
+COPY .yarnrc.yml ./
+COPY package.json yarn.lock ./
+COPY packages/web/package.json packages/web/package.json
+COPY packages/native/package.json packages/native/package.json
+RUN yarn --immutable
+
+EXPOSE 19000
+ENV PORT 19000
+CMD ["yarn", "native"]
