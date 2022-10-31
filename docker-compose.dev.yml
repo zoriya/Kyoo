@@ -30,6 +30,7 @@ services:
     volumes:
       - ./front:/app
       - /app/.yarn
+      - /app/node-modules
       - /app/packages/web/.next/
     ports:
       - "3000:3000"

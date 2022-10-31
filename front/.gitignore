@@ -35,9 +35,11 @@ yarn-error.log*
 *.tsbuildinfo
 
 .pnp.*
-.yarn/*
+.yarn
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
 !.yarn/sdks
+
+.expo
 
