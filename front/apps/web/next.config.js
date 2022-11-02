@@ -18,10 +18,9 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-const path = require("path")
+const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 const withTM = require("next-transpile-modules")(["@kyoo/ui"]);
-
 
 const suboctopus = path.dirname(require.resolve("@jellyfin/libass-wasm"));
 
@@ -45,6 +44,14 @@ const nextConfig = {
 				],
 			}),
 		];
+		config.resolve = {
+			...config.resolve,
+			alias: {
+				...config.resolve.alias,
+				"react-native$": "react-native-web",
+			},
+			extensions: [".web.tsx", ".tsx", ...config.resolve.extensions],
+		};
 		return config;
 	},
 	async redirects() {

@@ -1,7 +1,7 @@
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View } from "react-native";
 import { registerRootComponent } from "expo";
-import { Toto } from "app";
+import { Toto } from "@kyoo/ui";
 
 function App() {
 	return (

@@ -8,7 +8,17 @@
 		"typescript": "^4.8.4"
 	},
 	"peerDependencies": {
-		"react": "*"
+		"react": "*",
+		"react-native": "*",
+		"react-native-web": "*"
+	},
+	"peerDependenciesMeta": {
+		"react-native": {
+			"optional": true
+		},
+		"react-native-web": {
+			"optional": true
+		}
 	},
 	"dependencies": {
 		"@emotion/react": "^11.10.5"

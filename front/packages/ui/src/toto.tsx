@@ -1,3 +1,5 @@
+import { Button } from "react-native";
+
 export const Toto = () => {
-	return <button>tata</button>;
+	return <Button title="tato"></Button>;
 }

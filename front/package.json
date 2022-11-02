@@ -3,7 +3,7 @@
 	"private": true,
 	"scripts": {
 		"web": "yarn workspace web dev",
-		"native": "yarn workspace native start",
+		"mobile": "yarn workspace mobile start",
 		"build:web": "yarn workspace web build",
 		"lint": "eslint ."
 	},
