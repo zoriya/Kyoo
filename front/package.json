@@ -2,6 +2,7 @@
 	"name": "kyoo",
 	"private": true,
 	"scripts": {
+		"dev": "yarn workspaces foreach -pi run dev",
 		"web": "yarn workspace web dev",
 		"mobile": "yarn workspace mobile start",
 		"build:web": "yarn workspace web build",

@@ -67,6 +67,9 @@ const nextConfig = {
 		locales: ["en", "fr"],
 		defaultLocale: "en",
 	},
+	experimental: {
+		outputFileTracingRoot: path.join(__dirname, '../../'),
+	}
 };
 
 if (process.env.NODE_ENV !== "production") {

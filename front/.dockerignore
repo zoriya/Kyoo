@@ -11,3 +11,4 @@ README.md
 .git
 .yarn
 !.yarn/releases
+!.yarn/plugins

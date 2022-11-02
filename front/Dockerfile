@@ -3,9 +3,9 @@ WORKDIR /app
 COPY .yarn ./.yarn
 COPY .yarnrc.yml ./
 COPY package.json yarn.lock ./
-COPY packages/web/package.json packages/web/package.json
-COPY packages/native/package.json packages/native/package.json
-COPY packages/app/package.json packages/app/package.json
+COPY apps/web/package.json apps/web/package.json
+COPY apps/mobile/package.json apps/mobile/package.json
+COPY packages/ui/package.json packages/ui/package.json
 RUN yarn --immutable
 
 COPY . .
@@ -17,11 +17,10 @@ RUN yarn build:web
 FROM node:16-alpine
 WORKDIR /app
 
-COPY --from=builder /app/packages/web/.next/standalone .
-COPY --from=builder /app/packages/web/.next/static ./.next/static/
-COPY --from=builder /app/packages/web/public ./public
-# Waiting for https://github.com/vercel/next.js/discussions/39432
-# COPY --from=builder /app/packages/web/node_modules ./node_modules/
+COPY --from=builder /app/apps/web/.next/standalone/apps/web .
+COPY --from=builder /app/apps/web/.next/standalone/node_modules ./node_modules
+COPY --from=builder /app/apps/web/.next/static ./.next/static/
+COPY --from=builder /app/apps/web/public ./public
 
 EXPOSE 8901
 ENV PORT 8901

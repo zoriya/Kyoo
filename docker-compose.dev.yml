@@ -26,27 +26,15 @@ services:
   front:
     build: 
       context: ./front
-      dockerfile: Dockerfile.web.dev
+      dockerfile: Dockerfile.dev
     volumes:
       - ./front:/app
       - /app/.yarn
       - /app/node_modules
-      - /app/packages/web/.next/
+      - /app/apps/web/.next/
+      - /app/apps/mobile/.expo/
     ports:
       - "3000:3000"
-    restart: on-failure
-    environment:
-      - KYOO_URL=http://back:5000
-  native:
-    build: 
-      context: ./front
-      dockerfile: Dockerfile.native.dev
-    volumes:
-      - ./front:/app
-      - /app/.yarn
-      - /app/node_modules
-      - /app/packages/native/.expo/
-    ports:
       - "19000:19000"
     restart: on-failure
     environment:
