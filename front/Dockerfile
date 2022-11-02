@@ -5,6 +5,7 @@ COPY .yarnrc.yml ./
 COPY package.json yarn.lock ./
 COPY packages/web/package.json packages/web/package.json
 COPY packages/native/package.json packages/native/package.json
+COPY packages/app/package.json packages/app/package.json
 RUN yarn --immutable
 
 COPY . .

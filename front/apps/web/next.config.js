@@ -20,6 +20,7 @@
 
 const path = require("path")
 const CopyPlugin = require("copy-webpack-plugin");
+const withTM = require("next-transpile-modules")(["@kyoo/ui"]);
 
 
 const suboctopus = path.dirname(require.resolve("@jellyfin/libass-wasm"));
@@ -67,4 +68,4 @@ if (process.env.NODE_ENV !== "production") {
 	];
 }
 
-module.exports = nextConfig;
+module.exports = withTM(nextConfig);

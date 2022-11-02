@@ -1,5 +1,5 @@
 {
-	"name": "front",
+	"name": "kyoo",
 	"private": true,
 	"scripts": {
 		"web": "yarn workspace web dev",
@@ -8,6 +8,7 @@
 		"lint": "eslint ."
 	},
 	"workspaces": [
+		"apps/*",
 		"packages/*"
 	],
 	"prettier": {
