@@ -34,10 +34,10 @@ import {
 } from "@mui/material";
 import useTranslation from "next-translate/useTranslation";
 import { useRouter } from "next/router";
-import { MouseEvent, useState } from "react";
+import { useState } from "react";
 import { ErrorPage } from "~/components/errors";
-import { Navbar } from "~/components/navbar";
-import { Poster, Image } from "~/components/poster";
+import { Navbar } from "@kyoo/ui";
+import { Poster, Image } from "@kyoo/primitives";
 import { ItemType, LibraryItem, LibraryItemP } from "~/models";
 import { getDisplayDate } from "~/models/utils";
 import { InfiniteScroll } from "~/utils/infinite-scroll";
@@ -89,7 +89,7 @@ const ItemGrid = ({
 				m: [1, 2],
 			}}
 		>
-			<Poster img={poster} alt={name} width="100%" />
+			<Poster src={poster} alt={name} width="100%" />
 			<Typography minWidth="80%">{name ?? <Skeleton />}</Typography>
 			{(loading || subtitle) && (
 				<Typography variant="caption" minWidth="50%">
@@ -136,12 +136,12 @@ const ItemList = ({
 			}}
 		>
 			<Image
-				img={thumbnail}
+				src={thumbnail}
 				alt={name}
 				width="100%"
 				height="100%"
 				radius="5px"
-				sx={{
+				css={{
 					position: "absolute",
 					top: 0,
 					bottom: 0,
@@ -185,11 +185,10 @@ const ItemList = ({
 				)}
 			</Box>
 			<Poster
-				img={poster}
+				src={poster}
 				alt=""
 				height="80%"
-				className="poster"
-				sx={{
+				css={{
 					transition: "transform .2s",
 				}}
 			/>
@@ -433,7 +432,7 @@ BrowsePage.getLayout = (page) => {
 
 BrowsePage.getFetchUrls = ({ slug, sortBy }) => [
 	query(slug, sortBy?.split("-")[0] as SortBy, sortBy?.split("-")[1] as SortOrd),
-	Navbar.query(),
+	/* Navbar.query(), */
 ];
 
 export default withRoute(BrowsePage);

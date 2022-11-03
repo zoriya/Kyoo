@@ -18,4 +18,4 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./navbar/navbar";
+/* export { MaterialIcons as Icon } from "@expo/vector-icons"; */

@@ -30,7 +30,7 @@ import superjson from "superjson";
 import Head from "next/head";
 import { useMobileHover } from "~/utils/utils";
 import { catppuccin } from "~/utils/themes/catppuccin";
-import { selectMode } from "~/utils/themes/theme";
+import { selectMode } from "@kyoo/primitives";
 
 // Simply silence a SSR warning (see https://github.com/facebook/react/issues/14927 for more details)
 if (typeof window === "undefined") {

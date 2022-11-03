@@ -18,4 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./navbar/navbar";
+export * from "./text";
+export * from "./theme";
+export * from "./icon";
+export * from "./image";

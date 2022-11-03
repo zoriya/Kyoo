@@ -18,4 +18,21 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./navbar/navbar";
+import type { Property } from "csstype";
+import { View, Image } from "react-native";
+
+export const Avatar = ({
+	src,
+	alt,
+	size = "24px",
+}: {
+	src: string;
+	alt: string;
+	size: Property.InlineSize;
+}) => {
+	return (
+		<View css={{ borderRadius: "50%", width: size, height: size }}>
+			<Image source={src} alt={alt} css={{ width: size, height: size }} />
+		</View>
+	);
+};
