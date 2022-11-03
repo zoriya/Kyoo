@@ -1,0 +1,23 @@
+{
+	"name": "youshiki",
+	"main": "src/index.tsx",
+	"types": "src/index.tsx",
+	"packageManager": "yarn@3.2.4",
+	"devDependencies": {
+		"@types/react": "^18.0.24",
+		"typescript": "^4.8.4"
+	},
+	"peerDependencies": {
+		"react": "*",
+		"react-native": "*",
+		"react-native-web": "*"
+	},
+	"peerDependenciesMeta": {
+		"react-native": {
+			"optional": true
+		},
+		"react-native-web": {
+			"optional": true
+		}
+	}
+}
