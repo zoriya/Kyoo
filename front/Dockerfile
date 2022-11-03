@@ -6,6 +6,7 @@ COPY package.json yarn.lock ./
 COPY apps/web/package.json apps/web/package.json
 COPY apps/mobile/package.json apps/mobile/package.json
 COPY packages/ui/package.json packages/ui/package.json
+COPY packages/primitives/package.json packages/primitives/package.json
 RUN yarn --immutable
 
 COPY . .

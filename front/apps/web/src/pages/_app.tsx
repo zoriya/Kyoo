@@ -31,7 +31,6 @@ import Head from "next/head";
 import { useMobileHover } from "~/utils/utils";
 import { catppuccin } from "~/utils/themes/catppuccin";
 import { selectMode } from "~/utils/themes/theme";
-import { Toto } from "@kyoo/ui";
 
 // Simply silence a SSR warning (see https://github.com/facebook/react/issues/14927 for more details)
 if (typeof window === "undefined") {
@@ -94,7 +93,6 @@ const App = ({ Component, pageProps }: AppProps) => {
 				<Hydrate state={queryState}>
 					<ThemeSelector>
 						<GlobalCssTheme />
-						<Toto />
 						{getLayout(<Component {...props} />)}
 					</ThemeSelector>
 				</Hydrate>
