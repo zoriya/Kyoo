@@ -18,19 +18,15 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export type Theme = {
-	// TODO: remove this, just for test purpose
-	spacing: string;
-};
+import { splitRender } from "yoshiki";
+import { View } from "react-native";
+import { ReactNode } from "react";
 
-export type YoushikiStyle<Property> =
-	| Property
-	| ((theme: Theme) => Property)
-	| Breakpoints<Property>;
-
-export type Breakpoints<Property> = {
-	sm?: Property;
-	md?: Property;
-	lg?: Property;
-	xl?: Property;
-};
+export const Div = splitRender<HTMLDivElement, View, { children: ReactNode }>(
+	function _DivWeb(props, ref) {
+		return <div ref={ref} {...props}></div>;
+	},
+	function _DivNat(props, ref) {
+		return <View ref={ref} {...props}></View>;
+	},
+);

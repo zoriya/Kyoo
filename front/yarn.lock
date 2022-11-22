@@ -1433,7 +1433,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.10.2, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.14.0, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.18.6, @babel/runtime@npm:^7.18.9, @babel/runtime@npm:^7.19.0, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.8.4, @babel/runtime@npm:^7.8.7":
+"@babel/runtime@npm:^7.0.0, @babel/runtime@npm:^7.10.2, @babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.14.0, @babel/runtime@npm:^7.18.3, @babel/runtime@npm:^7.18.9, @babel/runtime@npm:^7.19.0, @babel/runtime@npm:^7.5.5, @babel/runtime@npm:^7.8.4, @babel/runtime@npm:^7.8.7":
   version: 7.20.0
   resolution: "@babel/runtime@npm:7.20.0"
   dependencies:
@@ -1867,13 +1867,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@expo/html-elements@npm:^0.2.0":
-  version: 0.2.2
-  resolution: "@expo/html-elements@npm:0.2.2"
-  checksum: c3b754f8a32bf1705fa9330b058d52e003b6572ad2c7752aff7b1085c0a43aa59d3483d9f7e2e2aab5715f29401972a589b6081cff017cf690c06f6e9820269c
-  languageName: node
-  linkType: hard
-
 "@expo/image-utils@npm:0.3.22":
   version: 0.3.22
   resolution: "@expo/image-utils@npm:0.3.22"
@@ -2235,10 +2228,9 @@ __metadata:
     "@types/react": ^18.0.24
     typescript: ^4.8.4
   peerDependencies:
-    "@expo/html-elements": "*"
     react: "*"
     react-native: "*"
-    react-native-web: "*"
+    yoshiki: "*"
   peerDependenciesMeta:
     react-native:
       optional: true
@@ -2256,15 +2248,11 @@ __metadata:
     react-native-svg: ^13.5.0
     typescript: ^4.8.4
   peerDependencies:
-    "@emotion/react": "*"
-    "@expo/html-elements": "*"
     react: "*"
     react-native: "*"
-    react-native-web: "*"
+    yoshiki: "*"
   peerDependenciesMeta:
     react-native:
-      optional: true
-    react-native-web:
       optional: true
   languageName: unknown
   linkType: soft
@@ -4821,16 +4809,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"create-react-class@npm:^15.7.0":
-  version: 15.7.0
-  resolution: "create-react-class@npm:15.7.0"
-  dependencies:
-    loose-envify: ^1.3.1
-    object-assign: ^4.1.1
-  checksum: 0c5f43da705fa9f67ec289051dd5780792652d440dfa17cd2c7d8423c1f604609596f895dabf46fda1960ddd93ee96fe1b61ef4d55a94fc4271b07d515486714
-  languageName: node
-  linkType: hard
-
 "cross-fetch@npm:^3.1.5":
   version: 3.1.5
   resolution: "cross-fetch@npm:3.1.5"
@@ -4882,16 +4860,6 @@ __metadata:
   version: 2.0.0
   resolution: "crypto-random-string@npm:2.0.0"
   checksum: 0283879f55e7c16fdceacc181f87a0a65c53bc16ffe1d58b9d19a6277adcd71900d02bb2c4843dd55e78c51e30e89b0fec618a7f170ebcc95b33182c28f05fd6
-  languageName: node
-  linkType: hard
-
-"css-in-js-utils@npm:^2.0.0":
-  version: 2.0.1
-  resolution: "css-in-js-utils@npm:2.0.1"
-  dependencies:
-    hyphenate-style-name: ^1.0.2
-    isobject: ^3.0.1
-  checksum: c9964c4708216954c468b69bbee2d971fd759ada4f40637b8ca4d3f79caba4818d0532a4f190ac560227c08742ad063ffec7a30afddc4d96b66a18c3a008f0d8
   languageName: node
   linkType: hard
 
@@ -6212,7 +6180,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fbjs@npm:^3.0.0, fbjs@npm:^3.0.4":
+"fbjs@npm:^3.0.0":
   version: 3.0.4
   resolution: "fbjs@npm:3.0.4"
   dependencies:
@@ -7008,13 +6976,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"hyphenate-style-name@npm:^1.0.2":
-  version: 1.0.4
-  resolution: "hyphenate-style-name@npm:1.0.4"
-  checksum: 4f5bf4b055089754924babebaa23c17845937bcca6aee95d5d015f8fa1e6814279002bd6a9e541e3fac2cd02519fc76305396727066c57c8e21a7e73e7a12137
-  languageName: node
-  linkType: hard
-
 "iconv-lite@npm:0.4.24":
   version: 0.4.24
   resolution: "iconv-lite@npm:0.4.24"
@@ -7125,15 +7086,6 @@ __metadata:
   version: 1.3.8
   resolution: "ini@npm:1.3.8"
   checksum: dfd98b0ca3a4fc1e323e38a6c8eb8936e31a97a918d3b377649ea15bdb15d481207a0dda1021efbd86b464cae29a0d33c1d7dcaf6c5672bee17fa849bc50a1b3
-  languageName: node
-  linkType: hard
-
-"inline-style-prefixer@npm:^6.0.1":
-  version: 6.0.1
-  resolution: "inline-style-prefixer@npm:6.0.1"
-  dependencies:
-    css-in-js-utils: ^2.0.0
-  checksum: 0bfa6fa89faa21e425c71425910c37c7b35a16ea753586c408fcc9246c84937c1b8184e6ce792139cda5de5cce8e1bc9eb0ba9f30968bdc97e7a06ece21c0737
   languageName: node
   linkType: hard
 
@@ -8196,7 +8148,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"loose-envify@npm:^1.0.0, loose-envify@npm:^1.1.0, loose-envify@npm:^1.3.1, loose-envify@npm:^1.4.0":
+"loose-envify@npm:^1.0.0, loose-envify@npm:^1.1.0, loose-envify@npm:^1.4.0":
   version: 1.4.0
   resolution: "loose-envify@npm:1.4.0"
   dependencies:
@@ -9189,7 +9141,6 @@ __metadata:
   resolution: "mobile@workspace:apps/mobile"
   dependencies:
     "@babel/core": ^7.19.6
-    "@expo/html-elements": ^0.2.0
     "@kyoo/ui": "workspace:^"
     "@types/react": ~18.0.14
     "@types/react-native": ~0.69.1
@@ -9199,8 +9150,8 @@ __metadata:
     react-dom: 18.0.0
     react-native: 0.69.6
     react-native-svg: 12.3.0
-    react-native-web: ~0.18.7
     typescript: ~4.3.5
+    yoshiki: 0.1.4
   languageName: unknown
   linkType: soft
 
@@ -9501,13 +9452,6 @@ __metadata:
   bin:
     nopt: bin/nopt.js
   checksum: 82149371f8be0c4b9ec2f863cc6509a7fd0fa729929c009f3a58e4eb0c9e4cae9920e8f1f8eb46e7d032fec8fb01bede7f0f41a67eb3553b7b8e14fa53de1dac
-  languageName: node
-  linkType: hard
-
-"normalize-css-color@npm:^1.0.2":
-  version: 1.0.2
-  resolution: "normalize-css-color@npm:1.0.2"
-  checksum: 7433dc995a8d27c9384059ef0b52ceef47f4fab1bab55f1f085058b27e7472466ce321f46391fc85b6851db5212b9bd2bf55f5dc361da01a8a8cf4c360f69dab
   languageName: node
   linkType: hard
 
@@ -10078,13 +10022,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss-value-parser@npm:^4.2.0":
-  version: 4.2.0
-  resolution: "postcss-value-parser@npm:4.2.0"
-  checksum: 819ffab0c9d51cf0acbabf8996dffbfafbafa57afc0e4c98db88b67f2094cb44488758f06e5da95d7036f19556a4a732525e84289a425f4f6fd8e412a9d7442f
-  languageName: node
-  linkType: hard
-
 "postcss@npm:8.4.5":
   version: 8.4.5
   resolution: "postcss@npm:8.4.5"
@@ -10411,24 +10348,6 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 91f33bc2e0667f78bfbd9ba395cc0710b6d5591c1f4c31e407a1fb64a8bb6cfb573a9d581577691eca34c640db85ee03c2069b3db4e7993583dde9e6e01080df
-  languageName: node
-  linkType: hard
-
-"react-native-web@npm:^0.18.9, react-native-web@npm:~0.18.7":
-  version: 0.18.9
-  resolution: "react-native-web@npm:0.18.9"
-  dependencies:
-    "@babel/runtime": ^7.18.6
-    create-react-class: ^15.7.0
-    fbjs: ^3.0.4
-    inline-style-prefixer: ^6.0.1
-    normalize-css-color: ^1.0.2
-    postcss-value-parser: ^4.2.0
-    styleq: ^0.1.2
-  peerDependencies:
-    react: ^17.0.2 || ^18.0.0
-    react-dom: ^17.0.2 || ^18.0.0
-  checksum: 2cd2c08d8ff92bf969a54124d21f101e8d4645b1eb0625aeabccc70ba55b05c0d1fc6ab570b237417be674346d140edc387c5deac403050a9e1f1d87b15b2253
   languageName: node
   linkType: hard
 
@@ -11637,13 +11556,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"styleq@npm:^0.1.2":
-  version: 0.1.2
-  resolution: "styleq@npm:0.1.2"
-  checksum: 050be47448efcb4abd778629ebe09f2db138e0b59504e8442e35432387d98bd696f0efe6962965c26eff5ee54a30ba4615806761b8f040a47874a62dd237e09f
-  languageName: node
-  linkType: hard
-
 "stylis@npm:4.1.3":
   version: 4.1.3
   resolution: "stylis@npm:4.1.3"
@@ -12551,7 +12463,6 @@ __metadata:
   dependencies:
     "@emotion/react": ^11.9.3
     "@emotion/styled": ^11.9.3
-    "@expo/html-elements": ^0.2.0
     "@jellyfin/libass-wasm": ^4.1.1
     "@kyoo/ui": "workspace:^"
     "@mui/icons-material": ^5.8.4
@@ -12574,10 +12485,10 @@ __metadata:
     react: 18.2.0
     react-dom: 18.2.0
     react-infinite-scroll-component: ^6.1.0
-    react-native-web: ^0.18.9
     superjson: ^1.9.1
     typescript: ^4.8.4
     webpack: ^5.74.0
+    yoshiki: 0.1.4
     zod: ^3.18.0
   languageName: unknown
   linkType: soft
@@ -12891,23 +12802,21 @@ __metadata:
   languageName: node
   linkType: hard
 
-"youshiki@workspace:packages/youshiki":
-  version: 0.0.0-use.local
-  resolution: "youshiki@workspace:packages/youshiki"
-  dependencies:
-    "@types/react": ^18.0.24
-    typescript: ^4.8.4
+"yoshiki@npm:0.1.4":
+  version: 0.1.4
+  resolution: "yoshiki@npm:0.1.4"
   peerDependencies:
+    "@types/node": ^18.11.9
+    "@types/react": ^18.0.25
+    "@types/react-native": ~0.70.6
     react: "*"
     react-native: "*"
-    react-native-web: "*"
   peerDependenciesMeta:
     react-native:
       optional: true
-    react-native-web:
-      optional: true
-  languageName: unknown
-  linkType: soft
+  checksum: 38db684944a56317591d5ccf5c3fafa11141c2acb293f598f664922f5b917d2ca954d3fdfed97e0b1c2be0f5bc8bd09132596589897a6c85d955465e39897bda
+  languageName: node
+  linkType: hard
 
 "zod@npm:^3.18.0":
   version: 3.19.1

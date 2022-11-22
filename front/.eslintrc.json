@@ -3,7 +3,7 @@
 	"plugins": ["header"],
 	"settings": {
 		"next": {
-			"rootDir": "packages/web/"
+			"rootDir": "apps/web/"
 		}
 	},
 	"rules": {

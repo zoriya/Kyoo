@@ -8,10 +8,9 @@
 		"typescript": "^4.8.4"
 	},
 	"peerDependencies": {
-		"@expo/html-elements": "*",
 		"react": "*",
 		"react-native": "*",
-		"react-native-web": "*"
+		"yoshiki": "*"
 	},
 	"peerDependenciesMeta": {
 		"react-native": {

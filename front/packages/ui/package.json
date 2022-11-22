@@ -12,17 +12,12 @@
 		"typescript": "^4.8.4"
 	},
 	"peerDependencies": {
-		"@emotion/react": "*",
-		"@expo/html-elements": "*",
 		"react": "*",
 		"react-native": "*",
-		"react-native-web": "*"
+		"yoshiki": "*"
 	},
 	"peerDependenciesMeta": {
 		"react-native": {
-			"optional": true
-		},
-		"react-native-web": {
 			"optional": true
 		}
 	}
