@@ -18,73 +18,42 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ReactNode } from "react";
-import { Text, TextStyle } from "react-native";
-import { splitRender } from "yoshiki";
-import { em, useYoshiki } from "yoshiki/native";
+import { ComponentType, ComponentProps } from "react";
+import { TextProps } from "react-native";
+import { useYoshiki } from "yoshiki/native";
+import {
+	H1 as EH1,
+	H2 as EH2,
+	H3 as EH3,
+	H4 as EH4,
+	H5 as EH5,
+	H6 as EH6,
+	P as EP,
+} from "@expo/html-elements";
 
-const headerStyles: Record<"h1" | "h2" | "h3" | "h4" | "h5" | "h6", TextStyle> = {
-	h1: {
-		fontSize: em(2),
-		marginVertical: em(0.67),
-		fontWeight: "bold",
-	},
-	h2: {
-		fontSize: em(1.5),
-		marginVertical: em(0.83),
-		fontWeight: "bold",
-	},
-	h3: {
-		fontSize: em(1.17),
-		marginVertical: em(1),
-		fontWeight: "bold",
-	},
-	h4: {
-		fontSize: em(1),
-		marginVertical: em(1.33),
-		fontWeight: "bold",
-	},
-	h5: {
-		fontSize: em(0.83),
-		marginVertical: em(1.67),
-		fontWeight: "bold",
-	},
-	h6: {
-		fontSize: em(0.67),
-		marginVertical: em(2.33),
-		fontWeight: "bold",
-	},
+const styleText = (Component: ComponentType<ComponentProps<typeof EP>>, heading?: boolean) => {
+	const Text = (props: ComponentProps<typeof EP>) => {
+		const { css, theme } = useYoshiki();
+
+		return (
+			<Component
+				{...css(
+					{
+						fontFamily: heading ? theme.fonts.heading : theme.fonts.paragraph,
+						color: heading ? theme.heading : theme.paragraph,
+					},
+					props as TextProps,
+				)}
+			/>
+		);
+	};
+	return Text;
 };
 
-const textGenerator = (webHeader?: "h1" | "h2" | "h3" | "h4" | "h5" | "h6") =>
-	splitRender<HTMLParagraphElement, Text, { children: ReactNode }, "text">(
-		function _PWeb({ children, ...props }, ref) {
-			const T = webHeader ?? "p";
-			return (
-				<T ref={ref} {...props}>
-					{children}
-				</T>
-			);
-		},
-		function _PNative({ children, ...props }, ref) {
-			const { css } = useYoshiki();
-
-			return (
-				<Text
-					ref={ref}
-					accessibilityRole={webHeader ? "header" : "text"}
-					{...css(webHeader ? headerStyles[webHeader] : {}, props)}
-				>
-					{children}
-				</Text>
-			);
-		},
-	);
-
-export const H1 = textGenerator("h1");
-export const H2 = textGenerator("h2");
-export const H3 = textGenerator("h3");
-export const H4 = textGenerator("h4");
-export const H5 = textGenerator("h5");
-export const H6 = textGenerator("h6");
-export const P = textGenerator();
+export const H1 = styleText(EH1, true);
+export const H2 = styleText(EH2, true);
+export const H3 = styleText(EH3, true);
+export const H4 = styleText(EH4, true);
+export const H5 = styleText(EH5, true);
+export const H6 = styleText(EH6, true);
+export const P = styleText(EP);

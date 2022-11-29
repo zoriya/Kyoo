@@ -18,15 +18,4 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { splitRender } from "yoshiki";
-import { View } from "react-native";
-import { ReactNode } from "react";
-
-export const Div = splitRender<HTMLDivElement, View, { children: ReactNode }>(
-	function _DivWeb(props, ref) {
-		return <div ref={ref} {...props}></div>;
-	},
-	function _DivNat(props, ref) {
-		return <View ref={ref} {...props}></View>;
-	},
-);
+export * from "./navbar";

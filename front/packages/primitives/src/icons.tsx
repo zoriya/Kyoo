@@ -18,28 +18,29 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
-import { registerRootComponent } from "expo";
-import { Navbar } from "@kyoo/ui";
+import MIcon from "@expo/vector-icons/MaterialIcons";
+import { ComponentProps } from "react";
+import { Pressable, useTheme } from "yoshiki/native";
 
-function App() {
+export type IconProps = {
+	icon: ComponentProps<typeof MIcon>["name"];
+	size?: number;
+	color?: string;
+};
+
+export const Icon = ({ icon, size, color }: IconProps) => {
+	return <MIcon name={icon} size={size ?? 24} color={color} />;
+};
+
+export const IconButton = ({
+	icon,
+	size,
+	color,
+	...props
+}: ComponentProps<typeof Pressable> & IconProps) => {
 	return (
-		<View style={styles.container}>
-			<Navbar />
-			<Text>Open up App.tsx to start working on your app!</Text>
-			<StatusBar style="auto" />
-		</View>
+		<Pressable {...props}>
+			<Icon icon={icon} size={size} color={color} />
+		</Pressable>
 	);
-}
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: "#fff",
-		alignItems: "center",
-		justifyContent: "center",
-	},
-});
-
-export default registerRootComponent(App);
+};

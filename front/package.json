@@ -4,7 +4,7 @@
 	"scripts": {
 		"dev": "yarn workspaces foreach -pi run dev",
 		"web": "yarn workspace web dev",
-		"mobile": "yarn workspace mobile start",
+		"mobile": "yarn workspace mobile dev",
 		"build:web": "yarn workspace web build",
 		"lint": "eslint ."
 	},
@@ -23,13 +23,13 @@
 		"tsdoc": true
 	},
 	"devDependencies": {
-		"eslint": "8.19.0",
-		"eslint-config-next": "12.2.2",
+		"eslint": "8.28.0",
+		"eslint-config-next": "13.0.5",
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-plugin-header": "^3.1.1",
-		"prettier": "^2.7.1",
-		"prettier-plugin-jsdoc": "^0.3.38",
-		"typescript": "4.7.4"
+		"prettier": "^2.8.0",
+		"prettier-plugin-jsdoc": "^0.4.2",
+		"typescript": "4.9.3"
 	},
 	"packageManager": "yarn@3.2.4"
 }

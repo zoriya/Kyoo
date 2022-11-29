@@ -20,7 +20,8 @@
 
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
-const withTM = require("next-transpile-modules")(["@kyoo/ui", "@kyoo/primitives"]);
+const DefinePlugin = require("webpack").DefinePlugin;
+const withFont = require("next-fonts");
 
 const suboctopus = path.dirname(require.resolve("@jellyfin/libass-wasm"));
 
@@ -50,8 +51,15 @@ const nextConfig = {
 				...config.resolve.alias,
 				"react-native$": "react-native-web",
 			},
-			extensions: [".web.tsx", ".tsx", ...config.resolve.extensions],
+			extensions: [".web.ts", ".web.tsx", ".web.js", ".web.jsx", ...config.resolve.extensions],
 		};
+
+		if (!config.plugins) config.plugins = [];
+		config.plugins.push(
+			new DefinePlugin({
+				__DEV__: JSON.stringify(process.env.NODE_ENV !== "production"),
+			}),
+		);
 		return config;
 	},
 	async redirects() {
@@ -68,8 +76,22 @@ const nextConfig = {
 		defaultLocale: "en",
 	},
 	experimental: {
-		outputFileTracingRoot: path.join(__dirname, '../../'),
-	}
+		forceSwcTransforms: true,
+		outputFileTracingRoot: path.join(__dirname, "../../"),
+		transpilePackages: [
+			"@kyoo/ui",
+			"@kyoo/primitives",
+			"solito",
+			"react-native",
+			"react-native-web",
+			"yoshiki",
+			"@expo/vector-icons",
+			"@expo/html-elements",
+			"expo-font",
+			"expo-asset",
+			"expo-modules-core",
+		],
+	},
 };
 
 if (process.env.NODE_ENV !== "production") {
@@ -78,4 +100,4 @@ if (process.env.NODE_ENV !== "production") {
 	];
 }
 
-module.exports = withTM(nextConfig);
+module.exports = withFont(nextConfig);

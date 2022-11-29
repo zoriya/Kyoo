@@ -10,19 +10,19 @@
 	},
 	"dependencies": {
 		"@kyoo/ui": "workspace:^",
-		"expo": "~46.0.16",
-		"expo-status-bar": "~1.4.0",
-		"react": "18.0.0",
-		"react-dom": "18.0.0",
-		"react-native": "0.69.6",
-		"react-native-svg": "12.3.0",
-		"yoshiki": "0.1.4"
+		"expo": "~46.0.17",
+		"expo-status-bar": "~1.4.2",
+		"react": "18.2.0",
+		"react-dom": "18.2.0",
+		"react-native": "0.69.7",
+		"react-native-svg": "12.4.4",
+		"yoshiki": "0.2.4"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.19.6",
-		"@types/react": "~18.0.14",
-		"@types/react-native": "~0.69.1",
-		"typescript": "~4.3.5"
+		"@types/react": "~18.0.25",
+		"@types/react-native": "~0.69.15",
+		"typescript": "~4.9.3"
 	},
 	"private": true
 }

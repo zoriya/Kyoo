@@ -18,9 +18,9 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Html, Main, Head, NextScript } from "next/document";
-import { Children } from "react";
 import { AppRegistry } from "react-native";
+import { Html, Main, Head, NextScript, DocumentContext } from "next/document";
+import { createStyleRegistry, StyleRegistryProvider } from "yoshiki/web";
 
 export const style = `
 /**
@@ -80,14 +80,40 @@ const Document = () => {
 	);
 };
 
-// Enables SSR for react-native-web styles.
-Document.getInitialProps = async ({ renderPage }: any) => {
-	AppRegistry.registerComponent("Main", () => Main);
-	// @ts-ignore
-	const { getStyleElement } = AppRegistry.getApplication("Main");
-	const page = await renderPage();
-	const styles = [<style dangerouslySetInnerHTML={{ __html: style }} />, getStyleElement()];
-	return { ...page, styles: Children.toArray(styles) };
-};
+Document.getInitialProps = async (ctx: DocumentContext) => {
+	const renderPage = ctx.renderPage;
+	const registry = createStyleRegistry();
 
+	ctx.renderPage = () =>
+		renderPage({
+			enhanceApp: (App) => (props) => {
+				return (
+					<StyleRegistryProvider registry={registry}>
+						<App {...props} />
+					</StyleRegistryProvider>
+				);
+			},
+		});
+
+	const props = await ctx.defaultGetInitialProps(ctx);
+
+	AppRegistry.registerComponent("Main", () => Main);
+	// @ts-ignore React native web missing type.
+	const { getStyleElement } = AppRegistry.getApplication("Main");
+	const page = await ctx.renderPage();
+
+	return {
+		...props,
+		...page,
+		styles: (
+			<>
+				{props.styles}
+				{page.styles}
+				<style>{style}</style>
+				{getStyleElement()}
+				{registry.flushToComponent()}
+			</>
+		),
+	};
+};
 export default Document;

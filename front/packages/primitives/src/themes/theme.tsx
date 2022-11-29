@@ -19,8 +19,8 @@
  */
 
 import { Property } from "csstype";
-import "@emotion/react";
-import { Theme, ThemeProvider, useTheme } from "@emotion/react";
+import "yoshiki";
+import { Theme, ThemeProvider, useTheme } from "yoshiki";
 
 type ThemeSettings = {
 	fonts: {
@@ -48,12 +48,12 @@ type Variant = {
 	subtext: Property.Color;
 };
 
-declare module "@emotion/react" {
+declare module "yoshiki" {
 	// TODO: Add specifics colors
 	export interface Theme extends ThemeSettings, Mode, Variant {}
 }
 
-export type { Theme } from "@emotion/react";
+export type { Theme } from "yoshiki";
 export type ThemeBuilder = ThemeSettings & {
 	light: Mode & { default: Variant };
 	dark: Mode & { default: Variant };

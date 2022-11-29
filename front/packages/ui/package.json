@@ -1,15 +1,15 @@
 {
 	"name": "@kyoo/ui",
-	"main": "src/index.tsx",
-	"types": "src/index.tsx",
+	"main": "src/index.ts",
+	"types": "src/index.ts",
 	"packageManager": "yarn@3.2.4",
 	"dependencies": {
 		"@kyoo/primitives": "workspace:^",
-		"react-native-svg": "^13.5.0"
+		"react-native-svg": "^13.6.0"
 	},
 	"devDependencies": {
-		"@types/react": "^18.0.24",
-		"typescript": "^4.8.4"
+		"@types/react": "^18.0.25",
+		"typescript": "^4.9.3"
 	},
 	"peerDependencies": {
 		"react": "*",

@@ -35,7 +35,7 @@ const NextButton = (
 	{ href, as, prefetch, locale, ...props }: ButtonLinkProps,
 	ref: Ref<ButtonRef>,
 ) => (
-	<NLink href={href} as={as} prefetch={prefetch} locale={locale} passHref>
+	<NLink href={href} as={as} prefetch={prefetch} locale={locale} legacyBehavior passHref>
 		<MButton ref={ref} {...props} />
 	</NLink>
 );
@@ -59,6 +59,7 @@ const NextLink = (
 		shallow={shallow}
 		replace={replace}
 		passHref
+		legacyBehavior
 	>
 		<MLink ref={ref} {...props} />
 	</NLink>

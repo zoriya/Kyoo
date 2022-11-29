@@ -34,9 +34,9 @@ import {
 } from "@mui/material";
 import useTranslation from "next-translate/useTranslation";
 import { useRouter } from "next/router";
-import { MouseEvent, useState } from "react";
+import { useState } from "react";
 import { ErrorPage } from "~/components/errors";
-import { Navbar } from "~/components/navbar";
+import { Navbar } from "@kyoo/ui";
 import { Poster, Image } from "~/components/poster";
 import { ItemType, LibraryItem, LibraryItemP } from "~/models";
 import { getDisplayDate } from "~/models/utils";
@@ -433,7 +433,7 @@ BrowsePage.getLayout = (page) => {
 
 BrowsePage.getFetchUrls = ({ slug, sortBy }) => [
 	query(slug, sortBy?.split("-")[0] as SortBy, sortBy?.split("-")[1] as SortOrd),
-	Navbar.query(),
+	/* Navbar.query(), */
 ];
 
 export default withRoute(BrowsePage);

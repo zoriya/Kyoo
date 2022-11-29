@@ -18,28 +18,14 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
-import { registerRootComponent } from "expo";
-import { Navbar } from "@kyoo/ui";
+export { Header, Nav, Footer } from "@expo/html-elements";
+export * from "./text";
+export * from "./themes";
+export * from "./icons";
+export * from "./links";
 
-function App() {
-	return (
-		<View style={styles.container}>
-			<Navbar />
-			<Text>Open up App.tsx to start working on your app!</Text>
-			<StatusBar style="auto" />
-		</View>
-	);
-}
+import { px } from "yoshiki/native";
 
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: "#fff",
-		alignItems: "center",
-		justifyContent: "center",
-	},
-});
-
-export default registerRootComponent(App);
+export const ts = (spacing: number) => {
+	return px(spacing * 8);
+};

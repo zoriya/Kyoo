@@ -18,28 +18,30 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
-import { registerRootComponent } from "expo";
-import { Navbar } from "@kyoo/ui";
+import { ReactNode } from "react";
+import { TextProps } from "react-native";
+import { TextLink } from "solito/link";
+import { useYoshiki } from "yoshiki/native";
 
-function App() {
+export const A = ({
+	href,
+	children,
+	...props
+}: TextProps & { href: string; children: ReactNode }) => {
+	const { css, theme } = useYoshiki();
+
 	return (
-		<View style={styles.container}>
-			<Navbar />
-			<Text>Open up App.tsx to start working on your app!</Text>
-			<StatusBar style="auto" />
-		</View>
+		<TextLink
+			href={href}
+			textProps={css(
+				{
+					fontFamily: theme.fonts.paragraph,
+					color: theme.paragraph,
+				},
+				props,
+			)}
+		>
+			{children}
+		</TextLink>
 	);
-}
-
-const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: "#fff",
-		alignItems: "center",
-		justifyContent: "center",
-	},
-});
-
-export default registerRootComponent(App);
+};

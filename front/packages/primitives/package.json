@@ -1,11 +1,11 @@
 {
 	"name": "@kyoo/primitives",
-	"main": "src/index.tsx",
-	"types": "src/index.tsx",
+	"main": "src/index.ts",
+	"types": "src/index.ts",
 	"packageManager": "yarn@3.2.4",
 	"devDependencies": {
-		"@types/react": "^18.0.24",
-		"typescript": "^4.8.4"
+		"@types/react": "^18.0.25",
+		"typescript": "^4.9.3"
 	},
 	"peerDependencies": {
 		"react": "*",
@@ -13,11 +13,13 @@
 		"yoshiki": "*"
 	},
 	"peerDependenciesMeta": {
-		"react-native": {
-			"optional": true
-		},
 		"react-native-web": {
 			"optional": true
 		}
+	},
+	"dependencies": {
+		"@expo/html-elements": "^0.2.2",
+		"@expo/vector-icons": "AnonymusRaccoon/expo-vector-icons#no-prepare",
+		"solito": "^2.0.5"
 	}
 }
