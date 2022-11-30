@@ -22,44 +22,14 @@ import useTranslation from "next-translate/useTranslation";
 /* import { Library, LibraryP, Page, Paged } from "~/models"; */
 /* import { QueryIdentifier, useFetch } from "~/utils/query"; */
 /* import { ErrorSnackbar } from "./errors"; */
-import { Stylable, useYoshiki } from "yoshiki/native";
-import { IconButton, Header, P, A, ts } from "@kyoo/primitives";
-import { Image, View } from "react-native";
+import { useYoshiki } from "yoshiki/native";
+import { IconButton, Header, Avatar, A, ts } from "@kyoo/primitives";
+import { View } from "react-native";
+import { KyooLongLogo } from "./icon";
 
 const tooltip = (tooltip: string): object => ({});
 
-export const NavbarTitle = (props: Stylable) => {
-	const { css } = useYoshiki();
-	const { t } = useTranslation("common");
-
-	return (
-		<A
-			href="/"
-			{...tooltip(t("navbar.home"))}
-			{...css(
-				{
-					alignItems: "center",
-					display: "flex",
-				},
-				props,
-			)}
-		>
-			{/* <Image source={"/icon.svg"} width="24px" height="24px" alt="" /> */}
-			<P
-				{...css({
-					marginLeft: ts(1),
-					marginRight: ts(2),
-					fontFamily: "monospace",
-					fontWeight: "700",
-					textTransform: "uppercase",
-					color: "white",
-				})}
-			>
-				Kyoo
-			</P>
-		</A>
-	);
-};
+export const NavbarTitle = KyooLongLogo;
 
 export const Navbar = () => {
 	const { css } = useYoshiki();
@@ -70,8 +40,19 @@ export const Navbar = () => {
 		<Header
 			{...css({
 				backgroundColor: (theme) => theme.appbar,
+				paddingX: ts(2),
+				height: { xs: 48, sm: 64 },
 				flexDirection: "row",
+				justifyContent: { xs: "space-between", sm: "flex-start" },
 				alignItems: "center",
+				shadowColor: "#000",
+				shadowOffset: {
+					width: 0,
+					height: 4,
+				},
+				shadowOpacity: 0.3,
+				shadowRadius: 4.65,
+				elevation: 8,
 			})}
 		>
 			<IconButton
@@ -82,10 +63,15 @@ export const Navbar = () => {
 				color="white"
 				{...css({ display: { xs: "flex", sm: "none" } })}
 			/>
-			{/* <Box sx={{ flexGrow: 1, display: { sx: "flex", sm: "none" } }} /> */}
-			<NavbarTitle {...css({ marginRight: ts(1) })} />
-			{/* <Box sx={{ flexGrow: 1, display: { sx: "flex", sm: "none" } }} /> */}
-			<View {...css({ flexGrow: 1, flexDirection: "row", display: { xs: "none", sm: "flex" } })}>
+			<NavbarTitle {...css({ marginX: ts(2) })} />
+			<View
+				{...css({
+					flexGrow: 1,
+					flexDirection: "row",
+					display: { xs: "none", sm: "flex" },
+					marginLeft: ts(2),
+				})}
+			>
 				{
 					/*isSuccess
 					? data.items.map((library) => */ true
@@ -111,8 +97,8 @@ export const Navbar = () => {
 						  )
 				}
 			</View>
-			<A href="/auth/login" {...tooltip(t("navbar.login"))} {...css({ p: 0 })}>
-				{/* <Avatar alt={t("navbar.login")} /> */}
+			<A href="/auth/login" {...tooltip(t("navbar.login"))}>
+				<Avatar alt={t("navbar.login")} size={30} />
 			</A>
 			{/* {isError && <ErrorSnackbar error={error} />} */}
 		</Header>

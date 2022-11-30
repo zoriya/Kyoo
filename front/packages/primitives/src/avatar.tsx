@@ -19,15 +19,28 @@
  */
 
 import { View, ViewStyle } from "react-native";
-import { Image } from "./";
+import { Image } from "./image";
 import { useYoshiki, px } from "yoshiki/native";
+import { Icon } from "./icons";
 
-export const Avatar = ({ src, alt, size = px(24) }: { src: string; alt: string; size: number }) => {
+export const Avatar = ({
+	src,
+	alt,
+	size = px(24),
+}: {
+	src?: string;
+	alt: string;
+	size?: number;
+}) => {
 	const { css } = useYoshiki();
 
 	return (
 		<View {...css({ borderRadius: size / 2, width: size, height: size })}>
-			<Image src={src} alt={alt} width={size} height={size} />
+			{src ? (
+				<Image src={src} alt={alt} width={size} height={size} />
+			) : (
+				<Icon icon="account-circle" size={size} />
+			)}
 		</View>
 	);
 };

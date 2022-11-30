@@ -19,15 +19,11 @@
  */
 
 import { useState } from "react";
-import {
-	View,
-	Image as Img,
-	ImageSourcePropType,
-} from "react-native";
-import type { Property } from "csstype";
+import { View, Image as Img, ImageSourcePropType, ImageStyle } from "react-native";
+import { percent, useYoshiki } from "yoshiki/native";
 
 type ImageOptions = {
-	radius?: string;
+	radius?: number;
 	fallback?: string | ImageSourcePropType;
 };
 
@@ -40,8 +36,8 @@ type ImagePropsWithLoading =
 	| (ImageProps & { loading?: boolean })
 	| (Partial<ImageProps> & { loading: true });
 
-type Width = Property.Width<(string & {}) | 0>;
-type Height = Property.Height<(string & {}) | 0>;
+type Width = ImageStyle["width"];
+type Height = ImageStyle["height"];
 
 export const Image = ({
 	src,
@@ -55,9 +51,10 @@ export const Image = ({
 	...others
 }: ImagePropsWithLoading &
 	(
-		| { aspectRatio?: string; width: Width; height: Height }
-		| { aspectRatio: string; width?: Width; height?: Height }
+		| { aspectRatio?: number; width: Width; height: Height }
+		| { aspectRatio: number; width?: Width; height?: Height }
 	)) => {
+	const { css } = useYoshiki();
 	const [showLoading, setLoading] = useState<boolean>(loading);
 	const [source, setSource] = useState(src);
 	/* const imgRef = useRef<Img>(null); */
@@ -70,16 +67,18 @@ export const Image = ({
 
 	return (
 		<View
-			css={{
-				aspectRatio,
-				width,
-				height,
-				/* backgroundColor: "grey.300", */
-				borderRadius: radius,
-				overflow: "hidden",
-				"& > *": { width: "100%", height: "100%" },
-			}}
-			{...others}
+			{...css(
+				{
+					aspectRatio,
+					width,
+					height,
+					/* backgroundColor: "grey.300", */
+					borderRadius: radius,
+					overflow: "hidden",
+					/* "& > *": { width: "100%", height: "100%" }, */
+				},
+				others,
+			)}
 		>
 			{/* {showLoading && <Skeleton variant="rectangular" height="100%" />} */}
 			{!loading && source && (
@@ -91,7 +90,12 @@ export const Image = ({
 						if (fallback) setSource(fallback);
 						else setLoading(false);
 					}}
-					css={{ objectFit: "cover", display: showLoading ? "hidden" : undefined }}
+					{...css({
+						height: percent(100),
+						width: percent(100),
+						resizeMode: "cover",
+						/* display: showLoading ? "hidden" : undefined, */
+					})}
 				/>
 			)}
 		</View>
@@ -99,5 +103,5 @@ export const Image = ({
 };
 
 export const Poster = (props: ImagePropsWithLoading & { width?: Width; height?: Height }) => (
-	<Image aspectRatio="2 / 3" {...props} />
+	<Image aspectRatio={2 / 3} {...props} />
 );

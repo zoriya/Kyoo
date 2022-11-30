@@ -84,6 +84,7 @@ const nextConfig = {
 			"solito",
 			"react-native",
 			"react-native-web",
+			"react-native-svg",
 			"yoshiki",
 			"@expo/vector-icons",
 			"@expo/html-elements",

@@ -29,7 +29,7 @@ export type IconProps = {
 };
 
 export const Icon = ({ icon, size, color }: IconProps) => {
-	return <MIcon name={icon} size={size ?? 24} color={color} />;
+	return <MIcon name={icon} size={size ?? 24} color={color ?? "white"} />;
 };
 
 export const IconButton = ({

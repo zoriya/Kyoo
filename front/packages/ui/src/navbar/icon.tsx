@@ -36,9 +36,11 @@ import Svg, { SvgProps, Path } from "react-native-svg";
 /* 	</Svg> */
 /* ); */
 
-export const KyooLongLogo = (props: SvgProps) => 
-	(
-	<Svg viewBox="49.954 131.833 318.13 108.676" {...props}>
+export const KyooLongLogo = ({
+	height = 24,
+	...props
+}: Omit<SvgProps, "width" | "height"> & { height?: number }) => (
+	<Svg viewBox="49.954 131.833 318.13 108.676" height={height} width={height * 2.9272} {...props}>
 		<Path
 			d="m164.844 186.759-114.89-53.76v107.51l114.89-53.75Z"
 			fill="#121327"

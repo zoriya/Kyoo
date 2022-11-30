@@ -19,17 +19,18 @@
  */
 
 import { Stack } from "expo-router";
-import { ThemeSelector } from "@kyoo/primitives";
+import { Avatar, ThemeSelector } from "@kyoo/primitives";
 import { useTheme } from "yoshiki/native";
 import { NavbarTitle } from "@kyoo/ui";
 
 const ThemedStack = () => {
-	const  theme  = useTheme();
+	const theme = useTheme();
 
 	return (
 		<Stack
 			screenOptions={{
 				headerTitle: () => <NavbarTitle />,
+				headerRight: () => <Avatar alt="login" />,
 				headerStyle: {
 					backgroundColor: theme.appbar,
 				},

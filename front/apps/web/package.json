@@ -34,7 +34,7 @@
 		"react-native-web": "^0.18.10",
 		"solito": "^2.0.5",
 		"superjson": "^1.11.0",
-		"yoshiki": "0.2.4",
+		"yoshiki": "0.2.7",
 		"zod": "^3.19.1"
 	},
 	"devDependencies": {
