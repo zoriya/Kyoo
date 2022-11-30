@@ -18,6 +18,34 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./theme";
-export * from "./catppuccin";
+import { Stack } from "expo-router";
+import { ThemeSelector } from "@kyoo/primitives";
+import { useTheme } from "yoshiki/native";
+import { NavbarTitle } from "@kyoo/ui";
 
+const ThemedStack = () => {
+	const  theme  = useTheme();
+
+	return (
+		<Stack
+			screenOptions={{
+				headerTitle: () => <NavbarTitle />,
+				headerStyle: {
+					backgroundColor: theme.appbar,
+				},
+				headerTintColor: "#fff",
+				headerTitleStyle: {
+					fontWeight: "bold",
+				},
+			}}
+		/>
+	);
+};
+
+export default function Root() {
+	return (
+		<ThemeSelector>
+			<ThemedStack />
+		</ThemeSelector>
+	);
+}

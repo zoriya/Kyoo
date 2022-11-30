@@ -2,10 +2,11 @@
 	"expo": {
 		"name": "kyoo",
 		"slug": "kyoo",
+		"scheme": "kyoo",
 		"version": "1.0.0",
 		"orientation": "portrait",
 		"icon": "./assets/icon.png",
-		"entryPoint": "./src/app.tsx",
+		"entryPoint": "./index.ts",
 		"userInterfaceStyle": "light",
 		"splash": {
 			"image": "./assets/splash.png",

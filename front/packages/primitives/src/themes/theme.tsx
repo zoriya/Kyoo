@@ -18,9 +18,11 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { ReactNode } from "react";
 import { Property } from "csstype";
-import "yoshiki";
 import { Theme, ThemeProvider, useTheme } from "yoshiki";
+import "yoshiki";
+import { catppuccin } from "./catppuccin";
 
 type ThemeSettings = {
 	fonts: {
@@ -85,4 +87,8 @@ export const SwitchVariant = ({ children }: { children?: JSX.Element | JSX.Eleme
 	const theme = useTheme();
 
 	return <ThemeProvider theme={switchVariant(theme)}>{children}</ThemeProvider>;
+};
+
+export const ThemeSelector = ({ children }: { children: ReactNode }) => {
+	return <ThemeProvider theme={selectMode(catppuccin, "light")}>{children}</ThemeProvider>;
 };

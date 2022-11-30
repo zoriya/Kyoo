@@ -24,11 +24,11 @@ import useTranslation from "next-translate/useTranslation";
 /* import { ErrorSnackbar } from "./errors"; */
 import { Stylable, useYoshiki } from "yoshiki/native";
 import { IconButton, Header, P, A, ts } from "@kyoo/primitives";
-import { View } from "react-native";
+import { Image, View } from "react-native";
 
 const tooltip = (tooltip: string): object => ({});
 
-const KyooTitle = (props: Stylable) => {
+export const NavbarTitle = (props: Stylable) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation("common");
 
@@ -44,13 +44,14 @@ const KyooTitle = (props: Stylable) => {
 				props,
 			)}
 		>
-			<img src={"/icon.svg"} width="24px" height="24px" alt="" />
+			{/* <Image source={"/icon.svg"} width="24px" height="24px" alt="" /> */}
 			<P
 				{...css({
 					marginLeft: ts(1),
 					marginRight: ts(2),
 					fontFamily: "monospace",
 					fontWeight: "700",
+					textTransform: "uppercase",
 					color: "white",
 				})}
 			>
@@ -82,7 +83,7 @@ export const Navbar = () => {
 				{...css({ display: { xs: "flex", sm: "none" } })}
 			/>
 			{/* <Box sx={{ flexGrow: 1, display: { sx: "flex", sm: "none" } }} /> */}
-			<KyooTitle {...css({ marginRight: ts(1) })} />
+			<NavbarTitle {...css({ marginRight: ts(1) })} />
 			{/* <Box sx={{ flexGrow: 1, display: { sx: "flex", sm: "none" } }} /> */}
 			<View {...css({ flexGrow: 1, flexDirection: "row", display: { xs: "none", sm: "flex" } })}>
 				{

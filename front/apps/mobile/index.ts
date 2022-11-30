@@ -18,6 +18,4 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./theme";
-export * from "./catppuccin";
-
+import "expo-router/entry";

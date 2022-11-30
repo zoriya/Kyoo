@@ -20,14 +20,14 @@
 
 import React, { ReactNode, useState } from "react";
 import appWithI18n from "next-translate/appWithI18n";
-import { ThemeProvider, useTheme, useMobileHover } from "yoshiki/web";
+import { useTheme, useMobileHover } from "yoshiki/web";
 import { createTheme, ThemeProvider as MTheme } from "@mui/material";
 import NextApp, { AppContext, type AppProps } from "next/app";
 import { Hydrate, QueryClientProvider } from "@tanstack/react-query";
 import { createQueryClient, fetchQuery, QueryIdentifier, QueryPage } from "~/utils/query";
 import superjson from "superjson";
 import Head from "next/head";
-import { selectMode, catppuccin } from "@kyoo/primitives";
+import { ThemeSelector as KThemeSelector } from "@kyoo/primitives";
 
 // Simply silence a SSR warning (see https://github.com/facebook/react/issues/14927 for more details)
 if (typeof window === "undefined") {
@@ -39,7 +39,9 @@ const ThemeSelector = ({ children }: { children?: ReactNode | ReactNode[] }) => 
 	// TODO: Hande theme change.
 	return (
 		<MTheme theme={createTheme()}>
-			<ThemeProvider theme={selectMode(catppuccin, "light")}>{children}</ThemeProvider>
+			<KThemeSelector>
+				{children}
+			</KThemeSelector>
 		</MTheme>
 	);
 };
