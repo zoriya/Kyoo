@@ -37,13 +37,14 @@ import { useRouter } from "next/router";
 import { useState } from "react";
 import { ErrorPage } from "~/components/errors";
 import { Navbar } from "@kyoo/ui";
-import { Poster, Image } from "~/components/poster";
+import { Poster, Image } from "@kyoo/primitives";
 import { ItemType, LibraryItem, LibraryItemP } from "~/models";
 import { getDisplayDate } from "~/models/utils";
 import { InfiniteScroll } from "~/utils/infinite-scroll";
 import { Link } from "~/utils/link";
 import { withRoute } from "~/utils/router";
 import { QueryIdentifier, QueryPage, useInfiniteFetch } from "~/utils/query";
+import { px } from "yoshiki/native";
 
 enum SortBy {
 	Name = "name",
@@ -89,7 +90,7 @@ const ItemGrid = ({
 				m: [1, 2],
 			}}
 		>
-			<Poster img={poster} alt={name} width="100%" />
+			<Poster src={poster} alt={name} width="100%" />
 			<Typography minWidth="80%">{name ?? <Skeleton />}</Typography>
 			{(loading || subtitle) && (
 				<Typography variant="caption" minWidth="50%">
@@ -136,12 +137,12 @@ const ItemList = ({
 			}}
 		>
 			<Image
-				img={thumbnail}
+				src={thumbnail}
 				alt={name}
 				width="100%"
 				height="100%"
-				radius="5px"
-				sx={{
+				radius={px(5)}
+				css={{
 					position: "absolute",
 					top: 0,
 					bottom: 0,
@@ -185,11 +186,10 @@ const ItemList = ({
 				)}
 			</Box>
 			<Poster
-				img={poster}
+				src={poster}
 				alt=""
 				height="80%"
-				className="poster"
-				sx={{
+				css={{
 					transition: "transform .2s",
 				}}
 			/>

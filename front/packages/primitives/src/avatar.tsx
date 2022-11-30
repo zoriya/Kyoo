@@ -18,16 +18,16 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export { Header, Nav, Footer } from "@expo/html-elements";
-export * from "./text";
-export * from "./themes";
-export * from "./icons";
-export * from "./links";
-export * from "./avatar";
-export * from "./image";
+import { View, ViewStyle } from "react-native";
+import { Image } from "./";
+import { useYoshiki, px } from "yoshiki/native";
 
-import { px } from "yoshiki/native";
+export const Avatar = ({ src, alt, size = px(24) }: { src: string; alt: string; size: number }) => {
+	const { css } = useYoshiki();
 
-export const ts = (spacing: number) => {
-	return px(spacing * 8);
+	return (
+		<View {...css({ borderRadius: size / 2, width: size, height: size })}>
+			<Image src={src} alt={alt} width={size} height={size} />
+		</View>
+	);
 };
