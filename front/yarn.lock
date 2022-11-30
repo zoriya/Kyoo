@@ -1540,34 +1540,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@emotion/native@npm:^11.10.0":
-  version: 11.10.0
-  resolution: "@emotion/native@npm:11.10.0"
-  dependencies:
-    "@emotion/primitives-core": ^11.10.0
-  peerDependencies:
-    "@babel/core": ^7.0.0
-    react-native: ">=0.14.0 <1"
-  peerDependenciesMeta:
-    "@babel/core":
-      optional: true
-  checksum: d3a48cd53f5ea54f306cefa46be9068bde0fe16375d430846015d0c6ef7e082473ca8fd49450f4a97e14fd5980d5016e71e09d741946e62dd1f451bc45b594a3
-  languageName: node
-  linkType: hard
-
-"@emotion/primitives-core@npm:^11.10.0":
-  version: 11.10.0
-  resolution: "@emotion/primitives-core@npm:11.10.0"
-  dependencies:
-    css-to-react-native: ^3.0.0
-  peerDependencies:
-    "@emotion/react": ^11.0.0-rc.0
-    react: ">=16.8.0"
-  checksum: bf7f50843351527a084b584ba0601e247b89625d0a149b9e3a53fd0a76d3caecc07bd518c30670bde0d9fa2fd3abf908ccf6cf0e8d0775429ff997f39bda89c7
-  languageName: node
-  linkType: hard
-
-"@emotion/react@npm:^11.10.5, @emotion/react@npm:^11.9.3":
+"@emotion/react@npm:^11.9.3":
   version: 11.10.5
   resolution: "@emotion/react@npm:11.10.5"
   dependencies:
@@ -2262,7 +2235,6 @@ __metadata:
     "@types/react": ^18.0.24
     typescript: ^4.8.4
   peerDependencies:
-    "@emotion/react": "*"
     "@expo/html-elements": "*"
     react: "*"
     react-native: "*"
@@ -4411,13 +4383,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"camelize@npm:^1.0.0":
-  version: 1.0.1
-  resolution: "camelize@npm:1.0.1"
-  checksum: 91d8611d09af725e422a23993890d22b2b72b4cabf7239651856950c76b4bf53fe0d0da7c5e4db05180e898e4e647220e78c9fbc976113bd96d603d1fcbfcb99
-  languageName: node
-  linkType: hard
-
 "caniuse-lite@npm:^1.0.30001332, caniuse-lite@npm:^1.0.30001400":
   version: 1.0.30001427
   resolution: "caniuse-lite@npm:1.0.30001427"
@@ -4920,13 +4885,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"css-color-keywords@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "css-color-keywords@npm:1.0.0"
-  checksum: 8f125e3ad477bd03c77b533044bd9e8a6f7c0da52d49bbc0bbe38327b3829d6ba04d368ca49dd9ff3b667d2fc8f1698d891c198bbf8feade1a5501bf5a296408
-  languageName: node
-  linkType: hard
-
 "css-in-js-utils@npm:^2.0.0":
   version: 2.0.1
   resolution: "css-in-js-utils@npm:2.0.1"
@@ -4960,17 +4918,6 @@ __metadata:
     domutils: ^3.0.1
     nth-check: ^2.0.1
   checksum: 2772c049b188d3b8a8159907192e926e11824aea525b8282981f72ba3f349cf9ecd523fdf7734875ee2cb772246c22117fc062da105b6d59afe8dcd5c99c9bda
-  languageName: node
-  linkType: hard
-
-"css-to-react-native@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "css-to-react-native@npm:3.0.0"
-  dependencies:
-    camelize: ^1.0.0
-    css-color-keywords: ^1.0.0
-    postcss-value-parser: ^4.0.2
-  checksum: 98a2e9d4fbe9cabc8b744dfdd5ec108396ce497a7b860912a95b299bd52517461281810fcb707965a021a8be39adca9587184a26fb4e926211391a1557aca3c1
   languageName: node
   linkType: hard
 
@@ -9242,8 +9189,6 @@ __metadata:
   resolution: "mobile@workspace:apps/mobile"
   dependencies:
     "@babel/core": ^7.19.6
-    "@emotion/native": ^11.10.0
-    "@emotion/react": ^11.10.5
     "@expo/html-elements": ^0.2.0
     "@kyoo/ui": "workspace:^"
     "@types/react": ~18.0.14
@@ -10133,7 +10078,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss-value-parser@npm:^4.0.2, postcss-value-parser@npm:^4.2.0":
+"postcss-value-parser@npm:^4.2.0":
   version: 4.2.0
   resolution: "postcss-value-parser@npm:4.2.0"
   checksum: 819ffab0c9d51cf0acbabf8996dffbfafbafa57afc0e4c98db88b67f2094cb44488758f06e5da95d7036f19556a4a732525e84289a425f4f6fd8e412a9d7442f
