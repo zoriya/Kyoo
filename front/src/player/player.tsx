@@ -106,7 +106,6 @@ const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 
 	useEffect(() => {
 		setStopCallback([ () => {
-			console.log("toto")
 			router.push(data ? (data.isMovie ? `/movie/${data.slug}` : `/show/${data.showSlug}`) : "/");
 		}]);
 		return () => {

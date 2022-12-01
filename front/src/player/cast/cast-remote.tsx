@@ -45,7 +45,7 @@ export const CastRemote = () => {
 			<Poster img={poster} alt="" width={"60%"} />
 			<Typography variant="h1">{name}</Typography>
 			{episodeName && <Typography variant="h2">{episodeName}</Typography>}
-			<ProgressBar />
+			{/* <ProgressBar /> */}
 			<Box sx={{ display: "flex" }}>
 				{previousSlug && (
 					<Tooltip title={t("previous")}>

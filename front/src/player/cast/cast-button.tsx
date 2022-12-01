@@ -21,7 +21,6 @@
 import { styled } from "@mui/material";
 import { ComponentProps, forwardRef } from "react";
 
-
 type CastProps = { class?: string };
 
 declare global {
@@ -32,7 +31,10 @@ declare global {
 	}
 }
 
-export const _CastButton = forwardRef<HTMLDivElement, ComponentProps<"div">>(function Cast({className, ...props}, ref) {
+export const _CastButton = forwardRef<HTMLDivElement, ComponentProps<"div">>(function Cast(
+	{ className, ...props },
+	ref,
+) {
 	return <google-cast-launcher ref={ref} class={className} {...props} />;
 });
 export const CastButton = styled(_CastButton)({});
