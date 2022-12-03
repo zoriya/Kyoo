@@ -20,8 +20,8 @@
 
 import useTranslation from "next-translate/useTranslation";
 import { Library, LibraryP, Page, Paged, QueryIdentifier } from "@kyoo/models";
-import { IconButton, Header, Avatar, A, ts } from "@kyoo/primitives";
 import { useYoshiki } from "yoshiki/native";
+import { IconButton, Header, Avatar, A, Skeleton, ts } from "@kyoo/primitives";
 import { Text, View } from "react-native";
 import { Fetch } from "../fetch";
 import { KyooLongLogo } from "./icon";
@@ -95,6 +95,9 @@ export const Navbar = () => {
 						)
 					}
 				</Fetch>
+				<Skeleton>
+					<Text>Toto</Text>
+				</Skeleton>
 			</View>
 			<A href="/auth/login" {...tooltip(t("navbar.login"))}>
 				<Avatar alt={t("navbar.login")} size={30} />

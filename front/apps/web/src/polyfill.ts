@@ -18,10 +18,15 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-module.exports = function (api) {
-	api.cache(true);
-	return {
-		presets: ["babel-preset-expo"],
-		/* plugins: ["react-native-reanimated/plugin"], */
-	};
-};
+import "raf/polyfill";
+import React from "react";
+
+// FIXME need reanimated update, see https://github.com/software-mansion/react-native-reanimated/issues/3355
+if (typeof window !== "undefined") {
+	// @ts-ignore
+	window._frameTimestamp = null;
+}
+// Simply silence a SSR warning (see https://github.com/facebook/react/issues/14927 for more details)
+if (typeof window === "undefined") {
+	React.useLayoutEffect = React.useEffect;
+}

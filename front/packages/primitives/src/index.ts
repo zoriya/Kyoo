@@ -25,6 +25,7 @@ export * from "./icons";
 export * from "./links";
 export * from "./avatar";
 export * from "./image";
+export * from "./skeleton";
 
 import { px } from "yoshiki/native";
 
