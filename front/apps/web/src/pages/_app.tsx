@@ -24,7 +24,7 @@ import { useTheme, useMobileHover } from "yoshiki/web";
 import { createTheme, ThemeProvider as MTheme } from "@mui/material";
 import NextApp, { AppContext, type AppProps } from "next/app";
 import { Hydrate, QueryClientProvider } from "@tanstack/react-query";
-import { createQueryClient, fetchQuery, QueryIdentifier, QueryPage } from "~/utils/query";
+import { createQueryClient, fetchQuery, QueryIdentifier, QueryPage } from "@kyoo/models";
 import superjson from "superjson";
 import Head from "next/head";
 import { ThemeSelector as KThemeSelector } from "@kyoo/primitives";

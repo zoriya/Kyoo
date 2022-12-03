@@ -22,6 +22,9 @@ import { Stack } from "expo-router";
 import { Avatar, ThemeSelector } from "@kyoo/primitives";
 import { useTheme } from "yoshiki/native";
 import { NavbarTitle } from "@kyoo/ui";
+import { useState } from "react";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { createQueryClient } from "@kyoo/models";
 
 const ThemedStack = () => {
 	const theme = useTheme();
@@ -44,9 +47,13 @@ const ThemedStack = () => {
 };
 
 export default function Root() {
+	const [queryClient] = useState(() => createQueryClient());
+
 	return (
-		<ThemeSelector>
-			<ThemedStack />
-		</ThemeSelector>
+		<QueryClientProvider client={queryClient}>
+			<ThemeSelector>
+				<ThemedStack />
+			</ThemeSelector>
+		</QueryClientProvider>
 	);
 }

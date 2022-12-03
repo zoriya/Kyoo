@@ -29,7 +29,6 @@ import {
 import { z } from "zod";
 import { KyooErrors } from "./kyoo-errors";
 import { Page, Paged } from "./page";
-import { Library } from "./resources";
 
 const queryFn = async <Data,>(
 	type: z.ZodType<Data>,
@@ -158,50 +157,4 @@ export const fetchQuery = async (queries: QueryIdentifier[]) => {
 		}),
 	);
 	return dehydrate(client);
-};
-
-/* export const Fetch = <Data,>({ */
-/* 	query, */
-/* 	children, */
-/* }: { */
-/* 	query: QueryIdentifier<Data>; */
-/* 	children: ( */
-/* 		item: (Data & { isLoading: false }) | { isLoading: true }, */
-/* 		i: number, */
-/* 	) => JSX.Element | null; */
-/* }) => { */
-/* 	const { data, error, isSuccess, isError } = useFetch(query); */
-
-/* 	return children(isSuccess ? { ...data, isLoading: false } : { isLoading: true }, 0); */
-/* }; */
-
-type WithLoading<Item> = (Item & { isLoading: false }) | { isLoading: true };
-
-const isPage = <T = unknown,>(obj: unknown): obj is Page<T> =>
-	(typeof obj === "object" && obj && "items" in obj) || false;
-
-export const Fetch = <Data,>({
-	query,
-	placeholderCount,
-	children,
-}: {
-	query: QueryIdentifier<Data>;
-	placeholderCount?: number;
-	children: (
-		item: Data extends Page<infer Item> ? WithLoading<Item> : WithLoading<Data>,
-		i: number,
-	) => JSX.Element | null;
-}) => {
-	const { data, error } = useFetch(query);
-
-	if (error) throw error;
-	if (!isPage<object>(data))
-		return <> {children(data ? { ...data, isLoading: false } : ({ isLoading: true } as any), 0)}</>;
-	return (
-		<>
-			{data
-				? data.items.map((item, i) => children({ ...item, isLoading: false } as any, i))
-				: [...Array(placeholderCount)].map((_, i) => children({ isLoading: true } as any, i))}
-		</>
-	);
 };

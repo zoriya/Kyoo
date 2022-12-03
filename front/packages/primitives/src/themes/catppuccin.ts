@@ -20,12 +20,14 @@
 
 import { ThemeBuilder } from "./theme";
 
+// Ref: https://github.com/catppuccin/catppuccin
 export const catppuccin: ThemeBuilder = {
 	fonts: {
 		heading: "Pacifico",
 		paragraph: "Poppins",
 	},
 	light: {
+		// Catppuccin latte
 		appbar: "#e64553",
 		contrast: "#cdd6f4",
 		subcontrast: "#bac2de",
@@ -45,8 +47,17 @@ export const catppuccin: ThemeBuilder = {
 			paragraph: "#5c5f77",
 			subtext: "#6c6f85",
 		},
+		colors: {
+			red: "#d20f39",
+			green: "#40a02b",
+			blue: "#1e66f5",
+			yellow: "#df8e1d",
+			black: "#4c4f69",
+			white: "#eff1f5",
+		},
 	},
 	dark: {
+		// Catppuccin mocha
 		appbar: "#94e2d5",
 		contrast: "#cdd6f4",
 		subcontrast: "#bac2de",
@@ -65,6 +76,14 @@ export const catppuccin: ThemeBuilder = {
 			heading: "#cdd6f4",
 			paragraph: "#bac2de",
 			subtext: "#a6adc8",
+		},
+		colors: {
+			red: "#f38ba8",
+			green: "#a6e3a1",
+			blue: "#89b4fa",
+			yellow: "#f9e2af",
+			black: "#11111b",
+			white: "#cdd6f4",
 		},
 	},
 };

@@ -39,6 +39,14 @@ type Mode = {
 	contrast: Property.Color;
 	subcontrast: Property.Color;
 	variant: Variant;
+	colors: {
+		red: Property.Color,
+		green: Property.Color,
+		blue: Property.Color,
+		yellow: Property.Color,
+		white: Property.Color,
+		black: Property.Color,
+	}
 };
 
 type Variant = {

@@ -43,7 +43,7 @@ import { getDisplayDate } from "@kyoo/models";
 import { InfiniteScroll } from "~/utils/infinite-scroll";
 import { Link } from "~/utils/link";
 import { withRoute } from "~/utils/router";
-import { QueryIdentifier, QueryPage, useInfiniteFetch } from "~/utils/query";
+import { QueryIdentifier, QueryPage, useInfiniteFetch } from "@kyoo/models";
 import { px } from "yoshiki/native";
 
 enum SortBy {

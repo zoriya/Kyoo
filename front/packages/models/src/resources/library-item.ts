@@ -34,7 +34,7 @@ export enum ItemType {
 
 export const LibraryItemP = z.preprocess(
 	(x: any) => {
-		x.aliases ??= [];
+		if (!x.aliases) x.aliases = [];
 		return x;
 	},
 	z.union([

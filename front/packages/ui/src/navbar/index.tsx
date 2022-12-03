@@ -19,10 +19,11 @@
  */
 
 import useTranslation from "next-translate/useTranslation";
-import { Library, LibraryP, Page, Paged, Fetch, QueryIdentifier } from "@kyoo/models";
-import { useYoshiki } from "yoshiki/native";
+import { Library, LibraryP, Page, Paged, QueryIdentifier } from "@kyoo/models";
 import { IconButton, Header, Avatar, A, ts } from "@kyoo/primitives";
+import { useYoshiki } from "yoshiki/native";
 import { Text, View } from "react-native";
+import { Fetch } from "../fetch";
 import { KyooLongLogo } from "./icon";
 
 const tooltip = (tooltip: string): object => ({});
@@ -64,12 +65,13 @@ export const Navbar = () => {
 			<View
 				{...css({
 					flexGrow: 1,
+					flexShrink: 1,
 					flexDirection: "row",
 					display: { xs: "none", sm: "flex" },
-					marginLeft: ts(2),
+					marginX: ts(2),
 				})}
 			>
-				<Fetch query={Navbar.query()}>
+				<Fetch query={Navbar.query()} placeholderCount={4}>
 					{(library, i) =>
 						!library.isLoading ? (
 							<A
