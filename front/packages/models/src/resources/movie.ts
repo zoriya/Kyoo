@@ -19,71 +19,61 @@
  */
 
 import { z } from "zod";
-import { zdate } from "~/utils/zod";
+import { zdate } from "../utils";
 import { ImagesP, ResourceP } from "../traits";
 import { GenreP } from "./genre";
-import { SeasonP } from "./season";
 import { StudioP } from "./studio";
 
 /**
- * The enum containing show's status.
+ * The enum containing movie's status.
  */
-export enum Status {
+export enum MovieStatus {
 	Unknown = 0,
 	Finished = 1,
-	Airing = 2,
 	Planned = 3,
 }
 
-export const ShowP = z.preprocess(
+export const MovieP = z.preprocess(
 	(x: any) => {
-		if (!x) return x;
 		// Waiting for the API to be updaded
 		x.name = x.title;
 		if (x.aliases === null) x.aliases = [];
+		x.airDate = x.startAir;
 		return x;
 	},
 	ResourceP.merge(ImagesP).extend({
 		/**
-		 * The title of this show.
+		 * The title of this movie.
 		 */
 		name: z.string(),
 		/**
-		 * The list of alternative titles of this show.
+		 * The list of alternative titles of this movie.
 		 */
 		aliases: z.array(z.string()),
 		/**
-		 * The summary of this show.
+		 * The summary of this movie.
 		 */
 		overview: z.string().nullable(),
 		/**
-		 * Is this show airing, not aired yet or finished?
+		 * Is this movie not aired yet or finished?
 		 */
-		status: z.nativeEnum(Status),
+		status: z.nativeEnum(MovieStatus),
 		/**
-		 * The date this show started airing. It can be null if this is unknown.
+		 * The date this movie aired. It can also be null if this is unknown.
 		 */
-		startAir: zdate().nullable(),
+		airDate: zdate().nullable(),
 		/**
-		 * The date this show finished airing. It can also be null if this is unknown.
-		 */
-		endAir: zdate().nullable(),
-		/**
-		 * The list of genres (themes) this show has.
+		 * The list of genres (themes) this movie has.
 		 */
 		genres: z.array(GenreP).optional(),
 		/**
-		 * The studio that made this show.
+		 * The studio that made this movie.
 		 */
 		studio: StudioP.optional().nullable(),
-		/**
-		 * The list of seasons of this show.
-		 */
-		seasons: z.array(SeasonP).optional(),
 	}),
 );
 
 /**
- * A tv serie or an anime.
+ * A Movie type
  */
-export type Show = z.infer<typeof ShowP>;
+export type Movie = z.infer<typeof MovieP>;

@@ -19,12 +19,11 @@
  */
 
 import useTranslation from "next-translate/useTranslation";
-/* import { Library, LibraryP, Page, Paged } from "~/models"; */
-/* import { QueryIdentifier, useFetch } from "~/utils/query"; */
-/* import { ErrorSnackbar } from "./errors"; */
-import { useYoshiki } from "yoshiki/native";
+import { Library, LibraryP, Page, Paged, QueryIdentifier } from "@kyoo/models";
 import { IconButton, Header, Avatar, A, ts } from "@kyoo/primitives";
-import { View } from "react-native";
+import { useYoshiki } from "yoshiki/native";
+import { Text, View } from "react-native";
+import { Fetch } from "../fetch";
 import { KyooLongLogo } from "./icon";
 
 const tooltip = (tooltip: string): object => ({});
@@ -34,7 +33,6 @@ export const NavbarTitle = KyooLongLogo;
 export const Navbar = () => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation("common");
-	/* const { data, error, isSuccess, isError } = useFetch(Navbar.query()); */
 
 	return (
 		<Header
@@ -67,35 +65,36 @@ export const Navbar = () => {
 			<View
 				{...css({
 					flexGrow: 1,
+					flexShrink: 1,
 					flexDirection: "row",
 					display: { xs: "none", sm: "flex" },
-					marginLeft: ts(2),
+					marginX: ts(2),
 				})}
 			>
-				{
-					/*isSuccess
-					? data.items.map((library) => */ true
-						? [...Array(4)].map((_, i) => (
-								<A
-									href={`/browse/${i /* library.slug */}`}
-									key={i} //{library.slug}
-									{...css({
-										marginX: ts(1),
-										textTransform: "uppercase",
-										color: "white",
-									})}
-								>
-									Toto
-									{/* {library.name} */}
-								</A>
-						  ))
-						: [...Array(4)].map(
-								(_, i) => null,
-								/* <Typography key={i} variant="button" px=".25rem"> */
-								/* 	<Skeleton width="5rem" /> */
-								/* </Typography> */
-						  )
-				}
+				<Fetch query={Navbar.query()} placeholderCount={4}>
+					{(library, i) =>
+						!library.isLoading ? (
+							<A
+								href={`/browse/${library.slug}`}
+								key={library.slug}
+								{...css({
+									marginX: ts(1),
+									textTransform: "uppercase",
+									color: "white",
+								})}
+							>
+								{library.name}
+							</A>
+						) : (
+							<>
+								<Text>Toto</Text>
+								{/* <Typography key={i} variant="button" px=".25rem"> */}
+								{/* 	<Skeleton width="5rem" /> */}
+								{/* </Typography> */}
+							</>
+						)
+					}
+				</Fetch>
 			</View>
 			<A href="/auth/login" {...tooltip(t("navbar.login"))}>
 				<Avatar alt={t("navbar.login")} size={30} />
@@ -105,7 +104,7 @@ export const Navbar = () => {
 	);
 };
 
-/* Navbar.query = (): QueryIdentifier<Page<Library>> => ({ */
-/* 	parser: Paged(LibraryP), */
-/* 	path: ["libraries"], */
-/* }); */
+Navbar.query = (): QueryIdentifier<Page<Library>> => ({
+	parser: Paged(LibraryP),
+	path: ["libraries"],
+});

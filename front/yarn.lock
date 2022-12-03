@@ -2341,12 +2341,30 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@kyoo/models@workspace:^, @kyoo/models@workspace:packages/models":
+  version: 0.0.0-use.local
+  resolution: "@kyoo/models@workspace:packages/models"
+  dependencies:
+    "@tanstack/react-query": ^4.18.0
+    "@types/react": ^18.0.25
+    typescript: ^4.9.3
+    zod: ^3.19.1
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  peerDependenciesMeta:
+    react-native-web:
+      optional: true
+  languageName: unknown
+  linkType: soft
+
 "@kyoo/primitives@workspace:^, @kyoo/primitives@workspace:packages/primitives":
   version: 0.0.0-use.local
   resolution: "@kyoo/primitives@workspace:packages/primitives"
   dependencies:
     "@expo/html-elements": ^0.2.2
     "@expo/vector-icons": "AnonymusRaccoon/expo-vector-icons#no-prepare"
+    "@tanstack/react-query": ^4.18.0
     "@types/react": ^18.0.25
     solito: ^2.0.5
     typescript: ^4.9.3
@@ -2364,6 +2382,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@kyoo/ui@workspace:packages/ui"
   dependencies:
+    "@kyoo/models": "workspace:^"
     "@kyoo/primitives": "workspace:^"
     "@types/react": ^18.0.25
     react-native-svg: ^13.6.0
@@ -12907,12 +12926,12 @@ __metadata:
     "@emotion/react": ^11.9.3
     "@emotion/styled": ^11.9.3
     "@jellyfin/libass-wasm": ^4.1.1
+    "@kyoo/models": "workspace:^"
     "@kyoo/primitives": "workspace:^"
     "@kyoo/ui": "workspace:^"
     "@mui/icons-material": ^5.8.4
     "@mui/material": ^5.8.7
     "@mui/system": ^5.10.10
-    "@tanstack/react-query": ^4.18.0
     "@types/node": 18.11.9
     "@types/react": 18.0.25
     "@types/react-dom": 18.0.9

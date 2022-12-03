@@ -4,6 +4,7 @@
 	"types": "src/index.ts",
 	"packageManager": "yarn@3.2.4",
 	"dependencies": {
+		"@kyoo/models": "workspace:^",
 		"@kyoo/primitives": "workspace:^",
 		"react-native-svg": "^13.6.0"
 	},

@@ -27,10 +27,10 @@ import {
 	useQuery,
 } from "@tanstack/react-query";
 import { z } from "zod";
-import { KyooErrors, Page } from "~/models";
-import { Paged } from "~/models/page";
+import { KyooErrors } from "./kyoo-errors";
+import { Page, Paged } from "./page";
 
-const queryFn = async <Data>(
+const queryFn = async <Data,>(
 	type: z.ZodType<Data>,
 	context: QueryFunctionContext,
 ): Promise<Data> => {
@@ -104,13 +104,13 @@ export type QueryPage<Props = {}> = ComponentType<Props> & {
 	getLayout?: (page: ReactElement) => ReactNode;
 };
 
-const toQueryKey = <Data>(query: QueryIdentifier<Data>) => {
+const toQueryKey = <Data,>(query: QueryIdentifier<Data>) => {
 	if (query.params) {
 		return [
 			...query.path,
 			"?" +
 				Object.entries(query.params)
-					.filter(([k, v]) => v !== undefined)
+					.filter(([_, v]) => v !== undefined)
 					.map(([k, v]) => `${k}=${Array.isArray(v) ? v.join(",") : v}`)
 					.join("&"),
 		];
@@ -119,14 +119,14 @@ const toQueryKey = <Data>(query: QueryIdentifier<Data>) => {
 	}
 };
 
-export const useFetch = <Data>(query: QueryIdentifier<Data>) => {
+export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 	return useQuery<Data, KyooErrors>({
 		queryKey: toQueryKey(query),
 		queryFn: (ctx) => queryFn(query.parser, ctx),
 	});
 };
 
-export const useInfiniteFetch = <Data>(query: QueryIdentifier<Data>) => {
+export const useInfiniteFetch = <Data,>(query: QueryIdentifier<Data>) => {
 	const ret = useInfiniteQuery<Page<Data>, KyooErrors>({
 		queryKey: toQueryKey(query),
 		queryFn: (ctx) => queryFn(Paged(query.parser), ctx),

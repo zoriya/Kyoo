@@ -18,6 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { Navbar } from "@kyoo/ui";
 import { Text, View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 
@@ -26,7 +27,7 @@ const App = () => {
 
 	return (
 		<View {...css({ backgroundColor: (theme) => theme.background })}>
-			{/* <Navbar /> */}
+			<Navbar />
 			<Text>toto</Text>
 		</View>
 	);

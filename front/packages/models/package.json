@@ -1,5 +1,5 @@
 {
-	"name": "@kyoo/primitives",
+	"name": "@kyoo/models",
 	"main": "src/index.ts",
 	"types": "src/index.ts",
 	"packageManager": "yarn@3.2.4",
@@ -9,8 +9,7 @@
 	},
 	"peerDependencies": {
 		"react": "*",
-		"react-native": "*",
-		"yoshiki": "*"
+		"react-native": "*"
 	},
 	"peerDependenciesMeta": {
 		"react-native-web": {
@@ -18,9 +17,7 @@
 		}
 	},
 	"dependencies": {
-		"@expo/html-elements": "^0.2.2",
-		"@expo/vector-icons": "AnonymusRaccoon/expo-vector-icons#no-prepare",
 		"@tanstack/react-query": "^4.18.0",
-		"solito": "^2.0.5"
+		"zod": "^3.19.1"
 	}
 }

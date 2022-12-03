@@ -19,15 +19,43 @@
  */
 
 import { z } from "zod";
+import { zdate } from "../utils";
+import { ImagesP } from "../traits";
+import { ResourceP } from "../traits/resource";
 
-export const zdate = () => {
-	return z.preprocess((arg) => {
-		if (arg instanceof Date) return arg;
+export const SeasonP = z.preprocess(
+	(x: any) => {
+		x.name = x.title;
+		return x;
+	},
+	ResourceP.merge(ImagesP).extend({
+		/**
+		 * The name of this season.
+		 */
+		name: z.string(),
+		/**
+		 * The number of this season. This can be set to 0 to indicate specials.
+		 */
+		seasonNumber: z.number(),
 
-		if (typeof arg === "string" && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z?/.test(arg)) {
-			return new Date(arg);
-		}
+		/**
+		 * A quick overview of this season.
+		 */
+		overview: z.string().nullable(),
 
-		return undefined;
-	}, z.date());
-};
+		/**
+		 * The starting air date of this season.
+		 */
+		startDate: zdate().nullable(),
+
+		/**
+		 * The ending date of this season.
+		 */
+		endDate: zdate().nullable(),
+	}),
+);
+
+/**
+ * A season of a Show.
+ */
+export type Season = z.infer<typeof SeasonP>;

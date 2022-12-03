@@ -18,44 +18,34 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { Movie, Show } from "./resources";
 import { z } from "zod";
-import { zdate } from "~/utils/zod";
-import { ImagesP } from "../traits";
-import { ResourceP } from "../traits/resource";
 
-export const SeasonP = z.preprocess(
-	(x: any) => {
-		x.name = x.title;
-		return x;
-	},
-	ResourceP.merge(ImagesP).extend({
-		/**
-		 * The name of this season.
-		 */
-		name: z.string(),
-		/**
-		 * The number of this season. This can be set to 0 to indicate specials.
-		 */
-		seasonNumber: z.number(),
+export const zdate = () => {
+	return z.preprocess((arg) => {
+		if (arg instanceof Date) return arg;
 
-		/**
-		 * A quick overview of this season.
-		 */
-		overview: z.string().nullable(),
+		if (typeof arg === "string" && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z?/.test(arg)) {
+			return new Date(arg);
+		}
 
-		/**
-		 * The starting air date of this season.
-		 */
-		startDate: zdate().nullable(),
+		return undefined;
+	}, z.date());
+};
 
-		/**
-		 * The ending date of this season.
-		 */
-		endDate: zdate().nullable(),
-	}),
-);
+export const getDisplayDate = (data: Show | Movie) => {
+	const {
+		startAir,
+		endAir,
+		airDate,
+	}: { startAir?: Date | null; endAir?: Date | null; airDate?: Date | null } = data;
 
-/**
- * A season of a Show.
- */
-export type Season = z.infer<typeof SeasonP>;
+	if (startAir) {
+		if (!endAir || startAir.getFullYear() === endAir.getFullYear()) {
+			return startAir.getFullYear().toString();
+		}
+		return startAir.getFullYear() + (endAir ? ` - ${endAir.getFullYear()}` : "");
+	} else if (airDate) {
+		return airDate.getFullYear().toString();
+	}
+};
