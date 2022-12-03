@@ -19,6 +19,19 @@
  */
 
 import { Movie, Show } from "./resources";
+import { z } from "zod";
+
+export const zdate = () => {
+	return z.preprocess((arg) => {
+		if (arg instanceof Date) return arg;
+
+		if (typeof arg === "string" && /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z?/.test(arg)) {
+			return new Date(arg);
+		}
+
+		return undefined;
+	}, z.date());
+};
 
 export const getDisplayDate = (data: Show | Movie) => {
 	const {

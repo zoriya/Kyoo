@@ -19,7 +19,7 @@
  */
 
 import { z } from "zod";
-import { zdate } from "~/utils/zod";
+import { zdate } from "../utils";
 import { ImagesP } from "../traits";
 import { ResourceP } from "../traits/resource";
 
