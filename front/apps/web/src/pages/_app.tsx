@@ -18,7 +18,9 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode, useState } from "react";
+import "../polyfill";
+
+import { ReactNode, useState } from "react";
 import appWithI18n from "next-translate/appWithI18n";
 import { useTheme, useMobileHover } from "yoshiki/web";
 import { createTheme, ThemeProvider as MTheme } from "@mui/material";
@@ -29,19 +31,12 @@ import superjson from "superjson";
 import Head from "next/head";
 import { ThemeSelector as KThemeSelector } from "@kyoo/primitives";
 
-// Simply silence a SSR warning (see https://github.com/facebook/react/issues/14927 for more details)
-if (typeof window === "undefined") {
-	React.useLayoutEffect = React.useEffect;
-}
-
 const ThemeSelector = ({ children }: { children?: ReactNode | ReactNode[] }) => {
 	// TODO: Handle user selected mode (light, dark, auto)
 	// TODO: Hande theme change.
 	return (
 		<MTheme theme={createTheme()}>
-			<KThemeSelector>
-				{children}
-			</KThemeSelector>
+			<KThemeSelector>{children}</KThemeSelector>
 		</MTheme>
 	);
 };

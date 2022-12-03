@@ -18,10 +18,4 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-module.exports = function (api) {
-	api.cache(true);
-	return {
-		presets: ["babel-preset-expo"],
-		/* plugins: ["react-native-reanimated/plugin"], */
-	};
-};
+export { Skeleton } from "moti/skeleton";

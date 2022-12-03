@@ -29,7 +29,8 @@ const suboctopus = path.dirname(require.resolve("@jellyfin/libass-wasm"));
  * @type {import("next").NextConfig}
  */
 const nextConfig = {
-	reactStrictMode: true,
+	// FIXME: https://github.com/nandorojo/moti/issues/224
+	reactStrictMode: false,
 	swcMinify: true,
 	output: "standalone",
 	webpack: (config) => {
@@ -86,12 +87,15 @@ const nextConfig = {
 			"react-native",
 			"react-native-web",
 			"react-native-svg",
+			"react-native-reanimated",
+			"moti",
 			"yoshiki",
 			"@expo/vector-icons",
 			"@expo/html-elements",
 			"expo-font",
 			"expo-asset",
 			"expo-modules-core",
+			"expo-linear-gradient",
 		],
 	},
 };
