@@ -8,6 +8,7 @@ COPY apps/web/package.json apps/web/package.json
 COPY apps/mobile/package.json apps/mobile/package.json
 COPY packages/ui/package.json packages/ui/package.json
 COPY packages/primitives/package.json packages/primitives/package.json
+COPY packages/models/package.json packages/models/package.json
 RUN yarn --immutable
 
 COPY . .

@@ -81,6 +81,7 @@ const nextConfig = {
 		transpilePackages: [
 			"@kyoo/ui",
 			"@kyoo/primitives",
+			"@kyoo/models",
 			"solito",
 			"react-native",
 			"react-native-web",

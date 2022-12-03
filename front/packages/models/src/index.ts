@@ -20,5 +20,8 @@
 
 export * from "./page";
 export * from "./kyoo-errors";
+export * from "./utils"
 export * from "./traits";
 export * from "./resources";
+
+export * from "./query";

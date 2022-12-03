@@ -27,10 +27,11 @@ import {
 	useQuery,
 } from "@tanstack/react-query";
 import { z } from "zod";
-import { KyooErrors, Page } from "~/models";
-import { Paged } from "~/models";
+import { KyooErrors } from "./kyoo-errors";
+import { Page, Paged } from "./page";
+import { Library } from "./resources";
 
-const queryFn = async <Data>(
+const queryFn = async <Data,>(
 	type: z.ZodType<Data>,
 	context: QueryFunctionContext,
 ): Promise<Data> => {
@@ -104,13 +105,13 @@ export type QueryPage<Props = {}> = ComponentType<Props> & {
 	getLayout?: (page: ReactElement) => ReactNode;
 };
 
-const toQueryKey = <Data>(query: QueryIdentifier<Data>) => {
+const toQueryKey = <Data,>(query: QueryIdentifier<Data>) => {
 	if (query.params) {
 		return [
 			...query.path,
 			"?" +
 				Object.entries(query.params)
-					.filter(([k, v]) => v !== undefined)
+					.filter(([_, v]) => v !== undefined)
 					.map(([k, v]) => `${k}=${Array.isArray(v) ? v.join(",") : v}`)
 					.join("&"),
 		];
@@ -119,14 +120,14 @@ const toQueryKey = <Data>(query: QueryIdentifier<Data>) => {
 	}
 };
 
-export const useFetch = <Data>(query: QueryIdentifier<Data>) => {
+export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 	return useQuery<Data, KyooErrors>({
 		queryKey: toQueryKey(query),
 		queryFn: (ctx) => queryFn(query.parser, ctx),
 	});
 };
 
-export const useInfiniteFetch = <Data>(query: QueryIdentifier<Data>) => {
+export const useInfiniteFetch = <Data,>(query: QueryIdentifier<Data>) => {
 	const ret = useInfiniteQuery<Page<Data>, KyooErrors>({
 		queryKey: toQueryKey(query),
 		queryFn: (ctx) => queryFn(Paged(query.parser), ctx),
@@ -157,4 +158,50 @@ export const fetchQuery = async (queries: QueryIdentifier[]) => {
 		}),
 	);
 	return dehydrate(client);
+};
+
+/* export const Fetch = <Data,>({ */
+/* 	query, */
+/* 	children, */
+/* }: { */
+/* 	query: QueryIdentifier<Data>; */
+/* 	children: ( */
+/* 		item: (Data & { isLoading: false }) | { isLoading: true }, */
+/* 		i: number, */
+/* 	) => JSX.Element | null; */
+/* }) => { */
+/* 	const { data, error, isSuccess, isError } = useFetch(query); */
+
+/* 	return children(isSuccess ? { ...data, isLoading: false } : { isLoading: true }, 0); */
+/* }; */
+
+type WithLoading<Item> = (Item & { isLoading: false }) | { isLoading: true };
+
+const isPage = <T = unknown,>(obj: unknown): obj is Page<T> =>
+	(typeof obj === "object" && obj && "items" in obj) || false;
+
+export const Fetch = <Data,>({
+	query,
+	placeholderCount,
+	children,
+}: {
+	query: QueryIdentifier<Data>;
+	placeholderCount?: number;
+	children: (
+		item: Data extends Page<infer Item> ? WithLoading<Item> : WithLoading<Data>,
+		i: number,
+	) => JSX.Element | null;
+}) => {
+	const { data, error } = useFetch(query);
+
+	if (error) throw error;
+	if (!isPage<object>(data))
+		return <> {children(data ? { ...data, isLoading: false } : ({ isLoading: true } as any), 0)}</>;
+	return (
+		<>
+			{data
+				? data.items.map((item, i) => children({ ...item, isLoading: false } as any, i))
+				: [...Array(placeholderCount)].map((_, i) => children({ isLoading: true } as any, i))}
+		</>
+	);
 };

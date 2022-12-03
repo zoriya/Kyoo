@@ -39,7 +39,7 @@ import { ErrorPage } from "~/components/errors";
 import { Navbar } from "@kyoo/ui";
 import { Poster, Image } from "@kyoo/primitives";
 import { ItemType, LibraryItem, LibraryItemP } from "~/models";
-import { getDisplayDate } from "~/models/utils";
+import { getDisplayDate } from "@kyoo/models";
 import { InfiniteScroll } from "~/utils/infinite-scroll";
 import { Link } from "~/utils/link";
 import { withRoute } from "~/utils/router";
