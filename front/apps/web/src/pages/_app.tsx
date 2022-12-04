@@ -29,7 +29,7 @@ import { Hydrate, QueryClientProvider } from "@tanstack/react-query";
 import { createQueryClient, fetchQuery, QueryIdentifier, QueryPage } from "@kyoo/models";
 import superjson from "superjson";
 import Head from "next/head";
-import { ThemeSelector as KThemeSelector } from "@kyoo/primitives";
+import { ThemeSelector as KThemeSelector, WebTooltip } from "@kyoo/primitives";
 
 const ThemeSelector = ({ children }: { children?: ReactNode | ReactNode[] }) => {
 	// TODO: Handle user selected mode (light, dark, auto)
@@ -45,27 +45,30 @@ const GlobalCssTheme = () => {
 	const theme = useTheme();
 
 	return (
-		<style jsx global>{`
-			body {
-				margin: 0px;
-				padding: 0px;
-				background-color: ${theme.background};
-			}
+		<>
+			<style jsx global>{`
+				body {
+					margin: 0px;
+					padding: 0px;
+					background-color: ${theme.background};
+				}
 
-			*::-webkit-scrollbar {
-				height: 6px;
-				width: 6px;
-				background: transparent;
-			}
+				*::-webkit-scrollbar {
+					height: 6px;
+					width: 6px;
+					background: transparent;
+				}
 
-			*::-webkit-scrollbar-thumb {
-				background-color: #999;
-				border-radius: 90px;
-			}
-			*:hover::-webkit-scrollbar-thumb {
-				background-color: rgb(134, 127, 127);
-			}
-		`}</style>
+				*::-webkit-scrollbar-thumb {
+					background-color: #999;
+					border-radius: 90px;
+				}
+				*:hover::-webkit-scrollbar-thumb {
+					background-color: rgb(134, 127, 127);
+				}
+			`}</style>
+			<WebTooltip theme={theme} />
+		</>
 	);
 };
 
