@@ -13,6 +13,7 @@
 		"typescript": "^4.9.3"
 	},
 	"peerDependencies": {
+		"@tanstack/react-query": "*",
 		"expo-linear-gradient": "*",
 		"moti": "*",
 		"react": "*",
