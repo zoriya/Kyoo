@@ -8,6 +8,7 @@
 		"typescript": "^4.9.3"
 	},
 	"peerDependencies": {
+		"@tanstack/react-query": "*",
 		"react": "*",
 		"react-native": "*"
 	},
@@ -17,7 +18,6 @@
 		}
 	},
 	"dependencies": {
-		"@tanstack/react-query": "^4.18.0",
 		"zod": "^3.19.1"
 	}
 }

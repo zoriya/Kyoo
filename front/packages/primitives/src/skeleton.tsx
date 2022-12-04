@@ -18,4 +18,16 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export { Skeleton } from "moti/skeleton";
+import { View } from "moti";
+import { Skeleton as MSkeleton } from "moti/skeleton";
+import { ComponentProps } from "react";
+import { useYoshiki, rem, px, Stylable } from "yoshiki/native";
+
+export const Skeleton = ({ style, ...props }: ComponentProps<typeof MSkeleton> & Stylable) => {
+	const { css } = useYoshiki();
+	return (
+		<View {...css({ margin: px(2) }, { style })}>
+			<MSkeleton colorMode="light" radius={6} height={rem(1.2)} {...props} />
+		</View>
+	);
+};

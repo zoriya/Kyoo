@@ -20,7 +20,7 @@
 
 import useTranslation from "next-translate/useTranslation";
 import { Library, LibraryP, Page, Paged, QueryIdentifier } from "@kyoo/models";
-import { useYoshiki } from "yoshiki/native";
+import { rem, useYoshiki } from "yoshiki/native";
 import { IconButton, Header, Avatar, A, Skeleton, ts } from "@kyoo/primitives";
 import { Text, View } from "react-native";
 import { Fetch } from "../fetch";
@@ -86,18 +86,10 @@ export const Navbar = () => {
 								{library.name}
 							</A>
 						) : (
-							<>
-								<Text>Toto</Text>
-								{/* <Typography key={i} variant="button" px=".25rem"> */}
-								{/* 	<Skeleton width="5rem" /> */}
-								{/* </Typography> */}
-							</>
+							<Skeleton key={i} width={rem(5)} colorMode="light" />
 						)
 					}
 				</Fetch>
-				<Skeleton>
-					<Text>Toto</Text>
-				</Skeleton>
 			</View>
 			<A href="/auth/login" {...tooltip(t("navbar.login"))}>
 				<Avatar alt={t("navbar.login")} size={30} />
