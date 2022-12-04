@@ -18,18 +18,18 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export { Header, Nav, Footer } from "@expo/html-elements";
-export * from "./text";
-export * from "./themes";
-export * from "./icons";
-export * from "./links";
-export * from "./avatar";
-export * from "./image";
-export * from "./skeleton";
-export * from "./tooltip";
+import React from "react";
+import "react-native";
 
-import { px } from "yoshiki/native";
+declare module "react-native" {
+	interface ViewProps {
+		dataSet?: Record<string, string>;
+	}
+}
 
-export const ts = (spacing: number) => {
-	return px(spacing * 8);
-};
+declare module "react" {
+	interface StyleHTMLAttributes<T> extends HTMLAttributes<T> {
+		jsx?: boolean;
+		global?: boolean;
+	}
+}

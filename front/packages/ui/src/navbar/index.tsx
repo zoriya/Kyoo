@@ -21,12 +21,10 @@
 import useTranslation from "next-translate/useTranslation";
 import { Library, LibraryP, Page, Paged, QueryIdentifier } from "@kyoo/models";
 import { rem, useYoshiki } from "yoshiki/native";
-import { IconButton, Header, Avatar, A, Skeleton, ts } from "@kyoo/primitives";
-import { Text, View } from "react-native";
+import { IconButton, Header, Avatar, A, Skeleton, tooltip, ts } from "@kyoo/primitives";
+import { View } from "react-native";
 import { Fetch } from "../fetch";
 import { KyooLongLogo } from "./icon";
-
-const tooltip = (tooltip: string): object => ({});
 
 export const NavbarTitle = KyooLongLogo;
 
