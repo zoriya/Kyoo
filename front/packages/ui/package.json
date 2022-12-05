@@ -15,8 +15,10 @@
 	"peerDependencies": {
 		"@tanstack/react-query": "*",
 		"expo-linear-gradient": "*",
+		"i18next": "*",
 		"moti": "*",
 		"react": "*",
+		"react-i18next": "*",
 		"react-native": "*",
 		"react-native-reanimated": "*",
 		"yoshiki": "*"

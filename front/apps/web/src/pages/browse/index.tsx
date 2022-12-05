@@ -433,7 +433,7 @@ BrowsePage.getLayout = (page) => {
 
 BrowsePage.getFetchUrls = ({ slug, sortBy }) => [
 	query(slug, sortBy?.split("-")[0] as SortBy, sortBy?.split("-")[1] as SortOrd),
-	/* Navbar.query(), */
+	Navbar.query(),
 ];
 
 export default withRoute(BrowsePage);
