@@ -21,15 +21,15 @@
 import "../polyfill";
 
 import { ReactNode, useState } from "react";
-import appWithI18n from "next-translate/appWithI18n";
-import { useTheme, useMobileHover } from "yoshiki/web";
-import { createTheme, ThemeProvider as MTheme } from "@mui/material";
 import NextApp, { AppContext, type AppProps } from "next/app";
+import { createTheme, ThemeProvider as MTheme } from "@mui/material";
 import { Hydrate, QueryClientProvider } from "@tanstack/react-query";
+import { ThemeSelector as KThemeSelector, WebTooltip } from "@kyoo/primitives";
 import { createQueryClient, fetchQuery, QueryIdentifier, QueryPage } from "@kyoo/models";
+import { useTheme, useMobileHover } from "yoshiki/web";
 import superjson from "superjson";
 import Head from "next/head";
-import { ThemeSelector as KThemeSelector, WebTooltip } from "@kyoo/primitives";
+import { withTranslations } from "../i18n";
 
 const ThemeSelector = ({ children }: { children?: ReactNode | ReactNode[] }) => {
 	// TODO: Handle user selected mode (light, dark, auto)
@@ -106,15 +106,5 @@ App.getInitialProps = async (ctx: AppContext) => {
 	return { pageProps: superjson.serialize(appProps.pageProps) };
 };
 
-// The as any is needed since appWithI18n as wrong type hints
-export default appWithI18n(App as any, {
-	skipInitialProps: false,
-	locales: ["en", "fr"],
-	defaultLocale: "en",
-	loader: false,
-	pages: {
-		"*": ["common", "browse", "player"],
-	},
-	loadLocaleFrom: (locale, namespace) =>
-		import(`../../locales/${locale}/${namespace}`).then((m) => m.default),
-});
+
+export default withTranslations(App);

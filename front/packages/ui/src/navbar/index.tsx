@@ -18,11 +18,11 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import useTranslation from "next-translate/useTranslation";
 import { Library, LibraryP, Page, Paged, QueryIdentifier } from "@kyoo/models";
-import { rem, useYoshiki } from "yoshiki/native";
 import { IconButton, Header, Avatar, A, Skeleton, tooltip, ts } from "@kyoo/primitives";
 import { View } from "react-native";
+import { useTranslation } from 'react-i18next';
+import { rem, useYoshiki } from "yoshiki/native";
 import { Fetch } from "../fetch";
 import { KyooLongLogo } from "./icon";
 
@@ -30,7 +30,7 @@ export const NavbarTitle = KyooLongLogo;
 
 export const Navbar = () => {
 	const { css } = useYoshiki();
-	const { t } = useTranslation("common");
+	const { t } = useTranslation();
 
 	return (
 		<Header

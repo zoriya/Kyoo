@@ -1,0 +1,49 @@
+{
+	"show": {
+		"play": "Play",
+		"trailer": "Play Trailer",
+		"studio": "Studio",
+		"genre": "Genres",
+		"genre-none": "No genres",
+		"staff": "Staff",
+		"staff-none": "The staff is unknown",
+		"noOverview": "No overview available",
+		"episode-none": "There is no episodes in this season",
+		"episodeNoMetadata": "No metadata available"
+	},
+	"browse": {
+		"sortby": "Sort by {{key}}",
+		"sortby-tt": "Sort by",
+		"sortkey": {
+			"name": "Name",
+			"startAir": "Start air",
+			"endAir": "End air"
+		},
+		"sortord": {
+			"asc": "asc",
+			"desc": "decs"
+		},
+		"switchToGrid": "Switch to grid view",
+		"switchToList": "Switch to list view"
+	},
+	"misc": {
+		"prev-page": "Previous page",
+		"next-page": "Next page"
+	},
+	"navbar": {
+		"home": "Home",
+		"login": "Login"
+	},
+	"player": {
+		"back": "Back",
+		"previous": "Previous episode",
+		"next": "Next episode",
+		"play": "Play",
+		"pause": "Pause",
+		"mute": "Toggle mute",
+		"volume": "Volume",
+		"subtitles": "Subtitles",
+		"subtitle-none": "None",
+		"fullscreen": "Fullscreen"
+	}
+}
