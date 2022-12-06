@@ -25,6 +25,26 @@ import { NavbarTitle } from "@kyoo/ui";
 import { useState } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createQueryClient } from "@kyoo/models";
+import i18next from "i18next";
+import { initReactI18next } from "react-i18next";
+import { getLocales } from "expo-localization";
+import "intl-pluralrules";
+
+// TODO: use a backend to load jsons.
+import en from "../../../translations/en.json";
+import fr from "../../../translations/fr.json";
+
+i18next.use(initReactI18next).init({
+	interpolation: {
+		escapeValue: false,
+	},
+	fallbackLng: "en",
+	lng: getLocales()[0].languageCode,
+	resources: {
+		en: { translation: en },
+		fr: { translation: fr },
+	},
+});
 
 const ThemedStack = () => {
 	const theme = useTheme();
