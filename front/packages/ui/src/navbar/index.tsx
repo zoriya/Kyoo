@@ -21,35 +21,46 @@
 import { Library, LibraryP, Page, Paged, QueryIdentifier } from "@kyoo/models";
 import { IconButton, Header, Avatar, A, Skeleton, tooltip, ts } from "@kyoo/primitives";
 import { View } from "react-native";
-import { useTranslation } from 'react-i18next';
-import { rem, useYoshiki } from "yoshiki/native";
+import { useTranslation } from "react-i18next";
+import { rem, Stylable, useYoshiki } from "yoshiki/native";
 import { Fetch } from "../fetch";
 import { KyooLongLogo } from "./icon";
 
-export const NavbarTitle = KyooLongLogo;
+export const NavbarTitle = (props: Stylable) => {
+	const { t } = useTranslation();
 
-export const Navbar = () => {
+	return (
+		<A href="/" {...tooltip(t("navbar.home"))} {...props}>
+			<KyooLongLogo />
+		</A>
+	);
+};
+
+export const Navbar = (props: Stylable) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
 
 	return (
 		<Header
-			{...css({
-				backgroundColor: (theme) => theme.appbar,
-				paddingX: ts(2),
-				height: { xs: 48, sm: 64 },
-				flexDirection: "row",
-				justifyContent: { xs: "space-between", sm: "flex-start" },
-				alignItems: "center",
-				shadowColor: "#000",
-				shadowOffset: {
-					width: 0,
-					height: 4,
+			{...css(
+				{
+					backgroundColor: (theme) => theme.appbar,
+					paddingX: ts(2),
+					height: { xs: 48, sm: 64 },
+					flexDirection: "row",
+					justifyContent: { xs: "space-between", sm: "flex-start" },
+					alignItems: "center",
+					shadowColor: "#000",
+					shadowOffset: {
+						width: 0,
+						height: 4,
+					},
+					shadowOpacity: 0.3,
+					shadowRadius: 4.65,
+					elevation: 8,
 				},
-				shadowOpacity: 0.3,
-				shadowRadius: 4.65,
-				elevation: 8,
-			})}
+				props,
+			)}
 		>
 			<IconButton
 				icon="menu"
@@ -92,7 +103,6 @@ export const Navbar = () => {
 			<A href="/auth/login" {...tooltip(t("navbar.login"))}>
 				<Avatar alt={t("navbar.login")} size={30} />
 			</A>
-			{/* {isError && <ErrorSnackbar error={error} />} */}
 		</Header>
 	);
 };

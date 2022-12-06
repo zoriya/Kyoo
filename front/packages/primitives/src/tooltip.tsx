@@ -60,9 +60,21 @@ export const WebTooltip = ({ theme }: { theme: Theme }) => {
 				transition: opacity 0.3s ease-in-out;
 			}
 
-			[data-tooltip]:hover::after {
+			:where(body:not(.noHover)) [data-tooltip]:hover::after,
+			[data-tooltip]:focus-visible::after {
 				opacity: 1;
 				visibility: visible;
+			}
+
+			:focus:not(:focus-visible) {
+				outline: none;
+			}
+
+			:focus-visible {
+				outline: none;
+				transition: box-shadow 0.15s ease-in-out;
+				box-shadow: 0 0 0 2px ${theme.colors.black};
+				/* box-shadow: ${theme.accent} 1px; */
 			}
 		`}</style>
 	);
