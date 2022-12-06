@@ -33,7 +33,6 @@ export const withTranslations = (
 ) => {
 	const i18n = i18next.createInstance();
 	const commonOptions: InitOptions = {
-		debug: true,
 		interpolation: {
 			escapeValue: false,
 		},

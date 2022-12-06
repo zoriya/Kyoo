@@ -6354,6 +6354,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-localization@npm:~14.0.0":
+  version: 14.0.0
+  resolution: "expo-localization@npm:14.0.0"
+  dependencies:
+    rtl-detect: ^1.0.2
+  peerDependencies:
+    expo: "*"
+  checksum: b1107fec3ce98386b21a1ed3adad279559cc24d07403ff32e4253e337f1018a115b265d471f374f76515c3ca6b0b73e132eff7783f51bd248908da3ca3c269a6
+  languageName: node
+  linkType: hard
+
 "expo-modules-autolinking@npm:*, expo-modules-autolinking@npm:1.0.0":
   version: 1.0.0
   resolution: "expo-modules-autolinking@npm:1.0.0"
@@ -7612,6 +7623,13 @@ __metadata:
     has: ^1.0.3
     side-channel: ^1.0.4
   checksum: 1944f92e981e47aebc98a88ff0db579fd90543d937806104d0b96557b10c1f170c51fb777b97740a8b6ddeec585fca8c39ae99fd08a8e058dfc8ab70937238bf
+  languageName: node
+  linkType: hard
+
+"intl-pluralrules@npm:^1.3.1":
+  version: 1.3.1
+  resolution: "intl-pluralrules@npm:1.3.1"
+  checksum: b22c2373b6b658e5a361d9d1e9a3d4478862a79a9723b910d29745ff6b5b78d8e1e10c47f344bd3835219b77d2f6cfd58388c1bab3b5daf4df72555e02342b40
   languageName: node
   linkType: hard
 
@@ -9625,9 +9643,11 @@ __metadata:
     expo-constants: ~14.0.2
     expo-linear-gradient: ~12.0.1
     expo-linking: ~3.2.3
+    expo-localization: ~14.0.0
     expo-router: ^0.0.36
     expo-status-bar: ~1.4.2
     i18next: ^22.0.6
+    intl-pluralrules: ^1.3.1
     moti: ^0.21.0
     react: 18.1.0
     react-dom: 18.1.0
@@ -11524,6 +11544,13 @@ __metadata:
   bin:
     rimraf: ./bin.js
   checksum: 3ea587b981a19016297edb96d1ffe48af7e6af69660e3b371dbfc73722a73a0b0e9be5c88089fbeeb866c389c1098e07f64929c7414290504b855f54f901ab10
+  languageName: node
+  linkType: hard
+
+"rtl-detect@npm:^1.0.2":
+  version: 1.0.4
+  resolution: "rtl-detect@npm:1.0.4"
+  checksum: d562535baa0db62f57f0a1d4676297bff72fd6b94e88f0f0900d5c3e810ab512c5c4cadffd3e05fbe8d9c74310c919afa3ea8c1001c244e5555e8eef12d02d6f
   languageName: node
   linkType: hard
 
