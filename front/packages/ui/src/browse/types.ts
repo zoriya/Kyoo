@@ -18,5 +18,18 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./navbar";
-export { BrowsePage } from "./browse";
+export enum SortBy {
+	Name = "name",
+	StartAir = "startAir",
+	EndAir = "endAir",
+}
+
+export enum SortOrd {
+	Asc = "asc",
+	Desc = "desc",
+}
+
+export enum Layout {
+	Grid,
+	List,
+}

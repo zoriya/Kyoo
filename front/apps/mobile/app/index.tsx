@@ -18,19 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Navbar } from "@kyoo/ui";
-import { Text, View } from "react-native";
-import { useYoshiki } from "yoshiki/native";
+import BrowsePage from "./browse";
 
-const App = () => {
-	const { css } = useYoshiki();
-
-	return (
-		<View {...css({ backgroundColor: (theme) => theme.background })}>
-			<Navbar />
-			<Text>toto</Text>
-		</View>
-	);
-};
-
-export default App;
+// While there is no home page, show the browse page.
+export default BrowsePage;
