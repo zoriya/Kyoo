@@ -100,11 +100,15 @@ App.getInitialProps = async (ctx: AppContext) => {
 	const appProps = await NextApp.getInitialProps(ctx);
 
 	const getUrl = (ctx.Component as QueryPage).getFetchUrls;
-	const urls: QueryIdentifier[] = getUrl ? getUrl(ctx.router.query as any) : [];
+	const getLayoutUrl = ((ctx.Component as QueryPage).getLayout as QueryPage)?.getFetchUrls;
+
+	const urls: QueryIdentifier[] = [
+		...(getUrl ? getUrl(ctx.router.query as any) : []),
+		...(getLayoutUrl ? getLayoutUrl(ctx.router.query as any) : []),
+	];
 	appProps.pageProps.queryState = await fetchQuery(urls);
 
 	return { pageProps: superjson.serialize(appProps.pageProps) };
 };
-
 
 export default withTranslations(App);

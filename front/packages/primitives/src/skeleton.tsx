@@ -23,11 +23,19 @@ import { Skeleton as MSkeleton } from "moti/skeleton";
 import { ComponentProps } from "react";
 import { useYoshiki, rem, px, Stylable } from "yoshiki/native";
 
-export const Skeleton = ({ style, ...props }: ComponentProps<typeof MSkeleton> & Stylable) => {
+export const Skeleton = ({
+	style,
+	children,
+	...props
+}: Omit<ComponentProps<typeof MSkeleton>, "children"> & {
+	children: ComponentProps<typeof MSkeleton>["children"] | boolean;
+} & Stylable) => {
 	const { css } = useYoshiki();
 	return (
 		<View {...css({ margin: px(2) }, { style })}>
-			<MSkeleton colorMode="light" radius={6} height={rem(1.2)} {...props} />
+			<MSkeleton colorMode="light" radius={6} height={rem(1.2)} {...props}>
+				{children !== true ? children || undefined : undefined}
+			</MSkeleton>
 		</View>
 	);
 };

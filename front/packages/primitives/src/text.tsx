@@ -31,17 +31,23 @@ import {
 	P as EP,
 } from "@expo/html-elements";
 
-const styleText = (Component: ComponentType<ComponentProps<typeof EP>>, heading?: boolean) => {
+const styleText = (
+	Component: ComponentType<ComponentProps<typeof EP>>,
+	type?: "header" | "sub",
+) => {
 	const Text = (props: ComponentProps<typeof EP>) => {
 		const { css, theme } = useYoshiki();
 
 		return (
 			<Component
 				{...css(
-					{
-						fontFamily: heading ? theme.fonts.heading : theme.fonts.paragraph,
-						color: heading ? theme.heading : theme.paragraph,
-					},
+					[
+						{
+							fontFamily: type === "header" ? theme.fonts.heading : theme.fonts.paragraph,
+							color: type === "header" ? theme.heading : theme.paragraph,
+						},
+						type === "sub" && { fontWeight: "300" },
+					],
 					props as TextProps,
 				)}
 			/>
@@ -50,10 +56,11 @@ const styleText = (Component: ComponentType<ComponentProps<typeof EP>>, heading?
 	return Text;
 };
 
-export const H1 = styleText(EH1, true);
-export const H2 = styleText(EH2, true);
-export const H3 = styleText(EH3, true);
-export const H4 = styleText(EH4, true);
-export const H5 = styleText(EH5, true);
-export const H6 = styleText(EH6, true);
+export const H1 = styleText(EH1, "header");
+export const H2 = styleText(EH2, "header");
+export const H3 = styleText(EH3, "header");
+export const H4 = styleText(EH4, "header");
+export const H5 = styleText(EH5, "header");
+export const H6 = styleText(EH6, "header");
 export const P = styleText(EP);
+export const SubP = styleText(EP, "sub");

@@ -18,12 +18,14 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Page, QueryIdentifier, useFetch, KyooErrors } from "@kyoo/models";
+import { Page, QueryIdentifier, useFetch, KyooErrors, useInfiniteFetch } from "@kyoo/models";
 import { P } from "@kyoo/primitives";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 
-export type WithLoading<Item> = (Item & { isLoading: false }) | { isLoading: true };
+export type WithLoading<Item> =
+	| (Item & { isLoading: false })
+	| (Partial<Item> & { isLoading: true });
 
 const isPage = <T = unknown,>(obj: unknown): obj is Page<T> =>
 	(typeof obj === "object" && obj && "items" in obj) || false;
@@ -52,6 +54,29 @@ export const Fetch = <Data,>({
 	return <>{data.items.map((item, i) => children({ ...item, isLoading: false } as any, i))}</>;
 };
 
+export const InfiniteFetch = <Data,>({
+	query,
+	placeholderCount = 15,
+	children,
+}: {
+	query: QueryIdentifier<Data>;
+	placeholderCount?: number;
+	children: (
+		item: Data extends Page<infer Item> ? WithLoading<Item> : WithLoading<Data>,
+		i: number,
+	) => JSX.Element | null;
+}): JSX.Element | null => {
+	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
+	const { items, error } = useInfiniteFetch(query);
+
+	if (error) return <ErrorView error={error} />;
+	if (!items)
+		return (
+			<>{[...Array(placeholderCount)].map((_, i) => children({ isLoading: true } as any, i))}</>
+		);
+	return <>{items.map((item, i) => children({ ...item, isLoading: false } as any, i))}</>;
+};
+
 export const ErrorView = ({ error }: { error: KyooErrors }) => {
 	const { css } = useYoshiki();
 
@@ -60,7 +85,8 @@ export const ErrorView = ({ error }: { error: KyooErrors }) => {
 			{...css({
 				backgroundColor: (theme) => theme.colors.red,
 				flex: 1,
-				alignItems: "center"
+				justifyContent: "center",
+				alignItems: "center",
 			})}
 		>
 			{error.errors.map((x, i) => (

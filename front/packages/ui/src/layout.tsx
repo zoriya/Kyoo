@@ -18,5 +18,19 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./navbar";
-export { BrowsePage } from "./browse";
+import { ReactElement } from "react";
+import { Navbar } from "./navbar";
+import { useYoshiki } from "yoshiki";
+
+export const DefaultLayout = (page: ReactElement) => {
+	const { css } = useYoshiki();
+
+	return (
+		<>
+			<Navbar />
+			<main {...css({ flex: 1, display: "flex" })}>{page}</main>
+		</>
+	);
+};
+
+DefaultLayout.query = () => [Navbar.query()];
