@@ -24,7 +24,7 @@ import { ReactNode, useState } from "react";
 import NextApp, { AppContext, type AppProps } from "next/app";
 import { createTheme, ThemeProvider as MTheme } from "@mui/material";
 import { Hydrate, QueryClientProvider } from "@tanstack/react-query";
-import { ThemeSelector as KThemeSelector, WebTooltip } from "@kyoo/primitives";
+import { SkeletonCss, ThemeSelector as KThemeSelector, WebTooltip } from "@kyoo/primitives";
 import { createQueryClient, fetchQuery, QueryIdentifier, QueryPage } from "@kyoo/models";
 import { useTheme, useMobileHover } from "yoshiki/web";
 import superjson from "superjson";
@@ -68,6 +68,7 @@ const GlobalCssTheme = () => {
 				}
 			`}</style>
 			<WebTooltip theme={theme} />
+			<SkeletonCss />
 		</>
 	);
 };

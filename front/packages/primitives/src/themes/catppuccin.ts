@@ -29,8 +29,8 @@ export const catppuccin: ThemeBuilder = {
 	light: {
 		// Catppuccin latte
 		appbar: "#e64553",
-		contrast: "#cdd6f4",
-		subcontrast: "#bac2de",
+		overlay0: "#9ca0b0",
+		overlay1: "#7c7f93",
 		default: {
 			background: "#eff1f5",
 			accent: "#ea76cb",
@@ -59,8 +59,8 @@ export const catppuccin: ThemeBuilder = {
 	dark: {
 		// Catppuccin mocha
 		appbar: "#94e2d5",
-		contrast: "#cdd6f4",
-		subcontrast: "#bac2de",
+		overlay0: "#6c7086",
+		overlay1: "#9399b2",
 		default: {
 			background: "#1e1e2e",
 			accent: "##f5c2e7",

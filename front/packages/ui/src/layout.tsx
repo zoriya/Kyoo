@@ -33,4 +33,4 @@ export const DefaultLayout = (page: ReactElement) => {
 	);
 };
 
-DefaultLayout.query = () => [Navbar.query()];
+DefaultLayout.getFetchUrls = () => [Navbar.query()];
