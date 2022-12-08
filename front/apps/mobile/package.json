@@ -11,6 +11,7 @@
 	"dependencies": {
 		"@kyoo/ui": "workspace:^",
 		"@tanstack/react-query": "^4.19.1",
+		"babel-plugin-transform-inline-environment-variables": "^0.4.4",
 		"expo": "^47.0.0",
 		"expo-constants": "~14.0.2",
 		"expo-linear-gradient": "~12.0.1",

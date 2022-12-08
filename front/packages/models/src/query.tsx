@@ -29,17 +29,24 @@ import {
 import { z } from "zod";
 import { KyooErrors } from "./kyoo-errors";
 import { Page, Paged } from "./page";
+import { Platform } from "react-native";
 
 const queryFn = async <Data,>(
 	type: z.ZodType<Data>,
 	context: QueryFunctionContext,
 ): Promise<Data> => {
-	const kyoo_url = process.env.KYOO_URL ?? "http://localhost:5000";
+	const kyooUrl =
+		Platform.OS !== "web"
+			? process.env.PUBLIC_BACK_URL
+			: typeof window === "undefined"
+			? process.env.KYOO_URL ?? "http://localhost:5000"
+			: "/api";
+	if (!kyooUrl) console.error("Kyoo's url is not defined.")
 
 	let resp;
 	try {
 		resp = await fetch(
-			[typeof window === "undefined" ? kyoo_url : "/api"]
+			[kyooUrl]
 				.concat(
 					context.pageParam ? [context.pageParam] : (context.queryKey.filter((x) => x) as string[]),
 				)
