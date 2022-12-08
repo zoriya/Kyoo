@@ -39,6 +39,7 @@ services:
     restart: on-failure
     environment:
       - KYOO_URL=http://back:5000
+      - PUBLIC_BACK_URL=${PUBLIC_BACK_URL}
   ingress:
     image: nginx
     restart: on-failure

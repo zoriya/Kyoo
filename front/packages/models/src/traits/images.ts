@@ -18,9 +18,11 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { Platform } from "react-native";
 import { z } from "zod";
 
-export const imageFn = (url: string) => (url.startsWith("/api") ? url : `/api${url}`);
+export const imageFn = (url: string) =>
+	Platform.OS === "web" ? `/api/${url}` : process.env.PUBLIC_BACK_URL + url;
 
 export const ImagesP = z.object({
 	/**
