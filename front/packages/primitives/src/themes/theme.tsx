@@ -33,20 +33,17 @@ type ThemeSettings = {
 
 type Mode = {
 	appbar: Property.Color;
-	/*
-	 * The color used in texts or button that are hover black shades on images (ShowHeader, player...)
-	 */
-	contrast: Property.Color;
-	subcontrast: Property.Color;
+	overlay0: Property.Color;
+	overlay1: Property.Color;
 	variant: Variant;
 	colors: {
-		red: Property.Color,
-		green: Property.Color,
-		blue: Property.Color,
-		yellow: Property.Color,
-		white: Property.Color,
-		black: Property.Color,
-	}
+		red: Property.Color;
+		green: Property.Color;
+		blue: Property.Color;
+		yellow: Property.Color;
+		white: Property.Color;
+		black: Property.Color;
+	};
 };
 
 type Variant = {

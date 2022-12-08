@@ -18,24 +18,95 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { View } from "moti";
-import { Skeleton as MSkeleton } from "moti/skeleton";
-import { ComponentProps } from "react";
-import { useYoshiki, rem, px, Stylable } from "yoshiki/native";
+import { LinearGradient as LG } from "expo-linear-gradient";
+import { motify } from "moti";
+import { useState } from "react";
+import { Platform, View, ViewProps } from "react-native";
+import { px, rem, useYoshiki, percent } from "yoshiki/native";
+
+const LinearGradient = motify(LG)();
+
+export const SkeletonCss = () => (
+	<style jsx global>{`
+		@keyframes skeleton {
+			0% {
+				transform: translateX(-100%);
+			}
+			50% {
+				transform: translateX(100%);
+			}
+			100% {
+				transform: translateX(100%);
+			}
+		}
+	`}</style>
+);
 
 export const Skeleton = ({
-	style,
 	children,
+	variant = "text",
 	...props
-}: Omit<ComponentProps<typeof MSkeleton>, "children"> & {
-	children: ComponentProps<typeof MSkeleton>["children"] | boolean;
-} & Stylable) => {
-	const { css } = useYoshiki();
+}: Omit<ViewProps, "children"> & {
+	children?: JSX.Element | boolean | null;
+	variant?: "text" | "round" | "custom";
+}) => {
+	const { css, theme } = useYoshiki();
+	const [width, setWidth] = useState<number | undefined>(undefined);
+	const perc = (v: number) => (v / 100) * width!;
+
+	if (children && children !== true) return children;
+
 	return (
-		<View {...css({ margin: px(2) }, { style })}>
-			<MSkeleton colorMode="light" radius={6} height={rem(1.2)} {...props}>
-				{children !== true ? children || undefined : undefined}
-			</MSkeleton>
+		<View
+			onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+			{...css(
+				[
+					{
+						bg: (theme) => theme.overlay0,
+						margin: px(2),
+						position: "relative",
+						overflow: "hidden",
+						borderRadius: px(6),
+					},
+					variant === "text" && {
+						width: percent(75),
+						height: rem(1.2),
+					},
+					variant === "round" && {
+						borderRadius: 9999999,
+					},
+				],
+				props,
+			)}
+		>
+			<LinearGradient
+				start={{ x: 0, y: 0.5 }}
+				end={{ x: 1, y: 0.5 }}
+				colors={["transparent", theme.overlay1, "transparent"]}
+				transition={{
+					loop: true,
+					repeatReverse: false,
+				}}
+				animate={{
+					translateX: width
+						? [perc(-100), { value: perc(100), type: "timing", duration: 800, delay: 800 }]
+						: undefined,
+				}}
+				{...css([
+					{
+						position: "absolute",
+						top: 0,
+						bottom: 0,
+						left: 0,
+						right: 0,
+					},
+					Platform.OS === "web" && {
+						// @ts-ignore Web only properties
+						animation: "skeleton 1.6s linear 0.5s infinite",
+						transform: "translateX(-100%)",
+					},
+				])}
+			/>
 		</View>
 	);
 };
