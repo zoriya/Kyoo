@@ -18,20 +18,18 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export { Header, Nav, Footer } from "@expo/html-elements";
-export * from "./text";
-export * from "./themes";
-export * from "./icons";
-export * from "./links";
-export * from "./avatar";
-export * from "./image";
-export * from "./skeleton";
-export * from "./tooltip";
+import { ViewProps } from "react-native";
 
-export * from "./utils/nojs";
+export const hiddenIfNoJs: ViewProps = { style: { $$css: true, noJs: "noJsHidden" } as any };
 
-import { px } from "yoshiki/native";
-
-export const ts = (spacing: number) => {
-	return px(spacing * 8);
-};
+export const HiddenIfNoJs = () => (
+	<noscript>
+		<style>
+			{`
+				.noJsHidden {
+					display: none;
+				}
+			`}
+		</style>
+	</noscript>
+);
