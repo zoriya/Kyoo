@@ -19,10 +19,11 @@
  */
 
 import { LinearGradient as LG } from "expo-linear-gradient";
-import { motify } from "moti";
+import { AnimatePresence, motify, MotiView } from "moti";
 import { useState } from "react";
 import { Platform, View, ViewProps } from "react-native";
 import { px, rem, useYoshiki, percent } from "yoshiki/native";
+import { hiddenIfNoJs } from "./utils/nojs";
 
 const LinearGradient = motify(LG)();
 
@@ -44,25 +45,25 @@ export const SkeletonCss = () => (
 
 export const Skeleton = ({
 	children,
+	show,
 	variant = "text",
 	...props
 }: Omit<ViewProps, "children"> & {
 	children?: JSX.Element | boolean | null;
+	show?: boolean;
 	variant?: "text" | "round" | "custom";
 }) => {
 	const { css, theme } = useYoshiki();
 	const [width, setWidth] = useState<number | undefined>(undefined);
 	const perc = (v: number) => (v / 100) * width!;
 
-	if (children && children !== true) return children;
+	if (show === undefined && children && children !== true) return children;
 
 	return (
 		<View
-			onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
 			{...css(
 				[
 					{
-						bg: (theme) => theme.overlay0,
 						margin: px(2),
 						position: "relative",
 						overflow: "hidden",
@@ -79,34 +80,58 @@ export const Skeleton = ({
 				props,
 			)}
 		>
-			<LinearGradient
-				start={{ x: 0, y: 0.5 }}
-				end={{ x: 1, y: 0.5 }}
-				colors={["transparent", theme.overlay1, "transparent"]}
-				transition={{
-					loop: true,
-					repeatReverse: false,
-				}}
-				animate={{
-					translateX: width
-						? [perc(-100), { value: perc(100), type: "timing", duration: 800, delay: 800 }]
-						: undefined,
-				}}
-				{...css([
-					{
-						position: "absolute",
-						top: 0,
-						bottom: 0,
-						left: 0,
-						right: 0,
-					},
-					Platform.OS === "web" && {
-						// @ts-ignore Web only properties
-						animation: "skeleton 1.6s linear 0.5s infinite",
-						transform: "translateX(-100%)",
-					},
-				])}
-			/>
+			<AnimatePresence>
+				{children}
+				{show && (
+					<MotiView
+						key="skeleton"
+						animate={{ opacity: "1" }}
+						exit={{ opacity: 0 }}
+						transition={{ type: "timing" }}
+						onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+						{...css(
+							{
+								bg: (theme) => theme.overlay0,
+								position: "absolute",
+								top: 0,
+								bottom: 0,
+								left: 0,
+								right: 0,
+							},
+							hiddenIfNoJs,
+						)}
+					>
+						<LinearGradient
+							start={{ x: 0, y: 0.5 }}
+							end={{ x: 1, y: 0.5 }}
+							colors={["transparent", theme.overlay1, "transparent"]}
+							transition={{
+								loop: true,
+								repeatReverse: false,
+							}}
+							animate={{
+								translateX: width
+									? [perc(-100), { value: perc(100), type: "timing", duration: 800, delay: 800 }]
+									: undefined,
+							}}
+							{...css([
+								{
+									position: "absolute",
+									top: 0,
+									bottom: 0,
+									left: 0,
+									right: 0,
+								},
+								Platform.OS === "web" && {
+									// @ts-ignore Web only properties
+									animation: "skeleton 1.6s linear 0.5s infinite",
+									transform: "translateX(-100%)",
+								},
+							])}
+						/>
+					</MotiView>
+				)}
+			</AnimatePresence>
 		</View>
 	);
 };
