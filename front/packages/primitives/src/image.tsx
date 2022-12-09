@@ -19,89 +19,99 @@
  */
 
 import { useState } from "react";
-import { View, Image as Img, ImageSourcePropType, ImageStyle } from "react-native";
-import { percent, useYoshiki } from "yoshiki/native";
+import {
+	View,
+	Image as Img,
+	ImageSourcePropType,
+	ImageStyle,
+	Platform,
+	ImageProps,
+} from "react-native";
+import { useYoshiki } from "yoshiki/native";
+import { YoshikiStyle } from "yoshiki/dist/type";
+import { Skeleton } from "./skeleton";
 
-type ImageOptions = {
-	radius?: number;
-	fallback?: string | ImageSourcePropType;
-};
+type YoshikiEnhanced<Style> = Style extends any
+	? {
+			[key in keyof Style]: YoshikiStyle<Style[key]>;
+	  }
+	: never;
 
-type ImageProps = {
+type WithLoading<T> = (T & { isLoading?: boolean }) | (Partial<T> & { isLoading: true });
+
+type Props = WithLoading<{
 	src?: string | ImageSourcePropType | null;
 	alt?: string;
-} & ImageOptions;
-
-type ImagePropsWithLoading =
-	| (ImageProps & { loading?: boolean })
-	| (Partial<ImageProps> & { loading: true });
-
-type Width = ImageStyle["width"];
-type Height = ImageStyle["height"];
+	fallback?: string | ImageSourcePropType;
+}>;
 
 export const Image = ({
 	src,
 	alt,
-	radius,
 	fallback,
-	loading = false,
-	aspectRatio = undefined,
-	width = undefined,
-	height = undefined,
-	...others
-}: ImagePropsWithLoading &
-	(
-		| { aspectRatio?: number; width: Width; height: Height }
-		| { aspectRatio: number; width?: Width; height?: Height }
-	)) => {
+	isLoading: forcedLoading = false,
+	layout,
+	...props
+}: Props & { style?: ImageStyle } & {
+	layout: YoshikiEnhanced<
+		| { width: ImageStyle["width"]; height: ImageStyle["height"] }
+		| { width: ImageStyle["width"]; aspectRatio: ImageStyle["aspectRatio"] }
+		| { height: ImageStyle["height"]; aspectRatio: ImageStyle["aspectRatio"] }
+	>;
+}) => {
 	const { css } = useYoshiki();
-	const [showLoading, setLoading] = useState<boolean>(loading);
+	const [isLoading, setLoading] = useState<boolean>(true);
 	const [source, setSource] = useState(src);
-	/* const imgRef = useRef<Img>(null); */
 
-	// This allow the loading bool to be false with SSR but still be on client-side
-	/* useLayoutEffect(() => { */
-	/* 	if (!imgRef.current?.complete && src) setLoading(true); */
-	/* 	if (!src && !loading) setLoading(false); */
-	/* }, [src, loading]); */
+	const border = { borderRadius: 6 } satisfies ImageStyle;
+
+	if (forcedLoading) return <Skeleton variant="custom" {...css([layout, border])} />;
+	if (!source) return <View {...css([{ bg: (theme) => theme.overlay0 }, layout, border])} />;
+
+	const nativeProps: ImageProps =
+		Platform.OS === "web"
+			? {
+					defaultSource:
+						typeof source === "string"
+							? { uri: source }
+							: Array.isArray(source)
+							? source[0]
+							: source,
+			  }
+			: {};
 
 	return (
-		<View
-			{...css(
-				{
-					aspectRatio,
-					width,
-					height,
-					/* backgroundColor: "grey.300", */
-					borderRadius: radius,
-					overflow: "hidden",
-					/* "& > *": { width: "100%", height: "100%" }, */
-				},
-				others,
-			)}
-		>
-			{/* {showLoading && <Skeleton variant="rectangular" height="100%" />} */}
-			{!loading && source && (
-				<Img
-					source={typeof source === "string" ? { uri: source } : source}
-					accessibilityLabel={alt}
-					onLoad={() => setLoading(false)}
-					onError={() => {
-						if (fallback) setSource(fallback);
-						else setLoading(false);
-					}}
-					{...css({
-						height: percent(100),
-						width: percent(100),
-						resizeMode: "cover",
-						/* display: showLoading ? "hidden" : undefined, */
-					})}
-				/>
-			)}
-		</View>
+		<Skeleton variant="custom" show={isLoading} {...css([layout, border])}>
+			<Img
+				source={typeof source === "string" ? { uri: source } : source}
+				accessibilityLabel={alt}
+				onLoad={() => setLoading(false)}
+				onError={() => {
+					if (fallback) setSource(fallback);
+					else setLoading(false);
+				}}
+				{...nativeProps}
+				{...css(
+					[
+						{
+							resizeMode: "cover",
+						},
+						layout,
+					],
+					props,
+				)}
+			/>
+		</Skeleton>
 	);
 };
 
-export const Poster = (props: ImagePropsWithLoading & { width?: Width; height?: Height }) => (
-	<Image aspectRatio={2 / 3} {...props} />
+export const Poster = ({
+	alt,
+	isLoading = false,
+	layout,
+	...props
+}: Props & { style?: ImageStyle } & {
+	layout: YoshikiEnhanced<{ width: ImageStyle["width"] } | { height: ImageStyle["height"] }>;
+}) => (
+	<Image isLoading={isLoading} alt={alt} layout={{ aspectRatio: 2 / 3, ...layout }} {...props} />
 );
