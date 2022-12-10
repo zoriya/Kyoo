@@ -38,7 +38,7 @@ services:
       - "19000:19000"
     restart: on-failure
     environment:
-      - KYOO_URL=http://back:5000
+      - KYOO_URL=${KYOO_URL:-http://back:5000}
       - PUBLIC_BACK_URL=${PUBLIC_BACK_URL}
   ingress:
     image: nginx
@@ -46,7 +46,7 @@ services:
     environment:
       - PORT=8901
       - FRONT_URL=http://front:3000
-      - BACK_URL=http://back:5000
+      - BACK_URL=${KYOO_URL:-http://back:5000}
     volumes:
       - ./nginx.conf.template:/etc/nginx/templates/kyoo.conf.template:ro
     depends_on:

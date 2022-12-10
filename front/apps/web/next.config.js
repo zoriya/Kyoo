@@ -102,7 +102,10 @@ const nextConfig = {
 
 if (process.env.NODE_ENV !== "production") {
 	nextConfig.rewrites = async () => [
-		{ source: "/api/:path*", destination: process.env.KYOO_URL ?? "http://localhost:5000/:path*" },
+		{
+			source: "/api/:path*",
+			destination: `${process.env.KYOO_URL}/:path*` ?? "http://localhost:5000/:path*",
+		},
 	];
 }
 
