@@ -30,8 +30,17 @@ export * from "./tooltip";
 
 export * from "./utils/nojs";
 
+import { Dimensions } from "react-native";
 import { px } from "yoshiki/native";
 
 export const ts = (spacing: number) => {
 	return px(spacing * 8);
+};
+
+export const vw = (spacing: number) => {
+	return px(spacing * Dimensions.get('window').width / 100);
+};
+
+export const vh = (spacing: number) => {
+	return px(spacing * Dimensions.get('window').height / 100);
 };

@@ -48,7 +48,6 @@ type Props = WithLoading<{
 export const Image = ({
 	src,
 	alt,
-	fallback,
 	isLoading: forcedLoading = false,
 	layout,
 	...props
@@ -60,36 +59,38 @@ export const Image = ({
 	>;
 }) => {
 	const { css } = useYoshiki();
-	const [isLoading, setLoading] = useState<boolean>(true);
-	const [source, setSource] = useState(src);
+	const [state, setState] = useState<"loading" | "errored" | "finished">(
+		src ? "loading" : "errored",
+	);
+
+	// This could be done with a key but this makes the API easier to use.
+	// This unsures that the state is resetted when the source change (useful for recycler lists.)
+	const [oldSource, setOldSource] = useState(src);
+	if (oldSource !== src) {
+		setState("loading");
+		setOldSource(src);
+	}
 
 	const border = { borderRadius: 6 } satisfies ImageStyle;
 
 	if (forcedLoading) return <Skeleton variant="custom" {...css([layout, border])} />;
-	if (!source) return <View {...css([{ bg: (theme) => theme.overlay0 }, layout, border])} />;
+	if (!src || state === "errored")
+		return <View {...css([{ bg: (theme) => theme.overlay0 }, layout, border])} />;
 
-	const nativeProps: ImageProps =
-		Platform.OS === "web"
-			? {
-					defaultSource:
-						typeof source === "string"
-							? { uri: source }
-							: Array.isArray(source)
-							? source[0]
-							: source,
-			  }
-			: {};
+	const nativeProps = Platform.select<ImageProps>({
+		web: {
+			defaultSource: typeof src === "string" ? { uri: src } : Array.isArray(src) ? src[0] : src,
+		},
+		default: {},
+	});
 
 	return (
-		<Skeleton variant="custom" show={isLoading} {...css([layout, border])}>
+		<Skeleton variant="custom" show={state === "loading"} {...css([layout, border])}>
 			<Img
-				source={typeof source === "string" ? { uri: source } : source}
+				source={typeof src === "string" ? { uri: src } : src}
 				accessibilityLabel={alt}
-				onLoad={() => setLoading(false)}
-				onError={() => {
-					if (fallback) setSource(fallback);
-					else setLoading(false);
-				}}
+				onLoad={() => setState("finished")}
+				onError={() => setState("errored")}
 				{...nativeProps}
 				{...css(
 					[

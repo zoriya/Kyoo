@@ -45,11 +45,11 @@ export const SkeletonCss = () => (
 
 export const Skeleton = ({
 	children,
-	show,
+	show: forcedShow,
 	variant = "text",
 	...props
 }: Omit<ViewProps, "children"> & {
-	children?: JSX.Element | boolean | null;
+	children?: JSX.Element | JSX.Element[] | boolean | null;
 	show?: boolean;
 	variant?: "text" | "round" | "custom";
 }) => {
@@ -57,19 +57,19 @@ export const Skeleton = ({
 	const [width, setWidth] = useState<number | undefined>(undefined);
 	const perc = (v: number) => (v / 100) * width!;
 
-	if (show === undefined && children && children !== true) return children;
+	if (forcedShow === undefined && children && children !== true) return <>{children}</>;
 
 	return (
 		<View
 			{...css(
 				[
 					{
-						margin: px(2),
 						position: "relative",
 						overflow: "hidden",
 						borderRadius: px(6),
 					},
 					variant === "text" && {
+						margin: px(2),
 						width: percent(75),
 						height: rem(1.2),
 					},
@@ -82,10 +82,11 @@ export const Skeleton = ({
 		>
 			<AnimatePresence>
 				{children}
-				{show && (
+				{(forcedShow || !children || children === true) && (
 					<MotiView
 						key="skeleton"
-						animate={{ opacity: "1" }}
+						// No clue why it is a number on mobile and a string on web but /shrug
+						animate={{ opacity: Platform.OS === "web" ? "1" : 1 }}
 						exit={{ opacity: 0 }}
 						transition={{ type: "timing" }}
 						onLayout={(e) => setWidth(e.nativeEvent.layout.width)}

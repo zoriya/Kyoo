@@ -28,7 +28,8 @@ import {
 	getDisplayDate,
 } from "@kyoo/models";
 import { DefaultLayout } from "../layout";
-import { InfiniteFetch, WithLoading } from "../fetch";
+import { WithLoading } from "../fetch";
+import { InfiniteFetch } from "../fetch-infinite";
 import { ItemGrid } from "./grid";
 import { SortBy, SortOrd, Layout } from "./types";
 
@@ -83,6 +84,8 @@ export const BrowsePage: QueryPage<{ slug?: string }> = ({ slug }) => {
 			<InfiniteFetch
 				query={query(slug, sortKey, sortOrd)}
 				placeholderCount={15}
+				size={ItemGrid.height}
+				numColumns={3}
 				/* sx={{ */
 				/* 	display: "flex", */
 				/* 	flexWrap: "wrap", */
@@ -90,7 +93,7 @@ export const BrowsePage: QueryPage<{ slug?: string }> = ({ slug }) => {
 				/* 	justifyContent: "center", */
 				/* }} */
 			>
-				{(item, i) => <ItemGrid key={item?.id ?? i} {...itemMap(item)} />}
+				{(item, key) => <ItemGrid key={key} {...itemMap(item)} />}
 			</InfiniteFetch>
 		</>
 	);
