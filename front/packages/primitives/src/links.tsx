@@ -19,7 +19,7 @@
  */
 
 import { ReactNode } from "react";
-import { TextProps } from "react-native";
+import { Platform, TextProps } from "react-native";
 import { TextLink } from "solito/link";
 import { useYoshiki } from "yoshiki/native";
 
@@ -35,7 +35,8 @@ export const A = ({
 			href={href}
 			textProps={css(
 				{
-					fontFamily: theme.fonts.paragraph,
+					// TODO: use a real font here.
+					fontFamily: Platform.OS === "web" ? theme.fonts.paragraph : undefined,
 					color: theme.paragraph,
 				},
 				props,

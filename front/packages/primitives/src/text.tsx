@@ -19,8 +19,8 @@
  */
 
 import { ComponentType, ComponentProps } from "react";
-import { TextProps } from "react-native";
-import { useYoshiki } from "yoshiki/native";
+import { Platform, TextProps } from "react-native";
+import { rem, useYoshiki } from "yoshiki/native";
 import {
 	H1 as EH1,
 	H2 as EH2,
@@ -43,10 +43,16 @@ const styleText = (
 				{...css(
 					[
 						{
-							fontFamily: type === "header" ? theme.fonts.heading : theme.fonts.paragraph,
+							// TODO: use custom fonts on mobile also.
+							fontFamily:
+								Platform.OS === "web"
+									? type === "header"
+										? theme.fonts.heading
+										: theme.fonts.paragraph
+									: undefined,
 							color: type === "header" ? theme.heading : theme.paragraph,
 						},
-						type === "sub" && { fontWeight: "300" },
+						type === "sub" && { fontWeight: "300", opacity: 0.8, fontSize: rem(0.8) },
 					],
 					props as TextProps,
 				)}

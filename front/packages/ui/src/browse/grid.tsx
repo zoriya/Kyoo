@@ -19,6 +19,7 @@
  */
 
 import { A, Skeleton, Poster, ts, P, SubP } from "@kyoo/primitives";
+import { Platform, View } from "react-native";
 import { percent, px, Stylable, useYoshiki } from "yoshiki/native";
 import { WithLoading } from "../fetch";
 
@@ -39,26 +40,49 @@ export const ItemGrid = ({
 	const { css } = useYoshiki();
 
 	return (
-		<A
-			href={href ?? ""}
+		<View
+			// href={href ?? ""}
 			{...css(
-				{
-					display: "flex",
-					flexDirection: "column",
-					alignItems: "center",
-					width: { xs: percent(18), sm: percent(25) },
-					minWidth: { xs: px(90), sm: px(120) },
-					maxWidth: px(168),
-					m: { xs: ts(1), sm: ts(2) },
-				},
+				[
+					{
+						flexDirection: "column",
+						alignItems: "center",
+						m: { xs: ts(1), sm: ts(2) },
+					},
+					// We leave no width on native to fill the list's grid.
+					Platform.OS === "web" && {
+						width: { xs: percent(18), sm: percent(25) },
+						minWidth: { xs: px(90), sm: px(120) },
+						maxWidth: px(168),
+					},
+				],
 				props,
 			)}
 		>
-			<Poster src={poster} alt={name} width={percent(100)} />
-			<Skeleton width={percent(80)}>{isLoading || <P>{name}</P>}</Skeleton>
+			<Poster src={poster} alt={name} isLoading={isLoading} layout={{ width: percent(100) }} />
+			<Skeleton>
+				{isLoading || (
+					<P numberOfLines={1} {...css({ marginY: 0, textAlign: "center" })}>
+						{name}
+					</P>
+				)}
+			</Skeleton>
 			{(isLoading || subtitle) && (
-				<Skeleton width={percent(50)}>{isLoading || <SubP>{subtitle}</SubP>}</Skeleton>
+				<Skeleton {...css({ width: percent(50) })}>
+					{isLoading || (
+						<SubP
+							{...css({
+								marginTop: 0,
+								textAlign: "center",
+							})}
+						>
+							{subtitle}
+						</SubP>
+					)}
+				</Skeleton>
 			)}
-		</A>
+		</View>
 	);
 };
+
+ItemGrid.height = px(250);
