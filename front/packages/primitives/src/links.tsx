@@ -18,9 +18,17 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ReactNode } from "react";
-import { Platform, TextProps } from "react-native";
-import { TextLink } from "solito/link";
+import { ComponentType, ReactNode } from "react";
+import {
+	Platform,
+	Pressable,
+	TextProps,
+	TouchableOpacity,
+	TouchableNativeFeedback,
+	View,
+	ViewProps,
+} from "react-native";
+import { LinkCore, TextLink } from "solito/link";
 import { useYoshiki } from "yoshiki/native";
 
 export const A = ({
@@ -44,5 +52,29 @@ export const A = ({
 		>
 			{children}
 		</TextLink>
+	);
+};
+
+export const Link = ({ href, children, ...props }: ViewProps & { href: string }) => {
+	return (
+		<LinkCore
+			href={href}
+			Component={Platform.select<ComponentType>({
+				web: View,
+				android: TouchableNativeFeedback,
+				ios: TouchableOpacity,
+				default: Pressable,
+			})}
+			componentProps={Platform.select<object>({
+				android: { useForeground: true },
+				default: props,
+			})}
+		>
+			{Platform.select<ReactNode>({
+				android: <View {...props}>{children}</View>,
+				ios: <View {...props}>{children}</View>,
+				default: children,
+			})}
+		</LinkCore>
 	);
 };
