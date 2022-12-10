@@ -66,6 +66,10 @@ const GlobalCssTheme = () => {
 				*:hover::-webkit-scrollbar-thumb {
 					background-color: rgb(134, 127, 127);
 				}
+
+				#__next {
+					height: 100vh;
+				}
 			`}</style>
 			<WebTooltip theme={theme} />
 			<SkeletonCss />

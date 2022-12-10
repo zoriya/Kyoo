@@ -21,7 +21,7 @@
 import { Link, Skeleton, Poster, ts, P, SubP } from "@kyoo/primitives";
 import { Platform } from "react-native";
 import { percent, px, Stylable, useYoshiki } from "yoshiki/native";
-import { WithLoading } from "../fetch";
+import { Layout, WithLoading } from "../fetch";
 
 export const ItemGrid = ({
 	href,
@@ -85,4 +85,7 @@ export const ItemGrid = ({
 	);
 };
 
-ItemGrid.height = px(250);
+ItemGrid.layout = {
+	size: px(150),
+	numColumns: { xs: 3, md: 5, xl: 7 },
+} satisfies Layout;

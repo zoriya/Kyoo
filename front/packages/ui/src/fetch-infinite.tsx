@@ -19,30 +19,30 @@
  */
 
 import { Page, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
+import { useBreakpointMap } from "@kyoo/primitives";
 import { FlashList } from "@shopify/flash-list";
 import { ReactElement } from "react";
-import { ErrorView, WithLoading } from "./fetch";
+import { ErrorView, Layout, WithLoading } from "./fetch";
 
 export const InfiniteFetch = <Data,>({
 	query,
 	placeholderCount = 15,
 	children,
-	size,
-	numColumns,
+	layout,
 	...props
 }: {
 	query: QueryIdentifier<Data>;
 	placeholderCount?: number;
-	numColumns: number;
+	layout: Layout;
 	children: (
 		item: Data extends Page<infer Item> ? WithLoading<Item> : WithLoading<Data>,
 		key: string | undefined,
 		i: number,
 	) => ReactElement | null;
-		size: number;
 }): JSX.Element | null => {
 	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
 
+	const { numColumns, size } = useBreakpointMap(layout);
 	const { items, error, fetchNextPage, hasNextPage, refetch, isRefetching } =
 		useInfiniteFetch(query);
 

@@ -19,9 +19,11 @@
  */
 
 import { Page, QueryIdentifier, useFetch, KyooErrors } from "@kyoo/models";
-import { P } from "@kyoo/primitives";
+import { Breakpoint, P } from "@kyoo/primitives";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
+
+export type Layout = { numColumns: Breakpoint<number>; size: Breakpoint<number> };
 
 export type WithLoading<Item> =
 	| (Item & { isLoading: false })
