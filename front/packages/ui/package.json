@@ -13,6 +13,7 @@
 		"typescript": "^4.9.3"
 	},
 	"peerDependencies": {
+		"@shopify/flash-list": "^1.4.0",
 		"@tanstack/react-query": "*",
 		"expo-linear-gradient": "*",
 		"i18next": "*",
