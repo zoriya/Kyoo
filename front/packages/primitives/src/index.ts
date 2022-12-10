@@ -28,6 +28,7 @@ export * from "./image";
 export * from "./skeleton";
 export * from "./tooltip";
 
+export * from "./utils/breakpoints";
 export * from "./utils/nojs";
 
 import { Dimensions } from "react-native";

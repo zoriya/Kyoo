@@ -28,7 +28,9 @@ export const DefaultLayout = (page: ReactElement) => {
 	return (
 		<>
 			<Navbar />
-			<main {...css({ flex: 1, display: "flex" })}>{page}</main>
+			<main id="main" {...css({ display: "flex", flexGrow: 1, flexShrink: 1, overflow: "auto" })}>
+				{page}
+			</main>
 		</>
 	);
 };

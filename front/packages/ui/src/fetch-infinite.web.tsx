@@ -19,19 +19,22 @@
  */
 
 import { Page, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
+import { useBreakpointValue } from "@kyoo/primitives";
 import { ReactElement } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useYoshiki } from "yoshiki";
-import { ErrorView, WithLoading } from "./fetch";
+import { ErrorView, Layout, WithLoading } from "./fetch";
 
 export const InfiniteFetch = <Data,>({
 	query,
 	placeholderCount = 15,
 	children,
+	layout,
 	...props
 }: {
 	query: QueryIdentifier<Data>;
 	placeholderCount?: number;
+	layout: Layout;
 	children: (
 		item: Data extends Page<infer Item> ? WithLoading<Item> : WithLoading<Data>,
 		key: string | undefined,
@@ -41,23 +44,33 @@ export const InfiniteFetch = <Data,>({
 	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
 
 	const { items, error, fetchNextPage, hasNextPage } = useInfiniteFetch(query);
+	const { numColumns } = useBreakpointValue(layout);
 	const { css } = useYoshiki();
 
 	if (error) return <ErrorView error={error} />;
 
 	return (
 		<InfiniteScroll
+			scrollableTarget="main" // Default to the main element for the scroll.
 			dataLength={items?.length ?? 0}
 			next={fetchNextPage}
 			hasMore={hasNextPage!}
 			loader={[...Array(12)].map((_, i) => children({ isLoading: true } as any, i.toString(), i))}
 			{...css(
-				{
-					display: "flex",
-					flexWrap: "wrap",
-					alignItems: "flex-start",
-					justifyContent: "center",
-				},
+				[
+					{
+						display: "flex",
+						alignItems: "flex-start",
+						justifyContent: "center",
+					},
+					numColumns === 1 && {
+						flexDirection: "column",
+					},
+					numColumns !== 1 && {
+						flexWrap: "wrap",
+					},
+				],
+
 				props,
 			)}
 		>

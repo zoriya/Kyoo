@@ -31,6 +31,7 @@ import { DefaultLayout } from "../layout";
 import { WithLoading } from "../fetch";
 import { InfiniteFetch } from "../fetch-infinite";
 import { ItemGrid } from "./grid";
+import { ItemList } from "./list";
 import { SortBy, SortOrd, Layout } from "./types";
 
 const itemMap = (item: WithLoading<LibraryItem>): WithLoading<ComponentProps<typeof ItemGrid>> => {
@@ -71,6 +72,8 @@ export const BrowsePage: QueryPage<{ slug?: string }> = ({ slug }) => {
 	const [sortOrd, setSortOrd] = useState(SortOrd.Asc);
 	const [layout, setLayout] = useState(Layout.Grid);
 
+	const LayoutComponent = layout === Layout.Grid ? ItemGrid : ItemList;
+
 	return (
 		<>
 			{/* <BrowseSettings */}
@@ -84,16 +87,9 @@ export const BrowsePage: QueryPage<{ slug?: string }> = ({ slug }) => {
 			<InfiniteFetch
 				query={query(slug, sortKey, sortOrd)}
 				placeholderCount={15}
-				size={ItemGrid.height}
-				numColumns={3}
-				/* sx={{ */
-				/* 	display: "flex", */
-				/* 	flexWrap: "wrap", */
-				/* 	alignItems: "flex-start", */
-				/* 	justifyContent: "center", */
-				/* }} */
+				layout={LayoutComponent.layout}
 			>
-				{(item, key) => <ItemGrid key={key} {...itemMap(item)} />}
+				{(item, key) => <LayoutComponent key={key} {...itemMap(item)} />}
 			</InfiniteFetch>
 		</>
 	);
