@@ -18,8 +18,8 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { A, Skeleton, Poster, ts, P, SubP } from "@kyoo/primitives";
-import { Platform, View } from "react-native";
+import { Link, Skeleton, Poster, ts, P, SubP } from "@kyoo/primitives";
+import { Platform } from "react-native";
 import { percent, px, Stylable, useYoshiki } from "yoshiki/native";
 import { WithLoading } from "../fetch";
 
@@ -40,8 +40,8 @@ export const ItemGrid = ({
 	const { css } = useYoshiki();
 
 	return (
-		<View
-			// href={href ?? ""}
+		<Link
+			href={href ?? ""}
 			{...css(
 				[
 					{
@@ -81,7 +81,7 @@ export const ItemGrid = ({
 					)}
 				</Skeleton>
 			)}
-		</View>
+		</Link>
 	);
 };
 
