@@ -21,7 +21,6 @@
 import { ComponentType, ReactNode } from "react";
 import {
 	Platform,
-	Pressable,
 	TextProps,
 	TouchableOpacity,
 	TouchableNativeFeedback,
@@ -29,7 +28,7 @@ import {
 	ViewProps,
 } from "react-native";
 import { LinkCore, TextLink } from "solito/link";
-import { useYoshiki } from "yoshiki/native";
+import { useYoshiki, Pressable } from "yoshiki/native";
 
 export const A = ({
 	href,
@@ -55,7 +54,20 @@ export const A = ({
 	);
 };
 
-export const Link = ({ href, children, ...props }: ViewProps & { href: string }) => {
+export const Link = ({
+	href,
+	children,
+	...props
+}: ViewProps & {
+	href: string;
+	onFocus?: () => void;
+	onBlur?: () => void;
+	onPressIn?: () => void;
+	onPressOut?: () => void;
+}) => {
+	const { onBlur, onFocus, onPressIn, onPressOut, ...noFocusProps } = props;
+	const focusProps = { onBlur, onFocus, onPressIn, onPressOut };
+
 	return (
 		<LinkCore
 			href={href}
@@ -66,7 +78,7 @@ export const Link = ({ href, children, ...props }: ViewProps & { href: string })
 				default: Pressable,
 			})}
 			componentProps={Platform.select<object>({
-				android: { useForeground: true },
+				android: { useForeground: true, ...focusProps },
 				default: props,
 			})}
 		>

@@ -70,6 +70,11 @@ const GlobalCssTheme = () => {
 				#__next {
 					height: 100vh;
 				}
+
+				.infinite-scroll-component__outerdiv {
+					width: 100%;
+					height: 100%;
+				}
 			`}</style>
 			<WebTooltip theme={theme} />
 			<SkeletonCss />

@@ -9682,7 +9682,7 @@ __metadata:
     react-native-screens: ~3.18.0
     react-native-svg: 13.4.0
     typescript: ^4.6.3
-    yoshiki: 0.2.7
+    yoshiki: 0.2.9
   languageName: unknown
   linkType: soft
 
@@ -13319,7 +13319,7 @@ __metadata:
     superjson: ^1.11.0
     typescript: ^4.9.3
     webpack: ^5.75.0
-    yoshiki: 0.2.7
+    yoshiki: 0.2.9
     zod: ^3.19.1
   languageName: unknown
   linkType: soft
@@ -13644,9 +13644,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yoshiki@npm:0.2.7":
-  version: 0.2.7
-  resolution: "yoshiki@npm:0.2.7"
+"yoshiki@npm:0.2.9":
+  version: 0.2.9
+  resolution: "yoshiki@npm:0.2.9"
   dependencies:
     "@types/node": 18.x.x
     "@types/react": 18.x.x
@@ -13661,7 +13661,7 @@ __metadata:
       optional: true
     react-native-web:
       optional: true
-  checksum: 5589cde181d2825a9c25d0ec51b99873a335869989314c3cee3a4503444344a546ccc4705e1a0f76a4ec4faaa14433ae96fa8e2024d6550498b61b193c0fba5f
+  checksum: 41ff5ff7e4cd99b2bc7453749a1f17ceb63bc9e1123285bc62a12315cac1fb087b58366db50e08b275e7dd0b1ce862df4c3acae51872f8e3aa8765ee9b61d4bf
   languageName: node
   linkType: hard
 

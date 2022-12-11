@@ -68,5 +68,6 @@ export const H3 = styleText(EH3, "header");
 export const H4 = styleText(EH4, "header");
 export const H5 = styleText(EH5, "header");
 export const H6 = styleText(EH6, "header");
+export const Heading = styleText(EP, "header");
 export const P = styleText(EP);
 export const SubP = styleText(EP, "sub");

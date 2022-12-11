@@ -18,32 +18,30 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export { Header, Nav, Footer } from "@expo/html-elements";
-export * from "./text";
-export * from "./themes";
-export * from "./icons";
-export * from "./links";
-export * from "./avatar";
-export * from "./image";
-export * from "./skeleton";
-export * from "./tooltip";
+import { motify } from "moti";
+import { Component, ComponentType, FunctionComponent } from "react";
+import { Poster } from "./image";
 
-export * from "./animated";
-
-export * from "./utils/breakpoints";
-export * from "./utils/nojs";
-
-import { Dimensions } from "react-native";
-import { px } from "yoshiki/native";
-
-export const ts = (spacing: number) => {
-	return px(spacing * 8);
+const getDisplayName = (Cmp: ComponentType<any>) => {
+	return Cmp.displayName || Cmp.name || "Component";
 };
 
-export const vw = (spacing: number) => {
-	return px(spacing * Dimensions.get('window').width / 100);
+const asClass = <Props,>(Cmp: FunctionComponent<Props>) => {
+	// TODO: ensure that every props is given at least once.
+	return class AsClass extends Component<Partial<Props> & { forward?: Partial<Props> }> {
+		static displayName = `WithClass(${getDisplayName(Cmp)})`;
+
+		constructor(props: Partial<Props> & { forward?: Partial<Props> }) {
+			super(props);
+		}
+
+		render() {
+			// @ts-ignore See todo above
+			return <Cmp {...this.props} {...this.props.forward} />;
+		}
+	};
 };
 
-export const vh = (spacing: number) => {
-	return px(spacing * Dimensions.get('window').height / 100);
+export const Animated = {
+	Poster: motify(asClass(Poster))(),
 };

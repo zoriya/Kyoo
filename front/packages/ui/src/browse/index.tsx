@@ -34,7 +34,9 @@ import { ItemGrid } from "./grid";
 import { ItemList } from "./list";
 import { SortBy, SortOrd, Layout } from "./types";
 
-const itemMap = (item: WithLoading<LibraryItem>): WithLoading<ComponentProps<typeof ItemGrid>> => {
+const itemMap = (
+	item: WithLoading<LibraryItem>,
+): WithLoading<ComponentProps<typeof ItemGrid> & ComponentProps<typeof ItemList>> => {
 	if (item.isLoading) return item;
 
 	let href;
@@ -48,6 +50,7 @@ const itemMap = (item: WithLoading<LibraryItem>): WithLoading<ComponentProps<typ
 		subtitle: item.type !== ItemType.Collection ? getDisplayDate(item) : undefined,
 		href,
 		poster: item.poster,
+		thumbnail: item.thumbnail,
 	};
 };
 
@@ -70,7 +73,7 @@ const query = (
 export const BrowsePage: QueryPage<{ slug?: string }> = ({ slug }) => {
 	const [sortKey, setSort] = useState(SortBy.Name);
 	const [sortOrd, setSortOrd] = useState(SortOrd.Asc);
-	const [layout, setLayout] = useState(Layout.Grid);
+	const [layout, setLayout] = useState(Layout.List);
 
 	const LayoutComponent = layout === Layout.Grid ? ItemGrid : ItemList;
 

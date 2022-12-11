@@ -62,9 +62,11 @@ export const InfiniteFetch = <Data,>({
 						display: "flex",
 						alignItems: "flex-start",
 						justifyContent: "center",
+						overflow: "unset !important",
 					},
 					numColumns === 1 && {
 						flexDirection: "column",
+						alignItems: "stretch",
 					},
 					numColumns !== 1 && {
 						flexWrap: "wrap",
