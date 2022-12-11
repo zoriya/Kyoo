@@ -73,10 +73,11 @@ const query = (
 export const BrowsePage: QueryPage<{ slug?: string }> = ({ slug }) => {
 	const [sortKey, setSort] = useState(SortBy.Name);
 	const [sortOrd, setSortOrd] = useState(SortOrd.Asc);
-	const [layout, setLayout] = useState(Layout.List);
+	const [layout, setLayout] = useState(Layout.Grid);
 
 	const LayoutComponent = layout === Layout.Grid ? ItemGrid : ItemList;
 
+	// TODO list header to seet sort things, filter and layout.
 	return (
 		<>
 			{/* <BrowseSettings */}
