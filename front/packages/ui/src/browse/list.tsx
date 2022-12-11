@@ -18,98 +18,101 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-const ItemList = ({
+import { Link, P, Skeleton, Animated, ts, ImageBackground, Heading } from "@kyoo/primitives";
+import { useState } from "react";
+import { View } from "react-native";
+import { percent, px, rem, useYoshiki } from "yoshiki/native";
+import { Layout, WithLoading } from "../fetch";
+
+export const ItemList = ({
 	href,
 	name,
 	subtitle,
 	thumbnail,
 	poster,
-	loading,
-}: {
-	href?: string;
-	name?: string;
-	subtitle?: string | null;
+	isLoading,
+}: WithLoading<{
+	href: string;
+	name: string;
+	subtitle?: string;
 	poster?: string | null;
 	thumbnail?: string | null;
-	loading?: boolean;
-}) => {
+}>) => {
+	const { css } = useYoshiki();
+	const [isHovered, setHovered] = useState(0);
+
 	return (
-		<Link
+		<ImageBackground
+			src={thumbnail}
+			alt={name}
+			as={Link}
 			href={href ?? ""}
-			color="inherit"
-			sx={{
-				display: "flex",
-				textAlign: "center",
+			onFocus={() => setHovered((i) => i + 1)}
+			onBlur={() => setHovered((i) => i - 1)}
+			onPressIn={() => setHovered((i) => i + 1)}
+			onPressOut={() => setHovered((i) => i - 1)}
+			containerStyle={{
+				borderRadius: px(6),
+			}}
+			imageStyle={{
+				borderRadius: px(6),
+			}}
+			{...css({
 				alignItems: "center",
 				justifyContent: "space-evenly",
-				width: "100%",
-				height: "300px",
 				flexDirection: "row",
-				m: 1,
-				position: "relative",
-				color: "white",
-				"&:hover .poster": {
-					transform: "scale(1.3)",
-				},
-			}}
+				height: ItemList.layout.size,
+				borderRadius: px(6),
+				m: ts(1),
+			})}
 		>
-			<Image
-				src={thumbnail}
-				alt={name}
-				width="100%"
-				height="100%"
-				radius={px(5)}
-				css={{
-					position: "absolute",
-					top: 0,
-					bottom: 0,
-					left: 0,
-					right: 0,
-					zIndex: -1,
-
-					"&::after": {
-						content: '""',
-						position: "absolute",
-						top: 0,
-						bottom: 0,
-						right: 0,
-						left: 0,
-						/* background: "rgba(0, 0, 0, 0.4)", */
-						background: "linear-gradient(to bottom, rgba(0, 0, 0, 0) 25%, rgba(0, 0, 0, 0.6) 100%)",
-					},
-				}}
-			/>
-			<Box
-				sx={{
-					display: "flex",
+			<View
+				{...css({
 					flexDirection: "column",
 					width: { xs: "50%", lg: "30%" },
-				}}
+				})}
 			>
-				<Typography
-					variant="button"
-					sx={{
-						fontSize: "2rem",
-						letterSpacing: "0.002rem",
-						fontWeight: 900,
-					}}
-				>
-					{name ?? <Skeleton />}
-				</Typography>
-				{(loading || subtitle) && (
-					<Typography variant="caption" sx={{ fontSize: "1rem" }}>
-						{subtitle ?? <Skeleton />}
-					</Typography>
+				<Skeleton {...css({ height: rem(2), alignSelf: "center" })}>
+					{isLoading || (
+						<Heading
+							{...css({
+								textAlign: "center",
+								fontSize: rem(2),
+								letterSpacing: rem(0.002),
+								fontWeight: "900",
+								textTransform: "uppercase",
+								textDecorationLine: isHovered ? "underline" : "none",
+							})}
+						>
+							{name}
+						</Heading>
+					)}
+				</Skeleton>
+				{(isLoading || subtitle) && (
+					<Skeleton {...css({ width: rem(5), alignSelf: "center" })}>
+						{isLoading || (
+							<P
+								{...css({
+									textAlign: "center",
+								})}
+							>
+								{subtitle}
+							</P>
+						)}
+					</Skeleton>
 				)}
-			</Box>
-			<Poster
+			</View>
+			<Animated.Poster
 				src={poster}
 				alt=""
-				height="80%"
-				css={{
-					transition: "transform .2s",
-				}}
+				isLoading={isLoading}
+				forward={{ layout: { height: percent(80) } }}
+				// TODO: this does not work on the web...
+				animate={{ scale: isHovered ? 1.3 : 1 }}
+				transition={{ type: "spring" }}
 			/>
-		</Link>
+		</ImageBackground>
 	);
 };
+
+ItemList.layout = { numColumns: 1, size: 300 } satisfies Layout;

@@ -46,6 +46,7 @@ export const WebTooltip = ({ theme }: { theme: Theme }) => {
 				top: 100%;
 				left: 50%;
 				transform: translate(-50%);
+				z-index: 999;
 
 				margin-top: 8px;
 				border-radius: 5px;

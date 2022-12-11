@@ -20,7 +20,8 @@
 
 import { ReactNode } from "react";
 import { Property } from "csstype";
-import { Theme, ThemeProvider, useTheme } from "yoshiki";
+import { Theme, ThemeProvider } from "yoshiki";
+import { useTheme, useYoshiki } from "yoshiki/native";
 import "yoshiki";
 import { catppuccin } from "./catppuccin";
 
@@ -57,7 +58,9 @@ type Variant = {
 
 declare module "yoshiki" {
 	// TODO: Add specifics colors
-	export interface Theme extends ThemeSettings, Mode, Variant {}
+	export interface Theme extends ThemeSettings, Mode, Variant {
+		builder: ThemeBuilder;
+	}
 }
 
 export type { Theme } from "yoshiki";
@@ -70,7 +73,7 @@ export const selectMode = (theme: ThemeBuilder, mode: "light" | "dark"): Theme =
 	const { light, dark, ...options } = theme;
 	const value = mode === "light" ? light : dark;
 	const { default: def, ...modeOpt } = value;
-	return { ...options, ...modeOpt, ...def, variant: value.variant };
+	return { ...options, ...modeOpt, ...def, variant: value.variant, builder: theme };
 };
 
 export const switchVariant = (theme: Theme) => {
@@ -88,12 +91,56 @@ export const switchVariant = (theme: Theme) => {
 	};
 };
 
-export const SwitchVariant = ({ children }: { children?: JSX.Element | JSX.Element[] }) => {
-	const theme = useTheme();
-
-	return <ThemeProvider theme={switchVariant(theme)}>{children}</ThemeProvider>;
-};
-
 export const ThemeSelector = ({ children }: { children: ReactNode }) => {
 	return <ThemeProvider theme={selectMode(catppuccin, "light")}>{children}</ThemeProvider>;
+};
+
+type YoshikiFunc<T> = (props: ReturnType<typeof useYoshiki>) => T;
+
+const YoshikiProvider = ({ children }: { children: YoshikiFunc<ReactNode> }) => {
+	const yoshiki = useYoshiki();
+	return <>{children(yoshiki)}</>;
+};
+
+export const SwitchVariant = ({ children }: { children: ReactNode | YoshikiFunc<ReactNode> }) => {
+	const theme = useTheme();
+
+	return (
+		<ThemeProvider theme={switchVariant(theme)}>
+			{typeof children === "function" ? <YoshikiProvider>{children}</YoshikiProvider> : children}
+		</ThemeProvider>
+	);
+};
+
+export const ContrastArea = ({
+	children,
+	mode = "dark",
+	contrastText,
+}: {
+	children: ReactNode | YoshikiFunc<ReactNode>;
+	mode?: "light" | "dark";
+	contrastText?: boolean;
+}) => {
+	const oldTheme = useTheme();
+	const theme = selectMode(oldTheme.builder, mode);
+
+	return (
+		<ThemeProvider
+			theme={
+				contrastText
+					? {
+							...theme,
+							heading: mode === "light" ? theme.colors.black : theme.colors.white,
+							paragraph: theme.heading,
+					  }
+					: theme
+			}
+		>
+			{typeof children === "function" ? <YoshikiProvider>{children}</YoshikiProvider> : children}
+		</ThemeProvider>
+	);
+};
+
+export const alpha = (color: Property.Color, alpha: number) => {
+	return color + (alpha * 255).toString(16);
 };

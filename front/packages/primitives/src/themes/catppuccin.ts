@@ -83,7 +83,7 @@ export const catppuccin: ThemeBuilder = {
 			blue: "#89b4fa",
 			yellow: "#f9e2af",
 			black: "#11111b",
-			white: "#cdd6f4",
+			white: "#f5f0f8",
 		},
 	},
 };
