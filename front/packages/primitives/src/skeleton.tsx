@@ -69,7 +69,6 @@ export const Skeleton = ({
 						borderRadius: px(6),
 					},
 					variant === "text" && {
-						margin: rem(1),
 						width: percent(75),
 						height: rem(1.2),
 					},

@@ -96,7 +96,7 @@ export const Navbar = (props: Stylable) => {
 								{library.name}
 							</A>
 						) : (
-							<Skeleton key={i} {...css({ width: rem(5) })} />
+							<Skeleton key={i} {...css({ width: rem(5), marginX: ts(1) })} />
 						)
 					}
 				</Fetch>

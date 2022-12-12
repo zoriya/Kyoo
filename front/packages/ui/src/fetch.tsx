@@ -34,11 +34,11 @@ const isPage = <T = unknown,>(obj: unknown): obj is Page<T> =>
 
 export const Fetch = <Data,>({
 	query,
-	placeholderCount,
+	placeholderCount = 1,
 	children,
 }: {
 	query: QueryIdentifier<Data>;
-	placeholderCount: number;
+	placeholderCount?: number;
 	children: (
 		item: Data extends Page<infer Item> ? WithLoading<Item> : WithLoading<Data>,
 		i: number,
@@ -52,7 +52,9 @@ export const Fetch = <Data,>({
 			<>{[...Array(placeholderCount)].map((_, i) => children({ isLoading: true } as any, i))}</>
 		);
 	if (!isPage<object>(data))
-		return children(data ? { ...data, isLoading: false } : ({ isLoading: true } as any), 0);
+		return (
+			<> {children(data ? { ...data, isLoading: false } : ({ isLoading: true } as any), 0)} </>
+		);
 	return <>{data.items.map((item, i) => children({ ...item, isLoading: false } as any, i))}</>;
 };
 

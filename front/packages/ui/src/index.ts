@@ -20,3 +20,4 @@
 
 export * from "./navbar";
 export { BrowsePage } from "./browse";
+export { MovieDetails } from "./details";

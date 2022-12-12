@@ -19,28 +19,69 @@
  */
 
 import MIcon from "@expo/vector-icons/MaterialIcons";
-import { ComponentProps } from "react";
-import { Pressable, useTheme } from "yoshiki/native";
+import { ComponentProps, ComponentType } from "react";
+import { PressableProps } from "react-native";
+import { Pressable, px, useYoshiki } from "yoshiki/native";
+import { Breakpoint, ts } from ".";
 
 export type IconProps = {
 	icon: ComponentProps<typeof MIcon>["name"];
 	size?: number;
-	color?: string;
+	color?: Breakpoint<string>;
 };
 
-export const Icon = ({ icon, size, color }: IconProps) => {
-	return <MIcon name={icon} size={size ?? 24} color={color ?? "white"} />;
+export const Icon = ({ icon, size = 24, color }: IconProps) => {
+	const { css, theme } = useYoshiki();
+	return (
+		<MIcon
+			name={icon}
+			size={size}
+			{...css({ color: color ?? theme.colors.white, width: size, height: size })}
+		/>
+	);
 };
 
-export const IconButton = ({
+export const IconButton = <AsProps = PressableProps,>({
 	icon,
 	size,
 	color,
-	...props
-}: ComponentProps<typeof Pressable> & IconProps) => {
+	as,
+	...asProps
+}: IconProps & { as?: ComponentType<AsProps> } & AsProps) => {
+	const { css } = useYoshiki();
+
+	const Container = as ?? Pressable;
+
 	return (
-		<Pressable {...props}>
+		<Container
+			{...(css(
+				{
+					p: ts(1),
+					m: px(2),
+					borderRadius: 9999,
+				},
+				asProps,
+			) as AsProps)}
+		>
 			<Icon icon={icon} size={size} color={color} />
-		</Pressable>
+		</Container>
+	);
+};
+
+export const IconFab = <AsProps = PressableProps,>(
+	props: ComponentProps<typeof IconButton<AsProps>>,
+) => {
+	const { css, theme } = useYoshiki();
+
+	return (
+		<IconButton
+			colors={theme.colors.black}
+			{...(css(
+				{
+					bg: (theme) => theme.accent,
+				},
+				props,
+			) as any)}
+		/>
 	);
 };

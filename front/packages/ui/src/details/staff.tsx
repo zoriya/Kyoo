@@ -18,24 +18,30 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export { Header, Main, Nav, Footer } from "@expo/html-elements";
-export * from "./text";
-export * from "./themes";
-export * from "./icons";
-export * from "./links";
-export * from "./avatar";
-export * from "./image";
-export * from "./skeleton";
-export * from "./tooltip";
-export * from "./container";
+export {}
+// export const ShowStaff = ({ slug }: { slug: string }) => {
+// 	const { items, isError, error } = useInfiniteFetch(ShowStaff.query(slug));
+// 	const { t } = useTranslation("browse");
 
-export * from "./animated";
+// 	// TODO: handle infinite scroll
 
-export * from "./utils/breakpoints";
-export * from "./utils/nojs";
+// 	if (isError) return <ErrorComponent {...error} />;
 
-import { px } from "yoshiki/native";
+// 	return (
+// 		<HorizontalList title={t("show.staff")} noContent={t("show.staff-none")}>
+// 			{(items ?? [...Array(20)]).map((x, i) => (
+// 				<PersonAvatar
+// 					key={x ? x.id : i}
+// 					person={x}
+// 					sx={{ width: { xs: "7rem", lg: "10rem" }, flexShrink: 0, px: 2 }}
+// 				/>
+// 			))}
+// 		</HorizontalList>
+// 	);
+// };
 
-export const ts = (spacing: number) => {
-	return px(spacing * 8);
-};
+// ShowStaff.query = (slug: string): QueryIdentifier<Person> => ({
+// 	parser: PersonP,
+// 	path: ["shows", slug, "people"],
+// 	infinite: true,
+// });

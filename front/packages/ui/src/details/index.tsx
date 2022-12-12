@@ -18,24 +18,30 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export { Header, Main, Nav, Footer } from "@expo/html-elements";
-export * from "./text";
-export * from "./themes";
-export * from "./icons";
-export * from "./links";
-export * from "./avatar";
-export * from "./image";
-export * from "./skeleton";
-export * from "./tooltip";
-export * from "./container";
+import { Movie, MovieP, QueryIdentifier, QueryPage } from "@kyoo/models";
+import { ShowHeader } from "./header";
 
-export * from "./animated";
+const query = (slug: string): QueryIdentifier<Movie> => ({
+	parser: MovieP,
+	path: ["shows", slug],
+	params: {
+		fields: ["genres", "studio"],
+	},
+});
 
-export * from "./utils/breakpoints";
-export * from "./utils/nojs";
-
-import { px } from "yoshiki/native";
-
-export const ts = (spacing: number) => {
-	return px(spacing * 8);
+export const MovieDetails: QueryPage<{ slug: string }> = ({ slug }) => {
+	return (
+		<>
+			{/* <Head> */}
+			{/* 	<title>{makeTitle(data?.name)}</title> */}
+			{/* 	<meta name="description" content={data?.overview!} /> */}
+			{/* </Head> */}
+			<ShowHeader slug={slug} query={query(slug)} />
+			{/* <ShowStaff slug={slug} /> */}
+		</>
+	);
 };
+
+MovieDetails.getFetchUrls = ({ slug }) => [//query(slug),
+	// ShowStaff.query(slug), Navbar.query()
+];
