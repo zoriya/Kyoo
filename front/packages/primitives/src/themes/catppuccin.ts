@@ -63,7 +63,7 @@ export const catppuccin: ThemeBuilder = {
 		overlay1: "#9399b2",
 		default: {
 			background: "#1e1e2e",
-			accent: "##f5c2e7",
+			accent: "#f5c2e7",
 			divider: "#7f849c",
 			heading: "#cdd6f4",
 			paragraph: "#bac2de",

@@ -18,6 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import BrowsePage from "./index";
+import { BrowsePage } from "@kyoo/ui";
+import { withRoute } from "~/utils/router";
 
-export default BrowsePage;
+export default withRoute(BrowsePage);

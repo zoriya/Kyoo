@@ -132,8 +132,8 @@ export const ImageBackground = <AsProps = ViewProps,>({
 	as?: ComponentType<AsProps>;
 	gradient?: Partial<LinearGradientProps> | boolean;
 	children: ReactNode;
-	containerStyle?: StyleList<ViewStyle>;
-	imageStyle?: StyleList<ImageStyle>;
+	containerStyle?: YoshikiEnhanced<ViewStyle>;
+	imageStyle?: YoshikiEnhanced<ImageStyle>;
 } & AsProps &
 	Props) => {
 	const [isErrored, setErrored] = useState(false);

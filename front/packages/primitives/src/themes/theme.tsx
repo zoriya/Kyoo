@@ -23,6 +23,7 @@ import { Property } from "csstype";
 import { Theme, ThemeProvider } from "yoshiki";
 import { useTheme, useYoshiki } from "yoshiki/native";
 import "yoshiki";
+import "yoshiki/native";
 import { catppuccin } from "./catppuccin";
 
 type ThemeSettings = {
@@ -57,11 +58,19 @@ type Variant = {
 };
 
 declare module "yoshiki" {
-	// TODO: Add specifics colors
 	export interface Theme extends ThemeSettings, Mode, Variant {
-		builder: ThemeBuilder;
+		light: Mode & Variant;
+		dark: Mode & Variant;
+		user: Mode & Variant;
 	}
 }
+// declare module "yoshiki/native" {
+// 	export interface Theme extends ThemeSettings, Mode, Variant {
+// 		light: Mode & Variant;
+// 		dark: Mode & Variant;
+// 		user: Mode & Variant;
+// 	}
+// }
 
 export type { Theme } from "yoshiki";
 export type ThemeBuilder = ThemeSettings & {
@@ -69,14 +78,21 @@ export type ThemeBuilder = ThemeSettings & {
 	dark: Mode & { default: Variant };
 };
 
-export const selectMode = (theme: ThemeBuilder, mode: "light" | "dark"): Theme => {
-	const { light, dark, ...options } = theme;
+const selectMode = (theme: ThemeBuilder, mode: "light" | "dark"): Theme => {
+	const { light: lightBuilder, dark: darkBuilder, ...options } = theme;
+	const light = { ...lightBuilder, ...lightBuilder.default };
+	const dark = { ...darkBuilder, ...darkBuilder.default };
 	const value = mode === "light" ? light : dark;
-	const { default: def, ...modeOpt } = value;
-	return { ...options, ...modeOpt, ...def, variant: value.variant, builder: theme };
+	return {
+		...options,
+		...value,
+		light,
+		dark,
+		user: value,
+	};
 };
 
-export const switchVariant = (theme: Theme) => {
+const switchVariant = (theme: Theme) => {
 	return {
 		...theme,
 		...theme.variant,
@@ -122,7 +138,7 @@ export const ContrastArea = ({
 	contrastText?: boolean;
 }) => {
 	const oldTheme = useTheme();
-	const theme = selectMode(oldTheme.builder, mode);
+	const theme: Theme = { ...oldTheme, ...oldTheme[mode] };
 
 	return (
 		<ThemeProvider

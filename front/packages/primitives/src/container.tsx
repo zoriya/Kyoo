@@ -18,24 +18,27 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export { Header, Main, Nav, Footer } from "@expo/html-elements";
-export * from "./text";
-export * from "./themes";
-export * from "./icons";
-export * from "./links";
-export * from "./avatar";
-export * from "./image";
-export * from "./skeleton";
-export * from "./tooltip";
-export * from "./container";
+import { View, ViewProps } from "react-native";
+import { useYoshiki } from "yoshiki/native";
 
-export * from "./animated";
+export const Container = (props: ViewProps) => {
+	const { css } = useYoshiki();
 
-export * from "./utils/breakpoints";
-export * from "./utils/nojs";
-
-import { px } from "yoshiki/native";
-
-export const ts = (spacing: number) => {
-	return px(spacing * 8);
+	return (
+		<View
+			{...css(
+				{
+					display: "flex",
+					paddingHorizontal: "15px",
+					marginHorizontal: "auto",
+					width: {
+						sm: "540px",
+						md: "880px",
+						lg: "1170px",
+					},
+				},
+				props,
+			)}
+		/>
+	);
 };
