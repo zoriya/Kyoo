@@ -31,6 +31,7 @@ export const catppuccin: ThemeBuilder = {
 		appbar: "#e64553",
 		overlay0: "#9ca0b0",
 		overlay1: "#7c7f93",
+		link: "#1e66f5",
 		default: {
 			background: "#eff1f5",
 			accent: "#ea76cb",
@@ -61,6 +62,7 @@ export const catppuccin: ThemeBuilder = {
 		appbar: "#94e2d5",
 		overlay0: "#6c7086",
 		overlay1: "#9399b2",
+		link: "#89b4fa",
 		default: {
 			background: "#1e1e2e",
 			accent: "#f5c2e7",

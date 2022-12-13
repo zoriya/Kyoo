@@ -18,28 +18,13 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { View, ViewProps } from "react-native";
-import { percent, px, useYoshiki } from "yoshiki/native";
+import NextHead from "next/head";
 
-export const Container = (props: ViewProps) => {
-	const { css } = useYoshiki();
-
+export const Head = ({ title, description }: { title?: string | null; description?: string | null }) => {
 	return (
-		<View
-			{...css(
-				{
-					display: "flex",
-					paddingHorizontal: px(15),
-					marginHorizontal: "auto",
-					width: {
-						xs: percent(100),
-						sm: px(540),
-						md: px(880),
-						lg: px(1170),
-					},
-				},
-				props,
-			)}
-		/>
+		<NextHead>
+			{title && <title>{title + "- Kyoo"}</title>}
+			{description && <meta name="description" content={description} />}
+		</NextHead>
 	);
 };

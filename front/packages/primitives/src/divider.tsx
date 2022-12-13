@@ -18,26 +18,37 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { View, ViewProps } from "react-native";
-import { percent, px, useYoshiki } from "yoshiki/native";
+import { HR as EHR } from "@expo/html-elements";
+import { percent, px, Stylable, useYoshiki } from "yoshiki/native";
+import { alpha, ts } from ".";
 
-export const Container = (props: ViewProps) => {
+export const HR = ({
+	orientation,
+	...props
+}: { orientation: "vertical" | "horizontal" } & Stylable) => {
 	const { css } = useYoshiki();
 
 	return (
-		<View
+		<EHR
 			{...css(
-				{
-					display: "flex",
-					paddingHorizontal: px(15),
-					marginHorizontal: "auto",
-					width: {
-						xs: percent(100),
-						sm: px(540),
-						md: px(880),
-						lg: px(1170),
+				[
+					{
+						bg: (theme) => alpha(theme.overlay0, 0.7),
+						borderWidth: 0,
 					},
-				},
+					orientation === "vertical" && {
+						width: px(1),
+						height: "auto",
+						marginVertical: ts(1),
+						marginHorizontal: ts(2),
+					},
+					orientation === "horizontal" && {
+						height: px(1),
+						width: "auto",
+						marginHorizontal: ts(1),
+						marginVertical: ts(2),
+					},
+				],
 				props,
 			)}
 		/>

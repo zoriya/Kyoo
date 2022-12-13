@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export { Header, Main, Nav, Footer } from "@expo/html-elements";
+export { Header, Main, Nav, Footer, UL } from "@expo/html-elements";
 export * from "./text";
 export * from "./themes";
 export * from "./icons";
@@ -28,11 +28,13 @@ export * from "./image";
 export * from "./skeleton";
 export * from "./tooltip";
 export * from "./container";
+export * from "./divider";
 
 export * from "./animated";
 
 export * from "./utils/breakpoints";
 export * from "./utils/nojs";
+export * from "./utils/head";
 
 import { px } from "yoshiki/native";
 

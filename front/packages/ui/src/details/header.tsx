@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Movie, QueryIdentifier, Show, getDisplayDate } from "@kyoo/models";
+import { Movie, QueryIdentifier, Show, getDisplayDate, Genre, Studio } from "@kyoo/models";
 import {
 	Container,
 	H1,
@@ -31,36 +31,32 @@ import {
 	Link,
 	IconButton,
 	IconFab,
+	Head,
+	HR,
+	H2,
+	UL,
+	LI,
+	A,
+	ts,
 } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
-import { Platform, StyleSheet, View } from "react-native";
-import { em, percent, rem, vh, useYoshiki, Stylable } from "yoshiki/native";
-import { Fetch, WithLoading } from "../fetch";
+import { StyleSheet, View } from "react-native";
+import {
+	Theme,
+	sm,
+	md,
+	px,
+	min,
+	max,
+	em,
+	percent,
+	rem,
+	vh,
+	useYoshiki,
+	Stylable,
+} from "yoshiki/native";
+import { Fetch } from "../fetch";
 import { Navbar } from "../navbar";
-
-// const StudioText = ({
-// 	studio,
-// 	loading = false,
-// 	sx,
-// }: {
-// 	studio?: Studio | null;
-// 	loading?: boolean;
-// 	sx?: SxProps;
-// }) => {
-// 	const { t } = useTranslation("browse");
-
-// 	if (!loading && !studio) return null;
-// 	return (
-// 		<Typography sx={sx}>
-// 			{t("show.studio")}:{" "}
-// 			{loading ? (
-// 				<Skeleton width="5rem" sx={{ display: "inline-flex" }} />
-// 			) : (
-// 				<Link href={`/studio/${studio!.slug}`}>{studio!.name}</Link>
-// 			)}
-// 		</Typography>
-// 	);
-// };
 
 const TitleLine = ({
 	isLoading,
@@ -68,6 +64,7 @@ const TitleLine = ({
 	name,
 	date,
 	poster,
+	studio,
 	...props
 }: {
 	isLoading: boolean;
@@ -75,6 +72,7 @@ const TitleLine = ({
 	name?: string;
 	date?: string;
 	poster?: string | null;
+	studio?: Studio | null;
 } & Stylable) => {
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
@@ -83,162 +81,197 @@ const TitleLine = ({
 		<Container
 			{...css(
 				{
-					flexDirection: { xs: "column", sm: "row" },
-					alignItems: { xs: "center", sm: "flex-start" },
+					flexDirection: { xs: "column", md: "row" },
 				},
 				props,
 			)}
 		>
-			<Poster
-				src={poster}
-				alt={name}
-				isLoading={isLoading}
-				layout={{
-					width: { xs: percent(50), md: percent(25) },
-				}}
-				{...css({ maxWidth: { xs: px(175), sm: "unset" }, flexShrink: 0 })}
-			/>
 			<View
 				{...css({
-					alignSelf: { xs: "center", sm: "flex-end", md: "center" },
+					flexDirection: { xs: "column", sm: "row" },
 					alignItems: { xs: "center", sm: "flex-start" },
-					paddingLeft: { sm: em(2.5) },
-					flexShrink: 1,
+					flexGrow: 1,
 				})}
 			>
-				<Skeleton {...css({ width: rem(15), height: rem(3), marginBottom: rem(0.5) })}>
-					{isLoading || (
-						<H1
-							{...css({
-								fontWeight: { md: "900" },
-								fontSize: rem(3),
-								marginTop: 0,
-								marginBottom: rem(0.5),
-								textAlign: { xs: "center", sm: "flex-start" },
-								color: (theme) => ({ xs: theme.user.heading, md: theme.heading }),
-							})}
-						>
-							{name}
-						</H1>
-					)}
-				</Skeleton>
-				{(isLoading || date) && (
-					<Skeleton
-						{...css({
-							width: rem(5),
-							height: rem(1.5),
-							marginBottom: rem(0.5),
-						})}
-					>
+				<Poster
+					src={poster}
+					alt={name}
+					isLoading={isLoading}
+					layout={{
+						width: { xs: percent(50), md: percent(25) },
+					}}
+					{...css({ maxWidth: { xs: px(175), sm: "unset" }, flexShrink: 0 })}
+				/>
+				<View
+					{...css({
+						alignSelf: { xs: "center", sm: "flex-end", md: "center" },
+						alignItems: { xs: "center", sm: "flex-start" },
+						paddingLeft: { sm: em(2.5) },
+						flexShrink: 1,
+						flexGrow: 1,
+					})}
+				>
+					<Skeleton {...css({ width: rem(15), height: rem(3) })}>
 						{isLoading || (
-							<P
+							<H1
 								{...css({
-									fontWeight: "300",
-									fontSize: rem(1.5),
-									letterSpacing: 0,
-									marginTop: 0,
-									marginBottom: rem(0.5),
-									textAlign: { xs: "center", sm: "flex-start" },
-									color: (theme) => ({ xs: theme.user.heading, md: theme.heading }),
+									fontWeight: { md: "900" },
+									textAlign: { xs: "center", sm: "left" },
+									color: (theme: Theme) => ({ xs: theme.user.heading, md: theme.heading }),
 								})}
 							>
-								{date}
-							</P>
+								{name}
+							</H1>
 						)}
 					</Skeleton>
-				)}
-				<View {...css({ flexDirection: "row" })} /*sx={{ "& > *": { m: ".3rem !important" } }} */>
-					<IconFab
-						icon="play-arrow"
-						as={Link}
-						href={`/watch/${slug}`}
-						color={{ xs: theme.user.colors.black, md: theme.colors.black }}
-						{...css({ bg: { xs: theme.user.accent, md: theme.accent } })}
-						{...tooltip(t("show.play"))}
-					/>
-					<IconButton
-						icon="local-movies"
-						color={{ xs: theme.user.colors.black, md: theme.colors.white }}
-						{...tooltip(t("show.trailer"))}
-					/>
+					{(isLoading || date) && (
+						<Skeleton
+							{...css({
+								width: rem(5),
+								height: rem(1.5),
+							})}
+						>
+							{isLoading || (
+								<P
+									{...css({
+										fontWeight: "300",
+										fontSize: rem(1.5),
+										letterSpacing: 0,
+										textAlign: { xs: "center", sm: "left" },
+										color: (theme: Theme) => ({ xs: theme.user.heading, md: theme.heading }),
+									})}
+								>
+									{date}
+								</P>
+							)}
+						</Skeleton>
+					)}
+					<View {...css({ flexDirection: "row" })}>
+						<IconFab
+							icon="play-arrow"
+							as={Link}
+							href={`/watch/${slug}`}
+							color={{ xs: theme.user.colors.black, md: theme.colors.black }}
+							{...css({ bg: { xs: theme.user.accent, md: theme.accent } })}
+							{...tooltip(t("show.play"))}
+						/>
+						<IconButton
+							icon="local-movies"
+							color={{ xs: theme.user.colors.black, md: theme.colors.white }}
+							{...tooltip(t("show.trailer"))}
+						/>
+					</View>
 				</View>
 			</View>
-			{/* <View */}
-			{/* 	{...css({ */}
-			{/* 		display: { xs: "none", md: "flex" }, */}
-			{/* 		flexDirection: "column", */}
-			{/* 		alignSelf: "flex-end", */}
-			{/* 		paddingRight: px(15), */}
-			{/* 	})} */}
-			{/* > */}
-			{/* 	{(isLoading || logo || true) && ( */}
-			{/* 		<Image */}
-			{/* 			src={logo} */}
-			{/* 			alt="" */}
-			{/* 			layout={{ */}
-			{/* 				width: "100%", */}
-			{/* 				height: px(100), */}
-			{/* 			}} */}
-			{/* 			// sx={{ display: { xs: "none", lg: "unset" } }} */}
-			{/* 		/> */}
-			{/* 	)} */}
-			{/* 	{/1* <StudioText loading={!data} studio={data?.studio} sx={{ mt: "auto", mb: 3 }} /> *1/} */}
-			{/* </View> */}
+			<View
+				{...css([
+					{
+						paddingTop: { xs: ts(3), sm: ts(8) },
+						alignSelf: { xs: "flex-start", md: "flex-end" },
+						justifyContent: "flex-end",
+						flexDirection: "column",
+					},
+					md({
+						position: "absolute",
+						top: 0,
+						bottom: 0,
+						right: 0,
+						width: percent(25),
+						height: percent(100),
+						paddingRight: ts(3),
+					}),
+				])}
+			>
+				<P
+					{...css({
+						color: (theme) => theme.user.paragraph,
+					})}
+				>
+					{t("show.studio")}:{" "}
+					{isLoading ? (
+						<Skeleton />
+					) : (
+						<A href={`/studio/${studio!.slug}`} {...css({ color: (theme) => theme.user.link })}>
+							{studio!.name}
+						</A>
+					)}
+				</P>
+			</View>
 		</Container>
 	);
 };
 
-// const Tata = () => {
-// 	return (
-// 		<Container sx={{ pt: 2 }}>
-// 			<Typography align="justify" sx={{ flexBasis: 0, flexGrow: 1, pt: { sm: 2 } }}>
-// 				{data
-// 					? data.overview ?? t("show.noOverview")
-// 					: [...Array(4)].map((_, i) => <Skeleton key={i} />)}
-// 			</Typography>
-// 			<Divider
-// 				orientation="vertical"
-// 				variant="middle"
-// 				flexItem
-// 				sx={{ mx: 2, display: { xs: "none", sm: "block" } }}
-// 			/>
-// 			<Box sx={{ flexBasis: "25%", display: { xs: "none", sm: "block" } }}>
-// 				<StudioText
-// 					loading={!data}
-// 					studio={data?.studio}
-// 					sx={{ display: { xs: "none", sm: "block", md: "none" }, pb: 2 }}
-// 				/>
+const Description = ({
+	isLoading,
+	overview,
+	genres,
+	...props
+}: {
+	isLoading: boolean;
+	overview?: string | null;
+	genres?: Genre[];
+} & Stylable) => {
+	const { t } = useTranslation();
+	const { css } = useYoshiki();
 
-// 				<Typography variant="h4" component="h2">
-// 					{t("show.genre")}
-// 				</Typography>
-// 				{!data || data.genres?.length ? (
-// 					<ul>
-// 						{(data ? data.genres! : [...Array(3)]).map((genre, i) => (
-// 							<li key={genre?.id ?? i}>
-// 								<Typography>
-// 									{genre ? <Link href={`/genres/${genre.slug}`}>{genre.name}</Link> : <Skeleton />}
-// 								</Typography>
-// 							</li>
-// 						))}
-// 					</ul>
-// 				) : (
-// 					<Typography>{t("show.genre-none")}</Typography>
-// 				)}
-// 			</Box>
-// 		</Container>
-// 	);
-// };
+	return (
+		<Container {...css({ flexDirection: { xs: "column", sm: "row" } }, props)}>
+			<P
+				{...css({
+					display: { xs: "flex", sm: "none" },
+					color: (theme: Theme) => theme.user.paragraph,
+				})}
+			>
+				{t("show.genre")}:{" "}
+				{(isLoading ? [...Array(3)] : genres!).map((genre, i) => (
+					<>
+						{i !== 0 && ", "}
+						{isLoading ? (
+							<Skeleton key={i} />
+						) : (
+							<A key={genre.slug} href={`/genres/${genre.slug}`}>
+								{genre.name}
+							</A>
+						)}
+					</>
+				))}
+			</P>
 
-const min = Platform.OS === "web"
-	? (...values: number[]): number => `min(${values.join(", ")})` as unknown as number
-	: (...values: number[]): number => Math.min(...values);
-const max = Platform.OS === "web"
-	? (...values: number[]): number => `max(${values.join(", ")})` as unknown as number
-	: (...values: number[]): number => Math.max(...values);
-const px = Platform.OS === "web"
-	? (value: number): number => `${value}px` as unknown as number
-	: (value: number): number => value;
+			<Skeleton
+				lines={4}
+				{...css({ width: percent(100), flexBasis: 0, flexGrow: 1, paddingTop: ts(4) })}
+			>
+				{isLoading || (
+					<P {...css({ flexBasis: 0, flexGrow: 1, textAlign: "justify", paddingTop: ts(4) })}>
+						{overview ?? t("show.noOverview")}
+					</P>
+				)}
+			</Skeleton>
+			<HR
+				orientation="vertical"
+				{...css({ marginX: ts(2), display: { xs: "none", sm: "flex" } })}
+			/>
+			<View {...css({ flexBasis: percent(25), display: { xs: "none", sm: "flex" } })}>
+				<H2>{t("show.genre")}</H2>
+				{isLoading || genres?.length ? (
+					<UL>
+						{(isLoading ? [...Array(3)] : genres!).map((genre, i) => (
+							<LI key={genre?.id ?? i}>
+								{isLoading ? (
+									<Skeleton {...css({ marginBottom: 0 })} />
+								) : (
+									<A href={`/genres/${genre.slug}`}>{genre.name}</A>
+								)}
+							</LI>
+						))}
+					</UL>
+				) : (
+					<P>{t("show.genre-none")}</P>
+				)}
+			</View>
+		</Container>
+	);
+};
 
 export const ShowHeader = ({
 	query,
@@ -256,19 +289,22 @@ export const ShowHeader = ({
 			<Navbar {...css({ bg: "transparent" })} />
 			<Fetch query={query}>
 				{({ isLoading, ...data }) => (
-					<>
-						{/* TODO: HEAD element for SEO*/}
+					<Main {...css(StyleSheet.absoluteFillObject)}>
+						<Head title={data?.name} description={data?.overview} />
 						{/* TODO: Add a shadow on navbar items */}
 						{/* TODO: Put the navbar outside of the scrollbox */}
 						<ImageBackground
 							src={data?.thumbnail}
 							alt=""
-							as={Main}
 							containerStyle={{
-								height: { xs: vh(40), sm: min(vh(60), px(750)), lg: vh(70) },
-								minHeight: { xs: px(350), sm: px(500), lg: px(600) },
+								height: {
+									xs: vh(40),
+									sm: min(vh(60), px(750)),
+									md: min(vh(60), px(680)),
+									lg: vh(70),
+								},
+								minHeight: { xs: px(350), sm: px(300), md: px(400), lg: px(600) },
 							}}
-							{...css(StyleSheet.absoluteFillObject)}
 						>
 							<TitleLine
 								isLoading={isLoading}
@@ -276,31 +312,24 @@ export const ShowHeader = ({
 								name={data?.name}
 								date={data ? getDisplayDate(data as any) : undefined}
 								poster={data?.poster}
+								studio={data?.studio}
 								{...css({
-									marginTop: { xs: max(vh(20), px(200)), sm: vh(45), md: vh(35) }
+									marginTop: {
+										xs: max(vh(20), px(200)),
+										sm: vh(45),
+										md: max(vh(30), px(150)),
+										lg: max(vh(35), px(200)),
+									},
 								})}
 							/>
-							{/* <Container sx={{ display: { xs: "block", sm: "none" }, pt: 3 }}> */}
-							{/* 	<StudioText loading={!data} studio={data?.studio} sx={{ mb: 1 }} /> */}
-							{/* 	<Typography sx={{ mb: 1 }}> */}
-							{/* 		{t("show.genre")} */}
-							{/* 		{": "} */}
-							{/* 		{!data ? ( */}
-							{/* 			<Skeleton width="10rem" sx={{ display: "inline-flex" }} /> */}
-							{/* 		) : data?.genres && data.genres.length ? ( */}
-							{/* 			data.genres.map((genre, i) => [ */}
-							{/* 				i > 0 && ", ", */}
-							{/* 				<Link key={genre.id} href={`/genres/${genre.slug}`}> */}
-							{/* 					{genre.name} */}
-							{/* 				</Link>, */}
-							{/* 			]) */}
-							{/* 		) : ( */}
-							{/* 			t("show.genre-none") */}
-							{/* 		)} */}
-							{/* 	</Typography> */}
-							{/* </Container> */}
 						</ImageBackground>
-					</>
+						<Description
+							isLoading={isLoading}
+							overview={data?.overview}
+							genres={data?.genres}
+							{...css({ paddingTop: { xs: 0, md: ts(2) } })}
+						/>
+					</Main>
 				)}
 			</Fetch>
 		</>

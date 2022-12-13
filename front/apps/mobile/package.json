@@ -31,7 +31,7 @@
 		"react-native-safe-area-context": "4.4.1",
 		"react-native-screens": "~3.18.0",
 		"react-native-svg": "13.4.0",
-		"yoshiki": "0.2.11"
+		"yoshiki": "0.3.1"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.19.3",
