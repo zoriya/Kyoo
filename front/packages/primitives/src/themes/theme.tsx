@@ -37,6 +37,7 @@ type Mode = {
 	appbar: Property.Color;
 	overlay0: Property.Color;
 	overlay1: Property.Color;
+	link: Property.Color;
 	variant: Variant;
 	colors: {
 		red: Property.Color;
@@ -64,13 +65,13 @@ declare module "yoshiki" {
 		user: Mode & Variant;
 	}
 }
-// declare module "yoshiki/native" {
-// 	export interface Theme extends ThemeSettings, Mode, Variant {
-// 		light: Mode & Variant;
-// 		dark: Mode & Variant;
-// 		user: Mode & Variant;
-// 	}
-// }
+declare module "yoshiki/native" {
+	export interface Theme extends ThemeSettings, Mode, Variant {
+		light: Mode & Variant;
+		dark: Mode & Variant;
+		user: Mode & Variant;
+	}
+}
 
 export type { Theme } from "yoshiki";
 export type ThemeBuilder = ThemeSettings & {
@@ -158,5 +159,5 @@ export const ContrastArea = ({
 };
 
 export const alpha = (color: Property.Color, alpha: number) => {
-	return color + (alpha * 255).toString(16);
+	return color + Math.round(alpha * 255).toString(16);
 };

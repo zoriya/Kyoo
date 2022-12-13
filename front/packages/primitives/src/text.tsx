@@ -19,8 +19,8 @@
  */
 
 import { ComponentType, ComponentProps } from "react";
-import { Platform, TextProps } from "react-native";
-import { rem, useYoshiki } from "yoshiki/native";
+import { Platform, Text, TextProps, TextStyle } from "react-native";
+import { percent, px, rem, useYoshiki } from "yoshiki/native";
 import {
 	H1 as EH1,
 	H2 as EH2,
@@ -29,11 +29,14 @@ import {
 	H5 as EH5,
 	H6 as EH6,
 	P as EP,
+	LI as ELI,
 } from "@expo/html-elements";
+import { ts } from ".";
 
 const styleText = (
 	Component: ComponentType<ComponentProps<typeof EP>>,
 	type?: "header" | "sub",
+	custom?: TextStyle,
 ) => {
 	const Text = (props: ComponentProps<typeof EP>) => {
 		const { css, theme } = useYoshiki();
@@ -43,16 +46,13 @@ const styleText = (
 				{...css(
 					[
 						{
-							// TODO: use custom fonts on mobile also.
-							fontFamily:
-								Platform.OS === "web"
-									? type === "header"
-										? theme.fonts.heading
-										: theme.fonts.paragraph
-									: undefined,
+							marginTop: 0,
+							marginBottom: rem(0.5),
+							// fontFamily: type === "header" ? theme.fonts.heading : theme.fonts.paragraph,
 							color: type === "header" ? theme.heading : theme.paragraph,
 						},
 						type === "sub" && { fontWeight: "300", opacity: 0.8, fontSize: rem(0.8) },
+						custom,
 					],
 					props as TextProps,
 				)}
@@ -62,12 +62,31 @@ const styleText = (
 	return Text;
 };
 
-export const H1 = styleText(EH1, "header");
-export const H2 = styleText(EH2, "header");
+export const H1 = styleText(EH1, "header", { fontSize: rem(3) });
+export const H2 = styleText(EH2, "header", { fontSize: rem(2) });
 export const H3 = styleText(EH3, "header");
 export const H4 = styleText(EH4, "header");
 export const H5 = styleText(EH5, "header");
 export const H6 = styleText(EH6, "header");
 export const Heading = styleText(EP, "header");
-export const P = styleText(EP);
+export const P = styleText(EP, undefined, { fontSize: rem(1) });
 export const SubP = styleText(EP, "sub");
+
+export const LI = ({ children, ...props }: TextProps) => {
+	const { css } = useYoshiki();
+
+	return (
+		<P accessibilityRole="listitem" {...props}>
+			<Text
+				{...css({
+					height: percent(100),
+					marginBottom: rem(0.5),
+					paddingRight: ts(1),
+				})}
+			>
+				{String.fromCharCode(0x2022)}
+			</Text>
+			{children}
+		</P>
+	);
+};

@@ -43,10 +43,13 @@ export const A = ({
 			textProps={css(
 				{
 					// TODO: use a real font here.
-					fontFamily: Platform.OS === "web" ? theme.fonts.paragraph : undefined,
-					color: theme.paragraph,
+					// fontFamily: theme.fonts.paragraph,
+					color: theme.link,
 				},
-				props,
+				{
+					selectable: true,
+					...props,
+				},
 			)}
 		>
 			{children}
@@ -83,8 +86,8 @@ export const Link = ({
 			})}
 		>
 			{Platform.select<ReactNode>({
-				android: <View {...props}>{children}</View>,
-				ios: <View {...props}>{children}</View>,
+				android: <View {...noFocusProps}>{children}</View>,
+				ios: <View {...noFocusProps}>{children}</View>,
 				default: children,
 			})}
 		</LinkCore>

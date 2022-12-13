@@ -46,11 +46,13 @@ export const SkeletonCss = () => (
 export const Skeleton = ({
 	children,
 	show: forcedShow,
+	lines = 1,
 	variant = "text",
 	...props
 }: Omit<ViewProps, "children"> & {
 	children?: JSX.Element | JSX.Element[] | boolean | null;
 	show?: boolean;
+	lines?: number;
 	variant?: "text" | "round" | "custom";
 }) => {
 	const { css, theme } = useYoshiki();
@@ -65,13 +67,14 @@ export const Skeleton = ({
 				[
 					{
 						position: "relative",
-						overflow: "hidden",
-						borderRadius: px(6),
 					},
-					variant === "text" && {
-						width: percent(75),
-						height: rem(1.2),
-					},
+					lines === 1 && { overflow: "hidden", borderRadius: px(6) },
+					variant === "text" &&
+						lines === 1 && {
+							width: percent(75),
+							height: rem(1.2),
+							marginBottom: rem(0.5),
+						},
 					variant === "round" && {
 						borderRadius: 9999999,
 					},
@@ -81,56 +84,68 @@ export const Skeleton = ({
 		>
 			<AnimatePresence>
 				{children}
-				{(forcedShow || !children || children === true) && (
-					<MotiView
-						key="skeleton"
-						// No clue why it is a number on mobile and a string on web but /shrug
-						animate={{ opacity: Platform.OS === "web" ? "1" : 1 }}
-						exit={{ opacity: 0 }}
-						transition={{ type: "timing" }}
-						onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
-						{...css(
-							{
-								bg: (theme) => theme.overlay0,
-								position: "absolute",
-								top: 0,
-								bottom: 0,
-								left: 0,
-								right: 0,
-							},
-							hiddenIfNoJs,
-						)}
-					>
-						<LinearGradient
-							start={{ x: 0, y: 0.5 }}
-							end={{ x: 1, y: 0.5 }}
-							colors={["transparent", theme.overlay1, "transparent"]}
-							transition={{
-								loop: true,
-								repeatReverse: false,
-							}}
-							animate={{
-								translateX: width
-									? [perc(-100), { value: perc(100), type: "timing", duration: 800, delay: 800 }]
-									: undefined,
-							}}
-							{...css([
-								{
-									position: "absolute",
-									top: 0,
-									bottom: 0,
-									left: 0,
-									right: 0,
-								},
-								Platform.OS === "web" && {
-									// @ts-ignore Web only properties
-									animation: "skeleton 1.6s linear 0.5s infinite",
-									transform: "translateX(-100%)",
-								},
-							])}
-						/>
-					</MotiView>
-				)}
+				{(forcedShow || !children || children === true) &&
+					[...Array(lines)].map((_, i) => (
+						<MotiView
+							key={`skeleton_${i}`}
+							// No clue why it is a number on mobile and a string on web but /shrug
+							animate={{ opacity: Platform.OS === "web" ? "1" : 1 }}
+							exit={{ opacity: 0 }}
+							transition={{ type: "timing" }}
+							onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+							{...css(
+								[
+									{
+										bg: (theme) => theme.overlay0,
+									},
+									lines === 1 && {
+										position: "absolute",
+										top: 0,
+										bottom: 0,
+										left: 0,
+										right: 0,
+									},
+									lines !== 1 && {
+										width: i === lines - 1 ? percent(40) : percent(100),
+										height: rem(1.2),
+										marginBottom: rem(0.5),
+										overflow: "hidden",
+										borderRadius: px(6),
+									},
+								],
+								hiddenIfNoJs,
+							)}
+						>
+							<LinearGradient
+								start={{ x: 0, y: 0.5 }}
+								end={{ x: 1, y: 0.5 }}
+								colors={["transparent", theme.overlay1, "transparent"]}
+								transition={{
+									loop: true,
+									repeatReverse: false,
+								}}
+								animate={{
+									translateX: width
+										? [perc(-100), { value: perc(100), type: "timing", duration: 800, delay: 800 }]
+										: undefined,
+								}}
+								{...css([
+									{
+										position: "absolute",
+										top: 0,
+										bottom: 0,
+										left: 0,
+										right: 0,
+									},
+									Platform.OS === "web" && {
+										// @ts-ignore Web only properties
+										animation: "skeleton 1.6s linear 0.5s infinite",
+										transform: "translateX(-100%)",
+									},
+								])}
+							/>
+						</MotiView>
+					))}
 			</AnimatePresence>
 		</View>
 	);
