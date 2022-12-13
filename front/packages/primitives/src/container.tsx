@@ -18,15 +18,20 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { ComponentType } from "react";
 import { View, ViewProps } from "react-native";
 import { percent, px, useYoshiki } from "yoshiki/native";
 
-export const Container = (props: ViewProps) => {
+export const Container = <AsProps = ViewProps,>({
+	as,
+	...props
+}: { as?: ComponentType<AsProps> } & AsProps) => {
 	const { css } = useYoshiki();
 
+	const As = as ?? View;
 	return (
-		<View
-			{...css(
+		<As
+			{...(css(
 				{
 					display: "flex",
 					paddingHorizontal: px(15),
@@ -39,7 +44,7 @@ export const Container = (props: ViewProps) => {
 					},
 				},
 				props,
-			)}
+			) as any)}
 		/>
 	);
 };

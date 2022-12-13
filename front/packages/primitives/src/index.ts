@@ -31,13 +31,4 @@ export * from "./container";
 export * from "./divider";
 
 export * from "./animated";
-
-export * from "./utils/breakpoints";
-export * from "./utils/nojs";
-export * from "./utils/head";
-
-import { px } from "yoshiki/native";
-
-export const ts = (spacing: number) => {
-	return px(spacing * 8);
-};
+export * from "./utils";

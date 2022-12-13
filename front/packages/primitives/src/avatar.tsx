@@ -18,26 +18,31 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { View, ViewStyle } from "react-native";
+import { View } from "react-native";
 import { Image } from "./image";
-import { useYoshiki, px } from "yoshiki/native";
+import { useYoshiki, px, Stylable } from "yoshiki/native";
 import { Icon } from "./icons";
+import { Skeleton } from "./skeleton";
 
 export const Avatar = ({
 	src,
 	alt,
 	size = px(24),
+	isLoading = false,
+	...props
 }: {
-	src?: string;
-	alt: string;
+	src?: string | null;
+	alt?: string;
 	size?: number;
-}) => {
+	isLoading?: boolean;
+} & Stylable) => {
 	const { css } = useYoshiki();
 
+	if (isLoading) return <Skeleton variant="round" {...css({ width: size, height: size })} />;
 	return (
-		<View {...css({ borderRadius: size / 2, width: size, height: size })}>
+		<View {...css({ borderRadius: size / 2, width: size, height: size }, props)}>
 			{src ? (
-				<Image src={src} alt={alt} width={size} height={size} />
+				<Image src={src} alt={alt} layout={{ width: size, height: size }} />
 			) : (
 				<Icon icon="account-circle" size={size} />
 			)}

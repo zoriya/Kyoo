@@ -18,30 +18,40 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export {}
-// export const ShowStaff = ({ slug }: { slug: string }) => {
-// 	const { items, isError, error } = useInfiniteFetch(ShowStaff.query(slug));
-// 	const { t } = useTranslation("browse");
+import { Person, PersonP, QueryIdentifier } from "@kyoo/models";
+import { useTranslation } from "react-i18next";
+import { InfiniteFetch } from "../fetch-infinite";
+import { PersonAvatar } from "./person";
 
-// 	// TODO: handle infinite scroll
+export const Staff = ({ slug }: { slug: string }) => {
+	const { t } = useTranslation();
 
-// 	if (isError) return <ErrorComponent {...error} />;
+	// TODO: handle infinite scroll
 
-// 	return (
-// 		<HorizontalList title={t("show.staff")} noContent={t("show.staff-none")}>
-// 			{(items ?? [...Array(20)]).map((x, i) => (
-// 				<PersonAvatar
-// 					key={x ? x.id : i}
-// 					person={x}
-// 					sx={{ width: { xs: "7rem", lg: "10rem" }, flexShrink: 0, px: 2 }}
-// 				/>
-// 			))}
-// 		</HorizontalList>
-// 	);
-// };
+	return (
+		<InfiniteFetch
+			query={Staff.query(slug)}
+			layout={{ numColumns: 0, size: PersonAvatar.width }}
+			placeholderCount={20}
+		>
+			{/* <HorizontalList title={t("show.staff")} noContent={t("show.staff-none")}> */}
+			{(item, key) => (
+				<PersonAvatar
+					key={key}
+					isLoading={item.isLoading}
+					slug={item?.slug}
+					name={item?.name}
+					role={item?.type ? `${item?.type} (${item?.role})` : item?.role}
+					poster={item?.poster}
+					// sx={{ width: { xs: "7rem", lg: "10rem" }, flexShrink: 0, px: 2 }}
+				/>
+			)}
+		</InfiniteFetch>
+	);
+};
 
-// ShowStaff.query = (slug: string): QueryIdentifier<Person> => ({
-// 	parser: PersonP,
-// 	path: ["shows", slug, "people"],
-// 	infinite: true,
-// });
+Staff.query = (slug: string): QueryIdentifier<Person> => ({
+	parser: PersonP,
+	path: ["shows", slug, "people"],
+	infinite: true,
+});

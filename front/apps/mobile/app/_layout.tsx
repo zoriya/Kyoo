@@ -57,7 +57,7 @@ const ThemedStack = () => {
 				headerStyle: {
 					backgroundColor: theme.appbar,
 				},
-				headerTintColor: "#fff",
+				headerTintColor: theme.colors.white,
 				headerTitleStyle: {
 					fontWeight: "bold",
 				},

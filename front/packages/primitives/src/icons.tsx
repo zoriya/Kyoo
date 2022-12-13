@@ -22,7 +22,7 @@ import MIcon from "@expo/vector-icons/MaterialIcons";
 import { ComponentProps, ComponentType } from "react";
 import { PressableProps } from "react-native";
 import { Pressable, px, useYoshiki } from "yoshiki/native";
-import { Breakpoint, ts } from ".";
+import { Breakpoint, ts } from "./utils";
 
 export type IconProps = {
 	icon: ComponentProps<typeof MIcon>["name"];
