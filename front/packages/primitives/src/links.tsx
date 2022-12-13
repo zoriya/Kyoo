@@ -78,7 +78,7 @@ export const Link = ({
 		},
 		default: {},
 	});
-	const Wrapper = radiusStyle ? View : Fragment;
+	const Wrapper = radiusStyle.style ? View : Fragment;
 
 	return (
 		<Wrapper {...radiusStyle}>

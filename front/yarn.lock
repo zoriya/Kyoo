@@ -2322,6 +2322,7 @@ __metadata:
   dependencies:
     "@kyoo/models": "workspace:^"
     "@kyoo/primitives": "workspace:^"
+    "@shopify/flash-list": ^1.4.0
     "@types/react": ^18.0.25
     react-native-svg: ^13.6.0
     typescript: ^4.9.3
@@ -3153,6 +3154,20 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 49a82512bf2b3622e1d7f1a86dc2837f7ee8809131fde0ffe0ced41ede001f77bf81741ea5d65b803ad76d669f146f8cd53702daf3387c9f89402b32f9667110
+  languageName: node
+  linkType: hard
+
+"@shopify/flash-list@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "@shopify/flash-list@npm:1.4.0"
+  dependencies:
+    recyclerlistview: 4.2.0
+    tslib: 2.4.0
+  peerDependencies:
+    "@babel/runtime": "*"
+    react: "*"
+    react-native: "*"
+  checksum: c6510b0d6ae6404fe92ede0c918ba184bc2b27ed39c627eebad16a6542792cb34e750e2004e1a9ce165f9d729f1af0555cba1e4c224fd52bfd2a600fdc9e2a65
   languageName: node
   linkType: hard
 
@@ -9834,15 +9849,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"next-transpile-modules@npm:^10.0.0":
-  version: 10.0.0
-  resolution: "next-transpile-modules@npm:10.0.0"
-  dependencies:
-    enhanced-resolve: ^5.10.0
-  checksum: 3300fc7081f63b2c9487588db7cbe718f209dfd2111adec22d9c8af0e3c8ade2d95fd45f91e045546d78d98cafc78a49431de9a623360d33831b5e694bf007c9
-  languageName: node
-  linkType: hard
-
 "next@npm:13.0.5":
   version: 13.0.5
   resolution: "next@npm:13.0.5"
@@ -10923,17 +10929,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-infinite-scroll-component@npm:^6.1.0":
-  version: 6.1.0
-  resolution: "react-infinite-scroll-component@npm:6.1.0"
-  dependencies:
-    throttle-debounce: ^2.1.0
-  peerDependencies:
-    react: ">=16.0.0"
-  checksum: 3708398934366df907dbad215247ebc1033221957ce7e32289ea31750cce70aa16513e2d03743e06c8b868ac7c542d12d5dbb6c830fd408433a4762f3cb5ecfb
-  languageName: node
-  linkType: hard
-
 "react-is@npm:^16.12.0 || ^17.0.0 || ^18.0.0, react-is@npm:^18.2.0":
   version: 18.2.0
   resolution: "react-is@npm:18.2.0"
@@ -11231,6 +11226,20 @@ __metadata:
     react: ">= 15.2.1"
     react-native: ">= 0.30.0"
   checksum: e18e36c0783b528b5244ed0b7eabf231c49ec7b0a97c947a6f596900165a4d7bbc3216b23084a8a2cb8d33b98fb38fc4a64254cf0b6431a0d0fa3ca2e7129fbc
+  languageName: node
+  linkType: hard
+
+"recyclerlistview@npm:4.2.0":
+  version: 4.2.0
+  resolution: "recyclerlistview@npm:4.2.0"
+  dependencies:
+    lodash.debounce: 4.0.8
+    prop-types: 15.8.1
+    ts-object-utils: 0.0.5
+  peerDependencies:
+    react: ">= 15.2.1"
+    react-native: ">= 0.30.0"
+  checksum: 6cba6a99fb487067c509112b94e3d4d3905d782bbcb7af2cffbd57c601a4650d670e4eee5fec18d195d58ff6ec01a47288c5510379a2f37da3c5fc0a58860441
   languageName: node
   linkType: hard
 
@@ -12624,13 +12633,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"throttle-debounce@npm:^2.1.0":
-  version: 2.3.0
-  resolution: "throttle-debounce@npm:2.3.0"
-  checksum: 6d90aa2ddb294f8dad13d854a1cfcd88fdb757469669a096a7da10f515ee466857ac1e750649cb9da931165c6f36feb448318e7cb92570f0a3679d20e860a925
-  languageName: node
-  linkType: hard
-
 "through2@npm:^2.0.1":
   version: 2.0.5
   resolution: "through2@npm:2.0.5"
@@ -13307,12 +13309,10 @@ __metadata:
     next: 13.0.5
     next-fonts: ^1.5.1
     next-translate: ^1.6.0
-    next-transpile-modules: ^10.0.0
     raf: ^3.4.1
     react: 18.2.0
     react-dom: 18.2.0
     react-i18next: ^12.0.0
-    react-infinite-scroll-component: ^6.1.0
     react-native-reanimated: ^2.13.0
     react-native-web: ^0.18.10
     solito: ^2.0.5
