@@ -39,11 +39,12 @@ import {
 	A,
 	ts,
 } from "@kyoo/primitives";
+import { ScrollView } from "moti";
+import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
 import { StyleSheet, View } from "react-native";
 import {
 	Theme,
-	sm,
 	md,
 	px,
 	min,
@@ -229,16 +230,14 @@ const Description = ({
 			>
 				{t("show.genre")}:{" "}
 				{(isLoading ? [...Array(3)] : genres!).map((genre, i) => (
-					<>
-						{i !== 0 && ", "}
+					<Fragment key={genre?.slug ?? i.toString()}>
+						<P>{i !== 0 && ", "}</P>
 						{isLoading ? (
-							<Skeleton key={i} {...css({ width: rem(5) })} />
+							<Skeleton {...css({ width: rem(5) })} />
 						) : (
-							<A key={genre.slug} href={`/genres/${genre.slug}`}>
-								{genre.name}
-							</A>
+							<A href={`/genres/${genre.slug}`}>{genre.name}</A>
 						)}
-					</>
+					</Fragment>
 				))}
 			</P>
 
@@ -278,65 +277,52 @@ const Description = ({
 	);
 };
 
-export const ShowHeader = ({
-	query,
-	slug,
-}: {
-	query: QueryIdentifier<Show | Movie>;
-	slug: string;
-}) => {
-	/* const scroll = useScroll(); */
+export const Header = ({ query, slug }: { query: QueryIdentifier<Show | Movie>; slug: string }) => {
 	const { css } = useYoshiki();
-	// TODO: tweek the navbar color with the theme.
 
 	return (
-		<>
-			<Navbar {...css({ bg: "transparent" })} />
-			<Fetch query={query}>
-				{({ isLoading, ...data }) => (
-					<Main {...css(StyleSheet.absoluteFillObject)}>
-						<Head title={data?.name} description={data?.overview} />
-						{/* TODO: Add a shadow on navbar items */}
-						{/* TODO: Put the navbar outside of the scrollbox */}
-						<ImageBackground
-							src={data?.thumbnail}
-							alt=""
-							containerStyle={{
-								height: {
-									xs: vh(40),
-									sm: min(vh(60), px(750)),
-									md: min(vh(60), px(680)),
-									lg: vh(70),
-								},
-								minHeight: { xs: px(350), sm: px(300), md: px(400), lg: px(600) },
-							}}
-						>
-							<TitleLine
-								isLoading={isLoading}
-								slug={slug}
-								name={data?.name}
-								date={data ? getDisplayDate(data as any) : undefined}
-								poster={data?.poster}
-								studio={data?.studio}
-								{...css({
-									marginTop: {
-										xs: max(vh(20), px(200)),
-										sm: vh(45),
-										md: max(vh(30), px(150)),
-										lg: max(vh(35), px(200)),
-									},
-								})}
-							/>
-						</ImageBackground>
-						<Description
+		<Fetch query={query}>
+			{({ isLoading, ...data }) => (
+				<ScrollView>
+					<Head title={data?.name} description={data?.overview} />
+					<ImageBackground
+						src={data?.thumbnail}
+						alt=""
+						containerStyle={{
+							height: {
+								xs: vh(40),
+								sm: min(vh(60), px(750)),
+								md: min(vh(60), px(680)),
+								lg: vh(70),
+							},
+							minHeight: { xs: px(350), sm: px(300), md: px(400), lg: px(600) },
+						}}
+					>
+						<TitleLine
 							isLoading={isLoading}
-							overview={data?.overview}
-							genres={data?.genres}
-							{...css({ paddingTop: { xs: 0, md: ts(2) } })}
+							slug={slug}
+							name={data?.name}
+							date={data ? getDisplayDate(data as any) : undefined}
+							poster={data?.poster}
+							studio={data?.studio}
+							{...css({
+								marginTop: {
+									xs: max(vh(20), px(200)),
+									sm: vh(45),
+									md: max(vh(30), px(150)),
+									lg: max(vh(35), px(200)),
+								},
+							})}
 						/>
-					</Main>
-				)}
-			</Fetch>
-		</>
+					</ImageBackground>
+					<Description
+						isLoading={isLoading}
+						overview={data?.overview}
+						genres={data?.genres}
+						{...css({ paddingTop: { xs: 0, md: ts(2) } })}
+					/>
+				</ScrollView>
+			)}
+		</Fetch>
 	);
 };

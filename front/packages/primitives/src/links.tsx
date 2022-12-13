@@ -18,7 +18,8 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ComponentType, ReactNode } from "react";
+import { ViewStyle } from "@expo/html-elements/build/primitives/View";
+import { ComponentType, Fragment, ReactNode } from "react";
 import {
 	Platform,
 	TextProps,
@@ -26,6 +27,7 @@ import {
 	TouchableNativeFeedback,
 	View,
 	ViewProps,
+	StyleSheet,
 } from "react-native";
 import { LinkCore, TextLink } from "solito/link";
 import { useYoshiki, Pressable } from "yoshiki/native";
@@ -70,26 +72,35 @@ export const Link = ({
 }) => {
 	const { onBlur, onFocus, onPressIn, onPressOut, ...noFocusProps } = props;
 	const focusProps = { onBlur, onFocus, onPressIn, onPressOut };
+	const radiusStyle = Platform.select<ViewProps>({
+		android: {
+			style: { borderRadius: StyleSheet.flatten(props?.style).borderRadius, overflow: "hidden" },
+		},
+		default: {},
+	});
+	const Wrapper = radiusStyle ? View : Fragment;
 
 	return (
-		<LinkCore
-			href={href}
-			Component={Platform.select<ComponentType>({
-				web: View,
-				android: TouchableNativeFeedback,
-				ios: TouchableOpacity,
-				default: Pressable,
-			})}
-			componentProps={Platform.select<object>({
-				android: { useForeground: true, ...focusProps },
-				default: props,
-			})}
-		>
-			{Platform.select<ReactNode>({
-				android: <View {...noFocusProps}>{children}</View>,
-				ios: <View {...noFocusProps}>{children}</View>,
-				default: children,
-			})}
-		</LinkCore>
+		<Wrapper {...radiusStyle}>
+			<LinkCore
+				href={href}
+				Component={Platform.select<ComponentType>({
+					web: View,
+					android: TouchableNativeFeedback,
+					ios: TouchableOpacity,
+					default: Pressable,
+				})}
+				componentProps={Platform.select<object>({
+					android: { useForeground: true, ...focusProps },
+					default: props,
+				})}
+			>
+				{Platform.select<ReactNode>({
+					android: <View {...noFocusProps}>{children}</View>,
+					ios: <View {...noFocusProps}>{children}</View>,
+					default: children,
+				})}
+			</LinkCore>
+		</Wrapper>
 	);
 };

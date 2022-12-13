@@ -20,6 +20,7 @@
 
 import { Page, QueryIdentifier, useFetch, KyooErrors } from "@kyoo/models";
 import { Breakpoint, P } from "@kyoo/primitives";
+import { Fragment } from "react";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 
@@ -47,13 +48,11 @@ export const Fetch = <Data,>({
 	const { data, error } = useFetch(query);
 
 	if (error) return <ErrorView error={error} />;
+	if (placeholderCount === 1 || !isPage<object>(data))
+		return children(data ? { ...data, isLoading: false } : ({ isLoading: true } as any), 0);
 	if (!data)
 		return (
 			<>{[...Array(placeholderCount)].map((_, i) => children({ isLoading: true } as any, i))}</>
-		);
-	if (!isPage<object>(data))
-		return (
-			<> {children(data ? { ...data, isLoading: false } : ({ isLoading: true } as any), 0)} </>
 		);
 	return <>{data.items.map((item, i) => children({ ...item, isLoading: false } as any, i))}</>;
 };

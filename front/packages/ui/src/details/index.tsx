@@ -19,7 +19,10 @@
  */
 
 import { Movie, MovieP, QueryIdentifier, QueryPage } from "@kyoo/models";
-import { ShowHeader } from "./header";
+import { Navbar } from "../navbar";
+import { DefaultLayout } from "../layout";
+import { Header } from "./header";
+import { Staff } from "./staff";
 
 const query = (slug: string): QueryIdentifier<Movie> => ({
 	parser: MovieP,
@@ -32,16 +35,16 @@ const query = (slug: string): QueryIdentifier<Movie> => ({
 export const MovieDetails: QueryPage<{ slug: string }> = ({ slug }) => {
 	return (
 		<>
-			{/* <Head> */}
-			{/* 	<title>{makeTitle(data?.name)}</title> */}
-			{/* 	<meta name="description" content={data?.overview!} /> */}
-			{/* </Head> */}
-			<ShowHeader slug={slug} query={query(slug)} />
-			{/* <ShowStaff slug={slug} /> */}
+			<Header slug={slug} query={query(slug)} />
+			{/* <Staff slug={slug} /> */}
 		</>
 	);
 };
 
-MovieDetails.getFetchUrls = ({ slug }) => [//query(slug),
-	// ShowStaff.query(slug), Navbar.query()
+MovieDetails.getFetchUrls = ({ slug }) => [
+	query(slug),
+	// ShowStaff.query(slug),
+	Navbar.query(),
 ];
+
+MovieDetails.getLayout = DefaultLayout;

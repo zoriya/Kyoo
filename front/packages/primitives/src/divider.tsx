@@ -19,8 +19,9 @@
  */
 
 import { HR as EHR } from "@expo/html-elements";
-import { percent, px, Stylable, useYoshiki } from "yoshiki/native";
-import { alpha, ts } from ".";
+import { px, Stylable, useYoshiki } from "yoshiki/native";
+import { alpha } from "./themes";
+import { ts } from "./utils";
 
 export const HR = ({
 	orientation,

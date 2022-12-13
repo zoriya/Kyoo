@@ -31,7 +31,7 @@ import {
 	P as EP,
 	LI as ELI,
 } from "@expo/html-elements";
-import { ts } from ".";
+import { ts } from "./utils/spacing";
 
 const styleText = (
 	Component: ComponentType<ComponentProps<typeof EP>>,
@@ -76,7 +76,7 @@ export const LI = ({ children, ...props }: TextProps) => {
 	const { css } = useYoshiki();
 
 	return (
-		<P accessibilityRole="listitem" {...props}>
+		<P accessibilityRole={Platform.OS === "web" ? "listitem" : props.accessibilityRole} {...props}>
 			<Text
 				{...css({
 					height: percent(100),
