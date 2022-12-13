@@ -18,31 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Movie, MovieP, QueryIdentifier, QueryPage } from "@kyoo/models";
-import { TransparentLayout } from "../layout";
-import { Header } from "./header";
-import { Staff } from "./staff";
+import { MovieDetails } from "@kyoo/ui";
+import { withRoute } from "../../utils";
 
-const query = (slug: string): QueryIdentifier<Movie> => ({
-	parser: MovieP,
-	path: ["shows", slug],
-	params: {
-		fields: ["genres", "studio"],
-	},
+export default withRoute(MovieDetails, {
+	options: { headerTransparent: true, headerStyle: { backgroundColor: "transparent" } },
+	statusBar: { barStyle: "light-content" },
 });
-
-export const MovieDetails: QueryPage<{ slug: string }> = ({ slug }) => {
-	return (
-		<>
-			<Header slug={slug} query={query(slug)} />
-			<Staff slug={slug} />
-		</>
-	);
-};
-
-MovieDetails.getFetchUrls = ({ slug }) => [
-	query(slug),
-	// ShowStaff.query(slug),
-];
-
-MovieDetails.getLayout = TransparentLayout;

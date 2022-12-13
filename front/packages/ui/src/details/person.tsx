@@ -18,31 +18,34 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Movie, MovieP, QueryIdentifier, QueryPage } from "@kyoo/models";
-import { TransparentLayout } from "../layout";
-import { Header } from "./header";
-import { Staff } from "./staff";
+import { Avatar, Link, P, Skeleton, SubP } from "@kyoo/primitives";
+import { Stylable, useYoshiki } from "yoshiki/native";
 
-const query = (slug: string): QueryIdentifier<Movie> => ({
-	parser: MovieP,
-	path: ["shows", slug],
-	params: {
-		fields: ["genres", "studio"],
-	},
-});
+export const PersonAvatar = ({
+	slug,
+	name,
+	role,
+	poster,
+	isLoading,
+	...props
+}: {
+	isLoading: boolean;
+	slug?: string;
+	name?: string;
+	role?: string;
+	poster?: string | null;
+} & Stylable) => {
+	const { css } = useYoshiki();
 
-export const MovieDetails: QueryPage<{ slug: string }> = ({ slug }) => {
 	return (
-		<>
-			<Header slug={slug} query={query(slug)} />
-			<Staff slug={slug} />
-		</>
+		<Link href={slug ? `/person/${slug}` : ""} {...props}>
+			<Avatar src={poster} alt={name} size={PersonAvatar.width} />
+			<Skeleton>{isLoading || <P {...css({ textAlign: "center" })}>{name}</P>}</Skeleton>
+			{(isLoading || role) && (
+				<Skeleton>{isLoading || <SubP {...css({ textAlign: "center" })}>{role}</SubP>}</Skeleton>
+			)}
+		</Link>
 	);
 };
 
-MovieDetails.getFetchUrls = ({ slug }) => [
-	query(slug),
-	// ShowStaff.query(slug),
-];
-
-MovieDetails.getLayout = TransparentLayout;
+PersonAvatar.width = 300;

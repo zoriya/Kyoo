@@ -31,6 +31,7 @@ export const Staff = ({ slug }: { slug: string }) => {
 	return (
 		<InfiniteFetch
 			query={Staff.query(slug)}
+			horizontal
 			layout={{ numColumns: 0, size: PersonAvatar.width }}
 			placeholderCount={20}
 		>
