@@ -111,7 +111,10 @@ const TitleLine = ({
 						flexGrow: 1,
 					})}
 				>
-					<Skeleton {...css({ width: rem(15), height: rem(3) })}>
+					<Skeleton
+						variant="header"
+						{...css({ width: rem(15), height: rem(2.5), marginBottom: rem(1) })}
+					>
 						{isLoading || (
 							<H1
 								{...css({
@@ -129,6 +132,7 @@ const TitleLine = ({
 							{...css({
 								width: rem(5),
 								height: rem(1.5),
+								marginBottom: rem(0.5),
 							})}
 						>
 							{isLoading || (
@@ -184,12 +188,13 @@ const TitleLine = ({
 			>
 				<P
 					{...css({
-						color: (theme) => theme.user.paragraph,
+						color: (theme: Theme) => theme.user.paragraph,
+						display: "flex",
 					})}
 				>
 					{t("show.studio")}:{" "}
 					{isLoading ? (
-						<Skeleton />
+						<Skeleton {...css({ width: rem(5) })} />
 					) : (
 						<A href={`/studio/${studio!.slug}`} {...css({ color: (theme) => theme.user.link })}>
 							{studio!.name}
@@ -227,7 +232,7 @@ const Description = ({
 					<>
 						{i !== 0 && ", "}
 						{isLoading ? (
-							<Skeleton key={i} />
+							<Skeleton key={i} {...css({ width: rem(5) })} />
 						) : (
 							<A key={genre.slug} href={`/genres/${genre.slug}`}>
 								{genre.name}

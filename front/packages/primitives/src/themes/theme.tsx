@@ -147,6 +147,9 @@ export const ContrastArea = ({
 				contrastText
 					? {
 							...theme,
+							// Keep the same skeletons, it looks weird otherwise.
+							overlay0: theme.user.overlay0,
+							overlay1: theme.user.overlay1,
 							heading: mode === "light" ? theme.colors.black : theme.colors.white,
 							paragraph: theme.heading,
 					  }
