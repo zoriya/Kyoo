@@ -27,6 +27,7 @@ import { ErrorView, Layout, WithLoading } from "./fetch";
 export const InfiniteFetch = <Data,>({
 	query,
 	placeholderCount = 15,
+	horizontal = false,
 	children,
 	layout,
 	...props
@@ -34,6 +35,7 @@ export const InfiniteFetch = <Data,>({
 	query: QueryIdentifier<Data>;
 	placeholderCount?: number;
 	layout: Layout;
+	horizontal?: boolean;
 	children: (
 		item: Data extends Page<infer Item> ? WithLoading<Item> : WithLoading<Data>,
 		key: string | undefined,
@@ -65,6 +67,7 @@ export const InfiniteFetch = <Data,>({
 					  ]
 					: items
 			}
+			horizontal={horizontal}
 			keyExtractor={(item: any) => item.id?.toString()}
 			numColumns={numColumns}
 			estimatedItemSize={size}
