@@ -18,31 +18,26 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Movie, MovieP, QueryIdentifier, QueryPage } from "@kyoo/models";
-import { TransparentLayout } from "../layout";
-import { Header } from "./header";
-import { Staff } from "./staff";
+import { Stack } from "expo-router";
+import { ComponentType } from "react";
+import { StatusBar, StatusBarProps } from "react-native";
 
-const query = (slug: string): QueryIdentifier<Movie> => ({
-	parser: MovieP,
-	path: ["shows", slug],
-	params: {
-		fields: ["genres", "studio"],
-	},
-});
+export const withRoute = <Props,>(
+	Component: ComponentType<Props>,
+	options?: Parameters<typeof Stack.Screen>[0] & { statusBar?: StatusBarProps },
+) => {
+	const { statusBar, ...routeOptions } = options ?? {};
+	const WithUseRoute = ({ route, ...props }: Props & { route: any }) => {
+		return (
+			<>
+				{routeOptions && <Stack.Screen {...routeOptions} />}
+				{statusBar && <StatusBar {...statusBar} />}
+				<Component {...route.params} {...props} />
+			</>
+		);
+	};
 
-export const MovieDetails: QueryPage<{ slug: string }> = ({ slug }) => {
-	return (
-		<>
-			<Header slug={slug} query={query(slug)} />
-			<Staff slug={slug} />
-		</>
-	);
+	const { ...all } = Component;
+	Object.assign(WithUseRoute, { ...all });
+	return WithUseRoute;
 };
-
-MovieDetails.getFetchUrls = ({ slug }) => [
-	query(slug),
-	// ShowStaff.query(slug),
-];
-
-MovieDetails.getLayout = TransparentLayout;

@@ -20,7 +20,8 @@
 
 import { ReactElement } from "react";
 import { Navbar } from "./navbar";
-import { useYoshiki } from "yoshiki";
+import { useYoshiki } from "yoshiki/native";
+import { Main } from "@kyoo/primitives";
 
 export const DefaultLayout = (page: ReactElement) => {
 	const { css } = useYoshiki();
@@ -28,11 +29,44 @@ export const DefaultLayout = (page: ReactElement) => {
 	return (
 		<>
 			<Navbar />
-			<main id="main" {...css({ display: "flex", flexGrow: 1, flexShrink: 1, overflow: "auto" })}>
+			<Main
+				{...css({
+					display: "flex",
+					flexGrow: 1,
+					flexShrink: 1,
+				})}
+			>
 				{page}
-			</main>
+			</Main>
 		</>
 	);
 };
-
 DefaultLayout.getFetchUrls = () => [Navbar.query()];
+
+export const TransparentLayout = (page: ReactElement) => {
+	const { css } = useYoshiki();
+
+	return (
+		<>
+			<Navbar
+				{...css({
+					bg: "transparent",
+					position: "absolute",
+					top: 0,
+					left: 0,
+					right: 0,
+				})}
+			/>
+			<Main
+				{...css({
+					display: "flex",
+					flexGrow: 1,
+					flexShrink: 1,
+				})}
+			>
+				{page}
+			</Main>
+		</>
+	);
+};
+TransparentLayout.getFetchUrls = () => [Navbar.query()];
