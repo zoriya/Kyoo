@@ -22,7 +22,6 @@ import { Movie, QueryIdentifier, Show, getDisplayDate, Genre, Studio } from "@ky
 import {
 	Container,
 	H1,
-	Main,
 	ImageBackground,
 	Skeleton,
 	Poster,
@@ -39,10 +38,9 @@ import {
 	A,
 	ts,
 } from "@kyoo/primitives";
-import { ScrollView } from "moti";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 import {
 	Theme,
 	md,
@@ -57,7 +55,6 @@ import {
 	Stylable,
 } from "yoshiki/native";
 import { Fetch } from "../fetch";
-import { Navbar } from "../navbar";
 
 const TitleLine = ({
 	isLoading,
@@ -283,7 +280,7 @@ export const Header = ({ query, slug }: { query: QueryIdentifier<Show | Movie>; 
 	return (
 		<Fetch query={query}>
 			{({ isLoading, ...data }) => (
-				<ScrollView>
+				<>
 					<Head title={data?.name} description={data?.overview} />
 					<ImageBackground
 						src={data?.thumbnail}
@@ -321,7 +318,7 @@ export const Header = ({ query, slug }: { query: QueryIdentifier<Show | Movie>; 
 						genres={data?.genres}
 						{...css({ paddingTop: { xs: 0, md: ts(2) } })}
 					/>
-				</ScrollView>
+				</>
 			)}
 		</Fetch>
 	);

@@ -36,15 +36,15 @@ export const Avatar = ({
 	size?: number;
 	isLoading?: boolean;
 } & Stylable) => {
-	const { css } = useYoshiki();
+	const { css, theme } = useYoshiki();
 
 	if (isLoading) return <Skeleton variant="round" {...css({ width: size, height: size })} />;
 	return (
-		<View {...css({ borderRadius: size / 2, width: size, height: size }, props)}>
+		<View {...css({ borderRadius: size / 2, width: size, height: size, overflow: "hidden" }, props)}>
 			{src ? (
 				<Image src={src} alt={alt} layout={{ width: size, height: size }} />
 			) : (
-				<Icon icon="account-circle" size={size} />
+				<Icon icon="account-circle" size={size} color={theme.overlay0} />
 			)}
 		</View>
 	);

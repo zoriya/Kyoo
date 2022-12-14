@@ -19,6 +19,8 @@
  */
 
 import { Movie, MovieP, QueryIdentifier, QueryPage } from "@kyoo/models";
+import { Platform, ScrollView } from "react-native";
+import { useYoshiki } from "yoshiki/native";
 import { TransparentLayout } from "../layout";
 import { Header } from "./header";
 import { Staff } from "./staff";
@@ -32,11 +34,13 @@ const query = (slug: string): QueryIdentifier<Movie> => ({
 });
 
 export const MovieDetails: QueryPage<{ slug: string }> = ({ slug }) => {
+	const { css } = useYoshiki();
+
 	return (
-		<>
+		<ScrollView {...css(Platform.OS === "web" && { overflow: "overlay" as any })}>
 			<Header slug={slug} query={query(slug)} />
 			<Staff slug={slug} />
-		</>
+		</ScrollView>
 	);
 };
 
