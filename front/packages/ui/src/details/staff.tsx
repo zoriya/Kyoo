@@ -32,7 +32,7 @@ export const Staff = ({ slug }: { slug: string }) => {
 		<InfiniteFetch
 			query={Staff.query(slug)}
 			horizontal
-			layout={{ numColumns: 0, size: PersonAvatar.width }}
+			layout={{ numColumns: 1, size: PersonAvatar.width }}
 			placeholderCount={20}
 		>
 			{/* <HorizontalList title={t("show.staff")} noContent={t("show.staff-none")}> */}

@@ -60,7 +60,7 @@ const InfiniteScroll = ({
 					{
 						display: "flex",
 						alignItems: "flex-start",
-						overflow: "overlay",
+						overflow: "auto",
 					},
 					layout == "vertical" && {
 						flexDirection: "column",
