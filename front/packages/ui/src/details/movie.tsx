@@ -18,34 +18,34 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Avatar, Link, P, Skeleton, SubP } from "@kyoo/primitives";
-import { Stylable, useYoshiki } from "yoshiki/native";
+import { Movie, MovieP, QueryIdentifier, QueryPage } from "@kyoo/models";
+import { Platform, ScrollView } from "react-native";
+import { useYoshiki } from "yoshiki/native";
+import { TransparentLayout } from "../layout";
+import { Header } from "./header";
 
-export const PersonAvatar = ({
-	slug,
-	name,
-	role,
-	poster,
-	isLoading,
-	...props
-}: {
-	isLoading: boolean;
-	slug?: string;
-	name?: string;
-	role?: string;
-	poster?: string | null;
-} & Stylable) => {
+const query = (slug: string): QueryIdentifier<Movie> => ({
+	parser: MovieP,
+	path: ["shows", slug],
+	params: {
+		fields: ["genres", "studio"],
+	},
+});
+
+export const MovieDetails: QueryPage<{ slug: string }> = ({ slug }) => {
 	const { css } = useYoshiki();
 
 	return (
-		<Link href={slug ? `/person/${slug}` : ""} {...props}>
-			<Avatar src={poster} alt={name} size={PersonAvatar.width} fill />
-			<Skeleton>{isLoading || <P {...css({ textAlign: "center" })}>{name}</P>}</Skeleton>
-			{(isLoading || role) && (
-				<Skeleton>{isLoading || <SubP {...css({ textAlign: "center" })}>{role}</SubP>}</Skeleton>
-			)}
-		</Link>
+		<ScrollView {...css(Platform.OS === "web" && { overflow: "overlay" as any })}>
+			<Header slug={slug} query={query(slug)} />
+			{/* <Staff slug={slug} /> */}
+		</ScrollView>
 	);
 };
 
-PersonAvatar.width = 300;
+MovieDetails.getFetchUrls = ({ slug }) => [
+	query(slug),
+	// ShowStaff.query(slug),
+];
+
+MovieDetails.getLayout = TransparentLayout;

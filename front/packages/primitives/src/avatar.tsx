@@ -23,6 +23,7 @@ import { Image } from "./image";
 import { useYoshiki, px, Stylable } from "yoshiki/native";
 import { Icon } from "./icons";
 import AccountCircle from "@material-symbols/svg-400/rounded/account_circle-fill.svg";
+import { YoshikiStyle } from "yoshiki/dist/type";
 
 export const Avatar = ({
 	src,
@@ -30,25 +31,36 @@ export const Avatar = ({
 	size = px(24),
 	color,
 	isLoading = false,
+	fill = false,
 	...props
 }: {
 	src?: string | null;
 	alt?: string;
-	size?: number;
+	size?: YoshikiStyle<number | string>;
 	color?: string;
 	isLoading?: boolean;
+	fill?: boolean;
 } & Stylable) => {
 	const { css, theme } = useYoshiki();
+	const col = color ?? theme.overlay0;
 
-	console.log(color)
+	// TODO: Support dark themes when fill === true
 	return (
 		<View
-			{...css({ borderRadius: size / 2, width: size, height: size, overflow: "hidden" }, props)}
+			{...css(
+				[
+					{ borderRadius: 999999, width: size, height: size, overflow: "hidden" },
+					fill && {
+						bg: col,
+					},
+				],
+				props,
+			)}
 		>
 			{src || isLoading ? (
 				<Image src={src} alt={alt} layout={{ width: size, height: size }} />
 			) : (
-				<Icon icon={AccountCircle} size={size} color={color ?? theme.overlay0} />
+				<Icon icon={AccountCircle} size={size} color={fill ? col : theme.colors.white} />
 			)}
 		</View>
 	);
