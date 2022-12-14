@@ -61,6 +61,27 @@ const nextConfig = {
 				__DEV__: JSON.stringify(process.env.NODE_ENV !== "production"),
 			}),
 		);
+
+		config.module.rules.push({
+			test: /\.svg$/i,
+			issuer: /\.[jt]sx?$/,
+			use: [
+				{
+					loader: "@svgr/webpack",
+					options: {
+						native: true,
+						svgoConfig: {
+							plugins: [
+								{
+									name: "removeViewBox",
+									active: false,
+								},
+							],
+						},
+					},
+				},
+			],
+		});
 		return config;
 	},
 	async redirects() {

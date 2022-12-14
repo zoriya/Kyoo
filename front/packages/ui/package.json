@@ -5,8 +5,7 @@
 	"packageManager": "yarn@3.2.4",
 	"dependencies": {
 		"@kyoo/models": "workspace:^",
-		"@kyoo/primitives": "workspace:^",
-		"react-native-svg": "^13.6.0"
+		"@kyoo/primitives": "workspace:^"
 	},
 	"devDependencies": {
 		"@shopify/flash-list": "^1.4.0",
@@ -14,6 +13,7 @@
 		"typescript": "^4.9.3"
 	},
 	"peerDependencies": {
+		"@material-symbols/svg-400": "*",
 		"@shopify/flash-list": "^1.4.0",
 		"@tanstack/react-query": "*",
 		"expo-linear-gradient": "*",
@@ -23,6 +23,7 @@
 		"react-i18next": "*",
 		"react-native": "*",
 		"react-native-reanimated": "*",
+		"react-native-svg": "*",
 		"yoshiki": "*"
 	},
 	"peerDependenciesMeta": {

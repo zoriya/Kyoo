@@ -74,7 +74,7 @@ export const Link = ({
 	const focusProps = { onBlur, onFocus, onPressIn, onPressOut };
 	const radiusStyle = Platform.select<ViewProps>({
 		android: {
-			style: { borderRadius: StyleSheet.flatten(props?.style).borderRadius, overflow: "hidden" },
+			style: { borderRadius: StyleSheet.flatten(props?.style)?.borderRadius, overflow: "hidden" },
 		},
 		default: {},
 	});
