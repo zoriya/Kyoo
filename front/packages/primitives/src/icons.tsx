@@ -19,7 +19,7 @@
  */
 
 import { ComponentProps, ComponentType } from "react";
-import { PressableProps, ViewStyle } from "react-native";
+import { Platform, PressableProps, ViewStyle } from "react-native";
 import { SvgProps } from "react-native-svg";
 import { YoshikiStyle } from "yoshiki/dist/type";
 import { Pressable, px, useYoshiki } from "yoshiki/native";
@@ -28,12 +28,24 @@ import { ts } from "./utils";
 type IconProps = {
 	icon: ComponentType<SvgProps>;
 	color: YoshikiStyle<string>;
-	size?: number | string;
+	size?: YoshikiStyle<number | string>;
 };
 
 export const Icon = ({ icon: Icon, color, size = 24, ...props }: IconProps) => {
 	const { css } = useYoshiki();
-	return <Icon width={size} height={size} {...css({ fill: color } as ViewStyle, props)} />;
+	const computed = css({ width: size, height: size, fill: color } as ViewStyle, props);
+	return (
+		<Icon
+			{...Platform.select<SvgProps>({
+				web: computed,
+				default: {
+					height: computed.style?.height,
+					width: computed.style?.width,
+					...computed,
+				},
+			})}
+		/>
+	);
 };
 
 export const IconButton = <AsProps = PressableProps,>({

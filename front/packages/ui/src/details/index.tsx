@@ -18,35 +18,4 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Movie, MovieP, QueryIdentifier, QueryPage } from "@kyoo/models";
-import { Platform, ScrollView } from "react-native";
-import { useYoshiki } from "yoshiki/native";
-import { TransparentLayout } from "../layout";
-import { Header } from "./header";
-import { Staff } from "./staff";
-
-const query = (slug: string): QueryIdentifier<Movie> => ({
-	parser: MovieP,
-	path: ["shows", slug],
-	params: {
-		fields: ["genres", "studio"],
-	},
-});
-
-export const MovieDetails: QueryPage<{ slug: string }> = ({ slug }) => {
-	const { css } = useYoshiki();
-
-	return (
-		<ScrollView {...css(Platform.OS === "web" && { overflow: "overlay" as any })}>
-			<Header slug={slug} query={query(slug)} />
-			<Staff slug={slug} />
-		</ScrollView>
-	);
-};
-
-MovieDetails.getFetchUrls = ({ slug }) => [
-	query(slug),
-	// ShowStaff.query(slug),
-];
-
-MovieDetails.getLayout = TransparentLayout;
+export { MovieDetails } from "./movie";
