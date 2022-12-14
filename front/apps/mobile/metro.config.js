@@ -21,21 +21,40 @@
 const { getDefaultConfig } = require("expo/metro-config");
 const path = require("path");
 
-// Find the project and workspace directories
 const projectRoot = __dirname;
-// This can be replaced with `find-yarn-workspace-root`
-const workspaceRoot = path.resolve(projectRoot, "../..");
+const defaultConfig = getDefaultConfig(projectRoot);
 
-const config = getDefaultConfig(projectRoot);
+function addMonorepoSupport(config) {
+	const workspaceRoot = path.resolve(projectRoot, "../..");
 
-// 1. Watch all files within the monorepo
-config.watchFolders = [workspaceRoot];
-// 2. Let Metro know where to resolve packages and in what order
-config.resolver.nodeModulesPaths = [
-	path.resolve(projectRoot, "node_modules"),
-	path.resolve(workspaceRoot, "node_modules"),
-];
-// 3. Force Metro to resolve (sub)dependencies only from the `nodeModulesPaths`
-config.resolver.disableHierarchicalLookup = true;
+	return {
+		...config,
+		watchFolders: [...config.watchFolders, workspaceRoot],
+		resolver: {
+			...config.resolver,
+			nodeModulesPaths: [
+				...config.resolver.nodeModulesPaths,
+				path.resolve(projectRoot, "node_modules"),
+				path.resolve(workspaceRoot, "node_modules"),
+			],
+			disableHierarchicalLookup: true,
+		},
+	};
+}
 
-module.exports = config;
+function addSvgTransformer(config) {
+	return {
+		...config,
+		transformer: {
+			...config.transformer,
+			babelTransformerPath: require.resolve("react-native-svg-transformer"),
+		},
+		resolver: {
+			...config.resolver,
+			assetExts: config.resolver.assetExts.filter((ext) => ext !== "svg"),
+			sourceExts: [...config.resolver.sourceExts, "svg"],
+		},
+	};
+}
+
+module.exports = addMonorepoSupport(addSvgTransformer(defaultConfig));

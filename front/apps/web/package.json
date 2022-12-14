@@ -17,6 +17,7 @@
 		"@kyoo/models": "workspace:^",
 		"@kyoo/primitives": "workspace:^",
 		"@kyoo/ui": "workspace:^",
+		"@material-symbols/svg-400": "^0.4.2",
 		"@mui/icons-material": "^5.8.4",
 		"@mui/material": "^5.8.7",
 		"@mui/system": "^5.10.10",
@@ -36,6 +37,7 @@
 		"react-dom": "18.2.0",
 		"react-i18next": "^12.0.0",
 		"react-native-reanimated": "^2.13.0",
+		"react-native-svg": "13.4.0",
 		"react-native-web": "^0.18.10",
 		"solito": "^2.0.5",
 		"superjson": "^1.11.0",
@@ -43,6 +45,7 @@
 		"zod": "^3.19.1"
 	},
 	"devDependencies": {
+		"@svgr/webpack": "^6.5.1",
 		"@types/node": "18.11.9",
 		"@types/react": "18.0.25",
 		"@types/react-dom": "18.0.9",

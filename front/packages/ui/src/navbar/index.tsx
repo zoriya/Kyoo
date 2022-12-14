@@ -22,7 +22,8 @@ import { Library, LibraryP, Page, Paged, QueryIdentifier } from "@kyoo/models";
 import { IconButton, Header, Avatar, A, Skeleton, tooltip, ts } from "@kyoo/primitives";
 import { View } from "react-native";
 import { useTranslation } from "react-i18next";
-import { rem, Stylable, useYoshiki } from "yoshiki/native";
+import { rem, Stylable, useTheme, useYoshiki } from "yoshiki/native";
+import Menu from "@material-symbols/svg-400/rounded/menu-fill.svg";
 import { Fetch } from "../fetch";
 import { KyooLongLogo } from "./icon";
 
@@ -36,9 +37,19 @@ export const NavbarTitle = (props: Stylable) => {
 	);
 };
 
-export const Navbar = (props: Stylable) => {
-	const { css } = useYoshiki();
+export const LoginAvatar = (props: Stylable) => {
+	const theme = useTheme();
 	const { t } = useTranslation();
+
+	return (
+		<A href="/auth/login" {...tooltip(t("navbar.login"))}>
+			<Avatar alt={t("navbar.login")} size={30} color={theme.colors.white} />
+		</A>
+	);
+};
+
+export const Navbar = (props: Stylable) => {
+	const { css, theme } = useYoshiki();
 
 	return (
 		<Header
@@ -64,11 +75,11 @@ export const Navbar = (props: Stylable) => {
 			)}
 		>
 			<IconButton
-				icon="menu"
+				icon={Menu}
 				aria-label="more"
 				aria-controls="menu-appbar"
 				aria-haspopup="true"
-				color="white"
+				color={theme.colors.white}
 				{...css({ display: { xs: "flex", sm: "none" } })}
 			/>
 			<NavbarTitle {...css({ marginX: ts(2) })} />
@@ -101,9 +112,7 @@ export const Navbar = (props: Stylable) => {
 					}
 				</Fetch>
 			</View>
-			<A href="/auth/login" {...tooltip(t("navbar.login"))}>
-				<Avatar alt={t("navbar.login")} size={30} />
-			</A>
+			<LoginAvatar />
 		</Header>
 	);
 };

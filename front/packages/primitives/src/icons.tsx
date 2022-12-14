@@ -18,27 +18,22 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import MIcon from "@expo/vector-icons/MaterialIcons";
 import { ComponentProps, ComponentType } from "react";
-import { PressableProps } from "react-native";
+import { PressableProps, ViewStyle } from "react-native";
+import { SvgProps } from "react-native-svg";
+import { YoshikiStyle } from "yoshiki/dist/type";
 import { Pressable, px, useYoshiki } from "yoshiki/native";
-import { Breakpoint, ts } from "./utils";
+import { ts } from "./utils";
 
-export type IconProps = {
-	icon: ComponentProps<typeof MIcon>["name"];
-	size?: number;
-	color?: Breakpoint<string>;
+type IconProps = {
+	icon: ComponentType<SvgProps>;
+	color: YoshikiStyle<string>;
+	size?: number | string;
 };
 
-export const Icon = ({ icon, size = 24, color }: IconProps) => {
-	const { css, theme } = useYoshiki();
-	return (
-		<MIcon
-			name={icon}
-			size={size}
-			{...css({ color: color ?? theme.colors.white, width: size, height: size })}
-		/>
-	);
+export const Icon = ({ icon: Icon, color, size = 24, ...props }: IconProps) => {
+	const { css } = useYoshiki();
+	return <Icon width={size} height={size} {...css({ fill: color } as ViewStyle, props)} />;
 };
 
 export const IconButton = <AsProps = PressableProps,>({

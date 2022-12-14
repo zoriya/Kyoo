@@ -22,29 +22,33 @@ import { View } from "react-native";
 import { Image } from "./image";
 import { useYoshiki, px, Stylable } from "yoshiki/native";
 import { Icon } from "./icons";
-import { Skeleton } from "./skeleton";
+import AccountCircle from "@material-symbols/svg-400/rounded/account_circle-fill.svg";
 
 export const Avatar = ({
 	src,
 	alt,
 	size = px(24),
+	color,
 	isLoading = false,
 	...props
 }: {
 	src?: string | null;
 	alt?: string;
 	size?: number;
+	color?: string;
 	isLoading?: boolean;
 } & Stylable) => {
 	const { css, theme } = useYoshiki();
 
-	if (isLoading) return <Skeleton variant="round" {...css({ width: size, height: size })} />;
+	console.log(color)
 	return (
-		<View {...css({ borderRadius: size / 2, width: size, height: size, overflow: "hidden" }, props)}>
-			{src ? (
+		<View
+			{...css({ borderRadius: size / 2, width: size, height: size, overflow: "hidden" }, props)}
+		>
+			{src || isLoading ? (
 				<Image src={src} alt={alt} layout={{ width: size, height: size }} />
 			) : (
-				<Icon icon="account-circle" size={size} color={theme.overlay0} />
+				<Icon icon={AccountCircle} size={size} color={color ?? theme.overlay0} />
 			)}
 		</View>
 	);

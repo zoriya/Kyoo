@@ -55,6 +55,8 @@ import {
 	Stylable,
 } from "yoshiki/native";
 import { Fetch } from "../fetch";
+import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg"
+import Theaters from "@material-symbols/svg-400/rounded/theaters-fill.svg"
 
 const TitleLine = ({
 	isLoading,
@@ -150,7 +152,7 @@ const TitleLine = ({
 					)}
 					<View {...css({ flexDirection: "row" })}>
 						<IconFab
-							icon="play-arrow"
+							icon={PlayArrow}
 							as={Link}
 							href={`/watch/${slug}`}
 							color={{ xs: theme.user.colors.black, md: theme.colors.black }}
@@ -158,7 +160,7 @@ const TitleLine = ({
 							{...tooltip(t("show.play"))}
 						/>
 						<IconButton
-							icon="local-movies"
+							icon={Theaters}
 							color={{ xs: theme.user.colors.black, md: theme.colors.white }}
 							{...tooltip(t("show.trailer"))}
 						/>
