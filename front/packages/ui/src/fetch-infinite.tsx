@@ -21,7 +21,7 @@
 import { Page, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
 import { useBreakpointMap, HR } from "@kyoo/primitives";
 import { FlashList } from "@shopify/flash-list";
-import { ReactElement } from "react";
+import { ComponentType, ReactElement } from "react";
 import { EmptyView, ErrorView, Layout, WithLoading } from "./fetch";
 
 export const InfiniteFetch = <Data,>({
@@ -32,6 +32,7 @@ export const InfiniteFetch = <Data,>({
 	layout,
 	empty,
 	divider = false,
+	Header,
 	...props
 }: {
 	query: QueryIdentifier<Data>;
@@ -43,7 +44,8 @@ export const InfiniteFetch = <Data,>({
 		i: number,
 	) => ReactElement | null;
 	empty?: string | JSX.Element;
-	divider?: boolean | JSX.Element;
+	divider?: boolean | ComponentType;
+	Header?: ComponentType<{ children: JSX.Element }>;
 }): JSX.Element | null => {
 	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
 
@@ -57,26 +59,14 @@ export const InfiniteFetch = <Data,>({
 		return <EmptyView message={empty} />;
 	}
 
+	const placeholders = [
+		...Array(items ? numColumns - (items.length % numColumns) + numColumns : placeholderCount),
+	].map((_, i) => ({ id: `gen${i}`, isLoading: true } as Data));
+
 	return (
 		<FlashList
-			renderItem={({ item, index }) => (
-				<>
-					{(divider === true && index !== 0) ? <HR orientation={horizontal ? "vertical" : "horizontal"} /> : divider}
-					{children({ isLoading: false, ...item } as any, index)}
-				</>
-			)}
-			data={
-				hasNextPage
-					? [
-							...(items || []),
-							...[
-								...Array(
-									items ? numColumns - (items.length % numColumns) + numColumns : placeholderCount,
-								),
-							].map((_, i) => ({ id: `gen${i}`, isLoading: true } as Data)),
-					  ]
-					: items
-			}
+			renderItem={({ item, index }) => children({ isLoading: false, ...item } as any, index)}
+			data={hasNextPage !== false ? [...(items || []), ...placeholders] : items}
 			horizontal={horizontal}
 			keyExtractor={(item: any) => item.id?.toString()}
 			numColumns={numColumns}
@@ -85,6 +75,8 @@ export const InfiniteFetch = <Data,>({
 			onEndReachedThreshold={0.5}
 			onRefresh={refetch}
 			refreshing={isRefetching}
+			ItemSeparatorComponent={divider === true ? HR : divider || null}
+			ListHeaderComponent={Header}
 			{...props}
 		/>
 	);

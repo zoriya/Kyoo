@@ -20,7 +20,7 @@
 
 import { Page, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
 import { HR } from "@kyoo/primitives";
-import { Fragment, ReactElement, useRef } from "react";
+import { ComponentType, Fragment, ReactElement, useRef } from "react";
 import { Stylable, useYoshiki } from "yoshiki";
 import { EmptyView, ErrorView, Layout, WithLoading } from "./fetch";
 
@@ -93,7 +93,8 @@ export const InfiniteFetch = <Data,>({
 	layout,
 	horizontal = false,
 	empty,
-	divider = false,
+	divider: Divider = false,
+	Header,
 	...props
 }: {
 	query: QueryIdentifier<Data>;
@@ -105,7 +106,8 @@ export const InfiniteFetch = <Data,>({
 		i: number,
 	) => ReactElement | null;
 	empty?: string | JSX.Element;
-	divider?: boolean | JSX.Element;
+	divider?: boolean | ComponentType;
+	Header?: ComponentType<{ children: JSX.Element }>;
 }): JSX.Element | null => {
 	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
 
@@ -118,7 +120,7 @@ export const InfiniteFetch = <Data,>({
 		return <EmptyView message={empty} />;
 	}
 
-	return (
+	const list = (
 		<InfiniteScroll
 			layout={grid ? "grid" : horizontal ? "horizontal" : "vertical"}
 			loadMore={fetchNextPage}
@@ -126,7 +128,7 @@ export const InfiniteFetch = <Data,>({
 			isFetching={isFetching}
 			loader={[...Array(12)].map((_, i) => (
 				<Fragment key={i.toString()}>
-					{(divider === true && i !== 0) ? <HR orientation={horizontal ? "vertical" : "horizontal"} /> : divider}
+					{Divider && i !== 0 && (Divider === true ? <HR /> : <Divider />)}
 					{children({ isLoading: true } as any, i)}
 				</Fragment>
 			))}
@@ -134,10 +136,12 @@ export const InfiniteFetch = <Data,>({
 		>
 			{items?.map((item, i) => (
 				<Fragment key={(item as any).id?.toString()}>
-					{(divider === true && i !== 0) ? <HR orientation={horizontal ? "vertical" : "horizontal"} /> : divider}
+					{Divider && i !== 0 && (Divider === true ? <HR /> : <Divider />)}
 					{children({ ...item, isLoading: false } as any, i)}
 				</Fragment>
 			))}
 		</InfiniteScroll>
 	);
+
+	return Header ? <Header>{list}</Header> : list;
 };

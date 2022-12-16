@@ -48,10 +48,12 @@ export const Fetch = <Data,>({
 	const { data, error } = useFetch(query);
 
 	if (error) return <ErrorView error={error} />;
-	if (!data)
-		return (
-			<>{[...Array(placeholderCount)].map((_, i) => children({ isLoading: true } as any, i))}</>
+	if (!data) {
+		const placeholders = [...Array(placeholderCount)].map((_, i) =>
+			children({ isLoading: true } as any, i),
 		);
+		return <>{placeholderCount === 1 ? placeholders[0] : placeholders}</>;
+	}
 	if (!isPage<object>(data))
 		return children(data ? { ...data, isLoading: false } : ({ isLoading: true } as any), 0);
 	return <>{data.items.map((item, i) => children({ ...item, isLoading: false } as any, i))}</>;

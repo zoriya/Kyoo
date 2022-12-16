@@ -87,5 +87,5 @@ export const ItemGrid = ({
 
 ItemGrid.layout = {
 	size: px(150),
-	numColumns: { xs: 3, md: 5, xl: 7 },
+	numColumns: { xs: 3, sm: 5, xl: 7 },
 } satisfies Layout;
