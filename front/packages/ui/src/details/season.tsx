@@ -19,7 +19,7 @@
  */
 
 import { Episode, EpisodeP, QueryIdentifier, Season } from "@kyoo/models";
-import { Container, SwitchVariant } from "@kyoo/primitives";
+import { Container, SwitchVariant, ts } from "@kyoo/primitives";
 import Svg, { SvgProps, Path } from "react-native-svg";
 import { Stylable } from "yoshiki/native";
 import { View } from "react-native";
@@ -73,7 +73,7 @@ export const SeasonTab = ({
 		<SwitchVariant>
 			{({ css, theme }) => (
 				<View>
-					<SvgWave fill={theme.background} />
+					<SvgWave fill={theme.background} {...css({ marginTop: { xs: ts(2), md: 0 } })} />
 					<View {...css({ bg: (theme) => theme.background }, props)}>
 						<Container>
 							{/* <Tabs value={season} onChange={(_, i) => setSeason(i)} aria-label="List of seasons"> */}

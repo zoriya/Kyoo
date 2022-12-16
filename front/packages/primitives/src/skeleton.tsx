@@ -22,7 +22,7 @@ import { LinearGradient as LG } from "expo-linear-gradient";
 import { AnimatePresence, motify, MotiView } from "moti";
 import { useState } from "react";
 import { Platform, View, ViewProps } from "react-native";
-import { px, rem, useYoshiki, percent } from "yoshiki/native";
+import { px, rem, useYoshiki, percent, em } from "yoshiki/native";
 import { hiddenIfNoJs } from "./utils/nojs";
 
 const LinearGradient = motify(LG)();
@@ -53,7 +53,7 @@ export const Skeleton = ({
 	children?: JSX.Element | JSX.Element[] | boolean | null;
 	show?: boolean;
 	lines?: number;
-	variant?: "text" | "header" | "round" | "custom" | "fill";
+	variant?: "text" | "header" | "round" | "custom" | "fill" | "filltext";
 }) => {
 	const { css, theme } = useYoshiki();
 	const [width, setWidth] = useState<number | undefined>(undefined);
@@ -90,6 +90,10 @@ export const Skeleton = ({
 					variant === "fill" && {
 						width: percent(100),
 						height: percent(100),
+					},
+					variant === "filltext" && {
+						width: percent(100),
+						height: em(1),
 					},
 				],
 				props,

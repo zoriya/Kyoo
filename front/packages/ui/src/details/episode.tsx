@@ -90,8 +90,8 @@ export const EpisodeLine = ({
 				props,
 			)}
 		>
-			<P {...css({ width: rem(4), flexShrink: 0, m: ts(1) })}>
-				{isLoading ? <Skeleton variant="fill" /> : displayNumber}
+			<P {...css({ width: rem(4), flexShrink: 0, m: ts(1), textAlign: "center" })}>
+				{isLoading ? <Skeleton variant="filltext" /> : displayNumber}
 			</P>
 			<Image
 				src={thumbnail}
