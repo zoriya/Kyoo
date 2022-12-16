@@ -15,11 +15,7 @@
 		"resolveJsonModule": true,
 		"isolatedModules": true,
 		"jsx": "react-jsx",
-		"incremental": true,
-		"baseUrl": ".",
-		"paths": {
-			"~/*": ["src/*"]
-		}
+		"incremental": true
 	},
 	"include": ["**/*.ts", "**/*.tsx"],
 	"exclude": ["node_modules"]

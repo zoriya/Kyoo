@@ -53,7 +53,7 @@ export const Skeleton = ({
 	children?: JSX.Element | JSX.Element[] | boolean | null;
 	show?: boolean;
 	lines?: number;
-	variant?: "text" | "header" | "round" | "custom";
+	variant?: "text" | "header" | "round" | "custom" | "fill";
 }) => {
 	const { css, theme } = useYoshiki();
 	const [width, setWidth] = useState<number | undefined>(undefined);
@@ -86,6 +86,10 @@ export const Skeleton = ({
 
 					variant === "round" && {
 						borderRadius: 9999999,
+					},
+					variant === "fill" && {
+						width: percent(100),
+						height: percent(100),
 					},
 				],
 				props,

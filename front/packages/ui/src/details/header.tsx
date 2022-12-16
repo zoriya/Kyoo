@@ -224,6 +224,7 @@ const Description = ({
 			<P
 				{...css({
 					display: { xs: "flex", sm: "none" },
+					flexWrap: "wrap",
 					color: (theme: Theme) => theme.user.paragraph,
 				})}
 			>

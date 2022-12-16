@@ -77,3 +77,19 @@ export const ErrorView = ({ error }: { error: KyooErrors }) => {
 		</View>
 	);
 };
+
+export const EmptyView = ({ message }: { message: string }) => {
+	const { css } = useYoshiki();
+
+	return (
+		<View
+			{...css({
+				flex: 1,
+				justifyContent: "center",
+				alignItems: "center",
+			})}
+		>
+			<P {...css({ color: (theme) => theme.heading })}>{message}</P>
+		</View>
+	);
+};
