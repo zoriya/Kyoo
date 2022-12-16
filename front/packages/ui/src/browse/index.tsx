@@ -93,7 +93,7 @@ export const BrowsePage: QueryPage<{ slug?: string }> = ({ slug }) => {
 				placeholderCount={15}
 				layout={LayoutComponent.layout}
 			>
-				{(item, key) => <LayoutComponent key={key} {...itemMap(item)} />}
+				{(item) => <LayoutComponent {...itemMap(item)} />}
 			</InfiniteFetch>
 		</>
 	);

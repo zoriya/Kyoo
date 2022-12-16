@@ -18,24 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { styled, experimental_sx as sx } from "@mui/system";
+import { ShowDetails } from "@kyoo/ui";
+import { withRoute } from "../../utils";
 
-export const Container = styled("div")(
-	sx({
-		display: "flex",
-		px: "15px",
-		mx: "auto",
-		width: {
-			sm: "540px",
-			md: "880px",
-			lg: "1170px",
-		},
-	}),
-);
-
-export const containerPadding = {
-	xs: "15px",
-	sm: "calc((100vw - 540px) / 2)",
-	md: "calc((100vw - 880px) / 2)",
-	lg: "calc((100vw - 1170px) / 2)",
-};
+export default withRoute(ShowDetails, {
+	options: { headerTransparent: true, headerStyle: { backgroundColor: "transparent" } },
+	statusBar: { barStyle: "light-content" },
+});

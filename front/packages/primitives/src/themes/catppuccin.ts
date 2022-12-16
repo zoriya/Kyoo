@@ -41,7 +41,7 @@ export const catppuccin: ThemeBuilder = {
 			subtext: "#6c6f85",
 		},
 		variant: {
-			background: "#dc8a78",
+			background: "#e6e9ef",
 			accent: "#d20f39",
 			divider: "#dd7878",
 			heading: "#4c4f69",

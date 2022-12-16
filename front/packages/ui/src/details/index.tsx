@@ -19,3 +19,4 @@
  */
 
 export { MovieDetails } from "./movie";
+export { ShowDetails } from "./show";

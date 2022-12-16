@@ -19,10 +19,10 @@
  */
 
 import { Page, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
-import { useBreakpointMap } from "@kyoo/primitives";
+import { useBreakpointMap, HR } from "@kyoo/primitives";
 import { FlashList } from "@shopify/flash-list";
 import { ReactElement } from "react";
-import { ErrorView, Layout, WithLoading } from "./fetch";
+import { EmptyView, ErrorView, Layout, WithLoading } from "./fetch";
 
 export const InfiniteFetch = <Data,>({
 	query,
@@ -30,6 +30,8 @@ export const InfiniteFetch = <Data,>({
 	horizontal = false,
 	children,
 	layout,
+	empty,
+	divider = false,
 	...props
 }: {
 	query: QueryIdentifier<Data>;
@@ -38,9 +40,10 @@ export const InfiniteFetch = <Data,>({
 	horizontal?: boolean;
 	children: (
 		item: Data extends Page<infer Item> ? WithLoading<Item> : WithLoading<Data>,
-		key: string | undefined,
 		i: number,
 	) => ReactElement | null;
+	empty?: string | JSX.Element;
+	divider?: boolean | JSX.Element;
 }): JSX.Element | null => {
 	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
 
@@ -49,12 +52,19 @@ export const InfiniteFetch = <Data,>({
 		useInfiniteFetch(query);
 
 	if (error) return <ErrorView error={error} />;
+	if (empty && items && items.length === 0) {
+		if (typeof empty !== "string") return empty;
+		return <EmptyView message={empty} />;
+	}
 
 	return (
 		<FlashList
-			renderItem={({ item, index }) =>
-				children({ isLoading: false, ...item } as any, undefined, index)
-			}
+			renderItem={({ item, index }) => (
+				<>
+					{(divider === true && index !== 0) ? <HR orientation={horizontal ? "vertical" : "horizontal"} /> : divider}
+					{children({ isLoading: false, ...item } as any, index)}
+				</>
+			)}
 			data={
 				hasNextPage
 					? [

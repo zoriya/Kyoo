@@ -19,16 +19,17 @@
  */
 
 import { Page, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
-import { ReactElement, useRef } from "react";
+import { HR } from "@kyoo/primitives";
+import { Fragment, ReactElement, useRef } from "react";
 import { Stylable, useYoshiki } from "yoshiki";
-import { ErrorView, Layout, WithLoading } from "./fetch";
+import { EmptyView, ErrorView, Layout, WithLoading } from "./fetch";
 
 const InfiniteScroll = ({
 	children,
 	loader,
 	layout = "vertical",
 	loadMore,
-	hasMore,
+	hasMore = true,
 	isFetching,
 	...props
 }: {
@@ -91,6 +92,8 @@ export const InfiniteFetch = <Data,>({
 	children,
 	layout,
 	horizontal = false,
+	empty,
+	divider = false,
 	...props
 }: {
 	query: QueryIdentifier<Data>;
@@ -99,9 +102,10 @@ export const InfiniteFetch = <Data,>({
 	horizontal?: boolean;
 	children: (
 		item: Data extends Page<infer Item> ? WithLoading<Item> : WithLoading<Data>,
-		key: string | undefined,
 		i: number,
 	) => ReactElement | null;
+	empty?: string | JSX.Element;
+	divider?: boolean | JSX.Element;
 }): JSX.Element | null => {
 	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
 
@@ -109,6 +113,10 @@ export const InfiniteFetch = <Data,>({
 	const grid = layout.numColumns !== 1;
 
 	if (error) return <ErrorView error={error} />;
+	if (empty && items && items.length === 0) {
+		if (typeof empty !== "string") return empty;
+		return <EmptyView message={empty} />;
+	}
 
 	return (
 		<InfiniteScroll
@@ -116,12 +124,20 @@ export const InfiniteFetch = <Data,>({
 			loadMore={fetchNextPage}
 			hasMore={hasNextPage!}
 			isFetching={isFetching}
-			loader={[...Array(12)].map((_, i) => children({ isLoading: true } as any, i.toString(), i))}
+			loader={[...Array(12)].map((_, i) => (
+				<Fragment key={i.toString()}>
+					{(divider === true && i !== 0) ? <HR orientation={horizontal ? "vertical" : "horizontal"} /> : divider}
+					{children({ isLoading: true } as any, i)}
+				</Fragment>
+			))}
 			{...props}
 		>
-			{items?.map((item, i) =>
-				children({ ...item, isLoading: false } as any, (item as any).id?.toString(), i),
-			)}
+			{items?.map((item, i) => (
+				<Fragment key={(item as any).id?.toString()}>
+					{(divider === true && i !== 0) ? <HR orientation={horizontal ? "vertical" : "horizontal"} /> : divider}
+					{children({ ...item, isLoading: false } as any, i)}
+				</Fragment>
+			))}
 		</InfiniteScroll>
 	);
 };
