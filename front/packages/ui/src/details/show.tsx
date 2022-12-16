@@ -19,11 +19,27 @@
  */
 
 import { QueryIdentifier, QueryPage, Show, ShowP } from "@kyoo/models";
-import { Platform, ScrollView } from "react-native";
-import { useYoshiki } from "yoshiki/native";
+import { Platform, ScrollView, View, ViewProps } from "react-native";
+import { percent, useYoshiki, vh } from "yoshiki/native";
 import { TransparentLayout } from "../layout";
-import { SeasonTab } from "./season";
+import { EpisodeList, SeasonTab } from "./season";
 import { Header } from "./header";
+import Svg, { Path, SvgProps } from "react-native-svg";
+import { Container, SwitchVariant } from "@kyoo/primitives";
+
+const SvgWave = (props: SvgProps) => {
+	const { css } = useYoshiki();
+	const width = 612;
+	const height = 52.771;
+
+	return (
+		<View {...css({ width: percent(100), aspectRatio: width / height })}>
+			<Svg width="100%" height="100%" viewBox="0 372.979 612 52.771" fill="black" {...props}>
+				<Path d="M0,375.175c68,-5.1,136,-0.85,204,7.948c68,9.052,136,22.652,204,24.777s136,-8.075,170,-12.878l34,-4.973v35.7h-612" />
+			</Svg>
+		</View>
+	);
+};
 
 const query = (slug: string): QueryIdentifier<Show> => ({
 	parser: ShowP,
@@ -34,14 +50,39 @@ const query = (slug: string): QueryIdentifier<Show> => ({
 });
 
 export const ShowDetails: QueryPage<{ slug: string; season: string }> = ({ slug, season }) => {
-	const { css } = useYoshiki();
+	const { css, theme } = useYoshiki();
 
-	return (
-		<ScrollView {...css(Platform.OS === "web" && { overflow: "overlay" as any })}>
+	const ShowHeader = ({ children, ...props }: ViewProps) => (
+		<View
+			{...css(
+				[
+					{ bg: (theme) => theme.background },
+					Platform.OS === "web" && { flexGrow: 1, flexShrink: 1, overflow: "overlay" as any },
+				],
+				props,
+			)}
+		>
 			<Header slug={slug} query={query(slug)} />
 			{/* <Staff slug={slug} /> */}
-			<SeasonTab slug={slug} season={season} />
-		</ScrollView>
+			<SvgWave
+				fill={theme.variant.background}
+				{...css({ flexShrink: 0, flexGrow: 1, display: "flex" })}
+			/>
+			{/* <SeasonTab slug={slug} season={season} /> */}
+			<View {...css({ bg: theme.variant.background })}>
+				<Container>{children}</Container>
+			</View>
+		</View>
+	);
+
+	return (
+		<SwitchVariant>
+			{({ css, theme }) => (
+				<View {...css({ bg: theme.background, flex: 1 })}>
+					<EpisodeList slug={slug} season={season} Header={ShowHeader} />
+				</View>
+			)}
+		</SwitchVariant>
 	);
 };
 

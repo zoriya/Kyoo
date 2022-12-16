@@ -22,7 +22,7 @@ import { H6, Image, Link, P, Skeleton, ts } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { Layout, WithLoading } from "../fetch";
-import { percent, rem, Stylable, useYoshiki, vw } from "yoshiki/native";
+import { percent, rem, Stylable, useYoshiki } from "yoshiki/native";
 
 export const episodeDisplayNumber = (
 	episode: {
@@ -111,5 +111,5 @@ export const EpisodeLine = ({
 };
 EpisodeLine.layout = {
 	numColumns: 1,
-	size: 100, //vw(18) / (16 / 9) + ts(2),
+	size: 100,
 } satisfies Layout;

@@ -35,7 +35,7 @@ export const Container = <AsProps = ViewProps,>({
 				{
 					display: "flex",
 					paddingHorizontal: px(15),
-					marginHorizontal: "auto",
+					alignSelf: "center",
 					width: {
 						xs: percent(100),
 						sm: px(540),

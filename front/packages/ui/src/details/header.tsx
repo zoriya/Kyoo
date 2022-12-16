@@ -40,7 +40,7 @@ import {
 } from "@kyoo/primitives";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 import {
 	Theme,
 	md,
@@ -55,8 +55,8 @@ import {
 	Stylable,
 } from "yoshiki/native";
 import { Fetch } from "../fetch";
-import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg"
-import Theaters from "@material-symbols/svg-400/rounded/theaters-fill.svg"
+import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
+import Theaters from "@material-symbols/svg-400/rounded/theaters-fill.svg";
 
 const TitleLine = ({
 	isLoading,
@@ -100,7 +100,10 @@ const TitleLine = ({
 					layout={{
 						width: { xs: percent(50), md: percent(25) },
 					}}
-					{...css({ maxWidth: { xs: px(175), sm: "unset" }, flexShrink: 0 })}
+					{...css({
+						maxWidth: { xs: px(175), sm: Platform.OS === "web" ? "unset" : 99999999 },
+						flexShrink: 0,
+					})}
 				/>
 				<View
 					{...css({

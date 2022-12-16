@@ -24,9 +24,9 @@ import { alpha } from "./themes";
 import { ts } from "./utils";
 
 export const HR = ({
-	orientation,
+	orientation = "horizontal",
 	...props
-}: { orientation: "vertical" | "horizontal" } & Stylable) => {
+}: { orientation?: "vertical" | "horizontal" } & Stylable) => {
 	const { css } = useYoshiki();
 
 	return (
