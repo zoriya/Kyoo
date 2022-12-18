@@ -2192,13 +2192,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@jellyfin/libass-wasm@npm:^4.1.1":
-  version: 4.1.1
-  resolution: "@jellyfin/libass-wasm@npm:4.1.1"
-  checksum: 5621a42ca991be51527151eb343d41004ca6e996509703427fe91befe5fe2650206a4839b757ea4a7e770280176503bfcc92ae170470c3b174fa6936f83320fc
-  languageName: node
-  linkType: hard
-
 "@jest/create-cache-key-function@npm:^29.0.3":
   version: 29.3.1
   resolution: "@jest/create-cache-key-function@npm:29.3.1"
@@ -8866,6 +8859,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"libass-wasm@npm:^4.1.0":
+  version: 4.1.0
+  resolution: "libass-wasm@npm:4.1.0"
+  checksum: a6ecc842594b36455b309aa3bb6ce3b59ada407ffbdc5e62bf657144dfce028c0a7d20dac34a9b3ed0b21d051b0daf14ea656f692e2aad3b1d66347a4ed95ec4
+  languageName: node
+  linkType: hard
+
 "lines-and-columns@npm:^1.1.6":
   version: 1.2.4
   resolution: "lines-and-columns@npm:1.2.4"
@@ -13608,7 +13608,6 @@ __metadata:
   dependencies:
     "@emotion/react": ^11.9.3
     "@emotion/styled": ^11.9.3
-    "@jellyfin/libass-wasm": ^4.1.1
     "@kyoo/models": "workspace:^"
     "@kyoo/primitives": "workspace:^"
     "@kyoo/ui": "workspace:^"
@@ -13630,6 +13629,7 @@ __metadata:
     hls.js: ^1.2.8
     i18next: ^22.0.6
     jotai: ^1.10.0
+    libass-wasm: ^4.1.0
     moti: ^0.21.0
     next: 13.0.5
     next-fonts: ^1.5.1
