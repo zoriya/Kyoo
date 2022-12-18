@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./navbar";
-export { BrowsePage } from "./browse";
-export { MovieDetails, ShowDetails } from "./details";
-export { Player } from "./player";
+import { Player } from "@kyoo/ui";
+import { withRoute } from "../../utils";
+
+export default withRoute(Player);
