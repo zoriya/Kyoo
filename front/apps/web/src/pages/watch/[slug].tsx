@@ -18,6 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Player from "~/player/player";
+import { Player } from "@kyoo/ui";
+import { withRoute } from "~/utils/router";
 
-export default Player;
+export default withRoute(Player);
