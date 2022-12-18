@@ -13,7 +13,6 @@
 	"dependencies": {
 		"@emotion/react": "^11.9.3",
 		"@emotion/styled": "^11.9.3",
-		"@jellyfin/libass-wasm": "^4.1.1",
 		"@kyoo/models": "workspace:^",
 		"@kyoo/primitives": "workspace:^",
 		"@kyoo/ui": "workspace:^",
@@ -28,6 +27,7 @@
 		"hls.js": "^1.2.8",
 		"i18next": "^22.0.6",
 		"jotai": "^1.10.0",
+		"libass-wasm": "^4.1.0",
 		"moti": "^0.21.0",
 		"next": "13.0.5",
 		"next-fonts": "^1.5.1",
