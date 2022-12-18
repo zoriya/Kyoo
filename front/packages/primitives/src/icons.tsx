@@ -27,13 +27,16 @@ import { ts } from "./utils";
 
 type IconProps = {
 	icon: ComponentType<SvgProps>;
-	color: YoshikiStyle<string>;
+	color?: YoshikiStyle<string>;
 	size?: YoshikiStyle<number | string>;
 };
 
 export const Icon = ({ icon: Icon, color, size = 24, ...props }: IconProps) => {
-	const { css } = useYoshiki();
-	const computed = css({ width: size, height: size, fill: color } as ViewStyle, props);
+	const { css, theme } = useYoshiki();
+	const computed = css(
+		{ width: size, height: size, fill: color ?? theme.colors.white } as ViewStyle,
+		props,
+	);
 	return (
 		<Icon
 			{...Platform.select<SvgProps>({

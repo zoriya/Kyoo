@@ -18,7 +18,6 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ViewStyle } from "@expo/html-elements/build/primitives/View";
 import { ComponentType, Fragment, ReactNode } from "react";
 import {
 	Platform,

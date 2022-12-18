@@ -28,3 +28,4 @@ export * from "./person";
 export * from "./studio";
 export * from "./episode";
 export * from "./season";
+export * from "./watch-item";

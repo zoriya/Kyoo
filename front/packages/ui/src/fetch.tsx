@@ -20,7 +20,6 @@
 
 import { Page, QueryIdentifier, useFetch, KyooErrors } from "@kyoo/models";
 import { Breakpoint, P } from "@kyoo/primitives";
-import { Fragment } from "react";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 
