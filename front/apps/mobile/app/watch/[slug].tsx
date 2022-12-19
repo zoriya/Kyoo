@@ -21,4 +21,10 @@
 import { Player } from "@kyoo/ui";
 import { withRoute } from "../../utils";
 
-export default withRoute(Player);
+export default withRoute(Player, {
+	options: {
+		headerShown: false,
+	},
+	statusBar: { hidden: true },
+	fullscreen: true,
+});

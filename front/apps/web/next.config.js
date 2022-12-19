@@ -23,7 +23,7 @@ const CopyPlugin = require("copy-webpack-plugin");
 const DefinePlugin = require("webpack").DefinePlugin;
 const withFont = require("next-fonts");
 
-const suboctopus = path.dirname(require.resolve("@jellyfin/libass-wasm"));
+const suboctopus = path.dirname(require.resolve("libass-wasm"));
 
 /**
  * @type {import("next").NextConfig}
@@ -115,6 +115,7 @@ const nextConfig = {
 			"@expo/html-elements",
 			"expo-font",
 			"expo-asset",
+			"expo-av",
 			"expo-modules-core",
 			"expo-linear-gradient",
 		],

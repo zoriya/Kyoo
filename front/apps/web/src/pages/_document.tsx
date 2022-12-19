@@ -43,6 +43,7 @@ html, body, #__next {
   flex-grow: 1;
   display: flex;
   flex: 1;
+  overflow: hidden;
 }
 html {
   scroll-behavior: smooth;

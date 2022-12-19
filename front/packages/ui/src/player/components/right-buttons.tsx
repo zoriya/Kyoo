@@ -18,14 +18,15 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ClosedCaption, Fullscreen, FullscreenExit } from "@mui/icons-material";
-import { Box, IconButton, ListItemText, Menu, MenuItem, Tooltip } from "@mui/material";
+import { Font, Track } from "@kyoo/models";
+import { IconButton, tooltip } from "@kyoo/primitives";
 import { useAtom } from "jotai";
-import useTranslation from "next-translate/useTranslation";
-import { useRouter } from "next/router";
+import { useRouter } from "solito/router";
 import { useState } from "react";
-import { Font, Track } from "~/models/resources/watch-item";
-import { Link } from "~/utils/link";
+import { View } from "react-native";
+import { useTranslation } from "react-i18next";
+import Fullscreen from "@material-symbols/svg-400/rounded/fullscreen-fill.svg";
+import FullscreenExit from "@material-symbols/svg-400/rounded/fullscreen_exit-fill.svg";
 import { fullscreenAtom, subtitleAtom } from "../state";
 
 export const RightButtons = ({
@@ -39,59 +40,56 @@ export const RightButtons = ({
 	onMenuOpen: () => void;
 	onMenuClose: () => void;
 }) => {
-	const { t } = useTranslation("player");
+	const { t } = useTranslation();
 	const [subtitleAnchor, setSubtitleAnchor] = useState<HTMLButtonElement | null>(null);
 	const [isFullscreen, setFullscreen] = useAtom(fullscreenAtom);
 
 	return (
-		<Box
-			sx={{
-				display: "flex",
-				"> *": {
-					m: { xs: "4px !important", sm: "8px !important" },
-					p: { xs: "4px !important", sm: "8px !important" },
-				},
-			}}
+		<View
+		// sx={{
+		// 	display: "flex",
+		// 	"> *": {
+		// 		m: { xs: "4px !important", sm: "8px !important" },
+		// 		p: { xs: "4px !important", sm: "8px !important" },
+		// 	},
+		// }}
 		>
-			{subtitles && (
-				<Tooltip title={t("subtitles")}>
-					<IconButton
-						id="sortby"
-						aria-label={t("subtitles")}
-						aria-controls={subtitleAnchor ? "subtitle-menu" : undefined}
-						aria-haspopup="true"
-						aria-expanded={subtitleAnchor ? "true" : undefined}
-						onClick={(event) => {
-							setSubtitleAnchor(event.currentTarget);
-							onMenuOpen();
-						}}
-						sx={{ color: "white" }}
-					>
-						<ClosedCaption />
-					</IconButton>
-				</Tooltip>
-			)}
-			<Tooltip title={t("fullscreen")}>
-				<IconButton
-					onClick={() => setFullscreen(!isFullscreen)}
-					aria-label={t("fullscreen")}
-					sx={{ color: "white" }}
-				>
-					{isFullscreen ? <FullscreenExit /> : <Fullscreen />}
-				</IconButton>
-			</Tooltip>
-			{subtitleAnchor && (
-				<SubtitleMenu
-					subtitles={subtitles!}
-					fonts={fonts!}
-					anchor={subtitleAnchor}
-					onClose={() => {
-						setSubtitleAnchor(null);
-						onMenuClose();
-					}}
-				/>
-			)}
-		</Box>
+			{/* {subtitles && ( */}
+			{/* 	<Tooltip title={t("subtitles")}> */}
+			{/* 		<IconButton */}
+			{/* 			id="sortby" */}
+			{/* 			aria-label={t("subtitles")} */}
+			{/* 			aria-controls={subtitleAnchor ? "subtitle-menu" : undefined} */}
+			{/* 			aria-haspopup="true" */}
+			{/* 			aria-expanded={subtitleAnchor ? "true" : undefined} */}
+			{/* 			onClick={(event) => { */}
+			{/* 				setSubtitleAnchor(event.currentTarget); */}
+			{/* 				onMenuOpen(); */}
+			{/* 			}} */}
+			{/* 			sx={{ color: "white" }} */}
+			{/* 		> */}
+			{/* 			<ClosedCaption /> */}
+			{/* 		</IconButton> */}
+			{/* 	</Tooltip> */}
+			{/* )} */}
+			<IconButton
+				icon={isFullscreen ? FullscreenExit : Fullscreen}
+				onClick={() => setFullscreen(!isFullscreen)}
+				{...tooltip(t("fullscreen"))}
+				sx={{ color: "white" }}
+			/>
+			{/* {subtitleAnchor && ( */}
+			{/* 	<SubtitleMenu */}
+			{/* 		subtitles={subtitles!} */}
+			{/* 		fonts={fonts!} */}
+			{/* 		anchor={subtitleAnchor} */}
+			{/* 		onClose={() => { */}
+			{/* 			setSubtitleAnchor(null); */}
+			{/* 			onMenuClose(); */}
+			{/* 		}} */}
+			{/* 	/> */}
+			{/* )} */}
+		</View>
 	);
 };
 

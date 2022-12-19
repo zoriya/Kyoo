@@ -19,7 +19,7 @@
  */
 
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { useRouter } from "next/router";
+import { useRouter } from "solito/router";
 import { useEffect } from "react";
 import { reducerAtom } from "./keyboard";
 import { durationAtom, playAtom, progressAtom } from "./state";

@@ -19,19 +19,37 @@
  */
 
 import { Stack } from "expo-router";
-import { ComponentType } from "react";
+import { ComponentType, useEffect } from "react";
 import { StatusBar, StatusBarProps } from "react-native";
+import * as ScreenOrientation from "expo-screen-orientation";
+import * as NavigationBar from "expo-navigation-bar";
+
+const FullscreenProvider = () => {
+	useEffect(() => {
+		ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE);
+		NavigationBar.setVisibilityAsync("hidden");
+		return () => {
+			ScreenOrientation.unlockAsync();
+			NavigationBar.setVisibilityAsync("visible");
+		};
+	}, []);
+	return null;
+};
 
 export const withRoute = <Props,>(
 	Component: ComponentType<Props>,
-	options?: Parameters<typeof Stack.Screen>[0] & { statusBar?: StatusBarProps },
+	options?: Parameters<typeof Stack.Screen>[0] & {
+		statusBar?: StatusBarProps;
+		fullscreen?: boolean;
+	},
 ) => {
-	const { statusBar, ...routeOptions } = options ?? {};
+	const { statusBar, fullscreen, ...routeOptions } = options ?? {};
 	const WithUseRoute = ({ route, ...props }: Props & { route: any }) => {
 		return (
 			<>
 				{routeOptions && <Stack.Screen {...routeOptions} />}
 				{statusBar && <StatusBar {...statusBar} />}
+				{fullscreen && <FullscreenProvider />}
 				<Component {...route.params} {...props} />
 			</>
 		);

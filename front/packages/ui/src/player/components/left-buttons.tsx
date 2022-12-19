@@ -18,109 +18,95 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Box, IconButton, Slider, Tooltip, Typography } from "@mui/material";
+import { IconButton, Link, P, tooltip, ts } from "@kyoo/primitives";
 import { useAtom, useAtomValue } from "jotai";
-import useTranslation from "next-translate/useTranslation";
-import { useRouter } from "next/router";
+import { useTranslation } from "react-i18next";
+import { View } from "react-native";
+import SkipPrevious from "@material-symbols/svg-400/rounded/skip_previous-fill.svg";
+import SkipNext from "@material-symbols/svg-400/rounded/skip_next-fill.svg";
+import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
+import Pause from "@material-symbols/svg-400/rounded/pause-fill.svg";
+import VolumeOff from "@material-symbols/svg-400/rounded/volume_off-fill.svg";
+import VolumeMute from "@material-symbols/svg-400/rounded/volume_mute-fill.svg";
+import VolumeDown from "@material-symbols/svg-400/rounded/volume_down-fill.svg";
+import VolumeUp from "@material-symbols/svg-400/rounded/volume_up-fill.svg";
 import { durationAtom, mutedAtom, playAtom, progressAtom, volumeAtom } from "../state";
-import NextLink from "next/link";
-import {
-	Pause,
-	PlayArrow,
-	SkipNext,
-	SkipPrevious,
-	VolumeDown,
-	VolumeMute,
-	VolumeOff,
-	VolumeUp,
-} from "@mui/icons-material";
+import { useYoshiki } from "yoshiki/native";
 
 export const LeftButtons = ({
 	previousSlug,
 	nextSlug,
 }: {
-	previousSlug?: string;
-	nextSlug?: string;
+	previousSlug?: string | null;
+	nextSlug?: string | null;
 }) => {
-	const { t } = useTranslation("player");
-	const router = useRouter();
+	const { css } = useYoshiki();
+	const { t } = useTranslation();
 	const [isPlaying, setPlay] = useAtom(playAtom);
 
+	const spacing = css({ marginHorizontal: ts(1) });
+
 	return (
-		<Box
-			sx={{
-				display: "flex",
-				"> *": {
-					mx: { xs: "2px !important", sm: "8px !important" },
-					p: { xs: "4px !important", sm: "8px !important" },
-				},
-			}}
-		>
+		<View {...css({ flexDirection: "row" })}>
 			{previousSlug && (
-				<Tooltip title={t("previous")}>
-					<NextLink href={{ query: { ...router.query, slug: previousSlug } }} passHref>
-						<IconButton aria-label={t("previous")} sx={{ color: "white" }}>
-							<SkipPrevious />
-						</IconButton>
-					</NextLink>
-				</Tooltip>
-			)}
-			<Tooltip title={isPlaying ? t("pause") : t("play")}>
 				<IconButton
-					onClick={() => setPlay(!isPlaying)}
-					aria-label={isPlaying ? t("pause") : t("play")}
-					sx={{ color: "white" }}
-				>
-					{isPlaying ? <Pause /> : <PlayArrow />}
-				</IconButton>
-			</Tooltip>
+					icon={SkipPrevious}
+					as={Link}
+					href={previousSlug}
+					{...tooltip(t("player.previous"))}
+					{...spacing}
+				/>
+			)}
+			<IconButton
+				icon={isPlaying ? Pause : PlayArrow}
+				onClick={() => setPlay(!isPlaying)}
+				{...tooltip(isPlaying ? t("player.pause") : t("player.play"))}
+				{...spacing}
+			/>
 			{nextSlug && (
-				<Tooltip title={t("next")}>
-					<NextLink href={{ query: { ...router.query, slug: nextSlug } }} passHref>
-						<IconButton aria-label={t("next")} sx={{ color: "white" }}>
-							<SkipNext />
-						</IconButton>
-					</NextLink>
-				</Tooltip>
+				<IconButton
+					icon={SkipNext}
+					as={Link}
+					href={nextSlug}
+					{...tooltip(t("next"))}
+					{...spacing}
+				/>
 			)}
 			<VolumeSlider />
 			<ProgressText />
-		</Box>
+		</View>
 	);
 };
 
 const VolumeSlider = () => {
 	const [volume, setVolume] = useAtom(volumeAtom);
 	const [isMuted, setMuted] = useAtom(mutedAtom);
-	const { t } = useTranslation("player");
+	const { css } = useYoshiki();
+	const { t } = useTranslation();
 
+	return null;
 	return (
-		<Box
-			sx={{
+		<View
+			{...css({
 				display: { xs: "none", sm: "flex" },
-				m: "0 !important",
-				p: "8px",
+				p: ts(1),
 				"body.hoverEnabled &:hover .slider": { width: "100px", px: "16px" },
-			}}
+			})}
 		>
-			<Tooltip title={t("mute")}>
-				<IconButton
-					onClick={() => setMuted(!isMuted)}
-					aria-label={t("mute")}
-					sx={{ color: "white" }}
-				>
-					{isMuted || volume == 0 ? (
-						<VolumeOff />
-					) : volume < 25 ? (
-						<VolumeMute />
-					) : volume < 65 ? (
-						<VolumeDown />
-					) : (
-						<VolumeUp />
-					)}
-				</IconButton>
-			</Tooltip>
-			<Box
+			<IconButton
+				icon={
+					isMuted || volume == 0
+						? VolumeOff
+						: volume < 25
+						? VolumeMute
+						: volume < 65
+						? VolumeDown
+						: VolumeUp
+				}
+				onClick={() => setMuted(!isMuted)}
+				{...tooltip(t("mute"))}
+			/>
+			<View
 				className="slider"
 				sx={{
 					width: 0,
@@ -136,19 +122,20 @@ const VolumeSlider = () => {
 					aria-label={t("volume")}
 					sx={{ alignSelf: "center" }}
 				/>
-			</Box>
-		</Box>
+			</View>
+		</View>
 	);
 };
 
 const ProgressText = () => {
 	const progress = useAtomValue(progressAtom);
 	const duration = useAtomValue(durationAtom);
+	const { css } = useYoshiki();
 
 	return (
-		<Typography color="white" sx={{ alignSelf: "center" }}>
+		<P {...css({ alignSelf: "center", marginBottom: 0 })}>
 			{toTimerString(progress, duration)} : {toTimerString(duration)}
-		</Typography>
+		</P>
 	);
 };
 
