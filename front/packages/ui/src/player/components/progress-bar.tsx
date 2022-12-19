@@ -19,7 +19,7 @@
  */
 
 import { Chapter } from "@kyoo/models";
-import { ts } from "@kyoo/primitives";
+import { ts, Slider } from "@kyoo/primitives";
 import { useAtom, useAtomValue } from "jotai";
 import { useEffect, useRef, useState } from "react";
 import { NativeTouchEvent, Pressable, Touchable, View } from "react-native";
@@ -27,13 +27,21 @@ import { useYoshiki, px, percent } from "yoshiki/native";
 import { bufferedAtom, durationAtom, progressAtom } from "../state";
 
 export const ProgressBar = ({ chapters }: { chapters?: Chapter[] }) => {
-	return null;
-	const { css } = useYoshiki();
-	const ref = useRef<View>(null);
-	const [isSeeking, setSeek] = useState(false);
 	const [progress, setProgress] = useAtom(progressAtom);
 	const buffered = useAtomValue(bufferedAtom);
 	const duration = useAtomValue(durationAtom);
+
+	return (
+		<Slider
+			progress={progress}
+			subtleProgress={buffered}
+			max={duration}
+			markers={chapters?.map((x) => x.startTime)}
+		/>
+	);
+	const { css } = useYoshiki();
+	const ref = useRef<View>(null);
+	const [isSeeking, setSeek] = useState(false);
 
 	const updateProgress = (event: NativeTouchEvent, skipSeek?: boolean) => {
 		if (!(isSeeking || skipSeek) || !ref?.current) return;

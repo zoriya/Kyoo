@@ -18,11 +18,11 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Font, Track } from "@kyoo/models";
+import { Font, Track, WatchItem } from "@kyoo/models";
 import { atom, useAtom, useSetAtom } from "jotai";
-import { RefObject, useEffect, useRef } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import { createParam } from "solito";
-import { ResizeMode, VideoProps } from "expo-av";
+import { ResizeMode, Video as NativeVideo, VideoProps } from "expo-av";
 import SubtitleOctopus from "libass-wasm";
 import Hls from "hls.js";
 import { bakedAtom } from "../jotai-utils";
@@ -34,31 +34,13 @@ enum PlayMode {
 
 const playModeAtom = atom<PlayMode>(PlayMode.Direct);
 
-export const playerAtom = atom<RefObject<HTMLVideoElement> | null>(null);
-export const [_playAtom, playAtom] = bakedAtom(true, async (get, set, value) => {
-	const player = get(playerAtom);
-	if (!player?.current) return;
-	if (value) {
-		try {
-			await player.current.play();
-		} catch (e) {
-			if (e instanceof DOMException && e.name === "NotSupportedError")
-				set(playModeAtom, PlayMode.Transmux);
-			else if (!(e instanceof DOMException && e.name === "NotAllowedError")) console.log(e);
-		}
-	} else {
-		player.current.pause();
-	}
-});
+export const playAtom = atom<boolean>(true);
+
 export const loadAtom = atom(false);
-export const [_progressAtom, progressAtom] = bakedAtom(0, (get, set, value, baker) => {
-	const player = get(playerAtom);
-	if (!player?.current) return;
-	set(baker, value);
-	player.current.currentTime = value;
-});
+export const progressAtom = atom(0);
 export const bufferedAtom = atom(0);
-export const durationAtom = atom(1);
+export const durationAtom = atom<number | undefined>(undefined);
+
 export const [_volumeAtom, volumeAtom] = bakedAtom(100, (get, set, value, baker) => {
 	const player = get(playerAtom);
 	if (!player?.current) return;
@@ -87,21 +69,27 @@ export const [_, fullscreenAtom] = bakedAtom(false, async (_, set, value, baker)
 
 let hls: Hls | null = null;
 
-export const useVideoController = (links?: { direct: string; transmux: string }) => {
-	const player = useRef<HTMLVideoElement>(null);
-	const setPlayer = useSetAtom(playerAtom);
-	const setPlay = useSetAtom(_playAtom);
-	const setPPlay = useSetAtom(playAtom);
-	const setLoad = useSetAtom(loadAtom);
-	const setProgress = useSetAtom(_progressAtom);
-	const setBuffered = useSetAtom(bufferedAtom);
-	const setDuration = useSetAtom(durationAtom);
-	const setVolume = useSetAtom(_volumeAtom);
-	const setMuted = useSetAtom(_mutedAtom);
-	const setFullscreen = useSetAtom(fullscreenAtom);
-	const [playMode, setPlayMode] = useAtom(playModeAtom);
+export const Video = ({ links, ...props }: { links?: WatchItem["link"] } & VideoProps) => {
+	// const player = useRef<HTMLVideoElement>(null);
+	// const setPlayer = useSetAtom(playerAtom);
+	// const setLoad = useSetAtom(loadAtom);
+	// const setVolume = useSetAtom(_volumeAtom);
+	// const setMuted = useSetAtom(_mutedAtom);
+	// const setFullscreen = useSetAtom(fullscreenAtom);
+	// const [playMode, setPlayMode] = useAtom(playModeAtom);
 
-	setPlayer(player);
+	const ref = useRef<NativeVideo | null>(null);
+	const [isPlaying, setPlay] = useAtom(playAtom);
+	const [progress, setProgress] = useAtom(progressAtom);
+	const [buffered, setBuffered] = useAtom(bufferedAtom);
+	const [duration, setDuration] = useAtom(durationAtom);
+
+	useEffect(() => {
+		// I think this will trigger an infinite refresh loop
+		// ref.current?.setStatusAsync({ positionMillis: progress });
+	}, [progress]);
+
+	// setPlayer(player);
 
 	// useEffect(() => {
 	// 	if (!player.current) return;
@@ -137,45 +125,53 @@ export const useVideoController = (links?: { direct: string; transmux: string })
 	// 	if (!player?.current?.duration) return;
 	// 	setDuration(player.current.duration);
 	// }, [player, setDuration]);
+	//
 
-	const videoProps: VideoProps = {
-		// ref: player,
-		// shouldPlay: isPlaying,
-		// onDoubleClick: () => {
-		// 	setFullscreen(!document.fullscreenElement);
-		// },
-		// onPlay: () => setPlay(true),
-		// onPause: () => setPlay(false),
-		// onWaiting: () => setLoad(true),
-		// onCanPlay: () => setLoad(false),
-		onError: () => {
-			if (player?.current?.error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED)
-				setPlayMode(PlayMode.Transmux);
-		},
-		// onTimeUpdate: () => setProgress(player?.current?.currentTime ?? 0),
-		// onDurationChange: () => setDuration(player?.current?.duration ?? 0),
-		// onProgress: () =>
-		// 	setBuffered(
-		// 		player?.current?.buffered.length
-		// 			? player.current.buffered.end(player.current.buffered.length - 1)
-		// 			: 0,
-		// 	),
-		// onVolumeChange: () => {
-		// 	if (!player.current) return;
-		// 	setVolume(player.current.volume * 100);
-		// 	setMuted(player?.current.muted);
-		// },
-		resizeMode: ResizeMode.CONTAIN,
-		useNativeControls: false,
-	};
-	return {
-		playerRef: player,
-		videoProps,
-		onVideoClick: () => {
-			if (!player.current) return;
-			setPPlay(player.current.paused);
-		},
-	};
+	return (
+		<NativeVideo
+			ref={ref}
+			{...props}
+			source={links ? { uri: links.direct } : undefined}
+			shouldPlay={isPlaying}
+			onPlaybackStatusUpdate={(status) => {
+				// TODO: Handle error state
+				if (!status.isLoaded) return;
+
+				setPlay(status.shouldPlay);
+				setProgress(status.positionMillis);
+				setBuffered(status.playableDurationMillis ?? 0);
+				setDuration(status.durationMillis);
+			}}
+			// ref: player,
+			// shouldPlay: isPlaying,
+			// onDoubleClick: () => {
+			// 	setFullscreen(!document.fullscreenElement);
+			// },
+			// onPlay: () => setPlay(true),
+			// onPause: () => setPlay(false),
+			// onWaiting: () => setLoad(true),
+			// onCanPlay: () => setLoad(false),
+			// onError: () => {
+			// 	if (player?.current?.error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED)
+			// 		setPlayMode(PlayMode.Transmux);
+			// },
+			// onTimeUpdate: () => setProgress(player?.current?.currentTime ?? 0),
+			// onDurationChange: () => setDuration(player?.current?.duration ?? 0),
+			// onProgress: () =>
+			// 	setBuffered(
+			// 		player?.current?.buffered.length
+			// 			? player.current.buffered.end(player.current.buffered.length - 1)
+			// 			: 0,
+			// 	),
+			// onVolumeChange: () => {
+			// 	if (!player.current) return;
+			// 	setVolume(player.current.volume * 100);
+			// 	setMuted(player?.current.muted);
+			// },
+			resizeMode={ResizeMode.CONTAIN}
+			useNativeControls={false}
+		/>
+	);
 };
 
 const htmlTrackAtom = atom<HTMLTrackElement | null>(null);
