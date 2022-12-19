@@ -24,9 +24,15 @@ import { ReactNode, useState } from "react";
 import NextApp, { AppContext, type AppProps } from "next/app";
 import { createTheme, ThemeProvider as MTheme } from "@mui/material";
 import { Hydrate, QueryClientProvider } from "@tanstack/react-query";
-import { HiddenIfNoJs, SkeletonCss, ThemeSelector as KThemeSelector, WebTooltip } from "@kyoo/primitives";
+import {
+	HiddenIfNoJs,
+	SkeletonCss,
+	ThemeSelector as KThemeSelector,
+	WebTooltip,
+} from "@kyoo/primitives";
 import { createQueryClient, fetchQuery, QueryIdentifier, QueryPage } from "@kyoo/models";
 import { useTheme, useMobileHover } from "yoshiki/web";
+import { useYoshiki } from "yoshiki/native";
 import superjson from "superjson";
 import Head from "next/head";
 import { withTranslations } from "../i18n";
@@ -86,7 +92,7 @@ const GlobalCssTheme = () => {
 const App = ({ Component, pageProps }: AppProps) => {
 	const [queryClient] = useState(() => createQueryClient());
 	const { queryState, ...props } = superjson.deserialize<any>(pageProps ?? { json: {} });
-	const getLayout = (Component as QueryPage).getLayout ?? ((page) => page);
+	const Layout = (Component as QueryPage).getLayout ?? (({ page }) => page);
 
 	useMobileHover();
 
@@ -99,7 +105,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 				<Hydrate state={queryState}>
 					<ThemeSelector>
 						<GlobalCssTheme />
-						{getLayout(<Component {...props} />)}
+						<Layout page={<Component {...props} />} />
 					</ThemeSelector>
 				</Hydrate>
 			</QueryClientProvider>

@@ -23,7 +23,7 @@ import { Navbar } from "./navbar";
 import { useYoshiki } from "yoshiki/native";
 import { Main } from "@kyoo/primitives";
 
-export const DefaultLayout = (page: ReactElement) => {
+export const DefaultLayout = ({ page }: { page: ReactElement }) => {
 	const { css } = useYoshiki();
 
 	return (
@@ -43,7 +43,7 @@ export const DefaultLayout = (page: ReactElement) => {
 };
 DefaultLayout.getFetchUrls = () => [Navbar.query()];
 
-export const TransparentLayout = (page: ReactElement) => {
+export const TransparentLayout = ({ page }: { page: ReactElement }) => {
 	const { css } = useYoshiki();
 
 	return (
