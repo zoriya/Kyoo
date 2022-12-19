@@ -21,13 +21,12 @@
 import { QueryIdentifier, QueryPage, WatchItem, WatchItemP, useFetch } from "@kyoo/models";
 import { Head } from "@kyoo/primitives";
 import { useState, useEffect, PointerEvent as ReactPointerEvent, ComponentProps } from "react";
-import { StyleSheet, View } from "react-native";
+import { PointerEvent, StyleSheet, View } from "react-native";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useRouter } from "solito/router";
-import { Video } from "expo-av";
 import { percent, useYoshiki } from "yoshiki/native";
 import { Hover, LoadingIndicator } from "./components/hover";
-import { fullscreenAtom, playAtom, useSubtitleController, useVideoController } from "./state";
+import { fullscreenAtom, playAtom, Video } from "./state";
 import { episodeDisplayNumber } from "../details/episode";
 import { useVideoKeyboard } from "./keyboard";
 import { MediaSessionManager } from "./media-session";
@@ -44,7 +43,7 @@ const query = (slug: string): QueryIdentifier<WatchItem> => ({
 
 const mapData = (
 	data: WatchItem | undefined,
-	previousSlug: string,
+	previousSlug?: string,
 	nextSlug?: string,
 ): Partial<ComponentProps<typeof Hover>> => {
 	if (!data) return {};
@@ -60,6 +59,7 @@ const mapData = (
 		nextSlug,
 	};
 };
+
 
 export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 	const { css } = useYoshiki();
@@ -152,17 +152,17 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 				})}
 			>
 				<Video
-					source={{ uri: data?.link.direct }}
-					videoStyle={{ margin: "auto" }}
+					links={data?.link}
+					videoStyle={{ width: percent(100), height: percent(100) }}
 					{...css(StyleSheet.absoluteFillObject)}
-					/* {...videoProps} */
-					// onPointerDown={(e: ReactPointerEvent<HTMLVideoElement>) => {
-					// 	if (e.pointerType === "mouse") {
+					// onClick={onVideoClick}
+					// onPointerDown={(e: PointerEvent) => {
+					// 	if (e.type === "mouse") {
 					// 		onVideoClick();
 					// 	} else if (mouseMoved) {
 					// 		setMouseMoved(false);
 					// 	} else {
-					// 		mouseHasMoved();
+					// 		// mouseHasMoved();
 					// 	}
 					// }}
 					// onEnded={() => {

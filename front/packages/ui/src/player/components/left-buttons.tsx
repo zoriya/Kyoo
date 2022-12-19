@@ -59,7 +59,7 @@ export const LeftButtons = ({
 			)}
 			<IconButton
 				icon={isPlaying ? Pause : PlayArrow}
-				onClick={() => setPlay(!isPlaying)}
+				onPress={() => setPlay(!isPlaying)}
 				{...tooltip(isPlaying ? t("player.pause") : t("player.play"))}
 				{...spacing}
 			/>
@@ -139,8 +139,9 @@ const ProgressText = () => {
 	);
 };
 
-const toTimerString = (timer: number, duration?: number) => {
+const toTimerString = (timer?: number, duration?: number) => {
+	if (timer === undefined) return "??:??";
 	if (!duration) duration = timer;
-	if (duration >= 3600) return new Date(timer * 1000).toISOString().substring(11, 19);
-	return new Date(timer * 1000).toISOString().substring(14, 19);
+	if (duration >= 3600) return new Date(timer).toISOString().substring(11, 19);
+	return new Date(timer).toISOString().substring(14, 19);
 };
