@@ -41,7 +41,7 @@ const queryFn = async <Data,>(
 			: typeof window === "undefined"
 			? process.env.KYOO_URL ?? "http://localhost:5000"
 			: "/api";
-	if (!kyooUrl) console.error("Kyoo's url is not defined.")
+	if (!kyooUrl) console.error("Kyoo's url is not defined.");
 
 	let resp;
 	try {
@@ -108,7 +108,7 @@ export type QueryIdentifier<T = unknown> = {
 
 export type QueryPage<Props = {}> = ComponentType<Props> & {
 	getFetchUrls?: (route: { [key: string]: string }) => QueryIdentifier[];
-	getLayout?: (page: ReactElement) => ReactNode;
+	getLayout?: ({ page }: { page: ReactElement }) => JSX.Element;
 };
 
 const toQueryKey = <Data,>(query: QueryIdentifier<Data>) => {
