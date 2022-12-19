@@ -18,144 +18,178 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ArrowBack } from "@mui/icons-material";
 import {
-	Box,
-	BoxProps,
 	CircularProgress,
+	ContrastArea,
+	H1,
+	H2,
 	IconButton,
+	Link,
+	Poster,
 	Skeleton,
-	Tooltip,
-	Typography,
-} from "@mui/material";
-import useTranslation from "next-translate/useTranslation";
-import NextLink from "next/link";
-import { Poster } from "~/components/poster";
-import { WatchItem } from "~/models/resources/watch-item";
-import { loadAtom } from "../state";
-import { episodeDisplayNumber } from "~/components/episode";
+	tooltip,
+	ts,
+} from "@kyoo/primitives";
+import { Chapter, Font, Track } from "@kyoo/models";
+import { useAtomValue } from "jotai";
+import { View, ViewProps } from "react-native";
+import ArrowBack from "@material-symbols/svg-400/rounded/arrow_back-fill.svg";
 import { LeftButtons } from "./left-buttons";
 import { RightButtons } from "./right-buttons";
 import { ProgressBar } from "./progress-bar";
-import { useAtomValue } from "jotai";
+import { loadAtom } from "../state";
+import { useTranslation } from "react-i18next";
+import { percent, rem, useYoshiki } from "yoshiki/native";
 
 export const Hover = ({
-	data,
+	name,
+	showName,
+	href,
+	poster,
+	chapters,
+	subtitles,
+	fonts,
+	previousSlug,
+	nextSlug,
 	onMenuOpen,
 	onMenuClose,
-	...props
-}: { data?: WatchItem; onMenuOpen: () => void; onMenuClose: () => void } & BoxProps) => {
-	const name = data
-		? data.isMovie
-			? data.name
-			: `${episodeDisplayNumber(data, "")} ${data.name}`
-		: undefined;
-
+}: {
+	name?: string;
+	showName?: string;
+	href?: string;
+	poster?: string | null;
+	chapters?: Chapter[];
+	subtitles?: Track[];
+	fonts?: Font[];
+	previousSlug?: string | null;
+	nextSlug?: string | null;
+	onMenuOpen: () => void;
+	onMenuClose: () => void;
+}) => {
 	return (
-		<Box {...props}>
-			<Back
-				name={data?.name}
-				href={data ? (data.isMovie ? `/movie/${data.slug}` : `/show/${data.showSlug}`) : "#"}
-			/>
-			<Box
-				sx={{
-					position: "absolute",
-					bottom: 0,
-					left: 0,
-					right: 0,
-					background: "rgba(0, 0, 0, 0.6)",
-					display: "flex",
-					padding: "1%",
-				}}
-			>
-				<VideoPoster poster={data?.poster} />
-				<Box
-					sx={{ width: "100%", ml: { xs: 0.5, sm: 3 }, display: "flex", flexDirection: "column" }}
-				>
-					<Typography variant="h4" component="h2" color="white" sx={{ pb: 1 }}>
-						{name ?? <Skeleton />}
-					</Typography>
-
-					<ProgressBar chapters={data?.chapters} />
-
-					<Box sx={{ display: "flex", flexDirection: "row", justifyContent: "space-between" }}>
-						<LeftButtons
-							previousSlug={data && !data.isMovie ? data.previousEpisode?.slug : undefined}
-							nextSlug={data && !data.isMovie ? data.nextEpisode?.slug : undefined}
-						/>
-						<RightButtons
-							subtitles={data?.subtitles}
-							fonts={data?.fonts}
-							onMenuOpen={onMenuOpen}
-							onMenuClose={onMenuClose}
-						/>
-					</Box>
-				</Box>
-			</Box>
-		</Box>
+		<ContrastArea mode="dark">
+			{({ css }) => (
+				<>
+					<Back name={showName} href={href} />
+					<View
+						{...css({
+							position: "absolute",
+							bottom: 0,
+							left: 0,
+							right: 0,
+							bg: "rgba(0, 0, 0, 0.6)",
+							flexDirection: "row",
+							padding: percent(1),
+						})}
+					>
+						<VideoPoster poster={poster} />
+						<View
+							{...css({
+								marginLeft: { xs: ts(0.5), sm: ts(3) },
+								flexDirection: "column",
+								flexGrow: 1,
+							})}
+						>
+							<H2 {...css({ paddingBottom: ts(1) })}>{name ?? <Skeleton variant="fill" />}</H2>
+							<ProgressBar chapters={chapters} />
+							<View
+								{...css({ flexDirection: "row", flexGrow: 1, justifyContent: "space-between" })}
+							>
+								<LeftButtons previousSlug={previousSlug} nextSlug={nextSlug} />
+								<RightButtons
+									subtitles={subtitles}
+									fonts={fonts}
+									onMenuOpen={onMenuOpen}
+									onMenuClose={onMenuClose}
+								/>
+							</View>
+						</View>
+					</View>
+				</>
+			)}
+		</ContrastArea>
 	);
 };
-export const Back = ({ name, href }: { name?: string; href: string }) => {
-	const { t } = useTranslation("player");
+export const Back = ({ name, href }: { name?: string; href?: string }) => {
+	const { css } = useYoshiki();
+	const { t } = useTranslation();
 
 	return (
-		<Box
-			sx={{
+		<View
+			{...css({
 				position: "absolute",
 				top: 0,
 				left: 0,
 				right: 0,
-				background: "rgba(0, 0, 0, 0.6)",
+				bg: "rgba(0, 0, 0, 0.6)",
 				display: "flex",
-				p: "0.33%",
+				flexDirection: "row",
+				alignItems: "center",
+				padding: percent(0.33),
 				color: "white",
-			}}
+			})}
 		>
-			<Tooltip title={t("back")}>
-				<NextLink href={href} passHref>
-					<IconButton aria-label={t("back")} sx={{ color: "white" }}>
-						<ArrowBack />
-					</IconButton>
-				</NextLink>
-			</Tooltip>
-			<Typography component="h1" variant="h5" sx={{ alignSelf: "center", ml: "1rem" }}>
-				{name ? name : <Skeleton />}
-			</Typography>
-		</Box>
+			<IconButton icon={ArrowBack} as={Link} href={href ?? ""} {...tooltip(t("back"))} />
+			<Skeleton>
+				{name ? (
+					<H1
+						{...css({
+							alignSelf: "center",
+							marginBottom: 0,
+							fontSize: rem(1.5),
+							marginLeft: rem(1),
+						})}
+					>
+						{name}
+					</H1>
+				) : (
+					<Skeleton {...css({ width: rem(5), marginBottom: 0 })} />
+				)}
+			</Skeleton>
+		</View>
 	);
 };
 
 const VideoPoster = ({ poster }: { poster?: string | null }) => {
+	const { css } = useYoshiki();
+
 	return (
-		<Box
-			sx={{
+		<View
+			{...css({
 				width: "15%",
-				display: { xs: "none", sm: "block" },
+				display: { xs: "none", sm: "flex" },
 				position: "relative",
-			}}
+			})}
 		>
-			<Poster img={poster} width="100%" sx={{ position: "absolute", bottom: 0 }} />
-		</Box>
+			<Poster
+				src={poster}
+				layout={{ width: percent(100) }}
+				{...css({ position: "absolute", bottom: 0 })}
+			/>
+		</View>
 	);
 };
 
 export const LoadingIndicator = () => {
 	const isLoading = useAtomValue(loadAtom);
+	const { css } = useYoshiki();
+
 	if (!isLoading) return null;
+
 	return (
-		<Box
-			sx={{
+		<View
+			{...css({
 				position: "absolute",
 				top: 0,
 				bottom: 0,
 				left: 0,
 				right: 0,
-				background: "rgba(0, 0, 0, 0.3)",
+				bg: "rgba(0, 0, 0, 0.3)",
 				display: "flex",
 				justifyContent: "center",
-			}}
+			})}
 		>
-			<CircularProgress thickness={5} sx={{ color: "white", alignSelf: "center" }} />
-		</Box>
+			<CircularProgress {...css({ alignSelf: "center" })} />
+		</View>
 	);
 };

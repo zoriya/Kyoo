@@ -18,10 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { Font, Track } from "@kyoo/models";
 import { atom, useSetAtom } from "jotai";
-import { useRouter } from "next/router";
+import { useRouter } from "solito/router";
 import { useEffect } from "react";
-import { Font, Track } from "~/models/resources/watch-item";
 import {
 	durationAtom,
 	fullscreenAtom,

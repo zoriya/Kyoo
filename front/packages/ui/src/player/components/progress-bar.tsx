@@ -18,20 +18,24 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Box } from "@mui/material";
+import { Chapter } from "@kyoo/models";
+import { ts } from "@kyoo/primitives";
 import { useAtom, useAtomValue } from "jotai";
 import { useEffect, useRef, useState } from "react";
-import { Chapter } from "~/models/resources/watch-item";
+import { NativeTouchEvent, Pressable, Touchable, View } from "react-native";
+import { useYoshiki, px, percent } from "yoshiki/native";
 import { bufferedAtom, durationAtom, progressAtom } from "../state";
 
 export const ProgressBar = ({ chapters }: { chapters?: Chapter[] }) => {
-	const ref = useRef<HTMLDivElement>(null);
+	return null;
+	const { css } = useYoshiki();
+	const ref = useRef<View>(null);
 	const [isSeeking, setSeek] = useState(false);
 	const [progress, setProgress] = useAtom(progressAtom);
 	const buffered = useAtomValue(bufferedAtom);
 	const duration = useAtomValue(durationAtom);
 
-	const updateProgress = (event: MouseEvent | TouchEvent, skipSeek?: boolean) => {
+	const updateProgress = (event: NativeTouchEvent, skipSeek?: boolean) => {
 		if (!(isSeeking || skipSeek) || !ref?.current) return;
 		const pageX: number = "pageX" in event ? event.pageX : event.changedTouches[0].pageX;
 		const value: number = (pageX - ref.current.offsetLeft) / ref.current.clientWidth;
@@ -58,26 +62,25 @@ export const ProgressBar = ({ chapters }: { chapters?: Chapter[] }) => {
 	});
 
 	return (
-		<Box
-			onMouseDown={(event) => {
+		<Pressable
+			onPointerDown={(event) => {
 				// prevent drag and drop of the UI.
 				event.preventDefault();
 				setSeek(true);
 			}}
-			onTouchStart={() => setSeek(true)}
-			onClick={(event) => updateProgress(event.nativeEvent, true)}
-			sx={{
-				width: "100%",
-				py: 1,
+			onPress={(event) => updateProgress(event.nativeEvent, true)}
+			{...css({
+				width: percent(100),
+				paddingVertical: ts(1),
 				cursor: "pointer",
 				WebkitTapHighlightColor: "transparent",
 				"body.hoverEnabled &:hover": {
 					".thumb": { opacity: 1 },
 					".bar": { transform: "unset" },
 				},
-			}}
+			})}
 		>
-			<Box
+			<View
 				ref={ref}
 				className="bar"
 				sx={{
@@ -88,7 +91,7 @@ export const ProgressBar = ({ chapters }: { chapters?: Chapter[] }) => {
 					position: "relative",
 				}}
 			>
-				<Box
+				<View
 					sx={{
 						width: `${(buffered / duration) * 100}%`,
 						position: "absolute",
@@ -98,7 +101,7 @@ export const ProgressBar = ({ chapters }: { chapters?: Chapter[] }) => {
 						background: "rgba(255, 255, 255, 0.5)",
 					}}
 				/>
-				<Box
+				<View
 					sx={{
 						width: `${(progress / duration) * 100}%`,
 						position: "absolute",
@@ -108,7 +111,7 @@ export const ProgressBar = ({ chapters }: { chapters?: Chapter[] }) => {
 						background: (theme) => theme.palette.primary.main,
 					}}
 				/>
-				<Box
+				<View
 					className="thumb"
 					sx={{
 						position: "absolute",
@@ -125,19 +128,19 @@ export const ProgressBar = ({ chapters }: { chapters?: Chapter[] }) => {
 				/>
 
 				{chapters?.map((x) => (
-					<Box
+					<View
 						key={x.startTime}
-						sx={{
+						{...css({
 							position: "absolute",
-							width: "4px",
+							width: px(4),
 							top: 0,
 							bottom: 0,
 							left: `${Math.min(100, (x.startTime / duration) * 100)}%`,
-							background: (theme) => theme.palette.primary.dark,
-						}}
+							bg: (theme) => theme.accent,
+						})}
 					/>
 				))}
-			</Box>
-		</Box>
+			</View>
+		</Pressable>
 	);
 };

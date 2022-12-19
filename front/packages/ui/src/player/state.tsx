@@ -18,15 +18,14 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { BoxProps } from "@mui/material";
+import { Font, Track } from "@kyoo/models";
 import { atom, useAtom, useSetAtom } from "jotai";
-import { useRouter } from "next/router";
 import { RefObject, useEffect, useRef } from "react";
-import { Font, Track } from "~/models/resources/watch-item";
-import { bakedAtom } from "~/utils/jotai-utils";
-// @ts-ignore
-import SubtitleOctopus from "@jellyfin/libass-wasm/dist/js/subtitles-octopus";
+import { createParam } from "solito";
+import { ResizeMode, VideoProps } from "expo-av";
+import SubtitleOctopus from "libass-wasm";
 import Hls from "hls.js";
+import { bakedAtom } from "../jotai-utils";
 
 enum PlayMode {
 	Direct,
@@ -104,69 +103,70 @@ export const useVideoController = (links?: { direct: string; transmux: string })
 
 	setPlayer(player);
 
-	useEffect(() => {
-		if (!player.current) return;
-		setPlay(!player.current.paused);
-	}, [setPlay]);
+	// useEffect(() => {
+	// 	if (!player.current) return;
+	// 	setPlay(!player.current.paused);
+	// }, [setPlay]);
 
-	useEffect(() => {
-		setPlayMode(PlayMode.Direct);
-	}, [links, setPlayMode]);
+	// useEffect(() => {
+	// 	setPlayMode(PlayMode.Direct);
+	// }, [links, setPlayMode]);
 
-	useEffect(() => {
-		const src = playMode === PlayMode.Direct ? links?.direct : links?.transmux;
+	// useEffect(() => {
+	// 	const src = playMode === PlayMode.Direct ? links?.direct : links?.transmux;
 
-		if (!player?.current || !src) return;
-		if (
-			playMode == PlayMode.Direct ||
-			player.current.canPlayType("application/vnd.apple.mpegurl")
-		) {
-			player.current.src = src;
-		} else {
-			if (hls === null) hls = new Hls();
-			hls.loadSource(src);
-			hls.attachMedia(player.current);
-			hls.on(Hls.Events.MANIFEST_LOADED, async () => {
-				try {
-					await player.current?.play();
-				} catch {}
-			});
-		}
-	}, [playMode, links, player]);
+	// 	if (!player?.current || !src) return;
+	// 	if (
+	// 		playMode == PlayMode.Direct ||
+	// 		player.current.canPlayType("application/vnd.apple.mpegurl")
+	// 	) {
+	// 		player.current.src = src;
+	// 	} else {
+	// 		if (hls === null) hls = new Hls();
+	// 		hls.loadSource(src);
+	// 		hls.attachMedia(player.current);
+	// 		hls.on(Hls.Events.MANIFEST_LOADED, async () => {
+	// 			try {
+	// 				await player.current?.play();
+	// 			} catch {}
+	// 		});
+	// 	}
+	// }, [playMode, links, player]);
 
-	useEffect(() => {
-		if (!player?.current?.duration) return;
-		setDuration(player.current.duration);
-	}, [player, setDuration]);
+	// useEffect(() => {
+	// 	if (!player?.current?.duration) return;
+	// 	setDuration(player.current.duration);
+	// }, [player, setDuration]);
 
-	const videoProps: BoxProps<"video"> = {
-		ref: player,
-		onDoubleClick: () => {
-			setFullscreen(!document.fullscreenElement);
-		},
-		onPlay: () => setPlay(true),
-		onPause: () => setPlay(false),
-		onWaiting: () => setLoad(true),
-		onCanPlay: () => setLoad(false),
+	const videoProps: VideoProps = {
+		// ref: player,
+		// shouldPlay: isPlaying,
+		// onDoubleClick: () => {
+		// 	setFullscreen(!document.fullscreenElement);
+		// },
+		// onPlay: () => setPlay(true),
+		// onPause: () => setPlay(false),
+		// onWaiting: () => setLoad(true),
+		// onCanPlay: () => setLoad(false),
 		onError: () => {
 			if (player?.current?.error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED)
 				setPlayMode(PlayMode.Transmux);
 		},
-		onTimeUpdate: () => setProgress(player?.current?.currentTime ?? 0),
-		onDurationChange: () => setDuration(player?.current?.duration ?? 0),
-		onProgress: () =>
-			setBuffered(
-				player?.current?.buffered.length
-					? player.current.buffered.end(player.current.buffered.length - 1)
-					: 0,
-			),
-		onVolumeChange: () => {
-			if (!player.current) return;
-			setVolume(player.current.volume * 100);
-			setMuted(player?.current.muted);
-		},
-		autoPlay: true,
-		controls: false,
+		// onTimeUpdate: () => setProgress(player?.current?.currentTime ?? 0),
+		// onDurationChange: () => setDuration(player?.current?.duration ?? 0),
+		// onProgress: () =>
+		// 	setBuffered(
+		// 		player?.current?.buffered.length
+		// 			? player.current.buffered.end(player.current.buffered.length - 1)
+		// 			: 0,
+		// 	),
+		// onVolumeChange: () => {
+		// 	if (!player.current) return;
+		// 	setVolume(player.current.volume * 100);
+		// 	setMuted(player?.current.muted);
+		// },
+		resizeMode: ResizeMode.CONTAIN,
+		useNativeControls: false,
 	};
 	return {
 		playerRef: player,
@@ -239,14 +239,14 @@ export const [_subtitleAtom, subtitleAtom] = bakedAtom<
 	}
 });
 
+const { useParam } = createParam<{ subtitle: string }>();
+
 export const useSubtitleController = (
 	player: RefObject<HTMLVideoElement>,
 	subtitles?: Track[],
 	fonts?: Font[],
 ) => {
-	const {
-		query: { subtitle },
-	} = useRouter();
+	const [subtitle] = useParam("subtitle");
 	const selectSubtitle = useSetAtom(subtitleAtom);
 
 	const newSub = subtitles?.find((x) => x.language === subtitle);
