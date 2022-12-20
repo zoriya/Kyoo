@@ -119,7 +119,7 @@ const WatchMovieP = z.preprocess(
 		/**
 		 * The title of this episode.
 		 */
-		name: z.string(),
+		name: z.string().nullable(),
 		/**
 		 * The sumarry of this episode.
 		 */
@@ -179,15 +179,15 @@ const WatchEpisodeP = WatchMovieP.and(
 		/**
 		 * The season in witch this episode is in.
 		 */
-		seasonNumber: z.number(),
+		seasonNumber: z.number().nullable(),
 		/**
 		 * The number of this episode is it's season.
 		 */
-		episodeNumber: z.number(),
+		episodeNumber: z.number().nullable(),
 		/**
 		 * The absolute number of this episode. It's an episode number that is not reset to 1 after a new season.
 		 */
-		absoluteNumber: z.number(),
+		absoluteNumber: z.number().nullable(),
 		/**
 		 * The episode that come before this one if you follow usual watch orders. If this is the first
 		 * episode or this is a movie, it will be null.

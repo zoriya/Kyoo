@@ -75,7 +75,7 @@ export const RightButtons = ({
 			<IconButton
 				icon={isFullscreen ? FullscreenExit : Fullscreen}
 				onClick={() => setFullscreen(!isFullscreen)}
-				{...tooltip(t("fullscreen"))}
+				{...tooltip(t("player.fullscreen"))}
 				sx={{ color: "white" }}
 			/>
 			{/* {subtitleAnchor && ( */}

@@ -20,7 +20,7 @@
 
 import { Font, Track, WatchItem } from "@kyoo/models";
 import { atom, useAtom, useSetAtom } from "jotai";
-import { RefObject, useEffect, useRef, useState } from "react";
+import { RefObject, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createParam } from "solito";
 import { ResizeMode, Video as NativeVideo, VideoProps } from "expo-av";
 import SubtitleOctopus from "libass-wasm";
@@ -34,8 +34,7 @@ enum PlayMode {
 
 const playModeAtom = atom<PlayMode>(PlayMode.Direct);
 
-export const playAtom = atom<boolean>(true);
-
+export const playAtom = atom(true);
 export const loadAtom = atom(false);
 export const progressAtom = atom(0);
 export const bufferedAtom = atom(0);
@@ -69,10 +68,13 @@ export const [_, fullscreenAtom] = bakedAtom(false, async (_, set, value, baker)
 
 let hls: Hls | null = null;
 
-export const Video = ({ links, ...props }: { links?: WatchItem["link"] } & VideoProps) => {
+export const Video = ({
+	links,
+	setError,
+	...props
+}: { links?: WatchItem["link"]; setError: (error: string | undefined) => void } & VideoProps) => {
 	// const player = useRef<HTMLVideoElement>(null);
 	// const setPlayer = useSetAtom(playerAtom);
-	// const setLoad = useSetAtom(loadAtom);
 	// const setVolume = useSetAtom(_volumeAtom);
 	// const setMuted = useSetAtom(_mutedAtom);
 	// const setFullscreen = useSetAtom(fullscreenAtom);
@@ -80,6 +82,12 @@ export const Video = ({ links, ...props }: { links?: WatchItem["link"] } & Video
 
 	const ref = useRef<NativeVideo | null>(null);
 	const [isPlaying, setPlay] = useAtom(playAtom);
+	const setLoad = useSetAtom(loadAtom);
+
+	useLayoutEffect(() => {
+		setLoad(true);
+	}, [])
+
 	const [progress, setProgress] = useAtom(progressAtom);
 	const [buffered, setBuffered] = useAtom(bufferedAtom);
 	const [duration, setDuration] = useAtom(durationAtom);
@@ -134,9 +142,13 @@ export const Video = ({ links, ...props }: { links?: WatchItem["link"] } & Video
 			source={links ? { uri: links.direct } : undefined}
 			shouldPlay={isPlaying}
 			onPlaybackStatusUpdate={(status) => {
-				// TODO: Handle error state
-				if (!status.isLoaded) return;
+				if (!status.isLoaded) {
+					setLoad(true);
+					if (status.error) setError(status.error);
+					return;
+				}
 
+				setLoad(status.isPlaying !== status.shouldPlay);
 				setPlay(status.shouldPlay);
 				setProgress(status.positionMillis);
 				setBuffered(status.playableDurationMillis ?? 0);

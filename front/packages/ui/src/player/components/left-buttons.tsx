@@ -68,7 +68,7 @@ export const LeftButtons = ({
 					icon={SkipNext}
 					as={Link}
 					href={nextSlug}
-					{...tooltip(t("next"))}
+					{...tooltip(t("player.next"))}
 					{...spacing}
 				/>
 			)}
