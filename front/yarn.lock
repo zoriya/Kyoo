@@ -9992,7 +9992,7 @@ __metadata:
     react-native-svg: 13.4.0
     react-native-svg-transformer: ^1.0.0
     typescript: ^4.6.3
-    yoshiki: 0.3.1
+    yoshiki: 0.3.2
   languageName: unknown
   linkType: soft
 
@@ -13677,7 +13677,7 @@ __metadata:
     superjson: ^1.11.0
     typescript: ^4.9.3
     webpack: ^5.75.0
-    yoshiki: 0.3.1
+    yoshiki: 0.3.2
     zod: ^3.19.1
   languageName: unknown
   linkType: soft
@@ -14002,9 +14002,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yoshiki@npm:0.3.1":
-  version: 0.3.1
-  resolution: "yoshiki@npm:0.3.1"
+"yoshiki@npm:0.3.2":
+  version: 0.3.2
+  resolution: "yoshiki@npm:0.3.2"
   dependencies:
     "@types/node": 18.x.x
     "@types/react": 18.x.x
@@ -14019,7 +14019,7 @@ __metadata:
       optional: true
     react-native-web:
       optional: true
-  checksum: 9448b628b61bbcc4485af7aed667a1c0f8490a2066fa35953b4a02126f1d31d94f90e27a592797f8ecedc0ce2220976a7651ba989f4ff3c68513496b2f9fdd0b
+  checksum: a723473e5593e9871d4903cfc9186240c6745cd97ca45ba9f1f0233e7717afefb908c08a0a6e2dc37ac2bbb0c9df269364767db6c885a8f2e19748d295c42a57
   languageName: node
   linkType: hard
 

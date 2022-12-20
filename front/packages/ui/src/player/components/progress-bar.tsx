@@ -20,20 +20,23 @@
 
 import { Chapter } from "@kyoo/models";
 import { ts, Slider } from "@kyoo/primitives";
-import { useAtom, useAtomValue } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useRef, useState } from "react";
 import { NativeTouchEvent, Pressable, View } from "react-native";
 import { useYoshiki, px, percent } from "yoshiki/native";
-import { bufferedAtom, durationAtom, progressAtom } from "../state";
+import { bufferedAtom, durationAtom, playAtom, progressAtom } from "../state";
 
 export const ProgressBar = ({ chapters }: { chapters?: Chapter[] }) => {
 	const [progress, setProgress] = useAtom(progressAtom);
 	const buffered = useAtomValue(bufferedAtom);
 	const duration = useAtomValue(durationAtom);
+	const setPlay = useSetAtom(playAtom);
 
 	return (
 		<Slider
 			progress={progress}
+			startSeek={() => setPlay(false)}
+			endSeek={() => setPlay(true)}
 			setProgress={setProgress}
 			subtleProgress={buffered}
 			max={duration}

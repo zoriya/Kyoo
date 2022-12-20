@@ -18,60 +18,92 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { useState } from "react";
-import { Platform, Pressable, View } from "react-native";
+import { useRef, useState } from "react";
+import { Platform, View } from "react-native";
 import { percent, Stylable, useYoshiki } from "yoshiki/native";
 import { ts } from "./utils";
-
-const calc =
-	Platform.OS === "web"
-		? (first: number, operator: "+" | "-" | "*" | "/", second: number): number =>
-				`calc(${first} ${operator} ${second})` as unknown as number
-		: (first: number, operator: "+" | "-" | "*" | "/", second: number): number => {
-				switch (operator) {
-					case "+":
-						return first + second;
-					case "-":
-						return first - second;
-					case "*":
-						return first * second;
-					case "/":
-						return first / second;
-				}
-		  };
 
 export const Slider = ({
 	progress,
 	subtleProgress,
 	max = 100,
 	markers,
+	setProgress,
+	startSeek,
+	endSeek,
 	...props
-}: { progress: number; max?: number; subtleProgress?: number; markers?: number[] } & Stylable) => {
+}: {
+	progress: number;
+	max?: number;
+	subtleProgress?: number;
+	markers?: number[];
+	setProgress: (progress: number) => void;
+	startSeek?: () => void;
+	endSeek?: () => void;
+} & Stylable) => {
 	const { css } = useYoshiki();
+	const ref = useRef<View>(null);
+	const [layout, setLayout] = useState({ x: 0, width: 0 });
 	const [isSeeking, setSeek] = useState(false);
+	const [isHover, setHover] = useState(false);
+	const [isFocus, setFocus] = useState(false);
+	const smallBar = !(isSeeking || isHover || isFocus);
 
+	// TODO keyboard handling (left, right, up, down)
 	return (
-		<Pressable
-			onTouchStart={(event) => {
-				// // prevent drag and drop of the UI.
-				// event.preventDefault();
+		<View
+			ref={ref}
+			// @ts-ignore Web only
+			onMouseEnter={() => setHover(true)}
+			// @ts-ignore Web only
+			onMouseLeave={() => setHover(false)}
+			// TODO: This does not work
+			tabindex={0}
+			onFocus={() => setFocus(true)}
+			onBlur={() => setFocus(false)}
+			onStartShouldSetResponder={() => true}
+			onResponderGrant={() => {
 				setSeek(true);
+				startSeek?.call(null);
 			}}
+			onResponderRelease={() => {
+				setSeek(false);
+				endSeek?.call(null);
+			}}
+			onResponderMove={(event) => {
+				event.preventDefault();
+				const locationX = Platform.select({
+					android: event.nativeEvent.pageX - layout.x,
+					default: event.nativeEvent.locationX,
+				});
+				setProgress(Math.max(0, Math.min(locationX / layout.width, 100)) * max);
+			}}
+			onLayout={() =>
+				ref.current?.measure((_, __, width, ___, pageX) =>
+					setLayout({ width: width, x: pageX }),
+				)
+			}
 			{...css(
 				{
 					paddingVertical: ts(1),
+					focus: {
+						shadowRadius: 0,
+					},
 				},
 				props,
 			)}
 		>
 			<View
-				{...css({
-					width: percent(100),
-					height: ts(1),
-					bg: (theme) => theme.overlay0,
-				})}
+				{...css([
+					{
+						width: percent(100),
+						height: ts(1),
+						bg: (theme) => theme.overlay0,
+					},
+					smallBar && { transform: [{ scaleY: 0.4 }] },
+				])}
 			>
-				{subtleProgress && (
+				{subtleProgress !== undefined && (
 					<View
 						{...css({
 							bg: (theme) => theme.overlay1,
@@ -84,14 +116,21 @@ export const Slider = ({
 					/>
 				)}
 				<View
-					{...css({
-						bg: (theme) => theme.accent,
-						position: "absolute",
-						top: 0,
-						bottom: 0,
-						left: 0,
-						width: percent((progress / max) * 100),
-					})}
+					{...css(
+						{
+							bg: (theme) => theme.accent,
+							position: "absolute",
+							top: 0,
+							bottom: 0,
+							left: 0,
+						},
+						{
+							// In an inline style because yoshiki's insertion can not catch up with the constant redraw
+							style: {
+								width: percent((progress / max) * 100),
+							},
+						},
+					)}
 				/>
 				{markers?.map((x) => (
 					<View
@@ -102,26 +141,34 @@ export const Slider = ({
 							bottom: 0,
 							left: percent(Math.min(100, (x / max) * 100)),
 							bg: (theme) => theme.accent,
-							width: ts(1),
+							width: ts(0.5),
 							height: ts(1),
-							borderRadius: ts(0.5),
 						})}
 					/>
 				))}
 			</View>
 			<View
-				{...css({
-					position: "absolute",
-					top: 0,
-					bottom: 0,
-					margin: "auto",
-					left: calc(percent((progress / max) * 100), "-", ts(1)),
-					bg: (theme) => theme.accent,
-					width: ts(2),
-					height: ts(2),
-					borderRadius: ts(1),
-				})}
+				{...css(
+					[
+						{
+							position: "absolute",
+							top: 0,
+							bottom: 0,
+							marginY: ts(.5),
+							bg: (theme) => theme.accent,
+							width: ts(2),
+							height: ts(2),
+							borderRadius: ts(1),
+						},
+						smallBar && { opacity: 0 },
+					],
+					{
+						style: {
+							left: percent((progress / max) * 100),
+						},
+					},
+				)}
 			/>
-		</Pressable>
+		</View>
 	);
 };

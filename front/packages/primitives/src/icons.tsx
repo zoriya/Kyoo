@@ -19,10 +19,10 @@
  */
 
 import { ComponentProps, ComponentType } from "react";
-import { Platform, PressableProps, ViewStyle } from "react-native";
+import { Pressable, Platform, PressableProps, ViewStyle } from "react-native";
 import { SvgProps } from "react-native-svg";
 import { YoshikiStyle } from "yoshiki/dist/type";
-import { Pressable, px, useYoshiki } from "yoshiki/native";
+import { px, useYoshiki } from "yoshiki/native";
 import { ts } from "./utils";
 
 type IconProps = {
