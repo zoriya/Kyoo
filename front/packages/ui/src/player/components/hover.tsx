@@ -32,7 +32,8 @@ import {
 } from "@kyoo/primitives";
 import { Chapter, Font, Track } from "@kyoo/models";
 import { useAtomValue } from "jotai";
-import { View, ViewProps } from "react-native";
+import { Pressable, View, ViewProps } from "react-native";
+import { useRouter } from "solito/router";
 import ArrowBack from "@material-symbols/svg-400/rounded/arrow_back-fill.svg";
 import { LeftButtons } from "./left-buttons";
 import { RightButtons } from "./right-buttons";
@@ -42,6 +43,7 @@ import { useTranslation } from "react-i18next";
 import { percent, rem, useYoshiki } from "yoshiki/native";
 
 export const Hover = ({
+	isLoading,
 	name,
 	showName,
 	href,
@@ -53,8 +55,11 @@ export const Hover = ({
 	nextSlug,
 	onMenuOpen,
 	onMenuClose,
+	show,
+	...props
 }: {
-	name?: string;
+	isLoading: boolean;
+	name?: string | null;
 	showName?: string;
 	href?: string;
 	poster?: string | null;
@@ -65,22 +70,27 @@ export const Hover = ({
 	nextSlug?: string | null;
 	onMenuOpen: () => void;
 	onMenuClose: () => void;
-}) => {
+	show: boolean;
+} & ViewProps) => {
+	// TODO animate show
 	return (
 		<ContrastArea mode="dark">
 			{({ css }) => (
-				<>
-					<Back name={showName} href={href} />
+				<View {...css([{ flexGrow: 1 }, !show && { opacity: 0 }])}>
+					<Back isLoading={isLoading} name={showName} href={href} {...props} />
 					<View
-						{...css({
-							position: "absolute",
-							bottom: 0,
-							left: 0,
-							right: 0,
-							bg: "rgba(0, 0, 0, 0.6)",
-							flexDirection: "row",
-							padding: percent(1),
-						})}
+						{...css(
+							{
+								position: "absolute",
+								bottom: 0,
+								left: 0,
+								right: 0,
+								bg: "rgba(0, 0, 0, 0.6)",
+								flexDirection: "row",
+								padding: percent(1),
+							},
+							props,
+						)}
 					>
 						<VideoPoster poster={poster} />
 						<View
@@ -90,7 +100,9 @@ export const Hover = ({
 								flexGrow: 1,
 							})}
 						>
-							<H2 {...css({ paddingBottom: ts(1) })}>{name ?? <Skeleton variant="fill" />}</H2>
+							<H2 {...css({ paddingBottom: ts(1) })}>
+								{isLoading ? <Skeleton {...css({ width: rem(15), height: rem(2) })} /> : name}
+							</H2>
 							<ProgressBar chapters={chapters} />
 							<View
 								{...css({ flexDirection: "row", flexGrow: 1, justifyContent: "space-between" })}
@@ -105,33 +117,48 @@ export const Hover = ({
 							</View>
 						</View>
 					</View>
-				</>
+				</View>
 			)}
 		</ContrastArea>
 	);
 };
-export const Back = ({ name, href }: { name?: string; href?: string }) => {
+export const Back = ({
+	isLoading,
+	name,
+	href,
+	...props
+}: { isLoading: boolean; name?: string; href?: string } & ViewProps) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
+	const router = useRouter();
 
 	return (
 		<View
-			{...css({
-				position: "absolute",
-				top: 0,
-				left: 0,
-				right: 0,
-				bg: "rgba(0, 0, 0, 0.6)",
-				display: "flex",
-				flexDirection: "row",
-				alignItems: "center",
-				padding: percent(0.33),
-				color: "white",
-			})}
+			{...css(
+				{
+					position: "absolute",
+					top: 0,
+					left: 0,
+					right: 0,
+					bg: "rgba(0, 0, 0, 0.6)",
+					display: "flex",
+					flexDirection: "row",
+					alignItems: "center",
+					padding: percent(0.33),
+					color: "white",
+				},
+				props,
+			)}
 		>
-			<IconButton icon={ArrowBack} as={Link} href={href ?? ""} {...tooltip(t("back"))} />
+			<IconButton
+				icon={ArrowBack}
+				{...(href ? { as: Link as any, href: href } : { as: Pressable, onPress: router.back })}
+				{...tooltip(t("player.back"))}
+			/>
 			<Skeleton>
-				{name ? (
+				{isLoading ? (
+					<Skeleton {...css({ width: rem(5), marginBottom: 0 })} />
+				) : (
 					<H1
 						{...css({
 							alignSelf: "center",
@@ -142,8 +169,6 @@ export const Back = ({ name, href }: { name?: string; href?: string }) => {
 					>
 						{name}
 					</H1>
-				) : (
-					<Skeleton {...css({ width: rem(5), marginBottom: 0 })} />
 				)}
 			</Skeleton>
 		</View>
@@ -185,7 +210,6 @@ export const LoadingIndicator = () => {
 				left: 0,
 				right: 0,
 				bg: "rgba(0, 0, 0, 0.3)",
-				display: "flex",
 				justifyContent: "center",
 			})}
 		>

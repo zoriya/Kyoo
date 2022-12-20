@@ -21,16 +21,17 @@
 import { QueryIdentifier, QueryPage, WatchItem, WatchItemP, useFetch } from "@kyoo/models";
 import { Head } from "@kyoo/primitives";
 import { useState, useEffect, PointerEvent as ReactPointerEvent, ComponentProps } from "react";
-import { PointerEvent, StyleSheet, View } from "react-native";
+import { Platform, Pressable, StyleSheet, View } from "react-native";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useRouter } from "solito/router";
 import { percent, useYoshiki } from "yoshiki/native";
-import { Hover, LoadingIndicator } from "./components/hover";
+import { Back, Hover, LoadingIndicator } from "./components/hover";
 import { fullscreenAtom, playAtom, Video } from "./state";
 import { episodeDisplayNumber } from "../details/episode";
 import { useVideoKeyboard } from "./keyboard";
 import { MediaSessionManager } from "./media-session";
 import { ErrorView } from "../fetch";
+import { useTranslation } from "react-i18next";
 
 // Callback used to hide the controls when the mouse goes iddle. This is stored globally to clear the old timeout
 // if the mouse moves again (if this is stored as a state, the whole page is redrawn on mouse move)
@@ -46,10 +47,11 @@ const mapData = (
 	previousSlug?: string,
 	nextSlug?: string,
 ): Partial<ComponentProps<typeof Hover>> => {
-	if (!data) return {};
+	if (!data) return { isLoading: true };
 	return {
+		isLoading: false,
 		name: data.isMovie ? data.name : `${episodeDisplayNumber(data, "")} ${data.name}`,
-		showName: data.isMovie ? data.name : data.showTitle,
+		showName: data.isMovie ? data.name! : data.showTitle,
 		href: data ? (data.isMovie ? `/movie/${data.slug}` : `/show/${data.showSlug}`) : "#",
 		poster: data.poster,
 		subtitles: data.subtitles,
@@ -60,10 +62,11 @@ const mapData = (
 	};
 };
 
-
 export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 	const { css } = useYoshiki();
+	const { t } = useTranslation();
 
+	const [playbackError, setPlaybackError] = useState<string | undefined>(undefined);
 	const { data, error } = useFetch(query(slug));
 	const previous =
 		data && !data.isMovie && data.previousEpisode
@@ -84,33 +87,40 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 	const [menuOpenned, setMenuOpen] = useState(false);
 
 	const displayControls = showHover || !isPlaying || mouseMoved || menuOpenned;
-	// const mouseHasMoved = () => {
-	// 	setMouseMoved(true);
-	// 	if (mouseCallback) clearTimeout(mouseCallback);
-	// 	mouseCallback = setTimeout(() => {
-	// 		setMouseMoved(false);
-	// 	}, 2500);
-	// };
-	// useEffect(() => {
-	// 	const handler = (e: PointerEvent) => {
-	// 		if (e.pointerType !== "mouse") return;
-	// 		mouseHasMoved();
-	// 	};
+	const show = () => {
+		setMouseMoved(true);
+		if (mouseCallback) clearTimeout(mouseCallback);
+		mouseCallback = setTimeout(() => {
+			setMouseMoved(false);
+		}, 2500);
+	};
+	useEffect(() => {
+		if (Platform.OS !== "web") return;
+		const handler = (e: PointerEvent) => {
+			if (e.pointerType !== "mouse") return;
+			show();
+		};
 
-	// 	document.addEventListener("pointermove", handler);
-	// 	return () => document.removeEventListener("pointermove", handler);
-	// });
+		document.addEventListener("pointermove", handler);
+		return () => document.removeEventListener("pointermove", handler);
+	});
 
 	// useEffect(() => {
 	// 	setPlay(true);
 	// }, [slug, setPlay]);
-	// useEffect(() => {
-	// 	if (!/Mobi/i.test(window.navigator.userAgent)) return;
-	// 	setFullscreen(true);
-	// 	return () => setFullscreen(false);
-	// }, [setFullscreen]);
+	useEffect(() => {
+		if (Platform.OS !== "web" || !/Mobi/i.test(window.navigator.userAgent)) return;
+		setFullscreen(true);
+		return () => setFullscreen(false);
+	}, [setFullscreen]);
 
-	if (error) return <ErrorView error={error} />;
+	if (error || playbackError)
+		return (
+			<>
+				<Back isLoading={false} {...css({ position: "relative", bg: (theme) => theme.appbar })} />
+				<ErrorView error={error ?? { errors: [playbackError!] }} />
+			</>
+		);
 
 	return (
 		<>
@@ -131,7 +141,7 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 				/>
 			)}
 			<MediaSessionManager
-				title={data?.name}
+				title={data?.name ?? t("show.episodeNoMetadata")}
 				image={data?.thumbnail}
 				next={next}
 				previous={previous}
@@ -142,29 +152,20 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 			{/* 		text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; */}
 			{/* 	} */}
 			{/* `}</style> */}
-			<View
-				// onMouseLeave={() => setMouseMoved(false)}
+			<Pressable
+				onHoverOut={() => setMouseMoved(false)}
+				onPress={Platform.OS === "web" ? () => setPlay(!isPlaying) : show}
 				{...css({
 					flexGrow: 1,
 					// @ts-ignore
-					// cursor: displayControls ? "unset" : "none",
 					bg: "black",
 				})}
 			>
 				<Video
 					links={data?.link}
 					videoStyle={{ width: percent(100), height: percent(100) }}
+					setError={setPlaybackError}
 					{...css(StyleSheet.absoluteFillObject)}
-					// onClick={onVideoClick}
-					// onPointerDown={(e: PointerEvent) => {
-					// 	if (e.type === "mouse") {
-					// 		onVideoClick();
-					// 	} else if (mouseMoved) {
-					// 		setMouseMoved(false);
-					// 	} else {
-					// 		// mouseHasMoved();
-					// 	}
-					// }}
 					// onEnded={() => {
 					// 	if (!data) return;
 					// 	if (data.isMovie) router.push(`/movie/${data.slug}`);
@@ -174,34 +175,22 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 					// 		);
 					// }}
 				/>
-				{/* <LoadingIndicator /> */}
+				<LoadingIndicator />
 				<Hover
 					{...mapData(data, previous, next)}
-					// onPointerOver={(e: ReactPointerEvent<HTMLElement>) => {
-					// 	if (e.pointerType === "mouse") setHover(true);
-					// }}
-					// onPointerOut={() => setHover(false)}
+					// @ts-ignore Web only types
+					onMouseEnter={() => setHover(true)}
+					// @ts-ignore Web only types
+					onMouseLeave={() => setHover(false)}
 					onMenuOpen={() => setMenuOpen(true)}
 					onMenuClose={() => {
 						// Disable hover since the menu overlay makes the mouseout unreliable.
 						setHover(false);
 						setMenuOpen(false);
 					}}
-					// sx={
-					// 	displayControls
-					// 		? {
-					// 				visibility: "visible",
-					// 				opacity: 1,
-					// 				transition: "opacity .2s ease-in",
-					// 		  }
-					// 		: {
-					// 				visibility: "hidden",
-					// 				opacity: 0,
-					// 				transition: "opacity .4s ease-out, visibility 0s .4s",
-					// 		  }
-					// }
+					show={displayControls}
 				/>
-			</View>
+			</Pressable>
 		</>
 	);
 };

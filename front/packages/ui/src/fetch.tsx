@@ -65,7 +65,8 @@ export const ErrorView = ({ error }: { error: KyooErrors }) => {
 		<View
 			{...css({
 				backgroundColor: (theme) => theme.colors.red,
-				flex: 1,
+				flexGrow: 1,
+				flexShrink: 1,
 				justifyContent: "center",
 				alignItems: "center",
 			})}
@@ -85,7 +86,8 @@ export const EmptyView = ({ message }: { message: string }) => {
 	return (
 		<View
 			{...css({
-				flex: 1,
+				flexGrow: 1,
+				flexShrink: 1,
 				justifyContent: "center",
 				alignItems: "center",
 			})}

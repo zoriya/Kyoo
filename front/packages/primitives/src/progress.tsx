@@ -18,18 +18,20 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Platform, View, ViewProps } from "react-native";
+import { ActivityIndicator, Platform, View } from "react-native";
 import { Circle, Svg } from "react-native-svg";
-import { px, useYoshiki } from "yoshiki/native";
+import { px, Stylable, useYoshiki } from "yoshiki/native";
 
-// TODO: Use moti on native
 export const CircularProgress = ({
 	size = 48,
 	tickness = 5,
 	color,
 	...props
-}: { size?: number; tickness?: number; color?: string } & ViewProps) => {
+}: { size?: number; tickness?: number; color?: string } & Stylable) => {
 	const { css, theme } = useYoshiki();
+
+	if (Platform.OS !== "web")
+		return <ActivityIndicator size={size} color={color ?? theme.accent} {...props} />;
 
 	return (
 		<View {...css({ width: size, height: size, overflow: "hidden" }, props)}>
@@ -60,6 +62,7 @@ export const CircularProgress = ({
 			<Svg
 				viewBox={`${size / 2} ${size / 2} ${size} ${size}`}
 				{...css(
+					// @ts-ignore Web only
 					Platform.OS === "web" && { animation: "circularProgress-svg 1.4s ease-in-out infinite" },
 				)}
 			>
@@ -73,6 +76,7 @@ export const CircularProgress = ({
 					strokeDasharray={[px(80), px(200)]}
 					{...css(
 						Platform.OS === "web" && {
+							// @ts-ignore Web only
 							animation: "circularProgress-circle 1.4s ease-in-out infinite",
 						},
 					)}
