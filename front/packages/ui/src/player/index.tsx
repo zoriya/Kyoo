@@ -195,4 +195,4 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 	);
 };
 
-// Player.getFetchUrls = ({ slug }) => [query(slug)];
+Player.getFetchUrls = ({ slug }) => [query(slug)];
