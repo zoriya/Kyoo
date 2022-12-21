@@ -19,7 +19,7 @@
  */
 
 import { useRef, useState } from "react";
-import { Platform, View } from "react-native";
+import { GestureResponderEvent, Platform, View } from "react-native";
 import { percent, Stylable, useYoshiki } from "yoshiki/native";
 import { ts } from "./utils";
 
@@ -49,6 +49,15 @@ export const Slider = ({
 	const [isFocus, setFocus] = useState(false);
 	const smallBar = !(isSeeking || isHover || isFocus);
 
+	const change = (event: GestureResponderEvent) => {
+		event.preventDefault();
+		const locationX = Platform.select({
+			android: event.nativeEvent.pageX - layout.x,
+			default: event.nativeEvent.locationX,
+		});
+		setProgress(Math.max(0, Math.min(locationX / layout.width, 1)) * max);
+	};
+
 	// TODO keyboard handling (left, right, up, down)
 	return (
 		<View
@@ -70,18 +79,10 @@ export const Slider = ({
 				setSeek(false);
 				endSeek?.call(null);
 			}}
-			onResponderMove={(event) => {
-				event.preventDefault();
-				const locationX = Platform.select({
-					android: event.nativeEvent.pageX - layout.x,
-					default: event.nativeEvent.locationX,
-				});
-				setProgress(Math.max(0, Math.min(locationX / layout.width, 100)) * max);
-			}}
+			onResponderStart={change}
+			onResponderMove={change}
 			onLayout={() =>
-				ref.current?.measure((_, __, width, ___, pageX) =>
-					setLayout({ width: width, x: pageX }),
-				)
+				ref.current?.measure((_, __, width, ___, pageX) => setLayout({ width: width, x: pageX }))
 			}
 			{...css(
 				{
@@ -154,7 +155,7 @@ export const Slider = ({
 							position: "absolute",
 							top: 0,
 							bottom: 0,
-							marginY: ts(.5),
+							marginY: ts(0.5),
 							bg: (theme) => theme.accent,
 							width: ts(2),
 							height: ts(2),

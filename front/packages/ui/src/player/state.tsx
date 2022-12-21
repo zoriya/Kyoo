@@ -19,7 +19,7 @@
  */
 
 import { Font, Track, WatchItem } from "@kyoo/models";
-import { atom, useAtom, useSetAtom } from "jotai";
+import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { RefObject, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createParam } from "solito";
 import { ResizeMode, Video as NativeVideo, VideoProps } from "expo-av";
@@ -36,9 +36,18 @@ const playModeAtom = atom<PlayMode>(PlayMode.Direct);
 
 export const playAtom = atom(true);
 export const loadAtom = atom(false);
-export const progressAtom = atom(0);
 export const bufferedAtom = atom(0);
 export const durationAtom = atom<number | undefined>(undefined);
+
+export const progressAtom = atom<number, number>(
+	(get) => get(privateProgressAtom),
+	(_, set, value) => {
+		set(privateProgressAtom, value);
+		set(publicProgressAtom, value);
+	},
+);
+const privateProgressAtom = atom(0);
+const publicProgressAtom = atom(0);
 
 export const [_volumeAtom, volumeAtom] = bakedAtom(100, (get, set, value, baker) => {
 	const player = get(playerAtom);
@@ -86,16 +95,16 @@ export const Video = ({
 
 	useLayoutEffect(() => {
 		setLoad(true);
-	}, [])
+	}, [setLoad]);
 
-	const [progress, setProgress] = useAtom(progressAtom);
-	const [buffered, setBuffered] = useAtom(bufferedAtom);
-	const [duration, setDuration] = useAtom(durationAtom);
+	const publicProgress = useAtomValue(publicProgressAtom);
+	const setPrivateProgress = useSetAtom(privateProgressAtom);
+	const setBuffered = useSetAtom(bufferedAtom);
+	const setDuration = useSetAtom(durationAtom);
 
 	useEffect(() => {
-		// I think this will trigger an infinite refresh loop
-		// ref.current?.setStatusAsync({ positionMillis: progress });
-	}, [progress]);
+		ref.current?.setStatusAsync({ positionMillis: publicProgress });
+	}, [publicProgress]);
 
 	// setPlayer(player);
 
@@ -150,7 +159,7 @@ export const Video = ({
 
 				setLoad(status.isPlaying !== status.shouldPlay);
 				setPlay(status.shouldPlay);
-				setProgress(status.positionMillis);
+				setPrivateProgress(status.positionMillis);
 				setBuffered(status.playableDurationMillis ?? 0);
 				setDuration(status.durationMillis);
 			}}

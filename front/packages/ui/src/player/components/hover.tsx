@@ -19,6 +19,7 @@
  */
 
 import {
+	alpha,
 	CircularProgress,
 	ContrastArea,
 	H1,
@@ -27,20 +28,20 @@ import {
 	Link,
 	Poster,
 	Skeleton,
+	Slider,
 	tooltip,
 	ts,
 } from "@kyoo/primitives";
 import { Chapter, Font, Track } from "@kyoo/models";
-import { useAtomValue } from "jotai";
+import { useAtomValue, useSetAtom, useAtom } from "jotai";
 import { Pressable, View, ViewProps } from "react-native";
+import { useTranslation } from "react-i18next";
+import { percent, rem, useYoshiki } from "yoshiki/native";
 import { useRouter } from "solito/router";
 import ArrowBack from "@material-symbols/svg-400/rounded/arrow_back-fill.svg";
 import { LeftButtons } from "./left-buttons";
 import { RightButtons } from "./right-buttons";
-import { ProgressBar } from "./progress-bar";
-import { loadAtom } from "../state";
-import { useTranslation } from "react-i18next";
-import { percent, rem, useYoshiki } from "yoshiki/native";
+import { bufferedAtom, durationAtom, loadAtom, playAtom, progressAtom } from "../state";
 
 export const Hover = ({
 	isLoading,
@@ -85,7 +86,7 @@ export const Hover = ({
 								bottom: 0,
 								left: 0,
 								right: 0,
-								bg: "rgba(0, 0, 0, 0.6)",
+								bg: (theme) => alpha(theme.colors.black, 0.6),
 								flexDirection: "row",
 								padding: percent(1),
 							},
@@ -122,6 +123,26 @@ export const Hover = ({
 		</ContrastArea>
 	);
 };
+
+export const ProgressBar = ({ chapters }: { chapters?: Chapter[] }) => {
+	const [progress, setProgress] = useAtom(progressAtom);
+	const buffered = useAtomValue(bufferedAtom);
+	const duration = useAtomValue(durationAtom);
+	const setPlay = useSetAtom(playAtom);
+
+	return (
+		<Slider
+			progress={progress}
+			startSeek={() => setPlay(false)}
+			endSeek={() => setTimeout(() => setPlay(true), 10)}
+			setProgress={setProgress}
+			subtleProgress={buffered}
+			max={duration}
+			markers={chapters?.map((x) => x.startTime * 1000)}
+		/>
+	);
+};
+
 export const Back = ({
 	isLoading,
 	name,
@@ -140,7 +161,7 @@ export const Back = ({
 					top: 0,
 					left: 0,
 					right: 0,
-					bg: "rgba(0, 0, 0, 0.6)",
+					bg: (theme) => alpha(theme.colors.black, 0.6),
 					display: "flex",
 					flexDirection: "row",
 					alignItems: "center",
@@ -209,7 +230,7 @@ export const LoadingIndicator = () => {
 				bottom: 0,
 				left: 0,
 				right: 0,
-				bg: "rgba(0, 0, 0, 0.3)",
+				bg: (theme) => alpha(theme.colors.black, 0.3),
 				justifyContent: "center",
 			})}
 		>
