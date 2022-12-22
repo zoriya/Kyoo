@@ -33,10 +33,6 @@ import { MediaSessionManager } from "./media-session";
 import { ErrorView } from "../fetch";
 import { useTranslation } from "react-i18next";
 
-// Callback used to hide the controls when the mouse goes iddle. This is stored globally to clear the old timeout
-// if the mouse moves again (if this is stored as a state, the whole page is redrawn on mouse move)
-let mouseCallback: NodeJS.Timeout;
-
 const query = (slug: string): QueryIdentifier<WatchItem> => ({
 	path: ["watch", slug],
 	parser: WatchItemP,
@@ -62,6 +58,14 @@ const mapData = (
 	};
 };
 
+// Callback used to hide the controls when the mouse goes iddle. This is stored globally to clear the old timeout
+// if the mouse moves again (if this is stored as a state, the whole page is redrawn on mouse move)
+let mouseCallback: NodeJS.Timeout;
+// Number of time the video has been pressed. Used to handle double click. Since there is only one player,
+// this can be global and not in the state.
+let touchCount = 0;
+let touchTimeout: NodeJS.Timeout;
+
 export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
@@ -80,7 +84,7 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 	// useVideoKeyboard(data?.subtitles, data?.fonts, previous, next);
 
 	const router = useRouter();
-	const setFullscreen = useSetAtom(fullscreenAtom);
+	const [isFullscreen, setFullscreen] = useAtom(fullscreenAtom);
 	const [isPlaying, setPlay] = useAtom(playAtom);
 	const [showHover, setHover] = useState(false);
 	const [mouseMoved, setMouseMoved] = useState(false);
@@ -154,7 +158,23 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 			{/* `}</style> */}
 			<Pressable
 				onHoverOut={() => setMouseMoved(false)}
-				onPress={Platform.OS === "web" ? () => setPlay(!isPlaying) : show}
+				onPress={
+					Platform.OS === "web"
+						? (e) => {
+								e.preventDefault();
+								touchCount++;
+								if (touchCount == 2) {
+									touchCount = 0;
+									setFullscreen(!isFullscreen);
+									clearTimeout(touchTimeout);
+								} else
+									touchTimeout = setTimeout(() => {
+										touchCount = 0;
+									}, 400);
+								setPlay(!isPlaying);
+						  }
+						: show
+				}
 				{...css({
 					flexGrow: 1,
 					// @ts-ignore

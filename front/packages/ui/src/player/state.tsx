@@ -36,6 +36,7 @@ const playModeAtom = atom<PlayMode>(PlayMode.Direct);
 
 export const playAtom = atom(true);
 export const loadAtom = atom(false);
+
 export const bufferedAtom = atom(0);
 export const durationAtom = atom<number | undefined>(undefined);
 
@@ -49,18 +50,9 @@ export const progressAtom = atom<number, number>(
 const privateProgressAtom = atom(0);
 const publicProgressAtom = atom(0);
 
-export const [_volumeAtom, volumeAtom] = bakedAtom(100, (get, set, value, baker) => {
-	const player = get(playerAtom);
-	if (!player?.current) return;
-	set(baker, value);
-	if (player.current) player.current.volume = Math.max(0, Math.min(value, 100)) / 100;
-});
-export const [_mutedAtom, mutedAtom] = bakedAtom(false, (get, set, value, baker) => {
-	const player = get(playerAtom);
-	if (!player?.current) return;
-	set(baker, value);
-	if (player.current) player.current.muted = value;
-});
+export const volumeAtom = atom(100);
+export const mutedAtom = atom(false);
+
 export const [_, fullscreenAtom] = bakedAtom(false, async (_, set, value, baker) => {
 	try {
 		if (value) {
@@ -82,11 +74,6 @@ export const Video = ({
 	setError,
 	...props
 }: { links?: WatchItem["link"]; setError: (error: string | undefined) => void } & VideoProps) => {
-	// const player = useRef<HTMLVideoElement>(null);
-	// const setPlayer = useSetAtom(playerAtom);
-	// const setVolume = useSetAtom(_volumeAtom);
-	// const setMuted = useSetAtom(_mutedAtom);
-	// const setFullscreen = useSetAtom(fullscreenAtom);
 	// const [playMode, setPlayMode] = useAtom(playModeAtom);
 
 	const ref = useRef<NativeVideo | null>(null);
@@ -101,17 +88,12 @@ export const Video = ({
 	const setPrivateProgress = useSetAtom(privateProgressAtom);
 	const setBuffered = useSetAtom(bufferedAtom);
 	const setDuration = useSetAtom(durationAtom);
-
 	useEffect(() => {
 		ref.current?.setStatusAsync({ positionMillis: publicProgress });
 	}, [publicProgress]);
 
-	// setPlayer(player);
-
-	// useEffect(() => {
-	// 	if (!player.current) return;
-	// 	setPlay(!player.current.paused);
-	// }, [setPlay]);
+	const volume = useAtomValue(volumeAtom);
+	const isMuted = useAtomValue(mutedAtom);
 
 	// useEffect(() => {
 	// 	setPlayMode(PlayMode.Direct);
@@ -150,6 +132,8 @@ export const Video = ({
 			{...props}
 			source={links ? { uri: links.direct } : undefined}
 			shouldPlay={isPlaying}
+			isMuted={isMuted}
+			volume={volume}
 			onPlaybackStatusUpdate={(status) => {
 				if (!status.isLoaded) {
 					setLoad(true);
@@ -158,7 +142,6 @@ export const Video = ({
 				}
 
 				setLoad(status.isPlaying !== status.shouldPlay);
-				setPlay(status.shouldPlay);
 				setPrivateProgress(status.positionMillis);
 				setBuffered(status.playableDurationMillis ?? 0);
 				setDuration(status.durationMillis);

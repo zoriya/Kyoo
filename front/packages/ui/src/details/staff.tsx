@@ -26,16 +26,14 @@ import { PersonAvatar } from "./person";
 export const Staff = ({ slug }: { slug: string }) => {
 	const { t } = useTranslation();
 
-	// TODO: handle infinite scroll
-
 	return (
 		<InfiniteFetch
 			query={Staff.query(slug)}
 			horizontal
 			layout={{ numColumns: 1, size: PersonAvatar.width }}
+			empty={t("show.staff-none")}
 			placeholderCount={20}
 		>
-			{/* <HorizontalList title={t("show.staff")} noContent={t("show.staff-none")}> */}
 			{(item, key) => (
 				<PersonAvatar
 					key={key}

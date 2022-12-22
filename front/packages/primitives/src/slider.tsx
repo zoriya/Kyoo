@@ -20,8 +20,7 @@
 
 import { useRef, useState } from "react";
 import { GestureResponderEvent, Platform, View } from "react-native";
-import { percent, Stylable, useYoshiki } from "yoshiki/native";
-import { ts } from "./utils";
+import { px, percent, Stylable, useYoshiki } from "yoshiki/native";
 
 export const Slider = ({
 	progress,
@@ -31,6 +30,7 @@ export const Slider = ({
 	setProgress,
 	startSeek,
 	endSeek,
+	size = 6,
 	...props
 }: {
 	progress: number;
@@ -40,6 +40,7 @@ export const Slider = ({
 	setProgress: (progress: number) => void;
 	startSeek?: () => void;
 	endSeek?: () => void;
+	size?: number;
 } & Stylable) => {
 	const { css } = useYoshiki();
 	const ref = useRef<View>(null);
@@ -48,6 +49,8 @@ export const Slider = ({
 	const [isHover, setHover] = useState(false);
 	const [isFocus, setFocus] = useState(false);
 	const smallBar = !(isSeeking || isHover || isFocus);
+
+	const ts = (value: number) => px(value * size);
 
 	const change = (event: GestureResponderEvent) => {
 		event.preventDefault();
@@ -58,7 +61,6 @@ export const Slider = ({
 		setProgress(Math.max(0, Math.min(locationX / layout.width, 1)) * max);
 	};
 
-	// TODO keyboard handling (left, right, up, down)
 	return (
 		<View
 			ref={ref}
@@ -66,8 +68,7 @@ export const Slider = ({
 			onMouseEnter={() => setHover(true)}
 			// @ts-ignore Web only
 			onMouseLeave={() => setHover(false)}
-			// TODO: This does not work
-			tabindex={0}
+			focusable
 			onFocus={() => setFocus(true)}
 			onBlur={() => setFocus(false)}
 			onStartShouldSetResponder={() => true}
@@ -84,6 +85,22 @@ export const Slider = ({
 			onLayout={() =>
 				ref.current?.measure((_, __, width, ___, pageX) => setLayout({ width: width, x: pageX }))
 			}
+			onKeyDown={(e: KeyboardEvent) => {
+				switch (e.code) {
+					case "ArrowLeft":
+						setProgress(Math.max(progress - 0.05 * max, 0));
+						break;
+					case "ArrowRight":
+						setProgress(Math.min(progress + 0.05 * max, max));
+						break;
+					case "ArrowDown":
+						setProgress(Math.max(progress - 0.1 * max, 0));
+						break;
+					case "ArrowUp":
+						setProgress(Math.min(progress + 0.1 * max, max));
+						break;
+				}
+			}}
 			{...css(
 				{
 					paddingVertical: ts(1),
@@ -155,11 +172,12 @@ export const Slider = ({
 							position: "absolute",
 							top: 0,
 							bottom: 0,
-							marginY: ts(0.5),
+							marginY: ts(Platform.OS === "android" ? -0.5 : 0.5),
 							bg: (theme) => theme.accent,
 							width: ts(2),
 							height: ts(2),
 							borderRadius: ts(1),
+							marginLeft: ts(-1),
 						},
 						smallBar && { opacity: 0 },
 					],
