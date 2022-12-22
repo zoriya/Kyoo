@@ -41,6 +41,7 @@ const queryFn = async <Data,>(
 			: typeof window === "undefined"
 			? process.env.KYOO_URL ?? "http://localhost:5000"
 			: "/api";
+	console.log(process.env.PUBLIC_BACK_URL)
 	if (!kyooUrl) console.error("Kyoo's url is not defined.");
 
 	let resp;

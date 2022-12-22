@@ -81,7 +81,7 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 
 	// const { playerRef, videoProps, onVideoClick } = useVideoController(data?.link);
 	// useSubtitleController(playerRef, data?.subtitles, data?.fonts);
-	// useVideoKeyboard(data?.subtitles, data?.fonts, previous, next);
+	useVideoKeyboard(data?.subtitles, data?.fonts, previous, next);
 
 	const router = useRouter();
 	const [isFullscreen, setFullscreen] = useAtom(fullscreenAtom);
