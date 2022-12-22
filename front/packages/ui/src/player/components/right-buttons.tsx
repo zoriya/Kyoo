@@ -23,7 +23,7 @@ import { IconButton, tooltip } from "@kyoo/primitives";
 import { useAtom } from "jotai";
 import { useRouter } from "solito/router";
 import { useState } from "react";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import Fullscreen from "@material-symbols/svg-400/rounded/fullscreen-fill.svg";
 import FullscreenExit from "@material-symbols/svg-400/rounded/fullscreen_exit-fill.svg";
@@ -72,12 +72,13 @@ export const RightButtons = ({
 			{/* 		</IconButton> */}
 			{/* 	</Tooltip> */}
 			{/* )} */}
-			<IconButton
-				icon={isFullscreen ? FullscreenExit : Fullscreen}
-				onClick={() => setFullscreen(!isFullscreen)}
-				{...tooltip(t("player.fullscreen"))}
-				sx={{ color: "white" }}
-			/>
+			{Platform.OS === "web" && (
+				<IconButton
+					icon={isFullscreen ? FullscreenExit : Fullscreen}
+					onPress={() => setFullscreen(!isFullscreen)}
+					{...tooltip(t("player.fullscreen"), true)}
+				/>
+			)}
 			{/* {subtitleAnchor && ( */}
 			{/* 	<SubtitleMenu */}
 			{/* 		subtitles={subtitles!} */}

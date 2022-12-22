@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { IconButton, Link, P, tooltip, ts } from "@kyoo/primitives";
+import { IconButton, Link, P, Slider, tooltip, ts } from "@kyoo/primitives";
 import { useAtom, useAtomValue } from "jotai";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
@@ -31,7 +31,7 @@ import VolumeMute from "@material-symbols/svg-400/rounded/volume_mute-fill.svg";
 import VolumeDown from "@material-symbols/svg-400/rounded/volume_down-fill.svg";
 import VolumeUp from "@material-symbols/svg-400/rounded/volume_up-fill.svg";
 import { durationAtom, mutedAtom, playAtom, progressAtom, volumeAtom } from "../state";
-import { useYoshiki } from "yoshiki/native";
+import { px, useYoshiki } from "yoshiki/native";
 
 export const LeftButtons = ({
 	previousSlug,
@@ -53,14 +53,14 @@ export const LeftButtons = ({
 					icon={SkipPrevious}
 					as={Link}
 					href={previousSlug}
-					{...tooltip(t("player.previous"))}
+					{...tooltip(t("player.previous"), true)}
 					{...spacing}
 				/>
 			)}
 			<IconButton
 				icon={isPlaying ? Pause : PlayArrow}
 				onPress={() => setPlay(!isPlaying)}
-				{...tooltip(isPlaying ? t("player.pause") : t("player.play"))}
+				{...tooltip(isPlaying ? t("player.pause") : t("player.play"), true)}
 				{...spacing}
 			/>
 			{nextSlug && (
@@ -68,7 +68,7 @@ export const LeftButtons = ({
 					icon={SkipNext}
 					as={Link}
 					href={nextSlug}
-					{...tooltip(t("player.next"))}
+					{...tooltip(t("player.next"), true)}
 					{...spacing}
 				/>
 			)}
@@ -84,13 +84,13 @@ const VolumeSlider = () => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
 
-	return null;
 	return (
 		<View
 			{...css({
 				display: { xs: "none", sm: "flex" },
-				p: ts(1),
-				"body.hoverEnabled &:hover .slider": { width: "100px", px: "16px" },
+				alignItems: "center",
+				flexDirection: "row",
+				paddingRight: ts(1),
 			})}
 		>
 			<IconButton
@@ -103,26 +103,16 @@ const VolumeSlider = () => {
 						? VolumeDown
 						: VolumeUp
 				}
-				onClick={() => setMuted(!isMuted)}
-				{...tooltip(t("mute"))}
+				onPress={() => setMuted(!isMuted)}
+				{...tooltip(t("player.mute"), true)}
 			/>
-			<View
-				className="slider"
-				sx={{
-					width: 0,
-					transition: "width .2s cubic-bezier(0.4,0, 1, 1), padding .2s cubic-bezier(0.4,0, 1, 1)",
-					overflow: "hidden",
-					alignSelf: "center",
-				}}
-			>
-				<Slider
-					value={volume}
-					onChange={(_, value) => setVolume(value as number)}
-					size="small"
-					aria-label={t("volume")}
-					sx={{ alignSelf: "center" }}
-				/>
-			</View>
+			<Slider
+				progress={volume}
+				setProgress={setVolume}
+				size={4}
+				{...css({ width: px(100) })}
+				{...tooltip(t("player.volume"), true)}
+			/>
 		</View>
 	);
 };

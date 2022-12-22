@@ -63,7 +63,8 @@ export const IconButton = <AsProps = PressableProps,>({
 	const Container = as ?? Pressable;
 
 	return (
-		<Container
+		<Container 
+			accessibilityRole="button"
 			{...(css(
 				{
 					p: ts(1),

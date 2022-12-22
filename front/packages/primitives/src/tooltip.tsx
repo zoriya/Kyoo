@@ -18,13 +18,13 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ToastAndroid, Platform } from "react-native";
+import { ToastAndroid, Platform, ViewProps, PressableProps } from "react-native";
 import { Theme } from "yoshiki/native";
 
-export const tooltip = (tooltip: string) =>
+export const tooltip = (tooltip: string, up?: boolean) =>
 	Platform.select({
 		web: {
-			dataSet: { tooltip, label: tooltip },
+			dataSet: { tooltip, label: tooltip, tooltipPos: up ? "up" : undefined },
 		},
 		android: {
 			onLongPress: () => {
@@ -66,6 +66,11 @@ export const WebTooltip = ({ theme }: { theme: Theme }) => {
 				visibility: hidden;
 				transition: opacity 0.3s ease-in-out;
 			}
+			[data-tooltip-pos]::after {
+				top: unset;
+				bottom: 100%;
+				margin-bottom: 8px;
+			}
 
 			:where(body:not(.noHover)) [data-tooltip]:hover::after,
 			[data-tooltip]:focus-visible::after {
@@ -81,7 +86,6 @@ export const WebTooltip = ({ theme }: { theme: Theme }) => {
 				outline: none;
 				transition: box-shadow 0.15s ease-in-out;
 				box-shadow: 0 0 0 2px ${theme.colors.black};
-				/* box-shadow: ${theme.accent} 1px; */
 			}
 		`}</style>
 	);
