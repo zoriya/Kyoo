@@ -53,19 +53,22 @@ const publicProgressAtom = atom(0);
 export const volumeAtom = atom(100);
 export const mutedAtom = atom(false);
 
-export const [_, fullscreenAtom] = bakedAtom(false, async (_, set, value, baker) => {
-	try {
-		if (value) {
-			await document.body.requestFullscreen();
-			set(baker, true);
-			await screen.orientation.lock("landscape");
-		} else {
-			await document.exitFullscreen();
-			set(baker, false);
-			screen.orientation.unlock();
-		}
-	} catch {}
-});
+export const [privateFullscreen, fullscreenAtom] = bakedAtom(
+	false,
+	async (_, set, value, baker) => {
+		try {
+			if (value) {
+				await document.body.requestFullscreen();
+				set(baker, true);
+				await screen.orientation.lock("landscape");
+			} else {
+				await document.exitFullscreen();
+				set(baker, false);
+				screen.orientation.unlock();
+			}
+		} catch {}
+	},
+);
 
 let hls: Hls | null = null;
 
@@ -77,7 +80,7 @@ export const Video = ({
 	// const [playMode, setPlayMode] = useAtom(playModeAtom);
 
 	const ref = useRef<NativeVideo | null>(null);
-	const [isPlaying, setPlay] = useAtom(playAtom);
+	const isPlaying = useAtomValue(playAtom);
 	const setLoad = useSetAtom(loadAtom);
 
 	useLayoutEffect(() => {
@@ -94,6 +97,15 @@ export const Video = ({
 
 	const volume = useAtomValue(volumeAtom);
 	const isMuted = useAtomValue(mutedAtom);
+
+	const setFullscreen = useSetAtom(privateFullscreen);
+	useEffect(() => {
+		const handler = () => {
+			setFullscreen(document.fullscreenElement != null);
+		};
+		document.addEventListener("fullscreenchange", handler);
+		return () => document.removeEventListener("fullscreenchange", handler);
+	});
 
 	// useEffect(() => {
 	// 	setPlayMode(PlayMode.Direct);
