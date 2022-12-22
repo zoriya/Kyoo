@@ -43,6 +43,7 @@ type Action =
 	| { type: "subtitle"; subtitles: Track[]; fonts: Font[] };
 
 export const reducerAtom = atom<null, Action>(null, (get, set, action) => {
+	const duration = get(durationAtom);
 	switch (action.type) {
 		case "play":
 			set(playAtom, !get(playAtom));
@@ -54,16 +55,17 @@ export const reducerAtom = atom<null, Action>(null, (get, set, action) => {
 			set(fullscreenAtom, !get(fullscreenAtom));
 			break;
 		case "seek":
-			set(progressAtom, get(progressAtom) + action.value);
+			if (duration)
+				set(progressAtom, Math.max(0, Math.min(get(progressAtom) + action.value, duration)));
 			break;
 		case "seekTo":
 			set(progressAtom, action.value);
 			break;
 		case "seekPercent":
-			set(progressAtom, (get(durationAtom) * action.value) / 100);
+			if (duration) set(progressAtom, (duration * action.value) / 100);
 			break;
 		case "volume":
-			set(volumeAtom, get(volumeAtom) + action.value);
+			set(volumeAtom, Math.max(0, Math.min(get(volumeAtom) + action.value, 100)));
 			break;
 		case "subtitle":
 			const subtitle = get(subtitleAtom);
@@ -108,17 +110,17 @@ export const useVideoKeyboard = (
 					break;
 
 				case "ArrowLeft":
-					reducer({ type: "seek", value: -5 });
+					reducer({ type: "seek", value: -5000 });
 					break;
 				case "ArrowRight":
-					reducer({ type: "seek", value: +5 });
+					reducer({ type: "seek", value: +5000 });
 					break;
 
 				case "j":
-					reducer({ type: "seek", value: -10 });
+					reducer({ type: "seek", value: -10_000 });
 					break;
 				case "l":
-					reducer({ type: "seek", value: +10 });
+					reducer({ type: "seek", value: +10_000 });
 					break;
 
 				case "ArrowUp":
