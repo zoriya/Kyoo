@@ -20,10 +20,11 @@
 
 import "../polyfill";
 
-import { ReactNode, useState } from "react";
-import NextApp, { AppContext, type AppProps } from "next/app";
+import { PortalProvider } from "@gorhom/portal";
 import { createTheme, ThemeProvider as MTheme } from "@mui/material";
 import { Hydrate, QueryClientProvider } from "@tanstack/react-query";
+import { ReactNode, useState } from "react";
+import NextApp, { AppContext, type AppProps } from "next/app";
 import {
 	HiddenIfNoJs,
 	SkeletonCss,
@@ -32,7 +33,6 @@ import {
 } from "@kyoo/primitives";
 import { createQueryClient, fetchQuery, QueryIdentifier, QueryPage } from "@kyoo/models";
 import { useTheme, useMobileHover } from "yoshiki/web";
-import { useYoshiki } from "yoshiki/native";
 import superjson from "superjson";
 import Head from "next/head";
 import { withTranslations } from "../i18n";
@@ -105,7 +105,9 @@ const App = ({ Component, pageProps }: AppProps) => {
 				<Hydrate state={queryState}>
 					<ThemeSelector>
 						<GlobalCssTheme />
-						<Layout page={<Component {...props} />} />
+						<PortalProvider>
+							<Layout page={<Component {...props} />} />
+						</PortalProvider>
 					</ThemeSelector>
 				</Hydrate>
 			</QueryClientProvider>

@@ -13,6 +13,7 @@
 	"dependencies": {
 		"@emotion/react": "^11.9.3",
 		"@emotion/styled": "^11.9.3",
+		"@gorhom/portal": "^1.0.14",
 		"@kyoo/models": "workspace:^",
 		"@kyoo/primitives": "workspace:^",
 		"@kyoo/ui": "workspace:^",

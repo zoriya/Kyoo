@@ -8,6 +8,7 @@
 		"typescript": "^4.9.3"
 	},
 	"peerDependencies": {
+		"@gorhom/portal": "*",
 		"@material-symbols/svg-400": "*",
 		"expo-linear-gradient": "*",
 		"moti": "*",

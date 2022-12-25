@@ -25,10 +25,5 @@
 		"react-native-reanimated": "*",
 		"react-native-svg": "*",
 		"yoshiki": "*"
-	},
-	"peerDependenciesMeta": {
-		"react-native": {
-			"optional": true
-		}
 	}
 }

@@ -26,6 +26,7 @@ import { ResizeMode, Video as NativeVideo, VideoProps } from "expo-av";
 import SubtitleOctopus from "libass-wasm";
 import Hls from "hls.js";
 import { bakedAtom } from "../jotai-utils";
+import { Platform } from "react-native";
 
 enum PlayMode {
 	Direct,
@@ -100,6 +101,7 @@ export const Video = ({
 
 	const setFullscreen = useSetAtom(privateFullscreen);
 	useEffect(() => {
+		if (Platform.OS !== "web") return;
 		const handler = () => {
 			setFullscreen(document.fullscreenElement != null);
 		};

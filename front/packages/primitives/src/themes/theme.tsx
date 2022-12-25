@@ -135,7 +135,7 @@ export const ContrastArea = ({
 	contrastText,
 }: {
 	children: ReactNode | YoshikiFunc<ReactNode>;
-	mode?: "light" | "dark";
+	mode?: "light" | "dark" | "user";
 	contrastText?: boolean;
 }) => {
 	const oldTheme = useTheme();

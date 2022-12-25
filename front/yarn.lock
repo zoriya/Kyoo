@@ -2142,6 +2142,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@gorhom/portal@npm:^1.0.14":
+  version: 1.0.14
+  resolution: "@gorhom/portal@npm:1.0.14"
+  dependencies:
+    nanoid: ^3.3.1
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 227bb96a2db854ab29bb9da8d4f3823c7f7448358de459709dd1b78522110da564c9a8734c6bc7d7153ed7c99320e0fb5d60b420c2ebb75ecaf2f0d757f410f9
+  languageName: node
+  linkType: hard
+
 "@graphql-typed-document-node/core@npm:^3.1.0":
   version: 3.1.1
   resolution: "@graphql-typed-document-node/core@npm:3.1.1"
@@ -2339,6 +2351,7 @@ __metadata:
     solito: ^2.0.5
     typescript: ^4.9.3
   peerDependencies:
+    "@gorhom/portal": "*"
     "@material-symbols/svg-400": "*"
     expo-linear-gradient: "*"
     moti: "*"
@@ -2375,9 +2388,6 @@ __metadata:
     react-native-reanimated: "*"
     react-native-svg: "*"
     yoshiki: "*"
-  peerDependenciesMeta:
-    react-native:
-      optional: true
   languageName: unknown
   linkType: soft
 
@@ -6545,19 +6555,19 @@ __metadata:
 
 "expo-av@file:///home/anonymus-raccoon/projects/expo/packages/expo-av/::locator=mobile%40workspace%3Aapps%2Fmobile":
   version: 13.0.1
-  resolution: "expo-av@file:///home/anonymus-raccoon/projects/expo/packages/expo-av/#///home/anonymus-raccoon/projects/expo/packages/expo-av/::hash=5981bc&locator=mobile%40workspace%3Aapps%2Fmobile"
+  resolution: "expo-av@file:///home/anonymus-raccoon/projects/expo/packages/expo-av/#///home/anonymus-raccoon/projects/expo/packages/expo-av/::hash=6acf81&locator=mobile%40workspace%3Aapps%2Fmobile"
   peerDependencies:
     expo: "*"
-  checksum: 3313e891f708f423f29c417372701fa6ddd5bd30028a1ebcd9634d61e5ed0475dbbcc51384fc88e82b4c0dd482dc6af38f9b1d4d103fb1a81ea05d2a4c967586
+  checksum: 89c23346fcf8cc3ed50b523969dad76c14e9bb3f526c7cc0032783fca9aeacc1c14a1aca86b84cb5ebd51d4ee2142f7fb507ed47d7430e12b71733858a70acc9
   languageName: node
   linkType: hard
 
 "expo-av@file:///home/anonymus-raccoon/projects/expo/packages/expo-av/::locator=web%40workspace%3Aapps%2Fweb":
   version: 13.0.1
-  resolution: "expo-av@file:///home/anonymus-raccoon/projects/expo/packages/expo-av/#///home/anonymus-raccoon/projects/expo/packages/expo-av/::hash=5981bc&locator=web%40workspace%3Aapps%2Fweb"
+  resolution: "expo-av@file:///home/anonymus-raccoon/projects/expo/packages/expo-av/#///home/anonymus-raccoon/projects/expo/packages/expo-av/::hash=6acf81&locator=web%40workspace%3Aapps%2Fweb"
   peerDependencies:
     expo: "*"
-  checksum: 3313e891f708f423f29c417372701fa6ddd5bd30028a1ebcd9634d61e5ed0475dbbcc51384fc88e82b4c0dd482dc6af38f9b1d4d103fb1a81ea05d2a4c967586
+  checksum: 89c23346fcf8cc3ed50b523969dad76c14e9bb3f526c7cc0032783fca9aeacc1c14a1aca86b84cb5ebd51d4ee2142f7fb507ed47d7430e12b71733858a70acc9
   languageName: node
   linkType: hard
 
@@ -9962,6 +9972,7 @@ __metadata:
   resolution: "mobile@workspace:apps/mobile"
   dependencies:
     "@babel/core": ^7.19.3
+    "@gorhom/portal": ^1.0.14
     "@kyoo/ui": "workspace:^"
     "@material-symbols/svg-400": ^0.4.2
     "@shopify/flash-list": 1.3.1
@@ -10057,7 +10068,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nanoid@npm:^3.1.23, nanoid@npm:^3.3.4":
+"nanoid@npm:^3.1.23, nanoid@npm:^3.3.1, nanoid@npm:^3.3.4":
   version: 3.3.4
   resolution: "nanoid@npm:3.3.4"
   bin:
@@ -13639,6 +13650,7 @@ __metadata:
   dependencies:
     "@emotion/react": ^11.9.3
     "@emotion/styled": ^11.9.3
+    "@gorhom/portal": ^1.0.14
     "@kyoo/models": "workspace:^"
     "@kyoo/primitives": "workspace:^"
     "@kyoo/ui": "workspace:^"
