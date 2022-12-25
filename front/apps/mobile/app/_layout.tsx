@@ -28,6 +28,7 @@ import { createQueryClient } from "@kyoo/models";
 import i18next from "i18next";
 import { initReactI18next } from "react-i18next";
 import { getLocales } from "expo-localization";
+import { PortalProvider } from "@gorhom/portal";
 import "intl-pluralrules";
 
 // TODO: use a backend to load jsons.
@@ -72,7 +73,9 @@ export default function Root() {
 	return (
 		<QueryClientProvider client={queryClient}>
 			<ThemeSelector>
-				<ThemedStack />
+				<PortalProvider>
+					<ThemedStack />
+				</PortalProvider>
 			</ThemeSelector>
 		</QueryClientProvider>
 	);

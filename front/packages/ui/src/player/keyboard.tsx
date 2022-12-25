@@ -31,6 +31,7 @@ import {
 	subtitleAtom,
 	volumeAtom,
 } from "./state";
+import { Platform } from "react-native";
 
 type Action =
 	| { type: "play" }
@@ -93,6 +94,7 @@ export const useVideoKeyboard = (
 	const router = useRouter();
 
 	useEffect(() => {
+		if (Platform.OS !== "web") return;
 		const handler = (event: KeyboardEvent) => {
 			if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
 

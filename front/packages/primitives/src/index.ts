@@ -31,6 +31,7 @@ export * from "./container";
 export * from "./divider";
 export * from "./progress";
 export * from "./slider";
+export * from "./menu";
 
 export * from "./animated";
 export * from "./utils";

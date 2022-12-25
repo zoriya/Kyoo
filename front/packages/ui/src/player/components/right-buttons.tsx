@@ -19,64 +19,75 @@
  */
 
 import { Font, Track } from "@kyoo/models";
-import { IconButton, tooltip } from "@kyoo/primitives";
+import { IconButton, tooltip, Menu, ts, A } from "@kyoo/primitives";
 import { useAtom } from "jotai";
 import { useRouter } from "solito/router";
-import { useState } from "react";
 import { Platform, View } from "react-native";
 import { useTranslation } from "react-i18next";
+import ClosedCaption from "@material-symbols/svg-400/rounded/closed_caption-fill.svg";
 import Fullscreen from "@material-symbols/svg-400/rounded/fullscreen-fill.svg";
 import FullscreenExit from "@material-symbols/svg-400/rounded/fullscreen_exit-fill.svg";
+import { Stylable, useYoshiki } from "yoshiki/native";
+import { createParam } from "solito";
 import { fullscreenAtom, subtitleAtom } from "../state";
+
+const { useParam } = createParam<{ subtitle?: string }>();
 
 export const RightButtons = ({
 	subtitles,
 	fonts,
 	onMenuOpen,
 	onMenuClose,
+	...props
 }: {
 	subtitles?: Track[];
 	fonts?: Font[];
 	onMenuOpen: () => void;
 	onMenuClose: () => void;
-}) => {
+} & Stylable) => {
+	const { css } = useYoshiki();
 	const { t } = useTranslation();
-	const [subtitleAnchor, setSubtitleAnchor] = useState<HTMLButtonElement | null>(null);
 	const [isFullscreen, setFullscreen] = useAtom(fullscreenAtom);
+	const [selectedSubtitle, setSubtitle] = useParam("subtitle");
+
+	const spacing = css({ marginHorizontal: ts(1) });
+
+	subtitles = [{ id: 1, slug: "oto", displayName: "toto" }];
 
 	return (
-		<View
-		// sx={{
-		// 	display: "flex",
-		// 	"> *": {
-		// 		m: { xs: "4px !important", sm: "8px !important" },
-		// 		p: { xs: "4px !important", sm: "8px !important" },
-		// 	},
-		// }}
-		>
-			{/* {subtitles && ( */}
-			{/* 	<Tooltip title={t("subtitles")}> */}
-			{/* 		<IconButton */}
-			{/* 			id="sortby" */}
-			{/* 			aria-label={t("subtitles")} */}
-			{/* 			aria-controls={subtitleAnchor ? "subtitle-menu" : undefined} */}
-			{/* 			aria-haspopup="true" */}
-			{/* 			aria-expanded={subtitleAnchor ? "true" : undefined} */}
-			{/* 			onClick={(event) => { */}
-			{/* 				setSubtitleAnchor(event.currentTarget); */}
-			{/* 				onMenuOpen(); */}
-			{/* 			}} */}
-			{/* 			sx={{ color: "white" }} */}
-			{/* 		> */}
-			{/* 			<ClosedCaption /> */}
-			{/* 		</IconButton> */}
-			{/* 	</Tooltip> */}
-			{/* )} */}
+		<View {...css({ flexDirection: "row" }, props)}>
+			{subtitles && (
+				<Menu
+					Triger={IconButton}
+					icon={ClosedCaption}
+					{...tooltip(t("player.subtitles"), true)}
+					{...spacing}
+					// id="sortby"
+					// aria-controls={subtitleAnchor ? "subtitle-menu" : undefined}
+					// aria-haspopup="true"
+					// aria-expanded={subtitleAnchor ? "true" : undefined}
+				>
+					<Menu.Item
+						label={t("player.subtitle-none")}
+						selected={!selectedSubtitle}
+						onPress={() => setSubtitle(undefined)}
+					/>
+					{subtitles.map((x) => (
+						<Menu.Item
+							key={x.id}
+							label={x.displayName}
+							selected={selectedSubtitle === x.slug}
+							onPress={() => setSubtitle(x.slug)}
+						/>
+					))}
+				</Menu>
+			)}
 			{Platform.OS === "web" && (
 				<IconButton
 					icon={isFullscreen ? FullscreenExit : Fullscreen}
 					onPress={() => setFullscreen(!isFullscreen)}
 					{...tooltip(t("player.fullscreen"), true)}
+					{...spacing}
 				/>
 			)}
 			{/* {subtitleAnchor && ( */}
