@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ComponentProps, ComponentType, Fragment, ReactNode } from "react";
+import { ComponentProps, ComponentType, forwardRef, Fragment, ReactNode } from "react";
 import {
 	Platform,
 	Pressable,
@@ -28,7 +28,7 @@ import {
 	View,
 	ViewProps,
 	StyleSheet,
-    PressableProps,
+	PressableProps,
 } from "react-native";
 import { LinkCore, TextLink } from "solito/link";
 import { useYoshiki } from "yoshiki/native";
@@ -60,27 +60,27 @@ export const A = ({
 	);
 };
 
-export const PressableFeedback = ({
-	children,
-	WebComponent,
-	...props
-}: ViewProps & {
-	onFocus?: PressableProps["onFocus"];
-	onBlur?: PressableProps["onBlur"];
-	onPressIn?: PressableProps["onPressIn"];
-	onPressOut?: PressableProps["onPressOut"];
-	onPress?: PressableProps["onPress"];
-	WebComponent?: ComponentType;
-}) => {
+export const PressableFeedback = forwardRef<
+	unknown,
+	ViewProps & {
+		onFocus?: PressableProps["onFocus"];
+		onBlur?: PressableProps["onBlur"];
+		onPressIn?: PressableProps["onPressIn"];
+		onPressOut?: PressableProps["onPressOut"];
+		onPress?: PressableProps["onPress"];
+		WebComponent?: ComponentType;
+	}
+>(function _Feedback({ children, WebComponent, ...props }, ref) {
 	const { onBlur, onFocus, onPressIn, onPressOut, onPress, ...noPressProps } = props;
 	const pressProps = { onBlur, onFocus, onPressIn, onPressOut, onPress };
-	const radiusStyle = Platform.select<ViewProps>({
+	const wrapperProps = Platform.select<ViewProps & { ref?: any }>({
 		android: {
 			style: { borderRadius: StyleSheet.flatten(props?.style)?.borderRadius, overflow: "hidden" },
+			ref,
 		},
 		default: {},
 	});
-	const Wrapper = radiusStyle.style ? View : Fragment;
+	const Wrapper = wrapperProps.style ? View : Fragment;
 	const InnerPressable = Platform.select<ComponentType<{ children?: any }>>({
 		web: WebComponent ?? Pressable,
 		android: TouchableNativeFeedback,
@@ -89,11 +89,11 @@ export const PressableFeedback = ({
 	});
 
 	return (
-		<Wrapper {...radiusStyle}>
+		<Wrapper {...wrapperProps}>
 			<InnerPressable
 				{...Platform.select<object>({
 					android: { useForeground: true, ...pressProps },
-					default: props,
+					default: { ref, ...props },
 				})}
 			>
 				{Platform.select<ReactNode>({
@@ -104,7 +104,7 @@ export const PressableFeedback = ({
 			</InnerPressable>
 		</Wrapper>
 	);
-};
+});
 
 export const Link = ({
 	href,

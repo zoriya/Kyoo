@@ -21,18 +21,19 @@
 import { Portal } from "@gorhom/portal";
 import { ScrollView } from "moti";
 import { ComponentType, createContext, ReactNode, useContext, useEffect, useState } from "react";
-import { PressableProps, StyleSheet, Pressable } from "react-native";
+import { StyleSheet, Pressable } from "react-native";
 import { percent, px, sm, useYoshiki, xl } from "yoshiki/native";
 import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
-import { IconButton } from "./icons";
+import { Icon, IconButton } from "./icons";
 import { PressableFeedback } from "./links";
 import { P } from "./text";
 import { ContrastArea } from "./themes";
 import { ts } from "./utils";
+import Check from "@material-symbols/svg-400/rounded/check-fill.svg";
 
 const MenuContext = createContext<((open: boolean) => void) | undefined>(undefined);
 
-const Menu = <AsProps extends { onPress: PressableProps["onPress"] }>({
+const Menu = <AsProps,>({
 	Triger,
 	onMenuOpen,
 	onMenuClose,
@@ -107,37 +108,39 @@ const Menu = <AsProps extends { onPress: PressableProps["onPress"] }>({
 	);
 };
 
-const MenuItem = <AsProps extends PressableProps>({
+const MenuItem = ({
 	label,
-	icon,
 	selected,
-	as,
-	onPress,
+	onSelect,
 	...props
 }: {
 	label: string;
-	icon?: JSX.Element;
 	selected?: boolean;
-	as?: ComponentType<AsProps>;
-} & AsProps) => {
-	const { css } = useYoshiki();
+	onSelect: () => void;
+}) => {
+	const { css, theme } = useYoshiki();
 	const setOpen = useContext(MenuContext);
 
-	const As: ComponentType<any> = as ?? PressableFeedback;
 	return (
-		<As
-			onPress={(e: any) => {
+		<PressableFeedback
+			onPress={() => {
 				setOpen?.call(null, false);
-				onPress?.call(null, e);
+				onSelect?.call(null);
 			}}
 			{...css(
-				{ paddingHorizontal: ts(2), width: percent(100), height: ts(5), justifyContent: "center" },
+				{
+					paddingHorizontal: ts(2),
+					width: percent(100),
+					height: ts(5),
+					alignItems: "center",
+					flexDirection: "row",
+				},
 				props as any,
 			)}
 		>
-			{icon ?? null}
-			<P>{label}</P>
-		</As>
+			{selected && <Icon icon={Check} color={theme.paragraph} size={24} />}
+			<P {...css({ paddingLeft: ts(2) + +!selected * px(24) })}>{label}</P>
+		</PressableFeedback>
 	);
 };
 Menu.Item = MenuItem;

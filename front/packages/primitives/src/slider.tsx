@@ -104,6 +104,8 @@ export const Slider = ({
 			{...css(
 				{
 					paddingVertical: ts(1),
+					// @ts-ignore Web only
+					cursor: "pointer",
 					focus: {
 						shadowRadius: 0,
 					},

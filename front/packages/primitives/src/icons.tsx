@@ -18,12 +18,18 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ComponentProps, ComponentType } from "react";
+import React, { ComponentProps, ComponentType, ForwardedRef, forwardRef } from "react";
 import { Pressable, Platform, PressableProps, ViewStyle } from "react-native";
 import { SvgProps } from "react-native-svg";
 import { YoshikiStyle } from "yoshiki/dist/type";
 import { px, useYoshiki } from "yoshiki/native";
 import { ts } from "./utils";
+
+declare module "react" {
+	function forwardRef<T, P = {}>(
+		render: (props: P, ref: React.ForwardedRef<T>) => React.ReactElement | null,
+	): (props: P & React.RefAttributes<T>) => React.ReactElement | null;
+}
 
 type IconProps = {
 	icon: ComponentType<SvgProps>;
@@ -51,19 +57,25 @@ export const Icon = ({ icon: Icon, color, size = 24, ...props }: IconProps) => {
 	);
 };
 
-export const IconButton = <AsProps = PressableProps,>({
-	icon,
-	size,
-	color,
-	as,
-	...asProps
-}: IconProps & { as?: ComponentType<AsProps> } & AsProps) => {
+export const IconButton = forwardRef(function _IconButton<AsProps = PressableProps>(
+	{
+		icon,
+		size,
+		color,
+		as,
+		...asProps
+	}: IconProps & {
+		as?: ComponentType<AsProps>;
+	} & AsProps,
+	ref: ForwardedRef<unknown>,
+) {
 	const { css } = useYoshiki();
 
 	const Container = as ?? Pressable;
 
 	return (
-		<Container 
+		<Container
+			ref={ref as any}
 			accessibilityRole="button"
 			{...(css(
 				{
@@ -77,7 +89,7 @@ export const IconButton = <AsProps = PressableProps,>({
 			<Icon icon={icon} size={size} color={color} />
 		</Container>
 	);
-};
+});
 
 export const IconFab = <AsProps = PressableProps,>(
 	props: ComponentProps<typeof IconButton<AsProps>>,

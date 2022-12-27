@@ -23,7 +23,6 @@ import { Head } from "@kyoo/primitives";
 import { useState, useEffect, PointerEvent as ReactPointerEvent, ComponentProps } from "react";
 import { Platform, Pressable, StyleSheet, View } from "react-native";
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { useRouter } from "solito/router";
 import { percent, useYoshiki } from "yoshiki/native";
 import { Back, Hover, LoadingIndicator } from "./components/hover";
 import { fullscreenAtom, playAtom, Video } from "./state";
@@ -83,7 +82,6 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 	// useSubtitleController(playerRef, data?.subtitles, data?.fonts);
 	useVideoKeyboard(data?.subtitles, data?.fonts, previous, next);
 
-	const router = useRouter();
 	const [isFullscreen, setFullscreen] = useAtom(fullscreenAtom);
 	const [isPlaying, setPlay] = useAtom(playAtom);
 	const [showHover, setHover] = useState(false);
@@ -157,44 +155,51 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 			{/* 	} */}
 			{/* `}</style> */}
 			<Pressable
+				focusable={false}
 				onHoverOut={() => setMouseMoved(false)}
-				onPress={
-					Platform.OS === "web"
-						? (e) => {
-								e.preventDefault();
-								touchCount++;
-								if (touchCount == 2) {
-									touchCount = 0;
-									setFullscreen(!isFullscreen);
-									clearTimeout(touchTimeout);
-								} else
-									touchTimeout = setTimeout(() => {
-										touchCount = 0;
-									}, 400);
-								setPlay(!isPlaying);
-						  }
-						: show
-				}
 				{...css({
 					flexGrow: 1,
-					// @ts-ignore
 					bg: "black",
+					// @ts-ignore Web only
+					cursor: "unset",
 				})}
 			>
-				<Video
-					links={data?.link}
-					videoStyle={{ width: percent(100), height: percent(100) }}
-					setError={setPlaybackError}
+				<Pressable
+					focusable={false}
+					onPress={
+						Platform.OS === "web"
+							? (e) => {
+									e.preventDefault();
+									touchCount++;
+									if (touchCount == 2) {
+										touchCount = 0;
+										setFullscreen(!isFullscreen);
+										clearTimeout(touchTimeout);
+									} else
+										touchTimeout = setTimeout(() => {
+											touchCount = 0;
+										}, 400);
+									setPlay(!isPlaying);
+							  }
+							: () => displayControls ? setMouseMoved(false) : show()
+					}
 					{...css(StyleSheet.absoluteFillObject)}
-					// onEnded={() => {
-					// 	if (!data) return;
-					// 	if (data.isMovie) router.push(`/movie/${data.slug}`);
-					// 	else
-					// 		router.push(
-					// 			data.nextEpisode ? `/watch/${data.nextEpisode.slug}` : `/show/${data.showSlug}`,
-					// 		);
-					// }}
-				/>
+				>
+					<Video
+						links={data?.link}
+						videoStyle={{ width: percent(100), height: percent(100) }}
+						setError={setPlaybackError}
+						{...css(StyleSheet.absoluteFillObject)}
+						// onEnded={() => {
+						// 	if (!data) return;
+						// 	if (data.isMovie) router.push(`/movie/${data.slug}`);
+						// 	else
+						// 		router.push(
+						// 			data.nextEpisode ? `/watch/${data.nextEpisode.slug}` : `/show/${data.showSlug}`,
+						// 		);
+						// }}
+					/>
+				</Pressable>
 				<LoadingIndicator />
 				<Hover
 					{...mapData(data, previous, next)}

@@ -63,6 +63,7 @@ declare module "yoshiki" {
 		light: Mode & Variant;
 		dark: Mode & Variant;
 		user: Mode & Variant;
+		alternate: Mode & Variant;
 	}
 }
 declare module "yoshiki/native" {
@@ -70,6 +71,7 @@ declare module "yoshiki/native" {
 		light: Mode & Variant;
 		dark: Mode & Variant;
 		user: Mode & Variant;
+		alternate: Mode & Variant;
 	}
 }
 
@@ -84,12 +86,14 @@ const selectMode = (theme: ThemeBuilder, mode: "light" | "dark"): Theme => {
 	const light = { ...lightBuilder, ...lightBuilder.default };
 	const dark = { ...darkBuilder, ...darkBuilder.default };
 	const value = mode === "light" ? light : dark;
+	const alternate = mode === "light" ? dark : light;
 	return {
 		...options,
 		...value,
 		light,
 		dark,
 		user: value,
+		alternate,
 	};
 };
 
