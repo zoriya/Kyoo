@@ -10,6 +10,7 @@
 	"peerDependencies": {
 		"@gorhom/portal": "*",
 		"@material-symbols/svg-400": "*",
+		"@radix-ui/react-dropdown-menu": "*",
 		"expo-linear-gradient": "*",
 		"moti": "*",
 		"react": "*",
@@ -19,6 +20,12 @@
 		"yoshiki": "*"
 	},
 	"peerDependenciesMeta": {
+		"@gorhom/portal": {
+			"optional": true
+		},
+		"@radix-ui/react-dropdown-menu": {
+			"optional": true
+		},
 		"react-native-web": {
 			"optional": true
 		}

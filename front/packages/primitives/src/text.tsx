@@ -46,8 +46,7 @@ const styleText = (
 				{...css(
 					[
 						{
-							marginTop: 0,
-							marginBottom: rem(0.5),
+							marginVertical: rem(0.5),
 							// fontFamily: type === "header" ? theme.fonts.heading : theme.fonts.paragraph,
 							color: type === "header" ? theme.heading : theme.paragraph,
 						},

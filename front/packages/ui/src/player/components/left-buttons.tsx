@@ -123,7 +123,7 @@ const ProgressText = () => {
 	const { css } = useYoshiki();
 
 	return (
-		<P {...css({ alignSelf: "center", marginBottom: 0 })}>
+		<P {...css({ alignSelf: "center" })}>
 			{toTimerString(progress, duration)} : {toTimerString(duration)}
 		</P>
 	);

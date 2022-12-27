@@ -74,22 +74,26 @@ export const Hover = ({
 	show: boolean;
 } & ViewProps) => {
 	// TODO animate show
+	const opacity = !show && { opacity: 0 };
 	return (
 		<ContrastArea mode="dark">
 			{({ css }) => (
-				<View {...css([{ flexGrow: 1 }, !show && { opacity: 0 }])}>
-					<Back isLoading={isLoading} name={showName} href={href} {...props} />
+				<>
+					<Back isLoading={isLoading} name={showName} href={href} {...css(opacity, props)} />
 					<View
 						{...css(
-							{
-								position: "absolute",
-								bottom: 0,
-								left: 0,
-								right: 0,
-								bg: (theme) => alpha(theme.colors.black, 0.6),
-								flexDirection: "row",
-								padding: percent(1),
-							},
+							[
+								{
+									position: "absolute",
+									bottom: 0,
+									left: 0,
+									right: 0,
+									bg: (theme) => alpha(theme.colors.black, 0.6),
+									flexDirection: "row",
+									padding: percent(1),
+								},
+								opacity,
+							],
 							props,
 						)}
 					>
@@ -118,7 +122,7 @@ export const Hover = ({
 							</View>
 						</View>
 					</View>
-				</View>
+				</>
 			)}
 		</ContrastArea>
 	);
@@ -178,12 +182,11 @@ export const Back = ({
 			/>
 			<Skeleton>
 				{isLoading ? (
-					<Skeleton {...css({ width: rem(5), marginBottom: 0 })} />
+					<Skeleton {...css({ width: rem(5), })} />
 				) : (
 					<H1
 						{...css({
 							alignSelf: "center",
-							marginBottom: 0,
 							fontSize: rem(1.5),
 							marginLeft: rem(1),
 						})}
@@ -224,6 +227,7 @@ export const LoadingIndicator = () => {
 
 	return (
 		<View
+			pointerEvents="none"
 			{...css({
 				position: "absolute",
 				top: 0,

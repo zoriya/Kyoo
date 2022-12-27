@@ -143,6 +143,7 @@ const TitleLine = ({
 									{...css({
 										fontWeight: "300",
 										fontSize: rem(1.5),
+										marginTop: 0,
 										letterSpacing: 0,
 										textAlign: { xs: "center", sm: "left" },
 										color: (theme: Theme) => ({ xs: theme.user.heading, md: theme.heading }),

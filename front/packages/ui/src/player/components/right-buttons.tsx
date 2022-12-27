@@ -21,7 +21,6 @@
 import { Font, Track } from "@kyoo/models";
 import { IconButton, tooltip, Menu, ts, A } from "@kyoo/primitives";
 import { useAtom } from "jotai";
-import { useRouter } from "solito/router";
 import { Platform, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import ClosedCaption from "@material-symbols/svg-400/rounded/closed_caption-fill.svg";
@@ -31,7 +30,7 @@ import { Stylable, useYoshiki } from "yoshiki/native";
 import { createParam } from "solito";
 import { fullscreenAtom, subtitleAtom } from "../state";
 
-const { useParam } = createParam<{ subtitle?: string }>();
+const { useParam } = createParam<{ subtitle?: (string) }>();
 
 export const RightButtons = ({
 	subtitles,
@@ -52,32 +51,28 @@ export const RightButtons = ({
 
 	const spacing = css({ marginHorizontal: ts(1) });
 
-	subtitles = [{ id: 1, slug: "oto", displayName: "toto" }];
-
 	return (
 		<View {...css({ flexDirection: "row" }, props)}>
 			{subtitles && (
 				<Menu
 					Triger={IconButton}
 					icon={ClosedCaption}
+					onMenuOpen={onMenuOpen}
+					onMenuClose={onMenuClose}
 					{...tooltip(t("player.subtitles"), true)}
 					{...spacing}
-					// id="sortby"
-					// aria-controls={subtitleAnchor ? "subtitle-menu" : undefined}
-					// aria-haspopup="true"
-					// aria-expanded={subtitleAnchor ? "true" : undefined}
 				>
 					<Menu.Item
 						label={t("player.subtitle-none")}
 						selected={!selectedSubtitle}
-						onPress={() => setSubtitle(undefined)}
+						onSelect={() => setSubtitle(undefined)}
 					/>
 					{subtitles.map((x) => (
 						<Menu.Item
 							key={x.id}
 							label={x.displayName}
-							selected={selectedSubtitle === x.slug}
-							onPress={() => setSubtitle(x.slug)}
+							selected={selectedSubtitle === x.language || selectedSubtitle === x.id.toString()}
+							onSelect={() => setSubtitle(x.language ?? x.id.toString())}
 						/>
 					))}
 				</Menu>
@@ -90,84 +85,7 @@ export const RightButtons = ({
 					{...spacing}
 				/>
 			)}
-			{/* {subtitleAnchor && ( */}
-			{/* 	<SubtitleMenu */}
-			{/* 		subtitles={subtitles!} */}
-			{/* 		fonts={fonts!} */}
-			{/* 		anchor={subtitleAnchor} */}
-			{/* 		onClose={() => { */}
-			{/* 			setSubtitleAnchor(null); */}
-			{/* 			onMenuClose(); */}
-			{/* 		}} */}
-			{/* 	/> */}
-			{/* )} */}
 		</View>
 	);
 };
 
-const SubtitleMenu = ({
-	subtitles,
-	fonts,
-	anchor,
-	onClose,
-}: {
-	subtitles: Track[];
-	fonts: Font[];
-	anchor: HTMLElement;
-	onClose: () => void;
-}) => {
-	const router = useRouter();
-	const { t } = useTranslation("player");
-	const [selectedSubtitle, setSubtitle] = useAtom(subtitleAtom);
-	const { subtitle, ...queryWithoutSubs } = router.query;
-
-	return (
-		<Menu
-			id="subtitle-menu"
-			MenuListProps={{
-				"aria-labelledby": "subtitle",
-			}}
-			anchorEl={anchor}
-			open={!!anchor}
-			onClose={onClose}
-			anchorOrigin={{
-				vertical: "top",
-				horizontal: "center",
-			}}
-			transformOrigin={{
-				vertical: "bottom",
-				horizontal: "center",
-			}}
-		>
-			<MenuItem
-				selected={!selectedSubtitle}
-				onClick={() => {
-					setSubtitle(null);
-					onClose();
-				}}
-				component={Link}
-				to={{ query: queryWithoutSubs }}
-				shallow
-				replace
-			>
-				<ListItemText>{t("subtitle-none")}</ListItemText>
-			</MenuItem>
-			{subtitles.map((sub) => (
-				<MenuItem
-					key={sub.id}
-					selected={selectedSubtitle?.id === sub.id}
-					onClick={() => {
-						setSubtitle({ track: sub, fonts });
-						onClose();
-					}}
-					component={Link}
-					to={{ query: { ...router.query, subtitle: sub.language ?? sub.id } }}
-					shallow
-					replace
-				>
-					<ListItemText>{sub.displayName}</ListItemText>
-				</MenuItem>
-			))}
-		</Menu>
-	);
-};
