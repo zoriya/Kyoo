@@ -21,6 +21,7 @@
 			"supportsTablet": true
 		},
 		"android": {
+			"package": "moe.sdg.kyoo",
 			"adaptiveIcon": {
 				"foregroundImage": "./assets/adaptive-icon.png",
 				"backgroundColor": "#FFFFFF"
@@ -28,6 +29,21 @@
 		},
 		"web": {
 			"favicon": "./assets/favicon.png"
-		}
+		},
+		"extra": {
+			"eas": {
+				"projectId": "55de6b52-c649-4a15-9a45-569ff5ed036c"
+			}
+		},
+		"plugins": [
+			[
+				"expo-build-properties",
+				{
+					"android": {
+						"compileSdkVersion": 31
+					}
+				}
+			]
+		]
 	}
 }
