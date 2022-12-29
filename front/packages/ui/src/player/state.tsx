@@ -22,7 +22,7 @@ import { Font, Track, WatchItem } from "@kyoo/models";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { RefObject, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createParam } from "solito";
-import { ResizeMode, Video as NativeVideo, VideoProps } from "expo-av";
+import NativeVideo, { VideoProperties as VideoProps } from "react-native-video";
 import SubtitleOctopus from "libass-wasm";
 import Hls from "hls.js";
 import { bakedAtom } from "../jotai-utils";
@@ -92,9 +92,9 @@ export const Video = ({
 	const setPrivateProgress = useSetAtom(privateProgressAtom);
 	const setBuffered = useSetAtom(bufferedAtom);
 	const setDuration = useSetAtom(durationAtom);
-	useEffect(() => {
-		ref.current?.setStatusAsync({ positionMillis: publicProgress });
-	}, [publicProgress]);
+	// useEffect(() => {
+	// 	ref.current?.setStatusAsync({ positionMillis: publicProgress });
+	// }, [publicProgress]);
 
 	const volume = useAtomValue(volumeAtom);
 	const isMuted = useAtomValue(mutedAtom);
@@ -144,22 +144,24 @@ export const Video = ({
 		<NativeVideo
 			ref={ref}
 			{...props}
-			source={links ? { uri: links.direct } : undefined}
-			shouldPlay={isPlaying}
-			isMuted={isMuted}
+			source={{ uri: links?.direct }}
+			paused={!isPlaying}
+			muted={isMuted}
 			volume={volume}
-			onPlaybackStatusUpdate={(status) => {
-				if (!status.isLoaded) {
-					setLoad(true);
-					if (status.error) setError(status.error);
-					return;
-				}
+			// resizeMode={ResizeMode.CONTAIN}
+			// onPlaybackStatusUpdate={(status) => {
+			// 	if (!status.isLoaded) {
+			// 		setLoad(true);
+			// 		if (status.error) setError(status.error);
+			// 		return;
+			// 	}
 
-				setLoad(status.isPlaying !== status.shouldPlay);
-				setPrivateProgress(status.positionMillis);
-				setBuffered(status.playableDurationMillis ?? 0);
-				setDuration(status.durationMillis);
-			}}
+			// 	setLoad(status.isPlaying !== status.shouldPlay);
+			// 	setPrivateProgress(status.positionMillis);
+			// 	setBuffered(status.playableDurationMillis ?? 0);
+			// 	setDuration(status.durationMillis);
+			// }}
+
 			// ref: player,
 			// shouldPlay: isPlaying,
 			// onDoubleClick: () => {
@@ -186,7 +188,6 @@ export const Video = ({
 			// 	setVolume(player.current.volume * 100);
 			// 	setMuted(player?.current.muted);
 			// },
-			resizeMode={ResizeMode.CONTAIN}
 			useNativeControls={false}
 		/>
 	);
