@@ -20,17 +20,18 @@
 
 import { QueryIdentifier, QueryPage, WatchItem, WatchItemP, useFetch } from "@kyoo/models";
 import { Head } from "@kyoo/primitives";
-import { useState, useEffect, PointerEvent as ReactPointerEvent, ComponentProps } from "react";
-import { Platform, Pressable, StyleSheet, View } from "react-native";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import { percent, useYoshiki } from "yoshiki/native";
+import { useState, useEffect, ComponentProps } from "react";
+import { Platform, Pressable, StyleSheet } from "react-native";
+import { useTranslation } from "react-i18next";
+import { useRouter } from "solito/router";
+import { useAtom } from "jotai";
+import { useYoshiki } from "yoshiki/native";
 import { Back, Hover, LoadingIndicator } from "./components/hover";
 import { fullscreenAtom, playAtom, Video } from "./state";
 import { episodeDisplayNumber } from "../details/episode";
 import { useVideoKeyboard } from "./keyboard";
 import { MediaSessionManager } from "./media-session";
 import { ErrorView } from "../fetch";
-import { useTranslation } from "react-i18next";
 
 const query = (slug: string): QueryIdentifier<WatchItem> => ({
 	path: ["watch", slug],
@@ -68,6 +69,7 @@ let touchTimeout: NodeJS.Timeout;
 export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
+	const router = useRouter();
 
 	const [playbackError, setPlaybackError] = useState<string | undefined>(undefined);
 	const { data, error } = useFetch(query(slug));
@@ -78,8 +80,6 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 	const next =
 		data && !data.isMovie && data.nextEpisode ? `/watch/${data.nextEpisode.slug}` : undefined;
 
-	// const { playerRef, videoProps, onVideoClick } = useVideoController(data?.link);
-	// useSubtitleController(playerRef, data?.subtitles, data?.fonts);
 	useVideoKeyboard(data?.subtitles, data?.fonts, previous, next);
 
 	const [isFullscreen, setFullscreen] = useAtom(fullscreenAtom);
@@ -107,9 +107,6 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 		return () => document.removeEventListener("pointermove", handler);
 	});
 
-	// useEffect(() => {
-	// 	setPlay(true);
-	// }, [slug, setPlay]);
 	useEffect(() => {
 		if (Platform.OS !== "web" || !/Mobi/i.test(window.navigator.userAgent)) return;
 		setFullscreen(true);
@@ -148,12 +145,6 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 				next={next}
 				previous={previous}
 			/>
-			{/* <style jsx global>{` */}
-			{/* 	::cue { */}
-			{/* 		background-color: transparent; */}
-			{/* 		text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; */}
-			{/* 	} */}
-			{/* `}</style> */}
 			<Pressable
 				focusable={false}
 				onHoverOut={() => setMouseMoved(false)}
@@ -181,7 +172,7 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 										}, 400);
 									setPlay(!isPlaying);
 							  }
-							: () => displayControls ? setMouseMoved(false) : show()
+							: () => (displayControls ? setMouseMoved(false) : show())
 					}
 					{...css(StyleSheet.absoluteFillObject)}
 				>
@@ -189,15 +180,15 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 						links={data?.link}
 						setError={setPlaybackError}
 						fonts={data?.fonts}
+						onEnd={() => {
+							if (!data) return;
+							if (data.isMovie) router.push(`/movie/${data.slug}`);
+							else
+								router.push(
+									data.nextEpisode ? `/watch/${data.nextEpisode.slug}` : `/show/${data.showSlug}`,
+								);
+						}}
 						{...css(StyleSheet.absoluteFillObject)}
-						// onEnded={() => {
-						// 	if (!data) return;
-						// 	if (data.isMovie) router.push(`/movie/${data.slug}`);
-						// 	else
-						// 		router.push(
-						// 			data.nextEpisode ? `/watch/${data.nextEpisode.slug}` : `/show/${data.showSlug}`,
-						// 		);
-						// }}
 					/>
 				</Pressable>
 				<LoadingIndicator />

@@ -80,6 +80,11 @@ const GlobalCssTheme = () => {
 					width: 100%;
 					height: 100%;
 				}
+
+				::cue {
+					background-color: transparent;
+					text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+				}
 			`}</style>
 			<WebTooltip theme={theme} />
 			<SkeletonCss />
