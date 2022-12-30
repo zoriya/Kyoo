@@ -30,7 +30,7 @@ import {
 	ViewStyle,
 } from "react-native";
 import { percent, useYoshiki } from "yoshiki/native";
-import { StyleList, YoshikiStyle } from "yoshiki/dist/type";
+import { YoshikiStyle } from "yoshiki/dist/type";
 import { Skeleton } from "./skeleton";
 import { LinearGradient, LinearGradientProps } from "expo-linear-gradient";
 import { alpha, ContrastArea } from "./themes";

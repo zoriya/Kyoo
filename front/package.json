@@ -6,6 +6,8 @@
 		"web": "yarn workspace web dev",
 		"mobile": "yarn workspace mobile dev",
 		"build:web": "yarn workspace web build",
+		"build:mobile": "yarn workspace mobile build",
+		"build:mobile:dev": "yarn workspace mobile build:dev",
 		"lint": "eslint ."
 	},
 	"workspaces": [
