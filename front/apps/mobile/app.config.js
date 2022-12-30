@@ -28,7 +28,7 @@ const config = {
 		version: "1.0.0",
 		orientation: "default",
 		icon: "./assets/icon.png",
-		entryPoint: "./index.ts",
+		entryPoint: "./index.tsx",
 		userInterfaceStyle: "light",
 		splash: {
 			image: "./assets/splash.png",
