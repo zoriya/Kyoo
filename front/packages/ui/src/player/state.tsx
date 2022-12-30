@@ -18,19 +18,12 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Font, Track, WatchItem } from "@kyoo/models";
+import { Track, WatchItem } from "@kyoo/models";
 import { atom, useAtomValue, useSetAtom } from "jotai";
-import { useEffect, useLayoutEffect, useRef } from "react";
+import { memo, useEffect, useLayoutEffect, useRef } from "react";
 import NativeVideo, { VideoProperties as VideoProps } from "./video";
 import { bakedAtom } from "../jotai-utils";
 import { Platform } from "react-native";
-
-enum PlayMode {
-	Direct,
-	Transmux,
-}
-
-const playModeAtom = atom<PlayMode>(PlayMode.Direct);
 
 export const playAtom = atom(true);
 export const loadAtom = atom(false);
@@ -70,7 +63,9 @@ export const [privateFullscreen, fullscreenAtom] = bakedAtom(
 
 export const subtitleAtom = atom<Track | null>(null);
 
-export const Video = ({
+const MemoVideo = memo(NativeVideo);
+
+export const Video = memo(function _Video({
 	links,
 	setError,
 	fonts,
@@ -78,7 +73,7 @@ export const Video = ({
 }: {
 	links?: WatchItem["link"];
 	setError: (error: string | undefined) => void;
-} & VideoProps) => {
+} & Partial<VideoProps>) {
 	const ref = useRef<NativeVideo | null>(null);
 	const isPlaying = useAtomValue(playAtom);
 	const setLoad = useSetAtom(loadAtom);
@@ -110,37 +105,13 @@ export const Video = ({
 
 	const subtitle = useAtomValue(subtitleAtom);
 
-	// useEffect(() => {
-	// 	setPlayMode(PlayMode.Direct);
-	// }, [links, setPlayMode]);
-
-	// useEffect(() => {
-	// 	const src = playMode === PlayMode.Direct ? links?.direct : links?.transmux;
-
-	// 	if (!player?.current || !src) return;
-	// 	if (
-	// 		playMode == PlayMode.Direct ||
-	// 		player.current.canPlayType("application/vnd.apple.mpegurl")
-	// 	) {
-	// 		player.current.src = src;
-	// 	} else {
-	// 		if (hls === null) hls = new Hls();
-	// 		hls.loadSource(src);
-	// 		hls.attachMedia(player.current);
-	// 		hls.on(Hls.Events.MANIFEST_LOADED, async () => {
-	// 			try {
-	// 				await player.current?.play();
-	// 			} catch {}
-	// 		});
-	// 	}
-	// }, [playMode, links, player]);
-
 	if (!links) return null;
 	return (
-		<NativeVideo
+		<MemoVideo
 			ref={ref}
 			{...props}
-			source={{ uri: links.direct }}
+			// @ts-ignore Web only
+			source={{ uri: links.direct, transmux: links.transmux }}
 			paused={!isPlaying}
 			muted={isMuted}
 			volume={volume}
@@ -170,4 +141,4 @@ export const Video = ({
 			// },
 		/>
 	);
-};
+});

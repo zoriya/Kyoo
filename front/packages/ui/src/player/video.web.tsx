@@ -19,25 +19,39 @@
  */
 
 import { Font, Track } from "@kyoo/models";
-import { forwardRef, RefObject, useEffect, useImperativeHandle, useRef } from "react";
-import { VideoProperties } from "react-native-video";
-import { useAtomValue } from "jotai";
+import {
+	forwardRef,
+	RefObject,
+	useEffect,
+	useImperativeHandle,
+	useLayoutEffect,
+	useRef,
+} from "react";
+import { VideoProps } from "react-native-video";
+import { atom, useAtom, useAtomValue } from "jotai";
 import { useYoshiki } from "yoshiki";
 import SubtitleOctopus from "libass-wasm";
 import { subtitleAtom } from "./state";
-// import Hls from "hls.js";
-
-// let hls: Hls | null = null;
-
-// TODO fallback via links and hls.
+import Hls from "hls.js";
 
 declare module "react-native-video" {
 	interface VideoProperties {
 		fonts?: Font[];
 	}
+	export type VideoProps = Omit<VideoProperties, "source"> & {
+		source: { uri?: string; transmux?: string };
+	};
 }
 
-const Video = forwardRef<{ seek: (value: number) => void }, VideoProperties>(function _Video(
+enum PlayMode {
+	Direct,
+	Transmux,
+}
+
+const playModeAtom = atom<PlayMode>(PlayMode.Direct);
+let hls: Hls | null = null;
+
+const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function _Video(
 	{ source, paused, muted, volume, onBuffer, onLoad, onProgress, onError, fonts },
 	forwaredRef,
 ) {
@@ -56,7 +70,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProperties>(fun
 
 	useEffect(() => {
 		if (paused) ref.current?.pause();
-		else ref.current?.play();
+		else ref.current?.play().catch(() => {});
 	}, [paused]);
 	useEffect(() => {
 		if (!ref.current || !volume) return;
@@ -67,10 +81,33 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProperties>(fun
 	const subtitle = useAtomValue(subtitleAtom);
 	useSubtitle(ref, subtitle, fonts);
 
+	const [playMode, setPlayMode] = useAtom(playModeAtom);
+	useEffect(() => {
+		setPlayMode(PlayMode.Direct);
+	}, [source.uri, setPlayMode]);
+
+	useLayoutEffect(() => {
+		console.log("toto");
+		const src = playMode === PlayMode.Direct ? source?.uri : source?.transmux;
+
+		if (!ref?.current || !src) return;
+		if (playMode == PlayMode.Direct || ref.current.canPlayType("application/vnd.apple.mpegurl")) {
+			ref.current.src = src;
+		} else {
+			if (hls === null) hls = new Hls();
+			hls.loadSource(src);
+			hls.attachMedia(ref.current);
+			hls.on(Hls.Events.MANIFEST_LOADED, async () => {
+				try {
+					await ref.current?.play();
+				} catch {}
+			});
+		}
+	}, [playMode, source?.uri, source?.transmux]);
+
 	return (
 		<video
 			ref={ref}
-			src={typeof source === "number" ? undefined : source.uri}
 			muted={muted}
 			autoPlay={!paused}
 			onCanPlay={() => onBuffer?.call(null, { isBuffering: false })}
@@ -89,11 +126,18 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProperties>(fun
 					seekableDuration: 0,
 				});
 			}}
-			onError={() =>
-				onError?.call(null, {
-					error: { "": "", errorString: ref.current?.error?.message ?? "Unknown error" },
-				})
-			}
+			onError={() => {
+				if (
+					ref?.current?.error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED &&
+					playMode !== PlayMode.Transmux
+				)
+					setPlayMode(PlayMode.Transmux);
+				else {
+					onError?.call(null, {
+						error: { "": "", errorString: ref.current?.error?.message ?? "Unknown error" },
+					});
+				}
+			}}
 			{...css({ width: "100%", height: "100%" })}
 		/>
 	);
