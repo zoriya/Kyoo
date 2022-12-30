@@ -187,7 +187,6 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 				>
 					<Video
 						links={data?.link}
-						videoStyle={{ width: percent(100), height: percent(100) }}
 						setError={setPlaybackError}
 						{...css(StyleSheet.absoluteFillObject)}
 						// onEnded={() => {

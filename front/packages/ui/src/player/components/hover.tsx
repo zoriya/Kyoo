@@ -142,7 +142,7 @@ export const ProgressBar = ({ chapters }: { chapters?: Chapter[] }) => {
 			setProgress={setProgress}
 			subtleProgress={buffered}
 			max={duration}
-			markers={chapters?.map((x) => x.startTime * 1000)}
+			markers={chapters?.map((x) => x.startTime)}
 		/>
 	);
 };

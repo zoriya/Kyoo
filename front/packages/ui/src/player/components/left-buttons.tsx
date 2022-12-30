@@ -132,6 +132,6 @@ const ProgressText = () => {
 const toTimerString = (timer?: number, duration?: number) => {
 	if (timer === undefined) return "??:??";
 	if (!duration) duration = timer;
-	if (duration >= 3600_000) return new Date(timer).toISOString().substring(11, 19);
-	return new Date(timer).toISOString().substring(14, 19);
+	if (duration >= 3600) return new Date(timer * 1000).toISOString().substring(11, 19);
+	return new Date(timer * 1000).toISOString().substring(14, 19);
 };

@@ -19,8 +19,9 @@
  */
 
 import { Font, Track } from "@kyoo/models";
-import { IconButton, tooltip, Menu, ts, A } from "@kyoo/primitives";
-import { useAtom } from "jotai";
+import { IconButton, tooltip, Menu, ts } from "@kyoo/primitives";
+import { useAtom, useSetAtom } from "jotai";
+import { useEffect } from "react";
 import { Platform, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import ClosedCaption from "@material-symbols/svg-400/rounded/closed_caption-fill.svg";
@@ -30,7 +31,7 @@ import { Stylable, useYoshiki } from "yoshiki/native";
 import { createParam } from "solito";
 import { fullscreenAtom, subtitleAtom } from "../state";
 
-const { useParam } = createParam<{ subtitle?: (string) }>();
+const { useParam } = createParam<{ subtitle?: string }>();
 
 export const RightButtons = ({
 	subtitles,
@@ -47,7 +48,16 @@ export const RightButtons = ({
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
 	const [isFullscreen, setFullscreen] = useAtom(fullscreenAtom);
+	const setSubAtom = useSetAtom(subtitleAtom);
 	const [selectedSubtitle, setSubtitle] = useParam("subtitle");
+
+	useEffect(() => {
+		const sub =
+			subtitles?.find(
+				(x) => x.language === selectedSubtitle || x.id.toString() === selectedSubtitle,
+			) ?? null;
+		setSubAtom(sub);
+	}, [subtitles, selectedSubtitle, setSubAtom]);
 
 	const spacing = css({ marginHorizontal: ts(1) });
 
@@ -88,4 +98,3 @@ export const RightButtons = ({
 		</View>
 	);
 };
-

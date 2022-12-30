@@ -71,6 +71,8 @@ export const [privateFullscreen, fullscreenAtom] = bakedAtom(
 	},
 );
 
+export const subtitleAtom = atom<Track | null>(null);
+
 let hls: Hls | null = null;
 
 export const Video = ({
@@ -78,8 +80,6 @@ export const Video = ({
 	setError,
 	...props
 }: { links?: WatchItem["link"]; setError: (error: string | undefined) => void } & VideoProps) => {
-	// const [playMode, setPlayMode] = useAtom(playModeAtom);
-
 	const ref = useRef<NativeVideo | null>(null);
 	const isPlaying = useAtomValue(playAtom);
 	const setLoad = useSetAtom(loadAtom);
@@ -92,9 +92,9 @@ export const Video = ({
 	const setPrivateProgress = useSetAtom(privateProgressAtom);
 	const setBuffered = useSetAtom(bufferedAtom);
 	const setDuration = useSetAtom(durationAtom);
-	// useEffect(() => {
-	// 	ref.current?.setStatusAsync({ positionMillis: publicProgress });
-	// }, [publicProgress]);
+	useEffect(() => {
+		ref.current?.seek(publicProgress);
+	}, [publicProgress]);
 
 	const volume = useAtomValue(volumeAtom);
 	const isMuted = useAtomValue(mutedAtom);
@@ -108,6 +108,8 @@ export const Video = ({
 		document.addEventListener("fullscreenchange", handler);
 		return () => document.removeEventListener("fullscreenchange", handler);
 	});
+
+	const subtitle = useAtomValue(subtitleAtom);
 
 	// useEffect(() => {
 	// 	setPlayMode(PlayMode.Direct);
@@ -134,139 +136,117 @@ export const Video = ({
 	// 	}
 	// }, [playMode, links, player]);
 
-	// useEffect(() => {
-	// 	if (!player?.current?.duration) return;
-	// 	setDuration(player.current.duration);
-	// }, [player, setDuration]);
-	//
-
+	if (!links) return null;
 	return (
 		<NativeVideo
 			ref={ref}
 			{...props}
-			source={{ uri: links?.direct }}
+			source={{ uri: links.direct }}
 			paused={!isPlaying}
 			muted={isMuted}
 			volume={volume}
-			// resizeMode={ResizeMode.CONTAIN}
-			// onPlaybackStatusUpdate={(status) => {
-			// 	if (!status.isLoaded) {
-			// 		setLoad(true);
-			// 		if (status.error) setError(status.error);
-			// 		return;
-			// 	}
-
-			// 	setLoad(status.isPlaying !== status.shouldPlay);
-			// 	setPrivateProgress(status.positionMillis);
-			// 	setBuffered(status.playableDurationMillis ?? 0);
-			// 	setDuration(status.durationMillis);
-			// }}
-
-			// ref: player,
-			// shouldPlay: isPlaying,
-			// onDoubleClick: () => {
-			// 	setFullscreen(!document.fullscreenElement);
-			// },
-			// onPlay: () => setPlay(true),
-			// onPause: () => setPlay(false),
-			// onWaiting: () => setLoad(true),
-			// onCanPlay: () => setLoad(false),
+			resizeMode="contain"
+			onBuffer={({ isBuffering }) => setLoad(isBuffering)}
+			onError={(status) => setError(status.error.errorString)}
+			onProgress={(progress) => {
+				setPrivateProgress(progress.currentTime);
+				setBuffered(progress.playableDuration);
+			}}
+			onLoad={(info) => {
+				console.log(info);
+				setDuration(info.duration);
+			}}
+			selectedTextTrack={
+				subtitle
+					? {
+							type: "index",
+							value: subtitle.trackIndex,
+					  }
+					: { type: "disabled" }
+			}
+			// TODO: textTracks: external subtitles
 			// onError: () => {
 			// 	if (player?.current?.error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED)
 			// 		setPlayMode(PlayMode.Transmux);
 			// },
-			// onTimeUpdate: () => setProgress(player?.current?.currentTime ?? 0),
-			// onDurationChange: () => setDuration(player?.current?.duration ?? 0),
-			// onProgress: () =>
-			// 	setBuffered(
-			// 		player?.current?.buffered.length
-			// 			? player.current.buffered.end(player.current.buffered.length - 1)
-			// 			: 0,
-			// 	),
-			// onVolumeChange: () => {
-			// 	if (!player.current) return;
-			// 	setVolume(player.current.volume * 100);
-			// 	setMuted(player?.current.muted);
-			// },
-			useNativeControls={false}
 		/>
 	);
 };
 
-const htmlTrackAtom = atom<HTMLTrackElement | null>(null);
-const suboctoAtom = atom<SubtitleOctopus | null>(null);
-export const [_subtitleAtom, subtitleAtom] = bakedAtom<
-	Track | null,
-	{ track: Track; fonts: Font[] } | null
->(null, (get, set, value, baked) => {
-	const removeHtmlSubtitle = () => {
-		const htmlTrack = get(htmlTrackAtom);
-		if (htmlTrack) htmlTrack.remove();
-		set(htmlTrackAtom, null);
-	};
-	const removeOctoSub = () => {
-		const subocto = get(suboctoAtom);
-		if (subocto) {
-			subocto.freeTrack();
-			subocto.dispose();
-		}
-		set(suboctoAtom, null);
-	};
+// const htmlTrackAtom = atom<HTMLTrackElement | null>(null);
+// const suboctoAtom = atom<SubtitleOctopus | null>(null);
+// export const [_subtitleAtom, subtitleAtom] = bakedAtom<
+// 	Track | null,
+// 	{ track: Track; fonts: Font[] } | null
+// >(null, (get, set, value, baked) => {
+// 	const removeHtmlSubtitle = () => {
+// 		const htmlTrack = get(htmlTrackAtom);
+// 		if (htmlTrack) htmlTrack.remove();
+// 		set(htmlTrackAtom, null);
+// 	};
+// 	const removeOctoSub = () => {
+// 		const subocto = get(suboctoAtom);
+// 		if (subocto) {
+// 			subocto.freeTrack();
+// 			subocto.dispose();
+// 		}
+// 		set(suboctoAtom, null);
+// 	};
 
-	const player = get(playerAtom);
-	if (!player?.current) return;
+// 	const player = get(playerAtom);
+// 	if (!player?.current) return;
 
-	if (get(baked)?.id === value?.track.id) return;
+// 	if (get(baked)?.id === value?.track.id) return;
 
-	set(baked, value?.track ?? null);
-	if (!value) {
-		removeHtmlSubtitle();
-		removeOctoSub();
-	} else if (value.track.codec === "vtt" || value.track.codec === "subrip") {
-		removeOctoSub();
-		if (player.current.textTracks.length > 0) player.current.textTracks[0].mode = "hidden";
-		const track: HTMLTrackElement = get(htmlTrackAtom) ?? document.createElement("track");
-		track.kind = "subtitles";
-		track.label = value.track.displayName;
-		if (value.track.language) track.srclang = value.track.language;
-		track.src = value.track.link! + ".vtt";
-		track.className = "subtitle_container";
-		track.default = true;
-		track.onload = () => {
-			if (player.current) player.current.textTracks[0].mode = "showing";
-		};
-		if (!get(htmlTrackAtom)) player.current.appendChild(track);
-		set(htmlTrackAtom, track);
-	} else if (value.track.codec === "ass") {
-		removeHtmlSubtitle();
-		removeOctoSub();
-		set(
-			suboctoAtom,
-			new SubtitleOctopus({
-				video: player.current,
-				subUrl: value.track.link!,
-				workerUrl: "/_next/static/chunks/subtitles-octopus-worker.js",
-				legacyWorkerUrl: "/_next/static/chunks/subtitles-octopus-worker-legacy.js",
-				fonts: value.fonts?.map((x) => x.link),
-				renderMode: "wasm-blend",
-			}),
-		);
-	}
-});
+// 	set(baked, value?.track ?? null);
+// 	if (!value) {
+// 		removeHtmlSubtitle();
+// 		removeOctoSub();
+// 	} else if (value.track.codec === "vtt" || value.track.codec === "subrip") {
+// 		removeOctoSub();
+// 		if (player.current.textTracks.length > 0) player.current.textTracks[0].mode = "hidden";
+// 		const track: HTMLTrackElement = get(htmlTrackAtom) ?? document.createElement("track");
+// 		track.kind = "subtitles";
+// 		track.label = value.track.displayName;
+// 		if (value.track.language) track.srclang = value.track.language;
+// 		track.src = value.track.link! + ".vtt";
+// 		track.className = "subtitle_container";
+// 		track.default = true;
+// 		track.onload = () => {
+// 			if (player.current) player.current.textTracks[0].mode = "showing";
+// 		};
+// 		if (!get(htmlTrackAtom)) player.current.appendChild(track);
+// 		set(htmlTrackAtom, track);
+// 	} else if (value.track.codec === "ass") {
+// 		removeHtmlSubtitle();
+// 		removeOctoSub();
+// 		set(
+// 			suboctoAtom,
+// 			new SubtitleOctopus({
+// 				video: player.current,
+// 				subUrl: value.track.link!,
+// 				workerUrl: "/_next/static/chunks/subtitles-octopus-worker.js",
+// 				legacyWorkerUrl: "/_next/static/chunks/subtitles-octopus-worker-legacy.js",
+// 				fonts: value.fonts?.map((x) => x.link),
+// 				renderMode: "wasm-blend",
+// 			}),
+// 		);
+// 	}
+// });
 
-const { useParam } = createParam<{ subtitle: string }>();
+// const { useParam } = createParam<{ subtitle: string }>();
 
-export const useSubtitleController = (
-	player: RefObject<HTMLVideoElement>,
-	subtitles?: Track[],
-	fonts?: Font[],
-) => {
-	const [subtitle] = useParam("subtitle");
-	const selectSubtitle = useSetAtom(subtitleAtom);
+// export const useSubtitleController = (
+// 	player: RefObject<HTMLVideoElement>,
+// 	subtitles?: Track[],
+// 	fonts?: Font[],
+// ) => {
+// 	const [subtitle] = useParam("subtitle");
+// 	const selectSubtitle = useSetAtom(subtitleAtom);
 
-	const newSub = subtitles?.find((x) => x.language === subtitle);
-	useEffect(() => {
-		if (newSub === undefined) return;
-		selectSubtitle({ track: newSub, fonts: fonts ?? [] });
-	}, [player.current?.src, newSub, fonts, selectSubtitle]);
-};
+// 	const newSub = subtitles?.find((x) => x.language === subtitle);
+// 	useEffect(() => {
+// 		if (newSub === undefined) return;
+// 		selectSubtitle({ track: newSub, fonts: fonts ?? [] });
+// 	}, [player.current?.src, newSub, fonts, selectSubtitle]);
+// };
