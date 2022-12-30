@@ -18,13 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Font, Track, WatchItem } from "@kyoo/models";
-import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
-import { RefObject, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { createParam } from "solito";
-import NativeVideo, { VideoProperties as VideoProps } from "react-native-video";
-import SubtitleOctopus from "libass-wasm";
-import Hls from "hls.js";
+import { Track, WatchItem } from "@kyoo/models";
+import { atom, useAtomValue, useSetAtom } from "jotai";
+import { useEffect, useLayoutEffect, useRef } from "react";
+import NativeVideo, { VideoProperties as VideoProps } from "./video";
 import { bakedAtom } from "../jotai-utils";
 import { Platform } from "react-native";
 
@@ -72,8 +69,6 @@ export const [privateFullscreen, fullscreenAtom] = bakedAtom(
 );
 
 export const subtitleAtom = atom<Track | null>(null);
-
-let hls: Hls | null = null;
 
 export const Video = ({
 	links,
@@ -153,7 +148,6 @@ export const Video = ({
 				setBuffered(progress.playableDuration);
 			}}
 			onLoad={(info) => {
-				console.log(info);
 				setDuration(info.duration);
 			}}
 			selectedTextTrack={
