@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Track, WatchItem } from "@kyoo/models";
+import { Font, Track, WatchItem } from "@kyoo/models";
 import { atom, useAtomValue, useSetAtom } from "jotai";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import NativeVideo, { VideoProperties as VideoProps } from "./video";
@@ -73,8 +73,12 @@ export const subtitleAtom = atom<Track | null>(null);
 export const Video = ({
 	links,
 	setError,
+	fonts,
 	...props
-}: { links?: WatchItem["link"]; setError: (error: string | undefined) => void } & VideoProps) => {
+}: {
+	links?: WatchItem["link"];
+	setError: (error: string | undefined) => void;
+} & VideoProps) => {
 	const ref = useRef<NativeVideo | null>(null);
 	const isPlaying = useAtomValue(playAtom);
 	const setLoad = useSetAtom(loadAtom);
@@ -158,6 +162,7 @@ export const Video = ({
 					  }
 					: { type: "disabled" }
 			}
+			fonts={fonts}
 			// TODO: textTracks: external subtitles
 			// onError: () => {
 			// 	if (player?.current?.error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED)
@@ -166,81 +171,3 @@ export const Video = ({
 		/>
 	);
 };
-
-// const htmlTrackAtom = atom<HTMLTrackElement | null>(null);
-// const suboctoAtom = atom<SubtitleOctopus | null>(null);
-// export const [_subtitleAtom, subtitleAtom] = bakedAtom<
-// 	Track | null,
-// 	{ track: Track; fonts: Font[] } | null
-// >(null, (get, set, value, baked) => {
-// 	const removeHtmlSubtitle = () => {
-// 		const htmlTrack = get(htmlTrackAtom);
-// 		if (htmlTrack) htmlTrack.remove();
-// 		set(htmlTrackAtom, null);
-// 	};
-// 	const removeOctoSub = () => {
-// 		const subocto = get(suboctoAtom);
-// 		if (subocto) {
-// 			subocto.freeTrack();
-// 			subocto.dispose();
-// 		}
-// 		set(suboctoAtom, null);
-// 	};
-
-// 	const player = get(playerAtom);
-// 	if (!player?.current) return;
-
-// 	if (get(baked)?.id === value?.track.id) return;
-
-// 	set(baked, value?.track ?? null);
-// 	if (!value) {
-// 		removeHtmlSubtitle();
-// 		removeOctoSub();
-// 	} else if (value.track.codec === "vtt" || value.track.codec === "subrip") {
-// 		removeOctoSub();
-// 		if (player.current.textTracks.length > 0) player.current.textTracks[0].mode = "hidden";
-// 		const track: HTMLTrackElement = get(htmlTrackAtom) ?? document.createElement("track");
-// 		track.kind = "subtitles";
-// 		track.label = value.track.displayName;
-// 		if (value.track.language) track.srclang = value.track.language;
-// 		track.src = value.track.link! + ".vtt";
-// 		track.className = "subtitle_container";
-// 		track.default = true;
-// 		track.onload = () => {
-// 			if (player.current) player.current.textTracks[0].mode = "showing";
-// 		};
-// 		if (!get(htmlTrackAtom)) player.current.appendChild(track);
-// 		set(htmlTrackAtom, track);
-// 	} else if (value.track.codec === "ass") {
-// 		removeHtmlSubtitle();
-// 		removeOctoSub();
-// 		set(
-// 			suboctoAtom,
-// 			new SubtitleOctopus({
-// 				video: player.current,
-// 				subUrl: value.track.link!,
-// 				workerUrl: "/_next/static/chunks/subtitles-octopus-worker.js",
-// 				legacyWorkerUrl: "/_next/static/chunks/subtitles-octopus-worker-legacy.js",
-// 				fonts: value.fonts?.map((x) => x.link),
-// 				renderMode: "wasm-blend",
-// 			}),
-// 		);
-// 	}
-// });
-
-// const { useParam } = createParam<{ subtitle: string }>();
-
-// export const useSubtitleController = (
-// 	player: RefObject<HTMLVideoElement>,
-// 	subtitles?: Track[],
-// 	fonts?: Font[],
-// ) => {
-// 	const [subtitle] = useParam("subtitle");
-// 	const selectSubtitle = useSetAtom(subtitleAtom);
-
-// 	const newSub = subtitles?.find((x) => x.language === subtitle);
-// 	useEffect(() => {
-// 		if (newSub === undefined) return;
-// 		selectSubtitle({ track: newSub, fonts: fonts ?? [] });
-// 	}, [player.current?.src, newSub, fonts, selectSubtitle]);
-// };

@@ -26,8 +26,8 @@ declare module "libass-wasm" {
 		video?: HTMLVideoElement;
 
 		/**
-		 * The canvas to render the subtitles to. If none is given it will create a new canvas and insert
-		 * it as a sibling of the video element (only if the video element exists)
+		 * The canvas to render the subtitles to. If none is given it will create a new canvas and
+		 * insert it as a sibling of the video element (only if the video element exists)
 		 */
 		canvas?: HTMLCanvasElement;
 
@@ -72,6 +72,19 @@ declare module "libass-wasm" {
 		debug?: boolean;
 
 		/**
+		* The default font.
+		*/
+		fallbackFont?: string;
+
+		/**
+		 * A boolean, whether to load files in a lazy way via FS.createLazyFile(). Requires
+		 * Access-Control-Expose-Headers for Accept-Ranges, Content-Length, and Content-Encoding. If
+		 * encoding is compressed or length is not set, file will be fully fetched instead of just a
+		 * HEAD request.
+		 */
+		lazyFileLoading?: boolean;
+
+		/**
 		 * Function that's called when SubtitlesOctopus is ready
 		 */
 		onReady?: () => void;
@@ -86,7 +99,7 @@ declare module "libass-wasm" {
 		/**
 		 * Change the render mode
 		 *
-		 * @default wasm-blend
+		 * @default wasm
 		 */
 		renderMode?: "js-blend" | "wasm-blend" | "lossy";
 	}
@@ -127,8 +140,8 @@ declare module "libass-wasm" {
 		setTrack(content: string): void;
 
 		/**
-		 * This simply removes the subtitles. You can use {@link setTrackByUrl} or {@link setTrack} methods
-		 * to set a new subtitle file to be displayed.
+		 * This simply removes the subtitles. You can use {@link setTrackByUrl} or {@link setTrack}
+		 * methods to set a new subtitle file to be displayed.
 		 */
 		freeTrack(): void;
 

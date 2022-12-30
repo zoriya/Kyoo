@@ -21,7 +21,7 @@
 import { Font, Track } from "@kyoo/models";
 import { IconButton, tooltip, Menu, ts } from "@kyoo/primitives";
 import { useAtom, useSetAtom } from "jotai";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Platform, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import ClosedCaption from "@material-symbols/svg-400/rounded/closed_caption-fill.svg";
@@ -49,7 +49,7 @@ export const RightButtons = ({
 	const { t } = useTranslation();
 	const [isFullscreen, setFullscreen] = useAtom(fullscreenAtom);
 	const setSubAtom = useSetAtom(subtitleAtom);
-	const [selectedSubtitle, setSubtitle] = useParam("subtitle");
+	const [selectedSubtitle, setSubtitle] = useState<string | undefined>(undefined);
 
 	useEffect(() => {
 		const sub =

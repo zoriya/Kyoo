@@ -18,19 +18,27 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import { Font, Track } from "@kyoo/models";
+import { forwardRef, RefObject, useEffect, useImperativeHandle, useRef } from "react";
 import { VideoProperties } from "react-native-video";
+import { useAtomValue } from "jotai";
 import { useYoshiki } from "yoshiki";
-// import SubtitleOctopus from "libass-wasm";
+import SubtitleOctopus from "libass-wasm";
+import { subtitleAtom } from "./state";
 // import Hls from "hls.js";
 
 // let hls: Hls | null = null;
 
 // TODO fallback via links and hls.
-// TODO: Subtitle (vtt, srt and ass)
+
+declare module "react-native-video" {
+	interface VideoProperties {
+		fonts?: Font[];
+	}
+}
 
 const Video = forwardRef<{ seek: (value: number) => void }, VideoProperties>(function _Video(
-	{ source, paused, muted, volume, onBuffer, onLoad, onProgress, onError },
+	{ source, paused, muted, volume, onBuffer, onLoad, onProgress, onError, fonts },
 	forwaredRef,
 ) {
 	const ref = useRef<HTMLVideoElement>(null);
@@ -54,6 +62,10 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProperties>(fun
 		if (!ref.current || !volume) return;
 		ref.current.volume = Math.max(0, Math.min(volume, 100)) / 100;
 	}, [volume]);
+
+	// This should use the selectedTextTrack prop instead of the atom but this is so much simpler
+	const subtitle = useAtomValue(subtitleAtom);
+	useSubtitle(ref, subtitle, fonts);
 
 	return (
 		<video
@@ -88,3 +100,60 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProperties>(fun
 });
 
 export default Video;
+
+let htmlTrack: HTMLTrackElement | null;
+let subOcto: SubtitleOctopus | null;
+const useSubtitle = (player: RefObject<HTMLVideoElement>, value: Track | null, fonts?: Font[]) => {
+	useEffect(() => {
+		if (!player.current) return;
+
+		const removeHtmlSubtitle = () => {
+			if (htmlTrack) htmlTrack.remove();
+			htmlTrack = null;
+		};
+
+		const removeOctoSub = () => {
+			if (subOcto) {
+				subOcto.freeTrack();
+				subOcto.dispose();
+			}
+			subOcto = null;
+		};
+
+		if (!value) {
+			removeHtmlSubtitle();
+			removeOctoSub();
+		} else if (value.codec === "vtt" || value.codec === "subrip") {
+			removeOctoSub();
+			if (player.current.textTracks.length > 0) player.current.textTracks[0].mode = "hidden";
+			const track: HTMLTrackElement = htmlTrack ?? document.createElement("track");
+			track.kind = "subtitles";
+			track.label = value.displayName;
+			if (value.language) track.srclang = value.language;
+			track.src = value.link! + ".vtt";
+			track.className = "subtitle_container";
+			track.default = true;
+			track.onload = () => {
+				if (player.current) player.current.textTracks[0].mode = "showing";
+			};
+			if (!htmlTrack) {
+				player.current.appendChild(track);
+				htmlTrack = track;
+			}
+		} else if (value.codec === "ass") {
+			removeHtmlSubtitle();
+			removeOctoSub();
+			subOcto = new SubtitleOctopus({
+				video: player.current,
+				subUrl: value.link!,
+				workerUrl: "/_next/static/chunks/subtitles-octopus-worker.js",
+				legacyWorkerUrl: "/_next/static/chunks/subtitles-octopus-worker-legacy.js",
+				fallbackFont: "/default.woff2",
+				fonts: fonts?.map((x) => x.link),
+				// availableFonts: fonts ? Object.fromEntries(fonts.map((x) => [x.slug, x.link])) : undefined,
+				// lazyFileLoading: true,
+				renderMode: "wasm-blend",
+			});
+		}
+	}, [player, value, fonts]);
+};
