@@ -19,7 +19,7 @@
  */
 
 import { Track, WatchItem } from "@kyoo/models";
-import { atom, useAtomValue, useSetAtom } from "jotai";
+import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { memo, useEffect, useLayoutEffect, useRef } from "react";
 import NativeVideo, { VideoProperties as VideoProps } from "./video";
 import { bakedAtom } from "../jotai-utils";
@@ -75,12 +75,8 @@ export const Video = memo(function _Video({
 	setError: (error: string | undefined) => void;
 } & Partial<VideoProps>) {
 	const ref = useRef<NativeVideo | null>(null);
-	const isPlaying = useAtomValue(playAtom);
+	const [isPlaying, setPlay] = useAtom(playAtom);
 	const setLoad = useSetAtom(loadAtom);
-
-	useLayoutEffect(() => {
-		setLoad(true);
-	}, [setLoad]);
 
 	const publicProgress = useAtomValue(publicProgressAtom);
 	const setPrivateProgress = useSetAtom(privateProgressAtom);
@@ -89,6 +85,13 @@ export const Video = memo(function _Video({
 	useEffect(() => {
 		ref.current?.seek(publicProgress);
 	}, [publicProgress]);
+
+	useLayoutEffect(() => {
+		// Reset the state when a new video is loaded.
+		setLoad(true);
+		setPrivateProgress(0);
+		setPlay(true);
+	}, [links, setLoad, setPrivateProgress, setPlay]);
 
 	const volume = useAtomValue(volumeAtom);
 	const isMuted = useAtomValue(mutedAtom);
@@ -125,6 +128,7 @@ export const Video = memo(function _Video({
 			onLoad={(info) => {
 				setDuration(info.duration);
 			}}
+			onPlayPause={setPlay}
 			selectedTextTrack={
 				subtitle
 					? {
@@ -135,10 +139,6 @@ export const Video = memo(function _Video({
 			}
 			fonts={fonts}
 			// TODO: textTracks: external subtitles
-			// onError: () => {
-			// 	if (player?.current?.error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED)
-			// 		setPlayMode(PlayMode.Transmux);
-			// },
 		/>
 	);
 });

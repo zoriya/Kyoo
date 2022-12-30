@@ -28,15 +28,16 @@ import {
 	useRef,
 } from "react";
 import { VideoProps } from "react-native-video";
-import { atom, useAtom, useAtomValue } from "jotai";
+import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useYoshiki } from "yoshiki";
 import SubtitleOctopus from "libass-wasm";
-import { subtitleAtom } from "./state";
+import { playAtom, subtitleAtom } from "./state";
 import Hls from "hls.js";
 
 declare module "react-native-video" {
 	interface VideoProperties {
 		fonts?: Font[];
+		onPlayPause: (isPlaying: boolean) => void;
 	}
 	export type VideoProps = Omit<VideoProperties, "source"> & {
 		source: { uri?: string; transmux?: string };
@@ -52,7 +53,19 @@ const playModeAtom = atom<PlayMode>(PlayMode.Direct);
 let hls: Hls | null = null;
 
 const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function _Video(
-	{ source, paused, muted, volume, onBuffer, onLoad, onProgress, onError, fonts },
+	{
+		source,
+		paused,
+		muted,
+		volume,
+		onBuffer,
+		onLoad,
+		onProgress,
+		onError,
+		onEnd,
+		onPlayPause,
+		fonts,
+	},
 	forwaredRef,
 ) {
 	const ref = useRef<HTMLVideoElement>(null);
@@ -87,7 +100,6 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 	}, [source.uri, setPlayMode]);
 
 	useLayoutEffect(() => {
-		console.log("toto");
 		const src = playMode === PlayMode.Direct ? source?.uri : source?.transmux;
 
 		if (!ref?.current || !src) return;
@@ -105,9 +117,17 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 		}
 	}, [playMode, source?.uri, source?.transmux]);
 
+	const setPlay = useSetAtom(playAtom);
+	useEffect(() => {
+		if (!ref.current) return;
+		// Set play state to the player's value (if autoplay is denied)
+		setPlay(!ref.current.paused);
+	}, [setPlay]);
+
 	return (
 		<video
 			ref={ref}
+			src={source.uri}
 			muted={muted}
 			autoPlay={!paused}
 			onCanPlay={() => onBuffer?.call(null, { isBuffering: false })}
@@ -138,6 +158,9 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 					});
 				}
 			}}
+			onPlay={() => onPlayPause?.call(null, true)}
+			onPause={() => onPlayPause?.call(null, false)}
+			onEnded={onEnd}
 			{...css({ width: "100%", height: "100%" })}
 		/>
 	);
