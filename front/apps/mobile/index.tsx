@@ -18,4 +18,13 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import "expo-router/entry";
+import { registerRootComponent } from "expo";
+import { ExpoRoot } from "expo-router";
+
+export function App() {
+	// @ts-ignore
+	const ctx = require.context("./app");
+	return <ExpoRoot context={ctx} />;
+}
+
+registerRootComponent(App);
