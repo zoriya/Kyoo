@@ -34,7 +34,7 @@ import { ItemGrid } from "./grid";
 import { ItemList } from "./list";
 import { SortBy, SortOrd, Layout } from "./types";
 
-const itemMap = (
+export const itemMap = (
 	item: WithLoading<LibraryItem>,
 ): WithLoading<ComponentProps<typeof ItemGrid> & ComponentProps<typeof ItemList>> => {
 	if (item.isLoading) return item;

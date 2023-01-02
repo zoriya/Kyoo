@@ -32,6 +32,7 @@
 	},
 	"navbar": {
 		"home": "Home",
+		"search": "Search",
 		"login": "Login"
 	},
 	"player": {
@@ -45,5 +46,8 @@
 		"subtitles": "Subtitles",
 		"subtitle-none": "None",
 		"fullscreen": "Fullscreen"
+	},
+	"search": {
+		"empty": "No result found. Try a different query."
 	}
 }

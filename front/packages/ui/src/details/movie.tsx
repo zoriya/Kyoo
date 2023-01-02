@@ -21,7 +21,7 @@
 import { Movie, MovieP, QueryIdentifier, QueryPage } from "@kyoo/models";
 import { Platform, ScrollView } from "react-native";
 import { useYoshiki } from "yoshiki/native";
-import { TransparentLayout } from "../layout";
+import { DefaultLayout } from "../layout";
 import { Header } from "./header";
 
 const query = (slug: string): QueryIdentifier<Movie> => ({
@@ -48,4 +48,4 @@ MovieDetails.getFetchUrls = ({ slug }) => [
 	// ShowStaff.query(slug),
 ];
 
-MovieDetails.getLayout = TransparentLayout;
+MovieDetails.getLayout = { Layout: DefaultLayout, props: { transparent: true } };

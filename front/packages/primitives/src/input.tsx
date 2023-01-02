@@ -18,21 +18,39 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export { Header, Main, Nav, Footer, UL } from "@expo/html-elements";
-export * from "./text";
-export * from "./themes";
-export * from "./icons";
-export * from "./links";
-export * from "./avatar";
-export * from "./image";
-export * from "./skeleton";
-export * from "./tooltip";
-export * from "./container";
-export * from "./divider";
-export * from "./progress";
-export * from "./slider";
-export * from "./menu";
-export * from "./input";
+import { TextInput } from "react-native";
+import { px, Stylable, useYoshiki } from "yoshiki/native";
+import { ts } from "./utils";
 
-export * from "./animated";
-export * from "./utils";
+export const Input = ({
+	onChange,
+	value,
+	placeholder,
+	placeholderTextColor,
+	...props
+}: {
+	onChange: (value: string) => void;
+	value?: string;
+	placeholder?: string;
+	placeholderTextColor?: string;
+} & Stylable) => {
+	const { css, theme } = useYoshiki();
+
+	return (
+		<TextInput
+			value={value ?? ""}
+			onChangeText={onChange}
+			placeholder={placeholder}
+			placeholderTextColor={placeholderTextColor ?? theme.overlay1}
+			{...css(
+				{
+					borderColor: (theme) => theme.accent,
+					borderRadius: ts(1),
+					borderWidth: px(1),
+					padding: ts(0.5),
+				},
+				props,
+			)}
+		/>
+	);
+};

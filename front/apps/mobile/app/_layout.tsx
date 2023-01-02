@@ -21,7 +21,7 @@
 import { Stack } from "expo-router";
 import { ThemeSelector } from "@kyoo/primitives";
 import { useTheme } from "yoshiki/native";
-import { LoginAvatar, NavbarTitle } from "@kyoo/ui";
+import { NavbarRight, NavbarTitle } from "@kyoo/ui";
 import { useState } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { createQueryClient } from "@kyoo/models";
@@ -54,7 +54,7 @@ const ThemedStack = () => {
 		<Stack
 			screenOptions={{
 				headerTitle: () => <NavbarTitle />,
-				headerRight: () => <LoginAvatar />,
+				headerRight: () => <NavbarRight />,
 				headerStyle: {
 					backgroundColor: theme.appbar,
 				},
