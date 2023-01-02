@@ -19,6 +19,6 @@
  */
 
 import { BrowsePage } from "@kyoo/ui";
-import { withRoute } from "~/utils/router";
+import { withRoute } from "~/router";
 
 export default withRoute(BrowsePage);

@@ -39,11 +39,7 @@ import { withTranslations } from "../i18n";
 const ThemeSelector = ({ children }: { children?: ReactNode | ReactNode[] }) => {
 	// TODO: Handle user selected mode (light, dark, auto)
 	// TODO: Hande theme change.
-	return (
-		<MTheme theme={createTheme()}>
-			<KThemeSelector>{children}</KThemeSelector>
-		</MTheme>
-	);
+	return <KThemeSelector>{children}</KThemeSelector>;
 };
 
 const GlobalCssTheme = () => {
