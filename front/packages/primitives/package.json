@@ -4,6 +4,7 @@
 	"types": "src/index.ts",
 	"packageManager": "yarn@3.2.4",
 	"devDependencies": {
+		"@gorhom/portal": "^1.0.14",
 		"@types/react": "^18.0.25",
 		"typescript": "^4.9.3"
 	},
