@@ -20,7 +20,6 @@
 
 import "../polyfill";
 
-import { createTheme, ThemeProvider as MTheme } from "@mui/material";
 import { Hydrate, QueryClientProvider } from "@tanstack/react-query";
 import { ReactNode, useState } from "react";
 import NextApp, { AppContext, type AppProps } from "next/app";
@@ -92,7 +91,9 @@ const GlobalCssTheme = () => {
 const App = ({ Component, pageProps }: AppProps) => {
 	const [queryClient] = useState(() => createQueryClient());
 	const { queryState, ...props } = superjson.deserialize<any>(pageProps ?? { json: {} });
-	const Layout = (Component as QueryPage).getLayout ?? (({ page }) => page);
+	const layoutInfo = (Component as QueryPage).getLayout ?? (({ page }) => page);
+	const { Layout, props: layoutProps } =
+		typeof layoutInfo === "function" ? { Layout: layoutInfo, props: {} } : layoutInfo;
 
 	useMobileHover();
 
@@ -105,7 +106,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 				<Hydrate state={queryState}>
 					<ThemeSelector>
 						<GlobalCssTheme />
-						<Layout page={<Component {...props} />} />
+						<Layout page={<Component {...props} />} {...layoutProps} />
 					</ThemeSelector>
 				</Hydrate>
 			</QueryClientProvider>

@@ -18,12 +18,13 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ComponentType, ReactElement, ReactNode } from "react";
+import { ComponentProps, ComponentType, ReactElement } from "react";
 import {
 	dehydrate,
 	QueryClient,
 	QueryFunctionContext,
 	useInfiniteQuery,
+	UseInfiniteQueryOptions,
 	useQuery,
 } from "@tanstack/react-query";
 import { z } from "zod";
@@ -40,8 +41,8 @@ const queryFn = async <Data,>(
 			? process.env.PUBLIC_BACK_URL
 			: typeof window === "undefined"
 			? process.env.KYOO_URL ?? "http://localhost:5000"
-				// TODO remove the hardcoded fallback. This is just for testing purposes
-			: "/api") ?? "https://beta.sdg.moe";
+			: // TODO remove the hardcoded fallback. This is just for testing purposes
+			  "/api") ?? "https://beta.sdg.moe";
 	if (!kyooUrl) console.error("Kyoo's url is not defined.");
 
 	let resp;
@@ -105,11 +106,17 @@ export type QueryIdentifier<T = unknown> = {
 	path: (string | undefined)[];
 	params?: { [query: string]: boolean | number | string | string[] | undefined };
 	infinite?: boolean;
+	/**
+	 * A custom get next function if the infinite query is not a page.
+	 */
+	getNext?: (item: unknown) => string | undefined;
 };
 
 export type QueryPage<Props = {}> = ComponentType<Props> & {
 	getFetchUrls?: (route: { [key: string]: string }) => QueryIdentifier[];
-	getLayout?: ({ page }: { page: ReactElement }) => JSX.Element;
+	getLayout?:
+		| ComponentType<{ page: ReactElement }>
+		| { Layout: ComponentType<{ page: ReactElement }>; props: object };
 };
 
 const toQueryKey = <Data,>(query: QueryIdentifier<Data>) => {
@@ -134,7 +141,21 @@ export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 	});
 };
 
-export const useInfiniteFetch = <Data,>(query: QueryIdentifier<Data>) => {
+export const useInfiniteFetch = <Data,>(
+	query: QueryIdentifier<Data>,
+	options?: Partial<UseInfiniteQueryOptions<Data[], KyooErrors>>,
+) => {
+	if (query.getNext) {
+		// eslint-disable-next-line react-hooks/rules-of-hooks
+		const ret = useInfiniteQuery<Data[], KyooErrors>({
+			queryKey: toQueryKey(query),
+			queryFn: (ctx) => queryFn(z.array(query.parser), ctx),
+			getNextPageParam: query.getNext,
+			...options,
+		});
+		return { ...ret, items: ret.data?.pages.flatMap((x) => x) };
+	}
+	// eslint-disable-next-line react-hooks/rules-of-hooks
 	const ret = useInfiniteQuery<Page<Data>, KyooErrors>({
 		queryKey: toQueryKey(query),
 		queryFn: (ctx) => queryFn(Paged(query.parser), ctx),

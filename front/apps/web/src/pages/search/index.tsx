@@ -18,21 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export { Header, Main, Nav, Footer, UL } from "@expo/html-elements";
-export * from "./text";
-export * from "./themes";
-export * from "./icons";
-export * from "./links";
-export * from "./avatar";
-export * from "./image";
-export * from "./skeleton";
-export * from "./tooltip";
-export * from "./container";
-export * from "./divider";
-export * from "./progress";
-export * from "./slider";
-export * from "./menu";
-export * from "./input";
+import { SearchPage } from "@kyoo/ui";
+import { withRoute } from "~/router";
 
-export * from "./animated";
-export * from "./utils";
+export default withRoute(SearchPage);

@@ -20,7 +20,7 @@
 
 import { Page, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
 import { HR } from "@kyoo/primitives";
-import { ComponentType, Fragment, ReactElement, useRef } from "react";
+import { ComponentType, Fragment, ReactElement, useMemo, useRef } from "react";
 import { Stylable, useYoshiki } from "yoshiki";
 import { EmptyView, ErrorView, Layout, WithLoading } from "./fetch";
 
@@ -88,6 +88,7 @@ const InfiniteScroll = ({
 
 export const InfiniteFetch = <Data,>({
 	query,
+	suspense = false,
 	placeholderCount = 15,
 	children,
 	layout,
@@ -98,6 +99,7 @@ export const InfiniteFetch = <Data,>({
 	...props
 }: {
 	query: QueryIdentifier<Data>;
+	suspense?: boolean;
 	placeholderCount?: number;
 	layout: Layout;
 	horizontal?: boolean;
@@ -111,7 +113,10 @@ export const InfiniteFetch = <Data,>({
 }): JSX.Element | null => {
 	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
 
-	const { items, error, fetchNextPage, hasNextPage, isFetching } = useInfiniteFetch(query);
+	const { items, error, fetchNextPage, hasNextPage, isFetching } = useInfiniteFetch(query, {
+		suspense: suspense,
+		useErrorBoundary: false,
+	});
 	const grid = layout.numColumns !== 1;
 
 	if (error) return <ErrorView error={error} />;

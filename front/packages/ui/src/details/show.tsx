@@ -19,9 +19,9 @@
  */
 
 import { QueryIdentifier, QueryPage, Show, ShowP } from "@kyoo/models";
-import { Platform, ScrollView, View, ViewProps } from "react-native";
+import { Platform, View, ViewProps } from "react-native";
 import { percent, useYoshiki, vh } from "yoshiki/native";
-import { TransparentLayout } from "../layout";
+import { DefaultLayout } from "../layout";
 import { EpisodeList, SeasonTab } from "./season";
 import { Header } from "./header";
 import Svg, { Path, SvgProps } from "react-native-svg";
@@ -89,7 +89,7 @@ export const ShowDetails: QueryPage<{ slug: string; season: string }> = ({ slug,
 ShowDetails.getFetchUrls = ({ slug, season = 1 }) => [
 	query(slug),
 	// ShowStaff.query(slug),
-	// EpisodeGrid.query(slug, season),
+	EpisodeList.query(slug, season),
 ];
 
-ShowDetails.getLayout = TransparentLayout;
+ShowDetails.getLayout = { Layout: DefaultLayout, props: { transparent: true }};

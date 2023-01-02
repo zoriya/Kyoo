@@ -27,6 +27,7 @@ import { EmptyView, ErrorView, Layout, WithLoading } from "./fetch";
 export const InfiniteFetch = <Data,>({
 	query,
 	placeholderCount = 15,
+	suspense = false,
 	horizontal = false,
 	children,
 	layout,
@@ -44,14 +45,20 @@ export const InfiniteFetch = <Data,>({
 		i: number,
 	) => ReactElement | null;
 	empty?: string | JSX.Element;
+	suspense?: boolean;
 	divider?: boolean | ComponentType;
 	Header?: ComponentType<{ children: JSX.Element }>;
 }): JSX.Element | null => {
 	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
 
 	const { numColumns, size } = useBreakpointMap(layout);
-	const { items, error, fetchNextPage, hasNextPage, refetch, isRefetching } =
-		useInfiniteFetch(query);
+	const { items, error, fetchNextPage, hasNextPage, refetch, isRefetching } = useInfiniteFetch(
+		query,
+		{
+			suspense: suspense,
+			useErrorBoundary: false,
+		},
+	);
 
 	if (error) return <ErrorView error={error} />;
 	if (empty && items && items.length === 0) {

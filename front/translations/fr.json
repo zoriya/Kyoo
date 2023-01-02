@@ -32,6 +32,7 @@
 	},
 	"navbar": {
 		"home": "Accueil",
+		"search": "Rechercher",
 		"login": "Connexion"
 	},
 	"player": {
@@ -45,5 +46,8 @@
 		"subtitles": "Sous titres",
 		"subtitle-none": "Aucun",
 		"fullscreen": "Plein-écran"
+	},
+	"search": {
+		"empty": "Aucun résultat trouvé. Essayer avec une autre recherche."
 	}
 }
