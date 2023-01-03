@@ -30,7 +30,7 @@ import {
 	ts,
 	Link,
 } from "@kyoo/primitives";
-import { Platform, View } from "react-native";
+import { Platform, TextInput, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { createParam } from "solito";
 import { useRouter } from "solito/router";
@@ -39,7 +39,7 @@ import Menu from "@material-symbols/svg-400/rounded/menu-fill.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import { Fetch } from "../fetch";
 import { KyooLongLogo } from "./icon";
-import { useState } from "react";
+import { forwardRef, useRef, useState } from "react";
 
 export const NavbarTitle = (props: Stylable) => {
 	const { t } = useTranslation();
@@ -53,19 +53,21 @@ export const NavbarTitle = (props: Stylable) => {
 
 const { useParam } = createParam<{ q?: string }>();
 
-const SearchBar = () => {
+const SearchBar = forwardRef<
+	TextInput,
+	{ onBlur?: (value: string | undefined) => void } & Stylable
+>(function _SearchBar({ onBlur, ...props }, ref) {
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
 	const { push, replace, back } = useRouter();
-	// eslint-disable-next-line react-hooks/rules-of-hooks
-	// const [query, setQuery] = Platform.OS === "web" ? useState("") : useParam("q");
-	const [query, setQuery] = useParam("q");
+	const [query] = useParam("q");
 
 	return (
 		<Input
+			ref={ref}
 			value={query}
+			onBlur={onBlur}
 			onChange={(q) => {
-				setQuery(q);
 				if (Platform.OS === "web") {
 					const action = window.location.pathname.startsWith("/search") ? replace : push;
 					if (q) action(`/search?q=${q}`, undefined, { shallow: true });
@@ -75,27 +77,59 @@ const SearchBar = () => {
 			placeholder={t("navbar.search")}
 			placeholderTextColor={theme.light.overlay0}
 			{...tooltip(t("navbar.search"))}
-			{...css({ borderColor: (theme) => theme.colors.white })}
+			{...css({ borderColor: (theme) => theme.colors.white }, props)}
 		/>
 	);
-};
+});
 
-const Right = () => {
-	const theme = useTheme();
-	const { css } = useYoshiki();
+export const NavbarProfile = () => {
+	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
 
 	return (
-		<>
-			{Platform.OS === "web" ? (
-				<SearchBar />
-			) : (
-				<IconButton icon={Search} as={Link} href="/search" {...tooltip("navbar.search")} />
+		<Link
+			href="/auth/login"
+			{...tooltip(t("navbar.login"))}
+			{...css({ marginLeft: ts(1), justifyContent: "center" })}
+		>
+			<Avatar alt={t("navbar.login")} size={30} color={theme.colors.white} />
+		</Link>
+	);
+};
+export const NavbarRight = () => {
+	const { css } = useYoshiki();
+	const { t } = useTranslation();
+	const [isSearching, setSearch] = useState(false);
+	const ref = useRef<TextInput | null>(null);
+	const [query] = useParam("q");
+	const searchExpanded = isSearching || query;
+
+	return (
+		<View {...css({ flexDirection: "row" })}>
+			<SearchBar
+				ref={ref}
+				onBlur={(q) => {
+					if (!q) setSearch(false);
+				}}
+				{...css(
+					Platform.OS === "web" && {
+						display: { xs: searchExpanded ? "flex" : "none", md: "flex" },
+					},
+				)}
+			/>
+			{!searchExpanded && (
+				<IconButton
+					icon={Search}
+					onPress={() => {
+						setSearch(true);
+						setTimeout(() => ref.current?.focus(), 0);
+					}}
+					{...tooltip(t("navbar.search"))}
+					{...css(Platform.OS === "web" && { display: { xs: "flex", md: "none" } })}
+				/>
 			)}
-			<A href="/auth/login" {...tooltip(t("navbar.login"))} {...css({ marginLeft: ts(1) })}>
-				<Avatar alt={t("navbar.login")} size={30} color={theme.colors.white} />
-			</A>
-		</>
+			<NavbarProfile />
+		</View>
 	);
 };
 
@@ -163,7 +197,7 @@ export const Navbar = (props: Stylable) => {
 					}
 				</Fetch>
 			</View>
-			<Right />
+			<NavbarRight />
 		</Header>
 	);
 };
