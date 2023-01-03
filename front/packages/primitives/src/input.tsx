@@ -18,30 +18,31 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { forwardRef } from "react";
 import { TextInput } from "react-native";
 import { px, Stylable, useYoshiki } from "yoshiki/native";
 import { ts } from "./utils";
 
-export const Input = ({
-	onChange,
-	value,
-	placeholder,
-	placeholderTextColor,
-	...props
-}: {
-	onChange: (value: string) => void;
-	value?: string;
-	placeholder?: string;
-	placeholderTextColor?: string;
-} & Stylable) => {
+export const Input = forwardRef<
+	TextInput,
+	{
+		onChange: (value: string) => void;
+		value?: string;
+		placeholder?: string;
+		placeholderTextColor?: string;
+		onBlur?: (value: string | undefined) => void;
+	} & Stylable
+>(function _Input({ onChange, value, placeholder, placeholderTextColor, onBlur, ...props }, ref) {
 	const { css, theme } = useYoshiki();
 
 	return (
 		<TextInput
+			ref={ref}
 			value={value ?? ""}
 			onChangeText={onChange}
 			placeholder={placeholder}
 			placeholderTextColor={placeholderTextColor ?? theme.overlay1}
+			onBlur={() => onBlur?.call(null, value)}
 			{...css(
 				{
 					borderColor: (theme) => theme.accent,
@@ -53,4 +54,4 @@ export const Input = ({
 			)}
 		/>
 	);
-};
+});
