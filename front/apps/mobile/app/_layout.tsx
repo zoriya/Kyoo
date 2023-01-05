@@ -18,17 +18,17 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Stack } from "expo-router";
-import { ThemeSelector } from "@kyoo/primitives";
-import { useTheme } from "yoshiki/native";
-import { NavbarRight, NavbarTitle } from "@kyoo/ui";
-import { useState } from "react";
-import { QueryClientProvider } from "@tanstack/react-query";
-import { createQueryClient } from "@kyoo/models";
-import i18next from "i18next";
-import { initReactI18next } from "react-i18next";
-import { getLocales } from "expo-localization";
 import { PortalProvider } from "@gorhom/portal";
+import { ThemeSelector } from "@kyoo/primitives";
+import { NavbarProfile, NavbarRight, NavbarTitle } from "@kyoo/ui";
+import { createQueryClient } from "@kyoo/models";
+import { QueryClientProvider } from "@tanstack/react-query";
+import i18next from "i18next";
+import { Stack } from "expo-router";
+import { getLocales } from "expo-localization";
+import { useState } from "react";
+import { initReactI18next, useTranslation } from "react-i18next";
+import { useTheme } from "yoshiki/native";
 import "intl-pluralrules";
 
 // TODO: use a backend to load jsons.

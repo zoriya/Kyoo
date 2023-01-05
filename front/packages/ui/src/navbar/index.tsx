@@ -102,28 +102,33 @@ export const NavbarRight = () => {
 	const [isSearching, setSearch] = useState(false);
 	const ref = useRef<TextInput | null>(null);
 	const [query] = useParam("q");
+	const { push } = useRouter();
 	const searchExpanded = isSearching || query;
 
 	return (
 		<View {...css({ flexDirection: "row" })}>
-			<SearchBar
-				ref={ref}
-				onBlur={(q) => {
-					if (!q) setSearch(false);
-				}}
-				{...css(
-					Platform.OS === "web" && {
+			{Platform.OS === "web" && (
+				<SearchBar
+					ref={ref}
+					onBlur={(q) => {
+						if (!q) setSearch(false);
+					}}
+					{...css({
 						display: { xs: searchExpanded ? "flex" : "none", md: "flex" },
-					},
-				)}
-			/>
+					})}
+				/>
+			)}
 			{!searchExpanded && (
 				<IconButton
 					icon={Search}
-					onPress={() => {
-						setSearch(true);
-						setTimeout(() => ref.current?.focus(), 0);
-					}}
+					onPress={
+						Platform.OS === "web"
+							? () => {
+									setSearch(true);
+									setTimeout(() => ref.current?.focus(), 0);
+							  }
+							: () => push("/search")
+					}
 					{...tooltip(t("navbar.search"))}
 					{...css(Platform.OS === "web" && { display: { xs: "flex", md: "none" } })}
 				/>

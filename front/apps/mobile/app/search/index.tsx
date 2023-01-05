@@ -19,6 +19,41 @@
  */
 
 import { SearchPage } from "@kyoo/ui";
-import { withRoute } from "../../utils";
+import { Stack } from "expo-router";
+import { useTranslation } from "react-i18next";
+import { createParam } from "solito";
+import { useRouter } from "solito/router";
+import { useTheme } from "yoshiki/native";
 
-export default withRoute(SearchPage);
+const { useParam } = createParam<{ q?: string }>();
+
+const Search = ({ route }: { route: any }) => {
+	const theme = useTheme();
+	const { back } = useRouter();
+	const { t } = useTranslation();
+	const [query, setQuery] = useParam("q");
+
+	return (
+		<>
+			<Stack.Screen
+				options={{
+					headerTitle: () => null,
+					// TODO: this shouuld not be null but since the header right is on the left of the search bar. shrug
+					headerRight: () => null,
+					headerSearchBarOptions: {
+						autoFocus: true,
+						headerIconColor: theme.colors.white,
+						hintTextColor: theme.light.overlay1,
+						textColor: theme.paragraph,
+						placeholder: t("navbar.search")!,
+						onClose: () => back(),
+						onChangeText: (e) => setQuery(e.nativeEvent.text),
+					},
+				}}
+			/>
+			<SearchPage {...route.params} />
+		</>
+	);
+};
+
+export default Search;
