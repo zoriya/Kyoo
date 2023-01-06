@@ -38,6 +38,7 @@ type Mode = {
 	overlay0: Property.Color;
 	overlay1: Property.Color;
 	link: Property.Color;
+	contrast: Property.Color;
 	variant: Variant;
 	colors: {
 		red: Property.Color;
@@ -67,26 +68,17 @@ declare module "yoshiki" {
 		font: FontList;
 	}
 }
-declare module "yoshiki/native" {
-	export interface Theme extends Mode, Variant {
-		light: Mode & Variant;
-		dark: Mode & Variant;
-		user: Mode & Variant;
-		alternate: Mode & Variant;
-		font: FontList;
-	}
-}
 
 export type { Theme } from "yoshiki";
 export type ThemeBuilder = {
-	light: Mode & { default: Variant };
-	dark: Mode & { default: Variant };
+	light: Omit<Mode, "contrast"> & { default: Variant };
+	dark: Omit<Mode, "contrast"> & { default: Variant };
 };
 
 const selectMode = (theme: ThemeBuilder & { font: FontList }, mode: "light" | "dark"): Theme => {
 	const { light: lightBuilder, dark: darkBuilder, ...options } = theme;
-	const light = { ...lightBuilder, ...lightBuilder.default };
-	const dark = { ...darkBuilder, ...darkBuilder.default };
+	const light = { ...lightBuilder, ...lightBuilder.default, contrast: lightBuilder.colors.black };
+	const dark = { ...darkBuilder, ...darkBuilder.default, contrast: darkBuilder.colors.white };
 	const value = mode === "light" ? light : dark;
 	const alternate = mode === "light" ? dark : light;
 	return {
