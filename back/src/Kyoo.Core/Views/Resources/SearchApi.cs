@@ -138,7 +138,6 @@ namespace Kyoo.Core.Api
 			return _libraryManager.Search<LibraryItem>(query);
 		}
 
-
 		/// <summary>
 		/// Search episodes
 		/// </summary>
