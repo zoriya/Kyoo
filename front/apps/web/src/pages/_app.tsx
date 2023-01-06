@@ -96,8 +96,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 			</Head>
 			<QueryClientProvider client={queryClient}>
 				<Hydrate state={queryState}>
-					{/* TODO: Add theme support */}
-					<ThemeSelector theme="light" font={{ normal: "inherit" }}>
+					<ThemeSelector theme="auto" font={{ normal: "inherit" }}>
 						<GlobalCssTheme />
 						<Layout page={<Component {...props} />} {...layoutProps} />
 					</ThemeSelector>

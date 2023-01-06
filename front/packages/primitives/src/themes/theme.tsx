@@ -20,11 +20,12 @@
 
 import { ReactNode } from "react";
 import { Property } from "csstype";
-import { Theme, ThemeProvider } from "yoshiki";
+import { Theme, ThemeProvider, useAutomaticTheme } from "yoshiki";
 import { useTheme, useYoshiki } from "yoshiki/native";
 import "yoshiki";
 import "yoshiki/native";
 import { catppuccin } from "./catppuccin";
+import { Platform } from "react-native";
 
 type FontList = Partial<
 	Record<
@@ -75,18 +76,36 @@ export type ThemeBuilder = {
 	dark: Omit<Mode, "contrast"> & { default: Variant };
 };
 
-const selectMode = (theme: ThemeBuilder & { font: FontList }, mode: "light" | "dark"): Theme => {
+const selectMode = (
+	theme: ThemeBuilder & { font: FontList },
+	mode: "light" | "dark" | "auto",
+): Theme => {
 	const { light: lightBuilder, dark: darkBuilder, ...options } = theme;
 	const light = { ...lightBuilder, ...lightBuilder.default, contrast: lightBuilder.colors.black };
 	const dark = { ...darkBuilder, ...darkBuilder.default, contrast: darkBuilder.colors.white };
-	const value = mode === "light" ? light : dark;
-	const alternate = mode === "light" ? dark : light;
+	if (Platform.OS !== "web" || mode !== "auto") {
+		const value = mode === "light" ? light : dark;
+		const alternate = mode === "light" ? dark : light;
+		return {
+			...options,
+			...value,
+			light,
+			dark,
+			user: value,
+			alternate,
+		};
+	}
+
+	// eslint-disable-next-line react-hooks/rules-of-hooks
+	const auto = useAutomaticTheme({ light, dark });
+	// eslint-disable-next-line react-hooks/rules-of-hooks
+	const alternate = useAutomaticTheme({ dark: light, light: dark });
 	return {
 		...options,
-		...value,
+		...auto,
 		light,
 		dark,
-		user: value,
+		user: auto,
 		alternate,
 	};
 };
@@ -112,12 +131,12 @@ export const ThemeSelector = ({
 	font,
 }: {
 	children: ReactNode;
-	theme: "light" | "dark";
+	theme: "light" | "dark" | "auto";
 	font: FontList;
 }) => {
-	return (
-		<ThemeProvider theme={selectMode({ ...catppuccin, font }, theme)}>{children}</ThemeProvider>
-	);
+	const newTheme = selectMode({ ...catppuccin, font }, theme);
+
+	return <ThemeProvider theme={newTheme}>{children}</ThemeProvider>;
 };
 
 type YoshikiFunc<T> = (props: ReturnType<typeof useYoshiki>) => T;

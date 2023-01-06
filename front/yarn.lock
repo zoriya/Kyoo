@@ -10200,7 +10200,7 @@ __metadata:
     react-native-svg-transformer: ^1.0.0
     react-native-video: alpha
     typescript: ^4.6.3
-    yoshiki: 0.3.2
+    yoshiki: 0.3.3
   languageName: unknown
   linkType: soft
 
@@ -10589,6 +10589,13 @@ __metadata:
     define-property: ^0.2.5
     kind-of: ^3.0.3
   checksum: a9e35f07e3a2c882a7e979090360d1a20ab51d1fa19dfdac3aa8873b328a7c4c7683946ee97c824ae40079d848d6740a3788fa14f2185155dab7ed970a72c783
+  languageName: node
+  linkType: hard
+
+"object-hash@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "object-hash@npm:3.0.0"
+  checksum: 80b4904bb3857c52cc1bfd0b52c0352532ca12ed3b8a6ff06a90cd209dfda1b95cee059a7625eb9da29537027f68ac4619363491eedb2f5d3dddbba97494fd6c
   languageName: node
   linkType: hard
 
@@ -13925,7 +13932,7 @@ __metadata:
     superjson: ^1.11.0
     typescript: ^4.9.3
     webpack: ^5.75.0
-    yoshiki: 0.3.2
+    yoshiki: 0.3.3
     zod: ^3.19.1
   languageName: unknown
   linkType: soft
@@ -14271,14 +14278,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yoshiki@npm:0.3.2":
-  version: 0.3.2
-  resolution: "yoshiki@npm:0.3.2"
+"yoshiki@npm:0.3.3":
+  version: 0.3.3
+  resolution: "yoshiki@npm:0.3.3"
   dependencies:
     "@types/node": 18.x.x
     "@types/react": 18.x.x
     "@types/react-native": ">= 0.70.0"
     inline-style-prefixer: ^7.0.0
+    object-hash: ^3.0.0
   peerDependencies:
     react: "*"
     react-native: "*"
@@ -14288,7 +14296,7 @@ __metadata:
       optional: true
     react-native-web:
       optional: true
-  checksum: a723473e5593e9871d4903cfc9186240c6745cd97ca45ba9f1f0233e7717afefb908c08a0a6e2dc37ac2bbb0c9df269364767db6c885a8f2e19748d295c42a57
+  checksum: 6358f53d28ba419a8783cd5cf785eb7c64878504815ed4c6794fbf81ed86bca83560a7677e5ecfe568f37c0ff714bf07f3a33c11ce6d869f6d758e800bfa58ba
   languageName: node
   linkType: hard
 

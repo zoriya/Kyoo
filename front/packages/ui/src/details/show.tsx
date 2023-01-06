@@ -57,7 +57,16 @@ export const ShowDetails: QueryPage<{ slug: string; season: string }> = ({ slug,
 			{...css(
 				[
 					{ bg: (theme) => theme.background },
-					Platform.OS === "web" && { flexGrow: 1, flexShrink: 1, overflow: "overlay" as any },
+					Platform.OS === "web" && {
+						flexGrow: 1,
+						flexShrink: 1,
+						// @ts-ignore Web only property
+						overflow: "auto" as any,
+						// @ts-ignore Web only property
+						overflowX: "hidden",
+						// @ts-ignore Web only property
+						overflowY: "overlay",
+					},
 				],
 				props,
 			)}
@@ -92,4 +101,4 @@ ShowDetails.getFetchUrls = ({ slug, season = 1 }) => [
 	EpisodeList.query(slug, season),
 ];
 
-ShowDetails.getLayout = { Layout: DefaultLayout, props: { transparent: true }};
+ShowDetails.getLayout = { Layout: DefaultLayout, props: { transparent: true } };
