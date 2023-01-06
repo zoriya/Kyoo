@@ -45,8 +45,7 @@ export const A = ({
 			href={href}
 			textProps={css(
 				{
-					// TODO: use a real font here.
-					// fontFamily: theme.fonts.paragraph,
+					fontFamily: theme.font.normal,
 					color: theme.link,
 				},
 				{

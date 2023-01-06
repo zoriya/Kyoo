@@ -21,7 +21,6 @@
 const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 const DefinePlugin = require("webpack").DefinePlugin;
-const withFont = require("next-fonts");
 
 const suboctopus = path.dirname(require.resolve("libass-wasm"));
 
@@ -131,4 +130,4 @@ if (process.env.NODE_ENV !== "production") {
 	];
 }
 
-module.exports = withFont(nextConfig);
+module.exports = nextConfig;

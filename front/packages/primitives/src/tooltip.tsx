@@ -59,7 +59,6 @@ export const WebTooltip = ({ theme }: { theme: Theme }) => {
 				font-size: 0.8rem;
 				color: ${theme.colors.white};
 				background-color: ${background};
-				font-family: ${theme.fonts.paragraph};
 				text-align: center;
 
 				opacity: 0;

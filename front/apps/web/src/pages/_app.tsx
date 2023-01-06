@@ -21,29 +21,20 @@
 import "../polyfill";
 
 import { Hydrate, QueryClientProvider } from "@tanstack/react-query";
-import { ReactNode, useState } from "react";
-import NextApp, { AppContext, type AppProps } from "next/app";
-import {
-	HiddenIfNoJs,
-	SkeletonCss,
-	ThemeSelector as KThemeSelector,
-	WebTooltip,
-} from "@kyoo/primitives";
+import { HiddenIfNoJs, SkeletonCss, ThemeSelector, WebTooltip } from "@kyoo/primitives";
 import { createQueryClient, fetchQuery, QueryIdentifier, QueryPage } from "@kyoo/models";
+import { useState } from "react";
+import NextApp, { AppContext, type AppProps } from "next/app";
+import { Poppins } from "@next/font/google";
 import { useTheme, useMobileHover } from "yoshiki/web";
 import superjson from "superjson";
 import Head from "next/head";
 import { withTranslations } from "../i18n";
 
-const ThemeSelector = ({ children }: { children?: ReactNode | ReactNode[] }) => {
-	// TODO: Handle user selected mode (light, dark, auto)
-	// TODO: Hande theme change.
-	return <KThemeSelector>{children}</KThemeSelector>;
-};
+const font = Poppins({ weight: ["300", "400", "900"], subsets: ["latin"], display: "swap" });
 
 const GlobalCssTheme = () => {
 	const theme = useTheme();
-
 	return (
 		<>
 			<style jsx global>{`
@@ -51,6 +42,7 @@ const GlobalCssTheme = () => {
 					margin: 0px;
 					padding: 0px;
 					background-color: ${theme.background};
+					font-family: ${font.style.fontFamily};
 				}
 
 				*::-webkit-scrollbar {
@@ -104,7 +96,8 @@ const App = ({ Component, pageProps }: AppProps) => {
 			</Head>
 			<QueryClientProvider client={queryClient}>
 				<Hydrate state={queryState}>
-					<ThemeSelector>
+					{/* TODO: Add theme support */}
+					<ThemeSelector theme="light" font={{ normal: "inherit" }}>
 						<GlobalCssTheme />
 						<Layout page={<Component {...props} />} {...layoutProps} />
 					</ThemeSelector>
