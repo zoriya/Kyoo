@@ -22,10 +22,9 @@ import { Platform } from "react-native";
 import { z } from "zod";
 
 export const imageFn = (url: string) =>
-	// TODO remove the hardcodded fallback
 	Platform.OS === "web"
 		? `/api/${url}`
-		: (process.env.PUBLIC_BACK_URL ?? "https://beta.sdg.moe") + url;
+		: process.env.PUBLIC_BACK_URL + url;
 
 export const ImagesP = z.object({
 	/**

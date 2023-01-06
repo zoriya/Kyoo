@@ -33,7 +33,7 @@ import {
 	Poppins_400Regular,
 	Poppins_900Black,
 } from "@expo-google-fonts/poppins";
-import { useCallback, useState } from "react";
+import { useCallback, useLayoutEffect, useState } from "react";
 import { useColorScheme } from "react-native";
 import { initReactI18next } from "react-i18next";
 import { useTheme } from "yoshiki/native";
@@ -81,6 +81,11 @@ export default function Root() {
 	const [queryClient] = useState(() => createQueryClient());
 	const theme = useColorScheme();
 	const [fontsLoaded] = useFonts({ Poppins_300Light, Poppins_400Regular, Poppins_900Black });
+
+	useLayoutEffect(() => {
+		// This does not seems to work on the global scope so why not.
+		SplashScreen.preventAutoHideAsync();
+	})
 
 	const onLayout = useCallback(async () => {
 		if (fontsLoaded) {
