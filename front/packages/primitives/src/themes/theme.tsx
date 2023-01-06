@@ -26,12 +26,12 @@ import "yoshiki";
 import "yoshiki/native";
 import { catppuccin } from "./catppuccin";
 
-type ThemeSettings = {
-	fonts: {
-		heading: string;
-		paragraph: string;
-	};
-};
+type FontList = Partial<
+	Record<
+		"normal" | "bold" | "100" | "200" | "300" | "400" | "500" | "600" | "700" | "800" | "900",
+		string
+	>
+>;
 
 type Mode = {
 	appbar: Property.Color;
@@ -59,29 +59,31 @@ type Variant = {
 };
 
 declare module "yoshiki" {
-	export interface Theme extends ThemeSettings, Mode, Variant {
+	export interface Theme extends Mode, Variant {
 		light: Mode & Variant;
 		dark: Mode & Variant;
 		user: Mode & Variant;
 		alternate: Mode & Variant;
+		font: FontList;
 	}
 }
 declare module "yoshiki/native" {
-	export interface Theme extends ThemeSettings, Mode, Variant {
+	export interface Theme extends Mode, Variant {
 		light: Mode & Variant;
 		dark: Mode & Variant;
 		user: Mode & Variant;
 		alternate: Mode & Variant;
+		font: FontList;
 	}
 }
 
 export type { Theme } from "yoshiki";
-export type ThemeBuilder = ThemeSettings & {
+export type ThemeBuilder = {
 	light: Mode & { default: Variant };
 	dark: Mode & { default: Variant };
 };
 
-const selectMode = (theme: ThemeBuilder, mode: "light" | "dark"): Theme => {
+const selectMode = (theme: ThemeBuilder & { font: FontList }, mode: "light" | "dark"): Theme => {
 	const { light: lightBuilder, dark: darkBuilder, ...options } = theme;
 	const light = { ...lightBuilder, ...lightBuilder.default };
 	const dark = { ...darkBuilder, ...darkBuilder.default };
@@ -112,8 +114,18 @@ const switchVariant = (theme: Theme) => {
 	};
 };
 
-export const ThemeSelector = ({ children }: { children: ReactNode }) => {
-	return <ThemeProvider theme={selectMode(catppuccin, "light")}>{children}</ThemeProvider>;
+export const ThemeSelector = ({
+	children,
+	theme,
+	font,
+}: {
+	children: ReactNode;
+	theme: "light" | "dark";
+	font: FontList;
+}) => {
+	return (
+		<ThemeProvider theme={selectMode({ ...catppuccin, font }, theme)}>{children}</ThemeProvider>
+	);
 };
 
 type YoshikiFunc<T> = (props: ReturnType<typeof useYoshiki>) => T;

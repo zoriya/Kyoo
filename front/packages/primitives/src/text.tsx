@@ -47,10 +47,19 @@ const styleText = (
 					[
 						{
 							marginVertical: rem(0.5),
-							// fontFamily: type === "header" ? theme.fonts.heading : theme.fonts.paragraph,
 							color: type === "header" ? theme.heading : theme.paragraph,
+							fontSize: rem(1),
+							fontFamily: theme.font.normal,
 						},
-						type === "sub" && { fontWeight: "300", opacity: 0.8, fontSize: rem(0.8) },
+						type === "sub" && {
+							fontFamily: theme.font["300"] ?? theme.font.normal,
+							fontWeight: "300",
+							opacity: 0.8,
+							fontSize: rem(0.8),
+						},
+						custom?.fontWeight && {
+							fontFamily: theme.font[custom.fontWeight] ?? theme.font.normal,
+						},
 						custom,
 					],
 					props as TextProps,
@@ -61,7 +70,7 @@ const styleText = (
 	return Text;
 };
 
-export const H1 = styleText(EH1, "header", { fontSize: rem(3) });
+export const H1 = styleText(EH1, "header", { fontSize: rem(3), fontWeight: "900" });
 export const H2 = styleText(EH2, "header", { fontSize: rem(2) });
 export const H3 = styleText(EH3, "header");
 export const H4 = styleText(EH4, "header");

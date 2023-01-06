@@ -22,10 +22,6 @@ import { ThemeBuilder } from "./theme";
 
 // Ref: https://github.com/catppuccin/catppuccin
 export const catppuccin: ThemeBuilder = {
-	fonts: {
-		heading: "Pacifico",
-		paragraph: "Poppins",
-	},
 	light: {
 		// Catppuccin latte
 		appbar: "#e64553",

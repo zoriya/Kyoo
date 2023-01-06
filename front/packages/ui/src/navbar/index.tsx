@@ -30,18 +30,18 @@ import {
 	ts,
 	Link,
 } from "@kyoo/primitives";
-import { Platform, TextInput, View } from "react-native";
+import { Platform, TextInput, View, ViewProps } from "react-native";
 import { useTranslation } from "react-i18next";
 import { createParam } from "solito";
 import { useRouter } from "solito/router";
-import { rem, Stylable, useTheme, useYoshiki } from "yoshiki/native";
+import { rem, Stylable, useYoshiki } from "yoshiki/native";
 import Menu from "@material-symbols/svg-400/rounded/menu-fill.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import { Fetch } from "../fetch";
 import { KyooLongLogo } from "./icon";
 import { forwardRef, useRef, useState } from "react";
 
-export const NavbarTitle = (props: Stylable) => {
+export const NavbarTitle = (props: Stylable & { onLayout?: ViewProps["onLayout"] }) => {
 	const { t } = useTranslation();
 
 	return (
