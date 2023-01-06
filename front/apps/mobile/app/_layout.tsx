@@ -20,7 +20,7 @@
 
 import { PortalProvider } from "@gorhom/portal";
 import { ThemeSelector } from "@kyoo/primitives";
-import { NavbarProfile, NavbarRight, NavbarTitle } from "@kyoo/ui";
+import { NavbarRight, NavbarTitle } from "@kyoo/ui";
 import { createQueryClient } from "@kyoo/models";
 import { QueryClientProvider } from "@tanstack/react-query";
 import i18next from "i18next";
@@ -35,7 +35,7 @@ import {
 } from "@expo-google-fonts/poppins";
 import { useCallback, useState } from "react";
 import { useColorScheme } from "react-native";
-import { initReactI18next, useTranslation } from "react-i18next";
+import { initReactI18next } from "react-i18next";
 import { useTheme } from "yoshiki/native";
 import "intl-pluralrules";
 
@@ -63,6 +63,9 @@ const ThemedStack = ({ onLayout }: { onLayout?: () => void }) => {
 			screenOptions={{
 				headerTitle: () => <NavbarTitle onLayout={onLayout} />,
 				headerRight: () => <NavbarRight />,
+				contentStyle: {
+					backgroundColor: theme.background,
+				},
 				headerStyle: {
 					backgroundColor: theme.appbar,
 				},

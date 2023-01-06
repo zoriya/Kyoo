@@ -165,7 +165,7 @@ const TitleLine = ({
 						/>
 						<IconButton
 							icon={Theaters}
-							color={{ xs: theme.user.colors.black, md: theme.colors.white }}
+							color={{ xs: theme.user.contrast, md: theme.colors.white }}
 							{...tooltip(t("show.trailer"))}
 						/>
 					</View>

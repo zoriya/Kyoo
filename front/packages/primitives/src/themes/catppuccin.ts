@@ -55,7 +55,7 @@ export const catppuccin: ThemeBuilder = {
 	},
 	dark: {
 		// Catppuccin mocha
-		appbar: "#94e2d5",
+		appbar: "#89b4fa",
 		overlay0: "#6c7086",
 		overlay1: "#9399b2",
 		link: "#89b4fa",

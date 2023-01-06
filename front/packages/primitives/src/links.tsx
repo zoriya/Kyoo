@@ -74,8 +74,12 @@ export const PressableFeedback = forwardRef<
 	const pressProps = { onBlur, onFocus, onPressIn, onPressOut, onPress };
 	const wrapperProps = Platform.select<ViewProps & { ref?: any }>({
 		android: {
-			...props,
-			style: { ...StyleSheet.flatten(props?.style), overflow: "hidden" },
+			style: {
+				borderRadius: StyleSheet.flatten(props?.style)?.borderRadius,
+				alignContent: "center",
+				justifyContent: "center",
+				overflow: "hidden",
+			},
 			ref,
 		},
 		default: {},

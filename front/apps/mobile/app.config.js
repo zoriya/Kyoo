@@ -20,21 +20,29 @@
 
 const IS_DEV = process.env.APP_VARIANT === "development";
 
+// Defined outside the config because dark splashscreen needs to be platform specific.
+const splash = {
+	image: "./assets/icon.png",
+	resizeMode: "contain",
+	backgroundColor: "#eff1f5",
+	dark: {
+		image: "./assets/icon.png",
+		resizeMode: "contain",
+		backgroundColor: "#1e1e2e",
+	},
+};
+
 const config = {
 	expo: {
-		name: "kyoo",
+		name: IS_DEV ? "Kyoo Development" : "Kyoo",
 		slug: "kyoo",
 		scheme: "kyoo",
 		version: "1.0.0",
 		orientation: "default",
 		icon: "./assets/icon.png",
 		entryPoint: "./index.tsx",
-		userInterfaceStyle: "light",
-		splash: {
-			image: "./assets/splash.png",
-			resizeMode: "contain",
-			backgroundColor: "#ffffff",
-		},
+		userInterfaceStyle: "automatic",
+		splash,
 		updates: {
 			fallbackToCacheTimeout: 0,
 		},
@@ -45,12 +53,10 @@ const config = {
 		android: {
 			package: IS_DEV ? "moe.sdg.kyoo.dev" : "moe.sdg.kyoo",
 			adaptiveIcon: {
-				foregroundImage: "./assets/adaptive-icon.png",
-				backgroundColor: "#FFFFFF",
+				foregroundImage: "./assets/icon.png",
+				backgroundColor: "#eff1f5",
 			},
-		},
-		web: {
-			favicon: "./assets/favicon.png",
+			splash,
 		},
 		extra: {
 			eas: {

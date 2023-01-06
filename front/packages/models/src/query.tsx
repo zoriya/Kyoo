@@ -37,12 +37,11 @@ const queryFn = async <Data,>(
 	context: QueryFunctionContext,
 ): Promise<Data> => {
 	const kyooUrl =
-		(Platform.OS !== "web"
+		Platform.OS !== "web"
 			? process.env.PUBLIC_BACK_URL
 			: typeof window === "undefined"
 			? process.env.KYOO_URL ?? "http://localhost:5000"
-			: // TODO remove the hardcoded fallback. This is just for testing purposes
-			  "/api") ?? "https://beta.sdg.moe";
+			: "/api";
 	if (!kyooUrl) console.error("Kyoo's url is not defined.");
 
 	let resp;
