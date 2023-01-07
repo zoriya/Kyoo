@@ -36,25 +36,26 @@ export const EpisodeList = ({
 	season: string | number;
 	Header: ComponentType<{ children: JSX.Element }>;
 }) => {
-	const { t } = useTranslation();
+	return null;
+	// const { t } = useTranslation();
 
-	return (
-		<InfiniteFetch
-			query={EpisodeList.query(slug, season)}
-			placeholderCount={15}
-			layout={EpisodeLine.layout}
-			empty={t("show.episode-none")}
-			divider
-			Header={Header}
-		>
-			{(item) => (
-				<EpisodeLine
-					{...item}
-					displayNumber={item.isLoading ? undefined : episodeDisplayNumber(item)}
-				/>
-			)}
-		</InfiniteFetch>
-	);
+	// return (
+	// 	<InfiniteFetch
+	// 		query={EpisodeList.query(slug, season)}
+	// 		placeholderCount={15}
+	// 		layout={EpisodeLine.layout}
+	// 		empty={t("show.episode-none")}
+	// 		divider
+	// 		Header={Header}
+	// 	>
+	// 		{(item) => (
+	// 			<EpisodeLine
+	// 				{...item}
+	// 				displayNumber={item.isLoading ? undefined : episodeDisplayNumber(item)}
+	// 			/>
+	// 		)}
+	// 	</InfiniteFetch>
+	// );
 };
 
 EpisodeList.query = (slug: string, season: string | number): QueryIdentifier<Episode> => ({

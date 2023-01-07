@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { resources, defaultNS } from "./i18n";
+import "i18next";
 import en from "../../../translations/en.json";
 
 declare module "i18next" {
