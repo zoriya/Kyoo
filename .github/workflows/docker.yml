@@ -19,7 +19,7 @@ jobs:
           - context: ./front
             label: front
             image: ghcr.io/${{github.repository_owner}}/kyoo_front
-    name: Docker build ${{matrix.label}}
+    name: Build ${{matrix.label}}
     steps:
       - uses: actions/checkout@v2
         with:

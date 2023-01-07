@@ -1,0 +1,23 @@
+{
+	"name": "@kyoo/models",
+	"main": "src/index.ts",
+	"types": "src/index.ts",
+	"packageManager": "yarn@3.2.4",
+	"devDependencies": {
+		"@types/react": "^18.0.25",
+		"typescript": "^4.9.3"
+	},
+	"peerDependencies": {
+		"@tanstack/react-query": "*",
+		"react": "*",
+		"react-native": "*"
+	},
+	"peerDependenciesMeta": {
+		"react-native-web": {
+			"optional": true
+		}
+	},
+	"dependencies": {
+		"zod": "^3.19.1"
+	}
+}

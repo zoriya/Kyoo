@@ -8,6 +8,7 @@ on:
 
 jobs:
   release:
+    name: Release a new version
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -20,17 +21,16 @@ jobs:
           repo-token: ${{secrets.GITHUB_TOKEN}}
           running-workflow-name: release
           allowed-conclusions: success,skipped,cancelled,neutral
-      # - name: Public the abstractions to nuget
-      #   id: publish_nuget
-      #   uses: rohith/publish-nuget@v2
-      #   with:
-      #     PROJECT_FILE_PATH: Kyoo.Abstractions/Kyoo.Abstractions.csproj
-      #     PACKAGE_NAME: Kyoo.Abstractions
-      #     VERSION_REGEX: ^\s*<PackageVersion>(.*)<\/PackageVersion>\s*$
-      #     NUGET_KEY: ${{secrets.NUGET_API_KEY}}
-      #     INCLUDE_SYMBOLS: true
+      - name: Download artifacts
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          commit: ${{env.COMMIT_SHA}}
+          workflow: native-build.yml
+          path: ./artifacts
+          github_token: ${{secrets.GITHUB_TOKEN}}
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
           generateReleaseNotes: true
+          artifacts: ./artifacts/**/*
           token: ${{secrets.GITHUB_TOKEN}}

@@ -29,20 +29,24 @@ services:
       dockerfile: Dockerfile.dev
     volumes:
       - ./front:/app
-      - /app/node_modules/
-      - /app/.next/
+      - /app/.yarn
+      - /app/node_modules
+      - /app/apps/web/.next/
+      - /app/apps/mobile/.expo/
     ports:
       - "3000:3000"
+      - "19000:19000"
     restart: on-failure
     environment:
-      - KYOO_URL=http://back:5000
+      - KYOO_URL=${KYOO_URL:-http://back:5000}
+      - PUBLIC_BACK_URL=${PUBLIC_BACK_URL}
   ingress:
     image: nginx
     restart: on-failure
     environment:
       - PORT=8901
       - FRONT_URL=http://front:3000
-      - BACK_URL=http://back:5000
+      - BACK_URL=${KYOO_URL:-http://back:5000}
     volumes:
       - ./nginx.conf.template:/etc/nginx/templates/kyoo.conf.template:ro
     depends_on:

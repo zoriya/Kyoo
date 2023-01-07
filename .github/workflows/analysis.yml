@@ -44,7 +44,7 @@ jobs:
         if: github.event_name != 'pull_request'
         with:
           ref: ${{github.ref}}
-          check-name: tests
+          check-name: "Back tests"
           repo-token: ${{secrets.GITHUB_TOKEN}}
           running-workflow-name: analysis
           allowed-conclusions: success,skipped,cancelled,neutral,failure
@@ -53,7 +53,7 @@ jobs:
         if: github.event_name == 'pull_request'
         with:
           ref: ${{github.event.pull_request.head.sha}}
-          check-name: tests
+          check-name: "Back tests"
           repo-token: ${{secrets.GITHUB_TOKEN}}
           running-workflow-name: analysis
           allowed-conclusions: success,skipped,cancelled,neutral,failure

@@ -121,6 +121,24 @@ namespace Kyoo.Core.Api
 		}
 
 		/// <summary>
+		/// Search items
+		/// </summary>
+		/// <remarks>
+		/// Search for items
+		/// </remarks>
+		/// <param name="query">The query to search for.</param>
+		/// <returns>A list of items found for the specified query.</returns>
+		[HttpGet("items")]
+		[HttpGet("item", Order = AlternativeRoute)]
+		[Permission(nameof(Show), Kind.Read)]
+		[ApiDefinition("Items")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		public Task<ICollection<LibraryItem>> SearchItems(string query)
+		{
+			return _libraryManager.Search<LibraryItem>(query);
+		}
+
+		/// <summary>
 		/// Search episodes
 		/// </summary>
 		/// <remarks>

@@ -1,4 +1,4 @@
-name: Update the documentation
+name: Documentation
 
 on:
   push:
@@ -6,8 +6,9 @@ on:
       - master
 
 jobs:
-  Building:
-    runs-on: [ubuntu-latest]
+  doc:
+    name: Update the documentation
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
       - uses: nikeee/docfx-action@v1.0.0

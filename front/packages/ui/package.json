@@ -1,0 +1,29 @@
+{
+	"name": "@kyoo/ui",
+	"main": "src/index.ts",
+	"types": "src/index.ts",
+	"packageManager": "yarn@3.2.4",
+	"dependencies": {
+		"@kyoo/models": "workspace:^",
+		"@kyoo/primitives": "workspace:^"
+	},
+	"devDependencies": {
+		"@shopify/flash-list": "^1.4.0",
+		"@types/react": "^18.0.25",
+		"typescript": "^4.9.3"
+	},
+	"peerDependencies": {
+		"@material-symbols/svg-400": "*",
+		"@shopify/flash-list": "^1.4.0",
+		"@tanstack/react-query": "*",
+		"expo-linear-gradient": "*",
+		"i18next": "*",
+		"moti": "*",
+		"react": "*",
+		"react-i18next": "*",
+		"react-native": "*",
+		"react-native-reanimated": "*",
+		"react-native-svg": "*",
+		"yoshiki": "*"
+	}
+}
