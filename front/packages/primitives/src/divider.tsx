@@ -20,7 +20,6 @@
 
 import { HR as EHR } from "@expo/html-elements";
 import { px, Stylable, useYoshiki } from "yoshiki/native";
-import { alpha } from "./themes";
 import { ts } from "./utils";
 
 export const HR = ({
@@ -34,7 +33,8 @@ export const HR = ({
 			{...css(
 				[
 					{
-						bg: (theme) => alpha(theme.overlay0, 0.7),
+						opacity: .7,
+						bg: (theme) => theme.overlay0,
 						borderWidth: 0,
 					},
 					orientation === "vertical" && {

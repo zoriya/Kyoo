@@ -36,7 +36,18 @@ export const MovieDetails: QueryPage<{ slug: string }> = ({ slug }) => {
 	const { css } = useYoshiki();
 
 	return (
-		<ScrollView {...css(Platform.OS === "web" && { overflow: "overlay" as any })}>
+		<ScrollView
+			{...css(
+				Platform.OS === "web" && {
+					// @ts-ignore Web only property
+					overflow: "auto" as any,
+					// @ts-ignore Web only property
+					overflowX: "hidden",
+					// @ts-ignore Web only property
+					overflowY: "overlay",
+				},
+			)}
+		>
 			<Header slug={slug} query={query(slug)} />
 			{/* <Staff slug={slug} /> */}
 		</ScrollView>
