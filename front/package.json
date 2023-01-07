@@ -11,7 +11,9 @@
 		"update": "yarn workspace mobile update",
 		"lint": "eslint ."
 	},
-	"eslintIgnore": ["next-env.d.ts"],
+	"eslintIgnore": [
+		"next-env.d.ts"
+	],
 	"workspaces": [
 		"apps/*",
 		"packages/*"

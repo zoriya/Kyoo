@@ -1,5 +1,10 @@
 name: Native build
-on: push
+on:
+  push:
+    branches:
+      - master
+      - next
+  pull_request:
 
 jobs:
   update:
@@ -9,6 +14,9 @@ jobs:
       run:
         working-directory: ./front
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Check for EXPO_TOKEN
         run: |
           if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
@@ -16,14 +24,12 @@ jobs:
             exit 1
           fi
 
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
       - name: Setup Node
         uses: actions/setup-node@v2
         with:
           node-version: 16.x
           cache: yarn
+          cache-dependency-path: front/yarn.lock
 
       - name: Setup Expo
         uses: expo/expo-github-action@v7
@@ -32,25 +38,18 @@ jobs:
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Restore cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.yarn-cache-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: ${{ runner.os }}-yarn-
-
       - name: Install dependencies
         run: yarn install --immutable
 
       - name: Build Mobile Release
-        run: yarn build:mobile --release-channel=build | tee log.txt
+        run: yarn build:mobile | tee log.txt
 
       - name: Parse Asset URL
         id: url
         run: |
-          ASSET_URL=$(grep -eo 'https?://expo\.io/artifacts/[^ ]+' log.txt)
+          ASSET_URL=$(grep -oe 'https?://expo\.io/artifacts/[^ ]+' log.txt)
           echo The android url is $ASSET_URL
-          echo "::set-output name=assetUrl::$ASSET_URL"
+          echo "assetUrl=$ASSET_URL" >> $GITHUB_OUTPUT
 
       - name: Download APK Asset
         run: wget -O kyoo.apk ${{ steps.url.outputs.assetUrl }}
@@ -60,11 +59,10 @@ jobs:
           name: kyoo.apk
           path: ./front/kyoo.apk
 
-
       - name: Upload Release Asset
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ./example-${{ env.GITHUB_REF_SLUG }}.apk
           asset_name: example-${{ env.GITHUB_REF_SLUG }}.apk
-          tag: ${{ github.ref }
+          tag: ${{ github.ref }}

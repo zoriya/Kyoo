@@ -1,4 +1,4 @@
-name: Update the documentation
+name: Documentation
 
 on:
   push:
@@ -6,7 +6,8 @@ on:
       - master
 
 jobs:
-  Building:
+  doc:
+    name: Update the documentation
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1

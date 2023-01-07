@@ -1,5 +1,9 @@
 name: Native update
-on: push
+on:
+  push:
+    branches:
+      - master
+      - next
 
 jobs:
   update:
@@ -24,6 +28,7 @@ jobs:
         with:
           node-version: 16.x
           cache: yarn
+          cache-dependency-path: front/yarn.lock
 
       - name: Setup Expo
         uses: expo/expo-github-action@v7
@@ -31,17 +36,6 @@ jobs:
           expo-version: latest
           eas-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
-
-      - name: Find yarn cache
-        id: yarn-cache-path
-        run: echo "::set-output name=dir::$(yarn cache dir)"
-
-      - name: Restore cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.yarn-cache-path.outputs.dir }}
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: ${{ runner.os }}-yarn-
 
       - name: Install dependencies
         run: yarn install --immutable
