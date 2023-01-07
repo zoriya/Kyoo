@@ -97,7 +97,7 @@ export const NavbarProfile = () => {
 	);
 };
 export const NavbarRight = () => {
-	const { css } = useYoshiki();
+	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
 	const [isSearching, setSearch] = useState(false);
 	const ref = useRef<TextInput | null>(null);
@@ -121,6 +121,7 @@ export const NavbarRight = () => {
 			{!searchExpanded && (
 				<IconButton
 					icon={Search}
+					color={theme.colors.white}
 					onPress={
 						Platform.OS === "web"
 							? () => {
