@@ -50,8 +50,7 @@ export const EpisodeList = ({
 			{(item) => (
 				<EpisodeLine
 					{...item}
-					isLoading={item.isLoading}
-					displayNumber={item.isLoading ? undefined : episodeDisplayNumber(item)}
+					displayNumber={item.isLoading ? undefined! : episodeDisplayNumber(item)!}
 				/>
 			)}
 		</InfiniteFetch>

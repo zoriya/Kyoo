@@ -44,16 +44,18 @@ export const EpisodeBox = ({
 	thumbnail,
 	isLoading,
 	...props
-}: WithLoading<{
-	name: string;
-	overview: string;
-	thumbnail?: string | null;
-}> &
-	Stylable) => {
+}: Stylable &
+	WithLoading<{
+		name: string | null;
+		overview: string;
+		thumbnail?: string | null;
+	}>) => {
+	const { t } = useTranslation();
+
 	return (
 		<View {...props}>
 			<Image src={thumbnail} alt="" layout={{ width: percent(100), aspectRatio: 16 / 9 }} />
-			<Skeleton>{isLoading || <P>{name}</P>}</Skeleton>
+			<Skeleton>{isLoading || <P>{name ?? t("show.episodeNoMetadata")}</P>}</Skeleton>
 			<Skeleton>{isLoading || <P>{overview}</P>}</Skeleton>
 		</View>
 	);
@@ -70,8 +72,8 @@ export const EpisodeLine = ({
 }: WithLoading<{
 	slug: string;
 	displayNumber: string;
-	name: string;
-	overview: string;
+	name: string | null;
+	overview: string | null;
 	thumbnail?: string | null;
 }> &
 	Stylable) => {
