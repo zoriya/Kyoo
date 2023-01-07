@@ -97,9 +97,9 @@ const selectMode = (
 	}
 
 	// eslint-disable-next-line react-hooks/rules-of-hooks
-	const auto = useAutomaticTheme({ light, dark });
+	const auto = useAutomaticTheme("theme", { light, dark });
 	// eslint-disable-next-line react-hooks/rules-of-hooks
-	const alternate = useAutomaticTheme({ dark: light, light: dark });
+	const alternate = useAutomaticTheme("alternate", { dark: light, light: dark });
 	return {
 		...options,
 		...auto,

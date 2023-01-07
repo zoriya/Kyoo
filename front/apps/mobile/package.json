@@ -7,8 +7,8 @@
 		"android": "expo start --android",
 		"ios": "expo start --ios",
 		"web": "expo start --web",
-		"build": "eas build --profile production --platform android",
-		"build:dev": "eas build --profile development --platform android",
+		"build": "eas build --profile production --platform android --non-interactive",
+		"build:dev": "eas build --profile development --platform android --non-interactive",
 		"update": "eas update --auto --channel prod"
 	},
 	"dependencies": {
@@ -44,7 +44,7 @@
 		"react-native-screens": "~3.18.0",
 		"react-native-svg": "13.4.0",
 		"react-native-video": "alpha",
-		"yoshiki": "0.3.5"
+		"yoshiki": "0.4.5"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.19.3",

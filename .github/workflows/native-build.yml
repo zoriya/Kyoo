@@ -47,7 +47,7 @@ jobs:
       - name: Parse Asset URL
         id: url
         run: |
-          ASSET_URL=$(grep -oe 'https?://expo\.io/artifacts/[^ ]+' log.txt)
+          ASSET_URL=$(grep -oe 'https://expo.dev/artifacts/eas/.*' log.txt)
           echo The android url is $ASSET_URL
           echo "assetUrl=$ASSET_URL" >> $GITHUB_OUTPUT
 
@@ -58,11 +58,3 @@ jobs:
         with:
           name: kyoo.apk
           path: ./front/kyoo.apk
-
-      - name: Upload Release Asset
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ./example-${{ env.GITHUB_REF_SLUG }}.apk
-          asset_name: example-${{ env.GITHUB_REF_SLUG }}.apk
-          tag: ${{ github.ref }}
