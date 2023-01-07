@@ -58,6 +58,12 @@ const config = {
 			},
 			splash,
 		},
+		updates: {
+			url: "https://u.expo.dev/55de6b52-c649-4a15-9a45-569ff5ed036c",
+		},
+		runtimeVersion: {
+			policy: "sdkVersion",
+		},
 		extra: {
 			eas: {
 				projectId: "55de6b52-c649-4a15-9a45-569ff5ed036c",
