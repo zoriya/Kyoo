@@ -103,7 +103,9 @@ export const EpisodeLine = ({
 				{...css({ flexShrink: 0, m: ts(1) })}
 			/>
 			<View {...css({ flexGrow: 1, flexShrink: 1, m: ts(1) })}>
-				<Skeleton>{isLoading || <H6 as="p">{name ?? t("show.episodeNoMetadata")}</H6>}</Skeleton>
+				<Skeleton>
+					{isLoading || <H6 aria-level={undefined}>{name ?? t("show.episodeNoMetadata")}</H6>}
+				</Skeleton>
 				<Skeleton>{isLoading || <P numberOfLines={3}>{overview}</P>}</Skeleton>
 			</View>
 		</Link>

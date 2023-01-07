@@ -73,12 +73,7 @@ export const reducerAtom = atom<null, Action>(null, (get, set, action) => {
 			const index = subtitle ? action.subtitles.findIndex((x) => x.id === subtitle.id) : -1;
 			set(
 				subtitleAtom,
-				index === -1
-					? null
-					: {
-							track: action.subtitles[(index + 1) % action.subtitles.length],
-							fonts: action.fonts,
-					  },
+				index === -1 ? null : action.subtitles[(index + 1) % action.subtitles.length],
 			);
 			break;
 	}
