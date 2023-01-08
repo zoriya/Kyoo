@@ -157,23 +157,24 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 			>
 				<Pressable
 					focusable={false}
-					onPress={
-						Platform.OS === "web"
-							? (e) => {
-									e.preventDefault();
-									touchCount++;
-									if (touchCount == 2) {
-										touchCount = 0;
-										setFullscreen(!isFullscreen);
-										clearTimeout(touchTimeout);
-									} else
-										touchTimeout = setTimeout(() => {
-											touchCount = 0;
-										}, 400);
-									setPlay(!isPlaying);
-							  }
-							: () => (displayControls ? setMouseMoved(false) : show())
-					}
+					onPress={(e) => {
+						// TODO: use onPress event to diferenciate touch and click on the web (requires react native web 0.19)
+						if (Platform.OS !== "web") {
+							displayControls ? setMouseMoved(false) : show();
+							return;
+						}
+						e.preventDefault();
+						touchCount++;
+						if (touchCount == 2) {
+							touchCount = 0;
+							setFullscreen(!isFullscreen);
+							clearTimeout(touchTimeout);
+						} else
+							touchTimeout = setTimeout(() => {
+								touchCount = 0;
+							}, 400);
+						setPlay(!isPlaying);
+					}}
 					{...css(StyleSheet.absoluteFillObject)}
 				>
 					<Video

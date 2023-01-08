@@ -35,7 +35,7 @@ export const tooltip = (tooltip: string, up?: boolean) =>
 	});
 
 export const WebTooltip = ({ theme }: { theme: Theme }) => {
-	const background = `${theme.colors.black}CC`;
+	const background = `${theme.light.colors.black}CC`;
 
 	return (
 		<style jsx global>{`
