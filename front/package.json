@@ -37,5 +37,9 @@
 		"prettier-plugin-jsdoc": "^0.4.2",
 		"typescript": "4.9.3"
 	},
+	"resolutions": {
+		"metro": "^0.73.1",
+		"metro-resolver": "^0.73.1"
+	},
 	"packageManager": "yarn@3.2.4"
 }

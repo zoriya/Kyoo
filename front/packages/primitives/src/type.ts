@@ -18,23 +18,4 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import React from "react";
-import "react-native";
-
-declare module "react-native" {
-	interface ViewProps {
-		dataSet?: Record<string, string>;
-	}
-
-	interface PressableStateCallbackType {
-		readonly hovered?: boolean;
-		readonly focused?: boolean;
-	}
-}
-
-declare module "react" {
-	interface StyleHTMLAttributes<T> extends HTMLAttributes<T> {
-		jsx?: boolean;
-		global?: boolean;
-	}
-}
+import "react-native/tvos-types.d";
