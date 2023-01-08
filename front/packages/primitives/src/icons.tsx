@@ -19,10 +19,11 @@
  */
 
 import React, { ComponentProps, ComponentType, ForwardedRef, forwardRef } from "react";
-import { Pressable, Platform, PressableProps, ViewStyle } from "react-native";
+import { Platform, PressableProps, ViewStyle } from "react-native";
 import { SvgProps } from "react-native-svg";
 import { YoshikiStyle } from "yoshiki/dist/type";
 import { px, useYoshiki } from "yoshiki/native";
+import { PressableFeedback } from "./links";
 import { ts } from "./utils";
 
 declare module "react" {
@@ -71,7 +72,7 @@ export const IconButton = forwardRef(function _IconButton<AsProps = PressablePro
 ) {
 	const { css } = useYoshiki();
 
-	const Container = as ?? Pressable;
+	const Container = as ?? PressableFeedback;
 
 	return (
 		<Container
