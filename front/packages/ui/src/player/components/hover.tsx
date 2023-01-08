@@ -27,6 +27,7 @@ import {
 	IconButton,
 	Link,
 	Poster,
+	PressableFeedback,
 	Skeleton,
 	Slider,
 	tooltip,
@@ -34,7 +35,7 @@ import {
 } from "@kyoo/primitives";
 import { Chapter, Font, Track } from "@kyoo/models";
 import { useAtomValue, useSetAtom, useAtom } from "jotai";
-import { Pressable, View, ViewProps } from "react-native";
+import { View, ViewProps } from "react-native";
 import { useTranslation } from "react-i18next";
 import { percent, rem, useYoshiki } from "yoshiki/native";
 import { useRouter } from "solito/router";
@@ -177,7 +178,7 @@ export const Back = ({
 		>
 			<IconButton
 				icon={ArrowBack}
-				{...(href ? { as: Link as any, href: href } : { as: Pressable, onPress: router.back })}
+				{...(href ? { as: Link as any, href: href } : { as: PressableFeedback, onPress: router.back })}
 				{...tooltip(t("player.back"))}
 			/>
 			<Skeleton>
