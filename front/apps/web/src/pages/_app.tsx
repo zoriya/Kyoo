@@ -41,6 +41,7 @@ const GlobalCssTheme = () => {
 				body {
 					margin: 0px;
 					padding: 0px;
+					overflow: "hidden";
 					background-color: ${theme.background};
 					font-family: ${font.style.fontFamily};
 				}
