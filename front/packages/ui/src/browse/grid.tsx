@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Link, Skeleton, Poster, ts, P, SubP } from "@kyoo/primitives";
+import { Link, Skeleton, Poster, ts, focusReset, P, SubP } from "@kyoo/primitives";
 import { Platform } from "react-native";
 import { percent, px, Stylable, useYoshiki } from "yoshiki/native";
 import { Layout, WithLoading } from "../fetch";
@@ -29,25 +29,49 @@ export const ItemGrid = ({
 	subtitle,
 	poster,
 	isLoading,
+	hasTVPreferredFocus,
 	...props
 }: WithLoading<{
 	href: string;
 	name: string;
 	subtitle?: string;
 	poster?: string | null;
+	hasTVPreferredFocus?: boolean;
 }> &
 	Stylable<"text">) => {
-	const { css } = useYoshiki();
+	const { css } = useYoshiki("grid");
 
 	return (
 		<Link
 			href={href ?? ""}
+			focusable={hasTVPreferredFocus || !isLoading}
+			accessible={hasTVPreferredFocus || !isLoading}
+			{...(Platform.isTV
+				? {
+						hasTVPreferredFocus: hasTVPreferredFocus,
+				  }
+				: {})}
 			{...css(
 				[
 					{
 						flexDirection: "column",
 						alignItems: "center",
-						m: { xs: ts(1), sm: ts(2) },
+						m: { xs: ts(1), sm: ts(4) },
+						child: {
+							poster: {
+								borderColor: "transparent",
+								borderWidth: px(4),
+							},
+						},
+						fover: {
+							self: focusReset,
+							poster: {
+								borderColor: (theme) => theme.appbar,
+							},
+							title: {
+								textDecorationLine: "underline",
+							},
+						},
 					},
 					// We leave no width on native to fill the list's grid.
 					Platform.OS === "web" && {
@@ -59,10 +83,16 @@ export const ItemGrid = ({
 				props,
 			)}
 		>
-			<Poster src={poster} alt={name} isLoading={isLoading} layout={{ width: percent(100) }} />
+			<Poster
+				src={poster}
+				alt={name}
+				isLoading={isLoading}
+				layout={{ width: percent(100) }}
+				{...css("poster")}
+			/>
 			<Skeleton>
 				{isLoading || (
-					<P numberOfLines={1} {...css({ marginY: 0, textAlign: "center" })}>
+					<P numberOfLines={1} {...css([{ marginY: 0, textAlign: "center" }, "title"])}>
 						{name}
 					</P>
 				)}

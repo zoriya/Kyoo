@@ -93,7 +93,7 @@ export const BrowsePage: QueryPage<{ slug?: string }> = ({ slug }) => {
 				placeholderCount={15}
 				layout={LayoutComponent.layout}
 			>
-				{(item) => <LayoutComponent {...itemMap(item)} />}
+				{(item, i) => <LayoutComponent {...itemMap(item)} hasTVPreferredFocus={i === 0} />}
 			</InfiniteFetch>
 		</>
 	);

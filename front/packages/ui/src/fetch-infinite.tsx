@@ -66,9 +66,10 @@ export const InfiniteFetch = <Data,>({
 		return <EmptyView message={empty} />;
 	}
 
-	const placeholders = [
-		...Array(items ? numColumns - (items.length % numColumns) + numColumns : placeholderCount),
-	].map((_, i) => ({ id: `gen${i}`, isLoading: true } as Data));
+	const count = items ? numColumns - (items.length % numColumns) : placeholderCount;
+	const placeholders = [...Array(count === 0 ? numColumns : count)].map(
+		(_, i) => ({ id: `gen${i}`, isLoading: true } as Data),
+	);
 
 	return (
 		<FlashList

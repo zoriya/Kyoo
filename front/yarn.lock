@@ -2251,7 +2251,7 @@ __metadata:
   dependencies:
     "@kyoo/models": "workspace:^"
     "@kyoo/primitives": "workspace:^"
-    "@shopify/flash-list": ^1.4.0
+    "@shopify/flash-list": 1.3.1
     "@types/react": ^18.0.25
     typescript: ^4.9.3
   peerDependencies:
@@ -3224,20 +3224,6 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 49a82512bf2b3622e1d7f1a86dc2837f7ee8809131fde0ffe0ced41ede001f77bf81741ea5d65b803ad76d669f146f8cd53702daf3387c9f89402b32f9667110
-  languageName: node
-  linkType: hard
-
-"@shopify/flash-list@npm:^1.4.0":
-  version: 1.4.0
-  resolution: "@shopify/flash-list@npm:1.4.0"
-  dependencies:
-    recyclerlistview: 4.2.0
-    tslib: 2.4.0
-  peerDependencies:
-    "@babel/runtime": "*"
-    react: "*"
-    react-native: "*"
-  checksum: c6510b0d6ae6404fe92ede0c918ba184bc2b27ed39c627eebad16a6542792cb34e750e2004e1a9ce165f9d729f1af0555cba1e4c224fd52bfd2a600fdc9e2a65
   languageName: node
   linkType: hard
 
@@ -10416,7 +10402,7 @@ __metadata:
     react-native-svg-transformer: ^1.0.0
     react-native-video: alpha
     typescript: ^4.6.3
-    yoshiki: 0.4.5
+    yoshiki: 1.2.0
   languageName: unknown
   linkType: soft
 
@@ -11993,20 +11979,6 @@ __metadata:
     react: ">= 15.2.1"
     react-native: ">= 0.30.0"
   checksum: e18e36c0783b528b5244ed0b7eabf231c49ec7b0a97c947a6f596900165a4d7bbc3216b23084a8a2cb8d33b98fb38fc4a64254cf0b6431a0d0fa3ca2e7129fbc
-  languageName: node
-  linkType: hard
-
-"recyclerlistview@npm:4.2.0":
-  version: 4.2.0
-  resolution: "recyclerlistview@npm:4.2.0"
-  dependencies:
-    lodash.debounce: 4.0.8
-    prop-types: 15.8.1
-    ts-object-utils: 0.0.5
-  peerDependencies:
-    react: ">= 15.2.1"
-    react-native: ">= 0.30.0"
-  checksum: 6cba6a99fb487067c509112b94e3d4d3905d782bbcb7af2cffbd57c601a4650d670e4eee5fec18d195d58ff6ec01a47288c5510379a2f37da3c5fc0a58860441
   languageName: node
   linkType: hard
 
@@ -14172,7 +14144,7 @@ __metadata:
     superjson: ^1.11.0
     typescript: ^4.9.3
     webpack: ^5.75.0
-    yoshiki: 0.4.5
+    yoshiki: 1.2.0
     zod: ^3.19.1
   languageName: unknown
   linkType: soft
@@ -14547,9 +14519,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yoshiki@npm:0.4.5":
-  version: 0.4.5
-  resolution: "yoshiki@npm:0.4.5"
+"yoshiki@npm:1.2.0":
+  version: 1.2.0
+  resolution: "yoshiki@npm:1.2.0"
   dependencies:
     "@types/node": 18.x.x
     "@types/react": 18.x.x
@@ -14564,7 +14536,7 @@ __metadata:
       optional: true
     react-native-web:
       optional: true
-  checksum: 0b2e6576ab0ddf8730da7b38feaa84943728f3c28e07d7472e080da5a9941513a6624dac529918f0efab2bd4bdaac9e4f3dba002f98253a3e26c6be5b32c4e63
+  checksum: 1ef4bc33563bcf344689a5bfbdc4da1636b99552fcff041ada8fa79224c6c3fac2530a890bf6980981fb7aed9cc4e31b89feb1d0bde920179039fc573935ab42
   languageName: node
   linkType: hard
 

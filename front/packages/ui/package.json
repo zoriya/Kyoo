@@ -8,7 +8,7 @@
 		"@kyoo/primitives": "workspace:^"
 	},
 	"devDependencies": {
-		"@shopify/flash-list": "^1.4.0",
+		"@shopify/flash-list": "1.3.1",
 		"@types/react": "^18.0.25",
 		"typescript": "^4.9.3"
 	},

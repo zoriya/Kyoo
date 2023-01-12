@@ -19,7 +19,7 @@
  */
 
 import { forwardRef, ReactNode } from "react";
-import { Pressable, TextProps, View, PressableProps } from "react-native";
+import { Pressable, TextProps, View, PressableProps, Platform } from "react-native";
 import { LinkCore, TextLink } from "solito/link";
 import { useTheme, useYoshiki } from "yoshiki/native";
 import { alpha } from "./themes";
@@ -59,7 +59,10 @@ export const PressableFeedback = forwardRef<View, PressableProps>(function _Feed
 	return (
 		<Pressable
 			ref={ref}
-			android_ripple={{ foreground: true, color: alpha(theme.contrast, 0.5) as any }}
+			// TODO: Enable ripple on tv. Waiting for https://github.com/react-native-tvos/react-native-tvos/issues/440
+			{...(Platform.isTV
+				? {}
+				: { android_ripple: { foreground: true, color: alpha(theme.contrast, 0.5) as any } })}
 			{...props}
 		>
 			{children}
