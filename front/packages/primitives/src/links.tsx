@@ -50,25 +50,24 @@ export const A = ({
 	);
 };
 
-export const PressableFeedback = forwardRef<View, PressableProps>(function _Feedback(
-	{ children, ...props },
-	ref,
-) {
-	const theme = useTheme();
+export const PressableFeedback = forwardRef<View, PressableProps>(
+	function _Feedback({ children, ...props }, ref) {
+		const theme = useTheme();
 
-	return (
-		<Pressable
-			ref={ref}
-			// TODO: Enable ripple on tv. Waiting for https://github.com/react-native-tvos/react-native-tvos/issues/440
-			{...(Platform.isTV
-				? {}
-				: { android_ripple: { foreground: true, color: alpha(theme.contrast, 0.5) as any } })}
-			{...props}
-		>
-			{children}
-		</Pressable>
-	);
-});
+		return (
+			<Pressable
+				ref={ref}
+				// TODO: Enable ripple on tv. Waiting for https://github.com/react-native-tvos/react-native-tvos/issues/440
+				{...(Platform.isTV
+					? {}
+					: { android_ripple: { foreground: true, color: alpha(theme.contrast, 0.5) as any } })}
+				{...props}
+			>
+				{children}
+			</Pressable>
+		);
+	},
+);
 
 export const Link = ({
 	href,

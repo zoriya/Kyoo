@@ -23,7 +23,13 @@ import { Navbar } from "./navbar";
 import { useYoshiki } from "yoshiki/native";
 import { Main } from "@kyoo/primitives";
 
-export const DefaultLayout = ({ page, transparent }: { page: ReactElement, transparent?: boolean }) => {
+export const DefaultLayout = ({
+	page,
+	transparent,
+}: {
+	page: ReactElement;
+	transparent?: boolean;
+}) => {
 	const { css } = useYoshiki();
 
 	return (
@@ -36,6 +42,7 @@ export const DefaultLayout = ({ page, transparent }: { page: ReactElement, trans
 						top: 0,
 						left: 0,
 						right: 0,
+						shadowOpacity: 0,
 					},
 				)}
 			/>

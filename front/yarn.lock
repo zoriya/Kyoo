@@ -10402,7 +10402,7 @@ __metadata:
     react-native-svg-transformer: ^1.0.0
     react-native-video: alpha
     typescript: ^4.6.3
-    yoshiki: 1.2.0
+    yoshiki: 1.2.1
   languageName: unknown
   linkType: soft
 
@@ -14144,7 +14144,7 @@ __metadata:
     superjson: ^1.11.0
     typescript: ^4.9.3
     webpack: ^5.75.0
-    yoshiki: 1.2.0
+    yoshiki: 1.2.1
     zod: ^3.19.1
   languageName: unknown
   linkType: soft
@@ -14519,9 +14519,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yoshiki@npm:1.2.0":
-  version: 1.2.0
-  resolution: "yoshiki@npm:1.2.0"
+"yoshiki@npm:1.2.1":
+  version: 1.2.1
+  resolution: "yoshiki@npm:1.2.1"
   dependencies:
     "@types/node": 18.x.x
     "@types/react": 18.x.x
@@ -14536,7 +14536,7 @@ __metadata:
       optional: true
     react-native-web:
       optional: true
-  checksum: 1ef4bc33563bcf344689a5bfbdc4da1636b99552fcff041ada8fa79224c6c3fac2530a890bf6980981fb7aed9cc4e31b89feb1d0bde920179039fc573935ab42
+  checksum: 8d5e58f392ca068f13bcb9b87787bf94da2e03077e733db89c40f22aaebe288536b451de2e92fba133d4241771aa87c6cc30d0bea902f94099335e162a146ab5
   languageName: node
   linkType: hard
 

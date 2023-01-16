@@ -18,8 +18,8 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Episode, EpisodeP, QueryIdentifier, Season } from "@kyoo/models";
-import { Container, SwitchVariant, ts } from "@kyoo/primitives";
+import { Episode, EpisodeP, QueryIdentifier } from "@kyoo/models";
+import { Container } from "@kyoo/primitives";
 import { Stylable } from "yoshiki/native";
 import { View } from "react-native";
 import { InfiniteFetch } from "../fetch-infinite";

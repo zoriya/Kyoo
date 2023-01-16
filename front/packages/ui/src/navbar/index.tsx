@@ -146,7 +146,7 @@ export const Navbar = (props: Stylable) => {
 		<Header
 			{...css(
 				{
-					backgroundColor: (theme) => theme.appbar,
+					backgroundColor: (theme) => theme.accent,
 					paddingX: ts(2),
 					height: { xs: 48, sm: 64 },
 					flexDirection: "row",

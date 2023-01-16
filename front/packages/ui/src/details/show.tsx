@@ -20,9 +20,9 @@
 
 import { QueryIdentifier, QueryPage, Show, ShowP } from "@kyoo/models";
 import { Platform, View, ViewProps } from "react-native";
-import { percent, useYoshiki, vh } from "yoshiki/native";
+import { percent, useYoshiki } from "yoshiki/native";
 import { DefaultLayout } from "../layout";
-import { EpisodeList, SeasonTab } from "./season";
+import { EpisodeList } from "./season";
 import { Header } from "./header";
 import Svg, { Path, SvgProps } from "react-native-svg";
 import { Container, SwitchVariant } from "@kyoo/primitives";

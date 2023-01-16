@@ -40,7 +40,15 @@ import {
 } from "@kyoo/primitives";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform, View } from "react-native";
+import {
+	FlatList,
+	NativeSyntheticEvent,
+	Platform,
+	Pressable,
+	PressableProps,
+	TargetedEvent,
+	View,
+} from "react-native";
 import {
 	Theme,
 	md,
@@ -160,7 +168,11 @@ const TitleLine = ({
 							as={Link}
 							href={`/watch/${slug}`}
 							color={{ xs: theme.user.colors.black, md: theme.colors.black }}
-							{...css({ bg: { xs: theme.user.accent, md: theme.accent } })}
+							hasTVPreferredFocus
+							{...css({
+								bg: theme.user.accent,
+								fover: { self: { bg: theme.user.accent } },
+							})}
 							{...tooltip(t("show.play"))}
 						/>
 						<IconButton
@@ -190,24 +202,31 @@ const TitleLine = ({
 					}),
 				])}
 			>
-				<P
-					{...css({
-						color: (theme: Theme) => theme.user.paragraph,
-						display: "flex",
-					})}
-				>
-					{t("show.studio")}:{" "}
-					{isLoading ? (
-						<Skeleton {...css({ width: rem(5) })} />
-					) : (
-						<A href={`/studio/${studio!.slug}`} {...css({ color: (theme) => theme.user.link })}>
-							{studio!.name}
-						</A>
-					)}
-				</P>
+				{!Platform.isTV && (
+					<P
+						{...css({
+							color: (theme: Theme) => theme.user.paragraph,
+							display: "flex",
+						})}
+					>
+						{t("show.studio")}:{" "}
+						{isLoading ? (
+							<Skeleton {...css({ width: rem(5) })} />
+						) : (
+							<A href={`/studio/${studio!.slug}`} {...css({ color: (theme) => theme.user.link })}>
+								{studio!.name}
+							</A>
+						)}
+					</P>
+				)}
 			</View>
 		</Container>
 	);
+};
+
+const TvPressable = ({ children, ...props }: PressableProps) => {
+	if (!Platform.isTV) return <>children</>;
+	return <Pressable {...props}>{children}</Pressable>;
 };
 
 const Description = ({
@@ -225,58 +244,78 @@ const Description = ({
 
 	return (
 		<Container {...css({ flexDirection: { xs: "column", sm: "row" } }, props)}>
-			<P
-				{...css({
-					display: { xs: "flex", sm: "none" },
-					flexWrap: "wrap",
-					color: (theme: Theme) => theme.user.paragraph,
-				})}
-			>
-				{t("show.genre")}:{" "}
-				{(isLoading ? [...Array(3)] : genres!).map((genre, i) => (
-					<Fragment key={genre?.slug ?? i.toString()}>
-						<P>{i !== 0 && ", "}</P>
-						{isLoading ? (
-							<Skeleton {...css({ width: rem(5) })} />
-						) : (
-							<A href={`/genres/${genre.slug}`}>{genre.name}</A>
-						)}
-					</Fragment>
-				))}
-			</P>
+			{!Platform.isTV && (
+				<P
+					{...css({
+						display: { xs: "flex", sm: "none" },
+						flexWrap: "wrap",
+						color: (theme: Theme) => theme.user.paragraph,
+					})}
+				>
+					{t("show.genre")}:{" "}
+					{(isLoading ? [...Array(3)] : genres!).map((genre, i) => (
+						<Fragment key={genre?.slug ?? i.toString()}>
+							<P>{i !== 0 && ", "}</P>
+							{isLoading ? (
+								<Skeleton {...css({ width: rem(5) })} />
+							) : (
+								<A href={`/genres/${genre.slug}`}>{genre.name}</A>
+							)}
+						</Fragment>
+					))}
+				</P>
+			)}
 
-			<Skeleton
-				lines={4}
-				{...css({ width: percent(100), flexBasis: 0, flexGrow: 1, paddingTop: ts(4) })}
-			>
-				{isLoading || (
-					<P {...css({ flexBasis: 0, flexGrow: 1, textAlign: "justify", paddingTop: ts(4) })}>
-						{overview ?? t("show.noOverview")}
-					</P>
-				)}
-			</Skeleton>
-			<HR
-				orientation="vertical"
-				{...css({ marginX: ts(2), display: { xs: "none", sm: "flex" } })}
-			/>
-			<View {...css({ flexBasis: percent(25), display: { xs: "none", sm: "flex" } })}>
-				<H2>{t("show.genre")}</H2>
-				{isLoading || genres?.length ? (
-					<UL>
-						{(isLoading ? [...Array(3)] : genres!).map((genre, i) => (
-							<LI key={genre?.id ?? i}>
-								{isLoading ? (
-									<Skeleton {...css({ marginBottom: 0 })} />
-								) : (
-									<A href={`/genres/${genre.slug}`}>{genre.name}</A>
-								)}
-							</LI>
-						))}
-					</UL>
-				) : (
-					<P>{t("show.genre-none")}</P>
-				)}
-			</View>
+			<TvPressable {...css({ focus: { self: { bg: "red" } } })}>
+				<Skeleton
+					lines={4}
+					{...css({
+						width: percent(100),
+						flexBasis: 0,
+						flexGrow: 1,
+						paddingTop: Platform.isTV ? 0 : ts(4),
+					})}
+				>
+					{isLoading || (
+						<P
+							{...css({
+								flexBasis: 0,
+								flexGrow: 1,
+								textAlign: "justify",
+								paddingTop: Platform.isTV ? 0 : ts(4),
+							})}
+						>
+							{overview ?? t("show.noOverview")}
+						</P>
+					)}
+				</Skeleton>
+			</TvPressable>
+			{!Platform.isTV && (
+				<>
+					<HR
+						orientation="vertical"
+						{...css({ marginX: ts(2), display: { xs: "none", sm: "flex" } })}
+					/>
+					<View {...css({ flexBasis: percent(25), display: { xs: "none", sm: "flex" } })}>
+						<H2>{t("show.genre")}</H2>
+						{isLoading || genres?.length ? (
+							<UL>
+								{(isLoading ? [...Array(3)] : genres!).map((genre, i) => (
+									<LI key={genre?.id ?? i}>
+										{isLoading ? (
+											<Skeleton {...css({ marginBottom: 0 })} />
+										) : (
+											<A href={`/genres/${genre.slug}`}>{genre.name}</A>
+										)}
+									</LI>
+								))}
+							</UL>
+						) : (
+							<P>{t("show.genre-none")}</P>
+						)}
+					</View>
+				</>
+			)}
 		</Container>
 	);
 };

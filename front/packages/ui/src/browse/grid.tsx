@@ -66,7 +66,7 @@ export const ItemGrid = ({
 						fover: {
 							self: focusReset,
 							poster: {
-								borderColor: (theme) => theme.appbar,
+								borderColor: (theme) => theme.accent,
 							},
 							title: {
 								textDecorationLine: "underline",
