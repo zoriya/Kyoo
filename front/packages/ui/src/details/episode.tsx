@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { H6, Image, Link, P, Skeleton, ts } from "@kyoo/primitives";
+import { focusReset, H6, Image, Link, P, Skeleton, ts } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { Layout, WithLoading } from "../fetch";
@@ -95,6 +95,7 @@ export const EpisodeLine = ({
 						},
 					},
 					focus: {
+						self: focusReset,
 						poster: {
 							transform: [{ scale: 1.1 }],
 							borderColor: (theme: Theme) => theme.accent,

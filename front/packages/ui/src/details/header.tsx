@@ -37,18 +37,11 @@ import {
 	LI,
 	A,
 	ts,
+	Button,
 } from "@kyoo/primitives";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
-import {
-	FlatList,
-	NativeSyntheticEvent,
-	Platform,
-	Pressable,
-	PressableProps,
-	TargetedEvent,
-	View,
-} from "react-native";
+import { Platform, Pressable, PressableProps, View } from "react-native";
 import {
 	Theme,
 	md,
@@ -225,7 +218,7 @@ const TitleLine = ({
 };
 
 const TvPressable = ({ children, ...props }: PressableProps) => {
-	if (!Platform.isTV) return <>children</>;
+	if (!Platform.isTV) return <>{children}</>;
 	return <Pressable {...props}>{children}</Pressable>;
 };
 
@@ -243,7 +236,15 @@ const Description = ({
 	const { css } = useYoshiki();
 
 	return (
-		<Container {...css({ flexDirection: { xs: "column", sm: "row" } }, props)}>
+		<Container
+			{...css(
+				{
+					flexDirection: Platform.isTV ? "column" : { xs: "column", sm: "row" },
+					paddingBottom: ts(1),
+				},
+				props,
+			)}
+		>
 			{!Platform.isTV && (
 				<P
 					{...css({
@@ -266,14 +267,29 @@ const Description = ({
 				</P>
 			)}
 
-			<TvPressable {...css({ focus: { self: { bg: "red" } } })}>
+			<TvPressable
+				{...css({
+					alignItems: "flex-start",
+					child: {
+						button: {
+							flexGrow: 0,
+							p: ts(2),
+							borderRadius: ts(5),
+						},
+					},
+					focus: {
+						button: { bg: (theme: Theme) => theme.accent },
+						text: { color: (theme: Theme) => theme.colors.white },
+					},
+				})}
+			>
 				<Skeleton
 					lines={4}
 					{...css({
 						width: percent(100),
 						flexBasis: 0,
 						flexGrow: 1,
-						paddingTop: Platform.isTV ? 0 : ts(4),
+						paddingTop: Platform.isTV ? 0 : { sm: ts(4) },
 					})}
 				>
 					{isLoading || (
@@ -282,13 +298,18 @@ const Description = ({
 								flexBasis: 0,
 								flexGrow: 1,
 								textAlign: "justify",
-								paddingTop: Platform.isTV ? 0 : ts(4),
+								paddingTop: Platform.isTV ? 0 : { sm: ts(4) },
 							})}
 						>
 							{overview ?? t("show.noOverview")}
 						</P>
 					)}
 				</Skeleton>
+				{Platform.isTV && (
+					<View {...css("button")}>
+						<P {...css("text")}>{t("show.showMore")}</P>
+					</View>
+				)}
 			</TvPressable>
 			{!Platform.isTV && (
 				<>
