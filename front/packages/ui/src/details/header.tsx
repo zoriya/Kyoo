@@ -344,6 +344,8 @@ const Description = ({
 export const Header = ({ query, slug }: { query: QueryIdentifier<Show | Movie>; slug: string }) => {
 	const { css } = useYoshiki();
 
+	// TODO center elements when they are focused 
+
 	return (
 		<Fetch query={query}>
 			{({ isLoading, ...data }) => (

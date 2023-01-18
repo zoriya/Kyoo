@@ -19,7 +19,7 @@
  */
 
 import { PortalProvider } from "@gorhom/portal";
-import { ThemeSelector } from "@kyoo/primitives";
+import { ThemeSelector, ts } from "@kyoo/primitives";
 import { NavbarRight, NavbarTitle } from "@kyoo/ui";
 import { createQueryClient } from "@kyoo/models";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -34,9 +34,9 @@ import {
 	Poppins_900Black,
 } from "@expo-google-fonts/poppins";
 import { useCallback, useLayoutEffect, useState } from "react";
-import { useColorScheme } from "react-native";
+import { Platform, useColorScheme } from "react-native";
 import { initReactI18next } from "react-i18next";
-import { useTheme } from "yoshiki/native";
+import { useTheme, useYoshiki } from "yoshiki/native";
 import "intl-pluralrules";
 
 // TODO: use a backend to load jsons.
@@ -56,21 +56,39 @@ i18next.use(initReactI18next).init({
 });
 
 const ThemedStack = ({ onLayout }: { onLayout?: () => void }) => {
-	const theme = useTheme();
+	const { css, theme } = useYoshiki();
 
 	return (
 		<Stack
-			screenOptions={{
-				headerTitle: () => <NavbarTitle onLayout={onLayout} />,
-				headerRight: () => <NavbarRight />,
-				contentStyle: {
-					backgroundColor: theme.background,
-				},
-				headerStyle: {
-					backgroundColor: theme.accent,
-				},
-				headerTintColor: theme.colors.white,
-			}}
+			screenOptions={
+				Platform.isTV
+					? {
+							headerTitle: () => null,
+							headerRight: () => (
+								<NavbarTitle
+									onLayout={onLayout}
+									{...css({ paddingTop: ts(4), paddingRight: ts(4) })}
+								/>
+							),
+							contentStyle: {
+								backgroundColor: theme.background,
+							},
+							headerStyle: { backgroundColor: "transparent" },
+							headerBackVisible: false,
+							headerTransparent: true,
+					  }
+					: {
+							headerTitle: () => <NavbarTitle onLayout={onLayout} />,
+							headerRight: () => <NavbarRight />,
+							contentStyle: {
+								backgroundColor: theme.background,
+							},
+							headerStyle: {
+								backgroundColor: theme.accent,
+							},
+							headerTintColor: theme.colors.white,
+					  }
+			}
 		/>
 	);
 };
@@ -85,7 +103,7 @@ export default function Root() {
 	useLayoutEffect(() => {
 		// This does not seems to work on the global scope so why not.
 		SplashScreen.preventAutoHideAsync();
-	})
+	});
 
 	const onLayout = useCallback(async () => {
 		if (fontsLoaded) {
