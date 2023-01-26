@@ -48,6 +48,8 @@ namespace Kyoo.Postgresql
 		/// </summary>
 		private readonly bool _skipConfigure;
 
+		// TOOD: This needs ot be updated but ef-core still does not offer a way to use this.
+		[Obsolete]
 		static PostgresContext()
 		{
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<Status>();
@@ -89,10 +91,7 @@ namespace Kyoo.Postgresql
 		{
 			if (!_skipConfigure)
 			{
-				if (_connection != null)
-					optionsBuilder.UseNpgsql(_connection);
-				else
-					optionsBuilder.UseNpgsql();
+				optionsBuilder.UseNpgsql();
 				if (_debugMode)
 					optionsBuilder.EnableDetailedErrors().EnableSensitiveDataLogging();
 			}

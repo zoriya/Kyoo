@@ -155,8 +155,8 @@ export type QueryIdentifier<T = unknown> = {
 export type QueryPage<Props = {}> = ComponentType<Props> & {
 	getFetchUrls?: (route: { [key: string]: string }) => QueryIdentifier[];
 	getLayout?:
-		| ComponentType<{ page: ReactElement }>
-		| { Layout: ComponentType<{ page: ReactElement }>; props: object };
+		| QueryPage<{ page: ReactElement }>
+		| { Layout: QueryPage<{ page: ReactElement }>; props: object };
 };
 
 const toQueryKey = <Data,>(query: QueryIdentifier<Data>) => {

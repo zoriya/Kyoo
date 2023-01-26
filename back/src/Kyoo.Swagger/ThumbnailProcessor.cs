@@ -30,7 +30,7 @@ namespace Kyoo.Swagger
 		/// <inheritdoc />
 		public void Process(SchemaProcessorContext context)
 		{
-			if (!context.Type.IsAssignableTo(typeof(IThumbnails)))
+			if (!context.ContextualType.OriginalType.IsAssignableTo(typeof(IThumbnails)))
 				return;
 			foreach ((int _, string imageP) in Images.ImageName)
 			{
