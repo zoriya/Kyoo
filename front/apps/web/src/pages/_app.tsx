@@ -26,7 +26,7 @@ import { createQueryClient, fetchQuery, QueryIdentifier, QueryPage } from "@kyoo
 import { useState } from "react";
 import NextApp, { AppContext, type AppProps } from "next/app";
 import { Poppins } from "@next/font/google";
-import { useTheme, useMobileHover } from "yoshiki/web";
+import { useTheme, useMobileHover, useStyleRegistry, StyleRegistryProvider } from "yoshiki/web";
 import superjson from "superjson";
 import Head from "next/head";
 import { withTranslations } from "../i18n";
@@ -80,6 +80,12 @@ const GlobalCssTheme = () => {
 	);
 };
 
+const YoshikiDebug = ({ children }: { children: JSX.Element }) => {
+	if (typeof window === "undefined") return children;
+	const registry = useStyleRegistry();
+	return <StyleRegistryProvider registry={registry}>{children}</StyleRegistryProvider>;
+};
+
 const App = ({ Component, pageProps }: AppProps) => {
 	const [queryClient] = useState(() => createQueryClient());
 	const { queryState, ...props } = superjson.deserialize<any>(pageProps ?? { json: {} });
@@ -90,19 +96,21 @@ const App = ({ Component, pageProps }: AppProps) => {
 	useMobileHover();
 
 	return (
-		<>
-			<Head>
-				<title>Kyoo</title>
-			</Head>
-			<QueryClientProvider client={queryClient}>
-				<Hydrate state={queryState}>
-					<ThemeSelector theme="auto" font={{ normal: "inherit" }}>
-						<GlobalCssTheme />
-						<Layout page={<Component {...props} />} {...layoutProps} />
-					</ThemeSelector>
-				</Hydrate>
-			</QueryClientProvider>
-		</>
+		<YoshikiDebug>
+			<>
+				<Head>
+					<title>Kyoo</title>
+				</Head>
+				<QueryClientProvider client={queryClient}>
+					<Hydrate state={queryState}>
+						<ThemeSelector theme="auto" font={{ normal: "inherit" }}>
+							<GlobalCssTheme />
+							<Layout page={<Component {...props} />} {...layoutProps} />
+						</ThemeSelector>
+					</Hydrate>
+				</QueryClientProvider>
+			</>
+		</YoshikiDebug>
 	);
 };
 
