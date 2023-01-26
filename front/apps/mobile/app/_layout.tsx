@@ -20,7 +20,7 @@
 
 import { PortalProvider } from "@gorhom/portal";
 import { ThemeSelector, ts } from "@kyoo/primitives";
-import { NavbarRight, NavbarTitle } from "@kyoo/ui";
+import { NavbarRight, NavbarTitle, TvDrawer } from "@kyoo/ui";
 import { createQueryClient } from "@kyoo/models";
 import { QueryClientProvider } from "@tanstack/react-query";
 import i18next from "i18next";
@@ -34,7 +34,7 @@ import {
 	Poppins_900Black,
 } from "@expo-google-fonts/poppins";
 import { useCallback, useLayoutEffect, useState } from "react";
-import { Platform, useColorScheme } from "react-native";
+import { Platform, useColorScheme, View } from "react-native";
 import { initReactI18next } from "react-i18next";
 import { useTheme, useYoshiki } from "yoshiki/native";
 import "intl-pluralrules";
@@ -124,7 +124,9 @@ export default function Root() {
 				}}
 			>
 				<PortalProvider>
-					<ThemedStack onLayout={onLayout} />
+					<TvDrawer>
+						<ThemedStack onLayout={onLayout} />
+					</TvDrawer>
 				</PortalProvider>
 			</ThemeSelector>
 		</QueryClientProvider>

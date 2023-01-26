@@ -23,3 +23,4 @@ export { BrowsePage } from "./browse";
 export { MovieDetails, ShowDetails } from "./details";
 export { Player } from "./player";
 export { SearchPage } from "./search";
+export { TvDrawer } from "./drawer";
