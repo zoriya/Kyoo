@@ -4,7 +4,7 @@ WORKDIR /transcoder
 COPY src/Kyoo.Transcoder .
 RUN cmake . && make -j
 
-FROM mcr.microsoft.com/dotnet/sdk:6.0 as builder
+FROM mcr.microsoft.com/dotnet/sdk:7.0 as builder
 WORKDIR /kyoo
 
 COPY Kyoo.sln ./Kyoo.sln
@@ -28,7 +28,7 @@ COPY . .
 ARG VERSION
 RUN dotnet publish --no-restore -c Release -o /opt/kyoo "-p:Version=${VERSION:-"0.0.0-dev"};SkipTranscoder=true" src/Kyoo.Host.Console
 
-FROM mcr.microsoft.com/dotnet/aspnet:6.0
+FROM mcr.microsoft.com/dotnet/aspnet:7.0
 RUN apt-get update && apt-get install -y libavutil-dev libavcodec-dev libavformat-dev
 EXPOSE 5000
 COPY --from=builder /opt/kyoo /usr/lib/kyoo

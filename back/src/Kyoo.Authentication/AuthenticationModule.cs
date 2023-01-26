@@ -77,7 +77,7 @@ namespace Kyoo.Authentication
 		{
 			AuthenticationOption jwt = ConfigurationBinder.Get<AuthenticationOption>(
 				_configuration.GetSection(AuthenticationOption.Path)
-			);
+			) ?? new();
 
 			// TODO handle direct-videos with bearers (probably add a cookie and a app.Use to translate that for videos)
 			services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
