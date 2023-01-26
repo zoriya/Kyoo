@@ -21,7 +21,8 @@
 import { QueryIdentifier, QueryPage, WatchItem, WatchItemP, useFetch } from "@kyoo/models";
 import { Head } from "@kyoo/primitives";
 import { useState, useEffect, ComponentProps } from "react";
-import { Platform, Pressable, StyleSheet } from "react-native";
+import { BackHandler, Platform, Pressable, StyleSheet } from "react-native";
+import { useTVEventHandler } from "@kyoo/primitives/tv";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "solito/router";
 import { useAtom } from "jotai";
@@ -106,6 +107,19 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 		document.addEventListener("pointermove", handler);
 		return () => document.removeEventListener("pointermove", handler);
 	});
+	useTVEventHandler((e) => {
+		if (e.eventType === "cancel") setMouseMoved(false);
+		show();
+	});
+	useEffect(() => {
+		const handler = BackHandler.addEventListener("hardwareBackPress", () => {
+			if (!displayControls) return false;
+			setMouseMoved(false);
+			return true;
+		});
+		return () => handler.remove();
+	}, [displayControls]);
+
 
 	useEffect(() => {
 		if (Platform.OS !== "web" || !/Mobi/i.test(window.navigator.userAgent)) return;
@@ -116,7 +130,7 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 	if (error || playbackError)
 		return (
 			<>
-				<Back isLoading={false} {...css({ position: "relative", bg: (theme) => theme.appbar })} />
+				<Back isLoading={false} {...css({ position: "relative", bg: (theme) => theme.accent })} />
 				<ErrorView error={error ?? { errors: [playbackError!] }} />
 			</>
 		);

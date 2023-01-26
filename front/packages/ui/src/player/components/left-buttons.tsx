@@ -21,7 +21,7 @@
 import { IconButton, Link, P, Slider, tooltip, ts } from "@kyoo/primitives";
 import { useAtom, useAtomValue } from "jotai";
 import { useTranslation } from "react-i18next";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 import SkipPrevious from "@material-symbols/svg-400/rounded/skip_previous-fill.svg";
 import SkipNext from "@material-symbols/svg-400/rounded/skip_next-fill.svg";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
@@ -32,13 +32,16 @@ import VolumeDown from "@material-symbols/svg-400/rounded/volume_down-fill.svg";
 import VolumeUp from "@material-symbols/svg-400/rounded/volume_up-fill.svg";
 import { durationAtom, mutedAtom, playAtom, progressAtom, volumeAtom } from "../state";
 import { px, useYoshiki } from "yoshiki/native";
+import { RefObject } from "react";
 
 export const LeftButtons = ({
 	previousSlug,
 	nextSlug,
+	playRef,
 }: {
 	previousSlug?: string | null;
 	nextSlug?: string | null;
+	playRef: RefObject<View>;
 }) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
@@ -58,7 +61,9 @@ export const LeftButtons = ({
 				/>
 			)}
 			<IconButton
+				ref={playRef}
 				icon={isPlaying ? Pause : PlayArrow}
+				hasTVPreferredFocus
 				onPress={() => setPlay(!isPlaying)}
 				{...tooltip(isPlaying ? t("player.pause") : t("player.play"), true)}
 				{...spacing}
@@ -72,7 +77,7 @@ export const LeftButtons = ({
 					{...spacing}
 				/>
 			)}
-			<VolumeSlider />
+			{!Platform.isTV && <VolumeSlider />}
 			<ProgressText />
 		</View>
 	);

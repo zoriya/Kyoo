@@ -35,7 +35,7 @@ import {
 } from "@kyoo/primitives";
 import { Chapter, Font, Track } from "@kyoo/models";
 import { useAtomValue, useSetAtom, useAtom } from "jotai";
-import { View, ViewProps } from "react-native";
+import { Platform, View, ViewProps } from "react-native";
 import { useTranslation } from "react-i18next";
 import { percent, rem, useYoshiki } from "yoshiki/native";
 import { useRouter } from "solito/router";
@@ -43,6 +43,7 @@ import ArrowBack from "@material-symbols/svg-400/rounded/arrow_back-fill.svg";
 import { LeftButtons } from "./left-buttons";
 import { RightButtons } from "./right-buttons";
 import { bufferedAtom, durationAtom, loadAtom, playAtom, progressAtom } from "../state";
+import { useEffect, useRef } from "react";
 
 export const Hover = ({
 	isLoading,
@@ -74,6 +75,14 @@ export const Hover = ({
 	onMenuClose: () => void;
 	show: boolean;
 } & ViewProps) => {
+	const ref = useRef<View | null>(null);
+
+	useEffect(() => {
+		setTimeout(() => {
+			ref.current?.focus();
+		}, 100);
+	}, [show]);
+
 	// TODO animate show
 	const opacity = !show && { opacity: 0 };
 	return (
@@ -113,7 +122,7 @@ export const Hover = ({
 							<View
 								{...css({ flexDirection: "row", flexGrow: 1, justifyContent: "space-between" })}
 							>
-								<LeftButtons previousSlug={previousSlug} nextSlug={nextSlug} />
+								<LeftButtons previousSlug={previousSlug} nextSlug={nextSlug} playRef={ref} />
 								<RightButtons
 									subtitles={subtitles}
 									fonts={fonts}
@@ -176,14 +185,18 @@ export const Back = ({
 				props,
 			)}
 		>
-			<IconButton
-				icon={ArrowBack}
-				{...(href ? { as: Link as any, href: href } : { as: PressableFeedback, onPress: router.back })}
-				{...tooltip(t("player.back"))}
-			/>
+			{!Platform.isTV && (
+				<IconButton
+					icon={ArrowBack}
+					{...(href
+						? { as: Link as any, href: href }
+						: { as: PressableFeedback, onPress: router.back })}
+					{...tooltip(t("player.back"))}
+				/>
+			)}
 			<Skeleton>
 				{isLoading ? (
-					<Skeleton {...css({ width: rem(5), })} />
+					<Skeleton {...css({ width: rem(5) })} />
 				) : (
 					<H1
 						{...css({

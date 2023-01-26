@@ -19,8 +19,10 @@
  */
 
 import { useRef, useState } from "react";
-import { GestureResponderEvent, Platform, View } from "react-native";
+import { GestureResponderEvent, Platform, Pressable, View } from "react-native";
+import { useTVEventHandler } from "@kyoo/primitives/tv";
 import { px, percent, Stylable, useYoshiki } from "yoshiki/native";
+import { focusReset } from "./utils";
 
 export const Slider = ({
 	progress,
@@ -49,7 +51,6 @@ export const Slider = ({
 	const [isHover, setHover] = useState(false);
 	const [isFocus, setFocus] = useState(false);
 	const smallBar = !(isSeeking || isHover || isFocus);
-
 	const ts = (value: number) => px(value * size);
 
 	const change = (event: GestureResponderEvent) => {
@@ -61,16 +62,17 @@ export const Slider = ({
 		setProgress(Math.max(0, Math.min(locationX / layout.width, 1)) * max);
 	};
 
+	useTVEventHandler((e) => {
+		if (!isFocus) return;
+
+		if (e.eventType === "left" && e.eventKeyAction === 0) setProgress(Math.max(progress - 5, 0));
+		if (e.eventType === "right" && e.eventKeyAction === 0) setProgress(Math.max(progress + 5, 0));
+	});
+
+	const Container = Platform.isTV ? Pressable : View;
 	return (
-		<View
+		<Container
 			ref={ref}
-			// @ts-ignore Web only
-			onMouseEnter={() => setHover(true)}
-			// @ts-ignore Web only
-			onMouseLeave={() => setHover(false)}
-			focusable
-			onFocus={() => setFocus(true)}
-			onBlur={() => setFocus(false)}
 			onStartShouldSetResponder={() => true}
 			onResponderGrant={() => {
 				setSeek(true);
@@ -85,6 +87,7 @@ export const Slider = ({
 			onLayout={() =>
 				ref.current?.measure((_, __, width, ___, pageX) => setLayout({ width: width, x: pageX }))
 			}
+			// @ts-ignore Web only
 			onKeyDown={(e: KeyboardEvent) => {
 				switch (e.code) {
 					case "ArrowLeft":
@@ -107,10 +110,16 @@ export const Slider = ({
 					// @ts-ignore Web only
 					cursor: "pointer",
 					focus: {
-						shadowRadius: 0,
+						self: focusReset,
 					},
 				},
-				props,
+				{
+					onFocus: () => setFocus(true),
+					onBlur: () => setFocus(false),
+					onMouseEnter: () => setHover(true),
+					onMouseLeave: () => setHover(false),
+					...props,
+				},
 			)}
 		>
 			<View
@@ -174,7 +183,7 @@ export const Slider = ({
 							position: "absolute",
 							top: 0,
 							bottom: 0,
-							marginY: ts(Platform.OS === "android" ? -0.5 : 0.5),
+							marginY: ts(Platform.OS === "android" && !Platform.isTV ? -0.5 : 0.5),
 							bg: (theme) => theme.accent,
 							width: ts(2),
 							height: ts(2),
@@ -190,6 +199,6 @@ export const Slider = ({
 					},
 				)}
 			/>
-		</View>
+		</Container>
 	);
 };
