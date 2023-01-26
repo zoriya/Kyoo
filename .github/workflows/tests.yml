@@ -10,7 +10,7 @@ jobs:
   tests:
     name: Back tests
     runs-on: ubuntu-latest
-    container: mcr.microsoft.com/dotnet/sdk:6.0
+    container: mcr.microsoft.com/dotnet/sdk:7.0
     services:
       postgres:
         image: postgres
@@ -30,7 +30,7 @@ jobs:
       run: |
         cd back
         dotnet build '-p:SkipTranscoder=true' -p:CopyLocalLockFileAssemblies=true
-        cp ./out/bin/Kyoo.Abstractions/Debug/net6.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll ./tests/Kyoo.Tests/bin/Debug/net6.0/
+        cp ./out/bin/Kyoo.Abstractions/Debug/net7.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll ./tests/Kyoo.Tests/bin/Debug/net7.0/
 
     - name: Test
       run: |
