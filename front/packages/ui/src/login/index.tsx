@@ -18,9 +18,12 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./navbar";
-export { BrowsePage } from "./browse";
-export { MovieDetails, ShowDetails } from "./details";
-export { Player } from "./player";
-export { SearchPage } from "./search";
-export { LoginPage } from "./login";
+import { QueryPage } from "@kyoo/models";
+import { View } from "react-native";
+import { DefaultLayout } from "../layout";
+
+export const LoginPage: QueryPage = () => {
+	return <View />;
+};
+
+LoginPage.getLayout = DefaultLayout;

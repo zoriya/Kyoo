@@ -88,7 +88,7 @@ export const NavbarProfile = () => {
 
 	return (
 		<Link
-			href="/auth/login"
+			href="/login"
 			{...tooltip(t("navbar.login"))}
 			{...css({ marginLeft: ts(1), justifyContent: "center" })}
 		>
