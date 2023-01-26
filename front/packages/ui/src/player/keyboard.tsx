@@ -107,17 +107,17 @@ export const useVideoKeyboard = (
 					break;
 
 				case "ArrowLeft":
-					reducer({ type: "seek", value: -5000 });
+					reducer({ type: "seek", value: -5 });
 					break;
 				case "ArrowRight":
-					reducer({ type: "seek", value: +5000 });
+					reducer({ type: "seek", value: +5 });
 					break;
 
 				case "j":
-					reducer({ type: "seek", value: -10_000 });
+					reducer({ type: "seek", value: -10 });
 					break;
 				case "l":
-					reducer({ type: "seek", value: +10_000 });
+					reducer({ type: "seek", value: +10 });
 					break;
 
 				case "ArrowUp":
@@ -125,37 +125,6 @@ export const useVideoKeyboard = (
 					break;
 				case "ArrowDown":
 					reducer({ type: "volume", value: -5 });
-					break;
-
-				case "0":
-					reducer({ type: "seekPercent", value: 0 });
-					break;
-				case "1":
-					reducer({ type: "seekPercent", value: 10 });
-					break;
-				case "2":
-					reducer({ type: "seekPercent", value: 20 });
-					break;
-				case "3":
-					reducer({ type: "seekPercent", value: 30 });
-					break;
-				case "4":
-					reducer({ type: "seekPercent", value: 40 });
-					break;
-				case "5":
-					reducer({ type: "seekPercent", value: 50 });
-					break;
-				case "6":
-					reducer({ type: "seekPercent", value: 60 });
-					break;
-				case "7":
-					reducer({ type: "seekPercent", value: 70 });
-					break;
-				case "8":
-					reducer({ type: "seekPercent", value: 80 });
-					break;
-				case "9":
-					reducer({ type: "seekPercent", value: 90 });
 					break;
 
 				case "f":
@@ -179,6 +148,38 @@ export const useVideoKeyboard = (
 					break;
 
 				default:
+					break;
+			}
+			switch (event.code) {
+				case "Digit0":
+					reducer({ type: "seekPercent", value: 0 });
+					break;
+				case "Digit1":
+					reducer({ type: "seekPercent", value: 10 });
+					break;
+				case "Digit2":
+					reducer({ type: "seekPercent", value: 20 });
+					break;
+				case "Digit3":
+					reducer({ type: "seekPercent", value: 30 });
+					break;
+				case "Digit4":
+					reducer({ type: "seekPercent", value: 40 });
+					break;
+				case "Digit5":
+					reducer({ type: "seekPercent", value: 50 });
+					break;
+				case "Digit6":
+					reducer({ type: "seekPercent", value: 60 });
+					break;
+				case "Digit7":
+					reducer({ type: "seekPercent", value: 70 });
+					break;
+				case "Digit8":
+					reducer({ type: "seekPercent", value: 80 });
+					break;
+				case "Digit9":
+					reducer({ type: "seekPercent", value: 90 });
 					break;
 			}
 		};
