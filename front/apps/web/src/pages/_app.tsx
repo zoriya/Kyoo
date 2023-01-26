@@ -124,9 +124,13 @@ const App = ({ Component, pageProps }: AppProps) => {
 
 App.getInitialProps = async (ctx: AppContext) => {
 	const appProps = await NextApp.getInitialProps(ctx);
+	const Component = ctx.Component as QueryPage;
 
-	const getUrl = (ctx.Component as QueryPage).getFetchUrls;
-	const getLayoutUrl = ((ctx.Component as QueryPage).getLayout as QueryPage)?.getFetchUrls;
+	const getUrl = Component.getFetchUrls;
+	const getLayoutUrl =
+		Component.getLayout && "Layout" in Component.getLayout
+			? Component.getLayout.Layout.getFetchUrls
+			: Component.getLayout?.getFetchUrls;
 
 	const urls: QueryIdentifier[] = [
 		...(getUrl ? getUrl(ctx.router.query as any) : []),
