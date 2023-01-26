@@ -21,8 +21,8 @@
 import { Portal } from "@gorhom/portal";
 import { ScrollView } from "moti";
 import { ComponentType, createContext, ReactNode, useContext, useEffect, useState } from "react";
-import { StyleSheet, Pressable } from "react-native";
-import { percent, px, sm, useYoshiki, xl } from "yoshiki/native";
+import { StyleSheet, Pressable, Platform, BackHandler } from "react-native";
+import { min, percent, px, sm, Theme, useYoshiki, vh, xl } from "yoshiki/native";
 import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
 import { Icon, IconButton } from "./icons";
 import { PressableFeedback } from "./links";
@@ -52,6 +52,15 @@ const Menu = <AsProps,>({
 		else onMenuClose?.call(null);
 	}, [isOpen, onMenuClose, onMenuOpen]);
 
+	useEffect(() => {
+		const handler = BackHandler.addEventListener("hardwareBackPress", () => {
+			if (!isOpen) return false;
+			setOpen(false);
+			return true;
+		});
+		return () => handler.remove();
+	}, [isOpen]);
+
 	return (
 		<>
 			{/* @ts-ignore */}
@@ -75,28 +84,26 @@ const Menu = <AsProps,>({
 											width: percent(100),
 											alignSelf: "center",
 											borderTopLeftRadius: px(26),
-											borderTopRightRadius: { xs: px(26), xl: 0 },
-											paddingTop: { xs: px(26), xl: 0 },
-											marginTop: { xs: px(72), xl: 0 },
+											borderTopRightRadius: px(26),
+											paddingTop: px(26),
+											marginTop: px(72),
 										},
 										sm({
 											maxWidth: px(640),
 											marginHorizontal: px(56),
 										}),
-										xl({
+										Platform.isTV && {
 											top: 0,
 											right: 0,
 											marginRight: 0,
 											borderBottomLeftRadius: px(26),
-										}),
+											maxWidth: min(px(640), vh(45)),
+											marginHorizontal: px(56),
+											borderTopRightRadius: 0,
+											marginTop: 0,
+										},
 									])}
 								>
-									<IconButton
-										icon={Close}
-										color={theme.colors.black}
-										onPress={() => setOpen(false)}
-										{...css({ alignSelf: "flex-end", display: { xs: "none", xl: "flex" } })}
-									/>
 									{children}
 								</ScrollView>
 							</MenuContext.Provider>
@@ -127,6 +134,7 @@ const MenuItem = ({
 				setOpen?.call(null, false);
 				onSelect?.call(null);
 			}}
+			hasTVPreferredFocus={selected}
 			{...css(
 				{
 					paddingHorizontal: ts(2),
@@ -134,12 +142,20 @@ const MenuItem = ({
 					height: ts(5),
 					alignItems: "center",
 					flexDirection: "row",
+					focus: {
+						self: {
+							bg: (theme: Theme) => theme.alternate.accent,
+						},
+						// text: {
+						// 	color: (theme: Theme) => theme.alternate.contrast,
+						// },
+					},
 				},
 				props as any,
 			)}
 		>
 			{selected && <Icon icon={Check} color={theme.paragraph} size={24} />}
-			<P {...css({ paddingLeft: ts(2) + +!selected * px(24) })}>{label}</P>
+			<P {...css(["text", { paddingLeft: ts(2) + +!selected * px(24) }])}>{label}</P>
 		</PressableFeedback>
 	);
 };

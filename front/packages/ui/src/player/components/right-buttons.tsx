@@ -28,10 +28,7 @@ import ClosedCaption from "@material-symbols/svg-400/rounded/closed_caption-fill
 import Fullscreen from "@material-symbols/svg-400/rounded/fullscreen-fill.svg";
 import FullscreenExit from "@material-symbols/svg-400/rounded/fullscreen_exit-fill.svg";
 import { Stylable, useYoshiki } from "yoshiki/native";
-import { createParam } from "solito";
 import { fullscreenAtom, subtitleAtom } from "../state";
-
-const { useParam } = createParam<{ subtitle?: string }>();
 
 export const RightButtons = ({
 	subtitles,
