@@ -95,7 +95,7 @@ export const ShowDetails: QueryPage<{ slug: string; season: string }> = ({ slug,
 	);
 };
 
-ShowDetails.getFetchUrls = ({ slug, season = 1 }) => [
+ShowDetails.getFetchUrls = ({ slug, season }) => [
 	query(slug),
 	// ShowStaff.query(slug),
 	EpisodeList.query(slug, season),
