@@ -18,40 +18,48 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { forwardRef } from "react";
-import { TextInput } from "react-native";
-import { px, Stylable, useYoshiki } from "yoshiki/native";
+import { forwardRef, ReactNode } from "react";
+import { Platform, TextInput, TextInputProps, View } from "react-native";
+import { px, useYoshiki } from "yoshiki/native";
 import { ts } from "./utils";
+
+const focusReset: object = Platform.OS === "web" ? { focus: { self: { boxShadow: "none" } } } : {};
 
 export const Input = forwardRef<
 	TextInput,
 	{
-		onChange: (value: string) => void;
-		value?: string;
-		placeholder?: string;
-		placeholderTextColor?: string;
-		onBlur?: (value: string | undefined) => void;
-	} & Stylable
->(function _Input({ onChange, value, placeholder, placeholderTextColor, onBlur, ...props }, ref) {
+		variant?: "small" | "big";
+		style;
+		right?: ReactNode;
+	} & TextInputProps
+>(function _Input({ style, placeholderTextColor, variant = "small", right, ...props }, ref) {
 	const { css, theme } = useYoshiki();
 
 	return (
-		<TextInput
-			ref={ref}
-			value={value ?? ""}
-			onChangeText={onChange}
-			placeholder={placeholder}
-			placeholderTextColor={placeholderTextColor ?? theme.overlay1}
-			onBlur={() => onBlur?.call(null, value)}
+		<View
 			{...css(
-				{
-					borderColor: (theme) => theme.accent,
-					borderRadius: ts(1),
-					borderWidth: px(1),
-					padding: ts(0.5),
-				},
-				props,
+				[
+					{
+						borderColor: (theme) => theme.accent,
+						borderRadius: ts(1),
+						borderWidth: px(1),
+						padding: ts(0.5),
+						flexDirection: "row",
+					},
+					variant === "big" && {
+						borderRadius: ts(4),
+						p: ts(1),
+					},
+				],
+				{ style },
 			)}
-		/>
+		>
+			<TextInput
+				ref={ref}
+				placeholderTextColor={placeholderTextColor ?? theme.overlay1}
+				{...css({ flexGrow: 1, color: (theme) => theme.paragraph, ...focusReset }, props)}
+			/>
+			{right}
+		</View>
 	);
 });
