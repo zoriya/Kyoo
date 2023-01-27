@@ -49,5 +49,12 @@
 	},
 	"search": {
 		"empty": "No result found. Try a different query."
+	},
+	"login": {
+		"login": "Login",
+		"register": "Register",
+		"email": "Email",
+		"password": "Password",
+		"or-register": "Don’t have an account? <1>Register</1>."
 	}
 }
