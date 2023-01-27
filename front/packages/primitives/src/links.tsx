@@ -18,20 +18,11 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ComponentProps, ComponentType, forwardRef, Fragment, ReactNode } from "react";
-import {
-	Platform,
-	Pressable,
-	TextProps,
-	TouchableOpacity,
-	TouchableNativeFeedback,
-	View,
-	ViewProps,
-	StyleSheet,
-	PressableProps,
-} from "react-native";
+import { forwardRef, ReactNode } from "react";
+import { Platform, Pressable, TextProps, View, PressableProps } from "react-native";
 import { LinkCore, TextLink } from "solito/link";
-import { useYoshiki } from "yoshiki/native";
+import { useTheme, useYoshiki } from "yoshiki/native";
+import { alpha } from "./themes";
 
 export const A = ({
 	href,
@@ -59,54 +50,23 @@ export const A = ({
 	);
 };
 
-export const PressableFeedback = forwardRef<
-	unknown,
-	ViewProps & {
-		onFocus?: PressableProps["onFocus"];
-		onBlur?: PressableProps["onBlur"];
-		onPressIn?: PressableProps["onPressIn"];
-		onPressOut?: PressableProps["onPressOut"];
-		onPress?: PressableProps["onPress"];
-		WebComponent?: ComponentType;
-	}
->(function _Feedback({ children, WebComponent, ...props }, ref) {
-	const { onBlur, onFocus, onPressIn, onPressOut, onPress, ...noPressProps } = props;
-	const pressProps = { onBlur, onFocus, onPressIn, onPressOut, onPress };
-	const wrapperProps = Platform.select<ViewProps & { ref?: any }>({
-		android: {
-			style: {
-				borderRadius: StyleSheet.flatten(props?.style)?.borderRadius,
-				alignContent: "center",
-				justifyContent: "center",
-				overflow: "hidden",
-			},
-			ref,
-		},
-		default: {},
-	});
-	const Wrapper = wrapperProps.style ? View : Fragment;
-	const InnerPressable = Platform.select<ComponentType<{ children?: any }>>({
-		web: WebComponent ?? Pressable,
-		android: TouchableNativeFeedback,
-		ios: TouchableOpacity,
-		default: Pressable,
-	});
+export const PressableFeedback = forwardRef<View, PressableProps>(function _Feedback(
+	{ children, ...props },
+	ref,
+) {
+	const theme = useTheme();
 
 	return (
-		<Wrapper {...wrapperProps}>
-			<InnerPressable
-				{...Platform.select<object>({
-					android: { useForeground: true, ...pressProps },
-					default: { ref, ...props },
-				})}
-			>
-				{Platform.select<ReactNode>({
-					android: <View {...noPressProps}>{children}</View>,
-					ios: <View {...noPressProps}>{children}</View>,
-					default: children,
-				})}
-			</InnerPressable>
-		</Wrapper>
+		<Pressable
+			ref={ref}
+			// TODO: Enable ripple on tv. Waiting for https://github.com/react-native-tvos/react-native-tvos/issues/440
+			{...(Platform.isTV
+				? {}
+				: { android_ripple: { foreground: true, color: alpha(theme.contrast, 0.5) as any } })}
+			{...props}
+		>
+			{children}
+		</Pressable>
 	);
 });
 
@@ -114,13 +74,9 @@ export const Link = ({
 	href,
 	children,
 	...props
-}: { href: string } & Omit<ComponentProps<typeof PressableFeedback>, "WebComponent">) => {
+}: { href: string; children?: ReactNode } & PressableProps) => {
 	return (
-		<LinkCore
-			href={href}
-			Component={PressableFeedback}
-			componentProps={{ WebComponent: View, ...props }}
-		>
+		<LinkCore href={href} Component={PressableFeedback} componentProps={props}>
 			{children}
 		</LinkCore>
 	);
