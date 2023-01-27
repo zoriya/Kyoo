@@ -18,22 +18,37 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export { Header, Main, Nav, Footer, UL } from "@expo/html-elements";
-export * from "./text";
-export * from "./themes";
-export * from "./icons";
-export * from "./links";
-export * from "./avatar";
-export * from "./image";
-export * from "./skeleton";
-export * from "./tooltip";
-export * from "./container";
-export * from "./divider";
-export * from "./progress";
-export * from "./slider";
-export * from "./menu";
-export * from "./input";
-export * from "./button";
+import { px, Stylable, Theme, useYoshiki } from "yoshiki/native";
+import { PressableFeedback } from "./links";
+import { P } from "./text";
+import { ts } from "./utils";
 
-export * from "./animated";
-export * from "./utils";
+export const Button = ({
+	text,
+	onPress,
+	...props
+}: { text: string; onPress?: () => void } & Stylable) => {
+	const { css } = useYoshiki();
+
+	return (
+		<PressableFeedback
+			onPress={onPress}
+			{...css(
+				{
+					flexGrow: 0,
+					p: ts(.5),
+					borderRadius: ts(5),
+					borderColor: (theme) => theme.accent,
+					borderWidth: ts(0.5),
+					fover: {
+						self: { bg: (theme: Theme) => theme.accent },
+						text: { color: (theme: Theme) => theme.colors.white },
+					},
+				},
+				props,
+			)}
+		>
+			<P {...css({ textAlign: "center" }, "text")}>{text}</P>
+		</PressableFeedback>
+	);
+};
