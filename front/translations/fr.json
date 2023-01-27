@@ -49,5 +49,12 @@
 	},
 	"search": {
 		"empty": "Aucun résultat trouvé. Essayer avec une autre recherche."
+	},
+	"login": {
+		"login": "Connexion",
+		"register": "Créer un compte",
+		"email": "Email",
+		"password": "Mot de passe",
+		"or-register": "Vous n'avez pas de compte ? <1>Inscrivez-vous</1>."
 	}
 }

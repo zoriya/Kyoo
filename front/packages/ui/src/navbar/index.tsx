@@ -66,8 +66,8 @@ const SearchBar = forwardRef<
 		<Input
 			ref={ref}
 			value={query}
-			onBlur={onBlur}
-			onChange={(q) => {
+			onBlur={() => onBlur?.call(null, query)}
+			onChangeText={(q) => {
 				if (Platform.OS === "web") {
 					const action = window.location.pathname.startsWith("/search") ? replace : push;
 					if (q) action(`/search?q=${q}`, undefined, { shallow: true });

@@ -32,16 +32,17 @@ import { KyooErrors } from "./kyoo-errors";
 import { Page, Paged } from "./page";
 import { Platform } from "react-native";
 
+export const kyooUrl =
+	Platform.OS !== "web"
+		? process.env.PUBLIC_BACK_URL
+		: typeof window === "undefined"
+		? process.env.KYOO_URL ?? "http://localhost:5000"
+		: "/api";
+
 const queryFn = async <Data,>(
 	type: z.ZodType<Data>,
 	context: QueryFunctionContext,
 ): Promise<Data> => {
-	const kyooUrl =
-		Platform.OS !== "web"
-			? process.env.PUBLIC_BACK_URL
-			: typeof window === "undefined"
-			? process.env.KYOO_URL ?? "http://localhost:5000"
-			: "/api";
 	if (!kyooUrl) console.error("Kyoo's url is not defined.");
 
 	let resp;
