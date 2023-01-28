@@ -20,7 +20,7 @@
 
 import { forwardRef, ReactNode } from "react";
 import { Platform, TextInput, TextInputProps, View } from "react-native";
-import { px, useYoshiki } from "yoshiki/native";
+import { px, Theme, useYoshiki } from "yoshiki/native";
 import { ts } from "./utils";
 
 const focusReset: object = Platform.OS === "web" ? { focus: { self: { boxShadow: "none" } } } : {};
@@ -29,7 +29,6 @@ export const Input = forwardRef<
 	TextInput,
 	{
 		variant?: "small" | "big";
-		style;
 		right?: ReactNode;
 	} & TextInputProps
 >(function _Input({ style, placeholderTextColor, variant = "small", right, ...props }, ref) {
@@ -45,6 +44,8 @@ export const Input = forwardRef<
 						borderWidth: px(1),
 						padding: ts(0.5),
 						flexDirection: "row",
+						alignContent: "center",
+						alignItems: "center"
 					},
 					variant === "big" && {
 						borderRadius: ts(4),
@@ -57,7 +58,7 @@ export const Input = forwardRef<
 			<TextInput
 				ref={ref}
 				placeholderTextColor={placeholderTextColor ?? theme.overlay1}
-				{...css({ flexGrow: 1, color: (theme) => theme.paragraph, ...focusReset }, props)}
+				{...css({ flexGrow: 1, color: (theme: Theme) => theme.paragraph, ...focusReset }, props)}
 			/>
 			{right}
 		</View>
