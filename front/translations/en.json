@@ -55,6 +55,7 @@
 		"register": "Register",
 		"server": "Server Address",
 		"email": "Email",
+		"username": "Username",
 		"password": "Password",
 		"or-register": "Don’t have an account? <1>Register</1>."
 	}

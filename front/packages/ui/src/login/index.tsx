@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { QueryPage } from "@kyoo/models";
+import { KyooErrors, kyooUrl, QueryPage } from "@kyoo/models";
 import { Button, P, Input, ts, H1, A, IconButton } from "@kyoo/primitives";
 import { ComponentProps, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -65,6 +65,32 @@ const PasswordInput = (props: ComponentProps<typeof Input>) => {
 	);
 };
 
+const login = async (username: string, password: string) => {
+	let resp;
+	try {
+		resp = await fetch(`${kyooUrl}/auth/login`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				username,
+				password,
+			}),
+		});
+	} catch (e) {
+		console.error("Login error", e);
+		throw { errors: ["Could not reach Kyoo's server."] } as KyooErrors;
+	}
+	if (!resp.ok) {
+		const err = await resp.json() as KyooErrors;
+		return { type: "error", value: null, error: err.errors[0] };
+	}
+	const token = await resp.json();
+	// TODO: Save the token in the secure storage.
+	return { type: "value", value: token, error: null };
+};
+
 export const LoginPage: QueryPage = () => {
 	const { t } = useTranslation();
 	const { css } = useYoshiki();
@@ -77,6 +103,10 @@ export const LoginPage: QueryPage = () => {
 		},
 		default: {},
 	});
+
+	const [username, setUsername] = useState("");
+	const [password, setPassword] = useState("");
+	const [error, setError] = useState<string | null>(null);
 
 	return (
 		<ImageBackground
@@ -110,12 +140,25 @@ export const LoginPage: QueryPage = () => {
 							<Input variant="big" />
 						</>
 					)}
-					<P {...css({ paddingLeft: ts(1) })}>{t("login.email")}</P>
-					<Input autoComplete="email" variant="big" />
+					<P {...css({ paddingLeft: ts(1) })}>{t("login.username")}</P>
+					<Input
+						autoComplete="username"
+						variant="big"
+						onChangeText={(value) => setUsername(value)}
+					/>
 					<P {...css({ paddingLeft: ts(1) })}>{t("login.password")}</P>
-					<PasswordInput autoComplete="password" variant="big" />
+					<PasswordInput
+						autoComplete="password"
+						variant="big"
+						onChangeText={(value) => setPassword(value)}
+					/>
+					{error && <P {...css({ color: (theme) => theme.colors.red })}>{error}</P>}
 					<Button
 						text={t("login.login")}
+						onPress={async () => {
+							const { error } = await login(username, password);
+							setError(error);
+						}}
 						{...css({
 							m: ts(1),
 							width: px(250),
