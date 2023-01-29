@@ -53,6 +53,7 @@
 	"login": {
 		"login": "Login",
 		"register": "Register",
+		"server": "Server Address",
 		"email": "Email",
 		"password": "Password",
 		"or-register": "Don’t have an account? <1>Register</1>."

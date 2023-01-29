@@ -53,6 +53,7 @@
 	"login": {
 		"login": "Connexion",
 		"register": "Créer un compte",
+		"server": "Addresse du serveur",
 		"email": "Email",
 		"password": "Mot de passe",
 		"or-register": "Vous n'avez pas de compte ? <1>Inscrivez-vous</1>."
