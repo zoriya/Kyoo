@@ -70,8 +70,7 @@ export const LoginPage: QueryPage = () => {
 	const { css } = useYoshiki();
 
 	// TODO: Replace the hardcoded 1 to a random show/movie thumbnail.
-	// TODO: Use a dynamic path for RN
-	const src = `/api/shows/1/thumbnail`;
+	const src = `${Platform.OS === "web" ? "/api/" : process.env.PUBLIC_BACK_URL}/shows/1/thumbnail`;
 	const nativeProps = Platform.select<ImageProps>({
 		web: {
 			defaultSource: typeof src === "string" ? { uri: src! } : Array.isArray(src) ? src[0] : src!,
@@ -101,10 +100,16 @@ export const LoginPage: QueryPage = () => {
 						width: percent(75),
 						maxWidth: vw(100),
 						paddingHorizontal: ts(3),
-						marginTop: ts(6),
+						marginTop: Platform.OS === "web" ? ts(6) : 0,
 					})}
 				>
 					<H1>{t("login.login")}</H1>
+					{Platform.OS !== "web" && (
+						<>
+							<P {...css({ paddingLeft: ts(1) })}>{t("login.server")}</P>
+							<Input variant="big" />
+						</>
+					)}
 					<P {...css({ paddingLeft: ts(1) })}>{t("login.email")}</P>
 					<Input autoComplete="email" variant="big" />
 					<P {...css({ paddingLeft: ts(1) })}>{t("login.password")}</P>
