@@ -55,6 +55,7 @@
 		"register": "Créer un compte",
 		"server": "Addresse du serveur",
 		"email": "Email",
+		"username": "Username",
 		"password": "Mot de passe",
 		"or-register": "Vous n'avez pas de compte ? <1>Inscrivez-vous</1>."
 	}

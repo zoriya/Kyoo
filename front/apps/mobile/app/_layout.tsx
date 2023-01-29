@@ -26,14 +26,14 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import i18next from "i18next";
 import { Stack } from "expo-router";
 import { getLocales } from "expo-localization";
-import * as SplashScreen from "expo-splash-screen";
+import { SplashScreen } from "expo-router";
 import {
 	useFonts,
 	Poppins_300Light,
 	Poppins_400Regular,
 	Poppins_900Black,
 } from "@expo-google-fonts/poppins";
-import { useCallback, useLayoutEffect, useState } from "react";
+import { useState } from "react";
 import { useColorScheme } from "react-native";
 import { initReactI18next } from "react-i18next";
 import { useTheme } from "yoshiki/native";
@@ -75,25 +75,12 @@ const ThemedStack = ({ onLayout }: { onLayout?: () => void }) => {
 	);
 };
 
-SplashScreen.preventAutoHideAsync();
-
 export default function Root() {
 	const [queryClient] = useState(() => createQueryClient());
 	const theme = useColorScheme();
 	const [fontsLoaded] = useFonts({ Poppins_300Light, Poppins_400Regular, Poppins_900Black });
 
-	useLayoutEffect(() => {
-		// This does not seems to work on the global scope so why not.
-		SplashScreen.preventAutoHideAsync();
-	})
-
-	const onLayout = useCallback(async () => {
-		if (fontsLoaded) {
-			await SplashScreen.hideAsync();
-		}
-	}, [fontsLoaded]);
-
-	if (!fontsLoaded) return null;
+	if (!fontsLoaded) return <SplashScreen />;
 	return (
 		<QueryClientProvider client={queryClient}>
 			<ThemeSelector
@@ -106,7 +93,7 @@ export default function Root() {
 				}}
 			>
 				<PortalProvider>
-					<ThemedStack onLayout={onLayout} />
+					<ThemedStack />
 				</PortalProvider>
 			</ThemeSelector>
 		</QueryClientProvider>
