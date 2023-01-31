@@ -57,6 +57,9 @@
 		"email": "Email",
 		"username": "Username",
 		"password": "Password",
-		"or-register": "Don’t have an account? <1>Register</1>."
+		"confirm": "Confirm Password",
+		"or-register": "Don’t have an account? <1>Register</1>.",
+		"or-login": "Have an account already? <1>Log in</1>.",
+		"password-no-match": "Passwords do not match."
 	}
 }

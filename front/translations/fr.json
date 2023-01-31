@@ -57,6 +57,9 @@
 		"email": "Email",
 		"username": "Username",
 		"password": "Mot de passe",
-		"or-register": "Vous n'avez pas de compte ? <1>Inscrivez-vous</1>."
+		"confirm": "Confirm Password",
+		"or-register": "Vous n'avez pas de compte ? <1>Inscrivez-vous</1>.",
+		"or-login": "Vous avez déjà un compte ? <1>Connectez-vous.<1/>",
+		"password-no-match": "Mots de passe differents"
 	}
 }

@@ -18,38 +18,28 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ComponentProps } from "react";
-import { Theme, useYoshiki } from "yoshiki/native";
-import { PressableFeedback } from "./links";
-import { P } from "./text";
-import { ts } from "./utils";
+import { IconButton, Input } from "@kyoo/primitives";
+import { ComponentProps, useState } from "react";
+import { px, useYoshiki } from "yoshiki/native";
+import Visibility from "@material-symbols/svg-400/rounded/visibility-fill.svg";
+import VisibilityOff from "@material-symbols/svg-400/rounded/visibility_off-fill.svg";
 
-export const Button = ({
-	text,
-	onPress,
-	...props
-}: { text: string } & ComponentProps<typeof PressableFeedback>) => {
+export const PasswordInput = (props: ComponentProps<typeof Input>) => {
 	const { css } = useYoshiki();
+	const [show, setVisibility] = useState(false);
 
 	return (
-		<PressableFeedback
-			{...css(
-				{
-					flexGrow: 0,
-					p: ts(0.5),
-					borderRadius: ts(5),
-					borderColor: (theme) => theme.accent,
-					borderWidth: ts(0.5),
-					fover: {
-						self: { bg: (theme: Theme) => theme.accent },
-						text: { color: (theme: Theme) => theme.colors.white },
-					},
-				},
-				// @ts-ignore ??
-				props,
-			)}
-		>
-			<P {...css({ textAlign: "center" }, "text")}>{text}</P>
-		</PressableFeedback>
+		<Input
+			secureTextEntry={!show}
+			right={
+				<IconButton
+					icon={show ? VisibilityOff : Visibility}
+					size={19}
+					onPress={() => setVisibility(!show)}
+					{...css({ width: px(19), height: px(19), m: 0, p: 0 })}
+				/>
+			}
+			{...props}
+		/>
 	);
 };
