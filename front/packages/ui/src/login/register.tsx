@@ -18,9 +18,9 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { KyooErrors, kyooUrl, QueryPage } from "@kyoo/models";
+import { QueryPage } from "@kyoo/models";
 import { Button, P, Input, ts, H1, A } from "@kyoo/primitives";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
 import { Trans } from "react-i18next";
@@ -28,6 +28,7 @@ import { percent, px, useYoshiki } from "yoshiki/native";
 import { DefaultLayout } from "../layout";
 import { FormPage } from "./form";
 import { PasswordInput } from "./password-input";
+import { loginFunc } from "./api";
 
 export const RegisterPage: QueryPage = () => {
 	const [email, setEmail] = useState("");
@@ -74,10 +75,11 @@ export const RegisterPage: QueryPage = () => {
 			)}
 			{error && <P {...css({ color: (theme) => theme.colors.red })}>{error}</P>}
 			<Button
-				text={t("login.login")}
-				disabled={error != null || password !== confirm}
+				text={t("login.register")}
+				disabled={password !== confirm}
 				onPress={async () => {
-					const { error } = await register(email, username, password);
+					console.log("toto")
+					const error = await loginFunc("register", { email, username, password });
 					setError(error);
 				}}
 				{...css({
