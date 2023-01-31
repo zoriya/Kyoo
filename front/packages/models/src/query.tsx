@@ -39,9 +39,9 @@ export const kyooUrl =
 		? process.env.KYOO_URL ?? "http://localhost:5000"
 		: "/api";
 
-const queryFn = async <Data,>(
-	type: z.ZodType<Data>,
-	context: QueryFunctionContext,
+export const queryFn = async <Data,>(
+	context: QueryFunctionContext | { path: string[]; body?: object; method: "GET" | "POST" },
+	type?: z.ZodType<Data>,
 ): Promise<Data> => {
 	if (!kyooUrl) console.error("Kyoo's url is not defined.");
 
@@ -50,10 +50,21 @@ const queryFn = async <Data,>(
 		resp = await fetch(
 			[kyooUrl]
 				.concat(
-					context.pageParam ? [context.pageParam] : (context.queryKey.filter((x) => x) as string[]),
+					"path" in context
+						? context.path
+						: context.pageParam
+						? [context.pageParam]
+						: (context.queryKey.filter((x) => x) as string[]),
 				)
 				.join("/")
 				.replace("/?", "?"),
+			{
+				// @ts-ignore
+				method: context.method,
+				// @ts-ignore
+				body: context.body ? JSON.stringify(context.body) : undefined,
+				headers: "body" in context ? { "Content-Type": "application/json" } : undefined,
+			},
 		);
 	} catch (e) {
 		console.log("Fetch error", e);
@@ -81,6 +92,7 @@ const queryFn = async <Data,>(
 		console.error("Invald json from kyoo", e);
 		throw { errors: ["Invalid repsonse from kyoo"] };
 	}
+	if (!type) return data;
 	const parsed = await type.safeParseAsync(data);
 	if (!parsed.success) {
 		console.log("Parse error: ", parsed.error);
@@ -137,7 +149,7 @@ const toQueryKey = <Data,>(query: QueryIdentifier<Data>) => {
 export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 	return useQuery<Data, KyooErrors>({
 		queryKey: toQueryKey(query),
-		queryFn: (ctx) => queryFn(query.parser, ctx),
+		queryFn: (ctx) => queryFn(ctx, query.parser),
 	});
 };
 
@@ -149,7 +161,7 @@ export const useInfiniteFetch = <Data,>(
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		const ret = useInfiniteQuery<Data[], KyooErrors>({
 			queryKey: toQueryKey(query),
-			queryFn: (ctx) => queryFn(z.array(query.parser), ctx),
+			queryFn: (ctx) => queryFn(ctx, z.array(query.parser)),
 			getNextPageParam: query.getNext,
 			...options,
 		});
@@ -158,7 +170,7 @@ export const useInfiniteFetch = <Data,>(
 	// eslint-disable-next-line react-hooks/rules-of-hooks
 	const ret = useInfiniteQuery<Page<Data>, KyooErrors>({
 		queryKey: toQueryKey(query),
-		queryFn: (ctx) => queryFn(Paged(query.parser), ctx),
+		queryFn: (ctx) => queryFn(ctx, Paged(query.parser)),
 		getNextPageParam: (page: Page<Data>) => page?.next || undefined,
 	});
 	return { ...ret, items: ret.data?.pages.flatMap((x) => x.items) };
@@ -175,12 +187,12 @@ export const fetchQuery = async (queries: QueryIdentifier[]) => {
 			if (query.infinite) {
 				return client.prefetchInfiniteQuery({
 					queryKey: toQueryKey(query),
-					queryFn: (ctx) => queryFn(Paged(query.parser), ctx),
+					queryFn: (ctx) => queryFn(ctx, Paged(query.parser)),
 				});
 			} else {
 				return client.prefetchQuery({
 					queryKey: toQueryKey(query),
-					queryFn: (ctx) => queryFn(query.parser, ctx),
+					queryFn: (ctx) => queryFn(ctx, query.parser),
 				});
 			}
 		}),

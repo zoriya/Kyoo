@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { KyooErrors, kyooUrl, QueryPage } from "@kyoo/models";
+import { QueryPage } from "@kyoo/models";
 import { Button, P, Input, ts, H1, A } from "@kyoo/primitives";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -28,32 +28,7 @@ import { percent, px, useYoshiki } from "yoshiki/native";
 import { DefaultLayout } from "../layout";
 import { FormPage } from "./form";
 import { PasswordInput } from "./password-input";
-
-const login = async (username: string, password: string) => {
-	let resp;
-	try {
-		resp = await fetch(`${kyooUrl}/auth/login`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify({
-				username,
-				password,
-			}),
-		});
-	} catch (e) {
-		console.error("Login error", e);
-		throw { errors: ["Could not reach Kyoo's server."] } as KyooErrors;
-	}
-	if (!resp.ok) {
-		const err = (await resp.json()) as KyooErrors;
-		return { type: "error", value: null, error: err.errors[0] };
-	}
-	const token = await resp.json();
-	// TODO: Save the token in the secure storage.
-	return { type: "value", value: token, error: null };
-};
+import { loginFunc } from "./api";
 
 export const LoginPage: QueryPage = () => {
 	const [username, setUsername] = useState("");
@@ -88,7 +63,7 @@ export const LoginPage: QueryPage = () => {
 			<Button
 				text={t("login.login")}
 				onPress={async () => {
-					const { error } = await login(username, password);
+					const error = await loginFunc("login", {username, password});
 					setError(error);
 				}}
 				{...css({

@@ -26,7 +26,6 @@ import { ts } from "./utils";
 
 export const Button = ({
 	text,
-	onPress,
 	...props
 }: { text: string } & ComponentProps<typeof PressableFeedback>) => {
 	const { css } = useYoshiki();
