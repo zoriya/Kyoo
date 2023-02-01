@@ -18,18 +18,4 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { KyooErrors, queryFn } from "@kyoo/models";
-
-export const loginFunc = async (action: "register" | "login", body: object) => {
-	try {
-		const token = await queryFn({
-			path: ["auth", action],
-			method: "POST",
-			body: body,
-		});
-
-		return null;
-	} catch (e) {
-		return (e as KyooErrors).errors[0];
-	}
-};
+export { setItemAsync as setSecureItem, getItemAsync as getSecureItem } from "expo-secure-store";
