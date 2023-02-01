@@ -8,13 +8,13 @@
 		"@kyoo/primitives": "workspace:^"
 	},
 	"devDependencies": {
-		"@shopify/flash-list": "^1.4.0",
+		"@shopify/flash-list": "^1.3.1",
 		"@types/react": "^18.0.25",
-		"typescript": "^4.9.3"
+		"typescript": "^4.9.5"
 	},
 	"peerDependencies": {
 		"@material-symbols/svg-400": "*",
-		"@shopify/flash-list": "^1.4.0",
+		"@shopify/flash-list": "^1.3.1",
 		"@tanstack/react-query": "*",
 		"expo-linear-gradient": "*",
 		"i18next": "*",

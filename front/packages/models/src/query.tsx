@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ComponentProps, ComponentType, ReactElement } from "react";
+import { ComponentType, ReactElement } from "react";
 import {
 	dehydrate,
 	QueryClient,
@@ -31,6 +31,8 @@ import { z } from "zod";
 import { KyooErrors } from "./kyoo-errors";
 import { Page, Paged } from "./page";
 import { Platform } from "react-native";
+import { getToken } from "./login";
+import { getSecureItem } from "./secure-store.web";
 
 export const kyooUrl =
 	Platform.OS !== "web"
@@ -40,18 +42,28 @@ export const kyooUrl =
 		: "/api";
 
 export const queryFn = async <Data,>(
-	context: QueryFunctionContext | { path: string[]; body?: object; method: "GET" | "POST" },
+	context:
+		| QueryFunctionContext
+		| {
+				path: (string | false | undefined | null)[];
+				body?: object;
+				method: "GET" | "POST";
+				authenticated?: boolean;
+		  },
 	type?: z.ZodType<Data>,
+	token?: string | null,
 ): Promise<Data> => {
 	if (!kyooUrl) console.error("Kyoo's url is not defined.");
 
+	// @ts-ignore
+	if (!token && context.auhtenticated !== false) token = await getToken();
 	let resp;
 	try {
 		resp = await fetch(
 			[kyooUrl]
 				.concat(
 					"path" in context
-						? context.path
+						? context.path.filter((x) => x)
 						: context.pageParam
 						? [context.pageParam]
 						: (context.queryKey.filter((x) => x) as string[]),
@@ -63,7 +75,10 @@ export const queryFn = async <Data,>(
 				method: context.method,
 				// @ts-ignore
 				body: context.body ? JSON.stringify(context.body) : undefined,
-				headers: "body" in context ? { "Content-Type": "application/json" } : undefined,
+				headers: {
+					...(token ? { Authorization: token } : {}),
+					...("body" in context ? { "Content-Type": "application/json" } : {}),
+				},
 			},
 		);
 	} catch (e) {
@@ -176,10 +191,11 @@ export const useInfiniteFetch = <Data,>(
 	return { ...ret, items: ret.data?.pages.flatMap((x) => x.items) };
 };
 
-export const fetchQuery = async (queries: QueryIdentifier[]) => {
+export const fetchQuery = async (queries: QueryIdentifier[], cookies?: string) => {
 	// we can't put this check in a function because we want build time optimizations
 	// see https://github.com/vercel/next.js/issues/5354 for details
 	if (typeof window !== "undefined") return {};
+	const authToken = getSecureItem("auth", cookies);
 
 	const client = createQueryClient();
 	await Promise.all(
@@ -187,12 +203,12 @@ export const fetchQuery = async (queries: QueryIdentifier[]) => {
 			if (query.infinite) {
 				return client.prefetchInfiniteQuery({
 					queryKey: toQueryKey(query),
-					queryFn: (ctx) => queryFn(ctx, Paged(query.parser)),
+					queryFn: (ctx) => queryFn(ctx, Paged(query.parser), authToken),
 				});
 			} else {
 				return client.prefetchQuery({
 					queryKey: toQueryKey(query),
-					queryFn: (ctx) => queryFn(ctx, query.parser),
+					queryFn: (ctx) => queryFn(ctx, query.parser, authToken),
 				});
 			}
 		}),

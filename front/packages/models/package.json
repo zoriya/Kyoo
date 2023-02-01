@@ -5,7 +5,8 @@
 	"packageManager": "yarn@3.2.4",
 	"devDependencies": {
 		"@types/react": "^18.0.25",
-		"typescript": "^4.9.3"
+		"expo-secure-store": "^12.0.0",
+		"typescript": "^4.9.5"
 	},
 	"peerDependencies": {
 		"@tanstack/react-query": "*",
@@ -18,6 +19,6 @@
 		}
 	},
 	"dependencies": {
-		"zod": "^3.19.1"
+		"zod": "^3.20.2"
 	}
 }

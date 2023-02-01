@@ -124,7 +124,7 @@ App.getInitialProps = async (ctx: AppContext) => {
 		...(getUrl ? getUrl(ctx.router.query as any) : []),
 		...(getLayoutUrl ? getLayoutUrl(ctx.router.query as any) : []),
 	];
-	appProps.pageProps.queryState = await fetchQuery(urls);
+	appProps.pageProps.queryState = await fetchQuery(urls, ctx.ctx.req?.headers.cookie);
 
 	return { pageProps: superjson.serialize(appProps.pageProps) };
 };

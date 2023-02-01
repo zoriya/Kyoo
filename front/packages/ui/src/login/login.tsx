@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { QueryPage } from "@kyoo/models";
+import { loginFunc, QueryPage } from "@kyoo/models";
 import { Button, P, Input, ts, H1, A } from "@kyoo/primitives";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -28,7 +28,6 @@ import { percent, px, useYoshiki } from "yoshiki/native";
 import { DefaultLayout } from "../layout";
 import { FormPage } from "./form";
 import { PasswordInput } from "./password-input";
-import { loginFunc } from "./api";
 
 export const LoginPage: QueryPage = () => {
 	const [username, setUsername] = useState("");

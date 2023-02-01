@@ -30,7 +30,7 @@ namespace Kyoo.Authentication
 		/// <summary>
 		/// The type of this token (always a Bearer).
 		/// </summary>
-		[JsonProperty("token_token")]
+		[JsonProperty("token_type")]
 		[JsonPropertyName("token_type")]
 		public string TokenType => "Bearer";
 
@@ -57,6 +57,13 @@ namespace Kyoo.Authentication
 		public TimeSpan ExpireIn { get; set; }
 
 		/// <summary>
+		/// The exact date at which the access token will expire.
+		/// </summary>
+		[JsonProperty("expire_at")]
+		[JsonPropertyName("expire_at")]
+		public DateTime ExpireAt { get; set; }
+
+		/// <summary>
 		/// Initializes a new instance of the <see cref="JwtToken"/> class.
 		/// </summary>
 		/// <param name="accessToken">The access token used to authorize requests.</param>
@@ -67,6 +74,7 @@ namespace Kyoo.Authentication
 			AccessToken = accessToken;
 			RefreshToken = refreshToken;
 			ExpireIn = expireIn;
+			ExpireAt = DateTime.UtcNow + expireIn;
 		}
 	}
 }
