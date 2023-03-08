@@ -17,6 +17,7 @@ services:
       - postgres
     volumes:
       - kyoo:/var/lib/kyoo
+      - ./cache:/var/lib/kyoo/cached
       - ./video:/video
   front:
     build: ./front
