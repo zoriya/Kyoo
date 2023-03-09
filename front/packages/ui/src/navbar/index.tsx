@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Library, LibraryP, Page, Paged, QueryIdentifier } from "@kyoo/models";
+import { Library, LibraryP, Page, Paged, QueryIdentifier, User, UserP } from "@kyoo/models";
 import {
 	Input,
 	IconButton,
@@ -82,18 +82,33 @@ const SearchBar = forwardRef<
 	);
 });
 
+export const MeQuery: QueryIdentifier<User> = {
+	path: ["auth", "me"],
+	parser: UserP,
+};
+
 export const NavbarProfile = () => {
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
 
+	// TODO: show logged in user.
 	return (
-		<Link
-			href="/login"
-			{...tooltip(t("navbar.login"))}
-			{...css({ marginLeft: ts(1), justifyContent: "center" })}
-		>
-			<Avatar alt={t("navbar.login")} size={30} color={theme.colors.white} />
-		</Link>
+		<Fetch query={MeQuery}>
+			{({ username }) => (
+				<Link
+					href="/login"
+					{...tooltip(username ?? t("navbar.login"))}
+					{...css({ marginLeft: ts(1), justifyContent: "center" })}
+				>
+					<Avatar
+						placeholder={username}
+						alt={t("navbar.login")}
+						size={30}
+						color={theme.colors.white}
+					/>
+				</Link>
+			)}
+		</Fetch>
 	);
 };
 export const NavbarRight = () => {
@@ -125,9 +140,9 @@ export const NavbarRight = () => {
 					onPress={
 						Platform.OS === "web"
 							? () => {
-									setSearch(true);
-									setTimeout(() => ref.current?.focus(), 0);
-							  }
+								setSearch(true);
+								setTimeout(() => ref.current?.focus(), 0);
+							}
 							: () => push("/search")
 					}
 					{...tooltip(t("navbar.search"))}

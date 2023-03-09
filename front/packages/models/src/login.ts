@@ -56,8 +56,9 @@ export const loginFunc = async (
 	}
 };
 
-export const getToken = async (): Promise<string | null> => {
-	const tokenStr = await getSecureItem("auth");
+export const getToken = async (cookies?: string): Promise<string | null> => {
+	// @ts-ignore Web only.
+	const tokenStr = await getSecureItem("auth", cookies);
 	if (!tokenStr) return null;
 	const token = JSON.parse(tokenStr) as Token;
 

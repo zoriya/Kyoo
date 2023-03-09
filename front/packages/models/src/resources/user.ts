@@ -18,15 +18,25 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./library";
-export * from "./library-item";
-export * from "./show";
-export * from "./movie";
-export * from "./collection";
-export * from "./genre";
-export * from "./person";
-export * from "./studio";
-export * from "./episode";
-export * from "./season";
-export * from "./watch-item";
-export * from "./user";
+import { z } from "zod";
+import { ResourceP } from "../traits/resource";
+
+/**
+ * The library that will contain Shows, Collections...
+ */
+export const UserP = ResourceP.extend({
+	/**
+	 * The name of this user.
+	 */
+	username: z.string(),
+	/**
+	 * The user email address.
+	 */
+	email: z.string(),
+	/**
+	 * The list of permissions of the user. The format of this is implementation dependent.
+	 */
+	permissions: z.array(z.string()),
+});
+
+export type User = z.infer<typeof UserP>;
