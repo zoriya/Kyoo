@@ -24,12 +24,14 @@ import { useYoshiki, px, Stylable } from "yoshiki/native";
 import { Icon } from "./icons";
 import AccountCircle from "@material-symbols/svg-400/rounded/account_circle-fill.svg";
 import { YoshikiStyle } from "yoshiki/dist/type";
+import { P } from "@expo/html-elements";
 
 export const Avatar = ({
 	src,
 	alt,
 	size = px(24),
 	color,
+	placeholder,
 	isLoading = false,
 	fill = false,
 	...props
@@ -37,6 +39,7 @@ export const Avatar = ({
 	src?: string | null;
 	alt?: string;
 	size?: YoshikiStyle<number | string>;
+	placeholder?: string;
 	color?: string;
 	isLoading?: boolean;
 	fill?: boolean;
@@ -53,12 +56,21 @@ export const Avatar = ({
 					fill && {
 						bg: col,
 					},
+					placeholder &&
+					!src &&
+					!isLoading && {
+						bg: theme.accent,
+						justifyContent: "center",
+						alignItems: "center",
+					},
 				],
 				props,
 			)}
 		>
 			{src || isLoading ? (
 				<Image src={src} alt={alt} layout={{ width: size, height: size }} />
+			) : placeholder ? (
+				<P {...css({})}>{placeholder[0]}</P>
 			) : (
 				<Icon icon={AccountCircle} size={size} color={fill ? col : theme.colors.white} />
 			)}

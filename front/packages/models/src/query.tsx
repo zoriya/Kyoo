@@ -32,7 +32,6 @@ import { KyooErrors } from "./kyoo-errors";
 import { Page, Paged } from "./page";
 import { Platform } from "react-native";
 import { getToken } from "./login";
-import { getSecureItem } from "./secure-store.web";
 
 export const kyooUrl =
 	Platform.OS !== "web"
@@ -195,7 +194,7 @@ export const fetchQuery = async (queries: QueryIdentifier[], cookies?: string) =
 	// we can't put this check in a function because we want build time optimizations
 	// see https://github.com/vercel/next.js/issues/5354 for details
 	if (typeof window !== "undefined") return {};
-	const authToken = getSecureItem("auth", cookies);
+	const authToken = await getToken(cookies);
 
 	const client = createQueryClient();
 	await Promise.all(

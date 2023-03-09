@@ -21,14 +21,13 @@
 export const setSecureItem = async (key: string, value: string): Promise<null> => {
 	const d = new Date();
 	// A year
-	d.setTime(d.getTime() + 356 * 24 * 60 * 60 * 1000);
+	d.setTime(d.getTime() + 365 * 24 * 60 * 60 * 1000);
 	const expires = "expires=" + d.toUTCString();
 	document.cookie = key + "=" + value + ";" + expires + ";path=/";
 	return null;
 };
 
 export const getSecureItem = async (key: string, cookies?: string): Promise<string | null> => {
-	if (typeof window === "undefined") return null;
 	const name = key + "=";
 	const decodedCookie = decodeURIComponent(cookies ?? document.cookie);
 	const ca = decodedCookie.split(";");
