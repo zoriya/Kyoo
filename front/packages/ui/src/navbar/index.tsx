@@ -37,7 +37,7 @@ import { useRouter } from "solito/router";
 import { rem, Stylable, useYoshiki } from "yoshiki/native";
 import Menu from "@material-symbols/svg-400/rounded/menu-fill.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
-import { Fetch } from "../fetch";
+import { Fetch, FetchNE } from "../fetch";
 import { KyooLongLogo } from "./icon";
 import { forwardRef, useRef, useState } from "react";
 
@@ -93,7 +93,7 @@ export const NavbarProfile = () => {
 
 	// TODO: show logged in user.
 	return (
-		<Fetch query={MeQuery}>
+		<FetchNE query={MeQuery}>
 			{({ username }) => (
 				<Link
 					href="/login"
@@ -108,7 +108,7 @@ export const NavbarProfile = () => {
 					/>
 				</Link>
 			)}
-		</Fetch>
+		</FetchNE>
 	);
 };
 export const NavbarRight = () => {

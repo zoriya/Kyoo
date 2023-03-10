@@ -29,10 +29,15 @@ export type WithLoading<Item> =
 	| (Item & { isLoading: false })
 	| (Partial<Item> & { isLoading: true });
 
+// We keep a Partial<Item> on the error value to allow destructuring.
+export type WithError<Item> =
+	| (Item & { isError: false; error: undefined })
+	| (Partial<Item> & { isError: true; error: KyooErrors });
+
 const isPage = <T = unknown,>(obj: unknown): obj is Page<T> =>
 	(typeof obj === "object" && obj && "items" in obj) || false;
 
-export const Fetch = <Data,>({
+export const FetchNE = <Data,>({
 	query,
 	placeholderCount = 1,
 	children,
@@ -40,13 +45,16 @@ export const Fetch = <Data,>({
 	query: QueryIdentifier<Data>;
 	placeholderCount?: number;
 	children: (
-		item: Data extends Page<infer Item> ? WithLoading<Item> : WithLoading<Data>,
+		item: Data extends Page<infer Item>
+			? WithError<WithLoading<Item>>
+			: WithError<WithLoading<Data>>,
 		i: number,
 	) => JSX.Element | null;
 }): JSX.Element | null => {
 	const { data, error } = useFetch(query);
 
-	if (error) return <ErrorView error={error} />;
+	// @ts-ignore
+	if (error) return children({ isError: true, error }, 0);
 	if (!data) {
 		const placeholders = [...Array(placeholderCount)].map((_, i) =>
 			children({ isLoading: true } as any, i),
@@ -56,6 +64,27 @@ export const Fetch = <Data,>({
 	if (!isPage<object>(data))
 		return children(data ? { ...data, isLoading: false } : ({ isLoading: true } as any), 0);
 	return <>{data.items.map((item, i) => children({ ...item, isLoading: false } as any, i))}</>;
+};
+
+export const Fetch = <Data,>({
+	children,
+	...params
+}: {
+	query: QueryIdentifier<Data>;
+	placeholderCount?: number;
+	children: (
+		item: Data extends Page<infer Item> ? WithLoading<Item> : WithLoading<Data>,
+		i: number,
+	) => JSX.Element | null;
+}): JSX.Element | null => {
+	return (
+		<FetchNE {...params}>
+			{({ isError, error, ...item }, i) =>
+				// @ts-ignore
+				isError ? <ErrorView error={error} /> : children(item, i)
+			}
+		</FetchNE>
+	);
 };
 
 export const ErrorView = ({ error }: { error: KyooErrors }) => {
