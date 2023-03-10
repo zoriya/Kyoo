@@ -22,7 +22,8 @@ import "../polyfill";
 
 import { Hydrate, QueryClientProvider } from "@tanstack/react-query";
 import { HiddenIfNoJs, SkeletonCss, ThemeSelector, WebTooltip } from "@kyoo/primitives";
-import { createQueryClient, fetchQuery, QueryIdentifier, QueryPage } from "@kyoo/models";
+import { createQueryClient, fetchQuery, getTokenWJ, QueryIdentifier, QueryPage } from "@kyoo/models";
+import { setSecureItemSync } from "@kyoo/models/src/secure-store.web";
 import { useState } from "react";
 import NextApp, { AppContext, type AppProps } from "next/app";
 import { Poppins } from "@next/font/google";
@@ -88,12 +89,16 @@ const YoshikiDebug = ({ children }: { children: JSX.Element }) => {
 
 const App = ({ Component, pageProps }: AppProps) => {
 	const [queryClient] = useState(() => createQueryClient());
-	const { queryState, ...props } = superjson.deserialize<any>(pageProps ?? { json: {} });
+	const { queryState, token, ...props } = superjson.deserialize<any>(pageProps ?? { json: {} });
 	const layoutInfo = (Component as QueryPage).getLayout ?? (({ page }) => page);
 	const { Layout, props: layoutProps } =
 		typeof layoutInfo === "function" ? { Layout: layoutInfo, props: {} } : layoutInfo;
 
 	useMobileHover();
+
+	// Set the auth from the server (if the token was refreshed during SSR).
+	if (typeof window !== "undefined" && token)
+		setSecureItemSync("auth", JSON.stringify(token));
 
 	return (
 		<YoshikiDebug>
@@ -124,7 +129,9 @@ App.getInitialProps = async (ctx: AppContext) => {
 		...(getUrl ? getUrl(ctx.router.query as any) : []),
 		...(getLayoutUrl ? getLayoutUrl(ctx.router.query as any) : []),
 	];
-	appProps.pageProps.queryState = await fetchQuery(urls, ctx.ctx.req?.headers.cookie);
+	const [authToken, token] = await getTokenWJ(ctx.ctx.req?.headers.cookie);
+	appProps.pageProps.queryState = await fetchQuery(urls, authToken);
+	appProps.pageProps.token = token;
 
 	return { pageProps: superjson.serialize(appProps.pageProps) };
 };

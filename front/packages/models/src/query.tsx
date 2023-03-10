@@ -37,49 +37,47 @@ export const kyooUrl =
 	Platform.OS !== "web"
 		? process.env.PUBLIC_BACK_URL
 		: typeof window === "undefined"
-		? process.env.KYOO_URL ?? "http://localhost:5000"
-		: "/api";
+			? process.env.KYOO_URL ?? "http://localhost:5000"
+			: "/api";
 
 export const queryFn = async <Data,>(
 	context:
 		| QueryFunctionContext
 		| {
-				path: (string | false | undefined | null)[];
-				body?: object;
-				method: "GET" | "POST";
-				authenticated?: boolean;
-		  },
+			path: (string | false | undefined | null)[];
+			body?: object;
+			method: "GET" | "POST";
+			authenticated?: boolean;
+		},
 	type?: z.ZodType<Data>,
 	token?: string | null,
 ): Promise<Data> => {
 	if (!kyooUrl) console.error("Kyoo's url is not defined.");
 
 	// @ts-ignore
-	if (!token && context.auhtenticated !== false) token = await getToken();
+	if (!token && context.authenticated !== false) token = await getToken();
+	const path = [kyooUrl]
+		.concat(
+			"path" in context
+				? context.path.filter((x) => x)
+				: context.pageParam
+					? [context.pageParam]
+					: (context.queryKey.filter((x) => x) as string[]),
+		)
+		.join("/")
+		.replace("/?", "?");
 	let resp;
 	try {
-		resp = await fetch(
-			[kyooUrl]
-				.concat(
-					"path" in context
-						? context.path.filter((x) => x)
-						: context.pageParam
-						? [context.pageParam]
-						: (context.queryKey.filter((x) => x) as string[]),
-				)
-				.join("/")
-				.replace("/?", "?"),
-			{
-				// @ts-ignore
-				method: context.method,
-				// @ts-ignore
-				body: context.body ? JSON.stringify(context.body) : undefined,
-				headers: {
-					...(token ? { Authorization: token } : {}),
-					...("body" in context ? { "Content-Type": "application/json" } : {}),
-				},
+		resp = await fetch(path, {
+			// @ts-ignore
+			method: context.method,
+			// @ts-ignore
+			body: context.body ? JSON.stringify(context.body) : undefined,
+			headers: {
+				...(token ? { Authorization: token } : {}),
+				...("body" in context ? { "Content-Type": "application/json" } : {}),
 			},
-		);
+		});
 	} catch (e) {
 		console.log("Fetch error", e);
 		throw { errors: ["Could not reach Kyoo's server."] } as KyooErrors;
@@ -95,7 +93,7 @@ export const queryFn = async <Data,>(
 		} catch (e) {
 			data = { errors: [error] } as KyooErrors;
 		}
-		console.log("Invalid response:", data);
+		console.log(`Invalid response (${path}):`, data);
 		throw data as KyooErrors;
 	}
 
@@ -141,8 +139,8 @@ export type QueryIdentifier<T = unknown> = {
 export type QueryPage<Props = {}> = ComponentType<Props> & {
 	getFetchUrls?: (route: { [key: string]: string }) => QueryIdentifier[];
 	getLayout?:
-		| ComponentType<{ page: ReactElement }>
-		| { Layout: ComponentType<{ page: ReactElement }>; props: object };
+	| ComponentType<{ page: ReactElement }>
+	| { Layout: ComponentType<{ page: ReactElement }>; props: object };
 };
 
 const toQueryKey = <Data,>(query: QueryIdentifier<Data>) => {
@@ -150,10 +148,10 @@ const toQueryKey = <Data,>(query: QueryIdentifier<Data>) => {
 		return [
 			...query.path,
 			"?" +
-				Object.entries(query.params)
-					.filter(([_, v]) => v !== undefined)
-					.map(([k, v]) => `${k}=${Array.isArray(v) ? v.join(",") : v}`)
-					.join("&"),
+			Object.entries(query.params)
+				.filter(([_, v]) => v !== undefined)
+				.map(([k, v]) => `${k}=${Array.isArray(v) ? v.join(",") : v}`)
+				.join("&"),
 		];
 	} else {
 		return query.path;
@@ -190,11 +188,10 @@ export const useInfiniteFetch = <Data,>(
 	return { ...ret, items: ret.data?.pages.flatMap((x) => x.items) };
 };
 
-export const fetchQuery = async (queries: QueryIdentifier[], cookies?: string) => {
+export const fetchQuery = async (queries: QueryIdentifier[], authToken?: string | null) => {
 	// we can't put this check in a function because we want build time optimizations
 	// see https://github.com/vercel/next.js/issues/5354 for details
 	if (typeof window !== "undefined") return {};
-	const authToken = await getToken(cookies);
 
 	const client = createQueryClient();
 	await Promise.all(

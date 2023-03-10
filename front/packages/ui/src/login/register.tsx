@@ -24,7 +24,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Platform } from "react-native";
 import { Trans } from "react-i18next";
-import { useRouter } from 'solito/router'
+import { useRouter } from "solito/router";
 import { percent, px, useYoshiki } from "yoshiki/native";
 import { DefaultLayout } from "../layout";
 import { FormPage } from "./form";
@@ -35,7 +35,7 @@ export const RegisterPage: QueryPage = () => {
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
 	const [confirm, setConfirm] = useState("");
-	const [error, setError] = useState<string | null>(null);
+	const [error, setError] = useState<string | undefined>(undefined);
 
 	const router = useRouter();
 	const { t } = useTranslation();
@@ -79,7 +79,7 @@ export const RegisterPage: QueryPage = () => {
 				text={t("login.register")}
 				disabled={password !== confirm}
 				onPress={async () => {
-					const error = await loginFunc("register", { email, username, password });
+					const { error } = await loginFunc("register", { email, username, password });
 					setError(error);
 					if (!error) router.push("/");
 				}}

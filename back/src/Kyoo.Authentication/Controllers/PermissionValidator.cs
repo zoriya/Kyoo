@@ -29,7 +29,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace Kyoo.Authentication
@@ -181,7 +180,10 @@ namespace Kyoo.Authentication
 				{
 					ICollection<string> permissions = _options.CurrentValue.Default ?? Array.Empty<string>();
 					if (res.Failure != null || permissions.All(x => x != permStr && x != overallStr))
-						context.Result = _ErrorResult($"Unlogged user does not have permission {permStr} or {overallStr}", StatusCodes.Status401Unauthorized);
+					{
+						context.Result = _ErrorResult("Token non present or invalid (it may have expired). " +
+							$"Unlogged user does not have permission {permStr} or {overallStr}", StatusCodes.Status401Unauthorized);
+					}
 				}
 			}
 		}

@@ -197,7 +197,7 @@ namespace Kyoo.Authentication.Views
 		public async Task<ActionResult<User>> GetMe()
 		{
 			if (!int.TryParse(User.FindFirstValue(Claims.Id), out int userID))
-				return Unauthorized(new RequestError("User not authenticated"));
+				return Unauthorized(new RequestError("User not authenticated or token invalid."));
 			try
 			{
 				return await _users.Get(userID);
@@ -226,7 +226,7 @@ namespace Kyoo.Authentication.Views
 		public async Task<ActionResult<User>> EditMe(User user)
 		{
 			if (!int.TryParse(User.FindFirstValue(Claims.Id), out int userID))
-				return Unauthorized(new RequestError("User not authenticated"));
+				return Unauthorized(new RequestError("User not authenticated or token invalid."));
 			try
 			{
 				user.ID = userID;
@@ -256,7 +256,7 @@ namespace Kyoo.Authentication.Views
 		public async Task<ActionResult<User>> PatchMe(User user)
 		{
 			if (!int.TryParse(User.FindFirstValue(Claims.Id), out int userID))
-				return Unauthorized(new RequestError("User not authenticated"));
+				return Unauthorized(new RequestError("User not authenticated or token invalid."));
 			try
 			{
 				user.ID = userID;
@@ -285,7 +285,7 @@ namespace Kyoo.Authentication.Views
 		public async Task<ActionResult<User>> DeleteMe()
 		{
 			if (!int.TryParse(User.FindFirstValue(Claims.Id), out int userID))
-				return Unauthorized(new RequestError("User not authenticated"));
+				return Unauthorized(new RequestError("User not authenticated or token invalid."));
 			try
 			{
 				await _users.Delete(userID);

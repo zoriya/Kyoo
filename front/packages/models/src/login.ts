@@ -33,38 +33,49 @@ const TokenP = z.object({
 });
 type Token = z.infer<typeof TokenP>;
 
+type Result<A, B> =
+	| { ok: true; value: A; error?: undefined }
+	| { ok: false; value?: undefined; error: B };
+
 export const loginFunc = async (
 	action: "register" | "login" | "refresh",
 	body: object | string,
-) => {
+): Promise<Result<Token, string>> => {
 	try {
 		const token = await queryFn(
 			{
 				path: ["auth", action, typeof body === "string" && `?token=${body}`],
-				method: "POST",
+				method: typeof body === "string" ? "GET" : "POST",
 				body: typeof body === "object" ? body : undefined,
 				authenticated: false,
 			},
 			TokenP,
 		);
 
-		await setSecureItem("auth", JSON.stringify(token));
-		return null;
+		if (typeof window !== "undefined")
+			await setSecureItem("auth", JSON.stringify(token));
+		return { ok: true, value: token };
 	} catch (e) {
 		console.error(action, e);
-		return (e as KyooErrors).errors[0];
+		return { ok: false, error: (e as KyooErrors).errors[0] };
 	}
 };
 
-export const getToken = async (cookies?: string): Promise<string | null> => {
+export const getTokenWJ = async (cookies?: string): Promise<[string, Token] | [null, null]> => {
 	// @ts-ignore Web only.
 	const tokenStr = await getSecureItem("auth", cookies);
-	if (!tokenStr) return null;
-	const token = JSON.parse(tokenStr) as Token;
+	if (!tokenStr) return [null, null];
+	let token = TokenP.parse(JSON.parse(tokenStr));
 
-	if (token.expire_at > new Date(new Date().getTime() + 10 * 1000)) {
-		await loginFunc("refresh", token.refresh_token);
-		return await getToken();
+	if (token.expire_at <= new Date(new Date().getTime() + 10 * 1000)) {
+		const { ok, value: nToken, error } = await loginFunc("refresh", token.refresh_token);
+		console.log("refreshed", nToken);
+		if (!ok) console.error("Error refreshing token durring ssr:", error);
+		else token = nToken;
 	}
-	return `${token.token_type} ${token.access_token}`;
+	return [`${token.token_type} ${token.access_token}`, token];
 };
+
+export const getToken = async (cookies?: string): Promise<string | null> =>
+	(await getTokenWJ(cookies))[0]
+

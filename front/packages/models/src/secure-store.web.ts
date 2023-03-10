@@ -18,16 +18,21 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export const setSecureItem = async (key: string, value: string): Promise<null> => {
+export const setSecureItemSync = (key: string, value?: string) => {
 	const d = new Date();
 	// A year
 	d.setTime(d.getTime() + 365 * 24 * 60 * 60 * 1000);
-	const expires = "expires=" + d.toUTCString();
+	const expires = value ? "expires=" + d.toUTCString() : "expires=Thu, 01 Jan 1970 00:00:01 GMT";
 	document.cookie = key + "=" + value + ";" + expires + ";path=/";
 	return null;
 };
 
+export const setSecureItem = async (key: string, value: string): Promise<null> =>
+	setSecureItemSync(key, value);
+
 export const getSecureItem = async (key: string, cookies?: string): Promise<string | null> => {
+	// Don't try to use document's cookies on SSR.
+	if (!cookies && typeof window === "undefined") return null;
 	const name = key + "=";
 	const decodedCookie = decodeURIComponent(cookies ?? document.cookie);
 	const ca = decodedCookie.split(";");
