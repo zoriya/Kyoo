@@ -53,6 +53,7 @@
 	"login": {
 		"login": "Connexion",
 		"register": "Créer un compte",
+		"logout": "Déconnexion",
 		"server": "Addresse du serveur",
 		"email": "Email",
 		"username": "Username",

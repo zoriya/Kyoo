@@ -18,4 +18,8 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export { setItemAsync as setSecureItem, getItemAsync as getSecureItem } from "expo-secure-store";
+export {
+	setItemAsync as setSecureItem,
+	deleteItemAsync as deleteSecureItem,
+	getItemAsync as getSecureItem,
+} from "expo-secure-store";

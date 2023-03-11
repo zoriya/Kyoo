@@ -25,31 +25,30 @@ import { Icon } from "./icons";
 import AccountCircle from "@material-symbols/svg-400/rounded/account_circle-fill.svg";
 import { YoshikiStyle } from "yoshiki/dist/type";
 import { P } from "@expo/html-elements";
+import { forwardRef } from "react";
 
-export const Avatar = ({
-	src,
-	alt,
-	size = px(24),
-	color,
-	placeholder,
-	isLoading = false,
-	fill = false,
-	...props
-}: {
-	src?: string | null;
-	alt?: string;
-	size?: YoshikiStyle<number | string>;
-	placeholder?: string;
-	color?: string;
-	isLoading?: boolean;
-	fill?: boolean;
-} & Stylable) => {
+export const Avatar = forwardRef<
+	View,
+	{
+		src?: string | null;
+		alt?: string;
+		size?: YoshikiStyle<number | string>;
+		placeholder?: string;
+		color?: string;
+		isLoading?: boolean;
+		fill?: boolean;
+	} & Stylable
+>(function _Avatar(
+	{ src, alt, size = px(24), color, placeholder, isLoading = false, fill = false, ...props },
+	ref,
+) {
 	const { css, theme } = useYoshiki();
 	const col = color ?? theme.overlay0;
 
 	// TODO: Support dark themes when fill === true
 	return (
 		<View
+			ref={ref}
 			{...css(
 				[
 					{ borderRadius: 999999, width: size, height: size, overflow: "hidden" },
@@ -76,4 +75,4 @@ export const Avatar = ({
 			)}
 		</View>
 	);
-};
+});

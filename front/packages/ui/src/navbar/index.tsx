@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Library, LibraryP, Page, Paged, QueryIdentifier, User, UserP } from "@kyoo/models";
+import { Library, LibraryP, logout, Page, Paged, QueryIdentifier, User, UserP } from "@kyoo/models";
 import {
 	Input,
 	IconButton,
@@ -29,17 +29,19 @@ import {
 	tooltip,
 	ts,
 	Link,
+	Menu,
 } from "@kyoo/primitives";
 import { Platform, TextInput, View, ViewProps } from "react-native";
 import { useTranslation } from "react-i18next";
 import { createParam } from "solito";
 import { useRouter } from "solito/router";
 import { rem, Stylable, useYoshiki } from "yoshiki/native";
-import Menu from "@material-symbols/svg-400/rounded/menu-fill.svg";
+import MenuIcon from "@material-symbols/svg-400/rounded/menu-fill.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import { Fetch, FetchNE } from "../fetch";
 import { KyooLongLogo } from "./icon";
 import { forwardRef, useRef, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const NavbarTitle = (props: Stylable & { onLayout?: ViewProps["onLayout"] }) => {
 	const { t } = useTranslation();
@@ -90,23 +92,37 @@ export const MeQuery: QueryIdentifier<User> = {
 export const NavbarProfile = () => {
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
+	const queryClient = useQueryClient();
 
-	// TODO: show logged in user.
 	return (
 		<FetchNE query={MeQuery}>
-			{({ username }) => (
-				<Link
-					href="/login"
+			{({ isError: isGuest, username }) => (
+				<Menu
+					Trigger={Avatar}
+					placeholder={username}
+					alt={t("navbar.login")}
+					size={30}
+					color={theme.colors.white}
+					{...css({ marginLeft: ts(1), marginVertical: "auto", justifyContent: "center" })}
 					{...tooltip(username ?? t("navbar.login"))}
-					{...css({ marginLeft: ts(1), justifyContent: "center" })}
 				>
-					<Avatar
-						placeholder={username}
-						alt={t("navbar.login")}
-						size={30}
-						color={theme.colors.white}
-					/>
-				</Link>
+					{isGuest ? (
+						<>
+							<Menu.Item label={t("login.login")} href="/login" />
+							<Menu.Item label={t("login.register")} href="/register" />
+						</>
+					) : (
+						<>
+							<Menu.Item
+								label={t("login.logout")}
+								onSelect={() => {
+									logout();
+									queryClient.invalidateQueries(["auth", "me"]);
+								}}
+							/>
+						</>
+					)}
+				</Menu>
 			)}
 		</FetchNE>
 	);
@@ -175,13 +191,12 @@ export const Navbar = (props: Stylable) => {
 					shadowOpacity: 0.3,
 					shadowRadius: 4.65,
 					elevation: 8,
-					zIndex: 1,
 				},
 				props,
 			)}
 		>
 			<IconButton
-				icon={Menu}
+				icon={MenuIcon}
 				aria-label="more"
 				aria-controls="menu-appbar"
 				aria-haspopup="true"
