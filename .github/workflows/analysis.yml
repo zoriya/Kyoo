@@ -1,58 +1,82 @@
 name: Analysis
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    branches:
+      - master
+      - next
+  pull_request:
+
 
 jobs:
   analysis:
     name: Static Analysis
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     steps:
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
       - name: Cache SonarCloud packages
         uses: actions/cache@v1
         with:
           path: ~/sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
+
       - name: Cache SonarCloud scanner
         id: cache-sonar-scanner
         uses: actions/cache@v1
         with:
-          path: ./.sonar/scanner
+          path: ~/.sonar/scanner
           key: ${{ runner.os }}-sonar-scanner
           restore-keys: ${{ runner.os }}-sonar-scanner
+
       - name: Install SonarCloud scanner
         if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
         shell: bash
         run: |
-          mkdir -p ./.sonar/scanner
-          dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
-      - name: Wait for tests to run
+          cd back
+          mkdir -p ~/.sonar/scanner
+          dotnet tool update dotnet-sonarscanner --tool-path ~/.sonar/scanner
+
+      - name: Wait for tests to run (Push)
         uses: lewagon/wait-on-check-action@master
+        if: github.event_name != 'pull_request'
         with:
           ref: ${{github.ref}}
-          check-name: tests
+          check-name: "Back tests"
           repo-token: ${{secrets.GITHUB_TOKEN}}
           running-workflow-name: analysis
           allowed-conclusions: success,skipped,cancelled,neutral,failure
+      - name: Wait for tests to run (PR)
+        uses: lewagon/wait-on-check-action@master
+        if: github.event_name == 'pull_request'
+        with:
+          ref: ${{github.event.pull_request.head.sha}}
+          check-name: "Back tests"
+          repo-token: ${{secrets.GITHUB_TOKEN}}
+          running-workflow-name: analysis
+          allowed-conclusions: success,skipped,cancelled,neutral,failure
+
       - name: Download coverage report
         uses: dawidd6/action-download-artifact@v2
         with:
           commit: ${{env.COMMIT_SHA}}
           workflow: tests.yml
           github_token: ${{secrets.GITHUB_TOKEN}}
+
       - name: Build and analyze
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: bash
         run: |
+          cp -r results.xml/ coverage.xml/ back/
+          cd back
           find . -name 'coverage.opencover.xml'
           dotnet build-server shutdown
 
-          ./.sonar/scanner/dotnet-sonarscanner begin \
+          ~/.sonar/scanner/dotnet-sonarscanner begin \
             -k:"AnonymusRaccoon_Kyoo" \
             -o:"anonymus-raccoon" \
             -d:sonar.login="${{ secrets.SONAR_TOKEN }}" \
@@ -60,6 +84,6 @@ jobs:
             -d:sonar.cs.opencover.reportsPaths="**/coverage.opencover.xml" \
             -d:sonar.cs.vstest.reportsPaths="**/TestOutputResults.xml"
 
-          dotnet build --no-incremental '-p:SkipTranscoder=true;SkipWebApp=true'
+          dotnet build --no-incremental '-p:SkipTranscoder=true'
 
-          ./.sonar/scanner/dotnet-sonarscanner end -d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+          ~/.sonar/scanner/dotnet-sonarscanner end -d:sonar.login="${{ secrets.SONAR_TOKEN }}"

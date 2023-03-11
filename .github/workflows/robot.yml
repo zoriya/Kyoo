@@ -1,31 +1,49 @@
 name: RobotTests
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    branches:
+      - master
+      - next
+  pull_request:
+
 
 jobs:
-  build:
+  test:
+    name: Run Robot Tests
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name != github.repository
     steps:
       - uses: actions/checkout@v2
         with:
           submodules: recursive
           fetch-depth: 0
+      - name: Pull images
+        run: docker-compose pull
+
+      - name: Docker cache
+        uses: satackey/action-docker-layer-caching@v0.0.11
+        continue-on-error: true
 
       - name: Build the app
         run: docker-compose build
 
       - name: Start the service
-        run: docker-compose up -d
+        run: |
+          cp .env.example .env
+          docker-compose up -d
 
       - name: Perform healthchecks
         run: |
           docker-compose ps -a
-          wget --retry-connrefused http://localhost:5000 # /healthcheck
+          wget --retry-connrefused --retry-on-http-error=502 http://localhost:8901 #/api/healthcheck
 
       - name: Run robot tests
         run: |
-          pip install -r tests/robot/requirements.txt
-          robot -d out tests/robot/
+          pip install -r back/tests/robot/requirements.txt
+          robot -d out back/tests/robot/
+
+      - name: Show logs
+        if: failure()
+        run: docker-compose logs
 
       - uses: actions/upload-artifact@v2
         with:

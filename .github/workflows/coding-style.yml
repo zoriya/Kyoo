@@ -1,15 +1,43 @@
-name: CodingStyle
+name: Coding Style
 on: [pull_request, workflow_dispatch]
 
 jobs:
-  build:
-    name: "Coding style check"
+  back:
+    name: "Lint Back"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: 6.0.x
+
       - name: Build the app
-        run: dotnet build -p:CheckCodingStyle=true -p:TreatWarningsAsErrors=true '-p:SkipTranscoder=true;SkipWebApp=true'
+        run: cd back && dotnet build -p:CheckCodingStyle=true -p:TreatWarningsAsErrors=true '-p:SkipTranscoder=true'
+
+  front:
+    name: "Lint Front"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./front
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Find yarn cache
+        id: yarn-cache-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - name: Restore cache
+        uses: actions/cache@v2
+        with:
+          path: ${{ steps.yarn-cache-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-yarn-
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Lint
+        run: yarn lint

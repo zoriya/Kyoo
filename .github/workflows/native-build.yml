@@ -1,0 +1,60 @@
+name: Native build
+on:
+  push:
+    branches:
+      - master
+      - next
+  pull_request:
+
+jobs:
+  update:
+    name: Expo Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./front
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Check for EXPO_TOKEN
+        run: |
+          if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
+            echo "You must provide an EXPO_TOKEN secret linked to this project's Expo account in this repo's secrets. Learn more: https://docs.expo.dev/eas-update/github-actions"
+            exit 1
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+          cache: yarn
+          cache-dependency-path: front/yarn.lock
+
+      - name: Setup Expo
+        uses: expo/expo-github-action@v7
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Build Mobile Release
+        run: yarn build:mobile | tee log.txt
+
+      - name: Parse Asset URL
+        id: url
+        run: |
+          ASSET_URL=$(grep -oe 'https://expo.dev/artifacts/eas/.*' log.txt)
+          echo The android url is $ASSET_URL
+          echo "assetUrl=$ASSET_URL" >> $GITHUB_OUTPUT
+
+      - name: Download APK Asset
+        run: wget -O kyoo.apk ${{ steps.url.outputs.assetUrl }}
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: kyoo.apk
+          path: ./front/kyoo.apk

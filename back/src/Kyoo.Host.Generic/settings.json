@@ -1,0 +1,75 @@
+{
+  "basics": {
+    "url": "http://*:5000",
+    "pluginsPath": "plugins/",
+    "transmuxPath": "cached/transmux",
+    "transcodePath": "cached/transcode",
+    "metadataPath": "metadata/"
+  },
+
+  "database": {
+    "enabled": "sqlite",
+    "configurations": {
+      "sqlite": {
+        "data Source": "kyoo.db",
+        "cache": "Shared"
+      },
+      "postgres": {
+        "server": "127.0.0.1",
+        "port": "5432",
+        "database": "kyooDB",
+        "user": "kyoo",
+        "password": "kyooPassword",
+        "pooling": "true",
+        "maxPoolSize": "95",
+        "timeout": "30"
+      }
+    }
+  },
+
+  "logging": {
+    "MinimumLevel": {
+      "Default": "Warning",
+      "Override": {
+        "Microsoft": "Warning",
+        "Microsoft.Hosting.Lifetime": "Information",
+        "Microsoft.EntityFrameworkCore": "Fatal",
+        "Kyoo": "Verbose"
+      }
+    }
+  },
+
+  "tasks": {
+    "parallels": "1",
+    "scheduled": {
+      "scan": "24:00:00"
+    }
+  },
+
+  "media": {
+    "regex": [
+      "^[\\/\\\\]*(?<Collection>.+)?[\\/\\\\]+(?<Show>.+?)(?: \\((?<StartYear>\\d+)\\))?[\\/\\\\]+\\k<Show>(?: \\(\\d+\\))? S(?<Season>\\d+)E(?<Episode>\\d+)\\..*$",
+      "^[\\/\\\\]*(?<Collection>.+)?[\\/\\\\]+(?<Show>.+?)(?: \\((?<StartYear>\\d+)\\))?[\\/\\\\]+\\k<Show>(?: \\(\\d+\\))? (?<Absolute>\\d+)\\..*$",
+      "^[\\/\\\\]*(?<Collection>.+)?[\\/\\\\]+(?<Show>.+?)(?: \\((?<StartYear>\\d+)\\))?[\\/\\\\]+\\k<Show>(?: \\(\\d+\\))?\\..*$"
+    ],
+    "subtitleRegex": [
+      "^(?<Episode>.+)\\.(?<Language>\\w{1,3})\\.(?<Default>default\\.)?(?<Forced>forced\\.)?.*$"
+    ]
+  },
+
+  "authentication": {
+    "permissions": {
+      "default": ["overall.read", "overall.write"],
+      "newUser": ["overall.read", "overall.write"]
+    },
+    "profilePicturePath": "users/",
+    "secret": "4c@mraGB!KRfF@kpS8740y9FcHemKxBsqqxLbdR?"
+  },
+
+  "tvdb": {
+    "apiKey": ""
+  },
+  "themoviedb": {
+    "apiKey": ""
+  }
+}

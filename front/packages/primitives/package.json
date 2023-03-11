@@ -1,0 +1,39 @@
+{
+	"name": "@kyoo/primitives",
+	"main": "src/index.ts",
+	"types": "src/index.ts",
+	"packageManager": "yarn@3.2.4",
+	"devDependencies": {
+		"@gorhom/portal": "^1.0.14",
+		"@types/react": "^18.0.25",
+		"typescript": "^4.9.5"
+	},
+	"peerDependencies": {
+		"@gorhom/portal": "*",
+		"@material-symbols/svg-400": "*",
+		"@radix-ui/react-dropdown-menu": "*",
+		"expo-linear-gradient": "*",
+		"moti": "*",
+		"react": "*",
+		"react-native": "*",
+		"react-native-reanimated": "*",
+		"react-native-svg": "*",
+		"yoshiki": "*"
+	},
+	"peerDependenciesMeta": {
+		"@gorhom/portal": {
+			"optional": true
+		},
+		"@radix-ui/react-dropdown-menu": {
+			"optional": true
+		},
+		"react-native-web": {
+			"optional": true
+		}
+	},
+	"dependencies": {
+		"@expo/html-elements": "^0.2.2",
+		"@tanstack/react-query": "^4.24.4",
+		"solito": "^2.0.5"
+	}
+}

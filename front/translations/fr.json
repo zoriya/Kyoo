@@ -1,0 +1,66 @@
+{
+	"show": {
+		"play": "Lecture",
+		"trailer": "Jouer le trailer",
+		"studio": "Studio",
+		"genre": "Genres",
+		"genre-none": "Aucun genres",
+		"staff": "Staff",
+		"staff-none": "Aucun membre du staff connu",
+		"noOverview": "Aucune description disponible",
+		"episode-none": "Il n'y a pas d'épisodes dans cette saison",
+		"episodeNoMetadata": "Aucune metadonnée disponible"
+	},
+	"browse": {
+		"sortby": "Trier par {{key}}",
+		"sortby-tt": "Trier par",
+		"sortkey": {
+			"name": "Nom",
+			"startAir": "Date de sortie",
+			"endAir": "Date de fin de sortie"
+		},
+		"sortord": {
+			"asc": "asc",
+			"desc": "decs"
+		},
+		"switchToGrid": "Passer en vue grille",
+		"switchToList": "Passer en vue liste"
+	},
+	"misc": {
+		"prev-page": "Page précédente",
+		"next-page": "Page suivante"
+	},
+	"navbar": {
+		"home": "Accueil",
+		"search": "Rechercher",
+		"login": "Connexion"
+	},
+	"player": {
+		"back": "Retour",
+		"previous": "Episode précédent",
+		"next": "Episode suivant",
+		"play": "Jouer",
+		"pause": "Pause",
+		"mute": "Muet",
+		"volume": "Volume",
+		"subtitles": "Sous titres",
+		"subtitle-none": "Aucun",
+		"fullscreen": "Plein-écran"
+	},
+	"search": {
+		"empty": "Aucun résultat trouvé. Essayer avec une autre recherche."
+	},
+	"login": {
+		"login": "Connexion",
+		"register": "Créer un compte",
+		"logout": "Déconnexion",
+		"server": "Addresse du serveur",
+		"email": "Email",
+		"username": "Username",
+		"password": "Mot de passe",
+		"confirm": "Confirm Password",
+		"or-register": "Vous n'avez pas de compte ? <1>Inscrivez-vous</1>.",
+		"or-login": "Vous avez déjà un compte ? <1>Connectez-vous.<1/>",
+		"password-no-match": "Mots de passe differents"
+	}
+}

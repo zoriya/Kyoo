@@ -22,7 +22,6 @@ We are going to take a look at the fields you might want to change to tailor Kyo
 
 - ```basics```
   - ```url```: The port on which Kyoo will be exposed
-  - ```publicUrl```: The full URL for Kyoo.
   For the 3 following fields, the path are relative to the directory ```settings.json``` is in
   - ```pluginsPath```: The directory where the plugins are stored
   - ```transmuxPath```: The directory where the transmux-ed video are stored (used as a cache)
@@ -34,7 +33,7 @@ We are going to take a look at the fields you might want to change to tailor Kyo
 - ```tasks```
   - ```parallels```: The number of tasks that can be run at the same time. If the values is not ```1```, the behavior is not implemented.
   - ```scheduled```: An object with keys being the name of an automation task, with a value being the interval between each task of the same type.
-    - The available keys can be found at ```publicUrl/api/tasks``` (as 'slug')
+    - The available keys can be found at ```/api/tasks``` (as 'slug')
     - The values must be formatted like ```HH:MM:SS``
     **For Example** in the default configuration, a file scan task will be executed every 24 hours
 
@@ -81,7 +80,7 @@ If everything looks normal, no error message will appear, just log messages.
 Then, we are going to interact with Kyoo's API. To create a library, you must do the following request for each library you want to make:
   
 - POST Request
-- At ```publicUrl/api/libraries``` (```publicUrl``` is in ```settings.json```)
+- At ```/api/libraries```
 - Content-Type: ```application/json```
 - Body:
 
@@ -97,6 +96,6 @@ Then, we are going to interact with Kyoo's API. To create a library, you must do
     }
     ```
 
-Now that you created your libraries, you can do a simple GET request to ```publicUrl/api/task/scan``` to scan for videos in all the libraries.
+Now that you created your libraries, you can do a simple GET request to ```/api/task/scan``` to scan for videos in all the libraries.
 
 Once the scan is over, ```Task finished: Scan Libraries``` will be displayed! You are now ready to use Kyoo!

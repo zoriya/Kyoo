@@ -1,7 +1,0 @@
-**/build
-**/dist
-src/Kyoo.WebApp/Front/nodes_modules
-**/bin
-**/obj
-docs
-tests
