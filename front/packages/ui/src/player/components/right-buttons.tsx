@@ -65,7 +65,7 @@ export const RightButtons = ({
 		<View {...css({ flexDirection: "row" }, props)}>
 			{subtitles && (
 				<Menu
-					Triger={IconButton}
+					Trigger={IconButton}
 					icon={ClosedCaption}
 					onMenuOpen={onMenuOpen}
 					onMenuClose={onMenuClose}

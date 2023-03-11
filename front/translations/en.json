@@ -53,6 +53,7 @@
 	"login": {
 		"login": "Login",
 		"register": "Register",
+		"logout": "Logout",
 		"server": "Server Address",
 		"email": "Email",
 		"username": "Username",

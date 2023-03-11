@@ -19,7 +19,7 @@
  */
 
 import { z } from "zod";
-import { getSecureItem, setSecureItem } from "./secure-store";
+import { deleteSecureItem, getSecureItem, setSecureItem } from "./secure-store";
 import { zdate } from "./utils";
 import { queryFn } from "./query";
 import { KyooErrors } from "./kyoo-errors";
@@ -79,3 +79,7 @@ export const getTokenWJ = async (cookies?: string): Promise<[string, Token] | [n
 export const getToken = async (cookies?: string): Promise<string | null> =>
 	(await getTokenWJ(cookies))[0]
 
+
+export const logout = async () =>{
+	deleteSecureItem("auth")
+}

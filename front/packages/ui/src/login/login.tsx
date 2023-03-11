@@ -29,6 +29,7 @@ import { percent, px, useYoshiki } from "yoshiki/native";
 import { DefaultLayout } from "../layout";
 import { FormPage } from "./form";
 import { PasswordInput } from "./password-input";
+import { useQueryClient } from "@tanstack/react-query";
 
 export const LoginPage: QueryPage = () => {
 	const [username, setUsername] = useState("");
@@ -36,6 +37,7 @@ export const LoginPage: QueryPage = () => {
 	const [error, setError] = useState<string | undefined>(undefined);
 
 	const router = useRouter();
+	const queryClient = useQueryClient();
 	const { t } = useTranslation();
 	const { css } = useYoshiki();
 
@@ -66,7 +68,9 @@ export const LoginPage: QueryPage = () => {
 				onPress={async () => {
 					const { error } = await loginFunc("login", { username, password });
 					setError(error);
-					if (!error) router.push("/");
+					if (error) return;
+					queryClient.invalidateQueries(["auth", "me"]);
+					router.push("/");
 				}}
 				{...css({
 					m: ts(1),

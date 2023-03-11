@@ -19,7 +19,8 @@
  */
 
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { ComponentType, forwardRef, ReactNode } from "react";
+import { ComponentProps, ComponentType, forwardRef, ReactNode } from "react";
+import Link from "next/link";
 import { PressableProps } from "react-native";
 import { useYoshiki } from "yoshiki/web";
 import { px, useYoshiki as useNativeYoshiki } from "yoshiki/native";
@@ -43,16 +44,16 @@ const InternalTriger = forwardRef<unknown, any>(function _Triger(
 });
 
 const Menu = <AsProps extends { onPress: PressableProps["onPress"] }>({
-	Triger,
+	Trigger,
 	onMenuOpen,
 	onMenuClose,
 	children,
 	...props
 }: {
-	Triger: ComponentType<AsProps>;
+	Trigger: ComponentType<AsProps>;
 	children: ReactNode | ReactNode[] | null;
-	onMenuOpen: () => void;
-	onMenuClose: () => void;
+	onMenuOpen?: () => void;
+	onMenuClose?: () => void;
 } & Omit<AsProps, "onPress">) => {
 	return (
 		<DropdownMenu.Root
@@ -63,7 +64,7 @@ const Menu = <AsProps extends { onPress: PressableProps["onPress"] }>({
 			}}
 		>
 			<DropdownMenu.Trigger asChild>
-				<InternalTriger Component={Triger} ComponentProps={props} />
+				<InternalTriger Component={Trigger} ComponentProps={props} />
 			</DropdownMenu.Trigger>
 			<ContrastArea mode="user">
 				<YoshikiProvider>
@@ -90,18 +91,38 @@ const Menu = <AsProps extends { onPress: PressableProps["onPress"] }>({
 	);
 };
 
+const Item = forwardRef<
+	HTMLDivElement,
+	ComponentProps<typeof DropdownMenu.Item> & { href?: string }
+>(function _Item({ children, href, ...props }, ref) {
+	if (href) {
+		return (
+			<DropdownMenu.Item ref={ref} {...props} asChild>
+				<Link href={href} style={{ textDecoration: "none" }}>
+					{children}
+				</Link>
+			</DropdownMenu.Item>
+		);
+	}
+	return (
+		<DropdownMenu.Item ref={ref} {...props}>
+			{children}
+		</DropdownMenu.Item>
+	);
+});
+
 const MenuItem = ({
 	label,
 	icon,
 	selected,
 	onSelect,
+	href,
 	...props
 }: {
 	label: string;
 	icon?: JSX.Element;
 	selected?: boolean;
-	onSelect: () => void;
-}) => {
+} & ({ onSelect: () => void; href?: undefined } | { href: string; onSelect?: undefined })) => {
 	const { css: nCss } = useNativeYoshiki();
 	const { css, theme } = useYoshiki();
 
@@ -112,8 +133,9 @@ const MenuItem = ({
 					background: ${theme.alternate.accent};
 				}
 			`}</style>
-			<DropdownMenu.Item
+			<Item
 				onSelect={onSelect}
+				href={href}
 				{...css(
 					[
 						{
@@ -121,7 +143,6 @@ const MenuItem = ({
 							alignItems: "center",
 							padding: "8px",
 							height: "32px",
-							color: (theme) => theme.paragraph,
 							focus: {
 								boxShadow: "none",
 							},
@@ -138,8 +159,8 @@ const MenuItem = ({
 						{...nCss({ paddingRight: px(8) })}
 					/>
 				)}
-				{<P {...nCss([{ color: "inherit" }, !selected && { paddingLeft: px(8 * 2) }])}>{label}</P>}
-			</DropdownMenu.Item>
+				{<P {...nCss(!selected && { paddingLeft: px(8 * 2) })}>{label}</P>}
+			</Item>
 		</>
 	);
 };

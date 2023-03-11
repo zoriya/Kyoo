@@ -30,20 +30,21 @@ import { P } from "./text";
 import { ContrastArea } from "./themes";
 import { ts } from "./utils";
 import Check from "@material-symbols/svg-400/rounded/check-fill.svg";
+import { useRouter } from "solito/router";
 
 const MenuContext = createContext<((open: boolean) => void) | undefined>(undefined);
 
 const Menu = <AsProps,>({
-	Triger,
+	Trigger,
 	onMenuOpen,
 	onMenuClose,
 	children,
 	...props
 }: {
-	Triger: ComponentType<AsProps>;
+	Trigger: ComponentType<AsProps>;
 	children: ReactNode | ReactNode[] | null;
-	onMenuOpen: () => void;
-	onMenuClose: () => void;
+	onMenuOpen?: () => void;
+	onMenuClose?: () => void;
 } & Omit<AsProps, "onPress">) => {
 	const [isOpen, setOpen] = useState(false);
 
@@ -55,7 +56,7 @@ const Menu = <AsProps,>({
 	return (
 		<>
 			{/* @ts-ignore */}
-			<Triger onPress={() => setOpen(true)} {...props} />
+			<Trigger onPress={() => setOpen(true)} {...props} />
 			{isOpen && (
 				<Portal>
 					<ContrastArea mode="user">
@@ -112,20 +113,22 @@ const MenuItem = ({
 	label,
 	selected,
 	onSelect,
+	href,
 	...props
 }: {
 	label: string;
 	selected?: boolean;
-	onSelect: () => void;
-}) => {
+} & ({ onSelect: () => void; href?: undefined } | { href: string; onSelect?: undefined })) => {
 	const { css, theme } = useYoshiki();
 	const setOpen = useContext(MenuContext);
+	const router = useRouter();
 
 	return (
 		<PressableFeedback
 			onPress={() => {
 				setOpen?.call(null, false);
 				onSelect?.call(null);
+				if (href) router.push(href);
 			}}
 			{...css(
 				{
