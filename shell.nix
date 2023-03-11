@@ -8,5 +8,6 @@ pkgs.mkShell {
         sdk_6_0
         aspnetcore_6_0
       ])
+	python3
   ];
 }
