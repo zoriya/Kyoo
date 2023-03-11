@@ -13,6 +13,7 @@ services:
       - DATABASE__CONFIGURATIONS__POSTGRES__DATABASE=${POSTGRES_DB}
       - TVDB__APIKEY=${TVDB__APIKEY}
       - THEMOVIEDB__APIKEY=${THEMOVIEDB__APIKEY}
+      - LIBRARY_ROOT=/video
     depends_on:
       - postgres
     volumes:
@@ -52,4 +53,3 @@ services:
 volumes:
   kyoo:
   db:
-

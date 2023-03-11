@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   back:
-    build: 
+    build:
       context: ./back
       dockerfile: Dockerfile.dev
     ports:
@@ -16,6 +16,7 @@ services:
       - DATABASE__CONFIGURATIONS__POSTGRES__PASSWORD=${POSTGRES_PASSWORD}
       - TVDB__APIKEY=${TVDB__APIKEY}
       - THEMOVIEDB__APIKEY=${THEMOVIEDB__APIKEY}
+      - LIBRARY_ROOT=/video
     depends_on:
       - postgres
     volumes:
@@ -24,7 +25,7 @@ services:
       - kyoo:/var/lib/kyoo
       - ./video:/video
   front:
-    build: 
+    build:
       context: ./front
       dockerfile: Dockerfile.dev
     volumes:
@@ -67,4 +68,3 @@ services:
 volumes:
   kyoo:
   db:
-

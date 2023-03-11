@@ -84,6 +84,7 @@ namespace Kyoo.Core
 			builder.RegisterTask<RegisterEpisode>();
 			builder.RegisterTask<RegisterSubtitle>();
 			builder.RegisterTask<MetadataProviderLoader>();
+			builder.RegisterTask<LibraryCreator>();
 
 			static bool DatabaseIsPresent(IComponentRegistryBuilder x)
 				=> x.IsRegistered(new TypedService(typeof(DatabaseContext)));
