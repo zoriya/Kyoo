@@ -83,6 +83,7 @@ const GlobalCssTheme = () => {
 
 const YoshikiDebug = ({ children }: { children: JSX.Element }) => {
 	if (typeof window === "undefined") return children;
+	// eslint-disable-next-line react-hooks/rules-of-hooks
 	const registry = useStyleRegistry();
 	return <StyleRegistryProvider registry={registry}>{children}</StyleRegistryProvider>;
 };
