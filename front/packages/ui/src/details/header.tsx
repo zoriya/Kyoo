@@ -190,21 +190,24 @@ const TitleLine = ({
 					}),
 				])}
 			>
-				<P
-					{...css({
-						color: (theme: Theme) => theme.user.paragraph,
-						display: "flex",
-					})}
-				>
-					{t("show.studio")}:{" "}
-					{isLoading ? (
-						<Skeleton {...css({ width: rem(5) })} />
-					) : (
-						<A href={`/studio/${studio!.slug}`} {...css({ color: (theme) => theme.user.link })}>
-							{studio!.name}
-						</A>
-					)}
-				</P>
+				{isLoading ||
+					(studio && (
+						<P
+							{...css({
+								color: (theme: Theme) => theme.user.paragraph,
+								display: "flex",
+							})}
+						>
+							{t("show.studio")}:{" "}
+							{isLoading ? (
+								<Skeleton {...css({ width: rem(5) })} />
+							) : (
+								<A href={`/studio/${studio.slug}`} {...css({ color: (theme) => theme.user.link })}>
+									{studio.name}
+								</A>
+							)}
+						</P>
+					))}
 			</View>
 		</Container>
 	);
