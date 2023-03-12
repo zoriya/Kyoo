@@ -129,7 +129,7 @@ namespace Kyoo.Core.Api
 			{
 				ICollection<T> resources = await Repository.GetAll(
 					ApiHelper.ParseWhere<T>(where),
-					new Sort<T>(sortBy),
+					Sort<T>.From(sortBy),
 					new Pagination(limit, afterID)
 				);
 

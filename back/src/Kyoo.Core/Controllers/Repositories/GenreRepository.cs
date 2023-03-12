@@ -39,7 +39,7 @@ namespace Kyoo.Core.Controllers
 		private readonly DatabaseContext _database;
 
 		/// <inheritdoc />
-		protected override Expression<Func<Genre, object>> DefaultSort => x => x.Slug;
+		protected override Sort<Genre> DefaultSort => new Sort<Genre>.By(x => x.Slug);
 
 		/// <summary>
 		/// Create a new <see cref="GenreRepository"/>.
@@ -54,9 +54,10 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task<ICollection<Genre>> Search(string query)
 		{
-			return await _database.Genres
-				.Where(_database.Like<Genre>(x => x.Name, $"%{query}%"))
-				.OrderBy(DefaultSort)
+			return await Sort(
+				_database.Genres
+					.Where(_database.Like<Genre>(x => x.Name, $"%{query}%"))
+				)
 				.Take(20)
 				.ToListAsync();
 		}

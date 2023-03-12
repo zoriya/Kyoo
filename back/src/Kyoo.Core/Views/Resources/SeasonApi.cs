@@ -92,7 +92,7 @@ namespace Kyoo.Core.Api
 			{
 				ICollection<Episode> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere(where, identifier.Matcher<Episode>(x => x.SeasonID, x => x.Season.Slug)),
-					new Sort<Episode>(sortBy),
+					Sort<Episode>.From(sortBy),
 					new Pagination(limit, afterID));
 
 				if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Season>()) == null)

@@ -89,7 +89,7 @@ namespace Kyoo.Core.Api
 			{
 				ICollection<LibraryItem> resources = await _libraryItems.GetAll(
 					ApiHelper.ParseWhere<LibraryItem>(where),
-					new Sort<LibraryItem>(sortBy),
+					Sort<LibraryItem>.From(sortBy),
 					new Pagination(limit, afterID)
 				);
 

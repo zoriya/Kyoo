@@ -17,7 +17,9 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using Kyoo.Utils;
 
 namespace Kyoo.Abstractions.Controllers
@@ -26,63 +28,73 @@ namespace Kyoo.Abstractions.Controllers
 	/// Information about how a query should be sorted. What factor should decide the sort and in which order.
 	/// </summary>
 	/// <typeparam name="T">For witch type this sort applies</typeparam>
-	public readonly struct Sort<T>
+	public record Sort<T>
 	{
 		/// <summary>
-		/// The sort key. This member will be used to sort the results.
+		/// Sort by a specific key
 		/// </summary>
-		public Expression<Func<T, object>> Key { get; }
-
-		/// <summary>
+		/// <param name="key">The sort keys. This members will be used to sort the results.</param>
+		/// <param name="desendant">
 		/// If this is set to true, items will be sorted in descend order else, they will be sorted in ascendant order.
-		/// </summary>
-		public bool Descendant { get; }
+		/// </param>
+		public record By(string key, bool desendant = false) : Sort<T>
+		{
+			/// <summary>
+			/// Sort by a specific key
+			/// </summary>
+			/// <param name="key">The sort keys. This members will be used to sort the results.</param>
+			/// <param name="desendant">
+			/// If this is set to true, items will be sorted in descend order else, they will be sorted in ascendant order.
+			/// </param>
+			public By(Expression<Func<T, object>> key, bool desendant = false)
+				: this(Utility.GetPropertyName(key), desendant) { }
+
+			/// <summary>
+			/// Create a new <see cref="Sort{T}"/> instance from a key's name (case insensitive).
+			/// </summary>
+			/// <param name="sortBy">A key name with an optional order specifier. Format: "key:asc", "key:desc" or "key".</param>
+			/// <exception cref="ArgumentException">An invalid key or sort specifier as been given.</exception>
+			/// <returns>A <see cref="Sort{T}"/> for the given string</returns>
+			public static new By From(string sortBy)
+			{
+				string key = sortBy.Contains(':') ? sortBy[..sortBy.IndexOf(':')] : sortBy;
+				string order = sortBy.Contains(':') ? sortBy[(sortBy.IndexOf(':') + 1)..] : null;
+				bool desendant = order switch
+				{
+					"desc" => true,
+					"asc" => false,
+					null => false,
+					_ => throw new ArgumentException($"The sort order, if set, should be :asc or :desc but it was :{order}.")
+				};
+				PropertyInfo property = typeof(T).GetProperty(key, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+				if (property == null)
+					throw new ArgumentException("The given sort key is not valid.");
+				return new By(property.Name, desendant);
+			}
+		}
 
 		/// <summary>
-		/// Create a new <see cref="Sort{T}"/> instance.
+		/// Sort by multiple keys.
 		/// </summary>
-		/// <param name="key">The sort key given. It is assigned to <see cref="Key"/>.</param>
-		/// <param name="descendant">Should this be in descendant order? The default is false.</param>
-		/// <exception cref="ArgumentException">If the given key is not a member.</exception>
-		public Sort(Expression<Func<T, object>> key, bool descendant = false)
-		{
-			Key = key;
-			Descendant = descendant;
+		/// <param name="list">The list of keys to sort by.</param>
+		public record Conglomerate(params By[] list) : Sort<T>;
 
-			if (!Utility.IsPropertyExpression(Key))
-				throw new ArgumentException("The given sort key is not valid.");
-		}
+		/// <summary>The default sort method for the given type.</summary>
+		public record Default : Sort<T>;
 
 		/// <summary>
 		/// Create a new <see cref="Sort{T}"/> instance from a key's name (case insensitive).
 		/// </summary>
 		/// <param name="sortBy">A key name with an optional order specifier. Format: "key:asc", "key:desc" or "key".</param>
 		/// <exception cref="ArgumentException">An invalid key or sort specifier as been given.</exception>
-		public Sort(string sortBy)
+		/// <returns>A <see cref="Sort{T}"/> for the given string</returns>
+		public static Sort<T> From(string sortBy)
 		{
 			if (string.IsNullOrEmpty(sortBy))
-			{
-				Key = null;
-				Descendant = false;
-				return;
-			}
-
-			string key = sortBy.Contains(':') ? sortBy[..sortBy.IndexOf(':')] : sortBy;
-			string order = sortBy.Contains(':') ? sortBy[(sortBy.IndexOf(':') + 1)..] : null;
-
-			ParameterExpression param = Expression.Parameter(typeof(T), "x");
-			MemberExpression property = Expression.Property(param, key);
-			Key = property.Type.IsValueType
-				? Expression.Lambda<Func<T, object>>(Expression.Convert(property, typeof(object)), param)
-				: Expression.Lambda<Func<T, object>>(property, param);
-
-			Descendant = order switch
-			{
-				"desc" => true,
-				"asc" => false,
-				null => false,
-				_ => throw new ArgumentException($"The sort order, if set, should be :asc or :desc but it was :{order}.")
-			};
+				return new Default();
+			if (sortBy.Contains(','))
+				return new Conglomerate(sortBy.Split(',').Select(By.From).ToArray());
+			return By.From(sortBy);
 		}
 	}
 }

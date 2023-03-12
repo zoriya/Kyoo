@@ -160,7 +160,7 @@ namespace Kyoo.Core.Api
 			{
 				ICollection<Track> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere(where, identifier.Matcher<Track>(x => x.EpisodeID, x => x.Episode.Slug)),
-					new Sort<Track>(sortBy),
+					Sort<Track>.From(sortBy),
 					new Pagination(limit, afterID));
 
 				if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Episode>()) == null)

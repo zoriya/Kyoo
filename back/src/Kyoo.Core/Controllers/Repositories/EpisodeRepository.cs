@@ -19,7 +19,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
@@ -51,7 +50,12 @@ namespace Kyoo.Core.Controllers
 		private readonly ITrackRepository _tracks;
 
 		/// <inheritdoc />
-		protected override Expression<Func<Episode, object>> DefaultSort => x => x.EpisodeNumber;
+		// Use absolute numbers by default and fallback to season/episodes if it does not exists.
+		protected override Sort<Episode> DefaultSort => new Sort<Episode>.Conglomerate(
+			new Sort<Episode>.By(x => x.AbsoluteNumber),
+			new Sort<Episode>.By(x => x.SeasonNumber),
+			new Sort<Episode>.By(x => x.EpisodeNumber)
+		);
 
 		/// <summary>
 		/// Create a new <see cref="EpisodeRepository"/>.
@@ -120,11 +124,12 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task<ICollection<Episode>> Search(string query)
 		{
-			List<Episode> ret = await _database.Episodes
-				.Include(x => x.Show)
-				.Where(x => x.EpisodeNumber != null || x.AbsoluteNumber != null)
-				.Where(_database.Like<Episode>(x => x.Title, $"%{query}%"))
-				.OrderBy(DefaultSort)
+			List<Episode> ret = await Sort(
+				_database.Episodes
+					.Include(x => x.Show)
+					.Where(x => x.EpisodeNumber != null || x.AbsoluteNumber != null)
+					.Where(_database.Like<Episode>(x => x.Title, $"%{query}%"))
+				)
 				.Take(20)
 				.ToListAsync();
 			foreach (Episode ep in ret)

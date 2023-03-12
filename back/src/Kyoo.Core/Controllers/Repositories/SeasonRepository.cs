@@ -45,7 +45,7 @@ namespace Kyoo.Core.Controllers
 		private readonly IProviderRepository _providers;
 
 		/// <inheritdoc/>
-		protected override Expression<Func<Season, object>> DefaultSort => x => x.SeasonNumber;
+		protected override Sort<Season> DefaultSort => new Sort<Season>.By(x => x.SeasonNumber);
 
 		/// <summary>
 		/// Create a new <see cref="SeasonRepository"/>.
@@ -95,9 +95,10 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc/>
 		public override async Task<ICollection<Season>> Search(string query)
 		{
-			return await _database.Seasons
-				.Where(_database.Like<Season>(x => x.Title, $"%{query}%"))
-				.OrderBy(DefaultSort)
+			return await Sort(
+				_database.Seasons
+					.Where(_database.Like<Season>(x => x.Title, $"%{query}%"))
+				)
 				.Take(20)
 				.ToListAsync();
 		}

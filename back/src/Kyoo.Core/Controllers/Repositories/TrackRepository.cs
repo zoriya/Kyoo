@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
@@ -38,7 +37,7 @@ namespace Kyoo.Core.Controllers
 		private readonly DatabaseContext _database;
 
 		/// <inheritdoc />
-		protected override Expression<Func<Track, object>> DefaultSort => x => x.TrackIndex;
+		protected override Sort<Track> DefaultSort => new Sort<Track>.By(x => x.TrackIndex);
 
 		/// <summary>
 		/// Create a new <see cref="TrackRepository"/>.
