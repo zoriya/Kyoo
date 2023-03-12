@@ -88,7 +88,7 @@ namespace Kyoo.Core.Api
 			{
 				ICollection<Show> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere(where, identifier.Matcher<Show>(x => x.StudioID, x => x.Studio.Slug)),
-					new Sort<Show>(sortBy),
+					Sort<Show>.From(sortBy),
 					new Pagination(limit, afterID)
 				);
 

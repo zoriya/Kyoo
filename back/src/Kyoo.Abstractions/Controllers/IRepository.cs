@@ -19,7 +19,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Kyoo.Abstractions.Models;
@@ -105,19 +104,6 @@ namespace Kyoo.Abstractions.Controllers
 		Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null,
 			Sort<T> sort = default,
 			Pagination limit = default);
-
-		/// <summary>
-		/// Get every resources that match all filters
-		/// </summary>
-		/// <param name="where">A filter predicate</param>
-		/// <param name="sort">A sort by predicate. The order is ascending.</param>
-		/// <param name="limit">How pagination should be done (where to start and how many to return)</param>
-		/// <returns>A list of resources that match every filters</returns>
-		[ItemNotNull]
-		Task<ICollection<T>> GetAll([Optional] Expression<Func<T, bool>> where,
-			Expression<Func<T, object>> sort,
-			Pagination limit = default
-		) => GetAll(where, new Sort<T>(sort), limit);
 
 		/// <summary>
 		/// Get the number of resources that match the filter's predicate.
@@ -355,21 +341,6 @@ namespace Kyoo.Abstractions.Controllers
 		/// <summary>
 		/// Get items (A wrapper around shows or collections) from a library.
 		/// </summary>
-		/// <param name="id">The ID of the library</param>
-		/// <param name="where">A filter function</param>
-		/// <param name="sort">A sort by method</param>
-		/// <param name="limit">How many items to return and where to start</param>
-		/// <exception cref="ItemNotFoundException">No library exist with the given ID.</exception>
-		/// <returns>A list of items that match every filters</returns>
-		public Task<ICollection<LibraryItem>> GetFromLibrary(int id,
-			[Optional] Expression<Func<LibraryItem, bool>> where,
-			Expression<Func<LibraryItem, object>> sort,
-			Pagination limit = default
-		) => GetFromLibrary(id, where, new Sort<LibraryItem>(sort), limit);
-
-		/// <summary>
-		/// Get items (A wrapper around shows or collections) from a library.
-		/// </summary>
 		/// <param name="slug">The slug of the library</param>
 		/// <param name="where">A filter function</param>
 		/// <param name="sort">Sort information (sort order and sort by)</param>
@@ -380,21 +351,6 @@ namespace Kyoo.Abstractions.Controllers
 			Expression<Func<LibraryItem, bool>> where = null,
 			Sort<LibraryItem> sort = default,
 			Pagination limit = default);
-
-		/// <summary>
-		/// Get items (A wrapper around shows or collections) from a library.
-		/// </summary>
-		/// <param name="slug">The slug of the library</param>
-		/// <param name="where">A filter function</param>
-		/// <param name="sort">A sort by method</param>
-		/// <param name="limit">How many items to return and where to start</param>
-		/// <exception cref="ItemNotFoundException">No library exist with the given slug.</exception>
-		/// <returns>A list of items that match every filters</returns>
-		public Task<ICollection<LibraryItem>> GetFromLibrary(string slug,
-			[Optional] Expression<Func<LibraryItem, bool>> where,
-			Expression<Func<LibraryItem, object>> sort,
-			Pagination limit = default
-		) => GetFromLibrary(slug, where, new Sort<LibraryItem>(sort), limit);
 	}
 
 	/// <summary>
@@ -434,21 +390,6 @@ namespace Kyoo.Abstractions.Controllers
 		/// <summary>
 		/// Get people's roles from a show.
 		/// </summary>
-		/// <param name="showID">The ID of the show</param>
-		/// <param name="where">A filter function</param>
-		/// <param name="sort">A sort by method</param>
-		/// <param name="limit">How many items to return and where to start</param>
-		/// <exception cref="ItemNotFoundException">No <see cref="Show"/> exist with the given ID.</exception>
-		/// <returns>A list of items that match every filters</returns>
-		Task<ICollection<PeopleRole>> GetFromShow(int showID,
-			[Optional] Expression<Func<PeopleRole, bool>> where,
-			Expression<Func<PeopleRole, object>> sort,
-			Pagination limit = default
-		) => GetFromShow(showID, where, new Sort<PeopleRole>(sort), limit);
-
-		/// <summary>
-		/// Get people's roles from a show.
-		/// </summary>
 		/// <param name="showSlug">The slug of the show</param>
 		/// <param name="where">A filter function</param>
 		/// <param name="sort">Sort information (sort order and sort by)</param>
@@ -459,21 +400,6 @@ namespace Kyoo.Abstractions.Controllers
 			Expression<Func<PeopleRole, bool>> where = null,
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default);
-
-		/// <summary>
-		/// Get people's roles from a show.
-		/// </summary>
-		/// <param name="showSlug">The slug of the show</param>
-		/// <param name="where">A filter function</param>
-		/// <param name="sort">A sort by method</param>
-		/// <param name="limit">How many items to return and where to start</param>
-		/// <exception cref="ItemNotFoundException">No <see cref="Show"/> exist with the given slug.</exception>
-		/// <returns>A list of items that match every filters</returns>
-		Task<ICollection<PeopleRole>> GetFromShow(string showSlug,
-			[Optional] Expression<Func<PeopleRole, bool>> where,
-			Expression<Func<PeopleRole, object>> sort,
-			Pagination limit = default
-		) => GetFromShow(showSlug, where, new Sort<PeopleRole>(sort), limit);
 
 		/// <summary>
 		/// Get people's roles from a person.
@@ -492,21 +418,6 @@ namespace Kyoo.Abstractions.Controllers
 		/// <summary>
 		/// Get people's roles from a person.
 		/// </summary>
-		/// <param name="id">The id of the person</param>
-		/// <param name="where">A filter function</param>
-		/// <param name="sort">A sort by method</param>
-		/// <param name="limit">How many items to return and where to start</param>
-		/// <exception cref="ItemNotFoundException">No <see cref="People"/> exist with the given ID.</exception>
-		/// <returns>A list of items that match every filters</returns>
-		Task<ICollection<PeopleRole>> GetFromPeople(int id,
-			[Optional] Expression<Func<PeopleRole, bool>> where,
-			Expression<Func<PeopleRole, object>> sort,
-			Pagination limit = default
-		) => GetFromPeople(id, where, new Sort<PeopleRole>(sort), limit);
-
-		/// <summary>
-		/// Get people's roles from a person.
-		/// </summary>
 		/// <param name="slug">The slug of the person</param>
 		/// <param name="where">A filter function</param>
 		/// <param name="sort">Sort information (sort order and sort by)</param>
@@ -517,21 +428,6 @@ namespace Kyoo.Abstractions.Controllers
 			Expression<Func<PeopleRole, bool>> where = null,
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default);
-
-		/// <summary>
-		/// Get people's roles from a person.
-		/// </summary>
-		/// <param name="slug">The slug of the person</param>
-		/// <param name="where">A filter function</param>
-		/// <param name="sort">A sort by method</param>
-		/// <param name="limit">How many items to return and where to start</param>
-		/// <exception cref="ItemNotFoundException">No <see cref="People"/> exist with the given slug.</exception>
-		/// <returns>A list of items that match every filters</returns>
-		Task<ICollection<PeopleRole>> GetFromPeople(string slug,
-			[Optional] Expression<Func<PeopleRole, bool>> where,
-			Expression<Func<PeopleRole, object>> sort,
-			Pagination limit = default
-		) => GetFromPeople(slug, where, new Sort<PeopleRole>(sort), limit);
 	}
 
 	/// <summary>
@@ -551,21 +447,6 @@ namespace Kyoo.Abstractions.Controllers
 			Sort<MetadataID> sort = default,
 			Pagination limit = default)
 			where T : class, IMetadata;
-
-		/// <summary>
-		/// Get a list of external ids that match all filters
-		/// </summary>
-		/// <param name="where">A predicate to add arbitrary filter</param>
-		/// <param name="sort">A sort by expression</param>
-		/// <param name="limit">Pagination information (where to start and how many to get)</param>
-		/// <typeparam name="T">The type of metadata to retrieve</typeparam>
-		/// <returns>A filtered list of external ids.</returns>
-		Task<ICollection<MetadataID>> GetMetadataID<T>([Optional] Expression<Func<MetadataID, bool>> where,
-			Expression<Func<MetadataID, object>> sort,
-			Pagination limit = default
-		)
-		where T : class, IMetadata
-			=> GetMetadataID<T>(where, new Sort<MetadataID>(sort), limit);
 	}
 
 	/// <summary>

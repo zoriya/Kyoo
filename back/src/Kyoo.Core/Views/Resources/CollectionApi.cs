@@ -92,7 +92,7 @@ namespace Kyoo.Core.Api
 			{
 				ICollection<Show> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere(where, identifier.IsContainedIn<Show, Collection>(x => x.Collections)),
-					new Sort<Show>(sortBy),
+					Sort<Show>.From(sortBy),
 					new Pagination(limit, afterID)
 				);
 
@@ -136,7 +136,7 @@ namespace Kyoo.Core.Api
 			{
 				ICollection<Library> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere(where, identifier.IsContainedIn<Library, Collection>(x => x.Collections)),
-					new Sort<Library>(sortBy),
+					Sort<Library>.From(sortBy),
 					new Pagination(limit, afterID)
 				);
 

@@ -45,7 +45,7 @@ namespace Kyoo.Core.Controllers
 		private readonly Lazy<ILibraryRepository> _libraries;
 
 		/// <inheritdoc />
-		protected override Expression<Func<LibraryItem, object>> DefaultSort => x => x.Title;
+		protected override Sort<LibraryItem> DefaultSort => new Sort<LibraryItem>.By(x => x.Title);
 
 		/// <summary>
 		/// Create a new <see cref="LibraryItemRepository"/>.
@@ -92,9 +92,10 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task<ICollection<LibraryItem>> Search(string query)
 		{
-			return await _database.LibraryItems
-				.Where(_database.Like<LibraryItem>(x => x.Title, $"%{query}%"))
-				.OrderBy(DefaultSort)
+			return await Sort(
+				_database.LibraryItems
+					.Where(_database.Like<LibraryItem>(x => x.Title, $"%{query}%"))
+				)
 				.Take(20)
 				.ToListAsync();
 		}

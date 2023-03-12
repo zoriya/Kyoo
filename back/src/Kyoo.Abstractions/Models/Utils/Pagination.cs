@@ -34,14 +34,21 @@ namespace Kyoo.Abstractions.Controllers
 		public int? AfterID { get; }
 
 		/// <summary>
+		/// Should the previous page be returned instead of the next?
+		/// </summary>
+		public bool Reverse { get; }
+
+		/// <summary>
 		/// Create a new <see cref="Pagination"/> instance.
 		/// </summary>
 		/// <param name="count">Set the <see cref="Count"/> value</param>
 		/// <param name="afterID">Set the <see cref="AfterID"/> value. If not specified, it will start from the start</param>
-		public Pagination(int count, int? afterID = null)
+		/// <param name="reverse">Should the previous page be returned instead of the next?</param>
+		public Pagination(int count, int? afterID = null, bool reverse = false)
 		{
 			Count = count;
 			AfterID = afterID;
+			Reverse = reverse;
 		}
 
 		/// <summary>

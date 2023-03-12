@@ -96,7 +96,7 @@ namespace Kyoo.Core.Api
 			{
 				ICollection<Season> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere(where, identifier.Matcher<Season>(x => x.ShowID, x => x.Show.Slug)),
-					new Sort<Season>(sortBy),
+					Sort<Season>.From(sortBy),
 					new Pagination(limit, afterID)
 				);
 
@@ -140,7 +140,7 @@ namespace Kyoo.Core.Api
 			{
 				ICollection<Episode> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere(where, identifier.Matcher<Episode>(x => x.ShowID, x => x.Show.Slug)),
-					new Sort<Episode>(sortBy),
+					Sort<Episode>.From(sortBy),
 					new Pagination(limit, afterID)
 				);
 
@@ -183,7 +183,7 @@ namespace Kyoo.Core.Api
 			try
 			{
 				Expression<Func<PeopleRole, bool>> whereQuery = ApiHelper.ParseWhere<PeopleRole>(where);
-				Sort<PeopleRole> sort = new(sortBy);
+				Sort<PeopleRole> sort = Sort<PeopleRole>.From(sortBy);
 				Pagination pagination = new(limit, afterID);
 
 				ICollection<PeopleRole> resources = await identifier.Match(
@@ -232,7 +232,7 @@ namespace Kyoo.Core.Api
 			{
 				ICollection<Genre> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere(where, identifier.IsContainedIn<Genre, Show>(x => x.Shows)),
-					new Sort<Genre>(sortBy),
+					Sort<Genre>.From(sortBy),
 					new Pagination(limit, afterID)
 				);
 
@@ -298,7 +298,7 @@ namespace Kyoo.Core.Api
 			{
 				ICollection<Library> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere(where, identifier.IsContainedIn<Library, Show>(x => x.Shows)),
-					new Sort<Library>(sortBy),
+					Sort<Library>.From(sortBy),
 					new Pagination(limit, afterID)
 				);
 
@@ -342,7 +342,7 @@ namespace Kyoo.Core.Api
 			{
 				ICollection<Collection> resources = await _libraryManager.GetAll(
 					ApiHelper.ParseWhere(where, identifier.IsContainedIn<Collection, Show>(x => x.Shows)),
-					new Sort<Collection>(sortBy),
+					Sort<Collection>.From(sortBy),
 					new Pagination(limit, afterID)
 				);
 

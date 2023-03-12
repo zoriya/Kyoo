@@ -113,7 +113,7 @@ namespace Kyoo.Abstractions.Models.Utils
 
 		/// <summary>
 		/// A matcher overload for nullable IDs. See
-		/// <see cref="Matcher{T}(System.Linq.Expressions.Expression{System.Func{T,int}},System.Linq.Expressions.Expression{System.Func{T,string}})"/>
+		/// <see cref="Matcher{T}(Expression{Func{T,int}},Expression{Func{T,string}})"/>
 		/// for more details.
 		/// </summary>
 		/// <param name="idGetter">An expression to retrieve an ID from the type <typeparamref name="T"/>.</param>

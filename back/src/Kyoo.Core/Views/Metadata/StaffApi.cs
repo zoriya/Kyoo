@@ -93,7 +93,7 @@ namespace Kyoo.Core.Api
 			try
 			{
 				Expression<Func<PeopleRole, bool>> whereQuery = ApiHelper.ParseWhere<PeopleRole>(where);
-				Sort<PeopleRole> sort = new(sortBy);
+				Sort<PeopleRole> sort = Sort<PeopleRole>.From(sortBy);
 				Pagination pagination = new(limit, afterID);
 
 				ICollection<PeopleRole> resources = await identifier.Match(

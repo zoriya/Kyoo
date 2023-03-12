@@ -39,7 +39,7 @@ namespace Kyoo.Core.Controllers
 		private readonly DatabaseContext _database;
 
 		/// <inheritdoc />
-		protected override Expression<Func<User, object>> DefaultSort => x => x.Username;
+		protected override Sort<User> DefaultSort => new Sort<User>.By(x => x.Username);
 
 		/// <summary>
 		/// Create a new <see cref="UserRepository"/>
@@ -54,9 +54,10 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task<ICollection<User>> Search(string query)
 		{
-			return await _database.Users
-				.Where(_database.Like<User>(x => x.Username, $"%{query}%"))
-				.OrderBy(DefaultSort)
+			return await Sort(
+				_database.Users
+					.Where(_database.Like<User>(x => x.Username, $"%{query}%"))
+				)
 				.Take(20)
 				.ToListAsync();
 		}

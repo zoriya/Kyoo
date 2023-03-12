@@ -16,6 +16,7 @@ dotnet_diagnostic.IDE0058.severity = none
 dotnet_diagnostic.IDE0046.severity = none
 dotnet_diagnostic.CA1848.severity = none
 dotnet_diagnostic.CA2007.severity = none
+dotnet_diagnostic.CA1716.severity = none
 # Sort using and Import directives with System.* appearing first
 dotnet_sort_system_directives_first = true
 csharp_using_directive_placement = outside_namespace:warning

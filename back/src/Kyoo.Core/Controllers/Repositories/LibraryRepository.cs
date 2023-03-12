@@ -45,7 +45,7 @@ namespace Kyoo.Core.Controllers
 		private readonly IProviderRepository _providers;
 
 		/// <inheritdoc />
-		protected override Expression<Func<Library, object>> DefaultSort => x => x.ID;
+		protected override Sort<Library> DefaultSort => new Sort<Library>.By(x => x.ID);
 
 		/// <summary>
 		/// Create a new <see cref="LibraryRepository"/> instance.
@@ -62,9 +62,10 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task<ICollection<Library>> Search(string query)
 		{
-			return await _database.Libraries
-				.Where(_database.Like<Library>(x => x.Name + " " + x.Slug, $"%{query}%"))
-				.OrderBy(DefaultSort)
+			return await Sort(
+				_database.Libraries
+					.Where(_database.Like<Library>(x => x.Name + " " + x.Slug, $"%{query}%"))
+				)
 				.Take(20)
 				.ToListAsync();
 		}
