@@ -62,19 +62,19 @@ namespace Kyoo.Core
 					break;
 			}
 		}
-	}
 
-	/// <inheritdoc />
-	public class ServerErrorObjectResult : ObjectResult
-	{
-		/// <summary>
-		/// Initializes a new instance of the <see cref="ServerErrorObjectResult"/> class.
-		/// </summary>
-		/// <param name="value">The object to return.</param>
-		public ServerErrorObjectResult(object value)
-			: base(value)
+		/// <inheritdoc />
+		public class ServerErrorObjectResult : ObjectResult
 		{
-			StatusCode = StatusCodes.Status500InternalServerError;
+			/// <summary>
+			/// Initializes a new instance of the <see cref="ServerErrorObjectResult"/> class.
+			/// </summary>
+			/// <param name="value">The object to return.</param>
+			public ServerErrorObjectResult(object value)
+				: base(value)
+			{
+				StatusCode = StatusCodes.Status500InternalServerError;
+			}
 		}
 	}
 }

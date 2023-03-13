@@ -82,19 +82,15 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public Task<ICollection<MetadataID>> GetMetadataID<T>(Expression<Func<MetadataID, bool>> where = null,
+		public async Task<ICollection<MetadataID>> GetMetadataID<T>(Expression<Func<MetadataID, bool>> where = null,
 			Sort<MetadataID> sort = default,
 			Pagination limit = default)
 			where T : class, IMetadata
 		{
-			throw new NotImplementedException();
-			// return ApplyFilters(_database.MetadataIds<T>()
-			// 		.Include(y => y.Provider),
-			// 	x => _database.MetadataIds<T>().FirstOrDefaultAsync(y => y.ResourceID == x),
-			// 	x => x.ResourceID,
-			// 	where,
-			// 	sort,
-			// 	limit);
+			return await _database.MetadataIds<T>()
+				.Include(y => y.Provider)
+				.Where(where)
+				.ToListAsync();
 		}
 	}
 }

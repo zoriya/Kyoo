@@ -148,7 +148,7 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public async Task<ICollection<PeopleRole>> GetFromShow(int showID,
+		public Task<ICollection<PeopleRole>> GetFromShow(int showID,
 			Expression<Func<PeopleRole, bool>> where = null,
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default)
@@ -169,7 +169,7 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public async Task<ICollection<PeopleRole>> GetFromShow(string showSlug,
+		public Task<ICollection<PeopleRole>> GetFromShow(string showSlug,
 			Expression<Func<PeopleRole, bool>> where = null,
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default)
@@ -192,7 +192,7 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public async Task<ICollection<PeopleRole>> GetFromPeople(int id,
+		public Task<ICollection<PeopleRole>> GetFromPeople(int id,
 			Expression<Func<PeopleRole, bool>> where = null,
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default)
@@ -212,7 +212,7 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public async Task<ICollection<PeopleRole>> GetFromPeople(string slug,
+		public Task<ICollection<PeopleRole>> GetFromPeople(string slug,
 			Expression<Func<PeopleRole, bool>> where = null,
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default)
