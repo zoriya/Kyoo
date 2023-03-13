@@ -44,9 +44,14 @@ namespace Kyoo.Core.Api
 		{
 			if (context.ActionArguments.TryGetValue("where", out object dic) && dic is Dictionary<string, string> where)
 			{
-				where.Remove("fields");
+				Dictionary<string, string> nWhere = new(where, StringComparer.InvariantCultureIgnoreCase);
+				nWhere.Remove("fields");
+				nWhere.Remove("afterID");
+				nWhere.Remove("limit");
+				nWhere.Remove("reverse");
 				foreach ((string key, _) in context.ActionArguments)
-					where.Remove(key);
+					nWhere.Remove(key);
+				context.ActionArguments["where"] = nWhere;
 			}
 
 			List<string> fields = context.HttpContext.Request.Query["fields"]

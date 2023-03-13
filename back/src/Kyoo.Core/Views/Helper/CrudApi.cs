@@ -120,7 +120,7 @@ namespace Kyoo.Core.Api
 				pagination
 			);
 
-			return Page(resources, pagination.Count);
+			return Page(resources, pagination.Limit);
 		}
 
 		/// <summary>

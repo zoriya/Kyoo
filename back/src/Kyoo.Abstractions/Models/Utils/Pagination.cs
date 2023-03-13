@@ -21,32 +21,42 @@ namespace Kyoo.Abstractions.Controllers
 	/// <summary>
 	/// Information about the pagination. How many items should be displayed and where to start.
 	/// </summary>
-	public readonly struct Pagination
+	public class Pagination
 	{
 		/// <summary>
 		/// The count of items to return.
 		/// </summary>
-		public int Count { get; }
+		public int Limit { get; set; }
 
 		/// <summary>
 		/// Where to start? Using the given sort.
 		/// </summary>
-		public int? AfterID { get; }
+		public int? AfterID { get; set; }
 
 		/// <summary>
 		/// Should the previous page be returned instead of the next?
 		/// </summary>
-		public bool Reverse { get; }
+		public bool Reverse { get; set; }
+
+		/// <summary>
+		/// Create a new <see cref="Pagination"/> with default values.
+		/// </summary>
+		public Pagination()
+		{
+			Limit = 20;
+			AfterID = null;
+			Reverse = false;
+		}
 
 		/// <summary>
 		/// Create a new <see cref="Pagination"/> instance.
 		/// </summary>
-		/// <param name="count">Set the <see cref="Count"/> value</param>
+		/// <param name="count">Set the <see cref="Limit"/> value</param>
 		/// <param name="afterID">Set the <see cref="AfterID"/> value. If not specified, it will start from the start</param>
 		/// <param name="reverse">Should the previous page be returned instead of the next?</param>
 		public Pagination(int count, int? afterID = null, bool reverse = false)
 		{
-			Count = count;
+			Limit = count;
 			AfterID = afterID;
 			Reverse = reverse;
 		}
@@ -54,7 +64,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <summary>
 		/// Implicitly create a new pagination from a limit number.
 		/// </summary>
-		/// <param name="limit">Set the <see cref="Count"/> value</param>
+		/// <param name="limit">Set the <see cref="Limit"/> value</param>
 		/// <returns>A new <see cref="Pagination"/> instance</returns>
 		public static implicit operator Pagination(int limit) => new(limit);
 	}

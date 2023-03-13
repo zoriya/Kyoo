@@ -163,47 +163,6 @@ namespace Kyoo.Abstractions.Models
 			await library.Load(ep, x => x.Show);
 			await library.Load(ep, x => x.Tracks);
 
-			// if (!ep.Show.IsMovie)
-			// {
-			// 	if (ep.AbsoluteNumber != null)
-			// 	{
-			// 		previous = await library.GetOrDefault(
-			// 			x => x.ShowID == ep.ShowID && x.AbsoluteNumber < ep.AbsoluteNumber,
-			// 			new Sort<Episode>(x => x.AbsoluteNumber, true)
-			// 		);
-			// 		next = await library.GetOrDefault(
-			// 			x => x.ShowID == ep.ShowID && x.AbsoluteNumber > ep.AbsoluteNumber,
-			// 			new Sort<Episode>(x => x.AbsoluteNumber)
-			// 		);
-			// 	}
-			// 	else if (ep.SeasonNumber != null && ep.EpisodeNumber != null)
-			// 	{
-			// 		previous = await library.GetOrDefault(
-			// 			x => x.ShowID == ep.ShowID
-			// 				&& x.SeasonNumber == ep.SeasonNumber
-			// 				&& x.EpisodeNumber < ep.EpisodeNumber,
-			// 			new Sort<Episode>(x => x.EpisodeNumber, true)
-			// 		);
-			// 		previous ??= await library.GetOrDefault(
-			// 			x => x.ShowID == ep.ShowID
-			// 				&& x.SeasonNumber == ep.SeasonNumber - 1,
-			// 			new Sort<Episode>(x => x.EpisodeNumber, true)
-			// 		);
-			//
-			// 		next = await library.GetOrDefault(
-			// 			x => x.ShowID == ep.ShowID
-			// 				&& x.SeasonNumber == ep.SeasonNumber
-			// 				&& x.EpisodeNumber > ep.EpisodeNumber,
-			// 			new Sort<Episode>(x => x.EpisodeNumber)
-			// 		);
-			// 		next ??= await library.GetOrDefault(
-			// 			x => x.ShowID == ep.ShowID
-			// 				&& x.SeasonNumber == ep.SeasonNumber + 1,
-			// 			new Sort<Episode>(x => x.EpisodeNumber)
-			// 		);
-			// 	}
-			// }
-
 			return new WatchItem
 			{
 				EpisodeID = ep.ID,
