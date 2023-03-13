@@ -92,7 +92,7 @@ namespace Kyoo.Core.Api
 
 			if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Library>()) == null)
 				return NotFound();
-			return Page(resources, pagination.Count);
+			return Page(resources, pagination.Limit);
 		}
 
 		/// <summary>
@@ -127,7 +127,7 @@ namespace Kyoo.Core.Api
 
 			if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Library>()) == null)
 				return NotFound();
-			return Page(resources, pagination.Count);
+			return Page(resources, pagination.Limit);
 		}
 
 		/// <summary>
@@ -165,7 +165,7 @@ namespace Kyoo.Core.Api
 				slug => _libraryManager.GetItemsFromLibrary(slug, whereQuery, sort, pagination)
 			);
 
-			return Page(resources, pagination.Count);
+			return Page(resources, pagination.Limit);
 		}
 	}
 }

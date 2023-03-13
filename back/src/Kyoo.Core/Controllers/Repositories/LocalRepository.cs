@@ -72,31 +72,38 @@ namespace Kyoo.Core.Controllers
 		{
 			sortBy ??= DefaultSort;
 
-			IOrderedQueryable<T> _Sort(IQueryable<T> query, Sort<T> sortBy)
+			IOrderedQueryable<T> _SortBy(IQueryable<T> qr, Expression<Func<T, object>> sort, bool desc, bool then)
+			{
+				if (then && qr is IOrderedQueryable<T> qro)
+				{
+					return desc
+						? qro.ThenByDescending(sort)
+						: qro.ThenBy(sort);
+				}
+				return desc
+					? qr.OrderByDescending(sort)
+					: qr.OrderBy(sort);
+			}
+
+			IOrderedQueryable<T> _Sort(IQueryable<T> query, Sort<T> sortBy, bool then)
 			{
 				switch (sortBy)
 				{
 					case Sort<T>.Default:
-						return Sort(query, DefaultSort);
+						return _Sort(query, DefaultSort, then);
 					case Sort<T>.By(var key, var desc):
-						return desc
-							? query.OrderByDescending(x => EF.Property<object>(x, key))
-							: query.OrderBy(x => EF.Property<T>(x, key));
-					case Sort<T>.Conglomerate(var keys):
-						IOrderedQueryable<T> nQuery = _Sort(query, keys[0]);
-						foreach ((string key, bool desc) in keys.Skip(1))
-						{
-							nQuery = desc
-								? nQuery.ThenByDescending(x => EF.Property<object>(x, key))
-								: nQuery.ThenBy(x => EF.Property<object>(x, key));
-						}
+						return _SortBy(query, x => EF.Property<T>(x, key), desc, then);
+					case Sort<T>.Conglomerate(var sorts):
+						IOrderedQueryable<T> nQuery = _Sort(query, sorts.First(), false);
+						foreach (Sort<T> sort in sorts.Skip(1))
+							nQuery = _Sort(nQuery, sort, true);
 						return nQuery;
 					default:
 						// The language should not require me to do this...
 						throw new SwitchExpressionException();
 				}
 			}
-			return _Sort(query, sortBy).ThenBy(x => x.ID);
+			return _Sort(query, sortBy, false).ThenBy(x => x.ID);
 		}
 
 		private static Func<Expression, Expression, BinaryExpression> _GetComparisonExpression(
@@ -133,22 +140,24 @@ namespace Kyoo.Core.Controllers
 			T reference,
 			bool next = true)
 		{
-			if (sort is Sort<T>.Default)
-				sort = DefaultSort;
-
 			// x =>
 			ParameterExpression x = Expression.Parameter(typeof(T), "x");
 			ConstantExpression referenceC = Expression.Constant(reference, typeof(T));
 
+			IEnumerable<Sort<T>.By> _GetSortsBy(Sort<T> sort)
+			{
+				return sort switch
+				{
+					Sort<T>.Default => _GetSortsBy(DefaultSort),
+					Sort<T>.By @sortBy => new[] { sortBy },
+					Sort<T>.Conglomerate(var list) => list.SelectMany(_GetSortsBy),
+					_ => Array.Empty<Sort<T>.By>(),
+				};
+			}
+
 			// Don't forget that every sorts must end with a ID sort (to differenciate equalities).
 			Sort<T>.By id = new(x => x.ID);
-
-			IEnumerable<Sort<T>.By> sorts = (sort switch
-			{
-				Sort<T>.By @sortBy => new[] { sortBy },
-				Sort<T>.Conglomerate(var list) => list,
-				_ => Array.Empty<Sort<T>.By>(),
-			}).Append(id);
+			IEnumerable<Sort<T>.By> sorts = _GetSortsBy(sort).Append(id);
 
 			BinaryExpression filter = null;
 			List<Sort<T>.By> previousSteps = new();
@@ -278,10 +287,10 @@ namespace Kyoo.Core.Controllers
 			if (limit.AfterID != null)
 			{
 				T reference = await Get(limit.AfterID.Value);
-				query = query.Where(KeysetPaginatate(sort, reference));
+				query = query.Where(KeysetPaginatate(sort, reference, !limit.Reverse));
 			}
-			if (limit.Count > 0)
-				query = query.Take(limit.Count);
+			if (limit.Limit > 0)
+				query = query.Take(limit.Limit);
 
 			return await query.ToListAsync();
 		}

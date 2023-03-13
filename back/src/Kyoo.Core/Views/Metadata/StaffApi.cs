@@ -95,7 +95,7 @@ namespace Kyoo.Core.Api
 				slug => _libraryManager.GetRolesFromPeople(slug, whereQuery, sort, pagination)
 			);
 
-			return Page(resources, pagination.Count);
+			return Page(resources, pagination.Limit);
 		}
 	}
 }

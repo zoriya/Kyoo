@@ -158,7 +158,7 @@ namespace Kyoo.Core.Api
 
 			if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Episode>()) == null)
 				return NotFound();
-			return Page(resources, pagination.Count);
+			return Page(resources, pagination.Limit);
 		}
 	}
 }

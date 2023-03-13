@@ -97,7 +97,7 @@ namespace Kyoo.Core.Api
 
 			if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Show>()) == null)
 				return NotFound();
-			return Page(resources, pagination.Count);
+			return Page(resources, pagination.Limit);
 		}
 
 		/// <summary>
@@ -132,7 +132,7 @@ namespace Kyoo.Core.Api
 
 			if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Show>()) == null)
 				return NotFound();
-			return Page(resources, pagination.Count);
+			return Page(resources, pagination.Limit);
 		}
 
 		/// <summary>
@@ -166,7 +166,7 @@ namespace Kyoo.Core.Api
 				id => _libraryManager.GetPeopleFromShow(id, whereQuery, sort, pagination),
 				slug => _libraryManager.GetPeopleFromShow(slug, whereQuery, sort, pagination)
 			);
-			return Page(resources, pagination.Count);
+			return Page(resources, pagination.Limit);
 		}
 
 		/// <summary>
@@ -201,7 +201,7 @@ namespace Kyoo.Core.Api
 
 			if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Show>()) == null)
 				return NotFound();
-			return Page(resources, pagination.Count);
+			return Page(resources, pagination.Limit);
 		}
 
 		/// <summary>
@@ -255,7 +255,7 @@ namespace Kyoo.Core.Api
 
 			if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Show>()) == null)
 				return NotFound();
-			return Page(resources, pagination.Count);
+			return Page(resources, pagination.Limit);
 		}
 
 		/// <summary>
@@ -290,7 +290,7 @@ namespace Kyoo.Core.Api
 
 			if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Show>()) == null)
 				return NotFound();
-			return Page(resources, pagination.Count);
+			return Page(resources, pagination.Limit);
 		}
 	}
 }

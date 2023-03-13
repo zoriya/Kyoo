@@ -48,36 +48,13 @@ namespace Kyoo.Abstractions.Controllers
 			/// </param>
 			public By(Expression<Func<T, object>> key, bool desendant = false)
 				: this(Utility.GetPropertyName(key), desendant) { }
-
-			/// <summary>
-			/// Create a new <see cref="Sort{T}"/> instance from a key's name (case insensitive).
-			/// </summary>
-			/// <param name="sortBy">A key name with an optional order specifier. Format: "key:asc", "key:desc" or "key".</param>
-			/// <exception cref="ArgumentException">An invalid key or sort specifier as been given.</exception>
-			/// <returns>A <see cref="Sort{T}"/> for the given string</returns>
-			public static new By From(string sortBy)
-			{
-				string key = sortBy.Contains(':') ? sortBy[..sortBy.IndexOf(':')] : sortBy;
-				string order = sortBy.Contains(':') ? sortBy[(sortBy.IndexOf(':') + 1)..] : null;
-				bool desendant = order switch
-				{
-					"desc" => true,
-					"asc" => false,
-					null => false,
-					_ => throw new ArgumentException($"The sort order, if set, should be :asc or :desc but it was :{order}.")
-				};
-				PropertyInfo property = typeof(T).GetProperty(key, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-				if (property == null)
-					throw new ArgumentException("The given sort key is not valid.");
-				return new By(property.Name, desendant);
-			}
 		}
 
 		/// <summary>
 		/// Sort by multiple keys.
 		/// </summary>
 		/// <param name="list">The list of keys to sort by.</param>
-		public record Conglomerate(params By[] list) : Sort<T>;
+		public record Conglomerate(params Sort<T>[] list) : Sort<T>;
 
 		/// <summary>The default sort method for the given type.</summary>
 		public record Default : Sort<T>;
@@ -90,11 +67,24 @@ namespace Kyoo.Abstractions.Controllers
 		/// <returns>A <see cref="Sort{T}"/> for the given string</returns>
 		public static Sort<T> From(string sortBy)
 		{
-			if (string.IsNullOrEmpty(sortBy))
+			if (string.IsNullOrEmpty(sortBy) || sortBy == "default")
 				return new Default();
 			if (sortBy.Contains(','))
-				return new Conglomerate(sortBy.Split(',').Select(By.From).ToArray());
-			return By.From(sortBy);
+				return new Conglomerate(sortBy.Split(',').Select(From).ToArray());
+
+			string key = sortBy.Contains(':') ? sortBy[..sortBy.IndexOf(':')] : sortBy;
+			string order = sortBy.Contains(':') ? sortBy[(sortBy.IndexOf(':') + 1)..] : null;
+			bool desendant = order switch
+			{
+				"desc" => true,
+				"asc" => false,
+				null => false,
+				_ => throw new ArgumentException($"The sort order, if set, should be :asc or :desc but it was :{order}.")
+			};
+			PropertyInfo property = typeof(T).GetProperty(key, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+			if (property == null)
+				throw new ArgumentException("The given sort key is not valid.");
+			return new By(property.Name, desendant);
 		}
 	}
 }
