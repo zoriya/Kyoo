@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
-using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
 using Microsoft.AspNetCore.Http;
@@ -90,19 +89,8 @@ namespace Kyoo.Core.Api
 		public IActionResult RunTask(string taskSlug,
 			[FromQuery] Dictionary<string, object> args)
 		{
-			try
-			{
-				_taskManager.StartTask(taskSlug, new Progress<float>(), args);
-				return Ok();
-			}
-			catch (ItemNotFoundException)
-			{
-				return NotFound();
-			}
-			catch (ArgumentException ex)
-			{
-				return BadRequest(new RequestError(ex.Message));
-			}
+			_taskManager.StartTask(taskSlug, new Progress<float>(), args);
+			return Ok();
 		}
 	}
 }

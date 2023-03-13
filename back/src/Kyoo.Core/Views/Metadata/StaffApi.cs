@@ -23,7 +23,6 @@ using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
-using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
 using Microsoft.AspNetCore.Http;
@@ -73,8 +72,7 @@ namespace Kyoo.Core.Api
 		/// <param name="identifier">The ID or slug of the person.</param>
 		/// <param name="sortBy">A key to sort roles by.</param>
 		/// <param name="where">An optional list of filters.</param>
-		/// <param name="limit">The number of roles to return.</param>
-		/// <param name="afterID">An optional role's ID to start the query from this specific item.</param>
+		/// <param name="pagination">The number of roles to return.</param>
 		/// <returns>A page of roles.</returns>
 		/// <response code="400">The filters or the sort parameters are invalid.</response>
 		/// <response code="404">No person with the given ID or slug could be found.</response>
@@ -87,30 +85,17 @@ namespace Kyoo.Core.Api
 		public async Task<ActionResult<Page<PeopleRole>>> GetRoles(Identifier identifier,
 			[FromQuery] string sortBy,
 			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 20,
-			[FromQuery] int? afterID = null)
+			[FromQuery] Pagination pagination)
 		{
-			try
-			{
-				Expression<Func<PeopleRole, bool>> whereQuery = ApiHelper.ParseWhere<PeopleRole>(where);
-				Sort<PeopleRole> sort = Sort<PeopleRole>.From(sortBy);
-				Pagination pagination = new(limit, afterID);
+			Expression<Func<PeopleRole, bool>> whereQuery = ApiHelper.ParseWhere<PeopleRole>(where);
+			Sort<PeopleRole> sort = Sort<PeopleRole>.From(sortBy);
 
-				ICollection<PeopleRole> resources = await identifier.Match(
-					id => _libraryManager.GetRolesFromPeople(id, whereQuery, sort, pagination),
-					slug => _libraryManager.GetRolesFromPeople(slug, whereQuery, sort, pagination)
-				);
+			ICollection<PeopleRole> resources = await identifier.Match(
+				id => _libraryManager.GetRolesFromPeople(id, whereQuery, sort, pagination),
+				slug => _libraryManager.GetRolesFromPeople(slug, whereQuery, sort, pagination)
+			);
 
-				return Page(resources, limit);
-			}
-			catch (ItemNotFoundException)
-			{
-				return NotFound();
-			}
-			catch (ArgumentException ex)
-			{
-				return BadRequest(new RequestError(ex.Message));
-			}
+			return Page(resources, pagination.Count);
 		}
 	}
 }

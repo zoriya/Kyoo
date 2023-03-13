@@ -72,10 +72,7 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<Episode>> GetEpisode(Identifier identifier)
 		{
-			Episode ret = await _libraryManager.GetOrDefault(identifier.IsContainedIn<Episode, Track>(x => x.Tracks));
-			if (ret == null)
-				return NotFound();
-			return ret;
+			return await _libraryManager.Get(identifier.IsContainedIn<Episode, Track>(x => x.Tracks));
 		}
 	}
 }
