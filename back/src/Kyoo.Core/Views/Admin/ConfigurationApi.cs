@@ -16,11 +16,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
-using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Permissions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -68,14 +66,7 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public ActionResult<object> GetConfiguration(string slug)
 		{
-			try
-			{
-				return _manager.GetValue(slug);
-			}
-			catch (ItemNotFoundException)
-			{
-				return NotFound();
-			}
+			return _manager.GetValue(slug);
 		}
 
 		/// <summary>
@@ -95,19 +86,8 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<object>> EditConfiguration(string slug, [FromBody] object newValue)
 		{
-			try
-			{
-				await _manager.EditValue(slug, newValue);
-				return newValue;
-			}
-			catch (ItemNotFoundException)
-			{
-				return NotFound();
-			}
-			catch (ArgumentException ex)
-			{
-				return BadRequest(ex.Message);
-			}
+			await _manager.EditValue(slug, newValue);
+			return newValue;
 		}
 	}
 }

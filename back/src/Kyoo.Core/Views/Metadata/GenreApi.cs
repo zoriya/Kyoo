@@ -16,7 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -67,8 +66,7 @@ namespace Kyoo.Core.Api
 		/// <param name="identifier">The ID or slug of the <see cref="Genre"/>.</param>
 		/// <param name="sortBy">A key to sort shows by.</param>
 		/// <param name="where">An optional list of filters.</param>
-		/// <param name="limit">The number of shows to return.</param>
-		/// <param name="afterID">An optional show's ID to start the query from this specific item.</param>
+		/// <param name="pagination">The number of shows to return and where to start.</param>
 		/// <returns>A page of shows.</returns>
 		/// <response code="400">The filters or the sort parameters are invalid.</response>
 		/// <response code="404">No genre with the given ID could be found.</response>
@@ -81,25 +79,17 @@ namespace Kyoo.Core.Api
 		public async Task<ActionResult<Page<Show>>> GetShows(Identifier identifier,
 			[FromQuery] string sortBy,
 			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 20,
-			[FromQuery] int? afterID = null)
+			[FromQuery] Pagination pagination)
 		{
-			try
-			{
-				ICollection<Show> resources = await _libraryManager.GetAll(
-					ApiHelper.ParseWhere(where, identifier.IsContainedIn<Show, Genre>(x => x.Genres)),
-					Sort<Show>.From(sortBy),
-					new Pagination(limit, afterID)
-				);
+			ICollection<Show> resources = await _libraryManager.GetAll(
+				ApiHelper.ParseWhere(where, identifier.IsContainedIn<Show, Genre>(x => x.Genres)),
+				Sort<Show>.From(sortBy),
+				pagination
+			);
 
-				if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Genre>()) == null)
-					return NotFound();
-				return Page(resources, limit);
-			}
-			catch (ArgumentException ex)
-			{
-				return BadRequest(new RequestError(ex.Message));
-			}
+			if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Genre>()) == null)
+				return NotFound();
+			return Page(resources, pagination.Count);
 		}
 	}
 }

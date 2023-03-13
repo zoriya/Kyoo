@@ -28,19 +28,19 @@ namespace Kyoo.Abstractions.Models.Exceptions
 	public class DuplicatedItemException : Exception
 	{
 		/// <summary>
-		/// Create a new <see cref="DuplicatedItemException"/> with the default message.
+		/// The existing object.
 		/// </summary>
-		public DuplicatedItemException()
-			: base("Already exists in the database.")
-		{ }
+		public object Existing { get; }
 
 		/// <summary>
-		/// Create a new <see cref="DuplicatedItemException"/> with a custom message.
+		/// Create a new <see cref="DuplicatedItemException"/> with the default message.
 		/// </summary>
-		/// <param name="message">The message to use</param>
-		public DuplicatedItemException(string message)
-			: base(message)
-		{ }
+		/// <param name="existing">The existing object.</param>
+		public DuplicatedItemException(object existing = null)
+			: base("Already exists in the database.")
+		{
+			Existing = existing;
+		}
 
 		/// <summary>
 		/// The serialization constructor.

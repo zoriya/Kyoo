@@ -424,28 +424,6 @@ namespace Kyoo.Database
 		/// <summary>
 		/// Save changes that are applied to this context.
 		/// </summary>
-		/// <param name="duplicateMessage">The message that will have the <see cref="DuplicatedItemException"/>
-		/// (if a duplicate is found).</param>
-		/// <exception cref="DuplicatedItemException">A duplicated item has been found.</exception>
-		/// <returns>The number of state entries written to the database.</returns>
-		public int SaveChanges(string duplicateMessage)
-		{
-			try
-			{
-				return base.SaveChanges();
-			}
-			catch (DbUpdateException ex)
-			{
-				DiscardChanges();
-				if (IsDuplicateException(ex))
-					throw new DuplicatedItemException(duplicateMessage);
-				throw;
-			}
-		}
-
-		/// <summary>
-		/// Save changes that are applied to this context.
-		/// </summary>
 		/// <param name="acceptAllChangesOnSuccess">Indicates whether AcceptAllChanges() is called after the changes
 		/// have been sent successfully to the database.</param>
 		/// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete</param>
@@ -491,12 +469,13 @@ namespace Kyoo.Database
 		/// <summary>
 		/// Save changes that are applied to this context.
 		/// </summary>
-		/// <param name="duplicateMessage">The message that will have the <see cref="DuplicatedItemException"/>
-		/// (if a duplicate is found).</param>
+		/// <param name="getExisting">How to retrieve the conflicting item.</param>
 		/// <param name="cancellationToken">A <see cref="CancellationToken"/> to observe while waiting for the task to complete</param>
 		/// <exception cref="DuplicatedItemException">A duplicated item has been found.</exception>
+		/// <typeparam name="T">The type of the potential duplicate (this is unused).</typeparam>
 		/// <returns>The number of state entries written to the database.</returns>
-		public async Task<int> SaveChangesAsync(string duplicateMessage,
+		public async Task<int> SaveChangesAsync<T>(
+			Func<Task<T>> getExisting,
 			CancellationToken cancellationToken = default)
 		{
 			try
@@ -507,7 +486,7 @@ namespace Kyoo.Database
 			{
 				DiscardChanges();
 				if (IsDuplicateException(ex))
-					throw new DuplicatedItemException(duplicateMessage);
+					throw new DuplicatedItemException(await getExisting());
 				throw;
 			}
 		}

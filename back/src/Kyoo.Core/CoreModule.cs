@@ -34,7 +34,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using IMetadataProvider = Kyoo.Abstractions.Controllers.IMetadataProvider;
 using JsonOptions = Kyoo.Core.Api.JsonOptions;
@@ -122,7 +121,10 @@ namespace Kyoo.Core
 			services.AddHttpContextAccessor();
 			services.AddTransient<IConfigureOptions<MvcNewtonsoftJsonOptions>, JsonOptions>();
 
-			services.AddMvcCore()
+			services.AddMvcCore(options =>
+				{
+					options.Filters.Add<ExceptionFilter>();
+				})
 				.AddNewtonsoftJson()
 				.AddDataAnnotations()
 				.AddControllersAsServices()
@@ -156,16 +158,7 @@ namespace Kyoo.Core
 		/// <inheritdoc />
 		public IEnumerable<IStartupAction> ConfigureSteps => new IStartupAction[]
 		{
-			SA.New<IApplicationBuilder, IHostEnvironment>((app, env) =>
-			{
-				if (env.IsDevelopment())
-					app.UseDeveloperExceptionPage();
-				else
-				{
-					app.UseExceptionHandler("/error");
-					app.UseHsts();
-				}
-			}, SA.Before),
+			SA.New<IApplicationBuilder>(app => app.UseHsts(), SA.Before),
 			SA.New<IApplicationBuilder>(app => app.UseResponseCompression(), SA.Routing + 1),
 			SA.New<IApplicationBuilder>(app => app.UseRouting(), SA.Routing),
 			SA.New<IApplicationBuilder>(app => app.UseEndpoints(x => x.MapControllers()), SA.Endpoint)

@@ -101,7 +101,7 @@ namespace Kyoo.Core.Controllers
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
-			await _database.SaveChangesAsync($"Trying to insert a duplicated show (slug {obj.Slug} already exists).");
+			await _database.SaveChangesAsync(() => Get(obj.Slug));
 			return obj;
 		}
 

@@ -24,7 +24,6 @@ using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
-using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
 using Microsoft.AspNetCore.Http;
@@ -70,8 +69,7 @@ namespace Kyoo.Core.Api
 		/// <param name="identifier">The ID or slug of the <see cref="Library"/>.</param>
 		/// <param name="sortBy">A key to sort shows by.</param>
 		/// <param name="where">An optional list of filters.</param>
-		/// <param name="limit">The number of shows to return.</param>
-		/// <param name="afterID">An optional show's ID to start the query from this specific item.</param>
+		/// <param name="pagination">The number of shows to return.</param>
 		/// <returns>A page of shows.</returns>
 		/// <response code="400">The filters or the sort parameters are invalid.</response>
 		/// <response code="404">No library with the given ID or slug could be found.</response>
@@ -84,25 +82,17 @@ namespace Kyoo.Core.Api
 		public async Task<ActionResult<Page<Show>>> GetShows(Identifier identifier,
 			[FromQuery] string sortBy,
 			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 50,
-			[FromQuery] int? afterID = null)
+			[FromQuery] Pagination pagination)
 		{
-			try
-			{
-				ICollection<Show> resources = await _libraryManager.GetAll(
-					ApiHelper.ParseWhere(where, identifier.IsContainedIn<Show, Library>(x => x.Libraries)),
-					Sort<Show>.From(sortBy),
-					new Pagination(limit, afterID)
-				);
+			ICollection<Show> resources = await _libraryManager.GetAll(
+				ApiHelper.ParseWhere(where, identifier.IsContainedIn<Show, Library>(x => x.Libraries)),
+				Sort<Show>.From(sortBy),
+				pagination
+			);
 
-				if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Library>()) == null)
-					return NotFound();
-				return Page(resources, limit);
-			}
-			catch (ArgumentException ex)
-			{
-				return BadRequest(new RequestError(ex.Message));
-			}
+			if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Library>()) == null)
+				return NotFound();
+			return Page(resources, pagination.Count);
 		}
 
 		/// <summary>
@@ -114,8 +104,7 @@ namespace Kyoo.Core.Api
 		/// <param name="identifier">The ID or slug of the <see cref="Library"/>.</param>
 		/// <param name="sortBy">A key to sort collections by.</param>
 		/// <param name="where">An optional list of filters.</param>
-		/// <param name="limit">The number of collections to return.</param>
-		/// <param name="afterID">An optional collection's ID to start the query from this specific item.</param>
+		/// <param name="pagination">The number of collections to return.</param>
 		/// <returns>A page of collections.</returns>
 		/// <response code="400">The filters or the sort parameters are invalid.</response>
 		/// <response code="404">No library with the given ID or slug could be found.</response>
@@ -128,25 +117,17 @@ namespace Kyoo.Core.Api
 		public async Task<ActionResult<Page<Collection>>> GetCollections(Identifier identifier,
 			[FromQuery] string sortBy,
 			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 50,
-			[FromQuery] int? afterID = null)
+			[FromQuery] Pagination pagination)
 		{
-			try
-			{
-				ICollection<Collection> resources = await _libraryManager.GetAll(
-					ApiHelper.ParseWhere(where, identifier.IsContainedIn<Collection, Library>(x => x.Libraries)),
-					Sort<Collection>.From(sortBy),
-					new Pagination(limit, afterID)
-				);
+			ICollection<Collection> resources = await _libraryManager.GetAll(
+				ApiHelper.ParseWhere(where, identifier.IsContainedIn<Collection, Library>(x => x.Libraries)),
+				Sort<Collection>.From(sortBy),
+				pagination
+			);
 
-				if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Library>()) == null)
-					return NotFound();
-				return Page(resources, limit);
-			}
-			catch (ArgumentException ex)
-			{
-				return BadRequest(new RequestError(ex.Message));
-			}
+			if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Library>()) == null)
+				return NotFound();
+			return Page(resources, pagination.Count);
 		}
 
 		/// <summary>
@@ -161,8 +142,7 @@ namespace Kyoo.Core.Api
 		/// <param name="identifier">The ID or slug of the <see cref="Library"/>.</param>
 		/// <param name="sortBy">A key to sort items by.</param>
 		/// <param name="where">An optional list of filters.</param>
-		/// <param name="limit">The number of items to return.</param>
-		/// <param name="afterID">An optional item's ID to start the query from this specific item.</param>
+		/// <param name="pagination">The number of items to return.</param>
 		/// <returns>A page of items.</returns>
 		/// <response code="400">The filters or the sort parameters are invalid.</response>
 		/// <response code="404">No library with the given ID or slug could be found.</response>
@@ -175,30 +155,17 @@ namespace Kyoo.Core.Api
 		public async Task<ActionResult<Page<LibraryItem>>> GetItems(Identifier identifier,
 			[FromQuery] string sortBy,
 			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 50,
-			[FromQuery] int? afterID = null)
+			[FromQuery] Pagination pagination)
 		{
-			try
-			{
-				Expression<Func<LibraryItem, bool>> whereQuery = ApiHelper.ParseWhere<LibraryItem>(where);
-				Sort<LibraryItem> sort = Sort<LibraryItem>.From(sortBy);
-				Pagination pagination = new(limit, afterID);
+			Expression<Func<LibraryItem, bool>> whereQuery = ApiHelper.ParseWhere<LibraryItem>(where);
+			Sort<LibraryItem> sort = Sort<LibraryItem>.From(sortBy);
 
-				ICollection<LibraryItem> resources = await identifier.Match(
-					id => _libraryManager.GetItemsFromLibrary(id, whereQuery, sort, pagination),
-					slug => _libraryManager.GetItemsFromLibrary(slug, whereQuery, sort, pagination)
-				);
+			ICollection<LibraryItem> resources = await identifier.Match(
+				id => _libraryManager.GetItemsFromLibrary(id, whereQuery, sort, pagination),
+				slug => _libraryManager.GetItemsFromLibrary(slug, whereQuery, sort, pagination)
+			);
 
-				return Page(resources, limit);
-			}
-			catch (ItemNotFoundException)
-			{
-				return NotFound();
-			}
-			catch (ArgumentException ex)
-			{
-				return BadRequest(new RequestError(ex.Message));
-			}
+			return Page(resources, pagination.Count);
 		}
 	}
 }

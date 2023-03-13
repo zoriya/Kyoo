@@ -16,12 +16,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
-using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
 using Microsoft.AspNetCore.Http;
@@ -93,14 +91,7 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		public async Task<ActionResult<int>> GetCount([FromQuery] Dictionary<string, string> where)
 		{
-			try
-			{
-				return await Repository.GetCount(ApiHelper.ParseWhere<T>(where));
-			}
-			catch (ArgumentException ex)
-			{
-				return BadRequest(new RequestError(ex.Message));
-			}
+			return await Repository.GetCount(ApiHelper.ParseWhere<T>(where));
 		}
 
 		/// <summary>
@@ -111,8 +102,7 @@ namespace Kyoo.Core.Api
 		/// </remarks>
 		/// <param name="sortBy">Sort information about the query (sort by, sort order).</param>
 		/// <param name="where">Filter the returned items.</param>
-		/// <param name="limit">How many items per page should be returned.</param>
-		/// <param name="afterID">Where the pagination should start.</param>
+		/// <param name="pagination">How many items per page should be returned, where should the page start...</param>
 		/// <returns>A list of resources that match every filters.</returns>
 		/// <response code="400">Invalid filters or sort information.</response>
 		[HttpGet]
@@ -122,23 +112,15 @@ namespace Kyoo.Core.Api
 		public async Task<ActionResult<Page<T>>> GetAll(
 			[FromQuery] string sortBy,
 			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] int limit = 20,
-			[FromQuery] int? afterID = null)
+			[FromQuery] Pagination pagination)
 		{
-			try
-			{
-				ICollection<T> resources = await Repository.GetAll(
-					ApiHelper.ParseWhere<T>(where),
-					Sort<T>.From(sortBy),
-					new Pagination(limit, afterID)
-				);
+			ICollection<T> resources = await Repository.GetAll(
+				ApiHelper.ParseWhere<T>(where),
+				Sort<T>.From(sortBy),
+				pagination
+			);
 
-				return Page(resources, limit);
-			}
-			catch (ArgumentException ex)
-			{
-				return BadRequest(new RequestError(ex.Message));
-			}
+			return Page(resources, pagination.Count);
 		}
 
 		/// <summary>
@@ -158,19 +140,7 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(ActionResult<>))]
 		public async Task<ActionResult<T>> Create([FromBody] T resource)
 		{
-			try
-			{
-				return await Repository.Create(resource);
-			}
-			catch (ArgumentException ex)
-			{
-				return BadRequest(new RequestError(ex.Message));
-			}
-			catch (DuplicatedItemException)
-			{
-				T existing = await Repository.GetOrDefault(resource.Slug);
-				return Conflict(existing);
-			}
+			return await Repository.Create(resource);
 		}
 
 		/// <summary>
@@ -191,19 +161,12 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<T>> Edit([FromBody] T resource)
 		{
-			try
-			{
-				if (resource.ID > 0)
-					return await Repository.Edit(resource, true);
-
-				T old = await Repository.Get(resource.Slug);
-				resource.ID = old.ID;
+			if (resource.ID > 0)
 				return await Repository.Edit(resource, true);
-			}
-			catch (ItemNotFoundException)
-			{
-				return NotFound();
-			}
+
+			T old = await Repository.Get(resource.Slug);
+			resource.ID = old.ID;
+			return await Repository.Edit(resource, true);
 		}
 
 		/// <summary>
@@ -224,19 +187,12 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<T>> Patch([FromBody] T resource)
 		{
-			try
-			{
-				if (resource.ID > 0)
-					return await Repository.Edit(resource, false);
-
-				T old = await Repository.Get(resource.Slug);
-				resource.ID = old.ID;
+			if (resource.ID > 0)
 				return await Repository.Edit(resource, false);
-			}
-			catch (ItemNotFoundException)
-			{
-				return NotFound();
-			}
+
+			T old = await Repository.Get(resource.Slug);
+			resource.ID = old.ID;
+			return await Repository.Edit(resource, false);
 		}
 
 		/// <summary>
@@ -254,18 +210,10 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<IActionResult> Delete(Identifier identifier)
 		{
-			try
-			{
-				await identifier.Match(
-					id => Repository.Delete(id),
-					slug => Repository.Delete(slug)
-				);
-			}
-			catch (ItemNotFoundException)
-			{
-				return NotFound();
-			}
-
+			await identifier.Match(
+				id => Repository.Delete(id),
+				slug => Repository.Delete(slug)
+			);
 			return NoContent();
 		}
 
@@ -284,15 +232,7 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		public async Task<IActionResult> Delete([FromQuery] Dictionary<string, string> where)
 		{
-			try
-			{
-				await Repository.DeleteAll(ApiHelper.ParseWhere<T>(where));
-			}
-			catch (ArgumentException ex)
-			{
-				return BadRequest(new RequestError(ex.Message));
-			}
-
+			await Repository.DeleteAll(ApiHelper.ParseWhere<T>(where));
 			return NoContent();
 		}
 	}
