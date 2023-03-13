@@ -57,7 +57,7 @@ namespace Kyoo.Tests.Identifier
 		[Fact]
 		public async Task EpisodeIdentification()
 		{
-			_manager.Setup(x => x.GetAll(null, new Sort<Library>(), default)).ReturnsAsync(new[]
+			_manager.Setup(x => x.GetAll<Library>(null, default, default)).ReturnsAsync(new[]
 			{
 				new Library {Paths = new [] {"/kyoo/Library/"}}
 			});
@@ -77,7 +77,7 @@ namespace Kyoo.Tests.Identifier
 		[Fact]
 		public async Task EpisodeIdentificationWithoutLibraryTrailingSlash()
 		{
-			_manager.Setup(x => x.GetAll(null, new Sort<Library>(), default)).ReturnsAsync(new[]
+			_manager.Setup(x => x.GetAll<Library>(null, default, default)).ReturnsAsync(new[]
 			{
 				new Library {Paths = new [] {"/kyoo/Library"}}
 			});
@@ -97,7 +97,7 @@ namespace Kyoo.Tests.Identifier
 		[Fact]
 		public async Task EpisodeIdentificationMultiplePaths()
 		{
-			_manager.Setup(x => x.GetAll(null, new Sort<Library>(), default)).ReturnsAsync(new[]
+			_manager.Setup(x => x.GetAll<Library>(null, default, default)).ReturnsAsync(new[]
 			{
 				new Library {Paths = new [] {"/kyoo", "/kyoo/Library/"}}
 			});
@@ -117,7 +117,7 @@ namespace Kyoo.Tests.Identifier
 		[Fact]
 		public async Task AbsoluteEpisodeIdentification()
 		{
-			_manager.Setup(x => x.GetAll(null, new Sort<Library>(), default)).ReturnsAsync(new[]
+			_manager.Setup(x => x.GetAll<Library>(null, default, default)).ReturnsAsync(new[]
 			{
 				new Library {Paths = new [] {"/kyoo", "/kyoo/Library/"}}
 			});
@@ -137,7 +137,7 @@ namespace Kyoo.Tests.Identifier
 		[Fact]
 		public async Task MovieEpisodeIdentification()
 		{
-			_manager.Setup(x => x.GetAll(null, new Sort<Library>(), default)).ReturnsAsync(new[]
+			_manager.Setup(x => x.GetAll<Library>(null, default, default)).ReturnsAsync(new[]
 			{
 				new Library {Paths = new [] {"/kyoo", "/kyoo/Library/"}}
 			});
@@ -158,7 +158,7 @@ namespace Kyoo.Tests.Identifier
 		[Fact]
 		public async Task InvalidEpisodeIdentification()
 		{
-			_manager.Setup(x => x.GetAll(null, new Sort<Library>(), default)).ReturnsAsync(new[]
+			_manager.Setup(x => x.GetAll<Library>(null, default, default)).ReturnsAsync(new[]
 			{
 				new Library {Paths = new [] {"/kyoo", "/kyoo/Library/"}}
 			});
@@ -168,7 +168,7 @@ namespace Kyoo.Tests.Identifier
 		[Fact]
 		public async Task SubtitleIdentification()
 		{
-			_manager.Setup(x => x.GetAll(null, new Sort<Library>(), default)).ReturnsAsync(new[]
+			_manager.Setup(x => x.GetAll<Library>(null, default, default)).ReturnsAsync(new[]
 			{
 				new Library {Paths = new [] {"/kyoo", "/kyoo/Library/"}}
 			});
@@ -184,7 +184,7 @@ namespace Kyoo.Tests.Identifier
 		[Fact]
 		public async Task SubtitleIdentificationUnknownCodec()
 		{
-			_manager.Setup(x => x.GetAll(null, new Sort<Library>(), default)).ReturnsAsync(new[]
+			_manager.Setup(x => x.GetAll<Library>(null, default, default)).ReturnsAsync(new[]
 			{
 				new Library {Paths = new [] {"/kyoo", "/kyoo/Library/"}}
 			});
@@ -200,7 +200,7 @@ namespace Kyoo.Tests.Identifier
 		[Fact]
 		public async Task InvalidSubtitleIdentification()
 		{
-			_manager.Setup(x => x.GetAll(null, new Sort<Library>(), default)).ReturnsAsync(new[]
+			_manager.Setup(x => x.GetAll<Library>(null, default, default)).ReturnsAsync(new[]
 			{
 				new Library {Paths = new [] {"/kyoo", "/kyoo/Library/"}}
 			});
