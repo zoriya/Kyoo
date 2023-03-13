@@ -168,6 +168,14 @@ namespace Kyoo.Core.Controllers
 			foreach ((string key, bool desc) in sorts)
 			{
 				BinaryExpression compare = null;
+				PropertyInfo property = typeof(T).GetProperty(key);
+
+				// Comparing a value with null always return false so we short opt < > comparisons with null.
+				if (property.GetValue(reference) == null)
+				{
+					previousSteps.Add(new(key, desc));
+					continue;
+				}
 
 				// Create all the equality statements for previous sorts.
 				foreach ((string pKey, bool pDesc) in previousSteps)
@@ -186,6 +194,16 @@ namespace Kyoo.Core.Controllers
 				MemberExpression xkey = Expression.Property(x, key);
 				MemberExpression rkey = Expression.Property(referenceC, key);
 				BinaryExpression lastCompare = ApiHelper.StringCompatibleExpression(comparer, xkey, rkey);
+
+				// Comparing a value with null always return false for nulls so we must add nulls to the results manually.
+				// Postgres sorts them after values so we will do the same
+				// We only add this condition if the collumn type is nullable
+				if (Nullable.GetUnderlyingType(property.PropertyType) != null)
+				{
+					BinaryExpression equalNull = Expression.Equal(xkey, Expression.Constant(null));
+					lastCompare = Expression.OrElse(lastCompare, equalNull);
+				}
+
 				compare = compare != null
 					? Expression.AndAlso(compare, lastCompare)
 					: lastCompare;

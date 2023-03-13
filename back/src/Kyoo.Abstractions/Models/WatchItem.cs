@@ -184,10 +184,16 @@ namespace Kyoo.Abstractions.Models
 				Fonts = await transcoder.ListFonts(ep),
 				PreviousEpisode = ep.Show.IsMovie
 					? null
-					: (await library.GetAll<Episode>(limit: new Pagination(1, ep.ID, true))).FirstOrDefault(),
+					: (await library.GetAll<Episode>(
+							where: x => x.ShowID == ep.ShowID,
+							limit: new Pagination(1, ep.ID, true)
+						)).FirstOrDefault(),
 				NextEpisode = ep.Show.IsMovie
 					? null
-					: (await library.GetAll<Episode>(limit: new Pagination(1, ep.ID))).FirstOrDefault(),
+					: (await library.GetAll<Episode>(
+							where: x => x.ShowID == ep.ShowID,
+							limit: new Pagination(1, ep.ID)
+						)).FirstOrDefault(),
 				Chapters = await _GetChapters(ep, fs),
 				IsMovie = ep.Show.IsMovie
 			};
