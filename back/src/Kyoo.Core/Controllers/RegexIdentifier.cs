@@ -68,8 +68,7 @@ namespace Kyoo.Core.Controllers
 			string libraryPath = (await _libraryManager.GetAll<Library>())
 				.SelectMany(x => x.Paths)
 				.Where(path.StartsWith)
-				.OrderByDescending(x => x.Length)
-				.FirstOrDefault();
+				.MaxBy(x => x.Length);
 			return path[(libraryPath?.Length ?? 0)..];
 		}
 
