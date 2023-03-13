@@ -147,10 +147,12 @@ namespace Kyoo.Core.Controllers
 			Sort<LibraryItem> sort = default,
 			Pagination limit = default)
 		{
-			ICollection<LibraryItem> items = await ApplyFilters(_LibraryRelatedQuery(x => x.ID == id),
+			ICollection<LibraryItem> items = await ApplyFilters(
+				_LibraryRelatedQuery(x => x.ID == id),
 				where,
 				sort,
-				limit);
+				limit
+			);
 			if (!items.Any() && await _libraries.Value.GetOrDefault(id) == null)
 				throw new ItemNotFoundException();
 			return items;
@@ -162,10 +164,12 @@ namespace Kyoo.Core.Controllers
 			Sort<LibraryItem> sort = default,
 			Pagination limit = default)
 		{
-			ICollection<LibraryItem> items = await ApplyFilters(_LibraryRelatedQuery(x => x.Slug == slug),
+			ICollection<LibraryItem> items = await ApplyFilters(
+				_LibraryRelatedQuery(x => x.Slug == slug),
 				where,
 				sort,
-				limit);
+				limit
+			);
 			if (!items.Any() && await _libraries.Value.GetOrDefault(slug) == null)
 				throw new ItemNotFoundException();
 			return items;

@@ -57,7 +57,7 @@ namespace Kyoo.Core
 					context.Result = new ConflictObjectResult(ex.Existing);
 					break;
 				case Exception ex:
-					_logger.LogError("Unhandled error", ex);
+					_logger.LogError(ex, "Unhandled error");
 					context.Result = new ServerErrorObjectResult(new RequestError("Internal Server Error"));
 					break;
 			}

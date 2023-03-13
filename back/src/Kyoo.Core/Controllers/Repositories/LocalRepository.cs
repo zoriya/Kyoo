@@ -140,6 +140,8 @@ namespace Kyoo.Core.Controllers
 			T reference,
 			bool next = true)
 		{
+			sort ??= DefaultSort;
+
 			// x =>
 			ParameterExpression x = Expression.Parameter(typeof(T), "x");
 			ConstantExpression referenceC = Expression.Constant(reference, typeof(T));
@@ -284,12 +286,14 @@ namespace Kyoo.Core.Controllers
 			if (where != null)
 				query = query.Where(where);
 
-			if (limit.AfterID != null)
+			if (limit?.AfterID != null)
 			{
 				T reference = await Get(limit.AfterID.Value);
 				query = query.Where(KeysetPaginatate(sort, reference, !limit.Reverse));
 			}
-			if (limit.Limit > 0)
+			if (limit?.Reverse == true)
+				query = query.Reverse();
+			if (limit?.Limit > 0)
 				query = query.Take(limit.Limit);
 
 			return await query.ToListAsync();
