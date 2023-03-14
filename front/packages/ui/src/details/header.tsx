@@ -37,10 +37,11 @@ import {
 	LI,
 	A,
 	ts,
+	Button,
 } from "@kyoo/primitives";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform, View } from "react-native";
+import { Platform, Pressable, PressableProps, View } from "react-native";
 import {
 	Theme,
 	md,
@@ -160,7 +161,10 @@ const TitleLine = ({
 							as={Link}
 							href={`/watch/${slug}`}
 							color={{ xs: theme.user.colors.black, md: theme.colors.black }}
-							{...css({ bg: { xs: theme.user.accent, md: theme.accent } })}
+							{...css({
+								bg: theme.user.accent,
+								fover: { self: { bg: theme.user.accent } },
+							})}
 							{...tooltip(t("show.play"))}
 						/>
 						<IconButton
@@ -227,7 +231,9 @@ const Description = ({
 	const { css } = useYoshiki();
 
 	return (
-		<Container {...css({ flexDirection: { xs: "column", sm: "row" } }, props)}>
+		<Container
+			{...css({ paddingBottom: ts(1), flexDirection: { xs: "column", sm: "row" } }, props)}
+		>
 			<P
 				{...css({
 					display: { xs: "flex", sm: "none" },
@@ -250,10 +256,22 @@ const Description = ({
 
 			<Skeleton
 				lines={4}
-				{...css({ width: percent(100), flexBasis: 0, flexGrow: 1, paddingTop: ts(4) })}
+				{...css({
+					width: percent(100),
+					flexBasis: 0,
+					flexGrow: 1,
+					paddingTop: ts(4),
+				})}
 			>
 				{isLoading || (
-					<P {...css({ flexBasis: 0, flexGrow: 1, textAlign: "justify", paddingTop: ts(4) })}>
+					<P
+						{...css({
+							flexBasis: 0,
+							flexGrow: 1,
+							textAlign: "justify",
+							paddingTop: ts(4),
+						})}
+					>
 						{overview ?? t("show.noOverview")}
 					</P>
 				)}

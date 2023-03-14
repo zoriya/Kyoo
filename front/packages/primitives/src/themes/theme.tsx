@@ -35,7 +35,6 @@ type FontList = Partial<
 >;
 
 type Mode = {
-	appbar: Property.Color;
 	overlay0: Property.Color;
 	overlay1: Property.Color;
 	link: Property.Color;

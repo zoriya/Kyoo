@@ -67,7 +67,7 @@ const ThemedStack = ({ onLayout }: { onLayout?: () => void }) => {
 					backgroundColor: theme.background,
 				},
 				headerStyle: {
-					backgroundColor: theme.appbar,
+					backgroundColor: theme.accent,
 				},
 				headerTintColor: theme.colors.white,
 			}}

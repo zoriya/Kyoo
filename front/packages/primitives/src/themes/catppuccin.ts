@@ -24,13 +24,12 @@ import { ThemeBuilder } from "./theme";
 export const catppuccin: ThemeBuilder = {
 	light: {
 		// Catppuccin latte
-		appbar: "#e64553",
 		overlay0: "#9ca0b0",
 		overlay1: "#7c7f93",
 		link: "#1e66f5",
 		default: {
 			background: "#eff1f5",
-			accent: "#ea76cb",
+			accent: "#e64553",
 			divider: "#8c8fa1",
 			heading: "#4c4f69",
 			paragraph: "#5c5f77",
@@ -55,13 +54,12 @@ export const catppuccin: ThemeBuilder = {
 	},
 	dark: {
 		// Catppuccin mocha
-		appbar: "#89b4fa",
 		overlay0: "#6c7086",
 		overlay1: "#9399b2",
 		link: "#89b4fa",
 		default: {
 			background: "#1e1e2e",
-			accent: "#f5c2e7",
+			accent: "#89b4fa",
 			divider: "#7f849c",
 			heading: "#cdd6f4",
 			paragraph: "#bac2de",
