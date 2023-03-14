@@ -33,6 +33,7 @@ import { InfiniteFetch } from "../fetch-infinite";
 import { ItemGrid } from "./grid";
 import { ItemList } from "./list";
 import { SortBy, SortOrd, Layout } from "./types";
+import { BrowseSettings } from "./header";
 
 export const itemMap = (
 	item: WithLoading<LibraryItem>,
@@ -80,18 +81,20 @@ export const BrowsePage: QueryPage<{ slug?: string }> = ({ slug }) => {
 	// TODO list header to seet sort things, filter and layout.
 	return (
 		<>
-			{/* <BrowseSettings */}
-			{/* 	sortKey={sortKey} */}
-			{/* 	setSort={setSort} */}
-			{/* 	sortOrd={sortOrd} */}
-			{/* 	setSortOrd={setSortOrd} */}
-			{/* 	layout={layout} */}
-			{/* 	setLayout={setLayout} */}
-			{/* /> */}
 			<InfiniteFetch
 				query={query(slug, sortKey, sortOrd)}
 				placeholderCount={15}
 				layout={LayoutComponent.layout}
+				Header={
+					<BrowseSettings
+						sortKey={sortKey}
+						setSort={setSort}
+						sortOrd={sortOrd}
+						setSortOrd={setSortOrd}
+						layout={layout}
+						setLayout={setLayout}
+					/>
+				}
 			>
 				{(item) => <LayoutComponent {...itemMap(item)} />}
 			</InfiniteFetch>

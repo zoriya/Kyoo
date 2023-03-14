@@ -109,7 +109,7 @@ export const InfiniteFetch = <Data,>({
 	) => ReactElement | null;
 	empty?: string | JSX.Element;
 	divider?: boolean | ComponentType;
-	Header?: ComponentType<{ children: JSX.Element }>;
+	Header?: ComponentType<{ children: JSX.Element }> | ReactElement;
 }): JSX.Element | null => {
 	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
 
@@ -148,5 +148,13 @@ export const InfiniteFetch = <Data,>({
 		</InfiniteScroll>
 	);
 
-	return Header ? <Header>{list}</Header> : list;
+	if (!Header) return list;
+	return typeof Header === "function" ? (
+		<Header>{list}</Header>
+	) : (
+		<>
+			{Header}
+			{list}
+		</>
+	);
 };

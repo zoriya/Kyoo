@@ -18,7 +18,13 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export {}
+import { IconButton, tooltip, ts } from "@kyoo/primitives";
+import { View } from "moti";
+import { useTranslation } from "react-i18next";
+import { useYoshiki } from "yoshiki/native";
+import GridView from "@material-symbols/svg-400/rounded/grid_view.svg";
+import ViewList from "@material-symbols/svg-400/rounded/view_list.svg";
+import { Layout, SortBy, SortOrd } from "./types";
 
 // const SortByMenu = ({
 // 	sortKey,
@@ -37,7 +43,7 @@ export {}
 // }) => {
 // 	const router = useRouter();
 // 	const { t } = useTranslation("browse");
-
+//
 // 	return (
 // 		<Menu
 // 			id="sortby-menu"
@@ -92,68 +98,75 @@ export {}
 // 	);
 // };
 
-// const BrowseSettings = ({
-// 	sortKey,
-// 	setSort,
-// 	sortOrd,
-// 	setSortOrd,
-// 	layout,
-// 	setLayout,
-// }: {
-// 	sortKey: SortBy;
-// 	setSort: (sort: SortBy) => void;
-// 	sortOrd: SortOrd;
-// 	setSortOrd: (sort: SortOrd) => void;
-// 	layout: Layout;
-// 	setLayout: (layout: Layout) => void;
-// }) => {
-// 	const [sortAnchor, setSortAnchor] = useState<HTMLElement | null>(null);
-// 	const { t } = useTranslation("browse");
+export const BrowseSettings = ({
+	sortKey,
+	setSort,
+	sortOrd,
+	setSortOrd,
+	layout,
+	setLayout,
+}: {
+	sortKey: SortBy;
+	setSort: (sort: SortBy) => void;
+	sortOrd: SortOrd;
+	setSortOrd: (sort: SortOrd) => void;
+	layout: Layout;
+	setLayout: (layout: Layout) => void;
+}) => {
+	// const [sortAnchor, setSortAnchor] = useState<HTMLElement | null>(null);
+	const { css } = useYoshiki();
+	const { t } = useTranslation();
 
-// 	const switchViewTitle =
-// 		layout === Layout.Grid ? t("browse.switchToList") : t("browse.switchToGrid");
+	return (
+		<View {...css({ flexDirection: "row" })}>
+			<IconButton
+				icon={GridView}
+				onPress={() => setLayout(Layout.Grid)}
+				{...tooltip(t("browse.switchToGrid"))}
+				{...css({ paddingX: ts(.5) })}
+			/>
+			<IconButton
+				icon={ViewList}
+				onPress={() => setLayout(Layout.List)}
+				{...tooltip(t("browse.switchToList"))}
+				{...css({ paddingX: ts(.5) })}
+			/>
+		</View>
+	);
 
-// 	return (
-// 		<>
-// 			<Box sx={{ display: "flex", justifyContent: "space-around" }}>
-// 				<ButtonGroup sx={{ m: 1 }}>
-// 					<Button disabled>
-// 						<FilterList />
-// 					</Button>
-// 					<Tooltip title={t("browse.sortby-tt")}>
-// 						<Button
-// 							id="sortby"
-// 							aria-label={t("browse.sortby-tt")}
-// 							aria-controls={sortAnchor ? "sorby-menu" : undefined}
-// 							aria-haspopup="true"
-// 							aria-expanded={sortAnchor ? "true" : undefined}
-// 							onClick={(event) => setSortAnchor(event.currentTarget)}
-// 						>
-// 							<Sort />
-// 							{t("browse.sortby", { key: t(`browse.sortkey.${sortKey}`) })}
-// 							{sortOrd === SortOrd.Asc ? <South fontSize="small" /> : <North fontSize="small" />}
-// 						</Button>
-// 					</Tooltip>
-// 					<Tooltip title={switchViewTitle}>
-// 						<Button
-// 							onClick={() => setLayout(layout === Layout.List ? Layout.Grid : Layout.List)}
-// 							aria-label={switchViewTitle}
-// 						>
-// 							{layout === Layout.List ? <GridView /> : <ViewList />}
-// 						</Button>
-// 					</Tooltip>
-// 				</ButtonGroup>
-// 			</Box>
-// 			{sortAnchor && (
-// 				<SortByMenu
-// 					sortKey={sortKey}
-// 					sortOrd={sortOrd}
-// 					setSort={setSort}
-// 					setSortOrd={setSortOrd}
-// 					anchor={sortAnchor}
-// 					onClose={() => setSortAnchor(null)}
-// 				/>
-// 			)}
-// 		</>
-// 	);
-// };
+	// return (
+	// 	<>
+	// 		<Box sx={{ display: "flex", justifyContent: "space-around" }}>
+	// 			<ButtonGroup sx={{ m: 1 }}>
+	// 				<Button disabled>
+	// 					<FilterList />
+	// 				</Button>
+	// 				<Tooltip title={t("browse.sortby-tt")}>
+	// 					<Button
+	// 						id="sortby"
+	// 						aria-label={t("browse.sortby-tt")}
+	// 						aria-controls={sortAnchor ? "sorby-menu" : undefined}
+	// 						aria-haspopup="true"
+	// 						aria-expanded={sortAnchor ? "true" : undefined}
+	// 						onClick={(event) => setSortAnchor(event.currentTarget)}
+	// 					>
+	// 						<Sort />
+	// 						{t("browse.sortby", { key: t(`browse.sortkey.${sortKey}`) })}
+	// 						{sortOrd === SortOrd.Asc ? <South fontSize="small" /> : <North fontSize="small" />}
+	// 					</Button>
+	// 				</Tooltip>
+	// 			</ButtonGroup>
+	// 		</Box>
+	// 		{sortAnchor && (
+	// 			<SortByMenu
+	// 				sortKey={sortKey}
+	// 				sortOrd={sortOrd}
+	// 				setSort={setSort}
+	// 				setSortOrd={setSortOrd}
+	// 				anchor={sortAnchor}
+	// 				onClose={() => setSortAnchor(null)}
+	// 			/>
+	// 		)}
+	// 	</>
+	// );
+};
