@@ -41,19 +41,21 @@ type IconProps = {
 
 export const Icon = ({ icon: Icon, color, size = 24, ...props }: IconProps) => {
 	const { css, theme } = useYoshiki();
-	// eslint-disable-next-line react-hooks/rules-of-hooks
-	const colorValue = Platform.OS !== "web" ? useBreakpointValue(color) : null;
+	const computed = css(
+		{ width: size, height: size, fill: color ?? theme.contrast } as ViewStyle,
+		props,
+	);
 
 	return (
 		<Icon
 			{...Platform.select<SvgProps>({
-				web: css({ width: size, height: size, fill: color ?? theme.contrast } as ViewStyle, props),
+				web: computed,
 				default: {
-					height: size,
-					width: size,
+					height: computed.style?.height,
+					width: computed.style?.width,
 					// @ts-ignore
-					fill: colorValue ?? theme.contrast,
-					...props,
+					fill: computed.style?.fill,
+					...computed,
 				},
 			})}
 		/>
