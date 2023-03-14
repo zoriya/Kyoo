@@ -18,11 +18,11 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { H6, Image, Link, P, Skeleton, ts } from "@kyoo/primitives";
+import { focusReset, H6, Image, Link, P, Skeleton, ts } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { Layout, WithLoading } from "../fetch";
-import { percent, rem, Stylable, useYoshiki } from "yoshiki/native";
+import { percent, px, rem, Stylable, Theme, useYoshiki } from "yoshiki/native";
 
 export const episodeDisplayNumber = (
 	episode: {
@@ -88,6 +88,22 @@ export const EpisodeLine = ({
 					m: ts(1),
 					alignItems: "center",
 					flexDirection: "row",
+					child: {
+						poster: {
+							borderColor: "transparent",
+							borderWidth: px(4),
+						},
+					},
+					focus: {
+						self: focusReset,
+						poster: {
+							transform: [{ scale: 1.1 }],
+							borderColor: (theme: Theme) => theme.accent,
+						},
+						title: {
+							textDecorationLine: "underline",
+						},
+					},
 				},
 				props,
 			)}
@@ -102,11 +118,15 @@ export const EpisodeLine = ({
 					width: percent(18),
 					aspectRatio: 16 / 9,
 				}}
-				{...css({ flexShrink: 0, m: ts(1) })}
+				{...css(["poster", { flexShrink: 0, m: ts(1) }])}
 			/>
 			<View {...css({ flexGrow: 1, flexShrink: 1, m: ts(1) })}>
 				<Skeleton>
-					{isLoading || <H6 aria-level={undefined}>{name ?? t("show.episodeNoMetadata")}</H6>}
+					{isLoading || (
+						<H6 aria-level={undefined} {...css("title")}>
+							{name ?? t("show.episodeNoMetadata")}
+						</H6>
+					)}
 				</Skeleton>
 				<Skeleton>{isLoading || <P numberOfLines={3}>{overview}</P>}</Skeleton>
 			</View>
