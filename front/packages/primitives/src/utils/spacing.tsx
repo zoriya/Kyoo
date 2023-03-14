@@ -18,8 +18,16 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { Platform } from "react-native";
 import { px } from "yoshiki/native";
 
 export const ts = (spacing: number) => {
 	return px(spacing * 8);
 };
+
+export const focusReset: object =
+	Platform.OS === "web"
+		? {
+				boxShadow: "unset",
+		  }
+		: {};

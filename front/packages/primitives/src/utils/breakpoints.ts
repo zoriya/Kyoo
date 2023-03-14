@@ -24,7 +24,6 @@ import { isBreakpoints } from "yoshiki/dist/utils";
 import { breakpoints } from "yoshiki/native";
 
 type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> & U[keyof U];
-
 export type Breakpoint<T> = T | AtLeastOne<YoshikiBreakpoint<T>>;
 
 // copied from yoshiki.
