@@ -156,6 +156,7 @@ const TitleLine = ({
 						</Skeleton>
 					)}
 					<View {...css({ flexDirection: "row" })}>
+						{/* @ts-ignore */}
 						<IconFab
 							icon={PlayArrow}
 							as={Link}

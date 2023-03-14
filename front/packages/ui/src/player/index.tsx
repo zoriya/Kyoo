@@ -116,7 +116,7 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 	if (error || playbackError)
 		return (
 			<>
-				<Back isLoading={false} {...css({ position: "relative", bg: (theme) => theme.appbar })} />
+				<Back isLoading={false} {...css({ position: "relative", bg: (theme) => theme.accent })} />
 				<ErrorView error={error ?? { errors: [playbackError!] }} />
 			</>
 		);
