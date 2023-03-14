@@ -47,7 +47,7 @@ export const InfiniteFetch = <Data,>({
 	empty?: string | JSX.Element;
 	suspense?: boolean;
 	divider?: boolean | ComponentType;
-	Header?: ComponentType<{ children: JSX.Element }>;
+	Header?: ComponentType<{ children: JSX.Element }> | ReactElement;
 }): JSX.Element | null => {
 	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
 
