@@ -28,6 +28,7 @@ import { P } from "./text";
 import { ContrastArea } from "./themes";
 import { Icon } from "./icons";
 import Dot from "@material-symbols/svg-400/rounded/fiber_manual_record-fill.svg";
+import { focusReset } from "./utils";
 
 type YoshikiFunc<T> = (props: ReturnType<typeof useYoshiki>) => T;
 const YoshikiProvider = ({ children }: { children: YoshikiFunc<ReactNode> }) => {
@@ -138,17 +139,13 @@ const MenuItem = ({
 				onSelect={onSelect}
 				href={href}
 				{...css(
-					[
-						{
-							display: "flex",
-							alignItems: "center",
-							padding: "8px",
-							height: "32px",
-							focus: {
-								boxShadow: "none",
-							},
-						},
-					],
+					{
+						display: "flex",
+						alignItems: "center",
+						padding: "8px",
+						height: "32px",
+						focus: focusReset as any,
+					},
 					props as any,
 				)}
 			>

@@ -18,13 +18,15 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { IconButton, tooltip, ts } from "@kyoo/primitives";
-import { View } from "moti";
+import { HR, Icon, IconButton, Menu, P, PressableFeedback, tooltip, ts } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
 import { useYoshiki } from "yoshiki/native";
 import GridView from "@material-symbols/svg-400/rounded/grid_view.svg";
 import ViewList from "@material-symbols/svg-400/rounded/view_list.svg";
+import Sort from "@material-symbols/svg-400/rounded/sort.svg";
 import { Layout, SortBy, SortOrd } from "./types";
+import { forwardRef } from "react";
+import { View, PressableProps } from "react-native";
 
 // const SortByMenu = ({
 // 	sortKey,
@@ -98,6 +100,25 @@ import { Layout, SortBy, SortOrd } from "./types";
 // 	);
 // };
 
+const SortTrigger = forwardRef<View, PressableProps & { sortKey: SortBy }>(function _SortTrigger(
+	{ sortKey, ...props },
+	ref,
+) {
+	const { css } = useYoshiki();
+	const { t } = useTranslation();
+
+	return (
+		<PressableFeedback
+			ref={ref}
+			{...css({ flexDirection: "row", alignItems: "center" }, props as any)}
+			{...tooltip(t("browse.sortby-tt"))}
+		>
+			<Icon icon={Sort} {...css({ paddingX: ts(0.5) })} />
+			<P>{t(`browse.sortkey.${sortKey}`)}</P>
+		</PressableFeedback>
+	);
+});
+
 export const BrowseSettings = ({
 	sortKey,
 	setSort,
@@ -114,23 +135,42 @@ export const BrowseSettings = ({
 	setLayout: (layout: Layout) => void;
 }) => {
 	// const [sortAnchor, setSortAnchor] = useState<HTMLElement | null>(null);
-	const { css } = useYoshiki();
+	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
 
 	return (
-		<View {...css({ flexDirection: "row" })}>
-			<IconButton
-				icon={GridView}
-				onPress={() => setLayout(Layout.Grid)}
-				{...tooltip(t("browse.switchToGrid"))}
-				{...css({ paddingX: ts(.5) })}
-			/>
-			<IconButton
-				icon={ViewList}
-				onPress={() => setLayout(Layout.List)}
-				{...tooltip(t("browse.switchToList"))}
-				{...css({ paddingX: ts(.5) })}
-			/>
+		<View {...css({ flexDirection: "row", marginX: ts(4), marginY: ts(1) })}>
+			<View {...css({ flexGrow: 1 })}></View>
+			<View {...css({ flexDirection: "row" })}>
+				<Menu Trigger={SortTrigger} sortKey={sortKey}>
+					{Object.values(SortBy).map((x) => (
+						<Menu.Item
+							key={x}
+							label={t(`browse.sortkey.${x}`)}
+							selected={sortKey === x}
+							onSelect={() => setSort(x)}
+							// component={Link}
+							// to={{ query: { ...router.query, sortBy: `${sortKey}-${sortOrd}` } }}
+							// TODO: Set query param for sort.
+						/>
+					))}
+				</Menu>
+				<HR orientation="vertical" />
+				<IconButton
+					icon={GridView}
+					onPress={() => setLayout(Layout.Grid)}
+					color={layout == Layout.Grid ? theme.accent : undefined}
+					{...tooltip(t("browse.switchToGrid"))}
+					{...css({ paddingX: ts(0.5) })}
+				/>
+				<IconButton
+					icon={ViewList}
+					onPress={() => setLayout(Layout.List)}
+					color={layout == Layout.List ? theme.accent : undefined}
+					{...tooltip(t("browse.switchToList"))}
+					{...css({ paddingX: ts(0.5) })}
+				/>
+			</View>
 		</View>
 	);
 
