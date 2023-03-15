@@ -19,7 +19,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="../Kyoo.Abstractions/Kyoo.Abstractions.csproj" />
-		<ProjectReference Include="../Kyoo.Database/Kyoo.Database.csproj" />
+		<ProjectReference Include="..\Kyoo.Postgresql\Kyoo.Postgresql.csproj" />
 	</ItemGroup>
 
 	<Target Name="BuildTranscoder" BeforeTargets="BeforeBuild" Condition="'$(SkipTranscoder)' != 'true' And !Exists('$(TranscoderRoot)/build/$(TranscoderBinary)')">

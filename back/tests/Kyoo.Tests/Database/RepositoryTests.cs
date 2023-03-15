@@ -27,7 +27,7 @@ using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Database;
 using Xunit;
 
-namespace Kyoo.Tests
+namespace Kyoo.Tests.Database
 {
 	public abstract class RepositoryTests<T> : IDisposable, IAsyncDisposable
 		where T : class, IResource, new()

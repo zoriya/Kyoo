@@ -22,7 +22,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using EFCore.NamingConventions.Internal;
 using Kyoo.Abstractions.Models;
-using Kyoo.Database;
 using Kyoo.Utils;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;

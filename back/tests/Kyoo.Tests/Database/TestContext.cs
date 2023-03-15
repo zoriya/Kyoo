@@ -20,8 +20,6 @@ using System;
 using System.Threading.Tasks;
 using Kyoo.Database;
 using Kyoo.Postgresql;
-using Kyoo.SqLite;
-using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Npgsql;
@@ -30,55 +28,6 @@ using Xunit.Abstractions;
 
 namespace Kyoo.Tests
 {
-	public sealed class SqLiteTestContext : TestContext
-	{
-		/// <summary>
-		/// The internal sqlite connection used by all context returned by this class.
-		/// </summary>
-		private readonly SqliteConnection _connection;
-
-		/// <summary>
-		/// The context's options that specify to use an in memory Sqlite database.
-		/// </summary>
-		private readonly DbContextOptions<DatabaseContext> _context;
-
-		public SqLiteTestContext(ITestOutputHelper output)
-		{
-			_connection = new SqliteConnection("DataSource=:memory:");
-			_connection.Open();
-
-			_context = new DbContextOptionsBuilder<DatabaseContext>()
-				.UseSqlite(_connection)
-				.UseLoggerFactory(LoggerFactory.Create(x =>
-				{
-					x.ClearProviders();
-					x.AddXunit(output);
-				}))
-				.EnableSensitiveDataLogging()
-				.EnableDetailedErrors()
-				.Options;
-
-			using DatabaseContext context = New();
-			context.Database.Migrate();
-			TestSample.FillDatabase(context);
-		}
-
-		public override void Dispose()
-		{
-			_connection.Close();
-		}
-
-		public override async ValueTask DisposeAsync()
-		{
-			await _connection.CloseAsync();
-		}
-
-		public override DatabaseContext New()
-		{
-			return new SqLiteContext(_context);
-		}
-	}
-
 	[CollectionDefinition(nameof(Postgresql))]
 	public class PostgresCollection : ICollectionFixture<PostgresFixture>
 	{ }

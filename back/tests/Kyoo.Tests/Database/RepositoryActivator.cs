@@ -24,7 +24,7 @@ using Kyoo.Core.Controllers;
 using Kyoo.Database;
 using Xunit.Abstractions;
 
-namespace Kyoo.Tests
+namespace Kyoo.Tests.Database
 {
 	public class RepositoryActivator : IDisposable, IAsyncDisposable
 	{
@@ -35,9 +35,7 @@ namespace Kyoo.Tests
 
 		public RepositoryActivator(ITestOutputHelper output, PostgresFixture postgres = null)
 		{
-			Context = postgres == null
-				? new SqLiteTestContext(output)
-				: new PostgresTestContext(postgres, output);
+			Context = new PostgresTestContext(postgres, output);
 
 			ProviderRepository provider = new(_NewContext());
 			LibraryRepository library = new(_NewContext(), provider);
