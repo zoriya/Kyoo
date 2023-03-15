@@ -90,7 +90,7 @@ export const IconButton = forwardRef(function _IconButton<AsProps = PressablePro
 					borderRadius: 9999,
 					fover: {
 						self: {
-							bg: (theme: Theme) => alpha(theme.contrast, 0.5),
+							bg: (theme: Theme) => theme.overlay0,
 						},
 					},
 				},
