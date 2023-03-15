@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Link, P, Skeleton, Animated, ts, ImageBackground, Heading } from "@kyoo/primitives";
+import { Link, P, Skeleton, ts, ImageBackground, Poster, Heading } from "@kyoo/primitives";
 import { useState } from "react";
 import { View } from "react-native";
 import { percent, px, rem, useYoshiki } from "yoshiki/native";
@@ -102,15 +102,7 @@ export const ItemList = ({
 					</Skeleton>
 				)}
 			</View>
-			<Animated.Poster
-				src={poster}
-				alt=""
-				isLoading={isLoading}
-				forward={{ layout: { height: percent(80) } }}
-				// TODO: this does not work on the web...
-				animate={{ scale: isHovered ? 1.3 : 1 }}
-				transition={{ type: "spring" }}
-			/>
+			<Poster src={poster} alt="" isLoading={isLoading} layout={{ height: percent(80) }} />
 		</ImageBackground>
 	);
 };

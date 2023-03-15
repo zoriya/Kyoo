@@ -36,5 +36,4 @@ export * from "./input";
 export * from "./button";
 export * from "./chip";
 
-export * from "./animated";
 export * from "./utils";
