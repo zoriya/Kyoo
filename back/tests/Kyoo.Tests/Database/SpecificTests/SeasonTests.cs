@@ -21,22 +21,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
-using Kyoo.Database;
+using Kyoo.Postgresql;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Kyoo.Tests.Database
 {
-	namespace SqLite
-	{
-		public class SeasonTests : ASeasonTests
-		{
-			public SeasonTests(ITestOutputHelper output)
-				: base(new RepositoryActivator(output)) { }
-		}
-	}
-
 	namespace PostgreSQL
 	{
 		[Collection(nameof(Postgresql))]
