@@ -18,9 +18,20 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { HR, Icon, IconButton, Menu, P, PressableFeedback, tooltip, ts } from "@kyoo/primitives";
+import {
+	Chip,
+	HR,
+	Icon,
+	IconButton,
+	Menu,
+	P,
+	PressableFeedback,
+	tooltip,
+	ts,
+} from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
 import { useYoshiki } from "yoshiki/native";
+import Style from "@material-symbols/svg-400/rounded/style.svg";
 import GridView from "@material-symbols/svg-400/rounded/grid_view.svg";
 import ViewList from "@material-symbols/svg-400/rounded/view_list.svg";
 import Sort from "@material-symbols/svg-400/rounded/sort.svg";
@@ -64,10 +75,19 @@ export const BrowseSettings = ({
 }) => {
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
+	const filters: string[] = [];
+	// TODO: implement filters in the front.
 
 	return (
-		<View {...css({ flexDirection: "row", marginX: ts(4), marginY: ts(1) })}>
-			<View {...css({ flexGrow: 1 })}></View>
+		<View {...css({ flexDirection: "row-reverse", alignItems: "center", marginX: ts(4), marginY: ts(1) })}>
+			{filters.length !== 0 && (
+				<View {...css({ flexGrow: 1, flexDirection: "row", alignItems: "center" })}>
+					<Icon icon={Style} {...css({ marginX: ts(1) })} />
+					{filters.map((x) => (
+						<Chip key={x} label={x} />
+					))}
+				</View>
+			)}
 			<View {...css({ flexDirection: "row" })}>
 				<Menu Trigger={SortTrigger} sortKey={sortKey}>
 					{Object.values(SortBy).map((x) => (
