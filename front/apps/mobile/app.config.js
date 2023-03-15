@@ -40,7 +40,6 @@ const config = {
 		version: "1.0.0",
 		orientation: "default",
 		icon: "./assets/icon.png",
-		entryPoint: "./index.tsx",
 		userInterfaceStyle: "automatic",
 		splash,
 		updates: {
