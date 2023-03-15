@@ -5482,16 +5482,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"create-react-class@npm:^15.7.0":
-  version: 15.7.0
-  resolution: "create-react-class@npm:15.7.0"
-  dependencies:
-    loose-envify: ^1.3.1
-    object-assign: ^4.1.1
-  checksum: 0c5f43da705fa9f67ec289051dd5780792652d440dfa17cd2c7d8423c1f604609596f895dabf46fda1960ddd93ee96fe1b61ef4d55a94fc4271b07d515486714
-  languageName: node
-  linkType: hard
-
 "cross-fetch@npm:^3.1.5":
   version: 3.1.5
   resolution: "cross-fetch@npm:3.1.5"
@@ -9172,7 +9162,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"loose-envify@npm:^1.0.0, loose-envify@npm:^1.1.0, loose-envify@npm:^1.3.1, loose-envify@npm:^1.4.0":
+"loose-envify@npm:^1.0.0, loose-envify@npm:^1.1.0, loose-envify@npm:^1.4.0":
   version: 1.4.0
   resolution: "loose-envify@npm:1.4.0"
   dependencies:
@@ -11554,21 +11544,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-web@npm:^0.18.10":
-  version: 0.18.10
-  resolution: "react-native-web@npm:0.18.10"
+"react-native-web@npm:0.0.0-c26cb9b08":
+  version: 0.0.0-c26cb9b08
+  resolution: "react-native-web@npm:0.0.0-c26cb9b08"
   dependencies:
     "@babel/runtime": ^7.18.6
-    create-react-class: ^15.7.0
     fbjs: ^3.0.4
     inline-style-prefixer: ^6.0.1
     normalize-css-color: ^1.0.2
     postcss-value-parser: ^4.2.0
     styleq: ^0.1.2
   peerDependencies:
-    react: ^17.0.2 || ^18.0.0
-    react-dom: ^17.0.2 || ^18.0.0
-  checksum: 2549a7e316e5e6ac2b59eac0c500bc8e021f32854bd852d4bf719eebad9ef9fbccbeb6fd3f4654d3d3f971c7af43240139affc8b3f36ad288908e7aeea32c43e
+    react: ^18.0.0
+    react-dom: ^18.0.0
+  checksum: d2c31e28b82434979e139c2cac84b9f2b227bd9520ea5b00464b2f161dc0a1ad36c5c40fc309d57794a641409c7d96b51f2e8f9daa861b5aa07cf5de5545c09c
   languageName: node
   linkType: hard
 
@@ -13895,7 +13884,7 @@ __metadata:
     react-native-reanimated: ^2.13.0
     react-native-svg: 13.4.0
     react-native-video: alpha
-    react-native-web: ^0.18.10
+    react-native-web: 0.0.0-c26cb9b08
     solito: ^2.0.5
     superjson: ^1.12.2
     typescript: ^4.9.5
