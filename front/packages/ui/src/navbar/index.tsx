@@ -67,7 +67,7 @@ const SearchBar = forwardRef<
 	return (
 		<Input
 			ref={ref}
-			value={query}
+			value={query ?? ""}
 			onBlur={() => onBlur?.call(null, query)}
 			onChangeText={(q) => {
 				if (Platform.OS === "web") {
