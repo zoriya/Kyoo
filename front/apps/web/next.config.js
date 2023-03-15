@@ -28,8 +28,6 @@ const suboctopus = path.dirname(require.resolve("libass-wasm"));
  * @type {import("next").NextConfig}
  */
 const nextConfig = {
-	// FIXME: https://github.com/nandorojo/moti/issues/224
-	reactStrictMode: false,
 	swcMinify: true,
 	output: "standalone",
 	webpack: (config) => {
@@ -96,28 +94,27 @@ const nextConfig = {
 		locales: ["en", "fr"],
 		defaultLocale: "en",
 	},
+	transpilePackages: [
+		"@kyoo/ui",
+		"@kyoo/primitives",
+		"@kyoo/models",
+		"solito",
+		"react-native",
+		"react-native-web",
+		"react-native-svg",
+		"react-native-reanimated",
+		"moti",
+		"yoshiki",
+		"@expo/vector-icons",
+		"@expo/html-elements",
+		"expo-font",
+		"expo-asset",
+		"expo-av",
+		"expo-modules-core",
+		"expo-linear-gradient",
+	],
 	experimental: {
-		forceSwcTransforms: true,
 		outputFileTracingRoot: path.join(__dirname, "../../"),
-		transpilePackages: [
-			"@kyoo/ui",
-			"@kyoo/primitives",
-			"@kyoo/models",
-			"solito",
-			"react-native",
-			"react-native-web",
-			"react-native-svg",
-			"react-native-reanimated",
-			"moti",
-			"yoshiki",
-			"@expo/vector-icons",
-			"@expo/html-elements",
-			"expo-font",
-			"expo-asset",
-			"expo-av",
-			"expo-modules-core",
-			"expo-linear-gradient",
-		],
 	},
 };
 

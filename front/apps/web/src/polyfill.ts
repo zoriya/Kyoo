@@ -18,14 +18,16 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import "raf/polyfill";
+// import "raf/polyfill";
+// import "setimmediate";
+// import "react-native-reanimated";
 import React from "react";
 
-// FIXME need reanimated update, see https://github.com/software-mansion/react-native-reanimated/issues/3355
-if (typeof window !== "undefined") {
-	// @ts-ignore
-	window._frameTimestamp = null;
-}
+// // FIXME need reanimated update, see https://github.com/software-mansion/react-native-reanimated/issues/3355
+// if (typeof window !== "undefined") {
+// 	// @ts-ignore
+// 	window._frameTimestamp = null;
+// }
 // Simply silence a SSR warning (see https://github.com/facebook/react/issues/14927 for more details)
 if (typeof window === "undefined") {
 	React.useLayoutEffect = React.useEffect;

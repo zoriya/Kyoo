@@ -26,7 +26,7 @@ import { createQueryClient, fetchQuery, getTokenWJ, QueryIdentifier, QueryPage }
 import { setSecureItemSync } from "@kyoo/models/src/secure-store.web";
 import { useState } from "react";
 import NextApp, { AppContext, type AppProps } from "next/app";
-import { Poppins } from "@next/font/google";
+import { Poppins } from "next/font/google";
 import { useTheme, useMobileHover, useStyleRegistry, StyleRegistryProvider } from "yoshiki/web";
 import superjson from "superjson";
 import Head from "next/head";
