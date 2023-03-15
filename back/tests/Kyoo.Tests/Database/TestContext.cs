@@ -18,7 +18,7 @@
 
 using System;
 using System.Threading.Tasks;
-using Kyoo.Database;
+using Kyoo.Postgresql;
 using Kyoo.Postgresql;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

@@ -25,15 +25,6 @@ using Xunit.Abstractions;
 
 namespace Kyoo.Tests.Database
 {
-	namespace SqLite
-	{
-		public class LibraryItemTest : ALibraryItemTest
-		{
-			public LibraryItemTest(ITestOutputHelper output)
-				: base(new RepositoryActivator(output)) { }
-		}
-	}
-
 	namespace PostgreSQL
 	{
 		[Collection(nameof(Postgresql))]

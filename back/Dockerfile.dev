@@ -13,9 +13,7 @@ COPY Kyoo.sln ./Kyoo.sln
 COPY nuget.config ./nuget.config
 COPY src/Directory.Build.props src/Directory.Build.props
 COPY src/Kyoo.Authentication/Kyoo.Authentication.csproj src/Kyoo.Authentication/Kyoo.Authentication.csproj
-COPY src/Kyoo.Database/Kyoo.Database.csproj src/Kyoo.Database/Kyoo.Database.csproj
 COPY src/Kyoo.Host.Generic/Kyoo.Host.Generic.csproj src/Kyoo.Host.Generic/Kyoo.Host.Generic.csproj
-COPY src/Kyoo.SqLite/Kyoo.SqLite.csproj src/Kyoo.SqLite/Kyoo.SqLite.csproj
 COPY src/Kyoo.TheMovieDb/Kyoo.TheMovieDb.csproj src/Kyoo.TheMovieDb/Kyoo.TheMovieDb.csproj
 COPY src/Kyoo.Abstractions/Kyoo.Abstractions.csproj src/Kyoo.Abstractions/Kyoo.Abstractions.csproj
 COPY src/Kyoo.Core/Kyoo.Core.csproj src/Kyoo.Core/Kyoo.Core.csproj

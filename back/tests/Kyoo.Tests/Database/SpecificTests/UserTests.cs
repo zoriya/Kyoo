@@ -24,15 +24,6 @@ using Xunit.Abstractions;
 
 namespace Kyoo.Tests.Database
 {
-	namespace SqLite
-	{
-		public class UserTests : AUserTests
-		{
-			public UserTests(ITestOutputHelper output)
-				: base(new RepositoryActivator(output)) { }
-		}
-	}
-
 	namespace PostgreSQL
 	{
 		[Collection(nameof(Postgresql))]

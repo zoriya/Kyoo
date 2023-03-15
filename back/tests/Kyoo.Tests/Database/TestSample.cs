@@ -19,7 +19,7 @@
 using System;
 using System.Collections.Generic;
 using Kyoo.Abstractions.Models;
-using Kyoo.Database;
+using Kyoo.Postgresql;
 
 namespace Kyoo.Tests
 {
