@@ -27,7 +27,6 @@ using Kyoo.Core;
 using Kyoo.Core.Models.Options;
 using Kyoo.Host.Generic.Controllers;
 using Kyoo.Postgresql;
-using Kyoo.SqLite;
 using Kyoo.Swagger;
 using Kyoo.TheMovieDb;
 using Kyoo.TheTvdb;
@@ -78,7 +77,6 @@ namespace Kyoo.Host.Generic
 				typeof(CoreModule),
 				typeof(AuthenticationModule),
 				typeof(PostgresModule),
-				typeof(SqLiteModule),
 				typeof(PluginTvdb),
 				typeof(PluginTmdb),
 				typeof(SwaggerModule)

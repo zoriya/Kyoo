@@ -18,8 +18,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using Kyoo.Abstractions.Controllers;
-using Kyoo.Database;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -47,7 +47,7 @@ namespace Kyoo.Postgresql
 		public Dictionary<string, Type> Configuration => new();
 
 		/// <inheritdoc />
-		public bool Enabled => _configuration.GetSelectedDatabase() == "postgres";
+		public bool Enabled => true;
 
 		/// <summary>
 		/// The configuration to use. The database connection string is pulled from it.
@@ -75,7 +75,18 @@ namespace Kyoo.Postgresql
 		{
 			services.AddDbContext<DatabaseContext, PostgresContext>(x =>
 			{
-				x.UseNpgsql(_configuration.GetDatabaseConnection("postgres"));
+				DbConnectionStringBuilder builder = new()
+				{
+					["USER ID"] = _configuration.GetValue("POSTGRES_USER", "KyooUser"),
+					["PASSWORD"] = _configuration.GetValue("POSTGRES_PASSWORD", "KyooPassword"),
+					["SERVER"] = _configuration.GetValue("POSTGRES_SERVER", "db"),
+					["PORT"] = _configuration.GetValue("POSTGRES_PORT", "5432"),
+					["DATABASE"] = _configuration.GetValue("POSTGRES_DB", "kyooDB"),
+					["POOLING"] = "true",
+					["MAXPOOLSIZE"] = "95",
+					["TIMEOUT"] = "30"
+				};
+				x.UseNpgsql(builder.ConnectionString);
 				if (_environment.IsDevelopment())
 					x.EnableDetailedErrors().EnableSensitiveDataLogging();
 			}, ServiceLifetime.Transient);

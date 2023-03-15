@@ -20,15 +20,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Autofac;
-using Autofac.Core;
-using Autofac.Core.Registration;
 using Kyoo.Abstractions;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Core.Controllers;
 using Kyoo.Core.Models.Options;
 using Kyoo.Core.Tasks;
-using Kyoo.Database;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
@@ -85,24 +82,18 @@ namespace Kyoo.Core
 			builder.RegisterTask<MetadataProviderLoader>();
 			builder.RegisterTask<LibraryCreator>();
 
-			static bool DatabaseIsPresent(IComponentRegistryBuilder x)
-				=> x.IsRegistered(new TypedService(typeof(DatabaseContext)));
-
-			builder.RegisterRepository<ILibraryRepository, LibraryRepository>().OnlyIf(DatabaseIsPresent);
-			builder.RegisterRepository<ILibraryItemRepository, LibraryItemRepository>().OnlyIf(DatabaseIsPresent);
-			builder.RegisterRepository<ICollectionRepository, CollectionRepository>().OnlyIf(DatabaseIsPresent);
-			builder.RegisterRepository<IShowRepository, ShowRepository>().OnlyIf(DatabaseIsPresent);
-			builder.RegisterRepository<ISeasonRepository, SeasonRepository>().OnlyIf(DatabaseIsPresent);
-			builder.RegisterRepository<IEpisodeRepository, EpisodeRepository>().OnlyIf(DatabaseIsPresent);
-			builder.RegisterRepository<ITrackRepository, TrackRepository>().OnlyIf(DatabaseIsPresent);
-			builder.RegisterRepository<IPeopleRepository, PeopleRepository>().OnlyIf(DatabaseIsPresent);
-			builder.RegisterRepository<IStudioRepository, StudioRepository>().OnlyIf(DatabaseIsPresent);
-			builder.RegisterRepository<IGenreRepository, GenreRepository>().OnlyIf(DatabaseIsPresent);
-			builder.RegisterRepository<IProviderRepository, ProviderRepository>().OnlyIf(DatabaseIsPresent);
-			builder.RegisterRepository<IUserRepository, UserRepository>().OnlyIf(DatabaseIsPresent);
-
-			builder.RegisterType<PassthroughPermissionValidator>().As<IPermissionValidator>()
-				.IfNotRegistered(typeof(IPermissionValidator));
+			builder.RegisterRepository<ILibraryRepository, LibraryRepository>();
+			builder.RegisterRepository<ILibraryItemRepository, LibraryItemRepository>();
+			builder.RegisterRepository<ICollectionRepository, CollectionRepository>();
+			builder.RegisterRepository<IShowRepository, ShowRepository>();
+			builder.RegisterRepository<ISeasonRepository, SeasonRepository>();
+			builder.RegisterRepository<IEpisodeRepository, EpisodeRepository>();
+			builder.RegisterRepository<ITrackRepository, TrackRepository>();
+			builder.RegisterRepository<IPeopleRepository, PeopleRepository>();
+			builder.RegisterRepository<IStudioRepository, StudioRepository>();
+			builder.RegisterRepository<IGenreRepository, GenreRepository>();
+			builder.RegisterRepository<IProviderRepository, ProviderRepository>();
+			builder.RegisterRepository<IUserRepository, UserRepository>();
 
 			builder.RegisterType<FileExtensionContentTypeProvider>().As<IContentTypeProvider>().SingleInstance()
 				.OnActivating(x =>

@@ -29,7 +29,7 @@ using Kyoo.Abstractions.Models.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace Kyoo.Database
+namespace Kyoo.Postgresql
 {
 	/// <summary>
 	/// The database handle used for all local repositories.
