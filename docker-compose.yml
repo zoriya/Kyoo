@@ -6,15 +6,11 @@ services:
     restart: on-failure
     env_file:
       - ./.env
-      - KYOO_DATADIR=/var/lib/kyoo
-      - TVDB__APIKEY=${TVDB__APIKEY}
-      - THEMOVIEDB__APIKEY=${THEMOVIEDB__APIKEY}
-      - LIBRARY_ROOT=/video
     depends_on:
       - postgres
     volumes:
-      - kyoo:/var/lib/kyoo
-      - ./cache:/var/lib/kyoo/cached
+      - kyoo:/kyoo
+      - ./cache:/kyoo/cached
       - ./video:/video
   front:
     build: ./front

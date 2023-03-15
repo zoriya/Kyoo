@@ -16,34 +16,35 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-namespace Kyoo.Abstractions.Controllers
+using System.Threading.Tasks;
+using Kyoo.Host;
+using Microsoft.AspNetCore.Hosting;
+
+namespace Kyoo.Host
 {
 	/// <summary>
-	/// An interface that allow one to interact with the host and shutdown or restart the app.
+	/// Program entrypoint.
 	/// </summary>
-	public interface IApplication
+	public static class Program
 	{
 		/// <summary>
-		/// Shutdown the process and stop gracefully.
+		/// The string representation of the environment used in <see cref="IWebHostEnvironment"/>.
 		/// </summary>
-		void Shutdown();
+#if DEBUG
+		private const string Environment = "Development";
+#else
+		private const string Environment = "Production";
+#endif
 
 		/// <summary>
-		/// Restart Kyoo from scratch, reload plugins, configurations and restart the web server.
+		/// Main function of the program
 		/// </summary>
-		void Restart();
-
-		/// <summary>
-		/// Get the data directory.
-		/// </summary>
-		/// <returns>Retrieve the data directory where runtime data should be stored.</returns>
-		string GetDataDirectory();
-
-		/// <summary>
-		/// Retrieve the path of the json configuration file
-		/// (relative to the data directory, see <see cref="GetDataDirectory"/>).
-		/// </summary>
-		/// <returns>The configuration file name.</returns>
-		string GetConfigFile();
+		/// <param name="args">Command line arguments</param>
+		/// <returns>A <see cref="Task"/> representing the lifetime of the program.</returns>
+		public static Task Main(string[] args)
+		{
+			Application application = new(Environment);
+			return application.Start(args);
+		}
 	}
 }

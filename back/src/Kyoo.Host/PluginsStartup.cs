@@ -25,7 +25,7 @@ using Kyoo.Abstractions.Controllers;
 using Kyoo.Authentication;
 using Kyoo.Core;
 using Kyoo.Core.Models.Options;
-using Kyoo.Host.Generic.Controllers;
+using Kyoo.Host.Controllers;
 using Kyoo.Postgresql;
 using Kyoo.Swagger;
 using Kyoo.TheMovieDb;
@@ -39,7 +39,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Kyoo.Host.Generic
+namespace Kyoo.Host
 {
 	/// <summary>
 	/// The Startup class is used to configure the AspNet's webhost.
@@ -148,8 +148,7 @@ namespace Kyoo.Host.Generic
 		/// </summary>
 		/// <param name="app">The asp net host to configure</param>
 		/// <param name="container">An autofac container used to create a new scope to configure asp-net.</param>
-		/// <param name="config">The configuration manager used to register strongly typed config.</param>
-		public void Configure(IApplicationBuilder app, ILifetimeScope container, IConfigurationManager config)
+		public void Configure(IApplicationBuilder app, ILifetimeScope container)
 		{
 			IEnumerable<IStartupAction> steps = _plugins.GetAllPlugins()
 				.Append(_hostModule)
@@ -162,17 +161,6 @@ namespace Kyoo.Host.Generic
 			IServiceProvider provider = scope.Resolve<IServiceProvider>();
 			foreach (IStartupAction step in steps)
 				step.Run(provider);
-
-			IEnumerable<KeyValuePair<string, Type>> pluginConfig = _plugins.GetAllPlugins()
-				.Append(_hostModule)
-				.SelectMany(x => x.Configuration)
-				.GroupBy(x => x.Key.Split(':').First())
-				.Select(x => x
-					.OrderBy(y => y.Key.Length)
-					.First()
-				);
-			foreach ((string path, Type type) in pluginConfig)
-				config.Register(path, type);
 		}
 
 		/// <summary>

@@ -28,7 +28,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace Kyoo.Host.Generic.Controllers
+namespace Kyoo.Host.Controllers
 {
 	/// <summary>
 	/// An implementation of <see cref="IPluginManager"/>.

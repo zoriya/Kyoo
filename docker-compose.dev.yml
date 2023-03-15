@@ -8,15 +8,8 @@ services:
     ports:
       - "5000:5000"
     restart: on-failure
-    environment:
-      - KYOO_DATADIR=/var/lib/kyoo
-      - DATABASE__ENABLED=postgres
-      - DATABASE__CONFIGURATIONS__POSTGRES__SERVER=postgres
-      - DATABASE__CONFIGURATIONS__POSTGRES__USER=${POSTGRES_USER}
-      - DATABASE__CONFIGURATIONS__POSTGRES__PASSWORD=${POSTGRES_PASSWORD}
-      - TVDB__APIKEY=${TVDB__APIKEY}
-      - THEMOVIEDB__APIKEY=${THEMOVIEDB__APIKEY}
-      - LIBRARY_ROOT=/video
+    env_file:
+      - ./.env
     depends_on:
       - postgres
     volumes:
@@ -58,10 +51,8 @@ services:
   postgres:
     image: "postgres"
     restart: on-failure
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
+    env_file:
+      - ./.env
     volumes:
       - db:/var/lib/postgresql/data
 

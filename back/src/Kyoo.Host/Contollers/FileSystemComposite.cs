@@ -31,7 +31,7 @@ using Kyoo.Core.Models.Options;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
-namespace Kyoo.Host.Generic.Controllers
+namespace Kyoo.Host.Controllers
 {
 	/// <summary>
 	/// A composite that merge every <see cref="IFileSystem"/> available
