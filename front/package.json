@@ -29,11 +29,11 @@
 		"tsdoc": true
 	},
 	"devDependencies": {
-		"eslint": "8.33.0",
-		"eslint-config-next": "13.1.6",
-		"eslint-config-prettier": "^8.6.0",
+		"eslint": "8.36.0",
+		"eslint-config-next": "13.2.4",
+		"eslint-config-prettier": "^8.7.0",
 		"eslint-plugin-header": "^3.1.1",
-		"prettier": "^2.8.3",
+		"prettier": "^2.8.4",
 		"prettier-plugin-jsdoc": "^0.4.2",
 		"typescript": "4.9.5"
 	},

@@ -5,7 +5,7 @@
 	"packageManager": "yarn@3.2.4",
 	"devDependencies": {
 		"@gorhom/portal": "^1.0.14",
-		"@types/react": "^18.0.25",
+		"@types/react": "^18.0.28",
 		"typescript": "^4.9.5"
 	},
 	"peerDependencies": {
@@ -32,8 +32,8 @@
 		}
 	},
 	"dependencies": {
-		"@expo/html-elements": "^0.2.2",
-		"@tanstack/react-query": "^4.24.4",
-		"solito": "^2.0.5"
+		"@expo/html-elements": "^0.4.1",
+		"@tanstack/react-query": "^4.26.1",
+		"solito": "^3.0.0"
 	}
 }
