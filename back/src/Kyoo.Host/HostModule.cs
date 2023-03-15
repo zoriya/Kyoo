@@ -24,12 +24,12 @@ using Kyoo.Abstractions;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Core.Models.Options;
 using Kyoo.Core.Tasks;
-using Kyoo.Host.Generic.Controllers;
+using Kyoo.Host.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 
-namespace Kyoo.Host.Generic
+namespace Kyoo.Host
 {
 	/// <summary>
 	/// A module that registers host controllers and other needed things.

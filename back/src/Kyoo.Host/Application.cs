@@ -23,42 +23,28 @@ using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
-using JetBrains.Annotations;
-using Kyoo.Abstractions.Controllers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Hosting.Systemd;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Templates;
 using Serilog.Templates.Themes;
 using ILogger = Serilog.ILogger;
 
-namespace Kyoo.Host.Generic
+namespace Kyoo.Host
 {
 	/// <summary>
-	/// The main implementation of <see cref="IApplication"/>.
 	/// Hosts of kyoo (main functions) generally only create a new <see cref="Application"/>
 	/// and return <see cref="Start(string[])"/>.
 	/// </summary>
-	public class Application : IApplication, IDisposable
+	public class Application : IDisposable
 	{
 		/// <summary>
 		/// The environment in witch Kyoo will run (ether "Production" or "Development").
 		/// </summary>
 		private readonly string _environment;
-
-		/// <summary>
-		/// The path to the data directory.
-		/// </summary>
-		private string _dataDir;
-
-		/// <summary>
-		/// Should the application restart after a shutdown?
-		/// </summary>
-		private bool _shouldRestart;
 
 		/// <summary>
 		/// The cancellation token source used to allow the app to be shutdown or restarted.
@@ -99,10 +85,8 @@ namespace Kyoo.Host.Generic
 		/// <returns>A task representing the whole process</returns>
 		public async Task Start(string[] args, Action<ContainerBuilder> configure)
 		{
-			_dataDir = _SetupDataDir(args);
-
 			LoggerConfiguration config = new();
-			_ConfigureLogging(config, null, null);
+			_ConfigureLogging(config);
 			Log.Logger = config.CreateBootstrapLogger();
 			_logger = Log.Logger.ForContext<Application>();
 
@@ -110,76 +94,12 @@ namespace Kyoo.Host.Generic
 			AppDomain.CurrentDomain.UnhandledException += (_, ex)
 				=> Log.Fatal(ex.ExceptionObject as Exception, "Unhandled exception");
 
-			do
-			{
-				IHost host = _CreateWebHostBuilder(args)
-					.ConfigureContainer(configure)
-					.Build();
-
-				_tokenSource = new CancellationTokenSource();
-				await _StartWithHost(host, _tokenSource.Token);
-			}
-			while (_shouldRestart);
-		}
-
-		/// <inheritdoc />
-		public void Shutdown()
-		{
-			_shouldRestart = false;
-			_tokenSource.Cancel();
-		}
-
-		/// <inheritdoc />
-		public void Restart()
-		{
-			_shouldRestart = true;
-			_tokenSource.Cancel();
-		}
-
-		/// <inheritdoc />
-		public string GetDataDirectory()
-		{
-			return _dataDir;
-		}
-
-		/// <inheritdoc />
-		public string GetConfigFile()
-		{
-			return "./settings.json";
-		}
-
-		/// <summary>
-		/// Parse the data directory from environment variables and command line arguments, create it if necessary.
-		/// Set the current directory to said data folder and place a default configuration file if it does not already
-		/// exists.
-		/// </summary>
-		/// <param name="args">The command line arguments</param>
-		/// <returns>The current data directory.</returns>
-		private string _SetupDataDir(string[] args)
-		{
-			IConfiguration parsed = new ConfigurationBuilder()
-				.AddEnvironmentVariables()
-				.AddEnvironmentVariables("KYOO_")
-				.AddCommandLine(args)
+			IHost host = _CreateWebHostBuilder(args)
+				.ConfigureContainer(configure)
 				.Build();
 
-			string path = parsed.GetValue<string>("datadir");
-			path ??= Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Kyoo");
-			path = Path.GetFullPath(path);
-
-			if (!Directory.Exists(path))
-				Directory.CreateDirectory(path);
-			Environment.CurrentDirectory = path;
-
-			if (!File.Exists(GetConfigFile()))
-			{
-				File.Copy(
-					Path.Join(AppDomain.CurrentDomain.BaseDirectory, GetConfigFile()),
-					GetConfigFile()
-				);
-			}
-
-			return path;
+			_tokenSource = new CancellationTokenSource();
+			await _StartWithHost(host, _tokenSource.Token);
 		}
 
 		/// <summary>
@@ -191,9 +111,7 @@ namespace Kyoo.Host.Generic
 		{
 			try
 			{
-				_logger.Information("Running as {Name}", Environment.UserName);
 				_logger.Information("Version: {Version}", Assembly.GetExecutingAssembly().GetName().Version.ToString(3));
-				_logger.Information("Data directory: {DataDirectory}", GetDataDirectory());
 				await host.RunAsync(cancellationToken);
 			}
 			catch (Exception ex)
@@ -209,25 +127,18 @@ namespace Kyoo.Host.Generic
 		/// <returns>A new web host instance</returns>
 		private IHostBuilder _CreateWebHostBuilder(string[] args)
 		{
-			IConfiguration configuration = _SetupConfig(new ConfigurationBuilder(), args).Build();
-
 			return new HostBuilder()
 				.UseServiceProviderFactory(new AutofacServiceProviderFactory())
 				.UseContentRoot(AppDomain.CurrentDomain.BaseDirectory)
 				.UseEnvironment(_environment)
-				.UseSystemd()
 				.ConfigureAppConfiguration(x => _SetupConfig(x, args))
-				.UseSerilog((host, services, builder) => _ConfigureLogging(builder, host.Configuration, services))
+				.UseSerilog((host, services, builder) => _ConfigureLogging(builder))
 				.ConfigureServices(x => x.AddRouting())
-				.ConfigureContainer<ContainerBuilder>(x =>
-				{
-					x.RegisterInstance(this).As<IApplication>().SingleInstance().ExternallyOwned();
-				})
 				.ConfigureWebHost(x => x
 					.UseKestrel(options => { options.AddServerHeader = false; })
 					.UseIIS()
 					.UseIISIntegration()
-					.UseUrls(configuration.GetValue<string>("basics:url"))
+					.UseUrls("http://*:5000")
 					.UseStartup(host => PluginsStartup.FromWebHost(host, new LoggerFactory().AddSerilog()))
 				);
 		}
@@ -240,9 +151,8 @@ namespace Kyoo.Host.Generic
 		/// <returns>The modified configuration builder</returns>
 		private IConfigurationBuilder _SetupConfig(IConfigurationBuilder builder, string[] args)
 		{
-			return builder.SetBasePath(GetDataDirectory())
-				.AddJsonFile(Path.Join(AppDomain.CurrentDomain.BaseDirectory, GetConfigFile()), false, true)
-				.AddJsonFile(GetConfigFile(), false, true)
+			return builder
+				.AddJsonFile(Path.Join(AppDomain.CurrentDomain.BaseDirectory, "./settings.json"), false, true)
 				.AddEnvironmentVariables()
 				.AddEnvironmentVariables("KYOO_")
 				.AddCommandLine(args);
@@ -252,51 +162,13 @@ namespace Kyoo.Host.Generic
 		/// Configure the logging.
 		/// </summary>
 		/// <param name="builder">The logger builder to configure.</param>
-		/// <param name="configuration">The configuration to read settings from.</param>
-		/// <param name="services">The services to read configuration from.</param>
-		private void _ConfigureLogging(LoggerConfiguration builder,
-			[CanBeNull] IConfiguration configuration,
-			[CanBeNull] IServiceProvider services)
+		private void _ConfigureLogging(LoggerConfiguration builder)
 		{
-			if (configuration != null)
-			{
-				try
-				{
-					builder.ReadFrom.Configuration(configuration, "logging");
-				}
-				catch (Exception ex)
-				{
-					_logger.Fatal(ex, "Could not read serilog configuration");
-				}
-			}
-
-			if (services != null)
-				builder.ReadFrom.Services(services);
-
 			const string template =
 				"[{@t:HH:mm:ss} {@l:u3} {Substring(SourceContext, LastIndexOf(SourceContext, '.') + 1), 25} "
 				+ "({@i:D10})] {@m}{#if not EndsWith(@m, '\n')}\n{#end}{@x}";
-
-			if (SystemdHelpers.IsSystemdService())
-			{
-				const string syslogTemplate = "[{SourceContext,-35}] {Message:lj}{NewLine}{Exception}";
-
-				builder
-					.WriteTo.Console(new ExpressionTemplate(template, theme: TemplateTheme.Code))
-					.WriteTo.LocalSyslog("Kyoo", outputTemplate: syslogTemplate)
-					.Enrich.WithThreadId()
-					.Enrich.FromLogContext();
-				return;
-			}
-
 			builder
 				.WriteTo.Console(new ExpressionTemplate(template, theme: TemplateTheme.Code))
-				.WriteTo.File(
-					path: Path.Combine(GetDataDirectory(), "logs", "log-.log"),
-					formatter: new ExpressionTemplate(template),
-					rollingInterval: RollingInterval.Day,
-					rollOnFileSizeLimit: true
-				)
 				.Enrich.WithThreadId()
 				.Enrich.FromLogContext();
 		}

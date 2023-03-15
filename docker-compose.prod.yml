@@ -4,21 +4,13 @@ services:
   back:
     image: zoriya/kyoo_back:edge
     restart: on-failure
-    environment:
-      - KYOO_DATADIR=/var/lib/kyoo
-      - DATABASE__ENABLED=postgres
-      - DATABASE__CONFIGURATIONS__POSTGRES__SERVER=postgres
-      - DATABASE__CONFIGURATIONS__POSTGRES__USER=${POSTGRES_USER}
-      - DATABASE__CONFIGURATIONS__POSTGRES__PASSWORD=${POSTGRES_PASSWORD}
-      - DATABASE__CONFIGURATIONS__POSTGRES__DATABASE=${POSTGRES_DB}
-      - TVDB__APIKEY=${TVDB__APIKEY}
-      - THEMOVIEDB__APIKEY=${THEMOVIEDB__APIKEY}
-      - LIBRARY_ROOT=/video
+    env_file:
+      - ./.env
     depends_on:
       - postgres
     volumes:
-      - kyoo:/var/lib/kyoo
-      - ./cache:/var/lib/kyoo/cached
+      - kyoo:/kyoo
+      - ./cache:/kyoo/cached
       - ./video:/video
   front:
     image: zoriya/kyoo_front:edge
@@ -43,10 +35,8 @@ services:
   postgres:
     image: postgres
     restart: on-failure
-    environment:
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - POSTGRES_DB=${POSTGRES_DB}
+    env_file:
+      - ./.env
     volumes:
       - db:/var/lib/postgresql/data
 

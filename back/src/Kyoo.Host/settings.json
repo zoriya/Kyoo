@@ -1,6 +1,5 @@
 {
   "basics": {
-    "url": "http://*:5000",
     "pluginsPath": "plugins/",
     "transmuxPath": "cached/transmux",
     "transcodePath": "cached/transcode",
@@ -44,12 +43,5 @@
     },
     "profilePicturePath": "users/",
     "secret": "4c@mraGB!KRfF@kpS8740y9FcHemKxBsqqxLbdR?"
-  },
-
-  "tvdb": {
-    "apiKey": ""
-  },
-  "themoviedb": {
-    "apiKey": ""
   }
 }

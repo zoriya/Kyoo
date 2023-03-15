@@ -30,7 +30,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="../../src/Kyoo.Abstractions/Kyoo.Abstractions.csproj" />
-		<ProjectReference Include="../../src/Kyoo.Host.Generic/Kyoo.Host.Generic.csproj" />
+		<ProjectReference Include="..\..\src\Kyoo.Host\Kyoo.Host.csproj" />
 		<ProjectReference Include="../../src/Kyoo.TheTvdb/Kyoo.TheTvdb.csproj" />
 	</ItemGroup>
 </Project>

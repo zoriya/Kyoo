@@ -66,7 +66,6 @@ namespace Kyoo.Core
 			builder.RegisterType<LocalFileSystem>().As<IFileSystem>().SingleInstance();
 			builder.RegisterType<HttpFileSystem>().As<IFileSystem>().SingleInstance();
 
-			builder.RegisterType<ConfigurationManager>().As<IConfigurationManager>().SingleInstance();
 			builder.RegisterType<Transcoder>().As<ITranscoder>().SingleInstance();
 			builder.RegisterType<ThumbnailsManager>().As<IThumbnailsManager>().InstancePerLifetimeScope();
 			builder.RegisterType<LibraryManager>().As<ILibraryManager>().InstancePerLifetimeScope();
