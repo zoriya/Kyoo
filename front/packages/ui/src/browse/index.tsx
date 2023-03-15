@@ -18,7 +18,6 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ComponentProps, useState } from "react";
 import {
 	QueryIdentifier,
 	QueryPage,
@@ -27,6 +26,8 @@ import {
 	ItemType,
 	getDisplayDate,
 } from "@kyoo/models";
+import { ComponentProps, useState } from "react";
+import { createParam } from "solito";
 import { DefaultLayout } from "../layout";
 import { WithLoading } from "../fetch";
 import { InfiniteFetch } from "../fetch-infinite";
@@ -34,6 +35,8 @@ import { ItemGrid } from "./grid";
 import { ItemList } from "./list";
 import { SortBy, SortOrd, Layout } from "./types";
 import { BrowseSettings } from "./header";
+
+const { useParam } = createParam<{ sortBy?: string }>();
 
 export const itemMap = (
 	item: WithLoading<LibraryItem>,
@@ -72,33 +75,32 @@ const query = (
 });
 
 export const BrowsePage: QueryPage<{ slug?: string }> = ({ slug }) => {
-	const [sortKey, setSort] = useState(SortBy.Name);
-	const [sortOrd, setSortOrd] = useState(SortOrd.Asc);
+	const [sort, setSort] = useParam("sortBy");
+	const sortKey = (sort?.split(":")[0] as SortBy) || SortBy.Name;
+	const sortOrd = (sort?.split(":")[1] as SortOrd) || SortOrd.Asc;
 	const [layout, setLayout] = useState(Layout.Grid);
 
 	const LayoutComponent = layout === Layout.Grid ? ItemGrid : ItemList;
 
-	// TODO list header to seet sort things, filter and layout.
 	return (
-		<>
-			<InfiniteFetch
-				query={query(slug, sortKey, sortOrd)}
-				placeholderCount={15}
-				layout={LayoutComponent.layout}
-				Header={
-					<BrowseSettings
-						sortKey={sortKey}
-						setSort={setSort}
-						sortOrd={sortOrd}
-						setSortOrd={setSortOrd}
-						layout={layout}
-						setLayout={setLayout}
-					/>
-				}
-			>
-				{(item) => <LayoutComponent {...itemMap(item)} />}
-			</InfiniteFetch>
-		</>
+		<InfiniteFetch
+			query={query(slug, sortKey, sortOrd)}
+			placeholderCount={15}
+			layout={LayoutComponent.layout}
+			Header={
+				<BrowseSettings
+					sortKey={sortKey}
+					sortOrd={sortOrd}
+					setSort={(key, ord) => {
+						setSort(`${key}:${ord}`);
+					}}
+					layout={layout}
+					setLayout={setLayout}
+				/>
+			}
+		>
+			{(item) => <LayoutComponent {...itemMap(item)} />}
+		</InfiniteFetch>
 	);
 };
 

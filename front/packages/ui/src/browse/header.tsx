@@ -24,81 +24,11 @@ import { useYoshiki } from "yoshiki/native";
 import GridView from "@material-symbols/svg-400/rounded/grid_view.svg";
 import ViewList from "@material-symbols/svg-400/rounded/view_list.svg";
 import Sort from "@material-symbols/svg-400/rounded/sort.svg";
+import ArrowUpward from "@material-symbols/svg-400/rounded/arrow_upward.svg";
+import ArrowDownward from "@material-symbols/svg-400/rounded/arrow_downward.svg";
 import { Layout, SortBy, SortOrd } from "./types";
 import { forwardRef } from "react";
 import { View, PressableProps } from "react-native";
-
-// const SortByMenu = ({
-// 	sortKey,
-// 	setSort,
-// 	sortOrd,
-// 	setSortOrd,
-// 	anchor,
-// 	onClose,
-// }: {
-// 	sortKey: SortBy;
-// 	setSort: (sort: SortBy) => void;
-// 	sortOrd: SortOrd;
-// 	setSortOrd: (sort: SortOrd) => void;
-// 	anchor: HTMLElement;
-// 	onClose: () => void;
-// }) => {
-// 	const router = useRouter();
-// 	const { t } = useTranslation("browse");
-//
-// 	return (
-// 		<Menu
-// 			id="sortby-menu"
-// 			MenuListProps={{
-// 				"aria-labelledby": "sortby",
-// 			}}
-// 			anchorEl={anchor}
-// 			open={!!anchor}
-// 			onClose={onClose}
-// 		>
-// 			{Object.values(SortBy).map((x) => (
-// 				<MenuItem
-// 					key={x}
-// 					selected={sortKey === x}
-// 					onClick={() => setSort(x)}
-// 					component={Link}
-// 					to={{ query: { ...router.query, sortBy: `${sortKey}-${sortOrd}` } }}
-// 					shallow
-// 					replace
-// 				>
-// 					<ListItemText>{t(`browse.sortkey.${x}`)}</ListItemText>
-// 				</MenuItem>
-// 			))}
-// 			<Divider />
-// 			<MenuItem
-// 				selected={sortOrd === SortOrd.Asc}
-// 				onClick={() => setSortOrd(SortOrd.Asc)}
-// 				component={Link}
-// 				to={{ query: { ...router.query, sortBy: `${sortKey}-${sortOrd}` } }}
-// 				shallow
-// 				replace
-// 			>
-// 				<ListItemIcon>
-// 					<South fontSize="small" />
-// 				</ListItemIcon>
-// 				<ListItemText>{t("browse.sortord.asc")}</ListItemText>
-// 			</MenuItem>
-// 			<MenuItem
-// 				selected={sortOrd === SortOrd.Desc}
-// 				onClick={() => setSortOrd(SortOrd.Desc)}
-// 				component={Link}
-// 				to={{ query: { ...router.query, sortBy: `${sortKey}-${sortOrd}` } }}
-// 				shallow
-// 				replace
-// 			>
-// 				<ListItemIcon>
-// 					<North fontSize="small" />
-// 				</ListItemIcon>
-// 				<ListItemText>{t("browse.sortord.desc")}</ListItemText>
-// 			</MenuItem>
-// 		</Menu>
-// 	);
-// };
 
 const SortTrigger = forwardRef<View, PressableProps & { sortKey: SortBy }>(function _SortTrigger(
 	{ sortKey, ...props },
@@ -121,20 +51,17 @@ const SortTrigger = forwardRef<View, PressableProps & { sortKey: SortBy }>(funct
 
 export const BrowseSettings = ({
 	sortKey,
-	setSort,
 	sortOrd,
-	setSortOrd,
+	setSort,
 	layout,
 	setLayout,
 }: {
 	sortKey: SortBy;
-	setSort: (sort: SortBy) => void;
 	sortOrd: SortOrd;
-	setSortOrd: (sort: SortOrd) => void;
+	setSort: (sort: SortBy, ord: SortOrd) => void;
 	layout: Layout;
 	setLayout: (layout: Layout) => void;
 }) => {
-	// const [sortAnchor, setSortAnchor] = useState<HTMLElement | null>(null);
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
 
@@ -148,10 +75,10 @@ export const BrowseSettings = ({
 							key={x}
 							label={t(`browse.sortkey.${x}`)}
 							selected={sortKey === x}
-							onSelect={() => setSort(x)}
-							// component={Link}
-							// to={{ query: { ...router.query, sortBy: `${sortKey}-${sortOrd}` } }}
-							// TODO: Set query param for sort.
+							icon={sortOrd === SortOrd.Asc ? ArrowUpward : ArrowDownward}
+							onSelect={() =>
+								setSort(x, sortKey === x && sortOrd === SortOrd.Asc ? SortOrd.Desc : SortOrd.Asc)
+							}
 						/>
 					))}
 				</Menu>
@@ -173,40 +100,4 @@ export const BrowseSettings = ({
 			</View>
 		</View>
 	);
-
-	// return (
-	// 	<>
-	// 		<Box sx={{ display: "flex", justifyContent: "space-around" }}>
-	// 			<ButtonGroup sx={{ m: 1 }}>
-	// 				<Button disabled>
-	// 					<FilterList />
-	// 				</Button>
-	// 				<Tooltip title={t("browse.sortby-tt")}>
-	// 					<Button
-	// 						id="sortby"
-	// 						aria-label={t("browse.sortby-tt")}
-	// 						aria-controls={sortAnchor ? "sorby-menu" : undefined}
-	// 						aria-haspopup="true"
-	// 						aria-expanded={sortAnchor ? "true" : undefined}
-	// 						onClick={(event) => setSortAnchor(event.currentTarget)}
-	// 					>
-	// 						<Sort />
-	// 						{t("browse.sortby", { key: t(`browse.sortkey.${sortKey}`) })}
-	// 						{sortOrd === SortOrd.Asc ? <South fontSize="small" /> : <North fontSize="small" />}
-	// 					</Button>
-	// 				</Tooltip>
-	// 			</ButtonGroup>
-	// 		</Box>
-	// 		{sortAnchor && (
-	// 			<SortByMenu
-	// 				sortKey={sortKey}
-	// 				sortOrd={sortOrd}
-	// 				setSort={setSort}
-	// 				setSortOrd={setSortOrd}
-	// 				anchor={sortAnchor}
-	// 				onClose={() => setSortAnchor(null)}
-	// 			/>
-	// 		)}
-	// 	</>
-	// );
 };

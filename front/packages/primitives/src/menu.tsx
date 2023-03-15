@@ -27,10 +27,11 @@ import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
 import { Icon, IconButton } from "./icons";
 import { PressableFeedback } from "./links";
 import { P } from "./text";
-import { ContrastArea } from "./themes";
+import { ContrastArea, SwitchVariant } from "./themes";
 import { ts } from "./utils";
 import Check from "@material-symbols/svg-400/rounded/check-fill.svg";
 import { useRouter } from "solito/router";
+import { SvgProps } from "react-native-svg";
 
 const MenuContext = createContext<((open: boolean) => void) | undefined>(undefined);
 
@@ -60,48 +61,50 @@ const Menu = <AsProps,>({
 			{isOpen && (
 				<Portal>
 					<ContrastArea mode="user">
-						{({ css, theme }) => (
-							<MenuContext.Provider value={setOpen}>
-								<Pressable
-									onPress={() => setOpen(false)}
-									focusable={false}
-									{...css({ ...StyleSheet.absoluteFillObject, flexGrow: 1, bg: "transparent" })}
-								/>
-								<ScrollView
-									{...css([
-										{
-											bg: (theme) => theme.background,
-											position: "absolute",
-											bottom: 0,
-											width: percent(100),
-											alignSelf: "center",
-											borderTopLeftRadius: px(26),
-											borderTopRightRadius: { xs: px(26), xl: 0 },
-											paddingTop: { xs: px(26), xl: 0 },
-											marginTop: { xs: px(72), xl: 0 },
-										},
-										sm({
-											maxWidth: px(640),
-											marginHorizontal: px(56),
-										}),
-										xl({
-											top: 0,
-											right: 0,
-											marginRight: 0,
-											borderBottomLeftRadius: px(26),
-										}),
-									])}
-								>
-									<IconButton
-										icon={Close}
-										color={theme.colors.black}
+						<SwitchVariant>
+							{({ css, theme }) => (
+								<MenuContext.Provider value={setOpen}>
+									<Pressable
 										onPress={() => setOpen(false)}
-										{...css({ alignSelf: "flex-end", display: { xs: "none", xl: "flex" } })}
+										focusable={false}
+										{...css({ ...StyleSheet.absoluteFillObject, flexGrow: 1, bg: "transparent" })}
 									/>
-									{children}
-								</ScrollView>
-							</MenuContext.Provider>
-						)}
+									<ScrollView
+										{...css([
+											{
+												bg: (theme) => theme.background,
+												position: "absolute",
+												bottom: 0,
+												width: percent(100),
+												alignSelf: "center",
+												borderTopLeftRadius: px(26),
+												borderTopRightRadius: { xs: px(26), xl: 0 },
+												paddingTop: { xs: px(26), xl: 0 },
+												marginTop: { xs: px(72), xl: 0 },
+											},
+											sm({
+												maxWidth: px(640),
+												marginHorizontal: px(56),
+											}),
+											xl({
+												top: 0,
+												right: 0,
+												marginRight: 0,
+												borderBottomLeftRadius: px(26),
+											}),
+										])}
+									>
+										<IconButton
+											icon={Close}
+											color={theme.colors.black}
+											onPress={() => setOpen(false)}
+											{...css({ alignSelf: "flex-end", display: { xs: "none", xl: "flex" } })}
+										/>
+										{children}
+									</ScrollView>
+								</MenuContext.Provider>
+							)}
+						</SwitchVariant>
 					</ContrastArea>
 				</Portal>
 			)}
@@ -114,10 +117,12 @@ const MenuItem = ({
 	selected,
 	onSelect,
 	href,
+	icon,
 	...props
 }: {
 	label: string;
 	selected?: boolean;
+	icon?: ComponentType<SvgProps>;
 } & ({ onSelect: () => void; href?: undefined } | { href: string; onSelect?: undefined })) => {
 	const { css, theme } = useYoshiki();
 	const setOpen = useContext(MenuContext);
@@ -141,7 +146,7 @@ const MenuItem = ({
 				props as any,
 			)}
 		>
-			{selected && <Icon icon={Check} color={theme.paragraph} size={24} />}
+			{selected && <Icon icon={icon ?? Check} color={theme.paragraph} size={24} />}
 			<P {...css({ paddingLeft: ts(2) + +!selected * px(24) })}>{label}</P>
 		</PressableFeedback>
 	);

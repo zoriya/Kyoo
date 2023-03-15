@@ -25,10 +25,11 @@ import { PressableProps } from "react-native";
 import { useYoshiki } from "yoshiki/web";
 import { px, useYoshiki as useNativeYoshiki } from "yoshiki/native";
 import { P } from "./text";
-import { ContrastArea } from "./themes";
+import { ContrastArea, SwitchVariant } from "./themes";
 import { Icon } from "./icons";
 import Dot from "@material-symbols/svg-400/rounded/fiber_manual_record-fill.svg";
-import { focusReset } from "./utils";
+import { focusReset, ts } from "./utils";
+import { SvgProps } from "react-native-svg";
 
 type YoshikiFunc<T> = (props: ReturnType<typeof useYoshiki>) => T;
 const YoshikiProvider = ({ children }: { children: YoshikiFunc<ReactNode> }) => {
@@ -68,26 +69,28 @@ const Menu = <AsProps extends { onPress: PressableProps["onPress"] }>({
 				<InternalTriger Component={Trigger} ComponentProps={props} />
 			</DropdownMenu.Trigger>
 			<ContrastArea mode="user">
-				<YoshikiProvider>
-					{({ css }) => (
-						<DropdownMenu.Portal>
-							<DropdownMenu.Content
-								onFocusOutside={(e) => e.stopImmediatePropagation()}
-								{...css({
-									bg: (theme) => theme.background,
-									overflow: "hidden",
-									minWidth: "220px",
-									borderRadius: "8px",
-									boxShadow:
-										"0px 10px 38px -10px rgba(22, 23, 24, 0.35), 0px 10px 20px -15px rgba(22, 23, 24, 0.2)",
-									zIndex: 2,
-								})}
-							>
-								{children}
-							</DropdownMenu.Content>
-						</DropdownMenu.Portal>
-					)}
-				</YoshikiProvider>
+				<SwitchVariant>
+					<YoshikiProvider>
+						{({ css }) => (
+							<DropdownMenu.Portal>
+								<DropdownMenu.Content
+									onFocusOutside={(e) => e.stopImmediatePropagation()}
+									{...css({
+										bg: (theme) => theme.background,
+										overflow: "hidden",
+										minWidth: "220px",
+										borderRadius: "8px",
+										boxShadow:
+											"0px 10px 38px -10px rgba(22, 23, 24, 0.35), 0px 10px 20px -15px rgba(22, 23, 24, 0.2)",
+										zIndex: 2,
+									})}
+								>
+									{children}
+								</DropdownMenu.Content>
+							</DropdownMenu.Portal>
+						)}
+					</YoshikiProvider>
+				</SwitchVariant>
 			</ContrastArea>
 		</DropdownMenu.Root>
 	);
@@ -122,7 +125,7 @@ const MenuItem = ({
 	...props
 }: {
 	label: string;
-	icon?: JSX.Element;
+	icon?: ComponentType<SvgProps>;
 	selected?: boolean;
 } & ({ onSelect: () => void; href?: undefined } | { href: string; onSelect?: undefined })) => {
 	const { css: nCss } = useNativeYoshiki();
@@ -132,7 +135,7 @@ const MenuItem = ({
 		<>
 			<style jsx global>{`
 				[data-highlighted] {
-					background: ${theme.alternate.accent};
+					background: ${theme.variant.accent};
 				}
 			`}</style>
 			<Item
@@ -151,13 +154,13 @@ const MenuItem = ({
 			>
 				{selected && (
 					<Icon
-						icon={Dot}
+						icon={icon ?? Dot}
 						color={theme.paragraph}
-						size={px(8)}
-						{...nCss({ paddingRight: px(8) })}
+						size={ts(icon ? 2 : 1)}
+						{...nCss({ paddingRight: ts(1) })}
 					/>
 				)}
-				{<P {...nCss(!selected && { paddingLeft: px(8 * 2) })}>{label}</P>}
+				{<P {...nCss(!selected && { paddingLeft: ts(1 + (icon ? 2 : 1)) })}>{label}</P>}
 			</Item>
 		</>
 	);
