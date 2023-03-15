@@ -80,7 +80,7 @@ export const Image = ({
 	if (!src || state === "errored")
 		return <View {...css([{ bg: (theme) => theme.overlay0 }, layout, border], props)} />;
 
-	const nativeProps = Platform.select<ImageProps>({
+	const nativeProps = Platform.select<Partial<ImageProps>>({
 		web: {
 			defaultSource: typeof src === "string" ? { uri: src } : Array.isArray(src) ? src[0] : src,
 		},
@@ -138,7 +138,7 @@ export const ImageBackground = <AsProps = ViewProps,>({
 	Props) => {
 	const [isErrored, setErrored] = useState(false);
 
-	const nativeProps = Platform.select<ImageProps>({
+	const nativeProps = Platform.select<Partial<ImageProps>>({
 		web: {
 			defaultSource: typeof src === "string" ? { uri: src! } : Array.isArray(src) ? src[0] : src!,
 		},

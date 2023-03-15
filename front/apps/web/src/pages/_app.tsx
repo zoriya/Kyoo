@@ -21,7 +21,8 @@
 import "../polyfill";
 
 import { Hydrate, QueryClientProvider } from "@tanstack/react-query";
-import { HiddenIfNoJs, SkeletonCss, ThemeSelector, WebTooltip } from "@kyoo/primitives";
+import { HiddenIfNoJs, SkeletonCss, ThemeSelector } from "@kyoo/primitives";
+import { WebTooltip } from "@kyoo/primitives/src/tooltip.web";
 import { createQueryClient, fetchQuery, getTokenWJ, QueryIdentifier, QueryPage } from "@kyoo/models";
 import { setSecureItemSync } from "@kyoo/models/src/secure-store.web";
 import { useState } from "react";

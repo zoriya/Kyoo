@@ -44,7 +44,7 @@ export const FormPage = ({ children, ...props }: { children: ReactNode } & Styla
 
 	// TODO: Replace the hardcoded 1 to a random show/movie thumbnail.
 	const src = `${Platform.OS === "web" ? "/api/" : process.env.PUBLIC_BACK_URL}/shows/1/thumbnail`;
-	const nativeProps = Platform.select<ImageProps>({
+	const nativeProps = Platform.select<Partial<ImageProps>>({
 		web: {
 			defaultSource: typeof src === "string" ? { uri: src! } : Array.isArray(src) ? src[0] : src!,
 		},

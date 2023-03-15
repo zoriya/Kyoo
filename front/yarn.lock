@@ -3704,7 +3704,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-native@npm:*, @types/react-native@npm:>= 0.70.0":
+"@types/react-native@npm:*":
   version: 0.71.3
   resolution: "@types/react-native@npm:0.71.3"
   dependencies:
@@ -10443,7 +10443,7 @@ __metadata:
     react-native-svg-transformer: ^1.0.0
     react-native-video: ^6.0.0-alpha.5
     typescript: ^4.9.5
-    yoshiki: 1.2.1
+    yoshiki: 1.2.2
   languageName: unknown
   linkType: soft
 
@@ -14254,7 +14254,7 @@ __metadata:
     superjson: ^1.12.2
     typescript: ^4.9.5
     webpack: ^5.76.1
-    yoshiki: 1.2.1
+    yoshiki: 1.2.2
     zod: ^3.21.4
   languageName: unknown
   linkType: soft
@@ -14641,13 +14641,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yoshiki@npm:1.2.1":
-  version: 1.2.1
-  resolution: "yoshiki@npm:1.2.1"
+"yoshiki@npm:1.2.2":
+  version: 1.2.2
+  resolution: "yoshiki@npm:1.2.2"
   dependencies:
     "@types/node": 18.x.x
     "@types/react": 18.x.x
-    "@types/react-native": ">= 0.70.0"
     inline-style-prefixer: ^7.0.0
   peerDependencies:
     react: "*"
@@ -14658,7 +14657,7 @@ __metadata:
       optional: true
     react-native-web:
       optional: true
-  checksum: 8d5e58f392ca068f13bcb9b87787bf94da2e03077e733db89c40f22aaebe288536b451de2e92fba133d4241771aa87c6cc30d0bea902f94099335e162a146ab5
+  checksum: 1510ac000573ca02aa0d2c069b15a1015ba402c27f700304c6a6db38284c89c590efdd457488bc51db9a9e0b94a3768319c1a0cfce6c353a2980b3d1f8f99d5e
   languageName: node
   linkType: hard
 

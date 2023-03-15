@@ -21,6 +21,7 @@
 import { useRef, useState } from "react";
 import { GestureResponderEvent, Platform, View } from "react-native";
 import { px, percent, Stylable, useYoshiki } from "yoshiki/native";
+import { focusReset } from "./utils";
 
 export const Slider = ({
 	progress,
@@ -106,9 +107,7 @@ export const Slider = ({
 					paddingVertical: ts(1),
 					// @ts-ignore Web only
 					cursor: "pointer",
-					focus: {
-						shadowRadius: 0,
-					},
+					focus: focusReset,
 				},
 				props,
 			)}

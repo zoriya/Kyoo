@@ -45,7 +45,7 @@
 		"react-native-screens": "~3.20.0",
 		"react-native-svg": "13.4.0",
 		"react-native-video": "^6.0.0-alpha.5",
-		"yoshiki": "1.2.1"
+		"yoshiki": "1.2.2"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.21.3",
