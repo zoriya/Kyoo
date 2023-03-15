@@ -18,23 +18,28 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export { Header, Main, Nav, Footer, UL } from "@expo/html-elements";
-export * from "./text";
-export * from "./themes";
-export * from "./icons";
-export * from "./links";
-export * from "./avatar";
-export * from "./image";
-export * from "./skeleton";
-export * from "./tooltip";
-export * from "./container";
-export * from "./divider";
-export * from "./progress";
-export * from "./slider";
-export * from "./menu";
-export * from "./input";
-export * from "./button";
-export * from "./chip";
+import { rem, Stylable, Theme, useYoshiki } from "yoshiki/native";
+import { P } from "./text";
+import { ts } from "./utils";
 
-export * from "./animated";
-export * from "./utils";
+export const Chip = ({ label, color, ...props }: { label: string; color?: string } & Stylable) => {
+	const { css } = useYoshiki();
+
+	return (
+		<P
+			{...css(
+				{
+					pY: ts(1),
+					pX: ts(1.5),
+					borderRadius: ts(3),
+					fontSize: rem(.8),
+					color: (theme: Theme) => theme.contrast,
+					bg: color ?? ((theme: Theme) => theme.accent),
+				},
+				props,
+			)}
+		>
+			{label}
+		</P>
+	);
+};
