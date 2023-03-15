@@ -69,7 +69,6 @@ export const getTokenWJ = async (cookies?: string): Promise<[string, Token] | [n
 
 	if (token.expire_at <= new Date(new Date().getTime() + 10 * 1000)) {
 		const { ok, value: nToken, error } = await loginFunc("refresh", token.refresh_token);
-		console.log("refreshed", nToken);
 		if (!ok) console.error("Error refreshing token durring ssr:", error);
 		else token = nToken;
 	}

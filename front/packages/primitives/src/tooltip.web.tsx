@@ -18,21 +18,11 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ToastAndroid, Platform, ViewProps, PressableProps } from "react-native";
 import { Theme } from "yoshiki/native";
 
-export const tooltip = (tooltip: string, up?: boolean) =>
-	Platform.select({
-		web: {
-			dataSet: { tooltip, label: tooltip, tooltipPos: up ? "up" : undefined },
-		},
-		android: {
-			onLongPress: () => {
-				ToastAndroid.show(tooltip, ToastAndroid.SHORT);
-			},
-		},
-		default: {},
-	});
+export const tooltip = (tooltip: string, up?: boolean) => ({
+	dataSet: { tooltip, label: tooltip, tooltipPos: up ? "up" : undefined },
+});
 
 export const WebTooltip = ({ theme }: { theme: Theme }) => {
 	const background = `${theme.light.colors.black}CC`;

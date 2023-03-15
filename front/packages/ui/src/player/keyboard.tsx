@@ -43,7 +43,7 @@ type Action =
 	| { type: "volume"; value: number }
 	| { type: "subtitle"; subtitles: Track[]; fonts: Font[] };
 
-export const reducerAtom = atom<null, Action>(null, (get, set, action) => {
+export const reducerAtom = atom(null, (get, set, action: Action) => {
 	const duration = get(durationAtom);
 	switch (action.type) {
 		case "play":

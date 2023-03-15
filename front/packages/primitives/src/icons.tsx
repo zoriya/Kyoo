@@ -42,7 +42,7 @@ type IconProps = {
 export const Icon = ({ icon: Icon, color, size = 24, ...props }: IconProps) => {
 	const { css, theme } = useYoshiki();
 	const computed = css(
-		{ width: size, height: size, fill: color ?? theme.contrast } as ViewStyle,
+		{ width: size, height: size, fill: color ?? theme.contrast } as any,
 		props,
 	);
 

@@ -110,7 +110,9 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 	useEffect(() => {
 		if (Platform.OS !== "web" || !/Mobi/i.test(window.navigator.userAgent)) return;
 		setFullscreen(true);
-		return () => setFullscreen(false);
+		return () => {
+			setFullscreen(false);
+		};
 	}, [setFullscreen]);
 
 	if (error || playbackError)
@@ -129,12 +131,12 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 						data.isMovie
 							? data.name
 							: data.showTitle +
-							  " " +
-							  episodeDisplayNumber({
-									seasonNumber: data.seasonNumber,
-									episodeNumber: data.episodeNumber,
-									absoluteNumber: data.absoluteNumber,
-							  })
+							" " +
+							episodeDisplayNumber({
+								seasonNumber: data.seasonNumber,
+								episodeNumber: data.episodeNumber,
+								absoluteNumber: data.absoluteNumber,
+							})
 					}
 					description={data.overview}
 				/>

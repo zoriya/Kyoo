@@ -22,7 +22,6 @@ import { Track, WatchItem, Font } from "@kyoo/models";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { memo, useEffect, useLayoutEffect, useRef } from "react";
 import NativeVideo, { VideoProperties as VideoProps } from "./video";
-import { bakedAtom } from "../jotai-utils";
 import { Platform } from "react-native";
 
 export const playAtom = atom(true);
@@ -31,9 +30,9 @@ export const loadAtom = atom(false);
 export const bufferedAtom = atom(0);
 export const durationAtom = atom<number | undefined>(undefined);
 
-export const progressAtom = atom<number, number>(
+export const progressAtom = atom(
 	(get) => get(privateProgressAtom),
-	(_, set, value) => {
+	(_, set, value: number) => {
 		set(privateProgressAtom, value);
 		set(publicProgressAtom, value);
 	},
@@ -44,22 +43,23 @@ const publicProgressAtom = atom(0);
 export const volumeAtom = atom(100);
 export const mutedAtom = atom(false);
 
-export const [privateFullscreen, fullscreenAtom] = bakedAtom(
-	false,
-	async (_, set, value, baker) => {
+export const fullscreenAtom = atom(
+	(get) => get(privateFullscreen),
+	async (_, set, value: boolean) => {
 		try {
 			if (value) {
 				await document.body.requestFullscreen();
-				set(baker, true);
+				set(privateFullscreen, true);
 				await screen.orientation.lock("landscape");
 			} else {
 				await document.exitFullscreen();
-				set(baker, false);
+				set(privateFullscreen, false);
 				screen.orientation.unlock();
 			}
 		} catch {}
 	},
 );
+const privateFullscreen = atom(false);
 
 export const subtitleAtom = atom<Track | null>(null);
 
