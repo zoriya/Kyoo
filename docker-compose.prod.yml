@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   back:
-    image: zoryia/kyoo_back:edge
+    image: zoriya/kyoo_back:edge
     restart: on-failure
     environment:
       - KYOO_DATADIR=/var/lib/kyoo
