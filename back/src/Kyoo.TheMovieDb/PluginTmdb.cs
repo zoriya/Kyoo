@@ -21,7 +21,6 @@ using System.Collections.Generic;
 using Autofac;
 using Kyoo.Abstractions;
 using Kyoo.Abstractions.Controllers;
-using Kyoo.TheMovieDb.Models;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -62,13 +61,10 @@ namespace Kyoo.TheMovieDb
 		public string Description => "A metadata provider for TheMovieDB.";
 
 		/// <inheritdoc />
-		public bool Enabled => !string.IsNullOrEmpty(_configuration.GetValue<string>("themoviedb:apikey"));
+		public bool Enabled => !string.IsNullOrEmpty(_configuration.GetValue<string>("THEMOVIEDB_APIKEY"));
 
 		/// <inheritdoc />
-		public Dictionary<string, Type> Configuration => new()
-		{
-			{ TheMovieDbOptions.Path, typeof(TheMovieDbOptions) }
-		};
+		public Dictionary<string, Type> Configuration => new();
 
 		/// <inheritdoc />
 		public void Configure(ContainerBuilder builder)

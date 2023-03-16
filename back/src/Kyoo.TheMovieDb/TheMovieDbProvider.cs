@@ -22,9 +22,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
-using Kyoo.TheMovieDb.Models;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using TMDbLib.Client;
 using TMDbLib.Objects.Movies;
 using TMDbLib.Objects.Search;
@@ -40,7 +39,7 @@ namespace Kyoo.TheMovieDb
 		/// <summary>
 		/// The API key used to authenticate with TheMovieDb API.
 		/// </summary>
-		private readonly IOptions<TheMovieDbOptions> _apiKey;
+		private readonly string _apiKey;
 
 		/// <summary>
 		/// The logger to use in ase of issue.
@@ -62,11 +61,11 @@ namespace Kyoo.TheMovieDb
 		/// <summary>
 		/// Create a new <see cref="TheMovieDbProvider"/> using the given api key.
 		/// </summary>
-		/// <param name="apiKey">The api key.</param>
+		/// <param name="config">The api key.</param>
 		/// <param name="logger">The logger to use in case of issue.</param>
-		public TheMovieDbProvider(IOptions<TheMovieDbOptions> apiKey, ILogger<TheMovieDbProvider> logger)
+		public TheMovieDbProvider(IConfiguration config, ILogger<TheMovieDbProvider> logger)
 		{
-			_apiKey = apiKey;
+			_apiKey = config.GetValue<string>("THEMOVIEDB_APIKEY");
 			_logger = logger;
 		}
 
@@ -100,7 +99,7 @@ namespace Kyoo.TheMovieDb
 					return found;
 			}
 
-			TMDbClient client = new(_apiKey.Value.ApiKey);
+			TMDbClient client = new(_apiKey);
 			return (await client.GetCollectionAsync(id)).ToCollection(Provider);
 		}
 
@@ -119,7 +118,7 @@ namespace Kyoo.TheMovieDb
 					return found;
 			}
 
-			TMDbClient client = new(_apiKey.Value.ApiKey);
+			TMDbClient client = new(_apiKey);
 
 			if (show.IsMovie)
 			{
@@ -150,7 +149,7 @@ namespace Kyoo.TheMovieDb
 			if (!season.Show.TryGetID(Provider.Slug, out int id))
 				return null;
 
-			TMDbClient client = new(_apiKey.Value.ApiKey);
+			TMDbClient client = new(_apiKey);
 			return (await client.GetTvSeasonAsync(id, season.SeasonNumber))
 				.ToSeason(id, Provider);
 		}
@@ -173,7 +172,7 @@ namespace Kyoo.TheMovieDb
 				|| episode.SeasonNumber == null || episode.EpisodeNumber == null)
 				return null;
 
-			TMDbClient client = new(_apiKey.Value.ApiKey);
+			TMDbClient client = new(_apiKey);
 			return (await client.GetTvEpisodeAsync(id, episode.SeasonNumber.Value, episode.EpisodeNumber.Value))
 				?.ToEpisode(id, Provider);
 		}
@@ -192,7 +191,7 @@ namespace Kyoo.TheMovieDb
 					return found;
 			}
 
-			TMDbClient client = new(_apiKey.Value.ApiKey);
+			TMDbClient client = new(_apiKey);
 			return (await client.GetPersonAsync(id)).ToPeople(Provider);
 		}
 
@@ -210,7 +209,7 @@ namespace Kyoo.TheMovieDb
 					return found;
 			}
 
-			TMDbClient client = new(_apiKey.Value.ApiKey);
+			TMDbClient client = new(_apiKey);
 			return (await client.GetCompanyAsync(id)).ToStudio(Provider);
 		}
 
@@ -236,7 +235,7 @@ namespace Kyoo.TheMovieDb
 		/// <returns>A list of collections containing metadata from TheMovieDb</returns>
 		private async Task<ICollection<Collection>> _SearchCollections(string query)
 		{
-			TMDbClient client = new(_apiKey.Value.ApiKey);
+			TMDbClient client = new(_apiKey);
 			return (await client.SearchCollectionAsync(query))
 				.Results
 				.Select(x => x.ToCollection(Provider))
@@ -251,7 +250,7 @@ namespace Kyoo.TheMovieDb
 		/// <returns>A list of shows containing metadata from TheMovieDb</returns>
 		private async Task<ICollection<Show>> _SearchShows(string query, int? year = null)
 		{
-			TMDbClient client = new(_apiKey.Value.ApiKey);
+			TMDbClient client = new(_apiKey);
 			return (await client.SearchMultiAsync(query, year: year ?? 0))
 				.Results
 				.Select(x =>
@@ -274,7 +273,7 @@ namespace Kyoo.TheMovieDb
 		/// <returns>A list of people containing metadata from TheMovieDb</returns>
 		private async Task<ICollection<People>> _SearchPeople(string query)
 		{
-			TMDbClient client = new(_apiKey.Value.ApiKey);
+			TMDbClient client = new(_apiKey);
 			return (await client.SearchPersonAsync(query))
 				.Results
 				.Select(x => x.ToPeople(Provider))
@@ -288,7 +287,7 @@ namespace Kyoo.TheMovieDb
 		/// <returns>A list of studios containing metadata from TheMovieDb</returns>
 		private async Task<ICollection<Studio>> _SearchStudios(string query)
 		{
-			TMDbClient client = new(_apiKey.Value.ApiKey);
+			TMDbClient client = new(_apiKey);
 			return (await client.SearchCompanyAsync(query))
 				.Results
 				.Select(x => x.ToStudio(Provider))
