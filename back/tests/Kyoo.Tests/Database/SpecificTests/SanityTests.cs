@@ -16,35 +16,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Threading.Tasks;
 using Kyoo.Abstractions.Models;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Kyoo.Tests.Database
 {
-	public class GlobalTests : IDisposable, IAsyncDisposable
+	public class GlobalTests
 	{
-		private readonly RepositoryActivator _repositories;
-
-		public GlobalTests(ITestOutputHelper output)
-		{
-			_repositories = new RepositoryActivator(output);
-		}
-
-		public void Dispose()
-		{
-			_repositories.Dispose();
-			GC.SuppressFinalize(this);
-		}
-
-		public ValueTask DisposeAsync()
-		{
-			return _repositories.DisposeAsync();
-		}
-
 		[Fact]
 		[SuppressMessage("ReSharper", "EqualExpressionComparison")]
 		public void SampleTest()
