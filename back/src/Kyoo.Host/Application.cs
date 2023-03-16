@@ -29,6 +29,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using Serilog.Events;
 using Serilog.Templates;
 using Serilog.Templates.Themes;
 using ILogger = Serilog.ILogger;
@@ -85,6 +86,16 @@ namespace Kyoo.Host
 		/// <returns>A task representing the whole process</returns>
 		public async Task Start(string[] args, Action<ContainerBuilder> configure)
 		{
+			IConfiguration parsed = new ConfigurationBuilder()
+				.AddEnvironmentVariables()
+				.AddEnvironmentVariables("KYOO_")
+				.AddCommandLine(args)
+				.Build();
+			string path = Path.GetFullPath(parsed.GetValue("DATADIR", "/kyoo"));
+			if (!Directory.Exists(path))
+				Directory.CreateDirectory(path);
+			Environment.CurrentDirectory = path;
+
 			LoggerConfiguration config = new();
 			_ConfigureLogging(config);
 			Log.Logger = config.CreateBootstrapLogger();
@@ -112,6 +123,7 @@ namespace Kyoo.Host
 			try
 			{
 				_logger.Information("Version: {Version}", Assembly.GetExecutingAssembly().GetName().Version.ToString(3));
+				_logger.Information("Data directory: {DataDirectory}", Environment.CurrentDirectory);
 				await host.RunAsync(cancellationToken);
 			}
 			catch (Exception ex)
@@ -168,6 +180,9 @@ namespace Kyoo.Host
 				"[{@t:HH:mm:ss} {@l:u3} {Substring(SourceContext, LastIndexOf(SourceContext, '.') + 1), 25} "
 				+ "({@i:D10})] {@m}{#if not EndsWith(@m, '\n')}\n{#end}{@x}";
 			builder
+				.MinimumLevel.Warning()
+				.MinimumLevel.Override("Kyoo", LogEventLevel.Verbose)
+				.MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Verbose)
 				.WriteTo.Console(new ExpressionTemplate(template, theme: TemplateTheme.Code))
 				.Enrich.WithThreadId()
 				.Enrich.FromLogContext();
