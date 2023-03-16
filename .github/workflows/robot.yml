@@ -17,7 +17,9 @@ jobs:
           submodules: recursive
           fetch-depth: 0
       - name: Pull images
-        run: docker-compose pull
+        run: |
+          cp .env.example .env
+          docker-compose pull
 
       - name: Docker cache
         uses: satackey/action-docker-layer-caching@v0.0.11
@@ -28,7 +30,6 @@ jobs:
 
       - name: Start the service
         run: |
-          cp .env.example .env
           docker-compose up -d
 
       - name: Perform healthchecks
