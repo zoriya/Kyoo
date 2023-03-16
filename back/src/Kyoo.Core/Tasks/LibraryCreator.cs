@@ -61,7 +61,7 @@ namespace Kyoo.Core.Tasks
 		{
 			ICollection<Provider> providers = await _libraryManager.GetAll<Provider>();
 			ICollection<string> existings = (await _libraryManager.GetAll<Library>()).SelectMany(x => x.Paths).ToArray();
-			IEnumerable<Library> newLibraries = Directory.GetDirectories(Environment.GetEnvironmentVariable("LIBRARY_ROOT") ?? "/video")
+			IEnumerable<Library> newLibraries = Directory.GetDirectories(Environment.GetEnvironmentVariable("KYOO_LIBRARY_ROOT") ?? "/video")
 				.Where(x => !existings.Contains(x))
 				.Select(x => new Library
 				{

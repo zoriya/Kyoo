@@ -11,13 +11,15 @@ services:
     volumes:
       - kyoo:/kyoo
       - ./cache:/kyoo/cached
-      - ./video:/video
+      - ${LIBRARY_ROOT}:/video
+
   front:
     build: ./front
     restart: on-failure
     environment:
       - KYOO_URL=${KYOO_URL:-http://back:5000}
       - PUBLIC_BACK_URL=${PUBLIC_BACK_URL}
+
   ingress:
     image: nginx
     restart: on-failure
@@ -32,6 +34,7 @@ services:
       - front
     ports:
       - "8901:8901"
+
   postgres:
     image: postgres
     restart: on-failure
@@ -39,6 +42,11 @@ services:
       - ./.env
     volumes:
       - db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   kyoo:
