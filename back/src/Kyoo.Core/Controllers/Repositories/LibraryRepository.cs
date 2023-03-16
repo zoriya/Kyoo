@@ -93,9 +93,11 @@ namespace Kyoo.Core.Controllers
 			if (resource.Providers != null)
 			{
 				resource.Providers = await resource.Providers
-					.SelectAsync(x => _providers.CreateIfNotExists(x))
+					.SelectAsync(async x =>
+						_database.LocalEntity<Provider>(x.Slug)
+						?? await _providers.CreateIfNotExists(x)
+					)
 					.ToListAsync();
-				_database.AttachRange(resource.Providers);
 			}
 		}
 
