@@ -7,8 +7,8 @@
 		"android": "expo start --android",
 		"ios": "expo start --ios",
 		"web": "expo start --web",
-		"build": "eas build --profile production --platform android --non-interactive",
-		"build:dev": "eas build --profile development --platform android --non-interactive",
+		"build": "ENTRY_FILE=./index.tsx eas build --profile production --platform android --non-interactive",
+		"build:dev": "ENTRY_FILE=./index.tsx eas build --profile development --platform android --non-interactive",
 		"update": "eas update --auto --channel prod"
 	},
 	"dependencies": {
