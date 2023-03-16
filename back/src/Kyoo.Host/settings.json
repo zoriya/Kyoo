@@ -6,18 +6,6 @@
     "metadataPath": "metadata/"
   },
 
-  "logging": {
-    "MinimumLevel": {
-      "Default": "Warning",
-      "Override": {
-        "Microsoft": "Warning",
-        "Microsoft.Hosting.Lifetime": "Information",
-        "Microsoft.EntityFrameworkCore": "Fatal",
-        "Kyoo": "Verbose"
-      }
-    }
-  },
-
   "tasks": {
     "parallels": "1",
     "scheduled": {

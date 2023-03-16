@@ -29,11 +29,6 @@ namespace Kyoo.Core.Models.Options
 		public const string Path = "Basics";
 
 		/// <summary>
-		/// The internal url where the server will listen. It supports globing.
-		/// </summary>
-		public string Url { get; set; } = "http://*:5000";
-
-		/// <summary>
 		/// The path of the plugin directory.
 		/// </summary>
 		public string PluginPath { get; set; } = "plugins/";

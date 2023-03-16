@@ -66,14 +66,7 @@ namespace Kyoo.Abstractions.Controllers
 		///
 		/// If a field should be loosely typed, <see cref="Dictionary{TKey,TValue}"/> or <c>null</c>
 		/// can be specified.
-		/// WARNING: null means an unmanaged type that won't be editable. This can be used
-		/// for external libraries or variable arguments.
 		/// </summary>
-		/// <remarks>
-		/// All use of the configuration must be specified here and not registered elsewhere, if a type is registered
-		/// elsewhere the configuration won't be editable via the <see cref="IConfigurationManager"/> and all values
-		/// will be discarded on edit.
-		/// </remarks>
 		Dictionary<string, Type> Configuration { get; }
 
 		/// <summary>

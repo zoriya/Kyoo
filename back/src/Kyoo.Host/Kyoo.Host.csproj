@@ -1,7 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk.Web">
 	<PropertyGroup>
-		<PackageId>Kyoo.Host</PackageId>
+		<OutputType>Exe</OutputType>
+		<AssemblyName>Kyoo.Host</AssemblyName>
+		<RootNamespace>Kyoo.Host</RootNamespace>
+		<StartupObject>Kyoo.Host.Program</StartupObject>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -24,9 +26,5 @@
 		<ProjectReference Include="../Kyoo.Postgresql/Kyoo.Postgresql.csproj" />
 		<ProjectReference Include="../Kyoo.Authentication/Kyoo.Authentication.csproj" />
 		<ProjectReference Include="../Kyoo.Swagger/Kyoo.Swagger.csproj" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<Content Include="settings.json" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 </Project>
