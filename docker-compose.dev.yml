@@ -15,7 +15,7 @@ services:
     volumes:
       - ./back:/app
       - /app/out/
-      - kyoo:/var/lib/kyoo
+      - kyoo:/kyoo
       - ./video:/video
   front:
     build:

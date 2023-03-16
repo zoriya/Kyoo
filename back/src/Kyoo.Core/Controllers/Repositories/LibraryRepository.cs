@@ -98,6 +98,7 @@ namespace Kyoo.Core.Controllers
 						?? await _providers.CreateIfNotExists(x)
 					)
 					.ToListAsync();
+				_database.AttachRange(resource.Providers);
 			}
 		}
 
