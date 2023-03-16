@@ -27,7 +27,7 @@ RUN dotnet publish --no-restore -c Release -o /app "-p:Version=${VERSION:-"0.0.0
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
 RUN apt-get update && apt-get install -y libavutil-dev libavcodec-dev libavformat-dev
 COPY --from=builder /app /app
-COPY --from=transcoder /transcoder/libtranscoder.so /usr/lib/kyoo
+COPY --from=transcoder /transcoder/libtranscoder.so /app
 
 WORKDIR /kyoo
 EXPOSE 5000

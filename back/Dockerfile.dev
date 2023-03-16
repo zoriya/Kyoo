@@ -22,7 +22,7 @@ COPY src/Kyoo.TheTvdb/Kyoo.TheTvdb.csproj src/Kyoo.TheTvdb/Kyoo.TheTvdb.csproj
 COPY tests/Kyoo.Tests/Kyoo.Tests.csproj tests/Kyoo.Tests/Kyoo.Tests.csproj
 RUN dotnet restore
 
-COPY --from=transcoder /transcoder/libtranscoder.so /usr/lib/
+COPY --from=transcoder /transcoder/libtranscoder.so /app
 
 WORKDIR /kyoo
 EXPOSE 5000
