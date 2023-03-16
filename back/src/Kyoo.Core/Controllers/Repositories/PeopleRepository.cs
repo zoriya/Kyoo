@@ -152,7 +152,7 @@ namespace Kyoo.Core.Controllers
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default)
 		{
-			throw new NotImplementedException();
+			return Task.FromResult<ICollection<PeopleRole>>(new List<PeopleRole>());
 			// ICollection<PeopleRole> people = await ApplyFilters(_database.PeopleRoles
 			// 		.Where(x => x.ShowID == showID)
 			// 		.Include(x => x.People),
@@ -173,7 +173,7 @@ namespace Kyoo.Core.Controllers
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default)
 		{
-			throw new NotImplementedException();
+			return Task.FromResult<ICollection<PeopleRole>>(new List<PeopleRole>());
 			// ICollection<PeopleRole> people = await ApplyFilters(_database.PeopleRoles
 			// 		.Where(x => x.Show.Slug == showSlug)
 			// 		.Include(x => x.People)
@@ -196,7 +196,7 @@ namespace Kyoo.Core.Controllers
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default)
 		{
-			throw new NotImplementedException();
+			return Task.FromResult<ICollection<PeopleRole>>(new List<PeopleRole>());
 			// ICollection<PeopleRole> roles = await ApplyFilters(_database.PeopleRoles
 			// 		.Where(x => x.PeopleID == id)
 			// 		.Include(x => x.Show),
@@ -216,7 +216,7 @@ namespace Kyoo.Core.Controllers
 			Sort<PeopleRole> sort = default,
 			Pagination limit = default)
 		{
-			throw new NotImplementedException();
+			return Task.FromResult<ICollection<PeopleRole>>(new List<PeopleRole>());
 			// ICollection<PeopleRole> roles = await ApplyFilters(_database.PeopleRoles
 			// 		.Where(x => x.People.Slug == slug)
 			// 		.Include(x => x.Show),
