@@ -26,7 +26,6 @@ using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Utils;
-using Microsoft.Extensions.Logging;
 
 namespace Kyoo.Core.Tasks
 {
@@ -43,28 +42,12 @@ namespace Kyoo.Core.Tasks
 		private readonly ILibraryManager _libraryManager;
 
 		/// <summary>
-		/// A task manager used to create sub tasks for each episode to add to the database.
-		/// </summary>
-		private readonly ITaskManager _taskManager;
-
-		/// <summary>
-		/// The logger used to inform the current status to the console.
-		/// </summary>
-		private readonly ILogger<Crawler> _logger;
-
-		/// <summary>
 		/// Create a new <see cref="Crawler"/>.
 		/// </summary>
 		/// <param name="libraryManager">The library manager to retrieve existing episodes/library/tracks</param>
-		/// <param name="taskManager">The task manager used to start <see cref="RegisterEpisode"/>.</param>
-		/// <param name="logger">The logger used print messages.</param>
-		public LibraryCreator(ILibraryManager libraryManager,
-			ITaskManager taskManager,
-			ILogger<Crawler> logger)
+		public LibraryCreator(ILibraryManager libraryManager)
 		{
 			_libraryManager = libraryManager;
-			_taskManager = taskManager;
-			_logger = logger;
 		}
 
 		/// <inheritdoc />
