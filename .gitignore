@@ -1,5 +1,6 @@
 /video
 .env
+.venv
 .idea
 .vscode
 log.html
