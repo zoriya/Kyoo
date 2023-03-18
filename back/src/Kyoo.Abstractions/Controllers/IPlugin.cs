@@ -35,30 +35,9 @@ namespace Kyoo.Abstractions.Controllers
 	public interface IPlugin
 	{
 		/// <summary>
-		/// A slug to identify this plugin in queries.
-		/// </summary>
-		string Slug { get; }
-
-		/// <summary>
 		/// The name of the plugin
 		/// </summary>
 		string Name { get; }
-
-		/// <summary>
-		/// The description of this plugin. This will be displayed on the "installed plugins" page.
-		/// </summary>
-		string Description { get; }
-
-		/// <summary>
-		/// <c>true</c> if the plugin should be enabled, <c>false</c> otherwise.
-		/// If a plugin is not enabled, no configure method will be called.
-		/// This allow one to enable a plugin if a specific configuration value is set or if the environment contains
-		/// the right settings.
-		/// </summary>
-		/// <remarks>
-		/// By default, a plugin is always enabled. This method can be overriden to change this behavior.
-		/// </remarks>
-		virtual bool Enabled => true;
 
 		/// <summary>
 		/// A list of types that will be available via the IOptions interfaces and will be listed inside
@@ -73,7 +52,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// An optional configuration step to allow a plugin to change asp net configurations.
 		/// </summary>
 		/// <seealso cref="SA"/>
-		virtual IEnumerable<IStartupAction> ConfigureSteps => ArraySegment<IStartupAction>.Empty;
+		IEnumerable<IStartupAction> ConfigureSteps => ArraySegment<IStartupAction>.Empty;
 
 		/// <summary>
 		/// A configure method that will be run on plugin's startup.
@@ -91,16 +70,6 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		/// <param name="services">A service container to register new services.</param>
 		void Configure(IServiceCollection services)
-		{
-			// Skipped
-		}
-
-		/// <summary>
-		/// An optional function to execute and initialize your plugin.
-		/// It can be used to initialize a database connection, fill initial data or anything.
-		/// </summary>
-		/// <param name="provider">A service provider to request services</param>
-		void Initialize(IServiceProvider provider)
 		{
 			// Skipped
 		}

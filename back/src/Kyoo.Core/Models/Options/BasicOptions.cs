@@ -29,11 +29,6 @@ namespace Kyoo.Core.Models.Options
 		public const string Path = "Basics";
 
 		/// <summary>
-		/// The path of the plugin directory.
-		/// </summary>
-		public string PluginPath { get; set; } = "plugins/";
-
-		/// <summary>
 		/// The temporary folder to cache transmuxed file.
 		/// </summary>
 		public string TransmuxPath { get; set; } = "cached/transmux";

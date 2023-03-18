@@ -16,12 +16,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using Autofac;
 using Autofac.Builder;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Utils;
-using Microsoft.Extensions.Configuration;
 
 namespace Kyoo.Abstractions
 {
@@ -30,32 +28,6 @@ namespace Kyoo.Abstractions
 	/// </summary>
 	public static class Module
 	{
-		/// <summary>
-		/// Register a new task to the container.
-		/// </summary>
-		/// <param name="builder">The container</param>
-		/// <typeparam name="T">The type of the task</typeparam>
-		/// <returns>The registration builder of this new task. That can be used to edit the registration.</returns>
-		public static IRegistrationBuilder<T, ConcreteReflectionActivatorData, SingleRegistrationStyle>
-			RegisterTask<T>(this ContainerBuilder builder)
-			where T : class, ITask
-		{
-			return builder.RegisterType<T>().As<ITask>();
-		}
-
-		/// <summary>
-		/// Register a new metadata provider to the container.
-		/// </summary>
-		/// <param name="builder">The container</param>
-		/// <typeparam name="T">The type of the task</typeparam>
-		/// <returns>The registration builder of this new provider. That can be used to edit the registration.</returns>
-		public static IRegistrationBuilder<T, ConcreteReflectionActivatorData, SingleRegistrationStyle>
-			RegisterProvider<T>(this ContainerBuilder builder)
-			where T : class, IMetadataProvider
-		{
-			return builder.RegisterType<T>().As<IMetadataProvider>().InstancePerLifetimeScope();
-		}
-
 		/// <summary>
 		/// Register a new repository to the container.
 		/// </summary>

@@ -24,15 +24,12 @@ using Kyoo.Abstractions;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Core.Controllers;
-using Kyoo.Core.Models.Options;
-using Kyoo.Core.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using IMetadataProvider = Kyoo.Abstractions.Controllers.IMetadataProvider;
 using JsonOptions = Kyoo.Core.Api.JsonOptions;
 
 namespace Kyoo.Core
@@ -43,21 +40,12 @@ namespace Kyoo.Core
 	public class CoreModule : IPlugin
 	{
 		/// <inheritdoc />
-		public string Slug => "core";
-
-		/// <inheritdoc />
 		public string Name => "Core";
-
-		/// <inheritdoc />
-		public string Description => "The core module containing default implementations.";
 
 		/// <inheritdoc />
 		public Dictionary<string, Type> Configuration => new()
 		{
-			{ TaskOptions.Path, typeof(TaskOptions) },
-			{ MediaOptions.Path, typeof(MediaOptions) },
 			{ "database", null },
-			{ "logging", null }
 		};
 
 		/// <inheritdoc />
@@ -69,17 +57,6 @@ namespace Kyoo.Core
 			builder.RegisterType<Transcoder>().As<ITranscoder>().SingleInstance();
 			builder.RegisterType<ThumbnailsManager>().As<IThumbnailsManager>().InstancePerLifetimeScope();
 			builder.RegisterType<LibraryManager>().As<ILibraryManager>().InstancePerLifetimeScope();
-			builder.RegisterType<RegexIdentifier>().As<IIdentifier>().SingleInstance();
-
-			builder.RegisterComposite<ProviderComposite, IMetadataProvider>();
-			builder.Register(x => (AProviderComposite)x.Resolve<IMetadataProvider>());
-
-			builder.RegisterTask<Crawler>();
-			builder.RegisterTask<Housekeeping>();
-			builder.RegisterTask<RegisterEpisode>();
-			builder.RegisterTask<RegisterSubtitle>();
-			builder.RegisterTask<MetadataProviderLoader>();
-			builder.RegisterTask<LibraryCreator>();
 
 			builder.RegisterRepository<ILibraryRepository, LibraryRepository>();
 			builder.RegisterRepository<ILibraryItemRepository, LibraryItemRepository>();
