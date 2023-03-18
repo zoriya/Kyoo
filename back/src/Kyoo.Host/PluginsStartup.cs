@@ -28,8 +28,6 @@ using Kyoo.Core.Models.Options;
 using Kyoo.Host.Controllers;
 using Kyoo.Postgresql;
 using Kyoo.Swagger;
-using Kyoo.TheMovieDb;
-using Kyoo.TheTvdb;
 using Kyoo.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -77,8 +75,6 @@ namespace Kyoo.Host
 				typeof(CoreModule),
 				typeof(AuthenticationModule),
 				typeof(PostgresModule),
-				typeof(PluginTvdb),
-				typeof(PluginTmdb),
 				typeof(SwaggerModule)
 			);
 		}
