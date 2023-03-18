@@ -23,6 +23,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Kyoo.Postgresql;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -103,6 +104,8 @@ namespace Kyoo.Host
 			IHost host = _CreateWebHostBuilder(args)
 				.ConfigureContainer(configure)
 				.Build();
+
+			PostgresModule.Initialize(host.Services);
 
 			await _StartWithHost(host);
 		}
