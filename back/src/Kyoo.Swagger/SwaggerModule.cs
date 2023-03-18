@@ -18,14 +18,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Utils;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NJsonSchema;
 using NJsonSchema.Generation.TypeMappers;
@@ -41,30 +38,10 @@ namespace Kyoo.Swagger
 	public class SwaggerModule : IPlugin
 	{
 		/// <inheritdoc />
-		public string Slug => "swagger";
-
-		/// <inheritdoc />
 		public string Name => "Swagger";
 
 		/// <inheritdoc />
-		public string Description => "A swagger interface and an OpenAPI endpoint to document Kyoo.";
-
-		/// <inheritdoc />
 		public Dictionary<string, Type> Configuration => new();
-
-		/// <summary>
-		/// The configuration instance used to retrieve the server's public url.
-		/// </summary>
-		private readonly IConfiguration _configuration;
-
-		/// <summary>
-		/// Create a new <see cref="SwaggerModule"/>.
-		/// </summary>
-		/// <param name="configuration">The configuration instance used to retrieve the server's public url.</param>
-		public SwaggerModule(IConfiguration configuration)
-		{
-			_configuration = configuration;
-		}
 
 		/// <inheritdoc />
 		public void Configure(IServiceCollection services)
@@ -133,7 +110,7 @@ namespace Kyoo.Swagger
 			SA.New<IApplicationBuilder>(app => app.UseReDoc(x =>
 			{
 				x.Path = "/doc";
-				x.TransformToExternalPath = (internalUiRoute, request) => "/api" + internalUiRoute;
+				x.TransformToExternalPath = (internalUiRoute, _) => "/api" + internalUiRoute;
 				x.AdditionalSettings["theme"] = new
 				{
 					colors = new { primary = new { main = "#e13e13" } }

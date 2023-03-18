@@ -20,13 +20,10 @@ using System;
 using System.Collections.Generic;
 using Autofac;
 using Autofac.Extras.AttributeMetadata;
-using Kyoo.Abstractions;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Core.Models.Options;
-using Kyoo.Core.Tasks;
 using Kyoo.Host.Controllers;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Hosting;
 using Serilog;
 
 namespace Kyoo.Host
@@ -37,13 +34,7 @@ namespace Kyoo.Host
 	public class HostModule : IPlugin
 	{
 		/// <inheritdoc />
-		public string Slug => "host";
-
-		/// <inheritdoc />
 		public string Name => "Host";
-
-		/// <inheritdoc />
-		public string Description => "A module that registers host controllers and other needed things.";
 
 		/// <inheritdoc />
 		public Dictionary<string, Type> Configuration => new()
@@ -71,8 +62,6 @@ namespace Kyoo.Host
 			builder.RegisterModule<AttributedMetadataModule>();
 			builder.RegisterInstance(_plugins).As<IPluginManager>().ExternallyOwned();
 			builder.RegisterComposite<FileSystemComposite, IFileSystem>().InstancePerLifetimeScope();
-			builder.RegisterType<TaskManager>().As<ITaskManager>().As<IHostedService>().SingleInstance();
-			builder.RegisterTask<PluginInitializer>();
 		}
 
 		/// <inheritdoc />
