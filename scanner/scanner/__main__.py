@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import asyncio
 import scanner
 
-exit(scanner.main())
+asyncio.run(scanner.main())
