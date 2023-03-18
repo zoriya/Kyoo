@@ -6,11 +6,13 @@ from typing import Optional
 from .genre import Genre
 from .status import Status
 
+
 @dataclass
 class MovieTranslation:
 	name: str
 	keywords: list[str] = field(default_factory=list)
 	overview: Optional[str] = None
+
 
 @dataclass
 class Movie:
@@ -30,9 +32,7 @@ class Movie:
 
 	translations: dict[str, MovieTranslation] = field(default_factory=dict)
 
-
 	def to_kyoo(self):
 		# For now, the API of kyoo only support one language so we remove the others.
-		default_language = os.environ["LIBRARY_LANGUAGES"].split(',')[0]
-		return { **asdict(self), **asdict(self.translations[default_language]) }
-
+		default_language = os.environ["LIBRARY_LANGUAGES"].split(",")[0]
+		return {**asdict(self), **asdict(self.translations[default_language])}
