@@ -1,8 +1,9 @@
+import os
 import asyncio
 import logging
+from aiohttp import ClientSession
 from pathlib import Path
 from guessit import guessit
-from themoviedb.routes.base import ClientSession, os
 from providers.provider import Provider
 
 
