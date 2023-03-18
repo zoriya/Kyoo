@@ -41,3 +41,16 @@ jobs:
 
       - name: Lint
         run: yarn lint
+  scanner:
+    name: "Lint scanner"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./scanner
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Run black
+        run: |
+          pip install black-with-tabs
+          black . --check

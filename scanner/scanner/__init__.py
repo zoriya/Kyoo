@@ -1,5 +1,6 @@
 from .scanner import Scanner
 
+
 async def main():
 	import os
 	import logging
@@ -17,4 +18,4 @@ async def main():
 	if len(sys.argv) > 1 and sys.argv[1] == "-v":
 		logging.basicConfig(level=logging.DEBUG)
 	async with ClientSession() as client:
-		await Scanner(client, languages.split(',')).scan(path)
+		await Scanner(client, languages.split(",")).scan(path)
