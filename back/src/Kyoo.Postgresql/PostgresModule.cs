@@ -61,6 +61,20 @@ namespace Kyoo.Postgresql
 			_environment = env;
 		}
 
+		/// <summary>
+		/// Migrate the database.
+		/// </summary>
+		/// <param name="provider">The service list to retrieve the database context</param>
+		public static void Initialize(IServiceProvider provider)
+		{
+			DatabaseContext context = provider.GetRequiredService<DatabaseContext>();
+			context.Database.Migrate();
+
+			using NpgsqlConnection conn = (NpgsqlConnection)context.Database.GetDbConnection();
+			conn.Open();
+			conn.ReloadTypes();
+		}
+
 		/// <inheritdoc />
 		public void Configure(IServiceCollection services)
 		{
@@ -81,17 +95,6 @@ namespace Kyoo.Postgresql
 				if (_environment.IsDevelopment())
 					x.EnableDetailedErrors().EnableSensitiveDataLogging();
 			}, ServiceLifetime.Transient);
-		}
-
-		/// <inheritdoc />
-		public void Initialize(IServiceProvider provider)
-		{
-			DatabaseContext context = provider.GetRequiredService<DatabaseContext>();
-			context.Database.Migrate();
-
-			using NpgsqlConnection conn = (NpgsqlConnection)context.Database.GetDbConnection();
-			conn.Open();
-			conn.ReloadTypes();
 		}
 	}
 }

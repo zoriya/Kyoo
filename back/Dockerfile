@@ -10,13 +10,11 @@ COPY Kyoo.sln ./Kyoo.sln
 COPY nuget.config ./nuget.config
 COPY src/Directory.Build.props src/Directory.Build.props
 COPY src/Kyoo.Authentication/Kyoo.Authentication.csproj src/Kyoo.Authentication/Kyoo.Authentication.csproj
-COPY src/Kyoo.TheMovieDb/Kyoo.TheMovieDb.csproj src/Kyoo.TheMovieDb/Kyoo.TheMovieDb.csproj
 COPY src/Kyoo.Abstractions/Kyoo.Abstractions.csproj src/Kyoo.Abstractions/Kyoo.Abstractions.csproj
 COPY src/Kyoo.Core/Kyoo.Core.csproj src/Kyoo.Core/Kyoo.Core.csproj
 COPY src/Kyoo.Host/Kyoo.Host.csproj src/Kyoo.Host/Kyoo.Host.csproj
 COPY src/Kyoo.Postgresql/Kyoo.Postgresql.csproj src/Kyoo.Postgresql/Kyoo.Postgresql.csproj
 COPY src/Kyoo.Swagger/Kyoo.Swagger.csproj src/Kyoo.Swagger/Kyoo.Swagger.csproj
-COPY src/Kyoo.TheTvdb/Kyoo.TheTvdb.csproj src/Kyoo.TheTvdb/Kyoo.TheTvdb.csproj
 COPY tests/Kyoo.Tests/Kyoo.Tests.csproj tests/Kyoo.Tests/Kyoo.Tests.csproj
 RUN dotnet restore
 
@@ -31,5 +29,5 @@ COPY --from=transcoder /transcoder/libtranscoder.so /app
 
 WORKDIR /kyoo
 EXPOSE 5000
-CMD ["/app/Kyoo.Host"]
+CMD /app/Kyoo.Host
 
