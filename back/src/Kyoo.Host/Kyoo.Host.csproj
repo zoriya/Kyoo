@@ -20,9 +20,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="../Kyoo.Abstractions/Kyoo.Abstractions.csproj" />
-		<ProjectReference Include="../Kyoo.TheMovieDb/Kyoo.TheMovieDb.csproj" />
 		<ProjectReference Include="../Kyoo.Core/Kyoo.Core.csproj" />
-		<ProjectReference Include="../Kyoo.TheTvdb/Kyoo.TheTvdb.csproj" />
 		<ProjectReference Include="../Kyoo.Postgresql/Kyoo.Postgresql.csproj" />
 		<ProjectReference Include="../Kyoo.Authentication/Kyoo.Authentication.csproj" />
 		<ProjectReference Include="../Kyoo.Swagger/Kyoo.Swagger.csproj" />
