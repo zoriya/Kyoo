@@ -17,16 +17,15 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
-using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Utils;
 
 namespace Kyoo.Abstractions.Models
 {
 	/// <summary>
-	/// This class contains metadata about <see cref="IMetadataProvider"/>.
-	/// You can have providers even if you don't have the corresponding <see cref="IMetadataProvider"/>.
+	/// A dead class that will be removed later.
 	/// </summary>
+	// TODO: Delete this class
 	public class Provider : IResource, IThumbnails
 	{
 		/// <inheritdoc />
