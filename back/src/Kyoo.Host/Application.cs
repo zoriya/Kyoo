@@ -40,17 +40,12 @@ namespace Kyoo.Host
 	/// Hosts of kyoo (main functions) generally only create a new <see cref="Application"/>
 	/// and return <see cref="Start(string[])"/>.
 	/// </summary>
-	public class Application : IDisposable
+	public class Application
 	{
 		/// <summary>
 		/// The environment in witch Kyoo will run (ether "Production" or "Development").
 		/// </summary>
 		private readonly string _environment;
-
-		/// <summary>
-		/// The cancellation token source used to allow the app to be shutdown or restarted.
-		/// </summary>
-		private CancellationTokenSource _tokenSource;
 
 		/// <summary>
 		/// The logger used for startup and error messages.
@@ -109,8 +104,7 @@ namespace Kyoo.Host
 				.ConfigureContainer(configure)
 				.Build();
 
-			_tokenSource = new CancellationTokenSource();
-			await _StartWithHost(host, _tokenSource.Token);
+			await _StartWithHost(host);
 		}
 
 		/// <summary>
@@ -118,7 +112,7 @@ namespace Kyoo.Host
 		/// </summary>
 		/// <param name="host">The host to start.</param>
 		/// <param name="cancellationToken">A token to allow one to stop the host.</param>
-		private async Task _StartWithHost(IHost host, CancellationToken cancellationToken)
+		private async Task _StartWithHost(IHost host, CancellationToken cancellationToken = default)
 		{
 			try
 			{
@@ -186,13 +180,6 @@ namespace Kyoo.Host
 				.WriteTo.Console(new ExpressionTemplate(template, theme: TemplateTheme.Code))
 				.Enrich.WithThreadId()
 				.Enrich.FromLogContext();
-		}
-
-		/// <inheritdoc/>
-		public void Dispose()
-		{
-			_tokenSource.Dispose();
-			GC.SuppressFinalize(this);
 		}
 	}
 }

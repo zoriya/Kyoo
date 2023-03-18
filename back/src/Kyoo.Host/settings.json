@@ -1,27 +1,8 @@
 {
   "basics": {
-    "pluginsPath": "plugins/",
     "transmuxPath": "cached/transmux",
     "transcodePath": "cached/transcode",
     "metadataPath": "metadata/"
-  },
-
-  "tasks": {
-    "parallels": "1",
-    "scheduled": {
-      "scan": "24:00:00"
-    }
-  },
-
-  "media": {
-    "regex": [
-      "^[\\/\\\\]*(?<Collection>.+)?[\\/\\\\]+(?<Show>.+?)(?: \\((?<StartYear>\\d+)\\))?[\\/\\\\]+\\k<Show>(?: \\(\\d+\\))? S(?<Season>\\d+)E(?<Episode>\\d+)\\..*$",
-      "^[\\/\\\\]*(?<Collection>.+)?[\\/\\\\]+(?<Show>.+?)(?: \\((?<StartYear>\\d+)\\))?[\\/\\\\]+\\k<Show>(?: \\(\\d+\\))? (?<Absolute>\\d+)\\..*$",
-      "^[\\/\\\\]*(?<Collection>.+)?[\\/\\\\]+(?<Show>.+?)(?: \\((?<StartYear>\\d+)\\))?[\\/\\\\]+\\k<Show>(?: \\(\\d+\\))?\\..*$"
-    ],
-    "subtitleRegex": [
-      "^(?<Episode>.+)\\.(?<Language>\\w{1,3})\\.(?<Default>default\\.)?(?<Forced>forced\\.)?.*$"
-    ]
   },
 
   "authentication": {

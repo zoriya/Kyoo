@@ -36,13 +36,7 @@ namespace Kyoo.Authentication
 	public class AuthenticationModule : IPlugin
 	{
 		/// <inheritdoc />
-		public string Slug => "auth";
-
-		/// <inheritdoc />
 		public string Name => "Authentication";
-
-		/// <inheritdoc />
-		public string Description => "Enable an authentication/permission system for Kyoo (via Jwt or ApiKeys).";
 
 		/// <inheritdoc />
 		public Dictionary<string, Type> Configuration => new()

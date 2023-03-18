@@ -18,10 +18,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.Loader;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Core.Models.Options;
 using Microsoft.Extensions.DependencyInjection;
@@ -89,51 +86,11 @@ namespace Kyoo.Host.Controllers
 			return _plugins;
 		}
 
-		/// <summary>
-		/// Load a single plugin and return all IPlugin implementations contained in the Assembly.
-		/// </summary>
-		/// <param name="path">The path of the dll</param>
-		/// <returns>The list of dlls in hte assembly</returns>
-		private IPlugin[] _LoadPlugin(string path)
-		{
-			path = Path.GetFullPath(path);
-			try
-			{
-				PluginDependencyLoader loader = new(path);
-				Assembly assembly = loader.LoadFromAssemblyPath(path);
-				return assembly.GetTypes()
-					.Where(x => typeof(IPlugin).IsAssignableFrom(x))
-					.Where(x => _plugins.All(y => y.GetType() != x))
-					.Select(x => (IPlugin)ActivatorUtilities.CreateInstance(_provider, x))
-					.ToArray();
-			}
-			catch (Exception ex)
-			{
-				_logger.LogError(ex, "Could not load the plugin at {Path}", path);
-				return Array.Empty<IPlugin>();
-			}
-		}
-
 		/// <inheritdoc />
 		public void LoadPlugins(ICollection<IPlugin> plugins)
 		{
-			string pluginFolder = _options.Value.PluginPath;
-			if (!Directory.Exists(pluginFolder))
-				Directory.CreateDirectory(pluginFolder);
-
-			_logger.LogTrace("Loading new plugins...");
-			string[] pluginsPaths = Directory.GetFiles(pluginFolder, "*.dll", SearchOption.AllDirectories);
-			_plugins.AddRange(plugins
-				.Concat(pluginsPaths.SelectMany(_LoadPlugin))
-				.Where(x => x.Enabled)
-				.GroupBy(x => x.Name)
-				.Select(x => x.First())
-			);
-
-			if (!_plugins.Any())
-				_logger.LogInformation("No plugin enabled");
-			else
-				_logger.LogInformation("Plugin enabled: {Plugins}", _plugins.Select(x => x.Name));
+			_plugins.AddRange(plugins);
+			_logger.LogInformation("Modules enabled: {Plugins}", _plugins.Select(x => x.Name));
 		}
 
 		/// <inheritdoc />
@@ -143,53 +100,6 @@ namespace Kyoo.Host.Controllers
 				.Select(x => (IPlugin)ActivatorUtilities.CreateInstance(_provider, x))
 				.ToArray()
 			);
-		}
-
-		/// <summary>
-		/// A custom <see cref="AssemblyLoadContext"/> to load plugin's dependency if they are on the same folder.
-		/// </summary>
-		private class PluginDependencyLoader : AssemblyLoadContext
-		{
-			/// <summary>
-			/// The basic resolver that will be used to load dlls.
-			/// </summary>
-			private readonly AssemblyDependencyResolver _resolver;
-
-			/// <summary>
-			/// Create a new <see cref="PluginDependencyLoader"/> for the given path.
-			/// </summary>
-			/// <param name="pluginPath">The path of the plugin and it's dependencies</param>
-			public PluginDependencyLoader(string pluginPath)
-			{
-				_resolver = new AssemblyDependencyResolver(pluginPath);
-			}
-
-			/// <inheritdoc />
-			protected override Assembly Load(AssemblyName assemblyName)
-			{
-				Assembly existing = AppDomain.CurrentDomain.GetAssemblies()
-					.FirstOrDefault(x =>
-					{
-						AssemblyName name = x.GetName();
-						return name.Name == assemblyName.Name && name.Version == assemblyName.Version;
-					});
-				if (existing != null)
-					return existing;
-				// TODO load the assembly from the common folder if the file exists (this would allow shared libraries)
-				string assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
-				if (assemblyPath != null)
-					return LoadFromAssemblyPath(assemblyPath);
-				return base.Load(assemblyName);
-			}
-
-			/// <inheritdoc />
-			protected override IntPtr LoadUnmanagedDll(string unmanagedDllName)
-			{
-				string libraryPath = _resolver.ResolveUnmanagedDllToPath(unmanagedDllName);
-				if (libraryPath != null)
-					return LoadUnmanagedDllFromPath(libraryPath);
-				return base.LoadUnmanagedDll(unmanagedDllName);
-			}
 		}
 	}
 }
