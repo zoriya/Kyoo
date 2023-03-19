@@ -1,3 +1,4 @@
+from functools import wraps
 import os
 import asyncio
 import logging
@@ -5,6 +6,15 @@ from aiohttp import ClientSession
 from pathlib import Path
 from guessit import guessit
 from providers.provider import Provider
+
+def log_errors(f):
+	@wraps(f)
+	async def internal(*args, **kwargs):
+		try:
+			await f(*args, **kwargs)
+		except Exception as e:
+			logging.exception("Unhandled error", exc_info=e)
+	return internal
 
 
 class Scanner:
@@ -15,8 +25,9 @@ class Scanner:
 
 	async def scan(self, path: str):
 		videos = filter(lambda p: p.is_file(), Path(path).rglob("*"))
-		await asyncio.gather(*map(self.identify, videos), return_exceptions=True)
+		await asyncio.gather(*map(self.identify, videos))
 
+	@log_errors
 	async def identify(self, path: Path):
 		raw = guessit(path)
 		logging.info("Identied %s: %s", path, raw)
@@ -36,7 +47,8 @@ class Scanner:
 			logging.warn("Unknown video file type: %s", raw["type"])
 
 	async def post(self, path: str, *, data: object):
+		url = os.environ.get('KYOO_URL', "http://back:5000")
 		async with self._client.post(
-			f"{os.environ['KYOO_URL']}/{path}", json=data
+			f"{url}/{path}", json=data
 		) as r:
 			r.raise_for_status()
