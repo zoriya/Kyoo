@@ -41,9 +41,6 @@ namespace Kyoo.Swagger
 		public string Name => "Swagger";
 
 		/// <inheritdoc />
-		public Dictionary<string, Type> Configuration => new();
-
-		/// <inheritdoc />
 		public void Configure(IServiceCollection services)
 		{
 			services.AddTransient<IApplicationModelProvider, GenericResponseProvider>();

@@ -40,15 +40,6 @@ namespace Kyoo.Abstractions.Controllers
 		string Name { get; }
 
 		/// <summary>
-		/// A list of types that will be available via the IOptions interfaces and will be listed inside
-		/// an IConfiguration.
-		///
-		/// If a field should be loosely typed, <see cref="Dictionary{TKey,TValue}"/> or <c>null</c>
-		/// can be specified.
-		/// </summary>
-		Dictionary<string, Type> Configuration { get; }
-
-		/// <summary>
 		/// An optional configuration step to allow a plugin to change asp net configurations.
 		/// </summary>
 		/// <seealso cref="SA"/>

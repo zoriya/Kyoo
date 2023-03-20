@@ -112,20 +112,6 @@ namespace Kyoo.Host
 			_hostModule.Configure(services);
 			foreach (IPlugin plugin in _plugins.GetAllPlugins())
 				plugin.Configure(services);
-
-			IEnumerable<KeyValuePair<string, Type>> configTypes = _plugins.GetAllPlugins()
-				.Append(_hostModule)
-				.SelectMany(x => x.Configuration)
-				.Where(x => x.Value != null);
-			foreach ((string path, Type type) in configTypes)
-			{
-				Utility.RunGenericMethod<object>(
-					typeof(OptionsConfigurationServiceCollectionExtensions),
-					nameof(OptionsConfigurationServiceCollectionExtensions.Configure),
-					type,
-					services, _configuration.GetSection(path)
-				);
-			}
 		}
 
 		/// <summary>

@@ -37,9 +37,6 @@ namespace Kyoo.Postgresql
 		/// <inheritdoc />
 		public string Name => "Postgresql";
 
-		/// <inheritdoc />
-		public Dictionary<string, Type> Configuration => new();
-
 		/// <summary>
 		/// The configuration to use. The database connection string is pulled from it.
 		/// </summary>
