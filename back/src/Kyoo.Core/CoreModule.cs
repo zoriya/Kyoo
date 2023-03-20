@@ -43,12 +43,6 @@ namespace Kyoo.Core
 		public string Name => "Core";
 
 		/// <inheritdoc />
-		public Dictionary<string, Type> Configuration => new()
-		{
-			{ "database", null },
-		};
-
-		/// <inheritdoc />
 		public void Configure(ContainerBuilder builder)
 		{
 			builder.RegisterType<LocalFileSystem>().As<IFileSystem>().SingleInstance();

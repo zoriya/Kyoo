@@ -49,11 +49,16 @@ namespace Kyoo.Authentication.Models
 		/// <summary>
 		/// The default permissions that will be given to a non-connected user.
 		/// </summary>
-		public string[] Default { get; set; } = new[] { "overall.read" };
+		public string[] Default { get; set; } = { "overall.read" };
 
 		/// <summary>
 		/// Permissions applied to a new user.
 		/// </summary>
-		public string[] NewUser { get; set; } = new[] { "overall.read" };
+		public string[] NewUser { get; set; } = { "overall.read" };
+
+		/// <summary>
+		/// The list of available ApiKeys.
+		/// </summary>
+		public string[] ApiKeys { get; set; } = Array.Empty<string>();
 	}
 }
