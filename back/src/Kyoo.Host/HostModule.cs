@@ -16,7 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Collections.Generic;
 using Autofac;
 using Autofac.Extras.AttributeMetadata;
@@ -24,6 +23,8 @@ using Kyoo.Abstractions.Controllers;
 using Kyoo.Core.Models.Options;
 using Kyoo.Host.Controllers;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 namespace Kyoo.Host
@@ -36,24 +37,25 @@ namespace Kyoo.Host
 		/// <inheritdoc />
 		public string Name => "Host";
 
-		/// <inheritdoc />
-		public Dictionary<string, Type> Configuration => new()
-		{
-			{ BasicOptions.Path, typeof(BasicOptions) },
-		};
-
 		/// <summary>
 		/// The plugin manager that loaded all plugins.
 		/// </summary>
 		private readonly IPluginManager _plugins;
 
 		/// <summary>
+		/// The configuration used to register options.
+		/// </summary>
+		private readonly IConfiguration _configuration;
+
+		/// <summary>
 		/// Create a new <see cref="HostModule"/>.
 		/// </summary>
 		/// <param name="plugins">The plugin manager that loaded all plugins.</param>
-		public HostModule(IPluginManager plugins)
+		/// <param name="configuration"> The configuration used to register options.</param>
+		public HostModule(IPluginManager plugins, IConfiguration configuration)
 		{
 			_plugins = plugins;
+			_configuration = configuration;
 		}
 
 		/// <inheritdoc />

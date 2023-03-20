@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Permissions;
@@ -29,7 +30,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Primitives;
 
 namespace Kyoo.Authentication
 {
@@ -42,13 +43,13 @@ namespace Kyoo.Authentication
 		/// <summary>
 		/// The permissions options to retrieve default permissions.
 		/// </summary>
-		private readonly IOptionsMonitor<PermissionOption> _options;
+		private readonly PermissionOption _options;
 
 		/// <summary>
 		/// Create a new factory with the given options.
 		/// </summary>
 		/// <param name="options">The option containing default values.</param>
-		public PermissionValidator(IOptionsMonitor<PermissionOption> options)
+		public PermissionValidator(PermissionOption options)
 		{
 			_options = options;
 		}
@@ -88,7 +89,7 @@ namespace Kyoo.Authentication
 			/// <summary>
 			/// The permissions options to retrieve default permissions.
 			/// </summary>
-			private readonly IOptionsMonitor<PermissionOption> _options;
+			private readonly PermissionOption _options;
 
 			/// <summary>
 			/// Create a new permission validator with the given options.
@@ -101,7 +102,7 @@ namespace Kyoo.Authentication
 				string permission,
 				Kind kind,
 				Group group,
-				IOptionsMonitor<PermissionOption> options)
+				PermissionOption options)
 			{
 				_permission = permission;
 				_kind = kind;
@@ -115,7 +116,7 @@ namespace Kyoo.Authentication
 			/// <param name="partialInfo">The partial permission to validate.</param>
 			/// <param name="group">The group of the permission.</param>
 			/// <param name="options">The option containing default values.</param>
-			public PermissionValidatorFilter(object partialInfo, Group? group, IOptionsMonitor<PermissionOption> options)
+			public PermissionValidatorFilter(object partialInfo, Group? group, PermissionOption options)
 			{
 				switch (partialInfo)
 				{
@@ -169,22 +170,60 @@ namespace Kyoo.Authentication
 
 				string permStr = $"{permission.ToLower()}.{kind.ToString()!.ToLower()}";
 				string overallStr = $"{_group.ToString().ToLower()}.{kind.ToString()!.ToLower()}";
-				AuthenticateResult res = await context.HttpContext.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme);
+				AuthenticateResult res = _ApiKeyCheck(context);
+				if (res.None)
+					res = await _JwtCheck(context);
+
 				if (res.Succeeded)
 				{
 					ICollection<string> permissions = res.Principal.GetPermissions();
 					if (permissions.All(x => x != permStr && x != overallStr))
 						context.Result = _ErrorResult($"Missing permission {permStr} or {overallStr}", StatusCodes.Status403Forbidden);
 				}
-				else
+				else if (res.None)
 				{
-					ICollection<string> permissions = _options.CurrentValue.Default ?? Array.Empty<string>();
-					if (res.Failure != null || permissions.All(x => x != permStr && x != overallStr))
+					ICollection<string> permissions = _options.Default ?? Array.Empty<string>();
+					if (permissions.All(x => x != permStr && x != overallStr))
 					{
-						context.Result = _ErrorResult("Token non present or invalid (it may have expired). " +
-							$"Unlogged user does not have permission {permStr} or {overallStr}", StatusCodes.Status401Unauthorized);
+						context.Result = _ErrorResult($"Unlogged user does not have permission {permStr} or {overallStr}", StatusCodes.Status401Unauthorized);
 					}
 				}
+				else if (res.Failure != null)
+					context.Result = _ErrorResult(res.Failure.Message, StatusCodes.Status403Forbidden);
+				else
+					context.Result = _ErrorResult("Authentication panic", StatusCodes.Status500InternalServerError);
+			}
+
+			private AuthenticateResult _ApiKeyCheck(ActionContext context)
+			{
+				if (!context.HttpContext.Request.Headers.TryGetValue("X-API-Key", out StringValues apiKey))
+					return AuthenticateResult.NoResult();
+				if (!_options.ApiKeys.Contains<string>(apiKey))
+					return AuthenticateResult.Fail("Invalid API-Key.");
+				return AuthenticateResult.Success(
+					new AuthenticationTicket(
+						new ClaimsPrincipal(
+							new[]
+							{
+								new ClaimsIdentity(new[]
+								{
+									// TODO: Make permission configurable, for now every APIKEY as all permissions.
+									new Claim(Claims.Permissions, string.Join(',', PermissionOption.Admin))
+								})
+							}
+						),
+						"apikey"
+					)
+				);
+			}
+
+			private async Task<AuthenticateResult> _JwtCheck(ActionContext context)
+			{
+				AuthenticateResult ret = await context.HttpContext.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme);
+				// Change the failure message to make the API nice to use.
+				if (ret.Failure != null)
+					return AuthenticateResult.Fail("Invalid JWT token. The token may have expired.");
+				return ret;
 			}
 		}
 

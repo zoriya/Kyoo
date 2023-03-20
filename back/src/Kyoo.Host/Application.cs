@@ -82,11 +82,7 @@ namespace Kyoo.Host
 		/// <returns>A task representing the whole process</returns>
 		public async Task Start(string[] args, Action<ContainerBuilder> configure)
 		{
-			IConfiguration parsed = new ConfigurationBuilder()
-				.AddEnvironmentVariables()
-				.AddEnvironmentVariables("KYOO_")
-				.AddCommandLine(args)
-				.Build();
+			IConfiguration parsed = _SetupConfig(new ConfigurationBuilder(), args).Build();
 			string path = Path.GetFullPath(parsed.GetValue("DATADIR", "/kyoo"));
 			if (!Directory.Exists(path))
 				Directory.CreateDirectory(path);
@@ -161,7 +157,6 @@ namespace Kyoo.Host
 		private IConfigurationBuilder _SetupConfig(IConfigurationBuilder builder, string[] args)
 		{
 			return builder
-				.AddJsonFile(Path.Join(AppDomain.CurrentDomain.BaseDirectory, "./settings.json"), false, true)
 				.AddEnvironmentVariables()
 				.AddEnvironmentVariables("KYOO_")
 				.AddCommandLine(args);

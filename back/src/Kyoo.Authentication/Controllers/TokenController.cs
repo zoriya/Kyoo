@@ -26,7 +26,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Models;
 using Kyoo.Authentication.Models;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Kyoo.Authentication
@@ -39,13 +38,13 @@ namespace Kyoo.Authentication
 		/// <summary>
 		/// The options that this controller will use.
 		/// </summary>
-		private readonly IOptions<AuthenticationOption> _options;
+		private readonly AuthenticationOption _options;
 
 		/// <summary>
 		/// Create a new <see cref="TokenController"/>.
 		/// </summary>
 		/// <param name="options">The options that this controller will use.</param>
-		public TokenController(IOptions<AuthenticationOption> options)
+		public TokenController(AuthenticationOption options)
 		{
 			_options = options;
 		}
@@ -55,7 +54,7 @@ namespace Kyoo.Authentication
 		{
 			expireIn = new TimeSpan(1, 0, 0);
 
-			SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_options.Value.Secret));
+			SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_options.Secret));
 			SigningCredentials credential = new(key, SecurityAlgorithms.HmacSha256Signature);
 			string permissions = user.Permissions != null
 				? string.Join(',', user.Permissions)
@@ -80,7 +79,7 @@ namespace Kyoo.Authentication
 		/// <inheritdoc />
 		public Task<string> CreateRefreshToken(User user)
 		{
-			SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_options.Value.Secret));
+			SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_options.Secret));
 			SigningCredentials credential = new(key, SecurityAlgorithms.HmacSha256Signature);
 			JwtSecurityToken token = new(
 				signingCredentials: credential,
@@ -99,7 +98,7 @@ namespace Kyoo.Authentication
 		/// <inheritdoc />
 		public int GetRefreshTokenUserID(string refreshToken)
 		{
-			SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_options.Value.Secret));
+			SymmetricSecurityKey key = new(Encoding.UTF8.GetBytes(_options.Secret));
 			JwtSecurityTokenHandler tokenHandler = new();
 			ClaimsPrincipal principal;
 			try

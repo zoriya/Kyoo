@@ -16,7 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Collections.Generic;
 using System.Text;
 using Autofac;
@@ -37,13 +36,6 @@ namespace Kyoo.Authentication
 	{
 		/// <inheritdoc />
 		public string Name => "Authentication";
-
-		/// <inheritdoc />
-		public Dictionary<string, Type> Configuration => new()
-		{
-			{ AuthenticationOption.Path, typeof(AuthenticationOption) },
-			{ PermissionOption.Path, typeof(PermissionOption) },
-		};
 
 		/// <summary>
 		/// The configuration to use.
@@ -69,9 +61,19 @@ namespace Kyoo.Authentication
 		/// <inheritdoc />
 		public void Configure(IServiceCollection services)
 		{
-			AuthenticationOption jwt = ConfigurationBinder.Get<AuthenticationOption>(
-				_configuration.GetSection(AuthenticationOption.Path)
-			);
+			string secret = _configuration.GetValue("AUTHENTICATION_SECRET", AuthenticationOption.DefaultSecret);
+			PermissionOption permissions = new()
+			{
+				Default = _configuration.GetValue<string>("UNLOGGED_PERMISSIONS", "overall.read").Split(','),
+				NewUser = _configuration.GetValue<string>("DEFAULT_PERMISSIONS", "overall.read").Split(','),
+				ApiKeys = _configuration.GetValue("KYOO_APIKEYS", string.Empty).Split(','),
+			};
+			services.AddSingleton<PermissionOption>(permissions);
+			services.AddSingleton<AuthenticationOption>(new AuthenticationOption()
+			{
+				Secret = secret,
+				Permissions = permissions,
+			});
 
 			// TODO handle direct-videos with bearers (probably add a cookie and a app.Use to translate that for videos)
 			services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -83,7 +85,7 @@ namespace Kyoo.Authentication
 						ValidateAudience = false,
 						ValidateLifetime = true,
 						ValidateIssuerSigningKey = true,
-						IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Secret))
+						IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret))
 					};
 				});
 		}

@@ -29,7 +29,6 @@ using Kyoo.Authentication.Models;
 using Kyoo.Authentication.Models.DTO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using static Kyoo.Abstractions.Models.Utils.Constants;
 using BCryptNet = BCrypt.Net.BCrypt;
@@ -57,7 +56,7 @@ namespace Kyoo.Authentication.Views
 		/// <summary>
 		/// The permisson options.
 		/// </summary>
-		private readonly IOptionsMonitor<PermissionOption> _permissions;
+		private readonly PermissionOption _permissions;
 
 		/// <summary>
 		/// Create a new <see cref="AuthApi"/>.
@@ -65,7 +64,7 @@ namespace Kyoo.Authentication.Views
 		/// <param name="users">The repository used to check if the user exists.</param>
 		/// <param name="token">The token generator.</param>
 		/// <param name="permissions">The permission opitons.</param>
-		public AuthApi(IUserRepository users, ITokenController token, IOptionsMonitor<PermissionOption> permissions)
+		public AuthApi(IUserRepository users, ITokenController token, PermissionOption permissions)
 		{
 			_users = users;
 			_token = token;
@@ -96,7 +95,7 @@ namespace Kyoo.Authentication.Views
 		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
 		public async Task<ActionResult<JwtToken>> Login([FromBody] LoginRequest request)
 		{
-			User user = await _users.GetOrDefault(x => x.Username == request.Username);
+			User? user = await _users.GetOrDefault(x => x.Username == request.Username);
 			if (user == null || !BCryptNet.Verify(request.Password, user.Password))
 				return Forbid(new RequestError("The user and password does not match."));
 
@@ -124,7 +123,7 @@ namespace Kyoo.Authentication.Views
 		public async Task<ActionResult<JwtToken>> Register([FromBody] RegisterRequest request)
 		{
 			User user = request.ToUser();
-			user.Permissions = _permissions.CurrentValue.NewUser;
+			user.Permissions = _permissions.NewUser;
 			// If no users exists, the new one will be an admin. Give it every permissions.
 			if (await _users.GetOrDefault(where: x => true) == null)
 				user.Permissions = PermissionOption.Admin;
