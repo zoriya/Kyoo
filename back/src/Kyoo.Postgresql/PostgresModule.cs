@@ -17,7 +17,6 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Collections.Generic;
 using System.Data.Common;
 using Kyoo.Abstractions.Controllers;
 using Microsoft.AspNetCore.Hosting;

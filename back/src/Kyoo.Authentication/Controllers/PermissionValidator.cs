@@ -173,7 +173,8 @@ namespace Kyoo.Authentication
 				string overallStr = $"{_group.ToString().ToLower()}.{kind.ToString()!.ToLower()}";
 				AuthenticateResult res = _ApiKeyCheck(context);
 				if (res.None)
-					res = await context.HttpContext.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme);
+					res = await _JwtCheck(context);
+
 				if (res.Succeeded)
 				{
 					ICollection<string> permissions = res.Principal.GetPermissions();
@@ -190,6 +191,8 @@ namespace Kyoo.Authentication
 				}
 				else if (res.Failure != null)
 					context.Result = _ErrorResult(res.Failure.Message, StatusCodes.Status403Forbidden);
+				else
+					context.Result = _ErrorResult("Authentication panic", StatusCodes.Status500InternalServerError);
 			}
 
 			private AuthenticateResult _ApiKeyCheck(ActionContext context)
@@ -213,6 +216,15 @@ namespace Kyoo.Authentication
 						"apikey"
 					)
 				);
+			}
+
+			private async Task<AuthenticateResult> _JwtCheck(ActionContext context)
+			{
+				AuthenticateResult ret = await context.HttpContext.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme);
+				// Change the failure message to make the API nice to use.
+				if (ret.Failure != null)
+					return AuthenticateResult.Fail("Invalid JWT token. The token may have expired.");
+				return ret;
 			}
 		}
 
