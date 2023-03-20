@@ -70,7 +70,7 @@ namespace Kyoo.Host
 		{
 			_plugins = plugins;
 			_configuration = configuration;
-			_hostModule = new HostModule(_plugins);
+			_hostModule = new HostModule(_plugins, configuration);
 			_plugins.LoadPlugins(
 				typeof(CoreModule),
 				typeof(AuthenticationModule),
