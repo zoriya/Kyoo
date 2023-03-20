@@ -96,7 +96,7 @@ namespace Kyoo.Authentication.Views
 		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
 		public async Task<ActionResult<JwtToken>> Login([FromBody] LoginRequest request)
 		{
-			User user = await _users.GetOrDefault(x => x.Username == request.Username);
+			User? user = await _users.GetOrDefault(x => x.Username == request.Username);
 			if (user == null || !BCryptNet.Verify(request.Password, user.Password))
 				return Forbid(new RequestError("The user and password does not match."));
 
