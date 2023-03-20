@@ -106,6 +106,8 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		protected override async Task Validate(Show resource)
 		{
+			resource.Slug ??= Utility.ToSlug(resource.Title);
+
 			await base.Validate(resource);
 			if (resource.Studio != null)
 			{

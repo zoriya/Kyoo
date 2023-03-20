@@ -1,4 +1,5 @@
 from functools import wraps
+import json
 import os
 import asyncio
 import logging
@@ -7,6 +8,7 @@ from pathlib import Path
 from guessit import guessit
 from providers.provider import Provider
 
+
 def log_errors(f):
 	@wraps(f)
 	async def internal(*args, **kwargs):
@@ -14,12 +16,16 @@ def log_errors(f):
 			await f(*args, **kwargs)
 		except Exception as e:
 			logging.exception("Unhandled error", exc_info=e)
+
 	return internal
 
 
 class Scanner:
-	def __init__(self, client: ClientSession, languages: list[str]) -> None:
+	def __init__(
+		self, client: ClientSession, *, languages: list[str], api_key: str
+	) -> None:
 		self._client = client
+		self._api_key = api_key
 		self.provider = Provider.get_all(client)[0]
 		self.languages = languages
 
@@ -41,14 +47,18 @@ class Scanner:
 			)
 			logging.debug("Got movie: %s", movie)
 			await self.post("movies", data=movie.to_kyoo())
+			movie.path = str(path)
 		elif raw["type"] == "episode":
 			pass
 		else:
 			logging.warn("Unknown video file type: %s", raw["type"])
 
 	async def post(self, path: str, *, data: object):
-		url = os.environ.get('KYOO_URL', "http://back:5000")
+		url = os.environ.get("KYOO_URL", "http://back:5000")
+		print(json.dumps(data, indent=4))
 		async with self._client.post(
-			f"{url}/{path}", json=data
+			f"{url}/{path}", json=data, headers={"X-API-Key": self._api_key}
 		) as r:
+			if not r.ok:
+				print(await r.text())
 			r.raise_for_status()

@@ -42,9 +42,10 @@ class TheMovieDatabase(Provider):
 				status=Status.UNKNOWN,
 				studio=None,
 				genres=[],
-				poster=[],
+				posters=[],
 				thumbnails=[],
-				logo=[],
+				logos=[],
+				trailers=[],
 			)
 			translation = MovieTranslation(
 				name=movie["title"],
