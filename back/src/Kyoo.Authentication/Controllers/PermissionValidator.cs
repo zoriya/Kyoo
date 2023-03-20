@@ -30,7 +30,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 
 namespace Kyoo.Authentication
@@ -44,13 +43,13 @@ namespace Kyoo.Authentication
 		/// <summary>
 		/// The permissions options to retrieve default permissions.
 		/// </summary>
-		private readonly IOptionsMonitor<PermissionOption> _options;
+		private readonly PermissionOption _options;
 
 		/// <summary>
 		/// Create a new factory with the given options.
 		/// </summary>
 		/// <param name="options">The option containing default values.</param>
-		public PermissionValidator(IOptionsMonitor<PermissionOption> options)
+		public PermissionValidator(PermissionOption options)
 		{
 			_options = options;
 		}
@@ -90,7 +89,7 @@ namespace Kyoo.Authentication
 			/// <summary>
 			/// The permissions options to retrieve default permissions.
 			/// </summary>
-			private readonly IOptionsMonitor<PermissionOption> _options;
+			private readonly PermissionOption _options;
 
 			/// <summary>
 			/// Create a new permission validator with the given options.
@@ -103,7 +102,7 @@ namespace Kyoo.Authentication
 				string permission,
 				Kind kind,
 				Group group,
-				IOptionsMonitor<PermissionOption> options)
+				PermissionOption options)
 			{
 				_permission = permission;
 				_kind = kind;
@@ -117,7 +116,7 @@ namespace Kyoo.Authentication
 			/// <param name="partialInfo">The partial permission to validate.</param>
 			/// <param name="group">The group of the permission.</param>
 			/// <param name="options">The option containing default values.</param>
-			public PermissionValidatorFilter(object partialInfo, Group? group, IOptionsMonitor<PermissionOption> options)
+			public PermissionValidatorFilter(object partialInfo, Group? group, PermissionOption options)
 			{
 				switch (partialInfo)
 				{
@@ -183,7 +182,7 @@ namespace Kyoo.Authentication
 				}
 				else if (res.None)
 				{
-					ICollection<string> permissions = _options.CurrentValue.Default ?? Array.Empty<string>();
+					ICollection<string> permissions = _options.Default ?? Array.Empty<string>();
 					if (permissions.All(x => x != permStr && x != overallStr))
 					{
 						context.Result = _ErrorResult($"Unlogged user does not have permission {permStr} or {overallStr}", StatusCodes.Status401Unauthorized);
@@ -199,7 +198,7 @@ namespace Kyoo.Authentication
 			{
 				if (!context.HttpContext.Request.Headers.TryGetValue("X-API-Key", out StringValues apiKey))
 					return AuthenticateResult.NoResult();
-				if (!_options.CurrentValue.ApiKeys.Contains<string>(apiKey))
+				if (!_options.ApiKeys.Contains<string>(apiKey))
 					return AuthenticateResult.Fail("Invalid API-Key.");
 				return AuthenticateResult.Success(
 					new AuthenticationTicket(
