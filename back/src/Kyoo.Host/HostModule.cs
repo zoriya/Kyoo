@@ -67,12 +67,6 @@ namespace Kyoo.Host
 		}
 
 		/// <inheritdoc />
-		public void Configure(IServiceCollection services)
-		{
-			services.Configure<BasicOptions>(_configuration.GetSection(BasicOptions.Path));
-		}
-
-		/// <inheritdoc />
 		public IEnumerable<IStartupAction> ConfigureSteps => new[]
 		{
 			SA.New<IApplicationBuilder>(app => app.UseSerilogRequestLogging(), SA.Before)

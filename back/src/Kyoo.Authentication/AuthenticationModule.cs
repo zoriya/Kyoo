@@ -62,15 +62,17 @@ namespace Kyoo.Authentication
 		public void Configure(IServiceCollection services)
 		{
 			string secret = _configuration.GetValue("AUTHENTICATION_SECRET", AuthenticationOption.DefaultSecret);
-			services.Configure<AuthenticationOption>(x =>
+			PermissionOption permissions = new()
 			{
-				x.Secret = secret;
-				x.Permissions = new PermissionOption
-				{
-					Default = _configuration.GetValue<string>("UNLOGGED_PERMISSIONS", "overall.read").Split(','),
-					NewUser = _configuration.GetValue<string>("DEFAULT_PERMISSIONS", "overall.read").Split(','),
-					ApiKeys = _configuration.GetValue("KYOO_APIKEYS", string.Empty).Split(','),
-				};
+				Default = _configuration.GetValue<string>("UNLOGGED_PERMISSIONS", "overall.read").Split(','),
+				NewUser = _configuration.GetValue<string>("DEFAULT_PERMISSIONS", "overall.read").Split(','),
+				ApiKeys = _configuration.GetValue("KYOO_APIKEYS", string.Empty).Split(','),
+			};
+			services.AddSingleton<PermissionOption>(permissions);
+			services.AddSingleton<AuthenticationOption>(new AuthenticationOption()
+			{
+				Secret = secret,
+				Permissions = permissions,
 			});
 
 			// TODO handle direct-videos with bearers (probably add a cookie and a app.Use to translate that for videos)
