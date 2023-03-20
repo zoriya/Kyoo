@@ -12,13 +12,14 @@ in
           aspnetcore_6_0
         ])
       python3
+      python3Packages.pip
     ];
 
     shellHook = ''
       # Install python modules
       SOURCE_DATE_EPOCH=$(date +%s)
       if [ ! -d "${venvDir}" ]; then
-        ${pkgs.python3} -m venv "${venvDir}"
+        ${pkgs.python3}/bin/python3 -m venv "${venvDir}"
       fi
       source "${venvDir}/bin/activate"
 	  export PIP_DISABLE_PIP_VERSION_CHECK=1
