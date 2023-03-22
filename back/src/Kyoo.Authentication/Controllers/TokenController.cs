@@ -112,9 +112,9 @@ namespace Kyoo.Authentication
 					IssuerSigningKey = key
 				}, out SecurityToken _);
 			}
-			catch (Exception ex)
+			catch (Exception)
 			{
-				throw new SecurityTokenException(ex.Message);
+				throw new SecurityTokenException("Invalid refresh token");
 			}
 
 			if (principal.Claims.First(x => x.Type == Claims.Type).Value != "refresh")
