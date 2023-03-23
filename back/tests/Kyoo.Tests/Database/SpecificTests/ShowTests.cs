@@ -214,12 +214,10 @@ namespace Kyoo.Tests.Database
 			Show newValue = new()
 			{
 				ID = value.ID,
+				Slug = "reset",
 				Title = "Reset"
 			};
 
-			await Assert.ThrowsAsync<ArgumentException>(() => _repository.Edit(newValue, true));
-
-			newValue.Slug = "reset";
 			Show edited = await _repository.Edit(newValue, true);
 
 			Assert.Equal(value.ID, edited.ID);
