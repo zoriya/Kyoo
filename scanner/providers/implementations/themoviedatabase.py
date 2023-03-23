@@ -10,6 +10,7 @@ from providers.types.metadataid import MetadataID
 from ..provider import Provider
 from ..types.movie import Movie, MovieTranslation
 from ..types.status import Status
+from ..types.studio import Studio
 
 
 class TheMovieDatabase(Provider):
@@ -84,8 +85,25 @@ class TheMovieDatabase(Provider):
 				status=Status.FINISHED
 				if movie["status"] == "Released"
 				else Status.PLANNED,
-				studios=list(map(lambda x: x["name"], movie["production_companies"])),
-				genres=[self.genre_map[x["id"]] for x in  movie["genres"] if x["id"] in self.genre_map],
+				studios=[
+					Studio(
+						name=x["name"],
+						logos=[f"https://image.tmdb.org/t/p/original{x['logo_path']}"]
+						if "logo_path" in x
+						else [],
+						external_id={
+							"themoviedatabase": MetadataID(
+								x["id"], f"https://www.themoviedb.org/company/{x['id']}"
+							)
+						},
+					)
+					for x in movie["production_companies"]
+				],
+				genres=[
+					self.genre_map[x["id"]]
+					for x in movie["genres"]
+					if x["id"] in self.genre_map
+				],
 				external_id={
 					"themoviedatabase": MetadataID(
 						movie["id"], f"https://www.themoviedb.org/movie/{movie['id']}"

@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class Genre(Enum):
+class Genre(str, Enum):
 	ACTION = "action"
 	ADVENTURE = "adventure"
 	ANIMATION = "animation"
@@ -20,3 +20,6 @@ class Genre(Enum):
 	THRILLER = "thriller"
 	WAR = "war"
 	WESTERN = "western"
+
+	def to_kyoo(self):
+		return {"name": self}

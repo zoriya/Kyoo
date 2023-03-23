@@ -3,8 +3,10 @@ from dataclasses import asdict, dataclass, field
 from datetime import date
 from typing import Optional
 
+
 from .genre import Genre
 from .status import Status
+from .studio import Studio
 from .metadataid import MetadataID
 
 
@@ -28,13 +30,20 @@ class Movie:
 	release_date: Optional[date | int] = None
 	status: Status = Status.UNKNOWN
 	path: Optional[str] = None
-	studios: list[str] = field(default_factory=list)
+	studios: list[Studio] = field(default_factory=list)
 	genres: list[Genre] = field(default_factory=list)
 	# TODO: handle staff
 	# staff: list[Staff]
 	external_id: dict[str, MetadataID] = field(default_factory=dict)
 
 	translations: dict[str, MovieTranslation] = field(default_factory=dict)
+
+	def format_date(self, date: date | int | None) -> str | None:
+		if date is None:
+			return None
+		if isinstance(date, int):
+			return f"{date}-01-01T00:00:00Z"
+		return date.isoformat()
 
 	def to_kyoo(self):
 		# For now, the API of kyoo only support one language so we remove the others.
@@ -43,11 +52,15 @@ class Movie:
 			**asdict(self),
 			**asdict(self.translations[default_language]),
 			"poster": next(iter(self.translations[default_language].posters), None),
-			"thumbnail": next(iter(self.translations[default_language].thumbnails), None),
+			"thumbnail": next(
+				iter(self.translations[default_language].thumbnails), None
+			),
 			"logo": next(iter(self.translations[default_language].logos), None),
 			"trailer": next(iter(self.translations[default_language].trailers), None),
-			"studio": next(iter(self.studios), None),
-			"startAir": self.release_date,
+			"studio": next(iter(x.to_kyoo() for x in self.studios), None),
+			"release_date": None,
+			"startAir": self.format_date(self.release_date),
 			"title": self.translations[default_language].name,
+			"genres": [x.to_kyoo() for x in self.genres],
 			"isMovie": True,
 		}
