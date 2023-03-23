@@ -23,6 +23,7 @@ using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Postgresql;
+using Kyoo.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Core.Controllers
@@ -80,6 +81,8 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		protected override async Task Validate(Studio resource)
 		{
+			resource.Slug ??= Utility.ToSlug(resource.Name);
+
 			await base.Validate(resource);
 			if (resource.ExternalIDs != null)
 			{

@@ -23,6 +23,7 @@ using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Postgresql;
+using Kyoo.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Core.Controllers
@@ -59,6 +60,13 @@ namespace Kyoo.Core.Controllers
 				)
 				.Take(20)
 				.ToListAsync();
+		}
+
+		/// <inheritdoc />
+		protected override async Task Validate(Genre resource)
+		{
+			resource.Slug ??= Utility.ToSlug(resource.Name);
+			await base.Validate(resource);
 		}
 
 		/// <inheritdoc />
