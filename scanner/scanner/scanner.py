@@ -45,9 +45,9 @@ class Scanner:
 			movie = await self.provider.identify_movie(
 				raw["title"], raw.get("year"), language=self.languages
 			)
+			movie.path = str(path)
 			logging.debug("Got movie: %s", movie)
 			await self.post("movies", data=movie.to_kyoo())
-			movie.path = str(path)
 		elif raw["type"] == "episode":
 			pass
 		else:

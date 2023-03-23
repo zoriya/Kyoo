@@ -13,6 +13,7 @@ class Provider:
 	@classmethod
 	def get_all(cls: type[Self], client: ClientSession) -> list[Self]:
 		from providers.implementations.themoviedatabase import TheMovieDatabase
+
 		providers = []
 
 		tmdb = os.environ.get("THEMOVIEDB_APIKEY")
