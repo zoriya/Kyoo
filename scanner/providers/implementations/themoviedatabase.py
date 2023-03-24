@@ -2,12 +2,12 @@ import asyncio
 from datetime import datetime
 import logging
 from aiohttp import ClientSession
-from typing import Awaitable, Callable, Coroutine, Dict, Optional, Any, TypeVar
+from typing import Awaitable, Callable, Dict, Optional, Any, TypeVar
 
 from ..provider import Provider
 from ..types.movie import Movie, MovieTranslation, Status as MovieStatus
 from ..types.season import Season, SeasonTranslation
-from ..types.episode import Episode, PartialShow
+from ..types.episode import Episode, EpisodeTranslation, PartialShow
 from ..types.studio import Studio
 from ..types.genre import Genre
 from ..types.metadataid import MetadataID
@@ -279,7 +279,7 @@ class TheMovieDatabase(Provider):
 		self,
 		name: str,
 		season: Optional[int],
-		episode: Optional[int],
+		episode_nbr: Optional[int],
 		absolute: Optional[int],
 		*,
 		language: list[str],
@@ -289,58 +289,47 @@ class TheMovieDatabase(Provider):
 		if search["original_language"] not in language:
 			language.append(search["original_language"])
 
+		# TODO: Handle absolute episodes
+
 		async def for_language(lng: str) -> Episode:
-			movie = await self.get(
-				f"/movie/{show_id}",
+			episode = await self.get(
+				f"/tv/{show_id}/season/{season}/episode/{episode_nbr}",
 				params={
 					"language": lng,
-					"append_to_response": "alternative_titles,videos,credits,keywords,images",
 				},
 			)
-			logging.debug("TMDb responded: %s", movie)
-			# TODO: Use collection data
+			logging.debug("TMDb responded: %s", episode)
 
-			ret = Movie(
-				original_language=movie["original_language"],
-				aliases=[x["title"] for x in movie["alternative_titles"]["titles"]],
-				release_date=datetime.strptime(
-					movie["release_date"], "%Y-%m-%d"
-				).date(),
-				status=MovieStatus.FINISHED
-				if movie["status"] == "Released"
-				else MovieStatus.PLANNED,
-				studios=[self.to_studio(x) for x in movie["production_companies"]],
-				genres=[
-					self.genre_map[x["id"]]
-					for x in movie["genres"]
-					if x["id"] in self.genre_map
-				],
+			ret = Episode(
+				show=PartialShow(
+					name=search["name"],
+					original_language=search["original_language"],
+					external_id={
+						"themoviedatabase": MetadataID(
+							show_id, f"https://www.themoviedb.org/tv/{show_id}"
+						)
+					},
+				),
+				season_number=episode["season_number"],
+				episode_number=episode["episode_number"],
+				# TODO: absolute numbers
+				absolute_number=None,
+				release_date=datetime.strptime(episode["air_date"], "%Y-%m-%d").date(),
+				thumbnail=f"https://image.tmdb.org/t/p/original{episode['poster_path']}"
+				if "poster_path" in episode
+				else None,
 				external_id={
 					"themoviedatabase": MetadataID(
-						movie["id"], f"https://www.themoviedb.org/movie/{movie['id']}"
+						episode["id"],
+						f"https://www.themoviedb.org/movie/{episode['id']}",
 					),
-					"imdb": MetadataID(
-						movie["imdb_id"],
-						f"https://www.imdb.com/title/{movie['imdb_id']}",
-					),
-				}
-				# TODO: Add cast information
+				},
 			)
-			translation = MovieTranslation(
-				name=movie["title"],
-				tagline=movie["tagline"],
-				keywords=list(map(lambda x: x["name"], movie["keywords"]["keywords"])),
-				overview=movie["overview"],
-				posters=self.get_image(movie["images"]["posters"]),
-				logos=self.get_image(movie["images"]["logos"]),
-				thumbnails=self.get_image(movie["images"]["backdrops"]),
-				trailers=[
-					f"https://www.youtube.com/watch?v{x['key']}"
-					for x in movie["videos"]["results"]
-					if x["type"] == "Trailer" and x["site"] == "YouTube"
-				],
+			translation = EpisodeTranslation(
+				name=episode["name"],
+				overview=episode["overview"],
 			)
 			ret.translations = {lng: translation}
 			return ret
 
-		return self.process_translations(for_language, language)
+		return await self.process_translations(for_language, language)
