@@ -7,6 +7,7 @@ from aiohttp import ClientSession
 from pathlib import Path
 from guessit import guessit
 from providers.provider import Provider
+from providers.types.episode import PartialShow
 
 
 def log_errors(f):
@@ -27,6 +28,7 @@ class Scanner:
 		self._client = client
 		self._api_key = api_key
 		self.provider = Provider.get_all(client)[0]
+		self.cache = {"shows": {}}
 		self.languages = languages
 
 	async def scan(self, path: str):
@@ -44,6 +46,7 @@ class Scanner:
 
 		# TODO: Add collections support
 		if raw["type"] == "movie":
+			return
 			movie = await self.provider.identify_movie(
 				raw["title"], raw.get("year"), language=self.languages
 			)
@@ -51,21 +54,32 @@ class Scanner:
 			logging.debug("Got movie: %s", movie)
 			await self.post("movies", data=movie.to_kyoo())
 		elif raw["type"] == "episode":
-			# TODO: Identify shows & seasons too.
 			episode = await self.provider.identify_episode(
 				raw["title"],
 				season=raw.get("season"),
-				episode=raw.get("episode"),
+				episode_nbr=raw.get("episode"),
 				absolute=raw.get("episode") if "season" not in raw else None,
 				language=self.languages,
 			)
 			episode.path = str(path)
 			logging.debug("Got episode: %s", episode)
+
+			show_provider_id = episode.show.external_id[self.provider.name].id
+			if (
+				isinstance(episode.show, PartialShow)
+				and show_provider_id not in self.cache["shows"]
+			):
+				show = await self.provider.identify_show(
+					episode.show, language=self.languages
+				)
+				logging.debug("Got show: %s", episode)
+				self.cache["shows"][show_provider_id] = await self.post("show", data=show.to_kyoo())
+			episode.show_id = self.cache["shows"][show_provider_id]
 			await self.post("episodes", data=episode.to_kyoo())
 		else:
 			logging.warn("Unknown video file type: %s", raw["type"])
 
-	async def post(self, path: str, *, data: object):
+	async def post(self, path: str, *, data: object) -> str:
 		url = os.environ.get("KYOO_URL", "http://back:5000")
 		print(json.dumps(data, indent=4))
 		async with self._client.post(
@@ -74,3 +88,6 @@ class Scanner:
 			if not r.ok:
 				print(await r.text())
 			r.raise_for_status()
+			ret = await r.json()
+			return ret["id"]
+

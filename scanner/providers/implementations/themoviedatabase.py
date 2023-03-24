@@ -41,6 +41,10 @@ class TheMovieDatabase(Provider):
 			37: Genre.WESTERN,
 		}
 
+	@property
+	def name(self) -> str:
+		return "themoviedatabase"
+
 	async def get(self, path: str, *, params: dict[str, Any] = {}):
 		params = {k: v for k, v in params.items() if v is not None}
 		async with self._client.get(
@@ -84,7 +88,7 @@ class TheMovieDatabase(Provider):
 			if "logo_path" in company
 			else [],
 			external_id={
-				"themoviedatabase": MetadataID(
+				self.name: MetadataID(
 					company["id"], f"https://www.themoviedb.org/company/{company['id']}"
 				)
 			},
@@ -127,7 +131,7 @@ class TheMovieDatabase(Provider):
 					if x["id"] in self.genre_map
 				],
 				external_id={
-					"themoviedatabase": MetadataID(
+					self.name: MetadataID(
 						movie["id"], f"https://www.themoviedb.org/movie/{movie['id']}"
 					),
 					"imdb": MetadataID(
@@ -162,7 +166,7 @@ class TheMovieDatabase(Provider):
 		*,
 		language: list[str],
 	) -> Show:
-		show_id = show.external_id["themoviedatabase"].id
+		show_id = show.external_id[self.name].id
 		if show.original_language not in language:
 			language.append(show.original_language)
 
@@ -194,7 +198,7 @@ class TheMovieDatabase(Provider):
 					if x["id"] in self.genre_map
 				],
 				external_id={
-					"themoviedatabase": MetadataID(
+					self.name: MetadataID(
 						show["id"], f"https://www.themoviedb.org/tv/{show['id']}"
 					),
 					"imdb": MetadataID(
@@ -256,7 +260,7 @@ class TheMovieDatabase(Provider):
 			start_date=datetime.strptime(season["air_date"], "%Y-%m-%d").date(),
 			end_date=None,
 			external_id={
-				"themoviedatabase": MetadataID(
+				self.name: MetadataID(
 					season["id"],
 					f"https://www.themoviedb.org/tv/{show_id}/season/{season['season_number']}",
 				)
@@ -290,6 +294,8 @@ class TheMovieDatabase(Provider):
 			language.append(search["original_language"])
 
 		# TODO: Handle absolute episodes
+		if not season or not episode_nbr:
+			raise NotImplementedError("Absolute order episodes not implemented for the movie database")
 
 		async def for_language(lng: str) -> Episode:
 			episode = await self.get(
@@ -305,7 +311,7 @@ class TheMovieDatabase(Provider):
 					name=search["name"],
 					original_language=search["original_language"],
 					external_id={
-						"themoviedatabase": MetadataID(
+						self.name: MetadataID(
 							show_id, f"https://www.themoviedb.org/tv/{show_id}"
 						)
 					},
@@ -319,7 +325,7 @@ class TheMovieDatabase(Provider):
 				if "poster_path" in episode
 				else None,
 				external_id={
-					"themoviedatabase": MetadataID(
+					self.name: MetadataID(
 						episode["id"],
 						f"https://www.themoviedb.org/movie/{episode['id']}",
 					),

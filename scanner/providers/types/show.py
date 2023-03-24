@@ -8,6 +8,7 @@ from .genre import Genre
 from .studio import Studio
 from .season import Season
 from .metadataid import MetadataID
+from ..utils import format_date
 
 class Status(str, Enum):
 	UNKNOWN = "unknown"
@@ -45,13 +46,6 @@ class Show:
 
 	translations: dict[str, ShowTranslation] = field(default_factory=dict)
 
-	def format_date(self, date: date | int | None) -> str | None:
-		if date is None:
-			return None
-		if isinstance(date, int):
-			return f"{date}-01-01T00:00:00Z"
-		return date.isoformat()
-
 	def to_kyoo(self):
 		# For now, the API of kyoo only support one language so we remove the others.
 		default_language = os.environ["LIBRARY_LANGUAGES"].split(",")[0]
@@ -65,8 +59,8 @@ class Show:
 			"logo": next(iter(self.translations[default_language].logos), None),
 			"trailer": next(iter(self.translations[default_language].trailers), None),
 			"studio": next(iter(x.to_kyoo() for x in self.studios), None),
-			"startAir": self.format_date(self.start_air),
-			"endAir": self.format_date(self.end_air),
+			"startAir": format_date(self.start_air),
+			"endAir": format_date(self.end_air),
 			"title": self.translations[default_language].name,
 			"genres": [x.to_kyoo() for x in self.genres],
 		}
