@@ -18,7 +18,6 @@ class PartialShow:
 class EpisodeTranslation:
 	name: str
 	overview: Optional[str]
-	thumbnails: list[str]
 
 
 @dataclass
@@ -28,7 +27,8 @@ class Episode:
 	episode_number: Optional[int]
 	absolute_number: Optional[int]
 	release_date: Optional[date | int]
-	path: Optional[str]
+	thumbnail: Optional[str]
 	external_id: dict[str, MetadataID]
 
+	path: Optional[str] = None
 	translations: dict[str, EpisodeTranslation] = field(default_factory=dict)
