@@ -51,13 +51,23 @@ class TheMovieDatabase(Provider):
 
 	T = TypeVar("T")
 
+	def merge_translations(self, host, translations, *, languages: list[str]):
+		host.translations = {
+			k: v.translations[k] for k, v in zip(languages, translations)
+		}
+		return host
+
 	async def process_translations(
-		self, for_language: Callable[[str], Awaitable[T]], languages: list[str]
+		self,
+		for_language: Callable[[str], Awaitable[T]],
+		languages: list[str],
+		post_merge: Callable[[T, list[T]], T] | None = None,
 	) -> T:
 		tasks = map(lambda lng: for_language(lng), languages)
 		items: list[Any] = await asyncio.gather(*tasks)
-		item = items[0]
-		item.translations = {k: v.translations[k] for k, v in zip(languages, items)}
+		item = self.merge_translations(items[0], items, languages=languages)
+		if post_merge:
+			item = post_merge(item, items)
 		return item
 
 	def get_image(self, images: list[Dict[str, Any]]) -> list[str]:
@@ -215,7 +225,27 @@ class TheMovieDatabase(Provider):
 			ret.translations = {lng: translation}
 			return ret
 
-		ret = await self.process_translations(for_language, language)
+		def merge_seasons_translations(item: Show, items: list[Show]) -> Show:
+			item.seasons = [
+				self.merge_translations(
+					season,
+					[
+						next(
+							y
+							for y in x.seasons
+							if y.season_number == season.season_number
+						)
+						for x in items
+					],
+					languages=language,
+				)
+				for season in item.seasons
+			]
+			return item
+
+		ret = await self.process_translations(
+			for_language, language, merge_seasons_translations
+		)
 		return ret
 
 	def to_season(
