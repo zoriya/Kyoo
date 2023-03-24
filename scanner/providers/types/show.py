@@ -4,9 +4,9 @@ from datetime import date
 from typing import Optional
 from enum import Enum
 
-
 from .genre import Genre
 from .studio import Studio
+from .season import Season
 from .metadataid import MetadataID
 
 class Status(str, Enum):
@@ -19,28 +19,29 @@ class Status(str, Enum):
 @dataclass
 class ShowTranslation:
 	name: str
-	tagline: Optional[str] = None
-	keywords: list[str] = field(default_factory=list)
-	overview: Optional[str] = None
+	tagline: Optional[str]
+	keywords: list[str]
+	overview: Optional[str]
 
-	posters: list[str] = field(default_factory=list)
-	logos: list[str] = field(default_factory=list)
-	trailers: list[str] = field(default_factory=list)
-	thumbnails: list[str] = field(default_factory=list)
+	posters: list[str]
+	logos: list[str]
+	trailers: list[str]
+	thumbnails: list[str]
 
 
 @dataclass
 class Show:
-	original_language: Optional[str] = None
-	aliases: list[str] = field(default_factory=list)
-	start_air: Optional[date | int] = None
-	end_air: Optional[date | int] = None
-	status: Status = Status.UNKNOWN
-	studios: list[Studio] = field(default_factory=list)
-	genres: list[Genre] = field(default_factory=list)
+	original_language: Optional[str]
+	aliases: list[str]
+	start_air: Optional[date | int]
+	end_air: Optional[date | int]
+	status: Status
+	studios: list[Studio]
+	genres: list[Genre]
+	seasons: list[Season]
 	# TODO: handle staff
 	# staff: list[Staff]
-	external_id: dict[str, MetadataID] = field(default_factory=dict)
+	external_id: dict[str, MetadataID]
 
 	translations: dict[str, ShowTranslation] = field(default_factory=dict)
 
