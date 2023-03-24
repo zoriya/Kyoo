@@ -8,15 +8,23 @@ from .metadataid import MetadataID
 
 
 @dataclass
+class PartialShow:
+	name: str
+	original_language: str
+	external_id: dict[str, MetadataID]
+
+
+@dataclass
 class EpisodeTranslation:
 	name: str
 	overview: Optional[str]
 	thumbnails: list[str]
 
+
 @dataclass
 class Episode:
-	show: Show | dict[str, MetadataID]
-	season: Optional[Season]
+	show: Show | PartialShow
+	season_number: Optional[int]
 	episode_number: Optional[int]
 	absolute_number: Optional[int]
 	release_date: Optional[date | int]

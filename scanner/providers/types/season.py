@@ -2,7 +2,6 @@ from datetime import date
 from dataclasses import dataclass, field
 from typing import Optional
 
-from .show import Show
 from .metadataid import MetadataID
 
 
@@ -16,7 +15,6 @@ class SeasonTranslation:
 
 @dataclass
 class Season:
-	show: Show | dict[str, MetadataID]
 	season_number: int
 	start_date: Optional[date | int]
 	end_date: Optional[date | int]
