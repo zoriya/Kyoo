@@ -35,12 +35,14 @@ class Scanner:
 
 	@log_errors
 	async def identify(self, path: Path):
-		raw = guessit(path)
+		raw = guessit(path, "--episode-prefer-number")
 		logging.info("Identied %s: %s", path, raw)
 
 		# TODO: check if episode/movie already exists in kyoo and skip if it does.
 		# TODO: keep a list of processing shows to only fetch metadata once even if
 		#       multiples identify of the same show run on the same time
+
+		# TODO: Add collections support
 		if raw["type"] == "movie":
 			movie = await self.provider.identify_movie(
 				raw["title"], raw.get("year"), language=self.languages
@@ -49,7 +51,17 @@ class Scanner:
 			logging.debug("Got movie: %s", movie)
 			await self.post("movies", data=movie.to_kyoo())
 		elif raw["type"] == "episode":
-			pass
+			# TODO: Identify shows & seasons too.
+			episode = await self.provider.identify_episode(
+				raw["title"],
+				season=raw.get("season"),
+				episode=raw.get("episode"),
+				absolute=raw.get("episode") if "season" not in raw else None,
+				language=self.languages,
+			)
+			episode.path = str(path)
+			logging.debug("Got episode: %s", episode)
+			await self.post("episodes", data=episode.to_kyoo())
 		else:
 			logging.warn("Unknown video file type: %s", raw["type"])
 
