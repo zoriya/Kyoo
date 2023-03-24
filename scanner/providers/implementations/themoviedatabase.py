@@ -9,7 +9,7 @@ from providers.types.metadataid import MetadataID
 
 from ..provider import Provider
 from ..types.movie import Movie, MovieTranslation
-from ..types.status import Status
+from ..types.episode import Episode
 from ..types.studio import Studio
 
 
@@ -138,3 +138,15 @@ class TheMovieDatabase(Provider):
 		movie = movies[0]
 		movie.translations = {k: v.translations[k] for k, v in zip(language, movies)}
 		return movie
+
+
+	async def identify_episode(
+		self,
+		name: str,
+		season: Optional[int],
+		episode: Optional[int],
+		absolute: Optional[int],
+		*,
+		language: list[str]
+	) -> Episode:
+		raise NotImplementedError

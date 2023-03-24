@@ -3,6 +3,7 @@ from aiohttp import ClientSession
 from abc import abstractmethod
 from typing import Optional, TypeVar
 
+from .types.episode import Episode
 from .types.movie import Movie
 
 
@@ -26,4 +27,16 @@ class Provider:
 	async def identify_movie(
 		self, name: str, year: Optional[int], *, language: list[str]
 	) -> Movie:
+		raise NotImplementedError
+
+	@abstractmethod
+	async def identify_episode(
+		self,
+		name: str,
+		season: Optional[int],
+		episode: Optional[int],
+		absolute: Optional[int],
+		*,
+		language: list[str]
+	) -> Episode:
 		raise NotImplementedError
