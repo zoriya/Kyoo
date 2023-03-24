@@ -4,19 +4,20 @@ from datetime import date
 from typing import Optional
 from enum import Enum
 
+
 from .genre import Genre
 from .studio import Studio
 from .metadataid import MetadataID
 
-
 class Status(str, Enum):
 	UNKNOWN = "unknown"
 	FINISHED = "finished"
+	AIRING = "airing"
 	PLANNED = "planned"
 
 
 @dataclass
-class MovieTranslation:
+class ShowTranslation:
 	name: str
 	tagline: Optional[str] = None
 	keywords: list[str] = field(default_factory=list)
@@ -29,19 +30,19 @@ class MovieTranslation:
 
 
 @dataclass
-class Movie:
+class Show:
 	original_language: Optional[str] = None
 	aliases: list[str] = field(default_factory=list)
-	release_date: Optional[date | int] = None
+	start_air: Optional[date | int] = None
+	end_air: Optional[date | int] = None
 	status: Status = Status.UNKNOWN
-	path: Optional[str] = None
 	studios: list[Studio] = field(default_factory=list)
 	genres: list[Genre] = field(default_factory=list)
 	# TODO: handle staff
 	# staff: list[Staff]
 	external_id: dict[str, MetadataID] = field(default_factory=dict)
 
-	translations: dict[str, MovieTranslation] = field(default_factory=dict)
+	translations: dict[str, ShowTranslation] = field(default_factory=dict)
 
 	def format_date(self, date: date | int | None) -> str | None:
 		if date is None:
@@ -63,9 +64,8 @@ class Movie:
 			"logo": next(iter(self.translations[default_language].logos), None),
 			"trailer": next(iter(self.translations[default_language].trailers), None),
 			"studio": next(iter(x.to_kyoo() for x in self.studios), None),
-			"release_date": None,
-			"startAir": self.format_date(self.release_date),
+			"startAir": self.format_date(self.start_air),
+			"endAir": self.format_date(self.end_air),
 			"title": self.translations[default_language].name,
 			"genres": [x.to_kyoo() for x in self.genres],
-			"isMovie": True,
 		}
