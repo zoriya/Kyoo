@@ -2,15 +2,16 @@ import asyncio
 from datetime import datetime
 import logging
 from aiohttp import ClientSession
-from typing import Callable, Dict, Optional, Any
-
-from providers.types.genre import Genre
-from providers.types.metadataid import MetadataID
+from typing import Awaitable, Callable, Coroutine, Dict, Optional, Any, TypeVar
 
 from ..provider import Provider
-from ..types.movie import Movie, MovieTranslation
-from ..types.episode import Episode
+from ..types.movie import Movie, MovieTranslation, Status as MovieStatus
+from ..types.season import Season, SeasonTranslation
+from ..types.episode import Episode, PartialShow
 from ..types.studio import Studio
+from ..types.genre import Genre
+from ..types.metadataid import MetadataID
+from ..types.show import Show, ShowTranslation, Status as ShowStatus
 
 
 class TheMovieDatabase(Provider):
@@ -48,12 +49,36 @@ class TheMovieDatabase(Provider):
 			r.raise_for_status()
 			return await r.json()
 
+	T = TypeVar("T")
+
+	async def process_translations(
+		self, for_language: Callable[[str], Awaitable[T]], languages: list[str]
+	) -> T:
+		tasks = map(lambda lng: for_language(lng), languages)
+		items: list[Any] = await asyncio.gather(*tasks)
+		item = items[0]
+		item.translations = {k: v.translations[k] for k, v in zip(languages, items)}
+		return item
+
 	def get_image(self, images: list[Dict[str, Any]]) -> list[str]:
 		return [
 			f"https://image.tmdb.org/t/p/original{x['file_path']}"
 			for x in images
 			if x["file_path"]
 		]
+
+	def to_studio(self, company: dict[str, Any]) -> Studio:
+		return Studio(
+			name=company["name"],
+			logos=[f"https://image.tmdb.org/t/p/original{company['logo_path']}"]
+			if "logo_path" in company
+			else [],
+			external_id={
+				"themoviedatabase": MetadataID(
+					company["id"], f"https://www.themoviedb.org/company/{company['id']}"
+				)
+			},
+		)
 
 	async def identify_movie(
 		self, name: str, year: Optional[int], *, language: list[str]
@@ -82,23 +107,10 @@ class TheMovieDatabase(Provider):
 				release_date=datetime.strptime(
 					movie["release_date"], "%Y-%m-%d"
 				).date(),
-				status=Status.FINISHED
+				status=MovieStatus.FINISHED
 				if movie["status"] == "Released"
-				else Status.PLANNED,
-				studios=[
-					Studio(
-						name=x["name"],
-						logos=[f"https://image.tmdb.org/t/p/original{x['logo_path']}"]
-						if "logo_path" in x
-						else [],
-						external_id={
-							"themoviedatabase": MetadataID(
-								x["id"], f"https://www.themoviedb.org/company/{x['id']}"
-							)
-						},
-					)
-					for x in movie["production_companies"]
-				],
+				else MovieStatus.PLANNED,
+				studios=[self.to_studio(x) for x in movie["production_companies"]],
 				genres=[
 					self.genre_map[x["id"]]
 					for x in movie["genres"]
@@ -132,13 +144,106 @@ class TheMovieDatabase(Provider):
 			ret.translations = {lng: translation}
 			return ret
 
-		# TODO: make the folllowing generic
-		tasks = map(lambda lng: for_language(lng), language)
-		movies: list[Movie] = await asyncio.gather(*tasks)
-		movie = movies[0]
-		movie.translations = {k: v.translations[k] for k, v in zip(language, movies)}
-		return movie
+		return await self.process_translations(for_language, language)
 
+	async def identify_show(
+		self,
+		show: PartialShow,
+		*,
+		language: list[str],
+	) -> Show:
+		show_id = show.external_id["themoviedatabase"].id
+		if show.original_language not in language:
+			language.append(show.original_language)
+
+		async def for_language(lng: str) -> Show:
+			show = await self.get(
+				f"/tv/{show_id}",
+				params={
+					"language": lng,
+					"append_to_response": "alternative_titles,videos,credits,keywords,images",
+				},
+			)
+			logging.debug("TMDb responded: %s", show)
+			# TODO: Use collection data
+
+			ret = Show(
+				original_language=show["original_language"],
+				aliases=[x["title"] for x in show["alternative_titles"]["titles"]],
+				start_air=datetime.strptime(show["first_air_date"], "%Y-%m-%d").date(),
+				end_air=datetime.strptime(show["last_air_date"], "%Y-%m-%d").date(),
+				status=ShowStatus.FINISHED
+				if show["status"] == "Released"
+				else ShowStatus.AIRING
+				if show["in_production"]
+				else ShowStatus.FINISHED,
+				studios=[self.to_studio(x) for x in show["production_companies"]],
+				genres=[
+					self.genre_map[x["id"]]
+					for x in show["genres"]
+					if x["id"] in self.genre_map
+				],
+				external_id={
+					"themoviedatabase": MetadataID(
+						show["id"], f"https://www.themoviedb.org/tv/{show['id']}"
+					),
+					"imdb": MetadataID(
+						show["imdb_id"],
+						f"https://www.imdb.com/title/{show['imdb_id']}",
+					),
+				},
+				seasons=[
+					self.to_season(x, language=lng, show_id=show["id"])
+					for x in show["seasons"]
+				],
+				# TODO: Add cast information
+			)
+			translation = ShowTranslation(
+				name=show["name"],
+				tagline=show["tagline"],
+				keywords=list(map(lambda x: x["name"], show["keywords"]["keywords"])),
+				overview=show["overview"],
+				posters=self.get_image(show["images"]["posters"]),
+				logos=self.get_image(show["images"]["logos"]),
+				thumbnails=self.get_image(show["images"]["backdrops"]),
+				trailers=[
+					f"https://www.youtube.com/watch?v{x['key']}"
+					for x in show["videos"]["results"]
+					if x["type"] == "Trailer" and x["site"] == "YouTube"
+				],
+			)
+			ret.translations = {lng: translation}
+			return ret
+
+		ret = await self.process_translations(for_language, language)
+		return ret
+
+	def to_season(
+		self, season: dict[str, Any], *, language: str, show_id: str
+	) -> Season:
+		return Season(
+			season_number=season["season_number"],
+			start_date=datetime.strptime(season["air_date"], "%Y-%m-%d").date(),
+			end_date=None,
+			external_id={
+				"themoviedatabase": MetadataID(
+					season["id"],
+					f"https://www.themoviedb.org/tv/{show_id}/season/{season['season_number']}",
+				)
+			},
+			translations={
+				language: SeasonTranslation(
+					name=season["name"],
+					overview=season["overview"],
+					poster=[
+						f"https://image.tmdb.org/t/p/original{season['poster_path']}"
+					]
+					if "poster_path" in season
+					else [],
+					thumbnails=[],
+				)
+			},
+		)
 
 	async def identify_episode(
 		self,
@@ -147,6 +252,65 @@ class TheMovieDatabase(Provider):
 		episode: Optional[int],
 		absolute: Optional[int],
 		*,
-		language: list[str]
+		language: list[str],
 	) -> Episode:
-		raise NotImplementedError
+		search = (await self.get("search/tv", params={"query": name}))["results"][0]
+		show_id = search["id"]
+		if search["original_language"] not in language:
+			language.append(search["original_language"])
+
+		async def for_language(lng: str) -> Episode:
+			movie = await self.get(
+				f"/movie/{show_id}",
+				params={
+					"language": lng,
+					"append_to_response": "alternative_titles,videos,credits,keywords,images",
+				},
+			)
+			logging.debug("TMDb responded: %s", movie)
+			# TODO: Use collection data
+
+			ret = Movie(
+				original_language=movie["original_language"],
+				aliases=[x["title"] for x in movie["alternative_titles"]["titles"]],
+				release_date=datetime.strptime(
+					movie["release_date"], "%Y-%m-%d"
+				).date(),
+				status=MovieStatus.FINISHED
+				if movie["status"] == "Released"
+				else MovieStatus.PLANNED,
+				studios=[self.to_studio(x) for x in movie["production_companies"]],
+				genres=[
+					self.genre_map[x["id"]]
+					for x in movie["genres"]
+					if x["id"] in self.genre_map
+				],
+				external_id={
+					"themoviedatabase": MetadataID(
+						movie["id"], f"https://www.themoviedb.org/movie/{movie['id']}"
+					),
+					"imdb": MetadataID(
+						movie["imdb_id"],
+						f"https://www.imdb.com/title/{movie['imdb_id']}",
+					),
+				}
+				# TODO: Add cast information
+			)
+			translation = MovieTranslation(
+				name=movie["title"],
+				tagline=movie["tagline"],
+				keywords=list(map(lambda x: x["name"], movie["keywords"]["keywords"])),
+				overview=movie["overview"],
+				posters=self.get_image(movie["images"]["posters"]),
+				logos=self.get_image(movie["images"]["logos"]),
+				thumbnails=self.get_image(movie["images"]["backdrops"]),
+				trailers=[
+					f"https://www.youtube.com/watch?v{x['key']}"
+					for x in movie["videos"]["results"]
+					if x["type"] == "Trailer" and x["site"] == "YouTube"
+				],
+			)
+			ret.translations = {lng: translation}
+			return ret
+
+		return self.process_translations(for_language, language)
