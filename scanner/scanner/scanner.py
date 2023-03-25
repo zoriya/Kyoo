@@ -42,9 +42,6 @@ class Scanner:
 		logging.info("Identied %s: %s", path, raw)
 
 		# TODO: check if episode/movie already exists in kyoo and skip if it does.
-		# TODO: keep a list of processing shows to only fetch metadata once even if
-		#       multiples identify of the same show run on the same time
-
 		# TODO: Add collections support
 		if raw["type"] == "movie":
 			return
@@ -64,21 +61,38 @@ class Scanner:
 			)
 			episode.path = str(path)
 			logging.debug("Got episode: %s", episode)
-
-			show_provider_id = episode.show.external_id[self.provider.name].id
-			if (
-				isinstance(episode.show, PartialShow)
-				and show_provider_id not in self.cache["shows"]
-			):
-				show = await self.provider.identify_show(
-					episode.show, language=self.languages
-				)
-				logging.debug("Got show: %s", episode)
-				self.cache["shows"][show_provider_id] = await self.post("show", data=show.to_kyoo())
-			episode.show_id = self.cache["shows"][show_provider_id]
+			episode.show_id = await self.create_or_get_show(episode)
 			await self.post("episodes", data=episode.to_kyoo())
 		else:
 			logging.warn("Unknown video file type: %s", raw["type"])
+
+	async def create_or_get_show(self, episode: Episode) -> str:
+		provider_id = episode.show.external_id[self.provider.name].id
+		if provider_id in self.cache["shows"]:
+			ret = self.cache["shows"][provider_id]
+			print(f"Waiting for {provider_id}")
+			await ret["event"].wait()
+			if not ret["id"]:
+				raise RuntimeError("Provider failed to create the show")
+			return ret["id"]
+
+		self.cache["shows"][provider_id] = {"id": None, "event": asyncio.Event()}
+		show = (
+			await self.provider.identify_show(episode.show, language=self.languages)
+			if isinstance(episode.show, PartialShow)
+			else episode.show
+		)
+		logging.debug("Got show: %s", episode)
+		try:
+			ret = await self.post("show", data=show.to_kyoo())
+		except:
+			# Allow tasks waiting for this show to bail out.
+			self.cache["shows"][provider_id]["event"].set()
+			raise
+		print(f"setting {provider_id}")
+		self.cache["shows"][provider_id]["id"] = ret
+		self.cache["shows"][provider_id]["event"].set()
+		return ret
 
 	async def post(self, path: str, *, data: object) -> str:
 		url = os.environ.get("KYOO_URL", "http://back:5000")
@@ -92,11 +106,12 @@ class Scanner:
 			),
 		)
 		async with self._client.post(
-			f"{url}/{path}", json=data, headers={"X-API-Key": self._api_key}
+			f"{url}/{path}",
+			json=data,
+			headers={"X-API-Key": self._api_key},
 		) as r:
 			if not r.ok:
 				print(await r.text())
 			r.raise_for_status()
 			ret = await r.json()
 			return ret["id"]
-
