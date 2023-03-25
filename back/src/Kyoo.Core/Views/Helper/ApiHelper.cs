@@ -97,7 +97,7 @@ namespace Kyoo.Core.Api
 				MemberExpression propertyExpr = Expression.Property(param, property);
 
 				ConstantExpression valueExpr = null;
-				bool isList = typeof(IEnumerable).IsAssignableFrom(propertyExpr.Type);
+				bool isList = typeof(IEnumerable).IsAssignableFrom(propertyExpr.Type) && propertyExpr.Type != typeof(string);
 				if (operand != "ctn" && !typeof(IResource).IsAssignableFrom(propertyExpr.Type) && !isList)
 				{
 					Type propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;

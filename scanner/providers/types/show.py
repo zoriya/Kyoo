@@ -43,7 +43,7 @@ class Show:
 	seasons: list[Season]
 	# TODO: handle staff
 	# staff: list[Staff]
-	external_id: dict[str, MetadataID]
+	external_ids: dict[str, MetadataID]
 
 	translations: dict[str, ShowTranslation] = field(default_factory=dict)
 
@@ -59,8 +59,10 @@ class Show:
 			),
 			"logo": next(iter(self.translations[default_language].logos), None),
 			"trailer": next(iter(self.translations[default_language].trailers), None),
-			"studio": next(iter(self.studios), None),
+			"studio": next((x.to_kyoo() for x in self.studios), None),
 			"title": self.translations[default_language].name,
 			"genres": [x.to_kyoo() for x in self.genres],
-			"seasons": [x.to_kyoo() for x in self.seasons],
+			"seasons": None,
+			# TODO: The back has bad external id support, we disable it for now
+			"external_ids": None,
 		}

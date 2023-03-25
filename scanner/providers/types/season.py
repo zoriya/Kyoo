@@ -20,8 +20,9 @@ class Season:
 	season_number: int
 	start_air: Optional[date | int]
 	end_air: Optional[date | int]
-	external_id: dict[str, MetadataID]
+	external_ids: dict[str, MetadataID]
 
+	show_id: Optional[str] = None
 	translations: dict[str, SeasonTranslation] = field(default_factory=dict)
 
 	def to_kyoo(self):
@@ -34,4 +35,7 @@ class Season:
 			"thumbnail": next(
 				iter(self.translations[default_language].thumbnails), None
 			),
+			"title": self.translations[default_language].name,
+			# TODO: The back has bad external id support, we disable it for now
+			"external_ids": None,
 		}
