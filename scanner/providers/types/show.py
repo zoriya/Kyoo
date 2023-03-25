@@ -10,6 +10,7 @@ from .season import Season
 from .metadataid import MetadataID
 from ..utils import format_date
 
+
 class Status(str, Enum):
 	UNKNOWN = "unknown"
 	FINISHED = "finished"
@@ -58,9 +59,8 @@ class Show:
 			),
 			"logo": next(iter(self.translations[default_language].logos), None),
 			"trailer": next(iter(self.translations[default_language].trailers), None),
-			"studio": next(iter(x.to_kyoo() for x in self.studios), None),
-			"startAir": format_date(self.start_air),
-			"endAir": format_date(self.end_air),
+			"studio": next(iter(self.studios), None),
 			"title": self.translations[default_language].name,
 			"genres": [x.to_kyoo() for x in self.genres],
+			"seasons": [x.to_kyoo() for x in self.seasons],
 		}
