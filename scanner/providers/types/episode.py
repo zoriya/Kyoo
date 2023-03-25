@@ -28,7 +28,7 @@ class Episode:
 	season_number: Optional[int]
 	episode_number: Optional[int]
 	absolute_number: Optional[int]
-	release_date: Optional[date]
+	release_date: Optional[date | int]
 	thumbnail: Optional[str]
 	external_id: dict[str, MetadataID]
 
@@ -43,5 +43,4 @@ class Episode:
 		return {
 			**asdict(self),
 			**asdict(self.translations[default_language]),
-			"release_date": format_date(self.release_date),
 		}

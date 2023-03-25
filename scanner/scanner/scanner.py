@@ -1,13 +1,14 @@
 from functools import wraps
-import json
 import os
 import asyncio
 import logging
+import jsons
 from aiohttp import ClientSession
 from pathlib import Path
 from guessit import guessit
 from providers.provider import Provider
-from providers.types.episode import PartialShow
+from providers.types.episode import Episode, PartialShow
+from providers.types.show import Show
 
 
 def log_errors(f):
@@ -81,7 +82,15 @@ class Scanner:
 
 	async def post(self, path: str, *, data: object) -> str:
 		url = os.environ.get("KYOO_URL", "http://back:5000")
-		print(json.dumps(data, indent=4))
+		logging.info(
+			"Sending %s: %s",
+			path,
+			jsons.dumps(
+				data,
+				key_transformer=jsons.KEY_TRANSFORMER_CAMELCASE,
+				jdkwargs={"indent": 4},
+			),
+		)
 		async with self._client.post(
 			f"{url}/{path}", json=data, headers={"X-API-Key": self._api_key}
 		) as r:
