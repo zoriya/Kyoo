@@ -40,7 +40,7 @@ class Movie:
 	genres: list[Genre] = field(default_factory=list)
 	# TODO: handle staff
 	# staff: list[Staff]
-	external_id: dict[str, MetadataID] = field(default_factory=dict)
+	external_ids: dict[str, MetadataID] = field(default_factory=dict)
 
 	translations: dict[str, MovieTranslation] = field(default_factory=dict)
 
@@ -56,10 +56,12 @@ class Movie:
 			),
 			"logo": next(iter(self.translations[default_language].logos), None),
 			"trailer": next(iter(self.translations[default_language].trailers), None),
-			"studio": next(iter(self.studios), None),
+			"studio": next((x.to_kyoo() for x in self.studios), None),
 			"release_date": None,
 			"startAir": format_date(self.release_date),
 			"title": self.translations[default_language].name,
 			"genres": [x.to_kyoo() for x in self.genres],
 			"isMovie": True,
+			# TODO: The back has bad external id support, we disable it for now
+			"external_ids": None,
 		}

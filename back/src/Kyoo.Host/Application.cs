@@ -143,7 +143,7 @@ namespace Kyoo.Host
 					.UseKestrel(options => { options.AddServerHeader = false; })
 					.UseIIS()
 					.UseIISIntegration()
-					.UseUrls("http://*:5000")
+					.UseUrls(Environment.GetEnvironmentVariable("KYOO_BIND_URL") ?? "http://*:5000")
 					.UseStartup(host => PluginsStartup.FromWebHost(host, new LoggerFactory().AddSerilog()))
 				);
 		}
