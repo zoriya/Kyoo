@@ -1,7 +1,7 @@
 import asyncio
-from datetime import datetime
 import logging
 from aiohttp import ClientSession
+from datetime import datetime
 from typing import Awaitable, Callable, Dict, Optional, Any, TypeVar
 
 from ..provider import Provider
@@ -175,7 +175,7 @@ class TheMovieDatabase(Provider):
 				f"/tv/{show_id}",
 				params={
 					"language": lng,
-					"append_to_response": "alternative_titles,videos,credits,keywords,images",
+					"append_to_response": "alternative_titles,videos,credits,keywords,images,external_ids",
 				},
 			)
 			logging.debug("TMDb responded: %s", show)
@@ -183,7 +183,7 @@ class TheMovieDatabase(Provider):
 
 			ret = Show(
 				original_language=show["original_language"],
-				aliases=[x["title"] for x in show["alternative_titles"]["titles"]],
+				aliases=[x["title"] for x in show["alternative_titles"]["results"]],
 				start_air=datetime.strptime(show["first_air_date"], "%Y-%m-%d").date(),
 				end_air=datetime.strptime(show["last_air_date"], "%Y-%m-%d").date(),
 				status=ShowStatus.FINISHED
@@ -202,9 +202,10 @@ class TheMovieDatabase(Provider):
 						show["id"], f"https://www.themoviedb.org/tv/{show['id']}"
 					),
 					"imdb": MetadataID(
-						show["imdb_id"],
-						f"https://www.imdb.com/title/{show['imdb_id']}",
+						show["external_ids"]["imdb_id"],
+						f"https://www.imdb.com/title/{show['external_ids']['imdb_id']}",
 					),
+					"tvdb": MetadataID(show["external_ids"]["tvdb_id"], link=None),
 				},
 				seasons=[
 					self.to_season(x, language=lng, show_id=show["id"])
@@ -215,7 +216,7 @@ class TheMovieDatabase(Provider):
 			translation = ShowTranslation(
 				name=show["name"],
 				tagline=show["tagline"],
-				keywords=list(map(lambda x: x["name"], show["keywords"]["keywords"])),
+				keywords=list(map(lambda x: x["name"], show["keywords"]["results"])),
 				overview=show["overview"],
 				posters=self.get_image(show["images"]["posters"]),
 				logos=self.get_image(show["images"]["logos"]),
@@ -257,8 +258,8 @@ class TheMovieDatabase(Provider):
 	) -> Season:
 		return Season(
 			season_number=season["season_number"],
-			start_date=datetime.strptime(season["air_date"], "%Y-%m-%d").date(),
-			end_date=None,
+			start_air=datetime.strptime(season["air_date"], "%Y-%m-%d").date(),
+			end_air=None,
 			external_id={
 				self.name: MetadataID(
 					season["id"],
@@ -269,10 +270,10 @@ class TheMovieDatabase(Provider):
 				language: SeasonTranslation(
 					name=season["name"],
 					overview=season["overview"],
-					poster=[
+					posters=[
 						f"https://image.tmdb.org/t/p/original{season['poster_path']}"
 					]
-					if "poster_path" in season
+					if season["poster_path"] is not None
 					else [],
 					thumbnails=[],
 				)
@@ -295,7 +296,9 @@ class TheMovieDatabase(Provider):
 
 		# TODO: Handle absolute episodes
 		if not season or not episode_nbr:
-			raise NotImplementedError("Absolute order episodes not implemented for the movie database")
+			raise NotImplementedError(
+				"Absolute order episodes not implemented for the movie database"
+			)
 
 		async def for_language(lng: str) -> Episode:
 			episode = await self.get(
@@ -327,7 +330,7 @@ class TheMovieDatabase(Provider):
 				external_id={
 					self.name: MetadataID(
 						episode["id"],
-						f"https://www.themoviedb.org/movie/{episode['id']}",
+						f"https://www.themoviedb.org/tv/{show_id}/season/{episode['season_number']}/episode/{episode['episode_number']}",
 					),
 				},
 			)

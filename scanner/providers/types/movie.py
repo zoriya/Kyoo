@@ -56,7 +56,7 @@ class Movie:
 			),
 			"logo": next(iter(self.translations[default_language].logos), None),
 			"trailer": next(iter(self.translations[default_language].trailers), None),
-			"studio": next(iter(x.to_kyoo() for x in self.studios), None),
+			"studio": next(iter(self.studios), None),
 			"release_date": None,
 			"startAir": format_date(self.release_date),
 			"title": self.translations[default_language].name,
