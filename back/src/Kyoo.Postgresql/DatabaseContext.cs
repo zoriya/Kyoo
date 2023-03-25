@@ -480,7 +480,7 @@ namespace Kyoo.Postgresql
 		{
 			try
 			{
-				return await base.SaveChangesAsync(cancellationToken);
+				return await SaveChangesAsync(cancellationToken);
 			}
 			catch (DbUpdateException ex)
 			{
@@ -488,6 +488,10 @@ namespace Kyoo.Postgresql
 				if (IsDuplicateException(ex))
 					throw new DuplicatedItemException(await getExisting());
 				throw;
+			}
+			catch (DuplicatedItemException)
+			{
+				throw new DuplicatedItemException(await getExisting());
 			}
 		}
 
