@@ -4,6 +4,8 @@ from aiohttp import ClientSession
 from datetime import datetime
 from typing import Awaitable, Callable, Dict, Optional, Any, TypeVar
 
+from providers.utils import ProviderError
+
 from ..provider import Provider
 from ..types.movie import Movie, MovieTranslation, Status as MovieStatus
 from ..types.season import Season, SeasonTranslation
@@ -97,9 +99,12 @@ class TheMovieDatabase(Provider):
 	async def identify_movie(
 		self, name: str, year: Optional[int], *, language: list[str]
 	) -> Movie:
-		search = (await self.get("search/movie", params={"query": name, "year": year}))[
-			"results"
-		][0]
+		search_results = (
+			await self.get("search/movie", params={"query": name, "year": year})
+		)["results"]
+		if len(search_results) == 0:
+			raise ProviderError(f"No result for a movie named: {name}")
+		search = search_results[0]
 		movie_id = search["id"]
 		if search["original_language"] not in language:
 			language.append(search["original_language"])
@@ -118,9 +123,9 @@ class TheMovieDatabase(Provider):
 			ret = Movie(
 				original_language=movie["original_language"],
 				aliases=[x["title"] for x in movie["alternative_titles"]["titles"]],
-				release_date=datetime.strptime(
-					movie["release_date"], "%Y-%m-%d"
-				).date(),
+				release_date=datetime.strptime(movie["release_date"], "%Y-%m-%d").date()
+				if movie["release_date"]
+				else None,
 				status=MovieStatus.FINISHED
 				if movie["status"] == "Released"
 				else MovieStatus.PLANNED,
@@ -184,8 +189,12 @@ class TheMovieDatabase(Provider):
 			ret = Show(
 				original_language=show["original_language"],
 				aliases=[x["title"] for x in show["alternative_titles"]["results"]],
-				start_air=datetime.strptime(show["first_air_date"], "%Y-%m-%d").date(),
-				end_air=datetime.strptime(show["last_air_date"], "%Y-%m-%d").date(),
+				start_air=datetime.strptime(show["first_air_date"], "%Y-%m-%d").date()
+				if show["first_air_date"]
+				else None,
+				end_air=datetime.strptime(show["last_air_date"], "%Y-%m-%d").date()
+				if show["last_air_date"]
+				else None,
 				status=ShowStatus.FINISHED
 				if show["status"] == "Released"
 				else ShowStatus.AIRING
@@ -258,7 +267,9 @@ class TheMovieDatabase(Provider):
 	) -> Season:
 		return Season(
 			season_number=season["season_number"],
-			start_air=datetime.strptime(season["air_date"], "%Y-%m-%d").date(),
+			start_air=datetime.strptime(season["air_date"], "%Y-%m-%d").date()
+			if season["air_date"]
+			else None,
 			end_air=None,
 			external_ids={
 				self.name: MetadataID(
@@ -289,14 +300,19 @@ class TheMovieDatabase(Provider):
 		*,
 		language: list[str],
 	) -> Episode:
-		search = (await self.get("search/tv", params={"query": name}))["results"][0]
+		search_results = (await self.get("search/tv", params={"query": name}))[
+			"results"
+		]
+		if len(search_results) == 0:
+			raise ProviderError(f"No result for a tv show named: {name}")
+		search = search_results[0]
 		show_id = search["id"]
 		if search["original_language"] not in language:
 			language.append(search["original_language"])
 
 		# TODO: Handle absolute episodes
 		if not season or not episode_nbr:
-			raise NotImplementedError(
+			raise ProviderError(
 				"Absolute order episodes not implemented for the movie database"
 			)
 
@@ -323,7 +339,9 @@ class TheMovieDatabase(Provider):
 				episode_number=episode["episode_number"],
 				# TODO: absolute numbers
 				absolute_number=None,
-				release_date=datetime.strptime(episode["air_date"], "%Y-%m-%d").date(),
+				release_date=datetime.strptime(episode["air_date"], "%Y-%m-%d").date()
+				if episode["air_date"]
+				else None,
 				thumbnail=f"https://image.tmdb.org/t/p/original{episode['poster_path']}"
 				if "poster_path" in episode
 				else None,
