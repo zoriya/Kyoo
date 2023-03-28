@@ -8,7 +8,8 @@ from pathlib import Path
 from guessit import guessit
 from providers.provider import Provider
 from providers.types.episode import Episode, PartialShow
-from providers.types.season import Season
+from providers.types.season import Season, SeasonTranslation
+from providers.utils import ProviderError
 
 
 def log_errors(f):
@@ -16,10 +17,62 @@ def log_errors(f):
 	async def internal(*args, **kwargs):
 		try:
 			await f(*args, **kwargs)
+		except ProviderError as e:
+			logging.error(str(e))
 		except Exception as e:
 			logging.exception("Unhandled error", exc_info=e)
 
 	return internal
+
+
+cache = {}
+
+
+def provider_cache(*args):
+	ic = cache
+	for arg in args:
+		if arg not in ic:
+			ic[arg] = {}
+		ic = ic[arg]
+
+	def wrapper(f):
+		@wraps(f)
+		async def internal(*args, **kwargs):
+			nonlocal ic
+			for arg in args:
+				if arg not in ic:
+					ic[arg] = {}
+				ic = ic[arg]
+
+			if "event" in ic:
+				await ic["event"].wait()
+				if not ic["ret"]:
+					raise ProviderError("Cache miss. Another error should exist")
+				return ic["ret"]
+			ic["event"] = asyncio.Event()
+			try:
+				ret = await f(*args, **kwargs)
+				ic["ret"] = ret
+			except:
+				ic["event"].set()
+				raise
+			ic["event"].set()
+			return ret
+		return internal
+	return wrapper
+
+
+def set_in_cache(key: list[str | int]):
+	ic = cache
+	for arg in key:
+		if arg not in ic:
+			ic[arg] = {}
+		ic = ic[arg]
+	evt = asyncio.Event()
+	evt.set()
+	ic["event"] = evt
+
+
 
 
 class Scanner:
@@ -30,7 +83,7 @@ class Scanner:
 		self._api_key = api_key
 		self._url = os.environ.get("KYOO_URL", "http://back:5000")
 		self.provider = Provider.get_all(client)[0]
-		self.cache = {"shows": {}}
+		self.cache = {"shows": {}, "seasons": {}}
 		self.languages = languages
 
 	async def scan(self, path: str):
@@ -50,7 +103,6 @@ class Scanner:
 				return True
 		return False
 
-
 	@log_errors
 	async def identify(self, path: Path):
 		if await self.is_registered(path):
@@ -58,7 +110,6 @@ class Scanner:
 		raw = guessit(path, "--episode-prefer-number")
 		logging.info("Identied %s: %s", path, raw)
 
-		# TODO: check if episode/movie already exists in kyoo and skip if it does.
 		# TODO: Add collections support
 		if raw["type"] == "movie":
 			movie = await self.provider.identify_movie(
@@ -78,47 +129,49 @@ class Scanner:
 			episode.path = str(path)
 			logging.debug("Got episode: %s", episode)
 			episode.show_id = await self.create_or_get_show(episode)
-			# TODO: Do the same things for seasons and wait for them to be created on the api (else the episode creation will fail)
+
+			if episode.season_number is not None:
+				await self.register_seasons(
+					show_id=episode.show_id,
+					season_number=episode.season_number,
+				)
 			await self.post("episodes", data=episode.to_kyoo())
 		else:
 			logging.warn("Unknown video file type: %s", raw["type"])
 
 	async def create_or_get_show(self, episode: Episode) -> str:
-		provider_id = episode.show.external_ids[self.provider.name].id
-		if provider_id in self.cache["shows"]:
-			ret = self.cache["shows"][provider_id]
-			await ret["event"].wait()
-			if not ret["id"]:
-				raise RuntimeError("Provider failed to create the show")
-			return ret["id"]
-
-		self.cache["shows"][provider_id] = {"id": None, "event": asyncio.Event()}
-
-		# TODO: Check if a show with the same metadata id exists already on kyoo.
-
-		show = (
-			await self.provider.identify_show(episode.show, language=self.languages)
-			if isinstance(episode.show, PartialShow)
-			else episode.show
-		)
-		logging.debug("Got show: %s", episode)
-		try:
+		@provider_cache("shows")
+		async def create_show(_: str):
+			# TODO: Check if a show with the same metadata id exists already on kyoo.
+			show = (
+				await self.provider.identify_show(episode.show, language=self.languages)
+				if isinstance(episode.show, PartialShow)
+				else episode.show
+			)
+			logging.debug("Got show: %s", episode)
 			ret = await self.post("show", data=show.to_kyoo())
-		except:
-			# Allow tasks waiting for this show to bail out.
-			self.cache["shows"][provider_id]["event"].set()
-			raise
-		self.cache["shows"][provider_id]["id"] = ret
-		self.cache["shows"][provider_id]["event"].set()
+			try:
+				for season in show.seasons:
+					season.show_id = ret
+					await self.post("seasons", data=season.to_kyoo())
+					set_in_cache(key=["seasons", ret, season.season_number])
+			except Exception as e:
+				logging.exception("Unhandled error create a season", exc_info=e)
+			return ret
 
-		# TODO: Better handling of seasons registrations (maybe a lock also)
-		await self.register_seasons(ret, show.seasons)
-		return ret
+		# The parameter is only used as a key for the cache.
+		provider_id = episode.show.external_ids[self.provider.name].id
+		return await create_show(provider_id)
 
-	async def register_seasons(self, show_id: str, seasons: list[Season]):
-		for season in seasons:
-			season.show_id = show_id
-			await self.post("seasons", data=season.to_kyoo())
+	@provider_cache("seasons")
+	async def register_seasons(self, show_id: str, season_number: int):
+		# TODO: fetch season here. this will be useful when a new season of a show is aired after the show has been created on kyoo.
+		season = Season(
+			season_number=season_number,
+			show_id=show_id,
+			translations={lng: SeasonTranslation() for lng in self.languages},
+		)
+		await self.post("seasons", data=season.to_kyoo())
 
 	async def post(self, path: str, *, data: object) -> str:
 		logging.debug(

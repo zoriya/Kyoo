@@ -9,18 +9,18 @@ from .metadataid import MetadataID
 
 @dataclass
 class SeasonTranslation:
-	name: Optional[str]
-	overview: Optional[str]
-	posters: list[str]
-	thumbnails: list[str]
+	name: Optional[str] = None
+	overview: Optional[str] = None
+	posters: list[str] = field(default_factory=list)
+	thumbnails: list[str] = field(default_factory=list)
 
 
 @dataclass
 class Season:
 	season_number: int
-	start_air: Optional[date | int]
-	end_air: Optional[date | int]
-	external_ids: dict[str, MetadataID]
+	start_air: Optional[date | int] = None
+	end_air: Optional[date | int] = None
+	external_ids: dict[str, MetadataID] = field(default_factory=dict)
 
 	show_id: Optional[str] = None
 	translations: dict[str, SeasonTranslation] = field(default_factory=dict)
