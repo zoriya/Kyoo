@@ -19,6 +19,9 @@ jobs:
           - context: ./front
             label: front
             image: zoriya/kyoo_front
+          - context: ./scanner
+            label: scanner
+            image: zoriya/kyoo_scanner
     name: Build ${{matrix.label}}
     steps:
       - uses: actions/checkout@v2
