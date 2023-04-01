@@ -3,9 +3,7 @@ from datetime import date
 from dataclasses import dataclass, field, asdict
 from typing import Optional
 
-from ..utils import format_date
 from .show import Show
-from .season import Season
 from .metadataid import MetadataID
 
 
@@ -35,7 +33,6 @@ class Episode:
 	path: Optional[str] = None
 	show_id: Optional[str] = None
 	translations: dict[str, EpisodeTranslation] = field(default_factory=dict)
-
 
 	def to_kyoo(self):
 		# For now, the API of kyoo only support one language so we remove the others.
