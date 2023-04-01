@@ -23,11 +23,12 @@ ARG VERSION
 RUN dotnet publish --no-restore -c Release -o /app "-p:Version=${VERSION:-"0.0.0-dev"};SkipTranscoder=true" src/Kyoo.Host
 
 FROM mcr.microsoft.com/dotnet/aspnet:6.0
-RUN apt-get update && apt-get install -y libavutil-dev libavcodec-dev libavformat-dev
+RUN apt-get update && apt-get install -y libavutil-dev libavcodec-dev libavformat-dev curl
 COPY --from=builder /app /app
 COPY --from=transcoder /transcoder/libtranscoder.so /app
 
 WORKDIR /kyoo
 EXPOSE 5000
+HEALTHCHECK CMD curl --fail http://localhost:5000/health || exit
 CMD /app/Kyoo.Host
 

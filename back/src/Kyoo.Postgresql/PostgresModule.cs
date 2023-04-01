@@ -91,6 +91,8 @@ namespace Kyoo.Postgresql
 				if (_environment.IsDevelopment())
 					x.EnableDetailedErrors().EnableSensitiveDataLogging();
 			}, ServiceLifetime.Transient);
+
+			services.AddHealthChecks().AddDbContextCheck<DatabaseContext>();
 		}
 	}
 }
