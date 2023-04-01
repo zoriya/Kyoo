@@ -20,6 +20,18 @@ services:
       - KYOO_URL=${KYOO_URL:-http://back:5000}
       - PUBLIC_BACK_URL=${PUBLIC_BACK_URL}
 
+  scanner:
+    image: zoriya/kyoo_scanner:edge
+    restart: on-failure
+    depends_on:
+      - back
+    env_file:
+      - ./.env
+    environment:
+      - KYOO_URL=${KYOO_URL:-http://back:5000}
+    volumes:
+      - ${LIBRARY_ROOT}:/video
+
   ingress:
     image: nginx
     restart: on-failure
