@@ -1,5 +1,5 @@
 {pkgs ? import <nixpkgs> {}}: let
-  venvDir = "./.venv";
+  venvDir = "./scanner/.venv";
   pythonPkgs = ./scanner/requirements.txt;
 in
   pkgs.mkShell {

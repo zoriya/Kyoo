@@ -3,7 +3,6 @@ from datetime import date
 from dataclasses import dataclass, field, asdict
 from typing import Optional
 
-from ..utils import format_date
 from .metadataid import MetadataID
 
 
