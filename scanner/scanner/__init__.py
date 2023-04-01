@@ -1,4 +1,5 @@
 from .scanner import Scanner
+from .monitor import monitor
 
 
 async def main():
@@ -11,10 +12,7 @@ async def main():
 	from aiohttp import ClientSession
 	from providers.utils import format_date
 
-	path = os.environ.get("LIBRARY_ROOT")
-	if not path:
-		print("Missing environment variable 'LIBRARY_ROOT'.")
-		exit(2)
+	path = os.environ.get("SCANNER_LIBRARY_ROOT", "/video")
 	languages = os.environ.get("LIBRARY_LANGUAGES")
 	if not languages:
 		print("Missing environment variable 'LIBRARY_LANGUAGES'.")
@@ -38,6 +36,7 @@ async def main():
 			*args, key_transformer=jsons.KEY_TRANSFORMER_CAMELCASE, **kwargs
 		),
 	) as client:
-		await Scanner(client, languages=languages.split(","), api_key=api_key).scan(
-			path
-		)
+		scanner = Scanner(client, languages=languages.split(","), api_key=api_key)
+		await scanner.scan(path)
+		logging.info("Scan finished. Starting to monitor...")
+		await monitor(path, scanner)
