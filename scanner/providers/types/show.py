@@ -8,7 +8,6 @@ from .genre import Genre
 from .studio import Studio
 from .season import Season
 from .metadataid import MetadataID
-from ..utils import format_date
 
 
 class Status(str, Enum):
