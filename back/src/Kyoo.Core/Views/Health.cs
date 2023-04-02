@@ -48,7 +48,7 @@ namespace Kyoo.Core.Api
 		/// </summary>
 		/// <returns>A status indicating the health of the api.</returns>
 		[HttpGet]
-		[ProducesResponseType(StatusCodes.Status204NoContent)]
+		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status503ServiceUnavailable)]
 		public async Task<IActionResult> CheckHealth()
 		{
@@ -60,11 +60,16 @@ namespace Kyoo.Core.Api
 			HealthReport result = await _healthCheckService.CheckHealthAsync();
 			return result.Status switch
 			{
-				HealthStatus.Healthy => NoContent(),
-				HealthStatus.Unhealthy => NoContent(),
+				HealthStatus.Healthy => Ok(new HealthResult("Healthy")),
+				HealthStatus.Unhealthy => Ok(new HealthResult("Unstable")),
 				HealthStatus.Degraded => StatusCode(StatusCodes.Status503ServiceUnavailable),
 				_ => StatusCode(StatusCodes.Status500InternalServerError),
 			};
 		}
+
+		/// <summary>
+		/// The result of a health operation.
+		/// </summary>
+		public record HealthResult(string Status);
 	}
 }
