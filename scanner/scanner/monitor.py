@@ -1,7 +1,15 @@
 import asyncio
 from functools import wraps
 from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler, DirCreatedEvent, FileCreatedEvent, DirMovedEvent, FileMovedEvent, DirDeletedEvent, FileDeletedEvent
+from watchdog.events import (
+	FileSystemEventHandler,
+	DirCreatedEvent,
+	FileCreatedEvent,
+	DirMovedEvent,
+	FileMovedEvent,
+	DirDeletedEvent,
+	FileDeletedEvent,
+)
 
 from scanner.utils import log_errors
 
@@ -9,6 +17,7 @@ from .scanner import Scanner
 
 task_list = []
 event = asyncio.Event()
+
 
 async def monitor(path: str, scanner: Scanner):
 	global task_list
@@ -28,6 +37,7 @@ async def monitor(path: str, scanner: Scanner):
 	# Should call .join() if the while stops one day.
 	# observer.join()
 
+
 def async_event(f):
 	# Log errors of f and catch them to prevent the gather to throw.
 	f = log_errors(f)
@@ -38,6 +48,7 @@ def async_event(f):
 		event.set()
 
 	return internal
+
 
 class EventHandler(FileSystemEventHandler):
 	def __init__(self, scanner: Scanner):
