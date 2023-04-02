@@ -24,7 +24,8 @@ services:
     image: zoriya/kyoo_scanner:edge
     restart: on-failure
     depends_on:
-      - back
+      back:
+        condition: service_healthy
     env_file:
       - ./.env
     environment:

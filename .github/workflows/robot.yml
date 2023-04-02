@@ -30,12 +30,7 @@ jobs:
 
       - name: Start the service
         run: |
-          docker-compose up -d
-
-      - name: Perform healthchecks
-        run: |
-          docker-compose ps -a
-          wget --retry-connrefused --retry-on-http-error=502 http://localhost:8901 #/api/healthcheck
+          docker-compose up -d --wait
 
       - name: Run robot tests
         run: |
