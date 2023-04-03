@@ -20,7 +20,7 @@ COPY src/Kyoo.Swagger/Kyoo.Swagger.csproj src/Kyoo.Swagger/Kyoo.Swagger.csproj
 COPY tests/Kyoo.Tests/Kyoo.Tests.csproj tests/Kyoo.Tests/Kyoo.Tests.csproj
 RUN dotnet restore
 
-COPY --from=transcoder /transcoder/libtranscoder.so /app
+COPY --from=transcoder /transcoder/libtranscoder.so /app/out/bin/Kyoo.Host/Debug/net6.0/libtranscoder.so
 
 WORKDIR /kyoo
 EXPOSE 5000

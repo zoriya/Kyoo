@@ -153,5 +153,14 @@ namespace Kyoo.Core.Api
 		{
 			return GetImage(identifier, Images.Thumbnail);
 		}
+
+		/// <inheritdoc/>
+		public override async Task<ActionResult<T>> Create([FromBody] T resource)
+		{
+			// TODO: Remove this method and use a websocket API to do that.
+			ActionResult<T> ret = await base.Create(resource);
+			await _thumbs.DownloadImages(ret.Value);
+			return ret;
+		}
 	}
 }

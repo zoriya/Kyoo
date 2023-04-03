@@ -30,10 +30,10 @@ class Season:
 		return {
 			**asdict(self),
 			**asdict(self.translations[default_language]),
-			"poster": next(iter(self.translations[default_language].posters), None),
-			"thumbnail": next(
-				iter(self.translations[default_language].thumbnails), None
-			),
+			"images": {
+				"0": next(iter(self.translations[default_language].posters), None),
+				"1": next(iter(self.translations[default_language].thumbnails), None),
+			},
 			"title": self.translations[default_language].name,
 			# TODO: The back has bad external id support, we disable it for now
 			"external_ids": None,
