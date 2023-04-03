@@ -22,4 +22,4 @@ class Genre(str, Enum):
 	WESTERN = "Western"
 
 	def to_kyoo(self):
-		return {"name": f"{self}"}
+		return {"name": self.value}

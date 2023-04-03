@@ -38,7 +38,7 @@ def provider_cache(*args):
 
 			if "event" in ic:
 				await ic["event"].wait()
-				if not ic["ret"]:
+				if "ret" not in ic:
 					raise ProviderError("Cache miss. Another error should exist")
 				return ic["ret"]
 			ic["event"] = asyncio.Event()

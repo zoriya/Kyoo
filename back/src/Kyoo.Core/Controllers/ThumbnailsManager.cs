@@ -69,6 +69,7 @@ namespace Kyoo.Core.Controllers
 
 			try
 			{
+				_logger.LogInformation("Downloading image {What}", what);
 				AsyncRef<string> mime = new();
 				await using Stream reader = await _files.GetReader(url, mime);
 				string extension = new FileExtensionContentTypeProvider()
