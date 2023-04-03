@@ -342,8 +342,8 @@ class TheMovieDatabase(Provider):
 				release_date=datetime.strptime(episode["air_date"], "%Y-%m-%d").date()
 				if episode["air_date"]
 				else None,
-				thumbnail=f"https://image.tmdb.org/t/p/original{episode['poster_path']}"
-				if "poster_path" in episode
+				thumbnail=f"https://image.tmdb.org/t/p/original{episode['still_path']}"
+				if "still_path" in episode and episode["still_path"] is not None
 				else None,
 				external_ids={
 					self.name: MetadataID(

@@ -50,12 +50,12 @@ class Movie:
 		return {
 			**asdict(self),
 			**asdict(self.translations[default_language]),
-			"poster": next(iter(self.translations[default_language].posters), None),
-			"thumbnail": next(
-				iter(self.translations[default_language].thumbnails), None
-			),
-			"logo": next(iter(self.translations[default_language].logos), None),
-			"trailer": next(iter(self.translations[default_language].trailers), None),
+			"images": {
+				"0": next(iter(self.translations[default_language].posters), None),
+				"1": next(iter(self.translations[default_language].thumbnails), None),
+				"2": next(iter(self.translations[default_language].logos), None),
+				"3": next(iter(self.translations[default_language].trailers), None),
+			},
 			"studio": next((x.to_kyoo() for x in self.studios), None),
 			"release_date": None,
 			"startAir": format_date(self.release_date),

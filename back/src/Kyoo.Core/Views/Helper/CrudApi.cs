@@ -138,7 +138,7 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status409Conflict, Type = typeof(ActionResult<>))]
-		public async Task<ActionResult<T>> Create([FromBody] T resource)
+		public virtual async Task<ActionResult<T>> Create([FromBody] T resource)
 		{
 			return await Repository.Create(resource);
 		}
