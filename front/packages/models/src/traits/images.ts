@@ -53,7 +53,7 @@ export const ImagesP = z.object({
 	 * will be null. If the kyoo's instance is not capable of handling this kind of image for the
 	 * specific resource, this field won't be present.
 	 */
-	trailer: z.string().transform(imageFn).optional().nullable(),
+	trailer: z.string().optional().nullable(),
 });
 
 /**

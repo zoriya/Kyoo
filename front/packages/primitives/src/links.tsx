@@ -50,31 +50,35 @@ export const A = ({
 	);
 };
 
-export const PressableFeedback = forwardRef<View, PressableProps>(
-	function _Feedback({ children, ...props }, ref) {
-		const theme = useTheme();
+export const PressableFeedback = forwardRef<View, PressableProps>(function _Feedback(
+	{ children, ...props },
+	ref,
+) {
+	const theme = useTheme();
 
-		return (
-			<Pressable
-				ref={ref}
-				// TODO: Enable ripple on tv. Waiting for https://github.com/react-native-tvos/react-native-tvos/issues/440
-				{...(Platform.isTV
-					? {}
-					: { android_ripple: { foreground: true, color: alpha(theme.contrast, 0.5) as any } })}
-				{...props}
-			>
-				{children}
-			</Pressable>
-		);
-	},
-);
+	return (
+		<Pressable
+			ref={ref}
+			// TODO: Enable ripple on tv. Waiting for https://github.com/react-native-tvos/react-native-tvos/issues/440
+			{...(Platform.isTV
+				? {}
+				: { android_ripple: { foreground: true, color: alpha(theme.contrast, 0.5) as any } })}
+			{...props}
+		>
+			{children}
+		</Pressable>
+	);
+});
 
 export const Link = ({
 	href,
+	target,
 	children,
 	...props
-}: { href: string; } & PressableProps) => {
-	const linkProps = useLink({href});
+}: { href: string; target?: string } & PressableProps) => {
+	const linkProps = useLink({ href });
+	// @ts-ignore Missing hrefAttrs type definition.
+	linkProps.hrefAttrs = { ...linkProps.hrefAttrs, target };
 	return (
 		<PressableFeedback {...linkProps} {...props}>
 			{children}

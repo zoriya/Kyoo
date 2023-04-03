@@ -66,6 +66,7 @@ const TitleLine = ({
 	date,
 	poster,
 	studio,
+	trailerUrl,
 	...props
 }: {
 	isLoading: boolean;
@@ -74,6 +75,7 @@ const TitleLine = ({
 	date?: string;
 	poster?: string | null;
 	studio?: Studio | null;
+	trailerUrl?: string | null;
 } & Stylable) => {
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
@@ -156,7 +158,6 @@ const TitleLine = ({
 						</Skeleton>
 					)}
 					<View {...css({ flexDirection: "row" })}>
-						{/* @ts-ignore */}
 						<IconFab
 							icon={PlayArrow}
 							as={Link}
@@ -168,11 +169,14 @@ const TitleLine = ({
 							})}
 							{...tooltip(t("show.play"))}
 						/>
-						<IconButton
+						{trailerUrl && <IconButton
 							icon={Theaters}
+							as={Link}
+							href={trailerUrl}
+							target="_blank"
 							color={{ xs: theme.user.contrast, md: theme.colors.white }}
 							{...tooltip(t("show.trailer"))}
-						/>
+						/>}
 					</View>
 				</View>
 			</View>
@@ -330,6 +334,7 @@ export const Header = ({ query, slug }: { query: QueryIdentifier<Show | Movie>; 
 							name={data?.name}
 							date={data ? getDisplayDate(data as any) : undefined}
 							poster={data?.poster}
+							trailerUrl={data?.trailer}
 							studio={data?.studio}
 							{...css({
 								marginTop: {
