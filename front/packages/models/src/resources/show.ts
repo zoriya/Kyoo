@@ -41,6 +41,7 @@ export const ShowP = z.preprocess(
 		// Waiting for the API to be updaded
 		x.name = x.title;
 		if (x.aliases === null) x.aliases = [];
+		x.trailer = x.images["3"];
 		return x;
 	},
 	ResourceP.merge(ImagesP).extend({

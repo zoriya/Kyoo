@@ -155,7 +155,7 @@ class TheMovieDatabase(Provider):
 				logos=self.get_image(movie["images"]["logos"]),
 				thumbnails=self.get_image(movie["images"]["backdrops"]),
 				trailers=[
-					f"https://www.youtube.com/watch?v{x['key']}"
+					f"https://www.youtube.com/watch?v={x['key']}"
 					for x in movie["videos"]["results"]
 					if x["type"] == "Trailer" and x["site"] == "YouTube"
 				],
@@ -231,7 +231,7 @@ class TheMovieDatabase(Provider):
 				logos=self.get_image(show["images"]["logos"]),
 				thumbnails=self.get_image(show["images"]["backdrops"]),
 				trailers=[
-					f"https://www.youtube.com/watch?v{x['key']}"
+					f"https://www.youtube.com/watch?v={x['key']}"
 					for x in show["videos"]["results"]
 					if x["type"] == "Trailer" and x["site"] == "YouTube"
 				],

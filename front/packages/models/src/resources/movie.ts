@@ -39,6 +39,7 @@ export const MovieP = z.preprocess(
 		x.name = x.title;
 		if (x.aliases === null) x.aliases = [];
 		x.airDate = x.startAir;
+		x.trailer = x.images["3"];
 		return x;
 	},
 	ResourceP.merge(ImagesP).extend({
