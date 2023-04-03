@@ -20,7 +20,7 @@
 
 import { forwardRef, ReactNode } from "react";
 import { Platform, Pressable, TextProps, View, PressableProps } from "react-native";
-import { LinkCore, TextLink } from "solito/link";
+import { LinkCore, TextLink, useLink } from "solito/link";
 import { useTheme, useYoshiki } from "yoshiki/native";
 import { alpha } from "./themes";
 
@@ -73,10 +73,11 @@ export const Link = ({
 	href,
 	children,
 	...props
-}: { href: string; children?: ReactNode } & PressableProps) => {
+}: { href: string; } & PressableProps) => {
+	const linkProps = useLink({href});
 	return (
-		<LinkCore href={href} Component={PressableFeedback} componentProps={props}>
+		<PressableFeedback {...linkProps} {...props}>
 			{children}
-		</LinkCore>
+		</PressableFeedback>
 	);
 };

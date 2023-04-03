@@ -32,7 +32,7 @@
 		"react-native-reanimated": "^3.0.2",
 		"react-native-svg": "13.8.0",
 		"react-native-video": "^6.0.0-alpha.5",
-		"react-native-web": "0.0.0-c26cb9b08",
+		"react-native-web": "0.19.1",
 		"solito": "^3.0.0",
 		"superjson": "^1.12.2",
 		"yoshiki": "1.2.2",

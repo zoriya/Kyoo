@@ -81,7 +81,6 @@ export const IconButton = forwardRef(function _IconButton<AsProps = PressablePro
 	return (
 		<Container
 			ref={ref as any}
-			accessibilityRole="button"
 			focusRipple
 			{...(css(
 				{
