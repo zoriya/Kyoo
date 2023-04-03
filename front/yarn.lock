@@ -11894,9 +11894,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-web@npm:0.0.0-c26cb9b08":
-  version: 0.0.0-c26cb9b08
-  resolution: "react-native-web@npm:0.0.0-c26cb9b08"
+"react-native-web@npm:0.19.1":
+  version: 0.19.1
+  resolution: "react-native-web@npm:0.19.1"
   dependencies:
     "@babel/runtime": ^7.18.6
     fbjs: ^3.0.4
@@ -11907,7 +11907,7 @@ __metadata:
   peerDependencies:
     react: ^18.0.0
     react-dom: ^18.0.0
-  checksum: d2c31e28b82434979e139c2cac84b9f2b227bd9520ea5b00464b2f161dc0a1ad36c5c40fc309d57794a641409c7d96b51f2e8f9daa861b5aa07cf5de5545c09c
+  checksum: 29d2eaa192cd07807e89b9be0aaa4d983dbae18fbe8ecf37e9aa27202cee7e78e53ee46f7cb40869099f7217744c36cd139cca3346df0b44300bd8637aa767c8
   languageName: node
   linkType: hard
 
@@ -14249,7 +14249,7 @@ __metadata:
     react-native-reanimated: ^3.0.2
     react-native-svg: 13.8.0
     react-native-video: ^6.0.0-alpha.5
-    react-native-web: 0.0.0-c26cb9b08
+    react-native-web: 0.19.1
     solito: ^3.0.0
     superjson: ^1.12.2
     typescript: ^4.9.5

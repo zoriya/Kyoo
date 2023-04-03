@@ -23,7 +23,7 @@ import { z } from "zod";
 
 export const imageFn = (url: string) =>
 	Platform.OS === "web"
-		? `/api/${url}`
+		? `/api${url}`
 		: process.env.PUBLIC_BACK_URL + url;
 
 export const ImagesP = z.object({
