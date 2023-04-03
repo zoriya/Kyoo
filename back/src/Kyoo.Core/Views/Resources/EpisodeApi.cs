@@ -24,6 +24,7 @@ using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
+using Kyoo.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using static Kyoo.Abstractions.Models.Utils.Constants;
@@ -74,6 +75,15 @@ namespace Kyoo.Core.Api
 			_libraryManager = libraryManager;
 			_transcoder = transcoder;
 			_files = files;
+		}
+
+		/// <inheritdoc/>
+		public override async Task<ActionResult<Episode>> Create([FromBody] Episode resource)
+		{
+			// TODO: Remove this method and use a websocket API to do that.
+			resource.Tracks = await _transcoder.ExtractInfos(resource, false);
+			ActionResult<Episode> ret = await base.Create(resource);
+			return ret;
 		}
 
 		/// <summary>
