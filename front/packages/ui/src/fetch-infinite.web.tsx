@@ -119,7 +119,7 @@ export const InfiniteFetch = <Data,>({
 	});
 	const grid = layout.numColumns !== 1;
 
-	if (error) return <ErrorView error={error} />;
+	if (error) return addHeader(Header, <ErrorView error={error} />);
 	if (empty && items && items.length === 0) {
 		if (typeof empty !== "string") return empty;
 		return <EmptyView message={empty} />;
@@ -147,14 +147,20 @@ export const InfiniteFetch = <Data,>({
 			))}
 		</InfiniteScroll>
 	);
+	return addHeader(Header, list);
+};
 
-	if (!Header) return list;
+const addHeader = (
+	Header: ComponentType<{ children: JSX.Element }> | ReactElement | undefined,
+	children: ReactElement,
+) => {
+	if (!Header) return children;
 	return typeof Header === "function" ? (
-		<Header>{list}</Header>
+		<Header>{children}</Header>
 	) : (
 		<>
 			{Header}
-			{list}
+			{children}
 		</>
 	);
 };
