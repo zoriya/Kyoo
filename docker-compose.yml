@@ -7,7 +7,8 @@ services:
     env_file:
       - ./.env
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     volumes:
       - kyoo:/kyoo
       - ./cache:/kyoo/cached
