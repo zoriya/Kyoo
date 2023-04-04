@@ -71,7 +71,8 @@ export const ShowDetails: QueryPage<{ slug: string; season: string }> = ({ slug,
 				props,
 			)}
 		>
-			<Header slug={slug} query={query(slug)} />
+			{/* TODO: Remove the slug quickfix for the play button */}
+			<Header slug={`${slug}-s1e1`} query={query(slug)} />
 			{/* <Staff slug={slug} /> */}
 			<SvgWave
 				fill={theme.variant.background}
