@@ -26,7 +26,8 @@ class Scanner:
 		logging.info("Starting the scan. It can take some times...")
 		videos = filter(lambda p: p.is_file(), Path(path).rglob("*"))
 		# We batch videos by 30 because too mutch at once kinda DDOS everything.
-		for group in batch(videos, 30):
+		for group in batch(videos, 50):
+			logging.info("Batch finished. Starting a new one")
 			await asyncio.gather(*map(self.identify, group))
 
 	async def is_registered(self, path: Path) -> bool:
