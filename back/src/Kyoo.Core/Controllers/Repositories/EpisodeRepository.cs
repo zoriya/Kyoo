@@ -142,7 +142,10 @@ namespace Kyoo.Core.Controllers
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
-			await _database.SaveChangesAsync(() => Get(obj.Slug));
+			await _database.SaveChangesAsync(() =>
+				obj.SeasonNumber != null && obj.EpisodeNumber != null
+				? Get(obj.ShowID, obj.SeasonNumber.Value, obj.EpisodeNumber.Value)
+				: GetAbsolute(obj.ShowID, obj.AbsoluteNumber.Value));
 			return await _ValidateTracks(obj);
 		}
 
