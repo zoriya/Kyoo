@@ -8,7 +8,7 @@ from guessit import guessit
 from providers.provider import Provider
 from providers.types.episode import Episode, PartialShow
 from providers.types.season import Season, SeasonTranslation
-from .utils import log_errors, provider_cache, set_in_cache
+from .utils import batch, log_errors, provider_cache, set_in_cache
 
 
 class Scanner:
@@ -23,8 +23,11 @@ class Scanner:
 		self.languages = languages
 
 	async def scan(self, path: str):
+		logging.info("Starting the scan. It can take some times...")
 		videos = filter(lambda p: p.is_file(), Path(path).rglob("*"))
-		await asyncio.gather(*map(self.identify, videos))
+		# We batch videos by 30 because too mutch at once kinda DDOS everything.
+		for group in batch(videos, 30):
+			await asyncio.gather(*map(self.identify, group))
 
 	async def is_registered(self, path: Path) -> bool:
 		# TODO: Once movies are separated from the api, a new endpoint should be created to check for paths.
