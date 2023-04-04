@@ -131,12 +131,12 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 						data.isMovie
 							? data.name
 							: data.showTitle +
-							" " +
-							episodeDisplayNumber({
-								seasonNumber: data.seasonNumber,
-								episodeNumber: data.episodeNumber,
-								absoluteNumber: data.absoluteNumber,
-							})
+							  " " +
+							  episodeDisplayNumber({
+									seasonNumber: data.seasonNumber,
+									episodeNumber: data.episodeNumber,
+									absoluteNumber: data.absoluteNumber,
+							  })
 					}
 					description={data.overview}
 				/>
@@ -154,7 +154,7 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 					flexGrow: 1,
 					bg: "black",
 					// @ts-ignore Web only
-					cursor: "unset",
+					cursor: displayControls ? "unset" : "none",
 				})}
 			>
 				<Pressable
@@ -177,7 +177,13 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 							}, 400);
 						setPlay(!isPlaying);
 					}}
-					{...css(StyleSheet.absoluteFillObject)}
+					{...css([
+						StyleSheet.absoluteFillObject,
+						{
+							// @ts-ignore Web only
+							cursor: "unset",
+						},
+					])}
 				>
 					<Video
 						links={data?.link}

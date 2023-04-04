@@ -20,7 +20,7 @@
 
 import { forwardRef, ReactNode } from "react";
 import { Platform, Pressable, TextProps, View, PressableProps } from "react-native";
-import { LinkCore, TextLink, useLink } from "solito/link";
+import { TextLink, useLink } from "solito/link";
 import { useTheme, useYoshiki } from "yoshiki/native";
 import { alpha } from "./themes";
 
