@@ -41,9 +41,15 @@ class Scanner:
 
 	@log_errors
 	async def identify(self, path: Path):
-		if await self.is_registered(path):
-			return
 		raw = guessit(path, "--episode-prefer-number")
+
+		if (
+			not "mimetype" in raw
+			or not raw["mimetype"].startswith("video")
+			or await self.is_registered(path)
+		):
+			return
+
 		logging.info("Identied %s: %s", path, raw)
 
 		# TODO: Add collections support
