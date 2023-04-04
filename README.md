@@ -28,16 +28,8 @@ Thanks to the [blender studio](https://www.blender.org/about/studio/) for provid
 
 ## Screens
 
-![Show](../screens/show.png?raw=true)
+![Movie](https://raw.githubusercontent.com/zoriya/kyoo/screens/movie.png)
 - - -
-![Show Dropdown](../screens/show_dropdown.png?raw=true)
+![Show](https://raw.githubusercontent.com/zoriya/kyoo/screens/show.png)
 - - -
-![Browse](../screens/browse.png?raw=true)
-- - -
-![Filters](../screens/filters.png?raw=true)
-- - -
-![People](../screens/people.png?raw=true)
-- - -
-![Player](../screens/player.png?raw=true)
-- - -
-![Search](../screens/search.png?raw=true)
+![Player](https://raw.githubusercontent.com/zoriya/kyoo/screens/player.png)
