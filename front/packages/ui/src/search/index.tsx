@@ -19,6 +19,7 @@
  */
 
 import { LibraryItem, LibraryItemP, QueryIdentifier, QueryPage } from "@kyoo/models";
+import { P } from "@kyoo/primitives";
 import { Suspense, useRef, useDeferredValue } from "react";
 import { useTranslation } from "react-i18next";
 import { ItemGrid } from "../browse/grid";
@@ -26,16 +27,6 @@ import { itemMap } from "../browse/index";
 import { EmptyView } from "../fetch";
 import { InfiniteFetch } from "../fetch-infinite";
 import { DefaultLayout } from "../layout";
-
-const useIsFirstRender = () => {
-	const isFirst = useRef(true);
-
-	if (isFirst.current) {
-		isFirst.current = false;
-		return true;
-	}
-	return false;
-};
 
 const query = (query: string): QueryIdentifier<LibraryItem> => ({
 	parser: LibraryItemP,
@@ -45,24 +36,21 @@ const query = (query: string): QueryIdentifier<LibraryItem> => ({
 });
 
 export const SearchPage: QueryPage<{ q?: string }> = ({ q }) => {
-	const deferredQuery = useDeferredValue(q);
 	const { t } = useTranslation();
-	const isFirst = useIsFirstRender();
 
 	const empty = <EmptyView message={t("search.empty")} />;
-	if (!deferredQuery) return empty;
+	if (!q) return empty;
 	return (
-		<Suspense>
-			<InfiniteFetch
-				query={query(deferredQuery)}
-				suspense={!isFirst}
-				layout={ItemGrid.layout}
-				placeholderCount={15}
-				empty={empty}
-			>
-				{(item) => <ItemGrid {...itemMap(item)} />}
-			</InfiniteFetch>
-		</Suspense>
+		<InfiniteFetch
+			query={query(q)}
+			// TODO: Understand why it does not work.
+			// suspense={true} //{!isFirst}
+			layout={ItemGrid.layout}
+			placeholderCount={15}
+			empty={empty}
+		>
+			{(item) => <ItemGrid {...itemMap(item)} />}
+		</InfiniteFetch>
 	);
 };
 
