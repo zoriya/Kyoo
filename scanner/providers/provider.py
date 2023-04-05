@@ -3,6 +3,8 @@ from aiohttp import ClientSession
 from abc import abstractmethod, abstractproperty
 from typing import Optional, TypeVar
 
+from providers.utils import ProviderError
+
 from .types.episode import Episode, PartialShow
 from .types.show import Show
 from .types.movie import Movie
@@ -21,6 +23,11 @@ class Provider:
 		tmdb = os.environ.get("THEMOVIEDB_APIKEY")
 		if tmdb:
 			providers.append(TheMovieDatabase(client, tmdb))
+
+		if not any(providers):
+			raise ProviderError(
+				"No provider configured. You probably forgot to specify an API Key"
+			)
 
 		return providers
 
