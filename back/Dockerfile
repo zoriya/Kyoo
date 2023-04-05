@@ -29,6 +29,6 @@ COPY --from=transcoder /transcoder/libtranscoder.so /app
 
 WORKDIR /kyoo
 EXPOSE 5000
-HEALTHCHECK CMD curl --fail http://localhost:5000/health || exit
+HEALTHCHECK --interval=5s CMD curl --fail http://localhost:5000/health || exit
 CMD /app/Kyoo.Host
 

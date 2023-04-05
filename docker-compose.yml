@@ -34,6 +34,12 @@ services:
     volumes:
       - ${LIBRARY_ROOT}:/video
 
+  transcoder:
+    build: ./transcoder
+    restart: on-failure
+    volumes:
+      - ${LIBRARY_ROOT}:/video
+
   ingress:
     image: nginx
     restart: on-failure

@@ -15,6 +15,7 @@ in
       python3
       python3Packages.pip
       cargo
+      cargo-watch
       rustfmt
       rustc
     ];

@@ -41,6 +41,7 @@ jobs:
 
       - name: Lint
         run: yarn lint
+
   scanner:
     name: "Lint scanner"
     runs-on: ubuntu-latest
@@ -54,3 +55,18 @@ jobs:
         run: |
           pip install black-with-tabs
           black . --check
+
+  transcoder:
+    name: "Lint transcoder"
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./transcoder
+    steps:
+      - uses: actions/checkout@v1
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Run cargo fmt
+        run: |
+          cargo fmt --check
