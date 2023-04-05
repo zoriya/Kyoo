@@ -7,11 +7,12 @@ or [Windows](https://docs.docker.com/desktop/install/windows-install/). Docker i
 an isolated environment with all the dependencies they need.
 
 Kyoo also needs 3 files to work properly. Two of them can simply be copy-pasted from this repository, the other needs to be filled in with your configurations.
+Those files can be put in any directory of your choice.
 
 Those 3 files are:
  - A `docker-compose.yml` (simply copy docker-compose.prod.yml from [here](https://raw.githubusercontent.com/zoriya/Kyoo/master/docker-compose.prod.yml)).
  - A `nginx.conf.template` copied from [here](https://raw.githubusercontent.com/zoriya/Kyoo/master/nginx.conf.template).
- - A `.env` file that you fill need to fill. Look at the example [.env.example](https://raw.githubusercontent.com/zoriya/Kyoo/master/.env.example)
+ - A `.env` file that you will need to **fill**. Look at the example [.env.example](https://raw.githubusercontent.com/zoriya/Kyoo/master/.env.example)
 
 
 > If you want an explanation of what are those files, you can read the following:
@@ -28,6 +29,16 @@ The next and last step is actually starting Kyoo. To do that, open a terminal in
 and run `docker-compose up -d`.
 
 Congratulation, everything is now ready to use Kyoo. You can navigate to `http://localhost:8901` on a web browser to see your instance of Kyoo.
+
+# Installing TLDR
+
+1. Install docker & docker-compose
+2. Download the
+[`docker-compose.yml`](https://raw.githubusercontent.com/zoriya/Kyoo/master/docker-compose.prod.yml),
+[`nginx.conf.template`](https://raw.githubusercontent.com/zoriya/Kyoo/master/nginx.conf.template) and
+[`.env`](https://raw.githubusercontent.com/zoriya/Kyoo/master/.env.example) files
+3. Fill the `.env` file with your configuration options (and an API Key from [themoviedb.org](https://www.themoviedb.org/))
+4. Run `docker-compose up -d`
 
 # Updating
 
