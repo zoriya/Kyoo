@@ -1,3 +1,4 @@
+from providers.utils import ProviderError
 from .scanner import Scanner
 from .monitor import monitor
 
@@ -36,7 +37,10 @@ async def main():
 			*args, key_transformer=jsons.KEY_TRANSFORMER_CAMELCASE, **kwargs
 		),
 	) as client:
-		scanner = Scanner(client, languages=languages.split(","), api_key=api_key)
-		await scanner.scan(path)
-		logging.info("Scan finished. Starting to monitor...")
-		await monitor(path, scanner)
+		try:
+			scanner = Scanner(client, languages=languages.split(","), api_key=api_key)
+			await scanner.scan(path)
+			logging.info("Scan finished. Starting to monitor...")
+			await monitor(path, scanner)
+		except ProviderError as e:
+			logging.error(e)
