@@ -1,0 +1,14 @@
+FROM rust
+RUN cargo install cargo-watch
+WORKDIR /app
+
+# FIX: see https://github.com/rust-lang/cargo/issues/2644
+RUN mkdir src/ && touch src/lib.rs
+COPY Cargo.toml Cargo.lock ./
+RUN cargo build
+RUN rm src/lib.rs
+
+ENV ROCKET_ADDRESS=0.0.0.0
+ENV ROCKET_PORT=7666
+EXPOSE 7666
+CMD cargo watch -x run

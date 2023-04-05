@@ -34,6 +34,12 @@ services:
     volumes:
       - ${LIBRARY_ROOT}:/video
 
+  transcoder:
+    image: zoriya/kyoo_transcoder:edge
+    restart: on-failure
+    volumes:
+      - ${LIBRARY_ROOT}:/video
+
   ingress:
     image: nginx
     restart: on-failure

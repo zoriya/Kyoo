@@ -24,6 +24,9 @@ jobs:
           - context: ./scanner
             label: scanner
             image: zoriya/kyoo_scanner
+          - context: ./transcoder
+            label: transcoder
+            image: zoriya/kyoo_transcoder
     name: Build ${{matrix.label}}
     steps:
       - uses: actions/checkout@v2
