@@ -1,5 +1,4 @@
 {pkgs ? import <nixpkgs> {}}: let
-  pwd = ./.;
   venvDir = "./scanner/.venv";
   pythonPkgs = ./scanner/requirements.txt;
 in
@@ -26,7 +25,7 @@ in
       # Install python modules
       SOURCE_DATE_EPOCH=$(date +%s)
       if [ ! -d "${venvDir}" ]; then
-          ${pkgs.python3}/bin/python3 -m venv ${pwd}/${venvDir}
+          ${pkgs.python3}/bin/python3 -m venv ${toString ./.}/${venvDir}
           source ${venvDir}/bin/activate
           export PIP_DISABLE_PIP_VERSION_CHECK=1
           pip install -r ${pythonPkgs} >&2

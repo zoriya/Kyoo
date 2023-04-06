@@ -8,7 +8,5 @@ COPY Cargo.toml Cargo.lock ./
 RUN cargo build
 RUN rm src/lib.rs
 
-ENV ROCKET_ADDRESS=0.0.0.0
-ENV ROCKET_PORT=7666
 EXPOSE 7666
 CMD cargo watch -x run
