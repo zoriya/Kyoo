@@ -14,7 +14,5 @@ FROM debian:bullseye-slim
 #RUN apt-get update && apt-get install -y extra-runtime-dependencies && rm -rf /var/lib/apt/lists/*
 COPY --from=builder /usr/local/cargo/bin/transcoder ./transcoder
 
-ENV ROCKET_ADDRESS=0.0.0.0
-ENV ROCKET_PORT=7666
 EXPOSE 7666
 CMD ./transcoder
