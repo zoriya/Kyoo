@@ -1,21 +1,12 @@
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
-use serde::{Deserialize, Serialize};
-use std::process::{Command, Child};
+use std::process::{Child, Command};
+use std::str::FromStr;
 use std::{collections::HashMap, sync::Mutex};
 
-pub struct TranscoderState {
-	running: Mutex<HashMap<u32, Child>>,
-}
+use crate::utils::Signalable;
 
-impl TranscoderState {
-	pub fn new() -> TranscoderState {
-		Self {
-			running: Mutex::new(HashMap::new()),
-		}
-	}
-}
-
+#[derive(PartialEq, Eq)]
 pub enum Quality {
 	P240,
 	P360,
@@ -28,9 +19,29 @@ pub enum Quality {
 	Original,
 }
 
-imhttps://sgsot3a.sic.shibaura-it.ac.jp/
+#[derive(Debug, PartialEq, Eq)]
+pub struct InvalidValueError;
 
-fn get_transcode_video_quality_args(quality: Quality) -> Vec<&'static str> {
+impl FromStr for Quality {
+	type Err = InvalidValueError;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		match s {
+			"240p" => Ok(Quality::P240),
+			"360p" => Ok(Quality::P360),
+			"480p" => Ok(Quality::P480),
+			"720p" => Ok(Quality::P720),
+			"1080p" => Ok(Quality::P1080),
+			"1440p" => Ok(Quality::P1440),
+			"4k" => Ok(Quality::P4k),
+			"8k" => Ok(Quality::P8k),
+			"original" => Ok(Quality::Original),
+			_ => Err(InvalidValueError),
+		}
+	}
+}
+
+fn get_transcode_video_quality_args(quality: &Quality) -> Vec<&'static str> {
 	// superfast or ultrafast would produce a file extremly big so we prever veryfast.
 	let enc_base: Vec<&str> = vec![
 		"-map", "0:v:0", "-c:v", "libx264", "-crf", "21", "-preset", "veryfast",
@@ -50,7 +61,7 @@ fn get_transcode_video_quality_args(quality: Quality) -> Vec<&'static str> {
 }
 
 // TODO: Add audios streams (and transcode them only when necesarry)
-async fn start_transcode(path: &str, quality: Quality, start_time_sec: f32) -> (String, Child) {
+async fn start_transcode(path: &str, quality: &Quality, start_time_sec: f32) -> (String, Child) {
 	// TODO: Use the out path below once cached segments can be reused.
 	// let out_dir = format!("/cache/{show_hash}/{quality}");
 	let uuid: String = thread_rng()
@@ -89,6 +100,40 @@ async fn start_transcode(path: &str, quality: Quality, start_time_sec: f32) -> (
 	(uuid, child)
 }
 
-pub async fn transcode(user_id: u32, path: &str, quality: Quality, start_time_sec: f32) {
+struct TranscodeInfo {
+	show: (String, Quality)
+	job: Child
+	uuid: String
+}
 
+pub struct Transcoder {
+	running: Mutex<HashMap<String, TranscodeInfo>>,
+}
+
+impl Transcoder {
+	pub fn new() -> Transcoder {
+		Self {
+			running: Mutex::new(HashMap::new()),
+		}
+	}
+
+	pub async fn transcode(
+		&mut self,
+		client_id: String,
+		path: String,
+		quality: Quality,
+		start_time_sec: f32,
+	) {
+		// TODO: If the stream is not yet up to start_time (and is far), kill it and restart one at the right time.
+		// TODO: Clear cache at startup/every X time without use.
+		// TODO: cache transcoded output for a show/quality and reuse it for every future requests.
+		if let Some(TranscodeInfo{show: (old_path, old_qual), job, uuid}) = self.running.lock().unwrap().get_mut(&client_id) {
+			if path == *old_path && quality != *old_qual {
+				job.interrupt();
+			}
+		}
+
+		let (uuid, job) = start_transcode(&path, &quality, start_time_sec).await;
+		self.running.lock().unwrap().insert(client_id, TranscodeInfo { show: (path, quality), job, uuid});
+	}
 }
