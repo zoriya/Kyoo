@@ -60,6 +60,7 @@ services:
     volumes:
       - ./transcoder:/app
       - ${LIBRARY_ROOT}:/video
+      - ${CACHE_ROOT}:/cache
 
   ingress:
     image: nginx

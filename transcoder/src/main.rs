@@ -23,18 +23,23 @@ async fn get_movie_auto(
 	req: HttpRequest,
 	query: web::Path<(String, String)>,
 	transcoder: web::Data<Transcoder>,
-) -> Result<NamedFile, ApiError> {
+) -> Result<String, ApiError> {
 	let (quality, slug) = query.into_inner();
 	let quality = Quality::from_str(quality.as_str()).map_err(|_| ApiError::BadRequest {
 		error: "Invalid quality".to_string(),
 	})?;
 	let client_id = req.headers().get("x-client-id")
-		.ok_or(ApiError::BadRequest { error: String::from("Missing client id. Please specify the X-CLIENT-ID header to a guid constant for the lifetime of the player (but unique per instance)."), })?;
+		.ok_or(ApiError::BadRequest { error: String::from("Missing client id. Please specify the X-CLIENT-ID header to a guid constant for the lifetime of the player (but unique per instance)."), })?
+		.to_str().unwrap();
 
 	let path = paths::get_movie_path(slug);
-
-	todo!()
+	// TODO: Handle start_time that is not 0
+	transcoder
+		.transcode(client_id.to_string(), path, quality, 0)
+		.await
+		.map_err(|_| ApiError::InternalError)
 }
+
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

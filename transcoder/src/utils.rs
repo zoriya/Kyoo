@@ -1,4 +1,4 @@
-use std::{io, process::Child};
+use tokio::{io, process::Child};
 
 extern "C" {
 	fn kill(pid: i32, sig: i32) -> i32;
@@ -26,13 +26,15 @@ pub trait Signalable {
 
 impl Signalable for Child {
 	fn signal(&mut self, signal: i32) -> io::Result<()> {
-		if self.try_wait()?.is_some() {
+		let id = self.id();
+
+		if self.try_wait()?.is_some() || id.is_none() {
 			Err(io::Error::new(
 				io::ErrorKind::InvalidInput,
 				"invalid argument: can't signal an exited process",
 			))
 		} else {
-			crate::utils::signal(self.id() as i32, signal)
+			crate::utils::signal(id.unwrap() as i32, signal)
 		}
 	}
 }
