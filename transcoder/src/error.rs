@@ -25,8 +25,8 @@ impl error::ResponseError for ApiError {
 	}
 
 	fn status_code(&self) -> StatusCode {
-		match *self {
-			ApiError::BadRequest { error } => StatusCode::BAD_REQUEST,
+		match self {
+			ApiError::BadRequest { error: _ } => StatusCode::BAD_REQUEST,
 			ApiError::InternalError => StatusCode::INTERNAL_SERVER_ERROR,
 		}
 	}

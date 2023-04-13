@@ -10,8 +10,8 @@ RUN rm src/lib.rs
 COPY src src
 RUN cargo install --path .
 
-FROM debian:bullseye-slim
-#RUN apt-get update && apt-get install -y extra-runtime-dependencies && rm -rf /var/lib/apt/lists/*
+FROM alpine
+RUN apk add --no-cache ffmpeg
 COPY --from=builder /usr/local/cargo/bin/transcoder ./transcoder
 
 EXPOSE 7666

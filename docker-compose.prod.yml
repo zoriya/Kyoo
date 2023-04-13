@@ -39,6 +39,7 @@ services:
     restart: on-failure
     volumes:
       - ${LIBRARY_ROOT}:/video
+      - ${CACHE_ROOT}:/cache
 
   ingress:
     image: nginx
