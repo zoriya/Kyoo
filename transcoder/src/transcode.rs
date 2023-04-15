@@ -1,11 +1,11 @@
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
+use std::collections::HashMap;
 use std::path::PathBuf;
 use std::process::Stdio;
 use std::str::FromStr;
 use std::sync::atomic::AtomicI32;
 use std::sync::{Arc, RwLock};
-use std::collections::HashMap;
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::process::{Child, Command};
 
@@ -54,14 +54,14 @@ fn get_transcode_video_quality_args(quality: &Quality) -> Vec<&'static str> {
 
 	match quality {
 		Quality::Original => vec![],
-		Quality::P240 => [enc_base, vec!["-vf", "scale=-1:240"]].concat(),
-		Quality::P360 => [enc_base, vec!["-vf", "scale=-1:360"]].concat(),
-		Quality::P480 => [enc_base, vec!["-vf", "scale=-1:480"]].concat(),
-		Quality::P720 => [enc_base, vec!["-vf", "scale=-1:720"]].concat(),
-		Quality::P1080 => [enc_base, vec!["-vf", "scale=-1:1080"]].concat(),
-		Quality::P1440 => [enc_base, vec!["-vf", "scale=-1:1440"]].concat(),
-		Quality::P4k => [enc_base, vec!["-vf", "scale=-1:2160"]].concat(),
-		Quality::P8k => [enc_base, vec!["-vf", "scale=-1:4320"]].concat(),
+		Quality::P240 => [enc_base, vec!["-vf", "scale=-2:240"]].concat(),
+		Quality::P360 => [enc_base, vec!["-vf", "scale=-2:360"]].concat(),
+		Quality::P480 => [enc_base, vec!["-vf", "scale=-2:480"]].concat(),
+		Quality::P720 => [enc_base, vec!["-vf", "scale=-2:720"]].concat(),
+		Quality::P1080 => [enc_base, vec!["-vf", "scale=-2:1080"]].concat(),
+		Quality::P1440 => [enc_base, vec!["-vf", "scale=-2:1440"]].concat(),
+		Quality::P4k => [enc_base, vec!["-vf", "scale=-2:2160"]].concat(),
+		Quality::P8k => [enc_base, vec!["-vf", "scale=-2:4320"]].concat(),
 	}
 }
 
@@ -142,7 +142,7 @@ fn get_cache_path(info: &TranscodeInfo) -> PathBuf {
 }
 
 fn get_cache_path_from_uuid(uuid: &String) -> PathBuf {
-	return PathBuf::from(format!("/cache/{uuid}/stream.m3u8", uuid = &uuid));
+	return PathBuf::from(format!("/cache/{uuid}/", uuid = &uuid));
 }
 
 struct TranscodeInfo {
@@ -186,16 +186,20 @@ impl Transcoder {
 			if path != *old_path || quality != *old_qual {
 				job.interrupt()?;
 			} else {
-				return std::fs::read_to_string(get_cache_path_from_uuid(uuid));
+				let mut path = get_cache_path_from_uuid(uuid);
+				path.push("stream.m3u8");
+				return std::fs::read_to_string(path);
 			}
 		}
 
 		let info = start_transcode(path, quality, start_time).await;
-		let path = get_cache_path(&info);
+		let mut path = get_cache_path(&info);
+		path.push("stream.m3u8");
 		self.running.write().unwrap().insert(client_id, info);
 		std::fs::read_to_string(path)
 	}
 
+	// TODO: Use path/quality instead of client_id
 	pub async fn get_segment(
 		&self,
 		client_id: String,
