@@ -18,8 +18,8 @@ async fn get_movie_direct(query: web::Path<String>) -> Result<NamedFile> {
 	Ok(NamedFile::open_async(path).await?)
 }
 
-#[get("/movie/{quality}/{slug}/master.m3u8")]
-async fn get_movie_auto(
+#[get("/movie/{quality}/{slug}/index.m3u8")]
+async fn transcode_movie(
 	req: HttpRequest,
 	query: web::Path<(String, String)>,
 	transcoder: web::Data<Transcoder>,
@@ -40,6 +40,32 @@ async fn get_movie_auto(
 		.map_err(|_| ApiError::InternalError)
 }
 
+#[get("/movie/{quality}/{slug}/segments/{chunk}")]
+async fn get_movie_chunk(
+	req: HttpRequest,
+	query: web::Path<(String, String, u32)>,
+	transcoder: web::Data<Transcoder>,
+) -> Result<NamedFile, ApiError> {
+	let (quality, slug, chunk) = query.into_inner();
+	let quality = Quality::from_str(quality.as_str()).map_err(|_| ApiError::BadRequest {
+		error: "Invalid quality".to_string(),
+	})?;
+	let client_id = req.headers().get("x-client-id")
+		.ok_or(ApiError::BadRequest { error: String::from("Missing client id. Please specify the X-CLIENT-ID header to a guid constant for the lifetime of the player (but unique per instance)."), })?
+		.to_str().unwrap();
+
+	let path = paths::get_movie_path(slug);
+	// TODO: Handle start_time that is not 0
+	transcoder
+		.get_segment(client_id.to_string(), path, quality, chunk)
+		.await
+		.map_err(|_| ApiError::InternalError)
+		.and_then(|path| {
+			NamedFile::open(path).map_err(|_| ApiError::BadRequest {
+				error: "Invalid segment number.".to_string(),
+			})
+		})
+}
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -49,7 +75,8 @@ async fn main() -> std::io::Result<()> {
 		App::new()
 			.app_data(state.clone())
 			.service(get_movie_direct)
-			.service(get_movie_auto)
+			.service(transcode_movie)
+			.service(get_movie_chunk)
 	})
 	.bind(("0.0.0.0", 7666))?
 	.run()

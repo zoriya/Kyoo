@@ -1,10 +1,11 @@
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
+use std::path::PathBuf;
 use std::process::Stdio;
 use std::str::FromStr;
 use std::sync::atomic::AtomicI32;
-use std::sync::Arc;
-use std::{collections::HashMap, sync::Mutex};
+use std::sync::{Arc, RwLock};
+use std::collections::HashMap;
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::process::{Child, Command};
 
@@ -136,6 +137,14 @@ async fn start_transcode(path: String, quality: Quality, start_time: i32) -> Tra
 	return info;
 }
 
+fn get_cache_path(info: &TranscodeInfo) -> PathBuf {
+	return get_cache_path_from_uuid(&info.uuid);
+}
+
+fn get_cache_path_from_uuid(uuid: &String) -> PathBuf {
+	return PathBuf::from(format!("/cache/{uuid}/stream.m3u8", uuid = &uuid));
+}
+
 struct TranscodeInfo {
 	show: (String, Quality),
 	// TODO: Store if the process as ended (probably Option<Child> for the job)
@@ -147,13 +156,13 @@ struct TranscodeInfo {
 }
 
 pub struct Transcoder {
-	running: Mutex<HashMap<String, TranscodeInfo>>,
+	running: RwLock<HashMap<String, TranscodeInfo>>,
 }
 
 impl Transcoder {
 	pub fn new() -> Transcoder {
 		Self {
-			running: Mutex::new(HashMap::new()),
+			running: RwLock::new(HashMap::new()),
 		}
 	}
 
@@ -172,19 +181,38 @@ impl Transcoder {
 			job,
 			uuid,
 			..
-		}) = self.running.lock().unwrap().get_mut(&client_id)
+		}) = self.running.write().unwrap().get_mut(&client_id)
 		{
 			if path != *old_path || quality != *old_qual {
 				job.interrupt()?;
 			} else {
-				let path = format!("/cache/{uuid}/stream.m3u8", uuid = &uuid);
-				return std::fs::read_to_string(path);
+				return std::fs::read_to_string(get_cache_path_from_uuid(uuid));
 			}
 		}
 
 		let info = start_transcode(path, quality, start_time).await;
-		let path = format!("/cache/{uuid}/stream.m3u8", uuid = &info.uuid);
-		self.running.lock().unwrap().insert(client_id, info);
+		let path = get_cache_path(&info);
+		self.running.write().unwrap().insert(client_id, info);
 		std::fs::read_to_string(path)
 	}
+
+	pub async fn get_segment(
+		&self,
+		client_id: String,
+		_path: String,
+		_quality: Quality,
+		chunk: u32,
+	) -> Result<PathBuf, SegmentError> {
+		let hashmap = self.running.read().unwrap();
+		let info = hashmap.get(&client_id).ok_or(SegmentError::NoTranscode)?;
+
+		// TODO: Check if ready_time is far enough for this fragment to exist.
+		let mut path = get_cache_path(&info);
+		path.push(format!("segments-{0:02}.ts", chunk));
+		Ok(path)
+	}
+}
+
+pub enum SegmentError {
+	NoTranscode,
 }
