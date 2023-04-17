@@ -41,7 +41,10 @@ async fn transcode_movie(
 	transcoder
 		.transcode(client_id, path, quality, 0)
 		.await
-		.map_err(|_| ApiError::InternalError)
+		.map_err(|e| {
+			eprintln!("Unhandled error occured while transcoding: {}", e);
+			ApiError::InternalError
+		})
 }
 
 #[get("/movie/{quality}/{slug}/segments-{chunk}.ts")]
