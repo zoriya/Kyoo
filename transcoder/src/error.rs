@@ -9,6 +9,8 @@ use derive_more::{Display, Error};
 pub enum ApiError {
 	#[display(fmt = "{}", error)]
 	BadRequest { error: String },
+	#[display(fmt = "Resource not found.")]
+	NotFound,
 	#[display(fmt = "An internal error occurred. Please try again later.")]
 	InternalError,
 }
@@ -27,6 +29,7 @@ impl error::ResponseError for ApiError {
 	fn status_code(&self) -> StatusCode {
 		match self {
 			ApiError::BadRequest { error: _ } => StatusCode::BAD_REQUEST,
+			ApiError::NotFound => StatusCode::NOT_FOUND,
 			ApiError::InternalError => StatusCode::INTERNAL_SERVER_ERROR,
 		}
 	}

@@ -17,6 +17,8 @@ in
       cargo-watch
       rustfmt
       rustc
+	  pkgconfig
+	  openssl
     ];
 
     RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
