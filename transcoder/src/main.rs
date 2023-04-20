@@ -19,7 +19,9 @@ fn get_client_id(req: HttpRequest) -> Result<String, ApiError> {
 #[get("/movie/direct/{slug}")]
 async fn get_movie_direct(query: web::Path<String>) -> Result<NamedFile> {
 	let slug = query.into_inner();
-	let path = paths::get_movie_path(slug);
+	let path = paths::get_movie_path(slug)
+		.await
+		.map_err(|_| ApiError::NotFound)?;
 
 	Ok(NamedFile::open_async(path).await?)
 }
@@ -36,7 +38,9 @@ async fn transcode_movie(
 	})?;
 	let client_id = get_client_id(req)?;
 
-	let path = paths::get_movie_path(slug);
+	let path = paths::get_movie_path(slug)
+		.await
+		.map_err(|_| ApiError::NotFound)?;
 	// TODO: Handle start_time that is not 0
 	transcoder
 		.transcode(client_id, path, quality, 0)
@@ -59,7 +63,9 @@ async fn get_movie_chunk(
 	})?;
 	let client_id = get_client_id(req)?;
 
-	let path = paths::get_movie_path(slug);
+	let path = paths::get_movie_path(slug)
+		.await
+		.map_err(|_| ApiError::NotFound)?;
 	// TODO: Handle start_time that is not 0
 	transcoder
 		.get_segment(client_id, path, quality, chunk)
