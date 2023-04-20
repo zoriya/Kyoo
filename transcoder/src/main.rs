@@ -16,29 +16,30 @@ fn get_client_id(req: HttpRequest) -> Result<String, ApiError> {
 		.map(|x| x.to_str().unwrap().to_string())
 }
 
-#[get("/movie/direct/{slug}")]
-async fn get_movie_direct(query: web::Path<String>) -> Result<NamedFile> {
-	let slug = query.into_inner();
-	let path = paths::get_movie_path(slug)
-		.await
-		.map_err(|_| ApiError::NotFound)?;
+#[get("/{resource}/direct/{slug}")]
+async fn get_direct(query: web::Path<(String, String)>) -> Result<NamedFile> {
+	let (resource, slug) = query.into_inner();
+	let path = paths::get_path(resource, slug).await.map_err(|e| {
+		eprintln!("Unhandled error occured while getting the path: {}", e);
+		ApiError::NotFound
+	})?;
 
 	Ok(NamedFile::open_async(path).await?)
 }
 
-#[get("/movie/{quality}/{slug}/index.m3u8")]
-async fn transcode_movie(
+#[get("/{resource}/{quality}/{slug}/index.m3u8")]
+async fn get_transcoded(
 	req: HttpRequest,
-	query: web::Path<(String, String)>,
+	query: web::Path<(String, String, String)>,
 	transcoder: web::Data<Transcoder>,
 ) -> Result<String, ApiError> {
-	let (quality, slug) = query.into_inner();
+	let (resource, quality, slug) = query.into_inner();
 	let quality = Quality::from_str(quality.as_str()).map_err(|_| ApiError::BadRequest {
 		error: "Invalid quality".to_string(),
 	})?;
 	let client_id = get_client_id(req)?;
 
-	let path = paths::get_movie_path(slug)
+	let path = paths::get_path(resource, slug)
 		.await
 		.map_err(|_| ApiError::NotFound)?;
 	// TODO: Handle start_time that is not 0
@@ -51,19 +52,19 @@ async fn transcode_movie(
 		})
 }
 
-#[get("/movie/{quality}/{slug}/segments-{chunk}.ts")]
-async fn get_movie_chunk(
+#[get("/{resource}/{quality}/{slug}/segments-{chunk}.ts")]
+async fn get_chunk(
 	req: HttpRequest,
-	query: web::Path<(String, String, u32)>,
+	query: web::Path<(String, String, String, u32)>,
 	transcoder: web::Data<Transcoder>,
 ) -> Result<NamedFile, ApiError> {
-	let (quality, slug, chunk) = query.into_inner();
+	let (resource, quality, slug, chunk) = query.into_inner();
 	let quality = Quality::from_str(quality.as_str()).map_err(|_| ApiError::BadRequest {
 		error: "Invalid quality".to_string(),
 	})?;
 	let client_id = get_client_id(req)?;
 
-	let path = paths::get_movie_path(slug)
+	let path = paths::get_path(resource, slug)
 		.await
 		.map_err(|_| ApiError::NotFound)?;
 	// TODO: Handle start_time that is not 0
@@ -87,9 +88,9 @@ async fn main() -> std::io::Result<()> {
 	HttpServer::new(move || {
 		App::new()
 			.app_data(state.clone())
-			.service(get_movie_direct)
-			.service(transcode_movie)
-			.service(get_movie_chunk)
+			.service(get_direct)
+			.service(get_transcoded)
+			.service(get_chunk)
 	})
 	.bind(("0.0.0.0", 7666))?
 	.run()

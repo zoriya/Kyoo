@@ -1,5 +1,5 @@
 FROM rust:alpine
-RUN apk add --no-cache musl-dev ffmpeg pkgconfig openssl-dev
+RUN apk add --no-cache musl-dev ffmpeg
 RUN cargo install cargo-watch
 WORKDIR /app
 
