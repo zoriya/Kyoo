@@ -1,11 +1,19 @@
 use std::str::FromStr;
 
 use actix_files::NamedFile;
-use actix_web::{get, web, App, HttpRequest, HttpServer, Result};
+use actix_web::{
+	get,
+	web::{self, Json},
+	App, HttpRequest, HttpServer, Result,
+};
 use error::ApiError;
 
-use crate::transcode::{Quality, Transcoder};
+use crate::{
+	identify::{identify, MediaInfo},
+	transcode::{Quality, Transcoder},
+};
 mod error;
+mod identify;
 mod paths;
 mod transcode;
 mod utils;
@@ -16,7 +24,7 @@ fn get_client_id(req: HttpRequest) -> Result<String, ApiError> {
 		.map(|x| x.to_str().unwrap().to_string())
 }
 
-#[get("/{resource}/direct/{slug}")]
+#[get("/{resource}/{slug}/direct{extension}")]
 async fn get_direct(query: web::Path<(String, String)>) -> Result<NamedFile> {
 	let (resource, slug) = query.into_inner();
 	let path = paths::get_path(resource, slug).await.map_err(|e| {
@@ -27,13 +35,13 @@ async fn get_direct(query: web::Path<(String, String)>) -> Result<NamedFile> {
 	Ok(NamedFile::open_async(path).await?)
 }
 
-#[get("/{resource}/{quality}/{slug}/index.m3u8")]
+#[get("/{resource}/{slug}/{quality}/index.m3u8")]
 async fn get_transcoded(
 	req: HttpRequest,
 	query: web::Path<(String, String, String)>,
 	transcoder: web::Data<Transcoder>,
 ) -> Result<String, ApiError> {
-	let (resource, quality, slug) = query.into_inner();
+	let (resource, slug, quality) = query.into_inner();
 	let quality = Quality::from_str(quality.as_str()).map_err(|_| ApiError::BadRequest {
 		error: "Invalid quality".to_string(),
 	})?;
@@ -52,13 +60,13 @@ async fn get_transcoded(
 		})
 }
 
-#[get("/{resource}/{quality}/{slug}/segments-{chunk}.ts")]
+#[get("/{resource}/{slug}/{quality}/segments-{chunk}.ts")]
 async fn get_chunk(
 	req: HttpRequest,
 	query: web::Path<(String, String, String, u32)>,
 	transcoder: web::Data<Transcoder>,
 ) -> Result<NamedFile, ApiError> {
-	let (resource, quality, slug, chunk) = query.into_inner();
+	let (resource, slug, quality, chunk) = query.into_inner();
 	let quality = Quality::from_str(quality.as_str()).map_err(|_| ApiError::BadRequest {
 		error: "Invalid quality".to_string(),
 	})?;
@@ -81,6 +89,21 @@ async fn get_chunk(
 		})
 }
 
+#[get("/{resource}/{slug}/identify")]
+async fn identify_resource(
+	query: web::Path<(String, String)>,
+) -> Result<Json<MediaInfo>, ApiError> {
+	let (resource, slug) = query.into_inner();
+	let path = paths::get_path(resource, slug)
+		.await
+		.map_err(|_| ApiError::NotFound)?;
+
+	identify(path).map(|info| Json(info)).map_err(|e| {
+		eprintln!("Unhandled error occured while transcoding: {}", e);
+		ApiError::InternalError
+	})
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
 	let state = web::Data::new(Transcoder::new());
@@ -91,6 +114,7 @@ async fn main() -> std::io::Result<()> {
 			.service(get_direct)
 			.service(get_transcoded)
 			.service(get_chunk)
+			.service(identify_resource)
 	})
 	.bind(("0.0.0.0", 7666))?
 	.run()
