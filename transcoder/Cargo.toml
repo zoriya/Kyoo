@@ -1,0 +1,13 @@
+[package]
+name = "transcoder"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+actix-web = "4"
+actix-files = "0.6.2"
+tokio = { version = "1.27.0", features = ["process"] }
+serde = { version = "1.0.159", features = ["derive"] }
+rand = "0.8.5"
+derive_more = "0.99.17"
+reqwest = { version = "0.11.16", default_features = false, features = ["json", "rustls-tls"] }

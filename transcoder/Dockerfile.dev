@@ -1,0 +1,13 @@
+FROM rust:alpine
+RUN apk add --no-cache musl-dev ffmpeg
+RUN cargo install cargo-watch
+WORKDIR /app
+
+# FIX: see https://github.com/rust-lang/cargo/issues/2644
+RUN mkdir src/ && touch src/lib.rs
+COPY Cargo.toml Cargo.lock ./
+RUN cargo build
+RUN rm src/lib.rs
+
+EXPOSE 7666
+CMD cargo watch -x run

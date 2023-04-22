@@ -50,6 +50,18 @@ services:
     volumes:
       - ${LIBRARY_ROOT}:/video
 
+  transcoder:
+    build:
+      context: ./transcoder
+      dockerfile: Dockerfile.dev
+    ports:
+      - "7666:7666"
+    restart: on-failure
+    volumes:
+      - ./transcoder:/app
+      - ${LIBRARY_ROOT}:/video
+      - ${CACHE_ROOT}:/cache
+
   ingress:
     image: nginx
     restart: on-failure

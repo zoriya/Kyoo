@@ -25,6 +25,6 @@ COPY --from=transcoder /transcoder/libtranscoder.so /app/out/bin/Kyoo.Host/Debug
 WORKDIR /kyoo
 EXPOSE 5000
 ENV DOTNET_USE_POLLING_FILE_WATCHER 1
-HEALTHCHECK CMD curl --fail http://localhost:5000/health || exit
+HEALTHCHECK --interval=5s CMD curl --fail http://localhost:5000/health || exit
 CMD dotnet watch run --no-restore --project /app/src/Kyoo.Host
 
