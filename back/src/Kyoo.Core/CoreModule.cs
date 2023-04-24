@@ -16,9 +16,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using AspNetCore.Proxy;
 using Autofac;
 using Kyoo.Abstractions;
 using Kyoo.Abstractions.Controllers;
@@ -113,6 +113,7 @@ namespace Kyoo.Core
 				x.EnableForHttps = true;
 			});
 
+			services.AddProxies();
 			services.AddHttpClient();
 		}
 

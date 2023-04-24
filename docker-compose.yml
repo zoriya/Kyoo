@@ -37,6 +37,8 @@ services:
   transcoder:
     build: ./transcoder
     restart: on-failure
+    env_file:
+      - ./.env
     volumes:
       - ${LIBRARY_ROOT}:/video
       - ${CACHE_ROOT}:/cache

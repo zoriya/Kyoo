@@ -57,6 +57,8 @@ services:
     ports:
       - "7666:7666"
     restart: on-failure
+    env_file:
+      - ./.env
     volumes:
       - ./transcoder:/app
       - ${LIBRARY_ROOT}:/video
