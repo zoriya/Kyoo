@@ -1,6 +1,7 @@
 use serde::Serialize;
+use utoipa::ToSchema;
 
-#[derive(Serialize)]
+#[derive(Serialize, ToSchema)]
 pub struct MediaInfo {
 	container: String,
 	video_codec: String,
@@ -10,7 +11,7 @@ pub struct MediaInfo {
 	chapters: Vec<Chapter>,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, ToSchema)]
 pub struct Track {
 	/// The index of this track on the media.
 	index: u32,
@@ -26,7 +27,7 @@ pub struct Track {
 	forced: bool,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, ToSchema)]
 pub struct Chapter {
 	/// The start time of the chapter (in second from the start of the episode).
 	start: f32,
@@ -37,6 +38,6 @@ pub struct Chapter {
 	// TODO: add a type field for Opening, Credits...
 }
 
-pub fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
+pub fn identify(_path: String) -> Result<MediaInfo, std::io::Error> {
 	todo!()
 }
