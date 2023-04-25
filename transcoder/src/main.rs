@@ -10,7 +10,7 @@ use error::ApiError;
 use utoipa::OpenApi;
 
 use crate::{
-	identify::{identify, MediaInfo, Track, Chapter},
+	identify::{identify, Chapter, MediaInfo, Track},
 	transcode::{Quality, Transcoder},
 };
 mod error;
