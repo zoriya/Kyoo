@@ -34,8 +34,7 @@ pub struct Chapter {
 	/// The end time of the chapter (in second from the start of the episode).
 	end: f32,
 	/// The name of this chapter. This should be a human-readable name that could be presented to the user.
-	name: String
-	// TODO: add a type field for Opening, Credits...
+	name: String, // TODO: add a type field for Opening, Credits...
 }
 
 pub fn identify(_path: String) -> Result<MediaInfo, std::io::Error> {
