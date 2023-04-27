@@ -43,6 +43,7 @@
 		"pause": "Pause",
 		"mute": "Toggle mute",
 		"volume": "Volume",
+		"quality": "Quality",
 		"subtitles": "Subtitles",
 		"subtitle-none": "None",
 		"fullscreen": "Fullscreen"

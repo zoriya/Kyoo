@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Font, Track } from "@kyoo/models";
+import { Font, getToken, Track } from "@kyoo/models";
 import {
 	forwardRef,
 	RefObject,
@@ -28,29 +28,22 @@ import {
 	useRef,
 } from "react";
 import { VideoProps } from "react-native-video";
-import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { useYoshiki } from "yoshiki";
 import SubtitleOctopus from "libass-wasm";
 import { playAtom, subtitleAtom } from "./state";
 import Hls from "hls.js";
 
-declare module "react-native-video" {
-	interface VideoProperties {
-		fonts?: Font[];
-		onPlayPause: (isPlaying: boolean) => void;
-	}
-	export type VideoProps = Omit<VideoProperties, "source"> & {
-		source: { uri?: string; transmux?: string };
-	};
-}
-
-enum PlayMode {
-	Direct,
-	Transmux,
-}
-
-const playModeAtom = atom<PlayMode>(PlayMode.Direct);
 let hls: Hls | null = null;
+
+function uuidv4(): string {
+	// @ts-ignore I have no clue how this works, thanks https://stackoverflow.com/questions/105034/how-do-i-create-a-guid-uuid
+	return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+		(c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16),
+	);
+}
+
+let client_id = typeof window === "undefined" ? "ssr" : uuidv4();
 
 const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function _Video(
 	{
@@ -64,10 +57,12 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 		onError,
 		onEnd,
 		onPlayPause,
+		onMediaUnsupported,
 		fonts,
 	},
 	forwaredRef,
 ) {
+	const { uri, type } = source;
 	const ref = useRef<HTMLVideoElement>(null);
 	const { css } = useYoshiki();
 
@@ -94,28 +89,33 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 	const subtitle = useAtomValue(subtitleAtom);
 	useSubtitle(ref, subtitle, fonts);
 
-	const [playMode, setPlayMode] = useAtom(playModeAtom);
-	useEffect(() => {
-		setPlayMode(PlayMode.Direct);
-	}, [source.uri, setPlayMode]);
-
 	useLayoutEffect(() => {
-		const src = playMode === PlayMode.Direct ? source?.uri : source?.transmux;
-
-		if (!ref?.current || !src) return;
-		if (playMode == PlayMode.Direct || ref.current.canPlayType("application/vnd.apple.mpegurl")) {
-			ref.current.src = src;
-		} else {
-			if (hls === null) hls = new Hls();
-			hls.loadSource(src);
-			hls.attachMedia(ref.current);
-			hls.on(Hls.Events.MANIFEST_LOADED, async () => {
-				try {
-					await ref.current?.play();
-				} catch {}
-			});
-		}
-	}, [playMode, source?.uri, source?.transmux]);
+		(async () => {
+			if (!ref?.current || !uri || !type) return;
+			// TODO: Use hls.js even for safari or handle XHR requests with tokens,auto...
+			if (type === "direct" || ref.current.canPlayType("application/vnd.apple.mpegurl")) {
+				ref.current.src = uri;
+			} else {
+				if (hls === null) {
+					const token = await getToken();
+					hls = new Hls({
+						xhrSetup: (xhr) => {
+							if (token) xhr.setRequestHeader("Authorization", `Bearer: {token}`);
+							xhr.setRequestHeader("X-CLIENT-ID", client_id);
+						},
+					});
+				}
+				hls.loadSource(uri);
+				hls.attachMedia(ref.current);
+				// TODO: Enable custom XHR for tokens
+				hls.on(Hls.Events.MANIFEST_LOADED, async () => {
+					try {
+						await ref.current?.play();
+					} catch {}
+				});
+			}
+		})();
+	}, [uri, type]);
 
 	const setPlay = useSetAtom(playAtom);
 	useEffect(() => {
@@ -147,11 +147,8 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 				});
 			}}
 			onError={() => {
-				if (
-					ref?.current?.error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED &&
-					playMode !== PlayMode.Transmux
-				)
-					setPlayMode(PlayMode.Transmux);
+				if (ref?.current?.error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED)
+					onMediaUnsupported?.call(undefined);
 				else {
 					onError?.call(null, {
 						error: { "": "", errorString: ref.current?.error?.message ?? "Unknown error" },

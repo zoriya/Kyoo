@@ -33,7 +33,7 @@ import {
 	tooltip,
 	ts,
 } from "@kyoo/primitives";
-import { Chapter, Font, Track } from "@kyoo/models";
+import { Chapter, Font, Track, WatchItem } from "@kyoo/models";
 import { useAtomValue, useSetAtom, useAtom } from "jotai";
 import { View, ViewProps } from "react-native";
 import { useTranslation } from "react-i18next";
@@ -51,6 +51,7 @@ export const Hover = ({
 	href,
 	poster,
 	chapters,
+	qualities,
 	subtitles,
 	fonts,
 	previousSlug,
@@ -66,6 +67,7 @@ export const Hover = ({
 	href?: string;
 	poster?: string | null;
 	chapters?: Chapter[];
+	qualities?: WatchItem["link"]
 	subtitles?: Track[];
 	fonts?: Font[];
 	previousSlug?: string | null;
@@ -117,6 +119,7 @@ export const Hover = ({
 								<RightButtons
 									subtitles={subtitles}
 									fonts={fonts}
+									qualities={qualities}
 									onMenuOpen={onMenuOpen}
 									onMenuClose={onMenuClose}
 								/>
