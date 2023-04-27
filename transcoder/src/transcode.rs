@@ -1,5 +1,6 @@
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
+use serde::Serialize;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::process::Stdio;
@@ -11,7 +12,7 @@ use tokio::sync::watch::{self, Receiver};
 
 use crate::utils::Signalable;
 
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Serialize)]
 pub enum Quality {
 	P240,
 	P360,
@@ -78,18 +79,18 @@ async fn start_transcode(path: String, quality: Quality, start_time: u32) -> Tra
 	std::fs::create_dir(&out_dir).expect("Could not create cache directory");
 
 	let segment_time: u32 = 10;
-	let mut child = Command::new("ffmpeg")
-		.args(&["-progress", "pipe:1"])
+	let mut cmd = Command::new("ffmpeg");
+	cmd.args(&["-progress", "pipe:1"])
 		.arg("-nostats")
 		.args(&["-ss", start_time.to_string().as_str()])
 		.args(&["-i", path.as_str()])
-		.args(&["-f", "segment"])
-		.args(&["-segment_list_type", "m3u8"])
+		.args(&["-f", "hls"])
 		// Use a .tmp file for segments (.ts files)
-		.args(&["-hls_flags", "temp_files"])
+		.args(&["-hls_flags", "temp_file"])
+		.args(&["-hls_allow_cache", "1"])
 		// Keep all segments in the list (else only last X are presents, useful for livestreams)
-		.args(&["-segment_list_size", "0"])
-		.args(&["-segment_time", segment_time.to_string().as_str()])
+		.args(&["-hls_list_size", "0"])
+		.args(&["-hls_time", segment_time.to_string().as_str()])
 		// Force segments to be exactly segment_time (only works when transcoding)
 		.args(&[
 			"-force_key_frames",
@@ -101,16 +102,13 @@ async fn start_transcode(path: String, quality: Quality, start_time: u32) -> Tra
 		])
 		.args(get_transcode_video_quality_args(&quality))
 		.args(&[
-			"-segment_list".to_string(),
-			format!("{out_dir}/stream.m3u8"),
+			"-hls_segment_filename".to_string(),
 			format!("{out_dir}/segments-%02d.ts"),
+			format!("{out_dir}/stream.m3u8"),
 		])
-		// TODO: Figure out which flag would be the best.
-		.args(&["-segment_list_flags", "live"])
-		// .args(&["-segment_list_flags", "cache"])
-		.stdout(Stdio::piped())
-		.spawn()
-		.expect("ffmpeg failed to start");
+		.stdout(Stdio::piped());
+	println!("Starting a transcode with the command: {:?}", cmd);
+	let mut child = cmd.spawn().expect("ffmpeg failed to start");
 
 	let stdout = child.stdout.take().unwrap();
 	let (tx, mut rx) = watch::channel(0u32);
