@@ -1,14 +1,28 @@
 use serde::Serialize;
 use utoipa::ToSchema;
 
+use crate::transcode::Quality;
+
 #[derive(Serialize, ToSchema)]
 pub struct MediaInfo {
+	/// The length of the media in seconds.
+	length: f32,
 	container: String,
-	video_codec: String,
+	video: VideoTrack,
 	audios: Vec<Track>,
 	subtitles: Vec<Track>,
 	fonts: Vec<String>,
 	chapters: Vec<Chapter>,
+}
+
+#[derive(Serialize, ToSchema)]
+pub struct VideoTrack {
+	/// The codec of this stream.
+	codec: String,
+	/// The language of this stream (as a ISO-639-2 language code)
+	language: String,
+	/// The max quality of this video track.
+	quality: Quality,
 }
 
 #[derive(Serialize, ToSchema)]
