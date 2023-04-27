@@ -50,6 +50,7 @@ const mapData = (
 		showName: data.isMovie ? data.name! : data.showTitle,
 		href: data ? (data.isMovie ? `/movie/${data.slug}` : `/show/${data.showSlug}`) : "#",
 		poster: data.poster,
+		qualities: data.link,
 		subtitles: data.subtitles,
 		chapters: data.chapters,
 		fonts: data.fonts,

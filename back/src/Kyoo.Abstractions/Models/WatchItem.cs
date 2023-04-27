@@ -141,11 +141,23 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		public ICollection<Chapter> Chapters { get; set; }
 
+		string _Type => IsMovie ? "movie" : "episode";
+
 		/// <inheritdoc/>
-		public object Link => new
+		public object Link => new[]
 		{
-			Direct = $"/video/direct/{Slug}",
-			Transmux = $"/video/transmux/{Slug}/master.m3u8",
+			new { Name = "Pristine", Link = $"/video/{_Type}/{Slug}/direct", Type = "direct" },
+			new { Name = "Original", Link = $"/video/{_Type}/{Slug}/original/index.m3u8", Type = "transmux" },
+			new { Name = "Auto", Link = $"/video/{_Type}/{Slug}/auto/index.m3u8", Type = "transcode-auto" },
+
+			new { Name = "8K", Link = $"/video/{_Type}/{Slug}/8k/index.m3u8", Type = "transcode", },
+			new { Name = "4K", Link = $"/video/{_Type}/{Slug}/4k/index.m3u8", Type = "transcode" },
+			new { Name = "1440p", Link = $"/video/{_Type}/{Slug}/1440p/index.m3u8", Type = "transcode" },
+			new { Name = "1080p", Link = $"/video/{_Type}/{Slug}/1080p/index.m3u8", Type = "transcode" },
+			new { Name = "720p", Link = $"/video/{_Type}/{Slug}/720p/index.m3u8", Type = "transcode" },
+			new { Name = "480p", Link = $"/video/{_Type}/{Slug}/480p/index.m3u8", Type = "transcode" },
+			new { Name = "360p", Link = $"/video/{_Type}/{Slug}/360p/index.m3u8", Type = "transcode" },
+			new { Name = "240p", Link = $"/video/{_Type}/{Slug}/240p/index.m3u8", Type = "transcode" },
 		};
 
 		/// <summary>

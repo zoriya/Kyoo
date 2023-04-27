@@ -18,7 +18,19 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+declare module "react-native-video" {
+	interface VideoProperties {
+		fonts?: Font[];
+		onPlayPause: (isPlaying: boolean) => void;
+		onMediaUnsupported?: () => void;
+	}
+	export type VideoProps = Omit<VideoProperties, "source"> & {
+		source: { uri: string } & WatchItem["link"][0];
+	};
+}
+
 export * from "react-native-video";
 
+import { Font, WatchItem } from "@kyoo/models";
 import Video from "react-native-video";
 export default Video;
