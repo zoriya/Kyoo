@@ -34,7 +34,7 @@ class Scanner:
 		# TODO: Once movies are separated from the api, a new endpoint should be created to check for paths.
 		async with self._client.get(
 			f"{self._url}/episodes/count",
-			params={"path": str(path)},
+			params={"path": f"eq:{path}"},
 			headers={"X-API-Key": self._api_key},
 		) as r:
 			r.raise_for_status()
