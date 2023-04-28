@@ -55,14 +55,14 @@ fn get_transcode_video_quality_args(quality: &Quality) -> Vec<&'static str> {
 
 	match quality {
 		Quality::Original => vec![],
-		Quality::P240 => [enc_base, vec!["-vf", "scale=-2:240"]].concat(),
-		Quality::P360 => [enc_base, vec!["-vf", "scale=-2:360"]].concat(),
-		Quality::P480 => [enc_base, vec!["-vf", "scale=-2:480"]].concat(),
-		Quality::P720 => [enc_base, vec!["-vf", "scale=-2:720"]].concat(),
-		Quality::P1080 => [enc_base, vec!["-vf", "scale=-2:1080"]].concat(),
-		Quality::P1440 => [enc_base, vec!["-vf", "scale=-2:1440"]].concat(),
-		Quality::P4k => [enc_base, vec!["-vf", "scale=-2:2160"]].concat(),
-		Quality::P8k => [enc_base, vec!["-vf", "scale=-2:4320"]].concat(),
+		Quality::P240 => [enc_base, vec!["-vf", "scale=-2:'min(240,ih)'"]].concat(),
+		Quality::P360 => [enc_base, vec!["-vf", "scale=-2:'min(360,ih)'"]].concat(),
+		Quality::P480 => [enc_base, vec!["-vf", "scale=-2:'min(480,ih)'"]].concat(),
+		Quality::P720 => [enc_base, vec!["-vf", "scale=-2:'min(720,ih)'"]].concat(),
+		Quality::P1080 => [enc_base, vec!["-vf", "scale=-2:'min(1080,ih)'"]].concat(),
+		Quality::P1440 => [enc_base, vec!["-vf", "scale=-2:'min(1440,ih)'"]].concat(),
+		Quality::P4k => [enc_base, vec!["-vf", "scale=-2:'min(2160,ih)'"]].concat(),
+		Quality::P8k => [enc_base, vec!["-vf", "scale=-2:'min(4320,ih)'"]].concat(),
 	}
 }
 
