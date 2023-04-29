@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{str::FromStr, iter::Map, collections::HashMap};
 
 use actix_files::NamedFile;
 use actix_web::{
@@ -48,6 +48,37 @@ async fn get_direct(query: web::Path<(String, String)>) -> Result<NamedFile> {
 	})?;
 
 	Ok(NamedFile::open_async(path).await?)
+}
+
+/// Get master playlist
+///
+/// Get a master playlist containing all possible video qualities and audios available for this resource.
+/// Note that the direct stream is missing (since the direct is not an hls stream) and
+/// subtitles/fonts are not included to support more codecs than just webvtt.
+#[utoipa::path(
+	responses(
+		(status = 200, description = "Get the m3u8 master playlist."),
+		(status = NOT_FOUND, description = "Invalid slug.")
+	),
+	params(
+		("resource" = String, Path, description = "Episode or movie"),
+		("slug" = String, Path, description = "The slug of the movie/episode."),
+	)
+)]
+#[get("/{resource}/{slug}/master.m3u8")]
+async fn get_master(
+	query: web::Path<(String, String)>,
+) -> Result<String, ApiError> {
+	let (_resource, _slug) = query.into_inner();
+
+	// TODO: Fetch kyoo to retrieve the max quality (as well as the list of audio streams)
+	// TODO: Put resolutions based on the aspect ratio and do not assume 16/9
+	Ok(String::from(r#"#EXTM3U
+#EXT-X-STREAM-INF:AVERAGE-BANDWIDTH=400000,BANDWIDTH=700000,RESOLUTION=426x240,CODECS="avc1.640028"
+./240p/index.m3u8
+#EXT-X-STREAM-INF:AVERAGE-BANDWIDTH=2400000,BANDWIDTH=4000000,RESOLUTION=1080x720,CODECS="avc1.640028"
+./720p/index.m3u8
+"#))
 }
 
 /// Transcode video
@@ -170,7 +201,7 @@ async fn get_swagger() -> String {
 	#[derive(OpenApi)]
 	#[openapi(
 		info(description = "Transcoder's open api."),
-		paths(get_direct, get_transcoded, get_chunk, identify_resource),
+		paths(get_direct, get_transcoded, get_master, get_chunk, identify_resource),
 		components(schemas(MediaInfo, Track, Chapter))
 	)]
 	struct ApiDoc;
@@ -187,6 +218,7 @@ async fn main() -> std::io::Result<()> {
 			.app_data(state.clone())
 			.service(get_direct)
 			.service(get_transcoded)
+			.service(get_master)
 			.service(get_chunk)
 			.service(identify_resource)
 			.service(get_swagger)
