@@ -148,7 +148,7 @@ namespace Kyoo.Abstractions.Models
 		{
 			new { Name = "Pristine", Link = $"/video/{_Type}/{Slug}/direct", Type = "direct" },
 			new { Name = "Original", Link = $"/video/{_Type}/{Slug}/original/index.m3u8", Type = "transmux" },
-			new { Name = "Auto", Link = $"/video/{_Type}/{Slug}/auto/index.m3u8", Type = "transcode-auto" },
+			new { Name = "Auto", Link = $"/video/{_Type}/{Slug}/master.m3u8", Type = "transcode-auto" },
 
 			new { Name = "8K", Link = $"/video/{_Type}/{Slug}/8k/index.m3u8", Type = "transcode", },
 			new { Name = "4K", Link = $"/video/{_Type}/{Slug}/4k/index.m3u8", Type = "transcode" },
