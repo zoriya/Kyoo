@@ -53,16 +53,59 @@ fn get_transcode_video_quality_args(quality: &Quality) -> Vec<&'static str> {
 		"-map", "0:v:0", "-c:v", "libx264", "-crf", "21", "-preset", "veryfast",
 	];
 
+	// I'm not entierly sure about the values for bitrates. Double checking would be nice.
+	// Even less sure but bufsize are 5x the avergae bitrate since the average bitrate is only
+	// useful for hls segments.
 	match quality {
 		Quality::Original => vec![],
-		Quality::P240 => [enc_base, vec!["-vf", "scale=-2:'min(240,ih)'"]].concat(),
-		Quality::P360 => [enc_base, vec!["-vf", "scale=-2:'min(360,ih)'"]].concat(),
-		Quality::P480 => [enc_base, vec!["-vf", "scale=-2:'min(480,ih)'"]].concat(),
-		Quality::P720 => [enc_base, vec!["-vf", "scale=-2:'min(720,ih)'"]].concat(),
-		Quality::P1080 => [enc_base, vec!["-vf", "scale=-2:'min(1080,ih)'"]].concat(),
-		Quality::P1440 => [enc_base, vec!["-vf", "scale=-2:'min(1440,ih)'"]].concat(),
-		Quality::P4k => [enc_base, vec!["-vf", "scale=-2:'min(2160,ih)'"]].concat(),
-		Quality::P8k => [enc_base, vec!["-vf", "scale=-2:'min(4320,ih)'"]].concat(),
+		Quality::P240 => [
+			enc_base,
+			vec!["-vf", "scale=-2:'min(240,ih)'"],
+			vec!["-b:v", "400k", "-bufsize", "2000k", "-maxrate", "700k"],
+		]
+		.concat(),
+		Quality::P360 => [
+			enc_base,
+			vec!["-vf", "scale=-2:'min(360,ih)'"],
+			vec!["-b:v", "800k", "-bufsize", "4000k", "-maxrate", "1400"],
+		]
+		.concat(),
+		Quality::P480 => [
+			enc_base,
+			vec!["-vf", "scale=-2:'min(480,ih)'"],
+			vec!["-b:v", "1200k", "-bufsize", "6000k", "-maxrate", "2100k"],
+		]
+		.concat(),
+		Quality::P720 => [
+			enc_base,
+			vec!["-vf", "scale=-2:'min(720,ih)'"],
+			vec!["-b:v", "2400k", "-bufsize", "12000k", "-maxrate", "4000k"],
+		]
+		.concat(),
+		Quality::P1080 => [
+			enc_base,
+			vec!["-vf", "scale=-2:'min(1080,ih)'"],
+			vec!["-b:v", "4800k", "-bufsize", "24000k", "-maxrate", "6000k"],
+		]
+		.concat(),
+		Quality::P1440 => [
+			enc_base,
+			vec!["-vf", "scale=-2:'min(1440,ih)'"],
+			vec!["-b:v", "9600k", "-bufsize", "48000k", "-maxrate", "12000k"],
+		]
+		.concat(),
+		Quality::P4k => [
+			enc_base,
+			vec!["-vf", "scale=-2:'min(2160,ih)'"],
+			vec!["-b:v", "16000k", "-bufsize", "80000k", "-maxrate", "28000k"],
+		]
+		.concat(),
+		Quality::P8k => [
+			enc_base,
+			vec!["-vf", "scale=-2:'min(4320,ih)'"],
+			vec!["-b:v", "28000k", "-bufsize", "140000k", "-maxrate", "40000k"],
+		]
+		.concat(),
 	}
 }
 
