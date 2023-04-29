@@ -17,12 +17,21 @@ pub struct MediaInfo {
 
 #[derive(Serialize, ToSchema)]
 pub struct VideoTrack {
-	/// The codec of this stream.
+	/// The codec of this stream (defined as the RFC 6381).
 	codec: String,
 	/// The language of this stream (as a ISO-639-2 language code)
 	language: String,
 	/// The max quality of this video track.
 	quality: Quality,
+	/// The width of the video stream
+	width: u32,
+	/// The height of the video stream
+	height: u32,
+	/// The average bitrate of the video in bytes/s
+	average_bitrate: u32,
+	// TODO: Figure out if this is doable
+	/// The max bitrate of the video in bytes/s
+	max_bitrate: u32,
 }
 
 #[derive(Serialize, ToSchema)]

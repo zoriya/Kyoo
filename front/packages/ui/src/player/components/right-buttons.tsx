@@ -41,7 +41,7 @@ export const RightButtons = ({
 }: {
 	subtitles?: Track[];
 	fonts?: Font[];
-	qualities?: WatchItem["link"]
+	qualities?: WatchItem["link"];
 	onMenuOpen: () => void;
 	onMenuClose: () => void;
 } & Stylable) => {
