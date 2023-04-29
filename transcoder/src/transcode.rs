@@ -1,9 +1,11 @@
+use derive_more::Display;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use serde::Serialize;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::process::Stdio;
+use std::slice::Iter;
 use std::str::FromStr;
 use std::sync::RwLock;
 use tokio::io::{AsyncBufReadExt, BufReader};
@@ -12,17 +14,87 @@ use tokio::sync::watch::{self, Receiver};
 
 use crate::utils::Signalable;
 
-#[derive(PartialEq, Eq, Serialize)]
+#[derive(PartialEq, Eq, Serialize, Display)]
 pub enum Quality {
+	#[display(fmt = "240p")]
 	P240,
+	#[display(fmt = "360p")]
 	P360,
+	#[display(fmt = "480p")]
 	P480,
+	#[display(fmt = "720p")]
 	P720,
+	#[display(fmt = "1080p")]
 	P1080,
+	#[display(fmt = "1440p")]
 	P1440,
+	#[display(fmt = "4k")]
 	P4k,
+	#[display(fmt = "8k")]
 	P8k,
+	#[display(fmt = "original")]
 	Original,
+}
+
+impl Quality {
+	fn iter() -> Iter<'static, Quality> {
+		static QUALITIES: [Quality; 8] = [
+			Quality::P240,
+			Quality::P360,
+			Quality::P480,
+			Quality::P720,
+			Quality::P1080,
+			Quality::P1440,
+			Quality::P4k,
+			Quality::P8k,
+			// Purposfully removing Original from this list (since it require special treatments
+			// anyways)
+		];
+		QUALITIES.iter()
+	}
+
+	fn height(&self) -> u32 {
+		match self {
+			Self::P240 => 240,
+			Self::P360 => 360,
+			Self::P480 => 480,
+			Self::P720 => 720,
+			Self::P1080 => 1080,
+			Self::P1440 => 1440,
+			Self::P4k => 2160,
+			Self::P8k => 4320,
+			Self::Original => panic!("Original quality must be handled specially"),
+		}
+	}
+
+	// I'm not entierly sure about the values for bitrates. Double checking would be nice.
+	fn average_bitrate(&self) -> u32 {
+		match self {
+			Self::P240 => 400_000,
+			Self::P360 => 800_000,
+			Self::P480 => 1200_000,
+			Self::P720 => 2400_000,
+			Self::P1080 => 4800_000,
+			Self::P1440 => 9600_000,
+			Self::P4k => 16_000_000,
+			Self::P8k => 28_000_000,
+			Self::Original => panic!("Original quality must be handled specially"),
+		}
+	}
+
+	fn max_bitrate(&self) -> u32 {
+		match self {
+			Self::P240 => 700_000,
+			Self::P360 => 1400_000,
+			Self::P480 => 2100_000,
+			Self::P720 => 4000_000,
+			Self::P1080 => 8000_000,
+			Self::P1440 => 12_000_000,
+			Self::P4k => 28_000_000,
+			Self::P8k => 40_000_000,
+			Self::Original => panic!("Original quality must be handled specially"),
+		}
+	}
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -47,66 +119,41 @@ impl FromStr for Quality {
 	}
 }
 
-fn get_transcode_video_quality_args(quality: &Quality) -> Vec<&'static str> {
-	// superfast or ultrafast would produce a file extremly big so we prever veryfast.
-	let enc_base: Vec<&str> = vec![
-		"-map", "0:v:0", "-c:v", "libx264", "-crf", "21", "-preset", "veryfast",
-	];
-
-	// I'm not entierly sure about the values for bitrates. Double checking would be nice.
-	// Even less sure but bufsize are 5x the avergae bitrate since the average bitrate is only
-	// useful for hls segments.
-	match quality {
-		Quality::Original => vec![],
-		Quality::P240 => [
-			enc_base,
-			vec!["-vf", "scale=-2:'min(240,ih)'"],
-			vec!["-b:v", "400k", "-bufsize", "2000k", "-maxrate", "700k"],
-		]
-		.concat(),
-		Quality::P360 => [
-			enc_base,
-			vec!["-vf", "scale=-2:'min(360,ih)'"],
-			vec!["-b:v", "800k", "-bufsize", "4000k", "-maxrate", "1400"],
-		]
-		.concat(),
-		Quality::P480 => [
-			enc_base,
-			vec!["-vf", "scale=-2:'min(480,ih)'"],
-			vec!["-b:v", "1200k", "-bufsize", "6000k", "-maxrate", "2100k"],
-		]
-		.concat(),
-		Quality::P720 => [
-			enc_base,
-			vec!["-vf", "scale=-2:'min(720,ih)'"],
-			vec!["-b:v", "2400k", "-bufsize", "12000k", "-maxrate", "4000k"],
-		]
-		.concat(),
-		Quality::P1080 => [
-			enc_base,
-			vec!["-vf", "scale=-2:'min(1080,ih)'"],
-			vec!["-b:v", "4800k", "-bufsize", "24000k", "-maxrate", "6000k"],
-		]
-		.concat(),
-		Quality::P1440 => [
-			enc_base,
-			vec!["-vf", "scale=-2:'min(1440,ih)'"],
-			vec!["-b:v", "9600k", "-bufsize", "48000k", "-maxrate", "12000k"],
-		]
-		.concat(),
-		Quality::P4k => [
-			enc_base,
-			vec!["-vf", "scale=-2:'min(2160,ih)'"],
-			vec!["-b:v", "16000k", "-bufsize", "80000k", "-maxrate", "28000k"],
-		]
-		.concat(),
-		Quality::P8k => [
-			enc_base,
-			vec!["-vf", "scale=-2:'min(4320,ih)'"],
-			vec!["-b:v", "28000k", "-bufsize", "140000k", "-maxrate", "40000k"],
-		]
-		.concat(),
+fn get_transcode_video_quality_args(quality: &Quality, segment_time: u32) -> Vec<String> {
+	if *quality == Quality::Original {
+		return vec!["-map", "0:v:0", "-c:v", "copy"]
+			.iter()
+			.map(|a| a.to_string())
+			.collect();
 	}
+	vec![
+		// superfast or ultrafast would produce a file extremly big so we prever veryfast.
+		vec![
+			"-map", "0:v:0", "-c:v", "libx264", "-crf", "21", "-preset", "veryfast",
+		],
+		vec![
+			"-vf",
+			format!("scale=-2:'min({height},ih)'", height = quality.height()).as_str(),
+		],
+		// Even less sure but bufsize are 5x the avergae bitrate since the average bitrate is only
+		// useful for hls segments.
+		vec!["-bufsize", (quality.max_bitrate() * 5).to_string().as_str()],
+		vec!["-b:v", quality.average_bitrate().to_string().as_str()],
+		vec!["-maxrate", quality.max_bitrate().to_string().as_str()],
+		// Force segments to be exactly segment_time (only works when transcoding)
+		vec![
+			"-force_key_frames",
+			format!("expr:gte(t,n_forced*{segment_time})").as_str(),
+			"-strict",
+			"-2",
+			"-segment_time_delta",
+			"0.1",
+		],
+	]
+	.concat()
+	.iter()
+	.map(|arg| arg.to_string())
+	.collect()
 }
 
 // TODO: Add audios streams (and transcode them only when necesarry)
@@ -130,20 +177,12 @@ async fn start_transcode(path: String, quality: Quality, start_time: u32) -> Tra
 		.args(&["-f", "hls"])
 		// Use a .tmp file for segments (.ts files)
 		.args(&["-hls_flags", "temp_file"])
-		.args(&["-hls_allow_cache", "1"])
+		// Cache can't be allowed since switching quality means starting a new encode for now.
+		// .args(&["-hls_allow_cache", "1"])
 		// Keep all segments in the list (else only last X are presents, useful for livestreams)
 		.args(&["-hls_list_size", "0"])
 		.args(&["-hls_time", segment_time.to_string().as_str()])
-		// Force segments to be exactly segment_time (only works when transcoding)
-		.args(&[
-			"-force_key_frames",
-			format!("expr:gte(t,n_forced*{segment_time})").as_str(),
-			"-strict",
-			"-2",
-			"-segment_time_delta",
-			"0.1",
-		])
-		.args(get_transcode_video_quality_args(&quality))
+		.args(get_transcode_video_quality_args(&quality, segment_time))
 		.args(&[
 			"-hls_segment_filename".to_string(),
 			format!("{out_dir}/segments-%02d.ts"),
@@ -216,6 +255,33 @@ impl Transcoder {
 		Self {
 			running: RwLock::new(HashMap::new()),
 		}
+	}
+
+	pub async fn build_master(&self, _resource: String, _slug: String) -> String {
+		let mut master = String::from("#EXTM3U\n");
+		// TODO: Add transmux (original quality) in this master playlist.
+		// Transmux should be the first variant since it's used to test bandwidth
+		// and serve as a hint for preffered variant for clients.
+
+		// TODO: Fetch kyoo to retrieve the max quality and the aspect_ratio
+		let aspect_ratio = 16.0 / 9.0;
+		for quality in Quality::iter() {
+			master.push_str("#EXT-X-STREAM-INF:");
+			master.push_str(format!("AVERAGE-BANDWIDTH={},", quality.average_bitrate()).as_str());
+			master.push_str(format!("BANDWIDTH={},", quality.max_bitrate()).as_str());
+			master.push_str(
+				format!(
+					"RESOLUTION={}x{},",
+					(aspect_ratio * quality.height() as f32).round() as u32,
+					quality.height()
+				)
+				.as_str(),
+			);
+			master.push_str("CODECS=\"avc1.640028\"\n");
+			master.push_str(format!("./{}/index.m3u8\n", quality).as_str());
+		}
+		// TODO: Add audio streams
+		master
 	}
 
 	pub async fn transcode(

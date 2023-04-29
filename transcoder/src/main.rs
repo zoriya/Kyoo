@@ -1,4 +1,4 @@
-use std::{str::FromStr, iter::Map, collections::HashMap};
+use std::str::FromStr;
 
 use actix_files::NamedFile;
 use actix_web::{
@@ -68,17 +68,10 @@ async fn get_direct(query: web::Path<(String, String)>) -> Result<NamedFile> {
 #[get("/{resource}/{slug}/master.m3u8")]
 async fn get_master(
 	query: web::Path<(String, String)>,
+	transcoder: web::Data<Transcoder>,
 ) -> Result<String, ApiError> {
-	let (_resource, _slug) = query.into_inner();
-
-	// TODO: Fetch kyoo to retrieve the max quality (as well as the list of audio streams)
-	// TODO: Put resolutions based on the aspect ratio and do not assume 16/9
-	Ok(String::from(r#"#EXTM3U
-#EXT-X-STREAM-INF:AVERAGE-BANDWIDTH=400000,BANDWIDTH=700000,RESOLUTION=426x240,CODECS="avc1.640028"
-./240p/index.m3u8
-#EXT-X-STREAM-INF:AVERAGE-BANDWIDTH=2400000,BANDWIDTH=4000000,RESOLUTION=1080x720,CODECS="avc1.640028"
-./720p/index.m3u8
-"#))
+	let (resource, slug) = query.into_inner();
+	Ok(transcoder.build_master(resource, slug).await)
 }
 
 /// Transcode video
@@ -227,3 +220,4 @@ async fn main() -> std::io::Result<()> {
 	.run()
 	.await
 }
+
