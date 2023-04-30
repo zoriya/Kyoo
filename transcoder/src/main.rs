@@ -10,13 +10,14 @@ use utoipa::OpenApi;
 use crate::{
 	audio::*,
 	identify::{identify, Chapter, MediaInfo, Track},
-	transcode::Transcoder,
+	state::Transcoder,
 	video::*,
 };
 mod audio;
 mod error;
 mod identify;
 mod paths;
+mod state;
 mod transcode;
 mod utils;
 mod video;

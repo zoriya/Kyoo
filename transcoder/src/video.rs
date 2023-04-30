@@ -1,10 +1,6 @@
 use std::str::FromStr;
 
-use crate::{
-	error::ApiError,
-	transcode::{Quality, Transcoder},
-	utils::get_client_id, paths,
-};
+use crate::{error::ApiError, paths, state::Transcoder, transcode::Quality, utils::get_client_id};
 use actix_files::NamedFile;
 use actix_web::{get, web, HttpRequest, Result};
 

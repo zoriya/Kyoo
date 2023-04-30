@@ -1,7 +1,7 @@
 use crate::{
 	error::ApiError,
 	paths,
-	transcode::Transcoder,
+	state::Transcoder,
 };
 use actix_files::NamedFile;
 use actix_web::{get, web, Result};
