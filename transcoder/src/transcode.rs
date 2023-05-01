@@ -168,20 +168,14 @@ fn get_transcode_video_quality_args(quality: &Quality, segment_time: u32) -> Vec
 	.collect()
 }
 
-pub async fn transcode_audio(path: String, audio: u32) -> TranscodeInfo {
-	let mut hasher = DefaultHasher::new();
-	path.hash(&mut hasher);
-	audio.hash(&mut hasher);
-	let hash = hasher.finish();
-
-	let child = start_transcode(
+pub async fn transcode_audio(path: String, audio: u32) {
+	start_transcode(
 		&path,
-		&format!("/cache/{hash}"),
+		&get_audio_path(&path, audio),
 		get_transcode_audio_args(audio),
 		0,
 	)
 	.await;
-	todo!()
 }
 
 pub async fn transcode_video(path: String, quality: Quality, start_time: u32) -> TranscodeInfo {
@@ -193,7 +187,6 @@ pub async fn transcode_video(path: String, quality: Quality, start_time: u32) ->
 		.map(char::from)
 		.collect();
 	let out_dir = format!("/cache/{uuid}");
-	std::fs::create_dir(&out_dir).expect("Could not create cache directory");
 
 	let child = start_transcode(
 		&path,
@@ -215,6 +208,8 @@ async fn start_transcode(
 	encode_args: Vec<String>,
 	start_time: u32,
 ) -> Child {
+	std::fs::create_dir(&out_dir).expect("Could not create cache directory");
+
 	let mut cmd = Command::new("ffmpeg");
 	cmd.args(&["-progress", "pipe:1"])
 		.arg("-nostats")
@@ -248,21 +243,29 @@ async fn start_transcode(
 				let value = &value[1..];
 				// Can't use ms since ms and us are both set to us /shrug
 				if key == "out_time_us" {
-					tx.send(value.parse::<u32>().unwrap() / 1_000_000).unwrap();
+					let _ = tx.send(value.parse::<u32>().unwrap() / 1_000_000);
 				}
-				// TODO: maybe store speed too.
 			}
 		}
 	});
 
 	// Wait for 1.5 * segment time after start_time to be ready.
 	loop {
-		rx.changed().await.unwrap();
+		// TODO: Create a better error handling for here.
+		rx.changed().await.expect("Invalid audio index.");
 		let ready_time = *rx.borrow();
 		if ready_time >= (1.5 * SEGMENT_TIME as f32) as u32 + start_time {
 			return child;
 		}
 	}
+}
+
+pub fn get_audio_path(path: &String, audio: u32) -> String {
+	let mut hasher = DefaultHasher::new();
+	path.hash(&mut hasher);
+	audio.hash(&mut hasher);
+	let hash = hasher.finish();
+	format!("/cache/{hash:x}")
 }
 
 pub fn get_cache_path(info: &TranscodeInfo) -> PathBuf {
@@ -274,7 +277,7 @@ pub fn get_cache_path_from_uuid(uuid: &String) -> PathBuf {
 }
 
 pub struct TranscodeInfo {
-	show: (String, Quality),
-	job: Child,
-	uuid: String,
+	pub show: (String, Quality),
+	pub job: Child,
+	pub uuid: String,
 }
