@@ -43,6 +43,7 @@ impl Signalable for Child {
 }
 
 pub fn get_client_id(req: HttpRequest) -> Result<String, ApiError> {
+	// return Ok(String::from("1234"));
 	req.headers().get("x-client-id")
 		.ok_or(ApiError::BadRequest { error: String::from("Missing client id. Please specify the X-CLIENT-ID header to a guid constant for the lifetime of the player (but unique per instance)."), })
 		.map(|x| x.to_str().unwrap().to_string())

@@ -6,12 +6,14 @@ use std::sync::RwLock;
 
 pub struct Transcoder {
 	running: RwLock<HashMap<String, TranscodeInfo>>,
+	audio_jobs: RwLock<Vec<(String, u32)>>,
 }
 
 impl Transcoder {
 	pub fn new() -> Transcoder {
 		Self {
 			running: RwLock::new(HashMap::new()),
+			audio_jobs: RwLock::new(Vec::new()),
 		}
 	}
 
@@ -24,6 +26,7 @@ impl Transcoder {
 		// TODO: Fetch kyoo to retrieve the max quality and the aspect_ratio
 		let aspect_ratio = 16.0 / 9.0;
 		for quality in Quality::iter() {
+			// Doc: https://developer.apple.com/documentation/http_live_streaming/example_playlists_for_http_live_streaming/creating_a_multivariant_playlist
 			master.push_str("#EXT-X-STREAM-INF:");
 			master.push_str(format!("AVERAGE-BANDWIDTH={},", quality.average_bitrate()).as_str());
 			master.push_str(format!("BANDWIDTH={},", quality.max_bitrate()).as_str());
@@ -35,10 +38,26 @@ impl Transcoder {
 				)
 				.as_str(),
 			);
-			master.push_str("CODECS=\"avc1.640028\"\n");
+			master.push_str("CODECS=\"avc1.640028\",");
+			// With multiple audio qualities, maybe switch qualities depending on the video quality.
+			master.push_str("AUDIO=\"audio\"\n");
 			master.push_str(format!("./{}/index.m3u8\n", quality).as_str());
 		}
-		// TODO: Add audio streams
+		// TODO: Fetch audio stream list/metadata from kyoo.
+		for audio in vec![0] {
+			// Doc: https://developer.apple.com/documentation/http_live_streaming/example_playlists_for_http_live_streaming/adding_alternate_media_to_a_playlist
+			master.push_str("#EXT-X-MEDIA:TYPE=AUDIO,");
+			// The group-id allows to distinguish multiple qualities from multiple variants.
+			// We could create another quality set and use group-ids hiqual and lowqual.
+			master.push_str("GROUP-ID=\"audio\",");
+			// master.push_str(format!("LANGUAGE=\"{}\",", "eng").as_str());
+			master.push_str(format!("NAME=\"{}\",", "Default").as_str());
+			// TODO: Support aac5.1 (and specify the number of channel bellow)
+			// master.push_str(format!("CHANNELS=\"{}\",", 2).as_str());
+			master.push_str("DEFAULT=YES,");
+			master.push_str(format!("URI=\"./audio/{}/index.m3u8\"\n", audio).as_str());
+		}
+
 		master
 	}
 
@@ -87,8 +106,42 @@ impl Transcoder {
 		let hashmap = self.running.read().unwrap();
 		let info = hashmap.get(&client_id).ok_or(SegmentError::NoTranscode)?;
 
-		// TODO: Check if ready_time is far enough for this fragment to exist.
+		// If the segment is in the playlist file, it is available so we don't need to check that.
 		let mut path = get_cache_path(&info);
+		path.push(format!("segments-{0:02}.ts", chunk));
+		Ok(path)
+	}
+
+	pub async fn transcode_audio(
+		&self,
+		path: String,
+		audio: u32,
+	) -> Result<String, std::io::Error> {
+		let mut stream = PathBuf::from(get_audio_path(&path, audio));
+		stream.push("stream.m3u8");
+
+		if !self
+			.audio_jobs
+			.read()
+			.unwrap()
+			.contains(&(path.clone(), audio))
+		{
+			// TODO: If two concurrent requests for the same audio came, the first one will
+			// initialize the transcode and wait for the second segment while the second will use
+			// the same transcode but not wait and retrieve a potentially invalid playlist file.
+			self.audio_jobs.write().unwrap().push((path.clone(), audio));
+			transcode_audio(path, audio).await;
+		}
+		std::fs::read_to_string(stream)
+	}
+
+	pub async fn get_audio_segment(
+		&self,
+		path: String,
+		audio: u32,
+		chunk: u32,
+	) -> Result<PathBuf, std::io::Error> {
+		let mut path = PathBuf::from(get_audio_path(&path, audio));
 		path.push(format!("segments-{0:02}.ts", chunk));
 		Ok(path)
 	}

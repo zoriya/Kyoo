@@ -22,7 +22,7 @@ use actix_web::{get, web, Result};
 		("audio" = u32, Path, description = "Specify the audio stream you want. For mappings, refer to the audios fields of the /watch response."),
 	)
 )]
-#[get("/audio/{resource}/{slug}/{audio}/index.m3u8")]
+#[get("/{resource}/{slug}/audio/{audio}/index.m3u8")]
 async fn get_audio_transcoded(
 	query: web::Path<(String, String, u32)>,
 	transcoder: web::Data<Transcoder>,
@@ -33,7 +33,7 @@ async fn get_audio_transcoded(
 		.map_err(|_| ApiError::NotFound)?;
 
 	transcoder
-		.get_transcoded_audio(path, audio)
+		.transcode_audio(path, audio)
 		.await
 		.map_err(|_| ApiError::InternalError)
 }
@@ -53,7 +53,7 @@ async fn get_audio_transcoded(
 		("chunk" = u32, Path, description = "The number of the chunk"),
 	)
 )]
-#[get("/audio/{resource}/{slug}/{audio}/segments-{chunk}.ts")]
+#[get("/{resource}/{slug}/audio/{audio}/segments-{chunk}.ts")]
 async fn get_audio_chunk(
 	query: web::Path<(String, String, u32, u32)>,
 	transcoder: web::Data<Transcoder>,
