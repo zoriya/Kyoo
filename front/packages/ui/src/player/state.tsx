@@ -26,8 +26,13 @@ import { Platform } from "react-native";
 
 export const playAtom = atom(true);
 export const loadAtom = atom(false);
+
 // TODO: Default to auto or pristine depending on the user settings.
-export const qualityAtom = atom<string>("Pristine");
+export enum PlayMode {
+	Direct,
+	Hls,
+}
+export const playModeAtom = atom<PlayMode>(PlayMode.Direct);
 
 export const bufferedAtom = atom(0);
 export const durationAtom = atom<number | undefined>(undefined);
@@ -78,8 +83,8 @@ export const Video = memo(function _Video({
 	const ref = useRef<NativeVideo | null>(null);
 	const [isPlaying, setPlay] = useAtom(playAtom);
 	const setLoad = useSetAtom(loadAtom);
-	const [source, setSource] = useState<WatchItem["link"][0] | null>(null);
-	const [quality, setQuality] = useAtom(qualityAtom);
+	const [source, setSource] = useState<string | null>(null);
+	const [mode, setPlayMode] = useAtom(playModeAtom);
 
 	const publicProgress = useAtomValue(publicProgressAtom);
 	const setPrivateProgress = useSetAtom(privateProgressAtom);
@@ -91,11 +96,11 @@ export const Video = memo(function _Video({
 
 	useLayoutEffect(() => {
 		// Reset the state when a new video is loaded.
-		setSource(links?.find(x => x.name == quality) ?? null)
+		setSource((mode === PlayMode.Direct ? links?.direct : links?.hls) ?? null);
 		setLoad(true);
 		setPrivateProgress(0);
 		setPlay(true);
-	}, [quality, links, setLoad, setPrivateProgress, setPlay]);
+	}, [mode, links, setLoad, setPrivateProgress, setPlay]);
 
 	const volume = useAtomValue(volumeAtom);
 	const isMuted = useAtomValue(mutedAtom);
@@ -112,12 +117,12 @@ export const Video = memo(function _Video({
 
 	const subtitle = useAtomValue(subtitleAtom);
 
-	if (!source) return null;
+	if (!source || !links) return null;
 	return (
 		<NativeVideo
 			ref={ref}
 			{...props}
-			source={{ uri: source.link, ...source }}
+			source={{ uri: source, ...links }}
 			paused={!isPlaying}
 			muted={isMuted}
 			volume={volume}
@@ -142,15 +147,9 @@ export const Video = memo(function _Video({
 			}
 			fonts={fonts}
 			onMediaUnsupported={() => {
-				if (source.type === "direct")
-					setQuality(links?.find(x => x.type == "transmux")!.name!)
-
-				// TODO: Replace transcode with transcode-auto when supported.
-				if (source.type === "transmux")
-					setQuality(links?.find(x => x.type == "transcode")!.name!)
-
+				if (mode == PlayMode.Direct)
+					setPlayMode(PlayMode.Hls);
 			}}
-
 			// TODO: textTracks: external subtitles
 		/>
 	);

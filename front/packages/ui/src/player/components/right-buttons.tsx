@@ -28,8 +28,10 @@ import ClosedCaption from "@material-symbols/svg-400/rounded/closed_caption-fill
 import Fullscreen from "@material-symbols/svg-400/rounded/fullscreen-fill.svg";
 import FullscreenExit from "@material-symbols/svg-400/rounded/fullscreen_exit-fill.svg";
 import SettingsIcon from "@material-symbols/svg-400/rounded/settings-fill.svg";
+import MusicNote from "@material-symbols/svg-400/rounded/music_note-fill.svg";
 import { Stylable, useYoshiki } from "yoshiki/native";
-import { fullscreenAtom, qualityAtom, subtitleAtom } from "../state";
+import { fullscreenAtom, subtitleAtom } from "../state";
+import { AudiosMenu, QualitiesMenu } from "../video";
 
 export const RightButtons = ({
 	subtitles,
@@ -49,7 +51,6 @@ export const RightButtons = ({
 	const { t } = useTranslation();
 	const [isFullscreen, setFullscreen] = useAtom(fullscreenAtom);
 	const setSubAtom = useSetAtom(subtitleAtom);
-	const [quality, setQuality] = useAtom(qualityAtom);
 	const [selectedSubtitle, setSubtitle] = useState<string | undefined>(undefined);
 
 	useEffect(() => {
@@ -64,7 +65,7 @@ export const RightButtons = ({
 
 	return (
 		<View {...css({ flexDirection: "row" }, props)}>
-			{subtitles && (
+			{subtitles && subtitles.length && (
 				<Menu
 					Trigger={IconButton}
 					icon={ClosedCaption}
@@ -88,23 +89,22 @@ export const RightButtons = ({
 					))}
 				</Menu>
 			)}
-			<Menu
+			<AudiosMenu
+				Trigger={IconButton}
+				icon={MusicNote}
+				onMenuOpen={onMenuOpen}
+				onMenuClose={onMenuClose}
+				{...tooltip(t("player.audios"), true)}
+				{...spacing}
+			/>
+			<QualitiesMenu
 				Trigger={IconButton}
 				icon={SettingsIcon}
 				onMenuOpen={onMenuOpen}
 				onMenuClose={onMenuClose}
 				{...tooltip(t("player.quality"), true)}
 				{...spacing}
-			>
-				{qualities?.map((x) => (
-					<Menu.Item
-						key={x.link}
-						label={x.name}
-						selected={quality === x.name}
-						onSelect={() => setQuality(x.name)}
-					/>
-				))}
-			</Menu>
+			/>
 			{Platform.OS === "web" && (
 				<IconButton
 					icon={isFullscreen ? FullscreenExit : Fullscreen}

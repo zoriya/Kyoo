@@ -78,7 +78,6 @@ export const getTokenWJ = async (cookies?: string): Promise<[string, Token] | [n
 export const getToken = async (cookies?: string): Promise<string | null> =>
 	(await getTokenWJ(cookies))[0]
 
-
 export const logout = async () =>{
 	deleteSecureItem("auth")
 }
