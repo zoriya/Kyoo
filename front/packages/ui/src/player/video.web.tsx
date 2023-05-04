@@ -107,14 +107,6 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 
 	useLayoutEffect(() => {
 		(async () => {
-			await initHls();
-			// Still load the hls source to list available qualities.
-			// Note: This may ask the server to transmux the audio/video by loading the index.m3u8
-			hls.loadSource(source.hls);
-		})();
-	}, [source.hls]);
-	useLayoutEffect(() => {
-		(async () => {
 			if (!ref?.current || !source.uri) return;
 			await initHls();
 			if (oldHls.current !== source.hls) {
