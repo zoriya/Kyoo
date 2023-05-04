@@ -25,12 +25,25 @@ declare module "react-native-video" {
 		onMediaUnsupported?: () => void;
 	}
 	export type VideoProps = Omit<VideoProperties, "source"> & {
-		source: { uri: string } & WatchItem["link"][0];
+		source: { uri: string; hls: string };
 	};
 }
 
 export * from "react-native-video";
 
-import { Font, WatchItem } from "@kyoo/models";
+import { Font } from "@kyoo/models";
+import { IconButton, Menu } from "@kyoo/primitives";
+import { ComponentProps } from "react";
 import Video from "react-native-video";
 export default Video;
+
+// TODO: Implement those for mobile.
+
+type CustomMenu = ComponentProps<typeof Menu<ComponentProps<typeof IconButton>>>;
+export const AudiosMenu = (props: CustomMenu) => {
+	return <Menu {...props}></Menu>;
+};
+
+export const QualitiesMenu = (props: CustomMenu) => {
+	return <Menu {...props}></Menu>;
+};

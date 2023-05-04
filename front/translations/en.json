@@ -44,9 +44,12 @@
 		"mute": "Toggle mute",
 		"volume": "Volume",
 		"quality": "Quality",
+		"audios": "Audio",
 		"subtitles": "Subtitles",
 		"subtitle-none": "None",
-		"fullscreen": "Fullscreen"
+		"fullscreen": "Fullscreen",
+		"direct": "Pristine",
+		"auto": "Auto"
 	},
 	"search": {
 		"empty": "No result found. Try a different query."

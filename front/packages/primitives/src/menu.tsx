@@ -43,7 +43,7 @@ const Menu = <AsProps,>({
 	...props
 }: {
 	Trigger: ComponentType<AsProps>;
-	children: ReactNode | ReactNode[] | null;
+	children?: ReactNode | ReactNode[] | null;
 	onMenuOpen?: () => void;
 	onMenuClose?: () => void;
 } & Omit<AsProps, "onPress">) => {

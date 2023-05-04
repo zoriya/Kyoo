@@ -156,13 +156,10 @@ const WatchMovieP = z.preprocess(
 		/**
 		 * The links to the videos of this watch item.
 		 */
-		link: z.array(
-			z.object({
-				name: z.string(),
-				link: z.string().transform(imageFn),
-				type: z.enum(["direct", "transmux", "transcode-auto", "transcode"])
-			}),
-		),
+		link: z.object({
+			direct: z.string().transform(imageFn),
+			hls: z.string().transform(imageFn),
+		}),
 	}),
 );
 
