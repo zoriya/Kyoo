@@ -1,4 +1,6 @@
 use serde::Serialize;
+use std::str;
+use tokio::process::Command;
 use utoipa::ToSchema;
 
 use crate::transcode::Quality;
@@ -20,7 +22,7 @@ pub struct VideoTrack {
 	/// The codec of this stream (defined as the RFC 6381).
 	codec: String,
 	/// The language of this stream (as a ISO-639-2 language code)
-	language: String,
+	language: Option<String>,
 	/// The max quality of this video track.
 	quality: Quality,
 	/// The width of the video stream
@@ -28,10 +30,7 @@ pub struct VideoTrack {
 	/// The height of the video stream
 	height: u32,
 	/// The average bitrate of the video in bytes/s
-	average_bitrate: u32,
-	// TODO: Figure out if this is doable
-	/// The max bitrate of the video in bytes/s
-	max_bitrate: u32,
+	bitrate: u32,
 }
 
 #[derive(Serialize, ToSchema)]
@@ -39,9 +38,9 @@ pub struct Track {
 	/// The index of this track on the media.
 	index: u32,
 	/// The title of the stream.
-	title: String,
+	title: Option<String>,
 	/// The language of this stream (as a ISO-639-2 language code)
-	language: String,
+	language: Option<String>,
 	/// The codec of this stream.
 	codec: String,
 	/// Is this stream the default one of it's type?
@@ -60,6 +59,66 @@ pub struct Chapter {
 	name: String, // TODO: add a type field for Opening, Credits...
 }
 
-pub fn identify(_path: String) -> Result<MediaInfo, std::io::Error> {
-	todo!()
+pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
+	let mediainfo = Command::new("mediainfo")
+		.arg("--Output=JSON")
+		.arg("--Language=raw")
+		.arg(path)
+		.output()
+		.await?;
+	assert!(mediainfo.status.success());
+	let output = json::parse(str::from_utf8(mediainfo.stdout.as_slice()).unwrap()).unwrap();
+
+	let general = output["media"]["tracks"]
+		.members()
+		.find(|x| x["@type"] == "General")
+		.unwrap();
+
+	Ok(MediaInfo {
+		length: general["Duration"].as_f32().unwrap(),
+		container: general["Format"].as_str().unwrap().to_string(),
+		video: {
+			let v = output["media"]["tracks"]
+				.members()
+				.find(|x| x["@type"] == "Video")
+				.expect("File without video found. This is not supported");
+			VideoTrack {
+				// This codec is not in the right format (does not include bitdepth...).
+				codec: v["Format"].as_str().unwrap().to_string(),
+				language: v["Language"].as_str().map(|x| x.to_string()),
+				quality: Quality::from_height(v["Height"].as_u32().unwrap()),
+				width: v["Width"].as_u32().unwrap(),
+				height: v["Height"].as_u32().unwrap(),
+				bitrate: v["BitRate"].as_u32().unwrap(),
+			}
+		},
+		audios: output["media"]["tracks"]
+			.members()
+			.filter(|x| x["@type"] == "Audio")
+			.map(|a| Track {
+				index: a["StreamOrder"].as_u32().unwrap(),
+				title: a["Title"].as_str().map(|x| x.to_string()),
+				language: a["Language"].as_str().map(|x| x.to_string()),
+				// TODO: format is invalid. Channels count missing...
+				codec: a["Format"].as_str().unwrap().to_string(),
+				default: a["Default"] == "Yes",
+				forced: a["Forced"] == "No",
+			})
+			.collect(),
+		subtitles: output["media"]["tracks"]
+			.members()
+			.filter(|x| x["@type"] == "Text")
+			.map(|a| Track {
+				index: a["StreamOrder"].as_u32().unwrap(),
+				title: a["Title"].as_str().map(|x| x.to_string()),
+				language: a["Language"].as_str().map(|x| x.to_string()),
+				// TODO: format is invalid. Channels count missing...
+				codec: a["Format"].as_str().unwrap().to_string(),
+				default: a["Default"] == "Yes",
+				forced: a["Forced"] == "No",
+			})
+			.collect(),
+		fonts: vec![],
+		chapters: vec![],
+	})
 }
