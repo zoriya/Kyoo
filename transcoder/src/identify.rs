@@ -119,6 +119,32 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 			})
 			.collect(),
 		fonts: vec![],
-		chapters: vec![],
+		chapters: output["media"]["tracks"]
+			.members()
+			.find(|x| x["@type"] == "Menu")
+			.map(|x| {
+				std::iter::zip(x["extra"].entries(), x["extra"].entries().skip(1))
+					.map(|((start, name), (end, _))| Chapter {
+						start: time_to_seconds(start),
+						end: time_to_seconds(end),
+						name: name.as_str().unwrap().to_string(),
+					})
+					.collect()
+			})
+			.unwrap_or(vec![]),
 	})
+}
+
+fn time_to_seconds(time: &str) -> f32 {
+	let splited: Vec<f32> = time
+		.split('_')
+		.skip(1)
+		.map(|x| x.parse().unwrap())
+		.collect();
+	let hours = splited[0];
+	let minutes = splited[1];
+	let seconds = splited[2];
+	let ms = splited[3];
+
+	(hours * 60. + minutes) * 60. + seconds + ms / 1000.
 }
