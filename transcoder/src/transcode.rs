@@ -14,7 +14,7 @@ use tokio::sync::watch;
 
 const SEGMENT_TIME: u32 = 10;
 
-#[derive(PartialEq, Eq, Serialize, Display)]
+#[derive(PartialEq, Eq, Serialize, Display, Clone, Copy)]
 pub enum Quality {
 	#[display(fmt = "240p")]
 	P240,
@@ -94,6 +94,13 @@ impl Quality {
 			Self::P8k => 40_000_000,
 			Self::Original => panic!("Original quality must be handled specially"),
 		}
+	}
+
+	pub fn from_height(height: u32) -> Self {
+		Self::iter()
+			.find(|x| x.height() <= height)
+			.unwrap_or(&Quality::P240)
+			.clone()
 	}
 }
 
