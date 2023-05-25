@@ -98,7 +98,7 @@ impl Quality {
 
 	pub fn from_height(height: u32) -> Self {
 		Self::iter()
-			.find(|x| x.height() <= height)
+			.find(|x| x.height() >= height)
 			.unwrap_or(&Quality::P240)
 			.clone()
 	}
