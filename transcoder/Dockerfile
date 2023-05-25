@@ -11,7 +11,7 @@ COPY src src
 RUN cargo install --path .
 
 FROM alpine
-RUN apk add --no-cache ffmpeg
+RUN apk add --no-cache ffmpeg mediainfo
 COPY --from=builder /usr/local/cargo/bin/transcoder ./transcoder
 
 EXPOSE 7666

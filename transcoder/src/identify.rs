@@ -1,5 +1,6 @@
+use json::JsonValue;
 use serde::Serialize;
-use std::str;
+use std::str::{self, FromStr};
 use tokio::process::Command;
 use utoipa::ToSchema;
 
@@ -65,20 +66,26 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 		.arg("--Language=raw")
 		.arg(path)
 		.output()
-		.await?;
+		.await
+		.expect("Error running the mediainfo command");
 	assert!(mediainfo.status.success());
 	let output = json::parse(str::from_utf8(mediainfo.stdout.as_slice()).unwrap()).unwrap();
 
-	let general = output["media"]["tracks"]
+	let general = output["media"]["track"]
 		.members()
 		.find(|x| x["@type"] == "General")
 		.unwrap();
 
+	fn parse<F: FromStr>(v: &JsonValue) -> Option<F> {
+		v.as_str().and_then(|x| x.parse::<F>().ok())
+	}
+
+	// TODO: Every number is wrapped by "" in mediainfo json's mode so the number parsing is wrong.
 	Ok(MediaInfo {
-		length: general["Duration"].as_f32().unwrap(),
+		length: parse::<f32>(&general["Duration"]).unwrap(),
 		container: general["Format"].as_str().unwrap().to_string(),
 		video: {
-			let v = output["media"]["tracks"]
+			let v = output["media"]["track"]
 				.members()
 				.find(|x| x["@type"] == "Video")
 				.expect("File without video found. This is not supported");
@@ -86,17 +93,17 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 				// This codec is not in the right format (does not include bitdepth...).
 				codec: v["Format"].as_str().unwrap().to_string(),
 				language: v["Language"].as_str().map(|x| x.to_string()),
-				quality: Quality::from_height(v["Height"].as_u32().unwrap()),
-				width: v["Width"].as_u32().unwrap(),
-				height: v["Height"].as_u32().unwrap(),
-				bitrate: v["BitRate"].as_u32().unwrap(),
+				quality: Quality::from_height(parse::<u32>(&v["Height"]).unwrap()),
+				width: parse::<u32>(&v["Width"]).unwrap(),
+				height: parse::<u32>(&v["Height"]).unwrap(),
+				bitrate: parse::<u32>(&v["BitRate"]).unwrap(),
 			}
 		},
-		audios: output["media"]["tracks"]
+		audios: output["media"]["track"]
 			.members()
 			.filter(|x| x["@type"] == "Audio")
 			.map(|a| Track {
-				index: a["StreamOrder"].as_u32().unwrap(),
+				index: parse::<u32>(&a["StreamOrder"]).unwrap(),
 				title: a["Title"].as_str().map(|x| x.to_string()),
 				language: a["Language"].as_str().map(|x| x.to_string()),
 				// TODO: format is invalid. Channels count missing...
@@ -105,11 +112,11 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 				forced: a["Forced"] == "No",
 			})
 			.collect(),
-		subtitles: output["media"]["tracks"]
+		subtitles: output["media"]["track"]
 			.members()
 			.filter(|x| x["@type"] == "Text")
 			.map(|a| Track {
-				index: a["StreamOrder"].as_u32().unwrap(),
+				index: parse::<u32>(&a["StreamOrder"]).unwrap(),
 				title: a["Title"].as_str().map(|x| x.to_string()),
 				language: a["Language"].as_str().map(|x| x.to_string()),
 				// TODO: format is invalid. Channels count missing...
@@ -119,7 +126,7 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 			})
 			.collect(),
 		fonts: vec![],
-		chapters: output["media"]["tracks"]
+		chapters: output["media"]["track"]
 			.members()
 			.find(|x| x["@type"] == "Menu")
 			.map(|x| {

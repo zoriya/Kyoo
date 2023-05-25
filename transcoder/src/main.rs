@@ -94,7 +94,7 @@ async fn identify_resource(
 		.map_err(|_| ApiError::NotFound)?;
 
 	identify(path).await.map(|info| Json(info)).map_err(|e| {
-		eprintln!("Unhandled error occured while transcoding: {}", e);
+		eprintln!("Unhandled error occured while identifing the resource: {}", e);
 		ApiError::InternalError
 	})
 }
