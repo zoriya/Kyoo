@@ -68,7 +68,10 @@ async fn get_master(
 	transcoder: web::Data<Transcoder>,
 ) -> Result<String, ApiError> {
 	let (resource, slug) = query.into_inner();
-	Ok(transcoder.build_master(resource, slug).await)
+	transcoder
+		.build_master(resource, slug)
+		.await
+		.ok_or(ApiError::InternalError)
 }
 
 /// Identify
@@ -84,7 +87,7 @@ async fn get_master(
 		("slug" = String, Path, description = "The slug of the movie/episode."),
 	)
 )]
-#[get("/{resource}/{slug}/identify")]
+#[get("/{resource}/{slug}/info")]
 async fn identify_resource(
 	query: web::Path<(String, String)>,
 ) -> Result<Json<MediaInfo>, ApiError> {
@@ -94,7 +97,10 @@ async fn identify_resource(
 		.map_err(|_| ApiError::NotFound)?;
 
 	identify(path).await.map(|info| Json(info)).map_err(|e| {
-		eprintln!("Unhandled error occured while identifing the resource: {}", e);
+		eprintln!(
+			"Unhandled error occured while identifing the resource: {}",
+			e
+		);
 		ApiError::InternalError
 	})
 }

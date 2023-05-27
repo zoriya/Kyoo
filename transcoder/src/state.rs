@@ -1,5 +1,7 @@
-use crate::transcode::*;
+use crate::identify::identify;
+use crate::paths::get_path;
 use crate::utils::Signalable;
+use crate::transcode::*;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::RwLock;
@@ -17,15 +19,30 @@ impl Transcoder {
 		}
 	}
 
-	pub async fn build_master(&self, _resource: String, _slug: String) -> String {
+	pub async fn build_master(&self, resource: String, slug: String) -> Option<String> {
 		let mut master = String::from("#EXTM3U\n");
-		// TODO: Add transmux (original quality) in this master playlist.
-		// Transmux should be the first variant since it's used to test bandwidth
-		// and serve as a hint for preffered variant for clients.
+		let path = get_path(resource, slug).await.ok()?;
+		let info = identify(path).await.ok()?;
 
-		// TODO: Fetch kyoo to retrieve the max quality and the aspect_ratio
-		let aspect_ratio = 16.0 / 9.0;
-		for quality in Quality::iter() {
+		// TODO: Only add this if transmuxing is possible.
+		if true {
+			// Doc: https://developer.apple.com/documentation/http_live_streaming/example_playlists_for_http_live_streaming/creating_a_multivariant_playlist
+			master.push_str("#EXT-X-STREAM-INF:");
+			master.push_str(format!("AVERAGE-BANDWIDTH={},", info.video.bitrate).as_str());
+			// Approximate a bit more because we can't know the maximum bandwidth.
+			master.push_str(format!("BANDWIDTH={},", (info.video.bitrate as f32 * 1.2) as u32).as_str());
+			master.push_str(
+				format!("RESOLUTION={}x{},", info.video.width, info.video.height).as_str(),
+			);
+			// TODO: Find codecs in the RFC 6381 format.
+			// master.push_str("CODECS=\"avc1.640028\",");
+			// TODO: With multiple audio qualities, maybe switch qualities depending on the video quality.
+			master.push_str("AUDIO=\"audio\"\n");
+			master.push_str(format!("./{}/index.m3u8\n", Quality::Original).as_str());
+		}
+
+		let aspect_ratio = info.video.width as f32 / info.video.height as f32;
+		for quality in Quality::iter().filter(|x| x.height() <= info.video.quality.height()) {
 			// Doc: https://developer.apple.com/documentation/http_live_streaming/example_playlists_for_http_live_streaming/creating_a_multivariant_playlist
 			master.push_str("#EXT-X-STREAM-INF:");
 			master.push_str(format!("AVERAGE-BANDWIDTH={},", quality.average_bitrate()).as_str());
@@ -39,26 +56,29 @@ impl Transcoder {
 				.as_str(),
 			);
 			master.push_str("CODECS=\"avc1.640028\",");
-			// With multiple audio qualities, maybe switch qualities depending on the video quality.
+			// TODO: With multiple audio qualities, maybe switch qualities depending on the video quality.
 			master.push_str("AUDIO=\"audio\"\n");
 			master.push_str(format!("./{}/index.m3u8\n", quality).as_str());
 		}
-		// TODO: Fetch audio stream list/metadata from kyoo.
-		for audio in vec![0] {
+		for audio in info.audios {
 			// Doc: https://developer.apple.com/documentation/http_live_streaming/example_playlists_for_http_live_streaming/adding_alternate_media_to_a_playlist
 			master.push_str("#EXT-X-MEDIA:TYPE=AUDIO,");
 			// The group-id allows to distinguish multiple qualities from multiple variants.
 			// We could create another quality set and use group-ids hiqual and lowqual.
 			master.push_str("GROUP-ID=\"audio\",");
-			// master.push_str(format!("LANGUAGE=\"{}\",", "eng").as_str());
-			master.push_str(format!("NAME=\"{}\",", "Default").as_str());
+			if let Some(language) = audio.language {
+				master.push_str(format!("LANGUAGE=\"{}\",", language).as_str());
+			}
+			if let Some(title) = audio.title {
+				master.push_str(format!("NAME=\"{}\",", title).as_str());
+			}
 			// TODO: Support aac5.1 (and specify the number of channel bellow)
 			// master.push_str(format!("CHANNELS=\"{}\",", 2).as_str());
 			master.push_str("DEFAULT=YES,");
-			master.push_str(format!("URI=\"./audio/{}/index.m3u8\"\n", audio).as_str());
+			master.push_str(format!("URI=\"./audio/{}/index.m3u8\"\n", audio.index).as_str());
 		}
 
-		master
+		Some(master)
 	}
 
 	pub async fn transcode(
