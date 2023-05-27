@@ -9,55 +9,55 @@ use crate::transcode::Quality;
 #[derive(Serialize, ToSchema)]
 pub struct MediaInfo {
 	/// The length of the media in seconds.
-	length: f32,
-	container: String,
-	video: VideoTrack,
-	audios: Vec<Track>,
-	subtitles: Vec<Track>,
-	fonts: Vec<String>,
-	chapters: Vec<Chapter>,
+	pub length: f32,
+	pub container: String,
+	pub video: VideoTrack,
+	pub audios: Vec<Track>,
+	pub subtitles: Vec<Track>,
+	pub fonts: Vec<String>,
+	pub chapters: Vec<Chapter>,
 }
 
 #[derive(Serialize, ToSchema)]
 pub struct VideoTrack {
 	/// The codec of this stream (defined as the RFC 6381).
-	codec: String,
+	pub codec: String,
 	/// The language of this stream (as a ISO-639-2 language code)
-	language: Option<String>,
+	pub language: Option<String>,
 	/// The max quality of this video track.
-	quality: Quality,
+	pub quality: Quality,
 	/// The width of the video stream
-	width: u32,
+	pub width: u32,
 	/// The height of the video stream
-	height: u32,
+	pub height: u32,
 	/// The average bitrate of the video in bytes/s
-	bitrate: u32,
+	pub bitrate: u32,
 }
 
 #[derive(Serialize, ToSchema)]
 pub struct Track {
 	/// The index of this track on the media.
-	index: u32,
+	pub index: u32,
 	/// The title of the stream.
-	title: Option<String>,
+	pub title: Option<String>,
 	/// The language of this stream (as a ISO-639-2 language code)
-	language: Option<String>,
+	pub language: Option<String>,
 	/// The codec of this stream.
-	codec: String,
+	pub codec: String,
 	/// Is this stream the default one of it's type?
-	default: bool,
+	pub default: bool,
 	/// Is this stream tagged as forced? (useful only for subtitles)
-	forced: bool,
+	pub forced: bool,
 }
 
 #[derive(Serialize, ToSchema)]
 pub struct Chapter {
 	/// The start time of the chapter (in second from the start of the episode).
-	start: f32,
+	pub start: f32,
 	/// The end time of the chapter (in second from the start of the episode).
-	end: f32,
+	pub end: f32,
 	/// The name of this chapter. This should be a human-readable name that could be presented to the user.
-	name: String, // TODO: add a type field for Opening, Credits...
+	pub name: String, // TODO: add a type field for Opening, Credits...
 }
 
 pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
@@ -80,7 +80,6 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 		v.as_str().and_then(|x| x.parse::<F>().ok())
 	}
 
-	// TODO: Every number is wrapped by "" in mediainfo json's mode so the number parsing is wrong.
 	Ok(MediaInfo {
 		length: parse::<f32>(&general["Duration"]).unwrap(),
 		container: general["Format"].as_str().unwrap().to_string(),
