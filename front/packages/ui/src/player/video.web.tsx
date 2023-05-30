@@ -34,7 +34,7 @@ import { useAtomValue, useSetAtom, useAtom } from "jotai";
 import { useYoshiki } from "yoshiki";
 import SubtitleOctopus from "libass-wasm";
 import { playAtom, PlayMode, playModeAtom, subtitleAtom } from "./state";
-import Hls from "hls.js";
+import Hls, { Level } from "hls.js";
 import { useTranslation } from "react-i18next";
 import { Menu } from "@kyoo/primitives";
 
@@ -58,6 +58,7 @@ const initHls = async () => {
 			xhr.setRequestHeader("X-CLIENT-ID", client_id);
 		},
 	});
+	// hls.currentLevel = hls.startLevel;
 };
 
 const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function _Video(
@@ -262,6 +263,12 @@ export const QualitiesMenu = (props: ComponentProps<typeof Menu>) => {
 		return () => hls!.off(Hls.Events.LEVEL_SWITCHED, rerender);
 	});
 
+	const levelName = (label: Level, auto?: boolean): string => {
+		const height = `${label.height}p`
+		if (auto) return height;
+		return label.uri.includes("original") ? `${t("player.transmux")} (${height})` : height;
+	}
+
 	return (
 		<Menu {...props}>
 			<Menu.Item
@@ -272,24 +279,24 @@ export const QualitiesMenu = (props: ComponentProps<typeof Menu>) => {
 			<Menu.Item
 				label={
 					hls != null && hls.autoLevelEnabled && hls.currentLevel >= 0
-						? `${t("player.auto")} (${hls.levels[hls.currentLevel].height}p)`
+						? `${t("player.auto")} (${levelName(hls.levels[hls.currentLevel], true)})`
 						: t("player.auto")
 				}
 				selected={hls?.autoLevelEnabled && mode === PlayMode.Hls}
 				onSelect={() => {
 					setPlayMode(PlayMode.Hls);
-					if (hls) hls.nextLevel = -1;
+					if (hls) hls.currentLevel = -1;
 				}}
 			/>
 			{hls?.levels
 				.map((x, i) => (
 					<Menu.Item
 						key={i.toString()}
-						label={`${x.height}p`}
+						label={levelName(x)}
 						selected={mode === PlayMode.Hls && hls!.currentLevel === i && !hls?.autoLevelEnabled}
 						onSelect={() => {
 							setPlayMode(PlayMode.Hls);
-							hls!.nextLevel = i;
+							hls!.currentLevel = i;
 						}}
 					/>
 				))

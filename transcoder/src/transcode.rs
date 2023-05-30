@@ -219,7 +219,7 @@ async fn start_transcode(
 
 	let mut cmd = Command::new("ffmpeg");
 	cmd.args(&["-progress", "pipe:1"])
-		.arg("-nostats")
+		.args(&["-nostats", "-hide_banner", "-loglevel", "warning"])
 		.args(&["-ss", start_time.to_string().as_str()])
 		.args(&["-i", path.as_str()])
 		.args(&["-f", "hls"])
@@ -250,7 +250,8 @@ async fn start_transcode(
 				let value = &value[1..];
 				// Can't use ms since ms and us are both set to us /shrug
 				if key == "out_time_us" {
-					let _ = tx.send(value.parse::<u32>().unwrap() / 1_000_000);
+					// Sometimes, the value is invalid (or negative), default to 0 in those cases
+					let _ = tx.send(value.parse::<u32>().unwrap_or(0) / 1_000_000);
 				}
 			}
 		}

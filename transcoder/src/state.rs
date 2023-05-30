@@ -1,7 +1,7 @@
 use crate::identify::identify;
 use crate::paths::get_path;
-use crate::utils::Signalable;
 use crate::transcode::*;
+use crate::utils::Signalable;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::RwLock;
@@ -30,7 +30,9 @@ impl Transcoder {
 			master.push_str("#EXT-X-STREAM-INF:");
 			master.push_str(format!("AVERAGE-BANDWIDTH={},", info.video.bitrate).as_str());
 			// Approximate a bit more because we can't know the maximum bandwidth.
-			master.push_str(format!("BANDWIDTH={},", (info.video.bitrate as f32 * 1.2) as u32).as_str());
+			master.push_str(
+				format!("BANDWIDTH={},", (info.video.bitrate as f32 * 1.2) as u32).as_str(),
+			);
 			master.push_str(
 				format!("RESOLUTION={}x{},", info.video.width, info.video.height).as_str(),
 			);
@@ -42,7 +44,9 @@ impl Transcoder {
 		}
 
 		let aspect_ratio = info.video.width as f32 / info.video.height as f32;
-		for quality in Quality::iter().filter(|x| x.height() <= info.video.quality.height()) {
+		// Do not include a quality with the same height as the original (simpler for automatic
+		// selection on the client side.)
+		for quality in Quality::iter().filter(|x| x.height() < info.video.quality.height()) {
 			// Doc: https://developer.apple.com/documentation/http_live_streaming/example_playlists_for_http_live_streaming/creating_a_multivariant_playlist
 			master.push_str("#EXT-X-STREAM-INF:");
 			master.push_str(format!("AVERAGE-BANDWIDTH={},", quality.average_bitrate()).as_str());
