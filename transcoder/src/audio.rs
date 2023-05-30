@@ -28,10 +28,10 @@ async fn get_audio_transcoded(
 		.await
 		.map_err(|_| ApiError::NotFound)?;
 
-	transcoder
-		.transcode_audio(path, audio)
-		.await
-		.map_err(|_| ApiError::InternalError)
+	transcoder.transcode_audio(path, audio).await.map_err(|e| {
+		eprintln!("Error while transcoding audio: {}", e);
+		ApiError::InternalError
+	})
 }
 
 /// Get audio chunk
