@@ -1,4 +1,4 @@
-FROM gcc:latest as transcoder
+FROM mcr.microsoft.com/dotnet/sdk:6.0 as transcoder
 RUN apt-get update && apt-get install -y cmake make libavutil-dev libavcodec-dev libavformat-dev
 WORKDIR /transcoder
 COPY src/Kyoo.Transcoder .

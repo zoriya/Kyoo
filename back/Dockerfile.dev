@@ -1,5 +1,6 @@
-FROM gcc:latest as transcoder
-RUN apt-get update && apt-get install -y cmake make libavutil-dev libavcodec-dev libavformat-dev
+FROM mcr.microsoft.com/dotnet/sdk:6.0 as transcoder
+# Using the dotnet sdk as a base image to have the same versions of glibc/ffmpeg
+RUN apt-get update && apt-get install -y gcc cmake make libavutil-dev libavcodec-dev libavformat-dev
 WORKDIR /transcoder
 COPY src/Kyoo.Transcoder .
 RUN cmake . && make -j
@@ -20,11 +21,12 @@ COPY src/Kyoo.Swagger/Kyoo.Swagger.csproj src/Kyoo.Swagger/Kyoo.Swagger.csproj
 COPY tests/Kyoo.Tests/Kyoo.Tests.csproj tests/Kyoo.Tests/Kyoo.Tests.csproj
 RUN dotnet restore
 
-COPY --from=transcoder /transcoder/libtranscoder.so /app/out/bin/Kyoo.Host/Debug/net6.0/libtranscoder.so
+COPY --from=transcoder /transcoder/libtranscoder.so /lib/libtranscoder.so
 
 WORKDIR /kyoo
 EXPOSE 5000
 ENV DOTNET_USE_POLLING_FILE_WATCHER 1
 HEALTHCHECK --interval=5s CMD curl --fail http://localhost:5000/health || exit
+# ENV LD_DEBUG libs
 CMD dotnet watch run --no-restore --project /app/src/Kyoo.Host
 
