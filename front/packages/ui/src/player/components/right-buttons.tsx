@@ -65,7 +65,7 @@ export const RightButtons = ({
 
 	return (
 		<View {...css({ flexDirection: "row" }, props)}>
-			{subtitles && subtitles.length && (
+			{subtitles && subtitles.length > 0 && (
 				<Menu
 					Trigger={IconButton}
 					icon={ClosedCaption}

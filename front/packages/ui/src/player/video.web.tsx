@@ -149,7 +149,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 				if (!ref.current) return;
 				onLoad?.call(null, { duration: ref.current.duration } as any);
 			}}
-			onProgress={() => {
+			onTimeUpdate={() => {
 				if (!ref.current) return;
 				onProgress?.call(null, {
 					currentTime: ref.current.currentTime,
