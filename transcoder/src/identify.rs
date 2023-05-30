@@ -102,7 +102,7 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 			.members()
 			.filter(|x| x["@type"] == "Audio")
 			.map(|a| Track {
-				index: parse::<u32>(&a["StreamOrder"]).unwrap(),
+				index: parse::<u32>(&a["StreamOrder"]).unwrap() - 1,
 				title: a["Title"].as_str().map(|x| x.to_string()),
 				language: a["Language"].as_str().map(|x| x.to_string()),
 				// TODO: format is invalid. Channels count missing...
@@ -115,7 +115,7 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 			.members()
 			.filter(|x| x["@type"] == "Text")
 			.map(|a| Track {
-				index: parse::<u32>(&a["StreamOrder"]).unwrap(),
+				index: parse::<u32>(&a["StreamOrder"]).unwrap() - 1,
 				title: a["Title"].as_str().map(|x| x.to_string()),
 				language: a["Language"].as_str().map(|x| x.to_string()),
 				// TODO: format is invalid. Channels count missing...

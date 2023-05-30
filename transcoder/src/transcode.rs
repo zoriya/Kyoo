@@ -140,7 +140,7 @@ fn get_transcode_audio_args(audio_idx: u32) -> Vec<String> {
 
 fn get_transcode_video_quality_args(quality: &Quality, segment_time: u32) -> Vec<String> {
 	if *quality == Quality::Original {
-		return vec!["-map", "0:v:0", "-c:v", "copy"]
+		return vec!["-map", "0:V:0", "-c:v", "copy"]
 			.iter()
 			.map(|a| a.to_string())
 			.collect();
@@ -215,7 +215,7 @@ async fn start_transcode(
 	encode_args: Vec<String>,
 	start_time: u32,
 ) -> Child {
-	std::fs::create_dir(&out_dir).expect("Could not create cache directory");
+	std::fs::create_dir_all(&out_dir).expect("Could not create cache directory");
 
 	let mut cmd = Command::new("ffmpeg");
 	cmd.args(&["-progress", "pipe:1"])
