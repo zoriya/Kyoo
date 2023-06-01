@@ -1,4 +1,5 @@
-FROM rust as builder
+FROM rust:alpine as builder
+RUN apk add --no-cache musl-dev
 WORKDIR /app
 
 # FIX: see https://github.com/rust-lang/cargo/issues/2644
@@ -12,7 +13,7 @@ COPY src src
 RUN cargo install --path .
 
 FROM alpine
-RUN apk add --no-cache ffmpeg
+RUN apk add --no-cache ffmpeg mediainfo musl-dev
 COPY --from=builder /usr/local/cargo/bin/transcoder ./transcoder
 
 EXPOSE 7666
