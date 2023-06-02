@@ -127,12 +127,15 @@ impl FromStr for Quality {
 }
 
 fn get_transcode_audio_args(audio_idx: u32) -> Vec<String> {
-	// TODO: Support multy audio qualities.
+	// TODO: Support multi audio qualities.
 	return vec![
 		"-map".to_string(),
 		format!("0:a:{}", audio_idx),
 		"-c:a".to_string(),
 		"aac".to_string(),
+		// TODO: Support 5.1 audio streams.
+		"-ac".to_string(),
+		"2".to_string(),
 		"-b:a".to_string(),
 		"128k".to_string(),
 	];
@@ -226,7 +229,7 @@ async fn start_transcode(
 		// Use a .tmp file for segments (.ts files)
 		.args(&["-hls_flags", "temp_file"])
 		// Cache can't be allowed since switching quality means starting a new encode for now.
-		// .args(&["-hls_allow_cache", "1"])
+		.args(&["-hls_allow_cache", "1"])
 		// Keep all segments in the list (else only last X are presents, useful for livestreams)
 		.args(&["-hls_list_size", "0"])
 		.args(&["-hls_time", SEGMENT_TIME.to_string().as_str()])
