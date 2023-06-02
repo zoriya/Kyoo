@@ -88,6 +88,7 @@ export const Video = memo(function _Video({
 
 	const publicProgress = useAtomValue(publicProgressAtom);
 	const setPrivateProgress = useSetAtom(privateProgressAtom);
+	const setPublicProgress = useSetAtom(publicProgressAtom);
 	const setBuffered = useSetAtom(bufferedAtom);
 	const setDuration = useSetAtom(durationAtom);
 	useEffect(() => {
@@ -99,8 +100,9 @@ export const Video = memo(function _Video({
 		setSource((mode === PlayMode.Direct ? links?.direct : links?.hls) ?? null);
 		setLoad(true);
 		setPrivateProgress(0);
+		setPublicProgress(0);
 		setPlay(true);
-	}, [mode, links, setLoad, setPrivateProgress, setPlay]);
+	}, [mode, links, setLoad, setPrivateProgress, setPublicProgress, setPlay]);
 
 	const volume = useAtomValue(volumeAtom);
 	const isMuted = useAtomValue(mutedAtom);
