@@ -38,7 +38,7 @@ import Hls, { Level } from "hls.js";
 import { useTranslation } from "react-i18next";
 import { Menu } from "@kyoo/primitives";
 
-let hls: Hls = null!;
+let hls: Hls | null = null;
 
 function uuidv4(): string {
 	// @ts-ignore I have no clue how this works, thanks https://stackoverflow.com/questions/105034/how-do-i-create-a-guid-uuid
@@ -49,16 +49,20 @@ function uuidv4(): string {
 
 let client_id = typeof window === "undefined" ? "ssr" : uuidv4();
 
-const initHls = async () => {
-	if (hls !== null) return;
+const initHls = async (): Promise<Hls> => {
+	if (hls !== null) return hls;
 	const token = await getToken();
 	hls = new Hls({
 		xhrSetup: (xhr) => {
 			if (token) xhr.setRequestHeader("Authorization", `Bearer: {token}`);
 			xhr.setRequestHeader("X-CLIENT-ID", client_id);
 		},
+		autoStartLoad: false,
+		// debug: true,
+		startPosition: 0,
 	});
 	// hls.currentLevel = hls.startLevel;
+	return hls;
 };
 
 const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function _Video(
@@ -109,8 +113,12 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 	useLayoutEffect(() => {
 		(async () => {
 			if (!ref?.current || !source.uri) return;
-			await initHls();
-			if (oldHls.current !== source.hls) {
+			if (!hls || oldHls.current !== source.hls) {
+				// Reinit the hls player when we change track.
+				if (hls)
+					hls.destroy();
+				hls = null;
+				hls = await initHls();
 				// Still load the hls source to list available qualities.
 				// Note: This may ask the server to transmux the audio/video by loading the index.m3u8
 				hls.loadSource(source.hls);
@@ -121,14 +129,23 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 				ref.current.src = source.uri;
 			} else {
 				hls.attachMedia(ref.current);
-				// TODO: Enable custom XHR for tokens
+				hls.startLoad(0);
 				hls.on(Hls.Events.MANIFEST_LOADED, async () => {
 					try {
 						await ref.current?.play();
 					} catch { }
 				});
+				hls.on(Hls.Events.ERROR, (_, d) => {
+					console.log("Hls error", d);
+					if (!d.fatal) return;
+					onError?.call(null, {
+						error: { "": "", errorString: d.reason ?? d.err?.message ?? "Unknown hls error" },
+					});
+				});
 			}
 		})();
+	// onError changes should not restart the playback.
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [source.uri, source.hls]);
 
 	const setPlay = useSetAtom(playAtom);
