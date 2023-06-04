@@ -97,6 +97,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 	);
 
 	useEffect(() => {
+		if (!ref.current || paused === ref.current.paused) return;
 		if (paused) ref.current?.pause();
 		else ref.current?.play().catch(() => { });
 	}, [paused]);
@@ -186,8 +187,9 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 					});
 				}
 			}}
-			onPlay={() => onPlayPause?.call(null, true)}
-			onPause={() => onPlayPause?.call(null, false)}
+			// BUG: If this is enabled, switching to fullscreen or opening a menu make a play/pause loop until firefox crash.
+			// onPlay={() => onPlayPause?.call(null, true)}
+			// onPause={() => onPlayPause?.call(null, false)}
 			onEnded={onEnd}
 			{...css({ width: "100%", height: "100%" })}
 		/>
