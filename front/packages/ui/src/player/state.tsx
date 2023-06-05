@@ -55,7 +55,9 @@ export const fullscreenAtom = atom(
 	async (_, set, value: boolean) => {
 		try {
 			if (value) {
-				await document.body.requestFullscreen();
+				await document.body.requestFullscreen({
+					navigationUI: "hide",
+				});
 				set(privateFullscreen, true);
 				await screen.orientation.lock("landscape");
 			} else {

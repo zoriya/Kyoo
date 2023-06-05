@@ -95,7 +95,8 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 				quality: Quality::from_height(parse::<u32>(&v["Height"]).unwrap()),
 				width: parse::<u32>(&v["Width"]).unwrap(),
 				height: parse::<u32>(&v["Height"]).unwrap(),
-				bitrate: parse::<u32>(&v["BitRate"]).unwrap(),
+				bitrate: parse::<u32>(&v["BitRate"])
+					.unwrap_or(parse(&general["OverallBitRate"]).unwrap()),
 			}
 		},
 		audios: output["media"]["track"]
