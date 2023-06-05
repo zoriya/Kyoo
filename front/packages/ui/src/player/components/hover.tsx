@@ -35,7 +35,7 @@ import {
 } from "@kyoo/primitives";
 import { Chapter, Font, Track, WatchItem } from "@kyoo/models";
 import { useAtomValue, useSetAtom, useAtom } from "jotai";
-import { View, ViewProps } from "react-native";
+import { Platform, View, ViewProps } from "react-native";
 import { useTranslation } from "react-i18next";
 import { percent, rem, useYoshiki } from "yoshiki/native";
 import { useRouter } from "solito/router";
@@ -87,7 +87,8 @@ export const Hover = ({
 						{...css(
 							[
 								{
-									position: "absolute",
+									// Fixed is used because firefox android make the hover disapear under the navigation bar in absolute
+									position: Platform.OS === "web" ? "fixed" as any : "absolute",
 									bottom: 0,
 									left: 0,
 									right: 0,
@@ -106,6 +107,7 @@ export const Hover = ({
 								marginLeft: { xs: ts(0.5), sm: ts(3) },
 								flexDirection: "column",
 								flexGrow: 1,
+								maxWidth: percent(100),
 							})}
 						>
 							<H2 {...css({ paddingBottom: ts(1) })}>

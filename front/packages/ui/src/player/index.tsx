@@ -21,7 +21,7 @@
 import { QueryIdentifier, QueryPage, WatchItem, WatchItemP, useFetch } from "@kyoo/models";
 import { Head } from "@kyoo/primitives";
 import { useState, useEffect, ComponentProps } from "react";
-import { Platform, Pressable, StyleSheet } from "react-native";
+import { Platform, Pressable, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "solito/router";
 import { useAtom } from "jotai";
@@ -42,7 +42,7 @@ const mapData = (
 	data: WatchItem | undefined,
 	previousSlug?: string,
 	nextSlug?: string,
-): Partial<ComponentProps<typeof Hover>> => {
+): Partial<ComponentProps<typeof Hover>> & { isLoading: boolean } => {
 	if (!data) return { isLoading: true };
 	return {
 		isLoading: false,
@@ -132,12 +132,12 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 						data.isMovie
 							? data.name
 							: data.showTitle +
-							  " " +
-							  episodeDisplayNumber({
-									seasonNumber: data.seasonNumber,
-									episodeNumber: data.episodeNumber,
-									absoluteNumber: data.absoluteNumber,
-							  })
+							" " +
+							episodeDisplayNumber({
+								seasonNumber: data.seasonNumber,
+								episodeNumber: data.episodeNumber,
+								absoluteNumber: data.absoluteNumber,
+							})
 					}
 					description={data.overview}
 				/>
@@ -148,9 +148,9 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 				next={next}
 				previous={previous}
 			/>
-			<Pressable
+			<View
 				focusable={false}
-				onHoverOut={() => setMouseMoved(false)}
+				onPointerLeave={(e) => { if (e.nativeEvent.pointerType === "mouse") setMouseMoved(false) }}
 				{...css({
 					flexGrow: 1,
 					bg: "black",
@@ -158,11 +158,9 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 					cursor: displayControls ? "unset" : "none",
 				})}
 			>
-				<Pressable
-					focusable={false}
-					onPress={(e) => {
-						// TODO: use onPress event to diferenciate touch and click on the web (requires react native web 0.19)
-						if (Platform.OS !== "web") {
+				<View
+					onPointerDown={(e) => {
+						if (e.nativeEvent.pointerType !== "mouse") {
 							displayControls ? setMouseMoved(false) : show();
 							return;
 						}
@@ -178,13 +176,7 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 							}, 400);
 						setPlay(!isPlaying);
 					}}
-					{...css([
-						StyleSheet.absoluteFillObject,
-						{
-							// @ts-ignore Web only
-							cursor: "unset",
-						},
-					])}
+					{...css(StyleSheet.absoluteFillObject)}
 				>
 					<Video
 						links={data?.link}
@@ -200,14 +192,18 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 						}}
 						{...css(StyleSheet.absoluteFillObject)}
 					/>
-				</Pressable>
+				</View>
 				<LoadingIndicator />
 				<Hover
 					{...mapData(data, previous, next)}
-					// @ts-ignore Web only types
-					onMouseEnter={() => setHover(true)}
-					// @ts-ignore Web only types
-					onMouseLeave={() => setHover(false)}
+					onPointerEnter={(e) => { if (e.nativeEvent.pointerType === "mouse") setHover(true) }}
+					onPointerLeave={(e) => { if (e.nativeEvent.pointerType === "mouse") setHover(false) }}
+					onPointerDown={(e) => {
+						// also handle touch here because if we dont, the area where the hover should be will catch touches
+						// without openning the hover.
+						if (e.nativeEvent.pointerType !== "mouse")
+							displayControls ? setMouseMoved(false) : show();
+					}}
 					onMenuOpen={() => setMenuOpen(true)}
 					onMenuClose={() => {
 						// Disable hover since the menu overlay makes the mouseout unreliable.
@@ -216,7 +212,7 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 					}}
 					show={displayControls}
 				/>
-			</Pressable>
+			</View>
 		</>
 	);
 };
