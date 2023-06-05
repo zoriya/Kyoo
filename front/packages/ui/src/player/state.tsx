@@ -63,7 +63,9 @@ export const fullscreenAtom = atom(
 				set(privateFullscreen, false);
 				screen.orientation.unlock();
 			}
-		} catch {}
+		} catch(e) {
+			console.error(e);
+		}
 	},
 );
 const privateFullscreen = atom(false);
