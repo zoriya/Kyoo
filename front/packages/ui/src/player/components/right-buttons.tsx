@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Font, Track } from "@kyoo/models";
+import { Font, Track, WatchItem } from "@kyoo/models";
 import { IconButton, tooltip, Menu, ts } from "@kyoo/primitives";
 import { useAtom, useSetAtom } from "jotai";
 import { useEffect, useState } from "react";
@@ -27,21 +27,23 @@ import { useTranslation } from "react-i18next";
 import ClosedCaption from "@material-symbols/svg-400/rounded/closed_caption-fill.svg";
 import Fullscreen from "@material-symbols/svg-400/rounded/fullscreen-fill.svg";
 import FullscreenExit from "@material-symbols/svg-400/rounded/fullscreen_exit-fill.svg";
+import SettingsIcon from "@material-symbols/svg-400/rounded/settings-fill.svg";
+import MusicNote from "@material-symbols/svg-400/rounded/music_note-fill.svg";
 import { Stylable, useYoshiki } from "yoshiki/native";
-import { createParam } from "solito";
 import { fullscreenAtom, subtitleAtom } from "../state";
-
-const { useParam } = createParam<{ subtitle?: string }>();
+import { AudiosMenu, QualitiesMenu } from "../video";
 
 export const RightButtons = ({
 	subtitles,
 	fonts,
+	qualities,
 	onMenuOpen,
 	onMenuClose,
 	...props
 }: {
 	subtitles?: Track[];
 	fonts?: Font[];
+	qualities?: WatchItem["link"];
 	onMenuOpen: () => void;
 	onMenuClose: () => void;
 } & Stylable) => {
@@ -63,7 +65,7 @@ export const RightButtons = ({
 
 	return (
 		<View {...css({ flexDirection: "row" }, props)}>
-			{subtitles && (
+			{subtitles && subtitles.length > 0 && (
 				<Menu
 					Trigger={IconButton}
 					icon={ClosedCaption}
@@ -87,6 +89,22 @@ export const RightButtons = ({
 					))}
 				</Menu>
 			)}
+			<AudiosMenu
+				Trigger={IconButton}
+				icon={MusicNote}
+				onMenuOpen={onMenuOpen}
+				onMenuClose={onMenuClose}
+				{...tooltip(t("player.audios"), true)}
+				{...spacing}
+			/>
+			<QualitiesMenu
+				Trigger={IconButton}
+				icon={SettingsIcon}
+				onMenuOpen={onMenuOpen}
+				onMenuClose={onMenuClose}
+				{...tooltip(t("player.quality"), true)}
+				{...spacing}
+			/>
 			{Platform.OS === "web" && (
 				<IconButton
 					icon={isFullscreen ? FullscreenExit : Fullscreen}

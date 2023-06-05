@@ -141,11 +141,14 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		public ICollection<Chapter> Chapters { get; set; }
 
+		[SerializeIgnore]
+		private string _Type => IsMovie ? "movie" : "episode";
+
 		/// <inheritdoc/>
 		public object Link => new
 		{
-			Direct = $"/video/direct/{Slug}",
-			Transmux = $"/video/transmux/{Slug}/master.m3u8",
+			Direct = $"/video/{_Type}/{Slug}/direct",
+			Hls = $"/video/{_Type}/{Slug}/master.m3u8",
 		};
 
 		/// <summary>

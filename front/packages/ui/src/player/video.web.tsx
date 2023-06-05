@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Font, Track } from "@kyoo/models";
+import { Font, getToken, Track } from "@kyoo/models";
 import {
 	forwardRef,
 	RefObject,
@@ -26,31 +26,44 @@ import {
 	useImperativeHandle,
 	useLayoutEffect,
 	useRef,
+	useReducer,
+	ComponentProps,
 } from "react";
 import { VideoProps } from "react-native-video";
-import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom, useAtom } from "jotai";
 import { useYoshiki } from "yoshiki";
 import SubtitleOctopus from "libass-wasm";
-import { playAtom, subtitleAtom } from "./state";
-import Hls from "hls.js";
+import { playAtom, PlayMode, playModeAtom, subtitleAtom } from "./state";
+import Hls, { Level } from "hls.js";
+import { useTranslation } from "react-i18next";
+import { Menu } from "@kyoo/primitives";
 
-declare module "react-native-video" {
-	interface VideoProperties {
-		fonts?: Font[];
-		onPlayPause: (isPlaying: boolean) => void;
-	}
-	export type VideoProps = Omit<VideoProperties, "source"> & {
-		source: { uri?: string; transmux?: string };
-	};
-}
-
-enum PlayMode {
-	Direct,
-	Transmux,
-}
-
-const playModeAtom = atom<PlayMode>(PlayMode.Direct);
 let hls: Hls | null = null;
+
+function uuidv4(): string {
+	// @ts-ignore I have no clue how this works, thanks https://stackoverflow.com/questions/105034/how-do-i-create-a-guid-uuid
+	return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+		(c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16),
+	);
+}
+
+let client_id = typeof window === "undefined" ? "ssr" : uuidv4();
+
+const initHls = async (): Promise<Hls> => {
+	if (hls !== null) return hls;
+	const token = await getToken();
+	hls = new Hls({
+		xhrSetup: (xhr) => {
+			if (token) xhr.setRequestHeader("Authorization", `Bearer: {token}`);
+			xhr.setRequestHeader("X-CLIENT-ID", client_id);
+		},
+		autoStartLoad: false,
+		// debug: true,
+		startPosition: 0,
+	});
+	// hls.currentLevel = hls.startLevel;
+	return hls;
+};
 
 const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function _Video(
 	{
@@ -64,11 +77,13 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 		onError,
 		onEnd,
 		onPlayPause,
+		onMediaUnsupported,
 		fonts,
 	},
 	forwaredRef,
 ) {
 	const ref = useRef<HTMLVideoElement>(null);
+	const oldHls = useRef<string | null>(null);
 	const { css } = useYoshiki();
 
 	useImperativeHandle(
@@ -82,8 +97,9 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 	);
 
 	useEffect(() => {
+		if (!ref.current || paused === ref.current.paused) return;
 		if (paused) ref.current?.pause();
-		else ref.current?.play().catch(() => {});
+		else ref.current?.play().catch(() => { });
 	}, [paused]);
 	useEffect(() => {
 		if (!ref.current || !volume) return;
@@ -94,28 +110,44 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 	const subtitle = useAtomValue(subtitleAtom);
 	useSubtitle(ref, subtitle, fonts);
 
-	const [playMode, setPlayMode] = useAtom(playModeAtom);
-	useEffect(() => {
-		setPlayMode(PlayMode.Direct);
-	}, [source.uri, setPlayMode]);
 
 	useLayoutEffect(() => {
-		const src = playMode === PlayMode.Direct ? source?.uri : source?.transmux;
-
-		if (!ref?.current || !src) return;
-		if (playMode == PlayMode.Direct || ref.current.canPlayType("application/vnd.apple.mpegurl")) {
-			ref.current.src = src;
-		} else {
-			if (hls === null) hls = new Hls();
-			hls.loadSource(src);
-			hls.attachMedia(ref.current);
-			hls.on(Hls.Events.MANIFEST_LOADED, async () => {
-				try {
-					await ref.current?.play();
-				} catch {}
-			});
-		}
-	}, [playMode, source?.uri, source?.transmux]);
+		(async () => {
+			if (!ref?.current || !source.uri) return;
+			if (!hls || oldHls.current !== source.hls) {
+				// Reinit the hls player when we change track.
+				if (hls)
+					hls.destroy();
+				hls = null;
+				hls = await initHls();
+				// Still load the hls source to list available qualities.
+				// Note: This may ask the server to transmux the audio/video by loading the index.m3u8
+				hls.loadSource(source.hls);
+				oldHls.current = source.hls;
+			}
+			if (!source.uri.endsWith(".m3u8")) {
+				hls.detachMedia();
+				ref.current.src = source.uri;
+			} else {
+				hls.attachMedia(ref.current);
+				hls.startLoad(0);
+				hls.on(Hls.Events.MANIFEST_LOADED, async () => {
+					try {
+						await ref.current?.play();
+					} catch { }
+				});
+				hls.on(Hls.Events.ERROR, (_, d) => {
+					console.log("Hls error", d);
+					if (!d.fatal || !hls?.media) return;
+					onError?.call(null, {
+						error: { "": "", errorString: d.reason ?? d.err?.message ?? "Unknown hls error" },
+					});
+				});
+			}
+		})();
+	// onError changes should not restart the playback.
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [source.uri, source.hls]);
 
 	const setPlay = useSetAtom(playAtom);
 	useEffect(() => {
@@ -136,7 +168,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 				if (!ref.current) return;
 				onLoad?.call(null, { duration: ref.current.duration } as any);
 			}}
-			onProgress={() => {
+			onTimeUpdate={() => {
 				if (!ref.current) return;
 				onProgress?.call(null, {
 					currentTime: ref.current.currentTime,
@@ -147,19 +179,17 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 				});
 			}}
 			onError={() => {
-				if (
-					ref?.current?.error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED &&
-					playMode !== PlayMode.Transmux
-				)
-					setPlayMode(PlayMode.Transmux);
+				if (ref?.current?.error?.code === MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED)
+					onMediaUnsupported?.call(undefined);
 				else {
 					onError?.call(null, {
 						error: { "": "", errorString: ref.current?.error?.message ?? "Unknown error" },
 					});
 				}
 			}}
-			onPlay={() => onPlayPause?.call(null, true)}
-			onPause={() => onPlayPause?.call(null, false)}
+			// BUG: If this is enabled, switching to fullscreen or opening a menu make a play/pause loop until firefox crash.
+			// onPlay={() => onPlayPause?.call(null, true)}
+			// onPause={() => onPlayPause?.call(null, false)}
 			onEnded={onEnd}
 			{...css({ width: "100%", height: "100%" })}
 		/>
@@ -223,4 +253,73 @@ const useSubtitle = (player: RefObject<HTMLVideoElement>, value: Track | null, f
 			});
 		}
 	}, [player, value, fonts]);
+};
+
+export const AudiosMenu = (props: ComponentProps<typeof Menu>) => {
+	if (!hls || hls.audioTracks.length < 2) return null;
+	return (
+		<Menu {...props}>
+			{hls.audioTracks.map((x, i) => (
+				<Menu.Item
+					key={i.toString()}
+					label={x.name}
+					selected={hls!.audioTrack === i}
+					onSelect={() => (hls!.audioTrack = i)}
+				/>
+			))}
+		</Menu>
+	);
+};
+
+export const QualitiesMenu = (props: ComponentProps<typeof Menu>) => {
+	const { t } = useTranslation();
+	const [mode, setPlayMode] = useAtom(playModeAtom);
+	const [_, rerender] = useReducer((x) => x + 1, 0);
+
+	useEffect(() => {
+		if (!hls) return;
+		hls.on(Hls.Events.LEVEL_SWITCHED, rerender);
+		return () => hls!.off(Hls.Events.LEVEL_SWITCHED, rerender);
+	});
+
+	const levelName = (label: Level, auto?: boolean): string => {
+		const height = `${label.height}p`
+		if (auto) return height;
+		return label.uri.includes("original") ? `${t("player.transmux")} (${height})` : height;
+	}
+
+	return (
+		<Menu {...props}>
+			<Menu.Item
+				label={t("player.direct")}
+				selected={hls === null || mode == PlayMode.Direct}
+				onSelect={() => setPlayMode(PlayMode.Direct)}
+			/>
+			<Menu.Item
+				label={
+					hls != null && hls.autoLevelEnabled && hls.currentLevel >= 0
+						? `${t("player.auto")} (${levelName(hls.levels[hls.currentLevel], true)})`
+						: t("player.auto")
+				}
+				selected={hls?.autoLevelEnabled && mode === PlayMode.Hls}
+				onSelect={() => {
+					setPlayMode(PlayMode.Hls);
+					if (hls) hls.currentLevel = -1;
+				}}
+			/>
+			{hls?.levels
+				.map((x, i) => (
+					<Menu.Item
+						key={i.toString()}
+						label={levelName(x)}
+						selected={mode === PlayMode.Hls && hls!.currentLevel === i && !hls?.autoLevelEnabled}
+						onSelect={() => {
+							setPlayMode(PlayMode.Hls);
+							hls!.currentLevel = i;
+						}}
+					/>
+				))
+				.reverse()}
+		</Menu>
+	);
 };

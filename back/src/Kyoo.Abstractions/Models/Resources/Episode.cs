@@ -125,7 +125,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The path of the video file for this episode. Any format supported by a <see cref="IFileSystem"/> is allowed.
 		/// </summary>
-		[SerializeIgnore] public string Path { get; set; }
+		public string Path { get; set; }
 
 		/// <inheritdoc />
 		public Dictionary<int, string> Images { get; set; }

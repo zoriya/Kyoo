@@ -1,4 +1,4 @@
-FROM gcc:latest as transcoder
+FROM mcr.microsoft.com/dotnet/sdk:6.0 as transcoder
 RUN apt-get update && apt-get install -y cmake make libavutil-dev libavcodec-dev libavformat-dev
 WORKDIR /transcoder
 COPY src/Kyoo.Transcoder .
@@ -29,6 +29,6 @@ COPY --from=transcoder /transcoder/libtranscoder.so /app
 
 WORKDIR /kyoo
 EXPOSE 5000
-HEALTHCHECK CMD curl --fail http://localhost:5000/health || exit
+HEALTHCHECK --interval=5s CMD curl --fail http://localhost:5000/health || exit
 CMD /app/Kyoo.Host
 

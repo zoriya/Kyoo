@@ -43,9 +43,14 @@
 		"pause": "Pause",
 		"mute": "Toggle mute",
 		"volume": "Volume",
+		"quality": "Quality",
+		"audios": "Audio",
 		"subtitles": "Subtitles",
 		"subtitle-none": "None",
-		"fullscreen": "Fullscreen"
+		"fullscreen": "Fullscreen",
+		"direct": "Pristine",
+		"transmux": "Original",
+		"auto": "Auto"
 	},
 	"search": {
 		"empty": "No result found. Try a different query."

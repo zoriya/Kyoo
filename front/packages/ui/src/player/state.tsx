@@ -20,12 +20,19 @@
 
 import { Track, WatchItem, Font } from "@kyoo/models";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
-import { memo, useEffect, useLayoutEffect, useRef } from "react";
+import { memo, useEffect, useLayoutEffect, useRef, useState } from "react";
 import NativeVideo, { VideoProperties as VideoProps } from "./video";
 import { Platform } from "react-native";
 
 export const playAtom = atom(true);
 export const loadAtom = atom(false);
+
+// TODO: Default to auto or pristine depending on the user settings.
+export enum PlayMode {
+	Direct,
+	Hls,
+}
+export const playModeAtom = atom<PlayMode>(PlayMode.Direct);
 
 export const bufferedAtom = atom(0);
 export const durationAtom = atom<number | undefined>(undefined);
@@ -56,14 +63,14 @@ export const fullscreenAtom = atom(
 				set(privateFullscreen, false);
 				screen.orientation.unlock();
 			}
-		} catch {}
+		} catch(e) {
+			console.error(e);
+		}
 	},
 );
 const privateFullscreen = atom(false);
 
 export const subtitleAtom = atom<Track | null>(null);
-
-const MemoVideo = memo(NativeVideo);
 
 export const Video = memo(function _Video({
 	links,
@@ -78,9 +85,12 @@ export const Video = memo(function _Video({
 	const ref = useRef<NativeVideo | null>(null);
 	const [isPlaying, setPlay] = useAtom(playAtom);
 	const setLoad = useSetAtom(loadAtom);
+	const [source, setSource] = useState<string | null>(null);
+	const [mode, setPlayMode] = useAtom(playModeAtom);
 
 	const publicProgress = useAtomValue(publicProgressAtom);
 	const setPrivateProgress = useSetAtom(privateProgressAtom);
+	const setPublicProgress = useSetAtom(publicProgressAtom);
 	const setBuffered = useSetAtom(bufferedAtom);
 	const setDuration = useSetAtom(durationAtom);
 	useEffect(() => {
@@ -89,10 +99,12 @@ export const Video = memo(function _Video({
 
 	useLayoutEffect(() => {
 		// Reset the state when a new video is loaded.
+		setSource((mode === PlayMode.Direct ? links?.direct : links?.hls) ?? null);
 		setLoad(true);
 		setPrivateProgress(0);
+		setPublicProgress(0);
 		setPlay(true);
-	}, [links, setLoad, setPrivateProgress, setPlay]);
+	}, [mode, links, setLoad, setPrivateProgress, setPublicProgress, setPlay]);
 
 	const volume = useAtomValue(volumeAtom);
 	const isMuted = useAtomValue(mutedAtom);
@@ -109,13 +121,12 @@ export const Video = memo(function _Video({
 
 	const subtitle = useAtomValue(subtitleAtom);
 
-	if (!links) return null;
+	if (!source || !links) return null;
 	return (
-		<MemoVideo
+		<NativeVideo
 			ref={ref}
 			{...props}
-			// @ts-ignore Web only
-			source={{ uri: links.direct, transmux: links.transmux }}
+			source={{ uri: source, ...links }}
 			paused={!isPlaying}
 			muted={isMuted}
 			volume={volume}
@@ -139,6 +150,10 @@ export const Video = memo(function _Video({
 					: { type: "disabled" }
 			}
 			fonts={fonts}
+			onMediaUnsupported={() => {
+				if (mode == PlayMode.Direct)
+					setPlayMode(PlayMode.Hls);
+			}}
 			// TODO: textTracks: external subtitles
 		/>
 	);

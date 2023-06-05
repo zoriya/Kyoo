@@ -18,7 +18,32 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+declare module "react-native-video" {
+	interface VideoProperties {
+		fonts?: Font[];
+		onPlayPause: (isPlaying: boolean) => void;
+		onMediaUnsupported?: () => void;
+	}
+	export type VideoProps = Omit<VideoProperties, "source"> & {
+		source: { uri: string; hls: string };
+	};
+}
+
 export * from "react-native-video";
 
+import { Font } from "@kyoo/models";
+import { IconButton, Menu } from "@kyoo/primitives";
+import { ComponentProps } from "react";
 import Video from "react-native-video";
 export default Video;
+
+// TODO: Implement those for mobile.
+
+type CustomMenu = ComponentProps<typeof Menu<ComponentProps<typeof IconButton>>>;
+export const AudiosMenu = (props: CustomMenu) => {
+	return <Menu {...props}></Menu>;
+};
+
+export const QualitiesMenu = (props: CustomMenu) => {
+	return <Menu {...props}></Menu>;
+};

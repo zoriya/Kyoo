@@ -129,7 +129,8 @@ const WatchMovieP = z.preprocess(
 		 */
 		releaseDate: zdate().nullable(),
 		/**
-		 * The container of the video file of this episode. Common containers are mp4, mkv, avi and so on.
+		 * The container of the video file of this episode. Common containers are mp4, mkv, avi and so
+		 * on.
 		 */
 		container: z.string(),
 		/**
@@ -157,7 +158,7 @@ const WatchMovieP = z.preprocess(
 		 */
 		link: z.object({
 			direct: z.string().transform(imageFn),
-			transmux: z.string().transform(imageFn),
+			hls: z.string().transform(imageFn),
 		}),
 	}),
 );
@@ -185,7 +186,8 @@ const WatchEpisodeP = WatchMovieP.and(
 		 */
 		episodeNumber: z.number().nullable(),
 		/**
-		 * The absolute number of this episode. It's an episode number that is not reset to 1 after a new season.
+		 * The absolute number of this episode. It's an episode number that is not reset to 1 after a
+		 * new season.
 		 */
 		absoluteNumber: z.number().nullable(),
 		/**

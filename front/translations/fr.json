@@ -43,9 +43,14 @@
 		"pause": "Pause",
 		"mute": "Muet",
 		"volume": "Volume",
+		"quality": "Qualité",
+		"audios": "Audio",
 		"subtitles": "Sous titres",
 		"subtitle-none": "Aucun",
-		"fullscreen": "Plein-écran"
+		"fullscreen": "Plein-écran",
+		"direct": "Pristine",
+		"transmux": "Original",
+		"auto": "Auto"
 	},
 	"search": {
 		"empty": "Aucun résultat trouvé. Essayer avec une autre recherche."

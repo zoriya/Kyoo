@@ -11,7 +11,6 @@ services:
         condition: service_healthy
     volumes:
       - kyoo:/kyoo
-      - ./cache:/kyoo/cached
       - ${LIBRARY_ROOT}:/video
 
   front:
@@ -33,6 +32,15 @@ services:
       - KYOO_URL=${KYOO_URL:-http://back:5000}
     volumes:
       - ${LIBRARY_ROOT}:/video
+
+  transcoder:
+    build: ./transcoder
+    restart: on-failure
+    env_file:
+      - ./.env
+    volumes:
+      - ${LIBRARY_ROOT}:/video
+      - ${CACHE_ROOT}:/cache
 
   ingress:
     image: nginx
