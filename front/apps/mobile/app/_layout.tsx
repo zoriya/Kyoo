@@ -22,6 +22,7 @@ import { PortalProvider } from "@gorhom/portal";
 import { ThemeSelector } from "@kyoo/primitives";
 import { NavbarRight, NavbarTitle } from "@kyoo/ui";
 import { createQueryClient } from "@kyoo/models";
+import { getSecureItem } from "@kyoo/models/src/secure-store";
 import { QueryClientProvider } from "@tanstack/react-query";
 import i18next from "i18next";
 import { Stack } from "expo-router";
@@ -33,11 +34,12 @@ import {
 	Poppins_400Regular,
 	Poppins_900Black,
 } from "@expo-google-fonts/poppins";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useColorScheme } from "react-native";
 import { initReactI18next } from "react-i18next";
 import { useTheme } from "yoshiki/native";
 import "intl-pluralrules";
+import { ApiUrlContext } from "./index";
 
 // TODO: use a backend to load jsons.
 import en from "../../../translations/en.json";
@@ -75,27 +77,44 @@ const ThemedStack = ({ onLayout }: { onLayout?: () => void }) => {
 	);
 };
 
+const useApiUrl = (): string | null | undefined => {
+	const [apiUrl, setApiUrl] = useState<string | null | undefined>(undefined);
+
+	useEffect(() => {
+		async function run() {
+			const apiUrl = await getSecureItem("apiUrl");
+			setApiUrl(apiUrl);
+		}
+		run();
+	}, []);
+
+	return apiUrl;
+}
+
 export default function Root() {
 	const [queryClient] = useState(() => createQueryClient());
 	const theme = useColorScheme();
 	const [fontsLoaded] = useFonts({ Poppins_300Light, Poppins_400Regular, Poppins_900Black });
+	const apiUrl = useApiUrl();
 
-	if (!fontsLoaded) return <SplashScreen />;
+	if (!fontsLoaded || apiUrl === undefined) return <SplashScreen />;
 	return (
-		<QueryClientProvider client={queryClient}>
-			<ThemeSelector
-				theme={theme ?? "light"}
-				font={{
-					normal: "Poppins_400Regular",
-					"300": "Poppins_300Light",
-					"400": "Poppins_400Regular",
-					"900": "Poppins_900Black",
-				}}
-			>
-				<PortalProvider>
-					<ThemedStack />
-				</PortalProvider>
-			</ThemeSelector>
-		</QueryClientProvider>
+		<ApiUrlContext.Provider value={apiUrl}>
+			<QueryClientProvider client={queryClient}>
+				<ThemeSelector
+					theme={theme ?? "light"}
+					font={{
+						normal: "Poppins_400Regular",
+						"300": "Poppins_300Light",
+						"400": "Poppins_400Regular",
+						"900": "Poppins_900Black",
+					}}
+				>
+					<PortalProvider>
+						<ThemedStack />
+					</PortalProvider>
+				</ThemeSelector>
+			</QueryClientProvider>
+		</ApiUrlContext.Provider>
 	);
 }

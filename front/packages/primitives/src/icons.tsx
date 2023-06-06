@@ -53,8 +53,8 @@ export const Icon = ({ icon: Icon, color, size = 24, ...props }: IconProps) => {
 				default: {
 					height: computed.style?.height,
 					width: computed.style?.width,
-					// @ts-ignore
-					fill: computed.style?.fill,
+					// // @ts-ignore
+					// fill: computed.style?.fill,
 					...computed,
 				},
 			})}

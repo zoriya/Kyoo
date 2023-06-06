@@ -57,4 +57,15 @@ function addSvgTransformer(config) {
 	};
 }
 
-module.exports = addMonorepoSupport(addSvgTransformer(defaultConfig));
+module.exports = addMonorepoSupport(
+	addSvgTransformer({
+		...defaultConfig,
+		resolver: {
+			...defaultConfig.resolver,
+			requireCycleIgnorePatterns: [
+				...defaultConfig.resolver.requireCycleIgnorePatterns,
+				/login.ts/,
+			],
+		},
+	}),
+);
