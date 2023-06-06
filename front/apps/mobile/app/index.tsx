@@ -18,7 +18,17 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import BrowsePage from "./browse";
+import { Redirect } from "expo-router";
+import { createContext, useContext } from "react";
 
-// While there is no home page, show the browse page.
-export default BrowsePage;
+export const ApiUrlContext = createContext<string | null>(null);
+
+const App = () => {
+	const apiUrl = useContext(ApiUrlContext);
+	if (!apiUrl)
+		return <Redirect href="/login" />;
+	// While there is no home page, show the browse page.
+	return <Redirect href="/browse" />;
+};
+
+export default App;

@@ -23,6 +23,8 @@ import { deleteSecureItem, getSecureItem, setSecureItem } from "./secure-store";
 import { zdate } from "./utils";
 import { queryFn } from "./query";
 import { KyooErrors } from "./kyoo-errors";
+import { createContext, useContext } from "react";
+import { User } from "./resources/user";
 
 const TokenP = z.object({
 	token_type: z.literal("Bearer"),
@@ -52,8 +54,7 @@ export const loginFunc = async (
 			TokenP,
 		);
 
-		if (typeof window !== "undefined")
-			await setSecureItem("auth", JSON.stringify(token));
+		if (typeof window !== "undefined") await setSecureItem("auth", JSON.stringify(token));
 		return { ok: true, value: token };
 	} catch (e) {
 		console.error(action, e);
