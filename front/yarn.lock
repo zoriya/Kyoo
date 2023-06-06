@@ -11678,26 +11678,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-reanimated@npm:^3.0.2":
-  version: 3.0.2
-  resolution: "react-native-reanimated@npm:3.0.2"
-  dependencies:
-    "@babel/plugin-transform-object-assign": ^7.16.7
-    "@babel/preset-typescript": ^7.16.7
-    convert-source-map: ^1.7.0
-    invariant: ^2.2.4
-    lodash.isequal: ^4.5.0
-    setimmediate: ^1.0.5
-    string-hash-64: ^1.0.3
-  peerDependencies:
-    "@babel/core": ^7.0.0-0
-    react: "*"
-    react-native: "*"
-  checksum: 7635d6d490eecdf74d3b3560e0696df14c8528f58b4c79d680bb623053e6a13e51e05f62aa9d40e1d53e9b2c90d67ac77ff1f4128400f14ab4a524ef3dec036b
-  languageName: node
-  linkType: hard
-
-"react-native-reanimated@npm:~2.14.4":
+"react-native-reanimated@npm:2.14.4, react-native-reanimated@npm:~2.14.4":
   version: 2.14.4
   resolution: "react-native-reanimated@npm:2.14.4"
   dependencies:
@@ -11763,19 +11744,6 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: e630c057d6a0947c4d729538f643585a1fd9380975c1cf9adffad7647822b35219a9e1e60407f422b2b70592ed7f7e8766fab15df74f9cfce0b1c8a1c3544676
-  languageName: node
-  linkType: hard
-
-"react-native-svg@npm:13.8.0":
-  version: 13.8.0
-  resolution: "react-native-svg@npm:13.8.0"
-  dependencies:
-    css-select: ^5.1.0
-    css-tree: ^1.1.3
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: dfcad65978bb2e06a81b6f6262fad0699fa48e720ac2e521e983da4f6fb7747435f6a15df08b9d57559299272d0ffa674b4f0a55482f8b37905ee1e96f51b46a
   languageName: node
   linkType: hard
 
@@ -14142,8 +14110,8 @@ __metadata:
     react: 18.2.0
     react-dom: 18.2.0
     react-i18next: ^12.2.0
-    react-native-reanimated: ^3.0.2
-    react-native-svg: 13.8.0
+    react-native-reanimated: 2.14.4
+    react-native-svg: 13.4.0
     react-native-video: ^6.0.0-alpha.5
     react-native-web: 0.19.1
     solito: ^3.0.0
