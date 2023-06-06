@@ -6,6 +6,8 @@ in
     packages = with pkgs; [
       nodejs-16_x
       nodePackages.yarn
+      nodePackages.eas-cli
+      nodePackages.expo-cli
       (with dotnetCorePackages;
         combinePackages [
           sdk_6_0
