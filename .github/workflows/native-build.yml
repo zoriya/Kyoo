@@ -4,6 +4,8 @@ on:
     branches:
       - master
       - next
+    tags:
+     - v*
   pull_request:
 
 jobs:
@@ -58,3 +60,11 @@ jobs:
         with:
           name: kyoo.apk
           path: ./front/kyoo.apk
+
+      - name: Upload release artifacts
+        uses: Roang-zero1/github-upload-release-artifacts-action@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          args: ./front/kyoo.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,9 +1,8 @@
 name: Native update
 on:
   push:
-    branches:
-      - master
-      - next
+    tags:
+      - v*
 
 jobs:
   update:

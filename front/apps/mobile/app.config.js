@@ -50,7 +50,7 @@ const config = {
 			supportsTablet: true,
 		},
 		android: {
-			package: IS_DEV ? "moe.sdg.kyoo.dev" : "moe.sdg.kyoo",
+			package: IS_DEV ? "dev.zoriya.kyoo.dev" : "dev.zoriya.kyoo",
 			adaptiveIcon: {
 				foregroundImage: "./assets/icon.png",
 				backgroundColor: "#eff1f5",
