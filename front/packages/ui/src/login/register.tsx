@@ -30,8 +30,11 @@ import { DefaultLayout } from "../layout";
 import { FormPage } from "./form";
 import { PasswordInput } from "./password-input";
 import { useQueryClient } from "@tanstack/react-query";
+import { setSecureItem } from "@kyoo/models/src/secure-store";
+import { cleanApiUrl } from "./login";
 
 export const RegisterPage: QueryPage = () => {
+	const [apiUrl, setApiUrl] = useState("");
 	const [email, setEmail] = useState("");
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
@@ -49,7 +52,7 @@ export const RegisterPage: QueryPage = () => {
 			{Platform.OS !== "web" && (
 				<>
 					<P {...css({ paddingLeft: ts(1) })}>{t("login.server")}</P>
-					<Input variant="big" />
+					<Input variant="big" onChangeText={setApiUrl} />
 				</>
 			)}
 
@@ -81,7 +84,7 @@ export const RegisterPage: QueryPage = () => {
 				text={t("login.register")}
 				disabled={password !== confirm}
 				onPress={async () => {
-					const { error } = await loginFunc("register", { email, username, password });
+					const { error } = await loginFunc("register", { email, username, password }, cleanApiUrl(apiUrl));
 					setError(error);
 					if (error) return;
 					queryClient.invalidateQueries(["auth", "me"]);

@@ -31,7 +31,14 @@ import { FormPage } from "./form";
 import { PasswordInput } from "./password-input";
 import { useQueryClient } from "@tanstack/react-query";
 
+export const cleanApiUrl = (apiUrl: string) => {
+	if (!/https?:\/\//.test(apiUrl)) apiUrl = "http://" + apiUrl;
+	apiUrl = apiUrl.replace(/\/$/, "");
+	return apiUrl + "/api";
+};
+
 export const LoginPage: QueryPage = () => {
+	const [apiUrl, setApiUrl] = useState("");
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
 	const [error, setError] = useState<string | undefined>(undefined);
@@ -51,7 +58,7 @@ export const LoginPage: QueryPage = () => {
 			{Platform.OS !== "web" && (
 				<>
 					<P {...css({ paddingLeft: ts(1) })}>{t("login.server")}</P>
-					<Input variant="big" />
+					<Input variant="big" onChangeText={setApiUrl} />
 				</>
 			)}
 			<P {...css({ paddingLeft: ts(1) })}>{t("login.username")}</P>
@@ -66,7 +73,7 @@ export const LoginPage: QueryPage = () => {
 			<Button
 				text={t("login.login")}
 				onPress={async () => {
-					const { error } = await loginFunc("login", { username, password });
+					const { error } = await loginFunc("login", { username, password }, cleanApiUrl(apiUrl));
 					setError(error);
 					if (error) return;
 					queryClient.invalidateQueries(["auth", "me"]);

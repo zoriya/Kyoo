@@ -67,5 +67,12 @@
 		"or-register": "Vous n'avez pas de compte ? <1>Inscrivez-vous</1>.",
 		"or-login": "Vous avez déjà un compte ? <1>Connectez-vous.<1/>",
 		"password-no-match": "Mots de passe differents"
+	},
+	"errors": {
+		"connection": "Impossible de se connecter au serveur de kyoo.",
+		"connection-tips": "Possible causes:\n - Etes-vous connecté a internet ?\n - Votre serveur kyoo est-il allumé ?\n - Votre compte est-il bannis ?",
+		"unknown": "Erreur inconnue",
+		"try-again": "Réessayer",
+		"re-login": "Se reconnecter"
 	}
 }
