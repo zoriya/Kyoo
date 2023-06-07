@@ -137,8 +137,8 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 					} catch { }
 				});
 				hls.on(Hls.Events.ERROR, (_, d) => {
-					console.log("Hls error", d);
 					if (!d.fatal || !hls?.media) return;
+					console.warn("Hls error", d);
 					onError?.call(null, {
 						error: { "": "", errorString: d.reason ?? d.err?.message ?? "Unknown hls error" },
 					});

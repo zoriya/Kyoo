@@ -23,8 +23,7 @@ import { deleteSecureItem, getSecureItem, setSecureItem } from "./secure-store";
 import { zdate } from "./utils";
 import { queryFn } from "./query";
 import { KyooErrors } from "./kyoo-errors";
-import { createContext, useContext } from "react";
-import { User } from "./resources/user";
+import { Platform } from "react-native";
 
 const TokenP = z.object({
 	token_type: z.literal("Bearer"),
@@ -39,9 +38,23 @@ type Result<A, B> =
 	| { ok: true; value: A; error?: undefined }
 	| { ok: false; value?: undefined; error: B };
 
+export type Account = Token & { apiUrl: string; username: string | null };
+
+
+const addAccount = async (token: Token, apiUrl: string, username: string | null): Promise<void> => {
+	const accounts: Account[] = JSON.parse(await getSecureItem("accounts") ?? "[]");
+	const accIdx = accounts.findIndex(x => x.refresh_token === token.refresh_token);
+	if (accIdx === -1)
+		accounts.push({...token, username, apiUrl});
+	else
+		accounts[accIdx] = {...accounts[accIdx], ...token};
+	await setSecureItem("accounts", JSON.stringify(accounts));
+}
+
 export const loginFunc = async (
 	action: "register" | "login" | "refresh",
-	body: object | string,
+	body: { username: string, password: string, email?: string } | string,
+	apiUrl?: string
 ): Promise<Result<Token, string>> => {
 	try {
 		const token = await queryFn(
@@ -50,11 +63,14 @@ export const loginFunc = async (
 				method: typeof body === "string" ? "GET" : "POST",
 				body: typeof body === "object" ? body : undefined,
 				authenticated: false,
+				apiUrl,
 			},
 			TokenP,
 		);
 
 		if (typeof window !== "undefined") await setSecureItem("auth", JSON.stringify(token));
+		if (Platform.OS !== "web" && apiUrl)
+			await addAccount(token, apiUrl, typeof body !== "string" ? body.username : null);
 		return { ok: true, value: token };
 	} catch (e) {
 		console.error(action, e);

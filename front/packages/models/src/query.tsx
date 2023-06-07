@@ -32,8 +32,9 @@ import { KyooErrors } from "./kyoo-errors";
 import { Page, Paged } from "./page";
 import { Platform } from "react-native";
 import { getToken } from "./login";
+import { getSecureItem } from "./secure-store";
 
-export const kyooUrl =
+const kyooUrl =
 	Platform.OS !== "web"
 		? process.env.PUBLIC_BACK_URL
 		: typeof window === "undefined"
@@ -48,15 +49,18 @@ export const queryFn = async <Data,>(
 			body?: object;
 			method: "GET" | "POST";
 			authenticated?: boolean;
+			apiUrl?: string
 		},
 	type?: z.ZodType<Data>,
 	token?: string | null,
 ): Promise<Data> => {
-	if (!kyooUrl) console.error("Kyoo's url is not defined.");
+	// @ts-ignore
+	let url: string | null = context.apiUrl ?? (Platform.OS !== "web" ? await getSecureItem("apiUrl") : null) ?? kyooUrl;
+	if (!url) console.error("Kyoo's url is not defined.");
 
 	// @ts-ignore
 	if (!token && context.authenticated !== false) token = await getToken();
-	const path = [kyooUrl]
+	const path = [url]
 		.concat(
 			"path" in context
 				? context.path.filter((x) => x)
@@ -93,7 +97,7 @@ export const queryFn = async <Data,>(
 		} catch (e) {
 			data = { errors: [error] } as KyooErrors;
 		}
-		console.log(`Invalid response (${path}):`, data);
+		console.log(`Invalid response (${path}):`, data, resp.status);
 		throw data as KyooErrors;
 	}
 
@@ -139,8 +143,8 @@ export type QueryIdentifier<T = unknown> = {
 export type QueryPage<Props = {}> = ComponentType<Props> & {
 	getFetchUrls?: (route: { [key: string]: string }) => QueryIdentifier[];
 	getLayout?:
-	| ComponentType<{ page: ReactElement }>
-	| { Layout: ComponentType<{ page: ReactElement }>; props: object };
+		| ComponentType<{ page: ReactElement }>
+		| { Layout: ComponentType<{ page: ReactElement }>; props: object };
 };
 
 const toQueryKey = <Data,>(query: QueryIdentifier<Data>) => {
@@ -148,10 +152,10 @@ const toQueryKey = <Data,>(query: QueryIdentifier<Data>) => {
 		return [
 			...query.path,
 			"?" +
-			Object.entries(query.params)
-				.filter(([_, v]) => v !== undefined)
-				.map(([k, v]) => `${k}=${Array.isArray(v) ? v.join(",") : v}`)
-				.join("&"),
+				Object.entries(query.params)
+					.filter(([_, v]) => v !== undefined)
+					.map(([k, v]) => `${k}=${Array.isArray(v) ? v.join(",") : v}`)
+					.join("&"),
 		];
 	} else {
 		return query.path;

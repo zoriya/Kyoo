@@ -22,7 +22,7 @@ import { ts } from "@kyoo/primitives";
 import { ReactNode } from "react";
 import { ScrollView, ImageBackground, ImageProps, Platform, View } from "react-native";
 import Svg, { SvgProps, Path } from "react-native-svg";
-import { min, percent, px, Stylable, useYoshiki, vh, vw } from "yoshiki/native";
+import { min, px, Stylable, useYoshiki, vh } from "yoshiki/native";
 
 const SvgBlob = (props: SvgProps) => {
 	const { css, theme } = useYoshiki();
