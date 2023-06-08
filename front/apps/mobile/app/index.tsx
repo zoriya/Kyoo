@@ -93,7 +93,6 @@ const App = () => {
 	// eslint-disable-next-line react-hooks/rules-of-hooks
 	const info = initialRender ? useContext(AccountContext) : useAccounts();
 	initialRender = false;
-	console.log(info);
 	if (info.type === "loading") return <CircularProgress />
 	if (info.type === "error") return <ConnectionError error={info.error} retry={info.retry} />;
 	if (info.selected === null) return <Redirect href="/login" />;

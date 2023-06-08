@@ -64,7 +64,7 @@ module.exports = addMonorepoSupport(
 			...defaultConfig.resolver,
 			requireCycleIgnorePatterns: [
 				...defaultConfig.resolver.requireCycleIgnorePatterns,
-				/login.ts/,
+				/.*/,
 			],
 		},
 	}),
