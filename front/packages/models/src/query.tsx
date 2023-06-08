@@ -41,6 +41,8 @@ const kyooUrl =
 			? process.env.KYOO_URL ?? "http://localhost:5000"
 			: "/api";
 
+export let kyooApiUrl: string | null = kyooUrl || null;
+
 export const queryFn = async <Data,>(
 	context:
 		| QueryFunctionContext
@@ -57,6 +59,7 @@ export const queryFn = async <Data,>(
 	// @ts-ignore
 	let url: string | null = context.apiUrl ?? (Platform.OS !== "web" ? await getSecureItem("apiUrl") : null) ?? kyooUrl;
 	if (!url) console.error("Kyoo's url is not defined.");
+	kyooApiUrl = url;
 
 	// @ts-ignore
 	if (!token && context.authenticated !== false) token = await getToken();

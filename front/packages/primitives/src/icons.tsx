@@ -44,17 +44,16 @@ export const Icon = ({ icon: Icon, color, size = 24, ...props }: IconProps) => {
 	const computed = css(
 		{ width: size, height: size, fill: color ?? theme.contrast } as any,
 		props,
-	);
+	) as any;
 
 	return (
 		<Icon
 			{...Platform.select<SvgProps>({
 				web: computed,
 				default: {
-					height: computed.style?.height,
-					width: computed.style?.width,
-					// // @ts-ignore
-					// fill: computed.style?.fill,
+					height: computed.style[0]?.height,
+					width: computed.style[0]?.width,
+					fill: computed.style[0]?.fill,
 					...computed,
 				},
 			})}

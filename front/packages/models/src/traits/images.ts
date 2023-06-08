@@ -20,11 +20,12 @@
 
 import { Platform } from "react-native";
 import { z } from "zod";
+import { kyooApiUrl } from "..";
 
 export const imageFn = (url: string) =>
 	Platform.OS === "web"
 		? `/api${url}`
-		: process.env.PUBLIC_BACK_URL + url;
+		: kyooApiUrl + url;
 
 export const ImagesP = z.object({
 	/**
