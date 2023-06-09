@@ -20,7 +20,7 @@
 
 import { Page, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
 import { HR } from "@kyoo/primitives";
-import { ComponentType, Fragment, ReactElement, useMemo, useRef } from "react";
+import { ComponentType, Fragment, isValidElement, ReactElement, useMemo, useRef } from "react";
 import { Stylable, useYoshiki } from "yoshiki";
 import { EmptyView, ErrorView, Layout, WithLoading } from "./fetch";
 
@@ -31,6 +31,7 @@ const InfiniteScroll = ({
 	loadMore,
 	hasMore = true,
 	isFetching,
+	Header,
 	...props
 }: {
 	children?: ReactElement | (ReactElement | null)[] | null;
@@ -39,23 +40,25 @@ const InfiniteScroll = ({
 	loadMore: () => void;
 	hasMore: boolean;
 	isFetching: boolean;
+	Header: ComponentType<{ children: JSX.Element }> | ReactElement | undefined;
 } & Stylable) => {
 	const ref = useRef<HTMLDivElement>(null);
 	const { css } = useYoshiki();
 
-	return (
-		<div
-			ref={ref}
-			onScroll={() => {
-				if (!ref.current || !hasMore || isFetching) return;
-				const scroll =
-					layout === "horizontal"
-						? ref.current.scrollWidth - ref.current.scrollLeft
-						: ref.current.scrollHeight - ref.current.scrollTop;
-				const offset = layout === "horizontal" ? ref.current.offsetWidth : ref.current.offsetHeight;
+	const onScroll = () => {
+		if (!ref.current || !hasMore || isFetching) return;
+		const scroll =
+			layout === "horizontal"
+				? ref.current.scrollWidth - ref.current.scrollLeft
+				: ref.current.scrollHeight - ref.current.scrollTop;
+		const offset = layout === "horizontal" ? ref.current.offsetWidth : ref.current.offsetHeight;
 
-				if (scroll <= offset * 1.2) loadMore();
-			}}
+		if (scroll <= offset * 1.2) loadMore();
+	};
+	const scrollProps = { ref, onScroll };
+
+	const list = (props: object) => (
+		<div
 			{...css(
 				[
 					{
@@ -83,6 +86,15 @@ const InfiniteScroll = ({
 			{children}
 			{hasMore && isFetching && loader}
 		</div>
+	);
+
+	if (!Header) return list({ ...scrollProps, ...props });
+	if (!isValidElement(Header)) return <Header {...scrollProps}>{list(props)}</Header>;
+	return (
+		<>
+			{Header}
+			{list({ ...scrollProps, ...props })}
+		</>
 	);
 };
 
@@ -125,7 +137,7 @@ export const InfiniteFetch = <Data,>({
 		return <EmptyView message={empty} />;
 	}
 
-	const list = (
+	return (
 		<InfiniteScroll
 			layout={grid ? "grid" : horizontal ? "horizontal" : "vertical"}
 			loadMore={fetchNextPage}
@@ -137,6 +149,7 @@ export const InfiniteFetch = <Data,>({
 					{children({ isLoading: true } as any, i)}
 				</Fragment>
 			))}
+			Header={Header}
 			{...props}
 		>
 			{items?.map((item, i) => (
@@ -147,7 +160,6 @@ export const InfiniteFetch = <Data,>({
 			))}
 		</InfiniteScroll>
 	);
-	return addHeader(Header, list);
 };
 
 const addHeader = (

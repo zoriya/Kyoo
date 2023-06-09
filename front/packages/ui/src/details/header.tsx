@@ -169,14 +169,16 @@ const TitleLine = ({
 							})}
 							{...tooltip(t("show.play"))}
 						/>
-						{trailerUrl && <IconButton
-							icon={Theaters}
-							as={Link}
-							href={trailerUrl}
-							target="_blank"
-							color={{ xs: theme.user.contrast, md: theme.colors.white }}
-							{...tooltip(t("show.trailer"))}
-						/>}
+						{trailerUrl && (
+							<IconButton
+								icon={Theaters}
+								as={Link}
+								href={trailerUrl}
+								target="_blank"
+								color={{ xs: theme.user.contrast, md: theme.colors.white }}
+								{...tooltip(t("show.trailer"))}
+							/>
+						)}
 					</View>
 				</View>
 			</View>
@@ -249,7 +251,7 @@ const Description = ({
 				{t("show.genre")}:{" "}
 				{(isLoading ? [...Array(3)] : genres!).map((genre, i) => (
 					<Fragment key={genre?.slug ?? i.toString()}>
-						<P>{i !== 0 && ", "}</P>
+						<P {...css({ m: 0 })}>{i !== 0 && ", "}</P>
 						{isLoading ? (
 							<Skeleton {...css({ width: rem(5) })} />
 						) : (
