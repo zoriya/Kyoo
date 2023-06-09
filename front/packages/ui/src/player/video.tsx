@@ -33,17 +33,98 @@ export * from "react-native-video";
 
 import { Font } from "@kyoo/models";
 import { IconButton, Menu } from "@kyoo/primitives";
-import { ComponentProps } from "react";
-import Video from "react-native-video";
-export default Video;
+import { ComponentProps, useRef } from "react";
+import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import NativeVideo, { OnLoadData } from "react-native-video";
+import { useTranslation } from "react-i18next";
+import { PlayMode, playModeAtom } from "./state";
 
-// TODO: Implement those for mobile.
+const infoAtom = atom<OnLoadData | null>(null);
+const videoAtom = atom(0);
+const audioAtom = atom(0);
+
+const Video = ({ onLoad, ...props }: ComponentProps<typeof NativeVideo>) => {
+	const player = useRef<NativeVideo | null>(null);
+	const setInfo = useSetAtom(infoAtom);
+	const video = useAtomValue(videoAtom);
+	const audio = useAtomValue(audioAtom);
+
+	return (
+		<NativeVideo
+			ref={(ref) => {
+				player.current = ref;
+			}}
+			onLoad={(info) => {
+				setInfo(info);
+				onLoad?.(info);
+			}}
+			selectedVideoTrack={video === -1 ? { type: "auto" } : { type: "resolution", value: video }}
+			selectedAudioTrack={{ type: "index", value: audio }}
+			{...props}
+		/>
+	);
+};
+
+export default Video;
 
 type CustomMenu = ComponentProps<typeof Menu<ComponentProps<typeof IconButton>>>;
 export const AudiosMenu = (props: CustomMenu) => {
-	return <Menu {...props}></Menu>;
+	const info = useAtomValue(infoAtom);
+	const [audio, setAudio] = useAtom(audioAtom);
+
+	if (!info || info.audioTracks.length < 2) return null;
+
+	return (
+		<Menu {...props}>
+			{info.audioTracks.map((x) => (
+				<Menu.Item
+					key={x.index}
+					label={x.title}
+					selected={audio === x.index}
+					onSelect={() => setAudio(x.index)}
+				/>
+			))}
+		</Menu>
+	);
 };
 
 export const QualitiesMenu = (props: CustomMenu) => {
-	return <Menu {...props}></Menu>;
+	const { t } = useTranslation();
+	const info = useAtomValue(infoAtom);
+	const [mode, setPlayMode] = useAtom(playModeAtom);
+	const [video, setVideo] = useAtom(videoAtom);
+
+	return (
+		<Menu {...props}>
+			<Menu.Item
+				label={t("player.direct")}
+				selected={mode == PlayMode.Direct}
+				onSelect={() => setPlayMode(PlayMode.Direct)}
+			/>
+			<Menu.Item
+				label={
+					mode === PlayMode.Hls && video !== -1
+						? `${t("player.auto")} (${video}p)`
+						: t("player.auto")
+				}
+				selected={video === -1}
+				onSelect={() => {
+					setPlayMode(PlayMode.Hls);
+					setVideo(-1);
+				}}
+			/>
+			{/* TODO: Support video tracks when the play mode is not hls. */}
+			{info?.videoTracks.map((x) => (
+				<Menu.Item
+					key={x.height}
+					label={`${x.height}p`}
+					selected={video === x.height}
+					onSelect={() => {
+						setPlayMode(PlayMode.Hls);
+						setVideo(x.height);
+					}}
+				/>
+			))}
+		</Menu>
+	);
 };
