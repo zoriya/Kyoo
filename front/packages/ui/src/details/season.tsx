@@ -41,7 +41,7 @@ export const EpisodeList = ({
 	return (
 		<InfiniteFetch
 			query={EpisodeList.query(slug, season)}
-			placeholderCount={15}
+			placeholderCount={10}
 			layout={EpisodeLine.layout}
 			empty={t("show.episode-none")}
 			divider

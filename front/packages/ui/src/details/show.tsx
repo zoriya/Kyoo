@@ -26,6 +26,7 @@ import { EpisodeList } from "./season";
 import { Header } from "./header";
 import Svg, { Path, SvgProps } from "react-native-svg";
 import { Container, SwitchVariant } from "@kyoo/primitives";
+import { forwardRef } from "react";
 
 const SvgWave = (props: SvgProps) => {
 	const { css } = useYoshiki();
@@ -52,38 +53,41 @@ const query = (slug: string): QueryIdentifier<Show> => ({
 export const ShowDetails: QueryPage<{ slug: string; season: string }> = ({ slug, season }) => {
 	const { css, theme } = useYoshiki();
 
-	const ShowHeader = ({ children, ...props }: ViewProps) => (
-		<View
-			{...css(
-				[
-					{ bg: (theme) => theme.background },
-					Platform.OS === "web" && {
-						flexGrow: 1,
-						flexShrink: 1,
-						// @ts-ignore Web only property
-						overflow: "auto" as any,
-						// @ts-ignore Web only property
-						overflowX: "hidden",
-						// @ts-ignore Web only property
-						overflowY: "overlay",
-					},
-				],
-				props,
-			)}
-		>
-			{/* TODO: Remove the slug quickfix for the play button */}
-			<Header slug={`${slug}-s1e1`} query={query(slug)} />
-			{/* <Staff slug={slug} /> */}
-			<SvgWave
-				fill={theme.variant.background}
-				{...css({ flexShrink: 0, flexGrow: 1, display: "flex" })}
-			/>
-			{/* <SeasonTab slug={slug} season={season} /> */}
-			<View {...css({ bg: theme.variant.background })}>
-				<Container>{children}</Container>
+	const ShowHeader = forwardRef<View, ViewProps>(function _ShowHeader({ children, ...props }, ref) {
+		return (
+			<View
+				ref={ref}
+				{...css(
+					[
+						{ bg: (theme) => theme.background },
+						Platform.OS === "web" && {
+							flexGrow: 1,
+							flexShrink: 1,
+							// @ts-ignore Web only property
+							overflow: "auto" as any,
+							// @ts-ignore Web only property
+							overflowX: "hidden",
+							// @ts-ignore Web only property
+							overflowY: "overlay",
+						},
+					],
+					props,
+				)}
+			>
+				{/* TODO: Remove the slug quickfix for the play button */}
+				<Header slug={`${slug}-s1e1`} query={query(slug)} />
+				{/* <Staff slug={slug} /> */}
+				<SvgWave
+					fill={theme.variant.background}
+					{...css({ flexShrink: 0, flexGrow: 1, display: "flex" })}
+				/>
+				{/* <SeasonTab slug={slug} season={season} /> */}
+				<View {...css({ bg: theme.variant.background })}>
+					<Container>{children}</Container>
+				</View>
 			</View>
-		</View>
-	);
+		);
+	});
 
 	return (
 		<SwitchVariant>
