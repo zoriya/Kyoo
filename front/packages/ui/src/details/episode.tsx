@@ -68,6 +68,11 @@ export const EpisodeLine = ({
 	thumbnail,
 	overview,
 	isLoading,
+	id,
+	absoluteNumber,
+	episodeNumber,
+	seasonNumber,
+	releaseDate,
 	...props
 }: WithLoading<{
 	slug: string;
@@ -75,6 +80,11 @@ export const EpisodeLine = ({
 	name: string | null;
 	overview: string | null;
 	thumbnail?: string | null;
+	absoluteNumber: number | null,
+	episodeNumber: number | null,
+	seasonNumber: number | null,
+	releaseDate: Date | null,
+	id: number,
 }> &
 	Stylable) => {
 	const { css } = useYoshiki();
