@@ -20,7 +20,7 @@
 
 import { Page, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
 import { HR } from "@kyoo/primitives";
-import { ComponentType, Fragment, isValidElement, ReactElement, useMemo, useRef } from "react";
+import { ComponentType, Fragment, isValidElement, ReactElement, useRef } from "react";
 import { Stylable, useYoshiki } from "yoshiki";
 import { EmptyView, ErrorView, Layout, WithLoading } from "./fetch";
 
