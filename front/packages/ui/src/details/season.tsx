@@ -27,14 +27,16 @@ import { episodeDisplayNumber, EpisodeLine } from "./episode";
 import { useTranslation } from "react-i18next";
 import { ComponentType } from "react";
 
-export const EpisodeList = ({
+export const EpisodeList = <Props,>({
 	slug,
 	season,
 	Header,
+	headerProps,
 }: {
 	slug: string;
 	season: string | number;
-	Header: ComponentType<{ children: JSX.Element }>;
+	Header: ComponentType<Props & { children: JSX.Element }>;
+	headerProps: Props
 }) => {
 	const { t } = useTranslation();
 
@@ -46,6 +48,7 @@ export const EpisodeList = ({
 			empty={t("show.episode-none")}
 			divider
 			Header={Header}
+			headerProps={headerProps}
 		>
 			{(item) => (
 				<EpisodeLine

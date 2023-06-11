@@ -21,10 +21,10 @@
 import { Page, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
 import { useBreakpointMap, HR } from "@kyoo/primitives";
 import { FlashList } from "@shopify/flash-list";
-import { ComponentType, ReactElement } from "react";
+import { ComponentType, isValidElement, ReactElement } from "react";
 import { EmptyView, ErrorView, Layout, WithLoading } from "./fetch";
 
-export const InfiniteFetch = <Data,>({
+export const InfiniteFetch = <Data, Props>({
 	query,
 	placeholderCount = 15,
 	suspense = false,
@@ -34,6 +34,7 @@ export const InfiniteFetch = <Data,>({
 	empty,
 	divider = false,
 	Header,
+	headerProps,
 	...props
 }: {
 	query: QueryIdentifier<Data>;
@@ -47,7 +48,8 @@ export const InfiniteFetch = <Data,>({
 	empty?: string | JSX.Element;
 	suspense?: boolean;
 	divider?: boolean | ComponentType;
-	Header?: ComponentType<{ children: JSX.Element }> | ReactElement;
+	Header?: ComponentType<Props & { children: JSX.Element }> | ReactElement;
+	headerProps?: Props
 }): JSX.Element | null => {
 	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
 
@@ -71,6 +73,8 @@ export const InfiniteFetch = <Data,>({
 		(_, i) => ({ id: `gen${i}`, isLoading: true } as Data),
 	);
 
+	// @ts-ignore
+	if (headerProps && !isValidElement(Header)) Header = <Header {...headerProps} />
 	return (
 		<FlashList
 			renderItem={({ item, index }) => children({ isLoading: false, ...item } as any, index)}

@@ -24,7 +24,7 @@ import { ComponentType, Fragment, isValidElement, ReactElement, useRef } from "r
 import { Stylable, useYoshiki } from "yoshiki";
 import { EmptyView, ErrorView, Layout, WithLoading } from "./fetch";
 
-const InfiniteScroll = ({
+const InfiniteScroll = <Props,>({
 	children,
 	loader,
 	layout = "vertical",
@@ -32,6 +32,7 @@ const InfiniteScroll = ({
 	hasMore = true,
 	isFetching,
 	Header,
+	headerProps,
 	...props
 }: {
 	children?: ReactElement | (ReactElement | null)[] | null;
@@ -40,7 +41,8 @@ const InfiniteScroll = ({
 	loadMore: () => void;
 	hasMore: boolean;
 	isFetching: boolean;
-	Header: ComponentType<{ children: JSX.Element }> | ReactElement | undefined;
+	Header?: ComponentType<Props & { children: JSX.Element }> | ReactElement;
+	headerProps?: Props
 } & Stylable) => {
 	const ref = useRef<HTMLDivElement>(null);
 	const { css } = useYoshiki();
@@ -89,7 +91,8 @@ const InfiniteScroll = ({
 	);
 
 	if (!Header) return list({ ...scrollProps, ...props });
-	if (!isValidElement(Header)) return <Header {...scrollProps}>{list(props)}</Header>;
+	// @ts-ignore
+	if (!isValidElement(Header)) return <Header {...scrollProps} {...headerProps}>{list(props)}</Header>;
 	return (
 		<>
 			{Header}
