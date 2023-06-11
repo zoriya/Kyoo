@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Stack } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import { ComponentType, useEffect } from "react";
 import { StatusBar, StatusBarProps } from "react-native";
 import * as ScreenOrientation from "expo-screen-orientation";
@@ -44,13 +44,14 @@ export const withRoute = <Props,>(
 	},
 ) => {
 	const { statusBar, fullscreen, ...routeOptions } = options ?? {};
-	const WithUseRoute = ({ route, ...props }: Props & { route: any }) => {
+	const WithUseRoute = (props: any) => {
+		const routeParams = useLocalSearchParams();
 		return (
 			<>
 				{routeOptions && <Stack.Screen {...routeOptions} />}
 				{statusBar && <StatusBar {...statusBar} />}
 				{fullscreen && <FullscreenProvider />}
-				<Component {...route.params} {...props} />
+				<Component {...routeParams} {...props} />
 			</>
 		);
 	};

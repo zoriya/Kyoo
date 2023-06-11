@@ -28,7 +28,7 @@
 		"expo-linking": "~4.0.1",
 		"expo-localization": "~14.1.1",
 		"expo-navigation-bar": "~2.1.1",
-		"expo-router": "^1.2.2",
+		"expo-router": "1.5.3",
 		"expo-screen-orientation": "~5.1.1",
 		"expo-secure-store": "~12.1.1",
 		"expo-status-bar": "~1.4.4",
