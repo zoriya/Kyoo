@@ -42,7 +42,10 @@ const SvgWave = (props: SvgProps) => {
 	);
 };
 
-const ShowHeader = forwardRef<View, ViewProps & { slug: string }>(function _ShowHeader({ children, slug, ...props }, ref) {
+const ShowHeader = forwardRef<View, ViewProps & { slug: string }>(function _ShowHeader(
+	{ children, slug, ...props },
+	ref,
+) {
 	const { css, theme } = useYoshiki();
 
 	return (
@@ -78,7 +81,7 @@ const ShowHeader = forwardRef<View, ViewProps & { slug: string }>(function _Show
 			</View>
 		</View>
 	);
-	});
+});
 
 const query = (slug: string): QueryIdentifier<Show> => ({
 	parser: ShowP,
@@ -89,14 +92,11 @@ const query = (slug: string): QueryIdentifier<Show> => ({
 });
 
 export const ShowDetails: QueryPage<{ slug: string; season: string }> = ({ slug, season }) => {
+	const { css, theme } = useYoshiki();
 	return (
-		<SwitchVariant>
-			{({ css, theme }) => (
-				<View {...css({ bg: theme.background, flex: 1 })}>
-					<EpisodeList slug={slug} season={season} Header={ShowHeader} headerProps={{slug}} />
-				</View>
-			)}
-		</SwitchVariant>
+		<View {...css({ bg: theme.variant.background, flex: 1 })}>
+			<EpisodeList slug={slug} season={season} Header={ShowHeader} headerProps={{ slug }} />
+		</View>
 	);
 };
 
