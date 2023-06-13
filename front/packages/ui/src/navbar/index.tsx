@@ -28,7 +28,6 @@ import {
 	Skeleton,
 	tooltip,
 	ts,
-	Link,
 	Menu,
 } from "@kyoo/primitives";
 import { Platform, TextInput, View, ViewProps } from "react-native";
@@ -72,7 +71,7 @@ const SearchBar = forwardRef<
 			onChangeText={(q) => {
 				if (Platform.OS === "web") {
 					const action = window.location.pathname.startsWith("/search") ? replace : push;
-					if (q) action(`/search?q=${q}`, undefined, { shallow: true });
+					if (q) action(`/search?q=${encodeURI(q)}`, undefined, { shallow: true });
 					else back();
 				}
 			}}

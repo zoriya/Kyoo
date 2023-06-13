@@ -21,13 +21,13 @@
 import { Page, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
 import { useBreakpointMap, HR } from "@kyoo/primitives";
 import { FlashList } from "@shopify/flash-list";
-import { ComponentType, isValidElement, ReactElement } from "react";
+import { ComponentType, isValidElement, ReactElement, useRef } from "react";
 import { EmptyView, ErrorView, Layout, WithLoading } from "./fetch";
 
 export const InfiniteFetch = <Data, Props>({
 	query,
 	placeholderCount = 15,
-	suspense = false,
+	incremental = false,
 	horizontal = false,
 	children,
 	layout,
@@ -46,7 +46,7 @@ export const InfiniteFetch = <Data, Props>({
 		i: number,
 	) => ReactElement | null;
 	empty?: string | JSX.Element;
-	suspense?: boolean;
+	incremental?: boolean;
 	divider?: boolean | ComponentType;
 	Header?: ComponentType<Props & { children: JSX.Element }> | ReactElement;
 	headerProps?: Props
@@ -54,13 +54,14 @@ export const InfiniteFetch = <Data, Props>({
 	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
 
 	const { numColumns, size } = useBreakpointMap(layout);
-	const { items, error, fetchNextPage, hasNextPage, refetch, isRefetching } = useInfiniteFetch(
+	const oldItems = useRef<Data[] | undefined>();
+	let { items, error, fetchNextPage, hasNextPage, refetch, isRefetching } = useInfiniteFetch(
 		query,
 		{
-			suspense: suspense,
 			useErrorBoundary: false,
 		},
 	);
+	if (incremental && items) oldItems.current = items;
 
 	if (error) return <ErrorView error={error} />;
 	if (empty && items && items.length === 0) {
@@ -68,6 +69,8 @@ export const InfiniteFetch = <Data, Props>({
 		return <EmptyView message={empty} />;
 	}
 
+	if (incremental)
+		items ??= oldItems.current;
 	const count = items ? numColumns - (items.length % numColumns) : placeholderCount;
 	const placeholders = [...Array(count === 0 ? numColumns : count)].map(
 		(_, i) => ({ id: `gen${i}`, isLoading: true } as Data),

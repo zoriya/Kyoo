@@ -103,7 +103,7 @@ const InfiniteScroll = <Props,>({
 
 export const InfiniteFetch = <Data,>({
 	query,
-	suspense = false,
+	incremental = false,
 	placeholderCount = 15,
 	children,
 	layout,
@@ -114,7 +114,7 @@ export const InfiniteFetch = <Data,>({
 	...props
 }: {
 	query: QueryIdentifier<Data>;
-	suspense?: boolean;
+	incremental?: boolean;
 	placeholderCount?: number;
 	layout: Layout;
 	horizontal?: boolean;
@@ -128,11 +128,13 @@ export const InfiniteFetch = <Data,>({
 }): JSX.Element | null => {
 	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
 
+	const oldItems = useRef<Data[] | undefined>();
 	const { items, error, fetchNextPage, hasNextPage, isFetching } = useInfiniteFetch(query, {
-		suspense: suspense,
 		useErrorBoundary: false,
 	});
 	const grid = layout.numColumns !== 1;
+
+	if (incremental && items) oldItems.current = items;
 
 	if (error) return addHeader(Header, <ErrorView error={error} />);
 	if (empty && items && items.length === 0) {
@@ -155,7 +157,7 @@ export const InfiniteFetch = <Data,>({
 			Header={Header}
 			{...props}
 		>
-			{items?.map((item, i) => (
+			{(items ?? oldItems.current)?.map((item, i) => (
 				<Fragment key={(item as any).id?.toString()}>
 					{Divider && i !== 0 && (Divider === true ? <HR /> : <Divider />)}
 					{children({ ...item, isLoading: false } as any, i)}
