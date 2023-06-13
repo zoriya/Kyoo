@@ -77,7 +77,7 @@ export const Hover = ({
 	show: boolean;
 } & ViewProps) => {
 	// TODO animate show
-	const opacity = !show && { opacity: 0 };
+	const opacity = !show && (Platform.OS === "web" ? { opacity: 0 } : { display: "none" as const});
 	return (
 		<ContrastArea mode="dark">
 			{({ css }) => (

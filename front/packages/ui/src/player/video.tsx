@@ -33,7 +33,7 @@ export * from "react-native-video";
 
 import { Font } from "@kyoo/models";
 import { IconButton, Menu } from "@kyoo/primitives";
-import { ComponentProps, useRef } from "react";
+import { ComponentProps, forwardRef } from "react";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import NativeVideo, { OnLoadData } from "react-native-video";
 import { useTranslation } from "react-i18next";
@@ -43,17 +43,17 @@ const infoAtom = atom<OnLoadData | null>(null);
 const videoAtom = atom(0);
 const audioAtom = atom(0);
 
-const Video = ({ onLoad, ...props }: ComponentProps<typeof NativeVideo>) => {
-	const player = useRef<NativeVideo | null>(null);
+const Video = forwardRef<NativeVideo, ComponentProps<typeof NativeVideo>>(function _NativeVideo(
+	{ onLoad, ...props },
+	ref,
+) {
 	const setInfo = useSetAtom(infoAtom);
 	const video = useAtomValue(videoAtom);
 	const audio = useAtomValue(audioAtom);
 
 	return (
 		<NativeVideo
-			ref={(ref) => {
-				player.current = ref;
-			}}
+			ref={ref}
 			onLoad={(info) => {
 				setInfo(info);
 				onLoad?.(info);
@@ -63,7 +63,7 @@ const Video = ({ onLoad, ...props }: ComponentProps<typeof NativeVideo>) => {
 			{...props}
 		/>
 	);
-};
+});
 
 export default Video;
 

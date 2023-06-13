@@ -21,7 +21,7 @@
 import { QueryIdentifier, QueryPage, WatchItem, WatchItemP, useFetch } from "@kyoo/models";
 import { Head } from "@kyoo/primitives";
 import { useState, useEffect, ComponentProps } from "react";
-import { Platform, Pressable, StyleSheet, View } from "react-native";
+import { Platform, Pressable, PressableProps, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "solito/router";
 import { useAtom } from "jotai";
@@ -58,6 +58,17 @@ const mapData = (
 		nextSlug,
 	};
 };
+
+const PressView =
+	Platform.OS === "web"
+		? View
+		: ({
+			onPointerDown,
+			onMobilePress,
+			...props
+		}: PressableProps & { onMobilePress: PressableProps["onPress"] }) => (
+			<Pressable focusable={false} onPress={(e) => onMobilePress?.(e)} {...props} />
+		);
 
 // Callback used to hide the controls when the mouse goes iddle. This is stored globally to clear the old timeout
 // if the mouse moves again (if this is stored as a state, the whole page is redrawn on mouse move)
@@ -148,9 +159,33 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 				next={next}
 				previous={previous}
 			/>
-			<View
+			<PressView
 				focusable={false}
-				onPointerLeave={(e) => { if (e.nativeEvent.pointerType === "mouse") setMouseMoved(false) }}
+				onMobilePress={(e) => {
+					e.preventDefault();
+					displayControls ? setMouseMoved(false) : show();
+				}}
+				onStartShouldSetResponder={(e) => true}
+				onPointerDown={(e) => {
+					e.preventDefault();
+					if (e.nativeEvent.pointerType !== "mouse") {
+						displayControls ? setMouseMoved(false) : show();
+						return;
+					}
+					touchCount++;
+					if (touchCount == 2) {
+						touchCount = 0;
+						setFullscreen(!isFullscreen);
+						clearTimeout(touchTimeout);
+					} else
+						touchTimeout = setTimeout(() => {
+							touchCount = 0;
+						}, 400);
+					setPlay(!isPlaying);
+				}}
+				onPointerLeave={(e) => {
+					if (e.nativeEvent.pointerType === "mouse") setMouseMoved(false);
+				}}
 				{...css({
 					flexGrow: 1,
 					bg: "black",
@@ -158,51 +193,33 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 					cursor: displayControls ? "unset" : "none",
 				})}
 			>
-				<View
-					onPointerDown={(e) => {
-						if (e.nativeEvent.pointerType !== "mouse") {
-							displayControls ? setMouseMoved(false) : show();
-							return;
-						}
-						e.preventDefault();
-						touchCount++;
-						if (touchCount == 2) {
-							touchCount = 0;
-							setFullscreen(!isFullscreen);
-							clearTimeout(touchTimeout);
-						} else
-							touchTimeout = setTimeout(() => {
-								touchCount = 0;
-							}, 400);
-						setPlay(!isPlaying);
+				<Video
+					links={data?.link}
+					setError={setPlaybackError}
+					fonts={data?.fonts}
+					onEnd={() => {
+						if (!data) return;
+						if (data.isMovie) router.push(`/movie/${data.slug}`);
+						else
+							router.push(
+								data.nextEpisode ? `/watch/${data.nextEpisode.slug}` : `/show/${data.showSlug}`,
+							);
 					}}
 					{...css(StyleSheet.absoluteFillObject)}
-				>
-					<Video
-						links={data?.link}
-						setError={setPlaybackError}
-						fonts={data?.fonts}
-						onEnd={() => {
-							if (!data) return;
-							if (data.isMovie) router.push(`/movie/${data.slug}`);
-							else
-								router.push(
-									data.nextEpisode ? `/watch/${data.nextEpisode.slug}` : `/show/${data.showSlug}`,
-								);
-						}}
-						{...css(StyleSheet.absoluteFillObject)}
-					/>
-				</View>
+				/>
 				<LoadingIndicator />
 				<Hover
 					{...mapData(data, previous, next)}
-					onPointerEnter={(e) => { if (e.nativeEvent.pointerType === "mouse") setHover(true) }}
-					onPointerLeave={(e) => { if (e.nativeEvent.pointerType === "mouse") setHover(false) }}
+					onPointerEnter={(e) => {
+						if (e.nativeEvent.pointerType === "mouse") setHover(true);
+					}}
+					onPointerLeave={(e) => {
+						if (e.nativeEvent.pointerType === "mouse") setHover(false);
+					}}
 					onPointerDown={(e) => {
-						// also handle touch here because if we dont, the area where the hover should be will catch touches
-						// without openning the hover.
-						if (e.nativeEvent.pointerType !== "mouse")
-							displayControls ? setMouseMoved(false) : show();
+						// Prevent clicks on the hover to play/pause.
+						e.preventDefault();
+						e.stopPropagation();
 					}}
 					onMenuOpen={() => setMenuOpen(true)}
 					onMenuClose={() => {
@@ -212,7 +229,7 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 					}}
 					show={displayControls}
 				/>
-			</View>
+			</PressView>
 		</>
 	);
 };

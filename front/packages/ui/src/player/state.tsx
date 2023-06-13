@@ -20,7 +20,7 @@
 
 import { Track, WatchItem, Font } from "@kyoo/models";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
-import { memo, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { ElementRef, memo, useEffect, useLayoutEffect, useRef, useState } from "react";
 import NativeVideo, { VideoProperties as VideoProps } from "./video";
 import { Platform } from "react-native";
 
@@ -84,7 +84,7 @@ export const Video = memo(function _Video({
 	setError: (error: string | undefined) => void;
 	fonts?: Font[];
 } & Partial<VideoProps>) {
-	const ref = useRef<NativeVideo | null>(null);
+	const ref = useRef<ElementRef<typeof NativeVideo> | null>(null);
 	const [isPlaying, setPlay] = useAtom(playAtom);
 	const setLoad = useSetAtom(loadAtom);
 	const [source, setSource] = useState<string | null>(null);
