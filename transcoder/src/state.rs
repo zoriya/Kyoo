@@ -70,11 +70,16 @@ impl Transcoder {
 			// The group-id allows to distinguish multiple qualities from multiple variants.
 			// We could create another quality set and use group-ids hiqual and lowqual.
 			master.push_str("GROUP-ID=\"audio\",");
-			if let Some(language) = audio.language {
+			if let Some(language) = audio.language.clone() {
 				master.push_str(format!("LANGUAGE=\"{}\",", language).as_str());
 			}
+			// Exoplayer throws if audio tracks dont have names so we always add one.
 			if let Some(title) = audio.title {
 				master.push_str(format!("NAME=\"{}\",", title).as_str());
+			} else if let Some(language) = audio.language {
+				master.push_str(format!("NAME=\"{}\"", language).as_str());
+			} else {
+				master.push_str(format!("NAME=\"Audio {}\"", audio.index).as_str());
 			}
 			// TODO: Support aac5.1 (and specify the number of channel bellow)
 			// master.push_str(format!("CHANNELS=\"{}\",", 2).as_str());

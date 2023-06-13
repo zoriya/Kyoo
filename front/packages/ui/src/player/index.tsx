@@ -165,7 +165,6 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 					e.preventDefault();
 					displayControls ? setMouseMoved(false) : show();
 				}}
-				onStartShouldSetResponder={(e) => true}
 				onPointerDown={(e) => {
 					e.preventDefault();
 					if (e.nativeEvent.pointerType !== "mouse") {
