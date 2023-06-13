@@ -65,7 +65,7 @@ export const fullscreenAtom = atom(
 				set(privateFullscreen, false);
 				screen.orientation.unlock();
 			}
-		} catch(e) {
+		} catch (e) {
 			console.error(e);
 		}
 	},
@@ -134,7 +134,10 @@ export const Video = memo(function _Video({
 			volume={volume}
 			resizeMode="contain"
 			onBuffer={({ isBuffering }) => setLoad(isBuffering)}
-			onError={(status) => setError(status.error.errorString)}
+			onError={(status) => {
+				console.error(status);
+				setError(status.error.errorString);
+			}}
 			onProgress={(progress) => {
 				setPrivateProgress(progress.currentTime);
 				setBuffered(progress.playableDuration);
@@ -146,17 +149,16 @@ export const Video = memo(function _Video({
 			selectedTextTrack={
 				subtitle
 					? {
-							type: "index",
-							value: subtitle.trackIndex,
-					  }
+						type: "index",
+						value: subtitle.trackIndex,
+					}
 					: { type: "disabled" }
 			}
 			fonts={fonts}
 			onMediaUnsupported={() => {
-				if (mode == PlayMode.Direct)
-					setPlayMode(PlayMode.Hls);
+				if (mode == PlayMode.Direct) setPlayMode(PlayMode.Hls);
 			}}
-			// TODO: textTracks: external subtitles
+		// TODO: textTracks: external subtitles
 		/>
 	);
 });
