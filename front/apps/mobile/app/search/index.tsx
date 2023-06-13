@@ -19,7 +19,7 @@
  */
 
 import { SearchPage } from "@kyoo/ui";
-import { Stack } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import { useTranslation } from "react-i18next";
 import { createParam } from "solito";
 import { useRouter } from "solito/router";
@@ -27,11 +27,12 @@ import { useTheme } from "yoshiki/native";
 
 const { useParam } = createParam<{ q?: string }>();
 
-const Search = ({ route }: { route: any }) => {
+const Search = () => {
 	const theme = useTheme();
 	const { back } = useRouter();
 	const { t } = useTranslation();
 	const [query, setQuery] = useParam("q");
+	const routeParams = useLocalSearchParams();
 
 	return (
 		<>
@@ -51,7 +52,7 @@ const Search = ({ route }: { route: any }) => {
 					},
 				}}
 			/>
-			<SearchPage {...route.params} />
+			<SearchPage {...routeParams} />
 		</>
 	);
 };

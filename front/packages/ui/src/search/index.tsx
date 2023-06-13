@@ -19,8 +19,6 @@
  */
 
 import { LibraryItem, LibraryItemP, QueryIdentifier, QueryPage } from "@kyoo/models";
-import { P } from "@kyoo/primitives";
-import { Suspense, useRef, useDeferredValue } from "react";
 import { useTranslation } from "react-i18next";
 import { ItemGrid } from "../browse/grid";
 import { itemMap } from "../browse/index";
@@ -44,7 +42,7 @@ export const SearchPage: QueryPage<{ q?: string }> = ({ q }) => {
 		<InfiniteFetch
 			query={query(q)}
 			// TODO: Understand why it does not work.
-			// suspense={true} //{!isFirst}
+			incremental={true}
 			layout={ItemGrid.layout}
 			placeholderCount={15}
 			empty={empty}
