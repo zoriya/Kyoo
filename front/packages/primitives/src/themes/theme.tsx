@@ -35,6 +35,7 @@ type FontList = Partial<
 >;
 
 type Mode = {
+	mode: "light" | "dark" | "auto";
 	overlay0: Property.Color;
 	overlay1: Property.Color;
 	link: Property.Color;
@@ -80,8 +81,18 @@ const selectMode = (
 	mode: "light" | "dark" | "auto",
 ): Theme => {
 	const { light: lightBuilder, dark: darkBuilder, ...options } = theme;
-	const light = { ...lightBuilder, ...lightBuilder.default, contrast: lightBuilder.colors.black };
-	const dark = { ...darkBuilder, ...darkBuilder.default, contrast: darkBuilder.colors.white };
+	const light: Mode & Variant = {
+		...lightBuilder,
+		...lightBuilder.default,
+		contrast: lightBuilder.colors.black,
+		mode: "light",
+	};
+	const dark: Mode & Variant = {
+		...darkBuilder,
+		...darkBuilder.default,
+		contrast: darkBuilder.colors.white,
+		mode: "dark",
+	};
 	if (Platform.OS !== "web" || mode !== "auto") {
 		const value = mode === "light" ? light : dark;
 		const alternate = mode === "light" ? dark : light;
@@ -102,10 +113,11 @@ const selectMode = (
 	return {
 		...options,
 		...auto,
+		mode: "auto",
 		light,
 		dark,
-		user: auto,
-		alternate,
+		user: { ...auto, mode: "auto" },
+		alternate: { ...alternate, mode: "auto" },
 	};
 };
 

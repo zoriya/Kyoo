@@ -35,6 +35,7 @@
 		"react-native-web": "0.19.1",
 		"solito": "^3.0.0",
 		"superjson": "^1.12.2",
+		"sweetalert2": "^11.7.12",
 		"yoshiki": "1.2.2",
 		"zod": "^3.21.4"
 	},
