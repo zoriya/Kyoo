@@ -18,14 +18,14 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { TextStyle, View } from "react-native";
+import { View, ViewStyle } from "react-native";
 import { Image } from "./image";
 import { useYoshiki, px, Stylable } from "yoshiki/native";
 import { Icon } from "./icons";
 import AccountCircle from "@material-symbols/svg-400/rounded/account_circle-fill.svg";
 import { YoshikiStyle } from "yoshiki/dist/type";
 import { P } from "@expo/html-elements";
-import { forwardRef } from "react";
+import { ComponentType, forwardRef, RefAttributes } from "react";
 import { ts } from "./utils";
 
 const stringToColor = (string: string) => {
@@ -54,33 +54,34 @@ export const Avatar = forwardRef<
 		color?: string;
 		isLoading?: boolean;
 		fill?: boolean;
+		as?: ComponentType<{ style?: ViewStyle } & RefAttributes<View>>;
 	} & Stylable
 >(function _Avatar(
-	{ src, alt, size = px(24), color, placeholder, isLoading = false, fill = false, ...props },
+	{ src, alt, size = px(24), color, placeholder, isLoading = false, fill = false, as, ...props },
 	ref,
 ) {
 	const { css, theme } = useYoshiki();
 	const col = color ?? theme.overlay0;
 
 	// TODO: Support dark themes when fill === true
+	const Container = as ?? View;
 	return (
-		<View
+		<Container
 			ref={ref}
 			{...css(
 				[
 					{
 						borderRadius: 999999,
-						overflow: "hidden",
 						p: ts(1),
 					},
 					fill && {
 						bg: col,
 					},
 					placeholder &&
-					!src &&
-					!isLoading && {
-						bg: stringToColor(placeholder),
-					},
+						!src &&
+						!isLoading && {
+							bg: stringToColor(placeholder),
+						},
 				],
 				props,
 			)}
@@ -102,6 +103,6 @@ export const Avatar = forwardRef<
 			) : (
 				<Icon icon={AccountCircle} size={size} color={fill ? col : theme.colors.white} />
 			)}
-		</View>
+		</Container>
 	);
 });

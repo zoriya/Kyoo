@@ -50,14 +50,14 @@ const Menu = <AsProps,>({
 	const [isOpen, setOpen] = useState(false);
 
 	useEffect(() => {
+		console.log("Opnned changed", isOpen);
 		if (isOpen) onMenuOpen?.call(null);
 		else onMenuClose?.call(null);
 	}, [isOpen, onMenuClose, onMenuOpen]);
 
 	return (
 		<>
-			{/* @ts-ignore */}
-			<Trigger onPress={() => setOpen(true)} {...props} />
+			<Trigger onPress={() => setOpen(true)} {...props as any} />
 			{isOpen && (
 				<Portal>
 					<ContrastArea mode="user">
