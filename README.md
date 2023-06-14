@@ -26,6 +26,12 @@ Feel free to open issues or pull requests, all contribution are welcomed.
 You can see a live demo with copyright-free movies here: [demo.kyoo.moe](https://demo.kyoo.moe).
 Thanks to the [blender studio](https://www.blender.org/about/studio/) for providing open-source movies available for all.
 
+## FAQ
+
+### How to delete your account
+
+To delete your account, simply click on your avatar on the app/website and click "Delete your account".
+
 ## Screens
 
 ![Movie](https://raw.githubusercontent.com/zoriya/kyoo/screens/movie.png)
