@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { View } from "react-native";
+import { TextStyle, View } from "react-native";
 import { Image } from "./image";
 import { useYoshiki, px, Stylable } from "yoshiki/native";
 import { Icon } from "./icons";
@@ -26,6 +26,7 @@ import AccountCircle from "@material-symbols/svg-400/rounded/account_circle-fill
 import { YoshikiStyle } from "yoshiki/dist/type";
 import { P } from "@expo/html-elements";
 import { forwardRef } from "react";
+import { ts } from "./utils";
 
 const stringToColor = (string: string) => {
 	let hash = 0;
@@ -41,7 +42,7 @@ const stringToColor = (string: string) => {
 		color += `00${value.toString(16)}`.slice(-2);
 	}
 	return color;
-}
+};
 
 export const Avatar = forwardRef<
 	View,
@@ -67,7 +68,11 @@ export const Avatar = forwardRef<
 			ref={ref}
 			{...css(
 				[
-					{ borderRadius: 999999, width: size, height: size, overflow: "hidden" },
+					{
+						borderRadius: 999999,
+						overflow: "hidden",
+						p: ts(1),
+					},
 					fill && {
 						bg: col,
 					},
@@ -75,8 +80,6 @@ export const Avatar = forwardRef<
 					!src &&
 					!isLoading && {
 						bg: stringToColor(placeholder),
-						justifyContent: "center",
-						alignItems: "center",
 					},
 				],
 				props,
@@ -85,7 +88,17 @@ export const Avatar = forwardRef<
 			{src || isLoading ? (
 				<Image src={src} alt={alt} layout={{ width: size, height: size }} />
 			) : placeholder ? (
-				<P {...css({})}>{placeholder[0]}</P>
+				<P
+					{...css({
+						marginVertical: 0,
+						height: size,
+						width: size,
+						lineHeight: size,
+						textAlign: "center",
+					})}
+				>
+					{placeholder[0]}
+				</P>
 			) : (
 				<Icon icon={AccountCircle} size={size} color={fill ? col : theme.colors.white} />
 			)}
