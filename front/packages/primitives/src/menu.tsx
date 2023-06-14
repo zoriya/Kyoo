@@ -50,7 +50,6 @@ const Menu = <AsProps,>({
 	const [isOpen, setOpen] = useState(false);
 
 	useEffect(() => {
-		console.log("Opnned changed", isOpen);
 		if (isOpen) onMenuOpen?.call(null);
 		else onMenuClose?.call(null);
 	}, [isOpen, onMenuClose, onMenuOpen]);
