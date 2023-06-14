@@ -18,8 +18,19 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Library, LibraryP, logout, Page, Paged, QueryIdentifier, User, UserP } from "@kyoo/models";
 import {
+	deleteAccount,
+	Library,
+	LibraryP,
+	logout,
+	Page,
+	Paged,
+	QueryIdentifier,
+	User,
+	UserP,
+} from "@kyoo/models";
+import {
+	Alert,
 	Input,
 	IconButton,
 	Header,
@@ -116,9 +127,34 @@ export const NavbarProfile = () => {
 						<>
 							<Menu.Item
 								label={t("login.logout")}
-								onSelect={() => {
-									logout();
+								onSelect={async () => {
+									await logout();
 									queryClient.invalidateQueries(["auth", "me"]);
+								}}
+							/>
+							<Menu.Item
+								label={t("login.delete")}
+								onSelect={async () => {
+									Alert.alert(
+										t("login.delete"),
+										t("login.delete-confirmation"),
+										[
+											{
+												text: t("misc.delete"),
+												onPress: async () => {
+													await deleteAccount();
+													queryClient.invalidateQueries(["auth", "me"]);
+												},
+												style: "destructive",
+											},
+											{ text: t("misc.cancel"), style: "cancel" },
+										],
+										{
+											cancelable: true,
+											userInterfaceStyle: theme.mode === "auto" ? "light" : theme.mode,
+											icon: "warning",
+										},
+									);
 								}}
 							/>
 						</>
@@ -157,9 +193,9 @@ export const NavbarRight = () => {
 					onPress={
 						Platform.OS === "web"
 							? () => {
-								setSearch(true);
-								setTimeout(() => ref.current?.focus(), 0);
-							}
+									setSearch(true);
+									setTimeout(() => ref.current?.focus(), 0);
+							  }
 							: () => push("/search")
 					}
 					{...tooltip(t("navbar.search"))}

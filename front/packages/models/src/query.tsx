@@ -49,7 +49,7 @@ export const queryFn = async <Data,>(
 		| {
 			path: (string | false | undefined | null)[];
 			body?: object;
-			method: "GET" | "POST";
+			method: "GET" | "POST" | "DELETE";
 			authenticated?: boolean;
 			apiUrl?: string
 		},
@@ -100,9 +100,13 @@ export const queryFn = async <Data,>(
 		} catch (e) {
 			data = { errors: [error] } as KyooErrors;
 		}
-		console.log(`Invalid response (${path}):`, data, resp.status);
+		console.log(`Invalid response (${"method" in context && context.method ? context.method : "GET"} ${path}):`, data, resp.status);
 		throw data as KyooErrors;
 	}
+
+	// If the method is DELETE, 204 NoContent is returned from kyoo.
+	// @ts-ignore
+	if (context.method === "DELETE") return undefined;
 
 	let data;
 	try {
