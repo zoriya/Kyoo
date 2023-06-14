@@ -18,23 +18,24 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export { Header, Main, Nav, Footer, UL } from "@expo/html-elements";
-export * from "./text";
-export * from "./themes";
-export * from "./icons";
-export * from "./links";
-export * from "./avatar";
-export * from "./image";
-export * from "./skeleton";
-export * from "./tooltip";
-export * from "./container";
-export * from "./divider";
-export * from "./progress";
-export * from "./slider";
-export * from "./alert";
-export * from "./menu";
-export * from "./input";
-export * from "./button";
-export * from "./chip";
 
-export * from "./utils";
+// Stolen from https://github.com/necolas/react-native-web/issues/1026#issuecomment-1458279681
+
+import {
+	Alert as RNAlert,
+	type AlertOptions,
+	type AlertButton,
+} from "react-native";
+import { type SweetAlertIcon } from "sweetalert2";
+
+export interface ExtendedAlertStatic {
+	alert: (
+		title: string,
+		message?: string,
+		buttons?: AlertButton[],
+		options?: AlertOptions & { icon?: SweetAlertIcon },
+	) => void;
+}
+
+export const Alert: ExtendedAlertStatic = RNAlert as ExtendedAlertStatic;
+

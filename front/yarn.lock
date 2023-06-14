@@ -13221,6 +13221,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"sweetalert2@npm:^11.7.12":
+  version: 11.7.12
+  resolution: "sweetalert2@npm:11.7.12"
+  checksum: 3f0d26399f7660bf8f410686d9e53bc2216e973a6cedd53a4566fd3f5952e642cf012d0ae68bc47d89cb2e29244ea54489c524217481581945983e5138ce1510
+  languageName: node
+  linkType: hard
+
 "synckit@npm:^0.8.4":
   version: 0.8.5
   resolution: "synckit@npm:0.8.5"
@@ -14116,6 +14123,7 @@ __metadata:
     react-native-web: 0.19.1
     solito: ^3.0.0
     superjson: ^1.12.2
+    sweetalert2: ^11.7.12
     typescript: ^4.9.5
     webpack: ^5.76.1
     yoshiki: 1.2.2
