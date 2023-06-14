@@ -28,7 +28,9 @@
 	},
 	"misc": {
 		"prev-page": "Previous page",
-		"next-page": "Next page"
+		"next-page": "Next page",
+		"delete": "Delete",
+		"cancel": "Cancel"
 	},
 	"navbar": {
 		"home": "Home",
@@ -66,7 +68,9 @@
 		"confirm": "Confirm Password",
 		"or-register": "Don’t have an account? <1>Register</1>.",
 		"or-login": "Have an account already? <1>Log in</1>.",
-		"password-no-match": "Passwords do not match."
+		"password-no-match": "Passwords do not match.",
+		"delete": "Delete your account",
+		"delete-confirmation": "This action can't be reverted. Are you sure?"
 	},
 	"errors": {
 		"connection": "Could not connect to the kyoo's server",

@@ -96,5 +96,20 @@ export const getToken = async (cookies?: string): Promise<string | null> =>
 	(await getTokenWJ(cookies))[0]
 
 export const logout = async () =>{
-	deleteSecureItem("auth")
+	if (Platform.OS !== "web") {
+		const tokenStr = await getSecureItem("auth");
+		if (!tokenStr) return;
+		const token = TokenP.parse(JSON.parse(tokenStr));
+
+		let accounts: Account[] = JSON.parse(await getSecureItem("accounts") ?? "[]");
+		accounts = accounts.filter(x => x.refresh_token !== token.refresh_token);
+		await setSecureItem("accounts", JSON.stringify(accounts));
+	}
+
+	await deleteSecureItem("auth")
+}
+
+export const deleteAccount = async () => {
+	await queryFn({ path: ["auth", "me"], method: "DELETE"});
+	await logout();
 }
