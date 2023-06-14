@@ -19,8 +19,8 @@
  */
 
 import { ComponentType, ComponentProps } from "react";
-import { Platform, Text, TextProps, TextStyle } from "react-native";
-import { percent, px, rem, useYoshiki } from "yoshiki/native";
+import { Platform, Text, TextProps, TextStyle, StyleProp } from "react-native";
+import { percent, rem, useYoshiki } from "yoshiki/native";
 import {
 	H1 as EH1,
 	H2 as EH2,
@@ -29,7 +29,6 @@ import {
 	H5 as EH5,
 	H6 as EH6,
 	P as EP,
-	LI as ELI,
 } from "@expo/html-elements";
 import { ts } from "./utils/spacing";
 
@@ -38,7 +37,7 @@ const styleText = (
 	type?: "header" | "sub",
 	custom?: TextStyle,
 ) => {
-	const Text = (props: ComponentProps<typeof EP>) => {
+	const Text = (props: Omit<ComponentProps<typeof EP>, "style"> & { style?: StyleProp<TextStyle> }) => {
 		const { css, theme } = useYoshiki();
 
 		return (

@@ -22,9 +22,9 @@ import { View, ViewStyle } from "react-native";
 import { Image } from "./image";
 import { useYoshiki, px, Stylable } from "yoshiki/native";
 import { Icon } from "./icons";
+import { P } from "./text";
 import AccountCircle from "@material-symbols/svg-400/rounded/account_circle-fill.svg";
 import { YoshikiStyle } from "yoshiki/dist/type";
-import { P } from "@expo/html-elements";
 import { ComponentType, forwardRef, RefAttributes } from "react";
 import { ts } from "./utils";
 
@@ -49,7 +49,7 @@ export const Avatar = forwardRef<
 	{
 		src?: string | null;
 		alt?: string;
-		size?: YoshikiStyle<number | string>;
+		size?: YoshikiStyle<number>;
 		placeholder?: string;
 		color?: string;
 		isLoading?: boolean;
