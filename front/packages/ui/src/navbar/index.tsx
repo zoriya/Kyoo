@@ -29,6 +29,7 @@ import {
 	tooltip,
 	ts,
 	Menu,
+	PressableFeedback,
 } from "@kyoo/primitives";
 import { Platform, TextInput, View, ViewProps } from "react-native";
 import { useTranslation } from "react-i18next";
@@ -98,6 +99,7 @@ export const NavbarProfile = () => {
 			{({ isError: isGuest, username }) => (
 				<Menu
 					Trigger={Avatar}
+					as={PressableFeedback}
 					placeholder={username}
 					alt={t("navbar.login")}
 					size={24}
