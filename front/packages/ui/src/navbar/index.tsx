@@ -34,7 +34,7 @@ import { Platform, TextInput, View, ViewProps } from "react-native";
 import { useTranslation } from "react-i18next";
 import { createParam } from "solito";
 import { useRouter } from "solito/router";
-import { rem, Stylable, useYoshiki } from "yoshiki/native";
+import { px, rem, Stylable, useYoshiki } from "yoshiki/native";
 import MenuIcon from "@material-symbols/svg-400/rounded/menu-fill.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import { Fetch, FetchNE } from "../fetch";
@@ -78,7 +78,7 @@ const SearchBar = forwardRef<
 			placeholder={t("navbar.search")}
 			placeholderTextColor={theme.light.overlay0}
 			{...tooltip(t("navbar.search"))}
-			{...css({ borderColor: (theme) => theme.colors.white }, props)}
+			{...css({ borderColor: (theme) => theme.colors.white, height: ts(4) }, props)}
 		/>
 	);
 });
@@ -100,9 +100,9 @@ export const NavbarProfile = () => {
 					Trigger={Avatar}
 					placeholder={username}
 					alt={t("navbar.login")}
-					size={30}
+					size={24}
 					color={theme.colors.white}
-					{...css({ marginLeft: ts(1), marginVertical: "auto", justifyContent: "center" })}
+					{...css({ marginLeft: ts(1), justifyContent: "center" })}
 					{...tooltip(username ?? t("navbar.login"))}
 				>
 					{isGuest ? (
@@ -136,7 +136,7 @@ export const NavbarRight = () => {
 	const searchExpanded = isSearching || query;
 
 	return (
-		<View {...css({ flexDirection: "row" })}>
+		<View {...css({ flexDirection: "row", alignItems: "center" })}>
 			{Platform.OS === "web" && (
 				<SearchBar
 					ref={ref}

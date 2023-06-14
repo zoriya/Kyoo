@@ -32,6 +32,7 @@ import { PasswordInput } from "./password-input";
 import { useQueryClient } from "@tanstack/react-query";
 
 export const cleanApiUrl = (apiUrl: string) => {
+	if (Platform.OS === "web") return undefined;
 	if (!/https?:\/\//.test(apiUrl)) apiUrl = "http://" + apiUrl;
 	apiUrl = apiUrl.replace(/\/$/, "");
 	return apiUrl + "/api";
