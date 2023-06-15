@@ -72,8 +72,8 @@ declare module "yoshiki" {
 
 export type { Theme } from "yoshiki";
 export type ThemeBuilder = {
-	light: Omit<Mode, "contrast"> & { default: Variant };
-	dark: Omit<Mode, "contrast"> & { default: Variant };
+	light: Omit<Mode, "contrast" | "mode"> & { default: Variant };
+	dark: Omit<Mode, "contrast" | "mode"> & { default: Variant };
 };
 
 const selectMode = (
