@@ -2,4 +2,4 @@ guessit
 aiohttp
 jsons
 black-with-tabs
-watchdog
+watchfiles
