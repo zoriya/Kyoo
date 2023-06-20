@@ -98,7 +98,6 @@ impl Transcoder {
 		start_time: u32,
 	) -> Result<String, std::io::Error> {
 		// TODO: If the stream is not yet up to start_time (and is far), kill it and restart one at the right time.
-		// TODO: Clear cache at startup/every X time without use.
 		// TODO: cache transcoded output for a show/quality and reuse it for every future requests.
 		if let Some(TranscodeInfo {
 			show: (old_path, old_qual),
@@ -110,6 +109,7 @@ impl Transcoder {
 			if path != *old_path || quality != *old_qual {
 				// If the job has already ended, interrupt returns an error but we don't care.
 				_ = job.interrupt();
+				_ = std::fs::remove_dir_all(get_cache_path_from_uuid(uuid));
 			} else {
 				let mut path = get_cache_path_from_uuid(uuid);
 				path.push("stream.m3u8");

@@ -130,6 +130,11 @@ async fn get_swagger() -> String {
 async fn main() -> std::io::Result<()> {
 	let state = web::Data::new(Transcoder::new());
 
+	// Clear the cache
+	for entry in std::fs::read_dir("/cache")? {
+		_ = std::fs::remove_dir_all(entry?.path());
+	}
+
 	HttpServer::new(move || {
 		App::new()
 			.app_data(state.clone())
