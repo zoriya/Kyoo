@@ -5,6 +5,7 @@ import jsons
 from aiohttp import ClientSession
 from pathlib import Path
 from guessit import guessit
+from typing import List
 from providers.provider import Provider
 from providers.types.episode import Episode, PartialShow
 from providers.types.season import Season, SeasonTranslation
@@ -24,34 +25,32 @@ class Scanner:
 
 	async def scan(self, path: str):
 		logging.info("Starting the scan. It can take some times...")
+		self.registered = await self.get_registered_paths()
 		videos = filter(lambda p: p.is_file(), Path(path).rglob("*"))
 		# We batch videos by 20 because too mutch at once kinda DDOS everything.
 		for group in batch(videos, 20):
 			logging.info("Batch finished. Starting a new one")
 			await asyncio.gather(*map(self.identify, group))
 
-	async def is_registered(self, path: Path) -> bool:
+	async def get_registered_paths(self) -> List[Path]:
 		# TODO: Once movies are separated from the api, a new endpoint should be created to check for paths.
 		async with self._client.get(
-			f"{self._url}/episodes/count",
-			params={"path": f"eq:{path}"},
+			f"{self._url}/episodes",
+			params={"limit": 0},
 			headers={"X-API-Key": self._api_key},
 		) as r:
 			r.raise_for_status()
-			ret = await r.text()
-			if ret != "0":
-				return True
-		return False
+			ret = await r.json()
+			return list(x["path"] for x in ret["items"])
 
 	@log_errors
 	async def identify(self, path: Path):
+		if path in self.registered:
+			return
+
 		raw = guessit(path, "--episode-prefer-number")
 
-		if (
-			not "mimetype" in raw
-			or not raw["mimetype"].startswith("video")
-			or await self.is_registered(path)
-		):
+		if not "mimetype" in raw or not raw["mimetype"].startswith("video"):
 			return
 
 		logging.info("Identied %s: %s", path, raw)
