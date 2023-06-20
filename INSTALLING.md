@@ -10,16 +10,15 @@ Kyoo also needs 3 files to work properly. Two of them can simply be copy-pasted 
 Those files can be put in any directory of your choice.
 
 Those 3 files are:
- - A `docker-compose.yml` (simply copy docker-compose.prod.yml from [here](https://raw.githubusercontent.com/zoriya/Kyoo/master/docker-compose.prod.yml)).
- - A `nginx.conf.template` copied from [here](https://raw.githubusercontent.com/zoriya/Kyoo/master/nginx.conf.template).
- - A `.env` file that you will need to **fill**. Look at the example [.env.example](https://raw.githubusercontent.com/zoriya/Kyoo/master/.env.example)
 
+- A `docker-compose.yml` (simply copy docker-compose.prod.yml from [here](https://raw.githubusercontent.com/zoriya/Kyoo/master/docker-compose.prod.yml)).
+- A `nginx.conf.template` copied from [here](https://raw.githubusercontent.com/zoriya/Kyoo/master/nginx.conf.template).
+- A `.env` file that you will need to **fill**. Look at the example [.env.example](https://raw.githubusercontent.com/zoriya/Kyoo/master/.env.example)
 
 > If you want an explanation of what are those files, you can read the following:
 > The `docker-compose.yml` file describes the different services of Kyoo, where they should be downloaded and their start order. \
 > The `nignx.conf.template` file describes which service will be called when accessing the URL of Kyoo. \
 > The `.env` file contains all the configuration options that the services in `docker-compose.yml` will read.
-
 
 To retrieve metadata, Kyoo will need to communicate with an external service. For now, that is `the movie database`.
 For this purpose, you will need to get an API Key. For that, go to [themoviedb.org](https://www.themoviedb.org/) and create an account, then
@@ -34,9 +33,9 @@ Congratulation, everything is now ready to use Kyoo. You can navigate to `http:/
 
 1. Install docker & docker-compose
 2. Download the
-[`docker-compose.yml`](https://raw.githubusercontent.com/zoriya/Kyoo/master/docker-compose.prod.yml),
-[`nginx.conf.template`](https://raw.githubusercontent.com/zoriya/Kyoo/master/nginx.conf.template) and
-[`.env`](https://raw.githubusercontent.com/zoriya/Kyoo/master/.env.example) files
+   [`docker-compose.yml`](https://raw.githubusercontent.com/zoriya/Kyoo/master/docker-compose.prod.yml),
+   [`nginx.conf.template`](https://raw.githubusercontent.com/zoriya/Kyoo/master/nginx.conf.template) and
+   [`.env`](https://raw.githubusercontent.com/zoriya/Kyoo/master/.env.example) files
 3. Fill the `.env` file with your configuration options (and an API Key from [themoviedb.org](https://www.themoviedb.org/))
 4. Run `docker-compose up -d`
 
@@ -47,6 +46,9 @@ unsure that your `.env` contains all the options specified in the updated `.env.
 
 After that, you will need to update Kyoo's services. For that, open a terminal in the configuration's directory and run
 the command `docker-compose pull`. You are now ready to restart Kyoo, you can run `docker-compose up -d`.
+
+You can also enable automatic updates via an external tool like [watchtower](https://containrrr.dev/watchtower/).
+TLDR: `docker run -d --name watchtower -e WATCHTOWER_CLEANUP=true -e WATCHTOWER_POLL_INTERVAL=86400 -v /var/run/docker.sock:/var/run/docker.sock containrrr/watchtower`
 
 # Uninstalling
 

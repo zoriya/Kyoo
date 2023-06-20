@@ -26,7 +26,7 @@ class Scanner:
 	async def scan(self, path: str):
 		logging.info("Starting the scan. It can take some times...")
 		self.registered = await self.get_registered_paths()
-		videos = filter(lambda p: p.is_file(), Path(path).rglob("*"))
+		videos = (str(p) for p in Path(path).rglob("*") if p.is_file())
 		# We batch videos by 20 because too mutch at once kinda DDOS everything.
 		for group in batch(videos, 20):
 			logging.info("Batch finished. Starting a new one")
@@ -44,7 +44,7 @@ class Scanner:
 			return list(x["path"] for x in ret["items"])
 
 	@log_errors
-	async def identify(self, path: Path):
+	async def identify(self, path: str):
 		if path in self.registered:
 			return
 
