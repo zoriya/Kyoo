@@ -50,13 +50,23 @@ namespace Kyoo.Core.Controllers
 		/// Create a new <see cref="SeasonRepository"/>.
 		/// </summary>
 		/// <param name="database">The database handle that will be used</param>
+		/// <param name="shows">A shows repository</param>
 		/// <param name="providers">A provider repository</param>
 		public SeasonRepository(DatabaseContext database,
+			IShowRepository shows,
 			IProviderRepository providers)
 			: base(database)
 		{
 			_database = database;
 			_providers = providers;
+
+			// Edit seasons slugs when the show's slug changes.
+			shows.OnEdited += async (show) =>
+			{
+				foreach (Season season in _database.Seasons.Where(x => x.ShowID == show.ID))
+					season.ShowSlug = show.Slug;
+				await _database.SaveChangesAsync();
+			};
 		}
 
 		/// <inheritdoc/>
