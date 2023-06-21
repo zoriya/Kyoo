@@ -61,9 +61,11 @@ namespace Kyoo.Core.Controllers
 		/// Create a new <see cref="EpisodeRepository"/>.
 		/// </summary>
 		/// <param name="database">The database handle to use.</param>
+		/// <param name="shows">A show repository</param>
 		/// <param name="providers">A provider repository</param>
 		/// <param name="tracks">A track repository</param>
 		public EpisodeRepository(DatabaseContext database,
+			IShowRepository shows,
 			IProviderRepository providers,
 			ITrackRepository tracks)
 			: base(database)
@@ -71,6 +73,14 @@ namespace Kyoo.Core.Controllers
 			_database = database;
 			_providers = providers;
 			_tracks = tracks;
+
+			// Edit episode slugs when the show's slug changes.
+			shows.OnEdited += async (show) =>
+			{
+				foreach (Episode ep in _database.Episodes.Where(x => x.ShowID == show.ID))
+					ep.ShowSlug = show.Slug;
+				await _database.SaveChangesAsync();
+			};
 		}
 
 		/// <inheritdoc />
