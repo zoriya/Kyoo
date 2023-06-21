@@ -34,6 +34,12 @@ namespace Kyoo.Abstractions.Controllers
 		where T : class, IResource
 	{
 		/// <summary>
+		/// The event handler type for all events of this repository.
+		/// </summary>
+		/// <param name="resource">The resource created/modified/deleted</param>
+		public delegate void ResourceEventHandler(T resource);
+
+		/// <summary>
 		/// Get a resource from it's ID.
 		/// </summary>
 		/// <param name="id">The id of the resource</param>
@@ -129,6 +135,11 @@ namespace Kyoo.Abstractions.Controllers
 		Task<T> CreateIfNotExists([NotNull] T obj);
 
 		/// <summary>
+		/// Called when a resource has been created.
+		/// </summary>
+		event ResourceEventHandler OnCreated;
+
+		/// <summary>
 		/// Edit a resource
 		/// </summary>
 		/// <param name="edited">The resource to edit, it's ID can't change.</param>
@@ -137,6 +148,11 @@ namespace Kyoo.Abstractions.Controllers
 		/// <returns>The resource edited and completed by database's information (related items and so on)</returns>
 		[ItemNotNull]
 		Task<T> Edit([NotNull] T edited, bool resetOld);
+
+		/// <summary>
+		/// Called when a resource has been edited.
+		/// </summary>
+		event ResourceEventHandler OnEdited;
 
 		/// <summary>
 		/// Delete a resource by it's ID
@@ -168,6 +184,11 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="where">A predicate to filter resources to delete. Every resource that match this will be deleted.</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		Task DeleteAll([NotNull] Expression<Func<T, bool>> where);
+
+		/// <summary>
+		/// Called when a resource has been edited.
+		/// </summary>
+		event ResourceEventHandler OnDeleted;
 	}
 
 	/// <summary>

@@ -146,6 +146,7 @@ namespace Kyoo.Core.Controllers
 				obj.SeasonNumber != null && obj.EpisodeNumber != null
 				? Get(obj.ShowID, obj.SeasonNumber.Value, obj.EpisodeNumber.Value)
 				: GetAbsolute(obj.ShowID, obj.AbsoluteNumber.Value));
+			OnResourceCreated(obj);
 			return await _ValidateTracks(obj);
 		}
 
@@ -223,6 +224,7 @@ namespace Kyoo.Core.Controllers
 			await obj.Tracks.ForEachAsync(x => _tracks.Delete(x));
 			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Deleted);
 			await _database.SaveChangesAsync();
+			await base.Delete(obj);
 		}
 	}
 }

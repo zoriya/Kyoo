@@ -85,6 +85,7 @@ namespace Kyoo.Core.Controllers
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
 			await _database.SaveChangesAsync(() => Get(obj.Slug));
+			OnResourceCreated(obj);
 			return obj;
 		}
 
@@ -144,6 +145,7 @@ namespace Kyoo.Core.Controllers
 			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Deleted);
 			obj.Roles.ForEach(x => _database.Entry(x).State = EntityState.Deleted);
 			await _database.SaveChangesAsync();
+			await base.Delete(obj);
 		}
 
 		/// <inheritdoc />

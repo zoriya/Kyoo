@@ -100,6 +100,7 @@ namespace Kyoo.Core.Controllers
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
 			await _database.SaveChangesAsync(() => Get(obj.Slug));
+			OnResourceCreated(obj);
 			return obj;
 		}
 
@@ -213,6 +214,7 @@ namespace Kyoo.Core.Controllers
 		{
 			_database.Remove(obj);
 			await _database.SaveChangesAsync();
+			await base.Delete(obj);
 		}
 	}
 }
