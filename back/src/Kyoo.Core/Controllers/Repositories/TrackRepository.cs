@@ -79,6 +79,7 @@ namespace Kyoo.Core.Controllers
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
 			await _database.SaveChangesAsync();
+			OnResourceCreated(obj);
 			return obj;
 		}
 
@@ -90,6 +91,7 @@ namespace Kyoo.Core.Controllers
 
 			_database.Entry(obj).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
+			await base.Delete(obj);
 		}
 	}
 }
