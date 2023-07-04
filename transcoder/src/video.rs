@@ -1,6 +1,12 @@
 use std::str::FromStr;
 
-use crate::{error::ApiError, paths, state::Transcoder, transcode::{Quality, TranscodeError}, utils::get_client_id};
+use crate::{
+	error::ApiError,
+	paths,
+	state::Transcoder,
+	transcode::{Quality, TranscodeError},
+	utils::get_client_id,
+};
 use actix_files::NamedFile;
 use actix_web::{get, web, HttpRequest, Result};
 
@@ -40,17 +46,21 @@ async fn get_transcoded(
 	transcoder
 		.transcode(client_id, path, quality, 0)
 		.await
-		.map_err(|e| {
-			match e {
-				TranscodeError::ArgumentError(err) => ApiError::BadRequest { error: err },
-				TranscodeError::FFmpegError(err) => {
-					eprintln!("Unhandled ffmpeg error occured while transcoding video: {}", err);
-					ApiError::InternalError
-				},
-				TranscodeError::ReadError(err) => {
-					eprintln!("Unhandled read error occured while transcoding video: {}", err);
-					ApiError::InternalError
-				}
+		.map_err(|e| match e {
+			TranscodeError::ArgumentError(err) => ApiError::BadRequest { error: err },
+			TranscodeError::FFmpegError(err) => {
+				eprintln!(
+					"Unhandled ffmpeg error occured while transcoding video: {}",
+					err
+				);
+				ApiError::InternalError
+			}
+			TranscodeError::ReadError(err) => {
+				eprintln!(
+					"Unhandled read error occured while transcoding video: {}",
+					err
+				);
+				ApiError::InternalError
 			}
 		})
 }
