@@ -85,7 +85,11 @@ export const MediaSessionManager = ({
 	}, [isPlaying]);
 	useEffect(() => {
 		if (!("mediaSession" in navigator) || !duration) return;
-		navigator.mediaSession.setPositionState({ position: progress, duration, playbackRate: 1 });
+		navigator.mediaSession.setPositionState({
+			position: Math.min(progress, duration),
+			duration,
+			playbackRate: 1,
+		});
 	}, [progress, duration]);
 
 	return null;
