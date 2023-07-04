@@ -1,4 +1,4 @@
-use crate::{error::ApiError, paths, state::Transcoder};
+use crate::{error::ApiError, paths, state::Transcoder, transcode::TranscodeError};
 use actix_files::NamedFile;
 use actix_web::{get, web, Result};
 
@@ -28,10 +28,26 @@ async fn get_audio_transcoded(
 		.await
 		.map_err(|_| ApiError::NotFound)?;
 
-	transcoder.transcode_audio(path, audio).await.map_err(|e| {
-		eprintln!("Error while transcoding audio: {}", e);
-		ApiError::InternalError
-	})
+	transcoder
+		.transcode_audio(path, audio)
+		.await
+		.map_err(|e| match e {
+			TranscodeError::ArgumentError(err) => ApiError::BadRequest { error: err },
+			TranscodeError::FFmpegError(err) => {
+				eprintln!(
+					"Unhandled ffmpeg error occured while transcoding audio: {}",
+					err
+				);
+				ApiError::InternalError
+			}
+			TranscodeError::ReadError(err) => {
+				eprintln!(
+					"Unhandled read error occured while transcoding audio: {}",
+					err
+				);
+				ApiError::InternalError
+			}
+		})
 }
 
 /// Get audio chunk

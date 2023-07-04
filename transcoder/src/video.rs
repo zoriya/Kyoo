@@ -1,6 +1,6 @@
 use std::str::FromStr;
 
-use crate::{error::ApiError, paths, state::Transcoder, transcode::Quality, utils::get_client_id};
+use crate::{error::ApiError, paths, state::Transcoder, transcode::{Quality, TranscodeError}, utils::get_client_id};
 use actix_files::NamedFile;
 use actix_web::{get, web, HttpRequest, Result};
 
@@ -41,8 +41,17 @@ async fn get_transcoded(
 		.transcode(client_id, path, quality, 0)
 		.await
 		.map_err(|e| {
-			eprintln!("Unhandled error occured while transcoding: {}", e);
-			ApiError::InternalError
+			match e {
+				TranscodeError::ArgumentError(err) => ApiError::BadRequest { error: err },
+				TranscodeError::FFmpegError(err) => {
+					eprintln!("Unhandled ffmpeg error occured while transcoding video: {}", err);
+					ApiError::InternalError
+				},
+				TranscodeError::ReadError(err) => {
+					eprintln!("Unhandled read error occured while transcoding video: {}", err);
+					ApiError::InternalError
+				}
+			}
 		})
 }
 
