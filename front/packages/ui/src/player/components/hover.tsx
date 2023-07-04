@@ -107,6 +107,7 @@ export const Hover = ({
 								marginLeft: { xs: ts(0.5), sm: ts(3) },
 								flexDirection: "column",
 								flexGrow: 1,
+								flexShrink: 1,
 								maxWidth: percent(100),
 							})}
 						>
