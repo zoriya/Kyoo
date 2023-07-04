@@ -21,6 +21,8 @@ in
       rustc
 	  pkgconfig
 	  openssl
+	  mediainfo
+	  ffmpeg
     ];
 
     RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";

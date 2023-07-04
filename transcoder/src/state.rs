@@ -96,7 +96,7 @@ impl Transcoder {
 		path: String,
 		quality: Quality,
 		start_time: u32,
-	) -> Result<String, std::io::Error> {
+	) -> Result<String, TranscodeError> {
 		// TODO: If the stream is not yet up to start_time (and is far), kill it and restart one at the right time.
 		// TODO: cache transcoded output for a show/quality and reuse it for every future requests.
 		if let Some(TranscodeInfo {
@@ -113,15 +113,15 @@ impl Transcoder {
 			} else {
 				let mut path = get_cache_path_from_uuid(uuid);
 				path.push("stream.m3u8");
-				return std::fs::read_to_string(path);
+				return std::fs::read_to_string(path).map_err(|e| TranscodeError::ReadError(e));
 			}
 		}
 
-		let info = transcode_video(path, quality, start_time).await;
+		let info = transcode_video(path, quality, start_time).await?;
 		let mut path = get_cache_path(&info);
 		path.push("stream.m3u8");
 		self.running.write().unwrap().insert(client_id, info);
-		std::fs::read_to_string(path)
+		std::fs::read_to_string(path).map_err(|e| TranscodeError::ReadError(e))
 	}
 
 	// TODO: Use path/quality instead of client_id
@@ -145,7 +145,7 @@ impl Transcoder {
 		&self,
 		path: String,
 		audio: u32,
-	) -> Result<String, std::io::Error> {
+	) -> Result<String, TranscodeError> {
 		let mut stream = PathBuf::from(get_audio_path(&path, audio));
 		stream.push("stream.m3u8");
 
@@ -159,9 +159,9 @@ impl Transcoder {
 			// initialize the transcode and wait for the second segment while the second will use
 			// the same transcode but not wait and retrieve a potentially invalid playlist file.
 			self.audio_jobs.write().unwrap().push((path.clone(), audio));
-			transcode_audio(path, audio).await;
+			transcode_audio(path, audio).await?;
 		}
-		std::fs::read_to_string(stream)
+		std::fs::read_to_string(stream).map_err(|e| TranscodeError::ReadError(e))
 	}
 
 	pub async fn get_audio_segment(

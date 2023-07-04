@@ -14,6 +14,12 @@ use tokio::sync::watch;
 
 const SEGMENT_TIME: u32 = 10;
 
+pub enum TranscodeError {
+	ReadError(std::io::Error),
+	FFmpegError(String),
+	ArgumentError(String),
+}
+
 #[derive(PartialEq, Eq, Serialize, Display, Clone, Copy)]
 pub enum Quality {
 	#[display(fmt = "240p")]
@@ -178,17 +184,30 @@ fn get_transcode_video_quality_args(quality: &Quality, segment_time: u32) -> Vec
 	.collect()
 }
 
-pub async fn transcode_audio(path: String, audio: u32) {
+pub async fn transcode_audio(path: String, audio: u32) -> Result<Child, TranscodeError> {
 	start_transcode(
 		&path,
 		&get_audio_path(&path, audio),
 		get_transcode_audio_args(audio),
 		0,
 	)
-	.await;
+	.await
+	.map_err(|e| {
+		if let TranscodeError::FFmpegError(message) = e {
+			if message.contains("matches no streams.") {
+				return TranscodeError::ArgumentError("Invalid audio index".to_string());
+			}
+			return TranscodeError::FFmpegError(message);
+		}
+		e
+	})
 }
 
-pub async fn transcode_video(path: String, quality: Quality, start_time: u32) -> TranscodeInfo {
+pub async fn transcode_video(
+	path: String,
+	quality: Quality,
+	start_time: u32,
+) -> Result<TranscodeInfo, TranscodeError> {
 	// TODO: Use the out path below once cached segments can be reused.
 	// let out_dir = format!("/cache/{show_hash}/{quality}");
 	let uuid: String = thread_rng()
@@ -204,12 +223,12 @@ pub async fn transcode_video(path: String, quality: Quality, start_time: u32) ->
 		get_transcode_video_quality_args(&quality, SEGMENT_TIME),
 		start_time,
 	)
-	.await;
-	TranscodeInfo {
+	.await?;
+	Ok(TranscodeInfo {
 		show: (path, quality),
 		job: child,
 		uuid,
-	}
+	})
 }
 
 async fn start_transcode(
@@ -217,7 +236,7 @@ async fn start_transcode(
 	out_dir: &String,
 	encode_args: Vec<String>,
 	start_time: u32,
-) -> Child {
+) -> Result<Child, TranscodeError> {
 	std::fs::create_dir_all(&out_dir).expect("Could not create cache directory");
 
 	let mut cmd = Command::new("ffmpeg");
@@ -239,7 +258,8 @@ async fn start_transcode(
 			format!("{out_dir}/segments-%02d.ts"),
 			format!("{out_dir}/stream.m3u8"),
 		])
-		.stdout(Stdio::piped());
+		.stdout(Stdio::piped())
+		.stderr(Stdio::piped());
 	println!("Starting a transcode with the command: {:?}", cmd);
 	let mut child = cmd.spawn().expect("ffmpeg failed to start");
 
@@ -260,13 +280,24 @@ async fn start_transcode(
 		}
 	});
 
-	// Wait for 1.5 * segment time after start_time to be ready.
 	loop {
-		// TODO: Create a better error handling for here.
-		rx.changed().await.expect("Invalid audio index.");
+		// rx.changed() returns an error if the sender is dropped aka if the coroutine 10 lines
+		// higher has finished aka if the process has finished.
+		if let Err(_) = rx.changed().await {
+			let es = child.wait().await.unwrap();
+			if es.success() {
+				return Ok(child);
+			}
+			let output = child.wait_with_output().await.unwrap();
+			return Err(TranscodeError::FFmpegError(
+				String::from_utf8(output.stderr).unwrap(),
+			));
+		}
+
+		// Wait for 1.5 * segment time after start_time to be ready.
 		let ready_time = *rx.borrow();
 		if ready_time >= (1.5 * SEGMENT_TIME as f32) as u32 + start_time {
-			return child;
+			return Ok(child);
 		}
 	}
 }
