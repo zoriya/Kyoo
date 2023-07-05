@@ -77,9 +77,9 @@ impl Transcoder {
 			if let Some(title) = audio.title {
 				master.push_str(format!("NAME=\"{}\",", title).as_str());
 			} else if let Some(language) = audio.language {
-				master.push_str(format!("NAME=\"{}\"", language).as_str());
+				master.push_str(format!("NAME=\"{}\",", language).as_str());
 			} else {
-				master.push_str(format!("NAME=\"Audio {}\"", audio.index).as_str());
+				master.push_str(format!("NAME=\"Audio {}\",", audio.index).as_str());
 			}
 			// TODO: Support aac5.1 (and specify the number of channel bellow)
 			// master.push_str(format!("CHANNELS=\"{}\",", 2).as_str());
