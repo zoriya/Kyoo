@@ -187,6 +187,7 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 				}}
 				{...css({
 					flexGrow: 1,
+					flexShrink: 1,
 					bg: "black",
 					// @ts-ignore Web only
 					cursor: displayControls ? "unset" : "none",
