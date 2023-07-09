@@ -55,15 +55,16 @@ export const useAccounts = () => {
 
 		if (accounts && selected !== null) check();
 		else setVerified({status: "unverified"});
-	}, [accounts, selected, verified.status]);
+	}, [accounts, selected]);
 
 	if (accounts === null || verified.status === "loading") return { type: "loading" } as const;
+	if (accounts !== null && verified.status === "unverified") return { type: "loading" } as const;
 	if (verified.status === "error") {
 		return {
 			type: "error",
 			error: verified.error,
 			retry: () => setVerified({ status: "loading" }),
-		};
+		} as const;
 	}
 	return { type: "ok", accounts, selected } as const;
 };
@@ -86,13 +87,8 @@ export const ConnectionError = ({ error, retry }: { error?: string; retry: () =>
 
 export const AccountContext = createContext<ReturnType<typeof useAccounts>>({ type: "loading" });
 
-let initialRender = true;
-
 const App = () => {
-	// Using context on the initial one to keep the splashscreen and not show a spinner.
-	// eslint-disable-next-line react-hooks/rules-of-hooks
-	const info = initialRender ? useContext(AccountContext) : useAccounts();
-	initialRender = false;
+	const info = useContext(AccountContext);
 	if (info.type === "loading") return <CircularProgress />
 	if (info.type === "error") return <ConnectionError error={info.error} retry={info.retry} />;
 	if (info.selected === null) return <Redirect href="/login" />;
