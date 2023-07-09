@@ -20,7 +20,7 @@
 
 import { Account, loginFunc } from "@kyoo/models";
 import { getSecureItem, setSecureItem } from "@kyoo/models/src/secure-store";
-import { Button, CircularProgress, H1, P } from "@kyoo/primitives";
+import { Button, CircularProgress, H1, P, ts } from "@kyoo/primitives";
 import { Redirect } from "expo-router";
 import { createContext, useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -75,12 +75,12 @@ export const ConnectionError = ({ error, retry }: { error?: string; retry: () =>
 	const router = useRouter();
 
 	return (
-		<View {...css({ bg: (theme) => theme.colors.red })}>
-			<H1>{t("error.connection")}</H1>
+		<View {...css({ padding: ts(2)})}>
+			<H1 {...css({ textAlign: "center"})}>{t("errors.connection")}</H1>
 			<P>{error ?? t("error.unknown")}</P>
-			<P>{t("error.connection-tips")}</P>
-			<Button onPress={retry} text={t("error.try-again")} />
-			<Button onPress={() => router.push("/login")} text={t("error.re-login")} />
+			<P>{t("errors.connection-tips")}</P>
+			<Button onPress={retry} text={t("errors.try-again")}  {...css({ m: ts(1)})} />
+			<Button onPress={() => router.push("/login")} text={t("errors.re-login")} {...css({ m: ts(1)})} />
 		</View>
 	);
 };
