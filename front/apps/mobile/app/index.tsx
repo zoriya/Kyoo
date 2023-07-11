@@ -34,6 +34,7 @@ export const useAccounts = () => {
 		status: "ok" | "error" | "loading" | "unverified";
 		error?: string;
 	}>({ status: "loading" });
+	const [retryCount, setRetryCount] = useState(0);
 	// TODO: Remember the last selected account.
 	const selected = accounts?.length ? 0 : null;
 
@@ -55,7 +56,7 @@ export const useAccounts = () => {
 
 		if (accounts && selected !== null) check();
 		else setVerified({status: "unverified"});
-	}, [accounts, selected]);
+	}, [accounts, selected, retryCount]);
 
 	if (accounts === null || verified.status === "loading") return { type: "loading" } as const;
 	if (accounts !== null && verified.status === "unverified") return { type: "loading" } as const;
@@ -63,7 +64,10 @@ export const useAccounts = () => {
 		return {
 			type: "error",
 			error: verified.error,
-			retry: () => setVerified({ status: "loading" }),
+			retry: () => {
+				setVerified({ status: "loading" })
+				setRetryCount((x) => x + 1);
+			},
 		} as const;
 	}
 	return { type: "ok", accounts, selected } as const;
