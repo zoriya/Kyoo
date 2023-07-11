@@ -76,6 +76,7 @@ const ThemedStack = ({ onLayout }: { onLayout?: () => void }) => {
 	);
 };
 
+let rendered: boolean = false;
 
 export default function Root() {
 	const [queryClient] = useState(() => createQueryClient());
@@ -83,7 +84,8 @@ export default function Root() {
 	const [fontsLoaded] = useFonts({ Poppins_300Light, Poppins_400Regular, Poppins_900Black });
 	const info = useAccounts();
 
-	if (!fontsLoaded || info.type === "loading") return <SplashScreen />;
+	if (!fontsLoaded || (!rendered && info.type === "loading")) return <SplashScreen />;
+	rendered = true;
 	return (
 		<AccountContext.Provider value={info}>
 			<QueryClientProvider client={queryClient}>
