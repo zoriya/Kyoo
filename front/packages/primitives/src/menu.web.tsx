@@ -152,7 +152,7 @@ const MenuItem = ({
 					props as any,
 				)}
 			>
-				{selected && (
+				{(icon || selected) && (
 					<Icon
 						icon={icon ?? Dot}
 						color={theme.paragraph}

@@ -49,6 +49,8 @@ import { useRouter } from "solito/router";
 import { px, rem, Stylable, useYoshiki } from "yoshiki/native";
 import MenuIcon from "@material-symbols/svg-400/rounded/menu-fill.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
+import Logout from "@material-symbols/svg-400/rounded/logout.svg";
+import Delete from "@material-symbols/svg-400/rounded/delete.svg";
 import { Fetch, FetchNE } from "../fetch";
 import { KyooLongLogo } from "./icon";
 import { forwardRef, useRef, useState } from "react";
@@ -127,6 +129,7 @@ export const NavbarProfile = () => {
 						<>
 							<Menu.Item
 								label={t("login.logout")}
+								icon={Logout}
 								onSelect={async () => {
 									await logout();
 									queryClient.invalidateQueries(["auth", "me"]);
@@ -134,6 +137,7 @@ export const NavbarProfile = () => {
 							/>
 							<Menu.Item
 								label={t("login.delete")}
+								icon={Delete}
 								onSelect={async () => {
 									Alert.alert(
 										t("login.delete"),
