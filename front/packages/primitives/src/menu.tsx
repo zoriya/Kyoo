@@ -145,8 +145,8 @@ const MenuItem = ({
 				props as any,
 			)}
 		>
-			{selected && <Icon icon={icon ?? Check} color={theme.paragraph} size={24} />}
-			<P {...css({ paddingLeft: ts(2) + +!selected * px(24) })}>{label}</P>
+			{(icon || selected) && <Icon icon={icon ?? Check} color={theme.paragraph} size={24} {...css({ paddingLeft: icon ? ts(2) : 0 })}/>}
+			<P {...css({ paddingLeft: ts(2) + +!(icon || selected) * px(24) })}>{label}</P>
 		</PressableFeedback>
 	);
 };
