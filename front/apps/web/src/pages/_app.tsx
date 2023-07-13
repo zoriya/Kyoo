@@ -24,7 +24,7 @@ import { Hydrate, QueryClientProvider } from "@tanstack/react-query";
 import { HiddenIfNoJs, SkeletonCss, ThemeSelector } from "@kyoo/primitives";
 import { WebTooltip } from "@kyoo/primitives/src/tooltip.web";
 import { createQueryClient, fetchQuery, getTokenWJ, QueryIdentifier, QueryPage } from "@kyoo/models";
-import { setSecureItemSync } from "@kyoo/models/src/secure-store.web";
+import { setSecureItem } from "@kyoo/models/src/secure-store.web";
 import { useState } from "react";
 import NextApp, { AppContext, type AppProps } from "next/app";
 import { Poppins } from "next/font/google";
@@ -101,7 +101,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 
 	// Set the auth from the server (if the token was refreshed during SSR).
 	if (typeof window !== "undefined" && token)
-		setSecureItemSync("auth", JSON.stringify(token));
+		setSecureItem("auth", JSON.stringify(token));
 
 	return (
 		<YoshikiDebug>
