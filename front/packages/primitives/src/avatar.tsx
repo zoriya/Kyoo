@@ -72,7 +72,8 @@ export const Avatar = forwardRef<
 				[
 					{
 						borderRadius: 999999,
-						p: ts(1),
+						height: size,
+						width: size,
 					},
 					fill && {
 						bg: col,
@@ -92,8 +93,6 @@ export const Avatar = forwardRef<
 				<P
 					{...css({
 						marginVertical: 0,
-						height: size,
-						width: size,
 						lineHeight: size,
 						textAlign: "center",
 					})}

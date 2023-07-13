@@ -24,6 +24,7 @@ import { zdate } from "./utils";
 import { queryFn } from "./query";
 import { KyooErrors } from "./kyoo-errors";
 import { Platform } from "react-native";
+import { useEffect, useState } from "react";
 
 const TokenP = z.object({
 	token_type: z.literal("Bearer"),
@@ -38,8 +39,21 @@ type Result<A, B> =
 	| { ok: true; value: A; error?: undefined }
 	| { ok: false; value?: undefined; error: B };
 
-export type Account = Token & { apiUrl: string; username: string | null };
+export type Account = Token & { apiUrl: string; username: string };
 
+export const useAccounts = () => {
+	const [accounts, setAccounts] = useState<Account[]>([]);
+	const [selected, setSelected] = useState(0);
+
+	useEffect(() => {
+		async function run() {
+			setAccounts(JSON.parse(await getSecureItem("accounts") ?? "[]"));
+		}
+
+		run();
+	}, []);
+	return {accounts, selected, setSelected};
+}
 
 const addAccount = async (token: Token, apiUrl: string, username: string | null): Promise<void> => {
 	const accounts: Account[] = JSON.parse(await getSecureItem("accounts") ?? "[]");
