@@ -60,6 +60,7 @@
 	"login": {
 		"login": "Login",
 		"register": "Register",
+		"add-account": "Add account",
 		"logout": "Logout",
 		"server": "Server Address",
 		"email": "Email",

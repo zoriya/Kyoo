@@ -20,7 +20,7 @@
 
 import { Portal } from "@gorhom/portal";
 import { ScrollView } from "moti";
-import { ComponentType, createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { ComponentType, createContext, ReactElement, ReactNode, useContext, useEffect, useState } from "react";
 import { StyleSheet, Pressable } from "react-native";
 import { percent, px, sm, useYoshiki, xl } from "yoshiki/native";
 import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
@@ -114,6 +114,7 @@ const Menu = <AsProps,>({
 const MenuItem = ({
 	label,
 	selected,
+	left,
 	onSelect,
 	href,
 	icon,
@@ -121,11 +122,14 @@ const MenuItem = ({
 }: {
 	label: string;
 	selected?: boolean;
+	left?: ReactElement;
 	icon?: ComponentType<SvgProps>;
 } & ({ onSelect: () => void; href?: undefined } | { href: string; onSelect?: undefined })) => {
 	const { css, theme } = useYoshiki();
 	const setOpen = useContext(MenuContext);
 	const router = useRouter();
+
+	const icn = (icon || selected) && <Icon icon={icon ?? Check} color={theme.paragraph} size={24} {...css({ paddingLeft: icon ? ts(2) : 0 })}/>;
 
 	return (
 		<PressableFeedback
@@ -145,8 +149,10 @@ const MenuItem = ({
 				props as any,
 			)}
 		>
-			{(icon || selected) && <Icon icon={icon ?? Check} color={theme.paragraph} size={24} {...css({ paddingLeft: icon ? ts(2) : 0 })}/>}
-			<P {...css({ paddingLeft: ts(2) + +!(icon || selected) * px(24) })}>{label}</P>
+			{left && left}
+			{!left && icn && icn}
+			<P {...css({ paddingLeft: ts(2) + +!(icon || selected || left) * px(24), flexGrow: 1 })}>{label}</P>
+			{left && icn && icn}
 		</PressableFeedback>
 	);
 };

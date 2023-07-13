@@ -60,6 +60,7 @@
 	"login": {
 		"login": "Connexion",
 		"register": "Créer un compte",
+		"add-account": "Ajouter un compte",
 		"logout": "Déconnexion",
 		"server": "Addresse du serveur",
 		"email": "Email",

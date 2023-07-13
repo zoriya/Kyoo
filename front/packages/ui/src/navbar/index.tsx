@@ -26,6 +26,7 @@ import {
 	Page,
 	Paged,
 	QueryIdentifier,
+	useAccounts,
 	User,
 	UserP,
 } from "@kyoo/models";
@@ -41,6 +42,7 @@ import {
 	ts,
 	Menu,
 	PressableFeedback,
+	HR,
 } from "@kyoo/primitives";
 import { Platform, TextInput, View, ViewProps } from "react-native";
 import { useTranslation } from "react-i18next";
@@ -49,6 +51,8 @@ import { useRouter } from "solito/router";
 import { px, rem, Stylable, useYoshiki } from "yoshiki/native";
 import MenuIcon from "@material-symbols/svg-400/rounded/menu-fill.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
+import Login from "@material-symbols/svg-400/rounded/login.svg";
+import Register from "@material-symbols/svg-400/rounded/app_registration.svg";
 import Logout from "@material-symbols/svg-400/rounded/logout.svg";
 import Delete from "@material-symbols/svg-400/rounded/delete.svg";
 import { Fetch, FetchNE } from "../fetch";
@@ -102,10 +106,17 @@ export const MeQuery: QueryIdentifier<User> = {
 	parser: UserP,
 };
 
+const getDisplayUrl = (url: string) => {
+	url = url.replace(/\/api$/, "");
+	url = url.replace(/https?:\/\//, "");
+	return url;
+};
+
 export const NavbarProfile = () => {
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
 	const queryClient = useQueryClient();
+	const { accounts, selected, setSelected } = useAccounts();
 
 	return (
 		<FetchNE query={MeQuery}>
@@ -120,13 +131,24 @@ export const NavbarProfile = () => {
 					{...css({ marginLeft: ts(1), justifyContent: "center" })}
 					{...tooltip(username ?? t("navbar.login"))}
 				>
+					{accounts.map((x, i) => (
+						<Menu.Item
+							key={x.refresh_token}
+							label={`${x.username} - ${getDisplayUrl(x.apiUrl)}`}
+							left={<Avatar placeholder={x.username} />}
+							selected={selected === i}
+							onSelect={() => setSelected(i)}
+						/>
+					))}
+					{accounts.length > 0 && <HR />}
 					{isGuest ? (
 						<>
-							<Menu.Item label={t("login.login")} href="/login" />
-							<Menu.Item label={t("login.register")} href="/register" />
+							<Menu.Item label={t("login.login")} icon={Login} href="/login" />
+							<Menu.Item label={t("login.register")} icon={Register} href="/register" />
 						</>
 					) : (
 						<>
+							<Menu.Item label={t("login.add-account")} icon={Login} href="/login" />
 							<Menu.Item
 								label={t("login.logout")}
 								icon={Logout}
@@ -197,9 +219,9 @@ export const NavbarRight = () => {
 					onPress={
 						Platform.OS === "web"
 							? () => {
-									setSearch(true);
-									setTimeout(() => ref.current?.focus(), 0);
-							  }
+								setSearch(true);
+								setTimeout(() => ref.current?.focus(), 0);
+							}
 							: () => push("/search")
 					}
 					{...tooltip(t("navbar.search"))}

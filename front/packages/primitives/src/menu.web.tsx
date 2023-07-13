@@ -19,7 +19,7 @@
  */
 
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
-import { ComponentProps, ComponentType, forwardRef, ReactNode } from "react";
+import { ComponentProps, ComponentType, forwardRef, ReactElement, ReactNode } from "react";
 import Link from "next/link";
 import { PressableProps } from "react-native";
 import { useYoshiki } from "yoshiki/web";
@@ -119,6 +119,7 @@ const Item = forwardRef<
 const MenuItem = ({
 	label,
 	icon,
+	left,
 	selected,
 	onSelect,
 	href,
@@ -126,6 +127,7 @@ const MenuItem = ({
 }: {
 	label: string;
 	icon?: ComponentType<SvgProps>;
+	left?: ReactElement;
 	selected?: boolean;
 } & ({ onSelect: () => void; href?: undefined } | { href: string; onSelect?: undefined })) => {
 	const { css: nCss } = useNativeYoshiki();
@@ -152,6 +154,7 @@ const MenuItem = ({
 					props as any,
 				)}
 			>
+				{left && left}
 				{(icon || selected) && (
 					<Icon
 						icon={icon ?? Dot}
@@ -160,7 +163,7 @@ const MenuItem = ({
 						{...nCss({ paddingRight: ts(1) })}
 					/>
 				)}
-				{<P {...nCss(!selected && { paddingLeft: ts(1 + (icon ? 2 : 1)) })}>{label}</P>}
+				{<P {...nCss(!(icon || selected || left) && { paddingLeft: ts(1) })}>{label}</P>}
 			</Item>
 		</>
 	);
