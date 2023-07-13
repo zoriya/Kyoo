@@ -42,33 +42,31 @@ type Result<A, B> =
 export type Account = Token & { apiUrl: string; username: string };
 
 export const useAccounts = () => {
-	const [accounts, setAccounts] = useState<Account[]>([]);
-	const [selected, setSelected] = useState(0);
+	const [accounts] = useState<Account[]>(JSON.parse(getSecureItem("accounts") ?? "[]"));
+	const [selected, setSelected] = useState<number>(parseInt(getSecureItem("selected") ?? "0"));
 
-	useEffect(() => {
-		async function run() {
-			setAccounts(JSON.parse(await getSecureItem("accounts") ?? "[]"));
-		}
+	return {
+		accounts,
+		selected,
+		setSelected: (selected: number) => {
+			setSelected(selected);
+			setSecureItem("selected", selected.toString());
+		},
+	};
+};
 
-		run();
-	}, []);
-	return {accounts, selected, setSelected};
-}
-
-const addAccount = async (token: Token, apiUrl: string, username: string | null): Promise<void> => {
-	const accounts: Account[] = JSON.parse(await getSecureItem("accounts") ?? "[]");
-	const accIdx = accounts.findIndex(x => x.refresh_token === token.refresh_token);
-	if (accIdx === -1)
-		accounts.push({...token, username, apiUrl});
-	else
-		accounts[accIdx] = {...accounts[accIdx], ...token};
-	await setSecureItem("accounts", JSON.stringify(accounts));
-}
+const addAccount = (token: Token, apiUrl: string, username: string | null)  => {
+	const accounts: Account[] = JSON.parse(getSecureItem("accounts") ?? "[]");
+	const accIdx = accounts.findIndex((x) => x.refresh_token === token.refresh_token);
+	if (accIdx === -1) accounts.push({ ...token, username: username!, apiUrl });
+	else accounts[accIdx] = { ...accounts[accIdx], ...token };
+	setSecureItem("accounts", JSON.stringify(accounts));
+};
 
 export const loginFunc = async (
 	action: "register" | "login" | "refresh",
-	body: { username: string, password: string, email?: string } | string,
-	apiUrl?: string
+	body: { username: string; password: string; email?: string } | string,
+	apiUrl?: string,
 ): Promise<Result<Token, string>> => {
 	try {
 		const token = await queryFn(
@@ -107,23 +105,23 @@ export const getTokenWJ = async (cookies?: string): Promise<[string, Token] | [n
 };
 
 export const getToken = async (cookies?: string): Promise<string | null> =>
-	(await getTokenWJ(cookies))[0]
+	(await getTokenWJ(cookies))[0];
 
-export const logout = async () =>{
+export const logout = async () => {
 	if (Platform.OS !== "web") {
 		const tokenStr = await getSecureItem("auth");
 		if (!tokenStr) return;
 		const token = TokenP.parse(JSON.parse(tokenStr));
 
-		let accounts: Account[] = JSON.parse(await getSecureItem("accounts") ?? "[]");
-		accounts = accounts.filter(x => x.refresh_token !== token.refresh_token);
+		let accounts: Account[] = JSON.parse((await getSecureItem("accounts")) ?? "[]");
+		accounts = accounts.filter((x) => x.refresh_token !== token.refresh_token);
 		await setSecureItem("accounts", JSON.stringify(accounts));
 	}
 
-	await deleteSecureItem("auth")
-}
+	await deleteSecureItem("auth");
+};
 
 export const deleteAccount = async () => {
-	await queryFn({ path: ["auth", "me"], method: "DELETE"});
+	await queryFn({ path: ["auth", "me"], method: "DELETE" });
 	await logout();
-}
+};

@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export const setSecureItemSync = (key: string, value: string | null) => {
+export const setSecureItem = (key: string, value: string | null) => {
 	const d = new Date();
 	// A year
 	d.setTime(d.getTime() + 365 * 24 * 60 * 60 * 1000);
@@ -27,12 +27,9 @@ export const setSecureItemSync = (key: string, value: string | null) => {
 	return null;
 };
 
-export const setSecureItem = async (key: string, value: string | null): Promise<null> =>
-	setSecureItemSync(key, value);
+export const deleteSecureItem = (key: string) => setSecureItem(key, null);
 
-export const deleteSecureItem = async (key: string) => setSecureItem(key, null);
-
-export const getSecureItem = async (key: string, cookies?: string): Promise<string | null> => {
+export const getSecureItem = (key: string, cookies?: string): string | null => {
 	// Don't try to use document's cookies on SSR.
 	if (!cookies && typeof window === "undefined") return null;
 	const name = key + "=";

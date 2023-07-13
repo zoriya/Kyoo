@@ -5,7 +5,7 @@
 	"packageManager": "yarn@3.2.4",
 	"devDependencies": {
 		"@types/react": "^18.0.28",
-		"expo-secure-store": "^12.1.1",
+		"react-native-mmkv": "^2.10.1",
 		"typescript": "^4.9.5"
 	},
 	"peerDependencies": {
