@@ -2315,6 +2315,7 @@ __metadata:
     "@kyoo/primitives": "workspace:^"
     "@shopify/flash-list": ^1.4.1
     "@types/react": ^18.0.28
+    react-native-uuid: ^2.0.1
     typescript: ^4.9.5
   peerDependencies:
     "@material-symbols/svg-400": "*"
@@ -10345,6 +10346,7 @@ __metadata:
     react-native-screens: ~3.20.0
     react-native-svg: 13.4.0
     react-native-svg-transformer: ^1.0.0
+    react-native-uuid: ^2.0.1
     react-native-video: ^6.0.0-alpha.5
     typescript: ^4.9.5
     yoshiki: 1.2.2
@@ -11755,6 +11757,13 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: e630c057d6a0947c4d729538f643585a1fd9380975c1cf9adffad7647822b35219a9e1e60407f422b2b70592ed7f7e8766fab15df74f9cfce0b1c8a1c3544676
+  languageName: node
+  linkType: hard
+
+"react-native-uuid@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "react-native-uuid@npm:2.0.1"
+  checksum: 2fae6e2ee6cef108a31ae9d5be661a1947a86f4c6a812c7386b57d970861b364dc887bc4fe3225227aeea7925ccdc24d4478ff30193305abc283eb4a30ee2138
   languageName: node
   linkType: hard
 

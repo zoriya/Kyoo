@@ -54,7 +54,7 @@ const initHls = async (): Promise<Hls> => {
 	const token = await getToken();
 	hls = new Hls({
 		xhrSetup: (xhr) => {
-			if (token) xhr.setRequestHeader("Authorization", `Bearer: {token}`);
+			if (token) xhr.setRequestHeader("Authorization", `Bearer: ${token}`);
 			xhr.setRequestHeader("X-CLIENT-ID", client_id);
 		},
 		autoStartLoad: false,
