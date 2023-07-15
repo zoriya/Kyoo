@@ -88,7 +88,9 @@ export const RegisterPage: QueryPage = () => {
 					setError(error);
 					if (error) return;
 					queryClient.invalidateQueries(["auth", "me"]);
-					router.push("/");
+					router.replace("/", undefined, {
+						experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
+					});
 				}}
 				{...css({
 					m: ts(1),
