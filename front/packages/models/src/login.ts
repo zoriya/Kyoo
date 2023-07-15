@@ -19,12 +19,13 @@
  */
 
 import { z } from "zod";
-import { deleteSecureItem, getSecureItem, setSecureItem } from "./secure-store";
+import { deleteSecureItem, getSecureItem, setSecureItem, storage } from "./secure-store";
 import { zdate } from "./utils";
-import { queryFn } from "./query";
+import { queryFn, setApiUrl } from "./query";
 import { KyooErrors } from "./kyoo-errors";
 import { Platform } from "react-native";
-import { useEffect, useState } from "react";
+import { createContext, useEffect, useState } from "react";
+import { useMMKVListener } from "react-native-mmkv";
 
 const TokenP = z.object({
 	token_type: z.literal("Bearer"),
@@ -41,25 +42,78 @@ type Result<A, B> =
 
 export type Account = Token & { apiUrl: string; username: string };
 
-export const useAccounts = () => {
-	const [accounts] = useState<Account[]>(JSON.parse(getSecureItem("accounts") ?? "[]"));
-	const [selected, setSelected] = useState<number>(parseInt(getSecureItem("selected") ?? "0"));
+export const AccountContext = createContext<ReturnType<typeof useAccounts>>({ type: "loading" });
 
+export const useAccounts = () => {
+	const [accounts, setAccounts] = useState<Account[]>(JSON.parse(getSecureItem("accounts") ?? "[]"));
+	const [verified, setVerified] = useState<{
+		status: "ok" | "error" | "loading" | "unverified";
+		error?: string;
+	}>({ status: "loading" });
+	const [retryCount, setRetryCount] = useState(0);
+
+	const sel = getSecureItem("selected");
+	let [selected, setSelected] = useState<number | null>(
+		sel ? parseInt(sel) : accounts.length > 0 ? 0 : null,
+	);
+	if (selected === null && accounts.length > 0) selected = 0;
+	if (accounts.length === 0) selected = null;
+
+	useEffect(() => {
+		async function check() {
+			setVerified({status: "loading"});
+			const selAcc = accounts![selected!];
+			setApiUrl(selAcc.apiUrl);
+			const verif = await loginFunc("refresh", selAcc.refresh_token);
+			setVerified(verif.ok ? { status: "ok" } : { status: "error", error: verif.error });
+		}
+
+		if (accounts.length && selected !== null) check();
+		else setVerified({ status: "unverified" });
+	// Use the length of the array and not the array directly because we don't care if the refresh token changes.
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [accounts.length, selected, retryCount]);
+
+	useMMKVListener((key) => {
+		if (key === "accounts") setAccounts(JSON.parse(getSecureItem("accounts") ?? "[]"));
+	}, storage);
+
+	if (verified.status === "loading") return { type: "loading" } as const;
+	if (accounts.length && verified.status === "unverified") return { type: "loading" } as const;
+	if (verified.status === "error") {
+		return {
+			type: "error",
+			error: verified.error,
+			retry: () => {
+				setVerified({ status: "loading" });
+				setRetryCount((x) => x + 1);
+			},
+		} as const;
+	}
 	return {
+		type: "ok",
 		accounts,
 		selected,
 		setSelected: (selected: number) => {
 			setSelected(selected);
 			setSecureItem("selected", selected.toString());
 		},
-	};
+	} as const;
 };
 
-const addAccount = (token: Token, apiUrl: string, username: string | null)  => {
+const addAccount = (token: Token, apiUrl: string, username: string | null) => {
 	const accounts: Account[] = JSON.parse(getSecureItem("accounts") ?? "[]");
-	const accIdx = accounts.findIndex((x) => x.refresh_token === token.refresh_token);
-	if (accIdx === -1) accounts.push({ ...token, username: username!, apiUrl });
-	else accounts[accIdx] = { ...accounts[accIdx], ...token };
+	if (accounts.find((x) => x.username === username && x.apiUrl === apiUrl)) return;
+	accounts.push({ ...token, username: username!, apiUrl });
+	setSecureItem("accounts", JSON.stringify(accounts));
+};
+
+const setCurrentAccountToken = (token: Token) => {
+	const accounts: Account[] = JSON.parse(getSecureItem("accounts") ?? "[]");
+	const selected = parseInt(getSecureItem("selected") ?? "0");
+	if (selected >= accounts.length) return;
+
+	accounts[selected] = { ...accounts[selected], ...token };
 	setSecureItem("accounts", JSON.stringify(accounts));
 };
 
@@ -80,9 +134,10 @@ export const loginFunc = async (
 			TokenP,
 		);
 
-		if (typeof window !== "undefined") await setSecureItem("auth", JSON.stringify(token));
-		if (Platform.OS !== "web" && apiUrl)
-			await addAccount(token, apiUrl, typeof body !== "string" ? body.username : null);
+		if (typeof window !== "undefined") setSecureItem("auth", JSON.stringify(token));
+		if (Platform.OS !== "web" && apiUrl && typeof body !== "string")
+			addAccount(token, apiUrl, body.username);
+		else if (Platform.OS !== "web" && action === "refresh") setCurrentAccountToken(token);
 		return { ok: true, value: token };
 	} catch (e) {
 		console.error(action, e);
@@ -91,8 +146,7 @@ export const loginFunc = async (
 };
 
 export const getTokenWJ = async (cookies?: string): Promise<[string, Token] | [null, null]> => {
-	// @ts-ignore Web only.
-	const tokenStr = await getSecureItem("auth", cookies);
+	const tokenStr = getSecureItem("auth", cookies);
 	if (!tokenStr) return [null, null];
 	let token = TokenP.parse(JSON.parse(tokenStr));
 
@@ -107,21 +161,18 @@ export const getTokenWJ = async (cookies?: string): Promise<[string, Token] | [n
 export const getToken = async (cookies?: string): Promise<string | null> =>
 	(await getTokenWJ(cookies))[0];
 
-export const logout = async () => {
+export const logout = () => {
 	if (Platform.OS !== "web") {
-		const tokenStr = await getSecureItem("auth");
-		if (!tokenStr) return;
-		const token = TokenP.parse(JSON.parse(tokenStr));
-
-		let accounts: Account[] = JSON.parse((await getSecureItem("accounts")) ?? "[]");
-		accounts = accounts.filter((x) => x.refresh_token !== token.refresh_token);
-		await setSecureItem("accounts", JSON.stringify(accounts));
+		let accounts: Account[] = JSON.parse(getSecureItem("accounts") ?? "[]");
+		const selected = parseInt(getSecureItem("selected") ?? "0");
+		accounts.splice(selected, 1);
+		setSecureItem("accounts", JSON.stringify(accounts));
 	}
 
-	await deleteSecureItem("auth");
+	deleteSecureItem("auth");
 };
 
 export const deleteAccount = async () => {
 	await queryFn({ path: ["auth", "me"], method: "DELETE" });
-	await logout();
+	logout();
 };

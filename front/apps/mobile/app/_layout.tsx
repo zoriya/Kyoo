@@ -21,7 +21,7 @@
 import { PortalProvider } from "@gorhom/portal";
 import { ThemeSelector } from "@kyoo/primitives";
 import { NavbarRight, NavbarTitle } from "@kyoo/ui";
-import { createQueryClient } from "@kyoo/models";
+import { AccountContext, createQueryClient, useAccounts } from "@kyoo/models";
 import { QueryClientProvider } from "@tanstack/react-query";
 import i18next from "i18next";
 import { Stack } from "expo-router";
@@ -37,8 +37,12 @@ import { useEffect, useState } from "react";
 import { useColorScheme } from "react-native";
 import { initReactI18next } from "react-i18next";
 import { useTheme } from "yoshiki/native";
+import { Button, CircularProgress, H1, P, ts } from "@kyoo/primitives";
+import { useTranslation } from "react-i18next";
+import { View } from "react-native";
+import { useYoshiki } from "yoshiki/native";
+import { useRouter } from "solito/router";
 import "intl-pluralrules";
-import { AccountContext, useAccounts } from "./index";
 
 // TODO: use a backend to load jsons.
 import en from "../../../translations/en.json";
@@ -55,6 +59,26 @@ i18next.use(initReactI18next).init({
 		fr: { translation: fr },
 	},
 });
+
+export const ConnectionError = ({ error, retry }: { error?: string; retry: () => void }) => {
+	const { css } = useYoshiki();
+	const { t } = useTranslation();
+	const router = useRouter();
+
+	return (
+		<View {...css({ padding: ts(2) })}>
+			<H1 {...css({ textAlign: "center" })}>{t("errors.connection")}</H1>
+			<P>{error ?? t("error.unknown")}</P>
+			<P>{t("errors.connection-tips")}</P>
+			<Button onPress={retry} text={t("errors.try-again")} {...css({ m: ts(1) })} />
+			<Button
+				onPress={() => router.push("/login")}
+				text={t("errors.re-login")}
+				{...css({ m: ts(1) })}
+			/>
+		</View>
+	);
+};
 
 const ThemedStack = ({ onLayout }: { onLayout?: () => void }) => {
 	const theme = useTheme();
@@ -74,6 +98,18 @@ const ThemedStack = ({ onLayout }: { onLayout?: () => void }) => {
 			}}
 		/>
 	);
+};
+
+const AuthGuard = ({ selected }: { selected: number | null }) => {
+	const router = useRouter();
+
+	useEffect(() => {
+		if (selected === null)
+			router.replace("/login", undefined, {
+				experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
+			});
+	}, [selected, router]);
+	return null;
 };
 
 let rendered: boolean = false;
@@ -99,7 +135,14 @@ export default function Root() {
 					}}
 				>
 					<PortalProvider>
-						<ThemedStack />
+						{info.type === "loading" && <CircularProgress />}
+						{info.type === "error" && <ConnectionError error={info.error} retry={info.retry} />}
+						{info.type === "ok" && (
+							<>
+								<ThemedStack />
+								<AuthGuard selected={info.selected} />
+							</>
+						)}
 					</PortalProvider>
 				</ThemeSelector>
 			</QueryClientProvider>

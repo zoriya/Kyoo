@@ -19,6 +19,7 @@
  */
 
 import {
+	AccountContext,
 	deleteAccount,
 	Library,
 	LibraryP,
@@ -26,7 +27,6 @@ import {
 	Page,
 	Paged,
 	QueryIdentifier,
-	useAccounts,
 	User,
 	UserP,
 } from "@kyoo/models";
@@ -48,7 +48,7 @@ import { Platform, TextInput, View, ViewProps } from "react-native";
 import { useTranslation } from "react-i18next";
 import { createParam } from "solito";
 import { useRouter } from "solito/router";
-import { px, rem, Stylable, useYoshiki } from "yoshiki/native";
+import { rem, Stylable, useYoshiki } from "yoshiki/native";
 import MenuIcon from "@material-symbols/svg-400/rounded/menu-fill.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import Login from "@material-symbols/svg-400/rounded/login.svg";
@@ -57,7 +57,7 @@ import Logout from "@material-symbols/svg-400/rounded/logout.svg";
 import Delete from "@material-symbols/svg-400/rounded/delete.svg";
 import { Fetch, FetchNE } from "../fetch";
 import { KyooLongLogo } from "./icon";
-import { forwardRef, useRef, useState } from "react";
+import { forwardRef, useContext, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 export const NavbarTitle = (props: Stylable & { onLayout?: ViewProps["onLayout"] }) => {
@@ -116,7 +116,7 @@ export const NavbarProfile = () => {
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
 	const queryClient = useQueryClient();
-	const { accounts, selected, setSelected } = useAccounts();
+	const { type, accounts, selected, setSelected } = useContext(AccountContext);
 
 	return (
 		<FetchNE query={MeQuery}>
@@ -131,7 +131,7 @@ export const NavbarProfile = () => {
 					{...css({ marginLeft: ts(1), justifyContent: "center" })}
 					{...tooltip(username ?? t("navbar.login"))}
 				>
-					{accounts.map((x, i) => (
+					{accounts?.map((x, i) => (
 						<Menu.Item
 							key={x.refresh_token}
 							label={`${x.username} - ${getDisplayUrl(x.apiUrl)}`}
@@ -140,7 +140,7 @@ export const NavbarProfile = () => {
 							onSelect={() => setSelected(i)}
 						/>
 					))}
-					{accounts.length > 0 && <HR />}
+					{accounts && accounts.length > 0 && <HR />}
 					{isGuest ? (
 						<>
 							<Menu.Item label={t("login.login")} icon={Login} href="/login" />
@@ -152,8 +152,8 @@ export const NavbarProfile = () => {
 							<Menu.Item
 								label={t("login.logout")}
 								icon={Logout}
-								onSelect={async () => {
-									await logout();
+								onSelect={() => {
+									logout();
 									queryClient.invalidateQueries(["auth", "me"]);
 								}}
 							/>

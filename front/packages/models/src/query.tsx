@@ -43,6 +43,10 @@ const kyooUrl =
 
 export let kyooApiUrl: string | null = kyooUrl || null;
 
+export const setApiUrl = (apiUrl: string) => {
+	kyooApiUrl = apiUrl;
+}
+
 export const queryFn = async <Data,>(
 	context:
 		| QueryFunctionContext
@@ -57,7 +61,7 @@ export const queryFn = async <Data,>(
 	token?: string | null,
 ): Promise<Data> => {
 	// @ts-ignore
-	let url: string | null = context.apiUrl ?? (Platform.OS !== "web" ? await getSecureItem("apiUrl") : null) ?? kyooUrl;
+	let url: string | null = context.apiUrl ?? kyooApiUrl;
 	if (!url) console.error("Kyoo's url is not defined.");
 	kyooApiUrl = url;
 
