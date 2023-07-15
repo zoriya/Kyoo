@@ -18,6 +18,8 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { createContext } from "react";
+
 export const useAccounts = () => {}
 
-export const AccountContext = 0;
+export const AccountContext = createContext({});
