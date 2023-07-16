@@ -32,7 +32,6 @@ import { KyooErrors } from "./kyoo-errors";
 import { Page, Paged } from "./page";
 import { Platform } from "react-native";
 import { getToken } from "./login";
-import { getSecureItem } from "./secure-store";
 
 const kyooUrl =
 	Platform.OS !== "web"
@@ -73,7 +72,7 @@ export const queryFn = async <Data,>(
 				? context.path.filter((x) => x)
 				: context.pageParam
 					? [context.pageParam]
-					: (context.queryKey.filter((x) => x) as string[]),
+					: (context.queryKey.filter((x, i) => x && i) as string[]),
 		)
 		.join("/")
 		.replace("/?", "?");
@@ -161,6 +160,7 @@ export type QueryPage<Props = {}> = ComponentType<Props> & {
 const toQueryKey = <Data,>(query: QueryIdentifier<Data>) => {
 	if (query.params) {
 		return [
+			kyooApiUrl,
 			...query.path,
 			"?" +
 				Object.entries(query.params)
@@ -169,7 +169,7 @@ const toQueryKey = <Data,>(query: QueryIdentifier<Data>) => {
 					.join("&"),
 		];
 	} else {
-		return query.path;
+		return [kyooApiUrl, ...query.path];
 	}
 };
 
