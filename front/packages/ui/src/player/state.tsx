@@ -18,12 +18,11 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Track, WatchItem, Font, getToken } from "@kyoo/models";
+import { Track, WatchItem, Font } from "@kyoo/models";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { ElementRef, memo, useEffect, useLayoutEffect, useRef, useState } from "react";
 import NativeVideo, { VideoProperties as VideoProps } from "./video";
 import { Platform } from "react-native";
-import uuid from "react-native-uuid";
 
 export const playAtom = atom(true);
 export const loadAtom = atom(false);
@@ -75,8 +74,6 @@ const privateFullscreen = atom(false);
 
 export const subtitleAtom = atom<Track | null>(null);
 
-let clientId = uuid.v4() as string;
-
 export const Video = memo(function _Video({
 	links,
 	setError,
@@ -88,7 +85,6 @@ export const Video = memo(function _Video({
 	fonts?: Font[];
 } & Partial<VideoProps>) {
 	const ref = useRef<ElementRef<typeof NativeVideo> | null>(null);
-	const token = useRef<string | null>(null);
 	const [isPlaying, setPlay] = useAtom(playAtom);
 	const setLoad = useSetAtom(loadAtom);
 	const [source, setSource] = useState<string | null>(null);
@@ -111,13 +107,6 @@ export const Video = memo(function _Video({
 		setPublicProgress(0);
 		setPlay(true);
 	}, [mode, links, setLoad, setPrivateProgress, setPublicProgress, setPlay]);
-
-	useEffect(() => {
-		async function run() {
-			token.current = await getToken();
-		}
-		run();
-	}, [links]);
 
 	const volume = useAtomValue(volumeAtom);
 	const isMuted = useAtomValue(mutedAtom);
@@ -142,10 +131,6 @@ export const Video = memo(function _Video({
 			source={{
 				uri: source,
 				...links,
-				headers: {
-					Authorization: `Bearer: ${token.current}`,
-					"X-CLIENT-ID": clientId,
-				},
 			}}
 			paused={!isPlaying}
 			muted={isMuted}
@@ -167,16 +152,16 @@ export const Video = memo(function _Video({
 			selectedTextTrack={
 				subtitle
 					? {
-						type: "index",
-						value: subtitle.trackIndex,
-					}
+							type: "index",
+							value: subtitle.trackIndex,
+					  }
 					: { type: "disabled" }
 			}
 			fonts={fonts}
 			onMediaUnsupported={() => {
 				if (mode == PlayMode.Direct) setPlayMode(PlayMode.Hls);
 			}}
-		// TODO: textTracks: external subtitles
+			// TODO: textTracks: external subtitles
 		/>
 	);
 });
