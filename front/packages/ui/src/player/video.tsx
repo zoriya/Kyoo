@@ -31,29 +31,47 @@ declare module "react-native-video" {
 
 export * from "react-native-video";
 
-import { Font } from "@kyoo/models";
+import { Font, getToken } from "@kyoo/models";
 import { IconButton, Menu } from "@kyoo/primitives";
-import { ComponentProps, forwardRef } from "react";
+import { ComponentProps, forwardRef, useEffect, useRef } from "react";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
-import NativeVideo, { OnLoadData } from "react-native-video";
+import NativeVideo, { OnLoadData, VideoProps } from "react-native-video";
 import { useTranslation } from "react-i18next";
 import { PlayMode, playModeAtom } from "./state";
+import uuid from "react-native-uuid";
 
 const infoAtom = atom<OnLoadData | null>(null);
 const videoAtom = atom(0);
 const audioAtom = atom(0);
 
-const Video = forwardRef<NativeVideo, ComponentProps<typeof NativeVideo>>(function _NativeVideo(
-	{ onLoad, ...props },
+const clientId = uuid.v4() as string;
+
+const Video = forwardRef<NativeVideo, VideoProps>(function _NativeVideo(
+	{ onLoad, source, ...props },
 	ref,
 ) {
+	const token = useRef<string | null>(null);
 	const setInfo = useSetAtom(infoAtom);
 	const video = useAtomValue(videoAtom);
 	const audio = useAtomValue(audioAtom);
 
+	useEffect(() => {
+		async function run() {
+			token.current = await getToken();
+		}
+		run();
+	}, [source]);
+
 	return (
 		<NativeVideo
 			ref={ref}
+			source={{
+				...source,
+				headers: {
+					Authorization: `Bearer: ${token.current}`,
+					"X-CLIENT-ID": clientId,
+				}
+			}}
 			onLoad={(info) => {
 				setInfo(info);
 				onLoad?.(info);
