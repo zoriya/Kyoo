@@ -158,9 +158,11 @@ export type QueryPage<Props = {}> = ComponentType<Props> & {
 };
 
 const toQueryKey = <Data,>(query: QueryIdentifier<Data>) => {
+	const prefix = Platform.OS !== "web" ? [kyooApiUrl] : [""];
+
 	if (query.params) {
 		return [
-			kyooApiUrl,
+			...prefix,
 			...query.path,
 			"?" +
 				Object.entries(query.params)
@@ -169,7 +171,7 @@ const toQueryKey = <Data,>(query: QueryIdentifier<Data>) => {
 					.join("&"),
 		];
 	} else {
-		return [kyooApiUrl, ...query.path];
+		return [...prefix, ...query.path];
 	}
 };
 

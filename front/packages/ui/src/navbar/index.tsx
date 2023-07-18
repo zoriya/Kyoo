@@ -21,11 +21,7 @@
 import {
 	AccountContext,
 	deleteAccount,
-	Library,
-	LibraryP,
 	logout,
-	Page,
-	Paged,
 	QueryIdentifier,
 	User,
 	UserP,
@@ -37,7 +33,6 @@ import {
 	Header,
 	Avatar,
 	A,
-	Skeleton,
 	tooltip,
 	ts,
 	Menu,
@@ -48,14 +43,14 @@ import { Platform, TextInput, View, ViewProps } from "react-native";
 import { useTranslation } from "react-i18next";
 import { createParam } from "solito";
 import { useRouter } from "solito/router";
-import { rem, Stylable, useYoshiki } from "yoshiki/native";
+import { Stylable, useYoshiki } from "yoshiki/native";
 import MenuIcon from "@material-symbols/svg-400/rounded/menu-fill.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import Login from "@material-symbols/svg-400/rounded/login.svg";
 import Register from "@material-symbols/svg-400/rounded/app_registration.svg";
 import Logout from "@material-symbols/svg-400/rounded/logout.svg";
 import Delete from "@material-symbols/svg-400/rounded/delete.svg";
-import { Fetch, FetchNE } from "../fetch";
+import { FetchNE } from "../fetch";
 import { KyooLongLogo } from "./icon";
 import { forwardRef, useContext, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -116,7 +111,7 @@ export const NavbarProfile = () => {
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
 	const queryClient = useQueryClient();
-	const { type, accounts, selected, setSelected } = useContext(AccountContext);
+	const { accounts, selected, setSelected } = useContext(AccountContext);
 
 	return (
 		<FetchNE query={MeQuery}>
@@ -276,33 +271,8 @@ export const Navbar = (props: Stylable) => {
 					display: { xs: "none", sm: "flex" },
 					marginX: ts(2),
 				})}
-			>
-				<Fetch query={Navbar.query()} placeholderCount={4}>
-					{(library, i) =>
-						!library.isLoading ? (
-							<A
-								href={`/browse/${library.slug}`}
-								key={library.slug}
-								{...css({
-									marginX: ts(1),
-									textTransform: "uppercase",
-									color: "white",
-								})}
-							>
-								{library.name}
-							</A>
-						) : (
-							<Skeleton key={i} {...css({ width: rem(5), marginX: ts(1) })} />
-						)
-					}
-				</Fetch>
-			</View>
+			/>
 			<NavbarRight />
 		</Header>
 	);
 };
-
-Navbar.query = (): QueryIdentifier<Page<Library>> => ({
-	parser: Paged(LibraryP),
-	path: ["libraries"],
-});
