@@ -76,11 +76,13 @@ export const subtitleAtom = atom<Track | null>(null);
 
 export const Video = memo(function _Video({
 	links,
+	subtitles,
 	setError,
 	fonts,
 	...props
 }: {
 	links?: WatchItem["link"];
+	subtitles?: WatchItem["subtitles"];
 	setError: (error: string | undefined) => void;
 	fonts?: Font[];
 } & Partial<VideoProps>) {
@@ -149,6 +151,12 @@ export const Video = memo(function _Video({
 				setDuration(info.duration);
 			}}
 			onPlayPause={setPlay}
+			textTracks={subtitles?.map(x => ({
+				type: "text/x-ssa" as any, //MimeTypes[x.codec],
+				uri: x.link!,
+				title: x.title!,
+				language: x.language!,
+			}))}
 			selectedTextTrack={
 				subtitle
 					? {

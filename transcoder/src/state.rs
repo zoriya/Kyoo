@@ -87,6 +87,23 @@ impl Transcoder {
 			master.push_str(format!("URI=\"./audio/{}/index.m3u8\"\n", audio.index).as_str());
 		}
 
+		for subtitle in info.subtitles {
+			master.push_str("#EXT-X-MEDIA:TYPE=SUBTITLES,");
+			master.push_str("GROUP-ID=\"subtitles\",");
+			if let Some(language) = subtitle.language.clone() {
+				master.push_str(format!("LANGUAGE=\"{}\",", language).as_str());
+			}
+			if let Some(title) = subtitle.title {
+				master.push_str(format!("NAME=\"{}\",", title).as_str());
+			} else if let Some(language) = subtitle.language {
+				master.push_str(format!("NAME=\"{}\",", language).as_str());
+			} else {
+				master.push_str(format!("NAME=\"Subtitle {}\",", subtitle.index).as_str());
+			}
+			master.push_str("URI=\"https://kyoo.sdg.moe/api/subtitle/akudama-drive-s1e1.eng.subtitle\"\n");
+			// master.push_str(format!("URI=\"./subtitles/{}/index.m3u8\"\n", subtitle.index).as_str());
+		}
+
 		Some(master)
 	}
 

@@ -26,14 +26,24 @@ import { alpha } from "./themes";
 
 export const A = ({
 	href,
+	replace,
 	children,
 	...props
-}: TextProps & { href: string; children: ReactNode }) => {
+}: TextProps & { href: string; replace?: boolean; children: ReactNode }) => {
 	const { css, theme } = useYoshiki();
 
 	return (
 		<TextLink
 			href={href}
+			replace={replace as any}
+			experimental={
+				replace
+					? {
+						nativeBehavior: "stack-replace",
+						isNestedNavigator: false,
+					}
+					: undefined
+			}
 			textProps={css(
 				{
 					fontFamily: theme.font.normal,
@@ -72,11 +82,16 @@ export const PressableFeedback = forwardRef<View, PressableProps>(function _Feed
 
 export const Link = ({
 	href,
+	replace,
 	target,
 	children,
 	...props
-}: { href: string; target?: string } & PressableProps) => {
-	const linkProps = useLink({ href });
+}: { href: string; target?: string; replace?: boolean } & PressableProps) => {
+	const linkProps = useLink({
+		href,
+		replace,
+		experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
+	});
 	// @ts-ignore Missing hrefAttrs type definition.
 	linkProps.hrefAttrs = { ...linkProps.hrefAttrs, target };
 	return (
