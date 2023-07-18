@@ -39,6 +39,8 @@ import NativeVideo, { OnLoadData, VideoProps } from "react-native-video";
 import { useTranslation } from "react-i18next";
 import { PlayMode, playModeAtom } from "./state";
 import uuid from "react-native-uuid";
+import { Pressable } from "react-native";
+import { useYoshiki } from "yoshiki/native";
 
 const infoAtom = atom<OnLoadData | null>(null);
 const videoAtom = atom(0);
@@ -47,9 +49,10 @@ const audioAtom = atom(0);
 const clientId = uuid.v4() as string;
 
 const Video = forwardRef<NativeVideo, VideoProps>(function _NativeVideo(
-	{ onLoad, source, ...props },
+	{ onLoad, source, onPointerDown, ...props },
 	ref,
 ) {
+	const { css } = useYoshiki();
 	const token = useRef<string | null>(null);
 	const setInfo = useSetAtom(infoAtom);
 	const video = useAtomValue(videoAtom);
@@ -66,23 +69,28 @@ const Video = forwardRef<NativeVideo, VideoProps>(function _NativeVideo(
 	}, [source]);
 
 	return (
-		<NativeVideo
-			ref={ref}
-			source={{
-				...source,
-				headers: {
-					Authorization: `Bearer: ${token.current}`,
-					"X-CLIENT-ID": clientId,
-				}
-			}}
-			onLoad={(info) => {
-				setInfo(info);
-				onLoad?.(info);
-			}}
-			selectedVideoTrack={video === -1 ? { type: "auto" } : { type: "resolution", value: video }}
-			selectedAudioTrack={{ type: "index", value: audio }}
-			{...props}
-		/>
+		<Pressable
+			focusable={false}
+			onPress={() => onPointerDown?.({ nativeEvent: { pointerType: "pointer" } } as any)}
+			{...css({ flexGrow: 1, flexShrink: 1 })}
+			>
+			<NativeVideo
+				ref={ref}
+				source={{
+					...source,
+					headers: {
+						Authorization: `Bearer: ${token.current}`,
+						"X-CLIENT-ID": clientId,
+					}
+				}}
+				onLoad={(info) => {
+					setInfo(info);
+					onLoad?.(info);
+				}}
+				selectedVideoTrack={video === -1 ? { type: "auto" } : { type: "resolution", value: video }}
+				selectedAudioTrack={{ type: "index", value: audio }}
+				{...props}
+			/></Pressable>
 	);
 });
 

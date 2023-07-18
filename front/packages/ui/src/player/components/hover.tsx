@@ -35,7 +35,7 @@ import {
 } from "@kyoo/primitives";
 import { Chapter, Font, Track, WatchItem } from "@kyoo/models";
 import { useAtomValue, useSetAtom, useAtom } from "jotai";
-import { Platform, View, ViewProps } from "react-native";
+import { Platform, Pressable, View, ViewProps } from "react-native";
 import { useTranslation } from "react-i18next";
 import { percent, rem, useYoshiki } from "yoshiki/native";
 import { useRouter } from "solito/router";
@@ -59,6 +59,7 @@ export const Hover = ({
 	onMenuOpen,
 	onMenuClose,
 	show,
+	onPointerDown,
 	...props
 }: {
 	isLoading: boolean;
@@ -83,7 +84,10 @@ export const Hover = ({
 			{({ css }) => (
 				<>
 					<Back isLoading={isLoading} name={showName} href={href} {...css(opacity, props)} />
-					<View
+					<Pressable
+						focusable={false}
+						onPointerDown={onPointerDown}
+						onPress={Platform.OS !== "web" ? () => onPointerDown?.({} as any): undefined}
 						{...css(
 							[
 								{
@@ -128,7 +132,7 @@ export const Hover = ({
 								/>
 							</View>
 						</View>
-					</View>
+					</Pressable>
 				</>
 			)}
 		</ContrastArea>

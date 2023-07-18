@@ -21,7 +21,7 @@
 import { QueryIdentifier, QueryPage, WatchItem, WatchItemP, useFetch } from "@kyoo/models";
 import { Head } from "@kyoo/primitives";
 import { useState, useEffect, ComponentProps } from "react";
-import { Platform, Pressable, PressableProps, StyleSheet, View } from "react-native";
+import { Platform, Pressable, PressableProps, StyleSheet, View, PointerEvent as NativePointerEvent } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "solito/router";
 import { useAtom } from "jotai";
@@ -127,6 +127,24 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 		};
 	}, [setFullscreen]);
 
+	const onPointerDown = (e: NativePointerEvent) => {
+		if (Platform.OS === "web") e.preventDefault();
+		if (Platform.OS !== "web" || e.nativeEvent.pointerType !== "mouse") {
+			displayControls ? setMouseMoved(false) : show();
+			return;
+		}
+		touchCount++;
+		if (touchCount == 2) {
+			touchCount = 0;
+			setFullscreen(!isFullscreen);
+			clearTimeout(touchTimeout);
+		} else
+		touchTimeout = setTimeout(() => {
+			touchCount = 0;
+		}, 400);
+		setPlay(!isPlaying);
+	};
+
 	if (error || playbackError)
 		return (
 			<>
@@ -159,29 +177,7 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 				next={next}
 				previous={previous}
 			/>
-			<PressView
-				focusable={false}
-				onMobilePress={(e) => {
-					e.preventDefault();
-					displayControls ? setMouseMoved(false) : show();
-				}}
-				onPointerDown={(e) => {
-					e.preventDefault();
-					if (e.nativeEvent.pointerType !== "mouse") {
-						displayControls ? setMouseMoved(false) : show();
-						return;
-					}
-					touchCount++;
-					if (touchCount == 2) {
-						touchCount = 0;
-						setFullscreen(!isFullscreen);
-						clearTimeout(touchTimeout);
-					} else
-						touchTimeout = setTimeout(() => {
-							touchCount = 0;
-						}, 400);
-					setPlay(!isPlaying);
-				}}
+			<View
 				onPointerLeave={(e) => {
 					if (e.nativeEvent.pointerType === "mouse") setMouseMoved(false);
 				}}
@@ -198,6 +194,7 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 					subtitles={data?.subtitles}
 					setError={setPlaybackError}
 					fonts={data?.fonts}
+					onPointerDown={(e) => onPointerDown(e)}
 					onEnd={() => {
 						if (!data) return;
 						if (data.isMovie)
@@ -217,15 +214,14 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 				<Hover
 					{...mapData(data, previous, next)}
 					onPointerEnter={(e) => {
-						if (e.nativeEvent.pointerType === "mouse") setHover(true);
+						if (Platform.OS !== "web" || e.nativeEvent.pointerType === "mouse") setHover(true);
 					}}
 					onPointerLeave={(e) => {
 						if (e.nativeEvent.pointerType === "mouse") setHover(false);
 					}}
 					onPointerDown={(e) => {
-						// Prevent clicks on the hover to play/pause.
-						e.preventDefault();
-						e.stopPropagation();
+						if (!displayControls) onPointerDown(e);
+						if (Platform.OS === "web") e.preventDefault();
 					}}
 					onMenuOpen={() => setMenuOpen(true)}
 					onMenuClose={() => {
@@ -235,7 +231,7 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 					}}
 					show={displayControls}
 				/>
-			</PressView>
+			</View>
 		</>
 	);
 };
