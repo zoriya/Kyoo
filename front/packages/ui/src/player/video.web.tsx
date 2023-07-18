@@ -79,6 +79,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 		onPlayPause,
 		onMediaUnsupported,
 		fonts,
+		onPointerDown,
 	},
 	forwaredRef,
 ) {
@@ -191,6 +192,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 			// onPlay={() => onPlayPause?.call(null, true)}
 			// onPause={() => onPlayPause?.call(null, false)}
 			onEnded={onEnd}
+			onPointerDown={(e) => onPointerDown?.(e as any)}
 			{...css({ width: "100%", height: "100%", objectFit: "contain" })}
 		/>
 	);
