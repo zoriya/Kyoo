@@ -58,4 +58,4 @@ export const DefaultLayout = ({
 		</>
 	);
 };
-DefaultLayout.getFetchUrls = () => [Navbar.query(), MeQuery];
+DefaultLayout.getFetchUrls = () => [MeQuery];
