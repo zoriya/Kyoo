@@ -55,6 +55,9 @@ const Video = forwardRef<NativeVideo, VideoProps>(function _NativeVideo(
 	const video = useAtomValue(videoAtom);
 	const audio = useAtomValue(audioAtom);
 
+	const info = useAtomValue(infoAtom);
+	console.log(info);
+
 	useEffect(() => {
 		async function run() {
 			token.current = await getToken();
@@ -120,11 +123,8 @@ export const QualitiesMenu = (props: CustomMenu) => {
 				onSelect={() => setPlayMode(PlayMode.Direct)}
 			/>
 			<Menu.Item
-				label={
-					mode === PlayMode.Hls && video !== -1
-						? `${t("player.auto")} (${video}p)`
-						: t("player.auto")
-				}
+				// TODO: Display the currently selected quality (impossible with rn-video right now)
+				label={t("player.auto")}
 				selected={video === -1}
 				onSelect={() => {
 					setPlayMode(PlayMode.Hls);

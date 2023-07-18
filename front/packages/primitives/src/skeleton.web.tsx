@@ -19,7 +19,6 @@
  */
 
 import { LinearGradient } from "expo-linear-gradient";
-import { useState } from "react";
 import { View, ViewProps } from "react-native";
 import { px, rem, useYoshiki, percent, em } from "yoshiki/native";
 import { hiddenIfNoJs } from "./utils/nojs";
@@ -53,8 +52,6 @@ export const Skeleton = ({
 	variant?: "text" | "header" | "round" | "custom" | "fill" | "filltext";
 }) => {
 	const { css, theme } = useYoshiki();
-	const [width, setWidth] = useState<number | undefined>(undefined);
-	const perc = (v: number) => (v / 100) * width!;
 
 	if (forcedShow === undefined && children && children !== true) return <>{children}</>;
 
@@ -101,7 +98,6 @@ export const Skeleton = ({
 				[...Array(lines)].map((_, i) => (
 					<View
 						key={`skeleton_${i}`}
-						onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
 						{...css(
 							[
 								{

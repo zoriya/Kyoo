@@ -195,14 +195,20 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 			>
 				<Video
 					links={data?.link}
+					subtitles={data?.subtitles}
 					setError={setPlaybackError}
 					fonts={data?.fonts}
 					onEnd={() => {
 						if (!data) return;
-						if (data.isMovie) router.push(`/movie/${data.slug}`);
+						if (data.isMovie)
+							router.replace(`/movie/${data.slug}`, undefined, {
+								experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
+							});
 						else
-							router.push(
+							router.replace(
 								data.nextEpisode ? `/watch/${data.nextEpisode.slug}` : `/show/${data.showSlug}`,
+								undefined,
+								{ experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false } },
 							);
 					}}
 					{...css(StyleSheet.absoluteFillObject)}
