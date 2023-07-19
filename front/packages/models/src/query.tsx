@@ -54,7 +54,8 @@ export const queryFn = async <Data,>(
 			body?: object;
 			method: "GET" | "POST" | "DELETE";
 			authenticated?: boolean;
-			apiUrl?: string
+			apiUrl?: string;
+			abortSignal?: AbortSignal;
 		},
 	type?: z.ZodType<Data>,
 	token?: string | null,
@@ -87,6 +88,7 @@ export const queryFn = async <Data,>(
 				...(token ? { Authorization: token } : {}),
 				...("body" in context ? { "Content-Type": "application/json" } : {}),
 			},
+			signal: "abortSignal" in context ? context.abortSignal : undefined,
 		});
 	} catch (e) {
 		console.log("Fetch error", e);
