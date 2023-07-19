@@ -35,11 +35,16 @@ export const useAccounts = () => {
 	const [retryCount, setRetryCount] = useState(0);
 
 	const sel = getSecureItem("selected");
-	let [selected, setSelected] = useState<number | null>(
+	let [selected, _setSelected] = useState<number | null>(
 		sel ? parseInt(sel) : accounts.length > 0 ? 0 : null,
 	);
 	if (selected === null && accounts.length > 0) selected = 0;
 	if (accounts.length === 0) selected = null;
+
+	const setSelected = (selected: number) => {
+		_setSelected(selected);
+		setSecureItem("selected", selected.toString());
+	};
 
 	useEffect(() => {
 		async function check() {
@@ -65,7 +70,10 @@ export const useAccounts = () => {
 	if (verified.status === "error") {
 		return {
 			type: "error",
+			accounts,
+			selected,
 			error: verified.error,
+			setSelected,
 			retry: () => {
 				setVerified({ status: "loading" });
 				setRetryCount((x) => x + 1);
@@ -76,10 +84,7 @@ export const useAccounts = () => {
 		type: "ok",
 		accounts,
 		selected,
-		setSelected: (selected: number) => {
-			setSelected(selected);
-			setSecureItem("selected", selected.toString());
-		},
+		setSelected,
 	} as const;
 };
 
