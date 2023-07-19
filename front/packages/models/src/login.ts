@@ -60,8 +60,11 @@ export const loginFunc = async (
 	action: "register" | "login" | "refresh",
 	body: { username: string; password: string; email?: string } | string,
 	apiUrl?: string,
+	timeout?: number,
 ): Promise<Result<Token, string>> => {
 	try {
+		const controller = timeout !== undefined ? new AbortController() : undefined;
+		if (controller) setTimeout(() => controller.abort(), timeout);
 		const token = await queryFn(
 			{
 				path: ["auth", action, typeof body === "string" && `?token=${body}`],
@@ -69,6 +72,7 @@ export const loginFunc = async (
 				body: typeof body === "object" ? body : undefined,
 				authenticated: false,
 				apiUrl,
+				abortSignal: controller?.signal,
 			},
 			TokenP,
 		);

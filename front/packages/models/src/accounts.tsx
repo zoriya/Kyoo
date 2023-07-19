@@ -46,7 +46,7 @@ export const useAccounts = () => {
 			setVerified({status: "loading"});
 			const selAcc = accounts![selected!];
 			setApiUrl(selAcc.apiUrl);
-			const verif = await loginFunc("refresh", selAcc.refresh_token);
+			const verif = await loginFunc("refresh", selAcc.refresh_token, undefined, 5_000);
 			setVerified(verif.ok ? { status: "ok" } : { status: "error", error: verif.error });
 		}
 
