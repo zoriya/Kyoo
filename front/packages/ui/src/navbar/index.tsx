@@ -132,7 +132,7 @@ export const NavbarProfile = () => {
 							label={`${x.username} - ${getDisplayUrl(x.apiUrl)}`}
 							left={<Avatar placeholder={x.username} />}
 							selected={selected === i}
-							onSelect={() => setSelected(i)}
+							onSelect={() => setSelected!(i)}
 						/>
 					))}
 					{accounts && accounts.length > 0 && <HR />}

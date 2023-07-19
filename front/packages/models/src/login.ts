@@ -45,6 +45,7 @@ const addAccount = (token: Token, apiUrl: string, username: string | null) => {
 	if (accounts.find((x) => x.username === username && x.apiUrl === apiUrl)) return;
 	accounts.push({ ...token, username: username!, apiUrl });
 	setSecureItem("accounts", JSON.stringify(accounts));
+	setSecureItem("selected", (accounts.length - 1).toString());
 };
 
 const setCurrentAccountToken = (token: Token) => {

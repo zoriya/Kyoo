@@ -37,10 +37,7 @@ import { useEffect, useState } from "react";
 import { useColorScheme } from "react-native";
 import { initReactI18next } from "react-i18next";
 import { useTheme } from "yoshiki/native";
-import { Button, CircularProgress, H1, P, ts } from "@kyoo/primitives";
-import { useTranslation } from "react-i18next";
-import { View } from "react-native";
-import { useYoshiki } from "yoshiki/native";
+import { CircularProgress } from "@kyoo/primitives";
 import { useRouter } from "solito/router";
 import "intl-pluralrules";
 
@@ -60,24 +57,15 @@ i18next.use(initReactI18next).init({
 	},
 });
 
-export const ConnectionError = ({ error, retry }: { error?: string; retry: () => void }) => {
-	const { css } = useYoshiki();
-	const { t } = useTranslation();
+export const ConnectionError = () => {
 	const router = useRouter();
 
-	return (
-		<View {...css({ padding: ts(2) })}>
-			<H1 {...css({ textAlign: "center" })}>{t("errors.connection")}</H1>
-			<P>{error ?? t("error.unknown")}</P>
-			<P>{t("errors.connection-tips")}</P>
-			<Button onPress={retry} text={t("errors.try-again")} {...css({ m: ts(1) })} />
-			<Button
-				onPress={() => router.push("/login")}
-				text={t("errors.re-login")}
-				{...css({ m: ts(1) })}
-			/>
-		</View>
-	);
+	useEffect(() => {
+		router.replace("/connection-error", undefined, {
+			experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
+		});
+	}, [router]);
+	return null;
 };
 
 const ThemedStack = ({ onLayout }: { onLayout?: () => void }) => {
@@ -135,14 +123,9 @@ export default function Root() {
 					}}
 				>
 					<PortalProvider>
-						{info.type === "loading" && <CircularProgress />}
-						{info.type === "error" && <ConnectionError error={info.error} retry={info.retry} />}
-						{info.type === "ok" && (
-							<>
-								<ThemedStack />
-								<AuthGuard selected={info.selected} />
-							</>
-						)}
+						{info.type === "loading" ? <CircularProgress /> : <ThemedStack />}
+						{info.type === "error" && <ConnectionError />}
+						{info.type === "ok" && <AuthGuard selected={info.selected} />}
 					</PortalProvider>
 				</ThemeSelector>
 			</QueryClientProvider>
