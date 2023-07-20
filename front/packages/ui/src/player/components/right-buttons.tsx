@@ -20,8 +20,7 @@
 
 import { Font, Track, WatchItem } from "@kyoo/models";
 import { IconButton, tooltip, Menu, ts } from "@kyoo/primitives";
-import { useAtom, useSetAtom } from "jotai";
-import { useEffect, useState } from "react";
+import { useAtom } from "jotai";
 import { Platform, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import ClosedCaption from "@material-symbols/svg-400/rounded/closed_caption-fill.svg";
@@ -50,16 +49,7 @@ export const RightButtons = ({
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
 	const [isFullscreen, setFullscreen] = useAtom(fullscreenAtom);
-	const setSubAtom = useSetAtom(subtitleAtom);
-	const [selectedSubtitle, setSubtitle] = useState<string | undefined>(undefined);
-
-	useEffect(() => {
-		const sub =
-			subtitles?.find(
-				(x) => x.language === selectedSubtitle || x.id.toString() === selectedSubtitle,
-			) ?? null;
-		setSubAtom(sub);
-	}, [subtitles, selectedSubtitle, setSubAtom]);
+	const [selectedSubtitle, setSubtitle] = useAtom(subtitleAtom);
 
 	const spacing = css({ marginHorizontal: ts(1) });
 
@@ -77,14 +67,14 @@ export const RightButtons = ({
 					<Menu.Item
 						label={t("player.subtitle-none")}
 						selected={!selectedSubtitle}
-						onSelect={() => setSubtitle(undefined)}
+						onSelect={() => setSubtitle(null)}
 					/>
 					{subtitles.map((x) => (
 						<Menu.Item
 							key={x.id}
 							label={x.displayName}
-							selected={selectedSubtitle === x.language || selectedSubtitle === x.id.toString()}
-							onSelect={() => setSubtitle(x.language ?? x.id.toString())}
+							selected={selectedSubtitle === x}
+							onSelect={() => setSubtitle(x)}
 						/>
 					))}
 				</Menu>

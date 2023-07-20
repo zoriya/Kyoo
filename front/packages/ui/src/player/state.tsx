@@ -110,6 +110,14 @@ export const Video = memo(function _Video({
 		setPlay(true);
 	}, [mode, links, setLoad, setPrivateProgress, setPublicProgress, setPlay]);
 
+	const [subtitle, setSubtitle] = useAtom(subtitleAtom);
+	useEffect(() => {
+		if (!subtitle || !subtitles) return;
+		setSubtitle(subtitles.find(x => x.language === subtitle.language) ?? null);
+	// When the video change, try to persist the subtitle language.
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [subtitles]);
+
 	const volume = useAtomValue(volumeAtom);
 	const isMuted = useAtomValue(mutedAtom);
 
