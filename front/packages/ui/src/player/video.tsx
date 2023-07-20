@@ -153,7 +153,7 @@ export const QualitiesMenu = (props: CustomMenu) => {
 			<Menu.Item
 				// TODO: Display the currently selected quality (impossible with rn-video right now)
 				label={t("player.auto")}
-				selected={video === -1}
+				selected={video === -1 && mode == PlayMode.Hls}
 				onSelect={() => {
 					setPlayMode(PlayMode.Hls);
 					setVideo(-1);
