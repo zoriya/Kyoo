@@ -220,8 +220,10 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 						if (e.nativeEvent.pointerType === "mouse") setHover(false);
 					}}
 					onPointerDown={(e) => {
-						if (!displayControls) onPointerDown(e);
-						if (Platform.OS === "web") e.preventDefault();
+						if (!displayControls) {
+							onPointerDown(e);
+							if (Platform.OS === "web") e.preventDefault();
+						}
 					}}
 					onMenuOpen={() => setMenuOpen(true)}
 					onMenuClose={() => {

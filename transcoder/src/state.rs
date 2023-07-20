@@ -39,7 +39,10 @@ impl Transcoder {
 			// TODO: Find codecs in the RFC 6381 format.
 			// master.push_str("CODECS=\"avc1.640028\",");
 			// TODO: With multiple audio qualities, maybe switch qualities depending on the video quality.
-			master.push_str("AUDIO=\"audio\"\n");
+			master.push_str("AUDIO=\"audio\",");
+			// Not adding this attribute result in some players (like android's exoplayer) to
+			// assume a non existant closed caption exist
+			master.push_str("CLOSED-CAPTIONS=NONE\n");
 			master.push_str(format!("./{}/index.m3u8\n", Quality::Original).as_str());
 		}
 
@@ -61,7 +64,10 @@ impl Transcoder {
 			);
 			master.push_str("CODECS=\"avc1.640028\",");
 			// TODO: With multiple audio qualities, maybe switch qualities depending on the video quality.
-			master.push_str("AUDIO=\"audio\"\n");
+			master.push_str("AUDIO=\"audio\",");
+			// Not adding this attribute result in some players (like android's exoplayer) to
+			// assume a non existant closed caption exist
+			master.push_str("CLOSED-CAPTIONS=NONE\n");
 			master.push_str(format!("./{}/index.m3u8\n", quality).as_str());
 		}
 		for audio in info.audios {
@@ -85,23 +91,6 @@ impl Transcoder {
 			// master.push_str(format!("CHANNELS=\"{}\",", 2).as_str());
 			master.push_str("DEFAULT=YES,");
 			master.push_str(format!("URI=\"./audio/{}/index.m3u8\"\n", audio.index).as_str());
-		}
-
-		for subtitle in info.subtitles {
-			master.push_str("#EXT-X-MEDIA:TYPE=SUBTITLES,");
-			master.push_str("GROUP-ID=\"subtitles\",");
-			if let Some(language) = subtitle.language.clone() {
-				master.push_str(format!("LANGUAGE=\"{}\",", language).as_str());
-			}
-			if let Some(title) = subtitle.title {
-				master.push_str(format!("NAME=\"{}\",", title).as_str());
-			} else if let Some(language) = subtitle.language {
-				master.push_str(format!("NAME=\"{}\",", language).as_str());
-			} else {
-				master.push_str(format!("NAME=\"Subtitle {}\",", subtitle.index).as_str());
-			}
-			master.push_str("URI=\"https://kyoo.sdg.moe/api/subtitle/akudama-drive-s1e1.eng.subtitle\"\n");
-			// master.push_str(format!("URI=\"./subtitles/{}/index.m3u8\"\n", subtitle.index).as_str());
 		}
 
 		Some(master)

@@ -123,8 +123,6 @@ export const Video = memo(function _Video({
 		return () => document.removeEventListener("fullscreenchange", handler);
 	});
 
-	const subtitle = useAtomValue(subtitleAtom);
-
 	if (!source || !links) return null;
 	return (
 		<NativeVideo
@@ -151,25 +149,11 @@ export const Video = memo(function _Video({
 				setDuration(info.duration);
 			}}
 			onPlayPause={setPlay}
-			textTracks={subtitles?.map(x => ({
-				type: "text/x-ssa" as any, //MimeTypes[x.codec],
-				uri: x.link!,
-				title: x.title!,
-				language: x.language!,
-			}))}
-			selectedTextTrack={
-				subtitle
-					? {
-							type: "index",
-							value: subtitle.trackIndex,
-					  }
-					: { type: "disabled" }
-			}
 			fonts={fonts}
+			subtitles={subtitles}
 			onMediaUnsupported={() => {
 				if (mode == PlayMode.Direct) setPlayMode(PlayMode.Hls);
 			}}
-			// TODO: textTracks: external subtitles
 		/>
 	);
 });
