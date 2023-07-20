@@ -107,7 +107,6 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 		ref.current.volume = Math.max(0, Math.min(volume, 100)) / 100;
 	}, [volume]);
 
-	// This should use the selectedTextTrack prop instead of the atom but this is so much simpler
 	const subtitle = useAtomValue(subtitleAtom);
 	useSubtitle(ref, subtitle, fonts);
 

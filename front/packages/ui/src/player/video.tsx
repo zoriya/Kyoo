@@ -26,21 +26,28 @@ declare module "react-native-video" {
 	}
 	export type VideoProps = Omit<VideoProperties, "source"> & {
 		source: { uri: string; hls: string };
+		subtitles?: WatchItem["subtitles"];
 	};
 }
 
 export * from "react-native-video";
 
-import { Font, getToken } from "@kyoo/models";
+import { Font, getToken, WatchItem } from "@kyoo/models";
 import { IconButton, Menu } from "@kyoo/primitives";
 import { ComponentProps, forwardRef, useEffect, useRef } from "react";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import NativeVideo, { OnLoadData, VideoProps } from "react-native-video";
 import { useTranslation } from "react-i18next";
-import { PlayMode, playModeAtom } from "./state";
+import { PlayMode, playModeAtom, subtitleAtom } from "./state";
 import uuid from "react-native-uuid";
 import { Pressable } from "react-native";
 import { useYoshiki } from "yoshiki/native";
+
+const MimeTypes: Map<string, string> = new Map([
+	["subrip", "application/x-subrip"],
+	["ass", "text/x-ssa"],
+	["vtt", "text/vtt"],
+]);
 
 const infoAtom = atom<OnLoadData | null>(null);
 const videoAtom = atom(0);
@@ -49,7 +56,7 @@ const audioAtom = atom(0);
 const clientId = uuid.v4() as string;
 
 const Video = forwardRef<NativeVideo, VideoProps>(function _NativeVideo(
-	{ onLoad, source, onPointerDown, ...props },
+	{ onLoad, source, onPointerDown, subtitles, ...props },
 	ref,
 ) {
 	const { css } = useYoshiki();
@@ -57,9 +64,7 @@ const Video = forwardRef<NativeVideo, VideoProps>(function _NativeVideo(
 	const setInfo = useSetAtom(infoAtom);
 	const video = useAtomValue(videoAtom);
 	const audio = useAtomValue(audioAtom);
-
-	const info = useAtomValue(infoAtom);
-	console.log(info);
+	const subtitle = useAtomValue(subtitleAtom);
 
 	useEffect(() => {
 		async function run() {
@@ -73,7 +78,7 @@ const Video = forwardRef<NativeVideo, VideoProps>(function _NativeVideo(
 			focusable={false}
 			onPress={() => onPointerDown?.({ nativeEvent: { pointerType: "pointer" } } as any)}
 			{...css({ flexGrow: 1, flexShrink: 1 })}
-			>
+		>
 			<NativeVideo
 				ref={ref}
 				source={{
@@ -81,7 +86,7 @@ const Video = forwardRef<NativeVideo, VideoProps>(function _NativeVideo(
 					headers: {
 						Authorization: `Bearer: ${token.current}`,
 						"X-CLIENT-ID": clientId,
-					}
+					},
 				}}
 				onLoad={(info) => {
 					setInfo(info);
@@ -89,8 +94,23 @@ const Video = forwardRef<NativeVideo, VideoProps>(function _NativeVideo(
 				}}
 				selectedVideoTrack={video === -1 ? { type: "auto" } : { type: "resolution", value: video }}
 				selectedAudioTrack={{ type: "index", value: audio }}
+				textTracks={subtitles?.map((x) => ({
+					type: MimeTypes.get(x.codec) as any,
+					uri: x.link!,
+					title: x.title ?? "Unknown",
+					language: x.language ?? "Unknown",
+				}))}
+				selectedTextTrack={
+					subtitle
+						? {
+								type: "index",
+								value: subtitles?.indexOf(subtitle),
+						  }
+						: { type: "disabled" }
+				}
 				{...props}
-			/></Pressable>
+			/>
+		</Pressable>
 	);
 });
 
