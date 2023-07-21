@@ -20,7 +20,15 @@
 
 import { Portal } from "@gorhom/portal";
 import { ScrollView } from "moti";
-import { ComponentType, createContext, ReactElement, ReactNode, useContext, useEffect, useState } from "react";
+import {
+	ComponentType,
+	createContext,
+	ReactElement,
+	ReactNode,
+	useContext,
+	useEffect,
+	useState,
+} from "react";
 import { StyleSheet, Pressable } from "react-native";
 import { percent, px, sm, useYoshiki, xl } from "yoshiki/native";
 import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
@@ -56,7 +64,7 @@ const Menu = <AsProps,>({
 
 	return (
 		<>
-			<Trigger onPress={() => setOpen(true)} {...props as any} />
+			<Trigger onPress={() => setOpen(true)} {...(props as any)} />
 			{isOpen && (
 				<Portal>
 					<ContrastArea mode="user">
@@ -129,7 +137,14 @@ const MenuItem = ({
 	const setOpen = useContext(MenuContext);
 	const router = useRouter();
 
-	const icn = (icon || selected) && <Icon icon={icon ?? Check} color={theme.paragraph} size={24} {...css({ paddingLeft: icon ? ts(2) : 0 })}/>;
+	const icn = (icon || selected) && (
+		<Icon
+			icon={icon ?? Check}
+			color={theme.paragraph}
+			size={24}
+			{...css({ paddingLeft: icon ? ts(2) : 0 })}
+		/>
+	);
 
 	return (
 		<PressableFeedback
@@ -151,7 +166,9 @@ const MenuItem = ({
 		>
 			{left && left}
 			{!left && icn && icn}
-			<P {...css({ paddingLeft: ts(2) + +!(icon || selected || left) * px(24), flexGrow: 1 })}>{label}</P>
+			<P {...css({ paddingLeft: ts(2) + +!(icon || selected || left) * px(24), flexGrow: 1 })}>
+				{label}
+			</P>
 			{left && icn && icn}
 		</PressableFeedback>
 	);

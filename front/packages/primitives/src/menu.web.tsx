@@ -23,7 +23,7 @@ import { ComponentProps, ComponentType, forwardRef, ReactElement, ReactNode } fr
 import Link from "next/link";
 import { PressableProps } from "react-native";
 import { useYoshiki } from "yoshiki/web";
-import { px, useYoshiki as useNativeYoshiki } from "yoshiki/native";
+import { px, useYoshiki as useNativeYoshiki, calc } from "yoshiki/native";
 import { P } from "./text";
 import { ContrastArea, SwitchVariant } from "./themes";
 import { Icon } from "./icons";
@@ -133,6 +133,15 @@ const MenuItem = ({
 	const { css: nCss } = useNativeYoshiki();
 	const { css, theme } = useYoshiki();
 
+	const icn = (icon || selected) && (
+		<Icon
+			icon={icon ?? Dot}
+			color={theme.paragraph}
+			size={ts(icon ? 2 : 1)}
+			{...nCss({ paddingRight: ts(1) })}
+		/>
+	);
+
 	return (
 		<>
 			<style jsx global>{`
@@ -155,15 +164,18 @@ const MenuItem = ({
 				)}
 			>
 				{left && left}
-				{(icon || selected) && (
-					<Icon
-						icon={icon ?? Dot}
-						color={theme.paragraph}
-						size={ts(icon ? 2 : 1)}
-						{...nCss({ paddingRight: ts(1) })}
-					/>
-				)}
-				{<P {...nCss(!(icon || selected || left) && { paddingLeft: ts(1) })}>{label}</P>}
+				{!left && icn && icn}
+				{
+					<P
+						{...nCss({
+							paddingLeft: ts((icon || selected || left) ? 0 : 2 + +!!icon),
+							flexGrow: 1,
+						})}
+					>
+						{label}
+					</P>
+				}
+				{left && icn && icn}
 			</Item>
 		</>
 	);
