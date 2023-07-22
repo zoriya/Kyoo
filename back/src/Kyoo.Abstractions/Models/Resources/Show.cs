@@ -88,7 +88,7 @@ namespace Kyoo.Abstractions.Models
 		public bool IsMovie { get; set; }
 
 		/// <inheritdoc />
-		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
+		[EditableRelation][LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
 
 		/// <summary>
 		/// The ID of the Studio that made this show.
@@ -99,17 +99,17 @@ namespace Kyoo.Abstractions.Models
 		/// The Studio that made this show.
 		/// This must be explicitly loaded via a call to <see cref="ILibraryManager.Load"/>.
 		/// </summary>
-		[LoadableRelation(nameof(StudioID))] [EditableRelation] public Studio Studio { get; set; }
+		[LoadableRelation(nameof(StudioID))][EditableRelation] public Studio Studio { get; set; }
 
 		/// <summary>
 		/// The list of genres (themes) this show has.
 		/// </summary>
-		[LoadableRelation] [EditableRelation] public ICollection<Genre> Genres { get; set; }
+		[LoadableRelation][EditableRelation] public ICollection<Genre> Genres { get; set; }
 
 		/// <summary>
 		/// The list of people that made this show.
 		/// </summary>
-		[LoadableRelation] [EditableRelation] public ICollection<PeopleRole> People { get; set; }
+		[LoadableRelation][EditableRelation] public ICollection<PeopleRole> People { get; set; }
 
 		/// <summary>
 		/// The different seasons in this show. If this is a movie, this list is always null or empty.

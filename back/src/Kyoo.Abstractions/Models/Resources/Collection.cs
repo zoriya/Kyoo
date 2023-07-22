@@ -57,6 +57,6 @@ namespace Kyoo.Abstractions.Models
 		[LoadableRelation] public ICollection<Library> Libraries { get; set; }
 
 		/// <inheritdoc />
-		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
+		[EditableRelation][LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
 	}
 }
