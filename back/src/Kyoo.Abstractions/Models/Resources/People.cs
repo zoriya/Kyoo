@@ -41,11 +41,11 @@ namespace Kyoo.Abstractions.Models
 		public Dictionary<int, string> Images { get; set; }
 
 		/// <inheritdoc />
-		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
+		[EditableRelation][LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
 
 		/// <summary>
 		/// The list of roles this person has played in. See <see cref="PeopleRole"/> for more information.
 		/// </summary>
-		[EditableRelation] [LoadableRelation] public ICollection<PeopleRole> Roles { get; set; }
+		[EditableRelation][LoadableRelation] public ICollection<PeopleRole> Roles { get; set; }
 	}
 }

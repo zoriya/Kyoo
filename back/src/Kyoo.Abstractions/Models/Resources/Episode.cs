@@ -146,12 +146,12 @@ namespace Kyoo.Abstractions.Models
 		public DateTime? ReleaseDate { get; set; }
 
 		/// <inheritdoc />
-		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
+		[EditableRelation][LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
 
 		/// <summary>
 		/// The list of tracks this episode has. This lists video, audio and subtitles available.
 		/// </summary>
-		[EditableRelation] [LoadableRelation] public ICollection<Track> Tracks { get; set; }
+		[EditableRelation][LoadableRelation] public ICollection<Track> Tracks { get; set; }
 
 		/// <summary>
 		/// Get the slug of an episode.

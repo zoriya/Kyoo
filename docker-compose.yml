@@ -58,7 +58,7 @@ services:
       - "8901:8901"
 
   postgres:
-    image: postgres
+    image: postgres:15
     restart: on-failure
     env_file:
       - ./.env

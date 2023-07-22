@@ -102,7 +102,7 @@ namespace Kyoo.Abstractions.Models
 		public Dictionary<int, string> Images { get; set; }
 
 		/// <inheritdoc />
-		[EditableRelation] [LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
+		[EditableRelation][LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
 
 		/// <summary>
 		/// The list of episodes that this season contains.

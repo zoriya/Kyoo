@@ -1,19 +1,33 @@
+// Kyoo - A portable and vast media library solution.
+// Copyright (c) Kyoo.
+//
+// See AUTHORS.md and LICENSE file in the project root for full license information.
+//
+// Kyoo is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// any later version.
+//
+// Kyoo is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
+
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Kyoo.Postgresql.Migrations
 {
+	/// <summary>
+	/// Remove triggers
+	/// </summary>
 	public partial class RemoveTrigers : Migration
 	{
+		/// <inheritdoc/>
 		protected override void Up(MigrationBuilder migrationBuilder)
 		{
-			migrationBuilder.AlterDatabase()
-				.Annotation("Npgsql:Enum:item_type", "show,movie,collection")
-				.Annotation("Npgsql:Enum:status", "unknown,finished,airing,planned")
-				.Annotation("Npgsql:Enum:stream_type", "unknown,video,audio,subtitle")
-				.OldAnnotation("Npgsql:Enum:item_type", "show,movie,collection")
-				.OldAnnotation("Npgsql:Enum:status", "unknown,finished,airing,planned")
-				.OldAnnotation("Npgsql:Enum:stream_type", "unknown,video,audio,subtitle,attachment");
-
 			// language=PostgreSQL
 			migrationBuilder.Sql("DROP TRIGGER show_slug_trigger ON shows;");
 			// language=PostgreSQL
@@ -36,15 +50,9 @@ namespace Kyoo.Postgresql.Migrations
 			migrationBuilder.Sql(@"DROP FUNCTION episode_update_tracks_slug;");
 		}
 
+		/// <inheritdoc/>
 		protected override void Down(MigrationBuilder migrationBuilder)
 		{
-			migrationBuilder.AlterDatabase()
-				.Annotation("Npgsql:Enum:item_type", "show,movie,collection")
-				.Annotation("Npgsql:Enum:status", "unknown,finished,airing,planned")
-				.Annotation("Npgsql:Enum:stream_type", "unknown,video,audio,subtitle,attachment")
-				.OldAnnotation("Npgsql:Enum:item_type", "show,movie,collection")
-				.OldAnnotation("Npgsql:Enum:status", "unknown,finished,airing,planned")
-				.OldAnnotation("Npgsql:Enum:stream_type", "unknown,video,audio,subtitle");
 		}
 	}
 }

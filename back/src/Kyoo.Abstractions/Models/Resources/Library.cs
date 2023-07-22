@@ -45,7 +45,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The list of <see cref="Provider"/> used for items in this library.
 		/// </summary>
-		[EditableRelation] [LoadableRelation] public ICollection<Provider> Providers { get; set; }
+		[EditableRelation][LoadableRelation] public ICollection<Provider> Providers { get; set; }
 
 		/// <summary>
 		/// The list of shows in this library.

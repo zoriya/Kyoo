@@ -45,11 +45,11 @@ namespace Kyoo.Tests.Database
 			PeopleRepository people = new(_NewContext(), provider,
 				new Lazy<IShowRepository>(() => LibraryManager.ShowRepository));
 			ShowRepository show = new(_NewContext(), studio, people, genre, provider);
-			SeasonRepository season = new(_NewContext(), provider);
+			SeasonRepository season = new(_NewContext(), show, provider);
 			LibraryItemRepository libraryItem = new(_NewContext(),
 				new Lazy<ILibraryRepository>(() => LibraryManager.LibraryRepository));
 			TrackRepository track = new(_NewContext());
-			EpisodeRepository episode = new(_NewContext(), provider, track);
+			EpisodeRepository episode = new(_NewContext(), show, provider, track);
 			UserRepository user = new(_NewContext());
 
 			LibraryManager = new LibraryManager(new IBaseRepository[] {
