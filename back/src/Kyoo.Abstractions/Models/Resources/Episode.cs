@@ -80,7 +80,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The slug of the Show that contain this episode. If this is not set, this episode is ill-formed.
 		/// </summary>
-		[SerializeIgnore] public string ShowSlug { private get; set; }
+		[SerializeIgnore] public string ShowSlug { get; set; }
 
 		/// <summary>
 		/// The ID of the Show containing this episode.
