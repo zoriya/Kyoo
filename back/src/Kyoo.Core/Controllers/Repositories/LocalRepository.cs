@@ -350,7 +350,7 @@ namespace Kyoo.Core.Controllers
 		/// <param name="obj">The resource newly created.</param>
 		protected void OnResourceCreated(T obj)
 		{
-			OnCreated.Invoke(obj);
+			OnCreated?.Invoke(obj);
 		}
 
 		/// <inheritdoc/>
@@ -390,7 +390,7 @@ namespace Kyoo.Core.Controllers
 				Merger.Complete(old, edited, x => x.GetCustomAttribute<LoadableRelationAttribute>() == null);
 				await EditRelations(old, edited, resetOld);
 				await Database.SaveChangesAsync();
-				OnEdited.Invoke(old);
+				OnEdited?.Invoke(old);
 				return old;
 			}
 			finally
@@ -469,7 +469,7 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc/>
 		public virtual Task Delete(T obj)
 		{
-			OnDeleted.Invoke(obj);
+			OnDeleted?.Invoke(obj);
 			return Task.CompletedTask;
 		}
 

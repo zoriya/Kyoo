@@ -78,7 +78,11 @@ namespace Kyoo.Core.Controllers
 			shows.OnEdited += async (show) =>
 			{
 				foreach (Episode ep in _database.Episodes.Where(x => x.ShowID == show.ID))
+				{
+					Console.WriteLine("BFR ID: {0}; Slug: {1}; ShowSlug: {2}", ep.ID, ep.Slug, ep.ShowSlug);
 					ep.ShowSlug = show.Slug;
+					Console.WriteLine("AFT ID: {0}; Slug: {1}; ShowSlug: {2}", ep.ID, ep.Slug, ep.ShowSlug);
+				}
 				await _database.SaveChangesAsync();
 			};
 		}
