@@ -305,6 +305,9 @@ namespace Kyoo.Postgresql
 			modelBuilder.Entity<People>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<Provider>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<Show>().Property(x => x.Slug).IsRequired();
+			modelBuilder.Entity<Season>().Property(x => x.Slug).IsRequired();
+			modelBuilder.Entity<Episode>().Property(x => x.Slug).IsRequired();
+			modelBuilder.Entity<Track>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<Studio>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<User>().Property(x => x.Slug).IsRequired();
 
@@ -350,16 +353,6 @@ namespace Kyoo.Postgresql
 			modelBuilder.Entity<User>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
-
-			modelBuilder.Entity<Season>()
-				.Property(x => x.Slug)
-				.ValueGeneratedOnAddOrUpdate();
-			modelBuilder.Entity<Episode>()
-				.Property(x => x.Slug)
-				.ValueGeneratedOnAddOrUpdate();
-			modelBuilder.Entity<Track>()
-				.Property(x => x.Slug)
-				.ValueGeneratedOnAddOrUpdate();
 		}
 
 		/// <summary>

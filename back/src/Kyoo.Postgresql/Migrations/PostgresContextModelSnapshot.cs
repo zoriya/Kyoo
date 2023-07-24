@@ -104,7 +104,7 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnName("show_id");
 
                     b.Property<string>("Slug")
-                        .ValueGeneratedOnAddOrUpdate()
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("slug");
 
@@ -359,7 +359,7 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnName("show_id");
 
                     b.Property<string>("Slug")
-                        .ValueGeneratedOnAddOrUpdate()
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("slug");
 
@@ -515,7 +515,7 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnName("path");
 
                     b.Property<string>("Slug")
-                        .ValueGeneratedOnAddOrUpdate()
+                        .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("slug");
 

@@ -23,11 +23,41 @@ namespace Kyoo.Postgresql.Migrations
 	/// <summary>
 	/// Remove triggers
 	/// </summary>
-	public partial class RemoveTrigers : Migration
+	public partial class RemoveTriggers : Migration
 	{
 		/// <inheritdoc/>
 		protected override void Up(MigrationBuilder migrationBuilder)
 		{
+			migrationBuilder.AlterColumn<string>(
+				name: "slug",
+				table: "tracks",
+				type: "text",
+				nullable: false,
+				defaultValue: string.Empty,
+				oldClrType: typeof(string),
+				oldType: "text",
+				oldNullable: true);
+
+			migrationBuilder.AlterColumn<string>(
+				name: "slug",
+				table: "seasons",
+				type: "text",
+				nullable: false,
+				defaultValue: string.Empty,
+				oldClrType: typeof(string),
+				oldType: "text",
+				oldNullable: true);
+
+			migrationBuilder.AlterColumn<string>(
+				name: "slug",
+				table: "episodes",
+				type: "text",
+				nullable: false,
+				defaultValue: string.Empty,
+				oldClrType: typeof(string),
+				oldType: "text",
+				oldNullable: true);
+
 			// language=PostgreSQL
 			migrationBuilder.Sql("DROP TRIGGER show_slug_trigger ON shows;");
 			// language=PostgreSQL
@@ -53,6 +83,29 @@ namespace Kyoo.Postgresql.Migrations
 		/// <inheritdoc/>
 		protected override void Down(MigrationBuilder migrationBuilder)
 		{
+			migrationBuilder.AlterColumn<string>(
+				name: "slug",
+				table: "tracks",
+				type: "text",
+				nullable: true,
+				oldClrType: typeof(string),
+				oldType: "text");
+
+			migrationBuilder.AlterColumn<string>(
+				name: "slug",
+				table: "seasons",
+				type: "text",
+				nullable: true,
+				oldClrType: typeof(string),
+				oldType: "text");
+
+			migrationBuilder.AlterColumn<string>(
+				name: "slug",
+				table: "episodes",
+				type: "text",
+				nullable: true,
+				oldClrType: typeof(string),
+				oldType: "text");
 		}
 	}
 }

@@ -38,7 +38,7 @@ jobs:
         dotnet test --no-build '-p:CollectCoverage=true;CoverletOutputFormat=opencover' --logger "trx;LogFileName=TestOutputResults.xml"
       env:
         POSTGRES_HOST: postgres
-        POSTGRES_USERNAME: postgres
+        POSTGRES_USER: postgres
         POSTGRES_PASSWORD: postgres
 
     - name: Sanitize coverage output

@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
@@ -43,10 +44,23 @@ namespace Kyoo.Core.Controllers
 		/// Create a new <see cref="TrackRepository"/>.
 		/// </summary>
 		/// <param name="database">The database handle</param>
-		public TrackRepository(DatabaseContext database)
+		/// <param name="episodes">The episode repository</param>
+		public TrackRepository(DatabaseContext database, IEpisodeRepository episodes)
 			: base(database)
 		{
 			_database = database;
+
+			// Edit tracks slugs when the episodes's slug changes.
+			episodes.OnEdited += (ep) =>
+			{
+				List<Track> tracks = _database.Tracks.AsTracking().Where(x => x.EpisodeID == ep.ID).ToList();
+				foreach (Track track in tracks)
+				{
+					track.EpisodeSlug = ep.Slug;
+					_database.SaveChanges();
+					OnResourceEdited(track);
+				}
+			};
 		}
 
 		/// <inheritdoc />
