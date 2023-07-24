@@ -68,7 +68,7 @@ namespace Kyoo.Abstractions.Models
 			{
 				string type = Type.ToString().ToLowerInvariant();
 				string index = TrackIndex != 0 ? $"-{TrackIndex}" : string.Empty;
-				string episode = _episodeSlug ?? Episode?.Slug ?? EpisodeID.ToString(CultureInfo.InvariantCulture);
+				string episode = EpisodeSlug ?? Episode?.Slug ?? EpisodeID.ToString(CultureInfo.InvariantCulture);
 				return $"{episode}.{Language ?? "und"}{index}{(IsForced ? ".forced" : string.Empty)}.{type}";
 			}
 
@@ -88,7 +88,7 @@ namespace Kyoo.Abstractions.Models
 					);
 				}
 
-				_episodeSlug = match.Groups["ep"].Value;
+				EpisodeSlug = match.Groups["ep"].Value;
 				Language = match.Groups["lang"].Value;
 				if (Language == "und")
 					Language = null;
@@ -154,7 +154,7 @@ namespace Kyoo.Abstractions.Models
 			{
 				_episode = value;
 				if (_episode != null)
-					_episodeSlug = _episode.Slug;
+					EpisodeSlug = _episode.Slug;
 			}
 		}
 
@@ -190,7 +190,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The slug of the episode that contain this track. If this is not set, this track is ill-formed.
 		/// </summary>
-		[SerializeIgnore] private string _episodeSlug;
+		[SerializeIgnore] public string EpisodeSlug { private get; set; }
 
 		/// <summary>
 		/// The episode that uses this track.

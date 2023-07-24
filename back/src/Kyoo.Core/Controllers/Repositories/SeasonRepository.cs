@@ -61,11 +61,15 @@ namespace Kyoo.Core.Controllers
 			_providers = providers;
 
 			// Edit seasons slugs when the show's slug changes.
-			shows.OnEdited += async (show) =>
+			shows.OnEdited += (show) =>
 			{
-				foreach (Season season in _database.Seasons.Where(x => x.ShowID == show.ID))
+				List<Season> seasons = _database.Seasons.AsTracking().Where(x => x.ShowID == show.ID).ToList();
+				foreach (Season season in seasons)
+				{
 					season.ShowSlug = show.Slug;
-				await _database.SaveChangesAsync();
+					_database.SaveChanges();
+					OnResourceEdited(season);
+				}
 			};
 		}
 

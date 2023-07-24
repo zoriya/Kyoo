@@ -353,6 +353,15 @@ namespace Kyoo.Core.Controllers
 			OnCreated?.Invoke(obj);
 		}
 
+		/// <summary>
+		/// Callback that should be called after a resource has been edited.
+		/// </summary>
+		/// <param name="obj">The resource newly edited.</param>
+		protected void OnResourceEdited(T obj)
+		{
+			OnEdited?.Invoke(obj);
+		}
+
 		/// <inheritdoc/>
 		public virtual async Task<T> CreateIfNotExists(T obj)
 		{

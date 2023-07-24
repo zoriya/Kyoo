@@ -47,7 +47,7 @@ namespace Kyoo.Core.Controllers
 		/// <summary>
 		/// A track repository to handle creation and deletion of tracks related to the current episode.
 		/// </summary>
-		private readonly ITrackRepository _tracks;
+		private readonly Lazy<ITrackRepository> _tracks;
 
 		/// <inheritdoc />
 		// Use absolute numbers by default and fallback to season/episodes if it does not exists.
@@ -67,7 +67,7 @@ namespace Kyoo.Core.Controllers
 		public EpisodeRepository(DatabaseContext database,
 			IShowRepository shows,
 			IProviderRepository providers,
-			ITrackRepository tracks)
+			Lazy<ITrackRepository> tracks)
 			: base(database)
 		{
 			_database = database;
@@ -75,15 +75,15 @@ namespace Kyoo.Core.Controllers
 			_tracks = tracks;
 
 			// Edit episode slugs when the show's slug changes.
-			shows.OnEdited += async (show) =>
+			shows.OnEdited += (show) =>
 			{
-				foreach (Episode ep in _database.Episodes.Where(x => x.ShowID == show.ID))
+				List<Episode> episodes = _database.Episodes.AsTracking().Where(x => x.ShowID == show.ID).ToList();
+				foreach (Episode ep in episodes)
 				{
-					Console.WriteLine("BFR ID: {0}; Slug: {1}; ShowSlug: {2}", ep.ID, ep.Slug, ep.ShowSlug);
 					ep.ShowSlug = show.Slug;
-					Console.WriteLine("AFT ID: {0}; Slug: {1}; ShowSlug: {2}", ep.ID, ep.Slug, ep.ShowSlug);
+					_database.SaveChanges();
+					OnResourceEdited(ep);
 				}
-				await _database.SaveChangesAsync();
 			};
 		}
 
@@ -171,7 +171,7 @@ namespace Kyoo.Core.Controllers
 
 			if (changed.Tracks != null || resetOld)
 			{
-				await _tracks.DeleteAll(x => x.EpisodeID == resource.ID);
+				await _tracks.Value.DeleteAll(x => x.EpisodeID == resource.ID);
 				resource.Tracks = changed.Tracks;
 				await _ValidateTracks(resource);
 			}
@@ -196,7 +196,7 @@ namespace Kyoo.Core.Controllers
 			resource.Tracks = await resource.Tracks.SelectAsync(x =>
 			{
 				x.Episode = resource;
-				return _tracks.Create(x);
+				return _tracks.Value.Create(x);
 			}).ToListAsync();
 			_database.Tracks.AttachRange(resource.Tracks);
 			return resource;
@@ -235,7 +235,7 @@ namespace Kyoo.Core.Controllers
 				throw new ArgumentNullException(nameof(obj));
 
 			_database.Entry(obj).State = EntityState.Deleted;
-			await obj.Tracks.ForEachAsync(x => _tracks.Delete(x));
+			await obj.Tracks.ForEachAsync(x => _tracks.Value.Delete(x));
 			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Deleted);
 			await _database.SaveChangesAsync();
 			await base.Delete(obj);

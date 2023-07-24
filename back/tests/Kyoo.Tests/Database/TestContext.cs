@@ -104,7 +104,7 @@ namespace Kyoo.Tests
 		{
 			string server = Environment.GetEnvironmentVariable("POSTGRES_HOST") ?? "127.0.0.1";
 			string port = Environment.GetEnvironmentVariable("POSTGRES_PORT") ?? "5432";
-			string username = Environment.GetEnvironmentVariable("POSTGRES_USERNAME") ?? "kyoo";
+			string username = Environment.GetEnvironmentVariable("POSTGRES_USER") ?? "kyoo";
 			string password = Environment.GetEnvironmentVariable("POSTGRES_PASSWORD") ?? "kyooPassword";
 			return $"Server={server};Port={port};Database={database};User ID={username};Password={password};Include Error Detail=true";
 		}
