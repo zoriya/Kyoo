@@ -198,7 +198,7 @@ namespace Kyoo.Authentication
 			{
 				if (!context.HttpContext.Request.Headers.TryGetValue("X-API-Key", out StringValues apiKey))
 					return AuthenticateResult.NoResult();
-				if (!_options.ApiKeys.Contains<string>(apiKey))
+				if (!_options.ApiKeys.Contains<string>(apiKey!))
 					return AuthenticateResult.Fail("Invalid API-Key.");
 				return AuthenticateResult.Success(
 					new AuthenticationTicket(

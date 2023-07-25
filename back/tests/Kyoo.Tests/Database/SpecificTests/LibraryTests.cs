@@ -91,7 +91,7 @@ namespace Kyoo.Tests.Database
 			await _repository.Create(library);
 			Library retrieved = await _repository.Get(2);
 			await Repositories.LibraryManager.Load(retrieved, x => x.Providers);
-			Assert.Equal(1, retrieved.Providers.Count);
+			Assert.Single(retrieved.Providers);
 			Assert.Equal(TestSample.Get<Provider>().Slug, retrieved.Providers.First().Slug);
 		}
 
