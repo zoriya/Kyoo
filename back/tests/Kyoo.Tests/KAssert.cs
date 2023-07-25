@@ -45,7 +45,7 @@ namespace Kyoo.Tests
 		[AssertionMethod]
 		public static void Fail()
 		{
-			throw new XunitException();
+			throw new XunitException("Explicit fail");
 		}
 
 		/// <summary>
