@@ -414,7 +414,7 @@ namespace Kyoo.Tests.Utility
 			};
 			IDictionary<int, string> ret = Merger.CompleteDictionaries(first, second, out bool changed);
 			Assert.True(changed);
-			Assert.Equal(1, ret.Count);
+			Assert.Single(ret);
 			Assert.Equal("new-poster", ret[Images.Poster]);
 		}
 

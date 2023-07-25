@@ -10,8 +10,8 @@ in
       nodePackages.expo-cli
       (with dotnetCorePackages;
         combinePackages [
-          sdk_6_0
-          aspnetcore_6_0
+          sdk_7_0
+          aspnetcore_7_0
         ])
       python3
       python3Packages.pip
@@ -19,10 +19,10 @@ in
       cargo-watch
       rustfmt
       rustc
-	  pkgconfig
-	  openssl
-	  mediainfo
-	  ffmpeg
+      pkgconfig
+      openssl
+      mediainfo
+      ffmpeg
     ];
 
     RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";

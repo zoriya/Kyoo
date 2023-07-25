@@ -61,12 +61,12 @@ namespace Kyoo.Authentication
 		/// <inheritdoc />
 		public void Configure(IServiceCollection services)
 		{
-			string secret = _configuration.GetValue("AUTHENTICATION_SECRET", AuthenticationOption.DefaultSecret);
+			string secret = _configuration.GetValue("AUTHENTICATION_SECRET", AuthenticationOption.DefaultSecret)!;
 			PermissionOption permissions = new()
 			{
-				Default = _configuration.GetValue("UNLOGGED_PERMISSIONS", "overall.read").Split(','),
-				NewUser = _configuration.GetValue("DEFAULT_PERMISSIONS", "overall.read").Split(','),
-				ApiKeys = _configuration.GetValue("KYOO_APIKEYS", string.Empty).Split(','),
+				Default = _configuration.GetValue("UNLOGGED_PERMISSIONS", "overall.read")!.Split(','),
+				NewUser = _configuration.GetValue("DEFAULT_PERMISSIONS", "overall.read")!.Split(','),
+				ApiKeys = _configuration.GetValue("KYOO_APIKEYS", string.Empty)!.Split(','),
 			};
 			services.AddSingleton(permissions);
 			services.AddSingleton(new AuthenticationOption()

@@ -316,7 +316,7 @@ namespace Kyoo.Tests.Database
 				.ThenInclude(x => x.Provider)
 				.FirstAsync(x => x.ID == created.ID);
 			KAssert.DeepEqual(expected, retrieved);
-			Assert.Equal(1, retrieved.ExternalIDs.Count);
+			Assert.Single(retrieved.ExternalIDs);
 			Assert.Equal("ID", retrieved.ExternalIDs.First().DataID);
 		}
 
@@ -362,8 +362,8 @@ namespace Kyoo.Tests.Database
 			await Repositories.LibraryManager.Load(show, x => x.Seasons);
 			await Repositories.LibraryManager.Load(show, x => x.Episodes);
 			Assert.Equal(1, await _repository.GetCount());
-			Assert.Equal(1, show.Seasons.Count);
-			Assert.Equal(1, show.Episodes.Count);
+			Assert.Single(show.Seasons);
+			Assert.Single(show.Episodes);
 			await _repository.Delete(show);
 			Assert.Equal(0, await Repositories.LibraryManager.ShowRepository.GetCount());
 			Assert.Equal(0, await Repositories.LibraryManager.SeasonRepository.GetCount());

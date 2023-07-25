@@ -196,7 +196,7 @@ namespace Kyoo.Tests.Database
 		{
 			string slug = TestSample.Get<T>().Slug[2..4];
 			ICollection<T> ret = await _repository.GetAll(x => x.Slug.Contains(slug));
-			Assert.Equal(1, ret.Count);
+			Assert.Single(ret);
 			KAssert.DeepEqual(TestSample.Get<T>(), ret.First());
 		}
 
