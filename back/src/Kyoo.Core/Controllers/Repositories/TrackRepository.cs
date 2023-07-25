@@ -91,6 +91,7 @@ namespace Kyoo.Core.Controllers
 				throw new ArgumentNullException(nameof(obj));
 
 			await base.Create(obj);
+			obj.EpisodeSlug = _database.Episodes.First(x => x.ID == obj.EpisodeID).Slug;
 			_database.Entry(obj).State = EntityState.Added;
 			await _database.SaveChangesAsync();
 			OnResourceCreated(obj);

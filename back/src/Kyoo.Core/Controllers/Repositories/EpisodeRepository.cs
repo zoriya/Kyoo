@@ -155,6 +155,7 @@ namespace Kyoo.Core.Controllers
 		public override async Task<Episode> Create(Episode obj)
 		{
 			await base.Create(obj);
+			obj.ShowSlug = _database.Shows.First(x => x.ID == obj.ShowID).Slug;
 			_database.Entry(obj).State = EntityState.Added;
 			await _database.SaveChangesAsync(() =>
 				obj.SeasonNumber != null && obj.EpisodeNumber != null

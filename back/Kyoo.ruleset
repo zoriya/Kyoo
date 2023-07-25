@@ -36,9 +36,6 @@
 		<Rule Id="SA1642" Action="None" />        <!-- ConstructorSummaryDocumentationMustBeginWithStandardText -->
 		<Rule Id="SA1643" Action="None" />        <!-- DestructorSummaryDocumentationMustBeginWithStandardText -->
 		<Rule Id="SA1623" Action="None" />        <!-- PropertySummaryDocumentationMustMatchAccessors -->
-
-
-
-		<Rule Id="SA1629" Action="None" />        <!-- DocumentationTextMustEndWithAPeriod TODO remove this, this is only temporary -->
+		<Rule Id="SA1629" Action="None" />        <!-- DocumentationTextMustEndWithAPeriod -->
 	</Rules>
 </RuleSet>
