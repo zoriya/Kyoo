@@ -120,6 +120,7 @@ namespace Kyoo.Core.Controllers
 		public override async Task<Season> Create(Season obj)
 		{
 			await base.Create(obj);
+			obj.ShowSlug = _database.Shows.First(x => x.ID == obj.ShowID).Slug;
 			_database.Entry(obj).State = EntityState.Added;
 			await _database.SaveChangesAsync(() => Get(obj.ShowID, obj.SeasonNumber));
 			OnResourceCreated(obj);

@@ -9,10 +9,10 @@
 		<PackageLicenseExpression>GPL-3.0-or-later</PackageLicenseExpression>
 		<RequireLicenseAcceptance>true</RequireLicenseAcceptance>
 
-		<RepositoryUrl>https://github.com/AnonymusRaccoon/Kyoo</RepositoryUrl>
+		<RepositoryUrl>https://github.com/zoriya/Kyoo</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<PublishRepositoryUrl>true</PublishRepositoryUrl>
-		<PackageProjectUrl>https://github.com/AnonymusRaccoon/Kyoo</PackageProjectUrl>
+		<PackageProjectUrl>https://github.com/zoriya/Kyoo</PackageProjectUrl>
 
 		<PackageVersion>1.0.0</PackageVersion>
 		<IncludeSymbols>true</IncludeSymbols>
@@ -53,6 +53,7 @@
 
 	<PropertyGroup Condition="$(CheckCodingStyle) == true">
 		<CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)../Kyoo.ruleset</CodeAnalysisRuleSet>
+		<NoWarn>1591</NoWarn>
 		<!-- <AnalysisMode>All</AnalysisMode> -->
 	</PropertyGroup>
 </Project>
