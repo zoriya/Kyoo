@@ -157,23 +157,7 @@ namespace Kyoo.Postgresql.Migrations
 			BEFORE INSERT OR UPDATE OF episode_id, is_forced, language, track_index, type ON tracks
 			FOR EACH ROW EXECUTE PROCEDURE track_slug_update();");
 
-			// language=PostgreSQL
-			migrationBuilder.Sql(@"
-			CREATE VIEW library_items AS
-				SELECT s.id, s.slug, s.title, s.overview, s.status, s.start_air, s.end_air, s.images, CASE
-					WHEN s.is_movie THEN 'movie'::item_type
-					ELSE 'show'::item_type
-					END AS type
-				FROM shows AS s
-				WHERE NOT (EXISTS (
-					SELECT 1
-					FROM link_collection_show AS l
-					INNER JOIN collections AS c ON l.collection_id = c.id
-					WHERE s.id = l.show_id))
-				UNION ALL
-				SELECT -c0.id, c0.slug, c0.name AS title, c0.overview, 'unknown'::status AS status,
-				       NULL AS start_air, NULL AS end_air, c0.images, 'collection'::item_type AS type
-				FROM collections AS c0");
+			MigrationHelper.CreateLibraryItemsView(migrationBuilder);
 		}
 
 		/// <inheritdoc/>
@@ -199,8 +183,7 @@ namespace Kyoo.Postgresql.Migrations
 			migrationBuilder.Sql("DROP TRIGGER episode_track_slug_trigger ON episodes;");
 			// language=PostgreSQL
 			migrationBuilder.Sql(@"DROP FUNCTION episode_update_tracks_slug;");
-			// language=PostgreSQL
-			migrationBuilder.Sql(@"DROP VIEW library_items;");
+			MigrationHelper.DropLibraryItemsView(migrationBuilder);
 		}
 	}
 }

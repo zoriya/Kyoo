@@ -60,8 +60,8 @@ namespace Kyoo.Tests
 					Title = "New Show",
 					Overview = "overview",
 					Status = Status.Planned,
-					StartAir = new DateTime(2011, 1, 1),
-					EndAir = new DateTime(2011, 1, 1),
+					StartAir = new DateTime(2011, 1, 1).ToUniversalTime(),
+					EndAir = new DateTime(2011, 1, 1).ToUniversalTime(),
 					Images = new Dictionary<int, string>
 					{
 						[Images.Poster] = "Poster",
@@ -81,9 +81,9 @@ namespace Kyoo.Tests
 					ShowSlug = Get<Show>().Slug,
 					Title = "New season",
 					Overview = "New overview",
-					EndDate = new DateTime(2000, 10, 10),
+					EndDate = new DateTime(2000, 10, 10).ToUniversalTime(),
 					SeasonNumber = 2,
-					StartDate = new DateTime(2010, 10, 10),
+					StartDate = new DateTime(2010, 10, 10).ToUniversalTime(),
 					Images = new Dictionary<int, string>
 					{
 						[Images.Logo] = "logo"
@@ -103,7 +103,7 @@ namespace Kyoo.Tests
 					AbsoluteNumber = 4,
 					Path = "/episode-path",
 					Title = "New Episode Title",
-					ReleaseDate = new DateTime(2000, 10, 10),
+					ReleaseDate = new DateTime(2000, 10, 10).ToUniversalTime(),
 					Overview = "new episode overview",
 					Images = new Dictionary<int, string>
 					{
@@ -184,8 +184,8 @@ namespace Kyoo.Tests
 						"school students, they had long ceased to think of each other as friends.",
 					Status = Status.Finished,
 					StudioID = 1,
-					StartAir = new DateTime(2011, 1, 1),
-					EndAir = new DateTime(2011, 1, 1),
+					StartAir = new DateTime(2011, 1, 1).ToUniversalTime(),
+					EndAir = new DateTime(2011, 1, 1).ToUniversalTime(),
 					Images = new Dictionary<int, string>
 					{
 						[Images.Poster] = "Poster",
@@ -206,8 +206,8 @@ namespace Kyoo.Tests
 					SeasonNumber = 1,
 					Title = "Season 1",
 					Overview = "The first season",
-					StartDate = new DateTime(2020, 06, 05),
-					EndDate = new DateTime(2020, 07, 05),
+					StartDate = new DateTime(2020, 06, 05).ToUniversalTime(),
+					EndDate = new DateTime(2020, 07, 05).ToUniversalTime(),
 					Images = new Dictionary<int, string>
 					{
 						[Images.Poster] = "Poster",
@@ -236,7 +236,7 @@ namespace Kyoo.Tests
 					},
 					Title = "Episode 1",
 					Overview = "Summary of the first episode",
-					ReleaseDate = new DateTime(2020, 06, 05)
+					ReleaseDate = new DateTime(2020, 06, 05).ToUniversalTime()
 				}
 			},
 			{
@@ -415,7 +415,7 @@ namespace Kyoo.Tests
 				},
 				Title = "Episode 3",
 				Overview = "Summary of the third absolute episode",
-				ReleaseDate = new DateTime(2020, 06, 05)
+				ReleaseDate = new DateTime(2020, 06, 05).ToUniversalTime()
 			};
 		}
 
@@ -435,7 +435,7 @@ namespace Kyoo.Tests
 				},
 				Title = "John wick",
 				Overview = "A movie episode test",
-				ReleaseDate = new DateTime(1595, 05, 12)
+				ReleaseDate = new DateTime(1595, 05, 12).ToUniversalTime()
 			};
 		}
 	}
