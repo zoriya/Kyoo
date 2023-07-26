@@ -37,5 +37,6 @@
 		<Rule Id="SA1643" Action="None" />        <!-- DestructorSummaryDocumentationMustBeginWithStandardText -->
 		<Rule Id="SA1623" Action="None" />        <!-- PropertySummaryDocumentationMustMatchAccessors -->
 		<Rule Id="SA1629" Action="None" />        <!-- DocumentationTextMustEndWithAPeriod -->
+		<Rule Id="SA1600" Action="None" />        <!-- Elements Shuld be Documented -->
 	</Rules>
 </RuleSet>

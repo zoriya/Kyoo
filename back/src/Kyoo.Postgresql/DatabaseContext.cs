@@ -353,6 +353,9 @@ namespace Kyoo.Postgresql
 			modelBuilder.Entity<User>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
+
+			modelBuilder.Entity<LibraryItem>()
+				.ToView("library_items");
 		}
 
 		/// <summary>

@@ -1,6 +1,11 @@
 {pkgs ? import <nixpkgs> {}}: let
   venvDir = "./scanner/.venv";
   pythonPkgs = ./scanner/requirements.txt;
+  dotnet = with pkgs.dotnetCorePackages;
+    combinePackages [
+      sdk_7_0
+      aspnetcore_7_0
+    ];
 in
   pkgs.mkShell {
     packages = with pkgs; [
@@ -8,11 +13,7 @@ in
       nodePackages.yarn
       nodePackages.eas-cli
       nodePackages.expo-cli
-      (with dotnetCorePackages;
-        combinePackages [
-          sdk_7_0
-          aspnetcore_7_0
-        ])
+      dotnet
       python3
       python3Packages.pip
       cargo
@@ -26,6 +27,7 @@ in
     ];
 
     RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";
+    DOTNET_ROOT = "${dotnet}";
 
     shellHook = ''
       # Install python modules
