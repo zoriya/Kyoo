@@ -1,11 +1,11 @@
-# FIXME: We use the sdk 8-preview because of this issue with the 7 https://github.com/dotnet/sdk/issues/29892
-FROM mcr.microsoft.com/dotnet/sdk:8.0-preview as transcoder
+FROM mcr.microsoft.com/dotnet/sdk:7.0 as transcoder
 RUN apt-get update && apt-get install -y cmake make libavutil-dev libavcodec-dev libavformat-dev
 WORKDIR /transcoder
 COPY src/Kyoo.Transcoder .
 RUN cmake . && make -j
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0-preview as builder
+FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:7.0 as builder
+ARG TARGETARCH
 WORKDIR /kyoo
 
 COPY Kyoo.sln ./Kyoo.sln
@@ -18,13 +18,13 @@ COPY src/Kyoo.Host/Kyoo.Host.csproj src/Kyoo.Host/Kyoo.Host.csproj
 COPY src/Kyoo.Postgresql/Kyoo.Postgresql.csproj src/Kyoo.Postgresql/Kyoo.Postgresql.csproj
 COPY src/Kyoo.Swagger/Kyoo.Swagger.csproj src/Kyoo.Swagger/Kyoo.Swagger.csproj
 COPY tests/Kyoo.Tests/Kyoo.Tests.csproj tests/Kyoo.Tests/Kyoo.Tests.csproj
-RUN dotnet restore
+RUN dotnet restore -a $TARGETARCH
 
 COPY . .
 ARG VERSION
-RUN dotnet publish --no-restore -c Release -o /app "-p:Version=${VERSION:-"0.0.0-dev"};SkipTranscoder=true" src/Kyoo.Host
+RUN dotnet publish -a $TARGETARCH --no-restore -c Release -o /app "-p:Version=${VERSION:-"0.0.0-dev"};SkipTranscoder=true" src/Kyoo.Host
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0-preview
+FROM mcr.microsoft.com/dotnet/aspnet:7.0
 RUN apt-get update && apt-get install -y libavutil-dev libavcodec-dev libavformat-dev curl
 COPY --from=builder /app /app
 COPY --from=transcoder /transcoder/libtranscoder.so /app

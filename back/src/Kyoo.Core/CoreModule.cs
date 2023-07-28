@@ -30,6 +30,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using JsonOptions = Kyoo.Core.Api.JsonOptions;
 
 namespace Kyoo.Core
@@ -86,7 +87,10 @@ namespace Kyoo.Core
 				{
 					options.Filters.Add<ExceptionFilter>();
 				})
-				.AddNewtonsoftJson()
+				.AddNewtonsoftJson(x =>
+				{
+					x.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+				})
 				.AddDataAnnotations()
 				.AddControllersAsServices()
 				.AddApiExplorer()
