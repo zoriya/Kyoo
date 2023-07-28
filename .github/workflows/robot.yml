@@ -25,12 +25,9 @@ jobs:
         uses: satackey/action-docker-layer-caching@v0.0.11
         continue-on-error: true
 
-      - name: Build the app
-        run: docker-compose build
-
       - name: Start the service
         run: |
-          docker-compose up -d # --wait Wait is not available on gha
+          docker-compose up -d back postgres ingress # --wait Wait is not available on gha
 
       - name: Perform healthchecks
         run: |
