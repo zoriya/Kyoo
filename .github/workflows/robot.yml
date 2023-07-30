@@ -19,7 +19,8 @@ jobs:
       - name: Pull images
         run: |
           cp .env.example .env
-          docker-compose pull
+          docker compose version
+          docker compose pull
 
       - name: Docker cache
         uses: satackey/action-docker-layer-caching@v0.0.11
@@ -27,11 +28,11 @@ jobs:
 
       - name: Start the service
         run: |
-          docker-compose up -d back postgres ingress # --wait Wait is not available on gha
+          docker compose up -d back postgres ingress # --wait Wait is not available on gha
 
       - name: Perform healthchecks
         run: |
-          docker-compose ps -a
+          docker compose ps -a
           wget --retry-connrefused --retry-on-http-error=502 http://localhost:8901/api/health
 
       - name: Run robot tests
@@ -41,7 +42,7 @@ jobs:
 
       - name: Show logs
         if: failure()
-        run: docker-compose logs
+        run: docker compose logs
 
       - uses: actions/upload-artifact@v2
         with:
