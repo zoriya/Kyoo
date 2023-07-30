@@ -11,7 +11,6 @@ services:
         condition: service_healthy
     volumes:
       - kyoo:/kyoo
-      - ${LIBRARY_ROOT}:/video
 
   front:
     build: ./front

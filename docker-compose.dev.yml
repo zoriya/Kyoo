@@ -17,7 +17,6 @@ services:
       - ./back:/app
       - /app/out/
       - kyoo:/kyoo
-      - ${LIBRARY_ROOT}:/video
 
   front:
     build:
