@@ -1,9 +1,3 @@
-FROM mcr.microsoft.com/dotnet/sdk:7.0 as transcoder
-RUN apt-get update && apt-get install -y cmake make libavutil-dev libavcodec-dev libavformat-dev
-WORKDIR /transcoder
-COPY src/Kyoo.Transcoder .
-RUN cmake . && make -j
-
 FROM --platform=$BUILDPLATFORM mcr.microsoft.com/dotnet/sdk:7.0 as builder
 ARG TARGETARCH
 WORKDIR /kyoo
@@ -22,12 +16,11 @@ RUN dotnet restore -a $TARGETARCH
 
 COPY . .
 ARG VERSION
-RUN dotnet publish -a $TARGETARCH --no-restore -c Release -o /app "-p:Version=${VERSION:-"0.0.0-dev"};SkipTranscoder=true" src/Kyoo.Host
+RUN dotnet publish -a $TARGETARCH --no-restore -c Release -o /app "-p:Version=${VERSION:-"0.0.0-dev"}" src/Kyoo.Host
 
 FROM mcr.microsoft.com/dotnet/aspnet:7.0
-RUN apt-get update && apt-get install -y libavutil-dev libavcodec-dev libavformat-dev curl
+RUN apt-get update && apt-get install -y curl
 COPY --from=builder /app /app
-COPY --from=transcoder /transcoder/libtranscoder.so /app
 
 WORKDIR /kyoo
 EXPOSE 5000
