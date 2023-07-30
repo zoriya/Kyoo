@@ -41,6 +41,7 @@ services:
     volumes:
       - ${LIBRARY_ROOT}:/video
       - ${CACHE_ROOT}:/cache
+      - metadata:/metadata
 
   ingress:
     image: nginx
@@ -73,3 +74,4 @@ services:
 volumes:
   kyoo:
   db:
+  metadata:

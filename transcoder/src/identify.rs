@@ -1,6 +1,12 @@
 use json::JsonValue;
 use serde::Serialize;
-use std::str::{self, FromStr};
+use sha1::{Sha1, Digest};
+use std::{
+	fs,
+	path::PathBuf,
+	process::Stdio,
+	str::{self, FromStr}, io,
+};
 use tokio::process::Command;
 use utoipa::ToSchema;
 
@@ -8,18 +14,21 @@ use crate::transcode::Quality;
 
 #[derive(Serialize, ToSchema)]
 pub struct MediaInfo {
+	pub sha: String,
+	/// The internal path of this track.
+	pub path: String,
 	/// The length of the media in seconds.
 	pub length: f32,
 	pub container: String,
-	pub video: VideoTrack,
-	pub audios: Vec<Track>,
-	pub subtitles: Vec<Track>,
+	pub video: Video,
+	pub audios: Vec<Audio>,
+	pub subtitles: Vec<Subtitle>,
 	pub fonts: Vec<String>,
 	pub chapters: Vec<Chapter>,
 }
 
 #[derive(Serialize, ToSchema)]
-pub struct VideoTrack {
+pub struct Video {
 	/// The codec of this stream (defined as the RFC 6381).
 	pub codec: String,
 	/// The language of this stream (as a ISO-639-2 language code)
@@ -35,7 +44,7 @@ pub struct VideoTrack {
 }
 
 #[derive(Serialize, ToSchema)]
-pub struct Track {
+pub struct Audio {
 	/// The index of this track on the media.
 	pub index: u32,
 	/// The title of the stream.
@@ -51,6 +60,24 @@ pub struct Track {
 }
 
 #[derive(Serialize, ToSchema)]
+pub struct Subtitle {
+	/// The index of this track on the media.
+	pub index: u32,
+	/// The title of the stream.
+	pub title: Option<String>,
+	/// The language of this stream (as a ISO-639-2 language code)
+	pub language: Option<String>,
+	/// The codec of this stream.
+	pub codec: String,
+	/// Is this stream the default one of it's type?
+	pub default: bool,
+	/// Is this stream tagged as forced? (useful only for subtitles)
+	pub forced: bool,
+	/// The link to access this subtitle.
+	pub link: String,
+}
+
+#[derive(Serialize, ToSchema)]
 pub struct Chapter {
 	/// The start time of the chapter (in second from the start of the episode).
 	pub start: f32,
@@ -60,21 +87,79 @@ pub struct Chapter {
 	pub name: String, // TODO: add a type field for Opening, Credits...
 }
 
+async fn extract(path: String, sha: &String, subs: &Vec<Subtitle>) {
+	let mut cmd = Command::new("ffmpeg");
+	cmd.current_dir(format!("/metadata/{sha}/att/"))
+		.args(&["-dump_attachment:t", ""])
+		.args(&["-i", path.as_str()]);
+	for sub in subs {
+		cmd.args(&[
+			"-map",
+			format!("0:s:{idx}", idx = sub.index).as_str(),
+			"-c:s",
+			"copy",
+			format!(
+				"/metadata/{sha}/sub/{idx}.{ext}",
+				idx = sub.index,
+				ext = sub.codec
+			)
+			.as_str(),
+		]);
+	}
+	println!("Starting extraction with the command: {:?}", cmd);
+	cmd.stdout(Stdio::null())
+		.spawn()
+		.expect("Error starting ffmpeg extract")
+		.wait()
+		.await
+		.expect("Error running ffmpeg extract");
+}
+
 pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 	let mediainfo = Command::new("mediainfo")
 		.arg("--Output=JSON")
 		.arg("--Language=raw")
-		.arg(path)
+		.arg(path.clone())
 		.output()
 		.await
 		.expect("Error running the mediainfo command");
 	assert!(mediainfo.status.success());
 	let output = json::parse(str::from_utf8(mediainfo.stdout.as_slice()).unwrap()).unwrap();
 
+	let mut file = fs::File::open(&path)?;
+	let mut hasher = Sha1::new();
+	io::copy(&mut file, &mut hasher)?;
+	let sha = format!("{:x}", hasher.finalize());
+
+
 	let general = output["media"]["track"]
 		.members()
 		.find(|x| x["@type"] == "General")
 		.unwrap();
+
+	let subs: Vec<Subtitle> = output["media"]["track"]
+		.members()
+		.filter(|x| x["@type"] == "Text")
+		.map(|a| {
+			let index = parse::<u32>(&a["@typeorder"]).unwrap() - 1;
+			let codec = a["Format"].as_str().unwrap().to_string().to_lowercase();
+			Subtitle {
+				link: format!("/video/{sha}/subtitle/{index}.{codec}"),
+				index,
+				title: a["Title"].as_str().map(|x| x.to_string()),
+				language: a["Language"].as_str().map(|x| x.to_string()),
+				codec,
+				default: a["Default"] == "Yes",
+				forced: a["Forced"] == "No",
+			}
+		})
+		.collect();
+
+	if !PathBuf::from(format!("/metadata/{sha}")).exists() {
+		std::fs::create_dir_all(format!("/metadata/{sha}/att"))?;
+		std::fs::create_dir_all(format!("/metadata/{sha}/sub"))?;
+		extract(path.clone(), &sha, &subs).await;
+	}
 
 	fn parse<F: FromStr>(v: &JsonValue) -> Option<F> {
 		v.as_str().and_then(|x| x.parse::<F>().ok())
@@ -88,7 +173,7 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 				.members()
 				.find(|x| x["@type"] == "Video")
 				.expect("File without video found. This is not supported");
-			VideoTrack {
+			Video {
 				// This codec is not in the right format (does not include bitdepth...).
 				codec: v["Format"].as_str().unwrap().to_string(),
 				language: v["Language"].as_str().map(|x| x.to_string()),
@@ -102,7 +187,7 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 		audios: output["media"]["track"]
 			.members()
 			.filter(|x| x["@type"] == "Audio")
-			.map(|a| Track {
+			.map(|a| Audio {
 				index: parse::<u32>(&a["StreamOrder"]).unwrap() - 1,
 				title: a["Title"].as_str().map(|x| x.to_string()),
 				language: a["Language"].as_str().map(|x| x.to_string()),
@@ -112,20 +197,12 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 				forced: a["Forced"] == "No",
 			})
 			.collect(),
-		subtitles: output["media"]["track"]
-			.members()
-			.filter(|x| x["@type"] == "Text")
-			.map(|a| Track {
-				index: parse::<u32>(&a["StreamOrder"]).unwrap() - 1,
-				title: a["Title"].as_str().map(|x| x.to_string()),
-				language: a["Language"].as_str().map(|x| x.to_string()),
-				// TODO: format is invalid. Channels count missing...
-				codec: a["Format"].as_str().unwrap().to_string(),
-				default: a["Default"] == "Yes",
-				forced: a["Forced"] == "No",
-			})
+		subtitles: subs,
+		fonts: general["extra"]["Attachments"]
+			.to_string()
+			.split(" / ")
+			.map(|x| format!("/video/{sha}/attachment/{x}"))
 			.collect(),
-		fonts: vec![],
 		chapters: output["media"]["track"]
 			.members()
 			.find(|x| x["@type"] == "Menu")
@@ -139,6 +216,8 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 					.collect()
 			})
 			.unwrap_or(vec![]),
+		sha,
+		path,
 	})
 }
 
