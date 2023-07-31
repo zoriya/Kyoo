@@ -14,11 +14,13 @@ use crate::transcode::Quality;
 
 #[derive(Serialize, ToSchema)]
 pub struct MediaInfo {
+	/// The sha1 of the video file.
 	pub sha: String,
-	/// The internal path of this track.
+	/// The internal path of the video file.
 	pub path: String,
 	/// The length of the media in seconds.
 	pub length: f32,
+	/// The container of the video file of this episode.
 	pub container: String,
 	pub video: Video,
 	pub audios: Vec<Audio>,
@@ -54,9 +56,9 @@ pub struct Audio {
 	/// The codec of this stream.
 	pub codec: String,
 	/// Is this stream the default one of it's type?
-	pub default: bool,
+	pub is_default: bool,
 	/// Is this stream tagged as forced? (useful only for subtitles)
-	pub forced: bool,
+	pub is_forced: bool,
 }
 
 #[derive(Serialize, ToSchema)]
@@ -70,9 +72,9 @@ pub struct Subtitle {
 	/// The codec of this stream.
 	pub codec: String,
 	/// Is this stream the default one of it's type?
-	pub default: bool,
+	pub is_default: bool,
 	/// Is this stream tagged as forced? (useful only for subtitles)
-	pub forced: bool,
+	pub is_forced: bool,
 	/// The link to access this subtitle.
 	pub link: String,
 }
@@ -80,9 +82,9 @@ pub struct Subtitle {
 #[derive(Serialize, ToSchema)]
 pub struct Chapter {
 	/// The start time of the chapter (in second from the start of the episode).
-	pub start: f32,
+	pub start_time: f32,
 	/// The end time of the chapter (in second from the start of the episode).
-	pub end: f32,
+	pub end_time: f32,
 	/// The name of this chapter. This should be a human-readable name that could be presented to the user.
 	pub name: String, // TODO: add a type field for Opening, Credits...
 }
@@ -149,8 +151,8 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 				title: a["Title"].as_str().map(|x| x.to_string()),
 				language: a["Language"].as_str().map(|x| x.to_string()),
 				codec,
-				default: a["Default"] == "Yes",
-				forced: a["Forced"] == "No",
+				is_default: a["Default"] == "Yes",
+				is_forced: a["Forced"] == "No",
 			}
 		})
 		.collect();
@@ -193,8 +195,8 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 				language: a["Language"].as_str().map(|x| x.to_string()),
 				// TODO: format is invalid. Channels count missing...
 				codec: a["Format"].as_str().unwrap().to_string(),
-				default: a["Default"] == "Yes",
-				forced: a["Forced"] == "No",
+				is_default: a["Default"] == "Yes",
+				is_forced: a["Forced"] == "No",
 			})
 			.collect(),
 		subtitles: subs,
@@ -209,8 +211,8 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 			.map(|x| {
 				std::iter::zip(x["extra"].entries(), x["extra"].entries().skip(1))
 					.map(|((start, name), (end, _))| Chapter {
-						start: time_to_seconds(start),
-						end: time_to_seconds(end),
+						start_time: time_to_seconds(start),
+						end_time: time_to_seconds(end),
 						name: name.as_str().unwrap().to_string(),
 					})
 					.collect()

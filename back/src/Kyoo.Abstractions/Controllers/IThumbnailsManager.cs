@@ -17,8 +17,9 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using Kyoo.Abstractions.Models;
+
+#nullable enable
 
 namespace Kyoo.Abstractions.Controllers
 {
@@ -39,17 +40,17 @@ namespace Kyoo.Abstractions.Controllers
 		/// </param>
 		/// <typeparam name="T">The type of the item</typeparam>
 		/// <returns><c>true</c> if an image has been downloaded, <c>false</c> otherwise.</returns>
-		Task<bool> DownloadImages<T>([NotNull] T item, bool alwaysDownload = false)
+		Task<bool> DownloadImages<T>(T item, bool alwaysDownload = false)
 			where T : IThumbnails;
 
 		/// <summary>
 		/// Retrieve the local path of an image of the given item.
 		/// </summary>
 		/// <param name="item">The item to retrieve the poster from.</param>
-		/// <param name="imageID">The ID of the image. See <see cref="Images"/> for values.</param>
+		/// <param name="imageId">The ID of the image. See <see cref="Images"/> for values.</param>
 		/// <typeparam name="T">The type of the item</typeparam>
 		/// <returns>The path of the image for the given resource or null if it does not exists.</returns>
-		Task<string> GetImagePath<T>([NotNull] T item, int imageID)
+		string? GetImagePath<T>(T item, int imageId)
 			where T : IThumbnails;
 	}
 }

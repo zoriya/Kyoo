@@ -24,7 +24,6 @@ using Autofac;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Authentication;
 using Kyoo.Core;
-using Kyoo.Core.Models.Options;
 using Kyoo.Host.Controllers;
 using Kyoo.Postgresql;
 using Kyoo.Swagger;
@@ -35,7 +34,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Kyoo.Host
 {
@@ -50,11 +48,6 @@ namespace Kyoo.Host
 		private readonly IPluginManager _plugins;
 
 		/// <summary>
-		/// The configuration used to register <see cref="IOptions{TOptions}"/> and so on for plugin's specified types.
-		/// </summary>
-		private readonly IConfiguration _configuration;
-
-		/// <summary>
 		/// The plugin that adds controllers and tasks specific to this host.
 		/// </summary>
 		private readonly IPlugin _hostModule;
@@ -63,14 +56,10 @@ namespace Kyoo.Host
 		/// Created from the DI container, those services are needed to load information and instantiate plugins.s
 		/// </summary>
 		/// <param name="plugins">The plugin manager to use to load new plugins and configure the host.</param>
-		/// <param name="configuration">
-		/// The configuration used to register <see cref="IOptions{TOptions}"/> and so on for plugin's specified types.
-		/// </param>
-		public PluginsStartup(IPluginManager plugins, IConfiguration configuration)
+		public PluginsStartup(IPluginManager plugins)
 		{
 			_plugins = plugins;
-			_configuration = configuration;
-			_hostModule = new HostModule(_plugins, configuration);
+			_hostModule = new HostModule(_plugins);
 			_plugins.LoadPlugins(
 				typeof(CoreModule),
 				typeof(AuthenticationModule),
@@ -94,10 +83,9 @@ namespace Kyoo.Host
 			HostServiceProvider hostProvider = new(host.HostingEnvironment, host.Configuration, logger);
 			PluginManager plugins = new(
 				hostProvider,
-				Options.Create(host.Configuration.GetSection(BasicOptions.Path).Get<BasicOptions>()),
 				logger.CreateLogger<PluginManager>()
 			);
-			return new PluginsStartup(plugins, host.Configuration);
+			return new PluginsStartup(plugins);
 		}
 
 		/// <summary>

@@ -51,12 +51,10 @@ namespace Kyoo.Core.Api
 		/// <param name="libraryManager">
 		/// The library manager used to modify or retrieve information in the data store.
 		/// </param>
-		/// <param name="files">The file manager used to send images.</param>
 		/// <param name="thumbs">The thumbnail manager used to retrieve images paths.</param>
 		public SeasonApi(ILibraryManager libraryManager,
-			IFileSystem files,
 			IThumbnailsManager thumbs)
-			: base(libraryManager.SeasonRepository, files, thumbs)
+			: base(libraryManager.SeasonRepository, thumbs)
 		{
 			_libraryManager = libraryManager;
 		}

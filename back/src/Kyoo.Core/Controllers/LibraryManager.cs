@@ -58,9 +58,6 @@ namespace Kyoo.Core.Controllers
 		public IEpisodeRepository EpisodeRepository { get; }
 
 		/// <inheritdoc />
-		public ITrackRepository TrackRepository { get; }
-
-		/// <inheritdoc />
 		public IPeopleRepository PeopleRepository { get; }
 
 		/// <inheritdoc />
@@ -89,7 +86,6 @@ namespace Kyoo.Core.Controllers
 			ShowRepository = GetRepository<Show>() as IShowRepository;
 			SeasonRepository = GetRepository<Season>() as ISeasonRepository;
 			EpisodeRepository = GetRepository<Episode>() as IEpisodeRepository;
-			TrackRepository = GetRepository<Track>() as ITrackRepository;
 			PeopleRepository = GetRepository<People>() as IPeopleRepository;
 			StudioRepository = GetRepository<Studio>() as IStudioRepository;
 			GenreRepository = GetRepository<Genre>() as IGenreRepository;
@@ -354,11 +350,6 @@ namespace Kyoo.Core.Controllers
 					(x, y) => x.ExternalIDs = y,
 					(x, y) => { x.ResourceID = y.ID; }),
 
-				(Episode e, nameof(Episode.Tracks)) => _SetRelation(e,
-					TrackRepository.GetAll(x => x.Episode.ID == obj.ID),
-					(x, y) => x.Tracks = y,
-					(x, y) => { x.Episode = y; x.EpisodeID = y.ID; }),
-
 				(Episode e, nameof(Episode.Show)) => ShowRepository
 					.GetOrDefault(x => x.Episodes.Any(y => y.ID == obj.ID))
 					.Then(x =>
@@ -373,15 +364,6 @@ namespace Kyoo.Core.Controllers
 					{
 						e.Season = x;
 						e.SeasonID = x?.ID ?? 0;
-					}),
-
-
-				(Track t, nameof(Track.Episode)) => EpisodeRepository
-					.GetOrDefault(x => x.Tracks.Any(y => y.ID == obj.ID))
-					.Then(x =>
-					{
-						t.Episode = x;
-						t.EpisodeID = x?.ID ?? 0;
 					}),
 
 

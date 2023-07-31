@@ -19,12 +19,14 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Logging;
+
+#nullable enable
 
 namespace Kyoo.Core.Controllers
 {
@@ -34,29 +36,26 @@ namespace Kyoo.Core.Controllers
 	public class ThumbnailsManager : IThumbnailsManager
 	{
 		/// <summary>
-		/// The file manager used to download the image if the file is distant
-		/// </summary>
-		private readonly IFileSystem _files;
-
-		/// <summary>
 		/// A logger to report errors.
 		/// </summary>
 		private readonly ILogger<ThumbnailsManager> _logger;
 
+		private readonly IHttpClientFactory _clientFactory;
+
 		/// <summary>
 		/// Create a new <see cref="ThumbnailsManager"/>.
 		/// </summary>
-		/// <param name="files">The file manager to use.</param>
+		/// <param name="clientFactory">Client factory</param>
 		/// <param name="logger">A logger to report errors</param>
-		public ThumbnailsManager(IFileSystem files,
+		public ThumbnailsManager(IHttpClientFactory clientFactory,
 			ILogger<ThumbnailsManager> logger)
 		{
-			_files = files;
+			_clientFactory = clientFactory;
 			_logger = logger;
 		}
 
 		/// <summary>
-		/// An helper function to download an image using a <see cref="LocalFileSystem"/>.
+		/// An helper function to download an image.
 		/// </summary>
 		/// <param name="url">The distant url of the image</param>
 		/// <param name="localPath">The local path of the image</param>
@@ -70,12 +69,17 @@ namespace Kyoo.Core.Controllers
 			try
 			{
 				_logger.LogInformation("Downloading image {What}", what);
-				AsyncRef<string> mime = new();
-				await using Stream reader = await _files.GetReader(url, mime);
+
+				HttpClient client = _clientFactory.CreateClient();
+				HttpResponseMessage response = await client.GetAsync(url);
+				response.EnsureSuccessStatusCode();
+				string mime = response.Content.Headers.ContentType?.MediaType!;
+				await using Stream reader = await response.Content.ReadAsStreamAsync();
+
 				string extension = new FileExtensionContentTypeProvider()
-					.Mappings.FirstOrDefault(x => x.Value == mime.Value)
+					.Mappings.FirstOrDefault(x => x.Value == mime)
 					.Key;
-				await using Stream local = await _files.NewFile(localPath + extension);
+				await using Stream local = File.Create(localPath + extension);
 				await reader.CopyToAsync(local);
 				return true;
 			}
@@ -101,8 +105,8 @@ namespace Kyoo.Core.Controllers
 
 			foreach ((int id, string image) in item.Images.Where(x => x.Value != null))
 			{
-				string localPath = await _GetPrivateImagePath(item, id);
-				if (alwaysDownload || !await _files.Exists(localPath))
+				string localPath = _GetPrivateImagePath(item, id);
+				if (alwaysDownload || !Path.Exists(localPath))
 					ret |= await _DownloadImage(image, localPath, $"The image n {id} of {name}");
 			}
 
@@ -113,34 +117,41 @@ namespace Kyoo.Core.Controllers
 		/// Retrieve the local path of an image of the given item <b>without an extension</b>.
 		/// </summary>
 		/// <param name="item">The item to retrieve the poster from.</param>
-		/// <param name="imageID">The ID of the image. See <see cref="Images"/> for values.</param>
+		/// <param name="imageId">The ID of the image. See <see cref="Images"/> for values.</param>
 		/// <typeparam name="T">The type of the item</typeparam>
 		/// <returns>The path of the image for the given resource, <b>even if it does not exists</b></returns>
-		private async Task<string> _GetPrivateImagePath<T>([NotNull] T item, int imageID)
+		private static string _GetPrivateImagePath<T>(T item, int imageId)
 		{
 			if (item == null)
 				throw new ArgumentNullException(nameof(item));
 
-			string directory = await _files.GetExtraDirectory(item);
-			string imageName = imageID switch
+			string directory = item switch
+			{
+				IResource res => Path.Combine("/metadata", typeof(T).Name.ToLowerInvariant(), res.Slug),
+				_ => Path.Combine("/metadata", typeof(T).Name.ToLowerInvariant())
+			};
+			Directory.CreateDirectory(directory);
+			string imageName = imageId switch
 			{
 				Images.Poster => "poster",
 				Images.Logo => "logo",
 				Images.Thumbnail => "thumbnail",
 				Images.Trailer => "trailer",
-				_ => $"{imageID}"
+				_ => $"{imageId}"
 			};
-			return _files.Combine(directory, imageName);
+			return Path.Combine(directory, imageName);
 		}
 
 		/// <inheritdoc />
-		public async Task<string> GetImagePath<T>(T item, int imageID)
+		public string? GetImagePath<T>(T item, int imageId)
 			where T : IThumbnails
 		{
-			string basePath = await _GetPrivateImagePath(item, imageID);
-			string directory = Path.GetDirectoryName(basePath);
+			string basePath = _GetPrivateImagePath(item, imageId);
+			string directory = Path.GetDirectoryName(basePath)!;
 			string baseFile = Path.GetFileName(basePath);
-			return (await _files.ListFiles(directory!))
+			if (!Directory.Exists(directory))
+				return null;
+			return Directory.GetFiles(directory, "*", SearchOption.TopDirectoryOnly)
 				.FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == baseFile);
 		}
 	}

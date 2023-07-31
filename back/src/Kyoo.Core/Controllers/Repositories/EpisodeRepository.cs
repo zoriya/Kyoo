@@ -44,11 +44,6 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		private readonly IProviderRepository _providers;
 
-		/// <summary>
-		/// A track repository to handle creation and deletion of tracks related to the current episode.
-		/// </summary>
-		private readonly Lazy<ITrackRepository> _tracks;
-
 		/// <inheritdoc />
 		// Use absolute numbers by default and fallback to season/episodes if it does not exists.
 		protected override Sort<Episode> DefaultSort => new Sort<Episode>.Conglomerate(
@@ -63,16 +58,13 @@ namespace Kyoo.Core.Controllers
 		/// <param name="database">The database handle to use.</param>
 		/// <param name="shows">A show repository</param>
 		/// <param name="providers">A provider repository</param>
-		/// <param name="tracks">A track repository</param>
 		public EpisodeRepository(DatabaseContext database,
 			IShowRepository shows,
-			IProviderRepository providers,
-			Lazy<ITrackRepository> tracks)
+			IProviderRepository providers)
 			: base(database)
 		{
 			_database = database;
 			_providers = providers;
-			_tracks = tracks;
 
 			// Edit episode slugs when the show's slug changes.
 			shows.OnEdited += (show) =>
@@ -162,7 +154,7 @@ namespace Kyoo.Core.Controllers
 				? Get(obj.ShowID, obj.SeasonNumber.Value, obj.EpisodeNumber.Value)
 				: GetAbsolute(obj.ShowID, obj.AbsoluteNumber.Value));
 			OnResourceCreated(obj);
-			return await _ValidateTracks(obj);
+			return obj;
 		}
 
 		/// <inheritdoc />
@@ -170,37 +162,11 @@ namespace Kyoo.Core.Controllers
 		{
 			await Validate(changed);
 
-			if (changed.Tracks != null || resetOld)
-			{
-				await _tracks.Value.DeleteAll(x => x.EpisodeID == resource.ID);
-				resource.Tracks = changed.Tracks;
-				await _ValidateTracks(resource);
-			}
-
 			if (changed.ExternalIDs != null || resetOld)
 			{
 				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
 				resource.ExternalIDs = changed.ExternalIDs;
 			}
-		}
-
-		/// <summary>
-		/// Set track's index and ensure that every tracks is well-formed.
-		/// </summary>
-		/// <param name="resource">The resource to fix.</param>
-		/// <returns>The <paramref name="resource"/> parameter is returned.</returns>
-		private async Task<Episode> _ValidateTracks(Episode resource)
-		{
-			if (resource.Tracks == null)
-				return resource;
-
-			resource.Tracks = await resource.Tracks.SelectAsync(x =>
-			{
-				x.Episode = resource;
-				return _tracks.Value.Create(x);
-			}).ToListAsync();
-			_database.Tracks.AttachRange(resource.Tracks);
-			return resource;
 		}
 
 		/// <inheritdoc />
@@ -236,7 +202,6 @@ namespace Kyoo.Core.Controllers
 				throw new ArgumentNullException(nameof(obj));
 
 			_database.Entry(obj).State = EntityState.Deleted;
-			await obj.Tracks.ForEachAsync(x => _tracks.Value.Delete(x));
 			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Deleted);
 			await _database.SaveChangesAsync();
 			await base.Delete(obj);

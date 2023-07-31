@@ -331,11 +331,6 @@ namespace Kyoo.Abstractions.Controllers
 	}
 
 	/// <summary>
-	/// A repository to handle tracks
-	/// </summary>
-	public interface ITrackRepository : IRepository<Track> { }
-
-	/// <summary>
 	/// A repository to handle libraries.
 	/// </summary>
 	public interface ILibraryRepository : IRepository<Library> { }

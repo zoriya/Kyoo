@@ -28,7 +28,6 @@ namespace Kyoo.Abstractions.Models
 	{
 		/// <summary>
 		/// The list of images mapped to a certain index.
-		/// The string value should be a path supported by the <see cref="IFileSystem"/>.
 		/// </summary>
 		/// <remarks>
 		/// An arbitrary index should not be used, instead use indexes from <see cref="Models.Images"/>

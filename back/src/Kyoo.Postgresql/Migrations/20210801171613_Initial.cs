@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using Kyoo.Abstractions.Models;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -27,6 +28,8 @@ namespace Kyoo.Postgresql.Migrations
 	/// <summary>
 	/// The initial migration that build most of the database.
 	/// </summary>
+	[DbContext(typeof(PostgresContext))]
+	[Migration("20210801171613_Initial")]
 	public partial class Initial : Migration
 	{
 		/// <inheritdoc/>
@@ -577,7 +580,7 @@ namespace Kyoo.Postgresql.Migrations
 					is_forced = table.Column<bool>(type: "boolean", nullable: false),
 					is_external = table.Column<bool>(type: "boolean", nullable: false),
 					path = table.Column<string>(type: "text", nullable: true),
-					type = table.Column<StreamType>(type: "stream_type", nullable: false),
+					type = table.Column<object>(type: "stream_type", nullable: false),
 					episode_id = table.Column<int>(type: "integer", nullable: false),
 					track_index = table.Column<int>(type: "integer", nullable: false)
 				},

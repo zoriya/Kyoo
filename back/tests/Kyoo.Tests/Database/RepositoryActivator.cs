@@ -48,8 +48,7 @@ namespace Kyoo.Tests.Database
 			SeasonRepository season = new(_NewContext(), show, provider);
 			LibraryItemRepository libraryItem = new(_NewContext(),
 				new Lazy<ILibraryRepository>(() => LibraryManager.LibraryRepository));
-			EpisodeRepository episode = new(_NewContext(), show, provider, new Lazy<ITrackRepository>(() => LibraryManager.TrackRepository));
-			TrackRepository track = new(_NewContext(), episode);
+			EpisodeRepository episode = new(_NewContext(), show, provider);
 			UserRepository user = new(_NewContext());
 
 			LibraryManager = new LibraryManager(new IBaseRepository[] {
@@ -60,7 +59,6 @@ namespace Kyoo.Tests.Database
 				show,
 				season,
 				episode,
-				track,
 				people,
 				studio,
 				genre,

@@ -27,7 +27,6 @@ using Kyoo.Core.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
-using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
@@ -46,10 +45,6 @@ namespace Kyoo.Core
 		/// <inheritdoc />
 		public void Configure(ContainerBuilder builder)
 		{
-			builder.RegisterType<LocalFileSystem>().As<IFileSystem>().SingleInstance();
-			builder.RegisterType<HttpFileSystem>().As<IFileSystem>().SingleInstance();
-
-			builder.RegisterType<Transcoder>().As<ITranscoder>().SingleInstance();
 			builder.RegisterType<ThumbnailsManager>().As<IThumbnailsManager>().InstancePerLifetimeScope();
 			builder.RegisterType<LibraryManager>().As<ILibraryManager>().InstancePerLifetimeScope();
 
@@ -59,22 +54,11 @@ namespace Kyoo.Core
 			builder.RegisterRepository<IShowRepository, ShowRepository>();
 			builder.RegisterRepository<ISeasonRepository, SeasonRepository>();
 			builder.RegisterRepository<IEpisodeRepository, EpisodeRepository>();
-			builder.RegisterRepository<ITrackRepository, TrackRepository>();
 			builder.RegisterRepository<IPeopleRepository, PeopleRepository>();
 			builder.RegisterRepository<IStudioRepository, StudioRepository>();
 			builder.RegisterRepository<IGenreRepository, GenreRepository>();
 			builder.RegisterRepository<IProviderRepository, ProviderRepository>();
 			builder.RegisterRepository<IUserRepository, UserRepository>();
-
-			builder.RegisterType<FileExtensionContentTypeProvider>().As<IContentTypeProvider>().SingleInstance()
-				.OnActivating(x =>
-				{
-					x.Instance.Mappings[".data"] = "application/octet-stream";
-					x.Instance.Mappings[".mkv"] = "video/x-matroska";
-					x.Instance.Mappings[".ass"] = "text/x-ssa";
-					x.Instance.Mappings[".srt"] = "application/x-subrip";
-					x.Instance.Mappings[".m3u8"] = "application/x-mpegurl";
-				});
 		}
 
 		/// <inheritdoc />

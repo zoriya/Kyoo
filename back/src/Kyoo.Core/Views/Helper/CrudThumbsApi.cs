@@ -16,6 +16,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.IO;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
@@ -23,6 +25,7 @@ using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using static Kyoo.Abstractions.Models.Utils.Constants;
 
 namespace Kyoo.Core.Api
@@ -38,11 +41,6 @@ namespace Kyoo.Core.Api
 		where T : class, IResource, IThumbnails
 	{
 		/// <summary>
-		/// The file manager used to send images.
-		/// </summary>
-		private readonly IFileSystem _files;
-
-		/// <summary>
 		/// The thumbnail manager used to retrieve images paths.
 		/// </summary>
 		private readonly IThumbnailsManager _thumbs;
@@ -53,15 +51,26 @@ namespace Kyoo.Core.Api
 		/// <param name="repository">
 		/// The repository to use as a baking store for the type <typeparamref name="T"/>.
 		/// </param>
-		/// <param name="files">The file manager used to send images.</param>
 		/// <param name="thumbs">The thumbnail manager used to retrieve images paths.</param>
 		public CrudThumbsApi(IRepository<T> repository,
-			IFileSystem files,
 			IThumbnailsManager thumbs)
 			: base(repository)
 		{
-			_files = files;
 			_thumbs = thumbs;
+		}
+
+		/// <summary>
+		/// Get the content type of a file using it's extension.
+		/// </summary>
+		/// <param name="path">The path of the file</param>
+		/// <exception cref="NotImplementedException">The extension of the file is not known.</exception>
+		/// <returns>The content type of the file</returns>
+		private static string _GetContentType(string path)
+		{
+			FileExtensionContentTypeProvider provider = new();
+			if (provider.TryGetContentType(path, out string contentType))
+				return contentType;
+			throw new NotImplementedException($"Can't get the content type of the file at: {path}");
 		}
 
 		/// <summary>
@@ -80,11 +89,7 @@ namespace Kyoo.Core.Api
 		/// <param name="image">The number of the image to retrieve.</param>
 		/// <returns>The image asked.</returns>
 		/// <response code="404">No item exist with the specific identifier or the image does not exists on kyoo.</response>
-		[HttpGet("{identifier:id}/image-{image:int}")]
-		[PartialPermission(Kind.Read)]
-		[ProducesResponseType(StatusCodes.Status200OK)]
-		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<IActionResult> GetImage(Identifier identifier, int image)
+		private async Task<IActionResult> _GetImage(Identifier identifier, int image)
 		{
 			T resource = await identifier.Match(
 				id => Repository.GetOrDefault(id),
@@ -92,8 +97,10 @@ namespace Kyoo.Core.Api
 			);
 			if (resource == null)
 				return NotFound();
-			string path = await _thumbs.GetImagePath(resource, image);
-			return _files.FileResult(path);
+			string path = _thumbs.GetImagePath(resource, image);
+			if (path == null || !System.IO.File.Exists(path))
+				return NotFound();
+			return PhysicalFile(Path.GetFullPath(path), _GetContentType(path), true);
 		}
 
 		/// <summary>
@@ -113,7 +120,7 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public Task<IActionResult> GetPoster(Identifier identifier)
 		{
-			return GetImage(identifier, Images.Poster);
+			return _GetImage(identifier, Images.Poster);
 		}
 
 		/// <summary>
@@ -133,7 +140,7 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public Task<IActionResult> GetLogo(Identifier identifier)
 		{
-			return GetImage(identifier, Images.Logo);
+			return _GetImage(identifier, Images.Logo);
 		}
 
 		/// <summary>
@@ -151,7 +158,7 @@ namespace Kyoo.Core.Api
 		[HttpGet("{identifier:id}/thumbnail", Order = AlternativeRoute)]
 		public Task<IActionResult> GetBackdrop(Identifier identifier)
 		{
-			return GetImage(identifier, Images.Thumbnail);
+			return _GetImage(identifier, Images.Thumbnail);
 		}
 
 		/// <inheritdoc/>
