@@ -20,19 +20,19 @@
 
 declare module "react-native-video" {
 	interface VideoProperties {
-		fonts?: Font[];
+		fonts?: string[];
+		subtitles?: Subtitle[]
 		onPlayPause: (isPlaying: boolean) => void;
 		onMediaUnsupported?: () => void;
 	}
 	export type VideoProps = Omit<VideoProperties, "source"> & {
 		source: { uri: string; hls: string };
-		subtitles?: WatchItem["subtitles"];
 	};
 }
 
 export * from "react-native-video";
 
-import { Font, getToken, WatchItem } from "@kyoo/models";
+import { Subtitle, getToken } from "@kyoo/models";
 import { IconButton, Menu } from "@kyoo/primitives";
 import { ComponentProps, forwardRef, useEffect, useRef } from "react";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
