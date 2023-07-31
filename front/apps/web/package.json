@@ -34,6 +34,7 @@
 		"react-native-video": "^6.0.0-alpha.5",
 		"react-native-web": "0.19.1",
 		"solito": "^3.0.0",
+		"srt-webvtt": "^2.0.0",
 		"superjson": "^1.12.2",
 		"sweetalert2": "^11.7.12",
 		"yoshiki": "1.2.2",

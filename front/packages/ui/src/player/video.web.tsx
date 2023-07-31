@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { getToken, Subtitle } from "@kyoo/models";
+import { getToken, queryFn, Subtitle } from "@kyoo/models";
 import {
 	forwardRef,
 	RefObject,
@@ -37,6 +37,8 @@ import { playAtom, PlayMode, playModeAtom, subtitleAtom } from "./state";
 import Hls, { Level } from "hls.js";
 import { useTranslation } from "react-i18next";
 import { Menu } from "@kyoo/primitives";
+import toVttBlob from "srt-webvtt";
+import { getDisplayName } from "./components/right-buttons";
 
 let hls: Hls | null = null;
 
@@ -100,7 +102,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 	useEffect(() => {
 		if (!ref.current || paused === ref.current.paused) return;
 		if (paused) ref.current?.pause();
-		else ref.current?.play().catch(() => { });
+		else ref.current?.play().catch(() => {});
 	}, [paused]);
 	useEffect(() => {
 		if (!ref.current || !volume) return;
@@ -110,14 +112,12 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 	const subtitle = useAtomValue(subtitleAtom);
 	useSubtitle(ref, subtitle, fonts);
 
-
 	useLayoutEffect(() => {
 		(async () => {
 			if (!ref?.current || !source.uri) return;
 			if (!hls || oldHls.current !== source.hls) {
 				// Reinit the hls player when we change track.
-				if (hls)
-					hls.destroy();
+				if (hls) hls.destroy();
 				hls = null;
 				hls = await initHls();
 				// Still load the hls source to list available qualities.
@@ -134,7 +134,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 				hls.on(Hls.Events.MANIFEST_LOADED, async () => {
 					try {
 						await ref.current?.play();
-					} catch { }
+					} catch {}
 				});
 				hls.on(Hls.Events.ERROR, (_, d) => {
 					if (!d.fatal || !hls?.media) return;
@@ -145,8 +145,8 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 				});
 			}
 		})();
-	// onError changes should not restart the playback.
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// onError changes should not restart the playback.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [source.uri, source.hls]);
 
 	const setPlay = useSetAtom(playAtom);
@@ -201,7 +201,11 @@ export default Video;
 
 let htmlTrack: HTMLTrackElement | null;
 let subOcto: SubtitleOctopus | null;
-const useSubtitle = (player: RefObject<HTMLVideoElement>, value: Subtitle | null, fonts?: string[]) => {
+const useSubtitle = (
+	player: RefObject<HTMLVideoElement>,
+	value: Subtitle | null,
+	fonts?: string[],
+) => {
 	useEffect(() => {
 		if (!player.current) return;
 
@@ -224,20 +228,23 @@ const useSubtitle = (player: RefObject<HTMLVideoElement>, value: Subtitle | null
 		} else if (value.codec === "vtt" || value.codec === "subrip") {
 			removeOctoSub();
 			if (player.current.textTracks.length > 0) player.current.textTracks[0].mode = "hidden";
-			const track: HTMLTrackElement = htmlTrack ?? document.createElement("track");
-			track.kind = "subtitles";
-			track.label = value.displayName;
-			if (value.language) track.srclang = value.language;
-			track.src = value.link;
-			track.className = "subtitle_container";
-			track.default = true;
-			track.onload = () => {
-				if (player.current) player.current.textTracks[0].mode = "showing";
+			const addSubtitle = async () => {
+				const track: HTMLTrackElement = htmlTrack ?? document.createElement("track");
+				track.kind = "subtitles";
+				track.label = getDisplayName(value);
+				if (value.language) track.srclang = value.language;
+				track.src = value.codec === "subrip" ? await toWebVtt(value.link) : value.link;
+				track.className = "subtitle_container";
+				track.default = true;
+				track.onload = () => {
+					if (player.current) player.current.textTracks[0].mode = "showing";
+				};
+				if (!htmlTrack) {
+					htmlTrack = track;
+					if (player.current) player.current.appendChild(track);
+				}
 			};
-			if (!htmlTrack) {
-				player.current.appendChild(track);
-				htmlTrack = track;
-			}
+			addSubtitle();
 		} else if (value.codec === "ass") {
 			removeHtmlSubtitle();
 			removeOctoSub();
@@ -253,6 +260,19 @@ const useSubtitle = (player: RefObject<HTMLVideoElement>, value: Subtitle | null
 			});
 		}
 	}, [player, value, fonts]);
+};
+
+const toWebVtt = async (srtUrl: string) => {
+	const token = await getToken();
+	const query = await fetch(srtUrl, {
+		headers: token
+			? {
+					Authorization: token,
+			  }
+			: undefined,
+	});
+	const srt = await query.blob();
+	return await toVttBlob(srt);
 };
 
 export const AudiosMenu = (props: ComponentProps<typeof Menu>) => {
@@ -283,10 +303,10 @@ export const QualitiesMenu = (props: ComponentProps<typeof Menu>) => {
 	});
 
 	const levelName = (label: Level, auto?: boolean): string => {
-		const height = `${label.height}p`
+		const height = `${label.height}p`;
 		if (auto) return height;
 		return label.uri.includes("original") ? `${t("player.transmux")} (${height})` : height;
-	}
+	};
 
 	return (
 		<Menu {...props}>

@@ -12851,6 +12851,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"srt-webvtt@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "srt-webvtt@npm:2.0.0"
+  checksum: 457645e902929c1b4a5691bb58195a7dc3b77699a62fa551bf13ce89e4900d919d4e0595a5e17641b4c0a6e24ec9e2794b1c728e8a625a76cf0c2304cb20356e
+  languageName: node
+  linkType: hard
+
 "ssri@npm:^8.0.1":
   version: 8.0.1
   resolution: "ssri@npm:8.0.1"
@@ -14142,6 +14149,7 @@ __metadata:
     react-native-video: ^6.0.0-alpha.5
     react-native-web: 0.19.1
     solito: ^3.0.0
+    srt-webvtt: ^2.0.0
     superjson: ^1.12.2
     sweetalert2: ^11.7.12
     typescript: ^4.9.5
