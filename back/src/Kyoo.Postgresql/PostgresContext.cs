@@ -54,7 +54,6 @@ namespace Kyoo.Postgresql
 		{
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<Status>();
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<ItemType>();
-			NpgsqlConnection.GlobalTypeMapper.MapEnum<StreamType>();
 		}
 
 		/// <summary>
@@ -108,7 +107,6 @@ namespace Kyoo.Postgresql
 		{
 			modelBuilder.HasPostgresEnum<Status>();
 			modelBuilder.HasPostgresEnum<ItemType>();
-			modelBuilder.HasPostgresEnum<StreamType>();
 
 			modelBuilder.Entity<LibraryItem>()
 				.ToView("library_items")

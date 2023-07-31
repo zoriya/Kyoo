@@ -16,15 +16,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
-using Kyoo.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using static Kyoo.Abstractions.Models.Utils.Constants;
@@ -48,42 +45,17 @@ namespace Kyoo.Core.Api
 		private readonly ILibraryManager _libraryManager;
 
 		/// <summary>
-		/// The transcoder used to retrive fonts.
-		/// </summary>
-		private readonly ITranscoder _transcoder;
-
-		/// <summary>
-		/// The file system used to send fonts.
-		/// </summary>
-		private readonly IFileSystem _files;
-
-		/// <summary>
 		/// Create a new <see cref="EpisodeApi"/>.
 		/// </summary>
 		/// <param name="libraryManager">
 		/// The library manager used to modify or retrieve information in the data store.
 		/// </param>
-		/// <param name="transcoder">The transcoder used to retrive fonts</param>
-		/// <param name="files">The file manager used to send images.</param>
 		/// <param name="thumbnails">The thumbnail manager used to retrieve images paths.</param>
 		public EpisodeApi(ILibraryManager libraryManager,
-			ITranscoder transcoder,
-			IFileSystem files,
 			IThumbnailsManager thumbnails)
-			: base(libraryManager.EpisodeRepository, files, thumbnails)
+			: base(libraryManager.EpisodeRepository, thumbnails)
 		{
 			_libraryManager = libraryManager;
-			_transcoder = transcoder;
-			_files = files;
-		}
-
-		/// <inheritdoc/>
-		public override async Task<ActionResult<Episode>> Create([FromBody] Episode resource)
-		{
-			// TODO: Remove this method and use a websocket API to do that.
-			resource.Tracks = await _transcoder.ExtractInfos(resource, false);
-			ActionResult<Episode> ret = await base.Create(resource);
-			return ret;
 		}
 
 		/// <summary>
@@ -131,44 +103,6 @@ namespace Kyoo.Core.Api
 			return episode == null
 				? NotFound()
 				: NoContent();
-		}
-
-		/// <summary>
-		/// Get tracks
-		/// </summary>
-		/// <remarks>
-		/// List the tracks (video, audio and subtitles) available for this episode.
-		/// This endpoint provide the list of raw tracks, without transcode on it. To get a schema easier to watch
-		/// on a player, see the [/watch endpoint](#/watch).
-		/// </remarks>
-		/// <param name="identifier">The ID or slug of the <see cref="Episode"/>.</param>
-		/// <param name="sortBy">A key to sort tracks by.</param>
-		/// <param name="where">An optional list of filters.</param>
-		/// <param name="pagination">The number of tracks to return.</param>
-		/// <returns>A page of tracks.</returns>
-		/// <response code="400">The filters or the sort parameters are invalid.</response>
-		/// <response code="404">No episode with the given ID or slug could be found.</response>
-		/// TODO fix the /watch endpoint link (when operations ID are specified).
-		[HttpGet("{identifier:id}/tracks")]
-		[HttpGet("{identifier:id}/track", Order = AlternativeRoute)]
-		[PartialPermission(Kind.Read)]
-		[ProducesResponseType(StatusCodes.Status200OK)]
-		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
-		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Page<Track>>> GetEpisode(Identifier identifier,
-			[FromQuery] string sortBy,
-			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] Pagination pagination)
-		{
-			ICollection<Track> resources = await _libraryManager.GetAll(
-				ApiHelper.ParseWhere(where, identifier.Matcher<Track>(x => x.EpisodeID, x => x.Episode.Slug)),
-				Sort<Track>.From(sortBy),
-				pagination
-				);
-
-			if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Episode>()) == null)
-				return NotFound();
-			return Page(resources, pagination.Limit);
 		}
 	}
 }

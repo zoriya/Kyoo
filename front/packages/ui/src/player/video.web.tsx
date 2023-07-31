@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Font, getToken, Track } from "@kyoo/models";
+import { getToken, Subtitle } from "@kyoo/models";
 import {
 	forwardRef,
 	RefObject,
@@ -201,7 +201,7 @@ export default Video;
 
 let htmlTrack: HTMLTrackElement | null;
 let subOcto: SubtitleOctopus | null;
-const useSubtitle = (player: RefObject<HTMLVideoElement>, value: Track | null, fonts?: Font[]) => {
+const useSubtitle = (player: RefObject<HTMLVideoElement>, value: Subtitle | null, fonts?: string[]) => {
 	useEffect(() => {
 		if (!player.current) return;
 
@@ -228,7 +228,7 @@ const useSubtitle = (player: RefObject<HTMLVideoElement>, value: Track | null, f
 			track.kind = "subtitles";
 			track.label = value.displayName;
 			if (value.language) track.srclang = value.language;
-			track.src = value.link! + ".vtt";
+			track.src = value.link;
 			track.className = "subtitle_container";
 			track.default = true;
 			track.onload = () => {
@@ -243,12 +243,11 @@ const useSubtitle = (player: RefObject<HTMLVideoElement>, value: Track | null, f
 			removeOctoSub();
 			subOcto = new SubtitleOctopus({
 				video: player.current,
-				subUrl: value.link!,
+				subUrl: value.link,
 				workerUrl: "/_next/static/chunks/subtitles-octopus-worker.js",
 				legacyWorkerUrl: "/_next/static/chunks/subtitles-octopus-worker-legacy.js",
 				fallbackFont: "/default.woff2",
-				fonts: fonts?.map((x) => x.link),
-				// availableFonts: fonts ? Object.fromEntries(fonts.map((x) => [x.slug, x.link])) : undefined,
+				fonts: fonts,
 				// lazyFileLoading: true,
 				renderMode: "wasm-blend",
 			});

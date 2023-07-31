@@ -20,10 +20,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Kyoo.Abstractions.Controllers;
-using Kyoo.Core.Models.Options;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace Kyoo.Host.Controllers
 {
@@ -39,11 +37,6 @@ namespace Kyoo.Host.Controllers
 		private readonly IServiceProvider _provider;
 
 		/// <summary>
-		/// The configuration to get the plugin's directory.
-		/// </summary>
-		private readonly IOptions<BasicOptions> _options;
-
-		/// <summary>
 		/// The logger used by this class.
 		/// </summary>
 		private readonly ILogger<PluginManager> _logger;
@@ -57,14 +50,11 @@ namespace Kyoo.Host.Controllers
 		/// Create a new <see cref="PluginManager"/> instance.
 		/// </summary>
 		/// <param name="provider">A service container to allow initialization of plugins</param>
-		/// <param name="options">The configuration instance, to get the plugin's directory path.</param>
 		/// <param name="logger">The logger used by this class.</param>
 		public PluginManager(IServiceProvider provider,
-			IOptions<BasicOptions> options,
 			ILogger<PluginManager> logger)
 		{
 			_provider = provider;
-			_options = options;
 			_logger = logger;
 		}
 

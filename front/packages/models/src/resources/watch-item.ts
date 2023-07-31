@@ -20,13 +20,17 @@
 
 import { z } from "zod";
 import { zdate } from "../utils";
-import { ResourceP, ImagesP, imageFn } from "../traits";
+import { ImagesP, imageFn } from "../traits";
 import { EpisodeP } from "./episode";
 
 /**
- * A video, audio or subtitle track for an episode.
+ * A audio or subtitle track.
  */
-export const TrackP = ResourceP.extend({
+export const TrackP = z.object({
+	/**
+	 * The index of this track on the episode.
+	 */
+	index: z.number(),
 	/**
 	 * The title of the stream.
 	 */
@@ -47,44 +51,16 @@ export const TrackP = ResourceP.extend({
 	 * Is this stream tagged as forced?
 	 */
 	isForced: z.boolean(),
-	/**
-	 * Is this track extern to the episode's file?
-	 */
-	isExternal: z.boolean(),
-	/**
-	 * The index of this track on the episode.
-	 */
-	trackIndex: z.number(),
-	/**
-	 * A user-friendly name for this track. It does not include the track type.
-	 */
-	displayName: z.string(),
+});
+export type Audio = z.infer<typeof TrackP>;
+
+export const SubtitleP = TrackP.extend({
 	/*
 	 * The url of this track (only if this is a subtitle)..
 	 */
-	link: z.string().transform(imageFn).nullable(),
-});
-export type Track = z.infer<typeof TrackP>;
-
-export const FontP = z.object({
-	/*
-	 * A human-readable identifier, used in the URL.
-	 */
-	slug: z.string(),
-	/*
-	 * The name of the font file (with the extension).
-	 */
-	file: z.string(),
-	/*
-	 * The format of this font (the extension).
-	 */
-	format: z.string(),
-	/*
-	 * The url of the font.
-	 */
 	link: z.string().transform(imageFn),
 });
-export type Font = z.infer<typeof FontP>;
+export type Subtitle = z.infer<typeof SubtitleP>;
 
 export const ChapterP = z.object({
 	/**
@@ -128,31 +104,41 @@ const WatchMovieP = z.preprocess(
 		 * The release date of this episode. It can be null if unknown.
 		 */
 		releaseDate: zdate().nullable(),
+
 		/**
-		 * The container of the video file of this episode. Common containers are mp4, mkv, avi and so
-		 * on.
+		 * The transcoder's info for this item. This include subtitles, fonts, chapters...
 		 */
-		container: z.string(),
-		/**
-		 * The video track. See Track for more information.
-		 */
-		video: TrackP,
-		/**
-		 * The list of audio tracks. See Track for more information.
-		 */
-		audios: z.array(TrackP),
-		/**
-		 * The list of subtitles tracks. See Track for more information.
-		 */
-		subtitles: z.array(TrackP),
-		/**
-		 * The list of fonts that can be used to display subtitles.
-		 */
-		fonts: z.array(FontP),
-		/**
-		 * The list of chapters. See Chapter for more information.
-		 */
-		chapters: z.array(ChapterP),
+		info: z.object({
+			/**
+			 * The sha1 of the video file.
+			 */
+			sha: z.string(),
+			/**
+			 * The internal path of the video file.
+			 */
+			path: z.string(),
+			/**
+			 * The container of the video file of this episode. Common containers are mp4, mkv, avi and so
+			 * on.
+			 */
+			container: z.string(),
+			/**
+			 * The list of audio tracks.
+			 */
+			audios: z.array(TrackP),
+			/**
+			 * The list of subtitles tracks.
+			 */
+			subtitles: z.array(SubtitleP),
+			/**
+			 * The list of fonts that can be used to display subtitles.
+			 */
+			fonts: z.array(z.string().transform(imageFn)),
+			/**
+			 * The list of chapters. See Chapter for more information.
+			 */
+			chapters: z.array(ChapterP),
+		}),
 		/**
 		 * The links to the videos of this watch item.
 		 */

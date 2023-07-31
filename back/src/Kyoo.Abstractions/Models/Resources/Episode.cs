@@ -123,7 +123,7 @@ namespace Kyoo.Abstractions.Models
 		public int? AbsoluteNumber { get; set; }
 
 		/// <summary>
-		/// The path of the video file for this episode. Any format supported by a <see cref="IFileSystem"/> is allowed.
+		/// The path of the video file for this episode.
 		/// </summary>
 		public string Path { get; set; }
 
@@ -147,11 +147,6 @@ namespace Kyoo.Abstractions.Models
 
 		/// <inheritdoc />
 		[EditableRelation][LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
-
-		/// <summary>
-		/// The list of tracks this episode has. This lists video, audio and subtitles available.
-		/// </summary>
-		[EditableRelation][LoadableRelation] public ICollection<Track> Tracks { get; set; }
 
 		/// <summary>
 		/// Get the slug of an episode.

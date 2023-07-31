@@ -51,9 +51,9 @@ const mapData = (
 		href: data ? (data.isMovie ? `/movie/${data.slug}` : `/show/${data.showSlug}`) : "#",
 		poster: data.poster,
 		qualities: data.link,
-		subtitles: data.subtitles,
-		chapters: data.chapters,
-		fonts: data.fonts,
+		subtitles: data.info.subtitles,
+		chapters: data.info.chapters,
+		fonts: data.info.fonts,
 		previousSlug,
 		nextSlug,
 	};
@@ -92,7 +92,7 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 	const next =
 		data && !data.isMovie && data.nextEpisode ? `/watch/${data.nextEpisode.slug}` : undefined;
 
-	useVideoKeyboard(data?.subtitles, data?.fonts, previous, next);
+	useVideoKeyboard(data?.info.subtitles, data?.info.fonts, previous, next);
 
 	const [isFullscreen, setFullscreen] = useAtom(fullscreenAtom);
 	const [isPlaying, setPlay] = useAtom(playAtom);
@@ -191,9 +191,9 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 			>
 				<Video
 					links={data?.link}
-					subtitles={data?.subtitles}
+					subtitles={data?.info.subtitles}
 					setError={setPlaybackError}
-					fonts={data?.fonts}
+					fonts={data?.info.fonts}
 					onPointerDown={(e) => onPointerDown(e)}
 					onEnd={() => {
 						if (!data) return;

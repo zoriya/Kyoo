@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Font, Track, WatchItem } from "@kyoo/models";
+import { Subtitle, WatchItem } from "@kyoo/models";
 import { IconButton, tooltip, Menu, ts } from "@kyoo/primitives";
 import { useAtom } from "jotai";
 import { Platform, View } from "react-native";
@@ -40,8 +40,8 @@ export const RightButtons = ({
 	onMenuClose,
 	...props
 }: {
-	subtitles?: Track[];
-	fonts?: Font[];
+	subtitles?: Subtitle[];
+	fonts?: string[];
 	qualities?: WatchItem["link"];
 	onMenuOpen: () => void;
 	onMenuClose: () => void;
@@ -71,7 +71,7 @@ export const RightButtons = ({
 					/>
 					{subtitles.map((x) => (
 						<Menu.Item
-							key={x.id}
+							key={x.index}
 							label={x.displayName}
 							selected={selectedSubtitle === x}
 							onSelect={() => setSubtitle(x)}

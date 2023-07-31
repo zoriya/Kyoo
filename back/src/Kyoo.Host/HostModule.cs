@@ -20,11 +20,7 @@ using System.Collections.Generic;
 using Autofac;
 using Autofac.Extras.AttributeMetadata;
 using Kyoo.Abstractions.Controllers;
-using Kyoo.Core.Models.Options;
-using Kyoo.Host.Controllers;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Serilog;
 
 namespace Kyoo.Host
@@ -43,19 +39,12 @@ namespace Kyoo.Host
 		private readonly IPluginManager _plugins;
 
 		/// <summary>
-		/// The configuration used to register options.
-		/// </summary>
-		private readonly IConfiguration _configuration;
-
-		/// <summary>
 		/// Create a new <see cref="HostModule"/>.
 		/// </summary>
 		/// <param name="plugins">The plugin manager that loaded all plugins.</param>
-		/// <param name="configuration"> The configuration used to register options.</param>
-		public HostModule(IPluginManager plugins, IConfiguration configuration)
+		public HostModule(IPluginManager plugins)
 		{
 			_plugins = plugins;
-			_configuration = configuration;
 		}
 
 		/// <inheritdoc />
@@ -63,7 +52,6 @@ namespace Kyoo.Host
 		{
 			builder.RegisterModule<AttributedMetadataModule>();
 			builder.RegisterInstance(_plugins).As<IPluginManager>().ExternallyOwned();
-			builder.RegisterComposite<FileSystemComposite, IFileSystem>().InstancePerLifetimeScope();
 		}
 
 		/// <inheritdoc />

@@ -71,11 +71,6 @@ namespace Kyoo.Abstractions.Controllers
 		IEpisodeRepository EpisodeRepository { get; }
 
 		/// <summary>
-		/// The repository that handle tracks.
-		/// </summary>
-		ITrackRepository TrackRepository { get; }
-
-		/// <summary>
 		/// The repository that handle people.
 		/// </summary>
 		IPeopleRepository PeopleRepository { get; }

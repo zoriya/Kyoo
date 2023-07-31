@@ -19,12 +19,12 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
-using PathIO = System.IO.Path;
 
 namespace Kyoo.Abstractions.Models
 {
@@ -86,11 +86,6 @@ namespace Kyoo.Abstractions.Models
 		public DateTime? ReleaseDate { get; set; }
 
 		/// <summary>
-		/// The path of the video file for this episode. Any format supported by a <see cref="IFileSystem"/> is allowed.
-		/// </summary>
-		[SerializeIgnore] public string Path { get; set; }
-
-		/// <summary>
 		/// The episode that come before this one if you follow usual watch orders.
 		/// If this is the first episode or this is a movie, it will be null.
 		/// </summary>
@@ -111,35 +106,9 @@ namespace Kyoo.Abstractions.Models
 		public Dictionary<int, string> Images { get; set; }
 
 		/// <summary>
-		/// The container of the video file of this episode.
-		/// Common containers are mp4, mkv, avi and so on.
+		/// The transcoder's info for this item. This include subtitles, fonts, chapters...
 		/// </summary>
-		public string Container { get; set; }
-
-		/// <summary>
-		/// The video track. See <see cref="Track"/> for more information.
-		/// </summary>
-		public Track Video { get; set; }
-
-		/// <summary>
-		/// The list of audio tracks. See <see cref="Track"/> for more information.
-		/// </summary>
-		public ICollection<Track> Audios { get; set; }
-
-		/// <summary>
-		/// The list of subtitles tracks. See <see cref="Track"/> for more information.
-		/// </summary>
-		public ICollection<Track> Subtitles { get; set; }
-
-		/// <summary>
-		/// The list of fonts that can be used to draw the subtitles.
-		/// </summary>
-		public ICollection<Font> Fonts { get; set; }
-
-		/// <summary>
-		/// The list of chapters. See <see cref="Chapter"/> for more information.
-		/// </summary>
-		public ICollection<Chapter> Chapters { get; set; }
+		public object Info { get; set; }
 
 		[SerializeIgnore]
 		private string _Type => IsMovie ? "movie" : "episode";
@@ -158,13 +127,11 @@ namespace Kyoo.Abstractions.Models
 		/// <param name="library">
 		/// A library manager to retrieve the next and previous episode and load the show and tracks of the episode.
 		/// </param>
-		/// <param name="fs">A file system used to retrieve chapters informations.</param>
-		/// <param name="transcoder">The transcoder used to list fonts.</param>
+		/// <param name="client">A http client to reach the transcoder.</param>
 		/// <returns>A new WatchItem representing the given episode.</returns>
-		public static async Task<WatchItem> FromEpisode(Episode ep, ILibraryManager library, IFileSystem fs, ITranscoder transcoder)
+		public static async Task<WatchItem> FromEpisode(Episode ep, ILibraryManager library, HttpClient client)
 		{
 			await library.Load(ep, x => x.Show);
-			await library.Load(ep, x => x.Tracks);
 
 			return new WatchItem
 			{
@@ -178,13 +145,7 @@ namespace Kyoo.Abstractions.Models
 				Title = ep.Title,
 				Overview = ep.Overview,
 				ReleaseDate = ep.ReleaseDate,
-				Path = ep.Path,
 				Images = ep.Show.Images,
-				Container = PathIO.GetExtension(ep.Path).Replace(".", string.Empty),
-				Video = ep.Tracks.FirstOrDefault(x => x.Type == StreamType.Video),
-				Audios = ep.Tracks.Where(x => x.Type == StreamType.Audio).ToArray(),
-				Subtitles = ep.Tracks.Where(x => x.Type == StreamType.Subtitle).ToArray(),
-				Fonts = await transcoder.ListFonts(ep),
 				PreviousEpisode = ep.Show.IsMovie
 					? null
 					: (await library.GetAll<Episode>(
@@ -197,50 +158,16 @@ namespace Kyoo.Abstractions.Models
 							where: x => x.ShowID == ep.ShowID,
 							limit: new Pagination(1, ep.ID)
 						)).FirstOrDefault(),
-				Chapters = await _GetChapters(ep, fs),
-				IsMovie = ep.Show.IsMovie
+				IsMovie = ep.Show.IsMovie,
+				Info = await _GetInfo(ep, client),
 			};
 		}
 
-		// TODO move this method in a controller to support abstraction.
-		private static async Task<ICollection<Chapter>> _GetChapters(Episode episode, IFileSystem fs)
+		private static async Task<object> _GetInfo(Episode ep, HttpClient client)
 		{
-			string path = fs.Combine(
-				await fs.GetExtraDirectory(episode),
-				"Chapters",
-				PathIO.GetFileNameWithoutExtension(episode.Path) + ".txt"
+			return await client.GetFromJsonAsync<object>(
+				$"http://transcoder:7666/info/{(ep.Show.IsMovie ? "movie" : "episode")}/${ep.Slug}/info"
 			);
-			if (!await fs.Exists(path))
-				return Array.Empty<Chapter>();
-			try
-			{
-				using StreamReader sr = new(await fs.GetReader(path));
-				string chapters = await sr.ReadToEndAsync();
-				return chapters.Split('\n')
-					.Select(x =>
-					{
-						string[] values = x.Split(' ');
-						if (
-							values.Length < 3
-							|| !float.TryParse(values[0], out float start)
-							|| !float.TryParse(values[1], out float end)
-						)
-							return null;
-						return new Chapter(
-							start,
-							end,
-							string.Join(' ', values.Skip(2))
-						);
-					})
-					.Where(x => x != null)
-					.ToArray();
-			}
-			catch (Exception ex)
-			{
-				await Console.Error.WriteLineAsync($"Invalid chapter file at {path}");
-				Console.Error.WriteLine(ex.ToString());
-				return Array.Empty<Chapter>();
-			}
 		}
 
 		/// <inheritdoc />

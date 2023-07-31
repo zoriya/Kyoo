@@ -29,13 +29,6 @@
 	</PropertyGroup>
 
 	<PropertyGroup>
-		<IsWindows Condition="$([MSBuild]::IsOSPlatform('Windows'))">true</IsWindows>
-		<IsOSX Condition="$([MSBuild]::IsOSPlatform('OSX'))">true</IsOSX>
-		<IsLinux Condition="$([MSBuild]::IsOSPlatform('Linux'))">true</IsLinux>
-
-		<!-- This is horrible but the only workarround I found to disable the transcoder copy on the dev dockerfile -->
-		<SkipTranscoder Condition="$(MsBuildThisFileDirectory) == '/app/src/'">true</SkipTranscoder>
-
 		<CheckCodingStyle Condition="$(CheckCodingStyle) == ''">true</CheckCodingStyle>
 	</PropertyGroup>
 

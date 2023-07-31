@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Kyoo.Postgresql.Migrations
@@ -23,6 +24,8 @@ namespace Kyoo.Postgresql.Migrations
 	/// <summary>
 	/// Remove triggers
 	/// </summary>
+	[DbContext(typeof(PostgresContext))]
+	[Migration("20230724144449_RemoveTriggers")]
 	public partial class RemoveTriggers : Migration
 	{
 		/// <inheritdoc/>

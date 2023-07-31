@@ -17,6 +17,7 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -24,6 +25,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Kyoo.Postgresql.Migrations
 {
 	/// <inheritdoc />
+	[DbContext(typeof(PostgresContext))]
+	[Migration("20230726100747_Timestamp")]
 	public partial class Timestamp : Migration
 	{
 		/// <inheritdoc />

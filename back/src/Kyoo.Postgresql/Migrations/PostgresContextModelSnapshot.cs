@@ -542,7 +542,7 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("track_index");
 
-                    b.Property<StreamType>("Type")
+                    b.Property<object>("Type")
                         .HasColumnType("stream_type")
                         .HasColumnName("type");
 

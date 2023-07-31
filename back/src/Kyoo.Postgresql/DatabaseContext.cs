@@ -66,11 +66,6 @@ namespace Kyoo.Postgresql
 		public DbSet<Episode> Episodes { get; set; }
 
 		/// <summary>
-		/// All tracks of Kyoo. See <see cref="Track"/>.
-		/// </summary>
-		public DbSet<Track> Tracks { get; set; }
-
-		/// <summary>
 		/// All genres of Kyoo. See <see cref="Genres"/>.
 		/// </summary>
 		public DbSet<Genre> Genres { get; set; }
@@ -268,10 +263,6 @@ namespace Kyoo.Postgresql
 				.HasMany(x => x.Episodes)
 				.WithOne(x => x.Season)
 				.OnDelete(DeleteBehavior.Cascade);
-			modelBuilder.Entity<Episode>()
-				.HasMany(x => x.Tracks)
-				.WithOne(x => x.Episode)
-				.OnDelete(DeleteBehavior.Cascade);
 
 			modelBuilder.Entity<Show>()
 				.HasOne(x => x.Studio)
@@ -307,7 +298,6 @@ namespace Kyoo.Postgresql
 			modelBuilder.Entity<Show>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<Season>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<Episode>().Property(x => x.Slug).IsRequired();
-			modelBuilder.Entity<Track>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<Studio>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<User>().Property(x => x.Slug).IsRequired();
 
@@ -342,12 +332,6 @@ namespace Kyoo.Postgresql
 				.HasIndex(x => new { x.ShowID, x.SeasonNumber, x.EpisodeNumber, x.AbsoluteNumber })
 				.IsUnique();
 			modelBuilder.Entity<Episode>()
-				.HasIndex(x => x.Slug)
-				.IsUnique();
-			modelBuilder.Entity<Track>()
-				.HasIndex(x => new { x.EpisodeID, x.Type, x.Language, x.TrackIndex, x.IsForced })
-				.IsUnique();
-			modelBuilder.Entity<Track>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
 			modelBuilder.Entity<User>()

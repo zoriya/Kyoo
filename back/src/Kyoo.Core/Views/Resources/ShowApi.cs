@@ -48,7 +48,6 @@ namespace Kyoo.Core.Api
 		/// The library manager used to modify or retrieve information in the data store.
 		/// </summary>
 		private readonly ILibraryManager _libraryManager;
-		private readonly ITranscoder _transcoder;
 
 		/// <summary>
 		/// Create a new <see cref="ShowApi"/>.
@@ -56,17 +55,12 @@ namespace Kyoo.Core.Api
 		/// <param name="libraryManager">
 		/// The library manager used to modify or retrieve information about the data store.
 		/// </param>
-		/// <param name="files">The file manager used to send images and fonts.</param>
 		/// <param name="thumbs">The thumbnail manager used to retrieve images paths.</param>
-		/// <param name="transcoder">TODO: Remove this.</param>
 		public ShowApi(ILibraryManager libraryManager,
-			IFileSystem files,
-			IThumbnailsManager thumbs,
-			ITranscoder transcoder)
-			: base(libraryManager.ShowRepository, files, thumbs)
+			IThumbnailsManager thumbs)
+			: base(libraryManager.ShowRepository, thumbs)
 		{
 			_libraryManager = libraryManager;
-			_transcoder = transcoder;
 		}
 
 		/// <inheritdoc/>
@@ -82,7 +76,6 @@ namespace Kyoo.Core.Api
 					Path = ret.Value.Path
 				};
 
-				episode.Tracks = await _transcoder.ExtractInfos(episode, false);
 				await _libraryManager.Create(episode);
 			}
 			return ret;
