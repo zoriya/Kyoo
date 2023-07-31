@@ -31,6 +31,17 @@ import MusicNote from "@material-symbols/svg-400/rounded/music_note-fill.svg";
 import { Stylable, useYoshiki } from "yoshiki/native";
 import { fullscreenAtom, subtitleAtom } from "../state";
 import { AudiosMenu, QualitiesMenu } from "../video";
+import i18next from "i18next";
+
+export const getDisplayName = (sub: Subtitle) => {
+	const languageNames = new Intl.DisplayNames([i18next.language], { type: "language" });
+	const lng = sub.language ? languageNames.of(sub.language) : undefined;
+
+	if (lng && sub.title) return `${lng} - ${sub.title}`;
+	if (lng) return lng;
+	if (sub.title) return sub.title;
+	return `Unknwon (${sub.index})`;
+};
 
 export const RightButtons = ({
 	subtitles,
@@ -72,7 +83,7 @@ export const RightButtons = ({
 					{subtitles.map((x) => (
 						<Menu.Item
 							key={x.index}
-							label={x.displayName}
+							label={getDisplayName(x)}
 							selected={selectedSubtitle === x}
 							onSelect={() => setSubtitle(x)}
 						/>
