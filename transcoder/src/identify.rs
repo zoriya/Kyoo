@@ -2,7 +2,9 @@ use json::JsonValue;
 use serde::Serialize;
 use sha1::{Digest, Sha1};
 use std::{
+	collections::HashMap,
 	fs, io,
+	iter::Map,
 	path::PathBuf,
 	process::Stdio,
 	str::{self, FromStr},
@@ -75,6 +77,8 @@ pub struct Subtitle {
 	pub language: Option<String>,
 	/// The codec of this stream.
 	pub codec: String,
+	/// The extension for the codec.
+	pub extension: Option<String>,
 	/// Is this stream the default one of it's type?
 	pub is_default: bool,
 	/// Is this stream tagged as forced? (useful only for subtitles)
@@ -100,18 +104,15 @@ async fn extract(path: String, sha: &String, subs: &Vec<Subtitle>) {
 		.args(&["-dump_attachment:t", ""])
 		.args(&["-i", path.as_str()]);
 	for sub in subs {
-		cmd.args(&[
-			"-map",
-			format!("0:s:{idx}", idx = sub.index).as_str(),
-			"-c:s",
-			"copy",
-			format!(
-				"/metadata/{sha}/sub/{idx}.{ext}",
-				idx = sub.index,
-				ext = sub.codec
-			)
-			.as_str(),
-		]);
+		if let Some(ext) = sub.extension.clone() {
+			cmd.args(&[
+				"-map",
+				format!("0:s:{idx}", idx = sub.index).as_str(),
+				"-c:s",
+				"copy",
+				format!("/metadata/{sha}/sub/{idx}.{ext}", idx = sub.index,).as_str(),
+			]);
+		}
 	}
 	println!("Starting extraction with the command: {:?}", cmd);
 	cmd.stdout(Stdio::null())
@@ -123,6 +124,8 @@ async fn extract(path: String, sha: &String, subs: &Vec<Subtitle>) {
 }
 
 pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
+	let extension_table: HashMap<&str, &str> = HashMap::from([("subrip", "srt"), ("ass", "ass")]);
+
 	let mediainfo = Command::new("mediainfo")
 		.arg("--Output=JSON")
 		.arg("--Language=raw")
@@ -148,13 +151,21 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 		.filter(|x| x["@type"] == "Text")
 		.map(|a| {
 			let index = parse::<u32>(&a["@typeorder"]).unwrap() - 1;
-			let codec = a["Format"].as_str().unwrap().to_string().to_lowercase();
+			let mut codec = a["Format"].as_str().unwrap().to_string().to_lowercase();
+			if codec == "utf-8" {
+				codec = "subrip".to_string();
+			}
+			let extension = extension_table.get(codec.as_str()).map(|x| x.to_string());
 			Subtitle {
-				link: format!("/video/{sha}/subtitle/{index}.{codec}"),
+				link: format!(
+					"/video/{sha}/subtitle/{index}.{ext}",
+					ext = extension.clone().unwrap_or(codec.clone())
+				),
 				index,
 				title: a["Title"].as_str().map(|x| x.to_string()),
 				language: a["Language"].as_str().map(|x| x.to_string()),
 				codec,
+				extension,
 				is_default: a["Default"] == "Yes",
 				is_forced: a["Forced"] == "No",
 			}

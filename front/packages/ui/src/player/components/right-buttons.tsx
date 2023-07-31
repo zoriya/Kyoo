@@ -34,7 +34,7 @@ import { AudiosMenu, QualitiesMenu } from "../video";
 import i18next from "i18next";
 
 export const getDisplayName = (sub: Subtitle) => {
-	const languageNames = new Intl.DisplayNames([i18next.language], { type: "language" });
+	const languageNames = new Intl.DisplayNames([i18next.language ?? "en"], { type: "language" });
 	const lng = sub.language ? languageNames.of(sub.language) : undefined;
 
 	if (lng && sub.title) return `${lng} - ${sub.title}`;
