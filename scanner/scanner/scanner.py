@@ -2,6 +2,7 @@ import os
 import asyncio
 import logging
 import jsons
+import re
 from aiohttp import ClientSession
 from pathlib import Path
 from guessit import guessit
@@ -19,6 +20,11 @@ class Scanner:
 		self._client = client
 		self._api_key = api_key
 		self._url = os.environ.get("KYOO_URL", "http://back:5000")
+		try:
+			self._ignore_pattern = re.compile(os.environ.get("LIBRARY_IGNORE_PATTERN", ""))
+		except Exception as e:
+			self._ignore_pattern = re.compile("")
+			logging.error(f"Invalid ignore pattern. Ignoring. Error: {e}")
 		self.provider = Provider.get_all(client)[0]
 		self.cache = {"shows": {}, "seasons": {}}
 		self.languages = languages
@@ -26,13 +32,20 @@ class Scanner:
 	async def scan(self, path: str):
 		logging.info("Starting the scan. It can take some times...")
 		self.registered = await self.get_registered_paths()
-		videos = (str(p) for p in Path(path).rglob("*") if p.is_file())
+		videos = [str(p) for p in Path(path).rglob("*") if p.is_file()]
+		deleted = [x for x in self.registered if x not in videos]
+
+		if len(deleted) != len(self.registered):
+			for x in deleted:
+				await self.delete(x)
+		else:
+			logging.warning("All video files are unavailable. Check your disks.")
+
 		# We batch videos by 20 because too mutch at once kinda DDOS everything.
-		for group in batch(videos, 20):
-			logging.info("Batch finished. Starting a new one")
+		for group in batch(iter(videos), 20):
 			await asyncio.gather(*map(self.identify, group))
 
-	async def get_registered_paths(self) -> List[Path]:
+	async def get_registered_paths(self) -> List[str]:
 		# TODO: Once movies are separated from the api, a new endpoint should be created to check for paths.
 		async with self._client.get(
 			f"{self._url}/episodes",
@@ -45,7 +58,7 @@ class Scanner:
 
 	@log_errors
 	async def identify(self, path: str):
-		if path in self.registered:
+		if path in self.registered or self._ignore_pattern.match(path):
 			return
 
 		raw = guessit(path, "--episode-prefer-number")
@@ -139,3 +152,13 @@ class Scanner:
 				r.raise_for_status()
 			ret = await r.json()
 			return ret["id"]
+
+	async def delete(self, path: str):
+		logging.info("Deleting %s", path)
+		# TODO: Adapt this for movies as well when they are split
+		async with self._client.delete(
+			f"{self._url}/episodes?path={path}", headers={"X-API-Key": self._api_key}
+		) as r:
+			if not r.ok:
+				logging.error(f"Request error: {await r.text()}")
+				r.raise_for_status()

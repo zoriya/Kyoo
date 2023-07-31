@@ -44,6 +44,8 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		private readonly IProviderRepository _providers;
 
+		private readonly IShowRepository _shows;
+
 		/// <inheritdoc />
 		// Use absolute numbers by default and fallback to season/episodes if it does not exists.
 		protected override Sort<Episode> DefaultSort => new Sort<Episode>.Conglomerate(
@@ -65,6 +67,7 @@ namespace Kyoo.Core.Controllers
 		{
 			_database = database;
 			_providers = providers;
+			_shows = shows;
 
 			// Edit episode slugs when the show's slug changes.
 			shows.OnEdited += (show) =>
@@ -201,10 +204,13 @@ namespace Kyoo.Core.Controllers
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
+			int epCount = await _database.Episodes.Where(x => x.ShowID == obj.ShowID).Take(2).CountAsync();
 			_database.Entry(obj).State = EntityState.Deleted;
 			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Deleted);
 			await _database.SaveChangesAsync();
 			await base.Delete(obj);
+			if (epCount == 1)
+				await _shows.Delete(obj.ShowID);
 		}
 	}
 }
