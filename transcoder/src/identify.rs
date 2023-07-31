@@ -13,6 +13,7 @@ use utoipa::ToSchema;
 use crate::transcode::Quality;
 
 #[derive(Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct MediaInfo {
 	/// The sha1 of the video file.
 	pub sha: String,
@@ -30,6 +31,7 @@ pub struct MediaInfo {
 }
 
 #[derive(Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct Video {
 	/// The codec of this stream (defined as the RFC 6381).
 	pub codec: String,
@@ -46,6 +48,7 @@ pub struct Video {
 }
 
 #[derive(Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct Audio {
 	/// The index of this track on the media.
 	pub index: u32,
@@ -62,6 +65,7 @@ pub struct Audio {
 }
 
 #[derive(Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct Subtitle {
 	/// The index of this track on the media.
 	pub index: u32,
@@ -80,6 +84,7 @@ pub struct Subtitle {
 }
 
 #[derive(Serialize, ToSchema)]
+#[serde(rename_all = "camelCase")]
 pub struct Chapter {
 	/// The start time of the chapter (in second from the start of the episode).
 	pub start_time: f32,

@@ -21,10 +21,10 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
+using Newtonsoft.Json;
 
 namespace Kyoo.Abstractions.Models
 {
@@ -165,9 +165,10 @@ namespace Kyoo.Abstractions.Models
 
 		private static async Task<object> _GetInfo(Episode ep, HttpClient client)
 		{
-			return await client.GetFromJsonAsync<object>(
-				$"http://transcoder:7666/info/{(ep.Show.IsMovie ? "movie" : "episode")}/${ep.Slug}/info"
-			);
+			HttpResponseMessage ret = await client.GetAsync($"http://transcoder:7666/{(ep.Show.IsMovie ? "movie" : "episode")}/{ep.Slug}/info");
+			ret.EnsureSuccessStatusCode();
+			string content = await ret.Content.ReadAsStringAsync();
+			return JsonConvert.DeserializeObject<object>(content);
 		}
 
 		/// <inheritdoc />
