@@ -30,9 +30,9 @@ async def main():
 		logging.basicConfig(level=logging.INFO)
 	if len(sys.argv) > 1 and sys.argv[1] == "-vv":
 		logging.basicConfig(level=logging.DEBUG)
-	logging.getLogger('watchfiles').setLevel(logging.WARNING)
+	logging.getLogger("watchfiles").setLevel(logging.WARNING)
 
-	jsons.set_serializer(lambda x, **_: format_date(x), Optional[date | int]) # type: ignore
+	jsons.set_serializer(lambda x, **_: format_date(x), Optional[date | int])  # type: ignore
 	async with ClientSession(
 		json_serialize=lambda *args, **kwargs: jsons.dumps(
 			*args, key_transformer=jsons.KEY_TRANSFORMER_CAMELCASE, **kwargs

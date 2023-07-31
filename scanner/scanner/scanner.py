@@ -21,7 +21,9 @@ class Scanner:
 		self._api_key = api_key
 		self._url = os.environ.get("KYOO_URL", "http://back:5000")
 		try:
-			self._ignore_pattern = re.compile(os.environ.get("LIBRARY_IGNORE_PATTERN", ""))
+			self._ignore_pattern = re.compile(
+				os.environ.get("LIBRARY_IGNORE_PATTERN", "")
+			)
 		except Exception as e:
 			self._ignore_pattern = re.compile("")
 			logging.error(f"Invalid ignore pattern. Ignoring. Error: {e}")

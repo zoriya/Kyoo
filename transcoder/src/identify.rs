@@ -1,11 +1,11 @@
 use json::JsonValue;
 use serde::Serialize;
-use sha1::{Sha1, Digest};
+use sha1::{Digest, Sha1};
 use std::{
-	fs,
+	fs, io,
 	path::PathBuf,
 	process::Stdio,
-	str::{self, FromStr}, io,
+	str::{self, FromStr},
 };
 use tokio::process::Command;
 use utoipa::ToSchema;
@@ -137,7 +137,6 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 	let mut hasher = Sha1::new();
 	io::copy(&mut file, &mut hasher)?;
 	let sha = format!("{:x}", hasher.finalize());
-
 
 	let general = output["media"]["track"]
 		.members()

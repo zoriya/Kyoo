@@ -11,7 +11,7 @@ async def monitor(path: str, scanner: Scanner):
 				if event == Change.added:
 					await scanner.identify(file)
 				elif event == Change.deleted:
-					await scanner.delete(file);
+					await scanner.delete(file)
 				elif event == Change.modified:
 					pass
 				else:

@@ -11,7 +11,7 @@ use utoipa::OpenApi;
 
 use crate::{
 	audio::*,
-	identify::{identify, Chapter, MediaInfo, Video, Audio, Subtitle},
+	identify::{identify, Audio, Chapter, MediaInfo, Subtitle, Video},
 	state::Transcoder,
 	video::*,
 };
@@ -104,16 +104,13 @@ async fn identify_resource(
 		.await
 		.map_err(|_| ApiError::NotFound)?;
 
-	identify(path)
-		.await
-		.map(|info| Json(info))
-		.map_err(|e| {
-			eprintln!(
-				"Unhandled error occured while identifing the resource: {}",
-				e
-			);
-			ApiError::InternalError
-		})
+	identify(path).await.map(|info| Json(info)).map_err(|e| {
+		eprintln!(
+			"Unhandled error occured while identifing the resource: {}",
+			e
+		);
+		ApiError::InternalError
+	})
 }
 
 /// Get attachments
