@@ -108,7 +108,7 @@ namespace Kyoo.Tests.Database
 		}
 
 		[Fact]
-		public async Task CreateTest()
+		public virtual async Task CreateTest()
 		{
 			await Assert.ThrowsAsync<DuplicatedItemException>(() => _repository.Create(TestSample.Get<T>()));
 			await _repository.Delete(TestSample.Get<T>());
@@ -132,7 +132,7 @@ namespace Kyoo.Tests.Database
 		}
 
 		[Fact]
-		public async Task CreateIfNotExistTest()
+		public virtual async Task CreateIfNotExistTest()
 		{
 			T expected = TestSample.Get<T>();
 			KAssert.DeepEqual(expected, await _repository.CreateIfNotExists(TestSample.Get<T>()));
