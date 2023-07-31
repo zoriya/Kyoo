@@ -21,6 +21,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Postgresql;
 using Microsoft.EntityFrameworkCore;
 using Xunit;
@@ -45,6 +46,7 @@ namespace Kyoo.Tests.Database
 		protected AEpisodeTests(RepositoryActivator repositories)
 			: base(repositories)
 		{
+
 			_repository = repositories.LibraryManager.EpisodeRepository;
 		}
 
@@ -331,6 +333,31 @@ namespace Kyoo.Tests.Database
 			ICollection<Episode> ret = await _repository.Search(query);
 			value.Show = TestSample.Get<Show>();
 			KAssert.DeepEqual(value, ret.First());
+		}
+
+		[Fact]
+		public override async Task CreateTest()
+		{
+			await Assert.ThrowsAsync<DuplicatedItemException>(() => _repository.Create(TestSample.Get<Episode>()));
+			await _repository.Delete(TestSample.Get<Episode>());
+
+			Episode expected = TestSample.Get<Episode>();
+			expected.ID = 0;
+			expected.ShowID = (await Repositories.LibraryManager.ShowRepository.Create(TestSample.Get<Show>())).ID;
+			expected.SeasonID = (await Repositories.LibraryManager.SeasonRepository.Create(TestSample.Get<Season>())).ID;
+			await _repository.Create(expected);
+			KAssert.DeepEqual(expected, await _repository.Get(expected.Slug));
+		}
+
+		[Fact]
+		public override async Task CreateIfNotExistTest()
+		{
+			Episode expected = TestSample.Get<Episode>();
+			KAssert.DeepEqual(expected, await _repository.CreateIfNotExists(TestSample.Get<Episode>()));
+			await _repository.Delete(TestSample.Get<Episode>());
+			expected.ShowID = (await Repositories.LibraryManager.ShowRepository.Create(TestSample.Get<Show>())).ID;
+			expected.SeasonID = (await Repositories.LibraryManager.SeasonRepository.Create(TestSample.Get<Season>())).ID;
+			KAssert.DeepEqual(expected, await _repository.CreateIfNotExists(expected));
 		}
 	}
 }

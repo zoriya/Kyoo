@@ -31,6 +31,27 @@ namespace Kyoo.Postgresql.Migrations
 		/// <inheritdoc/>
 		protected override void Up(MigrationBuilder migrationBuilder)
 		{
+			// language=PostgreSQL
+			migrationBuilder.Sql("DROP TRIGGER show_slug_trigger ON shows;");
+			// language=PostgreSQL
+			migrationBuilder.Sql(@"DROP FUNCTION show_slug_update;");
+			// language=PostgreSQL
+			migrationBuilder.Sql(@"DROP TRIGGER season_slug_trigger ON seasons;");
+			// language=PostgreSQL
+			migrationBuilder.Sql(@"DROP FUNCTION season_slug_update;");
+			// language=PostgreSQL
+			migrationBuilder.Sql("DROP TRIGGER episode_slug_trigger ON episodes;");
+			// language=PostgreSQL
+			migrationBuilder.Sql(@"DROP FUNCTION episode_slug_update;");
+			// language=PostgreSQL
+			migrationBuilder.Sql("DROP TRIGGER track_slug_trigger ON tracks;");
+			// language=PostgreSQL
+			migrationBuilder.Sql(@"DROP FUNCTION track_slug_update;");
+			// language=PostgreSQL
+			migrationBuilder.Sql("DROP TRIGGER episode_track_slug_trigger ON episodes;");
+			// language=PostgreSQL
+			migrationBuilder.Sql(@"DROP FUNCTION episode_update_tracks_slug;");
+
 			migrationBuilder.AlterColumn<string>(
 				name: "slug",
 				table: "tracks",
@@ -60,27 +81,6 @@ namespace Kyoo.Postgresql.Migrations
 				oldClrType: typeof(string),
 				oldType: "text",
 				oldNullable: true);
-
-			// language=PostgreSQL
-			migrationBuilder.Sql("DROP TRIGGER show_slug_trigger ON shows;");
-			// language=PostgreSQL
-			migrationBuilder.Sql(@"DROP FUNCTION show_slug_update;");
-			// language=PostgreSQL
-			migrationBuilder.Sql(@"DROP TRIGGER season_slug_trigger ON seasons;");
-			// language=PostgreSQL
-			migrationBuilder.Sql(@"DROP FUNCTION season_slug_update;");
-			// language=PostgreSQL
-			migrationBuilder.Sql("DROP TRIGGER episode_slug_trigger ON episodes;");
-			// language=PostgreSQL
-			migrationBuilder.Sql(@"DROP FUNCTION episode_slug_update;");
-			// language=PostgreSQL
-			migrationBuilder.Sql("DROP TRIGGER track_slug_trigger ON tracks;");
-			// language=PostgreSQL
-			migrationBuilder.Sql(@"DROP FUNCTION track_slug_update;");
-			// language=PostgreSQL
-			migrationBuilder.Sql("DROP TRIGGER episode_track_slug_trigger ON episodes;");
-			// language=PostgreSQL
-			migrationBuilder.Sql(@"DROP FUNCTION episode_update_tracks_slug;");
 		}
 
 		/// <inheritdoc/>
