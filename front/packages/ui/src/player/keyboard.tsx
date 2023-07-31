@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Font, Track } from "@kyoo/models";
+import { Subtitle } from "@kyoo/models";
 import { atom, useSetAtom } from "jotai";
 import { useRouter } from "solito/router";
 import { useEffect } from "react";
@@ -41,7 +41,7 @@ type Action =
 	| { type: "seekTo"; value: number }
 	| { type: "seekPercent"; value: number }
 	| { type: "volume"; value: number }
-	| { type: "subtitle"; subtitles: Track[]; fonts: Font[] };
+	| { type: "subtitle"; subtitles: Subtitle[]; fonts: string[] };
 
 export const reducerAtom = atom(null, (get, set, action: Action) => {
 	const duration = get(durationAtom);
@@ -70,7 +70,7 @@ export const reducerAtom = atom(null, (get, set, action: Action) => {
 			break;
 		case "subtitle":
 			const subtitle = get(subtitleAtom);
-			const index = subtitle ? action.subtitles.findIndex((x) => x.id === subtitle.id) : -1;
+			const index = subtitle ? action.subtitles.findIndex((x) => x.index === subtitle.index) : -1;
 			set(
 				subtitleAtom,
 				index === -1 ? null : action.subtitles[(index + 1) % action.subtitles.length],
@@ -80,8 +80,8 @@ export const reducerAtom = atom(null, (get, set, action: Action) => {
 });
 
 export const useVideoKeyboard = (
-	subtitles?: Track[],
-	fonts?: Font[],
+	subtitles?: Subtitle[],
+	fonts?: string[],
 	previousEpisode?: string,
 	nextEpisode?: string,
 ) => {

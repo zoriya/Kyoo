@@ -33,7 +33,7 @@ import {
 	tooltip,
 	ts,
 } from "@kyoo/primitives";
-import { Chapter, Font, Track, WatchItem } from "@kyoo/models";
+import { Chapter, Subtitle, WatchItem } from "@kyoo/models";
 import { useAtomValue, useSetAtom, useAtom } from "jotai";
 import { Platform, Pressable, View, ViewProps } from "react-native";
 import { useTranslation } from "react-i18next";
@@ -69,8 +69,8 @@ export const Hover = ({
 	poster?: string | null;
 	chapters?: Chapter[];
 	qualities?: WatchItem["link"]
-	subtitles?: Track[];
-	fonts?: Font[];
+	subtitles?: Subtitle[];
+	fonts?: string[];
 	previousSlug?: string | null;
 	nextSlug?: string | null;
 	onMenuOpen: () => void;
