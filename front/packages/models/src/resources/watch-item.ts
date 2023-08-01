@@ -58,7 +58,7 @@ export const SubtitleP = TrackP.extend({
 	/*
 	 * The url of this track (only if this is a subtitle)..
 	 */
-	link: z.string().transform(imageFn),
+	link: z.string().transform(imageFn).nullable(),
 });
 export type Subtitle = z.infer<typeof SubtitleP>;
 

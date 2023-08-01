@@ -4,7 +4,6 @@ use sha1::{Digest, Sha1};
 use std::{
 	collections::HashMap,
 	fs, io,
-	iter::Map,
 	path::PathBuf,
 	process::Stdio,
 	str::{self, FromStr},
@@ -84,7 +83,7 @@ pub struct Subtitle {
 	/// Is this stream tagged as forced? (useful only for subtitles)
 	pub is_forced: bool,
 	/// The link to access this subtitle.
-	pub link: String,
+	pub link: Option<String>,
 }
 
 #[derive(Serialize, ToSchema)]
@@ -124,7 +123,8 @@ async fn extract(path: String, sha: &String, subs: &Vec<Subtitle>) {
 }
 
 pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
-	let extension_table: HashMap<&str, &str> = HashMap::from([("subrip", "srt"), ("ass", "ass")]);
+	let extension_table: HashMap<&str, &str> =
+		HashMap::from([("subrip", "srt"), ("ass", "ass"), ("vtt", "vtt")]);
 
 	let mediainfo = Command::new("mediainfo")
 		.arg("--Output=JSON")
@@ -157,10 +157,7 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 			}
 			let extension = extension_table.get(codec.as_str()).map(|x| x.to_string());
 			Subtitle {
-				link: format!(
-					"/video/{sha}/subtitle/{index}.{ext}",
-					ext = extension.clone().unwrap_or(codec.clone())
-				),
+				link: extension.as_ref().map(|ext| format!("/video/{sha}/subtitle/{index}.{ext}")),
 				index,
 				title: a["Title"].as_str().map(|x| x.to_string()),
 				language: a["Language"].as_str().map(|x| x.to_string()),

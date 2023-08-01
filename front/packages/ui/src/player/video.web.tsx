@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { getToken, queryFn, Subtitle } from "@kyoo/models";
+import { getToken, Subtitle } from "@kyoo/models";
 import {
 	forwardRef,
 	RefObject,
@@ -222,7 +222,7 @@ const useSubtitle = (
 			subOcto = null;
 		};
 
-		if (!value) {
+		if (!value || !value.link) {
 			removeHtmlSubtitle();
 			removeOctoSub();
 		} else if (value.codec === "vtt" || value.codec === "subrip") {
@@ -233,7 +233,7 @@ const useSubtitle = (
 				track.kind = "subtitles";
 				track.label = getDisplayName(value);
 				if (value.language) track.srclang = value.language;
-				track.src = value.codec === "subrip" ? await toWebVtt(value.link) : value.link;
+				track.src = value.codec === "subrip" ? await toWebVtt(value.link!) : value.link!;
 				track.className = "subtitle_container";
 				track.default = true;
 				track.onload = () => {

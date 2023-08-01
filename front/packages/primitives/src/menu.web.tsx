@@ -123,11 +123,13 @@ const MenuItem = ({
 	selected,
 	onSelect,
 	href,
+	disabled,
 	...props
 }: {
 	label: string;
 	icon?: ComponentType<SvgProps>;
 	left?: ReactElement;
+	disabled?: boolean;
 	selected?: boolean;
 } & ({ onSelect: () => void; href?: undefined } | { href: string; onSelect?: undefined })) => {
 	const { css: nCss } = useNativeYoshiki();
@@ -152,6 +154,7 @@ const MenuItem = ({
 			<Item
 				onSelect={onSelect}
 				href={href}
+				disabled={disabled}
 				{...css(
 					{
 						display: "flex",
@@ -167,10 +170,15 @@ const MenuItem = ({
 				{!left && icn && icn}
 				{
 					<P
-						{...nCss({
-							paddingLeft: ts((icon || selected || left) ? 0 : 2 + +!!icon),
-							flexGrow: 1,
-						})}
+						{...nCss([
+							{
+								paddingLeft: ts(icon || selected || left ? 0 : 2 + +!!icon),
+								flexGrow: 1,
+							},
+							disabled && {
+								color: theme.overlay0,
+							},
+						])}
 					>
 						{label}
 					</P>
