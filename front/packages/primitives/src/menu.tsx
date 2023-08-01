@@ -126,11 +126,13 @@ const MenuItem = ({
 	onSelect,
 	href,
 	icon,
+	disabled,
 	...props
 }: {
 	label: string;
 	selected?: boolean;
 	left?: ReactElement;
+	disabled?: boolean;
 	icon?: ComponentType<SvgProps>;
 } & ({ onSelect: () => void; href?: undefined } | { href: string; onSelect?: undefined })) => {
 	const { css, theme } = useYoshiki();
@@ -153,20 +155,29 @@ const MenuItem = ({
 				onSelect?.call(null);
 				if (href) router.push(href);
 			}}
+			disabled={disabled}
 			{...css(
-				{
-					paddingHorizontal: ts(2),
-					width: percent(100),
-					height: ts(5),
-					alignItems: "center",
-					flexDirection: "row",
-				},
+				[
+					{
+						paddingHorizontal: ts(2),
+						width: percent(100),
+						height: ts(5),
+						alignItems: "center",
+						flexDirection: "row",
+					},
+					disabled && {},
+				],
 				props as any,
 			)}
 		>
 			{left && left}
 			{!left && icn && icn}
-			<P {...css({ paddingLeft: ts(2) + +!(icon || selected || left) * px(24), flexGrow: 1 })}>
+			<P
+				{...css([
+					{ paddingLeft: ts(2) + +!(icon || selected || left) * px(24), flexGrow: 1 },
+					disabled && { color: theme.overlay0 },
+				])}
+			>
 				{label}
 			</P>
 			{left && icn && icn}

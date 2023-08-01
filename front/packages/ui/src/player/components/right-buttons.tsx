@@ -83,8 +83,9 @@ export const RightButtons = ({
 					{subtitles.map((x) => (
 						<Menu.Item
 							key={x.index}
-							label={getDisplayName(x)}
+							label={x.link ? getDisplayName(x) : `${getDisplayName(x)} (${x.codec})`}
 							selected={selectedSubtitle === x}
+							disabled={!x.link}
 							onSelect={() => setSubtitle(x)}
 						/>
 					))}
