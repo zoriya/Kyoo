@@ -40,6 +40,10 @@ import { useTheme } from "yoshiki/native";
 import { CircularProgress } from "@kyoo/primitives";
 import { useRouter } from "solito/router";
 import "intl-pluralrules";
+import '@formatjs/intl-locale/polyfill'
+import '@formatjs/intl-displaynames/polyfill'
+import '@formatjs/intl-displaynames/locale-data/en'
+import '@formatjs/intl-displaynames/locale-data/fr'
 
 // TODO: use a backend to load jsons.
 import en from "../../../translations/en.json";

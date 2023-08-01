@@ -149,9 +149,9 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 	let subs: Vec<Subtitle> = output["media"]["track"]
 		.members()
 		.filter(|x| x["@type"] == "Text")
-		.map(|a| {
-			let index = parse::<u32>(&a["@typeorder"]).unwrap() - 1;
-			let mut codec = a["Format"].as_str().unwrap().to_string().to_lowercase();
+		.map(|x| {
+			let index = parse::<u32>(&x["@typeorder"]).unwrap_or(1) - 1;
+			let mut codec = x["Format"].as_str().unwrap().to_string().to_lowercase();
 			if codec == "utf-8" {
 				codec = "subrip".to_string();
 			}
@@ -159,12 +159,12 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 			Subtitle {
 				link: extension.as_ref().map(|ext| format!("/video/{sha}/subtitle/{index}.{ext}")),
 				index,
-				title: a["Title"].as_str().map(|x| x.to_string()),
-				language: a["Language"].as_str().map(|x| x.to_string()),
+				title: x["Title"].as_str().map(|x| x.to_string()),
+				language: x["Language"].as_str().map(|x| x.to_string()),
 				codec,
 				extension,
-				is_default: a["Default"] == "Yes",
-				is_forced: a["Forced"] == "No",
+				is_default: x["Default"] == "Yes",
+				is_forced: x["Forced"] == "No",
 			}
 		})
 		.collect();
