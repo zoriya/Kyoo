@@ -157,7 +157,9 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 			}
 			let extension = extension_table.get(codec.as_str()).map(|x| x.to_string());
 			Subtitle {
-				link: extension.as_ref().map(|ext| format!("/video/{sha}/subtitle/{index}.{ext}")),
+				link: extension
+					.as_ref()
+					.map(|ext| format!("/video/{sha}/subtitle/{index}.{ext}")),
 				index,
 				title: x["Title"].as_str().map(|x| x.to_string()),
 				language: x["Language"].as_str().map(|x| x.to_string()),
