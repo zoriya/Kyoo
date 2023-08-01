@@ -29,8 +29,8 @@ import {
 	useEffect,
 	useState,
 } from "react";
-import { StyleSheet, Pressable } from "react-native";
-import { percent, px, sm, useYoshiki, xl } from "yoshiki/native";
+import { StyleSheet, Pressable, View } from "react-native";
+import { percent, px, sm, useYoshiki, vh, xl } from "yoshiki/native";
 import Close from "@material-symbols/svg-400/rounded/close-fill.svg";
 import { Icon, IconButton } from "./icons";
 import { PressableFeedback } from "./links";
@@ -76,13 +76,14 @@ const Menu = <AsProps,>({
 										focusable={false}
 										{...css({ ...StyleSheet.absoluteFillObject, flexGrow: 1, bg: "transparent" })}
 									/>
-									<ScrollView
+									<View
 										{...css([
 											{
 												bg: (theme) => theme.background,
 												position: "absolute",
 												bottom: 0,
 												width: percent(100),
+												maxHeight: vh(80),
 												alignSelf: "center",
 												borderTopLeftRadius: px(26),
 												borderTopRightRadius: { xs: px(26), xl: 0 },
@@ -101,14 +102,16 @@ const Menu = <AsProps,>({
 											}),
 										])}
 									>
-										<IconButton
-											icon={Close}
-											color={theme.colors.black}
-											onPress={() => setOpen(false)}
-											{...css({ alignSelf: "flex-end", display: { xs: "none", xl: "flex" } })}
-										/>
-										{children}
-									</ScrollView>
+										<ScrollView {...css([])}>
+											<IconButton
+												icon={Close}
+												color={theme.colors.black}
+												onPress={() => setOpen(false)}
+												{...css({ alignSelf: "flex-end", display: { xs: "none", xl: "flex" } })}
+											/>
+											{children}
+										</ScrollView>
+									</View>
 								</MenuContext.Provider>
 							)}
 						</SwitchVariant>
@@ -142,7 +145,7 @@ const MenuItem = ({
 	const icn = (icon || selected) && (
 		<Icon
 			icon={icon ?? Check}
-			color={theme.paragraph}
+			color={disabled ? theme.overlay0 : theme.paragraph}
 			size={24}
 			{...css({ paddingLeft: icon ? ts(2) : 0 })}
 		/>
@@ -157,16 +160,13 @@ const MenuItem = ({
 			}}
 			disabled={disabled}
 			{...css(
-				[
-					{
-						paddingHorizontal: ts(2),
-						width: percent(100),
-						height: ts(5),
-						alignItems: "center",
-						flexDirection: "row",
-					},
-					disabled && {},
-				],
+				{
+					paddingHorizontal: ts(2),
+					width: percent(100),
+					height: ts(5),
+					alignItems: "center",
+					flexDirection: "row",
+				},
 				props as any,
 			)}
 		>

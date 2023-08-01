@@ -77,12 +77,13 @@ const Menu = <AsProps extends { onPress: PressableProps["onPress"] }>({
 									onFocusOutside={(e) => e.stopImmediatePropagation()}
 									{...css({
 										bg: (theme) => theme.background,
-										overflow: "hidden",
+										overflow: "auto",
 										minWidth: "220px",
 										borderRadius: "8px",
 										boxShadow:
 											"0px 10px 38px -10px rgba(22, 23, 24, 0.35), 0px 10px 20px -15px rgba(22, 23, 24, 0.2)",
 										zIndex: 2,
+										maxHeight: "calc(var(--radix-dropdown-menu-content-available-height) * 0.8)",
 									})}
 								>
 									{children}
@@ -138,7 +139,7 @@ const MenuItem = ({
 	const icn = (icon || selected) && (
 		<Icon
 			icon={icon ?? Dot}
-			color={theme.paragraph}
+			color={disabled ? theme.overlay0 : theme.paragraph}
 			size={ts(icon ? 2 : 1)}
 			{...nCss({ paddingRight: ts(1) })}
 		/>
