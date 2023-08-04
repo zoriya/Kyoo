@@ -86,11 +86,6 @@ namespace Kyoo.Abstractions.Controllers
 		IGenreRepository GenreRepository { get; }
 
 		/// <summary>
-		/// The repository that handle providers.
-		/// </summary>
-		IProviderRepository ProviderRepository { get; }
-
-		/// <summary>
 		/// The repository that handle users.
 		/// </summary>
 		IUserRepository UserRepository { get; }

@@ -38,11 +38,6 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		private readonly DatabaseContext _database;
 
-		/// <summary>
-		/// A provider repository to handle externalID creation and deletion
-		/// </summary>
-		private readonly IProviderRepository _providers;
-
 		/// <inheritdoc/>
 		protected override Sort<Season> DefaultSort => new Sort<Season>.By(x => x.SeasonNumber);
 
@@ -51,14 +46,11 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		/// <param name="database">The database handle that will be used</param>
 		/// <param name="shows">A shows repository</param>
-		/// <param name="providers">A provider repository</param>
 		public SeasonRepository(DatabaseContext database,
-			IShowRepository shows,
-			IProviderRepository providers)
+			IShowRepository shows)
 			: base(database)
 		{
 			_database = database;
-			_providers = providers;
 
 			// Edit seasons slugs when the show's slug changes.
 			shows.OnEdited += (show) =>
@@ -139,29 +131,6 @@ namespace Kyoo.Core.Controllers
 						$"(showID: {resource.ShowID}).");
 				}
 				resource.ShowID = resource.Show.ID;
-			}
-
-			if (resource.ExternalIDs != null)
-			{
-				foreach (MetadataID id in resource.ExternalIDs)
-				{
-					id.Provider = _database.LocalEntity<Provider>(id.Provider.Slug)
-						?? await _providers.CreateIfNotExists(id.Provider);
-					id.ProviderID = id.Provider.ID;
-				}
-				_database.MetadataIds<Season>().AttachRange(resource.ExternalIDs);
-			}
-		}
-
-		/// <inheritdoc/>
-		protected override async Task EditRelations(Season resource, Season changed, bool resetOld)
-		{
-			await Validate(changed);
-
-			if (changed.ExternalIDs != null || resetOld)
-			{
-				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
-				resource.ExternalIDs = changed.ExternalIDs;
 			}
 		}
 

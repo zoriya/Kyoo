@@ -341,6 +341,8 @@ namespace Kyoo.Core.Controllers
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 			await Validate(obj);
+			// if (obj is IThumbnails thumbs)
+			// 	await _thumbnailsManager.DownloadImages(thumbs);
 			return obj;
 		}
 

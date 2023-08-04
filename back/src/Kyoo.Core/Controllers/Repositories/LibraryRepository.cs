@@ -38,11 +38,6 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		private readonly DatabaseContext _database;
 
-		/// <summary>
-		/// A provider repository to handle externalID creation and deletion
-		/// </summary>
-		private readonly IProviderRepository _providers;
-
 		/// <inheritdoc />
 		protected override Sort<Library> DefaultSort => new Sort<Library>.By(x => x.ID);
 
@@ -50,12 +45,10 @@ namespace Kyoo.Core.Controllers
 		/// Create a new <see cref="LibraryRepository"/> instance.
 		/// </summary>
 		/// <param name="database">The database handle</param>
-		/// <param name="providers">The provider repository</param>
-		public LibraryRepository(DatabaseContext database, IProviderRepository providers)
+		public LibraryRepository(DatabaseContext database)
 			: base(database)
 		{
 			_database = database;
-			_providers = providers;
 		}
 
 		/// <inheritdoc />
@@ -90,29 +83,6 @@ namespace Kyoo.Core.Controllers
 				throw new ArgumentException("The library's name must be set and not empty");
 			if (resource.Paths == null || !resource.Paths.Any())
 				throw new ArgumentException("The library should have a least one path.");
-
-			if (resource.Providers != null)
-			{
-				resource.Providers = await resource.Providers
-					.SelectAsync(async x =>
-						_database.LocalEntity<Provider>(x.Slug)
-						?? await _providers.CreateIfNotExists(x)
-					)
-					.ToListAsync();
-				_database.AttachRange(resource.Providers);
-			}
-		}
-
-		/// <inheritdoc />
-		protected override async Task EditRelations(Library resource, Library changed, bool resetOld)
-		{
-			await Validate(changed);
-
-			if (changed.Providers != null || resetOld)
-			{
-				await Database.Entry(resource).Collection(x => x.Providers).LoadAsync();
-				resource.Providers = changed.Providers;
-			}
 		}
 
 		/// <inheritdoc />

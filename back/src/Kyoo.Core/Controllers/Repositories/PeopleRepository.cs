@@ -40,11 +40,6 @@ namespace Kyoo.Core.Controllers
 		private readonly DatabaseContext _database;
 
 		/// <summary>
-		/// A provider repository to handle externalID creation and deletion
-		/// </summary>
-		private readonly IProviderRepository _providers;
-
-		/// <summary>
 		/// A lazy loaded show repository to validate requests from shows.
 		/// </summary>
 		private readonly Lazy<IShowRepository> _shows;
@@ -56,15 +51,12 @@ namespace Kyoo.Core.Controllers
 		/// Create a new <see cref="PeopleRepository"/>
 		/// </summary>
 		/// <param name="database">The database handle</param>
-		/// <param name="providers">A provider repository</param>
 		/// <param name="shows">A lazy loaded show repository</param>
 		public PeopleRepository(DatabaseContext database,
-			IProviderRepository providers,
 			Lazy<IShowRepository> shows)
 			: base(database)
 		{
 			_database = database;
-			_providers = providers;
 			_shows = shows;
 		}
 
@@ -94,17 +86,6 @@ namespace Kyoo.Core.Controllers
 		{
 			await base.Validate(resource);
 
-			if (resource.ExternalIDs != null)
-			{
-				foreach (MetadataID id in resource.ExternalIDs)
-				{
-					id.Provider = _database.LocalEntity<Provider>(id.Provider.Slug)
-						?? await _providers.CreateIfNotExists(id.Provider);
-					id.ProviderID = id.Provider.ID;
-				}
-				_database.MetadataIds<People>().AttachRange(resource.ExternalIDs);
-			}
-
 			if (resource.Roles != null)
 			{
 				foreach (PeopleRole role in resource.Roles)
@@ -127,12 +108,6 @@ namespace Kyoo.Core.Controllers
 				await Database.Entry(resource).Collection(x => x.Roles).LoadAsync();
 				resource.Roles = changed.Roles;
 			}
-
-			if (changed.ExternalIDs != null || resetOld)
-			{
-				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
-				resource.ExternalIDs = changed.ExternalIDs;
-			}
 		}
 
 		/// <inheritdoc />
@@ -142,7 +117,6 @@ namespace Kyoo.Core.Controllers
 				throw new ArgumentNullException(nameof(obj));
 
 			_database.Entry(obj).State = EntityState.Deleted;
-			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Deleted);
 			obj.Roles.ForEach(x => _database.Entry(x).State = EntityState.Deleted);
 			await _database.SaveChangesAsync();
 			await base.Delete(obj);

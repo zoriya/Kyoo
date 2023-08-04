@@ -103,7 +103,13 @@ namespace Kyoo.Abstractions.Models
 		public bool IsMovie { get; set; }
 
 		/// <inheritdoc />
-		public Dictionary<int, string> Images { get; set; }
+		public Image Poster { get; set; }
+
+		/// <inheritdoc />
+		public Image Thumbnail { get; set; }
+
+		/// <inheritdoc />
+		public Image Logo { get; set; }
 
 		/// <summary>
 		/// The transcoder's info for this item. This include subtitles, fonts, chapters...
@@ -145,7 +151,9 @@ namespace Kyoo.Abstractions.Models
 				Title = ep.Title,
 				Overview = ep.Overview,
 				ReleaseDate = ep.ReleaseDate,
-				Images = ep.Show.Images,
+				Poster = ep.Poster,
+				Thumbnail = ep.Thumbnail,
+				Logo = ep.Logo,
 				PreviousEpisode = ep.Show.IsMovie
 					? null
 					: (await library.GetAll<Episode>(

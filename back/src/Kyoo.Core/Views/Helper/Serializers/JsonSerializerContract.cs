@@ -79,28 +79,28 @@ namespace Kyoo.Core.Api
 		protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
 		{
 			IList<JsonProperty> properties = base.CreateProperties(type, memberSerialization);
-			if (!type.IsAssignableTo(typeof(IThumbnails)))
+			if (!type.IsAssignableTo(typeof(Image)))
 				return properties;
-			foreach ((int id, string image) in Images.ImageName)
-			{
-				properties.Add(new JsonProperty
-				{
-					DeclaringType = type,
-					PropertyName = image.ToLower(),
-					UnderlyingName = image,
-					PropertyType = typeof(string),
-					Readable = true,
-					Writable = false,
-					ItemIsReference = false,
-					TypeNameHandling = TypeNameHandling.None,
-					ShouldSerialize = x =>
-					{
-						IThumbnails thumb = (IThumbnails)x;
-						return thumb?.Images?.ContainsKey(id) == true;
-					},
-					ValueProvider = new ThumbnailProvider(id)
-				});
-			}
+			// foreach ((int id, string image) in Images.ImageName)
+			// {
+				// properties.Add(new JsonProperty
+				// {
+					// DeclaringType = type,
+					// PropertyName = image.ToLower(),
+					// UnderlyingName = image,
+					// PropertyType = typeof(string),
+					// Readable = true,
+					// Writable = false,
+					// ItemIsReference = false,
+					// TypeNameHandling = TypeNameHandling.None,
+					// ShouldSerialize = x =>
+					// {
+						// IThumbnails thumb = (IThumbnails)x;
+						// return thumb?.Images?.ContainsKey(id) == true;
+					// },
+					// ValueProvider = new ThumbnailProvider(id)
+				// });
+			// }
 
 			return properties;
 		}
@@ -128,23 +128,22 @@ namespace Kyoo.Core.Api
 			/// <inheritdoc />
 			public void SetValue(object target, object value)
 			{
-				if (target is not IThumbnails thumb)
-					throw new ArgumentException($"The given object is not an Thumbnail.");
-				thumb.Images[_imageIndex] = value as string;
+				throw new NotSupportedException();
 			}
 
 			/// <inheritdoc />
 			public object GetValue(object target)
 			{
-				string slug = (target as IResource)?.Slug ?? (target as ICustomTypeDescriptor)?.GetComponentName();
-				if (target is not IThumbnails thumb
-					|| slug == null
-					|| string.IsNullOrEmpty(thumb.Images?.GetValueOrDefault(_imageIndex)))
-					return null;
-				string type = target is ICustomTypeDescriptor descriptor
-					? descriptor.GetClassName()
-					: target.GetType().Name;
-				return $"/{type}/{slug}/{Images.ImageName[_imageIndex]}".ToLowerInvariant();
+				return null;
+				// string slug = (target as IResource)?.Slug ?? (target as ICustomTypeDescriptor)?.GetComponentName();
+				// if (target is not IThumbnails thumb
+				// || slug == null
+				// || string.IsNullOrEmpty(thumb.Images?.GetValueOrDefault(_imageIndex)))
+				// return null;
+				// string type = target is ICustomTypeDescriptor descriptor
+				// ? descriptor.GetClassName()
+				// : target.GetType().Name;
+				// return $"/{type}/{slug}/{Images.ImageName[_imageIndex]}".ToLowerInvariant();
 			}
 		}
 	}

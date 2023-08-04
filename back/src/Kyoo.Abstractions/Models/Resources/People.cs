@@ -38,10 +38,16 @@ namespace Kyoo.Abstractions.Models
 		public string Name { get; set; }
 
 		/// <inheritdoc />
-		public Dictionary<int, string> Images { get; set; }
+		public Image Poster { get; set; }
 
 		/// <inheritdoc />
-		[EditableRelation][LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
+		public Image Thumbnail { get; set; }
+
+		/// <inheritdoc />
+		public Image Logo { get; set; }
+
+		/// <inheritdoc />
+		public Dictionary<string, MetadataID> ExternalId { get; set; }
 
 		/// <summary>
 		/// The list of roles this person has played in. See <see cref="PeopleRole"/> for more information.

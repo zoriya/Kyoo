@@ -67,9 +67,6 @@ namespace Kyoo.Core.Controllers
 		public IGenreRepository GenreRepository { get; }
 
 		/// <inheritdoc />
-		public IProviderRepository ProviderRepository { get; }
-
-		/// <inheritdoc />
 		public IUserRepository UserRepository { get; }
 
 		/// <summary>
@@ -89,7 +86,6 @@ namespace Kyoo.Core.Controllers
 			PeopleRepository = GetRepository<People>() as IPeopleRepository;
 			StudioRepository = GetRepository<Studio>() as IStudioRepository;
 			GenreRepository = GetRepository<Genre>() as IGenreRepository;
-			ProviderRepository = GetRepository<Provider>() as IProviderRepository;
 			UserRepository = GetRepository<User>() as IUserRepository;
 		}
 
@@ -259,10 +255,6 @@ namespace Kyoo.Core.Controllers
 
 			return (obj, member: memberName) switch
 			{
-				(Library l, nameof(Library.Providers)) => ProviderRepository
-					.GetAll(x => x.Libraries.Any(y => y.ID == obj.ID))
-					.Then(x => l.Providers = x),
-
 				(Library l, nameof(Library.Shows)) => ShowRepository
 					.GetAll(x => x.Libraries.Any(y => y.ID == obj.ID))
 					.Then(x => l.Shows = x),
@@ -272,11 +264,6 @@ namespace Kyoo.Core.Controllers
 					.Then(x => l.Collections = x),
 
 
-				(Collection c, nameof(Collection.ExternalIDs)) => _SetRelation(c,
-					ProviderRepository.GetMetadataID<Collection>(x => x.ResourceID == obj.ID),
-					(x, y) => x.ExternalIDs = y,
-					(x, y) => { x.ResourceID = y.ID; }),
-
 				(Collection c, nameof(Collection.Shows)) => ShowRepository
 					.GetAll(x => x.Collections.Any(y => y.ID == obj.ID))
 					.Then(x => c.Shows = x),
@@ -285,11 +272,6 @@ namespace Kyoo.Core.Controllers
 					.GetAll(x => x.Collections.Any(y => y.ID == obj.ID))
 					.Then(x => c.Libraries = x),
 
-
-				(Show s, nameof(Show.ExternalIDs)) => _SetRelation(s,
-					ProviderRepository.GetMetadataID<Show>(x => x.ResourceID == obj.ID),
-					(x, y) => x.ExternalIDs = y,
-					(x, y) => { x.ResourceID = y.ID; }),
 
 				(Show s, nameof(Show.Genres)) => GenreRepository
 					.GetAll(x => x.Shows.Any(y => y.ID == obj.ID))
@@ -326,11 +308,6 @@ namespace Kyoo.Core.Controllers
 					}),
 
 
-				(Season s, nameof(Season.ExternalIDs)) => _SetRelation(s,
-					ProviderRepository.GetMetadataID<Season>(x => x.ResourceID == obj.ID),
-					(x, y) => x.ExternalIDs = y,
-					(x, y) => { x.ResourceID = y.ID; }),
-
 				(Season s, nameof(Season.Episodes)) => _SetRelation(s,
 					EpisodeRepository.GetAll(x => x.Season.ID == obj.ID),
 					(x, y) => x.Episodes = y,
@@ -344,11 +321,6 @@ namespace Kyoo.Core.Controllers
 						s.ShowID = x?.ID ?? 0;
 					}),
 
-
-				(Episode e, nameof(Episode.ExternalIDs)) => _SetRelation(e,
-					ProviderRepository.GetMetadataID<Episode>(x => x.ResourceID == obj.ID),
-					(x, y) => x.ExternalIDs = y,
-					(x, y) => { x.ResourceID = y.ID; }),
 
 				(Episode e, nameof(Episode.Show)) => ShowRepository
 					.GetOrDefault(x => x.Episodes.Any(y => y.ID == obj.ID))
@@ -376,26 +348,9 @@ namespace Kyoo.Core.Controllers
 					.GetAll(x => x.Studio.ID == obj.ID)
 					.Then(x => s.Shows = x),
 
-				(Studio s, nameof(Studio.ExternalIDs)) => _SetRelation(s,
-					ProviderRepository.GetMetadataID<Studio>(x => x.ResourceID == obj.ID),
-					(x, y) => x.ExternalIDs = y,
-					(x, y) => { x.ResourceID = y.ID; }),
-
-
-				(People p, nameof(People.ExternalIDs)) => _SetRelation(p,
-					ProviderRepository.GetMetadataID<People>(x => x.ResourceID == obj.ID),
-					(x, y) => x.ExternalIDs = y,
-					(x, y) => { x.ResourceID = y.ID; }),
-
 				(People p, nameof(People.Roles)) => PeopleRepository
 					.GetFromPeople(obj.ID)
 					.Then(x => p.Roles = x),
-
-
-				(Provider p, nameof(Provider.Libraries)) => LibraryRepository
-					.GetAll(x => x.Providers.Any(y => y.ID == obj.ID))
-					.Then(x => p.Libraries = x),
-
 
 				_ => throw new ArgumentException($"Couldn't find a way to load {memberName} of {obj.Slug}.")
 			};

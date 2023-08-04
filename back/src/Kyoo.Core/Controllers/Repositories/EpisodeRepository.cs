@@ -39,11 +39,6 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		private readonly DatabaseContext _database;
 
-		/// <summary>
-		/// A provider repository to handle externalID creation and deletion
-		/// </summary>
-		private readonly IProviderRepository _providers;
-
 		private readonly IShowRepository _shows;
 
 		/// <inheritdoc />
@@ -59,14 +54,11 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		/// <param name="database">The database handle to use.</param>
 		/// <param name="shows">A show repository</param>
-		/// <param name="providers">A provider repository</param>
 		public EpisodeRepository(DatabaseContext database,
-			IShowRepository shows,
-			IProviderRepository providers)
+			IShowRepository shows)
 			: base(database)
 		{
 			_database = database;
-			_providers = providers;
 			_shows = shows;
 
 			// Edit episode slugs when the show's slug changes.
@@ -161,18 +153,6 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		protected override async Task EditRelations(Episode resource, Episode changed, bool resetOld)
-		{
-			await Validate(changed);
-
-			if (changed.ExternalIDs != null || resetOld)
-			{
-				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
-				resource.ExternalIDs = changed.ExternalIDs;
-			}
-		}
-
-		/// <inheritdoc />
 		protected override async Task Validate(Episode resource)
 		{
 			await base.Validate(resource);
@@ -185,17 +165,6 @@ namespace Kyoo.Core.Controllers
 				}
 				resource.ShowID = resource.Show.ID;
 			}
-
-			if (resource.ExternalIDs != null)
-			{
-				foreach (MetadataID id in resource.ExternalIDs)
-				{
-					id.Provider = _database.LocalEntity<Provider>(id.Provider.Slug)
-						?? await _providers.CreateIfNotExists(id.Provider);
-					id.ProviderID = id.Provider.ID;
-				}
-				_database.MetadataIds<Episode>().AttachRange(resource.ExternalIDs);
-			}
 		}
 
 		/// <inheritdoc />
@@ -206,7 +175,6 @@ namespace Kyoo.Core.Controllers
 
 			int epCount = await _database.Episodes.Where(x => x.ShowID == obj.ShowID).Take(2).CountAsync();
 			_database.Entry(obj).State = EntityState.Deleted;
-			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Deleted);
 			await _database.SaveChangesAsync();
 			await base.Delete(obj);
 			if (epCount == 1)

@@ -38,11 +38,6 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		private readonly DatabaseContext _database;
 
-		/// <summary>
-		/// A provider repository to handle externalID creation and deletion
-		/// </summary>
-		private readonly IProviderRepository _providers;
-
 		/// <inheritdoc />
 		protected override Sort<Studio> DefaultSort => new Sort<Studio>.By(x => x.Name);
 
@@ -50,12 +45,10 @@ namespace Kyoo.Core.Controllers
 		/// Create a new <see cref="StudioRepository"/>.
 		/// </summary>
 		/// <param name="database">The database handle</param>
-		/// <param name="providers">A provider repository</param>
-		public StudioRepository(DatabaseContext database, IProviderRepository providers)
+		public StudioRepository(DatabaseContext database)
 			: base(database)
 		{
 			_database = database;
-			_providers = providers;
 		}
 
 		/// <inheritdoc />
@@ -83,30 +76,7 @@ namespace Kyoo.Core.Controllers
 		protected override async Task Validate(Studio resource)
 		{
 			resource.Slug ??= Utility.ToSlug(resource.Name);
-
 			await base.Validate(resource);
-			if (resource.ExternalIDs != null)
-			{
-				foreach (MetadataID id in resource.ExternalIDs)
-				{
-					id.Provider = _database.LocalEntity<Provider>(id.Provider.Slug)
-						?? await _providers.CreateIfNotExists(id.Provider);
-					id.ProviderID = id.Provider.ID;
-				}
-				_database.MetadataIds<Studio>().AttachRange(resource.ExternalIDs);
-			}
-		}
-
-		/// <inheritdoc />
-		protected override async Task EditRelations(Studio resource, Studio changed, bool resetOld)
-		{
-			if (changed.ExternalIDs != null || resetOld)
-			{
-				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
-				resource.ExternalIDs = changed.ExternalIDs;
-			}
-
-			await base.EditRelations(resource, changed, resetOld);
 		}
 
 		/// <inheritdoc />

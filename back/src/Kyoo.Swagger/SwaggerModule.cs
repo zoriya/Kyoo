@@ -16,7 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Kyoo.Abstractions.Controllers;
@@ -87,7 +86,6 @@ namespace Kyoo.Swagger
 					x.IsNullableRaw = false;
 					x.Type = JsonObjectType.String | JsonObjectType.Integer;
 				}));
-				document.SchemaProcessors.Add(new ThumbnailProcessor());
 
 				document.AddSecurity(nameof(Kyoo), new OpenApiSecurityScheme
 				{

@@ -39,7 +39,7 @@ namespace Kyoo.Tests.Utility
 			Assert.True(KUtility.IsPropertyExpression(member));
 			Assert.True(KUtility.IsPropertyExpression(memberCast));
 
-			Expression<Func<Show, object>> call = x => x.GetID("test");
+			Expression<Func<Show, object>> call = x => x.ToString();
 			Assert.False(KUtility.IsPropertyExpression(call));
 		}
 

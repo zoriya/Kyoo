@@ -16,8 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using Kyoo.Abstractions.Controllers;
+using System.ComponentModel.DataAnnotations;
 
 namespace Kyoo.Abstractions.Models
 {
@@ -27,51 +26,54 @@ namespace Kyoo.Abstractions.Models
 	public interface IThumbnails
 	{
 		/// <summary>
-		/// The list of images mapped to a certain index.
-		/// </summary>
-		/// <remarks>
-		/// An arbitrary index should not be used, instead use indexes from <see cref="Models.Images"/>
-		/// </remarks>
-		/// <example>{"0": "example.com/dune/poster"}</example>
-		public Dictionary<int, string> Images { get; set; }
-	}
-
-	/// <summary>
-	/// A class containing constant values for images. To be used as index of a <see cref="IThumbnails.Images"/>.
-	/// </summary>
-	public static class Images
-	{
-		/// <summary>
 		/// A poster is a 9/16 format image with the cover of the resource.
 		/// </summary>
-		public const int Poster = 0;
+		public Image Poster { get; set; }
 
 		/// <summary>
 		/// A thumbnail is a 16/9 format image, it could ether be used as a background or as a preview but it usually
 		/// is not an official image.
 		/// </summary>
-		public const int Thumbnail = 1;
+		public Image Thumbnail { get; set; }
 
 		/// <summary>
 		/// A logo is a small image representing the resource.
 		/// </summary>
-		public const int Logo = 2;
+		public Image Logo { get; set; }
+	}
+
+	public class Image
+	{
+		/// <summary>
+		/// The original image from another server.
+		/// </summary>
+		public string Source { get; set; }
 
 		/// <summary>
-		/// A video of a few minutes that tease the content.
+		/// A hash to display as placeholder while the image is loading.
 		/// </summary>
-		public const int Trailer = 3;
+		[MaxLength(32)]
+		public string Blurhash { get; set; }
+	}
+
+	/// <summary>
+	/// The quality of an image
+	/// </summary>
+	public enum ImageQuality
+	{
+		/// <summary>
+		/// Small
+		/// </summary>
+		Small,
 
 		/// <summary>
-		/// Retrieve the name of an image using it's ID. It is also used by the serializer to retrieve all named images.
-		/// If a plugin adds a new image type, it should add it's value and name here to allow the serializer to add it.
+		/// Medium
 		/// </summary>
-		public static Dictionary<int, string> ImageName { get; } = new()
-		{
-			[Poster] = nameof(Poster),
-			[Thumbnail] = nameof(Thumbnail),
-			[Logo] = nameof(Logo),
-			[Trailer] = nameof(Trailer)
-		};
+		Medium,
+
+		/// <summary>
+		/// Large
+		/// </summary>
+		Large,
 	}
 }

@@ -44,7 +44,5 @@ class Episode:
 			"images": {
 				"1": self.thumbnail,
 			},
-			# TODO: The back has bad external id support, we disable it for now
-			"external_ids": None,
 			"show": None,
 		}

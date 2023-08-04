@@ -43,11 +43,6 @@ namespace Kyoo.Abstractions.Models
 		public string[] Paths { get; set; }
 
 		/// <summary>
-		/// The list of <see cref="Provider"/> used for items in this library.
-		/// </summary>
-		[EditableRelation][LoadableRelation] public ICollection<Provider> Providers { get; set; }
-
-		/// <summary>
 		/// The list of shows in this library.
 		/// </summary>
 		[LoadableRelation] public ICollection<Show> Shows { get; set; }

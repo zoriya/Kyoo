@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using JetBrains.Annotations;
@@ -81,11 +82,6 @@ namespace Kyoo.Postgresql
 		public DbSet<Studio> Studios { get; set; }
 
 		/// <summary>
-		/// All providers of Kyoo. See <see cref="Provider"/>.
-		/// </summary>
-		public DbSet<Provider> Providers { get; set; }
-
-		/// <summary>
 		/// The list of registered users.
 		/// </summary>
 		public DbSet<User> Users { get; set; }
@@ -107,17 +103,6 @@ namespace Kyoo.Postgresql
 		/// This set is ready only, on most database this will be a view.
 		/// </remarks>
 		public DbSet<LibraryItem> LibraryItems { get; set; }
-
-		/// <summary>
-		/// Get all metadataIDs (ExternalIDs) of a given resource. See <see cref="MetadataID"/>.
-		/// </summary>
-		/// <typeparam name="T">The metadata of this type will be returned.</typeparam>
-		/// <returns>A queryable of metadata ids for a type.</returns>
-		public DbSet<MetadataID> MetadataIds<T>()
-			where T : class, IMetadata
-		{
-			return Set<MetadataID>(MetadataName<T>());
-		}
 
 		/// <summary>
 		/// Add a many to many link between two resources.
@@ -194,17 +179,33 @@ namespace Kyoo.Postgresql
 		/// </summary>
 		/// <param name="modelBuilder">The database model builder</param>
 		/// <typeparam name="T">The type to add metadata to.</typeparam>
-		private void _HasMetadata<T>(ModelBuilder modelBuilder)
+		private static void _HasMetadata<T>(ModelBuilder modelBuilder)
 			where T : class, IMetadata
 		{
-			modelBuilder.SharedTypeEntity<MetadataID>(MetadataName<T>())
-				.HasKey(MetadataID.PrimaryKey);
+			// TODO: Waiting for https://github.com/dotnet/efcore/issues/29825
+			// modelBuilder.Entity<T>()
+			// 	.OwnsOne(x => x.ExternalIDs, x =>
+			// 	{
+			// 		x.ToJson();
+			// 	});
+			modelBuilder.Entity<T>()
+				.Property(x => x.ExternalId)
+				.HasConversion(
+					v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
+					v => JsonSerializer.Deserialize<Dictionary<string, MetadataID>>(v, (JsonSerializerOptions)null)
+				)
+				.HasColumnType("json");
+		}
 
-			modelBuilder.SharedTypeEntity<MetadataID>(MetadataName<T>())
-				.HasOne<T>()
-				.WithMany(x => x.ExternalIDs)
-				.HasForeignKey(x => x.ResourceID)
-				.OnDelete(DeleteBehavior.Cascade);
+		private static void _HasImages<T>(ModelBuilder modelBuilder)
+			where T : class, IThumbnails
+		{
+			modelBuilder.Entity<T>()
+				.OwnsOne(x => x.Poster);
+			modelBuilder.Entity<T>()
+				.OwnsOne(x => x.Thumbnail);
+			modelBuilder.Entity<T>()
+				.OwnsOne(x => x.Logo);
 		}
 
 		/// <summary>
@@ -269,7 +270,6 @@ namespace Kyoo.Postgresql
 				.WithMany(x => x.Shows)
 				.OnDelete(DeleteBehavior.SetNull);
 
-			_HasManyToMany<Library, Provider>(modelBuilder, x => x.Providers, x => x.Libraries);
 			_HasManyToMany<Library, Collection>(modelBuilder, x => x.Collections, x => x.Libraries);
 			_HasManyToMany<Library, Show>(modelBuilder, x => x.Shows, x => x.Libraries);
 			_HasManyToMany<Collection, Show>(modelBuilder, x => x.Shows, x => x.Collections);
@@ -287,6 +287,15 @@ namespace Kyoo.Postgresql
 			_HasMetadata<People>(modelBuilder);
 			_HasMetadata<Studio>(modelBuilder);
 
+			_HasImages<LibraryItem>(modelBuilder);
+			_HasImages<Collection>(modelBuilder);
+			_HasImages<Show>(modelBuilder);
+			_HasImages<Season>(modelBuilder);
+			_HasImages<Episode>(modelBuilder);
+			_HasImages<People>(modelBuilder);
+
+			modelBuilder.Entity<User>().OwnsOne(x => x.Logo);
+
 			modelBuilder.Entity<WatchedEpisode>()
 				.HasKey(x => new { User = x.UserID, Episode = x.EpisodeID });
 
@@ -294,7 +303,6 @@ namespace Kyoo.Postgresql
 			modelBuilder.Entity<Genre>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<Library>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<People>().Property(x => x.Slug).IsRequired();
-			modelBuilder.Entity<Provider>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<Show>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<Season>().Property(x => x.Slug).IsRequired();
 			modelBuilder.Entity<Episode>().Property(x => x.Slug).IsRequired();
@@ -317,9 +325,6 @@ namespace Kyoo.Postgresql
 				.HasIndex(x => x.Slug)
 				.IsUnique();
 			modelBuilder.Entity<Studio>()
-				.HasIndex(x => x.Slug)
-				.IsUnique();
-			modelBuilder.Entity<Provider>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
 			modelBuilder.Entity<Season>()

@@ -60,13 +60,6 @@ namespace Kyoo.Abstractions.Models
 		public Status Status { get; set; }
 
 		/// <summary>
-		/// An URL to a trailer.
-		/// </summary>
-		/// TODO for now, this is set to a youtube url. It should be cached and converted to a local file.
-		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
-		public string TrailerUrl => Images?.GetValueOrDefault(Models.Images.Trailer);
-
-		/// <summary>
 		/// The date this show started airing. It can be null if this is unknown.
 		/// </summary>
 		public DateTime? StartAir { get; set; }
@@ -78,16 +71,27 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		public DateTime? EndAir { get; set; }
 
-		/// <inheritdoc />
-		public Dictionary<int, string> Images { get; set; }
-
 		/// <summary>
 		/// True if this show represent a movie, false otherwise.
 		/// </summary>
 		public bool IsMovie { get; set; }
 
 		/// <inheritdoc />
-		[EditableRelation][LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
+		public Image Poster { get; set; }
+
+		/// <inheritdoc />
+		public Image Thumbnail { get; set; }
+
+		/// <inheritdoc />
+		public Image Logo { get; set; }
+
+		/// <summary>
+		/// A video of a few minutes that tease the content.
+		/// </summary>
+		public string Trailer { get; set; }
+
+		/// <inheritdoc />
+		public Dictionary<string, MetadataID> ExternalId { get; set; }
 
 		/// <summary>
 		/// The ID of the Studio that made this show.

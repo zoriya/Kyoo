@@ -353,69 +353,54 @@ namespace Kyoo.Tests.Utility
 			{
 				ID = 5,
 				Name = "merged",
-				Images = new Dictionary<int, string>
-				{
-					[Images.Logo] = "logo",
-					[Images.Poster] = "poster"
-				}
-
 			};
 			Collection collection2 = new()
 			{
 				Name = "test",
-				Images = new Dictionary<int, string>
-				{
-					[Images.Poster] = "new-poster",
-					[Images.Thumbnail] = "thumbnails"
-				}
 			};
 			Collection ret = Merger.Complete(collection, collection2);
 			Assert.True(ReferenceEquals(collection, ret));
 			Assert.Equal(5, ret.ID);
 			Assert.Equal("test", ret.Name);
 			Assert.Null(ret.Slug);
-			Assert.Equal(3, ret.Images.Count);
-			Assert.Equal("new-poster", ret.Images[Images.Poster]);
-			Assert.Equal("thumbnails", ret.Images[Images.Thumbnail]);
-			Assert.Equal("logo", ret.Images[Images.Logo]);
 		}
 
 		[Fact]
 		public void CompleteDictionaryOutParam()
 		{
-			Dictionary<int, string> first = new()
+			Dictionary<string, string> first = new()
 			{
-				[Images.Logo] = "logo",
-				[Images.Poster] = "poster"
+				["logo"] = "logo",
+				["poster"] = "poster"
 			};
-			Dictionary<int, string> second = new()
+			Dictionary<string, string> second = new()
 			{
-				[Images.Poster] = "new-poster",
-				[Images.Thumbnail] = "thumbnails"
+				["poster"] = "new-poster",
+				["thumbnail"] = "thumbnails"
 			};
-			IDictionary<int, string> ret = Merger.CompleteDictionaries(first, second, out bool changed);
+			IDictionary<string, string> ret = Merger.CompleteDictionaries(first, second, out bool changed);
 			Assert.True(changed);
 			Assert.Equal(3, ret.Count);
-			Assert.Equal("new-poster", ret[Images.Poster]);
-			Assert.Equal("thumbnails", ret[Images.Thumbnail]);
-			Assert.Equal("logo", ret[Images.Logo]);
+			Assert.Equal("new-poster", ret["poster"]);
+			Assert.Equal("thumbnails", ret["thumbnail"]);
+			Assert.Equal("logo", ret["logo"]);
 		}
 
 		[Fact]
 		public void CompleteDictionaryEqualTest()
 		{
-			Dictionary<int, string> first = new()
+			Dictionary<string, string> first = new()
 			{
-				[Images.Poster] = "poster"
+				["poster"] = "poster"
 			};
-			Dictionary<int, string> second = new()
+			Dictionary<string, string> second = new()
 			{
-				[Images.Poster] = "new-poster",
+				["poster"] = "new-poster",
 			};
-			IDictionary<int, string> ret = Merger.CompleteDictionaries(first, second, out bool changed);
+			IDictionary<string, string> ret = Merger.CompleteDictionaries(first, second, out bool changed);
 			Assert.True(changed);
 			Assert.Single(ret);
-			Assert.Equal("new-poster", ret[Images.Poster]);
+			Assert.Equal("new-poster", ret["poster"]);
 		}
 
 		private class TestMergeSetter
@@ -473,81 +458,81 @@ namespace Kyoo.Tests.Utility
 		[Fact]
 		public void MergeDictionaryNullValue()
 		{
-			Dictionary<int, string> first = new()
+			Dictionary<string, string> first = new()
 			{
-				[Images.Logo] = "logo",
-				[Images.Poster] = null
+				["logo"] = "logo",
+				["poster"] = null
 			};
-			Dictionary<int, string> second = new()
+			Dictionary<string, string> second = new()
 			{
-				[Images.Poster] = "new-poster",
-				[Images.Thumbnail] = "thumbnails"
+				["poster"] = "new-poster",
+				["thumbnail"] = "thumbnails"
 			};
-			IDictionary<int, string> ret = Merger.MergeDictionaries(first, second, out bool changed);
+			IDictionary<string, string> ret = Merger.MergeDictionaries(first, second, out bool changed);
 			Assert.True(changed);
 			Assert.Equal(3, ret.Count);
-			Assert.Equal("new-poster", ret[Images.Poster]);
-			Assert.Equal("thumbnails", ret[Images.Thumbnail]);
-			Assert.Equal("logo", ret[Images.Logo]);
+			Assert.Equal("new-poster", ret["poster"]);
+			Assert.Equal("thumbnails", ret["thumbnail"]);
+			Assert.Equal("logo", ret["logo"]);
 		}
 
 		[Fact]
 		public void MergeDictionaryNullValueNoChange()
 		{
-			Dictionary<int, string> first = new()
+			Dictionary<string, string> first = new()
 			{
-				[Images.Logo] = "logo",
-				[Images.Poster] = null
+				["logo"] = "logo",
+				["poster"] = null
 			};
-			Dictionary<int, string> second = new()
+			Dictionary<string, string> second = new()
 			{
-				[Images.Poster] = null,
+				["poster"] = null,
 			};
-			IDictionary<int, string> ret = Merger.MergeDictionaries(first, second, out bool changed);
+			IDictionary<string, string> ret = Merger.MergeDictionaries(first, second, out bool changed);
 			Assert.False(changed);
 			Assert.Equal(2, ret.Count);
-			Assert.Null(ret[Images.Poster]);
-			Assert.Equal("logo", ret[Images.Logo]);
+			Assert.Null(ret["poster"]);
+			Assert.Equal("logo", ret["logo"]);
 		}
 
 		[Fact]
 		public void CompleteDictionaryNullValue()
 		{
-			Dictionary<int, string> first = new()
+			Dictionary<string, string> first = new()
 			{
-				[Images.Logo] = "logo",
-				[Images.Poster] = null
+				["logo"] = "logo",
+				["poster"] = null
 			};
-			Dictionary<int, string> second = new()
+			Dictionary<string, string> second = new()
 			{
-				[Images.Poster] = "new-poster",
-				[Images.Thumbnail] = "thumbnails"
+				["poster"] = "new-poster",
+				["thumbnail"] = "thumbnails"
 			};
-			IDictionary<int, string> ret = Merger.CompleteDictionaries(first, second, out bool changed);
+			IDictionary<string, string> ret = Merger.CompleteDictionaries(first, second, out bool changed);
 			Assert.True(changed);
 			Assert.Equal(3, ret.Count);
-			Assert.Equal("new-poster", ret[Images.Poster]);
-			Assert.Equal("thumbnails", ret[Images.Thumbnail]);
-			Assert.Equal("logo", ret[Images.Logo]);
+			Assert.Equal("new-poster", ret["poster"]);
+			Assert.Equal("thumbnails", ret["thumbnail"]);
+			Assert.Equal("logo", ret["logo"]);
 		}
 
 		[Fact]
 		public void CompleteDictionaryNullValueNoChange()
 		{
-			Dictionary<int, string> first = new()
+			Dictionary<string, string> first = new()
 			{
-				[Images.Logo] = "logo",
-				[Images.Poster] = null
+				["logo"] = "logo",
+				["poster"] = null
 			};
-			Dictionary<int, string> second = new()
+			Dictionary<string, string> second = new()
 			{
-				[Images.Poster] = null,
+				["poster"] = null,
 			};
-			IDictionary<int, string> ret = Merger.CompleteDictionaries(first, second, out bool changed);
+			IDictionary<string, string> ret = Merger.CompleteDictionaries(first, second, out bool changed);
 			Assert.False(changed);
 			Assert.Equal(2, ret.Count);
-			Assert.Null(ret[Images.Poster]);
-			Assert.Equal("logo", ret[Images.Logo]);
+			Assert.Null(ret["poster"]);
+			Assert.Equal("logo", ret["logo"]);
 		}
 	}
 }

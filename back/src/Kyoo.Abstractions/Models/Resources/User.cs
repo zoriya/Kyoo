@@ -24,7 +24,7 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// A single user of the app.
 	/// </summary>
-	public class User : IResource, IThumbnails
+	public class User : IResource
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
@@ -59,8 +59,10 @@ namespace Kyoo.Abstractions.Models
 		[SerializeIgnore]
 		public Dictionary<string, string> ExtraData { get; set; }
 
-		/// <inheritdoc />
-		public Dictionary<int, string> Images { get; set; }
+		/// <summary>
+		/// A logo is a small image representing the resource.
+		/// </summary>
+		public Image Logo { get; set; }
 
 		/// <summary>
 		/// The list of shows the user has finished.

@@ -34,11 +34,6 @@ namespace Kyoo.Postgresql
 	public class PostgresContext : DatabaseContext
 	{
 		/// <summary>
-		/// The connection string to use.
-		/// </summary>
-		private readonly string _connection;
-
-		/// <summary>
 		/// Is this instance in debug mode?
 		/// </summary>
 		private readonly bool _debugMode;
@@ -78,7 +73,6 @@ namespace Kyoo.Postgresql
 		/// <param name="debugMode">Is this instance in debug mode?</param>
 		public PostgresContext(string connection, bool debugMode)
 		{
-			_connection = connection;
 			_debugMode = debugMode;
 		}
 
@@ -114,31 +108,6 @@ namespace Kyoo.Postgresql
 
 			modelBuilder.Entity<User>()
 				.Property(x => x.ExtraData)
-				.HasColumnType("jsonb");
-
-			modelBuilder.Entity<LibraryItem>()
-				.Property(x => x.Images)
-				.HasColumnType("jsonb");
-			modelBuilder.Entity<Collection>()
-				.Property(x => x.Images)
-				.HasColumnType("jsonb");
-			modelBuilder.Entity<Show>()
-				.Property(x => x.Images)
-				.HasColumnType("jsonb");
-			modelBuilder.Entity<Season>()
-				.Property(x => x.Images)
-				.HasColumnType("jsonb");
-			modelBuilder.Entity<Episode>()
-				.Property(x => x.Images)
-				.HasColumnType("jsonb");
-			modelBuilder.Entity<People>()
-				.Property(x => x.Images)
-				.HasColumnType("jsonb");
-			modelBuilder.Entity<Provider>()
-				.Property(x => x.Images)
-				.HasColumnType("jsonb");
-			modelBuilder.Entity<User>()
-				.Property(x => x.Images)
 				.HasColumnType("jsonb");
 
 			base.OnModelCreating(modelBuilder);

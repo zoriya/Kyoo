@@ -102,7 +102,7 @@ const Menu = <AsProps,>({
 											}),
 										])}
 									>
-										<ScrollView {...css([])}>
+										<ScrollView>
 											<IconButton
 												icon={Close}
 												color={theme.colors.black}

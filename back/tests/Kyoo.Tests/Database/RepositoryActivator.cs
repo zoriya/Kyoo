@@ -37,22 +37,20 @@ namespace Kyoo.Tests.Database
 		{
 			Context = new PostgresTestContext(postgres, output);
 
-			ProviderRepository provider = new(_NewContext());
-			LibraryRepository library = new(_NewContext(), provider);
-			CollectionRepository collection = new(_NewContext(), provider);
+			LibraryRepository library = new(_NewContext());
+			CollectionRepository collection = new(_NewContext());
 			GenreRepository genre = new(_NewContext());
-			StudioRepository studio = new(_NewContext(), provider);
-			PeopleRepository people = new(_NewContext(), provider,
+			StudioRepository studio = new(_NewContext());
+			PeopleRepository people = new(_NewContext(),
 				new Lazy<IShowRepository>(() => LibraryManager.ShowRepository));
-			ShowRepository show = new(_NewContext(), studio, people, genre, provider);
-			SeasonRepository season = new(_NewContext(), show, provider);
+			ShowRepository show = new(_NewContext(), studio, people, genre);
+			SeasonRepository season = new(_NewContext(), show);
 			LibraryItemRepository libraryItem = new(_NewContext(),
 				new Lazy<ILibraryRepository>(() => LibraryManager.LibraryRepository));
-			EpisodeRepository episode = new(_NewContext(), show, provider);
+			EpisodeRepository episode = new(_NewContext(), show);
 			UserRepository user = new(_NewContext());
 
 			LibraryManager = new LibraryManager(new IBaseRepository[] {
-				provider,
 				library,
 				libraryItem,
 				collection,

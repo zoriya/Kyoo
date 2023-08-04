@@ -57,7 +57,6 @@ namespace Kyoo.Core
 			builder.RegisterRepository<IPeopleRepository, PeopleRepository>();
 			builder.RegisterRepository<IStudioRepository, StudioRepository>();
 			builder.RegisterRepository<IGenreRepository, GenreRepository>();
-			builder.RegisterRepository<IProviderRepository, ProviderRepository>();
 			builder.RegisterRepository<IUserRepository, UserRepository>();
 		}
 

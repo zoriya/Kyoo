@@ -39,7 +39,13 @@ namespace Kyoo.Abstractions.Models
 		public string Name { get; set; }
 
 		/// <inheritdoc />
-		public Dictionary<int, string> Images { get; set; }
+		public Image Poster { get; set; }
+
+		/// <inheritdoc />
+		public Image Thumbnail { get; set; }
+
+		/// <inheritdoc />
+		public Image Logo { get; set; }
 
 		/// <summary>
 		/// The description of this collection.
@@ -57,6 +63,6 @@ namespace Kyoo.Abstractions.Models
 		[LoadableRelation] public ICollection<Library> Libraries { get; set; }
 
 		/// <inheritdoc />
-		[EditableRelation][LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
+		public Dictionary<string, MetadataID> ExternalId { get; set; }
 	}
 }

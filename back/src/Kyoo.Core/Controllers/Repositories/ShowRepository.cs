@@ -52,11 +52,6 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		private readonly IGenreRepository _genres;
 
-		/// <summary>
-		/// A provider repository to handle externalID creation and deletion
-		/// </summary>
-		private readonly IProviderRepository _providers;
-
 		/// <inheritdoc />
 		protected override Sort<Show> DefaultSort => new Sort<Show>.By(x => x.Title);
 
@@ -67,19 +62,16 @@ namespace Kyoo.Core.Controllers
 		/// <param name="studios">A studio repository</param>
 		/// <param name="people">A people repository</param>
 		/// <param name="genres">A genres repository</param>
-		/// <param name="providers">A provider repository</param>
 		public ShowRepository(DatabaseContext database,
 			IStudioRepository studios,
 			IPeopleRepository people,
-			IGenreRepository genres,
-			IProviderRepository providers)
+			IGenreRepository genres)
 			: base(database)
 		{
 			_database = database;
 			_studios = studios;
 			_people = people;
 			_genres = genres;
-			_providers = providers;
 		}
 
 		/// <inheritdoc />
@@ -124,17 +116,6 @@ namespace Kyoo.Core.Controllers
 				_database.AttachRange(resource.Genres);
 			}
 
-			if (resource.ExternalIDs != null)
-			{
-				foreach (MetadataID id in resource.ExternalIDs)
-				{
-					id.Provider = _database.LocalEntity<Provider>(id.Provider.Slug)
-						?? await _providers.CreateIfNotExists(id.Provider);
-					id.ProviderID = id.Provider.ID;
-				}
-				_database.MetadataIds<Show>().AttachRange(resource.ExternalIDs);
-			}
-
 			if (resource.People != null)
 			{
 				foreach (PeopleRole role in resource.People)
@@ -171,12 +152,6 @@ namespace Kyoo.Core.Controllers
 			{
 				await Database.Entry(resource).Collection(x => x.People).LoadAsync();
 				resource.People = changed.People;
-			}
-
-			if (changed.ExternalIDs != null || resetOld)
-			{
-				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
-				resource.ExternalIDs = changed.ExternalIDs;
 			}
 		}
 

@@ -447,25 +447,6 @@ namespace Kyoo.Abstractions.Controllers
 	}
 
 	/// <summary>
-	/// A repository to handle providers.
-	/// </summary>
-	public interface IProviderRepository : IRepository<Provider>
-	{
-		/// <summary>
-		/// Get a list of external ids that match all filters
-		/// </summary>
-		/// <param name="where">A predicate to add arbitrary filter</param>
-		/// <param name="sort">Sort information (sort order and sort by)</param>
-		/// <param name="limit">Pagination information (where to start and how many to get)</param>
-		/// <typeparam name="T">The type of metadata to retrieve</typeparam>
-		/// <returns>A filtered list of external ids.</returns>
-		Task<ICollection<MetadataID>> GetMetadataID<T>(Expression<Func<MetadataID, bool>> where = null,
-			Sort<MetadataID> sort = default,
-			Pagination limit = default)
-			where T : class, IMetadata;
-	}
-
-	/// <summary>
 	/// A repository to handle users.
 	/// </summary>
 	public interface IUserRepository : IRepository<User> { }

@@ -127,9 +127,6 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		public string Path { get; set; }
 
-		/// <inheritdoc />
-		public Dictionary<int, string> Images { get; set; }
-
 		/// <summary>
 		/// The title of this episode.
 		/// </summary>
@@ -146,7 +143,16 @@ namespace Kyoo.Abstractions.Models
 		public DateTime? ReleaseDate { get; set; }
 
 		/// <inheritdoc />
-		[EditableRelation][LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
+		public Image Poster { get; set; }
+
+		/// <inheritdoc />
+		public Image Thumbnail { get; set; }
+
+		/// <inheritdoc />
+		public Image Logo { get; set; }
+
+		/// <inheritdoc />
+		public Dictionary<string, MetadataID> ExternalId { get; set; }
 
 		/// <summary>
 		/// Get the slug of an episode.

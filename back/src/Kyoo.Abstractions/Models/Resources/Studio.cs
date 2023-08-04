@@ -44,7 +44,7 @@ namespace Kyoo.Abstractions.Models
 		[LoadableRelation] public ICollection<Show> Shows { get; set; }
 
 		/// <inheritdoc />
-		[EditableRelation][LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
+		public Dictionary<string, MetadataID> ExternalId { get; set; }
 
 		/// <summary>
 		/// Create a new, empty, <see cref="Studio"/>.

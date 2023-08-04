@@ -85,7 +85,13 @@ namespace Kyoo.Abstractions.Models
 		public DateTime? EndAir { get; set; }
 
 		/// <inheritdoc />
-		public Dictionary<int, string> Images { get; set; }
+		public Image Poster { get; set; }
+
+		/// <inheritdoc />
+		public Image Thumbnail { get; set; }
+
+		/// <inheritdoc />
+		public Image Logo { get; set; }
 
 		/// <summary>
 		/// The type of this item (ether a collection, a show or a movie).
@@ -110,7 +116,9 @@ namespace Kyoo.Abstractions.Models
 			Status = show.Status;
 			StartAir = show.StartAir;
 			EndAir = show.EndAir;
-			Images = show.Images;
+			Poster = show.Poster;
+			Thumbnail = show.Thumbnail;
+			Logo = show.Logo;
 			Type = show.IsMovie ? ItemType.Movie : ItemType.Show;
 		}
 
@@ -127,7 +135,9 @@ namespace Kyoo.Abstractions.Models
 			Status = Models.Status.Unknown;
 			StartAir = null;
 			EndAir = null;
-			Images = collection.Images;
+			Poster = collection.Poster;
+			Thumbnail = collection.Thumbnail;
+			Logo = collection.Logo;
 			Type = ItemType.Collection;
 		}
 
@@ -143,7 +153,9 @@ namespace Kyoo.Abstractions.Models
 			Status = x.Status,
 			StartAir = x.StartAir,
 			EndAir = x.EndAir,
-			Images = x.Images,
+			Poster = x.Poster,
+			Thumbnail = x.Thumbnail,
+			Logo = x.Logo,
 			Type = x.IsMovie ? ItemType.Movie : ItemType.Show
 		};
 
@@ -159,7 +171,9 @@ namespace Kyoo.Abstractions.Models
 			Status = Models.Status.Unknown,
 			StartAir = null,
 			EndAir = null,
-			Images = x.Images,
+			Poster = x.Poster,
+			Thumbnail = x.Thumbnail,
+			Logo = x.Logo,
 			Type = ItemType.Collection
 		};
 

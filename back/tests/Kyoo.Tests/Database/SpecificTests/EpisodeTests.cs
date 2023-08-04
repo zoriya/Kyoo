@@ -206,7 +206,7 @@ namespace Kyoo.Tests.Database
 		public async Task CreateWithExternalIdTest()
 		{
 			Episode value = TestSample.GetNew<Episode>();
-			value.ExternalIDs = new[]
+			value.ExternalId = new[]
 			{
 				new MetadataID
 				{
@@ -224,10 +224,10 @@ namespace Kyoo.Tests.Database
 			await _repository.Create(value);
 
 			Episode retrieved = await _repository.Get(2);
-			await Repositories.LibraryManager.Load(retrieved, x => x.ExternalIDs);
-			Assert.Equal(2, retrieved.ExternalIDs.Count);
-			KAssert.DeepEqual(value.ExternalIDs.First(), retrieved.ExternalIDs.First());
-			KAssert.DeepEqual(value.ExternalIDs.Last(), retrieved.ExternalIDs.Last());
+			await Repositories.LibraryManager.Load(retrieved, x => x.ExternalId);
+			Assert.Equal(2, retrieved.ExternalId.Count);
+			KAssert.DeepEqual(value.ExternalId.First(), retrieved.ExternalId.First());
+			KAssert.DeepEqual(value.ExternalId.Last(), retrieved.ExternalId.Last());
 		}
 
 		[Fact]
@@ -251,7 +251,7 @@ namespace Kyoo.Tests.Database
 		public async Task EditMetadataTest()
 		{
 			Episode value = await _repository.Get(TestSample.Get<Episode>().Slug);
-			value.ExternalIDs = new[]
+			value.ExternalId = new[]
 			{
 				new MetadataID
 				{
@@ -264,7 +264,7 @@ namespace Kyoo.Tests.Database
 
 			await using DatabaseContext database = Repositories.Context.New();
 			Episode retrieved = await database.Episodes
-				.Include(x => x.ExternalIDs)
+				.Include(x => x.ExternalId)
 				.ThenInclude(x => x.Provider)
 				.FirstAsync();
 
@@ -275,7 +275,7 @@ namespace Kyoo.Tests.Database
 		public async Task AddMetadataTest()
 		{
 			Episode value = await _repository.Get(TestSample.Get<Episode>().Slug);
-			value.ExternalIDs = new List<MetadataID>
+			value.ExternalId = new List<MetadataID>
 			{
 				new()
 				{
@@ -289,14 +289,14 @@ namespace Kyoo.Tests.Database
 			{
 				await using DatabaseContext database = Repositories.Context.New();
 				Episode retrieved = await database.Episodes
-					.Include(x => x.ExternalIDs)
+					.Include(x => x.ExternalId)
 					.ThenInclude(x => x.Provider)
 					.FirstAsync();
 
 				KAssert.DeepEqual(value, retrieved);
 			}
 
-			value.ExternalIDs.Add(new MetadataID
+			value.ExternalId.Add(new MetadataID
 			{
 				Provider = TestSample.GetNew<Provider>(),
 				Link = "link",
@@ -307,7 +307,7 @@ namespace Kyoo.Tests.Database
 			{
 				await using DatabaseContext database = Repositories.Context.New();
 				Episode retrieved = await database.Episodes
-					.Include(x => x.ExternalIDs)
+					.Include(x => x.ExternalId)
 					.ThenInclude(x => x.Provider)
 					.FirstAsync();
 
