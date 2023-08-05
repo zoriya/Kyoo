@@ -42,9 +42,9 @@ namespace Kyoo.Utils
 		/// <typeparam name="T">The type of items in the lists to merge.</typeparam>
 		/// <returns>The two list merged as an array</returns>
 		[ContractAnnotation("first:notnull => notnull; second:notnull => notnull", true)]
-		public static T[] MergeLists<T>([CanBeNull] IEnumerable<T> first,
-			[CanBeNull] IEnumerable<T> second,
-			[CanBeNull] Func<T, T, bool> isEqual = null)
+		public static T[] MergeLists<T>(IEnumerable<T>? first,
+			IEnumerable<T>? second,
+			Func<T, T, bool>? isEqual = null)
 		{
 			if (first == null)
 				return second?.ToArray();
@@ -66,8 +66,8 @@ namespace Kyoo.Utils
 		/// <returns>The first dictionary with the missing elements of <paramref name="second"/>.</returns>
 		/// <seealso cref="MergeDictionaries{T,T2}(System.Collections.Generic.IDictionary{T,T2},System.Collections.Generic.IDictionary{T,T2},out bool)"/>
 		[ContractAnnotation("first:notnull => notnull; second:notnull => notnull", true)]
-		public static IDictionary<T, T2> MergeDictionaries<T, T2>([CanBeNull] IDictionary<T, T2> first,
-			[CanBeNull] IDictionary<T, T2> second)
+		public static IDictionary<T, T2> MergeDictionaries<T, T2>(IDictionary<T, T2>? first,
+			IDictionary<T, T2>? second)
 		{
 			return MergeDictionaries(first, second, out bool _);
 		}
@@ -84,8 +84,8 @@ namespace Kyoo.Utils
 		/// <typeparam name="T2">The type of values in the dictionaries</typeparam>
 		/// <returns>The first dictionary with the missing elements of <paramref name="second"/>.</returns>
 		[ContractAnnotation("first:notnull => notnull; second:notnull => notnull", true)]
-		public static IDictionary<T, T2> MergeDictionaries<T, T2>([CanBeNull] IDictionary<T, T2> first,
-			[CanBeNull] IDictionary<T, T2> second,
+		public static IDictionary<T, T2> MergeDictionaries<T, T2>(IDictionary<T, T2>? first,
+			IDictionary<T, T2>? second,
 			out bool hasChanged)
 		{
 			if (first == null)
@@ -138,8 +138,8 @@ namespace Kyoo.Utils
 		/// set to those of <paramref name="first"/>.
 		/// </returns>
 		[ContractAnnotation("first:notnull => notnull; second:notnull => notnull", true)]
-		public static IDictionary<T, T2> CompleteDictionaries<T, T2>([CanBeNull] IDictionary<T, T2> first,
-			[CanBeNull] IDictionary<T, T2> second,
+		public static IDictionary<T, T2> CompleteDictionaries<T, T2>(IDictionary<T, T2>? first,
+			IDictionary<T, T2>? second,
 			out bool hasChanged)
 		{
 			if (first == null)
@@ -155,32 +155,6 @@ namespace Kyoo.Utils
 			foreach ((T key, T2 value) in first)
 				second.TryAdd(key, value);
 			return second;
-		}
-
-		/// <summary>
-		/// Set every fields of first to those of second. Ignore fields marked with the <see cref="NotMergeableAttribute"/> attribute
-		/// At the end, the OnMerge method of first will be called if first is a <see cref="IOnMerge"/>
-		/// </summary>
-		/// <param name="first">The object to assign</param>
-		/// <param name="second">The object containing new values</param>
-		/// <typeparam name="T">Fields of T will be used</typeparam>
-		/// <returns><paramref name="first"/></returns>
-		public static T Assign<T>(T first, T second)
-		{
-			Type type = typeof(T);
-			IEnumerable<PropertyInfo> properties = type.GetProperties()
-				.Where(x => x.CanRead && x.CanWrite
-					&& Attribute.GetCustomAttribute(x, typeof(NotMergeableAttribute)) == null);
-
-			foreach (PropertyInfo property in properties)
-			{
-				object value = property.GetValue(second);
-				property.SetValue(first, value);
-			}
-
-			if (first is IOnMerge merge)
-				merge.OnMerge(second);
-			return first;
 		}
 
 		/// <summary>
@@ -210,8 +184,8 @@ namespace Kyoo.Utils
 		/// <returns><paramref name="first"/></returns>
 		/// <exception cref="ArgumentNullException">If first is null</exception>
 		public static T Complete<T>([NotNull] T first,
-			[CanBeNull] T second,
-			[InstantHandle] Func<PropertyInfo, bool> where = null)
+			T? second,
+			[InstantHandle] Func<PropertyInfo, bool>? where = null)
 		{
 			if (first == null)
 				throw new ArgumentNullException(nameof(first));
@@ -281,9 +255,9 @@ namespace Kyoo.Utils
 		/// <typeparam name="T">Fields of T will be merged</typeparam>
 		/// <returns><paramref name="first"/></returns>
 		[ContractAnnotation("first:notnull => notnull; second:notnull => notnull", true)]
-		public static T Merge<T>([CanBeNull] T first,
-			[CanBeNull] T second,
-			[InstantHandle] Func<PropertyInfo, bool> where = null)
+		public static T Merge<T>(T? first,
+			T? second,
+			[InstantHandle] Func<PropertyInfo, bool>? where = null)
 		{
 			if (first == null)
 				return second;

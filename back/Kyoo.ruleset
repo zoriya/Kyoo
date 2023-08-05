@@ -33,10 +33,11 @@
 		<Rule Id="SA1513" Action="None"/>         <!-- ClosingBraceMustBeFollowedByBlankLine -->
 	</Rules>
 	<Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.CSharp.DocumentationRules">
+		<Rule Id="SA1600" Action="None" />        <!-- Elements Shuld be Documented -->
+		<Rule Id="SA1602" Action="None" />        <!-- Enums should be documented -->
 		<Rule Id="SA1642" Action="None" />        <!-- ConstructorSummaryDocumentationMustBeginWithStandardText -->
 		<Rule Id="SA1643" Action="None" />        <!-- DestructorSummaryDocumentationMustBeginWithStandardText -->
 		<Rule Id="SA1623" Action="None" />        <!-- PropertySummaryDocumentationMustMatchAccessors -->
 		<Rule Id="SA1629" Action="None" />        <!-- DocumentationTextMustEndWithAPeriod -->
-		<Rule Id="SA1600" Action="None" />        <!-- Elements Shuld be Documented -->
 	</Rules>
 </RuleSet>

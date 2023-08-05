@@ -30,6 +30,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using JsonOptions = Kyoo.Core.Api.JsonOptions;
 
 namespace Kyoo.Core
@@ -48,15 +49,14 @@ namespace Kyoo.Core
 			builder.RegisterType<ThumbnailsManager>().As<IThumbnailsManager>().InstancePerLifetimeScope();
 			builder.RegisterType<LibraryManager>().As<ILibraryManager>().InstancePerLifetimeScope();
 
-			builder.RegisterRepository<ILibraryRepository, LibraryRepository>();
 			builder.RegisterRepository<ILibraryItemRepository, LibraryItemRepository>();
 			builder.RegisterRepository<ICollectionRepository, CollectionRepository>();
+			builder.RegisterRepository<IMovieRepository, MovieRepository>();
 			builder.RegisterRepository<IShowRepository, ShowRepository>();
 			builder.RegisterRepository<ISeasonRepository, SeasonRepository>();
 			builder.RegisterRepository<IEpisodeRepository, EpisodeRepository>();
 			builder.RegisterRepository<IPeopleRepository, PeopleRepository>();
 			builder.RegisterRepository<IStudioRepository, StudioRepository>();
-			builder.RegisterRepository<IGenreRepository, GenreRepository>();
 			builder.RegisterRepository<IUserRepository, UserRepository>();
 		}
 
@@ -73,6 +73,7 @@ namespace Kyoo.Core
 				.AddNewtonsoftJson(x =>
 				{
 					x.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+					x.SerializerSettings.Converters.Add(new StringEnumConverter());
 				})
 				.AddDataAnnotations()
 				.AddControllersAsServices()

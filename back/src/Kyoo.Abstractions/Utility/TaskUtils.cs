@@ -77,8 +77,7 @@ namespace Kyoo.Utils
 		/// <param name="value">The initial task</param>
 		/// <typeparam name="T">The type that the task will return</typeparam>
 		/// <returns>A non-null task.</returns>
-		[NotNull]
-		public static Task<T> DefaultIfNull<T>([CanBeNull] Task<T> value)
+		public static Task<T> DefaultIfNull<T>(Task<T>? value)
 		{
 			return value ?? Task.FromResult<T>(default);
 		}

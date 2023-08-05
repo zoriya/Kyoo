@@ -17,7 +17,10 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Kyoo.Abstractions.Models.Attributes;
+using Kyoo.Utils;
+using Newtonsoft.Json;
 
 namespace Kyoo.Abstractions.Models
 {
@@ -31,7 +34,7 @@ namespace Kyoo.Abstractions.Models
 		public int ID { get; set; }
 
 		/// <inheritdoc />
-		public string Slug { get; set; }
+		[MaxLength(256)] public string Slug { get; set; }
 
 		/// <summary>
 		/// The name of this collection.
@@ -39,30 +42,39 @@ namespace Kyoo.Abstractions.Models
 		public string Name { get; set; }
 
 		/// <inheritdoc />
-		public Image Poster { get; set; }
+		public Image? Poster { get; set; }
 
 		/// <inheritdoc />
-		public Image Thumbnail { get; set; }
+		public Image? Thumbnail { get; set; }
 
 		/// <inheritdoc />
-		public Image Logo { get; set; }
+		public Image? Logo { get; set; }
 
 		/// <summary>
 		/// The description of this collection.
 		/// </summary>
-		public string Overview { get; set; }
+		public string? Overview { get; set; }
+
+		/// <summary>
+		/// The list of movies contained in this collection.
+		/// </summary>
+		[LoadableRelation] public ICollection<Movie>? Movies { get; set; }
 
 		/// <summary>
 		/// The list of shows contained in this collection.
 		/// </summary>
-		[LoadableRelation] public ICollection<Show> Shows { get; set; }
-
-		/// <summary>
-		/// The list of libraries that contains this collection.
-		/// </summary>
-		[LoadableRelation] public ICollection<Library> Libraries { get; set; }
+		[LoadableRelation] public ICollection<Show>? Shows { get; set; }
 
 		/// <inheritdoc />
-		public Dictionary<string, MetadataID> ExternalId { get; set; }
+		public Dictionary<string, MetadataID> ExternalId { get; set; } = new();
+
+		public Collection() { }
+
+		[JsonConstructor]
+		public Collection(string name)
+		{
+			Slug = Utility.ToSlug(name);
+			Name = name;
+		}
 	}
 }

@@ -12,9 +12,5 @@ class Studio:
 	def to_kyoo(self):
 		return {
 			**asdict(self),
-			"images": {
-				"2": next(iter(self.logos), None),
-			},
-			# TODO: The back has bad external id support, we disable it for now
-			"external_ids": None,
+			# "logo": next(iter(self.logos), None),
 		}

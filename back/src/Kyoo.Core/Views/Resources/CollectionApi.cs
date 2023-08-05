@@ -93,40 +93,5 @@ namespace Kyoo.Core.Api
 				return NotFound();
 			return Page(resources, pagination.Limit);
 		}
-
-		/// <summary>
-		/// Get libraries containing this collection
-		/// </summary>
-		/// <remarks>
-		/// Lists the libraries that contain the collection with the given id or slug.
-		/// </remarks>
-		/// <param name="identifier">The ID or slug of the <see cref="Collection"/>.</param>
-		/// <param name="sortBy">A key to sort libraries by.</param>
-		/// <param name="where">An optional list of filters.</param>
-		/// <param name="pagination">The number of libraries to return.</param>
-		/// <returns>A page of libraries.</returns>
-		/// <response code="400">The filters or the sort parameters are invalid.</response>
-		/// <response code="404">No collection with the given ID or slug could be found.</response>
-		[HttpGet("{identifier:id}/libraries")]
-		[HttpGet("{identifier:id}/library", Order = AlternativeRoute)]
-		[PartialPermission(Kind.Read)]
-		[ProducesResponseType(StatusCodes.Status200OK)]
-		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
-		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Page<Library>>> GetLibraries(Identifier identifier,
-			[FromQuery] string sortBy,
-			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] Pagination pagination)
-		{
-			ICollection<Library> resources = await _libraryManager.GetAll(
-				ApiHelper.ParseWhere(where, identifier.IsContainedIn<Library, Collection>(x => x.Collections)),
-				Sort<Library>.From(sortBy),
-				pagination
-			);
-
-			if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Collection>()) == null)
-				return NotFound();
-			return Page(resources, pagination.Limit);
-		}
 	}
 }

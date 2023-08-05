@@ -123,7 +123,7 @@ class TheMovieDatabase(Provider):
 			ret = Movie(
 				original_language=movie["original_language"],
 				aliases=[x["title"] for x in movie["alternative_titles"]["titles"]],
-				release_date=datetime.strptime(movie["release_date"], "%Y-%m-%d").date()
+				air_date=datetime.strptime(movie["release_date"], "%Y-%m-%d").date()
 				if movie["release_date"]
 				else None,
 				status=MovieStatus.FINISHED
@@ -148,8 +148,8 @@ class TheMovieDatabase(Provider):
 			)
 			translation = MovieTranslation(
 				name=movie["title"],
-				tagline=movie["tagline"],
-				keywords=list(map(lambda x: x["name"], movie["keywords"]["keywords"])),
+				tagline=movie["tagline"] if movie["tagline"] else None,
+				tags=list(map(lambda x: x["name"], movie["keywords"]["keywords"])),
 				overview=movie["overview"],
 				posters=self.get_image(movie["images"]["posters"]),
 				logos=self.get_image(movie["images"]["logos"]),
@@ -224,8 +224,8 @@ class TheMovieDatabase(Provider):
 			)
 			translation = ShowTranslation(
 				name=show["name"],
-				tagline=show["tagline"],
-				keywords=list(map(lambda x: x["name"], show["keywords"]["results"])),
+				tagline=show["tagline"] if show["tagline"] else None,
+				tags=list(map(lambda x: x["name"], show["keywords"]["results"])),
 				overview=show["overview"],
 				posters=self.get_image(show["images"]["posters"]),
 				logos=self.get_image(show["images"]["logos"]),

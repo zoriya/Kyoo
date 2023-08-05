@@ -16,7 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
@@ -38,7 +37,7 @@ namespace Kyoo.Core.Api
 	[Route("item", Order = AlternativeRoute)]
 	[ApiController]
 	[ResourceView]
-	[PartialPermission(nameof(LibraryItem))]
+	[PartialPermission("LibraryItem")]
 	[ApiDefinition("Items", Group = ResourcesGroup)]
 	public class LibraryItemApi : BaseApi
 	{
@@ -78,14 +77,14 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Page<LibraryItem>>> GetAll(
+		public async Task<ActionResult<Page<ILibraryItem>>> GetAll(
 			[FromQuery] string sortBy,
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] Pagination pagination)
 		{
-			ICollection<LibraryItem> resources = await _libraryItems.GetAll(
-				ApiHelper.ParseWhere<LibraryItem>(where),
-				Sort<LibraryItem>.From(sortBy),
+			ICollection<ILibraryItem> resources = await _libraryItems.GetAll(
+				ApiHelper.ParseWhere<ILibraryItem>(where),
+				Sort<ILibraryItem>.From(sortBy),
 				pagination
 			);
 

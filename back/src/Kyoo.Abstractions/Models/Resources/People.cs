@@ -17,7 +17,10 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Kyoo.Abstractions.Models.Attributes;
+using Kyoo.Utils;
+using Newtonsoft.Json;
 
 namespace Kyoo.Abstractions.Models
 {
@@ -30,6 +33,7 @@ namespace Kyoo.Abstractions.Models
 		public int ID { get; set; }
 
 		/// <inheritdoc />
+		[MaxLength(256)]
 		public string Slug { get; set; }
 
 		/// <summary>
@@ -38,20 +42,29 @@ namespace Kyoo.Abstractions.Models
 		public string Name { get; set; }
 
 		/// <inheritdoc />
-		public Image Poster { get; set; }
+		public Image? Poster { get; set; }
 
 		/// <inheritdoc />
-		public Image Thumbnail { get; set; }
+		public Image? Thumbnail { get; set; }
 
 		/// <inheritdoc />
-		public Image Logo { get; set; }
+		public Image? Logo { get; set; }
 
 		/// <inheritdoc />
-		public Dictionary<string, MetadataID> ExternalId { get; set; }
+		public Dictionary<string, MetadataID> ExternalId { get; set; } = new();
 
 		/// <summary>
 		/// The list of roles this person has played in. See <see cref="PeopleRole"/> for more information.
 		/// </summary>
-		[EditableRelation][LoadableRelation] public ICollection<PeopleRole> Roles { get; set; }
+		[EditableRelation][LoadableRelation] public ICollection<PeopleRole>? Roles { get; set; }
+
+		public People() { }
+
+		[JsonConstructor]
+		public People(string name)
+		{
+			Slug = Utility.ToSlug(name);
+			Name = name;
+		}
 	}
 }

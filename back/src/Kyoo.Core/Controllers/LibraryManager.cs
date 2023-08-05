@@ -40,13 +40,13 @@ namespace Kyoo.Core.Controllers
 		private readonly IBaseRepository[] _repositories;
 
 		/// <inheritdoc />
-		public ILibraryRepository LibraryRepository { get; }
-
-		/// <inheritdoc />
 		public ILibraryItemRepository LibraryItemRepository { get; }
 
 		/// <inheritdoc />
 		public ICollectionRepository CollectionRepository { get; }
+
+		/// <inheritdoc />
+		public IMovieRepository MovieRepository { get; }
 
 		/// <inheritdoc />
 		public IShowRepository ShowRepository { get; }
@@ -64,9 +64,6 @@ namespace Kyoo.Core.Controllers
 		public IStudioRepository StudioRepository { get; }
 
 		/// <inheritdoc />
-		public IGenreRepository GenreRepository { get; }
-
-		/// <inheritdoc />
 		public IUserRepository UserRepository { get; }
 
 		/// <summary>
@@ -77,15 +74,14 @@ namespace Kyoo.Core.Controllers
 		public LibraryManager(IEnumerable<IBaseRepository> repositories)
 		{
 			_repositories = repositories.ToArray();
-			LibraryRepository = GetRepository<Library>() as ILibraryRepository;
-			LibraryItemRepository = GetRepository<LibraryItem>() as ILibraryItemRepository;
+			LibraryItemRepository = GetRepository<ILibraryItem>() as ILibraryItemRepository;
 			CollectionRepository = GetRepository<Collection>() as ICollectionRepository;
+			MovieRepository = GetRepository<Movie>() as IMovieRepository;
 			ShowRepository = GetRepository<Show>() as IShowRepository;
 			SeasonRepository = GetRepository<Season>() as ISeasonRepository;
 			EpisodeRepository = GetRepository<Episode>() as IEpisodeRepository;
 			PeopleRepository = GetRepository<People>() as IPeopleRepository;
 			StudioRepository = GetRepository<Studio>() as IStudioRepository;
-			GenreRepository = GetRepository<Genre>() as IGenreRepository;
 			UserRepository = GetRepository<User>() as IUserRepository;
 		}
 
@@ -255,27 +251,9 @@ namespace Kyoo.Core.Controllers
 
 			return (obj, member: memberName) switch
 			{
-				(Library l, nameof(Library.Shows)) => ShowRepository
-					.GetAll(x => x.Libraries.Any(y => y.ID == obj.ID))
-					.Then(x => l.Shows = x),
-
-				(Library l, nameof(Library.Collections)) => CollectionRepository
-					.GetAll(x => x.Libraries.Any(y => y.ID == obj.ID))
-					.Then(x => l.Collections = x),
-
-
 				(Collection c, nameof(Collection.Shows)) => ShowRepository
 					.GetAll(x => x.Collections.Any(y => y.ID == obj.ID))
 					.Then(x => c.Shows = x),
-
-				(Collection c, nameof(Collection.Libraries)) => LibraryRepository
-					.GetAll(x => x.Collections.Any(y => y.ID == obj.ID))
-					.Then(x => c.Libraries = x),
-
-
-				(Show s, nameof(Show.Genres)) => GenreRepository
-					.GetAll(x => x.Shows.Any(y => y.ID == obj.ID))
-					.Then(x => s.Genres = x),
 
 				(Show s, nameof(Show.People)) => PeopleRepository
 					.GetFromShow(obj.ID)
@@ -290,10 +268,6 @@ namespace Kyoo.Core.Controllers
 					EpisodeRepository.GetAll(x => x.Show.ID == obj.ID),
 					(x, y) => x.Episodes = y,
 					(x, y) => { x.Show = y; x.ShowID = y.ID; }),
-
-				(Show s, nameof(Show.Libraries)) => LibraryRepository
-					.GetAll(x => x.Shows.Any(y => y.ID == obj.ID))
-					.Then(x => s.Libraries = x),
 
 				(Show s, nameof(Show.Collections)) => CollectionRepository
 					.GetAll(x => x.Shows.Any(y => y.ID == obj.ID))
@@ -339,11 +313,6 @@ namespace Kyoo.Core.Controllers
 					}),
 
 
-				(Genre g, nameof(Genre.Shows)) => ShowRepository
-					.GetAll(x => x.Genres.Any(y => y.ID == obj.ID))
-					.Then(x => g.Shows = x),
-
-
 				(Studio s, nameof(Studio.Shows)) => ShowRepository
 					.GetAll(x => x.Studio.ID == obj.ID)
 					.Then(x => s.Shows = x),
@@ -354,24 +323,6 @@ namespace Kyoo.Core.Controllers
 
 				_ => throw new ArgumentException($"Couldn't find a way to load {memberName} of {obj.Slug}.")
 			};
-		}
-
-		/// <inheritdoc />
-		public Task<ICollection<LibraryItem>> GetItemsFromLibrary(int id,
-			Expression<Func<LibraryItem, bool>> where = null,
-			Sort<LibraryItem> sort = default,
-			Pagination limit = default)
-		{
-			return LibraryItemRepository.GetFromLibrary(id, where, sort, limit);
-		}
-
-		/// <inheritdoc />
-		public Task<ICollection<LibraryItem>> GetItemsFromLibrary(string slug,
-			Expression<Func<LibraryItem, bool>> where = null,
-			Sort<LibraryItem> sort = default,
-			Pagination limit = default)
-		{
-			return LibraryItemRepository.GetFromLibrary(slug, where, sort, limit);
 		}
 
 		/// <inheritdoc />
@@ -408,20 +359,6 @@ namespace Kyoo.Core.Controllers
 			Pagination limit = default)
 		{
 			return PeopleRepository.GetFromPeople(slug, where, sort, limit);
-		}
-
-		/// <inheritdoc />
-		public Task AddShowLink(int showID, int? libraryID, int? collectionID)
-		{
-			return ShowRepository.AddShowLink(showID, libraryID, collectionID);
-		}
-
-		/// <inheritdoc />
-		public Task AddShowLink(Show show, Library library, Collection collection)
-		{
-			if (show == null)
-				throw new ArgumentNullException(nameof(show));
-			return ShowRepository.AddShowLink(show.ID, library?.ID, collection?.ID);
 		}
 
 		/// <inheritdoc />

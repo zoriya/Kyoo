@@ -64,33 +64,11 @@ namespace Kyoo.Utils
 		}
 
 		/// <summary>
-		/// Get the value of a member (property or field)
-		/// </summary>
-		/// <param name="member">The member value</param>
-		/// <param name="obj">The owner of this member</param>
-		/// <returns>The value boxed as an object</returns>
-		/// <exception cref="ArgumentNullException">if <paramref name="member"/> or <paramref name="obj"/> is null.</exception>
-		/// <exception cref="ArgumentException">The member is not a field or a property.</exception>
-		public static object GetValue([NotNull] this MemberInfo member, [NotNull] object obj)
-		{
-			if (member == null)
-				throw new ArgumentNullException(nameof(member));
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-			return member switch
-			{
-				PropertyInfo property => property.GetValue(obj),
-				FieldInfo field => field.GetValue(obj),
-				_ => throw new ArgumentException($"Can't get value of a non property/field (member: {member}).")
-			};
-		}
-
-		/// <summary>
 		/// Slugify a string (Replace spaces by -, Uniformize accents)
 		/// </summary>
 		/// <param name="str">The string to slugify</param>
 		/// <returns>The slug version of the given string</returns>
-		public static string ToSlug([CanBeNull] string str)
+		public static string ToSlug(string? str)
 		{
 			if (str == null)
 				return null;
@@ -132,26 +110,12 @@ namespace Kyoo.Utils
 		/// <param name="type">The starting type</param>
 		/// <returns>A list of types</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="type"/> can't be null</exception>
-		public static IEnumerable<Type> GetInheritanceTree([NotNull] this Type type)
+		public static IEnumerable<Type> GetInheritanceTree(this Type type)
 		{
 			if (type == null)
 				throw new ArgumentNullException(nameof(type));
 			for (; type != null; type = type.BaseType)
 				yield return type;
-		}
-
-		/// <summary>
-		/// Check if <paramref name="obj"/> inherit from a generic type <paramref name="genericType"/>.
-		/// </summary>
-		/// <param name="obj">Does this object's type is a <paramref name="genericType"/></param>
-		/// <param name="genericType">The generic type to check against (Only generic types are supported like typeof(IEnumerable&lt;&gt;).</param>
-		/// <returns>True if obj inherit from genericType. False otherwise</returns>
-		/// <exception cref="ArgumentNullException">obj and genericType can't be null</exception>
-		public static bool IsOfGenericType([NotNull] object obj, [NotNull] Type genericType)
-		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-			return IsOfGenericType(obj.GetType(), genericType);
 		}
 
 		/// <summary>
@@ -161,7 +125,7 @@ namespace Kyoo.Utils
 		/// <param name="genericType">The generic type to check against (Only generic types are supported like typeof(IEnumerable&lt;&gt;).</param>
 		/// <returns>True if obj inherit from genericType. False otherwise</returns>
 		/// <exception cref="ArgumentNullException">obj and genericType can't be null</exception>
-		public static bool IsOfGenericType([NotNull] Type type, [NotNull] Type genericType)
+		public static bool IsOfGenericType(Type type, Type genericType)
 		{
 			if (type == null)
 				throw new ArgumentNullException(nameof(type));
@@ -186,7 +150,7 @@ namespace Kyoo.Utils
 		/// <returns>The generic definition of genericType that type inherit or null if type does not implement the generic type.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="type"/> and <paramref name="genericType"/> can't be null</exception>
 		/// <exception cref="ArgumentException"><paramref name="genericType"/> must be a generic type</exception>
-		public static Type GetGenericDefinition([NotNull] Type type, [NotNull] Type genericType)
+		public static Type GetGenericDefinition(Type type, Type genericType)
 		{
 			if (type == null)
 				throw new ArgumentNullException(nameof(type));
@@ -224,12 +188,11 @@ namespace Kyoo.Utils
 		/// <exception cref="ArgumentException">No method match the given constraints.</exception>
 		/// <returns>The method handle of the matching method.</returns>
 		[PublicAPI]
-		[NotNull]
-		public static MethodInfo GetMethod([NotNull] Type type,
+		public static MethodInfo GetMethod(Type type,
 			BindingFlags flag,
 			string name,
-			[NotNull] Type[] generics,
-			[NotNull] object[] args)
+			Type[] generics,
+			object[] args)
 		{
 			if (type == null)
 				throw new ArgumentNullException(nameof(type));
@@ -297,9 +260,9 @@ namespace Kyoo.Utils
 		/// <seealso cref="RunGenericMethod{T}(object,string,System.Type,object[])"/>
 		/// <seealso cref="RunGenericMethod{T}(System.Type,string,System.Type[],object[])"/>
 		public static T RunGenericMethod<T>(
-			[NotNull] Type owner,
-			[NotNull] string methodName,
-			[NotNull] Type type,
+			Type owner,
+			string methodName,
+			Type type,
 			params object[] args)
 		{
 			return RunGenericMethod<T>(owner, methodName, new[] { type }, args);
@@ -334,9 +297,9 @@ namespace Kyoo.Utils
 		/// <seealso cref="RunGenericMethod{T}(System.Type,string,System.Type,object[])"/>
 		[PublicAPI]
 		public static T RunGenericMethod<T>(
-			[NotNull] Type owner,
-			[NotNull] string methodName,
-			[NotNull] Type[] types,
+			Type owner,
+			string methodName,
+			Type[] types,
 			params object[] args)
 		{
 			if (owner == null)
@@ -349,83 +312,6 @@ namespace Kyoo.Utils
 				throw new ArgumentException($"The {nameof(types)} array is empty. At least one type is needed.");
 			MethodInfo method = GetMethod(owner, BindingFlags.Static, methodName, types, args);
 			return (T)method.MakeGenericMethod(types).Invoke(null, args);
-		}
-
-		/// <summary>
-		/// Run a generic method for a runtime <see cref="Type"/>.
-		/// </summary>
-		/// <example>
-		/// To run <see cref="Merger.MergeLists{T}"/> for a List where you don't know the type at compile type,
-		/// you could do:
-		/// <code>
-		/// Utility.RunGenericMethod&lt;object&gt;(
-		///     typeof(Utility),
-		///     nameof(MergeLists),
-		///     enumerableType,
-		///     oldValue, newValue, equalityComparer)
-		/// </code>
-		/// </example>
-		/// <param name="instance">The <c>this</c> of the method to run.</param>
-		/// <param name="methodName">The name of the method. You should use the <c>nameof</c> keyword.</param>
-		/// <param name="type">The generic type to run the method with.</param>
-		/// <param name="args">The list of arguments of the method</param>
-		/// <typeparam name="T">
-		/// The return type of the method. You can put <see cref="object"/> for an unknown one.
-		/// </typeparam>
-		/// <exception cref="ArgumentException">No method match the given constraints.</exception>
-		/// <returns>The return of the method you wanted to run.</returns>
-		/// <seealso cref="RunGenericMethod{T}(object,string,System.Type,object[])"/>
-		/// <seealso cref="RunGenericMethod{T}(System.Type,string,System.Type[],object[])"/>
-		public static T RunGenericMethod<T>(
-			[NotNull] object instance,
-			[NotNull] string methodName,
-			[NotNull] Type type,
-			params object[] args)
-		{
-			return RunGenericMethod<T>(instance, methodName, new[] { type }, args);
-		}
-
-		/// <summary>
-		/// Run a generic method for a multiple runtime <see cref="Type"/>.
-		/// If your generic method only needs one type, see
-		/// <see cref="RunGenericMethod{T}(object,string,System.Type,object[])"/>
-		/// </summary>
-		/// <example>
-		/// To run <see cref="Merger.MergeLists{T}"/> for a List where you don't know the type at compile type,
-		/// you could do:
-		/// <code>
-		/// Utility.RunGenericMethod&lt;object&gt;(
-		///     typeof(Utility),
-		///     nameof(MergeLists),
-		///     enumerableType,
-		///     oldValue, newValue, equalityComparer)
-		/// </code>
-		/// </example>
-		/// <param name="instance">The <c>this</c> of the method to run.</param>
-		/// <param name="methodName">The name of the method. You should use the <c>nameof</c> keyword.</param>
-		/// <param name="types">The list of generic types to run the method with.</param>
-		/// <param name="args">The list of arguments of the method</param>
-		/// <typeparam name="T">
-		/// The return type of the method. You can put <see cref="object"/> for an unknown one.
-		/// </typeparam>
-		/// <exception cref="ArgumentException">No method match the given constraints.</exception>
-		/// <returns>The return of the method you wanted to run.</returns>
-		/// <seealso cref="RunGenericMethod{T}(object,string,System.Type[],object[])"/>
-		/// <seealso cref="RunGenericMethod{T}(System.Type,string,System.Type,object[])"/>
-		public static T RunGenericMethod<T>(
-			[NotNull] object instance,
-			[NotNull] string methodName,
-			[NotNull] Type[] types,
-			params object[] args)
-		{
-			if (instance == null)
-				throw new ArgumentNullException(nameof(instance));
-			if (methodName == null)
-				throw new ArgumentNullException(nameof(methodName));
-			if (types == null || types.Length == 0)
-				throw new ArgumentNullException(nameof(types));
-			MethodInfo method = GetMethod(instance.GetType(), BindingFlags.Instance, methodName, types, args);
-			return (T)method.MakeGenericMethod(types).Invoke(instance, args.ToArray());
 		}
 
 		/// <summary>
@@ -446,25 +332,11 @@ namespace Kyoo.Utils
 		/// </summary>
 		/// <param name="ex">The exception to rethrow.</param>
 		[System.Diagnostics.CodeAnalysis.DoesNotReturn]
-		public static void ReThrow([NotNull] this Exception ex)
+		public static void ReThrow(this Exception ex)
 		{
 			if (ex == null)
 				throw new ArgumentNullException(nameof(ex));
 			ExceptionDispatchInfo.Capture(ex).Throw();
-		}
-
-		/// <summary>
-		/// Get a friendly type name (supporting generics)
-		/// For example a list of string will be displayed as List&lt;string&gt; and not as List`1.
-		/// </summary>
-		/// <param name="type">The type to use</param>
-		/// <returns>The friendly name of the type</returns>
-		public static string FriendlyName(this Type type)
-		{
-			if (!type.IsGenericType)
-				return type.Name;
-			string generics = string.Join(", ", type.GetGenericArguments().Select(x => x.FriendlyName()));
-			return $"{type.Name[..type.Name.IndexOf('`')]}<{generics}>";
 		}
 	}
 }

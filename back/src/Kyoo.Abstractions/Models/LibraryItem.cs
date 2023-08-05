@@ -17,16 +17,13 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq.Expressions;
 
 namespace Kyoo.Abstractions.Models
 {
 	/// <summary>
 	/// The type of item, ether a show, a movie or a collection.
 	/// </summary>
-	public enum ItemType
+	public enum ItemKind
 	{
 		/// <summary>
 		/// The <see cref="LibraryItem"/> is a <see cref="Show"/>.
@@ -49,138 +46,67 @@ namespace Kyoo.Abstractions.Models
 	/// A type union between <see cref="Show"/> and <see cref="Collection"/>.
 	/// This is used to list content put inside a library.
 	/// </summary>
-	public class LibraryItem : CustomTypeDescriptor, IResource, IThumbnails
+	public interface ILibraryItem : IResource
 	{
-		/// <inheritdoc />
+		/// <summary>
+		/// Is the item a collection, a movie or a show?
+		/// </summary>
+		public ItemKind Kind { get; }
+
+		public string Name { get; }
+
+		public DateTime? AirDate { get; }
+
+		public Image Poster { get; }
+	}
+
+	public class BagItem : ILibraryItem
+	{
+		public ItemKind Kind { get; }
+
 		public int ID { get; set; }
 
-		/// <inheritdoc />
-		public string Slug { get; set; }
+		public string Slug { get; set;  }
 
-		/// <summary>
-		/// The title of the show or collection.
-		/// </summary>
-		public string Title { get; set; }
+		public string Name { get; set; }
 
-		/// <summary>
-		/// The summary of the show or collection.
-		/// </summary>
-		public string Overview { get; set; }
+		public DateTime? AirDate { get; set; }
 
-		/// <summary>
-		/// Is this show airing, not aired yet or finished? This is only applicable for shows.
-		/// </summary>
-		public Status? Status { get; set; }
-
-		/// <summary>
-		/// The date this show or collection started airing. It can be null if this is unknown.
-		/// </summary>
-		public DateTime? StartAir { get; set; }
-
-		/// <summary>
-		/// The date this show or collection finished airing.
-		/// It must be after the <see cref="StartAir"/> but can be the same (example: for movies).
-		/// It can also be null if this is unknown.
-		/// </summary>
-		public DateTime? EndAir { get; set; }
-
-		/// <inheritdoc />
 		public Image Poster { get; set; }
 
-		/// <inheritdoc />
-		public Image Thumbnail { get; set; }
+		public object Rest { get; set; }
 
-		/// <inheritdoc />
-		public Image Logo { get; set; }
-
-		/// <summary>
-		/// The type of this item (ether a collection, a show or a movie).
-		/// </summary>
-		public ItemType Type { get; set; }
-
-		/// <summary>
-		/// Create a new, empty <see cref="LibraryItem"/>.
-		/// </summary>
-		public LibraryItem() { }
-
-		/// <summary>
-		/// Create a <see cref="LibraryItem"/> from a show.
-		/// </summary>
-		/// <param name="show">The show that this library item should represent.</param>
-		public LibraryItem(Show show)
+		public ILibraryItem ToItem()
 		{
-			ID = show.ID;
-			Slug = show.Slug;
-			Title = show.Title;
-			Overview = show.Overview;
-			Status = show.Status;
-			StartAir = show.StartAir;
-			EndAir = show.EndAir;
-			Poster = show.Poster;
-			Thumbnail = show.Thumbnail;
-			Logo = show.Logo;
-			Type = show.IsMovie ? ItemType.Movie : ItemType.Show;
-		}
-
-		/// <summary>
-		/// Create a <see cref="LibraryItem"/> from a collection
-		/// </summary>
-		/// <param name="collection">The collection that this library item should represent.</param>
-		public LibraryItem(Collection collection)
-		{
-			ID = -collection.ID;
-			Slug = collection.Slug;
-			Title = collection.Name;
-			Overview = collection.Overview;
-			Status = Models.Status.Unknown;
-			StartAir = null;
-			EndAir = null;
-			Poster = collection.Poster;
-			Thumbnail = collection.Thumbnail;
-			Logo = collection.Logo;
-			Type = ItemType.Collection;
-		}
-
-		/// <summary>
-		/// An expression to create a <see cref="LibraryItem"/> representing a show.
-		/// </summary>
-		public static Expression<Func<Show, LibraryItem>> FromShow => x => new LibraryItem
-		{
-			ID = x.ID,
-			Slug = x.Slug,
-			Title = x.Title,
-			Overview = x.Overview,
-			Status = x.Status,
-			StartAir = x.StartAir,
-			EndAir = x.EndAir,
-			Poster = x.Poster,
-			Thumbnail = x.Thumbnail,
-			Logo = x.Logo,
-			Type = x.IsMovie ? ItemType.Movie : ItemType.Show
-		};
-
-		/// <summary>
-		/// An expression to create a <see cref="LibraryItem"/> representing a collection.
-		/// </summary>
-		public static Expression<Func<Collection, LibraryItem>> FromCollection => x => new LibraryItem
-		{
-			ID = -x.ID,
-			Slug = x.Slug,
-			Title = x.Name,
-			Overview = x.Overview,
-			Status = Models.Status.Unknown,
-			StartAir = null,
-			EndAir = null,
-			Poster = x.Poster,
-			Thumbnail = x.Thumbnail,
-			Logo = x.Logo,
-			Type = ItemType.Collection
-		};
-
-		/// <inheritdoc />
-		public override string GetClassName()
-		{
-			return Type.ToString();
+			return Kind switch
+			{
+				ItemKind.Movie => Rest as MovieItem,
+				ItemKind.Show => Rest as ShowItem,
+				ItemKind.Collection => Rest as CollectionItem,
+			};
 		}
 	}
+
+	public sealed class ShowItem : Show, ILibraryItem
+	{
+		/// <inheritdoc/>
+		public ItemKind Kind => ItemKind.Show;
+
+		public DateTime? AirDate => StartAir;
+	}
+
+	public sealed class MovieItem : Movie, ILibraryItem
+	{
+		/// <inheritdoc/>
+		public ItemKind Kind => ItemKind.Movie;
+	}
+
+	public sealed class CollectionItem : Collection, ILibraryItem
+	{
+		/// <inheritdoc/>
+		public ItemKind Kind => ItemKind.Collection;
+
+		public DateTime? AirDate => null;
+	}
+
 }

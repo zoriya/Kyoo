@@ -102,7 +102,7 @@ namespace Kyoo.Core.Controllers
 		{
 			return await Sort(
 				_database.Seasons
-					.Where(_database.Like<Season>(x => x.Title, $"%{query}%"))
+					.Where(_database.Like<Season>(x => x.Name, $"%{query}%"))
 				)
 				.Take(20)
 				.ToListAsync();

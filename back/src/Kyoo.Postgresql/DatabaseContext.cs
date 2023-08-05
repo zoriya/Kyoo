@@ -42,14 +42,14 @@ namespace Kyoo.Postgresql
 	public abstract class DatabaseContext : DbContext
 	{
 		/// <summary>
-		/// All libraries of Kyoo. See <see cref="Library"/>.
-		/// </summary>
-		public DbSet<Library> Libraries { get; set; }
-
-		/// <summary>
 		/// All collections of Kyoo. See <see cref="Collection"/>.
 		/// </summary>
 		public DbSet<Collection> Collections { get; set; }
+
+		/// <summary>
+		/// All movies of Kyoo. See <see cref="Movie"/>.
+		/// </summary>
+		public DbSet<Movie> Movies { get; set; }
 
 		/// <summary>
 		/// All shows of Kyoo. See <see cref="Show"/>.
@@ -65,11 +65,6 @@ namespace Kyoo.Postgresql
 		/// All episodes of Kyoo. See <see cref="Episode"/>.
 		/// </summary>
 		public DbSet<Episode> Episodes { get; set; }
-
-		/// <summary>
-		/// All genres of Kyoo. See <see cref="Genres"/>.
-		/// </summary>
-		public DbSet<Genre> Genres { get; set; }
 
 		/// <summary>
 		/// All people of Kyoo. See <see cref="People"/>.
@@ -92,17 +87,37 @@ namespace Kyoo.Postgresql
 		public DbSet<PeopleRole> PeopleRoles { get; set; }
 
 		/// <summary>
-		/// Episodes with a watch percentage. See <see cref="WatchedEpisode"/>.
-		/// </summary>
-		public DbSet<WatchedEpisode> WatchedEpisodes { get; set; }
-
-		/// <summary>
 		/// The list of library items (shows and collections that are part of a library - or the global one).
 		/// </summary>
 		/// <remarks>
 		/// This set is ready only, on most database this will be a view.
 		/// </remarks>
-		public DbSet<LibraryItem> LibraryItems { get; set; }
+		public IQueryable<BagItem> LibraryItems =>
+			Shows.Select(x => new BagItem
+			{
+				ID = x.ID,
+				Slug = x.Slug,
+				Name = x.Name,
+				AirDate = x.StartAir,
+				Poster = x.Poster,
+				Rest = x
+			}).Union(Movies.Select(x => new BagItem
+			{
+				ID = x.ID,
+				Slug = x.Slug,
+				Name = x.Name,
+				AirDate = x.AirDate,
+				Poster = x.Poster,
+				Rest = x
+			})).Union(Collections.Select(x => new BagItem
+			{
+				ID = x.ID,
+				Slug = x.Slug,
+				Name = x.Name,
+				AirDate = null,
+				Poster = x.Poster,
+				Rest = x
+			}));
 
 		/// <summary>
 		/// Add a many to many link between two resources.
@@ -137,14 +152,6 @@ namespace Kyoo.Postgresql
 		protected DatabaseContext(DbContextOptions options)
 			: base(options)
 		{ }
-
-		/// <summary>
-		/// Get the name of the metadata table of the given type.
-		/// </summary>
-		/// <typeparam name="T">The type related to the metadata</typeparam>
-		/// <returns>The name of the table containing the metadata.</returns>
-		protected abstract string MetadataName<T>()
-			where T : IMetadata;
 
 		/// <summary>
 		/// Get the name of the link table of the two given types.
@@ -265,15 +272,16 @@ namespace Kyoo.Postgresql
 				.WithOne(x => x.Season)
 				.OnDelete(DeleteBehavior.Cascade);
 
+			modelBuilder.Entity<Movie>()
+				.HasOne(x => x.Studio)
+				.WithMany(x => x.Movies)
+				.OnDelete(DeleteBehavior.SetNull);
 			modelBuilder.Entity<Show>()
 				.HasOne(x => x.Studio)
 				.WithMany(x => x.Shows)
 				.OnDelete(DeleteBehavior.SetNull);
 
-			_HasManyToMany<Library, Collection>(modelBuilder, x => x.Collections, x => x.Libraries);
-			_HasManyToMany<Library, Show>(modelBuilder, x => x.Shows, x => x.Libraries);
 			_HasManyToMany<Collection, Show>(modelBuilder, x => x.Shows, x => x.Collections);
-			_HasManyToMany<Show, Genre>(modelBuilder, x => x.Genres, x => x.Shows);
 
 			modelBuilder.Entity<User>()
 				.HasMany(x => x.Watched)
@@ -281,14 +289,15 @@ namespace Kyoo.Postgresql
 				.UsingEntity(x => x.ToTable(LinkName<User, Show>()));
 
 			_HasMetadata<Collection>(modelBuilder);
+			_HasMetadata<Movie>(modelBuilder);
 			_HasMetadata<Show>(modelBuilder);
 			_HasMetadata<Season>(modelBuilder);
 			_HasMetadata<Episode>(modelBuilder);
 			_HasMetadata<People>(modelBuilder);
 			_HasMetadata<Studio>(modelBuilder);
 
-			_HasImages<LibraryItem>(modelBuilder);
 			_HasImages<Collection>(modelBuilder);
+			_HasImages<Movie>(modelBuilder);
 			_HasImages<Show>(modelBuilder);
 			_HasImages<Season>(modelBuilder);
 			_HasImages<Episode>(modelBuilder);
@@ -299,26 +308,13 @@ namespace Kyoo.Postgresql
 			modelBuilder.Entity<WatchedEpisode>()
 				.HasKey(x => new { User = x.UserID, Episode = x.EpisodeID });
 
-			modelBuilder.Entity<Collection>().Property(x => x.Slug).IsRequired();
-			modelBuilder.Entity<Genre>().Property(x => x.Slug).IsRequired();
-			modelBuilder.Entity<Library>().Property(x => x.Slug).IsRequired();
-			modelBuilder.Entity<People>().Property(x => x.Slug).IsRequired();
-			modelBuilder.Entity<Show>().Property(x => x.Slug).IsRequired();
-			modelBuilder.Entity<Season>().Property(x => x.Slug).IsRequired();
-			modelBuilder.Entity<Episode>().Property(x => x.Slug).IsRequired();
-			modelBuilder.Entity<Studio>().Property(x => x.Slug).IsRequired();
-			modelBuilder.Entity<User>().Property(x => x.Slug).IsRequired();
-
 			modelBuilder.Entity<Collection>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
-			modelBuilder.Entity<Genre>()
-				.HasIndex(x => x.Slug)
-				.IsUnique();
-			modelBuilder.Entity<Library>()
-				.HasIndex(x => x.Slug)
-				.IsUnique();
 			modelBuilder.Entity<People>()
+				.HasIndex(x => x.Slug)
+				.IsUnique();
+			modelBuilder.Entity<Movie>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
 			modelBuilder.Entity<Show>()
@@ -342,9 +338,6 @@ namespace Kyoo.Postgresql
 			modelBuilder.Entity<User>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
-
-			modelBuilder.Entity<LibraryItem>()
-				.ToView("library_items");
 		}
 
 		/// <summary>

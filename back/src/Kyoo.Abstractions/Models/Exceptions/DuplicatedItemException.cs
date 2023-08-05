@@ -36,7 +36,7 @@ namespace Kyoo.Abstractions.Models.Exceptions
 		/// Create a new <see cref="DuplicatedItemException"/> with the default message.
 		/// </summary>
 		/// <param name="existing">The existing object.</param>
-		public DuplicatedItemException(object existing = null)
+		public DuplicatedItemException(object? existing = null)
 			: base("Already exists in the database.")
 		{
 			Existing = existing;

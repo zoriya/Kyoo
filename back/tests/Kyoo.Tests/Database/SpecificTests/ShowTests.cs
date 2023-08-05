@@ -56,7 +56,7 @@ namespace Kyoo.Tests.Database
 		{
 			Show value = await _repository.Get(TestSample.Get<Show>().Slug);
 			value.Path = "/super";
-			value.Title = "New Title";
+			value.Name = "New Title";
 			Show edited = await _repository.Edit(value, false);
 			KAssert.DeepEqual(value, edited);
 
@@ -215,7 +215,7 @@ namespace Kyoo.Tests.Database
 			{
 				ID = value.ID,
 				Slug = "reset",
-				Title = "Reset"
+				Name = "Reset"
 			};
 
 			Show edited = await _repository.Edit(newValue, true);
@@ -223,7 +223,7 @@ namespace Kyoo.Tests.Database
 			Assert.Equal(value.ID, edited.ID);
 			Assert.Null(edited.Overview);
 			Assert.Equal("reset", edited.Slug);
-			Assert.Equal("Reset", edited.Title);
+			Assert.Equal("Reset", edited.Name);
 			Assert.Null(edited.Aliases);
 			Assert.Null(edited.ExternalId);
 			Assert.Null(edited.People);
@@ -348,7 +348,7 @@ namespace Kyoo.Tests.Database
 			Show value = new()
 			{
 				Slug = "super-test",
-				Title = "This is a test title?"
+				Name = "This is a test title?"
 			};
 			await _repository.Create(value);
 			ICollection<Show> ret = await _repository.Search(query);

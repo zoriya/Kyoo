@@ -3,6 +3,7 @@
 		<Title>Kyoo.Abstractions</Title>
 		<Description>Base package to create plugins for Kyoo.</Description>
 		<RootNamespace>Kyoo.Abstractions</RootNamespace>
+		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<ItemGroup>

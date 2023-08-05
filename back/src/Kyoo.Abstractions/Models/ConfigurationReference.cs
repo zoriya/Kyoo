@@ -60,7 +60,7 @@ namespace Kyoo.Abstractions.Models
 		/// </param>
 		/// <param name="type">The type of the object</param>
 		/// <returns>The list of configuration reference a type has.</returns>
-		public static IEnumerable<ConfigurationReference> CreateReference(string path, [NotNull] Type type)
+		public static IEnumerable<ConfigurationReference> CreateReference(string path, Type type)
 		{
 			if (type == null)
 				throw new ArgumentNullException(nameof(type));

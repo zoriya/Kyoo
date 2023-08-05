@@ -30,7 +30,7 @@ namespace Kyoo.Core.Controllers
 	/// <summary>
 	/// A local repository to handle shows
 	/// </summary>
-	public class ShowRepository : LocalRepository<Show>, IShowRepository
+	public class MovieRepository : LocalRepository<Movie>, IMovieRepository
 	{
 		/// <summary>
 		/// The database handle
@@ -48,15 +48,15 @@ namespace Kyoo.Core.Controllers
 		private readonly IPeopleRepository _people;
 
 		/// <inheritdoc />
-		protected override Sort<Show> DefaultSort => new Sort<Show>.By(x => x.Name);
+		protected override Sort<Movie> DefaultSort => new Sort<Movie>.By(x => x.Name);
 
 		/// <summary>
-		/// Create a new <see cref="ShowRepository"/>.
+		/// Create a new <see cref="MovieRepository"/>.
 		/// </summary>
 		/// <param name="database">The database handle to use</param>
 		/// <param name="studios">A studio repository</param>
 		/// <param name="people">A people repository</param>
-		public ShowRepository(DatabaseContext database,
+		public MovieRepository(DatabaseContext database,
 			IStudioRepository studios,
 			IPeopleRepository people)
 			: base(database)
@@ -67,19 +67,19 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public override async Task<ICollection<Show>> Search(string query)
+		public override async Task<ICollection<Movie>> Search(string query)
 		{
 			query = $"%{query}%";
 			return await Sort(
-				_database.Shows
-					.Where(_database.Like<Show>(x => x.Name + " " + x.Slug, query))
+				_database.Movies
+					.Where(_database.Like<Movie>(x => x.Name + " " + x.Slug, query))
 				)
 				.Take(20)
 				.ToListAsync();
 		}
 
 		/// <inheritdoc />
-		public override async Task<Show> Create(Show obj)
+		public override async Task<Movie> Create(Movie obj)
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
@@ -89,10 +89,8 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		protected override async Task Validate(Show resource)
+		protected override async Task Validate(Movie resource)
 		{
-			resource.Slug ??= Utility.ToSlug(resource.Name);
-
 			await base.Validate(resource);
 			if (resource.Studio != null)
 			{
@@ -113,7 +111,7 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		protected override async Task EditRelations(Show resource, Show changed, bool resetOld)
+		protected override async Task EditRelations(Movie resource, Movie changed, bool resetOld)
 		{
 			await Validate(changed);
 
@@ -131,15 +129,7 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public Task<string> GetSlug(int showID)
-		{
-			return _database.Shows.Where(x => x.ID == showID)
-				.Select(x => x.Slug)
-				.FirstOrDefaultAsync();
-		}
-
-		/// <inheritdoc />
-		public override async Task Delete(Show obj)
+		public override async Task Delete(Movie obj)
 		{
 			_database.Remove(obj);
 			await _database.SaveChangesAsync();

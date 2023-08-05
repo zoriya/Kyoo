@@ -37,21 +37,17 @@ namespace Kyoo.Tests.Database
 		{
 			Context = new PostgresTestContext(postgres, output);
 
-			LibraryRepository library = new(_NewContext());
 			CollectionRepository collection = new(_NewContext());
-			GenreRepository genre = new(_NewContext());
 			StudioRepository studio = new(_NewContext());
 			PeopleRepository people = new(_NewContext(),
 				new Lazy<IShowRepository>(() => LibraryManager.ShowRepository));
-			ShowRepository show = new(_NewContext(), studio, people, genre);
+			ShowRepository show = new(_NewContext(), studio, people);
 			SeasonRepository season = new(_NewContext(), show);
-			LibraryItemRepository libraryItem = new(_NewContext(),
-				new Lazy<ILibraryRepository>(() => LibraryManager.LibraryRepository));
+			LibraryItemRepository libraryItem = new(_NewContext());
 			EpisodeRepository episode = new(_NewContext(), show);
 			UserRepository user = new(_NewContext());
 
 			LibraryManager = new LibraryManager(new IBaseRepository[] {
-				library,
 				libraryItem,
 				collection,
 				show,
@@ -59,7 +55,6 @@ namespace Kyoo.Tests.Database
 				episode,
 				people,
 				studio,
-				genre,
 				user
 			});
 		}

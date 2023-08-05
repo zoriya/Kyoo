@@ -18,7 +18,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Reflection;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;

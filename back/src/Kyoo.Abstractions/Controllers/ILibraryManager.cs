@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using JetBrains.Annotations;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Exceptions;
 
@@ -41,11 +40,6 @@ namespace Kyoo.Abstractions.Controllers
 			where T : class, IResource;
 
 		/// <summary>
-		/// The repository that handle libraries.
-		/// </summary>
-		ILibraryRepository LibraryRepository { get; }
-
-		/// <summary>
 		/// The repository that handle libraries items (a wrapper around shows and collections).
 		/// </summary>
 		ILibraryItemRepository LibraryItemRepository { get; }
@@ -54,6 +48,11 @@ namespace Kyoo.Abstractions.Controllers
 		/// The repository that handle collections.
 		/// </summary>
 		ICollectionRepository CollectionRepository { get; }
+
+		/// <summary>
+		/// The repository that handle shows.
+		/// </summary>
+		IMovieRepository MovieRepository { get; }
 
 		/// <summary>
 		/// The repository that handle shows.
@@ -81,11 +80,6 @@ namespace Kyoo.Abstractions.Controllers
 		IStudioRepository StudioRepository { get; }
 
 		/// <summary>
-		/// The repository that handle genres.
-		/// </summary>
-		IGenreRepository GenreRepository { get; }
-
-		/// <summary>
 		/// The repository that handle users.
 		/// </summary>
 		IUserRepository UserRepository { get; }
@@ -97,7 +91,6 @@ namespace Kyoo.Abstractions.Controllers
 		/// <typeparam name="T">The type of the resource</typeparam>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The resource found</returns>
-		[ItemNotNull]
 		Task<T> Get<T>(int id)
 			where T : class, IResource;
 
@@ -108,7 +101,6 @@ namespace Kyoo.Abstractions.Controllers
 		/// <typeparam name="T">The type of the resource</typeparam>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The resource found</returns>
-		[ItemNotNull]
 		Task<T> Get<T>(string slug)
 			where T : class, IResource;
 
@@ -119,7 +111,6 @@ namespace Kyoo.Abstractions.Controllers
 		/// <typeparam name="T">The type of the resource</typeparam>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The first resource found that match the where function</returns>
-		[ItemNotNull]
 		Task<T> Get<T>(Expression<Func<T, bool>> where)
 			where T : class, IResource;
 
@@ -130,7 +121,6 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="seasonNumber">The season's number</param>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The season found</returns>
-		[ItemNotNull]
 		Task<Season> Get(int showID, int seasonNumber);
 
 		/// <summary>
@@ -140,7 +130,6 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="seasonNumber">The season's number</param>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The season found</returns>
-		[ItemNotNull]
 		Task<Season> Get(string showSlug, int seasonNumber);
 
 		/// <summary>
@@ -151,7 +140,6 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="episodeNumber">The episode's number</param>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The episode found</returns>
-		[ItemNotNull]
 		Task<Episode> Get(int showID, int seasonNumber, int episodeNumber);
 
 		/// <summary>
@@ -162,7 +150,6 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="episodeNumber">The episode's number</param>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The episode found</returns>
-		[ItemNotNull]
 		Task<Episode> Get(string showSlug, int seasonNumber, int episodeNumber);
 
 		/// <summary>
@@ -171,8 +158,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="id">The id of the resource</param>
 		/// <typeparam name="T">The type of the resource</typeparam>
 		/// <returns>The resource found</returns>
-		[ItemCanBeNull]
-		Task<T> GetOrDefault<T>(int id)
+		Task<T?> GetOrDefault<T>(int id)
 			where T : class, IResource;
 
 		/// <summary>
@@ -181,8 +167,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="slug">The slug of the resource</param>
 		/// <typeparam name="T">The type of the resource</typeparam>
 		/// <returns>The resource found</returns>
-		[ItemCanBeNull]
-		Task<T> GetOrDefault<T>(string slug)
+		Task<T?> GetOrDefault<T>(string slug)
 			where T : class, IResource;
 
 		/// <summary>
@@ -192,8 +177,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="sortBy">A custom sort method to handle cases where multiples items match the filters.</param>
 		/// <typeparam name="T">The type of the resource</typeparam>
 		/// <returns>The first resource found that match the where function</returns>
-		[ItemCanBeNull]
-		Task<T> GetOrDefault<T>(Expression<Func<T, bool>> where, Sort<T> sortBy = default)
+		Task<T?> GetOrDefault<T>(Expression<Func<T, bool>> where, Sort<T>? sortBy = default)
 			where T : class, IResource;
 
 		/// <summary>
@@ -202,8 +186,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="showID">The id of the show</param>
 		/// <param name="seasonNumber">The season's number</param>
 		/// <returns>The season found</returns>
-		[ItemCanBeNull]
-		Task<Season> GetOrDefault(int showID, int seasonNumber);
+		Task<Season?> GetOrDefault(int showID, int seasonNumber);
 
 		/// <summary>
 		/// Get a season from it's show slug and it's seasonNumber or null if it is not found.
@@ -211,8 +194,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="showSlug">The slug of the show</param>
 		/// <param name="seasonNumber">The season's number</param>
 		/// <returns>The season found</returns>
-		[ItemCanBeNull]
-		Task<Season> GetOrDefault(string showSlug, int seasonNumber);
+		Task<Season?> GetOrDefault(string showSlug, int seasonNumber);
 
 		/// <summary>
 		/// Get a episode from it's showID, it's seasonNumber and it's episode number or null if it is not found.
@@ -221,8 +203,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="seasonNumber">The season's number</param>
 		/// <param name="episodeNumber">The episode's number</param>
 		/// <returns>The episode found</returns>
-		[ItemCanBeNull]
-		Task<Episode> GetOrDefault(int showID, int seasonNumber, int episodeNumber);
+		Task<Episode?> GetOrDefault(int showID, int seasonNumber, int episodeNumber);
 
 		/// <summary>
 		/// Get a episode from it's show slug, it's seasonNumber and it's episode number or null if it is not found.
@@ -231,8 +212,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="seasonNumber">The season's number</param>
 		/// <param name="episodeNumber">The episode's number</param>
 		/// <returns>The episode found</returns>
-		[ItemCanBeNull]
-		Task<Episode> GetOrDefault(string showSlug, int seasonNumber, int episodeNumber);
+		Task<Episode?> GetOrDefault(string showSlug, int seasonNumber, int episodeNumber);
 
 		/// <summary>
 		/// Load a related resource
@@ -248,7 +228,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <seealso cref="Load{T,T2}(T, Expression{Func{T,ICollection{T2}}}, bool)"/>
 		/// <seealso cref="Load{T}(T, string, bool)"/>
 		/// <seealso cref="Load(IResource, string, bool)"/>
-		Task<T> Load<T, T2>([NotNull] T obj, Expression<Func<T, T2>> member, bool force = false)
+		Task<T> Load<T, T2>(T obj, Expression<Func<T, T2>> member, bool force = false)
 			where T : class, IResource
 			where T2 : class, IResource;
 
@@ -266,7 +246,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <seealso cref="Load{T,T2}(T, Expression{Func{T,T2}}, bool)"/>
 		/// <seealso cref="Load{T}(T, string, bool)"/>
 		/// <seealso cref="Load(IResource, string, bool)"/>
-		Task<T> Load<T, T2>([NotNull] T obj, Expression<Func<T, ICollection<T2>>> member, bool force = false)
+		Task<T> Load<T, T2>(T obj, Expression<Func<T, ICollection<T2>>> member, bool force = false)
 			where T : class, IResource
 			where T2 : class;
 
@@ -283,7 +263,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <seealso cref="Load{T,T2}(T, Expression{Func{T,T2}}, bool)"/>
 		/// <seealso cref="Load{T,T2}(T, Expression{Func{T,ICollection{T2}}}, bool)"/>
 		/// <seealso cref="Load(IResource, string, bool)"/>
-		Task<T> Load<T>([NotNull] T obj, string memberName, bool force = false)
+		Task<T> Load<T>(T obj, string memberName, bool force = false)
 			where T : class, IResource;
 
 		/// <summary>
@@ -298,35 +278,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <seealso cref="Load{T,T2}(T, Expression{Func{T,ICollection{T2}}}, bool)"/>
 		/// <seealso cref="Load{T}(T, string, bool)"/>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		Task Load([NotNull] IResource obj, string memberName, bool force = false);
-
-		/// <summary>
-		/// Get items (A wrapper around shows or collections) from a library.
-		/// </summary>
-		/// <param name="id">The ID of the library</param>
-		/// <param name="where">A filter function</param>
-		/// <param name="sort">Sort information (sort order and sort by)</param>
-		/// <param name="limit">How many items to return and where to start</param>
-		/// <exception cref="ItemNotFoundException">No library exist with the given ID.</exception>
-		/// <returns>A list of items that match every filters</returns>
-		Task<ICollection<LibraryItem>> GetItemsFromLibrary(int id,
-			Expression<Func<LibraryItem, bool>> where = null,
-			Sort<LibraryItem> sort = default,
-			Pagination limit = default);
-
-		/// <summary>
-		/// Get items (A wrapper around shows or collections) from a library.
-		/// </summary>
-		/// <param name="slug">The slug of the library</param>
-		/// <param name="where">A filter function</param>
-		/// <param name="sort">Sort information (sort order and sort by)</param>
-		/// <param name="limit">How many items to return and where to start</param>
-		/// <exception cref="ItemNotFoundException">No library exist with the given slug.</exception>
-		/// <returns>A list of items that match every filters</returns>
-		Task<ICollection<LibraryItem>> GetItemsFromLibrary(string slug,
-			Expression<Func<LibraryItem, bool>> where = null,
-			Sort<LibraryItem> sort = default,
-			Pagination limit = default);
+		Task Load(IResource obj, string memberName, bool force = false);
 
 		/// <summary>
 		/// Get people's roles from a show.
@@ -338,9 +290,9 @@ namespace Kyoo.Abstractions.Controllers
 		/// <exception cref="ItemNotFoundException">No <see cref="Show"/> exist with the given ID.</exception>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetPeopleFromShow(int showID,
-			Expression<Func<PeopleRole, bool>> where = null,
-			Sort<PeopleRole> sort = default,
-			Pagination limit = default);
+			Expression<Func<PeopleRole, bool>>? where = null,
+			Sort<PeopleRole>? sort = default,
+			Pagination? limit = default);
 
 		/// <summary>
 		/// Get people's roles from a show.
@@ -352,9 +304,9 @@ namespace Kyoo.Abstractions.Controllers
 		/// <exception cref="ItemNotFoundException">No <see cref="Show"/> exist with the given slug.</exception>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetPeopleFromShow(string showSlug,
-			Expression<Func<PeopleRole, bool>> where = null,
-			Sort<PeopleRole> sort = default,
-			Pagination limit = default);
+			Expression<Func<PeopleRole, bool>>? where = null,
+			Sort<PeopleRole>? sort = default,
+			Pagination? limit = default);
 
 		/// <summary>
 		/// Get people's roles from a person.
@@ -366,9 +318,9 @@ namespace Kyoo.Abstractions.Controllers
 		/// <exception cref="ItemNotFoundException">No <see cref="People"/> exist with the given ID.</exception>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetRolesFromPeople(int id,
-			Expression<Func<PeopleRole, bool>> where = null,
-			Sort<PeopleRole> sort = default,
-			Pagination limit = default);
+			Expression<Func<PeopleRole, bool>>? where = null,
+			Sort<PeopleRole>? sort = default,
+			Pagination? limit = default);
 
 		/// <summary>
 		/// Get people's roles from a person.
@@ -380,27 +332,9 @@ namespace Kyoo.Abstractions.Controllers
 		/// <exception cref="ItemNotFoundException">No <see cref="People"/> exist with the given slug.</exception>
 		/// <returns>A list of items that match every filters</returns>
 		Task<ICollection<PeopleRole>> GetRolesFromPeople(string slug,
-			Expression<Func<PeopleRole, bool>> where = null,
-			Sort<PeopleRole> sort = default,
-			Pagination limit = default);
-
-		/// <summary>
-		/// Setup relations between a show, a library and a collection
-		/// </summary>
-		/// <param name="showID">The show's ID to setup relations with</param>
-		/// <param name="libraryID">The library's ID to setup relations with (optional)</param>
-		/// <param name="collectionID">The collection's ID to setup relations with (optional)</param>
-		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		Task AddShowLink(int showID, int? libraryID, int? collectionID);
-
-		/// <summary>
-		/// Setup relations between a show, a library and a collection
-		/// </summary>
-		/// <param name="show">The show to setup relations with</param>
-		/// <param name="library">The library to setup relations with (optional)</param>
-		/// <param name="collection">The collection to setup relations with (optional)</param>
-		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		Task AddShowLink([NotNull] Show show, Library library, Collection collection);
+			Expression<Func<PeopleRole, bool>>? where = null,
+			Sort<PeopleRole>? sort = default,
+			Pagination? limit = default);
 
 		/// <summary>
 		/// Get all resources with filters
@@ -410,9 +344,9 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="limit">How many items to return and where to start</param>
 		/// <typeparam name="T">The type of resources to load</typeparam>
 		/// <returns>A list of resources that match every filters</returns>
-		Task<ICollection<T>> GetAll<T>(Expression<Func<T, bool>> where = null,
-			Sort<T> sort = default,
-			Pagination limit = default)
+		Task<ICollection<T>> GetAll<T>(Expression<Func<T, bool>>? where = null,
+			Sort<T>? sort = default,
+			Pagination? limit = default)
 			where T : class, IResource;
 
 		/// <summary>
@@ -421,7 +355,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="where">A filter function</param>
 		/// <typeparam name="T">The type of resources to load</typeparam>
 		/// <returns>A list of resources that match every filters</returns>
-		Task<int> GetCount<T>(Expression<Func<T, bool>> where = null)
+		Task<int> GetCount<T>(Expression<Func<T, bool>>? where = null)
 			where T : class, IResource;
 
 		/// <summary>
@@ -439,7 +373,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="item">The item to register</param>
 		/// <typeparam name="T">The type of resource</typeparam>
 		/// <returns>The resource registers and completed by database's information (related items and so on)</returns>
-		Task<T> Create<T>([NotNull] T item)
+		Task<T> Create<T>(T item)
 			where T : class, IResource;
 
 		/// <summary>
@@ -448,7 +382,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="item">The item to register</param>
 		/// <typeparam name="T">The type of resource</typeparam>
 		/// <returns>The newly created item or the existing value if it existed.</returns>
-		Task<T> CreateIfNotExists<T>([NotNull] T item)
+		Task<T> CreateIfNotExists<T>(T item)
 			where T : class, IResource;
 
 		/// <summary>

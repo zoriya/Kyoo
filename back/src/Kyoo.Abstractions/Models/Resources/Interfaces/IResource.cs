@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System.ComponentModel.DataAnnotations;
 using Kyoo.Abstractions.Controllers;
 
 namespace Kyoo.Abstractions.Models
@@ -42,6 +43,7 @@ namespace Kyoo.Abstractions.Models
 		/// There is no setter for a slug since it can be computed from other fields.
 		/// For example, a season slug is {ShowSlug}-s{SeasonNumber}.
 		/// </remarks>
+		[MaxLength(256)]
 		public string Slug { get; }
 	}
 }

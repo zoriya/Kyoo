@@ -129,7 +129,7 @@ namespace Kyoo.Core.Controllers
 				_database.Episodes
 					.Include(x => x.Show)
 					.Where(x => x.EpisodeNumber != null || x.AbsoluteNumber != null)
-					.Where(_database.Like<Episode>(x => x.Title, $"%{query}%"))
+					.Where(_database.Like<Episode>(x => x.Name, $"%{query}%"))
 				)
 				.Take(20)
 				.ToListAsync();

@@ -28,18 +28,18 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// A poster is a 9/16 format image with the cover of the resource.
 		/// </summary>
-		public Image Poster { get; set; }
+		public Image? Poster { get; set; }
 
 		/// <summary>
 		/// A thumbnail is a 16/9 format image, it could ether be used as a background or as a preview but it usually
 		/// is not an official image.
 		/// </summary>
-		public Image Thumbnail { get; set; }
+		public Image? Thumbnail { get; set; }
 
 		/// <summary>
 		/// A logo is a small image representing the resource.
 		/// </summary>
-		public Image Logo { get; set; }
+		public Image? Logo { get; set; }
 	}
 
 	public class Image

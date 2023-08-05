@@ -36,7 +36,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The <see cref="Episode"/> started.
 		/// </summary>
-		public Episode Episode { get; set; }
+		public Episode? Episode { get; set; }
 
 		/// <summary>
 		/// Where the player has stopped watching the episode (between 0 and 100).

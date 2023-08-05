@@ -16,10 +16,10 @@ class Genre(str, Enum):
 	MUSIC = "Music"
 	MYSTERY = "Mystery"
 	ROMANCE = "Romance"
-	SCIENCE_FICTION = "Science Fiction"
+	SCIENCE_FICTION = "ScienceFiction"
 	THRILLER = "Thriller"
 	WAR = "War"
 	WESTERN = "Western"
 
 	def to_kyoo(self):
-		return {"name": self.value}
+		return self.value

@@ -121,7 +121,7 @@ namespace Kyoo.Tests.Database
 		public async Task EditTest()
 		{
 			Season value = await _repository.Get(TestSample.Get<Season>().Slug);
-			value.Title = "New Title";
+			value.Name = "New Title";
 			value.Images = new Dictionary<int, string>
 			{
 				[Images.Poster] = "new-poster"
@@ -212,7 +212,7 @@ namespace Kyoo.Tests.Database
 		{
 			Season value = new()
 			{
-				Title = "This is a test super title",
+				Name = "This is a test super title",
 				ShowID = 1
 			};
 			await _repository.Create(value);

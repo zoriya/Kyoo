@@ -43,12 +43,12 @@ namespace Kyoo.Postgresql
 		/// </summary>
 		private readonly bool _skipConfigure;
 
-		// TOOD: This needs ot be updated but ef-core still does not offer a way to use this.
+		// TODO: This needs ot be updated but ef-core still does not offer a way to use this.
 		[Obsolete]
 		static PostgresContext()
 		{
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<Status>();
-			NpgsqlConnection.GlobalTypeMapper.MapEnum<ItemType>();
+			NpgsqlConnection.GlobalTypeMapper.MapEnum<Genre>();
 		}
 
 		/// <summary>
@@ -100,24 +100,9 @@ namespace Kyoo.Postgresql
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.HasPostgresEnum<Status>();
-			modelBuilder.HasPostgresEnum<ItemType>();
-
-			modelBuilder.Entity<LibraryItem>()
-				.ToView("library_items")
-				.HasKey(x => x.ID);
-
-			modelBuilder.Entity<User>()
-				.Property(x => x.ExtraData)
-				.HasColumnType("jsonb");
+			modelBuilder.HasPostgresEnum<Genre>();
 
 			base.OnModelCreating(modelBuilder);
-		}
-
-		/// <inheritdoc />
-		protected override string MetadataName<T>()
-		{
-			SnakeCaseNameRewriter rewriter = new(CultureInfo.InvariantCulture);
-			return rewriter.RewriteName(typeof(T).Name + nameof(MetadataID));
 		}
 
 		/// <inheritdoc />

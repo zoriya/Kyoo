@@ -39,8 +39,8 @@ namespace Kyoo.Utils
 		/// <returns>The list mapped.</returns>
 		/// <exception cref="ArgumentNullException">The list or the mapper can't be null</exception>
 		[LinqTunnel]
-		public static IEnumerable<T2> Map<T, T2>([NotNull] this IEnumerable<T> self,
-			[NotNull] Func<T, int, T2> mapper)
+		public static IEnumerable<T2> Map<T, T2>(this IEnumerable<T> self,
+			Func<T, int, T2> mapper)
 		{
 			if (self == null)
 				throw new ArgumentNullException(nameof(self));
@@ -72,8 +72,8 @@ namespace Kyoo.Utils
 		/// <returns>The list mapped as an AsyncEnumerable.</returns>
 		/// <exception cref="ArgumentNullException">The list or the mapper can't be null.</exception>
 		[LinqTunnel]
-		public static IAsyncEnumerable<T2> MapAsync<T, T2>([NotNull] this IEnumerable<T> self,
-			[NotNull] Func<T, int, Task<T2>> mapper)
+		public static IAsyncEnumerable<T2> MapAsync<T, T2>(this IEnumerable<T> self,
+			Func<T, int, Task<T2>> mapper)
 		{
 			if (self == null)
 				throw new ArgumentNullException(nameof(self));
@@ -105,8 +105,8 @@ namespace Kyoo.Utils
 		/// <returns>The list mapped as an AsyncEnumerable</returns>
 		/// <exception cref="ArgumentNullException">The list or the mapper can't be null</exception>
 		[LinqTunnel]
-		public static IAsyncEnumerable<T2> SelectAsync<T, T2>([NotNull] this IEnumerable<T> self,
-			[NotNull] Func<T, Task<T2>> mapper)
+		public static IAsyncEnumerable<T2> SelectAsync<T, T2>(this IEnumerable<T> self,
+			Func<T, Task<T2>> mapper)
 		{
 			if (self == null)
 				throw new ArgumentNullException(nameof(self));
@@ -132,7 +132,7 @@ namespace Kyoo.Utils
 		/// <returns>A task that will return a simple list</returns>
 		/// <exception cref="ArgumentNullException">The list can't be null</exception>
 		[LinqTunnel]
-		public static Task<List<T>> ToListAsync<T>([NotNull] this IAsyncEnumerable<T> self)
+		public static Task<List<T>> ToListAsync<T>(this IAsyncEnumerable<T> self)
 		{
 			if (self == null)
 				throw new ArgumentNullException(nameof(self));
@@ -157,7 +157,7 @@ namespace Kyoo.Utils
 		/// <exception cref="ArgumentNullException">The iterable and the action can't be null.</exception>
 		/// <returns>The iterator proxied, there is no dual iterations.</returns>
 		[LinqTunnel]
-		public static IEnumerable<T> IfEmpty<T>([NotNull] this IEnumerable<T> self, [NotNull] Action action)
+		public static IEnumerable<T> IfEmpty<T>(this IEnumerable<T> self, Action action)
 		{
 			if (self == null)
 				throw new ArgumentNullException(nameof(self));
@@ -190,7 +190,7 @@ namespace Kyoo.Utils
 		/// <param name="self">The list to enumerate. If this is null, the function result in a no-op</param>
 		/// <param name="action">The action to execute for each arguments</param>
 		/// <typeparam name="T">The type of items in the list</typeparam>
-		public static void ForEach<T>([CanBeNull] this IEnumerable<T> self, Action<T> action)
+		public static void ForEach<T>(this IEnumerable<T>? self, Action<T> action)
 		{
 			if (self == null)
 				return;
@@ -203,7 +203,7 @@ namespace Kyoo.Utils
 		/// </summary>
 		/// <param name="self">The list to enumerate. If this is null, the function result in a no-op</param>
 		/// <param name="action">The action to execute for each arguments</param>
-		public static void ForEach([CanBeNull] this IEnumerable self, Action<object> action)
+		public static void ForEach(this IEnumerable? self, Action<object> action)
 		{
 			if (self == null)
 				return;
@@ -217,7 +217,7 @@ namespace Kyoo.Utils
 		/// <param name="self">The list to enumerate. If this is null, the function result in a no-op</param>
 		/// <param name="action">The action to execute for each arguments</param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		public static async Task ForEachAsync([CanBeNull] this IEnumerable self, Func<object, Task> action)
+		public static async Task ForEachAsync(this IEnumerable? self, Func<object, Task> action)
 		{
 			if (self == null)
 				return;
@@ -232,7 +232,7 @@ namespace Kyoo.Utils
 		/// <param name="action">The asynchronous action to execute for each arguments</param>
 		/// <typeparam name="T">The type of items in the list.</typeparam>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		public static async Task ForEachAsync<T>([CanBeNull] this IEnumerable<T> self, Func<T, Task> action)
+		public static async Task ForEachAsync<T>(this IEnumerable<T>? self, Func<T, Task> action)
 		{
 			if (self == null)
 				return;
@@ -247,7 +247,7 @@ namespace Kyoo.Utils
 		/// <param name="action">The action to execute for each arguments</param>
 		/// <typeparam name="T">The type of items in the list.</typeparam>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		public static async Task ForEachAsync<T>([CanBeNull] this IAsyncEnumerable<T> self, Action<T> action)
+		public static async Task ForEachAsync<T>(this IAsyncEnumerable<T>? self, Action<T> action)
 		{
 			if (self == null)
 				return;

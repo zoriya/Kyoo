@@ -29,7 +29,7 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// A series or a movie.
 	/// </summary>
-	public class Show : IResource, IMetadata, IOnMerge, IThumbnails
+	public class Movie : IResource, IMetadata, IOnMerge, IThumbnails
 	{
 		/// <inheritdoc />
 		public int ID { get; set; }
@@ -44,7 +44,7 @@ namespace Kyoo.Abstractions.Models
 		public string Name { get; set; }
 
 		/// <summary>
-		/// A catchphrase for this show.
+		/// A catchphrase for this movie.
 		/// </summary>
 		public string? Tagline { get; set; }
 
@@ -52,6 +52,11 @@ namespace Kyoo.Abstractions.Models
 		/// The list of alternative titles of this show.
 		/// </summary>
 		public string[] Aliases { get; set; } = Array.Empty<string>();
+
+		/// <summary>
+		/// The path of the movie video file.
+		/// </summary>
+		public string Path { get; set; }
 
 		/// <summary>
 		/// The summary of this show.
@@ -74,16 +79,9 @@ namespace Kyoo.Abstractions.Models
 		public Status Status { get; set; }
 
 		/// <summary>
-		/// The date this show started airing. It can be null if this is unknown.
+		/// The date this movie aired.
 		/// </summary>
-		public DateTime? StartAir { get; set; }
-
-		/// <summary>
-		/// The date this show finished airing.
-		/// It must be after the <see cref="StartAir"/> but can be the same (example: for movies).
-		/// It can also be null if this is unknown.
-		/// </summary>
-		public DateTime? EndAir { get; set; }
+		public DateTime? AirDate { get; set; }
 
 		/// <inheritdoc />
 		public Image? Poster { get; set; }
@@ -119,18 +117,6 @@ namespace Kyoo.Abstractions.Models
 		[LoadableRelation][EditableRelation] public ICollection<PeopleRole>? People { get; set; }
 
 		/// <summary>
-		/// The different seasons in this show. If this is a movie, this list is always null or empty.
-		/// </summary>
-		[LoadableRelation] public ICollection<Season>? Seasons { get; set; }
-
-		/// <summary>
-		/// The list of episodes in this show.
-		/// If this is a movie, there will be a unique episode (with the seasonNumber and episodeNumber set to null).
-		/// Having an episode is necessary to store metadata and tracks.
-		/// </summary>
-		[LoadableRelation] public ICollection<Episode>? Episodes { get; set; }
-
-		/// <summary>
 		/// The list of collections that contains this show.
 		/// </summary>
 		[LoadableRelation] public ICollection<Collection>? Collections { get; set; }
@@ -138,58 +124,17 @@ namespace Kyoo.Abstractions.Models
 		/// <inheritdoc />
 		public void OnMerge(object merged)
 		{
-			if (People != null)
-			{
-				foreach (PeopleRole link in People)
-					link.Show = this;
-			}
-
-			if (Seasons != null)
-			{
-				foreach (Season season in Seasons)
-					season.Show = this;
-			}
-
-			if (Episodes != null)
-			{
-				foreach (Episode episode in Episodes)
-					episode.Show = this;
-			}
+			foreach (PeopleRole link in People)
+				link.Movie = this;
 		}
 
-		public Show() { }
+		public Movie() { }
 
 		[JsonConstructor]
-		public Show(string name)
+		public Movie(string name)
 		{
 			Slug = Utility.ToSlug(name);
 			Name = name;
 		}
-	}
-
-	/// <summary>
-	/// The enum containing show's status.
-	/// </summary>
-	public enum Status
-	{
-		/// <summary>
-		/// The status of the show is not known.
-		/// </summary>
-		Unknown,
-
-		/// <summary>
-		/// The show has finished airing.
-		/// </summary>
-		Finished,
-
-		/// <summary>
-		/// The show is still actively airing.
-		/// </summary>
-		Airing,
-
-		/// <summary>
-		/// This show has not aired yet but has been announced.
-		/// </summary>
-		Planned
 	}
 }

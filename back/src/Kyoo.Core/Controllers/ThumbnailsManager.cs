@@ -98,9 +98,9 @@ namespace Kyoo.Core.Controllers
 				throw new ArgumentNullException(nameof(item));
 
 			string name = item is IResource res ? res.Slug : "???";
-			await _DownloadImage(item.Poster.Source, _GetBaseImagePath(item, "poster"), $"The poster of {name}");
-			await _DownloadImage(item.Thumbnail.Source, _GetBaseImagePath(item, "thumbnail"), $"The poster of {name}");
-			await _DownloadImage(item.Logo.Source, _GetBaseImagePath(item, "logo"), $"The poster of {name}");
+			await _DownloadImage(item.Poster?.Source, _GetBaseImagePath(item, "poster"), $"The poster of {name}");
+			await _DownloadImage(item.Thumbnail?.Source, _GetBaseImagePath(item, "thumbnail"), $"The poster of {name}");
+			await _DownloadImage(item.Logo?.Source, _GetBaseImagePath(item, "logo"), $"The poster of {name}");
 		}
 
 		private static string _GetBaseImagePath<T>(T item, string image)

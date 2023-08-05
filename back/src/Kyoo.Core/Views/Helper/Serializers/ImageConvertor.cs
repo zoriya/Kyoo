@@ -16,40 +16,31 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
-using Kyoo.Abstractions.Models.Attributes;
+using Kyoo.Abstractions.Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
-namespace Kyoo.Abstractions.Models
+namespace Kyoo.Core.Api
 {
-	/// <summary>
-	/// A library containing <see cref="Show"/> and <see cref="Collection"/>.
-	/// </summary>
-	public class Library : IResource
+	public class ImageConverter : JsonConverter<Image>
 	{
 		/// <inheritdoc />
-		public int ID { get; set; }
+		public override void WriteJson(JsonWriter writer, Image value, JsonSerializer serializer)
+		{
+			JObject obj = JObject.FromObject(value, serializer);
+			obj.WriteTo(writer);
+		}
 
 		/// <inheritdoc />
-		public string Slug { get; set; }
-
-		/// <summary>
-		/// The name of this library.
-		/// </summary>
-		public string Name { get; set; }
-
-		/// <summary>
-		/// The list of paths that this library is responsible for. This is mainly used by the Scan task.
-		/// </summary>
-		public string[] Paths { get; set; }
-
-		/// <summary>
-		/// The list of shows in this library.
-		/// </summary>
-		[LoadableRelation] public ICollection<Show> Shows { get; set; }
-
-		/// <summary>
-		/// The list of collections in this library.
-		/// </summary>
-		[LoadableRelation] public ICollection<Collection> Collections { get; set; }
+		public override Image ReadJson(JsonReader reader,
+			Type objectType,
+			Image existingValue,
+			bool hasExistingValue,
+			JsonSerializer serializer)
+		{
+			throw new NotImplementedException();
+		}
 	}
 }

@@ -28,16 +28,6 @@ namespace Kyoo.Tests
 		private static readonly Dictionary<Type, Func<object>> NewSamples = new()
 		{
 			{
-				typeof(Library),
-				() => new Library
-				{
-					ID = 2,
-					Slug = "new-library",
-					Name = "New Library",
-					Paths = new[] { "/a/random/path" }
-				}
-			},
-			{
 				typeof(Collection),
 				() => new Collection
 				{
@@ -57,7 +47,7 @@ namespace Kyoo.Tests
 				{
 					ID = 2,
 					Slug = "new-show",
-					Title = "New Show",
+					Name = "New Show",
 					Overview = "overview",
 					Status = Status.Planned,
 					StartAir = new DateTime(2011, 1, 1).ToUniversalTime(),
@@ -79,7 +69,7 @@ namespace Kyoo.Tests
 					ID = 2,
 					ShowID = 1,
 					ShowSlug = Get<Show>().Slug,
-					Title = "New season",
+					Name = "New season",
 					Overview = "New overview",
 					EndDate = new DateTime(2000, 10, 10).ToUniversalTime(),
 					SeasonNumber = 2,
@@ -102,7 +92,7 @@ namespace Kyoo.Tests
 					EpisodeNumber = 3,
 					AbsoluteNumber = 4,
 					Path = "/episode-path",
-					Title = "New Episode Title",
+					Name = "New Episode Title",
 					ReleaseDate = new DateTime(2000, 10, 10).ToUniversalTime(),
 					Overview = "new episode overview",
 					Images = new Dictionary<int, string>
@@ -172,7 +162,7 @@ namespace Kyoo.Tests
 				{
 					ID = 1,
 					Slug = "anohana",
-					Title = "Anohana: The Flower We Saw That Day",
+					Name = "Anohana: The Flower We Saw That Day",
 					Aliases = new[]
 					{
 						"Ano Hi Mita Hana no Namae o Bokutachi wa Mada Shiranai.",
@@ -204,7 +194,7 @@ namespace Kyoo.Tests
 					ShowSlug = "anohana",
 					ShowID = 1,
 					SeasonNumber = 1,
-					Title = "Season 1",
+					Name = "Season 1",
 					Overview = "The first season",
 					StartDate = new DateTime(2020, 06, 05).ToUniversalTime(),
 					EndDate = new DateTime(2020, 07, 05).ToUniversalTime(),
@@ -234,7 +224,7 @@ namespace Kyoo.Tests
 						[Images.Logo] = "Logo",
 						[Images.Thumbnail] = "Thumbnail"
 					},
-					Title = "Episode 1",
+					Name = "Episode 1",
 					Overview = "Summary of the first episode",
 					ReleaseDate = new DateTime(2020, 06, 05).ToUniversalTime()
 				}
@@ -379,7 +369,7 @@ namespace Kyoo.Tests
 					[Images.Logo] = "Logo",
 					[Images.Thumbnail] = "Thumbnail"
 				},
-				Title = "Episode 3",
+				Name = "Episode 3",
 				Overview = "Summary of the third absolute episode",
 				ReleaseDate = new DateTime(2020, 06, 05).ToUniversalTime()
 			};
@@ -399,7 +389,7 @@ namespace Kyoo.Tests
 					[Images.Logo] = "Logo",
 					[Images.Thumbnail] = "Thumbnail"
 				},
-				Title = "John wick",
+				Name = "John wick",
 				Overview = "A movie episode test",
 				ReleaseDate = new DateTime(1595, 05, 12).ToUniversalTime()
 			};

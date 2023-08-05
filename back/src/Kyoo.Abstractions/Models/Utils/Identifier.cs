@@ -58,7 +58,7 @@ namespace Kyoo.Abstractions.Models.Utils
 		/// Create a new <see cref="Identifier"/> for the given slug.
 		/// </summary>
 		/// <param name="slug">The slug of the resource.</param>
-		public Identifier([NotNull] string slug)
+		public Identifier(string slug)
 		{
 			if (slug == null)
 				throw new ArgumentNullException(nameof(slug));

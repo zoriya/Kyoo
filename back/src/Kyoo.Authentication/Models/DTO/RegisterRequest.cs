@@ -72,7 +72,6 @@ namespace Kyoo.Authentication.Models.DTO
 				Username = Username,
 				Password = BCryptNet.HashPassword(Password),
 				Email = Email,
-				ExtraData = new Dictionary<string, string>()
 			};
 		}
 	}

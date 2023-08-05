@@ -17,7 +17,10 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Kyoo.Abstractions.Models.Attributes;
+using Kyoo.Utils;
+using Newtonsoft.Json;
 
 namespace Kyoo.Abstractions.Models
 {
@@ -30,6 +33,7 @@ namespace Kyoo.Abstractions.Models
 		public int ID { get; set; }
 
 		/// <inheritdoc />
+		[MaxLength(256)]
 		public string Slug { get; set; }
 
 		/// <summary>
@@ -54,26 +58,29 @@ namespace Kyoo.Abstractions.Models
 		public string[] Permissions { get; set; }
 
 		/// <summary>
-		/// Arbitrary extra data that can be used by specific authentication implementations.
-		/// </summary>
-		[SerializeIgnore]
-		public Dictionary<string, string> ExtraData { get; set; }
-
-		/// <summary>
 		/// A logo is a small image representing the resource.
 		/// </summary>
-		public Image Logo { get; set; }
+		public Image? Logo { get; set; }
 
 		/// <summary>
 		/// The list of shows the user has finished.
 		/// </summary>
 		[SerializeIgnore]
-		public ICollection<Show> Watched { get; set; }
+		public ICollection<Show>? Watched { get; set; }
 
 		/// <summary>
 		/// The list of episodes the user is watching (stopped in progress or the next episode of the show)
 		/// </summary>
 		[SerializeIgnore]
-		public ICollection<WatchedEpisode> CurrentlyWatching { get; set; }
+		public ICollection<WatchedEpisode>? CurrentlyWatching { get; set; }
+
+		public User() { }
+
+		[JsonConstructor]
+		public User(string username)
+		{
+			Slug = Utility.ToSlug(username);
+			Username = username;
+		}
 	}
 }

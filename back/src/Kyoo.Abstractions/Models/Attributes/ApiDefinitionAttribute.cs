@@ -32,7 +32,7 @@ namespace Kyoo.Abstractions.Models.Attributes
 		/// <summary>
 		/// The public name of this api.
 		/// </summary>
-		[NotNull] public string Name { get; }
+		public string Name { get; }
 
 		/// <summary>
 		/// The name of the group in witch this API is. You can also specify a custom sort order using the following
@@ -45,7 +45,7 @@ namespace Kyoo.Abstractions.Models.Attributes
 		/// Create a new <see cref="ApiDefinitionAttribute"/>.
 		/// </summary>
 		/// <param name="name">The name of the api that will be used on the documentation page.</param>
-		public ApiDefinitionAttribute([NotNull] string name)
+		public ApiDefinitionAttribute(string name)
 		{
 			if (name == null)
 				throw new ArgumentNullException(nameof(name));

@@ -20,7 +20,7 @@ class Status(str, Enum):
 class MovieTranslation:
 	name: str
 	tagline: Optional[str] = None
-	keywords: list[str] = field(default_factory=list)
+	tags: list[str] = field(default_factory=list)
 	overview: Optional[str] = None
 
 	posters: list[str] = field(default_factory=list)
@@ -33,7 +33,7 @@ class MovieTranslation:
 class Movie:
 	original_language: Optional[str] = None
 	aliases: list[str] = field(default_factory=list)
-	release_date: Optional[date | int] = None
+	air_date: Optional[date | int] = None
 	status: Status = Status.UNKNOWN
 	path: Optional[str] = None
 	studios: list[Studio] = field(default_factory=list)
@@ -50,18 +50,10 @@ class Movie:
 		return {
 			**asdict(self),
 			**asdict(self.translations[default_language]),
-			"images": {
-				"0": next(iter(self.translations[default_language].posters), None),
-				"1": next(iter(self.translations[default_language].thumbnails), None),
-				"2": next(iter(self.translations[default_language].logos), None),
-				"3": next(iter(self.translations[default_language].trailers), None),
-			},
+			# "poster": next(iter(self.translations[default_language].posters), None),
+			# "thumbnail": next(iter(self.translations[default_language].thumbnails), None),
+			# "logo": next(iter(self.translations[default_language].logos), None),
+			"trailer": next(iter(self.translations[default_language].trailers), None),
 			"studio": next((x.to_kyoo() for x in self.studios), None),
-			"release_date": None,
-			"startAir": format_date(self.release_date),
-			"title": self.translations[default_language].name,
 			"genres": [x.to_kyoo() for x in self.genres],
-			"isMovie": True,
-			# TODO: The back has bad external id support, we disable it for now
-			"external_ids": None,
 		}

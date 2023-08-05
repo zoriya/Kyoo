@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 using Kyoo.Abstractions.Controllers;
@@ -35,6 +36,7 @@ namespace Kyoo.Abstractions.Models
 
 		/// <inheritdoc />
 		[Computed]
+		[MaxLength(256)]
 		public string Slug
 		{
 			get
@@ -48,7 +50,7 @@ namespace Kyoo.Abstractions.Models
 			[NotNull]
 			private set
 			{
-				Match match = Regex.Match(value ?? string.Empty, @"(?<show>.+)-s(?<season>\d+)");
+				Match match = Regex.Match(value, @"(?<show>.+)-s(?<season>\d+)");
 
 				if (!match.Success)
 					throw new ArgumentException("Invalid season slug. Format: {showSlug}-s{seasonNumber}");
@@ -60,7 +62,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The slug of the Show that contain this episode. If this is not set, this season is ill-formed.
 		/// </summary>
-		[SerializeIgnore] public string ShowSlug { private get; set; }
+		[SerializeIgnore] public string? ShowSlug { private get; set; }
 
 		/// <summary>
 		/// The ID of the Show containing this season.
@@ -71,7 +73,7 @@ namespace Kyoo.Abstractions.Models
 		/// The show that contains this season.
 		/// This must be explicitly loaded via a call to <see cref="ILibraryManager.Load"/>.
 		/// </summary>
-		[LoadableRelation(nameof(ShowID))] public Show Show { get; set; }
+		[LoadableRelation(nameof(ShowID))] public Show? Show { get; set; }
 
 		/// <summary>
 		/// The number of this season. This can be set to 0 to indicate specials.
@@ -81,12 +83,12 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The title of this season.
 		/// </summary>
-		public string Title { get; set; }
+		public string? Name { get; set; }
 
 		/// <summary>
 		/// A quick overview of this season.
 		/// </summary>
-		public string Overview { get; set; }
+		public string? Overview { get; set; }
 
 		/// <summary>
 		/// The starting air date of this season.
@@ -99,20 +101,20 @@ namespace Kyoo.Abstractions.Models
 		public DateTime? EndDate { get; set; }
 
 		/// <inheritdoc />
-		public Image Poster { get; set; }
+		public Image? Poster { get; set; }
 
 		/// <inheritdoc />
-		public Image Thumbnail { get; set; }
+		public Image? Thumbnail { get; set; }
 
 		/// <inheritdoc />
-		public Image Logo { get; set; }
+		public Image? Logo { get; set; }
 
 		/// <inheritdoc />
-		public Dictionary<string, MetadataID> ExternalId { get; set; }
+		public Dictionary<string, MetadataID> ExternalId { get; set; } = new();
 
 		/// <summary>
 		/// The list of episodes that this season contains.
 		/// </summary>
-		[LoadableRelation] public ICollection<Episode> Episodes { get; set; }
+		[LoadableRelation] public ICollection<Episode>? Episodes { get; set; }
 	}
 }
