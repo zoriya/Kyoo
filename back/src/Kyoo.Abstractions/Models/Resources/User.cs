@@ -30,7 +30,7 @@ namespace Kyoo.Abstractions.Models
 	public class User : IResource
 	{
 		/// <inheritdoc />
-		public int ID { get; set; }
+		public int Id { get; set; }
 
 		/// <inheritdoc />
 		[MaxLength(256)]

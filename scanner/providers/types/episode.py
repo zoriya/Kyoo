@@ -11,7 +11,7 @@ from .metadataid import MetadataID
 class PartialShow:
 	name: str
 	original_language: str
-	external_ids: dict[str, MetadataID]
+	external_id: dict[str, MetadataID]
 
 
 @dataclass
@@ -28,7 +28,7 @@ class Episode:
 	absolute_number: Optional[int]
 	release_date: Optional[date | int]
 	thumbnail: Optional[str]
-	external_ids: dict[str, MetadataID]
+	external_id: dict[str, MetadataID]
 
 	path: Optional[str] = None
 	show_id: Optional[str] = None

@@ -112,7 +112,7 @@ namespace Kyoo.Core.Controllers
 						throw new SwitchExpressionException();
 				}
 			}
-			return _Sort(query, sortBy, false).ThenBy(x => x.ID);
+			return _Sort(query, sortBy, false).ThenBy(x => x.Id);
 		}
 
 		private static Func<Expression, Expression, BinaryExpression> _GetComparisonExpression(
@@ -167,7 +167,7 @@ namespace Kyoo.Core.Controllers
 			}
 
 			// Don't forget that every sorts must end with a ID sort (to differenciate equalities).
-			Sort<T>.By id = new(x => x.ID);
+			Sort<T>.By id = new(x => x.Id);
 			IEnumerable<Sort<T>.By> sorts = _GetSortsBy(sort).Append(id);
 
 			BinaryExpression filter = null;
@@ -234,7 +234,7 @@ namespace Kyoo.Core.Controllers
 		/// <returns>The tracked resource with the given ID</returns>
 		protected virtual async Task<T> GetWithTracking(int id)
 		{
-			T ret = await Database.Set<T>().AsTracking().FirstOrDefaultAsync(x => x.ID == id);
+			T ret = await Database.Set<T>().AsTracking().FirstOrDefaultAsync(x => x.Id == id);
 			if (ret == null)
 				throw new ItemNotFoundException($"No {typeof(T).Name} found with the id {id}");
 			return ret;
@@ -270,7 +270,7 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public virtual Task<T> GetOrDefault(int id)
 		{
-			return Database.Set<T>().FirstOrDefaultAsync(x => x.ID == id);
+			return Database.Set<T>().FirstOrDefaultAsync(x => x.Id == id);
 		}
 
 		/// <inheritdoc />
@@ -394,7 +394,7 @@ namespace Kyoo.Core.Controllers
 			Database.ChangeTracker.LazyLoadingEnabled = false;
 			try
 			{
-				T old = await GetWithTracking(edited.ID);
+				T old = await GetWithTracking(edited.Id);
 
 				if (resetOld)
 					old = Merger.Nullify(old);

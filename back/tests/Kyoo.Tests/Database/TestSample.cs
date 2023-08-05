@@ -31,7 +31,7 @@ namespace Kyoo.Tests
 				typeof(Collection),
 				() => new Collection
 				{
-					ID = 2,
+					Id = 2,
 					Slug = "new-collection",
 					Name = "New Collection",
 					Overview = "A collection created by new sample",
@@ -45,7 +45,7 @@ namespace Kyoo.Tests
 				typeof(Show),
 				() => new Show
 				{
-					ID = 2,
+					Id = 2,
 					Slug = "new-show",
 					Name = "New Show",
 					Overview = "overview",
@@ -66,7 +66,7 @@ namespace Kyoo.Tests
 				typeof(Season),
 				() => new Season
 				{
-					ID = 2,
+					Id = 2,
 					ShowID = 1,
 					ShowSlug = Get<Show>().Slug,
 					Name = "New season",
@@ -84,7 +84,7 @@ namespace Kyoo.Tests
 				typeof(Episode),
 				() => new Episode
 				{
-					ID = 2,
+					Id = 2,
 					ShowID = 1,
 					ShowSlug = Get<Show>().Slug,
 					SeasonID = 1,
@@ -118,7 +118,7 @@ namespace Kyoo.Tests
 				typeof(People),
 				() => new People
 				{
-					ID = 2,
+					Id = 2,
 					Slug = "new-person-name",
 					Name = "New person name",
 					Images = new Dictionary<int, string>
@@ -146,7 +146,7 @@ namespace Kyoo.Tests
 				typeof(Collection),
 				() => new Collection
 				{
-					ID = 1,
+					Id = 1,
 					Slug = "collection",
 					Name = "Collection",
 					Overview = "A nice collection for tests",
@@ -160,7 +160,7 @@ namespace Kyoo.Tests
 				typeof(Show),
 				() => new Show
 				{
-					ID = 1,
+					Id = 1,
 					Slug = "anohana",
 					Name = "Anohana: The Flower We Saw That Day",
 					Aliases = new[]
@@ -190,7 +190,7 @@ namespace Kyoo.Tests
 				typeof(Season),
 				() => new Season
 				{
-					ID = 1,
+					Id = 1,
 					ShowSlug = "anohana",
 					ShowID = 1,
 					SeasonNumber = 1,
@@ -210,7 +210,7 @@ namespace Kyoo.Tests
 				typeof(Episode),
 				() => new Episode
 				{
-					ID = 1,
+					Id = 1,
 					ShowSlug = "anohana",
 					ShowID = 1,
 					SeasonID = 1,
@@ -233,7 +233,7 @@ namespace Kyoo.Tests
 				typeof(People),
 				() => new People
 				{
-					ID = 1,
+					Id = 1,
 					Slug = "the-actor",
 					Name = "The Actor",
 					Images = new Dictionary<int, string>
@@ -248,7 +248,7 @@ namespace Kyoo.Tests
 				typeof(Studio),
 				() => new Studio
 				{
-					ID = 1,
+					Id = 1,
 					Slug = "hyper-studio",
 					Name = "Hyper studio",
 				}
@@ -281,7 +281,7 @@ namespace Kyoo.Tests
 				typeof(User),
 				() => new User
 				{
-					ID = 1,
+					Id = 1,
 					Slug = "user",
 					Username = "User",
 					Email = "user@im-a-user.com",
@@ -304,22 +304,22 @@ namespace Kyoo.Tests
 		public static void FillDatabase(DatabaseContext context)
 		{
 			Collection collection = Get<Collection>();
-			collection.ID = 0;
+			collection.Id = 0;
 			context.Collections.Add(collection);
 
 			Show show = Get<Show>();
-			show.ID = 0;
+			show.Id = 0;
 			show.StudioID = 0;
 			context.Shows.Add(show);
 
 			Season season = Get<Season>();
-			season.ID = 0;
+			season.Id = 0;
 			season.ShowID = 0;
 			season.Show = show;
 			context.Seasons.Add(season);
 
 			Episode episode = Get<Episode>();
-			episode.ID = 0;
+			episode.Id = 0;
 			episode.ShowID = 0;
 			episode.Show = show;
 			episode.SeasonID = 0;
@@ -327,7 +327,7 @@ namespace Kyoo.Tests
 			context.Episodes.Add(episode);
 
 			Studio studio = Get<Studio>();
-			studio.ID = 0;
+			studio.Id = 0;
 			studio.Shows = new List<Show> { show };
 			context.Studios.Add(studio);
 
@@ -337,7 +337,7 @@ namespace Kyoo.Tests
 			context.Genres.Add(genre);
 
 			People people = Get<People>();
-			people.ID = 0;
+			people.Id = 0;
 			context.People.Add(people);
 
 			Library library = Get<Library>();
@@ -346,7 +346,7 @@ namespace Kyoo.Tests
 			context.Libraries.Add(library);
 
 			User user = Get<User>();
-			user.ID = 0;
+			user.Id = 0;
 			context.Users.Add(user);
 
 			context.SaveChanges();
@@ -356,7 +356,7 @@ namespace Kyoo.Tests
 		{
 			return new()
 			{
-				ID = 2,
+				Id = 2,
 				ShowSlug = "anohana",
 				ShowID = 1,
 				SeasonNumber = null,
@@ -379,7 +379,7 @@ namespace Kyoo.Tests
 		{
 			return new()
 			{
-				ID = 3,
+				Id = 3,
 				ShowSlug = "anohana",
 				ShowID = 1,
 				Path = "/home/kyoo/john-wick",

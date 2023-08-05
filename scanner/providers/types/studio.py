@@ -7,7 +7,7 @@ from .metadataid import MetadataID
 class Studio:
 	name: str
 	logos: list[str] = field(default_factory=list)
-	external_ids: dict[str, MetadataID] = field(default_factory=dict)
+	external_id: dict[str, MetadataID] = field(default_factory=dict)
 
 	def to_kyoo(self):
 		return {

@@ -92,7 +92,7 @@ namespace Kyoo.Core.Controllers
 				{
 					role.Show = _database.LocalEntity<Show>(role.Show.Slug)
 						?? await _shows.Value.CreateIfNotExists(role.Show);
-					role.ShowID = role.Show.ID;
+					role.ShowID = role.Show.Id;
 					_database.Entry(role).State = EntityState.Added;
 				}
 			}

@@ -64,7 +64,7 @@ namespace Kyoo.Abstractions.Models
 	{
 		public ItemKind Kind { get; }
 
-		public int ID { get; set; }
+		public int Id { get; set; }
 
 		public string Slug { get; set;  }
 

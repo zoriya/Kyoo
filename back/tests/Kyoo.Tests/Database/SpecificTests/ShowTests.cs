@@ -159,7 +159,7 @@ namespace Kyoo.Tests.Database
 			Show edited = await _repository.Edit(value, false);
 
 			Assert.Equal(value.Slug, edited.Slug);
-			Assert.Equal(edited.People.First().ShowID, value.ID);
+			Assert.Equal(edited.People.First().ShowID, value.Id);
 			Assert.Equal(
 				value.People.Select(x => new { x.Role, x.Slug, x.People.Name }),
 				edited.People.Select(x => new { x.Role, x.Slug, x.People.Name }));
@@ -182,10 +182,10 @@ namespace Kyoo.Tests.Database
 			Show value = await _repository.Get(TestSample.Get<Show>().Slug);
 			value.ExternalId = new[]
 			{
-				new MetadataID
+				new MetadataId
 				{
 					Provider = new Provider("test", "test.png"),
-					DataID = "1234"
+					DataId = "1234"
 				}
 			};
 			Show edited = await _repository.Edit(value, false);
@@ -213,14 +213,14 @@ namespace Kyoo.Tests.Database
 			Show value = await _repository.Get(TestSample.Get<Show>().Slug);
 			Show newValue = new()
 			{
-				ID = value.ID,
+				Id = value.Id,
 				Slug = "reset",
 				Name = "Reset"
 			};
 
 			Show edited = await _repository.Edit(newValue, true);
 
-			Assert.Equal(value.ID, edited.ID);
+			Assert.Equal(value.Id, edited.Id);
 			Assert.Null(edited.Overview);
 			Assert.Equal("reset", edited.Slug);
 			Assert.Equal("Reset", edited.Name);
@@ -235,14 +235,14 @@ namespace Kyoo.Tests.Database
 		public async Task CreateWithRelationsTest()
 		{
 			Show expected = TestSample.Get<Show>();
-			expected.ID = 0;
+			expected.Id = 0;
 			expected.Slug = "created-relation-test";
 			expected.ExternalId = new[]
 			{
-				new MetadataID
+				new MetadataId
 				{
 					Provider = new Provider("provider", "provider.png"),
-					DataID = "ID"
+					DataId = "ID"
 				}
 			};
 			expected.Genres = new[]
@@ -275,7 +275,7 @@ namespace Kyoo.Tests.Database
 				.Include(x => x.People)
 				.ThenInclude(x => x.People)
 				.Include(x => x.Studio)
-				.FirstAsync(x => x.ID == created.ID);
+				.FirstAsync(x => x.Id == created.Id);
 			retrieved.People.ForEach(x =>
 			{
 				x.Show = null;
@@ -298,14 +298,14 @@ namespace Kyoo.Tests.Database
 		public async Task CreateWithExternalID()
 		{
 			Show expected = TestSample.Get<Show>();
-			expected.ID = 0;
+			expected.Id = 0;
 			expected.Slug = "created-relation-test";
 			expected.ExternalId = new[]
 			{
-				new MetadataID
+				new MetadataId
 				{
 					Provider = TestSample.Get<Provider>(),
-					DataID = "ID"
+					DataId = "ID"
 				}
 			};
 			Show created = await _repository.Create(expected);
@@ -314,7 +314,7 @@ namespace Kyoo.Tests.Database
 			Show retrieved = await context.Shows
 				.Include(x => x.ExternalId)
 				.ThenInclude(x => x.Provider)
-				.FirstAsync(x => x.ID == created.ID);
+				.FirstAsync(x => x.Id == created.Id);
 			KAssert.DeepEqual(expected, retrieved);
 			Assert.Single(retrieved.ExternalId);
 			Assert.Equal("ID", retrieved.ExternalId.First().DataID);
@@ -324,7 +324,7 @@ namespace Kyoo.Tests.Database
 		public async Task SlugDuplicationTest()
 		{
 			Show test = TestSample.Get<Show>();
-			test.ID = 0;
+			test.Id = 0;
 			test.Slug = "300";
 			Show created = await _repository.Create(test);
 			Assert.Equal("300!", created.Slug);
@@ -334,7 +334,7 @@ namespace Kyoo.Tests.Database
 		public async Task GetSlugTest()
 		{
 			Show reference = TestSample.Get<Show>();
-			Assert.Equal(reference.Slug, await _repository.GetSlug(reference.ID));
+			Assert.Equal(reference.Slug, await _repository.GetSlug(reference.Id));
 		}
 
 		[Theory]

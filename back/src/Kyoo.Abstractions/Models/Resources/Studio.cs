@@ -30,7 +30,7 @@ namespace Kyoo.Abstractions.Models
 	public class Studio : IResource, IMetadata
 	{
 		/// <inheritdoc />
-		public int ID { get; set; }
+		public int Id { get; set; }
 
 		/// <inheritdoc />
 		[MaxLength(256)]
@@ -52,7 +52,7 @@ namespace Kyoo.Abstractions.Models
 		[LoadableRelation] public ICollection<Movie>? Movies { get; set; }
 
 		/// <inheritdoc />
-		public Dictionary<string, MetadataID> ExternalId { get; set; } = new();
+		public Dictionary<string, MetadataId> ExternalId { get; set; } = new();
 
 		/// <summary>
 		/// Create a new, empty, <see cref="Studio"/>.

@@ -130,7 +130,7 @@ class Scanner:
 			return ret
 
 		# The parameter is only used as a key for the cache.
-		provider_id = episode.show.external_ids[self.provider.name].id
+		provider_id = episode.show.external_id[self.provider.name].data_id
 		return await create_show(provider_id)
 
 	@provider_cache("seasons")

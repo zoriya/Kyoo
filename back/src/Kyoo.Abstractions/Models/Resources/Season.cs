@@ -32,7 +32,7 @@ namespace Kyoo.Abstractions.Models
 	public class Season : IResource, IMetadata, IThumbnails
 	{
 		/// <inheritdoc />
-		public int ID { get; set; }
+		public int Id { get; set; }
 
 		/// <inheritdoc />
 		[Computed]
@@ -110,7 +110,7 @@ namespace Kyoo.Abstractions.Models
 		public Image? Logo { get; set; }
 
 		/// <inheritdoc />
-		public Dictionary<string, MetadataID> ExternalId { get; set; } = new();
+		public Dictionary<string, MetadataId> ExternalId { get; set; } = new();
 
 		/// <summary>
 		/// The list of episodes that this season contains.

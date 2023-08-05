@@ -89,7 +89,7 @@ class TheMovieDatabase(Provider):
 			logos=[f"https://image.tmdb.org/t/p/original{company['logo_path']}"]
 			if "logo_path" in company
 			else [],
-			external_ids={
+			external_id={
 				self.name: MetadataID(
 					company["id"], f"https://www.themoviedb.org/company/{company['id']}"
 				)
@@ -135,15 +135,24 @@ class TheMovieDatabase(Provider):
 					for x in movie["genres"]
 					if x["id"] in self.genre_map
 				],
-				external_ids={
-					self.name: MetadataID(
-						movie["id"], f"https://www.themoviedb.org/movie/{movie['id']}"
-					),
-					"imdb": MetadataID(
-						movie["imdb_id"],
-						f"https://www.imdb.com/title/{movie['imdb_id']}",
-					),
-				}
+				external_id=(
+					{
+						self.name: MetadataID(
+							movie["id"],
+							f"https://www.themoviedb.org/movie/{movie['id']}",
+						)
+					}
+					| (
+						{
+							"imdb": MetadataID(
+								movie["imdb_id"],
+								f"https://www.imdb.com/title/{movie['imdb_id']}",
+							)
+						}
+						if movie["imdb_id"]
+						else {}
+					)
+				)
 				# TODO: Add cast information
 			)
 			translation = MovieTranslation(
@@ -171,7 +180,7 @@ class TheMovieDatabase(Provider):
 		*,
 		language: list[str],
 	) -> Show:
-		show_id = show.external_ids[self.name].id
+		show_id = show.external_id[self.name].data_id
 		if show.original_language not in language:
 			language.append(show.original_language)
 
@@ -206,7 +215,7 @@ class TheMovieDatabase(Provider):
 					for x in show["genres"]
 					if x["id"] in self.genre_map
 				],
-				external_ids={
+				external_id={
 					self.name: MetadataID(
 						show["id"], f"https://www.themoviedb.org/tv/{show['id']}"
 					),
@@ -271,7 +280,7 @@ class TheMovieDatabase(Provider):
 			if season["air_date"]
 			else None,
 			end_air=None,
-			external_ids={
+			external_id={
 				self.name: MetadataID(
 					season["id"],
 					f"https://www.themoviedb.org/tv/{show_id}/season/{season['season_number']}",
@@ -329,7 +338,7 @@ class TheMovieDatabase(Provider):
 				show=PartialShow(
 					name=search["name"],
 					original_language=search["original_language"],
-					external_ids={
+					external_id={
 						self.name: MetadataID(
 							show_id, f"https://www.themoviedb.org/tv/{show_id}"
 						)
@@ -345,7 +354,7 @@ class TheMovieDatabase(Provider):
 				thumbnail=f"https://image.tmdb.org/t/p/original{episode['still_path']}"
 				if "still_path" in episode and episode["still_path"] is not None
 				else None,
-				external_ids={
+				external_id={
 					self.name: MetadataID(
 						episode["id"],
 						f"https://www.themoviedb.org/tv/{show_id}/season/{episode['season_number']}/episode/{episode['episode_number']}",

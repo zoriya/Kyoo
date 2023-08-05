@@ -30,7 +30,7 @@ namespace Kyoo.Abstractions.Models
 	public class People : IResource, IMetadata, IThumbnails
 	{
 		/// <inheritdoc />
-		public int ID { get; set; }
+		public int Id { get; set; }
 
 		/// <inheritdoc />
 		[MaxLength(256)]
@@ -51,7 +51,7 @@ namespace Kyoo.Abstractions.Models
 		public Image? Logo { get; set; }
 
 		/// <inheritdoc />
-		public Dictionary<string, MetadataID> ExternalId { get; set; } = new();
+		public Dictionary<string, MetadataId> ExternalId { get; set; } = new();
 
 		/// <summary>
 		/// The list of roles this person has played in. See <see cref="PeopleRole"/> for more information.

@@ -64,7 +64,7 @@ namespace Kyoo.Core.Controllers
 			// Edit episode slugs when the show's slug changes.
 			shows.OnEdited += (show) =>
 			{
-				List<Episode> episodes = _database.Episodes.AsTracking().Where(x => x.ShowID == show.ID).ToList();
+				List<Episode> episodes = _database.Episodes.AsTracking().Where(x => x.ShowID == show.Id).ToList();
 				foreach (Episode ep in episodes)
 				{
 					ep.ShowSlug = show.Slug;
@@ -142,7 +142,7 @@ namespace Kyoo.Core.Controllers
 		public override async Task<Episode> Create(Episode obj)
 		{
 			await base.Create(obj);
-			obj.ShowSlug = obj.Show?.Slug ?? _database.Shows.First(x => x.ID == obj.ShowID).Slug;
+			obj.ShowSlug = obj.Show?.Slug ?? _database.Shows.First(x => x.Id == obj.ShowID).Slug;
 			_database.Entry(obj).State = EntityState.Added;
 			await _database.SaveChangesAsync(() =>
 				obj.SeasonNumber != null && obj.EpisodeNumber != null
@@ -163,7 +163,7 @@ namespace Kyoo.Core.Controllers
 					throw new ArgumentException($"Can't store an episode not related " +
 						$"to any show (showID: {resource.ShowID}).");
 				}
-				resource.ShowID = resource.Show.ID;
+				resource.ShowID = resource.Show.Id;
 			}
 		}
 

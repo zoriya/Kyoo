@@ -161,11 +161,11 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<T>> Edit([FromBody] T resource)
 		{
-			if (resource.ID > 0)
+			if (resource.Id > 0)
 				return await Repository.Edit(resource, true);
 
 			T old = await Repository.Get(resource.Slug);
-			resource.ID = old.ID;
+			resource.Id = old.Id;
 			return await Repository.Edit(resource, true);
 		}
 
@@ -187,11 +187,11 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<T>> Patch([FromBody] T resource)
 		{
-			if (resource.ID > 0)
+			if (resource.Id > 0)
 				return await Repository.Edit(resource, false);
 
 			T old = await Repository.Get(resource.Slug);
-			resource.ID = old.ID;
+			resource.Id = old.Id;
 			return await Repository.Edit(resource, false);
 		}
 

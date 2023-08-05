@@ -95,7 +95,7 @@ namespace Kyoo.Postgresql
 		public IQueryable<BagItem> LibraryItems =>
 			Shows.Select(x => new BagItem
 			{
-				ID = x.ID,
+				Id = x.Id,
 				Slug = x.Slug,
 				Name = x.Name,
 				AirDate = x.StartAir,
@@ -103,7 +103,7 @@ namespace Kyoo.Postgresql
 				Rest = x
 			}).Union(Movies.Select(x => new BagItem
 			{
-				ID = x.ID,
+				Id = x.Id,
 				Slug = x.Slug,
 				Name = x.Name,
 				AirDate = x.AirDate,
@@ -111,7 +111,7 @@ namespace Kyoo.Postgresql
 				Rest = x
 			})).Union(Collections.Select(x => new BagItem
 			{
-				ID = x.ID,
+				Id = x.Id,
 				Slug = x.Slug,
 				Name = x.Name,
 				AirDate = null,
@@ -199,7 +199,7 @@ namespace Kyoo.Postgresql
 				.Property(x => x.ExternalId)
 				.HasConversion(
 					v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
-					v => JsonSerializer.Deserialize<Dictionary<string, MetadataID>>(v, (JsonSerializerOptions)null)
+					v => JsonSerializer.Deserialize<Dictionary<string, MetadataId>>(v, (JsonSerializerOptions)null)
 				)
 				.HasColumnType("json");
 		}
@@ -350,7 +350,7 @@ namespace Kyoo.Postgresql
 		public T GetTemporaryObject<T>(T model)
 			where T : class, IResource
 		{
-			T tmp = Set<T>().Local.FirstOrDefault(x => x.ID == model.ID);
+			T tmp = Set<T>().Local.FirstOrDefault(x => x.Id == model.Id);
 			if (tmp != null)
 				return tmp;
 			Entry(model).State = EntityState.Unchanged;

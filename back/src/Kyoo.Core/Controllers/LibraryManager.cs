@@ -252,73 +252,73 @@ namespace Kyoo.Core.Controllers
 			return (obj, member: memberName) switch
 			{
 				(Collection c, nameof(Collection.Shows)) => ShowRepository
-					.GetAll(x => x.Collections.Any(y => y.ID == obj.ID))
+					.GetAll(x => x.Collections.Any(y => y.Id == obj.Id))
 					.Then(x => c.Shows = x),
 
 				(Show s, nameof(Show.People)) => PeopleRepository
-					.GetFromShow(obj.ID)
+					.GetFromShow(obj.Id)
 					.Then(x => s.People = x),
 
 				(Show s, nameof(Show.Seasons)) => _SetRelation(s,
-					SeasonRepository.GetAll(x => x.Show.ID == obj.ID),
+					SeasonRepository.GetAll(x => x.Show.Id == obj.Id),
 					(x, y) => x.Seasons = y,
-					(x, y) => { x.Show = y; x.ShowID = y.ID; }),
+					(x, y) => { x.Show = y; x.ShowID = y.Id; }),
 
 				(Show s, nameof(Show.Episodes)) => _SetRelation(s,
-					EpisodeRepository.GetAll(x => x.Show.ID == obj.ID),
+					EpisodeRepository.GetAll(x => x.Show.Id == obj.Id),
 					(x, y) => x.Episodes = y,
-					(x, y) => { x.Show = y; x.ShowID = y.ID; }),
+					(x, y) => { x.Show = y; x.ShowID = y.Id; }),
 
 				(Show s, nameof(Show.Collections)) => CollectionRepository
-					.GetAll(x => x.Shows.Any(y => y.ID == obj.ID))
+					.GetAll(x => x.Shows.Any(y => y.Id == obj.Id))
 					.Then(x => s.Collections = x),
 
 				(Show s, nameof(Show.Studio)) => StudioRepository
-					.GetOrDefault(x => x.Shows.Any(y => y.ID == obj.ID))
+					.GetOrDefault(x => x.Shows.Any(y => y.Id == obj.Id))
 					.Then(x =>
 					{
 						s.Studio = x;
-						s.StudioID = x?.ID ?? 0;
+						s.StudioID = x?.Id ?? 0;
 					}),
 
 
 				(Season s, nameof(Season.Episodes)) => _SetRelation(s,
-					EpisodeRepository.GetAll(x => x.Season.ID == obj.ID),
+					EpisodeRepository.GetAll(x => x.Season.Id == obj.Id),
 					(x, y) => x.Episodes = y,
-					(x, y) => { x.Season = y; x.SeasonID = y.ID; }),
+					(x, y) => { x.Season = y; x.SeasonID = y.Id; }),
 
 				(Season s, nameof(Season.Show)) => ShowRepository
-					.GetOrDefault(x => x.Seasons.Any(y => y.ID == obj.ID))
+					.GetOrDefault(x => x.Seasons.Any(y => y.Id == obj.Id))
 					.Then(x =>
 					{
 						s.Show = x;
-						s.ShowID = x?.ID ?? 0;
+						s.ShowID = x?.Id ?? 0;
 					}),
 
 
 				(Episode e, nameof(Episode.Show)) => ShowRepository
-					.GetOrDefault(x => x.Episodes.Any(y => y.ID == obj.ID))
+					.GetOrDefault(x => x.Episodes.Any(y => y.Id == obj.Id))
 					.Then(x =>
 					{
 						e.Show = x;
-						e.ShowID = x?.ID ?? 0;
+						e.ShowID = x?.Id ?? 0;
 					}),
 
 				(Episode e, nameof(Episode.Season)) => SeasonRepository
-					.GetOrDefault(x => x.Episodes.Any(y => y.ID == e.ID))
+					.GetOrDefault(x => x.Episodes.Any(y => y.Id == e.Id))
 					.Then(x =>
 					{
 						e.Season = x;
-						e.SeasonID = x?.ID ?? 0;
+						e.SeasonID = x?.Id ?? 0;
 					}),
 
 
 				(Studio s, nameof(Studio.Shows)) => ShowRepository
-					.GetAll(x => x.Studio.ID == obj.ID)
+					.GetAll(x => x.Studio.Id == obj.Id)
 					.Then(x => s.Shows = x),
 
 				(People p, nameof(People.Roles)) => PeopleRepository
-					.GetFromPeople(obj.ID)
+					.GetFromPeople(obj.Id)
 					.Then(x => p.Roles = x),
 
 				_ => throw new ArgumentException($"Couldn't find a way to load {memberName} of {obj.Slug}.")

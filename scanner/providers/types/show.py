@@ -42,7 +42,7 @@ class Show:
 	seasons: list[Season]
 	# TODO: handle staff
 	# staff: list[Staff]
-	external_ids: dict[str, MetadataID]
+	external_id: dict[str, MetadataID]
 
 	translations: dict[str, ShowTranslation] = field(default_factory=dict)
 

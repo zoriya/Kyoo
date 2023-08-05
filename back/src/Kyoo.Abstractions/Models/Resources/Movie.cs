@@ -32,7 +32,7 @@ namespace Kyoo.Abstractions.Models
 	public class Movie : IResource, IMetadata, IOnMerge, IThumbnails
 	{
 		/// <inheritdoc />
-		public int ID { get; set; }
+		public int Id { get; set; }
 
 		/// <inheritdoc />
 		[MaxLength(256)]
@@ -98,7 +98,7 @@ namespace Kyoo.Abstractions.Models
 		public string? Trailer { get; set; }
 
 		/// <inheritdoc />
-		public Dictionary<string, MetadataID> ExternalId { get; set; } = new();
+		public Dictionary<string, MetadataId> ExternalId { get; set; } = new();
 
 		/// <summary>
 		/// The ID of the Studio that made this show.

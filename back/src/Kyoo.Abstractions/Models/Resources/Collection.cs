@@ -31,7 +31,7 @@ namespace Kyoo.Abstractions.Models
 	public class Collection : IResource, IMetadata, IThumbnails
 	{
 		/// <inheritdoc />
-		public int ID { get; set; }
+		public int Id { get; set; }
 
 		/// <inheritdoc />
 		[MaxLength(256)] public string Slug { get; set; }
@@ -66,7 +66,7 @@ namespace Kyoo.Abstractions.Models
 		[LoadableRelation] public ICollection<Show>? Shows { get; set; }
 
 		/// <inheritdoc />
-		public Dictionary<string, MetadataID> ExternalId { get; set; } = new();
+		public Dictionary<string, MetadataId> ExternalId { get; set; } = new();
 
 		public Collection() { }
 

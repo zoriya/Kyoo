@@ -80,17 +80,17 @@ namespace Kyoo.Tests.Database
 			Collection collection = TestSample.GetNew<Collection>();
 			collection.ExternalId = new[]
 			{
-				new MetadataID
+				new MetadataId
 				{
 					Provider = TestSample.Get<Provider>(),
 					Link = "link",
-					DataID = "id"
+					DataId = "id"
 				},
-				new MetadataID
+				new MetadataId
 				{
 					Provider = TestSample.GetNew<Provider>(),
 					Link = "new-provider-link",
-					DataID = "new-id"
+					DataId = "new-id"
 				}
 			};
 			await _repository.Create(collection);
@@ -125,11 +125,11 @@ namespace Kyoo.Tests.Database
 			Collection value = await _repository.Get(TestSample.Get<Collection>().Slug);
 			value.ExternalId = new[]
 			{
-				new MetadataID
+				new MetadataId
 				{
 					Provider = TestSample.Get<Provider>(),
 					Link = "link",
-					DataID = "id"
+					DataId = "id"
 				},
 			};
 			await _repository.Edit(value, false);
@@ -147,13 +147,13 @@ namespace Kyoo.Tests.Database
 		public async Task AddMetadataTest()
 		{
 			Collection value = await _repository.Get(TestSample.Get<Collection>().Slug);
-			value.ExternalId = new List<MetadataID>
+			value.ExternalId = new List<MetadataId>
 			{
 				new()
 				{
 					Provider = TestSample.Get<Provider>(),
 					Link = "link",
-					DataID = "id"
+					DataId = "id"
 				},
 			};
 			await _repository.Edit(value, false);
@@ -168,11 +168,11 @@ namespace Kyoo.Tests.Database
 				KAssert.DeepEqual(value, retrieved);
 			}
 
-			value.ExternalId.Add(new MetadataID
+			value.ExternalId.Add(new MetadataId
 			{
 				Provider = TestSample.GetNew<Provider>(),
 				Link = "link",
-				DataID = "id"
+				DataId = "id"
 			});
 			await _repository.Edit(value, false);
 

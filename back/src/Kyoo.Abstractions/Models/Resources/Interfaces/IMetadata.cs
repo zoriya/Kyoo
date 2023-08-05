@@ -26,8 +26,8 @@ namespace Kyoo.Abstractions.Models
 	public interface IMetadata
 	{
 		/// <summary>
-		/// The link to metadata providers that this show has. See <see cref="MetadataID"/> for more information.
+		/// The link to metadata providers that this show has. See <see cref="MetadataId"/> for more information.
 		/// </summary>
-		public Dictionary<string, MetadataID> ExternalId { get; set; }
+		public Dictionary<string, MetadataId> ExternalId { get; set; }
 	}
 }

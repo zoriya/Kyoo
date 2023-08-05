@@ -95,7 +95,7 @@ namespace Kyoo.Core.Controllers
 			if (resource.Studio != null)
 			{
 				resource.Studio = await _studios.CreateIfNotExists(resource.Studio);
-				resource.StudioID = resource.Studio.ID;
+				resource.StudioID = resource.Studio.Id;
 			}
 
 			if (resource.People != null)
@@ -104,7 +104,7 @@ namespace Kyoo.Core.Controllers
 				{
 					role.People = _database.LocalEntity<People>(role.People.Slug)
 						?? await _people.CreateIfNotExists(role.People);
-					role.PeopleID = role.People.ID;
+					role.PeopleID = role.People.Id;
 					_database.Entry(role).State = EntityState.Added;
 				}
 			}

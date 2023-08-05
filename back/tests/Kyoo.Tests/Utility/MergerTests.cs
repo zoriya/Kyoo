@@ -223,7 +223,7 @@ namespace Kyoo.Tests.Utility
 		{
 			Show test = new()
 			{
-				ID = 5,
+				Id = 5,
 				Genres = new[] { new Genre("test") }
 			};
 			Show test2 = new()
@@ -236,7 +236,7 @@ namespace Kyoo.Tests.Utility
 			};
 			Show ret = Merger.Merge(test, test2);
 			Assert.True(ReferenceEquals(test, ret));
-			Assert.Equal(5, ret.ID);
+			Assert.Equal(5, ret.Id);
 
 			Assert.Equal(2, ret.Genres.Count);
 			Assert.Equal("test", ret.Genres.ToArray()[0].Slug);
@@ -351,7 +351,7 @@ namespace Kyoo.Tests.Utility
 		{
 			Collection collection = new()
 			{
-				ID = 5,
+				Id = 5,
 				Name = "merged",
 			};
 			Collection collection2 = new()
@@ -360,7 +360,7 @@ namespace Kyoo.Tests.Utility
 			};
 			Collection ret = Merger.Complete(collection, collection2);
 			Assert.True(ReferenceEquals(collection, ret));
-			Assert.Equal(5, ret.ID);
+			Assert.Equal(5, ret.Id);
 			Assert.Equal("test", ret.Name);
 			Assert.Null(ret.Slug);
 		}

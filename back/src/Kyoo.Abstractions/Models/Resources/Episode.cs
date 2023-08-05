@@ -32,7 +32,7 @@ namespace Kyoo.Abstractions.Models
 	public class Episode : IResource, IMetadata, IThumbnails
 	{
 		/// <inheritdoc />
-		public int ID { get; set; }
+		public int Id { get; set; }
 
 		/// <inheritdoc />
 		[Computed]
@@ -148,7 +148,7 @@ namespace Kyoo.Abstractions.Models
 		public Image? Logo { get; set; }
 
 		/// <inheritdoc />
-		public Dictionary<string, MetadataID> ExternalId { get; set; } = new();
+		public Dictionary<string, MetadataId> ExternalId { get; set; } = new();
 
 		/// <summary>
 		/// Get the slug of an episode.

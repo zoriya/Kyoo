@@ -40,7 +40,7 @@ class Movie:
 	genres: list[Genre] = field(default_factory=list)
 	# TODO: handle staff
 	# staff: list[Staff]
-	external_ids: dict[str, MetadataID] = field(default_factory=dict)
+	external_id: dict[str, MetadataID] = field(default_factory=dict)
 
 	translations: dict[str, MovieTranslation] = field(default_factory=dict)
 

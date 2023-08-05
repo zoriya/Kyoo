@@ -33,7 +33,7 @@ namespace Kyoo.Abstractions.Models
 		/// You don't need to specify an ID manually when creating a new resource,
 		/// this field is automatically assigned by the <see cref="IRepository{T}"/>.
 		/// </remarks>
-		public int ID { get; set; }
+		public int Id { get; set; }
 
 		/// <summary>
 		/// A human-readable identifier that can be used instead of an ID.

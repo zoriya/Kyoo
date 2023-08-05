@@ -29,7 +29,7 @@ namespace Kyoo.Abstractions.Models
 	public class PeopleRole : IResource
 	{
 		/// <inheritdoc />
-		public int ID { get; set; }
+		public int Id { get; set; }
 
 		/// <inheritdoc />
 		public string Slug => ForPeople ? Show.Slug : People.Slug;

@@ -55,7 +55,7 @@ namespace Kyoo.Tests.Database
 			Assert.Equal("anohana-s1", season.Slug);
 			Show show = new()
 			{
-				ID = season.ShowID,
+				Id = season.ShowID,
 				Slug = "new-slug"
 			};
 			await Repositories.LibraryManager.ShowRepository.Edit(show, false);
@@ -70,7 +70,7 @@ namespace Kyoo.Tests.Database
 			Assert.Equal("anohana-s1", season.Slug);
 			await _repository.Edit(new Season
 			{
-				ID = 1,
+				Id = 1,
 				SeasonNumber = 2,
 				ShowID = 1
 			}, false);
@@ -83,7 +83,7 @@ namespace Kyoo.Tests.Database
 		{
 			Season season = await _repository.Create(new Season
 			{
-				ShowID = TestSample.Get<Show>().ID,
+				ShowID = TestSample.Get<Show>().Id,
 				SeasonNumber = 2
 			});
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s2", season.Slug);
@@ -95,17 +95,17 @@ namespace Kyoo.Tests.Database
 			Season season = TestSample.GetNew<Season>();
 			season.ExternalId = new[]
 			{
-				new MetadataID
+				new MetadataId
 				{
 					Provider = TestSample.Get<Provider>(),
 					Link = "link",
-					DataID = "id"
+					DataId = "id"
 				},
-				new MetadataID
+				new MetadataId
 				{
 					Provider = TestSample.GetNew<Provider>(),
 					Link = "new-provider-link",
-					DataID = "new-id"
+					DataId = "new-id"
 				}
 			};
 			await _repository.Create(season);
@@ -140,11 +140,11 @@ namespace Kyoo.Tests.Database
 			Season value = await _repository.Get(TestSample.Get<Season>().Slug);
 			value.ExternalId = new[]
 			{
-				new MetadataID
+				new MetadataId
 				{
 					Provider = TestSample.Get<Provider>(),
 					Link = "link",
-					DataID = "id"
+					DataId = "id"
 				},
 			};
 			await _repository.Edit(value, false);
@@ -162,13 +162,13 @@ namespace Kyoo.Tests.Database
 		public async Task AddMetadataTest()
 		{
 			Season value = await _repository.Get(TestSample.Get<Season>().Slug);
-			value.ExternalId = new List<MetadataID>
+			value.ExternalId = new List<MetadataId>
 			{
 				new()
 				{
 					Provider = TestSample.Get<Provider>(),
 					Link = "link",
-					DataID = "id"
+					DataId = "id"
 				},
 			};
 			await _repository.Edit(value, false);
@@ -183,11 +183,11 @@ namespace Kyoo.Tests.Database
 				KAssert.DeepEqual(value, retrieved);
 			}
 
-			value.ExternalId.Add(new MetadataID
+			value.ExternalId.Add(new MetadataId
 			{
 				Provider = TestSample.GetNew<Provider>(),
 				Link = "link",
-				DataID = "id"
+				DataId = "id"
 			});
 			await _repository.Edit(value, false);
 

@@ -32,8 +32,8 @@ namespace Kyoo.Tests.Utility
 		[Fact]
 		public void IsPropertyExpression_Tests()
 		{
-			Expression<Func<Show, int>> member = x => x.ID;
-			Expression<Func<Show, object>> memberCast = x => x.ID;
+			Expression<Func<Show, int>> member = x => x.Id;
+			Expression<Func<Show, object>> memberCast = x => x.Id;
 
 			Assert.False(KUtility.IsPropertyExpression(null));
 			Assert.True(KUtility.IsPropertyExpression(member));
@@ -46,8 +46,8 @@ namespace Kyoo.Tests.Utility
 		[Fact]
 		public void GetPropertyName_Test()
 		{
-			Expression<Func<Show, int>> member = x => x.ID;
-			Expression<Func<Show, object>> memberCast = x => x.ID;
+			Expression<Func<Show, int>> member = x => x.Id;
+			Expression<Func<Show, object>> memberCast = x => x.Id;
 
 			Assert.Equal("ID", KUtility.GetPropertyName(member));
 			Assert.Equal("ID", KUtility.GetPropertyName(memberCast));

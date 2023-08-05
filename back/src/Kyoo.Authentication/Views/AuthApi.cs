@@ -228,7 +228,7 @@ namespace Kyoo.Authentication.Views
 				return Unauthorized(new RequestError("User not authenticated or token invalid."));
 			try
 			{
-				user.ID = userID;
+				user.Id = userID;
 				return await _users.Edit(user, true);
 			}
 			catch (ItemNotFoundException)
@@ -258,7 +258,7 @@ namespace Kyoo.Authentication.Views
 				return Unauthorized(new RequestError("User not authenticated or token invalid."));
 			try
 			{
-				user.ID = userID;
+				user.Id = userID;
 				return await _users.Edit(user, false);
 			}
 			catch (ItemNotFoundException)

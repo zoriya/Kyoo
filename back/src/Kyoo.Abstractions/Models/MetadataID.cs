@@ -20,16 +20,16 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// ID and link of an item on an external provider.
 	/// </summary>
-	public class MetadataID
+	public class MetadataId
 	{
 		/// <summary>
 		/// The ID of the resource on the external provider.
 		/// </summary>
-		public string DataID { get; set; }
+		public string DataId { get; set; }
 
 		/// <summary>
 		/// The URL of the resource on the external provider.
 		/// </summary>
-		public string Link { get; set; }
+		public string? Link { get; set; }
 	}
 }

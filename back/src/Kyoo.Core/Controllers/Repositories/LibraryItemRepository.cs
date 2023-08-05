@@ -54,7 +54,7 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task<ILibraryItem> GetOrDefault(int id)
 		{
-			return (await _database.LibraryItems.FirstOrDefaultAsync(x => x.ID == id)).ToItem();
+			return (await _database.LibraryItems.FirstOrDefaultAsync(x => x.Id == id)).ToItem();
 		}
 
 		/// <inheritdoc />

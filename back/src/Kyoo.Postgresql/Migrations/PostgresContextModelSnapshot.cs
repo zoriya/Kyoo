@@ -27,18 +27,18 @@ namespace Kyoo.Postgresql.Migrations
 
             modelBuilder.Entity("CollectionMovie", b =>
                 {
-                    b.Property<int>("CollectionsID")
+                    b.Property<int>("CollectionsId")
                         .HasColumnType("integer")
                         .HasColumnName("collections_id");
 
-                    b.Property<int>("MoviesID")
+                    b.Property<int>("MoviesId")
                         .HasColumnType("integer")
                         .HasColumnName("movies_id");
 
-                    b.HasKey("CollectionsID", "MoviesID")
+                    b.HasKey("CollectionsId", "MoviesId")
                         .HasName("pk_collection_movie");
 
-                    b.HasIndex("MoviesID")
+                    b.HasIndex("MoviesId")
                         .HasDatabaseName("ix_collection_movie_movies_id");
 
                     b.ToTable("collection_movie", (string)null);
@@ -46,12 +46,12 @@ namespace Kyoo.Postgresql.Migrations
 
             modelBuilder.Entity("Kyoo.Abstractions.Models.Collection", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ExternalId")
                         .IsRequired()
@@ -73,7 +73,7 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("character varying(256)")
                         .HasColumnName("slug");
 
-                    b.HasKey("ID")
+                    b.HasKey("Id")
                         .HasName("pk_collections");
 
                     b.HasIndex("Slug")
@@ -85,12 +85,12 @@ namespace Kyoo.Postgresql.Migrations
 
             modelBuilder.Entity("Kyoo.Abstractions.Models.Episode", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("AbsoluteNumber")
                         .HasColumnType("integer")
@@ -140,7 +140,7 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("character varying(256)")
                         .HasColumnName("slug");
 
-                    b.HasKey("ID")
+                    b.HasKey("Id")
                         .HasName("pk_episodes");
 
                     b.HasIndex("SeasonID")
@@ -159,12 +159,12 @@ namespace Kyoo.Postgresql.Migrations
 
             modelBuilder.Entity("Kyoo.Abstractions.Models.Movie", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime?>("AirDate")
                         .HasColumnType("timestamp with time zone")
@@ -226,7 +226,7 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("text")
                         .HasColumnName("trailer");
 
-                    b.HasKey("ID")
+                    b.HasKey("Id")
                         .HasName("pk_movies");
 
                     b.HasIndex("Slug")
@@ -241,12 +241,12 @@ namespace Kyoo.Postgresql.Migrations
 
             modelBuilder.Entity("Kyoo.Abstractions.Models.People", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ExternalId")
                         .IsRequired()
@@ -264,7 +264,7 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("character varying(256)")
                         .HasColumnName("slug");
 
-                    b.HasKey("ID")
+                    b.HasKey("Id")
                         .HasName("pk_people");
 
                     b.HasIndex("Slug")
@@ -276,12 +276,12 @@ namespace Kyoo.Postgresql.Migrations
 
             modelBuilder.Entity("Kyoo.Abstractions.Models.PeopleRole", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("MovieID")
                         .HasColumnType("integer")
@@ -305,7 +305,7 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("text")
                         .HasColumnName("type");
 
-                    b.HasKey("ID")
+                    b.HasKey("Id")
                         .HasName("pk_people_roles");
 
                     b.HasIndex("MovieID")
@@ -322,12 +322,12 @@ namespace Kyoo.Postgresql.Migrations
 
             modelBuilder.Entity("Kyoo.Abstractions.Models.Season", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("timestamp with time zone")
@@ -364,7 +364,7 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("start_date");
 
-                    b.HasKey("ID")
+                    b.HasKey("Id")
                         .HasName("pk_seasons");
 
                     b.HasIndex("Slug")
@@ -380,12 +380,12 @@ namespace Kyoo.Postgresql.Migrations
 
             modelBuilder.Entity("Kyoo.Abstractions.Models.Show", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string[]>("Aliases")
                         .IsRequired()
@@ -446,7 +446,7 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("text")
                         .HasColumnName("trailer");
 
-                    b.HasKey("ID")
+                    b.HasKey("Id")
                         .HasName("pk_shows");
 
                     b.HasIndex("Slug")
@@ -461,12 +461,12 @@ namespace Kyoo.Postgresql.Migrations
 
             modelBuilder.Entity("Kyoo.Abstractions.Models.Studio", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ExternalId")
                         .IsRequired()
@@ -484,7 +484,7 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("character varying(256)")
                         .HasColumnName("slug");
 
-                    b.HasKey("ID")
+                    b.HasKey("Id")
                         .HasName("pk_studios");
 
                     b.HasIndex("Slug")
@@ -496,12 +496,12 @@ namespace Kyoo.Postgresql.Migrations
 
             modelBuilder.Entity("Kyoo.Abstractions.Models.User", b =>
                 {
-                    b.Property<int>("ID")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer")
                         .HasColumnName("id");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ID"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -529,7 +529,7 @@ namespace Kyoo.Postgresql.Migrations
                         .HasColumnType("text")
                         .HasColumnName("username");
 
-                    b.HasKey("ID")
+                    b.HasKey("Id")
                         .HasName("pk_users");
 
                     b.HasIndex("Slug")
@@ -564,18 +564,18 @@ namespace Kyoo.Postgresql.Migrations
 
             modelBuilder.Entity("ShowUser", b =>
                 {
-                    b.Property<int>("UsersID")
+                    b.Property<int>("UsersId")
                         .HasColumnType("integer")
                         .HasColumnName("users_id");
 
-                    b.Property<int>("WatchedID")
+                    b.Property<int>("WatchedId")
                         .HasColumnType("integer")
                         .HasColumnName("watched_id");
 
-                    b.HasKey("UsersID", "WatchedID")
+                    b.HasKey("UsersId", "WatchedId")
                         .HasName("pk_link_user_show");
 
-                    b.HasIndex("WatchedID")
+                    b.HasIndex("WatchedId")
                         .HasDatabaseName("ix_link_user_show_watched_id");
 
                     b.ToTable("link_user_show", (string)null);
@@ -604,14 +604,14 @@ namespace Kyoo.Postgresql.Migrations
                 {
                     b.HasOne("Kyoo.Abstractions.Models.Collection", null)
                         .WithMany()
-                        .HasForeignKey("CollectionsID")
+                        .HasForeignKey("CollectionsId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_collection_movie_collections_collections_id");
 
                     b.HasOne("Kyoo.Abstractions.Models.Movie", null)
                         .WithMany()
-                        .HasForeignKey("MoviesID")
+                        .HasForeignKey("MoviesId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_collection_movie_movies_movies_id");
@@ -621,7 +621,7 @@ namespace Kyoo.Postgresql.Migrations
                 {
                     b.OwnsOne("Kyoo.Abstractions.Models.Image", "Logo", b1 =>
                         {
-                            b1.Property<int>("CollectionID")
+                            b1.Property<int>("CollectionId")
                                 .HasColumnType("integer")
                                 .HasColumnName("id");
 
@@ -636,18 +636,18 @@ namespace Kyoo.Postgresql.Migrations
                                 .HasColumnType("text")
                                 .HasColumnName("logo_source");
 
-                            b1.HasKey("CollectionID");
+                            b1.HasKey("CollectionId");
 
                             b1.ToTable("collections");
 
                             b1.WithOwner()
-                                .HasForeignKey("CollectionID")
+                                .HasForeignKey("CollectionId")
                                 .HasConstraintName("fk_collections_collections_id");
                         });
 
                     b.OwnsOne("Kyoo.Abstractions.Models.Image", "Poster", b1 =>
                         {
-                            b1.Property<int>("CollectionID")
+                            b1.Property<int>("CollectionId")
                                 .HasColumnType("integer")
                                 .HasColumnName("id");
 
@@ -662,18 +662,18 @@ namespace Kyoo.Postgresql.Migrations
                                 .HasColumnType("text")
                                 .HasColumnName("poster_source");
 
-                            b1.HasKey("CollectionID");
+                            b1.HasKey("CollectionId");
 
                             b1.ToTable("collections");
 
                             b1.WithOwner()
-                                .HasForeignKey("CollectionID")
+                                .HasForeignKey("CollectionId")
                                 .HasConstraintName("fk_collections_collections_id");
                         });
 
                     b.OwnsOne("Kyoo.Abstractions.Models.Image", "Thumbnail", b1 =>
                         {
-                            b1.Property<int>("CollectionID")
+                            b1.Property<int>("CollectionId")
                                 .HasColumnType("integer")
                                 .HasColumnName("id");
 
@@ -688,12 +688,12 @@ namespace Kyoo.Postgresql.Migrations
                                 .HasColumnType("text")
                                 .HasColumnName("thumbnail_source");
 
-                            b1.HasKey("CollectionID");
+                            b1.HasKey("CollectionId");
 
                             b1.ToTable("collections");
 
                             b1.WithOwner()
-                                .HasForeignKey("CollectionID")
+                                .HasForeignKey("CollectionId")
                                 .HasConstraintName("fk_collections_collections_id");
                         });
 
@@ -721,7 +721,7 @@ namespace Kyoo.Postgresql.Migrations
 
                     b.OwnsOne("Kyoo.Abstractions.Models.Image", "Logo", b1 =>
                         {
-                            b1.Property<int>("EpisodeID")
+                            b1.Property<int>("EpisodeId")
                                 .HasColumnType("integer")
                                 .HasColumnName("id");
 
@@ -736,18 +736,18 @@ namespace Kyoo.Postgresql.Migrations
                                 .HasColumnType("text")
                                 .HasColumnName("logo_source");
 
-                            b1.HasKey("EpisodeID");
+                            b1.HasKey("EpisodeId");
 
                             b1.ToTable("episodes");
 
                             b1.WithOwner()
-                                .HasForeignKey("EpisodeID")
+                                .HasForeignKey("EpisodeId")
                                 .HasConstraintName("fk_episodes_episodes_id");
                         });
 
                     b.OwnsOne("Kyoo.Abstractions.Models.Image", "Poster", b1 =>
                         {
-                            b1.Property<int>("EpisodeID")
+                            b1.Property<int>("EpisodeId")
                                 .HasColumnType("integer")
                                 .HasColumnName("id");
 
@@ -762,18 +762,18 @@ namespace Kyoo.Postgresql.Migrations
                                 .HasColumnType("text")
                                 .HasColumnName("poster_source");
 
-                            b1.HasKey("EpisodeID");
+                            b1.HasKey("EpisodeId");
 
                             b1.ToTable("episodes");
 
                             b1.WithOwner()
-                                .HasForeignKey("EpisodeID")
+                                .HasForeignKey("EpisodeId")
                                 .HasConstraintName("fk_episodes_episodes_id");
                         });
 
                     b.OwnsOne("Kyoo.Abstractions.Models.Image", "Thumbnail", b1 =>
                         {
-                            b1.Property<int>("EpisodeID")
+                            b1.Property<int>("EpisodeId")
                                 .HasColumnType("integer")
                                 .HasColumnName("id");
 
@@ -788,12 +788,12 @@ namespace Kyoo.Postgresql.Migrations
                                 .HasColumnType("text")
                                 .HasColumnName("thumbnail_source");
 
-                            b1.HasKey("EpisodeID");
+                            b1.HasKey("EpisodeId");
 
                             b1.ToTable("episodes");
 
                             b1.WithOwner()
-                                .HasForeignKey("EpisodeID")
+                                .HasForeignKey("EpisodeId")
                                 .HasConstraintName("fk_episodes_episodes_id");
                         });
 
@@ -818,7 +818,7 @@ namespace Kyoo.Postgresql.Migrations
 
                     b.OwnsOne("Kyoo.Abstractions.Models.Image", "Logo", b1 =>
                         {
-                            b1.Property<int>("MovieID")
+                            b1.Property<int>("MovieId")
                                 .HasColumnType("integer")
                                 .HasColumnName("id");
 
@@ -833,18 +833,18 @@ namespace Kyoo.Postgresql.Migrations
                                 .HasColumnType("text")
                                 .HasColumnName("logo_source");
 
-                            b1.HasKey("MovieID");
+                            b1.HasKey("MovieId");
 
                             b1.ToTable("movies");
 
                             b1.WithOwner()
-                                .HasForeignKey("MovieID")
+                                .HasForeignKey("MovieId")
                                 .HasConstraintName("fk_movies_movies_id");
                         });
 
                     b.OwnsOne("Kyoo.Abstractions.Models.Image", "Poster", b1 =>
                         {
-                            b1.Property<int>("MovieID")
+                            b1.Property<int>("MovieId")
                                 .HasColumnType("integer")
                                 .HasColumnName("id");
 
@@ -859,18 +859,18 @@ namespace Kyoo.Postgresql.Migrations
                                 .HasColumnType("text")
                                 .HasColumnName("poster_source");
 
-                            b1.HasKey("MovieID");
+                            b1.HasKey("MovieId");
 
                             b1.ToTable("movies");
 
                             b1.WithOwner()
-                                .HasForeignKey("MovieID")
+                                .HasForeignKey("MovieId")
                                 .HasConstraintName("fk_movies_movies_id");
                         });
 
                     b.OwnsOne("Kyoo.Abstractions.Models.Image", "Thumbnail", b1 =>
                         {
-                            b1.Property<int>("MovieID")
+                            b1.Property<int>("MovieId")
                                 .HasColumnType("integer")
                                 .HasColumnName("id");
 
@@ -885,12 +885,12 @@ namespace Kyoo.Postgresql.Migrations
                                 .HasColumnType("text")
                                 .HasColumnName("thumbnail_source");
 
-                            b1.HasKey("MovieID");
+                            b1.HasKey("MovieId");
 
                             b1.ToTable("movies");
 
                             b1.WithOwner()
-                                .HasForeignKey("MovieID")
+                                .HasForeignKey("MovieId")
                                 .HasConstraintName("fk_movies_movies_id");
                         });
 
@@ -907,7 +907,7 @@ namespace Kyoo.Postgresql.Migrations
                 {
                     b.OwnsOne("Kyoo.Abstractions.Models.Image", "Logo", b1 =>
                         {
-                            b1.Property<int>("PeopleID")
+                            b1.Property<int>("PeopleId")
                                 .HasColumnType("integer")
                                 .HasColumnName("id");
 
@@ -922,18 +922,18 @@ namespace Kyoo.Postgresql.Migrations
                                 .HasColumnType("text")
                                 .HasColumnName("logo_source");
 
-                            b1.HasKey("PeopleID");
+                            b1.HasKey("PeopleId");
 
                             b1.ToTable("people");
 
                             b1.WithOwner()
-                                .HasForeignKey("PeopleID")
+                                .HasForeignKey("PeopleId")
                                 .HasConstraintName("fk_people_people_id");
                         });
 
                     b.OwnsOne("Kyoo.Abstractions.Models.Image", "Poster", b1 =>
                         {
-                            b1.Property<int>("PeopleID")
+                            b1.Property<int>("PeopleId")
                                 .HasColumnType("integer")
                                 .HasColumnName("id");
 
@@ -948,18 +948,18 @@ namespace Kyoo.Postgresql.Migrations
                                 .HasColumnType("text")
                                 .HasColumnName("poster_source");
 
-                            b1.HasKey("PeopleID");
+                            b1.HasKey("PeopleId");
 
                             b1.ToTable("people");
 
                             b1.WithOwner()
-                                .HasForeignKey("PeopleID")
+                                .HasForeignKey("PeopleId")
                                 .HasConstraintName("fk_people_people_id");
                         });
 
                     b.OwnsOne("Kyoo.Abstractions.Models.Image", "Thumbnail", b1 =>
                         {
-                            b1.Property<int>("PeopleID")
+                            b1.Property<int>("PeopleId")
                                 .HasColumnType("integer")
                                 .HasColumnName("id");
 
@@ -974,12 +974,12 @@ namespace Kyoo.Postgresql.Migrations
                                 .HasColumnType("text")
                                 .HasColumnName("thumbnail_source");
 
-                            b1.HasKey("PeopleID");
+                            b1.HasKey("PeopleId");
 
                             b1.ToTable("people");
 
                             b1.WithOwner()
-                                .HasForeignKey("PeopleID")
+                                .HasForeignKey("PeopleId")
                                 .HasConstraintName("fk_people_people_id");
                         });
 
@@ -1027,7 +1027,7 @@ namespace Kyoo.Postgresql.Migrations
 
                     b.OwnsOne("Kyoo.Abstractions.Models.Image", "Logo", b1 =>
                         {
-                            b1.Property<int>("SeasonID")
+                            b1.Property<int>("SeasonId")
                                 .HasColumnType("integer")
                                 .HasColumnName("id");
 
@@ -1042,18 +1042,18 @@ namespace Kyoo.Postgresql.Migrations
                                 .HasColumnType("text")
                                 .HasColumnName("logo_source");
 
-                            b1.HasKey("SeasonID");
+                            b1.HasKey("SeasonId");
 
                             b1.ToTable("seasons");
 
                             b1.WithOwner()
-                                .HasForeignKey("SeasonID")
+                                .HasForeignKey("SeasonId")
                                 .HasConstraintName("fk_seasons_seasons_id");
                         });
 
                     b.OwnsOne("Kyoo.Abstractions.Models.Image", "Poster", b1 =>
                         {
-                            b1.Property<int>("SeasonID")
+                            b1.Property<int>("SeasonId")
                                 .HasColumnType("integer")
                                 .HasColumnName("id");
 
@@ -1068,18 +1068,18 @@ namespace Kyoo.Postgresql.Migrations
                                 .HasColumnType("text")
                                 .HasColumnName("poster_source");
 
-                            b1.HasKey("SeasonID");
+                            b1.HasKey("SeasonId");
 
                             b1.ToTable("seasons");
 
                             b1.WithOwner()
-                                .HasForeignKey("SeasonID")
+                                .HasForeignKey("SeasonId")
                                 .HasConstraintName("fk_seasons_seasons_id");
                         });
 
                     b.OwnsOne("Kyoo.Abstractions.Models.Image", "Thumbnail", b1 =>
                         {
-                            b1.Property<int>("SeasonID")
+                            b1.Property<int>("SeasonId")
                                 .HasColumnType("integer")
                                 .HasColumnName("id");
 
@@ -1094,12 +1094,12 @@ namespace Kyoo.Postgresql.Migrations
                                 .HasColumnType("text")
                                 .HasColumnName("thumbnail_source");
 
-                            b1.HasKey("SeasonID");
+                            b1.HasKey("SeasonId");
 
                             b1.ToTable("seasons");
 
                             b1.WithOwner()
-                                .HasForeignKey("SeasonID")
+                                .HasForeignKey("SeasonId")
                                 .HasConstraintName("fk_seasons_seasons_id");
                         });
 
@@ -1122,7 +1122,7 @@ namespace Kyoo.Postgresql.Migrations
 
                     b.OwnsOne("Kyoo.Abstractions.Models.Image", "Logo", b1 =>
                         {
-                            b1.Property<int>("ShowID")
+                            b1.Property<int>("ShowId")
                                 .HasColumnType("integer")
                                 .HasColumnName("id");
 
@@ -1137,18 +1137,18 @@ namespace Kyoo.Postgresql.Migrations
                                 .HasColumnType("text")
                                 .HasColumnName("logo_source");
 
-                            b1.HasKey("ShowID");
+                            b1.HasKey("ShowId");
 
                             b1.ToTable("shows");
 
                             b1.WithOwner()
-                                .HasForeignKey("ShowID")
+                                .HasForeignKey("ShowId")
                                 .HasConstraintName("fk_shows_shows_id");
                         });
 
                     b.OwnsOne("Kyoo.Abstractions.Models.Image", "Poster", b1 =>
                         {
-                            b1.Property<int>("ShowID")
+                            b1.Property<int>("ShowId")
                                 .HasColumnType("integer")
                                 .HasColumnName("id");
 
@@ -1163,18 +1163,18 @@ namespace Kyoo.Postgresql.Migrations
                                 .HasColumnType("text")
                                 .HasColumnName("poster_source");
 
-                            b1.HasKey("ShowID");
+                            b1.HasKey("ShowId");
 
                             b1.ToTable("shows");
 
                             b1.WithOwner()
-                                .HasForeignKey("ShowID")
+                                .HasForeignKey("ShowId")
                                 .HasConstraintName("fk_shows_shows_id");
                         });
 
                     b.OwnsOne("Kyoo.Abstractions.Models.Image", "Thumbnail", b1 =>
                         {
-                            b1.Property<int>("ShowID")
+                            b1.Property<int>("ShowId")
                                 .HasColumnType("integer")
                                 .HasColumnName("id");
 
@@ -1189,12 +1189,12 @@ namespace Kyoo.Postgresql.Migrations
                                 .HasColumnType("text")
                                 .HasColumnName("thumbnail_source");
 
-                            b1.HasKey("ShowID");
+                            b1.HasKey("ShowId");
 
                             b1.ToTable("shows");
 
                             b1.WithOwner()
-                                .HasForeignKey("ShowID")
+                                .HasForeignKey("ShowId")
                                 .HasConstraintName("fk_shows_shows_id");
                         });
 
@@ -1211,7 +1211,7 @@ namespace Kyoo.Postgresql.Migrations
                 {
                     b.OwnsOne("Kyoo.Abstractions.Models.Image", "Logo", b1 =>
                         {
-                            b1.Property<int>("UserID")
+                            b1.Property<int>("UserId")
                                 .HasColumnType("integer")
                                 .HasColumnName("id");
 
@@ -1226,12 +1226,12 @@ namespace Kyoo.Postgresql.Migrations
                                 .HasColumnType("text")
                                 .HasColumnName("logo_source");
 
-                            b1.HasKey("UserID");
+                            b1.HasKey("UserId");
 
                             b1.ToTable("users");
 
                             b1.WithOwner()
-                                .HasForeignKey("UserID")
+                                .HasForeignKey("UserId")
                                 .HasConstraintName("fk_users_users_id");
                         });
 
@@ -1261,14 +1261,14 @@ namespace Kyoo.Postgresql.Migrations
                 {
                     b.HasOne("Kyoo.Abstractions.Models.User", null)
                         .WithMany()
-                        .HasForeignKey("UsersID")
+                        .HasForeignKey("UsersId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_link_user_show_users_users_id");
 
                     b.HasOne("Kyoo.Abstractions.Models.Show", null)
                         .WithMany()
-                        .HasForeignKey("WatchedID")
+                        .HasForeignKey("WatchedId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_link_user_show_shows_watched_id");

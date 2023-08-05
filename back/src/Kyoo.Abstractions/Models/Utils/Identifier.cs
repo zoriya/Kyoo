@@ -139,7 +139,7 @@ namespace Kyoo.Abstractions.Models.Utils
 		public bool IsSame(IResource resource)
 		{
 			return Match(
-				id => resource.ID == id,
+				id => resource.Id == id,
 				slug => resource.Slug == slug
 			);
 		}
@@ -155,7 +155,7 @@ namespace Kyoo.Abstractions.Models.Utils
 			where T : IResource
 		{
 			return _id.HasValue
-				? x => x.ID == _id.Value
+				? x => x.Id == _id.Value
 				: x => x.Slug == _slug;
 		}
 

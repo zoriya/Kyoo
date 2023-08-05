@@ -19,7 +19,7 @@ class Season:
 	season_number: int
 	start_air: Optional[date | int] = None
 	end_air: Optional[date | int] = None
-	external_ids: dict[str, MetadataID] = field(default_factory=dict)
+	external_id: dict[str, MetadataID] = field(default_factory=dict)
 
 	show_id: Optional[str] = None
 	translations: dict[str, SeasonTranslation] = field(default_factory=dict)
