@@ -16,7 +16,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 
 namespace Kyoo.Abstractions.Models
 {
@@ -42,6 +45,7 @@ namespace Kyoo.Abstractions.Models
 		public Image? Logo { get; set; }
 	}
 
+	[TypeConverter(typeof(ImageConvertor))]
 	public class Image
 	{
 		/// <summary>
@@ -54,6 +58,31 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		[MaxLength(32)]
 		public string Blurhash { get; set; }
+
+		public Image(string source, string? blurhash = null)
+		{
+			Source = source;
+			Blurhash = blurhash ?? "00000000000000";
+		}
+
+		public class ImageConvertor : TypeConverter
+		{
+			/// <inheritdoc />
+			public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
+			{
+				if (sourceType == typeof(string))
+					return true;
+				return base.CanConvertFrom(context, sourceType);
+			}
+
+			/// <inheritdoc />
+			public override object ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
+			{
+				if (value is not string source)
+					return base.ConvertFrom(context, culture, value)!;
+				return new Image(source);
+			}
+		}
 	}
 
 	/// <summary>
@@ -64,7 +93,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// Small
 		/// </summary>
-		Small,
+		Low,
 
 		/// <summary>
 		/// Medium
@@ -74,6 +103,6 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// Large
 		/// </summary>
-		Large,
+		High,
 	}
 }

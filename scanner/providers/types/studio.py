@@ -12,5 +12,5 @@ class Studio:
 	def to_kyoo(self):
 		return {
 			**asdict(self),
-			# "logo": next(iter(self.logos), None),
+			"logo": next(iter(self.logos), None),
 		}

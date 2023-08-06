@@ -23,7 +23,6 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using JetBrains.Annotations;
 
 namespace Kyoo.Abstractions.Models.Utils
 {
@@ -43,7 +42,7 @@ namespace Kyoo.Abstractions.Models.Utils
 		/// <summary>
 		/// The slug of the resource or null if the id is specified.
 		/// </summary>
-		private readonly string _slug;
+		private readonly string? _slug;
 
 		/// <summary>
 		/// Create a new <see cref="Identifier"/> for the given id.
@@ -183,7 +182,7 @@ namespace Kyoo.Abstractions.Models.Utils
 		{
 			return _id.HasValue
 				? _id.Value.ToString()
-				: _slug;
+				: _slug!;
 		}
 
 		/// <summary>
@@ -192,7 +191,7 @@ namespace Kyoo.Abstractions.Models.Utils
 		public class IdentifierConvertor : TypeConverter
 		{
 			/// <inheritdoc />
-			public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+			public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
 			{
 				if (sourceType == typeof(int) || sourceType == typeof(string))
 					return true;
@@ -200,12 +199,12 @@ namespace Kyoo.Abstractions.Models.Utils
 			}
 
 			/// <inheritdoc />
-			public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+			public override object ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
 			{
 				if (value is int id)
 					return new Identifier(id);
 				if (value is not string slug)
-					return base.ConvertFrom(context, culture, value);
+					return base.ConvertFrom(context, culture, value)!;
 				return int.TryParse(slug, out id)
 					? new Identifier(id)
 					: new Identifier(slug);

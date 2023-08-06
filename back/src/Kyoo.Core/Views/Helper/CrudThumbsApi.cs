@@ -65,7 +65,7 @@ namespace Kyoo.Core.Api
 			);
 			if (resource == null)
 				return NotFound();
-			string path = _thumbs.GetImagePath(resource, image, quality ?? ImageQuality.Large);
+			string path = _thumbs.GetImagePath(resource, image, quality ?? ImageQuality.High);
 			if (path == null || !System.IO.File.Exists(path))
 				return NotFound();
 			return PhysicalFile(Path.GetFullPath(path), "image/jpeg", true);

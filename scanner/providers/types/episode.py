@@ -40,9 +40,5 @@ class Episode:
 		return {
 			**asdict(self),
 			**asdict(self.translations[default_language]),
-			# "poster": next(iter(self.translations[default_language].posters), None),
-			# "thumbnail": next(iter(self.translations[default_language].thumbnails), None),
-			# "logo": next(iter(self.translations[default_language].logos), None),
-			"thumbnail": None,
 			"show": None,
 		}

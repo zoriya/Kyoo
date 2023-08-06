@@ -20,6 +20,7 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using BlurHashSharp.SkiaSharp;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Microsoft.Extensions.Logging;
@@ -76,13 +77,13 @@ namespace Kyoo.Core.Controllers
 				SKBitmap bitmap = SKBitmap.Decode(reader);
 
 				bitmap.Resize(new SKSizeI(bitmap.Width, bitmap.Height), SKFilterQuality.High);
-				await _WriteTo(bitmap, $"{localPath}.{ImageQuality.Large.ToString().ToLowerInvariant()}.jpg");
+				await _WriteTo(bitmap, $"{localPath}.{ImageQuality.High.ToString().ToLowerInvariant()}.jpg");
 
 				bitmap.Resize(new SKSizeI(bitmap.Width, bitmap.Height), SKFilterQuality.Medium);
 				await _WriteTo(bitmap, $"{localPath}.{ImageQuality.Medium.ToString().ToLowerInvariant()}.jpg");
 
 				bitmap.Resize(new SKSizeI(bitmap.Width, bitmap.Height), SKFilterQuality.Low);
-				await _WriteTo(bitmap, $"{localPath}.{ImageQuality.Small.ToString().ToLowerInvariant()}.jpg");
+				await _WriteTo(bitmap, $"{localPath}.{ImageQuality.Low.ToString().ToLowerInvariant()}.jpg");
 			}
 			catch (Exception ex)
 			{
