@@ -92,32 +92,7 @@ namespace Kyoo.Postgresql
 		/// <remarks>
 		/// This set is ready only, on most database this will be a view.
 		/// </remarks>
-		public IQueryable<BagItem> LibraryItems =>
-			Shows.Select(x => new BagItem
-			{
-				Id = x.Id,
-				Slug = x.Slug,
-				Name = x.Name,
-				AirDate = x.StartAir,
-				Poster = x.Poster,
-				Rest = x
-			}).Union(Movies.Select(x => new BagItem
-			{
-				Id = x.Id,
-				Slug = x.Slug,
-				Name = x.Name,
-				AirDate = x.AirDate,
-				Poster = x.Poster,
-				Rest = x
-			})).Union(Collections.Select(x => new BagItem
-			{
-				Id = x.Id,
-				Slug = x.Slug,
-				Name = x.Name,
-				AirDate = null,
-				Poster = x.Poster,
-				Rest = x
-			}));
+		public DbSet<LibraryItem> LibraryItems { get; set; }
 
 		/// <summary>
 		/// Add a many to many link between two resources.
@@ -281,6 +256,7 @@ namespace Kyoo.Postgresql
 				.WithMany(x => x.Shows)
 				.OnDelete(DeleteBehavior.SetNull);
 
+			_HasManyToMany<Collection, Movie>(modelBuilder, x => x.Movies, x => x.Collections);
 			_HasManyToMany<Collection, Show>(modelBuilder, x => x.Shows, x => x.Collections);
 
 			modelBuilder.Entity<User>()
@@ -288,6 +264,7 @@ namespace Kyoo.Postgresql
 				.WithMany("Users")
 				.UsingEntity(x => x.ToTable(LinkName<User, Show>()));
 
+			_HasMetadata<LibraryItem>(modelBuilder);
 			_HasMetadata<Collection>(modelBuilder);
 			_HasMetadata<Movie>(modelBuilder);
 			_HasMetadata<Show>(modelBuilder);
@@ -296,6 +273,7 @@ namespace Kyoo.Postgresql
 			_HasMetadata<People>(modelBuilder);
 			_HasMetadata<Studio>(modelBuilder);
 
+			_HasImages<LibraryItem>(modelBuilder);
 			_HasImages<Collection>(modelBuilder);
 			_HasImages<Movie>(modelBuilder);
 			_HasImages<Show>(modelBuilder);

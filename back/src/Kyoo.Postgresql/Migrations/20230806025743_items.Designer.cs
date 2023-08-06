@@ -13,8 +13,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Kyoo.Postgresql.Migrations
 {
     [DbContext(typeof(PostgresContext))]
-    [Migration("20230805052627_initial")]
-    partial class initial
+    [Migration("20230806025743_items")]
+    partial class items
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,27 +25,9 @@ namespace Kyoo.Postgresql.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "genre", new[] { "action", "adventure", "animation", "comedy", "crime", "documentary", "drama", "family", "fantasy", "history", "horror", "music", "mystery", "romance", "science_fiction", "thriller", "war", "western" });
+            NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "item_kind", new[] { "show", "movie", "collection" });
             NpgsqlModelBuilderExtensions.HasPostgresEnum(modelBuilder, "status", new[] { "unknown", "finished", "airing", "planned" });
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("CollectionMovie", b =>
-                {
-                    b.Property<int>("CollectionsId")
-                        .HasColumnType("integer")
-                        .HasColumnName("collections_id");
-
-                    b.Property<int>("MoviesId")
-                        .HasColumnType("integer")
-                        .HasColumnName("movies_id");
-
-                    b.HasKey("CollectionsId", "MoviesId")
-                        .HasName("pk_collection_movie");
-
-                    b.HasIndex("MoviesId")
-                        .HasDatabaseName("ix_collection_movie_movies_id");
-
-                    b.ToTable("collection_movie", (string)null);
-                });
 
             modelBuilder.Entity("Kyoo.Abstractions.Models.Collection", b =>
                 {
@@ -158,6 +140,85 @@ namespace Kyoo.Postgresql.Migrations
                         .HasDatabaseName("ix_episodes_show_id_season_number_episode_number_absolute_numb");
 
                     b.ToTable("episodes", (string)null);
+                });
+
+            modelBuilder.Entity("Kyoo.Abstractions.Models.LibraryItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("AirDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("air_date");
+
+                    b.Property<string[]>("Aliases")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("aliases");
+
+                    b.Property<DateTime?>("EndAir")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("end_air");
+
+                    b.Property<string>("ExternalId")
+                        .IsRequired()
+                        .HasColumnType("json")
+                        .HasColumnName("external_id");
+
+                    b.Property<Genre[]>("Genres")
+                        .IsRequired()
+                        .HasColumnType("genre[]")
+                        .HasColumnName("genres");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Overview")
+                        .HasColumnType("text")
+                        .HasColumnName("overview");
+
+                    b.Property<string>("Path")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("path");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("slug");
+
+                    b.Property<DateTime?>("StartAir")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("start_air");
+
+                    b.Property<Status>("Status")
+                        .HasColumnType("status")
+                        .HasColumnName("status");
+
+                    b.Property<string>("Tagline")
+                        .HasColumnType("text")
+                        .HasColumnName("tagline");
+
+                    b.Property<string[]>("Tags")
+                        .IsRequired()
+                        .HasColumnType("text[]")
+                        .HasColumnName("tags");
+
+                    b.Property<string>("Trailer")
+                        .HasColumnType("text")
+                        .HasColumnName("trailer");
+
+                    b.HasKey("Id")
+                        .HasName("pk_library_items");
+
+                    b.ToTable("library_items", (string)null);
                 });
 
             modelBuilder.Entity("Kyoo.Abstractions.Models.Movie", b =>
@@ -584,6 +645,25 @@ namespace Kyoo.Postgresql.Migrations
                     b.ToTable("link_user_show", (string)null);
                 });
 
+            modelBuilder.Entity("link_collection_movie", b =>
+                {
+                    b.Property<int>("collection_id")
+                        .HasColumnType("integer")
+                        .HasColumnName("collection_id");
+
+                    b.Property<int>("movie_id")
+                        .HasColumnType("integer")
+                        .HasColumnName("movie_id");
+
+                    b.HasKey("collection_id", "movie_id")
+                        .HasName("pk_link_collection_movie");
+
+                    b.HasIndex("movie_id")
+                        .HasDatabaseName("ix_link_collection_movie_movie_id");
+
+                    b.ToTable("link_collection_movie", (string)null);
+                });
+
             modelBuilder.Entity("link_collection_show", b =>
                 {
                     b.Property<int>("collection_id")
@@ -601,23 +681,6 @@ namespace Kyoo.Postgresql.Migrations
                         .HasDatabaseName("ix_link_collection_show_show_id");
 
                     b.ToTable("link_collection_show", (string)null);
-                });
-
-            modelBuilder.Entity("CollectionMovie", b =>
-                {
-                    b.HasOne("Kyoo.Abstractions.Models.Collection", null)
-                        .WithMany()
-                        .HasForeignKey("CollectionsId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_collection_movie_collections_collections_id");
-
-                    b.HasOne("Kyoo.Abstractions.Models.Movie", null)
-                        .WithMany()
-                        .HasForeignKey("MoviesId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_collection_movie_movies_movies_id");
                 });
 
             modelBuilder.Entity("Kyoo.Abstractions.Models.Collection", b =>
@@ -807,6 +870,93 @@ namespace Kyoo.Postgresql.Migrations
                     b.Navigation("Season");
 
                     b.Navigation("Show");
+
+                    b.Navigation("Thumbnail");
+                });
+
+            modelBuilder.Entity("Kyoo.Abstractions.Models.LibraryItem", b =>
+                {
+                    b.OwnsOne("Kyoo.Abstractions.Models.Image", "Logo", b1 =>
+                        {
+                            b1.Property<int>("LibraryItemId")
+                                .HasColumnType("integer")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("Blurhash")
+                                .IsRequired()
+                                .HasMaxLength(32)
+                                .HasColumnType("character varying(32)")
+                                .HasColumnName("logo_blurhash");
+
+                            b1.Property<string>("Source")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("logo_source");
+
+                            b1.HasKey("LibraryItemId");
+
+                            b1.ToTable("library_items");
+
+                            b1.WithOwner()
+                                .HasForeignKey("LibraryItemId")
+                                .HasConstraintName("fk_library_items_library_items_id");
+                        });
+
+                    b.OwnsOne("Kyoo.Abstractions.Models.Image", "Poster", b1 =>
+                        {
+                            b1.Property<int>("LibraryItemId")
+                                .HasColumnType("integer")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("Blurhash")
+                                .IsRequired()
+                                .HasMaxLength(32)
+                                .HasColumnType("character varying(32)")
+                                .HasColumnName("poster_blurhash");
+
+                            b1.Property<string>("Source")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("poster_source");
+
+                            b1.HasKey("LibraryItemId");
+
+                            b1.ToTable("library_items");
+
+                            b1.WithOwner()
+                                .HasForeignKey("LibraryItemId")
+                                .HasConstraintName("fk_library_items_library_items_id");
+                        });
+
+                    b.OwnsOne("Kyoo.Abstractions.Models.Image", "Thumbnail", b1 =>
+                        {
+                            b1.Property<int>("LibraryItemId")
+                                .HasColumnType("integer")
+                                .HasColumnName("id");
+
+                            b1.Property<string>("Blurhash")
+                                .IsRequired()
+                                .HasMaxLength(32)
+                                .HasColumnType("character varying(32)")
+                                .HasColumnName("thumbnail_blurhash");
+
+                            b1.Property<string>("Source")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("thumbnail_source");
+
+                            b1.HasKey("LibraryItemId");
+
+                            b1.ToTable("library_items");
+
+                            b1.WithOwner()
+                                .HasForeignKey("LibraryItemId")
+                                .HasConstraintName("fk_library_items_library_items_id");
+                        });
+
+                    b.Navigation("Logo");
+
+                    b.Navigation("Poster");
 
                     b.Navigation("Thumbnail");
                 });
@@ -1275,6 +1425,23 @@ namespace Kyoo.Postgresql.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_link_user_show_shows_watched_id");
+                });
+
+            modelBuilder.Entity("link_collection_movie", b =>
+                {
+                    b.HasOne("Kyoo.Abstractions.Models.Collection", null)
+                        .WithMany()
+                        .HasForeignKey("collection_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_link_collection_movie_collections_collection_id");
+
+                    b.HasOne("Kyoo.Abstractions.Models.Movie", null)
+                        .WithMany()
+                        .HasForeignKey("movie_id")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_link_collection_movie_movies_movie_id");
                 });
 
             modelBuilder.Entity("link_collection_show", b =>

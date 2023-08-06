@@ -54,13 +54,13 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task<ILibraryItem> GetOrDefault(int id)
 		{
-			return (await _database.LibraryItems.FirstOrDefaultAsync(x => x.Id == id)).ToItem();
+			return await _database.LibraryItems.FirstOrDefaultAsync(x => x.Id == id);
 		}
 
 		/// <inheritdoc />
 		public override async Task<ILibraryItem> GetOrDefault(string slug)
 		{
-			return (await _database.LibraryItems.SingleOrDefaultAsync(x => x.Slug == slug)).ToItem();
+			return await _database.LibraryItems.SingleOrDefaultAsync(x => x.Slug == slug);
 		}
 
 		/// <inheritdoc />
@@ -68,9 +68,9 @@ namespace Kyoo.Core.Controllers
 			Sort<ILibraryItem> sort = default,
 			Pagination limit = default)
 		{
-			return (await ApplyFilters(_database.LibraryItems, where, sort, limit))
-				.Select(x => (x as BagItem)!.ToItem())
-				.ToList();
+			return await ApplyFilters(_database.LibraryItems, where, sort, limit);
+				// .Select(x => x.ToItem())
+				// .ToList();
 		}
 
 		/// <inheritdoc />
@@ -85,14 +85,12 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task<ICollection<ILibraryItem>> Search(string query)
 		{
-			return (await Sort(
+			return await Sort(
 					_database.LibraryItems
-						.Where(_database.Like<ILibraryItem>(x => x.Name, $"%{query}%"))
+					.Where(_database.Like<LibraryItem>(x => x.Name, $"%{query}%"))
 				)
 				.Take(20)
-				.ToListAsync())
-				.Select(x => (x as BagItem)!.ToItem())
-				.ToList();
+				.ToListAsync();
 		}
 
 		/// <inheritdoc />

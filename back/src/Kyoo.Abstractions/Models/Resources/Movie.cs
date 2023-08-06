@@ -124,8 +124,11 @@ namespace Kyoo.Abstractions.Models
 		/// <inheritdoc />
 		public void OnMerge(object merged)
 		{
-			foreach (PeopleRole link in People)
-				link.Movie = this;
+			if (People != null)
+			{
+				foreach (PeopleRole link in People)
+					link.Movie = this;
+			}
 		}
 
 		public Movie() { }

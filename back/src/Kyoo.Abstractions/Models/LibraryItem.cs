@@ -17,6 +17,11 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
+using Kyoo.Abstractions.Models.Attributes;
+using Kyoo.Utils;
 
 namespace Kyoo.Abstractions.Models
 {
@@ -53,60 +58,114 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		public ItemKind Kind { get; }
 
+		/// <summary>
+		/// The title of this show.
+		/// </summary>
 		public string Name { get; }
 
-		public DateTime? AirDate { get; }
+		/// <summary>
+		/// The summary of this show.
+		/// </summary>
+		public string? Overview { get; }
 
-		public Image Poster { get; }
+		/// <summary>
+		/// The date this movie aired.
+		/// </summary>
+		public DateTime? AirDate { get; }
 	}
 
-	public class BagItem : ILibraryItem
+	public class LibraryItem : IResource, ILibraryItem, IThumbnails, IMetadata
 	{
-		public ItemKind Kind { get; }
-
+		/// <inheritdoc />
 		public int Id { get; set; }
 
-		public string Slug { get; set;  }
+		/// <inheritdoc />
+		[MaxLength(256)]
+		public string Slug { get; set; }
 
+		/// <summary>
+		/// The title of this show.
+		/// </summary>
 		public string Name { get; set; }
 
+		/// <summary>
+		/// A catchphrase for this movie.
+		/// </summary>
+		public string? Tagline { get; set; }
+
+		/// <summary>
+		/// The list of alternative titles of this show.
+		/// </summary>
+		public string[] Aliases { get; set; } = Array.Empty<string>();
+
+		/// <summary>
+		/// The path of the movie video file.
+		/// </summary>
+		public string? Path { get; set; }
+
+		/// <summary>
+		/// The summary of this show.
+		/// </summary>
+		public string? Overview { get; set; }
+
+		/// <summary>
+		/// A list of tags that match this movie.
+		/// </summary>
+		public string[] Tags { get; set; } = Array.Empty<string>();
+
+		/// <summary>
+		/// The list of genres (themes) this show has.
+		/// </summary>
+		public Genre[] Genres { get; set; } = Array.Empty<Genre>();
+
+		/// <summary>
+		/// Is this show airing, not aired yet or finished?
+		/// </summary>
+		public Status Status { get; set; }
+
+		/// <summary>
+		/// The date this show started airing. It can be null if this is unknown.
+		/// </summary>
+		public DateTime? StartAir { get; set; }
+
+		/// <summary>
+		/// The date this show finished airing.
+		/// It can also be null if this is unknown.
+		/// </summary>
+		public DateTime? EndAir { get; set; }
+
+		/// <summary>
+		/// The date this movie aired.
+		/// </summary>
 		public DateTime? AirDate { get; set; }
 
-		public Image Poster { get; set; }
+		/// <inheritdoc />
+		public Image? Poster { get; set; }
 
-		public object Rest { get; set; }
+		/// <inheritdoc />
+		public Image? Thumbnail { get; set; }
 
-		public ILibraryItem ToItem()
+		/// <inheritdoc />
+		public Image? Logo { get; set; }
+
+		/// <summary>
+		/// A video of a few minutes that tease the content.
+		/// </summary>
+		public string? Trailer { get; set; }
+
+		/// <inheritdoc />
+		public ItemKind Kind => ItemKind.Movie;
+
+		/// <inheritdoc />
+		public Dictionary<string, MetadataId> ExternalId { get; set; } = new();
+
+		public LibraryItem() { }
+
+		[JsonConstructor]
+		public LibraryItem(string name)
 		{
-			return Kind switch
-			{
-				ItemKind.Movie => Rest as MovieItem,
-				ItemKind.Show => Rest as ShowItem,
-				ItemKind.Collection => Rest as CollectionItem,
-			};
+			Slug = Utility.ToSlug(name);
+			Name = name;
 		}
 	}
-
-	public sealed class ShowItem : Show, ILibraryItem
-	{
-		/// <inheritdoc/>
-		public ItemKind Kind => ItemKind.Show;
-
-		public DateTime? AirDate => StartAir;
-	}
-
-	public sealed class MovieItem : Movie, ILibraryItem
-	{
-		/// <inheritdoc/>
-		public ItemKind Kind => ItemKind.Movie;
-	}
-
-	public sealed class CollectionItem : Collection, ILibraryItem
-	{
-		/// <inheritdoc/>
-		public ItemKind Kind => ItemKind.Collection;
-
-		public DateTime? AirDate => null;
-	}
-
 }

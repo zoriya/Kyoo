@@ -80,7 +80,6 @@ namespace Kyoo.Abstractions.Models
 
 		/// <summary>
 		/// The date this show finished airing.
-		/// It must be after the <see cref="StartAir"/> but can be the same (example: for movies).
 		/// It can also be null if this is unknown.
 		/// </summary>
 		public DateTime? EndAir { get; set; }
@@ -98,6 +97,8 @@ namespace Kyoo.Abstractions.Models
 		/// A video of a few minutes that tease the content.
 		/// </summary>
 		public string? Trailer { get; set; }
+
+		[SerializeIgnore] public DateTime? AirDate => StartAir;
 
 		/// <inheritdoc />
 		public Dictionary<string, MetadataId> ExternalId { get; set; } = new();

@@ -41,6 +41,11 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		public string Name { get; set; }
 
+		/// <summary>
+		/// The description of this collection.
+		/// </summary>
+		public string? Overview { get; set; }
+
 		/// <inheritdoc />
 		public Image? Poster { get; set; }
 
@@ -49,11 +54,6 @@ namespace Kyoo.Abstractions.Models
 
 		/// <inheritdoc />
 		public Image? Logo { get; set; }
-
-		/// <summary>
-		/// The description of this collection.
-		/// </summary>
-		public string? Overview { get; set; }
 
 		/// <summary>
 		/// The list of movies contained in this collection.
