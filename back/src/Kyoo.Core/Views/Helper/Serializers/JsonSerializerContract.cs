@@ -78,29 +78,28 @@ namespace Kyoo.Core.Api
 		protected override IList<JsonProperty> CreateProperties(Type type, MemberSerialization memberSerialization)
 		{
 			IList<JsonProperty> properties = base.CreateProperties(type, memberSerialization);
-			if (!type.IsAssignableTo(typeof(Image)))
-				return properties;
+			// if (!type.IsAssignableTo(typeof(Image)))
+			// 	return properties;
 			// foreach ((int id, string image) in Images.ImageName)
 			// {
-				// properties.Add(new JsonProperty
-				// {
-					// DeclaringType = type,
-					// PropertyName = image.ToLower(),
-					// UnderlyingName = image,
-					// PropertyType = typeof(string),
-					// Readable = true,
-					// Writable = false,
-					// ItemIsReference = false,
-					// TypeNameHandling = TypeNameHandling.None,
-					// ShouldSerialize = x =>
-					// {
-						// IThumbnails thumb = (IThumbnails)x;
-						// return thumb?.Images?.ContainsKey(id) == true;
-					// },
-					// ValueProvider = new ThumbnailProvider(id)
-				// });
+			// 	properties.Add(new JsonProperty
+			// 	{
+			// 		DeclaringType = type,
+			// 		PropertyName = image.ToLower(),
+			// 		UnderlyingName = image,
+			// 		PropertyType = typeof(string),
+			// 		Readable = true,
+			// 		Writable = false,
+			// 		ItemIsReference = false,
+			// 		TypeNameHandling = TypeNameHandling.None,
+			// 		ShouldSerialize = x =>
+			// 		{
+			// 			IThumbnails thumb = (IThumbnails)x;
+			// 			return thumb?.Images?.ContainsKey(id) == true;
+			// 		},
+			// 		ValueProvider = new ThumbnailProvider(id)
+			// 	});
 			// }
-
 			return properties;
 		}
 

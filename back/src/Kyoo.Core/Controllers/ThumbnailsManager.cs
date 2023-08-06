@@ -20,7 +20,7 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
-using BlurHashSharp.SkiaSharp;
+using Blurhash.SkiaSharp;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Microsoft.Extensions.Logging;
@@ -62,28 +62,33 @@ namespace Kyoo.Core.Controllers
 			await reader.CopyToAsync(file);
 		}
 
-		private async Task _DownloadImage(string? url, string localPath, string what)
+		private async Task _DownloadImage(Image? image, string localPath, string what)
 		{
-			if (url == null)
+			if (image == null)
 				return;
 			try
 			{
 				_logger.LogInformation("Downloading image {What}", what);
 
 				HttpClient client = _clientFactory.CreateClient();
-				HttpResponseMessage response = await client.GetAsync(url);
+				HttpResponseMessage response = await client.GetAsync(image.Source);
 				response.EnsureSuccessStatusCode();
 				await using Stream reader = await response.Content.ReadAsStreamAsync();
-				SKBitmap bitmap = SKBitmap.Decode(reader);
+				using SKCodec codec = SKCodec.Create(reader);
+				SKImageInfo info = codec.Info;
+				info.ColorType = SKColorType.Rgba8888;
+				SKBitmap bitmap = SKBitmap.Decode(codec, info);
 
 				bitmap.Resize(new SKSizeI(bitmap.Width, bitmap.Height), SKFilterQuality.High);
 				await _WriteTo(bitmap, $"{localPath}.{ImageQuality.High.ToString().ToLowerInvariant()}.jpg");
 
-				bitmap.Resize(new SKSizeI(bitmap.Width, bitmap.Height), SKFilterQuality.Medium);
+				bitmap.Resize(new SKSizeI((int)(bitmap.Width / 1.5), (int)(bitmap.Height / 1.5)), SKFilterQuality.Medium);
 				await _WriteTo(bitmap, $"{localPath}.{ImageQuality.Medium.ToString().ToLowerInvariant()}.jpg");
 
-				bitmap.Resize(new SKSizeI(bitmap.Width, bitmap.Height), SKFilterQuality.Low);
+				bitmap.Resize(new SKSizeI(bitmap.Width / 2, bitmap.Height / 2), SKFilterQuality.Low);
 				await _WriteTo(bitmap, $"{localPath}.{ImageQuality.Low.ToString().ToLowerInvariant()}.jpg");
+
+				image.Blurhash = Blurhasher.Encode(bitmap, 4, 3);
 			}
 			catch (Exception ex)
 			{
@@ -99,9 +104,9 @@ namespace Kyoo.Core.Controllers
 				throw new ArgumentNullException(nameof(item));
 
 			string name = item is IResource res ? res.Slug : "???";
-			await _DownloadImage(item.Poster?.Source, _GetBaseImagePath(item, "poster"), $"The poster of {name}");
-			await _DownloadImage(item.Thumbnail?.Source, _GetBaseImagePath(item, "thumbnail"), $"The poster of {name}");
-			await _DownloadImage(item.Logo?.Source, _GetBaseImagePath(item, "logo"), $"The poster of {name}");
+			await _DownloadImage(item.Poster, _GetBaseImagePath(item, "poster"), $"The poster of {name}");
+			await _DownloadImage(item.Thumbnail, _GetBaseImagePath(item, "thumbnail"), $"The poster of {name}");
+			await _DownloadImage(item.Logo, _GetBaseImagePath(item, "logo"), $"The poster of {name}");
 		}
 
 		private static string _GetBaseImagePath<T>(T item, string image)

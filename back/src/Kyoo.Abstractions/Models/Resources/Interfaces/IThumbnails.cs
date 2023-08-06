@@ -29,7 +29,7 @@ namespace Kyoo.Abstractions.Models
 	public interface IThumbnails
 	{
 		/// <summary>
-		/// A poster is a 9/16 format image with the cover of the resource.
+		/// A poster is a 2/3 format image with the cover of the resource.
 		/// </summary>
 		public Image? Poster { get; set; }
 
@@ -81,6 +81,12 @@ namespace Kyoo.Abstractions.Models
 				if (value is not string source)
 					return base.ConvertFrom(context, culture, value)!;
 				return new Image(source);
+			}
+
+			/// <inheritdoc />
+			public override bool CanConvertTo(ITypeDescriptorContext? context, Type? destinationType)
+			{
+				return false;
 			}
 		}
 	}

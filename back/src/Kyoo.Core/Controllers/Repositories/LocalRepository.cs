@@ -341,8 +341,15 @@ namespace Kyoo.Core.Controllers
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 			await Validate(obj);
-			// if (obj is IThumbnails thumbs)
-			// 	await _thumbnailsManager.DownloadImages(thumbs);
+			if (obj is IThumbnails thumbs)
+			{
+				if (thumbs.Poster != null)
+					Database.Entry(thumbs).Reference(x => x.Poster).TargetEntry.State = EntityState.Added;
+				if (thumbs.Thumbnail != null)
+					Database.Entry(thumbs).Reference(x => x.Thumbnail).TargetEntry.State = EntityState.Added;
+				if (thumbs.Logo != null)
+					Database.Entry(thumbs).Reference(x => x.Logo).TargetEntry.State = EntityState.Added;
+			}
 			return obj;
 		}
 
@@ -427,6 +434,13 @@ namespace Kyoo.Core.Controllers
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		protected virtual Task EditRelations(T resource, T changed, bool resetOld)
 		{
+			if (resource is IThumbnails thumbs)
+			{
+				// FIXME: I think this throws if poster is set to null.
+				Database.Entry(thumbs).Reference(x => x.Poster).TargetEntry.State = EntityState.Modified;
+				Database.Entry(thumbs).Reference(x => x.Thumbnail).TargetEntry.State = EntityState.Modified;
+				Database.Entry(thumbs).Reference(x => x.Logo).TargetEntry.State = EntityState.Modified;
+			}
 			return Validate(resource);
 		}
 
