@@ -64,7 +64,7 @@ namespace Kyoo.Core.Controllers
 			// Edit episode slugs when the show's slug changes.
 			shows.OnEdited += (show) =>
 			{
-				List<Episode> episodes = _database.Episodes.AsTracking().Where(x => x.ShowID == show.Id).ToList();
+				List<Episode> episodes = _database.Episodes.AsTracking().Where(x => x.ShowId == show.Id).ToList();
 				foreach (Episode ep in episodes)
 				{
 					ep.ShowSlug = show.Slug;
@@ -77,7 +77,7 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public Task<Episode> GetOrDefault(int showID, int seasonNumber, int episodeNumber)
 		{
-			return _database.Episodes.FirstOrDefaultAsync(x => x.ShowID == showID
+			return _database.Episodes.FirstOrDefaultAsync(x => x.ShowId == showID
 				&& x.SeasonNumber == seasonNumber
 				&& x.EpisodeNumber == episodeNumber);
 		}
@@ -111,7 +111,7 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public Task<Episode> GetAbsolute(int showID, int absoluteNumber)
 		{
-			return _database.Episodes.FirstOrDefaultAsync(x => x.ShowID == showID
+			return _database.Episodes.FirstOrDefaultAsync(x => x.ShowId == showID
 				&& x.AbsoluteNumber == absoluteNumber);
 		}
 
@@ -142,12 +142,12 @@ namespace Kyoo.Core.Controllers
 		public override async Task<Episode> Create(Episode obj)
 		{
 			await base.Create(obj);
-			obj.ShowSlug = obj.Show?.Slug ?? _database.Shows.First(x => x.Id == obj.ShowID).Slug;
+			obj.ShowSlug = obj.Show?.Slug ?? _database.Shows.First(x => x.Id == obj.ShowId).Slug;
 			_database.Entry(obj).State = EntityState.Added;
 			await _database.SaveChangesAsync(() =>
 				obj.SeasonNumber != null && obj.EpisodeNumber != null
-				? Get(obj.ShowID, obj.SeasonNumber.Value, obj.EpisodeNumber.Value)
-				: GetAbsolute(obj.ShowID, obj.AbsoluteNumber.Value));
+				? Get(obj.ShowId, obj.SeasonNumber.Value, obj.EpisodeNumber.Value)
+				: GetAbsolute(obj.ShowId, obj.AbsoluteNumber.Value));
 			OnResourceCreated(obj);
 			return obj;
 		}
@@ -156,14 +156,14 @@ namespace Kyoo.Core.Controllers
 		protected override async Task Validate(Episode resource)
 		{
 			await base.Validate(resource);
-			if (resource.ShowID <= 0)
+			if (resource.ShowId <= 0)
 			{
 				if (resource.Show == null)
 				{
 					throw new ArgumentException($"Can't store an episode not related " +
-						$"to any show (showID: {resource.ShowID}).");
+						$"to any show (showID: {resource.ShowId}).");
 				}
-				resource.ShowID = resource.Show.Id;
+				resource.ShowId = resource.Show.Id;
 			}
 		}
 
@@ -173,12 +173,12 @@ namespace Kyoo.Core.Controllers
 			if (obj == null)
 				throw new ArgumentNullException(nameof(obj));
 
-			int epCount = await _database.Episodes.Where(x => x.ShowID == obj.ShowID).Take(2).CountAsync();
+			int epCount = await _database.Episodes.Where(x => x.ShowId == obj.ShowId).Take(2).CountAsync();
 			_database.Entry(obj).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
 			await base.Delete(obj);
 			if (epCount == 1)
-				await _shows.Delete(obj.ShowID);
+				await _shows.Delete(obj.ShowId);
 		}
 	}
 }

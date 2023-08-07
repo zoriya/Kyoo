@@ -27,6 +27,7 @@ using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Authentication.Models;
 using Kyoo.Authentication.Models.DTO;
+using Kyoo.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -229,7 +230,7 @@ namespace Kyoo.Authentication.Views
 			try
 			{
 				user.Id = userID;
-				return await _users.Edit(user, true);
+				return await _users.Edit(user);
 			}
 			catch (ItemNotFoundException)
 			{
@@ -252,14 +253,15 @@ namespace Kyoo.Authentication.Views
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status401Unauthorized, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status403Forbidden, Type = typeof(RequestError))]
-		public async Task<ActionResult<User>> PatchMe(User user)
+		public async Task<ActionResult<User>> PatchMe(PartialResource user)
 		{
 			if (!int.TryParse(User.FindFirstValue(Claims.Id), out int userID))
 				return Unauthorized(new RequestError("User not authenticated or token invalid."));
 			try
 			{
-				user.Id = userID;
-				return await _users.Edit(user, false);
+				if (user.Id.HasValue && user.Id != userID)
+					throw new ArgumentException("Can't edit your user id.");
+				return await _users.Patch(userID, TryUpdateModelAsync);
 			}
 			catch (ItemNotFoundException)
 			{

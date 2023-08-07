@@ -42,7 +42,7 @@ namespace Kyoo.Abstractions.Models
 			get
 			{
 				if (ShowSlug == null && Show == null)
-					return $"{ShowID}-s{SeasonNumber}";
+					return $"{ShowId}-s{SeasonNumber}";
 				return $"{ShowSlug ?? Show?.Slug}-s{SeasonNumber}";
 			}
 
@@ -67,13 +67,13 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the Show containing this season.
 		/// </summary>
-		[SerializeIgnore] public int ShowID { get; set; }
+		[SerializeIgnore] public int ShowId { get; set; }
 
 		/// <summary>
 		/// The show that contains this season.
 		/// This must be explicitly loaded via a call to <see cref="ILibraryManager.Load"/>.
 		/// </summary>
-		[LoadableRelation(nameof(ShowID))] public Show? Show { get; set; }
+		[LoadableRelation(nameof(ShowId))] public Show? Show { get; set; }
 
 		/// <summary>
 		/// The number of this season. This can be set to 0 to indicate specials.

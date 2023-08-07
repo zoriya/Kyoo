@@ -51,7 +51,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The list of alternative titles of this show.
 		/// </summary>
-		public string[] Aliases { get; set; } = Array.Empty<string>();
+		public List<string> Aliases { get; set; } = new();
 
 		/// <summary>
 		/// The summary of this show.
@@ -61,12 +61,12 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// A list of tags that match this movie.
 		/// </summary>
-		public string[] Tags { get; set; } = Array.Empty<string>();
+		public List<string> Tags { get; set; } = new();
 
 		/// <summary>
 		/// The list of genres (themes) this show has.
 		/// </summary>
-		public Genre[] Genres { get; set; } = Array.Empty<Genre>();
+		public List<Genre> Genres { get; set; } = new();
 
 		/// <summary>
 		/// Is this show airing, not aired yet or finished?
@@ -106,13 +106,13 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the Studio that made this show.
 		/// </summary>
-		[SerializeIgnore] public int? StudioID { get; set; }
+		[SerializeIgnore] public int? StudioId { get; set; }
 
 		/// <summary>
 		/// The Studio that made this show.
 		/// This must be explicitly loaded via a call to <see cref="ILibraryManager.Load"/>.
 		/// </summary>
-		[LoadableRelation(nameof(StudioID))][EditableRelation] public Studio? Studio { get; set; }
+		[LoadableRelation(nameof(StudioId))][EditableRelation] public Studio? Studio { get; set; }
 
 		/// <summary>
 		/// The list of people that made this show.

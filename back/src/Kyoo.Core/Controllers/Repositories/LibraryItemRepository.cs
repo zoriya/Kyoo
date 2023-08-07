@@ -100,7 +100,11 @@ namespace Kyoo.Core.Controllers
 			=> throw new InvalidOperationException();
 
 		/// <inheritdoc />
-		public override Task<ILibraryItem> Edit(ILibraryItem obj, bool resetOld)
+		public override Task<ILibraryItem> Edit(ILibraryItem obj)
+			=> throw new InvalidOperationException();
+
+		/// <inheritdoc />
+		public override Task<ILibraryItem> Patch(int id, Func<ILibraryItem, Task<bool>> patch)
 			=> throw new InvalidOperationException();
 
 		/// <inheritdoc />

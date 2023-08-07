@@ -20,7 +20,6 @@ using System;
 using System.Linq.Expressions;
 using System.Reflection;
 using Kyoo.Abstractions.Models;
-using Kyoo.Utils;
 using Xunit;
 
 using KUtility = Kyoo.Utils.Utility;
@@ -35,7 +34,6 @@ namespace Kyoo.Tests.Utility
 			Expression<Func<Show, int>> member = x => x.Id;
 			Expression<Func<Show, object>> memberCast = x => x.Id;
 
-			Assert.False(KUtility.IsPropertyExpression(null));
 			Assert.True(KUtility.IsPropertyExpression(member));
 			Assert.True(KUtility.IsPropertyExpression(memberCast));
 
@@ -51,7 +49,6 @@ namespace Kyoo.Tests.Utility
 
 			Assert.Equal("ID", KUtility.GetPropertyName(member));
 			Assert.Equal("ID", KUtility.GetPropertyName(memberCast));
-			Assert.Throws<ArgumentException>(() => KUtility.GetPropertyName(null));
 		}
 
 		[Fact]
@@ -83,17 +80,6 @@ namespace Kyoo.Tests.Utility
 				nameof(GetMethodTest),
 				Array.Empty<Type>(),
 				new object[] { this }));
-		}
-
-		[Fact]
-		public void GetMethodTest2()
-		{
-			MethodInfo method = KUtility.GetMethod(typeof(Merger),
-				BindingFlags.Static | BindingFlags.Public,
-				nameof(Merger.MergeLists),
-				new[] { typeof(string) },
-				new object[] { "string", "string2", null });
-			Assert.Equal(nameof(Merger.MergeLists), method.Name);
 		}
 	}
 }

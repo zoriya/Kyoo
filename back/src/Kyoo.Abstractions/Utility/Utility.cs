@@ -41,8 +41,6 @@ namespace Kyoo.Utils
 		/// <returns>True if the expression is a member, false otherwise</returns>
 		public static bool IsPropertyExpression(LambdaExpression ex)
 		{
-			if (ex == null)
-				return false;
 			return ex.Body is MemberExpression
 				|| (ex.Body.NodeType == ExpressionType.Convert && ((UnaryExpression)ex.Body).Operand is MemberExpression);
 		}
@@ -57,7 +55,7 @@ namespace Kyoo.Utils
 		{
 			if (!IsPropertyExpression(ex))
 				throw new ArgumentException($"{ex} is not a property expression.");
-			MemberExpression member = ex.Body.NodeType == ExpressionType.Convert
+			MemberExpression? member = ex.Body.NodeType == ExpressionType.Convert
 				? ((UnaryExpression)ex.Body).Operand as MemberExpression
 				: ex.Body as MemberExpression;
 			return member!.Member.Name;
@@ -90,18 +88,6 @@ namespace Kyoo.Utils
 			str = str.Trim('-', '_');
 			str = Regex.Replace(str, @"([-_]){2,}", "$1", RegexOptions.Compiled);
 			return str;
-		}
-
-		/// <summary>
-		/// Get the default value of a type.
-		/// </summary>
-		/// <param name="type">The type to get the default value</param>
-		/// <returns>The default value of the given type.</returns>
-		public static object GetClrDefault(this Type type)
-		{
-			return type.IsValueType
-				? Activator.CreateInstance(type)
-				: null;
 		}
 
 		/// <summary>
@@ -194,13 +180,6 @@ namespace Kyoo.Utils
 			Type[] generics,
 			object[] args)
 		{
-			if (type == null)
-				throw new ArgumentNullException(nameof(type));
-			if (generics == null)
-				throw new ArgumentNullException(nameof(generics));
-			if (args == null)
-				throw new ArgumentNullException(nameof(args));
-
 			MethodInfo[] methods = type.GetMethods(flag | BindingFlags.Public)
 				.Where(x => x.Name == name)
 				.Where(x => x.GetGenericArguments().Length == generics.Length)
@@ -295,12 +274,11 @@ namespace Kyoo.Utils
 		/// <returns>The return of the method you wanted to run.</returns>
 		/// <seealso cref="RunGenericMethod{T}(object,string,System.Type[],object[])"/>
 		/// <seealso cref="RunGenericMethod{T}(System.Type,string,System.Type,object[])"/>
-		[PublicAPI]
-		public static T RunGenericMethod<T>(
+		public static T? RunGenericMethod<T>(
 			Type owner,
 			string methodName,
 			Type[] types,
-			params object[] args)
+			params object?[] args)
 		{
 			if (owner == null)
 				throw new ArgumentNullException(nameof(owner));
@@ -311,7 +289,7 @@ namespace Kyoo.Utils
 			if (types.Length < 1)
 				throw new ArgumentException($"The {nameof(types)} array is empty. At least one type is needed.");
 			MethodInfo method = GetMethod(owner, BindingFlags.Static, methodName, types, args);
-			return (T)method.MakeGenericMethod(types).Invoke(null, args);
+			return (T?)method.MakeGenericMethod(types).Invoke(null, args);
 		}
 
 		/// <summary>

@@ -389,11 +389,23 @@ namespace Kyoo.Abstractions.Controllers
 		/// Edit a resource
 		/// </summary>
 		/// <param name="item">The resource to edit, it's ID can't change.</param>
-		/// <param name="resetOld">Should old properties of the resource be discarded or should null values considered as not changed?</param>
 		/// <typeparam name="T">The type of resources</typeparam>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The resource edited and completed by database's information (related items and so on)</returns>
-		Task<T> Edit<T>(T item, bool resetOld)
+		Task<T> Edit<T>(T item)
+			where T : class, IResource;
+
+		/// <summary>
+		/// Edit only specific properties of a resource
+		/// </summary>
+		/// <param name="id">The id of the resource to edit</param>
+		/// <param name="patch">
+		/// A method that will be called when you need to update every properties that you want to
+		/// persist. It can return false to abort the process via an ArgumentException
+		/// </param>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
+		/// <returns>The resource edited and completed by database's information (related items and so on)</returns>
+		Task<T> Patch<T>(int id, Func<T, Task<bool>> patch)
 			where T : class, IResource;
 
 		/// <summary>

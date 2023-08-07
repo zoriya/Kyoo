@@ -55,7 +55,7 @@ namespace Kyoo.Core.Controllers
 			// Edit seasons slugs when the show's slug changes.
 			shows.OnEdited += (show) =>
 			{
-				List<Season> seasons = _database.Seasons.AsTracking().Where(x => x.ShowID == show.Id).ToList();
+				List<Season> seasons = _database.Seasons.AsTracking().Where(x => x.ShowId == show.Id).ToList();
 				foreach (Season season in seasons)
 				{
 					season.ShowSlug = show.Slug;
@@ -86,7 +86,7 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc/>
 		public Task<Season> GetOrDefault(int showID, int seasonNumber)
 		{
-			return _database.Seasons.FirstOrDefaultAsync(x => x.ShowID == showID
+			return _database.Seasons.FirstOrDefaultAsync(x => x.ShowId == showID
 				&& x.SeasonNumber == seasonNumber);
 		}
 
@@ -112,9 +112,9 @@ namespace Kyoo.Core.Controllers
 		public override async Task<Season> Create(Season obj)
 		{
 			await base.Create(obj);
-			obj.ShowSlug = _database.Shows.First(x => x.Id == obj.ShowID).Slug;
+			obj.ShowSlug = _database.Shows.First(x => x.Id == obj.ShowId).Slug;
 			_database.Entry(obj).State = EntityState.Added;
-			await _database.SaveChangesAsync(() => Get(obj.ShowID, obj.SeasonNumber));
+			await _database.SaveChangesAsync(() => Get(obj.ShowId, obj.SeasonNumber));
 			OnResourceCreated(obj);
 			return obj;
 		}
@@ -123,14 +123,14 @@ namespace Kyoo.Core.Controllers
 		protected override async Task Validate(Season resource)
 		{
 			await base.Validate(resource);
-			if (resource.ShowID <= 0)
+			if (resource.ShowId <= 0)
 			{
 				if (resource.Show == null)
 				{
 					throw new ArgumentException($"Can't store a season not related to any show " +
-						$"(showID: {resource.ShowID}).");
+						$"(showID: {resource.ShowId}).");
 				}
-				resource.ShowID = resource.Show.Id;
+				resource.ShowId = resource.Show.Id;
 			}
 		}
 

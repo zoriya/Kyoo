@@ -97,7 +97,7 @@ namespace Kyoo.Core.Controllers
 			if (resource.Studio != null)
 			{
 				resource.Studio = await _studios.CreateIfNotExists(resource.Studio);
-				resource.StudioID = resource.Studio.Id;
+				resource.StudioId = resource.Studio.Id;
 			}
 
 			if (resource.People != null)

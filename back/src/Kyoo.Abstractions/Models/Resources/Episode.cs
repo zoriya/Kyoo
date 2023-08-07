@@ -43,7 +43,7 @@ namespace Kyoo.Abstractions.Models
 			{
 				if (ShowSlug != null || Show?.Slug != null)
 					return GetSlug(ShowSlug ?? Show.Slug, SeasonNumber, EpisodeNumber, AbsoluteNumber);
-				return GetSlug(ShowID.ToString(), SeasonNumber, EpisodeNumber, AbsoluteNumber);
+				return GetSlug(ShowId.ToString(), SeasonNumber, EpisodeNumber, AbsoluteNumber);
 			}
 
 			[UsedImplicitly]
@@ -81,17 +81,17 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the Show containing this episode.
 		/// </summary>
-		[SerializeIgnore] public int ShowID { get; set; }
+		[SerializeIgnore] public int ShowId { get; set; }
 
 		/// <summary>
 		/// The show that contains this episode. This must be explicitly loaded via a call to <see cref="ILibraryManager.Load"/>.
 		/// </summary>
-		[LoadableRelation(nameof(ShowID))] public Show? Show { get; set; }
+		[LoadableRelation(nameof(ShowId))] public Show? Show { get; set; }
 
 		/// <summary>
 		/// The ID of the Season containing this episode.
 		/// </summary>
-		[SerializeIgnore] public int? SeasonID { get; set; }
+		[SerializeIgnore] public int? SeasonId { get; set; }
 
 		/// <summary>
 		/// The season that contains this episode.
@@ -101,7 +101,7 @@ namespace Kyoo.Abstractions.Models
 		/// This can be null if the season is unknown and the episode is only identified
 		/// by it's <see cref="AbsoluteNumber"/>.
 		/// </remarks>
-		[LoadableRelation(nameof(SeasonID))] public Season? Season { get; set; }
+		[LoadableRelation(nameof(SeasonId))] public Season? Season { get; set; }
 
 		/// <summary>
 		/// The season in witch this episode is in.

@@ -129,13 +129,24 @@ namespace Kyoo.Abstractions.Controllers
 		event ResourceEventHandler OnCreated;
 
 		/// <summary>
-		/// Edit a resource
+		/// Edit a resource and replace every property
 		/// </summary>
 		/// <param name="edited">The resource to edit, it's ID can't change.</param>
-		/// <param name="resetOld">Should old properties of the resource be discarded or should null values considered as not changed?</param>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The resource edited and completed by database's information (related items and so on)</returns>
-		Task<T> Edit(T edited, bool resetOld);
+		Task<T> Edit(T edited);
+
+		/// <summary>
+		/// Edit only specific properties of a resource
+		/// </summary>
+		/// <param name="id">The id of the resource to edit</param>
+		/// <param name="patch">
+		/// A method that will be called when you need to update every properties that you want to
+		/// persist. It can return false to abort the process via an ArgumentException
+		/// </param>
+		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
+		/// <returns>The resource edited and completed by database's information (related items and so on)</returns>
+		Task<T> Patch(int id, Func<T, Task<bool>> patch);
 
 		/// <summary>
 		/// Called when a resource has been edited.

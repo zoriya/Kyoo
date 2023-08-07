@@ -284,12 +284,12 @@ namespace Kyoo.Core.Controllers
 				(Show s, nameof(Show.Seasons)) => _SetRelation(s,
 					SeasonRepository.GetAll(x => x.Show.Id == obj.Id),
 					(x, y) => x.Seasons = y,
-					(x, y) => { x.Show = y; x.ShowID = y.Id; }),
+					(x, y) => { x.Show = y; x.ShowId = y.Id; }),
 
 				(Show s, nameof(Show.Episodes)) => _SetRelation(s,
 					EpisodeRepository.GetAll(x => x.Show.Id == obj.Id),
 					(x, y) => x.Episodes = y,
-					(x, y) => { x.Show = y; x.ShowID = y.Id; }),
+					(x, y) => { x.Show = y; x.ShowId = y.Id; }),
 
 				(Show s, nameof(Show.Collections)) => CollectionRepository
 					.GetAll(x => x.Shows.Any(y => y.Id == obj.Id))
@@ -300,21 +300,21 @@ namespace Kyoo.Core.Controllers
 					.Then(x =>
 					{
 						s.Studio = x;
-						s.StudioID = x?.Id ?? 0;
+						s.StudioId = x?.Id ?? 0;
 					}),
 
 
 				(Season s, nameof(Season.Episodes)) => _SetRelation(s,
 					EpisodeRepository.GetAll(x => x.Season.Id == obj.Id),
 					(x, y) => x.Episodes = y,
-					(x, y) => { x.Season = y; x.SeasonID = y.Id; }),
+					(x, y) => { x.Season = y; x.SeasonId = y.Id; }),
 
 				(Season s, nameof(Season.Show)) => ShowRepository
 					.GetOrDefault(x => x.Seasons.Any(y => y.Id == obj.Id))
 					.Then(x =>
 					{
 						s.Show = x;
-						s.ShowID = x?.Id ?? 0;
+						s.ShowId = x?.Id ?? 0;
 					}),
 
 
@@ -323,7 +323,7 @@ namespace Kyoo.Core.Controllers
 					.Then(x =>
 					{
 						e.Show = x;
-						e.ShowID = x?.Id ?? 0;
+						e.ShowId = x?.Id ?? 0;
 					}),
 
 				(Episode e, nameof(Episode.Season)) => SeasonRepository
@@ -331,18 +331,18 @@ namespace Kyoo.Core.Controllers
 					.Then(x =>
 					{
 						e.Season = x;
-						e.SeasonID = x?.Id ?? 0;
+						e.SeasonId = x?.Id ?? 0;
 					}),
 
 				(Episode e, nameof(Episode.PreviousEpisode)) => EpisodeRepository
 					.GetAll(
-						where: x => x.ShowID == e.ShowID,
+						where: x => x.ShowId == e.ShowId,
 						limit: new Pagination(1, e.Id, true)
 					).Then(x => e.PreviousEpisode = x.FirstOrDefault()),
 
 				(Episode e, nameof(Episode.NextEpisode)) => EpisodeRepository
 					.GetAll(
-						where: x => x.ShowID == e.ShowID,
+						where: x => x.ShowId == e.ShowId,
 						limit: new Pagination(1, e.Id)
 					).Then(x => e.NextEpisode = x.FirstOrDefault()),
 
@@ -438,10 +438,17 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public Task<T> Edit<T>(T item, bool resetOld)
+		public Task<T> Edit<T>(T item)
 			where T : class, IResource
 		{
-			return GetRepository<T>().Edit(item, resetOld);
+			return GetRepository<T>().Edit(item);
+		}
+
+		/// <inheritdoc />
+		public Task<T> Patch<T>(int id, Func<T, Task<bool>> patch)
+			where T : class, IResource
+		{
+			return GetRepository<T>().Patch(id, patch);
 		}
 
 		/// <inheritdoc />

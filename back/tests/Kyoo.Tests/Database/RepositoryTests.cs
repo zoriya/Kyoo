@@ -141,15 +141,9 @@ namespace Kyoo.Tests.Database
 		}
 
 		[Fact]
-		public async Task EditNullTest()
-		{
-			await Assert.ThrowsAsync<ArgumentNullException>(() => _repository.Edit(null!, false));
-		}
-
-		[Fact]
 		public async Task EditNonExistingTest()
 		{
-			await Assert.ThrowsAsync<ItemNotFoundException>(() => _repository.Edit(new T { Id = 56 }, false));
+			await Assert.ThrowsAsync<ItemNotFoundException>(() => _repository.Edit(new T { Id = 56 }));
 		}
 
 		[Fact]
@@ -168,12 +162,6 @@ namespace Kyoo.Tests.Database
 		public async Task GetExpressionNotFoundTest()
 		{
 			await Assert.ThrowsAsync<ItemNotFoundException>(() => _repository.Get(x => x.Slug == "non-existing"));
-		}
-
-		[Fact]
-		public async Task GetExpressionNullTest()
-		{
-			await Assert.ThrowsAsync<ArgumentNullException>(() => _repository.Get((Expression<Func<T, bool>>)null!));
 		}
 
 		[Fact]

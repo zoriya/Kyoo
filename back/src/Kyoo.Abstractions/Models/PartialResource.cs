@@ -16,33 +16,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System.Diagnostics.CodeAnalysis;
-using Kyoo.Abstractions.Controllers;
-using Kyoo.Abstractions.Models;
-using Xunit;
-using Xunit.Abstractions;
+namespace Kyoo.Models;
 
-namespace Kyoo.Tests.Database
+public class PartialResource
 {
-	namespace PostgreSQL
-	{
-		[Collection(nameof(Postgresql))]
-		public class ProviderTests : AProviderTests
-		{
-			public ProviderTests(PostgresFixture postgres, ITestOutputHelper output)
-				: base(new RepositoryActivator(output, postgres)) { }
-		}
-	}
+	public int? Id { get; set; }
 
-	public abstract class AProviderTests : RepositoryTests<Provider>
-	{
-		[SuppressMessage("ReSharper", "NotAccessedField.Local")]
-		private readonly IProviderRepository _repository;
-
-		protected AProviderTests(RepositoryActivator repositories)
-			: base(repositories)
-		{
-			_repository = Repositories.LibraryManager.ProviderRepository;
-		}
-	}
+	public string? Slug { get; set; }
 }
