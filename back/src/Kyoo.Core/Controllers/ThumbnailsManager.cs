@@ -77,18 +77,18 @@ namespace Kyoo.Core.Controllers
 				using SKCodec codec = SKCodec.Create(reader);
 				SKImageInfo info = codec.Info;
 				info.ColorType = SKColorType.Rgba8888;
-				SKBitmap bitmap = SKBitmap.Decode(codec, info);
+				using SKBitmap original = SKBitmap.Decode(codec, info);
 
-				bitmap.Resize(new SKSizeI(bitmap.Width, bitmap.Height), SKFilterQuality.High);
-				await _WriteTo(bitmap, $"{localPath}.{ImageQuality.High.ToString().ToLowerInvariant()}.jpg");
+				using SKBitmap high = original.Resize(new SKSizeI(original.Width, original.Height), SKFilterQuality.High);
+				await _WriteTo(high, $"{localPath}.{ImageQuality.High.ToString().ToLowerInvariant()}.jpg");
 
-				bitmap.Resize(new SKSizeI((int)(bitmap.Width / 1.5), (int)(bitmap.Height / 1.5)), SKFilterQuality.Medium);
-				await _WriteTo(bitmap, $"{localPath}.{ImageQuality.Medium.ToString().ToLowerInvariant()}.jpg");
+				using SKBitmap medium = high.Resize(new SKSizeI((int)(high.Width / 1.5), (int)(high.Height / 1.5)), SKFilterQuality.Medium);
+				await _WriteTo(medium, $"{localPath}.{ImageQuality.Medium.ToString().ToLowerInvariant()}.jpg");
 
-				bitmap.Resize(new SKSizeI(bitmap.Width / 2, bitmap.Height / 2), SKFilterQuality.Low);
-				await _WriteTo(bitmap, $"{localPath}.{ImageQuality.Low.ToString().ToLowerInvariant()}.jpg");
+				using SKBitmap low = medium.Resize(new SKSizeI(medium.Width / 2, medium.Height / 2), SKFilterQuality.Low);
+				await _WriteTo(low, $"{localPath}.{ImageQuality.Low.ToString().ToLowerInvariant()}.jpg");
 
-				image.Blurhash = Blurhasher.Encode(bitmap, 4, 3);
+				image.Blurhash = Blurhasher.Encode(low, 4, 3);
 			}
 			catch (Exception ex)
 			{
