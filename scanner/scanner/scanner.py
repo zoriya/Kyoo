@@ -66,7 +66,7 @@ class Scanner:
 			r.raise_for_status()
 			ret = await r.json()
 			paths += list(x["path"] for x in ret["items"])
-		return paths;
+		return paths
 
 	@log_errors
 	async def identify(self, path: str):
