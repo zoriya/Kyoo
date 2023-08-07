@@ -151,6 +151,25 @@ namespace Kyoo.Abstractions.Models
 		public Dictionary<string, MetadataId> ExternalId { get; set; } = new();
 
 		/// <summary>
+		/// The previous episode that should be seen before viewing this one.
+		/// </summary>
+		[LoadableRelation] public Episode? PreviousEpisode { get; set; }
+
+		/// <summary>
+		/// The next episode to watch after this one.
+		/// </summary>
+		[LoadableRelation] public Episode? NextEpisode { get; set; }
+
+		/// <summary>
+		/// Links to watch this episode.
+		/// </summary>
+		public object Links => new
+		{
+			Direct = $"/video/episode/{Slug}/direct",
+			Hls = $"/video/episode/{Slug}/master.m3u8",
+		};
+
+		/// <summary>
 		/// Get the slug of an episode.
 		/// </summary>
 		/// <param name="showSlug">The slug of the show. It can't be null.</param>

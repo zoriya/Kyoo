@@ -255,6 +255,28 @@ namespace Kyoo.Core.Controllers
 					.GetAll(x => x.Collections.Any(y => y.Id == obj.Id))
 					.Then(x => c.Shows = x),
 
+				(Collection c, nameof(Collection.Movies)) => MovieRepository
+					.GetAll(x => x.Collections.Any(y => y.Id == obj.Id))
+					.Then(x => c.Movies = x),
+
+
+				(Movie m, nameof(Movie.People)) => PeopleRepository
+					.GetFromShow(obj.Id)
+					.Then(x => m.People = x),
+
+				(Movie m, nameof(Movie.Collections)) => CollectionRepository
+					.GetAll(x => x.Movies.Any(y => y.Id == obj.Id))
+					.Then(x => m.Collections = x),
+
+				(Movie m, nameof(Movie.Studio)) => StudioRepository
+					.GetOrDefault(x => x.Movies.Any(y => y.Id == obj.Id))
+					.Then(x =>
+					{
+						m.Studio = x;
+						m.StudioID = x?.Id ?? 0;
+					}),
+
+
 				(Show s, nameof(Show.People)) => PeopleRepository
 					.GetFromShow(obj.Id)
 					.Then(x => s.People = x),
@@ -312,10 +334,27 @@ namespace Kyoo.Core.Controllers
 						e.SeasonID = x?.Id ?? 0;
 					}),
 
+				(Episode e, nameof(Episode.PreviousEpisode)) => EpisodeRepository
+					.GetAll(
+						where: x => x.ShowID == e.ShowID,
+						limit: new Pagination(1, e.Id, true)
+					).Then(x => e.PreviousEpisode = x.FirstOrDefault()),
+
+				(Episode e, nameof(Episode.NextEpisode)) => EpisodeRepository
+					.GetAll(
+						where: x => x.ShowID == e.ShowID,
+						limit: new Pagination(1, e.Id)
+					).Then(x => e.NextEpisode = x.FirstOrDefault()),
+
 
 				(Studio s, nameof(Studio.Shows)) => ShowRepository
 					.GetAll(x => x.Studio.Id == obj.Id)
 					.Then(x => s.Shows = x),
+
+				(Studio s, nameof(Studio.Movies)) => MovieRepository
+					.GetAll(x => x.Studio.Id == obj.Id)
+					.Then(x => s.Movies = x),
+
 
 				(People p, nameof(People.Roles)) => PeopleRepository
 					.GetFromPeople(obj.Id)

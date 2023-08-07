@@ -69,8 +69,6 @@ namespace Kyoo.Core.Controllers
 			Pagination limit = default)
 		{
 			return await ApplyFilters(_database.LibraryItems, where, sort, limit);
-				// .Select(x => x.ToItem())
-				// .ToList();
 		}
 
 		/// <inheritdoc />

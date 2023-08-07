@@ -121,6 +121,15 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		[LoadableRelation] public ICollection<Collection>? Collections { get; set; }
 
+		/// <summary>
+		/// Links to watch this movie.
+		/// </summary>
+		public object Links => new
+		{
+			Direct = $"/video/movie/{Slug}/direct",
+			Hls = $"/video/movie/{Slug}/master.m3u8",
+		};
+
 		/// <inheritdoc />
 		public void OnMerge(object merged)
 		{

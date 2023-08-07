@@ -231,6 +231,10 @@ namespace Kyoo.Postgresql
 		{
 			base.OnModelCreating(modelBuilder);
 
+			modelBuilder.Entity<Episode>()
+				.Ignore(x => x.PreviousEpisode)
+				.Ignore(x => x.NextEpisode);
+
 			modelBuilder.Entity<PeopleRole>()
 				.Ignore(x => x.ForPeople);
 
