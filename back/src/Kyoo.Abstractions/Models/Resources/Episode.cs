@@ -42,7 +42,7 @@ namespace Kyoo.Abstractions.Models
 			get
 			{
 				if (ShowSlug != null || Show?.Slug != null)
-					return GetSlug(ShowSlug ?? Show.Slug, SeasonNumber, EpisodeNumber, AbsoluteNumber);
+					return GetSlug(ShowSlug ?? Show!.Slug, SeasonNumber, EpisodeNumber, AbsoluteNumber);
 				return GetSlug(ShowId.ToString(), SeasonNumber, EpisodeNumber, AbsoluteNumber);
 			}
 

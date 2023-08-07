@@ -170,7 +170,7 @@ namespace Kyoo.Core.Controllers
 			Sort<T>.By id = new(x => x.Id);
 			IEnumerable<Sort<T>.By> sorts = GetSortsBy(sort).Append(id);
 
-			BinaryExpression? filter = null;
+			BinaryExpression filter = null;
 			List<Sort<T>.By> previousSteps = new();
 			// TODO: Add an outer query >= for perf
 			// PERF: See https://use-the-index-luke.com/sql/partial-results/fetch-next-page#sb-equivalent-logic

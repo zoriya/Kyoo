@@ -76,6 +76,8 @@ namespace Kyoo.Core.Api
 			{
 				Query = query,
 				Collections = await _libraryManager.Search<Collection>(query),
+				Items = await _libraryManager.Search<ILibraryItem>(query),
+				Movies = await _libraryManager.Search<Movie>(query),
 				Shows = await _libraryManager.Search<Show>(query),
 				Episodes = await _libraryManager.Search<Episode>(query),
 				People = await _libraryManager.Search<People>(query),

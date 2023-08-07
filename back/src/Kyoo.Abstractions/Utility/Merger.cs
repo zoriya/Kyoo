@@ -107,7 +107,7 @@ namespace Kyoo.Utils
 
 				if (Utility.IsOfGenericType(property.PropertyType, typeof(IDictionary<,>)))
 				{
-					Type[] dictionaryTypes = Utility.GetGenericDefinition(property.PropertyType, typeof(IDictionary<,>))
+					Type[] dictionaryTypes = Utility.GetGenericDefinition(property.PropertyType, typeof(IDictionary<,>))!
 						.GenericTypeArguments;
 					object?[] parameters =
 					{

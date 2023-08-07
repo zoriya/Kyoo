@@ -32,7 +32,7 @@ namespace Kyoo.Abstractions.Models
 		public int Id { get; set; }
 
 		/// <inheritdoc />
-		public string Slug => ForPeople ? Show.Slug : People.Slug;
+		public string Slug => ForPeople ? Show!.Slug : People.Slug;
 
 		/// <summary>
 		/// Should this role be used as a Show substitute (the value is <c>true</c>) or

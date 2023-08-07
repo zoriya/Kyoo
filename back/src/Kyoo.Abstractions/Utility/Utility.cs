@@ -66,11 +66,8 @@ namespace Kyoo.Utils
 		/// </summary>
 		/// <param name="str">The string to slugify</param>
 		/// <returns>The slug version of the given string</returns>
-		public static string ToSlug(string? str)
+		public static string ToSlug(string str)
 		{
-			if (str == null)
-				return null;
-
 			str = str.ToLowerInvariant();
 
 			string normalizedString = str.Normalize(NormalizationForm.FormD);
@@ -93,14 +90,11 @@ namespace Kyoo.Utils
 		/// <summary>
 		/// Return every <see cref="Type"/> in the inheritance tree of the parameter (interfaces are not returned)
 		/// </summary>
-		/// <param name="type">The starting type</param>
+		/// <param name="self">The starting type</param>
 		/// <returns>A list of types</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="type"/> can't be null</exception>
-		public static IEnumerable<Type> GetInheritanceTree(this Type type)
+		public static IEnumerable<Type> GetInheritanceTree(this Type self)
 		{
-			if (type == null)
-				throw new ArgumentNullException(nameof(type));
-			for (; type != null; type = type.BaseType)
+			for (Type? type = self; type != null; type = type.BaseType)
 				yield return type;
 		}
 
@@ -136,7 +130,7 @@ namespace Kyoo.Utils
 		/// <returns>The generic definition of genericType that type inherit or null if type does not implement the generic type.</returns>
 		/// <exception cref="ArgumentNullException"><paramref name="type"/> and <paramref name="genericType"/> can't be null</exception>
 		/// <exception cref="ArgumentException"><paramref name="genericType"/> must be a generic type</exception>
-		public static Type GetGenericDefinition(Type type, Type genericType)
+		public static Type? GetGenericDefinition(Type type, Type genericType)
 		{
 			if (type == null)
 				throw new ArgumentNullException(nameof(type));
@@ -178,7 +172,7 @@ namespace Kyoo.Utils
 			BindingFlags flag,
 			string name,
 			Type[] generics,
-			object[] args)
+			object?[] args)
 		{
 			MethodInfo[] methods = type.GetMethods(flag | BindingFlags.Public)
 				.Where(x => x.Name == name)
@@ -217,7 +211,7 @@ namespace Kyoo.Utils
 		/// Run a generic static method for a runtime <see cref="Type"/>.
 		/// </summary>
 		/// <example>
-		/// To run <see cref="Merger.MergeLists{T}"/> for a List where you don't know the type at compile type,
+		/// To run Merger.MergeLists{T} for a List where you don't know the type at compile type,
 		/// you could do:
 		/// <code lang="C#">
 		/// Utility.RunGenericMethod&lt;object&gt;(
@@ -236,9 +230,8 @@ namespace Kyoo.Utils
 		/// </typeparam>
 		/// <exception cref="ArgumentException">No method match the given constraints.</exception>
 		/// <returns>The return of the method you wanted to run.</returns>
-		/// <seealso cref="RunGenericMethod{T}(object,string,System.Type,object[])"/>
 		/// <seealso cref="RunGenericMethod{T}(System.Type,string,System.Type[],object[])"/>
-		public static T RunGenericMethod<T>(
+		public static T? RunGenericMethod<T>(
 			Type owner,
 			string methodName,
 			Type type,
@@ -253,7 +246,7 @@ namespace Kyoo.Utils
 		/// <see cref="RunGenericMethod{T}(System.Type,string,System.Type,object[])"/>
 		/// </summary>
 		/// <example>
-		/// To run <see cref="Merger.MergeLists{T}"/> for a List where you don't know the type at compile type,
+		/// To run Merger.MergeLists{T} for a List where you don't know the type at compile type,
 		/// you could do:
 		/// <code>
 		/// Utility.RunGenericMethod&lt;object&gt;(
@@ -272,7 +265,6 @@ namespace Kyoo.Utils
 		/// </typeparam>
 		/// <exception cref="ArgumentException">No method match the given constraints.</exception>
 		/// <returns>The return of the method you wanted to run.</returns>
-		/// <seealso cref="RunGenericMethod{T}(object,string,System.Type[],object[])"/>
 		/// <seealso cref="RunGenericMethod{T}(System.Type,string,System.Type,object[])"/>
 		public static T? RunGenericMethod<T>(
 			Type owner,

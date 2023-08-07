@@ -38,7 +38,7 @@ namespace Kyoo.Swagger
 		{
 			context.OperationDescription.Operation.Security ??= new List<OpenApiSecurityRequirement>();
 			OpenApiSecurityRequirement perms = context.MethodInfo.GetCustomAttributes<UserOnlyAttribute>()
-				.Aggregate(new OpenApiSecurityRequirement(), (agg, cur) =>
+				.Aggregate(new OpenApiSecurityRequirement(), (agg, _) =>
 				{
 					agg[nameof(Kyoo)] = Array.Empty<string>();
 					return agg;
@@ -60,15 +60,15 @@ namespace Kyoo.Swagger
 				perms = context.MethodInfo.GetCustomAttributes<PartialPermissionAttribute>()
 					.Aggregate(perms, (agg, cur) =>
 					{
-						Group group = controller.Group != Group.Overall
+						Group? group = controller.Group != Group.Overall
 							? controller.Group
 							: cur.Group;
 						string type = controller.Type ?? cur.Type;
-						Kind kind = controller.Type == null
+						Kind? kind = controller.Type == null
 							? controller.Kind
 							: cur.Kind;
-						ICollection<string> permissions = _GetPermissionsList(agg, group);
-						permissions.Add($"{type}.{kind.ToString().ToLower()}");
+						ICollection<string> permissions = _GetPermissionsList(agg, group!.Value);
+						permissions.Add($"{type}.{kind!.Value.ToString().ToLower()}");
 						agg[nameof(Kyoo)] = permissions;
 						return agg;
 					});

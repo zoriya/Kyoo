@@ -403,6 +403,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// A method that will be called when you need to update every properties that you want to
 		/// persist. It can return false to abort the process via an ArgumentException
 		/// </param>
+		/// <typeparam name="T">The type of resources</typeparam>
 		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
 		/// <returns>The resource edited and completed by database's information (related items and so on)</returns>
 		Task<T> Patch<T>(int id, Func<T, Task<bool>> patch)

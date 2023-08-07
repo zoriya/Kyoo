@@ -86,7 +86,7 @@ namespace Kyoo.Abstractions.Models.Utils
 		{
 			return _id.HasValue
 				? idFunc(_id.Value)
-				: slugFunc(_slug);
+				: slugFunc(_slug!);
 		}
 
 		/// <summary>
@@ -173,7 +173,7 @@ namespace Kyoo.Abstractions.Models.Utils
 				.Where(x => x.Name == nameof(Enumerable.Any))
 				.FirstOrDefault(x => x.GetParameters().Length == 2)!
 				.MakeGenericMethod(typeof(T2));
-			MethodCallExpression call = Expression.Call(null, method!, listGetter.Body, IsSame<T2>());
+			MethodCallExpression call = Expression.Call(null, method, listGetter.Body, IsSame<T2>());
 			return Expression.Lambda<Func<T, bool>>(call, listGetter.Parameters);
 		}
 

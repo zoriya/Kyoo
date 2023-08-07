@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Kyoo.Abstractions.Models.Attributes;
@@ -55,7 +56,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The list of permissions of the user. The format of this is implementation dependent.
 		/// </summary>
-		public string[] Permissions { get; set; }
+		public string[] Permissions { get; set; } = Array.Empty<string>();
 
 		/// <summary>
 		/// A logo is a small image representing the resource.

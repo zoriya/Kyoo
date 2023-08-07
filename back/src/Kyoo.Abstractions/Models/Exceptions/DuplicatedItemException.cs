@@ -30,7 +30,7 @@ namespace Kyoo.Abstractions.Models.Exceptions
 		/// <summary>
 		/// The existing object.
 		/// </summary>
-		public object Existing { get; }
+		public object? Existing { get; }
 
 		/// <summary>
 		/// Create a new <see cref="DuplicatedItemException"/> with the default message.

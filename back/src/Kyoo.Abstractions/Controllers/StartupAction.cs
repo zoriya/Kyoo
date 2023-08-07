@@ -83,6 +83,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <typeparam name="T">A dependency that this action will use.</typeparam>
 		/// <returns>A new <see cref="StartupAction"/></returns>
 		public static StartupAction<T> New<T>(Action<T> action, int priority)
+			where T : notnull
 			=> new(action, priority);
 
 		/// <summary>
@@ -94,6 +95,8 @@ namespace Kyoo.Abstractions.Controllers
 		/// <typeparam name="T2">A second dependency that this action will use.</typeparam>
 		/// <returns>A new <see cref="StartupAction"/></returns>
 		public static StartupAction<T, T2> New<T, T2>(Action<T, T2> action, int priority)
+			where T : notnull
+			where T2 : notnull
 			=> new(action, priority);
 
 		/// <summary>
@@ -106,6 +109,9 @@ namespace Kyoo.Abstractions.Controllers
 		/// <typeparam name="T3">A third dependency that this action will use.</typeparam>
 		/// <returns>A new <see cref="StartupAction"/></returns>
 		public static StartupAction<T, T2, T3> New<T, T2, T3>(Action<T, T2, T3> action, int priority)
+			where T : notnull
+			where T2 : notnull
+			where T3 : notnull
 			=> new(action, priority);
 
 		/// <summary>
@@ -144,6 +150,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		/// <typeparam name="T">The dependency to use.</typeparam>
 		public class StartupAction<T> : IStartupAction
+			where T : notnull
 		{
 			/// <summary>
 			/// The action to execute at startup.
@@ -177,6 +184,8 @@ namespace Kyoo.Abstractions.Controllers
 		/// <typeparam name="T">The dependency to use.</typeparam>
 		/// <typeparam name="T2">The second dependency to use.</typeparam>
 		public class StartupAction<T, T2> : IStartupAction
+			where T : notnull
+			where T2 : notnull
 		{
 			/// <summary>
 			/// The action to execute at startup.
@@ -214,6 +223,9 @@ namespace Kyoo.Abstractions.Controllers
 		/// <typeparam name="T2">The second dependency to use.</typeparam>
 		/// <typeparam name="T3">The third dependency to use.</typeparam>
 		public class StartupAction<T, T2, T3> : IStartupAction
+			where T : notnull
+			where T2 : notnull
+			where T3 : notnull
 		{
 			/// <summary>
 			/// The action to execute at startup.

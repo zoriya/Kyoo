@@ -33,11 +33,11 @@ namespace Kyoo.Abstractions.Controllers
 		/// <summary>
 		/// Sort by a specific key
 		/// </summary>
-		/// <param name="key">The sort keys. This members will be used to sort the results.</param>
-		/// <param name="desendant">
+		/// <param name="Key">The sort keys. This members will be used to sort the results.</param>
+		/// <param name="Desendant">
 		/// If this is set to true, items will be sorted in descend order else, they will be sorted in ascendant order.
 		/// </param>
-		public record By(string key, bool desendant = false) : Sort<T>
+		public record By(string Key, bool Desendant = false) : Sort<T>
 		{
 			/// <summary>
 			/// Sort by a specific key
@@ -53,8 +53,8 @@ namespace Kyoo.Abstractions.Controllers
 		/// <summary>
 		/// Sort by multiple keys.
 		/// </summary>
-		/// <param name="list">The list of keys to sort by.</param>
-		public record Conglomerate(params Sort<T>[] list) : Sort<T>;
+		/// <param name="List">The list of keys to sort by.</param>
+		public record Conglomerate(params Sort<T>[] List) : Sort<T>;
 
 		/// <summary>The default sort method for the given type.</summary>
 		public record Default : Sort<T>;
@@ -73,7 +73,7 @@ namespace Kyoo.Abstractions.Controllers
 				return new Conglomerate(sortBy.Split(',').Select(From).ToArray());
 
 			string key = sortBy.Contains(':') ? sortBy[..sortBy.IndexOf(':')] : sortBy;
-			string order = sortBy.Contains(':') ? sortBy[(sortBy.IndexOf(':') + 1)..] : null;
+			string? order = sortBy.Contains(':') ? sortBy[(sortBy.IndexOf(':') + 1)..] : null;
 			bool desendant = order switch
 			{
 				"desc" => true,
@@ -81,7 +81,7 @@ namespace Kyoo.Abstractions.Controllers
 				null => false,
 				_ => throw new ArgumentException($"The sort order, if set, should be :asc or :desc but it was :{order}.")
 			};
-			PropertyInfo property = typeof(T).GetProperty(key, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+			PropertyInfo? property = typeof(T).GetProperty(key, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
 			if (property == null)
 				throw new ArgumentException("The given sort key is not valid.");
 			return new By(property.Name, desendant);

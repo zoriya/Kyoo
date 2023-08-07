@@ -30,7 +30,7 @@ namespace Kyoo.Abstractions.Models.Attributes
 		/// <summary>
 		/// The name of the field containing the related resource's ID.
 		/// </summary>
-		public string RelationID { get; }
+		public string? RelationID { get; }
 
 		/// <summary>
 		/// Create a new <see cref="LoadableRelationAttribute"/>.

@@ -36,6 +36,16 @@ namespace Kyoo.Abstractions.Models
 		public ICollection<Collection> Collections { get; init; }
 
 		/// <summary>
+		/// The items that matched the search.
+		/// </summary>
+		public ICollection<ILibraryItem> Items { get; init; }
+
+		/// <summary>
+		/// The movies that matched the search.
+		/// </summary>
+		public ICollection<Movie> Movies { get; init; }
+
+		/// <summary>
 		/// The shows that matched the search.
 		/// </summary>
 		public ICollection<Show> Shows { get; init; }
@@ -49,11 +59,6 @@ namespace Kyoo.Abstractions.Models
 		/// The people that matched the search.
 		/// </summary>
 		public ICollection<People> People { get; init; }
-
-		/// <summary>
-		/// The genres that matched the search.
-		/// </summary>
-		public ICollection<Genre> Genres { get; init; }
 
 		/// <summary>
 		/// The studios that matched the search.

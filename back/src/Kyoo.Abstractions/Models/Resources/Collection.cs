@@ -26,7 +26,6 @@ namespace Kyoo.Abstractions.Models
 {
 	/// <summary>
 	/// A class representing collections of <see cref="Show"/>.
-	/// A collection can also be stored in a <see cref="Library"/>.
 	/// </summary>
 	public class Collection : IResource, IMetadata, IThumbnails
 	{

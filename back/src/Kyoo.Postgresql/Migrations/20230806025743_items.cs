@@ -23,7 +23,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Kyoo.Postgresql.Migrations
 {
 	/// <inheritdoc />
-	public partial class items : Migration
+	public partial class Items : Migration
 	{
 		/// <inheritdoc />
 		protected override void Up(MigrationBuilder migrationBuilder)

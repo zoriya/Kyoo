@@ -14,7 +14,7 @@ namespace Kyoo.Postgresql.Migrations
 {
     [DbContext(typeof(PostgresContext))]
     [Migration("20230806025737_initial")]
-    partial class initial
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

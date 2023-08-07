@@ -217,7 +217,8 @@ namespace Kyoo.Tests.Database
 					People = TestSample.Get<People>(),
 					Show = expected,
 					ForPeople = false,
-					Role = "actor"
+					Role = "actor",
+					Type = "actor"
 				}
 			};
 			expected.Studio = new Studio("studio");

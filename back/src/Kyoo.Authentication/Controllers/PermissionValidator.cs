@@ -63,7 +63,7 @@ namespace Kyoo.Authentication
 		/// <inheritdoc />
 		public IFilterMetadata Create(PartialPermissionAttribute attribute)
 		{
-			return new PermissionValidatorFilter((object)attribute.Type ?? attribute.Kind, attribute.Group, _options);
+			return new PermissionValidatorFilter(((object?)attribute.Type ?? attribute.Kind)!, attribute.Group, _options);
 		}
 
 		/// <summary>

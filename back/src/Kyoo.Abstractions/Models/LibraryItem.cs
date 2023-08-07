@@ -20,7 +20,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
-using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Utils;
 
 namespace Kyoo.Abstractions.Models
@@ -36,8 +35,7 @@ namespace Kyoo.Abstractions.Models
 		Show,
 
 		/// <summary>
-		/// The <see cref="LibraryItem"/> is a Movie (a <see cref="Show"/> with
-		/// <see cref="Models.Show.IsMovie"/> equals to true).
+		/// The <see cref="LibraryItem"/> is a Movie.
 		/// </summary>
 		Movie,
 
@@ -45,33 +43,6 @@ namespace Kyoo.Abstractions.Models
 		/// The <see cref="LibraryItem"/> is a <see cref="Collection"/>.
 		/// </summary>
 		Collection
-	}
-
-	/// <summary>
-	/// A type union between <see cref="Show"/> and <see cref="Collection"/>.
-	/// This is used to list content put inside a library.
-	/// </summary>
-	public interface ILibraryItem : IResource
-	{
-		/// <summary>
-		/// Is the item a collection, a movie or a show?
-		/// </summary>
-		public ItemKind Kind { get; }
-
-		/// <summary>
-		/// The title of this show.
-		/// </summary>
-		public string Name { get; }
-
-		/// <summary>
-		/// The summary of this show.
-		/// </summary>
-		public string? Overview { get; }
-
-		/// <summary>
-		/// The date this movie aired.
-		/// </summary>
-		public DateTime? AirDate { get; }
 	}
 
 	public class LibraryItem : IResource, ILibraryItem, IThumbnails, IMetadata
@@ -154,7 +125,7 @@ namespace Kyoo.Abstractions.Models
 		public string? Trailer { get; set; }
 
 		/// <inheritdoc />
-		public ItemKind Kind => ItemKind.Movie;
+		public ItemKind Kind { get; set; }
 
 		/// <inheritdoc />
 		public Dictionary<string, MetadataId> ExternalId { get; set; } = new();
@@ -167,5 +138,32 @@ namespace Kyoo.Abstractions.Models
 			Slug = Utility.ToSlug(name);
 			Name = name;
 		}
+	}
+
+	/// <summary>
+	/// A type union between <see cref="Show"/> and <see cref="Collection"/>.
+	/// This is used to list content put inside a library.
+	/// </summary>
+	public interface ILibraryItem : IResource
+	{
+		/// <summary>
+		/// Is the item a collection, a movie or a show?
+		/// </summary>
+		public ItemKind Kind { get; }
+
+		/// <summary>
+		/// The title of this show.
+		/// </summary>
+		public string Name { get; }
+
+		/// <summary>
+		/// The summary of this show.
+		/// </summary>
+		public string? Overview { get; }
+
+		/// <summary>
+		/// The date this movie aired.
+		/// </summary>
+		public DateTime? AirDate { get; }
 	}
 }

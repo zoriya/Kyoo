@@ -43,7 +43,7 @@ namespace Kyoo.Abstractions
 		{
 			return builder.RegisterType<T>()
 				.As<IBaseRepository>()
-				.As(Utility.GetGenericDefinition(typeof(T), typeof(IRepository<>)))
+				.As(Utility.GetGenericDefinition(typeof(T), typeof(IRepository<>))!)
 				.InstancePerLifetimeScope();
 		}
 
@@ -59,6 +59,7 @@ namespace Kyoo.Abstractions
 		/// <returns>The initial container.</returns>
 		public static IRegistrationBuilder<T2, ConcreteReflectionActivatorData, SingleRegistrationStyle>
 			RegisterRepository<T, T2>(this ContainerBuilder builder)
+			where T : notnull
 			where T2 : IBaseRepository, T
 		{
 			return builder.RegisterRepository<T2>().As<T>();
