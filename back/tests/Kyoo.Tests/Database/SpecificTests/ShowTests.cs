@@ -75,9 +75,7 @@ namespace Kyoo.Tests.Database
 			Assert.Equal(value.Genres, edited.Genres);
 
 			await using DatabaseContext database = Repositories.Context.New();
-			Show show = await database.Shows
-				.Include(x => x.Genres)
-				.FirstAsync();
+			Show show = await database.Shows.FirstAsync();
 
 			Assert.Equal(value.Slug, show.Slug);
 			Assert.Equal(value.Genres, show.Genres);
@@ -94,9 +92,7 @@ namespace Kyoo.Tests.Database
 			Assert.Equal(value.Genres, edited.Genres);
 
 			await using DatabaseContext database = Repositories.Context.New();
-			Show show = await database.Shows
-				.Include(x => x.Genres)
-				.FirstAsync();
+			Show show = await database.Shows.FirstAsync();
 
 			Assert.Equal(value.Slug, show.Slug);
 			Assert.Equal(value.Genres, show.Genres);
@@ -113,9 +109,7 @@ namespace Kyoo.Tests.Database
 			Assert.Equal("studio", edited.Studio!.Slug);
 
 			await using DatabaseContext database = Repositories.Context.New();
-			Show show = await database.Shows
-				.Include(x => x.Studio)
-				.FirstAsync();
+			Show show = await database.Shows.Include(x => x.Studio).FirstAsync();
 
 			Assert.Equal(value.Slug, show.Slug);
 			Assert.Equal("studio", show.Studio!.Slug);
@@ -187,13 +181,13 @@ namespace Kyoo.Tests.Database
 			Show edited = await _repository.Edit(value);
 
 			Assert.Equal(value.Slug, edited.Slug);
-			Assert.Equal(value.ExternalId, edited.ExternalId);
+			KAssert.DeepEqual(value.ExternalId, edited.ExternalId);
 
 			await using DatabaseContext database = Repositories.Context.New();
 			Show show = await database.Shows.FirstAsync();
 
 			Assert.Equal(value.Slug, show.Slug);
-			Assert.Equal(value.ExternalId, show.ExternalId);
+			KAssert.DeepEqual(value.ExternalId, show.ExternalId);
 		}
 
 		[Fact]
@@ -227,8 +221,6 @@ namespace Kyoo.Tests.Database
 
 			await using DatabaseContext context = Repositories.Context.New();
 			Show retrieved = await context.Shows
-				.Include(x => x.ExternalId)
-				.Include(x => x.Genres)
 				.Include(x => x.People)
 				.ThenInclude(x => x.People)
 				.Include(x => x.Studio)
@@ -264,9 +256,7 @@ namespace Kyoo.Tests.Database
 			Show created = await _repository.Create(expected);
 			KAssert.DeepEqual(expected, created);
 			await using DatabaseContext context = Repositories.Context.New();
-			Show retrieved = await context.Shows
-				.Include(x => x.ExternalId)
-				.FirstAsync(x => x.Id == created.Id);
+			Show retrieved = await context.Shows.FirstAsync(x => x.Id == created.Id);
 			KAssert.DeepEqual(expected, retrieved);
 			Assert.Single(retrieved.ExternalId);
 			Assert.Equal("ID", retrieved.ExternalId["test"].DataId);

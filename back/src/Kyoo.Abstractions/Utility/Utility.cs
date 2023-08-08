@@ -104,13 +104,8 @@ namespace Kyoo.Utils
 		/// <param name="type">The type to check</param>
 		/// <param name="genericType">The generic type to check against (Only generic types are supported like typeof(IEnumerable&lt;&gt;).</param>
 		/// <returns>True if obj inherit from genericType. False otherwise</returns>
-		/// <exception cref="ArgumentNullException">obj and genericType can't be null</exception>
 		public static bool IsOfGenericType(Type type, Type genericType)
 		{
-			if (type == null)
-				throw new ArgumentNullException(nameof(type));
-			if (genericType == null)
-				throw new ArgumentNullException(nameof(genericType));
 			if (!genericType.IsGenericType)
 				throw new ArgumentException($"{nameof(genericType)} is not a generic type.");
 
@@ -128,14 +123,9 @@ namespace Kyoo.Utils
 		/// <param name="type">The type to check</param>
 		/// <param name="genericType">The generic type to check against (Only generic types are supported like typeof(IEnumerable&lt;&gt;).</param>
 		/// <returns>The generic definition of genericType that type inherit or null if type does not implement the generic type.</returns>
-		/// <exception cref="ArgumentNullException"><paramref name="type"/> and <paramref name="genericType"/> can't be null</exception>
 		/// <exception cref="ArgumentException"><paramref name="genericType"/> must be a generic type</exception>
 		public static Type? GetGenericDefinition(Type type, Type genericType)
 		{
-			if (type == null)
-				throw new ArgumentNullException(nameof(type));
-			if (genericType == null)
-				throw new ArgumentNullException(nameof(genericType));
 			if (!genericType.IsGenericType)
 				throw new ArgumentException($"{nameof(genericType)} is not a generic type.");
 
@@ -272,12 +262,6 @@ namespace Kyoo.Utils
 			Type[] types,
 			params object?[] args)
 		{
-			if (owner == null)
-				throw new ArgumentNullException(nameof(owner));
-			if (methodName == null)
-				throw new ArgumentNullException(nameof(methodName));
-			if (types == null)
-				throw new ArgumentNullException(nameof(types));
 			if (types.Length < 1)
 				throw new ArgumentException($"The {nameof(types)} array is empty. At least one type is needed.");
 			MethodInfo method = GetMethod(owner, BindingFlags.Static, methodName, types, args);

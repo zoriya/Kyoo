@@ -31,12 +31,12 @@ namespace Kyoo.Tests.Utility
 		{
 			Studio genre = new()
 			{
-				Id = 5,
 				Name = "merged"
 			};
 			Studio genre2 = new()
 			{
-				Name = "test"
+				Name = "test",
+				Id = 5,
 			};
 			Studio ret = Merger.Complete(genre, genre2);
 			Assert.True(ReferenceEquals(genre, ret));
@@ -50,11 +50,11 @@ namespace Kyoo.Tests.Utility
 		{
 			Collection collection = new()
 			{
-				Id = 5,
 				Name = "merged",
 			};
 			Collection collection2 = new()
 			{
+				Id = 5,
 				Name = "test",
 			};
 			Collection ret = Merger.Complete(collection, collection2);

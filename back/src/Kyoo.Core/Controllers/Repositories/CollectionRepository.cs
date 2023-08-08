@@ -82,9 +82,6 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task Delete(Collection obj)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-
 			_database.Entry(obj).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
 			await base.Delete(obj);

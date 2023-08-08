@@ -30,6 +30,7 @@ using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Core.Api;
 using Kyoo.Utils;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Kyoo.Core.Controllers
 {
@@ -338,14 +339,15 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc/>
 		public virtual async Task<T> Create(T obj)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
 			await Validate(obj);
 			if (obj is IThumbnails thumbs)
 			{
-				Database.Entry(thumbs).Reference(x => x.Poster).IsModified = thumbs.Poster != null;
-				Database.Entry(thumbs).Reference(x => x.Thumbnail).IsModified = thumbs.Thumbnail != null;
-				Database.Entry(thumbs).Reference(x => x.Logo).IsModified = thumbs.Logo != null;
+				if (thumbs.Poster != null)
+					Database.Entry(thumbs).Reference(x => x.Poster).TargetEntry.State = EntityState.Added;
+				if (thumbs.Thumbnail != null)
+					Database.Entry(thumbs).Reference(x => x.Thumbnail).TargetEntry.State = EntityState.Added;
+				if (thumbs.Logo != null)
+					Database.Entry(thumbs).Reference(x => x.Logo).TargetEntry.State = EntityState.Added;
 			}
 			return obj;
 		}
@@ -395,7 +397,7 @@ namespace Kyoo.Core.Controllers
 				T old = await GetWithTracking(edited.Id);
 
 				Merger.Complete(old, edited, x => x.GetCustomAttribute<LoadableRelationAttribute>() == null);
-				await EditRelations(old, edited, true);
+				await EditRelations(old, edited);
 				await Database.SaveChangesAsync();
 				OnEdited?.Invoke(old);
 				return old;
@@ -418,6 +420,7 @@ namespace Kyoo.Core.Controllers
 
 				if (!await patch(resource))
 					throw new ArgumentException("Could not patch resource");
+
 				await Database.SaveChangesAsync();
 				OnEdited?.Invoke(resource);
 				return resource;
@@ -439,11 +442,8 @@ namespace Kyoo.Core.Controllers
 		/// The new version of <paramref name="resource"/>.
 		/// This item will be saved on the database and replace <paramref name="resource"/>
 		/// </param>
-		/// <param name="resetOld">
-		/// A boolean to indicate if all values of resource should be discarded or not.
-		/// </param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		protected virtual Task EditRelations(T resource, T changed, bool resetOld)
+		protected virtual Task EditRelations(T resource, T changed)
 		{
 			if (resource is IThumbnails thumbs && changed is IThumbnails chng)
 			{

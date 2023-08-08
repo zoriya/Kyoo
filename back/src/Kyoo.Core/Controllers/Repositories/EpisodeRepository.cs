@@ -170,9 +170,6 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task Delete(Episode obj)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-
 			int epCount = await _database.Episodes.Where(x => x.ShowId == obj.ShowId).Take(2).CountAsync();
 			_database.Entry(obj).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();

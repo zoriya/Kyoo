@@ -119,18 +119,6 @@ namespace Kyoo.Tests.Database
 		}
 
 		[Fact]
-		public async Task CreateNullTest()
-		{
-			await Assert.ThrowsAsync<ArgumentNullException>(() => _repository.Create(null!));
-		}
-
-		[Fact]
-		public async Task CreateIfNotExistNullTest()
-		{
-			await Assert.ThrowsAsync<ArgumentNullException>(() => _repository.CreateIfNotExists(null!));
-		}
-
-		[Fact]
 		public virtual async Task CreateIfNotExistTest()
 		{
 			T expected = TestSample.Get<T>();

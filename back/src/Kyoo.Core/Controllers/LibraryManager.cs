@@ -209,8 +209,6 @@ namespace Kyoo.Core.Controllers
 			where T : class, IResource
 			where T2 : class, IResource
 		{
-			if (member == null)
-				throw new ArgumentNullException(nameof(member));
 			return Load(obj, Utility.GetPropertyName(member), force);
 		}
 
@@ -219,8 +217,6 @@ namespace Kyoo.Core.Controllers
 			where T : class, IResource
 			where T2 : class
 		{
-			if (member == null)
-				throw new ArgumentNullException(nameof(member));
 			return Load(obj, Utility.GetPropertyName(member), force);
 		}
 

@@ -22,7 +22,6 @@ using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Postgresql;
-using Kyoo.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Core.Controllers
@@ -111,17 +110,17 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		protected override async Task EditRelations(Movie resource, Movie changed, bool resetOld)
+		protected override async Task EditRelations(Movie resource, Movie changed)
 		{
 			await Validate(changed);
 
-			if (changed.Studio != null || resetOld)
+			if (changed.Studio != null || changed.StudioID == null)
 			{
 				await Database.Entry(resource).Reference(x => x.Studio).LoadAsync();
 				resource.Studio = changed.Studio;
 			}
 
-			if (changed.People != null || resetOld)
+			if (changed.People != null)
 			{
 				await Database.Entry(resource).Collection(x => x.People).LoadAsync();
 				resource.People = changed.People;

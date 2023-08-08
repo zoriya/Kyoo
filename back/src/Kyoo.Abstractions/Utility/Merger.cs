@@ -58,7 +58,7 @@ namespace Kyoo.Utils
 			hasChanged = false;
 			if (second == null)
 				return first;
-			hasChanged = second.Any(x => x.Value?.Equals(first[x.Key]) == false);
+			hasChanged = second.Any(x => !first.ContainsKey(x.Key) || x.Value?.Equals(first[x.Key]) == false);
 			foreach ((T key, T2 value) in first)
 				second.TryAdd(key, value);
 			return second;

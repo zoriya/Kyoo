@@ -186,14 +186,11 @@ namespace Kyoo.Abstractions.Models
 		/// If you don't know it or this is a movie, use null
 		/// </param>
 		/// <returns>The slug corresponding to the given arguments</returns>
-		/// <exception cref="ArgumentNullException">The given show slug was null.</exception>
 		public static string GetSlug(string showSlug,
 			int? seasonNumber,
 			int? episodeNumber,
 			int? absoluteNumber = null)
 		{
-			if (showSlug == null)
-				throw new ArgumentNullException(nameof(showSlug));
 			return seasonNumber switch
 			{
 				null when absoluteNumber == null => showSlug,

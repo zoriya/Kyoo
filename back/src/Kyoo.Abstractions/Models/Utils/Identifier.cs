@@ -59,8 +59,6 @@ namespace Kyoo.Abstractions.Models.Utils
 		/// <param name="slug">The slug of the resource.</param>
 		public Identifier(string slug)
 		{
-			if (slug == null)
-				throw new ArgumentNullException(nameof(slug));
 			_slug = slug;
 		}
 

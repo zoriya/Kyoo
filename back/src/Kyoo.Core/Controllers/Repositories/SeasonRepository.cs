@@ -137,9 +137,6 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc/>
 		public override async Task Delete(Season obj)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-
 			_database.Remove(obj);
 			await _database.SaveChangesAsync();
 			await base.Delete(obj);

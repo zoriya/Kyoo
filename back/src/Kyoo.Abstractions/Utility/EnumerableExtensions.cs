@@ -33,16 +33,10 @@ namespace Kyoo.Utils
 		/// <param name="self">The enumerable to check</param>
 		/// <param name="action">The action to execute is the list is empty</param>
 		/// <typeparam name="T">The type of items inside the list</typeparam>
-		/// <exception cref="ArgumentNullException">The iterable and the action can't be null.</exception>
 		/// <returns>The iterator proxied, there is no dual iterations.</returns>
 		[LinqTunnel]
 		public static IEnumerable<T> IfEmpty<T>(this IEnumerable<T> self, Action action)
 		{
-			if (self == null)
-				throw new ArgumentNullException(nameof(self));
-			if (action == null)
-				throw new ArgumentNullException(nameof(action));
-
 			static IEnumerable<T> Generator(IEnumerable<T> self, Action action)
 			{
 				using IEnumerator<T> enumerator = self.GetEnumerator();

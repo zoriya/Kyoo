@@ -47,8 +47,8 @@ namespace Kyoo.Tests.Utility
 			Expression<Func<Show, int>> member = x => x.Id;
 			Expression<Func<Show, object>> memberCast = x => x.Id;
 
-			Assert.Equal("ID", KUtility.GetPropertyName(member));
-			Assert.Equal("ID", KUtility.GetPropertyName(memberCast));
+			Assert.Equal("Id", KUtility.GetPropertyName(member));
+			Assert.Equal("Id", KUtility.GetPropertyName(memberCast));
 		}
 
 		[Fact]

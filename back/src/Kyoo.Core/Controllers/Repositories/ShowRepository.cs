@@ -113,17 +113,17 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		protected override async Task EditRelations(Show resource, Show changed, bool resetOld)
+		protected override async Task EditRelations(Show resource, Show changed)
 		{
 			await Validate(changed);
 
-			if (changed.Studio != null || resetOld)
+			if (changed.Studio != null || changed.StudioId == null)
 			{
 				await Database.Entry(resource).Reference(x => x.Studio).LoadAsync();
 				resource.Studio = changed.Studio;
 			}
 
-			if (changed.People != null || resetOld)
+			if (changed.People != null)
 			{
 				await Database.Entry(resource).Collection(x => x.People).LoadAsync();
 				resource.People = changed.People;

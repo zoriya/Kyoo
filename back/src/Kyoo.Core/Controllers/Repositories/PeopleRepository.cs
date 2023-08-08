@@ -99,11 +99,11 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		protected override async Task EditRelations(People resource, People changed, bool resetOld)
+		protected override async Task EditRelations(People resource, People changed)
 		{
 			await Validate(changed);
 
-			if (changed.Roles != null || resetOld)
+			if (changed.Roles != null)
 			{
 				await Database.Entry(resource).Collection(x => x.Roles).LoadAsync();
 				resource.Roles = changed.Roles;
@@ -113,9 +113,6 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task Delete(People obj)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-
 			_database.Entry(obj).State = EntityState.Deleted;
 			obj.Roles.ForEach(x => _database.Entry(x).State = EntityState.Deleted);
 			await _database.SaveChangesAsync();

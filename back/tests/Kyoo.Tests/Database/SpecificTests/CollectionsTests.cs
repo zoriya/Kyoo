@@ -120,9 +120,7 @@ namespace Kyoo.Tests.Database
 			await _repository.Edit(value);
 
 			await using DatabaseContext database = Repositories.Context.New();
-			Collection retrieved = await database.Collections
-				.Include(x => x.ExternalId)
-				.FirstAsync();
+			Collection retrieved = await database.Collections.FirstAsync();
 
 			KAssert.DeepEqual(value, retrieved);
 		}
@@ -143,9 +141,7 @@ namespace Kyoo.Tests.Database
 
 			{
 				await using DatabaseContext database = Repositories.Context.New();
-				Collection retrieved = await database.Collections
-					.Include(x => x.ExternalId)
-					.FirstAsync();
+				Collection retrieved = await database.Collections.FirstAsync();
 
 				KAssert.DeepEqual(value, retrieved);
 			}
@@ -159,9 +155,7 @@ namespace Kyoo.Tests.Database
 
 			{
 				await using DatabaseContext database = Repositories.Context.New();
-				Collection retrieved = await database.Collections
-					.Include(x => x.ExternalId)
-					.FirstAsync();
+				Collection retrieved = await database.Collections.FirstAsync();
 
 				KAssert.DeepEqual(value, retrieved);
 			}
