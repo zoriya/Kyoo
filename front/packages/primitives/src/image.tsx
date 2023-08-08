@@ -18,10 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { KyooImage } from "@kyoo/models";
 import { ComponentType, ReactNode, useState } from "react";
 import {
 	View,
-	Image as Img,
 	ImageSourcePropType,
 	ImageStyle,
 	Platform,
@@ -29,6 +29,7 @@ import {
 	ViewProps,
 	ViewStyle,
 } from "react-native";
+import {Image as Img} from "expo-image"
 import { percent, useYoshiki } from "yoshiki/native";
 import { YoshikiStyle } from "yoshiki/dist/type";
 import { Skeleton } from "./skeleton";
@@ -44,14 +45,14 @@ type YoshikiEnhanced<Style> = Style extends any
 type WithLoading<T> = (T & { isLoading?: boolean }) | (Partial<T> & { isLoading: true });
 
 type Props = WithLoading<{
-	src?: string | ImageSourcePropType | null;
+	src?: KyooImage | null;
 	alt?: string;
 }>;
 
 type ImageLayout = YoshikiEnhanced<
-	| { width: ViewStyle["width"]; height: ViewStyle["height"] }
-	| { width: ViewStyle["width"]; aspectRatio: ViewStyle["aspectRatio"] }
-	| { height: ViewStyle["height"]; aspectRatio: ViewStyle["aspectRatio"] }
+	| { width: ImageStyle["width"]; height: ImageStyle["height"] }
+	| { width: ImageStyle["width"]; aspectRatio: ImageStyle["aspectRatio"] }
+	| { height: ImageStyle["height"]; aspectRatio: ImageStyle["aspectRatio"] }
 >;
 
 export const Image = ({
@@ -62,49 +63,67 @@ export const Image = ({
 	...props
 }: Props & { style?: ViewStyle } & { layout: ImageLayout }) => {
 	const { css } = useYoshiki();
-	const [state, setState] = useState<"loading" | "errored" | "finished">(
-		src ? "loading" : "errored",
-	);
-
-	// This could be done with a key but this makes the API easier to use.
-	// This unsures that the state is resetted when the source change (useful for recycler lists.)
-	const [oldSource, setOldSource] = useState(src);
-	if (oldSource !== src) {
-		setState("loading");
-		setOldSource(src);
-	}
-
-	const border = { borderRadius: 6 } satisfies ViewStyle;
-
-	if (forcedLoading) return <Skeleton variant="custom" {...css([layout, border], props)} />;
-	if (!src || state === "errored")
-		return <View {...css([{ bg: (theme) => theme.overlay0 }, layout, border], props)} />;
-
-	const nativeProps = Platform.select<Partial<ImageProps>>({
-		web: {
-			defaultSource: typeof src === "string" ? { uri: src } : Array.isArray(src) ? src[0] : src,
-		},
-		default: {},
-	});
+	console.log(src);
 
 	return (
-		<Skeleton variant="custom" show={state === "loading"} {...css([layout, border], props)}>
-			<Img
-				source={typeof src === "string" ? { uri: src } : src}
-				accessibilityLabel={alt}
-				onLoad={() => setState("finished")}
-				onError={() => setState("errored")}
-				{...nativeProps}
-				{...css([
-					{
-						width: percent(100),
-						height: percent(100),
-						resizeMode: "cover",
-					},
-				])}
-			/>
-		</Skeleton>
+		<Img
+			source={src?.source}
+			placeholder={src?.blurhash}
+			accessibilityLabel={alt}
+			{...css([
+				layout,
+			// 	{
+			// 		// width: percent(100),
+			// 		// height: percent(100),
+			// 		// resizeMode: "cover",
+			// 		borderRadius: 6
+			// 	},
+			]) as ImageStyle}
+		/>
 	);
+	// const [state, setState] = useState<"loading" | "errored" | "finished">(
+	// 	src ? "loading" : "errored",
+	// );
+	//
+	// // This could be done with a key but this makes the API easier to use.
+	// // This unsures that the state is resetted when the source change (useful for recycler lists.)
+	// const [oldSource, setOldSource] = useState(src);
+	// if (oldSource !== src) {
+	// 	setState("loading");
+	// 	setOldSource(src);
+	// }
+	//
+	// const border = { borderRadius: 6 } satisfies ViewStyle;
+	//
+	// if (forcedLoading) return <Skeleton variant="custom" {...css([layout, border], props)} />;
+	// if (!src || state === "errored")
+	// 	return <View {...css([{ bg: (theme) => theme.overlay0 }, layout, border], props)} />;
+	//
+	// const nativeProps = Platform.select<Partial<ImageProps>>({
+	// 	web: {
+	// 		defaultSource: typeof src === "string" ? { uri: src } : Array.isArray(src) ? src[0] : src,
+	// 	},
+	// 	default: {},
+	// });
+	//
+	// return (
+	// 	<Skeleton variant="custom" show={state === "loading"} {...css([layout, border], props)}>
+	// 		<Img
+	// 			source={typeof src === "string" ? { uri: src } : src}
+	// 			accessibilityLabel={alt}
+	// 			onLoad={() => setState("finished")}
+	// 			onError={() => setState("errored")}
+	// 			{...nativeProps}
+	// 			{...css([
+	// 				{
+	// 					width: percent(100),
+	// 					height: percent(100),
+	// 					resizeMode: "cover",
+	// 				},
+	// 			])}
+	// 		/>
+	// 	</Skeleton>
+	// );
 };
 
 export const Poster = ({

@@ -176,16 +176,6 @@ const WatchEpisodeP = WatchMovieP.and(
 		 * new season.
 		 */
 		absoluteNumber: z.number().nullable(),
-		/**
-		 * The episode that come before this one if you follow usual watch orders. If this is the first
-		 * episode or this is a movie, it will be null.
-		 */
-		previousEpisode: EpisodeP.nullable(),
-		/**
-		 * The episode that come after this one if you follow usual watch orders. If this is the last
-		 * aired episode or this is a movie, it will be null.
-		 */
-		nextEpisode: EpisodeP.nullable(),
 	}),
 );
 

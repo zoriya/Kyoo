@@ -21,58 +21,53 @@
 import { z } from "zod";
 import { zdate } from "../utils";
 import { ImagesP, ResourceP } from "../traits";
-import { GenreP } from "./genre";
+import { Genre } from "./genre";
 import { StudioP } from "./studio";
+import { Status } from "./show";
 
-/**
- * The enum containing movie's status.
- */
-export enum MovieStatus {
-	Unknown = 0,
-	Finished = 1,
-	Planned = 3,
-}
-
-export const MovieP = z.preprocess(
-	(x: any) => {
-		// Waiting for the API to be updaded
-		x.name = x.title;
-		if (x.aliases === null) x.aliases = [];
-		x.airDate = x.startAir;
-		x.trailer = x.images["3"];
-		return x;
-	},
-	ResourceP.merge(ImagesP).extend({
-		/**
-		 * The title of this movie.
-		 */
-		name: z.string(),
-		/**
-		 * The list of alternative titles of this movie.
-		 */
-		aliases: z.array(z.string()),
-		/**
-		 * The summary of this movie.
-		 */
-		overview: z.string().nullable(),
-		/**
-		 * Is this movie not aired yet or finished?
-		 */
-		status: z.nativeEnum(MovieStatus),
-		/**
-		 * The date this movie aired. It can also be null if this is unknown.
-		 */
-		airDate: zdate().nullable(),
-		/**
-		 * The list of genres (themes) this movie has.
-		 */
-		genres: z.array(GenreP).optional(),
-		/**
-		 * The studio that made this movie.
-		 */
-		studio: StudioP.optional().nullable(),
-	}),
-);
+export const MovieP = ResourceP.merge(ImagesP).extend({
+	/**
+	 * The title of this movie.
+	 */
+	name: z.string(),
+	/**
+	 * A catchphrase for this show.
+	 */
+	tagline: z.string().nullable(),
+	/**
+	 * The list of alternative titles of this movie.
+	 */
+	aliases: z.array(z.string()),
+	/**
+	 * The summary of this movie.
+	 */
+	overview: z.string().nullable(),
+	/**
+	 * A list of tags that match this movie.
+	 */
+	tags: z.array(z.string()),
+	/**
+	/**
+	 * Is this movie not aired yet or finished?
+	 */
+	status: z.nativeEnum(Status),
+	/**
+	 * The date this movie aired. It can also be null if this is unknown.
+	 */
+	airDate: zdate().nullable(),
+	/**
+	 * A youtube url for the trailer.
+	 */
+	trailer: z.string().optional().nullable(),
+	/**
+	 * The list of genres (themes) this movie has.
+	 */
+	genres: z.array(z.nativeEnum(Genre)),
+	/**
+	 * The studio that made this movie.
+	 */
+	studio: StudioP.optional().nullable(),
+});
 
 /**
  * A Movie type

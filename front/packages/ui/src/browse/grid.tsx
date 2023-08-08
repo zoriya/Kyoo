@@ -18,6 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { KyooImage } from "@kyoo/models";
 import { Link, Skeleton, Poster, ts, focusReset, P, SubP } from "@kyoo/primitives";
 import { Platform } from "react-native";
 import { percent, px, Stylable, useYoshiki } from "yoshiki/native";
@@ -34,7 +35,7 @@ export const ItemGrid = ({
 	href: string;
 	name: string;
 	subtitle?: string;
-	poster?: string | null;
+	poster?: KyooImage | null;
 }> &
 	Stylable<"text">) => {
 	const { css } = useYoshiki("grid");

@@ -18,7 +18,6 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./library";
 export * from "./library-item";
 export * from "./show";
 export * from "./movie";

@@ -18,17 +18,23 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { z } from "zod";
-import { ResourceP } from "../traits/resource";
-
-export const GenreP = ResourceP.extend({
-	/**
-	 * The name of this genre.
-	 */
-	name: z.string(),
-});
-
-/**
- * A genre that allow one to specify categories for shows.
- */
-export type Genre = z.infer<typeof GenreP>;
+export enum Genre {
+	Action = "Action",
+	Adventure = "Adventure",
+	Animation = "Animation",
+	Comedy = "Comedy",
+	Crime = "Crime",
+	Documentary = "Documentary",
+	Drama = "Drama",
+	Family = "Family",
+	Fantasy = "Fantasy",
+	History = "History",
+	Horror = "Horror",
+	Music = "Music",
+	Mystery = "Mystery",
+	Romance = "Romance",
+	ScienceFiction = "ScienceFiction",
+	Thriller = "Thriller",
+	War = "War",
+	Western = "Western",
+}

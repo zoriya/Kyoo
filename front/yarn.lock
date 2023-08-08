@@ -2344,6 +2344,7 @@ __metadata:
     "@gorhom/portal": ^1.0.14
     "@tanstack/react-query": ^4.26.1
     "@types/react": ^18.0.28
+    expo-image: ^1.3.2
     solito: ^3.0.0
     typescript: ^4.9.5
   peerDependencies:
@@ -2375,6 +2376,7 @@ __metadata:
     "@kyoo/primitives": "workspace:^"
     "@shopify/flash-list": ^1.4.1
     "@types/react": ^18.0.28
+    expo-image: ^1.3.2
     react-native-uuid: ^2.0.1
     typescript: ^4.9.5
   peerDependencies:
@@ -6830,6 +6832,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-image@npm:^1.3.2":
+  version: 1.4.1
+  resolution: "expo-image@npm:1.4.1"
+  peerDependencies:
+    expo: "*"
+  checksum: 8eda22cba8ec12f647532b5562913c33adb2e206a4cea426e2d7325c34ab7b3fcb2d1effbf4e0b5df685dfd156e435d4429873a1ceb966e73885944cb6634005
+  languageName: node
+  linkType: hard
+
+"expo-image@npm:~1.0.0":
+  version: 1.0.1
+  resolution: "expo-image@npm:1.0.1"
+  peerDependencies:
+    expo: "*"
+  checksum: 4370c442df51dda577e2e1a5daf67267d9336fd89afb2b8ee6b0f74b4fdffd9a3b71a5f5580583310d1a71610eabba9ec40d5cf007a01ac6d8a6200ac8ee6a21
+  languageName: node
+  linkType: hard
+
 "expo-json-utils@npm:~0.5.0":
   version: 0.5.1
   resolution: "expo-json-utils@npm:0.5.1"
@@ -6910,6 +6930,16 @@ __metadata:
     compare-versions: ^3.4.0
     invariant: ^2.2.4
   checksum: 11c6a280a337a4a2fe13c61f0e56b7e74ceda25ff51ae4fab95539a3aa6bf7c8c5d49457e006fc0bdd83bdd9738147a6bef2abdd752afe753078fec189593ee2
+  languageName: node
+  linkType: hard
+
+"expo-modules-core@npm:^1.5.9":
+  version: 1.6.0
+  resolution: "expo-modules-core@npm:1.6.0"
+  dependencies:
+    compare-versions: ^3.4.0
+    invariant: ^2.2.4
+  checksum: 7e3d697cdeb7e1246216f9f4024f16d1a2966805b8cb46fd938cec1feec5bffb5aa166f0b25a6edb5bdf881ca318e142957d25ab4fb48420d8f060fc3742f4a4
   languageName: node
   linkType: hard
 
@@ -10386,6 +10416,7 @@ __metadata:
     expo-constants: ~14.2.1
     expo-dev-client: ~2.2.1
     expo-font: ~11.1.1
+    expo-image: ~1.0.0
     expo-linear-gradient: ~12.1.2
     expo-linking: ~4.0.1
     expo-localization: ~14.1.1
@@ -14194,7 +14225,9 @@ __metadata:
     copy-webpack-plugin: ^11.0.0
     eslint: ^8.36.0
     eslint-config-next: 13.2.4
+    expo-image: ^1.3.2
     expo-linear-gradient: ^12.1.2
+    expo-modules-core: ^1.5.9
     hls.js: ^1.3.4
     i18next: ^22.4.11
     jotai: ^2.0.3

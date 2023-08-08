@@ -23,44 +23,51 @@ import { zdate } from "../utils";
 import { ImagesP } from "../traits";
 import { ResourceP } from "../traits/resource";
 
-export const EpisodeP = z.preprocess(
-	(x: any) => {
-		if (!x) return x;
-		x.name = x.title;
-		return x;
-	},
-	ResourceP.merge(ImagesP).extend({
-		/**
-		 * The season in witch this episode is in.
-		 */
-		seasonNumber: z.number().nullable(),
+const BaseEpisodeP = ResourceP.merge(ImagesP).extend({
+	/**
+	 * The season in witch this episode is in.
+	 */
+	seasonNumber: z.number().nullable(),
 
-		/**
-		 * The number of this episode in it's season.
-		 */
-		episodeNumber: z.number().nullable(),
+	/**
+	 * The number of this episode in it's season.
+	 */
+	episodeNumber: z.number().nullable(),
 
-		/**
-		 * The absolute number of this episode. It's an episode number that is not reset to 1 after a new season.
-		 */
-		absoluteNumber: z.number().nullable(),
+	/**
+	 * The absolute number of this episode. It's an episode number that is not reset to 1 after a new
+	 * season.
+	 */
+	absoluteNumber: z.number().nullable(),
 
-		/**
-		 * The title of this episode.
-		 */
-		name: z.string().nullable(),
+	/**
+	 * The title of this episode.
+	 */
+	name: z.string().nullable(),
 
-		/**
-		 * The overview of this episode.
-		 */
-		overview: z.string().nullable(),
+	/**
+	 * The overview of this episode.
+	 */
+	overview: z.string().nullable(),
 
-		/**
-		 * The release date of this episode. It can be null if unknown.
-		 */
-		releaseDate: zdate().nullable(),
-	}),
-);
+	/**
+	 * The release date of this episode. It can be null if unknown.
+	 */
+	releaseDate: zdate().nullable(),
+});
+
+export const EpisodeP = BaseEpisodeP.extend({
+	/**
+	 * The episode that come before this one if you follow usual watch orders. If this is the first
+	 * episode or this is a movie, it will be null.
+	 */
+	previousEpisode: BaseEpisodeP.nullable().optional(),
+	/**
+	 * The episode that come after this one if you follow usual watch orders. If this is the last
+	 * aired episode or this is a movie, it will be null.
+	 */
+	nextEpisode: BaseEpisodeP.nullable().optional(),
+})
 
 /**
  * A class to represent a single show's episode.
