@@ -30,7 +30,6 @@ using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Core.Api;
 using Kyoo.Utils;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Kyoo.Core.Controllers
 {
@@ -227,6 +226,28 @@ namespace Kyoo.Core.Controllers
 			return Expression.Lambda<Func<T, bool>>(filter!, x);
 		}
 
+		protected void SetBackingImage(T obj)
+		{
+			if (obj is not IThumbnails thumbs)
+				return;
+			string type = obj is ILibraryItem item
+				? item.Kind.ToString().ToLowerInvariant()
+				: typeof(T).Name.ToLowerInvariant();
+
+			if (thumbs.Poster != null)
+				thumbs.Poster.Path = $"{type}/{obj.Slug}/poster";
+			if (thumbs.Thumbnail != null)
+				thumbs.Thumbnail.Path = $"{type}/{obj.Slug}/thumbnail";
+			if (thumbs.Logo != null)
+				thumbs.Logo.Path = $"{type}/{obj.Slug}/logo";
+		}
+
+		protected T SetBackingImageSelf(T obj)
+		{
+			SetBackingImage(obj);
+			return obj;
+		}
+
 		/// <summary>
 		/// Get a resource from it's ID and make the <see cref="Database"/> instance track it.
 		/// </summary>
@@ -236,6 +257,7 @@ namespace Kyoo.Core.Controllers
 		protected virtual async Task<T> GetWithTracking(int id)
 		{
 			T ret = await Database.Set<T>().AsTracking().FirstOrDefaultAsync(x => x.Id == id);
+			SetBackingImage(ret);
 			if (ret == null)
 				throw new ItemNotFoundException($"No {typeof(T).Name} found with the id {id}");
 			return ret;
@@ -271,30 +293,31 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public virtual Task<T> GetOrDefault(int id)
 		{
-			return Database.Set<T>().FirstOrDefaultAsync(x => x.Id == id);
+			return Database.Set<T>().FirstOrDefaultAsync(x => x.Id == id).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc />
 		public virtual Task<T> GetOrDefault(string slug)
 		{
-			return Database.Set<T>().FirstOrDefaultAsync(x => x.Slug == slug);
+			return Database.Set<T>().FirstOrDefaultAsync(x => x.Slug == slug).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc />
 		public virtual Task<T> GetOrDefault(Expression<Func<T, bool>> where, Sort<T> sortBy = default)
 		{
-			return Sort(Database.Set<T>(), sortBy).FirstOrDefaultAsync(where);
+			return Sort(Database.Set<T>(), sortBy).FirstOrDefaultAsync(where).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc/>
 		public abstract Task<ICollection<T>> Search(string query);
 
 		/// <inheritdoc/>
-		public virtual Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null,
+		public virtual async Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null,
 			Sort<T> sort = default,
 			Pagination limit = default)
 		{
-			return ApplyFilters(Database.Set<T>(), where, sort, limit);
+			return (await ApplyFilters(Database.Set<T>(), where, sort, limit))
+				.Select(SetBackingImageSelf).ToList();
 		}
 
 		/// <summary>
@@ -349,6 +372,7 @@ namespace Kyoo.Core.Controllers
 				if (thumbs.Logo != null)
 					Database.Entry(thumbs).Reference(x => x.Logo).TargetEntry.State = EntityState.Added;
 			}
+			SetBackingImage(obj);
 			return obj;
 		}
 
@@ -400,6 +424,7 @@ namespace Kyoo.Core.Controllers
 				await EditRelations(old, edited);
 				await Database.SaveChangesAsync();
 				OnEdited?.Invoke(old);
+				SetBackingImage(old);
 				return old;
 			}
 			finally
@@ -423,6 +448,7 @@ namespace Kyoo.Core.Controllers
 
 				await Database.SaveChangesAsync();
 				OnEdited?.Invoke(resource);
+				SetBackingImage(resource);
 				return resource;
 			}
 			finally

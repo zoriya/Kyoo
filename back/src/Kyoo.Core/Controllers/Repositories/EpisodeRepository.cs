@@ -79,7 +79,7 @@ namespace Kyoo.Core.Controllers
 		{
 			return _database.Episodes.FirstOrDefaultAsync(x => x.ShowId == showID
 				&& x.SeasonNumber == seasonNumber
-				&& x.EpisodeNumber == episodeNumber);
+				&& x.EpisodeNumber == episodeNumber).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc />
@@ -87,7 +87,7 @@ namespace Kyoo.Core.Controllers
 		{
 			return _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == showSlug
 				&& x.SeasonNumber == seasonNumber
-				&& x.EpisodeNumber == episodeNumber);
+				&& x.EpisodeNumber == episodeNumber).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc />
@@ -112,14 +112,14 @@ namespace Kyoo.Core.Controllers
 		public Task<Episode> GetAbsolute(int showID, int absoluteNumber)
 		{
 			return _database.Episodes.FirstOrDefaultAsync(x => x.ShowId == showID
-				&& x.AbsoluteNumber == absoluteNumber);
+				&& x.AbsoluteNumber == absoluteNumber).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc />
 		public Task<Episode> GetAbsolute(string showSlug, int absoluteNumber)
 		{
 			return _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == showSlug
-				&& x.AbsoluteNumber == absoluteNumber);
+				&& x.AbsoluteNumber == absoluteNumber).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc />
@@ -134,7 +134,10 @@ namespace Kyoo.Core.Controllers
 				.Take(20)
 				.ToListAsync();
 			foreach (Episode ep in ret)
+			{
 				ep.Show.Episodes = null;
+				SetBackingImage(ep);
+			}
 			return ret;
 		}
 

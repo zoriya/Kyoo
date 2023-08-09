@@ -16,7 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -53,12 +52,14 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task<ICollection<User>> Search(string query)
 		{
-			return await Sort(
+			return (await Sort(
 				_database.Users
 					.Where(_database.Like<User>(x => x.Username, $"%{query}%"))
 				)
 				.Take(20)
-				.ToListAsync();
+				.ToListAsync())
+				.Select(SetBackingImageSelf)
+				.ToList();
 		}
 
 		/// <inheritdoc />

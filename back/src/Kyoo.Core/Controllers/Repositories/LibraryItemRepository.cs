@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Postgresql;
+using Kyoo.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Core.Controllers
@@ -54,13 +55,19 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task<ILibraryItem> GetOrDefault(int id)
 		{
-			return await _database.LibraryItems.FirstOrDefaultAsync(x => x.Id == id);
+			return await _database.LibraryItems.SingleOrDefaultAsync(x => x.Id == id).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc />
 		public override async Task<ILibraryItem> GetOrDefault(string slug)
 		{
-			return await _database.LibraryItems.SingleOrDefaultAsync(x => x.Slug == slug);
+			return await _database.LibraryItems.SingleOrDefaultAsync(x => x.Slug == slug).Then(SetBackingImage);
+		}
+
+		/// <inheritdoc />
+		public override async Task<ILibraryItem> GetOrDefault(Expression<Func<ILibraryItem, bool>> where, Sort<ILibraryItem> sortBy = default)
+		{
+			return await Sort(_database.LibraryItems, sortBy).FirstOrDefaultAsync(where).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc />
@@ -68,7 +75,8 @@ namespace Kyoo.Core.Controllers
 			Sort<ILibraryItem> sort = default,
 			Pagination limit = default)
 		{
-			return await ApplyFilters(_database.LibraryItems, where, sort, limit);
+			return (await ApplyFilters(_database.LibraryItems, where, sort, limit))
+				.Select(SetBackingImageSelf).ToList();
 		}
 
 		/// <inheritdoc />
@@ -83,12 +91,14 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task<ICollection<ILibraryItem>> Search(string query)
 		{
-			return await Sort(
+			return (await Sort(
 					_database.LibraryItems
 					.Where(_database.Like<LibraryItem>(x => x.Name, $"%{query}%"))
 				)
 				.Take(20)
-				.ToListAsync();
+				.ToListAsync())
+				.Select(SetBackingImageSelf)
+				.ToList();
 		}
 
 		/// <inheritdoc />
@@ -100,7 +110,7 @@ namespace Kyoo.Core.Controllers
 			=> throw new InvalidOperationException();
 
 		/// <inheritdoc />
-		public override Task<ILibraryItem> Edit(ILibraryItem obj)
+		public override Task<ILibraryItem> Edit(ILibraryItem edited)
 			=> throw new InvalidOperationException();
 
 		/// <inheritdoc />

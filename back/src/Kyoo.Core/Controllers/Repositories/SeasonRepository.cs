@@ -24,6 +24,7 @@ using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Postgresql;
+using Kyoo.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Core.Controllers
@@ -87,25 +88,27 @@ namespace Kyoo.Core.Controllers
 		public Task<Season> GetOrDefault(int showID, int seasonNumber)
 		{
 			return _database.Seasons.FirstOrDefaultAsync(x => x.ShowId == showID
-				&& x.SeasonNumber == seasonNumber);
+				&& x.SeasonNumber == seasonNumber).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc/>
 		public Task<Season> GetOrDefault(string showSlug, int seasonNumber)
 		{
 			return _database.Seasons.FirstOrDefaultAsync(x => x.Show.Slug == showSlug
-				&& x.SeasonNumber == seasonNumber);
+				&& x.SeasonNumber == seasonNumber).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc/>
 		public override async Task<ICollection<Season>> Search(string query)
 		{
-			return await Sort(
+			return (await Sort(
 				_database.Seasons
 					.Where(_database.Like<Season>(x => x.Name, $"%{query}%"))
 				)
 				.Take(20)
-				.ToListAsync();
+				.ToListAsync())
+				.Select(SetBackingImageSelf)
+				.ToList();
 		}
 
 		/// <inheritdoc/>
