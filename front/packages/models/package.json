@@ -4,7 +4,7 @@
 	"types": "src/index.ts",
 	"packageManager": "yarn@3.2.4",
 	"devDependencies": {
-		"@types/react": "^18.2.18",
+		"@types/react": "18.2.0",
 		"react-native-mmkv": "^2.10.1",
 		"typescript": "^5.1.6"
 	},

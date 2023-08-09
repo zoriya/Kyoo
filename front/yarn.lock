@@ -2503,7 +2503,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@kyoo/models@workspace:packages/models"
   dependencies:
-    "@types/react": ^18.2.18
+    "@types/react": 18.2.0
     react-native-mmkv: ^2.10.1
     typescript: ^5.1.6
     zod: ^3.21.4
@@ -2524,7 +2524,7 @@ __metadata:
     "@expo/html-elements": ^0.5.1
     "@gorhom/portal": ^1.0.14
     "@tanstack/react-query": ^4.32.6
-    "@types/react": ^18.2.18
+    "@types/react": 18.2.0
     expo-image: ^1.3.2
     solito: ^4.0.1
     typescript: ^5.1.6
@@ -2556,7 +2556,7 @@ __metadata:
     "@kyoo/models": "workspace:^"
     "@kyoo/primitives": "workspace:^"
     "@shopify/flash-list": ^1.5.0
-    "@types/react": ^18.2.18
+    "@types/react": 18.2.0
     expo-image: ^1.3.2
     react-native-uuid: ^2.0.1
     typescript: ^5.1.6
@@ -4061,12 +4061,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react-dom@npm:18.2.7":
-  version: 18.2.7
-  resolution: "@types/react-dom@npm:18.2.7"
+"@types/react-dom@npm:18.2.0":
+  version: 18.2.0
+  resolution: "@types/react-dom@npm:18.2.0"
   dependencies:
     "@types/react": "*"
-  checksum: e02ea908289a7ad26053308248d2b87f6aeafd73d0e2de2a3d435947bcea0422599016ffd1c3e38ff36c42f5e1c87c7417f05b0a157e48649e4a02f21727d54f
+  checksum: 9212b3793707a763f10e2c608f6ccb5f729029da6cb84204f333634d3d7baafbc1b20b7faf7cf788a8fd385050a1fb579902031f9462473ef10607116f33f33c
   languageName: node
   linkType: hard
 
@@ -4090,7 +4090,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:*, @types/react@npm:18.x.x, @types/react@npm:^18.2.18, @types/react@npm:~18.2.18":
+"@types/react@npm:*, @types/react@npm:18.x.x":
   version: 18.2.19
   resolution: "@types/react@npm:18.2.19"
   dependencies:
@@ -4101,14 +4101,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/react@npm:18.2.18":
-  version: 18.2.18
-  resolution: "@types/react@npm:18.2.18"
+"@types/react@npm:18.2.0":
+  version: 18.2.0
+  resolution: "@types/react@npm:18.2.0"
   dependencies:
     "@types/prop-types": "*"
     "@types/scheduler": "*"
     csstype: ^3.0.2
-  checksum: 2e0d75de2b618e76780019e52478b1bec2b015a9187aea30f84518c0c3ddc639055bdfea50864aece937bad0cb0544d0100b80d30f5461e72fbc1c3c0be8b140
+  checksum: db3d92b423150222a666329f7aa3023e3e942044700557b8a7d161530847e621aec9f56c9e7f71761b06dd164c8a7b17ad52355863efe80963dffa5537e8e5fd
   languageName: node
   linkType: hard
 
@@ -10544,7 +10544,7 @@ __metadata:
     "@material-symbols/svg-400": ^0.10.3
     "@shopify/flash-list": 1.4.3
     "@tanstack/react-query": ^4.32.6
-    "@types/react": ~18.2.18
+    "@types/react": 18.2.0
     babel-plugin-transform-inline-environment-variables: ^0.4.4
     expo: ^49.0.6
     expo-build-properties: ~0.8.3
@@ -10577,7 +10577,7 @@ __metadata:
     react-native-uuid: ^2.0.1
     react-native-video: ^6.0.0-alpha.7
     typescript: ^5.1.6
-    yoshiki: 1.2.2
+    yoshiki: 1.2.3
   languageName: unknown
   linkType: soft
 
@@ -14254,8 +14254,8 @@ __metadata:
     "@svgr/webpack": ^8.0.1
     "@tanstack/react-query": ^4.32.6
     "@types/node": 20.4.8
-    "@types/react": 18.2.18
-    "@types/react-dom": 18.2.7
+    "@types/react": 18.2.0
+    "@types/react-dom": 18.2.0
     "@types/react-native-video": ^5.0.15
     copy-webpack-plugin: ^11.0.0
     eslint: ^8.46.0
@@ -14284,7 +14284,7 @@ __metadata:
     sweetalert2: ^11.7.20
     typescript: ^5.1.6
     webpack: ^5.88.2
-    yoshiki: 1.2.2
+    yoshiki: 1.2.3
     zod: ^3.21.4
   languageName: unknown
   linkType: soft
@@ -14666,9 +14666,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yoshiki@npm:1.2.2":
-  version: 1.2.2
-  resolution: "yoshiki@npm:1.2.2"
+"yoshiki@npm:1.2.3":
+  version: 1.2.3
+  resolution: "yoshiki@npm:1.2.3"
   dependencies:
     "@types/node": 18.x.x
     "@types/react": 18.x.x
@@ -14682,7 +14682,7 @@ __metadata:
       optional: true
     react-native-web:
       optional: true
-  checksum: 1510ac000573ca02aa0d2c069b15a1015ba402c27f700304c6a6db38284c89c590efdd457488bc51db9a9e0b94a3768319c1a0cfce6c353a2980b3d1f8f99d5e
+  checksum: 2ecfa044fcd43f94a5e663740075b87b5dee06116073dbd5673419ba32add90114a5cdce3841d92b7d6ae86e078926de09b310a6393bb50c7e37f14ae1d4cc65
   languageName: node
   linkType: hard
 

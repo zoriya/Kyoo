@@ -47,6 +47,7 @@ type WithLoading<T> = (T & { isLoading?: boolean }) | (Partial<T> & { isLoading:
 type Props = WithLoading<{
 	src?: KyooImage | null;
 	alt?: string;
+	quality: "low" | "medium" | "high"
 }>;
 
 type ImageLayout = YoshikiEnhanced<
@@ -57,17 +58,17 @@ type ImageLayout = YoshikiEnhanced<
 
 export const Image = ({
 	src,
+	quality,
 	alt,
 	isLoading: forcedLoading = false,
 	layout,
 	...props
 }: Props & { style?: ViewStyle } & { layout: ImageLayout }) => {
 	const { css } = useYoshiki();
-	console.log(src);
 
 	return (
 		<Img
-			source={src?.source}
+			source={src?.[quality ?? "high"]}
 			placeholder={src?.blurhash}
 			accessibilityLabel={alt}
 			{...css([
@@ -78,7 +79,7 @@ export const Image = ({
 			// 		// resizeMode: "cover",
 			// 		borderRadius: 6
 			// 	},
-			]) as ImageStyle}
+			]) as any}
 		/>
 	);
 	// const [state, setState] = useState<"loading" | "errored" | "finished">(

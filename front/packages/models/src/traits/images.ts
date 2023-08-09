@@ -27,9 +27,12 @@ export const imageFn = (url: string) =>
 		? `/api${url}`
 		: kyooApiUrl + url;
 
-const Img = z.object({
+export const Img = z.object({
 	source: z.string(),
-	blurhash: z.string()
+	blurhash: z.string(),
+	low: z.string().transform(imageFn),
+	medium: z.string().transform(imageFn),
+	high: z.string().transform(imageFn),
 });
 
 export const ImagesP = z.object({

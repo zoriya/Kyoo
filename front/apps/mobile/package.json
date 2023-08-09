@@ -50,11 +50,11 @@
 		"react-native-svg": "13.9.0",
 		"react-native-uuid": "^2.0.1",
 		"react-native-video": "^6.0.0-alpha.7",
-		"yoshiki": "1.2.2"
+		"yoshiki": "1.2.3"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.22.10",
-		"@types/react": "~18.2.18",
+		"@types/react": "18.2.0",
 		"react-native-svg-transformer": "^1.1.0",
 		"typescript": "^5.1.6"
 	},

@@ -39,14 +39,14 @@
 		"srt-webvtt": "^2.0.0",
 		"superjson": "^1.13.1",
 		"sweetalert2": "^11.7.20",
-		"yoshiki": "1.2.2",
+		"yoshiki": "1.2.3",
 		"zod": "^3.21.4"
 	},
 	"devDependencies": {
 		"@svgr/webpack": "^8.0.1",
 		"@types/node": "20.4.8",
-		"@types/react": "18.2.18",
-		"@types/react-dom": "18.2.7",
+		"@types/react": "18.2.0",
+		"@types/react-dom": "18.2.0",
 		"@types/react-native-video": "^5.0.15",
 		"copy-webpack-plugin": "^11.0.0",
 		"eslint": "^8.46.0",
