@@ -63,6 +63,7 @@ const TitleLine = ({
 	isLoading,
 	slug,
 	name,
+	tagline,
 	date,
 	poster,
 	studio,
@@ -72,7 +73,8 @@ const TitleLine = ({
 	isLoading: boolean;
 	slug: string;
 	name?: string;
-	date?: string;
+	tagline?: string;
+	date?: string | null;
 	poster?: KyooImage | null;
 	studio?: Studio | null;
 	trailerUrl?: string | null;
@@ -94,6 +96,7 @@ const TitleLine = ({
 					flexDirection: { xs: "column", sm: "row" },
 					alignItems: { xs: "center", sm: "flex-start" },
 					flexGrow: 1,
+					maxWidth: percent(100),
 				})}
 			>
 				<Poster
@@ -118,23 +121,23 @@ const TitleLine = ({
 						flexGrow: 1,
 					})}
 				>
-					<Skeleton
-						variant="header"
-						{...css({ width: rem(15), height: rem(2.5), marginBottom: rem(1) })}
-					>
-						{isLoading || (
-							<H1
-								{...css({
-									fontWeight: { md: "900" },
-									textAlign: { xs: "center", sm: "left" },
-									color: (theme: Theme) => ({ xs: theme.user.heading, md: theme.heading }),
-								})}
-							>
-								{name}
-							</H1>
-						)}
-					</Skeleton>
-					{(isLoading || date) && (
+					<P {...css({
+						textAlign: { xs: "center", sm: "left" },
+						color: (theme: Theme) => ({ xs: theme.user.heading, md: theme.heading }),
+					})}>
+						<Skeleton
+							variant="header"
+							{...css({ width: rem(15), height: rem(2.5), marginBottom: rem(1) })}
+						>
+							{isLoading || (
+								<>
+									<H1>{name}</H1>
+									{date && <P {...css({ fontSize: rem(2.5) })}> ({date})</P>}
+								</>
+							)}
+						</Skeleton>
+					</P>
+					{(isLoading || tagline) && (
 						<Skeleton
 							{...css({
 								width: rem(5),
@@ -153,7 +156,7 @@ const TitleLine = ({
 										color: (theme: Theme) => ({ xs: theme.user.heading, md: theme.heading }),
 									})}
 								>
-									{date}
+									{tagline}
 								</P>
 							)}
 						</Skeleton>
@@ -337,6 +340,7 @@ export const Header = ({ query, slug }: { query: QueryIdentifier<Show | Movie>; 
 							isLoading={isLoading}
 							slug={slug}
 							name={data?.name}
+							tagline={data?.tagline}
 							date={data ? getDisplayDate(data as any) : undefined}
 							poster={data?.poster}
 							trailerUrl={data?.trailer}
