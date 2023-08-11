@@ -26,9 +26,9 @@ import { Header } from "./header";
 
 const query = (slug: string): QueryIdentifier<Movie> => ({
 	parser: MovieP,
-	path: ["shows", slug],
+	path: ["movies", slug],
 	params: {
-		fields: ["genres", "studio"],
+		fields: ["studio"],
 	},
 });
 

@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Movie, QueryIdentifier, Show, getDisplayDate, Genre, Studio } from "@kyoo/models";
+import { Movie, QueryIdentifier, Show, getDisplayDate, Genre, Studio, KyooImage } from "@kyoo/models";
 import {
 	Container,
 	H1,
@@ -37,11 +37,11 @@ import {
 	LI,
 	A,
 	ts,
-	Button,
+	Chip,
 } from "@kyoo/primitives";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform, Pressable, PressableProps, View } from "react-native";
+import { Platform, View } from "react-native";
 import {
 	Theme,
 	md,
@@ -73,7 +73,7 @@ const TitleLine = ({
 	slug: string;
 	name?: string;
 	date?: string;
-	poster?: string | null;
+	poster?: KyooImage | null;
 	studio?: Studio | null;
 	trailerUrl?: string | null;
 } & Stylable) => {
@@ -99,12 +99,13 @@ const TitleLine = ({
 				<Poster
 					src={poster}
 					alt={name}
+					quality="high"
 					isLoading={isLoading}
 					layout={{
 						width: { xs: percent(50), md: percent(25) },
 					}}
 					{...css({
-						maxWidth: { xs: px(175), sm: Platform.OS === "web" ? "unset" : 99999999 },
+						maxWidth: { xs: px(175), sm: Platform.OS === "web" ? "unset" as any : 99999999 },
 						flexShrink: 0,
 					})}
 				/>
@@ -227,11 +228,13 @@ const TitleLine = ({
 const Description = ({
 	isLoading,
 	overview,
+	tags,
 	genres,
 	...props
 }: {
 	isLoading: boolean;
 	overview?: string | null;
+	tags?: string[];
 	genres?: Genre[];
 } & Stylable) => {
 	const { t } = useTranslation();
@@ -249,40 +252,40 @@ const Description = ({
 				})}
 			>
 				{t("show.genre")}:{" "}
-				{(isLoading ? [...Array(3)] : genres!).map((genre, i) => (
-					<Fragment key={genre?.slug ?? i.toString()}>
+				{(isLoading ? [...Array<Genre>(3)] : genres!).map((genre, i) => (
+					<Fragment key={genre ?? i.toString()}>
 						<P {...css({ m: 0 })}>{i !== 0 && ", "}</P>
 						{isLoading ? (
 							<Skeleton {...css({ width: rem(5) })} />
 						) : (
-							<A href={`/genres/${genre.slug}`}>{genre.name}</A>
+							<A href={`/genres/${genre.toLowerCase()}`}>{genre}</A>
 						)}
 					</Fragment>
 				))}
 			</P>
 
-			<Skeleton
-				lines={4}
-				{...css({
-					width: percent(100),
-					flexBasis: 0,
-					flexGrow: 1,
-					paddingTop: ts(4),
-				})}
-			>
-				{isLoading || (
-					<P
-						{...css({
-							flexBasis: 0,
-							flexGrow: 1,
-							textAlign: "justify",
-							paddingTop: ts(4),
-						})}
-					>
-						{overview ?? t("show.noOverview")}
-					</P>
-				)}
-			</Skeleton>
+			<View {...css({
+				flexDirection: "column",
+				flexGrow: 1,
+				flexBasis: { sm: 0 },
+				paddingTop: ts(4),
+			})}>
+				<Skeleton lines={4} >
+					{isLoading || (
+						<P
+							{...css({ textAlign: "justify", })}
+						>
+							{overview ?? t("show.noOverview")}
+						</P>
+					)}
+				</Skeleton>
+				<View {...css({ flexWrap: "wrap", flexDirection: "row", marginTop: ts(.5) })}>
+					<P {...css({ marginRight: ts(.5) })}>{t("show.tags")}:</P>
+					{(isLoading ? [...Array<string>(3)] : tags!).map((tag, i) => (
+						<Chip key={tag ?? i} label={tag} size="small" {...css({ m: ts(.5) })} />
+					))}
+				</View>
+			</View>
 			<HR
 				orientation="vertical"
 				{...css({ marginX: ts(2), display: { xs: "none", sm: "flex" } })}
@@ -291,12 +294,12 @@ const Description = ({
 				<H2>{t("show.genre")}</H2>
 				{isLoading || genres?.length ? (
 					<UL>
-						{(isLoading ? [...Array(3)] : genres!).map((genre, i) => (
-							<LI key={genre?.id ?? i}>
+						{(isLoading ? [...Array<Genre>(3)] : genres!).map((genre, i) => (
+							<LI key={genre ?? i}>
 								{isLoading ? (
 									<Skeleton {...css({ marginBottom: 0 })} />
 								) : (
-									<A href={`/genres/${genre.slug}`}>{genre.name}</A>
+									<A href={`/genres/${genre.toLowerCase()}`}>{genre}</A>
 								)}
 							</LI>
 						))}
@@ -352,6 +355,7 @@ export const Header = ({ query, slug }: { query: QueryIdentifier<Show | Movie>; 
 						isLoading={isLoading}
 						overview={data?.overview}
 						genres={data?.genres}
+						tags={data?.tags}
 						{...css({ paddingTop: { xs: 0, md: ts(2) } })}
 					/>
 				</>

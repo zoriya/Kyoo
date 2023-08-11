@@ -22,17 +22,24 @@ import { rem, Stylable, Theme, useYoshiki } from "yoshiki/native";
 import { P } from "./text";
 import { ts } from "./utils";
 
-export const Chip = ({ label, color, ...props }: { label: string; color?: string } & Stylable) => {
+export const Chip = ({
+	label,
+	color,
+	size = "medium",
+	...props
+}: { label: string; color?: string; size?: "small" | "medium" | "large" } & Stylable) => {
 	const { css } = useYoshiki();
+
+	const sizeMult = size == "medium" ? 1 : size == "small" ? 0.75 : 1.25;
 
 	return (
 		<P
 			{...css(
 				{
-					pY: ts(1),
-					pX: ts(1.5),
+					pY: ts(1 * sizeMult),
+					pX: ts(1.5 * sizeMult),
 					borderRadius: ts(3),
-					fontSize: rem(.8),
+					fontSize: rem(0.8),
 					color: (theme: Theme) => theme.contrast,
 					bg: color ?? ((theme: Theme) => theme.accent),
 				},
