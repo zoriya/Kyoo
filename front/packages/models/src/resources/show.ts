@@ -35,7 +35,7 @@ export enum Status {
 	Planned = "Planned",
 }
 
-export const ShowP = ResourceP.extend(ImagesP).extend({
+export const ShowP = ResourceP.merge(ImagesP).extend({
 	/**
 	 * The title of this show.
 	 */

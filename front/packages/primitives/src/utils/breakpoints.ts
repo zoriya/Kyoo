@@ -19,8 +19,8 @@
  */
 
 import { useWindowDimensions } from "react-native";
-import { Breakpoints as YoshikiBreakpoint } from "yoshiki/dist/type";
-import { isBreakpoints } from "yoshiki/dist/utils";
+import { Breakpoints as YoshikiBreakpoint } from "yoshiki/src/type";
+import { isBreakpoints } from "yoshiki/src/utils";
 import { breakpoints } from "yoshiki/native";
 
 type AtLeastOne<T, U = { [K in keyof T]: Pick<T, K> }> = Partial<T> & U[keyof U];

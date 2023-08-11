@@ -24,9 +24,8 @@ import { useYoshiki, px, Stylable } from "yoshiki/native";
 import { Icon } from "./icons";
 import { P } from "./text";
 import AccountCircle from "@material-symbols/svg-400/rounded/account_circle-fill.svg";
-import { YoshikiStyle } from "yoshiki/dist/type";
+import { YoshikiStyle } from "yoshiki/src/type";
 import { ComponentType, forwardRef, RefAttributes } from "react";
-import { ts } from "./utils";
 
 const stringToColor = (string: string) => {
 	let hash = 0;

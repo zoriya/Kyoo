@@ -69,7 +69,7 @@ const query = (
 	params: {
 		sortBy: sortKey
 			? `${sortKey}:${sortOrd ?? "asc"}`
-			: "namek:asc",
+			: "name:asc",
 	},
 });
 

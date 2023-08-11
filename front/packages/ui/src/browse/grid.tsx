@@ -51,7 +51,7 @@ export const ItemGrid = ({
 						m: { xs: ts(1), sm: ts(4) },
 						child: {
 							poster: {
-								borderColor: "transparent",
+								borderColor: theme => theme.background,
 								borderWidth: px(4),
 							},
 						},
@@ -78,6 +78,7 @@ export const ItemGrid = ({
 			<Poster
 				src={poster}
 				alt={name}
+				quality="low"
 				isLoading={isLoading}
 				layout={{ width: percent(100) }}
 				{...css("poster")}

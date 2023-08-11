@@ -235,11 +235,11 @@ namespace Kyoo.Core.Controllers
 				: typeof(T).Name.ToLowerInvariant();
 
 			if (thumbs.Poster != null)
-				thumbs.Poster.Path = $"{type}/{obj.Slug}/poster";
+				thumbs.Poster.Path = $"/{type}/{obj.Slug}/poster";
 			if (thumbs.Thumbnail != null)
-				thumbs.Thumbnail.Path = $"{type}/{obj.Slug}/thumbnail";
+				thumbs.Thumbnail.Path = $"/{type}/{obj.Slug}/thumbnail";
 			if (thumbs.Logo != null)
-				thumbs.Logo.Path = $"{type}/{obj.Slug}/logo";
+				thumbs.Logo.Path = $"/{type}/{obj.Slug}/logo";
 		}
 
 		protected T SetBackingImageSelf(T obj)
