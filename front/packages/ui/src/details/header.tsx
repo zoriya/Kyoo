@@ -73,7 +73,7 @@ const TitleLine = ({
 	isLoading: boolean;
 	slug: string;
 	name?: string;
-	tagline?: string;
+	tagline?: string | null;
 	date?: string | null;
 	poster?: KyooImage | null;
 	studio?: Studio | null;

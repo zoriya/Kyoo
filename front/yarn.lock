@@ -2525,12 +2525,14 @@ __metadata:
     "@gorhom/portal": ^1.0.14
     "@tanstack/react-query": ^4.32.6
     "@types/react": 18.2.0
+    blurhash: ^2.0.5
     solito: ^4.0.1
     typescript: ^5.1.6
   peerDependencies:
     "@gorhom/portal": "*"
     "@material-symbols/svg-400": "*"
     "@radix-ui/react-dropdown-menu": "*"
+    blurhash: "*"
     expo-linear-gradient: "*"
     moti: "*"
     react: "*"
@@ -2539,10 +2541,15 @@ __metadata:
     react-native-reanimated: "*"
     react-native-svg: "*"
     yoshiki: "*"
+  dependenciesMeta:
+    blurhash:
+      optional: true
   peerDependenciesMeta:
     "@gorhom/portal":
       optional: true
     "@radix-ui/react-dropdown-menu":
+      optional: true
+    blurhash:
       optional: true
     react-native-blurhash:
       optional: true
@@ -5120,6 +5127,13 @@ __metadata:
   version: 2.19.0
   resolution: "blueimp-md5@npm:2.19.0"
   checksum: 28095dcbd2c67152a2938006e8d7c74c3406ba6556071298f872505432feb2c13241b0476644160ee0a5220383ba94cb8ccdac0053b51f68d168728f9c382530
+  languageName: node
+  linkType: hard
+
+"blurhash@npm:^2.0.5":
+  version: 2.0.5
+  resolution: "blurhash@npm:2.0.5"
+  checksum: aa4d6855bbaae116065b118a7b1e889648c15047e72048c28bab3db426a042ce1dc032a30c55a52da6140c314534841b984ab11cc68303668dde446d6ca53bc6
   languageName: node
   linkType: hard
 

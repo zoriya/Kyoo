@@ -12,6 +12,7 @@
 		"@gorhom/portal": "*",
 		"@material-symbols/svg-400": "*",
 		"@radix-ui/react-dropdown-menu": "*",
+		"blurhash": "*",
 		"expo-linear-gradient": "*",
 		"moti": "*",
 		"react": "*",
@@ -28,6 +29,9 @@
 		"@radix-ui/react-dropdown-menu": {
 			"optional": true
 		},
+		"blurhash": {
+			"optional": true
+		},
 		"react-native-blurhash": {
 			"optional": true
 		},
@@ -39,5 +43,8 @@
 		"@expo/html-elements": "^0.5.1",
 		"@tanstack/react-query": "^4.32.6",
 		"solito": "^4.0.1"
+	},
+	"optionalDependencies": {
+		"blurhash": "^2.0.5"
 	}
 }
