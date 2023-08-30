@@ -5,8 +5,7 @@
 	"packageManager": "yarn@3.2.4",
 	"dependencies": {
 		"@kyoo/models": "workspace:^",
-		"@kyoo/primitives": "workspace:^",
-		"expo-image": "^1.3.2"
+		"@kyoo/primitives": "workspace:^"
 	},
 	"devDependencies": {
 		"@shopify/flash-list": "^1.5.0",

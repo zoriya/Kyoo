@@ -108,7 +108,6 @@ const nextConfig = {
 		"yoshiki",
 		"@expo/vector-icons",
 		"@expo/html-elements",
-		"expo-image",
 		"expo-font",
 		"expo-asset",
 		"expo-av",
