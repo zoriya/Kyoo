@@ -46,6 +46,7 @@ export const ItemList = ({
 		<ImageBackground
 			src={thumbnail}
 			alt={name}
+			quality="low"
 			as={Link}
 			href={href ?? ""}
 			onFocus={() => setHovered((i) => i + 1)}
@@ -103,7 +104,7 @@ export const ItemList = ({
 					</Skeleton>
 				)}
 			</View>
-			<Poster src={poster} alt="" isLoading={isLoading} layout={{ height: percent(80) }} />
+			<Poster src={poster} alt="" quality="low" isLoading={isLoading} layout={{ height: percent(80) }} />
 		</ImageBackground>
 	);
 };

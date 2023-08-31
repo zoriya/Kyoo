@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { focusReset, H6, Image, Link, P, Skeleton, ts } from "@kyoo/primitives";
+import { focusReset, H6, Image, ImageProps, Link, P, Skeleton, ts } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 import { Layout, WithLoading } from "../fetch";
@@ -48,13 +48,13 @@ export const EpisodeBox = ({
 	WithLoading<{
 		name: string | null;
 		overview: string;
-		thumbnail?: string | null;
+		thumbnail?: ImageProps["src"] | null;
 	}>) => {
 	const { t } = useTranslation();
 
 	return (
 		<View {...props}>
-			<Image src={thumbnail} alt="" layout={{ width: percent(100), aspectRatio: 16 / 9 }} />
+			<Image src={thumbnail} quality="low" alt="" layout={{ width: percent(100), aspectRatio: 16 / 9 }} />
 			<Skeleton>{isLoading || <P>{name ?? t("show.episodeNoMetadata")}</P>}</Skeleton>
 			<Skeleton>{isLoading || <P>{overview}</P>}</Skeleton>
 		</View>
@@ -123,6 +123,7 @@ export const EpisodeLine = ({
 			</P>
 			<Image
 				src={thumbnail}
+				quality="low"
 				alt=""
 				layout={{
 					width: percent(18),

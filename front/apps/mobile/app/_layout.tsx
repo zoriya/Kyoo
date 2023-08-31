@@ -40,10 +40,10 @@ import { useTheme } from "yoshiki/native";
 import { CircularProgress } from "@kyoo/primitives";
 import { useRouter } from "solito/router";
 import "intl-pluralrules";
-import '@formatjs/intl-locale/polyfill'
-import '@formatjs/intl-displaynames/polyfill'
-import '@formatjs/intl-displaynames/locale-data/en'
-import '@formatjs/intl-displaynames/locale-data/fr'
+import "@formatjs/intl-locale/polyfill";
+import "@formatjs/intl-displaynames/polyfill";
+import "@formatjs/intl-displaynames/locale-data/en";
+import "@formatjs/intl-displaynames/locale-data/fr";
 
 // TODO: use a backend to load jsons.
 import en from "../../../translations/en.json";
@@ -105,14 +105,20 @@ const AuthGuard = ({ selected }: { selected: number | null }) => {
 };
 
 let rendered: boolean = false;
+SplashScreen.preventAutoHideAsync();
 
 export default function Root() {
 	const [queryClient] = useState(() => createQueryClient());
 	const theme = useColorScheme();
 	const [fontsLoaded] = useFonts({ Poppins_300Light, Poppins_400Regular, Poppins_900Black });
 	const info = useAccounts();
+	const isReady = fontsLoaded && (rendered || info.type !== "loading");
 
-	if (!fontsLoaded || (!rendered && info.type === "loading")) return <SplashScreen />;
+	useEffect(() => {
+		if (isReady) SplashScreen.hideAsync();
+	}, [isReady]);
+
+	if (!isReady) return null;
 	rendered = true;
 	return (
 		<AccountContext.Provider value={info}>

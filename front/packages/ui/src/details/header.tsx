@@ -110,7 +110,7 @@ const TitleLine = ({
 				<Poster
 					src={poster}
 					alt={name}
-					quality="high"
+					quality="medium"
 					isLoading={isLoading}
 					layout={{
 						width: { xs: percent(50), md: percent(25) },
@@ -351,6 +351,7 @@ export const Header = ({ query, slug }: { query: QueryIdentifier<Show | Movie>; 
 					<Head title={data?.name} description={data?.overview} />
 					<ImageBackground
 						src={data?.thumbnail}
+						quality="high"
 						alt=""
 						containerStyle={{
 							height: {
