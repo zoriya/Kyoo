@@ -18,7 +18,15 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Movie, QueryIdentifier, Show, getDisplayDate, Genre, Studio, KyooImage } from "@kyoo/models";
+import {
+	Movie,
+	QueryIdentifier,
+	Show,
+	getDisplayDate,
+	Genre,
+	Studio,
+	KyooImage,
+} from "@kyoo/models";
 import {
 	Container,
 	H1,
@@ -108,7 +116,7 @@ const TitleLine = ({
 						width: { xs: percent(50), md: percent(25) },
 					}}
 					{...css({
-						maxWidth: { xs: px(175), sm: Platform.OS === "web" ? "unset" as any : 99999999 },
+						maxWidth: { xs: px(175), sm: Platform.OS === "web" ? ("unset" as any) : 99999999 },
 						flexShrink: 0,
 					})}
 				/>
@@ -121,18 +129,38 @@ const TitleLine = ({
 						flexGrow: 1,
 					})}
 				>
-					<P {...css({
-						textAlign: { xs: "center", sm: "left" },
-						color: (theme: Theme) => ({ xs: theme.user.heading, md: theme.heading }),
-					})}>
+					<P
+						{...css({
+							textAlign: { xs: "center", sm: "left" },
+						})}
+					>
 						<Skeleton
 							variant="header"
 							{...css({ width: rem(15), height: rem(2.5), marginBottom: rem(1) })}
 						>
 							{isLoading || (
 								<>
-									<H1>{name}</H1>
-									{date && <P {...css({ fontSize: rem(2.5) })}> ({date})</P>}
+									<H1
+										{...css({
+											color: (theme: Theme) => ({ xs: theme.user.heading, md: theme.heading }),
+										})}
+									>
+										{name}
+									</H1>
+									{date && (
+										<P
+											{...css({
+												fontSize: rem(2.5),
+												color: (theme: Theme) => ({
+													xs: theme.user.paragraph,
+													md: theme.paragraph,
+												}),
+											})}
+										>
+											{" "}
+											({date})
+										</P>
+									)}
 								</>
 							)}
 						</Skeleton>
@@ -267,25 +295,23 @@ const Description = ({
 				))}
 			</P>
 
-			<View {...css({
-				flexDirection: "column",
-				flexGrow: 1,
-				flexBasis: { sm: 0 },
-				paddingTop: ts(4),
-			})}>
-				<Skeleton lines={4} >
+			<View
+				{...css({
+					flexDirection: "column",
+					flexGrow: 1,
+					flexBasis: { sm: 0 },
+					paddingTop: ts(4),
+				})}
+			>
+				<Skeleton lines={4}>
 					{isLoading || (
-						<P
-							{...css({ textAlign: "justify", })}
-						>
-							{overview ?? t("show.noOverview")}
-						</P>
+						<P {...css({ textAlign: "justify" })}>{overview ?? t("show.noOverview")}</P>
 					)}
 				</Skeleton>
-				<View {...css({ flexWrap: "wrap", flexDirection: "row", marginTop: ts(.5) })}>
-					<P {...css({ marginRight: ts(.5) })}>{t("show.tags")}:</P>
+				<View {...css({ flexWrap: "wrap", flexDirection: "row", marginTop: ts(0.5) })}>
+					<P {...css({ marginRight: ts(0.5) })}>{t("show.tags")}:</P>
 					{(isLoading ? [...Array<string>(3)] : tags!).map((tag, i) => (
-						<Chip key={tag ?? i} label={tag} size="small" {...css({ m: ts(.5) })} />
+						<Chip key={tag ?? i} label={tag} size="small" {...css({ m: ts(0.5) })} />
 					))}
 				</View>
 			</View>

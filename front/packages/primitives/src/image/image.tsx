@@ -59,6 +59,7 @@ export const Image = ({
 		);
 	}
 
+	quality ??= "high";
 	return (
 		<View {...css([layout, border], props)}>
 			{state !== "finished" && (
@@ -69,7 +70,10 @@ export const Image = ({
 				/>
 			)}
 			<FastImage
-				source={{ uri: src[quality ?? "high"] }}
+				source={{
+					uri: src[quality],
+					priority: FastImage.priority[quality === "medium" ? "normal" : quality],
+				}}
 				accessibilityLabel={alt}
 				onLoad={() => setState("finished")}
 				onError={() => setState("errored")}

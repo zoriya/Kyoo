@@ -53,6 +53,7 @@ export const ItemGrid = ({
 							poster: {
 								borderColor: theme => theme.background,
 								borderWidth: px(4),
+								borderStyle: "solid",
 							},
 						},
 						fover: {

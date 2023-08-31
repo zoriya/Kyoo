@@ -26,7 +26,7 @@ import { LinearGradient, LinearGradientProps } from "expo-linear-gradient";
 import { ContrastArea, alpha } from "../themes";
 import { percent } from "yoshiki/native";
 
-export { Image };
+export { type Props as ImageProps, Image };
 
 export const Poster = ({
 	alt,

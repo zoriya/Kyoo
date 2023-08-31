@@ -73,7 +73,6 @@ export const Image = ({
 				// To reproduce view's behavior
 				position: "relative",
 				boxSizing: "border-box",
-				borderStyle: "solid",
 				overflow: "hidden",
 
 				// Use a blurhash here to nicely fade the NextImage when it is loaded completly
@@ -82,17 +81,15 @@ export const Image = ({
 				backgroundSize: "cover",
 				backgroundRepeat: "no-repeat",
 				backgroundPosition: "50% 50%",
-
-				// Use the layout's size and display the rounded border
-				width: (layout as any).width,
-				height: (layout as any).height,
-				aspectRatio: (layout as any).aspectRatio,
 			}}
-			// Gather classnames from props (to support parent's hover for example).
-			{...wCss({ ...border, borderRadius: "6px" }, { className: extractClassNames(props) })}
+			{...wCss([layout as any, { ...border, borderRadius: "6px" }], {
+				// Gather classnames from props (to support parent's hover for example).
+				className: extractClassNames(props),
+			})}
 		>
 			<NextImage
 				src={src[quality ?? "high"]}
+				priority={quality === "high"}
 				alt={alt!}
 				fill={true}
 				style={{

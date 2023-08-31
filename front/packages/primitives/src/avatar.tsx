@@ -19,7 +19,7 @@
  */
 
 import { View, ViewStyle } from "react-native";
-import { Image } from "./image";
+import { Image, ImageProps } from "./image";
 import { useYoshiki, px, Stylable } from "yoshiki/native";
 import { Icon } from "./icons";
 import { P } from "./text";
@@ -46,7 +46,8 @@ const stringToColor = (string: string) => {
 export const Avatar = forwardRef<
 	View,
 	{
-		src?: string | null;
+		src?: ImageProps["src"];
+		quality?: ImageProps["quality"];
 		alt?: string;
 		size?: YoshikiStyle<number>;
 		placeholder?: string;
@@ -56,7 +57,18 @@ export const Avatar = forwardRef<
 		as?: ComponentType<{ style?: ViewStyle } & RefAttributes<View>>;
 	} & Stylable
 >(function Avatar(
-	{ src, alt, size = px(24), color, placeholder, isLoading = false, fill = false, as, ...props },
+	{
+		src,
+		quality = "low",
+		alt,
+		size = px(24),
+		color,
+		placeholder,
+		isLoading = false,
+		fill = false,
+		as,
+		...props
+	},
 	ref,
 ) {
 	const { css, theme } = useYoshiki();
@@ -87,7 +99,13 @@ export const Avatar = forwardRef<
 			)}
 		>
 			{src || isLoading ? (
-				<Image src={src} alt={alt} layout={{ width: size, height: size }} />
+				<Image
+					src={src}
+					quality={quality}
+					isLoading={isLoading as any}
+					alt={alt}
+					layout={{ width: size, height: size }}
+				/>
 			) : placeholder ? (
 				<P
 					{...css({

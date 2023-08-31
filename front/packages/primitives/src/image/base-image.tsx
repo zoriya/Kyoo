@@ -29,7 +29,7 @@ export type YoshikiEnhanced<Style> = Style extends any
 	}
 	: never;
 
-type WithLoading<T> = (T & { isLoading?: false }) | (Partial<T> & { isLoading: true });
+type WithLoading<T> = (T & { isLoading?: boolean }) | (Partial<T> & { isLoading: true });
 
 export type Props = WithLoading<{
 	src?: KyooImage | null;
