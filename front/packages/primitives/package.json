@@ -18,6 +18,7 @@
 		"react": "*",
 		"react-native": "*",
 		"react-native-blurhash": "*",
+		"react-native-fast-image": "*",
 		"react-native-reanimated": "*",
 		"react-native-svg": "*",
 		"yoshiki": "*"
@@ -35,6 +36,9 @@
 		"react-native-blurhash": {
 			"optional": true
 		},
+		"react-native-fast-image": {
+			"optional": true
+		},
 		"react-native-web": {
 			"optional": true
 		}
@@ -45,6 +49,8 @@
 		"solito": "^4.0.1"
 	},
 	"optionalDependencies": {
-		"blurhash": "^2.0.5"
+		"blurhash": "^2.0.5",
+		"react-native-blurhash": "^1.1.11",
+		"react-native-fast-image": "^8.6.3"
 	}
 }

@@ -19,9 +19,11 @@
  */
 
 import { useState } from "react";
-import { ImageProps, ImageStyle, Platform, View, ViewStyle } from "react-native";
-import { useYoshiki } from "yoshiki/native";
-import { YoshikiEnhanced, WithLoading, Props, ImageLayout } from "./base-image";
+import { FlexStyle, ImageStyle, View, ViewStyle } from "react-native";
+import FastImage from "react-native-fast-image";
+import { Blurhash } from "react-native-blurhash";
+import { percent, useYoshiki } from "yoshiki/native";
+import { Props, ImageLayout } from "./base-image";
 import { Skeleton } from "../skeleton";
 
 export const Image = ({
@@ -30,6 +32,7 @@ export const Image = ({
 	alt,
 	isLoading: forcedLoading = false,
 	layout,
+	Error,
 	...props
 }: Props & { style?: ImageStyle } & { layout: ImageLayout }) => {
 	const { css } = useYoshiki();
@@ -45,41 +48,37 @@ export const Image = ({
 		setOldSource(src);
 	}
 
-	const border = { borderRadius: 6 } satisfies ViewStyle;
+	const border = { borderRadius: 6, overflow: "hidden" } satisfies ViewStyle;
 
 	if (forcedLoading) return <Skeleton variant="custom" {...css([layout, border], props)} />;
-	if (!src || state === "errored")
-		return <View {...css([{ bg: (theme) => theme.overlay0 }, layout, border], props)} />;
-
-	const nativeProps = Platform.select<Partial<ImageProps>>({
-		web: {
-			defaultSource: typeof src === "string" ? { uri: src } : Array.isArray(src) ? src[0] : src,
-		},
-		default: {},
-	});
+	if (!src || state === "errored") {
+		return Error !== undefined ? (
+			Error
+		) : (
+			<View {...css([{ bg: (theme) => theme.overlay0 }, layout, border], props)} />
+		);
+	}
 
 	return (
-		<View {...css(layout)}>
-			<Blurhash src={src.high} blurhash={src.blurhash} />
+		<View {...css([layout, border], props)}>
+			{state !== "finished" && (
+				<Blurhash
+					blurhash={src.blurhash}
+					resizeMode="cover"
+					{...css({ width: percent(100), height: percent(100) })}
+				/>
+			)}
+			<FastImage
+				source={{ uri: src[quality ?? "high"] }}
+				accessibilityLabel={alt}
+				onLoad={() => setState("finished")}
+				onError={() => setState("errored")}
+				resizeMode={FastImage.resizeMode.cover}
+				{...(css({
+					width: percent(100),
+					height: percent(100),
+				}) as { style: FlexStyle })}
+			/>
 		</View>
 	);
-
-	// return (
-	// 	<Skeleton variant="custom" show={state === "loading"} {...css([layout, border], props)}>
-	// 		<Img
-	// 			source={{ uri: src[quality || "high"] }}
-	// 			accessibilityLabel={alt}
-	// 			onLoad={() => setState("finished")}
-	// 			onError={() => setState("errored")}
-	// 			{...nativeProps}
-	// 			{...css([
-	// 				{
-	// 					width: percent(100),
-	// 					height: percent(100),
-	// 					resizeMode: "cover",
-	// 				},
-	// 			])}
-	// 		/>
-	// 	</Skeleton>
-	// );
 };

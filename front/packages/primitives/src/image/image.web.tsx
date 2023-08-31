@@ -21,6 +21,7 @@
 import { useLayoutEffect, useState } from "react";
 import { ImageStyle, View, ViewStyle } from "react-native";
 import { StyleList, processStyleList } from "yoshiki/src/type";
+import { useYoshiki as useWebYoshiki } from "yoshiki/web";
 import { useYoshiki } from "yoshiki/native";
 import { Props, ImageLayout } from "./base-image";
 import { blurHashToDataURL } from "./blurhash-web";
@@ -41,9 +42,11 @@ export const Image = ({
 	alt,
 	isLoading: forcedLoading = false,
 	layout,
+	Error,
 	...props
 }: Props & { style?: ImageStyle } & { layout: ImageLayout }) => {
 	const { css } = useYoshiki();
+	const { css: wCss } = useWebYoshiki();
 	const [state, setState] = useState<"loading" | "errored" | "finished">(
 		src ? "finished" : "errored",
 	);
@@ -55,8 +58,13 @@ export const Image = ({
 	const border = { borderRadius: 6 } satisfies ViewStyle;
 
 	if (forcedLoading) return <Skeleton variant="custom" {...css([layout, border], props)} />;
-	if (!src || state === "errored")
-		return <View {...css([{ bg: (theme) => theme.overlay0 }, layout, border], props)} />;
+	if (!src || state === "errored") {
+		return Error !== undefined ? (
+			Error
+		) : (
+			<View {...css([{ bg: (theme) => theme.overlay0 }, layout, border], props)} />
+		);
+	}
 
 	const blurhash = blurHashToDataURL(src.blurhash);
 	return (
@@ -79,10 +87,9 @@ export const Image = ({
 				width: (layout as any).width,
 				height: (layout as any).height,
 				aspectRatio: (layout as any).aspectRatio,
-				...border,
 			}}
 			// Gather classnames from props (to support parent's hover for example).
-			className={extractClassNames(props)}
+			{...wCss({ ...border, borderRadius: "6px" }, { className: extractClassNames(props) })}
 		>
 			<NextImage
 				src={src[quality ?? "high"]}

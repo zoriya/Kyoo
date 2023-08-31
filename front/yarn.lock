@@ -2526,6 +2526,8 @@ __metadata:
     "@tanstack/react-query": ^4.32.6
     "@types/react": 18.2.0
     blurhash: ^2.0.5
+    react-native-blurhash: ^1.1.11
+    react-native-fast-image: ^8.6.3
     solito: ^4.0.1
     typescript: ^5.1.6
   peerDependencies:
@@ -2538,11 +2540,16 @@ __metadata:
     react: "*"
     react-native: "*"
     react-native-blurhash: "*"
+    react-native-fast-image: "*"
     react-native-reanimated: "*"
     react-native-svg: "*"
     yoshiki: "*"
   dependenciesMeta:
     blurhash:
+      optional: true
+    react-native-blurhash:
+      optional: true
+    react-native-fast-image:
       optional: true
   peerDependenciesMeta:
     "@gorhom/portal":
@@ -2552,6 +2559,8 @@ __metadata:
     blurhash:
       optional: true
     react-native-blurhash:
+      optional: true
+    react-native-fast-image:
       optional: true
     react-native-web:
       optional: true
@@ -10565,6 +10574,7 @@ __metadata:
     react-i18next: ^13.0.3
     react-native: 0.72.3
     react-native-blurhash: ^1.1.11
+    react-native-fast-image: ^8.6.3
     react-native-mmkv: ^2.10.1
     react-native-reanimated: ~3.3.0
     react-native-safe-area-context: 4.6.3
@@ -11879,6 +11889,16 @@ __metadata:
     react: ">=16.8.1"
     react-native: ">=0.60.0-rc.0 <1.0.x"
   checksum: 45d78d14faf5aa8410550d0e3c86fa565bc6726cb425c1fd0b856304841c6210d70c9ef2527e3b82692cc5da51afcdc43643469518ee9a5bd0696a96cdefc524
+  languageName: node
+  linkType: hard
+
+"react-native-fast-image@npm:^8.6.3":
+  version: 8.6.3
+  resolution: "react-native-fast-image@npm:8.6.3"
+  peerDependencies:
+    react: ^17 || ^18
+    react-native: ">=0.60.0"
+  checksum: 29289cb6b2eae0983c8922b22e2d9de3be07322bb7991c5def19f95eadefaedb0e308ff0b38cc1d0444e8bd4fe94a7621a99a2d3d9298100bcb60b3144677234
   languageName: node
   linkType: hard
 

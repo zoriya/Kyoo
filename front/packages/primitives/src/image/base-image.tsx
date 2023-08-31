@@ -19,10 +19,8 @@
  */
 
 import { KyooImage } from "@kyoo/models";
-import {
-	Image as Img,
-	ImageStyle,
-} from "react-native";
+import { ReactElement } from "react";
+import { ImageStyle } from "react-native";
 import { YoshikiStyle } from "yoshiki/src/type";
 
 export type YoshikiEnhanced<Style> = Style extends any
@@ -31,12 +29,13 @@ export type YoshikiEnhanced<Style> = Style extends any
 	}
 	: never;
 
-export type WithLoading<T> = (T & { isLoading?: boolean }) | (Partial<T> & { isLoading: true });
+type WithLoading<T> = (T & { isLoading?: false }) | (Partial<T> & { isLoading: true });
 
 export type Props = WithLoading<{
 	src?: KyooImage | null;
-	alt: string;
 	quality: "low" | "medium" | "high";
+	alt: string;
+	Error?: ReactElement | null;
 }>;
 
 export type ImageLayout = YoshikiEnhanced<

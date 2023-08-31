@@ -19,7 +19,7 @@
  */
 
 import { ImageProps, ImageStyle, Platform, View, ViewProps, ViewStyle } from "react-native";
-import { Props, ImageLayout, YoshikiEnhanced } from "./base-image";
+import { Props, YoshikiEnhanced } from "./base-image";
 import { Image } from "./image";
 import { ComponentType, ReactNode, useState } from "react";
 import { LinearGradient, LinearGradientProps } from "expo-linear-gradient";
@@ -36,12 +36,18 @@ export const Poster = ({
 }: Props & { style?: ImageStyle } & {
 	layout: YoshikiEnhanced<{ width: ImageStyle["width"] } | { height: ImageStyle["height"] }>;
 }) => (
-	<Image isLoading={isLoading} alt={alt} layout={{ aspectRatio: 2 / 3, ...layout }} {...props} />
+	<Image
+		isLoading={isLoading as any}
+		alt={alt!}
+		layout={{ aspectRatio: 2 / 3, ...layout }}
+		{...props}
+	/>
 );
 
 export const ImageBackground = <AsProps = ViewProps,>({
 	src,
 	alt,
+	quality,
 	gradient = true,
 	as,
 	children,
@@ -57,14 +63,6 @@ export const ImageBackground = <AsProps = ViewProps,>({
 	imageStyle?: YoshikiEnhanced<ImageStyle>;
 } & AsProps &
 	Props) => {
-	const [isErrored, setErrored] = useState(false);
-
-	const nativeProps = Platform.select<Partial<ImageProps>>({
-		web: {
-			defaultSource: typeof src === "string" ? { uri: src! } : Array.isArray(src) ? src[0] : src!,
-		},
-		default: {},
-	});
 	const Container = as ?? View;
 	return (
 		<ContrastArea contrastText>
@@ -84,16 +82,14 @@ export const ImageBackground = <AsProps = ViewProps,>({
 							containerStyle,
 						])}
 					>
-						{src && !isErrored && (
+						{src && (
 							<Image
-								source={typeof src === "string" ? { uri: src } : src}
-								accessibilityLabel={alt}
-								onError={() => setErrored(true)}
-								{...nativeProps}
-								{...css([
-									{ width: percent(100), height: percent(100), resizeMode: "cover" },
-									imageStyle,
-								])}
+								src={src}
+								quality={quality}
+								alt={alt!}
+								layout={{ width: percent(100), height: percent(100) }}
+								Error={null}
+								{...(css([{ borderWidth: 0, borderRadius: 0 }, imageStyle]) as ImageProps)}
 							/>
 						)}
 						{gradient && (

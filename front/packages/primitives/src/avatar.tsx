@@ -55,7 +55,7 @@ export const Avatar = forwardRef<
 		fill?: boolean;
 		as?: ComponentType<{ style?: ViewStyle } & RefAttributes<View>>;
 	} & Stylable
->(function _Avatar(
+>(function Avatar(
 	{ src, alt, size = px(24), color, placeholder, isLoading = false, fill = false, as, ...props },
 	ref,
 ) {
