@@ -54,9 +54,9 @@ namespace Kyoo.Core.Controllers
 			_logger = logger;
 		}
 
-		private static async Task _WriteTo(SKBitmap bitmap, string path)
+		private static async Task _WriteTo(SKBitmap bitmap, string path, int quality)
 		{
-			SKData data = bitmap.Encode(SKEncodedImageFormat.Webp, 18);
+			SKData data = bitmap.Encode(SKEncodedImageFormat.Webp, quality);
 			await using Stream reader = data.AsStream();
 			await using Stream file = File.Create(path);
 			await reader.CopyToAsync(file);
@@ -80,13 +80,13 @@ namespace Kyoo.Core.Controllers
 				using SKBitmap original = SKBitmap.Decode(codec, info);
 
 				using SKBitmap high = original.Resize(new SKSizeI(original.Width, original.Height), SKFilterQuality.High);
-				await _WriteTo(high, $"{localPath}.{ImageQuality.High.ToString().ToLowerInvariant()}.webp");
+				await _WriteTo(original, $"{localPath}.{ImageQuality.High.ToString().ToLowerInvariant()}.webp", 80);
 
 				using SKBitmap medium = high.Resize(new SKSizeI((int)(high.Width / 1.5), (int)(high.Height / 1.5)), SKFilterQuality.Medium);
-				await _WriteTo(medium, $"{localPath}.{ImageQuality.Medium.ToString().ToLowerInvariant()}.webp");
+				await _WriteTo(medium, $"{localPath}.{ImageQuality.Medium.ToString().ToLowerInvariant()}.webp", 55);
 
-				using SKBitmap low = medium.Resize(new SKSizeI(medium.Width / 2, medium.Height / 2), SKFilterQuality.Low);
-				await _WriteTo(low, $"{localPath}.{ImageQuality.Low.ToString().ToLowerInvariant()}.webp");
+				using SKBitmap low = medium.Resize(new SKSizeI(original.Width / 2, original.Height / 2), SKFilterQuality.Low);
+				await _WriteTo(low, $"{localPath}.{ImageQuality.Low.ToString().ToLowerInvariant()}.webp", 25);
 
 				image.Blurhash = Blurhasher.Encode(low, 4, 3);
 			}
