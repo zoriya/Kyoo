@@ -130,6 +130,16 @@ namespace Kyoo.Abstractions.Models
 		/// <inheritdoc />
 		public Dictionary<string, MetadataId> ExternalId { get; set; } = new();
 
+		/// <summary>
+		/// Links to watch this movie.
+		/// </summary>
+		public VideoLinks? Links => Kind == ItemKind.Movie ? new()
+		{
+			Direct = $"/video/movie/{Slug}/direct",
+			Hls = $"/video/movie/{Slug}/master.m3u8",
+		}
+		: null;
+
 		public LibraryItem() { }
 
 		[JsonConstructor]

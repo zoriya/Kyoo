@@ -20,8 +20,9 @@
 
 import { z } from "zod";
 import { zdate } from "../utils";
-import { ImagesP } from "../traits";
+import { ImagesP, imageFn } from "../traits";
 import { ResourceP } from "../traits/resource";
+import { ShowP } from "./show";
 
 const BaseEpisodeP = ResourceP.merge(ImagesP).extend({
 	/**
@@ -54,6 +55,23 @@ const BaseEpisodeP = ResourceP.merge(ImagesP).extend({
 	 * The release date of this episode. It can be null if unknown.
 	 */
 	releaseDate: zdate().nullable(),
+
+	/**
+	 * The links to see a movie or an episode.
+	 */
+	links: z.object({
+		/**
+		 * The direct link to the unprocessed video (pristine quality).
+		 */
+		direct: z.string().transform(imageFn),
+
+		/**
+		 * The link to an HLS master playlist containing all qualities available for this video.
+		 */
+		hls: z.string().transform(imageFn),
+	}),
+
+	show: ShowP.optional()
 });
 
 export const EpisodeP = BaseEpisodeP.extend({

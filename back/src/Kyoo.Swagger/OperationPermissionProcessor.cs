@@ -67,7 +67,7 @@ namespace Kyoo.Swagger
 						Kind? kind = controller.Type == null
 							? controller.Kind
 							: cur.Kind;
-						ICollection<string> permissions = _GetPermissionsList(agg, group!.Value);
+						ICollection<string> permissions = _GetPermissionsList(agg, group ?? Group.Overall);
 						permissions.Add($"{type}.{kind!.Value.ToString().ToLower()}");
 						agg[nameof(Kyoo)] = permissions;
 						return agg;

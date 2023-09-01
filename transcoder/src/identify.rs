@@ -24,10 +24,15 @@ pub struct MediaInfo {
 	pub length: f32,
 	/// The container of the video file of this episode.
 	pub container: String,
+	/// The video codec and infromations.
 	pub video: Video,
+	/// The list of audio tracks.
 	pub audios: Vec<Audio>,
+	/// The list of subtitles tracks.
 	pub subtitles: Vec<Subtitle>,
+	/// The list of fonts that can be used to display subtitles.
 	pub fonts: Vec<String>,
+	/// The list of chapters. See Chapter for more information.
 	pub chapters: Vec<Chapter>,
 }
 

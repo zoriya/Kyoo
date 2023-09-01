@@ -320,6 +320,11 @@ namespace Kyoo.Postgresql
 			modelBuilder.Entity<User>()
 				.HasIndex(x => x.Slug)
 				.IsUnique();
+
+			modelBuilder.Entity<Movie>()
+				.Ignore(x => x.Links);
+			modelBuilder.Entity<LibraryItem>()
+				.Ignore(x => x.Links);
 		}
 
 		/// <summary>

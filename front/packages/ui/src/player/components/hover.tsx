@@ -33,7 +33,7 @@ import {
 	tooltip,
 	ts,
 } from "@kyoo/primitives";
-import { Chapter, Subtitle, WatchItem } from "@kyoo/models";
+import { Chapter, KyooImage, Subtitle } from "@kyoo/models";
 import { useAtomValue, useSetAtom, useAtom } from "jotai";
 import { Platform, Pressable, View, ViewProps } from "react-native";
 import { useTranslation } from "react-i18next";
@@ -51,7 +51,6 @@ export const Hover = ({
 	href,
 	poster,
 	chapters,
-	qualities,
 	subtitles,
 	fonts,
 	previousSlug,
@@ -66,9 +65,8 @@ export const Hover = ({
 	name?: string | null;
 	showName?: string;
 	href?: string;
-	poster?: string | null;
+	poster?: KyooImage | null;
 	chapters?: Chapter[];
-	qualities?: WatchItem["link"]
 	subtitles?: Subtitle[];
 	fonts?: string[];
 	previousSlug?: string | null;
@@ -77,7 +75,7 @@ export const Hover = ({
 	onMenuClose: () => void;
 	show: boolean;
 } & ViewProps) => {
-	// TODO animate show
+	// TODO: animate show
 	const opacity = !show && (Platform.OS === "web" ? { opacity: 0 } : { display: "none" as const});
 	return (
 		<ContrastArea mode="dark">
@@ -126,7 +124,6 @@ export const Hover = ({
 								<RightButtons
 									subtitles={subtitles}
 									fonts={fonts}
-									qualities={qualities}
 									onMenuOpen={onMenuOpen}
 									onMenuClose={onMenuClose}
 								/>
@@ -210,7 +207,7 @@ export const Back = ({
 	);
 };
 
-const VideoPoster = ({ poster }: { poster?: string | null }) => {
+const VideoPoster = ({ poster }: { poster?: KyooImage | null }) => {
 	const { css } = useYoshiki();
 
 	return (

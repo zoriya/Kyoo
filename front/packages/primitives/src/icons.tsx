@@ -113,7 +113,7 @@ export const IconFab = <AsProps = PressableProps,>(
 					bg: (theme) => theme.accent,
 					fover: {
 						self: {
-							transform: [{ scale: 1.3 }],
+							transform: "scale(1.3)" as any,
 							bg: (theme: Theme) => theme.accent,
 						},
 					},

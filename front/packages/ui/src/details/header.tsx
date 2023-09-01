@@ -76,6 +76,7 @@ const TitleLine = ({
 	poster,
 	studio,
 	trailerUrl,
+	type,
 	...props
 }: {
 	isLoading: boolean;
@@ -86,6 +87,7 @@ const TitleLine = ({
 	poster?: KyooImage | null;
 	studio?: Studio | null;
 	trailerUrl?: string | null;
+	type: "movie" | "show";
 } & Stylable) => {
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
@@ -193,7 +195,7 @@ const TitleLine = ({
 						<IconFab
 							icon={PlayArrow}
 							as={Link}
-							href={`/watch/${slug}`}
+							href={type === "show"  ? `/watch/${slug}` : `/movie/${slug}/watch`}
 							color={{ xs: theme.user.colors.black, md: theme.colors.black }}
 							{...css({
 								bg: theme.user.accent,
@@ -341,7 +343,7 @@ const Description = ({
 	);
 };
 
-export const Header = ({ query, slug }: { query: QueryIdentifier<Show | Movie>; slug: string }) => {
+export const Header = ({ query, type, slug }: { query: QueryIdentifier<Show | Movie>; type: "movie" | "show", slug: string }) => {
 	const { css } = useYoshiki();
 
 	return (
@@ -365,6 +367,7 @@ export const Header = ({ query, slug }: { query: QueryIdentifier<Show | Movie>; 
 					>
 						<TitleLine
 							isLoading={isLoading}
+							type={type}
 							slug={slug}
 							name={data?.name}
 							tagline={data?.tagline}

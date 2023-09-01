@@ -55,7 +55,7 @@ const audioAtom = atom(0);
 
 const clientId = uuid.v4() as string;
 
-const Video = forwardRef<NativeVideo, VideoProps>(function _NativeVideo(
+const Video = forwardRef<NativeVideo, VideoProps>(function Video(
 	{ onLoad, source, onPointerDown, subtitles, ...props },
 	ref,
 ) {

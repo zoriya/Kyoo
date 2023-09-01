@@ -2,6 +2,7 @@ use derive_more::Display;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use serde::Serialize;
+use utoipa::ToSchema;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::path::PathBuf;
@@ -20,7 +21,7 @@ pub enum TranscodeError {
 	ArgumentError(String),
 }
 
-#[derive(PartialEq, Eq, Serialize, Display, Clone, Copy)]
+#[derive(PartialEq, Eq, Serialize, Display, Clone, Copy, ToSchema)]
 pub enum Quality {
 	#[display(fmt = "240p")]
 	P240,

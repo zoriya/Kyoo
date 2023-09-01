@@ -18,18 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { useRouter } from "next/router";
-import { ComponentType } from "react";
+import { Player } from "@kyoo/ui";
+import { withRoute } from "~/router";
 
-export const withRoute = <Props,>(Component: ComponentType<Props>, defaultProps?: Partial<Props>) => {
-	const WithUseRoute = (props: Props) => {
-		const router = useRouter();
-
-		// @ts-ignore
-		return <Component {...defaultProps} {...router.query} {...props} />;
-	};
-
-	const { ...all } = Component;
-	Object.assign(WithUseRoute, { ...all });
-	return WithUseRoute;
-};
+export default withRoute(Player, { type: "movie" });

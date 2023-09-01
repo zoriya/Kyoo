@@ -20,7 +20,7 @@
 
 import { z } from "zod";
 import { zdate } from "../utils";
-import { ImagesP, ResourceP } from "../traits";
+import { ImagesP, ResourceP, imageFn } from "../traits";
 import { Genre } from "./genre";
 import { StudioP } from "./studio";
 import { Status } from "./show";
@@ -67,6 +67,21 @@ export const MovieP = ResourceP.merge(ImagesP).extend({
 	 * The studio that made this movie.
 	 */
 	studio: StudioP.optional().nullable(),
+
+	/**
+	 * The links to see a movie or an episode.
+	 */
+	links: z.object({
+		/**
+		 * The direct link to the unprocessed video (pristine quality).
+		 */
+		direct: z.string().transform(imageFn),
+
+		/**
+		 * The link to an HLS master playlist containing all qualities available for this video.
+		 */
+		hls: z.string().transform(imageFn),
+	}),
 });
 
 /**
