@@ -35,56 +35,67 @@ export enum Status {
 	Planned = "Planned",
 }
 
-export const ShowP = ResourceP.merge(ImagesP).extend({
-	/**
-	 * The title of this show.
-	 */
-	name: z.string(),
-	/**
-	 * A catchphrase for this show.
-	 */
-	tagline: z.string().nullable(),
-	/**
-	 * The list of alternative titles of this show.
-	 */
-	aliases: z.array(z.string()),
-	/**
-	 * The summary of this show.
-	 */
-	overview: z.string().nullable(),
-	/**
-	 * A list of tags that match this movie.
-	 */
-	tags: z.array(z.string()),
-	/**
-	 * Is this show airing, not aired yet or finished?
-	 */
-	status: z.nativeEnum(Status),
-	/**
-	 * The date this show started airing. It can be null if this is unknown.
-	 */
-	startAir: zdate().nullable(),
-	/**
-	 * The date this show finished airing. It can also be null if this is unknown.
-	 */
-	endAir: zdate().nullable(),
-	/**
-	 * The list of genres (themes) this show has.
-	 */
-	genres: z.array(z.nativeEnum(Genre)),
-	/**
-	 * A youtube url for the trailer.
-	 */
-	trailer: z.string().optional().nullable(),
-	/**
-	 * The studio that made this show.
-	 */
-	studio: StudioP.optional().nullable(),
-	/**
-	 * The list of seasons of this show.
-	 */
-	seasons: z.array(SeasonP).optional(),
-});
+export const ShowP = ResourceP.merge(ImagesP)
+	.extend({
+		/**
+		 * The title of this show.
+		 */
+		name: z.string(),
+		/**
+		 * A catchphrase for this show.
+		 */
+		tagline: z.string().nullable(),
+		/**
+		 * The list of alternative titles of this show.
+		 */
+		aliases: z.array(z.string()),
+		/**
+		 * The summary of this show.
+		 */
+		overview: z.string().nullable(),
+		/**
+		 * A list of tags that match this movie.
+		 */
+		tags: z.array(z.string()),
+		/**
+		 * Is this show airing, not aired yet or finished?
+		 */
+		status: z.nativeEnum(Status),
+		/**
+		 * The date this show started airing. It can be null if this is unknown.
+		 */
+		startAir: zdate().nullable(),
+		/**
+		 * The date this show finished airing. It can also be null if this is unknown.
+		 */
+		endAir: zdate().nullable(),
+		/**
+		 * The list of genres (themes) this show has.
+		 */
+		genres: z.array(z.nativeEnum(Genre)),
+		/**
+		 * A youtube url for the trailer.
+		 */
+		trailer: z.string().optional().nullable(),
+		/**
+		 * The studio that made this show.
+		 */
+		studio: StudioP.optional().nullable(),
+		/**
+		 * The list of seasons of this show.
+		 */
+		seasons: z.array(SeasonP).optional(),
+	})
+	.transform((x) => {
+		if (!x.thumbnail && x.poster) {
+			x.thumbnail = { ...x.poster };
+			if (x.thumbnail) {
+				x.thumbnail.low = x.thumbnail.high;
+				x.thumbnail.medium = x.thumbnail.high;
+			}
+		}
+		return x;
+	});
 
 /**
  * A tv serie or an anime.

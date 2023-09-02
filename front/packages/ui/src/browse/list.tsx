@@ -46,7 +46,7 @@ export const ItemList = ({
 		<ImageBackground
 			src={thumbnail}
 			alt={name}
-			quality="low"
+			quality="medium"
 			as={Link}
 			href={href ?? ""}
 			onFocus={() => setHovered((i) => i + 1)}
