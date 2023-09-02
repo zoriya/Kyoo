@@ -61,7 +61,7 @@ export const Icon = ({ icon: Icon, color, size = 24, ...props }: IconProps) => {
 	);
 };
 
-export const IconButton = forwardRef(function _IconButton<AsProps = PressableProps>(
+export const IconButton = forwardRef(function IconButton<AsProps = PressableProps>(
 	{
 		icon,
 		size,

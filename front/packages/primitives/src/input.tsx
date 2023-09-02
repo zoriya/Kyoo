@@ -31,7 +31,7 @@ export const Input = forwardRef<
 		variant?: "small" | "big";
 		right?: ReactNode;
 	} & TextInputProps
->(function _Input({ style, placeholderTextColor, variant = "small", right, ...props }, ref) {
+>(function Input({ style, placeholderTextColor, variant = "small", right, ...props }, ref) {
 	const { css, theme } = useYoshiki();
 
 	return (

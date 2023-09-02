@@ -22,6 +22,7 @@ using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Core.Controllers;
 using Kyoo.Postgresql;
+using Moq;
 using Xunit.Abstractions;
 
 namespace Kyoo.Tests.Database
@@ -37,16 +38,18 @@ namespace Kyoo.Tests.Database
 		{
 			Context = new PostgresTestContext(postgres, output);
 
-			CollectionRepository collection = new(_NewContext());
-			StudioRepository studio = new(_NewContext());
+			Mock<ThumbnailsManager> thumbs = new();
+			CollectionRepository collection = new(_NewContext(), thumbs.Object);
+			StudioRepository studio = new(_NewContext(), thumbs.Object);
 			PeopleRepository people = new(_NewContext(),
-				new Lazy<IShowRepository>(() => LibraryManager.ShowRepository));
-			MovieRepository movies = new(_NewContext(), studio, people);
-			ShowRepository show = new(_NewContext(), studio, people);
-			SeasonRepository season = new(_NewContext(), show);
-			LibraryItemRepository libraryItem = new(_NewContext());
-			EpisodeRepository episode = new(_NewContext(), show);
-			UserRepository user = new(_NewContext());
+				new Lazy<IShowRepository>(() => LibraryManager.ShowRepository),
+				thumbs.Object);
+			MovieRepository movies = new(_NewContext(), studio, people, thumbs.Object);
+			ShowRepository show = new(_NewContext(), studio, people, thumbs.Object);
+			SeasonRepository season = new(_NewContext(), show, thumbs.Object);
+			LibraryItemRepository libraryItem = new(_NewContext(), thumbs.Object);
+			EpisodeRepository episode = new(_NewContext(), show, thumbs.Object);
+			UserRepository user = new(_NewContext(), thumbs.Object);
 
 			LibraryManager = new LibraryManager(new IBaseRepository[] {
 				libraryItem,

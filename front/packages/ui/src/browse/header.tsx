@@ -41,7 +41,7 @@ import { Layout, SortBy, SortOrd } from "./types";
 import { forwardRef } from "react";
 import { View, PressableProps } from "react-native";
 
-const SortTrigger = forwardRef<View, PressableProps & { sortKey: SortBy }>(function _SortTrigger(
+const SortTrigger = forwardRef<View, PressableProps & { sortKey: SortBy }>(function SortTrigger(
 	{ sortKey, ...props },
 	ref,
 ) {
