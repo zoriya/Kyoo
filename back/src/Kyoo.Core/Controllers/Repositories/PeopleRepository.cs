@@ -52,9 +52,11 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		/// <param name="database">The database handle</param>
 		/// <param name="shows">A lazy loaded show repository</param>
+		/// <param name="thumbs">The thumbnail manager used to store images.</param>
 		public PeopleRepository(DatabaseContext database,
-			Lazy<IShowRepository> shows)
-			: base(database)
+			Lazy<IShowRepository> shows,
+			IThumbnailsManager thumbs)
+			: base(database, thumbs)
 		{
 			_database = database;
 			_shows = shows;

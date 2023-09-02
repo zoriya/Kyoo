@@ -46,8 +46,9 @@ namespace Kyoo.Core.Controllers
 		/// Create a new <see cref="ILibraryItemRepository"/>.
 		/// </summary>
 		/// <param name="database">The database instance</param>
-		public LibraryItemRepository(DatabaseContext database)
-			: base(database)
+		/// <param name="thumbs">The thumbnail manager used to store images.</param>
+		public LibraryItemRepository(DatabaseContext database, IThumbnailsManager thumbs)
+			: base(database, thumbs)
 		{
 			_database = database;
 		}

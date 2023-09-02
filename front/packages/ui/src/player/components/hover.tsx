@@ -220,6 +220,7 @@ const VideoPoster = ({ poster }: { poster?: KyooImage | null }) => {
 		>
 			<Poster
 				src={poster}
+				quality="low"
 				layout={{ width: percent(100) }}
 				{...css({ position: "absolute", bottom: 0 })}
 			/>

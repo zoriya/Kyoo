@@ -47,9 +47,11 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		/// <param name="database">The database handle that will be used</param>
 		/// <param name="shows">A shows repository</param>
+		/// <param name="thumbs">The thumbnail manager used to store images.</param>
 		public SeasonRepository(DatabaseContext database,
-			IShowRepository shows)
-			: base(database)
+			IShowRepository shows,
+			IThumbnailsManager thumbs)
+			: base(database, thumbs)
 		{
 			_database = database;
 

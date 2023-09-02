@@ -43,8 +43,9 @@ namespace Kyoo.Core.Controllers
 		/// Create a new <see cref="UserRepository"/>
 		/// </summary>
 		/// <param name="database">The database handle to use</param>
-		public UserRepository(DatabaseContext database)
-			: base(database)
+		/// <param name="thumbs">The thumbnail manager used to store images.</param>
+		public UserRepository(DatabaseContext database, IThumbnailsManager thumbs)
+			: base(database, thumbs)
 		{
 			_database = database;
 		}

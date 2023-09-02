@@ -75,7 +75,7 @@ const mapData = (
 		name: data.type === "movie" ? data.name : `${episodeDisplayNumber(data, "")} ${data.name}`,
 		showName: data.type === "movie" ? data.name! : data.show!.name,
 		href: data ? (data.type === "movie" ? `/movie/${data.slug}` : `/show/${data.show!.slug}`) : "#",
-		poster: data.poster,
+		poster: data.type === "movie" ? data.poster : data.show!.poster,
 		subtitles: info.subtitles,
 		chapters: info.chapters,
 		fonts: info.fonts,

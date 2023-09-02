@@ -46,6 +46,11 @@ namespace Kyoo.Core.Controllers
 		protected DbContext Database { get; }
 
 		/// <summary>
+		/// The thumbnail manager used to store images.
+		/// </summary>
+		private readonly IThumbnailsManager _thumbs;
+
+		/// <summary>
 		/// The default sort order that will be used for this resource's type.
 		/// </summary>
 		protected abstract Sort<T> DefaultSort { get; }
@@ -54,9 +59,11 @@ namespace Kyoo.Core.Controllers
 		/// Create a new base <see cref="LocalRepository{T}"/> with the given database handle.
 		/// </summary>
 		/// <param name="database">A database connection to load resources of type <typeparamref name="T"/></param>
-		protected LocalRepository(DbContext database)
+		/// <param name="thumbs">The thumbnail manager used to store images.</param>
+		protected LocalRepository(DbContext database, IThumbnailsManager thumbs)
 		{
 			Database = database;
+			_thumbs = thumbs;
 		}
 
 		/// <inheritdoc/>
@@ -365,6 +372,7 @@ namespace Kyoo.Core.Controllers
 			await Validate(obj);
 			if (obj is IThumbnails thumbs)
 			{
+				await _thumbs.DownloadImages(thumbs);
 				if (thumbs.Poster != null)
 					Database.Entry(thumbs).Reference(x => x.Poster).TargetEntry.State = EntityState.Added;
 				if (thumbs.Thumbnail != null)

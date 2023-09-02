@@ -54,9 +54,11 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		/// <param name="database">The database handle to use.</param>
 		/// <param name="shows">A show repository</param>
+		/// <param name="thumbs">The thumbnail manager used to store images.</param>
 		public EpisodeRepository(DatabaseContext database,
-			IShowRepository shows)
-			: base(database)
+			IShowRepository shows,
+			IThumbnailsManager thumbs)
+			: base(database, thumbs)
 		{
 			_database = database;
 			_shows = shows;
@@ -144,8 +146,8 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task<Episode> Create(Episode obj)
 		{
-			await base.Create(obj);
 			obj.ShowSlug = obj.Show?.Slug ?? _database.Shows.First(x => x.Id == obj.ShowId).Slug;
+			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
 			await _database.SaveChangesAsync(() =>
 				obj.SeasonNumber != null && obj.EpisodeNumber != null

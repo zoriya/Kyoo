@@ -56,10 +56,12 @@ namespace Kyoo.Core.Controllers
 		/// <param name="database">The database handle to use</param>
 		/// <param name="studios">A studio repository</param>
 		/// <param name="people">A people repository</param>
+		/// <param name="thumbs">The thumbnail manager used to store images.</param>
 		public ShowRepository(DatabaseContext database,
 			IStudioRepository studios,
-			IPeopleRepository people)
-			: base(database)
+			IPeopleRepository people,
+			IThumbnailsManager thumbs)
+			: base(database, thumbs)
 		{
 			_database = database;
 			_studios = studios;

@@ -131,12 +131,5 @@ namespace Kyoo.Core.Api
 		{
 			return _GetImage(identifier, "thumbnail", quality);
 		}
-
-		/// <inheritdoc/>
-		public override async Task<ActionResult<T>> Create([FromBody] T resource)
-		{
-			await _thumbs.DownloadImages(resource);
-			return await base.Create(resource);
-		}
 	}
 }

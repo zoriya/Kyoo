@@ -71,7 +71,6 @@ export const Image = ({
 		<div
 			style={{
 				// To reproduce view's behavior
-				position: "relative",
 				boxSizing: "border-box",
 				overflow: "hidden",
 
@@ -82,7 +81,7 @@ export const Image = ({
 				backgroundRepeat: "no-repeat",
 				backgroundPosition: "50% 50%",
 			}}
-			{...wCss([layout as any, { ...border, borderRadius: "6px" }], {
+			{...wCss([layout as any, { ...border, borderRadius: "6px", position: "relative" }], {
 				// Gather classnames from props (to support parent's hover for example).
 				className: extractClassNames(props),
 			})}

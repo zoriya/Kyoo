@@ -113,7 +113,7 @@ namespace Kyoo.Core.Controllers
 		{
 			string directory = item switch
 			{
-				IResource res => Path.Combine("./metadata", typeof(T).Name.ToLowerInvariant(), res.Slug),
+				IResource res => Path.Combine("./metadata", item.GetType().Name.ToLowerInvariant(), res.Slug),
 				_ => Path.Combine("./metadata", typeof(T).Name.ToLowerInvariant())
 			};
 			Directory.CreateDirectory(directory);
