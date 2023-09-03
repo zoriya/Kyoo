@@ -2,7 +2,6 @@ use derive_more::Display;
 use rand::distributions::Alphanumeric;
 use rand::{thread_rng, Rng};
 use serde::Serialize;
-use utoipa::ToSchema;
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::path::PathBuf;
@@ -12,6 +11,7 @@ use std::str::FromStr;
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::process::{Child, Command};
 use tokio::sync::watch;
+use utoipa::ToSchema;
 
 const SEGMENT_TIME: u32 = 10;
 

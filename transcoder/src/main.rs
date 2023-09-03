@@ -13,8 +13,8 @@ use crate::{
 	audio::*,
 	identify::{identify, Audio, Chapter, MediaInfo, Subtitle, Video},
 	state::Transcoder,
+	transcode::Quality,
 	video::*,
-	transcode::Quality
 };
 mod audio;
 mod error;
