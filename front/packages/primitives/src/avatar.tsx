@@ -102,7 +102,6 @@ export const Avatar = forwardRef<
 				<Image
 					src={src}
 					quality={quality}
-					isLoading={isLoading as any}
 					alt={alt}
 					layout={{ width: size, height: size }}
 				/>

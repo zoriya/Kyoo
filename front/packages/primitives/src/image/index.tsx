@@ -30,19 +30,11 @@ export { type Props as ImageProps, Image };
 
 export const Poster = ({
 	alt,
-	isLoading = false,
 	layout,
 	...props
 }: Props & { style?: ImageStyle } & {
 	layout: YoshikiEnhanced<{ width: ImageStyle["width"] } | { height: ImageStyle["height"] }>;
-}) => (
-	<Image
-		isLoading={isLoading as any}
-		alt={alt!}
-		layout={{ aspectRatio: 2 / 3, ...layout }}
-		{...props}
-	/>
-);
+}) => <Image alt={alt!} layout={{ aspectRatio: 2 / 3, ...layout }} {...props} />;
 
 export const ImageBackground = <AsProps = ViewProps,>({
 	src,
@@ -53,7 +45,7 @@ export const ImageBackground = <AsProps = ViewProps,>({
 	children,
 	containerStyle,
 	imageStyle,
-	isLoading,
+	forcedLoading,
 	...asProps
 }: {
 	as?: ComponentType<AsProps>;
@@ -86,10 +78,13 @@ export const ImageBackground = <AsProps = ViewProps,>({
 							<Image
 								src={src}
 								quality={quality}
+								forcedLoading={forcedLoading}
 								alt={alt!}
 								layout={{ width: percent(100), height: percent(100) }}
 								Error={null}
-								{...(css([{ borderWidth: 0, borderRadius: 0 }, imageStyle]) as ImageProps)}
+								{...(css([{ borderWidth: 0, borderRadius: 0 }, imageStyle]) as {
+									style: ImageStyle;
+								})}
 							/>
 						)}
 						{gradient && (

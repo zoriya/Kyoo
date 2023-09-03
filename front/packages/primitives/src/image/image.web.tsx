@@ -40,7 +40,7 @@ export const Image = ({
 	src,
 	quality,
 	alt,
-	isLoading: forcedLoading = false,
+	forcedLoading = false,
 	layout,
 	Error,
 	...props

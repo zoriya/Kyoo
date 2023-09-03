@@ -106,7 +106,7 @@ export const Skeleton = ({
 						<MotiView
 							key={`skeleton_${i}`}
 							// No clue why it is a number on mobile and a string on web but /shrug
-							animate={{ opacity: Platform.OS === "web" ? "1" : 1 }}
+							animate={{ opacity: Platform.OS === "web" ? "1" as any : 1 }}
 							exit={{ opacity: 0 }}
 							transition={{ type: "timing" }}
 							onLayout={(e) => setWidth(e.nativeEvent.layout.width)}

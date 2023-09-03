@@ -20,7 +20,7 @@
 
 import { KyooImage } from "@kyoo/models";
 import { Link, Skeleton, Poster, ts, focusReset, P, SubP } from "@kyoo/primitives";
-import { Platform } from "react-native";
+import { ImageStyle, Platform } from "react-native";
 import { percent, px, Stylable, useYoshiki } from "yoshiki/native";
 import { Layout, WithLoading } from "../fetch";
 
@@ -51,7 +51,7 @@ export const ItemGrid = ({
 						m: { xs: ts(1), sm: ts(4) },
 						child: {
 							poster: {
-								borderColor: theme => theme.background,
+								borderColor: (theme) => theme.background,
 								borderWidth: px(4),
 								borderStyle: "solid",
 							},
@@ -80,9 +80,9 @@ export const ItemGrid = ({
 				src={poster}
 				alt={name}
 				quality="low"
-				isLoading={isLoading}
+				forcedLoading={isLoading}
 				layout={{ width: percent(100) }}
-				{...css("poster")}
+				{...(css("poster") as { style: ImageStyle })}
 			/>
 			<Skeleton>
 				{isLoading || (

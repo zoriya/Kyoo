@@ -18,6 +18,8 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import "./react-native-video.d.ts";
+
 declare module "react-native-video" {
 	interface VideoProperties {
 		fonts?: string[];

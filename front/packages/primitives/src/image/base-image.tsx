@@ -29,14 +29,13 @@ export type YoshikiEnhanced<Style> = Style extends any
 	}
 	: never;
 
-type WithLoading<T> = (T & { isLoading?: boolean }) | (Partial<T> & { isLoading: true });
-
-export type Props = WithLoading<{
+export type Props = {
 	src?: KyooImage | null;
 	quality: "low" | "medium" | "high";
-	alt: string;
+	alt?: string;
 	Error?: ReactElement | null;
-}>;
+	forcedLoading?: boolean;
+};
 
 export type ImageLayout = YoshikiEnhanced<
 	| { width: ImageStyle["width"]; height: ImageStyle["height"] }

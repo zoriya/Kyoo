@@ -3564,7 +3564,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native/virtualized-lists@npm:^0.72.4, @react-native/virtualized-lists@npm:^0.72.6":
+"@react-native/virtualized-lists@npm:^0.72.6":
   version: 0.72.6
   resolution: "@react-native/virtualized-lists@npm:0.72.6"
   dependencies:
@@ -3995,6 +3995,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/inline-style-prefixer@npm:^5.0.0":
+  version: 5.0.0
+  resolution: "@types/inline-style-prefixer@npm:5.0.0"
+  checksum: f138ba446d01a32e4612cc626a8fc44be15713560035c73d721c20c744083c488d072d7a11fc9b14c9212582271f04001e9d8d432267ff806dc3e6186959860a
+  languageName: node
+  linkType: hard
+
 "@types/istanbul-lib-coverage@npm:*, @types/istanbul-lib-coverage@npm:^2.0.0":
   version: 2.0.4
   resolution: "@types/istanbul-lib-coverage@npm:2.0.4"
@@ -4084,26 +4091,6 @@ __metadata:
   dependencies:
     "@types/react": "*"
   checksum: 9212b3793707a763f10e2c608f6ccb5f729029da6cb84204f333634d3d7baafbc1b20b7faf7cf788a8fd385050a1fb579902031f9462473ef10607116f33f33c
-  languageName: node
-  linkType: hard
-
-"@types/react-native-video@npm:^5.0.15":
-  version: 5.0.15
-  resolution: "@types/react-native-video@npm:5.0.15"
-  dependencies:
-    "@types/react": "*"
-    "@types/react-native": "*"
-  checksum: 8ed4542fea36b9b919bddba0bf4232dc680315e79e9750fdfff5153977cac3d1f82bcb3bba520b51a58c1e8cc80015fbeb184c0f7131f054809c85428b8fa622
-  languageName: node
-  linkType: hard
-
-"@types/react-native@npm:*":
-  version: 0.72.2
-  resolution: "@types/react-native@npm:0.72.2"
-  dependencies:
-    "@react-native/virtualized-lists": ^0.72.4
-    "@types/react": "*"
-  checksum: b2915594381365ea379cb46b9a65219c6b6c7446d97d15f4da9615b8f180972bacba7cae584f4a8f83cce3a180f8a9a08a9c6b57081b37e2543f23f5717693d4
   languageName: node
   linkType: hard
 
@@ -10584,7 +10571,7 @@ __metadata:
     react-native-uuid: ^2.0.1
     react-native-video: ^6.0.0-alpha.7
     typescript: ^5.1.6
-    yoshiki: 1.2.4
+    yoshiki: 1.2.7
   languageName: unknown
   linkType: soft
 
@@ -14262,7 +14249,6 @@ __metadata:
     "@types/node": 20.4.8
     "@types/react": 18.2.0
     "@types/react-dom": 18.2.0
-    "@types/react-native-video": ^5.0.15
     copy-webpack-plugin: ^11.0.0
     eslint: ^8.46.0
     eslint-config-next: 13.4.13
@@ -14279,6 +14265,7 @@ __metadata:
     react: 18.2.0
     react-dom: 18.2.0
     react-i18next: ^13.0.3
+    react-native: 0.72.3
     react-native-reanimated: ~3.3.0
     react-native-svg: 13.11.0
     react-native-video: ^6.0.0-alpha.7
@@ -14289,7 +14276,7 @@ __metadata:
     sweetalert2: ^11.7.20
     typescript: ^5.1.6
     webpack: ^5.88.2
-    yoshiki: 1.2.4
+    yoshiki: 1.2.7
     zod: ^3.21.4
   languageName: unknown
   linkType: soft
@@ -14671,10 +14658,11 @@ __metadata:
   languageName: node
   linkType: hard
 
-"yoshiki@npm:1.2.4":
-  version: 1.2.4
-  resolution: "yoshiki@npm:1.2.4"
+"yoshiki@npm:1.2.7":
+  version: 1.2.7
+  resolution: "yoshiki@npm:1.2.7"
   dependencies:
+    "@types/inline-style-prefixer": ^5.0.0
     "@types/node": 18.x.x
     "@types/react": 18.x.x
     inline-style-prefixer: ^7.0.0
@@ -14687,7 +14675,7 @@ __metadata:
       optional: true
     react-native-web:
       optional: true
-  checksum: 03b8c1ef41621deb3ae65238516928f78cf58883e1610cd1ea2f19b6c1c9cf8d09f7bf1a5538d8e9e5c7d46c5e9bdd23db38276e4ccd29cd281762afde7513fa
+  checksum: 2ebe15f481ad347a90fc8d6bc021d17ef03a8f982b31fa00b8700fa65d27e987044faa3d83d69159becb383ad9aa9ea5523eff3888965e25bc457affe147d361
   languageName: node
   linkType: hard
 

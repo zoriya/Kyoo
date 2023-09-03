@@ -49,7 +49,7 @@ import {
 } from "@kyoo/primitives";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform, View } from "react-native";
+import { ImageStyle, Platform, View } from "react-native";
 import {
 	Theme,
 	md,
@@ -113,14 +113,14 @@ const TitleLine = ({
 					src={poster}
 					alt={name}
 					quality="medium"
-					isLoading={isLoading}
+					forcedLoading={isLoading}
 					layout={{
 						width: { xs: percent(50), md: percent(25) },
 					}}
-					{...css({
+					{...(css({
 						maxWidth: { xs: px(175), sm: Platform.OS === "web" ? ("unset" as any) : 99999999 },
 						flexShrink: 0,
-					})}
+					}) as { style: ImageStyle })}
 				/>
 				<View
 					{...css({
@@ -195,7 +195,7 @@ const TitleLine = ({
 						<IconFab
 							icon={PlayArrow}
 							as={Link}
-							href={type === "show"  ? `/watch/${slug}` : `/movie/${slug}/watch`}
+							href={type === "show" ? `/watch/${slug}` : `/movie/${slug}/watch`}
 							color={{ xs: theme.user.colors.black, md: theme.colors.black }}
 							{...css({
 								bg: theme.user.accent,
@@ -343,7 +343,15 @@ const Description = ({
 	);
 };
 
-export const Header = ({ query, type, slug }: { query: QueryIdentifier<Show | Movie>; type: "movie" | "show", slug: string }) => {
+export const Header = ({
+	query,
+	type,
+	slug,
+}: {
+	query: QueryIdentifier<Show | Movie>;
+	type: "movie" | "show";
+	slug: string;
+}) => {
 	const { css } = useYoshiki();
 
 	return (
