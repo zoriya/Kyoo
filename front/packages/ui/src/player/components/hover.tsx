@@ -33,9 +33,9 @@ import {
 	tooltip,
 	ts,
 } from "@kyoo/primitives";
-import { Chapter, Subtitle, WatchItem } from "@kyoo/models";
+import { Chapter, KyooImage, Subtitle } from "@kyoo/models";
 import { useAtomValue, useSetAtom, useAtom } from "jotai";
-import { Platform, Pressable, View, ViewProps } from "react-native";
+import { ImageStyle, Platform, Pressable, View, ViewProps } from "react-native";
 import { useTranslation } from "react-i18next";
 import { percent, rem, useYoshiki } from "yoshiki/native";
 import { useRouter } from "solito/router";
@@ -51,7 +51,6 @@ export const Hover = ({
 	href,
 	poster,
 	chapters,
-	qualities,
 	subtitles,
 	fonts,
 	previousSlug,
@@ -66,9 +65,8 @@ export const Hover = ({
 	name?: string | null;
 	showName?: string;
 	href?: string;
-	poster?: string | null;
+	poster?: KyooImage | null;
 	chapters?: Chapter[];
-	qualities?: WatchItem["link"]
 	subtitles?: Subtitle[];
 	fonts?: string[];
 	previousSlug?: string | null;
@@ -77,8 +75,8 @@ export const Hover = ({
 	onMenuClose: () => void;
 	show: boolean;
 } & ViewProps) => {
-	// TODO animate show
-	const opacity = !show && (Platform.OS === "web" ? { opacity: 0 } : { display: "none" as const});
+	// TODO: animate show
+	const opacity = !show && (Platform.OS === "web" ? { opacity: 0 } : { display: "none" as const });
 	return (
 		<ContrastArea mode="dark">
 			{({ css }) => (
@@ -87,12 +85,12 @@ export const Hover = ({
 					<Pressable
 						focusable={false}
 						onPointerDown={onPointerDown}
-						onPress={Platform.OS !== "web" ? () => onPointerDown?.({} as any): undefined}
+						onPress={Platform.OS !== "web" ? () => onPointerDown?.({} as any) : undefined}
 						{...css(
 							[
 								{
 									// Fixed is used because firefox android make the hover disapear under the navigation bar in absolute
-									position: Platform.OS === "web" ? "fixed" as any : "absolute",
+									position: Platform.OS === "web" ? ("fixed" as any) : "absolute",
 									bottom: 0,
 									left: 0,
 									right: 0,
@@ -126,7 +124,6 @@ export const Hover = ({
 								<RightButtons
 									subtitles={subtitles}
 									fonts={fonts}
-									qualities={qualities}
 									onMenuOpen={onMenuOpen}
 									onMenuClose={onMenuClose}
 								/>
@@ -188,12 +185,14 @@ export const Back = ({
 		>
 			<IconButton
 				icon={ArrowBack}
-				{...(href ? { as: Link as any, href: href } : { as: PressableFeedback, onPress: router.back })}
+				{...(href
+					? { as: Link as any, href: href }
+					: { as: PressableFeedback, onPress: router.back })}
 				{...tooltip(t("player.back"))}
 			/>
 			<Skeleton>
 				{isLoading ? (
-					<Skeleton {...css({ width: rem(5), })} />
+					<Skeleton {...css({ width: rem(5) })} />
 				) : (
 					<H1
 						{...css({
@@ -210,7 +209,7 @@ export const Back = ({
 	);
 };
 
-const VideoPoster = ({ poster }: { poster?: string | null }) => {
+const VideoPoster = ({ poster }: { poster?: KyooImage | null }) => {
 	const { css } = useYoshiki();
 
 	return (
@@ -223,8 +222,9 @@ const VideoPoster = ({ poster }: { poster?: string | null }) => {
 		>
 			<Poster
 				src={poster}
+				quality="low"
 				layout={{ width: percent(100) }}
-				{...css({ position: "absolute", bottom: 0 })}
+				{...(css({ position: "absolute", bottom: 0 }) as { style: ImageStyle })}
 			/>
 		</View>
 	);

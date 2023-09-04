@@ -11,6 +11,7 @@ use std::str::FromStr;
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::process::{Child, Command};
 use tokio::sync::watch;
+use utoipa::ToSchema;
 
 const SEGMENT_TIME: u32 = 10;
 
@@ -20,7 +21,7 @@ pub enum TranscodeError {
 	ArgumentError(String),
 }
 
-#[derive(PartialEq, Eq, Serialize, Display, Clone, Copy)]
+#[derive(PartialEq, Eq, Serialize, Display, Clone, Copy, ToSchema)]
 pub enum Quality {
 	#[display(fmt = "240p")]
 	P240,

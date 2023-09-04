@@ -37,8 +37,6 @@ namespace Kyoo.Core.Api
 	/// </summary>
 	[Route("shows")]
 	[Route("show", Order = AlternativeRoute)]
-	[Route("movie", Order = AlternativeRoute)]
-	[Route("movies", Order = AlternativeRoute)]
 	[ApiController]
 	[PartialPermission(nameof(Show))]
 	[ApiDefinition("Shows", Group = ResourcesGroup)]
@@ -61,24 +59,6 @@ namespace Kyoo.Core.Api
 			: base(libraryManager.ShowRepository, thumbs)
 		{
 			_libraryManager = libraryManager;
-		}
-
-		/// <inheritdoc/>
-		public override async Task<ActionResult<Show>> Create([FromBody] Show resource)
-		{
-			ActionResult<Show> ret = await base.Create(resource);
-			if (ret.Value.IsMovie)
-			{
-				Episode episode = new()
-				{
-					Show = ret.Value,
-					Title = ret.Value.Title,
-					Path = ret.Value.Path
-				};
-
-				await _libraryManager.Create(episode);
-			}
-			return ret;
 		}
 
 		/// <summary>
@@ -106,7 +86,7 @@ namespace Kyoo.Core.Api
 			[FromQuery] Pagination pagination)
 		{
 			ICollection<Season> resources = await _libraryManager.GetAll(
-				ApiHelper.ParseWhere(where, identifier.Matcher<Season>(x => x.ShowID, x => x.Show.Slug)),
+				ApiHelper.ParseWhere(where, identifier.Matcher<Season>(x => x.ShowId, x => x.Show.Slug)),
 				Sort<Season>.From(sortBy),
 				pagination
 			);
@@ -141,7 +121,7 @@ namespace Kyoo.Core.Api
 			[FromQuery] Pagination pagination)
 		{
 			ICollection<Episode> resources = await _libraryManager.GetAll(
-				ApiHelper.ParseWhere(where, identifier.Matcher<Episode>(x => x.ShowID, x => x.Show.Slug)),
+				ApiHelper.ParseWhere(where, identifier.Matcher<Episode>(x => x.ShowId, x => x.Show.Slug)),
 				Sort<Episode>.From(sortBy),
 				pagination
 			);
@@ -186,41 +166,6 @@ namespace Kyoo.Core.Api
 		}
 
 		/// <summary>
-		/// Get genres of this show
-		/// </summary>
-		/// <remarks>
-		/// List the genres that represent this show.
-		/// </remarks>
-		/// <param name="identifier">The ID or slug of the <see cref="Show"/>.</param>
-		/// <param name="sortBy">A key to sort genres by.</param>
-		/// <param name="where">An optional list of filters.</param>
-		/// <param name="pagination">The number of genres to return.</param>
-		/// <returns>A page of genres.</returns>
-		/// <response code="400">The filters or the sort parameters are invalid.</response>
-		/// <response code="404">No show with the given ID or slug could be found.</response>
-		[HttpGet("{identifier:id}/genres")]
-		[HttpGet("{identifier:id}/genre", Order = AlternativeRoute)]
-		[PartialPermission(Kind.Read)]
-		[ProducesResponseType(StatusCodes.Status200OK)]
-		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
-		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Page<Genre>>> GetGenres(Identifier identifier,
-			[FromQuery] string sortBy,
-			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] Pagination pagination)
-		{
-			ICollection<Genre> resources = await _libraryManager.GetAll(
-				ApiHelper.ParseWhere(where, identifier.IsContainedIn<Genre, Show>(x => x.Shows)),
-				Sort<Genre>.From(sortBy),
-				pagination
-			);
-
-			if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Show>()) == null)
-				return NotFound();
-			return Page(resources, pagination.Limit);
-		}
-
-		/// <summary>
 		/// Get studio that made the show
 		/// </summary>
 		/// <remarks>
@@ -236,42 +181,6 @@ namespace Kyoo.Core.Api
 		public async Task<ActionResult<Studio>> GetStudio(Identifier identifier)
 		{
 			return await _libraryManager.Get(identifier.IsContainedIn<Studio, Show>(x => x.Shows));
-		}
-
-		/// <summary>
-		/// Get libraries containing this show
-		/// </summary>
-		/// <remarks>
-		/// List the libraries that contain this show. If this show is contained in a collection that is contained in
-		/// a library, this library will be returned too.
-		/// </remarks>
-		/// <param name="identifier">The ID or slug of the <see cref="Show"/>.</param>
-		/// <param name="sortBy">A key to sort libraries by.</param>
-		/// <param name="where">An optional list of filters.</param>
-		/// <param name="pagination">The number of libraries to return.</param>
-		/// <returns>A page of libraries.</returns>
-		/// <response code="400">The filters or the sort parameters are invalid.</response>
-		/// <response code="404">No show with the given ID or slug could be found.</response>
-		[HttpGet("{identifier:id}/libraries")]
-		[HttpGet("{identifier:id}/library", Order = AlternativeRoute)]
-		[PartialPermission(Kind.Read)]
-		[ProducesResponseType(StatusCodes.Status200OK)]
-		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
-		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Page<Library>>> GetLibraries(Identifier identifier,
-			[FromQuery] string sortBy,
-			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] Pagination pagination)
-		{
-			ICollection<Library> resources = await _libraryManager.GetAll(
-				ApiHelper.ParseWhere(where, identifier.IsContainedIn<Library, Show>(x => x.Shows)),
-				Sort<Library>.From(sortBy),
-				pagination
-			);
-
-			if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Show>()) == null)
-				return NotFound();
-			return Page(resources, pagination.Limit);
 		}
 
 		/// <summary>

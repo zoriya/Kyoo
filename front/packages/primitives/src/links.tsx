@@ -60,7 +60,7 @@ export const A = ({
 	);
 };
 
-export const PressableFeedback = forwardRef<View, PressableProps>(function _Feedback(
+export const PressableFeedback = forwardRef<View, PressableProps>(function Feedback(
 	{ children, ...props },
 	ref,
 ) {

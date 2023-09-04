@@ -23,7 +23,7 @@ import {
 	QueryPage,
 	LibraryItem,
 	LibraryItemP,
-	ItemType,
+	ItemKind,
 	getDisplayDate,
 } from "@kyoo/models";
 import { ComponentProps, useState } from "react";
@@ -44,14 +44,14 @@ export const itemMap = (
 	if (item.isLoading) return item;
 
 	let href;
-	if (item?.type === ItemType.Movie) href = `/movie/${item.slug}`;
-	else if (item?.type === ItemType.Show) href = `/show/${item.slug}`;
+	if (item?.kind === ItemKind.Movie) href = `/movie/${item.slug}`;
+	else if (item?.kind === ItemKind.Show) href = `/show/${item.slug}`;
 	else href = `/collection/${item.slug}`;
 
 	return {
 		isLoading: item.isLoading,
 		name: item.name,
-		subtitle: item.type !== ItemType.Collection ? getDisplayDate(item) : undefined,
+		subtitle: item.kind !== ItemKind.Collection ? getDisplayDate(item) : undefined,
 		href,
 		poster: item.poster,
 		thumbnail: item.thumbnail,
@@ -67,10 +67,9 @@ const query = (
 	path: slug ? ["library", slug, "items"] : ["items"],
 	infinite: true,
 	params: {
-		// The API still uses title isntead of name
 		sortBy: sortKey
-			? `${sortKey === SortBy.Name ? "title" : sortKey}:${sortOrd ?? "asc"}`
-			: "title:asc",
+			? `${sortKey}:${sortOrd ?? "asc"}`
+			: "name:asc",
 	},
 });
 

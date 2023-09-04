@@ -23,8 +23,8 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
-using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Postgresql;
+using Kyoo.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Core.Controllers
@@ -32,84 +32,90 @@ namespace Kyoo.Core.Controllers
 	/// <summary>
 	/// A local repository to handle library items.
 	/// </summary>
-	public class LibraryItemRepository : LocalRepository<LibraryItem>, ILibraryItemRepository
+	public class LibraryItemRepository : LocalRepository<ILibraryItem>, ILibraryItemRepository
 	{
 		/// <summary>
 		/// The database handle
 		/// </summary>
 		private readonly DatabaseContext _database;
 
-		/// <summary>
-		/// A lazy loaded library repository to validate queries (check if a library does exist)
-		/// </summary>
-		private readonly Lazy<ILibraryRepository> _libraries;
-
 		/// <inheritdoc />
-		protected override Sort<LibraryItem> DefaultSort => new Sort<LibraryItem>.By(x => x.Title);
+		protected override Sort<ILibraryItem> DefaultSort => new Sort<ILibraryItem>.By(x => x.Name);
 
 		/// <summary>
-		/// Create a new <see cref="LibraryItemRepository"/>.
+		/// Create a new <see cref="ILibraryItemRepository"/>.
 		/// </summary>
 		/// <param name="database">The database instance</param>
-		/// <param name="libraries">A lazy loaded library repository</param>
-		public LibraryItemRepository(DatabaseContext database,
-			Lazy<ILibraryRepository> libraries)
-			: base(database)
+		/// <param name="thumbs">The thumbnail manager used to store images.</param>
+		public LibraryItemRepository(DatabaseContext database, IThumbnailsManager thumbs)
+			: base(database, thumbs)
 		{
 			_database = database;
-			_libraries = libraries;
 		}
 
 		/// <inheritdoc />
-		public override Task<LibraryItem> GetOrDefault(int id)
+		public override async Task<ILibraryItem> GetOrDefault(int id)
 		{
-			return _database.LibraryItems.FirstOrDefaultAsync(x => x.ID == id);
+			return await _database.LibraryItems.SingleOrDefaultAsync(x => x.Id == id).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc />
-		public override Task<LibraryItem> GetOrDefault(string slug)
+		public override async Task<ILibraryItem> GetOrDefault(string slug)
 		{
-			return _database.LibraryItems.SingleOrDefaultAsync(x => x.Slug == slug);
+			return await _database.LibraryItems.SingleOrDefaultAsync(x => x.Slug == slug).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc />
-		public override Task<ICollection<LibraryItem>> GetAll(Expression<Func<LibraryItem, bool>> where = null,
-			Sort<LibraryItem> sort = default,
+		public override async Task<ILibraryItem> GetOrDefault(Expression<Func<ILibraryItem, bool>> where, Sort<ILibraryItem> sortBy = default)
+		{
+			return await Sort(_database.LibraryItems, sortBy).FirstOrDefaultAsync(where).Then(SetBackingImage);
+		}
+
+		/// <inheritdoc />
+		public override async Task<ICollection<ILibraryItem>> GetAll(Expression<Func<ILibraryItem, bool>> where = null,
+			Sort<ILibraryItem> sort = default,
 			Pagination limit = default)
 		{
-			return ApplyFilters(_database.LibraryItems, where, sort, limit);
+			return (await ApplyFilters(_database.LibraryItems, where, sort, limit))
+				.Select(SetBackingImageSelf).ToList();
 		}
 
 		/// <inheritdoc />
-		public override Task<int> GetCount(Expression<Func<LibraryItem, bool>> where = null)
+		public override Task<int> GetCount(Expression<Func<ILibraryItem, bool>> where = null)
 		{
-			IQueryable<LibraryItem> query = _database.LibraryItems;
+			IQueryable<ILibraryItem> query = _database.LibraryItems;
 			if (where != null)
 				query = query.Where(where);
 			return query.CountAsync();
 		}
 
 		/// <inheritdoc />
-		public override async Task<ICollection<LibraryItem>> Search(string query)
+		public override async Task<ICollection<ILibraryItem>> Search(string query)
 		{
-			return await Sort(
-				_database.LibraryItems
-					.Where(_database.Like<LibraryItem>(x => x.Title, $"%{query}%"))
+			return (await Sort(
+					_database.LibraryItems
+					.Where(_database.Like<LibraryItem>(x => x.Name, $"%{query}%"))
 				)
 				.Take(20)
-				.ToListAsync();
+				.ToListAsync())
+				.Select(SetBackingImageSelf)
+				.ToList();
 		}
 
 		/// <inheritdoc />
-		public override Task<LibraryItem> Create(LibraryItem obj)
+		public override Task<ILibraryItem> Create(ILibraryItem obj)
 			=> throw new InvalidOperationException();
 
 		/// <inheritdoc />
-		public override Task<LibraryItem> CreateIfNotExists(LibraryItem obj)
+		public override Task<ILibraryItem> CreateIfNotExists(ILibraryItem obj)
 			=> throw new InvalidOperationException();
 
 		/// <inheritdoc />
-		public override Task<LibraryItem> Edit(LibraryItem obj, bool resetOld)
+		public override Task<ILibraryItem> Edit(ILibraryItem edited)
+			=> throw new InvalidOperationException();
+
+		/// <inheritdoc />
+		public override Task<ILibraryItem> Patch(int id, Func<ILibraryItem, Task<bool>> patch)
 			=> throw new InvalidOperationException();
 
 		/// <inheritdoc />
@@ -121,58 +127,7 @@ namespace Kyoo.Core.Controllers
 			=> throw new InvalidOperationException();
 
 		/// <inheritdoc />
-		public override Task Delete(LibraryItem obj)
+		public override Task Delete(ILibraryItem obj)
 			=> throw new InvalidOperationException();
-
-		/// <summary>
-		/// Get a basic queryable for a library with the right mapping from shows and collections.
-		/// Shows contained in a collection are excluded.
-		/// </summary>
-		/// <param name="selector">Only items that are part of a library that match this predicate will be returned.</param>
-		/// <returns>A queryable containing items that are part of a library matching the selector.</returns>
-		private IQueryable<LibraryItem> _LibraryRelatedQuery(Expression<Func<Library, bool>> selector)
-			=> _database.Libraries
-				.Where(selector)
-				.SelectMany(x => x.Shows)
-				.Where(x => !x.Collections.Any())
-				.Select(LibraryItem.FromShow)
-				.Concat(_database.Libraries
-					.Where(selector)
-					.SelectMany(x => x.Collections)
-					.Select(LibraryItem.FromCollection));
-
-		/// <inheritdoc />
-		public async Task<ICollection<LibraryItem>> GetFromLibrary(int id,
-			Expression<Func<LibraryItem, bool>> where = null,
-			Sort<LibraryItem> sort = default,
-			Pagination limit = default)
-		{
-			ICollection<LibraryItem> items = await ApplyFilters(
-				_LibraryRelatedQuery(x => x.ID == id),
-				where,
-				sort,
-				limit
-			);
-			if (!items.Any() && await _libraries.Value.GetOrDefault(id) == null)
-				throw new ItemNotFoundException();
-			return items;
-		}
-
-		/// <inheritdoc />
-		public async Task<ICollection<LibraryItem>> GetFromLibrary(string slug,
-			Expression<Func<LibraryItem, bool>> where = null,
-			Sort<LibraryItem> sort = default,
-			Pagination limit = default)
-		{
-			ICollection<LibraryItem> items = await ApplyFilters(
-				_LibraryRelatedQuery(x => x.Slug == slug),
-				where,
-				sort,
-				limit
-			);
-			if (!items.Any() && await _libraries.Value.GetOrDefault(slug) == null)
-				throw new ItemNotFoundException();
-			return items;
-		}
 	}
 }

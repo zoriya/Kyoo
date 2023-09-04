@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Subtitle, WatchItem } from "@kyoo/models";
+import { Episode, Subtitle } from "@kyoo/models";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
 import { ElementRef, memo, useEffect, useLayoutEffect, useRef, useState } from "react";
 import NativeVideo, { VideoProperties as VideoProps } from "./video";
@@ -74,14 +74,14 @@ const privateFullscreen = atom(false);
 
 export const subtitleAtom = atom<Subtitle | null>(null);
 
-export const Video = memo(function _Video({
+export const Video = memo(function Video({
 	links,
 	subtitles,
 	setError,
 	fonts,
 	...props
 }: {
-	links?: WatchItem["link"];
+	links?: Episode["links"];
 	subtitles?: Subtitle[];
 	setError: (error: string | undefined) => void;
 	fonts?: string[];

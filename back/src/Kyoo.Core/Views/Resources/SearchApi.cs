@@ -76,10 +76,11 @@ namespace Kyoo.Core.Api
 			{
 				Query = query,
 				Collections = await _libraryManager.Search<Collection>(query),
+				Items = await _libraryManager.Search<ILibraryItem>(query),
+				Movies = await _libraryManager.Search<Movie>(query),
 				Shows = await _libraryManager.Search<Show>(query),
 				Episodes = await _libraryManager.Search<Episode>(query),
 				People = await _libraryManager.Search<People>(query),
-				Genres = await _libraryManager.Search<Genre>(query),
 				Studios = await _libraryManager.Search<Studio>(query)
 			};
 		}
@@ -133,9 +134,9 @@ namespace Kyoo.Core.Api
 		[Permission(nameof(Show), Kind.Read)]
 		[ApiDefinition("Items")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
-		public Task<ICollection<LibraryItem>> SearchItems(string query)
+		public Task<ICollection<ILibraryItem>> SearchItems(string query)
 		{
-			return _libraryManager.Search<LibraryItem>(query);
+			return _libraryManager.Search<ILibraryItem>(query);
 		}
 
 		/// <summary>
@@ -173,24 +174,6 @@ namespace Kyoo.Core.Api
 		public Task<ICollection<People>> SearchPeople(string query)
 		{
 			return _libraryManager.Search<People>(query);
-		}
-
-		/// <summary>
-		/// Search genres
-		/// </summary>
-		/// <remarks>
-		/// Search for genres
-		/// </remarks>
-		/// <param name="query">The query to search for.</param>
-		/// <returns>A list of genres found for the specified query.</returns>
-		[HttpGet("genres")]
-		[HttpGet("genre", Order = AlternativeRoute)]
-		[Permission(nameof(Genre), Kind.Read)]
-		[ApiDefinition("Genres")]
-		[ProducesResponseType(StatusCodes.Status200OK)]
-		public Task<ICollection<Genre>> SearchGenres(string query)
-		{
-			return _libraryManager.Search<Genre>(query);
 		}
 
 		/// <summary>

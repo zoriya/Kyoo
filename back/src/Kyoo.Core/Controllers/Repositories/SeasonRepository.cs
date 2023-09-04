@@ -24,6 +24,7 @@ using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Postgresql;
+using Kyoo.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Core.Controllers
@@ -38,11 +39,6 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		private readonly DatabaseContext _database;
 
-		/// <summary>
-		/// A provider repository to handle externalID creation and deletion
-		/// </summary>
-		private readonly IProviderRepository _providers;
-
 		/// <inheritdoc/>
 		protected override Sort<Season> DefaultSort => new Sort<Season>.By(x => x.SeasonNumber);
 
@@ -51,19 +47,18 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		/// <param name="database">The database handle that will be used</param>
 		/// <param name="shows">A shows repository</param>
-		/// <param name="providers">A provider repository</param>
+		/// <param name="thumbs">The thumbnail manager used to store images.</param>
 		public SeasonRepository(DatabaseContext database,
 			IShowRepository shows,
-			IProviderRepository providers)
-			: base(database)
+			IThumbnailsManager thumbs)
+			: base(database, thumbs)
 		{
 			_database = database;
-			_providers = providers;
 
 			// Edit seasons slugs when the show's slug changes.
 			shows.OnEdited += (show) =>
 			{
-				List<Season> seasons = _database.Seasons.AsTracking().Where(x => x.ShowID == show.ID).ToList();
+				List<Season> seasons = _database.Seasons.AsTracking().Where(x => x.ShowId == show.Id).ToList();
 				foreach (Season season in seasons)
 				{
 					season.ShowSlug = show.Slug;
@@ -94,35 +89,37 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc/>
 		public Task<Season> GetOrDefault(int showID, int seasonNumber)
 		{
-			return _database.Seasons.FirstOrDefaultAsync(x => x.ShowID == showID
-				&& x.SeasonNumber == seasonNumber);
+			return _database.Seasons.FirstOrDefaultAsync(x => x.ShowId == showID
+				&& x.SeasonNumber == seasonNumber).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc/>
 		public Task<Season> GetOrDefault(string showSlug, int seasonNumber)
 		{
 			return _database.Seasons.FirstOrDefaultAsync(x => x.Show.Slug == showSlug
-				&& x.SeasonNumber == seasonNumber);
+				&& x.SeasonNumber == seasonNumber).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc/>
 		public override async Task<ICollection<Season>> Search(string query)
 		{
-			return await Sort(
+			return (await Sort(
 				_database.Seasons
-					.Where(_database.Like<Season>(x => x.Title, $"%{query}%"))
+					.Where(_database.Like<Season>(x => x.Name, $"%{query}%"))
 				)
 				.Take(20)
-				.ToListAsync();
+				.ToListAsync())
+				.Select(SetBackingImageSelf)
+				.ToList();
 		}
 
 		/// <inheritdoc/>
 		public override async Task<Season> Create(Season obj)
 		{
 			await base.Create(obj);
-			obj.ShowSlug = _database.Shows.First(x => x.ID == obj.ShowID).Slug;
+			obj.ShowSlug = _database.Shows.First(x => x.Id == obj.ShowId).Slug;
 			_database.Entry(obj).State = EntityState.Added;
-			await _database.SaveChangesAsync(() => Get(obj.ShowID, obj.SeasonNumber));
+			await _database.SaveChangesAsync(() => Get(obj.ShowId, obj.SeasonNumber));
 			OnResourceCreated(obj);
 			return obj;
 		}
@@ -131,46 +128,20 @@ namespace Kyoo.Core.Controllers
 		protected override async Task Validate(Season resource)
 		{
 			await base.Validate(resource);
-			if (resource.ShowID <= 0)
+			if (resource.ShowId <= 0)
 			{
 				if (resource.Show == null)
 				{
 					throw new ArgumentException($"Can't store a season not related to any show " +
-						$"(showID: {resource.ShowID}).");
+						$"(showID: {resource.ShowId}).");
 				}
-				resource.ShowID = resource.Show.ID;
-			}
-
-			if (resource.ExternalIDs != null)
-			{
-				foreach (MetadataID id in resource.ExternalIDs)
-				{
-					id.Provider = _database.LocalEntity<Provider>(id.Provider.Slug)
-						?? await _providers.CreateIfNotExists(id.Provider);
-					id.ProviderID = id.Provider.ID;
-				}
-				_database.MetadataIds<Season>().AttachRange(resource.ExternalIDs);
-			}
-		}
-
-		/// <inheritdoc/>
-		protected override async Task EditRelations(Season resource, Season changed, bool resetOld)
-		{
-			await Validate(changed);
-
-			if (changed.ExternalIDs != null || resetOld)
-			{
-				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
-				resource.ExternalIDs = changed.ExternalIDs;
+				resource.ShowId = resource.Show.Id;
 			}
 		}
 
 		/// <inheritdoc/>
 		public override async Task Delete(Season obj)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-
 			_database.Remove(obj);
 			await _database.SaveChangesAsync();
 			await base.Delete(obj);

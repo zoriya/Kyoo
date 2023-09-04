@@ -93,14 +93,14 @@ namespace Kyoo.Abstractions.Models
 
 			if (items.Count > 0 && query.ContainsKey("afterID"))
 			{
-				query["afterID"] = items.First().ID.ToString();
+				query["afterID"] = items.First().Id.ToString();
 				query["reverse"] = "true";
 				Previous = url + query.ToQueryString();
 			}
 			query.Remove("reverse");
 			if (items.Count == limit && limit > 0)
 			{
-				query["afterID"] = items.Last().ID.ToString();
+				query["afterID"] = items.Last().Id.ToString();
 				Next = url + query.ToQueryString();
 			}
 

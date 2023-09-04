@@ -4,5 +4,5 @@ from typing import Optional
 
 @dataclass
 class MetadataID:
-	id: str
+	data_id: str
 	link: Optional[str]

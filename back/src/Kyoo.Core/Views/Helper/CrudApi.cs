@@ -16,12 +16,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
+using Kyoo.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -161,12 +163,12 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<T>> Edit([FromBody] T resource)
 		{
-			if (resource.ID > 0)
-				return await Repository.Edit(resource, true);
+			if (resource.Id > 0)
+				return await Repository.Edit(resource);
 
 			T old = await Repository.Get(resource.Slug);
-			resource.ID = old.ID;
-			return await Repository.Edit(resource, true);
+			resource.Id = old.Id;
+			return await Repository.Edit(resource);
 		}
 
 		/// <summary>
@@ -185,14 +187,15 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<T>> Patch([FromBody] T resource)
+		public async Task<ActionResult<T>> Patch([FromBody] PartialResource resource)
 		{
-			if (resource.ID > 0)
-				return await Repository.Edit(resource, false);
+			if (resource.Id.HasValue)
+				return await Repository.Patch(resource.Id.Value, TryUpdateModelAsync);
+			if (resource.Slug == null)
+				throw new ArgumentException("Either the Id or the slug of the resource has to be defined to edit it.");
 
 			T old = await Repository.Get(resource.Slug);
-			resource.ID = old.ID;
-			return await Repository.Edit(resource, false);
+			return await Repository.Patch(old.Id, TryUpdateModelAsync);
 		}
 
 		/// <summary>

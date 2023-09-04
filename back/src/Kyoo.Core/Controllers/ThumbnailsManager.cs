@@ -18,13 +18,13 @@
 
 using System;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Blurhash.SkiaSharp;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
-using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Logging;
+using SkiaSharp;
 
 #nullable enable
 
@@ -54,105 +54,77 @@ namespace Kyoo.Core.Controllers
 			_logger = logger;
 		}
 
-		/// <summary>
-		/// An helper function to download an image.
-		/// </summary>
-		/// <param name="url">The distant url of the image</param>
-		/// <param name="localPath">The local path of the image</param>
-		/// <param name="what">What is currently downloaded (used for errors)</param>
-		/// <returns><c>true</c> if an image has been downloaded, <c>false</c> otherwise.</returns>
-		private async Task<bool> _DownloadImage(string url, string localPath, string what)
+		private static async Task _WriteTo(SKBitmap bitmap, string path, int quality)
 		{
-			if (url == localPath)
-				return false;
+			SKData data = bitmap.Encode(SKEncodedImageFormat.Webp, quality);
+			await using Stream reader = data.AsStream();
+			await using Stream file = File.Create(path);
+			await reader.CopyToAsync(file);
+		}
 
+		private async Task _DownloadImage(Image? image, string localPath, string what)
+		{
+			if (image == null)
+				return;
 			try
 			{
 				_logger.LogInformation("Downloading image {What}", what);
 
 				HttpClient client = _clientFactory.CreateClient();
-				HttpResponseMessage response = await client.GetAsync(url);
+				HttpResponseMessage response = await client.GetAsync(image.Source);
 				response.EnsureSuccessStatusCode();
-				string mime = response.Content.Headers.ContentType?.MediaType!;
 				await using Stream reader = await response.Content.ReadAsStreamAsync();
+				using SKCodec codec = SKCodec.Create(reader);
+				SKImageInfo info = codec.Info;
+				info.ColorType = SKColorType.Rgba8888;
+				using SKBitmap original = SKBitmap.Decode(codec, info);
 
-				string extension = new FileExtensionContentTypeProvider()
-					.Mappings.FirstOrDefault(x => x.Value == mime)
-					.Key;
-				await using Stream local = File.Create(localPath + extension);
-				await reader.CopyToAsync(local);
-				return true;
+				using SKBitmap high = original.Resize(new SKSizeI(original.Width, original.Height), SKFilterQuality.High);
+				await _WriteTo(original, $"{localPath}.{ImageQuality.High.ToString().ToLowerInvariant()}.webp", 80);
+
+				using SKBitmap medium = high.Resize(new SKSizeI((int)(high.Width / 1.5), (int)(high.Height / 1.5)), SKFilterQuality.Medium);
+				await _WriteTo(medium, $"{localPath}.{ImageQuality.Medium.ToString().ToLowerInvariant()}.webp", 55);
+
+				using SKBitmap low = medium.Resize(new SKSizeI(original.Width / 2, original.Height / 2), SKFilterQuality.Low);
+				await _WriteTo(low, $"{localPath}.{ImageQuality.Low.ToString().ToLowerInvariant()}.webp", 25);
+
+				image.Blurhash = Blurhasher.Encode(low, 4, 3);
 			}
 			catch (Exception ex)
 			{
 				_logger.LogError(ex, "{What} could not be downloaded", what);
-				return false;
 			}
 		}
 
 		/// <inheritdoc />
-		public async Task<bool> DownloadImages<T>(T item, bool alwaysDownload = false)
+		public async Task DownloadImages<T>(T item)
 			where T : IThumbnails
 		{
 			if (item == null)
 				throw new ArgumentNullException(nameof(item));
 
-			if (item.Images == null)
-				return false;
-
 			string name = item is IResource res ? res.Slug : "???";
-			bool ret = false;
-
-			foreach ((int id, string image) in item.Images.Where(x => x.Value != null))
-			{
-				string localPath = _GetPrivateImagePath(item, id);
-				if (alwaysDownload || !Path.Exists(localPath))
-					ret |= await _DownloadImage(image, localPath, $"The image n {id} of {name}");
-			}
-
-			return ret;
+			await _DownloadImage(item.Poster, _GetBaseImagePath(item, "poster"), $"The poster of {name}");
+			await _DownloadImage(item.Thumbnail, _GetBaseImagePath(item, "thumbnail"), $"The poster of {name}");
+			await _DownloadImage(item.Logo, _GetBaseImagePath(item, "logo"), $"The poster of {name}");
 		}
 
-		/// <summary>
-		/// Retrieve the local path of an image of the given item <b>without an extension</b>.
-		/// </summary>
-		/// <param name="item">The item to retrieve the poster from.</param>
-		/// <param name="imageId">The ID of the image. See <see cref="Images"/> for values.</param>
-		/// <typeparam name="T">The type of the item</typeparam>
-		/// <returns>The path of the image for the given resource, <b>even if it does not exists</b></returns>
-		private static string _GetPrivateImagePath<T>(T item, int imageId)
+		private static string _GetBaseImagePath<T>(T item, string image)
 		{
-			if (item == null)
-				throw new ArgumentNullException(nameof(item));
-
 			string directory = item switch
 			{
-				IResource res => Path.Combine("./metadata", typeof(T).Name.ToLowerInvariant(), res.Slug),
+				IResource res => Path.Combine("./metadata", item.GetType().Name.ToLowerInvariant(), res.Slug),
 				_ => Path.Combine("./metadata", typeof(T).Name.ToLowerInvariant())
 			};
 			Directory.CreateDirectory(directory);
-			string imageName = imageId switch
-			{
-				Images.Poster => "poster",
-				Images.Logo => "logo",
-				Images.Thumbnail => "thumbnail",
-				Images.Trailer => "trailer",
-				_ => $"{imageId}"
-			};
-			return Path.Combine(directory, imageName);
+			return Path.Combine(directory, image);
 		}
 
 		/// <inheritdoc />
-		public string? GetImagePath<T>(T item, int imageId)
+		public string GetImagePath<T>(T item, string image, ImageQuality quality)
 			where T : IThumbnails
 		{
-			string basePath = _GetPrivateImagePath(item, imageId);
-			string directory = Path.GetDirectoryName(basePath)!;
-			string baseFile = Path.GetFileName(basePath);
-			if (!Directory.Exists(directory))
-				return null;
-			return Directory.GetFiles(directory, "*", SearchOption.TopDirectoryOnly)
-				.FirstOrDefault(x => Path.GetFileNameWithoutExtension(x) == baseFile);
+			return $"{_GetBaseImagePath(item, image)}.{quality.ToString().ToLowerInvariant()}.webp";
 		}
 	}
 }

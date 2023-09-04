@@ -52,28 +52,25 @@ namespace Kyoo.Tests.Database
 		public async Task CreateWithExternalIdTest()
 		{
 			People value = TestSample.GetNew<People>();
-			value.ExternalIDs = new[]
+			value.ExternalId = new Dictionary<string, MetadataId>
 			{
-				new MetadataID
+				["2"] = new()
 				{
-					Provider = TestSample.Get<Provider>(),
 					Link = "link",
-					DataID = "id"
+					DataId = "id"
 				},
-				new MetadataID
+				["1"] = new()
 				{
-					Provider = TestSample.GetNew<Provider>(),
 					Link = "new-provider-link",
-					DataID = "new-id"
+					DataId = "new-id"
 				}
 			};
 			await _repository.Create(value);
 
 			People retrieved = await _repository.Get(2);
-			await Repositories.LibraryManager.Load(retrieved, x => x.ExternalIDs);
-			Assert.Equal(2, retrieved.ExternalIDs.Count);
-			KAssert.DeepEqual(value.ExternalIDs.First(), retrieved.ExternalIDs.First());
-			KAssert.DeepEqual(value.ExternalIDs.Last(), retrieved.ExternalIDs.Last());
+			Assert.Equal(2, retrieved.ExternalId.Count);
+			KAssert.DeepEqual(value.ExternalId.First(), retrieved.ExternalId.First());
+			KAssert.DeepEqual(value.ExternalId.Last(), retrieved.ExternalId.Last());
 		}
 
 		[Fact]
@@ -81,11 +78,8 @@ namespace Kyoo.Tests.Database
 		{
 			People value = await _repository.Get(TestSample.Get<People>().Slug);
 			value.Name = "New Name";
-			value.Images = new Dictionary<int, string>
-			{
-				[Images.Poster] = "new-poster"
-			};
-			await _repository.Edit(value, false);
+			value.Poster = new Image("poster");
+			await _repository.Edit(value);
 
 			await using DatabaseContext database = Repositories.Context.New();
 			People retrieved = await database.People.FirstAsync();
@@ -97,22 +91,18 @@ namespace Kyoo.Tests.Database
 		public async Task EditMetadataTest()
 		{
 			People value = await _repository.Get(TestSample.Get<People>().Slug);
-			value.ExternalIDs = new[]
+			value.ExternalId = new Dictionary<string, MetadataId>
 			{
-				new MetadataID
+				["toto"] = new()
 				{
-					Provider = TestSample.Get<Provider>(),
 					Link = "link",
-					DataID = "id"
+					DataId = "id"
 				},
 			};
-			await _repository.Edit(value, false);
+			await _repository.Edit(value);
 
 			await using DatabaseContext database = Repositories.Context.New();
-			People retrieved = await database.People
-				.Include(x => x.ExternalIDs)
-				.ThenInclude(x => x.Provider)
-				.FirstAsync();
+			People retrieved = await database.People.FirstAsync();
 
 			KAssert.DeepEqual(value, retrieved);
 		}
@@ -121,41 +111,32 @@ namespace Kyoo.Tests.Database
 		public async Task AddMetadataTest()
 		{
 			People value = await _repository.Get(TestSample.Get<People>().Slug);
-			value.ExternalIDs = new List<MetadataID>
+			value.ExternalId = new Dictionary<string, MetadataId>
 			{
-				new()
+				["1"] = new()
 				{
-					Provider = TestSample.Get<Provider>(),
 					Link = "link",
-					DataID = "id"
+					DataId = "id"
 				},
 			};
-			await _repository.Edit(value, false);
+			await _repository.Edit(value);
 
 			{
 				await using DatabaseContext database = Repositories.Context.New();
-				People retrieved = await database.People
-					.Include(x => x.ExternalIDs)
-					.ThenInclude(x => x.Provider)
-					.FirstAsync();
-
+				People retrieved = await database.People.FirstAsync();
 				KAssert.DeepEqual(value, retrieved);
 			}
 
-			value.ExternalIDs.Add(new MetadataID
+			value.ExternalId.Add("toto", new MetadataId
 			{
-				Provider = TestSample.GetNew<Provider>(),
 				Link = "link",
-				DataID = "id"
+				DataId = "id"
 			});
-			await _repository.Edit(value, false);
+			await _repository.Edit(value);
 
 			{
 				await using DatabaseContext database = Repositories.Context.New();
-				People retrieved = await database.People
-					.Include(x => x.ExternalIDs)
-					.ThenInclude(x => x.Provider)
-					.FirstAsync();
+				People retrieved = await database.People.FirstAsync();
 
 				KAssert.DeepEqual(value, retrieved);
 			}

@@ -53,12 +53,11 @@ namespace Kyoo.Tests.Database
 		{
 			Season season = await _repository.Get(1);
 			Assert.Equal("anohana-s1", season.Slug);
-			Show show = new()
+			await Repositories.LibraryManager.ShowRepository.Patch(season.ShowId, (x) =>
 			{
-				ID = season.ShowID,
-				Slug = "new-slug"
-			};
-			await Repositories.LibraryManager.ShowRepository.Edit(show, false);
+				x.Slug = "new-slug";
+				return Task.FromResult(true);
+			});
 			season = await _repository.Get(1);
 			Assert.Equal("new-slug-s1", season.Slug);
 		}
@@ -68,12 +67,12 @@ namespace Kyoo.Tests.Database
 		{
 			Season season = await _repository.Get(1);
 			Assert.Equal("anohana-s1", season.Slug);
-			await _repository.Edit(new Season
+			await _repository.Patch(season.Id, (x) =>
 			{
-				ID = 1,
-				SeasonNumber = 2,
-				ShowID = 1
-			}, false);
+				x.SeasonNumber = 2;
+				return Task.FromResult(true);
+			}
+			);
 			season = await _repository.Get(1);
 			Assert.Equal("anohana-s2", season.Slug);
 		}
@@ -83,7 +82,7 @@ namespace Kyoo.Tests.Database
 		{
 			Season season = await _repository.Create(new Season
 			{
-				ShowID = TestSample.Get<Show>().ID,
+				ShowId = TestSample.Get<Show>().Id,
 				SeasonNumber = 2
 			});
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s2", season.Slug);
@@ -93,40 +92,34 @@ namespace Kyoo.Tests.Database
 		public async Task CreateWithExternalIdTest()
 		{
 			Season season = TestSample.GetNew<Season>();
-			season.ExternalIDs = new[]
+			season.ExternalId = new Dictionary<string, MetadataId>
 			{
-				new MetadataID
+				["2"] = new()
 				{
-					Provider = TestSample.Get<Provider>(),
 					Link = "link",
-					DataID = "id"
+					DataId = "id"
 				},
-				new MetadataID
+				["1"] = new()
 				{
-					Provider = TestSample.GetNew<Provider>(),
 					Link = "new-provider-link",
-					DataID = "new-id"
+					DataId = "new-id"
 				}
 			};
 			await _repository.Create(season);
 
 			Season retrieved = await _repository.Get(2);
-			await Repositories.LibraryManager.Load(retrieved, x => x.ExternalIDs);
-			Assert.Equal(2, retrieved.ExternalIDs.Count);
-			KAssert.DeepEqual(season.ExternalIDs.First(), retrieved.ExternalIDs.First());
-			KAssert.DeepEqual(season.ExternalIDs.Last(), retrieved.ExternalIDs.Last());
+			Assert.Equal(2, retrieved.ExternalId.Count);
+			KAssert.DeepEqual(season.ExternalId.First(), retrieved.ExternalId.First());
+			KAssert.DeepEqual(season.ExternalId.Last(), retrieved.ExternalId.Last());
 		}
 
 		[Fact]
 		public async Task EditTest()
 		{
 			Season value = await _repository.Get(TestSample.Get<Season>().Slug);
-			value.Title = "New Title";
-			value.Images = new Dictionary<int, string>
-			{
-				[Images.Poster] = "new-poster"
-			};
-			await _repository.Edit(value, false);
+			value.Name = "New Title";
+			value.Poster = new Image("test");
+			await _repository.Edit(value);
 
 			await using DatabaseContext database = Repositories.Context.New();
 			Season retrieved = await database.Seasons.FirstAsync();
@@ -138,22 +131,18 @@ namespace Kyoo.Tests.Database
 		public async Task EditMetadataTest()
 		{
 			Season value = await _repository.Get(TestSample.Get<Season>().Slug);
-			value.ExternalIDs = new[]
+			value.ExternalId = new Dictionary<string, MetadataId>
 			{
-				new MetadataID
+				["toto"] = new()
 				{
-					Provider = TestSample.Get<Provider>(),
 					Link = "link",
-					DataID = "id"
+					DataId = "id"
 				},
 			};
-			await _repository.Edit(value, false);
+			await _repository.Edit(value);
 
 			await using DatabaseContext database = Repositories.Context.New();
-			Season retrieved = await database.Seasons
-				.Include(x => x.ExternalIDs)
-				.ThenInclude(x => x.Provider)
-				.FirstAsync();
+			Season retrieved = await database.Seasons.FirstAsync();
 
 			KAssert.DeepEqual(value, retrieved);
 		}
@@ -162,41 +151,33 @@ namespace Kyoo.Tests.Database
 		public async Task AddMetadataTest()
 		{
 			Season value = await _repository.Get(TestSample.Get<Season>().Slug);
-			value.ExternalIDs = new List<MetadataID>
+			value.ExternalId = new Dictionary<string, MetadataId>
 			{
-				new()
+				["1"] = new()
 				{
-					Provider = TestSample.Get<Provider>(),
 					Link = "link",
-					DataID = "id"
+					DataId = "id"
 				},
 			};
-			await _repository.Edit(value, false);
+			await _repository.Edit(value);
 
 			{
 				await using DatabaseContext database = Repositories.Context.New();
-				Season retrieved = await database.Seasons
-					.Include(x => x.ExternalIDs)
-					.ThenInclude(x => x.Provider)
-					.FirstAsync();
+				Season retrieved = await database.Seasons.FirstAsync();
 
 				KAssert.DeepEqual(value, retrieved);
 			}
 
-			value.ExternalIDs.Add(new MetadataID
+			value.ExternalId.Add("toto", new MetadataId
 			{
-				Provider = TestSample.GetNew<Provider>(),
 				Link = "link",
-				DataID = "id"
+				DataId = "id"
 			});
-			await _repository.Edit(value, false);
+			await _repository.Edit(value);
 
 			{
 				await using DatabaseContext database = Repositories.Context.New();
-				Season retrieved = await database.Seasons
-					.Include(x => x.ExternalIDs)
-					.ThenInclude(x => x.Provider)
-					.FirstAsync();
+				Season retrieved = await database.Seasons.FirstAsync();
 
 				KAssert.DeepEqual(value, retrieved);
 			}
@@ -212,8 +193,8 @@ namespace Kyoo.Tests.Database
 		{
 			Season value = new()
 			{
-				Title = "This is a test super title",
-				ShowID = 1
+				Name = "This is a test super title",
+				ShowId = 1
 			};
 			await _repository.Create(value);
 			ICollection<Season> ret = await _repository.Search(query);

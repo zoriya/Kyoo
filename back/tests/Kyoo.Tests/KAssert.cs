@@ -18,6 +18,7 @@
 
 using FluentAssertions;
 using JetBrains.Annotations;
+using Kyoo.Abstractions.Models;
 using Xunit.Sdk;
 
 namespace Kyoo.Tests
@@ -36,6 +37,22 @@ namespace Kyoo.Tests
 		[AssertionMethod]
 		public static void DeepEqual<T>(T expected, T value)
 		{
+			if (expected is IResource res && expected is IThumbnails thumbs) {
+				if (thumbs.Poster != null)
+					thumbs.Poster.Path = $"/{expected.GetType().Name.ToLower()}/{res.Slug}/poster";
+				if (thumbs.Thumbnail != null)
+					thumbs.Thumbnail.Path = $"/{expected.GetType().Name.ToLower()}/{res.Slug}/thumbnail";
+				if (thumbs.Logo != null)
+					thumbs.Logo.Path = $"/{expected.GetType().Name.ToLower()}/{res.Slug}/logo";
+			}
+			if (value is IResource resV && value is IThumbnails thumbsV) {
+				if (thumbsV.Poster != null)
+					thumbsV.Poster.Path = $"/{value.GetType().Name.ToLower()}/{resV.Slug}/poster";
+				if (thumbsV.Thumbnail != null)
+					thumbsV.Thumbnail.Path = $"/{value.GetType().Name.ToLower()}/{resV.Slug}/thumbnail";
+				if (thumbsV.Logo != null)
+					thumbsV.Logo.Path = $"/{value.GetType().Name.ToLower()}/{resV.Slug}/logo";
+			}
 			value.Should().BeEquivalentTo(expected);
 		}
 

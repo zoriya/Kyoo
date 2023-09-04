@@ -13,6 +13,7 @@ use crate::{
 	audio::*,
 	identify::{identify, Audio, Chapter, MediaInfo, Subtitle, Video},
 	state::Transcoder,
+	transcode::Quality,
 	video::*,
 };
 mod audio;
@@ -179,7 +180,7 @@ async fn get_swagger() -> String {
 			get_attachment,
 			get_subtitle,
 		),
-		components(schemas(MediaInfo, Video, Audio, Subtitle, Chapter))
+		components(schemas(MediaInfo, Video, Audio, Subtitle, Chapter, Quality))
 	)]
 	struct ApiDoc;
 

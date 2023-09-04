@@ -22,6 +22,7 @@ using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Core.Controllers;
 using Kyoo.Postgresql;
+using Moq;
 using Xunit.Abstractions;
 
 namespace Kyoo.Tests.Database
@@ -37,31 +38,28 @@ namespace Kyoo.Tests.Database
 		{
 			Context = new PostgresTestContext(postgres, output);
 
-			ProviderRepository provider = new(_NewContext());
-			LibraryRepository library = new(_NewContext(), provider);
-			CollectionRepository collection = new(_NewContext(), provider);
-			GenreRepository genre = new(_NewContext());
-			StudioRepository studio = new(_NewContext(), provider);
-			PeopleRepository people = new(_NewContext(), provider,
-				new Lazy<IShowRepository>(() => LibraryManager.ShowRepository));
-			ShowRepository show = new(_NewContext(), studio, people, genre, provider);
-			SeasonRepository season = new(_NewContext(), show, provider);
-			LibraryItemRepository libraryItem = new(_NewContext(),
-				new Lazy<ILibraryRepository>(() => LibraryManager.LibraryRepository));
-			EpisodeRepository episode = new(_NewContext(), show, provider);
-			UserRepository user = new(_NewContext());
+			Mock<IThumbnailsManager> thumbs = new();
+			CollectionRepository collection = new(_NewContext(), thumbs.Object);
+			StudioRepository studio = new(_NewContext(), thumbs.Object);
+			PeopleRepository people = new(_NewContext(),
+				new Lazy<IShowRepository>(() => LibraryManager.ShowRepository),
+				thumbs.Object);
+			MovieRepository movies = new(_NewContext(), studio, people, thumbs.Object);
+			ShowRepository show = new(_NewContext(), studio, people, thumbs.Object);
+			SeasonRepository season = new(_NewContext(), show, thumbs.Object);
+			LibraryItemRepository libraryItem = new(_NewContext(), thumbs.Object);
+			EpisodeRepository episode = new(_NewContext(), show, thumbs.Object);
+			UserRepository user = new(_NewContext(), thumbs.Object);
 
 			LibraryManager = new LibraryManager(new IBaseRepository[] {
-				provider,
-				library,
 				libraryItem,
 				collection,
+				movies,
 				show,
 				season,
 				episode,
 				people,
 				studio,
-				genre,
 				user
 			});
 		}

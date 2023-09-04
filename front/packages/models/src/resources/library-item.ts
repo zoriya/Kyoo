@@ -26,32 +26,26 @@ import { ShowP } from "./show";
 /**
  * The type of item, ether a show, a movie or a collection.
  */
-export enum ItemType {
-	Show = 0,
-	Movie = 1,
-	Collection = 2,
+export enum ItemKind {
+	Show = "Show",
+	Movie = "Movie",
+	Collection = "Collection",
 }
 
-export const LibraryItemP = z.preprocess(
-	(x: any) => {
-		if (!x.aliases) x.aliases = [];
-		return x;
-	},
-	z.union([
-		/*
-		 * Either a Show
-		 */
-		ShowP.and(z.object({ type: z.literal(ItemType.Show) })),
-		/*
-		 * Or a Movie
-		 */
-		MovieP.and(z.object({ type: z.literal(ItemType.Movie) })),
-		/*
-		 * Or a Collection
-		 */
-		CollectionP.and(z.object({ type: z.literal(ItemType.Collection) })),
-	]),
-);
+export const LibraryItemP = z.union([
+	/*
+	 * Either a Show
+	 */
+	ShowP.and(z.object({ kind: z.literal(ItemKind.Show) })),
+	/*
+	 * Or a Movie
+	 */
+	MovieP.and(z.object({ kind: z.literal(ItemKind.Movie) })),
+	/*
+	 * Or a Collection
+	 */
+	CollectionP.and(z.object({ kind: z.literal(ItemKind.Collection) })),
+]);
 
 /**
  * An item that can be contained by a Library (so a Show, a Movie or a Collection).

@@ -70,7 +70,7 @@ const { useParam } = createParam<{ q?: string }>();
 const SearchBar = forwardRef<
 	TextInput,
 	{ onBlur?: (value: string | undefined) => void } & Stylable
->(function _SearchBar({ onBlur, ...props }, ref) {
+>(function SearchBar({ onBlur, ...props }, ref) {
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
 	const { push, replace, back } = useRouter();

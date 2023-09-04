@@ -29,13 +29,13 @@
 		"tsdoc": true
 	},
 	"devDependencies": {
-		"eslint": "8.36.0",
-		"eslint-config-next": "13.2.4",
-		"eslint-config-prettier": "^8.7.0",
+		"eslint": "8.46.0",
+		"eslint-config-next": "13.4.13",
+		"eslint-config-prettier": "^9.0.0",
 		"eslint-plugin-header": "^3.1.1",
-		"prettier": "^2.8.4",
-		"prettier-plugin-jsdoc": "^0.4.2",
-		"typescript": "4.9.5"
+		"prettier": "^3.0.1",
+		"prettier-plugin-jsdoc": "^1.0.1",
+		"typescript": "5.1.6"
 	},
 	"packageManager": "yarn@3.2.4"
 }

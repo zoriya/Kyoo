@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ComponentType, ComponentProps } from "react";
+import { ComponentType, ComponentProps, ReactNode } from "react";
 import { Platform, Text, TextProps, TextStyle, StyleProp } from "react-native";
 import { percent, rem, useYoshiki } from "yoshiki/native";
 import {
@@ -37,7 +37,7 @@ const styleText = (
 	type?: "header" | "sub",
 	custom?: TextStyle,
 ) => {
-	const Text = (props: Omit<ComponentProps<typeof EP>, "style"> & { style?: StyleProp<TextStyle> }) => {
+	const Text = (props: Omit<ComponentProps<typeof EP>, "style"> & { style?: StyleProp<TextStyle>, children?: TextProps["children"] }) => {
 		const { css, theme } = useYoshiki();
 
 		return (

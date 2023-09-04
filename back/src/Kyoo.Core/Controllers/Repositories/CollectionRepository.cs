@@ -37,11 +37,6 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		private readonly DatabaseContext _database;
 
-		/// <summary>
-		/// A provider repository to handle externalID creation and deletion
-		/// </summary>
-		private readonly IProviderRepository _providers;
-
 		/// <inheritdoc />
 		protected override Sort<Collection> DefaultSort => new Sort<Collection>.By(nameof(Collection.Name));
 
@@ -49,22 +44,22 @@ namespace Kyoo.Core.Controllers
 		/// Create a new <see cref="CollectionRepository"/>.
 		/// </summary>
 		/// <param name="database">The database handle to use</param>
-		/// /// <param name="providers">A provider repository</param>
-		public CollectionRepository(DatabaseContext database, IProviderRepository providers)
-			: base(database)
+		/// <param name="thumbs">The thumbnail manager used to store images.</param>
+		public CollectionRepository(DatabaseContext database, IThumbnailsManager thumbs)
+			: base(database, thumbs)
 		{
 			_database = database;
-			_providers = providers;
 		}
 
 		/// <inheritdoc />
 		public override async Task<ICollection<Collection>> Search(string query)
 		{
-			return await Sort(
+			return (await Sort(
 				_database.Collections
 					.Where(_database.Like<Collection>(x => x.Name + " " + x.Slug, $"%{query}%"))
 					.Take(20)
-				).ToListAsync();
+				).ToListAsync())
+				.Select(SetBackingImageSelf).ToList();
 		}
 
 		/// <inheritdoc />
@@ -82,41 +77,13 @@ namespace Kyoo.Core.Controllers
 		{
 			await base.Validate(resource);
 
-			if (string.IsNullOrEmpty(resource.Slug))
-				throw new ArgumentException("The collection's slug must be set and not empty");
 			if (string.IsNullOrEmpty(resource.Name))
 				throw new ArgumentException("The collection's name must be set and not empty");
-
-			if (resource.ExternalIDs != null)
-			{
-				foreach (MetadataID id in resource.ExternalIDs)
-				{
-					id.Provider = _database.LocalEntity<Provider>(id.Provider.Slug)
-						?? await _providers.CreateIfNotExists(id.Provider);
-					id.ProviderID = id.Provider.ID;
-				}
-				_database.MetadataIds<Collection>().AttachRange(resource.ExternalIDs);
-			}
-		}
-
-		/// <inheritdoc />
-		protected override async Task EditRelations(Collection resource, Collection changed, bool resetOld)
-		{
-			await Validate(changed);
-
-			if (changed.ExternalIDs != null || resetOld)
-			{
-				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
-				resource.ExternalIDs = changed.ExternalIDs;
-			}
 		}
 
 		/// <inheritdoc />
 		public override async Task Delete(Collection obj)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-
 			_database.Entry(obj).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
 			await base.Delete(obj);

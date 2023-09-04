@@ -18,8 +18,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
+using Kyoo.Utils;
+using Newtonsoft.Json;
 
 namespace Kyoo.Abstractions.Models
 {
@@ -29,42 +32,46 @@ namespace Kyoo.Abstractions.Models
 	public class Show : IResource, IMetadata, IOnMerge, IThumbnails
 	{
 		/// <inheritdoc />
-		public int ID { get; set; }
+		public int Id { get; set; }
 
 		/// <inheritdoc />
+		[MaxLength(256)]
 		public string Slug { get; set; }
 
 		/// <summary>
 		/// The title of this show.
 		/// </summary>
-		public string Title { get; set; }
+		public string Name { get; set; }
+
+		/// <summary>
+		/// A catchphrase for this show.
+		/// </summary>
+		public string? Tagline { get; set; }
 
 		/// <summary>
 		/// The list of alternative titles of this show.
 		/// </summary>
-		[EditableRelation] public string[] Aliases { get; set; }
-
-		/// <summary>
-		/// The path of the root directory of this show.
-		/// </summary>
-		[SerializeIgnore] public string Path { get; set; }
+		public List<string> Aliases { get; set; } = new();
 
 		/// <summary>
 		/// The summary of this show.
 		/// </summary>
-		public string Overview { get; set; }
+		public string? Overview { get; set; }
+
+		/// <summary>
+		/// A list of tags that match this movie.
+		/// </summary>
+		public List<string> Tags { get; set; } = new();
+
+		/// <summary>
+		/// The list of genres (themes) this show has.
+		/// </summary>
+		public List<Genre> Genres { get; set; } = new();
 
 		/// <summary>
 		/// Is this show airing, not aired yet or finished?
 		/// </summary>
 		public Status Status { get; set; }
-
-		/// <summary>
-		/// An URL to a trailer.
-		/// </summary>
-		/// TODO for now, this is set to a youtube url. It should be cached and converted to a local file.
-		[Obsolete("Use Images instead of this, this is only kept for the API response.")]
-		public string TrailerUrl => Images?.GetValueOrDefault(Models.Images.Trailer);
 
 		/// <summary>
 		/// The date this show started airing. It can be null if this is unknown.
@@ -73,64 +80,61 @@ namespace Kyoo.Abstractions.Models
 
 		/// <summary>
 		/// The date this show finished airing.
-		/// It must be after the <see cref="StartAir"/> but can be the same (example: for movies).
 		/// It can also be null if this is unknown.
 		/// </summary>
 		public DateTime? EndAir { get; set; }
 
 		/// <inheritdoc />
-		public Dictionary<int, string> Images { get; set; }
-
-		/// <summary>
-		/// True if this show represent a movie, false otherwise.
-		/// </summary>
-		public bool IsMovie { get; set; }
+		public Image? Poster { get; set; }
 
 		/// <inheritdoc />
-		[EditableRelation][LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
+		public Image? Thumbnail { get; set; }
+
+		/// <inheritdoc />
+		public Image? Logo { get; set; }
+
+		/// <summary>
+		/// A video of a few minutes that tease the content.
+		/// </summary>
+		public string? Trailer { get; set; }
+
+		[SerializeIgnore] public DateTime? AirDate => StartAir;
+
+		/// <inheritdoc />
+		public Dictionary<string, MetadataId> ExternalId { get; set; } = new();
 
 		/// <summary>
 		/// The ID of the Studio that made this show.
 		/// </summary>
-		[SerializeIgnore] public int? StudioID { get; set; }
+		[SerializeIgnore] public int? StudioId { get; set; }
 
 		/// <summary>
 		/// The Studio that made this show.
 		/// This must be explicitly loaded via a call to <see cref="ILibraryManager.Load"/>.
 		/// </summary>
-		[LoadableRelation(nameof(StudioID))][EditableRelation] public Studio Studio { get; set; }
-
-		/// <summary>
-		/// The list of genres (themes) this show has.
-		/// </summary>
-		[LoadableRelation][EditableRelation] public ICollection<Genre> Genres { get; set; }
+		[LoadableRelation(nameof(StudioId))][EditableRelation] public Studio? Studio { get; set; }
 
 		/// <summary>
 		/// The list of people that made this show.
 		/// </summary>
-		[LoadableRelation][EditableRelation] public ICollection<PeopleRole> People { get; set; }
+		[LoadableRelation][EditableRelation] public ICollection<PeopleRole>? People { get; set; }
 
 		/// <summary>
 		/// The different seasons in this show. If this is a movie, this list is always null or empty.
 		/// </summary>
-		[LoadableRelation] public ICollection<Season> Seasons { get; set; }
+		[LoadableRelation] public ICollection<Season>? Seasons { get; set; }
 
 		/// <summary>
 		/// The list of episodes in this show.
 		/// If this is a movie, there will be a unique episode (with the seasonNumber and episodeNumber set to null).
 		/// Having an episode is necessary to store metadata and tracks.
 		/// </summary>
-		[LoadableRelation] public ICollection<Episode> Episodes { get; set; }
-
-		/// <summary>
-		/// The list of libraries that contains this show.
-		/// </summary>
-		[LoadableRelation] public ICollection<Library> Libraries { get; set; }
+		[LoadableRelation] public ICollection<Episode>? Episodes { get; set; }
 
 		/// <summary>
 		/// The list of collections that contains this show.
 		/// </summary>
-		[LoadableRelation] public ICollection<Collection> Collections { get; set; }
+		[LoadableRelation] public ICollection<Collection>? Collections { get; set; }
 
 		/// <inheritdoc />
 		public void OnMerge(object merged)
@@ -152,6 +156,15 @@ namespace Kyoo.Abstractions.Models
 				foreach (Episode episode in Episodes)
 					episode.Show = this;
 			}
+		}
+
+		public Show() { }
+
+		[JsonConstructor]
+		public Show(string name)
+		{
+			Slug = Utility.ToSlug(name);
+			Name = name;
 		}
 	}
 

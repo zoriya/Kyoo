@@ -26,11 +26,12 @@ services:
       - ./front:/app
       - /app/.yarn
       - /app/node_modules
+      - /app/apps/mobile/node_modules
       - /app/apps/web/.next/
       - /app/apps/mobile/.expo/
     ports:
       - "3000:3000"
-      - "19000:19000"
+      - "8081:8081"
     restart: on-failure
     environment:
       - KYOO_URL=${KYOO_URL:-http://back:5000}

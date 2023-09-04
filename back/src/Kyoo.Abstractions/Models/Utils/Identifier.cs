@@ -23,7 +23,6 @@ using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using JetBrains.Annotations;
 
 namespace Kyoo.Abstractions.Models.Utils
 {
@@ -43,7 +42,7 @@ namespace Kyoo.Abstractions.Models.Utils
 		/// <summary>
 		/// The slug of the resource or null if the id is specified.
 		/// </summary>
-		private readonly string _slug;
+		private readonly string? _slug;
 
 		/// <summary>
 		/// Create a new <see cref="Identifier"/> for the given id.
@@ -58,10 +57,8 @@ namespace Kyoo.Abstractions.Models.Utils
 		/// Create a new <see cref="Identifier"/> for the given slug.
 		/// </summary>
 		/// <param name="slug">The slug of the resource.</param>
-		public Identifier([NotNull] string slug)
+		public Identifier(string slug)
 		{
-			if (slug == null)
-				throw new ArgumentNullException(nameof(slug));
 			_slug = slug;
 		}
 
@@ -87,7 +84,7 @@ namespace Kyoo.Abstractions.Models.Utils
 		{
 			return _id.HasValue
 				? idFunc(_id.Value)
-				: slugFunc(_slug);
+				: slugFunc(_slug!);
 		}
 
 		/// <summary>
@@ -139,7 +136,7 @@ namespace Kyoo.Abstractions.Models.Utils
 		public bool IsSame(IResource resource)
 		{
 			return Match(
-				id => resource.ID == id,
+				id => resource.Id == id,
 				slug => resource.Slug == slug
 			);
 		}
@@ -155,7 +152,7 @@ namespace Kyoo.Abstractions.Models.Utils
 			where T : IResource
 		{
 			return _id.HasValue
-				? x => x.ID == _id.Value
+				? x => x.Id == _id.Value
 				: x => x.Slug == _slug;
 		}
 
@@ -174,7 +171,7 @@ namespace Kyoo.Abstractions.Models.Utils
 				.Where(x => x.Name == nameof(Enumerable.Any))
 				.FirstOrDefault(x => x.GetParameters().Length == 2)!
 				.MakeGenericMethod(typeof(T2));
-			MethodCallExpression call = Expression.Call(null, method!, listGetter.Body, IsSame<T2>());
+			MethodCallExpression call = Expression.Call(null, method, listGetter.Body, IsSame<T2>());
 			return Expression.Lambda<Func<T, bool>>(call, listGetter.Parameters);
 		}
 
@@ -183,7 +180,7 @@ namespace Kyoo.Abstractions.Models.Utils
 		{
 			return _id.HasValue
 				? _id.Value.ToString()
-				: _slug;
+				: _slug!;
 		}
 
 		/// <summary>
@@ -192,7 +189,7 @@ namespace Kyoo.Abstractions.Models.Utils
 		public class IdentifierConvertor : TypeConverter
 		{
 			/// <inheritdoc />
-			public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+			public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
 			{
 				if (sourceType == typeof(int) || sourceType == typeof(string))
 					return true;
@@ -200,12 +197,12 @@ namespace Kyoo.Abstractions.Models.Utils
 			}
 
 			/// <inheritdoc />
-			public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+			public override object ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
 			{
 				if (value is int id)
 					return new Identifier(id);
 				if (value is not string slug)
-					return base.ConvertFrom(context, culture, value);
+					return base.ConvertFrom(context, culture, value)!;
 				return int.TryParse(slug, out id)
 					? new Identifier(id)
 					: new Identifier(slug);

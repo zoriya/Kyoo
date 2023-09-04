@@ -21,7 +21,7 @@
 import React, { ComponentProps, ComponentType, ForwardedRef, forwardRef } from "react";
 import { Platform, PressableProps, ViewStyle } from "react-native";
 import { SvgProps } from "react-native-svg";
-import { YoshikiStyle } from "yoshiki/dist/type";
+import { YoshikiStyle } from "yoshiki/src/type";
 import { px, Theme, useYoshiki } from "yoshiki/native";
 import { PressableFeedback } from "./links";
 import { alpha } from "./themes";
@@ -61,7 +61,7 @@ export const Icon = ({ icon: Icon, color, size = 24, ...props }: IconProps) => {
 	);
 };
 
-export const IconButton = forwardRef(function _IconButton<AsProps = PressableProps>(
+export const IconButton = forwardRef(function IconButton<AsProps = PressableProps>(
 	{
 		icon,
 		size,
@@ -113,7 +113,7 @@ export const IconFab = <AsProps = PressableProps,>(
 					bg: (theme) => theme.accent,
 					fover: {
 						self: {
-							transform: [{ scale: 1.3 }],
+							transform: "scale(1.3)" as any,
 							bg: (theme: Theme) => theme.accent,
 						},
 					},

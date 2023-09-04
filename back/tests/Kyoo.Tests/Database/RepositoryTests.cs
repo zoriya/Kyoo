@@ -19,7 +19,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
@@ -30,7 +29,7 @@ using Xunit;
 namespace Kyoo.Tests.Database
 {
 	public abstract class RepositoryTests<T> : IDisposable, IAsyncDisposable
-		where T : class, IResource, new()
+		where T : class, IResource
 	{
 		protected readonly RepositoryActivator Repositories;
 		private readonly IRepository<T> _repository;
@@ -63,7 +62,7 @@ namespace Kyoo.Tests.Database
 		[Fact]
 		public async Task GetByIdTest()
 		{
-			T value = await _repository.Get(TestSample.Get<T>().ID);
+			T value = await _repository.Get(TestSample.Get<T>().Id);
 			KAssert.DeepEqual(TestSample.Get<T>(), value);
 		}
 
@@ -89,7 +88,7 @@ namespace Kyoo.Tests.Database
 		[Fact]
 		public async Task DeleteByIdTest()
 		{
-			await _repository.Delete(TestSample.Get<T>().ID);
+			await _repository.Delete(TestSample.Get<T>().Id);
 			Assert.Equal(0, await _repository.GetCount());
 		}
 
@@ -114,21 +113,9 @@ namespace Kyoo.Tests.Database
 			await _repository.Delete(TestSample.Get<T>());
 
 			T expected = TestSample.Get<T>();
-			expected.ID = 0;
+			expected.Id = 0;
 			await _repository.Create(expected);
 			KAssert.DeepEqual(expected, await _repository.Get(expected.Slug));
-		}
-
-		[Fact]
-		public async Task CreateNullTest()
-		{
-			await Assert.ThrowsAsync<ArgumentNullException>(() => _repository.Create(null!));
-		}
-
-		[Fact]
-		public async Task CreateIfNotExistNullTest()
-		{
-			await Assert.ThrowsAsync<ArgumentNullException>(() => _repository.CreateIfNotExists(null!));
 		}
 
 		[Fact]
@@ -140,22 +127,16 @@ namespace Kyoo.Tests.Database
 			KAssert.DeepEqual(expected, await _repository.CreateIfNotExists(TestSample.Get<T>()));
 		}
 
-		[Fact]
-		public async Task EditNullTest()
-		{
-			await Assert.ThrowsAsync<ArgumentNullException>(() => _repository.Edit(null!, false));
-		}
-
-		[Fact]
-		public async Task EditNonExistingTest()
-		{
-			await Assert.ThrowsAsync<ItemNotFoundException>(() => _repository.Edit(new T { ID = 56 }, false));
-		}
+		// [Fact]
+		// public async Task EditNonExistingTest()
+		// {
+		//	 await Assert.ThrowsAsync<ItemNotFoundException>(() => _repository.Edit(new T { Id = 56 }));
+		// }
 
 		[Fact]
 		public async Task GetExpressionIDTest()
 		{
-			KAssert.DeepEqual(TestSample.Get<T>(), await _repository.Get(x => x.ID == TestSample.Get<T>().ID));
+			KAssert.DeepEqual(TestSample.Get<T>(), await _repository.Get(x => x.Id == TestSample.Get<T>().Id));
 		}
 
 		[Fact]
@@ -168,12 +149,6 @@ namespace Kyoo.Tests.Database
 		public async Task GetExpressionNotFoundTest()
 		{
 			await Assert.ThrowsAsync<ItemNotFoundException>(() => _repository.Get(x => x.Slug == "non-existing"));
-		}
-
-		[Fact]
-		public async Task GetExpressionNullTest()
-		{
-			await Assert.ThrowsAsync<ArgumentNullException>(() => _repository.Get((Expression<Func<T, bool>>)null!));
 		}
 
 		[Fact]

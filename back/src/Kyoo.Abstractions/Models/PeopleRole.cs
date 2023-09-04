@@ -29,10 +29,10 @@ namespace Kyoo.Abstractions.Models
 	public class PeopleRole : IResource
 	{
 		/// <inheritdoc />
-		public int ID { get; set; }
+		public int Id { get; set; }
 
 		/// <inheritdoc />
-		public string Slug => ForPeople ? Show.Slug : People.Slug;
+		public string Slug => ForPeople ? Show!.Slug : People.Slug;
 
 		/// <summary>
 		/// Should this role be used as a Show substitute (the value is <c>true</c>) or
@@ -53,12 +53,16 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the Show where the People playing in.
 		/// </summary>
-		public int ShowID { get; set; }
+		public int? ShowID { get; set; }
 
 		/// <summary>
 		/// The show where the People played in.
 		/// </summary>
-		public Show Show { get; set; }
+		public Show? Show { get; set; }
+
+		public int? MovieID { get; set; }
+
+		public Movie? Movie { get; set; }
 
 		/// <summary>
 		/// The type of work the person has done for the show.

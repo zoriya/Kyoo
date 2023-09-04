@@ -11,7 +11,7 @@ from .metadataid import MetadataID
 class PartialShow:
 	name: str
 	original_language: str
-	external_ids: dict[str, MetadataID]
+	external_id: dict[str, MetadataID]
 
 
 @dataclass
@@ -28,7 +28,7 @@ class Episode:
 	absolute_number: Optional[int]
 	release_date: Optional[date | int]
 	thumbnail: Optional[str]
-	external_ids: dict[str, MetadataID]
+	external_id: dict[str, MetadataID]
 
 	path: Optional[str] = None
 	show_id: Optional[str] = None
@@ -40,11 +40,5 @@ class Episode:
 		return {
 			**asdict(self),
 			**asdict(self.translations[default_language]),
-			"title": self.translations[default_language].name,
-			"images": {
-				"1": self.thumbnail,
-			},
-			# TODO: The back has bad external id support, we disable it for now
-			"external_ids": None,
 			"show": None,
 		}

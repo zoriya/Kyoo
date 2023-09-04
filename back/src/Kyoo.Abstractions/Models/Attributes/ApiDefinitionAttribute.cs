@@ -17,7 +17,6 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using JetBrains.Annotations;
 
 namespace Kyoo.Abstractions.Models.Attributes
 {
@@ -32,23 +31,21 @@ namespace Kyoo.Abstractions.Models.Attributes
 		/// <summary>
 		/// The public name of this api.
 		/// </summary>
-		[NotNull] public string Name { get; }
+		public string Name { get; }
 
 		/// <summary>
 		/// The name of the group in witch this API is. You can also specify a custom sort order using the following
 		/// format: <code>order:name</code>. Everything before the first <c>:</c> will be removed but kept for
 		/// th alphabetical ordering.
 		/// </summary>
-		public string Group { get; set; }
+		public string? Group { get; set; }
 
 		/// <summary>
 		/// Create a new <see cref="ApiDefinitionAttribute"/>.
 		/// </summary>
 		/// <param name="name">The name of the api that will be used on the documentation page.</param>
-		public ApiDefinitionAttribute([NotNull] string name)
+		public ApiDefinitionAttribute(string name)
 		{
-			if (name == null)
-				throw new ArgumentNullException(nameof(name));
 			Name = name;
 		}
 	}

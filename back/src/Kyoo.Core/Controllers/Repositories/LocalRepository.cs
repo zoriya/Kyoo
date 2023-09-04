@@ -46,6 +46,11 @@ namespace Kyoo.Core.Controllers
 		protected DbContext Database { get; }
 
 		/// <summary>
+		/// The thumbnail manager used to store images.
+		/// </summary>
+		private readonly IThumbnailsManager _thumbs;
+
+		/// <summary>
 		/// The default sort order that will be used for this resource's type.
 		/// </summary>
 		protected abstract Sort<T> DefaultSort { get; }
@@ -54,9 +59,11 @@ namespace Kyoo.Core.Controllers
 		/// Create a new base <see cref="LocalRepository{T}"/> with the given database handle.
 		/// </summary>
 		/// <param name="database">A database connection to load resources of type <typeparamref name="T"/></param>
-		protected LocalRepository(DbContext database)
+		/// <param name="thumbs">The thumbnail manager used to store images.</param>
+		protected LocalRepository(DbContext database, IThumbnailsManager thumbs)
 		{
 			Database = database;
+			_thumbs = thumbs;
 		}
 
 		/// <inheritdoc/>
@@ -112,7 +119,7 @@ namespace Kyoo.Core.Controllers
 						throw new SwitchExpressionException();
 				}
 			}
-			return _Sort(query, sortBy, false).ThenBy(x => x.ID);
+			return _Sort(query, sortBy, false).ThenBy(x => x.Id);
 		}
 
 		private static Func<Expression, Expression, BinaryExpression> _GetComparisonExpression(
@@ -144,7 +151,7 @@ namespace Kyoo.Core.Controllers
 		/// <param name="reference">The reference item (the AfterID query)</param>
 		/// <param name="next">True if the following page should be returned, false for the previous.</param>
 		/// <returns>An expression ready to be added to a Where close of a sorted query to handle the AfterID</returns>
-		protected Expression<Func<T, bool>> KeysetPaginatate(
+		protected Expression<Func<T, bool>> KeysetPaginate(
 			Sort<T> sort,
 			T reference,
 			bool next = true)
@@ -155,20 +162,20 @@ namespace Kyoo.Core.Controllers
 			ParameterExpression x = Expression.Parameter(typeof(T), "x");
 			ConstantExpression referenceC = Expression.Constant(reference, typeof(T));
 
-			IEnumerable<Sort<T>.By> _GetSortsBy(Sort<T> sort)
+			IEnumerable<Sort<T>.By> GetSortsBy(Sort<T> sort)
 			{
 				return sort switch
 				{
-					Sort<T>.Default => _GetSortsBy(DefaultSort),
+					Sort<T>.Default => GetSortsBy(DefaultSort),
 					Sort<T>.By @sortBy => new[] { sortBy },
-					Sort<T>.Conglomerate(var list) => list.SelectMany(_GetSortsBy),
+					Sort<T>.Conglomerate(var list) => list.SelectMany(GetSortsBy),
 					_ => Array.Empty<Sort<T>.By>(),
 				};
 			}
 
-			// Don't forget that every sorts must end with a ID sort (to differenciate equalities).
-			Sort<T>.By id = new(x => x.ID);
-			IEnumerable<Sort<T>.By> sorts = _GetSortsBy(sort).Append(id);
+			// Don't forget that every sorts must end with a ID sort (to differentiate equalities).
+			Sort<T>.By id = new(x => x.Id);
+			IEnumerable<Sort<T>.By> sorts = GetSortsBy(sort).Append(id);
 
 			BinaryExpression filter = null;
 			List<Sort<T>.By> previousSteps = new();
@@ -180,9 +187,9 @@ namespace Kyoo.Core.Controllers
 				PropertyInfo property = typeof(T).GetProperty(key);
 
 				// Comparing a value with null always return false so we short opt < > comparisons with null.
-				if (property.GetValue(reference) == null)
+				if (property!.GetValue(reference) == null)
 				{
-					previousSteps.Add(new(key, desc));
+					previousSteps.Add(new Sort<T>.By(key, desc));
 					continue;
 				}
 
@@ -206,7 +213,7 @@ namespace Kyoo.Core.Controllers
 
 				// Comparing a value with null always return false for nulls so we must add nulls to the results manually.
 				// Postgres sorts them after values so we will do the same
-				// We only add this condition if the collumn type is nullable
+				// We only add this condition if the column type is nullable
 				if (Nullable.GetUnderlyingType(property.PropertyType) != null)
 				{
 					BinaryExpression equalNull = Expression.Equal(xkey, Expression.Constant(null));
@@ -223,7 +230,29 @@ namespace Kyoo.Core.Controllers
 
 				previousSteps.Add(new(key, desc));
 			}
-			return Expression.Lambda<Func<T, bool>>(filter, x);
+			return Expression.Lambda<Func<T, bool>>(filter!, x);
+		}
+
+		protected void SetBackingImage(T obj)
+		{
+			if (obj is not IThumbnails thumbs)
+				return;
+			string type = obj is ILibraryItem item
+				? item.Kind.ToString().ToLowerInvariant()
+				: typeof(T).Name.ToLowerInvariant();
+
+			if (thumbs.Poster != null)
+				thumbs.Poster.Path = $"/{type}/{obj.Slug}/poster";
+			if (thumbs.Thumbnail != null)
+				thumbs.Thumbnail.Path = $"/{type}/{obj.Slug}/thumbnail";
+			if (thumbs.Logo != null)
+				thumbs.Logo.Path = $"/{type}/{obj.Slug}/logo";
+		}
+
+		protected T SetBackingImageSelf(T obj)
+		{
+			SetBackingImage(obj);
+			return obj;
 		}
 
 		/// <summary>
@@ -234,7 +263,8 @@ namespace Kyoo.Core.Controllers
 		/// <returns>The tracked resource with the given ID</returns>
 		protected virtual async Task<T> GetWithTracking(int id)
 		{
-			T ret = await Database.Set<T>().AsTracking().FirstOrDefaultAsync(x => x.ID == id);
+			T ret = await Database.Set<T>().AsTracking().FirstOrDefaultAsync(x => x.Id == id);
+			SetBackingImage(ret);
 			if (ret == null)
 				throw new ItemNotFoundException($"No {typeof(T).Name} found with the id {id}");
 			return ret;
@@ -270,30 +300,31 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public virtual Task<T> GetOrDefault(int id)
 		{
-			return Database.Set<T>().FirstOrDefaultAsync(x => x.ID == id);
+			return Database.Set<T>().FirstOrDefaultAsync(x => x.Id == id).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc />
 		public virtual Task<T> GetOrDefault(string slug)
 		{
-			return Database.Set<T>().FirstOrDefaultAsync(x => x.Slug == slug);
+			return Database.Set<T>().FirstOrDefaultAsync(x => x.Slug == slug).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc />
 		public virtual Task<T> GetOrDefault(Expression<Func<T, bool>> where, Sort<T> sortBy = default)
 		{
-			return Sort(Database.Set<T>(), sortBy).FirstOrDefaultAsync(where);
+			return Sort(Database.Set<T>(), sortBy).FirstOrDefaultAsync(where).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc/>
 		public abstract Task<ICollection<T>> Search(string query);
 
 		/// <inheritdoc/>
-		public virtual Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null,
+		public virtual async Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null,
 			Sort<T> sort = default,
 			Pagination limit = default)
 		{
-			return ApplyFilters(Database.Set<T>(), where, sort, limit);
+			return (await ApplyFilters(Database.Set<T>(), where, sort, limit))
+				.Select(SetBackingImageSelf).ToList();
 		}
 
 		/// <summary>
@@ -316,7 +347,7 @@ namespace Kyoo.Core.Controllers
 			if (limit?.AfterID != null)
 			{
 				T reference = await Get(limit.AfterID.Value);
-				query = query.Where(KeysetPaginatate(sort, reference, !limit.Reverse));
+				query = query.Where(KeysetPaginate(sort, reference, !limit.Reverse));
 			}
 			if (limit?.Reverse == true)
 				query = query.Reverse();
@@ -338,9 +369,18 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc/>
 		public virtual async Task<T> Create(T obj)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
 			await Validate(obj);
+			if (obj is IThumbnails thumbs)
+			{
+				await _thumbs.DownloadImages(thumbs);
+				if (thumbs.Poster != null)
+					Database.Entry(thumbs).Reference(x => x.Poster).TargetEntry.State = EntityState.Added;
+				if (thumbs.Thumbnail != null)
+					Database.Entry(thumbs).Reference(x => x.Thumbnail).TargetEntry.State = EntityState.Added;
+				if (thumbs.Logo != null)
+					Database.Entry(thumbs).Reference(x => x.Logo).TargetEntry.State = EntityState.Added;
+			}
+			SetBackingImage(obj);
 			return obj;
 		}
 
@@ -367,9 +407,6 @@ namespace Kyoo.Core.Controllers
 		{
 			try
 			{
-				if (obj == null)
-					throw new ArgumentNullException(nameof(obj));
-
 				T old = await GetOrDefault(obj.Slug);
 				if (old != null)
 					return old;
@@ -383,24 +420,44 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc/>
-		public virtual async Task<T> Edit(T edited, bool resetOld)
+		public virtual async Task<T> Edit(T edited)
 		{
-			if (edited == null)
-				throw new ArgumentNullException(nameof(edited));
-
 			bool lazyLoading = Database.ChangeTracker.LazyLoadingEnabled;
 			Database.ChangeTracker.LazyLoadingEnabled = false;
 			try
 			{
-				T old = await GetWithTracking(edited.ID);
+				T old = await GetWithTracking(edited.Id);
 
-				if (resetOld)
-					old = Merger.Nullify(old);
 				Merger.Complete(old, edited, x => x.GetCustomAttribute<LoadableRelationAttribute>() == null);
-				await EditRelations(old, edited, resetOld);
+				await EditRelations(old, edited);
 				await Database.SaveChangesAsync();
 				OnEdited?.Invoke(old);
+				SetBackingImage(old);
 				return old;
+			}
+			finally
+			{
+				Database.ChangeTracker.LazyLoadingEnabled = lazyLoading;
+				Database.ChangeTracker.Clear();
+			}
+		}
+
+		/// <inheritdoc/>
+		public virtual async Task<T> Patch(int id, Func<T, Task<bool>> patch)
+		{
+			bool lazyLoading = Database.ChangeTracker.LazyLoadingEnabled;
+			Database.ChangeTracker.LazyLoadingEnabled = false;
+			try
+			{
+				T resource = await GetWithTracking(id);
+
+				if (!await patch(resource))
+					throw new ArgumentException("Could not patch resource");
+
+				await Database.SaveChangesAsync();
+				OnEdited?.Invoke(resource);
+				SetBackingImage(resource);
+				return resource;
 			}
 			finally
 			{
@@ -419,12 +476,15 @@ namespace Kyoo.Core.Controllers
 		/// The new version of <paramref name="resource"/>.
 		/// This item will be saved on the database and replace <paramref name="resource"/>
 		/// </param>
-		/// <param name="resetOld">
-		/// A boolean to indicate if all values of resource should be discarded or not.
-		/// </param>
 		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-		protected virtual Task EditRelations(T resource, T changed, bool resetOld)
+		protected virtual Task EditRelations(T resource, T changed)
 		{
+			if (resource is IThumbnails thumbs && changed is IThumbnails chng)
+			{
+				Database.Entry(thumbs).Reference(x => x.Poster).IsModified = thumbs.Poster != chng.Poster;
+				Database.Entry(thumbs).Reference(x => x.Thumbnail).IsModified = thumbs.Thumbnail != chng.Thumbnail;
+				Database.Entry(thumbs).Reference(x => x.Logo).IsModified = thumbs.Logo != chng.Logo;
+			}
 			return Validate(resource);
 		}
 

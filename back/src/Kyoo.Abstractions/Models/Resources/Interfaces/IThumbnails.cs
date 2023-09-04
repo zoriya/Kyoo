@@ -16,8 +16,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using Kyoo.Abstractions.Controllers;
+using System;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.Globalization;
+using Kyoo.Abstractions.Models.Attributes;
 
 namespace Kyoo.Abstractions.Models
 {
@@ -27,51 +30,104 @@ namespace Kyoo.Abstractions.Models
 	public interface IThumbnails
 	{
 		/// <summary>
-		/// The list of images mapped to a certain index.
+		/// A poster is a 2/3 format image with the cover of the resource.
 		/// </summary>
-		/// <remarks>
-		/// An arbitrary index should not be used, instead use indexes from <see cref="Models.Images"/>
-		/// </remarks>
-		/// <example>{"0": "example.com/dune/poster"}</example>
-		public Dictionary<int, string> Images { get; set; }
-	}
-
-	/// <summary>
-	/// A class containing constant values for images. To be used as index of a <see cref="IThumbnails.Images"/>.
-	/// </summary>
-	public static class Images
-	{
-		/// <summary>
-		/// A poster is a 9/16 format image with the cover of the resource.
-		/// </summary>
-		public const int Poster = 0;
+		public Image? Poster { get; set; }
 
 		/// <summary>
 		/// A thumbnail is a 16/9 format image, it could ether be used as a background or as a preview but it usually
 		/// is not an official image.
 		/// </summary>
-		public const int Thumbnail = 1;
+		public Image? Thumbnail { get; set; }
 
 		/// <summary>
 		/// A logo is a small image representing the resource.
 		/// </summary>
-		public const int Logo = 2;
+		public Image? Logo { get; set; }
+	}
+
+	[TypeConverter(typeof(ImageConvertor))]
+	public class Image
+	{
+		/// <summary>
+		/// The original image from another server.
+		/// </summary>
+		public string Source { get; set; }
 
 		/// <summary>
-		/// A video of a few minutes that tease the content.
+		/// A hash to display as placeholder while the image is loading.
 		/// </summary>
-		public const int Trailer = 3;
+		[MaxLength(32)]
+		public string Blurhash { get; set; }
+
+		[SerializeIgnore]
+		public string Path { private get; set; }
 
 		/// <summary>
-		/// Retrieve the name of an image using it's ID. It is also used by the serializer to retrieve all named images.
-		/// If a plugin adds a new image type, it should add it's value and name here to allow the serializer to add it.
+		/// The url to retrieve the low quality image.
 		/// </summary>
-		public static Dictionary<int, string> ImageName { get; } = new()
+		public string Low => $"{Path}?quality=low";
+
+		/// <summary>
+		/// The url to retrieve the medium quality image.
+		/// </summary>
+		public string Medium => $"{Path}?quality=medium";
+
+		/// <summary>
+		/// The url to retrieve the high quality image.
+		/// </summary>
+		public string High => $"{Path}?quality=high";
+
+		public Image(string source, string? blurhash = null)
 		{
-			[Poster] = nameof(Poster),
-			[Thumbnail] = nameof(Thumbnail),
-			[Logo] = nameof(Logo),
-			[Trailer] = nameof(Trailer)
-		};
+			Source = source;
+			Blurhash = blurhash ?? "00000000000000";
+		}
+
+		public class ImageConvertor : TypeConverter
+		{
+			/// <inheritdoc />
+			public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
+			{
+				if (sourceType == typeof(string))
+					return true;
+				return base.CanConvertFrom(context, sourceType);
+			}
+
+			/// <inheritdoc />
+			public override object ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
+			{
+				if (value is not string source)
+					return base.ConvertFrom(context, culture, value)!;
+				return new Image(source);
+			}
+
+			/// <inheritdoc />
+			public override bool CanConvertTo(ITypeDescriptorContext? context, Type? destinationType)
+			{
+				return false;
+			}
+		}
+	}
+
+	/// <summary>
+	/// The quality of an image
+	/// </summary>
+	public enum ImageQuality
+	{
+		/// <summary>
+		/// Small
+		/// </summary>
+		Low,
+
+		/// <summary>
+		/// Medium
+		/// </summary>
+		Medium,
+
+		/// <summary>
+		/// Large
+		/// </summary>
+		High,
 	}
 }

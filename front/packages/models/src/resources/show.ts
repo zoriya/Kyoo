@@ -21,7 +21,7 @@
 import { z } from "zod";
 import { zdate } from "../utils";
 import { ImagesP, ResourceP } from "../traits";
-import { GenreP } from "./genre";
+import { Genre } from "./genre";
 import { SeasonP } from "./season";
 import { StudioP } from "./studio";
 
@@ -29,26 +29,22 @@ import { StudioP } from "./studio";
  * The enum containing show's status.
  */
 export enum Status {
-	Unknown = 0,
-	Finished = 1,
-	Airing = 2,
-	Planned = 3,
+	Unknown = "Unknown",
+	Finished = "Finished",
+	Airing = "Airing",
+	Planned = "Planned",
 }
 
-export const ShowP = z.preprocess(
-	(x: any) => {
-		if (!x) return x;
-		// Waiting for the API to be updaded
-		x.name = x.title;
-		if (x.aliases === null) x.aliases = [];
-		x.trailer = x.images["3"];
-		return x;
-	},
-	ResourceP.merge(ImagesP).extend({
+export const ShowP = ResourceP.merge(ImagesP)
+	.extend({
 		/**
 		 * The title of this show.
 		 */
 		name: z.string(),
+		/**
+		 * A catchphrase for this show.
+		 */
+		tagline: z.string().nullable(),
 		/**
 		 * The list of alternative titles of this show.
 		 */
@@ -57,6 +53,10 @@ export const ShowP = z.preprocess(
 		 * The summary of this show.
 		 */
 		overview: z.string().nullable(),
+		/**
+		 * A list of tags that match this movie.
+		 */
+		tags: z.array(z.string()),
 		/**
 		 * Is this show airing, not aired yet or finished?
 		 */
@@ -72,7 +72,11 @@ export const ShowP = z.preprocess(
 		/**
 		 * The list of genres (themes) this show has.
 		 */
-		genres: z.array(GenreP).optional(),
+		genres: z.array(z.nativeEnum(Genre)),
+		/**
+		 * A youtube url for the trailer.
+		 */
+		trailer: z.string().optional().nullable(),
 		/**
 		 * The studio that made this show.
 		 */
@@ -81,8 +85,17 @@ export const ShowP = z.preprocess(
 		 * The list of seasons of this show.
 		 */
 		seasons: z.array(SeasonP).optional(),
-	}),
-);
+	})
+	.transform((x) => {
+		if (!x.thumbnail && x.poster) {
+			x.thumbnail = { ...x.poster };
+			if (x.thumbnail) {
+				x.thumbnail.low = x.thumbnail.high;
+				x.thumbnail.medium = x.thumbnail.high;
+			}
+		}
+		return x;
+	});
 
 /**
  * A tv serie or an anime.

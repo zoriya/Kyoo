@@ -21,12 +21,12 @@
 import { useRouter } from "next/router";
 import { ComponentType } from "react";
 
-export const withRoute = <Props,>(Component: ComponentType<Props>) => {
+export const withRoute = <Props,>(Component: ComponentType<Props>, defaultProps?: Partial<Props>) => {
 	const WithUseRoute = (props: Props) => {
 		const router = useRouter();
 
 		// @ts-ignore
-		return <Component {...router.query} {...props} />;
+		return <Component {...defaultProps} {...router.query} {...props} />;
 	};
 
 	const { ...all } = Component;

@@ -61,7 +61,7 @@ namespace Kyoo.Authentication
 				: string.Empty;
 			List<Claim> claims = new()
 			{
-				new Claim(Claims.Id, user.ID.ToString(CultureInfo.InvariantCulture)),
+				new Claim(Claims.Id, user.Id.ToString(CultureInfo.InvariantCulture)),
 				new Claim(Claims.Name, user.Username),
 				new Claim(Claims.Permissions, permissions),
 				new Claim(Claims.Type, "access")
@@ -85,7 +85,7 @@ namespace Kyoo.Authentication
 				signingCredentials: credential,
 				claims: new[]
 				{
-					new Claim(Claims.Id, user.ID.ToString(CultureInfo.InvariantCulture)),
+					new Claim(Claims.Id, user.Id.ToString(CultureInfo.InvariantCulture)),
 					new Claim(Claims.Guid, Guid.NewGuid().ToString()),
 					new Claim(Claims.Type, "refresh")
 				},

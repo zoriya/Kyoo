@@ -16,20 +16,25 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Kyoo.Abstractions.Models.Attributes;
+using Kyoo.Utils;
+using Newtonsoft.Json;
 
 namespace Kyoo.Abstractions.Models
 {
 	/// <summary>
 	/// A single user of the app.
 	/// </summary>
-	public class User : IResource, IThumbnails
+	public class User : IResource
 	{
 		/// <inheritdoc />
-		public int ID { get; set; }
+		public int Id { get; set; }
 
 		/// <inheritdoc />
+		[MaxLength(256)]
 		public string Slug { get; set; }
 
 		/// <summary>
@@ -51,27 +56,32 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The list of permissions of the user. The format of this is implementation dependent.
 		/// </summary>
-		public string[] Permissions { get; set; }
+		public string[] Permissions { get; set; } = Array.Empty<string>();
 
 		/// <summary>
-		/// Arbitrary extra data that can be used by specific authentication implementations.
+		/// A logo is a small image representing the resource.
 		/// </summary>
-		[SerializeIgnore]
-		public Dictionary<string, string> ExtraData { get; set; }
-
-		/// <inheritdoc />
-		public Dictionary<int, string> Images { get; set; }
+		public Image? Logo { get; set; }
 
 		/// <summary>
 		/// The list of shows the user has finished.
 		/// </summary>
 		[SerializeIgnore]
-		public ICollection<Show> Watched { get; set; }
+		public ICollection<Show>? Watched { get; set; }
 
 		/// <summary>
 		/// The list of episodes the user is watching (stopped in progress or the next episode of the show)
 		/// </summary>
 		[SerializeIgnore]
-		public ICollection<WatchedEpisode> CurrentlyWatching { get; set; }
+		public ICollection<WatchedEpisode>? CurrentlyWatching { get; set; }
+
+		public User() { }
+
+		[JsonConstructor]
+		public User(string username)
+		{
+			Slug = Utility.ToSlug(username);
+			Username = username;
+		}
 	}
 }

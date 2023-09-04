@@ -18,6 +18,8 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import "./react-native-video.d.ts";
+
 declare module "react-native-video" {
 	interface VideoProperties {
 		fonts?: string[];
@@ -55,7 +57,7 @@ const audioAtom = atom(0);
 
 const clientId = uuid.v4() as string;
 
-const Video = forwardRef<NativeVideo, VideoProps>(function _NativeVideo(
+const Video = forwardRef<NativeVideo, VideoProps>(function Video(
 	{ onLoad, source, onPointerDown, subtitles, ...props },
 	ref,
 ) {

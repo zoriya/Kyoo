@@ -19,14 +19,13 @@
  */
 
 import { View, ViewStyle } from "react-native";
-import { Image } from "./image";
+import { Image, ImageProps } from "./image";
 import { useYoshiki, px, Stylable } from "yoshiki/native";
 import { Icon } from "./icons";
 import { P } from "./text";
 import AccountCircle from "@material-symbols/svg-400/rounded/account_circle-fill.svg";
-import { YoshikiStyle } from "yoshiki/dist/type";
+import { YoshikiStyle } from "yoshiki/src/type";
 import { ComponentType, forwardRef, RefAttributes } from "react";
-import { ts } from "./utils";
 
 const stringToColor = (string: string) => {
 	let hash = 0;
@@ -47,7 +46,8 @@ const stringToColor = (string: string) => {
 export const Avatar = forwardRef<
 	View,
 	{
-		src?: string | null;
+		src?: ImageProps["src"];
+		quality?: ImageProps["quality"];
 		alt?: string;
 		size?: YoshikiStyle<number>;
 		placeholder?: string;
@@ -56,8 +56,19 @@ export const Avatar = forwardRef<
 		fill?: boolean;
 		as?: ComponentType<{ style?: ViewStyle } & RefAttributes<View>>;
 	} & Stylable
->(function _Avatar(
-	{ src, alt, size = px(24), color, placeholder, isLoading = false, fill = false, as, ...props },
+>(function Avatar(
+	{
+		src,
+		quality = "low",
+		alt,
+		size = px(24),
+		color,
+		placeholder,
+		isLoading = false,
+		fill = false,
+		as,
+		...props
+	},
 	ref,
 ) {
 	const { css, theme } = useYoshiki();
@@ -88,7 +99,12 @@ export const Avatar = forwardRef<
 			)}
 		>
 			{src || isLoading ? (
-				<Image src={src} alt={alt} layout={{ width: size, height: size }} />
+				<Image
+					src={src}
+					quality={quality}
+					alt={alt}
+					layout={{ width: size, height: size }}
+				/>
 			) : placeholder ? (
 				<P
 					{...css({

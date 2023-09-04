@@ -48,7 +48,7 @@ class Scanner:
 			await asyncio.gather(*map(self.identify, group))
 
 	async def get_registered_paths(self) -> List[str]:
-		# TODO: Once movies are separated from the api, a new endpoint should be created to check for paths.
+		paths = None
 		async with self._client.get(
 			f"{self._url}/episodes",
 			params={"limit": 0},
@@ -56,7 +56,17 @@ class Scanner:
 		) as r:
 			r.raise_for_status()
 			ret = await r.json()
-			return list(x["path"] for x in ret["items"])
+			paths = list(x["path"] for x in ret["items"])
+
+		async with self._client.get(
+			f"{self._url}/movies",
+			params={"limit": 0},
+			headers={"X-API-Key": self._api_key},
+		) as r:
+			r.raise_for_status()
+			ret = await r.json()
+			paths += list(x["path"] for x in ret["items"])
+		return paths
 
 	@log_errors
 	async def identify(self, path: str):
@@ -120,7 +130,7 @@ class Scanner:
 			return ret
 
 		# The parameter is only used as a key for the cache.
-		provider_id = episode.show.external_ids[self.provider.name].id
+		provider_id = episode.show.external_id[self.provider.name].data_id
 		return await create_show(provider_id)
 
 	@provider_cache("seasons")
@@ -157,7 +167,13 @@ class Scanner:
 
 	async def delete(self, path: str):
 		logging.info("Deleting %s", path)
-		# TODO: Adapt this for movies as well when they are split
+		async with self._client.delete(
+			f"{self._url}/movies?path={path}", headers={"X-API-Key": self._api_key}
+		) as r:
+			if not r.ok:
+				logging.error(f"Request error: {await r.text()}")
+				r.raise_for_status()
+
 		async with self._client.delete(
 			f"{self._url}/episodes?path={path}", headers={"X-API-Key": self._api_key}
 		) as r:

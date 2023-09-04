@@ -18,11 +18,12 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { focusReset, H6, Image, Link, P, Skeleton, ts } from "@kyoo/primitives";
+import { focusReset, H6, Image, ImageProps, Link, P, Skeleton, ts } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
-import { View } from "react-native";
+import { ImageStyle, View } from "react-native";
 import { Layout, WithLoading } from "../fetch";
 import { percent, px, rem, Stylable, Theme, useYoshiki } from "yoshiki/native";
+import { KyooImage } from "@kyoo/models";
 
 export const episodeDisplayNumber = (
 	episode: {
@@ -48,13 +49,18 @@ export const EpisodeBox = ({
 	WithLoading<{
 		name: string | null;
 		overview: string;
-		thumbnail?: string | null;
+		thumbnail?: ImageProps["src"] | null;
 	}>) => {
 	const { t } = useTranslation();
 
 	return (
 		<View {...props}>
-			<Image src={thumbnail} alt="" layout={{ width: percent(100), aspectRatio: 16 / 9 }} />
+			<Image
+				src={thumbnail}
+				quality="low"
+				alt=""
+				layout={{ width: percent(100), aspectRatio: 16 / 9 }}
+			/>
 			<Skeleton>{isLoading || <P>{name ?? t("show.episodeNoMetadata")}</P>}</Skeleton>
 			<Skeleton>{isLoading || <P>{overview}</P>}</Skeleton>
 		</View>
@@ -79,12 +85,12 @@ export const EpisodeLine = ({
 	displayNumber: string;
 	name: string | null;
 	overview: string | null;
-	thumbnail?: string | null;
-	absoluteNumber: number | null,
-	episodeNumber: number | null,
-	seasonNumber: number | null,
-	releaseDate: Date | null,
-	id: number,
+	thumbnail?: KyooImage | null;
+	absoluteNumber: number | null;
+	episodeNumber: number | null;
+	seasonNumber: number | null;
+	releaseDate: Date | null;
+	id: number;
 }> &
 	Stylable) => {
 	const { css } = useYoshiki();
@@ -123,12 +129,13 @@ export const EpisodeLine = ({
 			</P>
 			<Image
 				src={thumbnail}
+				quality="low"
 				alt=""
 				layout={{
 					width: percent(18),
 					aspectRatio: 16 / 9,
 				}}
-				{...css(["poster", { flexShrink: 0, m: ts(1) }])}
+				{...(css(["poster", { flexShrink: 0, m: ts(1) }]) as { style: ImageStyle })}
 			/>
 			<View {...css({ flexGrow: 1, flexShrink: 1, m: ts(1) })}>
 				<Skeleton>

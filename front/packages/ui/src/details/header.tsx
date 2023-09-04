@@ -18,7 +18,15 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Movie, QueryIdentifier, Show, getDisplayDate, Genre, Studio } from "@kyoo/models";
+import {
+	Movie,
+	QueryIdentifier,
+	Show,
+	getDisplayDate,
+	Genre,
+	Studio,
+	KyooImage,
+} from "@kyoo/models";
 import {
 	Container,
 	H1,
@@ -37,11 +45,11 @@ import {
 	LI,
 	A,
 	ts,
-	Button,
+	Chip,
 } from "@kyoo/primitives";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
-import { Platform, Pressable, PressableProps, View } from "react-native";
+import { ImageStyle, Platform, View } from "react-native";
 import {
 	Theme,
 	md,
@@ -63,19 +71,23 @@ const TitleLine = ({
 	isLoading,
 	slug,
 	name,
+	tagline,
 	date,
 	poster,
 	studio,
 	trailerUrl,
+	type,
 	...props
 }: {
 	isLoading: boolean;
 	slug: string;
 	name?: string;
-	date?: string;
-	poster?: string | null;
+	tagline?: string | null;
+	date?: string | null;
+	poster?: KyooImage | null;
 	studio?: Studio | null;
 	trailerUrl?: string | null;
+	type: "movie" | "show";
 } & Stylable) => {
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
@@ -94,19 +106,21 @@ const TitleLine = ({
 					flexDirection: { xs: "column", sm: "row" },
 					alignItems: { xs: "center", sm: "flex-start" },
 					flexGrow: 1,
+					maxWidth: percent(100),
 				})}
 			>
 				<Poster
 					src={poster}
 					alt={name}
-					isLoading={isLoading}
+					quality="medium"
+					forcedLoading={isLoading}
 					layout={{
 						width: { xs: percent(50), md: percent(25) },
 					}}
-					{...css({
-						maxWidth: { xs: px(175), sm: Platform.OS === "web" ? "unset" : 99999999 },
+					{...(css({
+						maxWidth: { xs: px(175), sm: Platform.OS === "web" ? ("unset" as any) : 99999999 },
 						flexShrink: 0,
-					})}
+					}) as { style: ImageStyle })}
 				/>
 				<View
 					{...css({
@@ -117,23 +131,43 @@ const TitleLine = ({
 						flexGrow: 1,
 					})}
 				>
-					<Skeleton
-						variant="header"
-						{...css({ width: rem(15), height: rem(2.5), marginBottom: rem(1) })}
+					<P
+						{...css({
+							textAlign: { xs: "center", sm: "left" },
+						})}
 					>
-						{isLoading || (
-							<H1
-								{...css({
-									fontWeight: { md: "900" },
-									textAlign: { xs: "center", sm: "left" },
-									color: (theme: Theme) => ({ xs: theme.user.heading, md: theme.heading }),
-								})}
-							>
-								{name}
-							</H1>
-						)}
-					</Skeleton>
-					{(isLoading || date) && (
+						<Skeleton
+							variant="header"
+							{...css({ width: rem(15), height: rem(2.5), marginBottom: rem(1) })}
+						>
+							{isLoading || (
+								<>
+									<H1
+										{...css({
+											color: (theme: Theme) => ({ xs: theme.user.heading, md: theme.heading }),
+										})}
+									>
+										{name}
+									</H1>
+									{date && (
+										<P
+											{...css({
+												fontSize: rem(2.5),
+												color: (theme: Theme) => ({
+													xs: theme.user.paragraph,
+													md: theme.paragraph,
+												}),
+											})}
+										>
+											{" "}
+											({date})
+										</P>
+									)}
+								</>
+							)}
+						</Skeleton>
+					</P>
+					{(isLoading || tagline) && (
 						<Skeleton
 							{...css({
 								width: rem(5),
@@ -152,7 +186,7 @@ const TitleLine = ({
 										color: (theme: Theme) => ({ xs: theme.user.heading, md: theme.heading }),
 									})}
 								>
-									{date}
+									{tagline}
 								</P>
 							)}
 						</Skeleton>
@@ -161,7 +195,7 @@ const TitleLine = ({
 						<IconFab
 							icon={PlayArrow}
 							as={Link}
-							href={`/watch/${slug}`}
+							href={type === "show" ? `/watch/${slug}` : `/movie/${slug}/watch`}
 							color={{ xs: theme.user.colors.black, md: theme.colors.black }}
 							{...css({
 								bg: theme.user.accent,
@@ -227,11 +261,13 @@ const TitleLine = ({
 const Description = ({
 	isLoading,
 	overview,
+	tags,
 	genres,
 	...props
 }: {
 	isLoading: boolean;
 	overview?: string | null;
+	tags?: string[];
 	genres?: Genre[];
 } & Stylable) => {
 	const { t } = useTranslation();
@@ -249,40 +285,38 @@ const Description = ({
 				})}
 			>
 				{t("show.genre")}:{" "}
-				{(isLoading ? [...Array(3)] : genres!).map((genre, i) => (
-					<Fragment key={genre?.slug ?? i.toString()}>
+				{(isLoading ? [...Array<Genre>(3)] : genres!).map((genre, i) => (
+					<Fragment key={genre ?? i.toString()}>
 						<P {...css({ m: 0 })}>{i !== 0 && ", "}</P>
 						{isLoading ? (
 							<Skeleton {...css({ width: rem(5) })} />
 						) : (
-							<A href={`/genres/${genre.slug}`}>{genre.name}</A>
+							<A href={`/genres/${genre.toLowerCase()}`}>{genre}</A>
 						)}
 					</Fragment>
 				))}
 			</P>
 
-			<Skeleton
-				lines={4}
+			<View
 				{...css({
-					width: percent(100),
-					flexBasis: 0,
+					flexDirection: "column",
 					flexGrow: 1,
+					flexBasis: { sm: 0 },
 					paddingTop: ts(4),
 				})}
 			>
-				{isLoading || (
-					<P
-						{...css({
-							flexBasis: 0,
-							flexGrow: 1,
-							textAlign: "justify",
-							paddingTop: ts(4),
-						})}
-					>
-						{overview ?? t("show.noOverview")}
-					</P>
-				)}
-			</Skeleton>
+				<Skeleton lines={4}>
+					{isLoading || (
+						<P {...css({ textAlign: "justify" })}>{overview ?? t("show.noOverview")}</P>
+					)}
+				</Skeleton>
+				<View {...css({ flexWrap: "wrap", flexDirection: "row", marginTop: ts(0.5) })}>
+					<P {...css({ marginRight: ts(0.5) })}>{t("show.tags")}:</P>
+					{(isLoading ? [...Array<string>(3)] : tags!).map((tag, i) => (
+						<Chip key={tag ?? i} label={tag} size="small" {...css({ m: ts(0.5) })} />
+					))}
+				</View>
+			</View>
 			<HR
 				orientation="vertical"
 				{...css({ marginX: ts(2), display: { xs: "none", sm: "flex" } })}
@@ -291,12 +325,12 @@ const Description = ({
 				<H2>{t("show.genre")}</H2>
 				{isLoading || genres?.length ? (
 					<UL>
-						{(isLoading ? [...Array(3)] : genres!).map((genre, i) => (
-							<LI key={genre?.id ?? i}>
+						{(isLoading ? [...Array<Genre>(3)] : genres!).map((genre, i) => (
+							<LI key={genre ?? i}>
 								{isLoading ? (
 									<Skeleton {...css({ marginBottom: 0 })} />
 								) : (
-									<A href={`/genres/${genre.slug}`}>{genre.name}</A>
+									<A href={`/genres/${genre.toLowerCase()}`}>{genre}</A>
 								)}
 							</LI>
 						))}
@@ -309,7 +343,15 @@ const Description = ({
 	);
 };
 
-export const Header = ({ query, slug }: { query: QueryIdentifier<Show | Movie>; slug: string }) => {
+export const Header = ({
+	query,
+	type,
+	slug,
+}: {
+	query: QueryIdentifier<Show | Movie>;
+	type: "movie" | "show";
+	slug: string;
+}) => {
 	const { css } = useYoshiki();
 
 	return (
@@ -319,6 +361,7 @@ export const Header = ({ query, slug }: { query: QueryIdentifier<Show | Movie>; 
 					<Head title={data?.name} description={data?.overview} />
 					<ImageBackground
 						src={data?.thumbnail}
+						quality="high"
 						alt=""
 						containerStyle={{
 							height: {
@@ -332,8 +375,10 @@ export const Header = ({ query, slug }: { query: QueryIdentifier<Show | Movie>; 
 					>
 						<TitleLine
 							isLoading={isLoading}
+							type={type}
 							slug={slug}
 							name={data?.name}
+							tagline={data?.tagline}
 							date={data ? getDisplayDate(data as any) : undefined}
 							poster={data?.poster}
 							trailerUrl={data?.trailer}
@@ -352,6 +397,7 @@ export const Header = ({ query, slug }: { query: QueryIdentifier<Show | Movie>; 
 						isLoading={isLoading}
 						overview={data?.overview}
 						genres={data?.genres}
+						tags={data?.tags}
 						{...css({ paddingTop: { xs: 0, md: ts(2) } })}
 					/>
 				</>

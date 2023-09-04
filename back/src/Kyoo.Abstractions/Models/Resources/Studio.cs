@@ -17,8 +17,10 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Utils;
+using Newtonsoft.Json;
 
 namespace Kyoo.Abstractions.Models
 {
@@ -28,9 +30,10 @@ namespace Kyoo.Abstractions.Models
 	public class Studio : IResource, IMetadata
 	{
 		/// <inheritdoc />
-		public int ID { get; set; }
+		public int Id { get; set; }
 
 		/// <inheritdoc />
+		[MaxLength(256)]
 		public string Slug { get; set; }
 
 		/// <summary>
@@ -41,10 +44,15 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The list of shows that are made by this studio.
 		/// </summary>
-		[LoadableRelation] public ICollection<Show> Shows { get; set; }
+		[LoadableRelation] public ICollection<Show>? Shows { get; set; }
+
+		/// <summary>
+		/// The list of movies that are made by this studio.
+		/// </summary>
+		[LoadableRelation] public ICollection<Movie>? Movies { get; set; }
 
 		/// <inheritdoc />
-		[EditableRelation][LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
+		public Dictionary<string, MetadataId> ExternalId { get; set; } = new();
 
 		/// <summary>
 		/// Create a new, empty, <see cref="Studio"/>.
@@ -55,6 +63,7 @@ namespace Kyoo.Abstractions.Models
 		/// Create a new <see cref="Studio"/> with a specific name, the slug is calculated automatically.
 		/// </summary>
 		/// <param name="name">The name of the studio.</param>
+		[JsonConstructor]
 		public Studio(string name)
 		{
 			Slug = Utility.ToSlug(name);

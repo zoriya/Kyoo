@@ -18,10 +18,20 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { QueryIdentifier, QueryPage, WatchItem, WatchItemP, useFetch } from "@kyoo/models";
+import {
+	Episode,
+	EpisodeP,
+	Movie,
+	MovieP,
+	QueryIdentifier,
+	QueryPage,
+	WatchInfo,
+	WatchInfoP,
+	useFetch,
+} from "@kyoo/models";
 import { Head } from "@kyoo/primitives";
 import { useState, useEffect, ComponentProps } from "react";
-import { Platform, Pressable, PressableProps, StyleSheet, View, PointerEvent as NativePointerEvent } from "react-native";
+import { Platform, StyleSheet, View, PointerEvent as NativePointerEvent } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useRouter } from "solito/router";
 import { useAtom } from "jotai";
@@ -33,42 +43,46 @@ import { useVideoKeyboard } from "./keyboard";
 import { MediaSessionManager } from "./media-session";
 import { ErrorView } from "../fetch";
 
-const query = (slug: string): QueryIdentifier<WatchItem> => ({
-	path: ["watch", slug],
-	parser: WatchItemP,
+type Item = (Movie & { type: "movie" }) | (Episode & { type: "episode" });
+
+const query = (type: string, slug: string): QueryIdentifier<Item> =>
+	type === "episode"
+		? {
+				path: ["episode", slug],
+				params: {
+					fields: ["nextEpisode", "previousEpisode", "show"],
+				},
+				parser: EpisodeP.transform((x) => ({ ...x, type: "episode" })),
+		  }
+		: {
+				path: ["movie", slug],
+				parser: MovieP.transform((x) => ({ ...x, type: "movie" })),
+		  };
+const infoQuery = (type: string, slug: string): QueryIdentifier<WatchInfo> => ({
+	path: ["video", type, slug, "info"],
+	parser: WatchInfoP,
 });
 
 const mapData = (
-	data: WatchItem | undefined,
+	data: Item | undefined,
+	info: WatchInfo | undefined,
 	previousSlug?: string,
 	nextSlug?: string,
 ): Partial<ComponentProps<typeof Hover>> & { isLoading: boolean } => {
-	if (!data) return { isLoading: true };
+	if (!data || !info) return { isLoading: true };
 	return {
 		isLoading: false,
-		name: data.isMovie ? data.name : `${episodeDisplayNumber(data, "")} ${data.name}`,
-		showName: data.isMovie ? data.name! : data.showTitle,
-		href: data ? (data.isMovie ? `/movie/${data.slug}` : `/show/${data.showSlug}`) : "#",
-		poster: data.poster,
-		qualities: data.link,
-		subtitles: data.info.subtitles,
-		chapters: data.info.chapters,
-		fonts: data.info.fonts,
+		name: data.type === "movie" ? data.name : `${episodeDisplayNumber(data, "")} ${data.name}`,
+		showName: data.type === "movie" ? data.name! : data.show!.name,
+		href: data ? (data.type === "movie" ? `/movie/${data.slug}` : `/show/${data.show!.slug}`) : "#",
+		poster: data.type === "movie" ? data.poster : data.show!.poster,
+		subtitles: info.subtitles,
+		chapters: info.chapters,
+		fonts: info.fonts,
 		previousSlug,
 		nextSlug,
 	};
 };
-
-const PressView =
-	Platform.OS === "web"
-		? View
-		: ({
-			onPointerDown,
-			onMobilePress,
-			...props
-		}: PressableProps & { onMobilePress: PressableProps["onPress"] }) => (
-			<Pressable focusable={false} onPress={(e) => onMobilePress?.(e)} {...props} />
-		);
 
 // Callback used to hide the controls when the mouse goes iddle. This is stored globally to clear the old timeout
 // if the mouse moves again (if this is stored as a state, the whole page is redrawn on mouse move)
@@ -78,21 +92,24 @@ let mouseCallback: NodeJS.Timeout;
 let touchCount = 0;
 let touchTimeout: NodeJS.Timeout;
 
-export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
+export const Player: QueryPage<{ slug: string; type: "episode" | "movie" }> = ({ slug, type }) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
 	const router = useRouter();
 
 	const [playbackError, setPlaybackError] = useState<string | undefined>(undefined);
-	const { data, error } = useFetch(query(slug));
+	const { data, error } = useFetch(query(type, slug));
+	const { data: info, error: infoError } = useFetch(infoQuery(type, slug));
 	const previous =
-		data && !data.isMovie && data.previousEpisode
+		data && data.type === "episode" && data.previousEpisode
 			? `/watch/${data.previousEpisode.slug}`
 			: undefined;
 	const next =
-		data && !data.isMovie && data.nextEpisode ? `/watch/${data.nextEpisode.slug}` : undefined;
+		data && data.type === "episode" && data.nextEpisode
+			? `/watch/${data.nextEpisode.slug}`
+			: undefined;
 
-	useVideoKeyboard(data?.info.subtitles, data?.info.fonts, previous, next);
+	useVideoKeyboard(info?.subtitles, info?.fonts, previous, next);
 
 	const [isFullscreen, setFullscreen] = useAtom(fullscreenAtom);
 	const [isPlaying, setPlay] = useAtom(playAtom);
@@ -139,17 +156,17 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 			setFullscreen(!isFullscreen);
 			clearTimeout(touchTimeout);
 		} else
-		touchTimeout = setTimeout(() => {
-			touchCount = 0;
-		}, 400);
+			touchTimeout = setTimeout(() => {
+				touchCount = 0;
+			}, 400);
 		setPlay(!isPlaying);
 	};
 
-	if (error || playbackError)
+	if (error || infoError || playbackError)
 		return (
 			<>
 				<Back isLoading={false} {...css({ position: "relative", bg: (theme) => theme.accent })} />
-				<ErrorView error={error ?? { errors: [playbackError!] }} />
+				<ErrorView error={error ?? infoError ?? { errors: [playbackError!] }} />
 			</>
 		);
 
@@ -158,22 +175,22 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 			{data && (
 				<Head
 					title={
-						data.isMovie
+						data.type === "movie"
 							? data.name
-							: data.showTitle +
-							" " +
-							episodeDisplayNumber({
-								seasonNumber: data.seasonNumber,
-								episodeNumber: data.episodeNumber,
-								absoluteNumber: data.absoluteNumber,
-							})
+							: data.show!.name +
+							  " " +
+							  episodeDisplayNumber({
+									seasonNumber: data.seasonNumber,
+									episodeNumber: data.episodeNumber,
+									absoluteNumber: data.absoluteNumber,
+							  })
 					}
 					description={data.overview}
 				/>
 			)}
 			<MediaSessionManager
 				title={data?.name ?? t("show.episodeNoMetadata")}
-				image={data?.thumbnail}
+				image={data?.thumbnail?.high}
 				next={next}
 				previous={previous}
 			/>
@@ -190,20 +207,20 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 				})}
 			>
 				<Video
-					links={data?.link}
-					subtitles={data?.info.subtitles}
+					links={data?.links}
+					subtitles={info?.subtitles}
 					setError={setPlaybackError}
-					fonts={data?.info.fonts}
+					fonts={info?.fonts}
 					onPointerDown={(e) => onPointerDown(e)}
 					onEnd={() => {
 						if (!data) return;
-						if (data.isMovie)
+						if (data.type === "movie")
 							router.replace(`/movie/${data.slug}`, undefined, {
 								experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
 							});
 						else
 							router.replace(
-								data.nextEpisode ? `/watch/${data.nextEpisode.slug}` : `/show/${data.showSlug}`,
+								data.nextEpisode ? `/watch/${data.nextEpisode.slug}` : `/show/${data.show!.slug}`,
 								undefined,
 								{ experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false } },
 							);
@@ -212,7 +229,7 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 				/>
 				<LoadingIndicator />
 				<Hover
-					{...mapData(data, previous, next)}
+					{...mapData(data, info, previous, next)}
 					onPointerEnter={(e) => {
 						if (Platform.OS !== "web" || e.nativeEvent.pointerType === "mouse") setHover(true);
 					}}
@@ -238,4 +255,4 @@ export const Player: QueryPage<{ slug: string }> = ({ slug }) => {
 	);
 };
 
-Player.getFetchUrls = ({ slug }) => [query(slug)];
+Player.getFetchUrls = ({ slug, type }) => [query(type, slug), infoQuery(type, slug)];

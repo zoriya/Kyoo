@@ -18,10 +18,27 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { MovieDetails } from "@kyoo/ui";
-import { withRoute } from "../../utils";
+import { KyooImage } from "@kyoo/models";
+import { ReactElement } from "react";
+import { ImageStyle } from "react-native";
+import { YoshikiStyle } from "yoshiki/src/type";
 
-export default withRoute(MovieDetails, {
-	options: { headerTransparent: true, headerStyle: { backgroundColor: "transparent" } },
-	statusBar: { barStyle: "light-content" },
-});
+export type YoshikiEnhanced<Style> = Style extends any
+	? {
+		[key in keyof Style]: YoshikiStyle<Style[key]>;
+	}
+	: never;
+
+export type Props = {
+	src?: KyooImage | null;
+	quality: "low" | "medium" | "high";
+	alt?: string;
+	Error?: ReactElement | null;
+	forcedLoading?: boolean;
+};
+
+export type ImageLayout = YoshikiEnhanced<
+	| { width: ImageStyle["width"]; height: ImageStyle["height"] }
+	| { width: ImageStyle["width"]; aspectRatio: ImageStyle["aspectRatio"] }
+	| { height: ImageStyle["height"]; aspectRatio: ImageStyle["aspectRatio"] }
+>;

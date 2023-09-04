@@ -26,9 +26,9 @@ import { Header } from "./header";
 
 const query = (slug: string): QueryIdentifier<Movie> => ({
 	parser: MovieP,
-	path: ["shows", slug],
+	path: ["movies", slug],
 	params: {
-		fields: ["genres", "studio"],
+		fields: ["studio"],
 	},
 });
 
@@ -48,7 +48,7 @@ export const MovieDetails: QueryPage<{ slug: string }> = ({ slug }) => {
 				},
 			)}
 		>
-			<Header slug={slug} query={query(slug)} />
+			<Header slug={slug} type="movie" query={query(slug)} />
 			{/* <Staff slug={slug} /> */}
 		</ScrollView>
 	);

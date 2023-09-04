@@ -31,13 +31,13 @@ namespace Kyoo.Abstractions.Models.Utils
 		/// The list of errors that where made in the request.
 		/// </summary>
 		/// <example><c>["InvalidFilter: no field 'startYear' on a collection"]</c></example>
-		[NotNull] public string[] Errors { get; set; }
+		public string[] Errors { get; set; }
 
 		/// <summary>
 		/// Create a new <see cref="RequestError"/> with one error.
 		/// </summary>
 		/// <param name="error">The error to specify in the response.</param>
-		public RequestError([NotNull] string error)
+		public RequestError(string error)
 		{
 			if (error == null)
 				throw new ArgumentNullException(nameof(error));
@@ -48,7 +48,7 @@ namespace Kyoo.Abstractions.Models.Utils
 		/// Create a new <see cref="RequestError"/> with multiple errors.
 		/// </summary>
 		/// <param name="errors">The errors to specify in the response.</param>
-		public RequestError([NotNull] string[] errors)
+		public RequestError(string[] errors)
 		{
 			if (errors == null || !errors.Any())
 				throw new ArgumentException("Errors must be non null and not empty", nameof(errors));

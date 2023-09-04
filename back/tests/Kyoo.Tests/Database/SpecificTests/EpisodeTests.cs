@@ -55,12 +55,11 @@ namespace Kyoo.Tests.Database
 		{
 			Episode episode = await _repository.Get(1);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s1e1", episode.Slug);
-			Show show = new()
+			await Repositories.LibraryManager.ShowRepository.Patch(episode.ShowId, (x) =>
 			{
-				ID = episode.ShowID,
-				Slug = "new-slug"
-			};
-			await Repositories.LibraryManager.ShowRepository.Edit(show, false);
+				x.Slug = "new-slug";
+				return Task.FromResult(true);
+			});
 			episode = await _repository.Get(1);
 			Assert.Equal("new-slug-s1e1", episode.Slug);
 		}
@@ -70,12 +69,11 @@ namespace Kyoo.Tests.Database
 		{
 			Episode episode = await _repository.Get(1);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s1e1", episode.Slug);
-			episode = await _repository.Edit(new Episode
+			episode = await _repository.Patch(1, (x) =>
 			{
-				ID = 1,
-				SeasonNumber = 2,
-				ShowID = 1
-			}, false);
+				x.SeasonNumber = 2;
+				return Task.FromResult(true);
+			});
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s2e1", episode.Slug);
 			episode = await _repository.Get(1);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s2e1", episode.Slug);
@@ -86,12 +84,11 @@ namespace Kyoo.Tests.Database
 		{
 			Episode episode = await _repository.Get(1);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s1e1", episode.Slug);
-			episode = await _repository.Edit(new Episode
+			episode = await Repositories.LibraryManager.Patch<Episode>(episode.Id, (x) =>
 			{
-				ID = 1,
-				EpisodeNumber = 2,
-				ShowID = 1
-			}, false);
+				x.EpisodeNumber = 2;
+				return Task.FromResult(true);
+			});
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s1e2", episode.Slug);
 			episode = await _repository.Get(1);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s1e2", episode.Slug);
@@ -100,12 +97,12 @@ namespace Kyoo.Tests.Database
 		[Fact]
 		public async Task EpisodeCreationSlugTest()
 		{
-			Episode episode = await _repository.Create(new Episode
-			{
-				ShowID = TestSample.Get<Show>().ID,
-				SeasonNumber = 2,
-				EpisodeNumber = 4
-			});
+			Episode model = TestSample.Get<Episode>();
+			model.Id = 0;
+			model.ShowId = TestSample.Get<Show>().Id;
+			model.SeasonNumber = 2;
+			model.EpisodeNumber = 4;
+			Episode episode = await _repository.Create(model);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s2e4", episode.Slug);
 		}
 
@@ -127,12 +124,11 @@ namespace Kyoo.Tests.Database
 		public async Task SlugEditAbsoluteTest()
 		{
 			Episode episode = await _repository.Create(TestSample.GetAbsoluteEpisode());
-			Show show = new()
+			await Repositories.LibraryManager.ShowRepository.Patch(episode.ShowId, (x) =>
 			{
-				ID = episode.ShowID,
-				Slug = "new-slug"
-			};
-			await Repositories.LibraryManager.ShowRepository.Edit(show, false);
+				x.Slug = "new-slug";
+				return Task.FromResult(true);
+			});
 			episode = await _repository.Get(2);
 			Assert.Equal($"new-slug-3", episode.Slug);
 		}
@@ -141,12 +137,11 @@ namespace Kyoo.Tests.Database
 		public async Task AbsoluteNumberEditTest()
 		{
 			await _repository.Create(TestSample.GetAbsoluteEpisode());
-			Episode episode = await _repository.Edit(new Episode
+			Episode episode = await _repository.Patch(2, (x) =>
 			{
-				ID = 2,
-				AbsoluteNumber = 56,
-				ShowID = 1
-			}, false);
+				x.AbsoluteNumber = 56;
+				return Task.FromResult(true);
+			});
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-56", episode.Slug);
 			episode = await _repository.Get(2);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-56", episode.Slug);
@@ -156,13 +151,12 @@ namespace Kyoo.Tests.Database
 		public async Task AbsoluteToNormalEditTest()
 		{
 			await _repository.Create(TestSample.GetAbsoluteEpisode());
-			Episode episode = await _repository.Edit(new Episode
+			Episode episode = await _repository.Patch(2, (x) =>
 			{
-				ID = 2,
-				SeasonNumber = 1,
-				EpisodeNumber = 2,
-				ShowID = 1
-			}, false);
+				x.SeasonNumber = 1;
+				x.EpisodeNumber = 2;
+				return Task.FromResult(true);
+			});
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s1e2", episode.Slug);
 			episode = await _repository.Get(2);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-s1e2", episode.Slug);
@@ -174,72 +168,44 @@ namespace Kyoo.Tests.Database
 			Episode episode = await _repository.Get(1);
 			episode.SeasonNumber = null;
 			episode.AbsoluteNumber = 12;
-			episode = await _repository.Edit(episode, true);
+			episode = await _repository.Edit(episode);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-12", episode.Slug);
 			episode = await _repository.Get(1);
 			Assert.Equal($"{TestSample.Get<Show>().Slug}-12", episode.Slug);
 		}
 
 		[Fact]
-		public async Task MovieEpisodeTest()
-		{
-			Episode episode = await _repository.Create(TestSample.GetMovieEpisode());
-			Assert.Equal(TestSample.Get<Show>().Slug, episode.Slug);
-			episode = await _repository.Get(3);
-			Assert.Equal(TestSample.Get<Show>().Slug, episode.Slug);
-		}
-
-		[Fact]
-		public async Task MovieEpisodeEditTest()
-		{
-			await _repository.Create(TestSample.GetMovieEpisode());
-			await Repositories.LibraryManager.Edit(new Show
-			{
-				ID = 1,
-				Slug = "john-wick"
-			}, false);
-			Episode episode = await _repository.Get(3);
-			Assert.Equal("john-wick", episode.Slug);
-		}
-
-		[Fact]
 		public async Task CreateWithExternalIdTest()
 		{
 			Episode value = TestSample.GetNew<Episode>();
-			value.ExternalIDs = new[]
+			value.ExternalId = new Dictionary<string, MetadataId>
 			{
-				new MetadataID
+				["2"] = new()
 				{
-					Provider = TestSample.Get<Provider>(),
 					Link = "link",
-					DataID = "id"
+					DataId = "id"
 				},
-				new MetadataID
+				["3"] = new()
 				{
-					Provider = TestSample.GetNew<Provider>(),
 					Link = "new-provider-link",
-					DataID = "new-id"
+					DataId = "new-id"
 				}
 			};
 			await _repository.Create(value);
 
 			Episode retrieved = await _repository.Get(2);
-			await Repositories.LibraryManager.Load(retrieved, x => x.ExternalIDs);
-			Assert.Equal(2, retrieved.ExternalIDs.Count);
-			KAssert.DeepEqual(value.ExternalIDs.First(), retrieved.ExternalIDs.First());
-			KAssert.DeepEqual(value.ExternalIDs.Last(), retrieved.ExternalIDs.Last());
+			Assert.Equal(2, retrieved.ExternalId.Count);
+			KAssert.DeepEqual(value.ExternalId.First(), retrieved.ExternalId.First());
+			KAssert.DeepEqual(value.ExternalId.Last(), retrieved.ExternalId.Last());
 		}
 
 		[Fact]
 		public async Task EditTest()
 		{
 			Episode value = await _repository.Get(TestSample.Get<Episode>().Slug);
-			value.Title = "New Title";
-			value.Images = new Dictionary<int, string>
-			{
-				[Images.Poster] = "new-poster"
-			};
-			await _repository.Edit(value, false);
+			value.Name = "New Title";
+			value.Poster = new Image("poster");
+			await _repository.Edit(value);
 
 			await using DatabaseContext database = Repositories.Context.New();
 			Episode retrieved = await database.Episodes.FirstAsync();
@@ -251,22 +217,18 @@ namespace Kyoo.Tests.Database
 		public async Task EditMetadataTest()
 		{
 			Episode value = await _repository.Get(TestSample.Get<Episode>().Slug);
-			value.ExternalIDs = new[]
+			value.ExternalId = new Dictionary<string, MetadataId>
 			{
-				new MetadataID
+				["1"] = new()
 				{
-					Provider = TestSample.Get<Provider>(),
 					Link = "link",
-					DataID = "id"
+					DataId = "id"
 				},
 			};
-			await _repository.Edit(value, false);
+			await _repository.Edit(value);
 
 			await using DatabaseContext database = Repositories.Context.New();
-			Episode retrieved = await database.Episodes
-				.Include(x => x.ExternalIDs)
-				.ThenInclude(x => x.Provider)
-				.FirstAsync();
+			Episode retrieved = await database.Episodes.FirstAsync();
 
 			KAssert.DeepEqual(value, retrieved);
 		}
@@ -275,41 +237,33 @@ namespace Kyoo.Tests.Database
 		public async Task AddMetadataTest()
 		{
 			Episode value = await _repository.Get(TestSample.Get<Episode>().Slug);
-			value.ExternalIDs = new List<MetadataID>
+			value.ExternalId = new Dictionary<string, MetadataId>
 			{
-				new()
+				["toto"] = new()
 				{
-					Provider = TestSample.Get<Provider>(),
 					Link = "link",
-					DataID = "id"
+					DataId = "id"
 				},
 			};
-			await _repository.Edit(value, false);
+			await _repository.Edit(value);
 
 			{
 				await using DatabaseContext database = Repositories.Context.New();
-				Episode retrieved = await database.Episodes
-					.Include(x => x.ExternalIDs)
-					.ThenInclude(x => x.Provider)
-					.FirstAsync();
+				Episode retrieved = await database.Episodes.FirstAsync();
 
 				KAssert.DeepEqual(value, retrieved);
 			}
 
-			value.ExternalIDs.Add(new MetadataID
+			value.ExternalId.Add("test", new MetadataId
 			{
-				Provider = TestSample.GetNew<Provider>(),
 				Link = "link",
-				DataID = "id"
+				DataId = "id"
 			});
-			await _repository.Edit(value, false);
+			await _repository.Edit(value);
 
 			{
 				await using DatabaseContext database = Repositories.Context.New();
-				Episode retrieved = await database.Episodes
-					.Include(x => x.ExternalIDs)
-					.ThenInclude(x => x.Provider)
-					.FirstAsync();
+				Episode retrieved = await database.Episodes.FirstAsync();
 
 				KAssert.DeepEqual(value, retrieved);
 			}
@@ -323,12 +277,10 @@ namespace Kyoo.Tests.Database
 		[InlineData("SuPeR")]
 		public async Task SearchTest(string query)
 		{
-			Episode value = new()
-			{
-				Title = "This is a test super title",
-				ShowID = 1,
-				AbsoluteNumber = 2
-			};
+			Episode value = TestSample.Get<Episode>();
+			value.Id = 0;
+			value.Name = "This is a test super title";
+			value.EpisodeNumber = 56;
 			await _repository.Create(value);
 			ICollection<Episode> ret = await _repository.Search(query);
 			value.Show = TestSample.Get<Show>();
@@ -342,9 +294,9 @@ namespace Kyoo.Tests.Database
 			await _repository.Delete(TestSample.Get<Episode>());
 
 			Episode expected = TestSample.Get<Episode>();
-			expected.ID = 0;
-			expected.ShowID = (await Repositories.LibraryManager.ShowRepository.Create(TestSample.Get<Show>())).ID;
-			expected.SeasonID = (await Repositories.LibraryManager.SeasonRepository.Create(TestSample.Get<Season>())).ID;
+			expected.Id = 0;
+			expected.ShowId = (await Repositories.LibraryManager.ShowRepository.Create(TestSample.Get<Show>())).Id;
+			expected.SeasonId = (await Repositories.LibraryManager.SeasonRepository.Create(TestSample.Get<Season>())).Id;
 			await _repository.Create(expected);
 			KAssert.DeepEqual(expected, await _repository.Get(expected.Slug));
 		}
@@ -355,8 +307,8 @@ namespace Kyoo.Tests.Database
 			Episode expected = TestSample.Get<Episode>();
 			KAssert.DeepEqual(expected, await _repository.CreateIfNotExists(TestSample.Get<Episode>()));
 			await _repository.Delete(TestSample.Get<Episode>());
-			expected.ShowID = (await Repositories.LibraryManager.ShowRepository.Create(TestSample.Get<Show>())).ID;
-			expected.SeasonID = (await Repositories.LibraryManager.SeasonRepository.Create(TestSample.Get<Season>())).ID;
+			expected.ShowId = (await Repositories.LibraryManager.ShowRepository.Create(TestSample.Get<Show>())).Id;
+			expected.SeasonId = (await Repositories.LibraryManager.SeasonRepository.Create(TestSample.Get<Season>())).Id;
 			KAssert.DeepEqual(expected, await _repository.CreateIfNotExists(expected));
 		}
 	}

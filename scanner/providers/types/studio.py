@@ -7,14 +7,10 @@ from .metadataid import MetadataID
 class Studio:
 	name: str
 	logos: list[str] = field(default_factory=list)
-	external_ids: dict[str, MetadataID] = field(default_factory=dict)
+	external_id: dict[str, MetadataID] = field(default_factory=dict)
 
 	def to_kyoo(self):
 		return {
 			**asdict(self),
-			"images": {
-				"2": next(iter(self.logos), None),
-			},
-			# TODO: The back has bad external id support, we disable it for now
-			"external_ids": None,
+			"logo": next(iter(self.logos), None),
 		}

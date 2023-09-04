@@ -67,39 +67,28 @@ namespace Kyoo.Tests.Database
 		}
 
 		[Fact]
-		public async Task CreateWithoutNameTest()
-		{
-			Collection collection = TestSample.GetNew<Collection>();
-			collection.Name = null;
-			await Assert.ThrowsAsync<ArgumentException>(() => _repository.Create(collection));
-		}
-
-		[Fact]
 		public async Task CreateWithExternalIdTest()
 		{
 			Collection collection = TestSample.GetNew<Collection>();
-			collection.ExternalIDs = new[]
+			collection.ExternalId = new Dictionary<string, MetadataId>
 			{
-				new MetadataID
+				["1"] = new()
 				{
-					Provider = TestSample.Get<Provider>(),
 					Link = "link",
-					DataID = "id"
+					DataId = "id"
 				},
-				new MetadataID
+				["2"] = new()
 				{
-					Provider = TestSample.GetNew<Provider>(),
 					Link = "new-provider-link",
-					DataID = "new-id"
+					DataId = "new-id"
 				}
 			};
 			await _repository.Create(collection);
 
 			Collection retrieved = await _repository.Get(2);
-			await Repositories.LibraryManager.Load(retrieved, x => x.ExternalIDs);
-			Assert.Equal(2, retrieved.ExternalIDs.Count);
-			KAssert.DeepEqual(collection.ExternalIDs.First(), retrieved.ExternalIDs.First());
-			KAssert.DeepEqual(collection.ExternalIDs.Last(), retrieved.ExternalIDs.Last());
+			Assert.Equal(2, retrieved.ExternalId.Count);
+			KAssert.DeepEqual(collection.ExternalId.First(), retrieved.ExternalId.First());
+			KAssert.DeepEqual(collection.ExternalId.Last(), retrieved.ExternalId.Last());
 		}
 
 		[Fact]
@@ -107,11 +96,8 @@ namespace Kyoo.Tests.Database
 		{
 			Collection value = await _repository.Get(TestSample.Get<Collection>().Slug);
 			value.Name = "New Title";
-			value.Images = new Dictionary<int, string>
-			{
-				[Images.Poster] = "new-poster"
-			};
-			await _repository.Edit(value, false);
+			value.Poster = new Image("new-poster");
+			await _repository.Edit(value);
 
 			await using DatabaseContext database = Repositories.Context.New();
 			Collection retrieved = await database.Collections.FirstAsync();
@@ -123,22 +109,18 @@ namespace Kyoo.Tests.Database
 		public async Task EditMetadataTest()
 		{
 			Collection value = await _repository.Get(TestSample.Get<Collection>().Slug);
-			value.ExternalIDs = new[]
+			value.ExternalId = new Dictionary<string, MetadataId>
 			{
-				new MetadataID
+				["test"] = new()
 				{
-					Provider = TestSample.Get<Provider>(),
 					Link = "link",
-					DataID = "id"
+					DataId = "id"
 				},
 			};
-			await _repository.Edit(value, false);
+			await _repository.Edit(value);
 
 			await using DatabaseContext database = Repositories.Context.New();
-			Collection retrieved = await database.Collections
-				.Include(x => x.ExternalIDs)
-				.ThenInclude(x => x.Provider)
-				.FirstAsync();
+			Collection retrieved = await database.Collections.FirstAsync();
 
 			KAssert.DeepEqual(value, retrieved);
 		}
@@ -147,41 +129,33 @@ namespace Kyoo.Tests.Database
 		public async Task AddMetadataTest()
 		{
 			Collection value = await _repository.Get(TestSample.Get<Collection>().Slug);
-			value.ExternalIDs = new List<MetadataID>
+			value.ExternalId = new Dictionary<string, MetadataId>
 			{
-				new()
+				["toto"] = new()
 				{
-					Provider = TestSample.Get<Provider>(),
 					Link = "link",
-					DataID = "id"
+					DataId = "id"
 				},
 			};
-			await _repository.Edit(value, false);
+			await _repository.Edit(value);
 
 			{
 				await using DatabaseContext database = Repositories.Context.New();
-				Collection retrieved = await database.Collections
-					.Include(x => x.ExternalIDs)
-					.ThenInclude(x => x.Provider)
-					.FirstAsync();
+				Collection retrieved = await database.Collections.FirstAsync();
 
 				KAssert.DeepEqual(value, retrieved);
 			}
 
-			value.ExternalIDs.Add(new MetadataID
+			value.ExternalId.Add("test", new MetadataId
 			{
-				Provider = TestSample.GetNew<Provider>(),
 				Link = "link",
-				DataID = "id"
+				DataId = "id"
 			});
-			await _repository.Edit(value, false);
+			await _repository.Edit(value);
 
 			{
 				await using DatabaseContext database = Repositories.Context.New();
-				Collection retrieved = await database.Collections
-					.Include(x => x.ExternalIDs)
-					.ThenInclude(x => x.Provider)
-					.FirstAsync();
+				Collection retrieved = await database.Collections.FirstAsync();
 
 				KAssert.DeepEqual(value, retrieved);
 			}

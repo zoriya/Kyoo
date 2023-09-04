@@ -9,7 +9,8 @@
 		"staff-none": "The staff is unknown",
 		"noOverview": "No overview available",
 		"episode-none": "There is no episodes in this season",
-		"episodeNoMetadata": "No metadata available"
+		"episodeNoMetadata": "No metadata available",
+		"tags": "Tags"
 	},
 	"browse": {
 		"sortby": "Sort by {{key}}",

@@ -16,7 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -44,8 +43,9 @@ namespace Kyoo.Core.Controllers
 		/// Create a new <see cref="UserRepository"/>
 		/// </summary>
 		/// <param name="database">The database handle to use</param>
-		public UserRepository(DatabaseContext database)
-			: base(database)
+		/// <param name="thumbs">The thumbnail manager used to store images.</param>
+		public UserRepository(DatabaseContext database, IThumbnailsManager thumbs)
+			: base(database, thumbs)
 		{
 			_database = database;
 		}
@@ -53,12 +53,14 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task<ICollection<User>> Search(string query)
 		{
-			return await Sort(
+			return (await Sort(
 				_database.Users
 					.Where(_database.Like<User>(x => x.Username, $"%{query}%"))
 				)
 				.Take(20)
-				.ToListAsync();
+				.ToListAsync())
+				.Select(SetBackingImageSelf)
+				.ToList();
 		}
 
 		/// <inheritdoc />
@@ -66,6 +68,8 @@ namespace Kyoo.Core.Controllers
 		{
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
+			if (obj.Logo != null)
+				_database.Entry(obj).Reference(x => x.Logo).TargetEntry.State = EntityState.Added;
 			await _database.SaveChangesAsync(() => Get(obj.Slug));
 			OnResourceCreated(obj);
 			return obj;
@@ -74,9 +78,6 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task Delete(User obj)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-
 			_database.Entry(obj).State = EntityState.Deleted;
 			await _database.SaveChangesAsync();
 			await base.Delete(obj);

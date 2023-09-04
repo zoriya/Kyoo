@@ -42,6 +42,7 @@ export const withRoute = <Props,>(
 		statusBar?: StatusBarProps;
 		fullscreen?: boolean;
 	},
+	defaultProps?: Partial<Props>,
 ) => {
 	const { statusBar, fullscreen, ...routeOptions } = options ?? {};
 	const WithUseRoute = (props: any) => {
@@ -51,7 +52,7 @@ export const withRoute = <Props,>(
 				{routeOptions && <Stack.Screen {...routeOptions} />}
 				{statusBar && <StatusBar {...statusBar} />}
 				{fullscreen && <FullscreenProvider />}
-				<Component {...routeParams} {...props} />
+				<Component {...defaultProps} {...routeParams} {...props} />
 			</>
 		);
 	};

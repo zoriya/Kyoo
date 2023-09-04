@@ -67,7 +67,7 @@ const initHls = async (): Promise<Hls> => {
 	return hls;
 };
 
-const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function _Video(
+const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function Video(
 	{
 		source,
 		paused,
@@ -140,7 +140,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 					if (!d.fatal || !hls?.media) return;
 					console.warn("Hls error", d);
 					onError?.call(null, {
-						error: { "": "", errorString: d.reason ?? d.err?.message ?? "Unknown hls error" },
+						error: { "": "", errorString: d.reason ?? d.error?.message ?? "Unknown hls error" },
 					});
 				});
 			}

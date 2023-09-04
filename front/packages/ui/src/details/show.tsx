@@ -25,8 +25,8 @@ import { DefaultLayout } from "../layout";
 import { EpisodeList } from "./season";
 import { Header } from "./header";
 import Svg, { Path, SvgProps } from "react-native-svg";
-import { Container, SwitchVariant } from "@kyoo/primitives";
-import { forwardRef, useCallback } from "react";
+import { Container } from "@kyoo/primitives";
+import { forwardRef } from "react";
 
 const SvgWave = (props: SvgProps) => {
 	const { css } = useYoshiki();
@@ -42,7 +42,7 @@ const SvgWave = (props: SvgProps) => {
 	);
 };
 
-const ShowHeader = forwardRef<View, ViewProps & { slug: string }>(function _ShowHeader(
+const ShowHeader = forwardRef<View, ViewProps & { slug: string }>(function ShowHeader(
 	{ children, slug, ...props },
 	ref,
 ) {
@@ -69,7 +69,7 @@ const ShowHeader = forwardRef<View, ViewProps & { slug: string }>(function _Show
 			)}
 		>
 			{/* TODO: Remove the slug quickfix for the play button */}
-			<Header slug={`${slug}-s1e1`} query={query(slug)} />
+			<Header slug={`${slug}-s1e1`} type="show" query={query(slug)} />
 			{/* <Staff slug={slug} /> */}
 			<SvgWave
 				fill={theme.variant.background}
@@ -87,7 +87,7 @@ const query = (slug: string): QueryIdentifier<Show> => ({
 	parser: ShowP,
 	path: ["shows", slug],
 	params: {
-		fields: ["genres", "studio"],
+		fields: ["studio"],
 	},
 });
 

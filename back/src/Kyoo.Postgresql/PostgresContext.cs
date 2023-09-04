@@ -34,11 +34,6 @@ namespace Kyoo.Postgresql
 	public class PostgresContext : DatabaseContext
 	{
 		/// <summary>
-		/// The connection string to use.
-		/// </summary>
-		private readonly string _connection;
-
-		/// <summary>
 		/// Is this instance in debug mode?
 		/// </summary>
 		private readonly bool _debugMode;
@@ -48,12 +43,13 @@ namespace Kyoo.Postgresql
 		/// </summary>
 		private readonly bool _skipConfigure;
 
-		// TOOD: This needs ot be updated but ef-core still does not offer a way to use this.
+		// TODO: This needs ot be updated but ef-core still does not offer a way to use this.
 		[Obsolete]
 		static PostgresContext()
 		{
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<Status>();
-			NpgsqlConnection.GlobalTypeMapper.MapEnum<ItemType>();
+			NpgsqlConnection.GlobalTypeMapper.MapEnum<Genre>();
+			NpgsqlConnection.GlobalTypeMapper.MapEnum<ItemKind>();
 		}
 
 		/// <summary>
@@ -78,7 +74,6 @@ namespace Kyoo.Postgresql
 		/// <param name="debugMode">Is this instance in debug mode?</param>
 		public PostgresContext(string connection, bool debugMode)
 		{
-			_connection = connection;
 			_debugMode = debugMode;
 		}
 
@@ -106,49 +101,10 @@ namespace Kyoo.Postgresql
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.HasPostgresEnum<Status>();
-			modelBuilder.HasPostgresEnum<ItemType>();
-
-			modelBuilder.Entity<LibraryItem>()
-				.ToView("library_items")
-				.HasKey(x => x.ID);
-
-			modelBuilder.Entity<User>()
-				.Property(x => x.ExtraData)
-				.HasColumnType("jsonb");
-
-			modelBuilder.Entity<LibraryItem>()
-				.Property(x => x.Images)
-				.HasColumnType("jsonb");
-			modelBuilder.Entity<Collection>()
-				.Property(x => x.Images)
-				.HasColumnType("jsonb");
-			modelBuilder.Entity<Show>()
-				.Property(x => x.Images)
-				.HasColumnType("jsonb");
-			modelBuilder.Entity<Season>()
-				.Property(x => x.Images)
-				.HasColumnType("jsonb");
-			modelBuilder.Entity<Episode>()
-				.Property(x => x.Images)
-				.HasColumnType("jsonb");
-			modelBuilder.Entity<People>()
-				.Property(x => x.Images)
-				.HasColumnType("jsonb");
-			modelBuilder.Entity<Provider>()
-				.Property(x => x.Images)
-				.HasColumnType("jsonb");
-			modelBuilder.Entity<User>()
-				.Property(x => x.Images)
-				.HasColumnType("jsonb");
+			modelBuilder.HasPostgresEnum<Genre>();
+			modelBuilder.HasPostgresEnum<ItemKind>();
 
 			base.OnModelCreating(modelBuilder);
-		}
-
-		/// <inheritdoc />
-		protected override string MetadataName<T>()
-		{
-			SnakeCaseNameRewriter rewriter = new(CultureInfo.InvariantCulture);
-			return rewriter.RewriteName(typeof(T).Name + nameof(MetadataID));
 		}
 
 		/// <inheritdoc />

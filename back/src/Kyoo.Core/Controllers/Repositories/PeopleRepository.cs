@@ -40,11 +40,6 @@ namespace Kyoo.Core.Controllers
 		private readonly DatabaseContext _database;
 
 		/// <summary>
-		/// A provider repository to handle externalID creation and deletion
-		/// </summary>
-		private readonly IProviderRepository _providers;
-
-		/// <summary>
 		/// A lazy loaded show repository to validate requests from shows.
 		/// </summary>
 		private readonly Lazy<IShowRepository> _shows;
@@ -56,27 +51,28 @@ namespace Kyoo.Core.Controllers
 		/// Create a new <see cref="PeopleRepository"/>
 		/// </summary>
 		/// <param name="database">The database handle</param>
-		/// <param name="providers">A provider repository</param>
 		/// <param name="shows">A lazy loaded show repository</param>
+		/// <param name="thumbs">The thumbnail manager used to store images.</param>
 		public PeopleRepository(DatabaseContext database,
-			IProviderRepository providers,
-			Lazy<IShowRepository> shows)
-			: base(database)
+			Lazy<IShowRepository> shows,
+			IThumbnailsManager thumbs)
+			: base(database, thumbs)
 		{
 			_database = database;
-			_providers = providers;
 			_shows = shows;
 		}
 
 		/// <inheritdoc />
 		public override async Task<ICollection<People>> Search(string query)
 		{
-			return await Sort(
+			return (await Sort(
 				_database.People
 					.Where(_database.Like<People>(x => x.Name, $"%{query}%"))
 				)
 				.Take(20)
-				.ToListAsync();
+				.ToListAsync())
+				.Select(SetBackingImageSelf)
+				.ToList();
 		}
 
 		/// <inheritdoc />
@@ -94,55 +90,34 @@ namespace Kyoo.Core.Controllers
 		{
 			await base.Validate(resource);
 
-			if (resource.ExternalIDs != null)
-			{
-				foreach (MetadataID id in resource.ExternalIDs)
-				{
-					id.Provider = _database.LocalEntity<Provider>(id.Provider.Slug)
-						?? await _providers.CreateIfNotExists(id.Provider);
-					id.ProviderID = id.Provider.ID;
-				}
-				_database.MetadataIds<People>().AttachRange(resource.ExternalIDs);
-			}
-
 			if (resource.Roles != null)
 			{
 				foreach (PeopleRole role in resource.Roles)
 				{
 					role.Show = _database.LocalEntity<Show>(role.Show.Slug)
 						?? await _shows.Value.CreateIfNotExists(role.Show);
-					role.ShowID = role.Show.ID;
+					role.ShowID = role.Show.Id;
 					_database.Entry(role).State = EntityState.Added;
 				}
 			}
 		}
 
 		/// <inheritdoc />
-		protected override async Task EditRelations(People resource, People changed, bool resetOld)
+		protected override async Task EditRelations(People resource, People changed)
 		{
 			await Validate(changed);
 
-			if (changed.Roles != null || resetOld)
+			if (changed.Roles != null)
 			{
 				await Database.Entry(resource).Collection(x => x.Roles).LoadAsync();
 				resource.Roles = changed.Roles;
-			}
-
-			if (changed.ExternalIDs != null || resetOld)
-			{
-				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
-				resource.ExternalIDs = changed.ExternalIDs;
 			}
 		}
 
 		/// <inheritdoc />
 		public override async Task Delete(People obj)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-
 			_database.Entry(obj).State = EntityState.Deleted;
-			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Deleted);
 			obj.Roles.ForEach(x => _database.Entry(x).State = EntityState.Deleted);
 			await _database.SaveChangesAsync();
 			await base.Delete(obj);

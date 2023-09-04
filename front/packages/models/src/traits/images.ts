@@ -27,37 +27,38 @@ export const imageFn = (url: string) =>
 		? `/api${url}`
 		: kyooApiUrl + url;
 
+export const Img = z.object({
+	source: z.string(),
+	blurhash: z.string(),
+	low: z.string().transform(imageFn),
+	medium: z.string().transform(imageFn),
+	high: z.string().transform(imageFn),
+});
+
 export const ImagesP = z.object({
 	/**
 	 * An url to the poster of this resource. If this resource does not have an image, the link will
 	 * be null. If the kyoo's instance is not capable of handling this kind of image for the specific
 	 * resource, this field won't be present.
 	 */
-	poster: z.string().transform(imageFn).optional().nullable(),
+	poster: Img.nullable(),
 
 	/**
 	 * An url to the thumbnail of this resource. If this resource does not have an image, the link
 	 * will be null. If the kyoo's instance is not capable of handling this kind of image for the
 	 * specific resource, this field won't be present.
 	 */
-	thumbnail: z.string().transform(imageFn).optional().nullable(),
+	thumbnail: Img.nullable(),
 
 	/**
 	 * An url to the logo of this resource. If this resource does not have an image, the link will be
 	 * null. If the kyoo's instance is not capable of handling this kind of image for the specific
 	 * resource, this field won't be present.
 	 */
-	logo: z.string().transform(imageFn).optional().nullable(),
-
-	/**
-	 * An url to the thumbnail of this resource. If this resource does not have an image, the link
-	 * will be null. If the kyoo's instance is not capable of handling this kind of image for the
-	 * specific resource, this field won't be present.
-	 */
-	trailer: z.string().optional().nullable(),
+	logo: Img.nullable(),
 });
 
 /**
  * Base traits for items that has image resources.
  */
-export type Images = z.infer<typeof ImagesP>;
+export type KyooImage = z.infer<typeof Img>;

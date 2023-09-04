@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 using JetBrains.Annotations;
 using Kyoo.Abstractions.Controllers;
@@ -31,28 +32,23 @@ namespace Kyoo.Abstractions.Models
 	public class Episode : IResource, IMetadata, IThumbnails
 	{
 		/// <inheritdoc />
-		public int ID { get; set; }
+		public int Id { get; set; }
 
 		/// <inheritdoc />
 		[Computed]
+		[MaxLength(256)]
 		public string Slug
 		{
 			get
 			{
 				if (ShowSlug != null || Show?.Slug != null)
-					return GetSlug(ShowSlug ?? Show.Slug, SeasonNumber, EpisodeNumber, AbsoluteNumber);
-				return ShowID != 0
-					? GetSlug(ShowID.ToString(), SeasonNumber, EpisodeNumber, AbsoluteNumber)
-					: null;
+					return GetSlug(ShowSlug ?? Show!.Slug, SeasonNumber, EpisodeNumber, AbsoluteNumber);
+				return GetSlug(ShowId.ToString(), SeasonNumber, EpisodeNumber, AbsoluteNumber);
 			}
 
 			[UsedImplicitly]
-			[NotNull]
 			private set
 			{
-				if (value == null)
-					throw new ArgumentNullException(nameof(value));
-
 				Match match = Regex.Match(value, @"(?<show>.+)-s(?<season>\d+)e(?<episode>\d+)");
 
 				if (match.Success)
@@ -80,22 +76,22 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The slug of the Show that contain this episode. If this is not set, this episode is ill-formed.
 		/// </summary>
-		[SerializeIgnore] public string ShowSlug { private get; set; }
+		[SerializeIgnore] public string? ShowSlug { private get; set; }
 
 		/// <summary>
 		/// The ID of the Show containing this episode.
 		/// </summary>
-		[SerializeIgnore] public int ShowID { get; set; }
+		[SerializeIgnore] public int ShowId { get; set; }
 
 		/// <summary>
 		/// The show that contains this episode. This must be explicitly loaded via a call to <see cref="ILibraryManager.Load"/>.
 		/// </summary>
-		[LoadableRelation(nameof(ShowID))] public Show Show { get; set; }
+		[LoadableRelation(nameof(ShowId))] public Show? Show { get; set; }
 
 		/// <summary>
 		/// The ID of the Season containing this episode.
 		/// </summary>
-		[SerializeIgnore] public int? SeasonID { get; set; }
+		[SerializeIgnore] public int? SeasonId { get; set; }
 
 		/// <summary>
 		/// The season that contains this episode.
@@ -105,7 +101,7 @@ namespace Kyoo.Abstractions.Models
 		/// This can be null if the season is unknown and the episode is only identified
 		/// by it's <see cref="AbsoluteNumber"/>.
 		/// </remarks>
-		[LoadableRelation(nameof(SeasonID))] public Season Season { get; set; }
+		[LoadableRelation(nameof(SeasonId))] public Season? Season { get; set; }
 
 		/// <summary>
 		/// The season in witch this episode is in.
@@ -127,18 +123,15 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		public string Path { get; set; }
 
-		/// <inheritdoc />
-		public Dictionary<int, string> Images { get; set; }
-
 		/// <summary>
 		/// The title of this episode.
 		/// </summary>
-		public string Title { get; set; }
+		public string? Name { get; set; }
 
 		/// <summary>
 		/// The overview of this episode.
 		/// </summary>
-		public string Overview { get; set; }
+		public string? Overview { get; set; }
 
 		/// <summary>
 		/// The release date of this episode. It can be null if unknown.
@@ -146,7 +139,35 @@ namespace Kyoo.Abstractions.Models
 		public DateTime? ReleaseDate { get; set; }
 
 		/// <inheritdoc />
-		[EditableRelation][LoadableRelation] public ICollection<MetadataID> ExternalIDs { get; set; }
+		public Image? Poster { get; set; }
+
+		/// <inheritdoc />
+		public Image? Thumbnail { get; set; }
+
+		/// <inheritdoc />
+		public Image? Logo { get; set; }
+
+		/// <inheritdoc />
+		public Dictionary<string, MetadataId> ExternalId { get; set; } = new();
+
+		/// <summary>
+		/// The previous episode that should be seen before viewing this one.
+		/// </summary>
+		[LoadableRelation] public Episode? PreviousEpisode { get; set; }
+
+		/// <summary>
+		/// The next episode to watch after this one.
+		/// </summary>
+		[LoadableRelation] public Episode? NextEpisode { get; set; }
+
+		/// <summary>
+		/// Links to watch this episode.
+		/// </summary>
+		public VideoLinks Links => new()
+		{
+			Direct = $"/video/episode/{Slug}/direct",
+			Hls = $"/video/episode/{Slug}/master.m3u8",
+		};
 
 		/// <summary>
 		/// Get the slug of an episode.
@@ -165,14 +186,11 @@ namespace Kyoo.Abstractions.Models
 		/// If you don't know it or this is a movie, use null
 		/// </param>
 		/// <returns>The slug corresponding to the given arguments</returns>
-		/// <exception cref="ArgumentNullException">The given show slug was null.</exception>
-		public static string GetSlug([NotNull] string showSlug,
+		public static string GetSlug(string showSlug,
 			int? seasonNumber,
 			int? episodeNumber,
 			int? absoluteNumber = null)
 		{
-			if (showSlug == null)
-				throw new ArgumentNullException(nameof(showSlug));
 			return seasonNumber switch
 			{
 				null when absoluteNumber == null => showSlug,

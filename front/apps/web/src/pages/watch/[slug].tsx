@@ -21,4 +21,4 @@
 import { Player } from "@kyoo/ui";
 import { withRoute } from "~/router";
 
-export default withRoute(Player);
+export default withRoute(Player, { type: "episode" });

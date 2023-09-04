@@ -16,16 +16,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-namespace Kyoo.Abstractions.Models
+namespace Kyoo.Models;
+
+public class PartialResource
 {
-	/// <summary>
-	/// An interface to represent resources that should have a link field in their return values (like videos).
-	/// </summary>
-	public interface ILink
-	{
-		/// <summary>
-		/// The link to return, in most cases this should be a string.
-		/// </summary>
-		public object Link { get; }
-	}
+	public int? Id { get; set; }
+
+	public string? Slug { get; set; }
 }

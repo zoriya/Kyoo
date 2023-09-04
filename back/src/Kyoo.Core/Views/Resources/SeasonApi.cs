@@ -84,7 +84,7 @@ namespace Kyoo.Core.Api
 			[FromQuery] Pagination pagination)
 		{
 			ICollection<Episode> resources = await _libraryManager.GetAll(
-				ApiHelper.ParseWhere(where, identifier.Matcher<Episode>(x => x.SeasonID, x => x.Season.Slug)),
+				ApiHelper.ParseWhere(where, identifier.Matcher<Episode>(x => x.SeasonId, x => x.Season.Slug)),
 				Sort<Episode>.From(sortBy),
 				pagination
 			);

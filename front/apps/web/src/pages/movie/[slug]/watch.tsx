@@ -18,22 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { z } from "zod";
-import { ResourceP } from "../traits/resource";
+import { Player } from "@kyoo/ui";
+import { withRoute } from "~/router";
 
-/**
- * The library that will contain Shows, Collections...
- */
-export const LibraryP = ResourceP.extend({
-	/**
-	 * The name of this library.
-	 */
-	name: z.string(),
-
-	/**
-	 * The list of paths that this library is responsible for. This is mainly used by the Scan task.
-	 */
-	paths: z.array(z.string()),
-});
-
-export type Library = z.infer<typeof LibraryP>;
+export default withRoute(Player, { type: "movie" });

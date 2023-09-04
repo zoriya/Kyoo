@@ -18,6 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { KyooImage } from "@kyoo/models";
 import { Link, P, Skeleton, ts, ImageBackground, Poster, Heading } from "@kyoo/primitives";
 import { useState } from "react";
 import { View } from "react-native";
@@ -35,8 +36,8 @@ export const ItemList = ({
 	href: string;
 	name: string;
 	subtitle?: string;
-	poster?: string | null;
-	thumbnail?: string | null;
+	poster?: KyooImage | null;
+	thumbnail?: KyooImage | null;
 }>) => {
 	const { css } = useYoshiki();
 	const [isHovered, setHovered] = useState(0);
@@ -45,6 +46,7 @@ export const ItemList = ({
 		<ImageBackground
 			src={thumbnail}
 			alt={name}
+			quality="medium"
 			as={Link}
 			href={href ?? ""}
 			onFocus={() => setHovered((i) => i + 1)}
@@ -102,7 +104,7 @@ export const ItemList = ({
 					</Skeleton>
 				)}
 			</View>
-			<Poster src={poster} alt="" isLoading={isLoading} layout={{ height: percent(80) }} />
+			<Poster src={poster} alt="" quality="low" forcedLoading={isLoading} layout={{ height: percent(80) }} />
 		</ImageBackground>
 	);
 };

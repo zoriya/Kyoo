@@ -18,8 +18,9 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { KyooImage } from "@kyoo/models";
 import { Link, Skeleton, Poster, ts, focusReset, P, SubP } from "@kyoo/primitives";
-import { Platform } from "react-native";
+import { ImageStyle, Platform } from "react-native";
 import { percent, px, Stylable, useYoshiki } from "yoshiki/native";
 import { Layout, WithLoading } from "../fetch";
 
@@ -34,7 +35,7 @@ export const ItemGrid = ({
 	href: string;
 	name: string;
 	subtitle?: string;
-	poster?: string | null;
+	poster?: KyooImage | null;
 }> &
 	Stylable<"text">) => {
 	const { css } = useYoshiki("grid");
@@ -50,8 +51,9 @@ export const ItemGrid = ({
 						m: { xs: ts(1), sm: ts(4) },
 						child: {
 							poster: {
-								borderColor: "transparent",
+								borderColor: (theme) => theme.background,
 								borderWidth: px(4),
+								borderStyle: "solid",
 							},
 						},
 						fover: {
@@ -77,9 +79,10 @@ export const ItemGrid = ({
 			<Poster
 				src={poster}
 				alt={name}
-				isLoading={isLoading}
+				quality="low"
+				forcedLoading={isLoading}
 				layout={{ width: percent(100) }}
-				{...css("poster")}
+				{...(css("poster") as { style: ImageStyle })}
 			/>
 			<Skeleton>
 				{isLoading || (

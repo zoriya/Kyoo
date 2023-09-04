@@ -39,11 +39,6 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		private readonly DatabaseContext _database;
 
-		/// <summary>
-		/// A provider repository to handle externalID creation and deletion
-		/// </summary>
-		private readonly IProviderRepository _providers;
-
 		private readonly IShowRepository _shows;
 
 		/// <inheritdoc />
@@ -59,20 +54,19 @@ namespace Kyoo.Core.Controllers
 		/// </summary>
 		/// <param name="database">The database handle to use.</param>
 		/// <param name="shows">A show repository</param>
-		/// <param name="providers">A provider repository</param>
+		/// <param name="thumbs">The thumbnail manager used to store images.</param>
 		public EpisodeRepository(DatabaseContext database,
 			IShowRepository shows,
-			IProviderRepository providers)
-			: base(database)
+			IThumbnailsManager thumbs)
+			: base(database, thumbs)
 		{
 			_database = database;
-			_providers = providers;
 			_shows = shows;
 
 			// Edit episode slugs when the show's slug changes.
 			shows.OnEdited += (show) =>
 			{
-				List<Episode> episodes = _database.Episodes.AsTracking().Where(x => x.ShowID == show.ID).ToList();
+				List<Episode> episodes = _database.Episodes.AsTracking().Where(x => x.ShowId == show.Id).ToList();
 				foreach (Episode ep in episodes)
 				{
 					ep.ShowSlug = show.Slug;
@@ -85,9 +79,9 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public Task<Episode> GetOrDefault(int showID, int seasonNumber, int episodeNumber)
 		{
-			return _database.Episodes.FirstOrDefaultAsync(x => x.ShowID == showID
+			return _database.Episodes.FirstOrDefaultAsync(x => x.ShowId == showID
 				&& x.SeasonNumber == seasonNumber
-				&& x.EpisodeNumber == episodeNumber);
+				&& x.EpisodeNumber == episodeNumber).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc />
@@ -95,7 +89,7 @@ namespace Kyoo.Core.Controllers
 		{
 			return _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == showSlug
 				&& x.SeasonNumber == seasonNumber
-				&& x.EpisodeNumber == episodeNumber);
+				&& x.EpisodeNumber == episodeNumber).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc />
@@ -119,15 +113,15 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public Task<Episode> GetAbsolute(int showID, int absoluteNumber)
 		{
-			return _database.Episodes.FirstOrDefaultAsync(x => x.ShowID == showID
-				&& x.AbsoluteNumber == absoluteNumber);
+			return _database.Episodes.FirstOrDefaultAsync(x => x.ShowId == showID
+				&& x.AbsoluteNumber == absoluteNumber).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc />
 		public Task<Episode> GetAbsolute(string showSlug, int absoluteNumber)
 		{
 			return _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == showSlug
-				&& x.AbsoluteNumber == absoluteNumber);
+				&& x.AbsoluteNumber == absoluteNumber).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc />
@@ -137,80 +131,56 @@ namespace Kyoo.Core.Controllers
 				_database.Episodes
 					.Include(x => x.Show)
 					.Where(x => x.EpisodeNumber != null || x.AbsoluteNumber != null)
-					.Where(_database.Like<Episode>(x => x.Title, $"%{query}%"))
+					.Where(_database.Like<Episode>(x => x.Name, $"%{query}%"))
 				)
 				.Take(20)
 				.ToListAsync();
 			foreach (Episode ep in ret)
+			{
 				ep.Show.Episodes = null;
+				SetBackingImage(ep);
+			}
 			return ret;
 		}
 
 		/// <inheritdoc />
 		public override async Task<Episode> Create(Episode obj)
 		{
+			obj.ShowSlug = obj.Show?.Slug ?? _database.Shows.First(x => x.Id == obj.ShowId).Slug;
 			await base.Create(obj);
-			obj.ShowSlug = obj.Show?.Slug ?? _database.Shows.First(x => x.ID == obj.ShowID).Slug;
 			_database.Entry(obj).State = EntityState.Added;
 			await _database.SaveChangesAsync(() =>
 				obj.SeasonNumber != null && obj.EpisodeNumber != null
-				? Get(obj.ShowID, obj.SeasonNumber.Value, obj.EpisodeNumber.Value)
-				: GetAbsolute(obj.ShowID, obj.AbsoluteNumber.Value));
+				? Get(obj.ShowId, obj.SeasonNumber.Value, obj.EpisodeNumber.Value)
+				: GetAbsolute(obj.ShowId, obj.AbsoluteNumber.Value));
 			OnResourceCreated(obj);
 			return obj;
-		}
-
-		/// <inheritdoc />
-		protected override async Task EditRelations(Episode resource, Episode changed, bool resetOld)
-		{
-			await Validate(changed);
-
-			if (changed.ExternalIDs != null || resetOld)
-			{
-				await Database.Entry(resource).Collection(x => x.ExternalIDs).LoadAsync();
-				resource.ExternalIDs = changed.ExternalIDs;
-			}
 		}
 
 		/// <inheritdoc />
 		protected override async Task Validate(Episode resource)
 		{
 			await base.Validate(resource);
-			if (resource.ShowID <= 0)
+			if (resource.ShowId <= 0)
 			{
 				if (resource.Show == null)
 				{
 					throw new ArgumentException($"Can't store an episode not related " +
-						$"to any show (showID: {resource.ShowID}).");
+						$"to any show (showID: {resource.ShowId}).");
 				}
-				resource.ShowID = resource.Show.ID;
-			}
-
-			if (resource.ExternalIDs != null)
-			{
-				foreach (MetadataID id in resource.ExternalIDs)
-				{
-					id.Provider = _database.LocalEntity<Provider>(id.Provider.Slug)
-						?? await _providers.CreateIfNotExists(id.Provider);
-					id.ProviderID = id.Provider.ID;
-				}
-				_database.MetadataIds<Episode>().AttachRange(resource.ExternalIDs);
+				resource.ShowId = resource.Show.Id;
 			}
 		}
 
 		/// <inheritdoc />
 		public override async Task Delete(Episode obj)
 		{
-			if (obj == null)
-				throw new ArgumentNullException(nameof(obj));
-
-			int epCount = await _database.Episodes.Where(x => x.ShowID == obj.ShowID).Take(2).CountAsync();
+			int epCount = await _database.Episodes.Where(x => x.ShowId == obj.ShowId).Take(2).CountAsync();
 			_database.Entry(obj).State = EntityState.Deleted;
-			obj.ExternalIDs.ForEach(x => _database.Entry(x).State = EntityState.Deleted);
 			await _database.SaveChangesAsync();
 			await base.Delete(obj);
 			if (epCount == 1)
-				await _shows.Delete(obj.ShowID);
+				await _shows.Delete(obj.ShowId);
 		}
 	}
 }

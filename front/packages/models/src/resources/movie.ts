@@ -20,33 +20,21 @@
 
 import { z } from "zod";
 import { zdate } from "../utils";
-import { ImagesP, ResourceP } from "../traits";
-import { GenreP } from "./genre";
+import { ImagesP, ResourceP, imageFn } from "../traits";
+import { Genre } from "./genre";
 import { StudioP } from "./studio";
+import { Status } from "./show";
 
-/**
- * The enum containing movie's status.
- */
-export enum MovieStatus {
-	Unknown = 0,
-	Finished = 1,
-	Planned = 3,
-}
-
-export const MovieP = z.preprocess(
-	(x: any) => {
-		// Waiting for the API to be updaded
-		x.name = x.title;
-		if (x.aliases === null) x.aliases = [];
-		x.airDate = x.startAir;
-		x.trailer = x.images["3"];
-		return x;
-	},
-	ResourceP.merge(ImagesP).extend({
+export const MovieP = ResourceP.merge(ImagesP)
+	.extend({
 		/**
 		 * The title of this movie.
 		 */
 		name: z.string(),
+		/**
+		 * A catchphrase for this show.
+		 */
+		tagline: z.string().nullable(),
 		/**
 		 * The list of alternative titles of this movie.
 		 */
@@ -56,23 +44,55 @@ export const MovieP = z.preprocess(
 		 */
 		overview: z.string().nullable(),
 		/**
-		 * Is this movie not aired yet or finished?
+		 * A list of tags that match this movie.
 		 */
-		status: z.nativeEnum(MovieStatus),
+		tags: z.array(z.string()),
+		/**
+		 * /** Is this movie not aired yet or finished?
+		 */
+		status: z.nativeEnum(Status),
 		/**
 		 * The date this movie aired. It can also be null if this is unknown.
 		 */
 		airDate: zdate().nullable(),
 		/**
+		 * A youtube url for the trailer.
+		 */
+		trailer: z.string().optional().nullable(),
+		/**
 		 * The list of genres (themes) this movie has.
 		 */
-		genres: z.array(GenreP).optional(),
+		genres: z.array(z.nativeEnum(Genre)),
 		/**
 		 * The studio that made this movie.
 		 */
 		studio: StudioP.optional().nullable(),
-	}),
-);
+
+		/**
+		 * The links to see a movie or an episode.
+		 */
+		links: z.object({
+			/**
+			 * The direct link to the unprocessed video (pristine quality).
+			 */
+			direct: z.string().transform(imageFn),
+
+			/**
+			 * The link to an HLS master playlist containing all qualities available for this video.
+			 */
+			hls: z.string().transform(imageFn),
+		}),
+	})
+	.transform((x) => {
+		if (!x.thumbnail && x.poster) {
+			x.thumbnail = { ...x.poster };
+			if (x.thumbnail) {
+				x.thumbnail.low = x.thumbnail.high;
+				x.thumbnail.medium = x.thumbnail.high;
+			}
+		}
+		return x;
+	});
 
 /**
  * A Movie type
