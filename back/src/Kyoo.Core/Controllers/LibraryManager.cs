@@ -74,7 +74,7 @@ namespace Kyoo.Core.Controllers
 		public LibraryManager(IEnumerable<IBaseRepository> repositories)
 		{
 			_repositories = repositories.ToArray();
-			LibraryItemRepository = GetRepository<ILibraryItem>() as ILibraryItemRepository;
+			LibraryItemRepository = GetRepository<LibraryItem>() as ILibraryItemRepository;
 			CollectionRepository = GetRepository<Collection>() as ICollectionRepository;
 			MovieRepository = GetRepository<Movie>() as IMovieRepository;
 			ShowRepository = GetRepository<Show>() as IShowRepository;

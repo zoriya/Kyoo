@@ -237,7 +237,7 @@ namespace Kyoo.Core.Controllers
 		{
 			if (obj is not IThumbnails thumbs)
 				return;
-			string type = obj is ILibraryItem item
+			string type = obj is LibraryItem item
 				? item.Kind.ToString().ToLowerInvariant()
 				: typeof(T).Name.ToLowerInvariant();
 

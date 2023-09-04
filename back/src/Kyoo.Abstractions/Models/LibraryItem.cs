@@ -45,7 +45,7 @@ namespace Kyoo.Abstractions.Models
 		Collection
 	}
 
-	public class LibraryItem : IResource, ILibraryItem, IThumbnails, IMetadata
+	public class LibraryItem : IResource, IThumbnails, IMetadata
 	{
 		/// <inheritdoc />
 		public int Id { get; set; }
@@ -124,7 +124,9 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		public string? Trailer { get; set; }
 
-		/// <inheritdoc />
+		/// <summary>
+		/// Is the item a collection, a movie or a show?
+		/// </summary>
 		public ItemKind Kind { get; set; }
 
 		/// <inheritdoc />
@@ -148,32 +150,5 @@ namespace Kyoo.Abstractions.Models
 			Slug = Utility.ToSlug(name);
 			Name = name;
 		}
-	}
-
-	/// <summary>
-	/// A type union between <see cref="Show"/> and <see cref="Collection"/>.
-	/// This is used to list content put inside a library.
-	/// </summary>
-	public interface ILibraryItem : IResource
-	{
-		/// <summary>
-		/// Is the item a collection, a movie or a show?
-		/// </summary>
-		public ItemKind Kind { get; }
-
-		/// <summary>
-		/// The title of this show.
-		/// </summary>
-		public string Name { get; }
-
-		/// <summary>
-		/// The summary of this show.
-		/// </summary>
-		public string? Overview { get; }
-
-		/// <summary>
-		/// The date this movie aired.
-		/// </summary>
-		public DateTime? AirDate { get; }
 	}
 }

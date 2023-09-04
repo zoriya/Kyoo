@@ -76,7 +76,7 @@ namespace Kyoo.Core.Api
 			{
 				Query = query,
 				Collections = await _libraryManager.Search<Collection>(query),
-				Items = await _libraryManager.Search<ILibraryItem>(query),
+				Items = await _libraryManager.Search<LibraryItem>(query),
 				Movies = await _libraryManager.Search<Movie>(query),
 				Shows = await _libraryManager.Search<Show>(query),
 				Episodes = await _libraryManager.Search<Episode>(query),
@@ -134,9 +134,9 @@ namespace Kyoo.Core.Api
 		[Permission(nameof(Show), Kind.Read)]
 		[ApiDefinition("Items")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
-		public Task<ICollection<ILibraryItem>> SearchItems(string query)
+		public Task<ICollection<LibraryItem>> SearchItems(string query)
 		{
-			return _libraryManager.Search<ILibraryItem>(query);
+			return _libraryManager.Search<LibraryItem>(query);
 		}
 
 		/// <summary>

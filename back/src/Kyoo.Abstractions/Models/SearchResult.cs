@@ -38,7 +38,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The items that matched the search.
 		/// </summary>
-		public ICollection<ILibraryItem> Items { get; init; }
+		public ICollection<LibraryItem> Items { get; init; }
 
 		/// <summary>
 		/// The movies that matched the search.

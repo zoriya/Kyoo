@@ -32,7 +32,7 @@ namespace Kyoo.Core.Controllers
 	/// <summary>
 	/// A local repository to handle library items.
 	/// </summary>
-	public class LibraryItemRepository : LocalRepository<ILibraryItem>, ILibraryItemRepository
+	public class LibraryItemRepository : LocalRepository<LibraryItem>, ILibraryItemRepository
 	{
 		/// <summary>
 		/// The database handle
@@ -40,7 +40,7 @@ namespace Kyoo.Core.Controllers
 		private readonly DatabaseContext _database;
 
 		/// <inheritdoc />
-		protected override Sort<ILibraryItem> DefaultSort => new Sort<ILibraryItem>.By(x => x.Name);
+		protected override Sort<LibraryItem> DefaultSort => new Sort<LibraryItem>.By(x => x.Name);
 
 		/// <summary>
 		/// Create a new <see cref="ILibraryItemRepository"/>.
@@ -54,26 +54,26 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public override async Task<ILibraryItem> GetOrDefault(int id)
+		public override async Task<LibraryItem> GetOrDefault(int id)
 		{
 			return await _database.LibraryItems.SingleOrDefaultAsync(x => x.Id == id).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc />
-		public override async Task<ILibraryItem> GetOrDefault(string slug)
+		public override async Task<LibraryItem> GetOrDefault(string slug)
 		{
 			return await _database.LibraryItems.SingleOrDefaultAsync(x => x.Slug == slug).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc />
-		public override async Task<ILibraryItem> GetOrDefault(Expression<Func<ILibraryItem, bool>> where, Sort<ILibraryItem> sortBy = default)
+		public override async Task<LibraryItem> GetOrDefault(Expression<Func<LibraryItem, bool>> where, Sort<LibraryItem> sortBy = default)
 		{
 			return await Sort(_database.LibraryItems, sortBy).FirstOrDefaultAsync(where).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc />
-		public override async Task<ICollection<ILibraryItem>> GetAll(Expression<Func<ILibraryItem, bool>> where = null,
-			Sort<ILibraryItem> sort = default,
+		public override async Task<ICollection<LibraryItem>> GetAll(Expression<Func<LibraryItem, bool>> where = null,
+			Sort<LibraryItem> sort = default,
 			Pagination limit = default)
 		{
 			return (await ApplyFilters(_database.LibraryItems, where, sort, limit))
@@ -81,16 +81,16 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public override Task<int> GetCount(Expression<Func<ILibraryItem, bool>> where = null)
+		public override Task<int> GetCount(Expression<Func<LibraryItem, bool>> where = null)
 		{
-			IQueryable<ILibraryItem> query = _database.LibraryItems;
+			IQueryable<LibraryItem> query = _database.LibraryItems;
 			if (where != null)
 				query = query.Where(where);
 			return query.CountAsync();
 		}
 
 		/// <inheritdoc />
-		public override async Task<ICollection<ILibraryItem>> Search(string query)
+		public override async Task<ICollection<LibraryItem>> Search(string query)
 		{
 			return (await Sort(
 					_database.LibraryItems
@@ -103,19 +103,19 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public override Task<ILibraryItem> Create(ILibraryItem obj)
+		public override Task<LibraryItem> Create(LibraryItem obj)
 			=> throw new InvalidOperationException();
 
 		/// <inheritdoc />
-		public override Task<ILibraryItem> CreateIfNotExists(ILibraryItem obj)
+		public override Task<LibraryItem> CreateIfNotExists(LibraryItem obj)
 			=> throw new InvalidOperationException();
 
 		/// <inheritdoc />
-		public override Task<ILibraryItem> Edit(ILibraryItem edited)
+		public override Task<LibraryItem> Edit(LibraryItem edited)
 			=> throw new InvalidOperationException();
 
 		/// <inheritdoc />
-		public override Task<ILibraryItem> Patch(int id, Func<ILibraryItem, Task<bool>> patch)
+		public override Task<LibraryItem> Patch(int id, Func<LibraryItem, Task<bool>> patch)
 			=> throw new InvalidOperationException();
 
 		/// <inheritdoc />
@@ -127,7 +127,7 @@ namespace Kyoo.Core.Controllers
 			=> throw new InvalidOperationException();
 
 		/// <inheritdoc />
-		public override Task Delete(ILibraryItem obj)
+		public override Task Delete(LibraryItem obj)
 			=> throw new InvalidOperationException();
 	}
 }

@@ -327,7 +327,7 @@ namespace Kyoo.Abstractions.Controllers
 	/// <summary>
 	/// A repository to handle library items (A wrapper around shows and collections).
 	/// </summary>
-	public interface ILibraryItemRepository : IRepository<ILibraryItem> { }
+	public interface ILibraryItemRepository : IRepository<LibraryItem> { }
 
 	/// <summary>
 	/// A repository for collections

@@ -77,14 +77,14 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Page<ILibraryItem>>> GetAll(
+		public async Task<ActionResult<Page<LibraryItem>>> GetAll(
 			[FromQuery] string sortBy,
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] Pagination pagination)
 		{
-			ICollection<ILibraryItem> resources = await _libraryItems.GetAll(
-				ApiHelper.ParseWhere<ILibraryItem>(where),
-				Sort<ILibraryItem>.From(sortBy),
+			ICollection<LibraryItem> resources = await _libraryItems.GetAll(
+				ApiHelper.ParseWhere<LibraryItem>(where),
+				Sort<LibraryItem>.From(sortBy),
 				pagination
 			);
 
