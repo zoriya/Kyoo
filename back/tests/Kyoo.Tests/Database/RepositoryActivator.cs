@@ -38,7 +38,7 @@ namespace Kyoo.Tests.Database
 		{
 			Context = new PostgresTestContext(postgres, output);
 
-			Mock<ThumbnailsManager> thumbs = new();
+			Mock<IThumbnailsManager> thumbs = new();
 			CollectionRepository collection = new(_NewContext(), thumbs.Object);
 			StudioRepository studio = new(_NewContext(), thumbs.Object);
 			PeopleRepository people = new(_NewContext(),

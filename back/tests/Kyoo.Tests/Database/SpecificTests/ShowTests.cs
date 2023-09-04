@@ -229,15 +229,21 @@ namespace Kyoo.Tests.Database
 			{
 				x.Show = null;
 				x.People.Roles = null;
+				x.People.Poster = null;
+				x.People.Thumbnail = null;
+				x.People.Logo = null;
 			});
 			retrieved.Studio!.Shows = null;
 			expected.People.ForEach(x =>
 			{
 				x.Show = null;
 				x.People.Roles = null;
+				x.People.Poster = null;
+				x.People.Thumbnail = null;
+				x.People.Logo = null;
 			});
 
-			retrieved.Should().BeEquivalentTo(expected);
+			KAssert.DeepEqual(retrieved, expected);
 		}
 
 		[Fact]
