@@ -111,7 +111,7 @@ class TheMovieDatabase(Provider):
 
 		async def for_language(lng: str) -> Movie:
 			movie = await self.get(
-				f"/movie/{movie_id}",
+				f"movie/{movie_id}",
 				params={
 					"language": lng,
 					"append_to_response": "alternative_titles,videos,credits,keywords,images",
@@ -186,7 +186,7 @@ class TheMovieDatabase(Provider):
 
 		async def for_language(lng: str) -> Show:
 			show = await self.get(
-				f"/tv/{show_id}",
+				f"tv/{show_id}",
 				params={
 					"language": lng,
 					"append_to_response": "alternative_titles,videos,credits,keywords,images,external_ids",
@@ -327,7 +327,7 @@ class TheMovieDatabase(Provider):
 
 		async def for_language(lng: str) -> Episode:
 			episode = await self.get(
-				f"/tv/{show_id}/season/{season}/episode/{episode_nbr}",
+				f"tv/{show_id}/season/{season}/episode/{episode_nbr}",
 				params={
 					"language": lng,
 				},

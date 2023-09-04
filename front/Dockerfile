@@ -1,5 +1,4 @@
 FROM node:16-alpine AS builder
-RUN apk add git bash
 WORKDIR /app
 COPY .yarn ./.yarn
 COPY .yarnrc.yml ./

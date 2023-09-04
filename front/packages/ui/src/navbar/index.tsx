@@ -34,10 +34,8 @@ import {
 } from "@kyoo/primitives";
 import { Platform, TextInput, View, ViewProps } from "react-native";
 import { useTranslation } from "react-i18next";
-import { createParam } from "solito";
 import { useRouter } from "solito/router";
 import { Stylable, useYoshiki } from "yoshiki/native";
-import MenuIcon from "@material-symbols/svg-400/rounded/menu-fill.svg";
 import Search from "@material-symbols/svg-400/rounded/search-fill.svg";
 import Login from "@material-symbols/svg-400/rounded/login.svg";
 import Register from "@material-symbols/svg-400/rounded/app_registration.svg";
@@ -58,16 +56,15 @@ export const NavbarTitle = (props: Stylable & { onLayout?: ViewProps["onLayout"]
 	);
 };
 
-const { useParam } = createParam<{ q?: string }>();
-
 const SearchBar = forwardRef<TextInput, Stylable>(function SearchBar(props, ref) {
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
 	const { push, replace, back } = useRouter();
+	const hasChanged = useRef<boolean>(false);
 	const [query, setQuery] = useState("");
 
 	useEffect(() => {
-		if (Platform.OS !== "web") return;
+		if (Platform.OS !== "web" || !hasChanged.current) return;
 		const action = window.location.pathname.startsWith("/search") ? replace : push;
 		if (query) action(`/search?q=${encodeURI(query)}`, undefined, { shallow: true });
 		else back();
@@ -77,7 +74,10 @@ const SearchBar = forwardRef<TextInput, Stylable>(function SearchBar(props, ref)
 		<Input
 			ref={ref}
 			value={query ?? ""}
-			onChangeText={setQuery}
+			onChangeText={(q) => {
+				hasChanged.current = true;
+				setQuery(q);
+			}}
 			placeholder={t("navbar.search")}
 			placeholderTextColor={theme.light.overlay0}
 			{...tooltip(t("navbar.search"))}
