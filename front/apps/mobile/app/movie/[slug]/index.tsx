@@ -19,7 +19,7 @@
  */
 
 import { MovieDetails } from "@kyoo/ui";
-import { withRoute } from "../../utils";
+import { withRoute } from "../../../utils";
 
 export default withRoute(MovieDetails, {
 	options: { headerTransparent: true, headerStyle: { backgroundColor: "transparent" } },
