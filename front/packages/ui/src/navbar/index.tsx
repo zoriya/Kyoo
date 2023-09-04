@@ -18,14 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-	AccountContext,
-	deleteAccount,
-	logout,
-	QueryIdentifier,
-	User,
-	UserP,
-} from "@kyoo/models";
+import { AccountContext, deleteAccount, logout, QueryIdentifier, User, UserP } from "@kyoo/models";
 import {
 	Alert,
 	Input,
@@ -52,7 +45,7 @@ import Logout from "@material-symbols/svg-400/rounded/logout.svg";
 import Delete from "@material-symbols/svg-400/rounded/delete.svg";
 import { FetchNE } from "../fetch";
 import { KyooLongLogo } from "./icon";
-import { forwardRef, useContext, useRef, useState } from "react";
+import { forwardRef, useContext, useEffect, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 
 export const NavbarTitle = (props: Stylable & { onLayout?: ViewProps["onLayout"] }) => {
@@ -67,27 +60,24 @@ export const NavbarTitle = (props: Stylable & { onLayout?: ViewProps["onLayout"]
 
 const { useParam } = createParam<{ q?: string }>();
 
-const SearchBar = forwardRef<
-	TextInput,
-	{ onBlur?: (value: string | undefined) => void } & Stylable
->(function SearchBar({ onBlur, ...props }, ref) {
+const SearchBar = forwardRef<TextInput, Stylable>(function SearchBar(props, ref) {
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
 	const { push, replace, back } = useRouter();
-	const [query] = useParam("q");
+	const [query, setQuery] = useState("");
+
+	useEffect(() => {
+		if (Platform.OS !== "web") return;
+		const action = window.location.pathname.startsWith("/search") ? replace : push;
+		if (query) action(`/search?q=${encodeURI(query)}`, undefined, { shallow: true });
+		else back();
+	}, [query]);
 
 	return (
 		<Input
 			ref={ref}
 			value={query ?? ""}
-			onBlur={() => onBlur?.call(null, query)}
-			onChangeText={(q) => {
-				if (Platform.OS === "web") {
-					const action = window.location.pathname.startsWith("/search") ? replace : push;
-					if (q) action(`/search?q=${encodeURI(q)}`, undefined, { shallow: true });
-					else back();
-				}
-			}}
+			onChangeText={setQuery}
 			placeholder={t("navbar.search")}
 			placeholderTextColor={theme.light.overlay0}
 			{...tooltip(t("navbar.search"))}
@@ -188,39 +178,18 @@ export const NavbarProfile = () => {
 export const NavbarRight = () => {
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
-	const [isSearching, setSearch] = useState(false);
-	const ref = useRef<TextInput | null>(null);
-	const [query] = useParam("q");
 	const { push } = useRouter();
-	const searchExpanded = isSearching || query;
 
 	return (
 		<View {...css({ flexDirection: "row", alignItems: "center" })}>
-			{Platform.OS === "web" && (
-				<SearchBar
-					ref={ref}
-					onBlur={(q) => {
-						if (!q) setSearch(false);
-					}}
-					{...css({
-						display: { xs: searchExpanded ? "flex" : "none", md: "flex" },
-					})}
-				/>
-			)}
-			{!searchExpanded && (
+			{Platform.OS === "web" ? (
+				<SearchBar />
+			) : (
 				<IconButton
 					icon={Search}
 					color={theme.colors.white}
-					onPress={
-						Platform.OS === "web"
-							? () => {
-								setSearch(true);
-								setTimeout(() => ref.current?.focus(), 0);
-							}
-							: () => push("/search")
-					}
+					onPress={() => push("/search")}
 					{...tooltip(t("navbar.search"))}
-					{...css(Platform.OS === "web" && { display: { xs: "flex", md: "none" } })}
 				/>
 			)}
 			<NavbarProfile />
@@ -254,14 +223,6 @@ export const Navbar = (props: Stylable) => {
 				props,
 			)}
 		>
-			<IconButton
-				icon={MenuIcon}
-				aria-label="more"
-				aria-controls="menu-appbar"
-				aria-haspopup="true"
-				color={theme.colors.white}
-				{...css({ display: { xs: "flex", sm: "none" } })}
-			/>
 			<NavbarTitle {...css({ marginX: ts(2) })} />
 			<View
 				{...css({
