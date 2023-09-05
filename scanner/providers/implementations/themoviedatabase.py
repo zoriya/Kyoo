@@ -104,7 +104,7 @@ class TheMovieDatabase(Provider):
 		)["results"]
 		if len(search_results) == 0:
 			raise ProviderError(f"No result for a movie named: {name}")
-		search = search_results[0]
+		search = self.get_best_result(search_results, name, year)
 		movie_id = search["id"]
 		if search["original_language"] not in language:
 			language.append(search["original_language"])
@@ -310,12 +310,12 @@ class TheMovieDatabase(Provider):
 		*,
 		language: list[str],
 	) -> Episode:
-		search_results = (await self.get("search/tv", params={"query": name}))[
-			"results"
-		]
+		search_results = (
+			await self.get("search/tv", params={"query": name, "year": year})
+		)["results"]
 		if len(search_results) == 0:
 			raise ProviderError(f"No result for a tv show named: {name}")
-		search = search_results[0]
+		search = self.get_best_result(search_results, name, year)
 		show_id = search["id"]
 		if search["original_language"] not in language:
 			language.append(search["original_language"])
@@ -370,3 +370,22 @@ class TheMovieDatabase(Provider):
 			return ret
 
 		return await self.process_translations(for_language, language)
+
+	def get_best_result(
+		self, search_results: List[Any], name: str, year: Optional[int]
+	) -> Any:
+		if year:
+			# Find perfect match by year since sometime tmdb decides to discard the year parameter.
+			return next(
+				(
+					x
+					for x in search_results
+					if (
+						"first_air_date" in x
+						and x["first_air_date"].startswith(str(year))
+					)
+					or ("release_date" in x and x["release_date"].startswith(str(year)))
+				),
+				search_results[0],
+			)
+		return search_results[0]
