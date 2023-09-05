@@ -45,6 +45,7 @@ class Movie:
 
 	def to_kyoo(self):
 		from ..utils import select_image
+
 		# For now, the API of kyoo only support one language so we remove the others.
 		default_language = os.environ["LIBRARY_LANGUAGES"].split(",")[0]
 		return {
