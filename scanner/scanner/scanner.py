@@ -77,6 +77,9 @@ class Scanner:
 
 		if not "mimetype" in raw or not raw["mimetype"].startswith("video"):
 			return
+		# Remove seasons in "One Piece (1999) 152.mkv" for example
+		if raw.get("season") == raw.get("year") and "season" in raw:
+			del raw["season"]
 
 		logging.info("Identied %s: %s", path, raw)
 
@@ -94,6 +97,7 @@ class Scanner:
 				season=raw.get("season"),
 				episode_nbr=raw.get("episode"),
 				absolute=raw.get("episode") if "season" not in raw else None,
+				year=raw.get("year"),
 				language=self.languages,
 			)
 			episode.path = str(path)
