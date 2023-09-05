@@ -52,6 +52,7 @@ class Provider:
 		season: Optional[int],
 		episode_nbr: Optional[int],
 		absolute: Optional[int],
+		year: Optional[int],
 		*,
 		language: list[str]
 	) -> Episode:
