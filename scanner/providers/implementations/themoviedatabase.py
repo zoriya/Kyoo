@@ -2,7 +2,7 @@ import asyncio
 import logging
 from aiohttp import ClientSession
 from datetime import datetime
-from typing import Awaitable, Callable, Dict, Optional, Any, TypeVar
+from typing import Awaitable, Callable, Dict, List, Optional, Any, TypeVar
 
 from providers.utils import ProviderError
 
@@ -42,6 +42,7 @@ class TheMovieDatabase(Provider):
 			10752: Genre.WAR,
 			37: Genre.WESTERN,
 		}
+		self.absolute_episode_cache = {}
 
 	@property
 	def name(self) -> str:
@@ -320,10 +321,36 @@ class TheMovieDatabase(Provider):
 		if search["original_language"] not in language:
 			language.append(search["original_language"])
 
-		# TODO: Handle absolute episodes
+		if not show_id in self.absolute_episode_cache:
+			await self.get_absolute_order(show_id)
+
+		if (
+			absolute and
+			(not season or not episode_nbr)
+			and self.absolute_episode_cache[show_id]
+			and self.absolute_episode_cache[show_id][absolute]
+		):
+			# Using absolute - 1 since the array is 0based (absolute episode 1 is at index 0)
+			season = self.absolute_episode_cache[show_id][absolute - 1]["season_number"]
+			episode_nbr = self.absolute_episode_cache[show_id][absolute - 1][
+				"episode_number"
+			]
+
 		if not season or not episode_nbr:
 			raise ProviderError(
-				"Absolute order episodes not implemented for the movie database"
+				f"Absolute order episodes not available for the show {name}"
+			)
+
+		if not absolute and self.absolute_episode_cache[show_id]:
+			absolute = next(
+				(
+					# The + 1 is to go from 0based index to 1based absolute number
+					i + 1
+					for i, x in enumerate(self.absolute_episode_cache[show_id])
+					if x["episode_number"] == episode_nbr
+					and x["season_number"] == season
+				),
+				None,
 			)
 
 		async def for_language(lng: str) -> Episode:
@@ -348,7 +375,7 @@ class TheMovieDatabase(Provider):
 				season_number=episode["season_number"],
 				episode_number=episode["episode_number"],
 				# TODO: absolute numbers
-				absolute_number=None,
+				absolute_number=absolute,
 				release_date=datetime.strptime(episode["air_date"], "%Y-%m-%d").date()
 				if episode["air_date"]
 				else None,
@@ -389,3 +416,27 @@ class TheMovieDatabase(Provider):
 				search_results[0],
 			)
 		return search_results[0]
+
+	async def get_absolute_order(self, show_id: str):
+		try:
+			groups = await self.get(f"tv/{show_id}/episode_groups")
+			ep_count = max((x["episode_count"] for x in groups["results"]), default=0)
+			# Filter only absolute groups that contains at least 75% of all episodes (to skip non maintained absolute ordering)
+			group_id = next(
+				(
+					x["id"]
+					for x in groups["results"]
+					if x["type"] == 2 and x["episode_count"] >= ep_count // 1.5
+				),
+				None,
+			)
+
+			if group_id is None:
+				self.absolute_episode_cache[show_id] = None
+				return
+			group = await self.get(f"tv/episode_group/{group_id}")
+			self.absolute_episode_cache[show_id] = group["groups"][0]["episodes"]
+		except Exception as e:
+			logging.exception(
+				"Could not retrieve absolute ordering information", exc_info=e
+			)
