@@ -17,7 +17,8 @@ def format_date(date: date | int | None) -> str | None:
 
 
 def select_image(
-	self: Movie | Show, type: Literal["posters"] | Literal["thumbnails"] | Literal["logos"]
+	self: Movie | Show,
+	type: Literal["posters"] | Literal["thumbnails"] | Literal["logos"],
 ) -> str | None:
 	# For now, the API of kyoo only support one language so we remove the others.
 	default_language = os.environ["LIBRARY_LANGUAGES"].split(",")[0]
