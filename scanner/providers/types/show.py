@@ -47,6 +47,7 @@ class Show:
 	translations: dict[str, ShowTranslation] = field(default_factory=dict)
 
 	def to_kyoo(self):
+		from providers.utils import select_image
 		# For now, the API of kyoo only support one language so we remove the others.
 		default_language = os.environ["LIBRARY_LANGUAGES"].split(",")[0]
 		return {
@@ -54,11 +55,9 @@ class Show:
 			**asdict(self.translations[default_language]),
 			"studio": next((x.to_kyoo() for x in self.studios), None),
 			"seasons": None,
-			"poster": next(iter(self.translations[default_language].posters), None),
-			"thumbnail": next(
-				iter(self.translations[default_language].thumbnails), None
-			),
-			"logo": next(iter(self.translations[default_language].logos), None),
+			"poster": select_image(self, "posters"),
+			"thumbnail": select_image(self, "thumbnails"),
+			"logo": select_image(self, "logos"),
 			"trailer": next(iter(self.translations[default_language].trailers), None),
 			"genres": [x.to_kyoo() for x in self.genres],
 		}
