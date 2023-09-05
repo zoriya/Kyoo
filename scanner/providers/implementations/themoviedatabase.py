@@ -48,11 +48,19 @@ class TheMovieDatabase(Provider):
 	def name(self) -> str:
 		return "themoviedatabase"
 
-	async def get(self, path: str, *, params: dict[str, Any] = {}):
+	async def get(
+		self,
+		path: str,
+		*,
+		params: dict[str, Any] = {},
+		not_found_fail: Optional[str] = None,
+	):
 		params = {k: v for k, v in params.items() if v is not None}
 		async with self._client.get(
 			f"{self.base}/{path}", params={"api_key": self.api_key, **params}
 		) as r:
+			if not_found_fail and r.status == 404:
+				raise ProviderError(not_found_fail)
 			r.raise_for_status()
 			return await r.json()
 
@@ -337,9 +345,9 @@ class TheMovieDatabase(Provider):
 			]
 
 		if not season or not episode_nbr:
-			raise ProviderError(
-				f"Absolute order episodes not available for the show {name}"
-			)
+			# Some shows don't have absolute numbering because the default one is absolute on tmdb (for example detetive conan)
+			season = 1
+			episode_nbr = absolute
 
 		if not absolute and self.absolute_episode_cache[show_id]:
 			absolute = next(
@@ -359,6 +367,7 @@ class TheMovieDatabase(Provider):
 				params={
 					"language": lng,
 				},
+				not_found_fail=f"Could not find episode {episode_nbr} of season {season} of serie {search['name']}",
 			)
 			logging.debug("TMDb responded: %s", episode)
 
@@ -374,7 +383,6 @@ class TheMovieDatabase(Provider):
 				),
 				season_number=episode["season_number"],
 				episode_number=episode["episode_number"],
-				# TODO: absolute numbers
 				absolute_number=absolute,
 				release_date=datetime.strptime(episode["air_date"], "%Y-%m-%d").date()
 				if episode["air_date"]
