@@ -81,7 +81,7 @@ namespace Kyoo.Abstractions.Models
 		public Image(string source, string? blurhash = null)
 		{
 			Source = source;
-			Blurhash = blurhash ?? "00000000000000";
+			Blurhash = blurhash ?? "000000";
 		}
 
 		public class ImageConvertor : TypeConverter
