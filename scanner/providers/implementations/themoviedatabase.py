@@ -325,8 +325,8 @@ class TheMovieDatabase(Provider):
 			await self.get_absolute_order(show_id)
 
 		if (
-			absolute and
-			(not season or not episode_nbr)
+			absolute
+			and (not season or not episode_nbr)
 			and self.absolute_episode_cache[show_id]
 			and self.absolute_episode_cache[show_id][absolute]
 		):
@@ -401,21 +401,34 @@ class TheMovieDatabase(Provider):
 	def get_best_result(
 		self, search_results: List[Any], name: str, year: Optional[int]
 	) -> Any:
+		results = search_results
+
+		# Find perfect match by year since sometime tmdb decides to discard the year parameter.
 		if year:
-			# Find perfect match by year since sometime tmdb decides to discard the year parameter.
-			return next(
-				(
-					x
-					for x in search_results
-					if (
-						"first_air_date" in x
-						and x["first_air_date"].startswith(str(year))
-					)
-					or ("release_date" in x and x["release_date"].startswith(str(year)))
-				),
-				search_results[0],
+			results = list(
+				x
+				for x in search_results
+				if ("first_air_date" in x and x["first_air_date"].startswith(str(year)))
+				or ("release_date" in x and x["release_date"].startswith(str(year)))
 			)
-		return search_results[0]
+			if not results:
+				results = search_results
+
+		# If there is a perfect match use it (and if there are multiple, use the most popular one)
+		res = sorted(
+			(
+				x
+				for x in results
+				if ("name" in x and x["name"] == name)
+				or ("title" in x and x["title"] == name)
+			),
+			key=lambda x: x["popularity"],
+			reverse=True,
+		)
+		if res:
+			results = res
+
+		return results[0]
 
 	async def get_absolute_order(self, show_id: str):
 		try:
