@@ -73,7 +73,7 @@ class Scanner:
 		if path in self.registered or self._ignore_pattern.match(path):
 			return
 
-		raw = guessit(path, "--episode-prefer-number")
+		raw = guessit(path, {"episode_prefer_number": True, "excludes": "language"})
 
 		if not "mimetype" in raw or not raw["mimetype"].startswith("video"):
 			return
