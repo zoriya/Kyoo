@@ -169,9 +169,23 @@ class TheMovieDatabase(Provider):
 				tagline=movie["tagline"] if movie["tagline"] else None,
 				tags=list(map(lambda x: x["name"], movie["keywords"]["keywords"])),
 				overview=movie["overview"],
-				posters=self.get_image(movie["images"]["posters"]),
+				posters=self.get_image(
+					movie["images"]["posters"]
+					+ (
+						[{"file_path": movie["poster_path"]}]
+						if lng == search["original_language"]
+						else []
+					)
+				),
 				logos=self.get_image(movie["images"]["logos"]),
-				thumbnails=self.get_image(movie["images"]["backdrops"]),
+				thumbnails=self.get_image(
+					movie["images"]["backdrops"]
+					+ (
+						[{"file_path": movie["backdrop_path"]}]
+						if lng == search["original_language"]
+						else []
+					)
+				),
 				trailers=[
 					f"https://www.youtube.com/watch?v={x['key']}"
 					for x in movie["videos"]["results"]
@@ -185,13 +199,13 @@ class TheMovieDatabase(Provider):
 
 	async def identify_show(
 		self,
-		show: PartialShow,
+		pshow: PartialShow,
 		*,
 		language: list[str],
 	) -> Show:
-		show_id = show.external_id[self.name].data_id
-		if show.original_language not in language:
-			language.append(show.original_language)
+		show_id = pshow.external_id[self.name].data_id
+		if pshow.original_language not in language:
+			language.append(pshow.original_language)
 
 		async def for_language(lng: str) -> Show:
 			show = await self.get(
@@ -199,7 +213,6 @@ class TheMovieDatabase(Provider):
 				params={
 					"language": lng,
 					"append_to_response": "alternative_titles,videos,credits,keywords,images,external_ids",
-					"include_image_language": f"{lng},null",
 				},
 			)
 			logging.debug("TMDb responded: %s", show)
@@ -250,9 +263,23 @@ class TheMovieDatabase(Provider):
 				tagline=show["tagline"] if show["tagline"] else None,
 				tags=list(map(lambda x: x["name"], show["keywords"]["results"])),
 				overview=show["overview"],
-				posters=self.get_image(show["images"]["posters"]),
+				posters=self.get_image(
+					show["images"]["posters"]
+					+ (
+						[{"file_path": show["poster_path"]}]
+						if lng == pshow.original_language
+						else []
+					)
+				),
 				logos=self.get_image(show["images"]["logos"]),
-				thumbnails=self.get_image(show["images"]["backdrops"]),
+				thumbnails=self.get_image(
+					show["images"]["backdrops"]
+					+ (
+						[{"file_path": show["backdrop_path"]}]
+						if lng == pshow.original_language
+						else []
+					)
+				),
 				trailers=[
 					f"https://www.youtube.com/watch?v={x['key']}"
 					for x in show["videos"]["results"]
