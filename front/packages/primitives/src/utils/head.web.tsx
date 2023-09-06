@@ -23,7 +23,7 @@ import NextHead from "next/head";
 export const Head = ({ title, description }: { title?: string | null; description?: string | null }) => {
 	return (
 		<NextHead>
-			{title && <title>{title + "- Kyoo"}</title>}
+			{title && <title>{title + " - Kyoo"}</title>}
 			{description && <meta name="description" content={description} />}
 		</NextHead>
 	);
