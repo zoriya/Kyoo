@@ -83,7 +83,7 @@ export const LI = ({ children, ...props }: TextProps) => {
 	const { css } = useYoshiki();
 
 	return (
-		<P accessibilityRole={Platform.OS === "web" ? "listitem" : props.accessibilityRole} {...props}>
+		<P role={Platform.OS === "web" ? "listitem" : props.role} {...props}>
 			<Text
 				{...css({
 					height: percent(100),

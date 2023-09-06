@@ -70,8 +70,6 @@ const BaseEpisodeP = ResourceP.merge(ImagesP).extend({
 		 */
 		hls: z.string().transform(imageFn),
 	}),
-
-	show: ShowP.optional()
 });
 
 export const EpisodeP = BaseEpisodeP.extend({
@@ -85,6 +83,8 @@ export const EpisodeP = BaseEpisodeP.extend({
 	 * aired episode or this is a movie, it will be null.
 	 */
 	nextEpisode: BaseEpisodeP.nullable().optional(),
+
+	show: ShowP.optional(),
 })
 
 /**

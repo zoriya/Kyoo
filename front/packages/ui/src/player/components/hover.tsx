@@ -103,7 +103,7 @@ export const Hover = ({
 							props,
 						)}
 					>
-						<VideoPoster poster={poster} />
+						<VideoPoster poster={poster} alt={showName}/>
 						<View
 							{...css({
 								marginLeft: { xs: ts(0.5), sm: ts(3) },
@@ -209,7 +209,7 @@ export const Back = ({
 	);
 };
 
-const VideoPoster = ({ poster }: { poster?: KyooImage | null }) => {
+const VideoPoster = ({ poster, alt }: { poster?: KyooImage | null, alt?: string }) => {
 	const { css } = useYoshiki();
 
 	return (
@@ -223,6 +223,7 @@ const VideoPoster = ({ poster }: { poster?: KyooImage | null }) => {
 			<Poster
 				src={poster}
 				quality="low"
+				alt={alt}
 				layout={{ width: percent(100) }}
 				{...(css({ position: "absolute", bottom: 0 }) as { style: ImageStyle })}
 			/>

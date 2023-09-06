@@ -113,7 +113,7 @@ export const EpisodeLine = ({
 					focus: {
 						self: focusReset,
 						poster: {
-							transform: [{ scale: 1.1 }],
+							transform: "scale(1.1)" as any,
 							borderColor: (theme: Theme) => theme.accent,
 						},
 						title: {
