@@ -24,6 +24,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using JetBrains.Annotations;
 using Kyoo.Abstractions.Models;
+using Kyoo.Utils;
 
 namespace Kyoo.Core.Api
 {
@@ -163,14 +164,34 @@ namespace Kyoo.Core.Api
 
 		private static Expression _ContainsResourceExpression(MemberExpression xProperty, string value)
 		{
+			if (xProperty.Type == typeof(string))
+			{
+				// x.PROPRETY.Contains(value);
+				return Expression.Call(xProperty, typeof(string).GetMethod("Contains", new[] { typeof(string) }), Expression.Constant(value));
+			}
+
+			// x.PROPERTY is either a List<> or a []
+			Type inner = xProperty.Type.GetElementType() ?? xProperty.Type.GenericTypeArguments.First();
+
+			if (inner.IsAssignableTo(typeof(string)))
+			{
+				return Expression.Call(typeof(Enumerable), "Contains", new[] { inner }, xProperty, Expression.Constant(value));
+			}
+			else if (inner.IsEnum && Enum.TryParse(inner, value, true, out object enumValue))
+			{
+				return Expression.Call(typeof(Enumerable), "Contains", new[] { inner }, xProperty, Expression.Constant(enumValue));
+			}
+
+			if (!inner.IsAssignableTo(typeof(IResource)))
+				throw new ArgumentException("Contain (ctn) not appliable for this property.");
+
 			// x => x.PROPERTY.Any(y => y.Slug == value)
 			Expression ret = null;
-			ParameterExpression y = Expression.Parameter(xProperty.Type.GenericTypeArguments.First(), "y");
+			ParameterExpression y = Expression.Parameter(inner, "y");
 			foreach (string val in value.Split(','))
 			{
 				LambdaExpression lambda = Expression.Lambda(_ResourceEqual(y, val), y);
-				Expression iteration = Expression.Call(typeof(Enumerable), "Any", xProperty.Type.GenericTypeArguments,
-					xProperty, lambda);
+				Expression iteration = Expression.Call(typeof(Enumerable), "Any", new[] { inner }, xProperty, lambda);
 
 				if (ret == null)
 					ret = iteration;
