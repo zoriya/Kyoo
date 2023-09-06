@@ -199,7 +199,7 @@ class TheMovieDatabase(Provider):
 				params={
 					"language": lng,
 					"append_to_response": "alternative_titles,videos,credits,keywords,images,external_ids",
-					"include_image_language": f"{lng},null"
+					"include_image_language": f"{lng},null",
 				},
 			)
 			logging.debug("TMDb responded: %s", show)
@@ -232,8 +232,12 @@ class TheMovieDatabase(Provider):
 					"imdb": MetadataID(
 						show["external_ids"]["imdb_id"],
 						f"https://www.imdb.com/title/{show['external_ids']['imdb_id']}",
-					),
-					"tvdb": MetadataID(show["external_ids"]["tvdb_id"], link=None),
+					)
+					if show["external_ids"]["imdb_id"]
+					else None,
+					"tvdb": MetadataID(show["external_ids"]["tvdb_id"], link=None)
+					if show["external_ids"]["tvdb_id"]
+					else None,
 				},
 				seasons=[
 					self.to_season(x, language=lng, show_id=show["id"])
