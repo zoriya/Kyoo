@@ -355,7 +355,11 @@ class TheMovieDatabase(Provider):
 			season = 1
 			episode_nbr = absolute
 
-		if absolute is None and self.absolute_episode_cache[show_id]:
+		if (
+			absolute is None
+			and show_id in self.absolute_episode_cache
+			and self.absolute_episode_cache[show_id]
+		):
 			absolute = next(
 				(
 					# The + 1 is to go from 0based index to 1based absolute number
@@ -441,6 +445,12 @@ class TheMovieDatabase(Provider):
 		)
 		if res:
 			results = res
+		else:
+			# Ignore totally unpopular shows or unknown ones.
+			# sorted is stable and False<True so doing this puts baddly rated items at the end of the list.
+			results = sorted(
+				results, key=lambda x: x["vote_count"] < 10 or x["popularity"] < 5
+			)
 
 		return results[0]
 
@@ -462,7 +472,7 @@ class TheMovieDatabase(Provider):
 				self.absolute_episode_cache[show_id] = None
 				return
 			group = await self.get(f"tv/episode_group/{group_id}")
-			grp = next(group["groups"], None)
+			grp = next(iter(group["groups"]), None)
 			self.absolute_episode_cache[show_id] = grp["episodes"] if grp else None
 		except Exception as e:
 			logging.exception(
