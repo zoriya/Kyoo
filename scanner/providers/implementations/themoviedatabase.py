@@ -334,10 +334,11 @@ class TheMovieDatabase(Provider):
 			await self.get_absolute_order(show_id)
 
 		if (
-			absolute
-			and (not season or not episode_nbr)
-			and self.absolute_episode_cache[show_id]
-			and self.absolute_episode_cache[show_id][absolute]
+			absolute is not None
+			and (season is None or episode_nbr is None)
+			and show_id in self.absolute_episode_cache
+			and self.absolute_episode_cache[show_id] is not None
+			and absolute in self.absolute_episode_cache[show_id]
 		):
 			# Using absolute - 1 since the array is 0based (absolute episode 1 is at index 0)
 			season = self.absolute_episode_cache[show_id][absolute - 1]["season_number"]
@@ -345,12 +346,12 @@ class TheMovieDatabase(Provider):
 				"episode_number"
 			]
 
-		if not season or not episode_nbr:
+		if season is None or episode_nbr is None:
 			# Some shows don't have absolute numbering because the default one is absolute on tmdb (for example detetive conan)
 			season = 1
 			episode_nbr = absolute
 
-		if not absolute and self.absolute_episode_cache[show_id]:
+		if absolute is None and self.absolute_episode_cache[show_id]:
 			absolute = next(
 				(
 					# The + 1 is to go from 0based index to 1based absolute number
@@ -457,7 +458,8 @@ class TheMovieDatabase(Provider):
 				self.absolute_episode_cache[show_id] = None
 				return
 			group = await self.get(f"tv/episode_group/{group_id}")
-			self.absolute_episode_cache[show_id] = group["groups"][0]["episodes"]
+			grp = next(group["groups"], None)
+			self.absolute_episode_cache[show_id] = grp["episodes"] if grp else None
 		except Exception as e:
 			logging.exception(
 				"Could not retrieve absolute ordering information", exc_info=e
