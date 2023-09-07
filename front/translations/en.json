@@ -18,7 +18,8 @@
 		"sortkey": {
 			"name": "Name",
 			"startAir": "Start air",
-			"endAir": "End air"
+			"endAir": "End air",
+			"addedDate": "Added date"
 		},
 		"sortord": {
 			"asc": "asc",

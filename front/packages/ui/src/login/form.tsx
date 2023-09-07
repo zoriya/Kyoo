@@ -18,6 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
+import { imageFn } from "@kyoo/models";
 import { ts } from "@kyoo/primitives";
 import { ReactNode } from "react";
 import { ScrollView, ImageBackground, ImageProps, Platform, View } from "react-native";
@@ -42,11 +43,10 @@ const SvgBlob = (props: SvgProps) => {
 export const FormPage = ({ children, ...props }: { children: ReactNode } & Stylable) => {
 	const { css } = useYoshiki();
 
-	// TODO: Replace the hardcoded 1 to a random show/movie thumbnail.
-	const src = `${Platform.OS === "web" ? "/api" : process.env.PUBLIC_BACK_URL}/shows/1/thumbnail`;
+	const src = imageFn("/items/random/thumbnail");
 	const nativeProps = Platform.select<Partial<ImageProps>>({
 		web: {
-			defaultSource: typeof src === "string" ? { uri: src! } : Array.isArray(src) ? src[0] : src!,
+			defaultSource: { uri: src },
 		},
 		default: {},
 	});

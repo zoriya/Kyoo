@@ -22,6 +22,7 @@ export enum SortBy {
 	Name = "name",
 	StartAir = "startAir",
 	EndAir = "endAir",
+	AddedDate = "addedDate",
 }
 
 export enum SortOrd {
