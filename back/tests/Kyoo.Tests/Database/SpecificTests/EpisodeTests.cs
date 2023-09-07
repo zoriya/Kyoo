@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -284,6 +285,8 @@ namespace Kyoo.Tests.Database
 			await _repository.Create(value);
 			ICollection<Episode> ret = await _repository.Search(query);
 			value.Show = TestSample.Get<Show>();
+			value.Show.AddedDate = DateTime.UnixEpoch;
+			ret.First().Show.AddedDate = DateTime.UnixEpoch;
 			KAssert.DeepEqual(value, ret.First());
 		}
 
