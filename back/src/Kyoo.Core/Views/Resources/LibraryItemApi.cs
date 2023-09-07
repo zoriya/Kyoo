@@ -39,7 +39,7 @@ namespace Kyoo.Core.Api
 	[ResourceView]
 	[PartialPermission("LibraryItem")]
 	[ApiDefinition("Items", Group = ResourcesGroup)]
-	public class LibraryItemApi : BaseApi
+	public class LibraryItemApi : CrudThumbsApi<LibraryItem>
 	{
 		/// <summary>
 		/// The library item repository used to modify or retrieve information in the data store.
@@ -52,7 +52,8 @@ namespace Kyoo.Core.Api
 		/// <param name="libraryItems">
 		/// The library item repository used to modify or retrieve information in the data store.
 		/// </param>
-		public LibraryItemApi(ILibraryItemRepository libraryItems)
+		public LibraryItemApi(ILibraryItemRepository libraryItems, IThumbnailsManager thumbs)
+			: base(libraryItems, thumbs)
 		{
 			_libraryItems = libraryItems;
 		}
