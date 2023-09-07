@@ -68,6 +68,14 @@ namespace Kyoo.Core.Api
 			string path = _thumbs.GetImagePath(resource, image, quality ?? ImageQuality.High);
 			if (path == null || !System.IO.File.Exists(path))
 				return NotFound();
+
+			if (!identifier.Match(id => false, slug => slug == "random"))
+			{
+				// Allow clients to cache the image for 6 month.
+				Response.Headers.Add("Cache-Control", $"public, max-age={60 * 60 * 24 * 31 * 6}");
+			}
+			else
+				Response.Headers.Add("Cache-Control", $"public, no-store");
 			return PhysicalFile(Path.GetFullPath(path), "image/webp", true);
 		}
 
