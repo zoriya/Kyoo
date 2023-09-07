@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using Kyoo.Abstractions.Models.Attributes;
@@ -27,7 +28,7 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// A class representing collections of <see cref="Show"/>.
 	/// </summary>
-	public class Collection : IResource, IMetadata, IThumbnails
+	public class Collection : IResource, IMetadata, IThumbnails, IAddedDate
 	{
 		/// <inheritdoc />
 		public int Id { get; set; }
@@ -44,6 +45,9 @@ namespace Kyoo.Abstractions.Models
 		/// The description of this collection.
 		/// </summary>
 		public string? Overview { get; set; }
+
+		/// <inheritdoc />
+		public DateTime AddedDate { get; set; }
 
 		/// <inheritdoc />
 		public Image? Poster { get; set; }

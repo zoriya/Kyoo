@@ -29,7 +29,7 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// A season of a <see cref="Show"/>.
 	/// </summary>
-	public class Season : IResource, IMetadata, IThumbnails
+	public class Season : IResource, IMetadata, IThumbnails, IAddedDate
 	{
 		/// <inheritdoc />
 		public int Id { get; set; }
@@ -94,6 +94,9 @@ namespace Kyoo.Abstractions.Models
 		/// The starting air date of this season.
 		/// </summary>
 		public DateTime? StartDate { get; set; }
+
+		/// <inheritdoc />
+		public DateTime AddedDate { get; set; }
 
 		/// <summary>
 		/// The ending date of this season.

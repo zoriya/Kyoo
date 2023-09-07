@@ -29,7 +29,7 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// A class to represent a single show's episode.
 	/// </summary>
-	public class Episode : IResource, IMetadata, IThumbnails
+	public class Episode : IResource, IMetadata, IThumbnails, IAddedDate
 	{
 		/// <inheritdoc />
 		public int Id { get; set; }
@@ -137,6 +137,9 @@ namespace Kyoo.Abstractions.Models
 		/// The release date of this episode. It can be null if unknown.
 		/// </summary>
 		public DateTime? ReleaseDate { get; set; }
+
+		/// <inheritdoc />
+		public DateTime AddedDate { get; set; }
 
 		/// <inheritdoc />
 		public Image? Poster { get; set; }
