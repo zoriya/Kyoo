@@ -18,7 +18,8 @@
 		"sortkey": {
 			"name": "Nom",
 			"startAir": "Date de sortie",
-			"endAir": "Date de fin de sortie"
+			"endAir": "Date de fin de sortie",
+			"addedDate": "Date d'ajout"
 		},
 		"sortord": {
 			"asc": "asc",
