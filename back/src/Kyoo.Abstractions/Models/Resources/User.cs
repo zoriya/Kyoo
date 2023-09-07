@@ -28,7 +28,7 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// A single user of the app.
 	/// </summary>
-	public class User : IResource
+	public class User : IResource, IAddedDate
 	{
 		/// <inheritdoc />
 		public int Id { get; set; }
@@ -57,6 +57,9 @@ namespace Kyoo.Abstractions.Models
 		/// The list of permissions of the user. The format of this is implementation dependent.
 		/// </summary>
 		public string[] Permissions { get; set; } = Array.Empty<string>();
+
+		/// <inheritdoc />
+		public DateTime AddedDate { get; set; }
 
 		/// <summary>
 		/// A logo is a small image representing the resource.

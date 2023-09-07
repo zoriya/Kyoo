@@ -45,7 +45,7 @@ namespace Kyoo.Abstractions.Models
 		Collection
 	}
 
-	public class LibraryItem : IResource, IThumbnails, IMetadata
+	public class LibraryItem : IResource, IThumbnails, IMetadata, IAddedDate
 	{
 		/// <inheritdoc />
 		public int Id { get; set; }
@@ -109,6 +109,9 @@ namespace Kyoo.Abstractions.Models
 		/// The date this movie aired.
 		/// </summary>
 		public DateTime? AirDate { get; set; }
+
+		/// <inheritdoc />
+		public DateTime AddedDate { get; set; }
 
 		/// <inheritdoc />
 		public Image? Poster { get; set; }

@@ -190,6 +190,14 @@ namespace Kyoo.Postgresql
 				.OwnsOne(x => x.Logo);
 		}
 
+		private static void _HasAddedDate<T>(ModelBuilder modelBuilder)
+			where T : class, IAddedDate
+		{
+			modelBuilder.Entity<T>()
+				.Property(x => x.AddedDate)
+				.HasDefaultValueSql("now() at time zone 'utc'");
+		}
+
 		/// <summary>
 		/// Create a many to many relationship between the two entities.
 		/// The resulting relationship will have an available <see cref="AddLinks{T1,T2}"/> method.
@@ -284,6 +292,14 @@ namespace Kyoo.Postgresql
 			_HasImages<Season>(modelBuilder);
 			_HasImages<Episode>(modelBuilder);
 			_HasImages<People>(modelBuilder);
+
+			_HasAddedDate<LibraryItem>(modelBuilder);
+			_HasAddedDate<Collection>(modelBuilder);
+			_HasAddedDate<Movie>(modelBuilder);
+			_HasAddedDate<Show>(modelBuilder);
+			_HasAddedDate<Season>(modelBuilder);
+			_HasAddedDate<Episode>(modelBuilder);
+			_HasAddedDate<User>(modelBuilder);
 
 			modelBuilder.Entity<User>().OwnsOne(x => x.Logo);
 

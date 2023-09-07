@@ -29,7 +29,7 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// A series or a movie.
 	/// </summary>
-	public class Show : IResource, IMetadata, IOnMerge, IThumbnails
+	public class Show : IResource, IMetadata, IOnMerge, IThumbnails, IAddedDate
 	{
 		/// <inheritdoc />
 		public int Id { get; set; }
@@ -83,6 +83,9 @@ namespace Kyoo.Abstractions.Models
 		/// It can also be null if this is unknown.
 		/// </summary>
 		public DateTime? EndAir { get; set; }
+
+		/// <inheritdoc />
+		public DateTime AddedDate { get; set; }
 
 		/// <inheritdoc />
 		public Image? Poster { get; set; }
