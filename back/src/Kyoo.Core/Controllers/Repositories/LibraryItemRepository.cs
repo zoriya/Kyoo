@@ -19,12 +19,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Postgresql;
-using Kyoo.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Core.Controllers
@@ -51,42 +49,6 @@ namespace Kyoo.Core.Controllers
 			: base(database, thumbs)
 		{
 			_database = database;
-		}
-
-		/// <inheritdoc />
-		public override async Task<LibraryItem> GetOrDefault(int id)
-		{
-			return await _database.LibraryItems.SingleOrDefaultAsync(x => x.Id == id).Then(SetBackingImage);
-		}
-
-		/// <inheritdoc />
-		public override async Task<LibraryItem> GetOrDefault(string slug)
-		{
-			return await _database.LibraryItems.SingleOrDefaultAsync(x => x.Slug == slug).Then(SetBackingImage);
-		}
-
-		/// <inheritdoc />
-		public override async Task<LibraryItem> GetOrDefault(Expression<Func<LibraryItem, bool>> where, Sort<LibraryItem> sortBy = default)
-		{
-			return await Sort(_database.LibraryItems, sortBy).FirstOrDefaultAsync(where).Then(SetBackingImage);
-		}
-
-		/// <inheritdoc />
-		public override async Task<ICollection<LibraryItem>> GetAll(Expression<Func<LibraryItem, bool>> where = null,
-			Sort<LibraryItem> sort = default,
-			Pagination limit = default)
-		{
-			return (await ApplyFilters(_database.LibraryItems, where, sort, limit))
-				.Select(SetBackingImageSelf).ToList();
-		}
-
-		/// <inheritdoc />
-		public override Task<int> GetCount(Expression<Func<LibraryItem, bool>> where = null)
-		{
-			IQueryable<LibraryItem> query = _database.LibraryItems;
-			if (where != null)
-				query = query.Where(where);
-			return query.CountAsync();
 		}
 
 		/// <inheritdoc />

@@ -56,6 +56,9 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="List">The list of keys to sort by.</param>
 		public record Conglomerate(params Sort<T>[] List) : Sort<T>;
 
+		/// <summary>Sort randomly items</summary>
+		public record Random() : Sort<T>;
+
 		/// <summary>The default sort method for the given type.</summary>
 		public record Default : Sort<T>;
 
@@ -69,6 +72,8 @@ namespace Kyoo.Abstractions.Controllers
 		{
 			if (string.IsNullOrEmpty(sortBy) || sortBy == "default")
 				return new Default();
+			if (sortBy == "random")
+				return new Random();
 			if (sortBy.Contains(','))
 				return new Conglomerate(sortBy.Split(',').Select(From).ToArray());
 

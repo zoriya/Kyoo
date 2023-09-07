@@ -109,6 +109,8 @@ namespace Kyoo.Core.Controllers
 						return _Sort(query, DefaultSort, then);
 					case Sort<T>.By(var key, var desc):
 						return _SortBy(query, x => EF.Property<T>(x, key), desc, then);
+					case Sort<T>.Random:
+						return _SortBy(query, x => EF.Functions.Random(), false, then);
 					case Sort<T>.Conglomerate(var sorts):
 						IOrderedQueryable<T> nQuery = _Sort(query, sorts.First(), false);
 						foreach (Sort<T> sort in sorts.Skip(1))
@@ -169,6 +171,7 @@ namespace Kyoo.Core.Controllers
 					Sort<T>.Default => GetSortsBy(DefaultSort),
 					Sort<T>.By @sortBy => new[] { sortBy },
 					Sort<T>.Conglomerate(var list) => list.SelectMany(GetSortsBy),
+					Sort<T>.Random => throw new ArgumentException("Impossible to paginate randomly sorted items."),
 					_ => Array.Empty<Sort<T>.By>(),
 				};
 			}
@@ -306,6 +309,8 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public virtual Task<T> GetOrDefault(string slug)
 		{
+			if (slug == "random")
+				return Database.Set<T>().OrderBy(x => EF.Functions.Random()).FirstOrDefaultAsync().Then(SetBackingImage);
 			return Database.Set<T>().FirstOrDefaultAsync(x => x.Slug == slug).Then(SetBackingImage);
 		}
 
