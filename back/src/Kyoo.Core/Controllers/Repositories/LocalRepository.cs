@@ -508,7 +508,7 @@ namespace Kyoo.Core.Controllers
 				return Task.CompletedTask;
 			if (string.IsNullOrEmpty(resource.Slug))
 				throw new ArgumentException("Resource can't have null as a slug.");
-			if (int.TryParse(resource.Slug, out int _))
+			if (int.TryParse(resource.Slug, out int _) || resource.Slug == "random")
 			{
 				try
 				{
@@ -516,11 +516,11 @@ namespace Kyoo.Core.Controllers
 					if (setter != null)
 						setter.Invoke(resource, new object[] { resource.Slug + '!' });
 					else
-						throw new ArgumentException("Resources slug can't be number only.");
+						throw new ArgumentException("Resources slug can't be number only or the literal \"random\".");
 				}
 				catch
 				{
-					throw new ArgumentException("Resources slug can't be number only.");
+					throw new ArgumentException("Resources slug can't be number only or the literal \"random\".");
 				}
 			}
 			return Task.CompletedTask;
