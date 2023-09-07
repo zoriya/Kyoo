@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using FluentAssertions;
 using JetBrains.Annotations;
 using Kyoo.Abstractions.Models;
@@ -37,7 +38,8 @@ namespace Kyoo.Tests
 		[AssertionMethod]
 		public static void DeepEqual<T>(T expected, T value)
 		{
-			if (expected is IResource res && expected is IThumbnails thumbs) {
+			if (expected is IResource res and IThumbnails thumbs)
+			{
 				if (thumbs.Poster != null)
 					thumbs.Poster.Path = $"/{expected.GetType().Name.ToLower()}/{res.Slug}/poster";
 				if (thumbs.Thumbnail != null)
@@ -45,13 +47,19 @@ namespace Kyoo.Tests
 				if (thumbs.Logo != null)
 					thumbs.Logo.Path = $"/{expected.GetType().Name.ToLower()}/{res.Slug}/logo";
 			}
-			if (value is IResource resV && value is IThumbnails thumbsV) {
+			if (value is IResource resV and IThumbnails thumbsV)
+			{
 				if (thumbsV.Poster != null)
 					thumbsV.Poster.Path = $"/{value.GetType().Name.ToLower()}/{resV.Slug}/poster";
 				if (thumbsV.Thumbnail != null)
 					thumbsV.Thumbnail.Path = $"/{value.GetType().Name.ToLower()}/{resV.Slug}/thumbnail";
 				if (thumbsV.Logo != null)
 					thumbsV.Logo.Path = $"/{value.GetType().Name.ToLower()}/{resV.Slug}/logo";
+			}
+			if (expected is IAddedDate ea && value is IAddedDate va)
+			{
+				ea.AddedDate = DateTime.UnixEpoch;
+				va.AddedDate = DateTime.UnixEpoch;
 			}
 			value.Should().BeEquivalentTo(expected);
 		}
