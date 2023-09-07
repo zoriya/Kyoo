@@ -52,44 +52,11 @@ namespace Kyoo.Core.Api
 		/// <param name="libraryItems">
 		/// The library item repository used to modify or retrieve information in the data store.
 		/// </param>
+		/// <param name="thumbs">Thumbnail manager to retrieve images.</param>
 		public LibraryItemApi(ILibraryItemRepository libraryItems, IThumbnailsManager thumbs)
 			: base(libraryItems, thumbs)
 		{
 			_libraryItems = libraryItems;
-		}
-
-		/// <summary>
-		/// Get items
-		/// </summary>
-		/// <remarks>
-		/// List all items of kyoo.
-		/// An item can ether represent a collection or a show.
-		/// This endpoint allow one to retrieve all collections and shows that are not contained in a collection.
-		/// This is what is displayed on the /browse page of the webapp.
-		/// </remarks>
-		/// <param name="sortBy">A key to sort items by.</param>
-		/// <param name="where">An optional list of filters.</param>
-		/// <param name="pagination">The number of items to return.</param>
-		/// <returns>A page of items.</returns>
-		/// <response code="400">The filters or the sort parameters are invalid.</response>
-		/// <response code="404">No library with the given ID or slug could be found.</response>
-		[HttpGet]
-		[PartialPermission(Kind.Read)]
-		[ProducesResponseType(StatusCodes.Status200OK)]
-		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
-		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Page<LibraryItem>>> GetAll(
-			[FromQuery] string sortBy,
-			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] Pagination pagination)
-		{
-			ICollection<LibraryItem> resources = await _libraryItems.GetAll(
-				ApiHelper.ParseWhere<LibraryItem>(where),
-				Sort<LibraryItem>.From(sortBy),
-				pagination
-			);
-
-			return Page(resources, pagination.Limit);
 		}
 	}
 }
