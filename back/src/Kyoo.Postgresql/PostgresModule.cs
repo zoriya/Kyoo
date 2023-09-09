@@ -87,7 +87,8 @@ namespace Kyoo.Postgresql
 					["MAXPOOLSIZE"] = "95",
 					["TIMEOUT"] = "30"
 				};
-				x.UseNpgsql(builder.ConnectionString);
+				x.UseNpgsql(builder.ConnectionString)
+					.UseProjectables();
 				if (_environment.IsDevelopment())
 					x.EnableDetailedErrors().EnableSensitiveDataLogging();
 			}, ServiceLifetime.Transient);
