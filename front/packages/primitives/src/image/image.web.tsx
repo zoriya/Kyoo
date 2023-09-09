@@ -20,21 +20,11 @@
 
 import { useLayoutEffect, useState } from "react";
 import { ImageStyle, View, ViewStyle } from "react-native";
-import { StyleList, processStyleList } from "yoshiki/src/type";
-import { useYoshiki as useWebYoshiki } from "yoshiki/web";
 import { useYoshiki } from "yoshiki/native";
 import { Props, ImageLayout } from "./base-image";
-import { blurHashToDataURL } from "./blurhash-web";
+import { BlurhashContainer, blurHashToDataURL } from "./blurhash.web";
 import { Skeleton } from "../skeleton";
 import NextImage from "next/image";
-
-// Extract classnames from leftover props using yoshiki's internal.
-const extractClassNames = <Style,>(props: {
-	style?: StyleList<{ $$css?: true; yoshiki?: string } | Style>;
-}) => {
-	const inline = processStyleList(props.style);
-	return "$$css" in inline && inline.$$css ? inline.yoshiki : undefined;
-};
 
 export const Image = ({
 	src,
@@ -46,7 +36,6 @@ export const Image = ({
 	...props
 }: Props & { style?: ImageStyle } & { layout: ImageLayout }) => {
 	const { css } = useYoshiki();
-	const { css: wCss } = useWebYoshiki();
 	const [state, setState] = useState<"loading" | "errored" | "finished">(
 		src ? "finished" : "errored",
 	);
@@ -66,26 +55,8 @@ export const Image = ({
 		);
 	}
 
-	const blurhash = blurHashToDataURL(src.blurhash);
 	return (
-		<div
-			style={{
-				// To reproduce view's behavior
-				boxSizing: "border-box",
-				overflow: "hidden",
-
-				// Use a blurhash here to nicely fade the NextImage when it is loaded completly
-				// (this prevents loading the image line by line which is ugly and buggy on firefox)
-				backgroundImage: `url(${blurhash})`,
-				backgroundSize: "cover",
-				backgroundRepeat: "no-repeat",
-				backgroundPosition: "50% 50%",
-			}}
-			{...wCss([layout as any, { ...border, borderRadius: "6px", position: "relative" }], {
-				// Gather classnames from props (to support parent's hover for example).
-				className: extractClassNames(props),
-			})}
-		>
+		<BlurhashContainer blurhash={src.blurhash} {...css([layout, border], props)}>
 			<NextImage
 				src={src[quality ?? "high"]}
 				priority={quality === "high"}
@@ -96,13 +67,13 @@ export const Image = ({
 					opacity: state === "loading" ? 0 : 1,
 					transition: "opacity .2s ease-out",
 				}}
-				blurDataURL={blurhash}
+				blurDataURL={blurHashToDataURL(src.blurhash)}
 				placeholder="blur"
 				// Don't use next's server to reprocess images, they are already optimized by kyoo.
 				unoptimized={true}
 				onLoadingComplete={() => setState("finished")}
 				onError={() => setState("errored")}
 			/>
-		</div>
+		</BlurhashContainer>
 	);
 };

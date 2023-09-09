@@ -19,6 +19,10 @@
  */
 
 import { decode } from "blurhash";
+import { ReactElement } from "react";
+import { useYoshiki } from "yoshiki";
+import { Stylable } from "yoshiki/native";
+import { StyleList, processStyleList } from "yoshiki/src/type";
 
 // The blurhashToUrl has been stolen from https://gist.github.com/mattiaz9/53cb67040fa135cb395b1d015a200aff
 export function blurHashToDataURL(hash: string | undefined): string | undefined {
@@ -186,3 +190,45 @@ function generatePng(width: number, height: number, rgbaString: string) {
 	const pngString = SIGNATURE + IHDR + IDAT + IEND;
 	return pngString;
 }
+
+// Extract classnames from leftover props using yoshiki's internal.
+const extractClassNames = <Style,>(props: {
+	style?: StyleList<{ $$css?: true; yoshiki?: string } | Style>;
+}) => {
+	const inline = processStyleList(props.style);
+	return "$$css" in inline && inline.$$css ? inline.yoshiki : undefined;
+};
+
+export const BlurhashContainer = ({
+	blurhash,
+	children,
+	...props
+}: { blurhash: string; children?: ReactElement | ReactElement[] } & Stylable) => {
+	const { css } = useYoshiki();
+
+	return (
+		<div
+			style={{
+				// To reproduce view's behavior
+				boxSizing: "border-box",
+				overflow: "hidden",
+
+				// Use a blurhash here to nicely fade the NextImage when it is loaded completly
+				// (this prevents loading the image line by line which is ugly and buggy on firefox)
+				backgroundImage: `url(${blurHashToDataURL(blurhash)})`,
+				backgroundSize: "cover",
+				backgroundRepeat: "no-repeat",
+				backgroundPosition: "50% 50%",
+			}}
+			// This should be in yoshiki but this allows this component to be styled like a native component.
+			{...css(
+				{ position: "relative" },
+				{
+					className: extractClassNames(props),
+				},
+			)}
+		>
+			{children}
+		</div>
+	);
+};
