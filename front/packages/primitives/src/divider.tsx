@@ -40,14 +40,14 @@ export const HR = ({
 					orientation === "vertical" && {
 						width: px(1),
 						height: "auto",
-						marginVertical: ts(1),
-						marginHorizontal: ts(2),
+						marginY: ts(1),
+						marginX: ts(2),
 					},
 					orientation === "horizontal" && {
 						height: px(1),
 						width: "auto",
-						marginHorizontal: ts(1),
-						marginVertical: ts(2),
+						marginX: ts(1),
+						marginY: ts(2),
 					},
 				],
 				props,
