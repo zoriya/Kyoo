@@ -37,26 +37,26 @@ const kyooUrl =
 	Platform.OS !== "web"
 		? process.env.PUBLIC_BACK_URL
 		: typeof window === "undefined"
-			? process.env.KYOO_URL ?? "http://localhost:5000"
-			: "/api";
+		? process.env.KYOO_URL ?? "http://localhost:5000"
+		: "/api";
 
 export let kyooApiUrl: string | null = kyooUrl || null;
 
 export const setApiUrl = (apiUrl: string) => {
 	kyooApiUrl = apiUrl;
-}
+};
 
 export const queryFn = async <Data,>(
 	context:
 		| QueryFunctionContext
 		| {
-			path: (string | false | undefined | null)[];
-			body?: object;
-			method: "GET" | "POST" | "DELETE";
-			authenticated?: boolean;
-			apiUrl?: string;
-			abortSignal?: AbortSignal;
-		},
+				path: (string | false | undefined | null)[];
+				body?: object;
+				method: "GET" | "POST" | "DELETE";
+				authenticated?: boolean;
+				apiUrl?: string;
+				abortSignal?: AbortSignal;
+		  },
 	type?: z.ZodType<Data>,
 	token?: string | null,
 ): Promise<Data> => {
@@ -72,8 +72,8 @@ export const queryFn = async <Data,>(
 			"path" in context
 				? context.path.filter((x) => x)
 				: context.pageParam
-					? [context.pageParam]
-					: (context.queryKey.filter((x, i) => x && i) as string[]),
+				? [context.pageParam]
+				: (context.queryKey.filter((x, i) => x && i) as string[]),
 		)
 		.join("/")
 		.replace("/?", "?");
@@ -105,7 +105,13 @@ export const queryFn = async <Data,>(
 		} catch (e) {
 			data = { errors: [error] } as KyooErrors;
 		}
-		console.log(`Invalid response (${"method" in context && context.method ? context.method : "GET"} ${path}):`, data, resp.status);
+		console.log(
+			`Invalid response (${
+				"method" in context && context.method ? context.method : "GET"
+			} ${path}):`,
+			data,
+			resp.status,
+		);
 		throw data as KyooErrors;
 	}
 
@@ -124,7 +130,11 @@ export const queryFn = async <Data,>(
 	const parsed = await type.safeParseAsync(data);
 	if (!parsed.success) {
 		console.log("Parse error: ", parsed.error);
-		throw { errors: ["Invalid response from kyoo. Possible version mismatch between the server and the application."] } as KyooErrors;
+		throw {
+			errors: [
+				"Invalid response from kyoo. Possible version mismatch between the server and the application.",
+			],
+		} as KyooErrors;
 	}
 	return parsed.data;
 };
@@ -141,11 +151,11 @@ export const createQueryClient = () =>
 		},
 	});
 
-export type QueryIdentifier<T = unknown> = {
+export type QueryIdentifier<T = unknown, Ret = T> = {
 	parser: z.ZodType<T, z.ZodTypeDef, any>;
 	path: (string | undefined)[];
 	params?: { [query: string]: boolean | number | string | string[] | undefined };
-	infinite?: boolean;
+	infinite?: boolean | { value: true; map?: (x: T[]) => Ret[] };
 	/**
 	 * A custom get next function if the infinite query is not a page.
 	 */
@@ -159,7 +169,7 @@ export type QueryPage<Props = {}> = ComponentType<Props> & {
 		| { Layout: QueryPage<{ page: ReactElement }>; props: object };
 };
 
-const toQueryKey = <Data,>(query: QueryIdentifier<Data>) => {
+const toQueryKey = <Data, Ret>(query: QueryIdentifier<Data, Ret>) => {
 	const prefix = Platform.OS !== "web" ? [kyooApiUrl] : [""];
 
 	if (query.params) {
@@ -184,8 +194,8 @@ export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 	});
 };
 
-export const useInfiniteFetch = <Data,>(
-	query: QueryIdentifier<Data>,
+export const useInfiniteFetch = <Data, Ret>(
+	query: QueryIdentifier<Data, Ret>,
 	options?: Partial<UseInfiniteQueryOptions<Data[], KyooErrors>>,
 ) => {
 	if (query.getNext) {
@@ -196,7 +206,7 @@ export const useInfiniteFetch = <Data,>(
 			getNextPageParam: query.getNext,
 			...options,
 		});
-		return { ...ret, items: ret.data?.pages.flatMap((x) => x) };
+		return { ...ret, items: ret.data?.pages.flatMap((x) => x) as unknown as Ret[] | undefined };
 	}
 	// eslint-disable-next-line react-hooks/rules-of-hooks
 	const ret = useInfiniteQuery<Page<Data>, KyooErrors>({
@@ -204,7 +214,14 @@ export const useInfiniteFetch = <Data,>(
 		queryFn: (ctx) => queryFn(ctx, Paged(query.parser)),
 		getNextPageParam: (page: Page<Data>) => page?.next || undefined,
 	});
-	return { ...ret, items: ret.data?.pages.flatMap((x) => x.items) };
+	const items = ret.data?.pages.flatMap((x) => x.items);
+	return {
+		...ret,
+		items:
+			items && typeof query.infinite === "object" && query.infinite.map
+				? query.infinite.map(items)
+				: (items as unknown as Ret[] | undefined),
+	};
 };
 
 export const fetchQuery = async (queries: QueryIdentifier[], authToken?: string | null) => {

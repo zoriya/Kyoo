@@ -18,14 +18,83 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Episode, EpisodeP, QueryIdentifier } from "@kyoo/models";
-import { Container } from "@kyoo/primitives";
-import { Stylable } from "yoshiki/native";
+import {
+	Episode,
+	EpisodeP,
+	QueryIdentifier,
+	Season,
+	SeasonP,
+	useInfiniteFetch,
+} from "@kyoo/models";
+import { Skeleton, H6, HR, P, ts, Menu, IconButton, tooltip } from "@kyoo/primitives";
+import { rem, useYoshiki } from "yoshiki/native";
 import { View } from "react-native";
 import { InfiniteFetch } from "../fetch-infinite";
 import { episodeDisplayNumber, EpisodeLine } from "./episode";
 import { useTranslation } from "react-i18next";
 import { ComponentType } from "react";
+import MenuIcon from "@material-symbols/svg-400/rounded/menu-fill.svg";
+
+export const SeasonHeader = ({
+	isLoading,
+	seasonNumber,
+	name,
+	seasons,
+	slug,
+}: {
+	isLoading: boolean;
+	seasonNumber?: number;
+	name?: string;
+	seasons?: Season[];
+	slug: string;
+}) => {
+	const { css } = useYoshiki();
+	const { t } = useTranslation();
+
+	return (
+		<View id={`season-${seasonNumber}`}>
+			<View {...css({ flexDirection: "row", marginX: ts(1) })}>
+				<P
+					{...css({
+						width: rem(4),
+						flexShrink: 0,
+						marginX: ts(1),
+						textAlign: "center",
+						fontSize: rem(1.5),
+					})}
+				>
+					{isLoading ? <Skeleton variant="filltext" /> : seasonNumber}
+				</P>
+				<H6
+					aria-level={2}
+					{...css({ marginX: ts(1), fontSize: rem(1.5), flexGrow: 1, flexShrink: 1 })}
+				>
+					{isLoading ? <Skeleton /> : name}
+				</H6>
+				<Menu Trigger={IconButton} icon={MenuIcon} {...tooltip(t("show.jumpToSeason"))}>
+					{seasons?.map((x) => (
+						<Menu.Item
+							key={x.seasonNumber}
+							label={`${x.seasonNumber}: ${x.name}`}
+							href={`/show/${slug}?season=${x.seasonNumber}`}
+						/>
+					))}
+				</Menu>
+			</View>
+			<HR />
+		</View>
+	);
+};
+
+SeasonHeader.query = (slug: string): QueryIdentifier<Season> => ({
+	parser: SeasonP,
+	path: ["shows", slug, "seasons"],
+	params: {
+		// Fetch all seasons at one, there won't be hundred of thems anyways.
+		limit: 0,
+	},
+	infinite: true,
+});
 
 export const EpisodeList = <Props,>({
 	slug,
@@ -39,6 +108,9 @@ export const EpisodeList = <Props,>({
 	headerProps: Props;
 }) => {
 	const { t } = useTranslation();
+	const { items: seasons, error } = useInfiniteFetch(SeasonHeader.query(slug));
+
+	if (error) console.error("Could not fetch seasons", error);
 
 	return (
 		<InfiniteFetch
@@ -50,53 +122,48 @@ export const EpisodeList = <Props,>({
 			Header={Header}
 			headerProps={headerProps}
 		>
-			{(item) => (
-				<EpisodeLine
-					{...item}
-					displayNumber={item.isLoading ? undefined! : episodeDisplayNumber(item)!}
-				/>
-			)}
+			{(item) => {
+				const sea = item ? seasons?.find((x) => x.seasonNumber === item.seasonNumber) : null;
+				return (
+					<>
+						{item.firstOfSeason && (
+							<SeasonHeader
+								isLoading={!sea}
+								name={sea?.name}
+								seasonNumber={sea?.seasonNumber}
+								seasons={seasons}
+								slug={slug}
+							/>
+						)}
+						<EpisodeLine
+							{...item}
+							displayNumber={item.isLoading ? undefined! : episodeDisplayNumber(item)!}
+						/>
+					</>
+				);
+			}}
 		</InfiniteFetch>
 	);
 };
 
-EpisodeList.query = (slug: string, season: string | number): QueryIdentifier<Episode> => ({
+EpisodeList.query = (
+	slug: string,
+	season: string | number,
+): QueryIdentifier<Episode, Episode & { firstOfSeason?: boolean }> => ({
 	parser: EpisodeP,
 	path: ["shows", slug, "episode"],
 	params: {
-		seasonNumber: season,
+		seasonNumber: season ? `gte:${season}` : undefined,
 	},
-	infinite: true,
+	infinite: {
+		value: true,
+		map: (episodes) => {
+			let currentSeason: number | null = null;
+			return episodes.map((x) => {
+				if (x.seasonNumber === currentSeason) return x;
+				currentSeason = x.seasonNumber;
+				return { ...x, firstOfSeason: true };
+			});
+		},
+	},
 });
-
-export const SeasonTab = ({
-	slug,
-	season,
-	...props
-}: { slug: string; season: number | string } & Stylable) => {
-	// TODO: handle absolute number only shows (without seasons)
-	return null;
-	return (
-		<View>
-			<Container>
-				{/* <Tabs value={season} onChange={(_, i) => setSeason(i)} aria-label="List of seasons"> */}
-				{/* 	{seasons */}
-				{/* 		? seasons.map((x) => ( */}
-				{/* 				<Tab */}
-				{/* 					key={x.seasonNumber} */}
-				{/* 					label={x.name} */}
-				{/* 					value={x.seasonNumber} */}
-				{/* 					component={Link} */}
-				{/* 					to={{ query: { ...router.query, season: x.seasonNumber } }} */}
-				{/* 					shallow */}
-				{/* 					replace */}
-				{/* 				/> */}
-				{/* 		  )) */}
-				{/* 		: [...Array(3)].map((_, i) => ( */}
-				{/* 				<Tab key={i} label={<Skeleton width="5rem" />} value={i + 1} disabled /> */}
-				{/* 		  ))} */}
-				{/* </Tabs> */}
-			</Container>
-		</View>
-	);
-};

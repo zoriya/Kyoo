@@ -22,7 +22,7 @@ import { QueryIdentifier, QueryPage, Show, ShowP } from "@kyoo/models";
 import { Platform, View, ViewProps } from "react-native";
 import { percent, useYoshiki } from "yoshiki/native";
 import { DefaultLayout } from "../layout";
-import { EpisodeList } from "./season";
+import { EpisodeList, SeasonHeader } from "./season";
 import { Header } from "./header";
 import Svg, { Path, SvgProps } from "react-native-svg";
 import { Container } from "@kyoo/primitives";
@@ -75,7 +75,6 @@ const ShowHeader = forwardRef<View, ViewProps & { slug: string }>(function ShowH
 				fill={theme.variant.background}
 				{...css({ flexShrink: 0, flexGrow: 1, display: "flex" })}
 			/>
-			{/* <SeasonTab slug={slug} season={season} /> */}
 			<View {...css({ bg: theme.variant.background })}>
 				<Container>{children}</Container>
 			</View>
@@ -104,6 +103,7 @@ ShowDetails.getFetchUrls = ({ slug, season }) => [
 	query(slug),
 	// ShowStaff.query(slug),
 	EpisodeList.query(slug, season),
+	SeasonHeader.query(slug),
 ];
 
 ShowDetails.getLayout = { Layout: DefaultLayout, props: { transparent: true } };
