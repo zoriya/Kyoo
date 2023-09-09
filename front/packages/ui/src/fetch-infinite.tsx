@@ -24,7 +24,7 @@ import { FlashList } from "@shopify/flash-list";
 import { ComponentType, isValidElement, ReactElement, useRef } from "react";
 import { EmptyView, ErrorView, Layout, WithLoading } from "./fetch";
 
-export const InfiniteFetch = <Data, Props>({
+export const InfiniteFetch = <Data, Props, _>({
 	query,
 	placeholderCount = 15,
 	incremental = false,
@@ -37,7 +37,7 @@ export const InfiniteFetch = <Data, Props>({
 	headerProps,
 	...props
 }: {
-	query: QueryIdentifier<Data>;
+	query: QueryIdentifier<_, Data>;
 	placeholderCount?: number;
 	layout: Layout;
 	horizontal?: boolean;
@@ -49,7 +49,7 @@ export const InfiniteFetch = <Data, Props>({
 	incremental?: boolean;
 	divider?: boolean | ComponentType;
 	Header?: ComponentType<Props & { children: JSX.Element }> | ReactElement;
-	headerProps?: Props
+	headerProps?: Props;
 }): JSX.Element | null => {
 	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
 
@@ -69,15 +69,14 @@ export const InfiniteFetch = <Data, Props>({
 		return <EmptyView message={empty} />;
 	}
 
-	if (incremental)
-		items ??= oldItems.current;
+	if (incremental) items ??= oldItems.current;
 	const count = items ? numColumns - (items.length % numColumns) : placeholderCount;
 	const placeholders = [...Array(count === 0 ? numColumns : count)].map(
-		(_, i) => ({ id: `gen${i}`, isLoading: true } as Data),
+		(_, i) => ({ id: `gen${i}`, isLoading: true }) as Data,
 	);
 
 	// @ts-ignore
-	if (headerProps && !isValidElement(Header)) Header = <Header {...headerProps} />
+	if (headerProps && !isValidElement(Header)) Header = <Header {...headerProps} />;
 	return (
 		<FlashList
 			renderItem={({ item, index }) => children({ isLoading: false, ...item } as any, index)}

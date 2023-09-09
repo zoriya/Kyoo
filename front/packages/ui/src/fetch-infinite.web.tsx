@@ -66,7 +66,8 @@ const InfiniteScroll = <Props,>({
 					{
 						display: "flex",
 						alignItems: "flex-start",
-						overflow: "auto",
+						overflowX: "hidden",
+						overflowY: "auto",
 					},
 					layout == "vertical" && {
 						flexDirection: "column",
@@ -101,7 +102,7 @@ const InfiniteScroll = <Props,>({
 	);
 };
 
-export const InfiniteFetch = <Data,>({
+export const InfiniteFetch = <Data, _>({
 	query,
 	incremental = false,
 	placeholderCount = 15,
@@ -113,7 +114,7 @@ export const InfiniteFetch = <Data,>({
 	Header,
 	...props
 }: {
-	query: QueryIdentifier<Data>;
+	query: QueryIdentifier<_, Data>;
 	incremental?: boolean;
 	placeholderCount?: number;
 	layout: Layout;

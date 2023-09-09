@@ -10,7 +10,8 @@
 		"noOverview": "Aucune description disponible",
 		"episode-none": "Il n'y a pas d'épisodes dans cette saison",
 		"episodeNoMetadata": "Aucune metadonnée disponible",
-		"tags": "Tags"
+		"tags": "Tags",
+		"jumpToSeason": "Aller sur une saison"
 	},
 	"browse": {
 		"sortby": "Trier par {{key}}",
