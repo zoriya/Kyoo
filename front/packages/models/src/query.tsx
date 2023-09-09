@@ -155,7 +155,7 @@ export type QueryIdentifier<T = unknown, Ret = T> = {
 	parser: z.ZodType<T, z.ZodTypeDef, any>;
 	path: (string | undefined)[];
 	params?: { [query: string]: boolean | number | string | string[] | undefined };
-	infinite?: boolean | { value: true; map?: (x: T[]) => Ret[] };
+	infinite?: boolean | { value: true; map?: (x: any[]) => Ret[] };
 	/**
 	 * A custom get next function if the infinite query is not a page.
 	 */
@@ -163,7 +163,7 @@ export type QueryIdentifier<T = unknown, Ret = T> = {
 };
 
 export type QueryPage<Props = {}> = ComponentType<Props> & {
-	getFetchUrls?: (route: { [key: string]: string }) => QueryIdentifier[];
+	getFetchUrls?: (route: { [key: string]: string }) => QueryIdentifier<any>[];
 	getLayout?:
 		| QueryPage<{ page: ReactElement }>
 		| { Layout: QueryPage<{ page: ReactElement }>; props: object };
