@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
+using EntityFrameworkCore.Projectables;
 using JetBrains.Annotations;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
@@ -119,5 +120,13 @@ namespace Kyoo.Abstractions.Models
 		/// The list of episodes that this season contains.
 		/// </summary>
 		[LoadableRelation] public ICollection<Episode>? Episodes { get; set; }
+
+		/// <summary>
+		/// The number of episodes in this season.
+		/// </summary>
+		[Projectable(UseMemberBody = nameof(_EpisodeCount))]
+		public int EpisodeCount { get; set; }
+
+		private int _EpisodeCount => Episodes!.Count;
 	}
 }
