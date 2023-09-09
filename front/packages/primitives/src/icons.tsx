@@ -83,6 +83,7 @@ export const IconButton = forwardRef(function IconButton<AsProps = PressableProp
 			focusRipple
 			{...(css(
 				{
+					alignSelf: "center",
 					p: ts(1),
 					m: px(2),
 					borderRadius: 9999,
