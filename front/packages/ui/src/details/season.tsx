@@ -123,7 +123,7 @@ export const EpisodeList = <Props,>({
 			headerProps={headerProps}
 		>
 			{(item) => {
-				const sea = item ? seasons?.find((x) => x.seasonNumber === item.seasonNumber) : null;
+				const sea = item?.firstOfSeason ? seasons?.find((x) => x.seasonNumber === item.seasonNumber) : null;
 				return (
 					<>
 						{item.firstOfSeason && (
