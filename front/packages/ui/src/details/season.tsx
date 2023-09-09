@@ -121,9 +121,12 @@ export const EpisodeList = <Props,>({
 			divider
 			Header={Header}
 			headerProps={headerProps}
+			getItemType={(item) => (item.firstOfSeason ? "withHeader" : "normal")}
 		>
 			{(item) => {
-				const sea = item?.firstOfSeason ? seasons?.find((x) => x.seasonNumber === item.seasonNumber) : null;
+				const sea = item?.firstOfSeason
+					? seasons?.find((x) => x.seasonNumber === item.seasonNumber)
+					: null;
 				return (
 					<>
 						{item.firstOfSeason && (

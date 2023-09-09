@@ -112,6 +112,7 @@ export const InfiniteFetch = <Data, _>({
 	empty,
 	divider: Divider = false,
 	Header,
+	getItemType,
 	...props
 }: {
 	query: QueryIdentifier<_, Data>;
@@ -126,6 +127,7 @@ export const InfiniteFetch = <Data, _>({
 	empty?: string | JSX.Element;
 	divider?: boolean | ComponentType;
 	Header?: ComponentType<{ children: JSX.Element }> | ReactElement;
+	getItemType?: (item: Data, index: number) => string | number;
 }): JSX.Element | null => {
 	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
 

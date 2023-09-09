@@ -35,6 +35,7 @@ export const InfiniteFetch = <Data, Props, _>({
 	divider = false,
 	Header,
 	headerProps,
+	getItemType,
 	...props
 }: {
 	query: QueryIdentifier<_, Data>;
@@ -50,6 +51,7 @@ export const InfiniteFetch = <Data, Props, _>({
 	divider?: boolean | ComponentType;
 	Header?: ComponentType<Props & { children: JSX.Element }> | ReactElement;
 	headerProps?: Props;
+	getItemType?: (item: Data, index: number) => string | number;
 }): JSX.Element | null => {
 	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
 
@@ -91,6 +93,7 @@ export const InfiniteFetch = <Data, Props, _>({
 			refreshing={isRefetching}
 			ItemSeparatorComponent={divider === true ? HR : divider || null}
 			ListHeaderComponent={Header}
+			getItemType={getItemType}
 			{...props}
 		/>
 	);
