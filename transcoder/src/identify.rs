@@ -1,8 +1,8 @@
 use json::JsonValue;
 use serde::Serialize;
 use std::{
-	collections::HashMap,
-	fs, io,
+	collections::{hash_map::DefaultHasher, HashMap},
+	hash::{Hash, Hasher},
 	path::PathBuf,
 	process::Stdio,
 	str::{self, FromStr},
@@ -146,7 +146,15 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 		.find(|x| x["@type"] == "General")
 		.unwrap();
 
-	let sha = general["UniqueID"].to_string();
+	let sha = general["UniqueID"]
+		.as_str()
+		.map(|x| x.to_string())
+		.unwrap_or_else(|| {
+			let mut hasher = DefaultHasher::new();
+			path.hash(&mut hasher);
+			general["File_Modified_Date"].to_string().hash(&mut hasher);
+			format!("{hash:x}", hash = hasher.finish())
+		});
 
 	let subs: Vec<Subtitle> = output["media"]["track"]
 		.members()
