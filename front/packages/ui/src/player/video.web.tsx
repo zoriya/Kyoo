@@ -34,7 +34,7 @@ import { useAtomValue, useSetAtom, useAtom } from "jotai";
 import { useYoshiki } from "yoshiki";
 import SubtitleOctopus from "libass-wasm";
 import { playAtom, PlayMode, playModeAtom, subtitleAtom } from "./state";
-import Hls, { Level } from "hls.js";
+import Hls, { Level, LoadPolicy } from "hls.js";
 import { useTranslation } from "react-i18next";
 import { Menu } from "@kyoo/primitives";
 import toVttBlob from "srt-webvtt";
@@ -54,6 +54,23 @@ let client_id = typeof window === "undefined" ? "ssr" : uuidv4();
 const initHls = async (): Promise<Hls> => {
 	if (hls !== null) return hls;
 	const token = await getToken();
+
+	const loadPolicy: LoadPolicy = {
+		default: {
+			maxTimeToFirstByteMs: Infinity,
+			maxLoadTimeMs: 60_000,
+			timeoutRetry: {
+				maxNumRetry: 2,
+				retryDelayMs: 0,
+				maxRetryDelayMs: 0,
+			},
+			errorRetry: {
+				maxNumRetry: 1,
+				retryDelayMs: 0,
+				maxRetryDelayMs: 0,
+			},
+		}
+	};
 	hls = new Hls({
 		xhrSetup: (xhr) => {
 			if (token) xhr.setRequestHeader("Authorization", `Bearer: ${token}`);
@@ -62,6 +79,12 @@ const initHls = async (): Promise<Hls> => {
 		autoStartLoad: false,
 		// debug: true,
 		startPosition: 0,
+		fragLoadPolicy: loadPolicy,
+		keyLoadPolicy: loadPolicy,
+		certLoadPolicy: loadPolicy,
+		playlistLoadPolicy: loadPolicy,
+		manifestLoadPolicy: loadPolicy,
+		steeringManifestLoadPolicy: loadPolicy,
 	});
 	// hls.currentLevel = hls.startLevel;
 	return hls;
@@ -102,7 +125,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 	useEffect(() => {
 		if (!ref.current || paused === ref.current.paused) return;
 		if (paused) ref.current?.pause();
-		else ref.current?.play().catch(() => {});
+		else ref.current?.play().catch(() => { });
 	}, [paused]);
 	useEffect(() => {
 		if (!ref.current || !volume) return;
@@ -134,7 +157,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 				hls.on(Hls.Events.MANIFEST_LOADED, async () => {
 					try {
 						await ref.current?.play();
-					} catch {}
+					} catch { }
 				});
 				hls.on(Hls.Events.ERROR, (_, d) => {
 					if (!d.fatal || !hls?.media) return;
@@ -267,8 +290,8 @@ const toWebVtt = async (srtUrl: string) => {
 	const query = await fetch(srtUrl, {
 		headers: token
 			? {
-					Authorization: token,
-			  }
+				Authorization: token,
+			}
 			: undefined,
 	});
 	const srt = await query.blob();
