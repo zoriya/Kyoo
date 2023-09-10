@@ -13,4 +13,3 @@ derive_more = "0.99.17"
 reqwest = { version = "0.11.16", default_features = false, features = ["json", "rustls-tls"] }
 utoipa = { version = "3", features = ["actix_extras"] }
 json = "0.12.4"
-sha-1 = "0.10.1"

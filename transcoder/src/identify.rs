@@ -1,6 +1,5 @@
 use json::JsonValue;
 use serde::Serialize;
-use sha1::{Digest, Sha1};
 use std::{
 	collections::HashMap,
 	fs, io,
@@ -103,6 +102,7 @@ pub struct Chapter {
 }
 
 async fn extract(path: String, sha: &String, subs: &Vec<Subtitle>) {
+	println!("Extract subs and fonts for {}", path);
 	let mut cmd = Command::new("ffmpeg");
 	cmd.current_dir(format!("/metadata/{sha}/att/"))
 		.args(&["-dump_attachment:t", ""])
@@ -141,15 +141,12 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 	assert!(mediainfo.status.success());
 	let output = json::parse(str::from_utf8(mediainfo.stdout.as_slice()).unwrap()).unwrap();
 
-	let mut file = fs::File::open(&path)?;
-	let mut hasher = Sha1::new();
-	io::copy(&mut file, &mut hasher)?;
-	let sha = format!("{:x}", hasher.finalize());
-
 	let general = output["media"]["track"]
 		.members()
 		.find(|x| x["@type"] == "General")
 		.unwrap();
+
+	let sha = general["UniqueID"].to_string();
 
 	let subs: Vec<Subtitle> = output["media"]["track"]
 		.members()
