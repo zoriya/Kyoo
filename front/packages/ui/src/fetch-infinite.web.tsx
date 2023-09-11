@@ -20,7 +20,7 @@
 
 import { Page, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
 import { HR } from "@kyoo/primitives";
-import { ComponentType, Fragment, isValidElement, ReactElement, useRef } from "react";
+import { ComponentType, Fragment, isValidElement, ReactElement, useEffect, useRef } from "react";
 import { Stylable, useYoshiki } from "yoshiki";
 import { EmptyView, ErrorView, Layout, WithLoading } from "./fetch";
 
@@ -46,6 +46,12 @@ const InfiniteScroll = <Props,>({
 } & Stylable) => {
 	const ref = useRef<HTMLDivElement>(null);
 	const { css } = useYoshiki();
+
+	// Automatically trigger a scroll check on start and after a fetch end in case the user is already
+	// at the bottom of the page or if there is no scroll bar (ultrawide or something like that)
+	useEffect(() => {
+		onScroll();
+	}, [isFetching]);
 
 	const onScroll = () => {
 		if (!ref.current || !hasMore || isFetching) return;
