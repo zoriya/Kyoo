@@ -43,7 +43,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		public Pagination()
 		{
-			Limit = 20;
+			Limit = 50;
 			AfterID = null;
 			Reverse = false;
 		}
