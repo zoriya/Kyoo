@@ -6,7 +6,6 @@ on:
       - next
     tags:
      - v*
-  pull_request:
 
 jobs:
   update:
