@@ -108,7 +108,7 @@ const InfiniteScroll = <Props,>({
 	);
 };
 
-export const InfiniteFetch = <Data, _>({
+export const InfiniteFetch = <Data, _, HeaderProps>({
 	query,
 	incremental = false,
 	placeholderCount = 15,
@@ -118,6 +118,7 @@ export const InfiniteFetch = <Data, _>({
 	empty,
 	divider: Divider = false,
 	Header,
+	headerProps,
 	getItemType,
 	...props
 }: {
@@ -132,7 +133,8 @@ export const InfiniteFetch = <Data, _>({
 	) => ReactElement | null;
 	empty?: string | JSX.Element;
 	divider?: boolean | ComponentType;
-	Header?: ComponentType<{ children: JSX.Element }> | ReactElement;
+	Header?: ComponentType<{ children: JSX.Element } & HeaderProps> | ReactElement;
+	headerProps: HeaderProps,
 	getItemType?: (item: Data, index: number) => string | number;
 }): JSX.Element | null => {
 	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
@@ -145,7 +147,7 @@ export const InfiniteFetch = <Data, _>({
 
 	if (incremental && items) oldItems.current = items;
 
-	if (error) return addHeader(Header, <ErrorView error={error} />);
+	if (error) return addHeader(Header, <ErrorView error={error} />, headerProps);
 	if (empty && items && items.length === 0) {
 		if (typeof empty !== "string") return empty;
 		return <EmptyView message={empty} />;
@@ -164,6 +166,7 @@ export const InfiniteFetch = <Data, _>({
 				</Fragment>
 			))}
 			Header={Header}
+			headerProps={headerProps}
 			{...props}
 		>
 			{(items ?? oldItems.current)?.map((item, i) => (
@@ -176,13 +179,15 @@ export const InfiniteFetch = <Data, _>({
 	);
 };
 
-const addHeader = (
-	Header: ComponentType<{ children: JSX.Element }> | ReactElement | undefined,
+const addHeader = <Props,>(
+	Header: ComponentType<{ children: JSX.Element } & Props> | ReactElement | undefined,
 	children: ReactElement,
+	headerProps?: Props
 ) => {
 	if (!Header) return children;
-	return typeof Header === "function" ? (
-		<Header>{children}</Header>
+	return !isValidElement(Header) ? (
+		// @ts-ignore
+		<Header {...(headerProps ?? {})}>{children}</Header>
 	) : (
 		<>
 			{Header}
