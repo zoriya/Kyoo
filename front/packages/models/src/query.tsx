@@ -129,7 +129,7 @@ export const queryFn = async <Data,>(
 	if (!type) return data;
 	const parsed = await type.safeParseAsync(data);
 	if (!parsed.success) {
-		console.log("Parse error: ", parsed.error);
+		console.log("Path: ", path, " Response: ", resp.status, " Parse error: ", parsed.error);
 		throw {
 			errors: [
 				"Invalid response from kyoo. Possible version mismatch between the server and the application.",
