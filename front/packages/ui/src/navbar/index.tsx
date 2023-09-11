@@ -68,7 +68,7 @@ const SearchBar = forwardRef<TextInput, Stylable>(function SearchBar(props, ref)
 		const action = window.location.pathname.startsWith("/search") ? replace : push;
 		if (query) action(`/search?q=${encodeURI(query)}`, undefined, { shallow: true });
 		else back();
-	}, [query]);
+	}, [query, push, replace, back]);
 
 	return (
 		<Input

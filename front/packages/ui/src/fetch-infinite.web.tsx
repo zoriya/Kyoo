@@ -20,7 +20,7 @@
 
 import { Page, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
 import { HR } from "@kyoo/primitives";
-import { ComponentType, Fragment, isValidElement, ReactElement, useEffect, useRef } from "react";
+import { ComponentType, Fragment, isValidElement, ReactElement, useCallback, useEffect, useRef } from "react";
 import { Stylable, useYoshiki } from "yoshiki";
 import { EmptyView, ErrorView, Layout, WithLoading } from "./fetch";
 
@@ -42,18 +42,12 @@ const InfiniteScroll = <Props,>({
 	hasMore: boolean;
 	isFetching: boolean;
 	Header?: ComponentType<Props & { children: JSX.Element }> | ReactElement;
-	headerProps?: Props
+	headerProps?: Props;
 } & Stylable) => {
 	const ref = useRef<HTMLDivElement>(null);
 	const { css } = useYoshiki();
 
-	// Automatically trigger a scroll check on start and after a fetch end in case the user is already
-	// at the bottom of the page or if there is no scroll bar (ultrawide or something like that)
-	useEffect(() => {
-		onScroll();
-	}, [isFetching]);
-
-	const onScroll = () => {
+	const onScroll = useCallback(() => {
 		if (!ref.current || !hasMore || isFetching) return;
 		const scroll =
 			layout === "horizontal"
@@ -62,8 +56,15 @@ const InfiniteScroll = <Props,>({
 		const offset = layout === "horizontal" ? ref.current.offsetWidth : ref.current.offsetHeight;
 
 		if (scroll <= offset * 1.2) loadMore();
-	};
+	}, [hasMore, isFetching, layout, loadMore]);
 	const scrollProps = { ref, onScroll };
+
+	// Automatically trigger a scroll check on start and after a fetch end in case the user is already
+	// at the bottom of the page or if there is no scroll bar (ultrawide or something like that)
+	useEffect(() => {
+		onScroll();
+	}, [isFetching, onScroll]);
+
 
 	const list = (props: object) => (
 		<div
@@ -98,8 +99,13 @@ const InfiniteScroll = <Props,>({
 	);
 
 	if (!Header) return list({ ...scrollProps, ...props });
-	// @ts-ignore
-	if (!isValidElement(Header)) return <Header {...scrollProps} {...headerProps}>{list(props)}</Header>;
+	if (!isValidElement(Header))
+		return (
+			// @ts-ignore
+			<Header {...scrollProps} {...headerProps}>
+				{list(props)}
+			</Header>
+		);
 	return (
 		<>
 			{Header}
@@ -134,7 +140,7 @@ export const InfiniteFetch = <Data, _, HeaderProps>({
 	empty?: string | JSX.Element;
 	divider?: boolean | ComponentType;
 	Header?: ComponentType<{ children: JSX.Element } & HeaderProps> | ReactElement;
-	headerProps: HeaderProps,
+	headerProps: HeaderProps;
 	getItemType?: (item: Data, index: number) => string | number;
 }): JSX.Element | null => {
 	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
@@ -182,7 +188,7 @@ export const InfiniteFetch = <Data, _, HeaderProps>({
 const addHeader = <Props,>(
 	Header: ComponentType<{ children: JSX.Element } & Props> | ReactElement | undefined,
 	children: ReactElement,
-	headerProps?: Props
+	headerProps?: Props,
 ) => {
 	if (!Header) return children;
 	return !isValidElement(Header) ? (
