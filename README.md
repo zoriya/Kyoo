@@ -10,7 +10,7 @@ Feel free to open issues or pull requests, all contribution are welcomed.
 ## Getting started
 
 - [Installation](./INSTALLING.md)
-- [Api Documentation](https://demo.kyoo.moe/redoc)
+- [Api Documentation](https://kyoo.zoriya.dev/api/doc)
 - [Contributing](./CONTRIBUTING.md)
 
 ## Features
@@ -23,7 +23,7 @@ Feel free to open issues or pull requests, all contribution are welcomed.
 
 ## Live Demo
 
-You can see a live demo with copyright-free movies here: [demo.kyoo.moe](https://demo.kyoo.moe).
+You can see a live demo with copyright-free movies here: [kyoo.zoriya.dev](https://kyoo.zoriya.dev).
 Thanks to the [blender studio](https://www.blender.org/about/studio/) for providing open-source movies available for all.
 
 ## Screens
