@@ -185,6 +185,8 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 			src={source.uri}
 			muted={muted}
 			autoPlay={!paused}
+			controls={false}
+			playsInline
 			onCanPlay={() => onBuffer?.call(null, { isBuffering: false })}
 			onWaiting={() => onBuffer?.call(null, { isBuffering: true })}
 			onDurationChange={() => {

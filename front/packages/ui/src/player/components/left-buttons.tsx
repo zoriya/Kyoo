@@ -100,10 +100,10 @@ const VolumeSlider = () => {
 					isMuted || volume == 0
 						? VolumeOff
 						: volume < 25
-						? VolumeMute
-						: volume < 65
-						? VolumeDown
-						: VolumeUp
+							? VolumeMute
+							: volume < 65
+								? VolumeDown
+								: VolumeUp
 				}
 				onPress={() => setMuted(!isMuted)}
 				{...tooltip(t("player.mute"), true)}
@@ -132,8 +132,8 @@ const ProgressText = () => {
 };
 
 const toTimerString = (timer?: number, duration?: number) => {
-	if (timer === undefined) return "??:??";
 	if (!duration) duration = timer;
+	if (timer === undefined || duration === undefined || isNaN(duration) || isNaN(timer)) return "??:??";
 	if (duration >= 3600) return new Date(timer * 1000).toISOString().substring(11, 19);
 	return new Date(timer * 1000).toISOString().substring(14, 19);
 };
