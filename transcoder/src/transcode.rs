@@ -8,6 +8,8 @@ use std::path::PathBuf;
 use std::process::Stdio;
 use std::slice::Iter;
 use std::str::FromStr;
+use std::sync::RwLock;
+use std::time::SystemTime;
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::process::{Child, Command};
 use tokio::sync::watch;
@@ -229,6 +231,7 @@ pub async fn transcode_video(
 		show: (path, quality),
 		job: child,
 		uuid,
+		last_used: RwLock::new(SystemTime::now())
 	})
 }
 
@@ -323,4 +326,5 @@ pub struct TranscodeInfo {
 	pub show: (String, Quality),
 	pub job: Child,
 	pub uuid: String,
+	pub last_used: RwLock<SystemTime>,
 }

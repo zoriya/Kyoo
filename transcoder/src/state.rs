@@ -5,6 +5,7 @@ use crate::utils::Signalable;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::sync::RwLock;
+use std::time::{Duration, SystemTime};
 
 pub struct Transcoder {
 	running: RwLock<HashMap<String, TranscodeInfo>>,
@@ -16,6 +17,18 @@ impl Transcoder {
 		Self {
 			running: RwLock::new(HashMap::new()),
 			audio_jobs: RwLock::new(Vec::new()),
+		}
+	}
+
+	fn clean_old_transcode(&self) {
+		for info in self.running.write().unwrap().values_mut() {
+			if SystemTime::now()
+				.duration_since(*info.last_used.read().unwrap())
+				.is_ok_and(|d| d > Duration::new(4 * 60 * 60, 0))
+			{
+				_ = info.job.interrupt();
+				_ = std::fs::remove_dir_all(get_cache_path_from_uuid(&info.uuid));
+			}
 		}
 	}
 
@@ -123,6 +136,8 @@ impl Transcoder {
 			}
 		}
 
+		self.clean_old_transcode();
+
 		let info = transcode_video(path, quality, start_time).await?;
 		let mut path = get_cache_path(&info);
 		path.push("stream.m3u8");
@@ -140,6 +155,10 @@ impl Transcoder {
 	) -> Result<PathBuf, SegmentError> {
 		let hashmap = self.running.read().unwrap();
 		let info = hashmap.get(&client_id).ok_or(SegmentError::NoTranscode)?;
+
+		if let Ok(mut last) = info.last_used.try_write() {
+			*last = SystemTime::now();
+		}
 
 		// If the segment is in the playlist file, it is available so we don't need to check that.
 		let mut path = get_cache_path(&info);
