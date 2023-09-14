@@ -127,7 +127,7 @@ async fn extract(path: String, sha: &String, subs: &Vec<Subtitle>) {
 		.expect("Error running ffmpeg extract");
 }
 
-pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
+pub async fn identify(path: String) -> Option<MediaInfo> {
 	let extension_table: HashMap<&str, &str> =
 		HashMap::from([("subrip", "srt"), ("ass", "ass"), ("vtt", "vtt")]);
 
@@ -138,7 +138,9 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 		.output()
 		.await
 		.expect("Error running the mediainfo command");
-	assert!(mediainfo.status.success());
+	if !mediainfo.status.success() {
+		return None;
+	}
 	let output = json::parse(str::from_utf8(mediainfo.stdout.as_slice()).unwrap()).unwrap();
 
 	let general = output["media"]["track"]
@@ -182,8 +184,8 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 		.collect();
 
 	if !PathBuf::from(format!("/metadata/{sha}")).exists() {
-		std::fs::create_dir_all(format!("/metadata/{sha}/att"))?;
-		std::fs::create_dir_all(format!("/metadata/{sha}/sub"))?;
+		std::fs::create_dir_all(format!("/metadata/{sha}/att")).unwrap();
+		std::fs::create_dir_all(format!("/metadata/{sha}/sub")).unwrap();
 		extract(path.clone(), &sha, &subs).await;
 	}
 
@@ -191,8 +193,8 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 		v.as_str().and_then(|x| x.parse::<F>().ok())
 	}
 
-	Ok(MediaInfo {
-		length: parse::<f32>(&general["Duration"]).unwrap(),
+	Some(MediaInfo {
+		length: parse::<f32>(&general["Duration"])?,
 		container: general["Format"].as_str().unwrap().to_string(),
 		video: {
 			let v = output["media"]["track"]
