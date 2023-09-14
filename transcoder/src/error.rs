@@ -20,7 +20,7 @@ impl error::ResponseError for ApiError {
 		HttpResponse::build(self.status_code())
 			.insert_header(ContentType::json())
 			.body(format!(
-				"{{ \"status\": \"{status}\", \"error\": \"{err}\" }}",
+				"{{ \"status\": \"{status}\", \"errors\": [\"{err}\"] }}",
 				status = self.status_code(),
 				err = self.to_string()
 			))

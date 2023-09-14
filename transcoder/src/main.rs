@@ -105,13 +105,12 @@ async fn identify_resource(
 		.await
 		.map_err(|_| ApiError::NotFound)?;
 
-	identify(path).await.map(|info| Json(info)).map_err(|e| {
-		eprintln!(
-			"Unhandled error occured while identifing the resource: {}",
-			e
-		);
-		ApiError::InternalError
-	})
+	identify(path)
+		.await
+		.map(|info| Json(info))
+		.ok_or_else(|| ApiError::BadRequest {
+			error: "Invalid video file. Could not parse informations.".to_string(),
+		})
 }
 
 /// Get attachments

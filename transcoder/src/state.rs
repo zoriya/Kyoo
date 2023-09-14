@@ -54,7 +54,7 @@ impl Transcoder {
 	pub async fn build_master(&self, resource: String, slug: String) -> Option<String> {
 		let mut master = String::from("#EXTM3U\n");
 		let path = get_path(resource, slug).await.ok()?;
-		let info = identify(path).await.ok()?;
+		let info = identify(path).await?;
 
 		// TODO: Only add this if transmuxing is possible.
 		if true {
