@@ -231,7 +231,7 @@ pub async fn transcode_video(
 		show: (path, quality),
 		job: child,
 		uuid,
-		last_used: RwLock::new(SystemTime::now())
+		last_used: RwLock::new(SystemTime::now()),
 	})
 }
 

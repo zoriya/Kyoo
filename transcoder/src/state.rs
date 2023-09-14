@@ -21,27 +21,34 @@ impl Transcoder {
 	}
 
 	fn clean_old_transcode(&self) {
-		for info in self.running.write().unwrap().values_mut() {
+		self.running.write().unwrap().retain(|_, info| {
 			if SystemTime::now()
 				.duration_since(*info.last_used.read().unwrap())
 				.is_ok_and(|d| d > Duration::new(4 * 60 * 60, 0))
 			{
 				_ = info.job.interrupt();
 				_ = std::fs::remove_dir_all(get_cache_path_from_uuid(&info.uuid));
+				return false;
 			}
-		}
+			return true;
+		});
 	}
 
 	fn clean_old_audio_transcode(&self) {
-		for ((path, idx), info) in self.audio_jobs.write().unwrap().iter_mut() {
-			if SystemTime::now()
-				.duration_since(*info.last_used.read().unwrap())
-				.is_ok_and(|d| d > Duration::new(4 * 60 * 60, 0))
-			{
-				_ = info.job.interrupt();
-				_ = std::fs::remove_dir_all(get_audio_path(path, *idx));
-			}
-		}
+		self.audio_jobs
+			.write()
+			.unwrap()
+			.retain(|(path, idx), info| {
+				if SystemTime::now()
+					.duration_since(*info.last_used.read().unwrap())
+					.is_ok_and(|d| d > Duration::new(4 * 60 * 60, 0))
+				{
+					_ = info.job.interrupt();
+					_ = std::fs::remove_dir_all(get_audio_path(path, *idx));
+					return false;
+				}
+				return true;
+			});
 	}
 
 	pub async fn build_master(&self, resource: String, slug: String) -> Option<String> {
