@@ -9,14 +9,14 @@ use std::time::{Duration, SystemTime};
 
 pub struct Transcoder {
 	running: RwLock<HashMap<String, TranscodeInfo>>,
-	audio_jobs: RwLock<Vec<(String, u32)>>,
+	audio_jobs: RwLock<HashMap<(String, u32), AudioInfo>>,
 }
 
 impl Transcoder {
 	pub fn new() -> Transcoder {
 		Self {
 			running: RwLock::new(HashMap::new()),
-			audio_jobs: RwLock::new(Vec::new()),
+			audio_jobs: RwLock::new(HashMap::new()),
 		}
 	}
 
@@ -28,6 +28,18 @@ impl Transcoder {
 			{
 				_ = info.job.interrupt();
 				_ = std::fs::remove_dir_all(get_cache_path_from_uuid(&info.uuid));
+			}
+		}
+	}
+
+	fn clean_old_audio_transcode(&self) {
+		for ((path, idx), info) in self.audio_jobs.write().unwrap().iter_mut() {
+			if SystemTime::now()
+				.duration_since(*info.last_used.read().unwrap())
+				.is_ok_and(|d| d > Duration::new(4 * 60 * 60, 0))
+			{
+				_ = info.job.interrupt();
+				_ = std::fs::remove_dir_all(get_audio_path(path, *idx));
 			}
 		}
 	}
@@ -178,13 +190,20 @@ impl Transcoder {
 			.audio_jobs
 			.read()
 			.unwrap()
-			.contains(&(path.clone(), audio))
+			.contains_key(&(path.clone(), audio))
 		{
+			self.clean_old_audio_transcode();
+
 			// TODO: If two concurrent requests for the same audio came, the first one will
 			// initialize the transcode and wait for the second segment while the second will use
 			// the same transcode but not wait and retrieve a potentially invalid playlist file.
-			self.audio_jobs.write().unwrap().push((path.clone(), audio));
-			transcode_audio(path, audio).await?;
+			self.audio_jobs.write().unwrap().insert(
+				(path.clone(), audio),
+				AudioInfo {
+					job: transcode_audio(path, audio).await?,
+					last_used: RwLock::new(SystemTime::now()),
+				},
+			);
 		}
 		std::fs::read_to_string(stream).map_err(|e| TranscodeError::ReadError(e))
 	}
@@ -195,6 +214,16 @@ impl Transcoder {
 		audio: u32,
 		chunk: u32,
 	) -> Result<PathBuf, std::io::Error> {
+		if let Some(mut last) = self
+			.audio_jobs
+			.read()
+			.unwrap()
+			.get(&(path.clone(), audio))
+			.and_then(|info| info.last_used.try_write().ok())
+		{
+			*last = SystemTime::now();
+		}
+
 		let mut path = PathBuf::from(get_audio_path(&path, audio));
 		path.push(format!("segments-{0:02}.ts", chunk));
 		Ok(path)

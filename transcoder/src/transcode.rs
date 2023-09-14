@@ -328,3 +328,8 @@ pub struct TranscodeInfo {
 	pub uuid: String,
 	pub last_used: RwLock<SystemTime>,
 }
+
+pub struct AudioInfo {
+	pub job: Child,
+	pub last_used: RwLock<SystemTime>,
+}
