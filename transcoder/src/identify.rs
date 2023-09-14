@@ -225,10 +225,13 @@ pub async fn identify(path: String) -> Result<MediaInfo, std::io::Error> {
 			.collect(),
 		subtitles: subs,
 		fonts: general["extra"]["Attachments"]
-			.to_string()
-			.split(" / ")
-			.map(|x| format!("/video/{sha}/attachment/{x}"))
-			.collect(),
+			.as_str()
+			.map_or(Vec::new(), |x| {
+				x.to_string()
+					.split(" / ")
+					.map(|x| format!("/video/{sha}/attachment/{x}"))
+					.collect()
+			}),
 		chapters: output["media"]["track"]
 			.members()
 			.find(|x| x["@type"] == "Menu")
