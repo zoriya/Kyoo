@@ -57,12 +57,12 @@ namespace Kyoo.Swagger
 					options.Info.Contact = new OpenApiContact
 					{
 						Name = "Kyoo's github",
-						Url = "https://github.com/AnonymusRaccoon/Kyoo"
+						Url = "https://github.com/zoriya/Kyoo"
 					};
 					options.Info.License = new OpenApiLicense
 					{
 						Name = "GPL-3.0-or-later",
-						Url = "https://github.com/AnonymusRaccoon/Kyoo/blob/master/LICENSE"
+						Url = "https://github.com/zoriya/Kyoo/blob/master/LICENSE"
 					};
 
 					options.Info.ExtensionData ??= new Dictionary<string, object>();
