@@ -249,6 +249,10 @@ export const Player: QueryPage<{ slug: string; type: "episode" | "movie" }> = ({
 						setMenuOpen(false);
 					}}
 					show={displayControls}
+					{...css({
+						// @ts-ignore Web only
+						cursor: "unset",
+					})}
 				/>
 			</View>
 		</>
