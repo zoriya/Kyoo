@@ -18,19 +18,17 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { MMKV } from 'react-native-mmkv'
+import { MMKV } from "react-native-mmkv";
 
 export const storage = new MMKV();
 
 export const setSecureItem = (key: string, value: string | null) => {
-	if (value === null)
-		storage.delete(key);
-	else
-		storage.set(key, value);
-}
+	if (value === null) storage.delete(key);
+	else storage.set(key, value);
+};
 
 export const deleteSecureItem = (key: string) => setSecureItem(key, null);
 
 export const getSecureItem = (key: string, _cookies?: string): string | null => {
 	return storage.getString(key) || null;
-}
+};

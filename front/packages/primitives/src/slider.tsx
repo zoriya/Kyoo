@@ -119,7 +119,7 @@ export const Slider = ({
 						height: ts(1),
 						bg: (theme) => theme.overlay0,
 					},
-					smallBar && { transform: "scaleY(0.4)" as any},
+					smallBar && { transform: "scaleY(0.4)" as any },
 				])}
 			>
 				{subtleProgress !== undefined && (

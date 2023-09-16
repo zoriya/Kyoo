@@ -20,7 +20,15 @@
 
 import { Page, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
 import { HR } from "@kyoo/primitives";
-import { ComponentType, Fragment, isValidElement, ReactElement, useCallback, useEffect, useRef } from "react";
+import {
+	ComponentType,
+	Fragment,
+	isValidElement,
+	ReactElement,
+	useCallback,
+	useEffect,
+	useRef,
+} from "react";
 import { Stylable, useYoshiki } from "yoshiki";
 import { EmptyView, ErrorView, Layout, WithLoading } from "./fetch";
 
@@ -64,7 +72,6 @@ const InfiniteScroll = <Props,>({
 	useEffect(() => {
 		onScroll();
 	}, [isFetching, onScroll]);
-
 
 	const list = (props: object) => (
 		<div

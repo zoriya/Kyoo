@@ -103,7 +103,7 @@ export const Hover = ({
 							props,
 						)}
 					>
-						<VideoPoster poster={poster} alt={showName}/>
+						<VideoPoster poster={poster} alt={showName} />
 						<View
 							{...css({
 								marginLeft: { xs: ts(0.5), sm: ts(3) },
@@ -209,7 +209,7 @@ export const Back = ({
 	);
 };
 
-const VideoPoster = ({ poster, alt }: { poster?: KyooImage | null, alt?: string }) => {
+const VideoPoster = ({ poster, alt }: { poster?: KyooImage | null; alt?: string }) => {
 	const { css } = useYoshiki();
 
 	return (

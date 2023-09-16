@@ -23,7 +23,7 @@ import "./react-native-video.d.ts";
 declare module "react-native-video" {
 	interface VideoProperties {
 		fonts?: string[];
-		subtitles?: Subtitle[]
+		subtitles?: Subtitle[];
 		onPlayPause: (isPlaying: boolean) => void;
 		onMediaUnsupported?: () => void;
 	}

@@ -25,6 +25,8 @@ in
       mediainfo
       ffmpeg
       postgresql_15
+      eslint_d
+      prettierd
     ];
 
     RUST_SRC_PATH = "${pkgs.rust.packages.stable.rustPlatform.rustLibSrc}";

@@ -9,6 +9,6 @@ indent_style = tab
 indent_size = tab
 smart_tab = true
 
-[{*.yaml,*.yml}]
+[{*.yaml,*.yml,*.nix}]
 indent_style = space
 indent_size = 2

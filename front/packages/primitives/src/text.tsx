@@ -37,7 +37,12 @@ const styleText = (
 	type?: "header" | "sub",
 	custom?: TextStyle,
 ) => {
-	const Text = (props: Omit<ComponentProps<typeof EP>, "style"> & { style?: StyleProp<TextStyle>, children?: TextProps["children"] }) => {
+	const Text = (
+		props: Omit<ComponentProps<typeof EP>, "style"> & {
+			style?: StyleProp<TextStyle>;
+			children?: TextProps["children"];
+		},
+	) => {
 		const { css, theme } = useYoshiki();
 
 		return (

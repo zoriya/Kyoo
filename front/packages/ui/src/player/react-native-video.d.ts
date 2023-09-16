@@ -173,12 +173,12 @@ declare module "react-native-video" {
 		/* Wrapper component */
 		// Opaque type returned by require('./video.mp4')
 		source:
-		| {
-			uri?: string | undefined;
-			headers?: { [key: string]: string } | undefined;
-			type?: string | undefined;
-		}
-		| number;
+			| {
+					uri?: string | undefined;
+					headers?: { [key: string]: string } | undefined;
+					type?: string | undefined;
+			  }
+			| number;
 		minLoadRetryCount?: number | undefined;
 		maxBitRate?: number | undefined;
 		resizeMode?: "stretch" | "contain" | "cover" | "none" | undefined; // via Image#resizeMode
@@ -190,13 +190,13 @@ declare module "react-native-video" {
 		muted?: boolean | undefined;
 		volume?: number | undefined;
 		bufferConfig?:
-		| {
-			minBufferMs?: number | undefined;
-			maxBufferMs?: number | undefined;
-			bufferForPlaybackMs?: number | undefined;
-			bufferForPlaybackAfterRebufferMs?: number | undefined;
-		}
-		| undefined;
+			| {
+					minBufferMs?: number | undefined;
+					maxBufferMs?: number | undefined;
+					bufferForPlaybackMs?: number | undefined;
+					bufferForPlaybackAfterRebufferMs?: number | undefined;
+			  }
+			| undefined;
 		stereoPan?: number | undefined;
 		rate?: number | undefined;
 		pictureInPicture?: boolean | undefined;
@@ -242,31 +242,31 @@ declare module "react-native-video" {
 		onRestoreUserInterfaceForPictureInPictureStop?(): void;
 		onExternalPlaybackChange?(data: OnExternalPlaybackChangeData): void;
 		selectedAudioTrack?:
-		| {
-			type: "system" | "disabled" | "title" | "language" | "index";
-			value?: string | number | undefined;
-		}
-		| undefined;
+			| {
+					type: "system" | "disabled" | "title" | "language" | "index";
+					value?: string | number | undefined;
+			  }
+			| undefined;
 		selectedTextTrack?:
-		| {
-			type: "system" | "disabled" | "title" | "language" | "index";
-			value?: string | number | undefined;
-		}
-		| undefined;
+			| {
+					type: "system" | "disabled" | "title" | "language" | "index";
+					value?: string | number | undefined;
+			  }
+			| undefined;
 		selectedVideoTrack?:
-		| {
-			type: "auto" | "disabled" | "resolution" | "index";
-			value?: string | number | undefined;
-		}
-		| undefined;
+			| {
+					type: "auto" | "disabled" | "resolution" | "index";
+					value?: string | number | undefined;
+			  }
+			| undefined;
 		textTracks?:
-		| Array<{
-			title?: string | undefined;
-			language?: string | undefined;
-			type: "application/x-subrip" | "application/ttml+xml" | "text/vtt";
-			uri: string;
-		}>
-		| undefined;
+			| Array<{
+					title?: string | undefined;
+					language?: string | undefined;
+					type: "application/x-subrip" | "application/ttml+xml" | "text/vtt";
+					uri: string;
+			  }>
+			| undefined;
 
 		/* Required by react-native */
 		scaleX?: number | undefined;

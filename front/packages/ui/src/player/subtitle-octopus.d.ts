@@ -72,8 +72,8 @@ declare module "libass-wasm" {
 		debug?: boolean;
 
 		/**
-		* The default font.
-		*/
+		 * The default font.
+		 */
 		fallbackFont?: string;
 
 		/**

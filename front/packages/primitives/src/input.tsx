@@ -45,7 +45,7 @@ export const Input = forwardRef<
 						padding: ts(0.5),
 						flexDirection: "row",
 						alignContent: "center",
-						alignItems: "center"
+						alignItems: "center",
 					},
 					variant === "big" && {
 						borderRadius: ts(4),

@@ -48,7 +48,8 @@ const nextConfig = {
 			alias: {
 				...config.resolve.alias,
 				"react-native$": "react-native-web",
-				'react-native/Libraries/Image/AssetRegistry$': 'react-native-web/dist/modules/AssetRegistry',
+				"react-native/Libraries/Image/AssetRegistry$":
+					"react-native-web/dist/modules/AssetRegistry",
 			},
 			extensions: [".web.ts", ".web.tsx", ".web.js", ".web.jsx", ...config.resolve.extensions],
 		};

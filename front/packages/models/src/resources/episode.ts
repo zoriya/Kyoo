@@ -85,7 +85,7 @@ export const EpisodeP = BaseEpisodeP.extend({
 	nextEpisode: BaseEpisodeP.nullable().optional(),
 
 	show: ShowP.optional(),
-})
+});
 
 /**
  * A class to represent a single show's episode.

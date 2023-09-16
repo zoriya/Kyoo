@@ -62,10 +62,7 @@ module.exports = addMonorepoSupport(
 		...defaultConfig,
 		resolver: {
 			...defaultConfig.resolver,
-			requireCycleIgnorePatterns: [
-				...defaultConfig.resolver.requireCycleIgnorePatterns,
-				/.*/,
-			],
+			requireCycleIgnorePatterns: [...defaultConfig.resolver.requireCycleIgnorePatterns, /.*/],
 		},
 	}),
 );

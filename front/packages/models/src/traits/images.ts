@@ -22,10 +22,7 @@ import { Platform } from "react-native";
 import { z } from "zod";
 import { kyooApiUrl } from "..";
 
-export const imageFn = (url: string) =>
-	Platform.OS === "web"
-		? `/api${url}`
-		: kyooApiUrl + url;
+export const imageFn = (url: string) => (Platform.OS === "web" ? `/api${url}` : kyooApiUrl + url);
 
 export const Img = z.object({
 	source: z.string(),

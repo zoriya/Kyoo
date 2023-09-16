@@ -104,7 +104,13 @@ export const ItemList = ({
 					</Skeleton>
 				)}
 			</View>
-			<Poster src={poster} alt="" quality="low" forcedLoading={isLoading} layout={{ height: percent(80) }} />
+			<Poster
+				src={poster}
+				alt=""
+				quality="low"
+				forcedLoading={isLoading}
+				layout={{ height: percent(80) }}
+			/>
 		</ImageBackground>
 	);
 };

@@ -33,7 +33,7 @@ export const HR = ({
 			{...css(
 				[
 					{
-						opacity: .7,
+						opacity: 0.7,
 						bg: (theme) => theme.overlay0,
 						borderWidth: 0,
 					},

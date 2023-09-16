@@ -99,12 +99,7 @@ export const Avatar = forwardRef<
 			)}
 		>
 			{src || isLoading ? (
-				<Image
-					src={src}
-					quality={quality}
-					alt={alt}
-					layout={{ width: size, height: size }}
-				/>
+				<Image src={src} quality={quality} alt={alt} layout={{ width: size, height: size }} />
 			) : placeholder ? (
 				<P
 					{...css({

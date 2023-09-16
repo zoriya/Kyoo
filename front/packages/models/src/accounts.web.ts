@@ -20,6 +20,6 @@
 
 import { createContext } from "react";
 
-export const useAccounts = () => {}
+export const useAccounts = () => {};
 
 export const AccountContext = createContext({});

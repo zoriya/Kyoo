@@ -84,7 +84,12 @@ export const RegisterPage: QueryPage = () => {
 				text={t("login.register")}
 				disabled={password !== confirm}
 				onPress={async () => {
-					const { error } = await loginFunc("register", { email, username, password }, cleanApiUrl(apiUrl), 5_000);
+					const { error } = await loginFunc(
+						"register",
+						{ email, username, password },
+						cleanApiUrl(apiUrl),
+						5_000,
+					);
 					setError(error);
 					if (error) return;
 					queryClient.invalidateQueries(["auth", "me"]);

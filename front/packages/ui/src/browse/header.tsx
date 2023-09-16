@@ -79,7 +79,14 @@ export const BrowseSettings = ({
 	// TODO: implement filters in the front.
 
 	return (
-		<View {...css({ flexDirection: "row-reverse", alignItems: "center", marginX: ts(4), marginY: ts(1) })}>
+		<View
+			{...css({
+				flexDirection: "row-reverse",
+				alignItems: "center",
+				marginX: ts(4),
+				marginY: ts(1),
+			})}
+		>
 			{filters.length !== 0 && (
 				<View {...css({ flexGrow: 1, flexDirection: "row", alignItems: "center" })}>
 					<Icon icon={Style} {...css({ marginX: ts(1) })} />

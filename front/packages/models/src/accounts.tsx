@@ -27,7 +27,9 @@ import { Account, loginFunc } from "./login";
 export const AccountContext = createContext<ReturnType<typeof useAccounts>>({ type: "loading" });
 
 export const useAccounts = () => {
-	const [accounts, setAccounts] = useState<Account[]>(JSON.parse(getSecureItem("accounts") ?? "[]"));
+	const [accounts, setAccounts] = useState<Account[]>(
+		JSON.parse(getSecureItem("accounts") ?? "[]"),
+	);
 	const [verified, setVerified] = useState<{
 		status: "ok" | "error" | "loading" | "unverified";
 		error?: string;
@@ -48,7 +50,7 @@ export const useAccounts = () => {
 
 	useEffect(() => {
 		async function check() {
-			setVerified({status: "loading"});
+			setVerified({ status: "loading" });
 			const selAcc = accounts![selected!];
 			setApiUrl(selAcc.apiUrl);
 			const verif = await loginFunc("refresh", selAcc.refresh_token, undefined, 5_000);
@@ -57,8 +59,8 @@ export const useAccounts = () => {
 
 		if (accounts.length && selected !== null) check();
 		else setVerified({ status: "unverified" });
-	// Use the length of the array and not the array directly because we don't care if the refresh token changes.
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// Use the length of the array and not the array directly because we don't care if the refresh token changes.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [accounts.length, selected, retryCount]);
 
 	useMMKVListener((key) => {
@@ -87,4 +89,3 @@ export const useAccounts = () => {
 		setSelected,
 	} as const;
 };
-

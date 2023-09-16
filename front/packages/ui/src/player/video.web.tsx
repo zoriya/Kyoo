@@ -69,7 +69,7 @@ const initHls = async (): Promise<Hls> => {
 				retryDelayMs: 0,
 				maxRetryDelayMs: 0,
 			},
-		}
+		},
 	};
 	hls = new Hls({
 		xhrSetup: (xhr) => {
@@ -125,7 +125,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 	useEffect(() => {
 		if (!ref.current || paused === ref.current.paused) return;
 		if (paused) ref.current?.pause();
-		else ref.current?.play().catch(() => { });
+		else ref.current?.play().catch(() => {});
 	}, [paused]);
 	useEffect(() => {
 		if (!ref.current || !volume) return;
@@ -157,7 +157,7 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 				hls.on(Hls.Events.MANIFEST_LOADED, async () => {
 					try {
 						await ref.current?.play();
-					} catch { }
+					} catch {}
 				});
 				hls.on(Hls.Events.ERROR, (_, d) => {
 					if (!d.fatal || !hls?.media) return;
@@ -292,8 +292,8 @@ const toWebVtt = async (srtUrl: string) => {
 	const query = await fetch(srtUrl, {
 		headers: token
 			? {
-				Authorization: token,
-			}
+					Authorization: token,
+			  }
 			: undefined,
 	});
 	const srt = await query.blob();

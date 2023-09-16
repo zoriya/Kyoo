@@ -67,9 +67,7 @@ const query = (
 	path: slug ? ["library", slug, "items"] : ["items"],
 	infinite: true,
 	params: {
-		sortBy: sortKey
-			? `${sortKey}:${sortOrd ?? "asc"}`
-			: "name:asc",
+		sortBy: sortKey ? `${sortKey}:${sortOrd ?? "asc"}` : "name:asc",
 	},
 });
 

@@ -23,7 +23,7 @@ export * from "./resources";
 export * from "./traits";
 export * from "./page";
 export * from "./kyoo-errors";
-export * from "./utils"
-export * from "./login"
+export * from "./utils";
+export * from "./login";
 
 export * from "./query";

@@ -39,9 +39,9 @@ export const A = ({
 			experimental={
 				replace
 					? {
-						nativeBehavior: "stack-replace",
-						isNestedNavigator: false,
-					}
+							nativeBehavior: "stack-replace",
+							isNestedNavigator: false,
+					  }
 					: undefined
 			}
 			textProps={css(

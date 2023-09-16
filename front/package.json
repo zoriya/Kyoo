@@ -9,7 +9,9 @@
 		"build:mobile": "yarn workspace mobile build",
 		"build:mobile:dev": "yarn workspace mobile build:dev",
 		"update": "yarn workspace mobile update",
-		"lint": "eslint ."
+		"lint": "eslint .",
+		"format": "prettier -c .",
+		"format:fix": "prettier -w ."
 	},
 	"eslintIgnore": [
 		"next-env.d.ts"

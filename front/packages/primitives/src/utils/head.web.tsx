@@ -20,7 +20,13 @@
 
 import NextHead from "next/head";
 
-export const Head = ({ title, description }: { title?: string | null; description?: string | null }) => {
+export const Head = ({
+	title,
+	description,
+}: {
+	title?: string | null;
+	description?: string | null;
+}) => {
 	return (
 		<NextHead>
 			{title && <title>{title + " - Kyoo"}</title>}
