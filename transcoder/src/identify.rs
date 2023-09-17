@@ -150,7 +150,13 @@ pub async fn identify(path: String) -> Option<MediaInfo> {
 
 	let sha = general["UniqueID"]
 		.as_str()
-		.map(|x| x.to_string())
+		.and_then(|x| {
+			// Remove dummy values that some tools use.
+			if x.len() < 5 {
+				return None;
+			}
+			Some(x.to_string())
+		})
 		.unwrap_or_else(|| {
 			let mut hasher = DefaultHasher::new();
 			path.hash(&mut hasher);
