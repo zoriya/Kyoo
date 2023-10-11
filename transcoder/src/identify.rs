@@ -222,7 +222,7 @@ pub async fn identify(path: String) -> Option<MediaInfo> {
 			.members()
 			.filter(|x| x["@type"] == "Audio")
 			.map(|a| Audio {
-				index: parse::<u32>(&a["StreamOrder"]).unwrap() - 1,
+				index: parse::<u32>(&a["@typeorder"]).unwrap_or(1) - 1,
 				title: a["Title"].as_str().map(|x| x.to_string()),
 				language: a["Language"].as_str().map(|x| x.to_string()),
 				// TODO: format is invalid. Channels count missing...
