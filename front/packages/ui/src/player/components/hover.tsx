@@ -33,7 +33,7 @@ import {
 	tooltip,
 	ts,
 } from "@kyoo/primitives";
-import { Chapter, KyooImage, Subtitle } from "@kyoo/models";
+import { Chapter, KyooImage, Subtitle, Audio } from "@kyoo/models";
 import { useAtomValue, useSetAtom, useAtom } from "jotai";
 import { ImageStyle, Platform, Pressable, View, ViewProps } from "react-native";
 import { useTranslation } from "react-i18next";
@@ -52,6 +52,7 @@ export const Hover = ({
 	poster,
 	chapters,
 	subtitles,
+	audios,
 	fonts,
 	previousSlug,
 	nextSlug,
@@ -68,6 +69,7 @@ export const Hover = ({
 	poster?: KyooImage | null;
 	chapters?: Chapter[];
 	subtitles?: Subtitle[];
+	audios?: Audio[];
 	fonts?: string[];
 	previousSlug?: string | null;
 	nextSlug?: string | null;
@@ -123,6 +125,7 @@ export const Hover = ({
 								<LeftButtons previousSlug={previousSlug} nextSlug={nextSlug} />
 								<RightButtons
 									subtitles={subtitles}
+									audios={audios}
 									fonts={fonts}
 									onMenuOpen={onMenuOpen}
 									onMenuClose={onMenuClose}

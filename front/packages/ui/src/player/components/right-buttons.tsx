@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Subtitle } from "@kyoo/models";
+import { Audio, Subtitle } from "@kyoo/models";
 import { IconButton, tooltip, Menu, ts } from "@kyoo/primitives";
 import { useAtom } from "jotai";
 import { Platform, View } from "react-native";
@@ -33,23 +33,15 @@ import { fullscreenAtom, subtitleAtom } from "../state";
 import { AudiosMenu, QualitiesMenu } from "../video";
 import i18next from "i18next";
 
-export const getDisplayName = (sub: Subtitle) => {
-	const languageNames = new Intl.DisplayNames([i18next.language ?? "en"], { type: "language" });
-	const lng = sub.language ? languageNames.of(sub.language) : undefined;
-
-	if (lng && sub.title) return `${lng} - ${sub.title}`;
-	if (lng) return lng;
-	if (sub.title) return sub.title;
-	return `Unknwon (${sub.index})`;
-};
-
 export const RightButtons = ({
+	audios,
 	subtitles,
 	fonts,
 	onMenuOpen,
 	onMenuClose,
 	...props
 }: {
+	audios?: Audio[];
 	subtitles?: Subtitle[];
 	fonts?: string[];
 	onMenuOpen: () => void;
@@ -81,7 +73,7 @@ export const RightButtons = ({
 					{subtitles.map((x) => (
 						<Menu.Item
 							key={x.index}
-							label={x.link ? getDisplayName(x) : `${getDisplayName(x)} (${x.codec})`}
+							label={x.link ? x.displayName : `${x.displayName} (${x.codec})`}
 							selected={selectedSubtitle === x}
 							disabled={!x.link}
 							onSelect={() => setSubtitle(x)}
@@ -94,6 +86,7 @@ export const RightButtons = ({
 				icon={MusicNote}
 				onMenuOpen={onMenuOpen}
 				onMenuClose={onMenuClose}
+				audios={audios}
 				{...tooltip(t("player.audios"), true)}
 				{...spacing}
 			/>

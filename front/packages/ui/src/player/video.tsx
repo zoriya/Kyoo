@@ -34,7 +34,7 @@ declare module "react-native-video" {
 
 export * from "react-native-video";
 
-import { Subtitle, getToken } from "@kyoo/models";
+import { Audio, Subtitle, getToken } from "@kyoo/models";
 import { IconButton, Menu } from "@kyoo/primitives";
 import { ComponentProps, forwardRef, useEffect, useRef } from "react";
 import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
@@ -119,7 +119,7 @@ const Video = forwardRef<NativeVideo, VideoProps>(function Video(
 export default Video;
 
 type CustomMenu = ComponentProps<typeof Menu<ComponentProps<typeof IconButton>>>;
-export const AudiosMenu = (props: CustomMenu) => {
+export const AudiosMenu = ({ audios, ...props }: CustomMenu & { audios?: Audio[] }) => {
 	const info = useAtomValue(infoAtom);
 	const [audio, setAudio] = useAtom(audioAtom);
 
@@ -130,7 +130,7 @@ export const AudiosMenu = (props: CustomMenu) => {
 			{info.audioTracks.map((x) => (
 				<Menu.Item
 					key={x.index}
-					label={x.title}
+					label={audios?.[x.index].displayName ?? x.title}
 					selected={audio === x.index}
 					onSelect={() => setAudio(x.index)}
 				/>
