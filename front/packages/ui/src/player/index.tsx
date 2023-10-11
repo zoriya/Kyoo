@@ -77,6 +77,7 @@ const mapData = (
 		href: data ? (data.type === "movie" ? `/movie/${data.slug}` : `/show/${data.show!.slug}`) : "#",
 		poster: data.type === "movie" ? data.poster : data.show!.poster,
 		subtitles: info.subtitles,
+		audios: info.audios,
 		chapters: info.chapters,
 		fonts: info.fonts,
 		previousSlug,

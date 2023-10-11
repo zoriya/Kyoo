@@ -20,6 +20,17 @@
 
 import { z } from "zod";
 import { imageFn } from "../traits";
+import i18next from "i18next";
+
+const getDisplayName = (sub: Track) => {
+	const languageNames = new Intl.DisplayNames([i18next.language ?? "en"], { type: "language" });
+	const lng = sub.language ? languageNames.of(sub.language) : undefined;
+
+	if (lng && sub.title && sub.title !== lng) return `${lng} - ${sub.title}`;
+	if (lng) return lng;
+	if (sub.title) return sub.title;
+	return `Unknwon (${sub.index})`;
+};
 
 /**
  * A audio or subtitle track.
@@ -50,14 +61,23 @@ export const TrackP = z.object({
 	 */
 	isForced: z.boolean(),
 });
-export type Audio = z.infer<typeof TrackP>;
+export type Track = z.infer<typeof TrackP>;
+
+export const AudioP = TrackP.transform((x) => ({
+	...x,
+	displayName: getDisplayName(x),
+}));
+export type Audio = z.infer<typeof AudioP>;
 
 export const SubtitleP = TrackP.extend({
 	/*
 	 * The url of this track (only if this is a subtitle)..
 	 */
 	link: z.string().transform(imageFn).nullable(),
-});
+}).transform((x) => ({
+	...x,
+	displayName: getDisplayName(x),
+}));
 export type Subtitle = z.infer<typeof SubtitleP>;
 
 export const ChapterP = z.object({
@@ -97,7 +117,7 @@ export const WatchInfoP = z.object({
 	/**
 	 * The list of audio tracks.
 	 */
-	audios: z.array(TrackP),
+	audios: z.array(AudioP),
 	/**
 	 * The list of subtitles tracks.
 	 */

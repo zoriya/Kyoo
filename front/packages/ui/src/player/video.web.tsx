@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { getToken, Subtitle } from "@kyoo/models";
+import { getToken, Subtitle, Audio } from "@kyoo/models";
 import {
 	forwardRef,
 	RefObject,
@@ -38,7 +38,6 @@ import Hls, { Level, LoadPolicy } from "hls.js";
 import { useTranslation } from "react-i18next";
 import { Menu } from "@kyoo/primitives";
 import toVttBlob from "srt-webvtt";
-import { getDisplayName } from "./components/right-buttons";
 
 let hls: Hls | null = null;
 
@@ -256,7 +255,7 @@ const useSubtitle = (
 			const addSubtitle = async () => {
 				const track: HTMLTrackElement = htmlTrack ?? document.createElement("track");
 				track.kind = "subtitles";
-				track.label = getDisplayName(value);
+				track.label = value.displayName;
 				if (value.language) track.srclang = value.language;
 				track.src = value.codec === "subrip" ? await toWebVtt(value.link!) : value.link!;
 				track.className = "subtitle_container";
@@ -300,14 +299,18 @@ const toWebVtt = async (srtUrl: string) => {
 	return await toVttBlob(srt);
 };
 
-export const AudiosMenu = (props: ComponentProps<typeof Menu>) => {
+export const AudiosMenu = ({
+	audios,
+	...props
+}: ComponentProps<typeof Menu> & { audios?: Audio[] }) => {
 	if (!hls || hls.audioTracks.length < 2) return null;
+	console.log(audios);
 	return (
 		<Menu {...props}>
 			{hls.audioTracks.map((x, i) => (
 				<Menu.Item
 					key={i.toString()}
-					label={x.name}
+					label={audios?.[i].displayName ?? x.name}
 					selected={hls!.audioTrack === i}
 					onSelect={() => (hls!.audioTrack = i)}
 				/>
