@@ -22,7 +22,7 @@ const path = require("path");
 const CopyPlugin = require("copy-webpack-plugin");
 const DefinePlugin = require("webpack").DefinePlugin;
 
-const suboctopus = path.dirname(require.resolve("libass-wasm"));
+const suboctopus = path.resolve(path.dirname(require.resolve("jassub")), "../dist");
 
 /**
  * @type {import("next").NextConfig}
@@ -124,7 +124,9 @@ if (process.env.NODE_ENV !== "production") {
 	nextConfig.rewrites = async () => [
 		{
 			source: "/api/:path*",
-			destination: `${process.env.KYOO_URL}/:path*` ?? "http://localhost:5000/:path*",
+			destination: process.env.KYOO_URL
+				? `${process.env.KYOO_URL}/:path*`
+				: "http://localhost:5000/:path*",
 		},
 	];
 }

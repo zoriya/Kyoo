@@ -8910,6 +8910,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"jassub@npm:^1.7.8":
+  version: 1.7.9
+  resolution: "jassub@npm:1.7.9"
+  dependencies:
+    rvfc-polyfill: ^1.0.7
+  checksum: 5f2abcb65ce2431a77fb4222446707ecd99c8d5e2182c77b385399b0fb1ce4ed9b6c429a343dcb086d3d3b0fa7b091681721f058d5ffc44751bb774370a6abc6
+  languageName: node
+  linkType: hard
+
 "jest-environment-node@npm:^29.2.1":
   version: 29.6.2
   resolution: "jest-environment-node@npm:29.6.2"
@@ -9334,13 +9343,6 @@ __metadata:
     prelude-ls: ^1.2.1
     type-check: ~0.4.0
   checksum: 12c5021c859bd0f5248561bf139121f0358285ec545ebf48bb3d346820d5c61a4309535c7f387ed7d84361cf821e124ce346c6b7cef8ee09a67c1473b46d0fc4
-  languageName: node
-  linkType: hard
-
-"libass-wasm@npm:^4.1.0":
-  version: 4.1.0
-  resolution: "libass-wasm@npm:4.1.0"
-  checksum: a6ecc842594b36455b309aa3bb6ce3b59ada407ffbdc5e62bf657144dfce028c0a7d20dac34a9b3ed0b21d051b0daf14ea656f692e2aad3b1d66347a4ed95ec4
   languageName: node
   linkType: hard
 
@@ -12537,6 +12539,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"rvfc-polyfill@npm:^1.0.7":
+  version: 1.0.7
+  resolution: "rvfc-polyfill@npm:1.0.7"
+  checksum: 1b0babe38866e252ce1594e82af3e6cc2e140f7d8c433fd7835c1ae28febc1aa5ad1354e7a84fa3b2611dc591bc9ca78dafc72ad41878d8cd2f2bfcb764c8abe
+  languageName: node
+  linkType: hard
+
 "sade@npm:^1.7.3":
   version: 1.8.1
   resolution: "sade@npm:1.8.1"
@@ -14256,8 +14265,8 @@ __metadata:
     expo-modules-core: ^1.5.9
     hls.js: ^1.4.10
     i18next: ^23.4.2
+    jassub: ^1.7.8
     jotai: ^2.3.1
-    libass-wasm: ^4.1.0
     moti: ^0.26.0
     next: 13.4.19
     next-translate: ^2.5.3
