@@ -32,7 +32,7 @@ import {
 import { VideoProps } from "react-native-video";
 import { useAtomValue, useSetAtom, useAtom } from "jotai";
 import { useYoshiki } from "yoshiki";
-import SubtitleOctopus from "libass-wasm";
+import Jassub from "jassub";
 import { playAtom, PlayMode, playModeAtom, subtitleAtom } from "./state";
 import Hls, { Level, LoadPolicy } from "hls.js";
 import { useTranslation } from "react-i18next";
@@ -223,27 +223,25 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 
 export default Video;
 
-let htmlTrack: HTMLTrackElement | null;
-let subOcto: SubtitleOctopus | null;
 const useSubtitle = (
 	player: RefObject<HTMLVideoElement>,
 	value: Subtitle | null,
 	fonts?: string[],
 ) => {
+	const htmlTrack = useRef<HTMLTrackElement | null>();
+	const subOcto = useRef<Jassub | null>();
+
 	useEffect(() => {
 		if (!player.current) return;
 
 		const removeHtmlSubtitle = () => {
-			if (htmlTrack) htmlTrack.remove();
-			htmlTrack = null;
+			if (htmlTrack.current) htmlTrack.current.remove();
+			htmlTrack.current = null;
 		};
 
 		const removeOctoSub = () => {
-			if (subOcto) {
-				subOcto.freeTrack();
-				subOcto.dispose();
-			}
-			subOcto = null;
+			if (subOcto.current) subOcto.current.destroy();
+			subOcto.current = null;
 		};
 
 		if (!value || !value.link) {
@@ -253,7 +251,7 @@ const useSubtitle = (
 			removeOctoSub();
 			if (player.current.textTracks.length > 0) player.current.textTracks[0].mode = "hidden";
 			const addSubtitle = async () => {
-				const track: HTMLTrackElement = htmlTrack ?? document.createElement("track");
+				const track: HTMLTrackElement = htmlTrack.current ?? document.createElement("track");
 				track.kind = "subtitles";
 				track.label = value.displayName;
 				if (value.language) track.srclang = value.language;
@@ -263,27 +261,43 @@ const useSubtitle = (
 				track.onload = () => {
 					if (player.current) player.current.textTracks[0].mode = "showing";
 				};
-				if (!htmlTrack) {
-					htmlTrack = track;
+				if (!htmlTrack.current) {
+					htmlTrack.current = track;
 					if (player.current) player.current.appendChild(track);
 				}
 			};
 			addSubtitle();
 		} else if (value.codec === "ass") {
 			removeHtmlSubtitle();
-			removeOctoSub();
-			subOcto = new SubtitleOctopus({
-				video: player.current,
-				subUrl: value.link,
-				workerUrl: "/_next/static/chunks/subtitles-octopus-worker.js",
-				legacyWorkerUrl: "/_next/static/chunks/subtitles-octopus-worker-legacy.js",
-				fallbackFont: "/default.woff2",
-				fonts: fonts,
-				// lazyFileLoading: true,
-				renderMode: "wasm-blend",
-			});
+			// Also recreate jassub when the player changes (this is not the most effective but
+			// since it creates a div/canvas, it needs to be recreated when the UI rerender)
+			// @ts-expect-error We are accessing the private _video field here.
+			if (!subOcto.current || subOcto.current._video !== player.current) {
+				removeOctoSub();
+				subOcto.current = new Jassub({
+					video: player.current,
+					workerUrl: "/_next/static/chunks/jassub-worker.js",
+					wasmUrl: "/_next/static/chunks/jassub-worker.wasm",
+					legacyWasmUrl: "/_next/static/chunks/jassub-worker.wasm.js",
+					// Disable offscreen renderer for firefox (see https://github.com/ThaUnknown/jassub/issues/31)
+					offscreenRender: !/firefox/i.test(navigator.userAgent),
+					subUrl: value.link,
+					fonts: fonts,
+				});
+			} else {
+				subOcto.current.freeTrack();
+				subOcto.current.setTrackByUrl(value.link);
+			}
 		}
 	}, [player, value, fonts]);
+	useEffect(() => {
+		return () => {
+			if (subOcto.current) subOcto.current.destroy();
+			subOcto.current = null;
+			if (htmlTrack.current) htmlTrack.current.remove();
+			htmlTrack.current = null;
+		};
+	}, []);
 };
 
 const toWebVtt = async (srtUrl: string) => {
@@ -304,7 +318,6 @@ export const AudiosMenu = ({
 	...props
 }: ComponentProps<typeof Menu> & { audios?: Audio[] }) => {
 	if (!hls || hls.audioTracks.length < 2) return null;
-	console.log(audios);
 	return (
 		<Menu {...props}>
 			{hls.audioTracks.map((x, i) => (
