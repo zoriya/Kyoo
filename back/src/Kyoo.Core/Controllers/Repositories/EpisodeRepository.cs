@@ -152,7 +152,7 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task<Episode> Create(Episode obj)
 		{
-			obj.ShowSlug = obj.Show?.Slug ?? _database.Shows.First(x => x.Id == obj.ShowId).Slug;
+			obj.ShowSlug = obj.Show?.Slug ?? (await _database.Shows.FirstAsync(x => x.Id == obj.ShowId)).Slug;
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
 			await _database.SaveChangesAsync(() =>
@@ -175,6 +175,11 @@ namespace Kyoo.Core.Controllers
 						$"to any show (showID: {resource.ShowId}).");
 				}
 				resource.ShowId = resource.Show.Id;
+			}
+			if (resource.SeasonId == null && resource.SeasonNumber != null)
+			{
+				resource.Season = await _database.Seasons.FirstOrDefaultAsync(x => x.ShowId == resource.ShowId
+					&& x.SeasonNumber == resource.SeasonNumber);
 			}
 		}
 
