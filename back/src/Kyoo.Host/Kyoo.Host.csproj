@@ -13,7 +13,7 @@
 		<PackageReference Include="Serilog.Expressions" Version="3.4.1" />
 		<PackageReference Include="Serilog.Sinks.SyslogMessages" Version="3.0.1" />
 		<PackageReference Include="System.Collections.Immutable" Version="7.0.0" />
-		<PackageReference Include="Autofac" Version="7.0.1" />
+		<PackageReference Include="Autofac" Version="7.1.0" />
 		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
 		<PackageReference Include="Autofac.Extras.AttributeMetadata" Version="6.0.0" />
 	</ItemGroup>

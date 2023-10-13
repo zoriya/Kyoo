@@ -49,4 +49,6 @@
 		<NoWarn>1591;1305;8618</NoWarn>
 		<!-- <AnalysisMode>All</AnalysisMode> -->
 	</PropertyGroup>
+
+	<!-- vim: ft=xml -->
 </Project>
