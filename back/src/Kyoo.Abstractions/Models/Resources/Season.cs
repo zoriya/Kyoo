@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.RegularExpressions;
 using EntityFrameworkCore.Projectables;
 using JetBrains.Annotations;
@@ -124,9 +125,10 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The number of episodes in this season.
 		/// </summary>
-		[Projectable(UseMemberBody = nameof(_EpisodeCount))]
-		public int EpisodeCount { get; set; }
+		[Projectable(UseMemberBody = nameof(_EpisodesCount))]
+		[NotMapped]
+		public int EpisodesCount { get; set; }
 
-		private int _EpisodeCount => Episodes!.Count;
+		private int _EpisodesCount => Episodes!.Count;
 	}
 }

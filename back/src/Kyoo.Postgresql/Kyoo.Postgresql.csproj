@@ -7,13 +7,13 @@
 
 	<ItemGroup>
 		<PackageReference Include="EFCore.NamingConventions" Version="7.0.2" />
-		<PackageReference Include="EntityFrameworkCore.Projectables" Version="3.0.4" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.9">
+		<PackageReference Include="EntityFrameworkCore.Projectables" Version="5.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.12">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="7.0.9" />
-		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="7.0.12" />
+		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="7.0.11" />
 	</ItemGroup>
 
 	<ItemGroup>
