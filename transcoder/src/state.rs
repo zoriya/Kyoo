@@ -81,7 +81,7 @@ impl Transcoder {
 		let aspect_ratio = info.video.width as f32 / info.video.height as f32;
 		// Do not include a quality with the same height as the original (simpler for automatic
 		// selection on the client side.)
-		for quality in Quality::iter().filter(|x| x.height() < info.video.quality.height()) {
+		for quality in Quality::iter().filter(|x| x.height() < info.video.quality.height() && x.average_bitrate() < info.video.bitrate) {
 			// Doc: https://developer.apple.com/documentation/http_live_streaming/example_playlists_for_http_live_streaming/creating_a_multivariant_playlist
 			master.push_str("#EXT-X-STREAM-INF:");
 			master.push_str(format!("AVERAGE-BANDWIDTH={},", quality.average_bitrate()).as_str());
