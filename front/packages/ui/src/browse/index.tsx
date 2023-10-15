@@ -43,16 +43,11 @@ export const itemMap = (
 ): WithLoading<ComponentProps<typeof ItemGrid> & ComponentProps<typeof ItemList>> => {
 	if (item.isLoading) return item;
 
-	let href;
-	if (item?.kind === ItemKind.Movie) href = `/movie/${item.slug}`;
-	else if (item?.kind === ItemKind.Show) href = `/show/${item.slug}`;
-	else href = `/collection/${item.slug}`;
-
 	return {
 		isLoading: item.isLoading,
 		name: item.name,
 		subtitle: item.kind !== ItemKind.Collection ? getDisplayDate(item) : undefined,
-		href,
+		href: item.href,
 		poster: item.poster,
 		thumbnail: item.thumbnail,
 	};

@@ -18,7 +18,6 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import Browse from "./browse";
+import { HomePage } from "@kyoo/ui";
 
-// While there is no home page, show the browse page.
-export default Browse;
+export default HomePage;

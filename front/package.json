@@ -23,12 +23,7 @@
 	"prettier": {
 		"useTabs": true,
 		"printWidth": 100,
-		"trailingComma": "all",
-		"plugins": [
-			"prettier-plugin-jsdoc"
-		],
-		"jsdocSingleLineComment": false,
-		"tsdoc": true
+		"trailingComma": "all"
 	},
 	"devDependencies": {
 		"eslint": "8.46.0",
@@ -36,7 +31,6 @@
 		"eslint-config-prettier": "^9.0.0",
 		"eslint-plugin-header": "^3.1.1",
 		"prettier": "^3.0.1",
-		"prettier-plugin-jsdoc": "^1.0.1",
 		"typescript": "5.1.6"
 	},
 	"packageManager": "yarn@3.2.4"
