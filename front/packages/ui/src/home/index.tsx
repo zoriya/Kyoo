@@ -18,10 +18,29 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./navbar";
-export { HomePage } from "./home";
-export { BrowsePage } from "./browse";
-export { MovieDetails, ShowDetails } from "./details";
-export { Player } from "./player";
-export { SearchPage } from "./search";
-export { LoginPage, RegisterPage } from "./login";
+import { ItemKind, QueryPage } from "@kyoo/models";
+import { Fetch } from "../fetch";
+import { Header } from "./header";
+import { DefaultLayout } from "../layout";
+
+export const HomePage: QueryPage = () => {
+	return (
+		<Fetch query={Header.query()}>
+			{(x) => (
+				<Header
+					isLoading={x.isLoading as any}
+					name={x.name}
+					tagline={"tagline" in x ? x.tagline : null}
+					overview={x.overview}
+					thumbnail={x.thumbnail}
+					link={x.kind === ItemKind.Show ? `/watch/${x.slug}-s1e1` : `/movie/${x.slug}/watch`}
+					infoLink={x.href}
+				/>
+			)}
+		</Fetch>
+	);
+};
+
+HomePage.getLayout = { Layout: DefaultLayout, props: { transparent: true } };
+
+HomePage.getFetchUrls = () => [Header.query()];

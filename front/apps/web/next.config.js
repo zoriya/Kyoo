@@ -83,15 +83,6 @@ const nextConfig = {
 		});
 		return config;
 	},
-	async redirects() {
-		return [
-			{
-				source: "/",
-				destination: "/browse",
-				permanent: true,
-			},
-		];
-	},
 	i18n: {
 		locales: ["en", "fr"],
 		defaultLocale: "en",
