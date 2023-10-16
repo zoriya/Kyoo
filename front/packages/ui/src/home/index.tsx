@@ -18,29 +18,41 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ItemKind, QueryPage } from "@kyoo/models";
+import { Genre, ItemKind, QueryPage } from "@kyoo/models";
 import { Fetch } from "../fetch";
 import { Header } from "./header";
 import { DefaultLayout } from "../layout";
+import { ScrollView, View } from "react-native";
+import { GenreGrid } from "./genre";
 
-export const HomePage: QueryPage = () => {
+export const HomePage: QueryPage<{}, Genre> = ({ randomItems }) => {
 	return (
-		<Fetch query={Header.query()}>
-			{(x) => (
-				<Header
-					isLoading={x.isLoading as any}
-					name={x.name}
-					tagline={"tagline" in x ? x.tagline : null}
-					overview={x.overview}
-					thumbnail={x.thumbnail}
-					link={x.kind === ItemKind.Show ? `/watch/${x.slug}-s1e1` : `/movie/${x.slug}/watch`}
-					infoLink={x.href}
-				/>
-			)}
-		</Fetch>
+		<ScrollView>
+			<Fetch query={Header.query()}>
+				{(x) => (
+					<Header
+						isLoading={x.isLoading as any}
+						name={x.name}
+						tagline={"tagline" in x ? x.tagline : null}
+						overview={x.overview}
+						thumbnail={x.thumbnail}
+						link={x.kind === ItemKind.Show ? `/watch/${x.slug}-s1e1` : `/movie/${x.slug}/watch`}
+						infoLink={x.href}
+					/>
+				)}
+			</Fetch>
+			{randomItems.map((x) => (
+				<GenreGrid key={x} genre={x} />
+			))}
+		</ScrollView>
 	);
 };
 
+HomePage.randomItems = [...Object.values(Genre)];
+
 HomePage.getLayout = { Layout: DefaultLayout, props: { transparent: true } };
 
-HomePage.getFetchUrls = () => [Header.query()];
+HomePage.getFetchUrls = () => [
+	Header.query(),
+	...Object.values(Genre).map((x) => GenreGrid.query(x)),
+];
