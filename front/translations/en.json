@@ -1,4 +1,8 @@
 {
+	"home": {
+		"recommanded": "Recommanded",
+		"info": "See more"
+	},
 	"show": {
 		"play": "Play",
 		"trailer": "Play Trailer",
