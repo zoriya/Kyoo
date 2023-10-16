@@ -24,6 +24,7 @@ import { Header } from "./header";
 import { DefaultLayout } from "../layout";
 import { ScrollView, View } from "react-native";
 import { GenreGrid } from "./genre";
+import { Recommanded } from "./recommanded";
 
 export const HomePage: QueryPage<{}, Genre> = ({ randomItems }) => {
 	return (
@@ -41,9 +42,14 @@ export const HomePage: QueryPage<{}, Genre> = ({ randomItems }) => {
 					/>
 				)}
 			</Fetch>
-			{randomItems.map((x) => (
-				<GenreGrid key={x} genre={x} />
-			))}
+			{/* <News /> */}
+			{randomItems.filter((_, i) => i < 2).map((x) =>
+				<GenreGrid key={x} genre={x} />,
+			)}
+			<Recommanded />
+			{randomItems.filter((_, i) => i >= 2).map((x) =>
+				<GenreGrid key={x} genre={x} />,
+			)}
 		</ScrollView>
 	);
 };
@@ -55,4 +61,5 @@ HomePage.getLayout = { Layout: DefaultLayout, props: { transparent: true } };
 HomePage.getFetchUrls = () => [
 	Header.query(),
 	...Object.values(Genre).map((x) => GenreGrid.query(x)),
+	Recommanded.query(),
 ];
