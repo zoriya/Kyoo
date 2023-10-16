@@ -4746,6 +4746,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"array-shuffle@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "array-shuffle@npm:3.0.0"
+  checksum: 003d813f10d6a57174d134d46d9465e0ca76a802a8c2d21c4b42513af914d4a25b3c51a3004c3d170c3a7b2caab356108c34455c327b21537978a6417cfde1d7
+  languageName: node
+  linkType: hard
+
 "array-union@npm:^2.1.0":
   version: 2.1.0
   resolution: "array-union@npm:2.1.0"
@@ -10198,6 +10205,7 @@ __metadata:
     "@shopify/flash-list": 1.4.3
     "@tanstack/react-query": ^4.32.6
     "@types/react": 18.2.0
+    array-shuffle: ^3.0.0
     babel-plugin-transform-inline-environment-variables: ^0.4.4
     expo: ^49.0.6
     expo-build-properties: ~0.8.3
@@ -13864,6 +13872,7 @@ __metadata:
     "@types/node": 20.4.8
     "@types/react": 18.2.0
     "@types/react-dom": 18.2.0
+    array-shuffle: ^3.0.0
     copy-webpack-plugin: ^11.0.0
     eslint: ^8.46.0
     eslint-config-next: 13.4.13

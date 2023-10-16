@@ -17,6 +17,7 @@
 		"@material-symbols/svg-400": "^0.10.3",
 		"@radix-ui/react-dropdown-menu": "^2.0.5",
 		"@tanstack/react-query": "^4.32.6",
+		"array-shuffle": "^3.0.0",
 		"expo-linear-gradient": "^12.4.0",
 		"expo-modules-core": "^1.5.9",
 		"hls.js": "^1.4.10",

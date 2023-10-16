@@ -38,6 +38,7 @@ import { useTheme, useMobileHover, useStyleRegistry, StyleRegistryProvider } fro
 import superjson from "superjson";
 import Head from "next/head";
 import { withTranslations } from "../i18n";
+import arrayShuffle from "array-shuffle";
 
 const font = Poppins({ weight: ["300", "400", "900"], subsets: ["latin"], display: "swap" });
 
@@ -102,7 +103,9 @@ const YoshikiDebug = ({ children }: { children: JSX.Element }) => {
 
 const App = ({ Component, pageProps }: AppProps) => {
 	const [queryClient] = useState(() => createQueryClient());
-	const { queryState, token, ...props } = superjson.deserialize<any>(pageProps ?? { json: {} });
+	const { queryState, token, randomItems, ...props } = superjson.deserialize<any>(
+		pageProps ?? { json: {} },
+	);
 	const layoutInfo = (Component as QueryPage).getLayout ?? (({ page }) => page);
 	const { Layout, props: layoutProps } =
 		typeof layoutInfo === "function" ? { Layout: layoutInfo, props: {} } : layoutInfo;
@@ -122,7 +125,19 @@ const App = ({ Component, pageProps }: AppProps) => {
 					<Hydrate state={queryState}>
 						<ThemeSelector theme="auto" font={{ normal: "inherit" }}>
 							<GlobalCssTheme />
-							<Layout page={<Component {...props} />} {...layoutProps} />
+							<Layout
+								page={
+									<Component
+										randomItems={
+											randomItems[Component.displayName!] ??
+											arrayShuffle((Component as QueryPage).randomItems ?? [])
+										}
+										{...props}
+									/>
+								}
+								randomItems={[]}
+								{...layoutProps}
+							/>
 						</ThemeSelector>
 					</Hydrate>
 				</QueryClientProvider>
@@ -148,6 +163,9 @@ App.getInitialProps = async (ctx: AppContext) => {
 	const [authToken, token] = await getTokenWJ(ctx.ctx.req?.headers.cookie);
 	appProps.pageProps.queryState = await fetchQuery(urls, authToken);
 	appProps.pageProps.token = token;
+	appProps.pageProps.randomItems = {
+		[Component.displayName!]: arrayShuffle(Component.randomItems ?? []),
+	};
 
 	return { pageProps: superjson.serialize(appProps.pageProps) };
 };
