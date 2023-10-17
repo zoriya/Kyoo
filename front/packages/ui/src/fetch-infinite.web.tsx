@@ -29,13 +29,13 @@ import {
 	useEffect,
 	useRef,
 } from "react";
-import { Stylable, useYoshiki } from "yoshiki";
+import { Stylable, useYoshiki, ysMap } from "yoshiki";
 import { EmptyView, ErrorView, Layout, WithLoading } from "./fetch";
 
 const InfiniteScroll = <Props,>({
 	children,
 	loader,
-	layout = "vertical",
+	layout,
 	loadMore,
 	hasMore = true,
 	isFetching,
@@ -45,7 +45,7 @@ const InfiniteScroll = <Props,>({
 }: {
 	children?: ReactElement | (ReactElement | null)[] | null;
 	loader?: (ReactElement | null)[];
-	layout?: "vertical" | "horizontal" | "grid";
+	layout: Layout;
 	loadMore: () => void;
 	hasMore: boolean;
 	isFetching: boolean;
@@ -58,10 +58,11 @@ const InfiniteScroll = <Props,>({
 	const onScroll = useCallback(() => {
 		if (!ref.current || !hasMore || isFetching) return;
 		const scroll =
-			layout === "horizontal"
+			layout.layout === "horizontal"
 				? ref.current.scrollWidth - ref.current.scrollLeft
 				: ref.current.scrollHeight - ref.current.scrollTop;
-		const offset = layout === "horizontal" ? ref.current.offsetWidth : ref.current.offsetHeight;
+		const offset =
+			layout.layout === "horizontal" ? ref.current.offsetWidth : ref.current.offsetHeight;
 
 		if (scroll <= offset * 1.2) loadMore();
 	}, [hasMore, isFetching, layout, loadMore]);
@@ -78,22 +79,30 @@ const InfiniteScroll = <Props,>({
 			{...css(
 				[
 					{
-						display: "flex",
-						alignItems: "flex-start",
-						overflowX: "hidden",
+						display: "grid",
+						gridAutoRows: "max-content",
+						// the as any is due to differencies between css types of native and web (already accounted for in yoshiki)
+						gridGap: layout.gap as any,
+						padding: layout.gap as any,
+					},
+					layout.layout == "vertical" && {
+						gridTemplateColumns: "1fr",
+						alignItems: "stretch",
 						overflowY: "auto",
 					},
-					layout == "vertical" && {
-						flexDirection: "column",
+					layout.layout == "horizontal" && {
 						alignItems: "stretch",
+						overflowX: "auto",
+						overflowY: "hidden",
+						gridAutoFlow: "column",
+						gridAutoColumns: ysMap(layout.numColumns, (x) => `${100 / x}%`),
+						gridTemplateRows: "max-content",
 					},
-					layout == "horizontal" && {
-						flexDirection: "row",
-						alignItems: "stretch",
-					},
-					layout === "grid" && {
-						flexWrap: "wrap",
+					layout.layout === "grid" && {
+						gridTemplateColumns: ysMap(layout.numColumns, (x) => `repeat(${x}, 1fr)`),
 						justifyContent: "center",
+						alignItems: "flex-start",
+						overflowY: "auto",
 					},
 				],
 
@@ -127,7 +136,6 @@ export const InfiniteFetch = <Data, _, HeaderProps>({
 	placeholderCount = 15,
 	children,
 	layout,
-	horizontal = false,
 	empty,
 	divider: Divider = false,
 	Header,
@@ -139,7 +147,6 @@ export const InfiniteFetch = <Data, _, HeaderProps>({
 	incremental?: boolean;
 	placeholderCount?: number;
 	layout: Layout;
-	horizontal?: boolean;
 	children: (
 		item: Data extends Page<infer Item> ? WithLoading<Item> : WithLoading<Data>,
 		i: number,
@@ -156,8 +163,6 @@ export const InfiniteFetch = <Data, _, HeaderProps>({
 	const { items, error, fetchNextPage, hasNextPage, isFetching } = useInfiniteFetch(query, {
 		useErrorBoundary: false,
 	});
-	const grid = layout.numColumns !== 1;
-
 	if (incremental && items) oldItems.current = items;
 
 	if (error) return addHeader(Header, <ErrorView error={error} />, headerProps);
@@ -168,7 +173,7 @@ export const InfiniteFetch = <Data, _, HeaderProps>({
 
 	return (
 		<InfiniteScroll
-			layout={grid ? "grid" : horizontal ? "horizontal" : "vertical"}
+			layout={layout}
 			loadMore={fetchNextPage}
 			hasMore={hasNextPage!}
 			isFetching={isFetching}

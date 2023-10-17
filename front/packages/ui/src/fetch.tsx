@@ -23,7 +23,12 @@ import { Breakpoint, P } from "@kyoo/primitives";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 
-export type Layout = { numColumns: Breakpoint<number>; size: Breakpoint<number> };
+export type Layout = {
+	numColumns: Breakpoint<number>;
+	size: Breakpoint<number>;
+	gap: Breakpoint<number | string>;
+	layout: "grid" | "horizontal" | "vertical";
+};
 
 export type WithLoading<Item> =
 	| (Item & { isLoading: false })

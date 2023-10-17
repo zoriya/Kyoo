@@ -65,7 +65,6 @@ export const ItemList = ({
 				flexDirection: "row",
 				height: ItemList.layout.size,
 				borderRadius: px(6),
-				m: ts(1),
 			})}
 		>
 			<View
@@ -115,4 +114,4 @@ export const ItemList = ({
 	);
 };
 
-ItemList.layout = { numColumns: 1, size: 300 } satisfies Layout;
+ItemList.layout = { numColumns: 1, size: 300, layout: "vertical", gap: ts(2) } satisfies Layout;
