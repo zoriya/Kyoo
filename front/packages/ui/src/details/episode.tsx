@@ -101,7 +101,6 @@ export const EpisodeLine = ({
 			href={slug ? `/watch/${slug}` : ""}
 			{...css(
 				{
-					m: ts(1),
 					alignItems: "center",
 					flexDirection: "row",
 					child: {
@@ -153,4 +152,6 @@ export const EpisodeLine = ({
 EpisodeLine.layout = {
 	numColumns: 1,
 	size: 100,
+	layout: "vertical",
+	gap: ts(1),
 } satisfies Layout;
