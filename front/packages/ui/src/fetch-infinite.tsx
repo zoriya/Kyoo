@@ -28,7 +28,6 @@ export const InfiniteFetch = <Data, Props, _>({
 	query,
 	placeholderCount = 15,
 	incremental = false,
-	horizontal = false,
 	children,
 	layout,
 	empty,
@@ -83,7 +82,7 @@ export const InfiniteFetch = <Data, Props, _>({
 		<FlashList
 			renderItem={({ item, index }) => children({ isLoading: false, ...item } as any, index)}
 			data={hasNextPage !== false ? [...(items || []), ...placeholders] : items}
-			horizontal={horizontal}
+			horizontal={layout.layout === "horizontal"}
 			keyExtractor={(item: any) => item.id?.toString()}
 			numColumns={numColumns}
 			estimatedItemSize={size}

@@ -21,7 +21,7 @@
 import { KyooImage } from "@kyoo/models";
 import { Link, Skeleton, Poster, ts, focusReset, P, SubP } from "@kyoo/primitives";
 import { ImageStyle, Platform } from "react-native";
-import { percent, px, Stylable, useYoshiki } from "yoshiki/native";
+import { percent, px, Stylable, Theme, useYoshiki } from "yoshiki/native";
 import { Layout, WithLoading } from "../fetch";
 
 export const ItemGrid = ({
@@ -44,35 +44,27 @@ export const ItemGrid = ({
 		<Link
 			href={href ?? ""}
 			{...css(
-				[
-					{
-						flexDirection: "column",
-						alignItems: "center",
-						m: { xs: ts(1), sm: ts(4) },
-						child: {
-							poster: {
-								borderColor: (theme) => theme.background,
-								borderWidth: px(4),
-								borderStyle: "solid",
-							},
-						},
-						fover: {
-							self: focusReset,
-							poster: {
-								borderColor: (theme) => theme.accent,
-							},
-							title: {
-								textDecorationLine: "underline",
-							},
+				{
+					flexDirection: "column",
+					alignItems: "center",
+					width: percent(100),
+					child: {
+						poster: {
+							borderColor: (theme) => theme.background,
+							borderWidth: px(4),
+							borderStyle: "solid",
 						},
 					},
-					// We leave no width on native to fill the list's grid.
-					Platform.OS === "web" && {
-						width: { xs: percent(18), sm: percent(25) },
-						minWidth: { xs: px(90), sm: px(120) },
-						maxWidth: px(168),
+					fover: {
+						self: focusReset,
+						poster: {
+							borderColor: (theme: Theme) => theme.accent,
+						},
+						title: {
+							textDecorationLine: "underline",
+						},
 					},
-				],
+				},
 				props,
 			)}
 		>
@@ -111,5 +103,7 @@ export const ItemGrid = ({
 
 ItemGrid.layout = {
 	size: px(150),
-	numColumns: { xs: 3, sm: 5, xl: 7 },
+	numColumns: { xs: 3, sm: 4, md: 5, lg: 6, xl: 8 },
+	gap: { xs: ts(1), sm: ts(2), md: ts(4) },
+	layout: "grid",
 } satisfies Layout;
