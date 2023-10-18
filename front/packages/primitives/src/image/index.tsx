@@ -92,7 +92,7 @@ export const ImageBackground = <AsProps = ViewProps,>({
 							<LinearGradient
 								start={{ x: 0, y: 0.25 }}
 								end={{ x: 0, y: 1 }}
-								colors={["transparent", alpha(theme.colors.black, 0.6)]}
+								colors={["transparent", theme.darkOverlay]}
 								{...css(
 									{
 										position: "absolute",
