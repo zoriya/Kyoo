@@ -38,6 +38,7 @@ type Mode = {
 	mode: "light" | "dark" | "auto";
 	overlay0: Property.Color;
 	overlay1: Property.Color;
+	darkOverlay: Property.Color;
 	link: Property.Color;
 	contrast: Property.Color;
 	variant: Variant;

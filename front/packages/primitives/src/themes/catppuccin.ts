@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { ThemeBuilder } from "./theme";
+import { ThemeBuilder, alpha } from "./theme";
 
 // Ref: https://github.com/catppuccin/catppuccin
 export const catppuccin: ThemeBuilder = {
@@ -26,6 +26,7 @@ export const catppuccin: ThemeBuilder = {
 		// Catppuccin latte
 		overlay0: "#9ca0b0",
 		overlay1: "#7c7f93",
+		darkOverlay: "#4c4f6999",
 		link: "#1e66f5",
 		default: {
 			background: "#eff1f5",
@@ -56,6 +57,7 @@ export const catppuccin: ThemeBuilder = {
 		// Catppuccin mocha
 		overlay0: "#6c7086",
 		overlay1: "#9399b2",
+		darkOverlay: "#11111b99",
 		link: "#89b4fa",
 		default: {
 			background: "#1e1e2e",
