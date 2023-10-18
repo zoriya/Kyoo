@@ -19,6 +19,7 @@
  */
 
 import {
+	Genre,
 	ItemKind,
 	KyooImage,
 	LibraryItem,
@@ -28,11 +29,12 @@ import {
 	QueryIdentifier,
 	getDisplayDate,
 } from "@kyoo/models";
-import { Container, H3, ImageBackground, P, Poster, SubP, ts } from "@kyoo/primitives";
+import { Chip, Container, H3, ImageBackground, P, Poster, SubP, alpha, ts } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
-import { View } from "react-native";
-import { percent, useYoshiki } from "yoshiki/native";
-import { Fetch, WithLoading } from "../fetch";
+import { ScrollView, View } from "react-native";
+import { percent, px, useYoshiki } from "yoshiki/native";
+import { Fetch, Layout, WithLoading } from "../fetch";
+import { InfiniteFetch } from "../fetch-infinite";
 
 export const ItemDetails = ({
 	isLoading,
@@ -41,34 +43,75 @@ export const ItemDetails = ({
 	subtitle,
 	overview,
 	poster,
+	genres,
 	...props
 }: WithLoading<{
 	name: string;
 	tagline: string | null;
 	subtitle: string;
 	poster: KyooImage | null;
+	genres: Genre[] | null;
 	overview: string | null;
 }>) => {
 	const { css } = useYoshiki();
 
 	return (
-		<View {...css({ flexDirection: "row", bg: (theme) => theme.variant.background }, props)}>
+		<View
+			{...css(
+				{
+					height: ItemDetails.layout.size,
+					flexDirection: "row",
+					bg: (theme) => theme.variant.background,
+					borderRadius: 6,
+					overflow: "hidden",
+				},
+				props,
+			)}
+		>
 			<ImageBackground
 				src={poster}
 				alt=""
 				quality="low"
+				gradient={false}
 				{...css({ height: percent(100), aspectRatio: 2 / 3 })}
 			>
-				<P>{name}</P>
-				{subtitle && <SubP>{subtitle}</SubP>}
+				<View
+					{...css({
+						bg: (theme) => theme.darkOverlay,
+						position: "absolute",
+						left: 0,
+						right: 0,
+						bottom: 0,
+						p: ts(1),
+					})}
+				>
+					<P {...css({ m: 0 })}>{name}</P>
+					{subtitle && <SubP {...css({ m: 0 })}>{subtitle}</SubP>}
+				</View>
 			</ImageBackground>
-			<View>
-				{tagline && <P>{tagline}</P>}
-				{overview && <SubP>{overview}</SubP>}
+			<View {...css({ flexShrink: 1, flexGrow: 1 })}>
+				{tagline && <P {...css({ p: ts(1) })}>{tagline}</P>}
+				{overview && (
+					<ScrollView>
+						<SubP {...css({ pX: ts(1) })}>{overview}</SubP>
+					</ScrollView>
+				)}
+				<View {...css({ bg: (theme) => theme.themeOverlay, flexDirection: "row" })}>
+					{genres?.map((x) => (
+						<Chip key={x} label={x} {...css({ mX: ts(.5) })} />
+					))}
+				</View>
 			</View>
 		</View>
 	);
 };
+
+ItemDetails.layout = {
+	size: ts(36),
+	numColumns: { xs: 1, md: 2, xl: 3 },
+	layout: "grid",
+	gap: ts(8),
+} satisfies Layout;
 
 export const Recommanded = () => {
 	const { t } = useTranslation();
@@ -77,7 +120,7 @@ export const Recommanded = () => {
 	return (
 		<View {...css({ marginX: ts(1) })}>
 			<H3>{t("home.recommanded")}</H3>
-			<Fetch query={Recommanded.query()}>
+			<InfiniteFetch query={Recommanded.query()} layout={ItemDetails.layout}>
 				{(x, i) => (
 					<ItemDetails
 						key={x.id ?? i}
@@ -89,16 +132,17 @@ export const Recommanded = () => {
 						subtitle={
 							x.kind !== ItemKind.Collection && !x.isLoading ? getDisplayDate(x) : undefined
 						}
-						{...css({ height: { xs: ts(15), md: ts(20) } })}
+						genres={"genres" in x ? x.genres : null}
 					/>
 				)}
-			</Fetch>
+			</InfiniteFetch>
 		</View>
 	);
 };
 
-Recommanded.query = (): QueryIdentifier<Page<LibraryItem>> => ({
-	parser: Paged(LibraryItemP) as any,
+Recommanded.query = (): QueryIdentifier<LibraryItem> => ({
+	parser: LibraryItemP,
+	infinite: true,
 	path: ["items"],
 	params: {
 		sortBy: "random",

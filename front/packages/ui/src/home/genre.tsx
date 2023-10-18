@@ -36,6 +36,7 @@ import { Fetch } from "../fetch";
 import { ItemGrid } from "../browse/grid";
 import ChevronLeft from "@material-symbols/svg-400/rounded/chevron_left-fill.svg";
 import ChevronRight from "@material-symbols/svg-400/rounded/chevron_right-fill.svg";
+import { InfiniteFetch } from "../fetch-infinite";
 
 export const GenreGrid = ({ genre }: { genre: Genre }) => {
 	const ref = useRef<ScrollView>(null);
@@ -43,7 +44,7 @@ export const GenreGrid = ({ genre }: { genre: Genre }) => {
 
 	return (
 		<View>
-			<View {...css({  marginX: ts(1), flexDirection: "row", justifyContent: "space-between" })}>
+			<View {...css({ marginX: ts(1), flexDirection: "row", justifyContent: "space-between" })}>
 				<H3>{genre}</H3>
 				<View {...css({ flexDirection: "row" })}>
 					<IconButton
@@ -56,28 +57,30 @@ export const GenreGrid = ({ genre }: { genre: Genre }) => {
 					/>
 				</View>
 			</View>
-			<ScrollView ref={ref} horizontal>
-				<Fetch query={GenreGrid.query(genre)}>
-					{(x, i) => (
-						<ItemGrid
-							key={x.id ?? i}
-							isLoading={x.isLoading as any}
-							href={x.href}
-							name={x.name}
-							subtitle={
-								x.kind !== ItemKind.Collection && !x.isLoading ? getDisplayDate(x) : undefined
-							}
-							poster={x.poster}
-						/>
-					)}
-				</Fetch>
-			</ScrollView>
+			<InfiniteFetch
+				query={GenreGrid.query(genre)}
+				layout={{ ...ItemGrid.layout, layout: "horizontal" }}
+			>
+				{(x, i) => (
+					<ItemGrid
+						key={x.id ?? i}
+						isLoading={x.isLoading as any}
+						href={x.href}
+						name={x.name}
+						subtitle={
+							x.kind !== ItemKind.Collection && !x.isLoading ? getDisplayDate(x) : undefined
+						}
+						poster={x.poster}
+					/>
+				)}
+			</InfiniteFetch>
 		</View>
 	);
 };
 
-GenreGrid.query = (genre: Genre): QueryIdentifier<Page<LibraryItem>> => ({
-	parser: Paged(LibraryItemP) as any,
+GenreGrid.query = (genre: Genre): QueryIdentifier<LibraryItem> => ({
+	parser: LibraryItemP,
+	infinite: true,
 	path: ["items"],
 	params: {
 		genres: genre,

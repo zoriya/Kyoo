@@ -38,7 +38,9 @@ type Mode = {
 	mode: "light" | "dark" | "auto";
 	overlay0: Property.Color;
 	overlay1: Property.Color;
+	lightOverlay: Property.Color;
 	darkOverlay: Property.Color;
+	themeOverlay: Property.Color;
 	link: Property.Color;
 	contrast: Property.Color;
 	variant: Variant;
@@ -73,8 +75,8 @@ declare module "yoshiki" {
 
 export type { Theme } from "yoshiki";
 export type ThemeBuilder = {
-	light: Omit<Mode, "contrast" | "mode"> & { default: Variant };
-	dark: Omit<Mode, "contrast" | "mode"> & { default: Variant };
+	light: Omit<Mode, "contrast" | "mode" | "themeOverlay"> & { default: Variant };
+	dark: Omit<Mode, "contrast" | "mode" | "themeOverlay"> & { default: Variant };
 };
 
 const selectMode = (
@@ -86,12 +88,14 @@ const selectMode = (
 		...lightBuilder,
 		...lightBuilder.default,
 		contrast: lightBuilder.colors.black,
+		themeOverlay: lightBuilder.lightOverlay,
 		mode: "light",
 	};
 	const dark: Mode & Variant = {
 		...darkBuilder,
 		...darkBuilder.default,
 		contrast: darkBuilder.colors.white,
+		themeOverlay: darkBuilder.darkOverlay,
 		mode: "dark",
 	};
 	if (Platform.OS !== "web" || mode !== "auto") {

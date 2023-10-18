@@ -26,6 +26,7 @@ export const catppuccin: ThemeBuilder = {
 		// Catppuccin latte
 		overlay0: "#9ca0b0",
 		overlay1: "#7c7f93",
+		lightOverlay: "#eff1f599",
 		darkOverlay: "#4c4f6999",
 		link: "#1e66f5",
 		default: {
@@ -57,6 +58,7 @@ export const catppuccin: ThemeBuilder = {
 		// Catppuccin mocha
 		overlay0: "#6c7086",
 		overlay1: "#9399b2",
+		lightOverlay: "#f5f0f899",
 		darkOverlay: "#11111b99",
 		link: "#89b4fa",
 		default: {
