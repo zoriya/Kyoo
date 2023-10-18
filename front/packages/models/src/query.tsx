@@ -162,12 +162,14 @@ export type QueryIdentifier<T = unknown, Ret = T> = {
 	getNext?: (item: unknown) => string | undefined;
 };
 
-export type QueryPage<Props = {}, Items = unknown> = ComponentType<Props & { randomItems: Items[]}> & {
+export type QueryPage<Props = {}, Items = unknown> = ComponentType<
+	Props & { randomItems: Items[] }
+> & {
 	getFetchUrls?: (route: { [key: string]: string }) => QueryIdentifier<any>[];
 	getLayout?:
 		| QueryPage<{ page: ReactElement }>
 		| { Layout: QueryPage<{ page: ReactElement }>; props: object };
-	randomItems?: Items[]
+	randomItems?: Items[];
 };
 
 const toQueryKey = <Data, Ret>(query: QueryIdentifier<Data, Ret>) => {
