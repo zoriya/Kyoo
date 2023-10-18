@@ -80,13 +80,13 @@ namespace Kyoo.Core.Controllers
 				using SKBitmap original = SKBitmap.Decode(codec, info);
 
 				using SKBitmap high = original.Resize(new SKSizeI(original.Width, original.Height), SKFilterQuality.High);
-				await _WriteTo(original, $"{localPath}.{ImageQuality.High.ToString().ToLowerInvariant()}.webp", 80);
+				await _WriteTo(original, $"{localPath}.{ImageQuality.High.ToString().ToLowerInvariant()}.webp", 90);
 
 				using SKBitmap medium = high.Resize(new SKSizeI((int)(high.Width / 1.5), (int)(high.Height / 1.5)), SKFilterQuality.Medium);
-				await _WriteTo(medium, $"{localPath}.{ImageQuality.Medium.ToString().ToLowerInvariant()}.webp", 55);
+				await _WriteTo(medium, $"{localPath}.{ImageQuality.Medium.ToString().ToLowerInvariant()}.webp", 75);
 
 				using SKBitmap low = medium.Resize(new SKSizeI(original.Width / 2, original.Height / 2), SKFilterQuality.Low);
-				await _WriteTo(low, $"{localPath}.{ImageQuality.Low.ToString().ToLowerInvariant()}.webp", 25);
+				await _WriteTo(low, $"{localPath}.{ImageQuality.Low.ToString().ToLowerInvariant()}.webp", 50);
 
 				image.Blurhash = Blurhasher.Encode(low, 4, 3);
 			}
