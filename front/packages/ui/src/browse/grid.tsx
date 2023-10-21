@@ -42,7 +42,7 @@ export const ItemGrid = ({
 
 	return (
 		<Link
-			href={href ?? ""}
+			href={href}
 			{...css(
 				{
 					flexDirection: "column",
@@ -51,7 +51,7 @@ export const ItemGrid = ({
 					child: {
 						poster: {
 							borderColor: (theme) => theme.background,
-							borderWidth: px(4),
+							borderWidth: ts(0.5),
 							borderStyle: "solid",
 						},
 					},
