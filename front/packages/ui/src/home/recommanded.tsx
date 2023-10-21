@@ -40,11 +40,13 @@ import {
 	Poster,
 	SubP,
 	alpha,
+	focusReset,
 	ts,
 } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
-import { ScrollView, View } from "react-native";
-import { calc, percent, px, rem, useYoshiki } from "yoshiki/native";
+import { Button, Pressable, ScrollView, View } from "react-native";
+import { useRouter } from "solito/router";
+import { Theme, calc, percent, px, rem, useYoshiki } from "yoshiki/native";
 import { Fetch, Layout, WithLoading } from "../fetch";
 import { InfiniteFetch } from "../fetch-infinite";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
@@ -57,6 +59,7 @@ export const ItemDetails = ({
 	overview,
 	poster,
 	genres,
+	href,
 	playHref,
 	...props
 }: WithLoading<{
@@ -66,12 +69,15 @@ export const ItemDetails = ({
 	poster: KyooImage | null;
 	genres: Genre[] | null;
 	overview: string | null;
+	href: string;
 	playHref: string;
 }>) => {
-	const { css } = useYoshiki();
+	const { push } = useRouter();
+	const { css } = useYoshiki("recommanded-card");
 
 	return (
-		<View
+		<Link
+			href={href}
 			{...css(
 				{
 					height: ItemDetails.layout.size,
@@ -79,6 +85,18 @@ export const ItemDetails = ({
 					bg: (theme) => theme.variant.background,
 					borderRadius: 6,
 					overflow: "hidden",
+					borderColor: (theme) => theme.background,
+					borderWidth: ts(0.25),
+					borderStyle: "solid",
+					fover: {
+						self: {
+							...focusReset,
+							borderColor: (theme: Theme) => theme.accent,
+						},
+						title: {
+							textDecorationLine: "underline",
+						},
+					},
 				},
 				props,
 			)}
@@ -100,7 +118,7 @@ export const ItemDetails = ({
 						p: ts(1),
 					})}
 				>
-					<P {...css({ m: 0 })}>{name}</P>
+					<P {...css([{ m: 0 }, "title"])}>{name}</P>
 					{subtitle && <SubP {...css({ m: 0 })}>{subtitle}</SubP>}
 				</View>
 			</ImageBackground>
@@ -125,13 +143,13 @@ export const ItemDetails = ({
 					<IconFab
 						icon={PlayArrow}
 						size={20}
-						as={Link}
-						href={playHref ?? "#"}
+						as={Pressable}
+						onPress={() => push(playHref ?? "")}
 						{...css({ fover: { self: { transform: "scale(1.2)" as any, mX: ts(0.5) } } })}
 					/>
 				</View>
 			</View>
-		</View>
+		</Link>
 	);
 };
 
@@ -162,6 +180,7 @@ export const Recommanded = () => {
 							x.kind !== ItemKind.Collection && !x.isLoading ? getDisplayDate(x) : undefined
 						}
 						genres={"genres" in x ? x.genres : null}
+						href={x.href}
 						playHref={x.kind !== ItemKind.Collection && !x.isLoading ? x.playHref : undefined}
 					/>
 				)}
