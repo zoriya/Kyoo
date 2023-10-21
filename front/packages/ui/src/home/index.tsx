@@ -25,6 +25,7 @@ import { DefaultLayout } from "../layout";
 import { ScrollView, View } from "react-native";
 import { GenreGrid } from "./genre";
 import { Recommanded } from "./recommanded";
+import { VerticalRecommanded } from "./vertical";
 
 export const HomePage: QueryPage<{}, Genre> = ({ randomItems }) => {
 	return (
@@ -50,7 +51,13 @@ export const HomePage: QueryPage<{}, Genre> = ({ randomItems }) => {
 				))}
 			<Recommanded />
 			{randomItems
-				.filter((_, i) => i >= 2)
+				.filter((_, i) => i >= 2 && i < 6)
+				.map((x) => (
+					<GenreGrid key={x} genre={x} />
+				))}
+			<VerticalRecommanded />
+			{randomItems
+				.filter((_, i) => i >= 6)
 				.map((x) => (
 					<GenreGrid key={x} genre={x} />
 				))}
@@ -66,4 +73,5 @@ HomePage.getFetchUrls = () => [
 	Header.query(),
 	...Object.values(Genre).map((x) => GenreGrid.query(x)),
 	Recommanded.query(),
+	VerticalRecommanded.query(),
 ];
