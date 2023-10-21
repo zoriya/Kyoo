@@ -20,6 +20,7 @@
 
 import { Page, QueryIdentifier, useFetch, KyooErrors } from "@kyoo/models";
 import { Breakpoint, P } from "@kyoo/primitives";
+import { ComponentType, ReactElement, isValidElement } from "react";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 
@@ -128,5 +129,22 @@ export const EmptyView = ({ message }: { message: string }) => {
 		>
 			<P {...css({ color: (theme) => theme.heading })}>{message}</P>
 		</View>
+	);
+};
+
+export const addHeader = <Props,>(
+	Header: ComponentType<{ children: JSX.Element } & Props> | ReactElement | undefined,
+	children: ReactElement,
+	headerProps?: Props,
+) => {
+	if (!Header) return children;
+	return !isValidElement(Header) ? (
+		// @ts-ignore
+		<Header {...(headerProps ?? {})}>{children}</Header>
+	) : (
+		<>
+			{Header}
+			{children}
+		</>
 	);
 };

@@ -1,7 +1,8 @@
 {
 	"home": {
 		"recommanded": "Recommanded",
-		"info": "See more"
+		"info": "See more",
+		"none": "No episodes"
 	},
 	"show": {
 		"play": "Play",
