@@ -29,7 +29,7 @@ import {
 import { H3, IconButton, ts } from "@kyoo/primitives";
 import { ReactElement, forwardRef, useRef } from "react";
 import { View } from "react-native";
-import { useYoshiki } from "yoshiki/native";
+import { px, useYoshiki } from "yoshiki/native";
 import { ItemGrid } from "../browse/grid";
 import ChevronLeft from "@material-symbols/svg-400/rounded/chevron_left-fill.svg";
 import ChevronRight from "@material-symbols/svg-400/rounded/chevron_right-fill.svg";
@@ -45,18 +45,26 @@ const Header = forwardRef<
 	return (
 		<View ref={ref}>
 			{!(empty && !displayEmpty) && (
-				<View {...css({ marginX: ts(1), flexDirection: "row", justifyContent: "space-between" })}>
+				<View
+					{...css({
+						marginTop: ItemGrid.layout.gap,
+						marginX: ItemGrid.layout.gap,
+						pX: ts(0.5),
+						flexDirection: "row",
+						justifyContent: "space-between",
+					})}
+				>
 					<H3>{genre}</H3>
-					<View {...css({ flexDirection: "row" })}>
-						<IconButton
-							icon={ChevronLeft}
-							// onPress={() => ref.current?.scrollTo({ x: 0, animated: true })}
-						/>
-						<IconButton
-							icon={ChevronRight}
-							// onPress={() => ref.current?.scrollTo({ x: 0, animated: true })}
-						/>
-					</View>
+					{/* <View {...css({ flexDirection: "row" })}> */}
+					{/* 	<IconButton */}
+					{/* 		icon={ChevronLeft} */}
+					{/* 		// onPress={() => ref.current?.scrollTo({ x: 0, animated: true })} */}
+					{/* 	/> */}
+					{/* 	<IconButton */}
+					{/* 		icon={ChevronRight} */}
+					{/* 		// onPress={() => ref.current?.scrollTo({ x: 0, animated: true })} */}
+					{/* 	/> */}
+					{/* </View> */}
 				</View>
 			)}
 			{children}

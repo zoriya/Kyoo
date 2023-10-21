@@ -39,7 +39,7 @@
 		"srt-webvtt": "^2.0.0",
 		"superjson": "^1.13.1",
 		"sweetalert2": "^11.7.20",
-		"yoshiki": "1.2.9",
+		"yoshiki": "1.2.12",
 		"zod": "^3.21.4"
 	},
 	"devDependencies": {
