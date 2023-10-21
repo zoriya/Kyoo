@@ -22,7 +22,7 @@ import { Page, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
 import { useBreakpointMap, HR } from "@kyoo/primitives";
 import { FlashList } from "@shopify/flash-list";
 import { ComponentType, isValidElement, ReactElement, useRef } from "react";
-import { EmptyView, ErrorView, Layout, WithLoading } from "./fetch";
+import { EmptyView, ErrorView, Layout, WithLoading, addHeader } from "./fetch";
 
 export const InfiniteFetch = <Data, Props, _>({
 	query,
@@ -33,7 +33,7 @@ export const InfiniteFetch = <Data, Props, _>({
 	empty,
 	divider = false,
 	Header,
-	headerProps,
+	headerProps: hprops,
 	getItemType,
 	...props
 }: {
@@ -48,7 +48,7 @@ export const InfiniteFetch = <Data, Props, _>({
 	empty?: string | JSX.Element;
 	incremental?: boolean;
 	divider?: boolean | ComponentType;
-	Header?: ComponentType<Props & { children: JSX.Element }> | ReactElement;
+	Header?: ComponentType<Props & { children: JSX.Element; empty: boolean }> | ReactElement;
 	headerProps?: Props;
 	getItemType?: (item: Data, index: number) => string | number;
 }): JSX.Element | null => {
@@ -65,9 +65,13 @@ export const InfiniteFetch = <Data, Props, _>({
 	if (incremental && items) oldItems.current = items;
 
 	if (error) return <ErrorView error={error} />;
+	// @ts-ignore
+	const headerProps: Props & { empty: boolean } = hprops
+		? { ...hprops, empty: items?.length === 0 }
+		: { empty: items?.length === 0 };
 	if (empty && items && items.length === 0) {
-		if (typeof empty !== "string") return empty;
-		return <EmptyView message={empty} />;
+		if (typeof empty !== "string") return addHeader(Header, empty, headerProps);
+		return addHeader(Header, <EmptyView message={empty} />, headerProps);
 	}
 
 	if (incremental) items ??= oldItems.current;

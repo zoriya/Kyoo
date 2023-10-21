@@ -30,7 +30,7 @@ import {
 	useRef,
 } from "react";
 import { Stylable, useYoshiki, ysMap } from "yoshiki";
-import { EmptyView, ErrorView, Layout, WithLoading } from "./fetch";
+import { EmptyView, ErrorView, Layout, WithLoading, addHeader } from "./fetch";
 
 const InfiniteScroll = <Props,>({
 	children,
@@ -139,7 +139,7 @@ export const InfiniteFetch = <Data, _, HeaderProps>({
 	empty,
 	divider: Divider = false,
 	Header,
-	headerProps,
+	headerProps: hprops,
 	getItemType,
 	...props
 }: {
@@ -165,10 +165,14 @@ export const InfiniteFetch = <Data, _, HeaderProps>({
 	});
 	if (incremental && items) oldItems.current = items;
 
+	// @ts-ignore
+	const headerProps: HeaderProps & { empty: boolean } = hprops
+		? { ...hprops, empty: items?.length === 0 }
+		: { empty: items?.length === 0 };
 	if (error) return addHeader(Header, <ErrorView error={error} />, headerProps);
 	if (empty && items && items.length === 0) {
-		if (typeof empty !== "string") return empty;
-		return <EmptyView message={empty} />;
+		if (typeof empty !== "string") return addHeader(Header, empty, headerProps);
+		return addHeader(Header, <EmptyView message={empty} />, headerProps);
 	}
 
 	return (
@@ -194,22 +198,5 @@ export const InfiniteFetch = <Data, _, HeaderProps>({
 				</Fragment>
 			))}
 		</InfiniteScroll>
-	);
-};
-
-const addHeader = <Props,>(
-	Header: ComponentType<{ children: JSX.Element } & Props> | ReactElement | undefined,
-	children: ReactElement,
-	headerProps?: Props,
-) => {
-	if (!Header) return children;
-	return !isValidElement(Header) ? (
-		// @ts-ignore
-		<Header {...(headerProps ?? {})}>{children}</Header>
-	) : (
-		<>
-			{Header}
-			{children}
-		</>
 	);
 };
