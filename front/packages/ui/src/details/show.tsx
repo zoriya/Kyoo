@@ -68,8 +68,7 @@ const ShowHeader = forwardRef<View, ViewProps & { slug: string }>(function ShowH
 				props,
 			)}
 		>
-			{/* TODO: Remove the slug quickfix for the play button */}
-			<Header slug={`${slug}-s1e1`} type="show" query={query(slug)} />
+			<Header type="show" query={query(slug)} />
 			{/* <Staff slug={slug} /> */}
 			<SvgWave
 				fill={theme.variant.background}

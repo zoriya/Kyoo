@@ -92,7 +92,12 @@ export const MovieP = ResourceP.merge(ImagesP)
 			}
 		}
 		return x;
-	});
+	})
+	.transform((x) => ({
+		...x,
+		href: `/movie/${x.slug}`,
+		playHref: `/movie/${x.slug}/watch`,
+	}));
 
 /**
  * A Movie type

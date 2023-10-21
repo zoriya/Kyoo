@@ -86,9 +86,9 @@ export const Link = ({
 	target,
 	children,
 	...props
-}: { href: string; target?: string; replace?: boolean } & PressableProps) => {
+}: { href?: string; target?: string; replace?: boolean } & PressableProps) => {
 	const linkProps = useLink({
-		href,
+		href: href ?? "#",
 		replace,
 		experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
 	});

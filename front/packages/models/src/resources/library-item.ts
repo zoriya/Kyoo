@@ -36,24 +36,15 @@ export const LibraryItemP = z.union([
 	/*
 	 * Either a Show
 	 */
-	ShowP.and(z.object({ kind: z.literal(ItemKind.Show) })).transform((x) => ({
-		...x,
-		href: `/show/${x.slug}`,
-	})),
+	ShowP.and(z.object({ kind: z.literal(ItemKind.Show) })),
 	/*
 	 * Or a Movie
 	 */
-	MovieP.and(z.object({ kind: z.literal(ItemKind.Movie) })).transform((x) => ({
-		...x,
-		href: `/movie/${x.slug}`,
-	})),
+	MovieP.and(z.object({ kind: z.literal(ItemKind.Movie) })),
 	/*
 	 * Or a Collection
 	 */
-	CollectionP.and(z.object({ kind: z.literal(ItemKind.Collection) })).transform((x) => ({
-		...x,
-		href: `/collection/${x.slug}`,
-	})),
+	CollectionP.and(z.object({ kind: z.literal(ItemKind.Collection) })),
 ]);
 
 /**

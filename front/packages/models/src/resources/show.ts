@@ -95,7 +95,13 @@ export const ShowP = ResourceP.merge(ImagesP)
 			}
 		}
 		return x;
-	});
+	})
+	.transform((x) => ({
+		href: `/show/${x.slug}`,
+		playHref: `/watch/${x.slug}-s1e1`,
+		...x,
+	}))
+;
 
 /**
  * A tv serie or an anime.
