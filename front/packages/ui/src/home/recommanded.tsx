@@ -133,9 +133,9 @@ export const ItemDetails = ({
 						minHeight: px(50),
 					})}
 				>
-					<View {...css({ flexDirection: "row" })}>
-						{genres?.slice(0, 2).map((x) => <Chip key={x} label={x} {...css({ mX: ts(0.5) })} />)}
-					</View>
+					<ScrollView horizontal>
+						{genres?.map((x) => <Chip key={x} label={x} {...css({ mX: ts(0.5) })} />)}
+					</ScrollView>
 					<IconFab
 						icon={PlayArrow}
 						size={20}

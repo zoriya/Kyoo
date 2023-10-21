@@ -31,8 +31,9 @@ import {
 	ts,
 } from "@kyoo/primitives";
 import { View } from "react-native";
-import { percent, useYoshiki, vh } from "yoshiki/native";
+import { percent, useYoshiki } from "yoshiki/native";
 import { WithLoading } from "../fetch";
+import { Header as DetailsHeader } from "../details/header";
 import { useTranslation } from "react-i18next";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import Info from "@material-symbols/svg-400/rounded/info.svg";
@@ -58,8 +59,15 @@ export const Header = ({
 	const { t } = useTranslation();
 
 	return (
-		<ImageBackground src={thumbnail} alt="" quality="high" {...css({ height: vh(70) }, props)}>
-			<View {...css({ width: percent(70), position: "absolute", bottom: 0, margin: ts(2) })}>
+		<ImageBackground
+			src={thumbnail}
+			alt=""
+			quality="high"
+			{...css(DetailsHeader.containerStyle, props)}
+		>
+			<View
+				{...css({ width: { md: percent(70) }, position: "absolute", bottom: 0, margin: ts(2) })}
+			>
 				<H1>{name}</H1>
 				<View {...css({ flexDirection: "row" })}>
 					<IconFab
@@ -77,7 +85,7 @@ export const Header = ({
 					/>
 					<H2>{tagline}</H2>
 				</View>
-				<P>{overview}</P>
+				<P {...css({ display: { xs: "none", md: "flex" } })}>{overview}</P>
 			</View>
 		</ImageBackground>
 	);

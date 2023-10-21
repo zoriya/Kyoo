@@ -104,7 +104,7 @@ export const EpisodeList = <Props,>({
 }: {
 	slug: string;
 	season: string | number;
-	Header: ComponentType<Props & { children: JSX.Element }>;
+	Header: ComponentType<Props & { children: JSX.Element; empty: boolean }>;
 	headerProps: Props;
 }) => {
 	const { t } = useTranslation();

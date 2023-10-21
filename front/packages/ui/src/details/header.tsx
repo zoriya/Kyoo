@@ -361,15 +361,7 @@ export const Header = ({
 						src={data?.thumbnail}
 						quality="high"
 						alt=""
-						containerStyle={{
-							height: {
-								xs: vh(40),
-								sm: min(vh(60), px(750)),
-								md: min(vh(60), px(680)),
-								lg: vh(70),
-							},
-							minHeight: { xs: px(350), sm: px(300), md: px(400), lg: px(600) },
-						}}
+						containerStyle={Header.containerStyle}
 					>
 						<TitleLine
 							isLoading={isLoading}
@@ -381,14 +373,7 @@ export const Header = ({
 							poster={data?.poster}
 							trailerUrl={data?.trailer}
 							studio={data?.studio}
-							{...css({
-								marginTop: {
-									xs: max(vh(20), px(200)),
-									sm: vh(45),
-									md: max(vh(30), px(150)),
-									lg: max(vh(35), px(200)),
-								},
-							})}
+							{...css(Header.childStyle)}
 						/>
 					</ImageBackground>
 					<Description
@@ -402,4 +387,23 @@ export const Header = ({
 			)}
 		</Fetch>
 	);
+};
+
+Header.containerStyle = {
+	height: {
+		xs: vh(40),
+		sm: min(vh(60), px(750)),
+		md: min(vh(60), px(680)),
+		lg: vh(70),
+	},
+	minHeight: { xs: px(350), sm: px(300), md: px(400), lg: px(600) },
+};
+
+Header.childStyle = {
+	marginTop: {
+		xs: max(vh(20), px(200)),
+		sm: vh(45),
+		md: max(vh(30), px(150)),
+		lg: max(vh(35), px(200)),
+	},
 };
