@@ -29,12 +29,12 @@ export const A = ({
 	replace,
 	children,
 	...props
-}: TextProps & { href: string; replace?: boolean; children: ReactNode }) => {
+}: TextProps & { href?: string; replace?: boolean; children: ReactNode }) => {
 	const { css, theme } = useYoshiki();
 
 	return (
 		<TextLink
-			href={href}
+			href={href ?? ""}
 			replace={replace as any}
 			experimental={
 				replace
