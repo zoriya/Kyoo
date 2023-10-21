@@ -199,6 +199,7 @@ export const NavbarRight = () => {
 
 export const Navbar = (props: Stylable) => {
 	const { css, theme } = useYoshiki();
+	const { t } = useTranslation();
 
 	return (
 		<Header
@@ -223,7 +224,19 @@ export const Navbar = (props: Stylable) => {
 				props,
 			)}
 		>
-			<NavbarTitle {...css({ marginX: ts(2) })} />
+			<View {...css({ flexDirection: "row" })}>
+				<NavbarTitle {...css({ marginX: ts(2) })} />
+				<A
+					href="/browse"
+					{...css({
+						textTransform: "uppercase",
+						fontWeight: "bold",
+						color: (theme) => theme.contrast,
+					})}
+				>
+					{t("navbar.browse")}
+				</A>
+			</View>
 			<View
 				{...css({
 					flexGrow: 1,

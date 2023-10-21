@@ -42,6 +42,7 @@
 	},
 	"navbar": {
 		"home": "Accueil",
+		"browse": "Liste",
 		"search": "Rechercher",
 		"login": "Connexion"
 	},
