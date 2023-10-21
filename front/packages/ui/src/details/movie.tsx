@@ -48,7 +48,7 @@ export const MovieDetails: QueryPage<{ slug: string }> = ({ slug }) => {
 				},
 			)}
 		>
-			<Header slug={slug} type="movie" query={query(slug)} />
+			<Header type="movie" query={query(slug)} />
 			{/* <Staff slug={slug} /> */}
 		</ScrollView>
 	);
