@@ -50,6 +50,7 @@ import { Theme, calc, percent, px, rem, useYoshiki } from "yoshiki/native";
 import { Fetch, Layout, WithLoading } from "../fetch";
 import { InfiniteFetch } from "../fetch-infinite";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
+import { ItemGrid } from "../browse/grid";
 
 export const ItemDetails = ({
 	isLoading,
@@ -165,9 +166,13 @@ export const Recommanded = () => {
 	const { css } = useYoshiki();
 
 	return (
-		<View {...css({ marginX: ts(1) })}>
-			<H3>{t("home.recommanded")}</H3>
-			<InfiniteFetch query={Recommanded.query()} layout={ItemDetails.layout}>
+		<View {...css({ marginX: ItemGrid.layout.gap, marginTop: ItemGrid.layout.gap })}>
+			<H3 {...css({ pX: ts(0.5) })}>{t("home.recommanded")}</H3>
+			<InfiniteFetch
+				query={Recommanded.query()}
+				layout={ItemDetails.layout}
+				{...css({ padding: 0 })}
+			>
 				{(x, i) => (
 					<ItemDetails
 						key={x.id ?? i}

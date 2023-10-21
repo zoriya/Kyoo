@@ -29,7 +29,7 @@ import {
 	useEffect,
 	useRef,
 } from "react";
-import { Stylable, useYoshiki, ysMap } from "yoshiki";
+import { Stylable, nativeStyleToCss, useYoshiki, ysMap } from "yoshiki";
 import { EmptyView, ErrorView, Layout, WithLoading, addHeader } from "./fetch";
 
 const InfiniteScroll = <Props,>({
@@ -83,12 +83,12 @@ const InfiniteScroll = <Props,>({
 						gridAutoRows: "max-content",
 						// the as any is due to differencies between css types of native and web (already accounted for in yoshiki)
 						gridGap: layout.gap as any,
-						padding: layout.gap as any,
 					},
 					layout.layout == "vertical" && {
 						gridTemplateColumns: "1fr",
 						alignItems: "stretch",
 						overflowY: "auto",
+						paddingY: layout.gap as any,
 					},
 					layout.layout == "horizontal" && {
 						alignItems: "stretch",
@@ -97,16 +97,17 @@ const InfiniteScroll = <Props,>({
 						gridAutoFlow: "column",
 						gridAutoColumns: ysMap(layout.numColumns, (x) => `${100 / x}%`),
 						gridTemplateRows: "max-content",
+						paddingX: layout.gap as any,
 					},
 					layout.layout === "grid" && {
 						gridTemplateColumns: ysMap(layout.numColumns, (x) => `repeat(${x}, 1fr)`),
 						justifyContent: "center",
 						alignItems: "flex-start",
 						overflowY: "auto",
+						padding: layout.gap as any,
 					},
 				],
-
-				props,
+				nativeStyleToCss(props),
 			)}
 		>
 			{children}

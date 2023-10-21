@@ -21,7 +21,7 @@
 import React, { ComponentProps, ComponentType, ForwardedRef, forwardRef } from "react";
 import { Platform, PressableProps, ViewStyle } from "react-native";
 import { SvgProps } from "react-native-svg";
-import { YoshikiStyle } from "yoshiki/src/type";
+import { YoshikiStyle } from "yoshiki";
 import { px, Theme, useYoshiki } from "yoshiki/native";
 import { PressableFeedback } from "./links";
 import { alpha } from "./themes";

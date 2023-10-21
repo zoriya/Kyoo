@@ -65,6 +65,7 @@ export const ItemList = ({
 				flexDirection: "row",
 				height: ItemList.layout.size,
 				borderRadius: px(6),
+				marginX: ItemList.layout.gap,
 			})}
 		>
 			<View

@@ -18,27 +18,22 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import {
-	ItemKind,
-	LibraryItem,
-	LibraryItemP,
-	QueryIdentifier,
-	getDisplayDate,
-} from "@kyoo/models";
+import { ItemKind, LibraryItem, LibraryItemP, QueryIdentifier, getDisplayDate } from "@kyoo/models";
 import { H3, ts } from "@kyoo/primitives";
 import { View } from "react-native";
 import { useYoshiki } from "yoshiki/native";
 import { InfiniteFetch } from "../fetch-infinite";
 import { ItemList } from "../browse/list";
 import { useTranslation } from "react-i18next";
+import { ItemGrid } from "../browse/grid";
 
 export const VerticalRecommanded = () => {
 	const { t } = useTranslation();
 	const { css } = useYoshiki();
 
 	return (
-		<View>
-			<H3 {...css({ mX: ts(1) })}>{t("home.recommanded")}</H3>
+		<View {...css({ marginTop: ItemGrid.layout.gap })}>
+			<H3 {...css({ mX: ItemGrid.layout.gap })}>{t("home.recommanded")}</H3>
 			<InfiniteFetch
 				query={VerticalRecommanded.query()}
 				layout={{ ...ItemList.layout, layout: "vertical" }}
