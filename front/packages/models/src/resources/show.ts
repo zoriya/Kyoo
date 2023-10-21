@@ -100,8 +100,7 @@ export const ShowP = ResourceP.merge(ImagesP)
 		href: `/show/${x.slug}`,
 		playHref: `/watch/${x.slug}-s1e1`,
 		...x,
-	}))
-;
+	}));
 
 /**
  * A tv serie or an anime.

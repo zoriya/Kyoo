@@ -24,30 +24,25 @@ import {
 	KyooImage,
 	LibraryItem,
 	LibraryItemP,
-	Page,
-	Paged,
 	QueryIdentifier,
 	getDisplayDate,
 } from "@kyoo/models";
 import {
 	Chip,
-	Container,
 	H3,
 	IconFab,
 	ImageBackground,
 	Link,
 	P,
-	Poster,
 	SubP,
-	alpha,
 	focusReset,
 	ts,
 } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
-import { Button, Pressable, ScrollView, View } from "react-native";
+import { Pressable, ScrollView, View } from "react-native";
 import { useRouter } from "solito/router";
-import { Theme, calc, percent, px, rem, useYoshiki } from "yoshiki/native";
-import { Fetch, Layout, WithLoading } from "../fetch";
+import { Theme, percent, px, useYoshiki } from "yoshiki/native";
+import { Layout, WithLoading } from "../fetch";
 import { InfiniteFetch } from "../fetch-infinite";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import { ItemGrid } from "../browse/grid";
