@@ -29,12 +29,25 @@ import {
 	QueryIdentifier,
 	getDisplayDate,
 } from "@kyoo/models";
-import { Chip, Container, H3, ImageBackground, P, Poster, SubP, alpha, ts } from "@kyoo/primitives";
+import {
+	Chip,
+	Container,
+	H3,
+	IconFab,
+	ImageBackground,
+	Link,
+	P,
+	Poster,
+	SubP,
+	alpha,
+	ts,
+} from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
 import { ScrollView, View } from "react-native";
-import { percent, px, useYoshiki } from "yoshiki/native";
+import { calc, percent, px, rem, useYoshiki } from "yoshiki/native";
 import { Fetch, Layout, WithLoading } from "../fetch";
 import { InfiniteFetch } from "../fetch-infinite";
+import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 
 export const ItemDetails = ({
 	isLoading,
@@ -44,6 +57,7 @@ export const ItemDetails = ({
 	overview,
 	poster,
 	genres,
+	playHref,
 	...props
 }: WithLoading<{
 	name: string;
@@ -52,6 +66,7 @@ export const ItemDetails = ({
 	poster: KyooImage | null;
 	genres: Genre[] | null;
 	overview: string | null;
+	playHref: string;
 }>) => {
 	const { css } = useYoshiki();
 
@@ -96,10 +111,24 @@ export const ItemDetails = ({
 						<SubP {...css({ pX: ts(1) })}>{overview}</SubP>
 					</ScrollView>
 				)}
-				<View {...css({ bg: (theme) => theme.themeOverlay, flexDirection: "row" })}>
-					{genres?.map((x) => (
-						<Chip key={x} label={x} {...css({ mX: ts(.5) })} />
-					))}
+				<View
+					{...css({
+						bg: (theme) => theme.themeOverlay,
+						flexDirection: "row",
+						justifyContent: "space-between",
+						minHeight: px(50),
+					})}
+				>
+					<View {...css({ flexDirection: "row" })}>
+						{genres?.slice(0, 2).map((x) => <Chip key={x} label={x} {...css({ mX: ts(0.5) })} />)}
+					</View>
+					<IconFab
+						icon={PlayArrow}
+						size={20}
+						as={Link}
+						href={playHref ?? "#"}
+						{...css({ fover: { self: { transform: "scale(1.2)" as any, mX: ts(0.5) } } })}
+					/>
 				</View>
 			</View>
 		</View>
@@ -133,6 +162,7 @@ export const Recommanded = () => {
 							x.kind !== ItemKind.Collection && !x.isLoading ? getDisplayDate(x) : undefined
 						}
 						genres={"genres" in x ? x.genres : null}
+						playHref={x.kind !== ItemKind.Collection && !x.isLoading ? x.playHref : undefined}
 					/>
 				)}
 			</InfiniteFetch>

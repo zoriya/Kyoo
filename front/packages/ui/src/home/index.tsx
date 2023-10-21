@@ -37,19 +37,23 @@ export const HomePage: QueryPage<{}, Genre> = ({ randomItems }) => {
 						tagline={"tagline" in x ? x.tagline : null}
 						overview={x.overview}
 						thumbnail={x.thumbnail}
-						link={x.kind === ItemKind.Show ? `/watch/${x.slug}-s1e1` : `/movie/${x.slug}/watch`}
+						link={x.kind !== ItemKind.Collection && !x.isLoading ? x.playHref : undefined}
 						infoLink={x.href}
 					/>
 				)}
 			</Fetch>
 			{/* <News /> */}
-			{randomItems.filter((_, i) => i < 2).map((x) =>
-				<GenreGrid key={x} genre={x} />,
-			)}
+			{randomItems
+				.filter((_, i) => i < 2)
+				.map((x) => (
+					<GenreGrid key={x} genre={x} />
+				))}
 			<Recommanded />
-			{randomItems.filter((_, i) => i >= 2).map((x) =>
-				<GenreGrid key={x} genre={x} />,
-			)}
+			{randomItems
+				.filter((_, i) => i >= 2)
+				.map((x) => (
+					<GenreGrid key={x} genre={x} />
+				))}
 		</ScrollView>
 	);
 };

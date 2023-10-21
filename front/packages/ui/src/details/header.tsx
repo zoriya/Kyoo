@@ -69,7 +69,7 @@ import Theaters from "@material-symbols/svg-400/rounded/theaters-fill.svg";
 
 const TitleLine = ({
 	isLoading,
-	slug,
+	playHref,
 	name,
 	tagline,
 	date,
@@ -80,7 +80,7 @@ const TitleLine = ({
 	...props
 }: {
 	isLoading: boolean;
-	slug: string;
+	playHref?: string;
 	name?: string;
 	tagline?: string | null;
 	date?: string | null;
@@ -195,7 +195,7 @@ const TitleLine = ({
 						<IconFab
 							icon={PlayArrow}
 							as={Link}
-							href={type === "show" ? `/watch/${slug}` : `/movie/${slug}/watch`}
+							href={playHref}
 							color={{ xs: theme.user.colors.black, md: theme.colors.black }}
 							{...css({
 								bg: theme.user.accent,
@@ -346,11 +346,9 @@ const Description = ({
 export const Header = ({
 	query,
 	type,
-	slug,
 }: {
 	query: QueryIdentifier<Show | Movie>;
 	type: "movie" | "show";
-	slug: string;
 }) => {
 	const { css } = useYoshiki();
 
@@ -376,7 +374,7 @@ export const Header = ({
 						<TitleLine
 							isLoading={isLoading}
 							type={type}
-							slug={slug}
+							playHref={data?.playHref}
 							name={data?.name}
 							tagline={data?.tagline}
 							date={data ? getDisplayDate(data as any) : undefined}
