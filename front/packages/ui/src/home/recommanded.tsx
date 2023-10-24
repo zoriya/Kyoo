@@ -166,6 +166,7 @@ export const Recommanded = () => {
 			<InfiniteFetch
 				query={Recommanded.query()}
 				layout={ItemDetails.layout}
+				fetchMore={false}
 				{...css({ padding: 0 })}
 			>
 				{(x, i) => (

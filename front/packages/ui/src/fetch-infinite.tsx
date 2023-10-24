@@ -35,6 +35,7 @@ export const InfiniteFetchList = <Data, Props, _>({
 	Header,
 	headerProps,
 	getItemType,
+	fetchMore = true,
 	...props
 }: {
 	query: ReturnType<typeof useInfiniteFetch<_, Data>>;
@@ -51,6 +52,7 @@ export const InfiniteFetchList = <Data, Props, _>({
 	Header?: ComponentType<Props & { children: JSX.Element }> | ReactElement;
 	headerProps?: Props;
 	getItemType?: (item: Data, index: number) => string | number;
+	fetchMore?: boolean;
 }): JSX.Element | null => {
 	const { numColumns, size } = useBreakpointMap(layout);
 	const oldItems = useRef<Data[] | undefined>();
@@ -79,7 +81,7 @@ export const InfiniteFetchList = <Data, Props, _>({
 			keyExtractor={(item: any) => item.id?.toString()}
 			numColumns={numColumns}
 			estimatedItemSize={size}
-			onEndReached={fetchNextPage}
+			onEndReached={fetchMore ? fetchNextPage : undefined}
 			onEndReachedThreshold={0.5}
 			onRefresh={refetch}
 			refreshing={isRefetching}
