@@ -21,10 +21,10 @@
 import { Page, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
 import { useBreakpointMap, HR } from "@kyoo/primitives";
 import { FlashList } from "@shopify/flash-list";
-import { ComponentType, isValidElement, ReactElement, useRef } from "react";
+import { ComponentProps, ComponentType, isValidElement, ReactElement, useRef } from "react";
 import { EmptyView, ErrorView, Layout, WithLoading, addHeader } from "./fetch";
 
-export const InfiniteFetch = <Data, Props, _>({
+export const InfiniteFetchList = <Data, Props, _>({
 	query,
 	placeholderCount = 15,
 	incremental = false,
@@ -33,11 +33,11 @@ export const InfiniteFetch = <Data, Props, _>({
 	empty,
 	divider = false,
 	Header,
-	headerProps: hprops,
+	headerProps,
 	getItemType,
 	...props
 }: {
-	query: QueryIdentifier<_, Data>;
+	query: ReturnType<typeof useInfiniteFetch<_, Data>>;
 	placeholderCount?: number;
 	layout: Layout;
 	horizontal?: boolean;
@@ -48,27 +48,16 @@ export const InfiniteFetch = <Data, Props, _>({
 	empty?: string | JSX.Element;
 	incremental?: boolean;
 	divider?: boolean | ComponentType;
-	Header?: ComponentType<Props & { children: JSX.Element; empty: boolean }> | ReactElement;
+	Header?: ComponentType<Props & { children: JSX.Element }> | ReactElement;
 	headerProps?: Props;
 	getItemType?: (item: Data, index: number) => string | number;
 }): JSX.Element | null => {
-	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
-
 	const { numColumns, size } = useBreakpointMap(layout);
 	const oldItems = useRef<Data[] | undefined>();
-	let { items, error, fetchNextPage, hasNextPage, refetch, isRefetching } = useInfiniteFetch(
-		query,
-		{
-			useErrorBoundary: false,
-		},
-	);
+	let { items, error, fetchNextPage, hasNextPage, refetch, isRefetching } = query;
 	if (incremental && items) oldItems.current = items;
 
 	if (error) return <ErrorView error={error} />;
-	// @ts-ignore
-	const headerProps: Props & { empty: boolean } = hprops
-		? { ...hprops, empty: items?.length === 0 }
-		: { empty: items?.length === 0 };
 	if (empty && items && items.length === 0) {
 		if (typeof empty !== "string") return addHeader(Header, empty, headerProps);
 		return addHeader(Header, <EmptyView message={empty} />, headerProps);
@@ -100,4 +89,18 @@ export const InfiniteFetch = <Data, Props, _>({
 			{...props}
 		/>
 	);
+};
+
+export const InfiniteFetch = <Data, Props, _>({
+	query,
+	...props
+}: {
+	query: QueryIdentifier<_, Data>;
+} & Omit<ComponentProps<typeof InfiniteFetchList<Data, Props, _>>, "query">) => {
+	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
+
+	const ret = useInfiniteFetch(query, {
+		useErrorBoundary: false,
+	});
+	return <InfiniteFetchList query={ret} {...props} />;
 };
