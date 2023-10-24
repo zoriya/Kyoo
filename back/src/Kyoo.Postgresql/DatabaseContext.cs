@@ -42,6 +42,13 @@ namespace Kyoo.Postgresql
 	public abstract class DatabaseContext : DbContext
 	{
 		/// <summary>
+		/// Calculate the MD5 of a string, can only be used in database context.
+		/// </summary>
+		/// <param name="str">The string to hash</param>
+		/// <returns>The hash</returns>
+		public static string MD5(string str) => throw new NotSupportedException();
+
+		/// <summary>
 		/// All collections of Kyoo. See <see cref="Collection"/>.
 		/// </summary>
 		public DbSet<Collection> Collections { get; set; }

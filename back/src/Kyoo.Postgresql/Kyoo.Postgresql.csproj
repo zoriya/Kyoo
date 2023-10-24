@@ -2,6 +2,7 @@
 	<PropertyGroup>
 		<AssemblyName>Kyoo.Postgresql</AssemblyName>
 		<RootNamespace>Kyoo.Postgresql</RootNamespace>
+		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<ItemGroup>

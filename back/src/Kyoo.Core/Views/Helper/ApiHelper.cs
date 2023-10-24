@@ -24,7 +24,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using JetBrains.Annotations;
 using Kyoo.Abstractions.Models;
-using Kyoo.Utils;
 
 namespace Kyoo.Core.Api
 {
@@ -53,7 +52,7 @@ namespace Kyoo.Core.Api
 			[NotNull] Expression left,
 			[NotNull] Expression right)
 		{
-			if (left is not MemberExpression member || ((PropertyInfo)member.Member).PropertyType != typeof(string))
+			if (left.Type != typeof(string))
 				return operand(left, right);
 			MethodCallExpression call = Expression.Call(typeof(string), "Compare", null, left, right);
 			return operand(call, Expression.Constant(0));
