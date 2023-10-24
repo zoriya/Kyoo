@@ -37,6 +37,7 @@ export const VerticalRecommanded = () => {
 			<InfiniteFetch
 				query={VerticalRecommanded.query()}
 				layout={{ ...ItemList.layout, layout: "vertical" }}
+				fetchMore={false}
 			>
 				{(x, i) => (
 					<ItemList

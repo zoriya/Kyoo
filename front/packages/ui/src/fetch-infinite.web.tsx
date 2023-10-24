@@ -42,6 +42,7 @@ const InfiniteScroll = <Props,>({
 	isFetching,
 	Header,
 	headerProps,
+	fetchMore = true,
 	...props
 }: {
 	children?: ReactElement | (ReactElement | null)[] | null;
@@ -52,12 +53,13 @@ const InfiniteScroll = <Props,>({
 	isFetching: boolean;
 	Header?: ComponentType<Props & { children: JSX.Element }> | ReactElement;
 	headerProps?: Props;
+	fetchMore?: boolean;
 } & Stylable) => {
 	const ref = useRef<HTMLDivElement>(null);
 	const { css } = useYoshiki();
 
 	const onScroll = useCallback(() => {
-		if (!ref.current || !hasMore || isFetching) return;
+		if (!ref.current || !hasMore || isFetching || !fetchMore) return;
 		const scroll =
 			layout.layout === "horizontal"
 				? ref.current.scrollWidth - ref.current.scrollLeft
@@ -66,7 +68,7 @@ const InfiniteScroll = <Props,>({
 			layout.layout === "horizontal" ? ref.current.offsetWidth : ref.current.offsetHeight;
 
 		if (scroll <= offset * 1.2) loadMore();
-	}, [hasMore, isFetching, layout, loadMore]);
+	}, [hasMore, isFetching, layout, loadMore, fetchMore]);
 	const scrollProps = { ref, onScroll };
 
 	// Automatically trigger a scroll check on start and after a fetch end in case the user is already
@@ -158,6 +160,7 @@ export const InfiniteFetchList = <Data, _, HeaderProps>({
 	Header?: ComponentType<{ children: JSX.Element } & HeaderProps> | ReactElement;
 	headerProps: HeaderProps;
 	getItemType?: (item: Data, index: number) => string | number;
+	fetchMore?: boolean;
 }): JSX.Element | null => {
 	const oldItems = useRef<Data[] | undefined>();
 	const { items, error, fetchNextPage, hasNextPage, isFetching } = query;
