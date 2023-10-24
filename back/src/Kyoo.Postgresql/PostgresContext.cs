@@ -106,7 +106,7 @@ namespace Kyoo.Postgresql
 			modelBuilder.HasPostgresEnum<Genre>();
 			modelBuilder.HasPostgresEnum<ItemKind>();
 
-			modelBuilder.HasDbFunction(typeof(DatabaseContext).GetMethod(nameof(MD5)))
+			modelBuilder.HasDbFunction(typeof(DatabaseContext).GetMethod(nameof(MD5))!)
 				.HasTranslation(args =>
 					new SqlFunctionExpression(
 						"md5",

@@ -59,14 +59,14 @@ namespace Kyoo.Core.Api
 
 		private async Task<IActionResult> _GetImage(Identifier identifier, string image, ImageQuality? quality)
 		{
-			T resource = await identifier.Match(
+			T? resource = await identifier.Match(
 				id => Repository.GetOrDefault(id),
 				slug => Repository.GetOrDefault(slug)
 			);
 			if (resource == null)
 				return NotFound();
 			string path = _thumbs.GetImagePath(resource, image, quality ?? ImageQuality.High);
-			if (path == null || !System.IO.File.Exists(path))
+			if (!System.IO.File.Exists(path))
 				return NotFound();
 
 			if (!identifier.Match(id => false, slug => slug == "random"))

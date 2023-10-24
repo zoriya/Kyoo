@@ -84,7 +84,7 @@ namespace Kyoo.Core
 					options.InvalidModelStateResponseFactory = ctx =>
 					{
 						string[] errors = ctx.ModelState
-							.SelectMany(x => x.Value.Errors)
+							.SelectMany(x => x.Value!.Errors)
 							.Select(x => x.ErrorMessage)
 							.ToArray();
 						return new BadRequestObjectResult(new RequestError(errors));

@@ -31,10 +31,16 @@ namespace Kyoo.Core.Api
 	public class PeopleRoleConverter : JsonConverter<PeopleRole>
 	{
 		/// <inheritdoc />
-		public override void WriteJson(JsonWriter writer, PeopleRole value, JsonSerializer serializer)
+		public override void WriteJson(JsonWriter writer, PeopleRole? value, JsonSerializer serializer)
 		{
-			ICollection<PeopleRole> oldPeople = value.Show?.People;
-			ICollection<PeopleRole> oldRoles = value.People?.Roles;
+			if (value == null)
+			{
+				writer.WriteNull();
+				return;
+			}
+
+			ICollection<PeopleRole>? oldPeople = value.Show?.People;
+			ICollection<PeopleRole>? oldRoles = value.People?.Roles;
 			if (value.Show != null)
 				value.Show.People = null;
 			if (value.People != null)
@@ -54,7 +60,7 @@ namespace Kyoo.Core.Api
 		/// <inheritdoc />
 		public override PeopleRole ReadJson(JsonReader reader,
 			Type objectType,
-			PeopleRole existingValue,
+			PeopleRole? existingValue,
 			bool hasExistingValue,
 			JsonSerializer serializer)
 		{

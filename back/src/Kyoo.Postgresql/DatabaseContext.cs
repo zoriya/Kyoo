@@ -180,8 +180,8 @@ namespace Kyoo.Postgresql
 			modelBuilder.Entity<T>()
 				.Property(x => x.ExternalId)
 				.HasConversion(
-					v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
-					v => JsonSerializer.Deserialize<Dictionary<string, MetadataId>>(v, (JsonSerializerOptions)null)
+					v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+					v => JsonSerializer.Deserialize<Dictionary<string, MetadataId>>(v, (JsonSerializerOptions?)null)!
 				)
 				.HasColumnType("json");
 		}
@@ -215,8 +215,8 @@ namespace Kyoo.Postgresql
 		/// <typeparam name="T">The owning type of the relationship</typeparam>
 		/// <typeparam name="T2">The owned type of the relationship</typeparam>
 		private void _HasManyToMany<T, T2>(ModelBuilder modelBuilder,
-			Expression<Func<T, IEnumerable<T2>>> firstNavigation,
-			Expression<Func<T2, IEnumerable<T>>> secondNavigation)
+			Expression<Func<T, IEnumerable<T2>?>> firstNavigation,
+			Expression<Func<T2, IEnumerable<T>?>> secondNavigation)
 			where T : class, IResource
 			where T2 : class, IResource
 		{
@@ -360,7 +360,7 @@ namespace Kyoo.Postgresql
 		public T GetTemporaryObject<T>(T model)
 			where T : class, IResource
 		{
-			T tmp = Set<T>().Local.FirstOrDefault(x => x.Id == model.Id);
+			T? tmp = Set<T>().Local.FirstOrDefault(x => x.Id == model.Id);
 			if (tmp != null)
 				return tmp;
 			Entry(model).State = EntityState.Unchanged;
@@ -509,8 +509,7 @@ namespace Kyoo.Postgresql
 		/// <param name="slug">The slug of the resource to check</param>
 		/// <typeparam name="T">The type of entity to check</typeparam>
 		/// <returns>The local entity representing the resource with the given slug if it exists or null.</returns>
-		[CanBeNull]
-		public T LocalEntity<T>(string slug)
+		public T? LocalEntity<T>(string slug)
 			where T : class, IResource
 		{
 			return ChangeTracker.Entries<T>()

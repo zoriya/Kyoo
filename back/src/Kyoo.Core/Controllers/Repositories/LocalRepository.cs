@@ -85,7 +85,7 @@ namespace Kyoo.Core.Controllers
 		/// <param name="query">The query to sort.</param>
 		/// <param name="sortBy">How to sort the query</param>
 		/// <returns>The newly sorted query.</returns>
-		protected IOrderedQueryable<T> Sort(IQueryable<T> query, Sort<T> sortBy = null)
+		protected IOrderedQueryable<T> Sort(IQueryable<T> query, Sort<T>? sortBy = null)
 		{
 			sortBy ??= DefaultSort;
 
@@ -138,7 +138,7 @@ namespace Kyoo.Core.Controllers
 				: (greaterThan ? Expression.GreaterThan : Expression.LessThan);
 		}
 
-		private record SortIndicator(string key, bool desc, string? seed);
+		private record SortIndicator(string Key, bool Desc, string? Seed);
 
 		/// <summary>
 		/// Create a filter (where) expression on the query to skip everything before/after the referenceID.
@@ -158,7 +158,7 @@ namespace Kyoo.Core.Controllers
 		/// <param name="next">True if the following page should be returned, false for the previous.</param>
 		/// <returns>An expression ready to be added to a Where close of a sorted query to handle the AfterID</returns>
 		protected Expression<Func<T, bool>> KeysetPaginate(
-			Sort<T> sort,
+			Sort<T>? sort,
 			T reference,
 			bool next = true)
 		{
@@ -170,7 +170,7 @@ namespace Kyoo.Core.Controllers
 
 			void GetRandomSortKeys(string seed, out Expression left, out Expression right)
 			{
-				MethodInfo concat = typeof(string).GetMethod(nameof(string.Concat), new[] { typeof(string), typeof(string) });
+				MethodInfo concat = typeof(string).GetMethod(nameof(string.Concat), new[] { typeof(string), typeof(string) })!;
 				Expression id = Expression.Call(Expression.Property(x, "ID"), nameof(int.ToString), null);
 				Expression xrng = Expression.Call(concat, Expression.Constant(seed), id);
 				right = Expression.Call(typeof(DatabaseContext), nameof(DatabaseContext.MD5), null, Expression.Constant($"{seed}{reference.Id}"));
@@ -193,14 +193,14 @@ namespace Kyoo.Core.Controllers
 			IEnumerable<SortIndicator> sorts = GetSortsBy(sort)
 				.Append(new SortIndicator("Id", false, null));
 
-			BinaryExpression filter = null;
+			BinaryExpression? filter = null;
 			List<SortIndicator> previousSteps = new();
 			// TODO: Add an outer query >= for perf
 			// PERF: See https://use-the-index-luke.com/sql/partial-results/fetch-next-page#sb-equivalent-logic
 			foreach ((string key, bool desc, string? seed) in sorts)
 			{
-				BinaryExpression compare = null;
-				PropertyInfo property = key != "random"
+				BinaryExpression? compare = null;
+				PropertyInfo? property = key != "random"
 					? typeof(T).GetProperty(key)
 					: null;
 
@@ -268,7 +268,7 @@ namespace Kyoo.Core.Controllers
 			return Expression.Lambda<Func<T, bool>>(filter!, x);
 		}
 
-		protected void SetBackingImage(T obj)
+		protected void SetBackingImage(T? obj)
 		{
 			if (obj is not IThumbnails thumbs)
 				return;
@@ -298,7 +298,7 @@ namespace Kyoo.Core.Controllers
 		/// <returns>The tracked resource with the given ID</returns>
 		protected virtual async Task<T> GetWithTracking(int id)
 		{
-			T ret = await Database.Set<T>().AsTracking().FirstOrDefaultAsync(x => x.Id == id);
+			T? ret = await Database.Set<T>().AsTracking().FirstOrDefaultAsync(x => x.Id == id);
 			SetBackingImage(ret);
 			if (ret == null)
 				throw new ItemNotFoundException($"No {typeof(T).Name} found with the id {id}");
@@ -308,7 +308,7 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc/>
 		public virtual async Task<T> Get(int id)
 		{
-			T ret = await GetOrDefault(id);
+			T? ret = await GetOrDefault(id);
 			if (ret == null)
 				throw new ItemNotFoundException($"No {typeof(T).Name} found with the id {id}");
 			return ret;
@@ -317,7 +317,7 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc/>
 		public virtual async Task<T> Get(string slug)
 		{
-			T ret = await GetOrDefault(slug);
+			T? ret = await GetOrDefault(slug);
 			if (ret == null)
 				throw new ItemNotFoundException($"No {typeof(T).Name} found with the slug {slug}");
 			return ret;
@@ -326,20 +326,20 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc/>
 		public virtual async Task<T> Get(Expression<Func<T, bool>> where)
 		{
-			T ret = await GetOrDefault(where);
+			T? ret = await GetOrDefault(where);
 			if (ret == null)
 				throw new ItemNotFoundException($"No {typeof(T).Name} found with the given predicate.");
 			return ret;
 		}
 
 		/// <inheritdoc />
-		public virtual Task<T> GetOrDefault(int id)
+		public virtual Task<T?> GetOrDefault(int id)
 		{
 			return Database.Set<T>().FirstOrDefaultAsync(x => x.Id == id).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc />
-		public virtual Task<T> GetOrDefault(string slug)
+		public virtual Task<T?> GetOrDefault(string slug)
 		{
 			if (slug == "random")
 				return Database.Set<T>().OrderBy(x => EF.Functions.Random()).FirstOrDefaultAsync().Then(SetBackingImage);
@@ -347,7 +347,7 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public virtual Task<T> GetOrDefault(Expression<Func<T, bool>> where, Sort<T> sortBy = default)
+		public virtual Task<T?> GetOrDefault(Expression<Func<T, bool>> where, Sort<T>? sortBy = default)
 		{
 			return Sort(Database.Set<T>(), sortBy).FirstOrDefaultAsync(where).Then(SetBackingImage);
 		}
@@ -356,9 +356,9 @@ namespace Kyoo.Core.Controllers
 		public abstract Task<ICollection<T>> Search(string query);
 
 		/// <inheritdoc/>
-		public virtual async Task<ICollection<T>> GetAll(Expression<Func<T, bool>> where = null,
-			Sort<T> sort = default,
-			Pagination limit = default)
+		public virtual async Task<ICollection<T>> GetAll(Expression<Func<T, bool>>? where = null,
+			Sort<T>? sort = default,
+			Pagination? limit = default)
 		{
 			return (await ApplyFilters(Database.Set<T>(), where, sort, limit))
 				.Select(SetBackingImageSelf).ToList();
@@ -373,9 +373,9 @@ namespace Kyoo.Core.Controllers
 		/// <param name="limit">Pagination information (where to start and how many to get)</param>
 		/// <returns>The filtered query</returns>
 		protected async Task<ICollection<T>> ApplyFilters(IQueryable<T> query,
-			Expression<Func<T, bool>> where = null,
-			Sort<T> sort = default,
-			Pagination limit = default)
+			Expression<Func<T, bool>>? where = null,
+			Sort<T>? sort = default,
+			Pagination? limit = default)
 		{
 			query = Sort(query, sort);
 			if (where != null)
@@ -395,7 +395,7 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc/>
-		public virtual Task<int> GetCount(Expression<Func<T, bool>> where = null)
+		public virtual Task<int> GetCount(Expression<Func<T, bool>>? where = null)
 		{
 			IQueryable<T> query = Database.Set<T>();
 			if (where != null)
@@ -411,11 +411,11 @@ namespace Kyoo.Core.Controllers
 			{
 				await _thumbs.DownloadImages(thumbs);
 				if (thumbs.Poster != null)
-					Database.Entry(thumbs).Reference(x => x.Poster).TargetEntry.State = EntityState.Added;
+					Database.Entry(thumbs).Reference(x => x.Poster).TargetEntry!.State = EntityState.Added;
 				if (thumbs.Thumbnail != null)
-					Database.Entry(thumbs).Reference(x => x.Thumbnail).TargetEntry.State = EntityState.Added;
+					Database.Entry(thumbs).Reference(x => x.Thumbnail).TargetEntry!.State = EntityState.Added;
 				if (thumbs.Logo != null)
-					Database.Entry(thumbs).Reference(x => x.Logo).TargetEntry.State = EntityState.Added;
+					Database.Entry(thumbs).Reference(x => x.Logo).TargetEntry!.State = EntityState.Added;
 			}
 			SetBackingImage(obj);
 			return obj;
@@ -444,7 +444,7 @@ namespace Kyoo.Core.Controllers
 		{
 			try
 			{
-				T old = await GetOrDefault(obj.Slug);
+				T? old = await GetOrDefault(obj.Slug);
 				if (old != null)
 					return old;
 
@@ -544,7 +544,7 @@ namespace Kyoo.Core.Controllers
 			{
 				try
 				{
-					MethodInfo setter = typeof(T).GetProperty(nameof(resource.Slug))!.GetSetMethod();
+					MethodInfo? setter = typeof(T).GetProperty(nameof(resource.Slug))!.GetSetMethod();
 					if (setter != null)
 						setter.Invoke(resource, new object[] { resource.Slug + '!' });
 					else

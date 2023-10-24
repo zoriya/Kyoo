@@ -84,7 +84,7 @@ namespace Kyoo.Core.Api
 			[FromQuery] Pagination pagination)
 		{
 			ICollection<Episode> resources = await _libraryManager.GetAll(
-				ApiHelper.ParseWhere(where, identifier.Matcher<Episode>(x => x.SeasonId, x => x.Season.Slug)),
+				ApiHelper.ParseWhere(where, identifier.Matcher<Episode>(x => x.SeasonId, x => x.Season!.Slug)),
 				Sort<Episode>.From(sortBy),
 				pagination
 			);
@@ -109,7 +109,7 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<Show>> GetShow(Identifier identifier)
 		{
-			Show ret = await _libraryManager.GetOrDefault(identifier.IsContainedIn<Show, Season>(x => x.Seasons));
+			Show? ret = await _libraryManager.GetOrDefault(identifier.IsContainedIn<Show, Season>(x => x.Seasons!));
 			if (ret == null)
 				return NotFound();
 			return ret;

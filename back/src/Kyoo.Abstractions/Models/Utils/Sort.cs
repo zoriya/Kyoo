@@ -46,7 +46,7 @@ namespace Kyoo.Abstractions.Controllers
 			/// <param name="desendant">
 			/// If this is set to true, items will be sorted in descend order else, they will be sorted in ascendant order.
 			/// </param>
-			public By(Expression<Func<T, object>> key, bool desendant = false)
+			public By(Expression<Func<T, object?>> key, bool desendant = false)
 				: this(Utility.GetPropertyName(key), desendant) { }
 		}
 
