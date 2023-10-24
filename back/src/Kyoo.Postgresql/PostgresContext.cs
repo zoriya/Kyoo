@@ -18,12 +18,14 @@
 
 using System;
 using System.Globalization;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using EFCore.NamingConventions.Internal;
 using Kyoo.Abstractions.Models;
 using Kyoo.Utils;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Npgsql;
 
 namespace Kyoo.Postgresql
@@ -103,6 +105,18 @@ namespace Kyoo.Postgresql
 			modelBuilder.HasPostgresEnum<Status>();
 			modelBuilder.HasPostgresEnum<Genre>();
 			modelBuilder.HasPostgresEnum<ItemKind>();
+
+			modelBuilder.HasDbFunction(typeof(DatabaseContext).GetMethod(nameof(MD5)))
+				.HasTranslation(args =>
+					new SqlFunctionExpression(
+						"md5",
+						args,
+						nullable: true,
+						argumentsPropagateNullability: new[] { false },
+						type: args[0].Type,
+						typeMapping: args[0].TypeMapping
+					)
+				);
 
 			base.OnModelCreating(modelBuilder);
 		}

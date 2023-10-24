@@ -57,7 +57,7 @@ namespace Kyoo.Abstractions.Controllers
 		public record Conglomerate(params Sort<T>[] List) : Sort<T>;
 
 		/// <summary>Sort randomly items</summary>
-		public record Random() : Sort<T>;
+		public record Random(int seed) : Sort<T>;
 
 		/// <summary>The default sort method for the given type.</summary>
 		public record Default : Sort<T>;
@@ -73,9 +73,12 @@ namespace Kyoo.Abstractions.Controllers
 			if (string.IsNullOrEmpty(sortBy) || sortBy == "default")
 				return new Default();
 			if (sortBy == "random")
-				return new Random();
+				return new Random(new System.Random().Next(int.MinValue, int.MaxValue));
 			if (sortBy.Contains(','))
 				return new Conglomerate(sortBy.Split(',').Select(From).ToArray());
+
+			if (sortBy.StartsWith("random:"))
+				return new Random(int.Parse(sortBy["random:".Length..]));
 
 			string key = sortBy.Contains(':') ? sortBy[..sortBy.IndexOf(':')] : sortBy;
 			string? order = sortBy.Contains(':') ? sortBy[(sortBy.IndexOf(':') + 1)..] : null;

@@ -28,6 +28,7 @@ using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Core.Api;
+using Kyoo.Postgresql;
 using Kyoo.Utils;
 using Microsoft.EntityFrameworkCore;
 
@@ -109,8 +110,9 @@ namespace Kyoo.Core.Controllers
 						return _Sort(query, DefaultSort, then);
 					case Sort<T>.By(var key, var desc):
 						return _SortBy(query, x => EF.Property<T>(x, key), desc, then);
-					case Sort<T>.Random:
-						return _SortBy(query, x => EF.Functions.Random(), false, then);
+					case Sort<T>.Random(var seed):
+						// NOTE: To edit this, don't forget to edit the random handiling inside the KeysetPaginate function
+						return _SortBy(query, x => DatabaseContext.MD5(seed + x.Id.ToString()), false, then);
 					case Sort<T>.Conglomerate(var sorts):
 						IOrderedQueryable<T> nQuery = _Sort(query, sorts.First(), false);
 						foreach (Sort<T> sort in sorts.Skip(1))
@@ -135,6 +137,8 @@ namespace Kyoo.Core.Controllers
 				? (greaterThan ? Expression.GreaterThanOrEqual : Expression.LessThanOrEqual)
 				: (greaterThan ? Expression.GreaterThan : Expression.LessThan);
 		}
+
+		private record SortIndicator(string key, bool desc, string? seed);
 
 		/// <summary>
 		/// Create a filter (where) expression on the query to skip everything before/after the referenceID.
@@ -164,45 +168,66 @@ namespace Kyoo.Core.Controllers
 			ParameterExpression x = Expression.Parameter(typeof(T), "x");
 			ConstantExpression referenceC = Expression.Constant(reference, typeof(T));
 
-			IEnumerable<Sort<T>.By> GetSortsBy(Sort<T> sort)
+			void GetRandomSortKeys(string seed, out Expression left, out Expression right)
+			{
+				MethodInfo concat = typeof(string).GetMethod(nameof(string.Concat), new[] { typeof(string), typeof(string) });
+				Expression id = Expression.Call(Expression.Property(x, "ID"), nameof(int.ToString), null);
+				Expression xrng = Expression.Call(concat, Expression.Constant(seed), id);
+				right = Expression.Call(typeof(DatabaseContext), nameof(DatabaseContext.MD5), null, Expression.Constant($"{seed}{reference.Id}"));
+				left = Expression.Call(typeof(DatabaseContext), nameof(DatabaseContext.MD5), null, xrng);
+			}
+
+			IEnumerable<SortIndicator> GetSortsBy(Sort<T> sort)
 			{
 				return sort switch
 				{
 					Sort<T>.Default => GetSortsBy(DefaultSort),
-					Sort<T>.By @sortBy => new[] { sortBy },
+					Sort<T>.By @sortBy => new[] { new SortIndicator(sortBy.Key, sortBy.Desendant, null) },
 					Sort<T>.Conglomerate(var list) => list.SelectMany(GetSortsBy),
-					Sort<T>.Random => throw new ArgumentException("Impossible to paginate randomly sorted items."),
-					_ => Array.Empty<Sort<T>.By>(),
+					Sort<T>.Random(var seed) => new[] { new SortIndicator("random", false, seed.ToString()) },
+					_ => Array.Empty<SortIndicator>(),
 				};
 			}
 
 			// Don't forget that every sorts must end with a ID sort (to differentiate equalities).
-			Sort<T>.By id = new(x => x.Id);
-			IEnumerable<Sort<T>.By> sorts = GetSortsBy(sort).Append(id);
+			IEnumerable<SortIndicator> sorts = GetSortsBy(sort)
+				.Append(new SortIndicator("Id", false, null));
 
 			BinaryExpression filter = null;
-			List<Sort<T>.By> previousSteps = new();
+			List<SortIndicator> previousSteps = new();
 			// TODO: Add an outer query >= for perf
 			// PERF: See https://use-the-index-luke.com/sql/partial-results/fetch-next-page#sb-equivalent-logic
-			foreach ((string key, bool desc) in sorts)
+			foreach ((string key, bool desc, string? seed) in sorts)
 			{
 				BinaryExpression compare = null;
-				PropertyInfo property = typeof(T).GetProperty(key);
+				PropertyInfo property = key != "random"
+					? typeof(T).GetProperty(key)
+					: null;
 
 				// Comparing a value with null always return false so we short opt < > comparisons with null.
-				if (property!.GetValue(reference) == null)
+				if (property != null && property.GetValue(reference) == null)
 				{
-					previousSteps.Add(new Sort<T>.By(key, desc));
+					previousSteps.Add(new SortIndicator(key, desc, seed));
 					continue;
 				}
 
 				// Create all the equality statements for previous sorts.
-				foreach ((string pKey, bool pDesc) in previousSteps)
+				foreach ((string pKey, bool pDesc, string? pSeed) in previousSteps)
 				{
-					BinaryExpression pcompare = Expression.Equal(
-						Expression.Property(x, pKey),
-						Expression.Property(referenceC, pKey)
-					);
+					BinaryExpression pcompare;
+
+					if (pSeed == null)
+					{
+						pcompare = Expression.Equal(
+							Expression.Property(x, pKey),
+							Expression.Property(referenceC, pKey)
+						);
+					}
+					else
+					{
+						GetRandomSortKeys(pSeed, out Expression left, out Expression right);
+						pcompare = Expression.Equal(left, right);
+					}
 					compare = compare != null
 						? Expression.AndAlso(compare, pcompare)
 						: pcompare;
@@ -210,14 +235,21 @@ namespace Kyoo.Core.Controllers
 
 				// Create the last comparison of the statement.
 				Func<Expression, Expression, BinaryExpression> comparer = _GetComparisonExpression(desc, next, false);
-				MemberExpression xkey = Expression.Property(x, key);
-				MemberExpression rkey = Expression.Property(referenceC, key);
+				Expression xkey;
+				Expression rkey;
+				if (seed == null)
+				{
+					xkey = Expression.Property(x, key);
+					rkey = Expression.Property(referenceC, key);
+				}
+				else
+					GetRandomSortKeys(seed, out xkey, out rkey);
 				BinaryExpression lastCompare = ApiHelper.StringCompatibleExpression(comparer, xkey, rkey);
 
 				// Comparing a value with null always return false for nulls so we must add nulls to the results manually.
 				// Postgres sorts them after values so we will do the same
 				// We only add this condition if the column type is nullable
-				if (Nullable.GetUnderlyingType(property.PropertyType) != null)
+				if (property != null && Nullable.GetUnderlyingType(property.PropertyType) != null)
 				{
 					BinaryExpression equalNull = Expression.Equal(xkey, Expression.Constant(null));
 					lastCompare = Expression.OrElse(lastCompare, equalNull);
@@ -231,7 +263,7 @@ namespace Kyoo.Core.Controllers
 					? Expression.OrElse(filter, compare)
 					: compare;
 
-				previousSteps.Add(new(key, desc));
+				previousSteps.Add(new SortIndicator(key, desc, seed));
 			}
 			return Expression.Lambda<Func<T, bool>>(filter!, x);
 		}

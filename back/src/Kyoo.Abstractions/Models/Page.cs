@@ -90,23 +90,18 @@ namespace Kyoo.Abstractions.Models
 		{
 			Items = items;
 			This = url + query.ToQueryString();
-
-			if (!(query.TryGetValue("sortBy", out string? sort) && sort.Contains("random")))
+			if (items.Count > 0 && query.ContainsKey("afterID"))
 			{
-				if (items.Count > 0 && query.ContainsKey("afterID"))
-				{
-					query["afterID"] = items.First().Id.ToString();
-					query["reverse"] = "true";
-					Previous = url + query.ToQueryString();
-				}
-				query.Remove("reverse");
-				if (items.Count == limit && limit > 0)
-				{
-					query["afterID"] = items.Last().Id.ToString();
-					Next = url + query.ToQueryString();
-				}
+				query["afterID"] = items.First().Id.ToString();
+				query["reverse"] = "true";
+				Previous = url + query.ToQueryString();
 			}
-
+			query.Remove("reverse");
+			if (items.Count == limit && limit > 0)
+			{
+				query["afterID"] = items.Last().Id.ToString();
+				Next = url + query.ToQueryString();
+			}
 			query.Remove("afterID");
 			First = url + query.ToQueryString();
 		}
