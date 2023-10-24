@@ -84,7 +84,7 @@ namespace Kyoo.Core.Api
 			[FromQuery] Pagination pagination)
 		{
 			ICollection<Show> resources = await _libraryManager.GetAll(
-				ApiHelper.ParseWhere(where, identifier.IsContainedIn<Show, Collection>(x => x.Collections)),
+				ApiHelper.ParseWhere(where, identifier.IsContainedIn<Show, Collection>(x => x.Collections!)),
 				Sort<Show>.From(sortBy),
 				pagination
 			);

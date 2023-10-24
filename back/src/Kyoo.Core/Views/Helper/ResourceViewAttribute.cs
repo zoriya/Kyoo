@@ -42,7 +42,7 @@ namespace Kyoo.Core.Api
 		/// <inheritdoc />
 		public override void OnActionExecuting(ActionExecutingContext context)
 		{
-			if (context.ActionArguments.TryGetValue("where", out object dic) && dic is Dictionary<string, string> where)
+			if (context.ActionArguments.TryGetValue("where", out object? dic) && dic is Dictionary<string, string> where)
 			{
 				Dictionary<string, string> nWhere = new(where, StringComparer.InvariantCultureIgnoreCase);
 				nWhere.Remove("fields");
@@ -55,7 +55,7 @@ namespace Kyoo.Core.Api
 			}
 
 			List<string> fields = context.HttpContext.Request.Query["fields"]
-				.SelectMany(x => x.Split(','))
+				.SelectMany(x => x!.Split(','))
 				.ToList();
 
 			if (context.ActionDescriptor is ControllerActionDescriptor descriptor)
@@ -77,7 +77,7 @@ namespace Kyoo.Core.Api
 					fields = fields
 						.Select(x =>
 						{
-							string property = properties
+							string? property = properties
 								.FirstOrDefault(y
 									=> string.Equals(x, y.Name, StringComparison.InvariantCultureIgnoreCase))
 								?.Name;
@@ -88,6 +88,7 @@ namespace Kyoo.Core.Api
 							);
 							return null;
 						})
+						.OfType<string>()
 						.ToList();
 					if (context.Result != null)
 						return;
@@ -111,12 +112,12 @@ namespace Kyoo.Core.Api
 				return;
 
 			ILibraryManager library = context.HttpContext.RequestServices.GetRequiredService<ILibraryManager>();
-			ICollection<string> fields = (ICollection<string>)context.HttpContext.Items["fields"];
-			Type pageType = Utility.GetGenericDefinition(result.DeclaredType, typeof(Page<>));
+			ICollection<string> fields = (ICollection<string>)context.HttpContext.Items["fields"]!;
+			Type? pageType = Utility.GetGenericDefinition(result.DeclaredType, typeof(Page<>));
 
 			if (pageType != null)
 			{
-				foreach (IResource resource in ((dynamic)result.Value).Items)
+				foreach (IResource resource in ((dynamic)result.Value!).Items)
 				{
 					foreach (string field in fields!)
 						await library.Load(resource, field);
@@ -125,7 +126,7 @@ namespace Kyoo.Core.Api
 			else if (result.DeclaredType.IsAssignableTo(typeof(IResource)))
 			{
 				foreach (string field in fields!)
-					await library.Load((IResource)result.Value, field);
+					await library.Load((IResource)result.Value!, field);
 			}
 		}
 	}

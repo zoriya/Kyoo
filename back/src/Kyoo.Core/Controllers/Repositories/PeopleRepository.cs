@@ -94,7 +94,7 @@ namespace Kyoo.Core.Controllers
 			{
 				foreach (PeopleRole role in resource.Roles)
 				{
-					role.Show = _database.LocalEntity<Show>(role.Show.Slug)
+					role.Show = _database.LocalEntity<Show>(role.Show!.Slug)
 						?? await _shows.Value.CreateIfNotExists(role.Show);
 					role.ShowID = role.Show.Id;
 					_database.Entry(role).State = EntityState.Added;
@@ -109,7 +109,7 @@ namespace Kyoo.Core.Controllers
 
 			if (changed.Roles != null)
 			{
-				await Database.Entry(resource).Collection(x => x.Roles).LoadAsync();
+				await Database.Entry(resource).Collection(x => x.Roles!).LoadAsync();
 				resource.Roles = changed.Roles;
 			}
 		}
@@ -125,9 +125,9 @@ namespace Kyoo.Core.Controllers
 
 		/// <inheritdoc />
 		public Task<ICollection<PeopleRole>> GetFromShow(int showID,
-			Expression<Func<PeopleRole, bool>> where = null,
-			Sort<PeopleRole> sort = default,
-			Pagination limit = default)
+			Expression<Func<PeopleRole, bool>>? where = null,
+			Sort<PeopleRole>? sort = default,
+			Pagination? limit = default)
 		{
 			return Task.FromResult<ICollection<PeopleRole>>(new List<PeopleRole>());
 			// ICollection<PeopleRole> people = await ApplyFilters(_database.PeopleRoles
@@ -146,9 +146,9 @@ namespace Kyoo.Core.Controllers
 
 		/// <inheritdoc />
 		public Task<ICollection<PeopleRole>> GetFromShow(string showSlug,
-			Expression<Func<PeopleRole, bool>> where = null,
-			Sort<PeopleRole> sort = default,
-			Pagination limit = default)
+			Expression<Func<PeopleRole, bool>>? where = null,
+			Sort<PeopleRole>? sort = default,
+			Pagination? limit = default)
 		{
 			return Task.FromResult<ICollection<PeopleRole>>(new List<PeopleRole>());
 			// ICollection<PeopleRole> people = await ApplyFilters(_database.PeopleRoles
@@ -169,9 +169,9 @@ namespace Kyoo.Core.Controllers
 
 		/// <inheritdoc />
 		public Task<ICollection<PeopleRole>> GetFromPeople(int id,
-			Expression<Func<PeopleRole, bool>> where = null,
-			Sort<PeopleRole> sort = default,
-			Pagination limit = default)
+			Expression<Func<PeopleRole, bool>>? where = null,
+			Sort<PeopleRole>? sort = default,
+			Pagination? limit = default)
 		{
 			return Task.FromResult<ICollection<PeopleRole>>(new List<PeopleRole>());
 			// ICollection<PeopleRole> roles = await ApplyFilters(_database.PeopleRoles
@@ -189,9 +189,9 @@ namespace Kyoo.Core.Controllers
 
 		/// <inheritdoc />
 		public Task<ICollection<PeopleRole>> GetFromPeople(string slug,
-			Expression<Func<PeopleRole, bool>> where = null,
-			Sort<PeopleRole> sort = default,
-			Pagination limit = default)
+			Expression<Func<PeopleRole, bool>>? where = null,
+			Sort<PeopleRole>? sort = default,
+			Pagination? limit = default)
 		{
 			return Task.FromResult<ICollection<PeopleRole>>(new List<PeopleRole>());
 			// ICollection<PeopleRole> roles = await ApplyFilters(_database.PeopleRoles

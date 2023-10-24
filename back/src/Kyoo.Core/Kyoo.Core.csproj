@@ -2,6 +2,7 @@
 	<PropertyGroup>
 		<AssemblyName>Kyoo.Core</AssemblyName>
 		<RootNamespace>Kyoo.Core</RootNamespace>
+		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<ItemGroup>

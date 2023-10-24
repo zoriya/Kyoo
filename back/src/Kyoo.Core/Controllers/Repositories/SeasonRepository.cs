@@ -71,7 +71,7 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc/>
 		public async Task<Season> Get(int showID, int seasonNumber)
 		{
-			Season ret = await GetOrDefault(showID, seasonNumber);
+			Season? ret = await GetOrDefault(showID, seasonNumber);
 			if (ret == null)
 				throw new ItemNotFoundException($"No season {seasonNumber} found for the show {showID}");
 			return ret;
@@ -80,23 +80,23 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc/>
 		public async Task<Season> Get(string showSlug, int seasonNumber)
 		{
-			Season ret = await GetOrDefault(showSlug, seasonNumber);
+			Season? ret = await GetOrDefault(showSlug, seasonNumber);
 			if (ret == null)
 				throw new ItemNotFoundException($"No season {seasonNumber} found for the show {showSlug}");
 			return ret;
 		}
 
 		/// <inheritdoc/>
-		public Task<Season> GetOrDefault(int showID, int seasonNumber)
+		public Task<Season?> GetOrDefault(int showID, int seasonNumber)
 		{
 			return _database.Seasons.FirstOrDefaultAsync(x => x.ShowId == showID
 				&& x.SeasonNumber == seasonNumber).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc/>
-		public Task<Season> GetOrDefault(string showSlug, int seasonNumber)
+		public Task<Season?> GetOrDefault(string showSlug, int seasonNumber)
 		{
-			return _database.Seasons.FirstOrDefaultAsync(x => x.Show.Slug == showSlug
+			return _database.Seasons.FirstOrDefaultAsync(x => x.Show!.Slug == showSlug
 				&& x.SeasonNumber == seasonNumber).Then(SetBackingImage);
 		}
 
@@ -105,7 +105,7 @@ namespace Kyoo.Core.Controllers
 		{
 			return (await Sort(
 				_database.Seasons
-					.Where(_database.Like<Season>(x => x.Name, $"%{query}%"))
+					.Where(_database.Like<Season>(x => x.Name!, $"%{query}%"))
 				)
 				.Take(20)
 				.ToListAsync())

@@ -108,7 +108,7 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<Studio>> GetStudio(Identifier identifier)
 		{
-			return await _libraryManager.Get(identifier.IsContainedIn<Studio, Movie>(x => x.Movies));
+			return await _libraryManager.Get(identifier.IsContainedIn<Studio, Movie>(x => x.Movies!));
 		}
 
 		/// <summary>
@@ -136,7 +136,7 @@ namespace Kyoo.Core.Api
 			[FromQuery] Pagination pagination)
 		{
 			ICollection<Collection> resources = await _libraryManager.GetAll(
-				ApiHelper.ParseWhere(where, identifier.IsContainedIn<Collection, Movie>(x => x.Movies)),
+				ApiHelper.ParseWhere(where, identifier.IsContainedIn<Collection, Movie>(x => x.Movies!)),
 				Sort<Collection>.From(sortBy),
 				pagination
 			);

@@ -77,7 +77,7 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public Task<Episode> GetOrDefault(int showID, int seasonNumber, int episodeNumber)
+		public Task<Episode?> GetOrDefault(int showID, int seasonNumber, int episodeNumber)
 		{
 			return _database.Episodes.FirstOrDefaultAsync(x => x.ShowId == showID
 				&& x.SeasonNumber == seasonNumber
@@ -85,9 +85,9 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public Task<Episode> GetOrDefault(string showSlug, int seasonNumber, int episodeNumber)
+		public Task<Episode?> GetOrDefault(string showSlug, int seasonNumber, int episodeNumber)
 		{
-			return _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == showSlug
+			return _database.Episodes.FirstOrDefaultAsync(x => x.Show!.Slug == showSlug
 				&& x.SeasonNumber == seasonNumber
 				&& x.EpisodeNumber == episodeNumber).Then(SetBackingImage);
 		}
@@ -95,7 +95,7 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public async Task<Episode> Get(int showID, int seasonNumber, int episodeNumber)
 		{
-			Episode ret = await GetOrDefault(showID, seasonNumber, episodeNumber);
+			Episode? ret = await GetOrDefault(showID, seasonNumber, episodeNumber);
 			if (ret == null)
 				throw new ItemNotFoundException($"No episode S{seasonNumber}E{episodeNumber} found on the show {showID}.");
 			return ret;
@@ -104,24 +104,30 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public async Task<Episode> Get(string showSlug, int seasonNumber, int episodeNumber)
 		{
-			Episode ret = await GetOrDefault(showSlug, seasonNumber, episodeNumber);
+			Episode? ret = await GetOrDefault(showSlug, seasonNumber, episodeNumber);
 			if (ret == null)
 				throw new ItemNotFoundException($"No episode S{seasonNumber}E{episodeNumber} found on the show {showSlug}.");
 			return ret;
 		}
 
 		/// <inheritdoc />
-		public Task<Episode> GetAbsolute(int showID, int absoluteNumber)
+		public async Task<Episode> GetAbsolute(int showID, int absoluteNumber)
 		{
-			return _database.Episodes.FirstOrDefaultAsync(x => x.ShowId == showID
+			Episode? ret = await _database.Episodes.FirstOrDefaultAsync(x => x.ShowId == showID
 				&& x.AbsoluteNumber == absoluteNumber).Then(SetBackingImage);
+			if (ret == null)
+				throw new ItemNotFoundException();
+			return ret;
 		}
 
 		/// <inheritdoc />
-		public Task<Episode> GetAbsolute(string showSlug, int absoluteNumber)
+		public async Task<Episode> GetAbsolute(string showSlug, int absoluteNumber)
 		{
-			return _database.Episodes.FirstOrDefaultAsync(x => x.Show.Slug == showSlug
+			Episode? ret = await _database.Episodes.FirstOrDefaultAsync(x => x.Show!.Slug == showSlug
 				&& x.AbsoluteNumber == absoluteNumber).Then(SetBackingImage);
+			if (ret == null)
+				throw new ItemNotFoundException();
+			return ret;
 		}
 
 		/// <inheritdoc />
@@ -131,13 +137,13 @@ namespace Kyoo.Core.Controllers
 				_database.Episodes
 					.Include(x => x.Show)
 					.Where(x => x.EpisodeNumber != null || x.AbsoluteNumber != null)
-					.Where(_database.Like<Episode>(x => x.Name, $"%{query}%"))
+					.Where(_database.Like<Episode>(x => x.Name!, $"%{query}%"))
 				)
 				.Take(20)
 				.ToListAsync();
 			foreach (Episode ep in ret)
 			{
-				ep.Show.Episodes = null;
+				ep.Show!.Episodes = null;
 				SetBackingImage(ep);
 			}
 			return ret;
@@ -152,7 +158,7 @@ namespace Kyoo.Core.Controllers
 			await _database.SaveChangesAsync(() =>
 				obj.SeasonNumber != null && obj.EpisodeNumber != null
 				? Get(obj.ShowId, obj.SeasonNumber.Value, obj.EpisodeNumber.Value)
-				: GetAbsolute(obj.ShowId, obj.AbsoluteNumber.Value));
+				: GetAbsolute(obj.ShowId, obj.AbsoluteNumber!.Value));
 			OnResourceCreated(obj);
 			return obj;
 		}

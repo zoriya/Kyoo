@@ -126,7 +126,7 @@ namespace Kyoo.Core.Controllers
 
 			if (changed.People != null)
 			{
-				await Database.Entry(resource).Collection(x => x.People).LoadAsync();
+				await Database.Entry(resource).Collection(x => x.People!).LoadAsync();
 				resource.People = changed.People;
 			}
 		}

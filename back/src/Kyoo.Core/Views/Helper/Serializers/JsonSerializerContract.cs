@@ -53,16 +53,16 @@ namespace Kyoo.Core.Api
 		{
 			JsonProperty property = base.CreateProperty(member, memberSerialization);
 
-			LoadableRelationAttribute relation = member.GetCustomAttribute<LoadableRelationAttribute>();
+			LoadableRelationAttribute? relation = member.GetCustomAttribute<LoadableRelationAttribute>();
 			if (relation != null)
 			{
 				property.ShouldSerialize = _ =>
 				{
-					string resType = (string)_httpContextAccessor.HttpContext!.Items["ResourceType"];
+					string resType = (string)_httpContextAccessor.HttpContext!.Items["ResourceType"]!;
 					if (member.DeclaringType!.Name != resType)
 						return false;
-					ICollection<string> fields = (ICollection<string>)_httpContextAccessor.HttpContext!.Items["fields"];
-					return fields!.Contains(member.Name);
+					ICollection<string> fields = (ICollection<string>)_httpContextAccessor.HttpContext!.Items["fields"]!;
+					return fields.Contains(member.Name);
 				};
 			}
 

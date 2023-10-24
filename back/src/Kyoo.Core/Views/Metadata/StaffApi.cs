@@ -85,7 +85,7 @@ namespace Kyoo.Core.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] Pagination pagination)
 		{
-			Expression<Func<PeopleRole, bool>> whereQuery = ApiHelper.ParseWhere<PeopleRole>(where);
+			Expression<Func<PeopleRole, bool>>? whereQuery = ApiHelper.ParseWhere<PeopleRole>(where);
 			Sort<PeopleRole> sort = Sort<PeopleRole>.From(sortBy);
 
 			ICollection<PeopleRole> resources = await identifier.Match(

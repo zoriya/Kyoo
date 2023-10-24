@@ -249,7 +249,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="showID">The id of the show</param>
 		/// <param name="seasonNumber">The season's number</param>
 		/// <returns>The season found</returns>
-		Task<Season> GetOrDefault(int showID, int seasonNumber);
+		Task<Season?> GetOrDefault(int showID, int seasonNumber);
 
 		/// <summary>
 		/// Get a season from it's show slug and it's seasonNumber or null if it is not found.
@@ -257,7 +257,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="showSlug">The slug of the show</param>
 		/// <param name="seasonNumber">The season's number</param>
 		/// <returns>The season found</returns>
-		Task<Season> GetOrDefault(string showSlug, int seasonNumber);
+		Task<Season?> GetOrDefault(string showSlug, int seasonNumber);
 	}
 
 	/// <summary>
@@ -294,7 +294,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="seasonNumber">The season's number</param>
 		/// <param name="episodeNumber">The episode's number</param>
 		/// <returns>The episode found</returns>
-		Task<Episode> GetOrDefault(int showID, int seasonNumber, int episodeNumber);
+		Task<Episode?> GetOrDefault(int showID, int seasonNumber, int episodeNumber);
 
 		/// <summary>
 		/// Get a episode from it's show slug, it's seasonNumber and it's episode number or null if it is not found.
@@ -303,7 +303,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="seasonNumber">The season's number</param>
 		/// <param name="episodeNumber">The episode's number</param>
 		/// <returns>The episode found</returns>
-		Task<Episode> GetOrDefault(string showSlug, int seasonNumber, int episodeNumber);
+		Task<Episode?> GetOrDefault(string showSlug, int seasonNumber, int episodeNumber);
 
 		/// <summary>
 		/// Get a episode from it's showID and it's absolute number.

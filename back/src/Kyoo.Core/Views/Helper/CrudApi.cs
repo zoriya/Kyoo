@@ -18,6 +18,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
@@ -69,7 +70,7 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<T>> Get(Identifier identifier)
 		{
-			T ret = await identifier.Match(
+			T? ret = await identifier.Match(
 				id => Repository.GetOrDefault(id),
 				slug => Repository.GetOrDefault(slug)
 			);
@@ -235,7 +236,11 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		public async Task<IActionResult> Delete([FromQuery] Dictionary<string, string> where)
 		{
-			await Repository.DeleteAll(ApiHelper.ParseWhere<T>(where));
+			Expression<Func<T, bool>>? w = ApiHelper.ParseWhere<T>(where);
+			if (w == null)
+				return BadRequest(new RequestError("Incule a filter to delete items, all items won't be deleted."));
+
+			await Repository.DeleteAll(w);
 			return NoContent();
 		}
 	}

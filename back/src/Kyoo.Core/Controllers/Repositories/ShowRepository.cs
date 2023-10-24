@@ -21,6 +21,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Postgresql;
 using Kyoo.Utils;
 using Microsoft.EntityFrameworkCore;
@@ -129,17 +130,20 @@ namespace Kyoo.Core.Controllers
 
 			if (changed.People != null)
 			{
-				await Database.Entry(resource).Collection(x => x.People).LoadAsync();
+				await Database.Entry(resource).Collection(x => x.People!).LoadAsync();
 				resource.People = changed.People;
 			}
 		}
 
 		/// <inheritdoc />
-		public Task<string> GetSlug(int showID)
+		public async Task<string> GetSlug(int showID)
 		{
-			return _database.Shows.Where(x => x.Id == showID)
+			string? ret = await _database.Shows.Where(x => x.Id == showID)
 				.Select(x => x.Slug)
 				.FirstOrDefaultAsync();
+			if (ret == null)
+				throw new ItemNotFoundException();
+			return ret;
 		}
 
 		/// <inheritdoc />

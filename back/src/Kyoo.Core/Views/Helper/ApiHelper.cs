@@ -48,9 +48,9 @@ namespace Kyoo.Core.Api
 		/// <param name="right">The second parameter to compare.</param>
 		/// <returns>A comparison expression compatible with strings</returns>
 		public static BinaryExpression StringCompatibleExpression(
-			[NotNull] Func<Expression, Expression, BinaryExpression> operand,
-			[NotNull] Expression left,
-			[NotNull] Expression right)
+			Func<Expression, Expression, BinaryExpression> operand,
+			Expression left,
+			Expression right)
 		{
 			if (left.Type != typeof(string))
 				return operand(left, right);
@@ -69,14 +69,14 @@ namespace Kyoo.Core.Api
 		/// <typeparam name="T">The type to create filters for.</typeparam>
 		/// <exception cref="ArgumentException">A filter is invalid.</exception>
 		/// <returns>An expression representing the filters that can be used anywhere or compiled</returns>
-		public static Expression<Func<T, bool>> ParseWhere<T>(Dictionary<string, string> where,
-			Expression<Func<T, bool>> defaultWhere = null)
+		public static Expression<Func<T, bool>>? ParseWhere<T>(Dictionary<string, string>? where,
+			Expression<Func<T, bool>>? defaultWhere = null)
 		{
 			if (where == null || where.Count == 0)
 				return defaultWhere;
 
 			ParameterExpression param = defaultWhere?.Parameters.First() ?? Expression.Parameter(typeof(T));
-			Expression expression = defaultWhere?.Body;
+			Expression? expression = defaultWhere?.Body;
 
 			foreach ((string key, string desired) in where)
 			{
@@ -91,17 +91,17 @@ namespace Kyoo.Core.Api
 					value = desired.Substring(desired.IndexOf(':') + 1);
 				}
 
-				PropertyInfo property = typeof(T).GetProperty(key, BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
+				PropertyInfo? property = typeof(T).GetProperty(key, BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
 				if (property == null)
 					throw new ArgumentException($"No filterable parameter with the name {key}.");
 				MemberExpression propertyExpr = Expression.Property(param, property);
 
-				ConstantExpression valueExpr = null;
+				ConstantExpression? valueExpr = null;
 				bool isList = typeof(IEnumerable).IsAssignableFrom(propertyExpr.Type) && propertyExpr.Type != typeof(string);
 				if (operand != "ctn" && !typeof(IResource).IsAssignableFrom(propertyExpr.Type) && !isList)
 				{
 					Type propertyType = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
-					object val;
+					object? val;
 					try
 					{
 						val = string.IsNullOrEmpty(value) || value.Equals("null", StringComparison.OrdinalIgnoreCase)
@@ -110,7 +110,7 @@ namespace Kyoo.Core.Api
 					}
 					catch (InvalidCastException)
 					{
-						throw new ArgumentException("Comparing two differents value's type.");
+						throw new ArgumentException("Comparing two different value's type.");
 					}
 
 					valueExpr = Expression.Constant(val, property.PropertyType);
@@ -166,7 +166,7 @@ namespace Kyoo.Core.Api
 			if (xProperty.Type == typeof(string))
 			{
 				// x.PROPRETY.Contains(value);
-				return Expression.Call(xProperty, typeof(string).GetMethod("Contains", new[] { typeof(string) }), Expression.Constant(value));
+				return Expression.Call(xProperty, typeof(string).GetMethod("Contains", new[] { typeof(string) })!, Expression.Constant(value));
 			}
 
 			// x.PROPERTY is either a List<> or a []
@@ -176,7 +176,8 @@ namespace Kyoo.Core.Api
 			{
 				return Expression.Call(typeof(Enumerable), "Contains", new[] { inner }, xProperty, Expression.Constant(value));
 			}
-			else if (inner.IsEnum && Enum.TryParse(inner, value, true, out object enumValue))
+
+			if (inner.IsEnum && Enum.TryParse(inner, value, true, out object? enumValue))
 			{
 				return Expression.Call(typeof(Enumerable), "Contains", new[] { inner }, xProperty, Expression.Constant(enumValue));
 			}
@@ -185,7 +186,7 @@ namespace Kyoo.Core.Api
 				throw new ArgumentException("Contain (ctn) not appliable for this property.");
 
 			// x => x.PROPERTY.Any(y => y.Slug == value)
-			Expression ret = null;
+			Expression? ret = null;
 			ParameterExpression y = Expression.Parameter(inner, "y");
 			foreach (string val in value.Split(','))
 			{
@@ -197,7 +198,7 @@ namespace Kyoo.Core.Api
 				else
 					ret = Expression.AndAlso(ret, iteration);
 			}
-			return ret;
+			return ret!;
 		}
 	}
 }

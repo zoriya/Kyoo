@@ -73,7 +73,7 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<Show>> GetShow(Identifier identifier)
 		{
-			return await _libraryManager.Get(identifier.IsContainedIn<Show, Episode>(x => x.Episodes));
+			return await _libraryManager.Get(identifier.IsContainedIn<Show, Episode>(x => x.Episodes!));
 		}
 
 		/// <summary>
@@ -93,10 +93,10 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<Season>> GetSeason(Identifier identifier)
 		{
-			Season ret = await _libraryManager.GetOrDefault(identifier.IsContainedIn<Season, Episode>(x => x.Episodes));
+			Season? ret = await _libraryManager.GetOrDefault(identifier.IsContainedIn<Season, Episode>(x => x.Episodes!));
 			if (ret != null)
 				return ret;
-			Episode episode = await identifier.Match(
+			Episode? episode = await identifier.Match(
 				id => _libraryManager.GetOrDefault<Episode>(id),
 				slug => _libraryManager.GetOrDefault<Episode>(slug)
 			);
