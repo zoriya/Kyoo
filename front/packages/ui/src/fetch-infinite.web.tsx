@@ -21,6 +21,7 @@
 import { Page, QueryIdentifier, useInfiniteFetch } from "@kyoo/models";
 import { HR } from "@kyoo/primitives";
 import {
+	ComponentProps,
 	ComponentType,
 	Fragment,
 	isValidElement,
@@ -131,7 +132,7 @@ const InfiniteScroll = <Props,>({
 	);
 };
 
-export const InfiniteFetch = <Data, _, HeaderProps>({
+export const InfiniteFetchList = <Data, _, HeaderProps>({
 	query,
 	incremental = false,
 	placeholderCount = 15,
@@ -140,11 +141,11 @@ export const InfiniteFetch = <Data, _, HeaderProps>({
 	empty,
 	divider: Divider = false,
 	Header,
-	headerProps: hprops,
+	headerProps,
 	getItemType,
 	...props
 }: {
-	query: QueryIdentifier<_, Data>;
+	query: ReturnType<typeof useInfiniteFetch<_, Data>>;
 	incremental?: boolean;
 	placeholderCount?: number;
 	layout: Layout;
@@ -158,18 +159,10 @@ export const InfiniteFetch = <Data, _, HeaderProps>({
 	headerProps: HeaderProps;
 	getItemType?: (item: Data, index: number) => string | number;
 }): JSX.Element | null => {
-	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
-
 	const oldItems = useRef<Data[] | undefined>();
-	const { items, error, fetchNextPage, hasNextPage, isFetching } = useInfiniteFetch(query, {
-		useErrorBoundary: false,
-	});
+	const { items, error, fetchNextPage, hasNextPage, isFetching } = query;
 	if (incremental && items) oldItems.current = items;
 
-	// @ts-ignore
-	const headerProps: HeaderProps & { empty: boolean } = hprops
-		? { ...hprops, empty: items?.length === 0 }
-		: { empty: items?.length === 0 };
 	if (error) return addHeader(Header, <ErrorView error={error} />, headerProps);
 	if (empty && items && items.length === 0) {
 		if (typeof empty !== "string") return addHeader(Header, empty, headerProps);
@@ -200,4 +193,18 @@ export const InfiniteFetch = <Data, _, HeaderProps>({
 			))}
 		</InfiniteScroll>
 	);
+};
+
+export const InfiniteFetch = <Data, Props, _>({
+	query,
+	...props
+}: {
+	query: QueryIdentifier<_, Data>;
+} & Omit<ComponentProps<typeof InfiniteFetchList<Data, Props, _>>, "query">) => {
+	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
+
+	const ret = useInfiniteFetch(query, {
+		useErrorBoundary: false,
+	});
+	return <InfiniteFetchList query={ret} {...props} />;
 };
