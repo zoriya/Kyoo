@@ -193,10 +193,12 @@ function generatePng(width: number, height: number, rgbaString: string) {
 
 export const BlurhashContainer = ({
 	blurhash,
+	blurhashUrl,
 	children,
 	...props
 }: {
-	blurhash: string;
+	blurhash?: string;
+	blurhashUrl?: string;
 	children?: ReactElement | ReactElement[];
 }) => {
 	const { css } = useYoshiki();
@@ -206,7 +208,7 @@ export const BlurhashContainer = ({
 			style={{
 				// Use a blurhash here to nicely fade the NextImage when it is loaded completly
 				// (this prevents loading the image line by line which is ugly and buggy on firefox)
-				backgroundImage: `url(${blurHashToDataURL(blurhash)})`,
+				backgroundImage: `url(${blurhashUrl ?? blurHashToDataURL(blurhash)})`,
 				backgroundSize: "cover",
 				backgroundRepeat: "no-repeat",
 				backgroundPosition: "50% 50%",

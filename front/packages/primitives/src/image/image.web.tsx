@@ -55,8 +55,9 @@ export const Image = ({
 		);
 	}
 
+	const blurhashUrl = blurHashToDataURL(src.blurhash);
 	return (
-		<BlurhashContainer blurhash={src.blurhash} {...css([layout, border], props)}>
+		<BlurhashContainer blurhashUrl={blurhashUrl} {...css([layout, border], props)}>
 			<NextImage
 				src={src[quality ?? "high"]}
 				priority={quality === "high"}
@@ -67,7 +68,7 @@ export const Image = ({
 					opacity: state === "loading" ? 0 : 1,
 					transition: "opacity .2s ease-out",
 				}}
-				blurDataURL={blurHashToDataURL(src.blurhash)}
+				blurDataURL={blurhashUrl}
 				placeholder="blur"
 				// Don't use next's server to reprocess images, they are already optimized by kyoo.
 				unoptimized={true}

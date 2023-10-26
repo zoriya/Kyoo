@@ -72,6 +72,7 @@ export const Header = ({
 				<View {...css({ flexDirection: "row" })}>
 					<IconFab
 						icon={PlayArrow}
+						aria-label={t("show.play")}
 						as={Link}
 						href={link ?? "#"}
 						{...tooltip(t("show.play"))}
@@ -79,6 +80,7 @@ export const Header = ({
 					/>
 					<IconButton
 						icon={Info}
+						aria-label={t("home.info")}
 						href={infoLink ?? "#"}
 						{...tooltip(t("home.info"))}
 						{...css({ marginRight: ts(2) })}

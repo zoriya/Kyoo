@@ -50,7 +50,7 @@ export const NavbarTitle = (props: Stylable & { onLayout?: ViewProps["onLayout"]
 	const { t } = useTranslation();
 
 	return (
-		<A href="/" {...tooltip(t("navbar.home"))} {...props}>
+		<A href="/" aria-label={t("navbar.home")} {...tooltip(t("navbar.home"))} {...props}>
 			<KyooLongLogo />
 		</A>
 	);
