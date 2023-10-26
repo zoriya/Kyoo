@@ -81,13 +81,13 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<Page<Season>>> GetSeasons(Identifier identifier,
-			[FromQuery] string sortBy,
+			[FromQuery] Sort<Season> sortBy,
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] Pagination pagination)
 		{
 			ICollection<Season> resources = await _libraryManager.GetAll(
 				ApiHelper.ParseWhere(where, identifier.Matcher<Season>(x => x.ShowId, x => x.Show!.Slug)),
-				Sort<Season>.From(sortBy),
+				sortBy,
 				pagination
 			);
 
@@ -116,13 +116,13 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<Page<Episode>>> GetEpisodes(Identifier identifier,
-			[FromQuery] string sortBy,
+			[FromQuery] Sort<Episode> sortBy,
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] Pagination pagination)
 		{
 			ICollection<Episode> resources = await _libraryManager.GetAll(
 				ApiHelper.ParseWhere(where, identifier.Matcher<Episode>(x => x.ShowId, x => x.Show!.Slug)),
-				Sort<Episode>.From(sortBy),
+				sortBy,
 				pagination
 			);
 
@@ -151,16 +151,15 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<Page<PeopleRole>>> GetPeople(Identifier identifier,
-			[FromQuery] string sortBy,
+			[FromQuery] Sort<PeopleRole> sortBy,
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] Pagination pagination)
 		{
 			Expression<Func<PeopleRole, bool>>? whereQuery = ApiHelper.ParseWhere<PeopleRole>(where);
-			Sort<PeopleRole> sort = Sort<PeopleRole>.From(sortBy);
 
 			ICollection<PeopleRole> resources = await identifier.Match(
-				id => _libraryManager.GetPeopleFromShow(id, whereQuery, sort, pagination),
-				slug => _libraryManager.GetPeopleFromShow(slug, whereQuery, sort, pagination)
+				id => _libraryManager.GetPeopleFromShow(id, whereQuery, sortBy, pagination),
+				slug => _libraryManager.GetPeopleFromShow(slug, whereQuery, sortBy, pagination)
 			);
 			return Page(resources, pagination.Limit);
 		}
@@ -203,13 +202,13 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<Page<Collection>>> GetCollections(Identifier identifier,
-			[FromQuery] string sortBy,
+			[FromQuery] Sort<Collection> sortBy,
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] Pagination pagination)
 		{
 			ICollection<Collection> resources = await _libraryManager.GetAll(
 				ApiHelper.ParseWhere(where, identifier.IsContainedIn<Collection, Show>(x => x.Shows!)),
-				Sort<Collection>.From(sortBy),
+				sortBy,
 				pagination
 			);
 

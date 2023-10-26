@@ -42,12 +42,12 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The link of the previous page.
 		/// </summary>
-		public string Previous { get; }
+		public string? Previous { get; }
 
 		/// <summary>
 		/// The link of the next page.
 		/// </summary>
-		public string Next { get; }
+		public string? Next { get; }
 
 		/// <summary>
 		/// The number of items in the current page.

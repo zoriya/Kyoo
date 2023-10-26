@@ -79,13 +79,13 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<Page<Episode>>> GetEpisode(Identifier identifier,
-			[FromQuery] string sortBy,
+			[FromQuery] Sort<Episode> sortBy,
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] Pagination pagination)
 		{
 			ICollection<Episode> resources = await _libraryManager.GetAll(
 				ApiHelper.ParseWhere(where, identifier.Matcher<Episode>(x => x.SeasonId, x => x.Season!.Slug)),
-				Sort<Episode>.From(sortBy),
+				sortBy,
 				pagination
 			);
 

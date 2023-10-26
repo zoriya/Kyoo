@@ -17,6 +17,7 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -57,7 +58,7 @@ namespace Kyoo.Abstractions.Controllers
 		public record Conglomerate(params Sort<T>[] List) : Sort<T>;
 
 		/// <summary>Sort randomly items</summary>
-		public record Random(int seed) : Sort<T>;
+		public record Random(uint seed) : Sort<T>;
 
 		/// <summary>The default sort method for the given type.</summary>
 		public record Default : Sort<T>;
@@ -66,19 +67,20 @@ namespace Kyoo.Abstractions.Controllers
 		/// Create a new <see cref="Sort{T}"/> instance from a key's name (case insensitive).
 		/// </summary>
 		/// <param name="sortBy">A key name with an optional order specifier. Format: "key:asc", "key:desc" or "key".</param>
+		/// <param name="seed">The random seed.</param>
 		/// <exception cref="ArgumentException">An invalid key or sort specifier as been given.</exception>
 		/// <returns>A <see cref="Sort{T}"/> for the given string</returns>
-		public static Sort<T> From(string sortBy)
+		public static Sort<T> From(string? sortBy, uint seed)
 		{
 			if (string.IsNullOrEmpty(sortBy) || sortBy == "default")
 				return new Default();
 			if (sortBy == "random")
-				return new Random(new System.Random().Next(int.MinValue, int.MaxValue));
+				return new Random(seed);
 			if (sortBy.Contains(','))
-				return new Conglomerate(sortBy.Split(',').Select(From).ToArray());
+				return new Conglomerate(sortBy.Split(',').Select(x => From(x, seed)).ToArray());
 
 			if (sortBy.StartsWith("random:"))
-				return new Random(int.Parse(sortBy["random:".Length..]));
+				return new Random(uint.Parse(sortBy["random:".Length..]));
 
 			string key = sortBy.Contains(':') ? sortBy[..sortBy.IndexOf(':')] : sortBy;
 			string? order = sortBy.Contains(':') ? sortBy[(sortBy.IndexOf(':') + 1)..] : null;
@@ -87,11 +89,11 @@ namespace Kyoo.Abstractions.Controllers
 				"desc" => true,
 				"asc" => false,
 				null => false,
-				_ => throw new ArgumentException($"The sort order, if set, should be :asc or :desc but it was :{order}.")
+				_ => throw new ValidationException($"The sort order, if set, should be :asc or :desc but it was :{order}.")
 			};
 			PropertyInfo? property = typeof(T).GetProperty(key, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
 			if (property == null)
-				throw new ArgumentException("The given sort key is not valid.");
+				throw new ValidationException("The given sort key is not valid.");
 			return new By(property.Name, desendant);
 		}
 	}

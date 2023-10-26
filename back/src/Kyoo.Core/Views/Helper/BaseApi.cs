@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Kyoo.Abstractions.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -42,14 +43,23 @@ namespace Kyoo.Core.Api
 		protected Page<TResult> Page<TResult>(ICollection<TResult> resources, int limit)
 			where TResult : IResource
 		{
+			Dictionary<string, string> query = Request.Query.ToDictionary(
+				x => x.Key,
+				x => x.Value.ToString(),
+				StringComparer.InvariantCultureIgnoreCase
+			);
+
+			// If the query was sorted randomly, add the seed to the url to get reproducible links (next,prev,first...)
+			if (query.ContainsKey("sortBy"))
+			{
+				object seed = HttpContext.Items["seed"]!;
+
+				query["sortBy"] = Regex.Replace(query["sortBy"], "random(?!:)", $"random:{seed}");
+			}
 			return new Page<TResult>(
 				resources,
 				Request.Path,
-				Request.Query.ToDictionary(
-					x => x.Key,
-					x => x.Value.ToString(),
-					StringComparer.InvariantCultureIgnoreCase
-				),
+				query,
 				limit
 			);
 		}

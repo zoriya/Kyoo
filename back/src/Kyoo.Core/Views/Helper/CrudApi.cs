@@ -113,13 +113,13 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		public async Task<ActionResult<Page<T>>> GetAll(
-			[FromQuery] string sortBy,
+			[FromQuery] Sort<T> sortBy,
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] Pagination pagination)
 		{
 			ICollection<T> resources = await Repository.GetAll(
 				ApiHelper.ParseWhere<T>(where),
-				Sort<T>.From(sortBy),
+				sortBy,
 				pagination
 			);
 
