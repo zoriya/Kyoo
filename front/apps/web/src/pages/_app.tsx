@@ -120,6 +120,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 			<>
 				<Head>
 					<title>Kyoo</title>
+					<meta name="description" content="A portable and vast media library solution." />
 				</Head>
 				<QueryClientProvider client={queryClient}>
 					<Hydrate state={queryState}>
