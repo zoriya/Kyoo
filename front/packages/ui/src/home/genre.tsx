@@ -25,7 +25,7 @@ import {
 	LibraryItemP,
 	QueryIdentifier,
 	getDisplayDate,
-    useInfiniteFetch,
+	useInfiniteFetch,
 } from "@kyoo/models";
 import { H3, IconButton, ts } from "@kyoo/primitives";
 import { ReactElement, forwardRef, useRef } from "react";
