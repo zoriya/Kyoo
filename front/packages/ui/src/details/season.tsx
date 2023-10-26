@@ -35,18 +35,18 @@ import { useTranslation } from "react-i18next";
 import { ComponentType } from "react";
 import MenuIcon from "@material-symbols/svg-400/rounded/menu-fill.svg";
 
+type SeasonProcessed = Season & { href: string };
+
 export const SeasonHeader = ({
 	isLoading,
 	seasonNumber,
 	name,
 	seasons,
-	slug,
 }: {
 	isLoading: boolean;
 	seasonNumber?: number;
 	name?: string;
-	seasons?: Season[];
-	slug: string;
+	seasons?: SeasonProcessed[];
 }) => {
 	const { css } = useYoshiki();
 	const { t } = useTranslation();
@@ -75,8 +75,8 @@ export const SeasonHeader = ({
 					{seasons?.map((x) => (
 						<Menu.Item
 							key={x.seasonNumber}
-							label={`${x.seasonNumber}: ${x.name}`}
-							href={`/show/${slug}?season=${x.seasonNumber}`}
+							label={`${x.seasonNumber}: ${x.name} (${x.episodesCount})`}
+							href={x.href}
 						/>
 					))}
 				</Menu>
@@ -86,14 +86,21 @@ export const SeasonHeader = ({
 	);
 };
 
-SeasonHeader.query = (slug: string): QueryIdentifier<Season> => ({
+SeasonHeader.query = (slug: string): QueryIdentifier<Season, SeasonProcessed> => ({
 	parser: SeasonP,
 	path: ["shows", slug, "seasons"],
 	params: {
 		// Fetch all seasons at one, there won't be hundred of thems anyways.
 		limit: 0,
 	},
-	infinite: true,
+	infinite: {
+		value: true,
+		map: (seasons) =>
+			seasons.reduce((acc, x) => {
+				if (x.episodesCount == 0) return acc;
+				return [...acc, { ...x, range: null, href: `/show/${slug}?season=${x.seasonNumber}` }];
+			}, [] as SeasonProcessed[]),
+	},
 });
 
 export const EpisodeList = <Props,>({
@@ -135,7 +142,6 @@ export const EpisodeList = <Props,>({
 								name={sea?.name}
 								seasonNumber={sea?.seasonNumber}
 								seasons={seasons}
-								slug={slug}
 							/>
 						)}
 						<EpisodeLine

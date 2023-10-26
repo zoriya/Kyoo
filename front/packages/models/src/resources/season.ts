@@ -44,6 +44,10 @@ export const SeasonP = ResourceP.merge(ImagesP).extend({
 	 * The ending date of this season.
 	 */
 	endDate: zdate().nullable(),
+	/**
+	 * The number of episodes available on kyoo of this season.
+	 */
+	episodesCount: z.number(),
 });
 
 /**
