@@ -131,13 +131,13 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<Page<Collection>>> GetCollections(Identifier identifier,
-			[FromQuery] string sortBy,
+			[FromQuery] Sort<Collection> sortBy,
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] Pagination pagination)
 		{
 			ICollection<Collection> resources = await _libraryManager.GetAll(
 				ApiHelper.ParseWhere(where, identifier.IsContainedIn<Collection, Movie>(x => x.Movies!)),
-				Sort<Collection>.From(sortBy),
+				sortBy,
 				pagination
 			);
 

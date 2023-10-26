@@ -23,6 +23,7 @@ using Autofac;
 using Kyoo.Abstractions;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Utils;
+using Kyoo.Core.Api;
 using Kyoo.Core.Controllers;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
@@ -69,6 +70,7 @@ namespace Kyoo.Core
 			services.AddMvcCore(options =>
 				{
 					options.Filters.Add<ExceptionFilter>();
+					options.ModelBinderProviders.Insert(0, new SortBinder.Provider());
 				})
 				.AddNewtonsoftJson(x =>
 				{

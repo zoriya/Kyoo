@@ -81,16 +81,15 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<ActionResult<Page<PeopleRole>>> GetRoles(Identifier identifier,
-			[FromQuery] string sortBy,
+			[FromQuery] Sort<PeopleRole> sortBy,
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] Pagination pagination)
 		{
 			Expression<Func<PeopleRole, bool>>? whereQuery = ApiHelper.ParseWhere<PeopleRole>(where);
-			Sort<PeopleRole> sort = Sort<PeopleRole>.From(sortBy);
 
 			ICollection<PeopleRole> resources = await identifier.Match(
-				id => _libraryManager.GetRolesFromPeople(id, whereQuery, sort, pagination),
-				slug => _libraryManager.GetRolesFromPeople(slug, whereQuery, sort, pagination)
+				id => _libraryManager.GetRolesFromPeople(id, whereQuery, sortBy, pagination),
+				slug => _libraryManager.GetRolesFromPeople(slug, whereQuery, sortBy, pagination)
 			);
 
 			return Page(resources, pagination.Limit);

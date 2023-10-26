@@ -17,6 +17,7 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.ComponentModel.DataAnnotations;
 using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Utils;
 using Microsoft.AspNetCore.Http;
@@ -48,6 +49,9 @@ namespace Kyoo.Core
 			switch (context.Exception)
 			{
 				case ArgumentException ex:
+					context.Result = new BadRequestObjectResult(new RequestError(ex.Message));
+					break;
+				case ValidationException ex:
 					context.Result = new BadRequestObjectResult(new RequestError(ex.Message));
 					break;
 				case ItemNotFoundException ex:
