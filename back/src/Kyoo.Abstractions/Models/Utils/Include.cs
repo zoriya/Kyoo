@@ -16,33 +16,33 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Reflection;
 using Kyoo.Abstractions.Models.Attributes;
 
 namespace Kyoo.Abstractions.Models.Utils;
 
 public class Include<T>
-	where T : IResource
 {
-	public string[] Fields { get; private init; }
+	public ICollection<string> Fields { get; private init; } = ArraySegment<string>.Empty;
 
-	public static Include<T> From(string fields)
+	public static Include<T> From(string? fields)
 	{
 		if (string.IsNullOrEmpty(fields))
-			return new();
+			return new Include<T>();
 
-		string[] values = fields.Split(',');
-		foreach (string field in values)
+		return new Include<T>
 		{
-			PropertyInfo? prop = typeof(T).GetProperty(field, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-			if (prop?.GetCustomAttribute<LoadableRelationAttribute>() == null)
-				throw new ValidationException($"No loadable relation with the name {field}.");
-		}
-
-		return new()
-		{
-			Fields = values,
+			Fields = fields.Split(',').Select(x =>
+			{
+				PropertyInfo? prop = typeof(T).GetProperty(x, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+				if (prop?.GetCustomAttribute<LoadableRelationAttribute>() == null)
+					throw new ValidationException($"No loadable relation with the name {x}.");
+				return prop.Name;
+			}).ToArray()
 		};
 	}
 }
