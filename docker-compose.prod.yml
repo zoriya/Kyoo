@@ -70,7 +70,17 @@ services:
       timeout: 5s
       retries: 5
 
+  meilisearch:
+    image: getmeili/meilisearch:v1.4
+    volumes:
+      - search:/meili_data
+    environment:
+      - MEILI_ENV=production
+    env_file:
+      - .env
+
 volumes:
   kyoo:
   db:
   metadata:
+  search:

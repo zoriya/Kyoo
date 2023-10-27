@@ -351,6 +351,14 @@ namespace Kyoo.Core.Controllers
 				.FirstOrDefaultAsync(where);
 		}
 
+		public async Task<ICollection<T>> FromIds(IList<int> ids)
+		{
+			return await Database.Set<T>()
+				.Where(x => ids.Contains(x.Id))
+				.OrderBy(x => ids.IndexOf(x.Id))
+				.ToListAsync();
+		}
+
 		/// <inheritdoc/>
 		public abstract Task<ICollection<T>> Search(string query);
 
