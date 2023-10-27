@@ -37,6 +37,7 @@ public class IncludeBinder : IModelBinder
 			object include = bindingContext.ModelType.GetMethod(nameof(Include<object>.From))!
 				.Invoke(null, new object?[] { fields.FirstValue })!;
 			bindingContext.Result = ModelBindingResult.Success(include);
+			bindingContext.HttpContext.Items["fields"] = ((dynamic)include).Fields;
 			return Task.CompletedTask;
 		}
 		catch (TargetInvocationException ex)

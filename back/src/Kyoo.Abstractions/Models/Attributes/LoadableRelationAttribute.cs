@@ -17,12 +17,11 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
-using Kyoo.Abstractions.Controllers;
 
 namespace Kyoo.Abstractions.Models.Attributes
 {
 	/// <summary>
-	/// The targeted relation can be loaded via a call to <see cref="ILibraryManager.Load"/>.
+	/// The targeted relation can be loaded.
 	/// </summary>
 	[AttributeUsage(AttributeTargets.Property)]
 	public class LoadableRelationAttribute : Attribute

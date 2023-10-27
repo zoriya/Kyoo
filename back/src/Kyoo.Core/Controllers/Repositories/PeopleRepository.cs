@@ -129,18 +129,18 @@ namespace Kyoo.Core.Controllers
 		// 	Sort<PeopleRole>? sort = default,
 		// 	Pagination? limit = default)
 		// {
-			// ICollection<PeopleRole> people = await ApplyFilters(_database.PeopleRoles
-			// 		.Where(x => x.ShowID == showID)
-			// 		.Include(x => x.People),
-			// 	x => x.People.Name,
-			// 	where,
-			// 	sort,
-			// 	limit);
-			// if (!people.Any() && await _shows.Value.GetOrDefault(showID) == null)
-			// 	throw new ItemNotFoundException();
-			// foreach (PeopleRole role in people)
-			// 	role.ForPeople = true;
-			// return people;
+		// ICollection<PeopleRole> people = await ApplyFilters(_database.PeopleRoles
+		// 		.Where(x => x.ShowID == showID)
+		// 		.Include(x => x.People),
+		// 	x => x.People.Name,
+		// 	where,
+		// 	sort,
+		// 	limit);
+		// if (!people.Any() && await _shows.Value.GetOrDefault(showID) == null)
+		// 	throw new ItemNotFoundException();
+		// foreach (PeopleRole role in people)
+		// 	role.ForPeople = true;
+		// return people;
 		// }
 
 		// /// <inheritdoc />
