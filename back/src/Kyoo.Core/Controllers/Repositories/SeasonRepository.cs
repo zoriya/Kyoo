@@ -23,6 +23,7 @@ using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Exceptions;
+using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Postgresql;
 using Kyoo.Utils;
 using Microsoft.EntityFrameworkCore;
@@ -69,11 +70,11 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc/>
-		public override async Task<ICollection<Season>> Search(string query)
+		public override async Task<ICollection<Season>> Search(string query, Include<Season>? include = default)
 		{
 			return await Sort(
-				_database.Seasons
-					.Where(_database.Like<Season>(x => x.Name!, $"%{query}%"))
+					AddIncludes(_database.Seasons, include)
+						.Where(_database.Like<Season>(x => x.Name!, $"%{query}%"))
 				)
 				.Take(20)
 				.ToListAsync();

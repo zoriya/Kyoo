@@ -21,6 +21,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Postgresql;
 using Microsoft.EntityFrameworkCore;
 
@@ -51,11 +52,11 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc />
-		public override async Task<ICollection<User>> Search(string query)
+		public override async Task<ICollection<User>> Search(string query, Include<User>? include = default)
 		{
 			return await Sort(
-				_database.Users
-					.Where(_database.Like<User>(x => x.Username, $"%{query}%"))
+					AddIncludes(_database.Users, include)
+						.Where(_database.Like<User>(x => x.Username, $"%{query}%"))
 				)
 				.Take(20)
 				.ToListAsync();

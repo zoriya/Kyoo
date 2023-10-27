@@ -94,11 +94,12 @@ namespace Kyoo.Abstractions.Controllers
 			Sort<T>? sortBy = default);
 
 		/// <summary>
-		/// Search for resources.
+		/// Search for resources with the database.
 		/// </summary>
 		/// <param name="query">The query string.</param>
+		/// <param name="include">The related fields to include.</param>
 		/// <returns>A list of resources found</returns>
-		Task<ICollection<T>> Search(string query);
+		Task<ICollection<T>> Search(string query, Include<T>? include = default);
 
 		/// <summary>
 		/// Get every resources that match all filters
@@ -119,6 +120,14 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="where">A filter predicate</param>
 		/// <returns>How many resources matched that filter</returns>
 		Task<int> GetCount(Expression<Func<T, bool>>? where = null);
+
+		/// <summary>
+		/// Map a list of ids to a list of items (keep the order).
+		/// </summary>
+		/// <param name="ids">The list of items id.</param>
+		/// <param name="include">The related fields to include.</param>
+		/// <returns>A list of resources mapped from ids.</returns>
+		Task<ICollection<T>> FromIds(IList<int> ids, Include<T>? include = default);
 
 		/// <summary>
 		/// Create a new resource.

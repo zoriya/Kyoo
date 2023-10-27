@@ -351,16 +351,20 @@ namespace Kyoo.Core.Controllers
 				.FirstOrDefaultAsync(where);
 		}
 
-		public async Task<ICollection<T>> FromIds(IList<int> ids)
+		/// <inheritdoc/>
+		public virtual async Task<ICollection<T>> FromIds(IList<int> ids, Include<T>? include = default)
 		{
-			return await Database.Set<T>()
-				.Where(x => ids.Contains(x.Id))
+			return (
+				await AddIncludes(Database.Set<T>(), include)
+					.Where(x => ids.Contains(x.Id))
+					.ToListAsync()
+				)
 				.OrderBy(x => ids.IndexOf(x.Id))
-				.ToListAsync();
+				.ToList();
 		}
 
 		/// <inheritdoc/>
-		public abstract Task<ICollection<T>> Search(string query);
+		public abstract Task<ICollection<T>> Search(string query, Include<T>? include = default);
 
 		/// <inheritdoc/>
 		public virtual Task<ICollection<T>> GetAll(Expression<Func<T, bool>>? where = null,
