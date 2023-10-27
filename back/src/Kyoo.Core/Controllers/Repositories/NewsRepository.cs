@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Postgresql;
 
 namespace Kyoo.Core.Controllers
@@ -38,7 +39,7 @@ namespace Kyoo.Core.Controllers
 		{ }
 
 		/// <inheritdoc />
-		public override Task<ICollection<News>> Search(string query)
+		public override Task<ICollection<News>> Search(string query, Include<News>? include = default)
 			=> throw new InvalidOperationException();
 
 		/// <inheritdoc />
