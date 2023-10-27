@@ -71,6 +71,7 @@ namespace Kyoo.Core
 				{
 					options.Filters.Add<ExceptionFilter>();
 					options.ModelBinderProviders.Insert(0, new SortBinder.Provider());
+					options.ModelBinderProviders.Insert(0, new IncludeBinder.Provider());
 				})
 				.AddNewtonsoftJson(x =>
 				{
