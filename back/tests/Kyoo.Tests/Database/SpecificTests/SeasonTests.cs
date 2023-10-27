@@ -40,12 +40,12 @@ namespace Kyoo.Tests.Database
 
 	public abstract class ASeasonTests : RepositoryTests<Season>
 	{
-		private readonly ISeasonRepository _repository;
+		private readonly IRepository<Season> _repository;
 
 		protected ASeasonTests(RepositoryActivator repositories)
 			: base(repositories)
 		{
-			_repository = Repositories.LibraryManager.SeasonRepository;
+			_repository = Repositories.LibraryManager.Seasons;
 		}
 
 		[Fact]
@@ -53,7 +53,7 @@ namespace Kyoo.Tests.Database
 		{
 			Season season = await _repository.Get(1);
 			Assert.Equal("anohana-s1", season.Slug);
-			await Repositories.LibraryManager.ShowRepository.Patch(season.ShowId, (x) =>
+			await Repositories.LibraryManager.Shows.Patch(season.ShowId, (x) =>
 			{
 				x.Slug = "new-slug";
 				return Task.FromResult(true);

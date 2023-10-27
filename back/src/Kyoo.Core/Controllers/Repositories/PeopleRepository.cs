@@ -32,7 +32,7 @@ namespace Kyoo.Core.Controllers
 	/// <summary>
 	/// A local repository to handle people.
 	/// </summary>
-	public class PeopleRepository : LocalRepository<People>, IPeopleRepository
+	public class PeopleRepository : LocalRepository<People>
 	{
 		/// <summary>
 		/// The database handle
@@ -42,7 +42,7 @@ namespace Kyoo.Core.Controllers
 		/// <summary>
 		/// A lazy loaded show repository to validate requests from shows.
 		/// </summary>
-		private readonly Lazy<IShowRepository> _shows;
+		private readonly Lazy<IRepository<Show>> _shows;
 
 		/// <inheritdoc />
 		protected override Sort<People> DefaultSort => new Sort<People>.By(x => x.Name);
@@ -54,7 +54,7 @@ namespace Kyoo.Core.Controllers
 		/// <param name="shows">A lazy loaded show repository</param>
 		/// <param name="thumbs">The thumbnail manager used to store images.</param>
 		public PeopleRepository(DatabaseContext database,
-			Lazy<IShowRepository> shows,
+			Lazy<IRepository<Show>> shows,
 			IThumbnailsManager thumbs)
 			: base(database, thumbs)
 		{
@@ -123,13 +123,12 @@ namespace Kyoo.Core.Controllers
 			await base.Delete(obj);
 		}
 
-		/// <inheritdoc />
-		public Task<ICollection<PeopleRole>> GetFromShow(int showID,
-			Expression<Func<PeopleRole, bool>>? where = null,
-			Sort<PeopleRole>? sort = default,
-			Pagination? limit = default)
-		{
-			return Task.FromResult<ICollection<PeopleRole>>(new List<PeopleRole>());
+		// /// <inheritdoc />
+		// public Task<ICollection<PeopleRole>> GetFromShow(int showID,
+		// 	Expression<Func<PeopleRole, bool>>? where = null,
+		// 	Sort<PeopleRole>? sort = default,
+		// 	Pagination? limit = default)
+		// {
 			// ICollection<PeopleRole> people = await ApplyFilters(_database.PeopleRoles
 			// 		.Where(x => x.ShowID == showID)
 			// 		.Include(x => x.People),
@@ -142,69 +141,66 @@ namespace Kyoo.Core.Controllers
 			// foreach (PeopleRole role in people)
 			// 	role.ForPeople = true;
 			// return people;
-		}
+		// }
 
-		/// <inheritdoc />
-		public Task<ICollection<PeopleRole>> GetFromShow(string showSlug,
-			Expression<Func<PeopleRole, bool>>? where = null,
-			Sort<PeopleRole>? sort = default,
-			Pagination? limit = default)
-		{
-			return Task.FromResult<ICollection<PeopleRole>>(new List<PeopleRole>());
-			// ICollection<PeopleRole> people = await ApplyFilters(_database.PeopleRoles
-			// 		.Where(x => x.Show.Slug == showSlug)
-			// 		.Include(x => x.People)
-			// 		.Include(x => x.Show),
-			// 	id => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id),
-			// 	x => x.People.Name,
-			// 	where,
-			// 	sort,
-			// 	limit);
-			// if (!people.Any() && await _shows.Value.GetOrDefault(showSlug) == null)
-			// 	throw new ItemNotFoundException();
-			// foreach (PeopleRole role in people)
-			// 	role.ForPeople = true;
-			// return people;
-		}
+		// /// <inheritdoc />
+		// public Task<ICollection<PeopleRole>> GetFromShow(string showSlug,
+		// 	Expression<Func<PeopleRole, bool>>? where = null,
+		// 	Sort<PeopleRole>? sort = default,
+		// 	Pagination? limit = default)
+		// {
+		// 	ICollection<PeopleRole> people = await ApplyFilters(_database.PeopleRoles
+		// 			.Where(x => x.Show.Slug == showSlug)
+		// 			.Include(x => x.People)
+		// 			.Include(x => x.Show),
+		// 		id => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id),
+		// 		x => x.People.Name,
+		// 		where,
+		// 		sort,
+		// 		limit);
+		// 	if (!people.Any() && await _shows.Value.GetOrDefault(showSlug) == null)
+		// 		throw new ItemNotFoundException();
+		// 	foreach (PeopleRole role in people)
+		// 		role.ForPeople = true;
+		// 	return people;
+		// }
 
-		/// <inheritdoc />
-		public Task<ICollection<PeopleRole>> GetFromPeople(int id,
-			Expression<Func<PeopleRole, bool>>? where = null,
-			Sort<PeopleRole>? sort = default,
-			Pagination? limit = default)
-		{
-			return Task.FromResult<ICollection<PeopleRole>>(new List<PeopleRole>());
-			// ICollection<PeopleRole> roles = await ApplyFilters(_database.PeopleRoles
-			// 		.Where(x => x.PeopleID == id)
-			// 		.Include(x => x.Show),
-			// 	y => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == y),
-			// 	x => x.Show.Title,
-			// 	where,
-			// 	sort,
-			// 	limit);
-			// if (!roles.Any() && await GetOrDefault(id) == null)
-			// 	throw new ItemNotFoundException();
-			// return roles;
-		}
+		// /// <inheritdoc />
+		// public Task<ICollection<PeopleRole>> GetFromPeople(int id,
+		// 	Expression<Func<PeopleRole, bool>>? where = null,
+		// 	Sort<PeopleRole>? sort = default,
+		// 	Pagination? limit = default)
+		// {
+		// 	ICollection<PeopleRole> roles = await ApplyFilters(_database.PeopleRoles
+		// 			.Where(x => x.PeopleID == id)
+		// 			.Include(x => x.Show),
+		// 		y => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == y),
+		// 		x => x.Show.Title,
+		// 		where,
+		// 		sort,
+		// 		limit);
+		// 	if (!roles.Any() && await GetOrDefault(id) == null)
+		// 		throw new ItemNotFoundException();
+		// 	return roles;
+		// }
 
-		/// <inheritdoc />
-		public Task<ICollection<PeopleRole>> GetFromPeople(string slug,
-			Expression<Func<PeopleRole, bool>>? where = null,
-			Sort<PeopleRole>? sort = default,
-			Pagination? limit = default)
-		{
-			return Task.FromResult<ICollection<PeopleRole>>(new List<PeopleRole>());
-			// ICollection<PeopleRole> roles = await ApplyFilters(_database.PeopleRoles
-			// 		.Where(x => x.People.Slug == slug)
-			// 		.Include(x => x.Show),
-			// 	id => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id),
-			// 	x => x.Show.Title,
-			// 	where,
-			// 	sort,
-			// 	limit);
-			// if (!roles.Any() && await GetOrDefault(slug) == null)
-			// 	throw new ItemNotFoundException();
-			// return roles;
-		}
+		// /// <inheritdoc />
+		// public Task<ICollection<PeopleRole>> GetFromPeople(string slug,
+		// 	Expression<Func<PeopleRole, bool>>? where = null,
+		// 	Sort<PeopleRole>? sort = default,
+		// 	Pagination? limit = default)
+		// {
+		// 	ICollection<PeopleRole> roles = await ApplyFilters(_database.PeopleRoles
+		// 			.Where(x => x.People.Slug == slug)
+		// 			.Include(x => x.Show),
+		// 		id => _database.PeopleRoles.FirstOrDefaultAsync(x => x.ID == id),
+		// 		x => x.Show.Title,
+		// 		where,
+		// 		sort,
+		// 		limit);
+		// 	if (!roles.Any() && await GetOrDefault(slug) == null)
+		// 		throw new ItemNotFoundException();
+		// 	return roles;
+		// }
 	}
 }

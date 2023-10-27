@@ -16,14 +16,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Permissions;
-using Kyoo.Abstractions.Models.Utils;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using static Kyoo.Abstractions.Models.Utils.Constants;
 
@@ -44,7 +40,7 @@ namespace Kyoo.Core.Api
 		/// <summary>
 		/// The library item repository used to modify or retrieve information in the data store.
 		/// </summary>
-		private readonly ILibraryItemRepository _libraryItems;
+		private readonly IRepository<LibraryItem> _libraryItems;
 
 		/// <summary>
 		/// Create a new <see cref="LibraryItemApi"/>.
@@ -53,7 +49,7 @@ namespace Kyoo.Core.Api
 		/// The library item repository used to modify or retrieve information in the data store.
 		/// </param>
 		/// <param name="thumbs">Thumbnail manager to retrieve images.</param>
-		public LibraryItemApi(ILibraryItemRepository libraryItems, IThumbnailsManager thumbs)
+		public LibraryItemApi(IRepository<LibraryItem> libraryItems, IThumbnailsManager thumbs)
 			: base(libraryItems, thumbs)
 		{
 			_libraryItems = libraryItems;

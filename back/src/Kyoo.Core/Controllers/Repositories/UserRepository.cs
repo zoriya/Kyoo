@@ -29,7 +29,7 @@ namespace Kyoo.Core.Controllers
 	/// <summary>
 	/// A repository for users.
 	/// </summary>
-	public class UserRepository : LocalRepository<User>, IUserRepository
+	public class UserRepository : LocalRepository<User>
 	{
 		/// <summary>
 		/// The database handle

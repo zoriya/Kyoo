@@ -27,6 +27,7 @@ using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Exceptions;
+using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Core.Api;
 using Kyoo.Postgresql;
 using Kyoo.Utils;
@@ -83,7 +84,7 @@ namespace Kyoo.Core.Controllers
 		/// Sort the given query.
 		/// </summary>
 		/// <param name="query">The query to sort.</param>
-		/// <param name="sortBy">How to sort the query</param>
+		/// <param name="sortBy">How to sort the query.</param>
 		/// <returns>The newly sorted query.</returns>
 		protected IOrderedQueryable<T> Sort(IQueryable<T> query, Sort<T>? sortBy = null)
 		{
@@ -268,6 +269,15 @@ namespace Kyoo.Core.Controllers
 			return Expression.Lambda<Func<T, bool>>(filter!, x);
 		}
 
+		protected IQueryable<T> AddIncludes(IQueryable<T> query, Include<T>? include)
+		{
+			if (include == null)
+				return query;
+			foreach (string field in include.Fields)
+				query = query.Include(field);
+			return query;
+		}
+
 		protected void SetBackingImage(T? obj)
 		{
 			if (obj is not IThumbnails thumbs)
@@ -306,50 +316,66 @@ namespace Kyoo.Core.Controllers
 		}
 
 		/// <inheritdoc/>
-		public virtual async Task<T> Get(int id)
+		public virtual async Task<T> Get(int id, Include<T>? include = default)
 		{
-			T? ret = await GetOrDefault(id);
+			T? ret = await GetOrDefault(id, include);
 			if (ret == null)
 				throw new ItemNotFoundException($"No {typeof(T).Name} found with the id {id}");
 			return ret;
 		}
 
 		/// <inheritdoc/>
-		public virtual async Task<T> Get(string slug)
+		public virtual async Task<T> Get(string slug, Include<T>? include = default)
 		{
-			T? ret = await GetOrDefault(slug);
+			T? ret = await GetOrDefault(slug, include);
 			if (ret == null)
 				throw new ItemNotFoundException($"No {typeof(T).Name} found with the slug {slug}");
 			return ret;
 		}
 
 		/// <inheritdoc/>
-		public virtual async Task<T> Get(Expression<Func<T, bool>> where)
+		public virtual async Task<T> Get(Expression<Func<T, bool>> where, Include<T>? include = default)
 		{
-			T? ret = await GetOrDefault(where);
+			T? ret = await GetOrDefault(where, include: include);
 			if (ret == null)
 				throw new ItemNotFoundException($"No {typeof(T).Name} found with the given predicate.");
 			return ret;
 		}
 
 		/// <inheritdoc />
-		public virtual Task<T?> GetOrDefault(int id)
+		public virtual Task<T?> GetOrDefault(int id, Include<T>? include = default)
 		{
-			return Database.Set<T>().FirstOrDefaultAsync(x => x.Id == id).Then(SetBackingImage);
+			return AddIncludes(Database.Set<T>(), include)
+				.FirstOrDefaultAsync(x => x.Id == id)
+				.Then(SetBackingImage);
 		}
 
 		/// <inheritdoc />
-		public virtual Task<T?> GetOrDefault(string slug)
+		public virtual Task<T?> GetOrDefault(string slug, Include<T>? include = default)
 		{
 			if (slug == "random")
-				return Database.Set<T>().OrderBy(x => EF.Functions.Random()).FirstOrDefaultAsync().Then(SetBackingImage);
-			return Database.Set<T>().FirstOrDefaultAsync(x => x.Slug == slug).Then(SetBackingImage);
+			{
+				return AddIncludes(Database.Set<T>(), include)
+					.OrderBy(x => EF.Functions.Random())
+					.FirstOrDefaultAsync()
+					.Then(SetBackingImage);
+			}
+			return AddIncludes(Database.Set<T>(), include)
+				.FirstOrDefaultAsync(x => x.Slug == slug)
+				.Then(SetBackingImage);
 		}
 
 		/// <inheritdoc />
-		public virtual Task<T?> GetOrDefault(Expression<Func<T, bool>> where, Sort<T>? sortBy = default)
+		public virtual Task<T?> GetOrDefault(Expression<Func<T, bool>> where,
+			Include<T>? include = default,
+			Sort<T>? sortBy = default)
 		{
-			return Sort(Database.Set<T>(), sortBy).FirstOrDefaultAsync(where).Then(SetBackingImage);
+			return Sort(
+					AddIncludes(Database.Set<T>(), include),
+					sortBy
+				)
+				.FirstOrDefaultAsync(where)
+				.Then(SetBackingImage);
 		}
 
 		/// <inheritdoc/>
@@ -358,9 +384,10 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc/>
 		public virtual async Task<ICollection<T>> GetAll(Expression<Func<T, bool>>? where = null,
 			Sort<T>? sort = default,
-			Pagination? limit = default)
+			Pagination? limit = default,
+			Include<T>? include = default)
 		{
-			return (await ApplyFilters(Database.Set<T>(), where, sort, limit))
+			return (await ApplyFilters(Database.Set<T>(), where, sort, limit, include))
 				.Select(SetBackingImageSelf).ToList();
 		}
 
@@ -371,12 +398,15 @@ namespace Kyoo.Core.Controllers
 		/// <param name="where">An expression to filter based on arbitrary conditions</param>
 		/// <param name="sort">The sort settings (sort order and sort by)</param>
 		/// <param name="limit">Pagination information (where to start and how many to get)</param>
+		/// <param name="include">Related fields to also load with this query.</param>
 		/// <returns>The filtered query</returns>
 		protected async Task<ICollection<T>> ApplyFilters(IQueryable<T> query,
 			Expression<Func<T, bool>>? where = null,
 			Sort<T>? sort = default,
-			Pagination? limit = default)
+			Pagination? limit = default,
+			Include<T>? include = default)
 		{
+			query = AddIncludes(query, include);
 			query = Sort(query, sort);
 			if (where != null)
 				query = query.Where(where);

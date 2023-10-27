@@ -37,7 +37,7 @@ namespace Kyoo.Tests.Database
 		protected RepositoryTests(RepositoryActivator repositories)
 		{
 			Repositories = repositories;
-			_repository = Repositories.LibraryManager.GetRepository<T>();
+			_repository = Repositories.GetRepository<T>();
 		}
 
 		public void Dispose()

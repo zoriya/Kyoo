@@ -21,7 +21,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
-using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Postgresql;
 using Kyoo.Utils;
 using Microsoft.EntityFrameworkCore;
@@ -31,7 +30,7 @@ namespace Kyoo.Core.Controllers
 	/// <summary>
 	/// A local repository to handle shows
 	/// </summary>
-	public class ShowRepository : LocalRepository<Show>, IShowRepository
+	public class ShowRepository : LocalRepository<Show>
 	{
 		/// <summary>
 		/// The database handle
@@ -41,12 +40,12 @@ namespace Kyoo.Core.Controllers
 		/// <summary>
 		/// A studio repository to handle creation/validation of related studios.
 		/// </summary>
-		private readonly IStudioRepository _studios;
+		private readonly IRepository<Studio> _studios;
 
 		/// <summary>
 		/// A people repository to handle creation/validation of related people.
 		/// </summary>
-		private readonly IPeopleRepository _people;
+		private readonly IRepository<People> _people;
 
 		/// <inheritdoc />
 		protected override Sort<Show> DefaultSort => new Sort<Show>.By(x => x.Name);
@@ -59,8 +58,8 @@ namespace Kyoo.Core.Controllers
 		/// <param name="people">A people repository</param>
 		/// <param name="thumbs">The thumbnail manager used to store images.</param>
 		public ShowRepository(DatabaseContext database,
-			IStudioRepository studios,
-			IPeopleRepository people,
+			IRepository<Studio> studios,
+			IRepository<People> people,
 			IThumbnailsManager thumbs)
 			: base(database, thumbs)
 		{
@@ -133,17 +132,6 @@ namespace Kyoo.Core.Controllers
 				await Database.Entry(resource).Collection(x => x.People!).LoadAsync();
 				resource.People = changed.People;
 			}
-		}
-
-		/// <inheritdoc />
-		public async Task<string> GetSlug(int showID)
-		{
-			string? ret = await _database.Shows.Where(x => x.Id == showID)
-				.Select(x => x.Slug)
-				.FirstOrDefaultAsync();
-			if (ret == null)
-				throw new ItemNotFoundException();
-			return ret;
 		}
 
 		/// <inheritdoc />

@@ -62,17 +62,18 @@ namespace Kyoo.Core.Api
 		/// Get a specific resource via it's ID or it's slug.
 		/// </remarks>
 		/// <param name="identifier">The ID or slug of the resource to retrieve.</param>
+		/// <param name="fields">The aditional fields to include in the result.</param>
 		/// <returns>The retrieved resource.</returns>
 		/// <response code="404">A resource with the given ID or slug does not exist.</response>
 		[HttpGet("{identifier:id}")]
 		[PartialPermission(Kind.Read)]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<T>> Get(Identifier identifier)
+		public async Task<ActionResult<T>> Get(Identifier identifier, [FromQuery] Include<T>? fields)
 		{
 			T? ret = await identifier.Match(
-				id => Repository.GetOrDefault(id),
-				slug => Repository.GetOrDefault(slug)
+				id => Repository.GetOrDefault(id, fields),
+				slug => Repository.GetOrDefault(slug, fields)
 			);
 			if (ret == null)
 				return NotFound();
@@ -106,6 +107,7 @@ namespace Kyoo.Core.Api
 		/// <param name="sortBy">Sort information about the query (sort by, sort order).</param>
 		/// <param name="where">Filter the returned items.</param>
 		/// <param name="pagination">How many items per page should be returned, where should the page start...</param>
+		/// <param name="fields">The aditional fields to include in the result.</param>
 		/// <returns>A list of resources that match every filters.</returns>
 		/// <response code="400">Invalid filters or sort information.</response>
 		[HttpGet]
@@ -115,12 +117,14 @@ namespace Kyoo.Core.Api
 		public async Task<ActionResult<Page<T>>> GetAll(
 			[FromQuery] Sort<T> sortBy,
 			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] Pagination pagination)
+			[FromQuery] Pagination pagination,
+			[FromQuery] Include<T>? fields)
 		{
 			ICollection<T> resources = await Repository.GetAll(
 				ApiHelper.ParseWhere<T>(where),
 				sortBy,
-				pagination
+				pagination,
+				fields
 			);
 
 			return Page(resources, pagination.Limit);

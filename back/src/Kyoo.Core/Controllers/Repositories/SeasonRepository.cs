@@ -32,7 +32,7 @@ namespace Kyoo.Core.Controllers
 	/// <summary>
 	/// A local repository to handle seasons.
 	/// </summary>
-	public class SeasonRepository : LocalRepository<Season>, ISeasonRepository
+	public class SeasonRepository : LocalRepository<Season>
 	{
 		/// <summary>
 		/// The database handle
@@ -49,7 +49,7 @@ namespace Kyoo.Core.Controllers
 		/// <param name="shows">A shows repository</param>
 		/// <param name="thumbs">The thumbnail manager used to store images.</param>
 		public SeasonRepository(DatabaseContext database,
-			IShowRepository shows,
+			IRepository<Show> shows,
 			IThumbnailsManager thumbs)
 			: base(database, thumbs)
 		{
@@ -66,38 +66,6 @@ namespace Kyoo.Core.Controllers
 					OnResourceEdited(season);
 				}
 			};
-		}
-
-		/// <inheritdoc/>
-		public async Task<Season> Get(int showID, int seasonNumber)
-		{
-			Season? ret = await GetOrDefault(showID, seasonNumber);
-			if (ret == null)
-				throw new ItemNotFoundException($"No season {seasonNumber} found for the show {showID}");
-			return ret;
-		}
-
-		/// <inheritdoc/>
-		public async Task<Season> Get(string showSlug, int seasonNumber)
-		{
-			Season? ret = await GetOrDefault(showSlug, seasonNumber);
-			if (ret == null)
-				throw new ItemNotFoundException($"No season {seasonNumber} found for the show {showSlug}");
-			return ret;
-		}
-
-		/// <inheritdoc/>
-		public Task<Season?> GetOrDefault(int showID, int seasonNumber)
-		{
-			return _database.Seasons.FirstOrDefaultAsync(x => x.ShowId == showID
-				&& x.SeasonNumber == seasonNumber).Then(SetBackingImage);
-		}
-
-		/// <inheritdoc/>
-		public Task<Season?> GetOrDefault(string showSlug, int seasonNumber)
-		{
-			return _database.Seasons.FirstOrDefaultAsync(x => x.Show!.Slug == showSlug
-				&& x.SeasonNumber == seasonNumber).Then(SetBackingImage);
 		}
 
 		/// <inheritdoc/>
@@ -119,7 +87,7 @@ namespace Kyoo.Core.Controllers
 			await base.Create(obj);
 			obj.ShowSlug = _database.Shows.First(x => x.Id == obj.ShowId).Slug;
 			_database.Entry(obj).State = EntityState.Added;
-			await _database.SaveChangesAsync(() => Get(obj.ShowId, obj.SeasonNumber));
+			await _database.SaveChangesAsync(() => Get(x => x.ShowId == obj.ShowId && x.SeasonNumber == obj.SeasonNumber));
 			OnResourceCreated(obj);
 			return obj;
 		}

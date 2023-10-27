@@ -54,7 +54,7 @@ namespace Kyoo.Core.Api
 		/// <param name="thumbs">The thumbnail manager used to retrieve images paths.</param>
 		public SeasonApi(ILibraryManager libraryManager,
 			IThumbnailsManager thumbs)
-			: base(libraryManager.SeasonRepository, thumbs)
+			: base(libraryManager.Seasons, thumbs)
 		{
 			_libraryManager = libraryManager;
 		}
@@ -69,6 +69,7 @@ namespace Kyoo.Core.Api
 		/// <param name="sortBy">A key to sort episodes by.</param>
 		/// <param name="where">An optional list of filters.</param>
 		/// <param name="pagination">The number of episodes to return.</param>
+		/// <param name="fields">The aditional fields to include in the result.</param>
 		/// <returns>A page of episodes.</returns>
 		/// <response code="400">The filters or the sort parameters are invalid.</response>
 		/// <response code="404">No season with the given ID or slug could be found.</response>
@@ -81,15 +82,17 @@ namespace Kyoo.Core.Api
 		public async Task<ActionResult<Page<Episode>>> GetEpisode(Identifier identifier,
 			[FromQuery] Sort<Episode> sortBy,
 			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] Pagination pagination)
+			[FromQuery] Pagination pagination,
+			[FromQuery] Include<Episode> fields)
 		{
-			ICollection<Episode> resources = await _libraryManager.GetAll(
+			ICollection<Episode> resources = await _libraryManager.Episodes.GetAll(
 				ApiHelper.ParseWhere(where, identifier.Matcher<Episode>(x => x.SeasonId, x => x.Season!.Slug)),
 				sortBy,
-				pagination
+				pagination,
+				fields
 			);
 
-			if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Season>()) == null)
+			if (!resources.Any() && await _libraryManager.Seasons.GetOrDefault(identifier.IsSame<Season>()) == null)
 				return NotFound();
 			return Page(resources, pagination.Limit);
 		}
@@ -101,15 +104,19 @@ namespace Kyoo.Core.Api
 		/// Get the show that this season is part of.
 		/// </remarks>
 		/// <param name="identifier">The ID or slug of the <see cref="Season"/>.</param>
+		/// <param name="fields">The aditional fields to include in the result.</param>
 		/// <returns>The show that contains this season.</returns>
 		/// <response code="404">No season with the given ID or slug could be found.</response>
 		[HttpGet("{identifier:id}/show")]
 		[PartialPermission(Kind.Read)]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Show>> GetShow(Identifier identifier)
+		public async Task<ActionResult<Show>> GetShow(Identifier identifier, [FromQuery] Include<Show> fields)
 		{
-			Show? ret = await _libraryManager.GetOrDefault(identifier.IsContainedIn<Show, Season>(x => x.Seasons!));
+			Show? ret = await _libraryManager.Shows.GetOrDefault(
+				identifier.IsContainedIn<Show, Season>(x => x.Seasons!),
+				fields
+			);
 			if (ret == null)
 				return NotFound();
 			return ret;

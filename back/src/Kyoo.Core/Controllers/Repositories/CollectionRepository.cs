@@ -30,7 +30,7 @@ namespace Kyoo.Core.Controllers
 	/// <summary>
 	/// A local repository to handle collections
 	/// </summary>
-	public class CollectionRepository : LocalRepository<Collection>, ICollectionRepository
+	public class CollectionRepository : LocalRepository<Collection>
 	{
 		/// <summary>
 		/// The database handle

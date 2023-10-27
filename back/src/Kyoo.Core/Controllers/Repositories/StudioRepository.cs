@@ -30,7 +30,7 @@ namespace Kyoo.Core.Controllers
 	/// <summary>
 	/// A local repository to handle studios
 	/// </summary>
-	public class StudioRepository : LocalRepository<Studio>, IStudioRepository
+	public class StudioRepository : LocalRepository<Studio>
 	{
 		/// <summary>
 		/// The database handle

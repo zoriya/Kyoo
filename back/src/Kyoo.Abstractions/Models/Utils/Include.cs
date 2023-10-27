@@ -16,33 +16,33 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System.Diagnostics.CodeAnalysis;
-using Kyoo.Abstractions.Controllers;
-using Kyoo.Abstractions.Models;
-using Xunit;
-using Xunit.Abstractions;
+using System.ComponentModel.DataAnnotations;
+using System.Reflection;
+using Kyoo.Abstractions.Models.Attributes;
 
-namespace Kyoo.Tests.Database
+namespace Kyoo.Abstractions.Models.Utils;
+
+public class Include<T>
+	where T : IResource
 {
-	namespace PostgreSQL
-	{
-		[Collection(nameof(Postgresql))]
-		public class UserTests : AUserTests
-		{
-			public UserTests(PostgresFixture postgres, ITestOutputHelper output)
-				: base(new RepositoryActivator(output, postgres)) { }
-		}
-	}
+	public string[] Fields { get; private init; }
 
-	public abstract class AUserTests : RepositoryTests<User>
+	public static Include<T> From(string fields)
 	{
-		[SuppressMessage("ReSharper", "NotAccessedField.Local")]
-		private readonly IRepository<User> _repository;
+		if (string.IsNullOrEmpty(fields))
+			return new();
 
-		protected AUserTests(RepositoryActivator repositories)
-			: base(repositories)
+		string[] values = fields.Split(',');
+		foreach (string field in values)
 		{
-			_repository = Repositories.LibraryManager.Users;
+			PropertyInfo? prop = typeof(T).GetProperty(field, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+			if (prop?.GetCustomAttribute<LoadableRelationAttribute>() == null)
+				throw new ValidationException($"No loadable relation with the name {field}.");
 		}
+
+		return new()
+		{
+			Fields = values,
+		};
 	}
 }
