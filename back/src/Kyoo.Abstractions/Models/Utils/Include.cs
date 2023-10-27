@@ -25,8 +25,15 @@ using Kyoo.Abstractions.Models.Attributes;
 
 namespace Kyoo.Abstractions.Models.Utils;
 
+/// <summary>
+/// The aditional fields to include in the result.
+/// </summary>
+/// <typeparam name="T">The type related to the new fields</typeparam>
 public class Include<T>
 {
+	/// <summary>
+	/// The aditional fields to include in the result.
+	/// </summary>
 	public ICollection<string> Fields { get; private init; } = ArraySegment<string>.Empty;
 
 	public static Include<T> From(string? fields)

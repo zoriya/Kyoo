@@ -84,7 +84,7 @@ namespace Kyoo.Abstractions.Models
 		[SerializeIgnore] public int ShowId { get; set; }
 
 		/// <summary>
-		/// The show that contains this episode. This must be explicitly loaded via a call to <see cref="ILibraryManager.Load"/>.
+		/// The show that contains this episode.
 		/// </summary>
 		[LoadableRelation(nameof(ShowId))] public Show? Show { get; set; }
 
@@ -95,7 +95,6 @@ namespace Kyoo.Abstractions.Models
 
 		/// <summary>
 		/// The season that contains this episode.
-		/// This must be explicitly loaded via a call to <see cref="ILibraryManager.Load"/>.
 		/// </summary>
 		/// <remarks>
 		/// This can be null if the season is unknown and the episode is only identified

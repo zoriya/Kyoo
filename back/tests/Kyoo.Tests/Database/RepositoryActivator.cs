@@ -82,7 +82,7 @@ namespace Kyoo.Tests.Database
 		}
 
 		public IRepository<T> GetRepository<T>()
-			where T: class, IResource
+			where T : class, IResource
 		{
 			return _repositories.First(x => x.RepositoryType == typeof(T)) as IRepository<T>;
 		}
