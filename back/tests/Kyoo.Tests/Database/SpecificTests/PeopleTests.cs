@@ -40,12 +40,12 @@ namespace Kyoo.Tests.Database
 
 	public abstract class APeopleTests : RepositoryTests<People>
 	{
-		private readonly IPeopleRepository _repository;
+		private readonly IRepository<People> _repository;
 
 		protected APeopleTests(RepositoryActivator repositories)
 			: base(repositories)
 		{
-			_repository = Repositories.LibraryManager.PeopleRepository;
+			_repository = Repositories.LibraryManager.People;
 		}
 
 		[Fact]

@@ -22,9 +22,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
-using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Postgresql;
-using Kyoo.Utils;
 using Microsoft.EntityFrameworkCore;
 
 namespace Kyoo.Core.Controllers
@@ -32,14 +30,14 @@ namespace Kyoo.Core.Controllers
 	/// <summary>
 	/// A local repository to handle episodes.
 	/// </summary>
-	public class EpisodeRepository : LocalRepository<Episode>, IEpisodeRepository
+	public class EpisodeRepository : LocalRepository<Episode>
 	{
 		/// <summary>
 		/// The database handle
 		/// </summary>
 		private readonly DatabaseContext _database;
 
-		private readonly IShowRepository _shows;
+		private readonly IRepository<Show> _shows;
 
 		/// <inheritdoc />
 		// Use absolute numbers by default and fallback to season/episodes if it does not exists.
@@ -56,7 +54,7 @@ namespace Kyoo.Core.Controllers
 		/// <param name="shows">A show repository</param>
 		/// <param name="thumbs">The thumbnail manager used to store images.</param>
 		public EpisodeRepository(DatabaseContext database,
-			IShowRepository shows,
+			IRepository<Show> shows,
 			IThumbnailsManager thumbs)
 			: base(database, thumbs)
 		{
@@ -74,60 +72,6 @@ namespace Kyoo.Core.Controllers
 					OnResourceEdited(ep);
 				}
 			};
-		}
-
-		/// <inheritdoc />
-		public Task<Episode?> GetOrDefault(int showID, int seasonNumber, int episodeNumber)
-		{
-			return _database.Episodes.FirstOrDefaultAsync(x => x.ShowId == showID
-				&& x.SeasonNumber == seasonNumber
-				&& x.EpisodeNumber == episodeNumber).Then(SetBackingImage);
-		}
-
-		/// <inheritdoc />
-		public Task<Episode?> GetOrDefault(string showSlug, int seasonNumber, int episodeNumber)
-		{
-			return _database.Episodes.FirstOrDefaultAsync(x => x.Show!.Slug == showSlug
-				&& x.SeasonNumber == seasonNumber
-				&& x.EpisodeNumber == episodeNumber).Then(SetBackingImage);
-		}
-
-		/// <inheritdoc />
-		public async Task<Episode> Get(int showID, int seasonNumber, int episodeNumber)
-		{
-			Episode? ret = await GetOrDefault(showID, seasonNumber, episodeNumber);
-			if (ret == null)
-				throw new ItemNotFoundException($"No episode S{seasonNumber}E{episodeNumber} found on the show {showID}.");
-			return ret;
-		}
-
-		/// <inheritdoc />
-		public async Task<Episode> Get(string showSlug, int seasonNumber, int episodeNumber)
-		{
-			Episode? ret = await GetOrDefault(showSlug, seasonNumber, episodeNumber);
-			if (ret == null)
-				throw new ItemNotFoundException($"No episode S{seasonNumber}E{episodeNumber} found on the show {showSlug}.");
-			return ret;
-		}
-
-		/// <inheritdoc />
-		public async Task<Episode> GetAbsolute(int showID, int absoluteNumber)
-		{
-			Episode? ret = await _database.Episodes.FirstOrDefaultAsync(x => x.ShowId == showID
-				&& x.AbsoluteNumber == absoluteNumber).Then(SetBackingImage);
-			if (ret == null)
-				throw new ItemNotFoundException();
-			return ret;
-		}
-
-		/// <inheritdoc />
-		public async Task<Episode> GetAbsolute(string showSlug, int absoluteNumber)
-		{
-			Episode? ret = await _database.Episodes.FirstOrDefaultAsync(x => x.Show!.Slug == showSlug
-				&& x.AbsoluteNumber == absoluteNumber).Then(SetBackingImage);
-			if (ret == null)
-				throw new ItemNotFoundException();
-			return ret;
 		}
 
 		/// <inheritdoc />
@@ -156,9 +100,9 @@ namespace Kyoo.Core.Controllers
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
 			await _database.SaveChangesAsync(() =>
-				obj.SeasonNumber != null && obj.EpisodeNumber != null
-				? Get(obj.ShowId, obj.SeasonNumber.Value, obj.EpisodeNumber.Value)
-				: GetAbsolute(obj.ShowId, obj.AbsoluteNumber!.Value));
+				obj is { SeasonNumber: not null, EpisodeNumber: not null }
+				? Get(x => x.ShowId == obj.ShowId && x.SeasonNumber == obj.SeasonNumber && x.EpisodeNumber == obj.EpisodeNumber)
+				: Get(x => x.ShowId == obj.ShowId && x.AbsoluteNumber == obj.AbsoluteNumber));
 			OnResourceCreated(obj);
 			return obj;
 		}

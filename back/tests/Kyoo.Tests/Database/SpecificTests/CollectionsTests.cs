@@ -41,12 +41,12 @@ namespace Kyoo.Tests.Database
 
 	public abstract class ACollectionTests : RepositoryTests<Collection>
 	{
-		private readonly ICollectionRepository _repository;
+		private readonly IRepository<Collection> _repository;
 
 		protected ACollectionTests(RepositoryActivator repositories)
 			: base(repositories)
 		{
-			_repository = Repositories.LibraryManager.CollectionRepository;
+			_repository = Repositories.LibraryManager.Collections;
 		}
 
 		[Fact]

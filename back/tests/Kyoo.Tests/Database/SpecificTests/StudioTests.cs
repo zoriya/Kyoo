@@ -37,12 +37,12 @@ namespace Kyoo.Tests.Database
 	public abstract class AStudioTests : RepositoryTests<Studio>
 	{
 		[SuppressMessage("ReSharper", "NotAccessedField.Local")]
-		private readonly IStudioRepository _repository;
+		private readonly IRepository<Studio> _repository;
 
 		protected AStudioTests(RepositoryActivator repositories)
 			: base(repositories)
 		{
-			_repository = Repositories.LibraryManager.StudioRepository;
+			_repository = Repositories.LibraryManager.Studios;
 		}
 	}
 }

@@ -16,7 +16,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -53,7 +52,7 @@ namespace Kyoo.Core.Api
 		/// The library manager used to modify or retrieve information in the data store.
 		/// </param>
 		public StudioApi(ILibraryManager libraryManager)
-			: base(libraryManager.StudioRepository)
+			: base(libraryManager.Studios)
 		{
 			_libraryManager = libraryManager;
 		}
@@ -68,6 +67,7 @@ namespace Kyoo.Core.Api
 		/// <param name="sortBy">A key to sort shows by.</param>
 		/// <param name="where">An optional list of filters.</param>
 		/// <param name="pagination">The number of shows to return.</param>
+		/// <param name="fields">The aditional fields to include in the result.</param>
 		/// <returns>A page of shows.</returns>
 		/// <response code="400">The filters or the sort parameters are invalid.</response>
 		/// <response code="404">No studio with the given ID or slug could be found.</response>
@@ -80,15 +80,17 @@ namespace Kyoo.Core.Api
 		public async Task<ActionResult<Page<Show>>> GetShows(Identifier identifier,
 			[FromQuery] Sort<Show> sortBy,
 			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] Pagination pagination)
+			[FromQuery] Pagination pagination,
+			[FromQuery] Include<Show> fields)
 		{
-			ICollection<Show> resources = await _libraryManager.GetAll(
+			ICollection<Show> resources = await _libraryManager.Shows.GetAll(
 				ApiHelper.ParseWhere(where, identifier.Matcher<Show>(x => x.StudioId, x => x.Studio!.Slug)),
 				sortBy,
-				pagination
+				pagination,
+				fields
 			);
 
-			if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Studio>()) == null)
+			if (!resources.Any() && await _libraryManager.Studios.GetOrDefault(identifier.IsSame<Studio>()) == null)
 				return NotFound();
 			return Page(resources, pagination.Limit);
 		}

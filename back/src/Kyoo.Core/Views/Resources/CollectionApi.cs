@@ -54,7 +54,7 @@ namespace Kyoo.Core.Api
 		/// <param name="thumbs">The thumbnail manager used to retrieve images paths.</param>
 		public CollectionApi(ILibraryManager libraryManager,
 			IThumbnailsManager thumbs)
-			: base(libraryManager.CollectionRepository, thumbs)
+			: base(libraryManager.Collections, thumbs)
 		{
 			_libraryManager = libraryManager;
 		}
@@ -69,6 +69,7 @@ namespace Kyoo.Core.Api
 		/// <param name="sortBy">A key to sort shows by.</param>
 		/// <param name="where">An optional list of filters.</param>
 		/// <param name="pagination">The number of shows to return.</param>
+		/// <param name="fields">The aditional fields to include in the result.</param>
 		/// <returns>A page of shows.</returns>
 		/// <response code="400">The filters or the sort parameters are invalid.</response>
 		/// <response code="404">No collection with the given ID could be found.</response>
@@ -81,15 +82,17 @@ namespace Kyoo.Core.Api
 		public async Task<ActionResult<Page<Show>>> GetShows(Identifier identifier,
 			[FromQuery] Sort<Show> sortBy,
 			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] Pagination pagination)
+			[FromQuery] Pagination pagination,
+			[FromQuery] Include<Show> fields)
 		{
-			ICollection<Show> resources = await _libraryManager.GetAll(
+			ICollection<Show> resources = await _libraryManager.Shows.GetAll(
 				ApiHelper.ParseWhere(where, identifier.IsContainedIn<Show, Collection>(x => x.Collections!)),
 				sortBy,
-				pagination
+				pagination,
+				fields
 			);
 
-			if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Collection>()) == null)
+			if (!resources.Any() && await _libraryManager.Collections.GetOrDefault(identifier.IsSame<Collection>()) == null)
 				return NotFound();
 			return Page(resources, pagination.Limit);
 		}

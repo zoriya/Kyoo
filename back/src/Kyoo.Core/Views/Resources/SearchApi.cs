@@ -22,6 +22,7 @@ using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Permissions;
+using Kyoo.Abstractions.Models.Utils;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using static Kyoo.Abstractions.Models.Utils.Constants;
@@ -53,54 +54,22 @@ namespace Kyoo.Core.Api
 		}
 
 		/// <summary>
-		/// Global search
-		/// </summary>
-		/// <remarks>
-		/// Search for collections, shows, episodes, staff, genre and studios at the same time
-		/// </remarks>
-		/// <param name="query">The query to search for.</param>
-		/// <returns>A list of every resources found for the specified query.</returns>
-		[HttpGet]
-		[Permission(nameof(Collection), Kind.Read)]
-		[Permission(nameof(Show), Kind.Read)]
-		[Permission(nameof(Episode), Kind.Read)]
-		[Permission(nameof(People), Kind.Read)]
-		[Permission(nameof(Genre), Kind.Read)]
-		[Permission(nameof(Studio), Kind.Read)]
-		[ProducesResponseType(StatusCodes.Status200OK)]
-		public async Task<ActionResult<SearchResult>> Search(string query)
-		{
-			HttpContext.Items["ResourceType"] = nameof(Episode);
-			HttpContext.Items["fields"] = new[] { nameof(Episode.Show) };
-			return new SearchResult
-			{
-				Query = query,
-				Collections = await _libraryManager.Search<Collection>(query),
-				Items = await _libraryManager.Search<LibraryItem>(query),
-				Movies = await _libraryManager.Search<Movie>(query),
-				Shows = await _libraryManager.Search<Show>(query),
-				Episodes = await _libraryManager.Search<Episode>(query),
-				People = await _libraryManager.Search<People>(query),
-				Studios = await _libraryManager.Search<Studio>(query)
-			};
-		}
-
-		/// <summary>
 		/// Search collections
 		/// </summary>
 		/// <remarks>
 		/// Search for collections
 		/// </remarks>
 		/// <param name="query">The query to search for.</param>
+		/// <param name="fields">The aditional fields to include in the result.</param>
 		/// <returns>A list of collections found for the specified query.</returns>
 		[HttpGet("collections")]
 		[HttpGet("collection", Order = AlternativeRoute)]
 		[Permission(nameof(Collection), Kind.Read)]
 		[ApiDefinition("Collections")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
-		public Task<ICollection<Collection>> SearchCollections(string query)
+		public Task<ICollection<Collection>> SearchCollections(string query, [FromQuery] Include<Collection> fields)
 		{
-			return _libraryManager.Search<Collection>(query);
+			return _libraryManager.Collections.Search(query);
 		}
 
 		/// <summary>
@@ -110,15 +79,16 @@ namespace Kyoo.Core.Api
 		/// Search for shows
 		/// </remarks>
 		/// <param name="query">The query to search for.</param>
+		/// <param name="fields">The aditional fields to include in the result.</param>
 		/// <returns>A list of shows found for the specified query.</returns>
 		[HttpGet("shows")]
 		[HttpGet("show", Order = AlternativeRoute)]
 		[Permission(nameof(Show), Kind.Read)]
 		[ApiDefinition("Shows")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
-		public Task<ICollection<Show>> SearchShows(string query)
+		public Task<ICollection<Show>> SearchShows(string query, [FromQuery] Include<Show> fields)
 		{
-			return _libraryManager.Search<Show>(query);
+			return _libraryManager.Shows.Search(query);
 		}
 
 		/// <summary>
@@ -128,15 +98,16 @@ namespace Kyoo.Core.Api
 		/// Search for items
 		/// </remarks>
 		/// <param name="query">The query to search for.</param>
+		/// <param name="fields">The aditional fields to include in the result.</param>
 		/// <returns>A list of items found for the specified query.</returns>
 		[HttpGet("items")]
 		[HttpGet("item", Order = AlternativeRoute)]
 		[Permission(nameof(Show), Kind.Read)]
 		[ApiDefinition("Items")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
-		public Task<ICollection<LibraryItem>> SearchItems(string query)
+		public Task<ICollection<LibraryItem>> SearchItems(string query, [FromQuery] Include<LibraryItem> fields)
 		{
-			return _libraryManager.Search<LibraryItem>(query);
+			return _libraryManager.LibraryItems.Search(query);
 		}
 
 		/// <summary>
@@ -146,15 +117,16 @@ namespace Kyoo.Core.Api
 		/// Search for episodes
 		/// </remarks>
 		/// <param name="query">The query to search for.</param>
+		/// <param name="fields">The aditional fields to include in the result.</param>
 		/// <returns>A list of episodes found for the specified query.</returns>
 		[HttpGet("episodes")]
 		[HttpGet("episode", Order = AlternativeRoute)]
 		[Permission(nameof(Episode), Kind.Read)]
 		[ApiDefinition("Episodes")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
-		public Task<ICollection<Episode>> SearchEpisodes(string query)
+		public Task<ICollection<Episode>> SearchEpisodes(string query, [FromQuery] Include<Episode> fields)
 		{
-			return _libraryManager.Search<Episode>(query);
+			return _libraryManager.Episodes.Search(query);
 		}
 
 		/// <summary>
@@ -164,6 +136,7 @@ namespace Kyoo.Core.Api
 		/// Search for staff
 		/// </remarks>
 		/// <param name="query">The query to search for.</param>
+		/// <param name="fields">The aditional fields to include in the result.</param>
 		/// <returns>A list of staff members found for the specified query.</returns>
 		[HttpGet("staff")]
 		[HttpGet("person", Order = AlternativeRoute)]
@@ -171,9 +144,9 @@ namespace Kyoo.Core.Api
 		[Permission(nameof(People), Kind.Read)]
 		[ApiDefinition("Staff")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
-		public Task<ICollection<People>> SearchPeople(string query)
+		public Task<ICollection<People>> SearchPeople(string query, [FromQuery] Include<People> fields)
 		{
-			return _libraryManager.Search<People>(query);
+			return _libraryManager.People.Search(query);
 		}
 
 		/// <summary>
@@ -183,15 +156,16 @@ namespace Kyoo.Core.Api
 		/// Search for studios
 		/// </remarks>
 		/// <param name="query">The query to search for.</param>
+		/// <param name="fields">The aditional fields to include in the result.</param>
 		/// <returns>A list of studios found for the specified query.</returns>
 		[HttpGet("studios")]
 		[HttpGet("studio", Order = AlternativeRoute)]
 		[Permission(nameof(Studio), Kind.Read)]
 		[ApiDefinition("Studios")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
-		public Task<ICollection<Studio>> SearchStudios(string query)
+		public Task<ICollection<Studio>> SearchStudios(string query, [FromQuery] Include<Studio> fields)
 		{
-			return _libraryManager.Search<Studio>(query);
+			return _libraryManager.Studios.Search(query);
 		}
 	}
 }

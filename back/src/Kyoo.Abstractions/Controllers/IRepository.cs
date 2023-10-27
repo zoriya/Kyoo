@@ -22,6 +22,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Exceptions;
+using Kyoo.Abstractions.Models.Utils;
 
 namespace Kyoo.Abstractions.Controllers
 {
@@ -42,47 +43,55 @@ namespace Kyoo.Abstractions.Controllers
 		/// Get a resource from it's ID.
 		/// </summary>
 		/// <param name="id">The id of the resource</param>
+		/// <param name="include">The related fields to include.</param>
 		/// <exception cref="ItemNotFoundException">If the item could not be found.</exception>
 		/// <returns>The resource found</returns>
-		Task<T> Get(int id);
+		Task<T> Get(int id, Include<T>? include = default);
 
 		/// <summary>
 		/// Get a resource from it's slug.
 		/// </summary>
 		/// <param name="slug">The slug of the resource</param>
+		/// <param name="include">The related fields to include.</param>
 		/// <exception cref="ItemNotFoundException">If the item could not be found.</exception>
 		/// <returns>The resource found</returns>
-		Task<T> Get(string slug);
+		Task<T> Get(string slug, Include<T>? include = default);
 
 		/// <summary>
 		/// Get the first resource that match the predicate.
 		/// </summary>
 		/// <param name="where">A predicate to filter the resource.</param>
+		/// <param name="include">The related fields to include.</param>
 		/// <exception cref="ItemNotFoundException">If the item could not be found.</exception>
 		/// <returns>The resource found</returns>
-		Task<T> Get(Expression<Func<T, bool>> where);
+		Task<T> Get(Expression<Func<T, bool>> where, Include<T>? include = default);
 
 		/// <summary>
 		/// Get a resource from it's ID or null if it is not found.
 		/// </summary>
 		/// <param name="id">The id of the resource</param>
+		/// <param name="include">The related fields to include.</param>
 		/// <returns>The resource found</returns>
-		Task<T?> GetOrDefault(int id);
+		Task<T?> GetOrDefault(int id, Include<T>? include = default);
 
 		/// <summary>
 		/// Get a resource from it's slug or null if it is not found.
 		/// </summary>
 		/// <param name="slug">The slug of the resource</param>
+		/// <param name="include">The related fields to include.</param>
 		/// <returns>The resource found</returns>
-		Task<T?> GetOrDefault(string slug);
+		Task<T?> GetOrDefault(string slug, Include<T>? include = default);
 
 		/// <summary>
 		/// Get the first resource that match the predicate or null if it is not found.
 		/// </summary>
 		/// <param name="where">A predicate to filter the resource.</param>
+		/// <param name="include">The related fields to include.</param>
 		/// <param name="sortBy">A custom sort method to handle cases where multiples items match the filters.</param>
 		/// <returns>The resource found</returns>
-		Task<T?> GetOrDefault(Expression<Func<T, bool>> where, Sort<T>? sortBy = default);
+		Task<T?> GetOrDefault(Expression<Func<T, bool>> where,
+			Include<T>? include = default,
+			Sort<T>? sortBy = default);
 
 		/// <summary>
 		/// Search for resources.
@@ -97,10 +106,12 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="where">A filter predicate</param>
 		/// <param name="sort">Sort information about the query (sort by, sort order)</param>
 		/// <param name="limit">How pagination should be done (where to start and how many to return)</param>
+		/// <param name="include">The related fields to include.</param>
 		/// <returns>A list of resources that match every filters</returns>
 		Task<ICollection<T>> GetAll(Expression<Func<T, bool>>? where = null,
 			Sort<T>? sort = default,
-			Pagination? limit = default);
+			Pagination? limit = default,
+			Include<T>? include = default);
 
 		/// <summary>
 		/// Get the number of resources that match the filter's predicate.
@@ -200,209 +211,4 @@ namespace Kyoo.Abstractions.Controllers
 		/// </summary>
 		Type RepositoryType { get; }
 	}
-
-	/// <summary>
-	/// A repository to handle shows.
-	/// </summary>
-	public interface IMovieRepository : IRepository<Movie> { }
-
-	/// <summary>
-	/// A repository to handle shows.
-	/// </summary>
-	public interface IShowRepository : IRepository<Show>
-	{
-		/// <summary>
-		/// Get a show's slug from it's ID.
-		/// </summary>
-		/// <param name="showID">The ID of the show</param>
-		/// <exception cref="ItemNotFoundException">If a show with the given ID is not found.</exception>
-		/// <returns>The show's slug</returns>
-		Task<string> GetSlug(int showID);
-	}
-
-	/// <summary>
-	/// A repository to handle seasons.
-	/// </summary>
-	public interface ISeasonRepository : IRepository<Season>
-	{
-		/// <summary>
-		/// Get a season from it's showID and it's seasonNumber
-		/// </summary>
-		/// <param name="showID">The id of the show</param>
-		/// <param name="seasonNumber">The season's number</param>
-		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-		/// <returns>The season found</returns>
-		Task<Season> Get(int showID, int seasonNumber);
-
-		/// <summary>
-		/// Get a season from it's show slug and it's seasonNumber
-		/// </summary>
-		/// <param name="showSlug">The slug of the show</param>
-		/// <param name="seasonNumber">The season's number</param>
-		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-		/// <returns>The season found</returns>
-		Task<Season> Get(string showSlug, int seasonNumber);
-
-		/// <summary>
-		/// Get a season from it's showID and it's seasonNumber or null if it is not found.
-		/// </summary>
-		/// <param name="showID">The id of the show</param>
-		/// <param name="seasonNumber">The season's number</param>
-		/// <returns>The season found</returns>
-		Task<Season?> GetOrDefault(int showID, int seasonNumber);
-
-		/// <summary>
-		/// Get a season from it's show slug and it's seasonNumber or null if it is not found.
-		/// </summary>
-		/// <param name="showSlug">The slug of the show</param>
-		/// <param name="seasonNumber">The season's number</param>
-		/// <returns>The season found</returns>
-		Task<Season?> GetOrDefault(string showSlug, int seasonNumber);
-	}
-
-	/// <summary>
-	/// The repository to handle episodes
-	/// </summary>
-	public interface IEpisodeRepository : IRepository<Episode>
-	{
-		// TODO replace the next methods with extension methods.
-
-		/// <summary>
-		/// Get a episode from it's showID, it's seasonNumber and it's episode number.
-		/// </summary>
-		/// <param name="showID">The id of the show</param>
-		/// <param name="seasonNumber">The season's number</param>
-		/// <param name="episodeNumber">The episode's number</param>
-		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-		/// <returns>The episode found</returns>
-		Task<Episode> Get(int showID, int seasonNumber, int episodeNumber);
-
-		/// <summary>
-		/// Get a episode from it's show slug, it's seasonNumber and it's episode number.
-		/// </summary>
-		/// <param name="showSlug">The slug of the show</param>
-		/// <param name="seasonNumber">The season's number</param>
-		/// <param name="episodeNumber">The episode's number</param>
-		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-		/// <returns>The episode found</returns>
-		Task<Episode> Get(string showSlug, int seasonNumber, int episodeNumber);
-
-		/// <summary>
-		/// Get a episode from it's showID, it's seasonNumber and it's episode number or null if it is not found.
-		/// </summary>
-		/// <param name="showID">The id of the show</param>
-		/// <param name="seasonNumber">The season's number</param>
-		/// <param name="episodeNumber">The episode's number</param>
-		/// <returns>The episode found</returns>
-		Task<Episode?> GetOrDefault(int showID, int seasonNumber, int episodeNumber);
-
-		/// <summary>
-		/// Get a episode from it's show slug, it's seasonNumber and it's episode number or null if it is not found.
-		/// </summary>
-		/// <param name="showSlug">The slug of the show</param>
-		/// <param name="seasonNumber">The season's number</param>
-		/// <param name="episodeNumber">The episode's number</param>
-		/// <returns>The episode found</returns>
-		Task<Episode?> GetOrDefault(string showSlug, int seasonNumber, int episodeNumber);
-
-		/// <summary>
-		/// Get a episode from it's showID and it's absolute number.
-		/// </summary>
-		/// <param name="showID">The id of the show</param>
-		/// <param name="absoluteNumber">The episode's absolute number (The episode number does not reset to 1 after the end of a season.</param>
-		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-		/// <returns>The episode found</returns>
-		Task<Episode> GetAbsolute(int showID, int absoluteNumber);
-
-		/// <summary>
-		/// Get a episode from it's showID and it's absolute number.
-		/// </summary>
-		/// <param name="showSlug">The slug of the show</param>
-		/// <param name="absoluteNumber">The episode's absolute number (The episode number does not reset to 1 after the end of a season.</param>
-		/// <exception cref="ItemNotFoundException">If the item is not found</exception>
-		/// <returns>The episode found</returns>
-		Task<Episode> GetAbsolute(string showSlug, int absoluteNumber);
-	}
-
-	/// <summary>
-	/// A repository to handle library items (A wrapper around shows and collections).
-	/// </summary>
-	public interface ILibraryItemRepository : IRepository<LibraryItem> { }
-
-	/// <summary>
-	/// A repository for collections
-	/// </summary>
-	public interface ICollectionRepository : IRepository<Collection> { }
-
-	/// <summary>
-	/// A repository for studios.
-	/// </summary>
-	public interface IStudioRepository : IRepository<Studio> { }
-
-	/// <summary>
-	/// A repository for people.
-	/// </summary>
-	public interface IPeopleRepository : IRepository<People>
-	{
-		/// <summary>
-		/// Get people's roles from a show.
-		/// </summary>
-		/// <param name="showID">The ID of the show</param>
-		/// <param name="where">A filter function</param>
-		/// <param name="sort">Sort information (sort order and sort by)</param>
-		/// <param name="limit">How many items to return and where to start</param>
-		/// <exception cref="ItemNotFoundException">No <see cref="Show"/> exist with the given ID.</exception>
-		/// <returns>A list of items that match every filters</returns>
-		Task<ICollection<PeopleRole>> GetFromShow(int showID,
-			Expression<Func<PeopleRole, bool>>? where = null,
-			Sort<PeopleRole>? sort = default,
-			Pagination? limit = default);
-
-		/// <summary>
-		/// Get people's roles from a show.
-		/// </summary>
-		/// <param name="showSlug">The slug of the show</param>
-		/// <param name="where">A filter function</param>
-		/// <param name="sort">Sort information (sort order and sort by)</param>
-		/// <param name="limit">How many items to return and where to start</param>
-		/// <exception cref="ItemNotFoundException">No <see cref="Show"/> exist with the given slug.</exception>
-		/// <returns>A list of items that match every filters</returns>
-		Task<ICollection<PeopleRole>> GetFromShow(string showSlug,
-			Expression<Func<PeopleRole, bool>>? where = null,
-			Sort<PeopleRole>? sort = default,
-			Pagination? limit = default);
-
-		/// <summary>
-		/// Get people's roles from a person.
-		/// </summary>
-		/// <param name="id">The id of the person</param>
-		/// <param name="where">A filter function</param>
-		/// <param name="sort">Sort information (sort order and sort by)</param>
-		/// <param name="limit">How many items to return and where to start</param>
-		/// <exception cref="ItemNotFoundException">No <see cref="People"/> exist with the given ID.</exception>
-		/// <returns>A list of items that match every filters</returns>
-		Task<ICollection<PeopleRole>> GetFromPeople(int id,
-			Expression<Func<PeopleRole, bool>>? where = null,
-			Sort<PeopleRole>? sort = default,
-			Pagination? limit = default);
-
-		/// <summary>
-		/// Get people's roles from a person.
-		/// </summary>
-		/// <param name="slug">The slug of the person</param>
-		/// <param name="where">A filter function</param>
-		/// <param name="sort">Sort information (sort order and sort by)</param>
-		/// <param name="limit">How many items to return and where to start</param>
-		/// <exception cref="ItemNotFoundException">No <see cref="People"/> exist with the given slug.</exception>
-		/// <returns>A list of items that match every filters</returns>
-		Task<ICollection<PeopleRole>> GetFromPeople(string slug,
-			Expression<Func<PeopleRole, bool>>? where = null,
-			Sort<PeopleRole>? sort = default,
-			Pagination? limit = default);
-	}
-
-	/// <summary>
-	/// A repository to handle users.
-	/// </summary>
-	public interface IUserRepository : IRepository<User> { }
 }

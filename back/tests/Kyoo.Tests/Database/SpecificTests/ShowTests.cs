@@ -42,12 +42,12 @@ namespace Kyoo.Tests.Database
 
 	public abstract class AShowTests : RepositoryTests<Show>
 	{
-		private readonly IShowRepository _repository;
+		private readonly IRepository<Show> _repository;
 
 		protected AShowTests(RepositoryActivator repositories)
 			: base(repositories)
 		{
-			_repository = Repositories.LibraryManager.ShowRepository;
+			_repository = Repositories.LibraryManager.Shows;
 		}
 
 		[Fact]
@@ -278,13 +278,6 @@ namespace Kyoo.Tests.Database
 			Assert.Equal("300!", created.Slug);
 		}
 
-		[Fact]
-		public async Task GetSlugTest()
-		{
-			Show reference = TestSample.Get<Show>();
-			Assert.Equal(reference.Slug, await _repository.GetSlug(reference.Id));
-		}
-
 		[Theory]
 		[InlineData("test")]
 		[InlineData("super")]
@@ -307,15 +300,11 @@ namespace Kyoo.Tests.Database
 		public async Task DeleteShowWithEpisodeAndSeason()
 		{
 			Show show = TestSample.Get<Show>();
-			await Repositories.LibraryManager.Load(show, x => x.Seasons);
-			await Repositories.LibraryManager.Load(show, x => x.Episodes);
 			Assert.Equal(1, await _repository.GetCount());
-			Assert.Single(show.Seasons!);
-			Assert.Single(show.Episodes!);
 			await _repository.Delete(show);
-			Assert.Equal(0, await Repositories.LibraryManager.ShowRepository.GetCount());
-			Assert.Equal(0, await Repositories.LibraryManager.SeasonRepository.GetCount());
-			Assert.Equal(0, await Repositories.LibraryManager.EpisodeRepository.GetCount());
+			Assert.Equal(0, await Repositories.LibraryManager.Shows.GetCount());
+			Assert.Equal(0, await Repositories.LibraryManager.Seasons.GetCount());
+			Assert.Equal(0, await Repositories.LibraryManager.Episodes.GetCount());
 		}
 	}
 }

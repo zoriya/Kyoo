@@ -53,7 +53,7 @@ namespace Kyoo.Core.Api
 		/// <param name="thumbnails">The thumbnail manager used to retrieve images paths.</param>
 		public EpisodeApi(ILibraryManager libraryManager,
 			IThumbnailsManager thumbnails)
-			: base(libraryManager.EpisodeRepository, thumbnails)
+			: base(libraryManager.Episodes, thumbnails)
 		{
 			_libraryManager = libraryManager;
 		}
@@ -65,15 +65,16 @@ namespace Kyoo.Core.Api
 		/// Get the show that this episode is part of.
 		/// </remarks>
 		/// <param name="identifier">The ID or slug of the <see cref="Episode"/>.</param>
+		/// <param name="fields">The aditional fields to include in the result.</param>
 		/// <returns>The show that contains this episode.</returns>
 		/// <response code="404">No episode with the given ID or slug could be found.</response>
 		[HttpGet("{identifier:id}/show")]
 		[PartialPermission(Kind.Read)]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Show>> GetShow(Identifier identifier)
+		public async Task<ActionResult<Show>> GetShow(Identifier identifier, [FromQuery] Include<Show> fields)
 		{
-			return await _libraryManager.Get(identifier.IsContainedIn<Show, Episode>(x => x.Episodes!));
+			return await _libraryManager.Shows.Get(identifier.IsContainedIn<Show, Episode>(x => x.Episodes!), fields);
 		}
 
 		/// <summary>
@@ -83,6 +84,7 @@ namespace Kyoo.Core.Api
 		/// Get the season that this episode is part of.
 		/// </remarks>
 		/// <param name="identifier">The ID or slug of the <see cref="Episode"/>.</param>
+		/// <param name="fields">The aditional fields to include in the result.</param>
 		/// <returns>The season that contains this episode.</returns>
 		/// <response code="204">The episode is not part of a season.</response>
 		/// <response code="404">No episode with the given ID or slug could be found.</response>
@@ -91,14 +93,17 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status204NoContent)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Season>> GetSeason(Identifier identifier)
+		public async Task<ActionResult<Season>> GetSeason(Identifier identifier, [FromQuery] Include<Season> fields)
 		{
-			Season? ret = await _libraryManager.GetOrDefault(identifier.IsContainedIn<Season, Episode>(x => x.Episodes!));
+			Season? ret = await _libraryManager.Seasons.GetOrDefault(
+				identifier.IsContainedIn<Season, Episode>(x => x.Episodes!),
+				fields
+			);
 			if (ret != null)
 				return ret;
 			Episode? episode = await identifier.Match(
-				id => _libraryManager.GetOrDefault<Episode>(id),
-				slug => _libraryManager.GetOrDefault<Episode>(slug)
+				id => _libraryManager.Episodes.GetOrDefault(id),
+				slug => _libraryManager.Episodes.GetOrDefault(slug)
 			);
 			return episode == null
 				? NotFound()

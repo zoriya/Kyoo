@@ -54,7 +54,7 @@ namespace Kyoo.Core.Api
 		/// <param name="thumbs">The thumbnail manager used to retrieve images paths.</param>
 		public MovieApi(ILibraryManager libraryManager,
 			IThumbnailsManager thumbs)
-			: base(libraryManager.MovieRepository, thumbs)
+			: base(libraryManager.Movies, thumbs)
 		{
 			_libraryManager = libraryManager;
 		}
@@ -100,15 +100,16 @@ namespace Kyoo.Core.Api
 		/// Get the studio that made the show.
 		/// </remarks>
 		/// <param name="identifier">The ID or slug of the <see cref="Show"/>.</param>
+		/// <param name="fields">The aditional fields to include in the result.</param>
 		/// <returns>The studio that made the show.</returns>
 		/// <response code="404">No show with the given ID or slug could be found.</response>
 		[HttpGet("{identifier:id}/studio")]
 		[PartialPermission(Kind.Read)]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Studio>> GetStudio(Identifier identifier)
+		public async Task<ActionResult<Studio>> GetStudio(Identifier identifier, [FromQuery] Include<Studio> fields)
 		{
-			return await _libraryManager.Get(identifier.IsContainedIn<Studio, Movie>(x => x.Movies!));
+			return await _libraryManager.Studios.Get(identifier.IsContainedIn<Studio, Movie>(x => x.Movies!), fields);
 		}
 
 		/// <summary>
@@ -121,6 +122,7 @@ namespace Kyoo.Core.Api
 		/// <param name="sortBy">A key to sort collections by.</param>
 		/// <param name="where">An optional list of filters.</param>
 		/// <param name="pagination">The number of collections to return.</param>
+		/// <param name="fields">The aditional fields to include in the result.</param>
 		/// <returns>A page of collections.</returns>
 		/// <response code="400">The filters or the sort parameters are invalid.</response>
 		/// <response code="404">No show with the given ID or slug could be found.</response>
@@ -133,15 +135,17 @@ namespace Kyoo.Core.Api
 		public async Task<ActionResult<Page<Collection>>> GetCollections(Identifier identifier,
 			[FromQuery] Sort<Collection> sortBy,
 			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] Pagination pagination)
+			[FromQuery] Pagination pagination,
+			[FromQuery] Include<Collection> fields)
 		{
-			ICollection<Collection> resources = await _libraryManager.GetAll(
+			ICollection<Collection> resources = await _libraryManager.Collections.GetAll(
 				ApiHelper.ParseWhere(where, identifier.IsContainedIn<Collection, Movie>(x => x.Movies!)),
 				sortBy,
-				pagination
+				pagination,
+				fields
 			);
 
-			if (!resources.Any() && await _libraryManager.GetOrDefault(identifier.IsSame<Movie>()) == null)
+			if (!resources.Any() && await _libraryManager.Movies.GetOrDefault(identifier.IsSame<Movie>()) == null)
 				return NotFound();
 			return Page(resources, pagination.Limit);
 		}

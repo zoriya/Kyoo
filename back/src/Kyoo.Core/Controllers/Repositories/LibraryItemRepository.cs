@@ -30,7 +30,7 @@ namespace Kyoo.Core.Controllers
 	/// <summary>
 	/// A local repository to handle library items.
 	/// </summary>
-	public class LibraryItemRepository : LocalRepository<LibraryItem>, ILibraryItemRepository
+	public class LibraryItemRepository : LocalRepository<LibraryItem>
 	{
 		/// <summary>
 		/// The database handle
@@ -41,7 +41,7 @@ namespace Kyoo.Core.Controllers
 		protected override Sort<LibraryItem> DefaultSort => new Sort<LibraryItem>.By(x => x.Name);
 
 		/// <summary>
-		/// Create a new <see cref="ILibraryItemRepository"/>.
+		/// Create a new <see cref="LibraryItemRepository"/>.
 		/// </summary>
 		/// <param name="database">The database instance</param>
 		/// <param name="thumbs">The thumbnail manager used to store images.</param>

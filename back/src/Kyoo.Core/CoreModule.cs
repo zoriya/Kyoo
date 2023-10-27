@@ -50,15 +50,15 @@ namespace Kyoo.Core
 			builder.RegisterType<ThumbnailsManager>().As<IThumbnailsManager>().InstancePerLifetimeScope();
 			builder.RegisterType<LibraryManager>().As<ILibraryManager>().InstancePerLifetimeScope();
 
-			builder.RegisterRepository<ILibraryItemRepository, LibraryItemRepository>();
-			builder.RegisterRepository<ICollectionRepository, CollectionRepository>();
-			builder.RegisterRepository<IMovieRepository, MovieRepository>();
-			builder.RegisterRepository<IShowRepository, ShowRepository>();
-			builder.RegisterRepository<ISeasonRepository, SeasonRepository>();
-			builder.RegisterRepository<IEpisodeRepository, EpisodeRepository>();
-			builder.RegisterRepository<IPeopleRepository, PeopleRepository>();
-			builder.RegisterRepository<IStudioRepository, StudioRepository>();
-			builder.RegisterRepository<IUserRepository, UserRepository>();
+			builder.RegisterRepository<LibraryItemRepository>();
+			builder.RegisterRepository<CollectionRepository>();
+			builder.RegisterRepository<MovieRepository>();
+			builder.RegisterRepository<ShowRepository>();
+			builder.RegisterRepository<SeasonRepository>();
+			builder.RegisterRepository<EpisodeRepository>();
+			builder.RegisterRepository<PeopleRepository>();
+			builder.RegisterRepository<StudioRepository>();
+			builder.RegisterRepository<UserRepository>();
 		}
 
 		/// <inheritdoc />

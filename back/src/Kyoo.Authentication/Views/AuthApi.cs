@@ -47,7 +47,7 @@ namespace Kyoo.Authentication.Views
 		/// <summary>
 		/// The repository to handle users.
 		/// </summary>
-		private readonly IUserRepository _users;
+		private readonly IRepository<User> _users;
 
 		/// <summary>
 		/// The token generator.
@@ -65,7 +65,7 @@ namespace Kyoo.Authentication.Views
 		/// <param name="users">The repository used to check if the user exists.</param>
 		/// <param name="token">The token generator.</param>
 		/// <param name="permissions">The permission opitons.</param>
-		public AuthApi(IUserRepository users, ITokenController token, PermissionOption permissions)
+		public AuthApi(IRepository<User> users, ITokenController token, PermissionOption permissions)
 		{
 			_users = users;
 			_token = token;

@@ -56,43 +56,43 @@ namespace Kyoo.Core.Api
 		/// <param name="thumbs">The thumbnail manager used to retrieve images paths.</param>
 		public StaffApi(ILibraryManager libraryManager,
 			IThumbnailsManager thumbs)
-			: base(libraryManager.PeopleRepository, thumbs)
+			: base(libraryManager.People, thumbs)
 		{
 			_libraryManager = libraryManager;
 		}
 
-		/// <summary>
-		/// Get roles
-		/// </summary>
-		/// <remarks>
-		/// List the roles in witch this person has played, written or worked in a way.
-		/// </remarks>
-		/// <param name="identifier">The ID or slug of the person.</param>
-		/// <param name="sortBy">A key to sort roles by.</param>
-		/// <param name="where">An optional list of filters.</param>
-		/// <param name="pagination">The number of roles to return.</param>
-		/// <returns>A page of roles.</returns>
-		/// <response code="400">The filters or the sort parameters are invalid.</response>
-		/// <response code="404">No person with the given ID or slug could be found.</response>
-		[HttpGet("{identifier:id}/roles")]
-		[HttpGet("{identifier:id}/role", Order = AlternativeRoute)]
-		[PartialPermission(Kind.Read)]
-		[ProducesResponseType(StatusCodes.Status200OK)]
-		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
-		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<ActionResult<Page<PeopleRole>>> GetRoles(Identifier identifier,
-			[FromQuery] Sort<PeopleRole> sortBy,
-			[FromQuery] Dictionary<string, string> where,
-			[FromQuery] Pagination pagination)
-		{
-			Expression<Func<PeopleRole, bool>>? whereQuery = ApiHelper.ParseWhere<PeopleRole>(where);
-
-			ICollection<PeopleRole> resources = await identifier.Match(
-				id => _libraryManager.GetRolesFromPeople(id, whereQuery, sortBy, pagination),
-				slug => _libraryManager.GetRolesFromPeople(slug, whereQuery, sortBy, pagination)
-			);
-
-			return Page(resources, pagination.Limit);
-		}
+		// /// <summary>
+		// /// Get roles
+		// /// </summary>
+		// /// <remarks>
+		// /// List the roles in witch this person has played, written or worked in a way.
+		// /// </remarks>
+		// /// <param name="identifier">The ID or slug of the person.</param>
+		// /// <param name="sortBy">A key to sort roles by.</param>
+		// /// <param name="where">An optional list of filters.</param>
+		// /// <param name="pagination">The number of roles to return.</param>
+		// /// <returns>A page of roles.</returns>
+		// /// <response code="400">The filters or the sort parameters are invalid.</response>
+		// /// <response code="404">No person with the given ID or slug could be found.</response>
+		// [HttpGet("{identifier:id}/roles")]
+		// [HttpGet("{identifier:id}/role", Order = AlternativeRoute)]
+		// [PartialPermission(Kind.Read)]
+		// [ProducesResponseType(StatusCodes.Status200OK)]
+		// [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
+		// [ProducesResponseType(StatusCodes.Status404NotFound)]
+		// public async Task<ActionResult<Page<PeopleRole>>> GetRoles(Identifier identifier,
+		// 	[FromQuery] Sort<PeopleRole> sortBy,
+		// 	[FromQuery] Dictionary<string, string> where,
+		// 	[FromQuery] Pagination pagination)
+		// {
+		// 	Expression<Func<PeopleRole, bool>>? whereQuery = ApiHelper.ParseWhere<PeopleRole>(where);
+		//
+		// 	ICollection<PeopleRole> resources = await identifier.Match(
+		// 		id => _libraryManager.GetRolesFromPeople(id, whereQuery, sortBy, pagination),
+		// 		slug => _libraryManager.GetRolesFromPeople(slug, whereQuery, sortBy, pagination)
+		// 	);
+		//
+		// 	return Page(resources, pagination.Limit);
+		// }
 	}
 }

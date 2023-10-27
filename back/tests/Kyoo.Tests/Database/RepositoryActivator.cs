@@ -18,8 +18,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
+using Kyoo.Abstractions.Models;
 using Kyoo.Core.Controllers;
 using Kyoo.Postgresql;
 using Moq;
@@ -34,6 +36,8 @@ namespace Kyoo.Tests.Database
 
 		private readonly List<DatabaseContext> _databases = new();
 
+		private readonly IBaseRepository[] _repositories;
+
 		public RepositoryActivator(ITestOutputHelper output, PostgresFixture postgres = null)
 		{
 			Context = new PostgresTestContext(postgres, output);
@@ -42,7 +46,7 @@ namespace Kyoo.Tests.Database
 			CollectionRepository collection = new(_NewContext(), thumbs.Object);
 			StudioRepository studio = new(_NewContext(), thumbs.Object);
 			PeopleRepository people = new(_NewContext(),
-				new Lazy<IShowRepository>(() => LibraryManager.ShowRepository),
+				new Lazy<IRepository<Show>>(() => LibraryManager.Shows),
 				thumbs.Object);
 			MovieRepository movies = new(_NewContext(), studio, people, thumbs.Object);
 			ShowRepository show = new(_NewContext(), studio, people, thumbs.Object);
@@ -51,7 +55,8 @@ namespace Kyoo.Tests.Database
 			EpisodeRepository episode = new(_NewContext(), show, thumbs.Object);
 			UserRepository user = new(_NewContext(), thumbs.Object);
 
-			LibraryManager = new LibraryManager(new IBaseRepository[] {
+			_repositories = new IBaseRepository[]
+			{
 				libraryItem,
 				collection,
 				movies,
@@ -61,7 +66,25 @@ namespace Kyoo.Tests.Database
 				people,
 				studio,
 				user
-			});
+			};
+
+			LibraryManager = new LibraryManager(
+				libraryItem,
+				collection,
+				movies,
+				show,
+				season,
+				episode,
+				people,
+				studio,
+				user
+			);
+		}
+
+		public IRepository<T> GetRepository<T>()
+			where T: class, IResource
+		{
+			return _repositories.First(x => x.RepositoryType == typeof(T)) as IRepository<T>;
 		}
 
 		private DatabaseContext _NewContext()
