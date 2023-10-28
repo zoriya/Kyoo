@@ -157,7 +157,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The previous episode that should be seen before viewing this one.
 		/// </summary>
-		[Projectable(UseMemberBody = nameof(_PreviousEpisode))]
+		[Projectable(UseMemberBody = nameof(_PreviousEpisode), OnlyOnInclude = true)]
 		[LoadableRelation] public Episode? PreviousEpisode { get; set; }
 
 		private Episode? _PreviousEpisode => Show!.Episodes!
@@ -173,7 +173,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The next episode to watch after this one.
 		/// </summary>
-		[Projectable(UseMemberBody = nameof(_NextEpisode))]
+		[Projectable(UseMemberBody = nameof(_NextEpisode), OnlyOnInclude = true)]
 		[LoadableRelation] public Episode? NextEpisode { get; set; }
 
 		private Episode? _NextEpisode => Show!.Episodes!
