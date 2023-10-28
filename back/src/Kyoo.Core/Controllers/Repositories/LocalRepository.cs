@@ -273,9 +273,7 @@ namespace Kyoo.Core.Controllers
 		{
 			if (include == null)
 				return query;
-			foreach (string field in include.Fields
-				// TODO: Remove this hotfix
-				.Where(x => x != "NextEpisode" && x != "PreviousEpisode"))
+			foreach (string field in include.Fields)
 				query = query.Include(field);
 			return query;
 		}
