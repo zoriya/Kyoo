@@ -110,7 +110,6 @@ namespace Kyoo.Abstractions.Models
 
 		/// <summary>
 		/// The Studio that made this show.
-		/// This must be explicitly loaded via a call to <see cref="ILibraryManager.Load"/>.
 		/// </summary>
 		[LoadableRelation(nameof(StudioID))][EditableRelation] public Studio? Studio { get; set; }
 

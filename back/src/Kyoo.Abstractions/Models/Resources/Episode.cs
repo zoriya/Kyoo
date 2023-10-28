@@ -19,7 +19,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 using System.Text.RegularExpressions;
+using EntityFrameworkCore.Projectables;
 using JetBrains.Annotations;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
@@ -155,12 +157,34 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The previous episode that should be seen before viewing this one.
 		/// </summary>
+		[Projectable(UseMemberBody = nameof(_PreviousEpisode))]
 		[LoadableRelation] public Episode? PreviousEpisode { get; set; }
+
+		private Episode? _PreviousEpisode => Show!.Episodes!
+			.OrderByDescending(x => x.AbsoluteNumber)
+			.ThenByDescending(x => x.SeasonNumber)
+			.ThenByDescending(x => x.EpisodeNumber)
+			.FirstOrDefault(x =>
+				x.AbsoluteNumber < AbsoluteNumber
+				|| x.SeasonNumber < SeasonNumber
+				|| (x.SeasonNumber == SeasonNumber && x.EpisodeNumber < EpisodeNumber)
+			);
 
 		/// <summary>
 		/// The next episode to watch after this one.
 		/// </summary>
+		[Projectable(UseMemberBody = nameof(_NextEpisode))]
 		[LoadableRelation] public Episode? NextEpisode { get; set; }
+
+		private Episode? _NextEpisode => Show!.Episodes!
+			.OrderBy(x => x.AbsoluteNumber)
+			.ThenBy(x => x.SeasonNumber)
+			.ThenBy(x => x.EpisodeNumber)
+			.FirstOrDefault(x =>
+				x.AbsoluteNumber > AbsoluteNumber
+				|| x.SeasonNumber > SeasonNumber
+				|| (x.SeasonNumber == SeasonNumber && x.EpisodeNumber > EpisodeNumber)
+			);
 
 		/// <summary>
 		/// Links to watch this episode.
