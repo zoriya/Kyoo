@@ -73,7 +73,6 @@ namespace Kyoo.Abstractions.Models
 
 		/// <summary>
 		/// The show that contains this season.
-		/// This must be explicitly loaded via a call to <see cref="ILibraryManager.Load"/>.
 		/// </summary>
 		[LoadableRelation(nameof(ShowId))] public Show? Show { get; set; }
 
