@@ -15,6 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{FEAE1B0E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Host", "src\Kyoo.Host\Kyoo.Host.csproj", "{0938459E-2E2B-457F-8120-7D8CA93866A6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Kyoo.Meilisearch", "src\Kyoo.Meilisearch\Kyoo.Meilisearch.csproj", "{F8E6018A-FD51-40EB-99FF-A26BA59F2762}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +63,10 @@ Global
 		{0938459E-2E2B-457F-8120-7D8CA93866A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0938459E-2E2B-457F-8120-7D8CA93866A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0938459E-2E2B-457F-8120-7D8CA93866A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8E6018A-FD51-40EB-99FF-A26BA59F2762}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8E6018A-FD51-40EB-99FF-A26BA59F2762}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8E6018A-FD51-40EB-99FF-A26BA59F2762}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8E6018A-FD51-40EB-99FF-A26BA59F2762}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{0C8AA7EA-E723-4532-852F-35AA4E8AFED5} = {FEAE1B0E-D797-470F-9030-0EF743575ECC}
