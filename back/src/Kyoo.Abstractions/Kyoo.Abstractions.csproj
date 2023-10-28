@@ -8,7 +8,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Autofac" Version="7.1.0" />
-		<PackageReference Include="EntityFrameworkCore.Projectables" Version="4.0.0-prebeta" />
+		<PackageReference Include="EntityFrameworkCore.Projectables" Version="4.0.1-prebeta" />
 		<PackageReference Include="JetBrains.Annotations" Version="2023.2.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
 		<PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
