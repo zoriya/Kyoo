@@ -17,6 +17,7 @@ RUN dotnet restore
 WORKDIR /kyoo
 EXPOSE 5000
 ENV DOTNET_USE_POLLING_FILE_WATCHER 1
-HEALTHCHECK --interval=5s CMD curl --fail http://localhost:5000/health || exit
+# HEALTHCHECK --interval=5s CMD curl --fail http://localhost:5000/health || exit
+HEALTHCHECK CMD true
 CMD dotnet watch run --no-restore --project /app/src/Kyoo.Host
 

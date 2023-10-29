@@ -23,7 +23,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using EntityFrameworkCore.Projectables;
 using JetBrains.Annotations;
-using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
 
 namespace Kyoo.Abstractions.Models
