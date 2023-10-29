@@ -20,7 +20,7 @@
 
 import { z } from "zod";
 import { zdate } from "../utils";
-import { ImagesP, ResourceP } from "../traits";
+import { withImages, ResourceP } from "../traits";
 import { Genre } from "./genre";
 import { SeasonP } from "./season";
 import { StudioP } from "./studio";
@@ -35,8 +35,7 @@ export enum Status {
 	Planned = "Planned",
 }
 
-export const ShowP = ResourceP.merge(ImagesP)
-	.extend({
+export const ShowP = withImages(ResourceP.extend({
 		/**
 		 * The title of this show.
 		 */
@@ -85,7 +84,7 @@ export const ShowP = ResourceP.merge(ImagesP)
 		 * The list of seasons of this show.
 		 */
 		seasons: z.array(SeasonP).optional(),
-	})
+	}), "shows")
 	.transform((x) => {
 		if (!x.thumbnail && x.poster) {
 			x.thumbnail = { ...x.poster };

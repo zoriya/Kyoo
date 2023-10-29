@@ -20,13 +20,13 @@
 
 import { z } from "zod";
 import { zdate } from "../utils";
-import { ImagesP, ResourceP, imageFn } from "../traits";
+import { withImages, ResourceP, imageFn } from "../traits";
 import { Genre } from "./genre";
 import { StudioP } from "./studio";
 import { Status } from "./show";
 
-export const MovieP = ResourceP.merge(ImagesP)
-	.extend({
+export const MovieP = withImages(
+	ResourceP.extend({
 		/**
 		 * The title of this movie.
 		 */
@@ -82,7 +82,9 @@ export const MovieP = ResourceP.merge(ImagesP)
 			 */
 			hls: z.string().transform(imageFn),
 		}),
-	})
+	}),
+	"movies",
+)
 	.transform((x) => {
 		if (!x.thumbnail && x.poster) {
 			x.thumbnail = { ...x.poster };

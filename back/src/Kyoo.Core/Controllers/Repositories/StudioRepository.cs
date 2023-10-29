@@ -54,14 +54,12 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task<ICollection<Studio>> Search(string query)
 		{
-			return (await Sort(
+			return await Sort(
 				_database.Studios
 					.Where(_database.Like<Studio>(x => x.Name, $"%{query}%"))
 				)
 				.Take(20)
-				.ToListAsync())
-				.Select(SetBackingImageSelf)
-				.ToList();
+				.ToListAsync();
 		}
 
 		/// <inheritdoc />
