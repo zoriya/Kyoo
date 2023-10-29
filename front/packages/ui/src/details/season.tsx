@@ -72,13 +72,15 @@ export const SeasonHeader = ({
 					{isLoading ? <Skeleton /> : name}
 				</H6>
 				<Menu Trigger={IconButton} icon={MenuIcon} {...tooltip(t("show.jumpToSeason"))}>
-					{seasons?.map((x) => (
-						<Menu.Item
-							key={x.seasonNumber}
-							label={`${x.seasonNumber}: ${x.name} (${x.episodesCount})`}
-							href={x.href}
-						/>
-					))}
+					{seasons
+						?.filter((x) => x.episodesCount > 0)
+						.map((x) => (
+							<Menu.Item
+								key={x.seasonNumber}
+								label={`${x.seasonNumber}: ${x.name} (${x.episodesCount})`}
+								href={x.href}
+							/>
+						))}
 				</Menu>
 			</View>
 			<HR />
@@ -96,10 +98,7 @@ SeasonHeader.query = (slug: string): QueryIdentifier<Season, SeasonProcessed> =>
 	infinite: {
 		value: true,
 		map: (seasons) =>
-			seasons.reduce((acc, x) => {
-				if (x.episodesCount == 0) return acc;
-				return [...acc, { ...x, href: `/show/${slug}?season=${x.seasonNumber}` }];
-			}, [] as SeasonProcessed[]),
+			seasons.map((x) => ({ ...x, href: `/show/${slug}?season=${x.seasonNumber}` })),
 	},
 });
 
@@ -134,6 +133,7 @@ export const EpisodeList = <Props,>({
 				const sea = item?.firstOfSeason
 					? seasons?.find((x) => x.seasonNumber === item.seasonNumber)
 					: null;
+				console.log(sea, seasons);
 				return (
 					<>
 						{item.firstOfSeason && (
