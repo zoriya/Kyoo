@@ -20,7 +20,6 @@ using System;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
-using Kyoo.Abstractions.Models.Attributes;
 
 namespace Kyoo.Abstractions.Models
 {
@@ -59,24 +58,6 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		[MaxLength(32)]
 		public string Blurhash { get; set; }
-
-		[SerializeIgnore]
-		public string Path { private get; set; }
-
-		/// <summary>
-		/// The url to retrieve the low quality image.
-		/// </summary>
-		public string Low => $"{Path}?quality=low";
-
-		/// <summary>
-		/// The url to retrieve the medium quality image.
-		/// </summary>
-		public string Medium => $"{Path}?quality=medium";
-
-		/// <summary>
-		/// The url to retrieve the high quality image.
-		/// </summary>
-		public string High => $"{Path}?quality=high";
 
 		public Image(string source, string? blurhash = null)
 		{

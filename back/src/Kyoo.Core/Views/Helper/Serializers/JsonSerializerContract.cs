@@ -58,7 +58,7 @@ namespace Kyoo.Core.Api
 			{
 				property.ShouldSerialize = _ =>
 				{
-					ICollection<string> fields = (ICollection<string>)_httpContextAccessor.HttpContext!.Items["fields"]!;
+					ICollection<string>? fields = (ICollection<string>)_httpContextAccessor.HttpContext!.Items["fields"]!;
 					if (fields == null)
 						return false;
 					return fields.Contains(member.Name);
