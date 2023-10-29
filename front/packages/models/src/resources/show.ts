@@ -35,7 +35,8 @@ export enum Status {
 	Planned = "Planned",
 }
 
-export const ShowP = withImages(ResourceP.extend({
+export const ShowP = withImages(
+	ResourceP.extend({
 		/**
 		 * The title of this show.
 		 */
@@ -84,7 +85,9 @@ export const ShowP = withImages(ResourceP.extend({
 		 * The list of seasons of this show.
 		 */
 		seasons: z.array(SeasonP).optional(),
-	}), "shows")
+	}),
+	"shows",
+)
 	.transform((x) => {
 		if (!x.thumbnail && x.poster) {
 			x.thumbnail = { ...x.poster };
