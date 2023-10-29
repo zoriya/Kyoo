@@ -77,7 +77,7 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public override async Task<ICollection<Episode>> Search(string query)
 		{
-			List<Episode> ret = await Sort(
+			return await Sort(
 				_database.Episodes
 					.Include(x => x.Show)
 					.Where(x => x.EpisodeNumber != null || x.AbsoluteNumber != null)
@@ -85,12 +85,6 @@ namespace Kyoo.Core.Controllers
 				)
 				.Take(20)
 				.ToListAsync();
-			foreach (Episode ep in ret)
-			{
-				ep.Show!.Episodes = null;
-				SetBackingImage(ep);
-			}
-			return ret;
 		}
 
 		/// <inheritdoc />

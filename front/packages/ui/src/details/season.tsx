@@ -98,7 +98,7 @@ SeasonHeader.query = (slug: string): QueryIdentifier<Season, SeasonProcessed> =>
 		map: (seasons) =>
 			seasons.reduce((acc, x) => {
 				if (x.episodesCount == 0) return acc;
-				return [...acc, { ...x, range: null, href: `/show/${slug}?season=${x.seasonNumber}` }];
+				return [...acc, { ...x, href: `/show/${slug}?season=${x.seasonNumber}` }];
 			}, [] as SeasonProcessed[]),
 	},
 });
