@@ -50,9 +50,9 @@ namespace Kyoo.Core.Api
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] Pagination pagination)
 		{
-			ICollection<News> resources = await _news.GetNews(
+			ICollection<News> resources = await _news.GetAll(
 				ApiHelper.ParseWhere<News>(where),
-				pagination
+				limit: pagination
 			);
 
 			return Page(resources, pagination.Limit);

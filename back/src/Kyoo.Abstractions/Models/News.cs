@@ -95,6 +95,11 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		public DateTime? AirDate { get; set; }
 
+		/// <summary>
+		/// The date this movie aired.
+		/// </summary>
+		public DateTime? ReleaseDate => AirDate;
+
 		/// <inheritdoc />
 		public DateTime AddedDate { get; set; }
 

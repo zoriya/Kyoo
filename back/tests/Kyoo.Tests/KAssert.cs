@@ -38,24 +38,6 @@ namespace Kyoo.Tests
 		[AssertionMethod]
 		public static void DeepEqual<T>(T expected, T value)
 		{
-			if (expected is IResource res and IThumbnails thumbs)
-			{
-				if (thumbs.Poster != null)
-					thumbs.Poster.Path = $"/{expected.GetType().Name.ToLower()}/{res.Slug}/poster";
-				if (thumbs.Thumbnail != null)
-					thumbs.Thumbnail.Path = $"/{expected.GetType().Name.ToLower()}/{res.Slug}/thumbnail";
-				if (thumbs.Logo != null)
-					thumbs.Logo.Path = $"/{expected.GetType().Name.ToLower()}/{res.Slug}/logo";
-			}
-			if (value is IResource resV and IThumbnails thumbsV)
-			{
-				if (thumbsV.Poster != null)
-					thumbsV.Poster.Path = $"/{value.GetType().Name.ToLower()}/{resV.Slug}/poster";
-				if (thumbsV.Thumbnail != null)
-					thumbsV.Thumbnail.Path = $"/{value.GetType().Name.ToLower()}/{resV.Slug}/thumbnail";
-				if (thumbsV.Logo != null)
-					thumbsV.Logo.Path = $"/{value.GetType().Name.ToLower()}/{resV.Slug}/logo";
-			}
 			if (expected is IAddedDate ea && value is IAddedDate va)
 			{
 				ea.AddedDate = DateTime.UnixEpoch;

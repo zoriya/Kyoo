@@ -79,7 +79,6 @@ namespace Kyoo.Core.Controllers
 		{
 			return await Sort(
 				_database.Episodes
-					.Include(x => x.Show)
 					.Where(x => x.EpisodeNumber != null || x.AbsoluteNumber != null)
 					.Where(_database.Like<Episode>(x => x.Name!, $"%{query}%"))
 				)

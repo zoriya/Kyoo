@@ -284,9 +284,6 @@ namespace Kyoo.Tests.Database
 			value.EpisodeNumber = 56;
 			await _repository.Create(value);
 			ICollection<Episode> ret = await _repository.Search(query);
-			value.Show = TestSample.Get<Show>();
-			value.Show.AddedDate = DateTime.UnixEpoch;
-			ret.First().Show.AddedDate = DateTime.UnixEpoch;
 			KAssert.DeepEqual(value, ret.First());
 		}
 
