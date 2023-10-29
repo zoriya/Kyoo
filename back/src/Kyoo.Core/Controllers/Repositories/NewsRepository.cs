@@ -31,7 +31,7 @@ namespace Kyoo.Core.Controllers
 	public class NewsRepository : LocalRepository<News>
 	{
 		/// <inheritdoc />
-		protected override Sort<News> DefaultSort => new Sort<News>.By(x => x.AddedDate);
+		protected override Sort<News> DefaultSort => new Sort<News>.By(x => x.AddedDate, true);
 
 		public NewsRepository(DatabaseContext database, IThumbnailsManager thumbs)
 			: base(database, thumbs)
