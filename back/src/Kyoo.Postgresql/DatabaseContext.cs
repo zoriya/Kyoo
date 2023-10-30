@@ -361,8 +361,11 @@ namespace Kyoo.Postgresql
 			modelBuilder.Entity<News>()
 				.Ignore(x => x.Links);
 
-			modelBuilder.Entity<News>()
+			var builder = modelBuilder.Entity<News>()
 				.OwnsOne(x => x.Show);
+			builder.OwnsOne(x => x.Poster);
+			builder.OwnsOne(x => x.Thumbnail);
+			builder.OwnsOne(x => x.Logo);
 		}
 
 		/// <summary>
