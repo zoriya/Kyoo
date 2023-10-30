@@ -23,6 +23,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Kyoo.Meiliseach;
 using Kyoo.Postgresql;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -102,6 +103,7 @@ namespace Kyoo.Host
 				.Build();
 
 			PostgresModule.Initialize(host.Services);
+			await MeilisearchModule.Initialize(host.Services);
 
 			await _StartWithHost(host);
 		}

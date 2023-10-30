@@ -33,25 +33,21 @@ namespace Kyoo.Core.Api
 	/// An endpoint to search for every resources of kyoo. Searching for only a specific type of resource
 	/// is available on the said endpoint.
 	/// </summary>
-	[Route("search/{query}")]
+	[Route("search/{query?}")]
 	[ApiController]
 	[ResourceView]
 	[ApiDefinition("Search", Group = ResourcesGroup)]
-	public class SearchApi : ControllerBase
+	public class SearchApi : BaseApi
 	{
-		/// <summary>
-		/// The library manager used to modify or retrieve information in the data store.
-		/// </summary>
 		private readonly ILibraryManager _libraryManager;
+		private readonly ISearchManager _searchManager;
 
-		/// <summary>
-		/// Create a new <see cref="SearchApi"/>.
-		/// </summary>
-		/// <param name="libraryManager">The library manager used to interact with the data store.</param>
-		public SearchApi(ILibraryManager libraryManager)
+		public SearchApi(ISearchManager searchManager)
 		{
-			_libraryManager = libraryManager;
+			_searchManager = searchManager;
 		}
+
+		// TODO: add filters and facets
 
 		/// <summary>
 		/// Search collections
@@ -89,6 +85,30 @@ namespace Kyoo.Core.Api
 		public Task<ICollection<Show>> SearchShows(string query, [FromQuery] Include<Show> fields)
 		{
 			return _libraryManager.Shows.Search(query);
+		}
+
+		/// <summary>
+		/// Search movie
+		/// </summary>
+		/// <remarks>
+		/// Search for movie
+		/// </remarks>
+		/// <param name="query">The query to search for.</param>
+		/// <param name="sortBy">Sort information about the query (sort by, sort order).</param>
+		/// <param name="pagination">How many items per page should be returned, where should the page start...</param>
+		/// <param name="fields">The aditional fields to include in the result.</param>
+		/// <returns>A list of movies found for the specified query.</returns>
+		[HttpGet("movies")]
+		[HttpGet("movie", Order = AlternativeRoute)]
+		[Permission(nameof(Movie), Kind.Read)]
+		[ApiDefinition("Movie")]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		public async Task<SearchPage<Movie>> SearchMovies(string? query,
+			[FromQuery] Sort<Movie> sortBy,
+			[FromQuery] SearchPagination pagination,
+			[FromQuery] Include<Movie> fields)
+		{
+			return SearchPage(await _searchManager.SearchMovies(query, sortBy, pagination, fields));
 		}
 
 		/// <summary>

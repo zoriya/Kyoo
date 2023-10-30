@@ -16,19 +16,21 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
-using System.Collections.Generic;
-
-namespace Kyoo.Abstractions.Models
+namespace Kyoo.Abstractions.Controllers
 {
 	/// <summary>
-	/// Results of a search request.
+	/// Information about the pagination. How many items should be displayed and where to start.
 	/// </summary>
-	public class SearchPage<T> : Page<T>
-		where T : class, IResource
+	public class SearchPagination
 	{
 		/// <summary>
-		/// The query of the search request.
+		/// The count of items to return.
 		/// </summary>
-		public string Query { get; init; }
+		public int Limit { get; set; } = 50;
+
+		/// <summary>
+		/// Where to start? How many items to skip?
+		/// </summary>
+		public int? Skip { get; set; }
 	}
 }

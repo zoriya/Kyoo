@@ -67,7 +67,7 @@ namespace Kyoo.Abstractions.Models
 		/// <param name="previous">The link of the previous page.</param>
 		/// <param name="next">The link of the next page.</param>
 		/// <param name="first">The link of the first page.</param>
-		public Page(ICollection<T> items, string @this, string previous, string next, string first)
+		public Page(ICollection<T> items, string @this, string? previous, string? next, string first)
 		{
 			Items = items;
 			This = @this;

@@ -20,7 +20,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Utils;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kyoo.Core.Api
@@ -61,6 +63,46 @@ namespace Kyoo.Core.Api
 				Request.Path,
 				query,
 				limit
+			);
+		}
+
+		protected SearchPage<TResult> SearchPage<TResult>(SearchPage<TResult>.SearchResult result)
+			where TResult : IResource
+		{
+			Dictionary<string, string> query = Request.Query.ToDictionary(
+				x => x.Key,
+				x => x.Value.ToString(),
+				StringComparer.InvariantCultureIgnoreCase
+			);
+
+			string self = Request.Path + query.ToQueryString();
+			string? previous = null;
+			string? next = null;
+			string first;
+			int limit = query.TryGetValue("limit", out string? limitStr) ? int.Parse(limitStr) : new SearchPagination().Limit;
+			int? skip = query.TryGetValue("skip", out string? skipStr) ? int.Parse(skipStr) : null;
+
+			if (skip != null)
+			{
+				query["skip"] = Math.Max(0, skip.Value - limit).ToString();
+				previous = Request.Path + query.ToQueryString();
+			}
+			if (result.Items.Count == limit && limit > 0)
+			{
+				int newSkip = skip.HasValue ? skip.Value + limit : limit;
+				query["skip"] = newSkip.ToString();
+				next = Request.Path + query.ToQueryString();
+			}
+
+			query.Remove("skip");
+			first = Request.Path + query.ToQueryString();
+
+			return new SearchPage<TResult>(
+				result,
+				self,
+				previous,
+				next,
+				first
 			);
 		}
 	}
