@@ -25,6 +25,7 @@ using Kyoo.Abstractions.Controllers;
 using Kyoo.Authentication;
 using Kyoo.Core;
 using Kyoo.Host.Controllers;
+using Kyoo.Meiliseach;
 using Kyoo.Postgresql;
 using Kyoo.Swagger;
 using Kyoo.Utils;
@@ -64,6 +65,7 @@ namespace Kyoo.Host
 				typeof(CoreModule),
 				typeof(AuthenticationModule),
 				typeof(PostgresModule),
+				typeof(MeilisearchModule),
 				typeof(SwaggerModule)
 			);
 		}

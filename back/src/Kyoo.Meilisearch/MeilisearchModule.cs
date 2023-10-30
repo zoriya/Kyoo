@@ -41,11 +41,12 @@ namespace Kyoo.Meiliseach
 		/// Init meilisearch indexes.
 		/// </summary>
 		/// <param name="provider">The service list to retrieve the meilisearch client</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
 		public static async Task Initialize(IServiceProvider provider)
 		{
 			MeilisearchClient client = provider.GetRequiredService<MeilisearchClient>();
 
-			await _CreateIndex(client, "items", new Settings()
+			await _CreateIndex(client, "items", true, new Settings()
 			{
 				SearchableAttributes = new[]
 				{
@@ -61,7 +62,7 @@ namespace Kyoo.Meiliseach
 					nameof(LibraryItem.Genres),
 					nameof(LibraryItem.Status),
 					nameof(LibraryItem.AirDate),
-					nameof(LibraryItem.StudioID),
+					nameof(Movie.StudioID),
 				},
 				SortableAttributes = new[]
 				{
@@ -69,15 +70,19 @@ namespace Kyoo.Meiliseach
 					nameof(LibraryItem.AddedDate),
 					nameof(LibraryItem.Kind),
 				},
-				DisplayedAttributes = new[] { nameof(LibraryItem.Id) },
+				DisplayedAttributes = new[]
+				{
+					nameof(LibraryItem.Id),
+					nameof(LibraryItem.Kind),
+				},
 				// TODO: Add stopwords
 				// TODO: Extend default ranking to add ratings.
 			});
 		}
 
-		private static async Task _CreateIndex(MeilisearchClient client, string index, Settings opts)
+		private static async Task _CreateIndex(MeilisearchClient client, string index, bool hasKind, Settings opts)
 		{
-			TaskInfo task = await client.CreateIndexAsync(index, "Id");
+			TaskInfo task = await client.CreateIndexAsync(index, hasKind ? "Ref" : nameof(IResource.Id));
 			await client.WaitForTaskAsync(task.TaskUid);
 			await client.Index(index).UpdateSettingsAsync(opts);
 		}
@@ -88,8 +93,8 @@ namespace Kyoo.Meiliseach
 			builder.RegisterInstance(new MeilisearchClient(
 				_configuration.GetValue("MEILI_HOST", "http://meilisearch:7700"),
 				_configuration.GetValue<string?>("MEILI_MASTER_KEY")
-			)).InstancePerLifetimeScope();
-			builder.RegisterType<SearchManager>().InstancePerLifetimeScope();
+			)).SingleInstance();
+			builder.RegisterType<SearchManager>().SingleInstance();
 		}
 	}
 }

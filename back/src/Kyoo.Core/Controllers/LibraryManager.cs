@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System.Linq;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 
@@ -26,6 +27,8 @@ namespace Kyoo.Core.Controllers
 	/// </summary>
 	public class LibraryManager : ILibraryManager
 	{
+		private readonly IBaseRepository[] _repositories;
+
 		public LibraryManager(
 			IRepository<LibraryItem> libraryItemRepository,
 			IRepository<Collection> collectionRepository,
@@ -46,6 +49,19 @@ namespace Kyoo.Core.Controllers
 			People = peopleRepository;
 			Studios = studioRepository;
 			Users = userRepository;
+
+			_repositories = new IBaseRepository[]
+			{
+				LibraryItems,
+				Collections,
+				Movies,
+				Shows,
+				Seasons,
+				Episodes,
+				People,
+				Studios,
+				Users
+			};
 		}
 
 		/// <inheritdoc />
@@ -74,5 +90,11 @@ namespace Kyoo.Core.Controllers
 
 		/// <inheritdoc />
 		public IRepository<User> Users { get; }
+
+		public IRepository<T> Repository<T>()
+			where T : class, IResource
+		{
+			return (IRepository<T>)_repositories.First(x => x.RepositoryType == typeof(T));
+		}
 	}
 }
