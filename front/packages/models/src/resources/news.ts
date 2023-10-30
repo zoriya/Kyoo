@@ -18,15 +18,38 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./library-item";
-export * from "./news";
-export * from "./show";
-export * from "./movie";
-export * from "./collection";
-export * from "./genre";
-export * from "./person";
-export * from "./studio";
-export * from "./episode";
-export * from "./season";
-export * from "./watch-info";
-export * from "./user";
+import { z } from "zod";
+import { MovieP } from "./movie";
+import { BaseEpisodeP } from "./episode";
+import { ResourceP } from "../traits/resource";
+
+/**
+ * The type of item, ether a a movie or an episode.
+ */
+export enum NewsKind {
+	Episode = "Episode",
+	Movie = "Movie",
+}
+
+export const NewsP = z.union([
+	/*
+	 * Either an episode
+	 */
+	BaseEpisodeP.and(
+		z.object({
+			kind: z.literal(NewsKind.Episode),
+			show: ResourceP.extend({
+				name: z.string(),
+			}),
+		}),
+	),
+	/*
+	 * Or a Movie
+	 */
+	MovieP.and(z.object({ kind: z.literal(NewsKind.Movie) })),
+]);
+
+/**
+ * A new item added to kyoo.
+ */
+export type News = z.infer<typeof NewsP>;

@@ -360,6 +360,9 @@ namespace Kyoo.Postgresql
 				.Ignore(x => x.Links);
 			modelBuilder.Entity<News>()
 				.Ignore(x => x.Links);
+
+			modelBuilder.Entity<News>()
+				.OwnsOne(x => x.Show);
 		}
 
 		/// <summary>

@@ -22,10 +22,11 @@ import { Genre, ItemKind, QueryPage } from "@kyoo/models";
 import { Fetch } from "../fetch";
 import { Header } from "./header";
 import { DefaultLayout } from "../layout";
-import { ScrollView, View } from "react-native";
+import { ScrollView } from "react-native";
 import { GenreGrid } from "./genre";
 import { Recommanded } from "./recommanded";
 import { VerticalRecommanded } from "./vertical";
+import { NewsList } from "./news";
 
 export const HomePage: QueryPage<{}, Genre> = ({ randomItems }) => {
 	return (
@@ -43,7 +44,7 @@ export const HomePage: QueryPage<{}, Genre> = ({ randomItems }) => {
 					/>
 				)}
 			</Fetch>
-			{/* <News /> */}
+			<NewsList />
 			{randomItems
 				.filter((_, i) => i < 2)
 				.map((x) => (
@@ -71,6 +72,7 @@ HomePage.getLayout = { Layout: DefaultLayout, props: { transparent: true } };
 
 HomePage.getFetchUrls = () => [
 	Header.query(),
+	NewsList.query(),
 	...Object.values(Genre).map((x) => GenreGrid.query(x)),
 	Recommanded.query(),
 	VerticalRecommanded.query(),

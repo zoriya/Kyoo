@@ -1275,9 +1275,40 @@ namespace Kyoo.Postgresql.Migrations
                                 .HasConstraintName("fk_news_news_id");
                         });
 
+                    b.OwnsOne("Kyoo.Abstractions.Models.ShowInfo", "Show", b1 =>
+                        {
+                            b1.Property<int>("NewsId")
+                                .HasColumnType("integer")
+                                .HasColumnName("id");
+
+                            b1.Property<int>("Id")
+                                .HasColumnType("integer")
+                                .HasColumnName("show_info_id");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("show_info_name");
+
+                            b1.Property<string>("Slug")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("show_info_slug");
+
+                            b1.HasKey("NewsId");
+
+                            b1.ToTable("news");
+
+                            b1.WithOwner()
+                                .HasForeignKey("NewsId")
+                                .HasConstraintName("fk_news_news_id");
+                        });
+
                     b.Navigation("Logo");
 
                     b.Navigation("Poster");
+
+                    b.Navigation("Show");
 
                     b.Navigation("Thumbnail");
                 });

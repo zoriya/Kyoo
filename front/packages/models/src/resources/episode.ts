@@ -24,7 +24,7 @@ import { withImages, imageFn } from "../traits";
 import { ResourceP } from "../traits/resource";
 import { ShowP } from "./show";
 
-const BaseEpisodeP = withImages(
+export const BaseEpisodeP = withImages(
 	ResourceP.extend({
 		/**
 		 * The season in witch this episode is in.
@@ -73,7 +73,10 @@ const BaseEpisodeP = withImages(
 		}),
 	}),
 	"episodes",
-);
+).transform((x) => ({
+	...x,
+	href: `/watch/${x.slug}`,
+}));
 
 export const EpisodeP = BaseEpisodeP.and(
 	z.object({
