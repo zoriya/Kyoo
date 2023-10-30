@@ -1197,6 +1197,119 @@ namespace Kyoo.Postgresql.Migrations
 
             modelBuilder.Entity("Kyoo.Abstractions.Models.News", b =>
                 {
+                    b.OwnsOne("Kyoo.Abstractions.Models.News+ShowInfo", "Show", b1 =>
+                        {
+                            b1.Property<int>("NewsId")
+                                .HasColumnType("integer")
+                                .HasColumnName("id");
+
+                            b1.Property<int>("Id")
+                                .HasColumnType("integer")
+                                .HasColumnName("show_id");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("show_name");
+
+                            b1.Property<string>("Slug")
+                                .IsRequired()
+                                .HasColumnType("text")
+                                .HasColumnName("show_slug");
+
+                            b1.HasKey("NewsId");
+
+                            b1.ToTable("news");
+
+                            b1.WithOwner()
+                                .HasForeignKey("NewsId")
+                                .HasConstraintName("fk_news_news_id");
+
+                            b1.OwnsOne("Kyoo.Abstractions.Models.Image", "Logo", b2 =>
+                                {
+                                    b2.Property<int>("ShowInfoNewsId")
+                                        .HasColumnType("integer")
+                                        .HasColumnName("id");
+
+                                    b2.Property<string>("Blurhash")
+                                        .IsRequired()
+                                        .HasMaxLength(32)
+                                        .HasColumnType("character varying(32)")
+                                        .HasColumnName("show_logo_blurhash");
+
+                                    b2.Property<string>("Source")
+                                        .IsRequired()
+                                        .HasColumnType("text")
+                                        .HasColumnName("show_logo_source");
+
+                                    b2.HasKey("ShowInfoNewsId");
+
+                                    b2.ToTable("news");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("ShowInfoNewsId")
+                                        .HasConstraintName("fk_news_news_id");
+                                });
+
+                            b1.OwnsOne("Kyoo.Abstractions.Models.Image", "Poster", b2 =>
+                                {
+                                    b2.Property<int>("ShowInfoNewsId")
+                                        .HasColumnType("integer")
+                                        .HasColumnName("id");
+
+                                    b2.Property<string>("Blurhash")
+                                        .IsRequired()
+                                        .HasMaxLength(32)
+                                        .HasColumnType("character varying(32)")
+                                        .HasColumnName("show_poster_blurhash");
+
+                                    b2.Property<string>("Source")
+                                        .IsRequired()
+                                        .HasColumnType("text")
+                                        .HasColumnName("show_poster_source");
+
+                                    b2.HasKey("ShowInfoNewsId");
+
+                                    b2.ToTable("news");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("ShowInfoNewsId")
+                                        .HasConstraintName("fk_news_news_id");
+                                });
+
+                            b1.OwnsOne("Kyoo.Abstractions.Models.Image", "Thumbnail", b2 =>
+                                {
+                                    b2.Property<int>("ShowInfoNewsId")
+                                        .HasColumnType("integer")
+                                        .HasColumnName("id");
+
+                                    b2.Property<string>("Blurhash")
+                                        .IsRequired()
+                                        .HasMaxLength(32)
+                                        .HasColumnType("character varying(32)")
+                                        .HasColumnName("show_thumbnail_blurhash");
+
+                                    b2.Property<string>("Source")
+                                        .IsRequired()
+                                        .HasColumnType("text")
+                                        .HasColumnName("show_thumbnail_source");
+
+                                    b2.HasKey("ShowInfoNewsId");
+
+                                    b2.ToTable("news");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("ShowInfoNewsId")
+                                        .HasConstraintName("fk_news_news_id");
+                                });
+
+                            b1.Navigation("Logo");
+
+                            b1.Navigation("Poster");
+
+                            b1.Navigation("Thumbnail");
+                        });
+
                     b.OwnsOne("Kyoo.Abstractions.Models.Image", "Logo", b1 =>
                         {
                             b1.Property<int>("NewsId")
@@ -1265,35 +1378,6 @@ namespace Kyoo.Postgresql.Migrations
                                 .IsRequired()
                                 .HasColumnType("text")
                                 .HasColumnName("thumbnail_source");
-
-                            b1.HasKey("NewsId");
-
-                            b1.ToTable("news");
-
-                            b1.WithOwner()
-                                .HasForeignKey("NewsId")
-                                .HasConstraintName("fk_news_news_id");
-                        });
-
-                    b.OwnsOne("Kyoo.Abstractions.Models.ShowInfo", "Show", b1 =>
-                        {
-                            b1.Property<int>("NewsId")
-                                .HasColumnType("integer")
-                                .HasColumnName("id");
-
-                            b1.Property<int>("Id")
-                                .HasColumnType("integer")
-                                .HasColumnName("show_info_id");
-
-                            b1.Property<string>("Name")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("show_info_name");
-
-                            b1.Property<string>("Slug")
-                                .IsRequired()
-                                .HasColumnType("text")
-                                .HasColumnName("show_info_slug");
 
                             b1.HasKey("NewsId");
 

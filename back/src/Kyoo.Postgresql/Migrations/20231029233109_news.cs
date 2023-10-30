@@ -38,7 +38,9 @@ namespace Kyoo.Postgresql.Migrations
 				e.id, e.slug, e.name, NULL AS tagline, '{}' AS aliases, e.path, e.overview, '{}' AS tags, '{}' AS genres,
 				NULL AS status, e.release_date AS air_date, e.poster_source, e.poster_blurhash, e.thumbnail_source, e.thumbnail_blurhash,
 				e.logo_source,e.logo_blurhash, NULL AS trailer, e.external_id, e.season_number, e.episode_number, e.absolute_number,
-				'episode'::news_kind AS kind, e.added_date, s.id AS show_id, s.slug AS show_slug, s.name AS show_name
+				'episode'::news_kind AS kind, e.added_date, s.id AS show_id, s.slug AS show_slug, s.name AS show_name,
+				s.poster_source AS show_poster_source, s.poster_blurhash AS show_poster_blurhash, s.thumbnail_source AS show_thumbnail_source,
+				s.thumbnail_blurhash AS show_thumbnail_blurhash, s.logo_source AS show_logo_source, s.logo_blurhash AS show_logo_blurhash
 			FROM episodes AS e
 			LEFT JOIN shows AS s ON e.show_id = s.id
 			UNION ALL
@@ -46,7 +48,9 @@ namespace Kyoo.Postgresql.Migrations
 				-m.id, m.slug, m.name, m.tagline, m.aliases, m.path, m.overview, m.tags, m.genres,
 				m.status, m.air_date, m.poster_source, m.poster_blurhash, m.thumbnail_source, m.thumbnail_blurhash,
 				m.logo_source, m.logo_blurhash, m.trailer, m.external_id, NULL AS season_number, NULL AS episode_number, NULL as absolute_number,
-				'movie'::news_kind AS kind, m.added_date, NULL AS show_id, NULL AS show_slug, NULL AS show_name
+				'movie'::news_kind AS kind, m.added_date, NULL AS show_id, NULL AS show_slug, NULL AS show_name,
+				NULL AS show_poster_source, NULL AS show_poster_blurhash, NULL AS show_thumbnail_source, NULL AS show_thumbnail_blurhash,
+				NULL AS show_logo_source, NULL AS show_logo_blurhash
 			FROM movies AS m
 			");
 		}

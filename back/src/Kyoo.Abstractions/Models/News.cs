@@ -159,7 +159,7 @@ namespace Kyoo.Abstractions.Models
 		/// A simple summary of informations about the show of this episode
 		/// (this is specially useful since news can't have includes).
 		/// </summary>
-		public class ShowInfo : IResource
+		public class ShowInfo : IResource, IThumbnails
 		{
 			/// <inheritdoc/>
 			public int Id { get; set; }
@@ -171,6 +171,15 @@ namespace Kyoo.Abstractions.Models
 			/// The title of this show.
 			/// </summary>
 			public string Name { get; set; }
+
+			/// <inheritdoc />
+			public Image? Poster { get; set; }
+
+			/// <inheritdoc />
+			public Image? Thumbnail { get; set; }
+
+			/// <inheritdoc />
+			public Image? Logo { get; set; }
 		}
 	}
 }
