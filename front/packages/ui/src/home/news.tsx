@@ -21,11 +21,11 @@
 import {
 	Genre,
 	ItemKind,
-	LibraryItem,
-	LibraryItemP,
+	News,
+	NewsKind,
+	NewsP,
 	QueryIdentifier,
 	getDisplayDate,
-	useInfiniteFetch,
 } from "@kyoo/models";
 import { H3, IconButton, ts } from "@kyoo/primitives";
 import { ReactElement, forwardRef, useRef } from "react";
@@ -36,76 +36,48 @@ import ChevronLeft from "@material-symbols/svg-400/rounded/chevron_left-fill.svg
 import ChevronRight from "@material-symbols/svg-400/rounded/chevron_right-fill.svg";
 import { InfiniteFetch, InfiniteFetchList } from "../fetch-infinite";
 import { useTranslation } from "react-i18next";
+import { Header } from "./genre";
+import { EpisodeBox } from "../details/episode";
 
-export const Header = ({ title }: { title: string }) => {
-	const { css } = useYoshiki();
-
-	return (
-		<View
-			{...css({
-				marginTop: ItemGrid.layout.gap,
-				marginX: ItemGrid.layout.gap,
-				pX: ts(0.5),
-				flexDirection: "row",
-				justifyContent: "space-between",
-			})}
-		>
-			<H3>{title}</H3>
-			{/* <View {...css({ flexDirection: "row" })}> */}
-			{/* 	<IconButton */}
-			{/* 		icon={ChevronLeft} */}
-			{/* 		// onPress={() => ref.current?.scrollTo({ x: 0, animated: true })} */}
-			{/* 	/> */}
-			{/* 	<IconButton */}
-			{/* 		icon={ChevronRight} */}
-			{/* 		// onPress={() => ref.current?.scrollTo({ x: 0, animated: true })} */}
-			{/* 	/> */}
-			{/* </View> */}
-		</View>
-	);
-};
-
-export const GenreGrid = ({ genre }: { genre: Genre }) => {
-	const query = useInfiniteFetch(GenreGrid.query(genre));
-	const displayEmpty = useRef(false);
+export const NewsList = () => {
 	const { t } = useTranslation();
 
 	return (
 		<>
-			{(displayEmpty.current || query.items?.length !== 0) && <Header title={genre} />}
-			<InfiniteFetchList
-				query={query}
+			<Header title={t("home.news")} />
+			<InfiniteFetch
+				query={NewsList.query()}
 				layout={{ ...ItemGrid.layout, layout: "horizontal" }}
-				empty={displayEmpty.current ? t("home.none") : undefined}
+				empty={t("home.none")}
 			>
-				{(x, i) => {
-					// only display empty list if a loading as been displayed (not durring ssr)
-					if (x.isLoading) displayEmpty.current = true;
-					return (
+				{(x, i) =>
+					x.kind === NewsKind.Movie || (x.isLoading && i % 2) ? (
 						<ItemGrid
-							key={x.id ?? i}
 							isLoading={x.isLoading as any}
 							href={x.href}
-							name={x.name}
-							subtitle={
-								x.kind !== ItemKind.Collection && !x.isLoading ? getDisplayDate(x) : undefined
-							}
+							name={x.name!}
+							subtitle={!x.isLoading ? getDisplayDate(x) : undefined}
 							poster={x.poster}
 						/>
-					);
-				}}
-			</InfiniteFetchList>
+					) : (
+						<EpisodeBox
+							isLoading={x.isLoading as any}
+							name={x.name}
+							overview={x.overview!}
+							thumbnail={x.thumbnail}
+						/>
+					)
+				}
+			</InfiniteFetch>
 		</>
 	);
 };
 
-GenreGrid.query = (genre: Genre): QueryIdentifier<LibraryItem> => ({
-	parser: LibraryItemP,
+NewsList.query = (): QueryIdentifier<News> => ({
+	parser: NewsP,
 	infinite: true,
-	path: ["items"],
+	path: ["news"],
 	params: {
-		genres: genre,
-		sortBy: "random",
 		// Limit the inital numbers of items
 		limit: 10,
 	},

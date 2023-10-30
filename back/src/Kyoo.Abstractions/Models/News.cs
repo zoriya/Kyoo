@@ -136,6 +136,12 @@ namespace Kyoo.Abstractions.Models
 		public int? AbsoluteNumber { get; set; }
 
 		/// <summary>
+		/// A simple summary of informations about the show of this episode
+		/// (this is specially useful since news can't have includes).
+		/// </summary>
+		public ShowInfo? Show { get; set; }
+
+		/// <summary>
 		/// Is the item a a movie or an episode?
 		/// </summary>
 		public NewsKind Kind { get; set; }
@@ -148,5 +154,23 @@ namespace Kyoo.Abstractions.Models
 			Direct = $"/video/{Kind.ToString().ToLower()}/{Slug}/direct",
 			Hls = $"/video/{Kind.ToString().ToLower()}/{Slug}/master.m3u8",
 		};
+
+		/// <summary>
+		/// A simple summary of informations about the show of this episode
+		/// (this is specially useful since news can't have includes).
+		/// </summary>
+		public class ShowInfo : IResource
+		{
+			/// <inheritdoc/>
+			public int Id { get; set; }
+
+			/// <inheritdoc/>
+			public string Slug { get; set; }
+
+			/// <summary>
+			/// The title of this show.
+			/// </summary>
+			public string Name { get; set; }
+		}
 	}
 }
