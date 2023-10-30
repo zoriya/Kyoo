@@ -41,6 +41,7 @@ import { EpisodeBox, episodeDisplayNumber } from "../details/episode";
 
 export const NewsList = () => {
 	const { t } = useTranslation();
+	const { css } = useYoshiki();
 
 	return (
 		<>
@@ -48,6 +49,9 @@ export const NewsList = () => {
 			<InfiniteFetch
 				query={NewsList.query()}
 				layout={{ ...ItemGrid.layout, layout: "horizontal" }}
+				getItemType={(x, i) =>
+					x.kind === NewsKind.Movie || (x.isLoading && i % 2) ? "movie" : "episode"
+				}
 				empty={t("home.none")}
 			>
 				{(x, i) =>
@@ -69,6 +73,9 @@ export const NewsList = () => {
 							}
 							overview={x.name}
 							thumbnail={x.thumbnail}
+							// TODO: support this on mobile too
+							// @ts-expect-error This is a web only property
+							{...css({ gridColumnEnd: "span 2" })}
 						/>
 					)
 				}
