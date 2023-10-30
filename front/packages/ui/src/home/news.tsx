@@ -37,7 +37,7 @@ import ChevronRight from "@material-symbols/svg-400/rounded/chevron_right-fill.s
 import { InfiniteFetch, InfiniteFetchList } from "../fetch-infinite";
 import { useTranslation } from "react-i18next";
 import { Header } from "./genre";
-import { EpisodeBox } from "../details/episode";
+import { EpisodeBox, episodeDisplayNumber } from "../details/episode";
 
 export const NewsList = () => {
 	const { t } = useTranslation();
@@ -62,8 +62,12 @@ export const NewsList = () => {
 					) : (
 						<EpisodeBox
 							isLoading={x.isLoading as any}
-							name={x.name}
-							overview={x.overview!}
+							name={
+								x.kind === NewsKind.Episode
+									? `${x.show!.name} ${episodeDisplayNumber(x)}`
+									: undefined
+							}
+							overview={x.name}
 							thumbnail={x.thumbnail}
 						/>
 					)

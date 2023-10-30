@@ -18,7 +18,7 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { focusReset, H6, Image, ImageProps, Link, P, Skeleton, ts } from "@kyoo/primitives";
+import { focusReset, H6, Image, ImageProps, Link, P, Skeleton, SubP, ts } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
 import { ImageStyle, View } from "react-native";
 import { Layout, WithLoading } from "../fetch";
@@ -44,26 +44,71 @@ export const EpisodeBox = ({
 	overview,
 	thumbnail,
 	isLoading,
+	href,
 	...props
 }: Stylable &
 	WithLoading<{
 		name: string | null;
-		overview: string;
+		overview: string | null;
+		href: string;
 		thumbnail?: ImageProps["src"] | null;
 	}>) => {
+	const { css } = useYoshiki("episodebox");
 	const { t } = useTranslation();
 
 	return (
-		<View {...props}>
+		<Link
+			href={href}
+			{...css(
+				{
+					child: {
+						poster: {
+							borderColor: (theme) => theme.background,
+							borderWidth: ts(0.5),
+							borderStyle: "solid",
+						},
+					},
+					fover: {
+						self: focusReset,
+						poster: {
+							borderColor: (theme: Theme) => theme.accent,
+						},
+						title: {
+							textDecorationLine: "underline",
+						},
+					},
+				},
+				props,
+			)}
+		>
 			<Image
 				src={thumbnail}
 				quality="low"
 				alt=""
 				layout={{ width: percent(100), aspectRatio: 16 / 9 }}
+				{...(css("poster") as any)}
 			/>
-			<Skeleton>{isLoading || <P>{name ?? t("show.episodeNoMetadata")}</P>}</Skeleton>
-			<Skeleton>{isLoading || <P>{overview}</P>}</Skeleton>
-		</View>
+			<Skeleton>
+				{isLoading || (
+					<P {...css([{ marginY: 0, textAlign: "center" }, "title"])}>
+						{name ?? t("show.episodeNoMetadata")}
+					</P>
+				)}
+			</Skeleton>
+			<Skeleton>
+				{isLoading || (
+					<SubP
+						numberOfLines={3}
+						{...css({
+							marginTop: 0,
+							textAlign: "center",
+						})}
+					>
+						{overview}
+					</SubP>
+				)}
+			</Skeleton>
+		</Link>
 	);
 };
 
