@@ -20,7 +20,7 @@
 
 import { KyooImage } from "@kyoo/models";
 import { Link, Skeleton, Poster, ts, focusReset, P, SubP } from "@kyoo/primitives";
-import { ImageStyle, Platform } from "react-native";
+import { ImageStyle } from "react-native";
 import { percent, px, Stylable, Theme, useYoshiki } from "yoshiki/native";
 import { Layout, WithLoading } from "../fetch";
 
