@@ -51,7 +51,7 @@ export const InfiniteFetchList = <Data, Props, _>({
 	divider?: boolean | ComponentType;
 	Header?: ComponentType<Props & { children: JSX.Element }> | ReactElement;
 	headerProps?: Props;
-	getItemType?: (item: Data, index: number) => string | number;
+	getItemType?: (item: WithLoading<Data>, index: number) => string | number;
 	fetchMore?: boolean;
 }): JSX.Element | null => {
 	const { numColumns, size } = useBreakpointMap(layout);

@@ -159,7 +159,7 @@ export const InfiniteFetchList = <Data, _, HeaderProps>({
 	divider?: boolean | ComponentType;
 	Header?: ComponentType<{ children: JSX.Element } & HeaderProps> | ReactElement;
 	headerProps: HeaderProps;
-	getItemType?: (item: Data, index: number) => string | number;
+	getItemType?: (item: WithLoading<Data>, index: number) => string | number;
 	fetchMore?: boolean;
 }): JSX.Element | null => {
 	const oldItems = useRef<Data[] | undefined>();
