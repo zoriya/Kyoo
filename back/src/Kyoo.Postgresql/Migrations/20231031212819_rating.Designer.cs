@@ -121,6 +121,10 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnType("timestamp with time zone")
 						.HasColumnName("release_date");
 
+					b.Property<int>("Runtime")
+						.HasColumnType("integer")
+						.HasColumnName("runtime");
+
 					b.Property<int?>("SeasonId")
 						.HasColumnType("integer")
 						.HasColumnName("season_id");
@@ -212,9 +216,12 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnName("path");
 
 					b.Property<int>("Rating")
-						.IsRequired()
 						.HasColumnType("integer")
 						.HasColumnName("rating");
+
+					b.Property<int>("Runtime")
+						.HasColumnType("integer")
+						.HasColumnName("runtime");
 
 					b.Property<string>("Slug")
 						.IsRequired()
@@ -298,9 +305,12 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnName("path");
 
 					b.Property<int>("Rating")
-						.IsRequired()
 						.HasColumnType("integer")
 						.HasColumnName("rating");
+
+					b.Property<int>("Runtime")
+						.HasColumnType("integer")
+						.HasColumnName("runtime");
 
 					b.Property<string>("Slug")
 						.IsRequired()
@@ -402,9 +412,12 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnName("path");
 
 					b.Property<int>("Rating")
-						.IsRequired()
 						.HasColumnType("integer")
 						.HasColumnName("rating");
+
+					b.Property<int>("Runtime")
+						.HasColumnType("integer")
+						.HasColumnName("runtime");
 
 					b.Property<int?>("SeasonNumber")
 						.HasColumnType("integer")
@@ -628,7 +641,6 @@ namespace Kyoo.Postgresql.Migrations
 						.HasColumnName("overview");
 
 					b.Property<int>("Rating")
-						.IsRequired()
 						.HasColumnType("integer")
 						.HasColumnName("rating");
 

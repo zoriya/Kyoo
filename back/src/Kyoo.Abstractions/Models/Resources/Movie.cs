@@ -83,6 +83,11 @@ namespace Kyoo.Abstractions.Models
 		public int Rating { get; set; }
 
 		/// <summary>
+		/// How long is this movie? (in minutes)
+		/// </summary>
+		public int Runtime { get; set; }
+
+		/// <summary>
 		/// The date this movie aired.
 		/// </summary>
 		public DateTime? AirDate { get; set; }

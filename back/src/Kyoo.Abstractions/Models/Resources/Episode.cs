@@ -134,6 +134,11 @@ namespace Kyoo.Abstractions.Models
 		public string? Overview { get; set; }
 
 		/// <summary>
+		/// How long is this episode? (in minutes)
+		/// </summary>
+		public int Runtime { get; set; }
+
+		/// <summary>
 		/// The release date of this episode. It can be null if unknown.
 		/// </summary>
 		public DateTime? ReleaseDate { get; set; }

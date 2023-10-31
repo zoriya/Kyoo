@@ -30,18 +30,19 @@ class MovieTranslation:
 
 @dataclass
 class Movie:
-	original_language: Optional[str] = None
-	aliases: list[str] = field(default_factory=list)
-	air_date: Optional[date | int] = None
-	status: Status = Status.UNKNOWN
-	rating: int = None
-	path: Optional[str] = None
-	studios: list[Studio] = field(default_factory=list)
-	genres: list[Genre] = field(default_factory=list)
+	original_language: Optional[str]
+	aliases: list[str]
+	air_date: Optional[date | int]
+	status: Status
+	rating: int
+	runtime: int
+	studios: list[Studio]
+	genres: list[Genre]
 	# TODO: handle staff
 	# staff: list[Staff]
-	external_id: dict[str, MetadataID] = field(default_factory=dict)
+	external_id: dict[str, MetadataID]
 
+	path: Optional[str] = None
 	translations: dict[str, MovieTranslation] = field(default_factory=dict)
 
 	def to_kyoo(self):
