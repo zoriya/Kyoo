@@ -53,20 +53,16 @@ export const itemMap = (
 	};
 };
 
-const query = (
-	slug?: string,
-	sortKey?: SortBy,
-	sortOrd?: SortOrd,
-): QueryIdentifier<LibraryItem> => ({
+const query = (sortKey?: SortBy, sortOrd?: SortOrd): QueryIdentifier<LibraryItem> => ({
 	parser: LibraryItemP,
-	path: slug ? ["library", slug, "items"] : ["items"],
+	path: ["items"],
 	infinite: true,
 	params: {
 		sortBy: sortKey ? `${sortKey}:${sortOrd ?? "asc"}` : "name:asc",
 	},
 });
 
-export const BrowsePage: QueryPage<{ slug?: string }> = ({ slug }) => {
+export const BrowsePage: QueryPage = () => {
 	const [sort, setSort] = useParam("sortBy");
 	const sortKey = (sort?.split(":")[0] as SortBy) || SortBy.Name;
 	const sortOrd = (sort?.split(":")[1] as SortOrd) || SortOrd.Asc;
@@ -76,11 +72,12 @@ export const BrowsePage: QueryPage<{ slug?: string }> = ({ slug }) => {
 
 	return (
 		<InfiniteFetch
-			query={query(slug, sortKey, sortOrd)}
+			query={query(sortKey, sortOrd)}
 			placeholderCount={15}
 			layout={LayoutComponent.layout}
 			Header={
 				<BrowseSettings
+					availableSorts={Object.values(SortBy)}
 					sortKey={sortKey}
 					sortOrd={sortOrd}
 					setSort={(key, ord) => {
@@ -98,6 +95,6 @@ export const BrowsePage: QueryPage<{ slug?: string }> = ({ slug }) => {
 
 BrowsePage.getLayout = DefaultLayout;
 
-BrowsePage.getFetchUrls = ({ slug, sortBy }) => [
-	query(slug, sortBy?.split("-")[0] as SortBy, sortBy?.split("-")[1] as SortOrd),
+BrowsePage.getFetchUrls = ({ sortBy }) => [
+	query(sortBy?.split("-")[0] as SortBy, sortBy?.split("-")[1] as SortOrd),
 ];

@@ -25,6 +25,12 @@ export enum SortBy {
 	AddedDate = "addedDate",
 }
 
+export enum SearchSort {
+	Relevance = "relevance",
+	AirDate = "airDate",
+	AddedDate = "addedDate",
+}
+
 export enum SortOrd {
 	Asc = "asc",
 	Desc = "desc",

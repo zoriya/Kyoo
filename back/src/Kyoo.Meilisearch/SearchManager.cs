@@ -32,13 +32,15 @@ public class SearchManager : ISearchManager
 	private readonly MeilisearchClient _client;
 	private readonly ILibraryManager _libraryManager;
 
-	private static IEnumerable<string> _GetSortsBy<T>(Sort<T>? sort)
+	private static IEnumerable<string> _GetSortsBy<T>(string index, Sort<T>? sort)
 	{
 		return sort switch
 		{
 			Sort<T>.Default => Array.Empty<string>(),
-			Sort<T>.By @sortBy => new[] { $"{sortBy.Key}:{(sortBy.Desendant ? "desc" : "asc")}" },
-			Sort<T>.Conglomerate(var list) => list.SelectMany(_GetSortsBy),
+			Sort<T>.By @sortBy => MeilisearchModule.IndexSettings[index].SortableAttributes.Contains(sortBy.Key, StringComparer.InvariantCultureIgnoreCase)
+				? new[] { $"{CamelCase.ConvertName(sortBy.Key)}:{(sortBy.Desendant ? "desc" : "asc")}" }
+				: throw new ValidationException($"Invalid sorting mode: {sortBy.Key}"),
+			Sort<T>.Conglomerate(var list) => list.SelectMany(x => _GetSortsBy(index, x)),
 			Sort<T>.Random => throw new ValidationException("Random sorting is not supported while searching."),
 			_ => Array.Empty<string>(),
 		};
@@ -106,7 +108,7 @@ public class SearchManager : ISearchManager
 		ISearchable<IdResource> res = await _client.Index(index).SearchAsync<IdResource>(query, new SearchQuery()
 		{
 			Filter = where,
-			Sort = _GetSortsBy(sortBy),
+			Sort = _GetSortsBy(index, sortBy),
 			Limit = pagination?.Limit ?? 50,
 			Offset = pagination?.Skip ?? 0,
 		});
@@ -126,7 +128,7 @@ public class SearchManager : ISearchManager
 		// TODO: add filters and facets
 		ISearchable<IdResource> res = await _client.Index("items").SearchAsync<IdResource>(query, new SearchQuery()
 		{
-			Sort = _GetSortsBy(sortBy),
+			Sort = _GetSortsBy("items", sortBy),
 			Limit = pagination?.Limit ?? 50,
 			Offset = pagination?.Skip ?? 0,
 		});

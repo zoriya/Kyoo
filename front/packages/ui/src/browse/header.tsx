@@ -37,11 +37,11 @@ import ViewList from "@material-symbols/svg-400/rounded/view_list.svg";
 import Sort from "@material-symbols/svg-400/rounded/sort.svg";
 import ArrowUpward from "@material-symbols/svg-400/rounded/arrow_upward.svg";
 import ArrowDownward from "@material-symbols/svg-400/rounded/arrow_downward.svg";
-import { Layout, SortBy, SortOrd } from "./types";
+import { Layout, SearchSort, SortOrd } from "./types";
 import { forwardRef } from "react";
 import { View, PressableProps } from "react-native";
 
-const SortTrigger = forwardRef<View, PressableProps & { sortKey: SortBy }>(function SortTrigger(
+const SortTrigger = forwardRef<View, PressableProps & { sortKey: string }>(function SortTrigger(
 	{ sortKey, ...props },
 	ref,
 ) {
@@ -61,15 +61,17 @@ const SortTrigger = forwardRef<View, PressableProps & { sortKey: SortBy }>(funct
 });
 
 export const BrowseSettings = ({
+	availableSorts,
 	sortKey,
 	sortOrd,
 	setSort,
 	layout,
 	setLayout,
 }: {
-	sortKey: SortBy;
+	availableSorts: string[];
+	sortKey: string;
 	sortOrd: SortOrd;
-	setSort: (sort: SortBy, ord: SortOrd) => void;
+	setSort: (sort: string, ord: SortOrd) => void;
 	layout: Layout;
 	setLayout: (layout: Layout) => void;
 }) => {
@@ -97,12 +99,18 @@ export const BrowseSettings = ({
 			)}
 			<View {...css({ flexDirection: "row" })}>
 				<Menu Trigger={SortTrigger} sortKey={sortKey}>
-					{Object.values(SortBy).map((x) => (
+					{availableSorts.map((x) => (
 						<Menu.Item
 							key={x}
 							label={t(`browse.sortkey.${x}`)}
 							selected={sortKey === x}
-							icon={sortOrd === SortOrd.Asc ? ArrowUpward : ArrowDownward}
+							icon={
+								x !== SearchSort.Relevance
+									? sortOrd === SortOrd.Asc
+										? ArrowUpward
+										: ArrowDownward
+									: undefined
+							}
 							onSelect={() =>
 								setSort(x, sortKey === x && sortOrd === SortOrd.Asc ? SortOrd.Desc : SortOrd.Asc)
 							}
