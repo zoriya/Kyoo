@@ -61,6 +61,7 @@ export const SearchPage: QueryPage<{ q?: string }> = ({ q }) => {
 			query={query(q, sortKey, sortOrd)}
 			placeholderCount={15}
 			layout={LayoutComponent.layout}
+			empty={t("search.empty")}
 			Header={
 				<BrowseSettings
 					availableSorts={Object.values(SearchSort)}
