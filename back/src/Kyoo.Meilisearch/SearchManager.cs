@@ -64,9 +64,10 @@ public class SearchManager : ISearchManager
 		if (kind != null)
 		{
 			dynamic expando = new ExpandoObject();
+			var dictionary = (IDictionary<string, object?>)expando;
 
 			foreach (PropertyInfo property in item.GetType().GetProperties())
-				expando.TryAdd(property.Name, property.GetValue(item));
+				dictionary.Add(property.Name, property.GetValue(item));
 			expando.Ref = $"{kind}/{item.Id}";
 			expando.Kind = kind;
 			return _client.Index(index).AddDocumentsAsync(new[] { item });

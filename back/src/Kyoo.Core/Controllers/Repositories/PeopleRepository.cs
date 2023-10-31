@@ -19,7 +19,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
@@ -80,7 +79,7 @@ namespace Kyoo.Core.Controllers
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
 			await _database.SaveChangesAsync(() => Get(obj.Slug));
-			OnResourceCreated(obj);
+			await IRepository<People>.OnResourceCreated(obj);
 			return obj;
 		}
 

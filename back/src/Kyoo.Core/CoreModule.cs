@@ -16,6 +16,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AspNetCore.Proxy;
@@ -41,6 +42,12 @@ namespace Kyoo.Core
 	/// </summary>
 	public class CoreModule : IPlugin
 	{
+		/// <summary>
+		/// A service provider to access services in static context (in events for example).
+		/// </summary>
+		/// <remarks>Don't forget to create a scope.</remarks>
+		public static IServiceProvider Services { get; set; }
+
 		/// <inheritdoc />
 		public string Name => "Core";
 
