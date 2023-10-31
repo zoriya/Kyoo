@@ -19,6 +19,8 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using EntityFrameworkCore.Projectables;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Utils;
 using Newtonsoft.Json;
@@ -141,6 +143,18 @@ namespace Kyoo.Abstractions.Models
 		/// The list of collections that contains this show.
 		/// </summary>
 		[LoadableRelation] public ICollection<Collection>? Collections { get; set; }
+
+		/// <summary>
+		/// The first episode of this show.
+		/// </summary>
+		[Projectable(UseMemberBody = nameof(_FirstEpisode), OnlyOnInclude = true)]
+		[LoadableRelation] public Episode? FirstEpisode { get; set; }
+
+		private Episode? _FirstEpisode => Episodes!
+			.OrderBy(x => x.AbsoluteNumber)
+			.ThenBy(x => x.SeasonNumber)
+			.ThenBy(x => x.EpisodeNumber)
+			.FirstOrDefault();
 
 		/// <inheritdoc />
 		public void OnMerge(object merged)
