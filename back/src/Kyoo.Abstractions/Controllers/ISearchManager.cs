@@ -78,4 +78,30 @@ public interface ISearchManager
 		Sort<Collection> sortBy,
 		SearchPagination pagination,
 		Include<Collection>? include = default);
+
+	/// <summary>
+	/// Search for episodes.
+	/// </summary>
+	/// <param name="query">The seach query.</param>
+	/// <param name="sortBy">Sort information about the query (sort by, sort order)</param>
+	/// <param name="pagination">How pagination should be done (where to start and how many to return)</param>
+	/// <param name="include">The related fields to include.</param>
+	/// <returns>A list of resources that match every filters</returns>
+	public Task<SearchPage<Episode>.SearchResult> SearchEpisodes(string? query,
+		Sort<Episode> sortBy,
+		SearchPagination pagination,
+		Include<Episode>? include = default);
+
+	/// <summary>
+	/// Search for studios.
+	/// </summary>
+	/// <param name="query">The seach query.</param>
+	/// <param name="sortBy">Sort information about the query (sort by, sort order)</param>
+	/// <param name="pagination">How pagination should be done (where to start and how many to return)</param>
+	/// <param name="include">The related fields to include.</param>
+	/// <returns>A list of resources that match every filters</returns>
+	public Task<SearchPage<Studio>.SearchResult> SearchStudios(string? query,
+		Sort<Studio> sortBy,
+		SearchPagination pagination,
+		Include<Studio>? include = default);
 }

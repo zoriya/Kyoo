@@ -23,6 +23,7 @@ using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Utils;
 using Meilisearch;
+using static System.Text.Json.JsonNamingPolicy;
 
 namespace Kyoo.Meiliseach;
 
@@ -57,9 +58,17 @@ public class SearchManager : ISearchManager
 		IRepository<Collection>.OnCreated += (x) => _CreateOrUpdate("items", x, nameof(Collection));
 		IRepository<Collection>.OnEdited += (x) => _CreateOrUpdate("items", x, nameof(Collection));
 		IRepository<Collection>.OnDeleted += (x) => _Delete("items", x.Id, nameof(Collection));
+
+		IRepository<Episode>.OnCreated += (x) => _CreateOrUpdate(nameof(Episode), x);
+		IRepository<Episode>.OnEdited += (x) => _CreateOrUpdate(nameof(Episode), x);
+		IRepository<Episode>.OnDeleted += (x) => _Delete(nameof(Episode), x.Id);
+
+		IRepository<Studio>.OnCreated += (x) => _CreateOrUpdate(nameof(Studio), x);
+		IRepository<Studio>.OnEdited += (x) => _CreateOrUpdate(nameof(Studio), x);
+		IRepository<Studio>.OnDeleted += (x) => _Delete(nameof(Studio), x.Id);
 	}
 
-	private Task _CreateOrUpdate(string index, IResource item, string? kind = null)
+	private async Task _CreateOrUpdate(string index, IResource item, string? kind = null)
 	{
 		if (kind != null)
 		{
@@ -67,12 +76,14 @@ public class SearchManager : ISearchManager
 			var dictionary = (IDictionary<string, object?>)expando;
 
 			foreach (PropertyInfo property in item.GetType().GetProperties())
-				dictionary.Add(property.Name, property.GetValue(item));
-			expando.Ref = $"{kind}/{item.Id}";
-			expando.Kind = kind;
-			return _client.Index(index).AddDocumentsAsync(new[] { item });
+				dictionary.Add(CamelCase.ConvertName(property.Name), property.GetValue(item));
+			dictionary.Add("ref", $"{kind}-{item.Id}");
+			expando.kind = kind;
+			var task = await _client.Index(index).AddDocumentsAsync(new[] { expando });
+			var ret = await _client.WaitForTaskAsync(task.TaskUid);
+			Console.WriteLine(ret.Error);
 		}
-		return _client.Index(index).AddDocumentsAsync(new[] { item });
+		await _client.Index(index).AddDocumentsAsync(new[] { item });
 	}
 
 	private Task _Delete(string index, int id, string? kind = null)
@@ -144,7 +155,7 @@ public class SearchManager : ISearchManager
 		SearchPagination pagination,
 		Include<Movie>? include = default)
 	{
-		return _Search("items", query, $"Kind = {nameof(Movie)}", sortBy, pagination, include);
+		return _Search("items", query, $"kind = {nameof(Movie)}", sortBy, pagination, include);
 	}
 
 	/// <inheritdoc/>
@@ -153,7 +164,7 @@ public class SearchManager : ISearchManager
 		SearchPagination pagination,
 		Include<Show>? include = default)
 	{
-		return _Search("items", query, $"Kind = {nameof(Show)}", sortBy, pagination, include);
+		return _Search("items", query, $"kind = {nameof(Show)}", sortBy, pagination, include);
 	}
 
 	/// <inheritdoc/>
@@ -162,7 +173,25 @@ public class SearchManager : ISearchManager
 		SearchPagination pagination,
 		Include<Collection>? include = default)
 	{
-		return _Search("items", query, $"Kind = {nameof(Collection)}", sortBy, pagination, include);
+		return _Search("items", query, $"kind = {nameof(Collection)}", sortBy, pagination, include);
+	}
+
+	/// <inheritdoc/>
+	public Task<SearchPage<Episode>.SearchResult> SearchEpisodes(string? query,
+		Sort<Episode> sortBy,
+		SearchPagination pagination,
+		Include<Episode>? include = default)
+	{
+		return _Search(nameof(Episode), query, null, sortBy, pagination, include);
+	}
+
+	/// <inheritdoc/>
+	public Task<SearchPage<Studio>.SearchResult> SearchStudios(string? query,
+		Sort<Studio> sortBy,
+		SearchPagination pagination,
+		Include<Studio>? include = default)
+	{
+		return _Search(nameof(Studio), query, null, sortBy, pagination, include);
 	}
 
 	private class IdResource

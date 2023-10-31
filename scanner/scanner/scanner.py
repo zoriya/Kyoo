@@ -40,7 +40,7 @@ class Scanner:
 		if len(deleted) != len(self.registered):
 			for x in deleted:
 				await self.delete(x)
-		else:
+		elif len(deleted) > 0:
 			logging.warning("All video files are unavailable. Check your disks.")
 
 		# We batch videos by 20 because too mutch at once kinda DDOS everything.

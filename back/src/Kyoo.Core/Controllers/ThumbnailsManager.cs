@@ -75,6 +75,12 @@ namespace Kyoo.Core.Controllers
 				response.EnsureSuccessStatusCode();
 				await using Stream reader = await response.Content.ReadAsStreamAsync();
 				using SKCodec codec = SKCodec.Create(reader);
+				if (codec == null)
+				{
+					_logger.LogError("Unsupported codec for {What}", what);
+					return;
+				}
+
 				SKImageInfo info = codec.Info;
 				info.ColorType = SKColorType.Rgba8888;
 				using SKBitmap original = SKBitmap.Decode(codec, info);
