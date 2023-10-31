@@ -39,7 +39,6 @@ namespace Kyoo.Core.Api
 	[ApiDefinition("Search", Group = ResourcesGroup)]
 	public class SearchApi : BaseApi
 	{
-		private readonly ILibraryManager _libraryManager;
 		private readonly ISearchManager _searchManager;
 
 		public SearchApi(ISearchManager searchManager)
@@ -56,6 +55,8 @@ namespace Kyoo.Core.Api
 		/// Search for collections
 		/// </remarks>
 		/// <param name="query">The query to search for.</param>
+		/// <param name="sortBy">Sort information about the query (sort by, sort order).</param>
+		/// <param name="pagination">How many items per page should be returned, where should the page start...</param>
 		/// <param name="fields">The aditional fields to include in the result.</param>
 		/// <returns>A list of collections found for the specified query.</returns>
 		[HttpGet("collections")]
@@ -63,9 +64,12 @@ namespace Kyoo.Core.Api
 		[Permission(nameof(Collection), Kind.Read)]
 		[ApiDefinition("Collections")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
-		public Task<ICollection<Collection>> SearchCollections(string query, [FromQuery] Include<Collection> fields)
+		public async Task<SearchPage<Collection>> SearchCollections(string? query,
+			[FromQuery] Sort<Collection> sortBy,
+			[FromQuery] SearchPagination pagination,
+			[FromQuery] Include<Collection> fields)
 		{
-			return _libraryManager.Collections.Search(query);
+			return SearchPage(await _searchManager.SearchCollections(query, sortBy, pagination, fields));
 		}
 
 		/// <summary>
@@ -75,16 +79,21 @@ namespace Kyoo.Core.Api
 		/// Search for shows
 		/// </remarks>
 		/// <param name="query">The query to search for.</param>
+		/// <param name="sortBy">Sort information about the query (sort by, sort order).</param>
+		/// <param name="pagination">How many items per page should be returned, where should the page start...</param>
 		/// <param name="fields">The aditional fields to include in the result.</param>
 		/// <returns>A list of shows found for the specified query.</returns>
 		[HttpGet("shows")]
 		[HttpGet("show", Order = AlternativeRoute)]
 		[Permission(nameof(Show), Kind.Read)]
-		[ApiDefinition("Shows")]
+		[ApiDefinition("Show")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
-		public Task<ICollection<Show>> SearchShows(string query, [FromQuery] Include<Show> fields)
+		public async Task<SearchPage<Show>> SearchShows(string? query,
+			[FromQuery] Sort<Show> sortBy,
+			[FromQuery] SearchPagination pagination,
+			[FromQuery] Include<Show> fields)
 		{
-			return _libraryManager.Shows.Search(query);
+			return SearchPage(await _searchManager.SearchShows(query, sortBy, pagination, fields));
 		}
 
 		/// <summary>
@@ -118,16 +127,21 @@ namespace Kyoo.Core.Api
 		/// Search for items
 		/// </remarks>
 		/// <param name="query">The query to search for.</param>
+		/// <param name="sortBy">Sort information about the query (sort by, sort order).</param>
+		/// <param name="pagination">How many items per page should be returned, where should the page start...</param>
 		/// <param name="fields">The aditional fields to include in the result.</param>
 		/// <returns>A list of items found for the specified query.</returns>
 		[HttpGet("items")]
 		[HttpGet("item", Order = AlternativeRoute)]
-		[Permission(nameof(Show), Kind.Read)]
-		[ApiDefinition("Items")]
+		[Permission(nameof(LibraryItem), Kind.Read)]
+		[ApiDefinition("Item")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
-		public Task<ICollection<LibraryItem>> SearchItems(string query, [FromQuery] Include<LibraryItem> fields)
+		public async Task<SearchPage<LibraryItem>> SearchItems(string? query,
+			[FromQuery] Sort<LibraryItem> sortBy,
+			[FromQuery] SearchPagination pagination,
+			[FromQuery] Include<LibraryItem> fields)
 		{
-			return _libraryManager.LibraryItems.Search(query);
+			return SearchPage(await _searchManager.SearchItems(query, sortBy, pagination, fields));
 		}
 
 		/// <summary>
@@ -137,6 +151,8 @@ namespace Kyoo.Core.Api
 		/// Search for episodes
 		/// </remarks>
 		/// <param name="query">The query to search for.</param>
+		/// <param name="sortBy">Sort information about the query (sort by, sort order).</param>
+		/// <param name="pagination">How many items per page should be returned, where should the page start...</param>
 		/// <param name="fields">The aditional fields to include in the result.</param>
 		/// <returns>A list of episodes found for the specified query.</returns>
 		[HttpGet("episodes")]
@@ -144,29 +160,12 @@ namespace Kyoo.Core.Api
 		[Permission(nameof(Episode), Kind.Read)]
 		[ApiDefinition("Episodes")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
-		public Task<ICollection<Episode>> SearchEpisodes(string query, [FromQuery] Include<Episode> fields)
+		public async Task<SearchPage<Episode>> SearchEpisodes(string? query,
+			[FromQuery] Sort<Episode> sortBy,
+			[FromQuery] SearchPagination pagination,
+			[FromQuery] Include<Episode> fields)
 		{
-			return _libraryManager.Episodes.Search(query);
-		}
-
-		/// <summary>
-		/// Search staff
-		/// </summary>
-		/// <remarks>
-		/// Search for staff
-		/// </remarks>
-		/// <param name="query">The query to search for.</param>
-		/// <param name="fields">The aditional fields to include in the result.</param>
-		/// <returns>A list of staff members found for the specified query.</returns>
-		[HttpGet("staff")]
-		[HttpGet("person", Order = AlternativeRoute)]
-		[HttpGet("people", Order = AlternativeRoute)]
-		[Permission(nameof(People), Kind.Read)]
-		[ApiDefinition("Staff")]
-		[ProducesResponseType(StatusCodes.Status200OK)]
-		public Task<ICollection<People>> SearchPeople(string query, [FromQuery] Include<People> fields)
-		{
-			return _libraryManager.People.Search(query);
+			return SearchPage(await _searchManager.SearchEpisodes(query, sortBy, pagination, fields));
 		}
 
 		/// <summary>
@@ -176,6 +175,8 @@ namespace Kyoo.Core.Api
 		/// Search for studios
 		/// </remarks>
 		/// <param name="query">The query to search for.</param>
+		/// <param name="sortBy">Sort information about the query (sort by, sort order).</param>
+		/// <param name="pagination">How many items per page should be returned, where should the page start...</param>
 		/// <param name="fields">The aditional fields to include in the result.</param>
 		/// <returns>A list of studios found for the specified query.</returns>
 		[HttpGet("studios")]
@@ -183,9 +184,12 @@ namespace Kyoo.Core.Api
 		[Permission(nameof(Studio), Kind.Read)]
 		[ApiDefinition("Studios")]
 		[ProducesResponseType(StatusCodes.Status200OK)]
-		public Task<ICollection<Studio>> SearchStudios(string query, [FromQuery] Include<Studio> fields)
+		public async Task<SearchPage<Studio>> SearchStudios(string? query,
+			[FromQuery] Sort<Studio> sortBy,
+			[FromQuery] SearchPagination pagination,
+			[FromQuery] Include<Studio> fields)
 		{
-			return _libraryManager.Studios.Search(query);
+			return SearchPage(await _searchManager.SearchStudios(query, sortBy, pagination, fields));
 		}
 	}
 }

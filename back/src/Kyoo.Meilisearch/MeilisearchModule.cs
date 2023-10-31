@@ -22,6 +22,7 @@ using Kyoo.Abstractions.Models;
 using Meilisearch;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using static System.Text.Json.JsonNamingPolicy;
 
 namespace Kyoo.Meiliseach
 {
@@ -50,39 +51,83 @@ namespace Kyoo.Meiliseach
 			{
 				SearchableAttributes = new[]
 				{
-					nameof(LibraryItem.Name),
-					nameof(LibraryItem.Slug),
-					nameof(LibraryItem.Aliases),
-					nameof(LibraryItem.Path),
-					nameof(LibraryItem.Tags),
+					CamelCase.ConvertName(nameof(LibraryItem.Name)),
+					CamelCase.ConvertName(nameof(LibraryItem.Slug)),
+					CamelCase.ConvertName(nameof(LibraryItem.Aliases)),
+					CamelCase.ConvertName(nameof(LibraryItem.Path)),
+					CamelCase.ConvertName(nameof(LibraryItem.Tags)),
 					// Overview could be included as well but I think it would be better without.
 				},
 				FilterableAttributes = new[]
 				{
-					nameof(LibraryItem.Genres),
-					nameof(LibraryItem.Status),
-					nameof(LibraryItem.AirDate),
-					nameof(Movie.StudioID),
-					nameof(LibraryItem.Kind),
+					CamelCase.ConvertName(nameof(LibraryItem.Genres)),
+					CamelCase.ConvertName(nameof(LibraryItem.Status)),
+					CamelCase.ConvertName(nameof(LibraryItem.AirDate)),
+					CamelCase.ConvertName(nameof(Movie.StudioID)),
+					CamelCase.ConvertName(nameof(LibraryItem.Kind)),
 				},
 				SortableAttributes = new[]
 				{
-					nameof(LibraryItem.AirDate),
-					nameof(LibraryItem.AddedDate),
+					CamelCase.ConvertName(nameof(LibraryItem.AirDate)),
+					CamelCase.ConvertName(nameof(LibraryItem.AddedDate)),
 				},
 				DisplayedAttributes = new[]
 				{
-					nameof(LibraryItem.Id),
-					nameof(LibraryItem.Kind),
+					CamelCase.ConvertName(nameof(LibraryItem.Id)),
+					CamelCase.ConvertName(nameof(LibraryItem.Kind)),
 				},
 				// TODO: Add stopwords
 				// TODO: Extend default ranking to add ratings.
+			});
+
+			await _CreateIndex(client, nameof(Episode), false, new Settings()
+			{
+				SearchableAttributes = new[]
+				{
+					CamelCase.ConvertName(nameof(Episode.Name)),
+					CamelCase.ConvertName(nameof(Episode.Overview)),
+					CamelCase.ConvertName(nameof(Episode.Slug)),
+					CamelCase.ConvertName(nameof(Episode.Path)),
+				},
+				FilterableAttributes = new[]
+				{
+					CamelCase.ConvertName(nameof(Episode.SeasonNumber)),
+				},
+				SortableAttributes = new[]
+				{
+					CamelCase.ConvertName(nameof(Episode.ReleaseDate)),
+					CamelCase.ConvertName(nameof(Episode.AddedDate)),
+					CamelCase.ConvertName(nameof(Episode.SeasonNumber)),
+					CamelCase.ConvertName(nameof(Episode.EpisodeNumber)),
+					CamelCase.ConvertName(nameof(Episode.AbsoluteNumber)),
+				},
+				DisplayedAttributes = new[]
+				{
+					CamelCase.ConvertName(nameof(Episode.Id)),
+				},
+				// TODO: Add stopwords
+			});
+
+			await _CreateIndex(client, nameof(Studio), false, new Settings()
+			{
+				SearchableAttributes = new[]
+				{
+					CamelCase.ConvertName(nameof(Studio.Name)),
+					CamelCase.ConvertName(nameof(Studio.Slug)),
+				},
+				FilterableAttributes = Array.Empty<string>(),
+				SortableAttributes = Array.Empty<string>(),
+				DisplayedAttributes = new[]
+				{
+					CamelCase.ConvertName(nameof(Studio.Id)),
+				},
+				// TODO: Add stopwords
 			});
 		}
 
 		private static async Task _CreateIndex(MeilisearchClient client, string index, bool hasKind, Settings opts)
 		{
-			TaskInfo task = await client.CreateIndexAsync(index, hasKind ? "Ref" : nameof(IResource.Id));
+			TaskInfo task = await client.CreateIndexAsync(index, hasKind ? "ref" : CamelCase.ConvertName(nameof(IResource.Id)));
 			await client.WaitForTaskAsync(task.TaskUid);
 			await client.Index(index).UpdateSettingsAsync(opts);
 		}
