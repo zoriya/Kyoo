@@ -138,6 +138,7 @@ class TheMovieDatabase(Provider):
 				status=MovieStatus.FINISHED
 				if movie["status"] == "Released"
 				else MovieStatus.PLANNED,
+				rating=round(float(movie["vote_average"]) * 10),
 				studios=[self.to_studio(x) for x in movie["production_companies"]],
 				genres=[
 					self.genre_map[x["id"]]
@@ -232,6 +233,7 @@ class TheMovieDatabase(Provider):
 				else ShowStatus.AIRING
 				if show["in_production"]
 				else ShowStatus.FINISHED,
+				rating=round(float(show["vote_average"]) * 10),
 				studios=[self.to_studio(x) for x in show["production_companies"]],
 				genres=[
 					self.genre_map[x["id"]]

@@ -95,6 +95,11 @@ namespace Kyoo.Abstractions.Models
 		public Status Status { get; set; }
 
 		/// <summary>
+		/// How well this item is rated? (from 0 to 100).
+		/// </summary>
+		public int Rating { get; set; }
+
+		/// <summary>
 		/// The date this show started airing. It can be null if this is unknown.
 		/// </summary>
 		public DateTime? StartAir { get; set; }
