@@ -71,15 +71,6 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc/>
 		public Type RepositoryType => typeof(T);
 
-		/// <inheritdoc/>
-		public event IRepository<T>.ResourceEventHandler OnCreated;
-
-		/// <inheritdoc/>
-		public event IRepository<T>.ResourceEventHandler OnEdited;
-
-		/// <inheritdoc/>
-		public event IRepository<T>.ResourceEventHandler OnDeleted;
-
 		/// <summary>
 		/// Sort the given query.
 		/// </summary>
@@ -434,24 +425,6 @@ namespace Kyoo.Core.Controllers
 			return obj;
 		}
 
-		/// <summary>
-		/// Callback that should be called after a resource has been created.
-		/// </summary>
-		/// <param name="obj">The resource newly created.</param>
-		protected void OnResourceCreated(T obj)
-		{
-			OnCreated?.Invoke(obj);
-		}
-
-		/// <summary>
-		/// Callback that should be called after a resource has been edited.
-		/// </summary>
-		/// <param name="obj">The resource newly edited.</param>
-		protected void OnResourceEdited(T obj)
-		{
-			OnEdited?.Invoke(obj);
-		}
-
 		/// <inheritdoc/>
 		public virtual async Task<T> CreateIfNotExists(T obj)
 		{
@@ -481,7 +454,7 @@ namespace Kyoo.Core.Controllers
 				Merger.Complete(old, edited, x => x.GetCustomAttribute<LoadableRelationAttribute>() == null);
 				await EditRelations(old, edited);
 				await Database.SaveChangesAsync();
-				OnEdited?.Invoke(old);
+				await IRepository<T>.OnResourceEdited(old);
 				return old;
 			}
 			finally
@@ -504,7 +477,7 @@ namespace Kyoo.Core.Controllers
 					throw new ArgumentException("Could not patch resource");
 
 				await Database.SaveChangesAsync();
-				OnEdited?.Invoke(resource);
+				await IRepository<T>.OnResourceEdited(resource);
 				return resource;
 			}
 			finally
@@ -586,7 +559,7 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc/>
 		public virtual Task Delete(T obj)
 		{
-			OnDeleted?.Invoke(obj);
+			IRepository<T>.OnResourceDeleted(obj);
 			return Task.CompletedTask;
 		}
 

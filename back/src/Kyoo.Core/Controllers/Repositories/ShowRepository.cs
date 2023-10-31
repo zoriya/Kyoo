@@ -86,7 +86,7 @@ namespace Kyoo.Core.Controllers
 			await base.Create(obj);
 			_database.Entry(obj).State = EntityState.Added;
 			await _database.SaveChangesAsync(() => Get(obj.Slug));
-			OnResourceCreated(obj);
+			await IRepository<Show>.OnResourceCreated(obj);
 			return obj;
 		}
 

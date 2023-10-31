@@ -37,7 +37,8 @@ namespace Kyoo.Abstractions.Controllers
 		/// The event handler type for all events of this repository.
 		/// </summary>
 		/// <param name="resource">The resource created/modified/deleted</param>
-		public delegate void ResourceEventHandler(T resource);
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+		public delegate Task ResourceEventHandler(T resource);
 
 		/// <summary>
 		/// Get a resource from it's ID.
@@ -146,7 +147,15 @@ namespace Kyoo.Abstractions.Controllers
 		/// <summary>
 		/// Called when a resource has been created.
 		/// </summary>
-		event ResourceEventHandler OnCreated;
+		static event ResourceEventHandler OnCreated;
+
+		/// <summary>
+		/// Callback that should be called after a resource has been created.
+		/// </summary>
+		/// <param name="obj">The resource newly created.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+		protected static Task OnResourceCreated(T obj)
+			=> OnCreated?.Invoke(obj) ?? Task.CompletedTask;
 
 		/// <summary>
 		/// Edit a resource and replace every property
@@ -171,7 +180,15 @@ namespace Kyoo.Abstractions.Controllers
 		/// <summary>
 		/// Called when a resource has been edited.
 		/// </summary>
-		event ResourceEventHandler OnEdited;
+		static event ResourceEventHandler OnEdited;
+
+		/// <summary>
+		/// Callback that should be called after a resource has been edited.
+		/// </summary>
+		/// <param name="obj">The resource newly edited.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+		protected static Task OnResourceEdited(T obj)
+			=> OnEdited?.Invoke(obj) ?? Task.CompletedTask;
 
 		/// <summary>
 		/// Delete a resource by it's ID
@@ -207,7 +224,15 @@ namespace Kyoo.Abstractions.Controllers
 		/// <summary>
 		/// Called when a resource has been edited.
 		/// </summary>
-		event ResourceEventHandler OnDeleted;
+		static event ResourceEventHandler OnDeleted;
+
+		/// <summary>
+		/// Callback that should be called after a resource has been deleted.
+		/// </summary>
+		/// <param name="obj">The resource newly deleted.</param>
+		/// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+		protected static Task OnResourceDeleted(T obj)
+			=> OnDeleted?.Invoke(obj) ?? Task.CompletedTask;
 	}
 
 	/// <summary>

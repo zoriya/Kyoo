@@ -25,6 +25,7 @@ using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Postgresql;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Core.Controllers
 {
@@ -48,6 +49,25 @@ namespace Kyoo.Core.Controllers
 			new Sort<Episode>.By(x => x.EpisodeNumber)
 		);
 
+		static EpisodeRepository()
+		{
+			// Edit episode slugs when the show's slug changes.
+			IRepository<Show>.OnEdited += async (show) =>
+			{
+				await using AsyncServiceScope scope = CoreModule.Services.CreateAsyncScope();
+				DatabaseContext database = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+				List<Episode> episodes = await database.Episodes.AsTracking()
+					.Where(x => x.ShowId == show.Id)
+					.ToListAsync();
+				foreach (Episode ep in episodes)
+				{
+					ep.ShowSlug = show.Slug;
+					await database.SaveChangesAsync();
+					await IRepository<Episode>.OnResourceEdited(ep);
+				}
+			};
+		}
+
 		/// <summary>
 		/// Create a new <see cref="EpisodeRepository"/>.
 		/// </summary>
@@ -61,18 +81,6 @@ namespace Kyoo.Core.Controllers
 		{
 			_database = database;
 			_shows = shows;
-
-			// Edit episode slugs when the show's slug changes.
-			shows.OnEdited += (show) =>
-			{
-				List<Episode> episodes = _database.Episodes.AsTracking().Where(x => x.ShowId == show.Id).ToList();
-				foreach (Episode ep in episodes)
-				{
-					ep.ShowSlug = show.Slug;
-					_database.SaveChanges();
-					OnResourceEdited(ep);
-				}
-			};
 		}
 
 		/// <inheritdoc />
@@ -96,7 +104,7 @@ namespace Kyoo.Core.Controllers
 				obj is { SeasonNumber: not null, EpisodeNumber: not null }
 				? Get(x => x.ShowId == obj.ShowId && x.SeasonNumber == obj.SeasonNumber && x.EpisodeNumber == obj.EpisodeNumber)
 				: Get(x => x.ShowId == obj.ShowId && x.AbsoluteNumber == obj.AbsoluteNumber));
-			OnResourceCreated(obj);
+			await IRepository<Episode>.OnResourceCreated(obj);
 			return obj;
 		}
 

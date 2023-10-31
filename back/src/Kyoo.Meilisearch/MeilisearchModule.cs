@@ -63,12 +63,12 @@ namespace Kyoo.Meiliseach
 					nameof(LibraryItem.Status),
 					nameof(LibraryItem.AirDate),
 					nameof(Movie.StudioID),
+					nameof(LibraryItem.Kind),
 				},
 				SortableAttributes = new[]
 				{
 					nameof(LibraryItem.AirDate),
 					nameof(LibraryItem.AddedDate),
-					nameof(LibraryItem.Kind),
 				},
 				DisplayedAttributes = new[]
 				{
@@ -94,7 +94,7 @@ namespace Kyoo.Meiliseach
 				_configuration.GetValue("MEILI_HOST", "http://meilisearch:7700"),
 				_configuration.GetValue<string?>("MEILI_MASTER_KEY")
 			)).SingleInstance();
-			builder.RegisterType<SearchManager>().SingleInstance();
+			builder.RegisterType<SearchManager>().As<ISearchManager>().SingleInstance().AutoActivate();
 		}
 	}
 }

@@ -70,7 +70,7 @@ namespace Kyoo.Core.Controllers
 			if (obj.Logo != null)
 				_database.Entry(obj).Reference(x => x.Logo).TargetEntry!.State = EntityState.Added;
 			await _database.SaveChangesAsync(() => Get(obj.Slug));
-			OnResourceCreated(obj);
+			await IRepository<User>.OnResourceCreated(obj);
 			return obj;
 		}
 

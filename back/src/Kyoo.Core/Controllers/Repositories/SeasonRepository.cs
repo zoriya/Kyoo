@@ -22,11 +22,10 @@ using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
-using Kyoo.Abstractions.Models.Exceptions;
 using Kyoo.Abstractions.Models.Utils;
 using Kyoo.Postgresql;
-using Kyoo.Utils;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Core.Controllers
 {
@@ -43,30 +42,35 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc/>
 		protected override Sort<Season> DefaultSort => new Sort<Season>.By(x => x.SeasonNumber);
 
+		static SeasonRepository()
+		{
+			// Edit seasons slugs when the show's slug changes.
+			IRepository<Show>.OnEdited += async (show) =>
+			{
+				await using AsyncServiceScope scope = CoreModule.Services.CreateAsyncScope();
+				DatabaseContext database = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
+				List<Season> seasons = await database.Seasons.AsTracking()
+					.Where(x => x.ShowId == show.Id)
+					.ToListAsync();
+				foreach (Season season in seasons)
+				{
+					season.ShowSlug = show.Slug;
+					await database.SaveChangesAsync();
+					await IRepository<Season>.OnResourceEdited(season);
+				}
+			};
+		}
+
 		/// <summary>
 		/// Create a new <see cref="SeasonRepository"/>.
 		/// </summary>
 		/// <param name="database">The database handle that will be used</param>
-		/// <param name="shows">A shows repository</param>
 		/// <param name="thumbs">The thumbnail manager used to store images.</param>
 		public SeasonRepository(DatabaseContext database,
-			IRepository<Show> shows,
 			IThumbnailsManager thumbs)
 			: base(database, thumbs)
 		{
 			_database = database;
-
-			// Edit seasons slugs when the show's slug changes.
-			shows.OnEdited += (show) =>
-			{
-				List<Season> seasons = _database.Seasons.AsTracking().Where(x => x.ShowId == show.Id).ToList();
-				foreach (Season season in seasons)
-				{
-					season.ShowSlug = show.Slug;
-					_database.SaveChanges();
-					OnResourceEdited(season);
-				}
-			};
 		}
 
 		/// <inheritdoc/>
@@ -87,7 +91,7 @@ namespace Kyoo.Core.Controllers
 			obj.ShowSlug = _database.Shows.First(x => x.Id == obj.ShowId).Slug;
 			_database.Entry(obj).State = EntityState.Added;
 			await _database.SaveChangesAsync(() => Get(x => x.ShowId == obj.ShowId && x.SeasonNumber == obj.SeasonNumber));
-			OnResourceCreated(obj);
+			await IRepository<Season>.OnResourceCreated(obj);
 			return obj;
 		}
 

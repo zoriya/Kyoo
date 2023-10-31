@@ -23,6 +23,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using Kyoo.Core;
 using Kyoo.Meiliseach;
 using Kyoo.Postgresql;
 using Microsoft.AspNetCore.Hosting;
@@ -117,6 +118,7 @@ namespace Kyoo.Host
 		{
 			try
 			{
+				CoreModule.Services = host.Services;
 				_logger.Information("Version: {Version}", Assembly.GetExecutingAssembly().GetName().Version.ToString(3));
 				_logger.Information("Data directory: {DataDirectory}", Environment.CurrentDirectory);
 				await host.RunAsync(cancellationToken);
