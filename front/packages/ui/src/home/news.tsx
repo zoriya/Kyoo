@@ -73,6 +73,7 @@ export const NewsList = () => {
 							}
 							overview={x.name}
 							thumbnail={x.thumbnail}
+							href={x.href}
 							// TODO: support this on mobile too
 							// @ts-expect-error This is a web only property
 							{...css({ gridColumnEnd: "span 2" })}
