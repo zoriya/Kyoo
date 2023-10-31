@@ -34,6 +34,7 @@ class Movie:
 	aliases: list[str] = field(default_factory=list)
 	air_date: Optional[date | int] = None
 	status: Status = Status.UNKNOWN
+	rating: int = None
 	path: Optional[str] = None
 	studios: list[Studio] = field(default_factory=list)
 	genres: list[Genre] = field(default_factory=list)

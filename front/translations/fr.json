@@ -23,10 +23,13 @@
 		"sortby": "Trier par {{key}}",
 		"sortby-tt": "Trier par",
 		"sortkey": {
+			"relevance": "Pertinence",
 			"name": "Nom",
+			"airDate": "Date de sortie",
 			"startAir": "Date de sortie",
 			"endAir": "Date de fin de sortie",
-			"addedDate": "Date d'ajout"
+			"addedDate": "Date d'ajout",
+			"rating": "Notes"
 		},
 		"sortord": {
 			"asc": "asc",

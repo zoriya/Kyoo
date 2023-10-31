@@ -23,12 +23,14 @@ export enum SortBy {
 	StartAir = "startAir",
 	EndAir = "endAir",
 	AddedDate = "addedDate",
+	Ratings = "rating",
 }
 
 export enum SearchSort {
 	Relevance = "relevance",
 	AirDate = "airDate",
 	AddedDate = "addedDate",
+	Ratings = "rating",
 }
 
 export enum SortOrd {

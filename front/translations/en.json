@@ -28,7 +28,8 @@
 			"airDate": "Air Date",
 			"startAir": "Start air",
 			"endAir": "End air",
-			"addedDate": "Added date"
+			"addedDate": "Added date",
+			"rating": "Ratings"
 		},
 		"sortord": {
 			"asc": "asc",

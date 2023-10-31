@@ -60,12 +60,23 @@ namespace Kyoo.Meiliseach
 					{
 						CamelCase.ConvertName(nameof(LibraryItem.AirDate)),
 						CamelCase.ConvertName(nameof(LibraryItem.AddedDate)),
+						CamelCase.ConvertName(nameof(LibraryItem.Rating)),
 					},
 					DisplayedAttributes = new[]
 					{
 						CamelCase.ConvertName(nameof(LibraryItem.Id)),
 						CamelCase.ConvertName(nameof(LibraryItem.Kind)),
 					},
+					RankingRules = new[]
+					{
+						"words",
+						"typo",
+						"proximity",
+						"attribute",
+						"sort",
+						"exactness",
+						$"{CamelCase.ConvertName(nameof(LibraryItem.Rating))}:desc",
+					}
 					// TODO: Add stopwords
 					// TODO: Extend default ranking to add ratings.
 				}

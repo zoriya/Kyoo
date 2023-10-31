@@ -19,7 +19,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Utils;
 using Newtonsoft.Json;
@@ -77,6 +76,11 @@ namespace Kyoo.Abstractions.Models
 		/// Is this show airing, not aired yet or finished?
 		/// </summary>
 		public Status Status { get; set; }
+
+		/// <summary>
+		/// How well this item is rated? (from 0 to 100).
+		/// </summary>
+		public int Rating { get; set; }
 
 		/// <summary>
 		/// The date this movie aired.
