@@ -139,6 +139,7 @@ class TheMovieDatabase(Provider):
 				if movie["status"] == "Released"
 				else MovieStatus.PLANNED,
 				rating=round(float(movie["vote_average"]) * 10),
+				runtime=int(movie["runtime"]),
 				studios=[self.to_studio(x) for x in movie["production_companies"]],
 				genres=[
 					self.genre_map[x["id"]]
@@ -423,6 +424,7 @@ class TheMovieDatabase(Provider):
 				season_number=episode["season_number"],
 				episode_number=episode["episode_number"],
 				absolute_number=absolute,
+				runtime=int(episode["runtime"]),
 				release_date=datetime.strptime(episode["air_date"], "%Y-%m-%d").date()
 				if episode["air_date"]
 				else None,

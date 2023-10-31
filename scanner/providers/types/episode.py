@@ -26,6 +26,7 @@ class Episode:
 	season_number: Optional[int]
 	episode_number: Optional[int]
 	absolute_number: Optional[int]
+	runtime: int
 	release_date: Optional[date | int]
 	thumbnail: Optional[str]
 	external_id: dict[str, MetadataID]

@@ -61,6 +61,7 @@ namespace Kyoo.Meiliseach
 						CamelCase.ConvertName(nameof(LibraryItem.AirDate)),
 						CamelCase.ConvertName(nameof(LibraryItem.AddedDate)),
 						CamelCase.ConvertName(nameof(LibraryItem.Rating)),
+						CamelCase.ConvertName(nameof(LibraryItem.Runtime)),
 					},
 					DisplayedAttributes = new[]
 					{
