@@ -19,38 +19,67 @@
  */
 
 import { LibraryItem, LibraryItemP, QueryIdentifier, QueryPage } from "@kyoo/models";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ItemGrid } from "../browse/grid";
-import { itemMap } from "../browse/index";
-import { EmptyView } from "../fetch";
-import { InfiniteFetch } from "../fetch-infinite";
+import { createParam } from "solito";
 import { DefaultLayout } from "../layout";
+import { InfiniteFetch } from "../fetch-infinite";
+import { itemMap } from "../browse";
+import { SearchSort, SortOrd, SortBy, Layout } from "../browse/types";
+import { BrowseSettings } from "../browse/header";
+import { ItemGrid } from "../browse/grid";
+import { ItemList } from "../browse/list";
 
-const query = (query: string): QueryIdentifier<LibraryItem> => ({
+const { useParam } = createParam<{ sortBy?: string }>();
+
+const query = (
+	query?: string,
+	sortKey?: SearchSort,
+	sortOrd?: SortOrd,
+): QueryIdentifier<LibraryItem> => ({
 	parser: LibraryItemP,
-	path: ["search", query, "items"],
+	path: ["search", "items"],
 	infinite: true,
-	getNext: () => undefined,
+	params: {
+		q: query,
+		sortBy:
+			sortKey && sortKey != SearchSort.Relevance ? `${sortKey}:${sortOrd ?? "asc"}` : undefined,
+	},
 });
 
 export const SearchPage: QueryPage<{ q?: string }> = ({ q }) => {
 	const { t } = useTranslation();
+	const [sort, setSort] = useParam("sortBy");
+	const sortKey = (sort?.split(":")[0] as SearchSort) || SearchSort.Relevance;
+	const sortOrd = (sort?.split(":")[1] as SortOrd) || SortOrd.Asc;
+	const [layout, setLayout] = useState(Layout.Grid);
 
-	const empty = <EmptyView message={t("search.empty")} />;
-	if (!q) return empty;
+	const LayoutComponent = layout === Layout.Grid ? ItemGrid : ItemList;
+
 	return (
 		<InfiniteFetch
-			query={query(q)}
-			// TODO: Understand why it does not work.
-			incremental={true}
-			layout={ItemGrid.layout}
+			query={query(q, sortKey, sortOrd)}
 			placeholderCount={15}
-			empty={empty}
+			layout={LayoutComponent.layout}
+			Header={
+				<BrowseSettings
+					availableSorts={Object.values(SearchSort)}
+					sortKey={sortKey}
+					sortOrd={sortOrd}
+					setSort={(key, ord) => {
+						setSort(`${key}:${ord}`);
+					}}
+					layout={layout}
+					setLayout={setLayout}
+				/>
+			}
 		>
-			{(item) => <ItemGrid {...itemMap(item)} />}
+			{(item) => <LayoutComponent {...itemMap(item)} />}
 		</InfiniteFetch>
 	);
 };
 
 SearchPage.getLayout = DefaultLayout;
-SearchPage.getFetchUrls = ({ q }) => (q ? [query(q)] : []);
+SearchPage.getFetchUrls = ({ q, sortBy }) => [
+	query(q, sortBy?.split("-")[0] as SearchSort, sortBy?.split("-")[1] as SortOrd),
+];

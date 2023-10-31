@@ -23,7 +23,9 @@
 		"sortby": "Sort by {{key}}",
 		"sortby-tt": "Sort by",
 		"sortkey": {
+			"relevance": "Relevance",
 			"name": "Name",
+			"airDate": "Air Date",
 			"startAir": "Start air",
 			"endAir": "End air",
 			"addedDate": "Added date"
