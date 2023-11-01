@@ -39,6 +39,7 @@ import superjson from "superjson";
 import Head from "next/head";
 import { withTranslations } from "../i18n";
 import arrayShuffle from "array-shuffle";
+import { Tooltip } from "react-tooltip";
 
 const font = Poppins({ weight: ["300", "400", "900"], subsets: ["latin"], display: "swap" });
 
@@ -139,6 +140,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 								randomItems={[]}
 								{...layoutProps}
 							/>
+							<Tooltip id="tooltip" positionStrategy={"fixed"} />
 						</ThemeSelector>
 					</Hydrate>
 				</QueryClientProvider>

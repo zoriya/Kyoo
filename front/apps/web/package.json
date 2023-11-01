@@ -35,6 +35,7 @@
 		"react-native-svg": "13.11.0",
 		"react-native-video": "^6.0.0-alpha.7",
 		"react-native-web": "0.19.7",
+		"react-tooltip": "^5.22.0",
 		"solito": "^4.0.1",
 		"srt-webvtt": "^2.0.0",
 		"superjson": "^1.13.1",
