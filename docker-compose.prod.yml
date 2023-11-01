@@ -3,7 +3,7 @@ version: "3.8"
 services:
   back:
     image: zoriya/kyoo_back:edge
-    restart: on-failure
+    restart: unless-stopped
     env_file:
       - ./.env
     depends_on:
@@ -14,14 +14,14 @@ services:
 
   front:
     image: zoriya/kyoo_front:edge
-    restart: on-failure
+    restart: unless-stopped
     environment:
       - KYOO_URL=${KYOO_URL:-http://back:5000}
       - PUBLIC_BACK_URL=${PUBLIC_BACK_URL}
 
   scanner:
     image: zoriya/kyoo_scanner:edge
-    restart: on-failure
+    restart: unless-stopped
     depends_on:
       back:
         condition: service_healthy
@@ -34,7 +34,7 @@ services:
 
   transcoder:
     image: zoriya/kyoo_transcoder:edge
-    restart: on-failure
+    restart: unless-stopped
     env_file:
       - ./.env
     volumes:
@@ -44,7 +44,7 @@ services:
 
   ingress:
     image: nginx
-    restart: on-failure
+    restart: unless-stopped
     environment:
       - PORT=8901
       - FRONT_URL=http://front:8901
@@ -59,7 +59,7 @@ services:
 
   postgres:
     image: postgres:15
-    restart: on-failure
+    restart: unless-stopped
     env_file:
       - ./.env
     volumes:
@@ -72,6 +72,7 @@ services:
 
   meilisearch:
     image: getmeili/meilisearch:v1.4
+    restart: unless-stopped
     volumes:
       - search:/meili_data
     environment:

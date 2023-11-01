@@ -72,6 +72,7 @@ services:
 
   meilisearch:
     image: getmeili/meilisearch:v1.4
+    restart: on-failure
     volumes:
       - search:/meili_data
     environment:

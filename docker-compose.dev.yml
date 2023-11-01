@@ -99,6 +99,7 @@ services:
 
   meilisearch:
     image: getmeili/meilisearch:v1.4
+    restart: on-failure
     ports:
       - "7700:7700"
     volumes:
