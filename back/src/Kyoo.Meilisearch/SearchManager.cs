@@ -70,7 +70,7 @@ public class SearchManager : ISearchManager
 		IRepository<Studio>.OnDeleted += (x) => _Delete(nameof(Studio), x.Id);
 	}
 
-	public async Task CreateOrUpdate(string index, IResource item, string? kind = null)
+	public Task CreateOrUpdate(string index, IResource item, string? kind = null)
 	{
 		if (kind != null)
 		{
@@ -81,11 +81,9 @@ public class SearchManager : ISearchManager
 				dictionary.Add(CamelCase.ConvertName(property.Name), property.GetValue(item));
 			dictionary.Add("ref", $"{kind}-{item.Id}");
 			expando.kind = kind;
-			var task = await _client.Index(index).AddDocumentsAsync(new[] { expando });
-			var ret = await _client.WaitForTaskAsync(task.TaskUid);
-			Console.WriteLine(ret.Error);
+			return _client.Index(index).AddDocumentsAsync(new[] { expando });
 		}
-		await _client.Index(index).AddDocumentsAsync(new[] { item });
+		return _client.Index(index).AddDocumentsAsync(new[] { item });
 	}
 
 	private Task _Delete(string index, int id, string? kind = null)
