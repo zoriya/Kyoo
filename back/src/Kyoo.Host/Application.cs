@@ -103,8 +103,11 @@ namespace Kyoo.Host
 				.ConfigureContainer(configure)
 				.Build();
 
-			PostgresModule.Initialize(host.Services);
-			await MeilisearchModule.Initialize(host.Services);
+			await using (AsyncServiceScope scope = host.Services.CreateAsyncScope())
+			{
+				PostgresModule.Initialize(scope.ServiceProvider);
+				await MeilisearchModule.Initialize(scope.ServiceProvider);
+			}
 
 			await _StartWithHost(host);
 		}
