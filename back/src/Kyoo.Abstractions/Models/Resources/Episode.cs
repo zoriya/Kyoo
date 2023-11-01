@@ -82,7 +82,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the Show containing this episode.
 		/// </summary>
-		[SerializeIgnore] public int ShowId { get; set; }
+		public int ShowId { get; set; }
 
 		/// <summary>
 		/// The show that contains this episode.
@@ -92,7 +92,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the Season containing this episode.
 		/// </summary>
-		[SerializeIgnore] public int? SeasonId { get; set; }
+		public int? SeasonId { get; set; }
 
 		/// <summary>
 		/// The season that contains this episode.
