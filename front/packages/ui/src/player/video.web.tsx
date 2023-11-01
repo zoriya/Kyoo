@@ -78,7 +78,22 @@ const initHls = async (): Promise<Hls> => {
 		autoStartLoad: false,
 		// debug: true,
 		startPosition: 0,
-		fragLoadPolicy: loadPolicy,
+		fragLoadPolicy: {
+			default: {
+				maxTimeToFirstByteMs: Infinity,
+				maxLoadTimeMs: 60_000,
+				timeoutRetry: {
+					maxNumRetry: 5,
+					retryDelayMs: 100,
+					maxRetryDelayMs: 0,
+				},
+				errorRetry: {
+					maxNumRetry: 5,
+					retryDelayMs: 0,
+					maxRetryDelayMs: 100,
+				},
+			},
+		},
 		keyLoadPolicy: loadPolicy,
 		certLoadPolicy: loadPolicy,
 		playlistLoadPolicy: loadPolicy,
