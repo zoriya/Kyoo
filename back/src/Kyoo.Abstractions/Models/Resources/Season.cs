@@ -23,7 +23,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.RegularExpressions;
 using EntityFrameworkCore.Projectables;
 using JetBrains.Annotations;
-using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
 
 namespace Kyoo.Abstractions.Models
@@ -69,7 +68,7 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The ID of the Show containing this season.
 		/// </summary>
-		[SerializeIgnore] public int ShowId { get; set; }
+		public int ShowId { get; set; }
 
 		/// <summary>
 		/// The show that contains this season.

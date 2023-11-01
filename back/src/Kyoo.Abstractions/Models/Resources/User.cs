@@ -83,8 +83,11 @@ namespace Kyoo.Abstractions.Models
 		[JsonConstructor]
 		public User(string username)
 		{
-			Slug = Utility.ToSlug(username);
-			Username = username;
+			if (username != null)
+			{
+				Slug = Utility.ToSlug(username);
+				Username = username;
+			}
 		}
 	}
 }
