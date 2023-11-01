@@ -52,7 +52,7 @@ export const Header = ({
 	thumbnail: KyooImage | null;
 	overview: string | null;
 	tagline: string | null;
-	link: string;
+	link: string | null;
 	infoLink: string;
 }>) => {
 	const { css } = useYoshiki();
@@ -70,14 +70,16 @@ export const Header = ({
 			>
 				<H1>{name}</H1>
 				<View {...css({ flexDirection: "row" })}>
-					<IconFab
-						icon={PlayArrow}
-						aria-label={t("show.play")}
-						as={Link}
-						href={link ?? "#"}
-						{...tooltip(t("show.play"))}
-						{...css({ marginRight: ts(1) })}
-					/>
+					{link !== null && (
+						<IconFab
+							icon={PlayArrow}
+							aria-label={t("show.play")}
+							as={Link}
+							href={link ?? "#"}
+							{...tooltip(t("show.play"))}
+							{...css({ marginRight: ts(1) })}
+						/>
+					)}
 					<IconButton
 						icon={Info}
 						aria-label={t("home.info")}
@@ -96,4 +98,7 @@ export const Header = ({
 Header.query = (): QueryIdentifier<LibraryItem> => ({
 	parser: LibraryItemP,
 	path: ["items", "random"],
+	params: {
+		fields: "firstEpisode",
+	},
 });

@@ -24,6 +24,7 @@ import { withImages, ResourceP } from "../traits";
 import { Genre } from "./genre";
 import { SeasonP } from "./season";
 import { StudioP } from "./studio";
+import { BaseEpisodeP } from "./episode.base";
 
 /**
  * The enum containing show's status.
@@ -62,6 +63,10 @@ export const ShowP = withImages(
 		 */
 		status: z.nativeEnum(Status),
 		/**
+		 * How well this item is rated? (from 0 to 100).
+		 */
+		rating: z.number().int().gte(0).lte(100),
+		/**
 		 * The date this show started airing. It can be null if this is unknown.
 		 */
 		startAir: zdate().nullable(),
@@ -85,6 +90,10 @@ export const ShowP = withImages(
 		 * The list of seasons of this show.
 		 */
 		seasons: z.array(SeasonP).optional(),
+		/**
+		 * The first episode of this show
+		 */
+		firstEpisode: BaseEpisodeP.optional().nullable(),
 	}),
 	"shows",
 )
@@ -100,7 +109,7 @@ export const ShowP = withImages(
 	})
 	.transform((x) => ({
 		href: `/show/${x.slug}`,
-		playHref: `/watch/${x.slug}-s1e1`,
+		playHref: x.firstEpisode ? `/watch/${x.firstEpisode.slug}` : null,
 		...x,
 	}));
 

@@ -66,7 +66,7 @@ export const ItemDetails = ({
 	genres: Genre[] | null;
 	overview: string | null;
 	href: string;
-	playHref: string;
+	playHref: string | null;
 }>) => {
 	const { push } = useRouter();
 	const { css } = useYoshiki("recommanded-card");
@@ -136,13 +136,15 @@ export const ItemDetails = ({
 					<ScrollView horizontal>
 						{genres?.map((x) => <Chip key={x} label={x} {...css({ mX: ts(0.5) })} />)}
 					</ScrollView>
-					<IconFab
-						icon={PlayArrow}
-						size={20}
-						as={Pressable}
-						onPress={() => push(playHref ?? "")}
-						{...css({ fover: { self: { transform: "scale(1.2)" as any, mX: ts(0.5) } } })}
-					/>
+					{playHref !== null && (
+						<IconFab
+							icon={PlayArrow}
+							size={20}
+							as={Pressable}
+							onPress={() => push(playHref ?? "")}
+							{...css({ fover: { self: { transform: "scale(1.2)" as any, mX: ts(0.5) } } })}
+						/>
+					)}
 				</View>
 			</View>
 		</Link>
@@ -197,5 +199,6 @@ Recommanded.query = (): QueryIdentifier<LibraryItem> => ({
 	params: {
 		sortBy: "random",
 		limit: 6,
+		fields: "firstEpisode",
 	},
 });
