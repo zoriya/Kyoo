@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
@@ -61,6 +62,29 @@ namespace Kyoo.Core.Controllers
 				)
 				.Take(20)
 				.ToListAsync();
+		}
+
+		public async Task<ICollection<LibraryItem>> GetAllOfCollection(
+			Expression<Func<Collection, bool>> selector,
+			Expression<Func<LibraryItem, bool>>? where = null,
+			Sort<LibraryItem>? sort = default,
+			Pagination? limit = default,
+			Include<LibraryItem>? include = default)
+		{
+			return await ApplyFilters(
+				_database.LibraryItems
+					.Where(item =>
+						_database.Movies
+							.Where(x => x.Id == -item.Id)
+							.Any(x => x.Collections!.AsQueryable().Any(selector))
+						|| _database.Shows
+							.Where(x => x.Id == item.Id)
+							.Any(x => x.Collections!.AsQueryable().Any(selector))
+					),
+				where,
+				sort,
+				limit,
+				include);
 		}
 
 		/// <inheritdoc />

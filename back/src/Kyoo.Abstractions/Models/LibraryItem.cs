@@ -20,6 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
+using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Utils;
 
 namespace Kyoo.Abstractions.Models

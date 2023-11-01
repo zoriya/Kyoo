@@ -43,14 +43,17 @@ namespace Kyoo.Core.Api
 	{
 		private readonly ILibraryManager _libraryManager;
 		private readonly CollectionRepository _collections;
+		private readonly LibraryItemRepository _items;
 
 		public CollectionApi(ILibraryManager libraryManager,
 			CollectionRepository collections,
+			LibraryItemRepository items,
 			IThumbnailsManager thumbs)
 			: base(libraryManager.Collections, thumbs)
 		{
 			_libraryManager = libraryManager;
 			_collections = collections;
+			_items = items;
 		}
 
 		/// <summary>
@@ -116,6 +119,45 @@ namespace Kyoo.Core.Api
 		}
 
 		/// <summary>
+		/// Get items in collection
+		/// </summary>
+		/// <remarks>
+		/// Lists the items that are contained in the collection with the given id or slug.
+		/// </remarks>
+		/// <param name="identifier">The ID or slug of the <see cref="Collection"/>.</param>
+		/// <param name="sortBy">A key to sort items by.</param>
+		/// <param name="where">An optional list of filters.</param>
+		/// <param name="pagination">The number of items to return.</param>
+		/// <param name="fields">The aditional fields to include in the result.</param>
+		/// <returns>A page of items.</returns>
+		/// <response code="400">The filters or the sort parameters are invalid.</response>
+		/// <response code="404">No collection with the given ID could be found.</response>
+		[HttpGet("{identifier:id}/items")]
+		[HttpGet("{identifier:id}/item", Order = AlternativeRoute)]
+		[PartialPermission(Kind.Read)]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task<ActionResult<Page<LibraryItem>>> GetItems(Identifier identifier,
+			[FromQuery] Sort<LibraryItem> sortBy,
+			[FromQuery] Dictionary<string, string> where,
+			[FromQuery] Pagination pagination,
+			[FromQuery] Include<LibraryItem>? fields)
+		{
+			ICollection<LibraryItem> resources = await _items.GetAllOfCollection(
+				identifier.IsSame<Collection>(),
+				ApiHelper.ParseWhere<LibraryItem>(where),
+				sortBy == new Sort<LibraryItem>.Default() ? new Sort<LibraryItem>.By(x => x.AirDate) : sortBy,
+				pagination,
+				fields
+			);
+
+			if (!resources.Any() && await _libraryManager.Collections.GetOrDefault(identifier.IsSame<Collection>()) == null)
+				return NotFound();
+			return Page(resources, pagination.Limit);
+		}
+
+		/// <summary>
 		/// Get shows in collection
 		/// </summary>
 		/// <remarks>
@@ -143,7 +185,45 @@ namespace Kyoo.Core.Api
 		{
 			ICollection<Show> resources = await _libraryManager.Shows.GetAll(
 				ApiHelper.ParseWhere(where, identifier.IsContainedIn<Show, Collection>(x => x.Collections!)),
-				sortBy ?? new Sort<Show>.By(x => x.StartAir),
+				sortBy == new Sort<Show>.Default() ? new Sort<Show>.By(x => x.AirDate) : sortBy,
+				pagination,
+				fields
+			);
+
+			if (!resources.Any() && await _libraryManager.Collections.GetOrDefault(identifier.IsSame<Collection>()) == null)
+				return NotFound();
+			return Page(resources, pagination.Limit);
+		}
+
+		/// <summary>
+		/// Get movies in collection
+		/// </summary>
+		/// <remarks>
+		/// Lists the movies that are contained in the collection with the given id or slug.
+		/// </remarks>
+		/// <param name="identifier">The ID or slug of the <see cref="Collection"/>.</param>
+		/// <param name="sortBy">A key to sort movies by.</param>
+		/// <param name="where">An optional list of filters.</param>
+		/// <param name="pagination">The number of movies to return.</param>
+		/// <param name="fields">The aditional fields to include in the result.</param>
+		/// <returns>A page of movies.</returns>
+		/// <response code="400">The filters or the sort parameters are invalid.</response>
+		/// <response code="404">No collection with the given ID could be found.</response>
+		[HttpGet("{identifier:id}/movies")]
+		[HttpGet("{identifier:id}/movie", Order = AlternativeRoute)]
+		[PartialPermission(Kind.Read)]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(RequestError))]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task<ActionResult<Page<Movie>>> GetMovies(Identifier identifier,
+			[FromQuery] Sort<Movie> sortBy,
+			[FromQuery] Dictionary<string, string> where,
+			[FromQuery] Pagination pagination,
+			[FromQuery] Include<Movie>? fields)
+		{
+			ICollection<Movie> resources = await _libraryManager.Movies.GetAll(
+				ApiHelper.ParseWhere(where, identifier.IsContainedIn<Movie, Collection>(x => x.Collections!)),
+				sortBy == new Sort<Movie>.Default() ? new Sort<Movie>.By(x => x.AirDate) : sortBy,
 				pagination,
 				fields
 			);
