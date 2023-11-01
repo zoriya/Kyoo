@@ -81,7 +81,7 @@ const SearchBar = forwardRef<TextInput, Stylable>(function SearchBar(props, ref)
 			placeholder={t("navbar.search")}
 			placeholderTextColor={theme.light.overlay0}
 			{...tooltip(t("navbar.search"))}
-			{...css({ borderColor: (theme) => theme.colors.white, height: ts(4) }, props)}
+			{...css({ borderColor: (theme) => theme.colors.white, height: ts(4), flexShrink: 1 }, props)}
 		/>
 	);
 });
@@ -181,7 +181,7 @@ export const NavbarRight = () => {
 	const { push } = useRouter();
 
 	return (
-		<View {...css({ flexDirection: "row", alignItems: "center" })}>
+		<View {...css({ flexDirection: "row", alignItems: "center", flexShrink: 1 })}>
 			{Platform.OS === "web" ? (
 				<SearchBar />
 			) : (

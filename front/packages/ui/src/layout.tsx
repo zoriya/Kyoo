@@ -20,7 +20,7 @@
 
 import { ReactElement } from "react";
 import { MeQuery, Navbar } from "./navbar";
-import { useYoshiki } from "yoshiki/native";
+import { useYoshiki, vw } from "yoshiki/native";
 import { Main } from "@kyoo/primitives";
 
 export const DefaultLayout = ({
@@ -49,8 +49,10 @@ export const DefaultLayout = ({
 			<Main
 				{...css({
 					display: "flex",
+					width: vw(100),
 					flexGrow: 1,
 					flexShrink: 1,
+					overflow: "hidden",
 				})}
 			>
 				{page}
