@@ -45,10 +45,10 @@ namespace Kyoo.Postgresql.Migrations
 			FROM movies AS m
 			UNION ALL
 			SELECT
-				c.id + 10000 AS id, c.slug, c.name, NULL as tagline, NULL as alises, c.overview, NULL AS tags, NULL AS genres, 'unknown'::status AS status,
+				c.id + 10000 AS id, c.slug, c.name, NULL as tagline, '{}' as alises, c.overview, '{}' AS tags, '{}' AS genres, 'unknown'::status AS status,
 				NULL AS start_air, NULL AS end_air, c.poster_source, c.poster_blurhash, c.thumbnail_source,
 				c.thumbnail_blurhash, c.logo_source, c.logo_blurhash, NULL as trailer, c.external_id, NULL AS air_date, NULL as path,
-				'collection'::item_kind AS kind, c.added_date, NULL AS rating, NULL AS runtime
+				'collection'::item_kind AS kind, c.added_date, 0 AS rating, NULL AS runtime
 			FROM collections AS c
 			");
 
