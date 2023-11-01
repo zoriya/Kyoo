@@ -18,14 +18,17 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
+using Kyoo.Core;
 using Kyoo.Core.Controllers;
 using Kyoo.Postgresql;
 using Moq;
 using Xunit.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Tests.Database
 {
@@ -67,6 +70,10 @@ namespace Kyoo.Tests.Database
 				studio,
 				user
 			};
+
+			ServiceCollection container = new();
+			container.AddScoped((_) => _NewContext());
+			CoreModule.Services = container.BuildServiceProvider();
 
 			LibraryManager = new LibraryManager(
 				libraryItem,
