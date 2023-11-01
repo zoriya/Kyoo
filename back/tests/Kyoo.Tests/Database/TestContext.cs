@@ -68,7 +68,6 @@ namespace Kyoo.Tests
 
 	public sealed class PostgresTestContext : TestContext
 	{
-		private readonly NpgsqlConnection _connection;
 		private readonly DbContextOptions<DatabaseContext> _context;
 
 		public PostgresTestContext(PostgresFixture template, ITestOutputHelper output)
@@ -83,11 +82,8 @@ namespace Kyoo.Tests
 				cmd.ExecuteNonQuery();
 			}
 
-			_connection = new NpgsqlConnection(GetConnectionString(database));
-			_connection.Open();
-
 			_context = new DbContextOptionsBuilder<DatabaseContext>()
-				.UseNpgsql(_connection)
+				.UseNpgsql(GetConnectionString(database))
 				.UseLoggerFactory(LoggerFactory.Create(x =>
 				{
 					x.ClearProviders();
@@ -111,14 +107,12 @@ namespace Kyoo.Tests
 		{
 			using DatabaseContext db = New();
 			db.Database.EnsureDeleted();
-			_connection.Close();
 		}
 
 		public override async ValueTask DisposeAsync()
 		{
 			await using DatabaseContext db = New();
 			await db.Database.EnsureDeletedAsync();
-			await _connection.CloseAsync();
 		}
 
 		public override DatabaseContext New()
