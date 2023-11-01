@@ -25,5 +25,5 @@ COPY --from=builder /app /app
 
 WORKDIR /kyoo
 EXPOSE 5000
-HEALTHCHECK --interval=5s CMD curl --fail http://localhost:5000/health || exit
+HEALTHCHECK --interval=30s CMD curl --fail http://localhost:5000/health || exit
 CMD /app/Kyoo.Host
