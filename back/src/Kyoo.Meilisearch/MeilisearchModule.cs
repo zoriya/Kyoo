@@ -174,7 +174,9 @@ namespace Kyoo.Meiliseach
 				_configuration.GetValue("MEILI_HOST", "http://meilisearch:7700"),
 				_configuration.GetValue<string?>("MEILI_MASTER_KEY")
 			)).SingleInstance();
-			builder.RegisterType<SearchManager>().As<ISearchManager>().SingleInstance().AutoActivate();
+			builder.RegisterType<SearchManager>().AsSelf().As<ISearchManager>()
+				.SingleInstance()
+				.AutoActivate();
 		}
 	}
 }
