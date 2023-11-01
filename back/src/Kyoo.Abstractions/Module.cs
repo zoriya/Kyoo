@@ -42,6 +42,7 @@ namespace Kyoo.Abstractions
 			where T : IBaseRepository
 		{
 			return builder.RegisterType<T>()
+				.AsSelf()
 				.As<IBaseRepository>()
 				.As(Utility.GetGenericDefinition(typeof(T), typeof(IRepository<>))!)
 				.InstancePerLifetimeScope();
@@ -62,7 +63,7 @@ namespace Kyoo.Abstractions
 			where T : notnull
 			where T2 : IBaseRepository, T
 		{
-			return builder.RegisterRepository<T2>().As<T>();
+			return builder.RegisterRepository<T2>().AsSelf().As<T>();
 		}
 	}
 }

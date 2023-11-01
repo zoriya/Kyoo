@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
@@ -79,6 +80,18 @@ namespace Kyoo.Core.Controllers
 
 			if (string.IsNullOrEmpty(resource.Name))
 				throw new ArgumentException("The collection's name must be set and not empty");
+		}
+
+		public async Task AddMovie(int id, int movieId)
+		{
+			_database.AddLinks<Collection, Movie>(id, movieId);
+			await _database.SaveChangesAsync();
+		}
+
+		public async Task AddShow(int id, int showId)
+		{
+			_database.AddLinks<Collection, Show>(id, showId);
+			await _database.SaveChangesAsync();
 		}
 
 		/// <inheritdoc />

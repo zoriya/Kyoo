@@ -24,6 +24,7 @@ using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
+using Kyoo.Core.Controllers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using static Kyoo.Abstractions.Models.Utils.Constants;
@@ -40,23 +41,78 @@ namespace Kyoo.Core.Api
 	[ApiDefinition("Collections", Group = ResourcesGroup)]
 	public class CollectionApi : CrudThumbsApi<Collection>
 	{
-		/// <summary>
-		/// The library manager used to modify or retrieve information about the data store.
-		/// </summary>
 		private readonly ILibraryManager _libraryManager;
+		private readonly CollectionRepository _collections;
 
-		/// <summary>
-		/// Create a new <see cref="CollectionApi"/>.
-		/// </summary>
-		/// <param name="libraryManager">
-		/// The library manager used to modify or retrieve information about the data store.
-		/// </param>
-		/// <param name="thumbs">The thumbnail manager used to retrieve images paths.</param>
 		public CollectionApi(ILibraryManager libraryManager,
+			CollectionRepository collections,
 			IThumbnailsManager thumbs)
 			: base(libraryManager.Collections, thumbs)
 		{
 			_libraryManager = libraryManager;
+			_collections = collections;
+		}
+
+		/// <summary>
+		/// Add a movie
+		/// </summary>
+		/// <remarks>
+		/// Add a movie in the collection.
+		/// </remarks>
+		/// <param name="identifier">The ID or slug of the <see cref="Collection"/>.</param>
+		/// <param name="movie">The ID or slug of the <see cref="Movie"/> to add.</param>
+		/// <returns>Nothing if successful.</returns>
+		/// <response code="404">No collection or movie with the given ID could be found.</response>
+		/// <response code="409">The specified movie is already in this collection.</response>
+		[HttpPut("{identifier:id}/movies/{movie:id}")]
+		[HttpPut("{identifier:id}/movie/{movie:id}", Order = AlternativeRoute)]
+		[PartialPermission(Kind.Write)]
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		[ProducesResponseType(StatusCodes.Status409Conflict)]
+		public async Task<ActionResult> AddMovie(Identifier identifier, Identifier movie)
+		{
+			int collectionId = await identifier.Match(
+				async id => (await _libraryManager.Collections.Get(id)).Id,
+				async slug => (await _libraryManager.Collections.Get(slug)).Id
+			);
+			int movieId = await movie.Match(
+				async id => (await _libraryManager.Movies.Get(id)).Id,
+				async slug => (await _libraryManager.Movies.Get(slug)).Id
+			);
+			await _collections.AddMovie(collectionId, movieId);
+			return NoContent();
+		}
+
+		/// <summary>
+		/// Add a show
+		/// </summary>
+		/// <remarks>
+		/// Add a show in the collection.
+		/// </remarks>
+		/// <param name="identifier">The ID or slug of the <see cref="Collection"/>.</param>
+		/// <param name="show">The ID or slug of the <see cref="Show"/> to add.</param>
+		/// <returns>Nothing if successful.</returns>
+		/// <response code="404">No collection or show with the given ID could be found.</response>
+		/// <response code="409">The specified show is already in this collection.</response>
+		[HttpPut("{identifier:id}/shows/{show:id}")]
+		[HttpPut("{identifier:id}/show/{show:id}", Order = AlternativeRoute)]
+		[PartialPermission(Kind.Write)]
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		[ProducesResponseType(StatusCodes.Status409Conflict)]
+		public async Task<ActionResult> AddShow(Identifier identifier, Identifier show)
+		{
+			int collectionId = await identifier.Match(
+				async id => (await _libraryManager.Collections.Get(id)).Id,
+				async slug => (await _libraryManager.Collections.Get(slug)).Id
+			);
+			int showId = await show.Match(
+				async id => (await _libraryManager.Shows.Get(id)).Id,
+				async slug => (await _libraryManager.Shows.Get(slug)).Id
+			);
+			await _collections.AddShow(collectionId, showId);
+			return NoContent();
 		}
 
 		/// <summary>
@@ -83,11 +139,11 @@ namespace Kyoo.Core.Api
 			[FromQuery] Sort<Show> sortBy,
 			[FromQuery] Dictionary<string, string> where,
 			[FromQuery] Pagination pagination,
-			[FromQuery] Include<Show> fields)
+			[FromQuery] Include<Show>? fields)
 		{
 			ICollection<Show> resources = await _libraryManager.Shows.GetAll(
 				ApiHelper.ParseWhere(where, identifier.IsContainedIn<Show, Collection>(x => x.Collections!)),
-				sortBy,
+				sortBy ?? new Sort<Show>.By(x => x.StartAir),
 				pagination,
 				fields
 			);
