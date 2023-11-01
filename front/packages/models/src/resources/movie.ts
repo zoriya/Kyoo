@@ -52,6 +52,14 @@ export const MovieP = withImages(
 		 */
 		status: z.nativeEnum(Status),
 		/**
+		 * How well this item is rated? (from 0 to 100).
+		 */
+		rating: z.number().int().gte(0).lte(100),
+		/**
+		 * How long is this movie? (in minutes).
+		 */
+		runtime: z.number().int(),
+		/**
 		 * The date this movie aired. It can also be null if this is unknown.
 		 */
 		airDate: zdate().nullable(),

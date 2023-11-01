@@ -19,64 +19,8 @@
  */
 
 import { z } from "zod";
-import { zdate } from "../utils";
-import { withImages, imageFn } from "../traits";
-import { ResourceP } from "../traits/resource";
 import { ShowP } from "./show";
-
-export const BaseEpisodeP = withImages(
-	ResourceP.extend({
-		/**
-		 * The season in witch this episode is in.
-		 */
-		seasonNumber: z.number().nullable(),
-
-		/**
-		 * The number of this episode in it's season.
-		 */
-		episodeNumber: z.number().nullable(),
-
-		/**
-		 * The absolute number of this episode. It's an episode number that is not reset to 1 after a new
-		 * season.
-		 */
-		absoluteNumber: z.number().nullable(),
-
-		/**
-		 * The title of this episode.
-		 */
-		name: z.string().nullable(),
-
-		/**
-		 * The overview of this episode.
-		 */
-		overview: z.string().nullable(),
-
-		/**
-		 * The release date of this episode. It can be null if unknown.
-		 */
-		releaseDate: zdate().nullable(),
-
-		/**
-		 * The links to see a movie or an episode.
-		 */
-		links: z.object({
-			/**
-			 * The direct link to the unprocessed video (pristine quality).
-			 */
-			direct: z.string().transform(imageFn),
-
-			/**
-			 * The link to an HLS master playlist containing all qualities available for this video.
-			 */
-			hls: z.string().transform(imageFn),
-		}),
-	}),
-	"episodes",
-).transform((x) => ({
-	...x,
-	href: `/watch/${x.slug}`,
-}));
+import { BaseEpisodeP } from "./episode.base";
 
 export const EpisodeP = BaseEpisodeP.and(
 	z.object({

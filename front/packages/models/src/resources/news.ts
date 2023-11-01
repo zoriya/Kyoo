@@ -20,7 +20,7 @@
 
 import { z } from "zod";
 import { MovieP } from "./movie";
-import { BaseEpisodeP } from "./episode";
+import { BaseEpisodeP } from "./episode.base";
 import { ResourceP } from "../traits/resource";
 import { withImages } from "../traits/images";
 

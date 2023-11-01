@@ -80,7 +80,7 @@ const TitleLine = ({
 	...props
 }: {
 	isLoading: boolean;
-	playHref?: string;
+	playHref?: string | null;
 	name?: string;
 	tagline?: string | null;
 	date?: string | null;
@@ -192,17 +192,19 @@ const TitleLine = ({
 						</Skeleton>
 					)}
 					<View {...css({ flexDirection: "row" })}>
-						<IconFab
-							icon={PlayArrow}
-							as={Link}
-							href={playHref}
-							color={{ xs: theme.user.colors.black, md: theme.colors.black }}
-							{...css({
-								bg: theme.user.accent,
-								fover: { self: { bg: theme.user.accent } },
-							})}
-							{...tooltip(t("show.play"))}
-						/>
+						{playHref !== null && (
+							<IconFab
+								icon={PlayArrow}
+								as={Link}
+								href={playHref}
+								color={{ xs: theme.user.colors.black, md: theme.colors.black }}
+								{...css({
+									bg: theme.user.accent,
+									fover: { self: { bg: theme.user.accent } },
+								})}
+								{...tooltip(t("show.play"))}
+							/>
+						)}
 						{trailerUrl && (
 							<IconButton
 								icon={Theaters}
