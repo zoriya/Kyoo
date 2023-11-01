@@ -51,26 +51,26 @@ public class SearchManager : ISearchManager
 		_client = client;
 		_libraryManager = libraryManager;
 
-		IRepository<Movie>.OnCreated += (x) => _CreateOrUpdate("items", x, nameof(Movie));
-		IRepository<Movie>.OnEdited += (x) => _CreateOrUpdate("items", x, nameof(Movie));
+		IRepository<Movie>.OnCreated += (x) => CreateOrUpdate("items", x, nameof(Movie));
+		IRepository<Movie>.OnEdited += (x) => CreateOrUpdate("items", x, nameof(Movie));
 		IRepository<Movie>.OnDeleted += (x) => _Delete("items", x.Id, nameof(Movie));
-		IRepository<Show>.OnCreated += (x) => _CreateOrUpdate("items", x, nameof(Show));
-		IRepository<Show>.OnEdited += (x) => _CreateOrUpdate("items", x, nameof(Show));
+		IRepository<Show>.OnCreated += (x) => CreateOrUpdate("items", x, nameof(Show));
+		IRepository<Show>.OnEdited += (x) => CreateOrUpdate("items", x, nameof(Show));
 		IRepository<Show>.OnDeleted += (x) => _Delete("items", x.Id, nameof(Show));
-		IRepository<Collection>.OnCreated += (x) => _CreateOrUpdate("items", x, nameof(Collection));
-		IRepository<Collection>.OnEdited += (x) => _CreateOrUpdate("items", x, nameof(Collection));
+		IRepository<Collection>.OnCreated += (x) => CreateOrUpdate("items", x, nameof(Collection));
+		IRepository<Collection>.OnEdited += (x) => CreateOrUpdate("items", x, nameof(Collection));
 		IRepository<Collection>.OnDeleted += (x) => _Delete("items", x.Id, nameof(Collection));
 
-		IRepository<Episode>.OnCreated += (x) => _CreateOrUpdate(nameof(Episode), x);
-		IRepository<Episode>.OnEdited += (x) => _CreateOrUpdate(nameof(Episode), x);
+		IRepository<Episode>.OnCreated += (x) => CreateOrUpdate(nameof(Episode), x);
+		IRepository<Episode>.OnEdited += (x) => CreateOrUpdate(nameof(Episode), x);
 		IRepository<Episode>.OnDeleted += (x) => _Delete(nameof(Episode), x.Id);
 
-		IRepository<Studio>.OnCreated += (x) => _CreateOrUpdate(nameof(Studio), x);
-		IRepository<Studio>.OnEdited += (x) => _CreateOrUpdate(nameof(Studio), x);
+		IRepository<Studio>.OnCreated += (x) => CreateOrUpdate(nameof(Studio), x);
+		IRepository<Studio>.OnEdited += (x) => CreateOrUpdate(nameof(Studio), x);
 		IRepository<Studio>.OnDeleted += (x) => _Delete(nameof(Studio), x.Id);
 	}
 
-	private async Task _CreateOrUpdate(string index, IResource item, string? kind = null)
+	public async Task CreateOrUpdate(string index, IResource item, string? kind = null)
 	{
 		if (kind != null)
 		{
