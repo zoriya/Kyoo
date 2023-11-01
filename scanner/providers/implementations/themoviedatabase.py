@@ -14,6 +14,7 @@ from ..types.studio import Studio
 from ..types.genre import Genre
 from ..types.metadataid import MetadataID
 from ..types.show import Show, ShowTranslation, Status as ShowStatus
+from ..types.collection import Collection, CollectionTranslation
 
 
 class TheMovieDatabase(Provider):
@@ -163,7 +164,19 @@ class TheMovieDatabase(Provider):
 						if movie["imdb_id"]
 						else {}
 					)
-				)
+				),
+				collections=[
+					Collection(
+						external_id={
+							self.name: MetadataID(
+								movie["belongs_to_collection"]["id"],
+								f"https://www.themoviedb.org/collection/{movie['belongs_to_collection']['id']}",
+							)
+						},
+					)
+				]
+				if movie["belongs_to_collection"] is not None
+				else [],
 				# TODO: Add cast information
 			)
 			translation = MovieTranslation(
@@ -218,7 +231,6 @@ class TheMovieDatabase(Provider):
 				},
 			)
 			logging.debug("TMDb responded: %s", show)
-			# TODO: Use collection data
 
 			ret = Show(
 				original_language=show["original_language"],
@@ -509,3 +521,39 @@ class TheMovieDatabase(Provider):
 			logging.exception(
 				"Could not retrieve absolute ordering information", exc_info=e
 			)
+
+	async def identify_collection(
+		self, provider_id: str, *, language: list[str]
+	) -> Collection:
+		async def for_language(lng: str) -> Collection:
+			collection = await self.get(
+				f"collection/{provider_id}",
+				params={
+					"language": lng,
+				},
+			)
+			logging.debug("TMDb responded: %s", collection)
+
+			ret = Collection(
+				external_id={
+					self.name: MetadataID(
+						collection["id"],
+						f"https://www.themoviedb.org/collection/{collection['id']}",
+					)
+				},
+			)
+			translation = CollectionTranslation(
+				name=collection["name"],
+				overview=collection["overview"],
+				posters=[
+					f"https://image.tmdb.org/t/p/original{collection['poster_path']}"
+				],
+				logos=[],
+				thumbnails=[
+					f"https://image.tmdb.org/t/p/original{collection['backdrop_path']}"
+				],
+			)
+			ret.translations = {lng: translation}
+			return ret
+
+		return await self.process_translations(for_language, language)

@@ -4,6 +4,7 @@ from datetime import date
 from typing import Optional
 from enum import Enum
 
+from .collection import Collection
 from .genre import Genre
 from .studio import Studio
 from .metadataid import MetadataID
@@ -43,6 +44,7 @@ class Movie:
 	external_id: dict[str, MetadataID]
 
 	path: Optional[str] = None
+	collections: list[Collection] = field(default_factory=list)
 	translations: dict[str, MovieTranslation] = field(default_factory=dict)
 
 	def to_kyoo(self):
@@ -59,4 +61,5 @@ class Movie:
 			"trailer": next(iter(self.translations[default_language].trailers), None),
 			"studio": next((x.to_kyoo() for x in self.studios), None),
 			"genres": [x.to_kyoo() for x in self.genres],
+			"collections": None,
 		}
