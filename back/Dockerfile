@@ -25,5 +25,6 @@ COPY --from=builder /app /app
 
 WORKDIR /kyoo
 EXPOSE 5000
-HEALTHCHECK --interval=30s CMD curl --fail http://localhost:5000/health || exit
+# The back can take a long time to start if meilisearch is initializing
+HEALTHCHECK --interval=5s --retries=15 CMD curl --fail http://localhost:5000/health || exit
 CMD /app/Kyoo.Host
