@@ -33,6 +33,7 @@ class Episode:
 
 	path: Optional[str] = None
 	show_id: Optional[str] = None
+	season_id: Optional[str] = None
 	translations: dict[str, EpisodeTranslation] = field(default_factory=dict)
 
 	def to_kyoo(self):

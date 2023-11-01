@@ -8,6 +8,7 @@ from providers.utils import ProviderError
 from .types.episode import Episode, PartialShow
 from .types.show import Show
 from .types.movie import Movie
+from .types.collection import Collection
 
 
 Self = TypeVar("Self", bound="Provider")
@@ -57,3 +58,8 @@ class Provider:
 		language: list[str]
 	) -> Episode:
 		raise NotImplementedError
+
+	@abstractmethod
+	async def identify_collection(self, provider_id: str, *, language: list[str]) -> Collection:
+		raise NotImplementedError
+

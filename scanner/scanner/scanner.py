@@ -6,8 +6,9 @@ import re
 from aiohttp import ClientSession
 from pathlib import Path
 from guessit import guessit
-from typing import List
+from typing import List, Literal
 from providers.provider import Provider
+from providers.types.collection import Collection
 from providers.types.episode import Episode, PartialShow
 from providers.types.season import Season, SeasonTranslation
 from .utils import batch, log_errors, provider_cache, set_in_cache
@@ -28,7 +29,7 @@ class Scanner:
 			self._ignore_pattern = re.compile("")
 			logging.error(f"Invalid ignore pattern. Ignoring. Error: {e}")
 		self.provider = Provider.get_all(client)[0]
-		self.cache = {"shows": {}, "seasons": {}}
+		self.cache = {"shows": {}, "seasons": {}, "collections": {}}
 		self.languages = languages
 
 	async def scan(self, path: str):
@@ -83,14 +84,21 @@ class Scanner:
 
 		logging.info("Identied %s: %s", path, raw)
 
-		# TODO: Add collections support
 		if raw["type"] == "movie":
 			movie = await self.provider.identify_movie(
 				raw["title"], raw.get("year"), language=self.languages
 			)
 			movie.path = str(path)
 			logging.debug("Got movie: %s", movie)
-			await self.post("movies", data=movie.to_kyoo())
+			movie_id = await self.post("movies", data=movie.to_kyoo())
+
+			if any(movie.collections):
+				ids = await asyncio.gather(
+					*(self.create_or_get_collection(x) for x in movie.collections)
+				)
+				await asyncio.gather(
+					*(self.link_collection(x, "movie", movie_id) for x in ids)
+				)
 		elif raw["type"] == "episode":
 			episode = await self.provider.identify_episode(
 				raw["title"],
@@ -105,13 +113,43 @@ class Scanner:
 			episode.show_id = await self.create_or_get_show(episode)
 
 			if episode.season_number is not None:
-				await self.register_seasons(
+				episode.season_id = await self.register_seasons(
 					show_id=episode.show_id,
 					season_number=episode.season_number,
 				)
 			await self.post("episodes", data=episode.to_kyoo())
 		else:
 			logging.warn("Unknown video file type: %s", raw["type"])
+
+	async def create_or_get_collection(self, collection: Collection) -> str:
+		@provider_cache("collection")
+		async def create_collection(provider_id: str):
+			# TODO: Check if a collection with the same metadata id exists already on kyoo.
+			new_collection = (
+				await self.provider.identify_collection(
+					provider_id, language=self.languages
+				)
+				if not any(collection.translations.keys())
+				else collection
+			)
+			logging.debug("Got collection: %s", new_collection)
+			return await self.post("collection", data=new_collection.to_kyoo())
+
+		# The parameter is only used as a key for the cache.
+		provider_id = collection.external_id[self.provider.name].data_id
+		return await create_collection(provider_id)
+
+	async def link_collection(
+		self, collection: str, type: Literal["movie"] | Literal["show"], id: str
+	):
+		async with self._client.put(
+			f"{self._url}/collections/{collection}/{type}/{id}",
+			headers={"X-API-Key": self._api_key},
+		) as r:
+			# Allow 409 and continue as if it worked.
+			if not r.ok and r.status != 409:
+				logging.error(f"Request error: {await r.text()}")
+				r.raise_for_status()
 
 	async def create_or_get_show(self, episode: Episode) -> str:
 		@provider_cache("shows")
@@ -122,6 +160,7 @@ class Scanner:
 				if isinstance(episode.show, PartialShow)
 				else episode.show
 			)
+			# TODO: collections
 			logging.debug("Got show: %s", episode)
 			ret = await self.post("show", data=show.to_kyoo())
 			try:
@@ -138,14 +177,14 @@ class Scanner:
 		return await create_show(provider_id)
 
 	@provider_cache("seasons")
-	async def register_seasons(self, show_id: str, season_number: int):
+	async def register_seasons(self, show_id: str, season_number: int) -> str:
 		# TODO: fetch season here. this will be useful when a new season of a show is aired after the show has been created on kyoo.
 		season = Season(
 			season_number=season_number,
 			show_id=show_id,
 			translations={lng: SeasonTranslation() for lng in self.languages},
 		)
-		await self.post("seasons", data=season.to_kyoo())
+		return await self.post("seasons", data=season.to_kyoo())
 
 	async def post(self, path: str, *, data: object) -> str:
 		logging.debug(
