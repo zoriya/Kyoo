@@ -21,63 +21,23 @@
 import { Theme } from "yoshiki/native";
 
 export const tooltip = (tooltip: string, up?: boolean) => ({
-	dataSet: { tooltip, label: tooltip, tooltipPos: up ? "up" : undefined },
+	dataSet: {
+		tooltipContent: tooltip,
+		label: tooltip,
+		tooltipPlace: up ? "top" : "bottom",
+		tooltipId: "tooltip",
+	},
 });
 
 export const WebTooltip = ({ theme }: { theme: Theme }) => {
-	const background = `${theme.light.colors.black}CC`;
-
 	return (
 		<style jsx global>{`
-			[data-tooltip] {
-				position: relative;
-			}
-
-			[data-tooltip]::after {
-				content: attr(data-tooltip);
-				display: flex;
-
-				position: absolute;
-				top: 100%;
-				left: 50%;
-				transform: translate(-50%);
-				z-index: 999;
-
-				width: max-content;
-				max-width: 300%;
-
-				margin-top: 8px;
-				border-radius: 5px;
-				padding: 6px;
-				font-size: 0.8rem;
-				color: ${theme.colors.white};
-				background-color: ${background};
-				text-align: center;
-
-				opacity: 0;
-				visibility: hidden;
-				transition: opacity 0.3s ease-in-out;
-			}
-			[data-tooltip-pos]::after {
-				top: unset;
-				bottom: 100%;
-				margin-bottom: 8px;
-			}
-
-			:where(body:not(.noHover)) [data-tooltip]:hover::after,
-			[data-tooltip]:focus-visible::after {
-				opacity: 1;
-				visibility: visible;
-			}
-
-			:focus:not(:focus-visible) {
-				outline: none;
-			}
-
-			:focus-visible {
-				outline: none;
-				transition: box-shadow 0.15s ease-in-out;
-				box-shadow: 0 0 0 2px ${theme.colors.black};
+			body {
+				--rt-color-white: ${theme.alternate.contrast};
+				--rt-color-dark: ${theme.user.contrast};
+				--rt-opacity: 0.9;
+				--rt-transition-show-delay: 0.15s;
+				--rt-transition-closing-delay: 0.15s;
 			}
 		`}</style>
 	);
