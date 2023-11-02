@@ -60,6 +60,7 @@ class Provider:
 		raise NotImplementedError
 
 	@abstractmethod
-	async def identify_collection(self, provider_id: str, *, language: list[str]) -> Collection:
+	async def identify_collection(
+		self, provider_id: str, *, language: list[str]
+	) -> Collection:
 		raise NotImplementedError
-
