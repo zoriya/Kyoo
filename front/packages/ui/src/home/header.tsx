@@ -98,7 +98,4 @@ export const Header = ({
 Header.query = (): QueryIdentifier<LibraryItem> => ({
 	parser: LibraryItemP,
 	path: ["items", "random"],
-	params: {
-		fields: "firstEpisode",
-	},
 });
