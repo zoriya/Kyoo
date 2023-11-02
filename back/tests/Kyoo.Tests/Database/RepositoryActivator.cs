@@ -26,9 +26,9 @@ using Kyoo.Abstractions.Models;
 using Kyoo.Core;
 using Kyoo.Core.Controllers;
 using Kyoo.Postgresql;
+using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit.Abstractions;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Kyoo.Tests.Database
 {

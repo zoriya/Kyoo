@@ -40,10 +40,9 @@ export const episodeDisplayNumber = (
 };
 
 export const displayRuntime = (runtime: number) => {
-	if (runtime < 60)
-		return `${runtime}min`;
+	if (runtime < 60) return `${runtime}min`;
 	return `${Math.floor(runtime / 60)}h${runtime % 60}`;
-}
+};
 
 export const EpisodeBox = ({
 	name,
@@ -205,7 +204,8 @@ export const EpisodeLine = ({
 							</H6>
 						)}
 					</Skeleton>
-					{isLoading || (runtime && <Skeleton>{isLoading || <SubP>{displayRuntime(runtime)}</SubP>}</Skeleton>)}
+					{isLoading ||
+						(runtime && <Skeleton>{isLoading || <SubP>{displayRuntime(runtime)}</SubP>}</Skeleton>)}
 				</View>
 				<Skeleton>{isLoading || <P numberOfLines={3}>{overview}</P>}</Skeleton>
 			</View>
