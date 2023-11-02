@@ -46,6 +46,7 @@ import {
 	A,
 	ts,
 	Chip,
+	DottedSeparator,
 } from "@kyoo/primitives";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
@@ -66,6 +67,8 @@ import {
 import { Fetch } from "../fetch";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import Theaters from "@material-symbols/svg-400/rounded/theaters-fill.svg";
+import { Rating } from "../components/rating";
+import { displayRuntime } from "./episode";
 
 const TitleLine = ({
 	isLoading,
@@ -73,6 +76,8 @@ const TitleLine = ({
 	name,
 	tagline,
 	date,
+	rating,
+	runtime,
 	poster,
 	studio,
 	trailerUrl,
@@ -84,6 +89,8 @@ const TitleLine = ({
 	name?: string;
 	tagline?: string | null;
 	date?: string | null;
+	rating?: number;
+	runtime?: number | null;
 	poster?: KyooImage | null;
 	studio?: Studio | null;
 	trailerUrl?: string | null;
@@ -191,7 +198,7 @@ const TitleLine = ({
 							)}
 						</Skeleton>
 					)}
-					<View {...css({ flexDirection: "row" })}>
+					<View {...css({ flexDirection: "row", alignItems: "center" })}>
 						{playHref !== null && (
 							<IconFab
 								icon={PlayArrow}
@@ -214,6 +221,14 @@ const TitleLine = ({
 								color={{ xs: theme.user.contrast, md: theme.colors.white }}
 								{...tooltip(t("show.trailer"))}
 							/>
+						)}
+						<DottedSeparator />
+						<Rating rating={rating} />
+						{runtime && (
+							<>
+								<DottedSeparator />
+								<P>{displayRuntime(runtime)}</P>
+							</>
 						)}
 					</View>
 				</View>
@@ -372,6 +387,8 @@ export const Header = ({
 							name={data?.name}
 							tagline={data?.tagline}
 							date={data ? getDisplayDate(data as any) : undefined}
+							rating={data?.rating}
+							runtime={"runtime" in data ? data.runtime : null}
 							poster={data?.poster}
 							trailerUrl={data?.trailer}
 							studio={data?.studio}
