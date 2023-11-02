@@ -26,6 +26,7 @@ import { px, Theme, useYoshiki } from "yoshiki/native";
 import { PressableFeedback } from "./links";
 import { alpha } from "./themes";
 import { Breakpoint, ts, useBreakpointValue } from "./utils";
+import { P } from "./text";
 
 declare module "react" {
 	function forwardRef<T, P = {}>(
@@ -123,4 +124,9 @@ export const IconFab = <AsProps = PressableProps,>(
 			) as any)}
 		/>
 	);
+};
+
+export const DottedSeparator = () => {
+	const { css } = useYoshiki();
+	return <P {...css({ mX: ts(1) })}>{String.fromCharCode(0x2022)}</P>;
 };

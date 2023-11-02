@@ -59,9 +59,6 @@ export const Skeleton = ({
 		<View
 			{...css(
 				[
-					{
-						position: "relative",
-					},
 					lines === 1 && { overflow: "hidden", borderRadius: px(6) },
 					(variant === "text" || variant === "header") &&
 						lines === 1 && [

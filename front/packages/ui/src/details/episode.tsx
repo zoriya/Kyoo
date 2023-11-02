@@ -39,6 +39,12 @@ export const episodeDisplayNumber = (
 	return def;
 };
 
+export const displayRuntime = (runtime: number) => {
+	if (runtime < 60)
+		return `${runtime}min`;
+	return `${Math.floor(runtime / 60)}h${runtime % 60}`;
+}
+
 export const EpisodeBox = ({
 	name,
 	overview,
@@ -124,6 +130,7 @@ export const EpisodeLine = ({
 	episodeNumber,
 	seasonNumber,
 	releaseDate,
+	runtime,
 	...props
 }: WithLoading<{
 	slug: string;
@@ -135,6 +142,7 @@ export const EpisodeLine = ({
 	episodeNumber: number | null;
 	seasonNumber: number | null;
 	releaseDate: Date | null;
+	runtime: number | null;
 	id: number;
 }> &
 	Stylable) => {
@@ -182,13 +190,23 @@ export const EpisodeLine = ({
 				{...(css(["poster", { flexShrink: 0, m: ts(1) }]) as { style: ImageStyle })}
 			/>
 			<View {...css({ flexGrow: 1, flexShrink: 1, m: ts(1) })}>
-				<Skeleton>
-					{isLoading || (
-						<H6 aria-level={undefined} {...css("title")}>
-							{name ?? t("show.episodeNoMetadata")}
-						</H6>
-					)}
-				</Skeleton>
+				<View
+					{...css({
+						flexGrow: 1,
+						flexShrink: 1,
+						flexDirection: "row",
+						justifyContent: "space-between",
+					})}
+				>
+					<Skeleton>
+						{isLoading || (
+							<H6 aria-level={undefined} {...css("title")}>
+								{name ?? t("show.episodeNoMetadata")}
+							</H6>
+						)}
+					</Skeleton>
+					{isLoading || (runtime && <Skeleton>{isLoading || <SubP>{displayRuntime(runtime)}</SubP>}</Skeleton>)}
+				</View>
 				<Skeleton>{isLoading || <P numberOfLines={3}>{overview}</P>}</Skeleton>
 			</View>
 		</Link>
