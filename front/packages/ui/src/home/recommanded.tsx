@@ -36,6 +36,7 @@ import {
 	P,
 	SubP,
 	focusReset,
+	tooltip,
 	ts,
 } from "@kyoo/primitives";
 import { useTranslation } from "react-i18next";
@@ -69,6 +70,7 @@ export const ItemDetails = ({
 	playHref: string | null;
 }>) => {
 	const { push } = useRouter();
+	const { t } = useTranslation();
 	const { css } = useYoshiki("recommanded-card");
 
 	return (
@@ -142,6 +144,7 @@ export const ItemDetails = ({
 							size={20}
 							as={Pressable}
 							onPress={() => push(playHref ?? "")}
+							{...tooltip(t("show.play"))}
 							{...css({ fover: { self: { transform: "scale(1.2)" as any, mX: ts(0.5) } } })}
 						/>
 					)}
@@ -199,6 +202,5 @@ Recommanded.query = (): QueryIdentifier<LibraryItem> => ({
 	params: {
 		sortBy: "random",
 		limit: 6,
-		fields: "firstEpisode",
 	},
 });
