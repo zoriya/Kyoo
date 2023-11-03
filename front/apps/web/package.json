@@ -41,7 +41,7 @@
 		"superjson": "^1.13.1",
 		"sweetalert2": "^11.7.20",
 		"yoshiki": "1.2.12",
-		"zod": "^3.21.4"
+		"zod": "^3.22.3"
 	},
 	"devDependencies": {
 		"@svgr/webpack": "^8.0.1",

@@ -2532,7 +2532,7 @@ __metadata:
     "@types/react": 18.2.0
     react-native-mmkv: ^2.10.1
     typescript: ^5.1.6
-    zod: ^3.21.4
+    zod: ^3.22.3
   peerDependencies:
     "@tanstack/react-query": "*"
     react: "*"
@@ -13948,7 +13948,7 @@ __metadata:
     typescript: ^5.1.6
     webpack: ^5.88.2
     yoshiki: 1.2.12
-    zod: ^3.21.4
+    zod: ^3.22.3
   languageName: unknown
   linkType: soft
 
@@ -14350,9 +14350,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"zod@npm:3.21.4, zod@npm:^3.21.4":
+"zod@npm:3.21.4":
   version: 3.21.4
   resolution: "zod@npm:3.21.4"
   checksum: f185ba87342ff16f7a06686767c2b2a7af41110c7edf7c1974095d8db7a73792696bcb4a00853de0d2edeb34a5b2ea6a55871bc864227dace682a0a28de33e1f
+  languageName: node
+  linkType: hard
+
+"zod@npm:^3.22.3":
+  version: 3.22.4
+  resolution: "zod@npm:3.22.4"
+  checksum: 80bfd7f8039b24fddeb0718a2ec7c02aa9856e4838d6aa4864335a047b6b37a3273b191ef335bf0b2002e5c514ef261ffcda5a589fb084a48c336ffc4cdbab7f
   languageName: node
   linkType: hard
