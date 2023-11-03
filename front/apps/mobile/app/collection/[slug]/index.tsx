@@ -18,11 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-export * from "./navbar";
-export { HomePage } from "./home";
-export { BrowsePage } from "./browse";
-export { MovieDetails, ShowDetails } from "./details";
-export { CollectionPage } from "./collection";
-export { Player } from "./player";
-export { SearchPage } from "./search";
-export { LoginPage, RegisterPage } from "./login";
+import { CollectionPage } from "@kyoo/ui";
+import { withRoute } from "../../../utils";
+
+export default withRoute(CollectionPage, {
+	options: { headerTransparent: true, headerStyle: { backgroundColor: "transparent" } },
+	statusBar: { barStyle: "light-content" },
+});
