@@ -26,6 +26,7 @@ import { SeasonP } from "./season";
 import { StudioP } from "./studio";
 import { BaseEpisodeP } from "./episode.base";
 import { CollectionP } from "./collection";
+import { MetadataP } from "./metadata";
 
 /**
  * The enum containing show's status.
@@ -99,6 +100,10 @@ export const ShowP = withImages(
 		 * The first episode of this show
 		 */
 		firstEpisode: BaseEpisodeP.optional().nullable(),
+		/**
+		 * The link to metadata providers that this show has.
+		 */
+		externalId: MetadataP,
 	}),
 	"shows",
 )

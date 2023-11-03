@@ -18,35 +18,54 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { rem, Stylable, Theme, useYoshiki } from "yoshiki/native";
+import { px, rem, Stylable, Theme, useYoshiki } from "yoshiki/native";
 import { P } from "./text";
 import { ts } from "./utils";
+import { A } from "./links";
+import { ComponentType } from "react";
 
-export const Chip = ({
-	label,
+export const Chip = <AsProps = { label: string },>({
 	color,
 	size = "medium",
+	outline = false,
+	as,
 	...props
-}: { label: string; color?: string; size?: "small" | "medium" | "large" } & Stylable) => {
+}: {
+	color?: string;
+	size?: "small" | "medium" | "large";
+	outline?: boolean;
+	as?: ComponentType<AsProps>;
+} & AsProps) => {
 	const { css } = useYoshiki();
 
 	const sizeMult = size == "medium" ? 1 : size == "small" ? 0.75 : 1.25;
 
+	const As = as ?? (P as any);
+	// @ts-ignore backward compatibilty
+	if (!as && props.label) props.children = props.label;
+
 	return (
-		<P
+		<As
 			{...css(
-				{
-					pY: ts(1 * sizeMult),
-					pX: ts(1.5 * sizeMult),
-					borderRadius: ts(3),
-					fontSize: rem(0.8),
-					color: (theme: Theme) => theme.contrast,
-					bg: color ?? ((theme: Theme) => theme.accent),
-				},
+				[
+					{
+						pY: ts(1 * sizeMult),
+						pX: ts(1.5 * sizeMult),
+						borderRadius: ts(3),
+						fontSize: rem(0.8),
+					},
+					!outline && {
+						color: (theme: Theme) => theme.contrast,
+						bg: color ?? ((theme: Theme) => theme.accent),
+					},
+					outline && {
+						borderColor: color ?? ((theme: Theme) => theme.accent),
+						borderStyle: "solid",
+						borderWidth: px(1),
+					},
+				],
 				props,
 			)}
-		>
-			{label}
-		</P>
+		/>
 	);
 };
