@@ -25,6 +25,7 @@ import { Genre } from "./genre";
 import { StudioP } from "./studio";
 import { Status } from "./show";
 import { CollectionP } from "./collection";
+import { MetadataP } from "./metadata";
 
 export const MovieP = withImages(
 	ResourceP.extend({
@@ -94,6 +95,10 @@ export const MovieP = withImages(
 			 */
 			hls: z.string().transform(imageFn),
 		}),
+		/**
+		 * The link to metadata providers that this show has.
+		 */
+		externalId: MetadataP,
 	}),
 	"movies",
 )

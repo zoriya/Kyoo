@@ -332,7 +332,14 @@ const Description = ({
 						<P {...css({ textAlign: "justify" })}>{overview ?? t("show.noOverview")}</P>
 					)}
 				</Skeleton>
-				<View {...css({ flexWrap: "wrap", flexDirection: "row", marginTop: ts(0.5) })}>
+				<View
+					{...css({
+						flexWrap: "wrap",
+						flexDirection: "row",
+						alignItems: "center",
+						marginTop: ts(0.5),
+					})}
+				>
 					<P {...css({ marginRight: ts(0.5) })}>{t("show.tags")}:</P>
 					{(isLoading ? [...Array<string>(3)] : tags!).map((tag, i) => (
 						<Chip key={tag ?? i} label={tag} size="small" {...css({ m: ts(0.5) })} />
@@ -373,6 +380,7 @@ export const Header = ({
 	type: "movie" | "show";
 }) => {
 	const { css } = useYoshiki();
+	const { t } = useTranslation();
 
 	return (
 		<Fetch query={query}>
@@ -407,6 +415,41 @@ export const Header = ({
 						tags={data?.tags}
 						{...css({ paddingTop: { xs: 0, md: ts(2) } })}
 					/>
+					<Container
+						{...css({
+							flexWrap: "wrap",
+							flexDirection: "row",
+							alignItems: "center",
+							marginTop: ts(0.5),
+						})}
+					>
+						<P {...css({ marginRight: ts(0.5), textAlign: "center" })}>{t("show.links")}:</P>
+						{(!isLoading
+							? Object.entries(data.externalId!).filter(([_, data]) => data.link)
+							: [...Array(3)].map((_, i) => [i, undefined] as const)
+						).map(([name, data]) => (
+							<Chip
+								key={name}
+								as={Link}
+								href={data?.link}
+								target="_blank"
+								size="small"
+								outline
+								{...css({
+									m: ts(0.5),
+									color: "inherit",
+									fover: {
+										self: {
+											color: (theme: Theme) => theme.contrast,
+											bg: (theme: Theme) => theme.accent,
+										},
+									},
+								})}
+							>
+								{data ? name : <Skeleton {...css({ width: rem(3) })} />}
+							</Chip>
+						))}
+					</Container>
 					{data?.collections && (
 						<Container {...css({ marginY: ts(2) })}>
 							{data.collections.map((x) => (
