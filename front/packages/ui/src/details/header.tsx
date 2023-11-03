@@ -437,7 +437,7 @@ export const Header = ({
 								outline
 								{...css({
 									m: ts(0.5),
-									color: "inherit",
+									color: (theme: Theme) => theme.contrast,
 									fover: {
 										self: {
 											color: (theme: Theme) => theme.contrast,
