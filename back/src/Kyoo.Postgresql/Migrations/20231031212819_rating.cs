@@ -88,12 +88,14 @@ namespace Kyoo.Postgresql.Migrations
 				name: "rating",
 				table: "shows",
 				type: "integer",
+				defaultValue: 0,
 				nullable: false);
 
 			migrationBuilder.AddColumn<int>(
 				name: "rating",
 				table: "movies",
 				type: "integer",
+				defaultValue: 0,
 				nullable: false);
 
 			migrationBuilder.AddColumn<int>(
