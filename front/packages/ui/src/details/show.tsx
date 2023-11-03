@@ -81,7 +81,7 @@ const query = (slug: string): QueryIdentifier<Show> => ({
 	parser: ShowP,
 	path: ["shows", slug],
 	params: {
-		fields: ["studio", "firstEpisode"],
+		fields: ["studio", "firstEpisode", "collections"],
 	},
 });
 

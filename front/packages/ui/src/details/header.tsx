@@ -69,6 +69,7 @@ import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
 import Theaters from "@material-symbols/svg-400/rounded/theaters-fill.svg";
 import { Rating } from "../components/rating";
 import { displayRuntime } from "./episode";
+import { PartOf } from "./collection";
 
 export const TitleLine = ({
 	isLoading,
@@ -406,6 +407,19 @@ export const Header = ({
 						tags={data?.tags}
 						{...css({ paddingTop: { xs: 0, md: ts(2) } })}
 					/>
+					{data?.collections && (
+						<Container {...css({ marginY: ts(2) })}>
+							{data.collections.map((x) => (
+								<PartOf
+									key={x.id}
+									name={x.name}
+									overview={x.overview}
+									thumbnail={x.thumbnail}
+									href={x.href}
+								/>
+							))}
+						</Container>
+					)}
 				</>
 			)}
 		</Fetch>

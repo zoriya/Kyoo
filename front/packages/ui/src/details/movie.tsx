@@ -28,7 +28,7 @@ const query = (slug: string): QueryIdentifier<Movie> => ({
 	parser: MovieP,
 	path: ["movies", slug],
 	params: {
-		fields: ["studio"],
+		fields: ["studio", "collections"],
 	},
 });
 
