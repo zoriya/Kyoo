@@ -17,7 +17,8 @@
 		"episode-none": "There is no episodes in this season",
 		"episodeNoMetadata": "No metadata available",
 		"tags": "Tags",
-		"jumpToSeason": "Jump to season"
+		"jumpToSeason": "Jump to season",
+		"partOf": "Part of the"
 	},
 	"browse": {
 		"sortby": "Sort by {{key}}",

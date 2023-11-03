@@ -25,6 +25,7 @@ import { Genre } from "./genre";
 import { SeasonP } from "./season";
 import { StudioP } from "./studio";
 import { BaseEpisodeP } from "./episode.base";
+import { CollectionP } from "./collection";
 
 /**
  * The enum containing show's status.
@@ -86,6 +87,10 @@ export const ShowP = withImages(
 		 * The studio that made this show.
 		 */
 		studio: StudioP.optional().nullable(),
+		/**
+		 * The collection this movie is part of.
+		 */
+		collections: z.array(CollectionP).optional(),
 		/**
 		 * The list of seasons of this show.
 		 */

@@ -224,7 +224,7 @@ export const Navbar = (props: Stylable) => {
 				props,
 			)}
 		>
-			<View {...css({ flexDirection: "row" })}>
+			<View {...css({ flexDirection: "row", alignItems: "center" })}>
 				<NavbarTitle {...css({ marginX: ts(2) })} />
 				<A
 					href="/browse"
