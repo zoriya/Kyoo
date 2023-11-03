@@ -70,7 +70,7 @@ import Theaters from "@material-symbols/svg-400/rounded/theaters-fill.svg";
 import { Rating } from "../components/rating";
 import { displayRuntime } from "./episode";
 
-const TitleLine = ({
+export const TitleLine = ({
 	isLoading,
 	playHref,
 	name,
@@ -89,12 +89,12 @@ const TitleLine = ({
 	name?: string;
 	tagline?: string | null;
 	date?: string | null;
-	rating?: number;
+	rating?: number | null;
 	runtime?: number | null;
 	poster?: KyooImage | null;
 	studio?: Studio | null;
 	trailerUrl?: string | null;
-	type: "movie" | "show";
+	type: "movie" | "show" | "collection";
 } & Stylable) => {
 	const { css, theme } = useYoshiki();
 	const { t } = useTranslation();
@@ -222,8 +222,12 @@ const TitleLine = ({
 								{...tooltip(t("show.trailer"))}
 							/>
 						)}
-						<DottedSeparator />
-						<Rating rating={rating} />
+						{rating !== null && (
+							<>
+								<DottedSeparator />
+								<Rating rating={rating} />
+							</>
+						)}
 						{runtime && (
 							<>
 								<DottedSeparator />

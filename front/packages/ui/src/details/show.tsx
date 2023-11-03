@@ -28,7 +28,7 @@ import Svg, { Path, SvgProps } from "react-native-svg";
 import { Container } from "@kyoo/primitives";
 import { forwardRef } from "react";
 
-const SvgWave = (props: SvgProps) => {
+export const SvgWave = (props: SvgProps) => {
 	const { css } = useYoshiki();
 	const width = 612;
 	const height = 52.771;
@@ -58,11 +58,7 @@ const ShowHeader = forwardRef<View, ViewProps & { slug: string }>(function ShowH
 						flexGrow: 1,
 						flexShrink: 1,
 						// @ts-ignore Web only property
-						overflow: "auto" as any,
-						// @ts-ignore Web only property
-						overflowX: "hidden",
-						// @ts-ignore Web only property
-						overflowY: "overlay",
+						overflowY: "auto" as any,
 					},
 				],
 				props,

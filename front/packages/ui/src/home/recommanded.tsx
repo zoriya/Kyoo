@@ -176,7 +176,6 @@ export const Recommanded = () => {
 			>
 				{(x, i) => (
 					<ItemDetails
-						key={x.id ?? i}
 						isLoading={x.isLoading as any}
 						name={x.name}
 						tagline={"tagline" in x ? x.tagline : null}
