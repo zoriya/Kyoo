@@ -29,7 +29,7 @@ import {
 	getDisplayDate,
 } from "@kyoo/models";
 import { Header as ShowHeader, TitleLine } from "../details/header";
-import { Container, ImageBackground, P, Skeleton, ts } from "@kyoo/primitives";
+import { Container, Head, ImageBackground, P, Skeleton, ts } from "@kyoo/primitives";
 import { percent, px, useYoshiki } from "yoshiki/native";
 import { useTranslation } from "react-i18next";
 import { forwardRef } from "react";
@@ -48,6 +48,8 @@ const Header = ({ slug }: { slug: string }) => {
 		<Fetch query={Header.query(slug)}>
 			{({ isLoading, ...data }) => (
 				<>
+					<Head title={data?.name} description={data?.overview} image={data?.thumbnail?.high} />
+
 					<ImageBackground
 						src={data?.thumbnail}
 						quality="high"
