@@ -386,7 +386,7 @@ export const Header = ({
 		<Fetch query={query}>
 			{({ isLoading, ...data }) => (
 				<>
-					<Head title={data?.name} description={data?.overview} />
+					<Head title={data?.name} description={data?.overview} image={data?.thumbnail?.high} />
 					<ImageBackground
 						src={data?.thumbnail}
 						quality="high"
