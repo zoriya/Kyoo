@@ -1,4 +1,4 @@
-FROM node:16-alpine AS builder
+FROM node:18-alpine AS builder
 WORKDIR /app
 COPY .yarn ./.yarn
 COPY .yarnrc.yml ./
@@ -16,7 +16,7 @@ ENV NODE_ENV production
 RUN yarn build:web
 
 
-FROM node:16-alpine
+FROM node:18-alpine
 WORKDIR /app
 
 COPY --from=builder /app/apps/web/.next/standalone/apps/web .

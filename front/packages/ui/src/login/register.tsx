@@ -92,7 +92,7 @@ export const RegisterPage: QueryPage = () => {
 					);
 					setError(error);
 					if (error) return;
-					queryClient.invalidateQueries(["auth", "me"]);
+					queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
 					router.replace("/", undefined, {
 						experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
 					});

@@ -23,8 +23,8 @@ import {
 	dehydrate,
 	QueryClient,
 	QueryFunctionContext,
+	QueryKey,
 	useInfiniteQuery,
-	UseInfiniteQueryOptions,
 	useQuery,
 } from "@tanstack/react-query";
 import { z } from "zod";
@@ -70,9 +70,9 @@ export const queryFn = async <Data,>(
 	const path = [url]
 		.concat(
 			"path" in context
-				? context.path.filter((x) => x)
-				: context.pageParam
-				? [context.pageParam]
+				? (context.path.filter((x) => x) as string[])
+				: "pageParam" in context
+				? [context.pageParam as string]
 				: (context.queryKey.filter((x, i) => x && i) as string[]),
 		)
 		.join("/")
@@ -197,17 +197,14 @@ export const useFetch = <Data,>(query: QueryIdentifier<Data>) => {
 	});
 };
 
-export const useInfiniteFetch = <Data, Ret>(
-	query: QueryIdentifier<Data, Ret>,
-	options?: Partial<UseInfiniteQueryOptions<Data[], KyooErrors>>,
-) => {
+export const useInfiniteFetch = <Data, Ret>(query: QueryIdentifier<Data, Ret>) => {
 	if (query.getNext) {
 		// eslint-disable-next-line react-hooks/rules-of-hooks
 		const ret = useInfiniteQuery<Data[], KyooErrors>({
 			queryKey: toQueryKey(query),
 			queryFn: (ctx) => queryFn(ctx, z.array(query.parser)),
 			getNextPageParam: query.getNext,
-			...options,
+			initialPageParam: undefined,
 		});
 		return { ...ret, items: ret.data?.pages.flatMap((x) => x) as unknown as Ret[] | undefined };
 	}
@@ -216,6 +213,7 @@ export const useInfiniteFetch = <Data, Ret>(
 		queryKey: toQueryKey(query),
 		queryFn: (ctx) => queryFn(ctx, Paged(query.parser)),
 		getNextPageParam: (page: Page<Data>) => page?.next || undefined,
+		initialPageParam: undefined,
 	});
 	const items = ret.data?.pages.flatMap((x) => x.items);
 	return {
@@ -239,6 +237,7 @@ export const fetchQuery = async (queries: QueryIdentifier[], authToken?: string 
 				return client.prefetchInfiniteQuery({
 					queryKey: toQueryKey(query),
 					queryFn: (ctx) => queryFn(ctx, Paged(query.parser), authToken),
+					initialPageParam: undefined,
 				});
 			} else {
 				return client.prefetchQuery({

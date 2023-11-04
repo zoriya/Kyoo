@@ -59,6 +59,7 @@ export const fullscreenAtom = atom(
 					navigationUI: "hide",
 				});
 				set(privateFullscreen, true);
+				// @ts-expect-error Firefox does not support this so ts complains
 				await screen.orientation.lock("landscape");
 			} else {
 				await document.exitFullscreen();

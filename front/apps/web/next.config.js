@@ -38,6 +38,7 @@ const nextConfig = {
 					{
 						context: suboctopus,
 						from: "*",
+						filter: (filepath) => !filepath.endsWith(".es.js"),
 						to: "static/chunks/",
 					},
 				],

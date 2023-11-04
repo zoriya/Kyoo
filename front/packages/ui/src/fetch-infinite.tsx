@@ -101,8 +101,6 @@ export const InfiniteFetch = <Data, Props, _>({
 } & Omit<ComponentProps<typeof InfiniteFetchList<Data, Props, _>>, "query">) => {
 	if (!query.infinite) console.warn("A non infinite query was passed to an InfiniteFetch.");
 
-	const ret = useInfiniteFetch(query, {
-		useErrorBoundary: false,
-	});
+	const ret = useInfiniteFetch(query);
 	return <InfiniteFetchList query={ret} {...props} />;
 };

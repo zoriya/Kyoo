@@ -139,7 +139,7 @@ export const NavbarProfile = () => {
 								icon={Logout}
 								onSelect={() => {
 									logout();
-									queryClient.invalidateQueries(["auth", "me"]);
+									queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
 								}}
 							/>
 							<Menu.Item
@@ -154,7 +154,7 @@ export const NavbarProfile = () => {
 												text: t("misc.delete"),
 												onPress: async () => {
 													await deleteAccount();
-													queryClient.invalidateQueries(["auth", "me"]);
+													queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
 												},
 												style: "destructive",
 											},
