@@ -4,9 +4,9 @@
 	"types": "src/index.ts",
 	"packageManager": "yarn@3.2.4",
 	"devDependencies": {
-		"@types/react": "18.2.0",
-		"react-native-mmkv": "^2.10.1",
-		"typescript": "^5.1.6"
+		"@types/react": "18.2.34",
+		"react-native-mmkv": "^2.10.2",
+		"typescript": "^5.2.2"
 	},
 	"peerDependencies": {
 		"@tanstack/react-query": "*",
@@ -19,6 +19,6 @@
 		}
 	},
 	"dependencies": {
-		"zod": "^3.21.4"
+		"zod": "^3.22.4"
 	}
 }

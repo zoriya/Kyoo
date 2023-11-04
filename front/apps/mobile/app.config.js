@@ -68,7 +68,7 @@ const config = {
 				projectId: "55de6b52-c649-4a15-9a45-569ff5ed036c",
 			},
 		},
-		plugins: ["expo-build-properties"],
+		plugins: ["expo-build-properties", "expo-localization"],
 	},
 };
 export default config;

@@ -77,7 +77,7 @@ export const LoginPage: QueryPage = () => {
 					const { error } = await loginFunc("login", { username, password }, cleanApiUrl(apiUrl));
 					setError(error);
 					if (error) return;
-					queryClient.invalidateQueries(["auth", "me"]);
+					queryClient.invalidateQueries({ queryKey: ["auth", "me"] });
 					router.replace("/", undefined, {
 						experimental: { nativeBehavior: "stack-replace", isNestedNavigator: false },
 					});

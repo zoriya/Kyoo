@@ -20,7 +20,7 @@
 
 import "../polyfill";
 
-import { Hydrate, QueryClientProvider } from "@tanstack/react-query";
+import { HydrationBoundary, QueryClientProvider } from "@tanstack/react-query";
 import { HiddenIfNoJs, SkeletonCss, ThemeSelector } from "@kyoo/primitives";
 import { WebTooltip } from "@kyoo/primitives/src/tooltip.web";
 import {
@@ -124,7 +124,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 					<meta name="description" content="A portable and vast media library solution." />
 				</Head>
 				<QueryClientProvider client={queryClient}>
-					<Hydrate state={queryState}>
+					<HydrationBoundary state={queryState}>
 						<ThemeSelector theme="auto" font={{ normal: "inherit" }}>
 							<GlobalCssTheme />
 							<Layout
@@ -142,7 +142,7 @@ const App = ({ Component, pageProps }: AppProps) => {
 							/>
 							<Tooltip id="tooltip" positionStrategy={"fixed"} />
 						</ThemeSelector>
-					</Hydrate>
+					</HydrationBoundary>
 				</QueryClientProvider>
 			</>
 		</YoshikiDebug>
