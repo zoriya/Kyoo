@@ -163,6 +163,14 @@ export const Player: QueryPage<{ slug: string; type: "episode" | "movie" }> = ({
 		setPlay(!isPlaying);
 	};
 
+	// When the controls hide, remove focus so space can be used to play/pause instead of triggering the button
+	// It also serves to hide the tooltip.
+	useEffect(() => {
+		if (Platform.OS !== "web") return;
+		if (!displayControls && document.activeElement instanceof HTMLElement)
+			document.activeElement.blur();
+	}, [displayControls]);
+
 	if (error || infoError || playbackError)
 		return (
 			<>
