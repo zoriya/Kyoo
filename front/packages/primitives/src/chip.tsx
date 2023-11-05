@@ -38,7 +38,7 @@ export const Chip = <AsProps = { label: string },>({
 } & AsProps) => {
 	const { css } = useYoshiki();
 
-	const sizeMult = size == "medium" ? 1 : size == "small" ? 0.75 : 1.25;
+	const sizeMult = size == "medium" ? 1 : size == "small" ? 0.5 : 1.5;
 
 	const As = as ?? (P as any);
 	// @ts-ignore backward compatibilty
