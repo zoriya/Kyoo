@@ -18,19 +18,19 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { Icon, P, Skeleton, ts } from "@kyoo/primitives";
+import { Breakpoint, Icon, P, Skeleton, ts } from "@kyoo/primitives";
 import { View } from "react-native";
 import Star from "@material-symbols/svg-400/rounded/star-fill.svg";
 import { rem, useYoshiki } from "yoshiki/native";
 
-export const Rating = ({ rating }: { rating?: number }) => {
+export const Rating = ({ rating, color }: { rating?: number, color: Breakpoint<string> }) => {
 	const { css } = useYoshiki();
 
 	return (
 		<View {...css({ flexDirection: "row", alignItems: "center" })}>
-			<Icon icon={Star} {...css({ marginRight: ts(0.5) })} />
+			<Icon icon={Star} color={color} {...css({ marginRight: ts(0.5) })} />
 			<Skeleton {...css({ width: rem(2) })}>
-				{rating !== undefined && <P>{rating ? rating / 10 : "??"} / 10</P>}
+				{rating !== undefined && <P {...css({ color })}>{rating ? rating / 10 : "??"} / 10</P>}
 			</Skeleton>
 		</View>
 	);
