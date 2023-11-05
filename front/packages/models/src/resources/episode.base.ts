@@ -69,7 +69,12 @@ export const BaseEpisodeP = withImages(
 		}),
 	}),
 	"episodes",
-).transform((x) => ({
-	...x,
-	href: `/watch/${x.slug}`,
-}));
+)
+	.transform((x) => ({
+		...x,
+		runtime: x.runtime === 0 ? null : x.runtime,
+	}))
+	.transform((x) => ({
+		...x,
+		href: `/watch/${x.slug}`,
+	}));
