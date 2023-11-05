@@ -50,7 +50,7 @@ import {
 } from "@kyoo/primitives";
 import { Fragment } from "react";
 import { useTranslation } from "react-i18next";
-import { ImageStyle, Platform, View } from "react-native";
+import { ImageStyle, Platform, Text, View } from "react-native";
 import {
 	Theme,
 	md,
@@ -430,12 +430,12 @@ export const Header = ({
 						).map(([name, data]) => (
 							<Chip
 								key={name}
-								as={Link}
+								as={A}
 								href={data?.link}
 								target="_blank"
 								size="small"
 								outline
-								{...css({
+								{...(css({
 									m: ts(0.5),
 									color: (theme: Theme) => theme.contrast,
 									fover: {
@@ -444,7 +444,7 @@ export const Header = ({
 											bg: (theme: Theme) => theme.accent,
 										},
 									},
-								})}
+								}) as any)}
 							>
 								{data ? name : <Skeleton {...css({ width: rem(3) })} />}
 							</Chip>

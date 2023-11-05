@@ -23,18 +23,26 @@ import { Platform, Pressable, TextProps, View, PressableProps } from "react-nati
 import { TextLink, useLink } from "solito/link";
 import { useTheme, useYoshiki } from "yoshiki/native";
 import { alpha } from "./themes";
+import { NextLink } from "solito/build/link/next-link";
 
 export const A = ({
 	href,
 	replace,
 	children,
+	target,
 	...props
-}: TextProps & { href?: string; replace?: boolean; children: ReactNode }) => {
+}: TextProps & {
+	href?: string | null;
+	target?: string;
+	replace?: boolean;
+	children: ReactNode;
+}) => {
 	const { css, theme } = useYoshiki();
 
 	return (
 		<TextLink
 			href={href ?? ""}
+			target={target}
 			replace={replace as any}
 			experimental={
 				replace
@@ -51,6 +59,7 @@ export const A = ({
 				},
 				{
 					selectable: true,
+					hrefAttrs: { target },
 					...props,
 				},
 			)}
