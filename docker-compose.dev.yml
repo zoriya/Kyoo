@@ -57,6 +57,7 @@ services:
     ports:
       - "7666:7666"
     restart: on-failure
+    cpus: 0.2
     env_file:
       - ./.env
     volumes:
