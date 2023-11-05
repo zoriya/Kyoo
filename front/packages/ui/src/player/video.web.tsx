@@ -168,11 +168,6 @@ const Video = forwardRef<{ seek: (value: number) => void }, VideoProps>(function
 			} else {
 				hls.attachMedia(ref.current);
 				hls.startLoad(0);
-				hls.on(Hls.Events.MANIFEST_LOADED, async () => {
-					try {
-						await ref.current?.play();
-					} catch {}
-				});
 				hls.on(Hls.Events.ERROR, (_, d) => {
 					if (!d.fatal || !hls?.media) return;
 					console.warn("Hls error", d);
