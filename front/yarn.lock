@@ -9619,12 +9619,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jassub@npm:^1.7.10":
-  version: 1.7.10
-  resolution: "jassub@npm:1.7.10"
+"jassub@npm:^1.7.11":
+  version: 1.7.11
+  resolution: "jassub@npm:1.7.11"
   dependencies:
     rvfc-polyfill: ^1.0.7
-  checksum: 4be5c9cba87709ff7717da9e6ea106c4e053f8ced00d07e5de3dc01159521200ce86a12aba6eb437139f8aabf8132717193c628778b0d0bcbb40e298bf2bc01a
+  checksum: f36778c0b0dcb0f0a3ed841741e77074697372c3bf2f700b49cb59afa93e65145ca448b7801f469ee1c8acad8fc35b9567f1ca96749a88a3990f0940b84ea975
   languageName: node
   linkType: hard
 
@@ -14893,7 +14893,7 @@ __metadata:
     expo-modules-core: ^1.5.11
     hls.js: ^1.4.12
     i18next: ^23.6.0
-    jassub: ^1.7.10
+    jassub: ^1.7.11
     jotai: ^2.5.0
     moti: ^0.26.1
     next: 14.0.1
