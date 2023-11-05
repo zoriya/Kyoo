@@ -102,6 +102,10 @@ export const MovieP = withImages(
 	}),
 	"movies",
 )
+	.transform((x) => ({
+		...x,
+		runtime: x.runtime === 0 ? null : x.runtime,
+	}))
 	.transform((x) => {
 		if (!x.thumbnail && x.poster) {
 			x.thumbnail = { ...x.poster };
