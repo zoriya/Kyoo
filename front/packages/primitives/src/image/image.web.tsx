@@ -72,7 +72,7 @@ export const Image = ({
 				placeholder="blur"
 				// Don't use next's server to reprocess images, they are already optimized by kyoo.
 				unoptimized={true}
-				onLoadingComplete={() => setState("finished")}
+				onLoad={() => setState("finished")}
 				onError={() => setState("errored")}
 			/>
 		</BlurhashContainer>

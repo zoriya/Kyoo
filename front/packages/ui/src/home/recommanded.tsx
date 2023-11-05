@@ -135,8 +135,8 @@ export const ItemDetails = ({
 						minHeight: px(50),
 					})}
 				>
-					<ScrollView horizontal>
-						{genres?.map((x) => <Chip key={x} label={x} {...css({ mX: ts(0.5) })} />)}
+					<ScrollView horizontal {...css({ alignItems: "center" })}>
+						{genres?.map((x) => <Chip key={x} size="small" label={x} {...css({ mX: ts(0.5) })} />)}
 					</ScrollView>
 					{playHref !== null && (
 						<IconFab
