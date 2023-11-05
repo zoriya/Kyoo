@@ -22,7 +22,7 @@ import React, { ComponentProps, ComponentType, ForwardedRef, forwardRef } from "
 import { Platform, PressableProps, ViewStyle } from "react-native";
 import { SvgProps } from "react-native-svg";
 import { YoshikiStyle } from "yoshiki";
-import { px, Theme, useYoshiki } from "yoshiki/native";
+import { px, Stylable, Theme, useYoshiki } from "yoshiki/native";
 import { PressableFeedback } from "./links";
 import { alpha } from "./themes";
 import { Breakpoint, ts, useBreakpointValue } from "./utils";
@@ -126,7 +126,7 @@ export const IconFab = <AsProps = PressableProps,>(
 	);
 };
 
-export const DottedSeparator = () => {
+export const DottedSeparator = (props: Stylable) => {
 	const { css } = useYoshiki();
-	return <P {...css({ mX: ts(1) })}>{String.fromCharCode(0x2022)}</P>;
+	return <P {...css({ mX: ts(1) }, props)}>{String.fromCharCode(0x2022)}</P>;
 };

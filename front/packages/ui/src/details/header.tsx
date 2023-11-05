@@ -225,14 +225,23 @@ export const TitleLine = ({
 						)}
 						{rating !== null && (
 							<>
-								<DottedSeparator />
-								<Rating rating={rating} />
+								<DottedSeparator
+									{...css({ color: { xs: theme.user.contrast, md: theme.colors.white } })}
+								/>
+								<Rating
+									rating={rating}
+									color={{ xs: theme.user.contrast, md: theme.colors.white }}
+								/>
 							</>
 						)}
 						{runtime && (
 							<>
-								<DottedSeparator />
-								<P>{displayRuntime(runtime)}</P>
+								<DottedSeparator
+									{...css({ color: { xs: theme.user.contrast, md: theme.colors.white } })}
+								/>
+								<P {...css({ color: { xs: theme.user.contrast, md: theme.colors.white } })}>
+									{displayRuntime(runtime)}
+								</P>
 							</>
 						)}
 					</View>
