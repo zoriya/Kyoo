@@ -29,5 +29,6 @@ export const focusReset: object =
 	Platform.OS === "web"
 		? {
 				boxShadow: "unset",
+				outline: "none"
 		  }
 		: {};

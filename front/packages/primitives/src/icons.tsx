@@ -25,7 +25,7 @@ import { YoshikiStyle } from "yoshiki";
 import { px, Stylable, Theme, useYoshiki } from "yoshiki/native";
 import { PressableFeedback } from "./links";
 import { alpha } from "./themes";
-import { Breakpoint, ts, useBreakpointValue } from "./utils";
+import { Breakpoint, focusReset, ts, useBreakpointValue } from "./utils";
 import { P } from "./text";
 
 declare module "react" {
@@ -90,6 +90,7 @@ export const IconButton = forwardRef(function IconButton<AsProps = PressableProp
 					borderRadius: 9999,
 					fover: {
 						self: {
+							...focusReset,
 							bg: (theme: Theme) => theme.overlay0,
 						},
 					},
