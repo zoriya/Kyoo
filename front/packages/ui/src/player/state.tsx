@@ -116,8 +116,9 @@ export const Video = memo(function Video({
 		if (!subtitle || !subtitles) return;
 		setSubtitle(subtitles.find((x) => x.language === subtitle.language) ?? null);
 		// When the video change, try to persist the subtitle language.
+		// Also include the player ref, it can be initalised after the subtitles.
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [subtitles]);
+	}, [subtitles, ref.current]);
 
 	const volume = useAtomValue(volumeAtom);
 	const isMuted = useAtomValue(mutedAtom);
