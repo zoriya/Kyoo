@@ -23,7 +23,7 @@ import { View } from "react-native";
 import Star from "@material-symbols/svg-400/rounded/star-fill.svg";
 import { rem, useYoshiki } from "yoshiki/native";
 
-export const Rating = ({ rating, color }: { rating?: number, color: Breakpoint<string> }) => {
+export const Rating = ({ rating, color }: { rating?: number; color: Breakpoint<string> }) => {
 	const { css } = useYoshiki();
 
 	return (
