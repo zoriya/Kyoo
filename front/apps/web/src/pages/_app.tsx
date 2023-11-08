@@ -159,16 +159,17 @@ App.getInitialProps = async (ctx: AppContext) => {
 			? Component.getLayout.Layout.getFetchUrls
 			: Component.getLayout?.getFetchUrls;
 
+	const items = arrayShuffle(Component.randomItems ?? []);
+	appProps.pageProps.randomItems = {
+		[Component.displayName!]: items,
+	};
 	const urls: QueryIdentifier[] = [
-		...(getUrl ? getUrl(ctx.router.query as any) : []),
-		...(getLayoutUrl ? getLayoutUrl(ctx.router.query as any) : []),
+		...(getUrl ? getUrl(ctx.router.query as any, items) : []),
+		...(getLayoutUrl ? getLayoutUrl(ctx.router.query as any, items) : []),
 	];
 	const [authToken, token] = await getTokenWJ(ctx.ctx.req?.headers.cookie);
 	appProps.pageProps.queryState = await fetchQuery(urls, authToken);
 	appProps.pageProps.token = token;
-	appProps.pageProps.randomItems = {
-		[Component.displayName!]: arrayShuffle(Component.randomItems ?? []),
-	};
 
 	return { pageProps: superjson.serialize(appProps.pageProps) };
 };
