@@ -18,12 +18,10 @@
  * along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
  */
 
-import { forwardRef, ReactNode } from "react";
+import { forwardRef, ReactNode, useState } from "react";
 import { Platform, TextInput, TextInputProps, View } from "react-native";
 import { px, Theme, useYoshiki } from "yoshiki/native";
-import { ts } from "./utils";
-
-const focusReset: object = Platform.OS === "web" ? { focus: { self: { boxShadow: "none" } } } : {};
+import { focusReset, ts } from "./utils";
 
 export const Input = forwardRef<
 	TextInput,
@@ -31,17 +29,19 @@ export const Input = forwardRef<
 		variant?: "small" | "big";
 		right?: ReactNode;
 	} & TextInputProps
->(function Input({ style, placeholderTextColor, variant = "small", right, ...props }, ref) {
+>(function Input({ placeholderTextColor, variant = "small", right, ...props }, ref) {
 	const { css, theme } = useYoshiki();
+	const [focused, setFocused] = useState(false);
 
 	return (
 		<View
 			{...css(
 				[
 					{
-						borderColor: (theme) => theme.accent,
+						borderColor: (theme) => theme.colors.white,
 						borderRadius: ts(1),
 						borderWidth: px(1),
+						borderStyle: "solid",
 						padding: ts(0.5),
 						flexDirection: "row",
 						alignContent: "center",
@@ -51,14 +51,22 @@ export const Input = forwardRef<
 						borderRadius: ts(4),
 						p: ts(1),
 					},
+					focused && {
+						borderWidth: px(2),
+					},
 				],
-				{ style },
+				props,
 			)}
 		>
 			<TextInput
 				ref={ref}
-				placeholderTextColor={placeholderTextColor ?? theme.overlay1}
-				{...css({ flexGrow: 1, color: (theme: Theme) => theme.paragraph, ...focusReset }, props)}
+				placeholderTextColor={placeholderTextColor ?? theme.colors.white}
+				onFocus={() => setFocused(true)}
+				onBlur={() => setFocused(false)}
+				{...css(
+					{ flexGrow: 1, color: (theme: Theme) => theme.colors.white, borderWidth: 0, ...focusReset },
+					props,
+				)}
 			/>
 			{right}
 		</View>
