@@ -37,12 +37,8 @@ export const Image = ({
 }: Props & { style?: ImageStyle } & { layout: ImageLayout }) => {
 	const { css } = useYoshiki();
 	const [state, setState] = useState<"loading" | "errored" | "finished">(
-		src ? "finished" : "errored",
+		src ? (typeof window === "undefined" ? "finished" : "loading") : "errored",
 	);
-
-	useLayoutEffect(() => {
-		setState("loading");
-	}, []);
 
 	const border = { borderRadius: 6 } satisfies ViewStyle;
 
@@ -55,9 +51,8 @@ export const Image = ({
 		);
 	}
 
-	const blurhashUrl = blurHashToDataURL(src.blurhash);
 	return (
-		<BlurhashContainer blurhashUrl={blurhashUrl} {...css([layout, border], props)}>
+		<BlurhashContainer blurhash={src.blurhash} {...css([layout, border], props)}>
 			<NextImage
 				src={src[quality ?? "high"]}
 				priority={quality === "high"}
@@ -68,12 +63,11 @@ export const Image = ({
 					opacity: state === "loading" ? 0 : 1,
 					transition: "opacity .2s ease-out",
 				}}
-				blurDataURL={blurhashUrl}
-				placeholder="blur"
 				// Don't use next's server to reprocess images, they are already optimized by kyoo.
 				unoptimized={true}
 				onLoad={() => setState("finished")}
 				onError={() => setState("errored")}
+				suppressHydrationWarning
 			/>
 		</BlurhashContainer>
 	);
