@@ -27,8 +27,12 @@ import { GenreGrid } from "./genre";
 import { Recommanded } from "./recommanded";
 import { VerticalRecommanded } from "./vertical";
 import { NewsList } from "./news";
+import { useLayoutEffect, useState } from "react";
 
 export const HomePage: QueryPage<{}, Genre> = ({ randomItems }) => {
+	const [isClient, setClient] = useState(false);
+	useLayoutEffect(() => setClient(true), []);
+
 	return (
 		<ScrollView>
 			<Fetch query={Header.query()}>
@@ -57,11 +61,7 @@ export const HomePage: QueryPage<{}, Genre> = ({ randomItems }) => {
 					<GenreGrid key={x} genre={x} />
 				))}
 			<VerticalRecommanded />
-			{randomItems
-				.filter((_, i) => i >= 6)
-				.map((x) => (
-					<GenreGrid key={x} genre={x} />
-				))}
+			{isClient && randomItems.filter((_, i) => i >= 6).map((x) => <GenreGrid key={x} genre={x} />)}
 		</ScrollView>
 	);
 };
@@ -70,10 +70,10 @@ HomePage.randomItems = [...Object.values(Genre)];
 
 HomePage.getLayout = { Layout: DefaultLayout, props: { transparent: true } };
 
-HomePage.getFetchUrls = () => [
+HomePage.getFetchUrls = (_, randomItems) => [
 	Header.query(),
 	NewsList.query(),
-	...Object.values(Genre).map((x) => GenreGrid.query(x)),
+	...randomItems.filter((_, i) => i < 6).map((x) => GenreGrid.query(x)),
 	Recommanded.query(),
 	VerticalRecommanded.query(),
 ];
