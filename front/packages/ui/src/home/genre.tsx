@@ -76,6 +76,7 @@ export const GenreGrid = ({ genre }: { genre: Genre }) => {
 			<InfiniteFetchList
 				query={query}
 				layout={{ ...ItemGrid.layout, layout: "horizontal" }}
+				placeholderCount={10}
 				empty={displayEmpty.current ? t("home.none") : undefined}
 			>
 				{(x, i) => {

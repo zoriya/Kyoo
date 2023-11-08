@@ -56,7 +56,7 @@ export const InfiniteFetchList = <Data, Props, _>({
 }): JSX.Element | null => {
 	const { numColumns, size } = useBreakpointMap(layout);
 	const oldItems = useRef<Data[] | undefined>();
-	let { items, error, fetchNextPage, hasNextPage, refetch, isRefetching } = query;
+	let { items, error, fetchNextPage, hasNextPage, isFetching, refetch, isRefetching } = query;
 	if (incremental && items) oldItems.current = items;
 
 	if (error) return <ErrorView error={error} />;
@@ -76,7 +76,7 @@ export const InfiniteFetchList = <Data, Props, _>({
 	return (
 		<FlashList
 			renderItem={({ item, index }) => children({ isLoading: false, ...item } as any, index)}
-			data={hasNextPage !== false ? [...(items || []), ...placeholders] : items}
+			data={hasNextPage || isFetching ? [...(items || []), ...placeholders] : items}
 			horizontal={layout.layout === "horizontal"}
 			keyExtractor={(item: any) => item.id?.toString()}
 			numColumns={numColumns}
