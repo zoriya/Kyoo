@@ -79,9 +79,8 @@ const SearchBar = forwardRef<TextInput, Stylable>(function SearchBar(props, ref)
 				setQuery(q);
 			}}
 			placeholder={t("navbar.search")}
-			placeholderTextColor={theme.light.overlay0}
 			{...tooltip(t("navbar.search"))}
-			{...css({ borderColor: (theme) => theme.colors.white, height: ts(4), flexShrink: 1 }, props)}
+			{...css({ height: ts(4), flexShrink: 1 }, props)}
 		/>
 	);
 });
