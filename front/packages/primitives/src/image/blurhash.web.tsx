@@ -19,7 +19,17 @@
  */
 
 import { decode } from "blurhash";
-import { ReactElement } from "react";
+import {
+	HTMLAttributes,
+	ReactElement,
+	createElement,
+	forwardRef,
+	useEffect,
+	useImperativeHandle,
+	useLayoutEffect,
+	useRef,
+	useState,
+} from "react";
 import { useYoshiki } from "yoshiki";
 import { Stylable, nativeStyleToCss } from "yoshiki/native";
 import { StyleList, processStyleList } from "yoshiki/src/type";
@@ -191,28 +201,102 @@ function generatePng(width: number, height: number, rgbaString: string) {
 	return pngString;
 }
 
-export const BlurhashContainer = ({
-	blurhash,
-	blurhashUrl,
-	children,
-	...props
-}: {
-	blurhash?: string;
-	blurhashUrl?: string;
-	children?: ReactElement | ReactElement[];
-}) => {
+const BlurhashCanvas = forwardRef<
+	HTMLCanvasElement,
+	{
+		blurhash: string;
+	} & HTMLAttributes<HTMLCanvasElement>
+>(function BlurhashCanvas({ blurhash, ...props }, forwardedRef) {
+	const ref = useRef<HTMLCanvasElement>(null);
+	const { css } = useYoshiki();
+
+	useImperativeHandle(forwardedRef, () => ref.current!, []);
+
+	useLayoutEffect(() => {
+		if (!ref.current) return;
+		const pixels = decode(blurhash, 32, 32);
+		const ctx = ref.current.getContext("2d");
+		if (!ctx) return;
+		const imageData = ctx.createImageData(32, 32);
+		imageData.data.set(pixels);
+		ctx.putImageData(imageData, 0, 0);
+	}, [blurhash]);
+
+	return (
+		<canvas
+			ref={ref}
+			width={32}
+			height={32}
+			{...css(
+				{
+					position: "absolute",
+					top: 0,
+					bottom: 0,
+					left: 0,
+					right: 0,
+					width: "100%",
+					height: "100%",
+				},
+				props,
+			)}
+		/>
+	);
+});
+
+const BlurhashDiv = forwardRef<
+	HTMLDivElement,
+	{ blurhash: string } & HTMLAttributes<HTMLDivElement>
+>(function BlurhashDiv({ blurhash, ...props }, ref) {
 	const { css } = useYoshiki();
 
 	return (
 		<div
+			ref={ref}
 			style={{
 				// Use a blurhash here to nicely fade the NextImage when it is loaded completly
 				// (this prevents loading the image line by line which is ugly and buggy on firefox)
-				backgroundImage: `url(${blurhashUrl ?? blurHashToDataURL(blurhash)})`,
+				backgroundImage: `url(${blurHashToDataURL(blurhash)})`,
 				backgroundSize: "cover",
 				backgroundRepeat: "no-repeat",
 				backgroundPosition: "50% 50%",
 			}}
+			{...css(
+				{
+					position: "absolute",
+					top: 0,
+					bottom: 0,
+					left: 0,
+					right: 0,
+					width: "100%",
+					height: "100%",
+				},
+				props,
+			)}
+		/>
+	);
+});
+
+export const BlurhashContainer = ({
+	blurhash,
+	children,
+	...props
+}: {
+	blurhash: string;
+	children?: ReactElement | ReactElement[];
+}) => {
+	const { css } = useYoshiki();
+	const ref = useRef<HTMLCanvasElement & HTMLDivElement>(null);
+	const [renderType, setRenderType] = useState<"ssr" | "hydratation" | "client">(
+		typeof window === "undefined" ? "ssr" : "hydratation",
+	);
+
+	useLayoutEffect(() => {
+		// If the html is empty, it was not SSRed.
+		if (ref.current?.innerHTML === '') setRenderType("client");
+	}, []);
+
+	return (
+		<div
 			{...css(
 				{
 					// To reproduce view's behavior
@@ -223,6 +307,11 @@ export const BlurhashContainer = ({
 				nativeStyleToCss(props),
 			)}
 		>
+			{renderType === "ssr" && <BlurhashDiv ref={ref} blurhash={blurhash} />}
+			{renderType === "client" && <BlurhashCanvas ref={ref} blurhash={blurhash} />}
+			{renderType === "hydratation" && (
+				<div ref={ref} dangerouslySetInnerHTML={{ __html: "" }} suppressHydrationWarning />
+			)}
 			{children}
 		</div>
 	);
