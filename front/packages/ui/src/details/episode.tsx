@@ -66,6 +66,7 @@ export const EpisodeBox = ({
 			href={href}
 			{...css(
 				{
+					alignItems: "center",
 					child: {
 						poster: {
 							borderColor: (theme) => theme.background,
@@ -90,17 +91,18 @@ export const EpisodeBox = ({
 				src={thumbnail}
 				quality="low"
 				alt=""
+				forcedLoading={isLoading}
 				layout={{ width: percent(100), aspectRatio: 16 / 9 }}
 				{...(css("poster") as any)}
 			/>
-			<Skeleton>
+			<Skeleton {...css({ width: percent(50) })}>
 				{isLoading || (
 					<P {...css([{ marginY: 0, textAlign: "center" }, "title"])}>
 						{name ?? t("show.episodeNoMetadata")}
 					</P>
 				)}
 			</Skeleton>
-			<Skeleton>
+			<Skeleton {...css({ width: percent(75), height: rem(0.8) })}>
 				{isLoading || (
 					<SubP
 						numberOfLines={3}

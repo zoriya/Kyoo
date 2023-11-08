@@ -114,7 +114,7 @@ const InfiniteScroll = <Props,>({
 			)}
 		>
 			{children}
-			{hasMore && isFetching && loader}
+			{((hasMore && fetchMore) || isFetching) && loader}
 		</div>
 	);
 
@@ -178,7 +178,7 @@ export const InfiniteFetchList = <Data, _, HeaderProps>({
 			loadMore={fetchNextPage}
 			hasMore={hasNextPage!}
 			isFetching={isFetching}
-			loader={[...Array(12)].map((_, i) => (
+			loader={[...Array(placeholderCount)].map((_, i) => (
 				<Fragment key={i.toString()}>
 					{Divider && i !== 0 && (Divider === true ? <HR /> : <Divider />)}
 					{children({ isLoading: true } as any, i)}

@@ -27,11 +27,11 @@ import { GenreGrid } from "./genre";
 import { Recommanded } from "./recommanded";
 import { VerticalRecommanded } from "./vertical";
 import { NewsList } from "./news";
-import { useLayoutEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
 export const HomePage: QueryPage<{}, Genre> = ({ randomItems }) => {
 	const [isClient, setClient] = useState(false);
-	useLayoutEffect(() => setClient(true), []);
+	useEffect(() => setClient(true), []);
 
 	return (
 		<ScrollView>

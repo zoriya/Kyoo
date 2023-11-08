@@ -36,6 +36,7 @@ export const VerticalRecommanded = () => {
 			<H3 {...css({ mX: ItemGrid.layout.gap })}>{t("home.recommanded")}</H3>
 			<InfiniteFetch
 				query={VerticalRecommanded.query()}
+				placeholderCount={3}
 				layout={{ ...ItemList.layout, layout: "vertical" }}
 				fetchMore={false}
 			>

@@ -34,6 +34,7 @@ import {
 	ImageBackground,
 	Link,
 	P,
+	Skeleton,
 	SubP,
 	focusReset,
 	tooltip,
@@ -42,7 +43,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { Pressable, ScrollView, View } from "react-native";
 import { useRouter } from "solito/router";
-import { Theme, percent, px, useYoshiki } from "yoshiki/native";
+import { Theme, percent, px, rem, useYoshiki } from "yoshiki/native";
 import { Layout, WithLoading } from "../fetch";
 import { InfiniteFetch } from "../fetch-infinite";
 import PlayArrow from "@material-symbols/svg-400/rounded/play_arrow-fill.svg";
@@ -104,6 +105,7 @@ export const ItemDetails = ({
 				alt=""
 				quality="low"
 				gradient={false}
+				forcedLoading={isLoading}
 				{...css({ height: percent(100), aspectRatio: 2 / 3 })}
 			>
 				<View
@@ -116,17 +118,29 @@ export const ItemDetails = ({
 						p: ts(1),
 					})}
 				>
-					<P {...css([{ m: 0 }, "title"])}>{name}</P>
-					{subtitle && <SubP {...css({ m: 0 })}>{subtitle}</SubP>}
+					<Skeleton {...css({ width: percent(100) })}>
+						{isLoading || <P {...css([{ m: 0 }, "title"])}>{name}</P>}
+					</Skeleton>
+					{(subtitle || isLoading) && (
+						<Skeleton {...css({ height: rem(0.8) })}>
+							{isLoading || <SubP {...css({ m: 0 })}>{subtitle}</SubP>}
+						</Skeleton>
+					)}
 				</View>
 			</ImageBackground>
-			<View {...css({ flexShrink: 1, flexGrow: 1 })}>
-				{tagline && <P {...css({ p: ts(1) })}>{tagline}</P>}
-				{overview && (
-					<ScrollView>
-						<SubP {...css({ pX: ts(1) })}>{overview}</SubP>
-					</ScrollView>
+			<View {...css({ flexShrink: 1, flexGrow: 1, justifyContent: "flex-end" })}>
+				{(isLoading || tagline) && (
+					<Skeleton {...css({ m: ts(1), marginVertical: ts(2) })}>
+						{isLoading || <P {...css({ p: ts(1) })}>{tagline}</P>}
+					</Skeleton>
 				)}
+				<ScrollView {...css({ pX: ts(1) })}>
+					<Skeleton lines={5} {...css({ height: rem(0.8) })}>
+						{isLoading || (
+							<SubP {...css({ textAlign: "justify" })}>{overview ?? t("show.noOverview")}</SubP>
+						)}
+					</Skeleton>
+				</ScrollView>
 				<View
 					{...css({
 						bg: (theme) => theme.themeOverlay,
@@ -136,7 +150,11 @@ export const ItemDetails = ({
 					})}
 				>
 					<ScrollView horizontal {...css({ alignItems: "center" })}>
-						{genres?.map((x) => <Chip key={x} size="small" label={x} {...css({ mX: ts(0.5) })} />)}
+						{(genres || [...Array(3)])?.map((x, i) => (
+							<Chip key={x ?? i} size="small" {...css({ mX: ts(0.5) })}>
+								{x ?? <Skeleton {...css({ width: rem(3), height: rem(0.8) })} />}
+							</Chip>
+						))}
 					</ScrollView>
 					{playHref !== null && (
 						<IconFab
@@ -171,6 +189,7 @@ export const Recommanded = () => {
 			<InfiniteFetch
 				query={Recommanded.query()}
 				layout={ItemDetails.layout}
+				placeholderCount={6}
 				fetchMore={false}
 				{...css({ padding: 0 })}
 			>

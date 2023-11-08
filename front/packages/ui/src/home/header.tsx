@@ -27,11 +27,12 @@ import {
 	ImageBackground,
 	Link,
 	P,
+	Skeleton,
 	tooltip,
 	ts,
 } from "@kyoo/primitives";
 import { View } from "react-native";
-import { percent, useYoshiki } from "yoshiki/native";
+import { percent, rem, useYoshiki } from "yoshiki/native";
 import { WithLoading } from "../fetch";
 import { Header as DetailsHeader } from "../details/header";
 import { useTranslation } from "react-i18next";
@@ -68,8 +69,10 @@ export const Header = ({
 			<View
 				{...css({ width: { md: percent(70) }, position: "absolute", bottom: 0, margin: ts(2) })}
 			>
-				<H1>{name}</H1>
-				<View {...css({ flexDirection: "row" })}>
+				<Skeleton {...css({ width: rem(8), height: rem(2.5) })}>
+					{isLoading || <H1>{name}</H1>}
+				</Skeleton>
+				<View {...css({ flexDirection: "row", alignItems: "center" })}>
 					{link !== null && (
 						<IconFab
 							icon={PlayArrow}
@@ -87,9 +90,13 @@ export const Header = ({
 						{...tooltip(t("home.info"))}
 						{...css({ marginRight: ts(2) })}
 					/>
-					<H2>{tagline}</H2>
+					<Skeleton {...css({ width: rem(25), height: rem(2) })}>
+						{isLoading || <H2>{tagline}</H2>}
+					</Skeleton>
 				</View>
-				<P {...css({ display: { xs: "none", md: "flex" } })}>{overview}</P>
+				<Skeleton lines={4} {...css({ marginTop: ts(1) })}>
+					{isLoading || <P {...css({ display: { xs: "none", md: "flex" } })}>{overview}</P>}
+				</Skeleton>
 			</View>
 		</ImageBackground>
 	);
