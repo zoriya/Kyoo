@@ -23,7 +23,7 @@ import { Props, YoshikiEnhanced } from "./base-image";
 import { Image } from "./image";
 import { ComponentType, ReactNode } from "react";
 import { LinearGradient, LinearGradientProps } from "expo-linear-gradient";
-import { ContrastArea, alpha } from "../themes";
+import { ContrastArea } from "../themes";
 import { percent } from "yoshiki/native";
 
 export { BlurhashContainer } from "./blurhash";

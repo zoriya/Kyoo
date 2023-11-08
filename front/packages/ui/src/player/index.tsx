@@ -69,17 +69,17 @@ const mapData = (
 	previousSlug?: string,
 	nextSlug?: string,
 ): Partial<ComponentProps<typeof Hover>> & { isLoading: boolean } => {
-	if (!data || !info) return { isLoading: true };
+	if (!data) return { isLoading: true };
 	return {
 		isLoading: false,
 		name: data.type === "movie" ? data.name : `${episodeDisplayNumber(data, "")} ${data.name}`,
 		showName: data.type === "movie" ? data.name! : data.show!.name,
 		href: data ? (data.type === "movie" ? `/movie/${data.slug}` : `/show/${data.show!.slug}`) : "#",
 		poster: data.type === "movie" ? data.poster : data.show!.poster,
-		subtitles: info.subtitles,
-		audios: info.audios,
-		chapters: info.chapters,
-		fonts: info.fonts,
+		subtitles: info?.subtitles,
+		audios: info?.audios,
+		chapters: info?.chapters,
+		fonts: info?.fonts,
 		previousSlug,
 		nextSlug,
 	};
