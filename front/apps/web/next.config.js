@@ -29,6 +29,7 @@ const suboctopus = path.resolve(path.dirname(require.resolve("jassub")), "../dis
  */
 const nextConfig = {
 	swcMinify: true,
+	reactStrictMode: true,
 	output: "standalone",
 	webpack: (config) => {
 		config.plugins = [
