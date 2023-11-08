@@ -120,7 +120,12 @@ export const Hover = ({
 							</H2>
 							<ProgressBar chapters={chapters} />
 							<View
-								{...css({ flexDirection: "row", flexGrow: 1, justifyContent: "space-between" })}
+								{...css({
+									flexDirection: "row",
+									flexGrow: 1,
+									justifyContent: "space-between",
+									flexWrap: "wrap",
+								})}
 							>
 								<LeftButtons previousSlug={previousSlug} nextSlug={nextSlug} />
 								<RightButtons
