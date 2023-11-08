@@ -19,7 +19,7 @@
  */
 
 import { forwardRef, ReactNode, useState } from "react";
-import { Platform, TextInput, TextInputProps, View } from "react-native";
+import { TextInput, TextInputProps, View } from "react-native";
 import { px, Theme, useYoshiki } from "yoshiki/native";
 import { focusReset, ts } from "./utils";
 
