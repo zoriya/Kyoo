@@ -69,7 +69,7 @@ export const Slider = ({
 			onMouseEnter={() => setHover(true)}
 			// @ts-ignore Web only
 			onMouseLeave={() => setHover(false)}
-			focusable
+			tabIndex={0}
 			onFocus={() => setFocus(true)}
 			onBlur={() => setFocus(false)}
 			onStartShouldSetResponder={() => true}
@@ -107,7 +107,7 @@ export const Slider = ({
 					paddingVertical: ts(1),
 					// @ts-ignore Web only
 					cursor: "pointer",
-					focus: focusReset,
+					...focusReset,
 				},
 				props,
 			)}

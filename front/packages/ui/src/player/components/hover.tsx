@@ -85,7 +85,7 @@ export const Hover = ({
 				<>
 					<Back isLoading={isLoading} name={showName} href={href} {...css(opacity, props)} />
 					<Pressable
-						focusable={false}
+						tabIndex={-1}
 						onPointerDown={onPointerDown}
 						onPress={Platform.OS !== "web" ? () => onPointerDown?.({} as any) : undefined}
 						{...css(
@@ -247,9 +247,9 @@ export const LoadingIndicator = () => {
 
 	return (
 		<View
-			pointerEvents="none"
 			{...css({
 				position: "absolute",
+				pointerEvents: "none",
 				top: 0,
 				bottom: 0,
 				left: 0,

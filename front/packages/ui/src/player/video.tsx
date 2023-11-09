@@ -43,6 +43,7 @@ import { useTranslation } from "react-i18next";
 import { PlayMode, playModeAtom, subtitleAtom } from "./state";
 import uuid from "react-native-uuid";
 import { Pressable } from "react-native";
+import "@kyoo/primitives/src/types.d.ts";
 import { useYoshiki } from "yoshiki/native";
 
 const MimeTypes: Map<string, string> = new Map([
@@ -77,7 +78,7 @@ const Video = forwardRef<NativeVideo, VideoProps>(function Video(
 
 	return (
 		<Pressable
-			focusable={false}
+			tabIndex={-1}
 			onPress={() => onPointerDown?.({ nativeEvent: { pointerType: "pointer" } } as any)}
 			{...css({ flexGrow: 1, flexShrink: 1 })}
 		>

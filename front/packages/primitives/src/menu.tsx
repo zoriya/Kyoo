@@ -73,7 +73,7 @@ const Menu = <AsProps,>({
 								<MenuContext.Provider value={setOpen}>
 									<Pressable
 										onPress={() => setOpen(false)}
-										focusable={false}
+										tabIndex={-1}
 										{...css({ ...StyleSheet.absoluteFillObject, flexGrow: 1, bg: "transparent" })}
 									/>
 									<View

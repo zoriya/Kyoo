@@ -2,6 +2,7 @@
 	"name": "mobile",
 	"version": "1.0.0",
 	"main": "index.tsx",
+	"sideEffects": false,
 	"scripts": {
 		"dev": "expo start",
 		"android": "expo start --android",
