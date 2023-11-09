@@ -1,3 +1,4 @@
+use cached::proc_macro::cached;
 use json::JsonValue;
 use serde::Serialize;
 use std::{
@@ -12,7 +13,7 @@ use utoipa::ToSchema;
 
 use crate::transcode::Quality;
 
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, ToSchema, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct MediaInfo {
 	/// The sha1 of the video file.
@@ -35,7 +36,7 @@ pub struct MediaInfo {
 	pub chapters: Vec<Chapter>,
 }
 
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, ToSchema, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Video {
 	/// The codec of this stream (defined as the RFC 6381).
@@ -52,7 +53,7 @@ pub struct Video {
 	pub bitrate: u32,
 }
 
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, ToSchema, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Audio {
 	/// The index of this track on the media.
@@ -69,7 +70,7 @@ pub struct Audio {
 	pub is_forced: bool,
 }
 
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, ToSchema, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Subtitle {
 	/// The index of this track on the media.
@@ -90,7 +91,7 @@ pub struct Subtitle {
 	pub link: Option<String>,
 }
 
-#[derive(Serialize, ToSchema)]
+#[derive(Serialize, ToSchema, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Chapter {
 	/// The start time of the chapter (in second from the start of the episode).
@@ -127,6 +128,7 @@ async fn extract(path: String, sha: &String, subs: &Vec<Subtitle>) {
 		.expect("Error running ffmpeg extract");
 }
 
+#[cached(sync_writes = true, time = 30)]
 pub async fn identify(path: String) -> Option<MediaInfo> {
 	let extension_table: HashMap<&str, &str> =
 		HashMap::from([("subrip", "srt"), ("ass", "ass"), ("vtt", "vtt")]);
