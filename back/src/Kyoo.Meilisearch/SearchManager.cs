@@ -17,8 +17,6 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System.ComponentModel.DataAnnotations;
-using System.Dynamic;
-using System.Reflection;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Utils;
@@ -50,49 +48,6 @@ public class SearchManager : ISearchManager
 	{
 		_client = client;
 		_libraryManager = libraryManager;
-
-		IRepository<Movie>.OnCreated += (x) => CreateOrUpdate("items", x, nameof(Movie));
-		IRepository<Movie>.OnEdited += (x) => CreateOrUpdate("items", x, nameof(Movie));
-		IRepository<Movie>.OnDeleted += (x) => _Delete("items", x.Id, nameof(Movie));
-		IRepository<Show>.OnCreated += (x) => CreateOrUpdate("items", x, nameof(Show));
-		IRepository<Show>.OnEdited += (x) => CreateOrUpdate("items", x, nameof(Show));
-		IRepository<Show>.OnDeleted += (x) => _Delete("items", x.Id, nameof(Show));
-		IRepository<Collection>.OnCreated += (x) => CreateOrUpdate("items", x, nameof(Collection));
-		IRepository<Collection>.OnEdited += (x) => CreateOrUpdate("items", x, nameof(Collection));
-		IRepository<Collection>.OnDeleted += (x) => _Delete("items", x.Id, nameof(Collection));
-
-		IRepository<Episode>.OnCreated += (x) => CreateOrUpdate(nameof(Episode), x);
-		IRepository<Episode>.OnEdited += (x) => CreateOrUpdate(nameof(Episode), x);
-		IRepository<Episode>.OnDeleted += (x) => _Delete(nameof(Episode), x.Id);
-
-		IRepository<Studio>.OnCreated += (x) => CreateOrUpdate(nameof(Studio), x);
-		IRepository<Studio>.OnEdited += (x) => CreateOrUpdate(nameof(Studio), x);
-		IRepository<Studio>.OnDeleted += (x) => _Delete(nameof(Studio), x.Id);
-	}
-
-	public Task CreateOrUpdate(string index, IResource item, string? kind = null)
-	{
-		if (kind != null)
-		{
-			dynamic expando = new ExpandoObject();
-			var dictionary = (IDictionary<string, object?>)expando;
-
-			foreach (PropertyInfo property in item.GetType().GetProperties())
-				dictionary.Add(CamelCase.ConvertName(property.Name), property.GetValue(item));
-			dictionary.Add("ref", $"{kind}-{item.Id}");
-			expando.kind = kind;
-			return _client.Index(index).AddDocumentsAsync(new[] { expando });
-		}
-		return _client.Index(index).AddDocumentsAsync(new[] { item });
-	}
-
-	private Task _Delete(string index, int id, string? kind = null)
-	{
-		if (kind != null)
-		{
-			return _client.Index(index).DeleteOneDocumentAsync($"{kind}/{id}");
-		}
-		return _client.Index(index).DeleteOneDocumentAsync(id);
 	}
 
 	private async Task<SearchPage<T>.SearchResult> _Search<T>(string index, string? query,
