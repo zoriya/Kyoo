@@ -12284,12 +12284,12 @@ __metadata:
   linkType: hard
 
 "react-devtools-core@npm:^4.27.2":
-  version: 4.28.0
-  resolution: "react-devtools-core@npm:4.28.0"
+  version: 4.28.5
+  resolution: "react-devtools-core@npm:4.28.5"
   dependencies:
     shell-quote: ^1.6.1
     ws: ^7
-  checksum: a5be506a35ca027ba283f0efa7c0c9a818bd8b9b38b77081960423cc038b9f3ab3014970ed9cdd451b72a949bc279399daedb65931e8a44def0fb49c0a69f0a7
+  checksum: d8e4b32ffcfe1ada5c9f7decffd04afc4707a3d6261953a92b8aed1c8abe15cd57d6eb4ce711f842180a2f5c60d2947209e3c1202f7ea29303ee150c55da59e0
   languageName: node
   linkType: hard
 
