@@ -2,6 +2,7 @@
 	"name": "@kyoo/models",
 	"main": "src/index.ts",
 	"types": "src/index.ts",
+	"sideEffects": false,
 	"packageManager": "yarn@3.2.4",
 	"devDependencies": {
 		"@types/react": "18.2.34",

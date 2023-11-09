@@ -53,12 +53,16 @@ export const A = ({
 					: undefined
 			}
 			textProps={css(
+				[
+					{
+						fontFamily: theme.font.normal,
+						color: theme.link,
+					},
+					{
+						userSelect: "text",
+					} as any,
+				],
 				{
-					fontFamily: theme.font.normal,
-					color: theme.link,
-				},
-				{
-					selectable: true,
 					hrefAttrs: { target },
 					...props,
 				},

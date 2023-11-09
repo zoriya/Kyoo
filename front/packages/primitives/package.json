@@ -2,6 +2,7 @@
 	"name": "@kyoo/primitives",
 	"main": "src/index.ts",
 	"types": "src/index.ts",
+	"sideEffects": false,
 	"packageManager": "yarn@3.2.4",
 	"devDependencies": {
 		"@gorhom/portal": "^1.0.14",
