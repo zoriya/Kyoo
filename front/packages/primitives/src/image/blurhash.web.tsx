@@ -292,7 +292,7 @@ export const BlurhashContainer = ({
 
 	useLayoutEffect(() => {
 		// If the html is empty, it was not SSRed.
-		if (ref.current?.innerHTML === '') setRenderType("client");
+		if (ref.current?.innerHTML === "") setRenderType("client");
 	}, []);
 
 	return (

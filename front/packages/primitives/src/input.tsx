@@ -64,7 +64,12 @@ export const Input = forwardRef<
 				onFocus={() => setFocused(true)}
 				onBlur={() => setFocused(false)}
 				{...css(
-					{ flexGrow: 1, color: (theme: Theme) => theme.colors.white, borderWidth: 0, ...focusReset },
+					{
+						flexGrow: 1,
+						color: (theme: Theme) => theme.colors.white,
+						borderWidth: 0,
+						...focusReset,
+					},
 					props,
 				)}
 			/>
