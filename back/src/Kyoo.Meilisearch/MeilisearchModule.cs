@@ -155,7 +155,7 @@ namespace Kyoo.Meiliseach
 			if (info.NumberOfDocuments == 0)
 			{
 				ILibraryManager database = provider.GetRequiredService<ILibraryManager>();
-				SearchManager search = provider.GetRequiredService<SearchManager>();
+				MeiliSync search = provider.GetRequiredService<MeiliSync>();
 
 				// This is a naive implementation that absolutly does not care about performances.
 				// This will run only once on users that already had a database when they upgrade.
@@ -186,9 +186,9 @@ namespace Kyoo.Meiliseach
 				_configuration.GetValue("MEILI_HOST", "http://meilisearch:7700"),
 				_configuration.GetValue<string?>("MEILI_MASTER_KEY")
 			)).SingleInstance();
-			builder.RegisterType<SearchManager>().AsSelf().As<ISearchManager>()
-				.SingleInstance()
+			builder.RegisterType<MeiliSync>().AsSelf().SingleInstance()
 				.AutoActivate();
+			builder.RegisterType<SearchManager>().As<ISearchManager>().InstancePerLifetimeScope();
 		}
 	}
 }
