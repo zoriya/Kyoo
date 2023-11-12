@@ -27,6 +27,8 @@ using System.Threading.Tasks;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Exceptions;
+using Kyoo.Authentication;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.ValueGeneration;
@@ -42,12 +44,16 @@ namespace Kyoo.Postgresql
 	/// </remarks>
 	public abstract class DatabaseContext : DbContext
 	{
+		private readonly IHttpContextAccessor _accessor;
+
 		/// <summary>
 		/// Calculate the MD5 of a string, can only be used in database context.
 		/// </summary>
 		/// <param name="str">The string to hash</param>
 		/// <returns>The hash</returns>
 		public static string MD5(string str) => throw new NotSupportedException();
+
+		public Guid? CurrentUserId => _accessor.HttpContext?.User.GetId();
 
 		/// <summary>
 		/// All collections of Kyoo. See <see cref="Collection"/>.
@@ -94,6 +100,8 @@ namespace Kyoo.Postgresql
 		// /// </summary>
 		// public DbSet<PeopleRole> PeopleRoles { get; set; }
 
+		public DbSet<WatchInfo> WatchInfo { get; set; }
+
 		/// <summary>
 		/// Add a many to many link between two resources.
 		/// </summary>
@@ -114,18 +122,16 @@ namespace Kyoo.Postgresql
 				});
 		}
 
-		/// <summary>
-		/// The default constructor
-		/// </summary>
-		protected DatabaseContext() { }
+		protected DatabaseContext(IHttpContextAccessor accessor)
+		{
+			_accessor = accessor;
+		}
 
-		/// <summary>
-		/// Create a new <see cref="DatabaseContext"/> using specific options
-		/// </summary>
-		/// <param name="options">The options to use.</param>
-		protected DatabaseContext(DbContextOptions options)
+		protected DatabaseContext(DbContextOptions options, IHttpContextAccessor accessor)
 			: base(options)
-		{ }
+		{
+			_accessor = accessor;
+		}
 
 		/// <summary>
 		/// Get the name of the link table of the two given types.
@@ -295,6 +301,11 @@ namespace Kyoo.Postgresql
 			_HasAddedDate<User>(modelBuilder);
 
 			modelBuilder.Entity<User>().OwnsOne(x => x.Logo);
+
+			modelBuilder.Entity<WatchInfo>()
+				.HasKey(x => new { User = x.UserId, Episode = x.EpisodeId, Movie = x.MovieId });
+			modelBuilder.Entity<WatchInfo>().HasQueryFilter(x => x.UserId == CurrentUserId);
+			modelBuilder.Entity<Movie>().Ignore(x => x.WatchInfo);
 
 			modelBuilder.Entity<Collection>()
 				.HasIndex(x => x.Slug)

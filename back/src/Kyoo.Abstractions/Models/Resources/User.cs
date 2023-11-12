@@ -69,6 +69,12 @@ namespace Kyoo.Abstractions.Models
 		/// </summary>
 		public Image? Logo { get; set; }
 
+		/// <summary>
+		/// The user's watch list.
+		/// </summary>
+		[SerializeIgnore]
+		public ICollection<WatchInfo>? Watchlist { get; set; }
+
 		public User() { }
 
 		[JsonConstructor]

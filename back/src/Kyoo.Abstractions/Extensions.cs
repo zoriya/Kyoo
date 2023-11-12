@@ -39,5 +39,18 @@ namespace Kyoo.Authentication
 			return user.Claims.FirstOrDefault(x => x.Type == Claims.Permissions)?.Value.Split(',')
 				?? Array.Empty<string>();
 		}
+
+		/// <summary>
+		/// Get the id of the current user or null if unlogged or invalid.
+		/// </summary>
+		/// <param name="user">The user.</param>
+		/// <returns>The id of the user or null.</returns>
+		public static Guid? GetId(this ClaimsPrincipal user)
+		{
+			Claim? value = user.FindFirst(Claims.Id);
+			if (Guid.TryParse(value?.Value, out Guid id))
+				return id;
+			return null;
+		}
 	}
 }
