@@ -20,6 +20,8 @@ using System;
 using System.Globalization;
 using EFCore.NamingConventions.Internal;
 using Kyoo.Abstractions.Models;
+using Kyoo.Utils;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query.SqlExpressions;
 using Npgsql;
@@ -47,29 +49,24 @@ namespace Kyoo.Postgresql
 		{
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<Status>();
 			NpgsqlConnection.GlobalTypeMapper.MapEnum<Genre>();
+			NpgsqlConnection.GlobalTypeMapper.MapEnum<WatchStatus>();
 		}
 
 		/// <summary>
-		/// A basic constructor that set default values (query tracker behaviors, mapping enums...)
+		/// Design time constructor (dotnet ef migrations add). Do not use
 		/// </summary>
-		public PostgresContext() { }
+		public PostgresContext()
+			: base(null!)
+		{ }
 
-		/// <summary>
-		/// Create a new <see cref="PostgresContext"/> using specific options
-		/// </summary>
-		/// <param name="options">The options to use.</param>
-		public PostgresContext(DbContextOptions options)
-			: base(options)
+		public PostgresContext(DbContextOptions options, IHttpContextAccessor accessor)
+			: base(options, accessor)
 		{
 			_skipConfigure = true;
 		}
 
-		/// <summary>
-		/// A basic constructor that set default values (query tracker behaviors, mapping enums...)
-		/// </summary>
-		/// <param name="connection">The connection string to use</param>
-		/// <param name="debugMode">Is this instance in debug mode?</param>
-		public PostgresContext(string connection, bool debugMode)
+		public PostgresContext(string connection, bool debugMode, IHttpContextAccessor accessor)
+			: base(accessor)
 		{
 			_debugMode = debugMode;
 		}
@@ -99,6 +96,7 @@ namespace Kyoo.Postgresql
 		{
 			modelBuilder.HasPostgresEnum<Status>();
 			modelBuilder.HasPostgresEnum<Genre>();
+			modelBuilder.HasPostgresEnum<WatchStatus>();
 
 			modelBuilder.HasDbFunction(typeof(DatabaseContext).GetMethod(nameof(MD5))!)
 				.HasTranslation(args =>

@@ -19,6 +19,8 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using EntityFrameworkCore.Projectables;
 using Kyoo.Abstractions.Controllers;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Utils;
@@ -143,6 +145,17 @@ namespace Kyoo.Abstractions.Models
 			Direct = $"/video/movie/{Slug}/direct",
 			Hls = $"/video/movie/{Slug}/master.m3u8",
 		};
+
+		[SerializeIgnore] public ICollection<WatchInfo> Watched { get; set; }
+
+		/// <summary>
+		/// Metadata of what an user as started/planned to watch.
+		/// </summary>
+		[Projectable(UseMemberBody = nameof(_WatchInfo), OnlyOnInclude = true)]
+		[LoadableRelation] public WatchInfo? WatchInfo { get; set; }
+
+		// There is a global query filter to filter by user so we just need to do single.
+		private WatchInfo? _WatchInfo => Watched.FirstOrDefault();
 
 		/// <inheritdoc />
 		public void OnMerge(object merged)
