@@ -28,7 +28,10 @@
 		<Rule Id="SA1027" Action="None"/>         <!-- UseTabsCorrectly (smarts tabs are broken). TODO find a way to enable smart tabs -->
 	</Rules>
 	<Rules AnalyzerId="StyleCop.Analyzers" RuleNamespace="StyleCop.CSharp.LayoutRules">
+		<Rule Id="SA1402" Action="None"/>         <!-- SingleClassPerFile -->
+		<Rule Id="SA1649" Action="None"/>         <!-- Class name must be filename -->
 		<Rule Id="SA1503" Action="None"/>         <!-- BracesMustNotBeOmitted -->
+		<Rule Id="SA1512" Action="None"/>         <!-- Let me comment -->
 		<Rule Id="SA1520" Action="None"/>         <!-- UseBracesConsistently -->
 		<Rule Id="SA1515" Action="None"/>         <!-- SingleLineCommentMustBePrecededByBlankLine -->
 		<Rule Id="SA1513" Action="None"/>         <!-- ClosingBraceMustBeFollowedByBlankLine -->
