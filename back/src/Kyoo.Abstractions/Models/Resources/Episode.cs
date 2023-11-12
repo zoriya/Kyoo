@@ -238,6 +238,17 @@ namespace Kyoo.Abstractions.Models
 				|| (x.SeasonNumber == SeasonNumber && x.EpisodeNumber > EpisodeNumber)
 			);
 
+		[SerializeIgnore] public ICollection<EpisodeWatchInfo> Watched { get; set; }
+
+		/// <summary>
+		/// Metadata of what an user as started/planned to watch.
+		/// </summary>
+		[Projectable(UseMemberBody = nameof(_WatchInfo), OnlyOnInclude = true)]
+		[LoadableRelation] public EpisodeWatchInfo? WatchInfo { get; set; }
+
+		// There is a global query filter to filter by user so we just need to do single.
+		private EpisodeWatchInfo? _WatchInfo => Watched.FirstOrDefault();
+
 		/// <summary>
 		/// Links to watch this episode.
 		/// </summary>

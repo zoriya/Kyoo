@@ -17,6 +17,8 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.Linq;
+using EntityFrameworkCore.Projectables;
 using Kyoo.Abstractions.Models.Attributes;
 
 namespace Kyoo.Abstractions.Models
@@ -50,7 +52,46 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// Metadata of what an user as started/planned to watch.
 	/// </summary>
-	public class WatchInfo : IAddedDate
+	public class MovieWatchInfo : IAddedDate
+	{
+		/// <summary>
+		/// The ID of the user that started watching this episode.
+		/// </summary>
+		[SerializeIgnore] public Guid UserId { get; set; }
+
+		/// <summary>
+		/// The user that started watching this episode.
+		/// </summary>
+		[SerializeIgnore] public User User { get; set; }
+
+		/// <summary>
+		/// The ID of the movie started.
+		/// </summary>
+		[SerializeIgnore] public Guid MovieId { get; set; }
+
+		/// <summary>
+		/// The <see cref="Movie"/> started.
+		/// </summary>
+		[SerializeIgnore] public Movie Movie { get; set; }
+
+		/// <inheritdoc/>
+		public DateTime AddedDate { get; set; }
+
+		/// <summary>
+		/// Has the user started watching, is it planned?
+		/// </summary>
+		public WatchStatus Status { get; set; }
+
+		/// <summary>
+		/// Where the player has stopped watching the movie (in seconds).
+		/// </summary>
+		/// <remarks>
+		/// Null if the status is not Watching.
+		/// </remarks>
+		public int? WatchedTime { get; set; }
+	}
+
+	public class EpisodeWatchInfo : IAddedDate
 	{
 		/// <summary>
 		/// The ID of the user that started watching this episode.
@@ -70,20 +111,10 @@ namespace Kyoo.Abstractions.Models
 		/// <summary>
 		/// The <see cref="Episode"/> started.
 		/// </summary>
-		[SerializeIgnore] public Episode? Episode { get; set; }
-
-		/// <summary>
-		/// The ID of the movie started.
-		/// </summary>
-		[SerializeIgnore] public Guid? MovieId { get; set; }
-
-		/// <summary>
-		/// The <see cref="Movie"/> started.
-		/// </summary>
-		[SerializeIgnore] public Movie? Movie { get; set; }
+		[SerializeIgnore] public Episode Episode { get; set; }
 
 		/// <inheritdoc/>
-		[SerializeIgnore] public DateTime AddedDate { get; set; }
+		public DateTime AddedDate { get; set; }
 
 		/// <summary>
 		/// Has the user started watching, is it planned?
@@ -97,5 +128,57 @@ namespace Kyoo.Abstractions.Models
 		/// Null if the status is not Watching.
 		/// </remarks>
 		public int? WatchedTime { get; set; }
+	}
+
+	public class ShowWatchInfo : IAddedDate
+	{
+		/// <summary>
+		/// The ID of the user that started watching this episode.
+		/// </summary>
+		[SerializeIgnore] public Guid UserId { get; set; }
+
+		/// <summary>
+		/// The user that started watching this episode.
+		/// </summary>
+		[SerializeIgnore] public User User { get; set; }
+
+		/// <summary>
+		/// The ID of the show started.
+		/// </summary>
+		[SerializeIgnore] public Guid ShowId { get; set; }
+
+		/// <summary>
+		/// The <see cref="Show"/> started.
+		/// </summary>
+		[SerializeIgnore] public Show Show { get; set; }
+
+		/// <inheritdoc/>
+		public DateTime AddedDate { get; set; }
+
+		/// <summary>
+		/// Has the user started watching, is it planned?
+		/// </summary>
+		public WatchStatus Status { get; set; }
+
+		/// <summary>
+		/// The ID of the episode started.
+		/// </summary>
+		[SerializeIgnore] public Guid NextEpisodeId { get; set; }
+
+		/// <summary>
+		/// The <see cref="Show"/> started.
+		/// </summary>
+		public Episode? NextEpisode { get; set; }
+
+		/// <summary>
+		/// Where the player has stopped watching the episode (in seconds).
+		/// </summary>
+		/// <remarks>
+		/// Null if the status is not Watching or if the next episode is not started.
+		/// </remarks>
+		[Projectable(UseMemberBody = nameof(_WatchedTime), NullConditionalRewriteSupport = NullConditionalRewriteSupport.Ignore)]
+		public int? WatchedTime { get; set; }
+
+		private int? _WatchedTime => NextEpisode?.Watched.FirstOrDefault()?.WatchedTime;
 	}
 }

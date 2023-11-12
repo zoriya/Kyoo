@@ -100,7 +100,11 @@ namespace Kyoo.Postgresql
 		// /// </summary>
 		// public DbSet<PeopleRole> PeopleRoles { get; set; }
 
-		public DbSet<WatchInfo> WatchInfo { get; set; }
+		public DbSet<MovieWatchInfo> MovieWatchInfo { get; set; }
+
+		public DbSet<ShowWatchInfo> ShowWatchInfo { get; set; }
+
+		public DbSet<EpisodeWatchInfo> EpisodeWatchInfo { get; set; }
 
 		/// <summary>
 		/// Add a many to many link between two resources.
@@ -302,10 +306,24 @@ namespace Kyoo.Postgresql
 
 			modelBuilder.Entity<User>().OwnsOne(x => x.Logo);
 
-			modelBuilder.Entity<WatchInfo>()
-				.HasKey(x => new { User = x.UserId, Episode = x.EpisodeId, Movie = x.MovieId });
-			modelBuilder.Entity<WatchInfo>().HasQueryFilter(x => x.UserId == CurrentUserId);
+			modelBuilder.Entity<MovieWatchInfo>()
+				.HasKey(x => new { User = x.UserId, Movie = x.MovieId });
+			modelBuilder.Entity<ShowWatchInfo>()
+				.HasKey(x => new { User = x.UserId, Show = x.ShowId });
+			modelBuilder.Entity<EpisodeWatchInfo>()
+				.HasKey(x => new { User = x.UserId, Episode = x.EpisodeId });
+
+			modelBuilder.Entity<MovieWatchInfo>().HasQueryFilter(x => x.UserId == CurrentUserId);
+			modelBuilder.Entity<ShowWatchInfo>().HasQueryFilter(x => x.UserId == CurrentUserId);
+			modelBuilder.Entity<EpisodeWatchInfo>().HasQueryFilter(x => x.UserId == CurrentUserId);
+
+			_HasAddedDate<MovieWatchInfo>(modelBuilder);
+			_HasAddedDate<ShowWatchInfo>(modelBuilder);
+			_HasAddedDate<EpisodeWatchInfo>(modelBuilder);
+
 			modelBuilder.Entity<Movie>().Ignore(x => x.WatchInfo);
+			modelBuilder.Entity<Show>().Ignore(x => x.WatchInfo);
+			modelBuilder.Entity<Episode>().Ignore(x => x.WatchInfo);
 
 			modelBuilder.Entity<Collection>()
 				.HasIndex(x => x.Slug)
