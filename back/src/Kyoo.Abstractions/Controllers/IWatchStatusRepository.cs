@@ -26,7 +26,7 @@ namespace Kyoo.Abstractions.Controllers;
 /// <summary>
 /// A local repository to handle watched items
 /// </summary>
-public interface IWatchItemsRepository : IBaseRepository
+public interface IWatchStatusRepository
 {
 	// /// <summary>
 	// /// The event handler type for all events of this repository.
@@ -53,4 +53,40 @@ public interface IWatchItemsRepository : IBaseRepository
 	/// is <see cref="WatchStatus.Watching"/></param>
 	/// <returns>The movie's status</returns>
 	Task<MovieWatchStatus> SetMovieStatus(int movieId, int userId, WatchStatus status, int? watchedTime);
+
+	/// <summary>
+	/// Get the watch status of a show.
+	/// </summary>
+	/// <param name="where">The show selector.</param>
+	/// <param name="userId">The id of the user.</param>
+	/// <returns>The show's status</returns>
+	Task<ShowWatchStatus?> GetShowStatus(Expression<Func<Show, bool>> where, int userId);
+
+	/// <summary>
+	/// Set the watch status of a show.
+	/// </summary>
+	/// <param name="showId">The id of the movie.</param>
+	/// <param name="userId">The id of the user.</param>
+	/// <param name="status">The new status.</param>
+	/// <returns>The shows's status</returns>
+	Task<ShowWatchStatus> SetShowStatus(int showId, int userId, WatchStatus status);
+
+	/// <summary>
+	/// Get the watch status of an episode.
+	/// </summary>
+	/// <param name="where">The episode selector.</param>
+	/// <param name="userId">The id of the user.</param>
+	/// <returns>The episode's status</returns>
+	Task<EpisodeWatchStatus?> GetEpisodeStatus(Expression<Func<Episode, bool>> where, int userId);
+
+	/// <summary>
+	/// Set the watch status of an episode.
+	/// </summary>
+	/// <param name="episodeId">The id of the episode.</param>
+	/// <param name="userId">The id of the user.</param>
+	/// <param name="status">The new status.</param>
+	/// <param name="watchedTime">Where the user has stopped watching. Only usable if Status
+	/// is <see cref="WatchStatus.Watching"/></param>
+	/// <returns>The episode's status</returns>
+	Task<EpisodeWatchStatus> SetEpisodeStatus(int episodeId, int userId, WatchStatus status, int? watchedTime);
 }

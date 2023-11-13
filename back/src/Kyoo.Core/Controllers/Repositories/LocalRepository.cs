@@ -257,13 +257,16 @@ namespace Kyoo.Core.Controllers
 		/// <inheritdoc />
 		public virtual Task<T?> GetOrDefault(Filter<T>? filter,
 			Include<T>? include = default,
-			Sort<T>? sortBy = default)
+			Sort<T>? sortBy = default,
+			bool reverse = false)
 		{
-			return Sort(
-					AddIncludes(Database.Set<T>(), include),
-					sortBy
-				)
-				.FirstOrDefaultAsync(ParseFilter(filter));
+			IQueryable<T> query = Sort(
+				AddIncludes(Database.Set<T>(), include),
+				sortBy
+			);
+			if (reverse)
+				query = query.Reverse();
+			return query.FirstOrDefaultAsync(ParseFilter(filter));
 		}
 
 		/// <inheritdoc/>

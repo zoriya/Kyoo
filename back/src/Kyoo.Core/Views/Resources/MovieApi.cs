@@ -170,7 +170,7 @@ namespace Kyoo.Core.Api
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
 		public async Task<MovieWatchStatus?> GetWatchStatus(Identifier identifier)
 		{
-			return await _libraryManager.WatchItems.GetMovieStatus(
+			return await _libraryManager.WatchStatus.GetMovieStatus(
 				identifier.IsSame<Movie>(),
 				User.GetId()!.Value
 			);
@@ -202,7 +202,7 @@ namespace Kyoo.Core.Api
 				id => Task.FromResult(id),
 				async slug => (await _libraryManager.Movies.Get(slug)).Id
 			);
-			return await _libraryManager.WatchItems.SetMovieStatus(
+			return await _libraryManager.WatchStatus.SetMovieStatus(
 				id,
 				User.GetId()!.Value,
 				status,
