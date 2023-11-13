@@ -52,7 +52,7 @@ namespace Kyoo.Abstractions.Models
 	/// <summary>
 	/// Metadata of what an user as started/planned to watch.
 	/// </summary>
-	public class MovieWatchInfo : IAddedDate
+	public class MovieWatchStatus : IAddedDate
 	{
 		/// <summary>
 		/// The ID of the user that started watching this episode.
@@ -91,7 +91,7 @@ namespace Kyoo.Abstractions.Models
 		public int? WatchedTime { get; set; }
 	}
 
-	public class EpisodeWatchInfo : IAddedDate
+	public class EpisodeWatchStatus : IAddedDate
 	{
 		/// <summary>
 		/// The ID of the user that started watching this episode.
@@ -130,7 +130,7 @@ namespace Kyoo.Abstractions.Models
 		public int? WatchedTime { get; set; }
 	}
 
-	public class ShowWatchInfo : IAddedDate
+	public class ShowWatchStatus : IAddedDate
 	{
 		/// <summary>
 		/// The ID of the user that started watching this episode.
