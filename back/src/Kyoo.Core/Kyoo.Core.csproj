@@ -10,6 +10,7 @@
 		<PackageReference Include="Blurhash.SkiaSharp" Version="2.0.0" />
 		<PackageReference Include="Dapper" Version="2.1.24" />
 		<PackageReference Include="InterpolatedSql.Dapper" Version="2.1.0" />
+		<PackageReference Include="FlexLabs.EntityFrameworkCore.Upsert" Version="7.0.0" />
 		<PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.9" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.12" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

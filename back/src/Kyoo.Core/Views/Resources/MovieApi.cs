@@ -24,6 +24,7 @@ using Kyoo.Abstractions.Models;
 using Kyoo.Abstractions.Models.Attributes;
 using Kyoo.Abstractions.Models.Permissions;
 using Kyoo.Abstractions.Models.Utils;
+using Kyoo.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using static Kyoo.Abstractions.Models.Utils.Constants;
@@ -118,7 +119,7 @@ namespace Kyoo.Core.Api
 		/// <remarks>
 		/// List the collections that contain this show.
 		/// </remarks>
-		/// <param name="identifier">The ID or slug of the <see cref="Show"/>.</param>
+		/// <param name="identifier">The ID or slug of the <see cref="Movie"/>.</param>
 		/// <param name="sortBy">A key to sort collections by.</param>
 		/// <param name="filter">An optional list of filters.</param>
 		/// <param name="pagination">The number of collections to return.</param>
@@ -148,6 +149,65 @@ namespace Kyoo.Core.Api
 			if (!resources.Any() && await _libraryManager.Movies.GetOrDefault(identifier.IsSame<Movie>()) == null)
 				return NotFound();
 			return Page(resources, pagination.Limit);
+		}
+
+		/// <summary>
+		/// Get watch status
+		/// </summary>
+		/// <remarks>
+		/// Get when an item has been wathed and if it was watched.
+		/// </remarks>
+		/// <param name="identifier">The ID or slug of the <see cref="Movie"/>.</param>
+		/// <returns>The status.</returns>
+		/// <response code="204">This movie does not have a specific status.</response>
+		/// <response code="404">No movie with the given ID or slug could be found.</response>
+		[HttpGet("{identifier:id}/watchStatus")]
+		[HttpGet("{identifier:id}/watchStatus", Order = AlternativeRoute)]
+		[PartialPermission(Kind.Read)]
+		[UserOnly]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task<MovieWatchStatus?> GetWatchStatus(Identifier identifier)
+		{
+			return await _libraryManager.WatchItems.GetMovieStatus(
+				identifier.IsSame<Movie>(),
+				User.GetId()!.Value
+			);
+		}
+
+		/// <summary>
+		/// Set watch status
+		/// </summary>
+		/// <remarks>
+		/// Set when an item has been wathed and if it was watched.
+		/// </remarks>
+		/// <param name="identifier">The ID or slug of the <see cref="Movie"/>.</param>
+		/// <param name="status">The new watch status.</param>
+		/// <param name="watchedTime">Where the user stopped watching.</param>
+		/// <returns>The newly set status.</returns>
+		/// <response code="200">The status has been set</response>
+		/// <response code="400">WatchedTime can't be specified if status is not watching.</response>
+		/// <response code="404">No movie with the given ID or slug could be found.</response>
+		[HttpGet("{identifier:id}/watchStatus")]
+		[HttpGet("{identifier:id}/watchStatus", Order = AlternativeRoute)]
+		[PartialPermission(Kind.Read)]
+		[UserOnly]
+		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status400BadRequest)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task<MovieWatchStatus> SetWatchStatus(Identifier identifier, WatchStatus status, int? watchedTime)
+		{
+			int id = await identifier.Match(
+				id => Task.FromResult(id),
+				async slug => (await _libraryManager.Movies.Get(slug)).Id
+			);
+			return await _libraryManager.WatchItems.SetMovieStatus(
+				id,
+				User.GetId()!.Value,
+				status,
+				watchedTime
+			);
 		}
 	}
 }

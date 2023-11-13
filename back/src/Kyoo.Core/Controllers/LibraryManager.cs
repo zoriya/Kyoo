@@ -31,6 +31,8 @@ namespace Kyoo.Core.Controllers
 
 		public LibraryManager(
 			IRepository<ILibraryItem> libraryItemRepository,
+			IRepository<INews> newsRepository,
+			IWatchItemsRepository watchItemsRepository,
 			IRepository<Collection> collectionRepository,
 			IRepository<Movie> movieRepository,
 			IRepository<Show> showRepository,
@@ -41,6 +43,8 @@ namespace Kyoo.Core.Controllers
 			IRepository<User> userRepository)
 		{
 			LibraryItems = libraryItemRepository;
+			News = newsRepository;
+			WatchItems = watchItemsRepository;
 			Collections = collectionRepository;
 			Movies = movieRepository;
 			Shows = showRepository;
@@ -53,6 +57,8 @@ namespace Kyoo.Core.Controllers
 			_repositories = new IBaseRepository[]
 			{
 				LibraryItems,
+				News,
+				WatchItems,
 				Collections,
 				Movies,
 				Shows,
@@ -66,6 +72,12 @@ namespace Kyoo.Core.Controllers
 
 		/// <inheritdoc />
 		public IRepository<ILibraryItem> LibraryItems { get; }
+
+		/// <inheritdoc />
+		public IRepository<INews> News { get; }
+
+		/// <inheritdoc />
+		public IWatchItemsRepository WatchItems { get; }
 
 		/// <inheritdoc />
 		public IRepository<Collection> Collections { get; }
