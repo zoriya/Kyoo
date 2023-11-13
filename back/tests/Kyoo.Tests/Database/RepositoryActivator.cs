@@ -77,6 +77,8 @@ namespace Kyoo.Tests.Database
 
 			LibraryManager = new LibraryManager(
 				libraryItem,
+				null,
+				null,
 				collection,
 				movies,
 				show,

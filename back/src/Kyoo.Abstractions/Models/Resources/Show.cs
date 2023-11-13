@@ -178,6 +178,15 @@ namespace Kyoo.Abstractions.Models
 			.ThenBy(x => x.EpisodeNumber)
 			.FirstOrDefault();
 
+		/// <summary>
+		/// The number of episodes in this season.
+		/// </summary>
+		[Projectable(UseMemberBody = nameof(_EpisodesCount), OnlyOnInclude = true)]
+		[NotMapped]
+		public int EpisodesCount { get; set; }
+
+		private int _EpisodesCount => Episodes!.Count;
+
 		[SerializeIgnore] public ICollection<ShowWatchStatus> Watched { get; set; }
 
 		/// <summary>

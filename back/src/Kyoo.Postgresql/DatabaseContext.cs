@@ -100,11 +100,11 @@ namespace Kyoo.Postgresql
 		// /// </summary>
 		// public DbSet<PeopleRole> PeopleRoles { get; set; }
 
-		public DbSet<MovieWatchStatus> MovieWatchInfo { get; set; }
+		public DbSet<MovieWatchStatus> MovieWatchStatus { get; set; }
 
-		public DbSet<ShowWatchStatus> ShowWatchInfo { get; set; }
+		public DbSet<ShowWatchStatus> ShowWatchStatus { get; set; }
 
-		public DbSet<EpisodeWatchStatus> EpisodeWatchInfo { get; set; }
+		public DbSet<EpisodeWatchStatus> EpisodeWatchStatus { get; set; }
 
 		/// <summary>
 		/// Add a many to many link between two resources.
