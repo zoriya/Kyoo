@@ -41,7 +41,7 @@ namespace Kyoo.Abstractions.Controllers
 		/// <summary>
 		/// The repository that handle watched items.
 		/// </summary>
-		IWatchItemsRepository WatchItems { get; }
+		IWatchStatusRepository WatchStatus { get; }
 
 		/// <summary>
 		/// The repository that handle collections.

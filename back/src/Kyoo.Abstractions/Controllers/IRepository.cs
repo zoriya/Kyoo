@@ -88,10 +88,12 @@ namespace Kyoo.Abstractions.Controllers
 		/// <param name="filter">A predicate to filter the resource.</param>
 		/// <param name="include">The related fields to include.</param>
 		/// <param name="sortBy">A custom sort method to handle cases where multiples items match the filters.</param>
+		/// <param name="reverse">Reverse the sort.</param>
 		/// <returns>The resource found</returns>
 		Task<T?> GetOrDefault(Filter<T>? filter,
 			Include<T>? include = default,
-			Sort<T>? sortBy = default);
+			Sort<T>? sortBy = default,
+			bool reverse = false);
 
 		/// <summary>
 		/// Search for resources with the database.
