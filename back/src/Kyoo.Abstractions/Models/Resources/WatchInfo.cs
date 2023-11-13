@@ -17,6 +17,7 @@
 // along with Kyoo. If not, see <https://www.gnu.org/licenses/>.
 
 using System;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using EntityFrameworkCore.Projectables;
 using Kyoo.Abstractions.Models.Attributes;
@@ -89,6 +90,14 @@ namespace Kyoo.Abstractions.Models
 		/// Null if the status is not Watching.
 		/// </remarks>
 		public int? WatchedTime { get; set; }
+
+		/// <summary>
+		/// Where the player has stopped watching the movie (in percentage between 0 and 100).
+		/// </summary>
+		/// <remarks>
+		/// Null if the status is not Watching.
+		/// </remarks>
+		public int? WatchedPercent { get; set; }
 	}
 
 	public class EpisodeWatchStatus : IAddedDate
@@ -128,6 +137,14 @@ namespace Kyoo.Abstractions.Models
 		/// Null if the status is not Watching.
 		/// </remarks>
 		public int? WatchedTime { get; set; }
+
+		/// <summary>
+		/// Where the player has stopped watching the episode (in percentage between 0 and 100).
+		/// </summary>
+		/// <remarks>
+		/// Null if the status is not Watching or if the next episode is not started.
+		/// </remarks>
+		public int? WatchedPercent { get; set; }
 	}
 
 	public class ShowWatchStatus : IAddedDate
@@ -161,6 +178,11 @@ namespace Kyoo.Abstractions.Models
 		public WatchStatus Status { get; set; }
 
 		/// <summary>
+		/// The numder of episodes the user has not seen.
+		/// </summary>
+		public int UnseenEpisodesCount { get; set; }
+
+		/// <summary>
 		/// The ID of the episode started.
 		/// </summary>
 		[SerializeIgnore] public Guid NextEpisodeId { get; set; }
@@ -177,8 +199,21 @@ namespace Kyoo.Abstractions.Models
 		/// Null if the status is not Watching or if the next episode is not started.
 		/// </remarks>
 		[Projectable(UseMemberBody = nameof(_WatchedTime), NullConditionalRewriteSupport = NullConditionalRewriteSupport.Ignore)]
+		[NotMapped]
 		public int? WatchedTime { get; set; }
 
 		private int? _WatchedTime => NextEpisode?.Watched.FirstOrDefault()?.WatchedTime;
+
+		/// <summary>
+		/// Where the player has stopped watching the episode (in percentage between 0 and 100).
+		/// </summary>
+		/// <remarks>
+		/// Null if the status is not Watching or if the next episode is not started.
+		/// </remarks>
+		[Projectable(UseMemberBody = nameof(_WatchedPercent), NullConditionalRewriteSupport = NullConditionalRewriteSupport.Ignore)]
+		[NotMapped]
+		public int? WatchedPercent { get; set; }
+
+		private int? _WatchedPercent => NextEpisode?.Watched.FirstOrDefault()?.WatchedPercent;
 	}
 }

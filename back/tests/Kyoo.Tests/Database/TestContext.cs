@@ -49,7 +49,7 @@ namespace Kyoo.Tests
 				.UseNpgsql(Connection)
 				.Options;
 
-			using PostgresContext context = new(_options);
+			using PostgresContext context = new(_options, null);
 			context.Database.Migrate();
 
 			using NpgsqlConnection conn = (NpgsqlConnection)context.Database.GetDbConnection();
@@ -62,7 +62,7 @@ namespace Kyoo.Tests
 
 		public void Dispose()
 		{
-			using PostgresContext context = new(_options);
+			using PostgresContext context = new(_options, null);
 			context.Database.EnsureDeleted();
 		}
 	}
@@ -119,7 +119,7 @@ namespace Kyoo.Tests
 
 		public override DatabaseContext New()
 		{
-			return new PostgresContext(_context);
+			return new PostgresContext(_context, null);
 		}
 
 		public override DbConnection NewConnection()

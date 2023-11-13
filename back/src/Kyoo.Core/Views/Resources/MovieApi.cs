@@ -163,7 +163,6 @@ namespace Kyoo.Core.Api
 		/// <response code="404">No movie with the given ID or slug could be found.</response>
 		[HttpGet("{identifier:id}/watchStatus")]
 		[HttpGet("{identifier:id}/watchStatus", Order = AlternativeRoute)]
-		[PartialPermission(Kind.Read)]
 		[UserOnly]
 		[ProducesResponseType(StatusCodes.Status200OK)]
 		[ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -187,16 +186,17 @@ namespace Kyoo.Core.Api
 		/// <param name="watchedTime">Where the user stopped watching.</param>
 		/// <returns>The newly set status.</returns>
 		/// <response code="200">The status has been set</response>
+		/// <response code="204">The status was not considered impactfull enough to be saved (less then 5% of watched for example).</response>
 		/// <response code="400">WatchedTime can't be specified if status is not watching.</response>
 		/// <response code="404">No movie with the given ID or slug could be found.</response>
-		[HttpGet("{identifier:id}/watchStatus")]
-		[HttpGet("{identifier:id}/watchStatus", Order = AlternativeRoute)]
-		[PartialPermission(Kind.Read)]
+		[HttpPost("{identifier:id}/watchStatus")]
+		[HttpPost("{identifier:id}/watchStatus", Order = AlternativeRoute)]
 		[UserOnly]
 		[ProducesResponseType(StatusCodes.Status200OK)]
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
 		[ProducesResponseType(StatusCodes.Status400BadRequest)]
 		[ProducesResponseType(StatusCodes.Status404NotFound)]
-		public async Task<MovieWatchStatus> SetWatchStatus(Identifier identifier, WatchStatus status, int? watchedTime)
+		public async Task<MovieWatchStatus?> SetWatchStatus(Identifier identifier, WatchStatus status, int? watchedTime)
 		{
 			int id = await identifier.Match(
 				id => Task.FromResult(id),
@@ -207,6 +207,29 @@ namespace Kyoo.Core.Api
 				User.GetId()!.Value,
 				status,
 				watchedTime
+			);
+		}
+
+		/// <summary>
+		/// Delete watch status
+		/// </summary>
+		/// <remarks>
+		/// Delete watch status (to rewatch for example).
+		/// </remarks>
+		/// <param name="identifier">The ID or slug of the <see cref="Movie"/>.</param>
+		/// <returns>The newly set status.</returns>
+		/// <response code="204">The status has been deleted.</response>
+		/// <response code="404">No movie with the given ID or slug could be found.</response>
+		[HttpDelete("{identifier:id}/watchStatus")]
+		[HttpDelete("{identifier:id}/watchStatus", Order = AlternativeRoute)]
+		[UserOnly]
+		[ProducesResponseType(StatusCodes.Status204NoContent)]
+		[ProducesResponseType(StatusCodes.Status404NotFound)]
+		public async Task DeleteWatchStatus(Identifier identifier)
+		{
+			await _libraryManager.WatchStatus.DeleteMovieStatus(
+				identifier.IsSame<Movie>(),
+				User.GetId()!.Value
 			);
 		}
 	}
