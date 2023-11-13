@@ -79,6 +79,11 @@ namespace Kyoo.Abstractions.Models
 		public DateTime AddedDate { get; set; }
 
 		/// <summary>
+		/// The date at which this item was played.
+		/// </summary>
+		public DateTime? PlayedDate { get; set; }
+
+		/// <summary>
 		/// Has the user started watching, is it planned?
 		/// </summary>
 		public WatchStatus Status { get; set; }
@@ -126,6 +131,11 @@ namespace Kyoo.Abstractions.Models
 		public DateTime AddedDate { get; set; }
 
 		/// <summary>
+		/// The date at which this item was played.
+		/// </summary>
+		public DateTime? PlayedDate { get; set; }
+
+		/// <summary>
 		/// Has the user started watching, is it planned?
 		/// </summary>
 		public WatchStatus Status { get; set; }
@@ -171,6 +181,11 @@ namespace Kyoo.Abstractions.Models
 
 		/// <inheritdoc/>
 		public DateTime AddedDate { get; set; }
+
+		/// <summary>
+		/// The date at which this item was played.
+		/// </summary>
+		public DateTime? PlayedDate { get; set; }
 
 		/// <summary>
 		/// Has the user started watching, is it planned?
