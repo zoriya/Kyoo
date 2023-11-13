@@ -95,7 +95,7 @@ public class WatchStatusRepository : IWatchStatusRepository
 			MovieId = movieId,
 			Status = status,
 			WatchedTime = watchedTime,
-			AddedDate = DateTime.UtcNow
+			PlayedDate = DateTime.UtcNow
 		};
 		await _database.MovieWatchStatus.Upsert(ret)
 			.UpdateIf(x => !(status == WatchStatus.Watching && x.Status == WatchStatus.Completed))
@@ -150,7 +150,7 @@ public class WatchStatusRepository : IWatchStatusRepository
 				)
 				: null,
 			UnseenEpisodesCount = unseenEpisodeCount,
-			AddedDate = DateTime.UtcNow
+			PlayedDate = DateTime.UtcNow
 		};
 		await _database.ShowWatchStatus.Upsert(ret)
 			.UpdateIf(x => !(status == WatchStatus.Watching && x.Status == WatchStatus.Completed))
@@ -213,7 +213,7 @@ public class WatchStatusRepository : IWatchStatusRepository
 			Status = status,
 			WatchedTime = watchedTime,
 			WatchedPercent = percent,
-			AddedDate = DateTime.UtcNow
+			PlayedDate = DateTime.UtcNow
 		};
 		await _database.EpisodeWatchStatus.Upsert(ret)
 			.UpdateIf(x => !(status == WatchStatus.Watching && x.Status == WatchStatus.Completed))
