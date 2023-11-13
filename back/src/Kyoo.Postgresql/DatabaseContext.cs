@@ -100,11 +100,11 @@ namespace Kyoo.Postgresql
 		// /// </summary>
 		// public DbSet<PeopleRole> PeopleRoles { get; set; }
 
-		public DbSet<MovieWatchInfo> MovieWatchInfo { get; set; }
+		public DbSet<MovieWatchStatus> MovieWatchInfo { get; set; }
 
-		public DbSet<ShowWatchInfo> ShowWatchInfo { get; set; }
+		public DbSet<ShowWatchStatus> ShowWatchInfo { get; set; }
 
-		public DbSet<EpisodeWatchInfo> EpisodeWatchInfo { get; set; }
+		public DbSet<EpisodeWatchStatus> EpisodeWatchInfo { get; set; }
 
 		/// <summary>
 		/// Add a many to many link between two resources.
@@ -306,24 +306,24 @@ namespace Kyoo.Postgresql
 
 			modelBuilder.Entity<User>().OwnsOne(x => x.Logo);
 
-			modelBuilder.Entity<MovieWatchInfo>()
+			modelBuilder.Entity<MovieWatchStatus>()
 				.HasKey(x => new { User = x.UserId, Movie = x.MovieId });
-			modelBuilder.Entity<ShowWatchInfo>()
+			modelBuilder.Entity<ShowWatchStatus>()
 				.HasKey(x => new { User = x.UserId, Show = x.ShowId });
-			modelBuilder.Entity<EpisodeWatchInfo>()
+			modelBuilder.Entity<EpisodeWatchStatus>()
 				.HasKey(x => new { User = x.UserId, Episode = x.EpisodeId });
 
-			modelBuilder.Entity<MovieWatchInfo>().HasQueryFilter(x => x.UserId == CurrentUserId);
-			modelBuilder.Entity<ShowWatchInfo>().HasQueryFilter(x => x.UserId == CurrentUserId);
-			modelBuilder.Entity<EpisodeWatchInfo>().HasQueryFilter(x => x.UserId == CurrentUserId);
+			modelBuilder.Entity<MovieWatchStatus>().HasQueryFilter(x => x.UserId == CurrentUserId);
+			modelBuilder.Entity<ShowWatchStatus>().HasQueryFilter(x => x.UserId == CurrentUserId);
+			modelBuilder.Entity<EpisodeWatchStatus>().HasQueryFilter(x => x.UserId == CurrentUserId);
 
-			_HasAddedDate<MovieWatchInfo>(modelBuilder);
-			_HasAddedDate<ShowWatchInfo>(modelBuilder);
-			_HasAddedDate<EpisodeWatchInfo>(modelBuilder);
+			_HasAddedDate<MovieWatchStatus>(modelBuilder);
+			_HasAddedDate<ShowWatchStatus>(modelBuilder);
+			_HasAddedDate<EpisodeWatchStatus>(modelBuilder);
 
-			modelBuilder.Entity<Movie>().Ignore(x => x.WatchInfo);
-			modelBuilder.Entity<Show>().Ignore(x => x.WatchInfo);
-			modelBuilder.Entity<Episode>().Ignore(x => x.WatchInfo);
+			modelBuilder.Entity<Movie>().Ignore(x => x.WatchStatus);
+			modelBuilder.Entity<Show>().Ignore(x => x.WatchStatus);
+			modelBuilder.Entity<Episode>().Ignore(x => x.WatchStatus);
 
 			modelBuilder.Entity<Collection>()
 				.HasIndex(x => x.Slug)

@@ -178,16 +178,16 @@ namespace Kyoo.Abstractions.Models
 			.ThenBy(x => x.EpisodeNumber)
 			.FirstOrDefault();
 
-		[SerializeIgnore] public ICollection<ShowWatchInfo> Watched { get; set; }
+		[SerializeIgnore] public ICollection<ShowWatchStatus> Watched { get; set; }
 
 		/// <summary>
 		/// Metadata of what an user as started/planned to watch.
 		/// </summary>
-		[Projectable(UseMemberBody = nameof(_WatchInfo), OnlyOnInclude = true)]
-		[LoadableRelation] public ShowWatchInfo? WatchInfo { get; set; }
+		[Projectable(UseMemberBody = nameof(_WatchStatus), OnlyOnInclude = true)]
+		[LoadableRelation] public ShowWatchStatus? WatchStatus { get; set; }
 
 		// There is a global query filter to filter by user so we just need to do single.
-		private ShowWatchInfo? _WatchInfo => Watched.FirstOrDefault();
+		private ShowWatchStatus? _WatchStatus => Watched.FirstOrDefault();
 
 		/// <inheritdoc />
 		public void OnMerge(object merged)
