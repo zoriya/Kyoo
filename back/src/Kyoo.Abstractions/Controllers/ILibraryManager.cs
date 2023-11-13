@@ -34,6 +34,16 @@ namespace Kyoo.Abstractions.Controllers
 		IRepository<ILibraryItem> LibraryItems { get; }
 
 		/// <summary>
+		/// The repository that handle new items.
+		/// </summary>
+		IRepository<INews> News { get; }
+
+		/// <summary>
+		/// The repository that handle watched items.
+		/// </summary>
+		IWatchItemsRepository WatchItems { get; }
+
+		/// <summary>
 		/// The repository that handle collections.
 		/// </summary>
 		IRepository<Collection> Collections { get; }
